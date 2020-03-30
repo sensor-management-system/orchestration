@@ -2,4 +2,5 @@
 
 ## RESTful APT
 [technology: python(flask)]
-provide SVM functionality via JSON/HTTPS
+
+Provide SVM functionality via JSON/HTTPS
