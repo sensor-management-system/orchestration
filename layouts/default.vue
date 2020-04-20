@@ -10,7 +10,6 @@
       <v-list
         nav
       >
-
         <!-- Home -->
         <v-list-item
           to="/"
@@ -67,7 +66,7 @@
           </v-list-item-content>
         </v-list-item>
 
-        <v-divider></v-divider>
+        <v-divider />
 
         <!-- Help -->
         <v-list-item
@@ -82,9 +81,7 @@
             <v-list-item-title>Help</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
-
       </v-list>
-
     </v-navigation-drawer>
     <v-app-bar
       :clipped-left="clipped"
