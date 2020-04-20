@@ -1,5 +1,5 @@
 <template>
-  <v-app dark>
+  <v-app>
     <v-navigation-drawer
       v-model="drawer"
       :mini-variant="miniVariant"
@@ -7,22 +7,84 @@
       fixed
       app
     >
-      <v-list>
+      <v-list
+        nav
+      >
+
+        <!-- Home -->
         <v-list-item
-          v-for="(item, i) in items"
-          :key="i"
-          :to="item.to"
-          router
+          to="/"
+          exact
+          nuxt
+        >
+          <v-list-item-action>
+            <v-icon>mdi-apps</v-icon>
+          </v-list-item-action>
+          <v-list-item-content>
+            <v-list-item-title>Home</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+
+        <!-- Devices -->
+        <v-list-item
+          to="devices"
+          exact
+          nuxt
+        >
+          <v-list-item-action>
+            <v-icon>mdi-network</v-icon>
+          </v-list-item-action>
+          <v-list-item-content>
+            <v-list-item-title>Devices</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+
+        <!-- Projects -->
+        <v-list-item
+          to="projects"
+          exact
+          nuxt
+        >
+          <v-list-item-action>
+            <v-icon>mdi-nature-people</v-icon>
+          </v-list-item-action>
+          <v-list-item-content>
+            <v-list-item-title>Projects</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+
+        <!-- Users -->
+        <v-list-item
+          to="users"
+          exact
+          nuxt
+        >
+          <v-list-item-action>
+            <v-icon>mdi-account-multiple</v-icon>
+          </v-list-item-action>
+          <v-list-item-content>
+            <v-list-item-title>Users</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+
+        <v-divider></v-divider>
+
+        <!-- Help -->
+        <v-list-item
+          to="help"
+          nuxt
           exact
         >
           <v-list-item-action>
-            <v-icon>{{ item.icon }}</v-icon>
+            <v-icon>mdi-help-circle-outline</v-icon>
           </v-list-item-action>
           <v-list-item-content>
-            <v-list-item-title v-text="item.title" />
+            <v-list-item-title>Help</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
+
       </v-list>
+
     </v-navigation-drawer>
     <v-app-bar
       :clipped-left="clipped"
