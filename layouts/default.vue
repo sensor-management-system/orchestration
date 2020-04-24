@@ -19,7 +19,7 @@
         </v-list-item>
 
         <!-- Devices -->
-        <v-list-item to="devices" exact nuxt>
+        <v-list-item to="/devices" exact nuxt>
           <v-list-item-action>
             <v-icon>mdi-network</v-icon>
           </v-list-item-action>
@@ -29,7 +29,7 @@
         </v-list-item>
 
         <!-- Projects -->
-        <v-list-item to="projects" exact nuxt>
+        <v-list-item to="/projects" exact nuxt>
           <v-list-item-action>
             <v-icon>mdi-nature-people</v-icon>
           </v-list-item-action>
@@ -39,7 +39,7 @@
         </v-list-item>
 
         <!-- Users -->
-        <v-list-item to="users" exact nuxt>
+        <v-list-item to="/users" exact nuxt>
           <v-list-item-action>
             <v-icon>mdi-account-multiple</v-icon>
           </v-list-item-action>
@@ -51,7 +51,7 @@
         <v-divider />
 
         <!-- Help -->
-        <v-list-item to="help" nuxt exact>
+        <v-list-item to="/help" nuxt exact>
           <v-list-item-action>
             <v-icon>mdi-help-circle-outline</v-icon>
           </v-list-item-action>
