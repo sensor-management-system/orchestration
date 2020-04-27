@@ -65,7 +65,9 @@
       <v-btn to="/devices/platforms">
         Add Platform
       </v-btn>
-      <v-btn>Add Sensor</v-btn>
+      <v-btn to="/devices/sensors">
+        Add Sensor
+      </v-btn>
     </v-card>
   </div>
 </template>
