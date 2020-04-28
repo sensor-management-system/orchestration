@@ -4,10 +4,10 @@ services:
   app:
     container_name: app
     build:
-      context: services/app
+      context: app/
       dockerfile: Dockerfile-dev
     volumes:
-      - './services/app:/usr/src/app'
+      - './app:/usr/src/app'
     ports:
       - 5001:5000
     environment:
