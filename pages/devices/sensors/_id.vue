@@ -3,117 +3,167 @@
     <v-breadcrumbs :items="navigation" />
     <h1>Add Sensor</h1>
     <v-form>
-      <v-tabs
-        v-model="activeTab"
+      <v-card
+        outlined
       >
-        <v-tab>Basic Data</v-tab>
-        <v-tab>Persons</v-tab>
-        <v-tab>Properties</v-tab>
-        <v-tab>Custom Fields</v-tab>
-        <v-tab>Events</v-tab>
-        <v-tab-item>
-          <v-row>
-            <v-col cols="12" md="6">
-              <span>Sensor URN: [MANUFACTURER_MODEL_TYPE_SERIALNUMBER]</span>
-            </v-col>
-          </v-row>
-          <v-row>
-            <v-col cols="12" md="3">
-              <v-text-field
-                label="persistent identifier (PID)"
-              />
-            </v-col>
-          </v-row>
-          <v-row>
-            <v-col cols="12" md="6">
-              <v-text-field
-                label="label"
-              />
-            </v-col>
-            <v-col cols="12" md="3">
-              <v-select
-                :items="states"
-                label="state"
-                chips
-              >
-                <template v-slot:selection="{ item }">
-                  <v-chip v-if="item.value == 2" color="green"><span>{{ item.text }}</span></v-chip>
-                  <v-chip v-else-if="item.value == 3" color="red"><span>{{ item.text }}</span></v-chip>
-                  <v-chip v-else><span>{{ item.text }}</span></v-chip>
-                </template>
-              </v-select>
-            </v-col>
-          </v-row>
-          <v-row>
-            <v-col cols="12" md="6">
-              <v-textarea label="Description" rows="3" />
-            </v-col>
-          </v-row>
-          <v-row>
-            <v-col cols="12" md="3">
-              <v-text-field
-                label="Website"
-                placeholder="https://"
-              />
-            </v-col>
-          </v-row>
-          <v-row>
-            <v-col cols="12" md="3">
-              <v-text-field
-                label="manufacturer"
-              />
-            </v-col>
-            <v-col cols="12" md="3">
-              <v-text-field
-                label="model"
-              />
-            </v-col>
-            <v-col cols="12" md="3">
-              <v-select
-                :items="sensorTypes"
-                label="type"
-              />
-            </v-col>
-          </v-row>
-          <v-row>
-            <v-col cols="12" md="3">
-              <v-text-field
-                label="Serial Number"
-              />
-            </v-col>
-            <v-col cols="12" md="3">
-              <v-text-field
-                label="Inventar Number"
-              />
-            </v-col>
-          </v-row>
-          <v-row>
-            <v-col cols="12" md="3">
-              <v-checkbox label="Dual Use" hint="can be used for military aims" :persistent-hint="true" color="red darken-3" />
-            </v-col>
-          </v-row>
-          <v-row>
-            <v-col cols="12" md="3">
-              <v-btn
-                outlined
-                right
-                @click="nextTab(1)"
-              >
-                next
-              </v-btn>
-            </v-col>
-          </v-row>
-        </v-tab-item>
-      </v-tabs>
-      <v-btn
-        fab
-        fixed
-        bottom
-        right
-        color="primary"
-      >
-        <v-icon>mdi-content-save</v-icon>
-      </v-btn>
+        <v-tabs
+          v-model="activeTab"
+          background-color="grey lighten-3"
+        >
+          <v-tab>Basic Data</v-tab>
+          <v-tab>Persons</v-tab>
+          <v-tab>Properties</v-tab>
+          <v-tab>Custom Fields</v-tab>
+          <v-tab>Events</v-tab>
+          <v-tab-item>
+            <v-card
+              flat
+            >
+              <v-card-title>Sensor URN: [MANUFACTURER_MODEL_TYPE_SERIALNUMBER]</v-card-title>
+              <v-card-text>
+                <v-row>
+                  <v-col cols="12" md="3">
+                    <v-text-field
+                      label="persistent identifier (PID)"
+                    />
+                  </v-col>
+                </v-row>
+                <v-row>
+                  <v-col cols="12" md="6">
+                    <v-text-field
+                      label="label"
+                    />
+                  </v-col>
+                  <v-col cols="12" md="3">
+                    <v-select
+                      :items="states"
+                      label="state"
+                    />
+                  </v-col>
+                </v-row>
+                <v-row>
+                  <v-col cols="12" md="3">
+                    <v-select
+                      :items="sensorTypes"
+                      label="type"
+                    />
+                  </v-col>
+                  <v-col cols="12" md="3">
+                    <v-text-field
+                      label="manufacturer"
+                    />
+                  </v-col>
+                  <v-col cols="12" md="3">
+                    <v-text-field
+                      label="model"
+                    />
+                  </v-col>
+                </v-row>
+                <v-divider />
+                <v-row>
+                  <v-col cols="12" md="6">
+                    <v-textarea label="Description" rows="3" />
+                  </v-col>
+                </v-row>
+                <v-row>
+                  <v-col cols="12" md="3">
+                    <v-text-field
+                      label="Website"
+                      placeholder="https://"
+                    />
+                  </v-col>
+                </v-row>
+                <v-divider />
+                <v-row>
+                  <v-col cols="12" md="3">
+                    <v-text-field
+                      label="Serial Number"
+                    />
+                  </v-col>
+                  <v-col cols="12" md="3">
+                    <v-text-field
+                      label="Inventar Number"
+                    />
+                  </v-col>
+                </v-row>
+                <v-row>
+                  <v-col cols="12" md="3">
+                    <v-checkbox label="Dual Use" hint="can be used for military aims" :persistent-hint="true" color="red darken-3" />
+                  </v-col>
+                </v-row>
+              </v-card-text>
+              <v-card-actions>
+                <v-btn
+                  text
+                  @click="nextTab(1)"
+                >
+                  next ❯
+                </v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-tab-item>
+          <v-tab-item>
+            <v-card
+              flat
+            >
+              <v-card-title>Sensor URN: [MANUFACTURER_MODEL_TYPE_SERIALNUMBER]</v-card-title>
+              <v-card-text>
+                <v-row>
+                  <v-col cols="3">
+                    <v-autocomplete
+                      label="add a person" />
+                    <v-chip
+                      class="ma-2"
+                      color="indigo"
+                      text-color="white"
+                      :close="true"
+                    >
+                      <v-avatar left>
+                        <v-icon>mdi-account-circle</v-icon>
+                      </v-avatar>
+                      Mister Marple
+                    </v-chip>
+                    <v-chip
+                      class="ma-2"
+                      color="indigo"
+                      text-color="white"
+                      :close="true"
+                    >
+                      <v-avatar left>
+                        <v-icon>mdi-account-circle</v-icon>
+                      </v-avatar>
+                      Hans Hamster
+                    </v-chip>
+                  </v-col>
+                </v-row>
+              </v-card-text>
+              <v-card-actions>
+                <v-btn
+                  text
+                  @click="previousTab"
+                >
+                  ❮ previous
+                </v-btn>
+                <v-btn
+                  text
+                  @click="nextTab"
+                >
+                  next ❯
+                </v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-tab-item>
+        </v-tabs>
+        <v-btn
+          fab
+          fixed
+          bottom
+          right
+          color="primary"
+        >
+          <v-icon>mdi-content-save</v-icon>
+        </v-btn>
+      </v-card>
     </v-form>
   </div>
 </template>
@@ -123,10 +173,15 @@ import { Vue, Component } from 'nuxt-property-decorator'
 
 @Component
 export default class Sensors extends Vue {
+  numberOfTabs: number = 5
   activeTab: number = 0
 
-  nextTab (tabNr:number) {
-    this.activeTab = tabNr
+  previousTab () {
+    this.activeTab = this.activeTab === 0 ? this.numberOfTabs - 1 : this.activeTab - 1
+  }
+
+  nextTab () {
+    this.activeTab = this.activeTab === this.numberOfTabs - 1 ? 0 : this.activeTab + 1
   }
 
   get navigation () {
