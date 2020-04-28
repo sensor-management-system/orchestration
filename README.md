@@ -1,9 +1,6 @@
 # backend
 
-## RESTful APT
-[technology: python(flask)]
-
-Provide SVM functionality via JSON/HTTPS
+This is the API of the REST service endpoints for managing sensor metadata.
 
 ### How to use 
 
@@ -17,7 +14,7 @@ Navigate to [http://localhost:5000/users/ping](http://localhost:5000/users/ping]
 You should see:
 ```json
 {
-"message": "Hallo World!",
+"message": "Hallo Sensor ;)",
 "status": "success"
 }
 
