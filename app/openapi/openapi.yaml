@@ -298,7 +298,7 @@ paths:
         '500':
           description: Internal Server Error .
           content: {}
-  '/platforms/{platformID}/relationship/devices':
+  '/platforms/{platformID}/relationships/devices':
     get:
       tags:
         - Platforms
@@ -550,7 +550,7 @@ paths:
         '500':
           description: Internal Server Error .
           content: {}
-  '/devices/{deviceID}/relationship/platforms':
+  '/devices/{deviceID}/relationships/platforms':
     get:
       tags:
         - Devices
@@ -648,7 +648,7 @@ paths:
         '500':
           description: Internal Server Error .
           content: {}
-  '/devices/{deviceID}/relationship/events':
+  '/devices/{deviceID}/relationships/events':
     get:
       tags:
         - Devices
@@ -746,7 +746,7 @@ paths:
         '500':
           description: Internal Server Error .
           content: {}
-  '/devices/{deviceID}/relationship/properties':
+  '/devices/{deviceID}/relationships/properties':
     get:
       tags:
         - Devices
@@ -844,7 +844,7 @@ paths:
         '500':
           description: Internal Server Error .
           content: {}
-  '/devices/{deviceID}/relationship/customfields':
+  '/devices/{deviceID}/relationships/customfields':
     get:
       tags:
         - Devices
@@ -988,12 +988,6 @@ components:
           format: date_time
         status:
           type: string
-        id:
-          type: integer
-          format: int32
-          example: 1
-          x-primary-key: true
-          x-autoincrement: true
     RequestDevice:
       type: object
       properties:
@@ -1003,6 +997,10 @@ components:
             type:
               type: string
               example: device
+            id:
+              type: integer
+              format: inst32
+              example: 1
             attributes:
                   $ref: '#/components/schemas/Device'
     ResponseDevice:
