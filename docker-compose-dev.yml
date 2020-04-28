@@ -1,13 +1,13 @@
 version: '3.4'
 
 services:
-  users:
-    container_name: users
+  app:
+    container_name: app
     build:
-      context: ./services/users
+      context: services/app
       dockerfile: Dockerfile-dev
     volumes:
-      - './services/users:/usr/src/app'
+      - './services/app:/usr/src/app'
     ports:
       - 5001:5000
     environment:
