@@ -36,4 +36,11 @@ the results of the first build. Once the build is done, fire up the container:
 ```
 $ docker-compose -f docker-compose-dev.yml up -d
 ```
-Navigate to:[http://localhost:5001/users/ping](http://localhost:5001/users/ping]) in your browser.
+Navigate to:[http://localhost:5001/users/ping](http://localhost:5001/ping]) in your browser.
+
+Apply the model to the dev database:
+```
+$ docker-compose -f docker-compose-dev.yml \
+run app python manage.py recreate_db
+
+```
