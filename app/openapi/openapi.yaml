@@ -10,7 +10,7 @@ info:
     url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
   version: "0.3"
 externalDocs:
-  description: 'Find out more about SVM '
+  description: 'Find out more about SIS '
   url: '###'
 servers:
   - url: sis/v1/
@@ -198,6 +198,32 @@ paths:
       x-codegen-request-body-name: body
       parameters: []
   '/platforms/{platformID}':
+    get:
+      tags:
+        - Platforms
+      summary: Retrieve details of a platform.
+      operationId: getAPlatform
+      parameters:
+        - name: platformID
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: OK
+          content:
+           application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/ResponsePlatform'
+        '404':
+          description: Platform not found
+          content: {}
+        '500':
+          description: Internal Server Error .
+          content: {}
+      x-codegen-request-body-name: body
     patch:
       tags:
         - Platforms
@@ -229,9 +255,6 @@ paths:
                 $ref: '#/components/schemas/ResponsePlatform'
         '404':
           description: Platform not found
-          content: {}
-        '422':
-          description: Validation Constraint Violation
           content: {}
         '500':
           description: Internal Server Error .
