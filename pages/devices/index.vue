@@ -10,7 +10,9 @@
             <v-container>
               <v-text-field v-model="searchText" label="Name" placeholder="Name of device" />
               <v-select label="Type" placeholder="Platform / Sensor" :items="searchTypes" />
-              <v-btn @click="search">search</v-btn>
+              <v-btn @click="search">
+                search
+              </v-btn>
               <a href="#" @click="toggleExtendedSearch">
                 <div v-if="!showExtendedSearch">Show extended search</div>
                 <div v-else>Hide extended search</div>
@@ -70,47 +72,49 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
+import { Component, Vue } from 'nuxt-property-decorator'
 
-import masterdataservice from '../../services/masterdataservice'
-import deviceservice from '../../services/deviceservice'
+import MasterDataService from '../../services/MasterDataService'
+import DeviceService from '../../services/DeviceService'
 
-export default {
-  data () {
-    return {
-      showExtendedSearch: false,
-      searchManufactures: [],
-      searchInstitutes: [],
-      searchParameter: [],
-      searchTypes: ['Platform / Sensor', 'Sensor', 'Platform'],
-      searchResults: [],
-      searchText: null
-    }
-  },
+import Manufacture from '../../models/Manufacture'
+import Institute from '../../models/Institute'
+
+@Component
+export default class DevicesIndexPage extends Vue {
+  private showExtendedSearch: boolean = false
+  private searchManufactures: Manufacture[] = []
+  private searchInstitutes: Institute[] = []
+  private searchParameter: Array<object> = []
+  private searchResults: Array<object> = []
+  private searchText: string | null = null
+  private searchTypes: string[] = ['Sensor / Platform', 'Sensor', 'Platform']
+
   mounted () {
-    masterdataservice.findAllManufactures().then((manufactures) => {
+    MasterDataService.findAllManufactures().then((manufactures) => {
       this.searchManufactures = manufactures
     })
-    masterdataservice.findAllInstitutes().then((institutes) => {
+    MasterDataService.findAllInstitutes().then((institutes) => {
       this.searchInstitutes = institutes
     })
-    masterdataservice.findAllParameter().then((paramater) => {
+    MasterDataService.findAllParameter().then((paramater) => {
       this.searchParameter = paramater
     })
-    deviceservice.findPlatformsAndSensors(this.searchText).then((findResults) => {
+    DeviceService.findPlatformsAndSensors(this.searchText).then((findResults) => {
       this.searchResults = findResults
     })
-  },
-  methods: {
-    toggleExtendedSearch (event) {
-      event.preventDefault()
-      this.showExtendedSearch = !this.showExtendedSearch
-    },
-    search () {
-      deviceservice.findPlatformsAndSensors(this.searchText).then((findResults) => {
-        this.searchResults = findResults
-      })
-    }
+  }
+
+  toggleExtendedSearch (event: any) {
+    event.preventDefault()
+    this.showExtendedSearch = !this.showExtendedSearch
+  }
+
+  search () {
+    DeviceService.findPlatformsAndSensors(this.searchText).then((findResults) => {
+      this.searchResults = findResults
+    })
   }
 }
 
