@@ -10,7 +10,7 @@ info:
     url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
   version: "0.3"
 externalDocs:
-  description: 'Find out more about SIS '
+  description: 'Find out more about SVM '
   url: '###'
 servers:
   - url: sis/v1/
@@ -238,9 +238,7 @@ paths:
             format: int32
       requestBody:
         description: >-
-          The needed JSON data to create a Platform. ShortNames will be ignored.
-          They must not be edited after creation, because they are an integral
-          part of the item URN.
+          The needed JSON data to create a Platform.
         content:
            application/vnd.api+json:
             schema:
@@ -317,7 +315,19 @@ paths:
           schema:
             type: integer
             format: int32
+      requestBody:
+        description: 'The needed JSON data to create a Platform.'
+        content:
+          application/vnd.api+json:
+            schema:
+              $ref: '#/components/schemas/RequestPlatformWithRelationship'
       responses:
+        '201':
+          description: Created
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/PlatformWithRelationship'
         '500':
           description: Internal Server Error .
           content: {}
@@ -1131,12 +1141,15 @@ components:
             type:
               type: string
               example: platform
+            id:
+              type: integer
+              format: int32
             attributes:
                   $ref: '#/components/schemas/Platform'
         relationships:
           type: object
           properties:
-            platform:
+            devices:
               type: object
               properties:
                 links:
@@ -1144,10 +1157,21 @@ components:
                   properties:
                     related:
                       type: string
-                      example: "/device/{deviceID}/platform"
+                      example: "/platforms/{deviceID}/relationships/devices"
                     self:
                       type: string
-                      example: "/device/{deviceID}/relationships/platform"
+                      example: "/platforms/{platformID}"
+                data:
+                  type: object
+                  properties:
+                    type:
+                      type: string
+                      example: device
+                    id:
+                      type: integer
+                      format: int32
+                      example: 1
+
         links:
           type: object
           properties:
@@ -1173,21 +1197,9 @@ components:
                 example: device
               attributes:
                     $ref: '#/components/schemas/Platform'
-              relationships:
-                type: object
-                properties:
-                  platform:
-                    type: object
-                    properties:
-                      links:
-                        type: object
-                        properties:
-                          related:
-                            type: string
-                            example: "/platform/{deviceID}/platform"
-                          self:
-                            type: string
-                            example: "/platform/{deviceID}/relationships/platform"
+              rel:
+                $ref: '#/components/schemas/Relationships'
+
         meta:
           type: object
           properties:
@@ -1196,17 +1208,57 @@ components:
               format: int32
               example: 1
         links:
+          $ref: '#/components/schemas/PlatfoemLinks'
+        jsonapi:
+          $ref: '#/components/schemas/Jsonapi'
+    RequestPlatformWithRelationship:
+      type: object
+      properties:
+        data:
           type: object
           properties:
-            self:
-              type: string
-              example: "/platform/1"
+            attributes:
+              $ref: '#/components/schemas/Platform'
+            relationships:
+              $ref: '#/components/schemas/Relationships'
+    Relationships:
+      type: object
+      properties:
+        platform:
+          type: object
+          properties:
+            links:
+              type: object
+              properties:
+                related:
+                  type: string
+                  example: "/platform/{deviceID}/platform"
+                self:
+                  type: string
+                  example: "/platform/{deviceID}/relationships/platform"
+    PlatformWithRelationship:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/ResponsePlatform'
+        included:
+          type: object
+        links:
+          $ref: '#/components/schemas/PlatfoemLinks'
         jsonapi:
+          $ref: '#/components/schemas/Jsonapi'
+    Jsonapi:
           type: object
           properties:
             version:
               type: string
               example: "1.0"
+    PlatfoemLinks:
+          type: object
+          properties:
+            self:
+              type: string
+              example: "/platform/1"
     Event:
       required:
         - date
@@ -1243,46 +1295,17 @@ components:
           type: string
         manufacturer:
           type: string
-        campaignID:
-          type: integer
-          description: >-
-            If the parent ID is empty or null during an update action, the item
-            will be removed from it's current parent, if there is one.
-          format: int32
-        parentPlatformID:
-          type: integer
-          description: >-
-            If the parent ID is empty or null during an update action, the item
-            will be removed from it's current parent, if there is one.
-          format: int32
-        deviceID:
-          type: integer
-          description: >-
-            If the child ID is empty or null during an update action, the item
-            will be removed from it's current child, if there is one.
-          format: int32
         type:
           type: string
         inventoryNumber:
           type: string
         platformType:
           type: string
-        attachments:
-          $ref: '#/components/schemas/Attachment'
-        responsiblePersons:
-          $ref: '#/components/schemas/ResponsiblePerson'
-        platformURN:
-          type: string
-        link:
+        website:
           type: string
         configurationDate:
           type: string
           format: date_time
-        id:
-          type: integer
-          format: int32
-        event:
-          $ref: '#/components/schemas/Event'
     customField:
       type: object
       properties:
