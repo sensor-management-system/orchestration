@@ -14,3 +14,20 @@ services:
       - FLASK_APP=project/__init__.py
       - FLASK_DEBUG=1
       - APP_SETTINGS=project.config.DevelopmentConfig
+      - DATABASE_URL=postgres://postgres:postgres@db:5432/users_dev
+      - DATABASE_TEST_URL=postgres://postgres:postgres@db:5432/users_test
+    depends_on:
+      - db
+    links:
+      - db
+
+  db:
+    container_name: db
+    build:
+      context: ./app/project/db
+      dockerfile: Dockerfile
+    ports:
+      - 5435:5432
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
