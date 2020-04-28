@@ -13,6 +13,12 @@ LABEL maintainer="Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>" \
     org.opencontainers.image.created=$BUILD_DATE
 
 
+# install environment dependencies
+RUN apt-get update -yqq \
+    && apt-get install -yqq --no-install-recommends \
+        netcat \
+    && apt-get -q clean
+
 # set working directory
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
@@ -24,8 +30,11 @@ COPY requirements.txt /usr/src/app/requirements.txt
 RUN pip install --upgrade pip\
    && pip install -r requirements.txt
 
+# add entrypoint.sh
+COPY ./entrypoint.sh /usr/src/app/entrypoint.sh
+
 # add app
-#COPY app /usr/src/app
+COPY . /usr/src/app
 
 
 FROM build
@@ -34,4 +43,5 @@ EXPOSE 5000
 
 #run server
 #CMD ['python', 'manage.py', 'run', '-h', '0.0.0.0']
-CMD python manage.py run -h 0.0.0.0
+#CMD python manage.py run -h 0.0.0.0
+CMD ["./entrypoint.sh"]
