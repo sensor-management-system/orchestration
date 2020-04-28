@@ -111,7 +111,8 @@
                 <v-row>
                   <v-col cols="3">
                     <v-autocomplete
-                      label="add a person" />
+                      label="add a person"
+                    />
                     <v-chip
                       class="ma-2"
                       color="indigo"
@@ -136,6 +137,95 @@
                     </v-chip>
                   </v-col>
                 </v-row>
+              </v-card-text>
+              <v-card-actions>
+                <v-btn
+                  text
+                  @click="previousTab"
+                >
+                  ❮ previous
+                </v-btn>
+                <v-btn
+                  text
+                  @click="nextTab"
+                >
+                  next ❯
+                </v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-tab-item>
+          <v-tab-item>
+            <v-card
+              flat
+            >
+              <v-card-title>Sensor URN: [MANUFACTURER_MODEL_TYPE_SERIALNUMBER]</v-card-title>
+              <v-card-text>
+                <v-expansion-panels
+                  v-model="propertyStates"
+                  multiple
+                >
+                  <v-expansion-panel
+                    v-for="(item, index) in [0, 1]"
+                    :key="index"
+                  >
+                    <v-expansion-panel-header>
+                      Property {{ index+1 }}
+                    </v-expansion-panel-header>
+                    <v-expansion-panel-content>
+                      <v-row>
+                        <v-col cols="12" md="3">
+                          <v-select
+                            label="compartment"
+                          />
+                        </v-col>
+                        <v-col cols="12" md="3">
+                          <v-select
+                            label="unit"
+                          />
+                        </v-col>
+                        <v-col cols="12" md="3">
+                          <v-text-field
+                            label="accuracy"
+                          />
+                        </v-col>
+                      </v-row>
+                      <v-row>
+                        <v-col cols="12" md="3">
+                          <v-select
+                            label="sampling media"
+                          />
+                        </v-col>
+                        <v-col cols="12" md="1">
+                          <v-text-field
+                            label="measuring range min"
+                          />
+                        </v-col>
+                        <v-col cols="12" md="1">
+                          <v-text-field
+                            label="measuring range min"
+                          />
+                        </v-col>
+                        <v-col cols="12" md="3" offset="1">
+                          <v-text-field
+                            label="label"
+                          />
+                        </v-col>
+                      </v-row>
+                      <v-row>
+                        <v-col cols="12" md="3">
+                          <v-select
+                            label="variable"
+                          />
+                        </v-col>
+                        <v-col cols="12" md="3">
+                          <v-text-field
+                            label="failure value"
+                          />
+                        </v-col>
+                      </v-row>
+                    </v-expansion-panel-content>
+                  </v-expansion-panel>
+                </v-expansion-panels>
               </v-card-text>
               <v-card-actions>
                 <v-btn
@@ -240,6 +330,13 @@ export default class Sensors extends Vue {
         text: 'scrapped',
         value: '5'
       }
+    ]
+  }
+
+  get propertyStates () {
+    return [
+      0,
+      1
     ]
   }
 }
