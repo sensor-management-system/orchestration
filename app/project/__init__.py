@@ -2,7 +2,7 @@ import os
 import sys
 from flask import Flask, jsonify
 from flask_sqlalchemy import SQLAlchemy
-
+from flask_rest_jsonapi import Api, ResourceList
 
 #init the app
 app = Flask(__name__)
@@ -29,10 +29,14 @@ class User(db.Model):
 
 # test to ensure the proper config was loaded
 #print(app.config, file=sys.stderr)
-@app.route('/ping', methods=['GET'])
-def ping_pong():
-    return jsonify\
-    ({
-            'status':'success',
-            'message':'Hello Sensor ;)'
-    })
+
+class Ping(ResourceList):
+    def get(self):
+        response = {
+            'status': 'success',
+            'message': 'Hello Sensor!'
+            }
+        return response
+
+api = Api(app)
+api.route(Ping, 'test_connection', '/ping')
