@@ -1,42 +1,39 @@
 import os
 import sys
+
 from flask import Flask, jsonify
 from flask_sqlalchemy import SQLAlchemy
-from flask_rest_jsonapi import Api, ResourceList
+from flask_rest_jsonapi import Api
+from project.api.ping import Ping
+from project.urls import Create_endpoints
 
-#init the app
-app = Flask(__name__)
+db = SQLAlchemy()
 
-#set config
-app_settings = os.getenv('APP_SETTINGS')
-app.config.from_object(app_settings)
+def create_app(script_info=None):
+    #init the app
+    app = Flask(__name__)
 
-# instantiate the db
-db = SQLAlchemy(app)
+    #set config
+    app_settings = os.getenv('APP_SETTINGS')
+    app.config.from_object(app_settings)
+
+    # instantiate the db
+    db.init_app(app)
 
 
-# model user to test the db
-class User(db.Model):
-    __tablename__ = "users"
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    username = db.Column(db.String(128), nullable=False)
-    email = db.Column(db.String(128), nullable=False)
-    active = db.Column(db.Boolean(), default=True, nullable=False)
+    # shell context for flask cli
+    app.shell_context_processor({'app': app, 'db': db})
 
-    def __init__(self, username, email):
-        self.username = username
-        self.email = email
+    # Create endpoints
+    api = Api(app)
+    Create_endpoints(api)
 
-# test to ensure the proper config was loaded
-#print(app.config, file=sys.stderr)
+    # test to ensure the proper config was loaded
+    #print(app.config, file=sys.stderr)
 
-class Ping(ResourceList):
-    def get(self):
-        response = {
-            'status': 'success',
-            'message': 'Hello Sensor!'
-            }
-        return response
+    return app
 
-api = Api(app)
-api.route(Ping, 'test_connection', '/ping')
+
+
+
+
