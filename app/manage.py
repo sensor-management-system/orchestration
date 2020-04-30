@@ -1,7 +1,8 @@
 import unittest
 
 from flask.cli import FlaskGroup
-from project import create_app, db
+from project import create_app
+from project.api.models.baseModel import db
 
 app = create_app()
 cli = FlaskGroup(create_app=create_app)
