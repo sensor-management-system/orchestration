@@ -15,7 +15,7 @@ export default class Institute {
   }
 
   set name (newName: string) {
-    this._name = name
+    this._name = newName
   }
 
   static createWithIdAndName (id: number, name: string): Institute {
