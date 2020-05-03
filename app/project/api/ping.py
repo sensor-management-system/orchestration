@@ -1,8 +1,6 @@
 from flask_rest_jsonapi import ResourceList
 
 
-
-
 class Ping(ResourceList):
     def get(self):
         response = {
@@ -10,6 +8,3 @@ class Ping(ResourceList):
             'message': 'Hello Sensor!'
         }
         return response
-
-
-

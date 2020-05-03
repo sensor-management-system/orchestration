@@ -4,10 +4,13 @@ from marshmallow_jsonapi.flask import Schema, Relationship
 
 class DeviceSchema(Schema):
     """
-    This class create a schema for a device. Every attribute in the schema going to expose through the api.
-    DeviceSchema has an attribute named “deviceURN” that is the result of concatenation manufacturer, model,
+    This class create a schema for a device. Every attribute in the
+    schema going to expose through the api.
+    DeviceSchema has an attribute named “deviceURN” that is the result
+     of concatenation manufacturer, model,
     type and serialNumber.
-    It uses library called marshmallow-jsonapi that fit the JSONAPI 1.0 specification and provides Flask integration.
+    It uses library called marshmallow-jsonapi that fit the JSONAPI 1.0
+    specification and provides Flask integration.
 
     """
 
@@ -30,10 +33,9 @@ class DeviceSchema(Schema):
     website = fields.Str(allow_none=True)
     configurationDate = fields.Date()
     persistentIdentifier = fields.Integer()
-    # deviceURN = fields.Function(lambda obj: "[{}]_[{}]_[{}]_[{}]".format(obj.manufacturer.upper(), obj.model.upper(),
-    #                                                                     obj.type.upper(), obj.serialNumber.upper()))
-    urn = fields.Function(lambda obj: "[{}]_[{}]_[{}]_[{}]".format(obj.manufacture.upper(), obj.model.upper(),
-                                                                   obj.type.upper(), obj.serialNumber))
+    urn = fields.Function(lambda obj: "[{}]_[{}]_[{}]_[{}]".format(
+        obj.manufacture.upper(), obj.model.upper(),
+        obj.type.upper(), obj.serialNumber))
     platform = Relationship(attribute='platform',
                             self_view='device_platform',
                             self_view_kwargs={'id': '<id>'},

@@ -1,6 +1,7 @@
 from marshmallow_jsonapi import fields
 from marshmallow_jsonapi.flask import Schema, Relationship
 
+
 class PlatformSchema(Schema):
     class Meta:
         type_ = 'platform'
@@ -18,11 +19,12 @@ class PlatformSchema(Schema):
     website = fields.Str(load_only=True)
     configurationDate = fields.Date()
     inventoryNumber = fields.Integer(as_string=True)
-    platformURN = fields.Function(lambda obj: "{}_{}".format(obj.platformType.upper(), obj.shortName.upper()))
+    platformURN = fields.Function(lambda obj: "{}_{}".format(
+        obj.platformType.upper(), obj.shortName.upper()))
     devices = Relationship(self_view='platform_devices',
-                             self_view_kwargs={'id': '<id>'},
-                             related_view='devices_list',
-                             related_view_kwargs={'id': '<id>'},
-                             many=True,
-                             schema='DeviceSchema',
-                             type_='device')
+                           self_view_kwargs={'id': '<id>'},
+                           related_view='devices_list',
+                           related_view_kwargs={'id': '<id>'},
+                           many=True,
+                           schema='DeviceSchema',
+                           type_='device')
