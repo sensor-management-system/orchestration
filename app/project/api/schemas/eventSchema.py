@@ -1,0 +1,27 @@
+from marshmallow_jsonapi import fields
+from marshmallow_jsonapi.flask import Schema, Relationship
+
+
+class EventSchema(Schema):
+    """
+    This class create a schema for an event. Every attribute in the schema going to expose through the api.
+    It uses library called marshmallow-jsonapi that fit the JSONAPI 1.0 specification and provides Flask integration.
+
+    """
+
+    class Meta:
+        type_ = 'event'
+        self_view = 'events_detail'
+        self_view_kwargs = {'id': '<id>'}
+
+    id = fields.Integer(as_string=True, dump_only=True)
+    description = fields.Str(required=True)
+    date = fields.Date()
+
+    device = Relationship(attribute='device',
+                          self_view='device_events',
+                          self_view_kwargs={'id': '<id>'},
+                          related_view='devices_detail',
+                          related_view_kwargs={'id': '<id>'},
+                          schema='DeviceSchema',
+                          type_='device')
