@@ -8,6 +8,9 @@ from project.api.resourceManager.eventRelationship import EventRelationship
 from project.api.resourceManager.platformDetail import PlatformDetail
 from project.api.resourceManager.platformList import PlatformList
 from project.api.resourceManager.platformRelationship import PlatformRelationship
+from project.api.resourceManager.contactList import ContactList
+from project.api.resourceManager.contactDetail import ContactDetail
+from project.api.resourceManager.contactRelationship import ContactRelationship
 
 
 def Create_endpoints(api):
@@ -31,3 +34,8 @@ def Create_endpoints(api):
     api.route(EventDetail, 'events_detail', '/events/<int:id>')
     api.route(EventRelationship, 'events_device',
               '/events/<int:id>/relationships/device')
+    # contact
+    api.route(ContactList, 'contacts_list', '/contacts')
+    api.route(ContactDetail, 'contacts_detail', '/contacts/<int:id>')
+    api.route(ContactRelationship, 'contacts_device',
+              '/contacts/<int:id>/relationships/device')
