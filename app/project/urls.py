@@ -15,41 +15,43 @@ from project.api.resourceManager.propertiesList import PropertiesList
 from project.api.resourceManager.propertiesDetail import PropertiesDetail
 from project.api.resourceManager.propertiesRelationship import PropertiesRelationship
 
+base_url = '/sis/v1'
+
 
 def Create_endpoints(api):
-    api.route(Ping, 'test_connection', '/ping')
+    api.route(Ping, 'test_connection', base_url + '/ping')
 
     # Platform
-    api.route(PlatformList, 'platform_list', '/platforms')
-    api.route(PlatformDetail, 'platform_detail', '/platforms/<int:id>',
-              '/devices/<int:device_id>/platform')
+    api.route(PlatformList, 'platform_list', base_url + '/platforms')
+    api.route(PlatformDetail, 'platform_detail', base_url + '/platforms/<int:id>',
+              base_url + '/devices/<int:device_id>/platform')
     api.route(PlatformRelationship, 'platform_devices',
-              '/platforms/<int:id>/relationships/devices')
+              base_url + '/platforms/<int:id>/relationships/devices')
 
     # Device
-    api.route(DeviceList, 'devices_list', '/devices',
-              '/platforms/<int:id>/devices')
-    api.route(DeviceDetail, 'devices_detail', '/devices/<int:id>')
+    api.route(DeviceList, 'devices_list', base_url + '/devices',
+              base_url + '/platforms/<int:id>/devices')
+    api.route(DeviceDetail, 'devices_detail', base_url + '/devices/<int:id>')
     api.route(DeviceRelationship, 'device_platform',
-              '/devices/<int:id>/relationships/platform')
+              base_url + '/devices/<int:id>/relationships/platform')
     api.route(DeviceRelationship, 'device_contacts',
-              '/devices/<int:id>/relationships/contacts')
+              base_url + '/devices/<int:id>/relationships/contacts')
     api.route(DeviceRelationship, 'device_events',
-              '/devices/<int:id>/relationships/events')
+              base_url + '/devices/<int:id>/relationships/events')
     api.route(DeviceRelationship, 'device_properties',
-              '/devices/<int:id>/relationships/properties')
+              base_url + '/devices/<int:id>/relationships/properties')
     # Event
-    api.route(EventList, 'events_list', '/events')
-    api.route(EventDetail, 'events_detail', '/events/<int:id>')
+    api.route(EventList, 'events_list', base_url + '/events')
+    api.route(EventDetail, 'events_detail', base_url + '/events/<int:id>')
     api.route(EventRelationship, 'events_device',
-              '/events/<int:id>/relationships/device')
+              base_url + '/events/<int:id>/relationships/device')
     # Contact
-    api.route(ContactList, 'contacts_list', '/contacts')
-    api.route(ContactDetail, 'contacts_detail', '/contacts/<int:id>')
+    api.route(ContactList, 'contacts_list', base_url + '/contacts')
+    api.route(ContactDetail, 'contacts_detail', base_url + '/contacts/<int:id>')
     api.route(ContactRelationship, 'contacts_device',
-              '/contacts/<int:id>/relationships/device')
+              base_url + '/contacts/<int:id>/relationships/device')
     # Properties
-    api.route(PropertiesList, 'properties_list', '/properties')
-    api.route(PropertiesDetail, 'properties_detail', '/properties/<int:id>')
+    api.route(PropertiesList, 'properties_list', base_url + '/properties')
+    api.route(PropertiesDetail, 'properties_detail', base_url + '/properties/<int:id>')
     api.route(PropertiesRelationship, 'properties_device',
-              '/properties/<int:id>/relationships/device')
+              base_url + '/properties/<int:id>/relationships/device')
