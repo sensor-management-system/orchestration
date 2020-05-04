@@ -160,6 +160,13 @@
             >
               <v-card-title>Sensor URN: [MANUFACTURER_MODEL_TYPE_SERIALNUMBER]</v-card-title>
               <v-card-text>
+                <v-btn
+                  small
+                  color="primary"
+                >
+                  add Property
+                </v-btn>
+                <br /><br />
                 <v-expansion-panels
                   v-model="propertyStates"
                   multiple
@@ -169,7 +176,34 @@
                     :key="index"
                   >
                     <v-expansion-panel-header>
-                      Property {{ index+1 }}
+                      <v-row no-gutters>
+                        <v-col cols="11">
+                          Property {{ index+1 }}
+                        </v-col>
+                        <v-col cols="1">
+                          <v-menu 
+                            right
+                          >
+                            <template v-slot:activator="{ on }">
+                              <v-btn
+                                icon
+                                v-on="on"
+                              >
+                                <v-icon>mdi-dots-vertical</v-icon>
+                              </v-btn>
+                            </template>
+
+                            <v-list>
+                              <v-list-item>
+                                <v-list-item-title>Copy</v-list-item-title>
+                              </v-list-item>
+                              <v-list-item>
+                                <v-list-item-title>Delete</v-list-item-title>
+                              </v-list-item>
+                            </v-list>
+                          </v-menu>
+                        </v-col>
+                      </v-row>
                     </v-expansion-panel-header>
                     <v-expansion-panel-content>
                       <v-row>
@@ -226,6 +260,59 @@
                     </v-expansion-panel-content>
                   </v-expansion-panel>
                 </v-expansion-panels>
+              </v-card-text>
+              <v-card-actions>
+                <v-btn
+                  text
+                  @click="previousTab"
+                >
+                  ❮ previous
+                </v-btn>
+                <v-btn
+                  text
+                  @click="nextTab"
+                >
+                  next ❯
+                </v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-tab-item>
+          <v-tab-item>
+            <v-card
+              flat
+            >
+              <v-card-title>Sensor URN: [MANUFACTURER_MODEL_TYPE_SERIALNUMBER]</v-card-title>
+              <v-card-text>
+                <v-btn
+                  small
+                  color="primary"
+                >
+                  add Custom Field
+                </v-btn>
+                <br /><br />
+                <v-row
+                  v-for="(item, index) in [0, 1]"
+                  :key="index"
+                >
+                  <v-col cols="12" md="3">
+                    <v-text-field
+                      label="key"
+                    />
+                  </v-col>
+                  <v-col cols="12" md="3">
+                    <v-text-field
+                      label="value"
+                    />
+                  </v-col>
+                  <v-col cols="1">
+                    <v-btn
+                      color="secondary"
+                      outlined
+                    >
+                      delete
+                    </v-btn>
+                  </v-col>
+                </v-row>
               </v-card-text>
               <v-card-actions>
                 <v-btn
