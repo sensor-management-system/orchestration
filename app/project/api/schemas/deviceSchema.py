@@ -53,3 +53,23 @@ class DeviceSchema(Schema):
                           schema='EventSchema',
                           type_='event',
                           id_field='event_id')
+
+    contacts = Relationship(attribute='contacts',
+                            self_view='device_contacts',
+                            self_view_kwargs={'id': '<id>'},
+                            related_view='contacts_list',
+                            related_view_kwargs={'device_id': '<id>'},
+                            many=True,
+                            schema='ContactSchema',
+                            type_='contact',
+                            id_field='contact_id')
+
+    properties = Relationship(attribute='properties',
+                              self_view='device_properties',
+                              self_view_kwargs={'id': '<id>'},
+                              related_view='contacts_list',
+                              related_view_kwargs={'device_id': '<id>'},
+                              many=True,
+                              schema='PropertiesSchema',
+                              type_='properties',
+                              id_field='properties_id')
