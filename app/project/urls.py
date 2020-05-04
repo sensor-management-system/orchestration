@@ -11,6 +11,9 @@ from project.api.resourceManager.platformRelationship import PlatformRelationshi
 from project.api.resourceManager.contactList import ContactList
 from project.api.resourceManager.contactDetail import ContactDetail
 from project.api.resourceManager.contactRelationship import ContactRelationship
+from project.api.resourceManager.propertiesList import PropertiesList
+from project.api.resourceManager.propertiesDetail import PropertiesDetail
+from project.api.resourceManager.propertiesRelationship import PropertiesRelationship
 
 
 def Create_endpoints(api):
@@ -29,13 +32,24 @@ def Create_endpoints(api):
     api.route(DeviceDetail, 'devices_detail', '/devices/<int:id>')
     api.route(DeviceRelationship, 'device_platform',
               '/devices/<int:id>/relationships/platform')
+    api.route(DeviceRelationship, 'device_contacts',
+              '/devices/<int:id>/relationships/contacts')
+    api.route(DeviceRelationship, 'device_events',
+              '/devices/<int:id>/relationships/events')
+    api.route(DeviceRelationship, 'device_properties',
+              '/devices/<int:id>/relationships/properties')
     # Event
     api.route(EventList, 'events_list', '/events')
     api.route(EventDetail, 'events_detail', '/events/<int:id>')
     api.route(EventRelationship, 'events_device',
               '/events/<int:id>/relationships/device')
-    # contact
+    # Contact
     api.route(ContactList, 'contacts_list', '/contacts')
     api.route(ContactDetail, 'contacts_detail', '/contacts/<int:id>')
     api.route(ContactRelationship, 'contacts_device',
               '/contacts/<int:id>/relationships/device')
+    # Properties
+    api.route(PropertiesList, 'properties_list', '/properties')
+    api.route(PropertiesDetail, 'properties_detail', '/properties/<int:id>')
+    api.route(PropertiesRelationship, 'properties_device',
+              '/properties/<int:id>/relationships/device')
