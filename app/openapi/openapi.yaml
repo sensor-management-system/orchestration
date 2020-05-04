@@ -8,151 +8,22 @@ info:
   license:
     name: Apache 2.0
     url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
-  version: "0.3"
+  version: "0.4"
 externalDocs:
-  description: 'Find out more about SVM '
-  url: '###'
+  description: 'Find out more about SIS in GitLab '
+  url: 'https://git.ufz.de/rdm-software/svm/backend'
 servers:
   - url: sis/v1/
     description: deployment
 tags:
   - name: Platforms
   - name: Devices
-  - name: Users
-  - name: Ping
+  - name: Contacts
+  - name: Events
+  - name: Properties
+  - name: Customfields
+  - name: Attachments
 paths:
-  /ping:
-    get:
-      tags:
-        - Ping
-      responses:
-        '200':
-          description: OK
-          content:
-             application/vnd.api+json:
-              schema:
-                type: object
-                properties:
-                  meta:
-                    type: object
-                    properties:
-                      message:
-                        type: string
-                        example: "Hello Sensor"
-                      status:
-                        type: string
-                        example: 'success'
-                  jsonapi:
-                    type: object
-                    properties:
-                      version:
-                        type: string
-                        example: "1.0"
-  /user/login:
-    get:
-      tags:
-        - Users
-      summary: Logs user into the system
-      operationId: loginUser
-      parameters:
-        - name: username
-          in: query
-          description: The user name for login
-          required: true
-          schema:
-            type: string
-        - name: password
-          in: query
-          description: The password for login in clear text
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: successful operation
-          headers:
-            X-Rate-Limit:
-              description: calls per hour allowed by the user
-              schema:
-                type: integer
-                format: int32
-            X-Expires-After:
-              description: date in UTC when token expires
-              schema:
-                type: string
-                format: date-time
-          content:
-            application/xml:
-              schema:
-                type: string
-            application/json:
-              schema:
-                type: string
-        '400':
-          description: Invalid username/password supplied
-          content: {}
-  /user/logout:
-    get:
-      tags:
-        - Users
-      summary: Logs out current logged in user session
-      operationId: logoutUser
-      responses:
-        default:
-          description: successful operation
-          content: {}
-      parameters: []
-  '/users/{userID}/devices':
-    get:
-      tags:
-        - Users
-      summary: Returns all Items that have a user with the given email adress.
-      operationId: getItemsOfContact
-      parameters:
-        - name: userID
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int32
-      responses:
-        '422':
-          description: Validation constraint violation
-          content: {}
-        '500':
-          description: Internal Server Error .
-          content: {}
-  '/users/{userID}/roles':
-    patch:
-      tags:
-        - Users
-      summary: Assigns a role to a user
-      operationId: assignRoleToUser
-      parameters:
-        - name: userID
-          in: path
-          description: the id of the the user that schould given the role.
-          required: true
-          schema:
-            type: integer
-            format: int32
-      requestBody:
-        description: 'The options needed to complete the reassignment '
-        content:
-          application/json; charset=UTF-8:
-            schema:
-              $ref: '#/components/schemas/Role'
-      responses:
-        '400':
-          description: ID does not exist.
-          content: {}
-        '200':
-          description: role added
-          content: {}
-        '500':
-          description: Internal Server Error .
-          content: {}
-      x-codegen-request-body-name: body
   /platforms:
     get:
       tags:
@@ -167,8 +38,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ResponsePlatforms'
         '500':
-          description: Internal Server Error .
-          content: {}
+          $ref: '#/components/responses/InternalServerError'
       parameters: []
     post:
       tags:
@@ -189,12 +59,10 @@ paths:
             application/vnd.api+json:
               schema:
                 $ref: '#/components/schemas/ResponsePlatform'
-        '422':
-          description: Validation constraint violation
-          content: {}
+        '400':
+          $ref: '#/components/responses/BadRequest'
         '500':
-          description: Internal Server Error .
-          content: {}
+           $ref: '#/components/responses/InternalServerError'
       x-codegen-request-body-name: body
       parameters: []
   '/platforms/{platformID}':
@@ -202,6 +70,8 @@ paths:
       tags:
         - Platforms
       summary: Retrieve details of a platform.
+      description: "you can also use the endpoint
+          '/devices/<int:id>/platform' "
       operationId: getAPlatform
       parameters:
         - name: platformID
@@ -221,13 +91,14 @@ paths:
           description: Platform not found
           content: {}
         '500':
-          description: Internal Server Error .
-          content: {}
+           $ref: '#/components/responses/InternalServerError'
       x-codegen-request-body-name: body
     patch:
       tags:
         - Platforms
       summary: Modifies an existing platform. The JSON has to include the platform ID.
+      description: "you can also use the endpoint
+          '/devices/<int:id>/platform' "
       operationId: modifyPlatform
       parameters:
         - name: platformID
@@ -255,13 +126,14 @@ paths:
           description: Platform not found
           content: {}
         '500':
-          description: Internal Server Error .
-          content: {}
+           $ref: '#/components/responses/InternalServerError'
       x-codegen-request-body-name: body
     delete:
       tags:
         - Platforms
       summary: 'Deletes the Platform with ID {platformID}.'
+      description: "you can also use the endpoint
+          '/devices/<int:id>/platform' "
       operationId: deletePlatform
       parameters:
         - name: platformID
@@ -284,53 +156,7 @@ paths:
           description: Platform still has references
           content: {}
         '500':
-          description: Internal Server Error .
-          content: {}
-  '/platforms/{platformID}/devices':
-    get:
-      tags:
-        - Platforms
-      summary: 'Find devices, that are directly attached to a first level platform'
-      operationId: getChildrenOfPlatform
-      parameters:
-        - name: platformID
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int32
-      responses:
-        '500':
-          description: Internal Server Error .
-          content: {}
-    post:
-      tags:
-        - Platforms
-      summary: 'Create a devices, that are directly attached to a first level platform'
-      operationId: addPlatformWithDevice
-      parameters:
-        - name: platformID
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int32
-      requestBody:
-        description: 'The needed JSON data to create a Platform.'
-        content:
-          application/vnd.api+json:
-            schema:
-              $ref: '#/components/schemas/RequestPlatformWithRelationship'
-      responses:
-        '201':
-          description: Created
-          content:
-            application/vnd.api+json:
-              schema:
-                $ref: '#/components/schemas/PlatformWithRelationship'
-        '500':
-          description: Internal Server Error .
-          content: {}
+           $ref: '#/components/responses/InternalServerError'
   '/platforms/{platformID}/relationships/devices':
     get:
       tags:
@@ -346,12 +172,11 @@ paths:
             format: int32
       responses:
         '500':
-          description: Internal Server Error .
-          content: {}
+           $ref: '#/components/responses/InternalServerError'
     post:
       tags:
         - Platforms
-      summary: 'Create relationships between a person and devices'
+      summary: 'Create relationships between a platform and devices'
       operationId: addPlatformRelationToDevice
       parameters:
         - name: platformID
@@ -362,8 +187,7 @@ paths:
             format: int32
       responses:
         '500':
-          description: Internal Server Error .
-          content: {}
+           $ref: '#/components/responses/InternalServerError'
     patch:
       tags:
         - Platforms
@@ -378,12 +202,11 @@ paths:
             format: int32
       responses:
         '500':
-          description: Internal Server Error .
-          content: {}
+           $ref: '#/components/responses/InternalServerError'
     delete:
       tags:
         - Platforms
-      summary: 'Delete relationships between  a person and devices'
+      summary: 'Delete relationships between  a platform and devices'
       operationId: removePlatformRelationToDevice
       parameters:
         - name: platformID
@@ -394,9 +217,7 @@ paths:
             format: int32
       responses:
         '500':
-          description: Internal Server Error .
-          content: {}
-
+           $ref: '#/components/responses/InternalServerError'
   /devices:
     get:
       tags:
@@ -404,6 +225,8 @@ paths:
       summary: >-
         Returns all available items. The level of detail and the returned amount
         of items can be configured by qunery parameters.
+      description: >-
+        you can also use the endpoint '/platforms/<int:id>/devices'
       operationId: getAllItems
       responses:
         '200':
@@ -413,18 +236,19 @@ paths:
               schema:
                 $ref: '#/components/schemas/ResponseDevices'
         '500':
-          description: Internal Server Error .
-          content: {}
+           $ref: '#/components/responses/InternalServerError'
     post:
       tags:
         - Devices
-      summary: Creates a device from JSON input
+      summary: Create a device from JSON input
+      description: >-
+        you can also use the endpoint '/platforms/<int:id>/devices'
       operationId: CreateDevice
       parameters:
         - name: parentItemID
           in: query
           description: >-
-            The ID of the parent platform to which the given Item should be
+            The ID of the parent platform to which the given Item can be
             assigned. Omit if the device should not have a parent platform. The
             parentID in the JSON document will be ignored.
           schema:
@@ -447,9 +271,6 @@ paths:
         '400':
           description: Invalid JSON.
           content: {}
-        '404':
-          description: Auth user or contact not found.
-          content: {}
         '409':
           description: Device with same ShortName under one parent
           content: {}
@@ -457,14 +278,17 @@ paths:
           description: Validation constraint violation .
           content: {}
         '500':
-          description: Internal Server Error .
-          content: {}
+           $ref: '#/components/responses/InternalServerError'
       x-codegen-request-body-name: body
   '/devices/{deviceID}':
     patch:
       tags:
         - Devices
       summary: Update a device from JSON input
+      description: >-
+        you can also use the endpoint '/events/<int:id>/device' or
+        '/contact/<int:id>/device' or '/properties/<int:id>/device' or
+        '/attachments/<int:id>/device' or '/customfields/<int:id>/device'
       operationId: alterDevice
       parameters:
         - name: deviceID
@@ -478,9 +302,7 @@ paths:
             format: int32
       requestBody:
         description: >-
-          The needed json data to update a Device. ShortNames will be ignored.
-          They must not be edited after creation, because they are an integral
-          part of the item URN.
+          The needed json data to update a Device.
         content:
            application/vnd.api+json:
             schema:
@@ -500,13 +322,16 @@ paths:
           description: Item could not be found.
           content: {}
         '500':
-          description: Internal Server Error .
-          content: {}
+           $ref: '#/components/responses/InternalServerError'
       x-codegen-request-body-name: body
     get:
       tags:
         - Devices
       summary: Get a Device by ID
+      description: >-
+        you can also use the endpoint '/events/<int:id>/device' or
+        '/contact/<int:id>/device' or '/properties/<int:id>/device' or
+        '/attachments/<int:id>/device' or '/customfields/<int:id>/device'
       operationId: getDevice
       parameters:
         - name: deviceID
@@ -526,8 +351,7 @@ paths:
           description: Device not found .
           content: {}
         '500':
-          description: Internal Server Error .
-          content: {}
+           $ref: '#/components/responses/InternalServerError'
     delete:
       tags:
         - Devices
@@ -548,139 +372,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/DeleteObject'
         '500':
-          description: Internal Server Error .
-          content: {}
-  '/devices/{deviceID}/platform':
-    get:
-      tags:
-        - Devices
-      summary: 'Find devices, that are directly attached to a first level platform'
-      operationId: getParentOfDevice
-      parameters:
-        - name: deviceID
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int32
-      responses:
-        '500':
-          description: Internal Server Error .
-          content: {}
-    post:
-      tags:
-        - Devices
-      summary: 'Create a devices, that are directly attached to a first level platform'
-      operationId: addDeviceToPlatform
-      parameters:
-        - name: deviceID
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int32
-      responses:
-        '500':
-          description: Internal Server Error .
-          content: {}
-  '/devices/{deviceID}/relationships/platforms':
-    get:
-      tags:
-        - Devices
-      summary: 'Retrieve relationships between a platform and devices'
-      operationId: getRealationsofDevice
-      parameters:
-        - name: deviceID
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int32
-      responses:
-        '500':
-          description: Internal Server Error .
-          content: {}
-    post:
-      tags:
-        - Devices
-      summary: 'Create relationships between a person and devices'
-      operationId: addRelationToDevice
-      parameters:
-        - name: deviceID
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int32
-      responses:
-        '500':
-          description: Internal Server Error .
-          content: {}
-    patch:
-      tags:
-        - Devices
-      summary: 'Update relationships between a platform and devices'
-      operationId: alterRealationsofDevice
-      parameters:
-        - name: deviceID
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int32
-      responses:
-        '500':
-          description: Internal Server Error .
-          content: {}
-    delete:
-      tags:
-        - Devices
-      summary: 'Delete relationships between  a person and devices'
-      operationId: removeRelationFromDevice
-      parameters:
-        - name: deviceID
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int32
-      responses:
-        '500':
-          description: Internal Server Error .
-          content: {}
-  '/devices/{deviceID}/events':
-    get:
-      tags:
-        - Devices
-      summary: 'Retrieve details of the events of a device'
-      operationId: getEventofDevice
-      parameters:
-        - name: deviceID
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int32
-      responses:
-        '500':
-          description: Internal Server Error .
-          content: {}
-    post:
-      tags:
-        - Devices
-      summary: 'Create a devices, that are directly attached to a an event'
-      operationId: addEventToDevice
-      parameters:
-        - name: deviceID
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int32
-      responses:
-        '500':
-          description: Internal Server Error .
-          content: {}
+           $ref: '#/components/responses/InternalServerError'
   '/devices/{deviceID}/relationships/events':
     get:
       tags:
@@ -696,8 +388,7 @@ paths:
             format: int32
       responses:
         '500':
-          description: Internal Server Error .
-          content: {}
+           $ref: '#/components/responses/InternalServerError'
     post:
       tags:
         - Devices
@@ -712,8 +403,7 @@ paths:
             format: int32
       responses:
         '500':
-          description: Internal Server Error .
-          content: {}
+           $ref: '#/components/responses/InternalServerError'
     patch:
       tags:
         - Devices
@@ -728,8 +418,7 @@ paths:
             format: int32
       responses:
         '500':
-          description: Internal Server Error .
-          content: {}
+          $ref: '#/components/responses/InternalServerError'
     delete:
       tags:
         - Devices
@@ -744,14 +433,13 @@ paths:
             format: int32
       responses:
         '500':
-          description: Internal Server Error .
-          content: {}
-  '/devices/{deviceID}/properties':
+          $ref: '#/components/responses/InternalServerError'
+  '/devices/{deviceID}/relationships/contacts':
     get:
       tags:
         - Devices
-      summary: 'Find devices, that are directly attached to a first level platform'
-      operationId: getpropertiestofDevice
+      summary: 'Retrieve relationships between a devices and an event'
+      operationId: getRealationsofDeviceToContact
       parameters:
         - name: deviceID
           in: path
@@ -761,13 +449,12 @@ paths:
             format: int32
       responses:
         '500':
-          description: Internal Server Error .
-          content: {}
+           $ref: '#/components/responses/InternalServerError'
     post:
       tags:
         - Devices
-      summary: 'Create a devices, that are directly attached to a first level platform'
-      operationId: addpropertiesToDevice
+      summary: 'Create relationships between a person and devices'
+      operationId: CreateEventToContact
       parameters:
         - name: deviceID
           in: path
@@ -777,8 +464,98 @@ paths:
             format: int32
       responses:
         '500':
-          description: Internal Server Error .
-          content: {}
+           $ref: '#/components/responses/InternalServerError'
+    patch:
+      tags:
+        - Devices
+      summary: 'Update relationships between a platform and devices'
+      operationId: alterContacttofDevice
+      parameters:
+        - name: deviceID
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      tags:
+        - Devices
+      summary: 'Delete relationships between  a person and devices'
+      operationId: removeContactfromDevice
+      parameters:
+        - name: deviceID
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  '/devices/{deviceID}/relationships/attachments':
+    get:
+      tags:
+        - Devices
+      summary: 'Retrieve relationships between a devices and an event'
+      operationId: getRealationsofDeviceToattachment
+      parameters:
+        - name: deviceID
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '500':
+           $ref: '#/components/responses/InternalServerError'
+    post:
+      tags:
+        - Devices
+      summary: 'Create relationships between a person and devices'
+      operationId: CreateEventToattachment
+      parameters:
+        - name: deviceID
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '500':
+           $ref: '#/components/responses/InternalServerError'
+    patch:
+      tags:
+        - Devices
+      summary: 'Update relationships between a platform and devices'
+      operationId: alterattachmenttofDevice
+      parameters:
+        - name: deviceID
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      tags:
+        - Devices
+      summary: 'Delete relationships between  a person and devices'
+      operationId: removeatachmentfromDevice
+      parameters:
+        - name: deviceID
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '500':
+          $ref: '#/components/responses/InternalServerError'
   '/devices/{deviceID}/relationships/properties':
     get:
       tags:
@@ -794,8 +571,7 @@ paths:
             format: int32
       responses:
         '500':
-          description: Internal Server Error .
-          content: {}
+          $ref: '#/components/responses/InternalServerError'
     post:
       tags:
         - Devices
@@ -810,8 +586,7 @@ paths:
             format: int32
       responses:
         '500':
-          description: Internal Server Error .
-          content: {}
+          $ref: '#/components/responses/InternalServerError'
     patch:
       tags:
         - Devices
@@ -826,8 +601,7 @@ paths:
             format: int32
       responses:
         '500':
-          description: Internal Server Error .
-          content: {}
+          $ref: '#/components/responses/InternalServerError'
     delete:
       tags:
         - Devices
@@ -842,41 +616,7 @@ paths:
             format: int32
       responses:
         '500':
-          description: Internal Server Error .
-          content: {}
-  '/devices/{deviceID}/customfields':
-    get:
-      tags:
-        - Devices
-      summary: 'Find devices, that are directly attached to a first level platform'
-      operationId: getCFofDevice
-      parameters:
-        - name: deviceID
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int32
-      responses:
-        '500':
-          description: Internal Server Error .
-          content: {}
-    post:
-      tags:
-        - Devices
-      summary: 'Create a devices, that are directly attached to a first level platform'
-      operationId: addCFToDevice
-      parameters:
-        - name: deviceID
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int32
-      responses:
-        '500':
-          description: Internal Server Error .
-          content: {}
+          $ref: '#/components/responses/InternalServerError'
   '/devices/{deviceID}/relationships/customfields':
     get:
       tags:
@@ -892,8 +632,7 @@ paths:
             format: int32
       responses:
         '500':
-          description: Internal Server Error .
-          content: {}
+          $ref: '#/components/responses/InternalServerError'
     post:
       tags:
         - Devices
@@ -908,8 +647,7 @@ paths:
             format: int32
       responses:
         '500':
-          description: Internal Server Error .
-          content: {}
+          $ref: '#/components/responses/InternalServerError'
     patch:
       tags:
         - Devices
@@ -924,8 +662,7 @@ paths:
             format: int32
       responses:
         '500':
-          description: Internal Server Error .
-          content: {}
+          $ref: '#/components/responses/InternalServerError'
     delete:
       tags:
         - Devices
@@ -940,10 +677,760 @@ paths:
             format: int32
       responses:
         '500':
-          description: Internal Server Error .
+          $ref: '#/components/responses/InternalServerError'
+  /events:
+    get:
+      tags:
+        - Events
+      summary: >-
+        Returns all available items.
+        description: >-
+        you can also use the endpoint '/devices/<int:id>/contacts'
+      operationId: getAllEvents
+      responses:
+        '200':
+          description: OK
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/ResponseDevices'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      tags:
+        - Events
+      summary: Creates an Event from JSON input
+      description: >-
+        you can also use the endpoint '/devices/<int:id>/contacts'
+      operationId: CreateEvent
+      parameters:
+        - name: parentItemID
+          in: query
+          description: >-
+            The ID of the parent device to which the given Item should be
+            assigned. Omit if the device should not have a parent platform. The
+            parentID in the JSON document will be ignored.
+          schema:
+            type: integer
+            format: int32
+      requestBody:
+        description: 'The needed json data to create an Event. '
+        content:
+          application/vnd.api+json:
+            schema:
+              $ref: '#/components/schemas/RequestEvent'
+        required: true
+      responses:
+        '201':
+          description: Created
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/ResponseEvents'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      x-codegen-request-body-name: body
+  '/event/{eventID}':
+    patch:
+      tags:
+        - Events
+      summary: Update an Event from JSON input
+      operationId: alterEvent
+      parameters:
+        - name: eventID
+          in: path
+          description: >-
+            The ID of the item you want to update. The itemID in the JSON
+            document will be ignored.
+          required: true
+          schema:
+            type: integer
+            format: int32
+      requestBody:
+        description: >-
+          The needed json data to update a Device. ShortNames will be ignored.
+          They must not be edited after creation, because they are an integral
+          part of the item URN.
+        content:
+           application/vnd.api+json:
+            schema:
+               $ref: '#/components/schemas/RequestEvent'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+           application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/ResponseEvents'
+      x-codegen-request-body-name: body
+    get:
+      tags:
+        - Events
+      summary: Get a Event by ID
+      operationId: getEvent
+      parameters:
+        - name: eventID
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: OK
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/ResponseEvents'
+        '404':
+          description: Device not found .
           content: {}
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      tags:
+        - Events
+      summary: 'remove an Event.'
+      operationId: removeEvent
+      parameters:
+        - name: eventID
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: OK
+          content:
+             application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/DeleteObject'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /properties:
+    get:
+      tags:
+        - Properties
+      summary: >-
+        Returns all available items.
+      description: >-
+        you can also use the endpoint '/devices/<int:id>/contacts'
+      operationId: getAllProperties
+      responses:
+        '200':
+          description: OK
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/ResponseProperties'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      tags:
+        - Properties
+      summary: Creates properties from JSON input
+      description: >-
+        you can also use the endpoint '/devices/<int:id>/contacts'
+      operationId: CreatePproperties
+      parameters:
+        - name: parentItemID
+          in: query
+          description: >-
+            The ID of the parent platform to which the given Item should be
+            assigned. Omit if the device should not have a parent platform. The
+            parentID in the JSON document will be ignored.
+          schema:
+            type: integer
+            format: int32
+      requestBody:
+        description: 'The needed json data to create a Device. '
+        content:
+          application/vnd.api+json:
+            schema:
+              $ref: '#/components/schemas/RequestProperties'
+        required: true
+      responses:
+        '201':
+          description: Created
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/ResponseProperties'
+        '400':
+          description: Invalid JSON.
+          content: {}
+        '404':
+          description: Auth user or contact not found.
+          content: {}
+        '409':
+          description: Device with same ShortName under one parent
+          content: {}
+        '422':
+          description: Validation constraint violation .
+          content: {}
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      x-codegen-request-body-name: body
+  '/properties/{propertiesID}':
+    patch:
+      tags:
+        - Properties
+      summary: Update properties from JSON input
+      operationId: alterProperties
+      parameters:
+        - name: propertiesID
+          in: path
+          description: >-
+            The ID of the item you want to update. The itemID in the JSON
+            document will be ignored.
+          required: true
+          schema:
+            type: integer
+            format: int32
+      requestBody:
+        description: >-
+          The needed json data to update a Device. ShortNames will be ignored.
+          They must not be edited after creation, because they are an integral
+          part of the item URN.
+        content:
+           application/vnd.api+json:
+            schema:
+              $ref: '#/components/schemas/RequestProperties'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+           application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/ResponseProperties'
+        '400':
+          description: Invalid JSON.
+          content: {}
+        '404':
+          description: Item could not be found.
+          content: {}
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      x-codegen-request-body-name: body
+    get:
+      tags:
+        - Properties
+      summary: Get properties by ID
+      operationId: getProperties
+      parameters:
+        - name: propertiesID
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: OK
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/ResponseProperties'
+        '404':
+          description: Device not found .
+          content: {}
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      tags:
+        - Properties
+      summary: 'remove properties.'
+      operationId: removeProperties
+      parameters:
+        - name: propertiesID
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: OK
+          content:
+             application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/DeleteObject'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /customfields:
+    get:
+      tags:
+        - Customfields
+      summary: >-
+        Returns all available items.
+      description: >-
+        you can also use the endpoint '/devices/<int:id>/contacts'
+      operationId: getAllCustomfields
+      responses:
+        '200':
+          description: OK
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/RequestCustomField'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      tags:
+        - Customfields
+      summary: Creates a customfield from JSON input
+      operationId: CreateCustomfields
+      description: >-
+        you can also use the endpoint '/devices/<int:id>/customfields'
+      parameters:
+        - name: parentItemID
+          in: query
+          description: >-
+            The ID of the parent platform to which the given Item should be
+            assigned. Omit if the device should not have a parent platform. The
+            parentID in the JSON document will be ignored.
+          schema:
+            type: integer
+            format: int32
+      requestBody:
+        description: 'The needed json data to create a custom field. '
+        content:
+          application/vnd.api+json:
+            schema:
+              $ref: '#/components/schemas/RequestCustomField'
+        required: true
+      responses:
+        '201':
+          description: Created
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/ResponseCustomField'
+        '400':
+          description: Invalid JSON.
+          content: {}
+        '404':
+          description: Auth user or contact not found.
+          content: {}
+        '409':
+          description: Device with same ShortName under one parent
+          content: {}
+        '422':
+          description: Validation constraint violation .
+          content: {}
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      x-codegen-request-body-name: body
+  '/customfields/{customfieldsID}':
+    patch:
+      tags:
+        - Customfields
+      summary: Update customfields from JSON input
+      operationId: alterCustomfields
+      parameters:
+        - name: customfieldsID
+          in: path
+          description: >-
+            The ID of the item you want to update. The itemID in the JSON
+            document will be ignored.
+          required: true
+          schema:
+            type: integer
+            format: int32
+      requestBody:
+        description: >-
+          The needed json data to update a Device. ShortNames will be ignored.
+          They must not be edited after creation, because they are an integral
+          part of the item URN.
+        content:
+           application/vnd.api+json:
+            schema:
+              $ref: '#/components/schemas/RequestCustomField'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+           application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/ResponseCustomField'
+        '400':
+          description: Invalid JSON.
+          content: {}
+        '404':
+          description: Item could not be found.
+          content: {}
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      x-codegen-request-body-name: body
+    get:
+      tags:
+        - Customfields
+      summary: Get a customfield by ID
+      operationId: getcustomfields
+      parameters:
+        - name: customfieldsID
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: OK
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/ResponseCustomField'
+        '404':
+          description: Device not found .
+          content: {}
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      tags:
+        - Customfields
+      summary: 'remove a customfield.'
+      operationId: removeCustomfields
+      parameters:
+        - name: customfieldsID
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: OK
+          content:
+             application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/DeleteObject'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /contacts:
+    get:
+      tags:
+        - Contacts
+      summary: >-
+        Returns all available items.
+        description: >-
+        you can also use the endpoint '/devices/<int:id>/contacts'
+      operationId: getAllContacts
+      responses:
+        '200':
+          description: OK
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/ResponseContact'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      tags:
+        - Contacts
+      summary: Creates a contact from JSON input
+      description: >-
+        you can also use the endpoint '/devices/<int:id>/contacts'
+      operationId: CreateContacts
+      parameters:
+        - name: parentItemID
+          in: query
+          description: >-
+            The ID of the parent platform to which the given Item should be
+            assigned. Omit if the device should not have a parent platform. The
+            parentID in the JSON document will be ignored.
+          schema:
+            type: integer
+            format: int32
+      requestBody:
+        description: 'The needed json data to create a contact. '
+        content:
+          application/vnd.api+json:
+            schema:
+              $ref: '#/components/schemas/RequestContact'
+        required: true
+      responses:
+        '201':
+          description: Created
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/ResponseContact'
+        '400':
+          description: Invalid JSON.
+          content: {}
+        '404':
+          description: Auth user or contact not found.
+          content: {}
+        '409':
+          description: Device with same ShortName under one parent
+          content: {}
+        '422':
+          description: Validation constraint violation .
+          content: {}
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      x-codegen-request-body-name: body
+  '/contacts/{contactsID}':
+    patch:
+      tags:
+        - Contacts
+      summary: Update contacts from JSON input
+      operationId: alterContacts
+      parameters:
+        - name: contactsID
+          in: path
+          description: >-
+            The ID of the item you want to update. The itemID in the JSON
+            document will be ignored.
+          required: true
+          schema:
+            type: integer
+            format: int32
+      requestBody:
+        description: >-
+          The needed json data to update a Device. ShortNames will be ignored.
+          They must not be edited after creation, because they are an integral
+          part of the item URN.
+        content:
+           application/vnd.api+json:
+            schema:
+              $ref: '#/components/schemas/RequestContact'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+           application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/ResponseContact'
+        '400':
+          description: Invalid JSON.
+          content: {}
+        '404':
+          description: Item could not be found.
+          content: {}
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      x-codegen-request-body-name: body
+    get:
+      tags:
+        - Contacts
+      summary: Get a contact by ID
+      operationId: getContacts
+      parameters:
+        - name: contactsID
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: OK
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/ResponseContact'
+        '404':
+          description: Device not found .
+          content: {}
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      tags:
+        - Contacts
+      summary: 'remove contact.'
+      operationId: removeContacts
+      parameters:
+        - name: contactsID
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: OK
+          content:
+             application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/DeleteObject'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /attachments:
+    get:
+      tags:
+        - Attachments
+      summary: >-
+        Returns all available items.
+      operationId: getAllAttachments
+      responses:
+        '200':
+          description: OK
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/ResponseAttachment'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      tags:
+        - Attachments
+      summary: Creates  attachments from JSON input
+      operationId: CreateAttachments
+      parameters:
+        - name: parentItemID
+          in: query
+          description: >-
+            The ID of the parent platform to which the given Item should be
+            assigned. Omit if the device should not have a parent platform. The
+            parentID in the JSON document will be ignored.
+          schema:
+            type: integer
+            format: int32
+      requestBody:
+        description: 'The needed json data to create an attachments. '
+        content:
+          application/vnd.api+json:
+            schema:
+              $ref: '#/components/schemas/RequestAttachment'
+        required: true
+      responses:
+        '201':
+          description: Created
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/ResponseAttachment'
+        '400':
+          description: Invalid JSON.
+          content: {}
+        '404':
+          description: Auth user or contact not found.
+          content: {}
+        '409':
+          description: Device with same ShortName under one parent
+          content: {}
+        '422':
+          description: Validation constraint violation .
+          content: {}
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      x-codegen-request-body-name: body
+  '/attachments/{attachmentsID}':
+    patch:
+      tags:
+        - Attachments
+      summary: Update attachments from JSON input
+      operationId: alterAttachments
+      parameters:
+        - name: attachmentsID
+          in: path
+          description: >-
+            The ID of the item you want to update. The itemID in the JSON
+            document will be ignored.
+          required: true
+          schema:
+            type: integer
+            format: int32
+      requestBody:
+        description: >-
+          The needed json data to update a Device. ShortNames will be ignored.
+          They must not be edited after creation, because they are an integral
+          part of the item URN.
+        content:
+           application/vnd.api+json:
+            schema:
+              $ref: '#/components/schemas/RequestAttachment'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+           application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/ResponseAttachment'
+        '400':
+          description: Invalid JSON.
+          content: {}
+        '404':
+          description: Item could not be found.
+          content: {}
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      x-codegen-request-body-name: body
+    get:
+      tags:
+        - Attachments
+      summary: Get an attachment by ID
+      operationId: getAttachments
+      parameters:
+        - name: attachmentsID
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: OK
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/ResponseAttachment'
+        '404':
+          description: Device not found .
+          content: {}
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      tags:
+        - Attachments
+      summary: 'remove attachments.'
+      operationId: removeAttachments
+      parameters:
+        - name: attachmentsID
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: OK
+          content:
+             application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/DeleteObject'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
 components:
   responses:
+    UnprocessableEntity:
+      description: Unprocessable Entity
+      content:
+         application/vnd.api+json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    InternalServerError:
+      description: Internal Server Error
+      content:
+         application/vnd.api+json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    BadRequest:
+      description: Bad Request
+      content:
+         application/vnd.api+json:
+          schema:
+            $ref: '#/components/schemas/Error'
     NotFound:
       description: The specified resource was not found
       content:
@@ -958,23 +1445,33 @@ components:
             $ref: '#/components/schemas/Error'
     UnauthorizedError:
           description: Access token is missing or invalid
-    BadRequest:
-      description: Invalid credentials
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
+
   schemas:
     Error:
       type: object
       properties:
-        code:
-          type: string
-        message:
-          type: string
-      required:
-        - code
-        - message
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              status:
+                type: string
+              source:
+                type: object
+                properties:
+                  parameter:
+                    type: string
+              title:
+                type: string
+              detail:
+                type: string
+        jsonapi:
+          type: object
+          properties:
+            version:
+              type: string
+              example: "1.0"
     Device:
       required:
         - persistentIdentifier
@@ -1208,19 +1705,9 @@ components:
               format: int32
               example: 1
         links:
-          $ref: '#/components/schemas/PlatfoemLinks'
+          $ref: '#/components/schemas/PlatformLinks'
         jsonapi:
           $ref: '#/components/schemas/Jsonapi'
-    RequestPlatformWithRelationship:
-      type: object
-      properties:
-        data:
-          type: object
-          properties:
-            attributes:
-              $ref: '#/components/schemas/Platform'
-            relationships:
-              $ref: '#/components/schemas/Relationships'
     Relationships:
       type: object
       properties:
@@ -1236,24 +1723,13 @@ components:
                 self:
                   type: string
                   example: "/platform/{deviceID}/relationships/platform"
-    PlatformWithRelationship:
-      type: object
-      properties:
-        data:
-          $ref: '#/components/schemas/ResponsePlatform'
-        included:
-          type: object
-        links:
-          $ref: '#/components/schemas/PlatfoemLinks'
-        jsonapi:
-          $ref: '#/components/schemas/Jsonapi'
     Jsonapi:
           type: object
           properties:
             version:
               type: string
               example: "1.0"
-    PlatfoemLinks:
+    PlatformLinks:
           type: object
           properties:
             self:
@@ -1280,6 +1756,32 @@ components:
         id:
           type: integer
           format: int32
+    RequestEvent:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            type:
+              type: string
+              example: platform
+            attributes:
+                  $ref: '#/components/schemas/Event'
+    ResponseEvents:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+                example: device
+              attributes:
+                    $ref: '#/components/schemas/Platform'
+              rel:
+                $ref: '#/components/schemas/Relationships'
     Platform:
       required:
         - longName
@@ -1306,13 +1808,39 @@ components:
         configurationDate:
           type: string
           format: date_time
-    customField:
+    CustomField:
       type: object
       properties:
         key:
           type: string
         value:
           type: string
+    RequestCustomField:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            type:
+              type: string
+              example: platform
+            attributes:
+                  $ref: '#/components/schemas/CustomField'
+    ResponseCustomField:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+                example: device
+              attributes:
+                    $ref: '#/components/schemas/CustomField'
+              rel:
+                $ref: '#/components/schemas/Relationships'
     Attachment:
       type: object
       properties:
@@ -1320,13 +1848,65 @@ components:
           type: string
         href:
           type: string
-    ResponsiblePerson:
+    RequestAttachment:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            type:
+              type: string
+              example: platform
+            attributes:
+                  $ref: '#/components/schemas/Attachment'
+    ResponseAttachment:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+                example: device
+              attributes:
+                    $ref: '#/components/schemas/Attachment'
+              rel:
+                $ref: '#/components/schemas/Relationships'
+    Contact:
       type: object
       properties:
         email:
           type: string
         name:
           type: string
+    RequestContact:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            type:
+              type: string
+              example: platform
+            attributes:
+                  $ref: '#/components/schemas/Contact'
+    ResponseContact:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+                example: device
+              attributes:
+                    $ref: '#/components/schemas/Contact'
+              rel:
+                $ref: '#/components/schemas/Relationships'
     Properties:
       type: object
       properties:
@@ -1365,22 +1945,32 @@ components:
           enum:
             - placeholder
             - placeholder
-    Role:
+    RequestProperties:
       type: object
       properties:
-        name:
-          type: string
-          enum:
-            - admin
-            - technican
-        userID:
-          type: integer
-          format: int32
-        default:
-          type: string
-        id:
-          type: integer
-          format: int32
+        data:
+          type: object
+          properties:
+            type:
+              type: string
+              example: platform
+            attributes:
+                  $ref: '#/components/schemas/Properties'
+    ResponseProperties:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+                example: device
+              attributes:
+                    $ref: '#/components/schemas/Properties'
+              rel:
+                $ref: '#/components/schemas/Relationships'
     DeleteObject:
       type: object
       properties:
