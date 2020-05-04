@@ -43,3 +43,13 @@ class DeviceSchema(Schema):
                             related_view_kwargs={'device_id': '<id>'},
                             schema='PlatformSchema',
                             type_='platform')
+
+    events = Relationship(attribute='events',
+                          self_view='device_events',
+                          self_view_kwargs={'id': '<id>'},
+                          related_view='events_list',
+                          related_view_kwargs={'device_id': '<id>'},
+                          many=True,
+                          schema='EventSchema',
+                          type_='event',
+                          id_field='event_id')
