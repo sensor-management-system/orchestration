@@ -1,10 +1,10 @@
-from project.api.deviceDetail import DeviceDetail
-from project.api.deviceList import DeviceList
-from project.api.deviceRelationship import DeviceRelationship
 from project.api.ping import Ping
-from project.api.platformDetail import PlatformDetail
-from project.api.platformList import PlatformList
-from project.api.platformRelationship import PlatformRelationship
+from project.api.resourceManager.deviceDetail import DeviceDetail
+from project.api.resourceManager.deviceList import DeviceList
+from project.api.resourceManager.deviceRelationship import DeviceRelationship
+from project.api.resourceManager.platformDetail import PlatformDetail
+from project.api.resourceManager.platformList import PlatformList
+from project.api.resourceManager.platformRelationship import PlatformRelationship
 
 
 def Create_endpoints(api):
