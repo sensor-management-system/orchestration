@@ -14,6 +14,9 @@ from project.api.resourceManager.contactRelationship import ContactRelationship
 from project.api.resourceManager.propertiesList import PropertiesList
 from project.api.resourceManager.propertiesDetail import PropertiesDetail
 from project.api.resourceManager.propertiesRelationship import PropertiesRelationship
+from project.api.resourceManager.attachmentList import AttachmentList
+from project.api.resourceManager.attachmentDetail import AttachmentDetail
+from project.api.resourceManager.attachmentRelationship import AttachmentRelationship
 
 base_url = '/sis/v1'
 
@@ -32,7 +35,9 @@ def Create_endpoints(api):
     api.route(DeviceList, 'devices_list', base_url + '/devices',
               base_url + '/platforms/<int:id>/devices')
     api.route(DeviceDetail, 'devices_detail', base_url + '/devices/<int:id>',
-              base_url + '/events/<int:event_id>/device', base_url + '/contact/<int:contact_id>/device',
+              base_url + '/events/<int:event_id>/device',
+              base_url + '/contact/<int:contact_id>/device',
+              base_url + '/attachments/<int:attachment_id>/device',
               base_url + '/properties/<int:properties_id>/device')
     api.route(DeviceRelationship, 'device_platform',
               base_url + '/devices/<int:id>/relationships/platform')
@@ -42,6 +47,8 @@ def Create_endpoints(api):
               base_url + '/devices/<int:id>/relationships/events')
     api.route(DeviceRelationship, 'device_properties',
               base_url + '/devices/<int:id>/relationships/properties')
+    api.route(DeviceRelationship, 'device_attachments',
+              base_url + '/devices/<int:id>/relationships/attachments')
     # Event
     api.route(EventList, 'events_list', base_url + '/events',
               base_url + '/devices/<int:id>/events')
@@ -60,3 +67,9 @@ def Create_endpoints(api):
     api.route(PropertiesDetail, 'properties_detail', base_url + '/properties/<int:id>')
     api.route(PropertiesRelationship, 'properties_device',
               base_url + '/properties/<int:device_id>/relationships/device')
+    # Attachment
+    api.route(AttachmentList, 'attachments_list', base_url + '/attachments',
+              base_url + '/devices/<int:device_id>/attachments')
+    api.route(AttachmentDetail, 'attachments_detail', base_url + '/attachments/<int:id>')
+    api.route(AttachmentRelationship, 'attachments_device',
+              base_url + '/attachments/<int:id>/relationships/device')
