@@ -47,3 +47,21 @@ With the containers up and running, run the tests:
 $ docker-compose -f docker-compose-dev.yml \
 run users python manage.py test
 ```
+
+### Code Quality
+
+Checking the code for stylistic or programming errors.
+
+```
+$ docker-compose -f docker-compose-dev.yml run app flake8 project
+```
+
+### Code Coverage
+
+Code coverage is the process of finding areas of the code not exercised by tests.
+
+```
+$ docker-compose -f docker-compose-dev.yml \
+run apps python manage.py cov
+
+```
