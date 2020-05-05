@@ -73,3 +73,13 @@ class DeviceSchema(Schema):
                               schema='PropertiesSchema',
                               type_='properties',
                               id_field='properties_id')
+
+    attachments = Relationship(attribute='attachments',
+                               self_view='device_attachments',
+                               self_view_kwargs={'id': '<id>'},
+                               related_view='attachments_list',
+                               related_view_kwargs={'device_id': '<id>'},
+                               many=True,
+                               schema='AttachmentSchema',
+                               type_='Attachment',
+                               id_field='attachment_id')
