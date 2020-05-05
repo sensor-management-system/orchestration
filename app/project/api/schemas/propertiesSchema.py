@@ -4,9 +4,7 @@ from marshmallow_jsonapi.flask import Schema, Relationship
 
 class PropertiesSchema(Schema):
     """
-    This class create a schema for a device. Every attribute in the schema going to expose through the api.
-    DeviceSchema has an attribute named “deviceURN” that is the result of concatenation manufacturer, model,
-    type and serialNumber.
+    This class create a schema for a properties. Every attribute in the schema going to expose through the api.
     It uses library called marshmallow-jsonapi that fit the JSONAPI 1.0 specification and provides Flask integration.
 
     """
