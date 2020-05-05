@@ -12,10 +12,12 @@ class ContactDetail(ResourceDetail):
     def before_get_object(self, view_kwargs):
         if view_kwargs.get('device_id') is not None:
             try:
-                device = self.session.query(Device).filter_by(id=view_kwargs['device_id']).one()
+                device = self.session.query(Device).filter_by(
+                    id=view_kwargs['device_id']).one()
             except NoResultFound:
                 raise ObjectNotFound({'parameter': 'device_id'},
-                                     "Device: {} not found".format(view_kwargs['device_id']))
+                                     "Device: {} not found".format(
+                                         view_kwargs['device_id']))
             else:
                 if device.platform is not None:
                     view_kwargs['id'] = device.platform.id
@@ -26,7 +28,3 @@ class ContactDetail(ResourceDetail):
     data_layer = {'session': db.session,
                   'model': Contact,
                   'methods': {'before_create_object': before_get_object}}
-
-
-
-

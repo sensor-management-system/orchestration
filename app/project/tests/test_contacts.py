@@ -1,7 +1,6 @@
 import json
 import unittest
 
-
 from project.api.models.contact import Contact
 from project.api.schemas.contactSchema import ContactSchema
 from project.tests.base import BaseTestCase
@@ -19,7 +18,8 @@ class TestEventServices(BaseTestCase):
 
     def test_add_platform_model(self):
         """""Ensure Add platform model """
-        contact = Contact(id=45, username='test', email="test@test.test")
+        contact = Contact(id=45, username='test',
+                          email="test@test.test")
         ContactSchema().dump(contact)
 
     def test_add_contact(self):
@@ -44,7 +44,8 @@ class TestEventServices(BaseTestCase):
         self.assertIn('contact', data['data']['type'])
 
     def test_add_contact_invalid_type(self):
-        """Ensure error is thrown if the JSON object has invalid type."""
+        """Ensure error is thrown if the JSON object
+         has invalid type."""
 
         with self.client:
             response = self.client.post(
@@ -61,10 +62,12 @@ class TestEventServices(BaseTestCase):
             )
         data = json.loads(response.data.decode())
         self.assertEqual(response.status_code, 409)
-        self.assertIn("Invalid type. Expected \"contact\".", data['errors'][0]['detail'])
+        self.assertIn("Invalid type. Expected \"contact\".",
+                      data['errors'][0]['detail'])
 
     def test_add_contact_missing_data(self):
-        """Ensure error is thrown if the JSON object has messing required data."""
+        """Ensure error is thrown if the JSON object
+        has messing required data."""
 
         with self.client:
             response = self.client.post(
@@ -81,7 +84,8 @@ class TestEventServices(BaseTestCase):
             )
         data = json.loads(response.data.decode())
         self.assertEqual(response.status_code, 422)
-        self.assertIn("Missing data for required field.", data['errors'][0]['detail'])
+        self.assertIn("Missing data for required field.",
+                      data['errors'][0]['detail'])
 
     def test_add_contact_invalid_json(self):
         """Ensure error is thrown if the JSON object invalid."""
@@ -94,16 +98,18 @@ class TestEventServices(BaseTestCase):
             )
         data = json.loads(response.data.decode())
         self.assertEqual(response.status_code, 422)
-        self.assertIn("Object must include `data` key.", data['errors'][0]['detail'])
+        self.assertIn("Object must include `data` key.",
+                      data['errors'][0]['detail'])
 
     def test_add_contact_invalid_data_key(self):
-        """Ensure error is thrown if the JSON object has invalid data key."""
+        """Ensure error is thrown if the JSON object
+        has invalid data key."""
 
         with self.client:
             response = self.client.post(
                 '/sis/v1/contacts',
                 data=json.dumps({
-                     "data": {
+                    "data": {
                         "type": "contact",
                         "attributes": {
                             "email": 123
@@ -114,7 +120,8 @@ class TestEventServices(BaseTestCase):
             )
         data = json.loads(response.data.decode())
         self.assertEqual(response.status_code, 422)
-        self.assertIn("Not a valid string.", data['errors'][0]['detail'])
+        self.assertIn("Not a valid string.",
+                      data['errors'][0]['detail'])
 
 
 if __name__ == '__main__':

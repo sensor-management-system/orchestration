@@ -18,7 +18,8 @@ class TestPlatformServices(BaseTestCase):
 
     def test_add_platform_model(self):
         """""Ensure Add platform model """
-        platform = Platform(id=13, shortName='short', type="type")
+        platform = Platform(id=13,
+                            shortName='short', type="type")
         PlatformSchema().dump(platform)
 
     def test_add_platform(self):
@@ -61,10 +62,12 @@ class TestPlatformServices(BaseTestCase):
             )
         data = json.loads(response.data.decode())
         self.assertEqual(response.status_code, 409)
-        self.assertIn("Invalid type. Expected \"platform\".", data['errors'][0]['detail'])
+        self.assertIn("Invalid type. Expected \"platform\".",
+                      data['errors'][0]['detail'])
 
     def test_add_platform_missing_data(self):
-        """Ensure error is thrown if the JSON object has messing required data."""
+        """Ensure error is thrown if the JSON object
+        has messing required data."""
 
         with self.client:
             response = self.client.post(
@@ -81,7 +84,8 @@ class TestPlatformServices(BaseTestCase):
             )
         data = json.loads(response.data.decode())
         self.assertEqual(response.status_code, 422)
-        self.assertIn("Missing data for required field.", data['errors'][0]['detail'])
+        self.assertIn("Missing data for required field.",
+                      data['errors'][0]['detail'])
 
     def test_add_platform_invalid_json(self):
         """Ensure error is thrown if the JSON object invalid."""
@@ -94,10 +98,12 @@ class TestPlatformServices(BaseTestCase):
             )
         data = json.loads(response.data.decode())
         self.assertEqual(response.status_code, 422)
-        self.assertIn("Object must include `data` key.", data['errors'][0]['detail'])
+        self.assertIn("Object must include `data` key.",
+                      data['errors'][0]['detail'])
 
     def test_add_platform_invalid_data_key(self):
-        """Ensure error is thrown if the JSON object has invalid data key."""
+        """Ensure error is thrown if the JSON object
+         has invalid data key."""
 
         with self.client:
             response = self.client.post(
@@ -115,7 +121,8 @@ class TestPlatformServices(BaseTestCase):
             )
         data = json.loads(response.data.decode())
         self.assertEqual(response.status_code, 422)
-        self.assertIn("Not a valid string.", data['errors'][0]['detail'])
+        self.assertIn("Not a valid string.",
+                      data['errors'][0]['detail'])
 
 
 if __name__ == '__main__':

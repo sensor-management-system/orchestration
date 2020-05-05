@@ -16,8 +16,7 @@ class TestDeviceService(BaseTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn('Hello Sensor!', data['message'])
         self.assertIn('success', data['status'])
-        #super().tear_down()
-
+        # super().tear_down()
 
     def test_get_devices(self):
         """Ensure the /devices route behaves correctly."""
@@ -29,7 +28,8 @@ class TestDeviceService(BaseTestCase):
 
     def test_add_device_model(self):
         """""Ensure Add device model """
-        sensor = Device(id=22, serialNumber='123456789', manufacture="manufacture",
+        sensor = Device(id=22, serialNumber='123456789',
+                        manufacture="manufacture",
                         model="model", inventoryNumber="123123",
                         persistentIdentifier="456456", type="type")
         DeviceSchema().dump(sensor)
@@ -85,10 +85,12 @@ class TestDeviceService(BaseTestCase):
             )
         data = json.loads(response.data.decode())
         self.assertEqual(response.status_code, 409)
-        self.assertIn("Invalid type. Expected \"device\".", data['errors'][0]['detail'])
+        self.assertIn("Invalid type. Expected \"device\".",
+                      data['errors'][0]['detail'])
 
     def test_add_device_missing_data(self):
-        """Ensure error is thrown if the JSON object has messing required data."""
+        """Ensure error is thrown if the JSON object
+        has messing required data."""
 
         with self.client:
             response = self.client.post(
@@ -105,7 +107,8 @@ class TestDeviceService(BaseTestCase):
             )
         data = json.loads(response.data.decode())
         self.assertEqual(response.status_code, 422)
-        self.assertIn("Missing data for required field.", data['errors'][0]['detail'])
+        self.assertIn("Missing data for required field.",
+                      data['errors'][0]['detail'])
 
     def test_add_device_invalid_json(self):
         """Ensure error is thrown if the JSON object invalid."""
@@ -118,10 +121,12 @@ class TestDeviceService(BaseTestCase):
             )
         data = json.loads(response.data.decode())
         self.assertEqual(response.status_code, 422)
-        self.assertIn("Object must include `data` key.", data['errors'][0]['detail'])
+        self.assertIn("Object must include `data` key.",
+                      data['errors'][0]['detail'])
 
     def test_add_device_invalid_data_key(self):
-        """Ensure error is thrown if the JSON object has invalid data key."""
+        """Ensure error is thrown if the JSON object
+         has invalid data key."""
 
         with self.client:
             response = self.client.post(
@@ -143,7 +148,8 @@ class TestDeviceService(BaseTestCase):
             )
         data = json.loads(response.data.decode())
         self.assertEqual(response.status_code, 422)
-        self.assertIn("Not a valid string.", data['errors'][0]['detail'])
+        self.assertIn("Not a valid string.",
+                      data['errors'][0]['detail'])
 
 
 if __name__ == '__main__':

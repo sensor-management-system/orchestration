@@ -4,8 +4,10 @@ from marshmallow_jsonapi.flask import Schema, Relationship
 
 class ContactSchema(Schema):
     """
-    This class create a schema for a contact. Every attribute in the schema going to expose through the api.
-    It uses library called marshmallow-jsonapi that fit the JSONAPI 1.0 specification and provides Flask integration.
+    This class create a schema for a contact.
+    Every attribute in the schema going to expose through the api.
+    It uses library called marshmallow-jsonapi that fit
+    the JSONAPI 1.0 specification and provides Flask integration.
 
     """
 

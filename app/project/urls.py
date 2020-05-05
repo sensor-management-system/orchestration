@@ -7,16 +7,19 @@ from project.api.resourceManager.eventList import EventList
 from project.api.resourceManager.eventRelationship import EventRelationship
 from project.api.resourceManager.platformDetail import PlatformDetail
 from project.api.resourceManager.platformList import PlatformList
-from project.api.resourceManager.platformRelationship import PlatformRelationship
+from project.api.resourceManager.platformRelationship \
+    import PlatformRelationship
 from project.api.resourceManager.contactList import ContactList
 from project.api.resourceManager.contactDetail import ContactDetail
 from project.api.resourceManager.contactRelationship import ContactRelationship
 from project.api.resourceManager.propertiesList import PropertiesList
 from project.api.resourceManager.propertiesDetail import PropertiesDetail
-from project.api.resourceManager.propertiesRelationship import PropertiesRelationship
+from project.api.resourceManager.propertiesRelationship \
+    import PropertiesRelationship
 from project.api.resourceManager.attachmentList import AttachmentList
 from project.api.resourceManager.attachmentDetail import AttachmentDetail
-from project.api.resourceManager.attachmentRelationship import AttachmentRelationship
+from project.api.resourceManager.attachmentRelationship \
+    import AttachmentRelationship
 
 base_url = '/sis/v1'
 
@@ -26,7 +29,8 @@ def Create_endpoints(api):
 
     # Platform
     api.route(PlatformList, 'platform_list', base_url + '/platforms')
-    api.route(PlatformDetail, 'platform_detail', base_url + '/platforms/<int:id>',
+    api.route(PlatformDetail, 'platform_detail',
+              base_url + '/platforms/<int:id>',
               base_url + '/devices/<int:device_id>/platform')
     api.route(PlatformRelationship, 'platform_devices',
               base_url + '/platforms/<int:id>/relationships/devices')
@@ -58,18 +62,21 @@ def Create_endpoints(api):
     # Contact
     api.route(ContactList, 'contacts_list', base_url + '/contacts',
               base_url + '/devices/<int:device_id>/contacts')
-    api.route(ContactDetail, 'contacts_detail', base_url + '/contacts/<int:id>')
+    api.route(ContactDetail, 'contacts_detail',
+              base_url + '/contacts/<int:id>')
     api.route(ContactRelationship, 'contacts_device',
               base_url + '/contacts/<int:id>/relationships/device')
     # Properties
     api.route(PropertiesList, 'properties_list', base_url + '/properties',
               base_url + '/devices/<int:device_id>/properties')
-    api.route(PropertiesDetail, 'properties_detail', base_url + '/properties/<int:id>')
+    api.route(PropertiesDetail, 'properties_detail',
+              base_url + '/properties/<int:id>')
     api.route(PropertiesRelationship, 'properties_device',
               base_url + '/properties/<int:device_id>/relationships/device')
     # Attachment
     api.route(AttachmentList, 'attachments_list', base_url + '/attachments',
               base_url + '/devices/<int:device_id>/attachments')
-    api.route(AttachmentDetail, 'attachments_detail', base_url + '/attachments/<int:id>')
+    api.route(AttachmentDetail, 'attachments_detail',
+              base_url + '/attachments/<int:id>')
     api.route(AttachmentRelationship, 'attachments_device',
               base_url + '/attachments/<int:id>/relationships/device')
