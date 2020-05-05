@@ -166,7 +166,7 @@
                 >
                   add Property
                 </v-btn>
-                <br /><br />
+                <br><br>
                 <v-expansion-panels
                   v-model="propertyStates"
                   multiple
@@ -181,7 +181,7 @@
                           Property {{ index+1 }}
                         </v-col>
                         <v-col cols="1">
-                          <v-menu 
+                          <v-menu
                             right
                           >
                             <template v-slot:activator="{ on }">
@@ -289,7 +289,7 @@
                 >
                   add Custom Field
                 </v-btn>
-                <br /><br />
+                <br><br>
                 <v-row
                   v-for="(item, index) in [0, 1]"
                   :key="index"
@@ -306,7 +306,8 @@
                   </v-col>
                   <v-col cols="1">
                     <v-btn
-                      color="secondary"
+                      color="error"
+                      small
                       outlined
                     >
                       delete
@@ -326,6 +327,65 @@
                   @click="nextTab"
                 >
                   next ❯
+                </v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-tab-item>
+          <v-tab-item>
+            <v-card
+              flat
+            >
+              <v-card-title>Sensor URN: [MANUFACTURER_MODEL_TYPE_SERIALNUMBER]</v-card-title>
+              <v-card-text>
+                <v-timeline dense clipped>
+                  <v-timeline-item
+                    class="mb-4"
+                    small
+                  >
+                    <v-row justify="space-between">
+                      <v-col cols="2">2020-04-28 10:15</v-col>
+                      <v-col cols="10">
+                        <strong>attached to platform XY</strong>
+                        <div>Max M.</div>
+                      </v-col>
+                    </v-row>
+                  </v-timeline-item>
+                  <v-timeline-item
+                    class="mb-4"
+                    color="grey"
+                    icon-color="grey lighten-2"
+                    small
+                  >
+                    <v-row justify="space-between">
+                      <v-col cols="2">2020-04-28 09:15</v-col>
+                      <v-col cols="10">
+                        <strong>edited description</strong>
+                        <div>Max M.</div>
+                      </v-col>
+                    </v-row>
+                  </v-timeline-item>
+                  <v-timeline-item
+                    class="mb-4"
+                    color="grey"
+                    icon-color="grey lighten-2"
+                    small
+                  >
+                    <v-row justify="space-between">
+                      <v-col cols="2">2020-04-20 08:05</v-col>
+                      <v-col cols="10">
+                        <strong>sensor created</strong>
+                        <div>Hans H.</div>
+                      </v-col>
+                    </v-row>
+                  </v-timeline-item>
+                </v-timeline>
+              </v-card-text>
+              <v-card-actions>
+                <v-btn
+                  text
+                  @click="previousTab"
+                >
+                  ❮ previous
                 </v-btn>
               </v-card-actions>
             </v-card>
