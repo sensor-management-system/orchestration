@@ -31,7 +31,9 @@ def Create_endpoints(api):
     # Device
     api.route(DeviceList, 'devices_list', base_url + '/devices',
               base_url + '/platforms/<int:id>/devices')
-    api.route(DeviceDetail, 'devices_detail', base_url + '/devices/<int:id>')
+    api.route(DeviceDetail, 'devices_detail', base_url + '/devices/<int:id>',
+              base_url + '/events/<int:event_id>/device', base_url + '/contact/<int:contact_id>/device',
+              base_url + '/properties/<int:properties_id>/device')
     api.route(DeviceRelationship, 'device_platform',
               base_url + '/devices/<int:id>/relationships/platform')
     api.route(DeviceRelationship, 'device_contacts',
@@ -41,17 +43,20 @@ def Create_endpoints(api):
     api.route(DeviceRelationship, 'device_properties',
               base_url + '/devices/<int:id>/relationships/properties')
     # Event
-    api.route(EventList, 'events_list', base_url + '/events')
+    api.route(EventList, 'events_list', base_url + '/events',
+              base_url + '/devices/<int:id>/events')
     api.route(EventDetail, 'events_detail', base_url + '/events/<int:id>')
     api.route(EventRelationship, 'events_device',
               base_url + '/events/<int:id>/relationships/device')
     # Contact
-    api.route(ContactList, 'contacts_list', base_url + '/contacts')
+    api.route(ContactList, 'contacts_list', base_url + '/contacts',
+              base_url + '/devices/<int:device_id>/contacts')
     api.route(ContactDetail, 'contacts_detail', base_url + '/contacts/<int:id>')
     api.route(ContactRelationship, 'contacts_device',
               base_url + '/contacts/<int:id>/relationships/device')
     # Properties
-    api.route(PropertiesList, 'properties_list', base_url + '/properties')
+    api.route(PropertiesList, 'properties_list', base_url + '/properties',
+              base_url + '/devices/<int:device_id>/properties')
     api.route(PropertiesDetail, 'properties_detail', base_url + '/properties/<int:id>')
     api.route(PropertiesRelationship, 'properties_device',
-              base_url + '/properties/<int:id>/relationships/device')
+              base_url + '/properties/<int:device_id>/relationships/device')
