@@ -73,7 +73,7 @@ class TestEventServices(BaseTestCase):
                     "data": {
                         "type": "event",
                         "attributes": {
-                            "date": "5.05.2020"
+
                         }
                     }
                 }),

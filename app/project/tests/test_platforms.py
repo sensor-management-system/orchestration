@@ -14,7 +14,7 @@ class TestPlatformServices(BaseTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn("http://localhost/sis/v1/platforms",
                       data['links']['self'])
-        #super().tear_down()
+        super().tear_down()
 
     def test_add_platform_model(self):
         """""Ensure Add platform model """
