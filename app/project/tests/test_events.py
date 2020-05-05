@@ -1,38 +1,38 @@
 import json
 import unittest
+import datetime
 
-from project.api.models.platform import Platform
-from project.api.schemas.platformSchema import PlatformSchema
+from project.api.models.event import Event
+from project.api.schemas.eventSchema import EventSchema
 from project.tests.base import BaseTestCase
 
 
-class TestPlatformServices(BaseTestCase):
+class TestEventServices(BaseTestCase):
     def test_get_devices(self):
-        """Ensure the /platform route behaves correctly."""
-        response = self.client.get('/sis/v1/platforms')
+        """Ensure the /event route behaves correctly."""
+        response = self.client.get('/sis/v1/events')
         data = json.loads(response.data.decode())
         self.assertEqual(response.status_code, 200)
-        self.assertIn("http://localhost/sis/v1/platforms",
+        self.assertIn("http://localhost/sis/v1/events",
                       data['links']['self'])
         #super().tear_down()
 
     def test_add_platform_model(self):
         """""Ensure Add platform model """
-        platform = Platform(id=13, shortName='short', type="type")
-        PlatformSchema().dump(platform)
+        event = Event(id=145, description='test issued')
+        EventSchema().dump(event)
 
-    def test_add_platform(self):
-        """Ensure a new platform can be added to the database."""
+    def test_add_event(self):
+        """Ensure a new event can be added to the database."""
 
         with self.client:
             response = self.client.post(
-                '/sis/v1/platforms',
+                '/sis/v1/events',
                 data=json.dumps({
                     "data": {
-                        "type": "platform",
+                        "type": "event",
                         "attributes": {
-                            "shortName": "short",
-                            "type": "type"
+                            "description": "test",
                         }
                     }
                 }),
@@ -40,20 +40,20 @@ class TestPlatformServices(BaseTestCase):
             )
         data = json.loads(response.data.decode())
         self.assertEqual(response.status_code, 201)
-        self.assertIn('[TYPE]_[SHORT]', data['data']['attributes']['urn'])
-        self.assertIn('platform', data['data']['type'])
+        self.assertIn('test', data['data']['attributes']['description'])
+        self.assertIn('event', data['data']['type'])
 
-    def test_add_platform_invalid_type(self):
+    def test_add_event_invalid_type(self):
         """Ensure error is thrown if the JSON object has invalid type."""
 
         with self.client:
             response = self.client.post(
-                '/sis/v1/platforms',
+                '/sis/v1/events',
                 data=json.dumps({
                     "data": {
-                        "type": "device",
+                        "type": "platform",
                         "attributes": {
-                            "type": "TYPE"
+                            "description": "test"
                         }
                     }
                 }),
@@ -61,19 +61,19 @@ class TestPlatformServices(BaseTestCase):
             )
         data = json.loads(response.data.decode())
         self.assertEqual(response.status_code, 409)
-        self.assertIn("Invalid type. Expected \"platform\".", data['errors'][0]['detail'])
+        self.assertIn("Invalid type. Expected \"event\".", data['errors'][0]['detail'])
 
-    def test_add_platform_missing_data(self):
+    def test_add_event_missing_data(self):
         """Ensure error is thrown if the JSON object has messing required data."""
 
         with self.client:
             response = self.client.post(
-                '/sis/v1/platforms',
+                '/sis/v1/events',
                 data=json.dumps({
                     "data": {
-                        "type": "platform",
+                        "type": "event",
                         "attributes": {
-                            "type": "test",
+                            "date": "5.05.2020"
                         }
                     }
                 }),
@@ -83,12 +83,12 @@ class TestPlatformServices(BaseTestCase):
         self.assertEqual(response.status_code, 422)
         self.assertIn("Missing data for required field.", data['errors'][0]['detail'])
 
-    def test_add_platform_invalid_json(self):
+    def test_add_event_invalid_json(self):
         """Ensure error is thrown if the JSON object invalid."""
 
         with self.client:
             response = self.client.post(
-                '/sis/v1/platforms',
+                '/sis/v1/events',
                 data=json.dumps({}),
                 content_type='application/vnd.api+json',
             )
@@ -96,18 +96,17 @@ class TestPlatformServices(BaseTestCase):
         self.assertEqual(response.status_code, 422)
         self.assertIn("Object must include `data` key.", data['errors'][0]['detail'])
 
-    def test_add_platform_invalid_data_key(self):
+    def test_add_event_invalid_data_key(self):
         """Ensure error is thrown if the JSON object has invalid data key."""
 
         with self.client:
             response = self.client.post(
-                '/sis/v1/platforms',
+                '/sis/v1/events',
                 data=json.dumps({
-                    "data": {
-                        "type": "platform",
+                     "data": {
+                        "type": "event",
                         "attributes": {
-                            "shortName": "short",
-                            "type": 123
+                            "description": 123
                         }
                     }
                 }),
