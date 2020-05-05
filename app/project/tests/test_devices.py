@@ -16,7 +16,8 @@ class TestDeviceService(BaseTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn('Hello Sensor!', data['message'])
         self.assertIn('success', data['status'])
-        super().tear_down()
+        #super().tear_down()
+
 
     def test_get_devices(self):
         """Ensure the /devices route behaves correctly."""
