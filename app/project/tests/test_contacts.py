@@ -2,37 +2,37 @@ import json
 import unittest
 
 
-from project.api.models.event import Event
-from project.api.schemas.eventSchema import EventSchema
+from project.api.models.contact import Contact
+from project.api.schemas.contactSchema import ContactSchema
 from project.tests.base import BaseTestCase
 
 
 class TestEventServices(BaseTestCase):
     def test_get_devices(self):
-        """Ensure the /event route behaves correctly."""
-        response = self.client.get('/sis/v1/events')
+        """Ensure the /contacts route behaves correctly."""
+        response = self.client.get('/sis/v1/contacts')
         data = json.loads(response.data.decode())
         self.assertEqual(response.status_code, 200)
-        self.assertIn("http://localhost/sis/v1/events",
+        self.assertIn("http://localhost/sis/v1/contacts",
                       data['links']['self'])
-        #super().tear_down()
+        super().tear_down()
 
     def test_add_platform_model(self):
         """""Ensure Add platform model """
-        event = Event(id=145, description='test issued')
-        EventSchema().dump(event)
+        contact = Contact(id=45, username='test', email="test@test.test")
+        ContactSchema().dump(contact)
 
-    def test_add_event(self):
-        """Ensure a new event can be added to the database."""
+    def test_add_contact(self):
+        """Ensure a new contact can be added to the database."""
 
         with self.client:
             response = self.client.post(
-                '/sis/v1/events',
+                '/sis/v1/contacts',
                 data=json.dumps({
                     "data": {
-                        "type": "event",
+                        "type": "contact",
                         "attributes": {
-                            "description": "test",
+                            "email": "test"
                         }
                     }
                 }),
@@ -40,20 +40,20 @@ class TestEventServices(BaseTestCase):
             )
         data = json.loads(response.data.decode())
         self.assertEqual(response.status_code, 201)
-        self.assertIn('test', data['data']['attributes']['description'])
-        self.assertIn('event', data['data']['type'])
+        self.assertIn('test', data['data']['attributes']['email'])
+        self.assertIn('contact', data['data']['type'])
 
-    def test_add_event_invalid_type(self):
+    def test_add_contact_invalid_type(self):
         """Ensure error is thrown if the JSON object has invalid type."""
 
         with self.client:
             response = self.client.post(
-                '/sis/v1/events',
+                '/sis/v1/contacts',
                 data=json.dumps({
                     "data": {
                         "type": "platform",
                         "attributes": {
-                            "description": "test"
+                            "email": "test"
                         }
                     }
                 }),
@@ -61,19 +61,19 @@ class TestEventServices(BaseTestCase):
             )
         data = json.loads(response.data.decode())
         self.assertEqual(response.status_code, 409)
-        self.assertIn("Invalid type. Expected \"event\".", data['errors'][0]['detail'])
+        self.assertIn("Invalid type. Expected \"contact\".", data['errors'][0]['detail'])
 
-    def test_add_event_missing_data(self):
+    def test_add_contact_missing_data(self):
         """Ensure error is thrown if the JSON object has messing required data."""
 
         with self.client:
             response = self.client.post(
-                '/sis/v1/events',
+                '/sis/v1/contacts',
                 data=json.dumps({
                     "data": {
-                        "type": "event",
+                        "type": "contact",
                         "attributes": {
-                            "date": "5.05.2020"
+                            "username": "testUser"
                         }
                     }
                 }),
@@ -83,12 +83,12 @@ class TestEventServices(BaseTestCase):
         self.assertEqual(response.status_code, 422)
         self.assertIn("Missing data for required field.", data['errors'][0]['detail'])
 
-    def test_add_event_invalid_json(self):
+    def test_add_contact_invalid_json(self):
         """Ensure error is thrown if the JSON object invalid."""
 
         with self.client:
             response = self.client.post(
-                '/sis/v1/events',
+                '/sis/v1/contacts',
                 data=json.dumps({}),
                 content_type='application/vnd.api+json',
             )
@@ -96,17 +96,17 @@ class TestEventServices(BaseTestCase):
         self.assertEqual(response.status_code, 422)
         self.assertIn("Object must include `data` key.", data['errors'][0]['detail'])
 
-    def test_add_event_invalid_data_key(self):
+    def test_add_contact_invalid_data_key(self):
         """Ensure error is thrown if the JSON object has invalid data key."""
 
         with self.client:
             response = self.client.post(
-                '/sis/v1/events',
+                '/sis/v1/contacts',
                 data=json.dumps({
                      "data": {
-                        "type": "event",
+                        "type": "contact",
                         "attributes": {
-                            "description": 123
+                            "email": 123
                         }
                     }
                 }),
