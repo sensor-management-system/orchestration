@@ -16,11 +16,11 @@ class PlatformSchema(Schema):
     manufacturer = fields.Str(allow_none=True)
     type = fields.Str(required=True)
     platformType = fields.Str(allow_none=True)
-    website = fields.Str(allow_none=True)
+    src = fields.Str(allow_none=True)
     configurationDate = fields.Date(allow_none=True)
     inventoryNumber = fields.Integer(allow_none=True)
-    platformURN = fields.Function(lambda obj: "{}_{}".format(
-        obj.platformType.upper(), obj.shortName.upper()))
+    urn = fields.Function(lambda obj: "[{}]_[{}]".format(
+        obj.type.upper(), obj.shortName.upper()))
     devices = Relationship(self_view='platform_devices',
                            self_view_kwargs={'id': '<id>'},
                            related_view='devices_list',
