@@ -17,7 +17,8 @@ based on JSON Schema.
 - python 3.6+: Python Language supported and tested
 - Flask: Micro Python Web Framework, good for microservice development and python WSGI apps.
 - [OpenAPI](https://swagger.io/specification/) 3: specification to describe both the service model
-- [Flask-REST-JSONAPI](https://flask-rest-jsonapi.readthedocs.io/en/latest/index.html): flask plugin for JSON Schema to describe an instance of JSON data, like the a HTTP request
+- [Flask-REST-JSONAPI](https://flask-rest-jsonapi.readthedocs.io/en/latest/index.html): 
+flask plugin for JSON Schema to describe an instance of JSON data, like the a HTTP request
  or response.
 - [Docker](https://docs.docker.com/get-started/overview/): A containerization tool for better devops
 - [Docker Compose](https://docs.docker.com/compose/): Tool for defining and running multi-container Docker applications
