@@ -12,10 +12,10 @@ class PlatformDetail(ResourceDetail):
         if view_kwargs.get('device_id') is not None:
             try:
                 device = self.session.query(Device).filter_by(
-                    id=view_kwargs['device_id']).one()
+                    id=view_kwargs['id']).one()
             except NoResultFound:
                 raise ObjectNotFound({'parameter': 'device_id'},
-                                     "Device: {} not found".format(
+                                     "Platform: {} not found".format(
                                          view_kwargs['device_id']))
             else:
                 if device.platform is not None:
