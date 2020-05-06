@@ -150,6 +150,36 @@ class TestDeviceService(BaseTestCase):
         self.assertEqual(response.status_code, 422)
         self.assertIn("Not a valid string.",
                       data['errors'][0]['detail'])
+    def test_get_devices_via_id(self):
+        """Ensure the get /platform/<id> route behaves correctly."""
+        response = self.client.get('/sis/v1/devices/1')
+        data = json.loads(response.data.decode())
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('[MANUFACTURE]_[MODEL]_[TYPE]_[125436987]',
+                      data['data']['attributes']['urn'])
+
+    def test_patch_devices_via_id(self):
+        """Ensure the patch /device/<id> route behaves correctly."""
+        with self.client:
+            response = self.client.patch(
+                '/sis/v1/devices/1',
+                data=json.dumps({
+                    "data": {
+                        "type": "device",
+                        "id": 1,
+                        "attributes": {
+                            "model": "model_new"
+                        }
+                    }
+                }),
+                content_type='application/vnd.api+json',
+            )
+        data = json.loads(response.data.decode())
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('[MANUFACTURE]_[MODEL_NEW]_[TYPE]_[125436987]',
+                      data['data']['attributes']['urn'])
+
+
 
 
 if __name__ == '__main__':
