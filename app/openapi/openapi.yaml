@@ -13,8 +13,10 @@ externalDocs:
   description: 'Find out more about SIS in GitLab '
   url: 'https://git.ufz.de/rdm-software/svm/backend'
 servers:
-  - url: sis/v1/
-    description: deployment
+  - url: http://localhost:5000/
+    description: 'local or docker install'
+  - url: http://localhost:5001/
+    description: 'docker-compose'
 tags:
   - name: Platforms
   - name: Devices
