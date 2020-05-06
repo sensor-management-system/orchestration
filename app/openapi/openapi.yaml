@@ -8,10 +8,10 @@ info:
   license:
     name: Apache 2.0
     url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
-  version: "0.4"
+  version: "0.6"
 externalDocs:
-  description: 'Learn more about requests and responses in JSON:API specs'
-  url: 'https://jsonapi.org/format/#fetching-includes'
+  description: 'Find out more about SIS in GitLab '
+  url: 'https://git.ufz.de/rdm-software/svm/backend'
 servers:
   - url: sis/v1/
     description: deployment
@@ -21,7 +21,7 @@ tags:
   - name: Contacts
   - name: Events
   - name: Properties
-  - name: Customfields
+  - name: Fields
   - name: Attachments
 paths:
   /platforms:
@@ -324,7 +324,7 @@ paths:
       description: >-
         you can also use the endpoint '/events/<int:id>/device' or
         '/contact/<int:id>/device' or '/properties/<int:id>/device' or
-        '/attachments/<int:id>/device' or '/customfields/<int:id>/device'
+        '/attachments/<int:id>/device' or '/Fields/<int:id>/device'
       operationId: alterDevice
       parameters:
         - name: deviceID
@@ -367,7 +367,7 @@ paths:
       description: >-
         you can also use the endpoint '/events/<int:id>/device' or
         '/contact/<int:id>/device' or '/properties/<int:id>/device' or
-        '/attachments/<int:id>/device' or '/customfields/<int:id>/device'
+        '/attachments/<int:id>/device' or '/Fields/<int:id>/device'
       operationId: getDevice
       parameters:
         - name: deviceID
@@ -458,7 +458,7 @@ paths:
     delete:
       tags:
         - Devices
-      summary: 'Delete relationships between  a person and devices'
+      summary: 'Delete relationships between two objects'
       operationId: removeEventfromDevice
       parameters:
         - name: deviceID
@@ -519,7 +519,7 @@ paths:
     delete:
       tags:
         - Devices
-      summary: 'Delete relationships between  a person and devices'
+      summary: 'Delete relationships between two object'
       operationId: removeContactfromDevice
       parameters:
         - name: deviceID
@@ -559,7 +559,19 @@ paths:
           schema:
             type: integer
             format: int32
+      requestBody:
+        description: 'The needed json data to create a platform. '
+        content:
+          application/vnd.api+json:
+            schema:
+              $ref: '#/components/schemas/Relationship'
       responses:
+        '200':
+          description: OK
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/AddObject'
         '500':
            $ref: '#/components/responses/InternalServerError'
     patch:
@@ -574,13 +586,25 @@ paths:
           schema:
             type: integer
             format: int32
+      requestBody:
+        description: 'The needed json data to create a platform. '
+        content:
+          application/vnd.api+json:
+            schema:
+              $ref: '#/components/schemas/Relationship'
       responses:
+        '200':
+          description: OK
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/AddObject'
         '500':
           $ref: '#/components/responses/InternalServerError'
     delete:
       tags:
         - Devices
-      summary: 'Delete relationships between  a person and devices'
+      summary: 'Delete relationships between two object'
       operationId: removeatachmentfromDevice
       parameters:
         - name: deviceID
@@ -589,7 +613,19 @@ paths:
           schema:
             type: integer
             format: int32
+      requestBody:
+        description: 'The needed json data to create a platform. '
+        content:
+          application/vnd.api+json:
+            schema:
+              $ref: '#/components/schemas/Relationship'
       responses:
+        '200':
+          description: OK
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/AddObject'
         '500':
           $ref: '#/components/responses/InternalServerError'
   '/devices/{deviceID}/relationships/properties':
@@ -635,13 +671,25 @@ paths:
           schema:
             type: integer
             format: int32
+      requestBody:
+        description: 'The needed json data to create an object. '
+        content:
+          application/vnd.api+json:
+            schema:
+              $ref: '#/components/schemas/Relationship'
       responses:
+        '200':
+          description: OK
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/AddObject'
         '500':
           $ref: '#/components/responses/InternalServerError'
     delete:
       tags:
         - Devices
-      summary: 'Delete relationships between  a person and devices'
+      summary: 'Delete relationships between two object'
       operationId: removePropertiesfromDevice
       parameters:
         - name: deviceID
@@ -650,10 +698,22 @@ paths:
           schema:
             type: integer
             format: int32
+      requestBody:
+        description: 'The needed json data to delete an object. '
+        content:
+          application/vnd.api+json:
+            schema:
+              $ref: '#/components/schemas/Relationship'
       responses:
+        '200':
+          description: OK
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/AddObject'
         '500':
           $ref: '#/components/responses/InternalServerError'
-  '/devices/{deviceID}/relationships/customfields':
+  '/devices/{deviceID}/relationships/Fields':
     get:
       tags:
         - Devices
@@ -681,7 +741,19 @@ paths:
           schema:
             type: integer
             format: int32
+      requestBody:
+        description: 'The needed json data to create an object. '
+        content:
+          application/vnd.api+json:
+            schema:
+              $ref: '#/components/schemas/Relationship'
       responses:
+        '200':
+          description: OK
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/AddObject'
         '500':
           $ref: '#/components/responses/InternalServerError'
     patch:
@@ -696,13 +768,25 @@ paths:
           schema:
             type: integer
             format: int32
+      requestBody:
+        description: 'The needed json data to create a platform. '
+        content:
+          application/vnd.api+json:
+            schema:
+              $ref: '#/components/schemas/Relationship'
       responses:
+        '200':
+          description: OK
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/AddObject'
         '500':
           $ref: '#/components/responses/InternalServerError'
     delete:
       tags:
         - Devices
-      summary: 'Delete relationships between  a person and devices'
+      summary: 'Delete relationships between two objects'
       operationId: removeCFfromDevice
       parameters:
         - name: deviceID
@@ -711,7 +795,19 @@ paths:
           schema:
             type: integer
             format: int32
+      requestBody:
+        description: 'The needed json data to create a platform. '
+        content:
+          application/vnd.api+json:
+            schema:
+              $ref: '#/components/schemas/Relationship'
       responses:
+        '200':
+          description: OK
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/AddObject'
         '500':
           $ref: '#/components/responses/InternalServerError'
   /events:
@@ -996,31 +1092,31 @@ paths:
                 $ref: '#/components/schemas/DeleteObject'
         '500':
           $ref: '#/components/responses/InternalServerError'
-  /customfields:
+  /fields:
     get:
       tags:
-        - Customfields
+        - Fields
       summary: >-
         Returns all available items.
       description: >-
         you can also use the endpoint '/devices/<int:id>/contacts'
-      operationId: getAllCustomfields
+      operationId: getAllFields
       responses:
         '200':
           description: OK
           content:
             application/vnd.api+json:
               schema:
-                $ref: '#/components/schemas/RequestCustomField'
+                $ref: '#/components/schemas/RequestField'
         '500':
           $ref: '#/components/responses/InternalServerError'
     post:
       tags:
-        - Customfields
-      summary: Creates a customfield from JSON input
-      operationId: CreateCustomfields
+        - Fields
+      summary: Creates a Field from JSON input
+      operationId: CreateFields
       description: >-
-        you can also use the endpoint '/devices/<int:id>/customfields'
+        you can also use the endpoint '/devices/<int:id>/Fields'
       parameters:
         - name: parentItemID
           in: query
@@ -1036,7 +1132,7 @@ paths:
         content:
           application/vnd.api+json:
             schema:
-              $ref: '#/components/schemas/RequestCustomField'
+              $ref: '#/components/schemas/RequestField'
         required: true
       responses:
         '201':
@@ -1044,7 +1140,7 @@ paths:
           content:
             application/vnd.api+json:
               schema:
-                $ref: '#/components/schemas/ResponseCustomField'
+                $ref: '#/components/schemas/ResponseField'
         '400':
           description: Invalid JSON.
           content: {}
@@ -1060,14 +1156,14 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
       x-codegen-request-body-name: body
-  '/customfields/{customfieldsID}':
+  '/fields/{FieldsID}':
     patch:
       tags:
-        - Customfields
-      summary: Update customfields from JSON input
-      operationId: alterCustomfields
+        - Fields
+      summary: Update Fields from JSON input
+      operationId: alterFields
       parameters:
-        - name: customfieldsID
+        - name: FieldsID
           in: path
           description: >-
             The ID of the item you want to update. The itemID in the JSON
@@ -1084,7 +1180,7 @@ paths:
         content:
            application/vnd.api+json:
             schema:
-              $ref: '#/components/schemas/RequestCustomField'
+              $ref: '#/components/schemas/RequestField'
         required: true
       responses:
         '200':
@@ -1092,7 +1188,7 @@ paths:
           content:
            application/vnd.api+json:
               schema:
-                $ref: '#/components/schemas/ResponseCustomField'
+                $ref: '#/components/schemas/ResponseField'
         '400':
           description: Invalid JSON.
           content: {}
@@ -1104,11 +1200,11 @@ paths:
       x-codegen-request-body-name: body
     get:
       tags:
-        - Customfields
-      summary: Get a customfield by ID
-      operationId: getcustomfields
+        - Fields
+      summary: Get a Field by ID
+      operationId: getFields
       parameters:
-        - name: customfieldsID
+        - name: FieldsID
           in: path
           required: true
           schema:
@@ -1120,7 +1216,7 @@ paths:
           content:
             application/vnd.api+json:
               schema:
-                $ref: '#/components/schemas/ResponseCustomField'
+                $ref: '#/components/schemas/ResponseField'
         '404':
           description: Device not found .
           content: {}
@@ -1128,11 +1224,11 @@ paths:
           $ref: '#/components/responses/InternalServerError'
     delete:
       tags:
-        - Customfields
-      summary: 'remove a customfield.'
-      operationId: removeCustomfields
+        - Fields
+      summary: 'remove a Field.'
+      operationId: removeFields
       parameters:
-        - name: customfieldsID
+        - name: FieldsID
           in: path
           required: true
           schema:
@@ -1529,7 +1625,7 @@ components:
           type: string
         serialNumber:
           type: string
-        manufacturer:
+        manufacture:
           type: string
         dualUse:
           type: boolean
@@ -1565,8 +1661,8 @@ components:
               example: device
             id:
               type: integer
-              format: inst32
-              example: 1
+              format: int32
+              example: use only with endpoints, that requird an id.
             attributes:
                   $ref: '#/components/schemas/Device'
     ResponseDevice:
@@ -1861,14 +1957,14 @@ components:
         configurationDate:
           type: string
           format: date_time
-    CustomField:
+    Field:
       type: object
       properties:
         key:
           type: string
         value:
           type: string
-    RequestCustomField:
+    RequestField:
       type: object
       properties:
         data:
@@ -1878,8 +1974,8 @@ components:
               type: string
               example: platform
             attributes:
-                  $ref: '#/components/schemas/CustomField'
-    ResponseCustomField:
+                  $ref: '#/components/schemas/Field'
+    ResponseField:
       type: object
       properties:
         data:
@@ -1891,7 +1987,7 @@ components:
                 type: string
                 example: device
               attributes:
-                    $ref: '#/components/schemas/CustomField'
+                    $ref: '#/components/schemas/Field'
               rel:
                 $ref: '#/components/schemas/Relationships'
     Attachment:
