@@ -7,7 +7,7 @@ services:
     volumes:
       - './app:/usr/src/app'
     ports:
-      - 127.0.0.1:5001:5000
+      - 127.0.0.1:5000:5000
     environment:
       - FLASK_DEBUG=1
       - APP_SETTINGS=project.config.DevelopmentConfig
@@ -30,7 +30,7 @@ services:
   db:
     image: postgres:12-alpine
     ports:
-      - 127.0.0.1:5435:5432
+      - 127.0.0.1:5432:5432
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
