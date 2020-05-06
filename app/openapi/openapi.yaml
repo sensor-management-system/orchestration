@@ -816,7 +816,7 @@ paths:
         - Events
       summary: >-
         Returns all available items.
-        description: >-
+      description: >-
         you can also use the endpoint '/devices/<int:id>/contacts'
       operationId: getAllEvents
       responses:
