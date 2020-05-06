@@ -33,9 +33,11 @@ class DeviceSchema(Schema):
     website = fields.Str(allow_none=True)
     configurationDate = fields.Date()
     persistentIdentifier = fields.Integer()
+
     urn = fields.Function(lambda obj: "[{}]_[{}]_[{}]_[{}]".format(
         obj.manufacture.upper(), obj.model.upper(),
         obj.type.upper(), obj.serialNumber))
+
     platform = Relationship(attribute='platform',
                             self_view='device_platform',
                             self_view_kwargs={'id': '<id>'},
@@ -83,3 +85,13 @@ class DeviceSchema(Schema):
                                schema='AttachmentSchema',
                                type_='Attachment',
                                id_field='attachment_id')
+
+    fields = Relationship(attribute='fields',
+                          self_view='device_fields',
+                          self_view_kwargs={'id': '<id>'},
+                          related_view='fields_list',
+                          related_view_kwargs={'device_id': '<id>'},
+                          many=True,
+                          schema='FieldSchema',
+                          type_='Field',
+                          id_field='field_id')

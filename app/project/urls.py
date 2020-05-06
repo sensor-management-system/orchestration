@@ -20,6 +20,10 @@ from project.api.resourceManager.attachmentList import AttachmentList
 from project.api.resourceManager.attachmentDetail import AttachmentDetail
 from project.api.resourceManager.attachmentRelationship \
     import AttachmentRelationship
+from project.api.resourceManager.fieldList import FieldList
+from project.api.resourceManager.fieldDetail import FieldDetail
+from project.api.resourceManager.fieldRelationship \
+    import FieldRelationship
 
 base_url = '/sis/v1'
 
@@ -53,6 +57,8 @@ def Create_endpoints(api):
               base_url + '/devices/<int:id>/relationships/properties')
     api.route(DeviceRelationship, 'device_attachments',
               base_url + '/devices/<int:id>/relationships/attachments')
+    api.route(DeviceRelationship, 'device_fields',
+              base_url + '/devices/<int:id>/relationships/fields')
     # Event
     api.route(EventList, 'events_list', base_url + '/events',
               base_url + '/devices/<int:id>/events')
@@ -80,3 +86,10 @@ def Create_endpoints(api):
               base_url + '/attachments/<int:id>')
     api.route(AttachmentRelationship, 'attachments_device',
               base_url + '/attachments/<int:id>/relationships/device')
+    # CustomFields
+    api.route(FieldList, 'fields_list', base_url + '/fields',
+              base_url + '/devices/<int:device_id>/fields')
+    api.route(FieldDetail, 'fields_detail',
+              base_url + '/fields/<int:id>')
+    api.route(FieldRelationship, 'fields_device',
+              base_url + '/fields/<int:id>/relationships/device')
