@@ -3,7 +3,7 @@
 There are multiple ways to install the application. This document describes a [Compose](#compose),  
 a [Docker](#docker) and a [Local](#local) installation. The preferred and easiest way to quickly get  
 it running is [Compose](#compose). Once you finished the installation navigate to  
-[http://localhost:5000/ping](http://localhost:5000/ping]) in your browser. You should see:
+[http://localhost:5000/sis/v1/ping](http://localhost:5000/sis/v1/ping) in your browser. You should see:
 
 ```json
 {

@@ -13,10 +13,8 @@ externalDocs:
   description: 'Learn more about requests and responses in JSON:API specs'
   url: 'https://jsonapi.org/format/#fetching-includes'
 servers:
-  - url: http://localhost:5000/
-    description: 'local or docker install'
-  - url: http://localhost:5001/
-    description: 'docker-compose'
+  - url: http://localhost:5000/sis/v1/
+    description: 'local development environment'
 tags:
   - name: Platforms
   - name: Devices
