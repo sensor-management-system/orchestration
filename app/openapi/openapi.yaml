@@ -8,10 +8,10 @@ info:
   license:
     name: Apache 2.0
     url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
-  version: "0.6"
+  version: "0.4"
 externalDocs:
-  description: 'Find out more about SIS in GitLab '
-  url: 'https://git.ufz.de/rdm-software/svm/backend'
+  description: 'Learn more about requests and responses in JSON:API specs'
+  url: 'https://jsonapi.org/format/#fetching-includes'
 servers:
   - url: sis/v1/
     description: deployment
