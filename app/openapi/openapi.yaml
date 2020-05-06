@@ -862,7 +862,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
       x-codegen-request-body-name: body
-  '/event/{eventID}':
+  '/events/{eventID}':
     patch:
       tags:
         - Events
