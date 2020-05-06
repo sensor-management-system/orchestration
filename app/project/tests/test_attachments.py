@@ -6,7 +6,7 @@ from project.api.schemas.attachmentSchema import AttachmentSchema
 from project.tests.base import BaseTestCase
 
 
-class TestEventServices(BaseTestCase):
+class TestAttachmentServices(BaseTestCase):
 
     def test_add_attachment_model(self):
         """""Ensure Add an Attachment model """
@@ -15,7 +15,7 @@ class TestEventServices(BaseTestCase):
         AttachmentSchema().dump(attachment)
 
     def test_add_attachment(self):
-        """Ensure a new contact can be added to the database."""
+        """Ensure a new Attachment can be added to the database."""
         super().create_app()
         super().set_up()
 

@@ -1,38 +1,31 @@
 import json
 import unittest
 
-from project.api.models.contact import Contact
-from project.api.schemas.contactSchema import ContactSchema
+from project.api.models.field import Field
+from project.api.schemas.fieldSchema import FieldSchema
 from project.tests.base import BaseTestCase
 
 
-class TestContactServices(BaseTestCase):
-    def test_get_devices(self):
-        """Ensure the /contacts route behaves correctly."""
-        response = self.client.get('/sis/v1/contacts')
-        data = json.loads(response.data.decode())
-        self.assertEqual(response.status_code, 200)
-        self.assertIn("http://localhost/sis/v1/contacts",
-                      data['links']['self'])
-        super().tear_down()
+class TestFieldServices(BaseTestCase):
 
-    def test_add_platform_model(self):
-        """""Ensure Add platform model """
-        contact = Contact(id=45, username='test',
-                          email="test@test.test")
-        ContactSchema().dump(contact)
+    def test_add_attachment_model(self):
+        """""Ensure Add an Field model """
+        field = Field(id=5, key='test',
+                      value="test")
+        FieldSchema().dump(field)
 
-    def test_add_contact(self):
-        """Ensure a new contact can be added to the database."""
+    def test_add_field(self):
+        """Ensure a new Field can be added to the database."""
 
         with self.client:
             response = self.client.post(
-                '/sis/v1/contacts',
+                '/sis/v1/fields',
                 data=json.dumps({
                     "data": {
-                        "type": "contact",
+                        "type": "field",
                         "attributes": {
-                            "email": "test"
+                            "key": "testKey1",
+                            "value": "testVal1"
                         }
                     }
                 }),
@@ -40,21 +33,20 @@ class TestContactServices(BaseTestCase):
             )
         data = json.loads(response.data.decode())
         self.assertEqual(response.status_code, 201)
-        self.assertIn('test', data['data']['attributes']['email'])
-        self.assertIn('contact', data['data']['type'])
+        self.assertIn('testKey1', data['data']['attributes']['key'])
+        self.assertIn('field', data['data']['type'])
 
-    def test_add_contact_invalid_type(self):
-        """Ensure error is thrown if the JSON object
-         has invalid type."""
+    def test_add_field_invalid_type(self):
+        """Ensure error is thrown if the JSON object has invalid type."""
 
         with self.client:
             response = self.client.post(
-                '/sis/v1/contacts',
+                '/sis/v1/fields',
                 data=json.dumps({
                     "data": {
-                        "type": "platform",
+                        "type": "contact",
                         "attributes": {
-                            "email": "test"
+                            "key": "test"
                         }
                     }
                 }),
@@ -62,21 +54,21 @@ class TestContactServices(BaseTestCase):
             )
         data = json.loads(response.data.decode())
         self.assertEqual(response.status_code, 409)
-        self.assertIn("Invalid type. Expected \"contact\".",
+        self.assertIn("Invalid type. Expected \"field\".",
                       data['errors'][0]['detail'])
 
-    def test_add_contact_missing_data(self):
+    def test_add_field_missing_data(self):
         """Ensure error is thrown if the JSON object
         has messing required data."""
 
         with self.client:
             response = self.client.post(
-                '/sis/v1/contacts',
+                '/sis/v1/fields',
                 data=json.dumps({
                     "data": {
-                        "type": "contact",
+                        "type": "field",
                         "attributes": {
-                            "username": "testUser"
+                            "key": "test"
                         }
                     }
                 }),
@@ -87,12 +79,12 @@ class TestContactServices(BaseTestCase):
         self.assertIn("Missing data for required field.",
                       data['errors'][0]['detail'])
 
-    def test_add_contact_invalid_json(self):
+    def test_add_field_invalid_json(self):
         """Ensure error is thrown if the JSON object invalid."""
 
         with self.client:
             response = self.client.post(
-                '/sis/v1/contacts',
+                '/sis/v1/fields',
                 data=json.dumps({}),
                 content_type='application/vnd.api+json',
             )
@@ -101,18 +93,19 @@ class TestContactServices(BaseTestCase):
         self.assertIn("Object must include `data` key.",
                       data['errors'][0]['detail'])
 
-    def test_add_contact_invalid_data_key(self):
+    def test_add_field_invalid_data_key(self):
         """Ensure error is thrown if the JSON object
-        has invalid data key."""
+         has invalid data key."""
 
         with self.client:
             response = self.client.post(
-                '/sis/v1/contacts',
+                '/sis/v1/fields',
                 data=json.dumps({
                     "data": {
-                        "type": "contact",
+                        "type": "field",
                         "attributes": {
-                            "email": 123
+                            "key": 123,
+                            "value": "test"
                         }
                     }
                 }),
