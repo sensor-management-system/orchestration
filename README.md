@@ -47,4 +47,4 @@ After having installed the dependencies, then just run the following commands to
 
 ### Author
 
-- [Kotyba Alhaj Taha](@alhajtah)
+- [Kotyba Alhaj Taha](@alhajtah)<!-- @IGNORE PREVIOUS: link -->
