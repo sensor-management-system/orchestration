@@ -150,6 +150,7 @@ class TestDeviceService(BaseTestCase):
         self.assertEqual(response.status_code, 422)
         self.assertIn("Not a valid string.",
                       data['errors'][0]['detail'])
+
     def test_get_devices_via_id(self):
         """Ensure the get /platform/<id> route behaves correctly."""
         response = self.client.get('/sis/v1/devices/1')
@@ -178,8 +179,6 @@ class TestDeviceService(BaseTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn('[MANUFACTURE]_[MODEL_NEW]_[TYPE]_[125436987]',
                       data['data']['attributes']['urn'])
-
-
 
 
 if __name__ == '__main__':

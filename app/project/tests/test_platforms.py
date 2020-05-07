@@ -171,7 +171,8 @@ class TestPlatformServices(BaseTestCase):
         response = self.client.get('/sis/v1/platforms/1/relationships/devices')
         data = json.loads(response.data.decode())
         self.assertEqual(response.status_code, 200)
-        self.assertIn('/sis/v1/platforms/1/relationships/device', data['links']['self'])
+        self.assertIn('/sis/v1/platforms/1/relationships/device',
+                      data['links']['self'])
 
     def test_post_relationship_platform_devices_via_id(self):
         """Ensure the post relationship between a
@@ -194,7 +195,8 @@ class TestPlatformServices(BaseTestCase):
             )
         data = json.loads(response.data.decode())
         self.assertEqual(response.status_code, 200)
-        self.assertIn('Relationship successfully created', data['meta']['message'])
+        self.assertIn('Relationship successfully created',
+                      data['meta']['message'])
 
 
 if __name__ == '__main__':
