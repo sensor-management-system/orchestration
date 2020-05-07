@@ -88,3 +88,7 @@ sw.*
 
 # Vim swap files
 *.swp
+
+# docker runtime environment
+.bash_history
+/.config/configstore/update-notifier-npm.json
