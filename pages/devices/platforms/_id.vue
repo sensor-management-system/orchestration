@@ -37,30 +37,46 @@
               <v-card-text>
                 <v-row>
                   <v-col cols="12" md="6">
-                    <v-text-field v-model="platform.shortName" label="short name" />
+                    <v-text-field v-model="platform.shortName" label="short name" :readonly="readonly" :disabled="readonly" />
                   </v-col>
                   <v-col cols="12" md="6">
-                    <v-text-field v-model="platform.longName" label="long name" />
+                    <v-text-field v-model="platform.longName" label="long name" :readonly="readonly" :disabled="readonly" />
                   </v-col>
                 </v-row>
                 <v-row>
                   <v-col cols="12" md="3">
-                    <v-select v-model="platform.platformTypeId" label="type" :items="platformTypes" :item-text="(x) => x.name" :item-value="(x) => x.id" />
+                    <v-select
+                      v-model="platform.platformTypeId"
+                      label="type"
+                      :items="platformTypes"
+                      :item-text="(x) => x.name"
+                      :item-value="(x) => x.id"
+                      :readonly="readonly"
+                      :disabled="readonly"
+                    />
                   </v-col>
                   <v-col cols="12" md="3">
-                    <v-select v-model="platform.manufactureId" label="manufacturer" :items="manufactures" :item-text="(x) => x.name" :item-value="(x) => x.id" />
+                    <v-select
+                      v-model="platform.manufactureId"
+                      label="manufacturer"
+                      :items="manufactures"
+                      :item-text="(x) => x.name"
+                      :item-value="(x) => x.id"
+                      :readonly="readonly"
+                      :disabled="readonly"
+                    />
                   </v-col>
                   <!--<v-select v-model="platform.type" label="type" :items="types" />-->
                 </v-row>
                 <v-divider />
                 <v-row>
                   <v-col cols="12" md="5">
-                    <v-textarea v-model="platform.description" label="Description" rows="3" />
+                    <v-textarea v-model="platform.description" label="Description" rows="3" :readonly="readonly" :disabled="readonly" />
                   </v-col>
                 </v-row>
                 <v-row>
                   <v-col cols="12" md="3">
-                    <v-text-field v-model="platform.website" label="Website" placeholder="https://" />
+                    <v-text-field v-model="platform.website" label="Website" placeholder="https://" :readonly="readonly" :disabled="readonly" />
                   </v-col>
                 </v-row>
               </v-card-text>
@@ -83,7 +99,7 @@
                 Platform URN: {{ platformURN }}
               </v-card-title>
               <v-card-text>
-                <v-row>
+                <v-row v-if="isInEditMode">
                   <v-col cols="5" md="3">
                     <v-autocomplete
                       v-model="personToAdd"
@@ -116,7 +132,7 @@
                       class="ma-2"
                       color="indigo"
                       text-color="white"
-                      :close="true"
+                      :close="isInEditMode"
                       @click:close="removePerson(index)"
                     >
                       <v-avatar left>
@@ -139,18 +155,34 @@
           </v-tab-item>
         </v-tabs>
         <!-- Buttons for all tabs -->
-        <v-btn
-          fab
-          fixed
-          bottom
-          right
-          color="primary"
-          @click="save"
-        >
-          <v-icon>
-            mdi-content-save
-          </v-icon>
-        </v-btn>
+        <div v-if="!isInEditMode">
+          <v-btn
+            fab
+            fixed
+            bottom
+            right
+            color="secondary"
+            @click="switchIntoEditMode"
+          >
+            <v-icon>
+              mdi-pencil
+            </v-icon>
+          </v-btn>
+        </div>
+        <div v-if="isInEditMode">
+          <v-btn
+            fab
+            fixed
+            bottom
+            right
+            color="primary"
+            @click="save"
+          >
+            <v-icon>
+              mdi-content-save
+            </v-icon>
+          </v-btn>
+        </div>
       </v-card>
     </v-form>
   </div>
@@ -187,6 +219,7 @@ export default class PlatformIdPage extends Vue {
   private activeTabIdx: number = 0
   private showSaveSuccess: boolean = false
   private showLoadingError: boolean = false
+  private isInEditMode: boolean = false
 
   mounted () {
     this.showLoadingError = false
@@ -200,14 +233,21 @@ export default class PlatformIdPage extends Vue {
       this.persons = foundPersons
     })
 
+    this.loadPlatform()
+  }
+
+  loadPlatform () {
     const platformId = this.$route.params.id
     if (platformId) {
+      this.isInEditMode = false
       DeviceService.findPlatformById(platformId).then((foundPlatform) => {
         this.platform = foundPlatform
       }).catch(() => {
         // We don't take the error directly
         this.showLoadingError = true
       })
+    } else {
+      this.isInEditMode = true
     }
   }
 
@@ -227,6 +267,10 @@ export default class PlatformIdPage extends Vue {
       this.showSaveSuccess = true
       // this.$router.push('/devices')
     })
+  }
+
+  switchIntoEditMode () {
+    this.isInEditMode = true
   }
 
   previousTab () {
@@ -305,9 +349,17 @@ export default class PlatformIdPage extends Vue {
     // return the verb (do we add a platform or do we edit one?)
     let verb = 'Add'
     if (this.$route.params.id) {
-      verb = 'Edit'
+      if (this.isInEditMode) {
+        verb = 'Edit'
+      } else {
+        verb = 'View'
+      }
     }
     return verb
+  }
+
+  get readonly () {
+    return !this.isInEditMode
   }
 
   get navigation () {
