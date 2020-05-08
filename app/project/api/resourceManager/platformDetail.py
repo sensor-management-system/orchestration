@@ -8,11 +8,19 @@ from sqlalchemy.orm.exc import NoResultFound
 
 
 class PlatformDetail(ResourceDetail):
+    """
+    Platform details class
+    """
     def before_get_object(self, view_kwargs):
+        """
+        before get method to get the platform id to fetch details
+        :param view_kwargs:
+        :return:
+        """
         if view_kwargs.get('device_id') is not None:
             try:
                 device = self.session.query(Device).filter_by(
-                    id=view_kwargs['id']).one()
+                    id=view_kwargs['device_id']).one()
             except NoResultFound:
                 raise ObjectNotFound({'parameter': 'device_id'},
                                      "Platform: {} not found".format(
