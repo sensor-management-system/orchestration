@@ -189,9 +189,8 @@
         <p>State {{ result.state }}</p>
       </v-card-text>
       <v-card-actions v-if="result.devicetype == 'platform'">
-        <v-btn>View</v-btn>
         <v-btn :to="'/devices/platforms/' + result.id">
-          Edit
+          View
         </v-btn>
         <v-btn>Copy</v-btn>
       </v-card-actions>
