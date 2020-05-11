@@ -2,7 +2,7 @@ from project.api.models.baseModel import db
 
 
 class Platform(db.Model):
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    id = db.Column(db.Integer, primary_key=True)
     description = db.Column(db.String(400))
     shortName = db.Column(db.String(10))
     longName = db.Column(db.String(128))
