@@ -1,5 +1,5 @@
 import Person from './Person'
-import SensorProperty from './SensorProperty'
+import { SensorProperty } from './SensorProperty'
 import CustomTextField from './CustomTextField'
 
 export default class Sensor {
