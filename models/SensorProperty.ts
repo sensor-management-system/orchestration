@@ -84,4 +84,19 @@ export class SensorProperty implements ISensorProperty {
   set failureValue (failureValue: number | null) {
     this._failureValue = failureValue
   }
+
+  static createFromObject (someObject: ISensorProperty) : SensorProperty {
+    const newObject = new SensorProperty()
+
+    newObject.accuracy = someObject.accuracy
+    newObject.compartment = someObject.compartment
+    newObject.failureValue = someObject.failureValue
+    newObject.label = someObject.label
+    newObject.measuringRange = MeasuringRange.createFromObject(someObject.measuringRange)
+    newObject.samplingMedia = someObject.samplingMedia
+    newObject.unit = someObject.unit
+    newObject.variable = someObject.variable
+
+    return newObject
+  }
 }
