@@ -1,4 +1,9 @@
-export class MeasuringRange {
+export interface IMeasuringRange {
+  min: number | null
+  max: number | null
+}
+
+export class MeasuringRange implements IMeasuringRange {
   private _min: number | null = null
   private _max: number | null = null
 
@@ -7,13 +12,9 @@ export class MeasuringRange {
     this.max = max
   }
 
-  /*
-  static createFromJson (someObject: Object) : MeasuringRange {
-    for (const key in someObject) {
-      this[(key as keyof MeasuringRange)] = someObject[(key as keyof Object)]
-    }
+  static createFromObject (someObject: IMeasuringRange) : MeasuringRange {
+    return new MeasuringRange(someObject.min, someObject.max)
   }
-  */
 
   get min (): number | null {
     return this._min
