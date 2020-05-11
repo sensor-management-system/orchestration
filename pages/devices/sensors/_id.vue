@@ -129,29 +129,25 @@
                 <v-row>
                   <v-col cols="3">
                     <v-autocomplete
+                      :items="allPersonsExceptSelected"
+                      :item-text="(x) => x.name"
+                      :item-value="(x) => x.id"
                       label="add a person"
+                      @change="addPerson"
                     />
                     <v-chip
+                      v-for="person in sensor.responsiblePersons"
+                      :key="person.id"
                       class="ma-2"
                       color="indigo"
                       text-color="white"
                       :close="true"
+                      @click:close="removePerson(person.id)"
                     >
                       <v-avatar left>
                         <v-icon>mdi-account-circle</v-icon>
                       </v-avatar>
-                      Mister Marple
-                    </v-chip>
-                    <v-chip
-                      class="ma-2"
-                      color="indigo"
-                      text-color="white"
-                      :close="true"
-                    >
-                      <v-avatar left>
-                        <v-icon>mdi-account-circle</v-icon>
-                      </v-avatar>
-                      Hans Hamster
+                      {{ person.name }}
                     </v-chip>
                   </v-col>
                 </v-row>
@@ -433,15 +429,40 @@
 import { Vue, Component } from 'nuxt-property-decorator'
 import Sensor from '../../../models/Sensor'
 import Person from '../../../models/Person'
-import SensorProperty from '../../../models/SensorProperty'
+import { SensorProperty } from '../../../models/SensorProperty'
 import CustomTextField from '../../../models/CustomTextField'
 
+import PersonService from '../../../services/PersonService'
+
 @Component
-export default class Sensors extends Vue {
+export default class SensorIdPage extends Vue {
   private numberOfTabs: number = 5
   private activeTab: number = 0
 
-  private sensor = new Sensor()
+  private sensor: Sensor = new Sensor()
+  private persons: Person[] = []
+
+  mounted () {
+    PersonService.findAllPersons().then((foundPersons) => {
+      this.persons = foundPersons
+    })
+  }
+
+  addPerson (somePersonId: string) {
+    const selectedPerson: Person | undefined = this.persons.find(p => p.id === parseInt(somePersonId))
+    if (selectedPerson) {
+      this.sensor.responsiblePersons.push(selectedPerson)
+    }
+  }
+
+  removePerson (somePersonId: number) {
+    const personIndex = this.sensor.responsiblePersons.findIndex(p => p.id === somePersonId)
+    this.sensor.responsiblePersons.splice(personIndex, 1)
+  }
+
+  get allPersonsExceptSelected (): Person[] {
+    return this.persons.filter(p => !this.sensor.responsiblePersons.find(rp => rp.id === p.id))
+  }
 
   previousTab () {
     this.activeTab = this.activeTab === 0 ? this.numberOfTabs - 1 : this.activeTab - 1
