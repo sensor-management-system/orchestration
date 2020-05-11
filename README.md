@@ -42,9 +42,12 @@ After having installed the dependencies, then just run the following commands to
 
 [How to run the tests](docs/test.md)
 
-### Todo
+### Filter & Include & sort
+
+[How to user filters](docs/filtering.md)
+
 
 
 ### Author
 
-- [Kotyba Alhaj Taha](@alhajtah)<!-- @IGNORE PREVIOUS: link -->
+- Kotyba Alhaj Taha
