@@ -448,6 +448,11 @@ export default class SensorIdPage extends Vue {
     })
   }
 
+  /**
+   * adds a person to the sensors responsiblePersons property
+   *
+   * @param {string} somePersonId - the id of the person to add
+   */
   addPerson (somePersonId: string) {
     const selectedPerson: Person | undefined = this.persons.find(p => p.id === parseInt(somePersonId))
     if (selectedPerson) {
@@ -455,11 +460,21 @@ export default class SensorIdPage extends Vue {
     }
   }
 
+  /**
+   * removes a person from the sensors responsiblePersons property
+   *
+   * @param {number} somePersonId - the id of the person to remove
+   */
   removePerson (somePersonId: number) {
     const personIndex = this.sensor.responsiblePersons.findIndex(p => p.id === somePersonId)
     this.sensor.responsiblePersons.splice(personIndex, 1)
   }
 
+  /**
+   * returns all persons except the ones that have already been selected
+   *
+   * @return {Person[]} an array of persons
+   */
   get allPersonsExceptSelected (): Person[] {
     return this.persons.filter(p => !this.sensor.responsiblePersons.find(rp => rp.id === p.id))
   }
