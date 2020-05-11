@@ -1,4 +1,9 @@
-export default class Person {
+export interface IPerson {
+  id: number | null
+  name: string
+}
+
+export default class Person implements IPerson {
   private _id: number | null = null
   private _name: string = ''
 
@@ -27,5 +32,19 @@ export default class Person {
 
   static createEmpty (): Person {
     return new Person()
+  }
+
+  /**
+   * creates an instance from another object
+   *
+   * @static
+   * @param {IPerson} someObject - the object from which the new instance is to be created
+   * @return {Person} the newly created instance
+   */
+  static createFromObject (someObject: IPerson): Person {
+    const newObject = new Person()
+    newObject.id = someObject.id
+    newObject.name = someObject.name
+    return newObject
   }
 }
