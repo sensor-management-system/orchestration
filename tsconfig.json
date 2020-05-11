@@ -25,7 +25,8 @@
     },
     "types": [
       "@types/node",
-      "@nuxt/types"
+      "@nuxt/types",
+      "@types/jest"
     ],
     "allowSyntheticDefaultImports": true,
     "plugins": [{ "name": "ts-vue-plugin" }]
