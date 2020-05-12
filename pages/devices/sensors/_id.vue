@@ -128,27 +128,7 @@
               <v-card-text>
                 <v-row>
                   <v-col cols="3">
-                    <v-autocomplete
-                      :items="allPersonsExceptSelected"
-                      :item-text="(x) => x.name"
-                      :item-value="(x) => x.id"
-                      label="add a person"
-                      @change="addPerson"
-                    />
-                    <v-chip
-                      v-for="person in sensor.responsiblePersons"
-                      :key="person.id"
-                      class="ma-2"
-                      color="indigo"
-                      text-color="white"
-                      :close="true"
-                      @click:close="removePerson(person.id)"
-                    >
-                      <v-avatar left>
-                        <v-icon>mdi-account-circle</v-icon>
-                      </v-avatar>
-                      {{ person.name }}
-                    </v-chip>
+                    <PersonSelect :selected-persons="sensor.responsiblePersons" />
                   </v-col>
                 </v-row>
               </v-card-text>
@@ -426,15 +406,18 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'nuxt-property-decorator'
+import { Vue, Component, Watch } from 'nuxt-property-decorator'
 import Sensor from '../../../models/Sensor'
 import Person from '../../../models/Person'
 import { SensorProperty } from '../../../models/SensorProperty'
 import CustomTextField from '../../../models/CustomTextField'
 
 import PersonService from '../../../services/PersonService'
+import PersonSelect from '../../../components/PersonSelect.vue'
 
-@Component
+@Component({
+  components: { PersonSelect }
+})
 export default class SensorIdPage extends Vue {
   private numberOfTabs: number = 5
   private activeTab: number = 0
@@ -446,37 +429,6 @@ export default class SensorIdPage extends Vue {
     PersonService.findAllPersons().then((foundPersons) => {
       this.persons = foundPersons
     })
-  }
-
-  /**
-   * adds a person to the sensors responsiblePersons property
-   *
-   * @param {string} somePersonId - the id of the person to add
-   */
-  addPerson (somePersonId: string) {
-    const selectedPerson: Person | undefined = this.persons.find(p => p.id === parseInt(somePersonId))
-    if (selectedPerson) {
-      this.sensor.responsiblePersons.push(selectedPerson)
-    }
-  }
-
-  /**
-   * removes a person from the sensors responsiblePersons property
-   *
-   * @param {number} somePersonId - the id of the person to remove
-   */
-  removePerson (somePersonId: number) {
-    const personIndex = this.sensor.responsiblePersons.findIndex(p => p.id === somePersonId)
-    this.sensor.responsiblePersons.splice(personIndex, 1)
-  }
-
-  /**
-   * returns all persons except the ones that have already been selected
-   *
-   * @return {Person[]} an array of persons
-   */
-  get allPersonsExceptSelected (): Person[] {
-    return this.persons.filter(p => !this.sensor.responsiblePersons.find(rp => rp.id === p.id))
   }
 
   previousTab () {
@@ -551,6 +503,11 @@ export default class SensorIdPage extends Vue {
       0,
       1
     ]
+  }
+
+  @Watch('sensor', { immediate: true, deep: true })
+  onSensorChanged(val: Sensor, oldVal: Sensor) {
+    console.log(val)
   }
 }
 </script>
