@@ -4,5 +4,6 @@ COPY . /ssmfrontend
 WORKDIR /ssmfrontend
 RUN npm install
 
-ENTRYPOINT ["npm", "run", "dev", "-H", "0.0.0.0", "-p", "80"]
+ENTRYPOINT ["npm"]
+CMD ["run", "dev", "--", "-H", "0.0.0.0", "-p", "80"]
 
