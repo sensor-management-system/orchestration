@@ -14,7 +14,7 @@ externalDocs:
   url: 'https://jsonapi.org/format/#fetching-includes'
 servers:
   - url: http://localhost:5000/sis/v1/
-    description: 'local development environment'
+    description: deployment
 tags:
   - name: Platforms
   - name: Devices
@@ -39,12 +39,66 @@ paths:
                 $ref: '#/components/schemas/ResponsePlatforms'
         '500':
           $ref: '#/components/responses/InternalServerError'
-      parameters: []
+      parameters:
+        - name: filter
+          in: query
+          description: >-
+            Retrieve devices after a specific attribute.
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+                description: the name of the field you want to filter on
+                example: devices
+              op:
+                type: string
+                description: the operation you want to use (all sqlalchemy operations are available)
+                externalDocs:
+                  description: sqlalchemy operations
+                  url: 'https://flask-rest-jsonapi.readthedocs.io/en/latest/filtering.html'
+                example: any
+              val:
+                type: string
+                description: the key for fitering
+                example: urn
+        - name: include
+          in: query
+          description: >-
+            You can include related object(s) details to responses with the querystring parameter named “include”
+          schema:
+            type: string
+            example: devices
+        - name: page
+          in: query
+          description: >-
+              Default pagination size is 30 but you can manage it from querystring parameter named “page”.
+          schema:
+            type: object
+            properties:
+              number:
+                description: Control page number
+                type: integer
+                format: int32
+                example: 2
+              size:
+                description: Control page size
+                type: integer
+                format: int32
+                example: 3
     post:
       tags:
         - Platforms
       summary: Creates a new Platform
       operationId: addNewPlatform
+      parameters:
+        - name: include
+          in: query
+          description: >-
+            You can include related object(s) details to request with the querystring parameter named “include”. this should change the request boby please visit the dics in GitLab to learn more.
+          schema:
+            type: string
+            example: devices
       requestBody:
         description: 'The needed json data to create a platform. '
         content:
@@ -64,7 +118,6 @@ paths:
         '500':
            $ref: '#/components/responses/InternalServerError'
       x-codegen-request-body-name: body
-      parameters: []
   '/platforms/{platformID}':
     get:
       tags:
@@ -264,6 +317,53 @@ paths:
       description: >-
         you can also use the endpoint '/platforms/<int:id>/devices'
       operationId: getAllItems
+      parameters:
+        - name: filter
+          in: query
+          description: >-
+            Retrieve devices after a specific attribute.
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+                description: the name of the field you want to filter on
+                example: devices
+              op:
+                type: string
+                description: the operation you want to use (all sqlalchemy operations are available)
+                externalDocs:
+                  description: sqlalchemy operations
+                  url: 'https://flask-rest-jsonapi.readthedocs.io/en/latest/filtering.html'
+                example: any
+              val:
+                type: string
+                description: the key for fitering
+                example: urn
+        - name: include
+          in: query
+          description: >-
+            You can include related object(s) details to responses with the querystring parameter named “include”
+          schema:
+            type: string
+            example: events
+        - name: page
+          in: query
+          description: >-
+              Default pagination size is 30 but you can manage it from querystring parameter named “page”.
+          schema:
+            type: object
+            properties:
+              number:
+                description: Control page number
+                type: integer
+                format: int32
+                example: 2
+              size:
+                description: Control page size
+                type: integer
+                format: int32
+                example: 3
       responses:
         '200':
           description: OK
@@ -281,15 +381,13 @@ paths:
         you can also use the endpoint '/platforms/<int:id>/devices'
       operationId: CreateDevice
       parameters:
-        - name: parentItemID
+        - name: include
           in: query
           description: >-
-            The ID of the parent platform to which the given Item can be
-            assigned. Omit if the device should not have a parent platform. The
-            parentID in the JSON document will be ignored.
+            You can include related object(s) details to request with the querystring parameter named “include”. this should change the request boby please visit the dics in GitLab to learn more.
           schema:
-            type: integer
-            format: int32
+            type: string
+            example: events
       requestBody:
         description: 'The needed json data to create a Device. '
         content:
@@ -816,9 +914,56 @@ paths:
         - Events
       summary: >-
         Returns all available items.
-      description: >-
+        description: >-
         you can also use the endpoint '/devices/<int:id>/contacts'
       operationId: getAllEvents
+      parameters:
+        - name: filter
+          in: query
+          description: >-
+            Retrieve devices after a specific attribute.
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+                description: the name of the field you want to filter on
+                example: devices
+              op:
+                type: string
+                description: the operation you want to use (all sqlalchemy operations are available)
+                externalDocs:
+                  description: sqlalchemy operations
+                  url: 'https://flask-rest-jsonapi.readthedocs.io/en/latest/filtering.html'
+                example: any
+              val:
+                type: string
+                description: the key for fitering
+                example: urn
+        - name: include
+          in: query
+          description: >-
+            You can include related object(s) details to responses with the querystring parameter named “include”
+          schema:
+            type: string
+            example: devices
+        - name: page
+          in: query
+          description: >-
+              Default pagination size is 30 but you can manage it from querystring parameter named “page”.
+          schema:
+            type: object
+            properties:
+              number:
+                description: Control page number
+                type: integer
+                format: int32
+                example: 2
+              size:
+                description: Control page size
+                type: integer
+                format: int32
+                example: 3
       responses:
         '200':
           description: OK
@@ -836,15 +981,13 @@ paths:
         you can also use the endpoint '/devices/<int:id>/contacts'
       operationId: CreateEvent
       parameters:
-        - name: parentItemID
+        - name: include
           in: query
           description: >-
-            The ID of the parent device to which the given Item should be
-            assigned. Omit if the device should not have a parent platform. The
-            parentID in the JSON document will be ignored.
+            You can include related object(s) details to request with the querystring parameter named “include”. this should change the request boby please visit the dics in GitLab to learn more.
           schema:
-            type: integer
-            format: int32
+            type: string
+            example: devices
       requestBody:
         description: 'The needed json data to create an Event. '
         content:
@@ -862,7 +1005,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
       x-codegen-request-body-name: body
-  '/events/{eventID}':
+  '/event/{eventID}':
     patch:
       tags:
         - Events
@@ -950,6 +1093,53 @@ paths:
       description: >-
         you can also use the endpoint '/devices/<int:id>/contacts'
       operationId: getAllProperties
+      parameters:
+        - name: filter
+          in: query
+          description: >-
+            Retrieve devices after a specific attribute.
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+                description: the name of the field you want to filter on
+                example: devices
+              op:
+                type: string
+                description: the operation you want to use (all sqlalchemy operations are available)
+                externalDocs:
+                  description: sqlalchemy operations
+                  url: 'https://flask-rest-jsonapi.readthedocs.io/en/latest/filtering.html'
+                example: any
+              val:
+                type: string
+                description: the key for fitering
+                example: urn
+        - name: include
+          in: query
+          description: >-
+            You can include related object(s) details to responses with the querystring parameter named “include”
+          schema:
+            type: string
+            example: devices
+        - name: page
+          in: query
+          description: >-
+              Default pagination size is 30 but you can manage it from querystring parameter named “page”.
+          schema:
+            type: object
+            properties:
+              number:
+                description: Control page number
+                type: integer
+                format: int32
+                example: 2
+              size:
+                description: Control page size
+                type: integer
+                format: int32
+                example: 3
       responses:
         '200':
           description: OK
@@ -967,15 +1157,13 @@ paths:
         you can also use the endpoint '/devices/<int:id>/contacts'
       operationId: CreatePproperties
       parameters:
-        - name: parentItemID
+        - name: include
           in: query
           description: >-
-            The ID of the parent platform to which the given Item should be
-            assigned. Omit if the device should not have a parent platform. The
-            parentID in the JSON document will be ignored.
+            You can include related object(s) details to request with the querystring parameter named “include”. this should change the request boby please visit the dics in GitLab to learn more.
           schema:
-            type: integer
-            format: int32
+            type: string
+            example: devices
       requestBody:
         description: 'The needed json data to create a Device. '
         content:
@@ -1101,6 +1289,53 @@ paths:
       description: >-
         you can also use the endpoint '/devices/<int:id>/contacts'
       operationId: getAllFields
+      parameters:
+        - name: filter
+          in: query
+          description: >-
+            Retrieve devices after a specific attribute.
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+                description: the name of the field you want to filter on
+                example: devices
+              op:
+                type: string
+                description: the operation you want to use (all sqlalchemy operations are available)
+                externalDocs:
+                  description: sqlalchemy operations
+                  url: 'https://flask-rest-jsonapi.readthedocs.io/en/latest/filtering.html'
+                example: any
+              val:
+                type: string
+                description: the key for fitering
+                example: urn
+        - name: include
+          in: query
+          description: >-
+            You can include related object(s) details to responses with the querystring parameter named “include”
+          schema:
+            type: string
+            example: devices
+        - name: page
+          in: query
+          description: >-
+              Default pagination size is 30 but you can manage it from querystring parameter named “page”.
+          schema:
+            type: object
+            properties:
+              number:
+                description: Control page number
+                type: integer
+                format: int32
+                example: 2
+              size:
+                description: Control page size
+                type: integer
+                format: int32
+                example: 3
       responses:
         '200':
           description: OK
@@ -1118,15 +1353,13 @@ paths:
       description: >-
         you can also use the endpoint '/devices/<int:id>/Fields'
       parameters:
-        - name: parentItemID
+        - name: include
           in: query
           description: >-
-            The ID of the parent platform to which the given Item should be
-            assigned. Omit if the device should not have a parent platform. The
-            parentID in the JSON document will be ignored.
+            You can include related object(s) details to request with the querystring parameter named “include”. this should change the request boby please visit the dics in GitLab to learn more.
           schema:
-            type: integer
-            format: int32
+            type: string
+            example: devices
       requestBody:
         description: 'The needed json data to create a custom field. '
         content:
@@ -1249,9 +1482,56 @@ paths:
         - Contacts
       summary: >-
         Returns all available items.
-      description: >-
+        description: >-
         you can also use the endpoint '/devices/<int:id>/contacts'
       operationId: getAllContacts
+      parameters:
+        - name: filter
+          in: query
+          description: >-
+            Retrieve devices after a specific attribute.
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+                description: the name of the field you want to filter on
+                example: devices
+              op:
+                type: string
+                description: the operation you want to use (all sqlalchemy operations are available)
+                externalDocs:
+                  description: sqlalchemy operations
+                  url: 'https://flask-rest-jsonapi.readthedocs.io/en/latest/filtering.html'
+                example: any
+              val:
+                type: string
+                description: the key for fitering
+                example: urn
+        - name: include
+          in: query
+          description: >-
+            You can include related object(s) details to responses with the querystring parameter named “include”
+          schema:
+            type: string
+            example: devices
+        - name: page
+          in: query
+          description: >-
+              Default pagination size is 30 but you can manage it from querystring parameter named “page”.
+          schema:
+            type: object
+            properties:
+              number:
+                description: Control page number
+                type: integer
+                format: int32
+                example: 2
+              size:
+                description: Control page size
+                type: integer
+                format: int32
+                example: 3
       responses:
         '200':
           description: OK
@@ -1269,15 +1549,13 @@ paths:
         you can also use the endpoint '/devices/<int:id>/contacts'
       operationId: CreateContacts
       parameters:
-        - name: parentItemID
+        - name: include
           in: query
           description: >-
-            The ID of the parent platform to which the given Item should be
-            assigned. Omit if the device should not have a parent platform. The
-            parentID in the JSON document will be ignored.
+            You can include related object(s) details to request with the querystring parameter named “include”. this should change the request boby please visit the dics in GitLab to learn more.
           schema:
-            type: integer
-            format: int32
+            type: string
+            example: devices
       requestBody:
         description: 'The needed json data to create a contact. '
         content:
@@ -1416,15 +1694,13 @@ paths:
       summary: Creates  attachments from JSON input
       operationId: CreateAttachments
       parameters:
-        - name: parentItemID
+        - name: include
           in: query
           description: >-
-            The ID of the parent platform to which the given Item should be
-            assigned. Omit if the device should not have a parent platform. The
-            parentID in the JSON document will be ignored.
+            You can include related object(s) details to request with the querystring parameter named “include”. this should change the request boby please visit the dics in GitLab to learn more.
           schema:
-            type: integer
-            format: int32
+            type: string
+            example: devices
       requestBody:
         description: 'The needed json data to create an attachments. '
         content:
