@@ -23,7 +23,7 @@ class DeviceSchema(Schema):
     description = fields.Str(allow_none=True)
     shortName = fields.Str(allow_none=True)
     longName = fields.Str(allow_none=True)
-    manufacture = fields.Str(required=True)
+    manufacturer = fields.Str(required=True)
     serialNumber = fields.Integer(as_string=True, required=True)
     type = fields.Str(required=True)
     model = fields.Str(required=True)

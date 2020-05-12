@@ -7,7 +7,7 @@ class Device(db.Model):
     shortName = db.Column(db.String(30))
     longName = db.Column(db.String(128))
     serialNumber = db.Column(db.Integer)
-    manufacture = db.Column(db.String(128))
+    manufacturer = db.Column(db.String(128))
     dualUse = db.Column(db.Boolean, default=False)
     model = db.Column(db.String(128))
     inventoryNumber = db.Column(db.String)

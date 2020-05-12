@@ -26,9 +26,8 @@ class PropertiesSchema(Schema):
     failureValue = fields.Float(as_string=True, required=True)
     Variable = fields.Str(required=True)
     model = fields.Str(required=True)
-    dualUse = fields.Str()
     inventoryNumber = fields.Integer()
-    website = fields.Str(allow_none=True)
+    src = fields.Str(allow_none=True)
     SamplingMedia = fields.Date(allow_none=True)
     persistentIdentifier = fields.Integer()
 
