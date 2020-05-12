@@ -37,6 +37,9 @@ build-deploy-image:
         docker push "$CI_REGISTRY_IMAGE:latest"
         docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_TAG"
       fi
+  tags:
+    - deploy
+    - staging
   #only:
   # - master
   # - tags
