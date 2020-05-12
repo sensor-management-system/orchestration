@@ -10,3 +10,7 @@ test-frontend-unit-tests:
     - which node
   script:
     - node -v
+  tags:
+    - ssm
+    - id2
+    - docker
