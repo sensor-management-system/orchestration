@@ -10,7 +10,7 @@ class Device(db.Model):
     manufacture = db.Column(db.String(128))
     dualUse = db.Column(db.Boolean, default=False)
     model = db.Column(db.String(128))
-    inventoryNumber = db.Column(db.Integer)
+    inventoryNumber = db.Column(db.String)
     persistentIdentifier = db.Column(db.String(128))
     src = db.Column(db.String(200))
     label = db.Column(db.String(128))

@@ -12,4 +12,4 @@ class Platform(db.Model):
     urn = db.Column(db.String(256))
     src = db.Column(db.String(400))
     configurationDate = db.Column(db.DateTime)
-    inventoryNumber = db.Column(db.Integer)
+    inventoryNumber = db.Column(db.String)
