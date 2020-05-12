@@ -27,6 +27,8 @@ build-deploy-image:
   image: docker:19.03.1
   before_script:
     - *docker_login_gitlab_registry
+    - echo "$CI_COMMIT_TAG"
+    - echo "$CI_REGISTRY_IMAGE"
   script:
     - >
       if [ -z "$CI_COMMIT_TAG" ]; then
