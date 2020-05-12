@@ -46,7 +46,6 @@ build-deploy-image:
 
 deploy-staging:
   stage: deploy
-  image: python:3
   environment:
     name: staging
     url: https://$STAGING_HOST
@@ -57,8 +56,8 @@ deploy-staging:
     COMPOSE_PROJECT_NAME: ssmfrontend
   before_script:
     - *docker_login_gitlab_registry
-    - pip3 install docker-compose
   script:
+    # nils@gfz-potsdam.de: I installed docker compose on the staging machine manually
     - docker-compose -f docker/deployment/docker-compose.yml pull
     - docker-compose -f docker/deployment/docker-compose.yml up -d
   #only:
