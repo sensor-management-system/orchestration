@@ -1193,7 +1193,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
       x-codegen-request-body-name: body
-  '/properties/{propertiesID}':
+  '/properties/{propertieID}':
     patch:
       tags:
         - Properties
@@ -1241,7 +1241,7 @@ paths:
       summary: Get properties by ID
       operationId: getProperties
       parameters:
-        - name: propertiesID
+        - name: propertieID
           in: path
           required: true
           schema:
@@ -1265,7 +1265,7 @@ paths:
       summary: 'remove properties.'
       operationId: removeProperties
       parameters:
-        - name: propertiesID
+        - name: propertieID
           in: path
           required: true
           schema:
@@ -1389,14 +1389,14 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
       x-codegen-request-body-name: body
-  '/fields/{FieldsID}':
+  '/fields/{FieldID}':
     patch:
       tags:
         - Fields
       summary: Update Fields from JSON input
       operationId: alterFields
       parameters:
-        - name: FieldsID
+        - name: FieldID
           in: path
           description: >-
             The ID of the item you want to update. The itemID in the JSON
@@ -1461,7 +1461,7 @@ paths:
       summary: 'remove a Field.'
       operationId: removeFields
       parameters:
-        - name: FieldsID
+        - name: FieldID
           in: path
           required: true
           schema:
@@ -1585,14 +1585,14 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
       x-codegen-request-body-name: body
-  '/contacts/{contactsID}':
+  '/contacts/{contactID}':
     patch:
       tags:
         - Contacts
       summary: Update contacts from JSON input
       operationId: alterContacts
       parameters:
-        - name: contactsID
+        - name: contactID
           in: path
           description: >-
             The ID of the item you want to update. The itemID in the JSON
@@ -1657,7 +1657,7 @@ paths:
       summary: 'remove contact.'
       operationId: removeContacts
       parameters:
-        - name: contactsID
+        - name: contactID
           in: path
           required: true
           schema:
@@ -1730,14 +1730,14 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
       x-codegen-request-body-name: body
-  '/attachments/{attachmentsID}':
+  '/attachments/{attachmentID}':
     patch:
       tags:
         - Attachments
       summary: Update attachments from JSON input
       operationId: alterAttachments
       parameters:
-        - name: attachmentsID
+        - name: attachmentID
           in: path
           description: >-
             The ID of the item you want to update. The itemID in the JSON
@@ -1802,7 +1802,7 @@ paths:
       summary: 'remove attachments.'
       operationId: removeAttachments
       parameters:
-        - name: attachmentsID
+        - name: attachmentID
           in: path
           required: true
           schema:
@@ -1915,12 +1915,15 @@ components:
           format: int32
         src:
           type: string
+          description: link to website
         label:
           type: string
         type:
           type: string
-        deviceURN:
+        urn:
           type: string
+          description: >-
+            '[manufacture_[model]_[type]_[serial_number]'
         configurationDate:
           type: string
           format: date_time
@@ -2103,7 +2106,7 @@ components:
             properties:
               type:
                 type: string
-                example: device
+                example: platform
               attributes:
                     $ref: '#/components/schemas/Platform'
               rel:
@@ -2230,6 +2233,11 @@ components:
           type: string
         src:
           type: string
+          description: link to website
+        urn:
+          type: string
+          description: >-
+            '[platformtype]_[short name]'
         configurationDate:
           type: string
           format: date_time
