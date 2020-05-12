@@ -46,6 +46,7 @@ build-deploy-image:
 
 deploy-staging:
   stage: deploy
+  image: python:3
   environment:
     name: staging
     url: https://$STAGING_HOST
