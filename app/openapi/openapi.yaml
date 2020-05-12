@@ -1091,7 +1091,7 @@ paths:
       summary: >-
         Returns all available items.
       description: >-
-        you can also use the endpoint '/devices/<int:id>/contacts'
+        you can also use the endpoint '/devices/<int:id>/properties'
       operationId: getAllProperties
       parameters:
         - name: filter
@@ -1154,7 +1154,7 @@ paths:
         - Properties
       summary: Creates properties from JSON input
       description: >-
-        you can also use the endpoint '/devices/<int:id>/contacts'
+        you can also use the endpoint '/devices/<int:id>/properties'
       operationId: CreatePproperties
       parameters:
         - name: include
