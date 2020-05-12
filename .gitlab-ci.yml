@@ -27,8 +27,6 @@ build-deploy-image:
   image: docker:19.03.1
   before_script:
     - *docker_login_gitlab_registry
-    - echo "$CI_COMMIT_TAG"
-    - echo "$CI_REGISTRY_IMAGE"
   script:
     - >
       if [ -z "$CI_COMMIT_TAG" ]; then
@@ -58,6 +56,7 @@ deploy-staging:
     COMPOSE_PROJECT_NAME: ssmfrontend
   before_script:
     - *docker_login_gitlab_registry
+    - pip3 install docker-compose
   script:
     - docker-compose -f docker/deployment/docker-compose.yml pull
     - docker-compose -f docker/deployment/docker-compose.yml up -d
