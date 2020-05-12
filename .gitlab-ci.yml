@@ -1,5 +1,7 @@
 stages:
   - test
+  - build
+  - deploy
 
 test-frontend-unit-tests:
   stage: test
@@ -16,3 +18,43 @@ test-frontend-unit-tests:
   cache:
     paths:
       - node_modules
+
+.docker_login_gitlab_registry: &docker_login_gitlab_registry
+  - echo "$CI_BUILD_TOKEN" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
+
+build-deploy-image:
+  stage: build
+  image: docker:19.03.1
+  before_script:
+    - *docker_login_gitlab_registry
+  script:
+    - >
+      if [ -z "$CI_COMMIT_TAG" ]; then
+        docker build --pull -t "$CI_REGISTRY_IMAGE:latest" --tag "$CI_REGISTRY_IMAGE:latest" -f docker/deployment/Dockerfile .
+        docker push "$CI_REGISTRY_IMAGE:latest"
+      else
+        docker build --pull -t "$CI_REGISTRY_IMAGE:latest" --tag "$CI_REGISTRY_IMAGE:$CI_COMMIT_TAG" --tag "$CI_REGISTRY_IMAGE:latest" -f docker/deployment/Dockerfile .
+        docker push "$CI_REGISTRY_IMAGE:latest"
+        docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_TAG"
+      fi
+  #only:
+  # - master
+  # - tags
+
+deploy-staging:
+  stage: deploy
+  environment:
+    name: staging
+    url: https://$STAGING_HOST
+  tags:
+    - deploy
+    - staging
+  variables:
+    COMPOSE_PROJECT_NAME: ssmfrontend
+  before_script:
+    - *docker_login_gitlab_registry
+  script:
+    - docker-compose -f docker/deployment/docker-compose.yml pull
+    - docker-compose -f docker/deployment/docker-compose.yml up -d
+  #only:
+  #  - master
