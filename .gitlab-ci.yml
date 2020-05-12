@@ -40,9 +40,9 @@ build-deploy-image:
   tags:
     - deploy
     - staging
-  #only:
-  # - master
-  # - tags
+  only:
+   - master
+   - tags
 
 deploy-staging:
   stage: deploy
@@ -60,5 +60,5 @@ deploy-staging:
     # nils@gfz-potsdam.de: I installed docker compose on the staging machine manually
     - docker-compose -f docker/deployment/docker-compose.yml pull
     - docker-compose -f docker/deployment/docker-compose.yml up -d
-  #only:
-  #  - master
+  only:
+    - master
