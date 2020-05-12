@@ -1,0 +1,8 @@
+stages:
+  - test
+
+
+test-frontend-unit-tests:
+  stage: test
+  script:
+    - node -v
