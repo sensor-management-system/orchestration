@@ -1,3 +1,4 @@
+image: node:current-slim
 stages:
   - test
 
