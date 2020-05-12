@@ -1,9 +1,9 @@
-image: node:current-slim
 stages:
   - test
 
 
 test-frontend-unit-tests:
   stage: test
+  image: node:10.16.3-stretch
   script:
     - node -v
