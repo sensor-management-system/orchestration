@@ -1,6 +1,7 @@
 <template>
   <div>
     <v-autocomplete
+      v-if="!readonly"
       :items="allPersonsExceptSelected"
       :item-text="(x) => x.name"
       :item-value="(x) => x.id"
@@ -13,7 +14,7 @@
       class="ma-2"
       color="indigo"
       text-color="white"
-      :close="true"
+      :close="!readonly"
       @click:close="removePerson(person.id)"
     >
       <v-avatar left>
@@ -46,6 +47,13 @@ export default class PersonSelect extends Vue {
   })
   // @ts-ignore
   selectedPersons!: Person[]
+
+  @Prop({
+    default: false,
+    type: Boolean
+  })
+  // @ts-ignore
+  readonly: boolean
 
   /**
    * copies the selectedPersons property to the local instance variable
