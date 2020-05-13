@@ -28,3 +28,13 @@ class PlatformSchema(Schema):
                            many=True,
                            schema='DeviceSchema',
                            type_='device')
+
+    contacts = Relationship(attribute='contacts',
+                            self_view='platform_contacts',
+                            self_view_kwargs={'id': '<id>'},
+                            related_view='contacts_list',
+                            related_view_kwargs={'platform_id': '<id>'},
+                            many=True,
+                            schema='ContactSchema',
+                            type_='contact',
+                            id_field='contact_id')
