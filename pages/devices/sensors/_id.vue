@@ -128,7 +128,7 @@
               <v-card-text>
                 <v-row>
                   <v-col cols="3">
-                    <PersonSelect :selected-persons="sensor.responsiblePersons" />
+                    <PersonSelect :selected-persons.sync="sensor.responsiblePersons" />
                   </v-col>
                 </v-row>
               </v-card-text>
@@ -503,11 +503,6 @@ export default class SensorIdPage extends Vue {
       0,
       1
     ]
-  }
-
-  @Watch('sensor', { immediate: true, deep: true })
-  onSensorChanged(val: Sensor, oldVal: Sensor) {
-    console.log(val)
   }
 }
 </script>
