@@ -160,11 +160,13 @@ import Manufacture from '../../../models/Manufacture'
 import PlatformType from '../../../models/PlatformType'
 import Platform from '../../../models/Platform'
 
+// @ts-ignore
 import PersonSelect from '../../../components/PersonSelect.vue'
 
 @Component({
   components: { PersonSelect }
 })
+// @ts-ignore
 export default class PlatformIdPage extends Vue {
   // data
   // first for the data to chose the elements

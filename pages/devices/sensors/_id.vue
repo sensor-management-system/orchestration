@@ -412,11 +412,13 @@ import Person from '../../../models/Person'
 import { SensorProperty } from '../../../models/SensorProperty'
 import CustomTextField from '../../../models/CustomTextField'
 
+// @ts-ignore
 import PersonSelect from '../../../components/PersonSelect.vue'
 
 @Component({
   components: { PersonSelect }
 })
+// @ts-ignore
 export default class SensorIdPage extends Vue {
   private numberOfTabs: number = 5
   private activeTab: number = 0
