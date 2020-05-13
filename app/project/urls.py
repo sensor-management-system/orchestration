@@ -35,9 +35,12 @@ def Create_endpoints(api):
     api.route(PlatformList, 'platform_list', base_url + '/platforms')
     api.route(PlatformDetail, 'platform_detail',
               base_url + '/platforms/<int:id>',
-              base_url + '/devices/<int:device_id>/platform')
+              base_url + '/devices/<int:device_id>/platform',
+              base_url + '/contacts/<int:device_id>/platform')
     api.route(PlatformRelationship, 'platform_devices',
               base_url + '/platforms/<int:id>/relationships/devices')
+    api.route(PlatformRelationship, 'platform_contacts',
+              base_url + '/platforms/<int:id>/relationships/contacts')
 
     # Device
     api.route(DeviceList, 'devices_list', base_url + '/devices',
@@ -67,11 +70,14 @@ def Create_endpoints(api):
               base_url + '/events/<int:id>/relationships/device')
     # Contact
     api.route(ContactList, 'contacts_list', base_url + '/contacts',
-              base_url + '/devices/<int:device_id>/contacts')
+              base_url + '/devices/<int:device_id>/contacts',
+              base_url + '/platforms/<int:device_id>/contacts')
     api.route(ContactDetail, 'contacts_detail',
               base_url + '/contacts/<int:id>')
     api.route(ContactRelationship, 'contacts_device',
               base_url + '/contacts/<int:id>/relationships/device')
+    api.route(ContactRelationship, 'contacts_platform',
+              base_url + '/contacts/<int:id>/relationships/platform')
     # Properties
     api.route(PropertiesList, 'properties_list', base_url + '/properties',
               base_url + '/devices/<int:device_id>/properties')
