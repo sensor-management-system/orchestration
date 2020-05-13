@@ -412,7 +412,6 @@ import Person from '../../../models/Person'
 import { SensorProperty } from '../../../models/SensorProperty'
 import CustomTextField from '../../../models/CustomTextField'
 
-import PersonService from '../../../services/PersonService'
 import PersonSelect from '../../../components/PersonSelect.vue'
 
 @Component({
@@ -423,13 +422,6 @@ export default class SensorIdPage extends Vue {
   private activeTab: number = 0
 
   private sensor: Sensor = new Sensor()
-  private persons: Person[] = []
-
-  mounted () {
-    PersonService.findAllPersons().then((foundPersons) => {
-      this.persons = foundPersons
-    })
-  }
 
   previousTab () {
     this.activeTab = this.activeTab === 0 ? this.numberOfTabs - 1 : this.activeTab - 1
