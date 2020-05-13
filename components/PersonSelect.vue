@@ -25,17 +25,43 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component, Prop } from 'nuxt-property-decorator'
+import { Vue, Component, Prop, Watch } from 'nuxt-property-decorator'
 import Person from '../models/Person'
 import PersonService from '../services/PersonService'
 
+/**
+ * A component to select persons
+ * @extends Vue
+ */
 @Component
+// @ts-ignore
 export default class PersonSelect extends Vue {
   private persons: Person[] = []
+  private localSelectedPersons: Person[] = []
 
-  @Prop()
-  selectedPersons: Person[]
+  @Prop({
+    default: [],
+    required: true,
+    type: Array
+  })
+  // @ts-ignore
+  selectedPersons!: Person[]
 
+  /**
+   * copies the selectedPersons property to the local instance variable
+   *
+   * @constructor
+   */
+  constructor () {
+    super()
+    this.localSelectedPersons = this.selectedPersons
+  }
+
+  /**
+   * fetches all available persons from the PersonsService
+   *
+   * @async
+   */
   async fetch () {
     this.persons = await PersonService.findAllPersons()
   }
@@ -48,7 +74,7 @@ export default class PersonSelect extends Vue {
   addPerson (somePersonId: string) {
     const selectedPerson: Person | undefined = this.persons.find(p => p.id === parseInt(somePersonId))
     if (selectedPerson) {
-      this.selectedPersons.push(selectedPerson)
+      this.localSelectedPersons.push(selectedPerson)
     }
   }
 
@@ -58,8 +84,8 @@ export default class PersonSelect extends Vue {
    * @param {number} somePersonId - the id of the person to remove
    */
   removePerson (somePersonId: number) {
-    const personIndex = this.selectedPersons.findIndex(p => p.id === somePersonId)
-    this.selectedPersons.splice(personIndex, 1)
+    const personIndex = this.localSelectedPersons.findIndex(p => p.id === somePersonId)
+    this.localSelectedPersons.splice(personIndex, 1)
   }
 
   /**
@@ -68,8 +94,24 @@ export default class PersonSelect extends Vue {
    * @return {Person[]} an array of persons
    */
   get allPersonsExceptSelected (): Person[] {
-    return this.persons.filter(p => !this.selectedPersons.find(rp => rp.id === p.id))
+    return this.persons.filter(p => !this.localSelectedPersons.find(rp => rp.id === p.id))
   }
 
+  /**
+   * triggers an update event for the selectedPersons property
+   *
+   * @param {Person[]} selectedPersons - the changed persons array
+   * @fires PersonSelect#update:selectedPersons
+   */
+  @Watch('localSelectedPersons', { immediate: true, deep: true })
+  // @ts-ignore
+  localSelectedPersonsChanged (selectedPersons: Person[]) {
+    /**
+     * Update event
+     * @event PersonSelect#update:selectedPersons
+     * @type Person[]
+     */
+    this.$emit('update:selectedPersons', selectedPersons)
+  }
 }
 </script>
