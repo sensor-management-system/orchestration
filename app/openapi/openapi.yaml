@@ -307,6 +307,67 @@ paths:
                 $ref: '#/components/schemas/DeleteObject'
         '500':
            $ref: '#/components/responses/InternalServerError'
+  '/platforms/{platformID}/relationships/contacts':
+    get:
+      tags:
+        - Platforms
+      summary: 'Retrieve relationships between a platform and contact'
+      operationId: getRealationsofplatformToContact
+      parameters:
+        - name: platformID
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '500':
+           $ref: '#/components/responses/InternalServerError'
+    post:
+      tags:
+        - Platforms
+      summary: 'Create relationships between a platform and contact'
+      operationId: CreatePlatformToContact
+      parameters:
+        - name: platformID
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '500':
+           $ref: '#/components/responses/InternalServerError'
+    patch:
+      tags:
+        - Platforms
+      summary: 'Update relationships between a platform and contact'
+      operationId: alterContacttofPlatform
+      parameters:
+        - name: platformID
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      tags:
+        - Platforms
+      summary: 'Delete relationships between two object'
+      operationId: removeContactfromplatform
+      parameters:
+        - name: platformID
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '500':
+          $ref: '#/components/responses/InternalServerError'
   /devices:
     get:
       tags:
@@ -1200,7 +1261,7 @@ paths:
       summary: Update properties from JSON input
       operationId: alterProperties
       parameters:
-        - name: propertiesID
+        - name: propertieID
           in: path
           description: >-
             The ID of the item you want to update. The itemID in the JSON
@@ -1407,9 +1468,7 @@ paths:
             format: int32
       requestBody:
         description: >-
-          The needed json data to update a Device. ShortNames will be ignored.
-          They must not be edited after creation, because they are an integral
-          part of the item URN.
+          The needed json data to update a Device.
         content:
            application/vnd.api+json:
             schema:
@@ -1437,7 +1496,7 @@ paths:
       summary: Get a Field by ID
       operationId: getFields
       parameters:
-        - name: FieldsID
+        - name: FieldID
           in: path
           required: true
           schema:
@@ -1603,9 +1662,7 @@ paths:
             format: int32
       requestBody:
         description: >-
-          The needed json data to update a Device. ShortNames will be ignored.
-          They must not be edited after creation, because they are an integral
-          part of the item URN.
+          The needed json data to update a Device.
         content:
            application/vnd.api+json:
             schema:
@@ -1633,7 +1690,7 @@ paths:
       summary: Get a contact by ID
       operationId: getContacts
       parameters:
-        - name: contactsID
+        - name: contactID
           in: path
           required: true
           schema:
@@ -1748,9 +1805,7 @@ paths:
             format: int32
       requestBody:
         description: >-
-          The needed json data to update a Device. ShortNames will be ignored.
-          They must not be edited after creation, because they are an integral
-          part of the item URN.
+          The needed json data to update a Device.
         content:
            application/vnd.api+json:
             schema:
@@ -1778,7 +1833,7 @@ paths:
       summary: Get an attachment by ID
       operationId: getAttachments
       parameters:
-        - name: attachmentsID
+        - name: attachmentID
           in: path
           required: true
           schema:
