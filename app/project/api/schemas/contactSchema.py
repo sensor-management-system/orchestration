@@ -27,3 +27,11 @@ class ContactSchema(Schema):
                           related_view_kwargs={'id': '<id>'},
                           schema='DeviceSchema',
                           type_='device')
+
+    platform = Relationship(attribute='platform',
+                            self_view='platform_contacts',
+                            self_view_kwargs={'id': '<id>'},
+                            related_view='platform_detail',
+                            related_view_kwargs={'id': '<id>'},
+                            schema='PlatformSchema',
+                            type_='platform')
