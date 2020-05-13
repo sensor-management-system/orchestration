@@ -1,3 +1,5 @@
+import Person from './Person'
+
 export default class Platform {
   private _id: number | null = null
   private _platformTypeId: number | null = null
@@ -6,7 +8,7 @@ export default class Platform {
   private _description: string = ''
   private _manufactureId: number | null = null
   private _website: string = ''
-  private _responsiblePersonIds: number[] = []
+  private _responsiblePersons: Person[] = []
 
   get id (): number | null {
     return this._id
@@ -64,12 +66,12 @@ export default class Platform {
     this._website = newWebsite
   }
 
-  get responsiblePersonIds (): number[] {
-    return this._responsiblePersonIds
+  get responsiblePersons (): Person[] {
+    return this._responsiblePersons
   }
 
-  set responsiblePersonIds (newResponsiblePersonIds: number[]) {
-    this._responsiblePersonIds = newResponsiblePersonIds
+  set responsiblePersons (responsiblePersons: Person[]) {
+    this._responsiblePersons = responsiblePersons
   }
 
   static createEmpty (): Platform {
@@ -84,7 +86,7 @@ export default class Platform {
     description: string,
     manufactureId: number | null,
     website: string,
-    responsiblePersonIds: number[]
+    responsiblePersons: Person[]
   ): Platform {
     const result: Platform = new Platform()
     result.id = id
@@ -94,7 +96,7 @@ export default class Platform {
     result.description = description
     result.manufactureId = manufactureId
     result.website = website
-    result.responsiblePersonIds = responsiblePersonIds
+    result.responsiblePersons = responsiblePersons
 
     return result
   }
