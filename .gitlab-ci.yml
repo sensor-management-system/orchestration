@@ -1,0 +1,7 @@
+build_app:
+  image: node:latest
+  script:
+    - ls -lah
+    - pwd
+    - npm install
+    - npm run generate
