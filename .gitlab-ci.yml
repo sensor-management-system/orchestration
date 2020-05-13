@@ -6,7 +6,6 @@ stages:
 cache:
   paths:
     - dist
-    - /kaniko/.docker/
 
 build_app:
   stage: build_app

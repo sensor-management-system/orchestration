@@ -4,7 +4,7 @@ ARG BUILD_DATE
 ARG VCS_REF
 
 LABEL maintainer="Martin Abbrent <martin.abbrent@ufz.de>" \
-    org.opencontainers.image.title="Sensor management" \
+    org.opencontainers.image.title="Sensor management frontend" \
     org.opencontainers.image.authors=" \
       Marc Hanisch <marc.hanisch@gfz-potsdam.de>  \
       Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>  \
