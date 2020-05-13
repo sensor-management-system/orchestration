@@ -7,3 +7,5 @@ class Contact(db.Model):
     email = db.Column(db.String(128), nullable=False)
     device_id = db.Column(db.Integer, db.ForeignKey('device.id'))
     device = db.relationship('Device', backref=db.backref('contacts'))
+    platform_id = db.Column(db.Integer, db.ForeignKey('platform.id'))
+    platform = db.relationship('Platform', backref=db.backref('contacts'))
