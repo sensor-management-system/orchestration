@@ -21,7 +21,7 @@ test-image:
   image:
     name: $CONTAINER_TEST_IMAGE
   script:
-    - flake8 project
+    - python manage cov
 
 release-image:
   stage: release
