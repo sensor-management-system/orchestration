@@ -2,7 +2,7 @@ from marshmallow_jsonapi import fields
 from marshmallow_jsonapi.flask import Schema, Relationship
 
 
-class FieldSchema(Schema):
+class CustomFieldSchema(Schema):
     """
     This class create a schema for a custom field.
     Every attribute in the schema going to expose through the api.
