@@ -8,7 +8,15 @@ from sqlalchemy.orm.exc import NoResultFound
 
 
 class DeviceList(ResourceList):
+    """
+
+    """
     def query(self, view_kwargs):
+        """
+
+        :param view_kwargs:
+        :return:
+        """
         query_ = self.session.query(Device)
         if view_kwargs.get('id') is not None:
             try:
@@ -24,6 +32,12 @@ class DeviceList(ResourceList):
         return query_
 
     def before_create_object(self, data, view_kwargs):
+        """
+
+        :param data:
+        :param view_kwargs:
+        :return:
+        """
         if view_kwargs.get('id') is not None:
             platform = self.session.query(Platform).filter_by(
                 id=view_kwargs['id']).one()

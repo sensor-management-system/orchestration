@@ -20,7 +20,7 @@ class PlatformSchema(Schema):
     configuration_date = fields.Date(allow_none=True)
     inventory_number = fields.Integer(allow_none=True)
     urn = fields.Function(lambda obj: "{}_{}".format(
-        obj.type.upper(), obj.shortName.upper()))
+        obj.type.upper(), obj.short_name.upper()))
     devices = Relationship(self_view='platform_devices',
                            self_view_kwargs={'id': '<id>'},
                            related_view='devices_list',

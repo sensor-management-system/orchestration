@@ -8,8 +8,16 @@ from sqlalchemy.orm.exc import NoResultFound
 
 
 class PropertiesDetail(ResourceDetail):
+    """
+    Properties Detail class
+    """
 
     def before_get_object(self, view_kwargs):
+        """
+        before get method to get the Properties id to fetch details
+        :param view_kwargs:
+        :return:
+        """
         if view_kwargs.get('device_id') is not None:
             try:
                 device = self.session.query(Device).filter_by(

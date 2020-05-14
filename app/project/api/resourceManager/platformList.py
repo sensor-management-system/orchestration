@@ -5,6 +5,10 @@ from project.api.schemas.platformSchema import PlatformSchema
 
 
 class PlatformList(ResourceList):
+    """
+    PlatformList class for creating a platformSchema
+    only POST and GET method allowed
+    """
     schema = PlatformSchema
     data_layer = {'session': db.session,
                   'model': Platform}
