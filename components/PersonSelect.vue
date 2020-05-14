@@ -45,7 +45,7 @@ export default class PersonSelect extends Vue {
   private localSelectedPersons: Person[] = []
 
   @Prop({
-    default: [],
+    default: () => [] as Person[],
     required: true,
     type: Array
   })
