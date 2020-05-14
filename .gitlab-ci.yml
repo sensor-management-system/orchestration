@@ -23,7 +23,7 @@ job 1:
     - pip install --upgrade setuptools
     - pip install --upgrade flake8
   script:
-    - flake8 $CI_PROJECT_DIR/project
+    - flake8 project
 
 job 2:
   stage: release
