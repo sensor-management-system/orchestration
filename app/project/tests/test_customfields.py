@@ -11,7 +11,7 @@ class TestFieldServices(BaseTestCase):
     def test_add_attachment_model(self):
         """""Ensure Add an Field model """
         customfield = CustomField(id=5, key='test',
-                      value="test")
+                                  value="test")
         CustomFieldSchema().dump(customfield)
 
     def test_add_field(self):

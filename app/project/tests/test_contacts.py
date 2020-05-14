@@ -14,7 +14,7 @@ class TestContactServices(BaseTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn("http://localhost/sis/v1/contacts",
                       data['links']['self'])
-        #super().tear_down()
+        # super().tear_down()
 
     def test_add_contact_model(self):
         """""Ensure Add platform model """
