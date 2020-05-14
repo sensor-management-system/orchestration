@@ -26,12 +26,16 @@
 </template>
 
 <script lang="ts">
+/**
+ * @file provides a component to select persons
+ * @author <marc.hanisch@gfz-potsdam.de>
+ */
 import { Vue, Component, Prop, Watch } from 'nuxt-property-decorator'
 import Person from '../models/Person'
 import PersonService from '../services/PersonService'
 
 /**
- * A component to select persons
+ * A class component to select persons
  * @extends Vue
  */
 @Component
