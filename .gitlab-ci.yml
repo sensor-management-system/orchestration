@@ -21,7 +21,7 @@ test-image:
   image:
     name: $CONTAINER_TEST_IMAGE
   script:
-    - python manage.py cov
+    - python $CI_PROJECT_DIR/app/manage.py cov
 
 release-image:
   stage: release
