@@ -12,8 +12,8 @@ class CustomFieldSchema(Schema):
     """
 
     class Meta:
-        type_ = 'field'
-        self_view = 'fields_detail'
+        type_ = 'customfield'
+        self_view = 'customfields_detail'
         self_view_kwargs = {'id': '<id>'}
 
     id = fields.Integer(as_string=True, dump_only=True)
@@ -21,7 +21,7 @@ class CustomFieldSchema(Schema):
     value = fields.Str(required=True)
 
     device = Relationship(attribute='device',
-                          self_view='device_fields',
+                          self_view='device_customfields',
                           self_view_kwargs={'id': '<id>'},
                           related_view='devices_detail',
                           related_view_kwargs={'id': '<id>'},

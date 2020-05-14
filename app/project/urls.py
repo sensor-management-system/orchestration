@@ -60,8 +60,8 @@ def Create_endpoints(api):
               base_url + '/devices/<int:id>/relationships/properties')
     api.route(DeviceRelationship, 'device_attachments',
               base_url + '/devices/<int:id>/relationships/attachments')
-    api.route(DeviceRelationship, 'device_fields',
-              base_url + '/devices/<int:id>/relationships/fields')
+    api.route(DeviceRelationship, 'device_customfields',
+              base_url + '/devices/<int:id>/relationships/customfields')
     # Event
     api.route(EventList, 'events_list', base_url + '/events',
               base_url + '/devices/<int:id>/events')
@@ -93,9 +93,9 @@ def Create_endpoints(api):
     api.route(AttachmentRelationship, 'attachments_device',
               base_url + '/attachments/<int:id>/relationships/device')
     # CustomFields
-    api.route(CustomFieldList, 'fields_list', base_url + '/fields',
-              base_url + '/devices/<int:device_id>/fields')
-    api.route(CustomFieldDetail, 'fields_detail',
-              base_url + '/fields/<int:id>')
-    api.route(CustomFieldRelationship, 'fields_device',
-              base_url + '/fields/<int:id>/relationships/device')
+    api.route(CustomFieldList, 'customfields_list', base_url + '/customfields',
+              base_url + '/devices/<int:device_id>/customfields')
+    api.route(CustomFieldDetail, 'customfields_detail',
+              base_url + '/customfields/<int:id>')
+    api.route(CustomFieldRelationship, 'customfields_device',
+              base_url + '/customfields/<int:id>/relationships/device')

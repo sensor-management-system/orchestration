@@ -86,12 +86,12 @@ class DeviceSchema(Schema):
                                type_='Attachment',
                                id_field='attachment_id')
 
-    fields = Relationship(attribute='fields',
-                          self_view='device_fields',
-                          self_view_kwargs={'id': '<id>'},
-                          related_view='fields_list',
-                          related_view_kwargs={'device_id': '<id>'},
-                          many=True,
-                          schema='FieldSchema',
-                          type_='Field',
-                          id_field='field_id')
+    customfields = Relationship(attribute='customfields',
+                                self_view='device_customfields',
+                                self_view_kwargs={'id': '<id>'},
+                                related_view='customfields_list',
+                                related_view_kwargs={'device_id': '<id>'},
+                                many=True,
+                                schema='CustomFieldSchema',
+                                type_='CustomField',
+                                id_field='customfield_id')
