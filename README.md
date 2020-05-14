@@ -1,5 +1,8 @@
 # API for Sensor Information System SIS 
 
+[![pipeline status](https://git.ufz.de/rdm-software/svm/backend/badges/master/pipeline.svg)](https://git.ufz.de/rdm-software/svm/backend/commits/master)
+[![version](https://img.shields.io/badge/version-v1.0-lightgrey.svg)](./README.md) [![stage](https://img.shields.io/badge/stage-deployment-blue.svg)](#)
+
 RESTful API service in Python for managing sensor metadata using [flask](https://flask.palletsprojects.com/en/1.1.x/).
 
 ### Documentation
