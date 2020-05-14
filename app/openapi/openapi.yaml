@@ -21,7 +21,7 @@ tags:
   - name: Contacts
   - name: Events
   - name: Properties
-  - name: Fields
+  - name: CustomFields
   - name: Attachments
 paths:
   /platforms:
@@ -49,7 +49,7 @@ paths:
             properties:
               name:
                 type: string
-                description: the name of the field you want to filter on
+                description: the name of the CustomField you want to filter on
                 example: devices
               op:
                 type: string
@@ -118,7 +118,7 @@ paths:
         '500':
            $ref: '#/components/responses/InternalServerError'
       x-codegen-request-body-name: body
-  '/platforms/{platformID}':
+  '/platforms/{platform_id}':
     get:
       tags:
         - Platforms
@@ -127,7 +127,7 @@ paths:
           '/devices/<int:id>/platform' "
       operationId: getAPlatform
       parameters:
-        - name: platformID
+        - name: platform_id
           in: path
           required: true
           schema:
@@ -154,7 +154,7 @@ paths:
           '/devices/<int:id>/platform' "
       operationId: modifyPlatform
       parameters:
-        - name: platformID
+        - name: platform_id
           in: path
           required: true
           schema:
@@ -184,12 +184,12 @@ paths:
     delete:
       tags:
         - Platforms
-      summary: 'Deletes the Platform with ID {platformID}.'
+      summary: 'Deletes the Platform with ID {platform_id}.'
       description: "you can also use the endpoint
           '/devices/<int:id>/platform' "
       operationId: deletePlatform
       parameters:
-        - name: platformID
+        - name: platform_id
           in: path
           required: true
           schema:
@@ -210,14 +210,14 @@ paths:
           content: {}
         '500':
            $ref: '#/components/responses/InternalServerError'
-  '/platforms/{platformID}/relationships/devices':
+  '/platforms/{platform_id}/relationships/devices':
     get:
       tags:
         - Platforms
       summary: 'Retrieve relationships between a platform and devices'
       operationId: getRealationsofPlatform
       parameters:
-        - name: platformID
+        - name: platform_id
           in: path
           required: true
           schema:
@@ -232,7 +232,7 @@ paths:
       summary: 'Create relationships between a platform and devices'
       operationId: addPlatformRelationToDevice
       parameters:
-        - name: platformID
+        - name: platform_id
           in: path
           required: true
           schema:
@@ -259,7 +259,7 @@ paths:
       summary: 'Update relationships between a platform and devices'
       operationId: alterRealationsofPlatform
       parameters:
-        - name: platformID
+        - name: platform_id
           in: path
           required: true
           schema:
@@ -286,7 +286,7 @@ paths:
       summary: 'Delete relationships between  a platform and devices'
       operationId: removePlatformRelationToDevice
       parameters:
-        - name: platformID
+        - name: platform_id
           in: path
           required: true
           schema:
@@ -307,14 +307,14 @@ paths:
                 $ref: '#/components/schemas/DeleteObject'
         '500':
            $ref: '#/components/responses/InternalServerError'
-  '/platforms/{platformID}/relationships/contacts':
+  '/platforms/{platform_id}/relationships/contacts':
     get:
       tags:
         - Platforms
       summary: 'Retrieve relationships between a platform and contact'
       operationId: getRealationsofplatformToContact
       parameters:
-        - name: platformID
+        - name: platform_id
           in: path
           required: true
           schema:
@@ -329,7 +329,7 @@ paths:
       summary: 'Create relationships between a platform and contact'
       operationId: CreatePlatformToContact
       parameters:
-        - name: platformID
+        - name: platform_id
           in: path
           required: true
           schema:
@@ -344,7 +344,7 @@ paths:
       summary: 'Update relationships between a platform and contact'
       operationId: alterContacttofPlatform
       parameters:
-        - name: platformID
+        - name: platform_id
           in: path
           required: true
           schema:
@@ -359,7 +359,7 @@ paths:
       summary: 'Delete relationships between two object'
       operationId: removeContactfromplatform
       parameters:
-        - name: platformID
+        - name: platform_id
           in: path
           required: true
           schema:
@@ -388,7 +388,7 @@ paths:
             properties:
               name:
                 type: string
-                description: the name of the field you want to filter on
+                description: the name of the CustomField you want to filter on
                 example: devices
               op:
                 type: string
@@ -475,7 +475,7 @@ paths:
         '500':
            $ref: '#/components/responses/InternalServerError'
       x-codegen-request-body-name: body
-  '/devices/{deviceID}':
+  '/devices/{device_id}':
     patch:
       tags:
         - Devices
@@ -483,10 +483,10 @@ paths:
       description: >-
         you can also use the endpoint '/events/<int:id>/device' or
         '/contact/<int:id>/device' or '/properties/<int:id>/device' or
-        '/attachments/<int:id>/device' or '/Fields/<int:id>/device'
+        '/attachments/<int:id>/device' or '/CustomFields/<int:id>/device'
       operationId: alterDevice
       parameters:
-        - name: deviceID
+        - name: device_id
           in: path
           description: >-
             The ID of the item you want to update. The itemID in the JSON
@@ -526,10 +526,10 @@ paths:
       description: >-
         you can also use the endpoint '/events/<int:id>/device' or
         '/contact/<int:id>/device' or '/properties/<int:id>/device' or
-        '/attachments/<int:id>/device' or '/Fields/<int:id>/device'
+        '/attachments/<int:id>/device' or '/CustomFields/<int:id>/device'
       operationId: getDevice
       parameters:
-        - name: deviceID
+        - name: device_id
           in: path
           required: true
           schema:
@@ -553,7 +553,7 @@ paths:
       summary: 'remove a device.'
       operationId: removeDevice
       parameters:
-        - name: deviceID
+        - name: device_id
           in: path
           required: true
           schema:
@@ -568,14 +568,14 @@ paths:
                 $ref: '#/components/schemas/DeleteObject'
         '500':
            $ref: '#/components/responses/InternalServerError'
-  '/devices/{deviceID}/relationships/events':
+  '/devices/{device_id}/relationships/events':
     get:
       tags:
         - Devices
       summary: 'Retrieve relationships between a devices and an event'
       operationId: getRealationsofDeviceToEvent
       parameters:
-        - name: deviceID
+        - name: device_id
           in: path
           required: true
           schema:
@@ -590,7 +590,7 @@ paths:
       summary: 'Create relationships between a person and devices'
       operationId: CreateEventToDevice
       parameters:
-        - name: deviceID
+        - name: device_id
           in: path
           required: true
           schema:
@@ -605,7 +605,7 @@ paths:
       summary: 'Update relationships between a platform and devices'
       operationId: alterEventofDevice
       parameters:
-        - name: deviceID
+        - name: device_id
           in: path
           required: true
           schema:
@@ -620,7 +620,7 @@ paths:
       summary: 'Delete relationships between two objects'
       operationId: removeEventfromDevice
       parameters:
-        - name: deviceID
+        - name: device_id
           in: path
           required: true
           schema:
@@ -629,14 +629,14 @@ paths:
       responses:
         '500':
           $ref: '#/components/responses/InternalServerError'
-  '/devices/{deviceID}/relationships/contacts':
+  '/devices/{device_id}/relationships/contacts':
     get:
       tags:
         - Devices
       summary: 'Retrieve relationships between a devices and an event'
       operationId: getRealationsofDeviceToContact
       parameters:
-        - name: deviceID
+        - name: device_id
           in: path
           required: true
           schema:
@@ -651,7 +651,7 @@ paths:
       summary: 'Create relationships between a person and devices'
       operationId: CreateEventToContact
       parameters:
-        - name: deviceID
+        - name: device_id
           in: path
           required: true
           schema:
@@ -666,7 +666,7 @@ paths:
       summary: 'Update relationships between a platform and devices'
       operationId: alterContacttofDevice
       parameters:
-        - name: deviceID
+        - name: device_id
           in: path
           required: true
           schema:
@@ -681,7 +681,7 @@ paths:
       summary: 'Delete relationships between two object'
       operationId: removeContactfromDevice
       parameters:
-        - name: deviceID
+        - name: device_id
           in: path
           required: true
           schema:
@@ -690,14 +690,14 @@ paths:
       responses:
         '500':
           $ref: '#/components/responses/InternalServerError'
-  '/devices/{deviceID}/relationships/attachments':
+  '/devices/{device_id}/relationships/attachments':
     get:
       tags:
         - Devices
       summary: 'Retrieve relationships between a devices and an event'
       operationId: getRealationsofDeviceToattachment
       parameters:
-        - name: deviceID
+        - name: device_id
           in: path
           required: true
           schema:
@@ -712,7 +712,7 @@ paths:
       summary: 'Create relationships between a person and devices'
       operationId: CreateEventToattachment
       parameters:
-        - name: deviceID
+        - name: device_id
           in: path
           required: true
           schema:
@@ -739,7 +739,7 @@ paths:
       summary: 'Update relationships between a platform and devices'
       operationId: alterattachmenttofDevice
       parameters:
-        - name: deviceID
+        - name: device_id
           in: path
           required: true
           schema:
@@ -766,7 +766,7 @@ paths:
       summary: 'Delete relationships between two object'
       operationId: removeatachmentfromDevice
       parameters:
-        - name: deviceID
+        - name: device_id
           in: path
           required: true
           schema:
@@ -787,14 +787,14 @@ paths:
                 $ref: '#/components/schemas/AddObject'
         '500':
           $ref: '#/components/responses/InternalServerError'
-  '/devices/{deviceID}/relationships/properties':
+  '/devices/{device_id}/relationships/properties':
     get:
       tags:
         - Devices
       summary: 'Retrieve relationships between a devices and an event'
       operationId: getRealationsofDeviceToProperties
       parameters:
-        - name: deviceID
+        - name: device_id
           in: path
           required: true
           schema:
@@ -809,7 +809,7 @@ paths:
       summary: 'Create relationships between a person and devices'
       operationId: CreatePropertiesToDevice
       parameters:
-        - name: deviceID
+        - name: device_id
           in: path
           required: true
           schema:
@@ -824,7 +824,7 @@ paths:
       summary: 'Update relationships between a platform and devices'
       operationId: alterPropertiesofDevice
       parameters:
-        - name: deviceID
+        - name: device_id
           in: path
           required: true
           schema:
@@ -851,7 +851,7 @@ paths:
       summary: 'Delete relationships between two object'
       operationId: removePropertiesfromDevice
       parameters:
-        - name: deviceID
+        - name: device_id
           in: path
           required: true
           schema:
@@ -872,14 +872,14 @@ paths:
                 $ref: '#/components/schemas/AddObject'
         '500':
           $ref: '#/components/responses/InternalServerError'
-  '/devices/{deviceID}/relationships/Fields':
+  '/devices/{device_id}/relationships/CustomFields':
     get:
       tags:
         - Devices
       summary: 'Retrieve relationships between a devices and an event'
       operationId: getRealationsofDeviceToCF
       parameters:
-        - name: deviceID
+        - name: device_id
           in: path
           required: true
           schema:
@@ -894,7 +894,7 @@ paths:
       summary: 'Create relationships between a person and devices'
       operationId: CreateCFToDevice
       parameters:
-        - name: deviceID
+        - name: device_id
           in: path
           required: true
           schema:
@@ -921,7 +921,7 @@ paths:
       summary: 'Update relationships between a platform and devices'
       operationId: alterCFofDevice
       parameters:
-        - name: deviceID
+        - name: device_id
           in: path
           required: true
           schema:
@@ -948,7 +948,7 @@ paths:
       summary: 'Delete relationships between two objects'
       operationId: removeCFfromDevice
       parameters:
-        - name: deviceID
+        - name: device_id
           in: path
           required: true
           schema:
@@ -988,7 +988,7 @@ paths:
             properties:
               name:
                 type: string
-                description: the name of the field you want to filter on
+                description: the name of the CustomField you want to filter on
                 example: devices
               op:
                 type: string
@@ -1066,14 +1066,14 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
       x-codegen-request-body-name: body
-  '/event/{eventID}':
+  '/event/{event_id}':
     patch:
       tags:
         - Events
       summary: Update an Event from JSON input
       operationId: alterEvent
       parameters:
-        - name: eventID
+        - name: event_id
           in: path
           description: >-
             The ID of the item you want to update. The itemID in the JSON
@@ -1106,7 +1106,7 @@ paths:
       summary: Get a Event by ID
       operationId: getEvent
       parameters:
-        - name: eventID
+        - name: event_id
           in: path
           required: true
           schema:
@@ -1130,7 +1130,7 @@ paths:
       summary: 'remove an Event.'
       operationId: removeEvent
       parameters:
-        - name: eventID
+        - name: event_id
           in: path
           required: true
           schema:
@@ -1164,7 +1164,7 @@ paths:
             properties:
               name:
                 type: string
-                description: the name of the field you want to filter on
+                description: the name of the CustomField you want to filter on
                 example: devices
               op:
                 type: string
@@ -1254,14 +1254,14 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
       x-codegen-request-body-name: body
-  '/properties/{propertieID}':
+  '/properties/{propertie_id}':
     patch:
       tags:
         - Properties
       summary: Update properties from JSON input
       operationId: alterProperties
       parameters:
-        - name: propertieID
+        - name: propertie_id
           in: path
           description: >-
             The ID of the item you want to update. The itemID in the JSON
@@ -1302,7 +1302,7 @@ paths:
       summary: Get properties by ID
       operationId: getProperties
       parameters:
-        - name: propertieID
+        - name: propertie_id
           in: path
           required: true
           schema:
@@ -1326,7 +1326,7 @@ paths:
       summary: 'remove properties.'
       operationId: removeProperties
       parameters:
-        - name: propertieID
+        - name: propertie_id
           in: path
           required: true
           schema:
@@ -1341,15 +1341,15 @@ paths:
                 $ref: '#/components/schemas/DeleteObject'
         '500':
           $ref: '#/components/responses/InternalServerError'
-  /fields:
+  /CustomFields:
     get:
       tags:
-        - Fields
+        - CustomFields
       summary: >-
         Returns all available items.
       description: >-
         you can also use the endpoint '/devices/<int:id>/contacts'
-      operationId: getAllFields
+      operationId: getAllCustomFields
       parameters:
         - name: filter
           in: query
@@ -1360,7 +1360,7 @@ paths:
             properties:
               name:
                 type: string
-                description: the name of the field you want to filter on
+                description: the name of the CustomField you want to filter on
                 example: devices
               op:
                 type: string
@@ -1403,16 +1403,16 @@ paths:
           content:
             application/vnd.api+json:
               schema:
-                $ref: '#/components/schemas/RequestField'
+                $ref: '#/components/schemas/RequestCustomField'
         '500':
           $ref: '#/components/responses/InternalServerError'
     post:
       tags:
-        - Fields
-      summary: Creates a Field from JSON input
-      operationId: CreateFields
+        - CustomFields
+      summary: Creates a CustomField from JSON input
+      operationId: CreateCustomFields
       description: >-
-        you can also use the endpoint '/devices/<int:id>/Fields'
+        you can also use the endpoint '/devices/<int:id>/CustomFields'
       parameters:
         - name: include
           in: query
@@ -1422,11 +1422,11 @@ paths:
             type: string
             example: devices
       requestBody:
-        description: 'The needed json data to create a custom field. '
+        description: 'The needed json data to create a custom CustomField. '
         content:
           application/vnd.api+json:
             schema:
-              $ref: '#/components/schemas/RequestField'
+              $ref: '#/components/schemas/RequestCustomField'
         required: true
       responses:
         '201':
@@ -1434,7 +1434,7 @@ paths:
           content:
             application/vnd.api+json:
               schema:
-                $ref: '#/components/schemas/ResponseField'
+                $ref: '#/components/schemas/ResponseCustomField'
         '400':
           description: Invalid JSON.
           content: {}
@@ -1450,14 +1450,14 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
       x-codegen-request-body-name: body
-  '/fields/{FieldID}':
+  '/CustomFields/{customField_id}':
     patch:
       tags:
-        - Fields
-      summary: Update Fields from JSON input
-      operationId: alterFields
+        - CustomFields
+      summary: Update CustomFields from JSON input
+      operationId: alterCustomFields
       parameters:
-        - name: FieldID
+        - name: customField_id
           in: path
           description: >-
             The ID of the item you want to update. The itemID in the JSON
@@ -1472,7 +1472,7 @@ paths:
         content:
            application/vnd.api+json:
             schema:
-              $ref: '#/components/schemas/RequestField'
+              $ref: '#/components/schemas/RequestCustomField'
         required: true
       responses:
         '200':
@@ -1480,7 +1480,7 @@ paths:
           content:
            application/vnd.api+json:
               schema:
-                $ref: '#/components/schemas/ResponseField'
+                $ref: '#/components/schemas/ResponseCustomField'
         '400':
           description: Invalid JSON.
           content: {}
@@ -1492,11 +1492,11 @@ paths:
       x-codegen-request-body-name: body
     get:
       tags:
-        - Fields
-      summary: Get a Field by ID
-      operationId: getFields
+        - CustomFields
+      summary: Get a CustomField by ID
+      operationId: getCustomFields
       parameters:
-        - name: FieldID
+        - name: customField_id
           in: path
           required: true
           schema:
@@ -1508,7 +1508,7 @@ paths:
           content:
             application/vnd.api+json:
               schema:
-                $ref: '#/components/schemas/ResponseField'
+                $ref: '#/components/schemas/ResponseCustomField'
         '404':
           description: Device not found .
           content: {}
@@ -1516,11 +1516,11 @@ paths:
           $ref: '#/components/responses/InternalServerError'
     delete:
       tags:
-        - Fields
-      summary: 'remove a Field.'
-      operationId: removeFields
+        - CustomFields
+      summary: 'remove a CustomField.'
+      operationId: removeCustomFields
       parameters:
-        - name: FieldID
+        - name: customField_id
           in: path
           required: true
           schema:
@@ -1554,7 +1554,7 @@ paths:
             properties:
               name:
                 type: string
-                description: the name of the field you want to filter on
+                description: the name of the CustomField you want to filter on
                 example: devices
               op:
                 type: string
@@ -1644,14 +1644,14 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
       x-codegen-request-body-name: body
-  '/contacts/{contactID}':
+  '/contacts/{contact_id}':
     patch:
       tags:
         - Contacts
       summary: Update contacts from JSON input
       operationId: alterContacts
       parameters:
-        - name: contactID
+        - name: contact_id
           in: path
           description: >-
             The ID of the item you want to update. The itemID in the JSON
@@ -1690,7 +1690,7 @@ paths:
       summary: Get a contact by ID
       operationId: getContacts
       parameters:
-        - name: contactID
+        - name: contact_id
           in: path
           required: true
           schema:
@@ -1714,7 +1714,7 @@ paths:
       summary: 'remove contact.'
       operationId: removeContacts
       parameters:
-        - name: contactID
+        - name: contact_id
           in: path
           required: true
           schema:
@@ -1787,14 +1787,14 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
       x-codegen-request-body-name: body
-  '/attachments/{attachmentID}':
+  '/attachments/{attachment_id}':
     patch:
       tags:
         - Attachments
       summary: Update attachments from JSON input
       operationId: alterAttachments
       parameters:
-        - name: attachmentID
+        - name: attachment_id
           in: path
           description: >-
             The ID of the item you want to update. The itemID in the JSON
@@ -1833,7 +1833,7 @@ paths:
       summary: Get an attachment by ID
       operationId: getAttachments
       parameters:
-        - name: attachmentID
+        - name: attachment_id
           in: path
           required: true
           schema:
@@ -1857,7 +1857,7 @@ paths:
       summary: 'remove attachments.'
       operationId: removeAttachments
       parameters:
-        - name: attachmentID
+        - name: attachment_id
           in: path
           required: true
           schema:
@@ -1950,38 +1950,35 @@ components:
       properties:
         description:
           type: string
-        shortName:
+        short_name:
           type: string
-        longName:
+        long_name:
           type: string
-        serialNumber:
+        serial_number:
           type: string
         manufacture:
           type: string
-        dualUse:
+        dual_use:
           type: boolean
           default: false
         model:
           type: string
-        inventoryNumber:
+        inventory_number:
           type: string
-        persistentIdentifier:
+        persistent_identifier:
           type: integer
           format: int32
-        src:
+        url:
           type: string
           description: link to website
         label:
           type: string
         type:
           type: string
-        urn:
-          type: string
-          description: >-
-            '[manufacture_[model]_[type]_[serial_number]'
-        configurationDate:
+        configuration_date:
           type: string
           format: date_time
+          example: "2020-05-21T17:32:28Z"
         status:
           type: string
     RequestDevice:
@@ -1996,7 +1993,7 @@ components:
             id:
               type: integer
               format: int32
-              example: use only with endpoints, that requird an id.
+              example: need in /devices/<device_id>
             attributes:
                   $ref: '#/components/schemas/Device'
     ResponseDevice:
@@ -2021,10 +2018,10 @@ components:
                   properties:
                     related:
                       type: string
-                      example: "/device/{deviceID}/platform"
+                      example: "/device/{device_id}/platform"
                     self:
                       type: string
-                      example: "/device/{deviceID}/relationships/platform"
+                      example: "/device/{device_id}/relationships/platform"
         links:
           type: object
           properties:
@@ -2061,10 +2058,10 @@ components:
                         properties:
                           related:
                             type: string
-                            example: "/device/{deviceID}/platform"
+                            example: "/device/{device_id}/platform"
                           self:
                             type: string
-                            example: "/device/{deviceID}/relationships/platform"
+                            example: "/device/{device_id}/relationships/platform"
         meta:
           type: object
           properties:
@@ -2124,10 +2121,10 @@ components:
                   properties:
                     related:
                       type: string
-                      example: "/platforms/{deviceID}/relationships/devices"
+                      example: "/platforms/{device_id}/relationships/devices"
                     self:
                       type: string
-                      example: "/platforms/{platformID}"
+                      example: "/platforms/{platform_id}"
                 data:
                   type: object
                   properties:
@@ -2189,10 +2186,10 @@ components:
               properties:
                 related:
                   type: string
-                  example: "/platform/{deviceID}/platform"
+                  example: "/platform/{device_id}/platform"
                 self:
                   type: string
-                  example: "/platform/{deviceID}/relationships/platform"
+                  example: "/platform/{device_id}/relationships/platform"
     Jsonapi:
           type: object
           properties:
@@ -2220,9 +2217,6 @@ components:
           example: Test
         description:
           type: string
-        deviceID:
-          type: integer
-          format: int32
         id:
           type: integer
           format: int32
@@ -2274,36 +2268,33 @@ components:
       properties:
         description:
           type: string
-        shortName:
+        short_name:
           type: string
-        longName:
+        long_name:
           type: string
         manufacturer:
           type: string
         type:
           type: string
-        inventoryNumber:
+        inventory_number:
           type: string
         platformType:
           type: string
-        src:
+        url:
           type: string
           description: link to website
-        urn:
-          type: string
-          description: >-
-            '[platformtype]_[short name]'
         configurationDate:
           type: string
           format: date_time
-    Field:
+          example: "2020-05-21T17:32:28Z"
+    CustomField:
       type: object
       properties:
         key:
           type: string
         value:
           type: string
-    RequestField:
+    RequestCustomField:
       type: object
       properties:
         data:
@@ -2313,8 +2304,8 @@ components:
               type: string
               example: platform
             attributes:
-                  $ref: '#/components/schemas/Field'
-    ResponseField:
+                  $ref: '#/components/schemas/CustomField'
+    ResponseCustomField:
       type: object
       properties:
         data:
@@ -2326,7 +2317,7 @@ components:
                 type: string
                 example: device
               attributes:
-                    $ref: '#/components/schemas/Field'
+                    $ref: '#/components/schemas/CustomField'
               rel:
                 $ref: '#/components/schemas/Relationships'
     Attachment:
@@ -2334,7 +2325,7 @@ components:
       properties:
         lable:
           type: string
-        src:
+        url:
           type: string
     RequestAttachment:
       type: object
@@ -2367,7 +2358,11 @@ components:
       properties:
         email:
           type: string
-        name:
+        user_name:
+          type: string
+        first_name:
+          type: string
+        last_name:
           type: string
     RequestContact:
       type: object
@@ -2410,7 +2405,7 @@ components:
           type: string
         label:
           type: string
-        failureValue:
+        failure_value:
           type: integer
           format: int32
         unit:
@@ -2418,17 +2413,17 @@ components:
           enum:
             - placeholder
             - placeholder
-        Compartment:
+        compartment:
           type: string
           enum:
             - placeholder
             - placeholder
-        SamplingMedia:
+        sampling_media:
           type: string
           enum:
             - placeholder
             - placeholder
-        Variable:
+        variable:
           type: string
           enum:
             - placeholder
