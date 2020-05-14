@@ -18,8 +18,6 @@ build-image:
 
 test-image:
   stage: test
-  image:
-    name: $CONTAINER_TEST_IMAGE
   script:
     - "This is dummy test: waiting for Database"
 
