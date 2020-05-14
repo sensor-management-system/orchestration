@@ -18,7 +18,7 @@ class AttachmentSchema(Schema):
 
     id = fields.Integer(as_string=True, dump_only=True)
     label = fields.Str(allow_none=True)
-    src = fields.Str(required=True)
+    url = fields.Str(required=True)
 
     device = Relationship(attribute='device',
                           self_view='device_attachments',

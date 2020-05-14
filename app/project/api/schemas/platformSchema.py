@@ -11,15 +11,15 @@ class PlatformSchema(Schema):
 
     id = fields.Integer(as_string=True, dump_only=True)
     description = fields.Str(allow_none=True)
-    shortName = fields.Str(required=True)
-    longName = fields.Str(allow_none=True)
+    short_name = fields.Str(required=True)
+    long_name = fields.Str(allow_none=True)
     manufacturer = fields.Str(allow_none=True)
     type = fields.Str(required=True)
-    platformType = fields.Str(allow_none=True)
+    platform_type = fields.Str(allow_none=True)
     src = fields.Str(allow_none=True)
-    configurationDate = fields.Date(allow_none=True)
-    inventoryNumber = fields.Integer(allow_none=True)
-    urn = fields.Function(lambda obj: "[{}]_[{}]".format(
+    configuration_date = fields.Date(allow_none=True)
+    inventory_number = fields.Integer(allow_none=True)
+    urn = fields.Function(lambda obj: "{}_{}".format(
         obj.type.upper(), obj.shortName.upper()))
     devices = Relationship(self_view='platform_devices',
                            self_view_kwargs={'id': '<id>'},

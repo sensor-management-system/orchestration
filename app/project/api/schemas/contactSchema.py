@@ -18,6 +18,8 @@ class ContactSchema(Schema):
 
     id = fields.Integer(as_string=True, dump_only=True)
     username = fields.Str(allow_none=True)
+    first_name = fields.Str(allow_none=True)
+    last_name = fields.Str(allow_none=True)
     email = fields.Str(required=True)
 
     device = Relationship(attribute='device',

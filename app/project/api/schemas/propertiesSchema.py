@@ -21,15 +21,15 @@ class PropertiesSchema(Schema):
     label = fields.Str(allow_none=True)
     unit = fields.Str(allow_none=True)
     Compartment = fields.Str(required=True)
-    measuringRangeMin = fields.Float(as_string=True, required=True)
-    measuringRangeMax = fields.Float(as_string=True, required=True)
-    failureValue = fields.Float(as_string=True, required=True)
+    measuring_range_min = fields.Float(as_string=True, required=True)
+    measuring_range_max = fields.Float(as_string=True, required=True)
+    failure_value = fields.Float(as_string=True, required=True)
     Variable = fields.Str(required=True)
     model = fields.Str(required=True)
-    inventoryNumber = fields.Integer()
-    src = fields.Str(allow_none=True)
-    SamplingMedia = fields.Date(allow_none=True)
-    persistentIdentifier = fields.Integer()
+    inventory_number = fields.Integer()
+    url = fields.Str(allow_none=True)
+    sampling_media = fields.Date(allow_none=True)
+    persistent_identifier = fields.Integer()
 
     device = Relationship(attribute='properties',
                           self_view='properties_events',

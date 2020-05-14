@@ -21,22 +21,22 @@ class DeviceSchema(Schema):
 
     id = fields.Integer(as_string=True, dump_only=True)
     description = fields.Str(allow_none=True)
-    shortName = fields.Str(allow_none=True)
-    longName = fields.Str(allow_none=True)
+    short_name = fields.Str(allow_none=True)
+    long_name = fields.Str(allow_none=True)
     manufacturer = fields.Str(required=True)
-    serialNumber = fields.Integer(as_string=True, required=True)
+    serial_number = fields.Integer(as_string=True, required=True)
     type = fields.Str(required=True)
     model = fields.Str(required=True)
-    dualUse = fields.Str()
+    dual_use = fields.Str()
     label = fields.Str(allow_none=True)
-    inventoryNumber = fields.Integer()
+    inventory_number = fields.Integer()
     website = fields.Str(allow_none=True)
-    configurationDate = fields.Date()
-    persistentIdentifier = fields.Integer()
+    configuration_date = fields.Date()
+    persistent_identifier = fields.Integer()
 
-    urn = fields.Function(lambda obj: "[{}]_[{}]_[{}]_[{}]".format(
-        obj.manufacture.upper(), obj.model.upper(),
-        obj.type.upper(), obj.serialNumber))
+    urn = fields.Function(lambda obj: "{}_{}_{}_{}".format(
+        obj.manufacturer.upper(), obj.model.upper(),
+        obj.type.upper(), obj.serial_number))
 
     platform = Relationship(attribute='platform',
                             self_view='device_platform',
