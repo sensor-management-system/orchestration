@@ -3,13 +3,21 @@ from flask_rest_jsonapi.exceptions import ObjectNotFound
 
 from project.api.models.baseModel import db
 from project.api.models.device import Device
-from project.api.schemas.fieldSchema import FieldSchema
-from project.api.models.field import Field
+from project.api.schemas.customfieldSchema import CustomFieldSchema
+from project.api.models.customfield import CustomField
 from sqlalchemy.orm.exc import NoResultFound
 
 
-class FieldDetail(ResourceDetail):
+class CustomFieldDetail(ResourceDetail):
+    """
+    Custom Field detail class.
+    """
     def before_get_object(self, view_kwargs):
+        """
+        before get method to get the field id to fetch details
+        :param view_kwargs:
+        :return:
+        """
         if view_kwargs.get('device_id') is not None:
             try:
                 device = self.session.query(Device).filter_by(
@@ -24,7 +32,7 @@ class FieldDetail(ResourceDetail):
                 else:
                     view_kwargs['id'] = None
 
-    schema = FieldSchema
+    schema = CustomFieldSchema
     data_layer = {'session': db.session,
-                  'model': Field,
+                  'model': CustomField,
                   'methods': {'before_create_object': before_get_object}}

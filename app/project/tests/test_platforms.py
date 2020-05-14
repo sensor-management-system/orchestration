@@ -163,7 +163,7 @@ class TestPlatformServices(BaseTestCase):
         data = json.loads(response.data.decode())
         self.assertEqual(response.status_code, 200)
         self.assertIn('Object successfully deleted', data['meta']['message'])
-        super().tear_down()
+        # super().tear_down()
 
     def test_get_platform_devices_via_id(self):
         """Ensure the get devices attached to a platform
