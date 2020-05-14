@@ -1937,14 +1937,14 @@ components:
               example: "1.0"
     Device:
       required:
-        - persistentIdentifier
-        - inventoryNumber
+        - persistent_identifier
+        - inventory_number
         - model
         - manufacturer
         - type
-        - serialNumber
-        - ResponsiblePersons
-        - dualUse
+        - serial_number
+        - responsible_persons
+        - dual_use
       type: object
       x-tablename: device
       properties:
@@ -2210,7 +2210,7 @@ components:
       properties:
         date:
           type: string
-          description: Please only use UTC format
+          description: only use UTC format
           format: date-time
         label:
           type: string
@@ -2261,9 +2261,9 @@ components:
                 format: int32
     Platform:
       required:
-        - longName
-        - platformType
-        - shortName
+        - long_name
+        - platform_type
+        - short_name
       type: object
       properties:
         description:
@@ -2278,7 +2278,7 @@ components:
           type: string
         inventory_number:
           type: string
-        platformType:
+        platform_type:
           type: string
         url:
           type: string
