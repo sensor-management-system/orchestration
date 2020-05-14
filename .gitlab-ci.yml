@@ -21,7 +21,6 @@ test-image:
   image:
     name: $CONTAINER_TEST_IMAGE
   script:
-    - pip install --upgrade setuptools
     - flake8 project
 
 release-image:
