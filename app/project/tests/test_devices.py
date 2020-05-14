@@ -19,7 +19,7 @@ class TestDeviceService(BaseTestCase):
         # super().tear_down()
 
     def test_get_devices(self):
-        """Ensure the /devices route behaves correctly."""
+        """Ensure the GET /devices route behaves correctly."""
         response = self.client.get('/sis/v1/devices')
         data = json.loads(response.data.decode())
         self.assertEqual(response.status_code, 200)
@@ -36,8 +36,8 @@ class TestDeviceService(BaseTestCase):
 
     def test_add_device(self):
         """Ensure a new device can be added to the database."""
-        super().create_app()
-        super().set_up()
+        # super().create_app()
+        # super().set_up()
 
         with self.client:
             response = self.client.post(
