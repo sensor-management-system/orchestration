@@ -4,6 +4,7 @@ import coverage
 from flask.cli import FlaskGroup
 from project import create_app
 from project.api.models.baseModel import db
+from project.api.insertInitialValues import *
 
 app = create_app()
 cli = FlaskGroup(create_app=create_app)
@@ -50,6 +51,22 @@ def cov():
     COV.erase()
     return 0
     return 1
+
+
+@cli.command('db_init')
+def db_init():
+    with app.app_context():
+        sensor = add_sensor()
+        event = add_event()
+        contact = add_contact()
+        platform = add_platform()
+        attachment = add_attachment()
+        db.session.add(sensor)
+        db.session.add(platform)
+        db.session.add(event)
+        db.session.add(contact)
+        db.session.add(attachment)
+        db.session.commit()
 
 
 if __name__ == '__main__':
