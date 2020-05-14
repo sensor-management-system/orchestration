@@ -18,8 +18,10 @@ build-image:
 
 test-image:
   stage: test
+  image:
+    name: $CONTAINER_TEST_IMAGE
   script:
-    - echo "This is just dummy test - it does nothing."
+    - flake8 project
 
 release-image:
   stage: release
