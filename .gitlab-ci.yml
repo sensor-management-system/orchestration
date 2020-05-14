@@ -19,7 +19,7 @@ build-image:
 test-image:
   stage: test
   script:
-    - "This is dummy test: waiting for Database"
+    - echo "This is just dummy test - it does nothing. Waitting for the Database "
 
 release-image:
   stage: release
