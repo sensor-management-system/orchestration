@@ -1,8 +1,8 @@
 import json
 import unittest
 
-from project.api.models.field import Field
-from project.api.schemas.fieldSchema import FieldSchema
+from project.api.models.customfield import CustomField
+from project.api.schemas.customfieldSchema import CustomFieldSchema
 from project.tests.base import BaseTestCase
 
 
@@ -10,19 +10,19 @@ class TestFieldServices(BaseTestCase):
 
     def test_add_attachment_model(self):
         """""Ensure Add an Field model """
-        field = Field(id=5, key='test',
+        customfield = CustomField(id=5, key='test',
                       value="test")
-        FieldSchema().dump(field)
+        CustomFieldSchema().dump(customfield)
 
     def test_add_field(self):
         """Ensure a new Field can be added to the database."""
 
         with self.client:
             response = self.client.post(
-                '/sis/v1/fields',
+                '/sis/v1/customfields',
                 data=json.dumps({
                     "data": {
-                        "type": "field",
+                        "type": "customfield",
                         "attributes": {
                             "key": "testKey1",
                             "value": "testVal1"
@@ -34,14 +34,14 @@ class TestFieldServices(BaseTestCase):
         data = json.loads(response.data.decode())
         self.assertEqual(response.status_code, 201)
         self.assertIn('testKey1', data['data']['attributes']['key'])
-        self.assertIn('field', data['data']['type'])
+        self.assertIn('customfield', data['data']['type'])
 
     def test_add_field_invalid_type(self):
         """Ensure error is thrown if the JSON object has invalid type."""
 
         with self.client:
             response = self.client.post(
-                '/sis/v1/fields',
+                '/sis/v1/customfields',
                 data=json.dumps({
                     "data": {
                         "type": "contact",
@@ -54,7 +54,7 @@ class TestFieldServices(BaseTestCase):
             )
         data = json.loads(response.data.decode())
         self.assertEqual(response.status_code, 409)
-        self.assertIn("Invalid type. Expected \"field\".",
+        self.assertIn("Invalid type. Expected \"customfield\".",
                       data['errors'][0]['detail'])
 
     def test_add_field_missing_data(self):
@@ -63,10 +63,10 @@ class TestFieldServices(BaseTestCase):
 
         with self.client:
             response = self.client.post(
-                '/sis/v1/fields',
+                '/sis/v1/customfields',
                 data=json.dumps({
                     "data": {
-                        "type": "field",
+                        "type": "customfield",
                         "attributes": {
                             "key": "test"
                         }
@@ -84,7 +84,7 @@ class TestFieldServices(BaseTestCase):
 
         with self.client:
             response = self.client.post(
-                '/sis/v1/fields',
+                '/sis/v1/customfields',
                 data=json.dumps({}),
                 content_type='application/vnd.api+json',
             )
@@ -99,10 +99,10 @@ class TestFieldServices(BaseTestCase):
 
         with self.client:
             response = self.client.post(
-                '/sis/v1/fields',
+                '/sis/v1/customfields',
                 data=json.dumps({
                     "data": {
-                        "type": "field",
+                        "type": "customfield",
                         "attributes": {
                             "key": 123,
                             "value": "test"
