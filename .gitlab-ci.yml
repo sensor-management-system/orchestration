@@ -49,11 +49,29 @@ build-deploy-image:
     - staging
     - id2
   only:
-    #refs:
-    #  - master
-    #  - tags
+    refs:
+      - master
+      - tags
     variables:
       - $STAGING_HOST =~ /gfz/
+
+build-deploy-image-manual:
+  stage: build-gfz
+  image: docker:19.03.1
+  before_script:
+    - *docker_login_gitlab_registry
+  script:
+    - >
+      docker build --pull -t "$CI_REGISTRY_IMAGE:latest" --tag "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA" -f docker/deployment/gfz/Dockerfile .
+      docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA"
+  tags:
+    - deploy
+    - staging
+    - id2
+  only:
+    variables:
+      - $STAGING_HOST =~ /gfz/
+  when: manual
 
 deploy-staging:
   stage: deploy-staging-gfz
@@ -69,11 +87,33 @@ deploy-staging:
   before_script:
     - *docker_login_gitlab_registry
   script:
-    - docker-compose -f docker/deployment/gfz/docker-compose.yml pull
-    - docker-compose -f docker/deployment/gfz/docker-compose.yml up -d
+    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml pull
+    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml up -d
   only:
-    #refs:
-    #  - master
+    refs:
+      - master
+    variables:
+      - $STAGING_HOST =~ /gfz/
+
+deploy-staging-manual-8080:
+  stage: deploy-staging-gfz
+  environment:
+    name: staging
+    url: https://${STAGING_HOST}:8080
+  tags:
+    - deploy
+    - staging
+    - id2
+  variables:
+    COMPOSE_PROJECT_NAME: ssmfrontend
+  before_script:
+    - *docker_login_gitlab_registry
+  script:
+    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml pull
+    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml up -d
+  dependencies:
+    - build-deploy-image-manual
+  only:
     variables:
       - $STAGING_HOST =~ /gfz/
 
@@ -112,3 +152,19 @@ test-availability-staging:
   only:
     variables:
       - $STAGING_HOST =~ /gfz/
+
+test-availability-staging8080:
+  stage: after-deployment-tests-gfz
+  image: python:3
+  tags:
+    - deploy
+    - staging
+    - id2
+  script:
+    - curl http://${STAGING_HOST}:8080
+  dependencies:
+    - deploy-staging-manual-8080
+  only:
+    variables:
+      - $STAGING_HOST =~ /gfz/
+
