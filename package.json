@@ -30,6 +30,7 @@
     "babel-jest": "^24.1.0",
     "eslint": "^6.1.0",
     "eslint-plugin-nuxt": ">=0.4.2",
+    "fibers": "^5.0.0"
     "jest": "^24.1.0",
     "ts-jest": "^25.0.0",
     "ts-vue-plugin": "^0.1.2",
