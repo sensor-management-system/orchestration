@@ -113,6 +113,7 @@ deploy-staging-manual-8080:
     - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml up -d
   dependencies:
     - build-deploy-image-manual
+  when: manual
   only:
     variables:
       - $STAGING_HOST =~ /gfz/
@@ -149,6 +150,8 @@ test-availability-staging:
     - id2
   script:
     - curl http://$STAGING_HOST
+  dependencies:
+    - deploy-staging
   only:
     variables:
       - $STAGING_HOST =~ /gfz/
@@ -164,6 +167,7 @@ test-availability-staging8080:
     - curl http://${STAGING_HOST}:8080
   dependencies:
     - deploy-staging-manual-8080
+  when: manual
   only:
     variables:
       - $STAGING_HOST =~ /gfz/
