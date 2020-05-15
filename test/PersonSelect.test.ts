@@ -12,6 +12,10 @@ Vue.use(Vuetify)
 describe('PersonSelect', () => {
   let wrapper: any
 
+  /*
+   * setup
+   */
+
   beforeEach(() => {
     const localVue = createLocalVue()
     const vuetify = new Vuetify()
@@ -61,13 +65,17 @@ describe('PersonSelect', () => {
     expect(wrapper.emitted('update:selectedPersons')).toBeTruthy()
   })
 
-  it('should remove one chip when a person is removed', async () => {
+  it('should remove a chip when a person is removed', async () => {
     const chipsNum = wrapper.findAll({ name: 'v-chip' }).length
     const chip = wrapper.find({ name: 'v-chip' })
     await chip.find('button').trigger('click')
 
     expect(wrapper.findAll({ name: 'v-chip' })).toHaveLength(chipsNum - 1)
   })
+
+  /*
+   * adding
+   */
 
   /*
   it('should fire an update:selectedPersons event ', async () => {
