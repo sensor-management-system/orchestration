@@ -5,5 +5,5 @@ WORKDIR /ssmfrontend
 RUN npm install
 RUN npm run generate
 
-FROM nginx:stable-apline as webserver
+FROM nginx:alpine as webserver
 COPY --from=js-builder /ssmfrontend/dist/ /usr/share/nginx/html
