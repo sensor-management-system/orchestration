@@ -1,10 +1,10 @@
 stages:
   - test
-  - build
-  - build_app
-  - deploy
-  - build_image
-  - after-deployment-tests
+  - build-gfz
+  - build-ufz
+  - deploy-staging-gfz
+  - deploy-ufz
+  - after-deployment-tests-gfz
 
 cache:
   paths:
@@ -30,7 +30,7 @@ test-frontend-unit-tests:
   - echo "$CI_BUILD_TOKEN" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
 
 build-deploy-image:
-  stage: build
+  stage: build-gfz
   image: docker:19.03.1
   before_script:
     - *docker_login_gitlab_registry
@@ -56,7 +56,7 @@ build-deploy-image:
       - $STAGING_HOST =~ /gfz/
 
 deploy-staging:
-  stage: deploy
+  stage: deploy-staging-gfz
   environment:
     name: staging
     url: https://$STAGING_HOST
@@ -78,7 +78,7 @@ deploy-staging:
       - $STAGING_HOST =~ /gfz/
 
 build_app:
-  stage: build_app
+  stage: build-ufz
   image: node:latest
   script:
     - npm install
@@ -89,7 +89,7 @@ build_app:
 
 
 build_image:
-  stage: build_image
+  stage: deploy-ufz
   image:
     name: gcr.io/kaniko-project/executor:debug
     entrypoint: [""]
@@ -101,7 +101,7 @@ build_image:
       - $STAGING_HOST =~ /gfz/
 
 test-availability-staging:
-  stage: after-deployment-tests
+  stage: after-deployment-tests-gfz
   image: python:3
   tags:
     - deploy
