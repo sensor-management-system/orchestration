@@ -406,7 +406,7 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'nuxt-property-decorator'
+import { Vue, Component, Watch } from 'nuxt-property-decorator'
 import Sensor from '../../../models/Sensor'
 import { SensorProperty } from '../../../models/SensorProperty'
 import CustomTextField from '../../../models/CustomTextField'
@@ -496,6 +496,12 @@ export default class SensorIdPage extends Vue {
       0,
       1
     ]
+  }
+
+  @Watch('sensor', { immediate: true, deep: true })
+  // @ts-ignore
+  onSensorChanged (val: Sensor, oldVal: Sensor) {
+    console.log('something changed', val.responsiblePersons)
   }
 }
 </script>
