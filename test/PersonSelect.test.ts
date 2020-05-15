@@ -40,8 +40,7 @@ describe('PersonSelect', () => {
 
   it('should remove one chip', async () => {
     const chip = wrapper.find({ name: 'v-chip' })
-    chip.find('button').trigger('click')
-    await wrapper.vm.$nextTick()
+    await chip.find('button').trigger('click')
 
     expect(wrapper.findAll({ name: 'v-chip' })).toHaveLength(0)
   })
