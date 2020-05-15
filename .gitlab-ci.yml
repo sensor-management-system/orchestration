@@ -38,10 +38,10 @@ build-deploy-image:
   script:
     - >
       if [ -z "$CI_COMMIT_TAG" ]; then
-        docker build --pull -t "$CI_REGISTRY_IMAGE:latest" --tag "$CI_REGISTRY_IMAGE:latest" -f docker/deployment/Dockerfile .
+        docker build --pull -t "$CI_REGISTRY_IMAGE:latest" --tag "$CI_REGISTRY_IMAGE:latest" -f docker/deployment/gfz/Dockerfile .
         docker push "$CI_REGISTRY_IMAGE:latest"
       else
-        docker build --pull -t "$CI_REGISTRY_IMAGE:latest" --tag "$CI_REGISTRY_IMAGE:$CI_COMMIT_TAG" --tag "$CI_REGISTRY_IMAGE:latest" -f docker/deployment/Dockerfile .
+        docker build --pull -t "$CI_REGISTRY_IMAGE:latest" --tag "$CI_REGISTRY_IMAGE:$CI_COMMIT_TAG" --tag "$CI_REGISTRY_IMAGE:latest" -f docker/deployment/gfz/Dockerfile .
         docker push "$CI_REGISTRY_IMAGE:latest"
         docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_TAG"
       fi
@@ -70,8 +70,8 @@ deploy-staging:
   before_script:
     - *docker_login_gitlab_registry
   script:
-    - docker-compose -f docker/deployment/docker-compose.yml pull
-    - docker-compose -f docker/deployment/docker-compose.yml up -d
+    - docker-compose -f docker/deployment/gfz/docker-compose.yml pull
+    - docker-compose -f docker/deployment/gfz/docker-compose.yml up -d
   only:
     #refs:
     #  - master
@@ -96,7 +96,7 @@ build_image:
     entrypoint: [""]
   script:
     - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
-    - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --destination $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG --destination $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA --destination $CI_REGISTRY_IMAGE --build-arg BUILD_DATE=$(date --utc +%FT%TZ) --build-arg VCS_REF=$CI_COMMIT_SHA
+    - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/docker/deployment/ufz/Dockerfile --destination $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG --destination $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA --destination $CI_REGISTRY_IMAGE --build-arg BUILD_DATE=$(date --utc +%FT%TZ) --build-arg VCS_REF=$CI_COMMIT_SHA
   except:
     variables:
       - $STAGING_HOST =~ /gfz/
