@@ -30,12 +30,34 @@ describe('PersonSelect', () => {
     })
   })
 
+  /*
+   * initial state
+   */
+
   it('should be a Vue instance', () => {
     expect(wrapper.isVueInstance()).toBeTruthy()
   })
 
+  it('should have a property localSelectedPersons with length 1', () => {
+    expect(wrapper.vm.$data.localSelectedPersons).toHaveLength(1)
+  })
+
   it('should render one chip', () => {
     expect(wrapper.findAll({ name: 'v-chip' })).toHaveLength(1)
+  })
+
+  /*
+   * removing
+   */
+
+  it('should have a property localSelectedPersons with length 0 when one person is removed', () => {
+    wrapper.vm.removePerson(1)
+    expect(wrapper.vm.$data.localSelectedPersons).toHaveLength(0)
+  })
+
+  it('should trigger an update event when one person is removed', () => {
+    wrapper.vm.removePerson(1)
+    expect(wrapper.emitted('update:selectedPersons')).toBeTruthy()
   })
 
   it('should remove one chip', async () => {
@@ -46,14 +68,11 @@ describe('PersonSelect', () => {
   })
 
   /*
-  it('should add a second chip', async () => {
+  it('should fire an update:selectedPersons event ', async () => {
     const autocomplete = wrapper.find('.v-autocomplete')
-    const input = autocomplete.find('input[type="text"]')
-    input.setValue('Person 2')
-    input.trigger('input')
-    await wrapper.vm.$nextTick()
-    autocomplete.trigger('keydown.enter')
-    await wrapper.vm.$nextTick()
+    autocomplete.setProps({ value: 'Person 2' })
+    await autocomplete.trigger('keydown.down')
+    await autocomplete.trigger('keydown.enter')
 
     expect(wrapper.findAll({ name: 'v-chip' })).toHaveLength(2)
   })
