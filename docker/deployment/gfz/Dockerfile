@@ -1,9 +1,9 @@
-FROM node:10.16.3-stretch
+FROM node:10.16.3-stretch as js-builder
 RUN mkdir /ssmfrontend
 COPY . /ssmfrontend
 WORKDIR /ssmfrontend
 RUN npm install
+RUN npm run generate
 
-ENTRYPOINT ["npm"]
-CMD ["run", "dev", "--", "-H", "0.0.0.0", "-p", "80"]
-
+FROM nginx:apline
+COPY --from=js-builder /ssmfrontend/dist/ /usr/share/nginx/html
