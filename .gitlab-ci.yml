@@ -3,7 +3,6 @@ stages:
   - build
   - build_app
   - deploy
-  - prepare_image
   - build_image
   - after-deployment-tests
 
