@@ -28,10 +28,10 @@ class TestDeviceService(BaseTestCase):
 
     def test_add_device_model(self):
         """""Ensure Add device model """
-        sensor = Device(id=22, serialNumber='123456789',
-                        manufacture="manufacture",
-                        model="model", inventoryNumber="123123",
-                        persistentIdentifier="456456", type="type")
+        sensor = Device(id=22, serial_number='123456789',
+                        manufacturer="manufacturer",
+                        model="model", inventory_number="123123",
+                        persistent_identifier="456456", type="type")
         DeviceSchema().dump(sensor)
 
     def test_add_device(self):
@@ -46,11 +46,11 @@ class TestDeviceService(BaseTestCase):
                     "data": {
                         "type": "device",
                         "attributes": {
-                            "serialNumber": "0125436987",
-                            "manufacture": "manufacture",
+                            "serial_number": "0125436987",
+                            "manufacturer": "manufacturer",
                             "model": "model",
-                            "inventoryNumber": "0001122",
-                            "persistentIdentifier": "54564654",
+                            "inventory_number": "0001122",
+                            "persistent_identifier": "54564654",
                             "type": "TYPE"
                         }
                     }
@@ -59,7 +59,7 @@ class TestDeviceService(BaseTestCase):
             )
         data = json.loads(response.data.decode())
         self.assertEqual(response.status_code, 201)
-        self.assertIn('[MANUFACTURE]_[MODEL]_[TYPE]_[125436987]',
+        self.assertIn('MANUFACTURER_MODEL_TYPE_125436987',
                       data['data']['attributes']['urn'])
 
     def test_add_device_invalid_type(self):
@@ -72,11 +72,11 @@ class TestDeviceService(BaseTestCase):
                     "data": {
                         "type": "platform",
                         "attributes": {
-                            "serialNumber": "0125436987",
-                            "manufacture": "manufacture",
+                            "serial_number": "0125436987",
+                            "manufacturer": "manufacturer",
                             "model": "model",
-                            "inventoryNumber": "0001122",
-                            "persistentIdentifier": "54564654",
+                            "inventory_number": "0001122",
+                            "persistent_identifier": "54564654",
                             "type": "TYPE"
                         }
                     }
@@ -99,7 +99,7 @@ class TestDeviceService(BaseTestCase):
                     "data": {
                         "type": "device",
                         "attributes": {
-                            "serialNumber": "0125436987",
+                            "serial_number": "0125436987",
                         }
                     }
                 }),
@@ -135,11 +135,11 @@ class TestDeviceService(BaseTestCase):
                     "data": {
                         "type": "device",
                         "attributes": {
-                            "serialNumber": "0125436987",
-                            "manufacture": "manufacture",
+                            "serial_number": "0125436987",
+                            "manufacturer": "manufacturer",
                             "model": 123,
-                            "inventoryNumber": "0001122",
-                            "persistentIdentifier": "54564654",
+                            "inventory_number": "0001122",
+                            "persistent_identifier": "54564654",
                             "type": "TYPE"
                         }
                     }
@@ -150,14 +150,6 @@ class TestDeviceService(BaseTestCase):
         self.assertEqual(response.status_code, 422)
         self.assertIn("Not a valid string.",
                       data['errors'][0]['detail'])
-
-    def test_get_devices_via_id(self):
-        """Ensure the get /platform/<id> route behaves correctly."""
-        response = self.client.get('/sis/v1/devices/1')
-        data = json.loads(response.data.decode())
-        self.assertEqual(response.status_code, 200)
-        self.assertIn('[MANUFACTURE]_[MODEL]_[TYPE]_[125436987]',
-                      data['data']['attributes']['urn'])
 
     def test_patch_devices_via_id(self):
         """Ensure the patch /device/<id> route behaves correctly."""
@@ -177,7 +169,7 @@ class TestDeviceService(BaseTestCase):
             )
         data = json.loads(response.data.decode())
         self.assertEqual(response.status_code, 200)
-        self.assertIn('[MANUFACTURE]_[MODEL_NEW]_[TYPE]_[125436987]',
+        self.assertIn('MANUFACTURER_MODEL_NEW_TYPE_125436987',
                       data['data']['attributes']['urn'])
 
 

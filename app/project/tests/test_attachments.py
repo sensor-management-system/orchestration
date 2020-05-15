@@ -11,7 +11,7 @@ class TestAttachmentServices(BaseTestCase):
     def test_add_attachment_model(self):
         """""Ensure Add an Attachment model """
         attachment = Attachment(id=45, label='test',
-                                src="http://test.test")
+                                url="http://test.test")
         AttachmentSchema().dump(attachment)
 
     def test_add_attachment(self):
@@ -27,7 +27,7 @@ class TestAttachmentServices(BaseTestCase):
                         "type": "attachment",
                         "attributes": {
                             "label": "test2",
-                            "src": "http://test.test"
+                            "url": "http://test.test"
                         }
                     }
                 }),
@@ -48,7 +48,7 @@ class TestAttachmentServices(BaseTestCase):
                     "data": {
                         "type": "contact",
                         "attributes": {
-                            "src": "test"
+                            "url": "test"
                         }
                     }
                 }),
@@ -106,7 +106,7 @@ class TestAttachmentServices(BaseTestCase):
                     "data": {
                         "type": "attachment",
                         "attributes": {
-                            "src": 123
+                            "url": 123
                         }
                     }
                 }),

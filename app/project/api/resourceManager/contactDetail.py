@@ -9,7 +9,15 @@ from sqlalchemy.orm.exc import NoResultFound
 
 
 class ContactDetail(ResourceDetail):
+    """
+    Contact detail Class
+    """
     def before_get_object(self, view_kwargs):
+        """
+
+        :param view_kwargs:
+        :return:
+        """
         if view_kwargs.get('device_id') is not None:
             try:
                 device = self.session.query(Device).filter_by(

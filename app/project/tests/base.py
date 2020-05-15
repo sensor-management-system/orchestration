@@ -11,6 +11,7 @@ class BaseTestCase(TestCase):
         return app
 
     def set_up(self):
+        db.drop_all()
         db.create_all()
         db.session.commit()
 

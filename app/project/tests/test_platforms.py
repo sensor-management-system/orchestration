@@ -18,7 +18,7 @@ class TestPlatformServices(BaseTestCase):
     def test_add_platform_model(self):
         """""Ensure Add platform model """
         platform = Platform(id=13,
-                            shortName='short', type="type")
+                            short_name='short', type="type")
         PlatformSchema().dump(platform)
 
     def test_add_platform(self):
@@ -32,14 +32,14 @@ class TestPlatformServices(BaseTestCase):
                         "type": "platform",
                         "attributes": {
                             "longName": "testLong",
-                            "platformType": "testPlType",
-                            "shortName": "short",
+                            "platform_type": "testPlType",
+                            "short_name": "short",
                             "description": "string",
                             "manufacturer": "string",
                             "type": "type",
-                            "inventoryNumber": 12,
-                            "configurationDate": "2020-05-04 11",
-                            "src": "string"
+                            "inventory_number": 12,
+                            "configuration_date": "2020-05-04 11",
+                            "url": "string"
                         }
                     }
                 }),
@@ -47,7 +47,7 @@ class TestPlatformServices(BaseTestCase):
             )
             data = json.loads(response.data.decode())
             self.assertEqual(response.status_code, 201)
-            self.assertIn('[TYPE]_[SHORT]', data['data']['attributes']['urn'])
+            self.assertIn('TYPE_SHORT', data['data']['attributes']['urn'])
             self.assertIn('platform', data['data']['type'])
 
     def test_add_platform_invalid_type(self):
@@ -118,7 +118,7 @@ class TestPlatformServices(BaseTestCase):
                     "data": {
                         "type": "platform",
                         "attributes": {
-                            "shortName": "short",
+                            "short_name": "short",
                             "type": 123
                         }
                     }
@@ -135,7 +135,7 @@ class TestPlatformServices(BaseTestCase):
         response = self.client.get('/sis/v1/platforms/1')
         data = json.loads(response.data.decode())
         self.assertEqual(response.status_code, 200)
-        self.assertIn('[TYPE]_[SHORT]', data['data']['attributes']['urn'])
+        self.assertIn('TYPE_SHORT', data['data']['attributes']['urn'])
 
     def test_patch_platforms_via_id(self):
         """Ensure the patch /platform/<id> route behaves correctly."""
@@ -147,7 +147,7 @@ class TestPlatformServices(BaseTestCase):
                         "type": "platform",
                         "id": 1,
                         "attributes": {
-                            "shortName": "short_new"
+                            "short_name": "new"
                         }
                     }
                 }),
@@ -155,7 +155,7 @@ class TestPlatformServices(BaseTestCase):
             )
         data = json.loads(response.data.decode())
         self.assertEqual(response.status_code, 200)
-        self.assertIn('[TYPE]_[SHORT_NEW]', data['data']['attributes']['urn'])
+        self.assertIn('TYPE_NEW', data['data']['attributes']['urn'])
 
     def test_z_platform_delete(self):
         """Ensure the  delete /platform/<id> route behaves correctly."""
@@ -163,7 +163,7 @@ class TestPlatformServices(BaseTestCase):
         data = json.loads(response.data.decode())
         self.assertEqual(response.status_code, 200)
         self.assertIn('Object successfully deleted', data['meta']['message'])
-        # super().tear_down()
+        super().tear_down()
 
     def test_get_platform_devices_via_id(self):
         """Ensure the get devices attached to a platform

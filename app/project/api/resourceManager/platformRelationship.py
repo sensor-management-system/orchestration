@@ -6,6 +6,9 @@ from project.api.schemas.platformSchema import PlatformSchema
 
 
 class PlatformRelationship(ResourceRelationship):
+    """
+    Platform Relationship Resource
+    """
     schema = PlatformSchema
     data_layer = {'session': db.session,
                   'model': Platform}
