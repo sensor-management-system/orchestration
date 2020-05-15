@@ -49,9 +49,9 @@ build-deploy-image:
     - staging
     - id2
   only:
-    refs:
-      - master
-      - tags
+    #refs:
+    #  - master
+    #  - tags
     variables:
       - $STAGING_HOST =~ /gfz/
 
@@ -72,8 +72,8 @@ deploy-staging:
     - docker-compose -f docker/deployment/docker-compose.yml pull
     - docker-compose -f docker/deployment/docker-compose.yml up -d
   only:
-    refs:
-      - master
+    #refs:
+    #  - master
     variables:
       - $STAGING_HOST =~ /gfz/
 
