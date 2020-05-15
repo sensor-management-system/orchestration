@@ -50,21 +50,23 @@ describe('PersonSelect', () => {
    * removing
    */
 
-  it('should have a property localSelectedPersons with length 0 when one person is removed', () => {
+  it('should have a property localSelectedPersons with a length decreased by 1 when a person is removed', () => {
+    const oldLength = wrapper.vm.$data.localSelectedPersons.length
     wrapper.vm.removePerson(1)
-    expect(wrapper.vm.$data.localSelectedPersons).toHaveLength(0)
+    expect(wrapper.vm.$data.localSelectedPersons).toHaveLength(oldLength - 1)
   })
 
-  it('should trigger an update event when one person is removed', () => {
+  it('should trigger an update event when a person is removed', () => {
     wrapper.vm.removePerson(1)
     expect(wrapper.emitted('update:selectedPersons')).toBeTruthy()
   })
 
-  it('should remove one chip', async () => {
+  it('should remove one chip when a person is removed', async () => {
+    const chipsNum = wrapper.findAll({ name: 'v-chip' }).length
     const chip = wrapper.find({ name: 'v-chip' })
     await chip.find('button').trigger('click')
 
-    expect(wrapper.findAll({ name: 'v-chip' })).toHaveLength(0)
+    expect(wrapper.findAll({ name: 'v-chip' })).toHaveLength(chipsNum - 1)
   })
 
   /*
