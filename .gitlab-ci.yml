@@ -1,0 +1,196 @@
+stages:
+  - check
+  - test
+  - build-gfz
+  - build-ufz
+  - deploy-staging-gfz
+  - deploy-ufz
+  - after-deployment-tests-gfz
+
+cache:
+  paths:
+    - dist
+
+check-lint:
+  stage: check
+  image: node:10.16.3-stretch
+  before_script:
+    - node -v
+    - npm install
+  script:
+    - npm run lint
+  tags:
+    - ssm
+    - id2
+    - docker
+  allow_failure: true
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - node_modules
+
+
+test-frontend-unit-tests:
+  stage: test
+  image: node:10.16.3-stretch
+  before_script:
+    - node -v
+    - npm install
+  script:
+    - npm test
+  tags:
+    - ssm
+    - id2
+    - docker
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - node_modules
+
+.docker_login_gitlab_registry: &docker_login_gitlab_registry
+  - echo "$CI_BUILD_TOKEN" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
+
+build-deploy-image:
+  stage: build-gfz
+  image: docker:19.03.1
+  before_script:
+    - *docker_login_gitlab_registry
+  script:
+    - >
+      if [ -z "$CI_COMMIT_TAG" ]; then
+        docker build --pull -t "$CI_REGISTRY_IMAGE:latest" --tag "$CI_REGISTRY_IMAGE:latest" -f docker/deployment/gfz/Dockerfile .
+        docker push "$CI_REGISTRY_IMAGE:latest"
+      else
+        docker build --pull -t "$CI_REGISTRY_IMAGE:latest" --tag "$CI_REGISTRY_IMAGE:$CI_COMMIT_TAG" --tag "$CI_REGISTRY_IMAGE:latest" -f docker/deployment/gfz/Dockerfile .
+        docker push "$CI_REGISTRY_IMAGE:latest"
+        docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_TAG"
+      fi
+  tags:
+    - deploy
+    - staging
+    - id2
+  only:
+    refs:
+      - master
+      - tags
+    variables:
+      - $STAGING_HOST =~ /gfz/
+
+build-deploy-image-manual:
+  stage: build-gfz
+  image: docker:19.03.1
+  before_script:
+    - *docker_login_gitlab_registry
+  script:
+    - docker build --tag "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA" -f docker/deployment/gfz/Dockerfile .
+    - docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA"
+  tags:
+    - deploy
+    - staging
+    - id2
+  only:
+    variables:
+      - $STAGING_HOST =~ /gfz/
+  when: manual
+
+deploy-staging:
+  stage: deploy-staging-gfz
+  environment:
+    name: staging
+    url: https://$STAGING_HOST
+  tags:
+    - deploy
+    - staging
+    - id2
+  variables:
+    COMPOSE_PROJECT_NAME: ssmfrontend
+  before_script:
+    - *docker_login_gitlab_registry
+  script:
+    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml pull
+    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml up -d
+  only:
+    refs:
+      - master
+    variables:
+      - $STAGING_HOST =~ /gfz/
+
+deploy-staging-manual-8080:
+  stage: deploy-staging-gfz
+  environment:
+    name: staging
+    url: https://${STAGING_HOST}:8080
+  tags:
+    - deploy
+    - staging
+    - id2
+  variables:
+    COMPOSE_PROJECT_NAME: ssmfrontend
+  before_script:
+    - *docker_login_gitlab_registry
+  script:
+    - docker-compose -f docker/deployment/gfz/staging8080/docker-compose.yml pull
+    - docker-compose -f docker/deployment/gfz/staging8080/docker-compose.yml up -d
+  dependencies:
+    - build-deploy-image-manual
+  when: manual
+  only:
+    variables:
+      - $STAGING_HOST =~ /gfz/
+
+build_app:
+  stage: build-ufz
+  image: node:latest
+  script:
+    - npm install
+    - npm run generate
+  except:
+    variables:
+      - $STAGING_HOST =~ /gfz/
+
+
+build_image:
+  stage: deploy-ufz
+  image:
+    name: gcr.io/kaniko-project/executor:debug
+    entrypoint: [""]
+  script:
+    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
+    - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/docker/deployment/ufz/Dockerfile --destination $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG --destination $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA --destination $CI_REGISTRY_IMAGE --build-arg BUILD_DATE=$(date --utc +%FT%TZ) --build-arg VCS_REF=$CI_COMMIT_SHA
+  except:
+    variables:
+      - $STAGING_HOST =~ /gfz/
+
+test-availability-staging:
+  stage: after-deployment-tests-gfz
+  image: python:3
+  tags:
+    - deploy
+    - staging
+    - id2
+  script:
+    - curl http://$STAGING_HOST
+  dependencies:
+    - deploy-staging
+  only:
+    refs:
+      - master
+    variables:
+      - $STAGING_HOST =~ /gfz/
+
+test-availability-staging8080:
+  stage: after-deployment-tests-gfz
+  image: python:3
+  tags:
+    - deploy
+    - staging
+    - id2
+  script:
+    - curl http://${STAGING_HOST}:8080
+  dependencies:
+    - deploy-staging-manual-8080
+  when: manual
+  only:
+    variables:
+      - $STAGING_HOST =~ /gfz/
+
