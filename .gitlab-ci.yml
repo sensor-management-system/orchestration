@@ -5,7 +5,7 @@ stages:
   - deploy
   - prepare_image
   - build_image
-  - after-deployment
+  - after-deployment-tests
 
 cache:
   paths:
@@ -101,15 +101,16 @@ build_image:
     variables:
       - $STAGING_HOST =~ /gfz/
 
-after-deployment-test:
-  stage: after-deployment
+test-availability:
+  stage: after-deployment-tests
   image: python:3
   before_script:
     - pip3 install httpie
   script:
     - http http://$STAGING_HOST
   only:
-    - $STAGING_HOST =~ /gfz/
+    variables:
+      - $STAGING_HOST =~ /gfz/
   cache:
     paths:
       - "$CI_PROJECT_DIR/.cache/pip"
