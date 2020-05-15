@@ -9,7 +9,7 @@
       @change="addPerson"
     />
     <v-chip
-      v-for="person in selectedPersons"
+      v-for="person in localSelectedPersons"
       :key="person.id"
       class="ma-2"
       color="indigo"
@@ -66,7 +66,8 @@ export default class PersonSelect extends Vue {
    */
   constructor () {
     super()
-    this.localSelectedPersons = this.selectedPersons
+    // create a shallow copy of the selectedPerson property
+    this.localSelectedPersons = [...this.selectedPersons]
   }
 
   /**
