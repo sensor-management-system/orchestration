@@ -77,7 +77,20 @@ describe('PersonSelect', () => {
    * adding
    */
 
+  it('should have a property localSelectedPersons with a length increased by 1 when a person is added', () => {
+    const oldLength = wrapper.vm.$data.localSelectedPersons.length
+    wrapper.vm.addPerson(2)
+    expect(wrapper.vm.$data.localSelectedPersons).toHaveLength(oldLength + 1)
+  })
+
+  it('should trigger an update event when a person is added', () => {
+    wrapper.vm.addPerson(2)
+    expect(wrapper.emitted('update:selectedPersons')).toBeTruthy()
+  })
+
   /*
+   * TODO: howto trigger an input event on a v-autocomplete?
+   *
   it('should fire an update:selectedPersons event ', async () => {
     const autocomplete = wrapper.find('.v-autocomplete')
     autocomplete.setProps({ value: 'Person 2' })
