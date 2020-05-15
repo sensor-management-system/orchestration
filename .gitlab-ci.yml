@@ -101,17 +101,15 @@ build_image:
     variables:
       - $STAGING_HOST =~ /gfz/
 
-test-availability:
+test-availability-staging:
   stage: after-deployment-tests
   image: python:3
-  before_script:
-    - pip3 install httpie
+  tags:
+    - deploy
+    - staging
+    - id2
   script:
-    - http http://$STAGING_HOST
+    - curl http://$STAGING_HOST
   only:
     variables:
       - $STAGING_HOST =~ /gfz/
-  cache:
-    paths:
-      - "$CI_PROJECT_DIR/.cache/pip"
-
