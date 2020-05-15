@@ -62,7 +62,7 @@ build-deploy-image-manual:
     - *docker_login_gitlab_registry
   script:
     - >
-      docker build --pull -t "$CI_REGISTRY_IMAGE:latest" --tag "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA" -f docker/deployment/gfz/Dockerfile .
+      docker build --tag "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA" -f docker/deployment/gfz/Dockerfile .
       docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA"
   tags:
     - deploy
@@ -109,8 +109,8 @@ deploy-staging-manual-8080:
   before_script:
     - *docker_login_gitlab_registry
   script:
-    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml pull
-    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml up -d
+    - docker-compose -f docker/deployment/gfz/staging8080/docker-compose.yml pull
+    - docker-compose -f docker/deployment/gfz/staging8080/docker-compose.yml up -d
   dependencies:
     - build-deploy-image-manual
   when: manual
@@ -153,6 +153,8 @@ test-availability-staging:
   dependencies:
     - deploy-staging
   only:
+    refs:
+      - master
     variables:
       - $STAGING_HOST =~ /gfz/
 
