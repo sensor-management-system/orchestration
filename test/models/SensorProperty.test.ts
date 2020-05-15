@@ -23,6 +23,7 @@ describe('SensorProperty Models', () => {
     expect(prop).toHaveProperty('unit', 'mm')
     expect(prop).toHaveProperty('variable', 'foo.bar')
     expect(prop).toHaveProperty('accuracy', 0.1)
+    expect(prop).toHaveProperty('failureValue', 0.01)
     expect(prop.measuringRange instanceof MeasuringRange).toBe(true)
   })
 })
