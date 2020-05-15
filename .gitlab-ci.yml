@@ -12,7 +12,7 @@ cache:
     - dist
 
 check-lint:
-  stage: test
+  stage: check
   image: node:10.16.3-stretch
   before_script:
     - node -v
