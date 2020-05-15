@@ -7,7 +7,7 @@ variables:
   CONTAINER_TEST_IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
   CONTAINER_RELEASE_IMAGE: $CI_REGISTRY_IMAGE:latest
 
-job 0:
+build-image:
   stage: build
   image:
     name: gcr.io/kaniko-project/executor:debug
@@ -16,7 +16,7 @@ job 0:
     - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
     - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --destination $CONTAINER_TEST_IMAGE
 
-job 1:
+Linting-code:
   stage: test
   image: $CI_REGISTRY_IMAGE
   before_script:
@@ -25,7 +25,12 @@ job 1:
   script:
     - flake8 $CI_PROJECT_DIR/app/project
 
-job 2:
+test-image:
+  stage: test
+  script:
+    - echo "This is just dummy test - waitting for the databse connection."
+
+release-image:
   stage: release
   image:
     name: gcr.io/kaniko-project/executor:debug
