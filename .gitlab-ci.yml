@@ -39,7 +39,7 @@ test-image:
     - echo "This is just dummy test - waitting for the databse connection."
   except:
     variables:
-      - STAGING_HOST =~ /gfz/
+      - $STAGING_HOST =~ /gfz/
 
 release-image:
   stage: release
