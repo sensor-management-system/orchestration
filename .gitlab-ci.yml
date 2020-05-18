@@ -70,10 +70,10 @@ build-gfz-image:
   script:
     - >
       if [ -z "$CI_COMMIT_TAG" ]; then
-        docker build --pull -t "$CI_REGISTRY_IMAGE:latest" --tag "$CI_REGISTRY_IMAGE:latest" -f Dockerfile .
+        docker build --tag "$CI_REGISTRY_IMAGE:latest" -f Dockerfile .
         docker push "$CI_REGISTRY_IMAGE:latest"
       else
-        docker build --pull -t "$CI_REGISTRY_IMAGE:latest" --tag "$CI_REGISTRY_IMAGE:$CI_COMMIT_TAG" --tag "$CI_REGISTRY_IMAGE:latest" -f Dockerfile .
+        docker build --tag "$CI_REGISTRY_IMAGE:$CI_COMMIT_TAG" --tag "$CI_REGISTRY_IMAGE:latest" -f Dockerfile .
         docker push "$CI_REGISTRY_IMAGE:latest"
         docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_TAG"
       fi
@@ -84,6 +84,8 @@ build-gfz-image:
   only:
     variables:
       - $STAGING_HOST =~ /gfz/
+  when: manual
+  allow_failure: true
 
 deploy-gfz-image:
   stage: deploy-gfz-image
@@ -105,4 +107,7 @@ deploy-gfz-image:
     variables:
       - $STAGING_HOST =~ /gfz/
   when: manual
+  dependencies:
+    - build-gfz-image
+  allow_failure: true
 
