@@ -55,7 +55,7 @@ describe('PersonSelect', () => {
     expect(wrapper.emitted('update:selectedPersons')).toBeTruthy()
   })
 
-  it('should trigger an event with a persons array with a length decreased by 1 when a person is removed', async () => {
+  it('should trigger an event with a persons array with a length decreased by 1 when a person is removed', () => {
     wrapper.vm.removePerson(1)
     expect(wrapper.emitted('update:selectedPersons')[0][0]).toHaveLength(0)
   })
@@ -73,5 +73,4 @@ describe('PersonSelect', () => {
     wrapper.vm.addPerson(2)
     expect(wrapper.emitted('update:selectedPersons')[0][0]).toHaveLength(2)
   })
-
 })
