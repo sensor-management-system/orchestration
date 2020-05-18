@@ -9,7 +9,7 @@
       @change="addPerson"
     />
     <v-chip
-      v-for="person in localSelectedPersons"
+      v-for="person in selectedPersons"
       :key="person.id"
       class="ma-2"
       color="indigo"
@@ -30,7 +30,7 @@
  * @file provides a component to select persons
  * @author <marc.hanisch@gfz-potsdam.de>
  */
-import { Vue, Component, Prop, Watch } from 'nuxt-property-decorator'
+import { Vue, Component, Prop } from 'nuxt-property-decorator'
 import Person from '../models/Person'
 import PersonService from '../services/PersonService'
 
@@ -42,7 +42,6 @@ import PersonService from '../services/PersonService'
 // @ts-ignore
 export default class PersonSelect extends Vue {
   private persons: Person[] = []
-  private localSelectedPersons: Person[] = []
 
   @Prop({
     default: () => [] as Person[],
@@ -60,17 +59,6 @@ export default class PersonSelect extends Vue {
   readonly: boolean
 
   /**
-   * copies the selectedPersons property to the local instance variable
-   *
-   * @constructor
-   */
-  constructor () {
-    super()
-    // create a shallow copy of the selectedPerson property
-    this.localSelectedPersons = [...this.selectedPersons]
-  }
-
-  /**
    * fetches all available persons from the PersonsService
    *
    * @async
@@ -83,11 +71,20 @@ export default class PersonSelect extends Vue {
    * adds a person to the sensors responsiblePersons property
    *
    * @param {string} somePersonId - the id of the person to add
+   * @fires PersonSelect#update:selectedPersons
    */
   addPerson (somePersonId: string) {
     const selectedPerson: Person | undefined = this.persons.find(p => p.id === parseInt(somePersonId))
     if (selectedPerson) {
-      this.localSelectedPersons.push(selectedPerson)
+      /**
+       * Update event
+       * @event PersonSelect#update:selectedPersons
+       * @type Person[]
+       */
+      this.$emit('update:selectedPersons', [
+        ...this.selectedPersons,
+        selectedPerson
+      ])
     }
   }
 
@@ -95,10 +92,20 @@ export default class PersonSelect extends Vue {
    * removes a person from the sensors responsiblePersons property
    *
    * @param {number} somePersonId - the id of the person to remove
+   * @fires PersonSelect#update:selectedPersons
    */
   removePerson (somePersonId: number) {
-    const personIndex = this.localSelectedPersons.findIndex(p => p.id === somePersonId)
-    this.localSelectedPersons.splice(personIndex, 1)
+    const personIndex: number = this.selectedPersons.findIndex(p => p.id === somePersonId)
+    if (personIndex > -1) {
+      /**
+       * Update event
+       * @event PersonSelect#update:selectedPersons
+       * @type Person[]
+       */
+      const selectedPersons = [...this.selectedPersons]
+      selectedPersons.splice(personIndex, 1)
+      this.$emit('update:selectedPersons', selectedPersons)
+    }
   }
 
   /**
@@ -107,24 +114,7 @@ export default class PersonSelect extends Vue {
    * @return {Person[]} an array of persons
    */
   get allPersonsExceptSelected (): Person[] {
-    return this.persons.filter(p => !this.localSelectedPersons.find(rp => rp.id === p.id))
-  }
-
-  /**
-   * triggers an update event for the selectedPersons property
-   *
-   * @param {Person[]} selectedPersons - the changed persons array
-   * @fires PersonSelect#update:selectedPersons
-   */
-  @Watch('localSelectedPersons', { immediate: true, deep: true })
-  // @ts-ignore
-  localSelectedPersonsChanged (selectedPersons: Person[]) {
-    /**
-     * Update event
-     * @event PersonSelect#update:selectedPersons
-     * @type Person[]
-     */
-    this.$emit('update:selectedPersons', selectedPersons)
+    return this.persons.filter(p => !this.selectedPersons.find(rp => rp.id === p.id))
   }
 }
 </script>
