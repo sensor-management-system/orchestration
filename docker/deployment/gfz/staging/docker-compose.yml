@@ -20,10 +20,27 @@ services:
 
   postgres:
     image: postgres:12-alpine
+    deploy:
+      restart_policy:
+        condition: unless-stopped
+        delay: 3s
+        max_attempts: 5
+        window: 120s
+    # restart policy for container (ignored in swarm mode)
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD: $DJANGO_DB_PASSWORD
+      POSTGRES_USER: $DJANGO_DB_USER
+      POSTGRES_DB: $DJANGO_DB_NAME
     ports:
       - 127.0.0.1:5432:5432
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres123456666666666666
     volumes:
-    - ./app/project/db/create.sql:/docker-entrypoint-initdb.d/create.sql
+      - ./app/project/db/create.sql:/docker-entrypoint-initdb.d/create.sql
+      - "postgres-data-staging:/var/lib/postgresql/data"
+    shm_size: 128M
+
+volumes:
+  postgres-data-staging:

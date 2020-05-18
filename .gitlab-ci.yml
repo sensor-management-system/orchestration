@@ -4,6 +4,7 @@ stages:
   - release
   - build-gfz-image
   - deploy-gfz-image
+  - after-deployment-test-gfz
 
 variables:
   CONTAINER_TEST_IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
@@ -111,3 +112,23 @@ deploy-gfz-image:
     - build-gfz-image
   allow_failure: true
 
+
+test-availability:
+  stage: after-deployment-test-gfz
+  image: python:3
+  environment:
+    name: gfzstaging
+    url: https://$STAGING_HOST
+  tags:
+    - deploy
+    - staging
+    - id2
+  script:
+    - curl http://$STAGING_HOST:5000/sis/v1/ping
+  only:
+    variables:
+      - $STAGING_HOST =~ /gfz/
+  when: manual
+  dependencies:
+    - deploy-gfz-image
+  allow_failure: true
