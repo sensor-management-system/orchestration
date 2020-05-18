@@ -156,7 +156,7 @@ deploy-staging:
 deploy-staging-manual-8080:
   stage: deploy-staging-gfz
   environment:
-    name: staging
+    name: staging8080
     url: https://${STAGING_HOST}:8080
   tags:
     - deploy
@@ -202,6 +202,9 @@ build_image:
 test-availability-staging:
   stage: after-deployment-tests-gfz
   image: python:3
+  environment:
+    name: staging
+    url: https://$STAGING_HOST
   tags:
     - deploy
     - staging
@@ -219,6 +222,9 @@ test-availability-staging:
 test-availability-staging8080:
   stage: after-deployment-tests-gfz
   image: python:3
+  environment:
+    name: staging8080
+    url: https://${STAGING_HOST}:8080
   tags:
     - deploy
     - staging
