@@ -11,7 +11,7 @@ cache:
   paths:
     - dist
 
-check-lint:
+check-lint-gfz:
   stage: check
   image: node:10.16.3-stretch
   before_script:
@@ -28,9 +28,28 @@ check-lint:
     key: ${CI_COMMIT_REF_SLUG}
     paths:
       - node_modules
+  only:
+    variables:
+      - $STAGING_HOST =~ /gfz/
 
+check-lint-ufz:
+  stage: check
+  image: node:10.16.3-stretch
+  before_script:
+    - node -v
+    - npm install
+  script:
+    - npm run lint
+  allow_failure: true
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - node_modules
+  except:
+    variables:
+      - $STAGING_HOST =~ /gfz/
 
-test-frontend-unit-tests:
+test-frontend-unit-tests-gfz:
   stage: test
   image: node:10.16.3-stretch
   before_script:
@@ -46,6 +65,29 @@ test-frontend-unit-tests:
     key: ${CI_COMMIT_REF_SLUG}
     paths:
       - node_modules
+  only:
+    variables:
+      - $STAGING_HOST =~ /gfz/
+
+test-frontend-unit-tests-ufz:
+  stage: test
+  image: node:10.16.3-stretch
+  before_script:
+    - node -v
+    - npm install
+  script:
+    - npm test
+  tags:
+    - ssm
+    - id2
+    - docker
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - node_modules
+  except:
+    variables:
+      - $STAGING_HOST =~ /gfz/
 
 .docker_login_gitlab_registry: &docker_login_gitlab_registry
   - echo "$CI_BUILD_TOKEN" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
