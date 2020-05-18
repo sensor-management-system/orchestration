@@ -408,7 +408,9 @@
 <script lang="ts">
 import { Vue, Component, Watch } from 'nuxt-property-decorator'
 import Sensor from '../../../models/Sensor'
+// eslint-disable-next-line
 import { SensorProperty } from '../../../models/SensorProperty'
+// eslint-disable-next-line
 import CustomTextField from '../../../models/CustomTextField'
 
 // @ts-ignore
@@ -500,7 +502,9 @@ export default class SensorIdPage extends Vue {
 
   @Watch('sensor', { immediate: true, deep: true })
   // @ts-ignore
-  onSensorChanged (val: Sensor, oldVal: Sensor) {
+  onSensorChanged (val: Sensor) {
+    // @TODO: remove!
+    // eslint-disable-next-line
     console.log('something changed', val.responsiblePersons)
   }
 }
