@@ -104,6 +104,7 @@ deploy-gfz-image:
   script:
     - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml pull
     - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml up -d
+    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec db psql 'CREATE DATABASE db_prod; CREATE DATABASE db_dev; CREATE DATABASE db_test;' || echo "Databases already existing"
   only:
     variables:
       - $STAGING_HOST =~ /gfz/
