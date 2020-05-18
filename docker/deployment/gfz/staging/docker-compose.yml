@@ -1,0 +1,29 @@
+version: '3'
+
+services:
+  ssmbackend:
+    image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_TAG:-latest}
+    deploy:
+      restart_policy:
+        condition: unless-stopped
+        delay: 1s
+        max_attempts: 5
+        window: 30s
+    restart: unless-stopped
+    environment:
+      - FLASK_DEBUG=1
+      - APP_SETTINGS=project.config.DevelopmentConfig
+      - DATABASE_URL=postgres://postgres:postgres123456666666666666@db:5432/db_dev
+      - DATABASE_TEST_URL=postgres://postgres:postgres123456666666666666@db:5432/db_test
+    ports:
+      - 5000:5000
+
+  postgres:
+    image: postgres:12-alpine
+    ports:
+      - 127.0.0.1:5432:5432
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres123456666666666666
+    volumes:
+    - ./app/project/db/create.sql:/docker-entrypoint-initdb.d/create.sql
