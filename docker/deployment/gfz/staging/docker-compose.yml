@@ -38,7 +38,6 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres123456666666666666
     volumes:
-      - ./app/project/db/create.sql:/docker-entrypoint-initdb.d/create.sql
       - "postgres-data-staging:/var/lib/postgresql/data"
     shm_size: 128M
 
