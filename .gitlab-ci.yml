@@ -77,10 +77,6 @@ test-frontend-unit-tests-ufz:
     - npm install
   script:
     - npm test
-  tags:
-    - ssm
-    - id2
-    - docker
   cache:
     key: ${CI_COMMIT_REF_SLUG}
     paths:
