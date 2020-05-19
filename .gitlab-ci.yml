@@ -114,7 +114,7 @@ deploy-gfz-image:
   allow_failure: true
 
 
-after-deploy-gfz-image:
+after-deploy-gfz-image-create-dbs:
   stage: after-deployment-gfz
   environment:
     name: gfzstaging
@@ -125,8 +125,6 @@ after-deploy-gfz-image:
     - id2
   variables:
     COMPOSE_PROJECT_NAME: ssmbackend
-  before_script:
-    - *docker_login_gitlab_registry
   script:
       - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec db psql -U postgres -c 'CREATE DATABASE db_prod' || echo "prod database already exists"
       - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec db psql -U postgres -c 'CREATE DATABASE db_dev' || echo "dev database already exists"
@@ -137,6 +135,48 @@ after-deploy-gfz-image:
   when: manual
   dependencies:
     - deploy-gfz-image
+  allow_failure: true
+
+after-deploy-gfz-image-recreate-tables:
+  stage: after-deployment-gfz
+  environment:
+    name: gfzstaging
+    url: https://$STAGING_HOST
+  tags:
+    - deploy
+    - staging
+    - id2
+  variables:
+    COMPOSE_PROJECT_NAME: ssmbackend
+  script:
+      - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec ssmbackend python3 app/manage.py recreate_db
+  only:
+    variables:
+      - $STAGING_HOST =~ /gfz/
+  when: manual
+  dependencies:
+    - after-deploy-gfz-image-create-dbs
+  allow_failure: true
+
+after-deploy-gfz-image-init-tables:
+  stage: after-deployment-gfz
+  environment:
+    name: gfzstaging
+    url: https://$STAGING_HOST
+  tags:
+    - deploy
+    - staging
+    - id2
+  variables:
+    COMPOSE_PROJECT_NAME: ssmbackend
+  script:
+      - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec ssmbackend python3 app/manage.py db_init
+  only:
+    variables:
+      - $STAGING_HOST =~ /gfz/
+  when: manual
+  dependencies:
+    - after-deploy-gfz-image-create-dbs
   allow_failure: true
 
 test-availability:
@@ -156,5 +196,5 @@ test-availability:
       - $STAGING_HOST =~ /gfz/
   when: manual
   dependencies:
-    - after-deploy-gfz-image
+    - after-deploy-gfz-image-init-tables
   allow_failure: true
