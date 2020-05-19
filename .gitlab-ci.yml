@@ -128,7 +128,7 @@ after-deploy-gfz-image:
   before_script:
     - *docker_login_gitlab_registry
   script:
-    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec db psql -U postgres 'CREATE DATABASE db_prod; CREATE DATABASE db_dev; CREATE DATABASE db_test;' || echo "Databases already existing"
+    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec db psql -U postgres app/project/db/create.sql || echo "Databases already existing"
   only:
     variables:
       - $STAGING_HOST =~ /gfz/
