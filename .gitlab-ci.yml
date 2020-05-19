@@ -127,6 +127,7 @@ build-deploy-image-manual:
     BACKEND_URL: ${STAGING_BACKEND_URL}
   before_script:
     - *docker_login_gitlab_registry
+    - echo $BACKEND_URL
   script:
     - docker build --tag "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA" -f docker/deployment/gfz/Dockerfile .
     - docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA"
