@@ -128,9 +128,9 @@ after-deploy-gfz-image-create-dbs:
   variables:
     COMPOSE_PROJECT_NAME: ssmbackend
   script:
-      - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec db psql -U postgres -c 'CREATE DATABASE db_prod' || echo "prod database already exists"
-      - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec db psql -U postgres -c 'CREATE DATABASE db_dev' || echo "dev database already exists"
-      - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec db psql -U postgres -c 'CREATE DATABASE db_test;' || echo "test database already exists"
+      - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T db psql -U postgres -c 'CREATE DATABASE db_prod' || echo "prod database already exists"
+      - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T db psql -U postgres -c 'CREATE DATABASE db_dev' || echo "dev database already exists"
+      - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T db psql -U postgres -c 'CREATE DATABASE db_test;' || echo "test database already exists"
   only:
     variables:
       - $STAGING_HOST =~ /gfz/
@@ -151,7 +151,7 @@ after-deploy-gfz-image-recreate-tables:
   variables:
     COMPOSE_PROJECT_NAME: ssmbackend
   script:
-      - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec ssmbackend python3 app/manage.py recreate_db
+      - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T ssmbackend python3 manage.py recreate_db
   only:
     variables:
       - $STAGING_HOST =~ /gfz/
@@ -173,7 +173,7 @@ after-deploy-gfz-image-init-tables:
   variables:
     COMPOSE_PROJECT_NAME: ssmbackend
   script:
-      - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec ssmbackend python3 app/manage.py db_init
+      - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T ssmbackend python3 manage.py db_init
   only:
     variables:
       - $STAGING_HOST =~ /gfz/
