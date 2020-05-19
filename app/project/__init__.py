@@ -36,7 +36,8 @@ def create_app(script_info=None):
 
     @app.after_request
     def add_header(response):
-        response.headers['Access-Control-Allow-Origin'] = 'https://git.ufz.de'
+        #response.headers['Access-Control-Allow-Origin'] = 'https://git.ufz.de'
+        response.headers['Access-Control-Allow-Origin'] = '*'
         response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
 
         return response
