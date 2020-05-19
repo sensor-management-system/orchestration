@@ -4,7 +4,9 @@ stages:
   - release
   - build-gfz-image
   - deploy-gfz-image
-  - after-deployment-gfz
+  - after-deployment-gfz-create-database
+  - after-deployment-gfz-create-tables
+  - after-deployment-gfz-init-tables
   - after-deployment-test-gfz
 
 variables:
@@ -115,7 +117,7 @@ deploy-gfz-image:
 
 
 after-deploy-gfz-image-create-dbs:
-  stage: after-deployment-gfz
+  stage: after-deployment-gfz-create-database
   environment:
     name: gfzstaging
     url: https://$STAGING_HOST
@@ -138,7 +140,7 @@ after-deploy-gfz-image-create-dbs:
   allow_failure: true
 
 after-deploy-gfz-image-recreate-tables:
-  stage: after-deployment-gfz
+  stage: after-deployment-gfz-init-tables
   environment:
     name: gfzstaging
     url: https://$STAGING_HOST
@@ -159,7 +161,8 @@ after-deploy-gfz-image-recreate-tables:
   allow_failure: true
 
 after-deploy-gfz-image-init-tables:
-  stage: after-deployment-gfz
+  stage: after-deployment-gfz-create-tables
+
   environment:
     name: gfzstaging
     url: https://$STAGING_HOST
