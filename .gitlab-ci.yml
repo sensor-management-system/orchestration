@@ -91,6 +91,8 @@ test-frontend-unit-tests-ufz:
 build-deploy-image:
   stage: build-gfz
   image: docker:19.03.1
+  variables:
+    BACKEND_URL: ${STAGING_BACKEND_URL}
   before_script:
     - *docker_login_gitlab_registry
   script:
@@ -117,6 +119,8 @@ build-deploy-image:
 build-deploy-image-manual:
   stage: build-gfz
   image: docker:19.03.1
+  variables:
+    BACKEND_URL: ${STAGING_BACKEND_URL}
   before_script:
     - *docker_login_gitlab_registry
   script:

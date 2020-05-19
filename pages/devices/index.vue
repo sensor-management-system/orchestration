@@ -266,6 +266,9 @@ export default class DevicesIndexPage extends Vue {
   clearBasicSearch () {
     this.searchText = null
     this.selectedSearchType = 'Sensor / Platform'
+    DeviceService.ping().then((data) => {
+      console.log(data)
+    })
   }
 
   extendedSearch () {
