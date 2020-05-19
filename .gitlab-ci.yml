@@ -140,7 +140,7 @@ after-deploy-gfz-image-create-dbs:
   allow_failure: true
 
 after-deploy-gfz-image-recreate-tables:
-  stage: after-deployment-gfz-init-tables
+  stage: after-deployment-gfz-create-tables
   environment:
     name: gfzstaging
     url: https://$STAGING_HOST
@@ -161,8 +161,7 @@ after-deploy-gfz-image-recreate-tables:
   allow_failure: true
 
 after-deploy-gfz-image-init-tables:
-  stage: after-deployment-gfz-create-tables
-
+  stage: after-deployment-gfz-init-tables
   environment:
     name: gfzstaging
     url: https://$STAGING_HOST
