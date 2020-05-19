@@ -1,5 +1,6 @@
 FROM node:10.16.3-stretch as js-builder
-ENV BACKEND_URL 'http://rz-vm64.gfz-potsdam.de:5000'
+ARG BACKEND_URL_ARG
+ENV BACKEND_URL $BACKEND_URL_ARG
 RUN mkdir /ssmfrontend
 COPY . /ssmfrontend
 WORKDIR /ssmfrontend
