@@ -1,9 +1,11 @@
+import IPathSetter from './IPathSetter'
+
 export interface IMeasuringRange {
   min: number | null
   max: number | null
 }
 
-export class MeasuringRange implements IMeasuringRange {
+export class MeasuringRange implements IMeasuringRange, IPathSetter {
   private _min: number | null = null
   private _max: number | null = null
 
@@ -21,6 +23,21 @@ export class MeasuringRange implements IMeasuringRange {
    */
   static createFromObject (someObject: IMeasuringRange) : MeasuringRange {
     return new MeasuringRange(someObject.min, someObject.max)
+  }
+
+  setPath (path: string, value: any): void {
+    const properties = path.split('.')
+    const property = properties.splice(0, 1)[0]
+    switch (property) {
+      case 'min':
+        this.min = parseInt(value)
+        break
+      case 'max':
+        this.max = parseInt(value)
+        break
+      default:
+        throw new TypeError('path ' + path + ' is not valid')
+    }
   }
 
   get min (): number | null {
