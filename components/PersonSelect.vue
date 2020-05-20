@@ -84,7 +84,7 @@ export default class PersonSelect extends Vue {
       this.$emit('update:selectedPersons', [
         ...this.selectedPersons,
         selectedPerson
-      ])
+      ] as Person[])
     }
   }
 
@@ -102,7 +102,7 @@ export default class PersonSelect extends Vue {
        * @event PersonSelect#update:selectedPersons
        * @type Person[]
        */
-      const selectedPersons = [...this.selectedPersons]
+      const selectedPersons = [...this.selectedPersons] as Person[]
       selectedPersons.splice(personIndex, 1)
       this.$emit('update:selectedPersons', selectedPersons)
     }
