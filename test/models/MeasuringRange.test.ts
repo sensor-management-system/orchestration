@@ -7,4 +7,13 @@ describe('MeasuringRange Models', () => {
     expect(range).toHaveProperty('min', 10)
     expect(range).toHaveProperty('max', 10)
   })
+
+  it('should set a property by its path', () => {
+    const range = new MeasuringRange()
+    range.setPath('min', 10)
+    range.setPath('max', 20)
+
+    expect(range).toHaveProperty('min', 10)
+    expect(range).toHaveProperty('max', 20)
+  })
 })
