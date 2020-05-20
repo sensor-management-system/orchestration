@@ -154,106 +154,7 @@
             >
               <v-card-title>Sensor URN: [MANUFACTURER_MODEL_TYPE_SERIALNUMBER]</v-card-title>
               <v-card-text>
-                <v-btn
-                  small
-                  color="primary"
-                >
-                  add Property
-                </v-btn>
-                <br><br>
-                <v-expansion-panels
-                  v-model="propertyStates"
-                  multiple
-                >
-                  <v-expansion-panel
-                    v-for="(item, index) in [0, 1]"
-                    :key="index"
-                  >
-                    <v-expansion-panel-header>
-                      <v-row no-gutters>
-                        <v-col cols="11">
-                          Property {{ index+1 }}
-                        </v-col>
-                        <v-col cols="1">
-                          <v-menu
-                            right
-                          >
-                            <template v-slot:activator="{ on }">
-                              <v-btn
-                                icon
-                                v-on="on"
-                              >
-                                <v-icon>mdi-dots-vertical</v-icon>
-                              </v-btn>
-                            </template>
-
-                            <v-list>
-                              <v-list-item>
-                                <v-list-item-title>Copy</v-list-item-title>
-                              </v-list-item>
-                              <v-list-item>
-                                <v-list-item-title>Delete</v-list-item-title>
-                              </v-list-item>
-                            </v-list>
-                          </v-menu>
-                        </v-col>
-                      </v-row>
-                    </v-expansion-panel-header>
-                    <v-expansion-panel-content>
-                      <v-row>
-                        <v-col cols="12" md="3">
-                          <v-select
-                            label="compartment"
-                          />
-                        </v-col>
-                        <v-col cols="12" md="3">
-                          <v-select
-                            label="unit"
-                          />
-                        </v-col>
-                        <v-col cols="12" md="3">
-                          <v-text-field
-                            label="accuracy"
-                          />
-                        </v-col>
-                      </v-row>
-                      <v-row>
-                        <v-col cols="12" md="3">
-                          <v-select
-                            label="sampling media"
-                          />
-                        </v-col>
-                        <v-col cols="12" md="1">
-                          <v-text-field
-                            label="measuring range min"
-                          />
-                        </v-col>
-                        <v-col cols="12" md="1">
-                          <v-text-field
-                            label="measuring range min"
-                          />
-                        </v-col>
-                        <v-col cols="12" md="3" offset="1">
-                          <v-text-field
-                            label="label"
-                          />
-                        </v-col>
-                      </v-row>
-                      <v-row>
-                        <v-col cols="12" md="3">
-                          <v-select
-                            label="variable"
-                          />
-                        </v-col>
-                        <v-col cols="12" md="3">
-                          <v-text-field
-                            label="failure value"
-                          />
-                        </v-col>
-                      </v-row>
-                    </v-expansion-panel-content>
-                  </v-expansion-panel>
-                </v-expansion-panels>
+                <SensorPropertyExpansionPanels v-model="sensor.properties" />
               </v-card-text>
               <v-card-actions>
                 <v-btn
@@ -415,9 +316,14 @@ import CustomTextField from '../../../models/CustomTextField'
 
 // @ts-ignore
 import PersonSelect from '../../../components/PersonSelect.vue'
+// @ts-ignore
+import SensorPropertyExpansionPanels from '../../../components/SensorPropertyExpansionPanels.vue'
 
 @Component({
-  components: { PersonSelect }
+  components: {
+    PersonSelect,
+    SensorPropertyExpansionPanels
+  }
 })
 // @ts-ignore
 export default class SensorIdPage extends Vue {
@@ -505,7 +411,7 @@ export default class SensorIdPage extends Vue {
   onSensorChanged (val: Sensor) {
     // @TODO: remove!
     // eslint-disable-next-line
-    console.log('something changed', val.responsiblePersons)
+    console.log('something changed in the sensor', val)
   }
 }
 </script>
