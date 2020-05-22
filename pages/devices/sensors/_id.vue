@@ -19,7 +19,7 @@
             <v-card
               flat
             >
-              <v-card-title>Sensor URN: [MANUFACTURER_MODEL_TYPE_SERIALNUMBER]</v-card-title>
+              <v-card-title>Sensor URN: {{ sensorURN }}</v-card-title>
               <v-card-text>
                 <v-row>
                   <v-col cols="12" md="3">
@@ -124,7 +124,7 @@
             <v-card
               flat
             >
-              <v-card-title>Sensor URN: [MANUFACTURER_MODEL_TYPE_SERIALNUMBER]</v-card-title>
+              <v-card-title>Sensor URN: {{ sensorURN }}</v-card-title>
               <v-card-text>
                 <v-row>
                   <v-col cols="3">
@@ -152,7 +152,7 @@
             <v-card
               flat
             >
-              <v-card-title>Sensor URN: [MANUFACTURER_MODEL_TYPE_SERIALNUMBER]</v-card-title>
+              <v-card-title>Sensor URN: {{ sensorURN }}</v-card-title>
               <v-card-text>
                 <SensorPropertyExpansionPanels v-model="sensor.properties" />
               </v-card-text>
@@ -200,7 +200,7 @@
             <v-card
               flat
             >
-              <v-card-title>Sensor URN: [MANUFACTURER_MODEL_TYPE_SERIALNUMBER]</v-card-title>
+              <v-card-title>Sensor URN: {{ sensorURN }}</v-card-title>
               <v-card-text>
                 <v-timeline dense clipped>
                   <v-timeline-item
@@ -300,6 +300,10 @@ export default class SensorIdPage extends Vue {
   private activeTab: number = 0
 
   private sensor: Sensor = new Sensor()
+
+  get sensorURN () {
+    return this.sensor.urn
+  }
 
   previousTab () {
     this.activeTab = this.activeTab === 0 ? this.numberOfTabs - 1 : this.activeTab - 1
