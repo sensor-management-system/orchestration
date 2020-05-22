@@ -1,6 +1,6 @@
 import Person from './Person'
 import { SensorProperty } from './SensorProperty'
-import CustomTextField from './CustomTextField'
+import { CustomTextField } from './CustomTextField'
 
 export default class Sensor {
   private _id: number | null = null
