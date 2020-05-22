@@ -176,39 +176,9 @@
             <v-card
               flat
             >
-              <v-card-title>Sensor URN: [MANUFACTURER_MODEL_TYPE_SERIALNUMBER]</v-card-title>
+              <v-card-title>Sensor URN: {{ sensorURN }}</v-card-title>
               <v-card-text>
-                <v-btn
-                  small
-                  color="primary"
-                >
-                  add Custom Field
-                </v-btn>
-                <br><br>
-                <v-row
-                  v-for="(item, index) in [0, 1]"
-                  :key="index"
-                >
-                  <v-col cols="12" md="3">
-                    <v-text-field
-                      label="key"
-                    />
-                  </v-col>
-                  <v-col cols="12" md="3">
-                    <v-text-field
-                      label="value"
-                    />
-                  </v-col>
-                  <v-col cols="1">
-                    <v-btn
-                      color="error"
-                      small
-                      outlined
-                    >
-                      delete
-                    </v-btn>
-                  </v-col>
-                </v-row>
+                <CustomFieldCards v-model="sensor.customFields" />
               </v-card-text>
               <v-card-actions>
                 <v-btn
@@ -309,20 +279,19 @@
 <script lang="ts">
 import { Vue, Component, Watch } from 'nuxt-property-decorator'
 import Sensor from '../../../models/Sensor'
-// eslint-disable-next-line
-import { SensorProperty } from '../../../models/SensorProperty'
-// eslint-disable-next-line
-import CustomTextField from '../../../models/CustomTextField'
 
 // @ts-ignore
 import PersonSelect from '../../../components/PersonSelect.vue'
 // @ts-ignore
 import SensorPropertyExpansionPanels from '../../../components/SensorPropertyExpansionPanels.vue'
+// @ts-ignore
+import CustomFieldCards from '../../../components/CustomFieldCards.vue'
 
 @Component({
   components: {
     PersonSelect,
-    SensorPropertyExpansionPanels
+    SensorPropertyExpansionPanels,
+    CustomFieldCards
   }
 })
 // @ts-ignore
