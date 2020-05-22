@@ -72,7 +72,6 @@ export default class CustomFieldCards extends Vue {
    * @fires CustomFieldCards#input
    */
   addField () {
-    console.log('Add')
     /**
      * Update event
      * @event CustomFieldCards#input
