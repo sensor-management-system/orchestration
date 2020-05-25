@@ -1,5 +1,17 @@
 <template>
   <v-container>
+      <v-row v-if="!isLoggedIn">
+          <v-col>
+              <h1 class="display-1 text-center">You're not logged in</h1>
+          </v-col>
+      </v-row>
+      <v-row v-if="isLoggedIn"
+             class="text-center"
+      >
+          <v-col>
+              <h1><kbd>{{username}}</kbd> you're now logged in.</h1>
+          </v-col>
+      </v-row>
     <v-row justify="center">
       <v-col cols="12">
         <h1>Welcome to the Sensor System Management tool</h1>
@@ -30,3 +42,20 @@
     </v-row>
   </v-container>
 </template>
+<script>
+
+    export default {
+        name: 'Home',
+        data: () => ({
+        }),
+        computed: {
+            isLoggedIn() {
+                return this.$store.getters['auth/isAuthenticated'];
+            },
+            username(){
+                return this.$store.getters['auth/username'];
+            }
+        }
+
+    }
+</script>
