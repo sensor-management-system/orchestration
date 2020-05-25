@@ -9,7 +9,7 @@ import SensorPropertyForm from '../components/SensorPropertyForm.vue'
 import { SensorProperty } from '@/models/SensorProperty'
 
 // see https://github.com/vuejs/vue-test-utils/issues/960
-function withWrapperArray(wrapperArray: WrapperArray<Vue>): Record<string, Function> {
+function withWrapperArray (wrapperArray: WrapperArray<Vue>): Record<string, Function> {
   return {
     childSelectorHasText: (
       selector: string,
@@ -24,7 +24,7 @@ function withWrapperArray(wrapperArray: WrapperArray<Vue>): Record<string, Funct
 
 Vue.use(Vuetify)
 
-describe('PersonSelect', () => {
+describe('SensorPropertyForm', () => {
   let wrapper: any
 
   /*
