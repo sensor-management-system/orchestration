@@ -4,7 +4,7 @@ import Vuetify from 'vuetify'
 import { mount, createLocalVue } from '@vue/test-utils'
 
 // @ts-ignore
-import PersonSelect from '../components/PersonSelect.vue'
+import PersonSelect from '@/components/PersonSelect.vue'
 import Person from '@/models/Person'
 
 Vue.use(Vuetify)

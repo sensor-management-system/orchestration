@@ -1,5 +1,5 @@
-import { MeasuringRange } from '../../models/MeasuringRange'
-import { SensorProperty } from '../../models/SensorProperty'
+import { MeasuringRange } from '@/models/MeasuringRange'
+import { SensorProperty } from '@/models/SensorProperty'
 
 describe('SensorProperty Models', () => {
   it('should create a SensorProperty from an object', () => {

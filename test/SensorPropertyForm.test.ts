@@ -5,7 +5,7 @@ import { mount, createLocalVue } from '@vue/test-utils'
 import { WrapperArray } from '@vue/test-utils/types'
 
 // @ts-ignore
-import SensorPropertyForm from '../components/SensorPropertyForm.vue'
+import SensorPropertyForm from '@/components/SensorPropertyForm.vue'
 import { SensorProperty } from '@/models/SensorProperty'
 
 // see https://github.com/vuejs/vue-test-utils/issues/960
