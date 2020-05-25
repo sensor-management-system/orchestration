@@ -69,6 +69,21 @@
       <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
       <v-toolbar-title v-text="title" />
       <v-spacer />
+      <v-btn
+          color="primary"
+          v-if="!isLoggedIn"
+          @click="loginPopup"
+      >
+        OIDC_login
+      </v-btn>
+      <v-btn
+          color="primary"
+          v-if="isLoggedIn"
+          light
+          @click="logoutPopup"
+      >
+          Logout
+      </v-btn>
     </v-app-bar>
     <v-content>
       <v-container>
@@ -85,7 +100,7 @@
 </template>
 
 <script>
-export default {
+  export default {
   data () {
     return {
       clipped: false,
@@ -94,6 +109,29 @@ export default {
       miniVariant: false,
       title: 'Sensor System Management'
     }
-  }
+  },
+    mounted() {
+      this.$store.dispatch('auth/loadStoredUser');
+    },
+    methods: {
+      loginPopup() {
+        this.$store.dispatch('auth/loginPopup');
+      },
+      logoutPopup() {
+        let routing = {
+          router: this.$router,
+          currentRoute: this.$route.path
+        };
+        this.$store.dispatch('auth/logoutPopup', routing);
+      },
+      silentRenew(){
+        this.$store.dispatch('auth/silentRenew');
+      }
+    },
+    computed: {
+      isLoggedIn() {
+        return this.$store.getters["auth/isAuthenticated"]
+      }
+    }
 }
 </script>
