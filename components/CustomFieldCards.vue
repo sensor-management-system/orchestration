@@ -3,6 +3,7 @@
     <v-btn
       small
       color="primary"
+      data-role="add-field"
       @click="addField"
     >
       add Custom Field
@@ -23,6 +24,7 @@
                 color="error"
                 small
                 outlined
+                data-role="delete-field"
                 @click="removeField(index)"
               >
                 delete
