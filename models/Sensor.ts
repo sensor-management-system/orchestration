@@ -1,6 +1,6 @@
 import Person from './Person'
 import { SensorProperty } from './SensorProperty'
-import CustomTextField from './CustomTextField'
+import { CustomTextField } from './CustomTextField'
 
 export default class Sensor {
   private _id: number | null = null
@@ -138,5 +138,14 @@ export default class Sensor {
 
   set customFields (customFields: CustomTextField[]) {
     this._customFields = customFields
+  }
+
+  get urn () {
+    let urn = ''
+    urn += this.manufacturer || ''
+    urn += this.model ? '_' + this.model : ''
+    urn += this.type ? '_' + this.type : ''
+    urn += this.serialNumber ? '_' + this.serialNumber : ''
+    return urn
   }
 }
