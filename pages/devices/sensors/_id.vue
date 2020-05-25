@@ -31,11 +31,13 @@
                 <v-row>
                   <v-col cols="12" md="6">
                     <v-text-field
+                      v-model="sensor.label"
                       label="label"
                     />
                   </v-col>
                   <v-col cols="12" md="3">
                     <v-select
+                      v-model="sensor.state"
                       :items="states"
                       label="state"
                     />
@@ -44,17 +46,20 @@
                 <v-row>
                   <v-col cols="12" md="3">
                     <v-select
+                      v-model="sensor.type"
                       :items="sensorTypes"
                       label="type"
                     />
                   </v-col>
                   <v-col cols="12" md="3">
                     <v-text-field
+                      v-model="sensor.manufacturer"
                       label="manufacturer"
                     />
                   </v-col>
                   <v-col cols="12" md="3">
                     <v-text-field
+                      v-model="sensor.model"
                       label="model"
                     />
                   </v-col>
@@ -62,12 +67,17 @@
                 <v-divider />
                 <v-row>
                   <v-col cols="12" md="6">
-                    <v-textarea label="Description" rows="3" />
+                    <v-textarea
+                      v-model="sensor.description"
+                      label="Description"
+                      rows="3"
+                    />
                   </v-col>
                 </v-row>
                 <v-row>
                   <v-col cols="12" md="3">
                     <v-text-field
+                      v-model="sensor.urlWebsite"
                       label="Website"
                       placeholder="https://"
                     />
@@ -77,18 +87,26 @@
                 <v-row>
                   <v-col cols="12" md="3">
                     <v-text-field
+                      v-model="sensor.serialNumber"
                       label="Serial Number"
                     />
                   </v-col>
                   <v-col cols="12" md="3">
                     <v-text-field
+                      v-model="sensor.inventoryNumber"
                       label="Inventar Number"
                     />
                   </v-col>
                 </v-row>
                 <v-row>
                   <v-col cols="12" md="3">
-                    <v-checkbox label="Dual Use" hint="can be used for military aims" :persistent-hint="true" color="red darken-3" />
+                    <v-checkbox
+                      v-model="sensor.dualUse"
+                      label="Dual Use"
+                      hint="can be used for military aims"
+                      :persistent-hint="true"
+                      color="red darken-3"
+                    />
                   </v-col>
                 </v-row>
               </v-card-text>
@@ -110,31 +128,7 @@
               <v-card-text>
                 <v-row>
                   <v-col cols="3">
-                    <v-autocomplete
-                      label="add a person"
-                    />
-                    <v-chip
-                      class="ma-2"
-                      color="indigo"
-                      text-color="white"
-                      :close="true"
-                    >
-                      <v-avatar left>
-                        <v-icon>mdi-account-circle</v-icon>
-                      </v-avatar>
-                      Mister Marple
-                    </v-chip>
-                    <v-chip
-                      class="ma-2"
-                      color="indigo"
-                      text-color="white"
-                      :close="true"
-                    >
-                      <v-avatar left>
-                        <v-icon>mdi-account-circle</v-icon>
-                      </v-avatar>
-                      Hans Hamster
-                    </v-chip>
+                    <PersonSelect :selected-persons.sync="sensor.responsiblePersons" />
                   </v-col>
                 </v-row>
               </v-card-text>
@@ -343,7 +337,9 @@
                     small
                   >
                     <v-row justify="space-between">
-                      <v-col cols="2">2020-04-28 10:15</v-col>
+                      <v-col cols="2">
+                        2020-04-28 10:15
+                      </v-col>
                       <v-col cols="10">
                         <strong>attached to platform XY</strong>
                         <div>Max M.</div>
@@ -357,7 +353,9 @@
                     small
                   >
                     <v-row justify="space-between">
-                      <v-col cols="2">2020-04-28 09:15</v-col>
+                      <v-col cols="2">
+                        2020-04-28 09:15
+                      </v-col>
                       <v-col cols="10">
                         <strong>edited description</strong>
                         <div>Max M.</div>
@@ -371,7 +369,9 @@
                     small
                   >
                     <v-row justify="space-between">
-                      <v-col cols="2">2020-04-20 08:05</v-col>
+                      <v-col cols="2">
+                        2020-04-20 08:05
+                      </v-col>
                       <v-col cols="10">
                         <strong>sensor created</strong>
                         <div>Hans H.</div>
@@ -407,11 +407,22 @@
 
 <script lang="ts">
 import { Vue, Component } from 'nuxt-property-decorator'
+import Sensor from '../../../models/Sensor'
+import { SensorProperty } from '../../../models/SensorProperty'
+import CustomTextField from '../../../models/CustomTextField'
 
-@Component
-export default class Sensors extends Vue {
-  numberOfTabs: number = 5
-  activeTab: number = 0
+// @ts-ignore
+import PersonSelect from '../../../components/PersonSelect.vue'
+
+@Component({
+  components: { PersonSelect }
+})
+// @ts-ignore
+export default class SensorIdPage extends Vue {
+  private numberOfTabs: number = 5
+  private activeTab: number = 0
+
+  private sensor: Sensor = new Sensor()
 
   previousTab () {
     this.activeTab = this.activeTab === 0 ? this.numberOfTabs - 1 : this.activeTab - 1
