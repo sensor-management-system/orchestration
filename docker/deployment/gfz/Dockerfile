@@ -1,4 +1,6 @@
 FROM node:10.16.3-stretch as js-builder
+ARG BACKEND_URL_ARG
+ENV BACKEND_URL $BACKEND_URL_ARG
 RUN mkdir /ssmfrontend
 COPY . /ssmfrontend
 WORKDIR /ssmfrontend

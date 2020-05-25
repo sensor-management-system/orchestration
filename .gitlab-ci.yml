@@ -11,7 +11,7 @@ cache:
   paths:
     - dist
 
-check-lint:
+check-lint-gfz:
   stage: check
   image: node:10.16.3-stretch
   before_script:
@@ -28,9 +28,28 @@ check-lint:
     key: ${CI_COMMIT_REF_SLUG}
     paths:
       - node_modules
+  only:
+    variables:
+      - $STAGING_HOST =~ /gfz/
 
+check-lint-ufz:
+  stage: check
+  image: node:10.16.3-stretch
+  before_script:
+    - node -v
+    - npm install
+  script:
+    - npm run lint
+  allow_failure: true
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - node_modules
+  except:
+    variables:
+      - $STAGING_HOST =~ /gfz/
 
-test-frontend-unit-tests:
+test-frontend-unit-tests-gfz:
   stage: test
   image: node:10.16.3-stretch
   before_script:
@@ -46,6 +65,25 @@ test-frontend-unit-tests:
     key: ${CI_COMMIT_REF_SLUG}
     paths:
       - node_modules
+  only:
+    variables:
+      - $STAGING_HOST =~ /gfz/
+
+test-frontend-unit-tests-ufz:
+  stage: test
+  image: node:10.16.3-stretch
+  before_script:
+    - node -v
+    - npm install
+  script:
+    - npm test
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - node_modules
+  except:
+    variables:
+      - $STAGING_HOST =~ /gfz/
 
 .docker_login_gitlab_registry: &docker_login_gitlab_registry
   - echo "$CI_BUILD_TOKEN" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
@@ -53,18 +91,24 @@ test-frontend-unit-tests:
 build-deploy-image:
   stage: build-gfz
   image: docker:19.03.1
+  variables:
+    BACKEND_URL: ${STAGING_BACKEND_URL}
   before_script:
     - *docker_login_gitlab_registry
   script:
     - >
       if [ -z "$CI_COMMIT_TAG" ]; then
-        docker build --pull -t "$CI_REGISTRY_IMAGE:latest" --tag "$CI_REGISTRY_IMAGE:latest" -f docker/deployment/gfz/Dockerfile .
+        docker build --pull -t "$CI_REGISTRY_IMAGE:latest" --tag "$CI_REGISTRY_IMAGE:latest" -f docker/deployment/gfz/Dockerfile --build-arg BACKEND_URL_ARG=$BACKEND_URL .
         docker push "$CI_REGISTRY_IMAGE:latest"
       else
-        docker build --pull -t "$CI_REGISTRY_IMAGE:latest" --tag "$CI_REGISTRY_IMAGE:$CI_COMMIT_TAG" --tag "$CI_REGISTRY_IMAGE:latest" -f docker/deployment/gfz/Dockerfile .
+        docker build --pull -t "$CI_REGISTRY_IMAGE:latest" --tag "$CI_REGISTRY_IMAGE:$CI_COMMIT_TAG" --tag "$CI_REGISTRY_IMAGE:latest" -f docker/deployment/gfz/Dockerfile --build-arg BACKEND_URL_ARG=$BACKEND_URL .
         docker push "$CI_REGISTRY_IMAGE:latest"
         docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_TAG"
       fi
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - node_modules
   tags:
     - deploy
     - staging
@@ -79,11 +123,17 @@ build-deploy-image:
 build-deploy-image-manual:
   stage: build-gfz
   image: docker:19.03.1
+  variables:
+    BACKEND_URL: ${STAGING_BACKEND_URL}
   before_script:
     - *docker_login_gitlab_registry
   script:
-    - docker build --tag "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA" -f docker/deployment/gfz/Dockerfile .
+    - docker build --tag "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA" -f docker/deployment/gfz/Dockerfile --build-arg BACKEND_URL_ARG=$BACKEND_URL .
     - docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA"
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - node_modules
   tags:
     - deploy
     - staging
@@ -96,7 +146,7 @@ build-deploy-image-manual:
 deploy-staging:
   stage: deploy-staging-gfz
   environment:
-    name: staging
+    name: gfzstaging
     url: https://$STAGING_HOST
   tags:
     - deploy
@@ -118,7 +168,7 @@ deploy-staging:
 deploy-staging-manual-8080:
   stage: deploy-staging-gfz
   environment:
-    name: staging
+    name: gfzstaging8080
     url: https://${STAGING_HOST}:8080
   tags:
     - deploy
@@ -164,6 +214,9 @@ build_image:
 test-availability-staging:
   stage: after-deployment-tests-gfz
   image: python:3
+  environment:
+    name: gfzstaging
+    url: https://$STAGING_HOST
   tags:
     - deploy
     - staging
@@ -181,6 +234,9 @@ test-availability-staging:
 test-availability-staging8080:
   stage: after-deployment-tests-gfz
   image: python:3
+  environment:
+    name: gfzstaging8080
+    url: https://${STAGING_HOST}:8080
   tags:
     - deploy
     - staging

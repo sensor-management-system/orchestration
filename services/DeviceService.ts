@@ -11,6 +11,11 @@ const fakeDb = {
 }
 
 export default class DeviceService {
+  // this was just a demo to see that we can reach our backend
+  /*static ping () : Promise<any> {
+    console.log(process.env.backendUrl)
+    return fetch(process.env.backendUrl + '/sis/v1/ping')
+  }*/
   static findPlatformById (id: string): Promise<Platform> {
     const searchId = Number.parseInt(id)
     return new Promise((resolve, reject) => {
