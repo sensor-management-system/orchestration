@@ -3,6 +3,7 @@
     <v-btn
       small
       color="primary"
+      data-role="add-property"
       @click="addProperty"
     >
       add Property
@@ -27,6 +28,7 @@
               >
                 <template v-slot:activator="{ on }">
                   <v-btn
+                    data-role="property-menu"
                     icon
                     v-on="on"
                   >
@@ -36,11 +38,13 @@
 
                 <v-list>
                   <v-list-item
+                    data-role="copy-property"
                     @click="copyProperty(index)"
                   >
                     <v-list-item-title>Copy</v-list-item-title>
                   </v-list-item>
                   <v-list-item
+                    data-role="delete-property"
                     @click="removeProperty(index)"
                   >
                     <v-list-item-title>Delete</v-list-item-title>
