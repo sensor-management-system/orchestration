@@ -1,12 +1,13 @@
 import Platform from '../models/Platform'
 import PlatformType from '../models/PlatformType'
+import Person from '../models/Person'
 
 import MasterDataService from './MasterDataService'
 
 const fakeDb = {
   platforms: [
-    Platform.createWithIdAndData(1, 1, 'Boeken', 'Boeken', 'The Boeken station', 1, '', [1]),
-    Platform.createWithIdAndData(2, 3, 'Polarstern', 'Polarsterrn', 'The icebreaker', 1, '', [2, 1])
+    Platform.createWithIdAndData(1, 1, 'Boeken', 'Boeken', 'The Boeken station', 1, '', [Person.createWithIdAndName(1, 'Person 1')]),
+    Platform.createWithIdAndData(2, 3, 'Polarstern', 'Polarsterrn', 'The icebreaker', 1, '', [Person.createWithIdAndName(1, 'Person 1'), Person.createWithIdAndName(2, 'Person 2')])
   ]
 }
 

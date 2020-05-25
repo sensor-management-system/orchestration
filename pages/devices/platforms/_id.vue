@@ -99,47 +99,9 @@
                 Platform URN: {{ platformURN }}
               </v-card-title>
               <v-card-text>
-                <v-row v-if="isInEditMode">
-                  <v-col cols="5" md="3">
-                    <v-autocomplete
-                      v-model="personToAdd"
-                      :items="possiblePersonsToSelect"
-                      :item-text="(x) => x.name"
-                      :item-value="(x) => x.id"
-                      label="add a person"
-                      no-data-text="There is no person to add"
-                    />
-                  </v-col>
-                  <v-col cols="5" md="1">
-                    <v-btn
-                      fab
-                      depressed
-                      small
-                      :disabled="personToAdd == null"
-                      @click="addSelectedPerson"
-                    >
-                      <v-icon>
-                        mdi-plus
-                      </v-icon>
-                    </v-btn>
-                  </v-col>
-                </v-row>
                 <v-row>
                   <v-col cols="3">
-                    <v-chip
-                      v-for="(personId, index) in platform.responsiblePersonIds"
-                      :key="personId"
-                      class="ma-2"
-                      color="indigo"
-                      text-color="white"
-                      :close="isInEditMode"
-                      @click:close="removePerson(index)"
-                    >
-                      <v-avatar left>
-                        <v-icon>mdi-account-circle</v-icon>
-                      </v-avatar>
-                      {{ findPersonNameById(personId) }}
-                    </v-chip>
+                    <PersonSelect :selected-persons.sync="platform.responsiblePersons" :readonly="!isInEditMode" />
                   </v-col>
                 </v-row>
               </v-card-text>
@@ -192,28 +154,28 @@
 import { Component, Vue } from 'nuxt-property-decorator'
 
 import MasterDataService from '../../../services/MasterDataService'
-import PersonService from '../../../services/PersonService'
 import DeviceService from '../../../services/DeviceService'
 
 import Manufacture from '../../../models/Manufacture'
 import PlatformType from '../../../models/PlatformType'
-import Person from '../../../models/Person'
 import Platform from '../../../models/Platform'
 
-@Component
+// @ts-ignore
+import PersonSelect from '../../../components/PersonSelect.vue'
+
+@Component({
+  components: { PersonSelect }
+})
+// @ts-ignore
 export default class PlatformIdPage extends Vue {
   // data
   // first for the data to chose the elements
   private platformTypes: PlatformType[] = []
   private manufactures: Manufacture[] = []
   private types: Array<string> = ['Type 01']
-  private persons: Person[] = []
 
   // then for our platform that we want to change
   private platform: Platform = Platform.createEmpty()
-
-  // for a person that we may want to add
-  private personToAdd: number | null = null
 
   // and some general data for the page
   private activeTabIdx: number = 0
@@ -229,10 +191,6 @@ export default class PlatformIdPage extends Vue {
     MasterDataService.findAllPlatformTypes().then((foundPlatformTypes) => {
       this.platformTypes = foundPlatformTypes
     })
-    PersonService.findAllPersons().then((foundPersons) => {
-      this.persons = foundPersons
-    })
-
     this.loadPlatform()
   }
 
@@ -252,15 +210,6 @@ export default class PlatformIdPage extends Vue {
   }
 
   // methods
-  addSelectedPerson () {
-    this.$set(this.platform.responsiblePersonIds, this.platform.responsiblePersonIds.length, this.personToAdd)
-    this.personToAdd = null
-  }
-
-  removePerson (index: number) {
-    this.$delete(this.platform.responsiblePersonIds, index)
-  }
-
   save () {
     this.showSaveSuccess = false
     DeviceService.savePlatform(this.platform).then(() => {
@@ -279,42 +228,6 @@ export default class PlatformIdPage extends Vue {
 
   nextTab () {
     this.activeTabIdx += 1
-  }
-
-  findPersonNameById (personId: number | null): string {
-    let foundPerson = null
-    for (const singlePerson of this.persons) {
-      if (singlePerson.id === personId) {
-        foundPerson = singlePerson
-        break
-      }
-    }
-    if (foundPerson != null) {
-      return foundPerson.name
-    }
-    return 'Unknown person'
-  }
-
-  get possiblePersonsToSelect (): Person[] {
-    // this here gives an filtered person array back
-    // it takes the original set from the person service
-    // but takes all out that are already in use for the
-    // current platform
-    //
-    // this way it is not possible to select the same person
-    // multiple times
-    const result = []
-    const usedPersonIds: Set<number> = new Set()
-
-    for (const personId of this.platform.responsiblePersonIds) {
-      usedPersonIds.add(personId)
-    }
-    for (const person of this.persons) {
-      if (person.id != null && !usedPersonIds.has(person.id)) {
-        result.push(person)
-      }
-    }
-    return result
   }
 
   get platformURN () {
