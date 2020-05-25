@@ -64,4 +64,8 @@ describe('PersonSelect', () => {
     expect(wrapper.isVueInstance()).toBeTruthy()
   })
 
+  it('should trigger an input event on change', async () => {
+    wrapper.get('input[type="text"]').setValue('foo')
+    expect(wrapper.emitted('input')).toBeTruthy()
+  })
 })
