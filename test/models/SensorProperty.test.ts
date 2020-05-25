@@ -2,7 +2,7 @@ import { MeasuringRange } from '../../models/MeasuringRange'
 import { SensorProperty } from '../../models/SensorProperty'
 
 describe('SensorProperty Models', () => {
-  test('create a SensorProperty from an object', () => {
+  it('should create a SensorProperty from an object', () => {
     const prop = SensorProperty.createFromObject({
       compartment: 'test',
       label: 'test',
@@ -23,6 +23,30 @@ describe('SensorProperty Models', () => {
     expect(prop).toHaveProperty('unit', 'mm')
     expect(prop).toHaveProperty('variable', 'foo.bar')
     expect(prop).toHaveProperty('accuracy', 0.1)
+    expect(prop).toHaveProperty('failureValue', 0.01)
     expect(prop.measuringRange instanceof MeasuringRange).toBe(true)
+  })
+
+  it('should set a property by its path', () => {
+    const prop = new SensorProperty()
+    prop.setPath('compartment', 'test')
+    prop.setPath('label', 'foo')
+    prop.setPath('samplingMedia', 'water')
+    prop.setPath('unit', 'mm')
+    prop.setPath('variable', 'foo.bar')
+    prop.setPath('measuringRange.min', 10)
+    prop.setPath('measuringRange.max', 20)
+    prop.setPath('accuracy', 0.1)
+    prop.setPath('failureValue', 0.01)
+
+    expect(prop).toHaveProperty('compartment', 'test')
+    expect(prop).toHaveProperty('label', 'foo')
+    expect(prop).toHaveProperty('samplingMedia', 'water')
+    expect(prop).toHaveProperty('unit', 'mm')
+    expect(prop).toHaveProperty('variable', 'foo.bar')
+    expect(prop).toHaveProperty('accuracy', 0.1)
+    expect(prop).toHaveProperty('failureValue', 0.01)
+    expect(prop.measuringRange).toHaveProperty('min', 10)
+    expect(prop.measuringRange).toHaveProperty('max', 20)
   })
 })

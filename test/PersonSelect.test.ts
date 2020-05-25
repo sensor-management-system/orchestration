@@ -12,6 +12,10 @@ Vue.use(Vuetify)
 describe('PersonSelect', () => {
   let wrapper: any
 
+  /*
+   * setup
+   */
+
   beforeEach(() => {
     const localVue = createLocalVue()
     const vuetify = new Vuetify()
@@ -30,6 +34,10 @@ describe('PersonSelect', () => {
     })
   })
 
+  /*
+   * initial state
+   */
+
   it('should be a Vue instance', () => {
     expect(wrapper.isVueInstance()).toBeTruthy()
   })
@@ -38,25 +46,31 @@ describe('PersonSelect', () => {
     expect(wrapper.findAll({ name: 'v-chip' })).toHaveLength(1)
   })
 
-  it('should remove one chip', async () => {
-    const chip = wrapper.find({ name: 'v-chip' })
-    chip.find('button').trigger('click')
-    await wrapper.vm.$nextTick()
+  /*
+   * removing
+   */
 
-    expect(wrapper.findAll({ name: 'v-chip' })).toHaveLength(0)
+  it('should trigger an update event when a person is removed', () => {
+    wrapper.vm.removePerson(1)
+    expect(wrapper.emitted('update:selectedPersons')).toBeTruthy()
+  })
+
+  it('should trigger an event with a persons array with a length decreased by 1 when a person is removed', () => {
+    wrapper.vm.removePerson(1)
+    expect(wrapper.emitted('update:selectedPersons')[0][0]).toHaveLength(0)
   })
 
   /*
-  it('should add a second chip', async () => {
-    const autocomplete = wrapper.find('.v-autocomplete')
-    const input = autocomplete.find('input[type="text"]')
-    input.setValue('Person 2')
-    input.trigger('input')
-    await wrapper.vm.$nextTick()
-    autocomplete.trigger('keydown.enter')
-    await wrapper.vm.$nextTick()
+   * adding
+   */
 
-    expect(wrapper.findAll({ name: 'v-chip' })).toHaveLength(2)
+  it('should trigger an update event when a person is added', () => {
+    wrapper.vm.addPerson(2)
+    expect(wrapper.emitted('update:selectedPersons')).toBeTruthy()
   })
-  */
+
+  it('should trigger an event with a persons array with a length increased by 1 when a person is added', () => {
+    wrapper.vm.addPerson(2)
+    expect(wrapper.emitted('update:selectedPersons')[0][0]).toHaveLength(2)
+  })
 })

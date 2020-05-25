@@ -1,4 +1,5 @@
 import { IMeasuringRange, MeasuringRange } from './MeasuringRange'
+import IPathSetter from './IPathSetter'
 
 export interface ISensorProperty {
   compartment: string
@@ -11,7 +12,7 @@ export interface ISensorProperty {
   failureValue: number | null
 }
 
-export class SensorProperty implements ISensorProperty {
+export class SensorProperty implements ISensorProperty, IPathSetter {
   private _compartment: string = ''
   private _unit: string = ''
   private _accuracy: number | null = null
@@ -41,6 +42,45 @@ export class SensorProperty implements ISensorProperty {
     newObject.variable = someObject.variable
 
     return newObject
+  }
+
+  setPath (path: string, value: any): void {
+    const properties = path.split('.')
+    const property = properties.splice(0, 1)[0]
+    let mrProperty
+
+    switch (property) {
+      case 'accuracy':
+        this.accuracy = parseFloat(value)
+        break
+      case 'failureValue':
+        this.failureValue = parseFloat(value)
+        break
+      case 'compartment':
+        this.compartment = String(value)
+        break
+      case 'label':
+        this.label = String(value)
+        break
+      case 'samplingMedia':
+        this.samplingMedia = String(value)
+        break
+      case 'unit':
+        this.unit = String(value)
+        break
+      case 'variable':
+        this.variable = String(value)
+        break
+      case 'measuringRange':
+        if (properties.length < 1) {
+          throw new TypeError('missing second level in path')
+        }
+        mrProperty = properties.splice(0, 1)[0]
+        this.measuringRange.setPath(mrProperty, value)
+        break
+      default:
+        throw new TypeError('path ' + path + ' is not valid')
+    }
   }
 
   get compartment (): string {
