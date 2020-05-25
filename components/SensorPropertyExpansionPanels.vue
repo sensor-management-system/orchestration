@@ -1,6 +1,7 @@
 <template>
   <div>
     <v-btn
+      v-if="!readonly"
       small
       color="primary"
       data-role="add-property"
@@ -23,6 +24,7 @@
             </v-col>
             <v-col cols="1">
               <v-menu
+                v-if="!readonly"
                 right
                 offset-y
               >
@@ -55,7 +57,7 @@
           </v-row>
         </v-expansion-panel-header>
         <v-expansion-panel-content>
-          <SensorPropertyForm v-model="value[index]" />
+          <SensorPropertyForm v-model="value[index]" :readonly="readonly" />
         </v-expansion-panel-content>
       </v-expansion-panel>
     </v-expansion-panels>
@@ -89,6 +91,13 @@ export default class SensorPropertyExpansionPanels extends Vue {
   })
   // @ts-ignore
   value!: SensorProperty[]
+
+  @Prop({
+    default: false,
+    type: Boolean
+  })
+  // @ts-ignore
+  readonly: boolean
 
   /**
    * adds a new SensorProperty instance

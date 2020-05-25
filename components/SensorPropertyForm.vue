@@ -5,6 +5,8 @@
         <v-select
           label="compartment"
           :value="value.compartment"
+          :readonly="readonly"
+          :disabled="readonly"
           @input="update('compartment', $event)"
         />
       </v-col>
@@ -12,6 +14,8 @@
         <v-select
           label="unit"
           :value="value.unit"
+          :readonly="readonly"
+          :disabled="readonly"
           @input="update('unit', $event)"
         />
       </v-col>
@@ -19,6 +23,8 @@
         <v-text-field
           label="accuracy"
           :value="value.accuracy"
+          :readonly="readonly"
+          :disabled="readonly"
           @input="update('accuracy', $event)"
         />
       </v-col>
@@ -28,6 +34,8 @@
         <v-select
           label="sampling media"
           :value="value.samplingMedia"
+          :readonly="readonly"
+          :disabled="readonly"
           @input="update('samplingMedia', $event)"
         />
       </v-col>
@@ -35,6 +43,8 @@
         <v-text-field
           label="measuring range min"
           :value="value.measuringRange.min"
+          :readonly="readonly"
+          :disabled="readonly"
           @input="update('measuringRange.min', $event)"
         />
       </v-col>
@@ -42,6 +52,8 @@
         <v-text-field
           label="measuring range max"
           :value="value.measuringRange.max"
+          :readonly="readonly"
+          :disabled="readonly"
           @input="update('measuringRange.max', $event)"
         />
       </v-col>
@@ -49,6 +61,8 @@
         <v-text-field
           label="label"
           :value="value.label"
+          :readonly="readonly"
+          :disabled="readonly"
           @input="update('label', $event)"
         />
       </v-col>
@@ -58,6 +72,8 @@
         <v-select
           label="variable"
           :value="value.variable"
+          :readonly="readonly"
+          :disabled="readonly"
           @input="update('variable', $event)"
         />
       </v-col>
@@ -65,6 +81,8 @@
         <v-text-field
           label="failure value"
           :value="value.failureValue"
+          :readonly="readonly"
+          :disabled="readonly"
           @input="update('failureValue', $event)"
         />
       </v-col>
@@ -94,6 +112,13 @@ export default class SensorPropertyForm extends Vue {
   })
   // @ts-ignore
   value!: SensorProperty
+
+  @Prop({
+    default: false,
+    type: Boolean
+  })
+  // @ts-ignore
+  readonly: boolean
 
   /**
    * update the internal model at a given key

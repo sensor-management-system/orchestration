@@ -4,6 +4,8 @@
       <v-text-field
         label="key"
         :value="value.key"
+        :readonly="readonly"
+        :disabled="readonly"
         @input="update('key', $event)"
       />
     </v-col>
@@ -11,6 +13,8 @@
       <v-text-field
         label="value"
         :value="value.value"
+        :readonly="readonly"
+        :disabled="readonly"
         @input="update('value', $event)"
       />
     </v-col>
@@ -42,6 +46,13 @@ export default class CustomFieldForm extends Vue {
   })
   // @ts-ignore
   value!: CustomTextField
+
+  @Prop({
+    default: false,
+    type: Boolean
+  })
+  // @ts-ignore
+  readonly: boolean
 
   /**
    * update the internal model at a given key

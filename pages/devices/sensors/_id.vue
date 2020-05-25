@@ -25,6 +25,8 @@
                   <v-col cols="12" md="3">
                     <v-text-field
                       label="persistent identifier (PID)"
+                      :readonly="readonly"
+                      :disabled="readonly"
                     />
                   </v-col>
                 </v-row>
@@ -33,6 +35,8 @@
                     <v-text-field
                       v-model="sensor.label"
                       label="label"
+                      :readonly="readonly"
+                      :disabled="readonly"
                     />
                   </v-col>
                   <v-col cols="12" md="3">
@@ -40,6 +44,8 @@
                       v-model="sensor.state"
                       :items="states"
                       label="state"
+                      :readonly="readonly"
+                      :disabled="readonly"
                     />
                   </v-col>
                 </v-row>
@@ -49,18 +55,24 @@
                       v-model="sensor.type"
                       :items="sensorTypes"
                       label="type"
+                      :readonly="readonly"
+                      :disabled="readonly"
                     />
                   </v-col>
                   <v-col cols="12" md="3">
                     <v-text-field
                       v-model="sensor.manufacturer"
                       label="manufacturer"
+                      :readonly="readonly"
+                      :disabled="readonly"
                     />
                   </v-col>
                   <v-col cols="12" md="3">
                     <v-text-field
                       v-model="sensor.model"
                       label="model"
+                      :readonly="readonly"
+                      :disabled="readonly"
                     />
                   </v-col>
                 </v-row>
@@ -71,6 +83,8 @@
                       v-model="sensor.description"
                       label="Description"
                       rows="3"
+                      :readonly="readonly"
+                      :disabled="readonly"
                     />
                   </v-col>
                 </v-row>
@@ -80,6 +94,8 @@
                       v-model="sensor.urlWebsite"
                       label="Website"
                       placeholder="https://"
+                      :readonly="readonly"
+                      :disabled="readonly"
                     />
                   </v-col>
                 </v-row>
@@ -89,12 +105,16 @@
                     <v-text-field
                       v-model="sensor.serialNumber"
                       label="Serial Number"
+                      :readonly="readonly"
+                      :disabled="readonly"
                     />
                   </v-col>
                   <v-col cols="12" md="3">
                     <v-text-field
                       v-model="sensor.inventoryNumber"
                       label="Inventar Number"
+                      :readonly="readonly"
+                      :disabled="readonly"
                     />
                   </v-col>
                 </v-row>
@@ -106,6 +126,8 @@
                       hint="can be used for military aims"
                       :persistent-hint="true"
                       color="red darken-3"
+                      :readonly="readonly"
+                      :disabled="readonly"
                     />
                   </v-col>
                 </v-row>
@@ -128,7 +150,7 @@
               <v-card-text>
                 <v-row>
                   <v-col cols="3">
-                    <PersonSelect :selected-persons.sync="sensor.responsiblePersons" />
+                    <PersonSelect :selected-persons.sync="sensor.responsiblePersons" :readonly="readonly" />
                   </v-col>
                 </v-row>
               </v-card-text>
@@ -154,7 +176,7 @@
             >
               <v-card-title>Sensor URN: {{ sensorURN }}</v-card-title>
               <v-card-text>
-                <SensorPropertyExpansionPanels v-model="sensor.properties" />
+                <SensorPropertyExpansionPanels v-model="sensor.properties" :readonly="readonly" />
               </v-card-text>
               <v-card-actions>
                 <v-btn
@@ -178,7 +200,7 @@
             >
               <v-card-title>Sensor URN: {{ sensorURN }}</v-card-title>
               <v-card-text>
-                <CustomFieldCards v-model="sensor.customFields" />
+                <CustomFieldCards v-model="sensor.customFields" :readonly="readonly" />
               </v-card-text>
               <v-card-actions>
                 <v-btn
@@ -263,11 +285,26 @@
           </v-tab-item>
         </v-tabs>
         <v-btn
+          v-if="!isInEditMode"
+          fab
+          fixed
+          bottom
+          right
+          color="secondary"
+          @click="toggleEditMode"
+        >
+          <v-icon>
+            mdi-pencil
+          </v-icon>
+        </v-btn>
+        <v-btn
+          v-if="isInEditMode"
           fab
           fixed
           bottom
           right
           color="primary"
+          @click="toggleEditMode"
         >
           <v-icon>mdi-content-save</v-icon>
         </v-btn>
@@ -300,6 +337,26 @@ export default class SensorIdPage extends Vue {
   private activeTab: number = 0
 
   private sensor: Sensor = new Sensor()
+  private isInEditMode: boolean = false
+
+  mounted () {
+    this.loadSensor()
+  }
+
+  loadSensor () {
+    const sensorId = this.$route.params.id
+    if (sensorId) {
+      this.isInEditMode = false
+      // @TODO
+    } else {
+      this.isInEditMode = true
+      // @TODO
+    }
+  }
+
+  toggleEditMode () {
+    this.isInEditMode = !this.isInEditMode
+  }
 
   get sensorURN () {
     return this.sensor.urn
@@ -311,6 +368,10 @@ export default class SensorIdPage extends Vue {
 
   nextTab () {
     this.activeTab = this.activeTab === this.numberOfTabs - 1 ? 0 : this.activeTab + 1
+  }
+
+  get readonly () {
+    return !this.isInEditMode
   }
 
   get navigation () {
@@ -369,13 +430,6 @@ export default class SensorIdPage extends Vue {
         text: 'scrapped',
         value: '5'
       }
-    ]
-  }
-
-  get propertyStates () {
-    return [
-      0,
-      1
     ]
   }
 

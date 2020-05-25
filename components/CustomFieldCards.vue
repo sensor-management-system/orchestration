@@ -1,6 +1,7 @@
 <template>
   <div>
     <v-btn
+      v-if="!readonly"
       small
       color="primary"
       data-role="add-field"
@@ -18,9 +19,11 @@
         <v-card-text>
           <CustomFieldForm
             v-model="value[index]"
+            :readonly="readonly"
           >
             <template v-slot:actions>
               <v-btn
+                v-if="!readonly"
                 color="error"
                 small
                 outlined
@@ -67,6 +70,13 @@ export default class CustomFieldCards extends Vue {
   })
   // @ts-ignore
   value!: CustomTextField[]
+
+  @Prop({
+    default: false,
+    type: Boolean
+  })
+  // @ts-ignore
+  readonly: boolean
 
   /**
    * adds a new CustomTextField instance
