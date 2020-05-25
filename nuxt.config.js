@@ -1,5 +1,6 @@
 import colors from 'vuetify/es5/util/colors'
-
+import path from 'path'
+import fs from 'fs'
 export default {
   mode: 'spa',
   /*
@@ -73,5 +74,11 @@ export default {
     */
     extend (config, ctx) {
     }
+  },
+  server: {
+  https: {
+    key: fs.readFileSync(path.resolve(__dirname, 'server.key')),
+    cert: fs.readFileSync(path.resolve(__dirname, 'server.crt'))
   }
+}
 }
