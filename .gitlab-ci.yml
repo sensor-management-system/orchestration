@@ -84,8 +84,7 @@ ci-services:
       - meta/ci-services-report.md
     expire_in: 30 days
   tags:
-    - deploy
-    - staging
+    - docker
     - id2
   only:
     variables:
