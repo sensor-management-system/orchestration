@@ -1,0 +1,15 @@
+# SPDX-FileCopyrightText: 2020 Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences Potsdam, Germany (https://www.gfz-potsdam.de/)
+#
+# SPDX-License-Identifier: CC0-1.0
+
+list-used-licenses:
+  # exclude patterns for license check
+  exclude:
+    - 'docs/.*' # documentation
+    - 'meta/.*' # meta data
+    - 'app/project/tests/.*' # test files
+  # matching of imported name to name in pkg manager
+  rename:
+    lib:
+  # mark local imports to exclude from license check
+  local_imports:
