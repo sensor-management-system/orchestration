@@ -9,7 +9,7 @@ import DevicePropertyForm from '../components/DevicePropertyForm.vue'
 import { DeviceProperty } from '~/models/DeviceProperty'
 
 // see https://github.com/vuejs/vue-test-utils/issues/960
-function withWrapperArray(wrapperArray: WrapperArray<Vue>): Record<string, Function> {
+function withWrapperArray (wrapperArray: WrapperArray<Vue>): Record<string, Function> {
   return {
     childSelectorHasText: (
       selector: string,
@@ -24,7 +24,7 @@ function withWrapperArray(wrapperArray: WrapperArray<Vue>): Record<string, Funct
 
 Vue.use(Vuetify)
 
-describe('PersonSelect', () => {
+describe('DevicePropertyForm', () => {
   let wrapper: any
 
   /*
@@ -62,5 +62,10 @@ describe('PersonSelect', () => {
 
   it('should be a Vue instance', () => {
     expect(wrapper.isVueInstance()).toBeTruthy()
+  })
+
+  it('should trigger an input event on change', () => {
+    wrapper.get('input[type="text"]').setValue('foo')
+    expect(wrapper.emitted('input')).toBeTruthy()
   })
 })

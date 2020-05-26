@@ -1,8 +1,10 @@
 <template>
   <div>
     <v-btn
+      v-if="!readonly"
       small
       color="primary"
+      data-role="add-property"
       @click="addProperty"
     >
       add Property
@@ -22,11 +24,13 @@
             </v-col>
             <v-col cols="1">
               <v-menu
+                v-if="!readonly"
                 right
                 offset-y
               >
                 <template v-slot:activator="{ on }">
                   <v-btn
+                    data-role="property-menu"
                     icon
                     v-on="on"
                   >
@@ -36,11 +40,13 @@
 
                 <v-list>
                   <v-list-item
+                    data-role="copy-property"
                     @click="copyProperty(index)"
                   >
                     <v-list-item-title>Copy</v-list-item-title>
                   </v-list-item>
                   <v-list-item
+                    data-role="delete-property"
                     @click="removeProperty(index)"
                   >
                     <v-list-item-title>Delete</v-list-item-title>
@@ -51,7 +57,7 @@
           </v-row>
         </v-expansion-panel-header>
         <v-expansion-panel-content>
-          <DevicePropertyForm v-model="value[index]" />
+          <DevicePropertyForm v-model="value[index]" :readonly="readonly" />
         </v-expansion-panel-content>
       </v-expansion-panel>
     </v-expansion-panels>
@@ -85,6 +91,13 @@ export default class DevicePropertyExpansionPanels extends Vue {
   })
   // @ts-ignore
   value!: DeviceProperty[]
+
+  @Prop({
+    default: false,
+    type: Boolean
+  })
+  // @ts-ignore
+  readonly: boolean
 
   /**
    * adds a new DeviceProperty instance

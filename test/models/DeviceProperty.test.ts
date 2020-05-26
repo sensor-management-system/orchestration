@@ -1,5 +1,5 @@
-import { MeasuringRange } from '../../models/MeasuringRange'
-import { DeviceProperty } from '../../models/DeviceProperty'
+import { MeasuringRange } from '@/models/MeasuringRange'
+import { DeviceProperty } from '@/models/DeviceProperty'
 
 describe('DeviceProperty Models', () => {
   it('should create a DeviceProperty from an object', () => {

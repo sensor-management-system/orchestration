@@ -24,9 +24,11 @@
                 <v-row>
                   <v-col cols="12" md="3">
                     <v-text-field
-                      label="persistent identifier (PID)"
                       v-model="device.persistentId"
+                      label="persistent identifier (PID)"
                       type="number"
+                      :readonly="readonly"
+                      :disabled="readonly"
                     />
                   </v-col>
                 </v-row>
@@ -35,6 +37,8 @@
                     <v-text-field
                       v-model="device.label"
                       label="label"
+                      :readonly="readonly"
+                      :disabled="readonly"
                     />
                   </v-col>
                   <v-col cols="12" md="3">
@@ -42,6 +46,8 @@
                       v-model="device.state"
                       :items="states"
                       label="state"
+                      :readonly="readonly"
+                      :disabled="readonly"
                     />
                   </v-col>
                 </v-row>
@@ -51,6 +57,8 @@
                       v-model="device.type"
                       :items="deviceTypes"
                       label="type"
+                      :readonly="readonly"
+                      :disabled="readonly"
                     />
                   </v-col>
                   <v-col cols="12" md="3">
@@ -58,12 +66,16 @@
                       v-model="device.manufacturer"
                       :items="manufacturers"
                       label="manufacturer"
+                      :readonly="readonly"
+                      :disabled="readonly"
                     />
                   </v-col>
                   <v-col cols="12" md="3">
                     <v-text-field
                       v-model="device.model"
                       label="model"
+                      :readonly="readonly"
+                      :disabled="readonly"
                     />
                   </v-col>
                 </v-row>
@@ -74,6 +86,8 @@
                       v-model="device.description"
                       label="Description"
                       rows="3"
+                      :readonly="readonly"
+                      :disabled="readonly"
                     />
                   </v-col>
                 </v-row>
@@ -83,6 +97,8 @@
                       v-model="device.urlWebsite"
                       label="Website"
                       placeholder="https://"
+                      :readonly="readonly"
+                      :disabled="readonly"
                     />
                   </v-col>
                 </v-row>
@@ -92,12 +108,16 @@
                     <v-text-field
                       v-model="device.serialNumber"
                       label="Serial Number"
+                      :readonly="readonly"
+                      :disabled="readonly"
                     />
                   </v-col>
                   <v-col cols="12" md="3">
                     <v-text-field
                       v-model="device.inventoryNumber"
                       label="Inventar Number"
+                      :readonly="readonly"
+                      :disabled="readonly"
                     />
                   </v-col>
                 </v-row>
@@ -109,6 +129,8 @@
                       hint="can be used for military aims"
                       :persistent-hint="true"
                       color="red darken-3"
+                      :readonly="readonly"
+                      :disabled="readonly"
                     />
                   </v-col>
                 </v-row>
@@ -131,7 +153,7 @@
               <v-card-text>
                 <v-row>
                   <v-col cols="3">
-                    <ContactSelect :selected-contacts.sync="device.responsiblePersons" />
+                    <ContactSelect :selected-contacts.sync="device.responsiblePersons" :readonly="readonly" />
                   </v-col>
                 </v-row>
               </v-card-text>
@@ -157,7 +179,7 @@
             >
               <v-card-title>device URN: {{ deviceURN }}</v-card-title>
               <v-card-text>
-                <DevicePropertyExpansionPanels v-model="device.properties" />
+                <DevicePropertyExpansionPanels v-model="device.properties" :readonly="readonly" />
               </v-card-text>
               <v-card-actions>
                 <v-btn
@@ -181,7 +203,7 @@
             >
               <v-card-title>device URN: {{ deviceURN }}</v-card-title>
               <v-card-text>
-                <CustomFieldCards v-model="device.customFields" />
+                <CustomFieldCards v-model="device.customFields" :readonly="readonly" />
               </v-card-text>
               <v-card-actions>
                 <v-btn
@@ -266,6 +288,20 @@
           </v-tab-item>
         </v-tabs>
         <v-btn
+          v-if="!isInEditMode"
+          fab
+          fixed
+          bottom
+          right
+          color="secondary"
+          @click="toggleEditMode"
+        >
+          <v-icon>
+            mdi-pencil
+          </v-icon>
+        </v-btn>
+        <v-btn
+          v-if="isInEditMode"
           fab
           fixed
           bottom
@@ -312,6 +348,8 @@ export default class DeviceIdPage extends Vue {
   private deviceTypes: String[] = []
   private manufacturers: String[] = []
 
+  private isInEditMode: boolean = false
+
   mounted () {
     MasterDataService.findAllStates().then((foundStates) => {
       this.states = foundStates
@@ -328,10 +366,17 @@ export default class DeviceIdPage extends Vue {
   loadDevice () {
     const deviceId = this.$route.params.id
     if (deviceId) {
+      this.isInEditMode = false
       DeviceService.findDeviceById(deviceId).then((foundDevice) => {
         this.device = foundDevice
       })
+    } else {
+      this.isInEditMode = true
     }
+  }
+
+  toggleEditMode () {
+    this.isInEditMode = !this.isInEditMode
   }
 
   save () {
@@ -352,6 +397,10 @@ export default class DeviceIdPage extends Vue {
     this.activeTab = this.activeTab === this.numberOfTabs - 1 ? 0 : this.activeTab + 1
   }
 
+  get readonly () {
+    return !this.isInEditMode
+  }
+
   get navigation () {
     return [
       {
@@ -370,13 +419,6 @@ export default class DeviceIdPage extends Vue {
         disabled: true,
         text: 'Add Device'
       }
-    ]
-  }
-
-  get propertyStates () {
-    return [
-      0,
-      1
     ]
   }
 

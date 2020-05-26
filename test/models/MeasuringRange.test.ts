@@ -1,4 +1,4 @@
-import { MeasuringRange } from '../../models/MeasuringRange'
+import { MeasuringRange } from '@/models/MeasuringRange'
 
 describe('MeasuringRange Models', () => {
   test('create a MeasuringRange from an object', () => {
