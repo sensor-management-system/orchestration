@@ -11,6 +11,7 @@ export default {
   filterProtocolClaims: 'true', //kleiner Trick, da man in der dpcker-compose.yaml kein boolean schreiben kann
   automaticSilentRenew: 'false', //kleiner Trick, da man in der dpcker-compose.yaml kein boolean schreiben kann
   silent_redirect_uri: 'https://localhost.localdomain:3000/silent-callback',
+  includeIdTokenInSilentRenew: 'false',
   popupWindowFeatures: 'location=no,toolbar=no,width=500,height=600,left=100,top=100' //adjusted height
 };
 
