@@ -25,7 +25,7 @@
           background-color="grey lighten-3"
         >
           <v-tab>Basic data</v-tab>
-          <v-tab>Persons</v-tab>
+          <v-tab>Contacts</v-tab>
           <v-tab-item>
             <!-- Basic data tab -->
             <v-card
@@ -46,37 +46,41 @@
                 <v-row>
                   <v-col cols="12" md="3">
                     <v-select
-                      v-model="platform.platformTypeId"
-                      label="type"
+                      v-model="platform.platformType"
+                      label="platform type"
                       :items="platformTypes"
-                      :item-text="(x) => x.name"
-                      :item-value="(x) => x.id"
                       :readonly="readonly"
                       :disabled="readonly"
                     />
                   </v-col>
                   <v-col cols="12" md="3">
                     <v-select
-                      v-model="platform.manufactureId"
-                      label="manufacturer"
-                      :items="manufactures"
-                      :item-text="(x) => x.name"
-                      :item-value="(x) => x.id"
+                      v-model="platform.type"
+                      label="type"
+                      :items="types"
                       :readonly="readonly"
                       :disabled="readonly"
                     />
                   </v-col>
-                  <!--<v-select v-model="platform.type" label="type" :items="types" />-->
+                  <v-col cols="12" md="3">
+                    <v-select
+                      v-model="platform.manufacturer"
+                      label="manufacturer"
+                      :items="manufacturers"
+                      :readonly="readonly"
+                      :disabled="readonly"
+                    />
+                  </v-col>
                 </v-row>
                 <v-divider />
                 <v-row>
                   <v-col cols="12" md="5">
-                    <v-textarea v-model="platform.description" label="Description" rows="3" :readonly="readonly" :disabled="readonly" />
+                    <v-textarea v-model="platform.description" label="description" rows="3" :readonly="readonly" :disabled="readonly" />
                   </v-col>
                 </v-row>
                 <v-row>
                   <v-col cols="12" md="3">
-                    <v-text-field v-model="platform.website" label="Website" placeholder="https://" :readonly="readonly" :disabled="readonly" />
+                    <v-text-field v-model="platform.inventoryNumber" label="inventory number" :readonly="readonly" :disabled="readonly" type="number" />
                   </v-col>
                 </v-row>
               </v-card-text>
@@ -90,7 +94,7 @@
               </v-card-actions>
             </v-card>
           </v-tab-item>
-          <!-- responsible persons tab -->
+          <!-- contacts tab -->
           <v-tab-item>
             <v-card
               flat
@@ -101,7 +105,7 @@
               <v-card-text>
                 <v-row>
                   <v-col cols="3">
-                    <PersonSelect :selected-persons.sync="platform.responsiblePersons" :readonly="!isInEditMode" />
+                    <ContactSelect :selected-contacts.sync="platform.contacts" :readonly="!isInEditMode" />
                   </v-col>
                 </v-row>
               </v-card-text>
@@ -156,23 +160,21 @@ import { Component, Vue } from 'nuxt-property-decorator'
 import MasterDataService from '../../../services/MasterDataService'
 import DeviceService from '../../../services/DeviceService'
 
-import Manufacture from '../../../models/Manufacture'
-import PlatformType from '../../../models/PlatformType'
 import Platform from '../../../models/Platform'
 
 // @ts-ignore
-import PersonSelect from '../../../components/PersonSelect.vue'
+import ContactSelect from '../../../components/ContactSelect.vue'
 
 @Component({
-  components: { PersonSelect }
+  components: { ContactSelect }
 })
 // @ts-ignore
 export default class PlatformIdPage extends Vue {
   // data
   // first for the data to chose the elements
-  private platformTypes: PlatformType[] = []
-  private manufactures: Manufacture[] = []
-  private types: Array<string> = ['Type 01']
+  private platformTypes: String[] = []
+  private manufacturers: String[] = []
+  private types: String[] = []
 
   // then for our platform that we want to change
   private platform: Platform = Platform.createEmpty()
@@ -185,11 +187,14 @@ export default class PlatformIdPage extends Vue {
 
   mounted () {
     this.showLoadingError = false
-    MasterDataService.findAllManufactures().then((foundManufactures) => {
-      this.manufactures = foundManufactures
+    MasterDataService.findAllManufacturers().then((foundManufacturers) => {
+      this.manufacturers = foundManufacturers
     })
     MasterDataService.findAllPlatformTypes().then((foundPlatformTypes) => {
       this.platformTypes = foundPlatformTypes
+    })
+    MasterDataService.findAllTypes().then((foundTypes) => {
+      this.types = foundTypes
     })
     this.loadPlatform()
   }
@@ -212,7 +217,8 @@ export default class PlatformIdPage extends Vue {
   // methods
   save () {
     this.showSaveSuccess = false
-    DeviceService.savePlatform(this.platform).then(() => {
+    DeviceService.savePlatform(this.platform).then((savedPlatform) => {
+      this.platform = savedPlatform
       this.showSaveSuccess = true
       // this.$router.push('/devices')
     })
@@ -237,17 +243,9 @@ export default class PlatformIdPage extends Vue {
     }
 
     let partPlatformType = '[platformtype]'
-    if (this.platform.platformTypeId != null) {
-      let foundPlatformType = null
-      for (const singlePlatformType of this.platformTypes) {
-        if (singlePlatformType.id === this.platform.platformTypeId) {
-          foundPlatformType = singlePlatformType
-          break
-        }
-      }
-      if (foundPlatformType != null) {
-        partPlatformType = removeWhitespace(foundPlatformType.name)
-      }
+    const possiblePlatformType = removeWhitespace(this.platform.platformType)
+    if (possiblePlatformType !== '') {
+      partPlatformType = possiblePlatformType
     }
 
     let partShortName = '[short_name]'

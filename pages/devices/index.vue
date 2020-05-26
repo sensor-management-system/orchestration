@@ -44,17 +44,15 @@
                   <v-text-field v-model="searchText" label="Name" placeholder="Name of device" />
                 </v-col>
                 <v-col cols="12" md="3">
-                  <v-select label="Type" placeholder="Platform / Sensor" :items="searchTypes" />
+                  <v-select label="search type" placeholder="Platform / Sensor" :items="searchTypes" />
                 </v-col>
               </v-row>
               <v-row>
                 <v-col cols="12" md="3">
                   <v-autocomplete
-                    v-model="manufactureToAdd"
-                    label="add manufacture"
-                    :items="notSelectedManufactures"
-                    :item-text="(x) => x.name"
-                    :item-value="(x) => x"
+                    v-model="manufacturerToAdd"
+                    label="add manufacturer"
+                    :items="notSelectedManufacturers"
                   />
                 </v-col>
                 <v-col cols="12" md="3">
@@ -62,8 +60,8 @@
                     fab
                     depressed
                     small
-                    :disabled="manufactureToAdd == null"
-                    @click="addSelectedManufacture"
+                    :disabled="manufacturerToAdd == null"
+                    @click="addSelectedManufacturer"
                   >
                     <v-icon>
                       mdi-plus
@@ -74,15 +72,15 @@
               <v-row>
                 <v-col cols="3">
                   <v-chip
-                    v-for="(manufacture, index) in selectedSearchManufactures"
-                    :key="manufacture.id"
+                    v-for="(manufacturer, index) in selectedSearchManufacturers"
+                    :key="manufacturer.id"
                     class="ma-2"
                     color="brown"
                     text-color="white"
                     :close="true"
                     @click:close="removeManufacture(index)"
                   >
-                    {{ manufacture.name }}
+                    {{ manufacturer }}
                   </v-chip>
                 </v-col>
               </v-row>
@@ -125,45 +123,6 @@
                   </v-chip>
                 </v-col>
               </v-row>
-              <v-row>
-                <v-col cols="12" md="3">
-                  <v-autocomplete
-                    v-model="parameterToAdd"
-                    label="add parameter"
-                    :items="notSelectedParameters"
-                    :item-text="(x) => x.name"
-                    :item-value="(x) => x"
-                  />
-                </v-col>
-                <v-col cols="12" md="3">
-                  <v-btn
-                    fab
-                    depressed
-                    small
-                    :disabled="parameterToAdd == null"
-                    @click="addSelectedParameter"
-                  >
-                    <v-icon>
-                      mdi-plus
-                    </v-icon>
-                  </v-btn>
-                </v-col>
-              </v-row>
-              <v-row>
-                <v-col cols="3">
-                  <v-chip
-                    v-for="(parameter, index) in selectedSearchParameter"
-                    :key="parameter.id"
-                    class="ma-2"
-                    color="pink"
-                    text-color="white"
-                    :close="true"
-                    @click:close="removeParameter(index)"
-                  >
-                    {{ parameter.name }}
-                  </v-chip>
-                </v-col>
-              </v-row>
             </v-card-text>
             <v-card-actions>
               <v-btn @click="extendedSearch">
@@ -179,7 +138,7 @@
     </v-card>
 
     <h2>Results:</h2>
-    <v-card v-for="result in searchResults" :key="result.id">
+    <v-card v-for="result in searchResults" :key="result.devicetype + result.id">
       <v-card-title>
         {{ result.name }}
       </v-card-title>
@@ -193,10 +152,18 @@
           View
         </v-btn>
         <v-btn>Copy</v-btn>
+        <!-- We must make sure if we want to allow deleting here.
+             For developlement it was needed to clean up the things
+             a bit easier.
+        -->
+        <!--<v-btn @click="deletePlatform(result.id)">
+          Delete
+        </v-btn>-->
       </v-card-actions>
       <v-card-actions v-if="result.devicetype == 'device'">
-        <v-btn>View</v-btn>
-        <v-btn>Edit</v-btn>
+        <v-btn :to="'devices/devices/' + result.id">
+          View
+        </v-btn>
         <v-btn>Copy</v-btn>
       </v-card-actions>
     </v-card>
@@ -205,8 +172,8 @@
       <v-btn to="/devices/platforms">
         Add Platform
       </v-btn>
-      <v-btn to="/devices/sensors">
-        Add Sensor
+      <v-btn to="/devices/devices">
+        Add Device
       </v-btn>
     </v-card>
   </div>
@@ -218,24 +185,19 @@ import { Component, Vue } from 'nuxt-property-decorator'
 import MasterDataService from '../../services/MasterDataService'
 import DeviceService from '../../services/DeviceService'
 
-import Manufacture from '../../models/Manufacture'
 import Institute from '../../models/Institute'
 
 @Component
 export default class DevicesIndexPage extends Vue {
   private activeSearchTypeTabIdx: number = 0
 
-  private searchManufactures: Manufacture[] = []
-  private selectedSearchManufactures: Manufacture[] = []
-  private manufactureToAdd: Manufacture | null = null
+  private searchManufacturers: String[] = []
+  private selectedSearchManufacturers: String[] = []
+  private manufacturerToAdd: String | null = null
 
   private searchInstitutes: Institute[] = []
   private selectedSearchInstitutes: Institute[] = []
   private instituteToAdd: Institute | null = null
-
-  private searchParameter: Array<any> = []
-  private selectedSearchParameter: Array<any> = []
-  private parameterToAdd: any | null = null
 
   private searchResults: Array<object> = []
   private searchText: string | null = null
@@ -244,14 +206,11 @@ export default class DevicesIndexPage extends Vue {
   private selectedSearchType: string = 'Sensor / Platform';
 
   mounted () {
-    MasterDataService.findAllManufactures().then((manufactures) => {
-      this.searchManufactures = manufactures
+    MasterDataService.findAllManufacturers().then((manufacturers) => {
+      this.searchManufacturers = manufacturers
     })
     MasterDataService.findAllInstitutes().then((institutes) => {
       this.searchInstitutes = institutes
-    })
-    MasterDataService.findAllParameter().then((paramater) => {
-      this.searchParameter = paramater
     })
     DeviceService.findPlatformsAndSensors(this.searchText).then((findResults) => {
       this.searchResults = findResults
@@ -275,13 +234,11 @@ export default class DevicesIndexPage extends Vue {
   clearExtendedSearch () {
     this.clearBasicSearch()
 
-    this.selectedSearchManufactures = []
+    this.selectedSearchManufacturers = []
     this.selectedSearchInstitutes = []
-    this.selectedSearchParameter = []
 
-    this.manufactureToAdd = null
+    this.manufacturerToAdd = null
     this.instituteToAdd = null
-    this.parameterToAdd = null
   }
 
   runSearch (searchText: string | null) {
@@ -290,13 +247,17 @@ export default class DevicesIndexPage extends Vue {
     })
   }
 
-  addSelectedManufacture () {
-    this.$set(this.selectedSearchManufactures, this.selectedSearchManufactures.length, this.manufactureToAdd)
-    this.manufactureToAdd = null
+  addSelectedManufacturer () {
+    this.$set(
+      this.selectedSearchManufacturers,
+      this.selectedSearchManufacturers.length,
+      this.manufacturerToAdd
+    )
+    this.manufacturerToAdd = null
   }
 
   removeManufacture (index: number) {
-    this.$delete(this.selectedSearchManufactures, index)
+    this.$delete(this.selectedSearchManufacturers, index)
   }
 
   addSelectedInstitute () {
@@ -308,26 +269,23 @@ export default class DevicesIndexPage extends Vue {
     this.$delete(this.selectedSearchInstitutes, index)
   }
 
-  addSelectedParameter () {
-    this.$set(this.selectedSearchParameter, this.selectedSearchParameter.length, this.parameterToAdd)
-    this.parameterToAdd = null
+  deletePlatform (id: number) {
+    DeviceService.deletePlatform(id).then(() => {
+      this.runSearch(this.searchText)
+    })
   }
 
-  removeParameter (index: number) {
-    this.$delete(this.selectedSearchParameter, index)
-  }
-
-  get notSelectedManufactures () {
+  get notSelectedManufacturers () {
     const result = []
-    const selectedManufactureIds = new Set()
+    const selectedManufactures = new Set()
 
-    for (const singleManufacture of this.selectedSearchManufactures) {
-      selectedManufactureIds.add(singleManufacture.id)
+    for (const singleManufacturer of this.selectedSearchManufacturers) {
+      selectedManufactures.add(singleManufacturer)
     }
 
-    for (const singleManufacture of this.searchManufactures) {
-      if (!selectedManufactureIds.has(singleManufacture.id)) {
-        result.push(singleManufacture)
+    for (const singleManufacturer of this.searchManufacturers) {
+      if (!selectedManufactures.has(singleManufacturer)) {
+        result.push(singleManufacturer)
       }
     }
     return result
@@ -347,22 +305,6 @@ export default class DevicesIndexPage extends Vue {
       }
     }
 
-    return result
-  }
-
-  get notSelectedParameters () {
-    const result = []
-    const selectedParameterIds = new Set()
-
-    for (const singleParameter of this.selectedSearchParameter) {
-      selectedParameterIds.add(singleParameter.id)
-    }
-
-    for (const singleParameter of this.searchParameter) {
-      if (!selectedParameterIds.has(singleParameter.id)) {
-        result.push(singleParameter)
-      }
-    }
     return result
   }
 

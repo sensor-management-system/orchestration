@@ -1,9 +1,9 @@
 import { MeasuringRange } from '../../models/MeasuringRange'
-import { SensorProperty } from '../../models/SensorProperty'
+import { DeviceProperty } from '../../models/DeviceProperty'
 
-describe('SensorProperty Models', () => {
-  it('should create a SensorProperty from an object', () => {
-    const prop = SensorProperty.createFromObject({
+describe('DeviceProperty Models', () => {
+  it('should create a DeviceProperty from an object', () => {
+    const prop = DeviceProperty.createFromObject({
       compartment: 'test',
       label: 'test',
       samplingMedia: 'water',
@@ -28,7 +28,7 @@ describe('SensorProperty Models', () => {
   })
 
   it('should set a property by its path', () => {
-    const prop = new SensorProperty()
+    const prop = new DeviceProperty()
     prop.setPath('compartment', 'test')
     prop.setPath('label', 'foo')
     prop.setPath('samplingMedia', 'water')

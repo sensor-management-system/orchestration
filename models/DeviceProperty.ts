@@ -1,7 +1,7 @@
 import { IMeasuringRange, MeasuringRange } from './MeasuringRange'
 import IPathSetter from './IPathSetter'
 
-export interface ISensorProperty {
+export interface IDeviceProperty {
   compartment: string
   unit: string
   accuracy: number | null
@@ -12,7 +12,7 @@ export interface ISensorProperty {
   failureValue: number | null
 }
 
-export class SensorProperty implements ISensorProperty, IPathSetter {
+export class DeviceProperty implements IDeviceProperty, IPathSetter {
   private _compartment: string = ''
   private _unit: string = ''
   private _accuracy: number | null = null
@@ -26,11 +26,11 @@ export class SensorProperty implements ISensorProperty, IPathSetter {
    * creates an instance from another object
    *
    * @static
-   * @param {ISensorProperty} someObject - the object from which the new instance is to be created
-   * @return {SensorProperty} the newly created instance
+   * @param {IDeviceProperty} someObject - the object from which the new instance is to be created
+   * @return {DeviceProperty} the newly created instance
    */
-  static createFromObject (someObject: ISensorProperty) : SensorProperty {
-    const newObject = new SensorProperty()
+  static createFromObject (someObject: IDeviceProperty) : DeviceProperty {
+    const newObject = new DeviceProperty()
 
     newObject.accuracy = someObject.accuracy
     newObject.compartment = someObject.compartment

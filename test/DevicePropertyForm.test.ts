@@ -5,8 +5,8 @@ import { mount, createLocalVue } from '@vue/test-utils'
 import { WrapperArray } from '@vue/test-utils/types'
 
 // @ts-ignore
-import SensorPropertyForm from '../components/SensorPropertyForm.vue'
-import { SensorProperty } from '@/models/SensorProperty'
+import DevicePropertyForm from '../components/DevicePropertyForm.vue'
+import { DeviceProperty } from '~/models/DeviceProperty'
 
 // see https://github.com/vuejs/vue-test-utils/issues/960
 function withWrapperArray(wrapperArray: WrapperArray<Vue>): Record<string, Function> {
@@ -35,11 +35,11 @@ describe('PersonSelect', () => {
     const localVue = createLocalVue()
     const vuetify = new Vuetify()
 
-    wrapper = mount(SensorPropertyForm, {
+    wrapper = mount(DevicePropertyForm, {
       localVue,
       vuetify,
       propsData: {
-        value: SensorProperty.createFromObject({
+        value: DeviceProperty.createFromObject({
           compartment: 'test',
           label: 'test',
           samplingMedia: 'water',
@@ -63,5 +63,4 @@ describe('PersonSelect', () => {
   it('should be a Vue instance', () => {
     expect(wrapper.isVueInstance()).toBeTruthy()
   })
-
 })

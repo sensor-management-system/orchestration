@@ -1,112 +1,239 @@
+import axios from 'axios'
+
 import Platform from '../models/Platform'
-import PlatformType from '../models/PlatformType'
-import Person from '../models/Person'
-
-import MasterDataService from './MasterDataService'
-
-const fakeDb = {
-  platforms: [
-    Platform.createWithIdAndData(1, 1, 'Boeken', 'Boeken', 'The Boeken station', 1, '', [Person.createWithIdAndName(1, 'Person 1')]),
-    Platform.createWithIdAndData(2, 3, 'Polarstern', 'Polarsterrn', 'The icebreaker', 1, '', [Person.createWithIdAndName(1, 'Person 1'), Person.createWithIdAndName(2, 'Person 2')])
-  ]
-}
+import Device from '../models/Device'
 
 export default class DeviceService {
-  // this was just a demo to see that we can reach our backend
-  /*static ping () : Promise<any> {
-    console.log(process.env.backendUrl)
-    return fetch(process.env.backendUrl + '/sis/v1/ping')
-  }*/
+  static serverPlatformResponseToEntity (entry: any) : Platform {
+    const result: Platform = Platform.createEmpty()
+
+    const attributes = entry.attributes
+
+    // TODO: use camelCase only!!!
+    result.id = Number.parseInt(entry.id)
+    result.platformType = attributes.platform_type || ''
+    result.shortName = attributes.short_name || ''
+    result.longName = attributes.long_name || ''
+    result.description = attributes.description || ''
+    result.manufacturer = attributes.manufacturer || ''
+    result.type = attributes.type || ''
+    result.inventoryNumber = attributes.inventory_number || ''
+    result.url = attributes.url || ''
+
+    // TODO: reading the contacts
+    result.contacts = []
+
+    return result
+  }
+
+  static serverDeviceResponseToEntity (entry: any) : Device {
+    const result: Device = new Device()
+
+    const attributes = entry.attributes
+
+    result.id = entry.id
+    result.description = attributes.description || ''
+    result.dualUse = attributes.dual_use || false
+    result.inventoryNumber = attributes.inventory_number || ''
+    result.label = attributes.label || ''
+    result.manufacturer = attributes.manufacturer || ''
+    result.model = attributes.model || ''
+    result.persistentId = attributes.persistent_identifier || ''
+    result.serialNumber = attributes.serial_number || ''
+    // TODO: What to do with short name?
+    // newEntry.name = attributes.short_name
+    result.type = attributes.type || ''
+    result.urlWebsite = attributes.url || ''
+
+    // TODO
+    result.contacts = []
+    result.properties = []
+    result.customFields = []
+
+    return result
+  }
+
   static findPlatformById (id: string): Promise<Platform> {
-    const searchId = Number.parseInt(id)
-    return new Promise((resolve, reject) => {
-      for (const platform of fakeDb.platforms) {
-        if (platform.id === searchId) {
-          resolve(platform)
-          break
-        }
-      }
-      reject(Error('Not found'))
+    return axios.get(process.env.backendUrl + '/sis/v1/platforms/' + id).then((rawResponse) => {
+      const entry = rawResponse.data.data
+      return DeviceService.serverPlatformResponseToEntity(entry)
     })
   }
 
+  static deletePlatform (id: number) {
+    return axios.delete(process.env.backendUrl + '/sis/v1/platforms/' + id)
+  }
+
   static savePlatform (platform: Platform) {
-    return new Promise((resolve) => {
-      if (!platform.id) {
-        let highestPlatformId = 0
-        for (const dbPlatform of fakeDb.platforms) {
-          const dbPlatformId = dbPlatform.id
-          if (dbPlatformId != null) {
-            if (highestPlatformId < dbPlatformId) {
-              highestPlatformId = dbPlatformId
-            }
-          }
-        }
-        platform.id = highestPlatformId += 1
-        fakeDb.platforms.push(platform)
-        resolve(platform)
-      } else {
-        let idxToSet = null
-        let idx = 0
-        for (const dbPlatform of fakeDb.platforms) {
-          if (dbPlatform.id === platform.id) {
-            idxToSet = idx
-            break
-          }
-          idx += 1
-        }
-        if (idxToSet != null) {
-          fakeDb.platforms[idxToSet] = platform
-          resolve(platform)
-        }
+    let method = axios.patch
+    // TODO: consistent camelCase
+    const data: any = {
+      type: 'platform',
+      attributes: {
+        description: platform.description,
+        short_name: platform.shortName,
+        long_name: platform.longName,
+        manufacturer: platform.manufacturer,
+        type: platform.type,
+        inventory_number: platform.inventoryNumber,
+        platform_type: platform.platformType,
+        url: platform.url
       }
+    }
+    let url = process.env.backendUrl + '/sis/v1/platforms'
+
+    if (platform.id === null) {
+      // new -> post
+      method = axios.post
+    } else {
+      // old -> patch
+      data.id = platform.id
+      url = url + '/' + platform.id
+    }
+
+    // TODO: links for contacts
+    return method(
+      url,
+      {
+        data
+      }
+    ).then((serverAnswer) => {
+      return DeviceService.serverPlatformResponseToEntity(serverAnswer.data.data)
+    })
+  }
+
+  static saveDevice (device: Device) {
+    let method = axios.patch
+    // TODO: consistent camelCase
+    const data: any = {
+      type: 'device',
+      attributes: {
+        description: device.description,
+        // Decide what to do with the short name
+        // short_name: device.shortName,
+        // Same for long name
+        // long_name: device.longName
+        dual_use: device.dualUse,
+        inventory_number: device.inventoryNumber,
+        label: device.label,
+        manufacturer: device.manufacturer,
+        model: device.model,
+        // TODO: This *must* be fixed at backend. PID is *NOT* a integer
+        persistent_identifier: Number.parseInt(device.persistentId),
+        url: device.urlWebsite,
+        type: device.type,
+        status: device.state,
+        serial_number: device.serialNumber
+      }
+    }
+    let url = process.env.backendUrl + '/sis/v1/devices'
+
+    if (device.id === null) {
+      // new -> post
+      method = axios.post
+    } else {
+      // old -> patch
+      data.id = device.id
+      url = url + '/' + device.id
+    }
+
+    // TODO: links for contacts
+    return method(
+      url,
+      {
+        data
+      }
+    ).then((serverAnswer) => {
+      return DeviceService.serverDeviceResponseToEntity(serverAnswer.data.data)
+    })
+  }
+
+  static findAllPlatforms (): Promise<Platform[]> {
+    return axios.get(process.env.backendUrl + '/sis/v1/platforms').then((rawResponse) => {
+      const rawData = rawResponse.data
+      const result: Platform[] = []
+
+      for (const entry of rawData.data) {
+        result.push(this.serverPlatformResponseToEntity(entry))
+      }
+
+      return result
+    })
+  }
+
+  static findAllDevices (): Promise<Device[]> {
+    return axios.get(process.env.backendUrl + '/sis/v1/devices').then((rawResonse) => {
+      const rawData = rawResonse.data
+      const result: Device[] = []
+
+      for (const entry of rawData.data) {
+        result.push(this.serverDeviceResponseToEntity(entry))
+      }
+
+      return result
+    })
+  }
+
+  static findDeviceById (id: string): Promise<Device> {
+    return axios.get(process.env.backendUrl + '/sis/v1/devices/' + id).then((rawResponse) => {
+      const entry = rawResponse.data.data
+      return DeviceService.serverDeviceResponseToEntity(entry)
     })
   }
 
   static findPlatformsAndSensors (text: string | null): Promise<Array<object>> {
+    const promiseAllPlatforms = this.findAllPlatforms()
+    const promiseAllDevices = this.findAllDevices()
+
     return new Promise((resolve) => {
-      MasterDataService.findAllPlatformTypes().then((platformTypes) => {
-        const result = []
+      promiseAllPlatforms.then((allPlatforms) => {
+        promiseAllDevices.then((allDevices) => {
+          const result = []
 
-        let filterFunc = (_platform: any): boolean => { return true }
+          let filterFuncPlatform = (_platform: any): boolean => { return true }
+          let filterFuncDevice = (_device: any): boolean => { return true }
 
-        if (text) {
-          filterFunc = (platform: any): boolean => {
-            return platform.shortName.includes(text)
-          }
-        }
-
-        const platformTypeLookup: {[id: number] : PlatformType} = {}
-        for (const platformType of platformTypes) {
-          const platformTypeId: number | null = platformType.id
-          if (platformTypeId != null) {
-            const platformTypeIdNotNull: number = platformTypeId
-            platformTypeLookup[platformTypeIdNotNull] = platformType
-          }
-        }
-
-        for (const platform of fakeDb.platforms) {
-          if (filterFunc(platform)) {
-            let plType: string | null = 'null'
-            if (platform.platformTypeId != null) {
-              const platformTypeId: number = platform.platformTypeId
-              if (platformTypeLookup[platformTypeId]) {
-                plType = platformTypeLookup[platformTypeId].name
-              }
+          if (text) {
+            filterFuncPlatform = (platform: any): boolean => {
+              return platform.shortName.includes(text)
             }
-            result.push(
-              {
-                id: platform.id,
-                name: platform.shortName,
-                project: '...',
-                type: plType,
-                state: 'shipping',
-                devicetype: 'platform'
-              }
-            )
+            filterFuncDevice = (device: any): boolean => {
+              return device.label.includes(text)
+            }
           }
-        }
-        resolve(result)
+
+          for (const platform of allPlatforms) {
+            if (filterFuncPlatform(platform)) {
+              result.push(
+                {
+                  id: platform.id,
+                  name: platform.shortName,
+                  project: '...',
+                  type: platform.platformType,
+                  state: 'shipping',
+                  devicetype: 'platform'
+                }
+              )
+            }
+          }
+
+          for (const device of allDevices) {
+            if (filterFuncDevice(device)) {
+              result.push(
+                {
+                  id: device.id,
+                  name: device.label,
+                  project: '...',
+                  type: device.type,
+                  state: device.state,
+                  devicetype: 'device'
+                }
+              )
+            }
+          }
+
+          resolve(result)
+        })
       })
     })
   }

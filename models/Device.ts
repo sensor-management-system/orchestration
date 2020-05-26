@@ -1,8 +1,8 @@
-import Person from './Person'
-import { SensorProperty } from './SensorProperty'
+import Contact from './Contact'
+import { DeviceProperty } from './DeviceProperty'
 import { CustomTextField } from './CustomTextField'
 
-export default class Sensor {
+export default class Device {
   private _id: number | null = null
   private _persistentId: string = ''
   private _label: string = ''
@@ -16,8 +16,8 @@ export default class Sensor {
   private _inventoryNumber: string = ''
   private _dualUse: boolean = false
 
-  private _responsiblePersons: Person[] = []
-  private _properties: SensorProperty[] = []
+  private _contacts: Contact[] = []
+  private _properties: DeviceProperty[] = []
   private _customFields: CustomTextField[] = []
 
   get id (): number | null {
@@ -116,19 +116,19 @@ export default class Sensor {
     this._dualUse = dualUse
   }
 
-  get responsiblePersons (): Person[] {
-    return this._responsiblePersons
+  get contacts (): Contact[] {
+    return this._contacts
   }
 
-  set responsiblePersons (responsiblePersons: Person[]) {
-    this._responsiblePersons = responsiblePersons
+  set contacts (contacts: Contact[]) {
+    this._contacts = contacts
   }
 
-  get properties (): SensorProperty[] {
+  get properties (): DeviceProperty[] {
     return this._properties
   }
 
-  set properties (properties: SensorProperty[]) {
+  set properties (properties: DeviceProperty[]) {
     this._properties = properties
   }
 

@@ -1,14 +1,17 @@
-import Person from './Person'
+import Contact from './Contact'
 
 export default class Platform {
   private _id: number | null = null
-  private _platformTypeId: number | null = null
+  private _platformType: string = ''
   private _shortName: string = ''
   private _longName: string = ''
   private _description: string = ''
-  private _manufactureId: number | null = null
-  private _website: string = ''
-  private _responsiblePersons: Person[] = []
+  private _manufacturer: string = ''
+  private _type: string = ''
+  private _inventoryNumber: number | null = null
+  private _url: string = ''
+
+  private _contacts: Contact[] = []
 
   get id (): number | null {
     return this._id
@@ -18,12 +21,12 @@ export default class Platform {
     this._id = newId
   }
 
-  get platformTypeId (): number | null {
-    return this._platformTypeId
+  get platformType (): string {
+    return this._platformType
   }
 
-  set platformTypeId (newPlatformTypeId: number | null) {
-    this._platformTypeId = newPlatformTypeId
+  set platformType (newPlatformType: string) {
+    this._platformType = newPlatformType
   }
 
   get shortName (): string {
@@ -50,28 +53,44 @@ export default class Platform {
     this._description = newDescription
   }
 
-  get manufactureId (): number | null {
-    return this._manufactureId
+  get manufacturer (): string {
+    return this._manufacturer
   }
 
-  set manufactureId (newManufactureId: number | null) {
-    this._manufactureId = newManufactureId
+  set manufacturer (newManufacturer: string) {
+    this._manufacturer = newManufacturer
   }
 
-  get website (): string {
-    return this._website
+  get type (): string {
+    return this._type
   }
 
-  set website (newWebsite: string) {
-    this._website = newWebsite
+  set type (newType: string) {
+    this._type = newType
   }
 
-  get responsiblePersons (): Person[] {
-    return this._responsiblePersons
+  get inventoryNumber (): number | null {
+    return this._inventoryNumber
   }
 
-  set responsiblePersons (responsiblePersons: Person[]) {
-    this._responsiblePersons = responsiblePersons
+  set inventoryNumber (newInventoryNumber: number | null) {
+    this._inventoryNumber = newInventoryNumber
+  }
+
+  get url (): string {
+    return this._url
+  }
+
+  set url (newUrl: string) {
+    this._url = newUrl
+  }
+
+  get contacts (): Contact[] {
+    return this._contacts
+  }
+
+  set contacts (newContacts: Contact[]) {
+    this._contacts = newContacts
   }
 
   static createEmpty (): Platform {
@@ -80,23 +99,27 @@ export default class Platform {
 
   static createWithIdAndData (
     id: number | null,
-    platformTypeId: number | null,
+    platformType: string,
     shortName: string,
     longName: string,
     description: string,
-    manufactureId: number | null,
-    website: string,
-    responsiblePersons: Person[]
+    manufacturer: string,
+    type: string,
+    inventoryNumber: number | null,
+    url: string,
+    contacts: Contact[]
   ): Platform {
     const result: Platform = new Platform()
     result.id = id
-    result.platformTypeId = platformTypeId
+    result.platformType = platformType
     result.shortName = shortName
     result.longName = longName
     result.description = description
-    result.manufactureId = manufactureId
-    result.website = website
-    result.responsiblePersons = responsiblePersons
+    result.manufacturer = manufacturer
+    result.type = type
+    result.inventoryNumber = inventoryNumber
+    result.url = url
+    result.contacts = contacts
 
     return result
   }

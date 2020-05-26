@@ -1,13 +1,11 @@
-import Manufacture from './../models/Manufacture'
 import Institute from './../models/Institute'
-import PlatformType from './../models/PlatformType'
 
 export default class MasterDataService {
-  static findAllManufactures (): Promise<Manufacture[]> {
-    return new Promise<Manufacture[]>((resolve) => {
+  static findAllManufacturers (): Promise<String[]> {
+    return new Promise<String[]>((resolve) => {
       resolve([
-        Manufacture.createWithIdAndName(1, 'Manufacture 01'),
-        Manufacture.createWithIdAndName(2, 'Manufacture 02')
+        'Manufacturer 01',
+        'Manufacturer 02'
       ])
     })
   }
@@ -21,25 +19,43 @@ export default class MasterDataService {
     })
   }
 
-  static findAllParameter (): Promise<Array<object>> {
-    return new Promise((resolve) => {
+  static findAllPlatformTypes (): Promise<String[]> {
+    return new Promise<String[]>((resolve) => {
       resolve([
-        {
-          id: 1,
-          name: 'Parameter 01'
-        }
+        'Station',
+        'Drone',
+        'Vessel',
+        'Vehicle',
+        'Satellite'
       ])
     })
   }
 
-  static findAllPlatformTypes (): Promise<PlatformType[]> {
-    return new Promise<PlatformType[]>((resolve) => {
+  static findAllTypes (): Promise<String[]> {
+    return new Promise<String[]>((resolve) => {
       resolve([
-        PlatformType.createWithIdAndName(1, 'Station'),
-        PlatformType.createWithIdAndName(2, 'Drone'),
-        PlatformType.createWithIdAndName(3, 'Vessel'),
-        PlatformType.createWithIdAndName(4, 'Vehicle'),
-        PlatformType.createWithIdAndName(5, 'Satellite')
+        'test type'
+      ])
+    })
+  }
+
+  static findAllStates (): Promise<String[]> {
+    return new Promise<String[]>((resolve) => {
+      resolve([
+        'in warehouse',
+        'in use',
+        'under construction',
+        'blocked',
+        'scrapped'
+      ])
+    })
+  }
+
+  static findAllDeviceTypes (): Promise<String[]> {
+    return new Promise<String[]>((resolve) => {
+      resolve([
+        'Einzelsensor',
+        'Multiparameter Sonde'
       ])
     })
   }

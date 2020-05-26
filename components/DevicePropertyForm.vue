@@ -74,42 +74,42 @@
 
 <script lang="ts">
 /**
- * @file provides a component for a sensor property
+ * @file provides a component for a device property
  * @author <marc.hanisch@gfz-potsdam.de>
  */
 import { Vue, Component, Prop } from 'nuxt-property-decorator'
-import { SensorProperty } from '../models/SensorProperty'
+import { DeviceProperty } from '../models/DeviceProperty'
 
 /**
- * A class component for a sensor property
+ * A class component for a device property
  * @extends Vue
  */
 @Component
 // @ts-ignore
-export default class SensorPropertyForm extends Vue {
+export default class DevicePropertyForm extends Vue {
   @Prop({
-    default: () => new SensorProperty(),
+    default: () => new DeviceProperty(),
     required: true,
-    type: SensorProperty
+    type: DeviceProperty
   })
   // @ts-ignore
-  value!: SensorProperty
+  value!: DeviceProperty
 
   /**
    * update the internal model at a given key
    *
    * @param {string} key - a path to the property to set
    * @param {string} value - the value to set
-   * @fires SensorPropertyForm#input
+   * @fires DevicePropertyForm#input
    */
   update (key: string, value: string) {
-    const newObj: SensorProperty = SensorProperty.createFromObject(this.value)
+    const newObj: DeviceProperty = DeviceProperty.createFromObject(this.value)
     newObj.setPath(key, value)
 
     /**
      * input event
-     * @event SensorPropertyForm#input
-     * @type SensorProperty
+     * @event DevicePropertyForm#input
+     * @type DeviceProperty
      */
     this.$emit('input', newObj)
   }
