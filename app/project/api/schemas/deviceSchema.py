@@ -27,7 +27,7 @@ class DeviceSchema(Schema):
     serial_number = fields.Integer(as_string=True, required=True)
     type = fields.Str(required=True)
     model = fields.Str(required=True)
-    dual_use = fields.Str()
+    dual_use = fields.Boolean()
     label = fields.Str(allow_none=True)
     inventory_number = fields.Integer()
     website = fields.Str(allow_none=True)
