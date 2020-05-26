@@ -24,11 +24,11 @@ describe('ContactSelect', () => {
       localVue,
       vuetify,
       propsData: {
-        selectedPersons: [Concact.createWithIdEMailAndNames(1, 'p1@mail.org', 'Person 1', 'Per', 'son 1')]
+        selectedContacts: [Concact.createWithIdEMailAndNames(1, 'p1@mail.org', 'Person 1', 'Per', 'son 1')]
       },
       data () {
         return {
-          persons: [
+          contacts: [
             Concact.createWithIdEMailAndNames(1, 'p1@mail.org', 'Person 1', 'Per', 'son 1'),
             Concact.createWithIdEMailAndNames(2, 'p2@mail.org', 'Person 2', 'Pers', 'On 2')]
         }
@@ -53,7 +53,7 @@ describe('ContactSelect', () => {
    */
 
   it('should trigger an update event when a contact is removed', () => {
-    wrapper.vm.removeConcact(1)
+    wrapper.vm.removeContact(1)
     expect(wrapper.emitted('update:selectedContacts')).toBeTruthy()
   })
 
