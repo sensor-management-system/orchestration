@@ -20,13 +20,13 @@ unittest-lint:
   stage: test
   image: $CI_REGISTRY_IMAGE
   before_script:
-    - apk add --no-cache --update python3-dev  gcc build-base
+    - apk add --no-cache --update python3-dev  gcc build-base curl
     - pip install --upgrade setuptools
     - pip install --upgrade flake8
     - pip install setuptools pylint pylint-exit pylint_flask pylint_flask_sqlalchemy
   script:
     - flake8 $CI_PROJECT_DIR/app/project
-    - pylint $CI_PROJECT_DIR/app/project | tee pylint.txt || pylint-exit $?
+    - pylint $CI_PROJECT_DIR/app/project --rcfile=$CI_PROJECT_DIR/app/.pylintrc| tee pylint.txt || pylint-exit $?
     - score=$(sed -n 's/^Your code has been rated at \([-0-9.]*\)\/.*/\1/p' pylint.txt)
     - echo "Pylint score was $score"
     - json_badge_info=$(curl -H "PRIVATE-TOKEN:$API_TOKEN" -X GET https://git.ufz.de/rdm-software/svm/backend/badges)
