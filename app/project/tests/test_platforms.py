@@ -2,11 +2,16 @@ import json
 import unittest
 
 from project.api.models.platform import Platform
-from project.api.schemas.platformSchema import PlatformSchema
+from project.api.schemas.platform_schema import PlatformSchema
 from project.tests.base import BaseTestCase
 
 
 class TestPlatformServices(BaseTestCase):
+    """
+    Test Event Services
+    """
+    url = '/sis/v1/platforms'
+
     def test_get_platfoms(self):
         """Ensure the /platform route behaves correctly."""
         response = self.client.get('/sis/v1/platforms')
@@ -24,28 +29,27 @@ class TestPlatformServices(BaseTestCase):
     def test_add_platform(self):
         """Ensure a new platform can be added to the database."""
 
+        data_object = {
+            "data": {
+                "type": "platform",
+                "attributes": {
+                    "longName": "testLong",
+                    "platform_type": "testPlType",
+                    "short_name": "short",
+                    "description": "string",
+                    "manufacturer": "string",
+                    "type": "type",
+                    "inventory_number": 12,
+                    "configuration_date": "2020-05-04 11",
+                    "url": "string"
+                }
+            }
+        }
         with self.client:
-            response = self.client.post(
-                '/sis/v1/platforms',
-                data=json.dumps({
-                    "data": {
-                        "type": "platform",
-                        "attributes": {
-                            "longName": "testLong",
-                            "platform_type": "testPlType",
-                            "short_name": "short",
-                            "description": "string",
-                            "manufacturer": "string",
-                            "type": "type",
-                            "inventory_number": 12,
-                            "configuration_date": "2020-05-04 11",
-                            "url": "string"
-                        }
-                    }
-                }),
-                content_type='application/vnd.api+json',
-            )
-            data = json.loads(response.data.decode())
+            data, response = super(TestPlatformServices, self). \
+                prepare_response(url=self.url,
+                                 data_object=data_object)
+
             self.assertEqual(response.status_code, 201)
             self.assertIn('TYPE_SHORT', data['data']['attributes']['urn'])
             self.assertIn('platform', data['data']['type'])
@@ -53,20 +57,19 @@ class TestPlatformServices(BaseTestCase):
     def test_add_platform_invalid_type(self):
         """Ensure error is thrown if the platform object has invalid type."""
 
+        data_object = {
+            "data": {
+                "type": "device",
+                "attributes": {
+                    "type": "TYPE"
+                }
+            }
+        }
         with self.client:
-            response = self.client.post(
-                '/sis/v1/platforms',
-                data=json.dumps({
-                    "data": {
-                        "type": "device",
-                        "attributes": {
-                            "type": "TYPE"
-                        }
-                    }
-                }),
-                content_type='application/vnd.api+json',
-            )
-        data = json.loads(response.data.decode())
+            data, response = super(TestPlatformServices, self). \
+                prepare_response(url=self.url,
+                                 data_object=data_object)
+
         self.assertEqual(response.status_code, 409)
         self.assertIn("Invalid type. Expected \"platform\".",
                       data['errors'][0]['detail'])
@@ -75,20 +78,20 @@ class TestPlatformServices(BaseTestCase):
         """Ensure error is thrown if the platform object
         has messing required data."""
 
+        data_object = {
+            "data": {
+                "type": "platform",
+                "attributes": {
+                    "type": "test",
+                }
+            }
+        }
+
         with self.client:
-            response = self.client.post(
-                '/sis/v1/platforms',
-                data=json.dumps({
-                    "data": {
-                        "type": "platform",
-                        "attributes": {
-                            "type": "test",
-                        }
-                    }
-                }),
-                content_type='application/vnd.api+json',
-            )
-        data = json.loads(response.data.decode())
+            data, response = super(TestPlatformServices, self). \
+                prepare_response(url=self.url,
+                                 data_object=data_object)
+
         self.assertEqual(response.status_code, 422)
         self.assertIn("Missing data for required field.",
                       data['errors'][0]['detail'])
@@ -96,13 +99,12 @@ class TestPlatformServices(BaseTestCase):
     def test_add_platform_invalid_json(self):
         """Ensure error is thrown if the platform object invalid."""
 
+        data_object = {}
+
         with self.client:
-            response = self.client.post(
-                '/sis/v1/platforms',
-                data=json.dumps({}),
-                content_type='application/vnd.api+json',
-            )
-        data = json.loads(response.data.decode())
+            data, response = super(TestPlatformServices, self). \
+                prepare_response(url=self.url,
+                                 data_object=data_object)
         self.assertEqual(response.status_code, 422)
         self.assertIn("Object must include `data` key.",
                       data['errors'][0]['detail'])
@@ -111,21 +113,21 @@ class TestPlatformServices(BaseTestCase):
         """Ensure error is thrown if the platform object
          has invalid data key."""
 
+        data_object = {
+            "data": {
+                "type": "platform",
+                "attributes": {
+                    "short_name": "short",
+                    "type": 123
+                }
+            }
+        }
+
         with self.client:
-            response = self.client.post(
-                '/sis/v1/platforms',
-                data=json.dumps({
-                    "data": {
-                        "type": "platform",
-                        "attributes": {
-                            "short_name": "short",
-                            "type": 123
-                        }
-                    }
-                }),
-                content_type='application/vnd.api+json',
-            )
-        data = json.loads(response.data.decode())
+            data, response = super(TestPlatformServices, self). \
+                prepare_response(url=self.url,
+                                 data_object=data_object)
+
         self.assertEqual(response.status_code, 422)
         self.assertIn("Not a valid string.",
                       data['errors'][0]['detail'])
@@ -139,21 +141,21 @@ class TestPlatformServices(BaseTestCase):
 
     def test_patch_platforms_via_id(self):
         """Ensure the patch /platform/<id> route behaves correctly."""
+        data_object = {
+            "data": {
+                "type": "platform",
+                "id": 1,
+                "attributes": {
+                    "short_name": "new"
+                }
+            }
+        }
+
         with self.client:
-            response = self.client.patch(
-                '/sis/v1/platforms/1',
-                data=json.dumps({
-                    "data": {
-                        "type": "platform",
-                        "id": 1,
-                        "attributes": {
-                            "short_name": "new"
-                        }
-                    }
-                }),
-                content_type='application/vnd.api+json',
-            )
-        data = json.loads(response.data.decode())
+            data, response = super(TestPlatformServices, self). \
+                prepare_response(url=self.url,
+                                 data_object=data_object)
+
         self.assertEqual(response.status_code, 200)
         self.assertIn('TYPE_NEW', data['data']['attributes']['urn'])
 
@@ -178,22 +180,20 @@ class TestPlatformServices(BaseTestCase):
         """Ensure the post relationship between a
          devices and a platform
          /platform/<id> route behaves correctly."""
+        data_object = {
+            "data": [
+                {
+                    "type": "device",
+                    "id": "1"
+                }
+            ]
+        }
+
         with self.client:
-            response = self.client.post(
-                '/sis/v1/platforms/1/relationships/devices',
-                data=json.dumps({
+            data, response = super(TestPlatformServices, self).prepare_response(
+                url='/sis/v1/platforms/1/relationships/devices',
+                data_object=data_object)
 
-                    "data": [
-                        {
-                            "type": "device",
-                            "id": "1"
-                        }
-                    ]
-
-                }),
-                content_type='application/vnd.api+json',
-            )
-        data = json.loads(response.data.decode())
         self.assertEqual(response.status_code, 200)
         self.assertIn('Relationship successfully created',
                       data['meta']['message'])

@@ -2,63 +2,59 @@ import json
 import unittest
 
 from project.api.models.event import Event
-from project.api.schemas.eventSchema import EventSchema
+from project.api.schemas.event_schema import EventSchema
 from project.tests.base import BaseTestCase
 
 
 class TestEventServices(BaseTestCase):
+    """
+    Test Event Services
+    """
+    url = '/sis/v1/events'
+    object_type = 'event'
+
     def test_get_devices(self):
         """Ensure the /event route behaves correctly."""
         response = self.client.get('/sis/v1/events')
         data = json.loads(response.data.decode())
         self.assertEqual(response.status_code, 200)
-        self.assertIn("http://localhost/sis/v1/events",
-                      data['links']['self'])
+        self.assertEqual(0, data['meta']['count'])
         # super().tear_down()
 
-    def test_add_platform_model(self):
+    def test_add_event_model(self):
         """""Ensure Add platform model """
         event = Event(id=145, description='test issued')
         EventSchema().dump(event)
 
     def test_add_event(self):
         """Ensure a new event can be added to the database."""
-
-        with self.client:
-            response = self.client.post(
-                '/sis/v1/events',
-                data=json.dumps({
-                    "data": {
-                        "type": "event",
-                        "attributes": {
-                            "description": "test",
-                        }
-                    }
-                }),
-                content_type='application/vnd.api+json',
-            )
-        data = json.loads(response.data.decode())
-        self.assertEqual(response.status_code, 201)
-        self.assertIn('test', data['data']['attributes']['description'])
-        self.assertIn('event', data['data']['type'])
+        data_object = {
+            "data": {
+                "type": "event",
+                "attributes": {
+                    "description": "test",
+                }
+            }
+        }
+        super(TestEventServices, self). \
+            test_add_object(url=self.url,
+                            data_object=data_object,
+                            object_type=self.object_type)
 
     def test_add_event_invalid_type(self):
         """Ensure error is thrown if the JSON object has invalid type."""
-
+        data_object = {
+            "data": {
+                "type": "platform",
+                "attributes": {
+                    "description": "test"
+                }
+            }
+        }
         with self.client:
-            response = self.client.post(
-                '/sis/v1/events',
-                data=json.dumps({
-                    "data": {
-                        "type": "platform",
-                        "attributes": {
-                            "description": "test"
-                        }
-                    }
-                }),
-                content_type='application/vnd.api+json',
-            )
-        data = json.loads(response.data.decode())
+            data, response = super(TestEventServices, self).prepare_response(
+                url=self.url, data_object=data_object)
+
         self.assertEqual(response.status_code, 409)
         self.assertIn("Invalid type. Expected \"event\".",
                       data['errors'][0]['detail'])
@@ -66,61 +62,48 @@ class TestEventServices(BaseTestCase):
     def test_add_event_missing_data(self):
         """Ensure error is thrown if the JSON object
          has messing required data."""
+        data_object = {
+            "data": {
+                "type": "event",
+                "attributes": {
 
+                }
+            }
+        }
         with self.client:
-            response = self.client.post(
-                '/sis/v1/events',
-                data=json.dumps({
-                    "data": {
-                        "type": "event",
-                        "attributes": {
+            data, response = super(TestEventServices, self).prepare_response(
+                url=self.url, data_object=data_object)
 
-                        }
-                    }
-                }),
-                content_type='application/vnd.api+json',
-            )
-        data = json.loads(response.data.decode())
         self.assertEqual(response.status_code, 422)
         self.assertIn("Missing data for required field.",
                       data['errors'][0]['detail'])
 
     def test_add_event_invalid_json(self):
         """Ensure error is thrown if the JSON object invalid."""
-
+        data_object = {}
         with self.client:
-            response = self.client.post(
-                '/sis/v1/events',
-                data=json.dumps({}),
-                content_type='application/vnd.api+json',
-            )
-        data = json.loads(response.data.decode())
+            data, response = super(TestEventServices, self).prepare_response(
+                url=self.url, data_object=data_object)
         self.assertEqual(response.status_code, 422)
         self.assertIn("Object must include `data` key.",
                       data['errors'][0]['detail'])
 
     def test_add_event_invalid_data_key(self):
-        """Ensure error is thrown if the JSON object
-         has invalid data key."""
-
+        data_object = {
+            "data": {
+                "type": "event",
+                "attributes": {
+                    "description": 123
+                }
+            }
+        }
         with self.client:
-            response = self.client.post(
-                '/sis/v1/events',
-                data=json.dumps({
-                    "data": {
-                        "type": "event",
-                        "attributes": {
-                            "description": 123
-                        }
-                    }
-                }),
-                content_type='application/vnd.api+json',
-            )
-        data = json.loads(response.data.decode())
+            data, response = super(TestEventServices, self).prepare_response(
+                url=self.url, data_object=data_object)
+
         self.assertEqual(response.status_code, 422)
         self.assertIn("Not a valid string.",
                       data['errors'][0]['detail'])
 
-
-if __name__ == '__main__':
-    unittest.main()
+        if __name__ == '__main__':
+            unittest.main()
