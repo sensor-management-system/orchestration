@@ -1,11 +1,10 @@
 from flask_rest_jsonapi import ResourceList
 from flask_rest_jsonapi.exceptions import ObjectNotFound
-from sqlalchemy.orm.exc import NoResultFound
 from project.api.models.base_model import db
 from project.api.models.device import Device
 from project.api.models.platform import Platform
 from project.api.schemas.device_schema import DeviceSchema
-
+from sqlalchemy.orm.exc import NoResultFound
 
 
 class DeviceList(ResourceList):
@@ -13,6 +12,7 @@ class DeviceList(ResourceList):
     provides get and post methods to retrieve
     a collection of Devices or create one.
     """
+
     def query(self, view_kwargs):
         """
 

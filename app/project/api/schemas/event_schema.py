@@ -3,6 +3,7 @@ from marshmallow_jsonapi.flask import Schema
 from project.api.schemas.base_schema import \
     set_device_relationship_schema
 
+
 class EventSchema(Schema):
     """
     This class create a schema for an event.

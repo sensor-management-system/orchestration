@@ -190,7 +190,7 @@ class TestPlatformServices(BaseTestCase):
         }
 
         with self.client:
-            data, response = super(TestPlatformServices, self).prepare_response(
+            data, response = super().prepare_response(
                 url='/sis/v1/platforms/1/relationships/devices',
                 data_object=data_object)
 
