@@ -20,6 +20,7 @@ unittest-lint:
   stage: test
   image: $CI_REGISTRY_IMAGE
   before_script:
+    - apt-get install build-essential
     - pip install --upgrade setuptools
     - pip install --upgrade flake8
     - pip install  pylint pylint-exit pylint_flask pylint_flask_sqlalchemy
