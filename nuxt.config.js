@@ -73,6 +73,12 @@ export default {
     ** You can extend webpack config here
     */
     extend (config, ctx) {
+      if (!ctx.isDev) {
+        // relative links, please.
+        // https://github.com/nuxt/nuxt.js/issues/2892#issuecomment-372504455
+        config.output.publicPath = './_nuxt/'
+      }
+      return config;
     }
   },
   server: {
