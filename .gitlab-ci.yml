@@ -42,7 +42,7 @@ unittest-lint:
 
     artifacts:
     paths:
-    - pylint.txt
+      - pylint.txt
 
 test-image:
   stage: test
