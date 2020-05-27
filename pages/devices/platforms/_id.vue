@@ -80,7 +80,7 @@
                 </v-row>
                 <v-row>
                   <v-col cols="12" md="3">
-                    <v-text-field v-model="platform.inventoryNumber" label="inventory number" :readonly="readonly" :disabled="readonly" type="number" />
+                    <v-text-field v-model="platform.inventoryNumber" label="inventory number" :readonly="readonly" :disabled="readonly" />
                   </v-col>
                 </v-row>
               </v-card-text>

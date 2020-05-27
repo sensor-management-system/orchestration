@@ -118,8 +118,7 @@ export default class DeviceService {
         label: device.label,
         manufacturer: device.manufacturer,
         model: device.model,
-        // TODO: This *must* be fixed at backend. PID is *NOT* a integer
-        persistent_identifier: Number.parseInt(device.persistentId),
+        persistent_identifier: device.persistentId,
         url: device.urlWebsite,
         type: device.type,
         status: device.state,

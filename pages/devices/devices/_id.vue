@@ -26,7 +26,6 @@
                     <v-text-field
                       v-model="device.persistentId"
                       label="persistent identifier (PID)"
-                      type="number"
                       :readonly="readonly"
                       :disabled="readonly"
                     />
