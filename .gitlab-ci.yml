@@ -28,7 +28,6 @@ unittest-lint:
     - pylint $CI_PROJECT_DIR/app/project | tee pylint.txt || pylint-exit $?
     - score=$(sed -n 's/^Your code has been rated at \([-0-9.]*\)\/.*/\1/p' pylint.txt)
     - echo "Pylint score was $score"
-    # get the json with all badge urls via API and regex the id of the badge with 'blue.svg' in it
     - json_badge_info=$(curl -H "PRIVATE-TOKEN:$API_TOKEN" -X GET https://git.ufz.de/rdm-software/svm/backend/badges)
     - pylint_badge_id=$(expr match "$json_badge_info" '.*https[^"]*-blue\.svg\",\"id\":\([0-9]\+\),')
     - echo $pylint_badge_id
@@ -39,10 +38,10 @@ unittest-lint:
       -H "PRIVATE-TOKEN: $API_TOKEN"
       -H "Content-Type: application/json"
       -d '{"image_url": "'"$badge_url"'"}'
-
-    artifacts:
+  artifacts:
     paths:
-      - pylint.txt
+        - pylint.txt
+
 
 test-image:
   stage: test
