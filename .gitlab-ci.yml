@@ -29,15 +29,13 @@ unittest-lint:
     - pylint $CI_PROJECT_DIR/app/project --rcfile=$CI_PROJECT_DIR/app/.pylintrc| tee pylint.txt || pylint-exit $?
     - score=$(sed -n 's/^Your code has been rated at \([-0-9.]*\)\/.*/\1/p' pylint.txt)
     - echo "Pylint score was $score"
-    - badge_url=https://img.shields.io/badge/lint%20score-$score-blue.svg
-    - pylint_badge_id=$(expr match "$json_badge_info" '.*https[^"]*-blue\.svg\",\"id\":\([0-9]\+\),')
-    - echo $pylint_badge_id
+    - badge_url=https://img.shields.io/badge/lint%20score-$score/10-blue.svg
     - >-
-      curl https://git.ufz.de/api/v4/projects/$CI_PROJECT_ID/badges/$pylint_badge_id
+      curl https://git.ufz.de/api/v4/projects/$CI_PROJECT_ID/badges/4
       -X PUT
       -H "PRIVATE-TOKEN: $API_TOKEN"
       -H "Content-Type: application/json"
-      -d '{"image_url": "'"$badge_url"'", "link_url":"https://git.ufz.de/rdm-software/svm/backend/-/commits/master"}'
+      -d '{"image_url": "'"$badge_url"'"}'
   artifacts:
     paths:
         - pylint.txt
