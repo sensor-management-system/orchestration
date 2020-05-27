@@ -1,7 +1,10 @@
-from project.api.models.baseModel import db
+from project.api.models.base_model import db
 
 
 class Attachment(db.Model):
+    """
+    Attachment class
+    """
     id = db.Column(db.Integer, primary_key=True)
     label = db.Column(db.String(256))
     url = db.Column(db.String(1024), nullable=False)

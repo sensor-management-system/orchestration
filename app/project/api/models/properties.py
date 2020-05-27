@@ -1,7 +1,10 @@
-from project.api.models.baseModel import db
+from project.api.models.base_model import db
 
 
 class Properties(db.Model):
+    """
+    Properties class
+    """
     id = db.Column(db.Integer, primary_key=True)
     measuring_range_min = db.Column(db.Float())
     measuring_range_max = db.Column(db.Float())
