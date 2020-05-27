@@ -81,6 +81,9 @@ export default {
       return config;
     }
   },
+  router: {
+    mode: "hash"
+  },
   server: {
   https: {
     key: fs.readFileSync(path.resolve(__dirname, 'server.key')),
