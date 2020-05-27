@@ -30,8 +30,10 @@ unittest-lint:
     - score=$(sed -n 's/^Your code has been rated at \([-0-9.]*\)\/.*/\1/p' pylint.txt)
     - echo "Pylint score was $score"
     - badge_url=https://img.shields.io/badge/lint%20score-$score-blue.svg
+    - pylint_badge_id=$(expr match "$json_badge_info" '.*https[^"]*-blue\.svg\",\"id\":\([0-9]\+\),')
+    - echo $pylint_badge_id
     - >-
-      curl https://git.ufz.de/api/v4/projects/1747/badges
+      curl https://git.ufz.de/api/v4/projects/$CI_PROJECT_ID/badges/$pylint_badge_id
       -X PUT
       -H "PRIVATE-TOKEN: $API_TOKEN"
       -H "Content-Type: application/json"
