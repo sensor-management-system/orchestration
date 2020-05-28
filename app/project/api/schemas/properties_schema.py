@@ -1,5 +1,7 @@
 from marshmallow_jsonapi import fields
-from marshmallow_jsonapi.flask import Schema, Relationship
+from marshmallow_jsonapi.flask import Schema
+from project.api.schemas.base_schema import \
+    set_device_relationship_schema
 
 
 class PropertiesSchema(Schema):
@@ -27,10 +29,4 @@ class PropertiesSchema(Schema):
     Variable = fields.Str(allow_none=True)
     sampling_media = fields.Str(allow_none=True)
 
-    device = Relationship(attribute='properties',
-                          self_view='properties_events',
-                          self_view_kwargs={'id': '<id>'},
-                          related_view='properties_detail',
-                          related_view_kwargs={'id': '<id>'},
-                          schema='PropertiesSchema',
-                          type_='properties')
+    device = set_device_relationship_schema('properties')

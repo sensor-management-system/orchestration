@@ -1,5 +1,7 @@
 from marshmallow_jsonapi import fields
-from marshmallow_jsonapi.flask import Schema, Relationship
+from marshmallow_jsonapi.flask import Schema
+from project.api.schemas.base_schema import \
+    set_device_relationship_schema
 
 
 class AttachmentSchema(Schema):
@@ -19,11 +21,4 @@ class AttachmentSchema(Schema):
     id = fields.Integer(as_string=True, dump_only=True)
     label = fields.Str(allow_none=True)
     url = fields.Str(required=True)
-
-    device = Relationship(attribute='device',
-                          self_view='device_attachments',
-                          self_view_kwargs={'id': '<id>'},
-                          related_view='devices_detail',
-                          related_view_kwargs={'id': '<id>'},
-                          schema='DeviceSchema',
-                          type_='device')
+    device = set_device_relationship_schema('attachments')

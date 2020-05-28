@@ -16,14 +16,30 @@ build-image:
     - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
     - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --destination $CONTAINER_TEST_IMAGE
 
-Linting-code:
+unittest-lint:
   stage: test
   image: $CI_REGISTRY_IMAGE
   before_script:
+    - apk add --no-cache --update python3-dev  gcc build-base curl
     - pip install --upgrade setuptools
     - pip install --upgrade flake8
+    - pip install setuptools pylint pylint-exit pylint_flask pylint_flask_sqlalchemy
   script:
     - flake8 $CI_PROJECT_DIR/app/project
+    - pylint $CI_PROJECT_DIR/app/project --rcfile=$CI_PROJECT_DIR/app/.pylintrc| tee pylint.txt || pylint-exit $?
+    - score=$(sed -n 's/^Your code has been rated at \([-0-9.]*\)\/.*/\1/p' pylint.txt)
+    - echo "Pylint score was $score"
+    - badge_url=https://img.shields.io/badge/lint%20score-$score/10-blue.svg
+    - >-
+      curl https://git.ufz.de/api/v4/projects/$CI_PROJECT_ID/badges/4
+      -X PUT
+      -H "PRIVATE-TOKEN: $API_TOKEN"
+      -H "Content-Type: application/json"
+      -d '{"image_url": "'"$badge_url"'"}'
+  artifacts:
+    paths:
+        - pylint.txt
+
 
 test-image:
   stage: test

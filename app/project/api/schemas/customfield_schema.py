@@ -1,5 +1,7 @@
 from marshmallow_jsonapi import fields
-from marshmallow_jsonapi.flask import Schema, Relationship
+from marshmallow_jsonapi.flask import Schema
+from project.api.schemas.base_schema import \
+    set_device_relationship_schema
 
 
 class CustomFieldSchema(Schema):
@@ -20,10 +22,4 @@ class CustomFieldSchema(Schema):
     key = fields.Str(required=True)
     value = fields.Str(required=True)
 
-    device = Relationship(attribute='device',
-                          self_view='device_customfields',
-                          self_view_kwargs={'id': '<id>'},
-                          related_view='devices_detail',
-                          related_view_kwargs={'id': '<id>'},
-                          schema='DeviceSchema',
-                          type_='device')
+    device = set_device_relationship_schema('customfields')
