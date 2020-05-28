@@ -2,9 +2,7 @@ stages:
   - check
   - test
   - build-gfz
-  - build-ufz
   - deploy-staging-gfz
-  - deploy-ufz
   - after-deployment-tests-gfz
 
 cache:
@@ -28,26 +26,6 @@ check-lint-gfz:
     key: ${CI_COMMIT_REF_SLUG}
     paths:
       - node_modules
-  only:
-    variables:
-      - $STAGING_HOST =~ /gfz/
-
-check-lint-ufz:
-  stage: check
-  image: node:10.16.3-stretch
-  before_script:
-    - node -v
-    - npm install
-  script:
-    - npm run lint
-  allow_failure: true
-  cache:
-    key: ${CI_COMMIT_REF_SLUG}
-    paths:
-      - node_modules
-  except:
-    variables:
-      - $STAGING_HOST =~ /gfz/
 
 test-frontend-unit-tests-gfz:
   stage: test
@@ -65,25 +43,6 @@ test-frontend-unit-tests-gfz:
     key: ${CI_COMMIT_REF_SLUG}
     paths:
       - node_modules
-  only:
-    variables:
-      - $STAGING_HOST =~ /gfz/
-
-test-frontend-unit-tests-ufz:
-  stage: test
-  image: node:10.16.3-stretch
-  before_script:
-    - node -v
-    - npm install
-  script:
-    - npm test
-  cache:
-    key: ${CI_COMMIT_REF_SLUG}
-    paths:
-      - node_modules
-  except:
-    variables:
-      - $STAGING_HOST =~ /gfz/
 
 .docker_login_gitlab_registry: &docker_login_gitlab_registry
   - echo "$CI_BUILD_TOKEN" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
@@ -117,8 +76,6 @@ build-deploy-image:
     refs:
       - master
       - tags
-    variables:
-      - $STAGING_HOST =~ /gfz/
 
 build-deploy-image-manual:
   stage: build-gfz
@@ -138,9 +95,6 @@ build-deploy-image-manual:
     - deploy
     - staging
     - id2
-  only:
-    variables:
-      - $STAGING_HOST =~ /gfz/
   when: manual
 
 deploy-staging:
@@ -162,8 +116,6 @@ deploy-staging:
   only:
     refs:
       - master
-    variables:
-      - $STAGING_HOST =~ /gfz/
 
 deploy-staging-manual-8080:
   stage: deploy-staging-gfz
@@ -184,32 +136,6 @@ deploy-staging-manual-8080:
   dependencies:
     - build-deploy-image-manual
   when: manual
-  only:
-    variables:
-      - $STAGING_HOST =~ /gfz/
-
-build_app:
-  stage: build-ufz
-  image: node:latest
-  script:
-    - npm install
-    - npm run generate
-  except:
-    variables:
-      - $STAGING_HOST =~ /gfz/
-
-
-build_image:
-  stage: deploy-ufz
-  image:
-    name: gcr.io/kaniko-project/executor:debug
-    entrypoint: [""]
-  script:
-    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
-    - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/docker/deployment/ufz/Dockerfile --destination $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG --destination $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA --destination $CI_REGISTRY_IMAGE --build-arg BUILD_DATE=$(date --utc +%FT%TZ) --build-arg VCS_REF=$CI_COMMIT_SHA
-  except:
-    variables:
-      - $STAGING_HOST =~ /gfz/
 
 test-availability-staging:
   stage: after-deployment-tests-gfz
@@ -228,8 +154,6 @@ test-availability-staging:
   only:
     refs:
       - master
-    variables:
-      - $STAGING_HOST =~ /gfz/
 
 test-availability-staging8080:
   stage: after-deployment-tests-gfz
@@ -246,7 +170,4 @@ test-availability-staging8080:
   dependencies:
     - deploy-staging-manual-8080
   when: manual
-  only:
-    variables:
-      - $STAGING_HOST =~ /gfz/
 
