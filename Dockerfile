@@ -42,7 +42,7 @@ COPY --from=builder /install /usr/local
 COPY app /usr/src/app
 
 #run server
-CMD ["sh", "-c","pip install --no-cache-dir -r requirements.txt && gunicorn -b 0.0.0.0:5000 manage:app"]
+CMD ["sh", "-c","pip install --no-cache-dir -r requirements.txt && gunicorn --access-logfile - -b 0.0.0.0:5000 manage:app"]
 EXPOSE 5000
 
 # docker run --rm -p 127.0.0.1:5000:5000 -e DATABASE_URL="postgres://postgres:postgres@db:5432/db_dev" -e APP_SETTINGS="project.config.DevelopmentConfig" git.ufz.de:4567/rdm-software/svm/backend:latest

@@ -25,7 +25,7 @@ from project.api.resourceManager.customfieldDetail import CustomFieldDetail
 from project.api.resourceManager.customfieldRelationship \
     import CustomFieldRelationship
 
-base_url = '/sis/v1'
+base_url = '/rdm/svm-api/v1'
 
 
 def Create_endpoints(api):
