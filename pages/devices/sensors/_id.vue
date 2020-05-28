@@ -19,57 +19,83 @@
             <v-card
               flat
             >
-              <v-card-title>Sensor URN: [MANUFACTURER_MODEL_TYPE_SERIALNUMBER]</v-card-title>
+              <v-card-title>Sensor URN: {{ sensorURN }}</v-card-title>
               <v-card-text>
                 <v-row>
                   <v-col cols="12" md="3">
                     <v-text-field
                       label="persistent identifier (PID)"
+                      :readonly="readonly"
+                      :disabled="readonly"
                     />
                   </v-col>
                 </v-row>
                 <v-row>
                   <v-col cols="12" md="6">
                     <v-text-field
+                      v-model="sensor.label"
                       label="label"
+                      :readonly="readonly"
+                      :disabled="readonly"
                     />
                   </v-col>
                   <v-col cols="12" md="3">
                     <v-select
+                      v-model="sensor.state"
                       :items="states"
                       label="state"
+                      :readonly="readonly"
+                      :disabled="readonly"
                     />
                   </v-col>
                 </v-row>
                 <v-row>
                   <v-col cols="12" md="3">
                     <v-select
+                      v-model="sensor.type"
                       :items="sensorTypes"
                       label="type"
+                      :readonly="readonly"
+                      :disabled="readonly"
                     />
                   </v-col>
                   <v-col cols="12" md="3">
                     <v-text-field
+                      v-model="sensor.manufacturer"
                       label="manufacturer"
+                      :readonly="readonly"
+                      :disabled="readonly"
                     />
                   </v-col>
                   <v-col cols="12" md="3">
                     <v-text-field
+                      v-model="sensor.model"
                       label="model"
+                      :readonly="readonly"
+                      :disabled="readonly"
                     />
                   </v-col>
                 </v-row>
                 <v-divider />
                 <v-row>
                   <v-col cols="12" md="6">
-                    <v-textarea label="Description" rows="3" />
+                    <v-textarea
+                      v-model="sensor.description"
+                      label="Description"
+                      rows="3"
+                      :readonly="readonly"
+                      :disabled="readonly"
+                    />
                   </v-col>
                 </v-row>
                 <v-row>
                   <v-col cols="12" md="3">
                     <v-text-field
+                      v-model="sensor.urlWebsite"
                       label="Website"
                       placeholder="https://"
+                      :readonly="readonly"
+                      :disabled="readonly"
                     />
                   </v-col>
                 </v-row>
@@ -77,18 +103,32 @@
                 <v-row>
                   <v-col cols="12" md="3">
                     <v-text-field
+                      v-model="sensor.serialNumber"
                       label="Serial Number"
+                      :readonly="readonly"
+                      :disabled="readonly"
                     />
                   </v-col>
                   <v-col cols="12" md="3">
                     <v-text-field
+                      v-model="sensor.inventoryNumber"
                       label="Inventar Number"
+                      :readonly="readonly"
+                      :disabled="readonly"
                     />
                   </v-col>
                 </v-row>
                 <v-row>
                   <v-col cols="12" md="3">
-                    <v-checkbox label="Dual Use" hint="can be used for military aims" :persistent-hint="true" color="red darken-3" />
+                    <v-checkbox
+                      v-model="sensor.dualUse"
+                      label="Dual Use"
+                      hint="can be used for military aims"
+                      :persistent-hint="true"
+                      color="red darken-3"
+                      :readonly="readonly"
+                      :disabled="readonly"
+                    />
                   </v-col>
                 </v-row>
               </v-card-text>
@@ -106,35 +146,11 @@
             <v-card
               flat
             >
-              <v-card-title>Sensor URN: [MANUFACTURER_MODEL_TYPE_SERIALNUMBER]</v-card-title>
+              <v-card-title>Sensor URN: {{ sensorURN }}</v-card-title>
               <v-card-text>
                 <v-row>
                   <v-col cols="3">
-                    <v-autocomplete
-                      label="add a person"
-                    />
-                    <v-chip
-                      class="ma-2"
-                      color="indigo"
-                      text-color="white"
-                      :close="true"
-                    >
-                      <v-avatar left>
-                        <v-icon>mdi-account-circle</v-icon>
-                      </v-avatar>
-                      Mister Marple
-                    </v-chip>
-                    <v-chip
-                      class="ma-2"
-                      color="indigo"
-                      text-color="white"
-                      :close="true"
-                    >
-                      <v-avatar left>
-                        <v-icon>mdi-account-circle</v-icon>
-                      </v-avatar>
-                      Hans Hamster
-                    </v-chip>
+                    <PersonSelect :selected-persons.sync="sensor.responsiblePersons" :readonly="readonly" />
                   </v-col>
                 </v-row>
               </v-card-text>
@@ -158,108 +174,9 @@
             <v-card
               flat
             >
-              <v-card-title>Sensor URN: [MANUFACTURER_MODEL_TYPE_SERIALNUMBER]</v-card-title>
+              <v-card-title>Sensor URN: {{ sensorURN }}</v-card-title>
               <v-card-text>
-                <v-btn
-                  small
-                  color="primary"
-                >
-                  add Property
-                </v-btn>
-                <br><br>
-                <v-expansion-panels
-                  v-model="propertyStates"
-                  multiple
-                >
-                  <v-expansion-panel
-                    v-for="(item, index) in [0, 1]"
-                    :key="index"
-                  >
-                    <v-expansion-panel-header>
-                      <v-row no-gutters>
-                        <v-col cols="11">
-                          Property {{ index+1 }}
-                        </v-col>
-                        <v-col cols="1">
-                          <v-menu
-                            right
-                          >
-                            <template v-slot:activator="{ on }">
-                              <v-btn
-                                icon
-                                v-on="on"
-                              >
-                                <v-icon>mdi-dots-vertical</v-icon>
-                              </v-btn>
-                            </template>
-
-                            <v-list>
-                              <v-list-item>
-                                <v-list-item-title>Copy</v-list-item-title>
-                              </v-list-item>
-                              <v-list-item>
-                                <v-list-item-title>Delete</v-list-item-title>
-                              </v-list-item>
-                            </v-list>
-                          </v-menu>
-                        </v-col>
-                      </v-row>
-                    </v-expansion-panel-header>
-                    <v-expansion-panel-content>
-                      <v-row>
-                        <v-col cols="12" md="3">
-                          <v-select
-                            label="compartment"
-                          />
-                        </v-col>
-                        <v-col cols="12" md="3">
-                          <v-select
-                            label="unit"
-                          />
-                        </v-col>
-                        <v-col cols="12" md="3">
-                          <v-text-field
-                            label="accuracy"
-                          />
-                        </v-col>
-                      </v-row>
-                      <v-row>
-                        <v-col cols="12" md="3">
-                          <v-select
-                            label="sampling media"
-                          />
-                        </v-col>
-                        <v-col cols="12" md="1">
-                          <v-text-field
-                            label="measuring range min"
-                          />
-                        </v-col>
-                        <v-col cols="12" md="1">
-                          <v-text-field
-                            label="measuring range min"
-                          />
-                        </v-col>
-                        <v-col cols="12" md="3" offset="1">
-                          <v-text-field
-                            label="label"
-                          />
-                        </v-col>
-                      </v-row>
-                      <v-row>
-                        <v-col cols="12" md="3">
-                          <v-select
-                            label="variable"
-                          />
-                        </v-col>
-                        <v-col cols="12" md="3">
-                          <v-text-field
-                            label="failure value"
-                          />
-                        </v-col>
-                      </v-row>
-                    </v-expansion-panel-content>
-                  </v-expansion-panel>
-                </v-expansion-panels>
+                <SensorPropertyExpansionPanels v-model="sensor.properties" :readonly="readonly" />
               </v-card-text>
               <v-card-actions>
                 <v-btn
@@ -281,39 +198,9 @@
             <v-card
               flat
             >
-              <v-card-title>Sensor URN: [MANUFACTURER_MODEL_TYPE_SERIALNUMBER]</v-card-title>
+              <v-card-title>Sensor URN: {{ sensorURN }}</v-card-title>
               <v-card-text>
-                <v-btn
-                  small
-                  color="primary"
-                >
-                  add Custom Field
-                </v-btn>
-                <br><br>
-                <v-row
-                  v-for="(item, index) in [0, 1]"
-                  :key="index"
-                >
-                  <v-col cols="12" md="3">
-                    <v-text-field
-                      label="key"
-                    />
-                  </v-col>
-                  <v-col cols="12" md="3">
-                    <v-text-field
-                      label="value"
-                    />
-                  </v-col>
-                  <v-col cols="1">
-                    <v-btn
-                      color="error"
-                      small
-                      outlined
-                    >
-                      delete
-                    </v-btn>
-                  </v-col>
-                </v-row>
+                <CustomFieldCards v-model="sensor.customFields" :readonly="readonly" />
               </v-card-text>
               <v-card-actions>
                 <v-btn
@@ -335,7 +222,7 @@
             <v-card
               flat
             >
-              <v-card-title>Sensor URN: [MANUFACTURER_MODEL_TYPE_SERIALNUMBER]</v-card-title>
+              <v-card-title>Sensor URN: {{ sensorURN }}</v-card-title>
               <v-card-text>
                 <v-timeline dense clipped>
                   <v-timeline-item
@@ -343,7 +230,9 @@
                     small
                   >
                     <v-row justify="space-between">
-                      <v-col cols="2">2020-04-28 10:15</v-col>
+                      <v-col cols="2">
+                        2020-04-28 10:15
+                      </v-col>
                       <v-col cols="10">
                         <strong>attached to platform XY</strong>
                         <div>Max M.</div>
@@ -357,7 +246,9 @@
                     small
                   >
                     <v-row justify="space-between">
-                      <v-col cols="2">2020-04-28 09:15</v-col>
+                      <v-col cols="2">
+                        2020-04-28 09:15
+                      </v-col>
                       <v-col cols="10">
                         <strong>edited description</strong>
                         <div>Max M.</div>
@@ -371,7 +262,9 @@
                     small
                   >
                     <v-row justify="space-between">
-                      <v-col cols="2">2020-04-20 08:05</v-col>
+                      <v-col cols="2">
+                        2020-04-20 08:05
+                      </v-col>
                       <v-col cols="10">
                         <strong>sensor created</strong>
                         <div>Hans H.</div>
@@ -392,11 +285,26 @@
           </v-tab-item>
         </v-tabs>
         <v-btn
+          v-if="!isInEditMode"
+          fab
+          fixed
+          bottom
+          right
+          color="secondary"
+          @click="toggleEditMode"
+        >
+          <v-icon>
+            mdi-pencil
+          </v-icon>
+        </v-btn>
+        <v-btn
+          v-if="isInEditMode"
           fab
           fixed
           bottom
           right
           color="primary"
+          @click="toggleEditMode"
         >
           <v-icon>mdi-content-save</v-icon>
         </v-btn>
@@ -406,12 +314,53 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'nuxt-property-decorator'
+import { Vue, Component, Watch } from 'nuxt-property-decorator'
+import Sensor from '../../../models/Sensor'
 
-@Component
-export default class Sensors extends Vue {
-  numberOfTabs: number = 5
-  activeTab: number = 0
+// @ts-ignore
+import PersonSelect from '../../../components/PersonSelect.vue'
+// @ts-ignore
+import SensorPropertyExpansionPanels from '../../../components/SensorPropertyExpansionPanels.vue'
+// @ts-ignore
+import CustomFieldCards from '../../../components/CustomFieldCards.vue'
+
+@Component({
+  components: {
+    PersonSelect,
+    SensorPropertyExpansionPanels,
+    CustomFieldCards
+  }
+})
+// @ts-ignore
+export default class SensorIdPage extends Vue {
+  private numberOfTabs: number = 5
+  private activeTab: number = 0
+
+  private sensor: Sensor = new Sensor()
+  private isInEditMode: boolean = false
+
+  mounted () {
+    this.loadSensor()
+  }
+
+  loadSensor () {
+    const sensorId = this.$route.params.id
+    if (sensorId) {
+      this.isInEditMode = false
+      // @TODO
+    } else {
+      this.isInEditMode = true
+      // @TODO
+    }
+  }
+
+  toggleEditMode () {
+    this.isInEditMode = !this.isInEditMode
+  }
+
+  get sensorURN () {
+    return this.sensor.urn
+  }
 
   previousTab () {
     this.activeTab = this.activeTab === 0 ? this.numberOfTabs - 1 : this.activeTab - 1
@@ -419,6 +368,10 @@ export default class Sensors extends Vue {
 
   nextTab () {
     this.activeTab = this.activeTab === this.numberOfTabs - 1 ? 0 : this.activeTab + 1
+  }
+
+  get readonly () {
+    return !this.isInEditMode
   }
 
   get navigation () {
@@ -480,11 +433,12 @@ export default class Sensors extends Vue {
     ]
   }
 
-  get propertyStates () {
-    return [
-      0,
-      1
-    ]
+  @Watch('sensor', { immediate: true, deep: true })
+  // @ts-ignore
+  onSensorChanged (val: Sensor) {
+    // @TODO: remove!
+    // eslint-disable-next-line
+    console.log('something changed in the sensor', val)
   }
 }
 </script>
