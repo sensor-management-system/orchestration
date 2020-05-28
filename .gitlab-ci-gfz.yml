@@ -98,7 +98,7 @@ build-deploy-image-manual:
   when: manual
 
 deploy-staging:
-  stage: deploy-staging-gfz
+  stage: deploy-staging
   environment:
     name: gfzstaging
     url: https://$STAGING_HOST
@@ -118,7 +118,7 @@ deploy-staging:
       - master
 
 deploy-staging-manual-8080:
-  stage: deploy-staging-gfz
+  stage: deploy-staging
   environment:
     name: gfzstaging8080
     url: https://${STAGING_HOST}:8080
