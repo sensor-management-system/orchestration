@@ -19,7 +19,7 @@ const state = () => ({
     isAutomaticSilentRenewOn:false
 })
 
-export const getters = {
+const getters = {
   isAuthenticated (state) {
     return isAuthenticated(state);
   },
@@ -44,7 +44,7 @@ export const getters = {
 
 }
 
-export const actions = {
+const actions = {
     loginPopup({dispatch}) {
         userManager.signinPopup()
                    .then(user => {
@@ -73,7 +73,7 @@ export const actions = {
     },
     automaticSilentRenew({state,dispatch,commit}) {
         if(!state.isAutomaticSilentRenewOn){
-            let intervalId = setInterval(() => dispatch('silentRenew'), process.env.VUE_APP_SILENT_RENEW_INTERVAL);
+            let intervalId = setInterval(() => dispatch('silentRenew'), 6900000);
             commit('setIntervalId',intervalId);
             commit('enableAutomaticSilentRenewOn')
         }

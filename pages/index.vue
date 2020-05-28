@@ -1,5 +1,17 @@
 <template>
+
   <v-container>
+    <v-row>
+                <v-col class="text-center">
+                    <v-btn
+                            color="primary"
+                            v-if="isLoggedIn"
+                            @click="silentRenew"
+                    >
+                        Silent Renew
+                    </v-btn>
+                </v-col>
+            </v-row>
       <v-row v-if="!isLoggedIn">
           <v-col>
               <h1 class="display-1 text-center">You're not logged in</h1>
@@ -10,6 +22,8 @@
       >
           <v-col>
               <h1><kbd>{{username}}</kbd> you're now logged in.</h1>
+            <h2>Go check you Profile</h2>
+                <v-btn to="/profile">Show Profile</v-btn>
           </v-col>
       </v-row>
     <v-row justify="center">
@@ -48,6 +62,24 @@
         name: 'Home',
         data: () => ({
         }),
+        mounted() {
+              this.$store.dispatch('auth/loadStoredUser');
+          },
+        methods: {
+              loginPopup() {
+                  this.$store.dispatch('auth/loginPopup');
+              },
+              logoutPopup() {
+                  let routing = {
+                      router: this.$router,
+                      currentRoute: this.$route.path
+                  };
+                  this.$store.dispatch('auth/logoutPopup', routing);
+              },
+              silentRenew(){
+                  this.$store.dispatch('auth/silentRenew');
+              }
+          },
         computed: {
             isLoggedIn() {
                 return this.$store.getters['auth/isAuthenticated'];
@@ -55,6 +87,7 @@
             username(){
                 return this.$store.getters['auth/username'];
             }
+
         }
 
     }
