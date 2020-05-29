@@ -6,6 +6,25 @@
       <v-card
         outlined
       >
+        <v-toolbar flat class="sticky">
+          <v-toolbar-title class="grey--text">Title</v-toolbar-title>
+
+          <v-spacer></v-spacer>
+
+          <v-btn icon>
+            <v-icon>mdi-magnify</v-icon>
+          </v-btn>
+
+          <v-btn icon>
+            <v-icon>mdi-apps</v-icon>
+          </v-btn>
+
+          <v-btn icon>
+            <v-icon>mdi-dots-vertical</v-icon>
+          </v-btn>
+        </v-toolbar>
+
+        <v-divider></v-divider>
         <v-tabs
           v-model="activeTab"
           background-color="grey lighten-3"
@@ -15,7 +34,7 @@
           <v-tab>Properties</v-tab>
           <v-tab>Custom Fields</v-tab>
           <v-tab>Events</v-tab>
-          <v-tab-item>
+          <v-tab-item :eager="true">
             <v-card
               flat
             >
@@ -142,7 +161,7 @@
               </v-card-actions>
             </v-card>
           </v-tab-item>
-          <v-tab-item>
+          <v-tab-item :eager="true">
             <v-card
               flat
             >
@@ -170,7 +189,7 @@
               </v-card-actions>
             </v-card>
           </v-tab-item>
-          <v-tab-item>
+          <v-tab-item :eager="true">
             <v-card
               flat
             >
@@ -194,7 +213,7 @@
               </v-card-actions>
             </v-card>
           </v-tab-item>
-          <v-tab-item>
+          <v-tab-item :eager="true">
             <v-card
               flat
             >
@@ -218,7 +237,7 @@
               </v-card-actions>
             </v-card>
           </v-tab-item>
-          <v-tab-item>
+          <v-tab-item :eager="true">
             <v-card
               flat
             >
@@ -312,6 +331,15 @@
     </v-form>
   </div>
 </template>
+
+<style scoped>
+.v-toolbar.sticky {
+  position: -webkit-sticky;
+  position: sticky;
+  top: 64px;
+  z-index: 9999;
+}
+</style>
 
 <script lang="ts">
 import { Vue, Component, Watch } from 'nuxt-property-decorator'
