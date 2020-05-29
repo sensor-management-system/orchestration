@@ -2,16 +2,15 @@ import {WebStorageStateStore} from "oidc-client";
 
 export default {
   userStore: new WebStorageStateStore({store: window.localStorage}),
-  authority: 'https://webapp.ufz.de/idp/oidc/v1',
-  client_id: 'oidc-test-implicit-flow-client-1',
-  redirect_uri: 'https://localhost.localdomain:3000/login-callback',
-  response_type: 'id_token',
-  scope: 'openid profile email',
-  post_logout_redirect_uri: 'https://localhost.localdomain:3000/logout-callback',
-  filterProtocolClaims: 'true',
-  automaticSilentRenew: 'false',
-  silent_redirect_uri: 'https://localhost.localdomain:3000/silent-callback',
-  includeIdTokenInSilentRenew: 'false',
-  popupWindowFeatures: 'location=no,toolbar=no,width=500,height=600,left=100,top=100' //adjusted height
+  authority: process.env.NUXT_ENV_AUTHORITY,
+  client_id: process.env.NUXT_ENV_CLIENT_ID,
+  redirect_uri: process.env.NUXT_ENV_REDIRECT_URI,
+  response_type: process.env.NUXT_ENV_RESPONSE_TYPE ,
+  scope: process.env.NUXT_ENV_SCOPE,
+  post_logout_redirect_uri: process.env.NUXT_ENV_POST_LOGOUT_REDIRECT_URI,
+  filterProtocolClaims: process.env.NUXT_ENV_FILTER_PROTOCOL_CLAIMS === 'true', //kleiner Trick, da man in der dpcker-compose.yaml kein boolean schreiben kann
+  automaticSilentRenew:process.env.NUXT_ENV_AUTOMATIC_SILENT_RENEW === 'false', //kleiner Trick, da man in der dpcker-compose.yaml kein boolean schreiben kann
+  silent_redirect_uri:process.env.NUXT_ENV_SILENT_REDIRECT_URI,
+  popupWindowFeatures:'location=no,toolbar=no,width=500,height=600,left=100,top=100' //adjusted height
 };
 

@@ -78,16 +78,11 @@ export default {
     */
     // eslint-disable-next-line
     extend (config, ctx) {
-      if (!ctx.isDev) {
-        // relative links, please.
-        // https://github.com/nuxt/nuxt.js/issues/2892#issuecomment-372504455
-        config.output.publicPath = './_nuxt/'
-      }
-      return config;
     }
   },
   router: {
-    mode: "hash"
+    mode: 'history',
+    base: process.env.BASE_URL,
   },
   server: {
   https: {
