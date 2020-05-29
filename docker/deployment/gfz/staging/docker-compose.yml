@@ -1,0 +1,16 @@
+version : '3'
+
+services:
+  ssmfrontend:
+    image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_TAG:-latest}
+    deploy:
+      restart_policy:
+        condition: unless-stopped
+        delay: 1s
+        max_attempts: 5
+        window: 30s
+    restart: unless-stopped
+    #environment:
+    ports:
+      - 80:80
+    #volumes:

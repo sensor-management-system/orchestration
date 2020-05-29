@@ -1,8 +1,12 @@
+// eslint-disable-next-line
 import colors from 'vuetify/es5/util/colors'
 import path from 'path'
 import fs from 'fs'
 export default {
   mode: 'spa',
+  env: {
+    backendUrl: process.env.BACKEND_URL || 'http://localhost:5000'
+  },
   /*
   ** Headers of the page
   */
@@ -72,6 +76,7 @@ export default {
     /*
     ** You can extend webpack config here
     */
+    // eslint-disable-next-line
     extend (config, ctx) {
       if (!ctx.isDev) {
         // relative links, please.

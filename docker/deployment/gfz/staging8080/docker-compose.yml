@@ -1,0 +1,16 @@
+version : '3'
+
+services:
+  ssmfrontend8080:
+    image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHORT_SHA:-latest}
+    deploy:
+      restart_policy:
+        condition: unless-stopped
+        delay: 1s
+        max_attempts: 5
+        window: 30s
+    restart: unless-stopped
+    #environment:
+    ports:
+      - 8080:80
+    #volumes:

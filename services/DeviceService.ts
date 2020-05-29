@@ -1,16 +1,22 @@
 import Platform from '../models/Platform'
 import PlatformType from '../models/PlatformType'
+import Person from '../models/Person'
 
 import MasterDataService from './MasterDataService'
 
 const fakeDb = {
   platforms: [
-    Platform.createWithIdAndData(1, 1, 'Boeken', 'Boeken', 'The Boeken station', 1, '', [1]),
-    Platform.createWithIdAndData(2, 3, 'Polarstern', 'Polarsterrn', 'The icebreaker', 1, '', [2, 1])
+    Platform.createWithIdAndData(1, 1, 'Boeken', 'Boeken', 'The Boeken station', 1, '', [Person.createWithIdAndName(1, 'Person 1')]),
+    Platform.createWithIdAndData(2, 3, 'Polarstern', 'Polarsterrn', 'The icebreaker', 1, '', [Person.createWithIdAndName(1, 'Person 1'), Person.createWithIdAndName(2, 'Person 2')])
   ]
 }
 
 export default class DeviceService {
+  // this was just a demo to see that we can reach our backend
+  /*static ping () : Promise<any> {
+    console.log(process.env.backendUrl)
+    return fetch(process.env.backendUrl + '/sis/v1/ping')
+  }*/
   static findPlatformById (id: string): Promise<Platform> {
     const searchId = Number.parseInt(id)
     return new Promise((resolve, reject) => {

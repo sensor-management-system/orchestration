@@ -1,0 +1,11 @@
+FROM node:10.16.3-stretch as js-builder
+ARG BACKEND_URL_ARG
+ENV BACKEND_URL $BACKEND_URL_ARG
+RUN mkdir /ssmfrontend
+COPY . /ssmfrontend
+WORKDIR /ssmfrontend
+RUN npm install
+RUN npm run generate
+
+FROM nginx:alpine as webserver
+COPY --from=js-builder /ssmfrontend/dist/ /usr/share/nginx/html
