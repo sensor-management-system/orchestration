@@ -1,6 +1,8 @@
 import Contact from './Contact'
 import { DeviceProperty } from './DeviceProperty'
 import { CustomTextField } from './CustomTextField'
+import { IDeviceOrPlatformSearchObject } from './IDeviceOrPlatformSearchObject'
+import { PlatformOrDeviceType } from '../enums/PlatformOrDeviceType'
 
 export default class Device {
   private _id: number | null = null
@@ -147,5 +149,42 @@ export default class Device {
     urn += this.type ? '_' + this.type : ''
     urn += this.serialNumber ? '_' + this.serialNumber : ''
     return urn
+  }
+
+  toSearchObject () : IDeviceOrPlatformSearchObject {
+    return new DeviceSearchObjectWrapper(this)
+  }
+}
+
+class DeviceSearchObjectWrapper implements IDeviceOrPlatformSearchObject {
+  private device: Device
+
+  constructor (device: Device) {
+    this.device = device
+  }
+
+  get id () : number | null {
+    return this.device.id
+  }
+
+  get name () : string {
+    return this.device.label
+  }
+
+  get type () : string {
+    return this.device.type
+  }
+
+  get searchType () : PlatformOrDeviceType {
+    return PlatformOrDeviceType.DEVICE
+  }
+
+  get project (): string {
+    // TODO
+    return 'No project yet'
+  }
+
+  get state () : string {
+    return this.device.state
   }
 }

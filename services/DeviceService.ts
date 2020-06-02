@@ -2,6 +2,7 @@ import axios from 'axios'
 
 import Platform from '../models/Platform'
 import Device from '../models/Device'
+import { IDeviceOrPlatformSearchObject } from '../models/IDeviceOrPlatformSearchObject'
 
 import { PlatformOrDeviceSearchType } from '../enums/PlatformOrDeviceSearchType'
 
@@ -190,7 +191,7 @@ export default class DeviceService {
     text: string | null,
     platformOrDevice: PlatformOrDeviceSearchType,
     manufacturer: string[]
-  ): Promise<Array<object>> {
+  ): Promise<IDeviceOrPlatformSearchObject[]> {
     let promiseAllPlatforms: Promise<Platform[]> = new Promise(resolve => resolve([]))
     let promiseAllDevices: Promise<Device[]> = new Promise(resolve => resolve([]))
 
@@ -239,31 +240,13 @@ export default class DeviceService {
 
           for (const platform of allPlatforms) {
             if (filterFuncPlatform(platform)) {
-              result.push(
-                {
-                  id: platform.id,
-                  name: platform.shortName,
-                  project: '...',
-                  type: platform.platformType,
-                  state: 'shipping',
-                  devicetype: 'platform'
-                }
-              )
+              result.push(platform.toSearchObject())
             }
           }
 
           for (const device of allDevices) {
             if (filterFuncDevice(device)) {
-              result.push(
-                {
-                  id: device.id,
-                  name: device.label,
-                  project: '...',
-                  type: device.type,
-                  state: device.state,
-                  devicetype: 'device'
-                }
-              )
+              result.push(device.toSearchObject())
             }
           }
 

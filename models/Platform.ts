@@ -1,5 +1,8 @@
 import Contact from './Contact'
 
+import { IDeviceOrPlatformSearchObject } from './IDeviceOrPlatformSearchObject'
+import { PlatformOrDeviceType } from '../enums/PlatformOrDeviceType'
+
 export default class Platform {
   private _id: number | null = null
   private _platformType: string = ''
@@ -93,6 +96,10 @@ export default class Platform {
     this._contacts = newContacts
   }
 
+  toSearchObject () : IDeviceOrPlatformSearchObject {
+    return new PlatformSearchObjectWrapper(this)
+  }
+
   static createEmpty (): Platform {
     return new Platform()
   }
@@ -122,5 +129,39 @@ export default class Platform {
     result.contacts = contacts
 
     return result
+  }
+}
+
+class PlatformSearchObjectWrapper implements IDeviceOrPlatformSearchObject {
+  private platform: Platform
+
+  constructor (platform: Platform) {
+    this.platform = platform
+  }
+
+  get id () : number | null {
+    return this.platform.id
+  }
+
+  get name () : string {
+    return this.platform.shortName
+  }
+
+  get type () : string {
+    return this.platform.platformType
+  }
+
+  get searchType () : PlatformOrDeviceType {
+    return PlatformOrDeviceType.PLATFORM
+  }
+
+  get project (): string {
+    // TODO
+    return 'No project yet'
+  }
+
+  get state () : string {
+    // TODO
+    return 'No state yet'
   }
 }

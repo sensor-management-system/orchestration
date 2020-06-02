@@ -144,7 +144,7 @@
     </v-card>
 
     <h2>Results:</h2>
-    <v-card v-for="result in searchResults" :key="result.devicetype + result.id">
+    <v-card v-for="result in searchResults" :key="result.searchType + result.id">
       <v-card-title>
         {{ result.name }}
       </v-card-title>
@@ -153,7 +153,7 @@
         <p>Project {{ result.project }}</p>
         <p>State {{ result.state }}</p>
       </v-card-text>
-      <v-card-actions v-if="result.devicetype == 'platform'">
+      <v-card-actions v-if="isPlatform(result)">
         <v-btn :to="'/devices/platforms/' + result.id">
           View
         </v-btn>
@@ -184,7 +184,7 @@
           </v-card>
         </v-dialog>
       </v-card-actions>
-      <v-card-actions v-if="result.devicetype == 'device'">
+      <v-card-actions v-if="isDevice(result)">
         <v-btn :to="'devices/devices/' + result.id">
           View
         </v-btn>
@@ -237,6 +237,8 @@ import DeviceService from '../../services/DeviceService'
 import { PlatformOrDeviceSearchType } from '../../enums/PlatformOrDeviceSearchType'
 
 import Institute from '../../models/Institute'
+import { IDeviceOrPlatformSearchObject } from '../../models/IDeviceOrPlatformSearchObject'
+import { PlatformOrDeviceType } from '../../enums/PlatformOrDeviceType'
 
 @Component
 export default class DevicesIndexPage extends Vue {
@@ -250,7 +252,7 @@ export default class DevicesIndexPage extends Vue {
   private selectedSearchInstitutes: Institute[] = []
   private instituteToAdd: Institute | null = null
 
-  private searchResults: Array<any> = []
+  private searchResults: Array<IDeviceOrPlatformSearchObject> = []
   private searchText: string | null = null
   private searchTypes: PlatformOrDeviceSearchType[] = Object.values(PlatformOrDeviceSearchType)
 
@@ -335,7 +337,7 @@ export default class DevicesIndexPage extends Vue {
     DeviceService.deletePlatform(id).then(() => {
       this.showDeletePlatformDialog = false
 
-      const searchIndex = this.searchResults.findIndex(r => r.id === id && r.devicetype === 'platform')
+      const searchIndex = this.searchResults.findIndex(r => r.id === id && r.searchType === PlatformOrDeviceType.PLATFORM)
       if (searchIndex > -1) {
         this.searchResults.splice(searchIndex, 1)
       }
@@ -349,13 +351,21 @@ export default class DevicesIndexPage extends Vue {
     DeviceService.deleteDevice(id).then(() => {
       this.showDeleteDeviceDialog = false
 
-      const searchIndex = this.searchResults.findIndex(r => r.id === id && r.devicetype === 'device')
+      const searchIndex = this.searchResults.findIndex(r => r.id === id && r.searchType === PlatformOrDeviceType.DEVICE)
       if (searchIndex > -1) {
         this.searchResults.splice(searchIndex, 1)
       }
       this.successMessage = 'Device deleted'
       this.showSuccessMessage = true
     })
+  }
+
+  isPlatform (searchObject: IDeviceOrPlatformSearchObject) {
+    return searchObject.searchType === PlatformOrDeviceType.PLATFORM
+  }
+
+  isDevice (searchObject: IDeviceOrPlatformSearchObject) {
+    return searchObject.searchType === PlatformOrDeviceType.DEVICE
   }
 
   get searchTypePlaceholder () {
