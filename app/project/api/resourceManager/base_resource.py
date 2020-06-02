@@ -1,7 +1,8 @@
 from flask_rest_jsonapi import ResourceDetail
 from flask_rest_jsonapi.exceptions import ObjectNotFound
-from project.api.models.device import Device
 from sqlalchemy.orm.exc import NoResultFound
+from project.api.models.device import Device
+
 
 
 class BaseResourceDetail(ResourceDetail):
@@ -9,7 +10,7 @@ class BaseResourceDetail(ResourceDetail):
     Base Resource detail
     """
 
-    def query_an_object(self, o, kwargs):
+    def query_an_object(self, kwargs, object_):
         """
 
         :param kwargs:
@@ -24,7 +25,9 @@ class BaseResourceDetail(ResourceDetail):
                                      "Device: {} not found".format(
                                          kwargs['device_id']))
             else:
-                if device.o is not None:
-                    kwargs['id'] = device.o.id
+                o = self.session.query(object_).filter_by(
+                    id=kwargs['id']).one()
+                if device[o] is not None:
+                    kwargs['id'] = device[o].id
                 else:
                     kwargs['id'] = None
