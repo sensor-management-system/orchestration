@@ -240,19 +240,19 @@ import Institute from '../../models/Institute'
 export default class DevicesIndexPage extends Vue {
   private activeSearchTypeTabIdx: number = 0
 
-  private searchManufacturers: String[] = []
-  private selectedSearchManufacturers: String[] = []
-  private manufacturerToAdd: String | null = null
+  private searchManufacturers: string[] = []
+  private selectedSearchManufacturers: string[] = []
+  private manufacturerToAdd: string | null = null
 
   private searchInstitutes: Institute[] = []
   private selectedSearchInstitutes: Institute[] = []
   private instituteToAdd: Institute | null = null
 
   private searchResults: Array<any> = []
-  private searchText: String | null = null
+  private searchText: string | null = null
   private searchTypes: string[] = ['Device / Platform', 'Device', 'Platform']
 
-  private selectedSearchType: String = 'Device / Platform';
+  private selectedSearchType: string = 'Device / Platform';
 
   private showDeletePlatformDialog: boolean = false
   private showDeleteDeviceDialog: boolean = false
@@ -301,7 +301,7 @@ export default class DevicesIndexPage extends Vue {
     this.instituteToAdd = null
   }
 
-  runSearch (searchText: String | null, searchType: String | null, manufacturer: String[]) {
+  runSearch (searchText: string | null, searchType: string | null, manufacturer: string[]) {
     DeviceService.findPlatformsAndSensors(searchText, searchType, manufacturer).then((findResults) => {
       this.searchResults = findResults
     })

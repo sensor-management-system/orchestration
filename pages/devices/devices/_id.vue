@@ -343,9 +343,9 @@ export default class DeviceIdPage extends Vue {
 
   private device: Device = new Device()
 
-  private states: String[] = []
-  private deviceTypes: String[] = []
-  private manufacturers: String[] = []
+  private states: string[] = []
+  private deviceTypes: string[] = []
+  private manufacturers: string[] = []
 
   private isInEditMode: boolean = false
 

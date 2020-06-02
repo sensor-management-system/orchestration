@@ -185,9 +185,9 @@ export default class DeviceService {
   }
 
   static findPlatformsAndSensors (
-    text: String | null,
-    platformOrDevice: String | null,
-    manufacturer: String[]
+    text: string | null,
+    platformOrDevice: string | null,
+    manufacturer: string[]
   ): Promise<Array<object>> {
     let promiseAllPlatforms: Promise<Platform[]> = new Promise(resolve => resolve([]))
     let promiseAllDevices: Promise<Device[]> = new Promise(resolve => resolve([]))

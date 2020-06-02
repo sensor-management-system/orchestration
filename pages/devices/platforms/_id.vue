@@ -172,9 +172,9 @@ import ContactSelect from '../../../components/ContactSelect.vue'
 export default class PlatformIdPage extends Vue {
   // data
   // first for the data to chose the elements
-  private platformTypes: String[] = []
-  private manufacturers: String[] = []
-  private types: String[] = []
+  private platformTypes: string[] = []
+  private manufacturers: string[] = []
+  private types: string[] = []
 
   // then for our platform that we want to change
   private platform: Platform = Platform.createEmpty()

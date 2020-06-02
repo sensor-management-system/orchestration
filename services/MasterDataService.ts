@@ -1,8 +1,8 @@
 import Institute from './../models/Institute'
 
 export default class MasterDataService {
-  static findAllManufacturers (): Promise<String[]> {
-    return new Promise<String[]>((resolve) => {
+  static findAllManufacturers (): Promise<string[]> {
+    return new Promise<string[]>((resolve) => {
       resolve([
         'Manufacturer 01',
         'Manufacturer 02'
@@ -19,8 +19,8 @@ export default class MasterDataService {
     })
   }
 
-  static findAllPlatformTypes (): Promise<String[]> {
-    return new Promise<String[]>((resolve) => {
+  static findAllPlatformTypes (): Promise<string[]> {
+    return new Promise<string[]>((resolve) => {
       resolve([
         'Station',
         'Drone',
@@ -31,16 +31,16 @@ export default class MasterDataService {
     })
   }
 
-  static findAllTypes (): Promise<String[]> {
-    return new Promise<String[]>((resolve) => {
+  static findAllTypes (): Promise<string[]> {
+    return new Promise<string[]>((resolve) => {
       resolve([
         'test type'
       ])
     })
   }
 
-  static findAllStates (): Promise<String[]> {
-    return new Promise<String[]>((resolve) => {
+  static findAllStates (): Promise<string[]> {
+    return new Promise<string[]>((resolve) => {
       resolve([
         'in warehouse',
         'in use',
@@ -51,8 +51,8 @@ export default class MasterDataService {
     })
   }
 
-  static findAllDeviceTypes (): Promise<String[]> {
-    return new Promise<String[]>((resolve) => {
+  static findAllDeviceTypes (): Promise<string[]> {
+    return new Promise<string[]>((resolve) => {
       resolve([
         'Einzelsensor',
         'Multiparameter Sonde'
