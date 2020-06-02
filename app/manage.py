@@ -5,6 +5,7 @@ from flask.cli import FlaskGroup
 from project import create_app
 from project.api.insert_initial_values import *
 from project.api.models.base_model import db
+from project.tests.base import BaseTestCase
 
 app = create_app()
 cli = FlaskGroup(create_app=create_app)
@@ -30,7 +31,9 @@ def recreate_db():
 @cli.command()
 def test():
     """ Runs the tests without code coverage """
-    tests = unittest.TestLoader().discover('project/tests', pattern='test*.py')
+    base = BaseTestCase()
+    # base.set_up()
+    tests = unittest.TestLoader().discover('project/tests', pattern='test_attachments.py')
     result = unittest.TextTestRunner(verbosity=2).run(tests)
     if result.wasSuccessful():
         return 0
