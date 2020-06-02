@@ -10,7 +10,7 @@ class TestAttachmentServices(BaseTestCase):
     """
     Test Attachment class
     """
-    url = '/sis/v1/attachments'
+    attachment_url = '/rdm/svm-api/v1/attachments'
     object_type = 'attachment'
 
     def test_add_attachment_model(self):
@@ -21,10 +21,8 @@ class TestAttachmentServices(BaseTestCase):
 
     def test_add_attachment(self):
         """Ensure a new Attachment can be added to the database."""
-        super().create_app()
-        super().set_up()
 
-        data_object = {
+        attachment_data = {
             "data": {
                 "type": "attachment",
                 "attributes": {
@@ -33,15 +31,15 @@ class TestAttachmentServices(BaseTestCase):
                 }
             }
         }
-        super(TestAttachmentServices, self). \
-            test_add_object(url=self.url,
-                            data_object=data_object,
-                            object_type=self.object_type)
+        super(). \
+            add_object(url=self.attachment_url,
+                       data_object=attachment_data,
+                       object_type=self.object_type)
 
     def test_add_attachment_invalid_type(self):
         """Ensure error is thrown if the JSON object has invalid type."""
 
-        data_object = {
+        attachment_data = {
             "data": {
                 "type": "contact",
                 "attributes": {
@@ -49,10 +47,9 @@ class TestAttachmentServices(BaseTestCase):
                 }
             }
         }
-        with self.client:
-            data, response = super(TestAttachmentServices, self). \
-                prepare_response(url=self.url,
-                                 data_object=data_object)
+
+        data, response = super().prepare_response(
+            url=self.attachment_url, data_object=attachment_data)
 
         self.assertEqual(response.status_code, 409)
         self.assertIn("Invalid type. Expected \"attachment\".",
@@ -61,7 +58,7 @@ class TestAttachmentServices(BaseTestCase):
     def test_add_attachment_missing_data(self):
         """Ensure error is thrown if the JSON object
         has messing required data."""
-        data_object = {
+        attachment_data = {
             "data": {
                 "type": "attachment",
                 "attributes": {
@@ -69,10 +66,9 @@ class TestAttachmentServices(BaseTestCase):
                 }
             }
         }
-        with self.client:
-            data, response = super(TestAttachmentServices, self). \
-                prepare_response(url=self.url,
-                                 data_object=data_object)
+
+        data, response = super().prepare_response(
+            url=self.attachment_url, data_object=attachment_data)
 
         data = json.loads(response.data.decode())
         self.assertEqual(response.status_code, 422)
@@ -83,11 +79,11 @@ class TestAttachmentServices(BaseTestCase):
         """Ensure error is thrown if the JSON
         object invalid."""
 
-        data_object = {}
+        attachment_data = {}
         with self.client:
-            data, response = super(TestAttachmentServices, self). \
-                prepare_response(url=self.url,
-                                 data_object=data_object)
+            data, response = super(). \
+                prepare_response(url=self.attachment_url,
+                                 data_object=attachment_data)
         self.assertEqual(response.status_code, 422)
         self.assertIn("Object must include `data` key.",
                       data['errors'][0]['detail'])
@@ -96,7 +92,7 @@ class TestAttachmentServices(BaseTestCase):
         """Ensure error is thrown if the JSON object
          has invalid data key."""
 
-        data_object = {
+        attachment_data = {
             "data": {
                 "type": "attachment",
                 "attributes": {
@@ -104,14 +100,8 @@ class TestAttachmentServices(BaseTestCase):
                 }
             }
         }
-        with self.client:
-            data, response = super(TestAttachmentServices, self). \
-                prepare_response(url=self.url,
-                                 data_object=data_object)
-
-        self.assertEqual(response.status_code, 422)
-        self.assertIn("Not a valid string.",
-                      data['errors'][0]['detail'])
+        super().add_object_invalid_data_key(
+            url=self.attachment_url, data_object=attachment_data)
 
 
 if __name__ == '__main__':

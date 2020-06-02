@@ -9,7 +9,7 @@ class TestFieldServices(BaseTestCase):
     """
     Test Field Services
     """
-    url = '/sis/v1/customfields'
+    field_url = '/customfields'
     object_type = 'customfield'
 
     def test_add_attachment_model(self):
@@ -21,7 +21,7 @@ class TestFieldServices(BaseTestCase):
     def test_add_field(self):
         """Ensure a new Field can be added to the database."""
 
-        data_object = {
+        c_field_data = {
             "data": {
                 "type": "customfield",
                 "attributes": {
@@ -30,15 +30,15 @@ class TestFieldServices(BaseTestCase):
                 }
             }
         }
-        super(TestFieldServices, self). \
-            test_add_object(url=self.url,
-                            data_object=data_object,
-                            object_type=self.object_type)
+        super(). \
+            add_object(url=self.field_url,
+                       data_object=c_field_data,
+                       object_type=self.object_type)
 
     def test_add_field_invalid_type(self):
         """Ensure error is thrown if the JSON object has invalid type."""
 
-        data_object = {
+        c_field_data = {
             "data": {
                 "type": "contact",
                 "attributes": {
@@ -46,10 +46,10 @@ class TestFieldServices(BaseTestCase):
                 }
             }
         }
-        with self.client:
-            data, response = super(TestFieldServices, self). \
-                prepare_response(url=self.url,
-                                 data_object=data_object)
+
+        data, response = super(). \
+            prepare_response(url=self.field_url,
+                             data_object=c_field_data)
 
         self.assertEqual(response.status_code, 409)
         self.assertIn("Invalid type. Expected \"customfield\".",
@@ -59,7 +59,7 @@ class TestFieldServices(BaseTestCase):
         """Ensure error is thrown if the JSON object
         has messing required data."""
 
-        data_object = {
+        c_field_data = {
             "data": {
                 "type": "customfield",
                 "attributes": {
@@ -67,10 +67,10 @@ class TestFieldServices(BaseTestCase):
                 }
             }
         }
-        with self.client:
-            data, response = super(TestFieldServices, self). \
-                prepare_response(url=self.url,
-                                 data_object=data_object)
+
+        data, response = super(). \
+            prepare_response(url=self.field_url,
+                             data_object=c_field_data)
 
         self.assertEqual(response.status_code, 422)
         self.assertIn("Missing data for required field.",
@@ -79,11 +79,11 @@ class TestFieldServices(BaseTestCase):
     def test_add_field_invalid_json(self):
         """Ensure error is thrown if the JSON object invalid."""
 
-        data_object = {}
-        with self.client:
-            data, response = super(TestFieldServices, self). \
-                prepare_response(url=self.url,
-                                 data_object=data_object)
+        c_field_data = {}
+
+        data, response = super(TestFieldServices, self). \
+            prepare_response(url=self.field_url,
+                             data_object=c_field_data)
         self.assertEqual(response.status_code, 422)
         self.assertIn("Object must include `data` key.",
                       data['errors'][0]['detail'])
@@ -92,7 +92,7 @@ class TestFieldServices(BaseTestCase):
         """Ensure error is thrown if the JSON object
          has invalid data key."""
 
-        data_object = {
+        c_field_data = {
             "data": {
                 "type": "customfield",
                 "attributes": {
@@ -101,14 +101,9 @@ class TestFieldServices(BaseTestCase):
                 }
             }
         }
-        with self.client:
-            data, response = super(TestFieldServices, self). \
-                prepare_response(url=self.url,
-                                 data_object=data_object)
 
-        self.assertEqual(response.status_code, 422)
-        self.assertIn("Not a valid string.",
-                      data['errors'][0]['detail'])
+        super().add_object_invalid_data_key(
+            url=self.attachment_url, data_object=c_field_data)
 
 
 if __name__ == '__main__':

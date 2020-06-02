@@ -8,7 +8,7 @@ from project.tests.base import BaseTestCase
 
 class TestDeviceService(BaseTestCase):
     """Tests for the Device Service."""
-    url = '/sis/v1/devices'
+    device_url = '/devices'
 
     def test_ping(self):
         """Ensure the /ping route behaves correctly."""
@@ -40,7 +40,7 @@ class TestDeviceService(BaseTestCase):
         # super().create_app()
         # super().set_up()
 
-        data_object = {
+        device_data = {
             "data": {
                 "type": "device",
                 "attributes": {
@@ -53,10 +53,10 @@ class TestDeviceService(BaseTestCase):
                 }
             }
         }
-        with self.client:
-            data, response = super(TestDeviceService, self). \
-                prepare_response(url=self.url,
-                                 data_object=data_object)
+
+        data, response = super(). \
+            prepare_response(url=self.device_url,
+                             data_object=device_data)
 
         self.assertEqual(response.status_code, 201)
         self.assertIn('MANUFACTURER_MODEL_TYPE_125436987',
@@ -65,7 +65,7 @@ class TestDeviceService(BaseTestCase):
     def test_add_device_invalid_type(self):
         """Ensure error is thrown if the JSON object has invalid type."""
 
-        data_object = {
+        device_data = {
             "data": {
                 "type": "platform",
                 "attributes": {
@@ -79,9 +79,9 @@ class TestDeviceService(BaseTestCase):
             }
         }
         with self.client:
-            data, response = super(TestDeviceService, self). \
-                prepare_response(url=self.url,
-                                 data_object=data_object)
+            data, response = super(). \
+                prepare_response(url=self.device_url,
+                                 data_object=device_data)
 
         self.assertEqual(response.status_code, 409)
         self.assertIn("Invalid type. Expected \"device\".",
@@ -91,7 +91,7 @@ class TestDeviceService(BaseTestCase):
         """Ensure error is thrown if the JSON object
         has messing required data."""
 
-        data_object = {
+        device_data = {
             "data": {
                 "type": "device",
                 "attributes": {
@@ -100,9 +100,9 @@ class TestDeviceService(BaseTestCase):
             }
         }
         with self.client:
-            data, response = super(TestDeviceService, self). \
-                prepare_response(url=self.url,
-                                 data_object=data_object)
+            data, response = super(). \
+                prepare_response(url=self.device_url,
+                                 data_object=device_data)
 
         self.assertEqual(response.status_code, 422)
         self.assertIn("Missing data for required field.",
@@ -111,13 +111,13 @@ class TestDeviceService(BaseTestCase):
     def test_add_device_invalid_json(self):
         """Ensure error is thrown if the JSON object invalid."""
 
-        data_object = {
+        device_data = {
             "data": {}
         }
         with self.client:
-            data, response = super(TestDeviceService, self). \
-                prepare_response(url=self.url,
-                                 data_object=data_object)
+            data, response = super(). \
+                prepare_response(url=self.device_url,
+                                 data_object=device_data)
         self.assertEqual(response.status_code, 422)
         self.assertIn("Object must include `data` key.",
                       data['errors'][0]['detail'])
@@ -126,7 +126,7 @@ class TestDeviceService(BaseTestCase):
         """Ensure error is thrown if the JSON object
          has invalid data key."""
 
-        data_object = {
+        device_data = {
             "data": {
                 "type": "device",
                 "attributes": {
@@ -139,18 +139,13 @@ class TestDeviceService(BaseTestCase):
                 }
             }
         }
-        with self.client:
-            data, response = super(TestDeviceService, self). \
-                prepare_response(url=self.url,
-                                 data_object=data_object)
 
-        self.assertEqual(response.status_code, 422)
-        self.assertIn("Not a valid string.",
-                      data['errors'][0]['detail'])
+        super().add_object_invalid_data_key(
+            url=self.attachment_url, data_object=device_data)
 
     def test_patch_devices_via_id(self):
         """Ensure the patch /device/<id> route behaves correctly."""
-        data_object = {
+        device_data = {
             "data": {
                 "type": "device",
                 "id": 1,
@@ -159,10 +154,10 @@ class TestDeviceService(BaseTestCase):
                 }
             }
         }
-        with self.client:
-            data, response = super(TestDeviceService, self). \
-                prepare_response(url=self.url,
-                                 data_object=data_object)
+
+        data, response = super(). \
+            prepare_response(url=self.device_url,
+                             data_object=device_data)
 
         self.assertEqual(response.status_code, 200)
         self.assertIn('MANUFACTURER_MODEL_NEW_TYPE_125436987',
