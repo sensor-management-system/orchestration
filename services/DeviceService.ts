@@ -3,6 +3,8 @@ import axios from 'axios'
 import Platform from '../models/Platform'
 import Device from '../models/Device'
 
+import { PlatformOrDeviceSearchType } from '../enums/PlatformOrDeviceSearchType'
+
 export default class DeviceService {
   static serverPlatformResponseToEntity (entry: any) : Platform {
     const result: Platform = Platform.createEmpty()
@@ -186,15 +188,15 @@ export default class DeviceService {
 
   static findPlatformsAndSensors (
     text: string | null,
-    platformOrDevice: string | null,
+    platformOrDevice: PlatformOrDeviceSearchType,
     manufacturer: string[]
   ): Promise<Array<object>> {
     let promiseAllPlatforms: Promise<Platform[]> = new Promise(resolve => resolve([]))
     let promiseAllDevices: Promise<Device[]> = new Promise(resolve => resolve([]))
 
-    if (platformOrDevice === 'Platform') {
+    if (platformOrDevice === PlatformOrDeviceSearchType.PLATFORMS) {
       promiseAllPlatforms = this.findAllPlatforms()
-    } else if (platformOrDevice === 'Device') {
+    } else if (platformOrDevice === PlatformOrDeviceSearchType.DEVICES) {
       promiseAllDevices = this.findAllDevices()
     } else {
       promiseAllPlatforms = this.findAllPlatforms()

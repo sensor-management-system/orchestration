@@ -26,7 +26,7 @@
                   <v-text-field v-model="searchText" label="Name" placeholder="Name of device" />
                 </v-col>
                 <v-col cols="12" md="3">
-                  <v-select v-model="selectedSearchType" label="Type" placeholder="Platform / Sensor" :items="searchTypes" />
+                  <v-select v-model="selectedSearchType" label="Type" :placeholder="searchTypePlaceholder" :items="searchTypes" />
                 </v-col>
                 <v-col cols="12" md="2">
                   <v-btn @click="basicSearch">
@@ -234,6 +234,8 @@ import { Component, Vue } from 'nuxt-property-decorator'
 import MasterDataService from '../../services/MasterDataService'
 import DeviceService from '../../services/DeviceService'
 
+import { PlatformOrDeviceSearchType } from '../../enums/PlatformOrDeviceSearchType'
+
 import Institute from '../../models/Institute'
 
 @Component
@@ -250,9 +252,9 @@ export default class DevicesIndexPage extends Vue {
 
   private searchResults: Array<any> = []
   private searchText: string | null = null
-  private searchTypes: string[] = ['Device / Platform', 'Device', 'Platform']
+  private searchTypes: PlatformOrDeviceSearchType[] = Object.values(PlatformOrDeviceSearchType)
 
-  private selectedSearchType: string = 'Device / Platform';
+  private selectedSearchType: PlatformOrDeviceSearchType = PlatformOrDeviceSearchType.PLATFORMS_AND_DEVICES
 
   private showDeletePlatformDialog: boolean = false
   private showDeleteDeviceDialog: boolean = false
@@ -284,7 +286,7 @@ export default class DevicesIndexPage extends Vue {
 
   clearBasicSearch () {
     this.searchText = null
-    this.selectedSearchType = 'Sensor / Platform'
+    this.selectedSearchType = PlatformOrDeviceSearchType.PLATFORMS_AND_DEVICES
   }
 
   extendedSearch () {
@@ -301,7 +303,7 @@ export default class DevicesIndexPage extends Vue {
     this.instituteToAdd = null
   }
 
-  runSearch (searchText: string | null, searchType: string | null, manufacturer: string[]) {
+  runSearch (searchText: string | null, searchType: PlatformOrDeviceSearchType, manufacturer: string[]) {
     DeviceService.findPlatformsAndSensors(searchText, searchType, manufacturer).then((findResults) => {
       this.searchResults = findResults
     })
@@ -354,6 +356,10 @@ export default class DevicesIndexPage extends Vue {
       this.successMessage = 'Device deleted'
       this.showSuccessMessage = true
     })
+  }
+
+  get searchTypePlaceholder () {
+    return PlatformOrDeviceSearchType.PLATFORMS_AND_DEVICES
   }
 
   get notSelectedManufacturers () {
