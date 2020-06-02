@@ -1,7 +1,12 @@
 # API for Sensor Information System SIS 
 
 [![pipeline status](https://git.ufz.de/rdm-software/svm/backend/badges/master/pipeline.svg)](https://git.ufz.de/rdm-software/svm/backend/commits/master)
-[![version](https://img.shields.io/badge/version-v1.0-lightgrey.svg)](./README.md) [![stage](https://img.shields.io/badge/stage-deployment-blue.svg)](#)
+[![version](https://img.shields.io/badge/version-v1.0-lightgrey.svg)](./README.md) [![python](https://img.shields.io/badge/python-3.5|3.6|3.7-blue.svg?style=?style=plastic&logo=python)](#)
+[![pylint](./docs/pylint.svg)](https://git.ufz.de/rdm-software/svm/backend/-/jobs?job=unittest-lint)
+[![r_licenses](https://img.shields.io/badge/requirements_licenses-check-redyellow.svg?style=plastic&logo=open-source-initiative)](./docs/requirements_licenses.md)
+[![openapi](https://img.shields.io/badge/requirements_licenses-3.0-green.svg?style=?style=plastic&logo=openapi-initiative)](./app/openapi/openapi.yaml)
+[![licences](https://img.shields.io/badge/licenses-MIT-green.svg?style=?style=plastic&logo=)](#)
+
 
 RESTful API service in Python for managing sensor metadata using [flask](https://flask.palletsprojects.com/en/1.1.x/).
 
