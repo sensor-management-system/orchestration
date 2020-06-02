@@ -50,7 +50,7 @@
                   <v-text-field v-model="searchText" label="Name" placeholder="Name of device" />
                 </v-col>
                 <v-col cols="12" md="3">
-                  <v-select label="search type" placeholder="Platform / Sensor" :items="searchTypes" />
+                  <v-select v-model="selectedSearchType" label="search type" placeholder="Platform / Sensor" :items="searchTypes" />
                 </v-col>
               </v-row>
               <v-row>
@@ -167,7 +167,7 @@
               Delete platform
             </v-card-title>
             <v-card-text>
-              Do you really want to delete the platform {{ result.name }}?
+              Do you really want to delete the platform <em>{{ result.name }}</em>?
             </v-card-text>
             <v-card-actions>
               <v-btn @click="showDeletePlatformDialog = false">
@@ -198,7 +198,7 @@
               Delete device
             </v-card-title>
             <v-card-text>
-              Do you really want to delete the device {{ result.name }}?
+              Do you really want to delete the device <em>{{ result.name }}</em>?
             </v-card-text>
             <v-card-actions>
               <v-btn @click="showDeleteDeviceDialog = false">
@@ -249,10 +249,10 @@ export default class DevicesIndexPage extends Vue {
   private instituteToAdd: Institute | null = null
 
   private searchResults: Array<any> = []
-  private searchText: string | null = null
-  private searchTypes: string[] = ['Sensor / Platform', 'Sensor', 'Platform']
+  private searchText: String | null = null
+  private searchTypes: string[] = ['Device / Platform', 'Device', 'Platform']
 
-  private selectedSearchType: string = 'Sensor / Platform';
+  private selectedSearchType: String = 'Device / Platform';
 
   private showDeletePlatformDialog: boolean = false
   private showDeleteDeviceDialog: boolean = false
@@ -266,14 +266,20 @@ export default class DevicesIndexPage extends Vue {
     MasterDataService.findAllInstitutes().then((institutes) => {
       this.searchInstitutes = institutes
     })
-    DeviceService.findPlatformsAndSensors(this.searchText).then((findResults) => {
-      this.searchResults = findResults
-    })
+    this.runSelectedSearch()
+  }
+
+  runSelectedSearch () {
+    if (this.activeSearchTypeTabIdx === 0) {
+      this.basicSearch()
+    } else {
+      this.extendedSearch()
+    }
   }
 
   basicSearch () {
     // only uses the text and the type (sensor or platform)
-    this.runSearch(this.searchText)
+    this.runSearch(this.searchText, this.selectedSearchType, [])
   }
 
   clearBasicSearch () {
@@ -282,7 +288,7 @@ export default class DevicesIndexPage extends Vue {
   }
 
   extendedSearch () {
-    this.runSearch(this.searchText)
+    this.runSearch(this.searchText, this.selectedSearchType, this.selectedSearchManufacturers)
   }
 
   clearExtendedSearch () {
@@ -295,8 +301,8 @@ export default class DevicesIndexPage extends Vue {
     this.instituteToAdd = null
   }
 
-  runSearch (searchText: string | null) {
-    DeviceService.findPlatformsAndSensors(searchText).then((findResults) => {
+  runSearch (searchText: String | null, searchType: String | null, manufacturer: String[]) {
+    DeviceService.findPlatformsAndSensors(searchText, searchType, manufacturer).then((findResults) => {
       this.searchResults = findResults
     })
   }

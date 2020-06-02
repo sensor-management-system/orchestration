@@ -184,9 +184,22 @@ export default class DeviceService {
     })
   }
 
-  static findPlatformsAndSensors (text: string | null): Promise<Array<object>> {
-    const promiseAllPlatforms = this.findAllPlatforms()
-    const promiseAllDevices = this.findAllDevices()
+  static findPlatformsAndSensors (
+    text: String | null,
+    platformOrDevice: String | null,
+    manufacturer: String[]
+  ): Promise<Array<object>> {
+    let promiseAllPlatforms: Promise<Platform[]> = new Promise(resolve => resolve([]))
+    let promiseAllDevices: Promise<Device[]> = new Promise(resolve => resolve([]))
+
+    if (platformOrDevice === 'Platform') {
+      promiseAllPlatforms = this.findAllPlatforms()
+    } else if (platformOrDevice === 'Device') {
+      promiseAllDevices = this.findAllDevices()
+    } else {
+      promiseAllPlatforms = this.findAllPlatforms()
+      promiseAllDevices = this.findAllDevices()
+    }
 
     return new Promise((resolve) => {
       promiseAllPlatforms.then((allPlatforms) => {
@@ -202,6 +215,23 @@ export default class DeviceService {
             }
             filterFuncDevice = (device: any): boolean => {
               return device.label.includes(text)
+            }
+          }
+
+          if (manufacturer.length > 0) {
+            const oldFilterFuncPlatform = filterFuncPlatform
+            const oldFilterFuncDevice = filterFuncDevice
+
+            filterFuncPlatform = (platform: any): boolean => {
+              return oldFilterFuncPlatform(platform) && (
+                manufacturer.findIndex(m => m === platform.manufacturer) > -1
+              )
+            }
+
+            filterFuncDevice = (device: any) : boolean => {
+              return oldFilterFuncDevice(device) && (
+                manufacturer.findIndex(m => m === device.manufacturer) > -1
+              )
             }
           }
 
