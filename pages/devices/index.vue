@@ -1,5 +1,11 @@
 <template>
   <div>
+    <v-snackbar v-model="showSuccessMessage" top color="success">
+      {{ successMessage }}
+      <v-btn fab @click="showSaveSuccess = false">
+        <v-icon>mdi-close</v-icon>
+      </v-btn>
+    </v-snackbar>
     <v-breadcrumbs :items="navigation" />
     <h1>Devices</h1>
 
@@ -152,19 +158,62 @@
           View
         </v-btn>
         <v-btn>Copy</v-btn>
-        <!-- We must make sure if we want to allow deleting here.
-             For developlement it was needed to clean up the things
-             a bit easier.
-        -->
-        <!--<v-btn @click="deletePlatform(result.id)">
+        <v-btn @click.stop="showDeletePlatformDialog = true">
           Delete
-        </v-btn>-->
+        </v-btn>
+        <v-dialog v-model="showDeletePlatformDialog" max-width="290">
+          <v-card>
+            <v-card-title class="headline">
+              Delete platform
+            </v-card-title>
+            <v-card-text>
+              Do you really want to delete the platform {{ result.name }}?
+            </v-card-text>
+            <v-card-actions>
+              <v-btn @click="showDeletePlatformDialog = false">
+                No
+              </v-btn>
+              <v-spacer />
+              <v-btn color="error" @click="deletePlatformAndCloseDialog(result.id)">
+                <v-icon left>
+                  mdi-delete
+                </v-icon>
+                Delete
+              </v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
       </v-card-actions>
       <v-card-actions v-if="result.devicetype == 'device'">
         <v-btn :to="'devices/devices/' + result.id">
           View
         </v-btn>
         <v-btn>Copy</v-btn>
+        <v-btn @click.stop="showDeleteDeviceDialog = true">
+          Delete
+        </v-btn>
+        <v-dialog v-model="showDeleteDeviceDialog" max-width="290">
+          <v-card>
+            <v-card-title class="headline">
+              Delete device
+            </v-card-title>
+            <v-card-text>
+              Do you really want to delete the device {{ result.name }}?
+            </v-card-text>
+            <v-card-actions>
+              <v-btn @click="showDeleteDeviceDialog = false">
+                No
+              </v-btn>
+              <v-spacer />
+              <v-btn color="error" @click="deleteDeviceAndCloseDialog(result.id)">
+                <v-icon left>
+                  mdi-delete
+                </v-icon>
+                Delete
+              </v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
       </v-card-actions>
     </v-card>
 
@@ -199,11 +248,16 @@ export default class DevicesIndexPage extends Vue {
   private selectedSearchInstitutes: Institute[] = []
   private instituteToAdd: Institute | null = null
 
-  private searchResults: Array<object> = []
+  private searchResults: Array<any> = []
   private searchText: string | null = null
   private searchTypes: string[] = ['Sensor / Platform', 'Sensor', 'Platform']
 
   private selectedSearchType: string = 'Sensor / Platform';
+
+  private showDeletePlatformDialog: boolean = false
+  private showDeleteDeviceDialog: boolean = false
+  private showSuccessMessage: boolean = false
+  private successMessage = ''
 
   mounted () {
     MasterDataService.findAllManufacturers().then((manufacturers) => {
@@ -269,9 +323,30 @@ export default class DevicesIndexPage extends Vue {
     this.$delete(this.selectedSearchInstitutes, index)
   }
 
-  deletePlatform (id: number) {
+  deletePlatformAndCloseDialog (id: number) {
     DeviceService.deletePlatform(id).then(() => {
-      this.runSearch(this.searchText)
+      this.showDeletePlatformDialog = false
+
+      const searchIndex = this.searchResults.findIndex(r => r.id === id && r.devicetype === 'platform')
+      if (searchIndex > -1) {
+        this.searchResults.splice(searchIndex, 1)
+      }
+
+      this.successMessage = 'Platform deleted'
+      this.showSuccessMessage = true
+    })
+  }
+
+  deleteDeviceAndCloseDialog (id: number) {
+    DeviceService.deleteDevice(id).then(() => {
+      this.showDeleteDeviceDialog = false
+
+      const searchIndex = this.searchResults.findIndex(r => r.id === id && r.devicetype === 'device')
+      if (searchIndex > -1) {
+        this.searchResults.splice(searchIndex, 1)
+      }
+      this.successMessage = 'Device deleted'
+      this.showSuccessMessage = true
     })
   }
 

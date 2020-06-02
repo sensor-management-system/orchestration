@@ -64,6 +64,10 @@ export default class DeviceService {
     return axios.delete(process.env.backendUrl + '/sis/v1/platforms/' + id)
   }
 
+  static deleteDevice (id: number) {
+    return axios.delete(process.env.backendUrl + '/sis/v1/devices/' + id)
+  }
+
   static savePlatform (platform: Platform) {
     let method = axios.patch
     // TODO: consistent camelCase
