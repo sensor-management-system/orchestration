@@ -4,7 +4,6 @@ from sqlalchemy.orm.exc import NoResultFound
 from project.api.models.device import Device
 
 
-
 class BaseResourceDetail(ResourceDetail):
     """
     Base Resource detail
