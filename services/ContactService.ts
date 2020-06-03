@@ -17,14 +17,14 @@ export default class ContactService {
         newEntry.email = attributes.email
         // TODO: Consistant usage of camel/snake case
         // JSONAPI uses camelcase
-        if (attributes.username) {
-          newEntry.userName = attributes.username
-        }
         if (attributes.first_name) {
           newEntry.firstName = attributes.first_name
         }
         if (attributes.last_name) {
           newEntry.lastName = attributes.last_name
+        }
+        if (attributes.profile_link) {
+          newEntry.profileLink = attributes.profile_link
         }
         result.push(newEntry)
       }

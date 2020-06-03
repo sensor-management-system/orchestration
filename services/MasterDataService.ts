@@ -1,20 +1,9 @@
-import Institute from './../models/Institute'
-
 export default class MasterDataService {
   static findAllManufacturers (): Promise<string[]> {
     return new Promise<string[]>((resolve) => {
       resolve([
         'Manufacturer 01',
         'Manufacturer 02'
-      ])
-    })
-  }
-
-  static findAllInstitutes (): Promise<Institute[]> {
-    return new Promise<Institute[]>((resolve) => {
-      resolve([
-        Institute.createWithIdAndName(1, 'UFZ'),
-        Institute.createWithIdAndName(2, 'GFZ')
       ])
     })
   }

@@ -1,6 +1,7 @@
-export default class Institute {
+export default class Manufacture {
   private _id: number | null = null
   private _name: string = ''
+  private _uri: string = ''
 
   get id (): number | null {
     return this._id
@@ -18,14 +19,15 @@ export default class Institute {
     this._name = newName
   }
 
-  static createWithIdAndName (id: number, name: string): Institute {
-    const result = new Institute()
-    result.id = id
-    result.name = name
-    return result
+  get uri (): string {
+    return this._uri
   }
 
-  static createEmpty (): Institute {
-    return new Institute()
+  set uri (newUri: string) {
+    this._uri = newUri
+  }
+
+  toString (): string {
+    return this._name
   }
 }

@@ -1,8 +1,9 @@
+import { PlatformOrDeviceType } from '../enums/PlatformOrDeviceType'
+
 import Contact from './Contact'
 import { DeviceProperty } from './DeviceProperty'
 import { CustomTextField } from './CustomTextField'
 import { IDeviceOrPlatformSearchObject } from './IDeviceOrPlatformSearchObject'
-import { PlatformOrDeviceType } from '../enums/PlatformOrDeviceType'
 
 export default class Device {
   private _id: number | null = null

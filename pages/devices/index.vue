@@ -90,45 +90,6 @@
                   </v-chip>
                 </v-col>
               </v-row>
-              <v-row>
-                <v-col cols="12" md="3">
-                  <v-autocomplete
-                    v-model="instituteToAdd"
-                    label="add institute"
-                    :items="notSelectedInstitutes"
-                    :item-text="(x) => x.name"
-                    :item-value="(x) => x"
-                  />
-                </v-col>
-                <v-col cols="12" md="3">
-                  <v-btn
-                    fab
-                    depressed
-                    small
-                    :disabled="instituteToAdd == null"
-                    @click="addSelectedInstitute"
-                  >
-                    <v-icon>
-                      mdi-plus
-                    </v-icon>
-                  </v-btn>
-                </v-col>
-              </v-row>
-              <v-row>
-                <v-col cols="3">
-                  <v-chip
-                    v-for="(institute, index) in selectedSearchInstitutes"
-                    :key="institute.id"
-                    class="ma-2"
-                    color="blue"
-                    text-color="white"
-                    :close="true"
-                    @click:close="removeInstitute(index)"
-                  >
-                    {{ institute.name }}
-                  </v-chip>
-                </v-col>
-              </v-row>
             </v-card-text>
             <v-card-actions>
               <v-btn @click="extendedSearch">
@@ -248,10 +209,6 @@ export default class DevicesIndexPage extends Vue {
   private selectedSearchManufacturers: string[] = []
   private manufacturerToAdd: string | null = null
 
-  private searchInstitutes: Institute[] = []
-  private selectedSearchInstitutes: Institute[] = []
-  private instituteToAdd: Institute | null = null
-
   private searchResults: Array<IDeviceOrPlatformSearchObject> = []
   private searchText: string | null = null
   private searchTypes: PlatformOrDeviceSearchType[] = Object.values(PlatformOrDeviceSearchType)
@@ -266,9 +223,6 @@ export default class DevicesIndexPage extends Vue {
   mounted () {
     MasterDataService.findAllManufacturers().then((manufacturers) => {
       this.searchManufacturers = manufacturers
-    })
-    MasterDataService.findAllInstitutes().then((institutes) => {
-      this.searchInstitutes = institutes
     })
     this.runSelectedSearch()
   }
@@ -299,10 +253,8 @@ export default class DevicesIndexPage extends Vue {
     this.clearBasicSearch()
 
     this.selectedSearchManufacturers = []
-    this.selectedSearchInstitutes = []
 
     this.manufacturerToAdd = null
-    this.instituteToAdd = null
   }
 
   runSearch (searchText: string | null, searchType: PlatformOrDeviceSearchType, manufacturer: string[]) {
@@ -322,15 +274,6 @@ export default class DevicesIndexPage extends Vue {
 
   removeManufacture (index: number) {
     this.$delete(this.selectedSearchManufacturers, index)
-  }
-
-  addSelectedInstitute () {
-    this.$set(this.selectedSearchInstitutes, this.selectedSearchInstitutes.length, this.instituteToAdd)
-    this.instituteToAdd = null
-  }
-
-  removeInstitute (index: number) {
-    this.$delete(this.selectedSearchInstitutes, index)
   }
 
   deletePlatformAndCloseDialog (id: number) {
@@ -385,23 +328,6 @@ export default class DevicesIndexPage extends Vue {
         result.push(singleManufacturer)
       }
     }
-    return result
-  }
-
-  get notSelectedInstitutes () {
-    const result = []
-    const selectedInstituteIds = new Set()
-
-    for (const singleInstitute of this.selectedSearchInstitutes) {
-      selectedInstituteIds.add(singleInstitute.id)
-    }
-
-    for (const singleInstitute of this.searchInstitutes) {
-      if (!selectedInstituteIds.has(singleInstitute.id)) {
-        result.push(singleInstitute)
-      }
-    }
-
     return result
   }
 

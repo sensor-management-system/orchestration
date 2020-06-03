@@ -3,7 +3,7 @@
     <v-autocomplete
       v-if="!readonly"
       :items="allContactsExceptSelected"
-      :item-text="(x) => x.userName"
+      :item-text="(x) => x"
       :item-value="(x) => x.id"
       label="add a contact"
       @change="addContact"
@@ -20,7 +20,7 @@
       <v-avatar left>
         <v-icon>mdi-account-circle</v-icon>
       </v-avatar>
-      {{ contact.userName }}
+      {{ contact }}
     </v-chip>
   </div>
 </template>

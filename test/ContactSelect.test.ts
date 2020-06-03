@@ -24,13 +24,13 @@ describe('ContactSelect', () => {
       localVue,
       vuetify,
       propsData: {
-        selectedContacts: [Concact.createWithIdEMailAndNames(1, 'p1@mail.org', 'Person 1', 'Per', 'son 1')]
+        selectedContacts: [Concact.createWithIdEMailAndNames(1, 'p1@mail.org', 'Per', 'son 1', 'stuff/per/son1')]
       },
       data () {
         return {
           contacts: [
-            Concact.createWithIdEMailAndNames(1, 'p1@mail.org', 'Person 1', 'Per', 'son 1'),
-            Concact.createWithIdEMailAndNames(2, 'p2@mail.org', 'Person 2', 'Pers', 'On 2')]
+            Concact.createWithIdEMailAndNames(1, 'p1@mail.org', 'Per', 'son 1', 'stuff/per/son1'),
+            Concact.createWithIdEMailAndNames(2, 'p2@mail.org', 'Pers', 'On 2', 'stuff/pers/On2')]
         }
       }
     })
