@@ -11,6 +11,7 @@ import Manufacturer from '~/models/Manufacturer'
 import PlatformStatus from '~/models/PlatformStatus'
 import PlatformType from '~/models/PlatformType'
 
+// Use on version for all the queries
 const BASE_URL = process.env.backendUrl + '/rdm/svm-api/v1'
 
 export default class SmsService {
