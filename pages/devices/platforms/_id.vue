@@ -36,6 +36,16 @@
               </v-card-title>
               <v-card-text>
                 <v-row>
+                  <v-col cols="12" md="3">
+                    <v-text-field
+                      v-model="platform.persistentIdentifier"
+                      label="persistent identifier (PID)"
+                      :readonly="readonly"
+                      :disabled="readonly"
+                    />
+                  </v-col>
+                </v-row>
+                <v-row>
                   <v-col cols="12" md="6">
                     <v-text-field v-model="platform.shortName" label="short name" :readonly="readonly" :disabled="readonly" />
                   </v-col>
@@ -46,18 +56,20 @@
                 <v-row>
                   <v-col cols="12" md="3">
                     <v-select
-                      v-model="platform.platformType"
+                      v-model="platform.platformTypeUri"
                       label="platform type"
                       :items="platformTypes"
+                      :item-value="(x) => x.uri"
                       :readonly="readonly"
                       :disabled="readonly"
                     />
                   </v-col>
                   <v-col cols="12" md="3">
                     <v-select
-                      v-model="platform.type"
-                      label="type"
-                      :items="types"
+                      v-model="platform.platformStateUri"
+                      label="platform state"
+                      :items="platformStates"
+                      :item-value="(x) => x.uri"
                       :readonly="readonly"
                       :disabled="readonly"
                     />
@@ -72,6 +84,14 @@
                       :disabled="readonly"
                     />
                   </v-col>
+                  <v-col cols="12" md="3">
+                    <v-text-field
+                      v-model="platform.model"
+                      label="model"
+                      :readonly="readonly"
+                      :disabled="readonly"
+                    />
+                  </v-col>
                 </v-row>
                 <v-divider />
                 <v-row>
@@ -80,6 +100,25 @@
                   </v-col>
                 </v-row>
                 <v-row>
+                  <v-col cols="12" md="3">
+                    <v-text-field
+                      v-model="platform.website"
+                      label="website"
+                      placeholder="https://"
+                      :readonly="readonly"
+                      :disabled="readonly"
+                    />
+                  </v-col>
+                </v-row>
+                <v-row>
+                  <v-col cols="12" md="3">
+                    <v-text-field
+                      v-model="platform.serialNumber"
+                      label="Serial Number"
+                      :readonly="readonly"
+                      :disabled="readonly"
+                    />
+                  </v-col>
                   <v-col cols="12" md="3">
                     <v-text-field v-model="platform.inventoryNumber" label="inventory number" :readonly="readonly" :disabled="readonly" />
                   </v-col>
@@ -166,6 +205,8 @@ import Platform from '../../../models/Platform'
 // @ts-ignore
 import ContactSelect from '../../../components/ContactSelect.vue'
 import Manufacturer from '../../../models/Manufacturer'
+import PlatformType from '../../../models/PlatformType'
+import PlatformStatus from '../../../models/PlatformStatus'
 
 @Component({
   components: { ContactSelect }
@@ -174,9 +215,9 @@ import Manufacturer from '../../../models/Manufacturer'
 export default class PlatformIdPage extends Vue {
   // data
   // first for the data to chose the elements
-  private platformTypes: string[] = []
+  private platformTypes: PlatformType[] = []
   private manufacturers: Manufacturer[] = []
-  private types: string[] = []
+  private platformStates: PlatformStatus[] = []
 
   // then for our platform that we want to change
   private platform: Platform = Platform.createEmpty()
@@ -195,8 +236,8 @@ export default class PlatformIdPage extends Vue {
     VCService.findAllPlatformTypes().then((foundPlatformTypes) => {
       this.platformTypes = foundPlatformTypes
     })
-    VCService.findAllTypes().then((foundTypes) => {
-      this.types = foundTypes
+    VCService.findAllPlatformStates().then((foundPlatformStates) => {
+      this.platformStates = foundPlatformStates
     })
     this.loadPlatform()
   }
@@ -243,11 +284,14 @@ export default class PlatformIdPage extends Vue {
     const removeWhitespace = (text: string) => {
       return text.replace(' ', '_')
     }
-
+    // TODO: I don't have the platform type
+    // I just have the platformTypeUri
     let partPlatformType = '[platformtype]'
-    const possiblePlatformType = removeWhitespace(this.platform.platformType)
-    if (possiblePlatformType !== '') {
-      partPlatformType = possiblePlatformType
+    if (this.platform.platformTypeUri !== '') {
+      const ptIndex = this.platformTypes.findIndex(pt => pt.uri === this.platform.platformTypeUri)
+      if (ptIndex > -1) {
+        partPlatformType = this.platformTypes[ptIndex].name
+      }
     }
 
     let partShortName = '[short_name]'

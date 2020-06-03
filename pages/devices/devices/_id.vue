@@ -42,9 +42,9 @@
                   </v-col>
                   <v-col cols="12" md="3">
                     <v-select
-                      v-model="device.state"
+                      v-model="device.status"
                       :items="states"
-                      label="state"
+                      label="status"
                       :readonly="readonly"
                       :disabled="readonly"
                     />
@@ -153,7 +153,7 @@
               <v-card-text>
                 <v-row>
                   <v-col cols="3">
-                    <ContactSelect :selected-contacts.sync="device.responsiblePersons" :readonly="readonly" />
+                    <ContactSelect :selected-contacts.sync="device.contacts" :readonly="readonly" />
                   </v-col>
                 </v-row>
               </v-card-text>
@@ -352,7 +352,7 @@ export default class DeviceIdPage extends Vue {
   private isInEditMode: boolean = false
 
   mounted () {
-    VCService.findAllStates().then((foundStates) => {
+    VCService.findAllDeviceStates().then((foundStates) => {
       this.states = foundStates
     })
     VCService.findAllDeviceTypes().then((foundDeviceTypes) => {

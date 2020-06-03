@@ -9,7 +9,7 @@ export default class Device {
   private _id: number | null = null
   private _persistentId: string = ''
   private _label: string = ''
-  private _state: string = ''
+  private _status: string = ''
   private _type: string = ''
   private _manufacturerUri: string = ''
   private _model: string = ''
@@ -47,12 +47,12 @@ export default class Device {
     this._label = label
   }
 
-  get state (): string {
-    return this._state
+  get status (): string {
+    return this._status
   }
 
-  set state (state: string) {
-    this._state = state
+  set status (status: string) {
+    this._status = status
   }
 
   get type (): string {
@@ -186,7 +186,7 @@ class DeviceSearchObjectWrapper implements IDeviceOrPlatformSearchObject {
     return 'No project yet'
   }
 
-  get state () : string {
-    return this.device.state
+  get status () : string {
+    return this.device.status
   }
 }

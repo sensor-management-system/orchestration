@@ -6,5 +6,5 @@ export interface IDeviceOrPlatformSearchObject {
   type: string,
   searchType: PlatformOrDeviceType,
   project: string,
-  state: string
+  status: string
 }

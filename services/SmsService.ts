@@ -8,6 +8,8 @@ import { IDeviceOrPlatformSearchObject } from '../models/IDeviceOrPlatformSearch
 
 import { PlatformOrDeviceSearchType } from '../enums/PlatformOrDeviceSearchType'
 import Manufacturer from '~/models/Manufacturer'
+import PlatformStatus from '~/models/PlatformStatus'
+import PlatformType from '~/models/PlatformType'
 
 export default class SmsService {
   static serverPlatformResponseToEntity (entry: any) : Platform {
@@ -17,15 +19,18 @@ export default class SmsService {
 
     // TODO: use camelCase only!!!
     result.id = Number.parseInt(entry.id)
-    result.platformType = attributes.platform_type || ''
+    // TODO: Renaming to platform_type_uri after change in backend
+    result.platformTypeUri = attributes.platform_type || ''
     result.shortName = attributes.short_name || ''
     result.longName = attributes.long_name || ''
     result.description = attributes.description || ''
     // TODO: Renaming to manufacturerUri after Change in Backend
     result.manufacturerUri = attributes.manufacturer || ''
-    result.type = attributes.type || ''
+    result.model = attributes.type || ''
     result.inventoryNumber = attributes.inventory_number || ''
-    result.url = attributes.url || ''
+    result.website = attributes.url || ''
+    // TODO: platformstatusUri
+    // TODO: serialNumber
 
     // TODO: reading the contacts
     result.contacts = []
@@ -87,10 +92,14 @@ export default class SmsService {
         long_name: platform.longName,
         // TODO: Change after renaming to manufacturerUri in backend
         manufacturer: platform.manufacturerUri,
-        type: platform.type,
+        type: platform.model,
         inventory_number: platform.inventoryNumber,
-        platform_type: platform.platformType,
-        url: platform.url
+        // TODO: Change after renaming to platformTypeUri in backend
+        platform_type: platform.platformTypeUri,
+        url: platform.website
+        // TODO: platformstatusUri
+        // TODO: serialNumber
+
       }
     }
     let url = process.env.backendUrl + '/sis/v1/platforms'
@@ -135,7 +144,7 @@ export default class SmsService {
         persistent_identifier: device.persistentId,
         url: device.urlWebsite,
         type: device.type,
-        status: device.state,
+        status: device.status,
         serial_number: device.serialNumber
       }
     }
@@ -197,7 +206,9 @@ export default class SmsService {
   static findPlatformsAndSensors (
     text: string | null,
     platformOrDevice: PlatformOrDeviceSearchType,
-    manufacturer: Manufacturer[]
+    manufacturer: Manufacturer[],
+    platformTypeLookupByUri: Map<string, PlatformType>,
+    platformStatusLookupByUri: Map<string, PlatformStatus>
   ): Promise<IDeviceOrPlatformSearchObject[]> {
     let promiseAllPlatforms: Promise<Platform[]> = new Promise(resolve => resolve([]))
     let promiseAllDevices: Promise<Device[]> = new Promise(resolve => resolve([]))
@@ -248,7 +259,7 @@ export default class SmsService {
 
           for (const platform of allPlatforms) {
             if (filterFuncPlatform(platform)) {
-              result.push(platform.toSearchObject())
+              result.push(platform.toSearchObject(platformTypeLookupByUri, platformStatusLookupByUri))
             }
           }
 

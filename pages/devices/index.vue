@@ -112,7 +112,7 @@
       <v-card-text>
         <p>{{ result.type }}</p>
         <p>Project {{ result.project }}</p>
-        <p>State {{ result.state }}</p>
+        <p>Status {{ result.status }}</p>
       </v-card-text>
       <v-card-actions v-if="isPlatform(result)">
         <v-btn :to="'/devices/platforms/' + result.id">
@@ -200,6 +200,8 @@ import { PlatformOrDeviceSearchType } from '../../enums/PlatformOrDeviceSearchTy
 import { IDeviceOrPlatformSearchObject } from '../../models/IDeviceOrPlatformSearchObject'
 import { PlatformOrDeviceType } from '../../enums/PlatformOrDeviceType'
 import Manufacturer from '../../models/Manufacturer'
+import PlatformType from '../../models/PlatformType'
+import PlatformStatus from '../../models/PlatformStatus'
 
 @Component
 export default class DevicesIndexPage extends Vue {
@@ -208,6 +210,9 @@ export default class DevicesIndexPage extends Vue {
   private searchManufacturers: Manufacturer[] = []
   private selectedSearchManufacturers: Manufacturer[] = []
   private manufacturerToAdd: Manufacturer | null = null
+
+  private platformTypeLookup: Map<string, PlatformType> = new Map<string, PlatformType>()
+  private platformStatusLookup: Map<string, PlatformStatus> = new Map<string, PlatformStatus>()
 
   private searchResults: Array<IDeviceOrPlatformSearchObject> = []
   private searchText: string | null = null
@@ -224,7 +229,27 @@ export default class DevicesIndexPage extends Vue {
     VCService.findAllManufacturers().then((manufacturers) => {
       this.searchManufacturers = manufacturers
     })
-    this.runSelectedSearch()
+    const promisePlatformTypes = VCService.findAllPlatformTypes()
+    const promisePlatformStates = VCService.findAllPlatformStates()
+
+    promisePlatformTypes.then((platformTypes) => {
+      promisePlatformStates.then((platformStates) => {
+        const platformTypeLookup = new Map<string, PlatformType>()
+        const platformStatusLookup = new Map<string, PlatformStatus>()
+
+        for (const platformType of platformTypes) {
+          platformTypeLookup.set(platformType.uri, platformType)
+        }
+        for (const platformStatus of platformStates) {
+          platformStatusLookup.set(platformStatus.uri, platformStatus)
+        }
+
+        this.platformTypeLookup = platformTypeLookup
+        this.platformStatusLookup = platformStatusLookup
+
+        this.runSelectedSearch()
+      })
+    })
   }
 
   runSelectedSearch () {
@@ -258,7 +283,9 @@ export default class DevicesIndexPage extends Vue {
   }
 
   runSearch (searchText: string | null, searchType: PlatformOrDeviceSearchType, manufacturer: Manufacturer[]) {
-    SmsService.findPlatformsAndSensors(searchText, searchType, manufacturer).then((findResults) => {
+    SmsService.findPlatformsAndSensors(
+      searchText, searchType, manufacturer, this.platformTypeLookup, this.platformStatusLookup
+    ).then((findResults) => {
       this.searchResults = findResults
     })
   }
