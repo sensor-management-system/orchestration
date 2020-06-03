@@ -2,11 +2,13 @@ import axios from 'axios'
 
 import Platform from '../models/Platform'
 import Device from '../models/Device'
+import Contact from '../models/Contact'
+
 import { IDeviceOrPlatformSearchObject } from '../models/IDeviceOrPlatformSearchObject'
 
 import { PlatformOrDeviceSearchType } from '../enums/PlatformOrDeviceSearchType'
 
-export default class DeviceService {
+export default class SmsService {
   static serverPlatformResponseToEntity (entry: any) : Platform {
     const result: Platform = Platform.createEmpty()
 
@@ -59,7 +61,7 @@ export default class DeviceService {
   static findPlatformById (id: string): Promise<Platform> {
     return axios.get(process.env.backendUrl + '/sis/v1/platforms/' + id).then((rawResponse) => {
       const entry = rawResponse.data.data
-      return DeviceService.serverPlatformResponseToEntity(entry)
+      return this.serverPlatformResponseToEntity(entry)
     })
   }
 
@@ -105,7 +107,7 @@ export default class DeviceService {
         data
       }
     ).then((serverAnswer) => {
-      return DeviceService.serverPlatformResponseToEntity(serverAnswer.data.data)
+      return this.serverPlatformResponseToEntity(serverAnswer.data.data)
     })
   }
 
@@ -150,7 +152,7 @@ export default class DeviceService {
         data
       }
     ).then((serverAnswer) => {
-      return DeviceService.serverDeviceResponseToEntity(serverAnswer.data.data)
+      return this.serverDeviceResponseToEntity(serverAnswer.data.data)
     })
   }
 
@@ -183,7 +185,7 @@ export default class DeviceService {
   static findDeviceById (id: string): Promise<Device> {
     return axios.get(process.env.backendUrl + '/sis/v1/devices/' + id).then((rawResponse) => {
       const entry = rawResponse.data.data
-      return DeviceService.serverDeviceResponseToEntity(entry)
+      return this.serverDeviceResponseToEntity(entry)
     })
   }
 
@@ -253,6 +255,35 @@ export default class DeviceService {
           resolve(result)
         })
       })
+    })
+  }
+
+  static findAllContacts (): Promise<Contact[]> {
+    return axios.get(process.env.backendUrl + '/sis/v1/contacts').then((rawResponse) => {
+      const rawData = rawResponse.data
+      const result: Contact[] = []
+
+      for (const entry of rawData.data) {
+        const attributes = entry.attributes
+        const newEntry = Contact.createEmpty()
+
+        newEntry.id = Number.parseInt(entry.id)
+        newEntry.email = attributes.email
+        // TODO: Consistant usage of camel/snake case
+        // JSONAPI uses camelcase
+        if (attributes.first_name) {
+          newEntry.firstName = attributes.first_name
+        }
+        if (attributes.last_name) {
+          newEntry.lastName = attributes.last_name
+        }
+        if (attributes.profile_link) {
+          newEntry.profileLink = attributes.profile_link
+        }
+        result.push(newEntry)
+      }
+
+      return result
     })
   }
 }

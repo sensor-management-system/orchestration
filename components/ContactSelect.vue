@@ -33,7 +33,7 @@
  */
 import { Vue, Component, Prop } from 'nuxt-property-decorator'
 import Contact from '../models/Contact'
-import ContactService from '../services/ContactService'
+import SmsService from '../services/SmsService'
 
 /**
  * A class component to select contacts
@@ -65,7 +65,7 @@ export default class ContactSelect extends Vue {
    * @async
    */
   async fetch () {
-    this.contacts = await ContactService.findAllContacts()
+    this.contacts = await SmsService.findAllContacts()
   }
 
   /**

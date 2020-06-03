@@ -158,7 +158,7 @@
 import { Component, Vue } from 'nuxt-property-decorator'
 
 import MasterDataService from '../../../services/MasterDataService'
-import DeviceService from '../../../services/DeviceService'
+import SmsService from '../../../services/SmsService'
 
 import Platform from '../../../models/Platform'
 
@@ -203,7 +203,7 @@ export default class PlatformIdPage extends Vue {
     const platformId = this.$route.params.id
     if (platformId) {
       this.isInEditMode = false
-      DeviceService.findPlatformById(platformId).then((foundPlatform) => {
+      SmsService.findPlatformById(platformId).then((foundPlatform) => {
         this.platform = foundPlatform
       }).catch(() => {
         // We don't take the error directly
@@ -217,7 +217,7 @@ export default class PlatformIdPage extends Vue {
   // methods
   save () {
     this.showSaveSuccess = false
-    DeviceService.savePlatform(this.platform).then((savedPlatform) => {
+    SmsService.savePlatform(this.platform).then((savedPlatform) => {
       this.platform = savedPlatform
       this.showSaveSuccess = true
       // this.$router.push('/devices')

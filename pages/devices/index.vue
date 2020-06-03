@@ -193,7 +193,7 @@
 import { Component, Vue } from 'nuxt-property-decorator'
 
 import MasterDataService from '../../services/MasterDataService'
-import DeviceService from '../../services/DeviceService'
+import SmsService from '../../services/SmsService'
 
 import { PlatformOrDeviceSearchType } from '../../enums/PlatformOrDeviceSearchType'
 
@@ -257,7 +257,7 @@ export default class DevicesIndexPage extends Vue {
   }
 
   runSearch (searchText: string | null, searchType: PlatformOrDeviceSearchType, manufacturer: string[]) {
-    DeviceService.findPlatformsAndSensors(searchText, searchType, manufacturer).then((findResults) => {
+    SmsService.findPlatformsAndSensors(searchText, searchType, manufacturer).then((findResults) => {
       this.searchResults = findResults
     })
   }
@@ -276,7 +276,7 @@ export default class DevicesIndexPage extends Vue {
   }
 
   deletePlatformAndCloseDialog (id: number) {
-    DeviceService.deletePlatform(id).then(() => {
+    SmsService.deletePlatform(id).then(() => {
       this.showDeletePlatformDialog = false
 
       const searchIndex = this.searchResults.findIndex(r => r.id === id && r.searchType === PlatformOrDeviceType.PLATFORM)
@@ -290,7 +290,7 @@ export default class DevicesIndexPage extends Vue {
   }
 
   deleteDeviceAndCloseDialog (id: number) {
-    DeviceService.deleteDevice(id).then(() => {
+    SmsService.deleteDevice(id).then(() => {
       this.showDeleteDeviceDialog = false
 
       const searchIndex = this.searchResults.findIndex(r => r.id === id && r.searchType === PlatformOrDeviceType.DEVICE)

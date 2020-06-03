@@ -327,7 +327,7 @@ import DevicePropertyExpansionPanels from '../../../components/DevicePropertyExp
 import CustomFieldCards from '../../../components/CustomFieldCards.vue'
 
 import MasterDataService from '../../../services/MasterDataService'
-import DeviceService from '../../../services/DeviceService'
+import SmsService from '../../../services/SmsService'
 
 @Component({
   components: {
@@ -366,7 +366,7 @@ export default class DeviceIdPage extends Vue {
     const deviceId = this.$route.params.id
     if (deviceId) {
       this.isInEditMode = false
-      DeviceService.findDeviceById(deviceId).then((foundDevice) => {
+      SmsService.findDeviceById(deviceId).then((foundDevice) => {
         this.device = foundDevice
       })
     } else {
@@ -379,7 +379,7 @@ export default class DeviceIdPage extends Vue {
   }
 
   save () {
-    DeviceService.saveDevice(this.device).then((savedDevice) => {
+    SmsService.saveDevice(this.device).then((savedDevice) => {
       this.device = savedDevice
     })
   }
