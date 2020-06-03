@@ -11,6 +11,8 @@ import Manufacturer from '~/models/Manufacturer'
 import PlatformStatus from '~/models/PlatformStatus'
 import PlatformType from '~/models/PlatformType'
 
+const BASE_URL = process.env.backendUrl + '/rdm/svm-api/v1'
+
 export default class SmsService {
   static serverPlatformResponseToEntity (entry: any) : Platform {
     const result: Platform = Platform.createEmpty()
@@ -67,18 +69,18 @@ export default class SmsService {
   }
 
   static findPlatformById (id: string): Promise<Platform> {
-    return axios.get(process.env.backendUrl + '/sis/v1/platforms/' + id).then((rawResponse) => {
+    return axios.get(BASE_URL + '/platforms/' + id).then((rawResponse) => {
       const entry = rawResponse.data.data
       return this.serverPlatformResponseToEntity(entry)
     })
   }
 
   static deletePlatform (id: number) {
-    return axios.delete(process.env.backendUrl + '/sis/v1/platforms/' + id)
+    return axios.delete(BASE_URL + '/platforms/' + id)
   }
 
   static deleteDevice (id: number) {
-    return axios.delete(process.env.backendUrl + '/sis/v1/devices/' + id)
+    return axios.delete(BASE_URL + '/devices/' + id)
   }
 
   static savePlatform (platform: Platform) {
@@ -102,7 +104,7 @@ export default class SmsService {
 
       }
     }
-    let url = process.env.backendUrl + '/sis/v1/platforms'
+    let url = BASE_URL + '/platforms'
 
     if (platform.id === null) {
       // new -> post
@@ -148,7 +150,7 @@ export default class SmsService {
         serial_number: device.serialNumber
       }
     }
-    let url = process.env.backendUrl + '/sis/v1/devices'
+    let url = BASE_URL + '/devices'
 
     if (device.id === null) {
       // new -> post
@@ -171,7 +173,7 @@ export default class SmsService {
   }
 
   static findAllPlatforms (): Promise<Platform[]> {
-    return axios.get(process.env.backendUrl + '/sis/v1/platforms').then((rawResponse) => {
+    return axios.get(BASE_URL + '/platforms').then((rawResponse) => {
       const rawData = rawResponse.data
       const result: Platform[] = []
 
@@ -184,7 +186,7 @@ export default class SmsService {
   }
 
   static findAllDevices (): Promise<Device[]> {
-    return axios.get(process.env.backendUrl + '/sis/v1/devices').then((rawResonse) => {
+    return axios.get(BASE_URL + '/devices').then((rawResonse) => {
       const rawData = rawResonse.data
       const result: Device[] = []
 
@@ -197,7 +199,7 @@ export default class SmsService {
   }
 
   static findDeviceById (id: string): Promise<Device> {
-    return axios.get(process.env.backendUrl + '/sis/v1/devices/' + id).then((rawResponse) => {
+    return axios.get(BASE_URL + '/devices/' + id).then((rawResponse) => {
       const entry = rawResponse.data.data
       return this.serverDeviceResponseToEntity(entry)
     })
@@ -276,7 +278,7 @@ export default class SmsService {
   }
 
   static findAllContacts (): Promise<Contact[]> {
-    return axios.get(process.env.backendUrl + '/sis/v1/contacts').then((rawResponse) => {
+    return axios.get(BASE_URL + '/contacts').then((rawResponse) => {
       const rawData = rawResponse.data
       const result: Contact[] = []
 
