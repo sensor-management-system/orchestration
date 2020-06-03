@@ -21,4 +21,5 @@ class PlatformDetail(BaseResourceDetail):
     schema = PlatformSchema
     data_layer = {'session': db.session,
                   'model': Platform,
-                  'methods': {'before_get_object': before_get_object}}
+                  # 'methods': {'before_get_object': before_get_object}
+                 }
