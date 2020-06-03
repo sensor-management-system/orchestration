@@ -10,7 +10,7 @@ export default class Platform {
   private _shortName: string = ''
   private _longName: string = ''
   private _description: string = ''
-  private _manufacturer: string = ''
+  private _manufacturerUri: string = ''
   private _type: string = ''
   private _inventoryNumber: number | null = null
   private _url: string = ''
@@ -57,12 +57,12 @@ export default class Platform {
     this._description = newDescription
   }
 
-  get manufacturer (): string {
-    return this._manufacturer
+  get manufacturerUri (): string {
+    return this._manufacturerUri
   }
 
-  set manufacturer (newManufacturer: string) {
-    this._manufacturer = newManufacturer
+  set manufacturerUri (newManufacturerUri: string) {
+    this._manufacturerUri = newManufacturerUri
   }
 
   get type (): string {
@@ -111,7 +111,7 @@ export default class Platform {
     shortName: string,
     longName: string,
     description: string,
-    manufacturer: string,
+    manufacturerUri: string,
     type: string,
     inventoryNumber: number | null,
     url: string,
@@ -123,7 +123,7 @@ export default class Platform {
     result.shortName = shortName
     result.longName = longName
     result.description = description
-    result.manufacturer = manufacturer
+    result.manufacturerUri = manufacturerUri
     result.type = type
     result.inventoryNumber = inventoryNumber
     result.url = url

@@ -1,9 +1,11 @@
+import Manufacturer from '../models/Manufacturer'
+
 export default class VCService {
-  static findAllManufacturers (): Promise<string[]> {
-    return new Promise<string[]>((resolve) => {
+  static findAllManufacturers (): Promise<Manufacturer[]> {
+    return new Promise<Manufacturer[]>((resolve) => {
       resolve([
-        'Manufacturer 01',
-        'Manufacturer 02'
+        Manufacturer.createWithData(1, 'Manufacturer 01', 'http://helmholtz/sms/manfucturer/1'),
+        Manufacturer.createWithData(2, 'Manufacturer 02', 'http://helmholtz/sms/manfucturer/2'),
       ])
     })
   }

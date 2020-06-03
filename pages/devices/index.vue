@@ -199,14 +199,15 @@ import { PlatformOrDeviceSearchType } from '../../enums/PlatformOrDeviceSearchTy
 
 import { IDeviceOrPlatformSearchObject } from '../../models/IDeviceOrPlatformSearchObject'
 import { PlatformOrDeviceType } from '../../enums/PlatformOrDeviceType'
+import Manufacturer from '../../models/Manufacturer'
 
 @Component
 export default class DevicesIndexPage extends Vue {
   private activeSearchTypeTabIdx: number = 0
 
-  private searchManufacturers: string[] = []
-  private selectedSearchManufacturers: string[] = []
-  private manufacturerToAdd: string | null = null
+  private searchManufacturers: Manufacturer[] = []
+  private selectedSearchManufacturers: Manufacturer[] = []
+  private manufacturerToAdd: Manufacturer | null = null
 
   private searchResults: Array<IDeviceOrPlatformSearchObject> = []
   private searchText: string | null = null
@@ -256,7 +257,7 @@ export default class DevicesIndexPage extends Vue {
     this.manufacturerToAdd = null
   }
 
-  runSearch (searchText: string | null, searchType: PlatformOrDeviceSearchType, manufacturer: string[]) {
+  runSearch (searchText: string | null, searchType: PlatformOrDeviceSearchType, manufacturer: Manufacturer[]) {
     SmsService.findPlatformsAndSensors(searchText, searchType, manufacturer).then((findResults) => {
       this.searchResults = findResults
     })

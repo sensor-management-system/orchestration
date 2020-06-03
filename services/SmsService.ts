@@ -7,6 +7,7 @@ import Contact from '../models/Contact'
 import { IDeviceOrPlatformSearchObject } from '../models/IDeviceOrPlatformSearchObject'
 
 import { PlatformOrDeviceSearchType } from '../enums/PlatformOrDeviceSearchType'
+import Manufacturer from '~/models/Manufacturer'
 
 export default class SmsService {
   static serverPlatformResponseToEntity (entry: any) : Platform {
@@ -20,7 +21,8 @@ export default class SmsService {
     result.shortName = attributes.short_name || ''
     result.longName = attributes.long_name || ''
     result.description = attributes.description || ''
-    result.manufacturer = attributes.manufacturer || ''
+    // TODO: Renaming to manufacturerUri after Change in Backend
+    result.manufacturerUri = attributes.manufacturer || ''
     result.type = attributes.type || ''
     result.inventoryNumber = attributes.inventory_number || ''
     result.url = attributes.url || ''
@@ -41,7 +43,8 @@ export default class SmsService {
     result.dualUse = attributes.dual_use || false
     result.inventoryNumber = attributes.inventory_number || ''
     result.label = attributes.label || ''
-    result.manufacturer = attributes.manufacturer || ''
+    // TODO: Change to uri after change in Backend
+    result.manufacturerUri = attributes.manufacturer || ''
     result.model = attributes.model || ''
     result.persistentId = attributes.persistent_identifier || ''
     result.serialNumber = attributes.serial_number || ''
@@ -82,7 +85,8 @@ export default class SmsService {
         description: platform.description,
         short_name: platform.shortName,
         long_name: platform.longName,
-        manufacturer: platform.manufacturer,
+        // TODO: Change after renaming to manufacturerUri in backend
+        manufacturer: platform.manufacturerUri,
         type: platform.type,
         inventory_number: platform.inventoryNumber,
         platform_type: platform.platformType,
@@ -125,7 +129,8 @@ export default class SmsService {
         dual_use: device.dualUse,
         inventory_number: device.inventoryNumber,
         label: device.label,
-        manufacturer: device.manufacturer,
+        // TODO: Change to uri after backend change
+        manufacturer: device.manufacturerUri,
         model: device.model,
         persistent_identifier: device.persistentId,
         url: device.urlWebsite,
@@ -192,7 +197,7 @@ export default class SmsService {
   static findPlatformsAndSensors (
     text: string | null,
     platformOrDevice: PlatformOrDeviceSearchType,
-    manufacturer: string[]
+    manufacturer: Manufacturer[]
   ): Promise<IDeviceOrPlatformSearchObject[]> {
     let promiseAllPlatforms: Promise<Platform[]> = new Promise(resolve => resolve([]))
     let promiseAllDevices: Promise<Device[]> = new Promise(resolve => resolve([]))
@@ -211,14 +216,14 @@ export default class SmsService {
         promiseAllDevices.then((allDevices) => {
           const result = []
 
-          let filterFuncPlatform = (_platform: any): boolean => { return true }
-          let filterFuncDevice = (_device: any): boolean => { return true }
+          let filterFuncPlatform = (_platform: Platform): boolean => { return true }
+          let filterFuncDevice = (_device: Device): boolean => { return true }
 
           if (text) {
-            filterFuncPlatform = (platform: any): boolean => {
+            filterFuncPlatform = (platform: Platform): boolean => {
               return platform.shortName.includes(text)
             }
-            filterFuncDevice = (device: any): boolean => {
+            filterFuncDevice = (device: Device): boolean => {
               return device.label.includes(text)
             }
           }
@@ -227,15 +232,16 @@ export default class SmsService {
             const oldFilterFuncPlatform = filterFuncPlatform
             const oldFilterFuncDevice = filterFuncDevice
 
-            filterFuncPlatform = (platform: any): boolean => {
+            filterFuncPlatform = (platform: Platform): boolean => {
               return oldFilterFuncPlatform(platform) && (
-                manufacturer.findIndex(m => m === platform.manufacturer) > -1
+                manufacturer.findIndex(m => m.uri === platform.manufacturerUri) > -1
               )
             }
 
-            filterFuncDevice = (device: any) : boolean => {
+            filterFuncDevice = (device: Device) : boolean => {
               return oldFilterFuncDevice(device) && (
-                manufacturer.findIndex(m => m === device.manufacturer) > -1
+                // TODO
+                manufacturer.findIndex(m => m.uri === device.manufacturerUri) > -1
               )
             }
           }

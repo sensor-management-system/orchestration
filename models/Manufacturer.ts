@@ -1,4 +1,4 @@
-export default class Manufacture {
+export default class Manufacturer {
   private _id: number | null = null
   private _name: string = ''
   private _uri: string = ''
@@ -29,5 +29,13 @@ export default class Manufacture {
 
   toString (): string {
     return this._name
+  }
+
+  static createWithData (id: number | null, name: string, uri: string): Manufacturer {
+    const result = new Manufacturer()
+    result.id = id
+    result.name = name
+    result.uri = uri
+    return result
   }
 }

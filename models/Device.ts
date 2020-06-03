@@ -11,7 +11,7 @@ export default class Device {
   private _label: string = ''
   private _state: string = ''
   private _type: string = ''
-  private _manufacturer: string = ''
+  private _manufacturerUri: string = ''
   private _model: string = ''
   private _description: string = ''
   private _urlWebsite: string = ''
@@ -63,12 +63,12 @@ export default class Device {
     this._type = type
   }
 
-  get manufacturer (): string {
-    return this._manufacturer
+  get manufacturerUri (): string {
+    return this._manufacturerUri
   }
 
-  set manufacturer (manufacturer: string) {
-    this._manufacturer = manufacturer
+  set manufacturerUri (manufacturerUri: string) {
+    this._manufacturerUri = manufacturerUri
   }
 
   get model (): string {
@@ -145,7 +145,8 @@ export default class Device {
 
   get urn () {
     let urn = ''
-    urn += this.manufacturer || ''
+    // TODO: how to add the manufacturer if we just want to have the uri in the model?
+    urn += this.manufacturerUri || ''
     urn += this.model ? '_' + this.model : ''
     urn += this.type ? '_' + this.type : ''
     urn += this.serialNumber ? '_' + this.serialNumber : ''

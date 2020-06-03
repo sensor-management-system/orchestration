@@ -62,8 +62,9 @@
                   </v-col>
                   <v-col cols="12" md="3">
                     <v-select
-                      v-model="device.manufacturer"
+                      v-model="device.manufacturerUri"
                       :items="manufacturers"
+                      :item-value="(x) => x.uri"
                       label="manufacturer"
                       :readonly="readonly"
                       :disabled="readonly"
@@ -328,6 +329,7 @@ import CustomFieldCards from '../../../components/CustomFieldCards.vue'
 
 import VCService from '../../../services/VCService'
 import SmsService from '../../../services/SmsService'
+import Manufacturer from '../../../models/Manufacturer'
 
 @Component({
   components: {
@@ -345,7 +347,7 @@ export default class DeviceIdPage extends Vue {
 
   private states: string[] = []
   private deviceTypes: string[] = []
-  private manufacturers: string[] = []
+  private manufacturers: Manufacturer[] = []
 
   private isInEditMode: boolean = false
 

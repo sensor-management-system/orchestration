@@ -64,9 +64,10 @@
                   </v-col>
                   <v-col cols="12" md="3">
                     <v-select
-                      v-model="platform.manufacturer"
+                      v-model="platform.manufacturerUri"
                       label="manufacturer"
                       :items="manufacturers"
+                      :item-value="(x) => x.uri"
                       :readonly="readonly"
                       :disabled="readonly"
                     />
@@ -164,6 +165,7 @@ import Platform from '../../../models/Platform'
 
 // @ts-ignore
 import ContactSelect from '../../../components/ContactSelect.vue'
+import Manufacturer from '../../../models/Manufacturer'
 
 @Component({
   components: { ContactSelect }
@@ -173,7 +175,7 @@ export default class PlatformIdPage extends Vue {
   // data
   // first for the data to chose the elements
   private platformTypes: string[] = []
-  private manufacturers: string[] = []
+  private manufacturers: Manufacturer[] = []
   private types: string[] = []
 
   // then for our platform that we want to change
