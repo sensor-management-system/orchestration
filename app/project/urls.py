@@ -1,34 +1,38 @@
 from project.api.ping import Ping
-from project.api.resourceManager.deviceDetail import DeviceDetail
-from project.api.resourceManager.deviceList import DeviceList
-from project.api.resourceManager.deviceRelationship import DeviceRelationship
-from project.api.resourceManager.eventDetail import EventDetail
-from project.api.resourceManager.eventList import EventList
-from project.api.resourceManager.eventRelationship import EventRelationship
-from project.api.resourceManager.platformDetail import PlatformDetail
-from project.api.resourceManager.platformList import PlatformList
-from project.api.resourceManager.platformRelationship \
+from project.api.resourceManager.device_detail import DeviceDetail
+from project.api.resourceManager.device_list import DeviceList
+from project.api.resourceManager.device_relationship import DeviceRelationship
+from project.api.resourceManager.event_detail import EventDetail
+from project.api.resourceManager.event_list import EventList
+from project.api.resourceManager.event_relationship import EventRelationship
+from project.api.resourceManager.platform_detail import PlatformDetail
+from project.api.resourceManager.platform_list import PlatformList
+from project.api.resourceManager.platform_relationship \
     import PlatformRelationship
-from project.api.resourceManager.contactList import ContactList
-from project.api.resourceManager.contactDetail import ContactDetail
-from project.api.resourceManager.contactRelationship import ContactRelationship
-from project.api.resourceManager.propertiesList import PropertiesList
-from project.api.resourceManager.propertiesDetail import PropertiesDetail
-from project.api.resourceManager.propertiesRelationship \
+from project.api.resourceManager.contact_list import ContactList
+from project.api.resourceManager.contact_detail import ContactDetail
+from project.api.resourceManager.contact_relationship \
+    import ContactRelationship
+from project.api.resourceManager.properties_list import PropertiesList
+from project.api.resourceManager.properties_detail import PropertiesDetail
+from project.api.resourceManager.properties_relationship \
     import PropertiesRelationship
-from project.api.resourceManager.attachmentList import AttachmentList
-from project.api.resourceManager.attachmentDetail import AttachmentDetail
-from project.api.resourceManager.attachmentRelationship \
+from project.api.resourceManager.attachment_list import AttachmentList
+from project.api.resourceManager.attachment_detail import AttachmentDetail
+from project.api.resourceManager.attachment_relationship \
     import AttachmentRelationship
-from project.api.resourceManager.customfieldList import CustomFieldList
-from project.api.resourceManager.customfieldDetail import CustomFieldDetail
-from project.api.resourceManager.customfieldRelationship \
+from project.api.resourceManager.customfield_list import CustomFieldList
+from project.api.resourceManager.customfield_detail import CustomFieldDetail
+from project.api.resourceManager.customfield_relationship \
     import CustomFieldRelationship
 
-base_url = '/sis/v1'
+base_url = '/rdm/svm-api/v1'
 
 
 def Create_endpoints(api):
+    """"
+    The routing system
+    """
     api.route(Ping, 'test_connection', base_url + '/ping')
 
     # Platform

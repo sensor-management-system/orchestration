@@ -1,10 +1,10 @@
 import unittest
-import coverage
 
+import coverage
 from flask.cli import FlaskGroup
 from project import create_app
-from project.api.models.baseModel import db
-from project.api.insertInitialValues import *
+from project.api.insert_initial_values import *
+from project.api.models.base_model import db
 
 app = create_app()
 cli = FlaskGroup(create_app=create_app)
@@ -67,6 +67,14 @@ def db_init():
         db.session.add(contact)
         db.session.add(attachment)
         db.session.commit()
+
+
+@app.after_request
+def add_header(response):
+    response.headers['Access-Control-Allow-Origin'] = 'https://git.ufz.de'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
+
+    return response
 
 
 if __name__ == '__main__':

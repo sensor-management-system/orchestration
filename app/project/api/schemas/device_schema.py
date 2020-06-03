@@ -24,15 +24,15 @@ class DeviceSchema(Schema):
     short_name = fields.Str(allow_none=True)
     long_name = fields.Str(allow_none=True)
     manufacturer = fields.Str(required=True)
-    serial_number = fields.Integer(as_string=True, required=True)
+    serial_number = fields.Str(required=True)
     type = fields.Str(required=True)
     model = fields.Str(required=True)
     dual_use = fields.Boolean()
     label = fields.Str(allow_none=True)
-    inventory_number = fields.Integer()
-    website = fields.Str(allow_none=True)
+    inventory_number = fields.Str(allow_none=True)
+    url = fields.Str(allow_none=True)
     configuration_date = fields.Date()
-    persistent_identifier = fields.Integer()
+    persistent_identifier = fields.Str(allow_none=True)
 
     urn = fields.Function(lambda obj: "{}_{}_{}_{}".format(
         obj.manufacturer.upper(), obj.model.upper(),
@@ -54,7 +54,7 @@ class DeviceSchema(Schema):
                           many=True,
                           schema='EventSchema',
                           type_='event',
-                          id_field='event_id')
+                          id_field='id')
 
     contacts = Relationship(attribute='contacts',
                             self_view='device_contacts',
@@ -64,7 +64,7 @@ class DeviceSchema(Schema):
                             many=True,
                             schema='ContactSchema',
                             type_='contact',
-                            id_field='contact_id')
+                            id_field='id')
 
     properties = Relationship(attribute='properties',
                               self_view='device_properties',
@@ -74,7 +74,7 @@ class DeviceSchema(Schema):
                               many=True,
                               schema='PropertiesSchema',
                               type_='properties',
-                              id_field='properties_id')
+                              id_field='id')
 
     attachments = Relationship(attribute='attachments',
                                self_view='device_attachments',
@@ -84,7 +84,7 @@ class DeviceSchema(Schema):
                                many=True,
                                schema='AttachmentSchema',
                                type_='Attachment',
-                               id_field='attachment_id')
+                               id_field='id')
 
     customfields = Relationship(attribute='customfields',
                                 self_view='device_customfields',
@@ -94,4 +94,4 @@ class DeviceSchema(Schema):
                                 many=True,
                                 schema='CustomFieldSchema',
                                 type_='CustomField',
-                                id_field='customfield_id')
+                                id_field='id')

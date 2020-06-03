@@ -1,7 +1,10 @@
-from project.api.models.baseModel import db
+from project.api.models.base_model import db
 
 
 class Event(db.Model):
+    """
+    Event class
+    """
     id = db.Column(db.Integer, primary_key=True)
     description = db.Column(db.Text)
     date = db.Column(db.DateTime)

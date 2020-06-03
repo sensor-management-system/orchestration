@@ -16,9 +16,9 @@ class PlatformSchema(Schema):
     manufacturer = fields.Str(allow_none=True)
     type = fields.Str(required=True)
     platform_type = fields.Str(allow_none=True)
-    src = fields.Str(allow_none=True)
+    url = fields.Str(allow_none=True)
     configuration_date = fields.Date(allow_none=True)
-    inventory_number = fields.Integer(allow_none=True)
+    inventory_number = fields.Str(allow_none=True)
     urn = fields.Function(lambda obj: "{}_{}".format(
         obj.type.upper(), obj.short_name.upper()))
     devices = Relationship(self_view='platform_devices',
@@ -37,4 +37,4 @@ class PlatformSchema(Schema):
                             many=True,
                             schema='ContactSchema',
                             type_='contact',
-                            id_field='contact_id')
+                            id_field='id')
