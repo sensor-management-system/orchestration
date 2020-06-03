@@ -192,7 +192,7 @@
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 
-import MasterDataService from '../../services/MasterDataService'
+import VCService from '../../services/VCService'
 import SmsService from '../../services/SmsService'
 
 import { PlatformOrDeviceSearchType } from '../../enums/PlatformOrDeviceSearchType'
@@ -220,7 +220,7 @@ export default class DevicesIndexPage extends Vue {
   private successMessage = ''
 
   mounted () {
-    MasterDataService.findAllManufacturers().then((manufacturers) => {
+    VCService.findAllManufacturers().then((manufacturers) => {
       this.searchManufacturers = manufacturers
     })
     this.runSelectedSearch()

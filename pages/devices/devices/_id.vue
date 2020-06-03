@@ -326,7 +326,7 @@ import DevicePropertyExpansionPanels from '../../../components/DevicePropertyExp
 // @ts-ignore
 import CustomFieldCards from '../../../components/CustomFieldCards.vue'
 
-import MasterDataService from '../../../services/MasterDataService'
+import VCService from '../../../services/VCService'
 import SmsService from '../../../services/SmsService'
 
 @Component({
@@ -350,13 +350,13 @@ export default class DeviceIdPage extends Vue {
   private isInEditMode: boolean = false
 
   mounted () {
-    MasterDataService.findAllStates().then((foundStates) => {
+    VCService.findAllStates().then((foundStates) => {
       this.states = foundStates
     })
-    MasterDataService.findAllDeviceTypes().then((foundDeviceTypes) => {
+    VCService.findAllDeviceTypes().then((foundDeviceTypes) => {
       this.deviceTypes = foundDeviceTypes
     })
-    MasterDataService.findAllManufacturers().then((foundManufacturers) => {
+    VCService.findAllManufacturers().then((foundManufacturers) => {
       this.manufacturers = foundManufacturers
     })
     this.loadDevice()

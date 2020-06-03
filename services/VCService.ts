@@ -1,4 +1,4 @@
-export default class MasterDataService {
+export default class VCService {
   static findAllManufacturers (): Promise<string[]> {
     return new Promise<string[]>((resolve) => {
       resolve([

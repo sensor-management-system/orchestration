@@ -157,7 +157,7 @@
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 
-import MasterDataService from '../../../services/MasterDataService'
+import VCService from '../../../services/VCService'
 import SmsService from '../../../services/SmsService'
 
 import Platform from '../../../models/Platform'
@@ -187,13 +187,13 @@ export default class PlatformIdPage extends Vue {
 
   mounted () {
     this.showLoadingError = false
-    MasterDataService.findAllManufacturers().then((foundManufacturers) => {
+    VCService.findAllManufacturers().then((foundManufacturers) => {
       this.manufacturers = foundManufacturers
     })
-    MasterDataService.findAllPlatformTypes().then((foundPlatformTypes) => {
+    VCService.findAllPlatformTypes().then((foundPlatformTypes) => {
       this.platformTypes = foundPlatformTypes
     })
-    MasterDataService.findAllTypes().then((foundTypes) => {
+    VCService.findAllTypes().then((foundTypes) => {
       this.types = foundTypes
     })
     this.loadPlatform()
