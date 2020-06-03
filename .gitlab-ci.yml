@@ -234,7 +234,7 @@ test-availability:
     - staging
     - id2
   script:
-    - curl http://$STAGING_HOST:5000/sis/v1/ping
+    - curl http://$STAGING_HOST:5000/rdm/svm-api/v1
   only:
     variables:
       - $STAGING_HOST =~ /gfz/
