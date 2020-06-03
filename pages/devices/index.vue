@@ -197,7 +197,6 @@ import DeviceService from '../../services/DeviceService'
 
 import { PlatformOrDeviceSearchType } from '../../enums/PlatformOrDeviceSearchType'
 
-import Institute from '../../models/Institute'
 import { IDeviceOrPlatformSearchObject } from '../../models/IDeviceOrPlatformSearchObject'
 import { PlatformOrDeviceType } from '../../enums/PlatformOrDeviceType'
 
