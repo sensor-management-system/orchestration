@@ -99,8 +99,18 @@ export default {
       drawer: false,
       fixed: false,
       miniVariant: false,
-      title: 'Sensor System Management'
+      title: 'Sensor System Management',
+      appBarContent: null,
+      appBarExtension: null
     }
+  },
+  created () {
+    this.$nuxt.$on('app-bar-content', (component) => {
+      this.appBarContent = component
+    })
+    this.$nuxt.$on('app-bar-extension', (component) => {
+      this.appBarExtension = component
+    })
   }
 }
 </script>
