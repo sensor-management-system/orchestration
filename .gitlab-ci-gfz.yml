@@ -1,17 +1,15 @@
 stages:
   - check
   - test
-  - build-gfz
-  - build-ufz
-  - deploy-staging-gfz
-  - deploy-ufz
-  - after-deployment-tests-gfz
+  - build
+  - deploy-staging
+  - after-deployment-tests
 
 cache:
   paths:
     - dist
 
-check-lint-gfz:
+check-lint:
   stage: check
   image: node:10.16.3-stretch
   before_script:
@@ -28,28 +26,8 @@ check-lint-gfz:
     key: ${CI_COMMIT_REF_SLUG}
     paths:
       - node_modules
-  only:
-    variables:
-      - $STAGING_HOST =~ /gfz/
 
-check-lint-ufz:
-  stage: check
-  image: node:10.16.3-stretch
-  before_script:
-    - node -v
-    - npm install
-  script:
-    - npm run lint
-  allow_failure: true
-  cache:
-    key: ${CI_COMMIT_REF_SLUG}
-    paths:
-      - node_modules
-  except:
-    variables:
-      - $STAGING_HOST =~ /gfz/
-
-test-frontend-unit-tests-gfz:
+test-frontend-unit-tests:
   stage: test
   image: node:10.16.3-stretch
   before_script:
@@ -65,31 +43,12 @@ test-frontend-unit-tests-gfz:
     key: ${CI_COMMIT_REF_SLUG}
     paths:
       - node_modules
-  only:
-    variables:
-      - $STAGING_HOST =~ /gfz/
-
-test-frontend-unit-tests-ufz:
-  stage: test
-  image: node:10.16.3-stretch
-  before_script:
-    - node -v
-    - npm install
-  script:
-    - npm test
-  cache:
-    key: ${CI_COMMIT_REF_SLUG}
-    paths:
-      - node_modules
-  except:
-    variables:
-      - $STAGING_HOST =~ /gfz/
 
 .docker_login_gitlab_registry: &docker_login_gitlab_registry
   - echo "$CI_BUILD_TOKEN" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
 
 build-deploy-image:
-  stage: build-gfz
+  stage: build
   image: docker:19.03.1
   variables:
     BACKEND_URL: ${STAGING_BACKEND_URL}
@@ -117,11 +76,9 @@ build-deploy-image:
     refs:
       - master
       - tags
-    variables:
-      - $STAGING_HOST =~ /gfz/
 
 build-deploy-image-manual:
-  stage: build-gfz
+  stage: build
   image: docker:19.03.1
   variables:
     BACKEND_URL: ${STAGING_BACKEND_URL}
@@ -138,13 +95,10 @@ build-deploy-image-manual:
     - deploy
     - staging
     - id2
-  only:
-    variables:
-      - $STAGING_HOST =~ /gfz/
   when: manual
 
 deploy-staging:
-  stage: deploy-staging-gfz
+  stage: deploy-staging
   environment:
     name: gfzstaging
     url: https://$STAGING_HOST
@@ -162,11 +116,9 @@ deploy-staging:
   only:
     refs:
       - master
-    variables:
-      - $STAGING_HOST =~ /gfz/
 
 deploy-staging-manual-8080:
-  stage: deploy-staging-gfz
+  stage: deploy-staging
   environment:
     name: gfzstaging8080
     url: https://${STAGING_HOST}:8080
@@ -184,35 +136,9 @@ deploy-staging-manual-8080:
   dependencies:
     - build-deploy-image-manual
   when: manual
-  only:
-    variables:
-      - $STAGING_HOST =~ /gfz/
-
-build_app:
-  stage: build-ufz
-  image: node:latest
-  script:
-    - npm install
-    - npm run generate
-  except:
-    variables:
-      - $STAGING_HOST =~ /gfz/
-
-
-build_image:
-  stage: deploy-ufz
-  image:
-    name: gcr.io/kaniko-project/executor:debug
-    entrypoint: [""]
-  script:
-    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
-    - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/docker/deployment/ufz/Dockerfile --destination $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG --destination $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA --destination $CI_REGISTRY_IMAGE --build-arg BUILD_DATE=$(date --utc +%FT%TZ) --build-arg VCS_REF=$CI_COMMIT_SHA
-  except:
-    variables:
-      - $STAGING_HOST =~ /gfz/
 
 test-availability-staging:
-  stage: after-deployment-tests-gfz
+  stage: after-deployment-tests
   image: python:3
   environment:
     name: gfzstaging
@@ -228,11 +154,9 @@ test-availability-staging:
   only:
     refs:
       - master
-    variables:
-      - $STAGING_HOST =~ /gfz/
 
 test-availability-staging8080:
-  stage: after-deployment-tests-gfz
+  stage: after-deployment-tests
   image: python:3
   environment:
     name: gfzstaging8080
@@ -246,7 +170,4 @@ test-availability-staging8080:
   dependencies:
     - deploy-staging-manual-8080
   when: manual
-  only:
-    variables:
-      - $STAGING_HOST =~ /gfz/
 
