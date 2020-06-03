@@ -67,8 +67,15 @@
       app
     >
       <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
-      <v-toolbar-title v-text="title" />
-      <v-spacer />
+      <template v-if="appBarContent">
+        <Component :is="appBarContent" />
+      </template>
+      <template v-else>
+        <v-toolbar-title v-text="title" />
+      </template>
+      <template v-if="appBarExtension" v-slot:extension>
+        <Component :is="appBarExtension" />
+      </template>
     </v-app-bar>
     <v-content>
       <v-container>
