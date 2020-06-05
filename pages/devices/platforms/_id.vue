@@ -389,8 +389,6 @@ export default class PlatformIdPage extends Vue {
   }
 
   get platformPlatformTypeName () : string {
-    console.log(this.platform.platformTypeUri)
-    console.log(this.platform.platformTypeName)
     const platformTypeIndex = this.platformTypes.findIndex(t => t.uri === this.platform.platformTypeUri)
     if (platformTypeIndex > -1) {
       return this.platformTypes[platformTypeIndex].name
