@@ -1,4 +1,4 @@
-export default class PlatformStatus {
+export default class Status {
   private _id: number | null = null
   private _name: string = ''
   private _uri: string = ''
@@ -31,8 +31,8 @@ export default class PlatformStatus {
     return this._name
   }
 
-  static createWithData (id: number | null, name: string, uri: string): PlatformStatus {
-    const result = new PlatformStatus()
+  static createWithData (id: number | null, name: string, uri: string): Status {
+    const result = new Status()
     result.id = id
     result.name = name
     result.uri = uri

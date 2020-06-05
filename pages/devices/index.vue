@@ -201,7 +201,7 @@ import { IDeviceOrPlatformSearchObject } from '../../models/IDeviceOrPlatformSea
 import { PlatformOrDeviceType } from '../../enums/PlatformOrDeviceType'
 import Manufacturer from '../../models/Manufacturer'
 import PlatformType from '../../models/PlatformType'
-import PlatformStatus from '../../models/PlatformStatus'
+import Status from '../../models/Status'
 
 @Component
 export default class DevicesIndexPage extends Vue {
@@ -212,7 +212,7 @@ export default class DevicesIndexPage extends Vue {
   private manufacturerToAdd: Manufacturer | null = null
 
   private platformTypeLookup: Map<string, PlatformType> = new Map<string, PlatformType>()
-  private platformStatusLookup: Map<string, PlatformStatus> = new Map<string, PlatformStatus>()
+  private statusLookup: Map<string, Status> = new Map<string, Status>()
 
   private searchResults: Array<IDeviceOrPlatformSearchObject> = []
   private searchText: string | null = null
@@ -230,22 +230,22 @@ export default class DevicesIndexPage extends Vue {
       this.searchManufacturers = manufacturers
     })
     const promisePlatformTypes = VCService.findAllPlatformTypes()
-    const promisePlatformStates = VCService.findAllPlatformStates()
+    const promiseStates = VCService.findAllStates()
 
     promisePlatformTypes.then((platformTypes) => {
-      promisePlatformStates.then((platformStates) => {
+      promiseStates.then((states) => {
         const platformTypeLookup = new Map<string, PlatformType>()
-        const platformStatusLookup = new Map<string, PlatformStatus>()
+        const statusLookup = new Map<string, Status>()
 
         for (const platformType of platformTypes) {
           platformTypeLookup.set(platformType.uri, platformType)
         }
-        for (const platformStatus of platformStates) {
-          platformStatusLookup.set(platformStatus.uri, platformStatus)
+        for (const status of states) {
+          statusLookup.set(status.uri, status)
         }
 
         this.platformTypeLookup = platformTypeLookup
-        this.platformStatusLookup = platformStatusLookup
+        this.statusLookup = statusLookup
 
         this.runSelectedSearch()
       })
@@ -284,7 +284,7 @@ export default class DevicesIndexPage extends Vue {
 
   runSearch (searchText: string | null, searchType: PlatformOrDeviceSearchType, manufacturer: Manufacturer[]) {
     SmsService.findPlatformsAndSensors(
-      searchText, searchType, manufacturer, this.platformTypeLookup, this.platformStatusLookup
+      searchText, searchType, manufacturer, this.platformTypeLookup, this.statusLookup
     ).then((findResults) => {
       this.searchResults = findResults
     })

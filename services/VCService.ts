@@ -1,6 +1,6 @@
 import Manufacturer from '../models/Manufacturer'
 import PlatformType from '~/models/PlatformType'
-import PlatformStatus from '~/models/PlatformStatus'
+import Status from '~/models/Status'
 
 export default class VCService {
   static findAllManufacturers (): Promise<Manufacturer[]> {
@@ -24,26 +24,14 @@ export default class VCService {
     })
   }
 
-  static findAllPlatformStates (): Promise<PlatformStatus[]> {
-    return new Promise<PlatformStatus[]>((resolve) => {
+  static findAllStates (): Promise<Status[]> {
+    return new Promise<Status[]>((resolve) => {
       resolve([
-        PlatformStatus.createWithData(1, 'in warehouse', 'https//helmholtz/smsvc/platformstatus/1'),
-        PlatformStatus.createWithData(2, 'in use', 'https//helmholtz/smsvc/platformstatus/2'),
-        PlatformStatus.createWithData(3, 'under construction', 'https//helmholtz/smsvc/platformstatus/3'),
-        PlatformStatus.createWithData(4, 'blocked', 'https//helmholtz/smsvc/platformstatus/4'),
-        PlatformStatus.createWithData(5, 'scrapped', 'https//helmholtz/smsvc/platformstatus/5')
-      ])
-    })
-  }
-
-  static findAllDeviceStates (): Promise<string[]> {
-    return new Promise<string[]>((resolve) => {
-      resolve([
-        'in warehouse',
-        'in use',
-        'under construction',
-        'blocked',
-        'scrapped'
+        Status.createWithData(1, 'in warehouse', 'https//helmholtz/smsvc/platformstatus/1'),
+        Status.createWithData(2, 'in use', 'https//helmholtz/smsvc/platformstatus/2'),
+        Status.createWithData(3, 'under construction', 'https//helmholtz/smsvc/platformstatus/3'),
+        Status.createWithData(4, 'blocked', 'https//helmholtz/smsvc/platformstatus/4'),
+        Status.createWithData(5, 'scrapped', 'https//helmholtz/smsvc/platformstatus/5')
       ])
     })
   }

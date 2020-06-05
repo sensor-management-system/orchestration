@@ -66,9 +66,9 @@
                   </v-col>
                   <v-col cols="12" md="3">
                     <v-select
-                      v-model="platform.platformStateUri"
-                      label="platform state"
-                      :items="platformStates"
+                      v-model="platform.stateUri"
+                      label="status"
+                      :items="states"
                       :item-value="(x) => x.uri"
                       :readonly="readonly"
                       :disabled="readonly"
@@ -206,7 +206,7 @@ import Platform from '../../../models/Platform'
 import ContactSelect from '../../../components/ContactSelect.vue'
 import Manufacturer from '../../../models/Manufacturer'
 import PlatformType from '../../../models/PlatformType'
-import PlatformStatus from '../../../models/PlatformStatus'
+import Status from '../../../models/Status'
 
 @Component({
   components: { ContactSelect }
@@ -217,7 +217,7 @@ export default class PlatformIdPage extends Vue {
   // first for the data to chose the elements
   private platformTypes: PlatformType[] = []
   private manufacturers: Manufacturer[] = []
-  private platformStates: PlatformStatus[] = []
+  private states: Status[] = []
 
   // then for our platform that we want to change
   private platform: Platform = Platform.createEmpty()
@@ -236,8 +236,8 @@ export default class PlatformIdPage extends Vue {
     VCService.findAllPlatformTypes().then((foundPlatformTypes) => {
       this.platformTypes = foundPlatformTypes
     })
-    VCService.findAllPlatformStates().then((foundPlatformStates) => {
-      this.platformStates = foundPlatformStates
+    VCService.findAllStates().then((foundStates) => {
+      this.states = foundStates
     })
     this.loadPlatform()
   }

@@ -352,8 +352,9 @@ export default class DeviceIdPage extends Vue {
   private isInEditMode: boolean = false
 
   mounted () {
-    VCService.findAllDeviceStates().then((foundStates) => {
-      this.states = foundStates
+    VCService.findAllStates().then((foundStates) => {
+      // TODO: Replace with real Status[] as we want to fill the uri & name
+      this.states = foundStates.map(x => x.name)
     })
     VCService.findAllDeviceTypes().then((foundDeviceTypes) => {
       this.deviceTypes = foundDeviceTypes

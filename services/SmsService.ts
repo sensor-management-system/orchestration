@@ -8,7 +8,7 @@ import { IDeviceOrPlatformSearchObject } from '../models/IDeviceOrPlatformSearch
 
 import { PlatformOrDeviceSearchType } from '../enums/PlatformOrDeviceSearchType'
 import Manufacturer from '~/models/Manufacturer'
-import PlatformStatus from '~/models/PlatformStatus'
+import Status from '~/models/Status'
 import PlatformType from '~/models/PlatformType'
 
 // Use on version for all the queries
@@ -211,7 +211,7 @@ export default class SmsService {
     platformOrDevice: PlatformOrDeviceSearchType,
     manufacturer: Manufacturer[],
     platformTypeLookupByUri: Map<string, PlatformType>,
-    platformStatusLookupByUri: Map<string, PlatformStatus>
+    statusLookupByUri: Map<string, Status>
   ): Promise<IDeviceOrPlatformSearchObject[]> {
     let promiseAllPlatforms: Promise<Platform[]> = new Promise(resolve => resolve([]))
     let promiseAllDevices: Promise<Device[]> = new Promise(resolve => resolve([]))
@@ -262,7 +262,7 @@ export default class SmsService {
 
           for (const platform of allPlatforms) {
             if (filterFuncPlatform(platform)) {
-              result.push(platform.toSearchObject(platformTypeLookupByUri, platformStatusLookupByUri))
+              result.push(platform.toSearchObject(platformTypeLookupByUri, statusLookupByUri))
             }
           }
 
@@ -292,13 +292,13 @@ export default class SmsService {
         // TODO: Consistant usage of camel/snake case
         // JSONAPI uses camelcase
         if (attributes.first_name) {
-          newEntry.firstName = attributes.first_name
+          newEntry.givenName = attributes.first_name
         }
         if (attributes.last_name) {
-          newEntry.lastName = attributes.last_name
+          newEntry.familyName = attributes.last_name
         }
         if (attributes.profile_link) {
-          newEntry.profileLink = attributes.profile_link
+          newEntry.website = attributes.profile_link
         }
         result.push(newEntry)
       }

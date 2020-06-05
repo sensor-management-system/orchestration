@@ -4,29 +4,39 @@ import Contact from './Contact'
 
 import { IDeviceOrPlatformSearchObject } from './IDeviceOrPlatformSearchObject'
 import PlatformType from './PlatformType'
-import PlatformStatus from './PlatformStatus'
+import Status from './Status'
+import Manufacturer from './Manufacturer'
 
 export default class Platform {
   private _id: number | null = null
+
   private _platformTypeUri: string = ''
+  private _platformTypeName: string = ''
+
   private _shortName: string = ''
   private _longName: string = ''
   private _description: string = ''
+
   private _manufacturerUri: string = ''
+  private _manufacturerName: string = ''
+
   private _model: string = ''
-  private _platformStatusUri: string = ''
+
+  private _statusUri: string = ''
+  private _statusName: string = ''
+
   private _inventoryNumber: string = ''
   private _serialNumber: string = ''
   private _website: string = ''
   private _persistentIdentifier: string = ''
   private _createdAt: Date | null = null
   private _modifiedAt: Date | null = null
-  /*
+
   private _createdByUserId: number | null = null
   private _modifiedByUserId: number | null = null
-  */
 
   private _contacts: Contact[] = []
+  // TODO: Add attachments
 
   get id (): number | null {
     return this._id
@@ -42,6 +52,19 @@ export default class Platform {
 
   set platformTypeUri (newPlatformTypeUri: string) {
     this._platformTypeUri = newPlatformTypeUri
+  }
+
+  get platformTypeName (): string {
+    return this._platformTypeName
+  }
+
+  set platformTypeName (newPlatformTypeName: string) {
+    this._platformTypeName = newPlatformTypeName
+  }
+
+  set platformType (newPlatformType: PlatformType) {
+    this.platformTypeUri = newPlatformType.uri
+    this.platformTypeName = newPlatformType.name
   }
 
   get shortName (): string {
@@ -76,6 +99,19 @@ export default class Platform {
     this._manufacturerUri = newManufacturerUri
   }
 
+  get manufacturerName (): string {
+    return this._manufacturerName
+  }
+
+  set manufacturerName (newManufacturerName: string) {
+    this._manufacturerName = newManufacturerName
+  }
+
+  set manufacturer (newManufacturer: Manufacturer) {
+    this.manufacturerUri = newManufacturer.uri
+    this.manufacturerName = newManufacturer.name
+  }
+
   get model (): string {
     return this._model
   }
@@ -84,12 +120,25 @@ export default class Platform {
     this._model = newModel
   }
 
-  get platformStatusUri (): string {
-    return this._platformStatusUri
+  get statusUri (): string {
+    return this._statusUri
   }
 
-  set platformStatusUri (newPlatformStatusUri: string) {
-    this._platformStatusUri = newPlatformStatusUri
+  set statusUri (newStatusUri: string) {
+    this._statusUri = newStatusUri
+  }
+
+  get statusName (): string {
+    return this._statusName
+  }
+
+  set statusName (newStatusName: string) {
+    this._statusName = newStatusName
+  }
+
+  set status (newStatus: Status) {
+    this.statusUri = newStatus.uri
+    this.statusName = newStatus.name
   }
 
   get inventoryNumber (): string {
@@ -148,7 +197,6 @@ export default class Platform {
     this._modifiedAt = newModifiedAt
   }
 
-  /*
   get createdByUserId (): number | null {
     return this._createdByUserId
   }
@@ -164,11 +212,10 @@ export default class Platform {
   set modifiedByUserId (newModifiedByUserId: number | null) {
     this._modifiedByUserId = newModifiedByUserId
   }
-  */
 
   toSearchObject (
     platformTypeLookupByUri: Map<string, PlatformType>,
-    platformStatusLookupByUri: Map<string, PlatformStatus>
+    platformStatusLookupByUri: Map<string, Status>
   ) : IDeviceOrPlatformSearchObject {
     return new PlatformSearchObjectWrapper(this, platformTypeLookupByUri, platformStatusLookupByUri)
   }
@@ -181,12 +228,12 @@ export default class Platform {
 class PlatformSearchObjectWrapper implements IDeviceOrPlatformSearchObject {
   private platform: Platform
   private platformTypeLookupByUri: Map<string, PlatformType>
-  private platformStatusLookupByUri: Map<string, PlatformStatus>
+  private statusLookupByUri: Map<string, Status>
 
-  constructor (platform: Platform, platformTypeLookupByUri: Map<string, PlatformType>, platformStatusLookupByUri: Map<string, PlatformStatus>) {
+  constructor (platform: Platform, platformTypeLookupByUri: Map<string, PlatformType>, statusLookupByUri: Map<string, Status>) {
     this.platform = platform
     this.platformTypeLookupByUri = platformTypeLookupByUri
-    this.platformStatusLookupByUri = platformStatusLookupByUri
+    this.statusLookupByUri = statusLookupByUri
   }
 
   get id () : number | null {
@@ -204,6 +251,9 @@ class PlatformSearchObjectWrapper implements IDeviceOrPlatformSearchObject {
       const platformType: PlatformType = this.platformTypeLookupByUri.get(this.platform.platformTypeUri) as PlatformType
       return platformType.name
     }
+    if (this.platform.platformTypeName) {
+      return this.platform.platformTypeName
+    }
     return 'Unknown type'
   }
 
@@ -217,11 +267,13 @@ class PlatformSearchObjectWrapper implements IDeviceOrPlatformSearchObject {
   }
 
   get status () : string {
-    if (this.platformStatusLookupByUri.has(this.platform.platformStatusUri)) {
-      const platformStatus: PlatformStatus = this.platformStatusLookupByUri.get(this.platform.platformStatusUri) as PlatformStatus
+    if (this.statusLookupByUri.has(this.platform.statusUri)) {
+      const platformStatus: Status = this.statusLookupByUri.get(this.platform.statusUri) as Status
       return platformStatus.name
     }
-    // TODO
+    if (this.platform.statusName) {
+      return this.platform.statusName
+    }
     return 'Unknown status'
   }
 }
