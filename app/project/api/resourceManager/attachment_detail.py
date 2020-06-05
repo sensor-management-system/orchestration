@@ -1,10 +1,10 @@
 from project.api.models.attachment import Attachment
 from project.api.models.base_model import db
-from project.api.resourceManager.base_resource import BaseResourceDetail
+from flask_rest_jsonapi import ResourceDetail
 from project.api.schemas.attachment_schema import AttachmentSchema
 
 
-class AttachmentDetail(BaseResourceDetail):
+class AttachmentDetail(ResourceDetail):
     """
      provides get, patch and delete methods to retrieve details
      of an object, update an object and delete an Attachment
@@ -16,7 +16,6 @@ class AttachmentDetail(BaseResourceDetail):
         :param view_kwargs:
         :return:
         """
-        super().query_an_object(kwargs=view_kwargs, o=Attachment)
 
     schema = AttachmentSchema
     data_layer = {'session': db.session,

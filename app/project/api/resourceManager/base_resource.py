@@ -1,32 +1,31 @@
-from flask_rest_jsonapi import ResourceDetail
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.orm.exc import NoResultFound
-from project.api.models.device import Device
 
 
-class BaseResourceDetail(ResourceDetail):
+class BaseResourceDetail():
     """
     Base Resource detail
     """
 
-    def query_an_object(self, kwargs, object_):
+    def query_an_object(self, view_kwargs, obj):
         """
 
         :param kwargs:
         :return:
         """
-        if kwargs.get('device_id') is not None:
-            try:
-                device = self.session.query(Device).filter_by(
-                    id=kwargs['device_id']).one()
-            except NoResultFound:
-                raise ObjectNotFound({'parameter': 'device_id'},
-                                     "Device: {} not found".format(
-                                         kwargs['device_id']))
+        obj_class = obj.capitalize()
+        obj_id = obj + '_id'
+        module = __import__("project.api.models" + obj)
+        the_class = getattr(module, obj_class)
+        try:
+            object_ = self.session.query(the_class).filter_by(
+                id=view_kwargs['contact_id']).one()
+        except NoResultFound:
+            raise ObjectNotFound({'parameter': obj_id},
+                                 "Computer: {} not found".format(
+                                     view_kwargs[obj_id]))
+        else:
+            if object_.device is not None:
+                view_kwargs['id'] = object_.device.id
             else:
-                o = self.session.query(object_).filter_by(
-                    id=kwargs['id']).one()
-                if device[o] is not None:
-                    kwargs['id'] = device[o].id
-                else:
-                    kwargs['id'] = None
+                view_kwargs['id'] = None
