@@ -1,5 +1,4 @@
 import datetime
-import logging
 from calendar import timegm
 from functools import wraps
 from typing import Dict
@@ -9,6 +8,8 @@ from flask import Blueprint, jsonify, request
 from jwkest import JWKESTException
 from jwkest.jwk import KEYS
 from jwkest.jws import JWS
+from project.api.models.base_model import db
+from project.api.models.user import User
 
 auth_blueprint = Blueprint('auth', __name__)
 
@@ -25,7 +26,7 @@ class TokenChecker():
         return ": email %s" % (self.id_token['sub'])
 
     def _load_config(self):
-        # Loads issuer and jwks url (see method below)
+        # Loads issuer and jwks url
         self.oidc_config: Dict = requests.get(
             self.config_url, verify=True).json()
         self.issuer = self.oidc_config['issuer']
@@ -52,7 +53,7 @@ class TokenChecker():
         utc_timestamp = timegm(datetime.datetime.utcnow().utctimetuple())
         if utc_timestamp > self.id_token.get('exp', 0):
             msg = 'Invalid Authorization header. JWT has expired.'
-            logging.error(msg)
+            raise handle_failed_authentication(msg)
         if 'nbf' in self.id_token and utc_timestamp < self.id_token['nbf']:
             msg = 'Invalid Authorization header. JWT not yet valid.'
             raise handle_failed_authentication(msg)
@@ -81,32 +82,53 @@ class AuthenticationFailed(Exception):
 
 @auth_blueprint.errorhandler(AuthenticationFailed)
 def handle_failed_authentication(error):
-    response = jsonify(error.to_dict())
-    response.status_code = error.status_code
+    response = jsonify(error)
+    # response.status_code = error.status_code
     return response
 
 
 def token_required(f):
     @wraps(f)
     def decorator(*args, **kwargs):
+        if not request.method == 'GET':
+            token = None
 
-        token = None
+            if 'token' in request.headers:
+                token = request.headers['token']
 
-        if 'token' in request.headers:
-            token = request.headers['token']
+            if not token:
+                return jsonify({'message': 'a valid token is missing'}), 400
 
-        if not token:
-            return jsonify({'message': 'a valid token is missing'}), 400
+            try:
+                current_user = TokenChecker().check_token(token=token)
+                user = add_user_to_database(current_user)
+                get_current_user(user)
 
-        try:
-            current_user = TokenChecker().check_token(token=token)
+            except JWKESTException:
+                return jsonify({'message': 'token is invalid'}), 400
 
-        except JWKESTException:
-            return jsonify({'message': 'token is invalid'}), 400
-
-        return f(current_user, *args, **kwargs)
+            return f(current_user, *args, **kwargs)
+        else:
+            return f(*args, **kwargs)
 
     return decorator
+
+
+def get_current_user(current_user):
+    current_user = current_user
+    return current_user
+
+
+def add_user_to_database(current_user):
+    exists = db.session.query(User).filter_by(
+        subject=current_user['sub']).first()
+    if not exists:
+        user = User(subject=current_user['sub'])
+        db.session.add(user)
+        db.session.commit()
+        return user
+    else:
+        return exists
 
 
 @auth_blueprint.route('/rdm/svm-api/v1/auth', methods=['GET'])
