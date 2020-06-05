@@ -5,7 +5,6 @@ import Contact from './Contact'
 import { IDeviceOrPlatformSearchObject } from './IDeviceOrPlatformSearchObject'
 import PlatformType from './PlatformType'
 import Status from './Status'
-import Manufacturer from './Manufacturer'
 
 export default class Platform {
   private _id: number | null = null
@@ -62,11 +61,6 @@ export default class Platform {
     this._platformTypeName = newPlatformTypeName
   }
 
-  set platformType (newPlatformType: PlatformType) {
-    this.platformTypeUri = newPlatformType.uri
-    this.platformTypeName = newPlatformType.name
-  }
-
   get shortName (): string {
     return this._shortName
   }
@@ -107,11 +101,6 @@ export default class Platform {
     this._manufacturerName = newManufacturerName
   }
 
-  set manufacturer (newManufacturer: Manufacturer) {
-    this.manufacturerUri = newManufacturer.uri
-    this.manufacturerName = newManufacturer.name
-  }
-
   get model (): string {
     return this._model
   }
@@ -134,11 +123,6 @@ export default class Platform {
 
   set statusName (newStatusName: string) {
     this._statusName = newStatusName
-  }
-
-  set status (newStatus: Status) {
-    this.statusUri = newStatus.uri
-    this.statusName = newStatus.name
   }
 
   get inventoryNumber (): string {

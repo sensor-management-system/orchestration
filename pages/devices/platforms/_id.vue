@@ -55,31 +55,30 @@
                 </v-row>
                 <v-row>
                   <v-col cols="12" md="3">
-                    <v-select
-                      v-model="platform.platformTypeUri"
+                    <!-- TODO: Auch hier den Namen und die URI ändern!!!
+                    -->
+                    <v-combobox
+                      v-model="platformPlatformTypeName"
                       label="platform type"
-                      :items="platformTypes"
-                      :item-value="(x) => x.uri"
+                      :items="platformTypeNames"
                       :readonly="readonly"
                       :disabled="readonly"
                     />
                   </v-col>
                   <v-col cols="12" md="3">
-                    <v-select
-                      v-model="platform.stateUri"
+                    <v-combobox
+                      v-model="platformStateName"
                       label="status"
-                      :items="states"
-                      :item-value="(x) => x.uri"
+                      :items="statusNames"
                       :readonly="readonly"
                       :disabled="readonly"
                     />
                   </v-col>
                   <v-col cols="12" md="3">
-                    <v-select
-                      v-model="platform.manufacturerUri"
+                    <v-combobox
+                      v-model="platformManufacturerName"
                       label="manufacturer"
-                      :items="manufacturers"
-                      :item-value="(x) => x.uri"
+                      :items="manufacturerNames"
                       :readonly="readonly"
                       :disabled="readonly"
                     />
@@ -339,6 +338,74 @@ export default class PlatformIdPage extends Vue {
         text: this.verb + ' Platform'
       }
     ]
+  }
+
+  get manufacturerNames () : string[] {
+    return this.manufacturers.map(m => m.name)
+  }
+
+  get platformManufacturerName (): string {
+    const manufacturerIndex = this.manufacturers.findIndex(m => m.uri === this.platform.manufacturerUri)
+    if (manufacturerIndex > -1) {
+      return this.manufacturers[manufacturerIndex].name
+    }
+    return this.platform.manufacturerName
+  }
+
+  set platformManufacturerName (newName: string) {
+    this.platform.manufacturerName = newName
+    const manufacturerIndex = this.manufacturers.findIndex(m => m.name === newName)
+    if (manufacturerIndex > -1) {
+      this.platform.manufacturerUri = this.manufacturers[manufacturerIndex].uri
+    } else {
+      this.platform.manufacturerUri = ''
+    }
+  }
+
+  get statusNames () : string[] {
+    return this.states.map(s => s.name)
+  }
+
+  get platformStateName (): string {
+    const statusIndex = this.states.findIndex(s => s.uri === this.platform.statusUri)
+    if (statusIndex > -1) {
+      return this.states[statusIndex].name
+    }
+    return this.platform.statusName
+  }
+
+  set platformStateName (newName: string) {
+    this.platform.statusName = newName
+    const statusIndex = this.states.findIndex(s => s.name === newName)
+    if (statusIndex > -1) {
+      this.platform.statusUri = this.states[statusIndex].uri
+    } else {
+      this.platform.statusUri = ''
+    }
+  }
+
+  get platformTypeNames () : string[] {
+    return this.platformTypes.map(t => t.name)
+  }
+
+  get platformPlatformTypeName () : string {
+    console.log(this.platform.platformTypeUri)
+    console.log(this.platform.platformTypeName)
+    const platformTypeIndex = this.platformTypes.findIndex(t => t.uri === this.platform.platformTypeUri)
+    if (platformTypeIndex > -1) {
+      return this.platformTypes[platformTypeIndex].name
+    }
+    return this.platform.platformTypeName
+  }
+
+  set platformPlatformTypeName (newName: string) {
+    this.platform.platformTypeName = newName
+    const platformTypeIndex = this.platformTypes.findIndex(t => t.name === newName)
+    if (platformTypeIndex > -1) {
+      this.platform.platformTypeUri = this.platformTypes[platformTypeIndex].uri
+    } else {
+      this.platform.platformTypeUri = ''
+    }
   }
 }
 
