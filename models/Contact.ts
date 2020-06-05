@@ -1,17 +1,17 @@
 export interface IContact {
   id: number | null
   email: string
-  firstName: string
-  lastName: string
-  profileLink: string
+  givenName: string
+  familyName: string
+  website: string
 }
 
 export default class Contact implements IContact {
   private _id: number | null = null
   private _email: string = ''
-  private _firstName: string = ''
-  private _lastName: string = ''
-  private _profileLink: string = ''
+  private _givenName: string = ''
+  private _familyName: string = ''
+  private _website: string = ''
 
   get id (): number | null {
     return this._id
@@ -29,33 +29,33 @@ export default class Contact implements IContact {
     this._email = newEmail
   }
 
-  get firstName (): string {
-    return this._firstName
+  get givenName (): string {
+    return this._givenName
   }
 
-  set firstName (newFirstName: string) {
-    this._firstName = newFirstName
+  set givenName (newGivenName: string) {
+    this._givenName = newGivenName
   }
 
-  get lastName (): string {
-    return this._lastName
+  get familyName (): string {
+    return this._familyName
   }
 
-  set lastName (newLastName: string) {
-    this._lastName = newLastName
+  set familyName (newFamilyName: string) {
+    this._familyName = newFamilyName
   }
 
-  get profileLink (): string {
-    return this._profileLink
+  get website (): string {
+    return this._website
   }
 
-  set profileLink (newProfileLink: string) {
-    this._profileLink = newProfileLink
+  set website (newWebsite: string) {
+    this._website = newWebsite
   }
 
   toString (): string {
-    if (this._firstName && this._lastName) {
-      return this._firstName + ' ' + this._lastName
+    if (this._givenName && this._familyName) {
+      return this._givenName + ' ' + this._familyName
     }
     if (this._email) {
       return this._email
@@ -63,13 +63,13 @@ export default class Contact implements IContact {
     return 'Contact ' + this._id
   }
 
-  static createWithIdEMailAndNames (id: number, email: string, firstName: string, lastName: string, profileLink: string): Contact {
+  static createWithIdEMailAndNames (id: number, email: string, givenName: string, familyName: string, website: string): Contact {
     const result = new Contact()
     result.id = id
     result.email = email
-    result.firstName = firstName
-    result.lastName = lastName
-    result.profileLink = profileLink
+    result.givenName = givenName
+    result.familyName = familyName
+    result.website = website
     return result
   }
 
@@ -88,9 +88,9 @@ export default class Contact implements IContact {
     const newObject = new Contact()
     newObject.id = someObject.id
     newObject.email = someObject.email
-    newObject.firstName = someObject.firstName
-    newObject.lastName = someObject.lastName
-    newObject.profileLink = someObject.profileLink
+    newObject.givenName = someObject.givenName
+    newObject.familyName = someObject.familyName
+    newObject.website = someObject.website
     return newObject
   }
 }
