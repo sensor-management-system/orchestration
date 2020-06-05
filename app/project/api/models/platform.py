@@ -1,14 +1,16 @@
-from sqlalchemy.sql import func
-from sqlalchemy.orm import relationship
-from sqlalchemy.ext.declarative import declared_attr
-from project.api.token_checker import get_current_user
 from project.api.models.base_model import db
+from project.api.token_checker import get_current_user
+from sqlalchemy.ext.declarative import declared_attr
+from sqlalchemy.orm import relationship
+from sqlalchemy.sql import func
+
 
 def _current_user_id_or_none():
     try:
         return get_current_user().id
-    except:
+    except Exception:
         return None
+
 
 class Platform(db.Model):
     """
@@ -37,10 +39,13 @@ class Platform(db.Model):
     @declared_attr
     def created_by_id(cls):
         return db.Column(db.Integer,
-                      db.ForeignKey('user.id', name='fk_%s_created_by_id' % cls.__name__, use_alter=True),
-                      # nullable=False,
-                      default=_current_user_id_or_none
-                      )
+                         db.ForeignKey('user.id',
+                                       name='fk_%s_created_by_id'
+                                            % cls.__name__,
+                                       use_alter=True),
+                         # nullable=False,
+                         default=_current_user_id_or_none
+                         )
 
     @declared_attr
     def created_by(cls):
@@ -57,4 +62,3 @@ class Platform(db.Model):
     # modified_by_id = db.Column(id.Integer, db.ForeignKey('user.id'))
     # modified_by = db.relationship('User', backref=db.backref('platforms',
     #                                                         lazy=True))
-

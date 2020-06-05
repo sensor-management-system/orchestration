@@ -1,7 +1,8 @@
+from flask_rest_jsonapi import ResourceDetail
 from project.api.models.attachment import Attachment
 from project.api.models.base_model import db
-from flask_rest_jsonapi import ResourceDetail
 from project.api.schemas.attachment_schema import AttachmentSchema
+from project.api.token_checker import token_required
 
 
 class AttachmentDetail(ResourceDetail):
@@ -10,14 +11,7 @@ class AttachmentDetail(ResourceDetail):
      of an object, update an object and delete an Attachment
     """
 
-    def before_get_object(self, view_kwargs):
-        """
-
-        :param view_kwargs:
-        :return:
-        """
-
     schema = AttachmentSchema
+    decorators = (token_required,)
     data_layer = {'session': db.session,
-                  'model': Attachment,
-                  'methods': {'before_create_object': before_get_object}}
+                  'model': Attachment}

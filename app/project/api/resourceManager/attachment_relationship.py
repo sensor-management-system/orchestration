@@ -1,8 +1,8 @@
 from flask_rest_jsonapi import ResourceRelationship
-
+from project.api.models.attachment import Attachment
 from project.api.models.base_model import db
 from project.api.schemas.attachment_schema import AttachmentSchema
-from project.api.models.attachment import Attachment
+from project.api.token_checker import token_required
 
 
 class AttachmentRelationship(ResourceRelationship):
@@ -12,5 +12,6 @@ class AttachmentRelationship(ResourceRelationship):
     relationships between Attachment and other objects.
     """
     schema = AttachmentSchema
+    decorators = (token_required,)
     data_layer = {'session': db.session,
                   'model': Attachment}
