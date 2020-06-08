@@ -22,17 +22,20 @@ export default class SmsService {
 
     // TODO: use camelCase only!!!
     result.id = Number.parseInt(entry.id)
-    // TODO: Renaming to platform_type_uri after change in backend
-    result.platformTypeUri = attributes.platform_type || ''
-    result.shortName = attributes.short_name || ''
-    result.longName = attributes.long_name || ''
+
     result.description = attributes.description || ''
+    result.inventoryNumber = attributes.inventory_number || ''
+    result.longName = attributes.long_name || ''
     // TODO: Renaming to manufacturerUri after Change in Backend
     result.manufacturerUri = attributes.manufacturer || ''
+    // TODO: Read from the right field
     result.model = attributes.type || ''
-    result.inventoryNumber = attributes.inventory_number || ''
+    // TODO: Renaming to platform_type_uri after change in backend
+    // TODO: Add platformTypeName
+    result.platformTypeUri = attributes.platform_type || ''
+    result.shortName = attributes.short_name || ''
     result.website = attributes.url || ''
-    // TODO: platformstatusUri
+    // TODO: statusUri
     // TODO: serialNumber
 
     // TODO: reading the contacts
@@ -47,24 +50,31 @@ export default class SmsService {
     const attributes = entry.attributes
 
     result.id = entry.id
+
     result.description = attributes.description || ''
+    // TODO: to camelcase
     result.dualUse = attributes.dual_use || false
     result.inventoryNumber = attributes.inventory_number || ''
-    result.label = attributes.label || ''
-    // TODO: Change to uri after change in Backend
-    result.manufacturerUri = attributes.manufacturer || ''
+    result.longName = attributes.long_name || ''
+    result.manufacturerName = attributes.manufacturer || ''
+    // TODO: manufacturerUri
     result.model = attributes.model || ''
+
     result.persistentIdentifier = attributes.persistent_identifier || ''
+    result.shortName = attributes.short_name || ''
     result.serialNumber = attributes.serial_number || ''
-    result.statusName = attributes.status || ''
-    // TODO: What to do with short name?
-    // newEntry.name = attributes.short_name
+    // TODO: StatusName & StatusUri
     result.website = attributes.url || ''
 
-    // TODO
+    // TODO: createdAt, modifiedAt, createdBy, modifiedBy
+
+    // TODO: Insert those as well
     result.contacts = []
     result.properties = []
     result.customFields = []
+
+    // TODO: Attachments
+    // TODO: events
 
     return result
   }
@@ -91,17 +101,18 @@ export default class SmsService {
       type: 'platform',
       attributes: {
         description: platform.description,
-        short_name: platform.shortName,
-        long_name: platform.longName,
-        // TODO: Change after renaming to manufacturerUri in backend
-        manufacturer: platform.manufacturerUri,
-        type: platform.model,
         inventory_number: platform.inventoryNumber,
-        // TODO: Change after renaming to platformTypeUri in backend
+        long_name: platform.longName,
+        // TODO: handle manufacturerName
+        manufacturer: platform.manufacturerUri,
+        // TODO: Handle platformTypeName
         platform_type: platform.platformTypeUri,
-        url: platform.website
-        // TODO: platformstatusUri
         // TODO: serialNumber
+        short_name: platform.shortName,
+        // TODO: statusUri
+        url: platform.website
+        // TODO: handle contacts
+        // TODO: Handle attachments
 
       }
     }
@@ -134,20 +145,18 @@ export default class SmsService {
       type: 'device',
       attributes: {
         description: device.description,
-        // Decide what to do with the short name
-        // short_name: device.shortName,
-        // Same for long name
-        // long_name: device.longName
         dual_use: device.dualUse,
         inventory_number: device.inventoryNumber,
-        label: device.label,
+        long_name: device.longName,
         // TODO: Change to uri after backend change
-        manufacturer: device.manufacturerUri,
+        manufacturer: device.manufacturerName,
+        // TODO: Add manufacturerUri
         model: device.model,
         persistent_identifier: device.persistentIdentifier,
-        url: device.website,
-        status: device.statusName,
-        serial_number: device.serialNumber
+        serial_number: device.serialNumber,
+        short_name: device.shortName,
+        // TODO: Add statusName & statusUri
+        url: device.website
       }
     }
     let url = BASE_URL + '/devices'
@@ -237,7 +246,7 @@ export default class SmsService {
               return platform.shortName.includes(text)
             }
             filterFuncDevice = (device: Device): boolean => {
-              return device.label.includes(text)
+              return device.shortName.includes(text)
             }
           }
 
@@ -267,7 +276,7 @@ export default class SmsService {
 
           for (const device of allDevices) {
             if (filterFuncDevice(device)) {
-              result.push(device.toSearchObject())
+              result.push(device.toSearchObject(statusLookupByUri))
             }
           }
 

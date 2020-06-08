@@ -4,25 +4,38 @@ import Contact from './Contact'
 import { DeviceProperty } from './DeviceProperty'
 import { CustomTextField } from './CustomTextField'
 import { IDeviceOrPlatformSearchObject } from './IDeviceOrPlatformSearchObject'
+import Status from './Status'
 
 export default class Device {
   private _id: number | null = null
   private _persistentIdentifier: string = ''
-  private _label: string = ''
+  private _shortName: string = ''
+  private _longName: string = ''
+
   private _statusUri: string = ''
   private _statusName: string = ''
+
   private _manufacturerUri: string = ''
   private _manufacturerName: string = ''
   private _model: string = ''
+
   private _description: string = ''
   private _website: string = ''
   private _serialNumber: string = ''
   private _inventoryNumber: string = ''
   private _dualUse: boolean = false
 
+  private _createdAt: Date | null = null
+  private _modifiedAt: Date | null = null
+
+  private _createdByUserId: number | null = null
+  private _modifiedByUserId: number | null = null
+
   private _contacts: Contact[] = []
   private _properties: DeviceProperty[] = []
   private _customFields: CustomTextField[] = []
+
+  // TODO: Attachments
 
   get id (): number | null {
     return this._id
@@ -40,12 +53,20 @@ export default class Device {
     this._persistentIdentifier = persistentIdentifier
   }
 
-  get label (): string {
-    return this._label
+  get shortName (): string {
+    return this._shortName
   }
 
-  set label (label: string) {
-    this._label = label
+  set shortName (shortName: string) {
+    this._shortName = shortName
+  }
+
+  get longName (): string {
+    return this._longName
+  }
+
+  set longName (longName: string) {
+    this._longName = longName
   }
 
   get statusUri (): string {
@@ -128,6 +149,38 @@ export default class Device {
     this._dualUse = dualUse
   }
 
+  get createdAt (): Date | null {
+    return this._createdAt
+  }
+
+  set createdAt (newCreatedAt: Date | null) {
+    this._createdAt = newCreatedAt
+  }
+
+  get modifiedAt (): Date | null {
+    return this._modifiedAt
+  }
+
+  set modifiedAt (newModifiedAt: Date | null) {
+    this._modifiedAt = newModifiedAt
+  }
+
+  get createdByUserId (): number | null {
+    return this._createdByUserId
+  }
+
+  set createdByUserId (newCreatedByUserId: number | null) {
+    this._createdByUserId = newCreatedByUserId
+  }
+
+  get modifiedByUserId (): number | null {
+    return this._modifiedByUserId
+  }
+
+  set modifiedByUserId (newModifiedByUserId: number | null) {
+    this._modifiedByUserId = newModifiedByUserId
+  }
+
   get contacts (): Contact[] {
     return this._contacts
   }
@@ -152,25 +205,18 @@ export default class Device {
     this._customFields = customFields
   }
 
-  get urn () {
-    let urn = ''
-    // TODO: how to add the manufacturer if we just want to have the uri in the model?
-    urn += this.manufacturerName || ''
-    urn += this.model ? '_' + this.model : ''
-    urn += this.serialNumber ? '_' + this.serialNumber : ''
-    return urn
-  }
-
-  toSearchObject () : IDeviceOrPlatformSearchObject {
-    return new DeviceSearchObjectWrapper(this)
+  toSearchObject (statusLookupByUri: Map<string, Status>) : IDeviceOrPlatformSearchObject {
+    return new DeviceSearchObjectWrapper(this, statusLookupByUri)
   }
 }
 
 class DeviceSearchObjectWrapper implements IDeviceOrPlatformSearchObject {
   private device: Device
+  private statusLookupByUri: Map<string, Status>
 
-  constructor (device: Device) {
+  constructor (device: Device, statusLookupByUri: Map<string, Status>) {
     this.device = device
+    this.statusLookupByUri = statusLookupByUri
   }
 
   get id () : number | null {
@@ -178,7 +224,7 @@ class DeviceSearchObjectWrapper implements IDeviceOrPlatformSearchObject {
   }
 
   get name () : string {
-    return this.device.label
+    return this.device.shortName
   }
 
   get type () : string {
@@ -195,7 +241,13 @@ class DeviceSearchObjectWrapper implements IDeviceOrPlatformSearchObject {
   }
 
   get status () : string {
-    // TODO
-    return this.device.statusName
+    if (this.statusLookupByUri.has(this.device.statusUri)) {
+      const status: Status = this.statusLookupByUri.get(this.device.statusUri) as Status
+      return status.name
+    }
+    if (this.device.statusName) {
+      return this.device.statusName
+    }
+    return 'Unknow status'
   }
 }

@@ -34,16 +34,24 @@
                 <v-row>
                   <v-col cols="12" md="6">
                     <v-text-field
-                      v-model="device.label"
-                      label="label"
+                      v-model="device.shortName"
+                      label="short name"
+                      :readonly="readonly"
+                      :disabled="readonly"
+                    />
+                  </v-col>
+                  <v-col cols="12" md="6">
+                    <v-text-field
+                      v-model="device.longName"
+                      label="long name"
                       :readonly="readonly"
                       :disabled="readonly"
                     />
                   </v-col>
                   <v-col cols="12" md="3">
                     <v-select
-                      v-model="device.statusName"
-                      :items="states"
+                      v-model="deviceStatusName"
+                      :items="statusNames"
                       label="status"
                       :readonly="readonly"
                       :disabled="readonly"
@@ -52,10 +60,9 @@
                 </v-row>
                 <v-row>
                   <v-col cols="12" md="3">
-                    <v-select
-                      v-model="device.manufacturerUri"
-                      :items="manufacturers"
-                      :item-value="(x) => x.uri"
+                    <v-combobox
+                      v-model="deviceManufacturerName"
+                      :items="manufacturerNames"
                       label="manufacturer"
                       :readonly="readonly"
                       :disabled="readonly"
@@ -106,7 +113,7 @@
                   <v-col cols="12" md="3">
                     <v-text-field
                       v-model="device.inventoryNumber"
-                      label="Inventar Number"
+                      label="Inventory Number"
                       :readonly="readonly"
                       :disabled="readonly"
                     />
@@ -321,6 +328,7 @@ import CustomFieldCards from '../../../components/CustomFieldCards.vue'
 import VCService from '../../../services/VCService'
 import SmsService from '../../../services/SmsService'
 import Manufacturer from '../../../models/Manufacturer'
+import Status from '../../../models/Status'
 
 @Component({
   components: {
@@ -336,7 +344,7 @@ export default class DeviceIdPage extends Vue {
 
   private device: Device = new Device()
 
-  private states: string[] = []
+  private states: Status[] = []
   private manufacturers: Manufacturer[] = []
 
   private isInEditMode: boolean = false
@@ -344,7 +352,7 @@ export default class DeviceIdPage extends Vue {
   mounted () {
     VCService.findAllStates().then((foundStates) => {
       // TODO: Replace with real Status[] as we want to fill the uri & name
-      this.states = foundStates.map(x => x.name)
+      this.states = foundStates
     })
     VCService.findAllManufacturers().then((foundManufacturers) => {
       this.manufacturers = foundManufacturers
@@ -375,7 +383,32 @@ export default class DeviceIdPage extends Vue {
   }
 
   get deviceURN () {
-    return this.device.urn
+    let partManufacturer = '[manufacturer]'
+    let partModel = '[model]'
+    let partSerialNumber = '[serial_number]'
+
+    if (this.device.manufacturerUri !== '') {
+      const manIndex = this.manufacturers.findIndex(m => m.uri === this.device.manufacturerUri)
+      if (manIndex > -1) {
+        partManufacturer = this.manufacturers[manIndex].name
+      } else if (this.device.manufacturerName !== '') {
+        partManufacturer = this.device.manufacturerName
+      }
+    } else if (this.device.manufacturerName !== '') {
+      partManufacturer = this.device.manufacturerName
+    }
+
+    if (this.device.model !== '') {
+      partModel = this.device.model
+    }
+
+    if (this.device.serialNumber !== '') {
+      partSerialNumber = this.device.serialNumber
+    }
+
+    return [partManufacturer, partModel, partSerialNumber].join('_').replace(
+      ' ', '_'
+    )
   }
 
   previousTab () {
@@ -409,6 +442,50 @@ export default class DeviceIdPage extends Vue {
         text: 'Add Device'
       }
     ]
+  }
+
+  get manufacturerNames (): string[] {
+    return this.manufacturers.map(m => m.name)
+  }
+
+  get deviceManufacturerName (): string {
+    const manufacturerIndex = this.manufacturers.findIndex(m => m.uri === this.device.manufacturerUri)
+    if (manufacturerIndex > -1) {
+      return this.manufacturers[manufacturerIndex].name
+    }
+    return this.device.manufacturerName
+  }
+
+  set deviceManufacturerName (newName: string) {
+    this.device.manufacturerName = newName
+    const manufacturerIndex = this.manufacturers.findIndex(m => m.name === newName)
+    if (manufacturerIndex > -1) {
+      this.device.manufacturerUri = this.manufacturers[manufacturerIndex].uri
+    } else {
+      this.device.manufacturerUri = newName
+    }
+  }
+
+  get statusNames (): string[] {
+    return this.states.map(s => s.name)
+  }
+
+  get deviceStatusName () {
+    const statusIndex = this.states.findIndex(s => s.uri === this.device.statusUri)
+    if (statusIndex > -1) {
+      return this.states[statusIndex].name
+    }
+    return this.device.statusName
+  }
+
+  set deviceStatusName (newName: string) {
+    this.device.statusName = newName
+    const statusIndex = this.states.findIndex(s => s.name === newName)
+    if (statusIndex > -1) {
+      this.device.statusUri = this.states[statusIndex].uri
+    } else {
+      this.device.statusUri = ''
+    }
   }
 
   @Watch('device', { immediate: true, deep: true })

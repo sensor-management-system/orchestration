@@ -67,7 +67,7 @@
                   </v-col>
                   <v-col cols="12" md="3">
                     <v-combobox
-                      v-model="platformStateName"
+                      v-model="platformStatusName"
                       label="status"
                       :items="statusNames"
                       :readonly="readonly"
@@ -366,7 +366,7 @@ export default class PlatformIdPage extends Vue {
     return this.states.map(s => s.name)
   }
 
-  get platformStateName (): string {
+  get platformStatusName (): string {
     const statusIndex = this.states.findIndex(s => s.uri === this.platform.statusUri)
     if (statusIndex > -1) {
       return this.states[statusIndex].name
@@ -374,7 +374,7 @@ export default class PlatformIdPage extends Vue {
     return this.platform.statusName
   }
 
-  set platformStateName (newName: string) {
+  set platformStatusName (newName: string) {
     this.platform.statusName = newName
     const statusIndex = this.states.findIndex(s => s.name === newName)
     if (statusIndex > -1) {
