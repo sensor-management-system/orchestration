@@ -9,8 +9,8 @@ export default class Device {
   private _id: number | null = null
   private _persistentIdentifier: string = ''
   private _label: string = ''
-  private _status: string = ''
-  private _type: string = ''
+  private _statusUri: string = ''
+  private _statusName: string = ''
   private _manufacturerUri: string = ''
   private _model: string = ''
   private _description: string = ''
@@ -47,20 +47,20 @@ export default class Device {
     this._label = label
   }
 
-  get status (): string {
-    return this._status
+  get statusUri (): string {
+    return this._statusUri
   }
 
-  set status (status: string) {
-    this._status = status
+  set statusUri (statusUri: string) {
+    this._statusUri = statusUri
   }
 
-  get type (): string {
-    return this._type
+  get statusName (): string {
+    return this._statusName
   }
 
-  set type (type: string) {
-    this._type = type
+  set statusName (statusName: string) {
+    this._statusName = statusName
   }
 
   get manufacturerUri (): string {
@@ -148,7 +148,6 @@ export default class Device {
     // TODO: how to add the manufacturer if we just want to have the uri in the model?
     urn += this.manufacturerUri || ''
     urn += this.model ? '_' + this.model : ''
-    urn += this.type ? '_' + this.type : ''
     urn += this.serialNumber ? '_' + this.serialNumber : ''
     return urn
   }
@@ -174,7 +173,7 @@ class DeviceSearchObjectWrapper implements IDeviceOrPlatformSearchObject {
   }
 
   get type () : string {
-    return this.device.type
+    return 'Device'
   }
 
   get searchType () : PlatformOrDeviceType {
@@ -187,6 +186,7 @@ class DeviceSearchObjectWrapper implements IDeviceOrPlatformSearchObject {
   }
 
   get status () : string {
-    return this.device.status
+    // TODO
+    return this.device.statusName
   }
 }

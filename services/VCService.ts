@@ -35,13 +35,4 @@ export default class VCService {
       ])
     })
   }
-
-  static findAllDeviceTypes (): Promise<string[]> {
-    return new Promise<string[]>((resolve) => {
-      resolve([
-        'Einzelsensor',
-        'Multiparameter Sonde'
-      ])
-    })
-  }
 }

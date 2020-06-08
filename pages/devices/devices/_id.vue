@@ -42,7 +42,7 @@
                   </v-col>
                   <v-col cols="12" md="3">
                     <v-select
-                      v-model="device.status"
+                      v-model="device.statusName"
                       :items="states"
                       label="status"
                       :readonly="readonly"
@@ -51,15 +51,6 @@
                   </v-col>
                 </v-row>
                 <v-row>
-                  <v-col cols="12" md="3">
-                    <v-select
-                      v-model="device.type"
-                      :items="deviceTypes"
-                      label="type"
-                      :readonly="readonly"
-                      :disabled="readonly"
-                    />
-                  </v-col>
                   <v-col cols="12" md="3">
                     <v-select
                       v-model="device.manufacturerUri"
@@ -346,7 +337,6 @@ export default class DeviceIdPage extends Vue {
   private device: Device = new Device()
 
   private states: string[] = []
-  private deviceTypes: string[] = []
   private manufacturers: Manufacturer[] = []
 
   private isInEditMode: boolean = false
@@ -355,9 +345,6 @@ export default class DeviceIdPage extends Vue {
     VCService.findAllStates().then((foundStates) => {
       // TODO: Replace with real Status[] as we want to fill the uri & name
       this.states = foundStates.map(x => x.name)
-    })
-    VCService.findAllDeviceTypes().then((foundDeviceTypes) => {
-      this.deviceTypes = foundDeviceTypes
     })
     VCService.findAllManufacturers().then((foundManufacturers) => {
       this.manufacturers = foundManufacturers

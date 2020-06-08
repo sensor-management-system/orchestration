@@ -54,11 +54,11 @@ export default class SmsService {
     // TODO: Change to uri after change in Backend
     result.manufacturerUri = attributes.manufacturer || ''
     result.model = attributes.model || ''
-    result.persistentId = attributes.persistent_identifier || ''
+    result.persistentIdentifier = attributes.persistent_identifier || ''
     result.serialNumber = attributes.serial_number || ''
+    result.statusName = attributes.status || ''
     // TODO: What to do with short name?
     // newEntry.name = attributes.short_name
-    result.type = attributes.type || ''
     result.urlWebsite = attributes.url || ''
 
     // TODO
@@ -144,10 +144,9 @@ export default class SmsService {
         // TODO: Change to uri after backend change
         manufacturer: device.manufacturerUri,
         model: device.model,
-        persistent_identifier: device.persistentId,
+        persistent_identifier: device.persistentIdentifier,
         url: device.urlWebsite,
-        type: device.type,
-        status: device.status,
+        status: device.statusName,
         serial_number: device.serialNumber
       }
     }
