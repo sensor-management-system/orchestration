@@ -15,7 +15,7 @@ export default class Device {
   private _manufacturerName: string = ''
   private _model: string = ''
   private _description: string = ''
-  private _urlWebsite: string = ''
+  private _website: string = ''
   private _serialNumber: string = ''
   private _inventoryNumber: string = ''
   private _dualUse: boolean = false
@@ -96,12 +96,12 @@ export default class Device {
     this._description = description
   }
 
-  get urlWebsite (): string {
-    return this._urlWebsite
+  get website (): string {
+    return this._website
   }
 
-  set urlWebsite (urlWebsite: string) {
-    this._urlWebsite = urlWebsite
+  set website (website: string) {
+    this._website = website
   }
 
   get serialNumber (): string {

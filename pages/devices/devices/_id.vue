@@ -85,7 +85,7 @@
                 <v-row>
                   <v-col cols="12" md="3">
                     <v-text-field
-                      v-model="device.urlWebsite"
+                      v-model="device.website"
                       label="Website"
                       placeholder="https://"
                       :readonly="readonly"

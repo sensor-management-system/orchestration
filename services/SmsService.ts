@@ -59,7 +59,7 @@ export default class SmsService {
     result.statusName = attributes.status || ''
     // TODO: What to do with short name?
     // newEntry.name = attributes.short_name
-    result.urlWebsite = attributes.url || ''
+    result.website = attributes.url || ''
 
     // TODO
     result.contacts = []
@@ -145,7 +145,7 @@ export default class SmsService {
         manufacturer: device.manufacturerUri,
         model: device.model,
         persistent_identifier: device.persistentIdentifier,
-        url: device.urlWebsite,
+        url: device.website,
         status: device.statusName,
         serial_number: device.serialNumber
       }
