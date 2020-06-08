@@ -12,6 +12,7 @@ export default class Device {
   private _statusUri: string = ''
   private _statusName: string = ''
   private _manufacturerUri: string = ''
+  private _manufacturerName: string = ''
   private _model: string = ''
   private _description: string = ''
   private _urlWebsite: string = ''
@@ -69,6 +70,14 @@ export default class Device {
 
   set manufacturerUri (manufacturerUri: string) {
     this._manufacturerUri = manufacturerUri
+  }
+
+  get manufacturerName (): string {
+    return this._manufacturerName
+  }
+
+  set manufacturerName (manufacturerName: string) {
+    this._manufacturerName = manufacturerName
   }
 
   get model (): string {
@@ -146,7 +155,7 @@ export default class Device {
   get urn () {
     let urn = ''
     // TODO: how to add the manufacturer if we just want to have the uri in the model?
-    urn += this.manufacturerUri || ''
+    urn += this.manufacturerName || ''
     urn += this.model ? '_' + this.model : ''
     urn += this.serialNumber ? '_' + this.serialNumber : ''
     return urn
