@@ -7,7 +7,7 @@ import { IDeviceOrPlatformSearchObject } from './IDeviceOrPlatformSearchObject'
 
 export default class Device {
   private _id: number | null = null
-  private _persistentId: string = ''
+  private _persistentIdentifier: string = ''
   private _label: string = ''
   private _status: string = ''
   private _type: string = ''
@@ -31,12 +31,12 @@ export default class Device {
     this._id = id
   }
 
-  get persistentId (): string {
-    return this._persistentId
+  get persistentIdentifier (): string {
+    return this._persistentIdentifier
   }
 
-  set persistentId (persistentId: string) {
-    this._persistentId = persistentId
+  set persistentIdentifier (persistentIdentifier: string) {
+    this._persistentIdentifier = persistentIdentifier
   }
 
   get label (): string {

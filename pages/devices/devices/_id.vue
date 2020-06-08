@@ -24,7 +24,7 @@
                 <v-row>
                   <v-col cols="12" md="3">
                     <v-text-field
-                      v-model="device.persistentId"
+                      v-model="device.persistentIdentifier"
                       label="persistent identifier (PID)"
                       :readonly="readonly"
                       :disabled="readonly"
