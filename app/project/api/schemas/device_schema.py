@@ -1,6 +1,9 @@
 from marshmallow_jsonapi import fields
 from marshmallow_jsonapi.flask import Schema, Relationship
+from project.api.schemas.attachment_schema import DeviceAttachmentSchema
 from project.api.schemas.customfield_schema import CustomFieldSchema
+from project.api.schemas.event_schema import EventSchema
+from project.api.schemas.properties_schema import DevicePropertiesSchema
 
 
 class DeviceSchema(Schema):
@@ -39,19 +42,9 @@ class DeviceSchema(Schema):
     modified_by_id = fields.Date(allow_none=True)
     persistent_identifier = fields.Str(allow_none=True)
     customfields = fields.Nested(CustomFieldSchema, many=True, allow_none=True)
-
-    events = Relationship(attribute='events',
-                          self_view='device_events',
-                          self_view_kwargs={'id': '<id>'},
-                          related_view='events_list',
-                          related_view_kwargs={'device_id': '<id>'},
-                          many=True,
-                          include_resource_linkage=True,
-                          schema='EventSchema',
-                          type_='event',
-                          id_field='id'
-                          )
-
+    events = fields.Nested(EventSchema, many=True, allow_none=True)
+    device_properties = fields.Nested(DevicePropertiesSchema, many=True, allow_none=True)
+    device_attachments = fields.Nested(DeviceAttachmentSchema, many=True, allow_none=True)
     contacts = Relationship(attribute='contacts',
                             self_view='devices_contacts',
                             self_view_kwargs={'id': '<id>'},
@@ -62,27 +55,3 @@ class DeviceSchema(Schema):
                             type_='contact',
                             id_field='id'
                             )
-
-    properties = Relationship(attribute='properties',
-                              self_view='device_properties',
-                              self_view_kwargs={'id': '<id>'},
-                              related_view='contacts_list',
-                              related_view_kwargs={'device_id': '<id>'},
-                              many=True,
-                              include_resource_linkage=True,
-                              schema='PropertiesSchema',
-                              type_='properties',
-                              id_field='id'
-                              )
-
-    attachments = Relationship(attribute='attachments',
-                               self_view='device_attachments',
-                               self_view_kwargs={'id': '<id>'},
-                               related_view='attachments_list',
-                               related_view_kwargs={'device_id': '<id>'},
-                               many=True,
-                               include_resource_linkage=True,
-                               schema='AttachmentSchema',
-                               type_='Attachment',
-                               id_field='id'
-                               )

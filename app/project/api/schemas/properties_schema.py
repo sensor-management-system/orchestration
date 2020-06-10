@@ -1,10 +1,8 @@
+from marshmallow import Schema as MarshmallowSchema
 from marshmallow_jsonapi import fields
-from marshmallow_jsonapi.flask import Schema
-from project.api.schemas.base_schema import \
-    set_device_relationship_schema
 
 
-class PropertiesSchema(Schema):
+class DevicePropertiesSchema(MarshmallowSchema):
     """
     This class create a schema for a properties.
     Every attribute in the schema going to expose through the api.
@@ -15,8 +13,6 @@ class PropertiesSchema(Schema):
 
     class Meta:
         type_ = 'properties'
-        self_view = 'properties_detail'
-        self_view_kwargs = {'id': '<id>'}
 
     id = fields.Integer(as_string=True, dump_only=True)
     accuracy = fields.Str(allow_none=True)
@@ -28,5 +24,3 @@ class PropertiesSchema(Schema):
     failure_value = fields.Float(as_string=True, allow_none=True)
     Variable = fields.Str(allow_none=True)
     sampling_media = fields.Str(allow_none=True)
-
-    device = set_device_relationship_schema('properties')
