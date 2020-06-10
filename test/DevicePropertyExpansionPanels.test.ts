@@ -43,11 +43,15 @@ describe('DevicePropertyExpansionPanels', () => {
       propsData: {
         value: [
           DeviceProperty.createFromObject({
-            compartment: 'test',
             label: 'test',
-            samplingMedia: 'water',
-            unit: 'mm',
-            variable: 'foo.bar',
+            compartmentUri: 'http://foo/compartment/1',
+            compartmentName: 'bar',
+            unitUri: 'http://foo/unit/1',
+            unitName: 'mm',
+            samplingMediaUri: 'http://foo/samplingMedia/1',
+            samplingMediaName: 'water',
+            propertyUri: 'http://foo/property/1',
+            propertyName: 'foo.bar',
             measuringRange: {
               min: 10,
               max: 1000
