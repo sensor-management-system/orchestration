@@ -23,3 +23,13 @@ class Device(db.Model):
     customfields = db.relationship("CustomField",
                                    cascade="save-update, merge, "
                                            "delete, delete-orphan")
+    device_properties = db.relationship("DeviceProperties",
+                                        cascade="save-update, merge, "
+                                                "delete, delete-orphan")
+    events = db.relationship("Event",
+                             cascade="save-update, merge, "
+                                     "delete, delete-orphan")
+
+    device_attachments = db.relationship("DeviceAttachment",
+                                        cascade="save-update, merge, "
+                                                "delete, delete-orphan")

@@ -1,7 +1,7 @@
 from project.api.models.base_model import db
 
 
-class Properties(db.Model):
+class DeviceProperties(db.Model):
     """
     Properties class
     """
@@ -21,4 +21,3 @@ class Properties(db.Model):
     sampling_media_uri = db.Column(db.String(256))
     sampling_media_name = db.Column(db.String(256))
     device_id = db.Column(db.Integer, db.ForeignKey('device.id'))
-    device = db.relationship('Device', backref=db.backref('properties'))

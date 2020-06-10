@@ -28,7 +28,7 @@ class Contact(db.Model):
     family_name = db.Column(db.String(256))
     website = db.Column(db.String(1024))
     email = db.Column(db.String(256), nullable=False)
-    device_id = db.Column(db.Integer, db.ForeignKey('device.id'))
-    devices = db.relationship('Device', backref=db.backref('contacts'))
-    platform_id = db.Column(db.Integer, db.ForeignKey('platform.id'))
-    platforms = db.relationship('Platform', backref=db.backref('contacts'))
+    devices = db.relationship('Device', secondary=device_contacts, lazy='subquery',
+                              backref=db.backref('contacts', lazy=True))
+    platforms = db.relationship('Platform', secondary=platform_contacts, lazy='subquery',
+                                backref=db.backref('contacts', lazy=True))

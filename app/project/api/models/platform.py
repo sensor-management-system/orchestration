@@ -1,15 +1,13 @@
 from project.api.models.base_model import db
-from project.api.token_checker import get_current_user
+from project.api.token_checker import token_required
 from sqlalchemy.ext.declarative import declared_attr
-from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
 
-def _current_user_id_or_none():
-    try:
-        return get_current_user().id
-    except Exception:
-        return None
+@token_required
+def _current_user_id_or_none(current_user):
+    user_name = current_user['sub'].split('@')[0]
+    return user_name
 
 
 class Platform(db.Model):
@@ -35,28 +33,24 @@ class Platform(db.Model):
     inventory_number = db.Column(db.String(256))
     serial_number = db.Column(db.String(256))
     persistent_identifier = db.Column(db.String(256))
+    platform_attachment = db.relationship("PlatformAttachment",
+                                          cascade="save-update, merge, "
+                                                  "delete, delete-orphan")
 
     @declared_attr
-    def created_by_id(cls):
+    def created_by(cls):
         return db.Column(db.Integer,
                          db.ForeignKey('user.id',
-                                       name='fk_%s_created_by_id'
+                                       name='fk_%s_created_by'
                                             % cls.__name__,
                                        use_alter=True),
                          # nullable=False,
                          default=_current_user_id_or_none
                          )
 
-    @declared_attr
-    def created_by(cls):
-        return relationship(
-            'User',
-            primaryjoin='User.id == %s.created_by_id' % cls.__name__,
-            remote_side='User.id'
-        )
-
     # created_by_id = db.Column(db.Integer(),
-    #                          db.ForeignKey('users.id'))
+    #                          db.ForeignKey('user.id'),
+    #                          default=_current_user_id_or_none)
     # created_by = db.relationship('User', backref=db.backref('platforms',
     #                                                        lazy=True))
     # modified_by_id = db.Column(id.Integer, db.ForeignKey('user.id'))

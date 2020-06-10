@@ -1,7 +1,7 @@
 from project.api.models.base_model import db
 
 
-class Attachment(db.Model):
+class DeviceAttachment(db.Model):
     """
     Attachment class
     """
@@ -9,4 +9,3 @@ class Attachment(db.Model):
     label = db.Column(db.String(256))
     url = db.Column(db.String(1024), nullable=False)
     device_id = db.Column(db.Integer, db.ForeignKey('device.id'))
-    device = db.relationship('Device', backref=db.backref('attachment'))
