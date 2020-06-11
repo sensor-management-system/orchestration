@@ -24,10 +24,10 @@ class Contact(db.Model):
     Contact class
     """
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    given_name = db.Column(db.String(256))
-    family_name = db.Column(db.String(256))
-    website = db.Column(db.String(1024))
-    email = db.Column(db.String(256), nullable=False)
+    given_name = db.Column(db.String(256), nullable=False)
+    family_name = db.Column(db.String(256), nullable=False)
+    website = db.Column(db.String(1024), nullable=True)
+    email = db.Column(db.String(256), nullable=False, unique=True)
     devices = db.relationship('Device', secondary=device_contacts, lazy='subquery',
                               backref=db.backref('contacts', lazy=True))
     platforms = db.relationship('Platform', secondary=platform_contacts, lazy='subquery',
