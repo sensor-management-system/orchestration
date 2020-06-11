@@ -1,26 +1,30 @@
 import datetime
+import os
 from calendar import timegm
 from functools import wraps
 from typing import Dict
 
 import requests
 from flask import Blueprint, jsonify, request
+from flask_rest_jsonapi.exceptions import AccessDenied
 from jwkest import JWKESTException
 from jwkest.jwk import KEYS
 from jwkest.jws import JWS
 from project.api.models.base_model import db
+from project.api.models.contact import Contact
 from project.api.models.user import User
 
 auth_blueprint = Blueprint('auth', __name__)
 
+current_user_id = None
+
 
 class TokenChecker():
     def __init__(self):
-        self.config_url: str = \
-            'https://webapp-stage.intranet.ufz.de/idp/oidc/v1/' \
-            '.well-known/openid-configuration'
+        self.config_url: str = os.environ.get('WELL_KNOW_URL')
         self._load_config()
         self._load_jwks_data()
+        self.id_token = None
 
     def __str__(self):
         return ": email %s" % (self.id_token['sub'])
@@ -42,49 +46,26 @@ class TokenChecker():
         except JWKESTException:
             msg = 'Invalid Authorization header. ' \
                   'JWT Signature verification failed'
-            raise handle_failed_authentication(msg)
+            raise AccessDenied(msg)
 
     def _validate_claims(self):
         if self.id_token.get('iss') != self.issuer:
             msg = 'Invalid Authorization header. Invalid JWT issuer.'
-            raise handle_failed_authentication(msg)
+            raise AccessDenied(msg)
 
         # Check if token is expired
         utc_timestamp = timegm(datetime.datetime.utcnow().utctimetuple())
         if utc_timestamp > self.id_token.get('exp', 0):
             msg = 'Invalid Authorization header. JWT has expired.'
-            raise handle_failed_authentication(msg)
+            raise AccessDenied(msg)
         if 'nbf' in self.id_token and utc_timestamp < self.id_token['nbf']:
             msg = 'Invalid Authorization header. JWT not yet valid.'
-            raise handle_failed_authentication(msg)
+            raise AccessDenied(msg)
 
     def check_token(self, token: str):
         self._decode_token(token=token)
         self._validate_claims()
         return self.id_token
-
-
-class AuthenticationFailed(Exception):
-    status_code = 410
-
-    def __init__(self, message, status_code=None, payload=None):
-        Exception.__init__(self)
-        self.message = message
-        if status_code is not None:
-            self.status_code = status_code
-        self.payload = payload
-
-    def to_dict(self):
-        rv = dict(self.payload or ())
-        rv['message'] = self.message
-        return rv
-
-
-@auth_blueprint.errorhandler(AuthenticationFailed)
-def handle_failed_authentication(error):
-    response = jsonify(error)
-    # response.status_code = error.status_code
-    return response
 
 
 def token_required(f):
@@ -101,9 +82,9 @@ def token_required(f):
 
             try:
                 current_user = TokenChecker().check_token(token=token)
-                user = add_user_to_database(current_user)
-                get_current_user(user)
-
+                u = add_user_to_database(current_user)
+                global current_user_id
+                current_user_id = u
             except JWKESTException:
                 return jsonify({'message': 'token is invalid'}), 400
 
@@ -114,26 +95,33 @@ def token_required(f):
     return decorator
 
 
-def get_current_user(current_user):
-    current_user = current_user
-    return current_user
-
-
 def add_user_to_database(current_user):
     exists = db.session.query(User).filter_by(
         subject=current_user['sub']).first()
     if not exists:
-        user = User(subject=current_user['sub'])
+        given_name = current_user['given_name']
+        family_name = current_user['family_name']
+        email = current_user['email']
+        subject = current_user['sub']
+        contact = Contact(given_name=given_name, family_name=family_name,
+                          email=email)
+        db.session.add(contact)
+        db.session.commit()
+        user = User(subject=subject, contact_id=contact.id)
         db.session.add(user)
         db.session.commit()
-        return user
-    else:
-        return exists
+        return user.id
+    return exists.id
 
 
 @auth_blueprint.route('/rdm/svm-api/v1/auth', methods=['GET'])
 @token_required
 def test(current_user):
+    """Just to test the functionality of the JWT encoding.
+
+    :param current_user: JWT
+    :return: dict
+    """
     response = {
         'status': 'success',
         'message': 'Hello {} from Sensor API!'.format(
