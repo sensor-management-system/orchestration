@@ -17,8 +17,7 @@ class UserSchema(Schema):
         self_view_kwargs = {'id': '<id>'}
 
     id = fields.Integer(as_string=True, dump_only=True)
-    user_name = fields.Str(allow_none=True)
-    value = fields.Str(allow_none=True)
+    subject = fields.Str(allow_none=True)
 
     contact = Relationship(attribute='contact',
                            self_view='contact_user',
@@ -30,15 +29,3 @@ class UserSchema(Schema):
                            type_='contact',
                            id_field='id'
                            )
-
-    events = Relationship(attribute='events',
-                          self_view='user_events',
-                          self_view_kwargs={'id': '<id>'},
-                          related_view='events_list',
-                          related_view_kwargs={'user_id': '<id>'},
-                          many=True,
-                          include_resource_linkage=True,
-                          schema='EventSchema',
-                          type_='event',
-                          id_field='id'
-                          )

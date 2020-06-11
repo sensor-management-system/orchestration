@@ -1,5 +1,6 @@
 from marshmallow_jsonapi import fields
 from marshmallow_jsonapi.flask import Schema, Relationship
+from project.api.schemas.attachment_schema import AttachmentSchema
 
 
 class PlatformSchema(Schema):
@@ -15,7 +16,7 @@ class PlatformSchema(Schema):
     long_name = fields.Str(allow_none=True)
     manufacturer_uri = fields.Str(allow_none=True)
     manufacturer_name = fields.Str(allow_none=True)
-    model = fields.Str(required=True)
+    model = fields.Str(allow_none=True)
     platform_type_uri = fields.Str(allow_none=True)
     platform_type_name = fields.Str(allow_none=True)
     status_uri = fields.Str(allow_none=True)
@@ -24,12 +25,13 @@ class PlatformSchema(Schema):
     created_at = fields.Date(allow_none=True)
     modified_at = fields.Date(allow_none=True)
     created_by = fields.Date(allow_none=True)
-    created_by_id = fields.Date(allow_none=True)
+    created_by_id = fields.Date(allow_none=True, dump_only=True)
     modified_by = fields.Date(allow_none=True)
     modified_by_id = fields.Date(allow_none=True)
     inventory_number = fields.Str(allow_none=True)
     serial_number = fields.Str(allow_none=True)
     persistent_identifier = fields.Str(allow_none=True)
+    platform_attachments = fields.Nested(AttachmentSchema, many=True, allow_none=True)
     contacts = Relationship(attribute='contacts',
                             self_view='platforms_contacts',
                             self_view_kwargs={'id': '<id>'},

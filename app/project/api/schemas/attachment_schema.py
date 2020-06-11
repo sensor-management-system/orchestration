@@ -2,7 +2,7 @@ from marshmallow import Schema as MarshmallowSchema
 from marshmallow_jsonapi import fields
 
 
-class DeviceAttachmentSchema(MarshmallowSchema):
+class AttachmentSchema(MarshmallowSchema):
     """
     This class create a schema for a attachment.
     Every attribute in the schema going to expose through the api.

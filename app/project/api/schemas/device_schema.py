@@ -1,9 +1,9 @@
 from marshmallow_jsonapi import fields
 from marshmallow_jsonapi.flask import Schema, Relationship
-from project.api.schemas.attachment_schema import DeviceAttachmentSchema
+from project.api.schemas.attachment_schema import AttachmentSchema
 from project.api.schemas.customfield_schema import CustomFieldSchema
 from project.api.schemas.event_schema import EventSchema
-from project.api.schemas.properties_schema import DevicePropertiesSchema
+from project.api.schemas.device_properties_schema import DevicePropertySchema
 
 
 class DeviceSchema(Schema):
@@ -25,14 +25,15 @@ class DeviceSchema(Schema):
 
     id = fields.Integer(as_string=True, dump_only=True)
     description = fields.Str(allow_none=True)
-    short_name = fields.Str(allow_none=True)
+    short_name = fields.Str(required=True)
     long_name = fields.Str(allow_none=True)
+    serial_number = fields.Str(allow_none=True)
     manufacturer_uri = fields.Str(allow_none=True)
     manufacturer_name = fields.Str(allow_none=True)
-    serial_number = fields.Str(required=True)
-    model = fields.Str(required=True)
-    dual_use = fields.Boolean()
+    model = fields.Str(allow_none=True)
+    dual_use = fields.Boolean(allow_none=True)
     inventory_number = fields.Str(allow_none=True)
+    persistent_identifier = fields.Str(allow_none=True)
     website = fields.Str(allow_none=True)
     created_at = fields.Date(allow_none=True)
     modified_at = fields.Date(allow_none=True)
@@ -40,11 +41,10 @@ class DeviceSchema(Schema):
     created_by_id = fields.Date(allow_none=True)
     modified_by = fields.Date(allow_none=True)
     modified_by_id = fields.Date(allow_none=True)
-    persistent_identifier = fields.Str(allow_none=True)
     customfields = fields.Nested(CustomFieldSchema, many=True, allow_none=True)
     events = fields.Nested(EventSchema, many=True, allow_none=True)
-    device_properties = fields.Nested(DevicePropertiesSchema, many=True, allow_none=True)
-    device_attachments = fields.Nested(DeviceAttachmentSchema, many=True, allow_none=True)
+    device_properties = fields.Nested(DevicePropertySchema, many=True, allow_none=True)
+    device_attachments = fields.Nested(AttachmentSchema, many=True, allow_none=True)
     contacts = Relationship(attribute='contacts',
                             self_view='devices_contacts',
                             self_view_kwargs={'id': '<id>'},

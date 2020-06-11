@@ -17,7 +17,7 @@ class EventSchema(MarshmallowSchema):
 
     id = fields.Integer(as_string=True, dump_only=True)
     description = fields.Str(required=True)
-    date = fields.Date()
+    timestamp = fields.Date(required=True)
     user = Relationship(self_view='events_user',
                         self_view_kwargs={'id': '<id>'},
                         related_view='events_list',

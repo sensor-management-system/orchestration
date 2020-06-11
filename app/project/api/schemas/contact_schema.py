@@ -17,8 +17,8 @@ class ContactSchema(Schema):
         self_view_kwargs = {'id': '<id>'}
 
     id = fields.Integer(as_string=True, dump_only=True)
-    given_name = fields.Str(allow_none=True)
-    family_name = fields.Str(allow_none=True)
+    given_name = fields.Str(required=True)
+    family_name = fields.Str(required=True)
     website = fields.Str(allow_none=True)
     email = fields.Str(required=True)
 
