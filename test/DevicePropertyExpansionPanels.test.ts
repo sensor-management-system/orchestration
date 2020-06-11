@@ -2,25 +2,10 @@ import Vue from 'vue'
 import Vuetify from 'vuetify'
 
 import { mount, createLocalVue } from '@vue/test-utils'
-import { WrapperArray } from '@vue/test-utils/types'
 
 // @ts-ignore
 import DevicePropertyExpansionPanels from '@/components/DevicePropertyExpansionPanels.vue'
 import { DeviceProperty } from '@/models/DeviceProperty'
-
-// see https://github.com/vuejs/vue-test-utils/issues/960
-function withWrapperArray (wrapperArray: WrapperArray<Vue>): Record<string, Function> {
-  return {
-    childSelectorHasText: (
-      selector: string,
-      str: string
-    ): WrapperArray<Vue> => wrapperArray
-      .filter(i => i.find(selector).text().match(str)),
-
-    hasText: (str: string): WrapperArray<Vue> => wrapperArray
-      .filter(i => i.text().match(str))
-  }
-}
 
 Vue.use(Vuetify)
 
