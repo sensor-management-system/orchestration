@@ -1,1 +1,0 @@
-WELL_KNOW_URL='https://webapp-stage.intranet.ufz.de/idp/oidc/v1/.well-known/openid-configuration'
