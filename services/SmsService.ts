@@ -80,6 +80,8 @@ export default class SmsService {
   }
 
   static findPlatformById (id: string): Promise<Platform> {
+    // TODO: Think about also including the contacts
+    // with ?include=contacts
     return axios.get(BASE_URL + '/platforms/' + id).then((rawResponse) => {
       const entry = rawResponse.data.data
       return this.serverPlatformResponseToEntity(entry)
@@ -115,6 +117,23 @@ export default class SmsService {
         // TODO: Handle attachments
 
       }
+      /*
+      relationships: {
+        contacts: {
+          data: [
+            {
+              type: 'contact',
+              id: 1,
+            },
+            {
+              type: 'contact',
+              id: 2
+            }
+          ]
+        }
+
+      }
+      */
     }
     let url = BASE_URL + '/platforms'
 
@@ -157,7 +176,37 @@ export default class SmsService {
         short_name: device.shortName,
         // TODO: Add statusName & statusUri
         url: device.website
+        /*
+        customFields: [
+          {
+            key: 'key1',
+            value: 'value1'
+          },
+          {
+            key: 'key2',
+            value: 'value2
+          }
+        ]
+        */
       }
+
+      /*
+      relationships: {
+        contacts: {
+          data: [
+            {
+              type: 'contact',
+              id: 1,
+            },
+            {
+              type: 'contact',
+              id: 2
+            }
+          ]
+        }
+
+      }
+      */
     }
     let url = BASE_URL + '/devices'
 
@@ -182,6 +231,8 @@ export default class SmsService {
   }
 
   static findAllPlatforms (): Promise<Platform[]> {
+    // TODO: Think about also including the contacts
+    // with ?include=contacts
     return axios.get(BASE_URL + '/platforms').then((rawResponse) => {
       const rawData = rawResponse.data
       const result: Platform[] = []
@@ -195,6 +246,8 @@ export default class SmsService {
   }
 
   static findAllDevices (): Promise<Device[]> {
+    // TODO: Think about also including the contacts
+    // with ?include=contacts
     return axios.get(BASE_URL + '/devices').then((rawResonse) => {
       const rawData = rawResonse.data
       const result: Device[] = []
@@ -208,6 +261,8 @@ export default class SmsService {
   }
 
   static findDeviceById (id: string): Promise<Device> {
+    // TODO: Think about also including the contacts
+    // with ?include=contacts
     return axios.get(BASE_URL + '/devices/' + id).then((rawResponse) => {
       const entry = rawResponse.data.data
       return this.serverDeviceResponseToEntity(entry)
