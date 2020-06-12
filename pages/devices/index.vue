@@ -1,16 +1,10 @@
 <template>
   <div>
-    <v-breadcrumbs :items="navigation" />
-    <h1>Devices</h1>
-
     <v-card>
-      <v-tabs
-        v-model="activeSearchTypeTabIdx"
-        background-color="grey lighten-3"
+      <v-tabs-items
+        v-model="activeTab"
       >
-        <v-tab>Basic search</v-tab>
-        <v-tab>Extended search</v-tab>
-        <v-tab-item>
+        <v-tab-item :eager="true">
           <v-card
             flat
           >
@@ -36,7 +30,7 @@
             </v-card-text>
           </v-card>
         </v-tab-item>
-        <v-tab-item>
+        <v-tab-item :eager="true">
           <v-card>
             <v-card-text>
               <v-row>
@@ -175,7 +169,7 @@
             </v-card-actions>
           </v-card>
         </v-tab-item>
-      </v-tabs>
+      </v-tabs-items>
     </v-card>
 
     <h2>Results:</h2>
@@ -221,9 +215,33 @@ import DeviceService from '../../services/DeviceService'
 import Manufacture from '../../models/Manufacture'
 import Institute from '../../models/Institute'
 
+// @ts-ignore
+import AppBarEditModeContent from '@/components/AppBarEditModeContent.vue'
+// @ts-ignore
+import AppBarTabsExtension from '@/components/AppBarTabsExtension.vue'
+
+@Component
+// @ts-ignore
+export class AppBarEditModeContentExtended extends AppBarEditModeContent {
+  get title (): string {
+    return 'Devices'
+  }
+}
+
+@Component
+// @ts-ignore
+export class AppBarTabsExtensionExtended extends AppBarTabsExtension {
+  get tabs (): String[] {
+    return [
+      'Search',
+      'Extended Search'
+    ]
+  }
+}
+
 @Component
 export default class DevicesIndexPage extends Vue {
-  private activeSearchTypeTabIdx: number = 0
+  private activeTab: number = 0
 
   private searchManufactures: Manufacture[] = []
   private selectedSearchManufactures: Manufacture[] = []
@@ -242,6 +260,19 @@ export default class DevicesIndexPage extends Vue {
   private searchTypes: string[] = ['Sensor / Platform', 'Sensor', 'Platform']
 
   private selectedSearchType: string = 'Sensor / Platform';
+
+  created () {
+    this.$nuxt.$emit('app-bar-content', AppBarEditModeContentExtended)
+    this.$nuxt.$emit('app-bar-extension', AppBarTabsExtensionExtended)
+    this.$nuxt.$on('AppBarExtension:change', (tab: number) => {
+      this.activeTab = tab
+    })
+  }
+
+  destroyed () {
+    this.$nuxt.$emit('app-bar-content', null)
+    this.$nuxt.$emit('app-bar-extension', null)
+  }
 
   mounted () {
     MasterDataService.findAllManufactures().then((manufactures) => {
