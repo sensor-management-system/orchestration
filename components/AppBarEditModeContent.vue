@@ -15,12 +15,12 @@
 import { Vue, Component } from 'nuxt-property-decorator'
 
 /**
- * A class component to select persons
+ * A class component to provide a title and two buttons in the App-Bar
  * @extends Vue
  */
 @Component
 // @ts-ignore
-export default class AppBarContent extends Vue {
+export default class AppBarEditModeContent extends Vue {
   get title (): string {
     return ''
   }

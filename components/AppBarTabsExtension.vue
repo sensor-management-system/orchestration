@@ -21,12 +21,12 @@
 import { Vue, Component } from 'nuxt-property-decorator'
 
 /**
- * A class component to select persons
+ * A class component to provide tabs to an app-bar extension
  * @extends Vue
  */
 @Component
 // @ts-ignore
-export default class AppBarExtension extends Vue {
+export default class AppBarTabsExtension extends Vue {
   private activeTab: number = 0
 
   get tabs (): String[] {
