@@ -12,6 +12,6 @@ class ContactList(ResourceList):
      a collection of Contacts or create one.
     """
     schema = ContactSchema
-    decorators = (token_required,)
+    # decorators = (token_required,)
     data_layer = {'session': db.session,
                   'model': Contact}

@@ -12,7 +12,7 @@ class PlatformList(ResourceList):
     """
 
     schema = PlatformSchema
-    decorators = (token_required,)
+    # decorators = (token_required,)
     data_layer = {'session': db.session,
                   'model': Platform
                   }

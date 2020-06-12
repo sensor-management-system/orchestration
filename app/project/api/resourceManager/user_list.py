@@ -12,6 +12,6 @@ class UserList(ResourceList):
     collection of Events or create one.
     """
     schema = UserSchema
-    decorators = (token_required,)
+    # decorators = (token_required,)
     data_layer = {'session': db.session,
                   'model': User}

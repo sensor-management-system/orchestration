@@ -12,6 +12,6 @@ class ContactDetail(ResourceDetail):
     """
 
     schema = ContactSchema
-    decorators = (token_required,)
+    # decorators = (token_required,)
     data_layer = {'session': db.session,
                   'model': Contact}

@@ -11,6 +11,7 @@ class PlatformDetail(ResourceDetail):
     """
 
     schema = PlatformSchema
+    # decorators = (token_required,)
     data_layer = {'session': db.session,
                   'model': Platform
                   }

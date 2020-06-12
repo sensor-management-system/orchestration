@@ -3,7 +3,6 @@ from project.api.models.base_model import db
 from project.api.models.device import Device
 from project.api.resourceManager.base_resource import BaseResourceDetail
 from project.api.schemas.device_schema import DeviceSchema
-from project.api.token_checker import token_required
 
 
 class DeviceDetail(ResourceDetail):
@@ -23,7 +22,7 @@ class DeviceDetail(ResourceDetail):
             BaseResourceDetail.query_an_object(view_kwargs, 'attachments')
 
     schema = DeviceSchema
-    decorators = (token_required,)
+    # decorators = (token_required,)
     data_layer = {'session': db.session,
                   'model': Device,
                   'methods': {'before_get_object': before_get_object}}

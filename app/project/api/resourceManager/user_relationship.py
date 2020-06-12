@@ -13,6 +13,6 @@ class UserRelationship(ResourceRelationship):
     relationships between Event and other objects.
     """
     schema = UserSchema
-    decorators = (token_required,)
+    # decorators = (token_required,)
     data_layer = {'session': db.session,
                   'model': User}
