@@ -1,7 +1,4 @@
 stages:
-  - build
-  - test
-  - release
   - ci-services
   - build-gfz-image
   - deploy-gfz-image
@@ -13,67 +10,6 @@ stages:
 variables:
   CONTAINER_TEST_IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
   CONTAINER_RELEASE_IMAGE: $CI_REGISTRY_IMAGE:latest
-
-build-image:
-  stage: build
-  image:
-    name: gcr.io/kaniko-project/executor:debug
-    entrypoint: [""]
-  script:
-    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
-    - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --destination $CONTAINER_TEST_IMAGE
-  except:
-    variables:
-      - $STAGING_HOST =~ /gfz/
-
-unittest-lint:
-  stage: test
-  image: $CI_REGISTRY_IMAGE
-  before_script:
-    - apk add --no-cache --update python3-dev  gcc build-base curl
-    - pip install --upgrade setuptools
-    - pip install --upgrade flake8
-    - pip install setuptools pylint pylint-exit pylint_flask pylint_flask_sqlalchemy
-  script:
-    - flake8 $CI_PROJECT_DIR/app/project
-    - pylint $CI_PROJECT_DIR/app/project --rcfile=$CI_PROJECT_DIR/app/.pylintrc| tee pylint.txt || pylint-exit $?
-    - score=$(sed -n 's/^Your code has been rated at \([-0-9.]*\)\/.*/\1/p' pylint.txt)
-    - echo "Pylint score was $score"
-    - badge_url=https://img.shields.io/badge/lint%20score-$score/10-blue.svg
-    - >-
-      curl https://git.ufz.de/api/v4/projects/$CI_PROJECT_ID/badges/4
-      -X PUT
-      -H "PRIVATE-TOKEN: $API_TOKEN"
-      -H "Content-Type: application/json"
-      -d '{"image_url": "'"$badge_url"'"}'
-  artifacts:
-    paths:
-        - pylint.txt
-  except:
-    variables:
-      - $STAGING_HOST =~ /gfz/
-
-test-image:
-  stage: test
-  script:
-    - echo "This is just dummy test - waitting for the databse connection."
-  except:
-    variables:
-      - $STAGING_HOST =~ /gfz/
-
-release-image:
-  stage: release
-  image:
-    name: gcr.io/kaniko-project/executor:debug
-    entrypoint: [""]
-  script:
-    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
-    - echo "FROM  ${CONTAINER_TEST_IMAGE}" | /kaniko/executor --context $CI_PROJECT_DIR --dockerfile /dev/stdin --destination ${CONTAINER_RELEASE_IMAGE}
-  only:
-    - master
-  except:
-    variables:
-      - $STAGING_HOST =~ /gfz/
 
 
 .docker_login_gitlab_registry: &docker_login_gitlab_registry
@@ -101,9 +37,6 @@ ci-services:
   tags:
     - docker
     - id2
-  only:
-    variables:
-      - $STAGING_HOST =~ /gfz/
 
 build-gfz-image:
   stage: build-gfz-image
@@ -127,9 +60,6 @@ build-gfz-image:
     - deploy
     - staging
     - id2
-  only:
-    variables:
-      - $STAGING_HOST =~ /gfz/
   when: manual
   allow_failure: true
 
@@ -149,9 +79,6 @@ deploy-gfz-image:
   script:
     - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml pull
     - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml up -d
-  only:
-    variables:
-      - $STAGING_HOST =~ /gfz/
   when: manual
   dependencies:
     - build-gfz-image
@@ -173,9 +100,6 @@ after-deploy-gfz-image-create-dbs:
       - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T db psql -U postgres -c 'CREATE DATABASE db_prod' || echo "prod database already exists"
       - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T db psql -U postgres -c 'CREATE DATABASE db_dev' || echo "dev database already exists"
       - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T db psql -U postgres -c 'CREATE DATABASE db_test;' || echo "test database already exists"
-  only:
-    variables:
-      - $STAGING_HOST =~ /gfz/
   when: manual
   dependencies:
     - deploy-gfz-image
@@ -194,9 +118,6 @@ after-deploy-gfz-image-recreate-tables:
     COMPOSE_PROJECT_NAME: ssmbackend
   script:
       - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T ssmbackend python3 manage.py recreate_db
-  only:
-    variables:
-      - $STAGING_HOST =~ /gfz/
   when: manual
   dependencies:
     - after-deploy-gfz-image-create-dbs
@@ -215,9 +136,6 @@ after-deploy-gfz-image-init-tables:
     COMPOSE_PROJECT_NAME: ssmbackend
   script:
       - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T ssmbackend python3 manage.py db_init
-  only:
-    variables:
-      - $STAGING_HOST =~ /gfz/
   when: manual
   dependencies:
     - after-deploy-gfz-image-create-dbs
@@ -235,9 +153,6 @@ test-availability:
     - id2
   script:
     - curl -f http://$STAGING_HOST:5000/rdm/svm-api/v1/ping
-  only:
-    variables:
-      - $STAGING_HOST =~ /gfz/
   when: manual
   dependencies:
     - after-deploy-gfz-image-init-tables
