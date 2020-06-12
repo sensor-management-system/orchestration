@@ -256,14 +256,14 @@ import SensorPropertyExpansionPanels from '../../../components/SensorPropertyExp
 // @ts-ignore
 import CustomFieldCards from '../../../components/CustomFieldCards.vue'
 // @ts-ignore
-import AppBarContent from '@/components/AppBarContent.vue'
+import AppBarEditModeContent from '@/components/AppBarEditModeContent.vue'
 
 // @ts-ignore
-import AppBarExtension from '@/components/AppBarExtension.vue'
+import AppBarTabsExtension from '@/components/AppBarTabsExtension.vue'
 
 @Component
 // @ts-ignore
-export class AppBarContentExtended extends AppBarContent {
+export class AppBarEditModeContentExtended extends AppBarEditModeContent {
   get title (): string {
     return 'Add Sensor'
   }
@@ -271,7 +271,7 @@ export class AppBarContentExtended extends AppBarContent {
 
 @Component
 // @ts-ignore
-export class AppBarExtensionExtended extends AppBarExtension {
+export class AppBarTabsExtensionExtended extends AppBarTabsExtension {
   get tabs (): String[] {
     return [
       'Basic Data',
@@ -303,7 +303,7 @@ export default class SensorIdPage extends Vue {
   }
 
   created () {
-    this.$nuxt.$emit('app-bar-content', AppBarContentExtended)
+    this.$nuxt.$emit('app-bar-content', AppBarEditModeContentExtended)
     this.$nuxt.$on('AppBarContent:save-button-click', () => {
       this.toggleEditMode()
     })
@@ -311,7 +311,7 @@ export default class SensorIdPage extends Vue {
       this.toggleEditMode()
     })
 
-    this.$nuxt.$emit('app-bar-extension', AppBarExtensionExtended)
+    this.$nuxt.$emit('app-bar-extension', AppBarTabsExtensionExtended)
     this.$nuxt.$on('AppBarExtension:change', (tab: number) => {
       this.activeTab = tab
     })
