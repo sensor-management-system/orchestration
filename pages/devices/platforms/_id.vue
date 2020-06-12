@@ -14,19 +14,12 @@
       </v-btn>
     </v-snackbar>
 
-    <!-- Then the breadcrumps for navigation -->
-    <v-breadcrumbs :items="navigation" />
-    <h1>{{ verb }} Platform</h1>
-
     <v-form>
       <v-card outlined>
-        <v-tabs
-          v-model="activeTabIdx"
-          background-color="grey lighten-3"
+        <v-tabs-items
+          v-model="activeTab"
         >
-          <v-tab>Basic data</v-tab>
-          <v-tab>Persons</v-tab>
-          <v-tab-item>
+          <v-tab-item :eager="true">
             <!-- Basic data tab -->
             <v-card
               flat
@@ -80,18 +73,10 @@
                   </v-col>
                 </v-row>
               </v-card-text>
-              <v-card-actions>
-                <v-btn
-                  text
-                  @click="nextTab"
-                >
-                  next ❯
-                </v-btn>
-              </v-card-actions>
             </v-card>
           </v-tab-item>
           <!-- responsible persons tab -->
-          <v-tab-item>
+          <v-tab-item :eager="true">
             <v-card
               flat
             >
@@ -105,46 +90,22 @@
                   </v-col>
                 </v-row>
               </v-card-text>
-              <v-card-actions>
-                <v-btn
-                  text
-                  @click="previousTab"
-                >
-                  ❮ previous
-                </v-btn>
-              </v-card-actions>
             </v-card>
           </v-tab-item>
-        </v-tabs>
-        <!-- Buttons for all tabs -->
-        <div v-if="!isInEditMode">
-          <v-btn
-            fab
-            fixed
-            bottom
-            right
-            color="secondary"
-            @click="switchIntoEditMode"
-          >
-            <v-icon>
-              mdi-pencil
-            </v-icon>
-          </v-btn>
-        </div>
-        <div v-if="isInEditMode">
-          <v-btn
-            fab
-            fixed
-            bottom
-            right
-            color="primary"
-            @click="save"
-          >
-            <v-icon>
-              mdi-content-save
-            </v-icon>
-          </v-btn>
-        </div>
+        </v-tabs-items>
+        <v-btn
+          v-if="!isInEditMode"
+          fab
+          fixed
+          bottom
+          right
+          color="secondary"
+          @click="toggleEditMode"
+        >
+          <v-icon>
+            mdi-pencil
+          </v-icon>
+        </v-btn>
       </v-card>
     </v-form>
   </div>
@@ -162,6 +123,29 @@ import Platform from '../../../models/Platform'
 
 // @ts-ignore
 import PersonSelect from '../../../components/PersonSelect.vue'
+// @ts-ignore
+import AppBarEditModeContent from '@/components/AppBarEditModeContent.vue'
+// @ts-ignore
+import AppBarTabsExtension from '@/components/AppBarTabsExtension.vue'
+
+@Component
+// @ts-ignore
+export class AppBarEditModeContentExtended extends AppBarEditModeContent {
+  get title (): string {
+    return 'Add Platform'
+  }
+}
+
+@Component
+// @ts-ignore
+export class AppBarTabsExtensionExtended extends AppBarTabsExtension {
+  get tabs (): String[] {
+    return [
+      'Basic Data',
+      'Persons',
+    ]
+  }
+}
 
 @Component({
   components: { PersonSelect }
@@ -178,10 +162,10 @@ export default class PlatformIdPage extends Vue {
   private platform: Platform = Platform.createEmpty()
 
   // and some general data for the page
-  private activeTabIdx: number = 0
+  private activeTab: number = 0
   private showSaveSuccess: boolean = false
   private showLoadingError: boolean = false
-  private isInEditMode: boolean = false
+  private editMode: boolean = false
 
   mounted () {
     this.showLoadingError = false
@@ -192,6 +176,26 @@ export default class PlatformIdPage extends Vue {
       this.platformTypes = foundPlatformTypes
     })
     this.loadPlatform()
+  }
+
+  created () {
+    this.$nuxt.$emit('app-bar-content', AppBarEditModeContentExtended)
+    this.$nuxt.$on('AppBarContent:save-button-click', () => {
+      this.save()
+    })
+    this.$nuxt.$on('AppBarContent:cancel-button-click', () => {
+      this.toggleEditMode()
+    })
+
+    this.$nuxt.$emit('app-bar-extension', AppBarTabsExtensionExtended)
+    this.$nuxt.$on('AppBarExtension:change', (tab: number) => {
+      this.activeTab = tab
+    })
+  }
+
+  destroyed () {
+    this.$nuxt.$emit('app-bar-content', null)
+    this.$nuxt.$emit('app-bar-extension', null)
   }
 
   loadPlatform () {
@@ -209,25 +213,28 @@ export default class PlatformIdPage extends Vue {
     }
   }
 
+  toggleEditMode () {
+    this.isInEditMode = !this.isInEditMode
+  }
+
+  get isInEditMode (): boolean {
+    return this.editMode
+  }
+
+  set isInEditMode (editMode: boolean) {
+    this.editMode = editMode
+    this.$nuxt.$emit('AppBarContent:save-button-hidden', !editMode)
+    this.$nuxt.$emit('AppBarContent:cancel-button-hidden', !editMode)
+  }
+
   // methods
   save () {
     this.showSaveSuccess = false
     DeviceService.savePlatform(this.platform).then(() => {
       this.showSaveSuccess = true
       // this.$router.push('/devices')
+      this.toggleEditMode()
     })
-  }
-
-  switchIntoEditMode () {
-    this.isInEditMode = true
-  }
-
-  previousTab () {
-    this.activeTabIdx -= 1
-  }
-
-  nextTab () {
-    this.activeTabIdx += 1
   }
 
   get platformURN () {
