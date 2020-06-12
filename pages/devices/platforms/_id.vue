@@ -47,7 +47,15 @@
                 </v-row>
                 <v-row>
                   <v-col cols="12" md="6">
-                    <v-text-field v-model="platform.shortName" label="short name" :readonly="readonly" :disabled="readonly" />
+                    <v-text-field 
+                      v-model="platform.shortName"
+                      label="Short name"
+                      required
+                      class="required"
+                      :rules="[rules.required]"
+                      :readonly="readonly"
+                      :disabled="readonly" 
+                    />
                   </v-col>
                   <v-col cols="12" md="6">
                     <v-text-field v-model="platform.longName" label="Long name" :readonly="readonly" :disabled="readonly" />
@@ -193,6 +201,10 @@
   </div>
 </template>
 
+<style lang="scss">
+@import "~/assets/styles/_forms.scss";
+</style>
+
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 
@@ -226,6 +238,10 @@ export default class PlatformIdPage extends Vue {
   private showSaveSuccess: boolean = false
   private showLoadingError: boolean = false
   private isInEditMode: boolean = false
+
+  private rules: Object = {
+    required: (v: string) => !!v || 'Required'
+  }
 
   mounted () {
     this.showLoadingError = false

@@ -35,7 +35,10 @@
                   <v-col cols="12" md="6">
                     <v-text-field
                       v-model="device.shortName"
-                      label="short name"
+                      label="Short name"
+                      required
+                      class="required"
+                      :rules="[rules.required]"
                       :readonly="readonly"
                       :disabled="readonly"
                     />
@@ -314,6 +317,10 @@
   </div>
 </template>
 
+<style lang="scss">
+@import "~/assets/styles/_forms.scss";
+</style>
+
 <script lang="ts">
 import { Vue, Component, Watch } from 'nuxt-property-decorator'
 import Device from '../../../models/Device'
@@ -348,6 +355,10 @@ export default class DeviceIdPage extends Vue {
   private manufacturers: Manufacturer[] = []
 
   private isInEditMode: boolean = false
+
+  private rules: Object = {
+    required: (v: string) => !!v || 'Required'
+  }
 
   mounted () {
     VCService.findAllStates().then((foundStates) => {
