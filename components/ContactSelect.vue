@@ -5,7 +5,7 @@
       :items="allContactsExceptSelected"
       :item-text="(x) => x"
       :item-value="(x) => x.id"
-      label="add a contact"
+      label="Add a contact"
       @change="addContact"
     />
     <v-chip

@@ -39,7 +39,7 @@
                   <v-col cols="12" md="3">
                     <v-text-field
                       v-model="platform.persistentIdentifier"
-                      label="persistent identifier (PID)"
+                      label="Persistent identifier (PID)"
                       :readonly="readonly"
                       :disabled="readonly"
                     />
@@ -50,7 +50,7 @@
                     <v-text-field v-model="platform.shortName" label="short name" :readonly="readonly" :disabled="readonly" />
                   </v-col>
                   <v-col cols="12" md="6">
-                    <v-text-field v-model="platform.longName" label="long name" :readonly="readonly" :disabled="readonly" />
+                    <v-text-field v-model="platform.longName" label="Long name" :readonly="readonly" :disabled="readonly" />
                   </v-col>
                 </v-row>
                 <v-row>
@@ -59,7 +59,7 @@
                     -->
                     <v-combobox
                       v-model="platformPlatformTypeName"
-                      label="platform type"
+                      label="Platform type"
                       :items="platformTypeNames"
                       :readonly="readonly"
                       :disabled="readonly"
@@ -68,7 +68,7 @@
                   <v-col cols="12" md="3">
                     <v-combobox
                       v-model="platformStatusName"
-                      label="status"
+                      label="Status"
                       :items="statusNames"
                       :readonly="readonly"
                       :disabled="readonly"
@@ -77,7 +77,7 @@
                   <v-col cols="12" md="3">
                     <v-combobox
                       v-model="platformManufacturerName"
-                      label="manufacturer"
+                      label="Manufacturer"
                       :items="manufacturerNames"
                       :readonly="readonly"
                       :disabled="readonly"
@@ -86,7 +86,7 @@
                   <v-col cols="12" md="3">
                     <v-text-field
                       v-model="platform.model"
-                      label="model"
+                      label="Model"
                       :readonly="readonly"
                       :disabled="readonly"
                     />
@@ -95,14 +95,14 @@
                 <v-divider />
                 <v-row>
                   <v-col cols="12" md="5">
-                    <v-textarea v-model="platform.description" label="description" rows="3" :readonly="readonly" :disabled="readonly" />
+                    <v-textarea v-model="platform.description" label="Description" rows="3" :readonly="readonly" :disabled="readonly" />
                   </v-col>
                 </v-row>
                 <v-row>
                   <v-col cols="12" md="3">
                     <v-text-field
                       v-model="platform.website"
-                      label="website"
+                      label="Website"
                       placeholder="https://"
                       :readonly="readonly"
                       :disabled="readonly"
@@ -113,13 +113,13 @@
                   <v-col cols="12" md="3">
                     <v-text-field
                       v-model="platform.serialNumber"
-                      label="Serial Number"
+                      label="Serial number"
                       :readonly="readonly"
                       :disabled="readonly"
                     />
                   </v-col>
                   <v-col cols="12" md="3">
-                    <v-text-field v-model="platform.inventoryNumber" label="inventory number" :readonly="readonly" :disabled="readonly" />
+                    <v-text-field v-model="platform.inventoryNumber" label="Inventory number" :readonly="readonly" :disabled="readonly" />
                   </v-col>
                 </v-row>
               </v-card-text>

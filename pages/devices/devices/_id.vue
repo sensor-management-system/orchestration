@@ -25,7 +25,7 @@
                   <v-col cols="12" md="3">
                     <v-text-field
                       v-model="device.persistentIdentifier"
-                      label="persistent identifier (PID)"
+                      label="Persistent identifier (PID)"
                       :readonly="readonly"
                       :disabled="readonly"
                     />
@@ -43,7 +43,7 @@
                   <v-col cols="12" md="6">
                     <v-text-field
                       v-model="device.longName"
-                      label="long name"
+                      label="Long name"
                       :readonly="readonly"
                       :disabled="readonly"
                     />
@@ -52,7 +52,7 @@
                     <v-select
                       v-model="deviceStatusName"
                       :items="statusNames"
-                      label="status"
+                      label="Status"
                       :readonly="readonly"
                       :disabled="readonly"
                     />
@@ -63,7 +63,7 @@
                     <v-combobox
                       v-model="deviceManufacturerName"
                       :items="manufacturerNames"
-                      label="manufacturer"
+                      label="Manufacturer"
                       :readonly="readonly"
                       :disabled="readonly"
                     />
@@ -71,7 +71,7 @@
                   <v-col cols="12" md="3">
                     <v-text-field
                       v-model="device.model"
-                      label="model"
+                      label="Model"
                       :readonly="readonly"
                       :disabled="readonly"
                     />
@@ -105,7 +105,7 @@
                   <v-col cols="12" md="3">
                     <v-text-field
                       v-model="device.serialNumber"
-                      label="Serial Number"
+                      label="Serial number"
                       :readonly="readonly"
                       :disabled="readonly"
                     />
@@ -113,7 +113,7 @@
                   <v-col cols="12" md="3">
                     <v-text-field
                       v-model="device.inventoryNumber"
-                      label="Inventory Number"
+                      label="Inventory number"
                       :readonly="readonly"
                       :disabled="readonly"
                     />
@@ -123,7 +123,7 @@
                   <v-col cols="12" md="3">
                     <v-checkbox
                       v-model="device.dualUse"
-                      label="Dual Use"
+                      label="Dual use"
                       hint="can be used for military aims"
                       :persistent-hint="true"
                       color="red darken-3"

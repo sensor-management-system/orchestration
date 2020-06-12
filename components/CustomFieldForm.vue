@@ -2,16 +2,17 @@
   <v-row>
     <v-col cols="12" md="3">
       <v-text-field
-        label="key"
+        label="Key"
         :value="value.key"
         :readonly="readonly"
         :disabled="readonly"
+        required
         @input="update('key', $event)"
       />
     </v-col>
     <v-col cols="12" md="3">
       <v-text-field
-        label="value"
+        label="Value"
         :value="value.value"
         :readonly="readonly"
         :disabled="readonly"
