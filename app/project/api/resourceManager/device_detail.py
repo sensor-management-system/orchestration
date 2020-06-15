@@ -12,14 +12,8 @@ class DeviceDetail(ResourceDetail):
     """
 
     def before_get_object(self, view_kwargs):
-        if view_kwargs.get('event_id') is not None:
-            BaseResourceDetail.query_an_object(view_kwargs, 'event')
         if view_kwargs.get('contact_id') is not None:
             BaseResourceDetail.query_an_object(view_kwargs, 'contact')
-        if view_kwargs.get('properties_id') is not None:
-            BaseResourceDetail.query_an_object(view_kwargs, 'properties')
-        if view_kwargs.get('attachments_id') is not None:
-            BaseResourceDetail.query_an_object(view_kwargs, 'attachments')
 
     schema = DeviceSchema
     # decorators = (token_required,)
