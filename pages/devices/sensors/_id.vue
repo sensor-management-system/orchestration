@@ -236,15 +236,6 @@
   </div>
 </template>
 
-<style scoped>
-.v-toolbar.sticky {
-  position: -webkit-sticky;
-  position: sticky;
-  top: 64px;
-  z-index: 9999;
-}
-</style>
-
 <script lang="ts">
 import { Vue, Component, Watch } from 'nuxt-property-decorator'
 import Sensor from '../../../models/Sensor'
