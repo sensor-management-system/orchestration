@@ -3,18 +3,18 @@
     <v-toolbar-title>{{ title }}</v-toolbar-title>
     <v-spacer />
     <v-btn
-      v-if="!cancelBtnHidden"
+      v-if="!isCancelBtnHidden"
       color="secondary"
       class="mr-1"
-      :disabled="cancelBtnDisabled"
+      :disabled="isCancelBtnDisabled"
       @click="$nuxt.$emit('AppBarContent:cancel-button-click')"
     >
       Cancel
     </v-btn>
     <v-btn
-      v-if="!saveBtnHidden"
+      v-if="!isSaveBtnHidden"
       color="primary"
-      :disabled="saveBtnDisabled"
+      :disabled="isSaveBtnDisabled"
       @click="$nuxt.$emit('AppBarContent:save-button-click')"
     >
       Save
@@ -36,14 +36,30 @@ import { Vue, Component } from 'nuxt-property-decorator'
 @Component
 // @ts-ignore
 export default class AppBarEditModeContent extends Vue {
-  get title (): string {
-    return ''
-  }
-
   private saveBtnHidden: boolean = true
   private cancelBtnHidden: boolean = true
   private saveBtnDisabled: boolean = false
   private cancelBtnDisabled: boolean = false
+
+  get title (): string {
+    return ''
+  }
+
+  get isSaveBtnHidden () {
+    return this.saveBtnHidden
+  }
+
+  get isCancelBtnHidden () {
+    return this.cancelBtnHidden
+  }
+
+  get isSaveBtnDisabled () {
+    return this.saveBtnDisabled
+  }
+
+  get isCancelBtnDisabled () {
+    return this.cancelBtnDisabled
+  }
 
   created () {
     this.$nuxt.$on('AppBarContent:save-button-hidden', (hidden: boolean) => {
