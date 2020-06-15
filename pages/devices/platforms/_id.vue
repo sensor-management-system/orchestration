@@ -112,7 +112,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
+import { Component, Vue, Watch } from 'nuxt-property-decorator'
 
 import MasterDataService from '../../../services/MasterDataService'
 import DeviceService from '../../../services/DeviceService'
@@ -167,17 +167,6 @@ export default class PlatformIdPage extends Vue {
   private showLoadingError: boolean = false
   private editMode: boolean = false
 
-  mounted () {
-    this.showLoadingError = false
-    MasterDataService.findAllManufactures().then((foundManufactures) => {
-      this.manufactures = foundManufactures
-    })
-    MasterDataService.findAllPlatformTypes().then((foundPlatformTypes) => {
-      this.platformTypes = foundPlatformTypes
-    })
-    this.loadPlatform()
-  }
-
   created () {
     this.$nuxt.$emit('app-bar-content', AppBarEditModeContentExtended)
     this.$nuxt.$on('AppBarContent:save-button-click', () => {
@@ -190,6 +179,23 @@ export default class PlatformIdPage extends Vue {
     this.$nuxt.$emit('app-bar-extension', AppBarTabsExtensionExtended)
     this.$nuxt.$on('AppBarExtension:change', (tab: number) => {
       this.activeTab = tab
+    })
+  }
+
+  mounted () {
+    this.showLoadingError = false
+    MasterDataService.findAllManufactures().then((foundManufactures) => {
+      this.manufactures = foundManufactures
+    })
+    MasterDataService.findAllPlatformTypes().then((foundPlatformTypes) => {
+      this.platformTypes = foundPlatformTypes
+    })
+    this.loadPlatform()
+
+    // make sure that all components (especially the dynamically passed ones) are rendered
+    this.$nextTick(() => {
+      this.$nuxt.$emit('AppBarContent:save-button-hidden', !this.editMode)
+      this.$nuxt.$emit('AppBarContent:cancel-button-hidden', !this.editMode)
     })
   }
 
@@ -213,16 +219,21 @@ export default class PlatformIdPage extends Vue {
     }
   }
 
-  toggleEditMode () {
-    this.isInEditMode = !this.isInEditMode
-  }
-
   get isInEditMode (): boolean {
     return this.editMode
   }
 
   set isInEditMode (editMode: boolean) {
     this.editMode = editMode
+  }
+
+  toggleEditMode () {
+    this.isInEditMode = !this.isInEditMode
+  }
+
+  @Watch('editMode', { immediate: true, deep: true })
+  // @ts-ignore
+  onEditModeChanged (editMode: boolean) {
     this.$nuxt.$emit('AppBarContent:save-button-hidden', !editMode)
     this.$nuxt.$emit('AppBarContent:cancel-button-hidden', !editMode)
   }
