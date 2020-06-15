@@ -147,7 +147,7 @@
             <v-card
               flat
             >
-              <v-card-title>device URN: {{ deviceURN }}</v-card-title>
+              <v-card-title>Device URN: {{ deviceURN }}</v-card-title>
               <v-card-text>
                 <v-row>
                   <v-col cols="3">
@@ -175,7 +175,7 @@
             <v-card
               flat
             >
-              <v-card-title>device URN: {{ deviceURN }}</v-card-title>
+              <v-card-title>Device URN: {{ deviceURN }}</v-card-title>
               <v-card-text>
                 <DevicePropertyExpansionPanels v-model="device.properties" :readonly="readonly" />
               </v-card-text>
@@ -199,7 +199,7 @@
             <v-card
               flat
             >
-              <v-card-title>device URN: {{ deviceURN }}</v-card-title>
+              <v-card-title>Device URN: {{ deviceURN }}</v-card-title>
               <v-card-text>
                 <CustomFieldCards v-model="device.customFields" :readonly="readonly" />
               </v-card-text>
@@ -223,7 +223,7 @@
             <v-card
               flat
             >
-              <v-card-title>device URN: {{ deviceURN }}</v-card-title>
+              <v-card-title>Device URN: {{ deviceURN }}</v-card-title>
               <v-card-text>
                 <v-timeline dense clipped>
                   <v-timeline-item

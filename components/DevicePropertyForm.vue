@@ -4,19 +4,19 @@
       <v-col cols="12" md="3">
         <v-select
           label="compartment"
-          :value="value.compartment"
+          :value="value.compartmentUri"
           :readonly="readonly"
           :disabled="readonly"
-          @input="update('compartment', $event)"
+          @input="update('compartmentUri', $event)"
         />
       </v-col>
       <v-col cols="12" md="3">
         <v-select
           label="unit"
-          :value="value.unit"
+          :value="value.unitUri"
           :readonly="readonly"
           :disabled="readonly"
-          @input="update('unit', $event)"
+          @input="update('unitUri', $event)"
         />
       </v-col>
       <v-col cols="12" md="3">
@@ -33,10 +33,10 @@
       <v-col cols="12" md="3">
         <v-select
           label="sampling media"
-          :value="value.samplingMedia"
+          :value="value.samplingMediaUri"
           :readonly="readonly"
           :disabled="readonly"
-          @input="update('samplingMedia', $event)"
+          @input="update('samplingMediaUri', $event)"
         />
       </v-col>
       <v-col cols="12" md="1">
@@ -70,11 +70,11 @@
     <v-row>
       <v-col cols="12" md="3">
         <v-select
-          label="variable"
-          :value="value.variable"
+          label="property"
+          :value="value.propertyUri"
           :readonly="readonly"
           :disabled="readonly"
-          @input="update('variable', $event)"
+          @input="update('propertyUri', $event)"
         />
       </v-col>
       <v-col cols="12" md="3">

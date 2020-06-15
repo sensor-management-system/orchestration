@@ -2,25 +2,10 @@ import Vue from 'vue'
 import Vuetify from 'vuetify'
 
 import { mount, createLocalVue } from '@vue/test-utils'
-import { WrapperArray } from '@vue/test-utils/types'
 
 // @ts-ignore
 import DevicePropertyExpansionPanels from '@/components/DevicePropertyExpansionPanels.vue'
 import { DeviceProperty } from '@/models/DeviceProperty'
-
-// see https://github.com/vuejs/vue-test-utils/issues/960
-function withWrapperArray (wrapperArray: WrapperArray<Vue>): Record<string, Function> {
-  return {
-    childSelectorHasText: (
-      selector: string,
-      str: string
-    ): WrapperArray<Vue> => wrapperArray
-      .filter(i => i.find(selector).text().match(str)),
-
-    hasText: (str: string): WrapperArray<Vue> => wrapperArray
-      .filter(i => i.text().match(str))
-  }
-}
 
 Vue.use(Vuetify)
 
@@ -43,11 +28,15 @@ describe('DevicePropertyExpansionPanels', () => {
       propsData: {
         value: [
           DeviceProperty.createFromObject({
-            compartment: 'test',
             label: 'test',
-            samplingMedia: 'water',
-            unit: 'mm',
-            variable: 'foo.bar',
+            compartmentUri: 'http://foo/compartment/1',
+            compartmentName: 'bar',
+            unitUri: 'http://foo/unit/1',
+            unitName: 'mm',
+            samplingMediaUri: 'http://foo/samplingMedia/1',
+            samplingMediaName: 'water',
+            propertyUri: 'http://foo/property/1',
+            propertyName: 'foo.bar',
             measuringRange: {
               min: 10,
               max: 1000
