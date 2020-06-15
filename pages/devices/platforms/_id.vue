@@ -142,7 +142,7 @@ export class AppBarTabsExtensionExtended extends AppBarTabsExtension {
   get tabs (): String[] {
     return [
       'Basic Data',
-      'Persons',
+      'Persons'
     ]
   }
 }

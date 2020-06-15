@@ -1,8 +1,8 @@
 <template>
   <v-tabs
     :value="activeTab"
-    @change="changeTab"
     background-color="grey lighten-3"
+    @change="changeTab"
   >
     <v-tab
       v-for="(tab, index) in tabs"

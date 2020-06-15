@@ -2,8 +2,23 @@
   <div class="v-toolbar__content" style="width:100%">
     <v-toolbar-title>{{ title }}</v-toolbar-title>
     <v-spacer />
-    <v-btn v-if="!cancelBtnHidden" color="secondary" class="mr-1" :disabled="cancelBtnDisabled" @click="$nuxt.$emit('AppBarContent:cancel-button-click')">Cancel</v-btn>
-    <v-btn v-if="!saveBtnHidden" color="primary" :disabled="saveBtnDisabled" @click="$nuxt.$emit('AppBarContent:save-button-click')">Save</v-btn>
+    <v-btn
+      v-if="!cancelBtnHidden"
+      color="secondary"
+      class="mr-1"
+      :disabled="cancelBtnDisabled"
+      @click="$nuxt.$emit('AppBarContent:cancel-button-click')"
+    >
+      Cancel
+    </v-btn>
+    <v-btn
+      v-if="!saveBtnHidden"
+      color="primary"
+      :disabled="saveBtnDisabled"
+      @click="$nuxt.$emit('AppBarContent:save-button-click')"
+    >
+      Save
+    </v-btn>
   </div>
 </template>
 
