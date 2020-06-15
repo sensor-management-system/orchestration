@@ -99,7 +99,7 @@ export default {
       drawer: false,
       fixed: false,
       miniVariant: false,
-      title: 'Sensor System Management',
+      title: 'Sensor Management System',
       appBarContent: null,
       appBarExtension: null
     }
