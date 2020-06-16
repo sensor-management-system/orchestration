@@ -209,8 +209,12 @@
           dark
           fab
         >
-          <v-icon v-if="fab">mdi-close</v-icon>
-          <v-icon v-else>mdi-plus</v-icon>
+          <v-icon v-if="fab">
+            mdi-close
+          </v-icon>
+          <v-icon v-else>
+            mdi-plus
+          </v-icon>
         </v-btn>
       </template>
       <v-btn
