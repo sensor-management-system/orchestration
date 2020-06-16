@@ -222,14 +222,6 @@ import AppBarTabsExtension from '@/components/AppBarTabsExtension.vue'
 
 @Component
 // @ts-ignore
-export class AppBarEditModeContentExtended extends AppBarEditModeContent {
-  get title (): string {
-    return 'Devices'
-  }
-}
-
-@Component
-// @ts-ignore
 export class AppBarTabsExtensionExtended extends AppBarTabsExtension {
   get tabs (): String[] {
     return [
@@ -262,16 +254,11 @@ export default class DevicesIndexPage extends Vue {
   private selectedSearchType: string = 'Sensor / Platform';
 
   created () {
-    this.$nuxt.$emit('app-bar-content', AppBarEditModeContentExtended)
+    this.$nuxt.$emit('app-bar-content', AppBarEditModeContent)
     this.$nuxt.$emit('app-bar-extension', AppBarTabsExtensionExtended)
     this.$nuxt.$on('AppBarExtension:change', (tab: number) => {
       this.activeTab = tab
     })
-  }
-
-  destroyed () {
-    this.$nuxt.$emit('app-bar-content', null)
-    this.$nuxt.$emit('app-bar-extension', null)
   }
 
   mounted () {
@@ -287,6 +274,16 @@ export default class DevicesIndexPage extends Vue {
     DeviceService.findPlatformsAndSensors(this.searchText).then((findResults) => {
       this.searchResults = findResults
     })
+    // make sure that all components (especially the dynamically passed ones) are rendered
+    this.$nextTick(() => {
+      this.$nuxt.$emit('AppBarContent:title', 'Devices')
+    })
+  }
+
+  beforeDestroy () {
+    this.$nuxt.$emit('app-bar-content', null)
+    this.$nuxt.$emit('app-bar-extension', null)
+    this.$nuxt.$off('AppBarExtension:change')
   }
 
   basicSearch () {

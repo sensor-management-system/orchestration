@@ -254,14 +254,6 @@ import AppBarTabsExtension from '@/components/AppBarTabsExtension.vue'
 
 @Component
 // @ts-ignore
-export class AppBarEditModeContentExtended extends AppBarEditModeContent {
-  get title (): string {
-    return 'Add Sensor'
-  }
-}
-
-@Component
-// @ts-ignore
 export class AppBarTabsExtensionExtended extends AppBarTabsExtension {
   get tabs (): String[] {
     return [
@@ -290,7 +282,7 @@ export default class SensorIdPage extends Vue {
   private editMode: boolean = false
 
   created () {
-    this.$nuxt.$emit('app-bar-content', AppBarEditModeContentExtended)
+    this.$nuxt.$emit('app-bar-content', AppBarEditModeContent)
     this.$nuxt.$on('AppBarContent:save-button-click', () => {
       this.toggleEditMode()
     })
@@ -313,14 +305,20 @@ export default class SensorIdPage extends Vue {
 
     // make sure that all components (especially the dynamically passed ones) are rendered
     this.$nextTick(() => {
+      if (!this.$route.params.id) {
+        this.$nuxt.$emit('AppBarContent:title', 'Add Device')
+      }
       this.$nuxt.$emit('AppBarContent:save-button-hidden', !this.editMode)
       this.$nuxt.$emit('AppBarContent:cancel-button-hidden', !this.editMode)
     })
   }
 
-  destroyed () {
+  beforeDestroy () {
     this.$nuxt.$emit('app-bar-content', null)
     this.$nuxt.$emit('app-bar-extension', null)
+    this.$nuxt.$off('AppBarContent:save-button-click')
+    this.$nuxt.$off('AppBarContent:cancel-button-click')
+    this.$nuxt.$off('AppBarExtension:change')
   }
 
   loadSensor () {
@@ -402,9 +400,9 @@ export default class SensorIdPage extends Vue {
   @Watch('sensor', { immediate: true, deep: true })
   // @ts-ignore
   onSensorChanged (val: Sensor) {
-    // @TODO: remove!
-    // eslint-disable-next-line
-    console.log('something changed in the sensor', val)
+    if (val.id) {
+      this.$nuxt.$emit('AppBarContent:title', 'Device ' + val.label)
+    }
   }
 }
 </script>
