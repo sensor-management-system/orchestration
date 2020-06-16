@@ -3,7 +3,7 @@ from marshmallow_jsonapi.flask import Schema, Relationship
 from project.api.schemas.attachment_schema import AttachmentSchema
 from project.api.schemas.customfield_schema import CustomFieldSchema
 from project.api.schemas.event_schema import EventSchema
-from project.api.schemas.device_properties_schema import DevicePropertySchema
+from project.api.schemas.device_property_schema import DevicePropertySchema
 
 
 class DeviceSchema(Schema):
@@ -46,7 +46,7 @@ class DeviceSchema(Schema):
     device_properties = fields.Nested(DevicePropertySchema, many=True, allow_none=True)
     device_attachments = fields.Nested(AttachmentSchema, many=True, allow_none=True)
     contacts = Relationship(attribute='contacts',
-                            self_view='devices_contacts',
+                            self_view='device_contacts',
                             self_view_kwargs={'id': '<id>'},
                             related_view='contacts_list',
                             related_view_kwargs={'device_id': '<id>'},
