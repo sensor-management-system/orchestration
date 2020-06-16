@@ -2,7 +2,7 @@ import Manufacturer from '../models/Manufacturer'
 import PlatformType from '~/models/PlatformType'
 import Status from '~/models/Status'
 
-export default class VCService {
+export default class CVService {
   static findAllManufacturers (): Promise<Manufacturer[]> {
     return new Promise<Manufacturer[]>((resolve) => {
       resolve([

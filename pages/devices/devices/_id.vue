@@ -326,7 +326,7 @@ import DevicePropertyExpansionPanels from '../../../components/DevicePropertyExp
 // @ts-ignore
 import CustomFieldCards from '../../../components/CustomFieldCards.vue'
 
-import VCService from '../../../services/VCService'
+import CVService from '../../../services/CVService'
 import SmsService from '../../../services/SmsService'
 import Manufacturer from '../../../models/Manufacturer'
 import Status from '../../../models/Status'
@@ -351,11 +351,11 @@ export default class DeviceIdPage extends Vue {
   private isInEditMode: boolean = false
 
   mounted () {
-    VCService.findAllStates().then((foundStates) => {
+    CVService.findAllStates().then((foundStates) => {
       // TODO: Replace with real Status[] as we want to fill the uri & name
       this.states = foundStates
     })
-    VCService.findAllManufacturers().then((foundManufacturers) => {
+    CVService.findAllManufacturers().then((foundManufacturers) => {
       this.manufacturers = foundManufacturers
     })
     this.loadDevice()

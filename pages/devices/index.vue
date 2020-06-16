@@ -192,7 +192,7 @@
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 
-import VCService from '../../services/VCService'
+import CVService from '../../services/CVService'
 import SmsService from '../../services/SmsService'
 
 import { PlatformOrDeviceSearchType } from '../../enums/PlatformOrDeviceSearchType'
@@ -226,11 +226,11 @@ export default class DevicesIndexPage extends Vue {
   private successMessage = ''
 
   mounted () {
-    VCService.findAllManufacturers().then((manufacturers) => {
+    CVService.findAllManufacturers().then((manufacturers) => {
       this.searchManufacturers = manufacturers
     })
-    const promisePlatformTypes = VCService.findAllPlatformTypes()
-    const promiseStates = VCService.findAllStates()
+    const promisePlatformTypes = CVService.findAllPlatformTypes()
+    const promiseStates = CVService.findAllStates()
 
     promisePlatformTypes.then((platformTypes) => {
       promiseStates.then((states) => {
