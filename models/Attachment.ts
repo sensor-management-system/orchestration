@@ -6,7 +6,7 @@ export interface IAttachment {
   label: string
 }
 
-export default class Attachment implements IAttachment, IPathSetter {
+export class Attachment implements IAttachment, IPathSetter {
   private _id: number | null = null
   private _url: string = ''
   private _label: string = ''
