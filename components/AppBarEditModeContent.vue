@@ -36,14 +36,11 @@ import { Vue, Component } from 'nuxt-property-decorator'
 @Component
 // @ts-ignore
 export default class AppBarEditModeContent extends Vue {
+  private title: string = ''
   private saveBtnHidden: boolean = true
   private cancelBtnHidden: boolean = true
   private saveBtnDisabled: boolean = false
   private cancelBtnDisabled: boolean = false
-
-  get title (): string {
-    return ''
-  }
 
   get isSaveBtnHidden () {
     return this.saveBtnHidden
@@ -62,6 +59,9 @@ export default class AppBarEditModeContent extends Vue {
   }
 
   created () {
+    this.$nuxt.$on('AppBarContent:title', (title: string) => {
+      this.title = title
+    })
     this.$nuxt.$on('AppBarContent:save-button-hidden', (hidden: boolean) => {
       this.saveBtnHidden = hidden
     })
