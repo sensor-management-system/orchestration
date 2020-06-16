@@ -1,6 +1,7 @@
 import { PlatformOrDeviceType } from '../enums/PlatformOrDeviceType'
 
 import Contact from './Contact'
+import { Attachment } from './Attachment'
 
 import { IDeviceOrPlatformSearchObject } from './IDeviceOrPlatformSearchObject'
 import PlatformType from './PlatformType'
@@ -35,7 +36,7 @@ export default class Platform {
   private _modifiedByUserId: number | null = null
 
   private _contacts: Contact[] = []
-  // TODO: Add attachments
+  private _attachments: Attachment[] = []
 
   get id (): number | null {
     return this._id
@@ -195,6 +196,14 @@ export default class Platform {
 
   set modifiedByUserId (newModifiedByUserId: number | null) {
     this._modifiedByUserId = newModifiedByUserId
+  }
+
+  get attachments (): Attachment[] {
+    return this._attachments
+  }
+
+  set attachments (attachments: Attachment[]) {
+    this._attachments = attachments
   }
 
   toSearchObject (

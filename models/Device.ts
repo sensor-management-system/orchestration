@@ -3,6 +3,7 @@ import { PlatformOrDeviceType } from '../enums/PlatformOrDeviceType'
 import Contact from './Contact'
 import { DeviceProperty } from './DeviceProperty'
 import { CustomTextField } from './CustomTextField'
+import { Attachment } from './Attachment'
 import { IDeviceOrPlatformSearchObject } from './IDeviceOrPlatformSearchObject'
 import Status from './Status'
 
@@ -34,6 +35,7 @@ export default class Device {
   private _contacts: Contact[] = []
   private _properties: DeviceProperty[] = []
   private _customFields: CustomTextField[] = []
+  private _attachments: Attachment[] = []
 
   // TODO: Attachments
   // TODO: Events
@@ -204,6 +206,14 @@ export default class Device {
 
   set customFields (customFields: CustomTextField[]) {
     this._customFields = customFields
+  }
+
+  get attachments (): Attachment[] {
+    return this._attachments
+  }
+
+  set attachments (attachments: Attachment[]) {
+    this._attachments = attachments
   }
 
   toSearchObject (statusLookupByUri: Map<string, Status>) : IDeviceOrPlatformSearchObject {
