@@ -233,8 +233,8 @@ export default class SmsService {
   static findAllPlatforms (): Promise<Platform[]> {
     // TODO: Think about also including the contacts
     // with ?include=contacts
-    // TODO: handle pagination
-    return axios.get(BASE_URL + '/platforms').then((rawResponse) => {
+    // size for having one query to get all the platforms (no pagination)
+    return axios.get(BASE_URL + '/platforms?page[size]=100000').then((rawResponse) => {
       const rawData = rawResponse.data
       const result: Platform[] = []
 
@@ -249,8 +249,8 @@ export default class SmsService {
   static findAllDevices (): Promise<Device[]> {
     // TODO: Think about also including the contacts
     // with ?include=contacts
-    // TODO: handle pagination
-    return axios.get(BASE_URL + '/devices').then((rawResonse) => {
+    // size for having one query to get all the devices (no pagination)
+    return axios.get(BASE_URL + '/devices?page[size]=100000').then((rawResonse) => {
       const rawData = rawResonse.data
       const result: Device[] = []
 
