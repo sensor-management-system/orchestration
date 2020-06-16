@@ -95,6 +95,7 @@
                       v-model="device.website"
                       label="Website"
                       placeholder="https://"
+                      type="url"
                       :readonly="readonly"
                       :disabled="readonly"
                     />

@@ -104,6 +104,7 @@
                       v-model="platform.website"
                       label="website"
                       placeholder="https://"
+                      type="url"
                       :readonly="readonly"
                       :disabled="readonly"
                     />
