@@ -194,15 +194,40 @@
         <v-btn>Copy</v-btn>
       </v-card-actions>
     </v-card>
-
-    <v-card>
-      <v-btn to="/devices/platforms">
-        Add Platform
+    <v-speed-dial
+      v-model="fab"
+      fixed
+      bottom
+      right
+      direction="top"
+      open-on-hover
+    >
+      <template v-slot:activator>
+        <v-btn
+          v-model="fab"
+          color="blue darken-2"
+          dark
+          fab
+        >
+          <v-icon v-if="fab">mdi-close</v-icon>
+          <v-icon v-else>mdi-plus</v-icon>
+        </v-btn>
+      </template>
+      <v-btn
+        rounded
+        to="/devices/platforms"
+        color="primary"
+      >
+        Add platform
       </v-btn>
-      <v-btn to="/devices/sensors">
-        Add Sensor
+      <v-btn
+        rounded
+        to="/devices/sensors"
+        color="primary"
+      >
+        Add sensor
       </v-btn>
-    </v-card>
+    </v-speed-dial>
   </div>
 </template>
 
@@ -234,6 +259,7 @@ export class AppBarTabsExtensionExtended extends AppBarTabsExtension {
 @Component
 export default class DevicesIndexPage extends Vue {
   private activeTab: number = 0
+  private fab: boolean = false
 
   private searchManufactures: Manufacture[] = []
   private selectedSearchManufactures: Manufacture[] = []
