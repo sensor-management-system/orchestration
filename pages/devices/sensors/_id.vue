@@ -295,7 +295,11 @@ export default class SensorIdPage extends Vue {
       this.toggleEditMode()
     })
     this.$nuxt.$on('AppBarContent:cancel-button-click', () => {
-      this.toggleEditMode()
+      if (this.sensor && this.sensor.id) {
+        this.toggleEditMode()
+      } else {
+        this.$router.push('/devices')
+      }
     })
 
     this.$nuxt.$emit('app-bar-extension', AppBarTabsExtensionExtended)

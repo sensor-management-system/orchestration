@@ -173,7 +173,11 @@ export default class PlatformIdPage extends Vue {
       this.save()
     })
     this.$nuxt.$on('AppBarContent:cancel-button-click', () => {
-      this.toggleEditMode()
+      if (this.platform && this.platform.id) {
+        this.toggleEditMode()
+      } else {
+        this.$router.push('/devices')
+      }
     })
 
     this.$nuxt.$emit('app-bar-extension', AppBarTabsExtensionExtended)
