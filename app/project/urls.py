@@ -37,7 +37,7 @@ def Create_endpoints(api):
               base_url + '/contacts/<int:id>/devices')
     api.route(DeviceDetail, 'devices_detail', base_url + '/devices/<int:id>',
               base_url + '/contact/<int:contact_id>/device')
-    api.route(DeviceRelationship, 'devices_contacts',
+    api.route(DeviceRelationship, 'device_contacts',
               base_url + '/devices/<int:id>/relationships/contacts')
     api.route(DeviceRelationship, 'device_attachments',
               base_url + '/devices/<int:id>/relationships/attachments')
