@@ -295,7 +295,7 @@ export default class DeviceIdPage extends Vue {
   created () {
     this.$nuxt.$emit('app-bar-content', AppBarEditModeContent)
     this.$nuxt.$on('AppBarContent:save-button-click', () => {
-      this.toggleEditMode()
+      this.save()
     })
     this.$nuxt.$on('AppBarContent:cancel-button-click', () => {
       if (this.device && this.device.id) {
@@ -356,6 +356,7 @@ export default class DeviceIdPage extends Vue {
   save () {
     SmsService.saveDevice(this.device).then((savedDevice) => {
       this.device = savedDevice
+      this.toggleEditMode()
     })
   }
 
@@ -453,7 +454,7 @@ export default class DeviceIdPage extends Vue {
 
   @Watch('device', { immediate: true, deep: true })
   // @ts-ignore
-  onDevoceChanged (val: Device) {
+  onDeviceChanged (val: Device) {
     if (val.id) {
       this.$nuxt.$emit('AppBarContent:title', 'Device ' + val.shortName)
     }
