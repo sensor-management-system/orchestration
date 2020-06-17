@@ -33,9 +33,9 @@ class PlatformSchema(Schema):
     persistent_identifier = fields.Str(allow_none=True)
     platform_attachments = fields.Nested(AttachmentSchema, many=True, allow_none=True)
     contacts = Relationship(attribute='contacts',
-                            self_view='platforms_contacts',
+                            self_view='platform_contacts',
                             self_view_kwargs={'id': '<id>'},
-                            related_view='contacts_list',
+                            related_view='contact_list',
                             related_view_kwargs={'platform_id': '<id>'},
                             many=True,
                             schema='ContactSchema',

@@ -25,29 +25,26 @@ def Create_endpoints(api):
     api.route(Ping, 'test_connection', base_url + '/ping')
 
     # Platform
-    api.route(PlatformList, 'platform_list', base_url + '/platforms')
+    api.route(PlatformList, 'platform_list', base_url + '/platforms',
+              base_url + '/contacts/<int:id>/platforms')
     api.route(PlatformDetail, 'platform_detail',
               base_url + '/platforms/<int:id>',
               base_url + '/contacts/<int:contact_id>/platforms')
-    api.route(PlatformRelationship, 'platforms_contacts',
+    api.route(PlatformRelationship, 'platform_contacts',
               base_url + '/platforms/<int:id>/relationships/contacts')
 
     # Device
-    api.route(DeviceList, 'devices_list', base_url + '/devices',
+    api.route(DeviceList, 'device_list', base_url + '/devices',
               base_url + '/contacts/<int:id>/devices')
-    api.route(DeviceDetail, 'devices_detail', base_url + '/devices/<int:id>',
+    api.route(DeviceDetail, 'device_detail', base_url + '/devices/<int:id>',
               base_url + '/contact/<int:contact_id>/device')
     api.route(DeviceRelationship, 'device_contacts',
               base_url + '/devices/<int:id>/relationships/contacts')
-    api.route(DeviceRelationship, 'device_attachments',
-              base_url + '/devices/<int:id>/relationships/attachments')
-    api.route(DeviceRelationship, 'device_customfields',
-              base_url + '/devices/<int:id>/relationships/customfields')
     # Contact
-    api.route(ContactList, 'contacts_list', base_url + '/contacts',
+    api.route(ContactList, 'contact_list', base_url + '/contacts',
               base_url + '/devices/<int:device_id>/contacts',
               base_url + '/platforms/<int:platform_id>/contacts')
-    api.route(ContactDetail, 'contacts_detail',
+    api.route(ContactDetail, 'contact_detail',
               base_url + '/contacts/<int:id>')
     api.route(ContactRelationship, 'contacts_devices',
               base_url + '/contacts/<int:id>/relationships/devices')
@@ -56,7 +53,7 @@ def Create_endpoints(api):
     api.route(ContactRelationship, 'contact_user',
               base_url + '/contacts/<int:id>/relationships/user')
     # Users
-    api.route(UserList, 'users_list', base_url + '/users',
+    api.route(UserList, 'user_list', base_url + '/users',
               base_url + '/contacts/<int:id>/users')
     api.route(UserDetail, 'users_detail', base_url + '/users/<int:id>')
     api.route(UserRelationship, 'user_contact',

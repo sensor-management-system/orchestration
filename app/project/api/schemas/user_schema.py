@@ -17,12 +17,12 @@ class UserSchema(Schema):
         self_view_kwargs = {'id': '<id>'}
 
     id = fields.Integer(as_string=True, dump_only=True)
-    subject = fields.Str(allow_none=True)
+    subject = fields.Str(required=True)
 
     contact = Relationship(attribute='contact',
                            self_view='contact_user',
                            self_view_kwargs={'id': '<id>'},
-                           related_view='contacts_detail',
+                           related_view='contact_detail',
                            related_view_kwargs={'id': '<id>'},
                            include_resource_linkage=True,
                            schema='ContactSchema',

@@ -20,7 +20,7 @@ class DeviceSchema(Schema):
 
     class Meta:
         type_ = 'device'
-        self_view = 'devices_detail'
+        self_view = 'device_detail'
         self_view_kwargs = {'id': '<id>'}
 
     id = fields.Integer(as_string=True, dump_only=True)
@@ -48,7 +48,7 @@ class DeviceSchema(Schema):
     contacts = Relationship(attribute='contacts',
                             self_view='device_contacts',
                             self_view_kwargs={'id': '<id>'},
-                            related_view='contacts_list',
+                            related_view='contact_list',
                             related_view_kwargs={'device_id': '<id>'},
                             many=True,
                             schema='ContactSchema',

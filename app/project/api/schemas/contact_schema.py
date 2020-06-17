@@ -13,7 +13,7 @@ class ContactSchema(Schema):
 
     class Meta:
         type_ = 'contact'
-        self_view = 'contacts_detail'
+        self_view = 'contact_detail'
         self_view_kwargs = {'id': '<id>'}
 
     id = fields.Integer(as_string=True, dump_only=True)
@@ -35,16 +35,17 @@ class ContactSchema(Schema):
     devices = Relationship(attribute='devices',
                            self_view='contacts_devices',
                            self_view_kwargs={'id': '<id>'},
-                           related_view='devices_list',
+                           related_view='device_list',
                            related_view_kwargs={'contact_id': '<id>'},
                            many=True,
                            schema='DeviceSchema',
                            type_='device',
                            id_field='id'
                            )
-    user = Relationship(self_view='contact_user',
+    user = Relationship(attribute='user',
+                        self_view='contact_user',
                         self_view_kwargs={'id': '<id>'},
-                        related_view='users_list',
+                        related_view='user_list',
                         related_view_kwargs={'id': '<id>'},
                         many=True,
                         include_resource_linkage=True,
