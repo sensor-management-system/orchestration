@@ -24,13 +24,14 @@
             <template v-slot:actions>
               <v-btn
                 v-if="!readonly"
+                icon
                 color="error"
-                small
-                outlined
                 data-role="delete-field"
                 @click="removeField(index)"
               >
-                delete
+                <v-icon>
+                  mdi-delete
+                </v-icon>
               </v-btn>
             </template>
           </CustomFieldForm>
