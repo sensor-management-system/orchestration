@@ -14,6 +14,7 @@
           <v-tab>Persons</v-tab>
           <v-tab>Properties</v-tab>
           <v-tab>Custom Fields</v-tab>
+          <v-tab>Attachments</v-tab>
           <v-tab>Events</v-tab>
           <v-tab-item>
             <v-card
@@ -226,6 +227,16 @@
             >
               <v-card-title>Device URN: {{ deviceURN }}</v-card-title>
               <v-card-text>
+                <AttachmentList v-model="device.attachments" :readonly="readonly" />
+              </v-card-text>
+            </v-card>
+          </v-tab-item>
+          <v-tab-item>
+            <v-card
+              flat
+            >
+              <v-card-title>Device URN: {{ deviceURN }}</v-card-title>
+              <v-card-text>
                 <v-timeline dense clipped>
                   <v-timeline-item
                     class="mb-4"
@@ -325,6 +336,8 @@ import ContactSelect from '../../../components/ContactSelect.vue'
 import DevicePropertyExpansionPanels from '../../../components/DevicePropertyExpansionPanels.vue'
 // @ts-ignore
 import CustomFieldCards from '../../../components/CustomFieldCards.vue'
+// @ts-ignore
+import AttachmentList from '../../../components/AttachmentList.vue'
 
 import CVService from '../../../services/CVService'
 import SmsService from '../../../services/SmsService'
@@ -335,7 +348,8 @@ import Status from '../../../models/Status'
   components: {
     ContactSelect,
     DevicePropertyExpansionPanels,
-    CustomFieldCards
+    CustomFieldCards,
+    AttachmentList
   }
 })
 // @ts-ignore

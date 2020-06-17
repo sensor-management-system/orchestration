@@ -26,6 +26,7 @@
         >
           <v-tab>Basic data</v-tab>
           <v-tab>Contacts</v-tab>
+          <v-tab>Attachments</v-tab>
           <v-tab-item>
             <!-- Basic data tab -->
             <v-card
@@ -159,6 +160,18 @@
               </v-card-actions>
             </v-card>
           </v-tab-item>
+          <v-tab-item>
+            <v-card
+              flat
+            >
+              <v-card-title>
+                Platform URN: {{ platformURN }}
+              </v-card-title>
+              <v-card-text>
+                <AttachmentList v-model="platform.attachments" :readonly="!isInEditMode" />
+              </v-card-text>
+            </v-card>
+          </v-tab-item>
         </v-tabs>
         <!-- Buttons for all tabs -->
         <div v-if="!isInEditMode">
@@ -204,12 +217,17 @@ import Platform from '../../../models/Platform'
 
 // @ts-ignore
 import ContactSelect from '../../../components/ContactSelect.vue'
+// @ts-ignore
+import AttachmentList from '../../../components/AttachmentList.vue'
 import Manufacturer from '../../../models/Manufacturer'
 import PlatformType from '../../../models/PlatformType'
 import Status from '../../../models/Status'
 
 @Component({
-  components: { ContactSelect }
+  components: {
+    ContactSelect,
+    AttachmentList
+  }
 })
 // @ts-ignore
 export default class PlatformIdPage extends Vue {
