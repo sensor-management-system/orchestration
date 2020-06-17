@@ -112,9 +112,12 @@ export default class SmsService {
         // TODO: serialNumber
         short_name: platform.shortName,
         // TODO: statusUri
-        url: platform.website
+        url: platform.website,
         // TODO: handle contacts
         // TODO: Handle attachments
+
+        // TODO: Remove type
+        type: ''
 
       }
       /*
@@ -175,7 +178,11 @@ export default class SmsService {
         serial_number: device.serialNumber,
         short_name: device.shortName,
         // TODO: Add statusName & statusUri
-        url: device.website
+        url: device.website,
+
+        // TODO remove
+        type: ''
+
         /*
         customFields: [
           {
