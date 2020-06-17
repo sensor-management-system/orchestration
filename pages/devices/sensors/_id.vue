@@ -1,21 +1,13 @@
 <template>
   <div>
-    <v-breadcrumbs :items="navigation" />
-    <h1>Add Sensor</h1>
     <v-form>
       <v-card
         outlined
       >
-        <v-tabs
+        <v-tabs-items
           v-model="activeTab"
-          background-color="grey lighten-3"
         >
-          <v-tab>Basic Data</v-tab>
-          <v-tab>Persons</v-tab>
-          <v-tab>Properties</v-tab>
-          <v-tab>Custom Fields</v-tab>
-          <v-tab>Events</v-tab>
-          <v-tab-item>
+          <v-tab-item :eager="true">
             <v-card
               flat
             >
@@ -132,17 +124,9 @@
                   </v-col>
                 </v-row>
               </v-card-text>
-              <v-card-actions>
-                <v-btn
-                  text
-                  @click="nextTab(1)"
-                >
-                  next ❯
-                </v-btn>
-              </v-card-actions>
             </v-card>
           </v-tab-item>
-          <v-tab-item>
+          <v-tab-item :eager="true">
             <v-card
               flat
             >
@@ -154,23 +138,9 @@
                   </v-col>
                 </v-row>
               </v-card-text>
-              <v-card-actions>
-                <v-btn
-                  text
-                  @click="previousTab"
-                >
-                  ❮ previous
-                </v-btn>
-                <v-btn
-                  text
-                  @click="nextTab"
-                >
-                  next ❯
-                </v-btn>
-              </v-card-actions>
             </v-card>
           </v-tab-item>
-          <v-tab-item>
+          <v-tab-item :eager="true">
             <v-card
               flat
             >
@@ -178,23 +148,9 @@
               <v-card-text>
                 <SensorPropertyExpansionPanels v-model="sensor.properties" :readonly="readonly" />
               </v-card-text>
-              <v-card-actions>
-                <v-btn
-                  text
-                  @click="previousTab"
-                >
-                  ❮ previous
-                </v-btn>
-                <v-btn
-                  text
-                  @click="nextTab"
-                >
-                  next ❯
-                </v-btn>
-              </v-card-actions>
             </v-card>
           </v-tab-item>
-          <v-tab-item>
+          <v-tab-item :eager="true">
             <v-card
               flat
             >
@@ -202,23 +158,9 @@
               <v-card-text>
                 <CustomFieldCards v-model="sensor.customFields" :readonly="readonly" />
               </v-card-text>
-              <v-card-actions>
-                <v-btn
-                  text
-                  @click="previousTab"
-                >
-                  ❮ previous
-                </v-btn>
-                <v-btn
-                  text
-                  @click="nextTab"
-                >
-                  next ❯
-                </v-btn>
-              </v-card-actions>
             </v-card>
           </v-tab-item>
-          <v-tab-item>
+          <v-tab-item :eager="true">
             <v-card
               flat
             >
@@ -273,17 +215,9 @@
                   </v-timeline-item>
                 </v-timeline>
               </v-card-text>
-              <v-card-actions>
-                <v-btn
-                  text
-                  @click="previousTab"
-                >
-                  ❮ previous
-                </v-btn>
-              </v-card-actions>
             </v-card>
           </v-tab-item>
-        </v-tabs>
+        </v-tabs-items>
         <v-btn
           v-if="!isInEditMode"
           fab
@@ -296,17 +230,6 @@
           <v-icon>
             mdi-pencil
           </v-icon>
-        </v-btn>
-        <v-btn
-          v-if="isInEditMode"
-          fab
-          fixed
-          bottom
-          right
-          color="primary"
-          @click="toggleEditMode"
-        >
-          <v-icon>mdi-content-save</v-icon>
         </v-btn>
       </v-card>
     </v-form>
@@ -323,6 +246,25 @@ import PersonSelect from '../../../components/PersonSelect.vue'
 import SensorPropertyExpansionPanels from '../../../components/SensorPropertyExpansionPanels.vue'
 // @ts-ignore
 import CustomFieldCards from '../../../components/CustomFieldCards.vue'
+// @ts-ignore
+import AppBarEditModeContent from '@/components/AppBarEditModeContent.vue'
+
+// @ts-ignore
+import AppBarTabsExtension from '@/components/AppBarTabsExtension.vue'
+
+@Component
+// @ts-ignore
+export class AppBarTabsExtensionExtended extends AppBarTabsExtension {
+  get tabs (): String[] {
+    return [
+      'Basic Data',
+      'Persons',
+      'Properties',
+      'Custom Fields',
+      'Events'
+    ]
+  }
+}
 
 @Component({
   components: {
@@ -337,10 +279,46 @@ export default class SensorIdPage extends Vue {
   private activeTab: number = 0
 
   private sensor: Sensor = new Sensor()
-  private isInEditMode: boolean = false
+  private editMode: boolean = false
+
+  created () {
+    this.$nuxt.$emit('app-bar-content', AppBarEditModeContent)
+    this.$nuxt.$on('AppBarContent:save-button-click', () => {
+      this.toggleEditMode()
+    })
+    this.$nuxt.$on('AppBarContent:cancel-button-click', () => {
+      if (this.sensor && this.sensor.id) {
+        this.toggleEditMode()
+      } else {
+        this.$router.push('/devices')
+      }
+    })
+
+    this.$nuxt.$emit('app-bar-extension', AppBarTabsExtensionExtended)
+    this.$nuxt.$on('AppBarExtension:change', (tab: number) => {
+      this.activeTab = tab
+    })
+  }
 
   mounted () {
     this.loadSensor()
+
+    // make sure that all components (especially the dynamically passed ones) are rendered
+    this.$nextTick(() => {
+      if (!this.$route.params.id) {
+        this.$nuxt.$emit('AppBarContent:title', 'Add Device')
+      }
+      this.$nuxt.$emit('AppBarContent:save-button-hidden', !this.editMode)
+      this.$nuxt.$emit('AppBarContent:cancel-button-hidden', !this.editMode)
+    })
+  }
+
+  beforeDestroy () {
+    this.$nuxt.$emit('app-bar-content', null)
+    this.$nuxt.$emit('app-bar-extension', null)
+    this.$nuxt.$off('AppBarContent:save-button-click')
+    this.$nuxt.$off('AppBarContent:cancel-button-click')
+    this.$nuxt.$off('AppBarExtension:change')
   }
 
   loadSensor () {
@@ -354,6 +332,21 @@ export default class SensorIdPage extends Vue {
     }
   }
 
+  get isInEditMode (): boolean {
+    return this.editMode
+  }
+
+  set isInEditMode (editMode: boolean) {
+    this.editMode = editMode
+  }
+
+  @Watch('editMode', { immediate: true, deep: true })
+  // @ts-ignore
+  onEditModeChanged (editMode: boolean) {
+    this.$nuxt.$emit('AppBarContent:save-button-hidden', !editMode)
+    this.$nuxt.$emit('AppBarContent:cancel-button-hidden', !editMode)
+  }
+
   toggleEditMode () {
     this.isInEditMode = !this.isInEditMode
   }
@@ -362,37 +355,8 @@ export default class SensorIdPage extends Vue {
     return this.sensor.urn
   }
 
-  previousTab () {
-    this.activeTab = this.activeTab === 0 ? this.numberOfTabs - 1 : this.activeTab - 1
-  }
-
-  nextTab () {
-    this.activeTab = this.activeTab === this.numberOfTabs - 1 ? 0 : this.activeTab + 1
-  }
-
   get readonly () {
     return !this.isInEditMode
-  }
-
-  get navigation () {
-    return [
-      {
-        disabled: false,
-        exact: true,
-        to: '/',
-        text: 'Home'
-      },
-      {
-        disabled: false,
-        exact: true,
-        to: '/devices',
-        text: 'Devices'
-      },
-      {
-        disabled: true,
-        text: 'Add Sensor'
-      }
-    ]
   }
 
   get sensorTypes () {
@@ -436,9 +400,9 @@ export default class SensorIdPage extends Vue {
   @Watch('sensor', { immediate: true, deep: true })
   // @ts-ignore
   onSensorChanged (val: Sensor) {
-    // @TODO: remove!
-    // eslint-disable-next-line
-    console.log('something changed in the sensor', val)
+    if (val.id) {
+      this.$nuxt.$emit('AppBarContent:title', 'Device ' + val.label)
+    }
   }
 }
 </script>

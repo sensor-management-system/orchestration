@@ -1,16 +1,10 @@
 <template>
   <div>
-    <v-breadcrumbs :items="navigation" />
-    <h1>Devices</h1>
-
     <v-card>
-      <v-tabs
-        v-model="activeSearchTypeTabIdx"
-        background-color="grey lighten-3"
+      <v-tabs-items
+        v-model="activeTab"
       >
-        <v-tab>Basic search</v-tab>
-        <v-tab>Extended search</v-tab>
-        <v-tab-item>
+        <v-tab-item :eager="true">
           <v-card
             flat
           >
@@ -36,7 +30,7 @@
             </v-card-text>
           </v-card>
         </v-tab-item>
-        <v-tab-item>
+        <v-tab-item :eager="true">
           <v-card>
             <v-card-text>
               <v-row>
@@ -175,7 +169,7 @@
             </v-card-actions>
           </v-card>
         </v-tab-item>
-      </v-tabs>
+      </v-tabs-items>
     </v-card>
 
     <h2>Results:</h2>
@@ -200,15 +194,44 @@
         <v-btn>Copy</v-btn>
       </v-card-actions>
     </v-card>
-
-    <v-card>
-      <v-btn to="/devices/platforms">
-        Add Platform
+    <v-speed-dial
+      v-model="fab"
+      fixed
+      bottom
+      right
+      direction="top"
+      open-on-hover
+    >
+      <template v-slot:activator>
+        <v-btn
+          v-model="fab"
+          color="blue darken-2"
+          dark
+          fab
+        >
+          <v-icon v-if="fab">
+            mdi-close
+          </v-icon>
+          <v-icon v-else>
+            mdi-plus
+          </v-icon>
+        </v-btn>
+      </template>
+      <v-btn
+        rounded
+        to="/devices/platforms"
+        color="primary"
+      >
+        Add platform
       </v-btn>
-      <v-btn to="/devices/sensors">
-        Add Sensor
+      <v-btn
+        rounded
+        to="/devices/sensors"
+        color="primary"
+      >
+        Add sensor
       </v-btn>
-    </v-card>
+    </v-speed-dial>
   </div>
 </template>
 
@@ -221,9 +244,26 @@ import DeviceService from '../../services/DeviceService'
 import Manufacture from '../../models/Manufacture'
 import Institute from '../../models/Institute'
 
+// @ts-ignore
+import AppBarEditModeContent from '@/components/AppBarEditModeContent.vue'
+// @ts-ignore
+import AppBarTabsExtension from '@/components/AppBarTabsExtension.vue'
+
+@Component
+// @ts-ignore
+export class AppBarTabsExtensionExtended extends AppBarTabsExtension {
+  get tabs (): String[] {
+    return [
+      'Search',
+      'Extended Search'
+    ]
+  }
+}
+
 @Component
 export default class DevicesIndexPage extends Vue {
-  private activeSearchTypeTabIdx: number = 0
+  private activeTab: number = 0
+  private fab: boolean = false
 
   private searchManufactures: Manufacture[] = []
   private selectedSearchManufactures: Manufacture[] = []
@@ -243,6 +283,14 @@ export default class DevicesIndexPage extends Vue {
 
   private selectedSearchType: string = 'Sensor / Platform';
 
+  created () {
+    this.$nuxt.$emit('app-bar-content', AppBarEditModeContent)
+    this.$nuxt.$emit('app-bar-extension', AppBarTabsExtensionExtended)
+    this.$nuxt.$on('AppBarExtension:change', (tab: number) => {
+      this.activeTab = tab
+    })
+  }
+
   mounted () {
     MasterDataService.findAllManufactures().then((manufactures) => {
       this.searchManufactures = manufactures
@@ -256,6 +304,16 @@ export default class DevicesIndexPage extends Vue {
     DeviceService.findPlatformsAndSensors(this.searchText).then((findResults) => {
       this.searchResults = findResults
     })
+    // make sure that all components (especially the dynamically passed ones) are rendered
+    this.$nextTick(() => {
+      this.$nuxt.$emit('AppBarContent:title', 'Devices')
+    })
+  }
+
+  beforeDestroy () {
+    this.$nuxt.$emit('app-bar-content', null)
+    this.$nuxt.$emit('app-bar-extension', null)
+    this.$nuxt.$off('AppBarExtension:change')
   }
 
   basicSearch () {
