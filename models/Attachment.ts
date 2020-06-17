@@ -10,6 +10,7 @@ export class Attachment implements IAttachment, IPathSetter {
   private _id: number | null = null
   private _url: string = ''
   private _label: string = ''
+  // @TODO: add an _uploadedAt field
 
   /**
    * creates an instance from another object
