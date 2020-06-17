@@ -37,7 +37,6 @@ export default class Device {
   private _customFields: CustomTextField[] = []
   private _attachments: Attachment[] = []
 
-  // TODO: Attachments
   // TODO: Events
 
   get id (): number | null {
