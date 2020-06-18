@@ -80,6 +80,8 @@ export default class SmsService {
   }
 
   static findPlatformById (id: string): Promise<Platform> {
+    // TODO: Think about also including the contacts
+    // with ?include=contacts
     return axios.get(BASE_URL + '/platforms/' + id).then((rawResponse) => {
       const entry = rawResponse.data.data
       return this.serverPlatformResponseToEntity(entry)
@@ -110,11 +112,31 @@ export default class SmsService {
         // TODO: serialNumber
         short_name: platform.shortName,
         // TODO: statusUri
-        url: platform.website
+        url: platform.website,
         // TODO: handle contacts
         // TODO: Handle attachments
 
+        // TODO: Remove type
+        type: ''
+
       }
+      /*
+      relationships: {
+        contacts: {
+          data: [
+            {
+              type: 'contact',
+              id: 1,
+            },
+            {
+              type: 'contact',
+              id: 2
+            }
+          ]
+        }
+
+      }
+      */
     }
     let url = BASE_URL + '/platforms'
 
@@ -156,8 +178,42 @@ export default class SmsService {
         serial_number: device.serialNumber,
         short_name: device.shortName,
         // TODO: Add statusName & statusUri
-        url: device.website
+        url: device.website,
+
+        // TODO remove
+        type: ''
+
+        /*
+        customFields: [
+          {
+            key: 'key1',
+            value: 'value1'
+          },
+          {
+            key: 'key2',
+            value: 'value2
+          }
+        ]
+        */
       }
+
+      /*
+      relationships: {
+        contacts: {
+          data: [
+            {
+              type: 'contact',
+              id: 1,
+            },
+            {
+              type: 'contact',
+              id: 2
+            }
+          ]
+        }
+
+      }
+      */
     }
     let url = BASE_URL + '/devices'
 
@@ -182,7 +238,10 @@ export default class SmsService {
   }
 
   static findAllPlatforms (): Promise<Platform[]> {
-    return axios.get(BASE_URL + '/platforms').then((rawResponse) => {
+    // TODO: Think about also including the contacts
+    // with ?include=contacts
+    // size for having one query to get all the platforms (no pagination)
+    return axios.get(BASE_URL + '/platforms?page[size]=100000').then((rawResponse) => {
       const rawData = rawResponse.data
       const result: Platform[] = []
 
@@ -195,7 +254,10 @@ export default class SmsService {
   }
 
   static findAllDevices (): Promise<Device[]> {
-    return axios.get(BASE_URL + '/devices').then((rawResonse) => {
+    // TODO: Think about also including the contacts
+    // with ?include=contacts
+    // size for having one query to get all the devices (no pagination)
+    return axios.get(BASE_URL + '/devices?page[size]=100000').then((rawResonse) => {
       const rawData = rawResonse.data
       const result: Device[] = []
 
@@ -208,6 +270,8 @@ export default class SmsService {
   }
 
   static findDeviceById (id: string): Promise<Device> {
+    // TODO: Think about also including the contacts
+    // with ?include=contacts
     return axios.get(BASE_URL + '/devices/' + id).then((rawResponse) => {
       const entry = rawResponse.data.data
       return this.serverDeviceResponseToEntity(entry)

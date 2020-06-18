@@ -14,19 +14,12 @@
       </v-btn>
     </v-snackbar>
 
-    <!-- Then the breadcrumps for navigation -->
-    <v-breadcrumbs :items="navigation" />
-    <h1>{{ verb }} Platform</h1>
-
     <v-form>
       <v-card outlined>
-        <v-tabs
-          v-model="activeTabIdx"
-          background-color="grey lighten-3"
+        <v-tabs-items
+          v-model="activeTab"
         >
-          <v-tab>Basic data</v-tab>
-          <v-tab>Contacts</v-tab>
-          <v-tab-item>
+          <v-tab-item :eager="true">
             <!-- Basic data tab -->
             <v-card
               flat
@@ -63,8 +56,6 @@
                 </v-row>
                 <v-row>
                   <v-col cols="12" md="3">
-                    <!-- TODO: Auch hier den Namen und die URI ändern!!!
-                    -->
                     <v-combobox
                       v-model="platformPlatformTypeName"
                       label="Platform type"
@@ -112,6 +103,7 @@
                       v-model="platform.website"
                       label="Website"
                       placeholder="https://"
+                      type="url"
                       :readonly="readonly"
                       :disabled="readonly"
                     />
@@ -131,18 +123,10 @@
                   </v-col>
                 </v-row>
               </v-card-text>
-              <v-card-actions>
-                <v-btn
-                  text
-                  @click="nextTab"
-                >
-                  next ❯
-                </v-btn>
-              </v-card-actions>
             </v-card>
           </v-tab-item>
-          <!-- contacts tab -->
-          <v-tab-item>
+          <!-- contact tab -->
+          <v-tab-item :eager="true">
             <v-card
               flat
             >
@@ -156,46 +140,22 @@
                   </v-col>
                 </v-row>
               </v-card-text>
-              <v-card-actions>
-                <v-btn
-                  text
-                  @click="previousTab"
-                >
-                  ❮ previous
-                </v-btn>
-              </v-card-actions>
             </v-card>
           </v-tab-item>
-        </v-tabs>
-        <!-- Buttons for all tabs -->
-        <div v-if="!isInEditMode">
-          <v-btn
-            fab
-            fixed
-            bottom
-            right
-            color="secondary"
-            @click="switchIntoEditMode"
-          >
-            <v-icon>
-              mdi-pencil
-            </v-icon>
-          </v-btn>
-        </div>
-        <div v-if="isInEditMode">
-          <v-btn
-            fab
-            fixed
-            bottom
-            right
-            color="primary"
-            @click="save"
-          >
-            <v-icon>
-              mdi-content-save
-            </v-icon>
-          </v-btn>
-        </div>
+        </v-tabs-items>
+        <v-btn
+          v-if="!isInEditMode"
+          fab
+          fixed
+          bottom
+          right
+          color="secondary"
+          @click="toggleEditMode"
+        >
+          <v-icon>
+            mdi-pencil
+          </v-icon>
+        </v-btn>
       </v-card>
     </v-form>
   </div>
@@ -206,9 +166,9 @@
 </style>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
+import { Component, Vue, Watch } from 'nuxt-property-decorator'
 
-import VCService from '../../../services/VCService'
+import CVService from '../../../services/CVService'
 import SmsService from '../../../services/SmsService'
 
 import Platform from '../../../models/Platform'
@@ -218,6 +178,22 @@ import ContactSelect from '../../../components/ContactSelect.vue'
 import Manufacturer from '../../../models/Manufacturer'
 import PlatformType from '../../../models/PlatformType'
 import Status from '../../../models/Status'
+
+// @ts-ignore
+import AppBarEditModeContent from '@/components/AppBarEditModeContent.vue'
+// @ts-ignore
+import AppBarTabsExtension from '@/components/AppBarTabsExtension.vue'
+
+@Component
+// @ts-ignore
+export class AppBarTabsExtensionExtended extends AppBarTabsExtension {
+  get tabs (): String[] {
+    return [
+      'Basic Data',
+      'Persons'
+    ]
+  }
+}
 
 @Component({
   components: { ContactSelect }
@@ -234,10 +210,29 @@ export default class PlatformIdPage extends Vue {
   private platform: Platform = Platform.createEmpty()
 
   // and some general data for the page
-  private activeTabIdx: number = 0
+  private activeTab: number = 0
   private showSaveSuccess: boolean = false
   private showLoadingError: boolean = false
-  private isInEditMode: boolean = false
+  private editMode: boolean = false
+
+  created () {
+    this.$nuxt.$emit('app-bar-content', AppBarEditModeContent)
+    this.$nuxt.$on('AppBarContent:save-button-click', () => {
+      this.save()
+    })
+    this.$nuxt.$on('AppBarContent:cancel-button-click', () => {
+      if (this.platform && this.platform.id) {
+        this.toggleEditMode()
+      } else {
+        this.$router.push('/devices')
+      }
+    })
+
+    this.$nuxt.$emit('app-bar-extension', AppBarTabsExtensionExtended)
+    this.$nuxt.$on('AppBarExtension:change', (tab: number) => {
+      this.activeTab = tab
+    })
+  }
 
   private rules: Object = {
     required: (v: string) => !!v || 'Required'
@@ -245,16 +240,33 @@ export default class PlatformIdPage extends Vue {
 
   mounted () {
     this.showLoadingError = false
-    VCService.findAllManufacturers().then((foundManufacturers) => {
+    CVService.findAllManufacturers().then((foundManufacturers) => {
       this.manufacturers = foundManufacturers
     })
-    VCService.findAllPlatformTypes().then((foundPlatformTypes) => {
+    CVService.findAllPlatformTypes().then((foundPlatformTypes) => {
       this.platformTypes = foundPlatformTypes
     })
-    VCService.findAllStates().then((foundStates) => {
+    CVService.findAllStates().then((foundStates) => {
       this.states = foundStates
     })
     this.loadPlatform()
+
+    // make sure that all components (especially the dynamically passed ones) are rendered
+    this.$nextTick(() => {
+      if (!this.$route.params.id) {
+        this.$nuxt.$emit('AppBarContent:title', 'Add Platform')
+      }
+      this.$nuxt.$emit('AppBarContent:save-button-hidden', !this.editMode)
+      this.$nuxt.$emit('AppBarContent:cancel-button-hidden', !this.editMode)
+    })
+  }
+
+  beforeDestroy () {
+    this.$nuxt.$emit('app-bar-content', null)
+    this.$nuxt.$emit('app-bar-extension', null)
+    this.$nuxt.$off('AppBarContent:save-button-click')
+    this.$nuxt.$off('AppBarContent:cancel-button-click')
+    this.$nuxt.$off('AppBarExtension:change')
   }
 
   loadPlatform () {
@@ -272,6 +284,25 @@ export default class PlatformIdPage extends Vue {
     }
   }
 
+  get isInEditMode (): boolean {
+    return this.editMode
+  }
+
+  set isInEditMode (editMode: boolean) {
+    this.editMode = editMode
+  }
+
+  toggleEditMode () {
+    this.isInEditMode = !this.isInEditMode
+  }
+
+  @Watch('editMode', { immediate: true, deep: true })
+  // @ts-ignore
+  onEditModeChanged (editMode: boolean) {
+    this.$nuxt.$emit('AppBarContent:save-button-hidden', !editMode)
+    this.$nuxt.$emit('AppBarContent:cancel-button-hidden', !editMode)
+  }
+
   // methods
   save () {
     this.showSaveSuccess = false
@@ -279,19 +310,8 @@ export default class PlatformIdPage extends Vue {
       this.platform = savedPlatform
       this.showSaveSuccess = true
       // this.$router.push('/devices')
+      this.toggleEditMode()
     })
-  }
-
-  switchIntoEditMode () {
-    this.isInEditMode = true
-  }
-
-  previousTab () {
-    this.activeTabIdx -= 1
-  }
-
-  nextTab () {
-    this.activeTabIdx += 1
   }
 
   get platformURN () {
@@ -299,8 +319,6 @@ export default class PlatformIdPage extends Vue {
     const removeWhitespace = (text: string) => {
       return text.replace(' ', '_')
     }
-    // TODO: I don't have the platform type
-    // I just have the platformTypeUri
     let partPlatformType = '[platformtype]'
     if (this.platform.platformTypeUri !== '') {
       const ptIndex = this.platformTypes.findIndex(pt => pt.uri === this.platform.platformTypeUri)
@@ -317,43 +335,8 @@ export default class PlatformIdPage extends Vue {
     return partPlatformType + '_' + partShortName
   }
 
-  get verb (): string {
-    // return the verb (do we add a platform or do we edit one?)
-    let verb = 'Add'
-    if (this.$route.params.id) {
-      if (this.isInEditMode) {
-        verb = 'Edit'
-      } else {
-        verb = 'View'
-      }
-    }
-    return verb
-  }
-
   get readonly () {
     return !this.isInEditMode
-  }
-
-  get navigation () {
-    // navigation for the breadcrumps
-    return [
-      {
-        disabled: false,
-        exact: true,
-        to: '/',
-        text: 'Home'
-      },
-      {
-        disabled: false,
-        exact: true,
-        to: '/devices',
-        text: 'Devices'
-      },
-      {
-        disabled: true,
-        text: this.verb + ' Platform'
-      }
-    ]
   }
 
   get manufacturerNames () : string[] {
@@ -419,6 +402,14 @@ export default class PlatformIdPage extends Vue {
       this.platform.platformTypeUri = this.platformTypes[platformTypeIndex].uri
     } else {
       this.platform.platformTypeUri = ''
+    }
+  }
+
+@Watch('platform', { immediate: true, deep: true })
+  // @ts-ignore
+  onPlatformChanged (val: Platform) {
+    if (val.id) {
+      this.$nuxt.$emit('AppBarContent:title', 'Platform ' + val.shortName)
     }
   }
 }

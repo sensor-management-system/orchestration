@@ -67,8 +67,15 @@
       app
     >
       <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
-      <v-toolbar-title v-text="title" />
-      <v-spacer />
+      <template v-if="appBarContent">
+        <Component :is="appBarContent" />
+      </template>
+      <template v-else>
+        <v-toolbar-title v-text="title" />
+      </template>
+      <template v-if="appBarExtension" v-slot:extension>
+        <Component :is="appBarExtension" />
+      </template>
     </v-app-bar>
     <v-content>
       <v-container>
@@ -92,8 +99,18 @@ export default {
       drawer: false,
       fixed: false,
       miniVariant: false,
-      title: 'Sensor System Management'
+      title: 'Sensor Management System',
+      appBarContent: null,
+      appBarExtension: null
     }
+  },
+  created () {
+    this.$nuxt.$on('app-bar-content', (component) => {
+      this.appBarContent = component
+    })
+    this.$nuxt.$on('app-bar-extension', (component) => {
+      this.appBarExtension = component
+    })
   }
 }
 </script>
