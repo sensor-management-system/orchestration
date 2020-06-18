@@ -1,4 +1,12 @@
-export default class Status {
+import IPathSetter from './IPathSetter'
+
+export interface IStatus {
+  id: number | null
+  name: string
+  uri: string
+}
+
+export default class Status implements IStatus, IPathSetter {
   private _id: number | null = null
   private _name: string = ''
   private _uri: string = ''
@@ -31,11 +39,44 @@ export default class Status {
     return this._name
   }
 
+  setPath (path: string, value: any): void {
+    const pathArray = path.split('.')
+    const topLevelElement = pathArray.splice(0, 1)[0]
+
+    switch (topLevelElement) {
+      case 'id':
+        if (value !== null) {
+          this.id = Number(value)
+        } else {
+          this.id = null
+        }
+        break
+      case 'name':
+        this.name = String(value)
+        break
+      case 'uri':
+        this.uri = String(value)
+        break
+      default:
+        throw new TypeError('path ' + path + ' is not value')
+    }
+  }
+
   static createWithData (id: number | null, name: string, uri: string): Status {
     const result = new Status()
     result.id = id
     result.name = name
     result.uri = uri
     return result
+  }
+
+  static createFromObject (someObject: IStatus): Status {
+    const newObject = new Status()
+
+    newObject.id = someObject.id
+    newObject.name = someObject.name
+    newObject.uri = someObject.uri
+
+    return newObject
   }
 }

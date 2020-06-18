@@ -6,17 +6,11 @@
         <v-icon>mdi-close</v-icon>
       </v-btn>
     </v-snackbar>
-    <v-breadcrumbs :items="navigation" />
-    <h1>Devices</h1>
-
     <v-card>
-      <v-tabs
-        v-model="activeSearchTypeTabIdx"
-        background-color="grey lighten-3"
+      <v-tabs-items
+        v-model="activeTab"
       >
-        <v-tab>Basic search</v-tab>
-        <v-tab>Extended search</v-tab>
-        <v-tab-item>
+        <v-tab-item :eager="true">
           <v-card
             flat
           >
@@ -42,7 +36,7 @@
             </v-card-text>
           </v-card>
         </v-tab-item>
-        <v-tab-item>
+        <v-tab-item :eager="true">
           <v-card>
             <v-card-text>
               <v-row>
@@ -50,7 +44,7 @@
                   <v-text-field v-model="searchText" label="Name" placeholder="Name of device" />
                 </v-col>
                 <v-col cols="12" md="3">
-                  <v-select v-model="selectedSearchType" label="search type" placeholder="Platform / Sensor" :items="searchTypes" />
+                  <v-select v-model="selectedSearchType" label="search type" :placeholder="searchTypePlaceholder" :items="searchTypes" />
                 </v-col>
               </v-row>
               <v-row>
@@ -84,7 +78,7 @@
                     color="brown"
                     text-color="white"
                     :close="true"
-                    @click:close="removeManufacture(index)"
+                    @click:close="removeManufacturer(index)"
                   >
                     {{ manufacturer }}
                   </v-chip>
@@ -101,7 +95,7 @@
             </v-card-actions>
           </v-card>
         </v-tab-item>
-      </v-tabs>
+      </v-tabs-items>
     </v-card>
 
     <h2>Results:</h2>
@@ -177,15 +171,44 @@
         </v-dialog>
       </v-card-actions>
     </v-card>
-
-    <v-card>
-      <v-btn to="/devices/platforms">
-        Add Platform
+    <v-speed-dial
+      v-model="fab"
+      fixed
+      bottom
+      right
+      direction="top"
+      open-on-hover
+    >
+      <template v-slot:activator>
+        <v-btn
+          v-model="fab"
+          color="blue darken-2"
+          dark
+          fab
+        >
+          <v-icon v-if="fab">
+            mdi-close
+          </v-icon>
+          <v-icon v-else>
+            mdi-plus
+          </v-icon>
+        </v-btn>
+      </template>
+      <v-btn
+        rounded
+        to="/devices/platforms"
+        color="primary"
+      >
+        Add platform
       </v-btn>
-      <v-btn to="/devices/devices">
-        Add Device
+      <v-btn
+        rounded
+        to="/devices/devices"
+        color="primary"
+      >
+        Add device
       </v-btn>
-    </v-card>
+    </v-speed-dial>
   </div>
 </template>
 
@@ -203,9 +226,26 @@ import Manufacturer from '../../models/Manufacturer'
 import PlatformType from '../../models/PlatformType'
 import Status from '../../models/Status'
 
+// @ts-ignore
+import AppBarEditModeContent from '@/components/AppBarEditModeContent.vue'
+// @ts-ignore
+import AppBarTabsExtension from '@/components/AppBarTabsExtension.vue'
+
+@Component
+// @ts-ignore
+export class AppBarTabsExtensionExtended extends AppBarTabsExtension {
+  get tabs (): String[] {
+    return [
+      'Search',
+      'Extended Search'
+    ]
+  }
+}
+
 @Component
 export default class DevicesIndexPage extends Vue {
-  private activeSearchTypeTabIdx: number = 0
+  private activeTab: number = 0
+  private fab: boolean = false
 
   private searchManufacturers: Manufacturer[] = []
   private selectedSearchManufacturers: Manufacturer[] = []
@@ -224,6 +264,14 @@ export default class DevicesIndexPage extends Vue {
   private showDeleteDeviceDialog: boolean = false
   private showSuccessMessage: boolean = false
   private successMessage = ''
+
+  created () {
+    this.$nuxt.$emit('app-bar-content', AppBarEditModeContent)
+    this.$nuxt.$emit('app-bar-extension', AppBarTabsExtensionExtended)
+    this.$nuxt.$on('AppBarExtension:change', (tab: number) => {
+      this.activeTab = tab
+    })
+  }
 
   mounted () {
     CVService.findAllManufacturers().then((manufacturers) => {
@@ -250,10 +298,20 @@ export default class DevicesIndexPage extends Vue {
         this.runSelectedSearch()
       })
     })
+    // make sure that all components (especially the dynamically passed ones) are rendered
+    this.$nextTick(() => {
+      this.$nuxt.$emit('AppBarContent:title', 'Devices')
+    })
+  }
+
+  beforeDestroy () {
+    this.$nuxt.$emit('app-bar-content', null)
+    this.$nuxt.$emit('app-bar-extension', null)
+    this.$nuxt.$off('AppBarExtension:change')
   }
 
   runSelectedSearch () {
-    if (this.activeSearchTypeTabIdx === 0) {
+    if (this.activeTab === 0) {
       this.basicSearch()
     } else {
       this.extendedSearch()
@@ -299,7 +357,7 @@ export default class DevicesIndexPage extends Vue {
     this.manufacturerToAdd = null
   }
 
-  removeManufacture (index: number) {
+  removeManufacturer (index: number) {
     this.$delete(this.selectedSearchManufacturers, index)
   }
 
@@ -356,21 +414,6 @@ export default class DevicesIndexPage extends Vue {
       }
     }
     return result
-  }
-
-  get navigation () {
-    return [
-      {
-        disabled: false,
-        exact: true,
-        to: '/',
-        text: 'Home'
-      },
-      {
-        disabled: true,
-        text: 'Devices'
-      }
-    ]
   }
 }
 

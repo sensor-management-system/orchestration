@@ -1,22 +1,13 @@
 <template>
   <div>
-    <v-breadcrumbs :items="navigation" />
-    <h1>Add Device</h1>
     <v-form>
       <v-card
         outlined
       >
-        <v-tabs
+        <v-tabs-items
           v-model="activeTab"
-          background-color="grey lighten-3"
         >
-          <v-tab>Basic Data</v-tab>
-          <v-tab>Persons</v-tab>
-          <v-tab>Properties</v-tab>
-          <v-tab>Custom Fields</v-tab>
-          <v-tab>Attachments</v-tab>
-          <v-tab>Events</v-tab>
-          <v-tab-item>
+          <v-tab-item :eager="true">
             <v-card
               flat
             >
@@ -135,17 +126,9 @@
                   </v-col>
                 </v-row>
               </v-card-text>
-              <v-card-actions>
-                <v-btn
-                  text
-                  @click="nextTab(1)"
-                >
-                  next ❯
-                </v-btn>
-              </v-card-actions>
             </v-card>
           </v-tab-item>
-          <v-tab-item>
+          <v-tab-item :eager="true">
             <v-card
               flat
             >
@@ -157,23 +140,9 @@
                   </v-col>
                 </v-row>
               </v-card-text>
-              <v-card-actions>
-                <v-btn
-                  text
-                  @click="previousTab"
-                >
-                  ❮ previous
-                </v-btn>
-                <v-btn
-                  text
-                  @click="nextTab"
-                >
-                  next ❯
-                </v-btn>
-              </v-card-actions>
             </v-card>
           </v-tab-item>
-          <v-tab-item>
+          <v-tab-item :eager="true">
             <v-card
               flat
             >
@@ -181,23 +150,9 @@
               <v-card-text>
                 <DevicePropertyExpansionPanels v-model="device.properties" :readonly="readonly" />
               </v-card-text>
-              <v-card-actions>
-                <v-btn
-                  text
-                  @click="previousTab"
-                >
-                  ❮ previous
-                </v-btn>
-                <v-btn
-                  text
-                  @click="nextTab"
-                >
-                  next ❯
-                </v-btn>
-              </v-card-actions>
             </v-card>
           </v-tab-item>
-          <v-tab-item>
+          <v-tab-item :eager="true">
             <v-card
               flat
             >
@@ -205,23 +160,9 @@
               <v-card-text>
                 <CustomFieldCards v-model="device.customFields" :readonly="readonly" />
               </v-card-text>
-              <v-card-actions>
-                <v-btn
-                  text
-                  @click="previousTab"
-                >
-                  ❮ previous
-                </v-btn>
-                <v-btn
-                  text
-                  @click="nextTab"
-                >
-                  next ❯
-                </v-btn>
-              </v-card-actions>
             </v-card>
           </v-tab-item>
-          <v-tab-item>
+          <v-tab-item :eager="true">
             <v-card
               flat
             >
@@ -286,17 +227,9 @@
                   </v-timeline-item>
                 </v-timeline>
               </v-card-text>
-              <v-card-actions>
-                <v-btn
-                  text
-                  @click="previousTab"
-                >
-                  ❮ previous
-                </v-btn>
-              </v-card-actions>
             </v-card>
           </v-tab-item>
-        </v-tabs>
+        </v-tabs-items>
         <v-btn
           v-if="!isInEditMode"
           fab
@@ -310,17 +243,6 @@
             mdi-pencil
           </v-icon>
         </v-btn>
-        <v-btn
-          v-if="isInEditMode"
-          fab
-          fixed
-          bottom
-          right
-          color="primary"
-          @click="save"
-        >
-          <v-icon>mdi-content-save</v-icon>
-        </v-btn>
       </v-card>
     </v-form>
   </div>
@@ -330,6 +252,11 @@
 import { Vue, Component, Watch } from 'nuxt-property-decorator'
 import Device from '../../../models/Device'
 
+import CVService from '../../../services/CVService'
+import SmsService from '../../../services/SmsService'
+import Manufacturer from '../../../models/Manufacturer'
+import Status from '../../../models/Status'
+
 // @ts-ignore
 import ContactSelect from '../../../components/ContactSelect.vue'
 // @ts-ignore
@@ -338,11 +265,26 @@ import DevicePropertyExpansionPanels from '../../../components/DevicePropertyExp
 import CustomFieldCards from '../../../components/CustomFieldCards.vue'
 // @ts-ignore
 import AttachmentList from '../../../components/AttachmentList.vue'
+// @ts-ignore
+import AppBarEditModeContent from '@/components/AppBarEditModeContent.vue'
 
-import CVService from '../../../services/CVService'
-import SmsService from '../../../services/SmsService'
-import Manufacturer from '../../../models/Manufacturer'
-import Status from '../../../models/Status'
+// @ts-ignore
+import AppBarTabsExtension from '@/components/AppBarTabsExtension.vue'
+
+@Component
+// @ts-ignore
+export class AppBarTabsExtensionExtended extends AppBarTabsExtension {
+  get tabs (): String[] {
+    return [
+      'Basic Data',
+      'Persons',
+      'Properties',
+      'Custom Fields',
+      'Attachments',
+      'Events'
+    ]
+  }
+}
 
 @Component({
   components: {
@@ -362,7 +304,26 @@ export default class DeviceIdPage extends Vue {
   private states: Status[] = []
   private manufacturers: Manufacturer[] = []
 
-  private isInEditMode: boolean = false
+  private editMode: boolean = false
+
+  created () {
+    this.$nuxt.$emit('app-bar-content', AppBarEditModeContent)
+    this.$nuxt.$on('AppBarContent:save-button-click', () => {
+      this.save()
+    })
+    this.$nuxt.$on('AppBarContent:cancel-button-click', () => {
+      if (this.device && this.device.id) {
+        this.toggleEditMode()
+      } else {
+        this.$router.push('/devices')
+      }
+    })
+
+    this.$nuxt.$emit('app-bar-extension', AppBarTabsExtensionExtended)
+    this.$nuxt.$on('AppBarExtension:change', (tab: number) => {
+      this.activeTab = tab
+    })
+  }
 
   mounted () {
     CVService.findAllStates().then((foundStates) => {
@@ -373,6 +334,21 @@ export default class DeviceIdPage extends Vue {
       this.manufacturers = foundManufacturers
     })
     this.loadDevice()
+    this.$nextTick(() => {
+      if (!this.$route.params.id) {
+        this.$nuxt.$emit('AppBarContent:title', 'Add Device')
+      }
+      this.$nuxt.$emit('AppBarContent:save-button-hidden', !this.editMode)
+      this.$nuxt.$emit('AppBarContent:cancel-button-hidden', !this.editMode)
+    })
+  }
+
+  beforeDestroy () {
+    this.$nuxt.$emit('app-bar-content', null)
+    this.$nuxt.$emit('app-bar-extension', null)
+    this.$nuxt.$off('AppBarContent:save-button-click')
+    this.$nuxt.$off('AppBarContent:cancel-button-click')
+    this.$nuxt.$off('AppBarExtension:change')
   }
 
   loadDevice () {
@@ -387,13 +363,14 @@ export default class DeviceIdPage extends Vue {
     }
   }
 
-  toggleEditMode () {
-    this.isInEditMode = !this.isInEditMode
+  get isInEditMode (): boolean {
+    return this.editMode
   }
 
   save () {
     SmsService.saveDevice(this.device).then((savedDevice) => {
       this.device = savedDevice
+      this.toggleEditMode()
     })
   }
 
@@ -426,37 +403,23 @@ export default class DeviceIdPage extends Vue {
     )
   }
 
-  previousTab () {
-    this.activeTab = this.activeTab === 0 ? this.numberOfTabs - 1 : this.activeTab - 1
+  set isInEditMode (editMode: boolean) {
+    this.editMode = editMode
   }
 
-  nextTab () {
-    this.activeTab = this.activeTab === this.numberOfTabs - 1 ? 0 : this.activeTab + 1
+  @Watch('editMode', { immediate: true, deep: true })
+  // @ts-ignore
+  onEditModeChanged (editMode: boolean) {
+    this.$nuxt.$emit('AppBarContent:save-button-hidden', !editMode)
+    this.$nuxt.$emit('AppBarContent:cancel-button-hidden', !editMode)
+  }
+
+  toggleEditMode () {
+    this.isInEditMode = !this.isInEditMode
   }
 
   get readonly () {
     return !this.isInEditMode
-  }
-
-  get navigation () {
-    return [
-      {
-        disabled: false,
-        exact: true,
-        to: '/',
-        text: 'Home'
-      },
-      {
-        disabled: false,
-        exact: true,
-        to: '/devices',
-        text: 'Devices'
-      },
-      {
-        disabled: true,
-        text: 'Add Device'
-      }
-    ]
   }
 
   get manufacturerNames (): string[] {
@@ -505,10 +468,10 @@ export default class DeviceIdPage extends Vue {
 
   @Watch('device', { immediate: true, deep: true })
   // @ts-ignore
-  onDeviceChanged (val: device) {
-    // @TODO: remove!
-    // eslint-disable-next-line
-    console.log('something changed in the device', val)
+  onDeviceChanged (val: Device) {
+    if (val.id) {
+      this.$nuxt.$emit('AppBarContent:title', 'Device ' + val.shortName)
+    }
   }
 }
 </script>
