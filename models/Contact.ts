@@ -71,7 +71,11 @@ export default class Contact implements IContact, IPathSetter {
 
     switch (topLevelElement) {
       case 'id':
-        this.id = Number(value)
+        if (value !== null) {
+          this.id = Number(value)
+        } else {
+          this.id = null
+        }
         break
       case 'email':
         this.email = String(value)
