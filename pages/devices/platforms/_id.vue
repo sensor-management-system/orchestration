@@ -93,20 +93,29 @@
                 </v-row>
                 <v-divider />
                 <v-row>
-                  <v-col cols="12" md="5">
+                  <v-col cols="12" md="9">
                     <v-textarea v-model="platform.description" label="Description" rows="3" :readonly="readonly" :disabled="readonly" />
                   </v-col>
                 </v-row>
                 <v-row>
-                  <v-col cols="12" md="3">
+                  <v-col cols="12" md="9">
                     <v-text-field
+                      v-if="readonly"
                       v-model="platform.website"
                       label="Website"
                       placeholder="https://"
                       type="url"
-                      :readonly="readonly"
-                      :disabled="readonly"
-                    />
+                      :readonly="true"
+                      :disabled="true"
+                    >
+                      <template slot="append">
+                        <a v-if="platform.website.length > 0" :href="platform.website" target="_blank">
+                          <v-icon>
+                            mdi-open-in-new
+                          </v-icon>
+                        </a>
+                      </template>
+                    </v-text-field>
                   </v-col>
                 </v-row>
                 <v-row>

@@ -74,7 +74,7 @@
                 </v-row>
                 <v-divider />
                 <v-row>
-                  <v-col cols="12" md="6">
+                  <v-col cols="12" md="9">
                     <v-textarea
                       v-model="device.description"
                       label="Description"
@@ -85,14 +85,30 @@
                   </v-col>
                 </v-row>
                 <v-row>
-                  <v-col cols="12" md="3">
+                  <v-col cols="12" md="9">
                     <v-text-field
+                      v-if="readonly"
                       v-model="device.website"
                       label="Website"
                       placeholder="https://"
                       type="url"
-                      :readonly="readonly"
-                      :disabled="readonly"
+                      :readonly="true"
+                      :disabled="true"
+                    >
+                      <template slot="append">
+                        <a v-if="device.website.length > 0" :href="device.website" target="_blank">
+                          <v-icon>
+                            mdi-open-in-new
+                          </v-icon>
+                        </a>
+                      </template>
+                    </v-text-field>
+                    <v-text-field
+                      v-else
+                      v-model="device.website"
+                      label="Website"
+                      placeholder="https://"
+                      type="url"
                     />
                   </v-col>
                 </v-row>
