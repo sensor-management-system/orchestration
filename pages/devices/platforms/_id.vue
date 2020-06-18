@@ -85,7 +85,7 @@
                 </v-row>
                 <v-divider />
                 <v-row>
-                  <v-col cols="12" md="5">
+                  <v-col cols="12" md="9">
                     <v-textarea v-model="platform.description" label="description" rows="3" :readonly="readonly" :disabled="readonly" />
                   </v-col>
                 </v-row>
