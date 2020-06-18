@@ -1,5 +1,11 @@
 <template>
   <div>
+    <v-snackbar v-model="showSuccessMessage" top color="success">
+      {{ successMessage }}
+      <v-btn fab @click="showSaveSuccess = false">
+        <v-icon>mdi-close</v-icon>
+      </v-btn>
+    </v-snackbar>
     <v-card>
       <v-tabs-items
         v-model="activeTab"
@@ -14,7 +20,7 @@
                   <v-text-field v-model="searchText" label="Name" placeholder="Name of device" />
                 </v-col>
                 <v-col cols="12" md="3">
-                  <v-select v-model="selectedSearchType" label="Type" placeholder="Platform / Sensor" :items="searchTypes" />
+                  <v-select v-model="selectedSearchType" label="Type" :placeholder="searchTypePlaceholder" :items="searchTypes" />
                 </v-col>
                 <v-col cols="12" md="2">
                   <v-btn @click="basicSearch">
@@ -38,17 +44,15 @@
                   <v-text-field v-model="searchText" label="Name" placeholder="Name of device" />
                 </v-col>
                 <v-col cols="12" md="3">
-                  <v-select label="Type" placeholder="Platform / Sensor" :items="searchTypes" />
+                  <v-select v-model="selectedSearchType" label="search type" :placeholder="searchTypePlaceholder" :items="searchTypes" />
                 </v-col>
               </v-row>
               <v-row>
                 <v-col cols="12" md="3">
                   <v-autocomplete
-                    v-model="manufactureToAdd"
-                    label="add manufacture"
-                    :items="notSelectedManufactures"
-                    :item-text="(x) => x.name"
-                    :item-value="(x) => x"
+                    v-model="manufacturerToAdd"
+                    label="add manufacturer"
+                    :items="notSelectedManufacturers"
                   />
                 </v-col>
                 <v-col cols="12" md="3">
@@ -56,8 +60,8 @@
                     fab
                     depressed
                     small
-                    :disabled="manufactureToAdd == null"
-                    @click="addSelectedManufacture"
+                    :disabled="manufacturerToAdd == null"
+                    @click="addSelectedManufacturer"
                   >
                     <v-icon>
                       mdi-plus
@@ -68,93 +72,15 @@
               <v-row>
                 <v-col cols="3">
                   <v-chip
-                    v-for="(manufacture, index) in selectedSearchManufactures"
-                    :key="manufacture.id"
+                    v-for="(manufacturer, index) in selectedSearchManufacturers"
+                    :key="manufacturer.id"
                     class="ma-2"
                     color="brown"
                     text-color="white"
                     :close="true"
-                    @click:close="removeManufacture(index)"
+                    @click:close="removeManufacturer(index)"
                   >
-                    {{ manufacture.name }}
-                  </v-chip>
-                </v-col>
-              </v-row>
-              <v-row>
-                <v-col cols="12" md="3">
-                  <v-autocomplete
-                    v-model="instituteToAdd"
-                    label="add institute"
-                    :items="notSelectedInstitutes"
-                    :item-text="(x) => x.name"
-                    :item-value="(x) => x"
-                  />
-                </v-col>
-                <v-col cols="12" md="3">
-                  <v-btn
-                    fab
-                    depressed
-                    small
-                    :disabled="instituteToAdd == null"
-                    @click="addSelectedInstitute"
-                  >
-                    <v-icon>
-                      mdi-plus
-                    </v-icon>
-                  </v-btn>
-                </v-col>
-              </v-row>
-              <v-row>
-                <v-col cols="3">
-                  <v-chip
-                    v-for="(institute, index) in selectedSearchInstitutes"
-                    :key="institute.id"
-                    class="ma-2"
-                    color="blue"
-                    text-color="white"
-                    :close="true"
-                    @click:close="removeInstitute(index)"
-                  >
-                    {{ institute.name }}
-                  </v-chip>
-                </v-col>
-              </v-row>
-              <v-row>
-                <v-col cols="12" md="3">
-                  <v-autocomplete
-                    v-model="parameterToAdd"
-                    label="add parameter"
-                    :items="notSelectedParameters"
-                    :item-text="(x) => x.name"
-                    :item-value="(x) => x"
-                  />
-                </v-col>
-                <v-col cols="12" md="3">
-                  <v-btn
-                    fab
-                    depressed
-                    small
-                    :disabled="parameterToAdd == null"
-                    @click="addSelectedParameter"
-                  >
-                    <v-icon>
-                      mdi-plus
-                    </v-icon>
-                  </v-btn>
-                </v-col>
-              </v-row>
-              <v-row>
-                <v-col cols="3">
-                  <v-chip
-                    v-for="(parameter, index) in selectedSearchParameter"
-                    :key="parameter.id"
-                    class="ma-2"
-                    color="pink"
-                    text-color="white"
-                    :close="true"
-                    @click:close="removeParameter(index)"
-                  >
-                    {{ parameter.name }}
+                    {{ manufacturer }}
                   </v-chip>
                 </v-col>
               </v-row>
@@ -173,25 +99,76 @@
     </v-card>
 
     <h2>Results:</h2>
-    <v-card v-for="result in searchResults" :key="result.id">
+    <v-card v-for="result in searchResults" :key="result.searchType + result.id">
       <v-card-title>
         {{ result.name }}
       </v-card-title>
       <v-card-text>
         <p>{{ result.type }}</p>
         <p>Project {{ result.project }}</p>
-        <p>State {{ result.state }}</p>
+        <p>Status {{ result.status }}</p>
       </v-card-text>
-      <v-card-actions v-if="result.devicetype == 'platform'">
+      <v-card-actions v-if="isPlatform(result)">
         <v-btn :to="'/devices/platforms/' + result.id">
           View
         </v-btn>
         <v-btn>Copy</v-btn>
+        <v-btn @click.stop="showDeletePlatformDialog = true">
+          Delete
+        </v-btn>
+        <v-dialog v-model="showDeletePlatformDialog" max-width="290">
+          <v-card>
+            <v-card-title class="headline">
+              Delete platform
+            </v-card-title>
+            <v-card-text>
+              Do you really want to delete the platform <em>{{ result.name }}</em>?
+            </v-card-text>
+            <v-card-actions>
+              <v-btn @click="showDeletePlatformDialog = false">
+                No
+              </v-btn>
+              <v-spacer />
+              <v-btn color="error" @click="deletePlatformAndCloseDialog(result.id)">
+                <v-icon left>
+                  mdi-delete
+                </v-icon>
+                Delete
+              </v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
       </v-card-actions>
-      <v-card-actions v-if="result.devicetype == 'device'">
-        <v-btn>View</v-btn>
-        <v-btn>Edit</v-btn>
+      <v-card-actions v-if="isDevice(result)">
+        <v-btn :to="'devices/devices/' + result.id">
+          View
+        </v-btn>
         <v-btn>Copy</v-btn>
+        <v-btn @click.stop="showDeleteDeviceDialog = true">
+          Delete
+        </v-btn>
+        <v-dialog v-model="showDeleteDeviceDialog" max-width="290">
+          <v-card>
+            <v-card-title class="headline">
+              Delete device
+            </v-card-title>
+            <v-card-text>
+              Do you really want to delete the device <em>{{ result.name }}</em>?
+            </v-card-text>
+            <v-card-actions>
+              <v-btn @click="showDeleteDeviceDialog = false">
+                No
+              </v-btn>
+              <v-spacer />
+              <v-btn color="error" @click="deleteDeviceAndCloseDialog(result.id)">
+                <v-icon left>
+                  mdi-delete
+                </v-icon>
+                Delete
+              </v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
       </v-card-actions>
     </v-card>
     <v-speed-dial
@@ -226,10 +203,10 @@
       </v-btn>
       <v-btn
         rounded
-        to="/devices/sensors"
+        to="/devices/devices"
         color="primary"
       >
-        Add sensor
+        Add device
       </v-btn>
     </v-speed-dial>
   </div>
@@ -238,11 +215,16 @@
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 
-import MasterDataService from '../../services/MasterDataService'
-import DeviceService from '../../services/DeviceService'
+import CVService from '../../services/CVService'
+import SmsService from '../../services/SmsService'
 
-import Manufacture from '../../models/Manufacture'
-import Institute from '../../models/Institute'
+import { PlatformOrDeviceSearchType } from '../../enums/PlatformOrDeviceSearchType'
+
+import { IDeviceOrPlatformSearchObject } from '../../models/IDeviceOrPlatformSearchObject'
+import { PlatformOrDeviceType } from '../../enums/PlatformOrDeviceType'
+import Manufacturer from '../../models/Manufacturer'
+import PlatformType from '../../models/PlatformType'
+import Status from '../../models/Status'
 
 // @ts-ignore
 import AppBarEditModeContent from '@/components/AppBarEditModeContent.vue'
@@ -265,23 +247,23 @@ export default class DevicesIndexPage extends Vue {
   private activeTab: number = 0
   private fab: boolean = false
 
-  private searchManufactures: Manufacture[] = []
-  private selectedSearchManufactures: Manufacture[] = []
-  private manufactureToAdd: Manufacture | null = null
+  private searchManufacturers: Manufacturer[] = []
+  private selectedSearchManufacturers: Manufacturer[] = []
+  private manufacturerToAdd: Manufacturer | null = null
 
-  private searchInstitutes: Institute[] = []
-  private selectedSearchInstitutes: Institute[] = []
-  private instituteToAdd: Institute | null = null
+  private platformTypeLookup: Map<string, PlatformType> = new Map<string, PlatformType>()
+  private statusLookup: Map<string, Status> = new Map<string, Status>()
 
-  private searchParameter: Array<any> = []
-  private selectedSearchParameter: Array<any> = []
-  private parameterToAdd: any | null = null
-
-  private searchResults: Array<object> = []
+  private searchResults: Array<IDeviceOrPlatformSearchObject> = []
   private searchText: string | null = null
-  private searchTypes: string[] = ['Sensor / Platform', 'Sensor', 'Platform']
+  private searchTypes: PlatformOrDeviceSearchType[] = Object.values(PlatformOrDeviceSearchType)
 
-  private selectedSearchType: string = 'Sensor / Platform';
+  private selectedSearchType: PlatformOrDeviceSearchType = PlatformOrDeviceSearchType.PLATFORMS_AND_DEVICES
+
+  private showDeletePlatformDialog: boolean = false
+  private showDeleteDeviceDialog: boolean = false
+  private showSuccessMessage: boolean = false
+  private successMessage = ''
 
   created () {
     this.$nuxt.$emit('app-bar-content', AppBarEditModeContent)
@@ -292,17 +274,29 @@ export default class DevicesIndexPage extends Vue {
   }
 
   mounted () {
-    MasterDataService.findAllManufactures().then((manufactures) => {
-      this.searchManufactures = manufactures
+    CVService.findAllManufacturers().then((manufacturers) => {
+      this.searchManufacturers = manufacturers
     })
-    MasterDataService.findAllInstitutes().then((institutes) => {
-      this.searchInstitutes = institutes
-    })
-    MasterDataService.findAllParameter().then((paramater) => {
-      this.searchParameter = paramater
-    })
-    DeviceService.findPlatformsAndSensors(this.searchText).then((findResults) => {
-      this.searchResults = findResults
+    const promisePlatformTypes = CVService.findAllPlatformTypes()
+    const promiseStates = CVService.findAllStates()
+
+    promisePlatformTypes.then((platformTypes) => {
+      promiseStates.then((states) => {
+        const platformTypeLookup = new Map<string, PlatformType>()
+        const statusLookup = new Map<string, Status>()
+
+        for (const platformType of platformTypes) {
+          platformTypeLookup.set(platformType.uri, platformType)
+        }
+        for (const status of states) {
+          statusLookup.set(status.uri, status)
+        }
+
+        this.platformTypeLookup = platformTypeLookup
+        this.statusLookup = statusLookup
+
+        this.runSelectedSearch()
+      })
     })
     // make sure that all components (especially the dynamically passed ones) are rendered
     this.$nextTick(() => {
@@ -316,127 +310,110 @@ export default class DevicesIndexPage extends Vue {
     this.$nuxt.$off('AppBarExtension:change')
   }
 
+  runSelectedSearch () {
+    if (this.activeTab === 0) {
+      this.basicSearch()
+    } else {
+      this.extendedSearch()
+    }
+  }
+
   basicSearch () {
     // only uses the text and the type (sensor or platform)
-    this.runSearch(this.searchText)
+    this.runSearch(this.searchText, this.selectedSearchType, [])
   }
 
   clearBasicSearch () {
     this.searchText = null
-    this.selectedSearchType = 'Sensor / Platform'
+    this.selectedSearchType = PlatformOrDeviceSearchType.PLATFORMS_AND_DEVICES
   }
 
   extendedSearch () {
-    this.runSearch(this.searchText)
+    this.runSearch(this.searchText, this.selectedSearchType, this.selectedSearchManufacturers)
   }
 
   clearExtendedSearch () {
     this.clearBasicSearch()
 
-    this.selectedSearchManufactures = []
-    this.selectedSearchInstitutes = []
-    this.selectedSearchParameter = []
+    this.selectedSearchManufacturers = []
 
-    this.manufactureToAdd = null
-    this.instituteToAdd = null
-    this.parameterToAdd = null
+    this.manufacturerToAdd = null
   }
 
-  runSearch (searchText: string | null) {
-    DeviceService.findPlatformsAndSensors(searchText).then((findResults) => {
+  runSearch (searchText: string | null, searchType: PlatformOrDeviceSearchType, manufacturer: Manufacturer[]) {
+    SmsService.findPlatformsAndSensors(
+      searchText, searchType, manufacturer, this.platformTypeLookup, this.statusLookup
+    ).then((findResults) => {
       this.searchResults = findResults
     })
   }
 
-  addSelectedManufacture () {
-    this.$set(this.selectedSearchManufactures, this.selectedSearchManufactures.length, this.manufactureToAdd)
-    this.manufactureToAdd = null
+  addSelectedManufacturer () {
+    this.$set(
+      this.selectedSearchManufacturers,
+      this.selectedSearchManufacturers.length,
+      this.manufacturerToAdd
+    )
+    this.manufacturerToAdd = null
   }
 
-  removeManufacture (index: number) {
-    this.$delete(this.selectedSearchManufactures, index)
+  removeManufacturer (index: number) {
+    this.$delete(this.selectedSearchManufacturers, index)
   }
 
-  addSelectedInstitute () {
-    this.$set(this.selectedSearchInstitutes, this.selectedSearchInstitutes.length, this.instituteToAdd)
-    this.instituteToAdd = null
+  deletePlatformAndCloseDialog (id: number) {
+    SmsService.deletePlatform(id).then(() => {
+      this.showDeletePlatformDialog = false
+
+      const searchIndex = this.searchResults.findIndex(r => r.id === id && r.searchType === PlatformOrDeviceType.PLATFORM)
+      if (searchIndex > -1) {
+        this.searchResults.splice(searchIndex, 1)
+      }
+
+      this.successMessage = 'Platform deleted'
+      this.showSuccessMessage = true
+    })
   }
 
-  removeInstitute (index: number) {
-    this.$delete(this.selectedSearchInstitutes, index)
+  deleteDeviceAndCloseDialog (id: number) {
+    SmsService.deleteDevice(id).then(() => {
+      this.showDeleteDeviceDialog = false
+
+      const searchIndex = this.searchResults.findIndex(r => r.id === id && r.searchType === PlatformOrDeviceType.DEVICE)
+      if (searchIndex > -1) {
+        this.searchResults.splice(searchIndex, 1)
+      }
+      this.successMessage = 'Device deleted'
+      this.showSuccessMessage = true
+    })
   }
 
-  addSelectedParameter () {
-    this.$set(this.selectedSearchParameter, this.selectedSearchParameter.length, this.parameterToAdd)
-    this.parameterToAdd = null
+  isPlatform (searchObject: IDeviceOrPlatformSearchObject) {
+    return searchObject.searchType === PlatformOrDeviceType.PLATFORM
   }
 
-  removeParameter (index: number) {
-    this.$delete(this.selectedSearchParameter, index)
+  isDevice (searchObject: IDeviceOrPlatformSearchObject) {
+    return searchObject.searchType === PlatformOrDeviceType.DEVICE
   }
 
-  get notSelectedManufactures () {
+  get searchTypePlaceholder () {
+    return PlatformOrDeviceSearchType.PLATFORMS_AND_DEVICES
+  }
+
+  get notSelectedManufacturers () {
     const result = []
-    const selectedManufactureIds = new Set()
+    const selectedManufactures = new Set()
 
-    for (const singleManufacture of this.selectedSearchManufactures) {
-      selectedManufactureIds.add(singleManufacture.id)
+    for (const singleManufacturer of this.selectedSearchManufacturers) {
+      selectedManufactures.add(singleManufacturer)
     }
 
-    for (const singleManufacture of this.searchManufactures) {
-      if (!selectedManufactureIds.has(singleManufacture.id)) {
-        result.push(singleManufacture)
+    for (const singleManufacturer of this.searchManufacturers) {
+      if (!selectedManufactures.has(singleManufacturer)) {
+        result.push(singleManufacturer)
       }
     }
     return result
-  }
-
-  get notSelectedInstitutes () {
-    const result = []
-    const selectedInstituteIds = new Set()
-
-    for (const singleInstitute of this.selectedSearchInstitutes) {
-      selectedInstituteIds.add(singleInstitute.id)
-    }
-
-    for (const singleInstitute of this.searchInstitutes) {
-      if (!selectedInstituteIds.has(singleInstitute.id)) {
-        result.push(singleInstitute)
-      }
-    }
-
-    return result
-  }
-
-  get notSelectedParameters () {
-    const result = []
-    const selectedParameterIds = new Set()
-
-    for (const singleParameter of this.selectedSearchParameter) {
-      selectedParameterIds.add(singleParameter.id)
-    }
-
-    for (const singleParameter of this.searchParameter) {
-      if (!selectedParameterIds.has(singleParameter.id)) {
-        result.push(singleParameter)
-      }
-    }
-    return result
-  }
-
-  get navigation () {
-    return [
-      {
-        disabled: false,
-        exact: true,
-        to: '/',
-        text: 'Home'
-      },
-      {
-        disabled: true,
-        text: 'Devices'
-      }
-    ]
   }
 }
 
