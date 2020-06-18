@@ -40,14 +40,14 @@
                 </v-row>
                 <v-row>
                   <v-col cols="12" md="6">
-                    <v-text-field 
+                    <v-text-field
                       v-model="platform.shortName"
                       label="Short name"
                       required
                       class="required"
                       :rules="[rules.required]"
                       :readonly="readonly"
-                      :disabled="readonly" 
+                      :disabled="readonly"
                     />
                   </v-col>
                   <v-col cols="12" md="6">
