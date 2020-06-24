@@ -60,7 +60,7 @@
 
 <script lang="ts">
 /**
- * @file provides a component for an attachment
+ * @file provides a component for a listing of attachments
  * @author <marc.hanisch@gfz-potsdam.de>
  */
 import { Vue, Component, Prop } from 'nuxt-property-decorator'

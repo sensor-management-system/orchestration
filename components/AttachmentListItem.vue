@@ -47,12 +47,12 @@ import { Vue, Component, Prop } from 'nuxt-property-decorator'
 import { Attachment } from '../models/Attachment'
 
 /**
- * A class component for a custom field
+ * A class component that displays a single attached file
  * @extends Vue
  */
 @Component
 // @ts-ignore
-export default class CustomFieldForm extends Vue {
+export default class AttachmentListItem extends Vue {
   @Prop({
     required: true,
     type: Attachment
