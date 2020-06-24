@@ -177,7 +177,7 @@
             >
               <v-card-title>Device URN: {{ deviceURN }}</v-card-title>
               <v-card-text>
-                <CustomFieldCards v-model="device.customFields" :readonly="readonly" />
+                <CustomFieldCards v-model="device.customFields" :readonly="readonly" :rules="rules" />
               </v-card-text>
             </v-card>
           </v-tab-item>

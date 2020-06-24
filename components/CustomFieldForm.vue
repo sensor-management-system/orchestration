@@ -7,6 +7,8 @@
         :readonly="readonly"
         :disabled="readonly"
         required
+        class="required"
+        :rules="rules.required ? [rules.required] : []"
         @input="update('key', $event)"
       />
     </v-col>
@@ -54,6 +56,14 @@ export default class CustomFieldForm extends Vue {
   })
   // @ts-ignore
   readonly: boolean
+
+  @Prop({
+    default: {},
+    required: false,
+    type: Object
+  })
+  // @ts-ignore
+  rules!: Object
 
   /**
    * update the internal model at a given key
