@@ -2,7 +2,7 @@
   <v-container>
     <v-row justify="center">
       <v-col cols="12">
-        <h1>Welcome to the Sensor Management System tool</h1>
+        <h1>Welcome to the Sensor Management System</h1>
         <p>The purpose of this application is to help scientists and technicans to...</p>
         <p>
           If you don't have an account, you can browse and view all datasets.<br>
