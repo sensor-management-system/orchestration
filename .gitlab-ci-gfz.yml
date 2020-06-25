@@ -51,16 +51,32 @@ build-deploy-image:
   stage: build
   image: docker:19.03.1
   variables:
-    BACKEND_URL: ${STAGING_BACKEND_URL}
+    SMS_BACKEND_URL: ${STAGING_BACKEND_URL}
+    CV_BACKEND_URL: ${STAGING_CV_BACKEND_URL}
   before_script:
     - *docker_login_gitlab_registry
   script:
     - >
       if [ -z "$CI_COMMIT_TAG" ]; then
-        docker build --pull -t "$CI_REGISTRY_IMAGE:latest" --tag "$CI_REGISTRY_IMAGE:latest" -f docker/deployment/gfz/Dockerfile --build-arg BACKEND_URL_ARG=$BACKEND_URL .
+        docker build \
+          --pull \
+          -t "$CI_REGISTRY_IMAGE:latest" \
+          --tag "$CI_REGISTRY_IMAGE:latest" \
+          -f docker/deployment/gfz/Dockerfile \
+          --build-arg SMS_BACKEND_URL_ARG=$SMS_BACKEND_URL \
+          --build-arg CV_BACKEND_URL_ARG=$CV_BACKEND_URL \
+          .
         docker push "$CI_REGISTRY_IMAGE:latest"
       else
-        docker build --pull -t "$CI_REGISTRY_IMAGE:latest" --tag "$CI_REGISTRY_IMAGE:$CI_COMMIT_TAG" --tag "$CI_REGISTRY_IMAGE:latest" -f docker/deployment/gfz/Dockerfile --build-arg BACKEND_URL_ARG=$BACKEND_URL .
+        docker build \
+          --pull \
+          -t "$CI_REGISTRY_IMAGE:latest" \
+          --tag "$CI_REGISTRY_IMAGE:$CI_COMMIT_TAG"\
+          --tag "$CI_REGISTRY_IMAGE:latest" \
+          -f docker/deployment/gfz/Dockerfile \
+          --build-arg SMS_BACKEND_URL_ARG=$SMS_BACKEND_URL \
+          --build-arg CV_BACKEND_URL_ARG=$CV_BACKEND_URL \
+          .
         docker push "$CI_REGISTRY_IMAGE:latest"
         docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_TAG"
       fi
@@ -81,11 +97,17 @@ build-deploy-image-manual:
   stage: build
   image: docker:19.03.1
   variables:
-    BACKEND_URL: ${STAGING_BACKEND_URL}
+    SMS_BACKEND_URL: ${STAGING_BACKEND_URL}
+    CV_BACKEND_URL: ${STAGING_CV_BACKEND_URL}
   before_script:
     - *docker_login_gitlab_registry
   script:
-    - docker build --tag "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA" -f docker/deployment/gfz/Dockerfile --build-arg BACKEND_URL_ARG=$BACKEND_URL .
+    - docker build \
+        --tag "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA" \
+        -f docker/deployment/gfz/Dockerfile \
+        --build-arg SMS_BACKEND_URL_ARG=$SMS_BACKEND_URL \
+        --build-arg CV_BACKEND_URL_ARG=$CV_BACKEND_URL \
+        .
     - docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA"
   cache:
     key: ${CI_COMMIT_REF_SLUG}

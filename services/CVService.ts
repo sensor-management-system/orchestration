@@ -1,6 +1,10 @@
+import axios from 'axios'
+
 import Manufacturer from '../models/Manufacturer'
 import PlatformType from '~/models/PlatformType'
 import Status from '~/models/Status'
+
+const BASE_URL = process.env.cvBackendUrl + '/api'
 
 export default class CVService {
   static findAllManufacturers (): Promise<Manufacturer[]> {
@@ -33,6 +37,12 @@ export default class CVService {
         Status.createWithData(4, 'blocked', 'https//helmholtz/smsvc/platformstatus/4'),
         Status.createWithData(5, 'scrapped', 'https//helmholtz/smsvc/platformstatus/5')
       ])
+    })
+  }
+
+  static findAllEquipmentTypes (): Promise<any> {
+    return axios.get(BASE_URL + '/equipmenttype').then((rawResponse: any) => {
+      return rawResponse
     })
   }
 }

@@ -12,7 +12,7 @@ import Status from '~/models/Status'
 import PlatformType from '~/models/PlatformType'
 
 // Use on version for all the queries
-const BASE_URL = process.env.backendUrl + '/rdm/svm-api/v1'
+const BASE_URL = process.env.smsBackendUrl + '/rdm/svm-api/v1'
 
 export default class SmsService {
   static serverPlatformResponseToEntity (entry: any) : Platform {
