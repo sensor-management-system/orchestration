@@ -277,10 +277,13 @@ export default class DevicesIndexPage extends Vue {
     CVService.findAllManufacturers().then((manufacturers) => {
       this.searchManufacturers = manufacturers
     })
+    /*
+      Just as a proof that the connection works
     // and try out that we can read the CV backend
     CVService.findAllEquipmentTypes().then((data) => {
       console.log(data)
     })
+    */
     const promisePlatformTypes = CVService.findAllPlatformTypes()
     const promiseStates = CVService.findAllStates()
 

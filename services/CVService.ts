@@ -40,9 +40,12 @@ export default class CVService {
     })
   }
 
+  /* Just as a proof that the connection works.
+
   static findAllEquipmentTypes (): Promise<any> {
     return axios.get(BASE_URL + '/equipmenttype').then((rawResponse: any) => {
       return rawResponse
     })
   }
+  */
 }
