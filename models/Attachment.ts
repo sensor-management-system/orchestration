@@ -7,6 +7,17 @@ export interface IAttachment {
 }
 
 export class Attachment implements IAttachment, IPathSetter {
+  static readonly mimeTypes: Object = {
+    'image/png': ['png'],
+    'images/jpeg': ['jpg', 'jpeg'],
+    'application/pdf': ['pdf'],
+    'text/plain': ['txt'],
+    'text/rtf': ['rtf'],
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['docx'],
+    'application/msword': ['doc'],
+    'application/vnd.oasis.opendocument.text': ['odt']
+  }
+
   private _id: number | null = null
   private _url: string = ''
   private _label: string = ''

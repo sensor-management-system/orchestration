@@ -10,7 +10,7 @@
         />
       </v-col>
       <v-col cols="12" md="3">
-        <v-file-input accept="image/*" label="File" required class="required" />
+        <v-file-input :accept="mimeTypeList" label="File" required class="required" />
       </v-col>
     </v-row>
     <v-row v-if="!readonly">
@@ -131,6 +131,10 @@ export default class AttachmentList extends Vue {
        */
       this.$emit('input', properties)
     }
+  }
+
+  get mimeTypeList (): string {
+    return Object.keys(Attachment.mimeTypes).join(',')
   }
 }
 </script>
