@@ -1,13 +1,13 @@
 <template>
   <div>
-    <v-form>
-      <v-card
-        outlined
+    <v-card
+      outlined
+    >
+      <v-tabs-items
+        v-model="activeTab"
       >
-        <v-tabs-items
-          v-model="activeTab"
-        >
-          <v-tab-item :eager="true">
+        <v-tab-item :eager="true">
+          <v-form ref="basicForm">
             <v-card
               flat
             >
@@ -146,8 +146,10 @@
                 </v-row>
               </v-card-text>
             </v-card>
-          </v-tab-item>
-          <v-tab-item :eager="true">
+          </v-form>
+        </v-tab-item>
+        <v-tab-item :eager="true">
+          <v-form ref="contactsForm">
             <v-card
               flat
             >
@@ -160,110 +162,110 @@
                 </v-row>
               </v-card-text>
             </v-card>
-          </v-tab-item>
-          <v-tab-item :eager="true">
-            <v-card
-              flat
-            >
-              <v-card-title>Device URN: {{ deviceURN }}</v-card-title>
-              <v-card-text>
-                <DevicePropertyExpansionPanels v-model="device.properties" :readonly="readonly" />
-              </v-card-text>
-            </v-card>
-          </v-tab-item>
-          <v-tab-item :eager="true">
-            <v-card
-              flat
-            >
-              <v-card-title>Device URN: {{ deviceURN }}</v-card-title>
-              <v-card-text>
-                <CustomFieldCards v-model="device.customFields" :readonly="readonly" :rules="rules" />
-              </v-card-text>
-            </v-card>
-          </v-tab-item>
-          <v-tab-item :eager="true">
-            <v-card
-              flat
-            >
-              <v-card-title>Device URN: {{ deviceURN }}</v-card-title>
-              <v-card-text>
-                <AttachmentList v-model="device.attachments" :readonly="readonly" />
-              </v-card-text>
-            </v-card>
-          </v-tab-item>
-          <v-tab-item>
-            <v-card
-              flat
-            >
-              <v-card-title>Device URN: {{ deviceURN }}</v-card-title>
-              <v-card-text>
-                <v-timeline dense clipped>
-                  <v-timeline-item
-                    class="mb-4"
-                    small
-                  >
-                    <v-row justify="space-between">
-                      <v-col cols="2">
-                        2020-04-28 10:15
-                      </v-col>
-                      <v-col cols="10">
-                        <strong>attached to platform XY</strong>
-                        <div>Max M.</div>
-                      </v-col>
-                    </v-row>
-                  </v-timeline-item>
-                  <v-timeline-item
-                    class="mb-4"
-                    color="grey"
-                    icon-color="grey lighten-2"
-                    small
-                  >
-                    <v-row justify="space-between">
-                      <v-col cols="2">
-                        2020-04-28 09:15
-                      </v-col>
-                      <v-col cols="10">
-                        <strong>edited description</strong>
-                        <div>Max M.</div>
-                      </v-col>
-                    </v-row>
-                  </v-timeline-item>
-                  <v-timeline-item
-                    class="mb-4"
-                    color="grey"
-                    icon-color="grey lighten-2"
-                    small
-                  >
-                    <v-row justify="space-between">
-                      <v-col cols="2">
-                        2020-04-20 08:05
-                      </v-col>
-                      <v-col cols="10">
-                        <strong>device created</strong>
-                        <div>Hans H.</div>
-                      </v-col>
-                    </v-row>
-                  </v-timeline-item>
-                </v-timeline>
-              </v-card-text>
-            </v-card>
-          </v-tab-item>
-        </v-tabs-items>
-        <v-btn
-          v-if="!isInEditMode"
-          fab
-          fixed
-          bottom
-          right
-          color="secondary"
-          @click="toggleEditMode"
-        >
-          <v-icon>
-            mdi-pencil
-          </v-icon>
-        </v-btn>
-      </v-card>
-    </v-form>
+          </v-form>
+        </v-tab-item>
+        <v-tab-item :eager="true">
+          <v-card
+            flat
+          >
+            <v-card-title>Device URN: {{ deviceURN }}</v-card-title>
+            <v-card-text>
+              <DevicePropertyExpansionPanels v-model="device.properties" :readonly="readonly" />
+            </v-card-text>
+          </v-card>
+        </v-tab-item>
+        <v-tab-item :eager="true">
+          <v-card
+            flat
+          >
+            <v-card-title>Device URN: {{ deviceURN }}</v-card-title>
+            <v-card-text>
+              <CustomFieldCards v-model="device.customFields" :readonly="readonly" :rules="rules" />
+            </v-card-text>
+          </v-card>
+        </v-tab-item>
+        <v-tab-item :eager="true">
+          <v-card
+            flat
+          >
+            <v-card-title>Device URN: {{ deviceURN }}</v-card-title>
+            <v-card-text>
+              <AttachmentList v-model="device.attachments" :readonly="readonly" :rules="rules" />
+            </v-card-text>
+          </v-card>
+        </v-tab-item>
+        <v-tab-item>
+          <v-card
+            flat
+          >
+            <v-card-title>Device URN: {{ deviceURN }}</v-card-title>
+            <v-card-text>
+              <v-timeline dense clipped>
+                <v-timeline-item
+                  class="mb-4"
+                  small
+                >
+                  <v-row justify="space-between">
+                    <v-col cols="2">
+                      2020-04-28 10:15
+                    </v-col>
+                    <v-col cols="10">
+                      <strong>attached to platform XY</strong>
+                      <div>Max M.</div>
+                    </v-col>
+                  </v-row>
+                </v-timeline-item>
+                <v-timeline-item
+                  class="mb-4"
+                  color="grey"
+                  icon-color="grey lighten-2"
+                  small
+                >
+                  <v-row justify="space-between">
+                    <v-col cols="2">
+                      2020-04-28 09:15
+                    </v-col>
+                    <v-col cols="10">
+                      <strong>edited description</strong>
+                      <div>Max M.</div>
+                    </v-col>
+                  </v-row>
+                </v-timeline-item>
+                <v-timeline-item
+                  class="mb-4"
+                  color="grey"
+                  icon-color="grey lighten-2"
+                  small
+                >
+                  <v-row justify="space-between">
+                    <v-col cols="2">
+                      2020-04-20 08:05
+                    </v-col>
+                    <v-col cols="10">
+                      <strong>device created</strong>
+                      <div>Hans H.</div>
+                    </v-col>
+                  </v-row>
+                </v-timeline-item>
+              </v-timeline>
+            </v-card-text>
+          </v-card>
+        </v-tab-item>
+      </v-tabs-items>
+      <v-btn
+        v-if="!isInEditMode"
+        fab
+        fixed
+        bottom
+        right
+        color="secondary"
+        @click="toggleEditMode"
+      >
+        <v-icon>
+          mdi-pencil
+        </v-icon>
+      </v-btn>
+    </v-card>
   </div>
 </template>
 

@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <v-form ref="propertiesForm">
     <v-btn
       v-if="!readonly"
       small
@@ -61,7 +61,7 @@
         </v-expansion-panel-content>
       </v-expansion-panel>
     </v-expansion-panels>
-  </div>
+  </v-form>
 </template>
 
 <script lang="ts">

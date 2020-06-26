@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <v-form ref="customFieldsForm">
     <v-btn
       v-if="!readonly"
       small
@@ -42,7 +42,7 @@
         :key="'br-' + index"
       >
     </template>
-  </div>
+  </v-form>
 </template>
 
 <script lang="ts">

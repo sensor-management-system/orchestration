@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <v-form ref="contactsForm">
     <v-autocomplete
       v-if="!readonly"
       :items="allContactsExceptSelected"
@@ -22,7 +22,7 @@
       </v-avatar>
       {{ contact }}
     </v-chip>
-  </div>
+  </v-form>
 </template>
 
 <script lang="ts">
