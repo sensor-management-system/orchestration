@@ -1,7 +1,7 @@
 <template>
   <v-container>
     <v-row v-if="!readonly">
-      <v-col cols="12" md="3">
+      <v-col cols="12" md="4">
         <v-text-field
           v-model="attachment.label"
           label="Label"
@@ -9,8 +9,37 @@
           class="required"
         />
       </v-col>
+    </v-row>
+    <v-row v-if="!readonly">
       <v-col cols="12" md="3">
-        <v-file-input :accept="mimeTypeList" label="File" required class="required" />
+        <v-radio-group
+          v-model="attachmentType"
+          label="Type"
+          row
+        >
+          <v-radio label="File" value="file" />
+          <v-radio label="Url" value="url" />
+        </v-radio-group>
+      </v-col>
+    </v-row>
+    <v-row v-if="!readonly">
+      <v-col cols="12" md="4">
+        <v-file-input
+          v-if="attachmentType === 'file'"
+          :accept="mimeTypeList"
+          label="File"
+          required
+          class="required"
+        />
+        <v-text-field
+          v-if="attachmentType === 'url'"
+          v-model="attachment.url"
+          label="URL"
+          type="url"
+          placeholder="http://"
+          required
+          class="required"
+        />
       </v-col>
     </v-row>
     <v-row v-if="!readonly">
@@ -94,6 +123,7 @@ export default class AttachmentList extends Vue {
   readonly: boolean
 
   private attachment: Attachment = new Attachment()
+  private attachmentType: string = 'file'
 
   /**
    * adds a new Attachment instance
