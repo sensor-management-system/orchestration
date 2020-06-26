@@ -118,14 +118,14 @@ export default class AttachmentList extends Vue {
     type: Array
   })
   // @ts-ignore
-  value!: Attachment[]
+  readonly value!: Attachment[]
 
   @Prop({
     default: false,
     type: Boolean
   })
   // @ts-ignore
-  readonly: boolean
+  readonly readonly: boolean
 
   @Prop({
     default: () => {},
@@ -133,7 +133,7 @@ export default class AttachmentList extends Vue {
     type: Object
   })
   // @ts-ignore
-  rules!: Object
+  readonly rules!: Object
 
   private attachment: Attachment = new Attachment()
   private attachmentType: string = 'file'

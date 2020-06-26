@@ -50,14 +50,14 @@ export default class ContactSelect extends Vue {
     type: Array
   })
   // @ts-ignore
-  selectedContacts!: Contact[]
+  readonly selectedContacts!: Contact[]
 
   @Prop({
     default: false,
     type: Boolean
   })
   // @ts-ignore
-  readonly: boolean
+  readonly readonly: boolean
 
   /**
    * fetches all available contacts from the ContactService

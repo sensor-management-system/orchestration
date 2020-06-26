@@ -71,14 +71,14 @@ export default class CustomFieldCards extends Vue {
     type: Array
   })
   // @ts-ignore
-  value!: CustomTextField[]
+  readonly value!: CustomTextField[]
 
   @Prop({
     default: false,
     type: Boolean
   })
   // @ts-ignore
-  readonly: boolean
+  readonly readonly: boolean
 
   @Prop({
     default: () => {},
@@ -86,7 +86,7 @@ export default class CustomFieldCards extends Vue {
     type: Object
   })
   // @ts-ignore
-  rules!: Object
+  readonly rules!: Object
 
   /**
    * adds a new CustomTextField instance

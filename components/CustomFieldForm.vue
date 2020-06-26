@@ -48,14 +48,14 @@ export default class CustomFieldForm extends Vue {
     type: CustomTextField
   })
   // @ts-ignore
-  value!: CustomTextField
+  readonly value!: CustomTextField
 
   @Prop({
     default: false,
     type: Boolean
   })
   // @ts-ignore
-  readonly: boolean
+  readonly readonly: boolean
 
   @Prop({
     default: () => {},
@@ -63,7 +63,7 @@ export default class CustomFieldForm extends Vue {
     type: Object
   })
   // @ts-ignore
-  rules!: Object
+  readonly rules!: Object
 
   /**
    * update the internal model at a given key

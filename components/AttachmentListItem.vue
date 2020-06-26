@@ -59,14 +59,14 @@ export default class AttachmentListItem extends Vue {
     type: Attachment
   })
   // @ts-ignore
-  value!: Attachment
+  readonly value!: Attachment
 
   @Prop({
     default: false,
     type: Boolean
   })
   // @ts-ignore
-  readonly: boolean
+  readonly readonly: boolean
 
   get filename (): string {
     const UNKNOWN_FILENAME = 'unknown filename'

@@ -111,14 +111,14 @@ export default class DevicePropertyForm extends Vue {
     type: DeviceProperty
   })
   // @ts-ignore
-  value!: DeviceProperty
+  readonly value!: DeviceProperty
 
   @Prop({
     default: false,
     type: Boolean
   })
   // @ts-ignore
-  readonly: boolean
+  readonly readonly: boolean
 
   /**
    * update the internal model at a given key
