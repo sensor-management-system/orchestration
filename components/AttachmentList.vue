@@ -51,7 +51,7 @@
           small
           @click="add()"
         >
-          Upload
+          {{ attachmentType === 'url' ? 'Add' : 'Upload' }}
         </v-btn>
       </v-col>
     </v-row>
