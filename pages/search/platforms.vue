@@ -17,10 +17,7 @@
             <v-card-text>
               <v-row>
                 <v-col cols="12" md="5">
-                  <v-text-field v-model="searchText" label="Name" placeholder="Name of device" />
-                </v-col>
-                <v-col cols="12" md="3">
-                  <v-select v-model="selectedSearchType" label="Type" :placeholder="searchTypePlaceholder" :items="searchTypes" />
+                  <v-text-field v-model="searchText" label="Name" placeholder="Name of platform" />
                 </v-col>
                 <v-col cols="12" md="2">
                   <v-btn @click="basicSearch">
@@ -41,10 +38,7 @@
             <v-card-text>
               <v-row>
                 <v-col cols="12" md="6">
-                  <v-text-field v-model="searchText" label="Name" placeholder="Name of device" />
-                </v-col>
-                <v-col cols="12" md="3">
-                  <v-select v-model="selectedSearchType" label="search type" :placeholder="searchTypePlaceholder" :items="searchTypes" />
+                  <v-text-field v-model="searchText" label="Name" placeholder="Name of platform" />
                 </v-col>
               </v-row>
               <v-row>
@@ -99,68 +93,37 @@
     </v-card>
 
     <h2>Results:</h2>
-    <v-card v-for="result in searchResults" :key="result.searchType + result.id">
+    <v-card v-for="result in searchResults" :key="result.id">
       <v-card-title>
-        {{ result.name }}
+        {{ result.shortName }}
       </v-card-title>
       <v-card-text>
-        <p>{{ result.type }}</p>
-        <p>Project {{ result.project }}</p>
-        <p>Status {{ result.status }}</p>
+        <p>{{ getPlatformType(result) }}</p>
+        <p>Project {{ getProject(result) }}</p>
+        <p>Status {{ getStatus(result) }}</p>
       </v-card-text>
-      <v-card-actions v-if="isPlatform(result)">
-        <v-btn :to="'/devices/platforms/' + result.id">
+      <v-card-actions>
+        <v-btn :to="'/platforms/' + result.id">
           View
         </v-btn>
         <v-btn>Copy</v-btn>
-        <v-btn @click.stop="showDeletePlatformDialog = true">
+        <v-btn @click.stop="showDeleteDialog = true">
           Delete
         </v-btn>
-        <v-dialog v-model="showDeletePlatformDialog" max-width="290">
+        <v-dialog v-model="showDeleteDialog" max-width="290">
           <v-card>
             <v-card-title class="headline">
               Delete platform
             </v-card-title>
             <v-card-text>
-              Do you really want to delete the platform <em>{{ result.name }}</em>?
+              Do you really want to delete the platform <em>{{ result.shortName }}</em>?
             </v-card-text>
             <v-card-actions>
-              <v-btn @click="showDeletePlatformDialog = false">
+              <v-btn @click="showDeleteDialog = false">
                 No
               </v-btn>
               <v-spacer />
-              <v-btn color="error" @click="deletePlatformAndCloseDialog(result.id)">
-                <v-icon left>
-                  mdi-delete
-                </v-icon>
-                Delete
-              </v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-dialog>
-      </v-card-actions>
-      <v-card-actions v-if="isDevice(result)">
-        <v-btn :to="'devices/devices/' + result.id">
-          View
-        </v-btn>
-        <v-btn>Copy</v-btn>
-        <v-btn @click.stop="showDeleteDeviceDialog = true">
-          Delete
-        </v-btn>
-        <v-dialog v-model="showDeleteDeviceDialog" max-width="290">
-          <v-card>
-            <v-card-title class="headline">
-              Delete device
-            </v-card-title>
-            <v-card-text>
-              Do you really want to delete the device <em>{{ result.name }}</em>?
-            </v-card-text>
-            <v-card-actions>
-              <v-btn @click="showDeleteDeviceDialog = false">
-                No
-              </v-btn>
-              <v-spacer />
-              <v-btn color="error" @click="deleteDeviceAndCloseDialog(result.id)">
+              <v-btn color="error" @click="deleteAndCloseDialog(result.id)">
                 <v-icon left>
                   mdi-delete
                 </v-icon>
@@ -181,33 +144,16 @@
     >
       <template v-slot:activator>
         <v-btn
-          v-model="fab"
-          color="blue darken-2"
+          color="primary"
           dark
           fab
+          to="/platforms"
         >
-          <v-icon v-if="fab">
-            mdi-close
-          </v-icon>
-          <v-icon v-else>
+          <v-icon>
             mdi-plus
           </v-icon>
         </v-btn>
       </template>
-      <v-btn
-        rounded
-        to="/devices/platforms"
-        color="primary"
-      >
-        Add platform
-      </v-btn>
-      <v-btn
-        rounded
-        to="/devices/devices"
-        color="primary"
-      >
-        Add device
-      </v-btn>
     </v-speed-dial>
   </div>
 </template>
@@ -218,12 +164,9 @@ import { Component, Vue } from 'nuxt-property-decorator'
 import CVService from '../../services/CVService'
 import SmsService from '../../services/SmsService'
 
-import { PlatformOrDeviceSearchType } from '../../enums/PlatformOrDeviceSearchType'
-
-import { IDeviceOrPlatformSearchObject } from '../../models/IDeviceOrPlatformSearchObject'
-import { PlatformOrDeviceType } from '../../enums/PlatformOrDeviceType'
 import Manufacturer from '../../models/Manufacturer'
 import PlatformType from '../../models/PlatformType'
+import Platform from '../../models/Platform'
 import Status from '../../models/Status'
 
 // @ts-ignore
@@ -243,7 +186,7 @@ export class AppBarTabsExtensionExtended extends AppBarTabsExtension {
 }
 
 @Component
-export default class DevicesIndexPage extends Vue {
+export default class SeachPlatformsPage extends Vue {
   private activeTab: number = 0
   private fab: boolean = false
 
@@ -254,14 +197,10 @@ export default class DevicesIndexPage extends Vue {
   private platformTypeLookup: Map<string, PlatformType> = new Map<string, PlatformType>()
   private statusLookup: Map<string, Status> = new Map<string, Status>()
 
-  private searchResults: Array<IDeviceOrPlatformSearchObject> = []
+  private searchResults: Platform[] = []
   private searchText: string | null = null
-  private searchTypes: PlatformOrDeviceSearchType[] = Object.values(PlatformOrDeviceSearchType)
 
-  private selectedSearchType: PlatformOrDeviceSearchType = PlatformOrDeviceSearchType.PLATFORMS_AND_DEVICES
-
-  private showDeletePlatformDialog: boolean = false
-  private showDeleteDeviceDialog: boolean = false
+  private showDeleteDialog: boolean = false
   private showSuccessMessage: boolean = false
   private successMessage = ''
 
@@ -300,7 +239,7 @@ export default class DevicesIndexPage extends Vue {
     })
     // make sure that all components (especially the dynamically passed ones) are rendered
     this.$nextTick(() => {
-      this.$nuxt.$emit('AppBarContent:title', 'Devices')
+      this.$nuxt.$emit('AppBarContent:title', 'Platforms')
     })
   }
 
@@ -320,29 +259,26 @@ export default class DevicesIndexPage extends Vue {
 
   basicSearch () {
     // only uses the text and the type (sensor or platform)
-    this.runSearch(this.searchText, this.selectedSearchType, [])
+    this.runSearch(this.searchText, [])
   }
 
   clearBasicSearch () {
     this.searchText = null
-    this.selectedSearchType = PlatformOrDeviceSearchType.PLATFORMS_AND_DEVICES
   }
 
   extendedSearch () {
-    this.runSearch(this.searchText, this.selectedSearchType, this.selectedSearchManufacturers)
+    this.runSearch(this.searchText, this.selectedSearchManufacturers)
   }
 
   clearExtendedSearch () {
     this.clearBasicSearch()
-
     this.selectedSearchManufacturers = []
-
     this.manufacturerToAdd = null
   }
 
-  runSearch (searchText: string | null, searchType: PlatformOrDeviceSearchType, manufacturer: Manufacturer[]) {
-    SmsService.findPlatformsAndSensors(
-      searchText, searchType, manufacturer, this.platformTypeLookup, this.statusLookup
+  runSearch (searchText: string | null, manufacturer: Manufacturer[]) {
+    SmsService.findPlatforms(
+      searchText, manufacturer
     ).then((findResults) => {
       this.searchResults = findResults
     })
@@ -361,11 +297,11 @@ export default class DevicesIndexPage extends Vue {
     this.$delete(this.selectedSearchManufacturers, index)
   }
 
-  deletePlatformAndCloseDialog (id: number) {
+  deleteAndCloseDialog (id: number) {
     SmsService.deletePlatform(id).then(() => {
-      this.showDeletePlatformDialog = false
+      this.showDeleteDialog = false
 
-      const searchIndex = this.searchResults.findIndex(r => r.id === id && r.searchType === PlatformOrDeviceType.PLATFORM)
+      const searchIndex = this.searchResults.findIndex(r => r.id === id)
       if (searchIndex > -1) {
         this.searchResults.splice(searchIndex, 1)
       }
@@ -375,29 +311,31 @@ export default class DevicesIndexPage extends Vue {
     })
   }
 
-  deleteDeviceAndCloseDialog (id: number) {
-    SmsService.deleteDevice(id).then(() => {
-      this.showDeleteDeviceDialog = false
-
-      const searchIndex = this.searchResults.findIndex(r => r.id === id && r.searchType === PlatformOrDeviceType.DEVICE)
-      if (searchIndex > -1) {
-        this.searchResults.splice(searchIndex, 1)
-      }
-      this.successMessage = 'Device deleted'
-      this.showSuccessMessage = true
-    })
+  getPlatformType (platform: Platform) {
+    if (this.platformTypeLookup.has(platform.platformTypeUri)) {
+      const platformType: PlatformType = this.platformTypeLookup.get(platform.platformTypeUri) as PlatformType
+      return platformType.name
+    }
+    if (platform.platformTypeName) {
+      return platform.platformTypeName
+    }
+    return 'Unknown type'
   }
 
-  isPlatform (searchObject: IDeviceOrPlatformSearchObject) {
-    return searchObject.searchType === PlatformOrDeviceType.PLATFORM
+  getProject (_platform: Platform) {
+    // TODO
+    return 'No project yet'
   }
 
-  isDevice (searchObject: IDeviceOrPlatformSearchObject) {
-    return searchObject.searchType === PlatformOrDeviceType.DEVICE
-  }
-
-  get searchTypePlaceholder () {
-    return PlatformOrDeviceSearchType.PLATFORMS_AND_DEVICES
+  getStatus (platform: Platform) {
+    if (this.statusLookup.has(platform.statusUri)) {
+      const platformStatus: Status = this.statusLookup.get(platform.statusUri) as Status
+      return platformStatus.name
+    }
+    if (platform.statusName) {
+      return platform.statusName
+    }
+    return 'Unknown status'
   }
 
   get notSelectedManufacturers () {

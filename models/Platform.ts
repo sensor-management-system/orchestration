@@ -1,10 +1,4 @@
-import { PlatformOrDeviceType } from '../enums/PlatformOrDeviceType'
-
 import Contact, { IContact } from './Contact'
-
-import { IDeviceOrPlatformSearchObject } from './IDeviceOrPlatformSearchObject'
-import PlatformType from './PlatformType'
-import Status from './Status'
 import IPathSetter from './IPathSetter'
 
 export interface IPlatform {
@@ -320,13 +314,6 @@ export default class Platform implements IPlatform, IPathSetter {
     }
   }
 
-  toSearchObject (
-    platformTypeLookupByUri: Map<string, PlatformType>,
-    platformStatusLookupByUri: Map<string, Status>
-  ) : IDeviceOrPlatformSearchObject {
-    return new PlatformSearchObjectWrapper(this, platformTypeLookupByUri, platformStatusLookupByUri)
-  }
-
   static createEmpty (): Platform {
     return new Platform()
   }
@@ -366,58 +353,5 @@ export default class Platform implements IPlatform, IPathSetter {
     newObject.contacts = someObject.contacts.map(Contact.createFromObject)
 
     return newObject
-  }
-}
-
-class PlatformSearchObjectWrapper implements IDeviceOrPlatformSearchObject {
-  private platform: Platform
-  private platformTypeLookupByUri: Map<string, PlatformType>
-  private statusLookupByUri: Map<string, Status>
-
-  constructor (platform: Platform, platformTypeLookupByUri: Map<string, PlatformType>, statusLookupByUri: Map<string, Status>) {
-    this.platform = platform
-    this.platformTypeLookupByUri = platformTypeLookupByUri
-    this.statusLookupByUri = statusLookupByUri
-  }
-
-  get id () : number | null {
-    return this.platform.id
-  }
-
-  get name () : string {
-    return this.platform.shortName
-  }
-
-  get type () : string {
-    // TODO: As we don't have the platform types
-    // we can't give the exact type for the uri
-    if (this.platformTypeLookupByUri.has(this.platform.platformTypeUri)) {
-      const platformType: PlatformType = this.platformTypeLookupByUri.get(this.platform.platformTypeUri) as PlatformType
-      return platformType.name
-    }
-    if (this.platform.platformTypeName) {
-      return this.platform.platformTypeName
-    }
-    return 'Unknown type'
-  }
-
-  get searchType () : PlatformOrDeviceType {
-    return PlatformOrDeviceType.PLATFORM
-  }
-
-  get project (): string {
-    // TODO
-    return 'No project yet'
-  }
-
-  get status () : string {
-    if (this.statusLookupByUri.has(this.platform.statusUri)) {
-      const platformStatus: Status = this.statusLookupByUri.get(this.platform.statusUri) as Status
-      return platformStatus.name
-    }
-    if (this.platform.statusName) {
-      return this.platform.statusName
-    }
-    return 'Unknown status'
   }
 }

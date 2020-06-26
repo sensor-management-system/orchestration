@@ -177,16 +177,16 @@
 <script lang="ts">
 import { Component, Vue, Watch } from 'nuxt-property-decorator'
 
-import CVService from '../../../services/CVService'
-import SmsService from '../../../services/SmsService'
+import CVService from '../../services/CVService'
+import SmsService from '../../services/SmsService'
 
-import Platform from '../../../models/Platform'
+import Platform from '../../models/Platform'
 
 // @ts-ignore
-import ContactSelect from '../../../components/ContactSelect.vue'
-import Manufacturer from '../../../models/Manufacturer'
-import PlatformType from '../../../models/PlatformType'
-import Status from '../../../models/Status'
+import ContactSelect from '../../components/ContactSelect.vue'
+import Manufacturer from '../../models/Manufacturer'
+import PlatformType from '../../models/PlatformType'
+import Status from '../../models/Status'
 
 // @ts-ignore
 import AppBarEditModeContent from '@/components/AppBarEditModeContent.vue'
@@ -233,7 +233,7 @@ export default class PlatformIdPage extends Vue {
       if (this.platform && this.platform.id) {
         this.toggleEditMode()
       } else {
-        this.$router.push('/devices')
+        this.$router.push('/search/platforms')
       }
     })
 
@@ -318,7 +318,7 @@ export default class PlatformIdPage extends Vue {
     SmsService.savePlatform(this.platform).then((savedPlatform) => {
       this.platform = savedPlatform
       this.showSaveSuccess = true
-      // this.$router.push('/devices')
+      // this.$router.push('/seach/platforms')
       this.toggleEditMode()
     })
   }

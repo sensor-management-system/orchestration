@@ -263,19 +263,19 @@
 
 <script lang="ts">
 import { Vue, Component, Watch } from 'nuxt-property-decorator'
-import Device from '../../../models/Device'
+import Device from '../../models/Device'
 
-import CVService from '../../../services/CVService'
-import SmsService from '../../../services/SmsService'
-import Manufacturer from '../../../models/Manufacturer'
-import Status from '../../../models/Status'
+import CVService from '../../services/CVService'
+import SmsService from '../../services/SmsService'
+import Manufacturer from '../../models/Manufacturer'
+import Status from '../../models/Status'
 
 // @ts-ignore
-import ContactSelect from '../../../components/ContactSelect.vue'
+import ContactSelect from '../../components/ContactSelect.vue'
 // @ts-ignore
-import DevicePropertyExpansionPanels from '../../../components/DevicePropertyExpansionPanels.vue'
+import DevicePropertyExpansionPanels from '../../components/DevicePropertyExpansionPanels.vue'
 // @ts-ignore
-import CustomFieldCards from '../../../components/CustomFieldCards.vue'
+import CustomFieldCards from '../../components/CustomFieldCards.vue'
 // @ts-ignore
 import AppBarEditModeContent from '@/components/AppBarEditModeContent.vue'
 
@@ -324,7 +324,7 @@ export default class DeviceIdPage extends Vue {
       if (this.device && this.device.id) {
         this.toggleEditMode()
       } else {
-        this.$router.push('/devices')
+        this.$router.push('/search/devices')
       }
     })
 
