@@ -26,9 +26,10 @@
         icon
         color="primary"
         :href="value.url"
+        target="_blank"
       >
         <v-icon>
-          mdi-link
+          mdi-open-in-new
         </v-icon>
       </v-btn>
     </v-list-item-action>
