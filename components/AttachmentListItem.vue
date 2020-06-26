@@ -101,7 +101,7 @@ export default class AttachmentListItem extends Vue {
         return 'mdi-file-pdf-box'
       case 'doc':
       case 'docx':
-      case 'odf':
+      case 'odt':
         return 'mdi-text-box'
       default:
         return 'mdi-paperclip'
