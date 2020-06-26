@@ -3,7 +3,7 @@ import { PlatformOrDeviceType } from '../enums/PlatformOrDeviceType'
 import Contact, { IContact } from './Contact'
 import { DeviceProperty } from './DeviceProperty'
 import { CustomTextField, ICustomTextField } from './CustomTextField'
-import { Attachment } from './Attachment'
+import { Attachment, IAttachment } from './Attachment'
 import { IDeviceOrPlatformSearchObject } from './IDeviceOrPlatformSearchObject'
 import Status from './Status'
 import IPathSetter from './IPathSetter'
@@ -35,6 +35,7 @@ export interface IDevice {
   contacts: IContact[]
   properties: DeviceProperty[]
   customFields: ICustomTextField[]
+  attachments: IAttachment[]
 }
 
 export default class Device implements IDevice, IPathSetter {
@@ -333,6 +334,9 @@ export default class Device implements IDevice, IPathSetter {
       case 'customFields':
         this.customFields = value.map(CustomTextField.createFromObject)
         break
+      case 'attachments':
+        this.attachments = value.map(Attachment.createFromObject)
+        break
       default:
         throw new TypeError('path ' + path + ' is not valid')
     }
@@ -367,6 +371,7 @@ export default class Device implements IDevice, IPathSetter {
     newObject.contacts = someObject.contacts.map(Contact.createFromObject)
     newObject.properties = someObject.properties.map(DeviceProperty.createFromObject)
     newObject.customFields = someObject.customFields.map(CustomTextField.createFromObject)
+    newObject.attachments = someObject.attachments.map(Attachment.createFromObject)
 
     return newObject
   }

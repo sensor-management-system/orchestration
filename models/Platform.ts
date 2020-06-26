@@ -1,7 +1,7 @@
 import { PlatformOrDeviceType } from '../enums/PlatformOrDeviceType'
 
 import Contact, { IContact } from './Contact'
-import { Attachment } from './Attachment'
+import { Attachment, IAttachment } from './Attachment'
 
 import { IDeviceOrPlatformSearchObject } from './IDeviceOrPlatformSearchObject'
 import PlatformType from './PlatformType'
@@ -38,6 +38,7 @@ export interface IPlatform {
   modifiedByUserId: number | null
 
   contacts: IContact[]
+  attachments: IAttachment[]
 }
 
 export default class Platform implements IPlatform, IPathSetter {
@@ -324,6 +325,9 @@ export default class Platform implements IPlatform, IPathSetter {
       case 'contacts':
         this.contacts = value.map(Contact.createFromObject)
         break
+      case 'attachments':
+        this.attachments = value.map(Attachment.createFromObject)
+        break
       default:
         throw new TypeError('path ' + path + ' is not valid')
     }
@@ -373,6 +377,7 @@ export default class Platform implements IPlatform, IPathSetter {
     newObject.modifiedByUserId = someObject.modifiedByUserId
 
     newObject.contacts = someObject.contacts.map(Contact.createFromObject)
+    newObject.attachments = someObject.attachments.map(Attachment.createFromObject)
 
     return newObject
   }
