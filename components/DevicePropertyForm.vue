@@ -3,7 +3,7 @@
     <v-row>
       <v-col cols="12" md="3">
         <v-select
-          label="compartment"
+          label="Compartment"
           :value="value.compartmentUri"
           :readonly="readonly"
           :disabled="readonly"
@@ -12,7 +12,7 @@
       </v-col>
       <v-col cols="12" md="3">
         <v-select
-          label="unit"
+          label="Unit"
           :value="value.unitUri"
           :readonly="readonly"
           :disabled="readonly"
@@ -21,7 +21,7 @@
       </v-col>
       <v-col cols="12" md="3">
         <v-text-field
-          label="accuracy"
+          label="Accuracy"
           :value="value.accuracy"
           :readonly="readonly"
           :disabled="readonly"
@@ -32,7 +32,7 @@
     <v-row>
       <v-col cols="12" md="3">
         <v-select
-          label="sampling media"
+          label="Sampling media"
           :value="value.samplingMediaUri"
           :readonly="readonly"
           :disabled="readonly"
@@ -41,7 +41,7 @@
       </v-col>
       <v-col cols="12" md="1">
         <v-text-field
-          label="measuring range min"
+          label="Measuring range min"
           :value="value.measuringRange.min"
           :readonly="readonly"
           :disabled="readonly"
@@ -50,7 +50,7 @@
       </v-col>
       <v-col cols="12" md="1">
         <v-text-field
-          label="measuring range max"
+          label="Measuring range max"
           :value="value.measuringRange.max"
           :readonly="readonly"
           :disabled="readonly"
@@ -59,7 +59,7 @@
       </v-col>
       <v-col cols="12" md="3" offset="1">
         <v-text-field
-          label="label"
+          label="Label"
           :value="value.label"
           :readonly="readonly"
           :disabled="readonly"
@@ -70,7 +70,7 @@
     <v-row>
       <v-col cols="12" md="3">
         <v-select
-          label="property"
+          label="Property"
           :value="value.propertyUri"
           :readonly="readonly"
           :disabled="readonly"
@@ -79,7 +79,7 @@
       </v-col>
       <v-col cols="12" md="3">
         <v-text-field
-          label="failure value"
+          label="Failure value"
           :value="value.failureValue"
           :readonly="readonly"
           :disabled="readonly"

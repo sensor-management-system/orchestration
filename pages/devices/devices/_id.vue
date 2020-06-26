@@ -17,7 +17,7 @@
                   <v-col cols="12" md="3">
                     <v-text-field
                       v-model="device.persistentIdentifier"
-                      label="persistent identifier (PID)"
+                      label="Persistent identifier (PID)"
                       :readonly="readonly"
                       :disabled="readonly"
                     />
@@ -27,7 +27,10 @@
                   <v-col cols="12" md="6">
                     <v-text-field
                       v-model="device.shortName"
-                      label="short name"
+                      label="Short name"
+                      required
+                      class="required"
+                      :rules="[rules.required]"
                       :readonly="readonly"
                       :disabled="readonly"
                     />
@@ -35,7 +38,7 @@
                   <v-col cols="12" md="6">
                     <v-text-field
                       v-model="device.longName"
-                      label="long name"
+                      label="Long name"
                       :readonly="readonly"
                       :disabled="readonly"
                     />
@@ -44,7 +47,7 @@
                     <v-select
                       v-model="deviceStatusName"
                       :items="statusNames"
-                      label="status"
+                      label="Status"
                       :readonly="readonly"
                       :disabled="readonly"
                     />
@@ -55,7 +58,7 @@
                     <v-combobox
                       v-model="deviceManufacturerName"
                       :items="manufacturerNames"
-                      label="manufacturer"
+                      label="Manufacturer"
                       :readonly="readonly"
                       :disabled="readonly"
                     />
@@ -63,7 +66,7 @@
                   <v-col cols="12" md="3">
                     <v-text-field
                       v-model="device.model"
-                      label="model"
+                      label="Model"
                       :readonly="readonly"
                       :disabled="readonly"
                     />
@@ -114,7 +117,7 @@
                   <v-col cols="12" md="3">
                     <v-text-field
                       v-model="device.serialNumber"
-                      label="Serial Number"
+                      label="Serial number"
                       :readonly="readonly"
                       :disabled="readonly"
                     />
@@ -122,7 +125,7 @@
                   <v-col cols="12" md="3">
                     <v-text-field
                       v-model="device.inventoryNumber"
-                      label="Inventory Number"
+                      label="Inventory number"
                       :readonly="readonly"
                       :disabled="readonly"
                     />
@@ -132,7 +135,7 @@
                   <v-col cols="12" md="3">
                     <v-checkbox
                       v-model="device.dualUse"
-                      label="Dual Use"
+                      label="Dual use"
                       hint="can be used for military aims"
                       :persistent-hint="true"
                       color="red darken-3"
@@ -174,7 +177,7 @@
             >
               <v-card-title>Device URN: {{ deviceURN }}</v-card-title>
               <v-card-text>
-                <CustomFieldCards v-model="device.customFields" :readonly="readonly" />
+                <CustomFieldCards v-model="device.customFields" :readonly="readonly" :rules="rules" />
               </v-card-text>
             </v-card>
           </v-tab-item>
@@ -264,6 +267,10 @@
   </div>
 </template>
 
+<style lang="scss">
+@import "~/assets/styles/_forms.scss";
+</style>
+
 <script lang="ts">
 import { Vue, Component, Watch } from 'nuxt-property-decorator'
 import Device from '../../../models/Device'
@@ -339,6 +346,10 @@ export default class DeviceIdPage extends Vue {
     this.$nuxt.$on('AppBarExtension:change', (tab: number) => {
       this.activeTab = tab
     })
+  }
+
+  private rules: Object = {
+    required: (v: string) => !!v || 'Required'
   }
 
   mounted () {

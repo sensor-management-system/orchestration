@@ -20,6 +20,7 @@
           <CustomFieldForm
             v-model="value[index]"
             :readonly="readonly"
+            :rules="rules"
           >
             <template v-slot:actions>
               <v-btn
@@ -78,6 +79,14 @@ export default class CustomFieldCards extends Vue {
   })
   // @ts-ignore
   readonly: boolean
+
+  @Prop({
+    default: {},
+    required: false,
+    type: Object
+  })
+  // @ts-ignore
+  rules!: Object
 
   /**
    * adds a new CustomTextField instance
