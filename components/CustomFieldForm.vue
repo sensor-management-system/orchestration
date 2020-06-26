@@ -8,7 +8,7 @@
         :disabled="readonly"
         required
         class="required"
-        :rules="rules.required ? [rules.required] : []"
+        :rules="rules && rules.required ? [rules.required] : []"
         @input="update('key', $event)"
       />
     </v-col>
@@ -58,7 +58,7 @@ export default class CustomFieldForm extends Vue {
   readonly: boolean
 
   @Prop({
-    default: {},
+    default: () => {},
     required: false,
     type: Object
   })

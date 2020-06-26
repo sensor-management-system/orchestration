@@ -20,7 +20,7 @@
           label="File"
           required
           class="required"
-          :rules="rules.required ? [rules.required] : []"
+          :rules="rules && rules.required ? [rules.required] : []"
           show-size
         />
         <v-text-field
@@ -31,7 +31,7 @@
           placeholder="http://"
           required
           class="required"
-          :rules="rules.required ? [rules.required] : []"
+          :rules="rules && rules.required ? [rules.required] : []"
         />
       </v-col>
     </v-row>
@@ -128,7 +128,7 @@ export default class AttachmentList extends Vue {
   readonly: boolean
 
   @Prop({
-    default: {},
+    default: () => {},
     required: false,
     type: Object
   })

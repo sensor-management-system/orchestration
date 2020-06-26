@@ -81,7 +81,7 @@ export default class CustomFieldCards extends Vue {
   readonly: boolean
 
   @Prop({
-    default: {},
+    default: () => {},
     required: false,
     type: Object
   })
