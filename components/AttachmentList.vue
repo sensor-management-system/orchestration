@@ -1,15 +1,5 @@
 <template>
-  <v-container>
-    <v-row v-if="!readonly">
-      <v-col cols="12" md="4">
-        <v-text-field
-          v-model="attachment.label"
-          label="Label"
-          required
-          class="required"
-        />
-      </v-col>
-    </v-row>
+  <v-form ref="attachmentsForm">
     <v-row v-if="!readonly">
       <v-col cols="12" md="3">
         <v-radio-group
@@ -30,6 +20,8 @@
           label="File"
           required
           class="required"
+          :rules="rules.required ? [rules.required] : []"
+          show-size
         />
         <v-text-field
           v-if="attachmentType === 'url'"
@@ -39,13 +31,26 @@
           placeholder="http://"
           required
           class="required"
+          :rules="rules.required ? [rules.required] : []"
+        />
+      </v-col>
+    </v-row>
+    <v-row v-if="!readonly">
+      <v-col cols="12" md="4">
+        <v-text-field
+          v-model="attachment.label"
+          label="Label"
         />
       </v-col>
     </v-row>
     <v-row v-if="!readonly">
       <v-col cols="12">
         <v-spacer />
-        <v-btn color="primary" small @click="add()">
+        <v-btn
+          color="primary"
+          small
+          @click="add()"
+        >
           Upload
         </v-btn>
       </v-col>
@@ -84,7 +89,7 @@
         </v-list>
       </v-col>
     </v-row>
-  </v-container>
+  </v-form>
 </template>
 
 <script lang="ts">
@@ -122,6 +127,14 @@ export default class AttachmentList extends Vue {
   // @ts-ignore
   readonly: boolean
 
+  @Prop({
+    default: {},
+    required: false,
+    type: Object
+  })
+  // @ts-ignore
+  rules!: Object
+
   private attachment: Attachment = new Attachment()
   private attachmentType: string = 'file'
 
@@ -131,6 +144,13 @@ export default class AttachmentList extends Vue {
    * @fires AttachmentList#input
    */
   add () {
+    // see https://stackoverflow.com/a/52109899/86224
+    if (!(this.$refs.attachmentsForm as Vue & { validate: () => boolean }).validate()) {
+      return
+    }
+
+    (this.$refs.attachmentsForm as Vue & { resetValidation: () => boolean }).resetValidation()
+
     /**
      * Update event
      * @event AttachmentList#input
