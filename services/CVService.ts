@@ -41,21 +41,24 @@ export default class CVService {
     })
   }
 
-  /* Just as a proof that the connection works.
-
-  static findAllEquipmentTypes (): Promise<any> {
-    return axios.get(BASE_URL + '/equipmenttype').then((rawResponse: any) => {
-      return rawResponse
-    })
-  }
-  */
-
   static findAllDeviceTypes (): Promise<DeviceType[]> {
-    return new Promise<DeviceType[]>((resolve) => {
-      resolve([
-        DeviceType.createWithData(1, 'type1', 'http://helmholtz/smvc/devicetype/1'),
-        DeviceType.createWithData(2, 'type2', 'http://helmholtz/smvc/devicetype/2')
-      ])
+    return axios.get(BASE_URL + '/equipmenttype').then((rawResponse) => {
+      const response = rawResponse.data
+      const data = response.data
+
+      const result = []
+
+      for (const record of data) {
+        const id = record.id
+        const name = record.attributes.name
+        const url = record.links.self
+
+        result.push(
+          DeviceType.createWithData(id, name, url)
+        )
+      }
+
+      return result
     })
   }
 }
