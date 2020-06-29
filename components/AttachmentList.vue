@@ -49,6 +49,7 @@
         <v-btn
           color="primary"
           small
+          data-role="add-attachment"
           @click="add()"
         >
           {{ attachmentType === 'url' ? 'Add' : 'Upload' }}
@@ -128,7 +129,11 @@ export default class AttachmentList extends Vue {
   readonly readonly: boolean
 
   @Prop({
-    default: () => {},
+    default: () => {
+      return {
+        required: (v: string) => !!v || 'Required'
+      }
+    },
     required: false,
     type: Object
   })
