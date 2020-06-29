@@ -190,7 +190,7 @@
           >
             <v-card-title>Device URN: {{ deviceURN }}</v-card-title>
             <v-card-text>
-              <AttachmentList v-model="device.attachments" :readonly="readonly" :rules="rules" />
+              <AttachmentList v-model="device.attachments" :readonly="readonly" />
             </v-card-text>
           </v-card>
         </v-tab-item>
