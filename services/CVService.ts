@@ -18,14 +18,23 @@ export default class CVService {
   }
 
   static findAllPlatformTypes (): Promise<PlatformType[]> {
-    return new Promise<PlatformType[]>((resolve) => {
-      resolve([
-        PlatformType.createWithData(1, 'Station', 'http://helmholtz/smsvc/platformtype/1'),
-        PlatformType.createWithData(2, 'Drone', 'http://helmholtz/smsvc/platformtype/2'),
-        PlatformType.createWithData(3, 'Vessel', 'http://helmholtz/smsvc/platformtype/3'),
-        PlatformType.createWithData(4, 'Vehicle', 'http://helmholtz/smsvc/platformtype/4'),
-        PlatformType.createWithData(5, 'Satellite', 'http://helmholtz/smsvc/platformtype/5')
-      ])
+    return axios.get(BASE_URL + '/sitetype').then((rawResponse) => {
+      const response = rawResponse.data
+      const data = response.data
+
+      const result = []
+
+      for (const record of data) {
+        const id = record.id
+        const name = record.attributes.name
+        const url = record.links.self
+
+        result.push(
+          PlatformType.createWithData(id, name, url)
+        )
+      }
+
+      return result
     })
   }
 
