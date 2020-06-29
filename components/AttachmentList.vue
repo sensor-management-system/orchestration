@@ -67,7 +67,7 @@
 
           <AttachmentListItem
             v-for="(item, index) in value"
-            :key="'attachment-' + index"
+            :key="item.url ? item.url : item.id"
             v-model="value[index]"
           >
             <template
