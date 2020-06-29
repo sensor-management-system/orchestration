@@ -16,6 +16,7 @@
       <v-col cols="12" md="4">
         <v-file-input
           v-if="attachmentType === 'file'"
+          v-model="file"
           :accept="mimeTypeList"
           label="File"
           required
@@ -142,6 +143,7 @@ export default class AttachmentList extends Vue {
 
   private attachment: Attachment = new Attachment()
   private attachmentType: string = 'file'
+  private file: File | null = null
 
   /**
    * adds a new Attachment instance
@@ -167,6 +169,7 @@ export default class AttachmentList extends Vue {
     ] as Attachment[])
 
     this.attachment = new Attachment()
+    this.file = null
   }
 
   /**
