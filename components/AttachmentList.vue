@@ -21,7 +21,7 @@
           label="File"
           required
           class="required"
-          :rules="rules && rules.required ? [rules.required] : []"
+          :rules="[rules.required]"
           show-size
         />
         <v-text-field
@@ -32,7 +32,7 @@
           placeholder="http://"
           required
           class="required"
-          :rules="rules && rules.required ? [rules.required] : []"
+          :rules="[rules.required, rules.validUrl]"
         />
       </v-col>
     </v-row>
@@ -129,21 +129,14 @@ export default class AttachmentList extends Vue {
   // @ts-ignore
   readonly readonly: boolean
 
-  @Prop({
-    default: () => {
-      return {
-        required: (v: string) => !!v || 'Required'
-      }
-    },
-    required: false,
-    type: Object
-  })
-  // @ts-ignore
-  readonly rules!: Object
-
   private attachment: Attachment = new Attachment()
   private attachmentType: string = 'file'
   private file: File | null = null
+
+  private rules: Object = {
+    required: (v: string) => !!v || 'Required',
+    validUrl: (v: string) => v.match(/^https*:\/\//) !== null || v.match(/^ftp*:\/\//) !== null || 'URL not valid'
+  }
 
   /**
    * adds a new Attachment instance
