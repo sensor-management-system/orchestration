@@ -19,6 +19,9 @@ export interface IDevice {
   manufacturerUri: string
   manufacturerName: string
 
+  deviceTypeUri: string
+  deviceTypeName: string
+
   model: string
   description: string
   website: string
@@ -47,6 +50,10 @@ export default class Device implements IDevice, IPathSetter {
 
   private _manufacturerUri: string = ''
   private _manufacturerName: string = ''
+
+  private _deviceTypeUri: string = ''
+  private _deviceTypeName: string = ''
+
   private _model: string = ''
 
   private _description: string = ''
@@ -130,6 +137,22 @@ export default class Device implements IDevice, IPathSetter {
 
   set manufacturerName (manufacturerName: string) {
     this._manufacturerName = manufacturerName
+  }
+
+  get deviceTypeUri (): string {
+    return this._deviceTypeUri
+  }
+
+  set deviceTypeUri (deviceTypeUri: string) {
+    this._deviceTypeUri = deviceTypeUri
+  }
+
+  get deviceTypeName (): string {
+    return this._deviceTypeName
+  }
+
+  set deviceTypeName (deviceTypeName: string) {
+    this._deviceTypeName = deviceTypeName
   }
 
   get model (): string {
@@ -269,6 +292,12 @@ export default class Device implements IDevice, IPathSetter {
       case 'manufacturerName':
         this.manufacturerName = String(value)
         break
+      case 'deviceTypeUri':
+        this.deviceTypeUri = String(value)
+        break
+      case 'deviceTypeName':
+        this.deviceTypeName = String(value)
+        break
       case 'model':
         this.model = String(value)
         break
@@ -342,6 +371,9 @@ export default class Device implements IDevice, IPathSetter {
 
     newObject.manufacturerUri = someObject.manufacturerUri
     newObject.manufacturerName = someObject.manufacturerName
+
+    newObject.deviceTypeUri = someObject.deviceTypeUri
+    newObject.deviceTypeName = someObject.deviceTypeName
 
     newObject.model = someObject.model
     newObject.description = someObject.description

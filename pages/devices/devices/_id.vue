@@ -56,6 +56,15 @@
                 <v-row>
                   <v-col cols="12" md="3">
                     <v-combobox
+                      v-model="deviceTypeName"
+                      :items="deviceTypeNames"
+                      label="Type"
+                      :readonly="readonly"
+                      :disabled="readonly"
+                    />
+                  </v-col>
+                  <v-col cols="12" md="3">
+                    <v-combobox
                       v-model="deviceManufacturerName"
                       :items="manufacturerNames"
                       label="Manufacturer"
@@ -267,6 +276,8 @@ import Device from '../../../models/Device'
 
 import CVService from '../../../services/CVService'
 import SmsService from '../../../services/SmsService'
+
+import DeviceType from '../../../models/DeviceType'
 import Manufacturer from '../../../models/Manufacturer'
 import Status from '../../../models/Status'
 
@@ -312,6 +323,7 @@ export default class DeviceIdPage extends Vue {
 
   private states: Status[] = []
   private manufacturers: Manufacturer[] = []
+  private deviceTypes: DeviceType[] = []
 
   private editMode: boolean = false
 
@@ -345,6 +357,9 @@ export default class DeviceIdPage extends Vue {
     })
     CVService.findAllManufacturers().then((foundManufacturers) => {
       this.manufacturers = foundManufacturers
+    })
+    CVService.findAllDeviceTypes().then((foundDeviceTypes) => {
+      this.deviceTypes = foundDeviceTypes
     })
     this.loadDevice()
     this.$nextTick(() => {
@@ -461,6 +476,10 @@ export default class DeviceIdPage extends Vue {
     return this.states.map(s => s.name)
   }
 
+  get deviceTypeNames (): string[] {
+    return this.deviceTypes.map(t => t.name)
+  }
+
   get deviceStatusName () {
     const statusIndex = this.states.findIndex(s => s.uri === this.device.statusUri)
     if (statusIndex > -1) {
@@ -476,6 +495,24 @@ export default class DeviceIdPage extends Vue {
       this.device.statusUri = this.states[statusIndex].uri
     } else {
       this.device.statusUri = ''
+    }
+  }
+
+  get deviceTypeName () {
+    const deviceTypeIndex = this.deviceTypes.findIndex(t => t.uri === this.device.deviceTypeUri)
+    if (deviceTypeIndex > -1) {
+      return this.deviceTypes[deviceTypeIndex].name
+    }
+    return this.device.deviceTypeName
+  }
+
+  set deviceTypeName (newName: string) {
+    this.device.deviceTypeName = newName
+    const deviceTypeIndex = this.deviceTypes.findIndex(t => t.name === newName)
+    if (deviceTypeIndex > -1) {
+      this.device.deviceTypeUri = this.deviceTypes[deviceTypeIndex].uri
+    } else {
+      this.device.deviceTypeUri = ''
     }
   }
 

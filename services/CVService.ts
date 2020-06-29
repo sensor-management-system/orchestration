@@ -3,6 +3,7 @@ import axios from 'axios'
 import Manufacturer from '../models/Manufacturer'
 import PlatformType from '~/models/PlatformType'
 import Status from '~/models/Status'
+import DeviceType from '~/models/DeviceType'
 
 const BASE_URL = process.env.cvBackendUrl + '/api'
 
@@ -48,4 +49,13 @@ export default class CVService {
     })
   }
   */
+
+  static findAllDeviceTypes (): Promise<DeviceType[]> {
+    return new Promise<DeviceType[]>((resolve) => {
+      resolve([
+        DeviceType.createWithData(1, 'type1', 'http://helmholtz/smvc/devicetype/1'),
+        DeviceType.createWithData(2, 'type2', 'http://helmholtz/smvc/devicetype/2')
+      ])
+    })
+  }
 }
