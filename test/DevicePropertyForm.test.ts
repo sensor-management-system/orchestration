@@ -6,6 +6,10 @@ import { mount, createLocalVue } from '@vue/test-utils'
 // @ts-ignore
 import DevicePropertyForm from '../components/DevicePropertyForm.vue'
 import { DeviceProperty } from '~/models/DeviceProperty'
+import Compartment from '~/models/Compartment'
+import SamplingMedia from '~/models/SamplingMedia'
+import Property from '~/models/Property'
+import Unit from '~/models/Unit'
 
 Vue.use(Vuetify)
 
@@ -40,7 +44,23 @@ describe('DevicePropertyForm', () => {
           },
           accuracy: 0.1,
           failureValue: 0.01
-        })
+        }),
+        compartments: [
+          Compartment.createWithData('1', 'bar', 'http://foo/compartment/1'),
+          Compartment.createWithData('2', 'foo', 'http://foo/compartment/2')
+        ] as Compartment[],
+        samplingMedias: [
+          SamplingMedia.createWithData('1', 'water', 'http://foo/samplingMedia/1'),
+          SamplingMedia.createWithData('2', 'media2', 'http://foo/samplingMedia/2')
+        ] as SamplingMedia[],
+        properties: [
+          Property.createWithData('1', 'foo.bar', 'http://foo/property/1'),
+          Property.createWithData('2', 'property2', 'http://foo/property/2')
+        ] as Property[],
+        units: [
+          Unit.createWithData('1', 'mm', 'http://foo/unit/1'),
+          Unit.createWithData('2', 's', 'http://foo/unit/2')
+        ] as Unit[]
       }
     })
   })

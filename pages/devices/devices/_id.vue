@@ -176,7 +176,14 @@
             >
               <v-card-title>Device URN: {{ deviceURN }}</v-card-title>
               <v-card-text>
-                <DevicePropertyExpansionPanels v-model="device.properties" :readonly="readonly" />
+                <DevicePropertyExpansionPanels
+                  v-model="device.properties"
+                  :readonly="readonly"
+                  :compartments="compartments"
+                  :sampling-medias="samplingMedias"
+                  :properties="properties"
+                  :units="units"
+                />
               </v-card-text>
             </v-card>
           </v-tab-item>
@@ -280,6 +287,10 @@ import SmsService from '../../../services/SmsService'
 import DeviceType from '../../../models/DeviceType'
 import Manufacturer from '../../../models/Manufacturer'
 import Status from '../../../models/Status'
+import Compartment from '../../../models/Compartment'
+import SamplingMedia from '../../../models/SamplingMedia'
+import Property from '../../../models/Property'
+import Unit from '../../../models/Unit'
 
 // @ts-ignore
 import ContactSelect from '../../../components/ContactSelect.vue'
@@ -325,6 +336,11 @@ export default class DeviceIdPage extends Vue {
   private manufacturers: Manufacturer[] = []
   private deviceTypes: DeviceType[] = []
 
+  private compartments: Compartment[] = []
+  private samplingMedias: SamplingMedia[] = []
+  private properties: Property[] = []
+  private units: Unit[] = []
+
   private editMode: boolean = false
 
   created () {
@@ -352,7 +368,6 @@ export default class DeviceIdPage extends Vue {
 
   mounted () {
     CVService.findAllStates().then((foundStates) => {
-      // TODO: Replace with real Status[] as we want to fill the uri & name
       this.states = foundStates
     })
     CVService.findAllManufacturers().then((foundManufacturers) => {
@@ -360,6 +375,18 @@ export default class DeviceIdPage extends Vue {
     })
     CVService.findAllDeviceTypes().then((foundDeviceTypes) => {
       this.deviceTypes = foundDeviceTypes
+    })
+    CVService.findAllCompartments().then((foundCompartments) => {
+      this.compartments = foundCompartments
+    })
+    CVService.findAllSamplingMedias().then((foundSamplingMedias) => {
+      this.samplingMedias = foundSamplingMedias
+    })
+    CVService.findAllProperties().then((foundProperties) => {
+      this.properties = foundProperties
+    })
+    CVService.findAllUnits().then((foundUnits) => {
+      this.units = foundUnits
     })
     this.loadDevice()
     this.$nextTick(() => {
