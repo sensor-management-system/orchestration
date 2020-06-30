@@ -1,5 +1,5 @@
 <template>
-  <v-form ref="attachmentsForm">
+  <v-form ref="attachmentsForm" @submit.prevent>
     <v-row v-if="!readonly">
       <v-col cols="12" md="3">
         <v-radio-group
