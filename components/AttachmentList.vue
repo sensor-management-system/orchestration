@@ -180,10 +180,21 @@ export default class AttachmentList extends mixins(Rules) {
     }
   }
 
+  /**
+   * returns a list of MimeTypes, seperated by ,
+   *
+   * @return {string} a list of MimeTypes
+   */
   get mimeTypeList (): string {
     return Object.keys(Attachment.mimeTypes).join(',')
   }
 
+  /**
+   * returns a unique index for the attachment in the list
+   *
+   * @param {Attachment} item - the attachment for that the index shall be created
+   * @return {string} the index in the form url + '#' + <count of url in the list if gt 0>
+   */
   getUrlIndex (item: Attachment) {
     const cnt: number = this.value.filter((attachment: Attachment): boolean => item.url === attachment.url).indexOf(item)
     return cnt > 0 ? item.url + '#' + cnt : item.url
