@@ -29,7 +29,7 @@
         </v-list-item>
 
         <!-- Configurations -->
-        <v-list-item to="/configurations" exact nuxt>
+        <v-list-item to="/search/configurations" exact nuxt>
           <v-list-item-action>
             <v-icon>mdi-file-cog</v-icon>
           </v-list-item-action>
