@@ -60,7 +60,7 @@ export default class ContactSelect extends Vue {
   readonly: boolean
 
   /**
-   * fetches all available contacts from the ContactService
+   * fetches all available contacts from the SmsService
    *
    * @async
    */

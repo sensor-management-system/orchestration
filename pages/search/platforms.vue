@@ -43,39 +43,7 @@
               </v-row>
               <v-row>
                 <v-col cols="12" md="3">
-                  <v-autocomplete
-                    v-model="manufacturerToAdd"
-                    label="add manufacturer"
-                    :items="notSelectedManufacturers"
-                  />
-                </v-col>
-                <v-col cols="12" md="3">
-                  <v-btn
-                    fab
-                    depressed
-                    small
-                    :disabled="manufacturerToAdd == null"
-                    @click="addSelectedManufacturer"
-                  >
-                    <v-icon>
-                      mdi-plus
-                    </v-icon>
-                  </v-btn>
-                </v-col>
-              </v-row>
-              <v-row>
-                <v-col cols="3">
-                  <v-chip
-                    v-for="(manufacturer, index) in selectedSearchManufacturers"
-                    :key="manufacturer.id"
-                    class="ma-2"
-                    color="brown"
-                    text-color="white"
-                    :close="true"
-                    @click:close="removeManufacturer(index)"
-                  >
-                    {{ manufacturer }}
-                  </v-chip>
+                  <ManufacturerSelect :selected-manufacturers.sync="selectedSearchManufacturers" />
                 </v-col>
               </v-row>
             </v-card-text>
@@ -170,6 +138,9 @@ import Platform from '../../models/Platform'
 import Status from '../../models/Status'
 
 // @ts-ignore
+import ManufacturerSelect from '@/components/ManufacturerSelect.vue'
+
+// @ts-ignore
 import AppBarEditModeContent from '@/components/AppBarEditModeContent.vue'
 // @ts-ignore
 import AppBarTabsExtension from '@/components/AppBarTabsExtension.vue'
@@ -185,14 +156,16 @@ export class AppBarTabsExtensionExtended extends AppBarTabsExtension {
   }
 }
 
-@Component
+@Component({
+  components: {
+    ManufacturerSelect
+  }
+})
 export default class SeachPlatformsPage extends Vue {
   private activeTab: number = 0
   private fab: boolean = false
 
-  private searchManufacturers: Manufacturer[] = []
   private selectedSearchManufacturers: Manufacturer[] = []
-  private manufacturerToAdd: Manufacturer | null = null
 
   private platformTypeLookup: Map<string, PlatformType> = new Map<string, PlatformType>()
   private statusLookup: Map<string, Status> = new Map<string, Status>()
@@ -213,9 +186,6 @@ export default class SeachPlatformsPage extends Vue {
   }
 
   mounted () {
-    CVService.findAllManufacturers().then((manufacturers) => {
-      this.searchManufacturers = manufacturers
-    })
     const promisePlatformTypes = CVService.findAllPlatformTypes()
     const promiseStates = CVService.findAllStates()
 
@@ -273,7 +243,6 @@ export default class SeachPlatformsPage extends Vue {
   clearExtendedSearch () {
     this.clearBasicSearch()
     this.selectedSearchManufacturers = []
-    this.manufacturerToAdd = null
   }
 
   runSearch (searchText: string | null, manufacturer: Manufacturer[]) {
@@ -282,19 +251,6 @@ export default class SeachPlatformsPage extends Vue {
     ).then((findResults) => {
       this.searchResults = findResults
     })
-  }
-
-  addSelectedManufacturer () {
-    this.$set(
-      this.selectedSearchManufacturers,
-      this.selectedSearchManufacturers.length,
-      this.manufacturerToAdd
-    )
-    this.manufacturerToAdd = null
-  }
-
-  removeManufacturer (index: number) {
-    this.$delete(this.selectedSearchManufacturers, index)
   }
 
   deleteAndCloseDialog (id: number) {
@@ -336,22 +292,6 @@ export default class SeachPlatformsPage extends Vue {
       return platform.statusName
     }
     return 'Unknown status'
-  }
-
-  get notSelectedManufacturers () {
-    const result = []
-    const selectedManufactures = new Set()
-
-    for (const singleManufacturer of this.selectedSearchManufacturers) {
-      selectedManufactures.add(singleManufacturer)
-    }
-
-    for (const singleManufacturer of this.searchManufacturers) {
-      if (!selectedManufactures.has(singleManufacturer)) {
-        result.push(singleManufacturer)
-      }
-    }
-    return result
   }
 }
 
