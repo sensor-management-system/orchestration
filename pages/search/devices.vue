@@ -43,7 +43,7 @@
               </v-row>
               <v-row>
                 <v-col cols="12" md="3">
-                  <ManufacturerSelect :selected-manufacturers.sync="selectedSearchManufacturers" />
+                  <ManufacturerSelect v-model="selectedSearchManufacturers" />
                 </v-col>
               </v-row>
             </v-card-text>

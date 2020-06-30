@@ -155,7 +155,7 @@
               <v-card-text>
                 <v-row>
                   <v-col cols="3">
-                    <ContactSelect :selected-contacts.sync="device.contacts" :readonly="readonly" />
+                    <ContactSelect v-model="device.contacts" :readonly="readonly" />
                   </v-col>
                 </v-row>
               </v-card-text>
