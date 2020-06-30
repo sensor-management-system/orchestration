@@ -28,6 +28,16 @@
           </v-list-item-content>
         </v-list-item>
 
+        <!-- Configurations -->
+        <v-list-item to="/configurations" exact nuxt>
+          <v-list-item-action>
+            <v-icon>mdi-file-cog</v-icon>
+          </v-list-item-action>
+          <v-list-item-content>
+            <v-list-item-title>Configurations</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+
         <!-- Projects -->
         <v-list-item to="/projects" exact nuxt>
           <v-list-item-action>
