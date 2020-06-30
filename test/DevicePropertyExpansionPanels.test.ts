@@ -2,29 +2,14 @@ import Vue from 'vue'
 import Vuetify from 'vuetify'
 
 import { mount, createLocalVue } from '@vue/test-utils'
-import { WrapperArray } from '@vue/test-utils/types'
 
 // @ts-ignore
-import SensorPropertyExpansionPanels from '@/components/SensorPropertyExpansionPanels.vue'
-import { SensorProperty } from '@/models/SensorProperty'
-
-// see https://github.com/vuejs/vue-test-utils/issues/960
-function withWrapperArray (wrapperArray: WrapperArray<Vue>): Record<string, Function> {
-  return {
-    childSelectorHasText: (
-      selector: string,
-      str: string
-    ): WrapperArray<Vue> => wrapperArray
-      .filter(i => i.find(selector).text().match(str)),
-
-    hasText: (str: string): WrapperArray<Vue> => wrapperArray
-      .filter(i => i.text().match(str))
-  }
-}
+import DevicePropertyExpansionPanels from '@/components/DevicePropertyExpansionPanels.vue'
+import { DeviceProperty } from '@/models/DeviceProperty'
 
 Vue.use(Vuetify)
 
-describe('SensorPropertyExpansionPanels', () => {
+describe('DevicePropertyExpansionPanels', () => {
   let wrapper: any
 
   /*
@@ -37,17 +22,21 @@ describe('SensorPropertyExpansionPanels', () => {
     // disable "[Vuetify] Unable to locate target [data-app]" warnings:
     document.body.setAttribute('data-app', 'true')
 
-    wrapper = mount(SensorPropertyExpansionPanels, {
+    wrapper = mount(DevicePropertyExpansionPanels, {
       localVue,
       vuetify,
       propsData: {
         value: [
-          SensorProperty.createFromObject({
-            compartment: 'test',
+          DeviceProperty.createFromObject({
             label: 'test',
-            samplingMedia: 'water',
-            unit: 'mm',
-            variable: 'foo.bar',
+            compartmentUri: 'http://foo/compartment/1',
+            compartmentName: 'bar',
+            unitUri: 'http://foo/unit/1',
+            unitName: 'mm',
+            samplingMediaUri: 'http://foo/samplingMedia/1',
+            samplingMediaName: 'water',
+            propertyUri: 'http://foo/property/1',
+            propertyName: 'foo.bar',
             measuringRange: {
               min: 10,
               max: 1000
@@ -55,7 +44,7 @@ describe('SensorPropertyExpansionPanels', () => {
             accuracy: 0.1,
             failureValue: 0.01
           })
-        ] as SensorProperty[]
+        ] as DeviceProperty[]
       }
     })
   })
@@ -77,7 +66,7 @@ describe('SensorPropertyExpansionPanels', () => {
     expect(wrapper.emitted('input')).toBeTruthy()
   })
 
-  it('should trigger an input event with a sensor property array length increased by 1 when the add button is clicked', async () => {
+  it('should trigger an input event with a device property array length increased by 1 when the add button is clicked', async () => {
     await wrapper.get('[data-role="add-property"]').trigger('click')
     expect(wrapper.emitted('input')[0][0]).toHaveLength(2)
   })
@@ -92,7 +81,7 @@ describe('SensorPropertyExpansionPanels', () => {
     expect(wrapper.emitted('input')).toBeTruthy()
   })
 
-  it('should trigger an input event with a sensor property array length decreased by 1 when the delete menu item is clicked', async () => {
+  it('should trigger an input event with a device property array length decreased by 1 when the delete menu item is clicked', async () => {
     await wrapper.get('[data-role="property-menu"]').trigger('click')
     await wrapper.get('[data-role="delete-property"]').trigger('click')
     expect(wrapper.emitted('input')[0][0]).toHaveLength(0)
@@ -108,7 +97,7 @@ describe('SensorPropertyExpansionPanels', () => {
     expect(wrapper.emitted('input')).toBeTruthy()
   })
 
-  it('should trigger an input event with a sensor property array length increased by 1 when the copy menu item is clicked', async () => {
+  it('should trigger an input event with a device property array length increased by 1 when the copy menu item is clicked', async () => {
     await wrapper.get('[data-role="property-menu"]').trigger('click')
     await wrapper.get('[data-role="copy-property"]').trigger('click')
     expect(wrapper.emitted('input')[0][0]).toHaveLength(2)

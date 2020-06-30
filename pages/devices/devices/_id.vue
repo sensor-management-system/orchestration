@@ -1,7 +1,7 @@
 <template>
   <div>
     <v-breadcrumbs :items="navigation" />
-    <h1>Add Sensor</h1>
+    <h1>Add Device</h1>
     <v-form>
       <v-card
         outlined
@@ -19,11 +19,12 @@
             <v-card
               flat
             >
-              <v-card-title>Sensor URN: {{ sensorURN }}</v-card-title>
+              <v-card-title>Device URN: {{ deviceURN }}</v-card-title>
               <v-card-text>
                 <v-row>
                   <v-col cols="12" md="3">
                     <v-text-field
+                      v-model="device.persistentIdentifier"
                       label="persistent identifier (PID)"
                       :readonly="readonly"
                       :disabled="readonly"
@@ -33,17 +34,25 @@
                 <v-row>
                   <v-col cols="12" md="6">
                     <v-text-field
-                      v-model="sensor.label"
-                      label="label"
+                      v-model="device.shortName"
+                      label="short name"
+                      :readonly="readonly"
+                      :disabled="readonly"
+                    />
+                  </v-col>
+                  <v-col cols="12" md="6">
+                    <v-text-field
+                      v-model="device.longName"
+                      label="long name"
                       :readonly="readonly"
                       :disabled="readonly"
                     />
                   </v-col>
                   <v-col cols="12" md="3">
                     <v-select
-                      v-model="sensor.state"
-                      :items="states"
-                      label="state"
+                      v-model="deviceStatusName"
+                      :items="statusNames"
+                      label="status"
                       :readonly="readonly"
                       :disabled="readonly"
                     />
@@ -51,17 +60,9 @@
                 </v-row>
                 <v-row>
                   <v-col cols="12" md="3">
-                    <v-select
-                      v-model="sensor.type"
-                      :items="sensorTypes"
-                      label="type"
-                      :readonly="readonly"
-                      :disabled="readonly"
-                    />
-                  </v-col>
-                  <v-col cols="12" md="3">
-                    <v-text-field
-                      v-model="sensor.manufacturer"
+                    <v-combobox
+                      v-model="deviceManufacturerName"
+                      :items="manufacturerNames"
                       label="manufacturer"
                       :readonly="readonly"
                       :disabled="readonly"
@@ -69,7 +70,7 @@
                   </v-col>
                   <v-col cols="12" md="3">
                     <v-text-field
-                      v-model="sensor.model"
+                      v-model="device.model"
                       label="model"
                       :readonly="readonly"
                       :disabled="readonly"
@@ -80,7 +81,7 @@
                 <v-row>
                   <v-col cols="12" md="6">
                     <v-textarea
-                      v-model="sensor.description"
+                      v-model="device.description"
                       label="Description"
                       rows="3"
                       :readonly="readonly"
@@ -91,9 +92,10 @@
                 <v-row>
                   <v-col cols="12" md="3">
                     <v-text-field
-                      v-model="sensor.urlWebsite"
+                      v-model="device.website"
                       label="Website"
                       placeholder="https://"
+                      type="url"
                       :readonly="readonly"
                       :disabled="readonly"
                     />
@@ -103,7 +105,7 @@
                 <v-row>
                   <v-col cols="12" md="3">
                     <v-text-field
-                      v-model="sensor.serialNumber"
+                      v-model="device.serialNumber"
                       label="Serial Number"
                       :readonly="readonly"
                       :disabled="readonly"
@@ -111,8 +113,8 @@
                   </v-col>
                   <v-col cols="12" md="3">
                     <v-text-field
-                      v-model="sensor.inventoryNumber"
-                      label="Inventar Number"
+                      v-model="device.inventoryNumber"
+                      label="Inventory Number"
                       :readonly="readonly"
                       :disabled="readonly"
                     />
@@ -121,7 +123,7 @@
                 <v-row>
                   <v-col cols="12" md="3">
                     <v-checkbox
-                      v-model="sensor.dualUse"
+                      v-model="device.dualUse"
                       label="Dual Use"
                       hint="can be used for military aims"
                       :persistent-hint="true"
@@ -146,11 +148,11 @@
             <v-card
               flat
             >
-              <v-card-title>Sensor URN: {{ sensorURN }}</v-card-title>
+              <v-card-title>Device URN: {{ deviceURN }}</v-card-title>
               <v-card-text>
                 <v-row>
                   <v-col cols="3">
-                    <PersonSelect :selected-persons.sync="sensor.responsiblePersons" :readonly="readonly" />
+                    <ContactSelect :selected-contacts.sync="device.contacts" :readonly="readonly" />
                   </v-col>
                 </v-row>
               </v-card-text>
@@ -174,9 +176,9 @@
             <v-card
               flat
             >
-              <v-card-title>Sensor URN: {{ sensorURN }}</v-card-title>
+              <v-card-title>Device URN: {{ deviceURN }}</v-card-title>
               <v-card-text>
-                <SensorPropertyExpansionPanels v-model="sensor.properties" :readonly="readonly" />
+                <DevicePropertyExpansionPanels v-model="device.properties" :readonly="readonly" />
               </v-card-text>
               <v-card-actions>
                 <v-btn
@@ -198,9 +200,9 @@
             <v-card
               flat
             >
-              <v-card-title>Sensor URN: {{ sensorURN }}</v-card-title>
+              <v-card-title>Device URN: {{ deviceURN }}</v-card-title>
               <v-card-text>
-                <CustomFieldCards v-model="sensor.customFields" :readonly="readonly" />
+                <CustomFieldCards v-model="device.customFields" :readonly="readonly" />
               </v-card-text>
               <v-card-actions>
                 <v-btn
@@ -222,7 +224,7 @@
             <v-card
               flat
             >
-              <v-card-title>Sensor URN: {{ sensorURN }}</v-card-title>
+              <v-card-title>Device URN: {{ deviceURN }}</v-card-title>
               <v-card-text>
                 <v-timeline dense clipped>
                   <v-timeline-item
@@ -266,7 +268,7 @@
                         2020-04-20 08:05
                       </v-col>
                       <v-col cols="10">
-                        <strong>sensor created</strong>
+                        <strong>device created</strong>
                         <div>Hans H.</div>
                       </v-col>
                     </v-row>
@@ -304,7 +306,7 @@
           bottom
           right
           color="primary"
-          @click="toggleEditMode"
+          @click="save"
         >
           <v-icon>mdi-content-save</v-icon>
         </v-btn>
@@ -315,42 +317,59 @@
 
 <script lang="ts">
 import { Vue, Component, Watch } from 'nuxt-property-decorator'
-import Sensor from '../../../models/Sensor'
+import Device from '../../../models/Device'
 
 // @ts-ignore
-import PersonSelect from '../../../components/PersonSelect.vue'
+import ContactSelect from '../../../components/ContactSelect.vue'
 // @ts-ignore
-import SensorPropertyExpansionPanels from '../../../components/SensorPropertyExpansionPanels.vue'
+import DevicePropertyExpansionPanels from '../../../components/DevicePropertyExpansionPanels.vue'
 // @ts-ignore
 import CustomFieldCards from '../../../components/CustomFieldCards.vue'
 
+import CVService from '../../../services/CVService'
+import SmsService from '../../../services/SmsService'
+import Manufacturer from '../../../models/Manufacturer'
+import Status from '../../../models/Status'
+
 @Component({
   components: {
-    PersonSelect,
-    SensorPropertyExpansionPanels,
+    ContactSelect,
+    DevicePropertyExpansionPanels,
     CustomFieldCards
   }
 })
 // @ts-ignore
-export default class SensorIdPage extends Vue {
+export default class DeviceIdPage extends Vue {
   private numberOfTabs: number = 5
   private activeTab: number = 0
 
-  private sensor: Sensor = new Sensor()
+  private device: Device = new Device()
+
+  private states: Status[] = []
+  private manufacturers: Manufacturer[] = []
+
   private isInEditMode: boolean = false
 
   mounted () {
-    this.loadSensor()
+    CVService.findAllStates().then((foundStates) => {
+      // TODO: Replace with real Status[] as we want to fill the uri & name
+      this.states = foundStates
+    })
+    CVService.findAllManufacturers().then((foundManufacturers) => {
+      this.manufacturers = foundManufacturers
+    })
+    this.loadDevice()
   }
 
-  loadSensor () {
-    const sensorId = this.$route.params.id
-    if (sensorId) {
+  loadDevice () {
+    const deviceId = this.$route.params.id
+    if (deviceId) {
       this.isInEditMode = false
-      // @TODO
+      SmsService.findDeviceById(deviceId).then((foundDevice) => {
+        this.device = foundDevice
+      })
     } else {
       this.isInEditMode = true
-      // @TODO
     }
   }
 
@@ -358,8 +377,39 @@ export default class SensorIdPage extends Vue {
     this.isInEditMode = !this.isInEditMode
   }
 
-  get sensorURN () {
-    return this.sensor.urn
+  save () {
+    SmsService.saveDevice(this.device).then((savedDevice) => {
+      this.device = savedDevice
+    })
+  }
+
+  get deviceURN () {
+    let partManufacturer = '[manufacturer]'
+    let partModel = '[model]'
+    let partSerialNumber = '[serial_number]'
+
+    if (this.device.manufacturerUri !== '') {
+      const manIndex = this.manufacturers.findIndex(m => m.uri === this.device.manufacturerUri)
+      if (manIndex > -1) {
+        partManufacturer = this.manufacturers[manIndex].name
+      } else if (this.device.manufacturerName !== '') {
+        partManufacturer = this.device.manufacturerName
+      }
+    } else if (this.device.manufacturerName !== '') {
+      partManufacturer = this.device.manufacturerName
+    }
+
+    if (this.device.model !== '') {
+      partModel = this.device.model
+    }
+
+    if (this.device.serialNumber !== '') {
+      partSerialNumber = this.device.serialNumber
+    }
+
+    return [partManufacturer, partModel, partSerialNumber].join('_').replace(
+      ' ', '_'
+    )
   }
 
   previousTab () {
@@ -390,55 +440,61 @@ export default class SensorIdPage extends Vue {
       },
       {
         disabled: true,
-        text: 'Add Sensor'
+        text: 'Add Device'
       }
     ]
   }
 
-  get sensorTypes () {
-    return [
-      {
-        text: 'Einzelsensor',
-        value: '1'
-      },
-      {
-        text: 'Multiparameter Sonde',
-        value: '2'
-      }
-    ]
+  get manufacturerNames (): string[] {
+    return this.manufacturers.map(m => m.name)
   }
 
-  get states () {
-    return [
-      {
-        text: 'in warehouse',
-        value: '1'
-      },
-      {
-        text: 'in use',
-        value: '2'
-      },
-      {
-        text: 'under construction',
-        value: '3'
-      },
-      {
-        text: 'blocked',
-        value: '4'
-      },
-      {
-        text: 'scrapped',
-        value: '5'
-      }
-    ]
+  get deviceManufacturerName (): string {
+    const manufacturerIndex = this.manufacturers.findIndex(m => m.uri === this.device.manufacturerUri)
+    if (manufacturerIndex > -1) {
+      return this.manufacturers[manufacturerIndex].name
+    }
+    return this.device.manufacturerName
   }
 
-  @Watch('sensor', { immediate: true, deep: true })
+  set deviceManufacturerName (newName: string) {
+    this.device.manufacturerName = newName
+    const manufacturerIndex = this.manufacturers.findIndex(m => m.name === newName)
+    if (manufacturerIndex > -1) {
+      this.device.manufacturerUri = this.manufacturers[manufacturerIndex].uri
+    } else {
+      this.device.manufacturerUri = newName
+    }
+  }
+
+  get statusNames (): string[] {
+    return this.states.map(s => s.name)
+  }
+
+  get deviceStatusName () {
+    const statusIndex = this.states.findIndex(s => s.uri === this.device.statusUri)
+    if (statusIndex > -1) {
+      return this.states[statusIndex].name
+    }
+    return this.device.statusName
+  }
+
+  set deviceStatusName (newName: string) {
+    this.device.statusName = newName
+    const statusIndex = this.states.findIndex(s => s.name === newName)
+    if (statusIndex > -1) {
+      this.device.statusUri = this.states[statusIndex].uri
+    } else {
+      this.device.statusUri = ''
+    }
+  }
+
+  @Watch('device', { immediate: true, deep: true })
   // @ts-ignore
-  onSensorChanged (val: Sensor) {
+  onDeviceChanged (val: device) {
     // @TODO: remove!
     // eslint-disable-next-line
-    console.log('something changed in the sensor', val)
+    console.log('something changed in the device', val)
   }
 }
 </script>

@@ -25,7 +25,7 @@
           background-color="grey lighten-3"
         >
           <v-tab>Basic data</v-tab>
-          <v-tab>Persons</v-tab>
+          <v-tab>Contacts</v-tab>
           <v-tab-item>
             <!-- Basic data tab -->
             <v-card
@@ -36,6 +36,16 @@
               </v-card-title>
               <v-card-text>
                 <v-row>
+                  <v-col cols="12" md="3">
+                    <v-text-field
+                      v-model="platform.persistentIdentifier"
+                      label="persistent identifier (PID)"
+                      :readonly="readonly"
+                      :disabled="readonly"
+                    />
+                  </v-col>
+                </v-row>
+                <v-row>
                   <v-col cols="12" md="6">
                     <v-text-field v-model="platform.shortName" label="short name" :readonly="readonly" :disabled="readonly" />
                   </v-col>
@@ -45,38 +55,72 @@
                 </v-row>
                 <v-row>
                   <v-col cols="12" md="3">
-                    <v-select
-                      v-model="platform.platformTypeId"
-                      label="type"
-                      :items="platformTypes"
-                      :item-text="(x) => x.name"
-                      :item-value="(x) => x.id"
+                    <!-- TODO: Auch hier den Namen und die URI ändern!!!
+                    -->
+                    <v-combobox
+                      v-model="platformPlatformTypeName"
+                      label="platform type"
+                      :items="platformTypeNames"
                       :readonly="readonly"
                       :disabled="readonly"
                     />
                   </v-col>
                   <v-col cols="12" md="3">
-                    <v-select
-                      v-model="platform.manufactureId"
-                      label="manufacturer"
-                      :items="manufactures"
-                      :item-text="(x) => x.name"
-                      :item-value="(x) => x.id"
+                    <v-combobox
+                      v-model="platformStatusName"
+                      label="status"
+                      :items="statusNames"
                       :readonly="readonly"
                       :disabled="readonly"
                     />
                   </v-col>
-                  <!--<v-select v-model="platform.type" label="type" :items="types" />-->
+                  <v-col cols="12" md="3">
+                    <v-combobox
+                      v-model="platformManufacturerName"
+                      label="manufacturer"
+                      :items="manufacturerNames"
+                      :readonly="readonly"
+                      :disabled="readonly"
+                    />
+                  </v-col>
+                  <v-col cols="12" md="3">
+                    <v-text-field
+                      v-model="platform.model"
+                      label="model"
+                      :readonly="readonly"
+                      :disabled="readonly"
+                    />
+                  </v-col>
                 </v-row>
                 <v-divider />
                 <v-row>
                   <v-col cols="12" md="5">
-                    <v-textarea v-model="platform.description" label="Description" rows="3" :readonly="readonly" :disabled="readonly" />
+                    <v-textarea v-model="platform.description" label="description" rows="3" :readonly="readonly" :disabled="readonly" />
                   </v-col>
                 </v-row>
                 <v-row>
                   <v-col cols="12" md="3">
-                    <v-text-field v-model="platform.website" label="Website" placeholder="https://" :readonly="readonly" :disabled="readonly" />
+                    <v-text-field
+                      v-model="platform.website"
+                      label="website"
+                      placeholder="https://"
+                      type="url"
+                      :readonly="readonly"
+                      :disabled="readonly"
+                    />
+                  </v-col>
+                </v-row>
+                <v-row>
+                  <v-col cols="12" md="3">
+                    <v-text-field
+                      v-model="platform.serialNumber"
+                      label="Serial Number"
+                      :readonly="readonly"
+                      :disabled="readonly"
+                    />
+                  </v-col>
+                  <v-col cols="12" md="3">
+                    <v-text-field v-model="platform.inventoryNumber" label="inventory number" :readonly="readonly" :disabled="readonly" />
                   </v-col>
                 </v-row>
               </v-card-text>
@@ -90,7 +134,7 @@
               </v-card-actions>
             </v-card>
           </v-tab-item>
-          <!-- responsible persons tab -->
+          <!-- contacts tab -->
           <v-tab-item>
             <v-card
               flat
@@ -101,7 +145,7 @@
               <v-card-text>
                 <v-row>
                   <v-col cols="3">
-                    <PersonSelect :selected-persons.sync="platform.responsiblePersons" :readonly="!isInEditMode" />
+                    <ContactSelect :selected-contacts.sync="platform.contacts" :readonly="!isInEditMode" />
                   </v-col>
                 </v-row>
               </v-card-text>
@@ -153,26 +197,27 @@
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 
-import MasterDataService from '../../../services/MasterDataService'
-import DeviceService from '../../../services/DeviceService'
+import CVService from '../../../services/CVService'
+import SmsService from '../../../services/SmsService'
 
-import Manufacture from '../../../models/Manufacture'
-import PlatformType from '../../../models/PlatformType'
 import Platform from '../../../models/Platform'
 
 // @ts-ignore
-import PersonSelect from '../../../components/PersonSelect.vue'
+import ContactSelect from '../../../components/ContactSelect.vue'
+import Manufacturer from '../../../models/Manufacturer'
+import PlatformType from '../../../models/PlatformType'
+import Status from '../../../models/Status'
 
 @Component({
-  components: { PersonSelect }
+  components: { ContactSelect }
 })
 // @ts-ignore
 export default class PlatformIdPage extends Vue {
   // data
   // first for the data to chose the elements
   private platformTypes: PlatformType[] = []
-  private manufactures: Manufacture[] = []
-  private types: Array<string> = ['Type 01']
+  private manufacturers: Manufacturer[] = []
+  private states: Status[] = []
 
   // then for our platform that we want to change
   private platform: Platform = Platform.createEmpty()
@@ -185,11 +230,14 @@ export default class PlatformIdPage extends Vue {
 
   mounted () {
     this.showLoadingError = false
-    MasterDataService.findAllManufactures().then((foundManufactures) => {
-      this.manufactures = foundManufactures
+    CVService.findAllManufacturers().then((foundManufacturers) => {
+      this.manufacturers = foundManufacturers
     })
-    MasterDataService.findAllPlatformTypes().then((foundPlatformTypes) => {
+    CVService.findAllPlatformTypes().then((foundPlatformTypes) => {
       this.platformTypes = foundPlatformTypes
+    })
+    CVService.findAllStates().then((foundStates) => {
+      this.states = foundStates
     })
     this.loadPlatform()
   }
@@ -198,7 +246,7 @@ export default class PlatformIdPage extends Vue {
     const platformId = this.$route.params.id
     if (platformId) {
       this.isInEditMode = false
-      DeviceService.findPlatformById(platformId).then((foundPlatform) => {
+      SmsService.findPlatformById(platformId).then((foundPlatform) => {
         this.platform = foundPlatform
       }).catch(() => {
         // We don't take the error directly
@@ -212,7 +260,8 @@ export default class PlatformIdPage extends Vue {
   // methods
   save () {
     this.showSaveSuccess = false
-    DeviceService.savePlatform(this.platform).then(() => {
+    SmsService.savePlatform(this.platform).then((savedPlatform) => {
+      this.platform = savedPlatform
       this.showSaveSuccess = true
       // this.$router.push('/devices')
     })
@@ -235,18 +284,13 @@ export default class PlatformIdPage extends Vue {
     const removeWhitespace = (text: string) => {
       return text.replace(' ', '_')
     }
-
+    // TODO: I don't have the platform type
+    // I just have the platformTypeUri
     let partPlatformType = '[platformtype]'
-    if (this.platform.platformTypeId != null) {
-      let foundPlatformType = null
-      for (const singlePlatformType of this.platformTypes) {
-        if (singlePlatformType.id === this.platform.platformTypeId) {
-          foundPlatformType = singlePlatformType
-          break
-        }
-      }
-      if (foundPlatformType != null) {
-        partPlatformType = removeWhitespace(foundPlatformType.name)
+    if (this.platform.platformTypeUri !== '') {
+      const ptIndex = this.platformTypes.findIndex(pt => pt.uri === this.platform.platformTypeUri)
+      if (ptIndex > -1) {
+        partPlatformType = this.platformTypes[ptIndex].name
       }
     }
 
@@ -295,6 +339,72 @@ export default class PlatformIdPage extends Vue {
         text: this.verb + ' Platform'
       }
     ]
+  }
+
+  get manufacturerNames () : string[] {
+    return this.manufacturers.map(m => m.name)
+  }
+
+  get platformManufacturerName (): string {
+    const manufacturerIndex = this.manufacturers.findIndex(m => m.uri === this.platform.manufacturerUri)
+    if (manufacturerIndex > -1) {
+      return this.manufacturers[manufacturerIndex].name
+    }
+    return this.platform.manufacturerName
+  }
+
+  set platformManufacturerName (newName: string) {
+    this.platform.manufacturerName = newName
+    const manufacturerIndex = this.manufacturers.findIndex(m => m.name === newName)
+    if (manufacturerIndex > -1) {
+      this.platform.manufacturerUri = this.manufacturers[manufacturerIndex].uri
+    } else {
+      this.platform.manufacturerUri = ''
+    }
+  }
+
+  get statusNames () : string[] {
+    return this.states.map(s => s.name)
+  }
+
+  get platformStatusName (): string {
+    const statusIndex = this.states.findIndex(s => s.uri === this.platform.statusUri)
+    if (statusIndex > -1) {
+      return this.states[statusIndex].name
+    }
+    return this.platform.statusName
+  }
+
+  set platformStatusName (newName: string) {
+    this.platform.statusName = newName
+    const statusIndex = this.states.findIndex(s => s.name === newName)
+    if (statusIndex > -1) {
+      this.platform.statusUri = this.states[statusIndex].uri
+    } else {
+      this.platform.statusUri = ''
+    }
+  }
+
+  get platformTypeNames () : string[] {
+    return this.platformTypes.map(t => t.name)
+  }
+
+  get platformPlatformTypeName () : string {
+    const platformTypeIndex = this.platformTypes.findIndex(t => t.uri === this.platform.platformTypeUri)
+    if (platformTypeIndex > -1) {
+      return this.platformTypes[platformTypeIndex].name
+    }
+    return this.platform.platformTypeName
+  }
+
+  set platformPlatformTypeName (newName: string) {
+    this.platform.platformTypeName = newName
+    const platformTypeIndex = this.platformTypes.findIndex(t => t.name === newName)
+    if (platformTypeIndex > -1) {
+      this.platform.platformTypeUri = this.platformTypes[platformTypeIndex].uri
+    } else {
+      this.platform.platformTypeUri = ''
+    }
   }
 }
 
