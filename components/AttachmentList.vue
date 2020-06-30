@@ -69,7 +69,7 @@
 
           <AttachmentListItem
             v-for="(item, index) in value"
-            :key="item.id + ':' + item.url + '|' + item.label"
+            :key="getUrlIndex(item)"
             v-model="value[index]"
           >
             <template
@@ -182,6 +182,11 @@ export default class AttachmentList extends mixins(Rules) {
 
   get mimeTypeList (): string {
     return Object.keys(Attachment.mimeTypes).join(',')
+  }
+
+  getUrlIndex (item: Attachment) {
+    const cnt: number = this.value.filter((attachment: Attachment): boolean => item.url === attachment.url).indexOf(item)
+    return cnt > 0 ? item.url + '#' + cnt : item.url
   }
 }
 </script>
