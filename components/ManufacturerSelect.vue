@@ -40,7 +40,6 @@ import CVService from '../services/CVService'
 // @ts-ignore
 export default class ManufacturerSelect extends Vue {
   private manufacturers: Manufacturer[] = []
-  private currentlySelectedManufacturer: Manufacturer | null = null
 
   @Prop({
     default: () => [] as Manufacturer[],
@@ -74,7 +73,6 @@ export default class ManufacturerSelect extends Vue {
    */
   addManufacturer (someManufacturerId: string) {
     const selectedManufacturer: Manufacturer | undefined = this.manufacturers.find(m => m.id === parseInt(someManufacturerId))
-    this.currentlySelectedManufacturer = null
     if (selectedManufacturer) {
       /**
        * Update event
