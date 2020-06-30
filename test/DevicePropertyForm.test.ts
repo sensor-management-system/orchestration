@@ -73,8 +73,16 @@ describe('DevicePropertyForm', () => {
     expect(wrapper.isVueInstance()).toBeTruthy()
   })
 
-  it('should trigger an input event on change', () => {
-    wrapper.get('input[type="text"]').setValue('foo')
+  it('should trigger an input event on change', async () => {
+    const inputField = wrapper.get('input[type="text"]')
+    inputField.setValue('foo')
+    // and because of the v-combobox, we need to trigger the
+    // update as well (so send enter)
+    inputField.trigger('keydown.enter')
+    // and we have to wait until the action is done
+    // and btw, we need to make the lambda function for the
+    // it call async
+    await wrapper.vm.$nextTick()
     expect(wrapper.emitted('input')).toBeTruthy()
   })
 })
