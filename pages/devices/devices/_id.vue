@@ -180,7 +180,7 @@
           >
             <v-card-title>Device URN: {{ deviceURN }}</v-card-title>
             <v-card-text>
-              <CustomFieldCards v-model="device.customFields" :readonly="readonly" :rules="rules" />
+              <CustomFieldCards v-model="device.customFields" :readonly="readonly" />
             </v-card-text>
           </v-card>
         </v-tab-item>
@@ -274,7 +274,7 @@
 </style>
 
 <script lang="ts">
-import { Vue, Component, Watch } from 'nuxt-property-decorator'
+import { Component, Watch, mixins } from 'nuxt-property-decorator'
 import Device from '../../../models/Device'
 
 import CVService from '../../../services/CVService'
@@ -295,6 +295,8 @@ import AppBarEditModeContent from '@/components/AppBarEditModeContent.vue'
 
 // @ts-ignore
 import AppBarTabsExtension from '@/components/AppBarTabsExtension.vue'
+// @ts-ignore
+import { Rules } from '@/mixins/Rules'
 
 @Component
 // @ts-ignore
@@ -320,7 +322,7 @@ export class AppBarTabsExtensionExtended extends AppBarTabsExtension {
   }
 })
 // @ts-ignore
-export default class DeviceIdPage extends Vue {
+export default class DeviceIdPage extends mixins(Rules) {
   private numberOfTabs: number = 5
   private activeTab: number = 0
 
@@ -348,10 +350,6 @@ export default class DeviceIdPage extends Vue {
     this.$nuxt.$on('AppBarExtension:change', (tab: number) => {
       this.activeTab = tab
     })
-  }
-
-  private rules: Object = {
-    required: (v: string) => !!v || 'Required'
   }
 
   mounted () {

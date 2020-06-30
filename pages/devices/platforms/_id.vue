@@ -188,7 +188,7 @@
 </style>
 
 <script lang="ts">
-import { Component, Vue, Watch } from 'nuxt-property-decorator'
+import { Component, Watch, mixins } from 'nuxt-property-decorator'
 
 import CVService from '../../../services/CVService'
 import SmsService from '../../../services/SmsService'
@@ -207,6 +207,8 @@ import Status from '../../../models/Status'
 import AppBarEditModeContent from '@/components/AppBarEditModeContent.vue'
 // @ts-ignore
 import AppBarTabsExtension from '@/components/AppBarTabsExtension.vue'
+// @ts-ignore
+import { Rules } from '@/mixins/Rules'
 
 @Component
 // @ts-ignore
@@ -227,7 +229,7 @@ export class AppBarTabsExtensionExtended extends AppBarTabsExtension {
   }
 })
 // @ts-ignore
-export default class PlatformIdPage extends Vue {
+export default class PlatformIdPage extends mixins(Rules) {
   // data
   // first for the data to chose the elements
   private platformTypes: PlatformType[] = []
@@ -260,10 +262,6 @@ export default class PlatformIdPage extends Vue {
     this.$nuxt.$on('AppBarExtension:change', (tab: number) => {
       this.activeTab = tab
     })
-  }
-
-  private rules: Object = {
-    required: (v: string) => !!v || 'Required'
   }
 
   mounted () {

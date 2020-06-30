@@ -99,11 +99,12 @@
  * @file provides a component for a listing of attachments
  * @author <marc.hanisch@gfz-potsdam.de>
  */
-import { Vue, Component, Prop } from 'nuxt-property-decorator'
+import { Vue, Component, Prop, mixins } from 'nuxt-property-decorator'
 import { Attachment } from '../models/Attachment'
 
 // @ts-ignore
 import AttachmentListItem from './AttachmentListItem.vue'
+import { Rules } from '@/mixins/Rules'
 
 /**
  * A class component for a list of Attachments and an upload form
@@ -113,7 +114,7 @@ import AttachmentListItem from './AttachmentListItem.vue'
   components: { AttachmentListItem }
 })
 // @ts-ignore
-export default class AttachmentList extends Vue {
+export default class AttachmentList extends mixins(Rules) {
   @Prop({
     default: () => [] as Attachment[],
     required: true,
@@ -132,11 +133,6 @@ export default class AttachmentList extends Vue {
   private attachment: Attachment = new Attachment()
   private attachmentType: string = 'file'
   private file: File | null = null
-
-  private rules: Object = {
-    required: (v: string) => !!v || 'Required',
-    validUrl: (v: string) => v.match(/^https*:\/\//) !== null || v.match(/^ftp*:\/\//) !== null || 'URL not valid'
-  }
 
   /**
    * adds a new Attachment instance
