@@ -3,6 +3,7 @@ import { PlatformOrDeviceType } from '../enums/PlatformOrDeviceType'
 import Contact, { IContact } from './Contact'
 import { DeviceProperty } from './DeviceProperty'
 import { CustomTextField, ICustomTextField } from './CustomTextField'
+import { Attachment, IAttachment } from './Attachment'
 import { IDeviceOrPlatformSearchObject } from './IDeviceOrPlatformSearchObject'
 import Status from './Status'
 import IPathSetter from './IPathSetter'
@@ -34,6 +35,7 @@ export interface IDevice {
   contacts: IContact[]
   properties: DeviceProperty[]
   customFields: ICustomTextField[]
+  attachments: IAttachment[]
 }
 
 export default class Device implements IDevice, IPathSetter {
@@ -64,8 +66,8 @@ export default class Device implements IDevice, IPathSetter {
   private _contacts: Contact[] = []
   private _properties: DeviceProperty[] = []
   private _customFields: CustomTextField[] = []
+  private _attachments: Attachment[] = []
 
-  // TODO: Attachments
   // TODO: Events
 
   get id (): number | null {
@@ -236,6 +238,14 @@ export default class Device implements IDevice, IPathSetter {
     this._customFields = customFields
   }
 
+  get attachments (): Attachment[] {
+    return this._attachments
+  }
+
+  set attachments (attachments: Attachment[]) {
+    this._attachments = attachments
+  }
+
   setPath (path: string, value: any): void {
     const pathArray = path.split('.')
     const topLevelElement = pathArray.splice(0, 1)[0]
@@ -324,6 +334,9 @@ export default class Device implements IDevice, IPathSetter {
       case 'customFields':
         this.customFields = value.map(CustomTextField.createFromObject)
         break
+      case 'attachments':
+        this.attachments = value.map(Attachment.createFromObject)
+        break
       default:
         throw new TypeError('path ' + path + ' is not valid')
     }
@@ -358,6 +371,7 @@ export default class Device implements IDevice, IPathSetter {
     newObject.contacts = someObject.contacts.map(Contact.createFromObject)
     newObject.properties = someObject.properties.map(DeviceProperty.createFromObject)
     newObject.customFields = someObject.customFields.map(CustomTextField.createFromObject)
+    newObject.attachments = someObject.attachments.map(Attachment.createFromObject)
 
     return newObject
   }

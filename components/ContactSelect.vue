@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <v-form ref="contactsForm">
     <v-autocomplete
       v-if="!readonly"
       :items="allContactsExceptSelected"
@@ -22,7 +22,7 @@
       </v-avatar>
       {{ contact }}
     </v-chip>
-  </div>
+  </v-form>
 </template>
 
 <script lang="ts">
@@ -50,14 +50,14 @@ export default class ContactSelect extends Vue {
     type: Array
   })
   // @ts-ignore
-  selectedContacts!: Contact[]
+  readonly selectedContacts!: Contact[]
 
   @Prop({
     default: false,
     type: Boolean
   })
   // @ts-ignore
-  readonly: boolean
+  readonly readonly: boolean
 
   /**
    * fetches all available contacts from the ContactService

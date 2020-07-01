@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <v-form ref="customFieldsForm">
     <v-btn
       v-if="!readonly"
       small
@@ -20,18 +20,18 @@
           <CustomFieldForm
             v-model="value[index]"
             :readonly="readonly"
-            :rules="rules"
           >
             <template v-slot:actions>
               <v-btn
                 v-if="!readonly"
+                icon
                 color="error"
-                small
-                outlined
                 data-role="delete-field"
                 @click="removeField(index)"
               >
-                delete
+                <v-icon>
+                  mdi-delete
+                </v-icon>
               </v-btn>
             </template>
           </CustomFieldForm>
@@ -41,7 +41,7 @@
         :key="'br-' + index"
       >
     </template>
-  </div>
+  </v-form>
 </template>
 
 <script lang="ts">
@@ -70,22 +70,14 @@ export default class CustomFieldCards extends Vue {
     type: Array
   })
   // @ts-ignore
-  value!: CustomTextField[]
+  readonly value!: CustomTextField[]
 
   @Prop({
     default: false,
     type: Boolean
   })
   // @ts-ignore
-  readonly: boolean
-
-  @Prop({
-    default: {},
-    required: false,
-    type: Object
-  })
-  // @ts-ignore
-  rules!: Object
+  readonly readonly: boolean
 
   /**
    * adds a new CustomTextField instance
