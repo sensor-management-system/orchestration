@@ -41,14 +41,14 @@ export default class ContactSelect extends Vue {
     type: Array
   })
   // @ts-ignore
-  value!: Contact[]
+  readonly value!: Contact[]
 
   @Prop({
     default: false,
     type: Boolean
   })
   // @ts-ignore
-  readonly: boolean
+  readonly readonly: boolean
 
   get findAllContacts () : ContactsLoaderFunction {
     return SmsService.findAllContacts

@@ -1,4 +1,6 @@
 import Contact, { IContact } from './Contact'
+import { Attachment, IAttachment } from './Attachment'
+
 import IPathSetter from './IPathSetter'
 
 export interface IPlatform {
@@ -31,6 +33,7 @@ export interface IPlatform {
   modifiedByUserId: number | null
 
   contacts: IContact[]
+  attachments: IAttachment[]
 }
 
 export default class Platform implements IPlatform, IPathSetter {
@@ -62,7 +65,7 @@ export default class Platform implements IPlatform, IPathSetter {
   private _modifiedByUserId: number | null = null
 
   private _contacts: Contact[] = []
-  // TODO: Add attachments
+  private _attachments: Attachment[] = []
 
   get id (): number | null {
     return this._id
@@ -224,6 +227,14 @@ export default class Platform implements IPlatform, IPathSetter {
     this._modifiedByUserId = newModifiedByUserId
   }
 
+  get attachments (): Attachment[] {
+    return this._attachments
+  }
+
+  set attachments (attachments: Attachment[]) {
+    this._attachments = attachments
+  }
+
   setPath (path: string, value: any): void {
     const pathArray = path.split('.')
     const topLevelElement = pathArray.splice(0, 1)[0]
@@ -309,6 +320,9 @@ export default class Platform implements IPlatform, IPathSetter {
       case 'contacts':
         this.contacts = value.map(Contact.createFromObject)
         break
+      case 'attachments':
+        this.attachments = value.map(Attachment.createFromObject)
+        break
       default:
         throw new TypeError('path ' + path + ' is not valid')
     }
@@ -351,6 +365,7 @@ export default class Platform implements IPlatform, IPathSetter {
     newObject.modifiedByUserId = someObject.modifiedByUserId
 
     newObject.contacts = someObject.contacts.map(Contact.createFromObject)
+    newObject.attachments = someObject.attachments.map(Attachment.createFromObject)
 
     return newObject
   }

@@ -53,39 +53,39 @@ export default class EntitySelect<E extends INumericId> extends Vue {
     type: Array
   })
   // @ts-ignore
-  value!: E[]
+  readonly value!: E[]
 
   @Prop({
     default: false,
     type: Boolean
   })
   // @ts-ignore
-  readonly: boolean
+  readonly readonly: boolean
 
   @Prop({
     required: true,
     type: Function
   })
-  fetchFunction!: EntityLoaderFunction<E>
+  readonly fetchFunction!: EntityLoaderFunction<E>
 
   @Prop({
     default: () => 'Add',
     type: String
   })
   // @ts-ignore
-  addLabel: string
+  readonly addLabel: string
 
   @Prop({
     default: () => '',
     type: String
   })
-  avatarIcon!: string
+  readonly avatarIcon!: string
 
   @Prop({
     type: String,
     required: true
   })
-  color!: string
+  readonly color!: string
 
   /**
    * fetches all available elements

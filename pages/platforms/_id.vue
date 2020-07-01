@@ -14,12 +14,12 @@
       </v-btn>
     </v-snackbar>
 
-    <v-form>
-      <v-card outlined>
-        <v-tabs-items
-          v-model="activeTab"
-        >
-          <v-tab-item :eager="true">
+    <v-card outlined>
+      <v-tabs-items
+        v-model="activeTab"
+      >
+        <v-tab-item :eager="true">
+          <v-form ref="basicForm">
             <!-- Basic data tab -->
             <v-card
               flat
@@ -133,9 +133,11 @@
                 </v-row>
               </v-card-text>
             </v-card>
-          </v-tab-item>
-          <!-- contact tab -->
-          <v-tab-item :eager="true">
+          </v-form>
+        </v-tab-item>
+        <!-- contact tab -->
+        <v-tab-item :eager="true">
+          <v-form ref="contactsForm" @submit.prevent>
             <v-card
               flat
             >
@@ -150,23 +152,36 @@
                 </v-row>
               </v-card-text>
             </v-card>
-          </v-tab-item>
-        </v-tabs-items>
-        <v-btn
-          v-if="!isInEditMode"
-          fab
-          fixed
-          bottom
-          right
-          color="secondary"
-          @click="toggleEditMode"
-        >
-          <v-icon>
-            mdi-pencil
-          </v-icon>
-        </v-btn>
-      </v-card>
-    </v-form>
+          </v-form>
+        </v-tab-item>
+        <v-tab-item :eager="true">
+          <v-card
+            flat
+          >
+            <v-card-title>
+              Platform URN: {{ platformURN }}
+            </v-card-title>
+            <v-card-text>
+              <AttachmentList v-model="platform.attachments" :readonly="!isInEditMode" />
+            </v-card-text>
+          </v-card>
+        </v-tab-item>
+      </v-tabs-items>
+      <!-- Buttons for all tabs -->
+      <v-btn
+        v-if="!isInEditMode"
+        fab
+        fixed
+        bottom
+        right
+        color="secondary"
+        @click="toggleEditMode"
+      >
+        <v-icon>
+          mdi-pencil
+        </v-icon>
+      </v-btn>
+    </v-card>
   </div>
 </template>
 
@@ -175,7 +190,7 @@
 </style>
 
 <script lang="ts">
-import { Component, Vue, Watch } from 'nuxt-property-decorator'
+import { Component, Watch, mixins } from 'nuxt-property-decorator'
 
 import CVService from '../../services/CVService'
 import SmsService from '../../services/SmsService'
@@ -184,6 +199,8 @@ import Platform from '../../models/Platform'
 
 // @ts-ignore
 import ContactSelect from '../../components/ContactSelect.vue'
+import AttachmentList from '../../components/AttachmentList.vue'
+
 import Manufacturer from '../../models/Manufacturer'
 import PlatformType from '../../models/PlatformType'
 import Status from '../../models/Status'
@@ -192,6 +209,8 @@ import Status from '../../models/Status'
 import AppBarEditModeContent from '@/components/AppBarEditModeContent.vue'
 // @ts-ignore
 import AppBarTabsExtension from '@/components/AppBarTabsExtension.vue'
+// @ts-ignore
+import { Rules } from '@/mixins/Rules'
 
 @Component
 // @ts-ignore
@@ -199,16 +218,20 @@ export class AppBarTabsExtensionExtended extends AppBarTabsExtension {
   get tabs (): String[] {
     return [
       'Basic Data',
-      'Persons'
+      'Persons',
+      'Attachments'
     ]
   }
 }
 
 @Component({
-  components: { ContactSelect }
+  components: {
+    ContactSelect,
+    AttachmentList
+  }
 })
 // @ts-ignore
-export default class PlatformIdPage extends Vue {
+export default class PlatformIdPage extends mixins(Rules) {
   // data
   // first for the data to chose the elements
   private platformTypes: PlatformType[] = []
@@ -241,10 +264,6 @@ export default class PlatformIdPage extends Vue {
     this.$nuxt.$on('AppBarExtension:change', (tab: number) => {
       this.activeTab = tab
     })
-  }
-
-  private rules: Object = {
-    required: (v: string) => !!v || 'Required'
   }
 
   mounted () {

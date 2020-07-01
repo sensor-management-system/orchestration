@@ -41,14 +41,14 @@ export default class ManufacturerSelect extends Vue {
     type: Array
   })
   // @ts-ignore
-  value!: Manufacturer[]
+  readonly value!: Manufacturer[]
 
   @Prop({
     default: false,
     type: Boolean
   })
   // @ts-ignore
-  readonly: boolean
+  readonly readonly: boolean
 
   get findAllManufacturers (): ManufacturersLoaderFunction {
     return CVService.findAllManufacturers
