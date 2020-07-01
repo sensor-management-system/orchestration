@@ -1,0 +1,291 @@
+<template>
+  <div>
+    <v-snackbar v-model="showSuccessMessage" top color="success">
+      {{ successMessage }}
+      <v-btn fab @click="showSaveSuccess = false">
+        <v-icon>mdi-close</v-icon>
+      </v-btn>
+    </v-snackbar>
+    <v-card>
+      <v-tabs-items
+        v-model="activeTab"
+      >
+        <v-tab-item :eager="true">
+          <v-card
+            flat
+          >
+            <v-card-text>
+              <v-row>
+                <v-col cols="12" md="5">
+                  <v-text-field v-model="searchText" label="Name" placeholder="Name of device" />
+                </v-col>
+                <v-col cols="12" md="2">
+                  <v-btn @click="basicSearch">
+                    Search
+                  </v-btn>
+                </v-col>
+                <v-col cols="12" md="1">
+                  <v-btn @click="clearBasicSearch">
+                    Clear
+                  </v-btn>
+                </v-col>
+              </v-row>
+            </v-card-text>
+          </v-card>
+        </v-tab-item>
+        <v-tab-item :eager="true">
+          <v-card>
+            <v-card-text>
+              <v-row>
+                <v-col cols="12" md="6">
+                  <v-text-field v-model="searchText" label="Name" placeholder="Name of device" />
+                </v-col>
+              </v-row>
+              <v-row>
+                <v-col cols="12" md="3">
+                  <ManufacturerSelect v-model="selectedSearchManufacturers" />
+                </v-col>
+              </v-row>
+            </v-card-text>
+            <v-card-actions>
+              <v-btn @click="extendedSearch">
+                Search
+              </v-btn>
+              <v-btn @click="clearExtendedSearch">
+                Clear
+              </v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-tab-item>
+      </v-tabs-items>
+    </v-card>
+
+    <h2>Results:</h2>
+    <v-card v-for="result in searchResults" :key="result.searchType + result.id">
+      <v-card-title>
+        {{ result.shortName }}
+      </v-card-title>
+      <v-card-text>
+        <p>{{ getType(result) }}</p>
+        <p>Project {{ getProject(result) }}</p>
+        <p>Status {{ getStatus(result) }}</p>
+      </v-card-text>
+      <v-card-actions>
+        <v-btn :to="'/devices/' + result.id">
+          View
+        </v-btn>
+        <v-btn>Copy</v-btn>
+        <v-btn @click.stop="showDeleteDialog = true">
+          Delete
+        </v-btn>
+        <v-dialog v-model="showDeleteDialog" max-width="290">
+          <v-card>
+            <v-card-title class="headline">
+              Delete device
+            </v-card-title>
+            <v-card-text>
+              Do you really want to delete the device <em>{{ result.shortName }}</em>?
+            </v-card-text>
+            <v-card-actions>
+              <v-btn @click="showDeleteDialog = false">
+                No
+              </v-btn>
+              <v-spacer />
+              <v-btn color="error" @click="deleteAndCloseDialog(result.id)">
+                <v-icon left>
+                  mdi-delete
+                </v-icon>
+                Delete
+              </v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
+      </v-card-actions>
+    </v-card>
+    <v-speed-dial
+      v-model="fab"
+      fixed
+      bottom
+      right
+      direction="top"
+      open-on-hover
+    >
+      <template v-slot:activator>
+        <v-btn
+          v-model="fab"
+          color="primary"
+          dark
+          fab
+          to="/devices"
+        >
+          <v-icon>
+            mdi-plus
+          </v-icon>
+        </v-btn>
+      </template>
+    </v-speed-dial>
+  </div>
+</template>
+
+<script lang="ts">
+import { Component, Vue } from 'nuxt-property-decorator'
+
+import CVService from '../../services/CVService'
+import SmsService from '../../services/SmsService'
+
+import Device from '../../models/Device'
+import Manufacturer from '../../models/Manufacturer'
+import PlatformType from '../../models/PlatformType'
+import Status from '../../models/Status'
+
+// @ts-ignore
+import ManufacturerSelect from '@/components/ManufacturerSelect.vue'
+
+// @ts-ignore
+import AppBarEditModeContent from '@/components/AppBarEditModeContent.vue'
+// @ts-ignore
+import AppBarTabsExtension from '@/components/AppBarTabsExtension.vue'
+
+@Component
+// @ts-ignore
+export class AppBarTabsExtensionExtended extends AppBarTabsExtension {
+  get tabs (): String[] {
+    return [
+      'Search',
+      'Extended Search'
+    ]
+  }
+}
+
+@Component({
+  components: { ManufacturerSelect }
+})
+export default class SeachDevicesPage extends Vue {
+  private activeTab: number = 0
+  private fab: boolean = false
+
+  private selectedSearchManufacturers: Manufacturer[] = []
+
+  private platformTypeLookup: Map<string, PlatformType> = new Map<string, PlatformType>()
+  private statusLookup: Map<string, Status> = new Map<string, Status>()
+
+  private searchResults: Device[] = []
+  private searchText: string | null = null
+
+  private showDeleteDialog: boolean = false
+  private showSuccessMessage: boolean = false
+  private successMessage = ''
+
+  created () {
+    this.$nuxt.$emit('app-bar-content', AppBarEditModeContent)
+    this.$nuxt.$emit('app-bar-extension', AppBarTabsExtensionExtended)
+    this.$nuxt.$on('AppBarExtension:change', (tab: number) => {
+      this.activeTab = tab
+    })
+  }
+
+  mounted () {
+    const promisePlatformTypes = CVService.findAllPlatformTypes()
+    const promiseStates = CVService.findAllStates()
+
+    promisePlatformTypes.then((platformTypes) => {
+      promiseStates.then((states) => {
+        const platformTypeLookup = new Map<string, PlatformType>()
+        const statusLookup = new Map<string, Status>()
+
+        for (const platformType of platformTypes) {
+          platformTypeLookup.set(platformType.uri, platformType)
+        }
+        for (const status of states) {
+          statusLookup.set(status.uri, status)
+        }
+
+        this.platformTypeLookup = platformTypeLookup
+        this.statusLookup = statusLookup
+
+        this.runSelectedSearch()
+      })
+    })
+    // make sure that all components (especially the dynamically passed ones) are rendered
+    this.$nextTick(() => {
+      this.$nuxt.$emit('AppBarContent:title', 'Devices')
+    })
+  }
+
+  beforeDestroy () {
+    this.$nuxt.$emit('app-bar-content', null)
+    this.$nuxt.$emit('app-bar-extension', null)
+    this.$nuxt.$off('AppBarExtension:change')
+  }
+
+  runSelectedSearch () {
+    if (this.activeTab === 0) {
+      this.basicSearch()
+    } else {
+      this.extendedSearch()
+    }
+  }
+
+  basicSearch () {
+    // only uses the text and the type (sensor or platform)
+    this.runSearch(this.searchText, [])
+  }
+
+  clearBasicSearch () {
+    this.searchText = null
+  }
+
+  extendedSearch () {
+    this.runSearch(this.searchText, this.selectedSearchManufacturers)
+  }
+
+  clearExtendedSearch () {
+    this.clearBasicSearch()
+
+    this.selectedSearchManufacturers = []
+  }
+
+  runSearch (searchText: string | null, manufacturer: Manufacturer[]) {
+    SmsService.findDevices(
+      searchText, manufacturer
+    ).then((findResults) => {
+      this.searchResults = findResults
+    })
+  }
+
+  deleteAndCloseDialog (id: number) {
+    SmsService.deleteDevice(id).then(() => {
+      this.showDeleteDialog = false
+
+      const searchIndex = this.searchResults.findIndex(r => r.id === id)
+      if (searchIndex > -1) {
+        this.searchResults.splice(searchIndex, 1)
+      }
+
+      this.successMessage = 'Device deleted'
+      this.showSuccessMessage = true
+    })
+  }
+
+  getType (_device: Device) {
+    return 'Device'
+  }
+
+  getProject (_device: Device) {
+    // TODO
+    return 'No project yet'
+  }
+
+  getStatus (device: Device) {
+    if (this.statusLookup.has(device.statusUri)) {
+      const deviceStatus: Status = this.statusLookup.get(device.statusUri) as Status
+      return deviceStatus.name
+    }
+    if (device.statusName) {
+      return device.statusName
+    }
+    return 'Unknown status'
+  }
+}
+
+</script>

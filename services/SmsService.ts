@@ -3,13 +3,7 @@ import axios from 'axios'
 import Platform from '../models/Platform'
 import Device from '../models/Device'
 import Contact from '../models/Contact'
-
-import { IDeviceOrPlatformSearchObject } from '../models/IDeviceOrPlatformSearchObject'
-
-import { PlatformOrDeviceSearchType } from '../enums/PlatformOrDeviceSearchType'
 import Manufacturer from '~/models/Manufacturer'
-import Status from '~/models/Status'
-import PlatformType from '~/models/PlatformType'
 
 // Use on version for all the queries
 const BASE_URL = process.env.backendUrl + '/rdm/svm-api/v1'
@@ -278,74 +272,74 @@ export default class SmsService {
     })
   }
 
-  static findPlatformsAndSensors (
+  static findDevices (
     text: string | null,
-    platformOrDevice: PlatformOrDeviceSearchType,
-    manufacturer: Manufacturer[],
-    platformTypeLookupByUri: Map<string, PlatformType>,
-    statusLookupByUri: Map<string, Status>
-  ): Promise<IDeviceOrPlatformSearchObject[]> {
-    let promiseAllPlatforms: Promise<Platform[]> = new Promise(resolve => resolve([]))
-    let promiseAllDevices: Promise<Device[]> = new Promise(resolve => resolve([]))
+    manufacturer: Manufacturer[]
+  ): Promise<Device[]> {
+    const promiseAllDevices: Promise<Device[]> = this.findAllDevices()
 
-    if (platformOrDevice === PlatformOrDeviceSearchType.PLATFORMS) {
-      promiseAllPlatforms = this.findAllPlatforms()
-    } else if (platformOrDevice === PlatformOrDeviceSearchType.DEVICES) {
-      promiseAllDevices = this.findAllDevices()
-    } else {
-      promiseAllPlatforms = this.findAllPlatforms()
-      promiseAllDevices = this.findAllDevices()
-    }
+    return new Promise((resolve) => {
+      promiseAllDevices.then((allDevices) => {
+        const result = []
+        let filterFunc = (_device: Device): boolean => { return true }
+
+        if (text) {
+          filterFunc = (device: Device): boolean => {
+            return device.shortName.includes(text)
+          }
+        }
+        if (manufacturer.length > 0) {
+          const oldFilterFunc = filterFunc
+
+          filterFunc = (device: Device): boolean => {
+            return oldFilterFunc(device) && (
+              manufacturer.findIndex(m => m.uri === device.manufacturerUri) > -1
+            )
+          }
+        }
+
+        for (const device of allDevices) {
+          if (filterFunc(device)) {
+            result.push(device)
+          }
+        }
+        resolve(result)
+      })
+    })
+  }
+
+  static findPlatforms (
+    text: string | null,
+    manufacturer: Manufacturer[]
+  ): Promise<Platform[]> {
+    const promiseAllPlatforms: Promise<Platform[]> = this.findAllPlatforms()
 
     return new Promise((resolve) => {
       promiseAllPlatforms.then((allPlatforms) => {
-        promiseAllDevices.then((allDevices) => {
-          const result = []
+        const result = []
+        let filterFunc = (_platform: Platform): boolean => { return true }
 
-          let filterFuncPlatform = (_platform: Platform): boolean => { return true }
-          let filterFuncDevice = (_device: Device): boolean => { return true }
-
-          if (text) {
-            filterFuncPlatform = (platform: Platform): boolean => {
-              return platform.shortName.includes(text)
-            }
-            filterFuncDevice = (device: Device): boolean => {
-              return device.shortName.includes(text)
-            }
+        if (text) {
+          filterFunc = (platform: Platform): boolean => {
+            return platform.shortName.includes(text)
           }
+        }
+        if (manufacturer.length > 0) {
+          const oldFilterFunc = filterFunc
 
-          if (manufacturer.length > 0) {
-            const oldFilterFuncPlatform = filterFuncPlatform
-            const oldFilterFuncDevice = filterFuncDevice
-
-            filterFuncPlatform = (platform: Platform): boolean => {
-              return oldFilterFuncPlatform(platform) && (
-                manufacturer.findIndex(m => m.uri === platform.manufacturerUri) > -1
-              )
-            }
-
-            filterFuncDevice = (device: Device) : boolean => {
-              return oldFilterFuncDevice(device) && (
-                // TODO
-                manufacturer.findIndex(m => m.uri === device.manufacturerUri) > -1
-              )
-            }
+          filterFunc = (platform: Platform): boolean => {
+            return oldFilterFunc(platform) && (
+              manufacturer.findIndex(m => m.uri === platform.manufacturerUri) > -1
+            )
           }
+        }
 
-          for (const platform of allPlatforms) {
-            if (filterFuncPlatform(platform)) {
-              result.push(platform.toSearchObject(platformTypeLookupByUri, statusLookupByUri))
-            }
+        for (const platform of allPlatforms) {
+          if (filterFunc(platform)) {
+            result.push(platform)
           }
-
-          for (const device of allDevices) {
-            if (filterFuncDevice(device)) {
-              result.push(device.toSearchObject(statusLookupByUri))
-            }
-          }
-
-          resolve(result)
-        })
+        }
+        resolve(result)
       })
     })
   }

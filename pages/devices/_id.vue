@@ -149,7 +149,7 @@
           </v-form>
         </v-tab-item>
         <v-tab-item :eager="true">
-          <v-form ref="contactsForm">
+          <v-form ref="contactsForm" @submit.prevent>
             <v-card
               flat
             >
@@ -157,7 +157,7 @@
               <v-card-text>
                 <v-row>
                   <v-col cols="3">
-                    <ContactSelect :selected-contacts.sync="device.contacts" :readonly="readonly" />
+                    <ContactSelect v-model="device.contacts" :readonly="readonly" />
                   </v-col>
                 </v-row>
               </v-card-text>
@@ -275,21 +275,21 @@
 
 <script lang="ts">
 import { Component, Watch, mixins } from 'nuxt-property-decorator'
-import Device from '../../../models/Device'
+import Device from '../../models/Device'
 
-import CVService from '../../../services/CVService'
-import SmsService from '../../../services/SmsService'
-import Manufacturer from '../../../models/Manufacturer'
-import Status from '../../../models/Status'
+import CVService from '../../services/CVService'
+import SmsService from '../../services/SmsService'
+import Manufacturer from '../../models/Manufacturer'
+import Status from '../../models/Status'
 
 // @ts-ignore
-import ContactSelect from '../../../components/ContactSelect.vue'
+import ContactSelect from '../../components/ContactSelect.vue'
 // @ts-ignore
-import DevicePropertyExpansionPanels from '../../../components/DevicePropertyExpansionPanels.vue'
+import DevicePropertyExpansionPanels from '../../components/DevicePropertyExpansionPanels.vue'
 // @ts-ignore
-import CustomFieldCards from '../../../components/CustomFieldCards.vue'
+import CustomFieldCards from '../../components/CustomFieldCards.vue'
 // @ts-ignore
-import AttachmentList from '../../../components/AttachmentList.vue'
+import AttachmentList from '../../components/AttachmentList.vue'
 // @ts-ignore
 import AppBarEditModeContent from '@/components/AppBarEditModeContent.vue'
 
@@ -342,7 +342,7 @@ export default class DeviceIdPage extends mixins(Rules) {
       if (this.device && this.device.id) {
         this.toggleEditMode()
       } else {
-        this.$router.push('/devices')
+        this.$router.push('/search/devices')
       }
     })
 
