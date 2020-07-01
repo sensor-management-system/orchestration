@@ -147,6 +147,50 @@
                       </template>
                     </v-treeview>
                   </v-col>
+                  <v-col cols="6" md="6">
+                    <v-breadcrumbs :items="breadcrumbs" divider=">" />
+                    <v-row v-if="selectedPlatform">
+                      <v-col cols="12" md="10">
+                        <template v-if="selectedPlatform.description">
+                          {{ selectedPlatform.description }}
+                        </template>
+                        <template v-else>
+                          The selected platform has no description.
+                        </template>
+                      </v-col>
+                      <v-col cols="12" md="2">
+                        <v-btn
+                          color="secondary"
+                        >
+                          remove
+                        </v-btn>
+                      </v-col>
+                    </v-row>
+                    <v-row v-else>
+                      Add platforms and / or devices on the left side to the configuration.<br>
+                      Select a platform to add platforms / or devices to the selected platform.
+                    </v-row>
+                    <v-row>
+                      <v-col cols="12" md="3">
+                        <v-select
+                          :items="['Platforms', 'Devices']"
+                          label="Type"
+                        />
+                      </v-col>
+                      <v-col cols="12" md="6">
+                        <v-text-field
+                          label="Name"
+                        />
+                      </v-col>
+                      <v-col cols="12" md="3">
+                        <v-btn
+                          color="primary"
+                        >
+                          search
+                        </v-btn>
+                      </v-col>
+                    </v-row>
+                  </v-col>
                 </v-row>
               </v-card-text>
             </v-card>
@@ -196,6 +240,8 @@ import { PlatformNode } from '@/models/PlatformNode'
 // @ts-ignore
 import { DeviceNode } from '@/models/DeviceNode'
 
+type Node = DeviceNode|PlatformNode
+
 @Component
 // @ts-ignore
 export class AppBarTabsExtensionExtended extends AppBarTabsExtension {
@@ -231,7 +277,8 @@ export default class ConfigurationsIdPage extends Vue {
 
   private contacts: Contact[] = []
 
-  private selectedConfigurationItem: number[] = []
+  private selectedConfigurationItemId: number[] = []
+  private selectedPlatform: Platform | null = null
 
   created () {
     this.$nuxt.$emit('app-bar-content', AppBarEditModeContent)
@@ -240,7 +287,7 @@ export default class ConfigurationsIdPage extends Vue {
     })
     this.$nuxt.$on('AppBarContent:cancel-button-click', () => {
       this.toggleEditMode()
-      //this.$router.push('/configurations')
+      // this.$router.push('/configurations')
     })
 
     this.$nuxt.$emit('app-bar-extension', AppBarTabsExtensionExtended)
@@ -301,7 +348,7 @@ export default class ConfigurationsIdPage extends Vue {
     ]
   }
 
-  get configurationItems (): Array<PlatformNode|DeviceNode> {
+  get configurationItems (): Array<Node> {
     return [
       ((): PlatformNode => {
         const n = new PlatformNode(
@@ -309,6 +356,8 @@ export default class ConfigurationsIdPage extends Vue {
             const o = new Platform()
             o.id = 1
             o.shortName = 'Platform 01'
+            o.longName = 'Platform 01 Bla blub'
+            o.description = 'A platform on which various light instruments can be mounted. Consists of wood, dry and rotten wood.'
             return o
           })()
         )
@@ -368,13 +417,74 @@ export default class ConfigurationsIdPage extends Vue {
     ]
   }
 
-  isPlatform (node: DeviceNode|PlatformNode): boolean {
+  isPlatform (node: Node): boolean {
     return node instanceof PlatformNode
   }
 
-  @Watch('selectedConfigurationItem')
+  get breadcrumbs (): Object[] {
+    const root = { text: 'Configuration' }
+    if (!this.selectedConfigurationItemId.length) {
+      return [root, { text: 'No platform selected' }]
+    }
+    const nodeId = this.selectedConfigurationItemId[0]
+    const nodeNames = this.getNodePath(nodeId).map((t: string): Object => { return { text: t } })
+    return [
+      root,
+      ...nodeNames
+    ]
+  }
+
+  getNodePath (nodeId: number): string[] {
+    const getNodePathRecursive = (nodeId: number, nodes: Node[], path: string[]): boolean => {
+      for (const node of nodes) {
+        if (node.id === nodeId) {
+          path.push(node.name)
+          return true
+        }
+        if (!node.canHaveChildren()) {
+          continue
+        }
+        if (getNodePathRecursive(nodeId, (node as PlatformNode).getChildren(), path)) {
+          path.unshift(node.name)
+          return true
+        }
+      }
+      return false
+    }
+
+    const paths: string[] = []
+    getNodePathRecursive(nodeId, this.configurationItems, paths)
+    return paths
+  }
+
+  getNode (nodeId: number): Node | null {
+    const getNodeRecursive = (nodeId: number, nodes: Node[]): Node | null => {
+      for (const node of nodes) {
+        if (node.id === nodeId) {
+          return node
+        }
+        if (!node.canHaveChildren()) {
+          continue
+        }
+        const found = getNodeRecursive(nodeId, (node as PlatformNode).getChildren())
+        if (!found) {
+          continue
+        }
+        return found
+      }
+      return null
+    }
+    return getNodeRecursive(nodeId, this.configurationItems)
+  }
+
+  @Watch('selectedConfigurationItemId')
   onItemSelect (val: number[]) {
-    console.log(val)
+    if (val.length) {
+      const node: Node | null = this.getNode(val[0])
+      this.selectedPlatform = node ? node.unpack() as Platform : null
+    } else {
+      this.selectedPlatform = null
+    }
   }
 }
 </script>
