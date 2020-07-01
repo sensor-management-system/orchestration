@@ -34,6 +34,9 @@
  * @author <nils.brinckmann@gfz-potsdam.de>
  */
 import { Vue, Component, Prop } from 'nuxt-property-decorator'
+import { INumericId } from '../models/INumericId'
+
+type EntityLoaderFunction<E> = () => Promise<E[]>
 
 /**
  * A class component to select entities
@@ -63,7 +66,7 @@ export default class EntitySelect<E extends INumericId> extends Vue {
     required: true,
     type: Function
   })
-  fetchFunction!: () => Promise<E[]>
+  fetchFunction!: EntityLoaderFunction<E>
 
   @Prop({
     default: () => 'Add',

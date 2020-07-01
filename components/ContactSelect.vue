@@ -22,6 +22,8 @@ import SmsService from '../services/SmsService'
 // @ts-ignore
 import EntitySelect from '@/components/EntitySelect'
 
+type ContactsLoaderFunction = () => Promise<Contact[]>
+
 /**
  * A class component to select contacts
  * @extends Vue
@@ -48,7 +50,7 @@ export default class ContactSelect extends Vue {
   // @ts-ignore
   readonly: boolean
 
-  get findAllContacts () : () => Promise<Contact[]> {
+  get findAllContacts () : ContactsLoaderFunction {
     return SmsService.findAllContacts
   }
 

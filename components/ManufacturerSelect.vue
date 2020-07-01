@@ -22,6 +22,8 @@ import CVService from '../services/CVService'
 // @ts-ignore
 import EntitySelect from '@/components/EntitySelect'
 
+type ManufacturersLoaderFunction = () => Promise<Manufacturer[]>
+
 /**
  * A class component to select manufacturers
  * @extends Vue
@@ -48,7 +50,7 @@ export default class ManufacturerSelect extends Vue {
   // @ts-ignore
   readonly: boolean
 
-  get findAllManufacturers (): () => Promise<Manufacturer[]> {
+  get findAllManufacturers (): ManufacturersLoaderFunction {
     return CVService.findAllManufacturers
   }
 
