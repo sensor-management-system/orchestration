@@ -33,15 +33,20 @@
                       </template>
                       <v-date-picker v-model="startDate" scrollable>
                         <v-spacer />
-                        <v-btn text color="primary" @click="startDateModal = false">Cancel</v-btn>
-                        <v-btn text color="primary" @click="$refs.startDateDialog.save(startDate)">OK</v-btn>
+                        <v-btn text color="primary" @click="startDateModal = false">
+                          Cancel
+                        </v-btn>
+                        <v-btn text color="primary" @click="$refs.startDateDialog.save(startDate)">
+                          OK
+                        </v-btn>
                       </v-date-picker>
                     </v-dialog>
                   </v-col>
                   <v-col cols="12" md="3">
                     <v-dialog
                       ref="endDateDialog"
-                      v-model="endDateModal" :return-value.sync="endDate"
+                      v-model="endDateModal"
+                      :return-value.sync="endDate"
                       persistent
                       width="290px"
                     >
@@ -57,8 +62,12 @@
                       </template>
                       <v-date-picker v-model="endDate" scrollable>
                         <v-spacer />
-                        <v-btn text color="primary" @click="endDateModal = false">Cancel</v-btn>
-                        <v-btn text color="primary" @click="$refs.endDateDialog.save(endDate)">OK</v-btn>
+                        <v-btn text color="primary" @click="endDateModal = false">
+                          Cancel
+                        </v-btn>
+                        <v-btn text color="primary" @click="$refs.endDateDialog.save(endDate)">
+                          OK
+                        </v-btn>
                       </v-date-picker>
                     </v-dialog>
                   </v-col>
@@ -66,9 +75,9 @@
                 <v-row>
                   <v-col cols="12" md="3">
                     <v-select
-                      :items="['Stationary', 'Dynamic']"
-                      label="Location type"
                       v-model="locationType"
+                      label="Location type"
+                      :items="['Stationary', 'Dynamic']"
                     />
                   </v-col>
                 </v-row>
@@ -128,9 +137,9 @@
             >
               <v-card-text>
                 <v-row>
-                  <v-col cols="6">
+                  <v-col cols="12" md="6">
                     <v-treeview
-                      :active.sync="selectedConfigurationItem"
+                      :active.sync="selectedConfigurationItemId"
                       :items="configurationItems"
                       :activatable="true"
                       :hoverable="true"
