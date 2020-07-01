@@ -11,7 +11,6 @@
             <v-card
               flat
             >
-              <v-card-title></v-card-title>
               <v-card-text>
                 foo
               </v-card-text>
