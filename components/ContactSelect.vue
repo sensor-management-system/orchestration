@@ -1,5 +1,5 @@
 <template>
- <EntitySelect
+  <EntitySelect
     v-model="wrappedValue"
     :readonly="readonly"
     :fetch-function="findAllContacts"
