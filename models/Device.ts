@@ -1,11 +1,8 @@
-import { PlatformOrDeviceType } from '../enums/PlatformOrDeviceType'
-
 import Contact, { IContact } from './Contact'
 import { DeviceProperty } from './DeviceProperty'
 import { CustomTextField, ICustomTextField } from './CustomTextField'
+
 import { Attachment, IAttachment } from './Attachment'
-import { IDeviceOrPlatformSearchObject } from './IDeviceOrPlatformSearchObject'
-import Status from './Status'
 import IPathSetter from './IPathSetter'
 
 export interface IDevice {
@@ -374,51 +371,5 @@ export default class Device implements IDevice, IPathSetter {
     newObject.attachments = someObject.attachments.map(Attachment.createFromObject)
 
     return newObject
-  }
-
-  toSearchObject (statusLookupByUri: Map<string, Status>) : IDeviceOrPlatformSearchObject {
-    return new DeviceSearchObjectWrapper(this, statusLookupByUri)
-  }
-}
-
-class DeviceSearchObjectWrapper implements IDeviceOrPlatformSearchObject {
-  private device: Device
-  private statusLookupByUri: Map<string, Status>
-
-  constructor (device: Device, statusLookupByUri: Map<string, Status>) {
-    this.device = device
-    this.statusLookupByUri = statusLookupByUri
-  }
-
-  get id () : number | null {
-    return this.device.id
-  }
-
-  get name () : string {
-    return this.device.shortName
-  }
-
-  get type () : string {
-    return 'Device'
-  }
-
-  get searchType () : PlatformOrDeviceType {
-    return PlatformOrDeviceType.DEVICE
-  }
-
-  get project (): string {
-    // TODO
-    return 'No project yet'
-  }
-
-  get status () : string {
-    if (this.statusLookupByUri.has(this.device.statusUri)) {
-      const status: Status = this.statusLookupByUri.get(this.device.statusUri) as Status
-      return status.name
-    }
-    if (this.device.statusName) {
-      return this.device.statusName
-    }
-    return 'Unknow status'
   }
 }

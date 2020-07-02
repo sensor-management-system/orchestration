@@ -14,12 +14,12 @@
       </v-btn>
     </v-snackbar>
 
-    <v-form>
-      <v-card outlined>
-        <v-tabs-items
-          v-model="activeTab"
-        >
-          <v-tab-item :eager="true">
+    <v-card outlined>
+      <v-tabs-items
+        v-model="activeTab"
+      >
+        <v-tab-item :eager="true">
+          <v-form ref="basicForm">
             <!-- Basic data tab -->
             <v-card
               flat
@@ -133,9 +133,11 @@
                 </v-row>
               </v-card-text>
             </v-card>
-          </v-tab-item>
-          <!-- contact tab -->
-          <v-tab-item :eager="true">
+          </v-form>
+        </v-tab-item>
+        <!-- contact tab -->
+        <v-tab-item :eager="true">
+          <v-form ref="contactsForm" @submit.prevent>
             <v-card
               flat
             >
@@ -145,41 +147,41 @@
               <v-card-text>
                 <v-row>
                   <v-col cols="3">
-                    <ContactSelect :selected-contacts.sync="platform.contacts" :readonly="!isInEditMode" />
+                    <ContactSelect v-model="platform.contacts" :readonly="!isInEditMode" />
                   </v-col>
                 </v-row>
               </v-card-text>
             </v-card>
-          </v-tab-item>
-          <v-tab-item :eager="true">
-            <v-card
-              flat
-            >
-              <v-card-title>
-                Platform URN: {{ platformURN }}
-              </v-card-title>
-              <v-card-text>
-                <AttachmentList v-model="platform.attachments" :readonly="!isInEditMode" />
-              </v-card-text>
-            </v-card>
-          </v-tab-item>
-        </v-tabs-items>
-        <!-- Buttons for all tabs -->
-        <v-btn
-          v-if="!isInEditMode"
-          fab
-          fixed
-          bottom
-          right
-          color="secondary"
-          @click="toggleEditMode"
-        >
-          <v-icon>
-            mdi-pencil
-          </v-icon>
-        </v-btn>
-      </v-card>
-    </v-form>
+          </v-form>
+        </v-tab-item>
+        <v-tab-item :eager="true">
+          <v-card
+            flat
+          >
+            <v-card-title>
+              Platform URN: {{ platformURN }}
+            </v-card-title>
+            <v-card-text>
+              <AttachmentList v-model="platform.attachments" :readonly="!isInEditMode" />
+            </v-card-text>
+          </v-card>
+        </v-tab-item>
+      </v-tabs-items>
+      <!-- Buttons for all tabs -->
+      <v-btn
+        v-if="!isInEditMode"
+        fab
+        fixed
+        bottom
+        right
+        color="secondary"
+        @click="toggleEditMode"
+      >
+        <v-icon>
+          mdi-pencil
+        </v-icon>
+      </v-btn>
+    </v-card>
   </div>
 </template>
 
@@ -190,18 +192,18 @@
 <script lang="ts">
 import { Component, Watch, mixins } from 'nuxt-property-decorator'
 
-import CVService from '../../../services/CVService'
-import SmsService from '../../../services/SmsService'
+import CVService from '../../services/CVService'
+import SmsService from '../../services/SmsService'
 
-import Platform from '../../../models/Platform'
+import Platform from '../../models/Platform'
 
 // @ts-ignore
-import ContactSelect from '../../../components/ContactSelect.vue'
-// @ts-ignore
-import AttachmentList from '../../../components/AttachmentList.vue'
-import Manufacturer from '../../../models/Manufacturer'
-import PlatformType from '../../../models/PlatformType'
-import Status from '../../../models/Status'
+import ContactSelect from '../../components/ContactSelect.vue'
+import AttachmentList from '../../components/AttachmentList.vue'
+
+import Manufacturer from '../../models/Manufacturer'
+import PlatformType from '../../models/PlatformType'
+import Status from '../../models/Status'
 
 // @ts-ignore
 import AppBarEditModeContent from '@/components/AppBarEditModeContent.vue'
@@ -254,7 +256,7 @@ export default class PlatformIdPage extends mixins(Rules) {
       if (this.platform && this.platform.id) {
         this.toggleEditMode()
       } else {
-        this.$router.push('/devices')
+        this.$router.push('/search/platforms')
       }
     })
 
@@ -335,7 +337,7 @@ export default class PlatformIdPage extends mixins(Rules) {
     SmsService.savePlatform(this.platform).then((savedPlatform) => {
       this.platform = savedPlatform
       this.showSaveSuccess = true
-      // this.$router.push('/devices')
+      // this.$router.push('/seach/platforms')
       this.toggleEditMode()
     })
   }
