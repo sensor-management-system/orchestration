@@ -19,12 +19,22 @@
         </v-list-item>
 
         <!-- Devices -->
-        <v-list-item to="/devices" exact nuxt>
+        <v-list-item to="/search/devices" exact nuxt>
           <v-list-item-action>
             <v-icon>mdi-network</v-icon>
           </v-list-item-action>
           <v-list-item-content>
             <v-list-item-title>Devices</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+
+        <!-- Platforms -->
+        <v-list-item to="/search/platforms" exact nuxt>
+          <v-list-item-action>
+            <v-icon>mdi-rocket</v-icon>
+          </v-list-item-action>
+          <v-list-item-content>
+            <v-list-item-title>Platforms</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
 

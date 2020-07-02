@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <v-form ref="propertiesForm">
     <v-btn
       v-if="!readonly"
       small
@@ -68,7 +68,7 @@
         </v-expansion-panel-content>
       </v-expansion-panel>
     </v-expansion-panels>
-  </div>
+  </v-form>
 </template>
 
 <script lang="ts">
@@ -102,14 +102,14 @@ export default class DevicePropertyExpansionPanels extends Vue {
     type: Array
   })
   // @ts-ignore
-  value!: DeviceProperty[]
+  readonly value!: DeviceProperty[]
 
   @Prop({
     default: false,
     type: Boolean
   })
   // @ts-ignore
-  readonly: boolean
+  readonly readonly: boolean
 
   @Prop({
     default: () => [] as Compartment[],

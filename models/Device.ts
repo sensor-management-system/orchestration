@@ -1,10 +1,8 @@
-import { PlatformOrDeviceType } from '../enums/PlatformOrDeviceType'
-
 import Contact, { IContact } from './Contact'
 import { DeviceProperty } from './DeviceProperty'
 import { CustomTextField, ICustomTextField } from './CustomTextField'
-import { IDeviceOrPlatformSearchObject } from './IDeviceOrPlatformSearchObject'
-import Status from './Status'
+
+import { Attachment, IAttachment } from './Attachment'
 import IPathSetter from './IPathSetter'
 
 export interface IDevice {
@@ -37,6 +35,7 @@ export interface IDevice {
   contacts: IContact[]
   properties: DeviceProperty[]
   customFields: ICustomTextField[]
+  attachments: IAttachment[]
 }
 
 export default class Device implements IDevice, IPathSetter {
@@ -71,8 +70,8 @@ export default class Device implements IDevice, IPathSetter {
   private _contacts: Contact[] = []
   private _properties: DeviceProperty[] = []
   private _customFields: CustomTextField[] = []
+  private _attachments: Attachment[] = []
 
-  // TODO: Attachments
   // TODO: Events
 
   get id (): number | null {
@@ -259,6 +258,14 @@ export default class Device implements IDevice, IPathSetter {
     this._customFields = customFields
   }
 
+  get attachments (): Attachment[] {
+    return this._attachments
+  }
+
+  set attachments (attachments: Attachment[]) {
+    this._attachments = attachments
+  }
+
   setPath (path: string, value: any): void {
     const pathArray = path.split('.')
     const topLevelElement = pathArray.splice(0, 1)[0]
@@ -353,6 +360,9 @@ export default class Device implements IDevice, IPathSetter {
       case 'customFields':
         this.customFields = value.map(CustomTextField.createFromObject)
         break
+      case 'attachments':
+        this.attachments = value.map(Attachment.createFromObject)
+        break
       default:
         throw new TypeError('path ' + path + ' is not valid')
     }
@@ -390,53 +400,8 @@ export default class Device implements IDevice, IPathSetter {
     newObject.contacts = someObject.contacts.map(Contact.createFromObject)
     newObject.properties = someObject.properties.map(DeviceProperty.createFromObject)
     newObject.customFields = someObject.customFields.map(CustomTextField.createFromObject)
+    newObject.attachments = someObject.attachments.map(Attachment.createFromObject)
 
     return newObject
-  }
-
-  toSearchObject (statusLookupByUri: Map<string, Status>) : IDeviceOrPlatformSearchObject {
-    return new DeviceSearchObjectWrapper(this, statusLookupByUri)
-  }
-}
-
-class DeviceSearchObjectWrapper implements IDeviceOrPlatformSearchObject {
-  private device: Device
-  private statusLookupByUri: Map<string, Status>
-
-  constructor (device: Device, statusLookupByUri: Map<string, Status>) {
-    this.device = device
-    this.statusLookupByUri = statusLookupByUri
-  }
-
-  get id () : number | null {
-    return this.device.id
-  }
-
-  get name () : string {
-    return this.device.shortName
-  }
-
-  get type () : string {
-    return 'Device'
-  }
-
-  get searchType () : PlatformOrDeviceType {
-    return PlatformOrDeviceType.DEVICE
-  }
-
-  get project (): string {
-    // TODO
-    return 'No project yet'
-  }
-
-  get status () : string {
-    if (this.statusLookupByUri.has(this.device.statusUri)) {
-      const status: Status = this.statusLookupByUri.get(this.device.statusUri) as Status
-      return status.name
-    }
-    if (this.device.statusName) {
-      return this.device.statusName
-    }
-    return 'Unknow status'
   }
 }

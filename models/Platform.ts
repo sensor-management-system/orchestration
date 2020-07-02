@@ -1,10 +1,6 @@
-import { PlatformOrDeviceType } from '../enums/PlatformOrDeviceType'
-
 import Contact, { IContact } from './Contact'
+import { Attachment, IAttachment } from './Attachment'
 
-import { IDeviceOrPlatformSearchObject } from './IDeviceOrPlatformSearchObject'
-import PlatformType from './PlatformType'
-import Status from './Status'
 import IPathSetter from './IPathSetter'
 
 export interface IPlatform {
@@ -37,6 +33,7 @@ export interface IPlatform {
   modifiedByUserId: number | null
 
   contacts: IContact[]
+  attachments: IAttachment[]
 }
 
 export default class Platform implements IPlatform, IPathSetter {
@@ -68,7 +65,7 @@ export default class Platform implements IPlatform, IPathSetter {
   private _modifiedByUserId: number | null = null
 
   private _contacts: Contact[] = []
-  // TODO: Add attachments
+  private _attachments: Attachment[] = []
 
   get id (): number | null {
     return this._id
@@ -230,6 +227,14 @@ export default class Platform implements IPlatform, IPathSetter {
     this._modifiedByUserId = newModifiedByUserId
   }
 
+  get attachments (): Attachment[] {
+    return this._attachments
+  }
+
+  set attachments (attachments: Attachment[]) {
+    this._attachments = attachments
+  }
+
   setPath (path: string, value: any): void {
     const pathArray = path.split('.')
     const topLevelElement = pathArray.splice(0, 1)[0]
@@ -315,16 +320,12 @@ export default class Platform implements IPlatform, IPathSetter {
       case 'contacts':
         this.contacts = value.map(Contact.createFromObject)
         break
+      case 'attachments':
+        this.attachments = value.map(Attachment.createFromObject)
+        break
       default:
         throw new TypeError('path ' + path + ' is not valid')
     }
-  }
-
-  toSearchObject (
-    platformTypeLookupByUri: Map<string, PlatformType>,
-    platformStatusLookupByUri: Map<string, Status>
-  ) : IDeviceOrPlatformSearchObject {
-    return new PlatformSearchObjectWrapper(this, platformTypeLookupByUri, platformStatusLookupByUri)
   }
 
   static createEmpty (): Platform {
@@ -364,60 +365,8 @@ export default class Platform implements IPlatform, IPathSetter {
     newObject.modifiedByUserId = someObject.modifiedByUserId
 
     newObject.contacts = someObject.contacts.map(Contact.createFromObject)
+    newObject.attachments = someObject.attachments.map(Attachment.createFromObject)
 
     return newObject
-  }
-}
-
-class PlatformSearchObjectWrapper implements IDeviceOrPlatformSearchObject {
-  private platform: Platform
-  private platformTypeLookupByUri: Map<string, PlatformType>
-  private statusLookupByUri: Map<string, Status>
-
-  constructor (platform: Platform, platformTypeLookupByUri: Map<string, PlatformType>, statusLookupByUri: Map<string, Status>) {
-    this.platform = platform
-    this.platformTypeLookupByUri = platformTypeLookupByUri
-    this.statusLookupByUri = statusLookupByUri
-  }
-
-  get id () : number | null {
-    return this.platform.id
-  }
-
-  get name () : string {
-    return this.platform.shortName
-  }
-
-  get type () : string {
-    // TODO: As we don't have the platform types
-    // we can't give the exact type for the uri
-    if (this.platformTypeLookupByUri.has(this.platform.platformTypeUri)) {
-      const platformType: PlatformType = this.platformTypeLookupByUri.get(this.platform.platformTypeUri) as PlatformType
-      return platformType.name
-    }
-    if (this.platform.platformTypeName) {
-      return this.platform.platformTypeName
-    }
-    return 'Unknown type'
-  }
-
-  get searchType () : PlatformOrDeviceType {
-    return PlatformOrDeviceType.PLATFORM
-  }
-
-  get project (): string {
-    // TODO
-    return 'No project yet'
-  }
-
-  get status () : string {
-    if (this.statusLookupByUri.has(this.platform.statusUri)) {
-      const platformStatus: Status = this.statusLookupByUri.get(this.platform.statusUri) as Status
-      return platformStatus.name
-    }
-    if (this.platform.statusName) {
-      return this.platform.statusName
-    }
-    return 'Unknown status'
   }
 }

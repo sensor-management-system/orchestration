@@ -1,13 +1,13 @@
 <template>
   <div>
-    <v-form>
-      <v-card
-        outlined
+    <v-card
+      outlined
+    >
+      <v-tabs-items
+        v-model="activeTab"
       >
-        <v-tabs-items
-          v-model="activeTab"
-        >
-          <v-tab-item :eager="true">
+        <v-tab-item :eager="true">
+          <v-form ref="basicForm">
             <v-card
               flat
             >
@@ -155,8 +155,10 @@
                 </v-row>
               </v-card-text>
             </v-card>
-          </v-tab-item>
-          <v-tab-item :eager="true">
+          </v-form>
+        </v-tab-item>
+        <v-tab-item :eager="true">
+          <v-form ref="contactsForm" @submit.prevent>
             <v-card
               flat
             >
@@ -164,112 +166,122 @@
               <v-card-text>
                 <v-row>
                   <v-col cols="3">
-                    <ContactSelect :selected-contacts.sync="device.contacts" :readonly="readonly" />
+                    <ContactSelect v-model="device.contacts" :readonly="readonly" />
                   </v-col>
                 </v-row>
               </v-card-text>
             </v-card>
-          </v-tab-item>
-          <v-tab-item :eager="true">
-            <v-card
-              flat
-            >
-              <v-card-title>Device URN: {{ deviceURN }}</v-card-title>
-              <v-card-text>
-                <DevicePropertyExpansionPanels
-                  v-model="device.properties"
-                  :readonly="readonly"
-                  :compartments="compartments"
-                  :sampling-medias="samplingMedias"
-                  :properties="properties"
-                  :units="units"
-                />
-              </v-card-text>
-            </v-card>
-          </v-tab-item>
-          <v-tab-item :eager="true">
-            <v-card
-              flat
-            >
-              <v-card-title>Device URN: {{ deviceURN }}</v-card-title>
-              <v-card-text>
-                <CustomFieldCards v-model="device.customFields" :readonly="readonly" :rules="rules" />
-              </v-card-text>
-            </v-card>
-          </v-tab-item>
-          <v-tab-item :eager="true">
-            <v-card
-              flat
-            >
-              <v-card-title>Device URN: {{ deviceURN }}</v-card-title>
-              <v-card-text>
-                <v-timeline dense clipped>
-                  <v-timeline-item
-                    class="mb-4"
-                    small
-                  >
-                    <v-row justify="space-between">
-                      <v-col cols="2">
-                        2020-04-28 10:15
-                      </v-col>
-                      <v-col cols="10">
-                        <strong>attached to platform XY</strong>
-                        <div>Max M.</div>
-                      </v-col>
-                    </v-row>
-                  </v-timeline-item>
-                  <v-timeline-item
-                    class="mb-4"
-                    color="grey"
-                    icon-color="grey lighten-2"
-                    small
-                  >
-                    <v-row justify="space-between">
-                      <v-col cols="2">
-                        2020-04-28 09:15
-                      </v-col>
-                      <v-col cols="10">
-                        <strong>edited description</strong>
-                        <div>Max M.</div>
-                      </v-col>
-                    </v-row>
-                  </v-timeline-item>
-                  <v-timeline-item
-                    class="mb-4"
-                    color="grey"
-                    icon-color="grey lighten-2"
-                    small
-                  >
-                    <v-row justify="space-between">
-                      <v-col cols="2">
-                        2020-04-20 08:05
-                      </v-col>
-                      <v-col cols="10">
-                        <strong>device created</strong>
-                        <div>Hans H.</div>
-                      </v-col>
-                    </v-row>
-                  </v-timeline-item>
-                </v-timeline>
-              </v-card-text>
-            </v-card>
-          </v-tab-item>
-        </v-tabs-items>
-        <v-btn
-          v-if="!isInEditMode"
-          fab
-          fixed
-          bottom
-          right
-          color="secondary"
-          @click="toggleEditMode"
-        >
-          <v-icon>
-            mdi-pencil
-          </v-icon>
-        </v-btn>
-      </v-card>
-    </v-form>
+          </v-form>
+        </v-tab-item>
+        <v-tab-item :eager="true">
+          <v-card
+            flat
+          >
+            <v-card-title>Device URN: {{ deviceURN }}</v-card-title>
+            <v-card-text>
+              <DevicePropertyExpansionPanels
+                v-model="device.properties"
+                :readonly="readonly"
+                :compartments="compartments"
+                :sampling-medias="samplingMedias"
+                :properties="properties"
+                :units="units"
+              />
+            </v-card-text>
+          </v-card>
+        </v-tab-item>
+        <v-tab-item :eager="true">
+          <v-card
+            flat
+          >
+            <v-card-title>Device URN: {{ deviceURN }}</v-card-title>
+            <v-card-text>
+              <CustomFieldCards v-model="device.customFields" :readonly="readonly" :rules="rules" />
+            </v-card-text>
+          </v-card>
+        </v-tab-item>
+        <v-tab-item :eager="true">
+          <v-card
+            flat
+          >
+            <v-card-title>Device URN: {{ deviceURN }}</v-card-title>
+            <v-card-text>
+              <AttachmentList v-model="device.attachments" :readonly="readonly" />
+            </v-card-text>
+          </v-card>
+        </v-tab-item>
+        <v-tab-item>
+          <v-card
+            flat
+          >
+            <v-card-title>Device URN: {{ deviceURN }}</v-card-title>
+            <v-card-text>
+              <v-timeline dense clipped>
+                <v-timeline-item
+                  class="mb-4"
+                  small
+                >
+                  <v-row justify="space-between">
+                    <v-col cols="2">
+                      2020-04-28 10:15
+                    </v-col>
+                    <v-col cols="10">
+                      <strong>attached to platform XY</strong>
+                      <div>Max M.</div>
+                    </v-col>
+                  </v-row>
+                </v-timeline-item>
+                <v-timeline-item
+                  class="mb-4"
+                  color="grey"
+                  icon-color="grey lighten-2"
+                  small
+                >
+                  <v-row justify="space-between">
+                    <v-col cols="2">
+                      2020-04-28 09:15
+                    </v-col>
+                    <v-col cols="10">
+                      <strong>edited description</strong>
+                      <div>Max M.</div>
+                    </v-col>
+                  </v-row>
+                </v-timeline-item>
+                <v-timeline-item
+                  class="mb-4"
+                  color="grey"
+                  icon-color="grey lighten-2"
+                  small
+                >
+                  <v-row justify="space-between">
+                    <v-col cols="2">
+                      2020-04-20 08:05
+                    </v-col>
+                    <v-col cols="10">
+                      <strong>device created</strong>
+                      <div>Hans H.</div>
+                    </v-col>
+                  </v-row>
+                </v-timeline-item>
+              </v-timeline>
+            </v-card-text>
+          </v-card>
+        </v-tab-item>
+      </v-tabs-items>
+      <v-btn
+        v-if="!isInEditMode"
+        fab
+        fixed
+        bottom
+        right
+        color="secondary"
+        @click="toggleEditMode"
+      >
+        <v-icon>
+          mdi-pencil
+        </v-icon>
+      </v-btn>
+    </v-card>
   </div>
 </template>
 
@@ -278,31 +290,35 @@
 </style>
 
 <script lang="ts">
-import { Vue, Component, Watch } from 'nuxt-property-decorator'
-import Device from '../../../models/Device'
+import { Component, Watch, mixins } from 'nuxt-property-decorator'
+import Device from '../../models/Device'
 
-import CVService from '../../../services/CVService'
-import SmsService from '../../../services/SmsService'
+import CVService from '../../services/CVService'
+import SmsService from '../../services/SmsService'
 
-import DeviceType from '../../../models/DeviceType'
-import Manufacturer from '../../../models/Manufacturer'
-import Status from '../../../models/Status'
-import Compartment from '../../../models/Compartment'
-import SamplingMedia from '../../../models/SamplingMedia'
-import Property from '../../../models/Property'
-import Unit from '../../../models/Unit'
+import Manufacturer from '../../models/Manufacturer'
+import Status from '../../models/Status'
+import DeviceType from '../../models/DeviceType'
+import Compartment from '../../models/Compartment'
+import SamplingMedia from '../../models/SamplingMedia'
+import Property from '../../models/Property'
+import Unit from '../../models/Unit'
 
 // @ts-ignore
-import ContactSelect from '../../../components/ContactSelect.vue'
+import ContactSelect from '../../components/ContactSelect.vue'
 // @ts-ignore
-import DevicePropertyExpansionPanels from '../../../components/DevicePropertyExpansionPanels.vue'
+import DevicePropertyExpansionPanels from '../../components/DevicePropertyExpansionPanels.vue'
 // @ts-ignore
-import CustomFieldCards from '../../../components/CustomFieldCards.vue'
+import CustomFieldCards from '../../components/CustomFieldCards.vue'
+// @ts-ignore
+import AttachmentList from '../../components/AttachmentList.vue'
 // @ts-ignore
 import AppBarEditModeContent from '@/components/AppBarEditModeContent.vue'
 
 // @ts-ignore
 import AppBarTabsExtension from '@/components/AppBarTabsExtension.vue'
+// @ts-ignore
+import { Rules } from '@/mixins/Rules'
 
 @Component
 // @ts-ignore
@@ -313,6 +329,7 @@ export class AppBarTabsExtensionExtended extends AppBarTabsExtension {
       'Persons',
       'Properties',
       'Custom Fields',
+      'Attachments',
       'Events'
     ]
   }
@@ -322,11 +339,12 @@ export class AppBarTabsExtensionExtended extends AppBarTabsExtension {
   components: {
     ContactSelect,
     DevicePropertyExpansionPanels,
-    CustomFieldCards
+    CustomFieldCards,
+    AttachmentList
   }
 })
 // @ts-ignore
-export default class DeviceIdPage extends Vue {
+export default class DeviceIdPage extends mixins(Rules) {
   private numberOfTabs: number = 5
   private activeTab: number = 0
 
@@ -352,7 +370,7 @@ export default class DeviceIdPage extends Vue {
       if (this.device && this.device.id) {
         this.toggleEditMode()
       } else {
-        this.$router.push('/devices')
+        this.$router.push('/search/devices')
       }
     })
 
@@ -360,10 +378,6 @@ export default class DeviceIdPage extends Vue {
     this.$nuxt.$on('AppBarExtension:change', (tab: number) => {
       this.activeTab = tab
     })
-  }
-
-  private rules: Object = {
-    required: (v: string) => !!v || 'Required'
   }
 
   mounted () {
