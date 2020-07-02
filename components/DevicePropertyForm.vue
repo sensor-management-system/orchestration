@@ -72,7 +72,7 @@
     </v-row>
     <v-row>
       <v-col cols="12" md="3">
-        <v-select
+        <v-combobox
           label="Property"
           :items="propertyNames"
           :value="valuePropertyName"
@@ -106,6 +106,11 @@ import Compartment from '../models/Compartment'
 import SamplingMedia from '../models/SamplingMedia'
 import Property from '../models/Property'
 import Unit from '../models/Unit'
+
+interface INameAndUri {
+  name: string
+  uri: string
+}
 
 /**
  * A class component for a device property
@@ -167,40 +172,32 @@ export default class DevicePropertyForm extends Vue {
   update (key: string, value: string) {
     const newObj: DeviceProperty = DeviceProperty.createFromObject(this.value)
 
-    if (key === 'compartmentName') {
-      const compartmentIndex = this.compartments.findIndex(c => c.name === value)
-      if (compartmentIndex > -1) {
-        newObj.setPath('compartmentUri', this.compartments[compartmentIndex].uri)
-      } else {
-        newObj.setPath('compartmentUri', '')
+    const uriLookupByName: { [id: string]: {nameToSet: string, elements: INameAndUri[] } } = {
+      compartmentName: {
+        nameToSet: 'compartmentUri',
+        elements: this.compartments
+      },
+      unitName: {
+        nameToSet: 'unitUri',
+        elements: this.units
+      },
+      samplingMediaName: {
+        nameToSet: 'samplingMediaUri',
+        elements: this.samplingMedias
+      },
+      propertyName: {
+        nameToSet: 'propertyUri',
+        elements: this.properties
       }
     }
 
-    if (key === 'unitName') {
-      const unitIndex = this.units.findIndex(u => u.name === value)
-      if (unitIndex > -1) {
-        newObj.setPath('unitUri', this.units[unitIndex].uri)
-      } else {
-        newObj.setPath('unitUri', '')
+    if (uriLookupByName[key]) {
+      const index = uriLookupByName[key].elements.findIndex(x => x.name === value)
+      let valueToSet = ''
+      if (index > -1) {
+        valueToSet = uriLookupByName[key].elements[index].uri
       }
-    }
-
-    if (key === 'samplingMediaName') {
-      const samplingMediaIndex = this.samplingMedias.findIndex(s => s.name === value)
-      if (samplingMediaIndex > -1) {
-        newObj.setPath('samplingMediaUri', this.samplingMedias[samplingMediaIndex].uri)
-      } else {
-        newObj.setPath('samplingMediaUri', '')
-      }
-    }
-
-    if (key === 'propertyName') {
-      const propertyIndex = this.properties.findIndex(p => p.name === value)
-      if (propertyIndex > -1) {
-        newObj.setPath('propertyUri', this.properties[propertyIndex].uri)
-      } else {
-        newObj.setPath('propertyUri', '')
-      }
+      newObj.setPath(uriLookupByName[key].nameToSet, valueToSet)
     }
 
     newObj.setPath(key, value)
