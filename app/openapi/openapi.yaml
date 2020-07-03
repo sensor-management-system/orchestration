@@ -918,6 +918,8 @@ components:
         description:
           type: string
           nullable: false
+        user:
+          $ref: '#/components/schemas/User'
     RelationshipData:
       type: object
       properties:
@@ -1066,6 +1068,15 @@ components:
                     $ref: '#/components/schemas/Contact'
               rel:
                 $ref: '#/components/schemas/Relationships'
+    User:
+      type: object
+      properties:
+        subject:
+          type: string
+          nullable: false
+          description: 'Subject retreived from the authentication token from the Identity Provider'
+        contact:
+          $ref: '#/components/schemas/Contact'
     Properties:
       type: object
       properties:
