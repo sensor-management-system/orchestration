@@ -4,7 +4,7 @@ from marshmallow_jsonapi import fields
 
 class DevicePropertySchema(MarshmallowSchema):
     """
-    This class create a schema for a properties.
+    This class create a schema for a property.
     Every attribute in the schema going to expose through the api.
     It uses library called marshmallow-jsonapi that fit
     the JSONAPI 1.0 specification and provides Flask integration.
@@ -12,7 +12,7 @@ class DevicePropertySchema(MarshmallowSchema):
     """
 
     class Meta:
-        type_ = 'properties'
+        type_ = 'property'
 
     id = fields.Integer(as_string=True, dump_only=True)
     measuring_range_min = fields.Float(as_string=True, allow_none=True)
