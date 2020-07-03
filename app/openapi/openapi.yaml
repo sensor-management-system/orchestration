@@ -963,6 +963,14 @@ components:
           type: string
           nullable: true
           description: link to website
+        devicetype_uri:
+          type: string
+          nullable: true
+          description: ''
+        devicetype_name:
+          type: string
+          nullable: true
+          description: ''
     Platform:
       type: object
       properties:
