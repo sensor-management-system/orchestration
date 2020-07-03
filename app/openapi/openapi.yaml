@@ -1023,7 +1023,7 @@ components:
       - url
       type: object
       properties:
-        lable:
+        label:
           type: string
           nullable: true
         url:
