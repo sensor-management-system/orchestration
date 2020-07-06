@@ -1,5 +1,9 @@
 <template>
   <div>
+    <p>
+      {{ value.compartmentName }}
+      {{ value.compartmentUri }}
+    </p>
     <v-row>
       <v-col cols="12" md="3">
         <v-combobox
@@ -192,6 +196,14 @@ export default class DevicePropertyForm extends Vue {
     }
 
     if (uriLookupByName[key]) {
+      // the comoboboxes may set the value to null,
+      // but we don't want to work further with nulls
+      //
+      // all of the comboboxes see the empty string as the
+      // "no value" choice
+      if (value === null) {
+        value = ''
+      }
       const index = uriLookupByName[key].elements.findIndex(x => x.name === value)
       let valueToSet = ''
       if (index > -1) {
