@@ -43,6 +43,8 @@
                       :disabled="readonly"
                     />
                   </v-col>
+                </v-row>
+                <v-row>
                   <v-col cols="12" md="3">
                     <v-select
                       v-model="deviceStatusName"
@@ -52,13 +54,11 @@
                       :disabled="readonly"
                     />
                   </v-col>
-                </v-row>
-                <v-row>
                   <v-col cols="12" md="3">
                     <v-combobox
                       v-model="deviceTypeName"
                       :items="deviceTypeNames"
-                      label="Type"
+                      label="Device type"
                       :readonly="readonly"
                       :disabled="readonly"
                     />

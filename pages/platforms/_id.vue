@@ -57,18 +57,18 @@
                 <v-row>
                   <v-col cols="12" md="3">
                     <v-combobox
-                      v-model="platformPlatformTypeName"
-                      label="Platform type"
-                      :items="platformTypeNames"
+                      v-model="platformStatusName"
+                      label="Status"
+                      :items="statusNames"
                       :readonly="readonly"
                       :disabled="readonly"
                     />
                   </v-col>
                   <v-col cols="12" md="3">
                     <v-combobox
-                      v-model="platformStatusName"
-                      label="Status"
-                      :items="statusNames"
+                      v-model="platformPlatformTypeName"
+                      label="Platform type"
+                      :items="platformTypeNames"
                       :readonly="readonly"
                       :disabled="readonly"
                     />
