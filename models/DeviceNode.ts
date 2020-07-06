@@ -17,7 +17,7 @@ export class DeviceNode implements IConfigurationsTreeNode<Device> {
   }
 
   get disabled (): boolean {
-    return true
+    return false
   }
 
   canHaveChildren (): boolean {
