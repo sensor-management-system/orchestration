@@ -125,7 +125,7 @@
               <v-card-text>
                 <v-row>
                   <v-col cols="3">
-                    <ContactSelect :selected-contacts.sync="contacts" :readonly="false" />
+                    <ContactSelect v-model="contacts" :readonly="false" />
                   </v-col>
                 </v-row>
               </v-card-text>
@@ -159,7 +159,7 @@
                   <v-col cols="6" md="6">
                     <v-breadcrumbs :items="breadcrumbs" divider=">" />
                     <v-row v-if="selectedPlatform">
-                      <v-col cols="12" md="10">
+                      <v-col cols="12" md="9">
                         <template v-if="selectedPlatform.description">
                           {{ selectedPlatform.description }}
                         </template>
@@ -167,9 +167,28 @@
                           The selected platform has no description.
                         </template>
                       </v-col>
-                      <v-col cols="12" md="2">
+                      <v-col cols="12" md="3">
                         <v-btn
                           color="secondary"
+                          @click="removeSelected"
+                        >
+                          remove
+                        </v-btn>
+                      </v-col>
+                    </v-row>
+                    <v-row v-if="selectedDevice">
+                      <v-col cols="12" md="9">
+                        <template v-if="selectedDevice.description">
+                          {{ selectedDevice.description }}
+                        </template>
+                        <template v-else>
+                          The selected device has no description.
+                        </template>
+                      </v-col>
+                      <v-col cols="12" md="3">
+                        <v-btn
+                          color="secondary"
+                          @click="removeSelected"
                         >
                           remove
                         </v-btn>
@@ -179,26 +198,105 @@
                       Add platforms and / or devices on the left side to the configuration.<br>
                       Select a platform to add platforms / or devices to the selected platform.
                     </v-row>
-                    <v-row>
-                      <v-col cols="12" md="3">
-                        <v-select
-                          :items="['Platforms', 'Devices']"
-                          label="Type"
-                        />
-                      </v-col>
-                      <v-col cols="12" md="6">
-                        <v-text-field
-                          label="Name"
-                        />
-                      </v-col>
-                      <v-col cols="12" md="3">
-                        <v-btn
-                          color="primary"
-                        >
-                          search
-                        </v-btn>
-                      </v-col>
-                    </v-row>
+                    <template v-if="!selectedDevice">
+                      <v-row>
+                        <v-col cols="12" md="3">
+                          <v-select
+                            v-model="searchOptions.searchType"
+                            label="Type"
+                            :items="searchTypes"
+                          />
+                        </v-col>
+                        <v-col cols="12" md="6">
+                          <v-text-field
+                            v-model="searchOptions.text"
+                            label="Name"
+                          />
+                        </v-col>
+                        <v-col cols="12" md="3">
+                          <v-btn
+                            color="primary"
+                            @click="search"
+                          >
+                            search
+                          </v-btn>
+                        </v-col>
+                      </v-row>
+                      <v-row v-if="platforms">
+                        <v-col cols="12">
+                          <v-list two-line>
+                            <v-list-item-group
+                              v-model="platformItem"
+                              color="primary"
+                            >
+                              <template
+                                v-for="(item, index) in platforms"
+                              >
+                                <v-list-item
+                                  :key="item.shortName"
+                                  :disabled="isUsed(item.id) ? true : false"
+                                >
+                                  <v-list-item-content>
+                                    <v-list-item-title v-text="item.shortName" />
+                                    <v-list-item-subtitle class="text--primary" v-text="item.longName" />
+                                    <v-list-item-subtitle>URN (TODO)</v-list-item-subtitle>
+                                  </v-list-item-content>
+                                  <v-list-item-action>
+                                    <v-btn
+                                      :disabled="isUsed(item.id) ? true : false"
+                                      @click="addPlatform(item)"
+                                    >
+                                      add
+                                    </v-btn>
+                                  </v-list-item-action>
+                                </v-list-item>
+                                <v-divider
+                                  v-if="index + 1 < platforms.length"
+                                  :key="index"
+                                />
+                              </template>
+                            </v-list-item-group>
+                          </v-list>
+                        </v-col>
+                      </v-row>
+                      <v-row v-if="devices">
+                        <v-col cols="12">
+                          <v-list two-line>
+                            <v-list-item-group
+                              v-model="deviceItem"
+                              color="primary"
+                            >
+                              <template
+                                v-for="(item, index) in devices"
+                              >
+                                <v-list-item
+                                  :key="item.shortName"
+                                  :disabled="isUsed(item.id) ? true : false"
+                                >
+                                  <v-list-item-content>
+                                    <v-list-item-title v-text="item.shortName" />
+                                    <v-list-item-subtitle class="text--primary" v-text="item.longName" />
+                                    <v-list-item-subtitle>URN (TODO)</v-list-item-subtitle>
+                                  </v-list-item-content>
+                                  <v-list-item-action>
+                                    <v-btn
+                                      :disabled="isUsed(item.id) ? true : false"
+                                      @click="addDevice(item)"
+                                    >
+                                      add
+                                    </v-btn>
+                                  </v-list-item-action>
+                                </v-list-item>
+                                <v-divider
+                                  v-if="index + 1 < devices.length"
+                                  :key="index"
+                                />
+                              </template>
+                            </v-list-item-group>
+                          </v-list>
+                        </v-col>
+                      </v-row>
+                    </template>
                   </v-col>
                 </v-row>
               </v-card-text>
@@ -248,8 +346,22 @@ import Device from '@/models/Device'
 import { PlatformNode } from '@/models/PlatformNode'
 // @ts-ignore
 import { DeviceNode } from '@/models/DeviceNode'
+// @ts-ignore
+import Manufacturer from '@/models/Manufacturer'
+// @ts-ignore
+import SmsService from '@/services/SmsService'
 
 type Node = DeviceNode|PlatformNode
+
+enum SearchType {
+  Platform = 'Platform',
+  Device = 'Device'
+}
+
+interface ISearchOptions {
+  searchType: SearchType
+  text: string
+}
 
 @Component
 // @ts-ignore
@@ -288,6 +400,25 @@ export default class ConfigurationsIdPage extends Vue {
 
   private selectedConfigurationItemId: number[] = []
   private selectedPlatform: Platform | null = null
+  private selectedDevice: Device | null = null
+
+  private searchTypes: string[] = [
+    SearchType.Platform,
+    SearchType.Device
+  ]
+
+  private searchOptions: ISearchOptions = {
+    searchType: SearchType.Platform,
+    text: ''
+  }
+
+  private platformsResult: Platform[] = [] as Platform[]
+  private devicesResult: Device[] = [] as Device[]
+
+  private configurationItems: Node[] = [] as Node[]
+
+  private platformItem: string = ''
+  private deviceItem: string = ''
 
   created () {
     this.$nuxt.$emit('app-bar-content', AppBarEditModeContent)
@@ -303,6 +434,8 @@ export default class ConfigurationsIdPage extends Vue {
     this.$nuxt.$on('AppBarExtension:change', (tab: number) => {
       this.activeTab = tab
     })
+
+    this.configurationItems = this.getDemoConfigurationItems()
   }
 
   mounted () {
@@ -357,13 +490,13 @@ export default class ConfigurationsIdPage extends Vue {
     ]
   }
 
-  get configurationItems (): Array<Node> {
+  getDemoConfigurationItems (): Array<Node> {
     return [
       ((): PlatformNode => {
         const n = new PlatformNode(
           ((): Platform => {
             const o = new Platform()
-            o.id = 1
+            o.id = -1
             o.shortName = 'Platform 01'
             o.longName = 'Platform 01 Bla blub'
             o.description = 'A platform on which various light instruments can be mounted. Consists of wood, dry and rotten wood.'
@@ -376,7 +509,7 @@ export default class ConfigurationsIdPage extends Vue {
               const n = new PlatformNode(
                 ((): Platform => {
                   const o = new Platform()
-                  o.id = 2
+                  o.id = -2
                   o.shortName = 'Platform 02'
                   return o
                 })()
@@ -386,7 +519,7 @@ export default class ConfigurationsIdPage extends Vue {
                   new DeviceNode(
                     ((): Device => {
                       const o = new Device()
-                      o.id = 3
+                      o.id = -3
                       o.shortName = 'Device 01'
                       return o
                     })()
@@ -394,7 +527,7 @@ export default class ConfigurationsIdPage extends Vue {
                   new DeviceNode(
                     ((): Device => {
                       const o = new Device()
-                      o.id = 4
+                      o.id = -4
                       o.shortName = 'Device 02'
                       return o
                     })()
@@ -402,7 +535,7 @@ export default class ConfigurationsIdPage extends Vue {
                   new DeviceNode(
                     ((): Device => {
                       const o = new Device()
-                      o.id = 5
+                      o.id = -5
                       o.shortName = 'Device 03'
                       return o
                     })()
@@ -418,7 +551,7 @@ export default class ConfigurationsIdPage extends Vue {
       new PlatformNode(
         ((): Platform => {
           const o = new Platform()
-          o.id = 6
+          o.id = -6
           o.shortName = 'Platform 03'
           return o
         })()
@@ -486,13 +619,176 @@ export default class ConfigurationsIdPage extends Vue {
     return getNodeRecursive(nodeId, this.configurationItems)
   }
 
-  @Watch('selectedConfigurationItemId')
-  onItemSelect (val: number[]) {
-    if (val.length) {
-      const node: Node | null = this.getNode(val[0])
-      this.selectedPlatform = node ? node.unpack() as Platform : null
+  getParentNode (node: Node): Node | null {
+    const getParentNodeRecursive = (node: Node, parentNode: Node | null, nodes: Node[]): Node | null => {
+      for (const aNode of nodes) {
+        if (node === aNode) {
+          return parentNode
+        }
+        if (!aNode.canHaveChildren()) {
+          continue
+        }
+        const found = getParentNodeRecursive(node, aNode, (aNode as PlatformNode).getChildren())
+        if (!found) {
+          continue
+        }
+        return found
+      }
+      return null
+    }
+    return getParentNodeRecursive(node, null, this.configurationItems)
+  }
+
+  isUsed (nodeId: number): boolean {
+    return !!this.getNode(nodeId)
+  }
+
+  getSelectedNode (): Node | null {
+    if (!this.selectedConfigurationItemId.length) {
+      return null
+    }
+    return this.getNode(this.selectedConfigurationItemId[0])
+  }
+
+  setSelectedNode (node: Node | null) {
+    if (node) {
+      const id = node.unpack().id
+      if (id) {
+        this.selectedConfigurationItemId = [id]
+      }
     } else {
+      this.selectedConfigurationItemId = []
+    }
+  }
+
+  get platforms (): Platform[] {
+    return this.platformsResult
+  }
+
+  set platforms (platforms: Platform[]) {
+    this.platformsResult = platforms
+    if (platforms.length) {
+      this.devicesResult = [] as Device[]
+    }
+  }
+
+  get devices (): Device[] {
+    return this.devicesResult
+  }
+
+  set devices (devices: Device[]) {
+    this.devicesResult = devices
+    if (devices.length) {
+      this.platformsResult = [] as Platform[]
+    }
+  }
+
+  async search () {
+    switch (this.searchOptions.searchType) {
+      case SearchType.Platform:
+        this.platforms = await SmsService.findPlatforms(
+          this.searchOptions.text,
+          [] as Manufacturer[]
+        )
+        break
+      case SearchType.Device:
+        this.devices = await SmsService.findDevices(
+          this.searchOptions.text,
+          [] as Manufacturer[]
+        )
+        break
+      default:
+        throw new TypeError('search function not defined for unknown value')
+    }
+  }
+
+  addPlatform (platform: Platform) {
+    const node: Node | null = this.getSelectedNode()
+    if (!node) {
+      this.configurationItems.push(
+        new PlatformNode(platform)
+      )
+      return
+    }
+
+    if (!node.canHaveChildren()) {
+      throw new Error('selected node-type cannot have children')
+    }
+
+    (node as PlatformNode).setChildren(
+      [
+        ...(node as PlatformNode).getChildren(),
+        new PlatformNode(platform)
+      ]
+    )
+  }
+
+  addDevice (device: Device) {
+    const node: Node | null = this.getSelectedNode()
+    if (!node) {
+      this.configurationItems.push(
+        new DeviceNode(device)
+      )
+      return
+    }
+
+    if (!node.canHaveChildren()) {
+      throw new Error('selected node-type cannot have children')
+    }
+
+    (node as PlatformNode).setChildren(
+      [
+        ...(node as PlatformNode).getChildren(),
+        new DeviceNode(device)
+      ]
+    )
+  }
+
+  removeSelected () {
+    const node: Node | null = this.getSelectedNode()
+    if (!node) {
+      return
+    }
+    const parentNode = this.getParentNode(node)
+    const removeNodeRecursive = (node: Node, nodes: Node[]): boolean => {
+      for (let i: number = 0; i < nodes.length; i++) {
+        const aNode: Node = nodes[i]
+        if (aNode === node) {
+          nodes.splice(i, 1)
+          return true
+        }
+        if (!aNode.canHaveChildren()) {
+          continue
+        }
+        const removed = removeNodeRecursive(node, (aNode as PlatformNode).getChildren())
+        if (!removed) {
+          continue
+        }
+        return true
+      }
+      return false
+    }
+    removeNodeRecursive(node, this.configurationItems)
+    this.setSelectedNode(parentNode)
+  }
+
+  @Watch('selectedConfigurationItemId')
+  onItemSelect () {
+    const node: Node | null = this.getSelectedNode()
+    if (!node) {
       this.selectedPlatform = null
+      this.selectedDevice = null
+      return
+    }
+    switch (true) {
+      case node instanceof PlatformNode:
+        this.selectedPlatform = node.unpack() as Platform
+        this.selectedDevice = null
+        break
+      case node instanceof DeviceNode:
+        this.selectedDevice = node.unpack() as Device
+        this.selectedPlatform = null
+        break
     }
   }
 }
