@@ -215,7 +215,7 @@ export default class DevicePropertyForm extends Vue {
   }
 
   get valueCompartmentName (): string {
-    const compartmentIndex = this.compartments.findIndex(c => c.uri === this.value.compartmentName)
+    const compartmentIndex = this.compartments.findIndex(c => c.uri === this.value.compartmentUri)
     if (compartmentIndex > -1) {
       return this.compartments[compartmentIndex].name
     }
