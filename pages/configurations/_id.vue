@@ -141,9 +141,9 @@
                     <v-treeview
                       :active.sync="selectedNodeIds"
                       :items="tree"
-                      :activatable="true"
-                      :hoverable="true"
-                      :rounded="true"
+                      activatable
+                      hoverable
+                      rounded
                       open-all
                     >
                       <template v-slot:prepend="{ item }">
@@ -157,48 +157,52 @@
                     </v-treeview>
                   </v-col>
                   <v-col cols="6" md="6">
-                    <v-breadcrumbs :items="breadcrumbs" divider=">" />
-                    <v-row v-if="selectedPlatform">
-                      <v-col cols="12" md="9">
-                        <template v-if="selectedPlatform.description">
-                          {{ selectedPlatform.description }}
-                        </template>
-                        <template v-else>
-                          The selected platform has no description.
-                        </template>
-                      </v-col>
-                      <v-col cols="12" md="3">
+                    <v-card v-if="selectedPlatform || selectedDevice">
+                      <v-breadcrumbs :items="breadcrumbs" divider=">" />
+                      <v-card-text>
+                        <v-row v-if="selectedPlatform">
+                          <v-col cols="12" md="9">
+                            <template v-if="selectedPlatform.description">
+                              {{ selectedPlatform.description }}
+                            </template>
+                            <template v-else>
+                              The selected platform has no description.
+                            </template>
+                          </v-col>
+                        </v-row>
+                        <v-row v-else-if="selectedDevice">
+                          <v-col cols="12" md="9">
+                            <template v-if="selectedDevice.description">
+                              {{ selectedDevice.description }}
+                            </template>
+                            <template v-else>
+                              The selected device has no description.
+                            </template>
+                          </v-col>
+                        </v-row>
+                      </v-card-text>
+                      <v-card-actions>
                         <v-btn
-                          color="secondary"
+                          v-if="selectedPlatform || selectedDevice"
+                          color="red"
+                          text
                           @click="removeSelectedNode"
                         >
                           remove
                         </v-btn>
-                      </v-col>
-                    </v-row>
-                    <v-row v-if="selectedDevice">
-                      <v-col cols="12" md="9">
-                        <template v-if="selectedDevice.description">
-                          {{ selectedDevice.description }}
-                        </template>
-                        <template v-else>
-                          The selected device has no description.
-                        </template>
-                      </v-col>
-                      <v-col cols="12" md="3">
-                        <v-btn
-                          color="secondary"
-                          @click="removeSelectedNode"
-                        >
-                          remove
-                        </v-btn>
-                      </v-col>
-                    </v-row>
-                    <v-row v-else>
-                      Add platforms and / or devices on the left side to the configuration.<br>
-                      Select a platform to add platforms / or devices to the selected platform.
-                    </v-row>
+                      </v-card-actions>
+                    </v-card>
+                    <v-alert 
+                      type="info"
+                      outlined
+                      v-else
+                    >
+                      Select a platform on the left side to add devices or platforms to it.<br>
+                      To add a device or platform to the root of this configuration, deselect any previously selected device or platform.
+                    </v-alert>
                     <template v-if="!selectedDevice">
+                      <v-subheader v-if="selectedPlatform">Add platforms and devices to the selected platform:</v-subheader>
+                      <v-subheader v-else>Add platforms and devices to the configuration:</v-subheader>
                       <v-row>
                         <v-col cols="12" md="3">
                           <v-select
@@ -501,16 +505,11 @@ export default class ConfigurationsIdPage extends Vue {
   }
 
   get breadcrumbs (): Object[] {
-    const root = { text: 'Configuration' }
     if (!this.selectedNodeIds.length) {
-      return [root, { text: 'No platform selected' }]
+      return []
     }
     const nodeId = this.selectedNodeIds[0]
-    const nodeNames = this.getNodePath(nodeId).map((t: string): Object => { return { text: t } })
-    return [
-      root,
-      ...nodeNames
-    ]
+    return this.getNodePath(nodeId).map((t: string): Object => { return { text: t } })
   }
 
   /**
