@@ -303,7 +303,26 @@
 
           <!-- Setup -->
           <v-tab-item :eager="true">
-            <v-subheader>Platforms</v-subheader>
+            <v-subheader>
+              Platforms
+              <v-spacer />
+              <v-btn
+                text
+                small
+                v-if="!platformPanelsHidden"
+                @click="platformPanelsHidden = true"
+              >
+                hide all
+              </v-btn>
+              <v-btn
+                text
+                small
+                v-if="platformPanelsHidden"
+                @click="platformPanelsHidden = false"
+              >
+                expand all
+              </v-btn>
+            </v-subheader>
             <v-expansion-panels
               :value="openedPlatformPanels"
               multiple
@@ -343,7 +362,26 @@
                 </v-expansion-panel-content>
               </v-expansion-panel>
             </v-expansion-panels>
-            <v-subheader>Devices</v-subheader>
+            <v-subheader>
+              Devices
+              <v-spacer />
+              <v-btn
+                text
+                small
+                v-if="!devicePanelsHidden"
+                @click="devicePanelsHidden = true"
+              >
+                hide all
+              </v-btn>
+              <v-btn
+                text
+                small
+                v-if="devicePanelsHidden"
+                @click="devicePanelsHidden = false"
+              >
+                expand all
+              </v-btn>
+            </v-subheader>
             <v-expansion-panels
               :value="openedDevicePanels"
               multiple
@@ -546,6 +584,9 @@ export default class ConfigurationsIdPage extends Vue {
 
   private platformPanels: number[] = []
   private devicePanels: number[] = []
+
+  private platformPanelsHidden: boolean = false
+  private devicePanelsHidden: boolean = false
 
   created () {
     this.$nuxt.$emit('app-bar-content', AppBarEditModeContent)
@@ -928,11 +969,11 @@ export default class ConfigurationsIdPage extends Vue {
   }
 
   get openedPlatformPanels (): number[] {
-    return this.getAllPlatforms().map((p, i) => i)
+    return !this.platformPanelsHidden ? this.getAllPlatforms().map((p, i) => i) : []
   }
 
   get openedDevicePanels (): number[] {
-    return this.getAllDevices().map((d, i) => i)
+    return !this.devicePanelsHidden ? this.getAllDevices().map((d, i) => i) : []
   }
 
   getPropertyNames (device: Device): string[] {
