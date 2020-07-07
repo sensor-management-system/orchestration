@@ -7,6 +7,7 @@
         <v-tabs-items
           v-model="activeTab"
         >
+          <!-- Configuration -->
           <v-tab-item :eager="true">
             <v-card
               flat
@@ -118,19 +119,8 @@
               </v-card-text>
             </v-card>
           </v-tab-item>
-          <v-tab-item :eager="true">
-            <v-card
-              flat
-            >
-              <v-card-text>
-                <v-row>
-                  <v-col cols="3">
-                    <ContactSelect v-model="contacts" :readonly="false" />
-                  </v-col>
-                </v-row>
-              </v-card-text>
-            </v-card>
-          </v-tab-item>
+
+          <!-- Platforms and Devices -->
           <v-tab-item :eager="true">
             <v-card
               flat
@@ -310,6 +300,131 @@
               </v-card-text>
             </v-card>
           </v-tab-item>
+
+          <!-- Setup -->
+          <v-tab-item :eager="true">
+            <v-subheader>Platforms</v-subheader>
+            <v-expansion-panels
+              :value="openedPlatformPanels"
+              multiple
+            >
+              <v-expansion-panel
+                v-for="(item, index) in getAllPlatforms()"
+                :key="item.id"
+              >
+                <v-expansion-panel-header>{{item.shortName}}</v-expansion-panel-header>
+                <v-expansion-panel-content>
+                  <v-row>
+                    <v-col
+                      cols="12"
+                      md="2"
+                    >
+                      <v-text-field
+                        label="offset (x)"
+                      />
+                    </v-col>
+                    <v-col
+                      cols="12"
+                      md="2"
+                    >
+                      <v-text-field
+                        label="offset (y)"
+                      />
+                    </v-col>
+                    <v-col
+                      cols="12"
+                      md="2"
+                    >
+                      <v-text-field
+                        label="offset (z)"
+                      />
+                    </v-col>
+                  </v-row>
+                </v-expansion-panel-content>
+              </v-expansion-panel>
+            </v-expansion-panels>
+            <v-subheader>Devices</v-subheader>
+            <v-expansion-panels
+              :value="openedDevicePanels"
+              multiple
+            >
+              <v-expansion-panel
+                v-for="(item, index) in getAllDevices()"
+                :key="item.id"
+              >
+                <v-expansion-panel-header>{{item.shortName}}</v-expansion-panel-header>
+                <v-expansion-panel-content>
+                  <v-row>
+                    <v-col
+                      cols="12"
+                      md="2"
+                    >
+                      <v-select
+                        label="property"
+                        :items="getPropertyNames(item)"
+                      />
+                    </v-col>
+                    <v-col
+                      cols="12"
+                      md="2"
+                    >
+                      <v-text-field
+                        label="offset (x)"
+                      />
+                    </v-col>
+                    <v-col
+                      cols="12"
+                      md="2"
+                    >
+                      <v-text-field
+                        label="offset (y)"
+                      />
+                    </v-col>
+                    <v-col
+                      cols="12"
+                      md="2"
+                    >
+                      <v-text-field
+                        label="offset (z)"
+                      />
+                    </v-col>
+                    <v-col
+                      cols="12"
+                      md="2"
+                    >
+                      <v-text-field
+                        label="calibration date"
+                      />
+                    </v-col>
+                    <v-col
+                      cols="12"
+                      md="2"
+                    >
+                      <v-btn
+                      >
+                        add
+                      </v-btn>
+                    </v-col>
+                  </v-row>
+                </v-expansion-panel-content>
+              </v-expansion-panel>
+            </v-expansion-panels>
+          </v-tab-item>
+
+          <!-- Contact -->
+          <v-tab-item :eager="true">
+            <v-card
+              flat
+            >
+              <v-card-text>
+                <v-row>
+                  <v-col cols="3">
+                    <ContactSelect v-model="contacts" :readonly="false" />
+                  </v-col>
+                </v-row>
+              </v-card-text>
+            </v-card>
+          </v-tab-item>
         </v-tabs-items>
         <v-btn
           v-if="!isInEditMode"
@@ -377,8 +492,9 @@ export class AppBarTabsExtensionExtended extends AppBarTabsExtension {
   get tabs (): String[] {
     return [
       'Configuration',
-      'Contacts',
-      'Platforms and Devices'
+      'Platforms and Devices',
+      'Setup',
+      'Contacts'
     ]
   }
 }
@@ -427,6 +543,9 @@ export default class ConfigurationsIdPage extends Vue {
 
   private platformItem: string = ''
   private deviceItem: string = ''
+
+  private platformPanels: number[] = []
+  private devicePanels: number[] = []
 
   created () {
     this.$nuxt.$emit('app-bar-content', AppBarEditModeContent)
@@ -750,6 +869,40 @@ export default class ConfigurationsIdPage extends Vue {
     this.setSelectedNode(parentNode)
   }
 
+  getAllPlatforms (): Platform[] {
+    const getPlatformNodesRecursive = (nodes: Node[], platforms: PlatformNode[]) => {
+      for (const node of nodes) {
+        if (node instanceof PlatformNode) {
+          platforms.push(node)
+        }
+        if (!node.canHaveChildren()) {
+          continue
+        }
+        getPlatformNodesRecursive((node as PlatformNode).getChildren(), platforms)
+      }
+    }
+    const platformNodes: PlatformNode[] = []
+    getPlatformNodesRecursive(this.tree, platformNodes)
+    return platformNodes.map(n => n.unpack())
+  }
+
+  getAllDevices (): Device[] {
+    const getDeviceNodesRecursive = (nodes: Node[], devices: DeviceNode[]) => {
+      for (const node of nodes) {
+        if (node instanceof DeviceNode) {
+          devices.push(node)
+        }
+        if (!node.canHaveChildren()) {
+          continue
+        }
+        getDeviceNodesRecursive((node as PlatformNode).getChildren(), devices)
+      }
+    }
+    const deviceNodes: DeviceNode[] = []
+    getDeviceNodesRecursive(this.tree, deviceNodes)
+    return deviceNodes.map(n => n.unpack())
+  }
+
   /**
    * searches for platforms or devices depending on the searchType
    *
@@ -772,6 +925,18 @@ export default class ConfigurationsIdPage extends Vue {
       default:
         throw new TypeError('search function not defined for unknown value')
     }
+  }
+
+  get openedPlatformPanels (): number[] {
+    return this.getAllPlatforms().map((p, i) => i)
+  }
+
+  get openedDevicePanels (): number[] {
+    return this.getAllDevices().map((d, i) => i)
+  }
+
+  getPropertyNames (device: Device): string[] {
+    return device.properties.map(p => p.propertyName)
   }
 
   @Watch('selectedNodeIds')
