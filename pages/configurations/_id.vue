@@ -192,17 +192,21 @@
                         </v-btn>
                       </v-card-actions>
                     </v-card>
-                    <v-alert 
+                    <v-alert
+                      v-else
                       type="info"
                       outlined
-                      v-else
                     >
                       Select a platform on the left side to add devices or platforms to it.<br>
                       To add a device or platform to the root of this configuration, deselect any previously selected device or platform.
                     </v-alert>
                     <template v-if="!selectedDevice">
-                      <v-subheader v-if="selectedPlatform">Add platforms and devices to the selected platform:</v-subheader>
-                      <v-subheader v-else>Add platforms and devices to the configuration:</v-subheader>
+                      <v-subheader v-if="selectedPlatform">
+                        Add platforms and devices to the selected platform:
+                      </v-subheader>
+                      <v-subheader v-else>
+                        Add platforms and devices to the configuration:
+                      </v-subheader>
                       <v-row>
                         <v-col cols="12" md="3">
                           <v-select
