@@ -307,17 +307,17 @@
               Platforms
               <v-spacer />
               <v-btn
+                v-if="!platformPanelsHidden"
                 text
                 small
-                v-if="!platformPanelsHidden"
                 @click="platformPanelsHidden = true"
               >
                 hide all
               </v-btn>
               <v-btn
+                v-if="platformPanelsHidden"
                 text
                 small
-                v-if="platformPanelsHidden"
                 @click="platformPanelsHidden = false"
               >
                 expand all
@@ -328,10 +328,10 @@
               multiple
             >
               <v-expansion-panel
-                v-for="(item, index) in getAllPlatforms()"
+                v-for="(item) in getAllPlatforms()"
                 :key="item.id"
               >
-                <v-expansion-panel-header>{{item.shortName}}</v-expansion-panel-header>
+                <v-expansion-panel-header>{{ item.shortName }}</v-expansion-panel-header>
                 <v-expansion-panel-content>
                   <v-row>
                     <v-col
@@ -366,17 +366,17 @@
               Devices
               <v-spacer />
               <v-btn
+                v-if="!devicePanelsHidden"
                 text
                 small
-                v-if="!devicePanelsHidden"
                 @click="devicePanelsHidden = true"
               >
                 hide all
               </v-btn>
               <v-btn
+                v-if="devicePanelsHidden"
                 text
                 small
-                v-if="devicePanelsHidden"
                 @click="devicePanelsHidden = false"
               >
                 expand all
@@ -387,10 +387,10 @@
               multiple
             >
               <v-expansion-panel
-                v-for="(item, index) in getAllDevices()"
+                v-for="(item) in getAllDevices()"
                 :key="item.id"
               >
-                <v-expansion-panel-header>{{item.shortName}}</v-expansion-panel-header>
+                <v-expansion-panel-header>{{ item.shortName }}</v-expansion-panel-header>
                 <v-expansion-panel-content>
                   <v-row>
                     <v-col
@@ -438,8 +438,7 @@
                       cols="12"
                       md="2"
                     >
-                      <v-btn
-                      >
+                      <v-btn>
                         add
                       </v-btn>
                     </v-col>
@@ -969,11 +968,11 @@ export default class ConfigurationsIdPage extends Vue {
   }
 
   get openedPlatformPanels (): number[] {
-    return !this.platformPanelsHidden ? this.getAllPlatforms().map((p, i) => i) : []
+    return !this.platformPanelsHidden ? this.getAllPlatforms().map((_, i) => i) : []
   }
 
   get openedDevicePanels (): number[] {
-    return !this.devicePanelsHidden ? this.getAllDevices().map((d, i) => i) : []
+    return !this.devicePanelsHidden ? this.getAllDevices().map((_, i) => i) : []
   }
 
   getPropertyNames (device: Device): string[] {
