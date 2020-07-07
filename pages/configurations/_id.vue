@@ -139,15 +139,15 @@
                 <v-row>
                   <v-col cols="12" md="6">
                     <v-treeview
-                      :active.sync="selectedConfigurationItemId"
-                      :items="configurationItems"
+                      :active.sync="selectedNodeIds"
+                      :items="tree"
                       :activatable="true"
                       :hoverable="true"
                       :rounded="true"
                       open-all
                     >
                       <template v-slot:prepend="{ item }">
-                        <v-icon v-if="isPlatform(item)">
+                        <v-icon v-if="nodeIsPlatform(item)">
                           mdi-rocket-outline
                         </v-icon>
                         <v-icon v-else>
@@ -170,7 +170,7 @@
                       <v-col cols="12" md="3">
                         <v-btn
                           color="secondary"
-                          @click="removeSelected"
+                          @click="removeSelectedNode"
                         >
                           remove
                         </v-btn>
@@ -188,7 +188,7 @@
                       <v-col cols="12" md="3">
                         <v-btn
                           color="secondary"
-                          @click="removeSelected"
+                          @click="removeSelectedNode"
                         >
                           remove
                         </v-btn>
@@ -234,7 +234,7 @@
                               >
                                 <v-list-item
                                   :key="item.shortName"
-                                  :disabled="isUsed(item.id) ? true : false"
+                                  :disabled="isNodeInTree(item.id) ? true : false"
                                 >
                                   <v-list-item-content>
                                     <v-list-item-title v-text="item.shortName" />
@@ -243,8 +243,8 @@
                                   </v-list-item-content>
                                   <v-list-item-action>
                                     <v-btn
-                                      :disabled="isUsed(item.id) ? true : false"
-                                      @click="addPlatform(item)"
+                                      :disabled="isNodeInTree(item.id) ? true : false"
+                                      @click="addPlatformNode(item)"
                                     >
                                       add
                                     </v-btn>
@@ -271,7 +271,7 @@
                               >
                                 <v-list-item
                                   :key="item.shortName"
-                                  :disabled="isUsed(item.id) ? true : false"
+                                  :disabled="isNodeInTree(item.id) ? true : false"
                                 >
                                   <v-list-item-content>
                                     <v-list-item-title v-text="item.shortName" />
@@ -280,8 +280,8 @@
                                   </v-list-item-content>
                                   <v-list-item-action>
                                     <v-btn
-                                      :disabled="isUsed(item.id) ? true : false"
-                                      @click="addDevice(item)"
+                                      :disabled="isNodeInTree(item.id) ? true : false"
+                                      @click="addDeviceNode(item)"
                                     >
                                       add
                                     </v-btn>
@@ -398,7 +398,7 @@ export default class ConfigurationsIdPage extends Vue {
 
   private contacts: Contact[] = []
 
-  private selectedConfigurationItemId: number[] = []
+  private selectedNodeIds: number[] = []
   private selectedPlatform: Platform | null = null
   private selectedDevice: Device | null = null
 
@@ -415,7 +415,7 @@ export default class ConfigurationsIdPage extends Vue {
   private platformsResult: Platform[] = [] as Platform[]
   private devicesResult: Device[] = [] as Device[]
 
-  private configurationItems: Node[] = [] as Node[]
+  private tree: Node[] = [] as Node[]
 
   private platformItem: string = ''
   private deviceItem: string = ''
@@ -435,7 +435,7 @@ export default class ConfigurationsIdPage extends Vue {
       this.activeTab = tab
     })
 
-    this.configurationItems = this.getDemoConfigurationItems()
+    this.tree = this.getDemoTree()
   }
 
   mounted () {
@@ -490,7 +490,308 @@ export default class ConfigurationsIdPage extends Vue {
     ]
   }
 
-  getDemoConfigurationItems (): Array<Node> {
+  /**
+   * returns whether a node is a PlatformNode or not
+   *
+   * @param {Node} node - the node to check for
+   * @return {boolean} true if the node is a PlatformNode
+   */
+  nodeIsPlatform (node: Node): boolean {
+    return node instanceof PlatformNode
+  }
+
+  get breadcrumbs (): Object[] {
+    const root = { text: 'Configuration' }
+    if (!this.selectedNodeIds.length) {
+      return [root, { text: 'No platform selected' }]
+    }
+    const nodeId = this.selectedNodeIds[0]
+    const nodeNames = this.getNodePath(nodeId).map((t: string): Object => { return { text: t } })
+    return [
+      root,
+      ...nodeNames
+    ]
+  }
+
+  /**
+   * returns the path in the tree to the node
+   *
+   * @param {number} nodeId - the node to get the path for
+   * @return {string[]} an array of node names
+   */
+  getNodePath (nodeId: number): string[] {
+    const getNodePathRecursive = (nodeId: number, nodes: Node[], path: string[]): boolean => {
+      for (const node of nodes) {
+        if (node.id === nodeId) {
+          path.push(node.name)
+          return true
+        }
+        if (!node.canHaveChildren()) {
+          continue
+        }
+        if (getNodePathRecursive(nodeId, (node as PlatformNode).getChildren(), path)) {
+          path.unshift(node.name)
+          return true
+        }
+      }
+      return false
+    }
+
+    const paths: string[] = []
+    getNodePathRecursive(nodeId, this.tree, paths)
+    return paths
+  }
+
+  /**
+   * finds a node in the tree by its id
+   *
+   * @param {number} nodeId - the id of the node to search
+   * @return {Node|null} the found node, null if it was not found
+   */
+  getNodeById (nodeId: number): Node | null {
+    const getNodeByIdRecursive = (nodeId: number, nodes: Node[]): Node | null => {
+      for (const node of nodes) {
+        if (node.id === nodeId) {
+          return node
+        }
+        if (!node.canHaveChildren()) {
+          continue
+        }
+        const found = getNodeByIdRecursive(nodeId, (node as PlatformNode).getChildren())
+        if (!found) {
+          continue
+        }
+        return found
+      }
+      return null
+    }
+    return getNodeByIdRecursive(nodeId, this.tree)
+  }
+
+  /**
+   * returns the parent of a node in the tree
+   *
+   * @param {Node} node - the node to get the parent of
+   * @return {Node|null} the parent of the node, null if the node has not parent
+   */
+  getParentNode (node: Node): Node | null {
+    const getParentNodeRecursive = (node: Node, parentNode: Node | null, nodes: Node[]): Node | null => {
+      for (const aNode of nodes) {
+        if (node === aNode) {
+          return parentNode
+        }
+        if (!aNode.canHaveChildren()) {
+          continue
+        }
+        const found = getParentNodeRecursive(node, aNode, (aNode as PlatformNode).getChildren())
+        if (!found) {
+          continue
+        }
+        return found
+      }
+      return null
+    }
+    return getParentNodeRecursive(node, null, this.tree)
+  }
+
+  /**
+   * returns whether a node is in the tree or not
+   *
+   * @param {number} nodeId - the id of the node
+   * @return {boolean} wheter the node was found or not
+   */
+  isNodeInTree (nodeId: number): boolean {
+    return !!this.getNodeById(nodeId)
+  }
+
+  /**
+   * returns the selected node in the tree
+   *
+   * @return {Node|null} the selected node
+   */
+  getSelectedNode (): Node | null {
+    if (!this.selectedNodeIds.length) {
+      return null
+    }
+    return this.getNodeById(this.selectedNodeIds[0])
+  }
+
+  /**
+   * sets the selected node in the tree
+   *
+   * @param {Node|null} node - the node to select
+   */
+  setSelectedNode (node: Node | null) {
+    if (node) {
+      const id = node.unpack().id
+      if (id) {
+        this.selectedNodeIds = [id]
+      }
+    } else {
+      this.selectedNodeIds = []
+    }
+  }
+
+  get platforms (): Platform[] {
+    return this.platformsResult
+  }
+
+  set platforms (platforms: Platform[]) {
+    this.platformsResult = platforms
+    if (platforms.length) {
+      this.devicesResult = [] as Device[]
+    }
+  }
+
+  get devices (): Device[] {
+    return this.devicesResult
+  }
+
+  set devices (devices: Device[]) {
+    this.devicesResult = devices
+    if (devices.length) {
+      this.platformsResult = [] as Platform[]
+    }
+  }
+
+  /**
+   * adds a PlatformNode to the tree
+   *
+   * @param {Platform} platform - the node to add
+   */
+  addPlatformNode (platform: Platform) {
+    const node: Node | null = this.getSelectedNode()
+    if (!node) {
+      this.tree.push(
+        new PlatformNode(platform)
+      )
+      return
+    }
+
+    if (!node.canHaveChildren()) {
+      throw new Error('selected node-type cannot have children')
+    }
+
+    (node as PlatformNode).setChildren(
+      [
+        ...(node as PlatformNode).getChildren(),
+        new PlatformNode(platform)
+      ]
+    )
+  }
+
+  /**
+   * adds a DeviceNode to the tree
+   *
+   * @param {Device} device - the node to add
+   */
+  addDeviceNode (device: Device) {
+    const node: Node | null = this.getSelectedNode()
+    if (!node) {
+      this.tree.push(
+        new DeviceNode(device)
+      )
+      return
+    }
+
+    if (!node.canHaveChildren()) {
+      throw new Error('selected node-type cannot have children')
+    }
+
+    (node as PlatformNode).setChildren(
+      [
+        ...(node as PlatformNode).getChildren(),
+        new DeviceNode(device)
+      ]
+    )
+  }
+
+  /**
+   * removes a node from the tree
+   *
+   * @param {Node} node - the node to remove
+   * @return {boolean} whether the node was removed or not
+   */
+  removeNode (node: Node): boolean {
+    const removeNodeRecursive = (node: Node, nodes: Node[]): boolean => {
+      for (let i: number = 0; i < nodes.length; i++) {
+        const aNode: Node = nodes[i]
+        if (aNode === node) {
+          nodes.splice(i, 1)
+          return true
+        }
+        if (!aNode.canHaveChildren()) {
+          continue
+        }
+        const removed = removeNodeRecursive(node, (aNode as PlatformNode).getChildren())
+        if (!removed) {
+          continue
+        }
+        return true
+      }
+      return false
+    }
+    return removeNodeRecursive(node, this.tree)
+  }
+
+  /**
+   * removes the selected node
+   */
+  removeSelectedNode () {
+    const node: Node | null = this.getSelectedNode()
+    if (!node) {
+      return
+    }
+    const parentNode = this.getParentNode(node)
+    this.removeNode(node)
+    this.setSelectedNode(parentNode)
+  }
+
+  /**
+   * searches for platforms or devices depending on the searchType
+   *
+   * @async
+   */
+  async search () {
+    switch (this.searchOptions.searchType) {
+      case SearchType.Platform:
+        this.platforms = await SmsService.findPlatforms(
+          this.searchOptions.text,
+          [] as Manufacturer[]
+        )
+        break
+      case SearchType.Device:
+        this.devices = await SmsService.findDevices(
+          this.searchOptions.text,
+          [] as Manufacturer[]
+        )
+        break
+      default:
+        throw new TypeError('search function not defined for unknown value')
+    }
+  }
+
+  @Watch('selectedNodeIds')
+  onItemSelect () {
+    const node: Node | null = this.getSelectedNode()
+    if (!node) {
+      this.selectedPlatform = null
+      this.selectedDevice = null
+      return
+    }
+    switch (true) {
+      case node instanceof PlatformNode:
+        this.selectedPlatform = node.unpack() as Platform
+        this.selectedDevice = null
+        break
+      case node instanceof DeviceNode:
+        this.selectedDevice = node.unpack() as Device
+        this.selectedPlatform = null
+        break
+    }
+  }
+
+  getDemoTree (): Array<Node> {
     return [
       ((): PlatformNode => {
         const n = new PlatformNode(
@@ -557,239 +858,6 @@ export default class ConfigurationsIdPage extends Vue {
         })()
       )
     ]
-  }
-
-  isPlatform (node: Node): boolean {
-    return node instanceof PlatformNode
-  }
-
-  get breadcrumbs (): Object[] {
-    const root = { text: 'Configuration' }
-    if (!this.selectedConfigurationItemId.length) {
-      return [root, { text: 'No platform selected' }]
-    }
-    const nodeId = this.selectedConfigurationItemId[0]
-    const nodeNames = this.getNodePath(nodeId).map((t: string): Object => { return { text: t } })
-    return [
-      root,
-      ...nodeNames
-    ]
-  }
-
-  getNodePath (nodeId: number): string[] {
-    const getNodePathRecursive = (nodeId: number, nodes: Node[], path: string[]): boolean => {
-      for (const node of nodes) {
-        if (node.id === nodeId) {
-          path.push(node.name)
-          return true
-        }
-        if (!node.canHaveChildren()) {
-          continue
-        }
-        if (getNodePathRecursive(nodeId, (node as PlatformNode).getChildren(), path)) {
-          path.unshift(node.name)
-          return true
-        }
-      }
-      return false
-    }
-
-    const paths: string[] = []
-    getNodePathRecursive(nodeId, this.configurationItems, paths)
-    return paths
-  }
-
-  getNode (nodeId: number): Node | null {
-    const getNodeRecursive = (nodeId: number, nodes: Node[]): Node | null => {
-      for (const node of nodes) {
-        if (node.id === nodeId) {
-          return node
-        }
-        if (!node.canHaveChildren()) {
-          continue
-        }
-        const found = getNodeRecursive(nodeId, (node as PlatformNode).getChildren())
-        if (!found) {
-          continue
-        }
-        return found
-      }
-      return null
-    }
-    return getNodeRecursive(nodeId, this.configurationItems)
-  }
-
-  getParentNode (node: Node): Node | null {
-    const getParentNodeRecursive = (node: Node, parentNode: Node | null, nodes: Node[]): Node | null => {
-      for (const aNode of nodes) {
-        if (node === aNode) {
-          return parentNode
-        }
-        if (!aNode.canHaveChildren()) {
-          continue
-        }
-        const found = getParentNodeRecursive(node, aNode, (aNode as PlatformNode).getChildren())
-        if (!found) {
-          continue
-        }
-        return found
-      }
-      return null
-    }
-    return getParentNodeRecursive(node, null, this.configurationItems)
-  }
-
-  isUsed (nodeId: number): boolean {
-    return !!this.getNode(nodeId)
-  }
-
-  getSelectedNode (): Node | null {
-    if (!this.selectedConfigurationItemId.length) {
-      return null
-    }
-    return this.getNode(this.selectedConfigurationItemId[0])
-  }
-
-  setSelectedNode (node: Node | null) {
-    if (node) {
-      const id = node.unpack().id
-      if (id) {
-        this.selectedConfigurationItemId = [id]
-      }
-    } else {
-      this.selectedConfigurationItemId = []
-    }
-  }
-
-  get platforms (): Platform[] {
-    return this.platformsResult
-  }
-
-  set platforms (platforms: Platform[]) {
-    this.platformsResult = platforms
-    if (platforms.length) {
-      this.devicesResult = [] as Device[]
-    }
-  }
-
-  get devices (): Device[] {
-    return this.devicesResult
-  }
-
-  set devices (devices: Device[]) {
-    this.devicesResult = devices
-    if (devices.length) {
-      this.platformsResult = [] as Platform[]
-    }
-  }
-
-  async search () {
-    switch (this.searchOptions.searchType) {
-      case SearchType.Platform:
-        this.platforms = await SmsService.findPlatforms(
-          this.searchOptions.text,
-          [] as Manufacturer[]
-        )
-        break
-      case SearchType.Device:
-        this.devices = await SmsService.findDevices(
-          this.searchOptions.text,
-          [] as Manufacturer[]
-        )
-        break
-      default:
-        throw new TypeError('search function not defined for unknown value')
-    }
-  }
-
-  addPlatform (platform: Platform) {
-    const node: Node | null = this.getSelectedNode()
-    if (!node) {
-      this.configurationItems.push(
-        new PlatformNode(platform)
-      )
-      return
-    }
-
-    if (!node.canHaveChildren()) {
-      throw new Error('selected node-type cannot have children')
-    }
-
-    (node as PlatformNode).setChildren(
-      [
-        ...(node as PlatformNode).getChildren(),
-        new PlatformNode(platform)
-      ]
-    )
-  }
-
-  addDevice (device: Device) {
-    const node: Node | null = this.getSelectedNode()
-    if (!node) {
-      this.configurationItems.push(
-        new DeviceNode(device)
-      )
-      return
-    }
-
-    if (!node.canHaveChildren()) {
-      throw new Error('selected node-type cannot have children')
-    }
-
-    (node as PlatformNode).setChildren(
-      [
-        ...(node as PlatformNode).getChildren(),
-        new DeviceNode(device)
-      ]
-    )
-  }
-
-  removeSelected () {
-    const node: Node | null = this.getSelectedNode()
-    if (!node) {
-      return
-    }
-    const parentNode = this.getParentNode(node)
-    const removeNodeRecursive = (node: Node, nodes: Node[]): boolean => {
-      for (let i: number = 0; i < nodes.length; i++) {
-        const aNode: Node = nodes[i]
-        if (aNode === node) {
-          nodes.splice(i, 1)
-          return true
-        }
-        if (!aNode.canHaveChildren()) {
-          continue
-        }
-        const removed = removeNodeRecursive(node, (aNode as PlatformNode).getChildren())
-        if (!removed) {
-          continue
-        }
-        return true
-      }
-      return false
-    }
-    removeNodeRecursive(node, this.configurationItems)
-    this.setSelectedNode(parentNode)
-  }
-
-  @Watch('selectedConfigurationItemId')
-  onItemSelect () {
-    const node: Node | null = this.getSelectedNode()
-    if (!node) {
-      this.selectedPlatform = null
-      this.selectedDevice = null
-      return
-    }
-    switch (true) {
-      case node instanceof PlatformNode:
-        this.selectedPlatform = node.unpack() as Platform
-        this.selectedDevice = null
-        break
-      case node instanceof DeviceNode:
-        this.selectedDevice = node.unpack() as Device
-        this.selectedPlatform = null
-        break
-    }
   }
 }
 </script>
