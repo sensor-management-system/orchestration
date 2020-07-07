@@ -107,7 +107,7 @@
                     <v-col cols="12" md="6">
                       <div id="map-wrap" style="height: 300px">
                         <no-ssr>
-                          <l-map :zoom="10" :center="location">
+                          <l-map :zoom="10" :center="location" style="z-index:0">
                             <l-tile-layer url="http://{s}.tile.osm.org/{z}/{x}/{y}.png" />
                             <l-marker :lat-lng="location" />
                           </l-map>
