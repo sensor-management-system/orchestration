@@ -1,10 +1,11 @@
 import { IConfigurationsTreeNode } from '@/models/IConfigurationsTreeNode'
-import { DeviceNode } from '@/models/DeviceNode'
+import { ConfigurationsTree } from '@/models/ConfigurationsTree'
+import { ConfigurationsTreeNode } from '@/models/ConfigurationsTreeNode'
 import Platform from '@/models/Platform'
 
 export class PlatformNode implements IConfigurationsTreeNode<Platform> {
   private node: Platform
-  private children: Array<PlatformNode|DeviceNode> = []
+  private tree: ConfigurationsTree = new ConfigurationsTree()
 
   constructor (node: Platform) {
     this.node = node
@@ -30,11 +31,15 @@ export class PlatformNode implements IConfigurationsTreeNode<Platform> {
     return this.node
   }
 
-  setChildren (children: Array<PlatformNode|DeviceNode>) {
-    this.children = children
+  setTree (tree: ConfigurationsTree) {
+    this.tree = tree
   }
 
-  getChildren (): Array<PlatformNode|DeviceNode> {
-    return this.children
+  getTree (): ConfigurationsTree {
+    return this.tree
+  }
+
+  get children (): ConfigurationsTreeNode[] {
+    return this.tree.toArray()
   }
 }
