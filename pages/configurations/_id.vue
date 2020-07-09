@@ -525,7 +525,6 @@ interface ISearchOptions {
   text: string
 }
 
-
 @Component
 // @ts-ignore
 export class AppBarTabsExtensionExtended extends AppBarTabsExtension {
