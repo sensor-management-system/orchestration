@@ -1,6 +1,21 @@
+/**
+ * @file provides classes to configure platforms and devices in a tree
+ * @author <marc.hanisch@gfz-potsdam.de>
+ */
+
 import { ConfigurationsTreeNode } from './ConfigurationsTreeNode'
 import { PlatformNode } from './PlatformNode'
 
+/**
+ * a class to iterate over the direct children of a ConfigurationsTree
+ *
+ * @example
+ * // a ConfigurationsTree can used in a for .. of loop like so:
+ * const tree = new ConfigurationsTree()
+ * for (const node of tree) {
+ *   // do something with node
+ * }
+ */
 export class ConfigurationsTreeIterator implements Iterator<ConfigurationsTreeNode> {
   private tree: ConfigurationsTree
   private index: number = 0
@@ -24,9 +39,19 @@ export class ConfigurationsTreeIterator implements Iterator<ConfigurationsTreeNo
   }
 }
 
+/**
+ * a class to configure platforms and devices in a tree
+ */
 export class ConfigurationsTree implements Iterable<ConfigurationsTreeNode> {
   private tree: ConfigurationsTreeNode[] = [] as ConfigurationsTreeNode[]
 
+  /**
+   * creates a new instance from an Array of ConfigurationsTreeNodes
+   *
+   * @static
+   * @param {ConfigurationsTreeNode[]} nodes - the Array of nodes to create the instance from
+   * @return {ConfigurationsTree} a ConfigurationsTree instance
+   */
   static fromArray (nodes: ConfigurationsTreeNode[]): ConfigurationsTree {
     const result = new ConfigurationsTree()
     for (const node of nodes) {
@@ -35,6 +60,11 @@ export class ConfigurationsTree implements Iterable<ConfigurationsTreeNode> {
     return result
   }
 
+  /**
+   * returns an Array of ConfigurationsTreeNode
+   *
+   * @return {ConfigurationsTreeNode[]} an Array of ConfigurationsTreeNodes
+   */
   toArray (): ConfigurationsTreeNode[] {
     return this.tree
   }
@@ -47,10 +77,22 @@ export class ConfigurationsTree implements Iterable<ConfigurationsTreeNode> {
     return this.tree.length
   }
 
+  /**
+   * checks wether an index is valid or not
+   *
+   * @param {number} index - the index to check for
+   * @return {boolean} true when the index is valid, otherwise false
+   */
   isValidIndex (index: number): boolean {
     return index >= 0 && index < this.length
   }
 
+  /**
+   * returns a ConfigurationsTreeNode at the given index
+   *
+   * @param {number} index - index of the ConfigurationsTreeNode to return
+   * @return {ConfigurationsTreeNode} the ConfigurationsTreeNode at the given index
+   */
   at (index: number): ConfigurationsTreeNode {
     if (!this.isValidIndex(index)) {
       throw new RangeError('index out of range')
@@ -58,10 +100,22 @@ export class ConfigurationsTree implements Iterable<ConfigurationsTreeNode> {
     return this.tree[index]
   }
 
+  /**
+   * adds a ConfigurationsTreeNode to the tree
+   *
+   * @param {ConfigurationsTreeNode} node - the ConfigurationsTreeNode to add
+   * @return {number} the length of the tree after the node was added
+   */
   push (node: ConfigurationsTreeNode): number {
     return this.tree.push(node)
   }
 
+  /**
+   * removes a ConfigurationsTreeNode at the given index
+   *
+   * @param {number} index - the index of the ConfigurationsTreeNode to remove from
+   * @return {ConfigurationsTreeNode} the removed ConfigurationsTreeNode
+   */
   removeAt (index: number): ConfigurationsTreeNode {
     if (!this.isValidIndex(index)) {
       throw new RangeError('index out of range')
@@ -98,7 +152,7 @@ export class ConfigurationsTree implements Iterable<ConfigurationsTreeNode> {
   }
 
   /**
-   * returns the path in the tree to the node
+   * returns the path to the node in the tree
    *
    * @param {number} nodeId - the node to get the path for
    * @return {string[]} an array of node names

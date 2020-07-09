@@ -1,8 +1,16 @@
+/**
+ * @file provides a wrapper class for a platform in a tree
+ * @author <marc.hanisch@gfz-potsdam.de>
+ */
+
 import { IConfigurationsTreeNode } from '@/models/IConfigurationsTreeNode'
 import { ConfigurationsTree } from '@/models/ConfigurationsTree'
 import { ConfigurationsTreeNode } from '@/models/ConfigurationsTreeNode'
 import Platform from '@/models/Platform'
 
+/**
+ * a class that wraps a Platform instance for the usage in a ConfigurationsTree
+ */
 export class PlatformNode implements IConfigurationsTreeNode<Platform> {
   private node: Platform
   private tree: ConfigurationsTree = new ConfigurationsTree()
