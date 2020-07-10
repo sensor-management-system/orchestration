@@ -2,16 +2,19 @@
   <v-row>
     <v-col cols="12" md="3">
       <v-text-field
-        label="key"
+        label="Key"
         :value="value.key"
         :readonly="readonly"
         :disabled="readonly"
+        required
+        class="required"
+        :rules="[rules.required]"
         @input="update('key', $event)"
       />
     </v-col>
     <v-col cols="12" md="3">
       <v-text-field
-        label="value"
+        label="Value"
         :value="value.value"
         :readonly="readonly"
         :disabled="readonly"
@@ -29,8 +32,9 @@
  * @file provides a component for a custom field
  * @author <marc.hanisch@gfz-potsdam.de>
  */
-import { Vue, Component, Prop } from 'nuxt-property-decorator'
+import { Component, Prop, mixins } from 'nuxt-property-decorator'
 import { CustomTextField } from '../models/CustomTextField'
+import { Rules } from '@/mixins/Rules'
 
 /**
  * A class component for a custom field
@@ -38,21 +42,21 @@ import { CustomTextField } from '../models/CustomTextField'
  */
 @Component
 // @ts-ignore
-export default class CustomFieldForm extends Vue {
+export default class CustomFieldForm extends mixins(Rules) {
   @Prop({
     default: () => new CustomTextField(),
     required: true,
     type: CustomTextField
   })
   // @ts-ignore
-  value!: CustomTextField
+  readonly value!: CustomTextField
 
   @Prop({
     default: false,
     type: Boolean
   })
   // @ts-ignore
-  readonly: boolean
+  readonly readonly: boolean
 
   /**
    * update the internal model at a given key

@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <v-form ref="propertiesForm">
     <v-btn
       v-if="!readonly"
       small
@@ -57,104 +57,104 @@
           </v-row>
         </v-expansion-panel-header>
         <v-expansion-panel-content>
-          <SensorPropertyForm v-model="value[index]" :readonly="readonly" />
+          <DevicePropertyForm v-model="value[index]" :readonly="readonly" />
         </v-expansion-panel-content>
       </v-expansion-panel>
     </v-expansion-panels>
-  </div>
+  </v-form>
 </template>
 
 <script lang="ts">
 /**
- * @file provides a component for collections of SensorPropertyForms
+ * @file provides a component for collections of DevicePropertyForms
  * @author <marc.hanisch@gfz-potsdam.de>
  */
 import { Vue, Component, Prop } from 'nuxt-property-decorator'
-import { SensorProperty } from '../models/SensorProperty'
+import { DeviceProperty } from '../models/DeviceProperty'
 
 // @ts-ignore
-import SensorPropertyForm from './SensorPropertyForm.vue'
+import DevicePropertyForm from './DevicePropertyForm.vue'
 
 /**
- * A class component that lists SensorPropertyForms as ExpansionPanels
+ * A class component that lists DevicePropertyForms as ExpansionPanels
  * @extends Vue
  */
 @Component({
-  components: { SensorPropertyForm }
+  components: { DevicePropertyForm }
 })
 // @ts-ignore
-export default class SensorPropertyExpansionPanels extends Vue {
+export default class DevicePropertyExpansionPanels extends Vue {
   @Prop({
-    default: () => [] as SensorProperty[],
+    default: () => [] as DeviceProperty[],
     required: true,
     type: Array
   })
   // @ts-ignore
-  value!: SensorProperty[]
+  readonly value!: DeviceProperty[]
 
   @Prop({
     default: false,
     type: Boolean
   })
   // @ts-ignore
-  readonly: boolean
+  readonly readonly: boolean
 
   /**
-   * adds a new SensorProperty instance
+   * adds a new DeviceProperty instance
    *
-   * @fires SensorPropertyExpansionPanels#input
+   * @fires DevicePropertyExpansionPanels#input
    */
   addProperty () {
     /**
      * Update event
-     * @event SensorPropertyExpansionPanels#input
-     * @type SensorProperty[]
+     * @event DevicePropertyExpansionPanels#input
+     * @type DeviceProperty[]
      */
     this.$emit('input', [
       ...this.value,
-      new SensorProperty()
-    ] as SensorProperty[])
+      new DeviceProperty()
+    ] as DeviceProperty[])
   }
 
   /**
-   * removes a SensorProperty instance
+   * removes a DeviceProperty instance
    *
-   * @param {SensorProperty} index - the index of the property to remove
-   * @fires SensorPropertyExpansionPanels#input
+   * @param {DeviceProperty} index - the index of the property to remove
+   * @fires DevicePropertyExpansionPanels#input
    */
   removeProperty (index: number) {
     if (this.value[index]) {
-      const properties = [...this.value] as SensorProperty[]
+      const properties = [...this.value] as DeviceProperty[]
       properties.splice(index, 1)
       /**
       * Update event
-      * @event SensorPropertyExpansionPanels#input
-      * @type SensorProperty[]
+      * @event DevicePropertyExpansionPanels#input
+      * @type DeviceProperty[]
       */
       this.$emit('input', properties)
     }
   }
 
   /**
-   * copies a SensorProperty instance
+   * copies a DevicceProperty instance
    *
-   * @param {SensorProperty} index - the index of the property to copy
-   * @fires SensorPropertyExpansionPanels#input
+   * @param {DeviceProperty} index - the index of the property to copy
+   * @fires DevicePropertyExpansionPanels#input
    */
   copyProperty (index: number) {
     if (this.value[index]) {
-      const newProperty = SensorProperty.createFromObject(this.value[index])
+      const newProperty = DeviceProperty.createFromObject(this.value[index])
       newProperty.label += ' (copy)'
 
       /**
        * Update event
-       * @event SensorPropertyExpansionPanels#input
-       * @type SensorProperty[]
+       * @event DevicePropertyExpansionPanels#input
+       * @type DeviceProperty[]
        */
       this.$emit('input', [
         ...this.value,
         newProperty
-      ] as SensorProperty[])
+      ] as DeviceProperty[])
     }
   }
 }

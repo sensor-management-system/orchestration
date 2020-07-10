@@ -3,25 +3,25 @@
     <v-row>
       <v-col cols="12" md="3">
         <v-select
-          label="compartment"
-          :value="value.compartment"
+          label="Compartment"
+          :value="value.compartmentUri"
           :readonly="readonly"
           :disabled="readonly"
-          @input="update('compartment', $event)"
+          @input="update('compartmentUri', $event)"
         />
       </v-col>
       <v-col cols="12" md="3">
         <v-select
-          label="unit"
-          :value="value.unit"
+          label="Unit"
+          :value="value.unitUri"
           :readonly="readonly"
           :disabled="readonly"
-          @input="update('unit', $event)"
+          @input="update('unitUri', $event)"
         />
       </v-col>
       <v-col cols="12" md="3">
         <v-text-field
-          label="accuracy"
+          label="Accuracy"
           :value="value.accuracy"
           :readonly="readonly"
           :disabled="readonly"
@@ -32,16 +32,16 @@
     <v-row>
       <v-col cols="12" md="3">
         <v-select
-          label="sampling media"
-          :value="value.samplingMedia"
+          label="Sampling media"
+          :value="value.samplingMediaUri"
           :readonly="readonly"
           :disabled="readonly"
-          @input="update('samplingMedia', $event)"
+          @input="update('samplingMediaUri', $event)"
         />
       </v-col>
       <v-col cols="12" md="1">
         <v-text-field
-          label="measuring range min"
+          label="Measuring range min"
           :value="value.measuringRange.min"
           :readonly="readonly"
           :disabled="readonly"
@@ -50,7 +50,7 @@
       </v-col>
       <v-col cols="12" md="1">
         <v-text-field
-          label="measuring range max"
+          label="Measuring range max"
           :value="value.measuringRange.max"
           :readonly="readonly"
           :disabled="readonly"
@@ -59,7 +59,7 @@
       </v-col>
       <v-col cols="12" md="3" offset="1">
         <v-text-field
-          label="label"
+          label="Label"
           :value="value.label"
           :readonly="readonly"
           :disabled="readonly"
@@ -70,16 +70,16 @@
     <v-row>
       <v-col cols="12" md="3">
         <v-select
-          label="variable"
-          :value="value.variable"
+          label="Property"
+          :value="value.propertyUri"
           :readonly="readonly"
           :disabled="readonly"
-          @input="update('variable', $event)"
+          @input="update('propertyUri', $event)"
         />
       </v-col>
       <v-col cols="12" md="3">
         <v-text-field
-          label="failure value"
+          label="Failure value"
           :value="value.failureValue"
           :readonly="readonly"
           :disabled="readonly"
@@ -92,49 +92,49 @@
 
 <script lang="ts">
 /**
- * @file provides a component for a sensor property
+ * @file provides a component for a device property
  * @author <marc.hanisch@gfz-potsdam.de>
  */
 import { Vue, Component, Prop } from 'nuxt-property-decorator'
-import { SensorProperty } from '../models/SensorProperty'
+import { DeviceProperty } from '../models/DeviceProperty'
 
 /**
- * A class component for a sensor property
+ * A class component for a device property
  * @extends Vue
  */
 @Component
 // @ts-ignore
-export default class SensorPropertyForm extends Vue {
+export default class DevicePropertyForm extends Vue {
   @Prop({
-    default: () => new SensorProperty(),
+    default: () => new DeviceProperty(),
     required: true,
-    type: SensorProperty
+    type: DeviceProperty
   })
   // @ts-ignore
-  value!: SensorProperty
+  readonly value!: DeviceProperty
 
   @Prop({
     default: false,
     type: Boolean
   })
   // @ts-ignore
-  readonly: boolean
+  readonly readonly: boolean
 
   /**
    * update the internal model at a given key
    *
    * @param {string} key - a path to the property to set
    * @param {string} value - the value to set
-   * @fires SensorPropertyForm#input
+   * @fires DevicePropertyForm#input
    */
   update (key: string, value: string) {
-    const newObj: SensorProperty = SensorProperty.createFromObject(this.value)
+    const newObj: DeviceProperty = DeviceProperty.createFromObject(this.value)
     newObj.setPath(key, value)
 
     /**
      * input event
-     * @event SensorPropertyForm#input
-     * @type SensorProperty
+     * @event DevicePropertyForm#input
+     * @type DeviceProperty
      */
     this.$emit('input', newObj)
   }

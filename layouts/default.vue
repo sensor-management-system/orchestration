@@ -19,12 +19,32 @@
         </v-list-item>
 
         <!-- Devices -->
-        <v-list-item to="/devices" exact nuxt>
+        <v-list-item to="/search/devices" exact nuxt>
           <v-list-item-action>
             <v-icon>mdi-network</v-icon>
           </v-list-item-action>
           <v-list-item-content>
             <v-list-item-title>Devices</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+
+        <!-- Platforms -->
+        <v-list-item to="/search/platforms" exact nuxt>
+          <v-list-item-action>
+            <v-icon>mdi-rocket</v-icon>
+          </v-list-item-action>
+          <v-list-item-content>
+            <v-list-item-title>Platforms</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+
+        <!-- Configurations -->
+        <v-list-item to="/search/configurations" exact nuxt>
+          <v-list-item-action>
+            <v-icon>mdi-file-cog</v-icon>
+          </v-list-item-action>
+          <v-list-item-content>
+            <v-list-item-title>Configurations</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
 
@@ -67,8 +87,15 @@
       app
     >
       <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
-      <v-toolbar-title v-text="title" />
-      <v-spacer />
+      <template v-if="appBarContent">
+        <Component :is="appBarContent" />
+      </template>
+      <template v-else>
+        <v-toolbar-title v-text="title" />
+      </template>
+      <template v-if="appBarExtension" v-slot:extension>
+        <Component :is="appBarExtension" />
+      </template>
     </v-app-bar>
     <v-content>
       <v-container>
@@ -92,8 +119,18 @@ export default {
       drawer: false,
       fixed: false,
       miniVariant: false,
-      title: 'Sensor System Management'
+      title: 'Sensor Management System',
+      appBarContent: null,
+      appBarExtension: null
     }
+  },
+  created () {
+    this.$nuxt.$on('app-bar-content', (component) => {
+      this.appBarContent = component
+    })
+    this.$nuxt.$on('app-bar-extension', (component) => {
+      this.appBarExtension = component
+    })
   }
 }
 </script>

@@ -1,63 +1,59 @@
 import Contact, { IContact } from './Contact'
-import { Attachment, IAttachment } from './Attachment'
+import { DeviceProperty } from './DeviceProperty'
+import { CustomTextField, ICustomTextField } from './CustomTextField'
 
+import { Attachment, IAttachment } from './Attachment'
 import IPathSetter from './IPathSetter'
 
-export interface IPlatform {
+export interface IDevice {
   id: number | null
-
-  platformTypeUri: string
-  platformTypeName: string
-
+  persistentIdentifier: string
   shortName: string
   longName: string
-  description: string
+
+  statusUri: string
+  statusName: string
 
   manufacturerUri: string
   manufacturerName: string
 
   model: string
-
-  statusUri: string
-  statusName: string
-
-  inventoryNumber: string
-  serialNumber: string
+  description: string
   website: string
-  persistentIdentifier: string
+  serialNumber: string
+  inventoryNumber: string
+  dualUse: boolean
 
   createdAt: Date | null
   modifiedAt: Date | null
-
   createdByUserId: number | null
   modifiedByUserId: number | null
 
   contacts: IContact[]
+  properties: DeviceProperty[]
+  customFields: ICustomTextField[]
   attachments: IAttachment[]
 }
 
-export default class Platform implements IPlatform, IPathSetter {
+export default class Device implements IDevice, IPathSetter {
   private _id: number | null = null
-
-  private _platformTypeUri: string = ''
-  private _platformTypeName: string = ''
-
+  private _persistentIdentifier: string = ''
   private _shortName: string = ''
   private _longName: string = ''
-  private _description: string = ''
-
-  private _manufacturerUri: string = ''
-  private _manufacturerName: string = ''
-
-  private _model: string = ''
 
   private _statusUri: string = ''
   private _statusName: string = ''
 
-  private _inventoryNumber: string = ''
-  private _serialNumber: string = ''
+  private _manufacturerUri: string = ''
+  private _manufacturerName: string = ''
+  private _model: string = ''
+
+  private _description: string = ''
   private _website: string = ''
-  private _persistentIdentifier: string = ''
+  private _serialNumber: string = ''
+  private _inventoryNumber: string = ''
+  private _dualUse: boolean = false
+
   private _createdAt: Date | null = null
   private _modifiedAt: Date | null = null
 
@@ -65,134 +61,122 @@ export default class Platform implements IPlatform, IPathSetter {
   private _modifiedByUserId: number | null = null
 
   private _contacts: Contact[] = []
+  private _properties: DeviceProperty[] = []
+  private _customFields: CustomTextField[] = []
   private _attachments: Attachment[] = []
+
+  // TODO: Events
 
   get id (): number | null {
     return this._id
   }
 
-  set id (newId: number | null) {
-    this._id = newId
-  }
-
-  get platformTypeUri (): string {
-    return this._platformTypeUri
-  }
-
-  set platformTypeUri (newPlatformTypeUri: string) {
-    this._platformTypeUri = newPlatformTypeUri
-  }
-
-  get platformTypeName (): string {
-    return this._platformTypeName
-  }
-
-  set platformTypeName (newPlatformTypeName: string) {
-    this._platformTypeName = newPlatformTypeName
-  }
-
-  get shortName (): string {
-    return this._shortName
-  }
-
-  set shortName (newShortName: string) {
-    this._shortName = newShortName
-  }
-
-  get longName (): string {
-    return this._longName
-  }
-
-  set longName (newLongName: string) {
-    this._longName = newLongName
-  }
-
-  get description (): string {
-    return this._description
-  }
-
-  set description (newDescription: string) {
-    this._description = newDescription
-  }
-
-  get manufacturerUri (): string {
-    return this._manufacturerUri
-  }
-
-  set manufacturerUri (newManufacturerUri: string) {
-    this._manufacturerUri = newManufacturerUri
-  }
-
-  get manufacturerName (): string {
-    return this._manufacturerName
-  }
-
-  set manufacturerName (newManufacturerName: string) {
-    this._manufacturerName = newManufacturerName
-  }
-
-  get model (): string {
-    return this._model
-  }
-
-  set model (newModel: string) {
-    this._model = newModel
-  }
-
-  get statusUri (): string {
-    return this._statusUri
-  }
-
-  set statusUri (newStatusUri: string) {
-    this._statusUri = newStatusUri
-  }
-
-  get statusName (): string {
-    return this._statusName
-  }
-
-  set statusName (newStatusName: string) {
-    this._statusName = newStatusName
-  }
-
-  get inventoryNumber (): string {
-    return this._inventoryNumber
-  }
-
-  set inventoryNumber (newInventoryNumber: string) {
-    this._inventoryNumber = newInventoryNumber
-  }
-
-  get serialNumber (): string {
-    return this._serialNumber
-  }
-
-  set serialNumber (newSerialNumber: string) {
-    this._serialNumber = newSerialNumber
-  }
-
-  get website (): string {
-    return this._website
-  }
-
-  set website (newWebsite: string) {
-    this._website = newWebsite
-  }
-
-  get contacts (): Contact[] {
-    return this._contacts
-  }
-
-  set contacts (newContacts: Contact[]) {
-    this._contacts = newContacts
+  set id (id: number | null) {
+    this._id = id
   }
 
   get persistentIdentifier (): string {
     return this._persistentIdentifier
   }
 
-  set persistentIdentifier (newPersistentIdentifier: string) {
-    this._persistentIdentifier = newPersistentIdentifier
+  set persistentIdentifier (persistentIdentifier: string) {
+    this._persistentIdentifier = persistentIdentifier
+  }
+
+  get shortName (): string {
+    return this._shortName
+  }
+
+  set shortName (shortName: string) {
+    this._shortName = shortName
+  }
+
+  get longName (): string {
+    return this._longName
+  }
+
+  set longName (longName: string) {
+    this._longName = longName
+  }
+
+  get statusUri (): string {
+    return this._statusUri
+  }
+
+  set statusUri (statusUri: string) {
+    this._statusUri = statusUri
+  }
+
+  get statusName (): string {
+    return this._statusName
+  }
+
+  set statusName (statusName: string) {
+    this._statusName = statusName
+  }
+
+  get manufacturerUri (): string {
+    return this._manufacturerUri
+  }
+
+  set manufacturerUri (manufacturerUri: string) {
+    this._manufacturerUri = manufacturerUri
+  }
+
+  get manufacturerName (): string {
+    return this._manufacturerName
+  }
+
+  set manufacturerName (manufacturerName: string) {
+    this._manufacturerName = manufacturerName
+  }
+
+  get model (): string {
+    return this._model
+  }
+
+  set model (model: string) {
+    this._model = model
+  }
+
+  get description (): string {
+    return this._description
+  }
+
+  set description (description: string) {
+    this._description = description
+  }
+
+  get website (): string {
+    return this._website
+  }
+
+  set website (website: string) {
+    this._website = website
+  }
+
+  get serialNumber (): string {
+    return this._serialNumber
+  }
+
+  set serialNumber (serialNumber: string) {
+    this._serialNumber = serialNumber
+  }
+
+  get inventoryNumber (): string {
+    return this._inventoryNumber
+  }
+
+  set inventoryNumber (inventoryNumber: string) {
+    this._inventoryNumber = inventoryNumber
+  }
+
+  get dualUse (): boolean {
+    return this._dualUse
+  }
+
+  set dualUse (dualUse: boolean) {
+    this._dualUse = dualUse
   }
 
   get createdAt (): Date | null {
@@ -227,6 +211,30 @@ export default class Platform implements IPlatform, IPathSetter {
     this._modifiedByUserId = newModifiedByUserId
   }
 
+  get contacts (): Contact[] {
+    return this._contacts
+  }
+
+  set contacts (contacts: Contact[]) {
+    this._contacts = contacts
+  }
+
+  get properties (): DeviceProperty[] {
+    return this._properties
+  }
+
+  set properties (properties: DeviceProperty[]) {
+    this._properties = properties
+  }
+
+  get customFields (): CustomTextField[] {
+    return this._customFields
+  }
+
+  set customFields (customFields: CustomTextField[]) {
+    this._customFields = customFields
+  }
+
   get attachments (): Attachment[] {
     return this._attachments
   }
@@ -247,11 +255,8 @@ export default class Platform implements IPlatform, IPathSetter {
           this.id = null
         }
         break
-      case 'platformTypeUri':
-        this.platformTypeUri = String(value)
-        break
-      case 'platformTypeName':
-        this.platformTypeName = String(value)
+      case 'persistentIdentifier':
+        this.persistentIdentifier = String(value)
         break
       case 'shortName':
         this.shortName = String(value)
@@ -259,8 +264,11 @@ export default class Platform implements IPlatform, IPathSetter {
       case 'longName':
         this.longName = String(value)
         break
-      case 'description':
-        this.description = String(value)
+      case 'statusUri':
+        this.statusUri = String(value)
+        break
+      case 'statusName':
+        this.statusName = String(value)
         break
       case 'manufacturerUri':
         this.manufacturerUri = String(value)
@@ -271,23 +279,20 @@ export default class Platform implements IPlatform, IPathSetter {
       case 'model':
         this.model = String(value)
         break
-      case 'statusUri':
-        this.statusUri = String(value)
-        break
-      case 'statusName':
-        this.statusName = String(value)
-        break
-      case 'inventoryNumber':
-        this.inventoryNumber = String(value)
-        break
-      case 'serialNumber':
-        this.serialNumber = String(value)
+      case 'description':
+        this.description = String(value)
         break
       case 'website':
         this.website = String(value)
         break
-      case 'persistentIdentifier':
-        this.persistentIdentifier = String(value)
+      case 'serialNumber':
+        this.serialNumber = String(value)
+        break
+      case 'inventoryNumber':
+        this.inventoryNumber = String(value)
+        break
+      case 'dualUse':
+        this.dualUse = Boolean(value)
         break
       case 'createdAt':
         if (value !== null) {
@@ -320,6 +325,12 @@ export default class Platform implements IPlatform, IPathSetter {
       case 'contacts':
         this.contacts = value.map(Contact.createFromObject)
         break
+      case 'properties':
+        this.properties = value.map(DeviceProperty.createFromObject)
+        break
+      case 'customFields':
+        this.customFields = value.map(CustomTextField.createFromObject)
+        break
       case 'attachments':
         this.attachments = value.map(Attachment.createFromObject)
         break
@@ -328,43 +339,35 @@ export default class Platform implements IPlatform, IPathSetter {
     }
   }
 
-  static createEmpty (): Platform {
-    return new Platform()
-  }
-
-  static createFromObject (someObject: IPlatform): Platform {
-    const newObject = new Platform()
+  static createFromObject (someObject: IDevice): Device {
+    const newObject = new Device()
 
     newObject.id = someObject.id
-
-    newObject.platformTypeUri = someObject.platformTypeUri
-    newObject.platformTypeName = someObject.platformTypeName
-
+    newObject.persistentIdentifier = someObject.persistentIdentifier
     newObject.shortName = someObject.shortName
     newObject.longName = someObject.longName
 
-    newObject.description = someObject.description
+    newObject.statusUri = someObject.statusUri
+    newObject.statusName = someObject.statusName
 
     newObject.manufacturerUri = someObject.manufacturerUri
     newObject.manufacturerName = someObject.manufacturerName
 
     newObject.model = someObject.model
-
-    newObject.statusUri = someObject.statusUri
-    newObject.statusName = someObject.statusName
-
-    newObject.inventoryNumber = someObject.inventoryNumber
-    newObject.serialNumber = someObject.serialNumber
+    newObject.description = someObject.description
     newObject.website = someObject.website
-    newObject.persistentIdentifier = someObject.persistentIdentifier
+    newObject.serialNumber = someObject.serialNumber
+    newObject.inventoryNumber = someObject.inventoryNumber
+    newObject.dualUse = someObject.dualUse
 
     newObject.createdAt = someObject.createdAt
     newObject.modifiedAt = someObject.modifiedAt
-
     newObject.createdByUserId = someObject.createdByUserId
     newObject.modifiedByUserId = someObject.modifiedByUserId
 
     newObject.contacts = someObject.contacts.map(Contact.createFromObject)
+    newObject.properties = someObject.properties.map(DeviceProperty.createFromObject)
+    newObject.customFields = someObject.customFields.map(CustomTextField.createFromObject)
     newObject.attachments = someObject.attachments.map(Attachment.createFromObject)
 
     return newObject

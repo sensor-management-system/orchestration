@@ -1,0 +1,5 @@
+@import '~vuetify/src/styles/styles.sass';
+
+.required label::after {
+    content: " *";
+}
