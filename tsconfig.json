@@ -26,7 +26,8 @@
     "types": [
       "@types/node",
       "@nuxt/types",
-      "@types/jest"
+      "@types/jest",
+      "nuxt-leaflet"
     ],
     "allowSyntheticDefaultImports": true,
     "plugins": [{ "name": "ts-vue-plugin" }]
