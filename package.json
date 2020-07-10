@@ -19,7 +19,8 @@
     "@nuxtjs/pwa": "^3.0.0-0",
     "nuxt": "^2.0.0",
     "nuxt-leaflet": "0.0.21",
-    "nuxt-property-decorator": "^2.7.2"
+    "nuxt-property-decorator": "^2.7.2",
+    "oidc-client": "^1.10.1"
   },
   "devDependencies": {
     "@nuxt/typescript-build": "^0.6.0",
