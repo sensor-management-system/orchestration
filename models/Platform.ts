@@ -1,12 +1,42 @@
-import { PlatformOrDeviceType } from '../enums/PlatformOrDeviceType'
+import Contact, { IContact } from './Contact'
+import { Attachment, IAttachment } from './Attachment'
 
-import Contact from './Contact'
+import IPathSetter from './IPathSetter'
 
-import { IDeviceOrPlatformSearchObject } from './IDeviceOrPlatformSearchObject'
-import PlatformType from './PlatformType'
-import Status from './Status'
+export interface IPlatform {
+  id: number | null
 
-export default class Platform {
+  platformTypeUri: string
+  platformTypeName: string
+
+  shortName: string
+  longName: string
+  description: string
+
+  manufacturerUri: string
+  manufacturerName: string
+
+  model: string
+
+  statusUri: string
+  statusName: string
+
+  inventoryNumber: string
+  serialNumber: string
+  website: string
+  persistentIdentifier: string
+
+  createdAt: Date | null
+  modifiedAt: Date | null
+
+  createdByUserId: number | null
+  modifiedByUserId: number | null
+
+  contacts: IContact[]
+  attachments: IAttachment[]
+}
+
+export default class Platform implements IPlatform, IPathSetter {
   private _id: number | null = null
 
   private _platformTypeUri: string = ''
@@ -35,7 +65,7 @@ export default class Platform {
   private _modifiedByUserId: number | null = null
 
   private _contacts: Contact[] = []
-  // TODO: Add attachments
+  private _attachments: Attachment[] = []
 
   get id (): number | null {
     return this._id
@@ -197,67 +227,146 @@ export default class Platform {
     this._modifiedByUserId = newModifiedByUserId
   }
 
-  toSearchObject (
-    platformTypeLookupByUri: Map<string, PlatformType>,
-    platformStatusLookupByUri: Map<string, Status>
-  ) : IDeviceOrPlatformSearchObject {
-    return new PlatformSearchObjectWrapper(this, platformTypeLookupByUri, platformStatusLookupByUri)
+  get attachments (): Attachment[] {
+    return this._attachments
+  }
+
+  set attachments (attachments: Attachment[]) {
+    this._attachments = attachments
+  }
+
+  setPath (path: string, value: any): void {
+    const pathArray = path.split('.')
+    const topLevelElement = pathArray.splice(0, 1)[0]
+
+    switch (topLevelElement) {
+      case 'id':
+        if (value !== null) {
+          this.id = Number(value)
+        } else {
+          this.id = null
+        }
+        break
+      case 'platformTypeUri':
+        this.platformTypeUri = String(value)
+        break
+      case 'platformTypeName':
+        this.platformTypeName = String(value)
+        break
+      case 'shortName':
+        this.shortName = String(value)
+        break
+      case 'longName':
+        this.longName = String(value)
+        break
+      case 'description':
+        this.description = String(value)
+        break
+      case 'manufacturerUri':
+        this.manufacturerUri = String(value)
+        break
+      case 'manufacturerName':
+        this.manufacturerName = String(value)
+        break
+      case 'model':
+        this.model = String(value)
+        break
+      case 'statusUri':
+        this.statusUri = String(value)
+        break
+      case 'statusName':
+        this.statusName = String(value)
+        break
+      case 'inventoryNumber':
+        this.inventoryNumber = String(value)
+        break
+      case 'serialNumber':
+        this.serialNumber = String(value)
+        break
+      case 'website':
+        this.website = String(value)
+        break
+      case 'persistentIdentifier':
+        this.persistentIdentifier = String(value)
+        break
+      case 'createdAt':
+        if (value !== null) {
+          this.createdAt = value as Date
+        } else {
+          this.createdAt = null
+        }
+        break
+      case 'modifiedAt':
+        if (value !== null) {
+          this.modifiedAt = value as Date
+        } else {
+          this.modifiedAt = null
+        }
+        break
+      case 'createdByUserId':
+        if (value !== null) {
+          this.createdByUserId = Number(value)
+        } else {
+          this.createdByUserId = null
+        }
+        break
+      case 'modifiedByUserId':
+        if (value !== null) {
+          this.modifiedByUserId = Number(value)
+        } else {
+          this.modifiedByUserId = null
+        }
+        break
+      case 'contacts':
+        this.contacts = value.map(Contact.createFromObject)
+        break
+      case 'attachments':
+        this.attachments = value.map(Attachment.createFromObject)
+        break
+      default:
+        throw new TypeError('path ' + path + ' is not valid')
+    }
   }
 
   static createEmpty (): Platform {
     return new Platform()
   }
-}
 
-class PlatformSearchObjectWrapper implements IDeviceOrPlatformSearchObject {
-  private platform: Platform
-  private platformTypeLookupByUri: Map<string, PlatformType>
-  private statusLookupByUri: Map<string, Status>
+  static createFromObject (someObject: IPlatform): Platform {
+    const newObject = new Platform()
 
-  constructor (platform: Platform, platformTypeLookupByUri: Map<string, PlatformType>, statusLookupByUri: Map<string, Status>) {
-    this.platform = platform
-    this.platformTypeLookupByUri = platformTypeLookupByUri
-    this.statusLookupByUri = statusLookupByUri
-  }
+    newObject.id = someObject.id
 
-  get id () : number | null {
-    return this.platform.id
-  }
+    newObject.platformTypeUri = someObject.platformTypeUri
+    newObject.platformTypeName = someObject.platformTypeName
 
-  get name () : string {
-    return this.platform.shortName
-  }
+    newObject.shortName = someObject.shortName
+    newObject.longName = someObject.longName
 
-  get type () : string {
-    // TODO: As we don't have the platform types
-    // we can't give the exact type for the uri
-    if (this.platformTypeLookupByUri.has(this.platform.platformTypeUri)) {
-      const platformType: PlatformType = this.platformTypeLookupByUri.get(this.platform.platformTypeUri) as PlatformType
-      return platformType.name
-    }
-    if (this.platform.platformTypeName) {
-      return this.platform.platformTypeName
-    }
-    return 'Unknown type'
-  }
+    newObject.description = someObject.description
 
-  get searchType () : PlatformOrDeviceType {
-    return PlatformOrDeviceType.PLATFORM
-  }
+    newObject.manufacturerUri = someObject.manufacturerUri
+    newObject.manufacturerName = someObject.manufacturerName
 
-  get project (): string {
-    // TODO
-    return 'No project yet'
-  }
+    newObject.model = someObject.model
 
-  get status () : string {
-    if (this.statusLookupByUri.has(this.platform.statusUri)) {
-      const platformStatus: Status = this.statusLookupByUri.get(this.platform.statusUri) as Status
-      return platformStatus.name
-    }
-    if (this.platform.statusName) {
-      return this.platform.statusName
-    }
-    return 'Unknown status'
+    newObject.statusUri = someObject.statusUri
+    newObject.statusName = someObject.statusName
+
+    newObject.inventoryNumber = someObject.inventoryNumber
+    newObject.serialNumber = someObject.serialNumber
+    newObject.website = someObject.website
+    newObject.persistentIdentifier = someObject.persistentIdentifier
+
+    newObject.createdAt = someObject.createdAt
+    newObject.modifiedAt = someObject.modifiedAt
+
+    newObject.createdByUserId = someObject.createdByUserId
+    newObject.modifiedByUserId = someObject.modifiedByUserId
+
+    newObject.contacts = someObject.contacts.map(Contact.createFromObject)
+    newObject.attachments = someObject.attachments.map(Attachment.createFromObject)
+
+    return newObject
   }
 }

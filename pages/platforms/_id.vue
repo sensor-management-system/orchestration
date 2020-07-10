@@ -14,19 +14,12 @@
       </v-btn>
     </v-snackbar>
 
-    <!-- Then the breadcrumps for navigation -->
-    <v-breadcrumbs :items="navigation" />
-    <h1>{{ verb }} Platform</h1>
-
-    <v-form>
-      <v-card outlined>
-        <v-tabs
-          v-model="activeTabIdx"
-          background-color="grey lighten-3"
-        >
-          <v-tab>Basic data</v-tab>
-          <v-tab>Contacts</v-tab>
-          <v-tab-item>
+    <v-card outlined>
+      <v-tabs-items
+        v-model="activeTab"
+      >
+        <v-tab-item :eager="true">
+          <v-form ref="basicForm">
             <!-- Basic data tab -->
             <v-card
               flat
@@ -39,7 +32,7 @@
                   <v-col cols="12" md="3">
                     <v-text-field
                       v-model="platform.persistentIdentifier"
-                      label="persistent identifier (PID)"
+                      label="Persistent identifier (PID)"
                       :readonly="readonly"
                       :disabled="readonly"
                     />
@@ -47,19 +40,25 @@
                 </v-row>
                 <v-row>
                   <v-col cols="12" md="6">
-                    <v-text-field v-model="platform.shortName" label="short name" :readonly="readonly" :disabled="readonly" />
+                    <v-text-field
+                      v-model="platform.shortName"
+                      label="Short name"
+                      required
+                      class="required"
+                      :rules="[rules.required]"
+                      :readonly="readonly"
+                      :disabled="readonly"
+                    />
                   </v-col>
                   <v-col cols="12" md="6">
-                    <v-text-field v-model="platform.longName" label="long name" :readonly="readonly" :disabled="readonly" />
+                    <v-text-field v-model="platform.longName" label="Long name" :readonly="readonly" :disabled="readonly" />
                   </v-col>
                 </v-row>
                 <v-row>
                   <v-col cols="12" md="3">
-                    <!-- TODO: Auch hier den Namen und die URI ändern!!!
-                    -->
                     <v-combobox
                       v-model="platformPlatformTypeName"
-                      label="platform type"
+                      label="Platform type"
                       :items="platformTypeNames"
                       :readonly="readonly"
                       :disabled="readonly"
@@ -68,7 +67,7 @@
                   <v-col cols="12" md="3">
                     <v-combobox
                       v-model="platformStatusName"
-                      label="status"
+                      label="Status"
                       :items="statusNames"
                       :readonly="readonly"
                       :disabled="readonly"
@@ -77,7 +76,7 @@
                   <v-col cols="12" md="3">
                     <v-combobox
                       v-model="platformManufacturerName"
-                      label="manufacturer"
+                      label="Manufacturer"
                       :items="manufacturerNames"
                       :readonly="readonly"
                       :disabled="readonly"
@@ -86,7 +85,7 @@
                   <v-col cols="12" md="3">
                     <v-text-field
                       v-model="platform.model"
-                      label="model"
+                      label="Model"
                       :readonly="readonly"
                       :disabled="readonly"
                     />
@@ -94,48 +93,51 @@
                 </v-row>
                 <v-divider />
                 <v-row>
-                  <v-col cols="12" md="5">
-                    <v-textarea v-model="platform.description" label="description" rows="3" :readonly="readonly" :disabled="readonly" />
+                  <v-col cols="12" md="9">
+                    <v-textarea v-model="platform.description" label="Description" rows="3" :readonly="readonly" :disabled="readonly" />
                   </v-col>
                 </v-row>
                 <v-row>
-                  <v-col cols="12" md="3">
+                  <v-col cols="12" md="9">
                     <v-text-field
+                      v-if="readonly"
                       v-model="platform.website"
-                      label="website"
+                      label="Website"
                       placeholder="https://"
                       type="url"
-                      :readonly="readonly"
-                      :disabled="readonly"
-                    />
+                      :readonly="true"
+                      :disabled="true"
+                    >
+                      <template slot="append">
+                        <a v-if="platform.website.length > 0" :href="platform.website" target="_blank">
+                          <v-icon>
+                            mdi-open-in-new
+                          </v-icon>
+                        </a>
+                      </template>
+                    </v-text-field>
                   </v-col>
                 </v-row>
                 <v-row>
                   <v-col cols="12" md="3">
                     <v-text-field
                       v-model="platform.serialNumber"
-                      label="Serial Number"
+                      label="Serial number"
                       :readonly="readonly"
                       :disabled="readonly"
                     />
                   </v-col>
                   <v-col cols="12" md="3">
-                    <v-text-field v-model="platform.inventoryNumber" label="inventory number" :readonly="readonly" :disabled="readonly" />
+                    <v-text-field v-model="platform.inventoryNumber" label="Inventory number" :readonly="readonly" :disabled="readonly" />
                   </v-col>
                 </v-row>
               </v-card-text>
-              <v-card-actions>
-                <v-btn
-                  text
-                  @click="nextTab"
-                >
-                  next ❯
-                </v-btn>
-              </v-card-actions>
             </v-card>
-          </v-tab-item>
-          <!-- contacts tab -->
-          <v-tab-item>
+          </v-form>
+        </v-tab-item>
+        <!-- contact tab -->
+        <v-tab-item :eager="true">
+          <v-form ref="contactsForm" @submit.prevent>
             <v-card
               flat
             >
@@ -145,74 +147,91 @@
               <v-card-text>
                 <v-row>
                   <v-col cols="3">
-                    <ContactSelect :selected-contacts.sync="platform.contacts" :readonly="!isInEditMode" />
+                    <ContactSelect v-model="platform.contacts" :readonly="!isInEditMode" />
                   </v-col>
                 </v-row>
               </v-card-text>
-              <v-card-actions>
-                <v-btn
-                  text
-                  @click="previousTab"
-                >
-                  ❮ previous
-                </v-btn>
-              </v-card-actions>
             </v-card>
-          </v-tab-item>
-        </v-tabs>
-        <!-- Buttons for all tabs -->
-        <div v-if="!isInEditMode">
-          <v-btn
-            fab
-            fixed
-            bottom
-            right
-            color="secondary"
-            @click="switchIntoEditMode"
+          </v-form>
+        </v-tab-item>
+        <v-tab-item :eager="true">
+          <v-card
+            flat
           >
-            <v-icon>
-              mdi-pencil
-            </v-icon>
-          </v-btn>
-        </div>
-        <div v-if="isInEditMode">
-          <v-btn
-            fab
-            fixed
-            bottom
-            right
-            color="primary"
-            @click="save"
-          >
-            <v-icon>
-              mdi-content-save
-            </v-icon>
-          </v-btn>
-        </div>
-      </v-card>
-    </v-form>
+            <v-card-title>
+              Platform URN: {{ platformURN }}
+            </v-card-title>
+            <v-card-text>
+              <AttachmentList v-model="platform.attachments" :readonly="!isInEditMode" />
+            </v-card-text>
+          </v-card>
+        </v-tab-item>
+      </v-tabs-items>
+      <!-- Buttons for all tabs -->
+      <v-btn
+        v-if="!isInEditMode"
+        fab
+        fixed
+        bottom
+        right
+        color="secondary"
+        @click="toggleEditMode"
+      >
+        <v-icon>
+          mdi-pencil
+        </v-icon>
+      </v-btn>
+    </v-card>
   </div>
 </template>
 
+<style lang="scss">
+@import "~/assets/styles/_forms.scss";
+</style>
+
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
+import { Component, Watch, mixins } from 'nuxt-property-decorator'
 
-import CVService from '../../../services/CVService'
-import SmsService from '../../../services/SmsService'
+import CVService from '../../services/CVService'
+import SmsService from '../../services/SmsService'
 
-import Platform from '../../../models/Platform'
+import Platform from '../../models/Platform'
 
 // @ts-ignore
-import ContactSelect from '../../../components/ContactSelect.vue'
-import Manufacturer from '../../../models/Manufacturer'
-import PlatformType from '../../../models/PlatformType'
-import Status from '../../../models/Status'
+import ContactSelect from '../../components/ContactSelect.vue'
+import AttachmentList from '../../components/AttachmentList.vue'
+
+import Manufacturer from '../../models/Manufacturer'
+import PlatformType from '../../models/PlatformType'
+import Status from '../../models/Status'
+
+// @ts-ignore
+import AppBarEditModeContent from '@/components/AppBarEditModeContent.vue'
+// @ts-ignore
+import AppBarTabsExtension from '@/components/AppBarTabsExtension.vue'
+// @ts-ignore
+import { Rules } from '@/mixins/Rules'
+
+@Component
+// @ts-ignore
+export class AppBarTabsExtensionExtended extends AppBarTabsExtension {
+  get tabs (): String[] {
+    return [
+      'Basic Data',
+      'Persons',
+      'Attachments'
+    ]
+  }
+}
 
 @Component({
-  components: { ContactSelect }
+  components: {
+    ContactSelect,
+    AttachmentList
+  }
 })
 // @ts-ignore
-export default class PlatformIdPage extends Vue {
+export default class PlatformIdPage extends mixins(Rules) {
   // data
   // first for the data to chose the elements
   private platformTypes: PlatformType[] = []
@@ -223,10 +242,29 @@ export default class PlatformIdPage extends Vue {
   private platform: Platform = Platform.createEmpty()
 
   // and some general data for the page
-  private activeTabIdx: number = 0
+  private activeTab: number = 0
   private showSaveSuccess: boolean = false
   private showLoadingError: boolean = false
-  private isInEditMode: boolean = false
+  private editMode: boolean = false
+
+  created () {
+    this.$nuxt.$emit('app-bar-content', AppBarEditModeContent)
+    this.$nuxt.$on('AppBarContent:save-button-click', () => {
+      this.save()
+    })
+    this.$nuxt.$on('AppBarContent:cancel-button-click', () => {
+      if (this.platform && this.platform.id) {
+        this.toggleEditMode()
+      } else {
+        this.$router.push('/search/platforms')
+      }
+    })
+
+    this.$nuxt.$emit('app-bar-extension', AppBarTabsExtensionExtended)
+    this.$nuxt.$on('AppBarExtension:change', (tab: number) => {
+      this.activeTab = tab
+    })
+  }
 
   mounted () {
     this.showLoadingError = false
@@ -240,6 +278,23 @@ export default class PlatformIdPage extends Vue {
       this.states = foundStates
     })
     this.loadPlatform()
+
+    // make sure that all components (especially the dynamically passed ones) are rendered
+    this.$nextTick(() => {
+      if (!this.$route.params.id) {
+        this.$nuxt.$emit('AppBarContent:title', 'Add Platform')
+      }
+      this.$nuxt.$emit('AppBarContent:save-button-hidden', !this.editMode)
+      this.$nuxt.$emit('AppBarContent:cancel-button-hidden', !this.editMode)
+    })
+  }
+
+  beforeDestroy () {
+    this.$nuxt.$emit('app-bar-content', null)
+    this.$nuxt.$emit('app-bar-extension', null)
+    this.$nuxt.$off('AppBarContent:save-button-click')
+    this.$nuxt.$off('AppBarContent:cancel-button-click')
+    this.$nuxt.$off('AppBarExtension:change')
   }
 
   loadPlatform () {
@@ -257,26 +312,34 @@ export default class PlatformIdPage extends Vue {
     }
   }
 
+  get isInEditMode (): boolean {
+    return this.editMode
+  }
+
+  set isInEditMode (editMode: boolean) {
+    this.editMode = editMode
+  }
+
+  toggleEditMode () {
+    this.isInEditMode = !this.isInEditMode
+  }
+
+  @Watch('editMode', { immediate: true, deep: true })
+  // @ts-ignore
+  onEditModeChanged (editMode: boolean) {
+    this.$nuxt.$emit('AppBarContent:save-button-hidden', !editMode)
+    this.$nuxt.$emit('AppBarContent:cancel-button-hidden', !editMode)
+  }
+
   // methods
   save () {
     this.showSaveSuccess = false
     SmsService.savePlatform(this.platform).then((savedPlatform) => {
       this.platform = savedPlatform
       this.showSaveSuccess = true
-      // this.$router.push('/devices')
+      // this.$router.push('/seach/platforms')
+      this.toggleEditMode()
     })
-  }
-
-  switchIntoEditMode () {
-    this.isInEditMode = true
-  }
-
-  previousTab () {
-    this.activeTabIdx -= 1
-  }
-
-  nextTab () {
-    this.activeTabIdx += 1
   }
 
   get platformURN () {
@@ -284,8 +347,6 @@ export default class PlatformIdPage extends Vue {
     const removeWhitespace = (text: string) => {
       return text.replace(' ', '_')
     }
-    // TODO: I don't have the platform type
-    // I just have the platformTypeUri
     let partPlatformType = '[platformtype]'
     if (this.platform.platformTypeUri !== '') {
       const ptIndex = this.platformTypes.findIndex(pt => pt.uri === this.platform.platformTypeUri)
@@ -302,43 +363,8 @@ export default class PlatformIdPage extends Vue {
     return partPlatformType + '_' + partShortName
   }
 
-  get verb (): string {
-    // return the verb (do we add a platform or do we edit one?)
-    let verb = 'Add'
-    if (this.$route.params.id) {
-      if (this.isInEditMode) {
-        verb = 'Edit'
-      } else {
-        verb = 'View'
-      }
-    }
-    return verb
-  }
-
   get readonly () {
     return !this.isInEditMode
-  }
-
-  get navigation () {
-    // navigation for the breadcrumps
-    return [
-      {
-        disabled: false,
-        exact: true,
-        to: '/',
-        text: 'Home'
-      },
-      {
-        disabled: false,
-        exact: true,
-        to: '/devices',
-        text: 'Devices'
-      },
-      {
-        disabled: true,
-        text: this.verb + ' Platform'
-      }
-    ]
   }
 
   get manufacturerNames () : string[] {
@@ -404,6 +430,14 @@ export default class PlatformIdPage extends Vue {
       this.platform.platformTypeUri = this.platformTypes[platformTypeIndex].uri
     } else {
       this.platform.platformTypeUri = ''
+    }
+  }
+
+@Watch('platform', { immediate: true, deep: true })
+  // @ts-ignore
+  onPlatformChanged (val: Platform) {
+    if (val.id) {
+      this.$nuxt.$emit('AppBarContent:title', 'Platform ' + val.shortName)
     }
   }
 }
