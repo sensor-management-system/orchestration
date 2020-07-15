@@ -190,6 +190,5 @@ export default class CVService {
         Unit.createWithData('5', 'hz', 'https//helmholtz/smsvc/unit/5')
       ])
     })
-    
   }
 }
