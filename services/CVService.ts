@@ -22,7 +22,7 @@ export default class CVService {
   }
 
   static findAllPlatformTypes (): Promise<PlatformType[]> {
-    return axios.get(BASE_URL + '/sitetype?page[size]=100000').then((rawResponse) => {
+    return axios.get(BASE_URL + '/sitetype?page[size]=100000&filter[active]=true').then((rawResponse) => {
       const response = rawResponse.data
       const data = response.data
 
@@ -55,7 +55,7 @@ export default class CVService {
   }
 
   static findAllDeviceTypes (): Promise<DeviceType[]> {
-    return axios.get(BASE_URL + '/equipmenttype?page[limit]=100000').then((rawResponse) => {
+    return axios.get(BASE_URL + '/equipmenttype?page[limit]=100000&filter[active]=true').then((rawResponse) => {
       const response = rawResponse.data
       const data = response.data
 
@@ -76,7 +76,7 @@ export default class CVService {
   }
 
   static findAllCompartments (): Promise<Compartment[]> {
-    return axios.get(BASE_URL + '/variabletype?page[limit]=100000').then((rawResponse) => {
+    return axios.get(BASE_URL + '/variabletype?page[limit]=100000&filter[active]=true').then((rawResponse) => {
       const response = rawResponse.data
       const data = response.data
 
@@ -97,7 +97,7 @@ export default class CVService {
   }
 
   static findAllSamplingMedias (): Promise<SamplingMedia[]> {
-    return axios.get(BASE_URL + '/medium?page[limit]=100000').then((rawResponse) => {
+    return axios.get(BASE_URL + '/medium?page[limit]=100000&filter[active]=true').then((rawResponse) => {
       const response = rawResponse.data
       const data = response.data
 
@@ -118,9 +118,7 @@ export default class CVService {
   }
 
   static findAllProperties (): Promise<Property[]> {
-    // TODO: It seems that a value > 250 is ignored
-    // but as we have here > 900 entries, we need to support those as well
-    return axios.get(BASE_URL + '/variablename?page[limit]=100000').then((rawResponse) => {
+    return axios.get(BASE_URL + '/variablename?page[limit]=100000&filter[active]=true').then((rawResponse) => {
       const response = rawResponse.data
       const data = response.data
 
