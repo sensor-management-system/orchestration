@@ -160,8 +160,6 @@ export default class CVService {
   }
 
   static findAllUnits (): Promise<Unit[]> {
-    // currently empty
-    /*
     return axios.get(BASE_URL + '/unit?page[limit]=100000&filter[active]=true').then((rawResponse) => {
       const response = rawResponse.data
       const data = response.data
@@ -170,8 +168,11 @@ export default class CVService {
 
       for (const record of data) {
         const id = record.id
-        const name = record.attributes.name
-        const url = record.links.self
+        let name = record.attributes.unitsname
+        if (record.attributes.unitsabbreviation) {
+          name += ' [' + record.attributes.unitsabbreviation + ']'
+        }
+        const url = record.attributes.unitslink || record.links.self
 
         result.push(
           Unit.createWithData(id, name, url)
@@ -179,16 +180,6 @@ export default class CVService {
       }
 
       return result
-    })
-    */
-    return new Promise<Unit[]>((resolve) => {
-      resolve([
-        Unit.createWithData('1', 'm', 'https//helmholtz/smsvc/unit/1'),
-        Unit.createWithData('2', 'm/s', 'https//helmholtz/smsvc/unit/2'),
-        Unit.createWithData('3', 's', 'https//helmholtz/smsvc/unit/3'),
-        Unit.createWithData('4', 'kg', 'https//helmholtz/smsvc/unit/4'),
-        Unit.createWithData('5', 'hz', 'https//helmholtz/smsvc/unit/5')
-      ])
     })
   }
 }
