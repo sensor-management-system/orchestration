@@ -12,4 +12,4 @@ LABEL maintainer="Martin Abbrent <martin.abbrent@ufz.de>" \
     org.opencontainers.image.revision=$VCS_REF \
     org.opencontainers.image.created=$BUILD_DATE
 
-COPY ./dist/ /usr/share/nginx/html/
+COPY ./dist/ /usr/share/nginx/html/rdm/svm

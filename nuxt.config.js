@@ -80,5 +80,8 @@ export default {
     // eslint-disable-next-line
     extend (config, ctx) {
     }
+  },
+  router: {
+    base: process.env.BASE_URL || '/'
   }
 }
