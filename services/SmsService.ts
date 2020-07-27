@@ -5,6 +5,10 @@ import Device from '../models/Device'
 import Contact from '../models/Contact'
 import Manufacturer from '~/models/Manufacturer'
 
+import {
+  IPaginationLoader, FilteredPaginationedLoader
+} from '@/utils/PaginatedLoader'
+
 // Use on version for all the queries
 const BASE_URL = process.env.smsBackendUrl + '/rdm/svm-api/v1'
 
@@ -233,11 +237,11 @@ export default class SmsService {
     })
   }
 
-  static findAllPlatforms (): Promise<Platform[]> {
-    // TODO: Think about also including the contacts
-    // with ?include=contacts
-    // size for having one query to get all the platforms (no pagination)
-    return axios.get(BASE_URL + '/platforms?page[size]=100000').then((rawResponse) => {
+  // we start with zero
+  static findAllPlatformsOnPage (page: number, pageSize: number): Promise<IPaginationLoader<Platform>> {
+    const pageParameter = 'page[size]=' + pageSize + '&page[number]=' + page
+
+    return axios.get(BASE_URL + '/platforms?' + pageParameter).then((rawResponse) => {
       const rawData = rawResponse.data
       const result: Platform[] = []
 
@@ -245,7 +249,16 @@ export default class SmsService {
         result.push(this.serverPlatformResponseToEntity(entry))
       }
 
-      return result
+      let funToLoadNext = null
+
+      if (result.length > 0) {
+        funToLoadNext = () => this.findAllPlatformsOnPage(page + 1, pageSize)
+      }
+
+      return {
+        elements: result,
+        funToLoadNext
+      }
     })
   }
 
@@ -311,38 +324,30 @@ export default class SmsService {
   }
 
   static findPlatforms (
+    pageSize: number,
     text: string | null,
     manufacturer: Manufacturer[]
-  ): Promise<Platform[]> {
-    const promiseAllPlatforms: Promise<Platform[]> = this.findAllPlatforms()
+  ): Promise<IPaginationLoader<Platform>> {
+    const loaderPromise: Promise<IPaginationLoader<Platform>> = this.findAllPlatformsOnPage(1, pageSize)
 
-    return new Promise((resolve) => {
-      promiseAllPlatforms.then((allPlatforms) => {
-        const result = []
-        let filterFunc = (_platform: Platform): boolean => { return true }
+    let filterFunc = (_platform: Platform): boolean => { return true }
 
-        if (text) {
-          filterFunc = (platform: Platform): boolean => {
-            return platform.shortName.includes(text)
-          }
-        }
-        if (manufacturer.length > 0) {
-          const oldFilterFunc = filterFunc
+    if (text) {
+      filterFunc = (platform: Platform): boolean => {
+        return platform.shortName.includes(text)
+      }
+    }
+    if (manufacturer.length > 0) {
+      const oldFilterFunc = filterFunc
 
-          filterFunc = (platform: Platform): boolean => {
-            return oldFilterFunc(platform) && (
-              manufacturer.findIndex(m => m.uri === platform.manufacturerUri) > -1
-            )
-          }
-        }
-
-        for (const platform of allPlatforms) {
-          if (filterFunc(platform)) {
-            result.push(platform)
-          }
-        }
-        resolve(result)
-      })
+      filterFunc = (platform: Platform): boolean => {
+        return oldFilterFunc(platform) && (
+          manufacturer.findIndex(m => m.uri === platform.manufacturerUri) > -1
+        )
+      }
+    }
+    return loaderPromise.then((loader) => {
+      return new FilteredPaginationedLoader<Platform>(loader, filterFunc)
     })
   }
 

@@ -153,6 +153,8 @@ import PlatformType from '../../models/PlatformType'
 import Platform from '../../models/Platform'
 import Status from '../../models/Status'
 
+import { IPaginationLoader } from '@/utils/PaginatedLoader'
+
 // @ts-ignore
 import ManufacturerSelect from '@/components/ManufacturerSelect.vue'
 
@@ -178,9 +180,12 @@ export class AppBarTabsExtensionExtended extends AppBarTabsExtension {
   }
 })
 export default class SeachPlatformsPage extends Vue {
+  private pageSize: number = 20
   private activeTab: number = 0
   private fab: boolean = false
   private loading: boolean = true
+
+  private loader: null | IPaginationLoader<Platform> = null
 
   private selectedSearchManufacturers: Manufacturer[] = []
 
@@ -228,6 +233,15 @@ export default class SeachPlatformsPage extends Vue {
     this.$nextTick(() => {
       this.$nuxt.$emit('AppBarContent:title', 'Platforms')
     })
+
+    window.onscroll = () => {
+      // from https://www.digitalocean.com/community/tutorials/vuejs-implementing-infinite-scroll
+      const isOnBottom = document.documentElement.scrollTop + window.innerHeight === document.documentElement.offsetHeight
+
+      if (isOnBottom && this.canLoadNext) {
+        this.loadNext()
+      }
+    }
   }
 
   beforeDestroy () {
@@ -264,12 +278,37 @@ export default class SeachPlatformsPage extends Vue {
 
   runSearch (searchText: string | null, manufacturer: Manufacturer[]) {
     this.loading = true
+    this.searchResults = []
     SmsService.findPlatforms(
-      searchText, manufacturer
-    ).then((findResults) => {
+      this.pageSize, searchText, manufacturer
+    ).then(this.loadUntilWeHaveSomeEntries)
+  }
+
+  loadUntilWeHaveSomeEntries (loader:IPaginationLoader<Platform>) {
+    this.loader = loader
+    this.loading = false
+    this.searchResults = [...this.searchResults, ...loader.elements]
+
+    if (this.searchResults.length >= 20 || !this.canLoadNext()) {
       this.loading = false
-      this.searchResults = findResults
-    })
+    } else if (this.canLoadNext() && loader.funToLoadNext != null) {
+      loader.funToLoadNext().then((nextLoader) => {
+        this.loadUntilWeHaveSomeEntries(nextLoader)
+      })
+    }
+  }
+
+  loadNext () {
+    if (this.loader != null && this.loader.funToLoadNext != null) {
+      this.loader.funToLoadNext().then((nextLoader) => {
+        this.loader = nextLoader
+        this.searchResults = [...this.searchResults, ...nextLoader.elements]
+      })
+    }
+  }
+
+  canLoadNext () {
+    return this.loader != null && this.loader.funToLoadNext != null
   }
 
   deleteAndCloseDialog (id: number) {
