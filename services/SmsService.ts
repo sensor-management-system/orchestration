@@ -60,6 +60,8 @@ export default class SmsService {
     // TODO: StatusName & StatusUri
     result.website = attributes.url || ''
 
+    result.deviceTypeUri = attributes.type || ''
+
     // TODO: createdAt, modifiedAt, createdBy, modifiedBy
 
     // TODO: Insert those as well
@@ -111,6 +113,8 @@ export default class SmsService {
         // TODO: Handle attachments
 
         // TODO: Remove type
+        // --> For the platform we have a platform type, but no other
+        // general type.
         type: ''
 
       }
@@ -173,9 +177,7 @@ export default class SmsService {
         short_name: device.shortName,
         // TODO: Add statusName & statusUri
         url: device.website,
-
-        // TODO remove
-        type: ''
+        type: device.deviceTypeUri
 
         /*
         customFields: [
