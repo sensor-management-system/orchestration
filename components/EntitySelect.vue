@@ -2,6 +2,7 @@
   <div>
     <v-autocomplete
       v-if="!readonly"
+      ref="autocompletefield"
       :items="allExceptSelected"
       :item-text="(x) => x"
       :item-value="(x) => x.id"
@@ -114,7 +115,21 @@ export default class EntitySelect<E extends INumericId> extends Vue {
         ...this.value,
         selectedElement
       ] as E[])
+      this.clearInputField()
     }
+  }
+
+  clearInputField () {
+    // the autocompletefield is an instance of this
+    // https://github.com/vuetifyjs/vuetify/blob/master/packages/vuetify/src/components/VAutocomplete/VAutocomplete.ts
+    // It is necessary as it doesn't work to use a v-model and set it to null
+    // (as this just updates the chosen value but not the search string;
+    // and working with the search string explicitly gives us trouble as well
+    // as we then have problems to handle text inputs - it hangs on the input
+    // field)
+    // --> We use the clear callback of the autocomplete field
+    const field: any = this.$refs.autocompletefield
+    field.clearableCallback()
   }
 
   /**
