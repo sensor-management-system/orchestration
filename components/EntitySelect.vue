@@ -103,7 +103,7 @@ export default class EntitySelect<E extends INumericId> extends Vue {
    * @fires EntitySelect#input
    */
   add (someId: string) {
-    const selectedElement: E | undefined = this.elements.find(e => e.id === parseInt(someId))
+    const selectedElement: E | undefined = this.elements.find(e => String(e.id) === String(someId))
     if (selectedElement) {
       /**
        * Update event
@@ -124,7 +124,7 @@ export default class EntitySelect<E extends INumericId> extends Vue {
    * @fires EntitySelect#input
    */
   remove (someId: number) {
-    const elementIndex: number = this.value.findIndex(e => e.id === someId)
+    const elementIndex: number = this.value.findIndex(e => String(e.id) === String(someId))
     if (elementIndex > -1) {
       /**
        * Update event
@@ -143,7 +143,7 @@ export default class EntitySelect<E extends INumericId> extends Vue {
    * @return {E[]} an array of elements
    */
   get allExceptSelected (): E[] {
-    return this.elements.filter(c => !this.value.find(rc => rc.id === c.id))
+    return this.elements.filter(c => !this.value.find(rc => String(rc.id) === String(c.id)))
   }
 }
 </script>
