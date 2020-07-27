@@ -238,7 +238,7 @@ export default class SeachPlatformsPage extends Vue {
       // from https://www.digitalocean.com/community/tutorials/vuejs-implementing-infinite-scroll
       const isOnBottom = document.documentElement.scrollTop + window.innerHeight === document.documentElement.offsetHeight
 
-      if (isOnBottom && this.canLoadNext) {
+      if (isOnBottom && this.canLoadNext()) {
         this.loadNext()
       }
     }

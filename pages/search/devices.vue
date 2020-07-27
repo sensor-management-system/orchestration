@@ -61,47 +61,63 @@
     </v-card>
 
     <h2>Results:</h2>
-    <v-card v-for="result in searchResults" :key="result.searchType + result.id">
-      <v-card-title>
-        {{ result.shortName }}
-      </v-card-title>
-      <v-card-text>
-        <p>{{ getType(result) }}</p>
-        <p>Project {{ getProject(result) }}</p>
-        <p>Status {{ getStatus(result) }}</p>
-      </v-card-text>
-      <v-card-actions>
-        <v-btn :to="'/devices/' + result.id">
-          View
-        </v-btn>
-        <v-btn>Copy</v-btn>
-        <v-btn @click.stop="showDeleteDialog = true">
-          Delete
-        </v-btn>
-        <v-dialog v-model="showDeleteDialog" max-width="290">
-          <v-card>
-            <v-card-title class="headline">
-              Delete device
-            </v-card-title>
-            <v-card-text>
-              Do you really want to delete the device <em>{{ result.shortName }}</em>?
-            </v-card-text>
-            <v-card-actions>
-              <v-btn @click="showDeleteDialog = false">
-                No
-              </v-btn>
-              <v-spacer />
-              <v-btn color="error" @click="deleteAndCloseDialog(result.id)">
-                <v-icon left>
-                  mdi-delete
-                </v-icon>
-                Delete
-              </v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-dialog>
-      </v-card-actions>
-    </v-card>
+    <div v-if="loading">
+      <div class="text-center pt-2">
+        <v-progress-circular indeterminate />
+      </div>
+    </div>
+    <div v-if="searchResults.length == 0 && !loading">
+      <v-card>
+        <v-card-text>
+          <p class="text-center">
+            There are no devices that match our search criteria.
+          </p>
+        </v-card-text>
+      </v-card>
+    </div>
+    <div v-else>
+      <v-card v-for="result in searchResults" :key="result.searchType + result.id" :disabled="loading">
+        <v-card-title>
+          {{ result.shortName }}
+        </v-card-title>
+        <v-card-text>
+          <p>{{ getType(result) }}</p>
+          <p>Project {{ getProject(result) }}</p>
+          <p>Status {{ getStatus(result) }}</p>
+        </v-card-text>
+        <v-card-actions>
+          <v-btn :to="'/devices/' + result.id">
+            View
+          </v-btn>
+          <v-btn>Copy</v-btn>
+          <v-btn @click.stop="showDeleteDialog = true">
+            Delete
+          </v-btn>
+          <v-dialog v-model="showDeleteDialog" max-width="290">
+            <v-card>
+              <v-card-title class="headline">
+                Delete device
+              </v-card-title>
+              <v-card-text>
+                Do you really want to delete the device <em>{{ result.shortName }}</em>?
+              </v-card-text>
+              <v-card-actions>
+                <v-btn @click="showDeleteDialog = false">
+                  No
+                </v-btn>
+                <v-spacer />
+                <v-btn color="error" @click="deleteAndCloseDialog(result.id)">
+                  <v-icon left>
+                    mdi-delete
+                  </v-icon>
+                  Delete
+                </v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-dialog>
+        </v-card-actions>
+      </v-card>
+    </div>
     <v-speed-dial
       v-model="fab"
       fixed
@@ -145,6 +161,7 @@ import ManufacturerSelect from '@/components/ManufacturerSelect.vue'
 import AppBarEditModeContent from '@/components/AppBarEditModeContent.vue'
 // @ts-ignore
 import AppBarTabsExtension from '@/components/AppBarTabsExtension.vue'
+import { IPaginationLoader } from '@/utils/PaginatedLoader'
 
 @Component
 // @ts-ignore
@@ -161,8 +178,12 @@ export class AppBarTabsExtensionExtended extends AppBarTabsExtension {
   components: { ManufacturerSelect }
 })
 export default class SeachDevicesPage extends Vue {
+  private pageSize: number = 20
   private activeTab: number = 0
   private fab: boolean = false
+  private loading: boolean = true
+
+  private loader: null | IPaginationLoader<Device> = null
 
   private selectedSearchManufacturers: Manufacturer[] = []
 
@@ -210,6 +231,15 @@ export default class SeachDevicesPage extends Vue {
     this.$nextTick(() => {
       this.$nuxt.$emit('AppBarContent:title', 'Devices')
     })
+
+    window.onscroll = () => {
+      // from https://www.digitalocean.com/community/tutorials/vuejs-implementing-infinite-scroll
+      const isOnBottom = document.documentElement.scrollTop + window.innerHeight === document.documentElement.offsetHeight
+
+      if (isOnBottom && this.canLoadNext()) {
+        this.loadNext()
+      }
+    }
   }
 
   beforeDestroy () {
@@ -246,11 +276,38 @@ export default class SeachDevicesPage extends Vue {
   }
 
   runSearch (searchText: string | null, manufacturer: Manufacturer[]) {
+    this.loading = true
+    this.searchResults = []
     SmsService.findDevices(
-      searchText, manufacturer
-    ).then((findResults) => {
-      this.searchResults = findResults
-    })
+      this.pageSize, searchText, manufacturer
+    ).then(this.loadUntilWeHaveSomeEntries)
+  }
+
+  loadUntilWeHaveSomeEntries (loader: IPaginationLoader<Device>) {
+    this.loader = loader
+    this.loading = false
+    this.searchResults = [...this.searchResults, ...loader.elements]
+
+    if (this.searchResults.length >= this.pageSize || !this.canLoadNext()) {
+      this.loading = false
+    } else if (this.canLoadNext() && loader.funToLoadNext != null) {
+      loader.funToLoadNext().then((nextLoader) => {
+        this.loadUntilWeHaveSomeEntries(nextLoader)
+      })
+    }
+  }
+
+  loadNext () {
+    if (this.loader != null && this.loader.funToLoadNext != null) {
+      this.loader.funToLoadNext().then((nextLoader) => {
+        this.loader = nextLoader
+        this.searchResults = [...this.searchResults, ...nextLoader.elements]
+      })
+    }
+  }
+
+  canLoadNext () {
+    return this.loader != null && this.loader.funToLoadNext != null
   }
 
   deleteAndCloseDialog (id: number) {

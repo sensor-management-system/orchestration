@@ -262,11 +262,12 @@ export default class SmsService {
     })
   }
 
-  static findAllDevices (): Promise<Device[]> {
+  static findAllDevicesOnPage (page: number, pageSize: number): Promise<IPaginationLoader<Device>> {
+    const pageParameter = 'page[size]=' + pageSize + '&page[number]=' + page
     // TODO: Think about also including the contacts
     // with ?include=contacts
     // size for having one query to get all the devices (no pagination)
-    return axios.get(BASE_URL + '/devices?page[size]=100000').then((rawResonse) => {
+    return axios.get(BASE_URL + '/devices?' + pageParameter).then((rawResonse) => {
       const rawData = rawResonse.data
       const result: Device[] = []
 
@@ -274,7 +275,16 @@ export default class SmsService {
         result.push(this.serverDeviceResponseToEntity(entry))
       }
 
-      return result
+      let funToLoadNext = null
+
+      if (result.length > 0) {
+        funToLoadNext = () => this.findAllDevicesOnPage(page + 1, pageSize)
+      }
+
+      return {
+        elements: result,
+        funToLoadNext
+      }
     })
   }
 
@@ -288,38 +298,31 @@ export default class SmsService {
   }
 
   static findDevices (
+    pageSize: number,
     text: string | null,
     manufacturer: Manufacturer[]
-  ): Promise<Device[]> {
-    const promiseAllDevices: Promise<Device[]> = this.findAllDevices()
+  ): Promise<IPaginationLoader<Device>> {
+    const loaderPromise: Promise<IPaginationLoader<Device>> = this.findAllDevicesOnPage(1, pageSize)
 
-    return new Promise((resolve) => {
-      promiseAllDevices.then((allDevices) => {
-        const result = []
-        let filterFunc = (_device: Device): boolean => { return true }
+    let filterFunc = (_device: Device): boolean => { return true }
 
-        if (text) {
-          filterFunc = (device: Device): boolean => {
-            return device.shortName.includes(text)
-          }
-        }
-        if (manufacturer.length > 0) {
-          const oldFilterFunc = filterFunc
+    if (text) {
+      filterFunc = (device: Device): boolean => {
+        return device.shortName.includes(text)
+      }
+    }
+    if (manufacturer.length > 0) {
+      const oldFilterFunc = filterFunc
 
-          filterFunc = (device: Device): boolean => {
-            return oldFilterFunc(device) && (
-              manufacturer.findIndex(m => m.uri === device.manufacturerUri) > -1
-            )
-          }
-        }
+      filterFunc = (device: Device): boolean => {
+        return oldFilterFunc(device) && (
+          manufacturer.findIndex(m => m.uri === device.manufacturerUri) > -1
+        )
+      }
+    }
 
-        for (const device of allDevices) {
-          if (filterFunc(device)) {
-            result.push(device)
-          }
-        }
-        resolve(result)
-      })
+    return loaderPromise.then((loader) => {
+      return new FilteredPaginationedLoader<Device>(loader, filterFunc)
     })
   }
 
