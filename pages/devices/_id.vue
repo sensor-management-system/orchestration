@@ -43,6 +43,8 @@
                       :disabled="readonly"
                     />
                   </v-col>
+                </v-row>
+                <v-row>
                   <v-col cols="12" md="3">
                     <v-select
                       v-model="deviceStatusName"
@@ -52,8 +54,15 @@
                       :disabled="readonly"
                     />
                   </v-col>
-                </v-row>
-                <v-row>
+                  <v-col cols="12" md="3">
+                    <v-combobox
+                      v-model="deviceTypeName"
+                      :items="deviceTypeNames"
+                      label="Device type"
+                      :readonly="readonly"
+                      :disabled="readonly"
+                    />
+                  </v-col>
                   <v-col cols="12" md="3">
                     <v-combobox
                       v-model="deviceManufacturerName"
@@ -170,7 +179,14 @@
           >
             <v-card-title>Device URN: {{ deviceURN }}</v-card-title>
             <v-card-text>
-              <DevicePropertyExpansionPanels v-model="device.properties" :readonly="readonly" />
+              <DevicePropertyExpansionPanels
+                v-model="device.properties"
+                :readonly="readonly"
+                :compartments="compartments"
+                :sampling-medias="samplingMedias"
+                :properties="properties"
+                :units="units"
+              />
             </v-card-text>
           </v-card>
         </v-tab-item>
@@ -180,7 +196,7 @@
           >
             <v-card-title>Device URN: {{ deviceURN }}</v-card-title>
             <v-card-text>
-              <CustomFieldCards v-model="device.customFields" :readonly="readonly" />
+              <CustomFieldCards v-model="device.customFields" :readonly="readonly" :rules="rules" />
             </v-card-text>
           </v-card>
         </v-tab-item>
@@ -279,8 +295,14 @@ import Device from '../../models/Device'
 
 import CVService from '../../services/CVService'
 import SmsService from '../../services/SmsService'
+
 import Manufacturer from '../../models/Manufacturer'
 import Status from '../../models/Status'
+import DeviceType from '../../models/DeviceType'
+import Compartment from '../../models/Compartment'
+import SamplingMedia from '../../models/SamplingMedia'
+import Property from '../../models/Property'
+import Unit from '../../models/Unit'
 
 // @ts-ignore
 import ContactSelect from '../../components/ContactSelect.vue'
@@ -330,6 +352,12 @@ export default class DeviceIdPage extends mixins(Rules) {
 
   private states: Status[] = []
   private manufacturers: Manufacturer[] = []
+  private deviceTypes: DeviceType[] = []
+
+  private compartments: Compartment[] = []
+  private samplingMedias: SamplingMedia[] = []
+  private properties: Property[] = []
+  private units: Unit[] = []
 
   private editMode: boolean = false
 
@@ -354,11 +382,25 @@ export default class DeviceIdPage extends mixins(Rules) {
 
   mounted () {
     CVService.findAllStates().then((foundStates) => {
-      // TODO: Replace with real Status[] as we want to fill the uri & name
       this.states = foundStates
     })
     CVService.findAllManufacturers().then((foundManufacturers) => {
       this.manufacturers = foundManufacturers
+    })
+    CVService.findAllDeviceTypes().then((foundDeviceTypes) => {
+      this.deviceTypes = foundDeviceTypes
+    })
+    CVService.findAllCompartments().then((foundCompartments) => {
+      this.compartments = foundCompartments
+    })
+    CVService.findAllSamplingMedias().then((foundSamplingMedias) => {
+      this.samplingMedias = foundSamplingMedias
+    })
+    CVService.findAllProperties().then((foundProperties) => {
+      this.properties = foundProperties
+    })
+    CVService.findAllUnits().then((foundUnits) => {
+      this.units = foundUnits
     })
     this.loadDevice()
     this.$nextTick(() => {
@@ -475,6 +517,10 @@ export default class DeviceIdPage extends mixins(Rules) {
     return this.states.map(s => s.name)
   }
 
+  get deviceTypeNames (): string[] {
+    return this.deviceTypes.map(t => t.name)
+  }
+
   get deviceStatusName () {
     const statusIndex = this.states.findIndex(s => s.uri === this.device.statusUri)
     if (statusIndex > -1) {
@@ -490,6 +536,24 @@ export default class DeviceIdPage extends mixins(Rules) {
       this.device.statusUri = this.states[statusIndex].uri
     } else {
       this.device.statusUri = ''
+    }
+  }
+
+  get deviceTypeName () {
+    const deviceTypeIndex = this.deviceTypes.findIndex(t => t.uri === this.device.deviceTypeUri)
+    if (deviceTypeIndex > -1) {
+      return this.deviceTypes[deviceTypeIndex].name
+    }
+    return this.device.deviceTypeName
+  }
+
+  set deviceTypeName (newName: string) {
+    this.device.deviceTypeName = newName
+    const deviceTypeIndex = this.deviceTypes.findIndex(t => t.name === newName)
+    if (deviceTypeIndex > -1) {
+      this.device.deviceTypeUri = this.deviceTypes[deviceTypeIndex].uri
+    } else {
+      this.device.deviceTypeUri = ''
     }
   }
 

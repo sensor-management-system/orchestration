@@ -92,3 +92,4 @@ sw.*
 # docker runtime environment
 .bash_history
 /.config/configstore/update-notifier-npm.json
+*.swo
