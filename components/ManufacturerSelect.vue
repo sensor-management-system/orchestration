@@ -16,11 +16,10 @@
  */
 import { Vue, Component, Prop } from 'nuxt-property-decorator'
 
-import Manufacturer from '../models/Manufacturer'
-import CVService from '../services/CVService'
-
 // @ts-ignore
 import EntitySelect from '@/components/EntitySelect'
+import Manufacturer from '../models/Manufacturer'
+import CVService from '../services/CVService'
 
 type ManufacturersLoaderFunction = () => Promise<Manufacturer[]>
 

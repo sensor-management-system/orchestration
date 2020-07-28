@@ -33,8 +33,8 @@
  * @author <marc.hanisch@gfz-potsdam.de>
  */
 import { Component, Prop, mixins } from 'nuxt-property-decorator'
-import { CustomTextField } from '../models/CustomTextField'
 import { Rules } from '@/mixins/Rules'
+import { CustomTextField } from '../models/CustomTextField'
 
 /**
  * A class component for a custom field

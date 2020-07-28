@@ -16,11 +16,10 @@
  * @author <nils.brinckmann@gfz-potsdam.de>
  */
 import { Vue, Component, Prop } from 'nuxt-property-decorator'
-import Contact from '../models/Contact'
-import SmsService from '../services/SmsService'
-
 // @ts-ignore
 import EntitySelect from '@/components/EntitySelect'
+import Contact from '../models/Contact'
+import SmsService from '../services/SmsService'
 
 type ContactsLoaderFunction = () => Promise<Contact[]>
 

@@ -130,6 +130,13 @@
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 
+// @ts-ignore
+import ManufacturerSelect from '@/components/ManufacturerSelect.vue'
+// @ts-ignore
+import AppBarEditModeContent from '@/components/AppBarEditModeContent.vue'
+// @ts-ignore
+import AppBarTabsExtension from '@/components/AppBarTabsExtension.vue'
+
 import CVService from '../../services/CVService'
 import SmsService from '../../services/SmsService'
 
@@ -137,14 +144,6 @@ import Device from '../../models/Device'
 import Manufacturer from '../../models/Manufacturer'
 import PlatformType from '../../models/PlatformType'
 import Status from '../../models/Status'
-
-// @ts-ignore
-import ManufacturerSelect from '@/components/ManufacturerSelect.vue'
-
-// @ts-ignore
-import AppBarEditModeContent from '@/components/AppBarEditModeContent.vue'
-// @ts-ignore
-import AppBarTabsExtension from '@/components/AppBarTabsExtension.vue'
 
 @Component
 // @ts-ignore

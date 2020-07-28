@@ -291,6 +291,14 @@
 
 <script lang="ts">
 import { Component, Watch, mixins } from 'nuxt-property-decorator'
+// @ts-ignore
+import { Rules } from '@/mixins/Rules'
+
+// @ts-ignore
+import AppBarEditModeContent from '@/components/AppBarEditModeContent.vue'
+// @ts-ignore
+import AppBarTabsExtension from '@/components/AppBarTabsExtension.vue'
+
 import Device from '../../models/Device'
 
 import CVService from '../../services/CVService'
@@ -312,13 +320,6 @@ import DevicePropertyExpansionPanels from '../../components/DevicePropertyExpans
 import CustomFieldCards from '../../components/CustomFieldCards.vue'
 // @ts-ignore
 import AttachmentList from '../../components/AttachmentList.vue'
-// @ts-ignore
-import AppBarEditModeContent from '@/components/AppBarEditModeContent.vue'
-
-// @ts-ignore
-import AppBarTabsExtension from '@/components/AppBarTabsExtension.vue'
-// @ts-ignore
-import { Rules } from '@/mixins/Rules'
 
 @Component
 // @ts-ignore
