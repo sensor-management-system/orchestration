@@ -3,6 +3,11 @@ import colors from 'vuetify/es5/util/colors'
 
 export default {
   mode: 'spa',
+  /*
+  ** Nuxt target
+  ** See https://nuxtjs.org/api/configuration-target
+  */
+  target: 'server',
   env: {
     smsBackendUrl: process.env.SMS_BACKEND_URL || 'http://localhost:5000',
     cvBackendUrl: process.env.CV_BACKEND_URL || 'http://localhost:5001'
@@ -80,8 +85,5 @@ export default {
     // eslint-disable-next-line
     extend (config, ctx) {
     }
-  },
-  router: {
-    base: process.env.BASE_URL || '/'
   }
 }
