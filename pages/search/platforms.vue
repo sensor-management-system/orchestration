@@ -289,7 +289,7 @@ export default class SeachPlatformsPage extends Vue {
     this.loading = false
     this.searchResults = [...this.searchResults, ...loader.elements]
 
-    if (this.searchResults.length >= 20 || !this.canLoadNext()) {
+    if (this.searchResults.length >= this.pageSize || !this.canLoadNext()) {
       this.loading = false
     } else if (this.canLoadNext() && loader.funToLoadNext != null) {
       loader.funToLoadNext().then((nextLoader) => {
