@@ -1,21 +1,21 @@
 import IPathSetter from './IPathSetter'
 
 export interface IStatus {
-  id: number | null
+  id: string
   name: string
   uri: string
 }
 
 export default class Status implements IStatus, IPathSetter {
-  private _id: number | null = null
+  private _id: string = ''
   private _name: string = ''
   private _uri: string = ''
 
-  get id (): number | null {
+  get id (): string {
     return this._id
   }
 
-  set id (newId: number | null) {
+  set id (newId: string) {
     this._id = newId
   }
 
@@ -45,11 +45,7 @@ export default class Status implements IStatus, IPathSetter {
 
     switch (topLevelElement) {
       case 'id':
-        if (value !== null) {
-          this.id = Number(value)
-        } else {
-          this.id = null
-        }
+        this.id = String(value)
         break
       case 'name':
         this.name = String(value)
@@ -62,7 +58,7 @@ export default class Status implements IStatus, IPathSetter {
     }
   }
 
-  static createWithData (id: number | null, name: string, uri: string): Status {
+  static createWithData (id: string, name: string, uri: string): Status {
     const result = new Status()
     result.id = id
     result.name = name
