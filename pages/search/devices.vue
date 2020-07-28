@@ -233,6 +233,10 @@ export default class SeachDevicesPage extends Vue {
         this.statusLookup = statusLookup
 
         this.runSelectedSearch()
+      }).catch((_error) => {
+        this.$store.commit('snackbar/setError', 'Loading of states failed')
+      }).catch((_error) => {
+        this.$store.commit('snackbar/setError', 'Loading of device types failed')
       })
     })
     // make sure that all components (especially the dynamically passed ones) are rendered
@@ -300,7 +304,9 @@ export default class SeachDevicesPage extends Vue {
     this.searchResults = []
     SmsService.findDevices(
       this.pageSize, searchText, manufacturer, states, types
-    ).then(this.loadUntilWeHaveSomeEntries)
+    ).then(this.loadUntilWeHaveSomeEntries).catch((_error) => {
+      this.$store.commit('snackbar/setError', 'Loading of devices failed')
+    })
   }
 
   loadUntilWeHaveSomeEntries (loader: IPaginationLoader<Device>) {
@@ -313,6 +319,8 @@ export default class SeachDevicesPage extends Vue {
     } else if (this.canLoadNext() && loader.funToLoadNext != null) {
       loader.funToLoadNext().then((nextLoader) => {
         this.loadUntilWeHaveSomeEntries(nextLoader)
+      }).catch((_error) => {
+        this.$store.commit('snackbar/setError', 'Loading of additional devices failed')
       })
     }
   }
@@ -322,6 +330,8 @@ export default class SeachDevicesPage extends Vue {
       this.loader.funToLoadNext().then((nextLoader) => {
         this.loader = nextLoader
         this.searchResults = [...this.searchResults, ...nextLoader.elements]
+      }).catch((_error) => {
+        this.$store.commit('snackbar/setError', 'Loading of additional devices failed')
       })
     }
   }
