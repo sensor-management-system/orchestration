@@ -4,8 +4,8 @@ import colors from 'vuetify/es5/util/colors'
 export default {
   mode: 'spa',
   env: {
-    smsBackendUrl: process.env.SMS_BACKEND_URL || 'http://localhost:5000',
-    cvBackendUrl: process.env.CV_BACKEND_URL || 'http://localhost:5001'
+    smsBackendUrl: process.env.SMS_BACKEND_URL || 'http://localhost:5000/rdm/svm-api/v1',
+    cvBackendUrl: process.env.CV_BACKEND_URL || 'http://localhost:5001/api'
   },
   /*
   ** Headers of the page
