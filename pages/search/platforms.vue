@@ -46,6 +46,16 @@
                   <ManufacturerSelect v-model="selectedSearchManufacturers" />
                 </v-col>
               </v-row>
+              <v-row>
+                <v-col cols="12" md="3">
+                  <StatusSelect v-model="selectedSearchStates" />
+                </v-col>
+              </v-row>
+              <v-row>
+                <v-col cols="12" md="3">
+                  <PlatformTypeSelect v-model="selectedSearchPlatformTypes" />
+                </v-col>
+              </v-row>
             </v-card-text>
             <v-card-actions>
               <v-btn @click="extendedSearch">
@@ -157,6 +167,10 @@ import { IPaginationLoader } from '@/utils/PaginatedLoader'
 
 // @ts-ignore
 import ManufacturerSelect from '@/components/ManufacturerSelect.vue'
+// @ts-ignore
+import StatusSelect from '@/components/StatusSelect.vue'
+// @ts-ignore
+import PlatformTypeSelect from '@/components/PlatformTypeSelect.vue'
 
 // @ts-ignore
 import AppBarEditModeContent from '@/components/AppBarEditModeContent.vue'
@@ -176,7 +190,9 @@ export class AppBarTabsExtensionExtended extends AppBarTabsExtension {
 
 @Component({
   components: {
-    ManufacturerSelect
+    ManufacturerSelect,
+    StatusSelect,
+    PlatformTypeSelect
   }
 })
 export default class SeachPlatformsPage extends Vue {
@@ -188,6 +204,8 @@ export default class SeachPlatformsPage extends Vue {
   private loader: null | IPaginationLoader<Platform> = null
 
   private selectedSearchManufacturers: Manufacturer[] = []
+  private selectedSearchStates: Status[] = []
+  private selectedSearchPlatformTypes: PlatformType[] = []
 
   private platformTypeLookup: Map<string, PlatformType> = new Map<string, PlatformType>()
   private statusLookup: Map<string, Status> = new Map<string, Status>()
@@ -260,7 +278,7 @@ export default class SeachPlatformsPage extends Vue {
 
   basicSearch () {
     // only uses the text and the type (sensor or platform)
-    this.runSearch(this.searchText, [])
+    this.runSearch(this.searchText, [], [], [])
   }
 
   clearBasicSearch () {
@@ -268,7 +286,12 @@ export default class SeachPlatformsPage extends Vue {
   }
 
   extendedSearch () {
-    this.runSearch(this.searchText, this.selectedSearchManufacturers)
+    this.runSearch(
+      this.searchText,
+      this.selectedSearchManufacturers,
+      this.selectedSearchStates,
+      this.selectedSearchPlatformTypes
+    )
   }
 
   clearExtendedSearch () {
@@ -276,11 +299,20 @@ export default class SeachPlatformsPage extends Vue {
     this.selectedSearchManufacturers = []
   }
 
-  runSearch (searchText: string | null, manufacturer: Manufacturer[]) {
+  runSearch (
+    searchText: string | null,
+    manufacturer: Manufacturer[],
+    states: Status[],
+    platformTypes: PlatformType[]
+  ) {
     this.loading = true
     this.searchResults = []
     SmsService.findPlatforms(
-      this.pageSize, searchText, manufacturer
+      this.pageSize,
+      searchText,
+      manufacturer,
+      states,
+      platformTypes
     ).then(this.loadUntilWeHaveSomeEntries)
   }
 

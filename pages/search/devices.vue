@@ -46,6 +46,16 @@
                   <ManufacturerSelect v-model="selectedSearchManufacturers" />
                 </v-col>
               </v-row>
+              <v-row>
+                <v-col cols="12" md="3">
+                  <StatusSelect v-model="selectedSearchStates" />
+                </v-col>
+              </v-row>
+              <v-row>
+                <v-col cols="12" md="3">
+                  <DeviceTypeSelect v-model="selectedSearchDeviceTypes" />
+                </v-col>
+              </v-row>
             </v-card-text>
             <v-card-actions>
               <v-btn @click="extendedSearch">
@@ -151,11 +161,15 @@ import SmsService from '../../services/SmsService'
 
 import Device from '../../models/Device'
 import Manufacturer from '../../models/Manufacturer'
-import PlatformType from '../../models/PlatformType'
 import Status from '../../models/Status'
+import DeviceType from '@/models/DeviceType'
 
 // @ts-ignore
 import ManufacturerSelect from '@/components/ManufacturerSelect.vue'
+// @ts-ignore
+import StatusSelect from '@/components/StatusSelect.vue'
+// @ts-ignore
+import DeviceTypeSelect from '@/components/DeviceTypeSelect.vue'
 
 // @ts-ignore
 import AppBarEditModeContent from '@/components/AppBarEditModeContent.vue'
@@ -175,7 +189,7 @@ export class AppBarTabsExtensionExtended extends AppBarTabsExtension {
 }
 
 @Component({
-  components: { ManufacturerSelect }
+  components: { ManufacturerSelect, StatusSelect, DeviceTypeSelect }
 })
 export default class SeachDevicesPage extends Vue {
   private pageSize: number = 20
@@ -186,8 +200,10 @@ export default class SeachDevicesPage extends Vue {
   private loader: null | IPaginationLoader<Device> = null
 
   private selectedSearchManufacturers: Manufacturer[] = []
+  private selectedSearchStates: Status[] = []
+  private selectedSearchDeviceTypes: DeviceType[] = []
 
-  private platformTypeLookup: Map<string, PlatformType> = new Map<string, PlatformType>()
+  private deviceTypeLookup: Map<string, DeviceType> = new Map<string, DeviceType>()
   private statusLookup: Map<string, Status> = new Map<string, Status>()
 
   private searchResults: Device[] = []
@@ -206,22 +222,22 @@ export default class SeachDevicesPage extends Vue {
   }
 
   mounted () {
-    const promisePlatformTypes = CVService.findAllPlatformTypes()
+    const promiseDeviceTypes = CVService.findAllDeviceTypes()
     const promiseStates = CVService.findAllStates()
 
-    promisePlatformTypes.then((platformTypes) => {
+    promiseDeviceTypes.then((deviceTypes) => {
       promiseStates.then((states) => {
-        const platformTypeLookup = new Map<string, PlatformType>()
+        const deviceTypeTypeLookup = new Map<string, DeviceType>()
         const statusLookup = new Map<string, Status>()
 
-        for (const platformType of platformTypes) {
-          platformTypeLookup.set(platformType.uri, platformType)
+        for (const deviceType of deviceTypes) {
+          deviceTypeTypeLookup.set(deviceType.uri, deviceType)
         }
         for (const status of states) {
           statusLookup.set(status.uri, status)
         }
 
-        this.platformTypeLookup = platformTypeLookup
+        this.deviceTypeLookup = deviceTypeTypeLookup
         this.statusLookup = statusLookup
 
         this.runSelectedSearch()
@@ -258,7 +274,7 @@ export default class SeachDevicesPage extends Vue {
 
   basicSearch () {
     // only uses the text and the type (sensor or platform)
-    this.runSearch(this.searchText, [])
+    this.runSearch(this.searchText, [], [], [])
   }
 
   clearBasicSearch () {
@@ -266,20 +282,32 @@ export default class SeachDevicesPage extends Vue {
   }
 
   extendedSearch () {
-    this.runSearch(this.searchText, this.selectedSearchManufacturers)
+    this.runSearch(
+      this.searchText,
+      this.selectedSearchManufacturers,
+      this.selectedSearchStates,
+      this.selectedSearchDeviceTypes
+    )
   }
 
   clearExtendedSearch () {
     this.clearBasicSearch()
 
     this.selectedSearchManufacturers = []
+    this.selectedSearchStates = []
+    this.selectedSearchDeviceTypes = []
   }
 
-  runSearch (searchText: string | null, manufacturer: Manufacturer[]) {
+  runSearch (
+    searchText: string | null,
+    manufacturer: Manufacturer[],
+    states: Status[],
+    types: DeviceType[]
+  ) {
     this.loading = true
     this.searchResults = []
     SmsService.findDevices(
-      this.pageSize, searchText, manufacturer
+      this.pageSize, searchText, manufacturer, states, types
     ).then(this.loadUntilWeHaveSomeEntries)
   }
 
