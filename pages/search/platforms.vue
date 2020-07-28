@@ -345,6 +345,8 @@ export default class SeachPlatformsPage extends Vue {
       }
 
       this.$store.commit('snackbar/setSuccess', 'Platform deleted')
+    }).catch((_error) => {
+      this.$store.commit('snackbar/setError', 'Platform could not be deleted')
     })
   }
 

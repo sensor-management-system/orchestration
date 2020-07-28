@@ -321,6 +321,8 @@ export default class PlatformIdPage extends mixins(Rules) {
       this.$store.commit('snackbar/setSuccess', 'Save successful')
       // this.$router.push('/seach/platforms')
       this.toggleEditMode()
+    }).catch((_error) => {
+      this.$store.commit('snackbar/setError', 'Save failed')
     })
   }
 

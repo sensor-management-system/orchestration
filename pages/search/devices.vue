@@ -340,11 +340,20 @@ export default class SeachDevicesPage extends Vue {
       }
 
       this.$store.commit('snackbar/setSuccess', 'Device deleted')
+    }).catch((_error) => {
+      this.$store.commit('snackbar/setError', 'Device could not be deleted')
     })
   }
 
-  getType (_device: Device) {
-    return 'Device'
+  getType (device: Device) {
+    if (this.deviceTypeLookup.has(device.deviceTypeUri)) {
+      const deviceType: DeviceType = this.deviceTypeLookup.get(device.deviceTypeUri) as DeviceType
+      return deviceType.name
+    }
+    if (device.deviceTypeName) {
+      return device.deviceTypeName
+    }
+    return 'Unknown type'
   }
 
   getProject (_device: Device) {
