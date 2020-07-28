@@ -61,47 +61,63 @@
     </v-card>
 
     <h2>Results:</h2>
-    <v-card v-for="result in searchResults" :key="result.id">
-      <v-card-title>
-        {{ result.shortName }}
-      </v-card-title>
-      <v-card-text>
-        <p>{{ getPlatformType(result) }}</p>
-        <p>Project {{ getProject(result) }}</p>
-        <p>Status {{ getStatus(result) }}</p>
-      </v-card-text>
-      <v-card-actions>
-        <v-btn :to="'/platforms/' + result.id">
-          View
-        </v-btn>
-        <v-btn>Copy</v-btn>
-        <v-btn @click.stop="showDeleteDialog = true">
-          Delete
-        </v-btn>
-        <v-dialog v-model="showDeleteDialog" max-width="290">
-          <v-card>
-            <v-card-title class="headline">
-              Delete platform
-            </v-card-title>
-            <v-card-text>
-              Do you really want to delete the platform <em>{{ result.shortName }}</em>?
-            </v-card-text>
-            <v-card-actions>
-              <v-btn @click="showDeleteDialog = false">
-                No
-              </v-btn>
-              <v-spacer />
-              <v-btn color="error" @click="deleteAndCloseDialog(result.id)">
-                <v-icon left>
-                  mdi-delete
-                </v-icon>
-                Delete
-              </v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-dialog>
-      </v-card-actions>
-    </v-card>
+    <div v-if="loading">
+      <div class="text-center pt-2">
+        <v-progress-circular indeterminate />
+      </div>
+    </div>
+    <div v-if="searchResults.length == 0 && !loading">
+      <v-card>
+        <v-card-text>
+          <p class="text-center">
+            There are no platforms that match your search criteria.
+          </p>
+        </v-card-text>
+      </v-card>
+    </div>
+    <div v-else>
+      <v-card v-for="result in searchResults" :key="result.id" :disabled="loading">
+        <v-card-title>
+          {{ result.shortName }}
+        </v-card-title>
+        <v-card-text>
+          <p>{{ getPlatformType(result) }}</p>
+          <p>Project {{ getProject(result) }}</p>
+          <p>Status {{ getStatus(result) }}</p>
+        </v-card-text>
+        <v-card-actions>
+          <v-btn :to="'/platforms/' + result.id">
+            View
+          </v-btn>
+          <v-btn>Copy</v-btn>
+          <v-btn @click.stop="showDeleteDialog = true">
+            Delete
+          </v-btn>
+          <v-dialog v-model="showDeleteDialog" max-width="290">
+            <v-card>
+              <v-card-title class="headline">
+                Delete platform
+              </v-card-title>
+              <v-card-text>
+                Do you really want to delete the platform <em>{{ result.shortName }}</em>?
+              </v-card-text>
+              <v-card-actions>
+                <v-btn @click="showDeleteDialog = false">
+                  No
+                </v-btn>
+                <v-spacer />
+                <v-btn color="error" @click="deleteAndCloseDialog(result.id)">
+                  <v-icon left>
+                    mdi-delete
+                  </v-icon>
+                  Delete
+                </v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-dialog>
+        </v-card-actions>
+      </v-card>
+    </div>
     <v-speed-dial
       v-model="fab"
       fixed
@@ -137,6 +153,8 @@ import PlatformType from '../../models/PlatformType'
 import Platform from '../../models/Platform'
 import Status from '../../models/Status'
 
+import { IPaginationLoader } from '@/utils/PaginatedLoader'
+
 // @ts-ignore
 import ManufacturerSelect from '@/components/ManufacturerSelect.vue'
 
@@ -162,8 +180,12 @@ export class AppBarTabsExtensionExtended extends AppBarTabsExtension {
   }
 })
 export default class SeachPlatformsPage extends Vue {
+  private pageSize: number = 20
   private activeTab: number = 0
   private fab: boolean = false
+  private loading: boolean = true
+
+  private loader: null | IPaginationLoader<Platform> = null
 
   private selectedSearchManufacturers: Manufacturer[] = []
 
@@ -211,6 +233,15 @@ export default class SeachPlatformsPage extends Vue {
     this.$nextTick(() => {
       this.$nuxt.$emit('AppBarContent:title', 'Platforms')
     })
+
+    window.onscroll = () => {
+      // from https://www.digitalocean.com/community/tutorials/vuejs-implementing-infinite-scroll
+      const isOnBottom = document.documentElement.scrollTop + window.innerHeight === document.documentElement.offsetHeight
+
+      if (isOnBottom && this.canLoadNext()) {
+        this.loadNext()
+      }
+    }
   }
 
   beforeDestroy () {
@@ -246,11 +277,38 @@ export default class SeachPlatformsPage extends Vue {
   }
 
   runSearch (searchText: string | null, manufacturer: Manufacturer[]) {
+    this.loading = true
+    this.searchResults = []
     SmsService.findPlatforms(
-      searchText, manufacturer
-    ).then((findResults) => {
-      this.searchResults = findResults
-    })
+      this.pageSize, searchText, manufacturer
+    ).then(this.loadUntilWeHaveSomeEntries)
+  }
+
+  loadUntilWeHaveSomeEntries (loader:IPaginationLoader<Platform>) {
+    this.loader = loader
+    this.loading = false
+    this.searchResults = [...this.searchResults, ...loader.elements]
+
+    if (this.searchResults.length >= this.pageSize || !this.canLoadNext()) {
+      this.loading = false
+    } else if (this.canLoadNext() && loader.funToLoadNext != null) {
+      loader.funToLoadNext().then((nextLoader) => {
+        this.loadUntilWeHaveSomeEntries(nextLoader)
+      })
+    }
+  }
+
+  loadNext () {
+    if (this.loader != null && this.loader.funToLoadNext != null) {
+      this.loader.funToLoadNext().then((nextLoader) => {
+        this.loader = nextLoader
+        this.searchResults = [...this.searchResults, ...nextLoader.elements]
+      })
+    }
+  }
+
+  canLoadNext () {
+    return this.loader != null && this.loader.funToLoadNext != null
   }
 
   deleteAndCloseDialog (id: number) {

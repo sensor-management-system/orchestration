@@ -845,15 +845,19 @@ export default class ConfigurationsIdPage extends Vue {
     switch (this.searchOptions.searchType) {
       case SearchType.Platform:
         this.platforms = await SmsService.findPlatforms(
+          // load all the elements with one run
+          100000,
           this.searchOptions.text,
           [] as Manufacturer[]
-        )
+        ).then(x => x.elements)
         break
       case SearchType.Device:
         this.devices = await SmsService.findDevices(
+          // load all the elements with one run
+          100000,
           this.searchOptions.text,
           [] as Manufacturer[]
-        )
+        ).then(x => x.elements)
         break
       default:
         throw new TypeError('search function not defined for unknown value')
