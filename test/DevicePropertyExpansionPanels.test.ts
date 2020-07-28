@@ -75,7 +75,7 @@ describe('DevicePropertyExpansionPanels', () => {
    */
 
   it('should be a Vue instance', () => {
-    expect(wrapper.isVueInstance()).toBeTruthy()
+    expect(wrapper.vm).toBeTruthy()
   })
 
   /*
