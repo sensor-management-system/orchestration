@@ -99,6 +99,18 @@
     </v-app-bar>
     <v-content>
       <v-container>
+        <v-snackbar v-model="hasSuccess" top color="green">
+          {{ success }}
+          <v-btn fab @click="closeSuccessSnackbar">
+            <v-icon>mdi-close</v-icon>
+          </v-btn>
+        </v-snackbar>
+        <v-snackbar v-model="hasError" top color="error">
+          {{ error }}
+          <v-btn fab @click="closeErrorSnackbar">
+            <v-icon>mdi-close</v-icon>
+          </v-btn>
+        </v-snackbar>
         <nuxt />
       </v-container>
     </v-content>
@@ -112,6 +124,7 @@
 </template>
 
 <script>
+
 export default {
   data () {
     return {
@@ -124,6 +137,20 @@ export default {
       appBarExtension: null
     }
   },
+  computed: {
+    error () {
+      return this.$store.state.snackbar.error
+    },
+    hasError () {
+      return this.$store.state.snackbar.error !== ''
+    },
+    success () {
+      return this.$store.state.snackbar.success
+    },
+    hasSuccess () {
+      return this.$store.state.snackbar.success !== ''
+    }
+  },
   created () {
     this.$nuxt.$on('app-bar-content', (component) => {
       this.appBarContent = component
@@ -131,6 +158,14 @@ export default {
     this.$nuxt.$on('app-bar-extension', (component) => {
       this.appBarExtension = component
     })
+  },
+  methods: {
+    closeErrorSnackbar () {
+      this.$store.commit('snackbar/clearError')
+    },
+    closeSuccessSnackbar () {
+      this.$store.commit('snackbar/clearSuccess')
+    }
   }
 }
 </script>

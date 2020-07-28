@@ -1,11 +1,5 @@
 <template>
   <div>
-    <v-snackbar v-model="showSuccessMessage" top color="success">
-      {{ successMessage }}
-      <v-btn fab @click="showSaveSuccess = false">
-        <v-icon>mdi-close</v-icon>
-      </v-btn>
-    </v-snackbar>
     <v-card>
       <v-tabs-items
         v-model="activeTab"
@@ -214,8 +208,6 @@ export default class SeachPlatformsPage extends Vue {
   private searchText: string | null = null
 
   private showDeleteDialog: boolean = false
-  private showSuccessMessage: boolean = false
-  private successMessage = ''
 
   created () {
     this.$nuxt.$emit('app-bar-content', AppBarEditModeContent)
@@ -352,8 +344,7 @@ export default class SeachPlatformsPage extends Vue {
         this.searchResults.splice(searchIndex, 1)
       }
 
-      this.successMessage = 'Platform deleted'
-      this.showSuccessMessage = true
+      this.$store.commit('snackbar/setSuccess', 'Platform deleted')
     })
   }
 
