@@ -1,12 +1,12 @@
 import IPathSetter from './IPathSetter'
 
-export interface IManufacturer {
+export interface IVariable {
   id: string
   name: string
   uri: string
 }
 
-export default class Manufacturer implements IManufacturer, IPathSetter {
+export default class Variable implements IVariable, IPathSetter {
   private _id: string = ''
   private _name: string = ''
   private _uri: string = ''
@@ -58,16 +58,16 @@ export default class Manufacturer implements IManufacturer, IPathSetter {
     }
   }
 
-  static createWithData (id: string, name: string, uri: string): Manufacturer {
-    const result = new Manufacturer()
+  static createWithData (id: string, name: string, uri: string): Variable {
+    const result = new Variable()
     result.id = id
     result.name = name
     result.uri = uri
     return result
   }
 
-  static createFromObject (someObject: IManufacturer): Manufacturer {
-    const newObject = new Manufacturer()
+  static createFromObject (someObject: IVariable): Variable {
+    const newObject = new Variable()
 
     newObject.id = someObject.id
     newObject.name = someObject.name

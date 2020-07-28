@@ -1,38 +1,185 @@
+import axios from 'axios'
+
 import Manufacturer from '../models/Manufacturer'
 import PlatformType from '~/models/PlatformType'
 import Status from '~/models/Status'
+import DeviceType from '~/models/DeviceType'
+import Compartment from '~/models/Compartment'
+import SamplingMedia from '~/models/SamplingMedia'
+import Property from '~/models/Property'
+import Unit from '~/models/Unit'
+
+const BASE_URL = process.env.cvBackendUrl + '/api'
 
 export default class CVService {
   static findAllManufacturers (): Promise<Manufacturer[]> {
-    return new Promise<Manufacturer[]>((resolve) => {
-      resolve([
-        Manufacturer.createWithData(1, 'Manufacturer 01', 'http://helmholtz/smsvc/manfucturer/1'),
-        Manufacturer.createWithData(2, 'Manufacturer 02', 'http://helmholtz/smsvs/manfucturer/2')
-      ])
+    return axios.get(BASE_URL + '/manufacturer?page[size]=100000&filter[active]=true').then((rawResponse) => {
+      const response = rawResponse.data
+      const data = response.data
+
+      const result = []
+
+      for (const record of data) {
+        const id = record.id
+        const name = record.attributes.name
+        const url = record.links.self
+
+        result.push(
+          Manufacturer.createWithData(id, name, url)
+        )
+      }
+
+      return result
     })
   }
 
   static findAllPlatformTypes (): Promise<PlatformType[]> {
-    return new Promise<PlatformType[]>((resolve) => {
-      resolve([
-        PlatformType.createWithData(1, 'Station', 'http://helmholtz/smsvc/platformtype/1'),
-        PlatformType.createWithData(2, 'Drone', 'http://helmholtz/smsvc/platformtype/2'),
-        PlatformType.createWithData(3, 'Vessel', 'http://helmholtz/smsvc/platformtype/3'),
-        PlatformType.createWithData(4, 'Vehicle', 'http://helmholtz/smsvc/platformtype/4'),
-        PlatformType.createWithData(5, 'Satellite', 'http://helmholtz/smsvc/platformtype/5')
-      ])
+    return axios.get(BASE_URL + '/platformtype?page[size]=100000&filter[active]=true').then((rawResponse) => {
+      const response = rawResponse.data
+      const data = response.data
+
+      const result = []
+
+      for (const record of data) {
+        const id = record.id
+        const name = record.attributes.name
+        const url = record.links.self
+
+        result.push(
+          PlatformType.createWithData(id, name, url)
+        )
+      }
+
+      return result
     })
   }
 
   static findAllStates (): Promise<Status[]> {
-    return new Promise<Status[]>((resolve) => {
-      resolve([
-        Status.createWithData(1, 'in warehouse', 'https//helmholtz/smsvc/platformstatus/1'),
-        Status.createWithData(2, 'in use', 'https//helmholtz/smsvc/platformstatus/2'),
-        Status.createWithData(3, 'under construction', 'https//helmholtz/smsvc/platformstatus/3'),
-        Status.createWithData(4, 'blocked', 'https//helmholtz/smsvc/platformstatus/4'),
-        Status.createWithData(5, 'scrapped', 'https//helmholtz/smsvc/platformstatus/5')
-      ])
+    return axios.get(BASE_URL + '/equipmentstatus?page[size]=100000&filter[active]=true').then((rawResponse) => {
+      const response = rawResponse.data
+      const data = response.data
+
+      const result = []
+
+      for (const record of data) {
+        const id = record.id
+        const name = record.attributes.name
+        const url = record.links.self
+
+        result.push(
+          Status.createWithData(id, name, url)
+        )
+      }
+
+      return result
+    })
+  }
+
+  static findAllDeviceTypes (): Promise<DeviceType[]> {
+    return axios.get(BASE_URL + '/equipmenttype?page[limit]=100000&filter[active]=true').then((rawResponse) => {
+      const response = rawResponse.data
+      const data = response.data
+
+      const result = []
+
+      for (const record of data) {
+        const id = record.id
+        const name = record.attributes.name
+        const url = record.links.self
+
+        result.push(
+          DeviceType.createWithData(id, name, url)
+        )
+      }
+
+      return result
+    })
+  }
+
+  static findAllCompartments (): Promise<Compartment[]> {
+    return axios.get(BASE_URL + '/variabletype?page[limit]=100000&filter[active]=true').then((rawResponse) => {
+      const response = rawResponse.data
+      const data = response.data
+
+      const result = []
+
+      for (const record of data) {
+        const id = record.id
+        const name = record.attributes.name
+        const url = record.links.self
+
+        result.push(
+          Compartment.createWithData(id, name, url)
+        )
+      }
+
+      return result
+    })
+  }
+
+  static findAllSamplingMedias (): Promise<SamplingMedia[]> {
+    return axios.get(BASE_URL + '/medium?page[limit]=100000&filter[active]=true').then((rawResponse) => {
+      const response = rawResponse.data
+      const data = response.data
+
+      const result = []
+
+      for (const record of data) {
+        const id = record.id
+        const name = record.attributes.name
+        const url = record.links.self
+
+        result.push(
+          SamplingMedia.createWithData(id, name, url)
+        )
+      }
+
+      return result
+    })
+  }
+
+  static findAllProperties (): Promise<Property[]> {
+    return axios.get(BASE_URL + '/variablename?page[limit]=100000&filter[active]=true').then((rawResponse) => {
+      const response = rawResponse.data
+      const data = response.data
+
+      const result = []
+
+      for (const record of data) {
+        const id = record.id
+        const name = record.attributes.name
+        const url = record.links.self
+
+        result.push(
+          Property.createWithData(id, name, url)
+        )
+      }
+
+      return result
+    })
+  }
+
+  static findAllUnits (): Promise<Unit[]> {
+    return axios.get(BASE_URL + '/unit?page[limit]=100000&filter[active]=true').then((rawResponse) => {
+      const response = rawResponse.data
+      const data = response.data
+
+      const result = []
+
+      for (const record of data) {
+        const id = record.id
+        let name = record.attributes.unitsname
+        if (record.attributes.unitsabbreviation) {
+          name += ' [' + record.attributes.unitsabbreviation + ']'
+        }
+        const url = record.attributes.unitslink || record.links.self
+
+        result.push(
+          Unit.createWithData(id, name, url)
+        )
+      }
+
+      return result
     })
   }
 }

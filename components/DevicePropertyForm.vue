@@ -1,22 +1,28 @@
 <template>
   <div>
+    <p>
+      {{ value.compartmentName }}
+      {{ value.compartmentUri }}
+    </p>
     <v-row>
       <v-col cols="12" md="3">
-        <v-select
+        <v-combobox
           label="Compartment"
-          :value="value.compartmentUri"
+          :items="compartmentNames"
+          :value="valueCompartmentName"
           :readonly="readonly"
           :disabled="readonly"
-          @input="update('compartmentUri', $event)"
+          @input="update('compartmentName', $event)"
         />
       </v-col>
       <v-col cols="12" md="3">
-        <v-select
+        <v-combobox
           label="Unit"
-          :value="value.unitUri"
+          :items="unitNames"
+          :value="valueUnitName"
           :readonly="readonly"
           :disabled="readonly"
-          @input="update('unitUri', $event)"
+          @input="update('unitName', $event)"
         />
       </v-col>
       <v-col cols="12" md="3">
@@ -31,12 +37,13 @@
     </v-row>
     <v-row>
       <v-col cols="12" md="3">
-        <v-select
+        <v-combobox
           label="Sampling media"
-          :value="value.samplingMediaUri"
+          :items="samplingMediaNames"
+          :value="valueSamplingMediaName"
           :readonly="readonly"
           :disabled="readonly"
-          @input="update('samplingMediaUri', $event)"
+          @input="update('samplingMediaName', $event)"
         />
       </v-col>
       <v-col cols="12" md="1">
@@ -69,12 +76,13 @@
     </v-row>
     <v-row>
       <v-col cols="12" md="3">
-        <v-select
+        <v-combobox
           label="Property"
-          :value="value.propertyUri"
+          :items="propertyNames"
+          :value="valuePropertyName"
           :readonly="readonly"
           :disabled="readonly"
-          @input="update('propertyUri', $event)"
+          @input="update('propertyName', $event)"
         />
       </v-col>
       <v-col cols="12" md="3">
@@ -98,6 +106,16 @@
 import { Vue, Component, Prop } from 'nuxt-property-decorator'
 import { DeviceProperty } from '../models/DeviceProperty'
 
+import Compartment from '../models/Compartment'
+import SamplingMedia from '../models/SamplingMedia'
+import Property from '../models/Property'
+import Unit from '../models/Unit'
+
+interface INameAndUri {
+  name: string
+  uri: string
+}
+
 /**
  * A class component for a device property
  * @extends Vue
@@ -120,6 +138,34 @@ export default class DevicePropertyForm extends Vue {
   // @ts-ignore
   readonly readonly: boolean
 
+  @Prop({
+    default: () => [] as Compartment[],
+    required: true,
+    type: Array
+  })
+  compartments!: Compartment[]
+
+  @Prop({
+    default: () => [] as SamplingMedia[],
+    required: true,
+    type: Array
+  })
+  samplingMedias!: SamplingMedia[]
+
+  @Prop({
+    default: () => [] as Property[],
+    required: true,
+    type: Array
+  })
+  properties!: Property[]
+
+  @Prop({
+    default: () => [] as Unit[],
+    required: true,
+    type: Array
+  })
+  units!: Unit[]
+
   /**
    * update the internal model at a given key
    *
@@ -129,6 +175,43 @@ export default class DevicePropertyForm extends Vue {
    */
   update (key: string, value: string) {
     const newObj: DeviceProperty = DeviceProperty.createFromObject(this.value)
+
+    const uriLookupByName: { [id: string]: {nameToSet: string, elements: INameAndUri[] } } = {
+      compartmentName: {
+        nameToSet: 'compartmentUri',
+        elements: this.compartments
+      },
+      unitName: {
+        nameToSet: 'unitUri',
+        elements: this.units
+      },
+      samplingMediaName: {
+        nameToSet: 'samplingMediaUri',
+        elements: this.samplingMedias
+      },
+      propertyName: {
+        nameToSet: 'propertyUri',
+        elements: this.properties
+      }
+    }
+
+    if (uriLookupByName[key]) {
+      // the comoboboxes may set the value to null,
+      // but we don't want to work further with nulls
+      //
+      // all of the comboboxes see the empty string as the
+      // "no value" choice
+      if (value === null) {
+        value = ''
+      }
+      const index = uriLookupByName[key].elements.findIndex(x => x.name === value)
+      let valueToSet = ''
+      if (index > -1) {
+        valueToSet = uriLookupByName[key].elements[index].uri
+      }
+      newObj.setPath(uriLookupByName[key].nameToSet, valueToSet)
+    }
+
     newObj.setPath(key, value)
 
     /**
@@ -137,6 +220,54 @@ export default class DevicePropertyForm extends Vue {
      * @type DeviceProperty
      */
     this.$emit('input', newObj)
+  }
+
+  get compartmentNames () : string[] {
+    return this.compartments.map(c => c.name)
+  }
+
+  get valueCompartmentName (): string {
+    const compartmentIndex = this.compartments.findIndex(c => c.uri === this.value.compartmentUri)
+    if (compartmentIndex > -1) {
+      return this.compartments[compartmentIndex].name
+    }
+    return this.value.compartmentName
+  }
+
+  get unitNames (): string[] {
+    return this.units.map(u => u.name)
+  }
+
+  get valueUnitName (): string {
+    const unitIndex = this.units.findIndex(u => u.uri === this.value.unitUri)
+    if (unitIndex > -1) {
+      return this.units[unitIndex].name
+    }
+    return this.value.unitName
+  }
+
+  get samplingMediaNames (): string[] {
+    return this.samplingMedias.map(s => s.name)
+  }
+
+  get valueSamplingMediaName (): string {
+    const samplingMediaIndex = this.samplingMedias.findIndex(s => s.uri === this.value.samplingMediaUri)
+    if (samplingMediaIndex > -1) {
+      return this.samplingMedias[samplingMediaIndex].name
+    }
+    return this.value.samplingMediaName
+  }
+
+  get propertyNames (): string[] {
+    return this.properties.map(p => p.name)
+  }
+
+  get valuePropertyName (): string {
+    const propertyIndex = this.properties.findIndex(p => p.uri === this.value.propertyUri)
+    if (propertyIndex > -1) {
+      return this.properties[propertyIndex].name
+    }
+    return this.value.propertyName
   }
 }
 </script>

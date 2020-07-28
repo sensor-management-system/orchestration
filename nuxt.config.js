@@ -4,8 +4,8 @@ import colors from 'vuetify/es5/util/colors'
 export default {
   mode: 'spa',
   env: {
-    // keep deprecated BACKEND_URL for backward compatibility
-    backendUrl: process.env.BACKEND_HOST_URL || process.env.BACKEND_URL || 'http://localhost:5000'
+    smsBackendUrl: process.env.SMS_BACKEND_URL || 'http://localhost:5000',
+    cvBackendUrl: process.env.CV_BACKEND_URL || 'http://localhost:5001'
   },
   /*
   ** Headers of the page
