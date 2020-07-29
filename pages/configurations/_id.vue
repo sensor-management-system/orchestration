@@ -86,14 +86,14 @@
                   <v-row>
                     <v-col cols="12" md="3">
                       <v-text-field
-                        v-model.lazy="longitude"
-                        label="Longitude (WGS84)"
+                        v-model.lazy="latitude"
+                        label="Latitude (WGS84)"
                       />
                     </v-col>
                     <v-col cols="12" md="3">
                       <v-text-field
-                        v-model.lazy="latitude"
-                        label="Latitude (WGS84)"
+                        v-model.lazy="longitude"
+                        label="Longitude (WGS84)"
                       />
                     </v-col>
                     <v-col cols="12" md="3">
@@ -654,8 +654,8 @@ export default class ConfigurationsIdPage extends Vue {
 
   get location (): number[] {
     return [
-      this.longitude,
-      this.latitude
+      this.latitude,
+      this.longitude
     ]
   }
 
@@ -845,15 +845,19 @@ export default class ConfigurationsIdPage extends Vue {
     switch (this.searchOptions.searchType) {
       case SearchType.Platform:
         this.platforms = await SmsService.findPlatforms(
+          // load all the elements with one run
+          100000,
           this.searchOptions.text,
           [] as Manufacturer[]
-        )
+        ).then(x => x.elements)
         break
       case SearchType.Device:
         this.devices = await SmsService.findDevices(
+          // load all the elements with one run
+          100000,
           this.searchOptions.text,
           [] as Manufacturer[]
-        )
+        ).then(x => x.elements)
         break
       default:
         throw new TypeError('search function not defined for unknown value')
