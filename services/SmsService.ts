@@ -1,13 +1,13 @@
 import axios from 'axios'
 
+import {
+  IPaginationLoader, FilteredPaginationedLoader
+} from '@/utils/PaginatedLoader'
+
 import Platform from '../models/Platform'
 import Device from '../models/Device'
 import Contact from '../models/Contact'
 import Manufacturer from '~/models/Manufacturer'
-
-import {
-  IPaginationLoader, FilteredPaginationedLoader
-} from '@/utils/PaginatedLoader'
 
 // Use on version for all the queries
 const BASE_URL = process.env.smsBackendUrl + '/rdm/svm-api/v1'
