@@ -11,10 +11,19 @@ import SamplingMediaApi from '@/services/cv/SamplingMediaApi'
 import StatusApi from '@/services/cv/StatusApi'
 import UnitApi from '@/services/cv/UnitApi'
 
-export class SmsApi {
+export default class Api {
   private _deviceApi: DeviceApi = new DeviceApi()
   private _platformApi: PlatformApi = new PlatformApi()
   private _contactApi: ContactApi = new ContactApi()
+
+  private _manufacturerApi: ManufacturerApi = new ManufacturerApi()
+  private _platformTypeApi: PlatformTypeApi = new PlatformTypeApi()
+  private _statusApi: StatusApi = new StatusApi()
+  private _deviceTypeApi: DeviceTypeApi = new DeviceTypeApi()
+  private _comparmentApi: CompartmentApi = new CompartmentApi()
+  private _samplingMediaApi: SamplingMediaApi = new SamplingMediaApi()
+  private _propertyApi: PropertyApi = new PropertyApi()
+  private _unitApi: UnitApi = new UnitApi()
 
   get devices (): DeviceApi {
     return this._deviceApi
@@ -27,17 +36,6 @@ export class SmsApi {
   get contacts (): ContactApi {
     return this._contactApi
   }
-}
-
-export class CvApi {
-  private _manufacturerApi: ManufacturerApi = new ManufacturerApi()
-  private _platformTypeApi: PlatformTypeApi = new PlatformTypeApi()
-  private _statusApi: StatusApi = new StatusApi()
-  private _deviceTypeApi: DeviceTypeApi = new DeviceTypeApi()
-  private _comparmentApi: CompartmentApi = new CompartmentApi()
-  private _samplingMediaApi: SamplingMediaApi = new SamplingMediaApi()
-  private _propertyApi: PropertyApi = new PropertyApi()
-  private _unitApi: UnitApi = new UnitApi()
 
   get manufacturer (): ManufacturerApi {
     return this._manufacturerApi
@@ -69,18 +67,5 @@ export class CvApi {
 
   get units (): UnitApi {
     return this._unitApi
-  }
-}
-
-export default class Api {
-  private _smsApi: SmsApi = new SmsApi()
-  private _cvApi: CvApi = new CvApi()
-
-  get sms (): SmsApi {
-    return this._smsApi
-  }
-
-  get cv (): CvApi {
-    return this._cvApi
   }
 }

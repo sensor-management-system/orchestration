@@ -52,7 +52,7 @@ export default class PlatformTypeSelect extends Vue {
 
   get findAllPlatformTypes (): PlatformTypeLoaderFunction {
     return () => {
-      return new Api().cv.platformTypes.findAll()
+      return new Api().platformTypes.findAll()
     }
   }
 

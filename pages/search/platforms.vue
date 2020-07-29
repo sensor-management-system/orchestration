@@ -219,8 +219,8 @@ export default class SeachPlatformsPage extends Vue {
   }
 
   mounted () {
-    const promisePlatformTypes = this.api.cv.platformTypes.findAll()
-    const promiseStates = this.api.cv.states.findAll()
+    const promisePlatformTypes = this.api.platformTypes.findAll()
+    const promiseStates = this.api.states.findAll()
 
     promisePlatformTypes.then((platformTypes) => {
       promiseStates.then((states) => {
@@ -304,7 +304,7 @@ export default class SeachPlatformsPage extends Vue {
   ) {
     this.loading = true
     this.searchResults = []
-    this.api.sms.platforms
+    this.api.platforms
       .newSearchBuilder()
       .withTextInShortName(searchText)
       .withOneMatchingManufacturerOf(manufacturer)
@@ -349,7 +349,7 @@ export default class SeachPlatformsPage extends Vue {
   }
 
   deleteAndCloseDialog (id: number) {
-    this.api.sms.platforms.deleteById(id).then(() => {
+    this.api.platforms.deleteById(id).then(() => {
       this.showDeleteDialog = false
 
       const searchIndex = this.searchResults.findIndex(r => r.id === id)

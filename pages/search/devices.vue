@@ -215,8 +215,8 @@ export default class SeachDevicesPage extends Vue {
   }
 
   mounted () {
-    const promiseDeviceTypes = this.api.cv.deviceTypes.findAll()
-    const promiseStates = this.api.cv.states.findAll()
+    const promiseDeviceTypes = this.api.deviceTypes.findAll()
+    const promiseStates = this.api.states.findAll()
 
     promiseDeviceTypes.then((deviceTypes) => {
       promiseStates.then((states) => {
@@ -303,7 +303,7 @@ export default class SeachDevicesPage extends Vue {
   ) {
     this.loading = true
     this.searchResults = []
-    this.api.sms.devices
+    this.api.devices
       .newSearchBuilder()
       .withTextInShortName(searchText)
       .withOneMachtingManufacturerOf(manufacturer)
@@ -348,7 +348,7 @@ export default class SeachDevicesPage extends Vue {
   }
 
   deleteAndCloseDialog (id: number) {
-    this.api.sms.devices.deleteById(id).then(() => {
+    this.api.devices.deleteById(id).then(() => {
       this.showDeleteDialog = false
 
       const searchIndex = this.searchResults.findIndex(r => r.id === id)

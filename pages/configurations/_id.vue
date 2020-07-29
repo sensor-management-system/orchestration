@@ -844,13 +844,13 @@ export default class ConfigurationsIdPage extends Vue {
   async search () {
     switch (this.searchOptions.searchType) {
       case SearchType.Platform:
-        this.platforms = await this.api.sms.platforms.newSearchBuilder()
+        this.platforms = await this.api.platforms.newSearchBuilder()
           .withTextInShortName(this.searchOptions.text)
           .build()
           .findMatchingAsList()
         break
       case SearchType.Device:
-        this.devices = await this.api.sms.devices.newSearchBuilder()
+        this.devices = await this.api.devices.newSearchBuilder()
           .withTextInShortName(this.searchOptions.text)
           .build()
           .findMatchingAsList()

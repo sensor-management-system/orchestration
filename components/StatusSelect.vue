@@ -52,7 +52,7 @@ export default class StatusSelect extends Vue {
 
   get findAllStates (): StatesLoaderFunction {
     return () => {
-      return new Api().cv.states.newSearchBuilder().build().findMatchingAsList()
+      return new Api().states.findAll()
     }
   }
 

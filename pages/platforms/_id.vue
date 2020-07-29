@@ -252,13 +252,13 @@ export default class PlatformIdPage extends mixins(Rules) {
   }
 
   mounted () {
-    this.api.cv.manufacturer.findAll().then((foundManufacturers) => {
+    this.api.manufacturer.findAll().then((foundManufacturers) => {
       this.manufacturers = foundManufacturers
     })
-    this.api.cv.platformTypes.findAll().then((foundPlatformTypes) => {
+    this.api.platformTypes.findAll().then((foundPlatformTypes) => {
       this.platformTypes = foundPlatformTypes
     })
-    this.api.cv.states.findAll().then((foundStates) => {
+    this.api.states.findAll().then((foundStates) => {
       this.states = foundStates
     })
     this.loadPlatform()
@@ -285,7 +285,7 @@ export default class PlatformIdPage extends mixins(Rules) {
     const platformId = this.$route.params.id
     if (platformId) {
       this.isInEditMode = false
-      this.api.sms.platforms.findById(platformId).then((foundPlatform) => {
+      this.api.platforms.findById(platformId).then((foundPlatform) => {
         this.platform = foundPlatform
       }).catch(() => {
         // We don't take the error directly
@@ -317,7 +317,7 @@ export default class PlatformIdPage extends mixins(Rules) {
 
   // methods
   save () {
-    this.api.sms.platforms.save(this.platform).then((savedPlatform) => {
+    this.api.platforms.save(this.platform).then((savedPlatform) => {
       this.platform = savedPlatform
       this.$store.commit('snackbar/setSuccess', 'Save successful')
       // this.$router.push('/seach/platforms')

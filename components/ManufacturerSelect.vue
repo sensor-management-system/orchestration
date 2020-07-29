@@ -52,7 +52,7 @@ export default class ManufacturerSelect extends Vue {
 
   get findAllManufacturers (): ManufacturersLoaderFunction {
     return () => {
-      return new Api().cv.manufacturer.findAll()
+      return new Api().manufacturer.findAll()
     }
   }
 

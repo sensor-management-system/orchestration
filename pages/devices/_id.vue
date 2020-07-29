@@ -381,25 +381,25 @@ export default class DeviceIdPage extends mixins(Rules) {
   }
 
   mounted () {
-    this.api.cv.states.findAll().then((foundStates) => {
+    this.api.states.findAll().then((foundStates) => {
       this.states = foundStates
     })
-    this.api.cv.manufacturer.findAll().then((foundManufacturers) => {
+    this.api.manufacturer.findAll().then((foundManufacturers) => {
       this.manufacturers = foundManufacturers
     })
-    this.api.cv.deviceTypes.findAll().then((foundDeviceTypes) => {
+    this.api.deviceTypes.findAll().then((foundDeviceTypes) => {
       this.deviceTypes = foundDeviceTypes
     })
-    this.api.cv.compartments.findAll().then((foundCompartments) => {
+    this.api.compartments.findAll().then((foundCompartments) => {
       this.compartments = foundCompartments
     })
-    this.api.cv.samplingMedia.findAll().then((foundSamplingMedias) => {
+    this.api.samplingMedia.findAll().then((foundSamplingMedias) => {
       this.samplingMedias = foundSamplingMedias
     })
-    this.api.cv.properties.findAll().then((foundProperties) => {
+    this.api.properties.findAll().then((foundProperties) => {
       this.properties = foundProperties
     })
-    this.api.cv.units.findAll().then((foundUnits) => {
+    this.api.units.findAll().then((foundUnits) => {
       this.units = foundUnits
     })
     this.loadDevice()
@@ -424,7 +424,7 @@ export default class DeviceIdPage extends mixins(Rules) {
     const deviceId = this.$route.params.id
     if (deviceId) {
       this.isInEditMode = false
-      this.api.sms.devices.findById(deviceId).then((foundDevice) => {
+      this.api.devices.findById(deviceId).then((foundDevice) => {
         this.device = foundDevice
       }).catch((_error) => {
         this.$store.commit('snackbar/setError', 'Loading device failed')
@@ -439,7 +439,7 @@ export default class DeviceIdPage extends mixins(Rules) {
   }
 
   save () {
-    this.api.sms.devices.save(this.device).then((savedDevice) => {
+    this.api.devices.save(this.device).then((savedDevice) => {
       this.device = savedDevice
       this.toggleEditMode()
       this.$store.commit('snackbar/setSuccess', 'Save successful')

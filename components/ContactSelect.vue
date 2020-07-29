@@ -52,7 +52,7 @@ export default class ContactSelect extends Vue {
 
   get findAllContacts () : ContactsLoaderFunction {
     return () => {
-      return new Api().sms.contacts.findAll()
+      return new Api().contacts.findAll()
     }
   }
 

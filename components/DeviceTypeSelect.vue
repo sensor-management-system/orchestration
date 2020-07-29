@@ -52,7 +52,7 @@ export default class DeviceTypeSelect extends Vue {
 
   get findAllDeviceTypes (): DeviceTypeLoaderFunction {
     return () => {
-      return new Api().cv.deviceTypes.findAll()
+      return new Api().deviceTypes.findAll()
     }
   }
 
