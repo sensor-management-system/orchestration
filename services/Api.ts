@@ -31,6 +31,7 @@ export default class Api {
   private readonly _unitApi: UnitApi
 
   constructor (smsBaseUrl: string | undefined = SMS_BASE_URL, cvBaseUrl: string | undefined = CV_BASE_URL) {
+    // here we can set settings for all the sms api calls
     const smsConfig: AxiosRequestConfig = {
     }
 
@@ -44,6 +45,7 @@ export default class Api {
       this.createAxios(smsBaseUrl, '/devices', smsConfig)
     )
 
+    // and here we can set settings for all the cv api calls
     const cvConfig: AxiosRequestConfig = {
     }
 
