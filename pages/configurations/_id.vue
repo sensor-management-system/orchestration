@@ -86,14 +86,14 @@
                   <v-row>
                     <v-col cols="12" md="3">
                       <v-text-field
-                        v-model.lazy="longitude"
-                        label="Longitude (WGS84)"
+                        v-model.lazy="latitude"
+                        label="Latitude (WGS84)"
                       />
                     </v-col>
                     <v-col cols="12" md="3">
                       <v-text-field
-                        v-model.lazy="latitude"
-                        label="Latitude (WGS84)"
+                        v-model.lazy="longitude"
+                        label="Longitude (WGS84)"
                       />
                     </v-col>
                     <v-col cols="12" md="3">
@@ -654,8 +654,8 @@ export default class ConfigurationsIdPage extends Vue {
 
   get location (): number[] {
     return [
-      this.longitude,
-      this.latitude
+      this.latitude,
+      this.longitude
     ]
   }
 
