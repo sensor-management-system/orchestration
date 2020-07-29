@@ -654,8 +654,8 @@ export default class ConfigurationsIdPage extends Vue {
 
   get location (): number[] {
     return [
-      this.longitude,
-      this.latitude
+      this.latitude,
+      this.longitude
     ]
   }
 
