@@ -219,6 +219,7 @@ export class AppBarTabsExtensionExtended extends AppBarTabsExtension {
 })
 // @ts-ignore
 export default class PlatformIdPage extends mixins(Rules) {
+  private platformApi: PlatformApi = new PlatformApi()
   // data
   // first for the data to chose the elements
   private platformTypes: PlatformType[] = []
@@ -285,7 +286,7 @@ export default class PlatformIdPage extends mixins(Rules) {
     const platformId = this.$route.params.id
     if (platformId) {
       this.isInEditMode = false
-      PlatformApi.findById(platformId).then((foundPlatform) => {
+      this.platformApi.findById(platformId).then((foundPlatform) => {
         this.platform = foundPlatform
       }).catch(() => {
         // We don't take the error directly
@@ -317,7 +318,7 @@ export default class PlatformIdPage extends mixins(Rules) {
 
   // methods
   save () {
-    PlatformApi.save(this.platform).then((savedPlatform) => {
+    this.platformApi.save(this.platform).then((savedPlatform) => {
       this.platform = savedPlatform
       this.$store.commit('snackbar/setSuccess', 'Save successful')
       // this.$router.push('/seach/platforms')

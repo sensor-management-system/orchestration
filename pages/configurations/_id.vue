@@ -500,7 +500,6 @@ import Contact from '@/models/Contact'
 
 // @ts-ignore
 import Platform from '@/models/Platform'
-import PlatformType from '@/models/PlatformType'
 // @ts-ignore
 import Device from '@/models/Device'
 import DeviceType from '@/models/DeviceType'
@@ -548,6 +547,8 @@ export class AppBarTabsExtensionExtended extends AppBarTabsExtension {
 })
 // @ts-ignore
 export default class ConfigurationsIdPage extends Vue {
+  private platformApi: PlatformApi = new PlatformApi()
+
   private activeTab: number = 0
   private editMode: boolean = false
 
@@ -847,14 +848,10 @@ export default class ConfigurationsIdPage extends Vue {
   async search () {
     switch (this.searchOptions.searchType) {
       case SearchType.Platform:
-        this.platforms = await PlatformApi.find(
-          // load all the elements with one run
-          100000,
-          this.searchOptions.text,
-          [] as Manufacturer[],
-          [] as Status[],
-          [] as PlatformType[]
-        ).then(x => x.elements)
+        this.platforms = await this.platformApi.newSearchBuilder()
+          .withTextInShortName(this.searchOptions.text)
+          .build()
+          .findMatchingAsList()
         break
       case SearchType.Device:
         this.devices = await DeviceApi.find(

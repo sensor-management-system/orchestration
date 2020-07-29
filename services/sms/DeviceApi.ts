@@ -10,7 +10,7 @@ import {
 } from '@/utils/PaginatedLoader'
 
 // Use on version for all the queries
-const BASE_URL = process.env.smsBackendUrl
+const BASE_URL = process.env.smsBackendUrl + '/devices'
 
 export default class DeviceApi {
   static serverResponseToEntity (entry: any) : Device {
@@ -50,7 +50,7 @@ export default class DeviceApi {
   }
 
   static deleteById (id: number) {
-    return axios.delete(BASE_URL + '/devices/' + id)
+    return axios.delete(BASE_URL + '/' + id)
   }
 
   static save (device: Device) {
@@ -106,7 +106,7 @@ export default class DeviceApi {
       }
       */
     }
-    let url = BASE_URL + '/devices'
+    let url = BASE_URL
 
     if (device.id === null) {
       // new -> post
@@ -133,7 +133,7 @@ export default class DeviceApi {
     // TODO: Think about also including the contacts
     // with ?include=contacts
     // size for having one query to get all the devices (no pagination)
-    return axios.get(BASE_URL + '/devices?' + pageParameter).then((rawResonse) => {
+    return axios.get(BASE_URL + '?' + pageParameter).then((rawResonse) => {
       const rawData = rawResonse.data
       const result: Device[] = []
 
@@ -157,7 +157,7 @@ export default class DeviceApi {
   static findById (id: string): Promise<Device> {
     // TODO: Think about also including the contacts
     // with ?include=contacts
-    return axios.get(BASE_URL + '/devices/' + id).then((rawResponse) => {
+    return axios.get(BASE_URL + '/' + id).then((rawResponse) => {
       const entry = rawResponse.data.data
       return this.serverResponseToEntity(entry)
     })

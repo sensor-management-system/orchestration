@@ -196,6 +196,8 @@ export default class SeachPlatformsPage extends Vue {
   private fab: boolean = false
   private loading: boolean = true
 
+  private platformApi: PlatformApi = new PlatformApi()
+
   private loader: null | IPaginationLoader<Platform> = null
 
   private selectedSearchManufacturers: Manufacturer[] = []
@@ -304,15 +306,17 @@ export default class SeachPlatformsPage extends Vue {
   ) {
     this.loading = true
     this.searchResults = []
-    PlatformApi.find(
-      this.pageSize,
-      searchText,
-      manufacturer,
-      states,
-      platformTypes
-    ).then(this.loadUntilWeHaveSomeEntries).catch((_error) => {
-      this.$store.commit('snackbar/setError', 'Loading of platforms failed')
-    })
+    this.platformApi
+      .newSearchBuilder()
+      .withTextInShortName(searchText)
+      .withOneMatchingManufacturerOf(manufacturer)
+      .withOneMatchingStatusOf(states)
+      .withOneMatchingPlatformTypeOf(platformTypes)
+      .build()
+      .findMatchingAsPaginationLoader(this.pageSize)
+      .then(this.loadUntilWeHaveSomeEntries).catch((_error) => {
+        this.$store.commit('snackbar/setError', 'Loading of platforms failed')
+      })
   }
 
   loadUntilWeHaveSomeEntries (loader:IPaginationLoader<Platform>) {
@@ -347,7 +351,7 @@ export default class SeachPlatformsPage extends Vue {
   }
 
   deleteAndCloseDialog (id: number) {
-    PlatformApi.deleteById(id).then(() => {
+    this.platformApi.deleteById(id).then(() => {
       this.showDeleteDialog = false
 
       const searchIndex = this.searchResults.findIndex(r => r.id === id)
