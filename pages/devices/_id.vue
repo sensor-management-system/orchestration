@@ -166,7 +166,7 @@
               <v-card-text>
                 <v-row>
                   <v-col cols="3">
-                    <ContactSelect v-model="device.contacts" :readonly="readonly" />
+                    <ContactSelect v-model="device.contacts" :readonly="readonly" label="Add a contact" />
                   </v-col>
                 </v-row>
               </v-card-text>

@@ -3,7 +3,7 @@
     v-model="wrappedValue"
     :readonly="readonly"
     :fetch-function="findAllStates"
-    add-label="Add a status"
+    :label="label"
     color="green"
   />
 </template>
@@ -49,6 +49,12 @@ export default class StatusSelect extends Vue {
   })
   // @ts-ignore
   readonly readonly: boolean
+
+  @Prop({
+    required: true,
+    type: String
+  })
+  readonly label!: string
 
   get findAllStates (): StatesLoaderFunction {
     return CVService.findAllStates
