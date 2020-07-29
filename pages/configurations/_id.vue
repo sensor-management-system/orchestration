@@ -507,8 +507,6 @@ import { PlatformNode } from '@/models/PlatformNode'
 // @ts-ignore
 import { DeviceNode } from '@/models/DeviceNode'
 // @ts-ignore
-import Api from '@/services/Api'
-// @ts-ignore
 import { ConfigurationsTree } from '@/models/ConfigurationsTree'
 // @ts-ignore
 import { ConfigurationsTreeNode } from '@/models/ConfigurationsTreeNode'
@@ -543,8 +541,6 @@ export class AppBarTabsExtensionExtended extends AppBarTabsExtension {
 })
 // @ts-ignore
 export default class ConfigurationsIdPage extends Vue {
-  private api: Api = new Api()
-
   private activeTab: number = 0
   private editMode: boolean = false
 
@@ -844,13 +840,13 @@ export default class ConfigurationsIdPage extends Vue {
   async search () {
     switch (this.searchOptions.searchType) {
       case SearchType.Platform:
-        this.platforms = await this.api.platforms.newSearchBuilder()
+        this.platforms = await this.$api.platforms.newSearchBuilder()
           .withTextInShortName(this.searchOptions.text)
           .build()
           .findMatchingAsList()
         break
       case SearchType.Device:
-        this.devices = await this.api.devices.newSearchBuilder()
+        this.devices = await this.$api.devices.newSearchBuilder()
           .withTextInShortName(this.searchOptions.text)
           .build()
           .findMatchingAsList()

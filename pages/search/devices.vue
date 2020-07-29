@@ -155,8 +155,6 @@ import Manufacturer from '../../models/Manufacturer'
 import Status from '../../models/Status'
 import DeviceType from '@/models/DeviceType'
 
-import Api from '@/services/Api'
-
 // @ts-ignore
 import ManufacturerSelect from '@/components/ManufacturerSelect.vue'
 // @ts-ignore
@@ -185,8 +183,6 @@ export class AppBarTabsExtensionExtended extends AppBarTabsExtension {
   components: { ManufacturerSelect, StatusSelect, DeviceTypeSelect }
 })
 export default class SeachDevicesPage extends Vue {
-  private api: Api = new Api()
-
   private pageSize: number = 20
   private activeTab: number = 0
   private fab: boolean = false
@@ -215,8 +211,8 @@ export default class SeachDevicesPage extends Vue {
   }
 
   mounted () {
-    const promiseDeviceTypes = this.api.deviceTypes.findAll()
-    const promiseStates = this.api.states.findAll()
+    const promiseDeviceTypes = this.$api.deviceTypes.findAll()
+    const promiseStates = this.$api.states.findAll()
 
     promiseDeviceTypes.then((deviceTypes) => {
       promiseStates.then((states) => {
@@ -303,7 +299,7 @@ export default class SeachDevicesPage extends Vue {
   ) {
     this.loading = true
     this.searchResults = []
-    this.api.devices
+    this.$api.devices
       .newSearchBuilder()
       .withTextInShortName(searchText)
       .withOneMachtingManufacturerOf(manufacturer)
@@ -348,7 +344,7 @@ export default class SeachDevicesPage extends Vue {
   }
 
   deleteAndCloseDialog (id: number) {
-    this.api.devices.deleteById(id).then(() => {
+    this.$api.devices.deleteById(id).then(() => {
       this.showDeleteDialog = false
 
       const searchIndex = this.searchResults.findIndex(r => r.id === id)

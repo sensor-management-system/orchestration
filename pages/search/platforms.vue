@@ -156,8 +156,6 @@ import Status from '../../models/Status'
 
 import { IPaginationLoader } from '@/utils/PaginatedLoader'
 
-import Api from '@/services/Api'
-
 // @ts-ignore
 import ManufacturerSelect from '@/components/ManufacturerSelect.vue'
 // @ts-ignore
@@ -194,8 +192,6 @@ export default class SeachPlatformsPage extends Vue {
   private fab: boolean = false
   private loading: boolean = true
 
-  private api: Api = new Api()
-
   private loader: null | IPaginationLoader<Platform> = null
 
   private selectedSearchManufacturers: Manufacturer[] = []
@@ -219,8 +215,8 @@ export default class SeachPlatformsPage extends Vue {
   }
 
   mounted () {
-    const promisePlatformTypes = this.api.platformTypes.findAll()
-    const promiseStates = this.api.states.findAll()
+    const promisePlatformTypes = this.$api.platformTypes.findAll()
+    const promiseStates = this.$api.states.findAll()
 
     promisePlatformTypes.then((platformTypes) => {
       promiseStates.then((states) => {
@@ -304,7 +300,7 @@ export default class SeachPlatformsPage extends Vue {
   ) {
     this.loading = true
     this.searchResults = []
-    this.api.platforms
+    this.$api.platforms
       .newSearchBuilder()
       .withTextInShortName(searchText)
       .withOneMatchingManufacturerOf(manufacturer)
@@ -349,7 +345,7 @@ export default class SeachPlatformsPage extends Vue {
   }
 
   deleteAndCloseDialog (id: number) {
-    this.api.platforms.deleteById(id).then(() => {
+    this.$api.platforms.deleteById(id).then(() => {
       this.showDeleteDialog = false
 
       const searchIndex = this.searchResults.findIndex(r => r.id === id)

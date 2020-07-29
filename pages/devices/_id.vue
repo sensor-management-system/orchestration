@@ -314,7 +314,6 @@ import AppBarEditModeContent from '@/components/AppBarEditModeContent.vue'
 
 // @ts-ignore
 import AppBarTabsExtension from '@/components/AppBarTabsExtension.vue'
-import Api from '@/services/Api'
 // @ts-ignore
 import { Rules } from '@/mixins/Rules'
 
@@ -343,8 +342,6 @@ export class AppBarTabsExtensionExtended extends AppBarTabsExtension {
 })
 // @ts-ignore
 export default class DeviceIdPage extends mixins(Rules) {
-  private api: Api = new Api()
-
   private numberOfTabs: number = 5
   private activeTab: number = 0
 
@@ -381,25 +378,25 @@ export default class DeviceIdPage extends mixins(Rules) {
   }
 
   mounted () {
-    this.api.states.findAll().then((foundStates) => {
+    this.$api.states.findAll().then((foundStates) => {
       this.states = foundStates
     })
-    this.api.manufacturer.findAll().then((foundManufacturers) => {
+    this.$api.manufacturer.findAll().then((foundManufacturers) => {
       this.manufacturers = foundManufacturers
     })
-    this.api.deviceTypes.findAll().then((foundDeviceTypes) => {
+    this.$api.deviceTypes.findAll().then((foundDeviceTypes) => {
       this.deviceTypes = foundDeviceTypes
     })
-    this.api.compartments.findAll().then((foundCompartments) => {
+    this.$api.compartments.findAll().then((foundCompartments) => {
       this.compartments = foundCompartments
     })
-    this.api.samplingMedia.findAll().then((foundSamplingMedias) => {
+    this.$api.samplingMedia.findAll().then((foundSamplingMedias) => {
       this.samplingMedias = foundSamplingMedias
     })
-    this.api.properties.findAll().then((foundProperties) => {
+    this.$api.properties.findAll().then((foundProperties) => {
       this.properties = foundProperties
     })
-    this.api.units.findAll().then((foundUnits) => {
+    this.$api.units.findAll().then((foundUnits) => {
       this.units = foundUnits
     })
     this.loadDevice()
@@ -424,7 +421,7 @@ export default class DeviceIdPage extends mixins(Rules) {
     const deviceId = this.$route.params.id
     if (deviceId) {
       this.isInEditMode = false
-      this.api.devices.findById(deviceId).then((foundDevice) => {
+      this.$api.devices.findById(deviceId).then((foundDevice) => {
         this.device = foundDevice
       }).catch((_error) => {
         this.$store.commit('snackbar/setError', 'Loading device failed')
@@ -439,7 +436,7 @@ export default class DeviceIdPage extends mixins(Rules) {
   }
 
   save () {
-    this.api.devices.save(this.device).then((savedDevice) => {
+    this.$api.devices.save(this.device).then((savedDevice) => {
       this.device = savedDevice
       this.toggleEditMode()
       this.$store.commit('snackbar/setSuccess', 'Save successful')

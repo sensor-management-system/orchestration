@@ -17,7 +17,6 @@
 import { Vue, Component, Prop } from 'nuxt-property-decorator'
 
 import PlatformType from '@/models/PlatformType'
-import Api from '@/services/Api'
 
 // @ts-ignore
 import EntitySelect from '@/components/EntitySelect'
@@ -51,9 +50,7 @@ export default class PlatformTypeSelect extends Vue {
   readonly readonly: boolean
 
   get findAllPlatformTypes (): PlatformTypeLoaderFunction {
-    return () => {
-      return new Api().platformTypes.findAll()
-    }
+    return this.$api.platformTypes.findAll
   }
 
   get wrappedValue () {
