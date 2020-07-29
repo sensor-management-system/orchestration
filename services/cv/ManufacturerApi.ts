@@ -2,12 +2,10 @@ import axios, { AxiosInstance } from 'axios'
 
 import Manufacturer from '@/models/Manufacturer'
 
-const BASE_URL = process.env.cvBackendUrl + '/manufacturer'
-
 export default class ManufacturerApi {
   private axiosApi: AxiosInstance
 
-  constructor (baseURL: string = BASE_URL) {
+  constructor (baseURL: string) {
     this.axiosApi = axios.create({
       baseURL
     })

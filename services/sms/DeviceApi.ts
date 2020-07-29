@@ -9,13 +9,10 @@ import {
   IPaginationLoader, FilteredPaginationedLoader
 } from '@/utils/PaginatedLoader'
 
-// Use on version for all the queries
-const BASE_URL = process.env.smsBackendUrl + '/devices'
-
 export default class DeviceApi {
   private axiosApi: AxiosInstance
 
-  constructor (baseURL: string = BASE_URL) {
+  constructor (baseURL: string) {
     this.axiosApi = axios.create({
       baseURL
     })

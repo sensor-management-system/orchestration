@@ -2,12 +2,10 @@ import axios, { AxiosInstance } from 'axios'
 
 import Property from '@/models/Property'
 
-const BASE_URL = process.env.cvBackendUrl + '/variablename'
-
 export default class PropertyApi {
   private axiosApi: AxiosInstance
 
-  constructor (baseURL: string = BASE_URL) {
+  constructor (baseURL: string) {
     this.axiosApi = axios.create({
       baseURL
     })

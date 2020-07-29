@@ -2,12 +2,10 @@ import axios, { AxiosInstance } from 'axios'
 
 import DeviceType from '@/models/DeviceType'
 
-const BASE_URL = process.env.cvBackendUrl + '/equipmenttype'
-
 export default class DeviceTypeApi {
   private axiosApi: AxiosInstance
 
-  constructor (baseURL: string = BASE_URL) {
+  constructor (baseURL: string) {
     this.axiosApi = axios.create({
       baseURL
     })

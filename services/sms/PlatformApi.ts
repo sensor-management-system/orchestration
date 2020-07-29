@@ -10,12 +10,10 @@ import {
   IPaginationLoader, FilteredPaginationedLoader
 } from '@/utils/PaginatedLoader'
 
-const BASE_URL = process.env.smsBackendUrl + '/platforms'
-
 export default class PlatformApi {
   private axiosApi: AxiosInstance
 
-  constructor (baseURL: string = BASE_URL) {
+  constructor (baseURL: string) {
     this.axiosApi = axios.create({
       baseURL
     })

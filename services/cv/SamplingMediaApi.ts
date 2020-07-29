@@ -2,12 +2,10 @@ import axios, { AxiosInstance } from 'axios'
 
 import SamplingMedia from '@/models/SamplingMedia'
 
-const BASE_URL = process.env.cvBackendUrl + '/medium'
-
 export default class SamplingMediaApi {
   private axiosApi: AxiosInstance
 
-  constructor (baseURL: string = BASE_URL) {
+  constructor (baseURL: string) {
     this.axiosApi = axios.create({
       baseURL
     })

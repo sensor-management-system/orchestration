@@ -2,12 +2,10 @@ import axios, { AxiosInstance } from 'axios'
 
 import Contact from '@/models/Contact'
 
-const BASE_URL = process.env.smsBackendUrl + '/contacts'
-
 export default class ContactApi {
   private axiosApi: AxiosInstance
 
-  constructor (baseURL: string = BASE_URL) {
+  constructor (baseURL: string) {
     this.axiosApi = axios.create({
       baseURL
     })

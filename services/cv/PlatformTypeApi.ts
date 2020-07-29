@@ -2,12 +2,10 @@ import axios, { AxiosInstance } from 'axios'
 
 import PlatformType from '@/models/PlatformType'
 
-const BASE_URL = process.env.cvBackendUrl + '/platformtype'
-
 export default class PlatformTypeApi {
   private axiosApi: AxiosInstance
 
-  constructor (baseURL: string = BASE_URL) {
+  constructor (baseURL: string) {
     this.axiosApi = axios.create({
       baseURL
     })
