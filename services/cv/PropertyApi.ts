@@ -1,14 +1,12 @@
-import axios, { AxiosInstance } from 'axios'
+import { AxiosInstance } from 'axios'
 
 import Property from '@/models/Property'
 
 export default class PropertyApi {
   private axiosApi: AxiosInstance
 
-  constructor (baseURL: string) {
-    this.axiosApi = axios.create({
-      baseURL
-    })
+  constructor (axiosInstance: AxiosInstance) {
+    this.axiosApi = axiosInstance
   }
 
   newSearchBuilder (): PropertySearchBuilder {

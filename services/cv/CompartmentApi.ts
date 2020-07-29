@@ -1,14 +1,12 @@
-import axios, { AxiosInstance } from 'axios'
+import { AxiosInstance } from 'axios'
 
 import Compartment from '@/models/Compartment'
 
 export default class DeviceTypeApi {
   private axiosApi: AxiosInstance
 
-  constructor (baseURL: string) {
-    this.axiosApi = axios.create({
-      baseURL
-    })
+  constructor (axiosInstance: AxiosInstance) {
+    this.axiosApi = axiosInstance
   }
 
   newSearchBuilder (): CompartmentSearchBuilder {

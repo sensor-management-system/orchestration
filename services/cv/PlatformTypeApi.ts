@@ -1,14 +1,12 @@
-import axios, { AxiosInstance } from 'axios'
+import { AxiosInstance } from 'axios'
 
 import PlatformType from '@/models/PlatformType'
 
 export default class PlatformTypeApi {
   private axiosApi: AxiosInstance
 
-  constructor (baseURL: string) {
-    this.axiosApi = axios.create({
-      baseURL
-    })
+  constructor (axiosInstance: AxiosInstance) {
+    this.axiosApi = axiosInstance
   }
 
   newSearchBuilder (): PlatformTypeSearchBuilder {

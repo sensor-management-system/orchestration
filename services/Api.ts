@@ -1,3 +1,5 @@
+import axios, { AxiosInstance, AxiosRequestConfig } from 'axios'
+
 import ContactApi from '@/services/sms/ContactApi'
 import DeviceApi from '@/services/sms/DeviceApi'
 import PlatformApi from '@/services/sms/PlatformApi'
@@ -29,18 +31,54 @@ export default class Api {
   private readonly _unitApi: UnitApi
 
   constructor (smsBaseUrl: string | undefined = SMS_BASE_URL, cvBaseUrl: string | undefined = CV_BASE_URL) {
-    this._contactApi = new ContactApi(smsBaseUrl + '/contacts')
-    this._platformApi = new PlatformApi(smsBaseUrl + '/platforms')
-    this._deviceApi = new DeviceApi(smsBaseUrl + '/devices')
+    const smsConfig: AxiosRequestConfig = {
+    }
 
-    this._comparmentApi = new CompartmentApi(cvBaseUrl + '/variabletype')
-    this._deviceTypeApi = new DeviceTypeApi(cvBaseUrl + '/equipmenttype')
-    this._manufacturerApi = new ManufacturerApi(cvBaseUrl + '/manufacturer')
-    this._platformTypeApi = new PlatformTypeApi(cvBaseUrl + '/platformtype')
-    this._propertyApi = new PropertyApi(cvBaseUrl + '/variablename')
-    this._samplingMediaApi = new SamplingMediaApi(cvBaseUrl + '/medium')
-    this._statusApi = new StatusApi(cvBaseUrl + '/equipmentstatus')
-    this._unitApi = new UnitApi(cvBaseUrl + '/unit')
+    this._contactApi = new ContactApi(
+      this.createAxios(smsBaseUrl, '/contacts', smsConfig)
+    )
+    this._platformApi = new PlatformApi(
+      this.createAxios(smsBaseUrl, '/platforms', smsConfig)
+    )
+    this._deviceApi = new DeviceApi(
+      this.createAxios(smsBaseUrl, '/devices', smsConfig)
+    )
+
+    const cvConfig: AxiosRequestConfig = {
+    }
+
+    this._comparmentApi = new CompartmentApi(
+      this.createAxios(cvBaseUrl, '/variabletype', cvConfig)
+    )
+    this._deviceTypeApi = new DeviceTypeApi(
+      this.createAxios(cvBaseUrl, '/equipmenttype', cvConfig)
+    )
+    this._manufacturerApi = new ManufacturerApi(
+      this.createAxios(cvBaseUrl, '/manufacturer', cvConfig)
+    )
+    this._platformTypeApi = new PlatformTypeApi(
+      this.createAxios(cvBaseUrl, '/platformtype', cvConfig)
+    )
+    this._propertyApi = new PropertyApi(
+      this.createAxios(cvBaseUrl, '/variablename', cvConfig)
+    )
+    this._samplingMediaApi = new SamplingMediaApi(
+      this.createAxios(cvBaseUrl, '/medium', cvConfig)
+    )
+    this._statusApi = new StatusApi(
+      this.createAxios(cvBaseUrl, '/equipmentstatus', cvConfig)
+    )
+    this._unitApi = new UnitApi(
+      this.createAxios(cvBaseUrl, '/unit', cvConfig)
+    )
+  }
+
+  private createAxios (baseUrl: string | undefined, path: string, baseConfig: AxiosRequestConfig): AxiosInstance {
+    const config = {
+      ...baseConfig,
+      baseURL: baseUrl + path
+    }
+    return axios.create(config)
   }
 
   get devices (): DeviceApi {

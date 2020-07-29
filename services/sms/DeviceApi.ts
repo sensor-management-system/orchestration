@@ -1,4 +1,4 @@
-import axios, { AxiosInstance, Method } from 'axios'
+import { AxiosInstance, Method } from 'axios'
 
 import Device from '@/models/Device'
 import DeviceType from '@/models/DeviceType'
@@ -12,10 +12,8 @@ import {
 export default class DeviceApi {
   private axiosApi: AxiosInstance
 
-  constructor (baseURL: string) {
-    this.axiosApi = axios.create({
-      baseURL
-    })
+  constructor (axiosInstance: AxiosInstance) {
+    this.axiosApi = axiosInstance
   }
 
   findById (id: string): Promise<Device> {

@@ -1,4 +1,4 @@
-import axios, { AxiosInstance, Method } from 'axios'
+import { AxiosInstance, Method } from 'axios'
 
 import Platform from '@/models/Platform'
 import PlatformType from '@/models/PlatformType'
@@ -13,10 +13,8 @@ import {
 export default class PlatformApi {
   private axiosApi: AxiosInstance
 
-  constructor (baseURL: string) {
-    this.axiosApi = axios.create({
-      baseURL
-    })
+  constructor (axiosInstance: AxiosInstance) {
+    this.axiosApi = axiosInstance
   }
 
   findById (id: string): Promise<Platform> {
@@ -113,7 +111,7 @@ export class PlatformSearchBuilder {
     this.clientSideFilterFunc = (_p: Platform) => true
   }
 
-  withTextInShortName (text: string | null) {
+  withTextInShortName (text: string | null) : PlatformSearchBuilder {
     if (text) {
       const oldFilterFunc = this.clientSideFilterFunc
       this.clientSideFilterFunc = (platform: Platform): boolean => {
@@ -125,7 +123,7 @@ export class PlatformSearchBuilder {
     return this
   }
 
-  withOneMatchingManufacturerOf (manufacturers: Manufacturer[]) {
+  withOneMatchingManufacturerOf (manufacturers: Manufacturer[]): PlatformSearchBuilder {
     if (manufacturers.length > 0) {
       const oldFilterFunc = this.clientSideFilterFunc
       this.clientSideFilterFunc = (platform: Platform) : boolean => {
@@ -137,7 +135,7 @@ export class PlatformSearchBuilder {
     return this
   }
 
-  withOneMatchingStatusOf (states: Status[]) {
+  withOneMatchingStatusOf (states: Status[]): PlatformSearchBuilder {
     if (states.length > 0) {
       const oldFilterFunc = this.clientSideFilterFunc
       this.clientSideFilterFunc = (platform: Platform) : boolean => {
@@ -149,7 +147,7 @@ export class PlatformSearchBuilder {
     return this
   }
 
-  withOneMatchingPlatformTypeOf (types: PlatformType[]) {
+  withOneMatchingPlatformTypeOf (types: PlatformType[]): PlatformSearchBuilder {
     if (types.length > 0) {
       const oldFilterFunc = this.clientSideFilterFunc
       this.clientSideFilterFunc = (platform: Platform) : boolean => {
