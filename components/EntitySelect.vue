@@ -6,7 +6,7 @@
       :items="allExceptSelected"
       :item-text="(x) => x"
       :item-value="(x) => x.id"
-      :label="addLabel"
+      :label="label"
       @change="add"
     />
     <v-chip
@@ -70,11 +70,11 @@ export default class EntitySelect<E extends INumericId> extends Vue {
   readonly fetchFunction!: EntityLoaderFunction<E>
 
   @Prop({
-    default: () => 'Add',
+    required: true,
     type: String
   })
   // @ts-ignore
-  readonly addLabel: string
+  readonly label!: string
 
   @Prop({
     default: () => '',

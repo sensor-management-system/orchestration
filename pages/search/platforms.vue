@@ -37,17 +37,17 @@
               </v-row>
               <v-row>
                 <v-col cols="12" md="3">
-                  <ManufacturerSelect v-model="selectedSearchManufacturers" />
+                  <ManufacturerSelect v-model="selectedSearchManufacturers" label="Select a manufacturer" />
                 </v-col>
               </v-row>
               <v-row>
                 <v-col cols="12" md="3">
-                  <StatusSelect v-model="selectedSearchStates" />
+                  <StatusSelect v-model="selectedSearchStates" label="Select a status" />
                 </v-col>
               </v-row>
               <v-row>
                 <v-col cols="12" md="3">
-                  <PlatformTypeSelect v-model="selectedSearchPlatformTypes" />
+                  <PlatformTypeSelect v-model="selectedSearchPlatformTypes" label="Select a platform type" />
                 </v-col>
               </v-row>
             </v-card-text>

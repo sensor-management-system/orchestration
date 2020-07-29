@@ -3,7 +3,7 @@
     v-model="wrappedValue"
     :readonly="readonly"
     :fetch-function="findAllDeviceTypes"
-    add-label="Add a device type"
+    :label="label"
     color="red"
   />
 </template>
@@ -48,6 +48,12 @@ export default class DeviceTypeSelect extends Vue {
   })
   // @ts-ignore
   readonly readonly: boolean
+
+  @Prop({
+    required: true,
+    type: String
+  })
+  readonly label!: string
 
   get findAllDeviceTypes (): DeviceTypeLoaderFunction {
     return () => { return this.$api.deviceTypes.findAll() }

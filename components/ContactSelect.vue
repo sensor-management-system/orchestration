@@ -3,7 +3,7 @@
     v-model="wrappedValue"
     :readonly="readonly"
     :fetch-function="findAllContacts"
-    add-label="Add a contact"
+    :label="label"
     color="indigo"
     avatar-icon="mdi-account-circle"
   />
@@ -48,6 +48,12 @@ export default class ContactSelect extends Vue {
   })
   // @ts-ignore
   readonly readonly: boolean
+
+  @Prop({
+    required: true,
+    type: String
+  })
+  readonly label!: string
 
   get findAllContacts () : ContactsLoaderFunction {
     return () => { return this.$api.contacts.findAll() }

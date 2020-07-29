@@ -3,7 +3,7 @@
     v-model="wrappedValue"
     :readonly="readonly"
     :fetch-function="findAllPlatformTypes"
-    add-label="Add a platform type"
+    :label="label"
     color="red"
   />
 </template>
@@ -48,6 +48,12 @@ export default class PlatformTypeSelect extends Vue {
   })
   // @ts-ignore
   readonly readonly: boolean
+
+  @Prop({
+    required: true,
+    type: String
+  })
+  readonly label!: string
 
   get findAllPlatformTypes (): PlatformTypeLoaderFunction {
     return () => { return this.$api.platformTypes.findAll() }
