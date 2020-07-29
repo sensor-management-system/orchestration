@@ -179,7 +179,6 @@
 import { Component, Watch, mixins } from 'nuxt-property-decorator'
 
 import CVService from '../../services/CVService'
-import SmsService from '../../services/SmsService'
 
 import Platform from '../../models/Platform'
 
@@ -190,6 +189,8 @@ import AttachmentList from '../../components/AttachmentList.vue'
 import Manufacturer from '../../models/Manufacturer'
 import PlatformType from '../../models/PlatformType'
 import Status from '../../models/Status'
+
+import PlatformApi from '@/services/sms/PlatformApi'
 
 // @ts-ignore
 import AppBarEditModeContent from '@/components/AppBarEditModeContent.vue'
@@ -284,7 +285,7 @@ export default class PlatformIdPage extends mixins(Rules) {
     const platformId = this.$route.params.id
     if (platformId) {
       this.isInEditMode = false
-      SmsService.findPlatformById(platformId).then((foundPlatform) => {
+      PlatformApi.findById(platformId).then((foundPlatform) => {
         this.platform = foundPlatform
       }).catch(() => {
         // We don't take the error directly
@@ -316,7 +317,7 @@ export default class PlatformIdPage extends mixins(Rules) {
 
   // methods
   save () {
-    SmsService.savePlatform(this.platform).then((savedPlatform) => {
+    PlatformApi.save(this.platform).then((savedPlatform) => {
       this.platform = savedPlatform
       this.$store.commit('snackbar/setSuccess', 'Save successful')
       // this.$router.push('/seach/platforms')

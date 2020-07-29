@@ -511,8 +511,8 @@ import { DeviceNode } from '@/models/DeviceNode'
 // @ts-ignore
 import Manufacturer from '@/models/Manufacturer'
 import Status from '@/models/Status'
-// @ts-ignore
-import SmsService from '@/services/SmsService'
+import DeviceApi from '@/services/sms/DeviceApi'
+import PlatformApi from '@/services/sms/PlatformApi'
 // @ts-ignore
 import { ConfigurationsTree } from '@/models/ConfigurationsTree'
 // @ts-ignore
@@ -847,7 +847,7 @@ export default class ConfigurationsIdPage extends Vue {
   async search () {
     switch (this.searchOptions.searchType) {
       case SearchType.Platform:
-        this.platforms = await SmsService.findPlatforms(
+        this.platforms = await PlatformApi.find(
           // load all the elements with one run
           100000,
           this.searchOptions.text,
@@ -857,7 +857,7 @@ export default class ConfigurationsIdPage extends Vue {
         ).then(x => x.elements)
         break
       case SearchType.Device:
-        this.devices = await SmsService.findDevices(
+        this.devices = await DeviceApi.find(
           // load all the elements with one run
           100000,
           this.searchOptions.text,

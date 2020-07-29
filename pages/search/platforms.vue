@@ -150,7 +150,6 @@
 import { Component, Vue } from 'nuxt-property-decorator'
 
 import CVService from '../../services/CVService'
-import SmsService from '../../services/SmsService'
 
 import Manufacturer from '../../models/Manufacturer'
 import PlatformType from '../../models/PlatformType'
@@ -158,6 +157,8 @@ import Platform from '../../models/Platform'
 import Status from '../../models/Status'
 
 import { IPaginationLoader } from '@/utils/PaginatedLoader'
+
+import PlatformApi from '@/services/sms/PlatformApi'
 
 // @ts-ignore
 import ManufacturerSelect from '@/components/ManufacturerSelect.vue'
@@ -303,7 +304,7 @@ export default class SeachPlatformsPage extends Vue {
   ) {
     this.loading = true
     this.searchResults = []
-    SmsService.findPlatforms(
+    PlatformApi.find(
       this.pageSize,
       searchText,
       manufacturer,
@@ -346,7 +347,7 @@ export default class SeachPlatformsPage extends Vue {
   }
 
   deleteAndCloseDialog (id: number) {
-    SmsService.deletePlatform(id).then(() => {
+    PlatformApi.deleteById(id).then(() => {
       this.showDeleteDialog = false
 
       const searchIndex = this.searchResults.findIndex(r => r.id === id)

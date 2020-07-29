@@ -294,7 +294,7 @@ import { Component, Watch, mixins } from 'nuxt-property-decorator'
 import Device from '../../models/Device'
 
 import CVService from '../../services/CVService'
-import SmsService from '../../services/SmsService'
+import DeviceApi from '../../services/sms/DeviceApi'
 
 import Manufacturer from '../../models/Manufacturer'
 import Status from '../../models/Status'
@@ -424,7 +424,7 @@ export default class DeviceIdPage extends mixins(Rules) {
     const deviceId = this.$route.params.id
     if (deviceId) {
       this.isInEditMode = false
-      SmsService.findDeviceById(deviceId).then((foundDevice) => {
+      DeviceApi.findById(deviceId).then((foundDevice) => {
         this.device = foundDevice
       }).catch((_error) => {
         this.$store.commit('snackbar/setError', 'Loading device failed')
@@ -439,7 +439,7 @@ export default class DeviceIdPage extends mixins(Rules) {
   }
 
   save () {
-    SmsService.saveDevice(this.device).then((savedDevice) => {
+    DeviceApi.save(this.device).then((savedDevice) => {
       this.device = savedDevice
       this.toggleEditMode()
       this.$store.commit('snackbar/setSuccess', 'Save successful')

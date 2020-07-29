@@ -151,12 +151,13 @@
 import { Component, Vue } from 'nuxt-property-decorator'
 
 import CVService from '../../services/CVService'
-import SmsService from '../../services/SmsService'
 
 import Device from '../../models/Device'
 import Manufacturer from '../../models/Manufacturer'
 import Status from '../../models/Status'
 import DeviceType from '@/models/DeviceType'
+
+import DeviceApi from '@/services/sms/DeviceApi'
 
 // @ts-ignore
 import ManufacturerSelect from '@/components/ManufacturerSelect.vue'
@@ -302,7 +303,7 @@ export default class SeachDevicesPage extends Vue {
   ) {
     this.loading = true
     this.searchResults = []
-    SmsService.findDevices(
+    DeviceApi.find(
       this.pageSize, searchText, manufacturer, states, types
     ).then(this.loadUntilWeHaveSomeEntries).catch((_error) => {
       this.$store.commit('snackbar/setError', 'Loading of devices failed')
@@ -341,7 +342,7 @@ export default class SeachDevicesPage extends Vue {
   }
 
   deleteAndCloseDialog (id: number) {
-    SmsService.deleteDevice(id).then(() => {
+    DeviceApi.deleteById(id).then(() => {
       this.showDeleteDialog = false
 
       const searchIndex = this.searchResults.findIndex(r => r.id === id)

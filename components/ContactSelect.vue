@@ -17,7 +17,7 @@
  */
 import { Vue, Component, Prop } from 'nuxt-property-decorator'
 import Contact from '../models/Contact'
-import SmsService from '../services/SmsService'
+import ContactApi from '@/services/sms/ContactApi'
 
 // @ts-ignore
 import EntitySelect from '@/components/EntitySelect'
@@ -51,7 +51,9 @@ export default class ContactSelect extends Vue {
   readonly readonly: boolean
 
   get findAllContacts () : ContactsLoaderFunction {
-    return SmsService.findAllContacts
+    return () => {
+      return new ContactApi().newSearchBuilder().findMatchingAsList()
+    }
   }
 
   get wrappedValue () {
@@ -60,15 +62,6 @@ export default class ContactSelect extends Vue {
 
   set wrappedValue (newValue) {
     this.$emit('input', newValue)
-  }
-
-  /**
-   * fetches all available contacts from the SmsService
-   *
-   * @async
-   */
-  async fetch () {
-    this.contacts = await SmsService.findAllContacts()
   }
 }
 </script>
