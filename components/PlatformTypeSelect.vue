@@ -50,7 +50,7 @@ export default class PlatformTypeSelect extends Vue {
   readonly readonly: boolean
 
   get findAllPlatformTypes (): PlatformTypeLoaderFunction {
-    return this.$api.platformTypes.findAll
+    return () => { return this.$api.platformTypes.findAll() }
   }
 
   get wrappedValue () {

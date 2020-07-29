@@ -50,7 +50,7 @@ export default class ContactSelect extends Vue {
   readonly readonly: boolean
 
   get findAllContacts () : ContactsLoaderFunction {
-    return this.$api.contacts.findAll
+    return () => { return this.$api.contacts.findAll() }
   }
 
   get wrappedValue () {

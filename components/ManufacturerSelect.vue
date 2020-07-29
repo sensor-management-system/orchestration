@@ -50,7 +50,7 @@ export default class ManufacturerSelect extends Vue {
   readonly readonly: boolean
 
   get findAllManufacturers (): ManufacturersLoaderFunction {
-    return this.$api.manufacturer.findAll
+    return () => { return this.$api.manufacturer.findAll() }
   }
 
   get wrappedValue () {

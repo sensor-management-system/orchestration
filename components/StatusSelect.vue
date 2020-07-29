@@ -50,7 +50,7 @@ export default class StatusSelect extends Vue {
   readonly readonly: boolean
 
   get findAllStates (): StatesLoaderFunction {
-    return this.$api.states.findAll
+    return () => { return this.$api.states.findAll() }
   }
 
   get wrappedValue () {

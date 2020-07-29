@@ -50,7 +50,7 @@ export default class DeviceTypeSelect extends Vue {
   readonly readonly: boolean
 
   get findAllDeviceTypes (): DeviceTypeLoaderFunction {
-    return this.$api.deviceTypes.findAll
+    return () => { return this.$api.deviceTypes.findAll() }
   }
 
   get wrappedValue () {
