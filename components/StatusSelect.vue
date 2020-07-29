@@ -17,7 +17,7 @@
 import { Vue, Component, Prop } from 'nuxt-property-decorator'
 
 import Status from '@/models/Status'
-import CVService from '@/services/CVService'
+import Api from '@/services/Api'
 
 // @ts-ignore
 import EntitySelect from '@/components/EntitySelect'
@@ -51,7 +51,9 @@ export default class StatusSelect extends Vue {
   readonly readonly: boolean
 
   get findAllStates (): StatesLoaderFunction {
-    return CVService.findAllStates
+    return () => {
+      return new Api().cv.states.newSearchBuilder().build().findMatchingAsList()
+    }
   }
 
   get wrappedValue () {

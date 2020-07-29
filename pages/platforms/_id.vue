@@ -178,8 +178,6 @@
 <script lang="ts">
 import { Component, Watch, mixins } from 'nuxt-property-decorator'
 
-import CVService from '../../services/CVService'
-
 import Platform from '../../models/Platform'
 
 // @ts-ignore
@@ -190,7 +188,7 @@ import Manufacturer from '../../models/Manufacturer'
 import PlatformType from '../../models/PlatformType'
 import Status from '../../models/Status'
 
-import PlatformApi from '@/services/sms/PlatformApi'
+import Api from '@/services/Api'
 
 // @ts-ignore
 import AppBarEditModeContent from '@/components/AppBarEditModeContent.vue'
@@ -219,7 +217,8 @@ export class AppBarTabsExtensionExtended extends AppBarTabsExtension {
 })
 // @ts-ignore
 export default class PlatformIdPage extends mixins(Rules) {
-  private platformApi: PlatformApi = new PlatformApi()
+  private api: Api = new Api()
+
   // data
   // first for the data to chose the elements
   private platformTypes: PlatformType[] = []
@@ -253,13 +252,13 @@ export default class PlatformIdPage extends mixins(Rules) {
   }
 
   mounted () {
-    CVService.findAllManufacturers().then((foundManufacturers) => {
+    this.api.cv.manufacturer.findAll().then((foundManufacturers) => {
       this.manufacturers = foundManufacturers
     })
-    CVService.findAllPlatformTypes().then((foundPlatformTypes) => {
+    this.api.cv.platformTypes.findAll().then((foundPlatformTypes) => {
       this.platformTypes = foundPlatformTypes
     })
-    CVService.findAllStates().then((foundStates) => {
+    this.api.cv.states.findAll().then((foundStates) => {
       this.states = foundStates
     })
     this.loadPlatform()
@@ -286,7 +285,7 @@ export default class PlatformIdPage extends mixins(Rules) {
     const platformId = this.$route.params.id
     if (platformId) {
       this.isInEditMode = false
-      this.platformApi.findById(platformId).then((foundPlatform) => {
+      this.api.sms.platforms.findById(platformId).then((foundPlatform) => {
         this.platform = foundPlatform
       }).catch(() => {
         // We don't take the error directly
@@ -318,7 +317,7 @@ export default class PlatformIdPage extends mixins(Rules) {
 
   // methods
   save () {
-    this.platformApi.save(this.platform).then((savedPlatform) => {
+    this.api.sms.platforms.save(this.platform).then((savedPlatform) => {
       this.platform = savedPlatform
       this.$store.commit('snackbar/setSuccess', 'Save successful')
       // this.$router.push('/seach/platforms')

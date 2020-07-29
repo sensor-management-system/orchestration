@@ -150,14 +150,12 @@
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 
-import CVService from '../../services/CVService'
-
 import Device from '../../models/Device'
 import Manufacturer from '../../models/Manufacturer'
 import Status from '../../models/Status'
 import DeviceType from '@/models/DeviceType'
 
-import DeviceApi from '@/services/sms/DeviceApi'
+import Api from '@/services/Api'
 
 // @ts-ignore
 import ManufacturerSelect from '@/components/ManufacturerSelect.vue'
@@ -187,6 +185,8 @@ export class AppBarTabsExtensionExtended extends AppBarTabsExtension {
   components: { ManufacturerSelect, StatusSelect, DeviceTypeSelect }
 })
 export default class SeachDevicesPage extends Vue {
+  private api: Api = new Api()
+
   private pageSize: number = 20
   private activeTab: number = 0
   private fab: boolean = false
@@ -215,8 +215,8 @@ export default class SeachDevicesPage extends Vue {
   }
 
   mounted () {
-    const promiseDeviceTypes = CVService.findAllDeviceTypes()
-    const promiseStates = CVService.findAllStates()
+    const promiseDeviceTypes = this.api.cv.deviceTypes.findAll()
+    const promiseStates = this.api.cv.states.findAll()
 
     promiseDeviceTypes.then((deviceTypes) => {
       promiseStates.then((states) => {
@@ -303,11 +303,17 @@ export default class SeachDevicesPage extends Vue {
   ) {
     this.loading = true
     this.searchResults = []
-    DeviceApi.find(
-      this.pageSize, searchText, manufacturer, states, types
-    ).then(this.loadUntilWeHaveSomeEntries).catch((_error) => {
-      this.$store.commit('snackbar/setError', 'Loading of devices failed')
-    })
+    this.api.sms.devices
+      .newSearchBuilder()
+      .withTextInShortName(searchText)
+      .withOneMachtingManufacturerOf(manufacturer)
+      .withOneMatchingStatusOf(states)
+      .withOneMatchingDeviceTypeOf(types)
+      .build()
+      .findMatchingAsPaginationLoader(this.pageSize)
+      .then(this.loadUntilWeHaveSomeEntries).catch((_error) => {
+        this.$store.commit('snackbar/setError', 'Loading of devices failed')
+      })
   }
 
   loadUntilWeHaveSomeEntries (loader: IPaginationLoader<Device>) {
@@ -342,7 +348,7 @@ export default class SeachDevicesPage extends Vue {
   }
 
   deleteAndCloseDialog (id: number) {
-    DeviceApi.deleteById(id).then(() => {
+    this.api.sms.devices.deleteById(id).then(() => {
       this.showDeleteDialog = false
 
       const searchIndex = this.searchResults.findIndex(r => r.id === id)

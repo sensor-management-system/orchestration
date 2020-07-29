@@ -17,7 +17,7 @@
 import { Vue, Component, Prop } from 'nuxt-property-decorator'
 
 import DeviceType from '@/models/DeviceType'
-import CVService from '@/services/CVService'
+import Api from '@/services/Api'
 
 // @ts-ignore
 import EntitySelect from '@/components/EntitySelect'
@@ -51,7 +51,9 @@ export default class DeviceTypeSelect extends Vue {
   readonly readonly: boolean
 
   get findAllDeviceTypes (): DeviceTypeLoaderFunction {
-    return CVService.findAllDeviceTypes
+    return () => {
+      return new Api().cv.deviceTypes.findAll()
+    }
   }
 
   get wrappedValue () {

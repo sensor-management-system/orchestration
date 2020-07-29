@@ -149,8 +149,6 @@
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 
-import CVService from '../../services/CVService'
-
 import Manufacturer from '../../models/Manufacturer'
 import PlatformType from '../../models/PlatformType'
 import Platform from '../../models/Platform'
@@ -158,7 +156,7 @@ import Status from '../../models/Status'
 
 import { IPaginationLoader } from '@/utils/PaginatedLoader'
 
-import PlatformApi from '@/services/sms/PlatformApi'
+import Api from '@/services/Api'
 
 // @ts-ignore
 import ManufacturerSelect from '@/components/ManufacturerSelect.vue'
@@ -196,7 +194,7 @@ export default class SeachPlatformsPage extends Vue {
   private fab: boolean = false
   private loading: boolean = true
 
-  private platformApi: PlatformApi = new PlatformApi()
+  private api: Api = new Api()
 
   private loader: null | IPaginationLoader<Platform> = null
 
@@ -221,8 +219,8 @@ export default class SeachPlatformsPage extends Vue {
   }
 
   mounted () {
-    const promisePlatformTypes = CVService.findAllPlatformTypes()
-    const promiseStates = CVService.findAllStates()
+    const promisePlatformTypes = this.api.cv.platformTypes.findAll()
+    const promiseStates = this.api.cv.states.findAll()
 
     promisePlatformTypes.then((platformTypes) => {
       promiseStates.then((states) => {
@@ -306,7 +304,7 @@ export default class SeachPlatformsPage extends Vue {
   ) {
     this.loading = true
     this.searchResults = []
-    this.platformApi
+    this.api.sms.platforms
       .newSearchBuilder()
       .withTextInShortName(searchText)
       .withOneMatchingManufacturerOf(manufacturer)
@@ -351,7 +349,7 @@ export default class SeachPlatformsPage extends Vue {
   }
 
   deleteAndCloseDialog (id: number) {
-    this.platformApi.deleteById(id).then(() => {
+    this.api.sms.platforms.deleteById(id).then(() => {
       this.showDeleteDialog = false
 
       const searchIndex = this.searchResults.findIndex(r => r.id === id)

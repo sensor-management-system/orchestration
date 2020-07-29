@@ -502,16 +502,12 @@ import Contact from '@/models/Contact'
 import Platform from '@/models/Platform'
 // @ts-ignore
 import Device from '@/models/Device'
-import DeviceType from '@/models/DeviceType'
 // @ts-ignore
 import { PlatformNode } from '@/models/PlatformNode'
 // @ts-ignore
 import { DeviceNode } from '@/models/DeviceNode'
 // @ts-ignore
-import Manufacturer from '@/models/Manufacturer'
-import Status from '@/models/Status'
-import DeviceApi from '@/services/sms/DeviceApi'
-import PlatformApi from '@/services/sms/PlatformApi'
+import Api from '@/services/Api'
 // @ts-ignore
 import { ConfigurationsTree } from '@/models/ConfigurationsTree'
 // @ts-ignore
@@ -547,7 +543,7 @@ export class AppBarTabsExtensionExtended extends AppBarTabsExtension {
 })
 // @ts-ignore
 export default class ConfigurationsIdPage extends Vue {
-  private platformApi: PlatformApi = new PlatformApi()
+  private api: Api = new Api()
 
   private activeTab: number = 0
   private editMode: boolean = false
@@ -848,20 +844,16 @@ export default class ConfigurationsIdPage extends Vue {
   async search () {
     switch (this.searchOptions.searchType) {
       case SearchType.Platform:
-        this.platforms = await this.platformApi.newSearchBuilder()
+        this.platforms = await this.api.sms.platforms.newSearchBuilder()
           .withTextInShortName(this.searchOptions.text)
           .build()
           .findMatchingAsList()
         break
       case SearchType.Device:
-        this.devices = await DeviceApi.find(
-          // load all the elements with one run
-          100000,
-          this.searchOptions.text,
-          [] as Manufacturer[],
-          [] as Status[],
-          [] as DeviceType[]
-        ).then(x => x.elements)
+        this.devices = await this.api.sms.devices.newSearchBuilder()
+          .withTextInShortName(this.searchOptions.text)
+          .build()
+          .findMatchingAsList()
         break
       default:
         throw new TypeError('search function not defined for unknown value')

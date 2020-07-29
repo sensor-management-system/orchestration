@@ -17,7 +17,7 @@
 import { Vue, Component, Prop } from 'nuxt-property-decorator'
 
 import Manufacturer from '../models/Manufacturer'
-import CVService from '../services/CVService'
+import Api from '@/services/Api'
 
 // @ts-ignore
 import EntitySelect from '@/components/EntitySelect'
@@ -51,7 +51,9 @@ export default class ManufacturerSelect extends Vue {
   readonly readonly: boolean
 
   get findAllManufacturers (): ManufacturersLoaderFunction {
-    return CVService.findAllManufacturers
+    return () => {
+      return new Api().cv.manufacturer.findAll()
+    }
   }
 
   get wrappedValue () {

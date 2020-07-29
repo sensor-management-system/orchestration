@@ -16,6 +16,10 @@ export default class ContactApi {
   newSearchBuilder (): ContactSearchBuilder {
     return new ContactSearchBuilder(this.axiosApi)
   }
+
+  findAll (): Promise<Contact[]> {
+    return this.newSearchBuilder().build().findMatchingAsList()
+  }
 }
 
 export function serverResponseToEntity (entry: any): Contact {
@@ -40,6 +44,18 @@ export function serverResponseToEntity (entry: any): Contact {
 }
 
 export class ContactSearchBuilder {
+  private axiosApi: AxiosInstance
+
+  constructor (axiosApi: AxiosInstance) {
+    this.axiosApi = axiosApi
+  }
+
+  build (): ContactSearcher {
+    return new ContactSearcher(this.axiosApi)
+  }
+}
+
+export class ContactSearcher {
   private axiosApi: AxiosInstance
 
   constructor (axiosApi: AxiosInstance) {

@@ -1,4 +1,4 @@
-import axios from 'axios'
+import axios, { AxiosInstance, Method } from 'axios'
 
 import Device from '@/models/Device'
 import DeviceType from '@/models/DeviceType'
@@ -13,48 +13,28 @@ import {
 const BASE_URL = process.env.smsBackendUrl + '/devices'
 
 export default class DeviceApi {
-  static serverResponseToEntity (entry: any) : Device {
-    const result: Device = new Device()
+  private axiosApi: AxiosInstance
 
-    const attributes = entry.attributes
-
-    result.id = entry.id
-
-    result.description = attributes.description || ''
-    // TODO: to camelcase
-    result.dualUse = attributes.dual_use || false
-    result.inventoryNumber = attributes.inventory_number || ''
-    result.longName = attributes.long_name || ''
-    result.manufacturerName = attributes.manufacturer || ''
-    // TODO: manufacturerUri
-    result.model = attributes.model || ''
-
-    result.persistentIdentifier = attributes.persistent_identifier || ''
-    result.shortName = attributes.short_name || ''
-    result.serialNumber = attributes.serial_number || ''
-    // TODO: StatusName & StatusUri
-    result.website = attributes.url || ''
-
-    result.deviceTypeUri = attributes.type || ''
-    // TODO: createdAt, modifiedAt, createdBy, modifiedBy
-
-    // TODO: Insert those as well
-    result.contacts = []
-    result.properties = []
-    result.customFields = []
-
-    // TODO: Attachments
-    // TODO: events
-
-    return result
+  constructor (baseURL: string = BASE_URL) {
+    this.axiosApi = axios.create({
+      baseURL
+    })
   }
 
-  static deleteById (id: number) {
-    return axios.delete(BASE_URL + '/' + id)
+  findById (id: string): Promise<Device> {
+    // TODO: Think about also including the contacts
+    // with ?include=contacts
+    return this.axiosApi.get(id).then((rawResponse) => {
+      const entry = rawResponse.data.data
+      return serverResponseToEntity(entry)
+    })
   }
 
-  static save (device: Device) {
-    let method = axios.patch
+  deleteById (id: number) : Promise<void> {
+    return this.axiosApi.delete<string, void>(String(id))
+  }
+
+  save (device: Device) {
     // TODO: consistent camelCase
     const data: any = {
       type: 'device',
@@ -106,43 +86,162 @@ export default class DeviceApi {
       }
       */
     }
-    let url = BASE_URL
+    let method: Method = 'patch'
+    let url = ''
 
     if (device.id === null) {
       // new -> post
-      method = axios.post
+      method = 'post'
     } else {
       // old -> patch
       data.id = device.id
-      url = url + '/' + device.id
+      url = String(device.id)
     }
 
     // TODO: links for contacts
-    return method(
+    return this.axiosApi.request({
       url,
-      {
+      method,
+      data: {
         data
       }
-    ).then((serverAnswer) => {
-      return this.serverResponseToEntity(serverAnswer.data.data)
+    }).then((serverAnswer) => {
+      return serverResponseToEntity(serverAnswer.data.data)
     })
   }
 
-  static findAllOnPage (page: number, pageSize: number): Promise<IPaginationLoader<Device>> {
-    const pageParameter = 'page[size]=' + pageSize + '&page[number]=' + page
-    // TODO: Think about also including the contacts
-    // with ?include=contacts
-    // size for having one query to get all the devices (no pagination)
-    return axios.get(BASE_URL + '?' + pageParameter).then((rawResonse) => {
-      const rawData = rawResonse.data
+  newSearchBuilder (): DeviceSearchBuilder {
+    return new DeviceSearchBuilder(this.axiosApi)
+  }
+}
+
+export class DeviceSearchBuilder {
+  private axiosApi: AxiosInstance
+  private clientSideFilterFunc: (device: Device) => boolean
+
+  constructor (axiosApi: AxiosInstance) {
+    this.axiosApi = axiosApi
+    this.clientSideFilterFunc = (_d: Device) => true
+  }
+
+  withTextInShortName (text: string | null) {
+    if (text) {
+      const oldFilterFunc = this.clientSideFilterFunc
+      this.clientSideFilterFunc = (device: Device): boolean => {
+        return oldFilterFunc(device) && (
+          device.shortName.includes(text)
+        )
+      }
+    }
+    return this
+  }
+
+  withOneMachtingManufacturerOf (manufacturers: Manufacturer[]) {
+    if (manufacturers.length > 0) {
+      const oldFilterFunc = this.clientSideFilterFunc
+      this.clientSideFilterFunc = (device: Device) : boolean => {
+        return oldFilterFunc(device) && (
+          manufacturers.findIndex(m => m.uri === device.manufacturerUri) > -1
+        )
+      }
+    }
+    return this
+  }
+
+  withOneMatchingStatusOf (states: Status[]) {
+    if (states.length > 0) {
+      const oldFilterFunc = this.clientSideFilterFunc
+      this.clientSideFilterFunc = (device: Device) : boolean => {
+        return oldFilterFunc(device) && (
+          states.findIndex(s => s.uri === device.statusUri) > -1
+        )
+      }
+    }
+    return this
+  }
+
+  withOneMatchingDeviceTypeOf (types: DeviceType[]) {
+    if (types.length > 0) {
+      const oldFilterFunc = this.clientSideFilterFunc
+      this.clientSideFilterFunc = (device: Device) : boolean => {
+        return oldFilterFunc(device) && (
+          types.findIndex(t => t.uri === device.deviceTypeUri) > -1
+        )
+      }
+    }
+    return this
+  }
+
+  build (): DeviceSearcher {
+    return new DeviceSearcher(
+      this.axiosApi,
+      this.clientSideFilterFunc
+    )
+  }
+}
+
+export class DeviceSearcher {
+  private axiosApi: AxiosInstance
+  private clientSideFilterFunc: (device: Device) => boolean
+
+  constructor (
+    axiosApi: AxiosInstance,
+    clientSideFilterFunc: (device: Device) => boolean
+  ) {
+    this.axiosApi = axiosApi
+    this.clientSideFilterFunc = clientSideFilterFunc
+  }
+
+  findMatchingAsList (): Promise<Device[]> {
+    return this.axiosApi.get(
+      '',
+      {
+        params: {
+          'page[size]': 100000
+        }
+      }
+    ).then((rawResponse: any) => {
+      const rawData = rawResponse.data
       const result: Device[] = []
 
       for (const entry of rawData.data) {
-        result.push(this.serverResponseToEntity(entry))
+        const device = serverResponseToEntity(entry)
+        if (this.clientSideFilterFunc(device)) {
+          result.push(device)
+        }
+      }
+      return result
+    })
+  }
+
+  findMatchingAsPaginationLoader (pageSize: number): Promise<IPaginationLoader<Device>> {
+    const loaderPromise: Promise<IPaginationLoader<Device>> = this.findAllOnPage(1, pageSize)
+    return loaderPromise.then((loader) => {
+      return new FilteredPaginationedLoader<Device>(loader, this.clientSideFilterFunc)
+    })
+  }
+
+  private findAllOnPage (page: number, pageSize: number): Promise<IPaginationLoader<Device>> {
+    return this.axiosApi.get(
+      '',
+      {
+        params: {
+          'page[size]': pageSize,
+          'page[number]': page
+        }
+      }
+    ).then((rawResponse) => {
+      const rawData = rawResponse.data
+      const result: Device[] = []
+      for (const entry of rawData.data) {
+        // client side filtering will not be done here
+        // (but in the FilteredPaginationedLoader)
+        // so that we know if we still have elements here
+        // there may be others to load as well
+        result.push(serverResponseToEntity(entry))
       }
 
       let funToLoadNext = null
-
       if (result.length > 0) {
         funToLoadNext = () => this.findAllOnPage(page + 1, pageSize)
       }
@@ -153,60 +252,40 @@ export default class DeviceApi {
       }
     })
   }
+}
 
-  static findById (id: string): Promise<Device> {
-    // TODO: Think about also including the contacts
-    // with ?include=contacts
-    return axios.get(BASE_URL + '/' + id).then((rawResponse) => {
-      const entry = rawResponse.data.data
-      return this.serverResponseToEntity(entry)
-    })
-  }
+export function serverResponseToEntity (entry: any) : Device {
+  const result: Device = new Device()
 
-  static find (
-    pageSize: number,
-    text: string | null,
-    manufacturer: Manufacturer[],
-    states: Status[],
-    types: DeviceType[]
-  ): Promise<IPaginationLoader<Device>> {
-    const loaderPromise: Promise<IPaginationLoader<Device>> = this.findAllOnPage(1, pageSize)
+  const attributes = entry.attributes
 
-    let filterFunc = (_device: Device): boolean => { return true }
+  result.id = entry.id
 
-    if (text) {
-      filterFunc = (device: Device): boolean => {
-        return device.shortName.includes(text)
-      }
-    }
-    if (manufacturer.length > 0) {
-      const oldFilterFunc = filterFunc
+  result.description = attributes.description || ''
+  // TODO: to camelcase
+  result.dualUse = attributes.dual_use || false
+  result.inventoryNumber = attributes.inventory_number || ''
+  result.longName = attributes.long_name || ''
+  result.manufacturerName = attributes.manufacturer || ''
+  // TODO: manufacturerUri
+  result.model = attributes.model || ''
 
-      filterFunc = (device: Device): boolean => {
-        return oldFilterFunc(device) && (
-          manufacturer.findIndex(m => m.uri === device.manufacturerUri) > -1
-        )
-      }
-    }
-    if (states.length > 0) {
-      const oldFilterFunc = filterFunc
-      filterFunc = (device: Device): boolean => {
-        return oldFilterFunc(device) && (
-          states.findIndex(s => s.uri === device.statusUri) > -1
-        )
-      }
-    }
-    if (types.length > 0) {
-      const oldFilterFunc = filterFunc
-      filterFunc = (device: Device): boolean => {
-        return oldFilterFunc(device) && (
-          types.findIndex(t => t.uri === device.deviceTypeUri) > -1
-        )
-      }
-    }
+  result.persistentIdentifier = attributes.persistent_identifier || ''
+  result.shortName = attributes.short_name || ''
+  result.serialNumber = attributes.serial_number || ''
+  // TODO: StatusName & StatusUri
+  result.website = attributes.url || ''
 
-    return loaderPromise.then((loader) => {
-      return new FilteredPaginationedLoader<Device>(loader, filterFunc)
-    })
-  }
+  result.deviceTypeUri = attributes.type || ''
+  // TODO: createdAt, modifiedAt, createdBy, modifiedBy
+
+  // TODO: Insert those as well
+  result.contacts = []
+  result.properties = []
+  result.customFields = []
+
+  // TODO: Attachments
+  // TODO: events
+
+  return result
 }

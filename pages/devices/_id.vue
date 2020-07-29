@@ -291,11 +291,8 @@
 
 <script lang="ts">
 import { Component, Watch, mixins } from 'nuxt-property-decorator'
+
 import Device from '../../models/Device'
-
-import CVService from '../../services/CVService'
-import DeviceApi from '../../services/sms/DeviceApi'
-
 import Manufacturer from '../../models/Manufacturer'
 import Status from '../../models/Status'
 import DeviceType from '../../models/DeviceType'
@@ -317,6 +314,7 @@ import AppBarEditModeContent from '@/components/AppBarEditModeContent.vue'
 
 // @ts-ignore
 import AppBarTabsExtension from '@/components/AppBarTabsExtension.vue'
+import Api from '@/services/Api'
 // @ts-ignore
 import { Rules } from '@/mixins/Rules'
 
@@ -345,6 +343,8 @@ export class AppBarTabsExtensionExtended extends AppBarTabsExtension {
 })
 // @ts-ignore
 export default class DeviceIdPage extends mixins(Rules) {
+  private api: Api = new Api()
+
   private numberOfTabs: number = 5
   private activeTab: number = 0
 
@@ -381,25 +381,25 @@ export default class DeviceIdPage extends mixins(Rules) {
   }
 
   mounted () {
-    CVService.findAllStates().then((foundStates) => {
+    this.api.cv.states.findAll().then((foundStates) => {
       this.states = foundStates
     })
-    CVService.findAllManufacturers().then((foundManufacturers) => {
+    this.api.cv.manufacturer.findAll().then((foundManufacturers) => {
       this.manufacturers = foundManufacturers
     })
-    CVService.findAllDeviceTypes().then((foundDeviceTypes) => {
+    this.api.cv.deviceTypes.findAll().then((foundDeviceTypes) => {
       this.deviceTypes = foundDeviceTypes
     })
-    CVService.findAllCompartments().then((foundCompartments) => {
+    this.api.cv.compartments.findAll().then((foundCompartments) => {
       this.compartments = foundCompartments
     })
-    CVService.findAllSamplingMedias().then((foundSamplingMedias) => {
+    this.api.cv.samplingMedia.findAll().then((foundSamplingMedias) => {
       this.samplingMedias = foundSamplingMedias
     })
-    CVService.findAllProperties().then((foundProperties) => {
+    this.api.cv.properties.findAll().then((foundProperties) => {
       this.properties = foundProperties
     })
-    CVService.findAllUnits().then((foundUnits) => {
+    this.api.cv.units.findAll().then((foundUnits) => {
       this.units = foundUnits
     })
     this.loadDevice()
@@ -424,7 +424,7 @@ export default class DeviceIdPage extends mixins(Rules) {
     const deviceId = this.$route.params.id
     if (deviceId) {
       this.isInEditMode = false
-      DeviceApi.findById(deviceId).then((foundDevice) => {
+      this.api.sms.devices.findById(deviceId).then((foundDevice) => {
         this.device = foundDevice
       }).catch((_error) => {
         this.$store.commit('snackbar/setError', 'Loading device failed')
@@ -439,7 +439,7 @@ export default class DeviceIdPage extends mixins(Rules) {
   }
 
   save () {
-    DeviceApi.save(this.device).then((savedDevice) => {
+    this.api.sms.devices.save(this.device).then((savedDevice) => {
       this.device = savedDevice
       this.toggleEditMode()
       this.$store.commit('snackbar/setSuccess', 'Save successful')

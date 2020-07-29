@@ -17,7 +17,7 @@
  */
 import { Vue, Component, Prop } from 'nuxt-property-decorator'
 import Contact from '../models/Contact'
-import ContactApi from '@/services/sms/ContactApi'
+import Api from '@/services/Api'
 
 // @ts-ignore
 import EntitySelect from '@/components/EntitySelect'
@@ -52,7 +52,7 @@ export default class ContactSelect extends Vue {
 
   get findAllContacts () : ContactsLoaderFunction {
     return () => {
-      return new ContactApi().newSearchBuilder().findMatchingAsList()
+      return new Api().sms.contacts.findAll()
     }
   }
 

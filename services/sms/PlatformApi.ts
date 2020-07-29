@@ -163,15 +163,15 @@ export class PlatformSearchBuilder {
     return this
   }
 
-  build (): PlatformSearchQuery {
-    return new PlatformSearchQuery(
+  build (): PlatformSearcher {
+    return new PlatformSearcher(
       this.axiosApi,
       this.clientSideFilterFunc
     )
   }
 }
 
-export class PlatformSearchQuery {
+export class PlatformSearcher {
   private axiosApi: AxiosInstance
   private clientSideFilterFunc: (platform: Platform) => boolean
 
