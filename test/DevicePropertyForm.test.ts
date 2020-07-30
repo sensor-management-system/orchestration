@@ -70,7 +70,7 @@ describe('DevicePropertyForm', () => {
    */
 
   it('should be a Vue instance', () => {
-    expect(wrapper.isVueInstance()).toBeTruthy()
+    expect(wrapper.vm).toBeTruthy()
   })
 
   it('should trigger an input event on change', async () => {

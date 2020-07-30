@@ -1,0 +1,2 @@
+FROM node:14.6.0-stretch-slim
+RUN apt-get update && apt-get install g++ build-essential python3 -y

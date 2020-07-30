@@ -16,11 +16,11 @@
  */
 import { Vue, Component, Prop } from 'nuxt-property-decorator'
 
-import Status from '@/models/Status'
+import EntitySelect from '@/components/EntitySelect.vue'
+
 import CVService from '@/services/CVService'
 
-// @ts-ignore
-import EntitySelect from '@/components/EntitySelect'
+import Status from '@/models/Status'
 
 type StatesLoaderFunction = () => Promise<Status[]>
 

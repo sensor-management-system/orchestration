@@ -50,10 +50,10 @@
  * @author <marc.hanisch@gfz-potsdam.de>
  */
 import { Vue, Component, Prop } from 'nuxt-property-decorator'
-import { CustomTextField } from '../models/CustomTextField'
 
-// @ts-ignore
-import CustomFieldForm from './CustomFieldForm.vue'
+import CustomFieldForm from '@/components/CustomFieldForm.vue'
+
+import { CustomTextField } from '@/models/CustomTextField'
 
 /**
  * A class component that lists CustomFieldForms as Cards

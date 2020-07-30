@@ -1,13 +1,13 @@
 import axios from 'axios'
 
-import Manufacturer from '../models/Manufacturer'
-import PlatformType from '~/models/PlatformType'
-import Status from '~/models/Status'
-import DeviceType from '~/models/DeviceType'
-import Compartment from '~/models/Compartment'
-import SamplingMedia from '~/models/SamplingMedia'
-import Property from '~/models/Property'
-import Unit from '~/models/Unit'
+import Compartment from '@/models/Compartment'
+import DeviceType from '@/models/DeviceType'
+import Manufacturer from '@/models/Manufacturer'
+import PlatformType from '@/models/PlatformType'
+import Property from '@/models/Property'
+import SamplingMedia from '@/models/SamplingMedia'
+import Status from '@/models/Status'
+import Unit from '@/models/Unit'
 
 const BASE_URL = process.env.cvBackendUrl + '/api'
 

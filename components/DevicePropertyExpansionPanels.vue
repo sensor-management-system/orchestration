@@ -77,15 +77,14 @@
  * @author <marc.hanisch@gfz-potsdam.de>
  */
 import { Vue, Component, Prop } from 'nuxt-property-decorator'
-import { DeviceProperty } from '../models/DeviceProperty'
 
-import Compartment from '../models/Compartment'
-import SamplingMedia from '../models/SamplingMedia'
-import Property from '../models/Property'
-import Unit from '../models/Unit'
+import DevicePropertyForm from '@/components/DevicePropertyForm.vue'
 
-// @ts-ignore
-import DevicePropertyForm from './DevicePropertyForm.vue'
+import Compartment from '@/models/Compartment'
+import Property from '@/models/Property'
+import SamplingMedia from '@/models/SamplingMedia'
+import Unit from '@/models/Unit'
+import { DeviceProperty } from '@/models/DeviceProperty'
 
 /**
  * A class component that lists DevicePropertyForms as ExpansionPanels
