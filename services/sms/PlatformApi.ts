@@ -6,7 +6,7 @@ import PlatformType from '@/models/PlatformType'
 import Manufacturer from '@/models/Manufacturer'
 import Status from '@/models/Status'
 
-import { IJSONAPIFilter } from '@/utils/JSONApiInterfaces'
+import { IFlaskJSONAPIFilter } from '@/utils/JSONApiInterfaces'
 
 import {
   IPaginationLoader, FilteredPaginationedLoader
@@ -107,7 +107,7 @@ export default class PlatformApi {
 export class PlatformSearchBuilder {
   private axiosApi: AxiosInstance
   private clientSideFilterFunc: (platform: Platform) => boolean
-  private shortNameILikeValue : string | null = null
+  private serverSideFilterSettings: IFlaskJSONAPIFilter[] = []
 
   constructor (axiosApi: AxiosInstance) {
     this.axiosApi = axiosApi
@@ -116,7 +116,11 @@ export class PlatformSearchBuilder {
 
   withTextInShortName (text: string | null) : PlatformSearchBuilder {
     if (text) {
-      this.shortNameILikeValue = text
+      this.serverSideFilterSettings.push({
+        name: 'short_name',
+        op: 'ilike',
+        val: '%' + text + '%'
+      })
     }
     return this
   }
@@ -158,20 +162,10 @@ export class PlatformSearchBuilder {
   }
 
   build (): PlatformSearcher {
-    const serverSideFilterSettings: IJSONAPIFilter[] = []
-
-    if (this.shortNameILikeValue != null) {
-      serverSideFilterSettings.push({
-        name: 'short_name',
-        op: 'ilike',
-        val: '%' + this.shortNameILikeValue + '%'
-      })
-    }
-
     return new PlatformSearcher(
       this.axiosApi,
       this.clientSideFilterFunc,
-      serverSideFilterSettings
+      this.serverSideFilterSettings
     )
   }
 }
@@ -179,12 +173,12 @@ export class PlatformSearchBuilder {
 export class PlatformSearcher {
   private axiosApi: AxiosInstance
   private clientSideFilterFunc: (platform: Platform) => boolean
-  private serverSideFilterSettings: IJSONAPIFilter[]
+  private serverSideFilterSettings: IFlaskJSONAPIFilter[]
 
   constructor (
     axiosApi: AxiosInstance,
     clientSideFilterFunc: (platform: Platform) => boolean,
-    serverSideFilterSetting: IJSONAPIFilter[]
+    serverSideFilterSetting: IFlaskJSONAPIFilter[]
   ) {
     this.axiosApi = axiosApi
     this.clientSideFilterFunc = clientSideFilterFunc

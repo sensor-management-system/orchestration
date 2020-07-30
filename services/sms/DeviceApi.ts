@@ -5,7 +5,7 @@ import DeviceType from '@/models/DeviceType'
 import Manufacturer from '@/models/Manufacturer'
 import Status from '@/models/Status'
 
-import { IJSONAPIFilter } from '@/utils/JSONApiInterfaces'
+import { IFlaskJSONAPIFilter } from '@/utils/JSONApiInterfaces'
 
 import {
   IPaginationLoader, FilteredPaginationedLoader
@@ -115,7 +115,7 @@ export default class DeviceApi {
 export class DeviceSearchBuilder {
   private axiosApi: AxiosInstance
   private clientSideFilterFunc: (device: Device) => boolean
-  private serverSideFilterSettings: IJSONAPIFilter[] = []
+  private serverSideFilterSettings: IFlaskJSONAPIFilter[] = []
 
   constructor (axiosApi: AxiosInstance) {
     this.axiosApi = axiosApi
@@ -181,12 +181,12 @@ export class DeviceSearchBuilder {
 export class DeviceSearcher {
   private axiosApi: AxiosInstance
   private clientSideFilterFunc: (device: Device) => boolean
-  private serverSideFilterSettings: IJSONAPIFilter[]
+  private serverSideFilterSettings: IFlaskJSONAPIFilter[]
 
   constructor (
     axiosApi: AxiosInstance,
     clientSideFilterFunc: (device: Device) => boolean,
-    serverSideFilterSettings: IJSONAPIFilter[]
+    serverSideFilterSettings: IFlaskJSONAPIFilter[]
   ) {
     this.axiosApi = axiosApi
     this.clientSideFilterFunc = clientSideFilterFunc
