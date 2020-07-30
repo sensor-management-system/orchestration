@@ -1,19 +1,5 @@
 <template>
   <div>
-    <!-- The very first: the snackback if we have some messages from the system -->
-    <v-snackbar v-model="showSaveSuccess" top color="success">
-      Save successful
-      <v-btn fab @click="showSaveSuccess = false">
-        <v-icon>mdi-close</v-icon>
-      </v-btn>
-    </v-snackbar>
-    <v-snackbar v-model="showLoadingError" top color="error">
-      Loading platform failed
-      <v-btn fab @click="showLoadingError = false">
-        <v-icon>mdi-close</v-icon>
-      </v-btn>
-    </v-snackbar>
-
     <v-card outlined>
       <v-tabs-items
         v-model="activeTab"
@@ -237,8 +223,6 @@ export default class PlatformIdPage extends mixins(Rules) {
 
   // and some general data for the page
   private activeTab: number = 0
-  private showSaveSuccess: boolean = false
-  private showLoadingError: boolean = false
   private editMode: boolean = false
 
   created () {
@@ -261,7 +245,6 @@ export default class PlatformIdPage extends mixins(Rules) {
   }
 
   mounted () {
-    this.showLoadingError = false
     CVService.findAllManufacturers().then((foundManufacturers) => {
       this.manufacturers = foundManufacturers
     })
@@ -299,7 +282,7 @@ export default class PlatformIdPage extends mixins(Rules) {
         this.platform = foundPlatform
       }).catch(() => {
         // We don't take the error directly
-        this.showLoadingError = true
+        this.$store.commit('snackbar/setError', 'Loading platform failed')
       })
     } else {
       this.isInEditMode = true
@@ -327,12 +310,13 @@ export default class PlatformIdPage extends mixins(Rules) {
 
   // methods
   save () {
-    this.showSaveSuccess = false
     SmsService.savePlatform(this.platform).then((savedPlatform) => {
       this.platform = savedPlatform
-      this.showSaveSuccess = true
+      this.$store.commit('snackbar/setSuccess', 'Save successful')
       // this.$router.push('/seach/platforms')
       this.toggleEditMode()
+    }).catch((_error) => {
+      this.$store.commit('snackbar/setError', 'Save failed')
     })
   }
 
