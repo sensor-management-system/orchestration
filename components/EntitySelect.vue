@@ -35,7 +35,8 @@
  * @author <nils.brinckmann@gfz-potsdam.de>
  */
 import { Vue, Component, Prop } from 'nuxt-property-decorator'
-import { INumericId } from '../models/INumericId'
+
+import { INumericId } from '@/models/INumericId'
 
 type EntityLoaderFunction<E> = () => Promise<E[]>
 

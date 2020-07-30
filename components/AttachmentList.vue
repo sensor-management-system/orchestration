@@ -101,10 +101,10 @@
  */
 import { Vue, Component, Prop, mixins } from 'nuxt-property-decorator'
 import { Rules } from '@/mixins/Rules'
-import { Attachment } from '../models/Attachment'
 
-// @ts-ignore
-import AttachmentListItem from './AttachmentListItem.vue'
+import AttachmentListItem from '@/components/AttachmentListItem.vue'
+
+import { Attachment } from '@/models/Attachment'
 
 /**
  * A class component for a list of Attachments and an upload form

@@ -155,28 +155,21 @@
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 
-// @ts-ignore
-import ManufacturerSelect from '@/components/ManufacturerSelect.vue'
-// @ts-ignore
-import StatusSelect from '@/components/StatusSelect.vue'
-// @ts-ignore
-import PlatformTypeSelect from '@/components/PlatformTypeSelect.vue'
-
-// @ts-ignore
 import AppBarEditModeContent from '@/components/AppBarEditModeContent.vue'
-// @ts-ignore
 import AppBarTabsExtension from '@/components/AppBarTabsExtension.vue'
+import ManufacturerSelect from '@/components/ManufacturerSelect.vue'
+import PlatformTypeSelect from '@/components/PlatformTypeSelect.vue'
+import StatusSelect from '@/components/StatusSelect.vue'
 
-// @ts-ignore
 import { IPaginationLoader } from '@/utils/PaginatedLoader'
 
-import CVService from '../../services/CVService'
-import SmsService from '../../services/SmsService'
+import CVService from '@/services/CVService'
+import SmsService from '@/services/SmsService'
 
-import Manufacturer from '../../models/Manufacturer'
-import PlatformType from '../../models/PlatformType'
-import Platform from '../../models/Platform'
-import Status from '../../models/Status'
+import Manufacturer from '@/models/Manufacturer'
+import Platform from '@/models/Platform'
+import PlatformType from '@/models/PlatformType'
+import Status from '@/models/Status'
 
 @Component
 // @ts-ignore

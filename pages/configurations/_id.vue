@@ -488,35 +488,23 @@
 <script lang="ts">
 import { Vue, Component, Watch } from 'nuxt-property-decorator'
 
-// @ts-ignore
 import AppBarEditModeContent from '@/components/AppBarEditModeContent.vue'
-// @ts-ignore
 import AppBarTabsExtension from '@/components/AppBarTabsExtension.vue'
-
-// @ts-ignore
 import ContactSelect from '@/components/ContactSelect.vue'
-// @ts-ignore
-import Contact from '@/models/Contact'
 
-// @ts-ignore
-import Platform from '@/models/Platform'
-import PlatformType from '@/models/PlatformType'
-// @ts-ignore
+import SmsService from '@/services/SmsService'
+
+import Contact from '@/models/Contact'
 import Device from '@/models/Device'
 import DeviceType from '@/models/DeviceType'
-// @ts-ignore
-import { PlatformNode } from '@/models/PlatformNode'
-// @ts-ignore
-import { DeviceNode } from '@/models/DeviceNode'
-// @ts-ignore
 import Manufacturer from '@/models/Manufacturer'
+import Platform from '@/models/Platform'
+import PlatformType from '@/models/PlatformType'
 import Status from '@/models/Status'
-// @ts-ignore
-import SmsService from '@/services/SmsService'
-// @ts-ignore
 import { ConfigurationsTree } from '@/models/ConfigurationsTree'
-// @ts-ignore
 import { ConfigurationsTreeNode } from '@/models/ConfigurationsTreeNode'
+import { DeviceNode } from '@/models/DeviceNode'
+import { PlatformNode } from '@/models/PlatformNode'
 
 enum SearchType {
   Platform = 'Platform',

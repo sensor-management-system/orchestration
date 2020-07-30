@@ -104,12 +104,12 @@
  * @author <marc.hanisch@gfz-potsdam.de>
  */
 import { Vue, Component, Prop } from 'nuxt-property-decorator'
-import { DeviceProperty } from '../models/DeviceProperty'
 
-import Compartment from '../models/Compartment'
-import SamplingMedia from '../models/SamplingMedia'
-import Property from '../models/Property'
-import Unit from '../models/Unit'
+import Compartment from '@/models/Compartment'
+import Property from '@/models/Property'
+import SamplingMedia from '@/models/SamplingMedia'
+import Unit from '@/models/Unit'
+import { DeviceProperty } from '@/models/DeviceProperty'
 
 interface INameAndUri {
   name: string
