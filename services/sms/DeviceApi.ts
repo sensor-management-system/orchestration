@@ -5,6 +5,8 @@ import DeviceType from '@/models/DeviceType'
 import Manufacturer from '@/models/Manufacturer'
 import Status from '@/models/Status'
 
+import { IJSONAPIFilter } from '@/utils/JSONApiInterfaces'
+
 import {
   IPaginationLoader, FilteredPaginationedLoader
 } from '@/utils/PaginatedLoader'
@@ -113,6 +115,7 @@ export default class DeviceApi {
 export class DeviceSearchBuilder {
   private axiosApi: AxiosInstance
   private clientSideFilterFunc: (device: Device) => boolean
+  private serverSideFilterSettings: IJSONAPIFilter[] = []
 
   constructor (axiosApi: AxiosInstance) {
     this.axiosApi = axiosApi
@@ -121,12 +124,11 @@ export class DeviceSearchBuilder {
 
   withTextInShortName (text: string | null) {
     if (text) {
-      const oldFilterFunc = this.clientSideFilterFunc
-      this.clientSideFilterFunc = (device: Device): boolean => {
-        return oldFilterFunc(device) && (
-          device.shortName.includes(text)
-        )
-      }
+      this.serverSideFilterSettings.push({
+        name: 'short_name',
+        op: 'ilike',
+        val: '%' + text + '%'
+      })
     }
     return this
   }
@@ -170,7 +172,8 @@ export class DeviceSearchBuilder {
   build (): DeviceSearcher {
     return new DeviceSearcher(
       this.axiosApi,
-      this.clientSideFilterFunc
+      this.clientSideFilterFunc,
+      this.serverSideFilterSettings
     )
   }
 }
@@ -178,13 +181,22 @@ export class DeviceSearchBuilder {
 export class DeviceSearcher {
   private axiosApi: AxiosInstance
   private clientSideFilterFunc: (device: Device) => boolean
+  private serverSideFilterSettings: IJSONAPIFilter[]
 
   constructor (
     axiosApi: AxiosInstance,
-    clientSideFilterFunc: (device: Device) => boolean
+    clientSideFilterFunc: (device: Device) => boolean,
+    serverSideFilterSettings: IJSONAPIFilter[]
   ) {
     this.axiosApi = axiosApi
     this.clientSideFilterFunc = clientSideFilterFunc
+    this.serverSideFilterSettings = serverSideFilterSettings
+  }
+
+  private get commonParams (): any {
+    return {
+      filter: JSON.stringify(this.serverSideFilterSettings)
+    }
   }
 
   findMatchingAsList (): Promise<Device[]> {
@@ -192,7 +204,8 @@ export class DeviceSearcher {
       '',
       {
         params: {
-          'page[size]': 100000
+          'page[size]': 100000,
+          ...this.commonParams
         }
       }
     ).then((rawResponse: any) => {
@@ -222,7 +235,8 @@ export class DeviceSearcher {
       {
         params: {
           'page[size]': pageSize,
-          'page[number]': page
+          'page[number]': page,
+          ...this.commonParams
         }
       }
     ).then((rawResponse) => {

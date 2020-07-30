@@ -6,6 +6,8 @@ import PlatformType from '@/models/PlatformType'
 import Manufacturer from '@/models/Manufacturer'
 import Status from '@/models/Status'
 
+import { IJSONAPIFilter } from '@/utils/JSONApiInterfaces'
+
 import {
   IPaginationLoader, FilteredPaginationedLoader
 } from '@/utils/PaginatedLoader'
@@ -105,6 +107,7 @@ export default class PlatformApi {
 export class PlatformSearchBuilder {
   private axiosApi: AxiosInstance
   private clientSideFilterFunc: (platform: Platform) => boolean
+  private shortNameILikeValue : string | null = null
 
   constructor (axiosApi: AxiosInstance) {
     this.axiosApi = axiosApi
@@ -113,12 +116,7 @@ export class PlatformSearchBuilder {
 
   withTextInShortName (text: string | null) : PlatformSearchBuilder {
     if (text) {
-      const oldFilterFunc = this.clientSideFilterFunc
-      this.clientSideFilterFunc = (platform: Platform): boolean => {
-        return oldFilterFunc(platform) && (
-          platform.shortName.includes(text)
-        )
-      }
+      this.shortNameILikeValue = text
     }
     return this
   }
@@ -160,9 +158,20 @@ export class PlatformSearchBuilder {
   }
 
   build (): PlatformSearcher {
+    const serverSideFilterSettings: IJSONAPIFilter[] = []
+
+    if (this.shortNameILikeValue != null) {
+      serverSideFilterSettings.push({
+        name: 'short_name',
+        op: 'ilike',
+        val: '%' + this.shortNameILikeValue + '%'
+      })
+    }
+
     return new PlatformSearcher(
       this.axiosApi,
-      this.clientSideFilterFunc
+      this.clientSideFilterFunc,
+      serverSideFilterSettings
     )
   }
 }
@@ -170,13 +179,22 @@ export class PlatformSearchBuilder {
 export class PlatformSearcher {
   private axiosApi: AxiosInstance
   private clientSideFilterFunc: (platform: Platform) => boolean
+  private serverSideFilterSettings: IJSONAPIFilter[]
 
   constructor (
     axiosApi: AxiosInstance,
-    clientSideFilterFunc: (platform: Platform) => boolean
+    clientSideFilterFunc: (platform: Platform) => boolean,
+    serverSideFilterSetting: IJSONAPIFilter[]
   ) {
     this.axiosApi = axiosApi
     this.clientSideFilterFunc = clientSideFilterFunc
+    this.serverSideFilterSettings = serverSideFilterSetting
+  }
+
+  private get commonParams (): any {
+    return {
+      filter: JSON.stringify(this.serverSideFilterSettings)
+    }
   }
 
   findMatchingAsList (): Promise<Platform[]> {
@@ -184,7 +202,8 @@ export class PlatformSearcher {
       '',
       {
         params: {
-          'page[size]': 100000
+          'page[size]': 100000,
+          ...this.commonParams
         }
       }
     ).then((rawResponse: any) => {
@@ -214,7 +233,8 @@ export class PlatformSearcher {
       {
         params: {
           'page[size]': pageSize,
-          'page[number]': page
+          'page[number]': page,
+          ...this.commonParams
         }
       }
     ).then((rawResponse) => {
