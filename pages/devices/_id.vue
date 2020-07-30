@@ -426,6 +426,8 @@ export default class DeviceIdPage extends mixins(Rules) {
       this.isInEditMode = false
       SmsService.findDeviceById(deviceId).then((foundDevice) => {
         this.device = foundDevice
+      }).catch((_error) => {
+        this.$store.commit('snackbar/setError', 'Loading device failed')
       })
     } else {
       this.isInEditMode = true
@@ -440,6 +442,9 @@ export default class DeviceIdPage extends mixins(Rules) {
     SmsService.saveDevice(this.device).then((savedDevice) => {
       this.device = savedDevice
       this.toggleEditMode()
+      this.$store.commit('snackbar/setSuccess', 'Save successful')
+    }).catch((_error) => {
+      this.$store.commit('snackbar/setError', 'Save failed')
     })
   }
 

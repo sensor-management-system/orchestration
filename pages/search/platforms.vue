@@ -1,11 +1,5 @@
 <template>
   <div>
-    <v-snackbar v-model="showSuccessMessage" top color="success">
-      {{ successMessage }}
-      <v-btn fab @click="showSaveSuccess = false">
-        <v-icon>mdi-close</v-icon>
-      </v-btn>
-    </v-snackbar>
     <v-card>
       <v-tabs-items
         v-model="activeTab"
@@ -214,8 +208,6 @@ export default class SeachPlatformsPage extends Vue {
   private searchText: string | null = null
 
   private showDeleteDialog: boolean = false
-  private showSuccessMessage: boolean = false
-  private successMessage = ''
 
   created () {
     this.$nuxt.$emit('app-bar-content', AppBarEditModeContent)
@@ -245,7 +237,11 @@ export default class SeachPlatformsPage extends Vue {
         this.statusLookup = statusLookup
 
         this.runSelectedSearch()
+      }).catch((_error) => {
+        this.$store.commit('snackbar/setError', 'Loading of states failed')
       })
+    }).catch((_error) => {
+      this.$store.commit('snackbar/setError', 'Loading of platform types failed')
     })
     // make sure that all components (especially the dynamically passed ones) are rendered
     this.$nextTick(() => {
@@ -313,7 +309,9 @@ export default class SeachPlatformsPage extends Vue {
       manufacturer,
       states,
       platformTypes
-    ).then(this.loadUntilWeHaveSomeEntries)
+    ).then(this.loadUntilWeHaveSomeEntries).catch((_error) => {
+      this.$store.commit('snackbar/setError', 'Loading of platforms failed')
+    })
   }
 
   loadUntilWeHaveSomeEntries (loader:IPaginationLoader<Platform>) {
@@ -326,6 +324,8 @@ export default class SeachPlatformsPage extends Vue {
     } else if (this.canLoadNext() && loader.funToLoadNext != null) {
       loader.funToLoadNext().then((nextLoader) => {
         this.loadUntilWeHaveSomeEntries(nextLoader)
+      }).catch((_error) => {
+        this.$store.commit('snackbar/setError', 'Loading of additional platforms failed')
       })
     }
   }
@@ -335,6 +335,8 @@ export default class SeachPlatformsPage extends Vue {
       this.loader.funToLoadNext().then((nextLoader) => {
         this.loader = nextLoader
         this.searchResults = [...this.searchResults, ...nextLoader.elements]
+      }).catch((_error) => {
+        this.$store.commit('snackbar/setError', 'Loading of additional platforms failed')
       })
     }
   }
@@ -352,8 +354,9 @@ export default class SeachPlatformsPage extends Vue {
         this.searchResults.splice(searchIndex, 1)
       }
 
-      this.successMessage = 'Platform deleted'
-      this.showSuccessMessage = true
+      this.$store.commit('snackbar/setSuccess', 'Platform deleted')
+    }).catch((_error) => {
+      this.$store.commit('snackbar/setError', 'Platform could not be deleted')
     })
   }
 
