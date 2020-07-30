@@ -292,30 +292,23 @@
 <script lang="ts">
 import { Component, Watch, mixins } from 'nuxt-property-decorator'
 
-import Device from '../../models/Device'
-import Manufacturer from '../../models/Manufacturer'
-import Status from '../../models/Status'
-import DeviceType from '../../models/DeviceType'
-import Compartment from '../../models/Compartment'
-import SamplingMedia from '../../models/SamplingMedia'
-import Property from '../../models/Property'
-import Unit from '../../models/Unit'
-
-// @ts-ignore
-import ContactSelect from '../../components/ContactSelect.vue'
-// @ts-ignore
-import DevicePropertyExpansionPanels from '../../components/DevicePropertyExpansionPanels.vue'
-// @ts-ignore
-import CustomFieldCards from '../../components/CustomFieldCards.vue'
-// @ts-ignore
-import AttachmentList from '../../components/AttachmentList.vue'
-// @ts-ignore
-import AppBarEditModeContent from '@/components/AppBarEditModeContent.vue'
-
-// @ts-ignore
-import AppBarTabsExtension from '@/components/AppBarTabsExtension.vue'
-// @ts-ignore
 import { Rules } from '@/mixins/Rules'
+
+import Compartment from '@/models/Compartment'
+import Device from '@/models/Device'
+import DeviceType from '@/models/DeviceType'
+import Manufacturer from '@/models/Manufacturer'
+import Property from '@/models/Property'
+import SamplingMedia from '@/models/SamplingMedia'
+import Status from '@/models/Status'
+import Unit from '@/models/Unit'
+
+import AppBarEditModeContent from '@/components/AppBarEditModeContent.vue'
+import AppBarTabsExtension from '@/components/AppBarTabsExtension.vue'
+import AttachmentList from '@/components/AttachmentList.vue'
+import ContactSelect from '@/components/ContactSelect.vue'
+import CustomFieldCards from '@/components/CustomFieldCards.vue'
+import DevicePropertyExpansionPanels from '@/components/DevicePropertyExpansionPanels.vue'
 
 @Component
 // @ts-ignore

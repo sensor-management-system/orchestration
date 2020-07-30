@@ -68,9 +68,7 @@
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 
-// @ts-ignore
 import AppBarEditModeContent from '@/components/AppBarEditModeContent.vue'
-// @ts-ignore
 import AppBarTabsExtension from '@/components/AppBarTabsExtension.vue'
 
 @Component

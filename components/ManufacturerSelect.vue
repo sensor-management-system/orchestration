@@ -16,10 +16,9 @@
  */
 import { Vue, Component, Prop } from 'nuxt-property-decorator'
 
-import Manufacturer from '../models/Manufacturer'
+import EntitySelect from '@/components/EntitySelect.vue'
 
-// @ts-ignore
-import EntitySelect from '@/components/EntitySelect'
+import Manufacturer from '@/models/Manufacturer'
 
 type ManufacturersLoaderFunction = () => Promise<Manufacturer[]>
 

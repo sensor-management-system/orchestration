@@ -16,10 +16,9 @@
  */
 import { Vue, Component, Prop } from 'nuxt-property-decorator'
 
-import PlatformType from '@/models/PlatformType'
+import EntitySelect from '@/components/EntitySelect.vue'
 
-// @ts-ignore
-import EntitySelect from '@/components/EntitySelect'
+import PlatformType from '@/models/PlatformType'
 
 type PlatformTypeLoaderFunction = () => Promise<PlatformType[]>
 

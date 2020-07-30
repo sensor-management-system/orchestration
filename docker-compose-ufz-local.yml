@@ -2,14 +2,17 @@ version: '3.7'
 services:
 
   node:
-    image: node:current-slim
+    build:
+      context: '.'
+      dockerfile: 'docker/local-dev/Dockerfile-local-dev'
     user: "node"
     working_dir: /home/node/
     ports:
       - "127.0.0.1:${HTTP_PORT:-80}:3000"
     environment:
       BASE_URL: "/"
-      BACKEND_HOST_URL: "http://localhost:5000"
+      SMS_BACKEND_HOST_URL: "http://localhost:5000/rdm/svm-api/v1"
+      # TODO: CV_BACKEND_URL
 #      NUXT_ENV_REDIRECT_URI: "https://localhost.localdomain:3000/login-callback"
 #      NUXT_ENV_CLIENT_ID: "rdmsvm-implicit-flow"
 #      NUXT_ENV_AUTHORITY: "https://webapp.ufz.de/idp/oidc/v1"
