@@ -2,46 +2,46 @@
   <EntitySelect
     v-model="wrappedValue"
     :readonly="readonly"
-    :fetch-function="findAllContacts"
+    :fetch-function="findAllDeviceTypes"
     :label="label"
-    color="indigo"
-    avatar-icon="mdi-account-circle"
+    color="red"
   />
 </template>
 
 <script lang="ts">
 /**
- * @file provides a component to select contacts
+ * @file provides a component to select device types
  * @author <marc.hanisch@gfz-potsdam.de>
  * @author <nils.brinckmann@gfz-potsdam.de>
  */
 import { Vue, Component, Prop } from 'nuxt-property-decorator'
-import Contact from '../models/Contact'
-import SmsService from '../services/SmsService'
+
+import DeviceType from '@/models/DeviceType'
+import CVService from '@/services/CVService'
 
 // @ts-ignore
 import EntitySelect from '@/components/EntitySelect'
 
-type ContactsLoaderFunction = () => Promise<Contact[]>
+type DeviceTypeLoaderFunction = () => Promise<DeviceType[]>
 
 /**
- * A class component to select contacts
+ * A class component to select device types
  * @extends Vue
  */
 @Component({
-  components: { EntitySelect }
+  components: {
+    EntitySelect
+  }
 })
 // @ts-ignore
-export default class ContactSelect extends Vue {
-  private contacts: Contact[] = []
-
+export default class DeviceTypeSelect extends Vue {
   @Prop({
-    default: () => [] as Contact[],
+    default: () => [] as DeviceType[],
     required: true,
     type: Array
   })
   // @ts-ignore
-  readonly value!: Contact[]
+  readonly value!: DeviceType[]
 
   @Prop({
     default: false,
@@ -56,8 +56,8 @@ export default class ContactSelect extends Vue {
   })
   readonly label!: string
 
-  get findAllContacts () : ContactsLoaderFunction {
-    return SmsService.findAllContacts
+  get findAllDeviceTypes (): DeviceTypeLoaderFunction {
+    return CVService.findAllDeviceTypes
   }
 
   get wrappedValue () {
@@ -66,15 +66,6 @@ export default class ContactSelect extends Vue {
 
   set wrappedValue (newValue) {
     this.$emit('input', newValue)
-  }
-
-  /**
-   * fetches all available contacts from the SmsService
-   *
-   * @async
-   */
-  async fetch () {
-    this.contacts = await SmsService.findAllContacts()
   }
 }
 </script>

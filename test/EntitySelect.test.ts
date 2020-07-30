@@ -31,7 +31,8 @@ describe('EntitySelect', () => {
             Concact.createWithIdEMailAndNames(2, 'p2@mail.org', 'Pers', 'On 2', 'stuff/pers/On2')
           ])
         }),
-        color: 'red'
+        color: 'red',
+        label: 'Add a contact'
       },
       data () {
         return {
