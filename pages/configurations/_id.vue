@@ -500,14 +500,17 @@ import Contact from '@/models/Contact'
 
 // @ts-ignore
 import Platform from '@/models/Platform'
+import PlatformType from '@/models/PlatformType'
 // @ts-ignore
 import Device from '@/models/Device'
+import DeviceType from '@/models/DeviceType'
 // @ts-ignore
 import { PlatformNode } from '@/models/PlatformNode'
 // @ts-ignore
 import { DeviceNode } from '@/models/DeviceNode'
 // @ts-ignore
 import Manufacturer from '@/models/Manufacturer'
+import Status from '@/models/Status'
 // @ts-ignore
 import SmsService from '@/services/SmsService'
 // @ts-ignore
@@ -848,7 +851,9 @@ export default class ConfigurationsIdPage extends Vue {
           // load all the elements with one run
           100000,
           this.searchOptions.text,
-          [] as Manufacturer[]
+          [] as Manufacturer[],
+          [] as Status[],
+          [] as PlatformType[]
         ).then(x => x.elements)
         break
       case SearchType.Device:
@@ -856,7 +861,9 @@ export default class ConfigurationsIdPage extends Vue {
           // load all the elements with one run
           100000,
           this.searchOptions.text,
-          [] as Manufacturer[]
+          [] as Manufacturer[],
+          [] as Status[],
+          [] as DeviceType[]
         ).then(x => x.elements)
         break
       default:

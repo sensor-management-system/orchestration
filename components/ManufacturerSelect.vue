@@ -3,7 +3,7 @@
     v-model="wrappedValue"
     :readonly="readonly"
     :fetch-function="findAllManufacturers"
-    add-label="Add a manufacturer"
+    :label="label"
     color="brown"
   />
 </template>
@@ -48,6 +48,12 @@ export default class ManufacturerSelect extends Vue {
   })
   // @ts-ignore
   readonly readonly: boolean
+
+  @Prop({
+    required: true,
+    type: String
+  })
+  readonly label!: String
 
   get findAllManufacturers (): ManufacturersLoaderFunction {
     return CVService.findAllManufacturers

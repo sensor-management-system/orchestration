@@ -4,10 +4,13 @@ import {
   IPaginationLoader, FilteredPaginationedLoader
 } from '@/utils/PaginatedLoader'
 
-import Platform from '../models/Platform'
-import Device from '../models/Device'
-import Contact from '../models/Contact'
-import Manufacturer from '~/models/Manufacturer'
+import Platform from '@/models/Platform'
+import PlatformType from '@/models/PlatformType'
+import Device from '@/models/Device'
+import DeviceType from '@/models/DeviceType'
+import Contact from '@/models/Contact'
+import Manufacturer from '@/models/Manufacturer'
+import Status from '@/models/Status'
 
 // Use on version for all the queries
 const BASE_URL = process.env.smsBackendUrl + '/rdm/svm-api/v1'
@@ -300,7 +303,9 @@ export default class SmsService {
   static findDevices (
     pageSize: number,
     text: string | null,
-    manufacturer: Manufacturer[]
+    manufacturer: Manufacturer[],
+    states: Status[],
+    types: DeviceType[]
   ): Promise<IPaginationLoader<Device>> {
     const loaderPromise: Promise<IPaginationLoader<Device>> = this.findAllDevicesOnPage(1, pageSize)
 
@@ -320,6 +325,22 @@ export default class SmsService {
         )
       }
     }
+    if (states.length > 0) {
+      const oldFilterFunc = filterFunc
+      filterFunc = (device: Device): boolean => {
+        return oldFilterFunc(device) && (
+          states.findIndex(s => s.uri === device.statusUri) > -1
+        )
+      }
+    }
+    if (types.length > 0) {
+      const oldFilterFunc = filterFunc
+      filterFunc = (device: Device): boolean => {
+        return oldFilterFunc(device) && (
+          types.findIndex(t => t.uri === device.deviceTypeUri) > -1
+        )
+      }
+    }
 
     return loaderPromise.then((loader) => {
       return new FilteredPaginationedLoader<Device>(loader, filterFunc)
@@ -329,7 +350,9 @@ export default class SmsService {
   static findPlatforms (
     pageSize: number,
     text: string | null,
-    manufacturer: Manufacturer[]
+    manufacturer: Manufacturer[],
+    states: Status[],
+    types: PlatformType[]
   ): Promise<IPaginationLoader<Platform>> {
     const loaderPromise: Promise<IPaginationLoader<Platform>> = this.findAllPlatformsOnPage(1, pageSize)
 
@@ -349,6 +372,24 @@ export default class SmsService {
         )
       }
     }
+
+    if (states.length > 0) {
+      const oldFilterFunc = filterFunc
+      filterFunc = (platform: Platform): boolean => {
+        return oldFilterFunc(platform) && (
+          states.findIndex(s => s.uri === platform.statusUri) > -1
+        )
+      }
+    }
+    if (types.length > 0) {
+      const oldFilterFunc = filterFunc
+      filterFunc = (platform: Platform): boolean => {
+        return oldFilterFunc(platform) && (
+          types.findIndex(t => t.uri === platform.platformTypeUri) > -1
+        )
+      }
+    }
+
     return loaderPromise.then((loader) => {
       return new FilteredPaginationedLoader<Platform>(loader, filterFunc)
     })
