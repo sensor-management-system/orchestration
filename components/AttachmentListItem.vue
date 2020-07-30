@@ -45,7 +45,8 @@
  * @author <marc.hanisch@gfz-potsdam.de>
  */
 import { Vue, Component, Prop } from 'nuxt-property-decorator'
-import { Attachment } from '../models/Attachment'
+
+import { Attachment } from '@/models/Attachment'
 
 /**
  * A class component that displays a single attached file

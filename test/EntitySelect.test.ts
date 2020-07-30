@@ -49,11 +49,11 @@ describe('EntitySelect', () => {
    */
 
   it('should be a Vue instance', () => {
-    expect(wrapper.isVueInstance()).toBeTruthy()
+    expect(wrapper.vm).toBeTruthy()
   })
 
   it('should render one chip', () => {
-    expect(wrapper.findAll({ name: 'v-chip' })).toHaveLength(1)
+    expect(wrapper.findAllComponents({ name: 'v-chip' })).toHaveLength(1)
   })
 
   /*

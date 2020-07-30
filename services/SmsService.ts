@@ -1,16 +1,16 @@
 import axios from 'axios'
 
-import Platform from '@/models/Platform'
-import PlatformType from '@/models/PlatformType'
-import Device from '@/models/Device'
-import DeviceType from '@/models/DeviceType'
-import Contact from '@/models/Contact'
-import Manufacturer from '@/models/Manufacturer'
-import Status from '@/models/Status'
-
 import {
   IPaginationLoader, FilteredPaginationedLoader
 } from '@/utils/PaginatedLoader'
+
+import Contact from '@/models/Contact'
+import Device from '@/models/Device'
+import DeviceType from '@/models/DeviceType'
+import Manufacturer from '@/models/Manufacturer'
+import Platform from '@/models/Platform'
+import PlatformType from '@/models/PlatformType'
+import Status from '@/models/Status'
 
 // Use on version for all the queries
 const BASE_URL = process.env.smsBackendUrl
