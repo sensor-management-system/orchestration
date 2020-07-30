@@ -302,7 +302,7 @@ export default class SeachPlatformsPage extends Vue {
     this.searchResults = []
     this.$api.platforms
       .newSearchBuilder()
-      .withTextInShortName(searchText)
+      .withTextInName(searchText)
       .withOneMatchingManufacturerOf(manufacturer)
       .withOneMatchingStatusOf(states)
       .withOneMatchingPlatformTypeOf(platformTypes)

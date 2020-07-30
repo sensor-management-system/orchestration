@@ -841,13 +841,13 @@ export default class ConfigurationsIdPage extends Vue {
     switch (this.searchOptions.searchType) {
       case SearchType.Platform:
         this.platforms = await this.$api.platforms.newSearchBuilder()
-          .withTextInShortName(this.searchOptions.text)
+          .withTextInName(this.searchOptions.text)
           .build()
           .findMatchingAsList()
         break
       case SearchType.Device:
         this.devices = await this.$api.devices.newSearchBuilder()
-          .withTextInShortName(this.searchOptions.text)
+          .withTextInName(this.searchOptions.text)
           .build()
           .findMatchingAsList()
         break

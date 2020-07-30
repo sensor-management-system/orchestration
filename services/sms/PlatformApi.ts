@@ -114,12 +114,28 @@ export class PlatformSearchBuilder {
     this.clientSideFilterFunc = (_p: Platform) => true
   }
 
-  withTextInShortName (text: string | null) : PlatformSearchBuilder {
+  withTextInName (text: string | null) : PlatformSearchBuilder {
     if (text) {
+      const ilikeValue = '%' + text + '%'
+      const fieldsToSearchIn = [
+        'short_name',
+        'long_name'
+        // here we can add description
+        // as well
+        // --> if so, also change the method name here
+      ]
+
+      const filter: IFlaskJSONAPIFilter[] = []
+      for (const field of fieldsToSearchIn) {
+        filter.push({
+          name: field,
+          op: 'ilike',
+          val: ilikeValue
+        })
+      }
+
       this.serverSideFilterSettings.push({
-        name: 'short_name',
-        op: 'ilike',
-        val: '%' + text + '%'
+        or: filter
       })
     }
     return this
@@ -127,18 +143,23 @@ export class PlatformSearchBuilder {
 
   withOneMatchingManufacturerOf (manufacturers: Manufacturer[]): PlatformSearchBuilder {
     if (manufacturers.length > 0) {
-      const oldFilterFunc = this.clientSideFilterFunc
-      this.clientSideFilterFunc = (platform: Platform) : boolean => {
-        return oldFilterFunc(platform) && (
-          manufacturers.findIndex(m => m.uri === platform.manufacturerUri) > -1
-        )
-      }
+      this.serverSideFilterSettings.push({
+        // TODO: change to manufacturer_uri
+        // and extend with manufacturer name as well
+        name: 'manufacturer',
+        op: 'in_',
+        val: manufacturers.map((m: Manufacturer) => m.uri)
+      })
     }
     return this
   }
 
   withOneMatchingStatusOf (states: Status[]): PlatformSearchBuilder {
     if (states.length > 0) {
+      // TODO: at the moment there is no status field
+      // with could be used to read the data from
+      // --> once this is there, we want to add the
+      // serverside filtering is we do with the manufacturers
       const oldFilterFunc = this.clientSideFilterFunc
       this.clientSideFilterFunc = (platform: Platform) : boolean => {
         return oldFilterFunc(platform) && (
@@ -151,12 +172,13 @@ export class PlatformSearchBuilder {
 
   withOneMatchingPlatformTypeOf (types: PlatformType[]): PlatformSearchBuilder {
     if (types.length > 0) {
-      const oldFilterFunc = this.clientSideFilterFunc
-      this.clientSideFilterFunc = (platform: Platform) : boolean => {
-        return oldFilterFunc(platform) && (
-          types.findIndex(t => t.uri === platform.platformTypeUri) > -1
-        )
-      }
+      this.serverSideFilterSettings.push({
+        // TODO: change to platformtype_uri
+        // and extend with platformtype name as well
+        name: 'platform_type',
+        op: 'in_',
+        val: types.map((t: PlatformType) => t.uri)
+      })
     }
     return this
   }

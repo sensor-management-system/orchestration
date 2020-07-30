@@ -301,7 +301,7 @@ export default class SeachDevicesPage extends Vue {
     this.searchResults = []
     this.$api.devices
       .newSearchBuilder()
-      .withTextInShortName(searchText)
+      .withTextInName(searchText)
       .withOneMachtingManufacturerOf(manufacturer)
       .withOneMatchingStatusOf(states)
       .withOneMatchingDeviceTypeOf(types)

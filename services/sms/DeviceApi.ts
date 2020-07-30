@@ -122,12 +122,28 @@ export class DeviceSearchBuilder {
     this.clientSideFilterFunc = (_d: Device) => true
   }
 
-  withTextInShortName (text: string | null) {
+  withTextInName (text: string | null) {
     if (text) {
+      const ilikeValue = '%' + text + '%'
+      const fieldsToSearchIn = [
+        'short_name',
+        'long_name'
+        // here we can add description
+        // as well
+        // --> if so, also change the method name here
+      ]
+
+      const filter: IFlaskJSONAPIFilter[] = []
+      for (const field of fieldsToSearchIn) {
+        filter.push({
+          name: field,
+          op: 'ilike',
+          val: ilikeValue
+        })
+      }
+
       this.serverSideFilterSettings.push({
-        name: 'short_name',
-        op: 'ilike',
-        val: '%' + text + '%'
+        or: filter
       })
     }
     return this
@@ -135,18 +151,23 @@ export class DeviceSearchBuilder {
 
   withOneMachtingManufacturerOf (manufacturers: Manufacturer[]) {
     if (manufacturers.length > 0) {
-      const oldFilterFunc = this.clientSideFilterFunc
-      this.clientSideFilterFunc = (device: Device) : boolean => {
-        return oldFilterFunc(device) && (
-          manufacturers.findIndex(m => m.uri === device.manufacturerUri) > -1
-        )
-      }
+      this.serverSideFilterSettings.push({
+        // TODO: change to manufacturer_name
+        // and extend with manufacturer uri as well
+        name: 'manufacturer',
+        op: 'in_',
+        val: manufacturers.map((m: Manufacturer) => m.name)
+      })
     }
     return this
   }
 
   withOneMatchingStatusOf (states: Status[]) {
     if (states.length > 0) {
+      // TODO: at the moment there is no status field
+      // with could be used to read the data from
+      // --> once this is there, we want to add the
+      // serverside filtering is we do with the manufacturers
       const oldFilterFunc = this.clientSideFilterFunc
       this.clientSideFilterFunc = (device: Device) : boolean => {
         return oldFilterFunc(device) && (
@@ -159,12 +180,13 @@ export class DeviceSearchBuilder {
 
   withOneMatchingDeviceTypeOf (types: DeviceType[]) {
     if (types.length > 0) {
-      const oldFilterFunc = this.clientSideFilterFunc
-      this.clientSideFilterFunc = (device: Device) : boolean => {
-        return oldFilterFunc(device) && (
-          types.findIndex(t => t.uri === device.deviceTypeUri) > -1
-        )
-      }
+      this.serverSideFilterSettings.push({
+        // TODO: change to devicetype_uri
+        // and extend with platformtype name as well
+        name: 'type',
+        op: 'in_',
+        val: types.map((t: DeviceType) => t.uri)
+      })
     }
     return this
   }
