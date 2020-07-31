@@ -80,7 +80,7 @@
       </v-card>
     </div>
     <div v-else>
-      <v-card v-for="result in searchResults" :key="result.searchType + result.id" :disabled="loading">
+      <v-card v-for="result in searchResults" :key="result.id" :disabled="loading">
         <v-card-title>
           {{ result.shortName }}
         </v-card-title>
