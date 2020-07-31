@@ -9,7 +9,7 @@ import SamplingMedia from '@/models/SamplingMedia'
 import Status from '@/models/Status'
 import Unit from '@/models/Unit'
 
-const BASE_URL = process.env.cvBackendUrl + '/api'
+const BASE_URL = process.env.cvBackendUrl
 
 export default class CVService {
   static findAllManufacturers (): Promise<Manufacturer[]> {
