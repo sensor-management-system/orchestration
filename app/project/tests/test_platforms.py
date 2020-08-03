@@ -10,14 +10,14 @@ class TestPlatformServices(BaseTestCase):
     """
     Test Event Services
     """
-    url = '/sis/v1/platforms'
+    platform_url = '/platforms'
 
     def test_get_platfoms(self):
         """Ensure the /platform route behaves correctly."""
         response = self.client.get('/sis/v1/platforms')
         data = json.loads(response.data.decode())
         self.assertEqual(response.status_code, 200)
-        self.assertIn("http://localhost/sis/v1/platforms",
+        self.assertIn("http://localhost/rdm/svm-api/v1/platforms",
                       data['links']['self'])
 
     def test_add_platform_model(self):
@@ -29,7 +29,7 @@ class TestPlatformServices(BaseTestCase):
     def test_add_platform(self):
         """Ensure a new platform can be added to the database."""
 
-        data_object = {
+        platform_data = {
             "data": {
                 "type": "platform",
                 "attributes": {
@@ -45,19 +45,19 @@ class TestPlatformServices(BaseTestCase):
                 }
             }
         }
-        with self.client:
-            data, response = super(TestPlatformServices, self). \
-                prepare_response(url=self.url,
-                                 data_object=data_object)
 
-            self.assertEqual(response.status_code, 201)
-            self.assertIn('TYPE_SHORT', data['data']['attributes']['urn'])
-            self.assertIn('platform', data['data']['type'])
+        data, response = super(TestPlatformServices, self). \
+            prepare_response(url=self.platform_url,
+                             data_object=platform_data)
+
+        self.assertEqual(response.status_code, 201)
+        self.assertIn('TYPE_SHORT', data['data']['attributes']['urn'])
+        self.assertIn('platform', data['data']['type'])
 
     def test_add_platform_invalid_type(self):
         """Ensure error is thrown if the platform object has invalid type."""
 
-        data_object = {
+        platform_data = {
             "data": {
                 "type": "device",
                 "attributes": {
@@ -65,10 +65,10 @@ class TestPlatformServices(BaseTestCase):
                 }
             }
         }
-        with self.client:
-            data, response = super(TestPlatformServices, self). \
-                prepare_response(url=self.url,
-                                 data_object=data_object)
+
+        data, response = super(TestPlatformServices, self). \
+            prepare_response(url=self.platform_url,
+                             data_object=platform_data)
 
         self.assertEqual(response.status_code, 409)
         self.assertIn("Invalid type. Expected \"platform\".",
@@ -78,7 +78,7 @@ class TestPlatformServices(BaseTestCase):
         """Ensure error is thrown if the platform object
         has messing required data."""
 
-        data_object = {
+        platform_data = {
             "data": {
                 "type": "platform",
                 "attributes": {
@@ -87,10 +87,9 @@ class TestPlatformServices(BaseTestCase):
             }
         }
 
-        with self.client:
-            data, response = super(TestPlatformServices, self). \
-                prepare_response(url=self.url,
-                                 data_object=data_object)
+        data, response = super(TestPlatformServices, self). \
+            prepare_response(url=self.platform_url,
+                             data_object=platform_data)
 
         self.assertEqual(response.status_code, 422)
         self.assertIn("Missing data for required field.",
@@ -99,12 +98,11 @@ class TestPlatformServices(BaseTestCase):
     def test_add_platform_invalid_json(self):
         """Ensure error is thrown if the platform object invalid."""
 
-        data_object = {}
+        platform_data = {}
 
-        with self.client:
-            data, response = super(TestPlatformServices, self). \
-                prepare_response(url=self.url,
-                                 data_object=data_object)
+        data, response = super(). \
+            prepare_response(url=self.platform_url,
+                             data_object=platform_data)
         self.assertEqual(response.status_code, 422)
         self.assertIn("Object must include `data` key.",
                       data['errors'][0]['detail'])
@@ -113,7 +111,7 @@ class TestPlatformServices(BaseTestCase):
         """Ensure error is thrown if the platform object
          has invalid data key."""
 
-        data_object = {
+        platform_data = {
             "data": {
                 "type": "platform",
                 "attributes": {
@@ -123,10 +121,9 @@ class TestPlatformServices(BaseTestCase):
             }
         }
 
-        with self.client:
-            data, response = super(TestPlatformServices, self). \
-                prepare_response(url=self.url,
-                                 data_object=data_object)
+        data, response = super(). \
+            prepare_response(url=self.platform_url,
+                             data_object=platform_data)
 
         self.assertEqual(response.status_code, 422)
         self.assertIn("Not a valid string.",
@@ -134,14 +131,14 @@ class TestPlatformServices(BaseTestCase):
 
     def test_get_platforms_via_id(self):
         """Ensure the get /platform/<id> route behaves correctly."""
-        response = self.client.get('/sis/v1/platforms/1')
+        response = self.client.get('/rdm/svm-api/v1/platforms/1')
         data = json.loads(response.data.decode())
         self.assertEqual(response.status_code, 200)
         self.assertIn('TYPE_SHORT', data['data']['attributes']['urn'])
 
     def test_patch_platforms_via_id(self):
         """Ensure the patch /platform/<id> route behaves correctly."""
-        data_object = {
+        platform_data = {
             "data": {
                 "type": "platform",
                 "id": 1,
@@ -151,17 +148,16 @@ class TestPlatformServices(BaseTestCase):
             }
         }
 
-        with self.client:
-            data, response = super(TestPlatformServices, self). \
-                prepare_response(url=self.url,
-                                 data_object=data_object)
+        data, response = super(). \
+            prepare_response(url=self.platform_url,
+                             data_object=platform_data)
 
         self.assertEqual(response.status_code, 200)
         self.assertIn('TYPE_NEW', data['data']['attributes']['urn'])
 
     def test_z_platform_delete(self):
         """Ensure the  delete /platform/<id> route behaves correctly."""
-        response = self.client.delete('/sis/v1/platforms/1')
+        response = self.client.delete('/rdm/svm-api/v1/platforms/1')
         data = json.loads(response.data.decode())
         self.assertEqual(response.status_code, 200)
         self.assertIn('Object successfully deleted', data['meta']['message'])
@@ -170,7 +166,8 @@ class TestPlatformServices(BaseTestCase):
     def test_get_platform_devices_via_id(self):
         """Ensure the get devices attached to a platform
          /platform/<id> route behaves correctly."""
-        response = self.client.get('/sis/v1/platforms/1/relationships/devices')
+        response = self.client.get(
+            '/rdm/svm-api/v1/platforms/1/relationships/devices')
         data = json.loads(response.data.decode())
         self.assertEqual(response.status_code, 200)
         self.assertIn('/sis/v1/platforms/1/relationships/device',
@@ -180,7 +177,7 @@ class TestPlatformServices(BaseTestCase):
         """Ensure the post relationship between a
          devices and a platform
          /platform/<id> route behaves correctly."""
-        data_object = {
+        platform_data = {
             "data": [
                 {
                     "type": "device",
@@ -189,14 +186,8 @@ class TestPlatformServices(BaseTestCase):
             ]
         }
 
-        with self.client:
-            data, response = super().prepare_response(
-                url='/sis/v1/platforms/1/relationships/devices',
-                data_object=data_object)
-
-        self.assertEqual(response.status_code, 200)
-        self.assertIn('Relationship successfully created',
-                      data['meta']['message'])
+        super().add_object_invalid_data_key(
+            url=self.attachment_url, data_object=platform_data)
 
 
 if __name__ == '__main__':

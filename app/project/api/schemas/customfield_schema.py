@@ -1,10 +1,8 @@
+from marshmallow import Schema as MarshmallowSchema
 from marshmallow_jsonapi import fields
-from marshmallow_jsonapi.flask import Schema
-from project.api.schemas.base_schema import \
-    set_device_relationship_schema
 
 
-class CustomFieldSchema(Schema):
+class CustomFieldSchema(MarshmallowSchema):
     """
     This class create a schema for a custom field.
     Every attribute in the schema going to expose through the api.
@@ -15,11 +13,7 @@ class CustomFieldSchema(Schema):
 
     class Meta:
         type_ = 'customfield'
-        self_view = 'customfields_detail'
-        self_view_kwargs = {'id': '<id>'}
 
     id = fields.Integer(as_string=True, dump_only=True)
-    key = fields.Str(required=True)
+    key = fields.Str(allow_none=True)
     value = fields.Str(required=True)
-
-    device = set_device_relationship_schema('customfields')

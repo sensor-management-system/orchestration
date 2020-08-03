@@ -1,6 +1,6 @@
 openapi: 3.0.1
 info:
-  title: Sensor Information System SIS
+  title: Sensor Managment System SMS
   description: This is the API of the REST service endpoints for managing sensor metadata.
   termsOfService: '#'
   contact:
@@ -8,7 +8,7 @@ info:
   license:
     name: Apache 2.0
     url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
-  version: "0.4"
+  version: "1.0"
 externalDocs:
   description: 'Learn more about requests and responses in JSON:API specs'
   url: 'https://jsonapi.org/format/#fetching-includes'
@@ -21,10 +21,6 @@ tags:
   - name: Platforms
   - name: Devices
   - name: Contacts
-  - name: Events
-  - name: Properties
-  - name: CustomFields
-  - name: Attachments
 paths:
   /platforms:
     get:
@@ -38,75 +34,20 @@ paths:
           content:
             application/vnd.api+json:
               schema:
-                $ref: '#/components/schemas/ResponsePlatforms'
-        '500':
+                $ref: '#/components/schemas/PlatformResponse'
+        '400':
           $ref: '#/components/responses/InternalServerError'
-      parameters:
-        - name: filter
-          in: query
-          description: >-
-            Retrieve devices after a specific attribute.
-          schema:
-            type: object
-            properties:
-              name:
-                type: string
-                description: the name of the CustomField you want to filter on
-                example: devices
-              op:
-                type: string
-                description: the operation you want to use (all sqlalchemy operations are available)
-                externalDocs:
-                  description: sqlalchemy operations
-                  url: 'https://flask-rest-jsonapi.readthedocs.io/en/latest/filtering.html'
-                example: any
-              val:
-                type: string
-                description: the key for fitering
-                example: urn
-        - name: include
-          in: query
-          description: >-
-            You can include related object(s) details to responses with the querystring parameter named “include”
-          schema:
-            type: string
-            example: devices
-        - name: page
-          in: query
-          description: >-
-              Default pagination size is 30 but you can manage it from querystring parameter named “page”.
-          schema:
-            type: object
-            properties:
-              number:
-                description: Control page number
-                type: integer
-                format: int32
-                example: 2
-              size:
-                description: Control page size
-                type: integer
-                format: int32
-                example: 3
     post:
       tags:
         - Platforms
       summary: Creates a new Platform
       operationId: addNewPlatform
-      parameters:
-        - name: include
-          in: query
-          description: >-
-            You can include related object(s) details to request with the querystring parameter named “include”. this should change the request boby please visit the dics in GitLab to learn more.
-          schema:
-            type: string
-            example: devices
       requestBody:
         description: 'The needed json data to create a platform. '
         content:
           application/vnd.api+json:
             schema:
-              $ref: '#/components/schemas/RequestPlatform'
+              $ref: '#/components/schemas/PlatformRequest'
         required: true
       responses:
         '201':
@@ -114,19 +55,15 @@ paths:
           content:
             application/vnd.api+json:
               schema:
-                $ref: '#/components/schemas/ResponsePlatform'
+                $ref: '#/components/schemas/PlatformResponse'
         '400':
           $ref: '#/components/responses/BadRequest'
-        '500':
-           $ref: '#/components/responses/InternalServerError'
       x-codegen-request-body-name: body
   '/platforms/{platform_id}':
     get:
       tags:
         - Platforms
       summary: Retrieve details of a platform.
-      description: "you can also use the endpoint
-          '/devices/<int:id>/platform' "
       operationId: getAPlatform
       parameters:
         - name: platform_id
@@ -152,8 +89,6 @@ paths:
       tags:
         - Platforms
       summary: Modifies an existing platform. The JSON has to include the platform ID.
-      description: "you can also use the endpoint
-          '/devices/<int:id>/platform' "
       operationId: modifyPlatform
       parameters:
         - name: platform_id
@@ -168,7 +103,8 @@ paths:
         content:
            application/vnd.api+json:
             schema:
-              $ref: '#/components/schemas/RequestPlatform'
+                $ref: '#/components/schemas/PlatformRequestWithID'
+
         required: true
       responses:
         '200':
@@ -177,9 +113,6 @@ paths:
            application/vnd.api+json:
               schema:
                 $ref: '#/components/schemas/ResponsePlatform'
-        '404':
-          description: Platform not found
-          content: {}
         '500':
            $ref: '#/components/responses/InternalServerError'
       x-codegen-request-body-name: body
@@ -187,8 +120,6 @@ paths:
       tags:
         - Platforms
       summary: 'Deletes the Platform with ID {platform_id}.'
-      description: "you can also use the endpoint
-          '/devices/<int:id>/platform' "
       operationId: deletePlatform
       parameters:
         - name: platform_id
@@ -203,110 +134,13 @@ paths:
           content:
              application/vnd.api+json:
               schema:
-                $ref: '#/components/schemas/DeleteObject'
+                $ref: '#/components/schemas/ObjectDeleted'
         '404':
           description: Platform not found
           content: {}
         '409':
           description: Platform still has references
           content: {}
-        '500':
-           $ref: '#/components/responses/InternalServerError'
-  '/platforms/{platform_id}/relationships/devices':
-    get:
-      tags:
-        - Platforms
-      summary: 'Retrieve relationships between a platform and devices'
-      operationId: getRealationsofPlatform
-      parameters:
-        - name: platform_id
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int32
-      responses:
-        '500':
-           $ref: '#/components/responses/InternalServerError'
-    post:
-      tags:
-        - Platforms
-      summary: 'Create relationships between a platform and devices'
-      operationId: addPlatformRelationToDevice
-      parameters:
-        - name: platform_id
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int32
-      requestBody:
-        description: 'The needed json data to create a platform. '
-        content:
-          application/vnd.api+json:
-            schema:
-              $ref: '#/components/schemas/Relationship'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/vnd.api+json:
-              schema:
-                $ref: '#/components/schemas/AddObject'
-        '500':
-           $ref: '#/components/responses/InternalServerError'
-    patch:
-      tags:
-        - Platforms
-      summary: 'Update relationships between a platform and devices'
-      operationId: alterRealationsofPlatform
-      parameters:
-        - name: platform_id
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int32
-      requestBody:
-        description: 'The needed json data to create a platform. '
-        content:
-          application/vnd.api+json:
-            schema:
-              $ref: '#/components/schemas/Relationship'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/vnd.api+json:
-              schema:
-                $ref: '#/components/schemas/AddObject'
-        '500':
-           $ref: '#/components/responses/InternalServerError'
-    delete:
-      tags:
-        - Platforms
-      summary: 'Delete relationships between  a platform and devices'
-      operationId: removePlatformRelationToDevice
-      parameters:
-        - name: platform_id
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int32
-      requestBody:
-        description: 'The needed json data to create a platform. '
-        content:
-          application/vnd.api+json:
-            schema:
-              $ref: '#/components/schemas/Relationship'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/vnd.api+json:
-              schema:
-                $ref: '#/components/schemas/DeleteObject'
         '500':
            $ref: '#/components/responses/InternalServerError'
   '/platforms/{platform_id}/relationships/contacts':
@@ -337,7 +171,20 @@ paths:
           schema:
             type: integer
             format: int32
+      requestBody:
+         description: >-
+          The needed JSON data to create a Relationship.
+         content:
+           application/vnd.api+json:
+            schema:
+              $ref:  '#/components/schemas/AddARelationship'
       responses:
+        '200':
+            description: OK
+            content:
+               application/vnd.api+json:
+                schema:
+                  $ref: '#/components/schemas/ObjectAdded'
         '500':
            $ref: '#/components/responses/InternalServerError'
     patch:
@@ -352,6 +199,13 @@ paths:
           schema:
             type: integer
             format: int32
+      requestBody:
+         description: >-
+          The needed JSON data to create a Relationship.
+         content:
+           application/vnd.api+json:
+            schema:
+              $ref:  '#/components/schemas/AddARelationship'
       responses:
         '500':
           $ref: '#/components/responses/InternalServerError'
@@ -367,6 +221,13 @@ paths:
           schema:
             type: integer
             format: int32
+      requestBody:
+         description: >-
+          The needed JSON data to create a Relationship.
+         content:
+           application/vnd.api+json:
+            schema:
+              $ref:  '#/components/schemas/AddARelationship'
       responses:
         '500':
           $ref: '#/components/responses/InternalServerError'
@@ -377,56 +238,7 @@ paths:
       summary: >-
         Returns all available items. The level of detail and the returned amount
         of items can be configured by qunery parameters.
-      description: >-
-        you can also use the endpoint '/platforms/<int:id>/devices'
       operationId: getAllItems
-      parameters:
-        - name: filter
-          in: query
-          description: >-
-            Retrieve devices after a specific attribute.
-          schema:
-            type: object
-            properties:
-              name:
-                type: string
-                description: the name of the CustomField you want to filter on
-                example: devices
-              op:
-                type: string
-                description: the operation you want to use (all sqlalchemy operations are available)
-                externalDocs:
-                  description: sqlalchemy operations
-                  url: 'https://flask-rest-jsonapi.readthedocs.io/en/latest/filtering.html'
-                example: any
-              val:
-                type: string
-                description: the key for fitering
-                example: urn
-        - name: include
-          in: query
-          description: >-
-            You can include related object(s) details to responses with the querystring parameter named “include”
-          schema:
-            type: string
-            example: events
-        - name: page
-          in: query
-          description: >-
-              Default pagination size is 30 but you can manage it from querystring parameter named “page”.
-          schema:
-            type: object
-            properties:
-              number:
-                description: Control page number
-                type: integer
-                format: int32
-                example: 2
-              size:
-                description: Control page size
-                type: integer
-                format: int32
-                example: 3
       responses:
         '200':
           description: OK
@@ -440,23 +252,13 @@ paths:
       tags:
         - Devices
       summary: Create a device from JSON input
-      description: >-
-        you can also use the endpoint '/platforms/<int:id>/devices'
       operationId: CreateDevice
-      parameters:
-        - name: include
-          in: query
-          description: >-
-            You can include related object(s) details to request with the querystring parameter named “include”. this should change the request boby please visit the dics in GitLab to learn more.
-          schema:
-            type: string
-            example: events
       requestBody:
         description: 'The needed json data to create a Device. '
         content:
           application/vnd.api+json:
             schema:
-              $ref: '#/components/schemas/RequestDevice'
+              $ref: '#/components/schemas/DeviceRequest'
         required: true
       responses:
         '201':
@@ -482,10 +284,6 @@ paths:
       tags:
         - Devices
       summary: Update a device from JSON input
-      description: >-
-        you can also use the endpoint '/events/<int:id>/device' or
-        '/contact/<int:id>/device' or '/properties/<int:id>/device' or
-        '/attachments/<int:id>/device' or '/CustomFields/<int:id>/device'
       operationId: alterDevice
       parameters:
         - name: device_id
@@ -503,7 +301,7 @@ paths:
         content:
            application/vnd.api+json:
             schema:
-              $ref: '#/components/schemas/RequestDevice'
+              $ref: '#/components/schemas/DeviceRequestWithID'
         required: true
       responses:
         '200':
@@ -525,10 +323,6 @@ paths:
       tags:
         - Devices
       summary: Get a Device by ID
-      description: >-
-        you can also use the endpoint '/events/<int:id>/device' or
-        '/contact/<int:id>/device' or '/properties/<int:id>/device' or
-        '/attachments/<int:id>/device' or '/CustomFields/<int:id>/device'
       operationId: getDevice
       parameters:
         - name: device_id
@@ -567,70 +361,9 @@ paths:
           content:
              application/vnd.api+json:
               schema:
-                $ref: '#/components/schemas/DeleteObject'
+                $ref: '#/components/schemas/ObjectDeleted'
         '500':
            $ref: '#/components/responses/InternalServerError'
-  '/devices/{device_id}/relationships/events':
-    get:
-      tags:
-        - Devices
-      summary: 'Retrieve relationships between a devices and an event'
-      operationId: getRealationsofDeviceToEvent
-      parameters:
-        - name: device_id
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int32
-      responses:
-        '500':
-           $ref: '#/components/responses/InternalServerError'
-    post:
-      tags:
-        - Devices
-      summary: 'Create relationships between a person and devices'
-      operationId: CreateEventToDevice
-      parameters:
-        - name: device_id
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int32
-      responses:
-        '500':
-           $ref: '#/components/responses/InternalServerError'
-    patch:
-      tags:
-        - Devices
-      summary: 'Update relationships between a platform and devices'
-      operationId: alterEventofDevice
-      parameters:
-        - name: device_id
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int32
-      responses:
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-    delete:
-      tags:
-        - Devices
-      summary: 'Delete relationships between two objects'
-      operationId: removeEventfromDevice
-      parameters:
-        - name: device_id
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int32
-      responses:
-        '500':
-          $ref: '#/components/responses/InternalServerError'
   '/devices/{device_id}/relationships/contacts':
     get:
       tags:
@@ -659,7 +392,20 @@ paths:
           schema:
             type: integer
             format: int32
+      requestBody:
+         description: >-
+          The needed JSON data to create a Relationship.
+         content:
+           application/vnd.api+json:
+            schema:
+              $ref:  '#/components/schemas/AddARelationship'
       responses:
+        '200':
+            description: OK
+            content:
+               application/vnd.api+json:
+                schema:
+                  $ref: '#/components/schemas/ObjectAdded'
         '500':
            $ref: '#/components/responses/InternalServerError'
     patch:
@@ -674,6 +420,13 @@ paths:
           schema:
             type: integer
             format: int32
+      requestBody:
+         description: >-
+          The needed JSON data to create a Relationship.
+         content:
+           application/vnd.api+json:
+            schema:
+              $ref:  '#/components/schemas/AddARelationship'
       responses:
         '500':
           $ref: '#/components/responses/InternalServerError'
@@ -689,852 +442,14 @@ paths:
           schema:
             type: integer
             format: int32
-      responses:
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-  '/devices/{device_id}/relationships/attachments':
-    get:
-      tags:
-        - Devices
-      summary: 'Retrieve relationships between a devices and an event'
-      operationId: getRealationsofDeviceToattachment
-      parameters:
-        - name: device_id
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int32
-      responses:
-        '500':
-           $ref: '#/components/responses/InternalServerError'
-    post:
-      tags:
-        - Devices
-      summary: 'Create relationships between a person and devices'
-      operationId: CreateEventToattachment
-      parameters:
-        - name: device_id
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int32
       requestBody:
-        description: 'The needed json data to create a platform. '
-        content:
-          application/vnd.api+json:
-            schema:
-              $ref: '#/components/schemas/Relationship'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/vnd.api+json:
-              schema:
-                $ref: '#/components/schemas/AddObject'
-        '500':
-           $ref: '#/components/responses/InternalServerError'
-    patch:
-      tags:
-        - Devices
-      summary: 'Update relationships between a platform and devices'
-      operationId: alterattachmenttofDevice
-      parameters:
-        - name: device_id
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int32
-      requestBody:
-        description: 'The needed json data to create a platform. '
-        content:
-          application/vnd.api+json:
-            schema:
-              $ref: '#/components/schemas/Relationship'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/vnd.api+json:
-              schema:
-                $ref: '#/components/schemas/AddObject'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-    delete:
-      tags:
-        - Devices
-      summary: 'Delete relationships between two object'
-      operationId: removeatachmentfromDevice
-      parameters:
-        - name: device_id
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int32
-      requestBody:
-        description: 'The needed json data to create a platform. '
-        content:
-          application/vnd.api+json:
-            schema:
-              $ref: '#/components/schemas/Relationship'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/vnd.api+json:
-              schema:
-                $ref: '#/components/schemas/AddObject'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-  '/devices/{device_id}/relationships/properties':
-    get:
-      tags:
-        - Devices
-      summary: 'Retrieve relationships between a devices and an event'
-      operationId: getRealationsofDeviceToProperties
-      parameters:
-        - name: device_id
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int32
-      responses:
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-    post:
-      tags:
-        - Devices
-      summary: 'Create relationships between a person and devices'
-      operationId: CreatePropertiesToDevice
-      parameters:
-        - name: device_id
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int32
-      responses:
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-    patch:
-      tags:
-        - Devices
-      summary: 'Update relationships between a platform and devices'
-      operationId: alterPropertiesofDevice
-      parameters:
-        - name: device_id
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int32
-      requestBody:
-        description: 'The needed json data to create an object. '
-        content:
-          application/vnd.api+json:
-            schema:
-              $ref: '#/components/schemas/Relationship'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/vnd.api+json:
-              schema:
-                $ref: '#/components/schemas/AddObject'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-    delete:
-      tags:
-        - Devices
-      summary: 'Delete relationships between two object'
-      operationId: removePropertiesfromDevice
-      parameters:
-        - name: device_id
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int32
-      requestBody:
-        description: 'The needed json data to delete an object. '
-        content:
-          application/vnd.api+json:
-            schema:
-              $ref: '#/components/schemas/Relationship'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/vnd.api+json:
-              schema:
-                $ref: '#/components/schemas/AddObject'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-  '/devices/{device_id}/relationships/CustomFields':
-    get:
-      tags:
-        - Devices
-      summary: 'Retrieve relationships between a devices and an event'
-      operationId: getRealationsofDeviceToCF
-      parameters:
-        - name: device_id
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int32
-      responses:
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-    post:
-      tags:
-        - Devices
-      summary: 'Create relationships between a person and devices'
-      operationId: CreateCFToDevice
-      parameters:
-        - name: device_id
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int32
-      requestBody:
-        description: 'The needed json data to create an object. '
-        content:
-          application/vnd.api+json:
-            schema:
-              $ref: '#/components/schemas/Relationship'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/vnd.api+json:
-              schema:
-                $ref: '#/components/schemas/AddObject'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-    patch:
-      tags:
-        - Devices
-      summary: 'Update relationships between a platform and devices'
-      operationId: alterCFofDevice
-      parameters:
-        - name: device_id
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int32
-      requestBody:
-        description: 'The needed json data to create a platform. '
-        content:
-          application/vnd.api+json:
-            schema:
-              $ref: '#/components/schemas/Relationship'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/vnd.api+json:
-              schema:
-                $ref: '#/components/schemas/AddObject'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-    delete:
-      tags:
-        - Devices
-      summary: 'Delete relationships between two objects'
-      operationId: removeCFfromDevice
-      parameters:
-        - name: device_id
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int32
-      requestBody:
-        description: 'The needed json data to create a platform. '
-        content:
-          application/vnd.api+json:
-            schema:
-              $ref: '#/components/schemas/Relationship'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/vnd.api+json:
-              schema:
-                $ref: '#/components/schemas/AddObject'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-  /events:
-    get:
-      tags:
-        - Events
-      summary: >-
-        Returns all available items.
-        description: >-
-        you can also use the endpoint '/devices/<int:id>/contacts'
-      operationId: getAllEvents
-      parameters:
-        - name: filter
-          in: query
-          description: >-
-            Retrieve devices after a specific attribute.
-          schema:
-            type: object
-            properties:
-              name:
-                type: string
-                description: the name of the CustomField you want to filter on
-                example: devices
-              op:
-                type: string
-                description: the operation you want to use (all sqlalchemy operations are available)
-                externalDocs:
-                  description: sqlalchemy operations
-                  url: 'https://flask-rest-jsonapi.readthedocs.io/en/latest/filtering.html'
-                example: any
-              val:
-                type: string
-                description: the key for fitering
-                example: urn
-        - name: include
-          in: query
-          description: >-
-            You can include related object(s) details to responses with the querystring parameter named “include”
-          schema:
-            type: string
-            example: devices
-        - name: page
-          in: query
-          description: >-
-              Default pagination size is 30 but you can manage it from querystring parameter named “page”.
-          schema:
-            type: object
-            properties:
-              number:
-                description: Control page number
-                type: integer
-                format: int32
-                example: 2
-              size:
-                description: Control page size
-                type: integer
-                format: int32
-                example: 3
-      responses:
-        '200':
-          description: OK
-          content:
-            application/vnd.api+json:
-              schema:
-                $ref: '#/components/schemas/ResponseDevices'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-    post:
-      tags:
-        - Events
-      summary: Creates an Event from JSON input
-      description: >-
-        you can also use the endpoint '/devices/<int:id>/contacts'
-      operationId: CreateEvent
-      parameters:
-        - name: include
-          in: query
-          description: >-
-            You can include related object(s) details to request with the querystring parameter named “include”. this should change the request boby please visit the dics in GitLab to learn more.
-          schema:
-            type: string
-            example: devices
-      requestBody:
-        description: 'The needed json data to create an Event. '
-        content:
-          application/vnd.api+json:
-            schema:
-              $ref: '#/components/schemas/RequestEvent'
-        required: true
-      responses:
-        '201':
-          description: Created
-          content:
-            application/vnd.api+json:
-              schema:
-                $ref: '#/components/schemas/ResponseEvents'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-      x-codegen-request-body-name: body
-  '/event/{event_id}':
-    patch:
-      tags:
-        - Events
-      summary: Update an Event from JSON input
-      operationId: alterEvent
-      parameters:
-        - name: event_id
-          in: path
-          description: >-
-            The ID of the item you want to update. The itemID in the JSON
-            document will be ignored.
-          required: true
-          schema:
-            type: integer
-            format: int32
-      requestBody:
-        description: >-
-          The needed json data to update a Device. ShortNames will be ignored.
-          They must not be edited after creation, because they are an integral
-          part of the item URN.
-        content:
+         description: >-
+          The needed JSON data to create a Relationship.
+         content:
            application/vnd.api+json:
             schema:
-               $ref: '#/components/schemas/RequestEvent'
-        required: true
+              $ref:  '#/components/schemas/AddARelationship'
       responses:
-        '200':
-          description: OK
-          content:
-           application/vnd.api+json:
-              schema:
-                $ref: '#/components/schemas/ResponseEvents'
-      x-codegen-request-body-name: body
-    get:
-      tags:
-        - Events
-      summary: Get a Event by ID
-      operationId: getEvent
-      parameters:
-        - name: event_id
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int32
-      responses:
-        '200':
-          description: OK
-          content:
-            application/vnd.api+json:
-              schema:
-                $ref: '#/components/schemas/ResponseEvents'
-        '404':
-          description: Device not found .
-          content: {}
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-    delete:
-      tags:
-        - Events
-      summary: 'remove an Event.'
-      operationId: removeEvent
-      parameters:
-        - name: event_id
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int32
-      responses:
-        '200':
-          description: OK
-          content:
-             application/vnd.api+json:
-              schema:
-                $ref: '#/components/schemas/DeleteObject'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-  /properties:
-    get:
-      tags:
-        - Properties
-      summary: >-
-        Returns all available items.
-      description: >-
-        you can also use the endpoint '/devices/<int:id>/properties'
-      operationId: getAllProperties
-      parameters:
-        - name: filter
-          in: query
-          description: >-
-            Retrieve devices after a specific attribute.
-          schema:
-            type: object
-            properties:
-              name:
-                type: string
-                description: the name of the CustomField you want to filter on
-                example: devices
-              op:
-                type: string
-                description: the operation you want to use (all sqlalchemy operations are available)
-                externalDocs:
-                  description: sqlalchemy operations
-                  url: 'https://flask-rest-jsonapi.readthedocs.io/en/latest/filtering.html'
-                example: any
-              val:
-                type: string
-                description: the key for fitering
-                example: urn
-        - name: include
-          in: query
-          description: >-
-            You can include related object(s) details to responses with the querystring parameter named “include”
-          schema:
-            type: string
-            example: devices
-        - name: page
-          in: query
-          description: >-
-              Default pagination size is 30 but you can manage it from querystring parameter named “page”.
-          schema:
-            type: object
-            properties:
-              number:
-                description: Control page number
-                type: integer
-                format: int32
-                example: 2
-              size:
-                description: Control page size
-                type: integer
-                format: int32
-                example: 3
-      responses:
-        '200':
-          description: OK
-          content:
-            application/vnd.api+json:
-              schema:
-                $ref: '#/components/schemas/ResponseProperties'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-    post:
-      tags:
-        - Properties
-      summary: Creates properties from JSON input
-      description: >-
-        you can also use the endpoint '/devices/<int:id>/properties'
-      operationId: CreatePproperties
-      parameters:
-        - name: include
-          in: query
-          description: >-
-            You can include related object(s) details to request with the querystring parameter named “include”. this should change the request boby please visit the dics in GitLab to learn more.
-          schema:
-            type: string
-            example: devices
-      requestBody:
-        description: 'The needed json data to create a Device. '
-        content:
-          application/vnd.api+json:
-            schema:
-              $ref: '#/components/schemas/RequestProperties'
-        required: true
-      responses:
-        '201':
-          description: Created
-          content:
-            application/vnd.api+json:
-              schema:
-                $ref: '#/components/schemas/ResponseProperties'
-        '400':
-          description: Invalid JSON.
-          content: {}
-        '404':
-          description: Auth user or contact not found.
-          content: {}
-        '409':
-          description: Device with same ShortName under one parent
-          content: {}
-        '422':
-          description: Validation constraint violation .
-          content: {}
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-      x-codegen-request-body-name: body
-  '/properties/{propertie_id}':
-    patch:
-      tags:
-        - Properties
-      summary: Update properties from JSON input
-      operationId: alterProperties
-      parameters:
-        - name: propertie_id
-          in: path
-          description: >-
-            The ID of the item you want to update. The itemID in the JSON
-            document will be ignored.
-          required: true
-          schema:
-            type: integer
-            format: int32
-      requestBody:
-        description: >-
-          The needed json data to update a Device. ShortNames will be ignored.
-          They must not be edited after creation, because they are an integral
-          part of the item URN.
-        content:
-           application/vnd.api+json:
-            schema:
-              $ref: '#/components/schemas/RequestProperties'
-        required: true
-      responses:
-        '200':
-          description: OK
-          content:
-           application/vnd.api+json:
-              schema:
-                $ref: '#/components/schemas/ResponseProperties'
-        '400':
-          description: Invalid JSON.
-          content: {}
-        '404':
-          description: Item could not be found.
-          content: {}
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-      x-codegen-request-body-name: body
-    get:
-      tags:
-        - Properties
-      summary: Get properties by ID
-      operationId: getProperties
-      parameters:
-        - name: propertie_id
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int32
-      responses:
-        '200':
-          description: OK
-          content:
-            application/vnd.api+json:
-              schema:
-                $ref: '#/components/schemas/ResponseProperties'
-        '404':
-          description: Device not found .
-          content: {}
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-    delete:
-      tags:
-        - Properties
-      summary: 'remove properties.'
-      operationId: removeProperties
-      parameters:
-        - name: propertie_id
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int32
-      responses:
-        '200':
-          description: OK
-          content:
-             application/vnd.api+json:
-              schema:
-                $ref: '#/components/schemas/DeleteObject'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-  /CustomFields:
-    get:
-      tags:
-        - CustomFields
-      summary: >-
-        Returns all available items.
-      description: >-
-        you can also use the endpoint '/devices/<int:id>/contacts'
-      operationId: getAllCustomFields
-      parameters:
-        - name: filter
-          in: query
-          description: >-
-            Retrieve devices after a specific attribute.
-          schema:
-            type: object
-            properties:
-              name:
-                type: string
-                description: the name of the CustomField you want to filter on
-                example: devices
-              op:
-                type: string
-                description: the operation you want to use (all sqlalchemy operations are available)
-                externalDocs:
-                  description: sqlalchemy operations
-                  url: 'https://flask-rest-jsonapi.readthedocs.io/en/latest/filtering.html'
-                example: any
-              val:
-                type: string
-                description: the key for fitering
-                example: urn
-        - name: include
-          in: query
-          description: >-
-            You can include related object(s) details to responses with the querystring parameter named “include”
-          schema:
-            type: string
-            example: devices
-        - name: page
-          in: query
-          description: >-
-              Default pagination size is 30 but you can manage it from querystring parameter named “page”.
-          schema:
-            type: object
-            properties:
-              number:
-                description: Control page number
-                type: integer
-                format: int32
-                example: 2
-              size:
-                description: Control page size
-                type: integer
-                format: int32
-                example: 3
-      responses:
-        '200':
-          description: OK
-          content:
-            application/vnd.api+json:
-              schema:
-                $ref: '#/components/schemas/RequestCustomField'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-    post:
-      tags:
-        - CustomFields
-      summary: Creates a CustomField from JSON input
-      operationId: CreateCustomFields
-      description: >-
-        you can also use the endpoint '/devices/<int:id>/CustomFields'
-      parameters:
-        - name: include
-          in: query
-          description: >-
-            You can include related object(s) details to request with the querystring parameter named “include”. this should change the request boby please visit the dics in GitLab to learn more.
-          schema:
-            type: string
-            example: devices
-      requestBody:
-        description: 'The needed json data to create a custom CustomField. '
-        content:
-          application/vnd.api+json:
-            schema:
-              $ref: '#/components/schemas/RequestCustomField'
-        required: true
-      responses:
-        '201':
-          description: Created
-          content:
-            application/vnd.api+json:
-              schema:
-                $ref: '#/components/schemas/ResponseCustomField'
-        '400':
-          description: Invalid JSON.
-          content: {}
-        '404':
-          description: Auth user or contact not found.
-          content: {}
-        '409':
-          description: Device with same ShortName under one parent
-          content: {}
-        '422':
-          description: Validation constraint violation .
-          content: {}
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-      x-codegen-request-body-name: body
-  '/CustomFields/{customField_id}':
-    patch:
-      tags:
-        - CustomFields
-      summary: Update CustomFields from JSON input
-      operationId: alterCustomFields
-      parameters:
-        - name: customField_id
-          in: path
-          description: >-
-            The ID of the item you want to update. The itemID in the JSON
-            document will be ignored.
-          required: true
-          schema:
-            type: integer
-            format: int32
-      requestBody:
-        description: >-
-          The needed json data to update a Device.
-        content:
-           application/vnd.api+json:
-            schema:
-              $ref: '#/components/schemas/RequestCustomField'
-        required: true
-      responses:
-        '200':
-          description: OK
-          content:
-           application/vnd.api+json:
-              schema:
-                $ref: '#/components/schemas/ResponseCustomField'
-        '400':
-          description: Invalid JSON.
-          content: {}
-        '404':
-          description: Item could not be found.
-          content: {}
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-      x-codegen-request-body-name: body
-    get:
-      tags:
-        - CustomFields
-      summary: Get a CustomField by ID
-      operationId: getCustomFields
-      parameters:
-        - name: customField_id
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int32
-      responses:
-        '200':
-          description: OK
-          content:
-            application/vnd.api+json:
-              schema:
-                $ref: '#/components/schemas/ResponseCustomField'
-        '404':
-          description: Device not found .
-          content: {}
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-    delete:
-      tags:
-        - CustomFields
-      summary: 'remove a CustomField.'
-      operationId: removeCustomFields
-      parameters:
-        - name: customField_id
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int32
-      responses:
-        '200':
-          description: OK
-          content:
-             application/vnd.api+json:
-              schema:
-                $ref: '#/components/schemas/DeleteObject'
         '500':
           $ref: '#/components/responses/InternalServerError'
   /contacts:
@@ -1544,55 +459,9 @@ paths:
       summary: >-
         Returns all available items.
         description: >-
-        you can also use the endpoint '/devices/<int:id>/contacts'
+        you can also use the endpoint '/devices/<int:id>/contacts' or
+        '/paltforms/<int:id>/contacts'
       operationId: getAllContacts
-      parameters:
-        - name: filter
-          in: query
-          description: >-
-            Retrieve devices after a specific attribute.
-          schema:
-            type: object
-            properties:
-              name:
-                type: string
-                description: the name of the CustomField you want to filter on
-                example: devices
-              op:
-                type: string
-                description: the operation you want to use (all sqlalchemy operations are available)
-                externalDocs:
-                  description: sqlalchemy operations
-                  url: 'https://flask-rest-jsonapi.readthedocs.io/en/latest/filtering.html'
-                example: any
-              val:
-                type: string
-                description: the key for fitering
-                example: urn
-        - name: include
-          in: query
-          description: >-
-            You can include related object(s) details to responses with the querystring parameter named “include”
-          schema:
-            type: string
-            example: devices
-        - name: page
-          in: query
-          description: >-
-              Default pagination size is 30 but you can manage it from querystring parameter named “page”.
-          schema:
-            type: object
-            properties:
-              number:
-                description: Control page number
-                type: integer
-                format: int32
-                example: 2
-              size:
-                description: Control page size
-                type: integer
-                format: int32
-                example: 3
       responses:
         '200':
           description: OK
@@ -1609,14 +478,6 @@ paths:
       description: >-
         you can also use the endpoint '/devices/<int:id>/contacts'
       operationId: CreateContacts
-      parameters:
-        - name: include
-          in: query
-          description: >-
-            You can include related object(s) details to request with the querystring parameter named “include”. this should change the request boby please visit the dics in GitLab to learn more.
-          schema:
-            type: string
-            example: devices
       requestBody:
         description: 'The needed json data to create a contact. '
         content:
@@ -1728,153 +589,9 @@ paths:
           content:
              application/vnd.api+json:
               schema:
-                $ref: '#/components/schemas/DeleteObject'
+                $ref: '#/components/schemas/ObjectDeleted'
         '500':
           $ref: '#/components/responses/InternalServerError'
-  /attachments:
-    get:
-      tags:
-        - Attachments
-      summary: >-
-        Returns all available items.
-      operationId: getAllAttachments
-      responses:
-        '200':
-          description: OK
-          content:
-            application/vnd.api+json:
-              schema:
-                $ref: '#/components/schemas/ResponseAttachment'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-    post:
-      tags:
-        - Attachments
-      summary: Creates  attachments from JSON input
-      operationId: CreateAttachments
-      parameters:
-        - name: include
-          in: query
-          description: >-
-            You can include related object(s) details to request with the querystring parameter named “include”. this should change the request boby please visit the dics in GitLab to learn more.
-          schema:
-            type: string
-            example: devices
-      requestBody:
-        description: 'The needed json data to create an attachments. '
-        content:
-          application/vnd.api+json:
-            schema:
-              $ref: '#/components/schemas/RequestAttachment'
-        required: true
-      responses:
-        '201':
-          description: Created
-          content:
-            application/vnd.api+json:
-              schema:
-                $ref: '#/components/schemas/ResponseAttachment'
-        '400':
-          description: Invalid JSON.
-          content: {}
-        '404':
-          description: Auth user or contact not found.
-          content: {}
-        '409':
-          description: Device with same ShortName under one parent
-          content: {}
-        '422':
-          description: Validation constraint violation .
-          content: {}
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-      x-codegen-request-body-name: body
-  '/attachments/{attachment_id}':
-    patch:
-      tags:
-        - Attachments
-      summary: Update attachments from JSON input
-      operationId: alterAttachments
-      parameters:
-        - name: attachment_id
-          in: path
-          description: >-
-            The ID of the item you want to update. The itemID in the JSON
-            document will be ignored.
-          required: true
-          schema:
-            type: integer
-            format: int32
-      requestBody:
-        description: >-
-          The needed json data to update a Device.
-        content:
-           application/vnd.api+json:
-            schema:
-              $ref: '#/components/schemas/RequestAttachment'
-        required: true
-      responses:
-        '200':
-          description: OK
-          content:
-           application/vnd.api+json:
-              schema:
-                $ref: '#/components/schemas/ResponseAttachment'
-        '400':
-          description: Invalid JSON.
-          content: {}
-        '404':
-          description: Item could not be found.
-          content: {}
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-      x-codegen-request-body-name: body
-    get:
-      tags:
-        - Attachments
-      summary: Get an attachment by ID
-      operationId: getAttachments
-      parameters:
-        - name: attachment_id
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int32
-      responses:
-        '200':
-          description: OK
-          content:
-            application/vnd.api+json:
-              schema:
-                $ref: '#/components/schemas/ResponseAttachment'
-        '404':
-          description: Device not found .
-          content: {}
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-    delete:
-      tags:
-        - Attachments
-      summary: 'remove attachments.'
-      operationId: removeAttachments
-      parameters:
-        - name: attachment_id
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int32
-      responses:
-        '200':
-          description: OK
-          content:
-             application/vnd.api+json:
-              schema:
-                $ref: '#/components/schemas/DeleteObject'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-
 components:
   responses:
     UnprocessableEntity:
@@ -1885,7 +602,7 @@ components:
             $ref: '#/components/schemas/Error'
 
     InternalServerError:
-      description: Internal Server Error
+      description:  Error
       content:
          application/vnd.api+json:
           schema:
@@ -1932,58 +649,47 @@ components:
               detail:
                 type: string
         jsonapi:
+          $ref: '#/components/schemas/Jsonapi'
+    Device:
+      allOf:
+        - $ref: '#/components/schemas/BaseDevice'
+        - type: object
+          properties:
+            dual_use:
+              type: boolean
+              default: false
+            customfields:
+              type: array
+              nullable: true
+              items:
+               $ref: '#/components/schemas/CustomField'
+            device_properties:
+              type: array
+              nullable: true
+              items:
+               $ref: '#/components/schemas/Properties'
+            device_attachments:
+              type: array
+              nullable: true
+              items:
+               $ref: '#/components/schemas/Attachment'
+            events:
+              type: array
+              nullable: true
+              items:
+                $ref: '#/components/schemas/Event'
+    DeviceRequest:
+      type: object
+      properties:
+        data:
           type: object
           properties:
-            version:
+            type:
               type: string
-              example: "1.0"
-    Device:
-      required:
-        - persistent_identifier
-        - inventory_number
-        - model
-        - manufacturer
-        - type
-        - serial_number
-        - responsible_persons
-        - dual_use
-      type: object
-      x-tablename: device
-      properties:
-        description:
-          type: string
-        short_name:
-          type: string
-        long_name:
-          type: string
-        serial_number:
-          type: string
-        manufacture:
-          type: string
-        dual_use:
-          type: boolean
-          default: false
-        model:
-          type: string
-        inventory_number:
-          type: string
-        persistent_identifier:
-          type: integer
-          format: int32
-        url:
-          type: string
-          description: link to website
-        label:
-          type: string
-        type:
-          type: string
-        configuration_date:
-          type: string
-          format: date_time
-          example: "2020-05-21T17:32:28Z"
-        status:
-          type: string
-    RequestDevice:
+              example: device
+            attributes:
+                  $ref: '#/components/schemas/Device'
+    DeviceRequestWithID:
       type: object
       properties:
         data:
@@ -1993,9 +699,8 @@ components:
               type: string
               example: device
             id:
-              type: integer
-              format: int32
-              example: need in /devices/<device_id>
+             type: integer
+             format: int32
             attributes:
                   $ref: '#/components/schemas/Device'
     ResponseDevice:
@@ -2008,34 +713,17 @@ components:
               type: string
               example: device
             attributes:
-                  $ref: '#/components/schemas/Device'
+                allOf:
+                  - $ref: '#/components/schemas/Device'
+                  - $ref: '#/components/schemas/BasicResponse'
         relationships:
-          type: object
-          properties:
-            platform:
-              type: object
-              properties:
-                links:
-                  type: object
-                  properties:
-                    related:
-                      type: string
-                      example: "/device/{device_id}/platform"
-                    self:
-                      type: string
-                      example: "/device/{device_id}/relationships/platform"
+          type: array
+          items:
+            $ref: '#/components/schemas/Relationships'
         links:
-          type: object
-          properties:
-            self:
-              type: string
-              example: "/device/1"
+          $ref: '#/components/schemas/Link'
         jsonapi:
-          type: object
-          properties:
-            version:
-              type: string
-              example: "1.0"
+          $ref: '#/components/schemas/Jsonapi'
     ResponseDevices:
       type: object
       properties:
@@ -2050,20 +738,7 @@ components:
               attributes:
                     $ref: '#/components/schemas/Device'
               relationships:
-                type: object
-                properties:
-                  platform:
-                    type: object
-                    properties:
-                      links:
-                        type: object
-                        properties:
-                          related:
-                            type: string
-                            example: "/device/{device_id}/platform"
-                          self:
-                            type: string
-                            example: "/device/{device_id}/relationships/platform"
+                $ref: '#/components/schemas/Relationships'
         meta:
           type: object
           properties:
@@ -2083,7 +758,7 @@ components:
             version:
               type: string
               example: "1.0"
-    RequestPlatform:
+    PlatformRequest:
       type: object
       properties:
         data:
@@ -2092,12 +767,26 @@ components:
             type:
               type: string
               example: platform
-            id:
-              type: integer
-              format: int32
-              example: use only with endpoints, that requird an id.
             attributes:
-                  $ref: '#/components/schemas/Platform'
+                allOf:
+                  - $ref: '#/components/schemas/BaseDevice'
+                  - $ref: '#/components/schemas/Platform'
+    PlatformRequestWithID:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            type:
+              type: string
+              example: device
+            id:
+             type: integer
+             format: int32
+            attributes:
+                 allOf:
+                  - $ref: '#/components/schemas/BaseDevice'
+                  - $ref: '#/components/schemas/Platform'
     ResponsePlatform:
       type: object
       properties:
@@ -2111,33 +800,23 @@ components:
               type: integer
               format: int32
             attributes:
-                  $ref: '#/components/schemas/Platform'
+                 allOf:
+                    - $ref: '#/components/schemas/BaseDevice'
+                    - $ref: '#/components/schemas/Platform'
+                    - $ref: '#/components/schemas/BasicResponse'
         relationships:
           type: object
           properties:
-            devices:
-              type: object
-              properties:
-                links:
-                  type: object
-                  properties:
-                    related:
-                      type: string
-                      example: "/platforms/{device_id}/relationships/devices"
-                    self:
-                      type: string
-                      example: "/platforms/{platform_id}"
                 data:
                   type: object
                   properties:
                     type:
                       type: string
-                      example: device
+                      example: contact
                     id:
                       type: integer
                       format: int32
                       example: 1
-
         links:
           type: object
           properties:
@@ -2150,7 +829,7 @@ components:
             version:
               type: string
               example: "1.0"
-    ResponsePlatforms:
+    PlatformResponse:
       type: object
       properties:
         data:
@@ -2162,7 +841,7 @@ components:
                 type: string
                 example: platform
               attributes:
-                    $ref: '#/components/schemas/Platform'
+                    $ref: '#/components/schemas/BaseDevice'
               rel:
                 $ref: '#/components/schemas/Relationships'
 
@@ -2174,13 +853,38 @@ components:
               format: int32
               example: 1
         links:
-          $ref: '#/components/schemas/PlatformLinks'
+          $ref: '#/components/schemas/Link'
         jsonapi:
           $ref: '#/components/schemas/Jsonapi'
+    BasicResponse:
+      type: object
+      properties:
+        created_at:
+          type: string
+          format: date_time
+          example: "2020-05-21T17:32:28Z"
+        modified_at:
+          type: string
+          format: date_time
+          example: "2020-06-23T17:32:28Z"
+        created_by_id:
+          type: integer
+          format: int32
+          example: 1
+        modified_by_id:
+          type: integer
+          format: int32
+          example: 2
+        created_by:
+          type: string
+          example: device
+        modified_by:
+          type: string
+          example: device
     Relationships:
       type: object
       properties:
-        platform:
+        <object>:
           type: object
           properties:
             links:
@@ -2188,115 +892,120 @@ components:
               properties:
                 related:
                   type: string
-                  example: "/platform/{device_id}/platform"
+                  example: "/<object>/{object_id}/<object>"
                 self:
                   type: string
-                  example: "/platform/{device_id}/relationships/platform"
+                  example: "/<object>/{object_id}/relationships/<objects>"
+            data:
+              $ref: '#/components/schemas/RelationshipData'
     Jsonapi:
           type: object
           properties:
             version:
               type: string
               example: "1.0"
-    PlatformLinks:
-          type: object
-          properties:
-            self:
-              type: string
-              example: "/platform/1"
     Event:
       required:
-        - date
+        - timestamp
         - description
       type: object
       properties:
-        date:
+        timestamp:
           type: string
-          description: only use UTC format
+          nullable: false
+          description: Please only use UTC format
           format: date-time
-        label:
-          type: string
-          example: Test
         description:
           type: string
-        id:
-          type: integer
-          format: int32
-    RequestEvent:
+          nullable: false
+        user:
+          $ref: '#/components/schemas/User'
+    RelationshipData:
       type: object
       properties:
-        data:
-          type: object
-          properties:
-            type:
-              type: string
-              example: platform
-            attributes:
-                  $ref: '#/components/schemas/Event'
-    ResponseEvents:
-      type: object
-      properties:
-        data:
-          type: array
-          items:
-            type: object
-            properties:
-              type:
-                type: string
-                example: device
-              attributes:
-                    $ref: '#/components/schemas/Platform'
-              rel:
-                $ref: '#/components/schemas/Relationships'
-    Relationship:
-      type: object
-      properties:
-        data:
-          type: array
-          items:
-            type: object
-            properties:
-              type:
-                type: string
-              id:
-                type: integer
-                format: int32
-    Platform:
-      required:
-        - long_name
-        - platform_type
-        - short_name
+          type:
+            type: string
+          id:
+            type: integer
+            format: int32
+    BaseDevice:
       type: object
       properties:
         description:
           type: string
+          nullable: true
         short_name:
           type: string
+          nullable: false
         long_name:
           type: string
-        manufacturer:
+          nullable: true
+        manufacturer_name:
           type: string
-        type:
+          nullable: true
+          description: 'URI fields generally have a correspondending Name field as fallback'
+        manufacturer_uri:
           type: string
+          nullable: true
+          description: 'From CV'
+        model:
+          type: string
+          nullable: true
         inventory_number:
           type: string
-        platform_type:
+          nullable: true
+        serial_number:
           type: string
-        url:
+          nullable: true
+        persistent_identifier:
           type: string
+          nullable: true
+          uniqueItems: true
+        website:
+          type: string
+          nullable: true
           description: link to website
-        configurationDate:
+        devicetype_uri:
           type: string
-          format: date_time
-          example: "2020-05-21T17:32:28Z"
+          nullable: true
+          description: ''
+        devicetype_name:
+          type: string
+          nullable: true
+          description: ''
+    Platform:
+      type: object
+      properties:
+        platform_type_name:
+          type: string
+          nullable: true
+        platform_type_uri:
+          type: string
+          nullable: true
+          description: 'From CV'
+        status_name:
+          type: string
+          nullable: true
+        status_uri:
+          type: string
+          nullable: true
+          description: 'From CV'
+        platform_attachments:
+          type: array
+          items:
+            $ref: '#/components/schemas/Attachment'
     CustomField:
+      required:
+      - key
       type: object
       properties:
         key:
           type: string
+          nullable: false
         value:
           type: string
-    RequestCustomField:
+          nullable: true
+    AddARelationship:
       type: object
       properties:
         data:
@@ -2304,68 +1013,35 @@ components:
           properties:
             type:
               type: string
-              example: platform
-            attributes:
-                  $ref: '#/components/schemas/CustomField'
-    ResponseCustomField:
-      type: object
-      properties:
-        data:
-          type: array
-          items:
-            type: object
-            properties:
-              type:
-                type: string
-                example: device
-              attributes:
-                    $ref: '#/components/schemas/CustomField'
-              rel:
-                $ref: '#/components/schemas/Relationships'
+              example: '<object>'
+            id:
+              type: integer
+              format: int32
+              example: 2
     Attachment:
+      required:
+      - url
       type: object
       properties:
-        lable:
+        label:
           type: string
+          nullable: true
         url:
           type: string
-    RequestAttachment:
-      type: object
-      properties:
-        data:
-          type: object
-          properties:
-            type:
-              type: string
-              example: platform
-            attributes:
-                  $ref: '#/components/schemas/Attachment'
-    ResponseAttachment:
-      type: object
-      properties:
-        data:
-          type: array
-          items:
-            type: object
-            properties:
-              type:
-                type: string
-                example: device
-              attributes:
-                    $ref: '#/components/schemas/Attachment'
-              rel:
-                $ref: '#/components/schemas/Relationships'
+          nullable: false
     Contact:
       type: object
       properties:
         email:
           type: string
-        user_name:
+          nullable: false
+        given_name:
           type: string
-        first_name:
+        family_name:
           type: string
-        last_name:
+        website:
           type: string
+          nullable: true
     RequestContact:
       type: object
       properties:
@@ -2392,71 +1068,62 @@ components:
                     $ref: '#/components/schemas/Contact'
               rel:
                 $ref: '#/components/schemas/Relationships'
+    User:
+      type: object
+      properties:
+        subject:
+          type: string
+          nullable: false
+          description: 'Subject retreived from the authentication token from the Identity Provider'
+        contact:
+          $ref: '#/components/schemas/Contact'
     Properties:
       type: object
       properties:
-        measuring range:
-          properties:
-            min:
-              type: integer
-              format: int32
-            max:
-              type: integer
-              format: int32
-        accuracy:
-          type: string
-        label:
-          type: string
+        measuring_range_min:
+          type: integer
+          format: float
+          nullable: true
+        measuring_range_max:
+          type: integer
+          format: float
+          nullable: true
         failure_value:
           type: integer
-          format: int32
-        unit:
+          format: flaot
+          nullable: true
+        accuracy:
+          type: integer
+          format: flaot
+          nullable: true
+        label:
           type: string
-          enum:
-            - placeholder
-            - placeholder
-        compartment:
+          nullable: true
+        unit_uri:
           type: string
-          enum:
-            - placeholder
-            - placeholder
-        sampling_media:
+          nullable: true
+        unit_name:
           type: string
-          enum:
-            - placeholder
-            - placeholder
-        variable:
+          nullable: true
+        compartment_uri:
           type: string
-          enum:
-            - placeholder
-            - placeholder
-    RequestProperties:
-      type: object
-      properties:
-        data:
-          type: object
-          properties:
-            type:
-              type: string
-              example: platform
-            attributes:
-                  $ref: '#/components/schemas/Properties'
-    ResponseProperties:
-      type: object
-      properties:
-        data:
-          type: array
-          items:
-            type: object
-            properties:
-              type:
-                type: string
-                example: device
-              attributes:
-                    $ref: '#/components/schemas/Properties'
-              rel:
-                $ref: '#/components/schemas/Relationships'
-    AddObject:
+          nullable: true
+        compartment_name:
+          type: string
+          nullable: true
+        property_uri:
+          type: string
+          nullable: true
+        property_name:
+          type: string
+          nullable: true
+        sampling_media_uri:
+          type: string
+          nullable: true
+        sampling_media_name:
+          type: string
+          nullable: true
+    ObjectAdded:
       type: object
       properties:
         meta:
@@ -2471,7 +1138,7 @@ components:
             version:
               type: string
               example: "1.0"
-    DeleteObject:
+    ObjectDeleted:
       type: object
       properties:
         meta:
@@ -2481,11 +1148,13 @@ components:
               type: string
               example: "Object successfully deleted"
         jsonapi:
+          $ref: '#/components/schemas/Jsonapi'
+    Link:
           type: object
           properties:
-            version:
+            self:
               type: string
-              example: "1.0"
+              example: "/<object>/1"
   securitySchemes:
     bearerAuth:
       type: http

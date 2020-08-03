@@ -1,7 +1,5 @@
 from marshmallow_jsonapi import fields
-from marshmallow_jsonapi.flask import Schema
-from project.api.schemas.base_schema import \
-    set_device_relationship_schema, set_platform_relationship_schema
+from marshmallow_jsonapi.flask import Schema, Relationship
 
 
 class ContactSchema(Schema):
@@ -19,11 +17,38 @@ class ContactSchema(Schema):
         self_view_kwargs = {'id': '<id>'}
 
     id = fields.Integer(as_string=True, dump_only=True)
-    username = fields.Str(allow_none=True)
-    first_name = fields.Str(allow_none=True)
-    last_name = fields.Str(allow_none=True)
+    given_name = fields.Str(required=True)
+    family_name = fields.Str(required=True)
+    website = fields.Str(allow_none=True)
     email = fields.Str(required=True)
 
-    device = set_device_relationship_schema('contacts')
-
-    platform = set_platform_relationship_schema('contacts')
+    platforms = Relationship(attribute='platforms',
+                             self_view='contacts_platforms',
+                             self_view_kwargs={'id': '<id>'},
+                             related_view='platform_list',
+                             related_view_kwargs={'contact_id': '<id>'},
+                             many=True,
+                             schema='PlatformSchema',
+                             type_='platform',
+                             id_field='id'
+                             )
+    devices = Relationship(attribute='devices',
+                           self_view='contacts_devices',
+                           self_view_kwargs={'id': '<id>'},
+                           related_view='devices_list',
+                           related_view_kwargs={'contact_id': '<id>'},
+                           many=True,
+                           schema='DeviceSchema',
+                           type_='device',
+                           id_field='id'
+                           )
+    user = Relationship(self_view='contact_user',
+                        self_view_kwargs={'id': '<id>'},
+                        related_view='users_list',
+                        related_view_kwargs={'id': '<id>'},
+                        many=True,
+                        include_resource_linkage=True,
+                        schema='UserSchema',
+                        type_='user',
+                        id_field='id'
+                        )

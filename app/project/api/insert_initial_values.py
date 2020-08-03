@@ -1,9 +1,11 @@
-from project.api.models.attachment import Attachment
 from project.api.models.contact import Contact
 from project.api.models.customfield import CustomField
 from project.api.models.device import Device
+from project.api.models.device_attachment import DeviceAttachment
 from project.api.models.event import Event
 from project.api.models.platform import Platform
+from project.api.models.platform_attachment import PlatformAttachment
+from project.api.models.device_property import DeviceProperty
 
 
 def add_sensor():
@@ -44,8 +46,20 @@ def add_customfield():
     return customfield
 
 
-def add_attachment():
-    """""Add attachment model """
-    attachment = Attachment(id=1, label='test label',
-                            url="http://test.test")
-    return attachment
+def add_device_attachment():
+    """""Add a device attachment model """
+    device_attachment = DeviceAttachment(id=1, label='test label',
+                                         url="http://test.test")
+    return device_attachment
+
+
+def add_device_properties():
+    """""Add device properties model """
+    properties = DeviceProperty(id=1)
+    return properties
+
+
+def add_platform_attachment():
+    """""Add platform attachment model """
+    attachmet = PlatformAttachment(id=1)
+    return attachmet

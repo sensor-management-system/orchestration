@@ -1,10 +1,9 @@
+from marshmallow import Schema as MarshmallowSchema
 from marshmallow_jsonapi import fields
-from marshmallow_jsonapi.flask import Schema
-from project.api.schemas.base_schema import \
-    set_device_relationship_schema
+from marshmallow_jsonapi.flask import Relationship
 
 
-class EventSchema(Schema):
+class EventSchema(MarshmallowSchema):
     """
     This class create a schema for an event.
     Every attribute in the schema going to expose through the api.
@@ -15,11 +14,17 @@ class EventSchema(Schema):
 
     class Meta:
         type_ = 'event'
-        self_view = 'events_detail'
-        self_view_kwargs = {'id': '<id>'}
 
     id = fields.Integer(as_string=True, dump_only=True)
     description = fields.Str(required=True)
-    date = fields.Date()
-
-    device = set_device_relationship_schema('events')
+    timestamp = fields.Date(required=True)
+    user = Relationship(self_view='events_user',
+                        self_view_kwargs={'id': '<id>'},
+                        related_view='events_list',
+                        related_view_kwargs={'id': '<id>'},
+                        many=True,
+                        include_resource_linkage=True,
+                        schema='UserSchema',
+                        type_='user',
+                        id_field='id'
+                        )

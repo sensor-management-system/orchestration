@@ -7,8 +7,10 @@ def set_device_relationship_schema(object_type):
                           self_view_kwargs={'id': '<id>'},
                           related_view='devices_detail',
                           related_view_kwargs={'id': '<id>'},
+                          include_resource_linkage=True,
                           schema='DeviceSchema',
-                          type_='device')
+                          type_='device'
+                          )
     return device
 
 
@@ -18,6 +20,9 @@ def set_platform_relationship_schema(object_type):
                             self_view_kwargs={'id': '<id>'},
                             related_view='platform_detail',
                             related_view_kwargs={'id': '<id>'},
+                            many=True,
+                            include_resource_linkage=True,
                             schema='PlatformSchema',
-                            type_='platform')
+                            type_='platform'
+                            )
     return platform

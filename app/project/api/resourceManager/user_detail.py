@@ -1,17 +1,18 @@
 from flask_rest_jsonapi import ResourceDetail
 from project.api.models.base_model import db
-from project.api.models.contact import Contact
-from project.api.schemas.contact_schema import ContactSchema
+from project.api.models.user import User
+from project.api.schemas.user_schema import UserSchema
 from project.api.token_checker import token_required
 
 
-class ContactDetail(ResourceDetail):
+class UserDetail(ResourceDetail):
     """
      provides get, patch and delete methods to retrieve details
-     of an object, update an object and delete a Contact
+     of an object, update an Event and delete a Event
     """
 
-    schema = ContactSchema
+    schema = UserSchema
     # decorators = (token_required,)
     data_layer = {'session': db.session,
-                  'model': Contact}
+                  'model': User,
+                  }

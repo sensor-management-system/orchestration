@@ -1,11 +1,11 @@
 import os
 
-
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_rest_jsonapi import Api
 from flask_cors import CORS
 from project.urls import Create_endpoints
+from project.api.token_checker import auth_blueprint
 
 DB = SQLAlchemy()
 
@@ -37,5 +37,7 @@ def create_app():
     # test to ensure the proper config was loaded
     # import sys
     # print(app.config, file=sys.stderr)
+
+    app.register_blueprint(auth_blueprint)
 
     return app

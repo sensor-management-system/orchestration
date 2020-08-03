@@ -10,7 +10,7 @@ class TestContactServices(BaseTestCase):
     """
     Test Contact Services
     """
-    url = '/sis/v1/contacts'
+    contact_url = '/contacts'
     object_type = 'contact'
 
     def test_get_devices(self):
@@ -31,7 +31,7 @@ class TestContactServices(BaseTestCase):
     def test_add_contact(self):
         """Ensure a new contact can be added to the database."""
 
-        data_object = {
+        contact_data = {
             "data": {
                 "type": "contact",
                 "attributes": {
@@ -39,16 +39,15 @@ class TestContactServices(BaseTestCase):
                 }
             }
         }
-        super(TestContactServices, self). \
-            test_add_object(url=self.url,
-                            data_object=data_object,
-                            object_type=self.object_type)
+        super().add_object(
+            url=self.contact_url, data_object=contact_data,
+            object_type=self.object_type)
 
     def test_add_contact_invalid_type(self):
         """Ensure error is thrown if the JSON object
          has invalid type."""
 
-        data_object = {
+        contact_data = {
             "data": {
                 "type": "platform",
                 "attributes": {
@@ -57,9 +56,8 @@ class TestContactServices(BaseTestCase):
             }
         }
         with self.client:
-            data, response = super(TestContactServices, self). \
-                prepare_response(url=self.url,
-                                 data_object=data_object)
+            data, response = super().prepare_response(
+                url=self.contact_url, data_object=contact_data)
 
         self.assertEqual(response.status_code, 409)
         self.assertIn("Invalid type. Expected \"contact\".",
@@ -69,7 +67,7 @@ class TestContactServices(BaseTestCase):
         """Ensure error is thrown if the JSON object
         has messing required data."""
 
-        data_object = {
+        contact_data = {
             "data": {
                 "type": "contact",
                 "attributes": {
@@ -78,9 +76,8 @@ class TestContactServices(BaseTestCase):
             }
         }
         with self.client:
-            data, response = super(TestContactServices, self). \
-                prepare_response(url=self.url,
-                                 data_object=data_object)
+            data, response = super().prepare_response(
+                url=self.contact_url, data_object=contact_data)
 
         self.assertEqual(response.status_code, 422)
         self.assertIn("Missing data for required field.",
@@ -89,11 +86,10 @@ class TestContactServices(BaseTestCase):
     def test_add_contact_invalid_json(self):
         """Ensure error is thrown if the JSON object invalid."""
 
-        data_object = {}
+        contact_data = {}
         with self.client:
-            data, response = super(TestContactServices, self). \
-                prepare_response(url=self.contacts_url,
-                                 data_object=data_object)
+            data, response = super().prepare_response(
+                url=self.contacts_url, data_object=contact_data)
         self.assertEqual(response.status_code, 422)
         self.assertIn("Object must include `data` key.",
                       data['errors'][0]['detail'])
@@ -102,7 +98,7 @@ class TestContactServices(BaseTestCase):
         """Ensure error is thrown if the JSON object
         has invalid data key."""
 
-        data_object = {
+        contact_data = {
             "data": {
                 "type": "contact",
                 "attributes": {
@@ -110,14 +106,9 @@ class TestContactServices(BaseTestCase):
                 }
             }
         }
-        with self.client:
-            data, response = super(TestContactServices, self). \
-                prepare_response(url=self.url,
-                                 data_object=data_object)
 
-        self.assertEqual(response.status_code, 422)
-        self.assertIn("Not a valid string.",
-                      data['errors'][0]['detail'])
+        super().add_object_invalid_data_key(
+            url=self.attachment_url, data_object=contact_data)
 
 
 if __name__ == '__main__':

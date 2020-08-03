@@ -1,5 +1,9 @@
 from marshmallow_jsonapi import fields
 from marshmallow_jsonapi.flask import Schema, Relationship
+from project.api.schemas.attachment_schema import AttachmentSchema
+from project.api.schemas.customfield_schema import CustomFieldSchema
+from project.api.schemas.event_schema import EventSchema
+from project.api.schemas.device_property_schema import DevicePropertySchema
 
 
 class DeviceSchema(Schema):
@@ -21,77 +25,33 @@ class DeviceSchema(Schema):
 
     id = fields.Integer(as_string=True, dump_only=True)
     description = fields.Str(allow_none=True)
-    short_name = fields.Str(allow_none=True)
+    short_name = fields.Str(required=True)
     long_name = fields.Str(allow_none=True)
-    manufacturer = fields.Str(required=True)
-    serial_number = fields.Str(required=True)
-    type = fields.Str(required=True)
-    model = fields.Str(required=True)
-    dual_use = fields.Boolean()
-    label = fields.Str(allow_none=True)
+    serial_number = fields.Str(allow_none=True)
+    manufacturer_uri = fields.Str(allow_none=True)
+    manufacturer_name = fields.Str(allow_none=True)
+    model = fields.Str(allow_none=True)
+    dual_use = fields.Boolean(allow_none=True)
     inventory_number = fields.Str(allow_none=True)
-    url = fields.Str(allow_none=True)
-    configuration_date = fields.Date()
     persistent_identifier = fields.Str(allow_none=True)
-
-    urn = fields.Function(lambda obj: "{}_{}_{}_{}".format(
-        obj.manufacturer.upper(), obj.model.upper(),
-        obj.type.upper(), obj.serial_number))
-
-    platform = Relationship(attribute='platform',
-                            self_view='device_platform',
-                            self_view_kwargs={'id': '<id>'},
-                            related_view='platform_detail',
-                            related_view_kwargs={'device_id': '<id>'},
-                            schema='PlatformSchema',
-                            type_='platform')
-
-    events = Relationship(attribute='events',
-                          self_view='device_events',
-                          self_view_kwargs={'id': '<id>'},
-                          related_view='events_list',
-                          related_view_kwargs={'device_id': '<id>'},
-                          many=True,
-                          schema='EventSchema',
-                          type_='event',
-                          id_field='id')
-
+    website = fields.Str(allow_none=True)
+    created_at = fields.Date(allow_none=True)
+    modified_at = fields.Date(allow_none=True)
+    created_by = fields.Date(allow_none=True)
+    created_by_id = fields.Date(allow_none=True)
+    modified_by = fields.Date(allow_none=True)
+    modified_by_id = fields.Date(allow_none=True)
+    customfields = fields.Nested(CustomFieldSchema, many=True, allow_none=True)
+    events = fields.Nested(EventSchema, many=True, allow_none=True)
+    device_properties = fields.Nested(DevicePropertySchema, many=True, allow_none=True)
+    device_attachments = fields.Nested(AttachmentSchema, many=True, allow_none=True)
     contacts = Relationship(attribute='contacts',
-                            self_view='device_contacts',
+                            self_view='devices_contacts',
                             self_view_kwargs={'id': '<id>'},
                             related_view='contacts_list',
                             related_view_kwargs={'device_id': '<id>'},
                             many=True,
                             schema='ContactSchema',
                             type_='contact',
-                            id_field='id')
-
-    properties = Relationship(attribute='properties',
-                              self_view='device_properties',
-                              self_view_kwargs={'id': '<id>'},
-                              related_view='contacts_list',
-                              related_view_kwargs={'device_id': '<id>'},
-                              many=True,
-                              schema='PropertiesSchema',
-                              type_='properties',
-                              id_field='id')
-
-    attachments = Relationship(attribute='attachments',
-                               self_view='device_attachments',
-                               self_view_kwargs={'id': '<id>'},
-                               related_view='attachments_list',
-                               related_view_kwargs={'device_id': '<id>'},
-                               many=True,
-                               schema='AttachmentSchema',
-                               type_='Attachment',
-                               id_field='id')
-
-    customfields = Relationship(attribute='customfields',
-                                self_view='device_customfields',
-                                self_view_kwargs={'id': '<id>'},
-                                related_view='customfields_list',
-                                related_view_kwargs={'device_id': '<id>'},
-                                many=True,
-                                schema='CustomFieldSchema',
-                                type_='CustomField',
-                                id_field='id')
+                            id_field='id'
+                            )

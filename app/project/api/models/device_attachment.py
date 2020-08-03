@@ -1,12 +1,12 @@
 from project.api.models.base_model import db
 
 
-class CustomField(db.Model):
+class DeviceAttachment(db.Model):
     """
-    Custom Field class
+    Attachment class
     """
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    key = db.Column(db.String(256), nullable=False)
-    value = db.Column(db.String(1024), nullable=True)
+    label = db.Column(db.String(256), nullable=True)
+    url = db.Column(db.String(1024), nullable=False)
     device_id = db.Column(db.Integer, db.ForeignKey('device.id'),
                           nullable=False)

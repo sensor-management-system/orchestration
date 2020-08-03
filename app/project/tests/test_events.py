@@ -10,12 +10,12 @@ class TestEventServices(BaseTestCase):
     """
     Test Event Services
     """
-    url = '/sis/v1/events'
+    event_url = '/events'
     object_type = 'event'
 
     def test_get_devices(self):
         """Ensure the /event route behaves correctly."""
-        response = self.client.get('/sis/v1/events')
+        response = self.client.get('/rdm/svm-api/v1/events')
         data = json.loads(response.data.decode())
         self.assertEqual(response.status_code, 200)
         self.assertEqual(0, data['meta']['count'])
@@ -28,7 +28,7 @@ class TestEventServices(BaseTestCase):
 
     def test_add_event(self):
         """Ensure a new event can be added to the database."""
-        data_object = {
+        event_data = {
             "data": {
                 "type": "event",
                 "attributes": {
@@ -36,14 +36,13 @@ class TestEventServices(BaseTestCase):
                 }
             }
         }
-        super(TestEventServices, self). \
-            test_add_object(url=self.url,
-                            data_object=data_object,
-                            object_type=self.object_type)
+        super().add_object(
+            url=self.event_url, data_object=event_data,
+            object_type=self.object_type)
 
     def test_add_event_invalid_type(self):
         """Ensure error is thrown if the JSON object has invalid type."""
-        data_object = {
+        event_data = {
             "data": {
                 "type": "platform",
                 "attributes": {
@@ -52,8 +51,8 @@ class TestEventServices(BaseTestCase):
             }
         }
         with self.client:
-            data, response = super(TestEventServices, self).prepare_response(
-                url=self.url, data_object=data_object)
+            data, response = super().prepare_response(
+                url=self.event_url, data_object=event_data)
 
         self.assertEqual(response.status_code, 409)
         self.assertIn("Invalid type. Expected \"event\".",
@@ -62,7 +61,7 @@ class TestEventServices(BaseTestCase):
     def test_add_event_missing_data(self):
         """Ensure error is thrown if the JSON object
          has messing required data."""
-        data_object = {
+        event_data = {
             "data": {
                 "type": "event",
                 "attributes": {
@@ -70,9 +69,9 @@ class TestEventServices(BaseTestCase):
                 }
             }
         }
-        with self.client:
-            data, response = super(TestEventServices, self).prepare_response(
-                url=self.url, data_object=data_object)
+
+        data, response = super().prepare_response(
+            url=self.event_url, data_object=event_data)
 
         self.assertEqual(response.status_code, 422)
         self.assertIn("Missing data for required field.",
@@ -80,16 +79,16 @@ class TestEventServices(BaseTestCase):
 
     def test_add_event_invalid_json(self):
         """Ensure error is thrown if the JSON object invalid."""
-        data_object = {}
-        with self.client:
-            data, response = super(TestEventServices, self).prepare_response(
-                url=self.url, data_object=data_object)
+        event_data = {}
+
+        data, response = super().prepare_response(
+            url=self.event_url, data_object=event_data)
         self.assertEqual(response.status_code, 422)
         self.assertIn("Object must include `data` key.",
                       data['errors'][0]['detail'])
 
     def test_add_event_invalid_data_key(self):
-        data_object = {
+        event_data = {
             "data": {
                 "type": "event",
                 "attributes": {
@@ -97,13 +96,8 @@ class TestEventServices(BaseTestCase):
                 }
             }
         }
-        with self.client:
-            data, response = super(TestEventServices, self).prepare_response(
-                url=self.url, data_object=data_object)
-
-        self.assertEqual(response.status_code, 422)
-        self.assertIn("Not a valid string.",
-                      data['errors'][0]['detail'])
+        super().add_object_invalid_data_key(
+            url=self.event_url, data_object=event_data)
 
         if __name__ == '__main__':
             unittest.main()
