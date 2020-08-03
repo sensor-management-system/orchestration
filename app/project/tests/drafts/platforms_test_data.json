@@ -1,0 +1,30 @@
+{
+  "platforms": [
+    {
+      "description": "platform_test1_description",
+      "short_name": "platform_short_name_test1",
+      "long_name": "platform_long_name_test1",
+      "serial_number": "platform_serial_number_test1",
+      "manufacturer_name": "platform_manufacturer_name_test1",
+      "model": "platform_model_test1",
+      "inventory_number": "platform_inventory_number_test1",
+      "persistent_identifier": "platform_persistent_identifier1",
+      "website": "http://device.wepsite1.de",
+      "label": "platform_label_test1",
+      "platform_type_name": "platform_type_name_test1"
+    },
+    {
+      "description": "platform_test_2description",
+      "short_name": "platform_short_name_test2",
+      "long_name": "platform_long_name_test2",
+      "serial_number": "platform_serial_number_test2",
+      "manufacturer_name": "platform_manufacturer_name_test2",
+      "model": "platform_model_test2",
+      "inventory_number": "platform_inventory_number_test2",
+      "persistent_identifier": "platform_persistent_identifier2",
+      "website": "http://device.wepsite2.de",
+      "label": "platform_label_test2",
+      "platform_type_name": "platform_type_name_test2"
+    }
+  ]
+}

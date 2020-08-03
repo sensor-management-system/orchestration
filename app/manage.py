@@ -31,9 +31,7 @@ def recreate_db():
 @cli.command()
 def test():
     """ Runs the tests without code coverage """
-    base = BaseTestCase()
-    # base.set_up()
-    tests = unittest.TestLoader().discover('project/tests', pattern='test_attachments.py')
+    tests = unittest.TestLoader().discover('project/tests', pattern='test_*.py')
     result = unittest.TextTestRunner(verbosity=2).run(tests)
     if result.wasSuccessful():
         return 0

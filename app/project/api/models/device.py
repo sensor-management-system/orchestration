@@ -1,5 +1,5 @@
 from project.api.models.base_model import db
-from project.api.models.my_mixin import AuditMixin
+from project.api.models.mixin import AuditMixin
 
 
 class Device(db.Model, AuditMixin):

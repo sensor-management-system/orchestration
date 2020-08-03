@@ -5,7 +5,7 @@ def set_device_relationship_schema(object_type):
     device = Relationship(attribute='device',
                           self_view='device_' + object_type,
                           self_view_kwargs={'id': '<id>'},
-                          related_view='devices_detail',
+                          related_view='device_detail',
                           related_view_kwargs={'id': '<id>'},
                           include_resource_linkage=True,
                           schema='DeviceSchema',

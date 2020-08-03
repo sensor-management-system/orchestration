@@ -13,17 +13,19 @@ class BaseResourceDetail():
         :param kwargs:
         :return:
         """
-        obj_class = obj.capitalize()
-        obj_id = obj + '_id'
-        module = __import__("project.api.models" + obj)
-        the_class = getattr(module, obj_class)
+        class_name = obj.capitalize()  # Contact
+        object_id = obj + '_id'  # contact_id
+        # to import a module dynamically
+        module = __import__("project.api.models." + obj)
+        object_class = getattr(module, class_name)
+        instance = object_class()
         try:
-            object_ = self.session.query(the_class).filter_by(
-                id=view_kwargs['contact_id']).one()
+            object_ = self.session.query(instance).filter_by(
+                id=view_kwargs[object_id]).one()
         except NoResultFound:
-            raise ObjectNotFound({'parameter': obj_id},
-                                 "Computer: {} not found".format(
-                                     view_kwargs[obj_id]))
+            raise ObjectNotFound({'parameter': object_id},
+                                 "{}: {} not found".format(
+                                     instance, view_kwargs[object_id]))
         else:
             if object_.device is not None:
                 view_kwargs['id'] = object_.device.id
