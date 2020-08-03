@@ -10,7 +10,7 @@ class UserRelationship(ResourceRelationship):
     """
     provides get, post, patch and delete methods to get relationships,
     create relationships, update relationships and delete
-    relationships between Event and other objects.
+    relationships between User and other objects.
     """
     schema = UserSchema
     # decorators = (token_required,)
