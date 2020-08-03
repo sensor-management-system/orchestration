@@ -57,16 +57,18 @@ def cov():
 @cli.command('db_init')
 def db_init():
     with app.app_context():
-        sensor = add_sensor()
-        event = add_event()
+        device = add_device()
+        event = add_event(device)
         contact = add_contact()
         platform = add_platform()
-        attachment = add_attachment()
+        attachment = add_device_attachment(device)
+        pl_attachment = add_platform_attachment(platform)
         db.session.add(sensor)
         db.session.add(platform)
         db.session.add(event)
         db.session.add(contact)
         db.session.add(attachment)
+        db.session.add(pl_attachment)
         db.session.commit()
 
 
