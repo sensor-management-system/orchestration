@@ -29,7 +29,7 @@ class PlatformSchema(Schema):
     #modified_by = fields.Date(allow_none=True)
     modified_by_id = fields.Integer(allow_none=True, data_key="modifiedById")
     inventory_number = fields.Str(allow_none=True, data_key="intentoryNumber")
-    serial_number = fields.Str(allow_none=True), data_key="serialNumber")
+    serial_number = fields.Str(allow_none=True, data_key="serialNumber")
     persistent_identifier = fields.Str(allow_none=True, data_key="persistentIdentifier")
     platform_attachments = fields.Nested(AttachmentSchema, many=True, allow_none=True, data_key="attachments")
     contacts = Relationship(attribute='contacts',
