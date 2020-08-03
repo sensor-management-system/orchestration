@@ -17,13 +17,13 @@ class ContactSchema(Schema):
         self_view_kwargs = {'id': '<id>'}
 
     id = fields.Integer(as_string=True, dump_only=True)
-    given_name = fields.Str(required=True)
-    family_name = fields.Str(required=True)
-    website = fields.Str(allow_none=True)
-    email = fields.Str(required=True)
+    given_name = fields.Str(required=True, data_key='givenName')
+    family_name = fields.Str(required=True, data_key='familyName')
+    website = fields.Url(allow_none=True)
+    email = fields.Email(required=True)
 
     platforms = Relationship(attribute='platforms',
-                             self_view='contacts_platforms',
+                             self_view='contact_platforms',
                              self_view_kwargs={'id': '<id>'},
                              related_view='platform_list',
                              related_view_kwargs={'contact_id': '<id>'},
@@ -33,7 +33,7 @@ class ContactSchema(Schema):
                              id_field='id'
                              )
     devices = Relationship(attribute='devices',
-                           self_view='contacts_devices',
+                           self_view='contact_devices',
                            self_view_kwargs={'id': '<id>'},
                            related_view='device_list',
                            related_view_kwargs={'contact_id': '<id>'},
