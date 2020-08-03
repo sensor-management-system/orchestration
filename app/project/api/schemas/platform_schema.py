@@ -14,7 +14,7 @@ class PlatformSchema(Schema):
     description = fields.Str(allow_none=True)
     short_name = fields.Str(required=True, data_key="shortName")
     long_name = fields.Str(allow_none=True, data_key="longName")
-    manufacturer_uri = fields.Str(allow_none=True, data_key="manufacturerUri"
+    manufacturer_uri = fields.Str(allow_none=True, data_key="manufacturerUri")
     manufacturer_name = fields.Str(allow_none=True, data_key="manufacturerName")
     model = fields.Str(allow_none=True)
     platform_type_uri = fields.Str(allow_none=True, data_key="platformTypeUri")
