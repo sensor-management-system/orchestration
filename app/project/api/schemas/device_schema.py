@@ -4,6 +4,7 @@ from project.api.schemas.attachment_schema import AttachmentSchema
 from project.api.schemas.customfield_schema import CustomFieldSchema
 from project.api.schemas.event_schema import EventSchema
 from project.api.schemas.device_property_schema import DevicePropertySchema
+from project.api.schemas.utils import camel_case
 
 
 class DeviceSchema(Schema):
@@ -22,30 +23,31 @@ class DeviceSchema(Schema):
         type_ = 'device'
         self_view = 'device_detail'
         self_view_kwargs = {'id': '<id>'}
+        inflect = camel_case
 
     id = fields.Integer(as_string=True, dump_only=True)
     description = fields.Str(allow_none=True)
-    short_name = fields.Str(required=True, data_key="shortName")
-    long_name = fields.Str(allow_none=True, data_key="longName")
-    serial_number = fields.Str(allow_none=True, data_key="serialNumber")
-    manufacturer_uri = fields.Str(allow_none=True, data_key="manufacturerUri")
-    manufacturer_name = fields.Str(allow_none=True, data_key="manufacturerName")
+    short_name = fields.Str(required=True)
+    long_name = fields.Str(allow_none=True)
+    serial_number = fields.Str(allow_none=True)
+    manufacturer_uri = fields.Str(allow_none=True)
+    manufacturer_name = fields.Str(allow_none=True)
     model = fields.Str(allow_none=True)
-    dual_use = fields.Boolean(allow_none=True, data_key="dualUse")
-    inventory_number = fields.Str(allow_none=True, data_key="inventoryNumber")
-    persistent_identifier = fields.Str(allow_none=True, data_key="persistentIdentifier")
+    dual_use = fields.Boolean(allow_none=True)
+    inventory_number = fields.Str(allow_none=True)
+    persistent_identifier = fields.Str(allow_none=True)
     website = fields.Url(allow_none=True)
-    created_at = fields.DateTime(allow_none=True, data_key="createdAt")
-    modified_at = fields.DateTime(allow_none=True, data_key="modifiedAt")
+    created_at = fields.DateTime(allow_none=True)
+    modified_at = fields.DateTime(allow_none=True)
     # TODO: Those must be Users
-    #created_by = fields.Date(allow_none=True, data_key="createdBy")
-    #modified_by = fields.Date(allow_none=True, data_key="modifiedBy")
-    created_by_id = fields.Integer(allow_none=True, data_key="createdById")
-    modified_by_id = fields.Integer(allow_none=True, data_key="modifiedById")
+    #created_by = fields.Date(allow_none=True)
+    #modified_by = fields.Date(allow_none=True)
+    created_by_id = fields.Integer(allow_none=True)
+    modified_by_id = fields.Integer(allow_none=True)
     customfields = fields.Nested(CustomFieldSchema, many=True, allow_none=True)
     events = fields.Nested(EventSchema, many=True, allow_none=True)
-    device_properties = fields.Nested(DevicePropertySchema, many=True, allow_none=True, data_key="deviceProperties")
-    device_attachments = fields.Nested(AttachmentSchema, many=True, allow_none=True, data_key="attachments")
+    device_properties = fields.Nested(DevicePropertySchema, many=True, allow_none=True)
+    attachments = fields.Nested(AttachmentSchema, many=True, allow_none=True)
     contacts = Relationship(attribute='contacts',
                             self_view='device_contacts',
                             self_view_kwargs={'id': '<id>'},

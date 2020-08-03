@@ -10,7 +10,7 @@ from project.api.models.device_property import DeviceProperty
 
 def add_device():
     """""Ensure Add device model """
-    sensor = Device(
+    device = Device(
         id=1,
         short_name='Device short name',
         long_name='Device long name',
@@ -18,9 +18,9 @@ def add_device():
         model="test model", 
         inventory_number="0000001",
         persistent_identifier="0000001",
-        description='My first test sensor'
+        description='My first test device'
     )
-    return sensor
+    return device
 
 
 def add_platform():
@@ -69,7 +69,7 @@ def add_device_properties(device):
 
 def add_platform_attachment(platform):
     """""Add platform attachment model """
-    attachment PlatformAttachment(
+    attachment = PlatformAttachment(
         id=1,
         platform_id=platform.id,
         label="test platform label",

@@ -65,11 +65,11 @@ def create_endpoints(api):
         base_url + '/contacts/<int:id>'
     )
     api.route(
-        ContactRelationship, 'contacts_devices',
+        ContactRelationship, 'contact_devices',
         base_url + '/contacts/<int:id>/relationships/devices'
     )
     api.route(
-        ContactRelationship, 'contacts_platforms',
+        ContactRelationship, 'contact_platforms',
         base_url + '/contacts/<int:id>/relationships/platforms'
     )
     api.route(

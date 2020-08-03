@@ -63,7 +63,7 @@ def db_init():
         platform = add_platform()
         attachment = add_device_attachment(device)
         pl_attachment = add_platform_attachment(platform)
-        db.session.add(sensor)
+        db.session.add(device)
         db.session.add(platform)
         db.session.add(event)
         db.session.add(contact)
