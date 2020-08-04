@@ -121,7 +121,7 @@ def create_endpoints(api):
         base_url + "/users",
         base_url + "/contacts/<int:id>/users",
     )
-    api.route(UserDetail, "users_detail", base_url + "/users/<int:id>")
+    api.route(UserDetail, "user_detail", base_url + "/users/<int:id>")
     api.route(
         UserRelationship,
         "user_contact",
