@@ -39,15 +39,35 @@ class DeviceSchema(Schema):
     website = fields.Url(allow_none=True)
     created_at = fields.DateTime(allow_none=True)
     modified_at = fields.DateTime(allow_none=True)
-    # TODO: Those must be Users
-    #created_by = fields.Date(allow_none=True)
-    #modified_by = fields.Date(allow_none=True)
-    created_by_id = fields.Integer(allow_none=True)
-    modified_by_id = fields.Integer(allow_none=True)
+    created_by = Relationship(
+        attribute='created_by',
+        self_view='device_created_user',
+        self_view_kwargs={'id': '<id>'},
+        related_view='user_detail',
+        related_view_kwargs={'id': '<created_by_id>'}
+        type_='user'
+    }
+    modified_by = Relationship(
+        attribute='modified_by',
+        self_view='device_modified_user',
+        self_view_kwargs={'id': '<id>'},
+        related_view='user_detail',
+        related_view_kwargs={'id': '<modified_by_id>'}
+        type_='user'
+    }
     customfields = fields.Nested(CustomFieldSchema, many=True, allow_none=True)
-    events = fields.Nested(EventSchema, many=True, allow_none=True)
+    events = Relationship(
+      self_view='device_events',
+      self_view_kwargs={'id': '<id>'},
+      related_view='event_list',
+      related_view_kwargs={'device_id': '<id>'},
+      many=True,
+      allow_none=True,
+      schema='EventSchema',
+      type_='event'
+    )
     device_properties = fields.Nested(DevicePropertySchema, many=True, allow_none=True)
-    attachments = fields.Nested(AttachmentSchema, many=True, allow_none=True)
+    attachments = fields.Nested(AttachmentSchema, many=True, allow_none=True, attribute='device_attachments')
     contacts = Relationship(attribute='contacts',
                             self_view='device_contacts',
                             self_view_kwargs={'id': '<id>'},

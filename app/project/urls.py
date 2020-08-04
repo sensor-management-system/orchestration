@@ -6,6 +6,9 @@ from project.api.resourceManager.contact_relationship \
 from project.api.resourceManager.device_detail import DeviceDetail
 from project.api.resourceManager.device_list import DeviceList
 from project.api.resourceManager.device_relationship import DeviceRelationship
+from project.api.resourceManager.event_detail import EventDetail
+from project.api.resourceManager.event_list import EventList
+from project.api.resourceManager.event_relationship import EventRelationship
 from project.api.resourceManager.platform_detail import PlatformDetail
 from project.api.resourceManager.platform_list import PlatformList
 from project.api.resourceManager.platform_relationship \
@@ -38,6 +41,27 @@ def create_endpoints(api):
         PlatformRelationship, 'platform_contacts',
         base_url + '/platforms/<int:id>/relationships/contacts'
     )
+    api.route(
+        PlatformRelationship, 'platform_created_user',
+        base_url + '/platforms/<int:id>/relationships/createdUser'
+    )
+    api.route(
+        PlatformRelationship, 'platform_modified_user',
+        base_url + '/platforms/<int:id>/relationships/modifiedUser'
+    )
+    # Events
+    api.route(
+        EventList, 'event_list',
+        base_url + '/events'
+    )
+    api.route(
+        EventDetail, 'event_detail',
+        base_url + '/events/<int:id',
+    )
+    api.route(
+        EventRelationship, 'event_user',
+        base_url + '/events/<int:id>/relationships/user'
+    )
 
     # Device
     api.route(
@@ -52,6 +76,14 @@ def create_endpoints(api):
     api.route(
         DeviceRelationship, 'device_contacts',
         base_url + '/devices/<int:id>/relationships/contacts'
+    )
+    api.route(
+        DeviceRelationship, 'device_created_user',
+        base_url + '/devices/<int:id>/relationships/createdUser'
+    )
+    api.route(
+        DeviceRelationship, 'device_modified_user',
+        base_url + '/devices/<int:id>/relationships/modifiedUser'
     )
     # Contact
     api.route(

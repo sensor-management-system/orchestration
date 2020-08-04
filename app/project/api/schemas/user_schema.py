@@ -20,7 +20,7 @@ class UserSchema(Schema):
     subject = fields.Str(required=True)
 
     contact = Relationship(attribute='contact',
-                           self_view='contact_user',
+                           self_view='user_contact',
                            self_view_kwargs={'id': '<id>'},
                            related_view='contact_detail',
                            related_view_kwargs={'id': '<id>'},

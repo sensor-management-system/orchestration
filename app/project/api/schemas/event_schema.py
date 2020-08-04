@@ -1,6 +1,5 @@
-from marshmallow import Schema as MarshmallowSchema
+from marshmallow_jsonapi.flask import Schema, Relationship
 from marshmallow_jsonapi import fields
-from marshmallow_jsonapi.flask import Relationship
 
 
 class EventSchema(MarshmallowSchema):
@@ -14,6 +13,9 @@ class EventSchema(MarshmallowSchema):
 
     class Meta:
         type_ = 'event'
+        self_view = 'event_detail'
+        self_view_kwargs = {'id': '<id>'}
+        self_view_many = 'event_list'
 
     id = fields.Integer(as_string=True, dump_only=True)
     description = fields.Str(required=True)
