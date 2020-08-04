@@ -318,7 +318,7 @@ export class AppBarTabsExtensionExtended extends AppBarTabsExtension {
   get tabs (): String[] {
     return [
       'Basic Data',
-      'Persons',
+      'Contacts',
       'Properties',
       'Custom Fields',
       'Attachments',
