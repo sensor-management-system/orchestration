@@ -46,8 +46,8 @@ def create_endpoints(api):
         base_url + '/platforms/<int:id>/relationships/createdUser'
     )
     api.route(
-        PlatformRelationship, 'platform_modified_user',
-        base_url + '/platforms/<int:id>/relationships/modifiedUser'
+        PlatformRelationship, 'platform_updated_user',
+        base_url + '/platforms/<int:id>/relationships/updatedUser'
     )
     # Events
     api.route(
@@ -78,12 +78,16 @@ def create_endpoints(api):
         base_url + '/devices/<int:id>/relationships/contacts'
     )
     api.route(
+        DeviceRelationship, 'device_events',
+        base_url + '/devices/<int:id>/relationships/events',
+    )
+    api.route(
         DeviceRelationship, 'device_created_user',
         base_url + '/devices/<int:id>/relationships/createdUser'
     )
     api.route(
-        DeviceRelationship, 'device_modified_user',
-        base_url + '/devices/<int:id>/relationships/modifiedUser'
+        DeviceRelationship, 'device_updated_user',
+        base_url + '/devices/<int:id>/relationships/updatedUser'
     )
     # Contact
     api.route(
