@@ -21,14 +21,14 @@ def create_app():
     CORS(app)
 
     # set config
-    app_settings = os.getenv('APP_SETTINGS')
+    app_settings = os.getenv("APP_SETTINGS")
     app.config.from_object(app_settings)
 
     # instantiate the db
     DB.init_app(app)
 
     # shell context for flask cli
-    app.shell_context_processor({'app': app, 'db': DB})
+    app.shell_context_processor({"app": app, "db": DB})
 
     # Create endpoints
     api = Api(app)

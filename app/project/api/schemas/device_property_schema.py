@@ -13,7 +13,7 @@ class DevicePropertySchema(MarshmallowSchema):
     """
 
     class Meta:
-        type_ = 'property'
+        type_ = "property"
         inflect = camel_case
 
     id = fields.Integer(as_string=True, dump_only=True)

@@ -12,52 +12,55 @@ def add_device():
     """""Ensure Add device model """
     device = Device(
         id=1,
-        short_name='Device short name',
-        long_name='Device long name',
-        serial_number='0000001',
-        model="test model", 
+        short_name="Device short name",
+        long_name="Device long name",
+        serial_number="0000001",
+        model="test model",
         inventory_number="0000001",
         persistent_identifier="0000001",
-        description='My first test device'
+        description="My first test device",
     )
     return device
 
 
 def add_platform():
     """""Add platform model """
-    platform = Platform(id=1,
-                        short_name='test short name',
-                        long_name='test long name',
-                        description='My first test platform')
+    platform = Platform(
+        id=1,
+        short_name="test short name",
+        long_name="test long name",
+        description="My first test platform",
+    )
     return platform
 
 
 def add_event(device):
     """""Add event model """
-    event = Event(id=1, description='My first test event', device_id=device.id)
+    event = Event(id=1, description="My first test event", device_id=device.id)
     return event
 
 
 def add_contact():
     """""Add contact model """
-    contact = Contact(id=1, given_name='Max', family_name='Mustermann',
-                      email="test@test.test")
+    contact = Contact(
+        id=1, given_name="Max", family_name="Mustermann", email="test@test.test"
+    )
     return contact
 
 
 def add_customfield(device):
     """""Add customfield model """
-    customfield = CustomField(id=1, key='test key',
-                              device_id=device.id,
-                              value="test value")
+    customfield = CustomField(
+        id=1, key="test key", device_id=device.id, value="test value"
+    )
     return customfield
 
 
 def add_device_attachment(device):
     """""Add a device attachment model """
-    device_attachment = DeviceAttachment(id=1, label='test label',
-                                         device_id=device.id,
-                                         url="http://test.test")
+    device_attachment = DeviceAttachment(
+        id=1, label="test label", device_id=device.id, url="http://test.test"
+    )
     return device_attachment
 
 
@@ -73,6 +76,6 @@ def add_platform_attachment(platform):
         id=1,
         platform_id=platform.id,
         label="test platform label",
-        url="http://www.google.de"
+        url="http://www.google.de",
     )
     return attachment

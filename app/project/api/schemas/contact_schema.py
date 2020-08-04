@@ -2,6 +2,7 @@ from marshmallow_jsonapi import fields
 from marshmallow_jsonapi.flask import Schema, Relationship
 from project.api.schemas.utils import camel_case
 
+
 class ContactSchema(Schema):
     """
     This class create a schema for a contact.
@@ -12,9 +13,9 @@ class ContactSchema(Schema):
     """
 
     class Meta:
-        type_ = 'contact'
-        self_view = 'contact_detail'
-        self_view_kwargs = {'id': '<id>'}
+        type_ = "contact"
+        self_view = "contact_detail"
+        self_view_kwargs = {"id": "<id>"}
         inflect = camel_case
 
     id = fields.Integer(as_string=True, dump_only=True)
@@ -23,33 +24,36 @@ class ContactSchema(Schema):
     website = fields.Url(allow_none=True)
     email = fields.Email(required=True)
 
-    platforms = Relationship(attribute='platforms',
-                             self_view='contact_platforms',
-                             self_view_kwargs={'id': '<id>'},
-                             related_view='platform_list',
-                             related_view_kwargs={'contact_id': '<id>'},
-                             many=True,
-                             schema='PlatformSchema',
-                             type_='platform',
-                             id_field='id'
-                             )
-    devices = Relationship(attribute='devices',
-                           self_view='contact_devices',
-                           self_view_kwargs={'id': '<id>'},
-                           related_view='device_list',
-                           related_view_kwargs={'contact_id': '<id>'},
-                           many=True,
-                           schema='DeviceSchema',
-                           type_='device',
-                           id_field='id'
-                           )
-    user = Relationship(attribute='user',
-                        self_view='contact_user',
-                        self_view_kwargs={'id': '<id>'},
-                        related_view='user_list',
-                        related_view_kwargs={'id': '<id>'},
-                        include_resource_linkage=True,
-                        schema='UserSchema',
-                        type_='user',
-                        id_field='id'
-                        )
+    platforms = Relationship(
+        attribute="platforms",
+        self_view="contact_platforms",
+        self_view_kwargs={"id": "<id>"},
+        related_view="platform_list",
+        related_view_kwargs={"contact_id": "<id>"},
+        many=True,
+        schema="PlatformSchema",
+        type_="platform",
+        id_field="id",
+    )
+    devices = Relationship(
+        attribute="devices",
+        self_view="contact_devices",
+        self_view_kwargs={"id": "<id>"},
+        related_view="device_list",
+        related_view_kwargs={"contact_id": "<id>"},
+        many=True,
+        schema="DeviceSchema",
+        type_="device",
+        id_field="id",
+    )
+    user = Relationship(
+        attribute="user",
+        self_view="contact_user",
+        self_view_kwargs={"id": "<id>"},
+        related_view="user_list",
+        related_view_kwargs={"id": "<id>"},
+        include_resource_linkage=True,
+        schema="UserSchema",
+        type_="user",
+        id_field="id",
+    )

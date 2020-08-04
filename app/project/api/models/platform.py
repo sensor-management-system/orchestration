@@ -6,6 +6,7 @@ class Platform(db.Model, AuditMixin):
     """
     Platform class
     """
+
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     description = db.Column(db.Text, nullable=True)
     short_name = db.Column(db.String(256), nullable=False)
@@ -20,8 +21,7 @@ class Platform(db.Model, AuditMixin):
     website = db.Column(db.String(1024), nullable=True)
     inventory_number = db.Column(db.String(256), nullable=True)
     serial_number = db.Column(db.String(256), nullable=True)
-    persistent_identifier = db.Column(db.String(256), nullable=True,
-                                      unique=True)
-    platform_attachments = db.relationship("PlatformAttachment",
-                                          cascade="save-update, merge, "
-                                                  "delete, delete-orphan")
+    persistent_identifier = db.Column(db.String(256), nullable=True, unique=True)
+    platform_attachments = db.relationship(
+        "PlatformAttachment", cascade="save-update, merge, " "delete, delete-orphan"
+    )

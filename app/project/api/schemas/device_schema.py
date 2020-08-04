@@ -20,9 +20,9 @@ class DeviceSchema(Schema):
     """
 
     class Meta:
-        type_ = 'device'
-        self_view = 'device_detail'
-        self_view_kwargs = {'id': '<id>'}
+        type_ = "device"
+        self_view = "device_detail"
+        self_view_kwargs = {"id": "<id>"}
         inflect = camel_case
 
     id = fields.Integer(as_string=True, dump_only=True)
@@ -40,39 +40,42 @@ class DeviceSchema(Schema):
     created_at = fields.DateTime(allow_none=True)
     updated_at = fields.DateTime(allow_none=True)
     created_by = Relationship(
-        self_view='device_created_user',
-        self_view_kwargs={'id': '<id>'},
-        related_view='user_detail',
-        related_view_kwargs={'id': '<created_by_id>'},
-        type_='user'
+        self_view="device_created_user",
+        self_view_kwargs={"id": "<id>"},
+        related_view="user_detail",
+        related_view_kwargs={"id": "<created_by_id>"},
+        type_="user",
     )
     updated_by = Relationship(
-        self_view='device_updated_user',
-        self_view_kwargs={'id': '<id>'},
-        related_view='user_detail',
-        related_view_kwargs={'id': '<updated_by_id>'},
-        type_='user'
+        self_view="device_updated_user",
+        self_view_kwargs={"id": "<id>"},
+        related_view="user_detail",
+        related_view_kwargs={"id": "<updated_by_id>"},
+        type_="user",
     )
     customfields = fields.Nested(CustomFieldSchema, many=True, allow_none=True)
     events = Relationship(
-      self_view='device_events',
-      self_view_kwargs={'id': '<id>'},
-      related_view='event_list',
-      related_view_kwargs={'device_id': '<id>'},
-      many=True,
-      allow_none=True,
-      schema='EventSchema',
-      type_='event'
+        self_view="device_events",
+        self_view_kwargs={"id": "<id>"},
+        related_view="event_list",
+        related_view_kwargs={"device_id": "<id>"},
+        many=True,
+        allow_none=True,
+        schema="EventSchema",
+        type_="event",
     )
     device_properties = fields.Nested(DevicePropertySchema, many=True, allow_none=True)
-    attachments = fields.Nested(AttachmentSchema, many=True, allow_none=True, attribute='device_attachments')
-    contacts = Relationship(attribute='contacts',
-                            self_view='device_contacts',
-                            self_view_kwargs={'id': '<id>'},
-                            related_view='contact_list',
-                            related_view_kwargs={'device_id': '<id>'},
-                            many=True,
-                            schema='ContactSchema',
-                            type_='contact',
-                            id_field='id'
-                            )
+    attachments = fields.Nested(
+        AttachmentSchema, many=True, allow_none=True, attribute="device_attachments"
+    )
+    contacts = Relationship(
+        attribute="contacts",
+        self_view="device_contacts",
+        self_view_kwargs={"id": "<id>"},
+        related_view="contact_list",
+        related_view_kwargs={"device_id": "<id>"},
+        many=True,
+        schema="ContactSchema",
+        type_="contact",
+        id_field="id",
+    )

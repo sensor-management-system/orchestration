@@ -10,9 +10,9 @@ class DeviceDetail(ResourceDetail):
      of an object, update an object and delete a Device
     """
 
-
     schema = DeviceSchema
     # decorators = (token_required,)
-    data_layer = {'session': db.session,
-                  'model': Device,
+    data_layer = {
+        "session": db.session,
+        "model": Device,
     }

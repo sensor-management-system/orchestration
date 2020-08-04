@@ -6,6 +6,7 @@ class Device(db.Model, AuditMixin):
     """
     Device class
     """
+
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     description = db.Column(db.Text, nullable=True)
     short_name = db.Column(db.String(256), nullable=False)
@@ -20,16 +21,16 @@ class Device(db.Model, AuditMixin):
     website = db.Column(db.String(1024), nullable=True)
     devicetype_uri = db.Column(db.String(256), nullable=True)
     devicetype_name = db.Column(db.String(256), nullable=True)
-    customfields = db.relationship("CustomField",
-                                   cascade="save-update, merge, "
-                                           "delete, delete-orphan")
-    device_properties = db.relationship("DeviceProperty",
-                                        cascade="save-update, merge, "
-                                                "delete, delete-orphan")
-    events = db.relationship("Event",
-                             cascade="save-update, merge, "
-                                     "delete, delete-orphan")
+    customfields = db.relationship(
+        "CustomField", cascade="save-update, merge, " "delete, delete-orphan"
+    )
+    device_properties = db.relationship(
+        "DeviceProperty", cascade="save-update, merge, " "delete, delete-orphan"
+    )
+    events = db.relationship(
+        "Event", cascade="save-update, merge, " "delete, delete-orphan"
+    )
 
-    device_attachments = db.relationship("DeviceAttachment",
-                                         cascade="save-update, merge, "
-                                                 "delete, delete-orphan")
+    device_attachments = db.relationship(
+        "DeviceAttachment", cascade="save-update, merge, " "delete, delete-orphan"
+    )

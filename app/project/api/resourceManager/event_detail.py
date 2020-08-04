@@ -4,6 +4,7 @@ from project.api.models.event import Event
 from project.api.schemas.event_schema import EventSchema
 from project.api.token_checker import token_required
 
+
 class EventDetail(ResourceDetail):
     """
     Class that provides get, patch and delete methods
@@ -14,6 +15,6 @@ class EventDetail(ResourceDetail):
     schema = EventSchema
     # decorators = (token_required,)
     data_layer = {
-        'session': db.session,
-        'model': Event,
+        "session": db.session,
+        "model": Event,
     }

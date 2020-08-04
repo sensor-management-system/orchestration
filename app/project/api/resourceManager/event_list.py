@@ -14,7 +14,4 @@ class EventList(ResourceList):
 
     schema = EventSchema
     # decorators = (token_required,)
-    data_layer = {
-        "session": db.session,
-        "model": Event
-    }
+    data_layer = {"session": db.session, "model": Event}

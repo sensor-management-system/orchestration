@@ -12,7 +12,7 @@ class UserRelationship(ResourceRelationship):
     create relationships, update relationships and delete
     relationships between User and other objects.
     """
+
     schema = UserSchema
     # decorators = (token_required,)
-    data_layer = {'session': db.session,
-                  'model': User}
+    data_layer = {"session": db.session, "model": User}

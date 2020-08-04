@@ -12,7 +12,7 @@ class AttachmentSchema(MarshmallowSchema):
     """
 
     class Meta:
-        type_ = 'attachment'
+        type_ = "attachment"
 
     id = fields.Integer(as_string=True, dump_only=True)
     label = fields.Str(allow_none=True)
