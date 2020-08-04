@@ -66,7 +66,7 @@ class DeviceSchema(Schema):
         schema="EventSchema",
         type_="event",
     )
-    device_properties = fields.Nested(DevicePropertySchema, many=True, allow_none=True)
+    properties = fields.Nested(DevicePropertySchema, many=True, allow_none=True, attribute="device_properties")
     attachments = fields.Nested(
         AttachmentSchema, many=True, allow_none=True, attribute="device_attachments"
     )

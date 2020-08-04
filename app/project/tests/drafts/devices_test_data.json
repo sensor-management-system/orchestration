@@ -2,13 +2,13 @@
   "devices": [
     {
       "description": "device_test1_description",
-      "short_name": "device_short_name_test1",
-      "long_name": "device_long_name_test1",
-      "serial_number": "device_serial_number_test1",
-      "manufacturer_name": "device_manufacturer_name_test1",
+      "shortName": "device_short_name_test1",
+      "longName": "device_long_name_test1",
+      "serialNumber": "device_serial_number_test1",
+      "manufacturerName": "device_manufacturer_name_test1",
       "model": "device_model_test1",
-      "inventory_number": "device_inventory_number_test1",
-      "persistent_identifier": "device_persistent_identifier1",
+      "inventoryNumber": "device_inventory_number_test1",
+      "persistentIdentifier": "device_persistent_identifier1",
       "website": "http://device.website1.de",
       "label": "device_label_test1",
       "type": "device_type_test1",
@@ -18,7 +18,7 @@
           "value": "customfields_test1_value"
         }
       ],
-      "device_attachments": [
+      "attachments": [
         {
           "label": "device_attachments_label_test1",
           "url": "http://test1.test"
@@ -28,33 +28,33 @@
           "url": "http://test2.test"
         }
       ],
-      "device_properties": [
+      "properties": [
         {
-          "measuring_range_min": 1.2,
-          "measuring_range_max": 2.1,
-          "failure_value": 999.9,
+          "measuringRangeMin": 1.2,
+          "measuringRangeMax": 2.1,
+          "failureValue": 999.9,
           "accuracy": 0.9,
           "label": "device_property_test1",
-          "unit_uri": "device_unit_uri_test1",
-          "unit_name": "device_unit_name_test1",
-          "compartment_uri": "device_compartment_uri_test1",
-          "compartment_name": "device_compartment_name_test1",
-          "property_uri": "device_property_uri_test1",
-          "property_name": "device_property_name_test1",
-          "sampling_media_uri": "device_sampling_media_uri_test1",
-          "sampling_media_name": "device_sampling_media_name_test1"
+          "unitUri": "device_unit_uri_test1",
+          "unitName": "device_unit_name_test1",
+          "compartmentUri": "device_compartment_uri_test1",
+          "compartmentName": "device_compartment_name_test1",
+          "propertyUri": "device_property_uri_test1",
+          "propertyName": "device_property_name_test1",
+          "samplingMediaUri": "device_sampling_media_uri_test1",
+          "samplingMediaName": "device_sampling_media_name_test1"
         }
       ]
     },
     {
       "description": "device_test2_description",
-      "short_name": "device_short_name_test2",
-      "long_name": "device_long_name_test2",
-      "serial_number": "device_serial_number_test2",
-      "manufacturer_name": "device_manufacturer_name_test2",
+      "shortName": "device_short_name_test2",
+      "longName": "device_long_name_test2",
+      "serialNumber": "device_serial_number_test2",
+      "manufacturerName": "device_manufacturer_name_test2",
       "model": "device_model_test2",
-      "inventory_number": "device_inventory_number_test2",
-      "persistent_identifier": "device_persistent_identifier2",
+      "inventoryNumber": "device_inventory_number_test2",
+      "persistentIdentifier": "device_persistent_identifier2",
       "website": "http://device.website2.de",
       "label": "device_label_test2",
       "type": "device_type_test2",
@@ -64,7 +64,7 @@
           "value": "customfields_test2_value"
         }
       ],
-      "device_attachments": [
+      "attachments": [
         {
           "label": "device_attachments_label_test2",
           "url": "http://test2.test"
@@ -74,21 +74,21 @@
           "url": "http://test22.test"
         }
       ],
-      "device_properties": [
+      "properties": [
         {
-          "measuring_range_min": 8.7,
-          "measuring_range_max": 9.9,
-          "failure_value": 999.9,
+          "measuringRangeMin": 8.7,
+          "measuringRangeMax": 9.9,
+          "failureValue": 999.9,
           "accuracy": 0.5,
           "label": "device_property_test2",
-          "unit_uri": "device_unit_uri_test2",
-          "unit_name": "device_unit_name_test2",
-          "compartment_uri": "device_compartment_uri_test2",
-          "compartment_name": "device_compartment_name_test2",
-          "property_uri": "device_property_uri_test2",
-          "property_name": "device_property_name_test2",
-          "sampling_media_uri": "device_sampling_media_uri_test2",
-          "sampling_media_name": "device_sampling_media_name_test2"
+          "unitUri": "device_unit_uri_test2",
+          "unitName": "device_unit_name_test2",
+          "compartmentUri": "device_compartment_uri_test2",
+          "compartmentName": "device_compartment_name_test2",
+          "propertyUri": "device_property_uri_test2",
+          "propertyName": "device_property_name_test2",
+          "samplingMediaUri": "device_sampling_media_uri_test2",
+          "samplingMediaName": "device_sampling_media_name_test2"
         }
       ]
     }
