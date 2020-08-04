@@ -56,7 +56,7 @@ def create_endpoints(api):
     )
     api.route(
         EventDetail, 'event_detail',
-        base_url + '/events/<int:id',
+        base_url + '/events/<int:id>',
     )
     api.route(
         EventRelationship, 'event_user',

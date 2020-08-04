@@ -44,17 +44,17 @@ class DeviceSchema(Schema):
         self_view='device_created_user',
         self_view_kwargs={'id': '<id>'},
         related_view='user_detail',
-        related_view_kwargs={'id': '<created_by_id>'}
+        related_view_kwargs={'id': '<created_by_id>'},
         type_='user'
-    }
+    )
     modified_by = Relationship(
         attribute='modified_by',
         self_view='device_modified_user',
         self_view_kwargs={'id': '<id>'},
         related_view='user_detail',
-        related_view_kwargs={'id': '<modified_by_id>'}
+        related_view_kwargs={'id': '<modified_by_id>'},
         type_='user'
-    }
+    )
     customfields = fields.Nested(CustomFieldSchema, many=True, allow_none=True)
     events = Relationship(
       self_view='device_events',

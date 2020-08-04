@@ -31,17 +31,17 @@ class PlatformSchema(Schema):
         self_view='platform_created_user',
         self_view_kwargs={'id': '<id>'},
         related_view='user_detail',
-        related_view_kwargs={'id': '<created_by_id>'}
+        related_view_kwargs={'id': '<created_by_id>'},
         type_='user'
-    }
+    )
     modified_by = Relationship(
         attribute='modified_by',
         self_view='platform_modified_user',
         self_view_kwargs={'id': '<id>'},
         related_view='user_detail',
-        related_view_kwargs={'id': '<modified_by_id>'}
+        related_view_kwargs={'id': '<modified_by_id>'},
         type_='user'
-    }
+    )
     inventory_number = fields.Str(allow_none=True)
     serial_number = fields.Str(allow_none=True)
     persistent_identifier = fields.Str(allow_none=True)

@@ -2,7 +2,7 @@ from marshmallow_jsonapi.flask import Schema, Relationship
 from marshmallow_jsonapi import fields
 
 
-class EventSchema(MarshmallowSchema):
+class EventSchema(Schema):
     """
     This class create a schema for an event.
     Every attribute in the schema going to expose through the api.
@@ -22,7 +22,7 @@ class EventSchema(MarshmallowSchema):
     timestamp = fields.DateTime(required=True)
     user = Relationship(self_view='event_user',
                         self_view_kwargs={'id': '<id>'},
-                        related_view='events_list',
+                        related_view='event_list',
                         related_view_kwargs={'id': '<id>'},
                         include_resource_linkage=True,
                         schema='UserSchema',
