@@ -38,9 +38,6 @@ def create_app():
     # import sys
     # print(app.config, file=sys.stderr)
 
-    # should not be active at the moment
-    auth_active = False
-    if auth_active:
-        app.register_blueprint(auth_blueprint)
+    app.register_blueprint(auth_blueprint)
 
     return app
