@@ -23,5 +23,5 @@ class Platform(db.Model, AuditMixin):
     serial_number = db.Column(db.String(256), nullable=True)
     persistent_identifier = db.Column(db.String(256), nullable=True, unique=True)
     platform_attachments = db.relationship(
-        "PlatformAttachment", cascade="save-update, merge, " "delete, delete-orphan"
+        "PlatformAttachment", cascade="save-update, merge, delete, delete-orphan"
     )
