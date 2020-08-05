@@ -7,64 +7,15 @@
     <v-row>
       <v-col cols="12" md="3">
         <v-combobox
-          label="Compartment"
-          :items="compartmentNames"
-          :value="valueCompartmentName"
+          label="Property"
+          :items="propertyNames"
+          :value="valuePropertyName"
           :readonly="readonly"
           :disabled="readonly"
-          @input="update('compartmentName', $event)"
+          @input="update('propertyName', $event)"
         />
       </v-col>
       <v-col cols="12" md="3">
-        <v-combobox
-          label="Unit"
-          :items="unitNames"
-          :value="valueUnitName"
-          :readonly="readonly"
-          :disabled="readonly"
-          @input="update('unitName', $event)"
-        />
-      </v-col>
-      <v-col cols="12" md="3">
-        <v-text-field
-          label="Accuracy"
-          :value="value.accuracy"
-          :readonly="readonly"
-          :disabled="readonly"
-          @input="update('accuracy', $event)"
-        />
-      </v-col>
-    </v-row>
-    <v-row>
-      <v-col cols="12" md="3">
-        <v-combobox
-          label="Sampling media"
-          :items="samplingMediaNames"
-          :value="valueSamplingMediaName"
-          :readonly="readonly"
-          :disabled="readonly"
-          @input="update('samplingMediaName', $event)"
-        />
-      </v-col>
-      <v-col cols="12" md="1">
-        <v-text-field
-          label="Measuring range min"
-          :value="value.measuringRange.min"
-          :readonly="readonly"
-          :disabled="readonly"
-          @input="update('measuringRange.min', $event)"
-        />
-      </v-col>
-      <v-col cols="12" md="1">
-        <v-text-field
-          label="Measuring range max"
-          :value="value.measuringRange.max"
-          :readonly="readonly"
-          :disabled="readonly"
-          @input="update('measuringRange.max', $event)"
-        />
-      </v-col>
-      <v-col cols="12" md="3" offset="1">
         <v-text-field
           label="Label"
           :value="value.label"
@@ -77,12 +28,63 @@
     <v-row>
       <v-col cols="12" md="3">
         <v-combobox
-          label="Property"
-          :items="propertyNames"
-          :value="valuePropertyName"
+          label="Compartment"
+          :items="compartmentNames"
+          :value="valueCompartmentName"
           :readonly="readonly"
           :disabled="readonly"
-          @input="update('propertyName', $event)"
+          @input="update('compartmentName', $event)"
+        />
+      </v-col>
+      <v-col cols="12" md="3">
+        <v-combobox
+          label="Sampling media"
+          :items="samplingMediaNames"
+          :value="valueSamplingMediaName"
+          :readonly="readonly"
+          :disabled="readonly"
+          @input="update('samplingMediaName', $event)"
+        />
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="12" md="3">
+        <v-combobox
+          label="Unit"
+          :items="unitNames"
+          :value="valueUnitName"
+          :readonly="readonly"
+          :disabled="readonly"
+          @input="update('unitName', $event)"
+        />
+      </v-col>
+      <v-col cols="12" md="3">
+        <v-text-field
+          label="Measuring range min"
+          :value="value.measuringRange.min"
+          :readonly="readonly"
+          :disabled="readonly"
+          @input="update('measuringRange.min', $event)"
+        />
+      </v-col>
+      <v-col cols="12" md="3">
+        <v-text-field
+          label="Measuring range max"
+          :value="value.measuringRange.max"
+          :readonly="readonly"
+          :disabled="readonly"
+          @input="update('measuringRange.max', $event)"
+        />
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="12" md="3">
+        <v-text-field
+          label="Accuracy"
+          :value="value.accuracy"
+          :readonly="readonly"
+          :disabled="readonly"
+          @input="update('accuracy', $event)"
         />
       </v-col>
       <v-col cols="12" md="3">
