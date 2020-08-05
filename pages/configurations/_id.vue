@@ -459,7 +459,7 @@
               <v-card-text>
                 <v-row>
                   <v-col cols="3">
-                    <ContactSelect v-model="contacts" :readonly="false" />
+                    <ContactSelect v-model="contacts" label="Add a contact" :readonly="false" />
                   </v-col>
                 </v-row>
               </v-card-text>
