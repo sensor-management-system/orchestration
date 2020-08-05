@@ -217,7 +217,8 @@ export class DeviceSearcher {
 
   private get commonParams (): any {
     return {
-      filter: JSON.stringify(this.serverSideFilterSettings)
+      filter: JSON.stringify(this.serverSideFilterSettings),
+      sort: 'short_name'
     }
   }
 

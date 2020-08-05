@@ -54,7 +54,8 @@ export class UnitSearcher {
       {
         params: {
           'page[size]': 100000,
-          'filter[active]': true
+          'filter[active]': true,
+          sort: 'unitsname'
         }
       }
     ).then((rawResponse) => {

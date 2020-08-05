@@ -51,7 +51,8 @@ export class ManufacturerSearcher {
       {
         params: {
           'page[size]': 100000,
-          'filter[active]': true
+          'filter[active]': true,
+          sort: 'name'
         }
       }
     ).then((rawResponse) => {
