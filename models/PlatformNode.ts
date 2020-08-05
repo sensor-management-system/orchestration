@@ -47,6 +47,10 @@ export class PlatformNode implements IConfigurationsTreeNode<Platform> {
     return this.tree
   }
 
+  set children (children: ConfigurationsTreeNode[]) {
+    this.tree = ConfigurationsTree.fromArray(children)
+  }
+
   get children (): ConfigurationsTreeNode[] {
     return this.tree.toArray()
   }
