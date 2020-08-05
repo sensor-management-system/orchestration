@@ -64,7 +64,8 @@ export class ContactSearcher {
       '',
       {
         params: {
-          'page[size]': 100000
+          'page[size]': 100000,
+          sort: 'username'
         }
       }).then((rawResponse: any) => {
       const rawData = rawResponse.data
