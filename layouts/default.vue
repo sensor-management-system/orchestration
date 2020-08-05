@@ -101,15 +101,19 @@
       <v-container>
         <v-snackbar v-model="hasSuccess" top color="green">
           {{ success }}
-          <v-btn fab @click="closeSuccessSnackbar">
-            <v-icon>mdi-close</v-icon>
-          </v-btn>
+          <template v-slot:action="{ attrs }">
+            <v-btn fab small v-bind="attrs" @click="closeSuccessSnackbar">
+              <v-icon>mdi-close</v-icon>
+            </v-btn>
+          </template>
         </v-snackbar>
         <v-snackbar v-model="hasError" top color="error">
           {{ error }}
-          <v-btn fab @click="closeErrorSnackbar">
-            <v-icon>mdi-close</v-icon>
-          </v-btn>
+          <template v-slot:action="{ attrs }">
+            <v-btn fab small v-bind="attrs" @click="closeErrorSnackbar">
+              <v-icon>mdi-close</v-icon>
+            </v-btn>
+          </template>
         </v-snackbar>
         <nuxt />
       </v-container>
@@ -141,14 +145,28 @@ export default {
     error () {
       return this.$store.state.snackbar.error
     },
-    hasError () {
-      return this.$store.state.snackbar.error !== ''
+    hasError: {
+      get () {
+        return this.$store.state.snackbar.error !== ''
+      },
+      set (newValue) {
+        if (!newValue) {
+          this.$store.commit('snackbar/clearError')
+        }
+      }
     },
     success () {
       return this.$store.state.snackbar.success
     },
-    hasSuccess () {
-      return this.$store.state.snackbar.success !== ''
+    hasSuccess: {
+      get () {
+        return this.$store.state.snackbar.success !== ''
+      },
+      set (newValue) {
+        if (!newValue) {
+          this.$store.commit('snackbar/clearSuccess')
+        }
+      }
     }
   },
   created () {

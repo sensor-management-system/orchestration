@@ -94,10 +94,10 @@
             View
           </v-btn>
           <v-btn>Copy</v-btn>
-          <v-btn @click.stop="showDeleteDialog = true">
+          <v-btn @click.stop="showDeleteDialogFor(result.id)">
             Delete
           </v-btn>
-          <v-dialog v-model="showDeleteDialog" max-width="290">
+          <v-dialog v-model="showDeleteDialog[result.id]" max-width="290">
             <v-card>
               <v-card-title class="headline">
                 Delete device
@@ -106,7 +106,7 @@
                 Do you really want to delete the device <em>{{ result.shortName }}</em>?
               </v-card-text>
               <v-card-actions>
-                <v-btn @click="showDeleteDialog = false">
+                <v-btn @click="hideDeleteDialog(result.id)">
                   No
                 </v-btn>
                 <v-spacer />
@@ -195,7 +195,7 @@ export default class SeachDevicesPage extends Vue {
   private searchResults: Device[] = []
   private searchText: string | null = null
 
-  private showDeleteDialog: boolean = false
+  private showDeleteDialog: { [id: number]: boolean} = {}
 
   created () {
     this.$nuxt.$emit('app-bar-content', AppBarEditModeContent)
@@ -340,7 +340,7 @@ export default class SeachDevicesPage extends Vue {
 
   deleteAndCloseDialog (id: number) {
     this.$api.devices.deleteById(id).then(() => {
-      this.showDeleteDialog = false
+      this.showDeleteDialog = {}
 
       const searchIndex = this.searchResults.findIndex(r => r.id === id)
       if (searchIndex > -1) {
@@ -349,6 +349,7 @@ export default class SeachDevicesPage extends Vue {
 
       this.$store.commit('snackbar/setSuccess', 'Device deleted')
     }).catch((_error) => {
+      this.showDeleteDialog = {}
       this.$store.commit('snackbar/setError', 'Device could not be deleted')
     })
   }
@@ -378,6 +379,14 @@ export default class SeachDevicesPage extends Vue {
       return device.statusName
     }
     return 'Unknown status'
+  }
+
+  showDeleteDialogFor (id: number) {
+    Vue.set(this.showDeleteDialog, id, true)
+  }
+
+  hideDeleteDialogFor (id: number) {
+    Vue.set(this.showDeleteDialog, id, false)
   }
 }
 
