@@ -86,20 +86,23 @@
                   <v-row>
                     <v-col cols="12" md="3">
                       <v-text-field
-                        v-model.lazy="latitude"
+                        v-model.number.lazy="latitude"
                         label="Latitude (WGS84)"
+                        type="number"
                       />
                     </v-col>
                     <v-col cols="12" md="3">
                       <v-text-field
-                        v-model.lazy="longitude"
+                        v-model.number.lazy="longitude"
                         label="Longitude (WGS84)"
+                        type="number"
                       />
                     </v-col>
                     <v-col cols="12" md="3">
                       <v-text-field
-                        v-model="elevation"
+                        v-model.number="elevation"
                         label="Elevation (m asl)"
+                        type="number"
                       />
                     </v-col>
                   </v-row>
@@ -456,7 +459,7 @@
               <v-card-text>
                 <v-row>
                   <v-col cols="3">
-                    <ContactSelect v-model="contacts" :readonly="false" />
+                    <ContactSelect v-model="contacts" label="Add a contact" :readonly="false" />
                   </v-col>
                 </v-row>
               </v-card-text>

@@ -50,7 +50,7 @@ export class DeviceTypeSearcher {
       '',
       {
         params: {
-          'page[size]': 100000,
+          'page[limit]': 100000,
           'filter[active]': true,
           sort: 'name'
         }
