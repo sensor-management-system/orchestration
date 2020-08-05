@@ -158,9 +158,6 @@ import StatusSelect from '@/components/StatusSelect.vue'
 
 import { IPaginationLoader } from '@/utils/PaginatedLoader'
 
-import CVService from '@/services/CVService'
-import SmsService from '@/services/SmsService'
-
 import Device from '@/models/Device'
 import DeviceType from '@/models/DeviceType'
 import Manufacturer from '@/models/Manufacturer'
@@ -209,8 +206,8 @@ export default class SeachDevicesPage extends Vue {
   }
 
   mounted () {
-    const promiseDeviceTypes = CVService.findAllDeviceTypes()
-    const promiseStates = CVService.findAllStates()
+    const promiseDeviceTypes = this.$api.deviceTypes.findAll()
+    const promiseStates = this.$api.states.findAll()
 
     promiseDeviceTypes.then((deviceTypes) => {
       promiseStates.then((states) => {
@@ -297,11 +294,17 @@ export default class SeachDevicesPage extends Vue {
   ) {
     this.loading = true
     this.searchResults = []
-    SmsService.findDevices(
-      this.pageSize, searchText, manufacturer, states, types
-    ).then(this.loadUntilWeHaveSomeEntries).catch((_error) => {
-      this.$store.commit('snackbar/setError', 'Loading of devices failed')
-    })
+    this.$api.devices
+      .newSearchBuilder()
+      .withTextInName(searchText)
+      .withOneMachtingManufacturerOf(manufacturer)
+      .withOneMatchingStatusOf(states)
+      .withOneMatchingDeviceTypeOf(types)
+      .build()
+      .findMatchingAsPaginationLoader(this.pageSize)
+      .then(this.loadUntilWeHaveSomeEntries).catch((_error) => {
+        this.$store.commit('snackbar/setError', 'Loading of devices failed')
+      })
   }
 
   loadUntilWeHaveSomeEntries (loader: IPaginationLoader<Device>) {
@@ -336,7 +339,7 @@ export default class SeachDevicesPage extends Vue {
   }
 
   deleteAndCloseDialog (id: number) {
-    SmsService.deleteDevice(id).then(() => {
+    this.$api.devices.deleteById(id).then(() => {
       this.showDeleteDialog = {}
 
       const searchIndex = this.searchResults.findIndex(r => r.id === id)

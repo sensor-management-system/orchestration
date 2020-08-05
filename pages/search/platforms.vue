@@ -157,9 +157,6 @@ import StatusSelect from '@/components/StatusSelect.vue'
 
 import { IPaginationLoader } from '@/utils/PaginatedLoader'
 
-import CVService from '@/services/CVService'
-import SmsService from '@/services/SmsService'
-
 import Manufacturer from '@/models/Manufacturer'
 import Platform from '@/models/Platform'
 import PlatformType from '@/models/PlatformType'
@@ -212,8 +209,8 @@ export default class SeachPlatformsPage extends Vue {
   }
 
   mounted () {
-    const promisePlatformTypes = CVService.findAllPlatformTypes()
-    const promiseStates = CVService.findAllStates()
+    const promisePlatformTypes = this.$api.platformTypes.findAll()
+    const promiseStates = this.$api.states.findAll()
 
     promisePlatformTypes.then((platformTypes) => {
       promiseStates.then((states) => {
@@ -297,15 +294,17 @@ export default class SeachPlatformsPage extends Vue {
   ) {
     this.loading = true
     this.searchResults = []
-    SmsService.findPlatforms(
-      this.pageSize,
-      searchText,
-      manufacturer,
-      states,
-      platformTypes
-    ).then(this.loadUntilWeHaveSomeEntries).catch((_error) => {
-      this.$store.commit('snackbar/setError', 'Loading of platforms failed')
-    })
+    this.$api.platforms
+      .newSearchBuilder()
+      .withTextInName(searchText)
+      .withOneMatchingManufacturerOf(manufacturer)
+      .withOneMatchingStatusOf(states)
+      .withOneMatchingPlatformTypeOf(platformTypes)
+      .build()
+      .findMatchingAsPaginationLoader(this.pageSize)
+      .then(this.loadUntilWeHaveSomeEntries).catch((_error) => {
+        this.$store.commit('snackbar/setError', 'Loading of platforms failed')
+      })
   }
 
   loadUntilWeHaveSomeEntries (loader:IPaginationLoader<Platform>) {
@@ -340,7 +339,7 @@ export default class SeachPlatformsPage extends Vue {
   }
 
   deleteAndCloseDialog (id: number) {
-    SmsService.deletePlatform(id).then(() => {
+    this.$api.platforms.deleteById(id).then(() => {
       this.showDeleteDialog = {}
 
       const searchIndex = this.searchResults.findIndex(r => r.id === id)

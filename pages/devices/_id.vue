@@ -291,10 +291,8 @@
 
 <script lang="ts">
 import { Component, Watch, mixins } from 'nuxt-property-decorator'
-import { Rules } from '@/mixins/Rules'
 
-import CVService from '@/services/CVService'
-import SmsService from '@/services/SmsService'
+import { Rules } from '@/mixins/Rules'
 
 import Compartment from '@/models/Compartment'
 import Device from '@/models/Device'
@@ -373,25 +371,25 @@ export default class DeviceIdPage extends mixins(Rules) {
   }
 
   mounted () {
-    CVService.findAllStates().then((foundStates) => {
+    this.$api.states.findAll().then((foundStates) => {
       this.states = foundStates
     })
-    CVService.findAllManufacturers().then((foundManufacturers) => {
+    this.$api.manufacturer.findAll().then((foundManufacturers) => {
       this.manufacturers = foundManufacturers
     })
-    CVService.findAllDeviceTypes().then((foundDeviceTypes) => {
+    this.$api.deviceTypes.findAll().then((foundDeviceTypes) => {
       this.deviceTypes = foundDeviceTypes
     })
-    CVService.findAllCompartments().then((foundCompartments) => {
+    this.$api.compartments.findAll().then((foundCompartments) => {
       this.compartments = foundCompartments
     })
-    CVService.findAllSamplingMedias().then((foundSamplingMedias) => {
+    this.$api.samplingMedia.findAll().then((foundSamplingMedias) => {
       this.samplingMedias = foundSamplingMedias
     })
-    CVService.findAllProperties().then((foundProperties) => {
+    this.$api.properties.findAll().then((foundProperties) => {
       this.properties = foundProperties
     })
-    CVService.findAllUnits().then((foundUnits) => {
+    this.$api.units.findAll().then((foundUnits) => {
       this.units = foundUnits
     })
     this.loadDevice()
@@ -416,7 +414,7 @@ export default class DeviceIdPage extends mixins(Rules) {
     const deviceId = this.$route.params.id
     if (deviceId) {
       this.isInEditMode = false
-      SmsService.findDeviceById(deviceId).then((foundDevice) => {
+      this.$api.devices.findById(deviceId).then((foundDevice) => {
         this.device = foundDevice
       }).catch((_error) => {
         this.$store.commit('snackbar/setError', 'Loading device failed')
@@ -431,7 +429,7 @@ export default class DeviceIdPage extends mixins(Rules) {
   }
 
   save () {
-    SmsService.saveDevice(this.device).then((savedDevice) => {
+    this.$api.devices.save(this.device).then((savedDevice) => {
       this.device = savedDevice
       this.toggleEditMode()
       this.$store.commit('snackbar/setSuccess', 'Save successful')

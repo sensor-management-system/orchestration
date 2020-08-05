@@ -492,15 +492,10 @@ import AppBarEditModeContent from '@/components/AppBarEditModeContent.vue'
 import AppBarTabsExtension from '@/components/AppBarTabsExtension.vue'
 import ContactSelect from '@/components/ContactSelect.vue'
 
-import SmsService from '@/services/SmsService'
-
 import Contact from '@/models/Contact'
 import Device from '@/models/Device'
-import DeviceType from '@/models/DeviceType'
-import Manufacturer from '@/models/Manufacturer'
 import Platform from '@/models/Platform'
-import PlatformType from '@/models/PlatformType'
-import Status from '@/models/Status'
+
 import { ConfigurationsTree } from '@/models/ConfigurationsTree'
 import { ConfigurationsTreeNode } from '@/models/ConfigurationsTreeNode'
 import { DeviceNode } from '@/models/DeviceNode'
@@ -835,24 +830,16 @@ export default class ConfigurationsIdPage extends Vue {
   async search () {
     switch (this.searchOptions.searchType) {
       case SearchType.Platform:
-        this.platforms = await SmsService.findPlatforms(
-          // load all the elements with one run
-          100000,
-          this.searchOptions.text,
-          [] as Manufacturer[],
-          [] as Status[],
-          [] as PlatformType[]
-        ).then(x => x.elements)
+        this.platforms = await this.$api.platforms.newSearchBuilder()
+          .withTextInName(this.searchOptions.text)
+          .build()
+          .findMatchingAsList()
         break
       case SearchType.Device:
-        this.devices = await SmsService.findDevices(
-          // load all the elements with one run
-          100000,
-          this.searchOptions.text,
-          [] as Manufacturer[],
-          [] as Status[],
-          [] as DeviceType[]
-        ).then(x => x.elements)
+        this.devices = await this.$api.devices.newSearchBuilder()
+          .withTextInName(this.searchOptions.text)
+          .build()
+          .findMatchingAsList()
         break
       default:
         throw new TypeError('search function not defined for unknown value')

@@ -18,8 +18,6 @@ import { Vue, Component, Prop } from 'nuxt-property-decorator'
 
 import EntitySelect from '@/components/EntitySelect.vue'
 
-import CVService from '@/services/CVService'
-
 import Status from '@/models/Status'
 
 type StatesLoaderFunction = () => Promise<Status[]>
@@ -57,7 +55,7 @@ export default class StatusSelect extends Vue {
   readonly label!: string
 
   get findAllStates (): StatesLoaderFunction {
-    return CVService.findAllStates
+    return () => { return this.$api.states.findAll() }
   }
 
   get wrappedValue () {

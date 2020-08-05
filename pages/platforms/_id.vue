@@ -184,9 +184,6 @@ import AppBarTabsExtension from '@/components/AppBarTabsExtension.vue'
 import AttachmentList from '@/components/AttachmentList.vue'
 import ContactSelect from '@/components/ContactSelect.vue'
 
-import CVService from '@/services/CVService'
-import SmsService from '@/services/SmsService'
-
 import Manufacturer from '@/models/Manufacturer'
 import Platform from '@/models/Platform'
 import PlatformType from '@/models/PlatformType'
@@ -245,13 +242,13 @@ export default class PlatformIdPage extends mixins(Rules) {
   }
 
   mounted () {
-    CVService.findAllManufacturers().then((foundManufacturers) => {
+    this.$api.manufacturer.findAll().then((foundManufacturers) => {
       this.manufacturers = foundManufacturers
     })
-    CVService.findAllPlatformTypes().then((foundPlatformTypes) => {
+    this.$api.platformTypes.findAll().then((foundPlatformTypes) => {
       this.platformTypes = foundPlatformTypes
     })
-    CVService.findAllStates().then((foundStates) => {
+    this.$api.states.findAll().then((foundStates) => {
       this.states = foundStates
     })
     this.loadPlatform()
@@ -278,7 +275,7 @@ export default class PlatformIdPage extends mixins(Rules) {
     const platformId = this.$route.params.id
     if (platformId) {
       this.isInEditMode = false
-      SmsService.findPlatformById(platformId).then((foundPlatform) => {
+      this.$api.platforms.findById(platformId).then((foundPlatform) => {
         this.platform = foundPlatform
       }).catch(() => {
         // We don't take the error directly
@@ -310,7 +307,7 @@ export default class PlatformIdPage extends mixins(Rules) {
 
   // methods
   save () {
-    SmsService.savePlatform(this.platform).then((savedPlatform) => {
+    this.$api.platforms.save(this.platform).then((savedPlatform) => {
       this.platform = savedPlatform
       this.$store.commit('snackbar/setSuccess', 'Save successful')
       // this.$router.push('/seach/platforms')
