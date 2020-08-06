@@ -54,4 +54,10 @@ export class PlatformNode implements IConfigurationsTreeNode<Platform> {
   get children (): ConfigurationsTreeNode[] {
     return this.tree.toArray()
   }
+
+  static createFromObject (someObject: PlatformNode): PlatformNode {
+    const newObject = new PlatformNode(someObject.unpack())
+    newObject.setTree(ConfigurationsTree.createFromObject(someObject.getTree()))
+    return newObject
+  }
 }

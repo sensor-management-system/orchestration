@@ -4,6 +4,7 @@
  */
 
 import { ConfigurationsTreeNode } from './ConfigurationsTreeNode'
+import { DeviceNode } from './DeviceNode'
 import { PlatformNode } from './PlatformNode'
 
 /**
@@ -67,6 +68,17 @@ export class ConfigurationsTree implements Iterable<ConfigurationsTreeNode> {
    */
   toArray (): ConfigurationsTreeNode[] {
     return this.tree
+  }
+
+  static createFromObject (someObject: ConfigurationsTree): ConfigurationsTree {
+    return ConfigurationsTree.fromArray(
+      someObject.toArray().map((e) => {
+        if (e instanceof PlatformNode) {
+          return PlatformNode.createFromObject(e as PlatformNode)
+        }
+        return DeviceNode.createFromObject(e as DeviceNode)
+      })
+    )
   }
 
   [Symbol.iterator] (): Iterator<ConfigurationsTreeNode> {
