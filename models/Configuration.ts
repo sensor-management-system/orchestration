@@ -1,5 +1,5 @@
 import IPathSetter from '@/models/IPathSetter'
-import { IContact } from '@/models/Contact'
+import Contact, { IContact } from '@/models/Contact'
 import { ConfigurationsTree } from '@/models/ConfigurationsTree'
 import { ConfigurationsTreeNode } from '@/models/ConfigurationsTreeNode'
 
@@ -16,7 +16,7 @@ export const isILocation = (location: any): location is ILocation => {
     location.elevation !== undefined && (location.elevation === null || typeof location.elevation === 'number')
 }
 
-export interface ITypedLocation extends ILocation {
+export interface ITypedLocation extends ILocation, IPathSetter {
   type: string
 }
 
@@ -220,8 +220,9 @@ export class Configuration implements IConfiguration, IPathSetter {
   }
 
   setPath (path: string, value: any): void {
-    const pathArray = path.split('.')
-    const topLevelElement = pathArray.splice(0, 1)[0]
+    const paths = path.split('.')
+    const topLevelElement = paths.splice(0, 1)[0]
+    const tail = paths.join('.')
     switch (topLevelElement) {
       case 'id':
         this.id = isNaN(parseInt(value)) ? null : parseInt(value)
@@ -233,23 +234,14 @@ export class Configuration implements IConfiguration, IPathSetter {
         this.endDate = value instanceof Date ? value : null
         break
       case 'location':
-        if (!isITypedLocation(value)) {
-          throw new TypeError('location expected to implement ITypedLocation')
-        }
-        switch (value.type) {
-          case 'stationary':
-            this.location = StationaryLocation.createFromObject(value)
-            break
-          case 'dynamic':
-            this.location = DynamicLocation.createFromObject(value)
-            break
-          default:
-            throw new TypeError('location type not implemented')
-        }
+        this.location.setPath(tail, value)
+        break
+      default:
+        throw new TypeError('path ' + path + ' is not defined')
     }
   }
 
-  static createFromObject (someObject: IConfiguration): Configuration {
+  static createFromObject (someObject: Configuration): Configuration {
     const newObject = new Configuration()
 
     newObject.id = someObject.id
@@ -263,8 +255,8 @@ export class Configuration implements IConfiguration, IPathSetter {
         newObject.location = DynamicLocation.createFromObject(someObject.location)
         break
     }
-    newObject.contacts = someObject.contacts
-    newObject.children = someObject.children
+    newObject.contacts = someObject.contacts.map(Contact.createFromObject)
+    newObject.tree = ConfigurationsTree.createFromObject(someObject.tree)
 
     return newObject
   }
