@@ -94,10 +94,10 @@
             View
           </v-btn>
           <v-btn>Copy</v-btn>
-          <v-btn @click.stop="showDeleteDialog = true">
+          <v-btn @click.stop="showDeleteDialogFor(result.id)">
             Delete
           </v-btn>
-          <v-dialog v-model="showDeleteDialog" max-width="290">
+          <v-dialog v-model="showDeleteDialog[result.id]" max-width="290">
             <v-card>
               <v-card-title class="headline">
                 Delete platform
@@ -106,7 +106,7 @@
                 Do you really want to delete the platform <em>{{ result.shortName }}</em>?
               </v-card-text>
               <v-card-actions>
-                <v-btn @click="showDeleteDialog = false">
+                <v-btn @click="hideDeleteDialogFor(result.id)">
                   No
                 </v-btn>
                 <v-spacer />
@@ -157,9 +157,6 @@ import StatusSelect from '@/components/StatusSelect.vue'
 
 import { IPaginationLoader } from '@/utils/PaginatedLoader'
 
-import CVService from '@/services/CVService'
-import SmsService from '@/services/SmsService'
-
 import Manufacturer from '@/models/Manufacturer'
 import Platform from '@/models/Platform'
 import PlatformType from '@/models/PlatformType'
@@ -201,7 +198,7 @@ export default class SeachPlatformsPage extends Vue {
   private searchResults: Platform[] = []
   private searchText: string | null = null
 
-  private showDeleteDialog: boolean = false
+  private showDeleteDialog: {[index: number]: boolean } = {}
 
   created () {
     this.$nuxt.$emit('app-bar-content', AppBarEditModeContent)
@@ -212,8 +209,8 @@ export default class SeachPlatformsPage extends Vue {
   }
 
   mounted () {
-    const promisePlatformTypes = CVService.findAllPlatformTypes()
-    const promiseStates = CVService.findAllStates()
+    const promisePlatformTypes = this.$api.platformTypes.findAll()
+    const promiseStates = this.$api.states.findAll()
 
     promisePlatformTypes.then((platformTypes) => {
       promiseStates.then((states) => {
@@ -297,15 +294,17 @@ export default class SeachPlatformsPage extends Vue {
   ) {
     this.loading = true
     this.searchResults = []
-    SmsService.findPlatforms(
-      this.pageSize,
-      searchText,
-      manufacturer,
-      states,
-      platformTypes
-    ).then(this.loadUntilWeHaveSomeEntries).catch((_error) => {
-      this.$store.commit('snackbar/setError', 'Loading of platforms failed')
-    })
+    this.$api.platforms
+      .newSearchBuilder()
+      .withTextInName(searchText)
+      .withOneMatchingManufacturerOf(manufacturer)
+      .withOneMatchingStatusOf(states)
+      .withOneMatchingPlatformTypeOf(platformTypes)
+      .build()
+      .findMatchingAsPaginationLoader(this.pageSize)
+      .then(this.loadUntilWeHaveSomeEntries).catch((_error) => {
+        this.$store.commit('snackbar/setError', 'Loading of platforms failed')
+      })
   }
 
   loadUntilWeHaveSomeEntries (loader:IPaginationLoader<Platform>) {
@@ -340,8 +339,8 @@ export default class SeachPlatformsPage extends Vue {
   }
 
   deleteAndCloseDialog (id: number) {
-    SmsService.deletePlatform(id).then(() => {
-      this.showDeleteDialog = false
+    this.$api.platforms.deleteById(id).then(() => {
+      this.showDeleteDialog = {}
 
       const searchIndex = this.searchResults.findIndex(r => r.id === id)
       if (searchIndex > -1) {
@@ -350,6 +349,7 @@ export default class SeachPlatformsPage extends Vue {
 
       this.$store.commit('snackbar/setSuccess', 'Platform deleted')
     }).catch((_error) => {
+      this.showDeleteDialog = {}
       this.$store.commit('snackbar/setError', 'Platform could not be deleted')
     })
   }
@@ -379,6 +379,14 @@ export default class SeachPlatformsPage extends Vue {
       return platform.statusName
     }
     return 'Unknown status'
+  }
+
+  showDeleteDialogFor (id: number) {
+    Vue.set(this.showDeleteDialog, id, true)
+  }
+
+  hideDeleteDialogFor (id: number) {
+    Vue.set(this.showDeleteDialog, id, false)
   }
 }
 

@@ -86,20 +86,23 @@
                   <v-row>
                     <v-col cols="12" md="3">
                       <v-text-field
-                        v-model.lazy="latitude"
+                        v-model.number.lazy="latitude"
                         label="Latitude (WGS84)"
+                        type="number"
                       />
                     </v-col>
                     <v-col cols="12" md="3">
                       <v-text-field
-                        v-model.lazy="longitude"
+                        v-model.number.lazy="longitude"
                         label="Longitude (WGS84)"
+                        type="number"
                       />
                     </v-col>
                     <v-col cols="12" md="3">
                       <v-text-field
-                        v-model="elevation"
+                        v-model.number="elevation"
                         label="Elevation (m asl)"
+                        type="number"
                       />
                     </v-col>
                   </v-row>
@@ -456,7 +459,7 @@
               <v-card-text>
                 <v-row>
                   <v-col cols="3">
-                    <ContactSelect v-model="contacts" :readonly="false" />
+                    <ContactSelect v-model="contacts" label="Add a contact" :readonly="false" />
                   </v-col>
                 </v-row>
               </v-card-text>
@@ -492,15 +495,10 @@ import AppBarEditModeContent from '@/components/AppBarEditModeContent.vue'
 import AppBarTabsExtension from '@/components/AppBarTabsExtension.vue'
 import ContactSelect from '@/components/ContactSelect.vue'
 
-import SmsService from '@/services/SmsService'
-
 import Contact from '@/models/Contact'
 import Device from '@/models/Device'
-import DeviceType from '@/models/DeviceType'
-import Manufacturer from '@/models/Manufacturer'
 import Platform from '@/models/Platform'
-import PlatformType from '@/models/PlatformType'
-import Status from '@/models/Status'
+
 import { ConfigurationsTree } from '@/models/ConfigurationsTree'
 import { ConfigurationsTreeNode } from '@/models/ConfigurationsTreeNode'
 import { DeviceNode } from '@/models/DeviceNode'
@@ -835,24 +833,16 @@ export default class ConfigurationsIdPage extends Vue {
   async search () {
     switch (this.searchOptions.searchType) {
       case SearchType.Platform:
-        this.platforms = await SmsService.findPlatforms(
-          // load all the elements with one run
-          100000,
-          this.searchOptions.text,
-          [] as Manufacturer[],
-          [] as Status[],
-          [] as PlatformType[]
-        ).then(x => x.elements)
+        this.platforms = await this.$api.platforms.newSearchBuilder()
+          .withTextInName(this.searchOptions.text)
+          .build()
+          .findMatchingAsList()
         break
       case SearchType.Device:
-        this.devices = await SmsService.findDevices(
-          // load all the elements with one run
-          100000,
-          this.searchOptions.text,
-          [] as Manufacturer[],
-          [] as Status[],
-          [] as DeviceType[]
-        ).then(x => x.elements)
+        this.devices = await this.$api.devices.newSearchBuilder()
+          .withTextInName(this.searchOptions.text)
+          .build()
+          .findMatchingAsList()
         break
       default:
         throw new TypeError('search function not defined for unknown value')

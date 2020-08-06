@@ -18,8 +18,6 @@ import { Vue, Component, Prop } from 'nuxt-property-decorator'
 
 import EntitySelect from '@/components/EntitySelect.vue'
 
-import CVService from '@/services/CVService'
-
 import PlatformType from '@/models/PlatformType'
 
 type PlatformTypeLoaderFunction = () => Promise<PlatformType[]>
@@ -57,7 +55,7 @@ export default class PlatformTypeSelect extends Vue {
   readonly label!: string
 
   get findAllPlatformTypes (): PlatformTypeLoaderFunction {
-    return CVService.findAllPlatformTypes
+    return () => { return this.$api.platformTypes.findAll() }
   }
 
   get wrappedValue () {

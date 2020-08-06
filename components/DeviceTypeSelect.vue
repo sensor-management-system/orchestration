@@ -18,8 +18,6 @@ import { Vue, Component, Prop } from 'nuxt-property-decorator'
 
 import EntitySelect from '@/components/EntitySelect.vue'
 
-import CVService from '@/services/CVService'
-
 import DeviceType from '@/models/DeviceType'
 
 type DeviceTypeLoaderFunction = () => Promise<DeviceType[]>
@@ -57,7 +55,7 @@ export default class DeviceTypeSelect extends Vue {
   readonly label!: string
 
   get findAllDeviceTypes (): DeviceTypeLoaderFunction {
-    return CVService.findAllDeviceTypes
+    return () => { return this.$api.deviceTypes.findAll() }
   }
 
   get wrappedValue () {
