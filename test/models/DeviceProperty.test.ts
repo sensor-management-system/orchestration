@@ -4,6 +4,7 @@ import { DeviceProperty } from '@/models/DeviceProperty'
 describe('DeviceProperty Models', () => {
   it('should create a DeviceProperty from an object', () => {
     const prop = DeviceProperty.createFromObject({
+      id: null,
       label: 'test',
       compartmentUri: 'http://foo/compartment/1',
       compartmentName: 'bar',
@@ -21,6 +22,7 @@ describe('DeviceProperty Models', () => {
       failureValue: 0.01
     })
     expect(typeof prop).toBe('object')
+    expect(prop).toHaveProperty('id', null)
     expect(prop).toHaveProperty('label', 'test')
     expect(prop).toHaveProperty('compartmentUri', 'http://foo/compartment/1')
     expect(prop).toHaveProperty('compartmentName', 'bar')
@@ -37,6 +39,7 @@ describe('DeviceProperty Models', () => {
 
   it('should set a property by its path', () => {
     const prop = new DeviceProperty()
+    prop.setPath('id', 1)
     prop.setPath('label', 'test')
     prop.setPath('compartmentUri', 'http://foo/compartment/1')
     prop.setPath('compartmentName', 'bar')
@@ -51,6 +54,7 @@ describe('DeviceProperty Models', () => {
     prop.setPath('measuringRange.min', 10)
     prop.setPath('measuringRange.max', 20)
 
+    expect(prop).toHaveProperty('id', 1)
     expect(prop).toHaveProperty('label', 'test')
     expect(prop).toHaveProperty('compartmentUri', 'http://foo/compartment/1')
     expect(prop).toHaveProperty('compartmentName', 'bar')
