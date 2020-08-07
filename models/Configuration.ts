@@ -255,8 +255,9 @@ export class Configuration implements IConfiguration, IPathSetter {
     const newObject = new Configuration()
 
     newObject.id = someObject.id
-    newObject.startDate = someObject.startDate
-    newObject.endDate = someObject.endDate
+    newObject.startDate = someObject.startDate instanceof Date ? new Date(someObject.startDate.getTime()) : null
+    newObject.endDate = someObject.endDate instanceof Date ? new Date(someObject.endDate.getTime()) : null
+
     switch (someObject.location.type) {
       case 'stationary':
         newObject.location = StationaryLocation.createFromObject(someObject.location)
