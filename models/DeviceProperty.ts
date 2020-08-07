@@ -2,6 +2,7 @@ import { IMeasuringRange, MeasuringRange } from './MeasuringRange'
 import IPathSetter from './IPathSetter'
 
 export interface IDeviceProperty {
+  id: number | null
   label: string
   compartmentUri: string
   compartmentName: string
@@ -17,6 +18,7 @@ export interface IDeviceProperty {
 }
 
 export class DeviceProperty implements IDeviceProperty, IPathSetter {
+  private _id: number | null = null
   private _label: string = ''
   private _compartmentUri: string = ''
   private _compartmentName: string = ''
@@ -40,6 +42,7 @@ export class DeviceProperty implements IDeviceProperty, IPathSetter {
   static createFromObject (someObject: IDeviceProperty) : DeviceProperty {
     const newObject = new DeviceProperty()
 
+    newObject.id = someObject.id
     newObject.label = someObject.label
     newObject.compartmentUri = someObject.compartmentUri
     newObject.compartmentName = someObject.compartmentName
@@ -62,6 +65,9 @@ export class DeviceProperty implements IDeviceProperty, IPathSetter {
     let mrProperty
 
     switch (property) {
+      case 'id':
+        this.id = null || isNaN(value) ? null : parseFloat(value)
+        break
       case 'label':
         this.label = String(value)
         break
@@ -105,6 +111,14 @@ export class DeviceProperty implements IDeviceProperty, IPathSetter {
       default:
         throw new TypeError('path ' + path + ' is not valid')
     }
+  }
+
+  get id (): number | null {
+    return this._id
+  }
+
+  set id (id: number | null) {
+    this._id = id
   }
 
   get label (): string {
