@@ -14,7 +14,7 @@ export class PlatformConfigurationAttributes implements IPlatformConfigurationAt
   private _offsetY: number = 0
   private _offsetZ: number = 0
 
-  constructor (platform: platform) {
+  constructor (platform: Platform) {
     this._platform = platform
   }
 
@@ -48,7 +48,7 @@ export class PlatformConfigurationAttributes implements IPlatformConfigurationAt
     return this._platform.id
   }
 
-  get platform (): platform {
+  get platform (): Platform {
     return this._platform
   }
 
