@@ -3,6 +3,7 @@ import Contact, { IContact } from '@/models/Contact'
 import { ConfigurationsTree } from '@/models/ConfigurationsTree'
 import { ConfigurationsTreeNode } from '@/models/ConfigurationsTreeNode'
 import { DeviceConfigurationAttributes } from '@/models/DeviceConfigurationAttributes'
+import { PlatformConfigurationAttributes } from '@/models/PlatformConfigurationAttributes'
 
 export interface ILocation {
   latitude: number | null
@@ -154,6 +155,8 @@ export interface IConfiguration {
   location: ITypedLocation
   contacts: IContact[]
   children: ConfigurationsTreeNode[]
+  platformAttributes: PlatformConfigurationAttributes[]
+  deviceAttributes: DeviceConfigurationAttributes[]
 }
 
 export class Configuration implements IConfiguration, IPathSetter {
@@ -163,6 +166,7 @@ export class Configuration implements IConfiguration, IPathSetter {
   private _location: ITypedLocation = new StationaryLocation()
   private _contacts: IContact[] = [] as IContact[]
   private _tree: ConfigurationsTree = new ConfigurationsTree()
+  private _platformAttributes: PlatformConfigurationAttributes[] = [] as PlatformConfigurationAttributes[]
   private _deviceAttributes: DeviceConfigurationAttributes[] = [] as DeviceConfigurationAttributes[]
 
   get id (): number | null {
@@ -221,6 +225,14 @@ export class Configuration implements IConfiguration, IPathSetter {
     this._tree = ConfigurationsTree.fromArray(children)
   }
 
+  get platformAttributes (): PlatformConfigurationAttributes[] {
+    return this._platformAttributes
+  }
+
+  set platformAttributes (attributes: PlatformConfigurationAttributes[]) {
+    this._platformAttributes = attributes
+  }
+
   get deviceAttributes (): DeviceConfigurationAttributes[] {
     return this._deviceAttributes
   }
@@ -268,6 +280,7 @@ export class Configuration implements IConfiguration, IPathSetter {
     }
     newObject.contacts = someObject.contacts.map(Contact.createFromObject)
     newObject.tree = ConfigurationsTree.createFromObject(someObject.tree)
+    newObject.platformAttributes = someObject.platformAttributes.map(PlatformConfigurationAttributes.createFromObject)
     newObject.deviceAttributes = someObject.deviceAttributes.map(DeviceConfigurationAttributes.createFromObject)
 
     return newObject
