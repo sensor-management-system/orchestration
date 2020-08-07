@@ -23,6 +23,10 @@ export class PlatformNode implements IConfigurationsTreeNode<Platform> {
     return this.node.id
   }
 
+  get type (): string {
+    return 'platform'
+  }
+
   get name (): string {
     return this.node.shortName
   }
