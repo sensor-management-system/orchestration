@@ -2,6 +2,7 @@ import IPathSetter from '@/models/IPathSetter'
 import Contact, { IContact } from '@/models/Contact'
 import { ConfigurationsTree } from '@/models/ConfigurationsTree'
 import { ConfigurationsTreeNode } from '@/models/ConfigurationsTreeNode'
+import { DeviceConfigurationAttributes } from '@/models/DeviceConfigurationAttributes'
 
 export interface ILocation {
   latitude: number | null
@@ -162,6 +163,7 @@ export class Configuration implements IConfiguration, IPathSetter {
   private _location: ITypedLocation = new StationaryLocation()
   private _contacts: IContact[] = [] as IContact[]
   private _tree: ConfigurationsTree = new ConfigurationsTree()
+  private _deviceAttributes: DeviceConfigurationAttributes[] = [] as DeviceConfigurationAttributes[]
 
   get id (): number | null {
     return this._id
@@ -219,6 +221,14 @@ export class Configuration implements IConfiguration, IPathSetter {
     this._tree = ConfigurationsTree.fromArray(children)
   }
 
+  get deviceAttributes (): DeviceConfigurationAttributes[] {
+    return this._deviceAttributes
+  }
+
+  set deviceAttributes (attributes: DeviceConfigurationAttributes[]) {
+    this._deviceAttributes = attributes
+  }
+
   setPath (path: string, value: any): void {
     const paths = path.split('.')
     const topLevelElement = paths.splice(0, 1)[0]
@@ -257,6 +267,7 @@ export class Configuration implements IConfiguration, IPathSetter {
     }
     newObject.contacts = someObject.contacts.map(Contact.createFromObject)
     newObject.tree = ConfigurationsTree.createFromObject(someObject.tree)
+    newObject.deviceAttributes = someObject.deviceAttributes.map(DeviceConfigurationAttributes.createFromObject)
 
     return newObject
   }
