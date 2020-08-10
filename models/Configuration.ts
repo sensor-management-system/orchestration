@@ -117,8 +117,6 @@ export class Configuration implements IConfiguration, IPathSetter {
         // as the setPath method is implemented in the concrete classes, we have to cast the objects here
         if (this.location instanceof StationaryLocation) {
           (this.location as StationaryLocation).setPath(tail, value)
-        } else {
-          (this.location as DynamicLocation).setPath(tail, value)
         }
         break
       default:
@@ -133,12 +131,12 @@ export class Configuration implements IConfiguration, IPathSetter {
     newObject.startDate = someObject.startDate instanceof Date ? new Date(someObject.startDate.getTime()) : null
     newObject.endDate = someObject.endDate instanceof Date ? new Date(someObject.endDate.getTime()) : null
 
-    switch (someObject.location.type) {
-      case 'stationary':
-        newObject.location = StationaryLocation.createFromObject(someObject.location)
+    switch (true) {
+      case someObject.location instanceof StationaryLocation:
+        newObject.location = StationaryLocation.createFromObject(someObject.location as StationaryLocation)
         break
-      case 'dynamic':
-        newObject.location = DynamicLocation.createFromObject(someObject.location)
+      case someObject.location instanceof DynamicLocation:
+        newObject.location = DynamicLocation.createFromObject(someObject.location as DynamicLocation)
         break
     }
     newObject.contacts = someObject.contacts.map(Contact.createFromObject)
