@@ -3,14 +3,14 @@ import Contact, { IContact } from '@/models/Contact'
 import { ConfigurationsTree } from '@/models/ConfigurationsTree'
 import { ConfigurationsTreeNode } from '@/models/ConfigurationsTreeNode'
 import { DeviceConfigurationAttributes } from '@/models/DeviceConfigurationAttributes'
-import { ITypedLocation, StationaryLocation, DynamicLocation } from '@/models/Location'
+import { StationaryLocation, DynamicLocation } from '@/models/Location'
 import { PlatformConfigurationAttributes } from '@/models/PlatformConfigurationAttributes'
 
 export interface IConfiguration {
   id: number | null
   startDate: Date | null
   endDate: Date | null
-  location: ITypedLocation
+  location: StationaryLocation | DynamicLocation
   contacts: IContact[]
   children: ConfigurationsTreeNode[]
   platformAttributes: PlatformConfigurationAttributes[]
@@ -21,7 +21,7 @@ export class Configuration implements IConfiguration, IPathSetter {
   private _id: number | null = null
   private _startDate: Date | null = null
   private _endDate: Date | null = null
-  private _location: ITypedLocation = new StationaryLocation()
+  private _location: StationaryLocation | DynamicLocation = new StationaryLocation()
   private _contacts: IContact[] = [] as IContact[]
   private _tree: ConfigurationsTree = new ConfigurationsTree()
   private _platformAttributes: PlatformConfigurationAttributes[] = [] as PlatformConfigurationAttributes[]
@@ -51,11 +51,11 @@ export class Configuration implements IConfiguration, IPathSetter {
     this._endDate = date
   }
 
-  get location (): ITypedLocation {
+  get location (): StationaryLocation | DynamicLocation {
     return this._location
   }
 
-  set location (location: ITypedLocation) {
+  set location (location: StationaryLocation | DynamicLocation) {
     this._location = location
   }
 
@@ -114,7 +114,12 @@ export class Configuration implements IConfiguration, IPathSetter {
         this.endDate = value instanceof Date ? value : null
         break
       case 'location':
-        this.location.setPath(tail, value)
+        // as the setPath method is implemented in the concrete classes, we have to cast the objects here
+        if (this.location instanceof StationaryLocation) {
+          (this.location as StationaryLocation).setPath(tail, value)
+        } else {
+          (this.location as DynamicLocation).setPath(tail, value)
+        }
         break
       default:
         throw new TypeError('path ' + path + ' is not defined')
