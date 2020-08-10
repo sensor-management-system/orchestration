@@ -6,7 +6,7 @@ export interface ILocation {
   elevation: number | null
 }
 
-export interface ITypedLocation extends ILocation, IPathSetter {
+export interface ITypedLocation extends ILocation {
   type: string
 }
 
