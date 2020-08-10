@@ -30,7 +30,7 @@ export class DeviceConfigurationAttributes implements IDeviceConfigurationAttrib
     newObject.offsetY = someObject.offsetY
     newObject.offsetZ = someObject.offsetZ
     newObject.calibrationDate = someObject.calibrationDate instanceof Date ? new Date(someObject.calibrationDate.getTime()) : null
-    someObject.deviceProperties.forEach(e => newObject.addDeviceProperty(e))
+    someObject.deviceProperties = [...someObject.deviceProperties]
 
     return newObject
   }
@@ -98,9 +98,13 @@ export class DeviceConfigurationAttributes implements IDeviceConfigurationAttrib
     return this._deviceProperties
   }
 
+  set deviceProperties (properties: DeviceProperty[]) {
+    properties.forEach(property => this.addDeviceProperty(property))
+  }
+
   addDeviceProperty (property: DeviceProperty): number {
     if (!this.device.properties.find(e => e === property)) {
-      throw new Error('unknown property')
+      throw new Error('property is not a member of the device')
     }
     return this._deviceProperties.push(property)
   }
