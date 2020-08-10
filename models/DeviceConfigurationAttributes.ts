@@ -3,7 +3,7 @@ import Device from '@/models/Device'
 import IPathSetter from '@/models/IPathSetter'
 
 export interface IDeviceConfigurationAttributes {
-  id: number | null
+  device: Device
   offsetX: number
   offsetY: number
   offsetZ: number
@@ -23,7 +23,7 @@ export class DeviceConfigurationAttributes implements IDeviceConfigurationAttrib
     this._device = device
   }
 
-  static createFromObject (someObject: DeviceConfigurationAttributes): DeviceConfigurationAttributes {
+  static createFromObject (someObject: IDeviceConfigurationAttributes): DeviceConfigurationAttributes {
     const newObject = new DeviceConfigurationAttributes(someObject.device)
 
     newObject.offsetX = someObject.offsetX
