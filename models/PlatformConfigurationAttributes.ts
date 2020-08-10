@@ -1,5 +1,5 @@
 import Platform from '@/models/Platform'
-import IPathSetter from './IPathSetter'
+import IPathSetter from '@/models/IPathSetter'
 
 export interface IPlatformConfigurationAttributes {
   id: number | null

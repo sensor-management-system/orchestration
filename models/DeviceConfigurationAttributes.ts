@@ -1,6 +1,6 @@
 import { DeviceProperty } from '@/models/DeviceProperty'
 import Device from '@/models/Device'
-import IPathSetter from './IPathSetter'
+import IPathSetter from '@/models/IPathSetter'
 
 export interface IDeviceConfigurationAttributes {
   id: number | null
