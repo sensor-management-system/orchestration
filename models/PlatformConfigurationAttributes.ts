@@ -2,7 +2,7 @@ import Platform from '@/models/Platform'
 import IPathSetter from '@/models/IPathSetter'
 
 export interface IPlatformConfigurationAttributes {
-  id: number | null
+  platform: Platform
   offsetX: number
   offsetY: number
   offsetZ: number
@@ -18,7 +18,7 @@ export class PlatformConfigurationAttributes implements IPlatformConfigurationAt
     this._platform = platform
   }
 
-  static createFromObject (someObject: PlatformConfigurationAttributes): PlatformConfigurationAttributes {
+  static createFromObject (someObject: IPlatformConfigurationAttributes): PlatformConfigurationAttributes {
     const newObject = new PlatformConfigurationAttributes(someObject.platform)
 
     newObject.offsetX = someObject.offsetX
