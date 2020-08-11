@@ -72,10 +72,14 @@ describe('ConfigurationsTree', () => {
   it('should remove a given node', () => {
     const platformNode = new PlatformNode(new Platform())
     const deviceNode = new DeviceNode(new Device())
+    const someOtherNode = new DeviceNode(new Device())
 
     const tree = ConfigurationsTree.fromArray([platformNode, deviceNode])
 
     expect(tree.remove(deviceNode)).toBeTruthy()
+    expect(tree).toHaveLength(1)
+
+    expect(tree.remove(someOtherNode)).toBeFalsy()
     expect(tree).toHaveLength(1)
   })
 
@@ -99,6 +103,7 @@ describe('ConfigurationsTree', () => {
 
     expect(Object.is(tree.removeAt(1), deviceNode)).toBeTruthy()
     expect(tree).toHaveLength(1)
+    expect(() => { tree.removeAt(2) }).toThrow()
   })
 
   it('should return an array of node names for a given node id', () => {
@@ -118,6 +123,8 @@ describe('ConfigurationsTree', () => {
     const tree = ConfigurationsTree.fromArray([platformNode])
 
     expect(tree.getPath(2)).toEqual(['Platform', 'Device'])
+    // when a node is not found, just an empty array should be returned
+    expect(tree.getPath(3)).toEqual([])
   })
 
   it('should return a node by its id recursively', () => {
