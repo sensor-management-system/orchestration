@@ -9,6 +9,7 @@ describe('PlatformNode', () => {
     const node = new PlatformNode(platform)
     expect(node.unpack()).toBe(platform)
     expect(node).toHaveProperty('id', 1)
+    expect(node).toHaveProperty('type', 'platform')
   })
 
   it('should create a PlatformNode from another one', () => {
@@ -21,5 +22,12 @@ describe('PlatformNode', () => {
     expect(secondNode).not.toBe(firstNode)
     expect(secondNode.unpack()).toBe(firstNode.unpack())
     expect(secondNode.getTree()).not.toBe(firstNode.getTree())
+  })
+
+  it('should have children', () => {
+    const platform = new Platform()
+
+    const node = new PlatformNode(platform)
+    expect(node.canHaveChildren()).toBeTruthy()
   })
 })
