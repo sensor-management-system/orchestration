@@ -23,7 +23,7 @@ describe('DeviceNode', () => {
     expect(secondNode.unpack()).toBe(firstNode.unpack())
   })
 
-  it('should not have children', () => {
+  it('should not be allowed to have children', () => {
     const device = new Device()
 
     const node = new DeviceNode(device)
