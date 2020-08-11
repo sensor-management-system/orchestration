@@ -29,5 +29,4 @@ describe('DeviceNode', () => {
     const node = new DeviceNode(device)
     expect(node.canHaveChildren()).toBeFalsy()
   })
-
 })
