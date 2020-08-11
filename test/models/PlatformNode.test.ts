@@ -7,7 +7,7 @@ describe('PlatformNode', () => {
     platform.id = 1
 
     const node = new PlatformNode(platform)
-    expect(node.unpack()).toBe(platform)
+    expect(Object.is(node.unpack(), platform)).toBeTruthy()
     expect(node).toHaveProperty('id', 1)
     expect(node).toHaveProperty('type', 'platform')
   })
@@ -19,9 +19,9 @@ describe('PlatformNode', () => {
     const firstNode = new PlatformNode(firstPlatform)
     const secondNode = PlatformNode.createFromObject(firstNode)
 
-    expect(secondNode).not.toBe(firstNode)
-    expect(secondNode.unpack()).toBe(firstNode.unpack())
-    expect(secondNode.getTree()).not.toBe(firstNode.getTree())
+    expect(Object.is(secondNode, firstNode)).toBeFalsy()
+    expect(Object.is(secondNode.unpack(), firstNode.unpack())).toBeTruthy()
+    expect(Object.is(secondNode.getTree(), firstNode.getTree())).toBeFalsy()
   })
 
   it('should be allowed to have children', () => {
@@ -42,7 +42,7 @@ describe('PlatformNode', () => {
 
     expect(firstNode.children).toBeInstanceOf(Array)
     expect(firstNode.children).toHaveLength(1)
-    expect(firstNode.children[0]).toBe(secondNode)
+    expect(Object.is(firstNode.children[0], secondNode)).toBeTruthy()
   })
 
   it('should set the tree from an array of children', () => {
@@ -54,6 +54,6 @@ describe('PlatformNode', () => {
 
     firstNode.children = [secondNode]
     expect(firstNode.getTree()).toHaveLength(1)
-    expect(firstNode.children[0]).toBe(secondNode)
+    expect(Object.is(firstNode.children[0], secondNode)).toBeTruthy()
   })
 })

@@ -7,7 +7,7 @@ describe('DeviceNode', () => {
     device.id = 1
 
     const node = new DeviceNode(device)
-    expect(node.unpack()).toBe(device)
+    expect(Object.is(node.unpack(), device)).toBeTruthy()
     expect(node).toHaveProperty('id', 1)
     expect(node).toHaveProperty('type', 'device')
   })
@@ -19,8 +19,8 @@ describe('DeviceNode', () => {
     const firstNode = new DeviceNode(firstDevice)
     const secondNode = DeviceNode.createFromObject(firstNode)
 
-    expect(secondNode).not.toBe(firstNode)
-    expect(secondNode.unpack()).toBe(firstNode.unpack())
+    expect(Object.is(secondNode, firstNode)).toBeFalsy()
+    expect(Object.is(secondNode.unpack(), firstNode.unpack())).toBeTruthy()
   })
 
   it('should not be allowed to have children', () => {
