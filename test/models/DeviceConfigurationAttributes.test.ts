@@ -23,7 +23,7 @@ describe('DeviceConfigurationAttributes', () => {
     const now = new Date()
     const attributes = DeviceConfigurationAttributes.createFromObject({ device, offsetX: 1, offsetY: 1, offsetZ: 1, calibrationDate: now, deviceProperties: [prop1] })
     expect(typeof attributes).toBe('object')
-    expect(attributes).toHaveProperty('device', device)
+    expect(attributes.device).toBe(device)
     expect(attributes).toHaveProperty('id', 1)
     expect(attributes).toHaveProperty('offsetX', 1)
     expect(attributes).toHaveProperty('offsetY', 1)
@@ -38,6 +38,7 @@ describe('DeviceConfigurationAttributes', () => {
 
     const attributes = new DeviceConfigurationAttributes(device)
     attributes.addDeviceProperty(prop1)
+    expect(attributes.deviceProperties[0]).toBe(prop1)
     expect(attributes.deviceProperties).toHaveLength(1)
   })
 
@@ -57,6 +58,7 @@ describe('DeviceConfigurationAttributes', () => {
 
     const attributes = new DeviceConfigurationAttributes(device)
     attributes.addDevicePropertyById(prop1.id)
+    expect(attributes.deviceProperties[0]).toBe(prop1)
     expect(attributes.deviceProperties).toHaveLength(1)
   })
 
