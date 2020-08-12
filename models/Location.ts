@@ -3,41 +3,41 @@ import { DeviceProperty } from '@/models/DeviceProperty'
 
 export interface IStationaryLocation {
   type: string
-  latitude: number
-  longitude: number
-  elevation: number
+  latitude: number | null
+  longitude: number | null
+  elevation: number | null
 }
 
 export class StationaryLocation implements IStationaryLocation, IPathSetter {
-  private _latitude: number = 0
-  private _longitude: number = 0
-  private _elevation: number = 0
+  private _latitude: number | null = null
+  private _longitude: number | null = null
+  private _elevation: number | null = null
 
   get type (): string {
     return 'stationary'
   }
 
-  get latitude (): number {
+  get latitude (): number | null {
     return this._latitude
   }
 
-  set latitude (latitude: number) {
+  set latitude (latitude: number | null) {
     this._latitude = latitude
   }
 
-  get longitude (): number {
+  get longitude (): number | null {
     return this._longitude
   }
 
-  set longitude (longitude: number) {
+  set longitude (longitude: number | null) {
     this._longitude = longitude
   }
 
-  get elevation (): number {
+  get elevation (): number | null {
     return this._elevation
   }
 
-  set elevation (elevation: number) {
+  set elevation (elevation: number | null) {
     this._elevation = elevation
   }
 
