@@ -10,7 +10,7 @@ export interface IConfiguration {
   id: number | null
   startDate: Date | null
   endDate: Date | null
-  location: IStationaryLocation | IDynamicLocation
+  location: IStationaryLocation | IDynamicLocation | null
   contacts: IContact[]
   children: ConfigurationsTreeNode[]
   platformAttributes: PlatformConfigurationAttributes[]
@@ -21,7 +21,7 @@ export class Configuration implements IConfiguration, IPathSetter {
   private _id: number | null = null
   private _startDate: Date | null = null
   private _endDate: Date | null = null
-  private _location: IStationaryLocation | IDynamicLocation = new StationaryLocation()
+  private _location: IStationaryLocation | IDynamicLocation | null = null
   private _contacts: IContact[] = [] as IContact[]
   private _tree: ConfigurationsTree = new ConfigurationsTree()
   private _platformAttributes: PlatformConfigurationAttributes[] = [] as PlatformConfigurationAttributes[]
@@ -51,11 +51,11 @@ export class Configuration implements IConfiguration, IPathSetter {
     this._endDate = date
   }
 
-  get location (): IStationaryLocation | IDynamicLocation {
+  get location (): IStationaryLocation | IDynamicLocation | null {
     return this._location
   }
 
-  set location (location: IStationaryLocation | IDynamicLocation) {
+  set location (location: IStationaryLocation | IDynamicLocation | null) {
     this._location = location
   }
 
