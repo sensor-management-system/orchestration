@@ -99,6 +99,7 @@ export class DeviceConfigurationAttributes implements IDeviceConfigurationAttrib
   }
 
   set deviceProperties (properties: DeviceProperty[]) {
+    this._deviceProperties = []
     properties.forEach(property => this.addDeviceProperty(property))
   }
 
