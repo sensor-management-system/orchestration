@@ -66,7 +66,7 @@ export class DeviceProperty implements IDeviceProperty, IPathSetter {
 
     switch (property) {
       case 'id':
-        this.id = null || isNaN(value) ? null : parseFloat(value)
+        this.id = value === null || isNaN(value) ? null : parseFloat(value)
         break
       case 'label':
         this.label = String(value)
