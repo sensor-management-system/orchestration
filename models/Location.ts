@@ -61,9 +61,9 @@ export class StationaryLocation implements IStationaryLocation, IPathSetter {
 
   static createFromObject (someObject: IStationaryLocation): StationaryLocation {
     const newObject: StationaryLocation = new StationaryLocation()
-    newObject.latitude = someObject.latitude || 0
-    newObject.longitude = someObject.longitude || 0
-    newObject.elevation = someObject.elevation || 0
+    newObject.latitude = someObject.latitude
+    newObject.longitude = someObject.longitude
+    newObject.elevation = someObject.elevation
     return newObject
   }
 }
