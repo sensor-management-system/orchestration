@@ -64,6 +64,7 @@
           :value="value.measuringRange.min"
           :readonly="readonly"
           :disabled="readonly"
+          type="number"
           @input="update('measuringRange.min', $event)"
         />
       </v-col>
@@ -73,6 +74,7 @@
           :value="value.measuringRange.max"
           :readonly="readonly"
           :disabled="readonly"
+          type="number"
           @input="update('measuringRange.max', $event)"
         />
       </v-col>
@@ -84,6 +86,7 @@
           :value="value.accuracy"
           :readonly="readonly"
           :disabled="readonly"
+          type="number"
           @input="update('accuracy', $event)"
         />
       </v-col>
@@ -93,6 +96,7 @@
           :value="value.failureValue"
           :readonly="readonly"
           :disabled="readonly"
+          type="number"
           @input="update('failureValue', $event)"
         />
       </v-col>
@@ -112,6 +116,7 @@ import Property from '@/models/Property'
 import SamplingMedia from '@/models/SamplingMedia'
 import Unit from '@/models/Unit'
 import { DeviceProperty } from '@/models/DeviceProperty'
+import { parseFloatOrDefault } from '@/utils/numericsHelper'
 
 interface INameAndUri {
   name: string
@@ -234,16 +239,16 @@ export default class DevicePropertyForm extends Vue {
         newObj.propertyUri = getUriValue('propertyName', value)
         break
       case 'measuringRange.min':
-        newObj.measuringRange.min = parseInt(value)
+        newObj.measuringRange.min = parseFloatOrDefault(value)
         break
       case 'measuringRange.max':
-        newObj.measuringRange.max = parseInt(value)
+        newObj.measuringRange.max = parseFloatOrDefault(value)
         break
       case 'accuracy':
-        newObj.accuracy = parseFloat(value)
+        newObj.accuracy = parseFloatOrDefault(value)
         break
       case 'failureValue':
-        newObj.failureValue = parseFloat(value)
+        newObj.failureValue = parseFloatOrDefault(value)
         break
       default:
         throw new TypeError('path ' + key + ' is not valid')
