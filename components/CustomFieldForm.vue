@@ -69,7 +69,17 @@ export default class CustomFieldForm extends mixins(Rules) {
    */
   update (key: string, value: string) {
     const newObj: CustomTextField = CustomTextField.createFromObject(this.value)
-    newObj.setPath(key, value)
+
+    switch (key) {
+      case 'key':
+        newObj.key = value
+        break
+      case 'value':
+        newObj.value = value
+        break
+      default:
+        throw new TypeError('path ' + key + ' is not valid')
+    }
 
     /**
      * input event
