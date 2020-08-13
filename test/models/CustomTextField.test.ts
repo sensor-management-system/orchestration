@@ -7,13 +7,4 @@ describe('CustomTextField', () => {
     expect(textfield).toHaveProperty('key', 'foo')
     expect(textfield).toHaveProperty('value', 'bar')
   })
-
-  it('should set a property by its path', () => {
-    const textfield = new CustomTextField()
-    textfield.setPath('key', 'foo')
-    textfield.setPath('value', 'bar')
-
-    expect(textfield).toHaveProperty('key', 'foo')
-    expect(textfield).toHaveProperty('value', 'bar')
-  })
 })
