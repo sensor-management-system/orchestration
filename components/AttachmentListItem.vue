@@ -119,7 +119,20 @@ export default class AttachmentListItem extends Vue {
    */
   update (key: string, value: string) {
     const newObj: Attachment = Attachment.createFromObject(this.value)
-    newObj.setPath(key, value)
+
+    switch (key) {
+      case 'id':
+        newObj.id = parseInt(value)
+        break
+      case 'url':
+        newObj.url = value
+        break
+      case 'label':
+        newObj.label = value
+        break
+      default:
+        throw new TypeError('path ' + key + ' is not valid')
+    }
 
     /**
      * input event
