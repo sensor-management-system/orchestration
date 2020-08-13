@@ -1,5 +1,4 @@
 import { IMeasuringRange, MeasuringRange } from './MeasuringRange'
-import IPathSetter from './IPathSetter'
 
 export interface IDeviceProperty {
   id: number | null
@@ -17,7 +16,7 @@ export interface IDeviceProperty {
   failureValue: number | null
 }
 
-export class DeviceProperty implements IDeviceProperty, IPathSetter {
+export class DeviceProperty implements IDeviceProperty {
   private _id: number | null = null
   private _label: string = ''
   private _compartmentUri: string = ''
@@ -57,60 +56,6 @@ export class DeviceProperty implements IDeviceProperty, IPathSetter {
     newObject.failureValue = someObject.failureValue
 
     return newObject
-  }
-
-  setPath (path: string, value: any): void {
-    const properties = path.split('.')
-    const property = properties.splice(0, 1)[0]
-    let mrProperty
-
-    switch (property) {
-      case 'id':
-        this.id = value === null || isNaN(value) ? null : parseFloat(value)
-        break
-      case 'label':
-        this.label = String(value)
-        break
-      case 'compartmentUri':
-        this.compartmentUri = String(value)
-        break
-      case 'compartmentName':
-        this.compartmentName = String(value)
-        break
-      case 'unitUri':
-        this.unitUri = String(value)
-        break
-      case 'unitName':
-        this.unitName = String(value)
-        break
-      case 'samplingMediaUri':
-        this.samplingMediaUri = String(value)
-        break
-      case 'samplingMediaName':
-        this.samplingMediaName = String(value)
-        break
-      case 'propertyUri':
-        this.propertyUri = String(value)
-        break
-      case 'propertyName':
-        this.propertyName = String(value)
-        break
-      case 'measuringRange':
-        if (properties.length < 1) {
-          throw new TypeError('missing second level in path')
-        }
-        mrProperty = properties.splice(0, 1)[0]
-        this.measuringRange.setPath(mrProperty, value)
-        break
-      case 'accuracy':
-        this.accuracy = parseFloat(value)
-        break
-      case 'failureValue':
-        this.failureValue = parseFloat(value)
-        break
-      default:
-        throw new TypeError('path ' + path + ' is not valid')
-    }
   }
 
   get id (): number | null {
