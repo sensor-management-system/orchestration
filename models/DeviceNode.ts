@@ -35,4 +35,9 @@ export class DeviceNode implements IConfigurationsTreeNode<Device> {
   unpack (): Device {
     return this.node
   }
+
+  static createFromObject (someObject: DeviceNode): DeviceNode {
+    const newObject = new DeviceNode(someObject.unpack())
+    return newObject
+  }
 }

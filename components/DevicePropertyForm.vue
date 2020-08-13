@@ -64,6 +64,7 @@
           :value="value.measuringRange.min"
           :readonly="readonly"
           :disabled="readonly"
+          type="number"
           @input="update('measuringRange.min', $event)"
         />
       </v-col>
@@ -73,6 +74,7 @@
           :value="value.measuringRange.max"
           :readonly="readonly"
           :disabled="readonly"
+          type="number"
           @input="update('measuringRange.max', $event)"
         />
       </v-col>
@@ -84,6 +86,7 @@
           :value="value.accuracy"
           :readonly="readonly"
           :disabled="readonly"
+          type="number"
           @input="update('accuracy', $event)"
         />
       </v-col>
@@ -93,6 +96,7 @@
           :value="value.failureValue"
           :readonly="readonly"
           :disabled="readonly"
+          type="number"
           @input="update('failureValue', $event)"
         />
       </v-col>
@@ -112,6 +116,7 @@ import Property from '@/models/Property'
 import SamplingMedia from '@/models/SamplingMedia'
 import Unit from '@/models/Unit'
 import { DeviceProperty } from '@/models/DeviceProperty'
+import { parseFloatOrDefault } from '@/utils/numericsHelper'
 
 interface INameAndUri {
   name: string
@@ -178,26 +183,26 @@ export default class DevicePropertyForm extends Vue {
   update (key: string, value: string) {
     const newObj: DeviceProperty = DeviceProperty.createFromObject(this.value)
 
-    const uriLookupByName: { [id: string]: {nameToSet: string, elements: INameAndUri[] } } = {
-      compartmentName: {
-        nameToSet: 'compartmentUri',
-        elements: this.compartments
-      },
-      unitName: {
-        nameToSet: 'unitUri',
-        elements: this.units
-      },
-      samplingMediaName: {
-        nameToSet: 'samplingMediaUri',
-        elements: this.samplingMedias
-      },
-      propertyName: {
-        nameToSet: 'propertyUri',
-        elements: this.properties
-      }
-    }
+    const getUriValue = (name: string, value: string) => {
+      let valueToSet = ''
 
-    if (uriLookupByName[key]) {
+      const elementsByName: { [name: string]: { elements: INameAndUri[] } } = {
+        compartmentName: {
+          elements: this.compartments
+        },
+        unitName: {
+          elements: this.units
+        },
+        samplingMediaName: {
+          elements: this.samplingMedias
+        },
+        propertyName: {
+          elements: this.properties
+        }
+      }
+      if (!elementsByName[name]) {
+        return valueToSet
+      }
       // the comoboboxes may set the value to null,
       // but we don't want to work further with nulls
       //
@@ -206,15 +211,48 @@ export default class DevicePropertyForm extends Vue {
       if (value === null) {
         value = ''
       }
-      const index = uriLookupByName[key].elements.findIndex(x => x.name === value)
-      let valueToSet = ''
+      const index = elementsByName[name].elements.findIndex(x => x.name === value)
       if (index > -1) {
-        valueToSet = uriLookupByName[key].elements[index].uri
+        valueToSet = elementsByName[name].elements[index].uri
       }
-      newObj.setPath(uriLookupByName[key].nameToSet, valueToSet)
+      return valueToSet
     }
 
-    newObj.setPath(key, value)
+    switch (key) {
+      case 'label':
+        newObj.label = value
+        break
+      case 'compartmentName':
+        newObj.compartmentName = value
+        newObj.compartmentUri = getUriValue('compartmentName', value)
+        break
+      case 'unitName':
+        newObj.unitName = value
+        newObj.unitUri = getUriValue('unitName', value)
+        break
+      case 'samplingMediaName':
+        newObj.samplingMediaName = value
+        newObj.samplingMediaUri = getUriValue('samplingMediaName', value)
+        break
+      case 'propertyName':
+        newObj.propertyName = value
+        newObj.propertyUri = getUriValue('propertyName', value)
+        break
+      case 'measuringRange.min':
+        newObj.measuringRange.min = parseFloatOrDefault(value)
+        break
+      case 'measuringRange.max':
+        newObj.measuringRange.max = parseFloatOrDefault(value)
+        break
+      case 'accuracy':
+        newObj.accuracy = parseFloatOrDefault(value)
+        break
+      case 'failureValue':
+        newObj.failureValue = parseFloatOrDefault(value)
+        break
+      default:
+        throw new TypeError('path ' + key + ' is not valid')
+    }
 
     /**
      * input event

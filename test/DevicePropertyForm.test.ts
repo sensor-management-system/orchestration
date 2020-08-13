@@ -29,6 +29,7 @@ describe('DevicePropertyForm', () => {
       vuetify,
       propsData: {
         value: DeviceProperty.createFromObject({
+          id: null,
           label: 'test',
           compartmentUri: 'http://foo/compartment/1',
           compartmentName: 'bar',

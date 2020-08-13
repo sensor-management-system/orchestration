@@ -1,5 +1,3 @@
-import IPathSetter from './IPathSetter'
-
 export interface IContact {
   id: number | null
   email: string
@@ -8,7 +6,7 @@ export interface IContact {
   website: string
 }
 
-export default class Contact implements IContact, IPathSetter {
+export default class Contact implements IContact {
   private _id: number | null = null
   private _email: string = ''
   private _givenName: string = ''
@@ -63,35 +61,6 @@ export default class Contact implements IContact, IPathSetter {
       return this._email
     }
     return 'Contact ' + this._id
-  }
-
-  setPath (path: string, value: any): void {
-    const pathArray = path.split('.')
-    const topLevelElement = pathArray.splice(0, 1)[0]
-
-    switch (topLevelElement) {
-      case 'id':
-        if (value !== null) {
-          this.id = Number(value)
-        } else {
-          this.id = null
-        }
-        break
-      case 'email':
-        this.email = String(value)
-        break
-      case 'givenName':
-        this.givenName = String(value)
-        break
-      case 'familyName':
-        this.familyName = String(value)
-        break
-      case 'website':
-        this.website = String(value)
-        break
-      default:
-        throw new TypeError('path ' + path + ' is not valid')
-    }
   }
 
   static createWithIdEMailAndNames (id: number, email: string, givenName: string, familyName: string, website: string): Contact {

@@ -3,8 +3,9 @@
  * @author <marc.hanisch@gfz-potsdam.de>
  */
 
-import { ConfigurationsTreeNode } from './ConfigurationsTreeNode'
-import { PlatformNode } from './PlatformNode'
+import { ConfigurationsTreeNode } from '@/models/ConfigurationsTreeNode'
+import { DeviceNode } from '@/models/DeviceNode'
+import { PlatformNode } from '@/models/PlatformNode'
 
 /**
  * a class to iterate over the direct children of a ConfigurationsTree
@@ -67,6 +68,17 @@ export class ConfigurationsTree implements Iterable<ConfigurationsTreeNode> {
    */
   toArray (): ConfigurationsTreeNode[] {
     return this.tree
+  }
+
+  static createFromObject (someObject: ConfigurationsTree): ConfigurationsTree {
+    return ConfigurationsTree.fromArray(
+      someObject.toArray().map((e) => {
+        if (e instanceof PlatformNode) {
+          return PlatformNode.createFromObject(e as PlatformNode)
+        }
+        return DeviceNode.createFromObject(e as DeviceNode)
+      })
+    )
   }
 
   [Symbol.iterator] (): Iterator<ConfigurationsTreeNode> {
