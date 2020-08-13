@@ -9,7 +9,6 @@ describe('DeviceNode', () => {
     const node = new DeviceNode(device)
     expect(Object.is(node.unpack(), device)).toBeTruthy()
     expect(node).toHaveProperty('id', 1)
-    expect(node).toHaveProperty('type', 'device')
   })
 
   it('should create a DeviceNode from another one', () => {

@@ -8,7 +8,6 @@
  */
 export interface IConfigurationsTreeNode<T> {
   id: number | null
-  type: string
   name: string
   disabled: boolean
 

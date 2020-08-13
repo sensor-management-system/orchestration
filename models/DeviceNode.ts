@@ -20,10 +20,6 @@ export class DeviceNode implements IConfigurationsTreeNode<Device> {
     return this.node.id
   }
 
-  get type (): string {
-    return 'device'
-  }
-
   get name (): string {
     return this.node.shortName
   }
