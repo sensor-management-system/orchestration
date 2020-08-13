@@ -1,4 +1,4 @@
-import Contact, { IContact } from './Contact'
+import Contact, { IContact } from '@/models/Contact'
 
 export interface IUser {
   id: number | null

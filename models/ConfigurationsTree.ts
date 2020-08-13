@@ -3,9 +3,9 @@
  * @author <marc.hanisch@gfz-potsdam.de>
  */
 
-import { ConfigurationsTreeNode } from './ConfigurationsTreeNode'
-import { DeviceNode } from './DeviceNode'
-import { PlatformNode } from './PlatformNode'
+import { ConfigurationsTreeNode } from '@/models/ConfigurationsTreeNode'
+import { DeviceNode } from '@/models/DeviceNode'
+import { PlatformNode } from '@/models/PlatformNode'
 
 /**
  * a class to iterate over the direct children of a ConfigurationsTree

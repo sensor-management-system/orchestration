@@ -1,5 +1,5 @@
-import Contact, { IContact } from './Contact'
-import { Attachment, IAttachment } from './Attachment'
+import Contact, { IContact } from '@/models/Contact'
+import { Attachment, IAttachment } from '@/models/Attachment'
 
 export interface IPlatform {
   id: number | null

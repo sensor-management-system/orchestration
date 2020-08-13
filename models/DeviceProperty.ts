@@ -1,4 +1,4 @@
-import { IMeasuringRange, MeasuringRange } from './MeasuringRange'
+import { IMeasuringRange, MeasuringRange } from '@/models/MeasuringRange'
 
 export interface IDeviceProperty {
   id: number | null

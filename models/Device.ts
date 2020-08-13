@@ -1,8 +1,8 @@
-import Contact, { IContact } from './Contact'
-import { DeviceProperty } from './DeviceProperty'
-import { CustomTextField, ICustomTextField } from './CustomTextField'
+import Contact, { IContact } from '@/models/Contact'
+import { DeviceProperty } from '@/models/DeviceProperty'
+import { CustomTextField, ICustomTextField } from '@/models/CustomTextField'
 
-import { Attachment, IAttachment } from './Attachment'
+import { Attachment, IAttachment } from '@/models/Attachment'
 
 export interface IDevice {
   id: number | null
