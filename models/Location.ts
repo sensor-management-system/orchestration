@@ -1,7 +1,6 @@
 import { DeviceProperty } from '@/models/DeviceProperty'
 
 export interface IStationaryLocation {
-  type: string
   latitude: number | null
   longitude: number | null
   elevation: number | null
@@ -11,10 +10,6 @@ export class StationaryLocation implements IStationaryLocation {
   private _latitude: number | null = null
   private _longitude: number | null = null
   private _elevation: number | null = null
-
-  get type (): string {
-    return 'stationary'
-  }
 
   get latitude (): number | null {
     return this._latitude
@@ -50,7 +45,6 @@ export class StationaryLocation implements IStationaryLocation {
 }
 
 export interface IDynamicLocation {
-  type: string
   latitude: DeviceProperty | null
   longitude: DeviceProperty | null
   elevation: DeviceProperty | null
@@ -60,10 +54,6 @@ export class DynamicLocation implements IDynamicLocation {
   private _latitude: DeviceProperty | null = null
   private _longitude: DeviceProperty | null = null
   private _elevation: DeviceProperty | null = null
-
-  get type (): string {
-    return 'dynamic'
-  }
 
   get latitude (): DeviceProperty | null {
     return this._latitude
