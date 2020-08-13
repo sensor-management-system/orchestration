@@ -121,9 +121,6 @@ export default class AttachmentListItem extends Vue {
     const newObj: Attachment = Attachment.createFromObject(this.value)
 
     switch (key) {
-      case 'id':
-        newObj.id = parseInt(value)
-        break
       case 'url':
         newObj.url = value
         break
