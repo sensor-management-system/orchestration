@@ -1,5 +1,4 @@
 import Contact, { IContact } from './Contact'
-import IPathSetter from './IPathSetter'
 
 export interface IUser {
   id: number | null
@@ -7,7 +6,7 @@ export interface IUser {
   contact: IContact | null
 }
 
-export default class User implements IUser, IPathSetter {
+export default class User implements IUser {
   private _id: number | null = null
   private _subject: string = ''
   private _contact: Contact | null = null
@@ -34,33 +33,6 @@ export default class User implements IUser, IPathSetter {
 
   set contact (newContact: Contact | null) {
     this._contact = newContact
-  }
-
-  setPath (path: string, value: any) : void {
-    const pathArray = path.split('.')
-    const topLevelElement = pathArray.splice(0, 1)[0]
-
-    switch (topLevelElement) {
-      case 'id':
-        if (value !== null) {
-          this.id = Number(value)
-        } else {
-          this.id = null
-        }
-        break
-      case 'subject':
-        this.subject = String(value)
-        break
-      case 'contact':
-        if (value !== null) {
-          this.contact = Contact.createFromObject(value)
-        } else {
-          this.contact = null
-        }
-        break
-      default:
-        throw new TypeError('path ' + path + ' is not value')
-    }
   }
 
   static createFromObjet (someObject: IUser): User {

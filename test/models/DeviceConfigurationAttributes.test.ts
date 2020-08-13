@@ -71,24 +71,6 @@ describe('DeviceConfigurationAttributes', () => {
     expect(() => { attributes.addDevicePropertyById(prop1.id) }).toThrow(Error)
   })
 
-  it('should set a property by its path', () => {
-    const device = new Device()
-    device.id = 1
-
-    const now = new Date()
-    const attributes = new DeviceConfigurationAttributes(device)
-    attributes.setPath('offsetX', 1)
-    attributes.setPath('offsetY', 1)
-    attributes.setPath('offsetZ', 1)
-    attributes.setPath('calibrationDate', now)
-
-    expect(attributes).toHaveProperty('id', 1)
-    expect(attributes).toHaveProperty('offsetX', 1)
-    expect(attributes).toHaveProperty('offsetY', 1)
-    expect(attributes).toHaveProperty('offsetZ', 1)
-    expect(attributes).toHaveProperty('calibrationDate', now)
-  })
-
   it('should remove a deviceProperty', () => {
     const prop1 = new DeviceProperty()
     const device = new Device()
@@ -121,13 +103,5 @@ describe('DeviceConfigurationAttributes', () => {
 
     const attributes = new DeviceConfigurationAttributes(device)
     expect(() => { attributes.addDevicePropertyById(prop1.id) }).toThrow(Error)
-  })
-
-  it('should throw an error when using a invalid path', () => {
-    const device = new Device()
-    device.id = 1
-
-    const attributes = new DeviceConfigurationAttributes(device)
-    expect(() => attributes.setPath('id', 2)).toThrow(TypeError)
   })
 })

@@ -1,4 +1,3 @@
-import IPathSetter from '@/models/IPathSetter'
 import Contact, { IContact } from '@/models/Contact'
 import { ConfigurationsTree } from '@/models/ConfigurationsTree'
 import { ConfigurationsTreeNode } from '@/models/ConfigurationsTreeNode'
@@ -17,7 +16,7 @@ export interface IConfiguration {
   deviceAttributes: DeviceConfigurationAttributes[]
 }
 
-export class Configuration implements IConfiguration, IPathSetter {
+export class Configuration implements IConfiguration {
   private _id: number | null = null
   private _startDate: Date | null = null
   private _endDate: Date | null = null
@@ -97,31 +96,6 @@ export class Configuration implements IConfiguration, IPathSetter {
 
   set deviceAttributes (attributes: DeviceConfigurationAttributes[]) {
     this._deviceAttributes = attributes
-  }
-
-  setPath (path: string, value: any): void {
-    const paths = path.split('.')
-    const topLevelElement = paths.splice(0, 1)[0]
-    const tail = paths.join('.')
-    switch (topLevelElement) {
-      case 'id':
-        this.id = isNaN(parseInt(value)) ? null : parseInt(value)
-        break
-      case 'startDate':
-        this.startDate = value instanceof Date ? value : null
-        break
-      case 'endDate':
-        this.endDate = value instanceof Date ? value : null
-        break
-      case 'location':
-        // as the setPath method is implemented in the concrete classes, we have to cast the objects here
-        if (this.location instanceof StationaryLocation) {
-          (this.location as StationaryLocation).setPath(tail, value)
-        }
-        break
-      default:
-        throw new TypeError('path ' + path + ' is not defined')
-    }
   }
 
   static createFromObject (someObject: Configuration): Configuration {

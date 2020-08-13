@@ -1,12 +1,10 @@
-import IPathSetter from './IPathSetter'
-
 export interface IUnit {
   id: string
   name: string
   uri: string
 }
 
-export default class Unit implements IUnit, IPathSetter {
+export default class Unit implements IUnit {
   private _id: string = ''
   private _name: string = ''
   private _uri: string = ''
@@ -37,25 +35,6 @@ export default class Unit implements IUnit, IPathSetter {
 
   toString (): string {
     return this._name
-  }
-
-  setPath (path: string, value: any): void {
-    const pathArray = path.split('.')
-    const topLevelElement = pathArray.splice(0, 1)[0]
-
-    switch (topLevelElement) {
-      case 'id':
-        this.id = String(value)
-        break
-      case 'name':
-        this.name = String(value)
-        break
-      case 'uri':
-        this.uri = String(value)
-        break
-      default:
-        throw new TypeError('path ' + path + ' is not value')
-    }
   }
 
   static createWithData (id: string, name: string, uri: string): Unit {

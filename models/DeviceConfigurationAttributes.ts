@@ -1,6 +1,5 @@
 import { DeviceProperty } from '@/models/DeviceProperty'
 import Device from '@/models/Device'
-import IPathSetter from '@/models/IPathSetter'
 
 export interface IDeviceConfigurationAttributes {
   device: Device
@@ -11,7 +10,7 @@ export interface IDeviceConfigurationAttributes {
   deviceProperties: DeviceProperty[]
 }
 
-export class DeviceConfigurationAttributes implements IDeviceConfigurationAttributes, IPathSetter {
+export class DeviceConfigurationAttributes implements IDeviceConfigurationAttributes {
   private _device: Device
   private _offsetX: number = 0
   private _offsetY: number = 0
@@ -33,25 +32,6 @@ export class DeviceConfigurationAttributes implements IDeviceConfigurationAttrib
     someObject.deviceProperties = [...someObject.deviceProperties]
 
     return newObject
-  }
-
-  setPath (path: string, value: any): void {
-    switch (path) {
-      case 'offsetX':
-        this.offsetX = isNaN(value) ? 0 : parseInt(value)
-        break
-      case 'offsetY':
-        this.offsetY = isNaN(value) ? 0 : parseInt(value)
-        break
-      case 'offsetZ':
-        this.offsetZ = isNaN(value) ? 0 : parseInt(value)
-        break
-      case 'calibrationDate':
-        this.calibrationDate = value instanceof Date ? value : null
-        break
-      default:
-        throw new TypeError('path ' + path + ' is not defined')
-    }
   }
 
   get id (): number | null {

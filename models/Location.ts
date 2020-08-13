@@ -1,4 +1,3 @@
-import IPathSetter from '@/models/IPathSetter'
 import { DeviceProperty } from '@/models/DeviceProperty'
 
 export interface IStationaryLocation {
@@ -8,7 +7,7 @@ export interface IStationaryLocation {
   elevation: number | null
 }
 
-export class StationaryLocation implements IStationaryLocation, IPathSetter {
+export class StationaryLocation implements IStationaryLocation {
   private _latitude: number | null = null
   private _longitude: number | null = null
   private _elevation: number | null = null
@@ -39,24 +38,6 @@ export class StationaryLocation implements IStationaryLocation, IPathSetter {
 
   set elevation (elevation: number | null) {
     this._elevation = elevation
-  }
-
-  setPath (path: string, value: any): void {
-    switch (path) {
-      case 'type':
-        throw new TypeError('path type is readonly')
-      case 'latitude':
-        this.latitude = isNaN(parseFloat(value)) ? 0 : parseFloat(value)
-        break
-      case 'longitude':
-        this.longitude = isNaN(parseFloat(value)) ? 0 : parseFloat(value)
-        break
-      case 'elevation':
-        this.elevation = isNaN(parseFloat(value)) ? 0 : parseFloat(value)
-        break
-      default:
-        throw new TypeError('path ' + path + ' is not defined')
-    }
   }
 
   static createFromObject (someObject: IStationaryLocation): StationaryLocation {

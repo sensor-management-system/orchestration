@@ -1,5 +1,4 @@
 import Platform from '@/models/Platform'
-import IPathSetter from '@/models/IPathSetter'
 
 export interface IPlatformConfigurationAttributes {
   platform: Platform
@@ -8,7 +7,7 @@ export interface IPlatformConfigurationAttributes {
   offsetZ: number
 }
 
-export class PlatformConfigurationAttributes implements IPlatformConfigurationAttributes, IPathSetter {
+export class PlatformConfigurationAttributes implements IPlatformConfigurationAttributes {
   private _platform: Platform
   private _offsetX: number = 0
   private _offsetY: number = 0
@@ -26,22 +25,6 @@ export class PlatformConfigurationAttributes implements IPlatformConfigurationAt
     newObject.offsetZ = someObject.offsetZ
 
     return newObject
-  }
-
-  setPath (path: string, value: any): void {
-    switch (path) {
-      case 'offsetX':
-        this.offsetX = isNaN(value) ? 0 : parseInt(value)
-        break
-      case 'offsetY':
-        this.offsetY = isNaN(value) ? 0 : parseInt(value)
-        break
-      case 'offsetZ':
-        this.offsetZ = isNaN(value) ? 0 : parseInt(value)
-        break
-      default:
-        throw new TypeError('path ' + path + ' is not defined')
-    }
   }
 
   get id (): number | null {
