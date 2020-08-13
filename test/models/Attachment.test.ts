@@ -8,20 +8,4 @@ describe('Attachment Models', () => {
     expect(attachment).toHaveProperty('url', 'https://foo/test.png')
     expect(attachment).toHaveProperty('label', 'Testpicture')
   })
-
-  it('should set a property by its path', () => {
-    const attachment = new Attachment()
-    attachment.setPath('id', 1)
-    attachment.setPath('url', 'https://foo/test.png')
-    attachment.setPath('label', 'Testpicture')
-
-    expect(attachment).toHaveProperty('id', 1)
-    expect(attachment).toHaveProperty('url', 'https://foo/test.png')
-    expect(attachment).toHaveProperty('label', 'Testpicture')
-  })
-
-  it('should throw an error when using a invalid path', () => {
-    const attachment = new Attachment()
-    expect(() => attachment.setPath('foo', 'bar')).toThrow(TypeError)
-  })
 })

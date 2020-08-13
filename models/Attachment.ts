@@ -1,12 +1,10 @@
-import IPathSetter from './IPathSetter'
-
 export interface IAttachment {
   id: number | null
   url: string
   label: string
 }
 
-export class Attachment implements IAttachment, IPathSetter {
+export class Attachment implements IAttachment {
   static readonly mimeTypes: Object = {
     'image/png': ['png'],
     'images/jpeg': ['jpg', 'jpeg'],
@@ -36,30 +34,6 @@ export class Attachment implements IAttachment, IPathSetter {
     attachment.url = someObject.url || ''
     attachment.label = someObject.label || ''
     return attachment
-  }
-
-  /**
-   * sets the path of the instance to value
-   *
-   * @param {string} path - the path to the property to be changed
-   * @param {any} value - the value to set the property to
-   */
-  setPath (path: string, value: any): void {
-    const properties = path.split('.')
-    const property = properties.splice(0, 1)[0]
-    switch (property) {
-      case 'id':
-        this.id = parseInt(value)
-        break
-      case 'url':
-        this.url = String(value)
-        break
-      case 'label':
-        this.label = String(value)
-        break
-      default:
-        throw new TypeError('path ' + path + ' is not valid')
-    }
   }
 
   get id (): number | null {
