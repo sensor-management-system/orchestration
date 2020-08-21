@@ -3,6 +3,7 @@ import axios, { AxiosInstance, AxiosRequestConfig } from 'axios'
 import ContactApi from '@/services/sms/ContactApi'
 import DeviceApi from '@/services/sms/DeviceApi'
 import PlatformApi from '@/services/sms/PlatformApi'
+import ConfigurationApi from '@/services/sms/ConfigurationApi'
 
 import CompartmentApi from '@/services/cv/CompartmentApi'
 import DeviceTypeApi from '@/services/cv/DeviceTypeApi'
@@ -20,6 +21,7 @@ export default class Api {
   private readonly _contactApi: ContactApi
   private readonly _deviceApi: DeviceApi
   private readonly _platformApi: PlatformApi
+  private readonly _configurationApi: ConfigurationApi
 
   private readonly _manufacturerApi: ManufacturerApi
   private readonly _platformTypeApi: PlatformTypeApi
@@ -43,6 +45,9 @@ export default class Api {
     )
     this._deviceApi = new DeviceApi(
       this.createAxios(smsBaseUrl, '/devices', smsConfig)
+    )
+    this._configurationApi = new ConfigurationApi(
+      this.createAxios(smsBaseUrl, '/configurations', smsConfig)
     )
 
     // and here we can set settings for all the cv api calls
@@ -89,6 +94,10 @@ export default class Api {
 
   get platforms (): PlatformApi {
     return this._platformApi
+  }
+
+  get configurations (): ConfigurationApi {
+    return this._configurationApi
   }
 
   get contacts (): ContactApi {
