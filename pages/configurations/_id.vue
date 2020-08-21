@@ -133,7 +133,7 @@
                   <v-col cols="12" md="6">
                     <v-treeview
                       :active.sync="selectedNodeIds"
-                      :items="tree.toArray()"
+                      :items="configuration.tree.toArray()"
                       activatable
                       hoverable
                       rounded
@@ -499,6 +499,7 @@ import Contact from '@/models/Contact'
 import Device from '@/models/Device'
 import Platform from '@/models/Platform'
 
+import { Configuration } from '@/models/Configuration'
 import { ConfigurationsTree } from '@/models/ConfigurationsTree'
 import { ConfigurationsTreeNode } from '@/models/ConfigurationsTreeNode'
 import { DeviceNode } from '@/models/DeviceNode'
@@ -536,6 +537,8 @@ export class AppBarTabsExtensionExtended extends AppBarTabsExtension {
 export default class ConfigurationsIdPage extends Vue {
   private activeTab: number = 0
   private editMode: boolean = false
+
+  private configuration = new Configuration()
 
   private startDateModal: boolean = false
   private endDateModal: boolean = false
@@ -592,11 +595,10 @@ export default class ConfigurationsIdPage extends Vue {
     this.$nuxt.$on('AppBarExtension:change', (tab: number) => {
       this.activeTab = tab
     })
-
-    this.tree = this.getDemoConfigurationsTree()
   }
 
   mounted () {
+    this.loadConfiguration()
     this.$nextTick(() => {
       if (!this.$route.params.id) {
         this.$nuxt.$emit('AppBarContent:title', 'Add Configuration')
@@ -604,6 +606,20 @@ export default class ConfigurationsIdPage extends Vue {
       this.$nuxt.$emit('AppBarContent:save-button-hidden', !this.editMode)
       this.$nuxt.$emit('AppBarContent:cancel-button-hidden', !this.editMode)
     })
+  }
+
+  loadConfiguration () {
+    const configurationId = this.$route.params.id
+    if (configurationId) {
+      this.isInEditMode = false
+      this.$api.configurations.findById(configurationId).then((foundConfiguration) => {
+        this.configuration = foundConfiguration
+      }).catch((_error) => {
+        this.$store.commit('snackbar/setError', 'Loading configuration failed')
+      })
+    } else {
+      this.isInEditMode = true
+    }
   }
 
   beforeDestroy () {
@@ -663,7 +679,7 @@ export default class ConfigurationsIdPage extends Vue {
       return []
     }
     const nodeId = this.selectedNodeIds[0]
-    return this.tree.getPath(nodeId).map((t: string): Object => { return { text: t } })
+    return this.configuration.tree.getPath(nodeId).map((t: string): Object => { return { text: t } })
   }
 
   /**
@@ -673,7 +689,7 @@ export default class ConfigurationsIdPage extends Vue {
    * @return {boolean} wheter the node was found or not
    */
   isNodeInTree (nodeId: number): boolean {
-    return !!this.tree.getById(nodeId)
+    return !!this.configuration.tree.getById(nodeId)
   }
 
   /**
@@ -685,7 +701,7 @@ export default class ConfigurationsIdPage extends Vue {
     if (!this.selectedNodeIds.length) {
       return null
     }
-    return this.tree.getById(this.selectedNodeIds[0])
+    return this.configuration.tree.getById(this.selectedNodeIds[0])
   }
 
   /**
@@ -734,7 +750,7 @@ export default class ConfigurationsIdPage extends Vue {
   addPlatformNode (platform: Platform) {
     const node: ConfigurationsTreeNode | null = this.getSelectedNode()
     if (!node) {
-      this.tree.push(
+      this.configuration.tree.push(
         new PlatformNode(platform)
       )
       return
@@ -755,7 +771,7 @@ export default class ConfigurationsIdPage extends Vue {
   addDeviceNode (device: Device) {
     const node: ConfigurationsTreeNode | null = this.getSelectedNode()
     if (!node) {
-      this.tree.push(
+      this.configuration.tree.push(
         new DeviceNode(device)
       )
       return
@@ -776,8 +792,8 @@ export default class ConfigurationsIdPage extends Vue {
     if (!node) {
       return
     }
-    const parentNode = this.tree.getParent(node)
-    this.tree.remove(node)
+    const parentNode = this.configuration.tree.getParent(node)
+    this.configuration.tree.remove(node)
     this.setSelectedNode(parentNode)
   }
 
@@ -799,7 +815,7 @@ export default class ConfigurationsIdPage extends Vue {
       }
     }
     const platformNodes: PlatformNode[] = []
-    getPlatformNodesRecursive(this.tree, platformNodes)
+    getPlatformNodesRecursive(this.configuration.tree, platformNodes)
     return platformNodes.map(n => n.unpack())
   }
 
@@ -821,7 +837,7 @@ export default class ConfigurationsIdPage extends Vue {
       }
     }
     const deviceNodes: DeviceNode[] = []
-    getDeviceNodesRecursive(this.tree, deviceNodes)
+    getDeviceNodesRecursive(this.configuration.tree, deviceNodes)
     return deviceNodes.map(n => n.unpack())
   }
 
