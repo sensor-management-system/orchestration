@@ -86,21 +86,21 @@
                   <v-row>
                     <v-col cols="12" md="3">
                       <v-text-field
-                        v-model.number.lazy="latitude"
+                        v-model.number.lazy="configuration.location.latitude"
                         label="Latitude (WGS84)"
                         type="number"
                       />
                     </v-col>
                     <v-col cols="12" md="3">
                       <v-text-field
-                        v-model.number.lazy="longitude"
+                        v-model.number.lazy="configuration.location.longitude"
                         label="Longitude (WGS84)"
                         type="number"
                       />
                     </v-col>
                     <v-col cols="12" md="3">
                       <v-text-field
-                        v-model.number="elevation"
+                        v-model.number="configuration.location.elevation"
                         label="Elevation (m asl)"
                         type="number"
                       />
@@ -499,6 +499,7 @@ import Contact from '@/models/Contact'
 import Device from '@/models/Device'
 import Platform from '@/models/Platform'
 
+import { IStationaryLocation, IDynamicLocation, StationaryLocation, DynamicLocation } from '@/models/Location'
 import { Configuration } from '@/models/Configuration'
 import { ConfigurationsTree } from '@/models/ConfigurationsTree'
 import { ConfigurationsTreeNode } from '@/models/ConfigurationsTreeNode'
@@ -508,6 +509,11 @@ import { PlatformNode } from '@/models/PlatformNode'
 enum SearchType {
   Platform = 'Platform',
   Device = 'Device'
+}
+
+enum LocationType {
+  Stationary = 'Stationary',
+  Dynamic = 'Dynamic'
 }
 
 interface ISearchOptions {
@@ -544,8 +550,6 @@ export default class ConfigurationsIdPage extends Vue {
   private endDateModal: boolean = false
   private startDate: Date | null = null
   private endDate: Date | null = null
-
-  private locationType: string = ''
 
   private longitude: number = 0
   private latitude: number = 0
@@ -657,10 +661,41 @@ export default class ConfigurationsIdPage extends Vue {
     return !this.isInEditMode
   }
 
+  get locationType (): string | null {
+    switch (true) {
+      case (this.configuration.location instanceof StationaryLocation):
+        return LocationType.Stationary
+      case (this.configuration.location instanceof DynamicLocation):
+        return LocationType.Dynamic
+      default:
+        return null
+    }
+  }
+
+  set locationType (locationType: string | null) {
+    switch (locationType) {
+      case LocationType.Stationary:
+        if (!(this.configuration.location instanceof StationaryLocation)) {
+          this.configuration.location = new StationaryLocation()
+        }
+        break
+      case LocationType.Dynamic:
+        if (!(this.configuration.location instanceof DynamicLocation)) {
+          this.configuration.location = new DynamicLocation()
+        }
+        break
+      default:
+        this.configuration.location = null
+    }
+  }
+
   get location (): number[] {
+    if (!this.configuration.location || !(this.configuration.location instanceof StationaryLocation)) {
+      return [0, 0]
+    }
     return [
-      this.latitude,
-      this.longitude
+      this.configuration.location.latitude || 0,
+      this.configuration.location.longitude || 0
     ]
   }
 
