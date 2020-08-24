@@ -18,13 +18,13 @@
                     <v-dialog
                       ref="startDateDialog"
                       v-model="startDateModal"
-                      :return-value.sync="startDate"
+                      :return-value.sync="configuration.startDate"
                       persistent
                       width="290px"
                     >
                       <template v-slot:activator="{ on, attrs }">
                         <v-text-field
-                          v-model="startDate"
+                          v-model="configuration.startDate"
                           label="Start date"
                           prepend-icon="mdi-calendar-range"
                           readonly
@@ -32,12 +32,12 @@
                           v-on="on"
                         />
                       </template>
-                      <v-date-picker v-model="startDate" scrollable>
+                      <v-date-picker v-model="configuration.startDate" scrollable>
                         <v-spacer />
                         <v-btn text color="primary" @click="startDateModal = false">
                           Cancel
                         </v-btn>
-                        <v-btn text color="primary" @click="$refs.startDateDialog.save(startDate)">
+                        <v-btn text color="primary" @click="$refs.startDateDialog.save(configuration.startDate)">
                           OK
                         </v-btn>
                       </v-date-picker>
@@ -47,13 +47,13 @@
                     <v-dialog
                       ref="endDateDialog"
                       v-model="endDateModal"
-                      :return-value.sync="endDate"
+                      :return-value.sync="configuration.endDate"
                       persistent
                       width="290px"
                     >
                       <template v-slot:activator="{ on, attrs }">
                         <v-text-field
-                          v-model="endDate"
+                          v-model="configuration.endDate"
                           label="End date"
                           prepend-icon="mdi-calendar-range"
                           readonly
@@ -61,12 +61,12 @@
                           v-on="on"
                         />
                       </template>
-                      <v-date-picker v-model="endDate" scrollable>
+                      <v-date-picker v-model="configuration.endDate" scrollable>
                         <v-spacer />
                         <v-btn text color="primary" @click="endDateModal = false">
                           Cancel
                         </v-btn>
-                        <v-btn text color="primary" @click="$refs.endDateDialog.save(endDate)">
+                        <v-btn text color="primary" @click="$refs.endDateDialog.save(configuration.endDate)">
                           OK
                         </v-btn>
                       </v-date-picker>
