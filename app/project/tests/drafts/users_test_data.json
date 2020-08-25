@@ -1,0 +1,11 @@
+{
+  "users": [
+    {
+      "subject": "testuser1@ufz.de",
+      "contactId": 45
+    },
+    {
+      "subject": "testuser1@gfz.de"
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "contacts": [
+    {
+      "givenName": "test_1",
+      "familyName": "family_name",
+      "website": "http://testuserprofile.de",
+      "email": "test_1@test.de"
+    },
+    {
+      "givenName": "test_1",
+      "familyName": "family_name",
+      "website": "http://testuserprofile.de",
+      "email": "test_1@test.de"
+    }
+  ]
+}

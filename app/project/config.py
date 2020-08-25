@@ -1,7 +1,7 @@
 import os
 
 
-class BaseConfig:  # pylint: disable=too-few-public-methods
+class BaseConfig:
     """Base configuration"""
     TESTING = False
     SQLALCHEMY_TRACK_MODIFICATIONS = False
@@ -11,17 +11,17 @@ class BaseConfig:  # pylint: disable=too-few-public-methods
     SQLALCHEMY_POOL_TIMEOUT = os.environ.get('POOL_TIMEOUT', DEFAULT_POOL_TIMEOUT)
 
 
-class DevelopmentConfig(BaseConfig):  # pylint: disable=too-few-public-methods
+class DevelopmentConfig(BaseConfig):
     """Development configuration"""
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
 
 
-class TestingConfig(BaseConfig):  # pylint: disable=too-few-public-methods
+class TestingConfig(BaseConfig):
     """Testing configuration"""
     TESTING = True
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_TEST_URL')
 
 
-class ProductionConfig(BaseConfig):  # pylint: disable=too-few-public-methods
+class ProductionConfig(BaseConfig):
     """Production configuration"""
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')

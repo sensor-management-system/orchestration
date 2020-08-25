@@ -5,8 +5,8 @@ class CustomField(db.Model):
     """
     Custom Field class
     """
-    id = db.Column(db.Integer, primary_key=True)
-    key = db.Column(db.String(256))
-    value = db.Column(db.String(1024))
-    device_id = db.Column(db.Integer, db.ForeignKey('device.id'))
-    device = db.relationship('Device', backref=db.backref('field'))
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    key = db.Column(db.String(256), nullable=False)
+    value = db.Column(db.String(1024), nullable=True)
+    device_id = db.Column(db.Integer, db.ForeignKey('device.id'),
+                          nullable=False)

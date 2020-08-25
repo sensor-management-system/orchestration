@@ -25,21 +25,15 @@ unittest-lint:
     - pip install --upgrade flake8
     - pip install setuptools pylint pylint-exit pylint_flask pylint_flask_sqlalchemy
   script:
-    - flake8 --max-line-length=100 $CI_PROJECT_DIR/app/project
+    - flake8 --max-line-length=100 --ignore F401,W504 $CI_PROJECT_DIR/app/project
     - pylint $CI_PROJECT_DIR/app/project --rcfile=$CI_PROJECT_DIR/app/.pylintrc| tee pylint.txt || pylint-exit $?
     - score=$(sed -n 's/^Your code has been rated at \([-0-9.]*\)\/.*/\1/p' pylint.txt)
+    - curl https://img.shields.io/badge/lint%20score-$score/10-blue.svg  > $CI_PROJECT_DIR/docs/pylint.svg
     - echo "Pylint score was $score"
-    - badge_url=https://img.shields.io/badge/lint%20score-$score/10-blue.svg
-    - >-
-      curl https://git.ufz.de/api/v4/projects/$CI_PROJECT_ID/badges/4
-      -X PUT
-      -H "PRIVATE-TOKEN: $API_TOKEN"
-      -H "Content-Type: application/json"
-      -d '{"image_url": "'"$badge_url"'"}'
+
   artifacts:
     paths:
         - pylint.txt
-
 
 test-image:
   stage: test
