@@ -38,6 +38,7 @@ export interface ITimer {
   readonly count: number,
   readonly totalTime: number,
   readonly avgTime: number,
+  readonly currentTime: number,
   times: ITime[],
   log (message: string): void
 }
@@ -57,10 +58,19 @@ class Timer {
     return this.totalTime / this.count
   }
 
+  get currentTime (): number {
+    const times = this.times.filter(t => t.endTime !== null)
+    if (!times.length) {
+      return 0
+    }
+    return times[times.length - 1].time
+  }
+
   log (message: string): void {
     console.log(message, {
-      count: this.count,
+      currentTime: this.currentTime,
       totalTime: this.totalTime,
+      count: this.count,
       avgTime: this.avgTime,
       times: this.times
     })
