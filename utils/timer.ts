@@ -35,38 +35,56 @@ export class Time implements ITime {
 }
 
 export interface ITimer {
-  count: number,
-  totalTime: number,
-  avgTime: number,
-  times: ITime[]
+  readonly count: number,
+  readonly totalTime: number,
+  readonly avgTime: number,
+  times: ITime[],
+  log (message: string): void
+}
+
+class Timer {
+  public times: ITime[] = []
+
+  get count (): number {
+    return this.times.filter(t => t.endTime !== null).length
+  }
+
+  get totalTime (): number {
+    return this.times.filter(t => t.endTime !== null).reduce((acc, current) => acc + current.time, 0)
+  }
+
+  get avgTime (): number {
+    return this.totalTime / this.count
+  }
+
+  log (message: string): void {
+    console.log(message, {
+      count: this.count,
+      totalTime: this.totalTime,
+      avgTime: this.avgTime,
+      times: this.times
+    })
+  }
 }
 
 interface IInternalTimer {
   [name: string]: ITimer
 }
 
-const timer: IInternalTimer = {}
+const internalTimer: IInternalTimer = {}
 
 export const startTimer = (name: string) => {
-  if (!timer[name]) {
-    timer[name] = {
-      count: 0,
-      totalTime: 0,
-      avgTime: 0,
-      times: []
-    }
+  if (!internalTimer[name]) {
+    internalTimer[name] = new Timer()
   }
-  timer[name].count++
-  timer[name].times.push(new Time())
+  internalTimer[name].times.push(new Time())
 }
 
 export const endTimer = (name: string): ITimer => {
-  if (!timer[name]) {
+  if (!internalTimer[name]) {
     throw new Error('timer with name ' + name + ' does not exist')
   }
-  const theTimer = timer[name]
-  const time = theTimer.times[theTimer.times.length - 1].stop()
-  theTimer.totalTime += time
-  theTimer.avgTime = theTimer.totalTime / theTimer.times.length
-  return theTimer
+  const timer = internalTimer[name]
+  timer.times[timer.times.length - 1].stop()
+  return timer
 }
