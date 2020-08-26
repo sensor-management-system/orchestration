@@ -67,7 +67,7 @@ class Timer {
   }
 
   log (message: string): void {
-    console.log(message, {
+    console && console.log(message, {
       currentTime: this.currentTime,
       totalTime: this.totalTime,
       count: this.count,
