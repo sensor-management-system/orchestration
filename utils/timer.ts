@@ -67,6 +67,7 @@ class Timer {
   }
 
   log (message: string): void {
+    // eslint-disable-next-line no-console
     console && console.log(message, {
       currentTime: this.currentTime,
       totalTime: this.totalTime,
@@ -83,18 +84,26 @@ interface IInternalTimer {
 
 const internalTimer: IInternalTimer = {}
 
-export const startTimer = (name: string) => {
+/**
+ * starts a timer
+ *
+ * @example
+ * // create the timer
+ * const timer = startTimer('methodXY')
+ * // stop it and log the result to the console
+ * timer().log('timer for methodXY')
+ *
+ * @param {name} string - a name that should be unique to a group of timers
+ * @returns {function} a function to stop the timer which returns the timer itself
+ */
+export const startTimer = (name: string): (() => Timer) => {
   if (!internalTimer[name]) {
     internalTimer[name] = new Timer()
   }
-  internalTimer[name].times.push(new Time())
-}
-
-export const endTimer = (name: string): ITimer => {
-  if (!internalTimer[name]) {
-    throw new Error('timer with name ' + name + ' does not exist')
+  const time = new Time()
+  internalTimer[name].times.push(time)
+  return () => {
+    time.stop()
+    return internalTimer[name]
   }
-  const timer = internalTimer[name]
-  timer.times[timer.times.length - 1].stop()
-  return timer
 }
