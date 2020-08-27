@@ -122,9 +122,9 @@ describe('ConfigurationsTree', () => {
 
     const tree = ConfigurationsTree.fromArray([platformNode])
 
-    expect(tree.getPath(2)).toEqual(['Platform', 'Device'])
+    expect(tree.getPath(deviceNode)).toEqual(['Platform', 'Device'])
     // when a node is not found, just an empty array should be returned
-    expect(tree.getPath(3)).toEqual([])
+    expect(tree.getPath(new DeviceNode(new Device()))).toEqual([])
   })
 
   it('should return a node by its id recursively', () => {
@@ -143,7 +143,8 @@ describe('ConfigurationsTree', () => {
 
     const tree = ConfigurationsTree.fromArray([platformNode])
 
-    expect(Object.is(tree.getById(2), deviceNode)).toBeTruthy()
+    expect(Object.is(tree.getPlatformById(1), platformNode)).toBeTruthy()
+    expect(Object.is(tree.getDeviceById(2), deviceNode)).toBeTruthy()
   })
 
   it('should return the parent node of a node', () => {
