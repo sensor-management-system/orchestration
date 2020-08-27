@@ -12,12 +12,17 @@ import Device from '@/models/Device'
 export class DeviceNode implements IConfigurationsTreeNode<Device> {
   private node: Device
 
+  static readonly ID_PREFIX = 'DeviceNode-'
+
   constructor (node: Device) {
     this.node = node
   }
 
-  get id (): number | null {
-    return this.node.id
+  get id (): string | null {
+    if (!this.node.id) {
+      return null
+    }
+    return DeviceNode.ID_PREFIX + this.node.id
   }
 
   get name (): string {

@@ -15,12 +15,17 @@ export class PlatformNode implements IConfigurationsTreeNode<Platform> {
   private node: Platform
   private tree: ConfigurationsTree = new ConfigurationsTree()
 
+  static readonly ID_PREFIX = 'PlatformNode-'
+
   constructor (node: Platform) {
     this.node = node
   }
 
-  get id (): number | null {
-    return this.node.id
+  get id (): string | null {
+    if (!this.node.id) {
+      return null
+    }
+    return PlatformNode.ID_PREFIX + this.node.id
   }
 
   get name (): string {
