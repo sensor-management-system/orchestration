@@ -333,10 +333,10 @@
               multiple
             >
               <v-expansion-panel
-                v-for="(item) in getAllPlatforms()"
-                :key="item.id"
+                v-for="(item) in configuration.platformAttributes"
+                :key="'platformAttribute-' + item.id"
               >
-                <v-expansion-panel-header>{{ item.shortName }}</v-expansion-panel-header>
+                <v-expansion-panel-header>{{ item.platform.shortName }}</v-expansion-panel-header>
                 <v-expansion-panel-content>
                   <v-row>
                     <v-col
@@ -344,6 +344,7 @@
                       md="2"
                     >
                       <v-text-field
+                        v-model="item.offsetX"
                         label="offset (x)"
                       />
                     </v-col>
@@ -352,6 +353,7 @@
                       md="2"
                     >
                       <v-text-field
+                        v-model="item.offsetY"
                         label="offset (y)"
                       />
                     </v-col>
@@ -360,6 +362,7 @@
                       md="2"
                     >
                       <v-text-field
+                        v-model="item.offsetZ"
                         label="offset (z)"
                       />
                     </v-col>
@@ -392,10 +395,10 @@
               multiple
             >
               <v-expansion-panel
-                v-for="(item) in getAllDevices()"
-                :key="item.id"
+                v-for="(item) in configuration.deviceAttributes"
+                :key="'deviceAttribute-' + item.id"
               >
-                <v-expansion-panel-header>{{ item.shortName }}</v-expansion-panel-header>
+                <v-expansion-panel-header>{{ item.device.shortName }}</v-expansion-panel-header>
                 <v-expansion-panel-content>
                   <v-row>
                     <v-col
@@ -404,7 +407,7 @@
                     >
                       <v-select
                         label="property"
-                        :items="getPropertyNames(item)"
+                        :items="getPropertyNames(item.device)"
                       />
                     </v-col>
                     <v-col
@@ -412,6 +415,7 @@
                       md="2"
                     >
                       <v-text-field
+                        v-model="item.offsetX"
                         label="offset (x)"
                       />
                     </v-col>
@@ -420,6 +424,7 @@
                       md="2"
                     >
                       <v-text-field
+                        v-model="item.offsetY"
                         label="offset (y)"
                       />
                     </v-col>
@@ -428,6 +433,7 @@
                       md="2"
                     >
                       <v-text-field
+                        v-model="item.offsetZ"
                         label="offset (z)"
                       />
                     </v-col>
@@ -507,6 +513,8 @@ import { ConfigurationsTree } from '@/models/ConfigurationsTree'
 import { ConfigurationsTreeNode } from '@/models/ConfigurationsTreeNode'
 import { DeviceNode } from '@/models/DeviceNode'
 import { PlatformNode } from '@/models/PlatformNode'
+import { DeviceConfigurationAttributes } from '@/models/DeviceConfigurationAttributes'
+import { PlatformConfigurationAttributes } from '@/models/PlatformConfigurationAttributes'
 
 enum SearchType {
   Platform = 'Platform',
@@ -810,6 +818,7 @@ export default class ConfigurationsIdPage extends Vue {
       this.configuration.tree.push(
         new PlatformNode(platform)
       )
+      this.addPlatformConfigurationAttribute(platform)
       return
     }
 
@@ -818,6 +827,15 @@ export default class ConfigurationsIdPage extends Vue {
     }
 
     (node as PlatformNode).getTree().push(new PlatformNode(platform))
+    this.addPlatformConfigurationAttribute(platform)
+  }
+
+  addPlatformConfigurationAttribute (platform: Platform): number {
+    const index = this.configuration.platformAttributes.findIndex(a => a.platform === platform)
+    if (index === -1) {
+      this.configuration.platformAttributes.push(new PlatformConfigurationAttributes(platform))
+    }
+    return this.configuration.platformAttributes.length
   }
 
   /**
@@ -831,6 +849,7 @@ export default class ConfigurationsIdPage extends Vue {
       this.configuration.tree.push(
         new DeviceNode(device)
       )
+      this.addDeviceConfigurationAttribute(device)
       return
     }
 
@@ -839,6 +858,15 @@ export default class ConfigurationsIdPage extends Vue {
     }
 
     (node as PlatformNode).getTree().push(new DeviceNode(device))
+    this.addDeviceConfigurationAttribute(device)
+  }
+
+  addDeviceConfigurationAttribute (device: Device): number {
+    const index = this.configuration.deviceAttributes.findIndex(a => a.device === device)
+    if (index === -1) {
+      this.configuration.deviceAttributes.push(new DeviceConfigurationAttributes(device))
+    }
+    return this.configuration.deviceAttributes.length
   }
 
   /**
@@ -851,7 +879,31 @@ export default class ConfigurationsIdPage extends Vue {
     }
     const parentNode = this.configuration.tree.getParent(node)
     this.configuration.tree.remove(node)
+    switch (true) {
+      case node instanceof PlatformNode:
+        this.removePlatformConfigurationAttribute((node as PlatformNode).unpack())
+        break
+      case node instanceof DeviceNode:
+        this.removeDeviceConfigurationAttribute((node as DeviceNode).unpack())
+        break
+    }
     this.setSelectedNode(parentNode)
+  }
+
+  removePlatformConfigurationAttribute (platform: Platform): number {
+    const index = this.configuration.platformAttributes.findIndex(a => a.platform === platform)
+    if (index > -1) {
+      this.configuration.platformAttributes.splice(index, 1)
+    }
+    return this.configuration.platformAttributes.length
+  }
+
+  removeDeviceConfigurationAttribute (device: Device): number {
+    const index = this.configuration.deviceAttributes.findIndex(a => a.device === device)
+    if (index > -1) {
+      this.configuration.deviceAttributes.splice(index, 1)
+    }
+    return this.configuration.deviceAttributes.length
   }
 
   /**
