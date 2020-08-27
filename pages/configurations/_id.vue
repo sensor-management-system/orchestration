@@ -234,8 +234,8 @@
                                 v-for="(item, index) in platforms"
                               >
                                 <v-list-item
-                                  :key="item.shortName"
-                                  :disabled="isNodeInTree(item.id) ? true : false"
+                                  :key="'platform-' + item.id"
+                                  :disabled="isPlatformInTree(item)"
                                 >
                                   <v-list-item-content>
                                     <v-list-item-title v-text="item.shortName" />
@@ -244,7 +244,8 @@
                                   </v-list-item-content>
                                   <v-list-item-action>
                                     <v-btn
-                                      :disabled="isNodeInTree(item.id) ? true : false"
+                                      :key="'btn-add-platform-' + item.id"
+                                      :disabled="isPlatformInTree(item)"
                                       @click="addPlatformNode(item)"
                                     >
                                       add
@@ -253,7 +254,7 @@
                                 </v-list-item>
                                 <v-divider
                                   v-if="index + 1 < platforms.length"
-                                  :key="index"
+                                  :key="'platformDivider-' + index"
                                 />
                               </template>
                             </v-list-item-group>
@@ -271,8 +272,8 @@
                                 v-for="(item, index) in devices"
                               >
                                 <v-list-item
-                                  :key="item.shortName"
-                                  :disabled="isNodeInTree(item.id) ? true : false"
+                                  :key="'device-' + item.id"
+                                  :disabled="isDeviceInTree(item)"
                                 >
                                   <v-list-item-content>
                                     <v-list-item-title v-text="item.shortName" />
@@ -281,7 +282,8 @@
                                   </v-list-item-content>
                                   <v-list-item-action>
                                     <v-btn
-                                      :disabled="isNodeInTree(item.id) ? true : false"
+                                      :key="'btn-add-device-' + item.id"
+                                      :disabled="isDeviceInTree(item)"
                                       @click="addDeviceNode(item)"
                                     >
                                       add
@@ -289,8 +291,8 @@
                                   </v-list-item-action>
                                 </v-list-item>
                                 <v-divider
-                                  v-if="index + 1 < devices.length"
-                                  :key="index"
+                                  v-show="index + 1 < devices.length"
+                                  :key="'deviceDivider-' + index"
                                 />
                               </template>
                             </v-list-item-group>
@@ -499,7 +501,7 @@ import Contact from '@/models/Contact'
 import Device from '@/models/Device'
 import Platform from '@/models/Platform'
 
-import { IStationaryLocation, IDynamicLocation, StationaryLocation, DynamicLocation } from '@/models/Location'
+import { StationaryLocation, DynamicLocation } from '@/models/Location'
 import { Configuration } from '@/models/Configuration'
 import { ConfigurationsTree } from '@/models/ConfigurationsTree'
 import { ConfigurationsTreeNode } from '@/models/ConfigurationsTreeNode'
@@ -557,7 +559,7 @@ export default class ConfigurationsIdPage extends Vue {
 
   private contacts: Contact[] = []
 
-  private selectedNodeIds: number[] = []
+  private selectedNodeIds: string[] = []
   private selectedPlatform: Platform | null = null
   private selectedDevice: Device | null = null
 
@@ -713,18 +715,39 @@ export default class ConfigurationsIdPage extends Vue {
     if (!this.selectedNodeIds.length) {
       return []
     }
-    const nodeId = this.selectedNodeIds[0]
-    return this.configuration.tree.getPath(nodeId).map((t: string): Object => { return { text: t } })
+    const node = this.configuration.tree.getById(this.selectedNodeIds[0])
+    if (!node) {
+      return []
+    }
+    return this.configuration.tree.getPath(node).map((t: string): Object => { return { text: t } })
   }
 
   /**
-   * returns whether a node is in the tree or not
+   * returns whether a platform is in the tree or not
    *
    * @param {number} nodeId - the id of the node
    * @return {boolean} wheter the node was found or not
    */
-  isNodeInTree (nodeId: number): boolean {
-    return !!this.configuration.tree.getById(nodeId)
+  isPlatformInTree (platform: Platform): boolean {
+    const platformId = platform.id
+    if (platformId === null) {
+      return false
+    }
+    return !!this.configuration.tree.getPlatformById(platformId)
+  }
+
+  /**
+   * returns whether a device is in the tree or not
+   *
+   * @param {number} nodeId - the id of the node
+   * @return {boolean} wheter the node was found or not
+   */
+  isDeviceInTree (device: Device): boolean {
+    const deviceId = device.id
+    if (deviceId === null) {
+      return false
+    }
+    return !!this.configuration.tree.getDeviceById(deviceId)
   }
 
   /**
@@ -746,9 +769,8 @@ export default class ConfigurationsIdPage extends Vue {
    */
   setSelectedNode (node: ConfigurationsTreeNode | null) {
     if (node) {
-      const id = node.unpack().id
-      if (id) {
-        this.selectedNodeIds = [id]
+      if (node.id) {
+        this.selectedNodeIds = [node.id]
       }
     } else {
       this.selectedNodeIds = []
