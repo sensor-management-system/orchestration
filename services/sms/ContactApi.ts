@@ -23,18 +23,12 @@ export function serverResponseToEntity (entry: any): Contact {
   const newEntry = Contact.createEmpty()
 
   newEntry.id = Number.parseInt(entry.id)
+  newEntry.givenName = attributes.givenName || ''
+  newEntry.familyName = attributes.familyName || ''
+  newEntry.website = attributes.website || ''
   newEntry.email = attributes.email
-  // TODO: Consistant usage of camel/snake case
-  // JSONAPI uses camelcase
-  if (attributes.first_name) {
-    newEntry.givenName = attributes.first_name
-  }
-  if (attributes.last_name) {
-    newEntry.familyName = attributes.last_name
-  }
-  if (attributes.profile_link) {
-    newEntry.website = attributes.profile_link
-  }
+
+  // todo: Check list of platforms, list of devices and the user
 
   return newEntry
 }

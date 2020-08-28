@@ -25,10 +25,10 @@ export interface IPlatform {
   persistentIdentifier: string
 
   createdAt: Date | null
-  modifiedAt: Date | null
+  updatedAt: Date | null
 
   createdByUserId: number | null
-  modifiedByUserId: number | null
+  updatedByUserId: number | null
 
   contacts: IContact[]
   attachments: IAttachment[]
@@ -57,10 +57,10 @@ export default class Platform implements IPlatform {
   private _website: string = ''
   private _persistentIdentifier: string = ''
   private _createdAt: Date | null = null
-  private _modifiedAt: Date | null = null
+  private _updatedAt: Date | null = null
 
   private _createdByUserId: number | null = null
-  private _modifiedByUserId: number | null = null
+  private _updatedByUserId: number | null = null
 
   private _contacts: Contact[] = []
   private _attachments: Attachment[] = []
@@ -201,12 +201,12 @@ export default class Platform implements IPlatform {
     this._createdAt = newCreatedAt
   }
 
-  get modifiedAt (): Date | null {
-    return this._modifiedAt
+  get updatedAt (): Date | null {
+    return this._updatedAt
   }
 
-  set modifiedAt (newModifiedAt: Date | null) {
-    this._modifiedAt = newModifiedAt
+  set updatedAt (newUpdatedAt: Date | null) {
+    this._updatedAt = newUpdatedAt
   }
 
   get createdByUserId (): number | null {
@@ -217,12 +217,12 @@ export default class Platform implements IPlatform {
     this._createdByUserId = newCreatedByUserId
   }
 
-  get modifiedByUserId (): number | null {
-    return this._modifiedByUserId
+  get updatedByUserId (): number | null {
+    return this._updatedByUserId
   }
 
-  set modifiedByUserId (newModifiedByUserId: number | null) {
-    this._modifiedByUserId = newModifiedByUserId
+  set updatedByUserId (newUpdatedByUserId: number | null) {
+    this._updatedByUserId = newUpdatedByUserId
   }
 
   get attachments (): Attachment[] {
@@ -264,10 +264,10 @@ export default class Platform implements IPlatform {
     newObject.persistentIdentifier = someObject.persistentIdentifier
 
     newObject.createdAt = someObject.createdAt
-    newObject.modifiedAt = someObject.modifiedAt
+    newObject.updatedAt = someObject.updatedAt
 
     newObject.createdByUserId = someObject.createdByUserId
-    newObject.modifiedByUserId = someObject.modifiedByUserId
+    newObject.updatedByUserId = someObject.updatedByUserId
 
     newObject.contacts = someObject.contacts.map(Contact.createFromObject)
     newObject.attachments = someObject.attachments.map(Attachment.createFromObject)

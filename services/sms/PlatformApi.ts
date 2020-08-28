@@ -38,24 +38,27 @@ export default class PlatformApi {
       type: 'platform',
       attributes: {
         description: platform.description,
-        inventory_number: platform.inventoryNumber,
-        long_name: platform.longName,
-        // TODO: handle manufacturerName
-        manufacturer: platform.manufacturerUri,
-        // TODO: Handle platformTypeName
-        platform_type: platform.platformTypeUri,
-        // TODO: serialNumber
-        short_name: platform.shortName,
-        // TODO: statusUri
-        url: platform.website,
-        // TODO: handle contacts
-        // TODO: Handle attachments
-
-        // TODO: Remove type
-        // --> For the platform we have a platform type, but no other
-        // general type.
-        type: ''
-
+        shortName: platform.shortName,
+        longName: platform.longName,
+        manufacturerUri: platform.manufacturerUri,
+        manufacturerName: platform.manufacturerName,
+        model: platform.model,
+        platformTypeUri: platform.platformTypeUri,
+        platformTypeName: platform.platformTypeName,
+        statusUri: platform.statusUri,
+        statusName: platform.statusName,
+        website: platform.website,
+        createdAt: platform.createdAt,
+        updatedAt: platform.updatedAt,
+        // createdBy: platform.createdBy,
+        // updatedBy: platform.updatedBy,
+        inventoryNumber: platform.inventoryNumber,
+        serialNumber: platform.serialNumber,
+        persistentIdentifier: platform.persistentIdentifier,
+        // TODO
+        attachments: [],
+        contacts: []
+        // events: []
       }
       /*
       relationships: {
@@ -287,22 +290,31 @@ export function serverResponseToEntity (entry: any) : Platform {
   result.id = Number.parseInt(entry.id)
 
   result.description = attributes.description || ''
-  result.inventoryNumber = attributes.inventory_number || ''
-  result.longName = attributes.long_name || ''
-  // TODO: Renaming to manufacturerUri after Change in Backend
-  result.manufacturerUri = attributes.manufacturer || ''
-  // TODO: Read from the right field
-  result.model = attributes.type || ''
-  // TODO: Renaming to platform_type_uri after change in backend
-  // TODO: Add platformTypeName
-  result.platformTypeUri = attributes.platform_type || ''
-  result.shortName = attributes.short_name || ''
-  result.website = attributes.url || ''
-  // TODO: statusUri
-  // TODO: serialNumber
+  result.shortName = attributes.shortName || ''
+  result.longName = attributes.longName || ''
+  result.manufacturerUri = attributes.manufacturerUri || ''
+  result.manufacturerName = attributes.manufacturerName || ''
+  result.model = attributes.model || ''
+  result.platformTypeUri = attributes.platformTypeUri || ''
+  result.platformTypeName = attributes.platformTypeName || ''
+  result.statusUri = attributes.statusUri || ''
+  result.statusName = attributes.statusName || ''
+  result.website = attributes.website || ''
+  result.createdAt = attributes.createdAt
+  result.updatedAt = attributes.updatedAt
 
-  // TODO: reading the contacts
+  // TODO
+  // result.createdBy = attributes.createdBy
+  // result.updatedBy = attributes.updatedBy
+
+  result.inventoryNumber = attributes.inventoryNumber || ''
+  result.serialNumber = attributes.serialNumber || ''
+  result.persistentIdentifier = attributes.persistentIdentifier || ''
+
+  // TODO
+  result.attachments = []
   result.contacts = []
+  // result.events = []
 
   return result
 }

@@ -37,19 +37,28 @@ export default class DeviceApi {
       type: 'device',
       attributes: {
         description: device.description,
-        dual_use: device.dualUse,
-        inventory_number: device.inventoryNumber,
-        long_name: device.longName,
-        // TODO: Change to uri after backend change
-        manufacturer: device.manufacturerName,
-        // TODO: Add manufacturerUri
+        shortName: device.shortName,
+        longName: device.longName,
+        serialNumber: device.serialNumber,
+        manufacturerUri: device.manufacturerUri,
+        manufacturerName: device.manufacturerName,
+        deviceTypeUri: device.deviceTypeUri,
+        deviceTypeName: device.deviceTypeName,
         model: device.model,
-        persistent_identifier: device.persistentIdentifier,
-        serial_number: device.serialNumber,
-        short_name: device.shortName,
-        // TODO: Add statusName & statusUri
-        url: device.website,
-        type: device.deviceTypeUri
+        dualUse: device.dualUse,
+        inventoryNumber: device.inventoryNumber,
+        persistentIdentifier: device.persistentIdentifier,
+        website: device.website,
+        createdAt: device.createdAt,
+        updatedAt: device.updatedAt,
+        // TODO
+        // createdBy: device.createdBy,
+        // updatedBy: device.updatedBy,
+
+        // TODO
+        customfields: [],
+        properties: [],
+        attachments: []
 
         /*
         customFields: [
@@ -67,6 +76,9 @@ export default class DeviceApi {
 
       /*
       relationships: {
+        events: {
+
+        },
         contacts: {
           data: [
             {
@@ -294,30 +306,26 @@ export function serverResponseToEntity (entry: any) : Device {
   result.id = entry.id
 
   result.description = attributes.description || ''
-  // TODO: to camelcase
-  result.dualUse = attributes.dual_use || false
-  result.inventoryNumber = attributes.inventory_number || ''
-  result.longName = attributes.long_name || ''
-  result.manufacturerName = attributes.manufacturer || ''
-  // TODO: manufacturerUri
+  result.shortName = attributes.shortName || ''
+  result.longName = attributes.longName || ''
+  result.serialNumber = attributes.serialNumber || ''
+  result.manufacturerUri = attributes.manufacturerUri || ''
+  result.manufacturerName = attributes.manufacturerName || ''
+  result.deviceTypeUri = attributes.deviceTypeUri || ''
+  result.deviceTypeName = attributes.deviceTypeName || ''
   result.model = attributes.model || ''
-
-  result.persistentIdentifier = attributes.persistent_identifier || ''
-  result.shortName = attributes.short_name || ''
-  result.serialNumber = attributes.serial_number || ''
-  // TODO: StatusName & StatusUri
-  result.website = attributes.url || ''
-
-  result.deviceTypeUri = attributes.type || ''
-  // TODO: createdAt, modifiedAt, createdBy, modifiedBy
-
-  // TODO: Insert those as well
-  result.contacts = []
-  result.properties = []
+  result.dualUse = attributes.dualUse || false
+  result.inventoryNumber = attributes.inventoryNumber || ''
+  result.persistentIdentifier = attributes.persistentIdentifier || ''
+  result.website = attributes.website || ''
+  result.createdAt = attributes.createdAt
+  result.updatedAt = attributes.updatedAt
+  // result.createdBy = attributes.createdBy
+  // result.updatedBy = attributes.updatedBy
   result.customFields = []
-
-  // TODO: Attachments
-  // TODO: events
+  // result.events = []
+  result.attachments = []
+  result.contacts = []
 
   return result
 }
