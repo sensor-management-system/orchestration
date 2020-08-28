@@ -21,6 +21,8 @@ class Device(db.Model, AuditMixin):
     website = db.Column(db.String(1024), nullable=True)
     device_type_uri = db.Column(db.String(256), nullable=True)
     device_type_name = db.Column(db.String(256), nullable=True)
+    status_uri = db.Column(db.String(256), nullable=True)
+    status_name = db.Column(db.String(256), nullable=True)
     customfields = db.relationship(
         "CustomField", cascade="save-update, merge, delete, delete-orphan"
     )

@@ -16,4 +16,4 @@ class AttachmentSchema(MarshmallowSchema):
 
     id = fields.Integer(as_string=True, dump_only=True)
     label = fields.Str(allow_none=True)
-    url = fields.Url(required=True)
+    url = fields.Str(required=True)
