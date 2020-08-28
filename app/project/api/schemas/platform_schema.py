@@ -23,7 +23,7 @@ class PlatformSchema(Schema):
     platform_type_name = fields.Str(allow_none=True)
     status_uri = fields.Str(allow_none=True)
     status_name = fields.Str(allow_none=True)
-    website = fields.Url(allow_none=True)
+    website = fields.Str(allow_none=True)
     created_at = fields.DateTime(allow_none=True)
     updated_at = fields.DateTime(allow_none=True)
     created_by = Relationship(

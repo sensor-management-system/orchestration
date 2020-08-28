@@ -38,7 +38,7 @@ class DeviceSchema(Schema):
     dual_use = fields.Boolean(allow_none=True)
     inventory_number = fields.Str(allow_none=True)
     persistent_identifier = fields.Str(allow_none=True)
-    website = fields.Url(allow_none=True)
+    website = fields.Str(allow_none=True)
     created_at = fields.DateTime(allow_none=True)
     updated_at = fields.DateTime(allow_none=True)
     created_by = Relationship(

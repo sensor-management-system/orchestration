@@ -21,7 +21,7 @@ class ContactSchema(Schema):
     id = fields.Integer(as_string=True, dump_only=True)
     given_name = fields.Str(required=True)
     family_name = fields.Str(required=True)
-    website = fields.Url(allow_none=True)
+    website = fields.Str(allow_none=True)
     email = fields.Email(required=True)
 
     platforms = Relationship(
