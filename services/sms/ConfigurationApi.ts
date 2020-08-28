@@ -1,14 +1,13 @@
+// eslint-disable-next-line
 import { AxiosInstance, Method } from 'axios'
 
-import Platform from '@/models/Platform'
-import Device from '@/models/Device'
-import { PlatformNode } from '@/models/PlatformNode'
-import { DeviceNode } from '@/models/DeviceNode'
 import { Configuration } from '@/models/Configuration'
 
+// eslint-disable-next-line
 import { IFlaskJSONAPIFilter } from '@/utils/JSONApiInterfaces'
 
 import {
+  // eslint-disable-next-line
   IPaginationLoader, FilteredPaginationedLoader
 } from '@/utils/PaginatedLoader'
 
@@ -20,21 +19,22 @@ export default class ConfigurationApi {
   }
 
   findById (id: string): Promise<Configuration> {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       const configuration = this._createDemoConfiguration()
       configuration.id = parseInt(id)
       resolve(configuration)
     })
   }
 
+  // eslint-disable-next-line
   deleteById (id: number) : Promise<void> {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       resolve()
     })
   }
 
   save (configuration: Configuration): Promise<Configuration> {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       resolve(configuration)
     })
   }
@@ -44,6 +44,7 @@ export default class ConfigurationApi {
   }
 }
 
+// eslint-disable-next-line
 export function serverResponseToEntity (entry: any) : Configuration {
   throw new Error('not implemented')
 }
