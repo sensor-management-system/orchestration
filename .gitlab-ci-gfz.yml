@@ -14,28 +14,28 @@ variables:
 .docker_login_gitlab_registry: &docker_login_gitlab_registry
   - echo "$CI_BUILD_TOKEN" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
 
-ci-services:
-  stage: ci-services
-  image:
-    name: "gitext.gfz-potsdam.de:5000/software/services/fair/ci-services/ci-services:latest-dev"
-    entrypoint: [""]
-  script:
-    - cp -r "$CI_PROJECT_DIR" /repo
-    - rm -rf /repo/meta
-    - docker-entrypoint.sh --version
-    - docker-entrypoint.sh --list-authors
-    - docker-entrypoint.sh --list-used-languages
-    - docker-entrypoint.sh --list-used-licenses
-    - docker-entrypoint.sh --reuse-lint
-    - docker-entrypoint.sh --generate-report
-    - cp -rT /repo "$CI_PROJECT_DIR"
-  artifacts:
-    paths:
-      - meta/ci-services-report.md
-    expire_in: 30 days
-  tags:
-    - docker
-    - id2
+# ci-services:
+#   stage: ci-services
+#   image:
+#     name: "gitext.gfz-potsdam.de:5000/software/services/fair/ci-services/ci-services:latest-dev"
+#     entrypoint: [""]
+#   script:
+#     - cp -r "$CI_PROJECT_DIR" /repo
+#     - rm -rf /repo/meta
+#     - docker-entrypoint.sh --version
+#     - docker-entrypoint.sh --list-authors
+#     - docker-entrypoint.sh --list-used-languages
+#     - docker-entrypoint.sh --list-used-licenses
+#     - docker-entrypoint.sh --reuse-lint
+#     - docker-entrypoint.sh --generate-report
+#     - cp -rT /repo "$CI_PROJECT_DIR"
+#   artifacts:
+#     paths:
+#       - meta/ci-services-report.md
+#     expire_in: 30 days
+#   tags:
+#     - docker
+#     - id2
 
 build-gfz-image:
   stage: build-gfz-image
