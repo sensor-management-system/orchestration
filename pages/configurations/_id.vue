@@ -405,15 +405,6 @@
                       cols="12"
                       md="2"
                     >
-                      <v-select
-                        label="property"
-                        :items="getPropertyNames(item.device)"
-                      />
-                    </v-col>
-                    <v-col
-                      cols="12"
-                      md="2"
-                    >
                       <v-text-field
                         v-model="item.offsetX"
                         label="offset (x)"
@@ -445,13 +436,13 @@
                         label="calibration date"
                       />
                     </v-col>
+                  </v-row>
+                  <v-row>
                     <v-col
                       cols="12"
-                      md="2"
+                      md="3"
                     >
-                      <v-btn>
-                        add
-                      </v-btn>
+                      <DevicePropertySelect v-model="item.deviceProperties" :properties="item.device.properties" label="Add a property" :readonly="false" />
                     </v-col>
                   </v-row>
                 </v-expansion-panel-content>
@@ -502,6 +493,7 @@ import { Vue, Component, Watch } from 'nuxt-property-decorator'
 import AppBarEditModeContent from '@/components/AppBarEditModeContent.vue'
 import AppBarTabsExtension from '@/components/AppBarTabsExtension.vue'
 import ContactSelect from '@/components/ContactSelect.vue'
+import DevicePropertySelect from '@/components/DevicePropertySelect.vue'
 
 import Contact from '@/models/Contact'
 import Device from '@/models/Device'
@@ -546,7 +538,8 @@ export class AppBarTabsExtensionExtended extends AppBarTabsExtension {
 
 @Component({
   components: {
-    ContactSelect
+    ContactSelect,
+    DevicePropertySelect
   }
 })
 // @ts-ignore
