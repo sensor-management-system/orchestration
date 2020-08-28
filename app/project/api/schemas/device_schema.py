@@ -34,6 +34,8 @@ class DeviceSchema(Schema):
     manufacturer_name = fields.Str(allow_none=True)
     device_type_uri = fields.Str(allow_none=True)
     device_type_name = fields.Str(allow_none=True)
+    status_uri = fields.Str(allow_none=True)
+    status_name = fields.Str(allow_none=True)
     model = fields.Str(allow_none=True)
     dual_use = fields.Boolean(allow_none=True)
     inventory_number = fields.Str(allow_none=True)
