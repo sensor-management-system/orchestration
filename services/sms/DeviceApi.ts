@@ -44,6 +44,8 @@ export default class DeviceApi {
         manufacturerName: device.manufacturerName,
         deviceTypeUri: device.deviceTypeUri,
         deviceTypeName: device.deviceTypeName,
+        statusUri: device.statusUri,
+        statusName: device.statusName,
         model: device.model,
         dualUse: device.dualUse,
         inventoryNumber: device.inventoryNumber,
@@ -313,6 +315,8 @@ export function serverResponseToEntity (entry: any) : Device {
   result.manufacturerName = attributes.manufacturerName || ''
   result.deviceTypeUri = attributes.deviceTypeUri || ''
   result.deviceTypeName = attributes.deviceTypeName || ''
+  result.statusUri = attributes.statusUri || ''
+  result.statusName = attributes.statusName || ''
   result.model = attributes.model || ''
   result.dualUse = attributes.dualUse || false
   result.inventoryNumber = attributes.inventoryNumber || ''

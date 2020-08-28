@@ -56,11 +56,9 @@ export default class PlatformApi {
         serialNumber: platform.serialNumber,
         persistentIdentifier: platform.persistentIdentifier,
         // TODO
-        attachments: [],
-        contacts: []
+        attachments: []
         // events: []
-      }
-      /*
+      }/*,
       relationships: {
         contacts: {
           data: [
@@ -74,7 +72,6 @@ export default class PlatformApi {
             }
           ]
         }
-
       }
       */
     }
