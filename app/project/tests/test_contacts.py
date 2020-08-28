@@ -1,123 +1,57 @@
-import json
 import unittest
 
+from project.api.models.base_model import db
 from project.api.models.contact import Contact
 from project.api.schemas.contact_schema import ContactSchema
 from project.tests.base import BaseTestCase
+from project.tests.read_from_json import extract_data_from_json_file
+from project.urls import base_url
 
 
 class TestContactServices(BaseTestCase):
     """
     Test Contact Services
     """
-    url = '/sis/v1/contacts'
+    contact_url = base_url + '/contacts'
     object_type = 'contact'
+    json_data_url = "/usr/src/app/project/tests/drafts/contacts_test_data.json"
 
-    def test_get_devices(self):
+    def test_get_contacts(self):
         """Ensure the /contacts route behaves correctly."""
-        response = self.client.get('/sis/v1/contacts')
-        data = json.loads(response.data.decode())
+        response = self.client.get(self.contact_url)
         self.assertEqual(response.status_code, 200)
-        self.assertIn("http://localhost/sis/v1/contacts",
-                      data['links']['self'])
-        # super().tear_down()
 
     def test_add_contact_model(self):
         """""Ensure Add platform model """
-        contact = Contact(id=45, username='test',
+        contact = Contact(id=45, given_name='test_user',
+                          family_name='Test',
+                          website='http://test.de',
                           email="test@test.test")
         ContactSchema().dump(contact)
+        db.session.add(contact)
+        db.session.commit()
+
+        c = db.session.query(Contact).filter_by(
+            id=contact.id).one()
+        self.assertIn(c.email, contact.email)
+        return contact
 
     def test_add_contact(self):
         """Ensure a new contact can be added to the database."""
+        contact_json = extract_data_from_json_file(
+            self.json_data_url,
+            "contacts")
 
-        data_object = {
+        contact_data = {
             "data": {
                 "type": "contact",
-                "attributes": {
-                    "email": "test"
-                }
+                "attributes": contact_json[0]
             }
         }
-        super(TestContactServices, self). \
-            test_add_object(url=self.url,
-                            data_object=data_object,
-                            object_type=self.object_type)
-
-    def test_add_contact_invalid_type(self):
-        """Ensure error is thrown if the JSON object
-         has invalid type."""
-
-        data_object = {
-            "data": {
-                "type": "platform",
-                "attributes": {
-                    "email": "test"
-                }
-            }
-        }
-        with self.client:
-            data, response = super(TestContactServices, self). \
-                prepare_response(url=self.url,
-                                 data_object=data_object)
-
-        self.assertEqual(response.status_code, 409)
-        self.assertIn("Invalid type. Expected \"contact\".",
-                      data['errors'][0]['detail'])
-
-    def test_add_contact_missing_data(self):
-        """Ensure error is thrown if the JSON object
-        has messing required data."""
-
-        data_object = {
-            "data": {
-                "type": "contact",
-                "attributes": {
-                    "username": "testUser"
-                }
-            }
-        }
-        with self.client:
-            data, response = super(TestContactServices, self). \
-                prepare_response(url=self.url,
-                                 data_object=data_object)
-
-        self.assertEqual(response.status_code, 422)
-        self.assertIn("Missing data for required field.",
-                      data['errors'][0]['detail'])
-
-    def test_add_contact_invalid_json(self):
-        """Ensure error is thrown if the JSON object invalid."""
-
-        data_object = {}
-        with self.client:
-            data, response = super(TestContactServices, self). \
-                prepare_response(url=self.contacts_url,
-                                 data_object=data_object)
-        self.assertEqual(response.status_code, 422)
-        self.assertIn("Object must include `data` key.",
-                      data['errors'][0]['detail'])
-
-    def test_add_contact_invalid_data_key(self):
-        """Ensure error is thrown if the JSON object
-        has invalid data key."""
-
-        data_object = {
-            "data": {
-                "type": "contact",
-                "attributes": {
-                    "email": 123
-                }
-            }
-        }
-        with self.client:
-            data, response = super(TestContactServices, self). \
-                prepare_response(url=self.url,
-                                 data_object=data_object)
-
-        self.assertEqual(response.status_code, 422)
-        self.assertIn("Not a valid string.",
-                      data['errors'][0]['detail'])
+        super().add_object(
+            url=self.contact_url, data_object=contact_data,
+            object_type=self.object_type)
+        return contact_data
 
 
 if __name__ == '__main__':

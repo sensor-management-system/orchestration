@@ -1,40 +1,59 @@
 from marshmallow_jsonapi import fields
 from marshmallow_jsonapi.flask import Schema, Relationship
+from project.api.schemas.attachment_schema import AttachmentSchema
+from project.api.schemas.utils import camel_case
 
 
 class PlatformSchema(Schema):
     class Meta:
-        type_ = 'platform'
-        self_view = 'platform_detail'
-        self_view_kwargs = {'id': '<id>'}
-        self_view_many = 'platform_list'
+        type_ = "platform"
+        self_view = "platform_detail"
+        self_view_kwargs = {"id": "<id>"}
+        self_view_many = "platform_list"
+        inflect = camel_case
 
     id = fields.Integer(as_string=True, dump_only=True)
     description = fields.Str(allow_none=True)
     short_name = fields.Str(required=True)
     long_name = fields.Str(allow_none=True)
-    manufacturer = fields.Str(allow_none=True)
-    type = fields.Str(required=True)
-    platform_type = fields.Str(allow_none=True)
-    url = fields.Str(allow_none=True)
-    configuration_date = fields.Date(allow_none=True)
+    manufacturer_uri = fields.Str(allow_none=True)
+    manufacturer_name = fields.Str(allow_none=True)
+    model = fields.Str(allow_none=True)
+    platform_type_uri = fields.Str(allow_none=True)
+    platform_type_name = fields.Str(allow_none=True)
+    status_uri = fields.Str(allow_none=True)
+    status_name = fields.Str(allow_none=True)
+    website = fields.Url(allow_none=True)
+    created_at = fields.DateTime(allow_none=True)
+    updated_at = fields.DateTime(allow_none=True)
+    created_by = Relationship(
+        self_view="platform_created_user",
+        self_view_kwargs={"id": "<id>"},
+        related_view="user_detail",
+        related_view_kwargs={"id": "<created_by_id>"},
+        type_="user",
+    )
+    updated_by = Relationship(
+        self_view="platform_updated_user",
+        self_view_kwargs={"id": "<id>"},
+        related_view="user_detail",
+        related_view_kwargs={"id": "<updated_by_id>"},
+        type_="user",
+    )
     inventory_number = fields.Str(allow_none=True)
-    urn = fields.Function(lambda obj: "{}_{}".format(
-        obj.type.upper(), obj.short_name.upper()))
-    devices = Relationship(self_view='platform_devices',
-                           self_view_kwargs={'id': '<id>'},
-                           related_view='devices_list',
-                           related_view_kwargs={'id': '<id>'},
-                           many=True,
-                           schema='DeviceSchema',
-                           type_='device')
-
-    contacts = Relationship(attribute='contacts',
-                            self_view='platform_contacts',
-                            self_view_kwargs={'id': '<id>'},
-                            related_view='contacts_list',
-                            related_view_kwargs={'platform_id': '<id>'},
-                            many=True,
-                            schema='ContactSchema',
-                            type_='contact',
-                            id_field='id')
+    serial_number = fields.Str(allow_none=True)
+    persistent_identifier = fields.Str(allow_none=True)
+    attachments = fields.Nested(
+        AttachmentSchema, many=True, allow_none=True, attribute="platform_attachments"
+    )
+    contacts = Relationship(
+        attribute="contacts",
+        self_view="platform_contacts",
+        self_view_kwargs={"id": "<id>"},
+        related_view="contact_list",
+        related_view_kwargs={"platform_id": "<id>"},
+        many=True,
+        schema="ContactSchema",
+        type_="contact",
+        id_field="id",
+    )

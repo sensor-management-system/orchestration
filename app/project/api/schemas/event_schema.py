@@ -1,7 +1,5 @@
+from marshmallow_jsonapi.flask import Schema, Relationship
 from marshmallow_jsonapi import fields
-from marshmallow_jsonapi.flask import Schema
-from project.api.schemas.base_schema import \
-    set_device_relationship_schema
 
 
 class EventSchema(Schema):
@@ -15,11 +13,19 @@ class EventSchema(Schema):
 
     class Meta:
         type_ = 'event'
-        self_view = 'events_detail'
+        self_view = 'event_detail'
         self_view_kwargs = {'id': '<id>'}
+        self_view_many = 'event_list'
 
     id = fields.Integer(as_string=True, dump_only=True)
     description = fields.Str(required=True)
-    date = fields.Date()
-
-    device = set_device_relationship_schema('events')
+    timestamp = fields.DateTime(required=True)
+    user = Relationship(self_view='event_user',
+                        self_view_kwargs={'id': '<id>'},
+                        related_view='event_list',
+                        related_view_kwargs={'id': '<id>'},
+                        include_resource_linkage=True,
+                        schema='UserSchema',
+                        type_='user',
+                        id_field='id'
+                        )

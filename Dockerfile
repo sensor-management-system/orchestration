@@ -1,4 +1,4 @@
-FROM python:3-alpine as base
+FROM python:3.8.3-alpine as base
 
 ARG BUILD_DATE
 ARG VCS_REF
@@ -31,7 +31,7 @@ RUN apk add --no-cache --virtual .build-deps \
     musl-dev \
     postgresql-dev \
     && pip install --upgrade pip \
-    && pip install --install-option="--prefix=/install" --no-cache-dir -r /tmp/requirements.txt \
+    && pip install --prefix=/install --no-cache-dir -r /tmp/requirements.txt \
     && apk del --no-cache .build-deps
 
 FROM base
