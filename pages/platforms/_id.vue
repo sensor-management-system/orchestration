@@ -102,6 +102,13 @@
                         </a>
                       </template>
                     </v-text-field>
+                    <v-text-field
+                      v-else
+                      v-model="platform.website"
+                      label="Website"
+                      placeholder="https://"
+                      type="url"
+                    />
                   </v-col>
                 </v-row>
                 <v-row>
