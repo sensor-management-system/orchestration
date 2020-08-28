@@ -1,5 +1,4 @@
 stages:
-  - ci-services
   - build-gfz-image
   - deploy-gfz-image
   - after-deployment-gfz-create-database
