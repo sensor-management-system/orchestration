@@ -1,7 +1,6 @@
 from marshmallow_jsonapi import fields
 from marshmallow_jsonapi.flask import Schema, Relationship
 from project.api.schemas.attachment_schema import AttachmentSchema
-from project.api.schemas.utils import camel_case
 
 
 class PlatformSchema(Schema):
@@ -10,7 +9,6 @@ class PlatformSchema(Schema):
         self_view = "platform_detail"
         self_view_kwargs = {"id": "<id>"}
         self_view_many = "platform_list"
-        inflect = camel_case
 
     id = fields.Integer(as_string=True, dump_only=True)
     description = fields.Str(allow_none=True)

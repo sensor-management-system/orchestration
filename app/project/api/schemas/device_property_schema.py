@@ -1,6 +1,5 @@
 from marshmallow import Schema as MarshmallowSchema
 from marshmallow_jsonapi import fields
-from project.api.schemas.utils import camel_case
 
 
 class DevicePropertySchema(MarshmallowSchema):
@@ -14,25 +13,24 @@ class DevicePropertySchema(MarshmallowSchema):
 
     class Meta:
         type_ = "property"
-        inflect = camel_case
 
     id = fields.Integer(as_string=True, dump_only=True)
     measuring_range_min = fields.Float(
-        as_string=True, allow_none=True, data_key="measuringRangeMin"
+        as_string=True, allow_none=True
     )
     measuring_range_max = fields.Float(
-        as_string=True, allow_none=True, data_key="measuringRangeMax"
+        as_string=True, allow_none=True
     )
     failure_value = fields.Float(
-        as_string=True, allow_none=True, data_key="failureValue"
+        as_string=True, allow_none=True
     )
     accuracy = fields.Float(as_string=True, allow_none=True)
     label = fields.Str(allow_none=True)
-    unit_uri = fields.Str(allow_none=True, data_key="unitUri")
-    unit_name = fields.Str(allow_none=True, data_key="unitName")
-    compartment_uri = fields.Str(allow_none=True, data_key="compartmentUri")
-    compartment_name = fields.Str(allow_none=True, data_key="compartmentName")
-    property_uri = fields.Str(allow_none=True, data_key="propertyUri")
-    property_name = fields.Str(allow_none=True, data_key="propertyName")
-    sampling_media_uri = fields.Str(allow_none=True, data_key="samplingMediaUri")
-    sampling_media_name = fields.Str(allow_none=True, data_key="samplingMediaName")
+    unit_uri = fields.Str(allow_none=True)
+    unit_name = fields.Str(allow_none=True)
+    compartment_uri = fields.Str(allow_none=True)
+    compartment_name = fields.Str(allow_none=True)
+    property_uri = fields.Str(allow_none=True)
+    property_name = fields.Str(allow_none=True)
+    sampling_media_uri = fields.Str(allow_none=True)
+    sampling_media_name = fields.Str(allow_none=True)
