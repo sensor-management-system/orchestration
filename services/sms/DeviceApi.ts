@@ -12,6 +12,7 @@ import {
 } from '@/utils/PaginatedLoader'
 import { DeviceProperty } from '~/models/DeviceProperty'
 import { MeasuringRange } from '~/models/MeasuringRange'
+import { CustomTextField } from '~/models/CustomTextField'
 
 export default class DeviceApi {
   private axiosApi: AxiosInstance
@@ -41,6 +42,9 @@ export default class DeviceApi {
     for (const property of device.properties) {
       const propertyToSave: any = {}
       if (property.id != null) {
+        // TODO:
+        // currently it seems that the id is always set to a higher value
+        // I can set it to 8, but it will be saved with a new id (9)
         propertyToSave.id = property.id
       }
 
@@ -59,6 +63,20 @@ export default class DeviceApi {
       propertyToSave.sampling_media_name = property.samplingMediaName
 
       properties.push(propertyToSave)
+    }
+
+    const customfields = []
+    for (const customField of device.customFields) {
+      const customFieldToSave: any = {}
+
+      if (customField.id != null) {
+        customFieldToSave.id = customField.id
+      }
+
+      customFieldToSave.key = customField.key
+      customFieldToSave.value = customField.value
+
+      customfields.push(customFieldToSave)
     }
 
     const data: any = {
@@ -83,9 +101,9 @@ export default class DeviceApi {
         // created_by: device.createdBy,
         // updated_by: device.updatedBy,
 
-        // TODO
-        customfields: [],
+        customfields,
         properties,
+        // TODO
         attachments: []
 
         /*
@@ -354,7 +372,6 @@ export function serverResponseToEntity (entry: any) : Device {
   result.updatedAt = attributes.updated_at
   // result.createdBy = attributes.created_by
   // result.updatedBy = attributes.updated_by
-  result.customFields = []
   // result.events = []
   result.attachments = []
   result.contacts = []
@@ -383,6 +400,19 @@ export function serverResponseToEntity (entry: any) : Device {
   }
 
   result.properties = properties
+
+  const customFields: CustomTextField[] = []
+
+  for (const customFieldFromServer of attributes.customfields) {
+    const customField = new CustomTextField()
+    customField.id = Number.parseInt(customFieldFromServer.id)
+    customField.key = customFieldFromServer.key || ''
+    customField.value = customFieldFromServer.value || ''
+
+    customFields.push(customField)
+  }
+
+  result.customFields = customFields
 
   return result
 }
