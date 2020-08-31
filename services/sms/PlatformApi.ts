@@ -38,23 +38,23 @@ export default class PlatformApi {
       type: 'platform',
       attributes: {
         description: platform.description,
-        shortName: platform.shortName,
-        longName: platform.longName,
-        manufacturerUri: platform.manufacturerUri,
-        manufacturerName: platform.manufacturerName,
+        short_name: platform.shortName,
+        long_name: platform.longName,
+        manufacturer_uri: platform.manufacturerUri,
+        manufacturer_name: platform.manufacturerName,
         model: platform.model,
-        platformTypeUri: platform.platformTypeUri,
-        platformTypeName: platform.platformTypeName,
-        statusUri: platform.statusUri,
-        statusName: platform.statusName,
+        platform_type_uri: platform.platformTypeUri,
+        platform_type_name: platform.platformTypeName,
+        status_uri: platform.statusUri,
+        status_name: platform.statusName,
         website: platform.website,
-        createdAt: platform.createdAt,
-        updatedAt: platform.updatedAt,
-        // createdBy: platform.createdBy,
-        // updatedBy: platform.updatedBy,
-        inventoryNumber: platform.inventoryNumber,
-        serialNumber: platform.serialNumber,
-        persistentIdentifier: platform.persistentIdentifier,
+        created_at: platform.createdAt,
+        updated_at: platform.updatedAt,
+        // created_by: platform.createdBy,
+        // updated_by: platform.updatedBy,
+        inventory_number: platform.inventoryNumber,
+        serial_number: platform.serialNumber,
+        persistent_identifier: platform.persistentIdentifier === '' ? null : platform.persistentIdentifier,
         // TODO
         attachments: []
         // events: []
@@ -146,7 +146,7 @@ export class PlatformSearchBuilder {
       this.serverSideFilterSettings.push({
         // TODO: change to manufacturer_uri
         // and extend with manufacturer name as well
-        name: 'manufacturer',
+        name: 'manufacturer_uri',
         op: 'in_',
         val: manufacturers.map((m: Manufacturer) => m.uri)
       })
@@ -175,7 +175,7 @@ export class PlatformSearchBuilder {
       this.serverSideFilterSettings.push({
         // TODO: change to platformtype_uri
         // and extend with platformtype name as well
-        name: 'platform_type',
+        name: 'platform_type_uri',
         op: 'in_',
         val: types.map((t: PlatformType) => t.uri)
       })
@@ -287,26 +287,26 @@ export function serverResponseToEntity (entry: any) : Platform {
   result.id = Number.parseInt(entry.id)
 
   result.description = attributes.description || ''
-  result.shortName = attributes.shortName || ''
-  result.longName = attributes.longName || ''
-  result.manufacturerUri = attributes.manufacturerUri || ''
-  result.manufacturerName = attributes.manufacturerName || ''
+  result.shortName = attributes.short_name || ''
+  result.longName = attributes.long_name || ''
+  result.manufacturerUri = attributes.manufacturer_uri || ''
+  result.manufacturerName = attributes.manufacturer_name || ''
   result.model = attributes.model || ''
-  result.platformTypeUri = attributes.platformTypeUri || ''
-  result.platformTypeName = attributes.platformTypeName || ''
-  result.statusUri = attributes.statusUri || ''
-  result.statusName = attributes.statusName || ''
+  result.platformTypeUri = attributes.platform_type_uri || ''
+  result.platformTypeName = attributes.platform_type_name || ''
+  result.statusUri = attributes.status_uri || ''
+  result.statusName = attributes.status_name || ''
   result.website = attributes.website || ''
-  result.createdAt = attributes.createdAt
-  result.updatedAt = attributes.updatedAt
+  result.createdAt = attributes.created_at
+  result.updatedAt = attributes.updated_at
 
   // TODO
-  // result.createdBy = attributes.createdBy
-  // result.updatedBy = attributes.updatedBy
+  // result.createdBy = attributes.created_by
+  // result.updatedBy = attributes.updated_by
 
-  result.inventoryNumber = attributes.inventoryNumber || ''
-  result.serialNumber = attributes.serialNumber || ''
-  result.persistentIdentifier = attributes.persistentIdentifier || ''
+  result.inventoryNumber = attributes.inventory_number || ''
+  result.serialNumber = attributes.serial_number || ''
+  result.persistentIdentifier = attributes.persistent_identifier || ''
 
   // TODO
   result.attachments = []
