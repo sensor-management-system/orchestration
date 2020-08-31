@@ -10,6 +10,7 @@ import { IFlaskJSONAPIFilter } from '@/utils/JSONApiInterfaces'
 import {
   IPaginationLoader, FilteredPaginationedLoader
 } from '@/utils/PaginatedLoader'
+import { DeviceProperty } from '~/models/DeviceProperty'
 
 export default class DeviceApi {
   private axiosApi: AxiosInstance
@@ -33,6 +34,32 @@ export default class DeviceApi {
 
   save (device: Device) {
     // TODO: consistent camelCase
+
+    const properties = []
+
+    for (const property of device.properties) {
+      const propertyToSave: any = {}
+      if (property.id != null) {
+        propertyToSave.id = property.id
+      }
+
+      propertyToSave.measuringRangeMin = property.measuringRange.min
+      propertyToSave.measuringRangeMax = property.measuringRange.max
+      propertyToSave.failureValue = property.failureValue
+      propertyToSave.accuracy = property.accuracy
+      propertyToSave.label = property.label
+      propertyToSave.unitUri = property.unitUri
+      propertyToSave.unitName = property.unitName
+      propertyToSave.compartmentUri = property.compartmentUri
+      propertyToSave.compartmentName = property.compartmentName
+      propertyToSave.propertyUri = property.propertyUri
+      propertyToSave.propertyName = property.propertyName
+      propertyToSave.samplingMediaUri = property.samplingMediaUri
+      propertyToSave.samplingMediaName = property.samplingMediaName
+
+      properties.push(propertyToSave)
+    }
+
     const data: any = {
       type: 'device',
       attributes: {
@@ -49,7 +76,7 @@ export default class DeviceApi {
         model: device.model,
         dualUse: device.dualUse,
         inventoryNumber: device.inventoryNumber,
-        persistentIdentifier: device.persistentIdentifier,
+        persistentIdentifier: device.persistentIdentifier === '' ? null : device.persistentIdentifier,
         website: device.website,
         createdAt: device.createdAt,
         updatedAt: device.updatedAt,
@@ -59,7 +86,7 @@ export default class DeviceApi {
 
         // TODO
         customfields: [],
-        properties: [],
+        properties,
         attachments: []
 
         /*
@@ -232,6 +259,8 @@ export class DeviceSearcher {
   private get commonParams (): any {
     return {
       filter: JSON.stringify(this.serverSideFilterSettings),
+      // yes, it must be snake_case as the flask & sqlalchemy implementation
+      // use this casing (only the json:api on top of that uses camelCase)
       sort: 'short_name'
     }
   }
@@ -330,6 +359,27 @@ export function serverResponseToEntity (entry: any) : Device {
   // result.events = []
   result.attachments = []
   result.contacts = []
+  result.properties = []
+
+  for (const propertyFromServer of attributes.properties) {
+    const property = new DeviceProperty()
+    property.id = Number.parseInt(propertyFromServer.id)
+    property.measuringRange.min = propertyFromServer.measuringRangeMin
+    property.measuringRange.max = propertyFromServer.measuringRangeMax
+    property.failureValue = propertyFromServer.failureValue
+    property.accuracy = propertyFromServer.accuracy
+    property.label = propertyFromServer.label || ''
+    property.unitUri = propertyFromServer.unitUri || ''
+    property.unitName = propertyFromServer.unitName || ''
+    property.compartmentUri = propertyFromServer.compartmentUri || ''
+    property.compartmentName = propertyFromServer.compartmentName || ''
+    property.propertyUri = propertyFromServer.propertyUri || ''
+    property.propertyName = propertyFromServer.propertyName || ''
+    property.samplingMediaUri = propertyFromServer.samplingMediaUri || ''
+    property.samplingMediaName = propertyFromServer.samplingMediaName || ''
+
+    result.properties.push(propertyFromServer)
+  }
 
   return result
 }
