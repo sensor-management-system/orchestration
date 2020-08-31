@@ -25,6 +25,7 @@ describe('CustomFieldForm', () => {
       vuetify,
       propsData: {
         value: CustomTextField.createFromObject({
+          id: 2,
           key: 'foo',
           value: 'bar'
         })
