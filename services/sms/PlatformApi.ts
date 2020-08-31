@@ -12,6 +12,9 @@ import {
   IPaginationLoader, FilteredPaginationedLoader
 } from '@/utils/PaginatedLoader'
 
+import { serverResponseToEntity as serverResponseToContact } from '@/services/sms/ContactApi'
+import Contact from '~/models/Contact'
+
 export default class PlatformApi {
   private axiosApi: AxiosInstance
 
@@ -22,9 +25,15 @@ export default class PlatformApi {
   findById (id: string): Promise<Platform> {
     // TODO: Think about also including the contacts
     // with ?include=contacts
-    return this.axiosApi.get(id).then((rawResponse) => {
-      const entry = rawResponse.data.data
-      return serverResponseToEntity(entry)
+    return this.axiosApi.get(id, {
+      params: {
+        include: 'contacts'
+      }
+    }).then((rawResponse) => {
+      const rawData = rawResponse.data
+      const entry = rawData.data
+      const included: any[] = rawData.included || []
+      return serverResponseToEntity(entry, included)
     })
   }
 
@@ -44,6 +53,14 @@ export default class PlatformApi {
       attachmentToSave.url = attachment.url
 
       attachments.push(attachmentToSave)
+    }
+
+    const contacts = []
+    for (const contact of platform.contacts) {
+      contacts.push({
+        id: contact.id,
+        type: 'contact'
+      })
     }
 
     const data: any = {
@@ -68,25 +85,13 @@ export default class PlatformApi {
         serial_number: platform.serialNumber,
         persistent_identifier: platform.persistentIdentifier === '' ? null : platform.persistentIdentifier,
         attachments
-        // TODO
-
-        // events: []
-      }/*,
+      },
       relationships: {
         contacts: {
-          data: [
-            {
-              type: 'contact',
-              id: 1,
-            },
-            {
-              type: 'contact',
-              id: 2
-            }
-          ]
+          data: contacts
         }
+        // TODO: events
       }
-      */
     }
     let method: Method = 'patch'
     let url = ''
@@ -108,7 +113,7 @@ export default class PlatformApi {
         data
       }
     }).then((serverAnswer) => {
-      return serverResponseToEntity(serverAnswer.data.data)
+      return this.findById(serverAnswer.data.data.id)
     })
   }
 
@@ -239,9 +244,10 @@ export class PlatformSearcher {
     ).then((rawResponse: any) => {
       const rawData = rawResponse.data
       const result: Platform[] = []
+      const included: any[] = rawData.included || []
 
       for (const entry of rawData.data) {
-        const platform = serverResponseToEntity(entry)
+        const platform = serverResponseToEntity(entry, included)
         if (this.clientSideFilterFunc(platform)) {
           result.push(platform)
         }
@@ -270,12 +276,13 @@ export class PlatformSearcher {
     ).then((rawResponse) => {
       const rawData = rawResponse.data
       const result: Platform[] = []
+      const included: any[] = rawData.included || []
       for (const entry of rawData.data) {
         // client side filtering will not be done here
         // (but in the FilteredPaginationedLoader)
         // so that we know if we still have elements here
         // there may be others to load as well
-        result.push(serverResponseToEntity(entry))
+        result.push(serverResponseToEntity(entry, included))
       }
 
       let funToLoadNext = null
@@ -291,10 +298,11 @@ export class PlatformSearcher {
   }
 }
 
-export function serverResponseToEntity (entry: any) : Platform {
+export function serverResponseToEntity (entry: any, included: any[]) : Platform {
   const result: Platform = Platform.createEmpty()
 
   const attributes = entry.attributes
+  const relationships = entry.relationships
 
   // TODO: use camelCase only!!!
   result.id = Number.parseInt(entry.id)
@@ -337,6 +345,41 @@ export function serverResponseToEntity (entry: any) : Platform {
   }
 
   result.attachments = attachments
+
+  const contactIds = []
+  if (relationships.contacts && relationships.contacts.data && relationships.contacts.data.length > 0) {
+    for (const relationShipContactData of relationships.contacts.data) {
+      const contactId = Number.parseInt(relationShipContactData.id)
+      contactIds.push(contactId)
+    }
+  }
+
+  const possibleContacts: {[key: number]: Contact} = {}
+  if (included && included.length > 0) {
+    for (const includedEntry of included) {
+      if (includedEntry.type === 'contact') {
+        const contactId = Number.parseInt(includedEntry.id)
+        if (contactIds.includes(contactId)) {
+          const contact = serverResponseToContact(includedEntry)
+          possibleContacts[contactId] = contact
+        }
+      }
+    }
+  }
+
+  const contacts = []
+
+  for (const contactId of contactIds) {
+    if (possibleContacts[contactId]) {
+      contacts.push(possibleContacts[contactId])
+    } else {
+      const contact = new Contact()
+      contact.id = contactId
+      contacts.push(contact)
+    }
+  }
+
+  result.contacts = contacts
 
   return result
 }

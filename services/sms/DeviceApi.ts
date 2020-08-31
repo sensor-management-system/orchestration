@@ -11,9 +11,12 @@ import { Attachment } from '@/models/Attachment'
 
 import { IFlaskJSONAPIFilter } from '@/utils/JSONApiInterfaces'
 
+import { serverResponseToEntity as serverResponseToContact } from '@/services/sms/ContactApi'
+
 import {
   IPaginationLoader, FilteredPaginationedLoader
 } from '@/utils/PaginatedLoader'
+import Contact from '~/models/Contact'
 
 export default class DeviceApi {
   private axiosApi: AxiosInstance
@@ -25,9 +28,15 @@ export default class DeviceApi {
   findById (id: string): Promise<Device> {
     // TODO: Think about also including the contacts
     // with ?include=contacts
-    return this.axiosApi.get(id).then((rawResponse) => {
-      const entry = rawResponse.data.data
-      return serverResponseToEntity(entry)
+    return this.axiosApi.get(id, {
+      params: {
+        include: 'contacts'
+      }
+    }).then((rawResponse) => {
+      const rawData = rawResponse.data
+      const entry = rawData.data
+      const included: any[] = rawData.included || []
+      return serverResponseToEntity(entry, included)
     })
   }
 
@@ -92,6 +101,14 @@ export default class DeviceApi {
       attachments.push(attachmentToSave)
     }
 
+    const contacts = []
+    for (const contact of device.contacts) {
+      contacts.push({
+        id: contact.id,
+        type: 'contact'
+      })
+    }
+
     const data: any = {
       type: 'device',
       attributes: {
@@ -116,43 +133,14 @@ export default class DeviceApi {
 
         customfields,
         properties,
-        // TODO
         attachments
-
-        /*
-        customFields: [
-          {
-            key: 'key1',
-            value: 'value1'
-          },
-          {
-            key: 'key2',
-            value: 'value2
-          }
-        ]
-        */
-      }
-
-      /*
+      },
       relationships: {
-        events: {
-
-        },
         contacts: {
-          data: [
-            {
-              type: 'contact',
-              id: 1,
-            },
-            {
-              type: 'contact',
-              id: 2
-            }
-          ]
+          data: contacts
         }
-
+        // TODO: events
       }
-      */
     }
     let method: Method = 'patch'
     let url = ''
@@ -174,7 +162,7 @@ export default class DeviceApi {
         data
       }
     }).then((serverAnswer) => {
-      return serverResponseToEntity(serverAnswer.data.data)
+      return this.findById(serverAnswer.data.data.id)
     })
   }
 
@@ -289,8 +277,6 @@ export class DeviceSearcher {
   private get commonParams (): any {
     return {
       filter: JSON.stringify(this.serverSideFilterSettings),
-      // yes, it must be snake_case as the flask & sqlalchemy implementation
-      // use this casing (only the json:api on top of that uses camelCase)
       sort: 'short_name'
     }
   }
@@ -307,9 +293,10 @@ export class DeviceSearcher {
     ).then((rawResponse: any) => {
       const rawData = rawResponse.data
       const result: Device[] = []
+      const included: any[] = rawData.included || []
 
       for (const entry of rawData.data) {
-        const device = serverResponseToEntity(entry)
+        const device = serverResponseToEntity(entry, included)
         if (this.clientSideFilterFunc(device)) {
           result.push(device)
         }
@@ -338,12 +325,13 @@ export class DeviceSearcher {
     ).then((rawResponse) => {
       const rawData = rawResponse.data
       const result: Device[] = []
+      const included: any[] = rawData.included || []
       for (const entry of rawData.data) {
         // client side filtering will not be done here
         // (but in the FilteredPaginationedLoader)
         // so that we know if we still have elements here
         // there may be others to load as well
-        result.push(serverResponseToEntity(entry))
+        result.push(serverResponseToEntity(entry, included))
       }
 
       let funToLoadNext = null
@@ -359,10 +347,11 @@ export class DeviceSearcher {
   }
 }
 
-export function serverResponseToEntity (entry: any) : Device {
+export function serverResponseToEntity (entry: any, included: any[]) : Device {
   const result: Device = new Device()
 
   const attributes = entry.attributes
+  const relationships = entry.relationships
 
   result.id = entry.id
 
@@ -439,6 +428,41 @@ export function serverResponseToEntity (entry: any) : Device {
   }
 
   result.attachments = attachments
+
+  const contactIds = []
+  if (relationships.contacts && relationships.contacts.data && relationships.contacts.data.length > 0) {
+    for (const relationShipContactData of relationships.contacts.data) {
+      const contactId = Number.parseInt(relationShipContactData.id)
+      contactIds.push(contactId)
+    }
+  }
+
+  const possibleContacts: {[key: number]: Contact} = {}
+  if (included && included.length > 0) {
+    for (const includedEntry of included) {
+      if (includedEntry.type === 'contact') {
+        const contactId = Number.parseInt(includedEntry.id)
+        if (contactIds.includes(contactId)) {
+          const contact = serverResponseToContact(includedEntry)
+          possibleContacts[contactId] = contact
+        }
+      }
+    }
+  }
+
+  const contacts = []
+
+  for (const contactId of contactIds) {
+    if (possibleContacts[contactId]) {
+      contacts.push(possibleContacts[contactId])
+    } else {
+      const contact = new Contact()
+      contact.id = contactId
+      contacts.push(contact)
+    }
+  }
+
+  result.contacts = contacts
 
   return result
 }
