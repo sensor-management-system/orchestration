@@ -13,6 +13,7 @@ import {
 import { DeviceProperty } from '~/models/DeviceProperty'
 import { MeasuringRange } from '~/models/MeasuringRange'
 import { CustomTextField } from '~/models/CustomTextField'
+import { Attachment } from '~/models/Attachment'
 
 export default class DeviceApi {
   private axiosApi: AxiosInstance
@@ -79,6 +80,18 @@ export default class DeviceApi {
       customfields.push(customFieldToSave)
     }
 
+    const attachments = []
+    for (const attachment of device.attachments) {
+      const attachmentToSave: any = {}
+      if (attachment.id != null) {
+        attachmentToSave.id = attachment.id
+      }
+      attachmentToSave.label = attachment.label
+      attachmentToSave.url = attachment.url
+
+      attachments.push(attachmentToSave)
+    }
+
     const data: any = {
       type: 'device',
       attributes: {
@@ -104,7 +117,7 @@ export default class DeviceApi {
         customfields,
         properties,
         // TODO
-        attachments: []
+        attachments
 
         /*
         customFields: [
@@ -413,6 +426,19 @@ export function serverResponseToEntity (entry: any) : Device {
   }
 
   result.customFields = customFields
+
+  const attachments: Attachment[] = []
+
+  for (const attachmentFromServer of attributes.attachments) {
+    const attachment = new Attachment()
+    attachment.id = Number.parseInt(attachmentFromServer.id)
+    attachment.label = attachmentFromServer.label || ''
+    attachment.url = attachmentFromServer.url || ''
+
+    attachments.push(attachment)
+  }
+
+  result.attachments = attachments
 
   return result
 }
