@@ -37,25 +37,25 @@ export default class DeviceApi {
       type: 'device',
       attributes: {
         description: device.description,
-        shortName: device.shortName,
-        longName: device.longName,
-        serialNumber: device.serialNumber,
-        manufacturerUri: device.manufacturerUri,
-        manufacturerName: device.manufacturerName,
-        deviceTypeUri: device.deviceTypeUri,
-        deviceTypeName: device.deviceTypeName,
-        statusUri: device.statusUri,
-        statusName: device.statusName,
+        short_name: device.shortName,
+        long_name: device.longName,
+        serial_number: device.serialNumber,
+        manufacturer_uri: device.manufacturerUri,
+        manufacturer_name: device.manufacturerName,
+        device_type_uri: device.deviceTypeUri,
+        device_type_name: device.deviceTypeName,
+        status_uri: device.statusUri,
+        status_name: device.statusName,
         model: device.model,
-        dualUse: device.dualUse,
-        inventoryNumber: device.inventoryNumber,
-        persistentIdentifier: device.persistentIdentifier,
+        dual_use: device.dualUse,
+        inventory_number: device.inventoryNumber,
+        persistent_identifier: device.persistentIdentifier === '' ? null : device.persistentIdentifier,
         website: device.website,
-        createdAt: device.createdAt,
-        updatedAt: device.updatedAt,
+        created_at: device.createdAt,
+        updated_at: device.updatedAt,
         // TODO
-        // createdBy: device.createdBy,
-        // updatedBy: device.updatedBy,
+        // created_by: device.createdBy,
+        // updated_by: device.updatedBy,
 
         // TODO
         customfields: [],
@@ -168,7 +168,7 @@ export class DeviceSearchBuilder {
       this.serverSideFilterSettings.push({
         // TODO: change to manufacturer_name
         // and extend with manufacturer uri as well
-        name: 'manufacturer',
+        name: 'manufacturer_name',
         op: 'in_',
         val: manufacturers.map((m: Manufacturer) => m.name)
       })
@@ -197,7 +197,7 @@ export class DeviceSearchBuilder {
       this.serverSideFilterSettings.push({
         // TODO: change to devicetype_uri
         // and extend with platformtype name as well
-        name: 'type',
+        name: 'device_type_uri',
         op: 'in_',
         val: types.map((t: DeviceType) => t.uri)
       })
@@ -308,24 +308,24 @@ export function serverResponseToEntity (entry: any) : Device {
   result.id = entry.id
 
   result.description = attributes.description || ''
-  result.shortName = attributes.shortName || ''
-  result.longName = attributes.longName || ''
-  result.serialNumber = attributes.serialNumber || ''
-  result.manufacturerUri = attributes.manufacturerUri || ''
-  result.manufacturerName = attributes.manufacturerName || ''
-  result.deviceTypeUri = attributes.deviceTypeUri || ''
-  result.deviceTypeName = attributes.deviceTypeName || ''
-  result.statusUri = attributes.statusUri || ''
-  result.statusName = attributes.statusName || ''
+  result.shortName = attributes.short_name || ''
+  result.longName = attributes.long_name || ''
+  result.serialNumber = attributes.serial_number || ''
+  result.manufacturerUri = attributes.manufacturer_uri || ''
+  result.manufacturerName = attributes.manufacturer_name || ''
+  result.deviceTypeUri = attributes.device_type_uri || ''
+  result.deviceTypeName = attributes.device_type_name || ''
+  result.statusUri = attributes.status_uri || ''
+  result.statusName = attributes.status_name || ''
   result.model = attributes.model || ''
-  result.dualUse = attributes.dualUse || false
-  result.inventoryNumber = attributes.inventoryNumber || ''
-  result.persistentIdentifier = attributes.persistentIdentifier || ''
+  result.dualUse = attributes.dual_use || false
+  result.inventoryNumber = attributes.inventory_number || ''
+  result.persistentIdentifier = attributes.persistent_identifier || ''
   result.website = attributes.website || ''
-  result.createdAt = attributes.createdAt
-  result.updatedAt = attributes.updatedAt
-  // result.createdBy = attributes.createdBy
-  // result.updatedBy = attributes.updatedBy
+  result.createdAt = attributes.created_at
+  result.updatedAt = attributes.updated_at
+  // result.createdBy = attributes.created_by
+  // result.updatedBy = attributes.updated_by
   result.customFields = []
   // result.events = []
   result.attachments = []
