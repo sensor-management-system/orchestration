@@ -11,6 +11,7 @@ import {
   IPaginationLoader, FilteredPaginationedLoader
 } from '@/utils/PaginatedLoader'
 import { DeviceProperty } from '~/models/DeviceProperty'
+import { MeasuringRange } from '~/models/MeasuringRange'
 
 export default class DeviceApi {
   private axiosApi: AxiosInstance
@@ -43,19 +44,19 @@ export default class DeviceApi {
         propertyToSave.id = property.id
       }
 
-      propertyToSave.measuringRangeMin = property.measuringRange.min
-      propertyToSave.measuringRangeMax = property.measuringRange.max
-      propertyToSave.failureValue = property.failureValue
+      propertyToSave.measuring_range_min = property.measuringRange.min
+      propertyToSave.measuring_range_min = property.measuringRange.max
+      propertyToSave.failure_value = property.failureValue
       propertyToSave.accuracy = property.accuracy
       propertyToSave.label = property.label
-      propertyToSave.unitUri = property.unitUri
-      propertyToSave.unitName = property.unitName
-      propertyToSave.compartmentUri = property.compartmentUri
-      propertyToSave.compartmentName = property.compartmentName
-      propertyToSave.propertyUri = property.propertyUri
-      propertyToSave.propertyName = property.propertyName
-      propertyToSave.samplingMediaUri = property.samplingMediaUri
-      propertyToSave.samplingMediaName = property.samplingMediaName
+      propertyToSave.unit_uri = property.unitUri
+      propertyToSave.unit_name = property.unitName
+      propertyToSave.compartment_uri = property.compartmentUri
+      propertyToSave.compartment_name = property.compartmentName
+      propertyToSave.property_uri = property.propertyUri
+      propertyToSave.property_name = property.propertyName
+      propertyToSave.sampling_media_uri = property.samplingMediaUri
+      propertyToSave.sampling_media_name = property.samplingMediaName
 
       properties.push(propertyToSave)
     }
@@ -357,27 +358,31 @@ export function serverResponseToEntity (entry: any) : Device {
   // result.events = []
   result.attachments = []
   result.contacts = []
-  result.properties = []
+  const properties: DeviceProperty[] = []
 
   for (const propertyFromServer of attributes.properties) {
     const property = new DeviceProperty()
     property.id = Number.parseInt(propertyFromServer.id)
-    property.measuringRange.min = propertyFromServer.measuringRangeMin
-    property.measuringRange.max = propertyFromServer.measuringRangeMax
-    property.failureValue = propertyFromServer.failureValue
+    property.measuringRange = new MeasuringRange(
+      propertyFromServer.measuring_range_min,
+      propertyFromServer.measuring_range_max
+    )
+    property.failureValue = propertyFromServer.failure_value
     property.accuracy = propertyFromServer.accuracy
     property.label = propertyFromServer.label || ''
-    property.unitUri = propertyFromServer.unitUri || ''
-    property.unitName = propertyFromServer.unitName || ''
-    property.compartmentUri = propertyFromServer.compartmentUri || ''
-    property.compartmentName = propertyFromServer.compartmentName || ''
-    property.propertyUri = propertyFromServer.propertyUri || ''
-    property.propertyName = propertyFromServer.propertyName || ''
-    property.samplingMediaUri = propertyFromServer.samplingMediaUri || ''
-    property.samplingMediaName = propertyFromServer.samplingMediaName || ''
+    property.unitUri = propertyFromServer.unit_uri || ''
+    property.unitName = propertyFromServer.unit_name || ''
+    property.compartmentUri = propertyFromServer.compartment_uri || ''
+    property.compartmentName = propertyFromServer.compartment_name || ''
+    property.propertyUri = propertyFromServer.property_uri || ''
+    property.propertyName = propertyFromServer.property_name || ''
+    property.samplingMediaUri = propertyFromServer.sampling_media_uri || ''
+    property.samplingMediaName = propertyFromServer.sampling_media_name || ''
 
-    result.properties.push(propertyFromServer)
+    properties.push(property)
   }
+
+  result.properties = properties
 
   return result
 }
