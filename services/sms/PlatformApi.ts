@@ -2,7 +2,7 @@ import { AxiosInstance, Method } from 'axios'
 
 import Platform from '@/models/Platform'
 import PlatformType from '@/models/PlatformType'
-
+import { Attachment } from '@/models/Attachment'
 import Manufacturer from '@/models/Manufacturer'
 import Status from '@/models/Status'
 
@@ -33,7 +33,19 @@ export default class PlatformApi {
   }
 
   save (platform: Platform): Promise<Platform> {
-    // TODO: consistent camelCase
+    const attachments = []
+
+    for (const attachment of platform.attachments) {
+      const attachmentToSave: any = {}
+      if (attachment.id != null) {
+        attachmentToSave.id = attachment.id
+      }
+      attachmentToSave.label = attachment.label
+      attachmentToSave.url = attachment.url
+
+      attachments.push(attachmentToSave)
+    }
+
     const data: any = {
       type: 'platform',
       attributes: {
@@ -55,8 +67,9 @@ export default class PlatformApi {
         inventory_number: platform.inventoryNumber,
         serial_number: platform.serialNumber,
         persistent_identifier: platform.persistentIdentifier === '' ? null : platform.persistentIdentifier,
+        attachments
         // TODO
-        attachments: []
+
         // events: []
       }/*,
       relationships: {
@@ -309,9 +322,21 @@ export function serverResponseToEntity (entry: any) : Platform {
   result.persistentIdentifier = attributes.persistent_identifier || ''
 
   // TODO
-  result.attachments = []
   result.contacts = []
   // result.events = []
+
+  const attachments: Attachment[] = []
+
+  for (const attachmentFromServer of attributes.attachments) {
+    const attachment = new Attachment()
+    attachment.id = Number.parseInt(attachmentFromServer.id)
+    attachment.label = attachmentFromServer.label || ''
+    attachment.url = attachmentFromServer.url || ''
+
+    attachments.push(attachment)
+  }
+
+  result.attachments = attachments
 
   return result
 }

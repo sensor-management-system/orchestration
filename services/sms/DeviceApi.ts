@@ -4,16 +4,16 @@ import Device from '@/models/Device'
 import DeviceType from '@/models/DeviceType'
 import Manufacturer from '@/models/Manufacturer'
 import Status from '@/models/Status'
+import { DeviceProperty } from '@/models/DeviceProperty'
+import { MeasuringRange } from '@/models/MeasuringRange'
+import { CustomTextField } from '@/models/CustomTextField'
+import { Attachment } from '@/models/Attachment'
 
 import { IFlaskJSONAPIFilter } from '@/utils/JSONApiInterfaces'
 
 import {
   IPaginationLoader, FilteredPaginationedLoader
 } from '@/utils/PaginatedLoader'
-import { DeviceProperty } from '~/models/DeviceProperty'
-import { MeasuringRange } from '~/models/MeasuringRange'
-import { CustomTextField } from '~/models/CustomTextField'
-import { Attachment } from '~/models/Attachment'
 
 export default class DeviceApi {
   private axiosApi: AxiosInstance
