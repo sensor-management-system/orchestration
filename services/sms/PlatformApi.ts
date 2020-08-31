@@ -77,6 +77,7 @@ export default class PlatformApi {
         status_uri: platform.statusUri,
         status_name: platform.statusName,
         website: platform.website,
+        // those two time slots are set by the db, no matter what we deliver here
         created_at: platform.createdAt,
         updated_at: platform.updatedAt,
         // created_by: platform.createdBy,

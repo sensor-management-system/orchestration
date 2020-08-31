@@ -125,6 +125,7 @@ export default class DeviceApi {
         model: device.model,
         persistent_identifier: device.persistentIdentifier === '' ? null : device.persistentIdentifier,
         website: device.website,
+        // those two time slots are set by the db, no matter what we deliver here
         created_at: device.createdAt,
         updated_at: device.updatedAt,
         // TODO
