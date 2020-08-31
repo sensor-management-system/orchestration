@@ -4,7 +4,6 @@ from project.api.schemas.attachment_schema import AttachmentSchema
 from project.api.schemas.customfield_schema import CustomFieldSchema
 from project.api.schemas.event_schema import EventSchema
 from project.api.schemas.device_property_schema import DevicePropertySchema
-from project.api.schemas.utils import camel_case
 
 
 class DeviceSchema(Schema):
@@ -23,7 +22,6 @@ class DeviceSchema(Schema):
         type_ = "device"
         self_view = "device_detail"
         self_view_kwargs = {"id": "<id>"}
-        inflect = camel_case
 
     id = fields.Integer(as_string=True, dump_only=True)
     description = fields.Str(allow_none=True)
