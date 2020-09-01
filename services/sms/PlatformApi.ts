@@ -38,26 +38,27 @@ export default class PlatformApi {
       type: 'platform',
       attributes: {
         description: platform.description,
-        inventory_number: platform.inventoryNumber,
-        long_name: platform.longName,
-        // TODO: handle manufacturerName
-        manufacturer: platform.manufacturerUri,
-        // TODO: Handle platformTypeName
-        platform_type: platform.platformTypeUri,
-        // TODO: serialNumber
         short_name: platform.shortName,
-        // TODO: statusUri
-        url: platform.website,
-        // TODO: handle contacts
-        // TODO: Handle attachments
-
-        // TODO: Remove type
-        // --> For the platform we have a platform type, but no other
-        // general type.
-        type: ''
-
-      }
-      /*
+        long_name: platform.longName,
+        manufacturer_uri: platform.manufacturerUri,
+        manufacturer_name: platform.manufacturerName,
+        model: platform.model,
+        platform_type_uri: platform.platformTypeUri,
+        platform_type_name: platform.platformTypeName,
+        status_uri: platform.statusUri,
+        status_name: platform.statusName,
+        website: platform.website,
+        created_at: platform.createdAt,
+        updated_at: platform.updatedAt,
+        // created_by: platform.createdBy,
+        // updated_by: platform.updatedBy,
+        inventory_number: platform.inventoryNumber,
+        serial_number: platform.serialNumber,
+        persistent_identifier: platform.persistentIdentifier === '' ? null : platform.persistentIdentifier,
+        // TODO
+        attachments: []
+        // events: []
+      }/*,
       relationships: {
         contacts: {
           data: [
@@ -71,7 +72,6 @@ export default class PlatformApi {
             }
           ]
         }
-
       }
       */
     }
@@ -146,7 +146,7 @@ export class PlatformSearchBuilder {
       this.serverSideFilterSettings.push({
         // TODO: change to manufacturer_uri
         // and extend with manufacturer name as well
-        name: 'manufacturer',
+        name: 'manufacturer_uri',
         op: 'in_',
         val: manufacturers.map((m: Manufacturer) => m.uri)
       })
@@ -175,7 +175,7 @@ export class PlatformSearchBuilder {
       this.serverSideFilterSettings.push({
         // TODO: change to platformtype_uri
         // and extend with platformtype name as well
-        name: 'platform_type',
+        name: 'platform_type_uri',
         op: 'in_',
         val: types.map((t: PlatformType) => t.uri)
       })
@@ -287,22 +287,31 @@ export function serverResponseToEntity (entry: any) : Platform {
   result.id = Number.parseInt(entry.id)
 
   result.description = attributes.description || ''
-  result.inventoryNumber = attributes.inventory_number || ''
-  result.longName = attributes.long_name || ''
-  // TODO: Renaming to manufacturerUri after Change in Backend
-  result.manufacturerUri = attributes.manufacturer || ''
-  // TODO: Read from the right field
-  result.model = attributes.type || ''
-  // TODO: Renaming to platform_type_uri after change in backend
-  // TODO: Add platformTypeName
-  result.platformTypeUri = attributes.platform_type || ''
   result.shortName = attributes.short_name || ''
-  result.website = attributes.url || ''
-  // TODO: statusUri
-  // TODO: serialNumber
+  result.longName = attributes.long_name || ''
+  result.manufacturerUri = attributes.manufacturer_uri || ''
+  result.manufacturerName = attributes.manufacturer_name || ''
+  result.model = attributes.model || ''
+  result.platformTypeUri = attributes.platform_type_uri || ''
+  result.platformTypeName = attributes.platform_type_name || ''
+  result.statusUri = attributes.status_uri || ''
+  result.statusName = attributes.status_name || ''
+  result.website = attributes.website || ''
+  result.createdAt = attributes.created_at
+  result.updatedAt = attributes.updated_at
 
-  // TODO: reading the contacts
+  // TODO
+  // result.createdBy = attributes.created_by
+  // result.updatedBy = attributes.updated_by
+
+  result.inventoryNumber = attributes.inventory_number || ''
+  result.serialNumber = attributes.serial_number || ''
+  result.persistentIdentifier = attributes.persistent_identifier || ''
+
+  // TODO
+  result.attachments = []
   result.contacts = []
+  // result.events = []
 
   return result
 }

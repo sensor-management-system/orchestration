@@ -37,19 +37,30 @@ export default class DeviceApi {
       type: 'device',
       attributes: {
         description: device.description,
+        short_name: device.shortName,
+        long_name: device.longName,
+        serial_number: device.serialNumber,
+        manufacturer_uri: device.manufacturerUri,
+        manufacturer_name: device.manufacturerName,
+        device_type_uri: device.deviceTypeUri,
+        device_type_name: device.deviceTypeName,
+        status_uri: device.statusUri,
+        status_name: device.statusName,
+        model: device.model,
         dual_use: device.dualUse,
         inventory_number: device.inventoryNumber,
-        long_name: device.longName,
-        // TODO: Change to uri after backend change
-        manufacturer: device.manufacturerName,
-        // TODO: Add manufacturerUri
-        model: device.model,
-        persistent_identifier: device.persistentIdentifier,
-        serial_number: device.serialNumber,
-        short_name: device.shortName,
-        // TODO: Add statusName & statusUri
-        url: device.website,
-        type: device.deviceTypeUri
+        persistent_identifier: device.persistentIdentifier === '' ? null : device.persistentIdentifier,
+        website: device.website,
+        created_at: device.createdAt,
+        updated_at: device.updatedAt,
+        // TODO
+        // created_by: device.createdBy,
+        // updated_by: device.updatedBy,
+
+        // TODO
+        customfields: [],
+        properties: [],
+        attachments: []
 
         /*
         customFields: [
@@ -67,6 +78,9 @@ export default class DeviceApi {
 
       /*
       relationships: {
+        events: {
+
+        },
         contacts: {
           data: [
             {
@@ -154,7 +168,7 @@ export class DeviceSearchBuilder {
       this.serverSideFilterSettings.push({
         // TODO: change to manufacturer_name
         // and extend with manufacturer uri as well
-        name: 'manufacturer',
+        name: 'manufacturer_name',
         op: 'in_',
         val: manufacturers.map((m: Manufacturer) => m.name)
       })
@@ -183,7 +197,7 @@ export class DeviceSearchBuilder {
       this.serverSideFilterSettings.push({
         // TODO: change to devicetype_uri
         // and extend with platformtype name as well
-        name: 'type',
+        name: 'device_type_uri',
         op: 'in_',
         val: types.map((t: DeviceType) => t.uri)
       })
@@ -294,30 +308,28 @@ export function serverResponseToEntity (entry: any) : Device {
   result.id = entry.id
 
   result.description = attributes.description || ''
-  // TODO: to camelcase
+  result.shortName = attributes.short_name || ''
+  result.longName = attributes.long_name || ''
+  result.serialNumber = attributes.serial_number || ''
+  result.manufacturerUri = attributes.manufacturer_uri || ''
+  result.manufacturerName = attributes.manufacturer_name || ''
+  result.deviceTypeUri = attributes.device_type_uri || ''
+  result.deviceTypeName = attributes.device_type_name || ''
+  result.statusUri = attributes.status_uri || ''
+  result.statusName = attributes.status_name || ''
+  result.model = attributes.model || ''
   result.dualUse = attributes.dual_use || false
   result.inventoryNumber = attributes.inventory_number || ''
-  result.longName = attributes.long_name || ''
-  result.manufacturerName = attributes.manufacturer || ''
-  // TODO: manufacturerUri
-  result.model = attributes.model || ''
-
   result.persistentIdentifier = attributes.persistent_identifier || ''
-  result.shortName = attributes.short_name || ''
-  result.serialNumber = attributes.serial_number || ''
-  // TODO: StatusName & StatusUri
-  result.website = attributes.url || ''
-
-  result.deviceTypeUri = attributes.type || ''
-  // TODO: createdAt, modifiedAt, createdBy, modifiedBy
-
-  // TODO: Insert those as well
-  result.contacts = []
-  result.properties = []
+  result.website = attributes.website || ''
+  result.createdAt = attributes.created_at
+  result.updatedAt = attributes.updated_at
+  // result.createdBy = attributes.created_by
+  // result.updatedBy = attributes.updated_by
   result.customFields = []
-
-  // TODO: Attachments
-  // TODO: events
+  // result.events = []
+  result.attachments = []
+  result.contacts = []
 
   return result
 }
