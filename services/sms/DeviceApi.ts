@@ -117,6 +117,7 @@ export default class DeviceApi {
         short_name: device.shortName,
         long_name: device.longName,
         serial_number: device.serialNumber,
+        inventory_number: device.inventoryNumber,
         manufacturer_uri: device.manufacturerUri,
         manufacturer_name: device.manufacturerName,
         device_type_uri: device.deviceTypeUri,
