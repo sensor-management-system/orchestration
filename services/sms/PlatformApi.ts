@@ -1,5 +1,6 @@
 import { AxiosInstance, Method } from 'axios'
 
+import Contact from '@/models/Contact'
 import Platform from '@/models/Platform'
 import PlatformType from '@/models/PlatformType'
 import { Attachment } from '@/models/Attachment'
@@ -13,7 +14,7 @@ import {
 } from '@/utils/PaginatedLoader'
 
 import { serverResponseToEntity as serverResponseToContact } from '@/services/sms/ContactApi'
-import Contact from '~/models/Contact'
+
 
 export default class PlatformApi {
   private axiosApi: AxiosInstance

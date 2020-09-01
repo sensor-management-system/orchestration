@@ -1,5 +1,6 @@
 import { AxiosInstance, Method } from 'axios'
 
+import Contact from '@/models/Contact'
 import Device from '@/models/Device'
 import DeviceType from '@/models/DeviceType'
 import Manufacturer from '@/models/Manufacturer'
@@ -16,7 +17,7 @@ import { serverResponseToEntity as serverResponseToContact } from '@/services/sm
 import {
   IPaginationLoader, FilteredPaginationedLoader
 } from '@/utils/PaginatedLoader'
-import Contact from '~/models/Contact'
+
 
 export default class DeviceApi {
   private axiosApi: AxiosInstance
