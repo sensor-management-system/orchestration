@@ -15,7 +15,6 @@ import {
 
 import { serverResponseToEntity as serverResponseToContact } from '@/services/sms/ContactApi'
 
-
 export default class PlatformApi {
   private axiosApi: AxiosInstance
 
@@ -24,8 +23,6 @@ export default class PlatformApi {
   }
 
   findById (id: string): Promise<Platform> {
-    // TODO: Think about also including the contacts
-    // with ?include=contacts
     return this.axiosApi.get(id, {
       params: {
         include: 'contacts'
@@ -81,10 +78,13 @@ export default class PlatformApi {
         // those two time slots are set by the db, no matter what we deliver here
         created_at: platform.createdAt,
         updated_at: platform.updatedAt,
+        // TODO
         // created_by: platform.createdBy,
         // updated_by: platform.updatedBy,
         inventory_number: platform.inventoryNumber,
         serial_number: platform.serialNumber,
+        // as the persistent_identifier must be unique, we sent null in case
+        // that we don't have an identifier here
         persistent_identifier: platform.persistentIdentifier === '' ? null : platform.persistentIdentifier,
         attachments
       },
@@ -164,11 +164,18 @@ export class PlatformSearchBuilder {
   withOneMatchingManufacturerOf (manufacturers: Manufacturer[]): PlatformSearchBuilder {
     if (manufacturers.length > 0) {
       this.serverSideFilterSettings.push({
-        // TODO: change to manufacturer_uri
-        // and extend with manufacturer name as well
-        name: 'manufacturer_uri',
-        op: 'in_',
-        val: manufacturers.map((m: Manufacturer) => m.uri)
+        or: [
+          {
+            name: 'manufacturer_name',
+            op: 'in_',
+            val: manufacturers.map((m: Manufacturer) => m.name)
+          },
+          {
+            name: 'manufacturer_uri',
+            op: 'in_',
+            val: manufacturers.map((m: Manufacturer) => m.uri)
+          }
+        ]
       })
     }
     return this
@@ -176,16 +183,20 @@ export class PlatformSearchBuilder {
 
   withOneMatchingStatusOf (states: Status[]): PlatformSearchBuilder {
     if (states.length > 0) {
-      // TODO: at the moment there is no status field
-      // with could be used to read the data from
-      // --> once this is there, we want to add the
-      // serverside filtering is we do with the manufacturers
-      const oldFilterFunc = this.clientSideFilterFunc
-      this.clientSideFilterFunc = (platform: Platform) : boolean => {
-        return oldFilterFunc(platform) && (
-          states.findIndex(s => s.uri === platform.statusUri) > -1
-        )
-      }
+      this.serverSideFilterSettings.push({
+        or: [
+          {
+            name: 'status_name',
+            op: 'in_',
+            val: states.map((s: Status) => s.name)
+          },
+          {
+            name: 'status_uri',
+            op: 'in_',
+            val: states.map((s: Status) => s.uri)
+          }
+        ]
+      })
     }
     return this
   }
@@ -193,11 +204,18 @@ export class PlatformSearchBuilder {
   withOneMatchingPlatformTypeOf (types: PlatformType[]): PlatformSearchBuilder {
     if (types.length > 0) {
       this.serverSideFilterSettings.push({
-        // TODO: change to platformtype_uri
-        // and extend with platformtype name as well
-        name: 'platform_type_uri',
-        op: 'in_',
-        val: types.map((t: PlatformType) => t.uri)
+        or: [
+          {
+            name: 'platform_type_name',
+            op: 'in_',
+            val: types.map((t: PlatformType) => t.name)
+          },
+          {
+            name: 'platform_type_uri',
+            op: 'in_',
+            val: types.map((t: PlatformType) => t.uri)
+          }
+        ]
       })
     }
     return this
@@ -306,7 +324,6 @@ export function serverResponseToEntity (entry: any, included: any[]) : Platform 
   const attributes = entry.attributes
   const relationships = entry.relationships
 
-  // TODO: use camelCase only!!!
   result.id = Number.parseInt(entry.id)
 
   result.description = attributes.description || ''
@@ -332,7 +349,6 @@ export function serverResponseToEntity (entry: any, included: any[]) : Platform 
   result.persistentIdentifier = attributes.persistent_identifier || ''
 
   // TODO
-  result.contacts = []
   // result.events = []
 
   const attachments: Attachment[] = []

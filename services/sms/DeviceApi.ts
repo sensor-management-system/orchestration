@@ -18,7 +18,6 @@ import {
   IPaginationLoader, FilteredPaginationedLoader
 } from '@/utils/PaginatedLoader'
 
-
 export default class DeviceApi {
   private axiosApi: AxiosInstance
 
@@ -27,8 +26,6 @@ export default class DeviceApi {
   }
 
   findById (id: string): Promise<Device> {
-    // TODO: Think about also including the contacts
-    // with ?include=contacts
     return this.axiosApi.get(id, {
       params: {
         include: 'contacts'
@@ -46,21 +43,19 @@ export default class DeviceApi {
   }
 
   save (device: Device) {
-    // TODO: consistent camelCase
-
     const properties = []
 
     for (const property of device.properties) {
       const propertyToSave: any = {}
       if (property.id != null) {
-        // TODO:
         // currently it seems that the id is always set to a higher value
         // I can set it to 8, but it will be saved with a new id (9)
+        // there is already an issue for the backend, so hopefully it will be fixed there
         propertyToSave.id = property.id
       }
 
       propertyToSave.measuring_range_min = property.measuringRange.min
-      propertyToSave.measuring_range_min = property.measuringRange.max
+      propertyToSave.measuring_range_max = property.measuringRange.max
       propertyToSave.failure_value = property.failureValue
       propertyToSave.accuracy = property.accuracy
       propertyToSave.label = property.label
@@ -158,7 +153,6 @@ export default class DeviceApi {
       url = String(device.id)
     }
 
-    // TODO: links for contacts
     return this.axiosApi.request({
       url,
       method,
@@ -166,6 +160,8 @@ export default class DeviceApi {
         data
       }
     }).then((serverAnswer) => {
+      // the server answer doesn't include the contacts
+      // so we will reload from the database
       return this.findById(serverAnswer.data.data.id)
     })
   }
@@ -215,11 +211,18 @@ export class DeviceSearchBuilder {
   withOneMachtingManufacturerOf (manufacturers: Manufacturer[]) {
     if (manufacturers.length > 0) {
       this.serverSideFilterSettings.push({
-        // TODO: change to manufacturer_name
-        // and extend with manufacturer uri as well
-        name: 'manufacturer_name',
-        op: 'in_',
-        val: manufacturers.map((m: Manufacturer) => m.name)
+        or: [
+          {
+            name: 'manufacturer_name',
+            op: 'in_',
+            val: manufacturers.map((m: Manufacturer) => m.name)
+          },
+          {
+            name: 'manufacturer_uri',
+            op: 'in_',
+            val: manufacturers.map((m: Manufacturer) => m.uri)
+          }
+        ]
       })
     }
     return this
@@ -227,16 +230,20 @@ export class DeviceSearchBuilder {
 
   withOneMatchingStatusOf (states: Status[]) {
     if (states.length > 0) {
-      // TODO: at the moment there is no status field
-      // with could be used to read the data from
-      // --> once this is there, we want to add the
-      // serverside filtering is we do with the manufacturers
-      const oldFilterFunc = this.clientSideFilterFunc
-      this.clientSideFilterFunc = (device: Device) : boolean => {
-        return oldFilterFunc(device) && (
-          states.findIndex(s => s.uri === device.statusUri) > -1
-        )
-      }
+      this.serverSideFilterSettings.push({
+        or: [
+          {
+            name: 'status_name',
+            op: 'in_',
+            val: states.map((s: Status) => s.name)
+          },
+          {
+            name: 'status_uri',
+            op: 'in_',
+            val: states.map((s: Status) => s.uri)
+          }
+        ]
+      })
     }
     return this
   }
@@ -244,11 +251,18 @@ export class DeviceSearchBuilder {
   withOneMatchingDeviceTypeOf (types: DeviceType[]) {
     if (types.length > 0) {
       this.serverSideFilterSettings.push({
-        // TODO: change to devicetype_uri
-        // and extend with platformtype name as well
-        name: 'device_type_uri',
-        op: 'in_',
-        val: types.map((t: DeviceType) => t.uri)
+        or: [
+          {
+            name: 'device_type_name',
+            op: 'in_',
+            val: types.map((t: DeviceType) => t.name)
+          },
+          {
+            name: 'device_type_uri',
+            op: 'in_',
+            val: types.map((t: DeviceType) => t.uri)
+          }
+        ]
       })
     }
     return this
@@ -376,6 +390,7 @@ export function serverResponseToEntity (entry: any, included: any[]) : Device {
   result.website = attributes.website || ''
   result.createdAt = attributes.created_at
   result.updatedAt = attributes.updated_at
+  // TODO
   // result.createdBy = attributes.created_by
   // result.updatedBy = attributes.updated_by
   // result.events = []

@@ -284,6 +284,8 @@ export default class SeachPlatformsPage extends Vue {
   clearExtendedSearch () {
     this.clearBasicSearch()
     this.selectedSearchManufacturers = []
+    this.selectedSearchStates = []
+    this.selectedSearchPlatformTypes = []
   }
 
   runSearch (
