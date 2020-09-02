@@ -55,7 +55,7 @@ build_app:
   image: node:latest
   script:
     - npm install
-    - npm run generate
+    - npm run build
 
 
 build_image:
