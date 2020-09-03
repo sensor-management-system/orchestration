@@ -33,7 +33,13 @@
                           v-on="on"
                         />
                       </template>
-                      <v-date-picker v-model="configuration.startDate" @input="startDateMenu = false" first-day-of-week="1" :show-week="true" :max="configuration.endDate" />
+                      <v-date-picker
+                        v-model="configuration.startDate"
+                        first-day-of-week="1"
+                        :show-week="true"
+                        :max="configuration.endDate"
+                        @input="startDateMenu = false"
+                      />
                     </v-menu>
                   </v-col>
                   <v-col cols="12" md="3">
@@ -55,7 +61,13 @@
                           v-on="on"
                         />
                       </template>
-                      <v-date-picker v-model="configuration.endDate" @input="endDateMenu = false" first-day-of-week="1" :show-week="true" :min="configuration.startDate" />
+                      <v-date-picker
+                        v-model="configuration.endDate"
+                        first-day-of-week="1"
+                        :show-week="true"
+                        :min="configuration.startDate"
+                        @input="endDateMenu = false"
+                      />
                     </v-menu>
                   </v-col>
                 </v-row>
@@ -442,7 +454,10 @@
                             v-on="on"
                           />
                         </template>
-                        <v-date-picker v-model="item.calibrationDate" @input="calibrationDateMenu = false" />
+                        <v-date-picker
+                          v-model="item.calibrationDate"
+                          @input="calibrationDateMenu = false"
+                        />
                       </v-menu>
                     </v-col>
                   </v-row>
