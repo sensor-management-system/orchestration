@@ -4,7 +4,7 @@
     :readonly="readonly"
     :fetch-function="getAvailableDeviceProperties"
     :label="label"
-    color="green"
+    color="blue"
   />
 </template>
 
