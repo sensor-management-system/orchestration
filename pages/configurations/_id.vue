@@ -424,9 +424,26 @@
                       cols="12"
                       md="2"
                     >
-                      <v-text-field
-                        label="calibration date"
-                      />
+                      <v-menu
+                        v-model="calibrationDateMenu"
+                        :close-on-content-click="false"
+                        :nudge-right="40"
+                        transition="scale-transition"
+                        offset-y
+                        min-width="290px"
+                      >
+                        <template v-slot:activator="{ on, attrs }">
+                          <v-text-field
+                            v-model="item.calibrationDate"
+                            label="Calibration date"
+                            prepend-icon="mdi-calendar-range"
+                            readonly
+                            v-bind="attrs"
+                            v-on="on"
+                          />
+                        </template>
+                        <v-date-picker v-model="item.calibrationDate" @input="calibrationDateMenu = false" />
+                      </v-menu>
                     </v-col>
                   </v-row>
                   <v-row>
@@ -577,6 +594,8 @@ export default class ConfigurationsIdPage extends Vue {
 
   private platformPanelsHidden: boolean = false
   private devicePanelsHidden: boolean = false
+
+  private calibrationDateMenu: boolean = false
 
   created () {
     this.$nuxt.$emit('app-bar-content', AppBarEditModeContent)
