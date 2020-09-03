@@ -117,6 +117,55 @@
                     </v-col>
                   </v-row>
                 </div>
+                <div v-if="locationType === 'Dynamic'">
+                  <v-row>
+                    <v-col cols="12" md="3">
+                      <v-select
+                        :items="allDevices"
+                        :item-text="(device) => device.shortName"
+                        :item-value="(device) => device"
+                        v-model="dynamicLocationLatitudeDevice"
+                        label="Device that measures latitude"
+                      />
+                      <v-select
+                        :items="propertiesOfLatitudeDevice"
+                        :item-text="(property) => property.propertyName"
+                        :item-value="(property) => property"
+                        label="Property for latitude"
+                      />
+                    </v-col>
+                    <v-col cols="12" md="3">
+                      <v-select
+                        :items="allDevices"
+                        :item-text="(device) => device.shortName"
+                        :item-value="(device) => device"
+                        v-model="dynamicLocationLongitudeDevice"
+                        label="Device that measures longitude"
+                      />
+                      <v-select
+                        :items="propertiesOfLongitudeDevice"
+                        :item-text="(property) => property.propertyName"
+                        :item-value="(property) => property"
+                        label="Property for longitude"
+                      />
+                    </v-col>
+                    <v-col cols="12" md="3">
+                      <v-select
+                        :items="allDevices"
+                        :item-text="(device) => device.shortName"
+                        :item-value="(device) => device"
+                        v-model="dynamicLocationElevationDevice"
+                        label="Device that measures elevation"
+                      />
+                      <v-select
+                        :items="propertiesOfElevationDevice"
+                        :item-text="(property) => property.propertyName"
+                        :item-value="(property) => property"
+                        label="Property for elevation"
+                      />
+                    </v-col>
+                  </v-row>
+                </div>
               </v-card-text>
             </v-card>
           </v-tab-item>
@@ -531,6 +580,7 @@ import { DeviceNode } from '@/models/DeviceNode'
 import { PlatformNode } from '@/models/PlatformNode'
 import { DeviceConfigurationAttributes } from '@/models/DeviceConfigurationAttributes'
 import { PlatformConfigurationAttributes } from '@/models/PlatformConfigurationAttributes'
+import { DeviceProperty } from '@/models/DeviceProperty'
 
 enum SearchType {
   Platform = 'Platform',
@@ -611,6 +661,10 @@ export default class ConfigurationsIdPage extends Vue {
   private devicePanelsHidden: boolean = false
 
   private calibrationDateMenu: boolean = false
+
+  private dynamicLocationLatitudeDevice: Device | null = null
+  private dynamicLocationLongitudeDevice: Device | null = null
+  private dynamicLocationElevationDevice: Device | null = null
 
   created () {
     this.$nuxt.$emit('app-bar-content', AppBarEditModeContent)
@@ -967,6 +1021,10 @@ export default class ConfigurationsIdPage extends Vue {
     return deviceNodes.map(n => n.unpack())
   }
 
+  get allDevices (): Device[] {
+    return this.getAllDevices()
+  }
+
   /**
    * searches for platforms or devices depending on the searchType
    *
@@ -999,14 +1057,25 @@ export default class ConfigurationsIdPage extends Vue {
     return !this.devicePanelsHidden ? this.getAllDevices().map((_, i) => i) : []
   }
 
-  /**
-   * returns all property names of a given Device
-   *
-   * @param {Device} device - the device to get the property names from
-   * @return {string[]} an Array of property names
-   */
-  getPropertyNames (device: Device): string[] {
-    return device.properties.map(p => p.propertyName)
+  get propertiesOfLatitudeDevice (): DeviceProperty[] {
+    if (!this.dynamicLocationLatitudeDevice) {
+      return []
+    }
+    return this.dynamicLocationLatitudeDevice.properties
+  }
+
+  get propertiesOfLongitudeDevice (): DeviceProperty[] {
+    if (!this.dynamicLocationLongitudeDevice) {
+      return []
+    }
+    return this.dynamicLocationLongitudeDevice.properties
+  }
+
+  get propertiesOfElevationDevice (): DeviceProperty[] {
+    if (!this.dynamicLocationElevationDevice) {
+      return []
+    }
+    return this.dynamicLocationElevationDevice.properties
   }
 
   /**
