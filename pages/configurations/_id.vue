@@ -15,12 +15,13 @@
               <v-card-text>
                 <v-row>
                   <v-col cols="12" md="3">
-                    <v-dialog
-                      ref="startDateDialog"
-                      v-model="startDateModal"
-                      :return-value.sync="configuration.startDate"
-                      persistent
-                      width="290px"
+                    <v-menu
+                      v-model="startDateMenu"
+                      :close-on-content-click="false"
+                      :nudge-right="40"
+                      transition="scale-transition"
+                      offset-y
+                      min-width="290px"
                     >
                       <template v-slot:activator="{ on, attrs }">
                         <v-text-field
@@ -32,24 +33,17 @@
                           v-on="on"
                         />
                       </template>
-                      <v-date-picker v-model="configuration.startDate" scrollable>
-                        <v-spacer />
-                        <v-btn text color="primary" @click="startDateModal = false">
-                          Cancel
-                        </v-btn>
-                        <v-btn text color="primary" @click="$refs.startDateDialog.save(configuration.startDate)">
-                          OK
-                        </v-btn>
-                      </v-date-picker>
-                    </v-dialog>
+                      <v-date-picker v-model="configuration.startDate" @input="startDateMenu = false" first-day-of-week="1" :show-week="true" :max="configuration.endDate" />
+                    </v-menu>
                   </v-col>
                   <v-col cols="12" md="3">
-                    <v-dialog
-                      ref="endDateDialog"
-                      v-model="endDateModal"
-                      :return-value.sync="configuration.endDate"
-                      persistent
-                      width="290px"
+                    <v-menu
+                      v-model="endDateMenu"
+                      :close-on-content-click="false"
+                      :nudge-right="40"
+                      transition="scale-transition"
+                      offset-y
+                      min-width="290px"
                     >
                       <template v-slot:activator="{ on, attrs }">
                         <v-text-field
@@ -61,16 +55,8 @@
                           v-on="on"
                         />
                       </template>
-                      <v-date-picker v-model="configuration.endDate" scrollable>
-                        <v-spacer />
-                        <v-btn text color="primary" @click="endDateModal = false">
-                          Cancel
-                        </v-btn>
-                        <v-btn text color="primary" @click="$refs.endDateDialog.save(configuration.endDate)">
-                          OK
-                        </v-btn>
-                      </v-date-picker>
-                    </v-dialog>
+                      <v-date-picker v-model="configuration.endDate" @input="endDateMenu = false" first-day-of-week="1" :show-week="true" :min="configuration.startDate" />
+                    </v-menu>
                   </v-col>
                 </v-row>
                 <v-row>
@@ -555,10 +541,8 @@ export default class ConfigurationsIdPage extends Vue {
 
   private configuration = new Configuration()
 
-  private startDateModal: boolean = false
-  private endDateModal: boolean = false
-  private startDate: Date | null = null
-  private endDate: Date | null = null
+  private startDateMenu: boolean = false
+  private endDateMenu: boolean = false
 
   private longitude: number = 0
   private latitude: number = 0
