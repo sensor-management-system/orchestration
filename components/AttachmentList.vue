@@ -71,6 +71,7 @@
             v-for="(item, index) in value"
             :key="getUrlIndex(item)"
             v-model="value[index]"
+            :readonly="readonly"
           >
             <template
               v-if="!readonly"
