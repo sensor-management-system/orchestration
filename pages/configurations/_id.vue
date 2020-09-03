@@ -451,7 +451,7 @@
                       cols="12"
                       md="3"
                     >
-                      <DevicePropertySelect v-model="item.deviceProperties" :properties="item.device.properties" label="Add a property" :readonly="false" />
+                      <DevicePropertySelect v-model="item.deviceProperties" :properties="item.device.properties" label="Add one or more properties" :readonly="false" />
                     </v-col>
                   </v-row>
                 </v-expansion-panel-content>
