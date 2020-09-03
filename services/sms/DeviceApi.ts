@@ -1,11 +1,18 @@
 import { AxiosInstance, Method } from 'axios'
 
+import Contact from '@/models/Contact'
 import Device from '@/models/Device'
 import DeviceType from '@/models/DeviceType'
 import Manufacturer from '@/models/Manufacturer'
 import Status from '@/models/Status'
+import { DeviceProperty } from '@/models/DeviceProperty'
+import { MeasuringRange } from '@/models/MeasuringRange'
+import { CustomTextField } from '@/models/CustomTextField'
+import { Attachment } from '@/models/Attachment'
 
 import { IFlaskJSONAPIFilter } from '@/utils/JSONApiInterfaces'
+
+import { serverResponseToEntity as serverResponseToContact } from '@/services/sms/ContactApi'
 
 import {
   IPaginationLoader, FilteredPaginationedLoader
@@ -19,11 +26,15 @@ export default class DeviceApi {
   }
 
   findById (id: string): Promise<Device> {
-    // TODO: Think about also including the contacts
-    // with ?include=contacts
-    return this.axiosApi.get(id).then((rawResponse) => {
-      const entry = rawResponse.data.data
-      return serverResponseToEntity(entry)
+    return this.axiosApi.get(id, {
+      params: {
+        include: 'contacts'
+      }
+    }).then((rawResponse) => {
+      const rawData = rawResponse.data
+      const entry = rawData.data
+      const included: any[] = rawData.included || []
+      return serverResponseToEntity(entry, included)
     })
   }
 
@@ -32,56 +43,103 @@ export default class DeviceApi {
   }
 
   save (device: Device) {
-    // TODO: consistent camelCase
+    const properties = []
+
+    for (const property of device.properties) {
+      const propertyToSave: any = {}
+      if (property.id != null) {
+        // currently it seems that the id is always set to a higher value
+        // I can set it to 8, but it will be saved with a new id (9)
+        // there is already an issue for the backend, so hopefully it will be fixed there
+        propertyToSave.id = property.id
+      }
+
+      propertyToSave.measuring_range_min = property.measuringRange.min
+      propertyToSave.measuring_range_max = property.measuringRange.max
+      propertyToSave.failure_value = property.failureValue
+      propertyToSave.accuracy = property.accuracy
+      propertyToSave.label = property.label
+      propertyToSave.unit_uri = property.unitUri
+      propertyToSave.unit_name = property.unitName
+      propertyToSave.compartment_uri = property.compartmentUri
+      propertyToSave.compartment_name = property.compartmentName
+      propertyToSave.property_uri = property.propertyUri
+      propertyToSave.property_name = property.propertyName
+      propertyToSave.sampling_media_uri = property.samplingMediaUri
+      propertyToSave.sampling_media_name = property.samplingMediaName
+
+      properties.push(propertyToSave)
+    }
+
+    const customfields = []
+    for (const customField of device.customFields) {
+      const customFieldToSave: any = {}
+
+      if (customField.id != null) {
+        customFieldToSave.id = customField.id
+      }
+
+      customFieldToSave.key = customField.key
+      customFieldToSave.value = customField.value
+
+      customfields.push(customFieldToSave)
+    }
+
+    const attachments = []
+    for (const attachment of device.attachments) {
+      const attachmentToSave: any = {}
+      if (attachment.id != null) {
+        attachmentToSave.id = attachment.id
+      }
+      attachmentToSave.label = attachment.label
+      attachmentToSave.url = attachment.url
+
+      attachments.push(attachmentToSave)
+    }
+
+    const contacts = []
+    for (const contact of device.contacts) {
+      contacts.push({
+        id: contact.id,
+        type: 'contact'
+      })
+    }
+
     const data: any = {
       type: 'device',
       attributes: {
         description: device.description,
-        dual_use: device.dualUse,
-        inventory_number: device.inventoryNumber,
-        long_name: device.longName,
-        // TODO: Change to uri after backend change
-        manufacturer: device.manufacturerName,
-        // TODO: Add manufacturerUri
-        model: device.model,
-        persistent_identifier: device.persistentIdentifier,
-        serial_number: device.serialNumber,
         short_name: device.shortName,
-        // TODO: Add statusName & statusUri
-        url: device.website,
-        type: device.deviceTypeUri
+        long_name: device.longName,
+        serial_number: device.serialNumber,
+        inventory_number: device.inventoryNumber,
+        manufacturer_uri: device.manufacturerUri,
+        manufacturer_name: device.manufacturerName,
+        device_type_uri: device.deviceTypeUri,
+        device_type_name: device.deviceTypeName,
+        status_uri: device.statusUri,
+        status_name: device.statusName,
+        model: device.model,
+        persistent_identifier: device.persistentIdentifier === '' ? null : device.persistentIdentifier,
+        website: device.website,
+        dual_use: device.dualUse,
+        // those two time slots are set by the db, no matter what we deliver here
+        created_at: device.createdAt,
+        updated_at: device.updatedAt,
+        // TODO
+        // created_by: device.createdBy,
+        // updated_by: device.updatedBy,
 
-        /*
-        customFields: [
-          {
-            key: 'key1',
-            value: 'value1'
-          },
-          {
-            key: 'key2',
-            value: 'value2
-          }
-        ]
-        */
-      }
-
-      /*
+        customfields,
+        properties,
+        attachments
+      },
       relationships: {
         contacts: {
-          data: [
-            {
-              type: 'contact',
-              id: 1,
-            },
-            {
-              type: 'contact',
-              id: 2
-            }
-          ]
+          data: contacts
         }
-
+        // TODO: events
       }
-      */
     }
     let method: Method = 'patch'
     let url = ''
@@ -95,7 +153,6 @@ export default class DeviceApi {
       url = String(device.id)
     }
 
-    // TODO: links for contacts
     return this.axiosApi.request({
       url,
       method,
@@ -103,7 +160,9 @@ export default class DeviceApi {
         data
       }
     }).then((serverAnswer) => {
-      return serverResponseToEntity(serverAnswer.data.data)
+      // the server answer doesn't include the contacts
+      // so we will reload from the database
+      return this.findById(serverAnswer.data.data.id)
     })
   }
 
@@ -152,11 +211,18 @@ export class DeviceSearchBuilder {
   withOneMachtingManufacturerOf (manufacturers: Manufacturer[]) {
     if (manufacturers.length > 0) {
       this.serverSideFilterSettings.push({
-        // TODO: change to manufacturer_name
-        // and extend with manufacturer uri as well
-        name: 'manufacturer',
-        op: 'in_',
-        val: manufacturers.map((m: Manufacturer) => m.name)
+        or: [
+          {
+            name: 'manufacturer_name',
+            op: 'in_',
+            val: manufacturers.map((m: Manufacturer) => m.name)
+          },
+          {
+            name: 'manufacturer_uri',
+            op: 'in_',
+            val: manufacturers.map((m: Manufacturer) => m.uri)
+          }
+        ]
       })
     }
     return this
@@ -164,16 +230,20 @@ export class DeviceSearchBuilder {
 
   withOneMatchingStatusOf (states: Status[]) {
     if (states.length > 0) {
-      // TODO: at the moment there is no status field
-      // with could be used to read the data from
-      // --> once this is there, we want to add the
-      // serverside filtering is we do with the manufacturers
-      const oldFilterFunc = this.clientSideFilterFunc
-      this.clientSideFilterFunc = (device: Device) : boolean => {
-        return oldFilterFunc(device) && (
-          states.findIndex(s => s.uri === device.statusUri) > -1
-        )
-      }
+      this.serverSideFilterSettings.push({
+        or: [
+          {
+            name: 'status_name',
+            op: 'in_',
+            val: states.map((s: Status) => s.name)
+          },
+          {
+            name: 'status_uri',
+            op: 'in_',
+            val: states.map((s: Status) => s.uri)
+          }
+        ]
+      })
     }
     return this
   }
@@ -181,11 +251,18 @@ export class DeviceSearchBuilder {
   withOneMatchingDeviceTypeOf (types: DeviceType[]) {
     if (types.length > 0) {
       this.serverSideFilterSettings.push({
-        // TODO: change to devicetype_uri
-        // and extend with platformtype name as well
-        name: 'type',
-        op: 'in_',
-        val: types.map((t: DeviceType) => t.uri)
+        or: [
+          {
+            name: 'device_type_name',
+            op: 'in_',
+            val: types.map((t: DeviceType) => t.name)
+          },
+          {
+            name: 'device_type_uri',
+            op: 'in_',
+            val: types.map((t: DeviceType) => t.uri)
+          }
+        ]
       })
     }
     return this
@@ -234,9 +311,10 @@ export class DeviceSearcher {
     ).then((rawResponse: any) => {
       const rawData = rawResponse.data
       const result: Device[] = []
+      const included: any[] = rawData.included || []
 
       for (const entry of rawData.data) {
-        const device = serverResponseToEntity(entry)
+        const device = serverResponseToEntity(entry, included)
         if (this.clientSideFilterFunc(device)) {
           result.push(device)
         }
@@ -265,12 +343,13 @@ export class DeviceSearcher {
     ).then((rawResponse) => {
       const rawData = rawResponse.data
       const result: Device[] = []
+      const included: any[] = rawData.included || []
       for (const entry of rawData.data) {
         // client side filtering will not be done here
         // (but in the FilteredPaginationedLoader)
         // so that we know if we still have elements here
         // there may be others to load as well
-        result.push(serverResponseToEntity(entry))
+        result.push(serverResponseToEntity(entry, included))
       }
 
       let funToLoadNext = null
@@ -286,38 +365,123 @@ export class DeviceSearcher {
   }
 }
 
-export function serverResponseToEntity (entry: any) : Device {
+export function serverResponseToEntity (entry: any, included: any[]) : Device {
   const result: Device = new Device()
 
   const attributes = entry.attributes
+  const relationships = entry.relationships
 
   result.id = entry.id
 
   result.description = attributes.description || ''
-  // TODO: to camelcase
+  result.shortName = attributes.short_name || ''
+  result.longName = attributes.long_name || ''
+  result.serialNumber = attributes.serial_number || ''
+  result.manufacturerUri = attributes.manufacturer_uri || ''
+  result.manufacturerName = attributes.manufacturer_name || ''
+  result.deviceTypeUri = attributes.device_type_uri || ''
+  result.deviceTypeName = attributes.device_type_name || ''
+  result.statusUri = attributes.status_uri || ''
+  result.statusName = attributes.status_name || ''
+  result.model = attributes.model || ''
   result.dualUse = attributes.dual_use || false
   result.inventoryNumber = attributes.inventory_number || ''
-  result.longName = attributes.long_name || ''
-  result.manufacturerName = attributes.manufacturer || ''
-  // TODO: manufacturerUri
-  result.model = attributes.model || ''
-
   result.persistentIdentifier = attributes.persistent_identifier || ''
-  result.shortName = attributes.short_name || ''
-  result.serialNumber = attributes.serial_number || ''
-  // TODO: StatusName & StatusUri
-  result.website = attributes.url || ''
-
-  result.deviceTypeUri = attributes.type || ''
-  // TODO: createdAt, modifiedAt, createdBy, modifiedBy
-
-  // TODO: Insert those as well
+  result.website = attributes.website || ''
+  result.createdAt = attributes.created_at
+  result.updatedAt = attributes.updated_at
+  // TODO
+  // result.createdBy = attributes.created_by
+  // result.updatedBy = attributes.updated_by
+  // result.events = []
+  result.attachments = []
   result.contacts = []
-  result.properties = []
-  result.customFields = []
+  const properties: DeviceProperty[] = []
 
-  // TODO: Attachments
-  // TODO: events
+  for (const propertyFromServer of attributes.properties) {
+    const property = new DeviceProperty()
+    property.id = Number.parseInt(propertyFromServer.id)
+    property.measuringRange = new MeasuringRange(
+      propertyFromServer.measuring_range_min,
+      propertyFromServer.measuring_range_max
+    )
+    property.failureValue = propertyFromServer.failure_value
+    property.accuracy = propertyFromServer.accuracy
+    property.label = propertyFromServer.label || ''
+    property.unitUri = propertyFromServer.unit_uri || ''
+    property.unitName = propertyFromServer.unit_name || ''
+    property.compartmentUri = propertyFromServer.compartment_uri || ''
+    property.compartmentName = propertyFromServer.compartment_name || ''
+    property.propertyUri = propertyFromServer.property_uri || ''
+    property.propertyName = propertyFromServer.property_name || ''
+    property.samplingMediaUri = propertyFromServer.sampling_media_uri || ''
+    property.samplingMediaName = propertyFromServer.sampling_media_name || ''
+
+    properties.push(property)
+  }
+
+  result.properties = properties
+
+  const customFields: CustomTextField[] = []
+
+  for (const customFieldFromServer of attributes.customfields) {
+    const customField = new CustomTextField()
+    customField.id = Number.parseInt(customFieldFromServer.id)
+    customField.key = customFieldFromServer.key || ''
+    customField.value = customFieldFromServer.value || ''
+
+    customFields.push(customField)
+  }
+
+  result.customFields = customFields
+
+  const attachments: Attachment[] = []
+
+  for (const attachmentFromServer of attributes.attachments) {
+    const attachment = new Attachment()
+    attachment.id = Number.parseInt(attachmentFromServer.id)
+    attachment.label = attachmentFromServer.label || ''
+    attachment.url = attachmentFromServer.url || ''
+
+    attachments.push(attachment)
+  }
+
+  result.attachments = attachments
+
+  const contactIds = []
+  if (relationships.contacts && relationships.contacts.data && relationships.contacts.data.length > 0) {
+    for (const relationShipContactData of relationships.contacts.data) {
+      const contactId = Number.parseInt(relationShipContactData.id)
+      contactIds.push(contactId)
+    }
+  }
+
+  const possibleContacts: {[key: number]: Contact} = {}
+  if (included && included.length > 0) {
+    for (const includedEntry of included) {
+      if (includedEntry.type === 'contact') {
+        const contactId = Number.parseInt(includedEntry.id)
+        if (contactIds.includes(contactId)) {
+          const contact = serverResponseToContact(includedEntry)
+          possibleContacts[contactId] = contact
+        }
+      }
+    }
+  }
+
+  const contacts = []
+
+  for (const contactId of contactIds) {
+    if (possibleContacts[contactId]) {
+      contacts.push(possibleContacts[contactId])
+    } else {
+      const contact = new Contact()
+      contact.id = contactId
+      contacts.push(contact)
+    }
+  }
+
+  result.contacts = contacts
 
   return result
 }
