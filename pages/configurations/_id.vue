@@ -121,10 +121,10 @@
                   <v-row>
                     <v-col cols="12" md="3">
                       <v-select
+                        v-model="dynamicLocationLatitudeDevice"
                         :items="allDevices"
                         :item-text="(device) => device.shortName"
                         :item-value="(device) => device"
-                        v-model="dynamicLocationLatitudeDevice"
                         label="Device that measures latitude"
                       />
                       <v-select
@@ -136,10 +136,10 @@
                     </v-col>
                     <v-col cols="12" md="3">
                       <v-select
+                        v-model="dynamicLocationLongitudeDevice"
                         :items="allDevices"
                         :item-text="(device) => device.shortName"
                         :item-value="(device) => device"
-                        v-model="dynamicLocationLongitudeDevice"
                         label="Device that measures longitude"
                       />
                       <v-select
@@ -151,10 +151,10 @@
                     </v-col>
                     <v-col cols="12" md="3">
                       <v-select
+                        v-model="dynamicLocationElevationDevice"
                         :items="allDevices"
                         :item-text="(device) => device.shortName"
                         :item-value="(device) => device"
-                        v-model="dynamicLocationElevationDevice"
                         label="Device that measures elevation"
                       />
                       <v-select
