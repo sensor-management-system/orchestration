@@ -334,7 +334,7 @@
                     >
                       <v-text-field
                         v-model="item.offsetX"
-                        label="offset (x)"
+                        label="Offset (x)"
                       />
                     </v-col>
                     <v-col
@@ -343,7 +343,7 @@
                     >
                       <v-text-field
                         v-model="item.offsetY"
-                        label="offset (y)"
+                        label="Offset (y)"
                       />
                     </v-col>
                     <v-col
@@ -352,7 +352,7 @@
                     >
                       <v-text-field
                         v-model="item.offsetZ"
-                        label="offset (z)"
+                        label="Offset (z)"
                       />
                     </v-col>
                   </v-row>
@@ -399,7 +399,7 @@
                     >
                       <v-text-field
                         v-model="item.offsetX"
-                        label="offset (x)"
+                        label="Offset (x)"
                       />
                     </v-col>
                     <v-col
@@ -408,7 +408,7 @@
                     >
                       <v-text-field
                         v-model="item.offsetY"
-                        label="offset (y)"
+                        label="Offset (y)"
                       />
                     </v-col>
                     <v-col
@@ -417,7 +417,7 @@
                     >
                       <v-text-field
                         v-model="item.offsetZ"
-                        label="offset (z)"
+                        label="Offset (z)"
                       />
                     </v-col>
                     <v-col
