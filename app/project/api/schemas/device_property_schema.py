@@ -1,6 +1,5 @@
 from marshmallow import Schema as MarshmallowSchema
 from marshmallow_jsonapi import fields
-from project.api.schemas.utils import camel_case
 
 
 class DevicePropertySchema(MarshmallowSchema):
@@ -14,12 +13,17 @@ class DevicePropertySchema(MarshmallowSchema):
 
     class Meta:
         type_ = "property"
-        inflect = camel_case
 
     id = fields.Integer(as_string=True, dump_only=True)
-    measuring_range_min = fields.Float(as_string=True, allow_none=True)
-    measuring_range_max = fields.Float(as_string=True, allow_none=True)
-    failure_value = fields.Float(as_string=True, allow_none=True)
+    measuring_range_min = fields.Float(
+        as_string=True, allow_none=True
+    )
+    measuring_range_max = fields.Float(
+        as_string=True, allow_none=True
+    )
+    failure_value = fields.Float(
+        as_string=True, allow_none=True
+    )
     accuracy = fields.Float(as_string=True, allow_none=True)
     label = fields.Str(allow_none=True)
     unit_uri = fields.Str(allow_none=True)
