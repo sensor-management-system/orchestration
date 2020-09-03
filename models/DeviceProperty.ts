@@ -161,4 +161,8 @@ export class DeviceProperty implements IDeviceProperty {
   set failureValue (failureValue: number | null) {
     this._failureValue = failureValue
   }
+
+  toString (): string {
+    return this.propertyName
+  }
 }
