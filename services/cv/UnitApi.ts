@@ -24,7 +24,7 @@ export function serverResponseToEntity (entry: any): Unit {
   if (entry.attributes.unitsabbreviation) {
     name += ' [' + entry.attributes.unitsabbreviation + ']'
   }
-  const url = entry.attributes.unitslink || entry.links.self
+  const url = entry.links.self
 
   return Unit.createWithData(id, name, url)
 }
