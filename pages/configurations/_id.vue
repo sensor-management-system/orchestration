@@ -308,7 +308,9 @@
 
           <!-- Setup -->
           <v-tab-item :eager="true">
-            <v-subheader>
+            <v-subheader
+              v-if="configuration.platformAttributes.length"
+            >
               Platforms
               <v-spacer />
               <v-btn
@@ -329,6 +331,7 @@
               </v-btn>
             </v-subheader>
             <v-expansion-panels
+              v-if="configuration.platformAttributes.length"
               :value="openedPlatformPanels"
               multiple
             >
@@ -370,7 +373,9 @@
                 </v-expansion-panel-content>
               </v-expansion-panel>
             </v-expansion-panels>
-            <v-subheader>
+            <v-subheader
+              v-if="configuration.deviceAttributes.length"
+            >
               Devices
               <v-spacer />
               <v-btn
@@ -391,6 +396,7 @@
               </v-btn>
             </v-subheader>
             <v-expansion-panels
+              v-if="configuration.deviceAttributes.length"
               :value="openedDevicePanels"
               multiple
             >
