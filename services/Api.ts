@@ -50,28 +50,36 @@ export default class Api {
     }
 
     this._comparmentApi = new CompartmentApi(
-      this.createAxios(cvBaseUrl, '/variabletype', cvConfig)
+      this.createAxios(cvBaseUrl, '/variabletype', cvConfig),
+      cvBaseUrl
     )
     this._deviceTypeApi = new DeviceTypeApi(
-      this.createAxios(cvBaseUrl, '/equipmenttype', cvConfig)
+      this.createAxios(cvBaseUrl, '/equipmenttype', cvConfig),
+      cvBaseUrl
     )
     this._manufacturerApi = new ManufacturerApi(
-      this.createAxios(cvBaseUrl, '/manufacturer', cvConfig)
+      this.createAxios(cvBaseUrl, '/manufacturer', cvConfig),
+      cvBaseUrl
     )
     this._platformTypeApi = new PlatformTypeApi(
-      this.createAxios(cvBaseUrl, '/platformtype', cvConfig)
+      this.createAxios(cvBaseUrl, '/platformtype', cvConfig),
+      cvBaseUrl
     )
     this._propertyApi = new PropertyApi(
-      this.createAxios(cvBaseUrl, '/variablename', cvConfig)
+      this.createAxios(cvBaseUrl, '/variablename', cvConfig),
+      cvBaseUrl
     )
     this._samplingMediaApi = new SamplingMediaApi(
-      this.createAxios(cvBaseUrl, '/medium', cvConfig)
+      this.createAxios(cvBaseUrl, '/medium', cvConfig),
+      cvBaseUrl
     )
     this._statusApi = new StatusApi(
-      this.createAxios(cvBaseUrl, '/equipmentstatus', cvConfig)
+      this.createAxios(cvBaseUrl, '/equipmentstatus', cvConfig),
+      cvBaseUrl
     )
     this._unitApi = new UnitApi(
-      this.createAxios(cvBaseUrl, '/unit', cvConfig)
+      this.createAxios(cvBaseUrl, '/unit', cvConfig),
+      cvBaseUrl
     )
   }
 
