@@ -120,66 +120,27 @@
                 <div v-if="locationType === 'Dynamic'">
                   <v-row>
                     <v-col cols="12" md="3">
-                      <v-select
-                        :value="dynamicLocationLatitudeDevice"
-                        :items="allDevices"
-                        :item-text="(device) => device.shortName"
-                        :item-value="(device) => device"
-                        label="Device that measures latitude"
-                        clearable
-                        @change="addLatitudeDevice"
-                      />
-                      <v-select
-                        v-if="dynamicLocationLatitudeDevice"
-                        :value="configuration.location.latitude"
-                        :items="propertiesOfLatitudeDevice"
-                        :item-text="(property) => property.propertyName"
-                        :item-value="(property) => property"
-                        label="Property for latitude"
-                        clearable
-                        @change="addLatitudeProperty"
+                      <DevicePropertyHierarchySelect
+                        v-model="configuration.location.latitude"
+                        :devices="allDevices"
+                        device-select-label="Device that measures latitude"
+                        property-select-label="Property for latitude"
                       />
                     </v-col>
                     <v-col cols="12" md="3">
-                      <v-select
-                        :value="dynamicLocationLongitudeDevice"
-                        :items="allDevices"
-                        :item-text="(device) => device.shortName"
-                        :item-value="(device) => device"
-                        label="Device that measures longitude"
-                        clearable
-                        @change="addLongitudeDevice"
-                      />
-                      <v-select
-                        v-if="dynamicLocationLongitudeDevice"
-                        :value="configuration.location.longitude"
-                        :items="propertiesOfLongitudeDevice"
-                        :item-text="(property) => property.propertyName"
-                        :item-value="(property) => property"
-                        label="Property for longitude"
-                        clearable
-                        @change="addLongitudeProperty"
+                      <DevicePropertyHierarchySelect
+                        v-model="configuration.location.longitude"
+                        :devices="allDevices"
+                        device-select-label="Device that measures longitude"
+                        property-select-label="Property for longitude"
                       />
                     </v-col>
                     <v-col cols="12" md="3">
-                      <v-select
-                        :value="dynamicLocationElevationDevice"
-                        :items="allDevices"
-                        :item-text="(device) => device.shortName"
-                        :item-value="(device) => device"
-                        label="Device that measures elevation"
-                        clearable
-                        @change="addElevationDevice"
-                      />
-                      <v-select
-                        v-if="dynamicLocationElevationDevice"
-                        :value="configuration.location.elevation"
-                        :items="propertiesOfElevationDevice"
-                        :item-text="(property) => property.propertyName"
-                        :item-value="(property) => property"
-                        label="Property for elevation"
-                        clearable
-                        @change="addElevationProperty"
+                      <DevicePropertyHierarchySelect
+                        v-model="configuration.location.elevation"
+                        :devices="allDevices"
+                        device-select-label="Device that measures elevation"
+                        property-select-label="Property for elevation"
                       />
                     </v-col>
                   </v-row>
@@ -585,6 +546,7 @@ import AppBarEditModeContent from '@/components/AppBarEditModeContent.vue'
 import AppBarTabsExtension from '@/components/AppBarTabsExtension.vue'
 import ContactSelect from '@/components/ContactSelect.vue'
 import DevicePropertySelect from '@/components/DevicePropertySelect.vue'
+import DevicePropertyHierarchySelect from '@/components/DevicePropertyHierarchySelect.vue'
 
 import Contact from '@/models/Contact'
 import Device from '@/models/Device'
@@ -632,7 +594,8 @@ export class AppBarTabsExtensionExtended extends AppBarTabsExtension {
 @Component({
   components: {
     ContactSelect,
-    DevicePropertySelect
+    DevicePropertySelect,
+    DevicePropertyHierarchySelect
   }
 })
 // @ts-ignore
