@@ -121,47 +121,65 @@
                   <v-row>
                     <v-col cols="12" md="3">
                       <v-select
-                        v-model="dynamicLocationLatitudeDevice"
+                        :value="dynamicLocationLatitudeDevice"
                         :items="allDevices"
                         :item-text="(device) => device.shortName"
                         :item-value="(device) => device"
                         label="Device that measures latitude"
+                        clearable
+                        @change="addLatitudeDevice"
                       />
                       <v-select
+                        v-if="dynamicLocationLatitudeDevice"
+                        :value="configuration.location.latitude"
                         :items="propertiesOfLatitudeDevice"
                         :item-text="(property) => property.propertyName"
                         :item-value="(property) => property"
                         label="Property for latitude"
+                        clearable
+                        @change="addLatitudeProperty"
                       />
                     </v-col>
                     <v-col cols="12" md="3">
                       <v-select
-                        v-model="dynamicLocationLongitudeDevice"
+                        :value="dynamicLocationLongitudeDevice"
                         :items="allDevices"
                         :item-text="(device) => device.shortName"
                         :item-value="(device) => device"
                         label="Device that measures longitude"
+                        clearable
+                        @change="addLongitudeDevice"
                       />
                       <v-select
+                        v-if="dynamicLocationLongitudeDevice"
+                        :value="configuration.location.longitude"
                         :items="propertiesOfLongitudeDevice"
                         :item-text="(property) => property.propertyName"
                         :item-value="(property) => property"
                         label="Property for longitude"
+                        clearable
+                        @change="addLongitudeProperty"
                       />
                     </v-col>
                     <v-col cols="12" md="3">
                       <v-select
-                        v-model="dynamicLocationElevationDevice"
+                        :value="dynamicLocationElevationDevice"
                         :items="allDevices"
                         :item-text="(device) => device.shortName"
                         :item-value="(device) => device"
                         label="Device that measures elevation"
+                        clearable
+                        @change="addElevationDevice"
                       />
                       <v-select
+                        v-if="dynamicLocationElevationDevice"
+                        :value="configuration.location.elevation"
                         :items="propertiesOfElevationDevice"
                         :item-text="(property) => property.propertyName"
                         :item-value="(property) => property"
                         label="Property for elevation"
+                        clearable
+                        @change="addElevationProperty"
                       />
                     </v-col>
                   </v-row>
@@ -581,6 +599,7 @@ import { PlatformNode } from '@/models/PlatformNode'
 import { DeviceConfigurationAttributes } from '@/models/DeviceConfigurationAttributes'
 import { PlatformConfigurationAttributes } from '@/models/PlatformConfigurationAttributes'
 import { DeviceProperty } from '@/models/DeviceProperty'
+import { IDynamicLocation } from '@/models/Location'
 
 enum SearchType {
   Platform = 'Platform',
@@ -1076,6 +1095,64 @@ export default class ConfigurationsIdPage extends Vue {
       return []
     }
     return this.dynamicLocationElevationDevice.properties
+  }
+
+  addLocationDevice (device: Device | null, target: keyof IDynamicLocation) {
+    const targets = ['latitude', 'longitude', 'elevation']
+    if (!targets.includes(target as string)) {
+      throw new TypeError('unknown target ' + (target as string))
+    }
+    switch (target as string) {
+      case 'latitude':
+        this.dynamicLocationLatitudeDevice = device
+        break
+      case 'longitude':
+        this.dynamicLocationLongitudeDevice = device
+        break
+      case 'elevation':
+        this.dynamicLocationElevationDevice = device
+        break
+    }
+
+    if (device && device.properties.length === 1) {
+      this.addLocationDeviceProperty(device.properties[0], target)
+    } else {
+      this.addLocationDeviceProperty(null, target)
+    }
+  }
+
+  addLatitudeDevice (device?: Device) {
+    return this.addLocationDevice(device || null, 'latitude')
+  }
+
+  addLongitudeDevice (device?: Device) {
+    return this.addLocationDevice(device || null, 'longitude')
+  }
+
+  addElevationDevice (device?: Device) {
+    return this.addLocationDevice(device || null, 'elevation')
+  }
+
+  addLocationDeviceProperty (property: DeviceProperty | null, target: keyof IDynamicLocation) {
+    const targets = ['latitude', 'longitude', 'elevation']
+    if (!targets.includes(target as string)) {
+      throw new TypeError('unknown target ' + (target as string))
+    }
+    if (this.configuration.location && this.configuration.location instanceof DynamicLocation) {
+      this.configuration.location[target] = property
+    }
+  }
+
+  addLatitudeProperty (property?: DeviceProperty) {
+    return this.addLocationDeviceProperty(property || null, 'latitude')
+  }
+
+  addLongitudeProperty (property?: DeviceProperty) {
+    return this.addLocationDeviceProperty(property || null, 'longitude')
+  }
+
+  addElevationProperty (property?: DeviceProperty) {
+    return this.addLocationDeviceProperty(property || null, 'elevation')
   }
 
   /**
