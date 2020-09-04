@@ -560,8 +560,6 @@ import { DeviceNode } from '@/models/DeviceNode'
 import { PlatformNode } from '@/models/PlatformNode'
 import { DeviceConfigurationAttributes } from '@/models/DeviceConfigurationAttributes'
 import { PlatformConfigurationAttributes } from '@/models/PlatformConfigurationAttributes'
-import { DeviceProperty } from '@/models/DeviceProperty'
-import { IDynamicLocation } from '@/models/Location'
 
 enum SearchType {
   Platform = 'Platform',
@@ -607,10 +605,7 @@ export default class ConfigurationsIdPage extends Vue {
 
   private startDateMenu: boolean = false
   private endDateMenu: boolean = false
-
-  private longitude: number = 0
-  private latitude: number = 0
-  private elevation: number = 0
+  private calibrationDateMenu: boolean = false
 
   private contacts: Contact[] = []
 
@@ -641,12 +636,6 @@ export default class ConfigurationsIdPage extends Vue {
 
   private platformPanelsHidden: boolean = false
   private devicePanelsHidden: boolean = false
-
-  private calibrationDateMenu: boolean = false
-
-  private dynamicLocationLatitudeDevice: Device | null = null
-  private dynamicLocationLongitudeDevice: Device | null = null
-  private dynamicLocationElevationDevice: Device | null = null
 
   created () {
     this.$nuxt.$emit('app-bar-content', AppBarEditModeContent)
@@ -1039,85 +1028,6 @@ export default class ConfigurationsIdPage extends Vue {
     return !this.devicePanelsHidden ? this.getAllDevices().map((_, i) => i) : []
   }
 
-  get propertiesOfLatitudeDevice (): DeviceProperty[] {
-    if (!this.dynamicLocationLatitudeDevice) {
-      return []
-    }
-    return this.dynamicLocationLatitudeDevice.properties
-  }
-
-  get propertiesOfLongitudeDevice (): DeviceProperty[] {
-    if (!this.dynamicLocationLongitudeDevice) {
-      return []
-    }
-    return this.dynamicLocationLongitudeDevice.properties
-  }
-
-  get propertiesOfElevationDevice (): DeviceProperty[] {
-    if (!this.dynamicLocationElevationDevice) {
-      return []
-    }
-    return this.dynamicLocationElevationDevice.properties
-  }
-
-  addLocationDevice (device: Device | null, target: keyof IDynamicLocation) {
-    const targets = ['latitude', 'longitude', 'elevation']
-    if (!targets.includes(target as string)) {
-      throw new TypeError('unknown target ' + (target as string))
-    }
-    switch (target as string) {
-      case 'latitude':
-        this.dynamicLocationLatitudeDevice = device
-        break
-      case 'longitude':
-        this.dynamicLocationLongitudeDevice = device
-        break
-      case 'elevation':
-        this.dynamicLocationElevationDevice = device
-        break
-    }
-
-    if (device && device.properties.length === 1) {
-      this.addLocationDeviceProperty(device.properties[0], target)
-    } else {
-      this.addLocationDeviceProperty(null, target)
-    }
-  }
-
-  addLatitudeDevice (device?: Device) {
-    return this.addLocationDevice(device || null, 'latitude')
-  }
-
-  addLongitudeDevice (device?: Device) {
-    return this.addLocationDevice(device || null, 'longitude')
-  }
-
-  addElevationDevice (device?: Device) {
-    return this.addLocationDevice(device || null, 'elevation')
-  }
-
-  addLocationDeviceProperty (property: DeviceProperty | null, target: keyof IDynamicLocation) {
-    const targets = ['latitude', 'longitude', 'elevation']
-    if (!targets.includes(target as string)) {
-      throw new TypeError('unknown target ' + (target as string))
-    }
-    if (this.configuration.location && this.configuration.location instanceof DynamicLocation) {
-      this.configuration.location[target] = property
-    }
-  }
-
-  addLatitudeProperty (property?: DeviceProperty) {
-    return this.addLocationDeviceProperty(property || null, 'latitude')
-  }
-
-  addLongitudeProperty (property?: DeviceProperty) {
-    return this.addLocationDeviceProperty(property || null, 'longitude')
-  }
-
-  addElevationProperty (property?: DeviceProperty) {
-    return this.addLocationDeviceProperty(property || null, 'elevation')
-  }
-
   /**
    * sets the selected platform or device, when a node is selected
    */
@@ -1139,86 +1049,6 @@ export default class ConfigurationsIdPage extends Vue {
         this.selectedPlatform = null
         break
     }
-  }
-
-  /**
-   * creates a ConfigurationsTree for demo purposes
-   *
-   * @return {ConfigurationsTree} the demo tree
-   */
-  getDemoConfigurationsTree (): ConfigurationsTree {
-    return ConfigurationsTree.fromArray(
-      [
-        ((): PlatformNode => {
-          const n = new PlatformNode(
-            ((): Platform => {
-              const o = new Platform()
-              o.id = -1
-              o.shortName = 'Platform 01'
-              o.longName = 'Platform 01 Bla blub'
-              o.description = 'A platform on which various light instruments can be mounted. Consists of wood, dry and rotten wood.'
-              return o
-            })()
-          )
-          n.setTree(
-            ConfigurationsTree.fromArray(
-              [
-                ((): PlatformNode => {
-                  const n = new PlatformNode(
-                    ((): Platform => {
-                      const o = new Platform()
-                      o.id = -2
-                      o.shortName = 'Platform 02'
-                      return o
-                    })()
-                  )
-                  n.setTree(
-                    ConfigurationsTree.fromArray(
-                      [
-                        new DeviceNode(
-                          ((): Device => {
-                            const o = new Device()
-                            o.id = -3
-                            o.shortName = 'Device 01'
-                            return o
-                          })()
-                        ),
-                        new DeviceNode(
-                          ((): Device => {
-                            const o = new Device()
-                            o.id = -4
-                            o.shortName = 'Device 02'
-                            return o
-                          })()
-                        ),
-                        new DeviceNode(
-                          ((): Device => {
-                            const o = new Device()
-                            o.id = -5
-                            o.shortName = 'Device 03'
-                            return o
-                          })()
-                        )
-                      ]
-                    )
-                  )
-                  return n
-                })()
-              ]
-            )
-          )
-          return n
-        })(),
-        new PlatformNode(
-          ((): Platform => {
-            const o = new Platform()
-            o.id = -6
-            o.shortName = 'Platform 03'
-            return o
-          })()
-        )
-      ]
-    )
   }
 }
 </script>
