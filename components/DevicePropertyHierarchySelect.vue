@@ -75,11 +75,12 @@ export default class DevicePropertyHierarchySelect extends Vue {
    * @param {Device} device - the device whose properties should be displayed
    */
   addDevice (device?: Device) {
+    const oldState = this.selectedDevice
     this.selectedDevice = device || null
 
     if (device && device.properties.length === 1) {
       this.addProperty(device.properties[0])
-    } else {
+    } else if (oldState !== null) {
       this.addProperty()
     }
   }
