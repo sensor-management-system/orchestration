@@ -211,14 +211,10 @@
                         </v-btn>
                       </v-card-actions>
                     </v-card>
-                    <v-alert
-                      v-else
-                      type="info"
-                      outlined
-                    >
+                    <Info v-if="!selectedPlatform && !selectedDevice">
                       Select a platform on the left side to add devices or platforms to it.<br>
                       To add a device or platform to the root of this configuration, deselect any previously selected device or platform.
-                    </v-alert>
+                    </Info>
                     <template v-if="!selectedDevice">
                       <v-subheader v-if="selectedPlatform">
                         Add platforms and devices to the selected platform:
@@ -390,6 +386,7 @@ import ContactSelect from '@/components/ContactSelect.vue'
 import DevicePropertyHierarchySelect from '@/components/DevicePropertyHierarchySelect.vue'
 import DeviceConfigurationAttributesExpansionPanels from '@/components/DeviceConfigurationAttributesExpansionPanels.vue'
 import PlatformConfigurationAttributesExpansionPanels from '@/components/PlatformConfigurationAttributesExpansionPanels.vue'
+import Info from '@/components/Info.vue'
 
 import Contact from '@/models/Contact'
 import Device from '@/models/Device'
@@ -437,7 +434,8 @@ export class AppBarTabsExtensionExtended extends AppBarTabsExtension {
     ContactSelect,
     DevicePropertyHierarchySelect,
     DeviceConfigurationAttributesExpansionPanels,
-    PlatformConfigurationAttributesExpansionPanels
+    PlatformConfigurationAttributesExpansionPanels,
+    Info
   }
 })
 // @ts-ignore

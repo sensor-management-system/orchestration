@@ -1,5 +1,8 @@
 <template>
   <div>
+    <Info v-if="!value.length">
+      Please add some platforms to the configuration.
+    </Info>
     <v-subheader
       v-if="value.length"
     >
@@ -50,6 +53,7 @@
  */
 import { Vue, Component, Prop } from 'nuxt-property-decorator'
 
+import Info from '@/components/Info.vue'
 import PlatformConfigurationAttributesForm from '@/components/PlatformConfigurationAttributesForm.vue'
 
 import { PlatformConfigurationAttributes } from '@/models/PlatformConfigurationAttributes'
@@ -60,6 +64,7 @@ import { PlatformConfigurationAttributes } from '@/models/PlatformConfigurationA
  */
 @Component({
   components: {
+    Info,
     PlatformConfigurationAttributesForm
   }
 })

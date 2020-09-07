@@ -1,5 +1,8 @@
 <template>
   <div>
+    <Info v-if="!value.length">
+      Please add some devices to the configuration.
+    </Info>
     <v-subheader
       v-if="value.length"
     >
@@ -50,6 +53,7 @@
  */
 import { Vue, Component, Prop } from 'nuxt-property-decorator'
 
+import Info from '@/components/Info.vue'
 import DeviceConfigurationAttributesForm from '@/components/DeviceConfigurationAttributesForm.vue'
 
 import { DeviceConfigurationAttributes } from '@/models/DeviceConfigurationAttributes'
@@ -60,6 +64,7 @@ import { DeviceConfigurationAttributes } from '@/models/DeviceConfigurationAttri
  */
 @Component({
   components: {
+    Info,
     DeviceConfigurationAttributesForm
   }
 })
