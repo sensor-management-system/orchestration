@@ -334,172 +334,14 @@
 
           <!-- Setup -->
           <v-tab-item :eager="true">
-            <v-subheader
-              v-if="configuration.platformAttributes.length"
-            >
-              Platforms
-              <v-spacer />
-              <v-btn
-                v-if="!platformPanelsHidden"
-                text
-                small
-                @click="platformPanelsHidden = true"
-              >
-                hide all
-              </v-btn>
-              <v-btn
-                v-if="platformPanelsHidden"
-                text
-                small
-                @click="platformPanelsHidden = false"
-              >
-                expand all
-              </v-btn>
-            </v-subheader>
-            <v-expansion-panels
-              v-if="configuration.platformAttributes.length"
-              :value="openedPlatformPanels"
-              multiple
-            >
-              <v-expansion-panel
-                v-for="(item) in configuration.platformAttributes"
-                :key="'platformAttribute-' + item.id"
-              >
-                <v-expansion-panel-header>{{ item.platform.shortName }}</v-expansion-panel-header>
-                <v-expansion-panel-content>
-                  <v-row>
-                    <v-col
-                      cols="12"
-                      md="2"
-                    >
-                      <v-text-field
-                        v-model="item.offsetX"
-                        label="Offset (x)"
-                      />
-                    </v-col>
-                    <v-col
-                      cols="12"
-                      md="2"
-                    >
-                      <v-text-field
-                        v-model="item.offsetY"
-                        label="Offset (y)"
-                      />
-                    </v-col>
-                    <v-col
-                      cols="12"
-                      md="2"
-                    >
-                      <v-text-field
-                        v-model="item.offsetZ"
-                        label="Offset (z)"
-                      />
-                    </v-col>
-                  </v-row>
-                </v-expansion-panel-content>
-              </v-expansion-panel>
-            </v-expansion-panels>
-            <v-subheader
-              v-if="configuration.deviceAttributes.length"
-            >
-              Devices
-              <v-spacer />
-              <v-btn
-                v-if="!devicePanelsHidden"
-                text
-                small
-                @click="devicePanelsHidden = true"
-              >
-                hide all
-              </v-btn>
-              <v-btn
-                v-if="devicePanelsHidden"
-                text
-                small
-                @click="devicePanelsHidden = false"
-              >
-                expand all
-              </v-btn>
-            </v-subheader>
-            <v-expansion-panels
-              v-if="configuration.deviceAttributes.length"
-              :value="openedDevicePanels"
-              multiple
-            >
-              <v-expansion-panel
-                v-for="(item) in configuration.deviceAttributes"
-                :key="'deviceAttribute-' + item.id"
-              >
-                <v-expansion-panel-header>{{ item.device.shortName }}</v-expansion-panel-header>
-                <v-expansion-panel-content>
-                  <v-row>
-                    <v-col
-                      cols="12"
-                      md="2"
-                    >
-                      <v-text-field
-                        v-model="item.offsetX"
-                        label="Offset (x)"
-                      />
-                    </v-col>
-                    <v-col
-                      cols="12"
-                      md="2"
-                    >
-                      <v-text-field
-                        v-model="item.offsetY"
-                        label="Offset (y)"
-                      />
-                    </v-col>
-                    <v-col
-                      cols="12"
-                      md="2"
-                    >
-                      <v-text-field
-                        v-model="item.offsetZ"
-                        label="Offset (z)"
-                      />
-                    </v-col>
-                    <v-col
-                      cols="12"
-                      md="2"
-                    >
-                      <v-menu
-                        v-model="calibrationDateMenu"
-                        :close-on-content-click="false"
-                        :nudge-right="40"
-                        transition="scale-transition"
-                        offset-y
-                        min-width="290px"
-                      >
-                        <template v-slot:activator="{ on, attrs }">
-                          <v-text-field
-                            v-model="item.calibrationDate"
-                            label="Calibration date"
-                            prepend-icon="mdi-calendar-range"
-                            readonly
-                            v-bind="attrs"
-                            v-on="on"
-                          />
-                        </template>
-                        <v-date-picker
-                          v-model="item.calibrationDate"
-                          @input="calibrationDateMenu = false"
-                        />
-                      </v-menu>
-                    </v-col>
-                  </v-row>
-                  <v-row>
-                    <v-col
-                      cols="12"
-                      md="3"
-                    >
-                      <DevicePropertySelect v-model="item.deviceProperties" :properties="item.device.properties" label="Add one or more properties" :readonly="false" />
-                    </v-col>
-                  </v-row>
-                </v-expansion-panel-content>
-              </v-expansion-panel>
-            </v-expansion-panels>
+            <PlatformConfigurationAttributesExpansionPanels
+              v-model="configuration.platformAttributes"
+              :readonly="readonly"
+            />
+            <DeviceConfigurationAttributesExpansionPanels
+              v-model="configuration.deviceAttributes"
+              :readonly="readonly"
+            />
           </v-tab-item>
 
           <!-- Contact -->
@@ -545,8 +387,9 @@ import { Vue, Component, Watch } from 'nuxt-property-decorator'
 import AppBarEditModeContent from '@/components/AppBarEditModeContent.vue'
 import AppBarTabsExtension from '@/components/AppBarTabsExtension.vue'
 import ContactSelect from '@/components/ContactSelect.vue'
-import DevicePropertySelect from '@/components/DevicePropertySelect.vue'
 import DevicePropertyHierarchySelect from '@/components/DevicePropertyHierarchySelect.vue'
+import DeviceConfigurationAttributesExpansionPanels from '@/components/DeviceConfigurationAttributesExpansionPanels.vue'
+import PlatformConfigurationAttributesExpansionPanels from '@/components/PlatformConfigurationAttributesExpansionPanels.vue'
 
 import Contact from '@/models/Contact'
 import Device from '@/models/Device'
@@ -592,8 +435,9 @@ export class AppBarTabsExtensionExtended extends AppBarTabsExtension {
 @Component({
   components: {
     ContactSelect,
-    DevicePropertySelect,
-    DevicePropertyHierarchySelect
+    DevicePropertyHierarchySelect,
+    DeviceConfigurationAttributesExpansionPanels,
+    PlatformConfigurationAttributesExpansionPanels
   }
 })
 // @ts-ignore
@@ -605,7 +449,6 @@ export default class ConfigurationsIdPage extends Vue {
 
   private startDateMenu: boolean = false
   private endDateMenu: boolean = false
-  private calibrationDateMenu: boolean = false
 
   private contacts: Contact[] = []
 
@@ -630,12 +473,6 @@ export default class ConfigurationsIdPage extends Vue {
 
   private platformItem: string = ''
   private deviceItem: string = ''
-
-  private platformPanels: number[] = []
-  private devicePanels: number[] = []
-
-  private platformPanelsHidden: boolean = false
-  private devicePanelsHidden: boolean = false
 
   created () {
     this.$nuxt.$emit('app-bar-content', AppBarEditModeContent)
@@ -1018,14 +855,6 @@ export default class ConfigurationsIdPage extends Vue {
       default:
         throw new TypeError('search function not defined for unknown value')
     }
-  }
-
-  get openedPlatformPanels (): number[] {
-    return !this.platformPanelsHidden ? this.getAllPlatforms().map((_, i) => i) : []
-  }
-
-  get openedDevicePanels (): number[] {
-    return !this.devicePanelsHidden ? this.getAllDevices().map((_, i) => i) : []
   }
 
   /**
