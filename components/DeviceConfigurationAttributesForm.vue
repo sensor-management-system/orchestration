@@ -58,6 +58,7 @@
               label="Calibration date"
               prepend-icon="mdi-calendar-range"
               readonly
+              :disabled="readonly"
               v-bind="attrs"
               v-on="on"
             />
