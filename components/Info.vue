@@ -6,7 +6,7 @@
     elevation="2"
     dismissible
   >
-    <slot></slot>
+    <slot />
   </v-alert>
 </template>
 
