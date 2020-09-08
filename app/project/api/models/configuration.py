@@ -18,17 +18,23 @@ class Configuration(db.Model, AuditMixin):
     project_uri = db.Column(db.String(256), nullable=True)
     project_name = db.Column(db.String(256), nullable=True)
 
-    longitude_src_device_property_id = db.Column(db.Integer, db.ForeignKey('device_property.id'), nullable=True)
+    longitude_src_device_property_id = db.Column(
+        db.Integer, db.ForeignKey('device_property.id'), nullable=True
+    )
     longitude_src_device_property = db.relationship(
         DeviceProperty, uselist=False, foreign_keys=[longitude_src_device_property_id]
     )
 
-    latitude_src_device_property_id = db.Column(db.Integer, db.ForeignKey('device_property.id'), nullable=True)
+    latitude_src_device_property_id = db.Column(
+        db.Integer, db.ForeignKey('device_property.id'), nullable=True
+    )
     latitude_src_device_property = db.relationship(
         DeviceProperty, uselist=False, foreign_keys=[latitude_src_device_property_id]
     )
 
-    elevation_src_device_property_id = db.Column(db.Integer, db.ForeignKey('device_property.id'), nullable=True)
+    elevation_src_device_property_id = db.Column(
+        db.Integer, db.ForeignKey('device_property.id'), nullable=True
+    )
     elevation_src_device_property = db.relationship(
         DeviceProperty, uselist=False, foreign_keys=[elevation_src_device_property_id]
     )
