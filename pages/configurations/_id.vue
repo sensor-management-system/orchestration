@@ -222,105 +222,12 @@
                       <v-subheader v-else>
                         Add platforms and devices to the configuration:
                       </v-subheader>
-                      <v-row>
-                        <v-col cols="12" md="3">
-                          <v-select
-                            v-model="searchOptions.searchType"
-                            label="Type"
-                            :items="searchTypes"
-                          />
-                        </v-col>
-                        <v-col cols="12" md="6">
-                          <v-text-field
-                            v-model="searchOptions.text"
-                            label="Name"
-                          />
-                        </v-col>
-                        <v-col cols="12" md="3">
-                          <v-btn
-                            color="primary"
-                            @click="search"
-                          >
-                            search
-                          </v-btn>
-                        </v-col>
-                      </v-row>
-                      <v-row v-if="platforms">
-                        <v-col cols="12">
-                          <v-list two-line>
-                            <v-list-item-group
-                              v-model="platformItem"
-                              color="primary"
-                            >
-                              <template
-                                v-for="(item, index) in platforms"
-                              >
-                                <v-list-item
-                                  :key="'platform-' + item.id"
-                                  :disabled="isPlatformInTree(item)"
-                                >
-                                  <v-list-item-content>
-                                    <v-list-item-title v-text="item.shortName" />
-                                    <v-list-item-subtitle class="text--primary" v-text="item.longName" />
-                                    <v-list-item-subtitle>URN (TODO)</v-list-item-subtitle>
-                                  </v-list-item-content>
-                                  <v-list-item-action>
-                                    <v-btn
-                                      :key="'btn-add-platform-' + item.id"
-                                      :disabled="isPlatformInTree(item)"
-                                      @click="addPlatformNode(item)"
-                                    >
-                                      add
-                                    </v-btn>
-                                  </v-list-item-action>
-                                </v-list-item>
-                                <v-divider
-                                  v-if="index + 1 < platforms.length"
-                                  :key="'platformDivider-' + index"
-                                />
-                              </template>
-                            </v-list-item-group>
-                          </v-list>
-                        </v-col>
-                      </v-row>
-                      <v-row v-if="devices">
-                        <v-col cols="12">
-                          <v-list two-line>
-                            <v-list-item-group
-                              v-model="deviceItem"
-                              color="primary"
-                            >
-                              <template
-                                v-for="(item, index) in devices"
-                              >
-                                <v-list-item
-                                  :key="'device-' + item.id"
-                                  :disabled="isDeviceInTree(item)"
-                                >
-                                  <v-list-item-content>
-                                    <v-list-item-title v-text="item.shortName" />
-                                    <v-list-item-subtitle class="text--primary" v-text="item.longName" />
-                                    <v-list-item-subtitle>URN (TODO)</v-list-item-subtitle>
-                                  </v-list-item-content>
-                                  <v-list-item-action>
-                                    <v-btn
-                                      :key="'btn-add-device-' + item.id"
-                                      :disabled="isDeviceInTree(item)"
-                                      @click="addDeviceNode(item)"
-                                    >
-                                      add
-                                    </v-btn>
-                                  </v-list-item-action>
-                                </v-list-item>
-                                <v-divider
-                                  v-show="index + 1 < devices.length"
-                                  :key="'deviceDivider-' + index"
-                                />
-                              </template>
-                            </v-list-item-group>
-                          </v-list>
-                        </v-col>
-                      </v-row>
+                      <ConfigurationsPlatformDeviceSearch
+                        is-platform-used-func="isPlatformInTree"
+                        is-device-used-func="isDeviceInTree"
+                        add-platform-func="addPlatformNode"
+                        add-device-func="addDeviceNode"
+                      />
                     </template>
                   </v-col>
                 </v-row>
@@ -401,19 +308,9 @@ import { PlatformNode } from '@/models/PlatformNode'
 import { DeviceConfigurationAttributes } from '@/models/DeviceConfigurationAttributes'
 import { PlatformConfigurationAttributes } from '@/models/PlatformConfigurationAttributes'
 
-enum SearchType {
-  Platform = 'Platform',
-  Device = 'Device'
-}
-
 enum LocationType {
   Stationary = 'Stationary',
   Dynamic = 'Dynamic'
-}
-
-interface ISearchOptions {
-  searchType: SearchType
-  text: string
 }
 
 @Component
@@ -454,23 +351,7 @@ export default class ConfigurationsIdPage extends Vue {
   private selectedPlatform: Platform | null = null
   private selectedDevice: Device | null = null
 
-  private searchTypes: string[] = [
-    SearchType.Platform,
-    SearchType.Device
-  ]
-
-  private searchOptions: ISearchOptions = {
-    searchType: SearchType.Platform,
-    text: ''
-  }
-
-  private platformsResult: Platform[] = [] as Platform[]
-  private devicesResult: Device[] = [] as Device[]
-
   private tree: ConfigurationsTree = new ConfigurationsTree()
-
-  private platformItem: string = ''
-  private deviceItem: string = ''
 
   created () {
     this.$nuxt.$emit('app-bar-content', AppBarEditModeContent)
@@ -662,34 +543,12 @@ export default class ConfigurationsIdPage extends Vue {
     }
   }
 
-  get platforms (): Platform[] {
-    return this.platformsResult
-  }
-
-  set platforms (platforms: Platform[]) {
-    this.platformsResult = platforms
-    if (platforms.length) {
-      this.devicesResult = [] as Device[]
-    }
-  }
-
-  get devices (): Device[] {
-    return this.devicesResult
-  }
-
-  set devices (devices: Device[]) {
-    this.devicesResult = devices
-    if (devices.length) {
-      this.platformsResult = [] as Platform[]
-    }
-  }
-
   /**
    * adds a PlatformNode to the tree
    *
    * @param {Platform} platform - the node to add
    */
-  addPlatformNode (platform: Platform) {
+  addPlatformNode (platform: Platform): void {
     const node: ConfigurationsTreeNode | null = this.getSelectedNode()
     if (!node) {
       this.configuration.tree.push(
@@ -720,7 +579,7 @@ export default class ConfigurationsIdPage extends Vue {
    *
    * @param {Device} device - the node to add
    */
-  addDeviceNode (device: Device) {
+  addDeviceNode (device: Device): void {
     const node: ConfigurationsTreeNode | null = this.getSelectedNode()
     if (!node) {
       this.configuration.tree.push(
@@ -829,30 +688,6 @@ export default class ConfigurationsIdPage extends Vue {
 
   get allDevices (): Device[] {
     return this.getAllDevices()
-  }
-
-  /**
-   * searches for platforms or devices depending on the searchType
-   *
-   * @async
-   */
-  async search () {
-    switch (this.searchOptions.searchType) {
-      case SearchType.Platform:
-        this.platforms = await this.$api.platforms.newSearchBuilder()
-          .withTextInName(this.searchOptions.text)
-          .build()
-          .findMatchingAsList()
-        break
-      case SearchType.Device:
-        this.devices = await this.$api.devices.newSearchBuilder()
-          .withTextInName(this.searchOptions.text)
-          .build()
-          .findMatchingAsList()
-        break
-      default:
-        throw new TypeError('search function not defined for unknown value')
-    }
   }
 
   /**
