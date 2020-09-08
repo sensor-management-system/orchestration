@@ -1,4 +1,7 @@
 from project.api.ping import Ping
+from project.api.resourceManager.configuration_detail import ConfigurationDetail
+from project.api.resourceManager.configuration_list import ConfigurationList
+from project.api.resourceManager.configuration_relationship import ConfigurationRelationship
 from project.api.resourceManager.contact_detail import ContactDetail
 from project.api.resourceManager.contact_list import ContactList
 from project.api.resourceManager.contact_relationship import ContactRelationship
@@ -132,3 +135,18 @@ def create_endpoints(api):
         "user_events",
         base_url + "/users/<int:id>/relationships/events",
     )
+
+    # Configuration
+    api.route(
+        ConfigurationList,
+        "configuration_list",
+        base_url + "/configurations",
+    )
+    api.route(
+        ConfigurationDetail, "configuration_detail", base_url + "/configurations/<int:id>",
+    )
+    # api.route(
+    #     ConfigurationRelationship,
+    #     "device_contacts",
+    #     base_url + "/devices/<int:id>/relationships/contacts",
+    # )
