@@ -1,6 +1,9 @@
 <template>
   <div>
     <v-row>
+      <v-col cols="12">Add platforms and devices:</v-col>
+    </v-row>
+    <v-row>
       <v-col cols="12" md="3">
         <v-select
           v-model="searchOptions.searchType"
@@ -25,7 +28,11 @@
     </v-row>
     <v-row v-if="platforms">
       <v-col cols="12">
-        <v-list two-line>
+        <v-list
+          two-line
+          max-height="450"
+          class="overflow-y-auto"
+        >
           <v-list-item-group
             v-model="platformItem"
             color="primary"
@@ -46,7 +53,7 @@
                   <v-btn
                     :key="'btn-add-platform-' + item.id"
                     :disabled="isPlatformUsedFunc(item)"
-                    @click="addPlatformFunc(item)"
+                    @click="addPlatform(item)"
                   >
                     add
                   </v-btn>
@@ -84,7 +91,7 @@
                   <v-btn
                     :key="'btn-add-device-' + item.id"
                     :disabled="isDeviceUsedFunc(item)"
-                    @click="addDeviceFunc(item)"
+                    @click="addDevice(item)"
                   >
                     add
                   </v-btn>
@@ -124,8 +131,6 @@ interface ISearchOptions {
 
 type IsPlatformUsedFunc = (p: Platform) => boolean
 type IsDeviceUsedFunc = (d: Device) => boolean
-type AddPlatformFunc = (p: Platform) => void
-type AddDeviceFunc = (d: Device) => void
 
 /**
  * A class component to select platforms and devices for a configuration
@@ -151,32 +156,18 @@ export default class ConfigurationsPlatformDeviceSearch extends Vue {
   private deviceItem: string = ''
 
   @Prop({
-    required: true,
+    default: () => false,
     type: Function
   })
   // @ts-ignore
-  readonly isDeviceUsedFunc!: IsDeviceUsedFunc
+  readonly isDeviceUsedFunc: IsDeviceUsedFunc
 
   @Prop({
-    required: true,
+    default: () => false,
     type: Function
   })
   // @ts-ignore
-  readonly isPlatformUsedFunc!: IsPlatformUsedFunc
-
-  @Prop({
-    required: true,
-    type: Function
-  })
-  // @ts-ignore
-  readonly addDeviceFunc!: AddDeviceFunc
-
-  @Prop({
-    required: true,
-    type: Function
-  })
-  // @ts-ignore
-  readonly addPlatformFunc!: AddPlatformFunc
+  readonly isPlatformUsedFunc: IsPlatformUsedFunc
 
   get platforms (): Platform[] {
     return this.platformsResult
@@ -222,6 +213,14 @@ export default class ConfigurationsPlatformDeviceSearch extends Vue {
       default:
         throw new TypeError('search function not defined for unknown value')
     }
+  }
+
+  addPlatform (platform: Platform) {
+    this.$emit('add-platform', platform)
+  }
+
+  addDevice (device: Device) {
+    this.$emit('add-device', device)
   }
 }
 </script>
