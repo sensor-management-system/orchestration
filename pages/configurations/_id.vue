@@ -157,78 +157,29 @@
               <v-card-text>
                 <v-row>
                   <v-col cols="12" md="6">
-                    <v-treeview
-                      :active.sync="selectedNodeIds"
-                      :items="configuration.tree.toArray()"
-                      activatable
-                      hoverable
-                      rounded
-                      open-all
-                    >
-                      <template v-slot:prepend="{ item }">
-                        <v-icon v-if="nodeIsPlatform(item)">
-                          mdi-rocket-outline
-                        </v-icon>
-                        <v-icon v-else>
-                          mdi-network-outline
-                        </v-icon>
-                      </template>
-                    </v-treeview>
+                    <ConfigurationsTreeView
+                      ref="treeView"
+                      v-model="configuration.tree"
+                      :selected="selectedNode"
+                      @select="setSelectedNode"
+                    />
                   </v-col>
                   <v-col cols="6" md="6">
-                    <v-card v-if="selectedPlatform || selectedDevice">
-                      <v-breadcrumbs :items="breadcrumbs" divider=">" />
-                      <v-card-text>
-                        <v-row v-if="selectedPlatform">
-                          <v-col cols="12" md="9">
-                            <template v-if="selectedPlatform.description">
-                              {{ selectedPlatform.description }}
-                            </template>
-                            <template v-else>
-                              The selected platform has no description.
-                            </template>
-                          </v-col>
-                        </v-row>
-                        <v-row v-else-if="selectedDevice">
-                          <v-col cols="12" md="9">
-                            <template v-if="selectedDevice.description">
-                              {{ selectedDevice.description }}
-                            </template>
-                            <template v-else>
-                              The selected device has no description.
-                            </template>
-                          </v-col>
-                        </v-row>
-                      </v-card-text>
-                      <v-card-actions>
-                        <v-btn
-                          v-if="selectedPlatform || selectedDevice"
-                          color="red"
-                          text
-                          @click="removeSelectedNode"
-                        >
-                          remove
-                        </v-btn>
-                      </v-card-actions>
-                    </v-card>
-                    <Info v-if="!selectedPlatform && !selectedDevice">
-                      Select a platform on the left side to add devices or platforms to it.<br>
-                      To add a device or platform to the root of this configuration, deselect any previously selected device or platform.
+                    <Info v-if="!selectedNode">
+                      Select a platform on the left side to add devices or platforms to it. To add a device or platform to the root of this configuration, deselect any previously selected device or platform.
                     </Info>
-                    <template v-if="!selectedDevice">
-                      <v-subheader v-if="selectedPlatform">
-                        Add platforms and devices to the selected platform:
-                      </v-subheader>
-                      <v-subheader v-else>
-                        Add platforms and devices to the configuration:
-                      </v-subheader>
-                      <ConfigurationsPlatformDeviceSearch
-                        is-platform-used-func="isPlatformInTree"
-                        is-device-used-func="isDeviceInTree"
-                        add-platform-func="addPlatformNode"
-                        add-device-func="addDeviceNode"
-                      />
-                    </template>
+                    <ConfigurationsSelectedItem
+                      :value="selectedNode"
+                      :breadcrumbs="breadcrumbs"
+                      @remove="removeSelectedNode"
+                    />
+                    <ConfigurationsPlatformDeviceSearch
+                      v-if="!selectedNode || selectedNodeIsPlatform"
+                      :is-platform-used-func="isPlatformInTree"
+                      :is-device-used-func="isDeviceInTree"
+                      @add-platform="addPlatformNode"
+                      @add-device="addDeviceNode"
+                    />
                   </v-col>
                 </v-row>
               </v-card-text>
@@ -293,6 +244,9 @@ import ContactSelect from '@/components/ContactSelect.vue'
 import DevicePropertyHierarchySelect from '@/components/DevicePropertyHierarchySelect.vue'
 import DeviceConfigurationAttributesExpansionPanels from '@/components/DeviceConfigurationAttributesExpansionPanels.vue'
 import PlatformConfigurationAttributesExpansionPanels from '@/components/PlatformConfigurationAttributesExpansionPanels.vue'
+import ConfigurationsPlatformDeviceSearch from '@/components/ConfigurationsPlatformDeviceSearch.vue'
+import ConfigurationsTreeView from '@/components/ConfigurationsTreeView.vue'
+import ConfigurationsSelectedItem from '@/components/ConfigurationsSelectedItem.vue'
 import Info from '@/components/Info.vue'
 
 import Contact from '@/models/Contact'
@@ -332,6 +286,9 @@ export class AppBarTabsExtensionExtended extends AppBarTabsExtension {
     DevicePropertyHierarchySelect,
     DeviceConfigurationAttributesExpansionPanels,
     PlatformConfigurationAttributesExpansionPanels,
+    ConfigurationsPlatformDeviceSearch,
+    ConfigurationsTreeView,
+    ConfigurationsSelectedItem,
     Info
   }
 })
@@ -347,9 +304,7 @@ export default class ConfigurationsIdPage extends Vue {
 
   private contacts: Contact[] = []
 
-  private selectedNodeIds: string[] = []
-  private selectedPlatform: Platform | null = null
-  private selectedDevice: Device | null = null
+  private selectedNode: ConfigurationsTreeNode | null = null
 
   private tree: ConfigurationsTree = new ConfigurationsTree()
 
@@ -467,25 +422,11 @@ export default class ConfigurationsIdPage extends Vue {
     ]
   }
 
-  /**
-   * returns whether a node is a PlatformNode or not
-   *
-   * @param {ConfigurationsTreeNode} node - the node to check for
-   * @return {boolean} true if the node is a PlatformNode
-   */
-  nodeIsPlatform (node: ConfigurationsTreeNode): boolean {
-    return node instanceof PlatformNode
-  }
-
   get breadcrumbs (): Object[] {
-    if (!this.selectedNodeIds.length) {
+    if (!this.selectedNode) {
       return []
     }
-    const node = this.configuration.tree.getById(this.selectedNodeIds[0])
-    if (!node) {
-      return []
-    }
-    return this.configuration.tree.getPath(node).map((t: string): Object => { return { text: t } })
+    return this.configuration.tree.getPath(this.selectedNode).map((t: string): Object => { return { text: t } })
   }
 
   /**
@@ -517,39 +458,12 @@ export default class ConfigurationsIdPage extends Vue {
   }
 
   /**
-   * returns the selected node in the tree
-   *
-   * @return {ConfigurationsTreeNode|null} the selected node
-   */
-  getSelectedNode (): ConfigurationsTreeNode | null {
-    if (!this.selectedNodeIds.length) {
-      return null
-    }
-    return this.configuration.tree.getById(this.selectedNodeIds[0])
-  }
-
-  /**
-   * sets the selected node in the tree
-   *
-   * @param {ConfigurationsTreeNode|null} node - the node to select
-   */
-  setSelectedNode (node: ConfigurationsTreeNode | null) {
-    if (node) {
-      if (node.id) {
-        this.selectedNodeIds = [node.id]
-      }
-    } else {
-      this.selectedNodeIds = []
-    }
-  }
-
-  /**
    * adds a PlatformNode to the tree
    *
    * @param {Platform} platform - the node to add
    */
   addPlatformNode (platform: Platform): void {
-    const node: ConfigurationsTreeNode | null = this.getSelectedNode()
+    const node: ConfigurationsTreeNode | null = this.selectedNode
     if (!node) {
       this.configuration.tree.push(
         new PlatformNode(platform)
@@ -580,7 +494,7 @@ export default class ConfigurationsIdPage extends Vue {
    * @param {Device} device - the node to add
    */
   addDeviceNode (device: Device): void {
-    const node: ConfigurationsTreeNode | null = this.getSelectedNode()
+    const node: ConfigurationsTreeNode | null = this.selectedNode
     if (!node) {
       this.configuration.tree.push(
         new DeviceNode(device)
@@ -609,21 +523,28 @@ export default class ConfigurationsIdPage extends Vue {
    * removes the selected node and sets the selected node to the parent
    */
   removeSelectedNode () {
-    const node: ConfigurationsTreeNode | null = this.getSelectedNode()
+    const node: ConfigurationsTreeNode | null = this.selectedNode
     if (!node) {
       return
     }
+
+    this.removeConfigurationAttributes(node)
+
     const parentNode = this.configuration.tree.getParent(node)
     this.configuration.tree.remove(node)
-    switch (true) {
-      case node instanceof PlatformNode:
-        this.removePlatformConfigurationAttribute((node as PlatformNode).unpack())
-        break
-      case node instanceof DeviceNode:
-        this.removeDeviceConfigurationAttribute((node as DeviceNode).unpack())
-        break
+    this.selectedNode = parentNode
+  }
+
+  removeConfigurationAttributes (node: ConfigurationsTreeNode) {
+    if (node instanceof PlatformNode) {
+      // as the platform can have childs in the tree, remove also the attributes of the children
+      for (const child of node.children) {
+        this.removeConfigurationAttributes(child)
+      }
+      this.removePlatformConfigurationAttribute((node as PlatformNode).unpack())
+    } else if (node instanceof DeviceNode) {
+      this.removeDeviceConfigurationAttribute((node as DeviceNode).unpack())
     }
-    this.setSelectedNode(parentNode)
   }
 
   removePlatformConfigurationAttribute (platform: Platform): number {
@@ -640,28 +561,6 @@ export default class ConfigurationsIdPage extends Vue {
       this.configuration.deviceAttributes.splice(index, 1)
     }
     return this.configuration.deviceAttributes.length
-  }
-
-  /**
-   * returns an Array of all platforms in the tree
-   *
-   * @return {Platform[]} an Array of Platforms
-   */
-  getAllPlatforms (): Platform[] {
-    const getPlatformNodesRecursive = (nodes: ConfigurationsTree, platforms: PlatformNode[]) => {
-      for (const node of nodes) {
-        if (node instanceof PlatformNode) {
-          platforms.push(node)
-        }
-        if (!node.canHaveChildren()) {
-          continue
-        }
-        getPlatformNodesRecursive((node as PlatformNode).getTree(), platforms)
-      }
-    }
-    const platformNodes: PlatformNode[] = []
-    getPlatformNodesRecursive(this.configuration.tree, platformNodes)
-    return platformNodes.map(n => n.unpack())
   }
 
   /**
@@ -690,27 +589,12 @@ export default class ConfigurationsIdPage extends Vue {
     return this.getAllDevices()
   }
 
-  /**
-   * sets the selected platform or device, when a node is selected
-   */
-  @Watch('selectedNodeIds')
-  onItemSelect () {
-    const node: ConfigurationsTreeNode | null = this.getSelectedNode()
-    if (!node) {
-      this.selectedPlatform = null
-      this.selectedDevice = null
-      return
-    }
-    switch (true) {
-      case node instanceof PlatformNode:
-        this.selectedPlatform = (node as PlatformNode).unpack() as Platform
-        this.selectedDevice = null
-        break
-      case node instanceof DeviceNode:
-        this.selectedDevice = (node as DeviceNode).unpack() as Device
-        this.selectedPlatform = null
-        break
-    }
+  get selectedNodeIsPlatform (): boolean {
+    return this.selectedNode instanceof PlatformNode
+  }
+
+  setSelectedNode (node: ConfigurationsTreeNode) {
+    this.selectedNode = node
   }
 }
 </script>
