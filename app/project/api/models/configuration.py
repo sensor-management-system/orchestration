@@ -38,3 +38,11 @@ class Configuration(db.Model, AuditMixin):
     elevation_src_device_property = db.relationship(
         DeviceProperty, uselist=False, foreign_keys=[elevation_src_device_property_id]
     )
+
+    configuration_platforms = db.relationship(
+        "ConfigurationPlatform"
+    )
+
+    configuration_devices = db.relationship(
+        "ConfigurationDevice"
+    )

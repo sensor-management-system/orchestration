@@ -33,6 +33,17 @@ class ContactSchema(Schema):
         type_="platform",
         id_field="id",
     )
+    configurations = Relationship(
+        attribute="configurations",
+        self_view="contact_configurations",
+        self_view_kwargs={"id": "<id>"},
+        related_view="configuration_list",
+        related_view_kwargs={"contact_id": "<id>"},
+        many=True,
+        schema="ConfigurationSchema",
+        type_="configuration",
+        id_field="id",
+    )
     devices = Relationship(
         attribute="devices",
         self_view="contact_devices",

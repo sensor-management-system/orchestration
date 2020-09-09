@@ -1,5 +1,6 @@
 from marshmallow_jsonapi import fields
 from marshmallow_jsonapi.flask import Schema, Relationship
+from project.api.schemas.contact_schema import ContactSchema
 from project.api.schemas.device_property_schema import DevicePropertySchema
 
 
@@ -32,4 +33,16 @@ class ConfigurationSchema(Schema):
     )
     elevation_src_device_property = fields.Nested(
         DevicePropertySchema, allow_none=True
+    )
+
+    contacts = fields.Nested(
+        ContactSchema, many=True, allow_none=True,
+    )
+
+    configuration_platforms = fields.Nested(
+        "ConfigurationPlatformSchema", many=True, allow_none=True
+    )
+
+    configuration_devices = fields.Nested(
+        "ConfigurationDeviceSchema", many=True, allow_none=True
     )
