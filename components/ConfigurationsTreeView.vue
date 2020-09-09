@@ -25,15 +25,11 @@
  * @file provides a component to select platforms and devices for a configuration
  * @author <marc.hanisch@gfz-potsdam.de>
  */
-import { Vue, Component, Prop, Watch } from 'nuxt-property-decorator'
+import { Vue, Component, Prop } from 'nuxt-property-decorator'
 
 import { ConfigurationsTree } from '@/models/ConfigurationsTree'
 import { ConfigurationsTreeNode } from '@/models/ConfigurationsTreeNode'
 import { PlatformNode } from '@/models/PlatformNode'
-import { DeviceNode } from '@/models/DeviceNode'
-
-import Platform from '@/models/Platform'
-import Device from '@/models/Device'
 
 /**
  * A class component to select platforms and devices for a configuration

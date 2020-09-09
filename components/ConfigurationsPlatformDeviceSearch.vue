@@ -1,7 +1,9 @@
 <template>
   <div>
     <v-row>
-      <v-col cols="12">Add platforms and devices:</v-col>
+      <v-col cols="12">
+        Add platforms and devices:
+      </v-col>
     </v-row>
     <v-row>
       <v-col cols="12" md="3">
