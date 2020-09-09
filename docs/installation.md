@@ -93,3 +93,23 @@ To run the server local without docker, please execute the following from the ap
     export FLASK_APP=project/__init__.py
     python manage.py run
     ```
+
+## UFZ WOMBAT K8s
+
+(Re-) creation of database schema:
+
+1. Connect to running backend container shell
+
+    ```bash
+    kubectl --context=wombat-stage-intern exec custom-rdm-svm-5f4fd99776-j4fjz --container=frontend sh -ti
+    ```
+
+2. Temporarily change the database credentials to adm-user to allow schema modification
+3. Run `python manage.py recreate_db`
+
+
+After recreation of database schema:
+
+```postgresql
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO rdm_sis_stage_rw;
+```
