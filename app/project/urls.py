@@ -161,7 +161,9 @@ def create_endpoints(api):
     #     base_url + "/configuration-platforms",
     # )
     api.route(
-        ConfigurationPlatformDetail, "configuration_platform_detail", base_url + "/configuration-platforms/<int:id>",
+        ConfigurationPlatformDetail,
+        "configuration_platform_detail",
+        base_url + "/configuration-platforms/<int:id>",
     )
     # ConfigurationDevice
     # api.route(
@@ -170,5 +172,7 @@ def create_endpoints(api):
     #     base_url + "/configuration-devices",
     # )
     api.route(
-        ConfigurationDeviceDetail, "configuration_device_detail", base_url + "/configuration-devices/<int:id>",
+        ConfigurationDeviceDetail,
+        "configuration_device_detail",
+        base_url + "/configuration-devices/<int:id>",
     )
