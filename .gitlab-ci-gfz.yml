@@ -104,7 +104,7 @@ after-deploy-gfz-image-create-dbs:
     - deploy-gfz-image
   allow_failure: true
 
-after-deploy-gfz-image-recreate-tables:
+after-deploy-gfz-image-migrate-tables:
   stage: after-deployment-gfz-create-tables
   environment:
     name: gfzstaging
@@ -116,29 +116,12 @@ after-deploy-gfz-image-recreate-tables:
   variables:
     COMPOSE_PROJECT_NAME: ssmbackend
   script:
-      - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T ssmbackend python3 manage.py recreate_db
+      - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T ssmbackend python3 manage.py db migrate
   when: manual
   dependencies:
     - after-deploy-gfz-image-create-dbs
   allow_failure: true
 
-after-deploy-gfz-image-init-tables:
-  stage: after-deployment-gfz-init-tables
-  environment:
-    name: gfzstaging
-    url: https://$STAGING_HOST
-  tags:
-    - deploy
-    - staging
-    - id2
-  variables:
-    COMPOSE_PROJECT_NAME: ssmbackend
-  script:
-      - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T ssmbackend python3 manage.py db_init
-  when: manual
-  dependencies:
-    - after-deploy-gfz-image-create-dbs
-  allow_failure: true
 
 test-availability:
   stage: after-deployment-test-gfz
