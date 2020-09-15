@@ -137,5 +137,5 @@ test-availability:
     - curl -f http://$STAGING_HOST:5000/rdm/svm-api/v1/ping
   when: manual
   dependencies:
-    - after-deploy-gfz-image-init-tables
+    - after-deploy-gfz-image-migrate-tables
   allow_failure: true
