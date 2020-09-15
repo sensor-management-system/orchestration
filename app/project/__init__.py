@@ -2,12 +2,14 @@ import os
 
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 from flask_rest_jsonapi import Api
 from flask_cors import CORS
 from project.urls import create_endpoints
 from project.api.token_checker import auth_blueprint
 
 DB = SQLAlchemy()
+migrate = Migrate()
 
 
 def create_app():
@@ -26,6 +28,7 @@ def create_app():
 
     # instantiate the db
     DB.init_app(app)
+    migrate.init_app(app, DB)
 
     # shell context for flask cli
     app.shell_context_processor({"app": app, "db": DB})
