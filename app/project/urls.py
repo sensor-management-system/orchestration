@@ -1,4 +1,11 @@
 from project.api.ping import Ping
+from project.api.resourceManager.configuration_detail import ConfigurationDetail
+from project.api.resourceManager.configuration_device_detail import ConfigurationDeviceDetail
+from project.api.resourceManager.configuration_device_list import ConfigurationDeviceList
+from project.api.resourceManager.configuration_list import ConfigurationList
+from project.api.resourceManager.configuration_platform_detail import ConfigurationPlatformDetail
+from project.api.resourceManager.configuration_platform_list import ConfigurationPlatformList
+from project.api.resourceManager.configuration_relationship import ConfigurationRelationship
 from project.api.resourceManager.contact_detail import ContactDetail
 from project.api.resourceManager.contact_list import ContactList
 from project.api.resourceManager.contact_relationship import ContactRelationship
@@ -111,6 +118,11 @@ def create_endpoints(api):
     )
     api.route(
         ContactRelationship,
+        "contact_configurations",
+        base_url + "/contacts/<int:id>/relationships/configurations",
+    )
+    api.route(
+        ContactRelationship,
         "contact_user",
         base_url + "/contacts/<int:id>/relationships/user",
     )
@@ -131,4 +143,36 @@ def create_endpoints(api):
         UserRelationship,
         "user_events",
         base_url + "/users/<int:id>/relationships/events",
+    )
+
+    # Configuration
+    api.route(
+        ConfigurationList,
+        "configuration_list",
+        base_url + "/configurations",
+    )
+    api.route(
+        ConfigurationDetail, "configuration_detail", base_url + "/configurations/<int:id>",
+    )
+    # ConfigurationPlatform
+    # api.route(
+    #     ConfigurationPlatformList,
+    #     "configuration_platform_list",
+    #     base_url + "/configuration-platforms",
+    # )
+    api.route(
+        ConfigurationPlatformDetail,
+        "configuration_platform_detail",
+        base_url + "/configuration-platforms/<int:id>",
+    )
+    # ConfigurationDevice
+    # api.route(
+    #     ConfigurationDeviceList,
+    #     "configuration_device_list",
+    #     base_url + "/configuration-devices",
+    # )
+    api.route(
+        ConfigurationDeviceDetail,
+        "configuration_device_detail",
+        base_url + "/configuration-devices/<int:id>",
     )
