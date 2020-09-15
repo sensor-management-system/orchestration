@@ -6,7 +6,7 @@ ARG VCS_REF
 LABEL maintainer="Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>" \
     org.opencontainers.image.title="SVM Image" \
     org.opencontainers.image.licenses="MIT" \
-    org.opencontainers.image.version="0.1" \
+    org.opencontainers.image.version="0.1.1" \
     org.opencontainers.image.url="git.ufz.de:4567/rdm-software/svm/backend:$BUILD_DATE" \
     org.opencontainers.image.revision=$VCS_REF \
     org.opencontainers.image.created=$BUILD_DATE
@@ -31,7 +31,7 @@ RUN apk add --no-cache --virtual .build-deps \
     musl-dev \
     postgresql-dev \
     && pip install --upgrade pip \
-    && pip install --prefix=/install --no-cache-dir -r /tmp/requirements.txt \
+    && pip install --prefix /install --no-cache-dir -r /tmp/requirements.txt \
     && apk del --no-cache .build-deps
 
 FROM base
