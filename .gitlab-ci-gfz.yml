@@ -116,7 +116,7 @@ after-deploy-gfz-image-migrate-tables:
   variables:
     COMPOSE_PROJECT_NAME: ssmbackend
   script:
-      - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T ssmbackend python3 manage.py db migrate
+      - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T ssmbackend python3 manage.py db upgrade
   when: manual
   dependencies:
     - after-deploy-gfz-image-create-dbs
