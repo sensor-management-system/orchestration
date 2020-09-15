@@ -69,8 +69,8 @@ def db_init():
 
 @app.after_request
 def add_header(response):
-    response.headers["Access-Control-Allow-Origin"] = "https://git.ufz.de"
-    response.headers["Access-Control-Allow-Headers"] = "Content-Type"
+    response.headers['Access-Control-Allow-Origin'] = 'https://git.ufz.de'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
 
     return response
 
