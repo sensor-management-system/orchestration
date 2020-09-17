@@ -14,21 +14,21 @@ class ConfigurationDevice(db.Model, AuditMixin):
     offset_z = db.Column(db.Float(), nullable=True)
     calibration_date = db.Column(db.DateTime, nullable=True)
 
-    configuration_id = db.Column(db.Integer, db.ForeignKey('configuration.id'))
+    configuration_id = db.Column(
+        db.Integer, db.ForeignKey("configuration.id"), nullable=False
+    )
     configuration = db.relationship(
         Configuration, uselist=False, foreign_keys=[configuration_id]
     )
 
-    device_id = db.Column(db.Integer, db.ForeignKey('device.id'))
-    device = db.relationship(
-        Device, uselist=False, foreign_keys=[device_id]
-    )
+    device_id = db.Column(db.Integer, db.ForeignKey("device.id"), nullable=False)
+    device = db.relationship(Device, uselist=False, foreign_keys=[device_id])
 
-    platform_id = db.Column(db.Integer, db.ForeignKey('platform.id'))
-    platform = db.relationship(
-        Platform, uselist=False, foreign_keys=[platform_id]
-    )
+    platform_id = db.Column(db.Integer, db.ForeignKey("platform.id"), nullable=False)
+    platform = db.relationship(Platform, uselist=False, foreign_keys=[platform_id])
 
     __table_args__ = (
-        UniqueConstraint('device_id', 'configuration_id', name='uc_configuration_device'),
+        UniqueConstraint(
+            "device_id", "configuration_id", name="uc_configuration_device"
+        ),
     )
