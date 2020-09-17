@@ -16,7 +16,7 @@ export class DeviceNode implements IConfigurationsTreeNode<Device> {
     this.node = node
   }
 
-  get id (): number | null {
+  get id (): string | null {
     return this.node.id
   }
 

@@ -5,7 +5,7 @@ import { CustomTextField, ICustomTextField } from '@/models/CustomTextField'
 import { Attachment, IAttachment } from '@/models/Attachment'
 
 export interface IDevice {
-  id: number | null
+  id: string | null
   persistentIdentifier: string
   shortName: string
   longName: string
@@ -38,7 +38,7 @@ export interface IDevice {
 }
 
 export default class Device implements IDevice {
-  private _id: number | null = null
+  private _id: string | null = null
   private _persistentIdentifier: string = ''
   private _shortName: string = ''
   private _longName: string = ''
@@ -73,11 +73,11 @@ export default class Device implements IDevice {
 
   // TODO: Events
 
-  get id (): number | null {
+  get id (): string | null {
     return this._id
   }
 
-  set id (id: number | null) {
+  set id (id: string | null) {
     this._id = id
   }
 

@@ -6,7 +6,7 @@ import { IStationaryLocation, IDynamicLocation, StationaryLocation, DynamicLocat
 import { PlatformConfigurationAttributes } from '@/models/PlatformConfigurationAttributes'
 
 export interface IConfiguration {
-  id: number | null
+  id: string | null
   startDate: Date | null
   endDate: Date | null
   location: IStationaryLocation | IDynamicLocation | null
@@ -17,7 +17,7 @@ export interface IConfiguration {
 }
 
 export class Configuration implements IConfiguration {
-  private _id: number | null = null
+  private _id: string | null = null
   private _startDate: Date | null = null
   private _endDate: Date | null = null
   private _location: IStationaryLocation | IDynamicLocation | null = null
@@ -26,11 +26,11 @@ export class Configuration implements IConfiguration {
   private _platformAttributes: PlatformConfigurationAttributes[] = [] as PlatformConfigurationAttributes[]
   private _deviceAttributes: DeviceConfigurationAttributes[] = [] as DeviceConfigurationAttributes[]
 
-  get id (): number | null {
+  get id (): string | null {
     return this._id
   }
 
-  set id (id: number | null) {
+  set id (id: string | null) {
     this._id = id
   }
 

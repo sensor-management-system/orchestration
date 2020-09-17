@@ -27,7 +27,7 @@ export class PlatformConfigurationAttributes implements IPlatformConfigurationAt
     return newObject
   }
 
-  get id (): number | null {
+  get id (): string | null {
     return this._platform.id
   }
 

@@ -1,5 +1,5 @@
 export interface IContact {
-  id: number | null
+  id: string | null
   email: string
   givenName: string
   familyName: string
@@ -7,17 +7,17 @@ export interface IContact {
 }
 
 export default class Contact implements IContact {
-  private _id: number | null = null
+  private _id: string | null = null
   private _email: string = ''
   private _givenName: string = ''
   private _familyName: string = ''
   private _website: string = ''
 
-  get id (): number | null {
+  get id (): string | null {
     return this._id
   }
 
-  set id (newId: number | null) {
+  set id (newId: string | null) {
     this._id = newId
   }
 
@@ -63,7 +63,7 @@ export default class Contact implements IContact {
     return 'Contact ' + this._id
   }
 
-  static createWithIdEMailAndNames (id: number, email: string, givenName: string, familyName: string, website: string): Contact {
+  static createWithIdEMailAndNames (id: string, email: string, givenName: string, familyName: string, website: string): Contact {
     const result = new Contact()
     result.id = id
     result.email = email

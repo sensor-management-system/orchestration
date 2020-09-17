@@ -2,7 +2,7 @@ import Contact, { IContact } from '@/models/Contact'
 import { Attachment, IAttachment } from '@/models/Attachment'
 
 export interface IPlatform {
-  id: number | null
+  id: string | null
 
   platformTypeUri: string
   platformTypeName: string
@@ -35,7 +35,7 @@ export interface IPlatform {
 }
 
 export default class Platform implements IPlatform {
-  private _id: number | null = null
+  private _id: string | null = null
 
   private _platformTypeUri: string = ''
   private _platformTypeName: string = ''
@@ -65,11 +65,11 @@ export default class Platform implements IPlatform {
   private _contacts: Contact[] = []
   private _attachments: Attachment[] = []
 
-  get id (): number | null {
+  get id (): string | null {
     return this._id
   }
 
-  set id (newId: number | null) {
+  set id (newId: string | null) {
     this._id = newId
   }
 

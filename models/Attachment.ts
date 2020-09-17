@@ -1,5 +1,5 @@
 export interface IAttachment {
-  id: number | null
+  id: string | null
   url: string
   label: string
 }
@@ -16,7 +16,7 @@ export class Attachment implements IAttachment {
     'application/vnd.oasis.opendocument.text': ['odt']
   }
 
-  private _id: number | null = null
+  private _id: string | null = null
   private _url: string = ''
   private _label: string = ''
   // @TODO: add an _uploadedAt field
@@ -36,11 +36,11 @@ export class Attachment implements IAttachment {
     return attachment
   }
 
-  get id (): number | null {
+  get id (): string | null {
     return this._id
   }
 
-  set id (id: number | null) {
+  set id (id: string | null) {
     this._id = id
   }
 

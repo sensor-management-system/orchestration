@@ -38,8 +38,8 @@ export default class DeviceApi {
     })
   }
 
-  deleteById (id: number) : Promise<void> {
-    return this.axiosApi.delete<string, void>(String(id))
+  deleteById (id: string) : Promise<void> {
+    return this.axiosApi.delete<string, void>(id)
   }
 
   save (device: Device) {
@@ -400,7 +400,7 @@ export function serverResponseToEntity (entry: any, included: any[]) : Device {
 
   for (const propertyFromServer of attributes.properties) {
     const property = new DeviceProperty()
-    property.id = Number.parseInt(propertyFromServer.id)
+    property.id = propertyFromServer.id
     property.measuringRange = new MeasuringRange(
       propertyFromServer.measuring_range_min,
       propertyFromServer.measuring_range_max
@@ -426,7 +426,7 @@ export function serverResponseToEntity (entry: any, included: any[]) : Device {
 
   for (const customFieldFromServer of attributes.customfields) {
     const customField = new CustomTextField()
-    customField.id = Number.parseInt(customFieldFromServer.id)
+    customField.id = customFieldFromServer.id
     customField.key = customFieldFromServer.key || ''
     customField.value = customFieldFromServer.value || ''
 
@@ -439,7 +439,7 @@ export function serverResponseToEntity (entry: any, included: any[]) : Device {
 
   for (const attachmentFromServer of attributes.attachments) {
     const attachment = new Attachment()
-    attachment.id = Number.parseInt(attachmentFromServer.id)
+    attachment.id = attachmentFromServer.id
     attachment.label = attachmentFromServer.label || ''
     attachment.url = attachmentFromServer.url || ''
 
@@ -451,16 +451,16 @@ export function serverResponseToEntity (entry: any, included: any[]) : Device {
   const contactIds = []
   if (relationships.contacts && relationships.contacts.data && relationships.contacts.data.length > 0) {
     for (const relationShipContactData of relationships.contacts.data) {
-      const contactId = Number.parseInt(relationShipContactData.id)
+      const contactId = relationShipContactData.id
       contactIds.push(contactId)
     }
   }
 
-  const possibleContacts: {[key: number]: Contact} = {}
+  const possibleContacts: {[key: string]: Contact} = {}
   if (included && included.length > 0) {
     for (const includedEntry of included) {
       if (includedEntry.type === 'contact') {
-        const contactId = Number.parseInt(includedEntry.id)
+        const contactId = includedEntry.id
         if (contactIds.includes(contactId)) {
           const contact = serverResponseToContact(includedEntry)
           possibleContacts[contactId] = contact
