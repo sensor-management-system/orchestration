@@ -21,7 +21,7 @@ class ConfigurationDeviceSchema(Schema):
     #     ConfigurationSchema
     # )
     device = fields.Nested(
-        PlatformSchema
+        ConfigurationSchema
     )
     platform = fields.Nested(
         PlatformSchema
