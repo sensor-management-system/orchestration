@@ -58,7 +58,7 @@ export default class ConfigurationsSelectedItem extends Vue {
   readonly value: ConfigurationsTreeNode | null
 
   @Prop({
-    default: [],
+    default: () => [],
     type: Array
   })
   // @ts-ignore
