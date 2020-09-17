@@ -24,6 +24,7 @@
         v-if="value"
         color="red"
         text
+        data-role="remove-node"
         @click="remove"
       >
         remove
