@@ -198,7 +198,7 @@ export default class SeachPlatformsPage extends Vue {
   private searchResults: Platform[] = []
   private searchText: string | null = null
 
-  private showDeleteDialog: {[index: number]: boolean } = {}
+  private showDeleteDialog: {[index: string]: boolean } = {}
 
   created () {
     this.$nuxt.$emit('app-bar-content', AppBarEditModeContent)
@@ -340,7 +340,7 @@ export default class SeachPlatformsPage extends Vue {
     return this.loader != null && this.loader.funToLoadNext != null
   }
 
-  deleteAndCloseDialog (id: number) {
+  deleteAndCloseDialog (id: string) {
     this.$api.platforms.deleteById(id).then(() => {
       this.showDeleteDialog = {}
 
@@ -383,11 +383,11 @@ export default class SeachPlatformsPage extends Vue {
     return 'Unknown status'
   }
 
-  showDeleteDialogFor (id: number) {
+  showDeleteDialogFor (id: string) {
     Vue.set(this.showDeleteDialog, id, true)
   }
 
-  hideDeleteDialogFor (id: number) {
+  hideDeleteDialogFor (id: string) {
     Vue.set(this.showDeleteDialog, id, false)
   }
 }

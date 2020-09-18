@@ -5,11 +5,11 @@ import { DeviceProperty } from '@/models/DeviceProperty'
 describe('DeviceConfigurationAttributes', () => {
   it('should create a DeviceConfigurationAttributes object', () => {
     const device = new Device()
-    device.id = 1
+    device.id = '1'
 
     const attributes = new DeviceConfigurationAttributes(device)
     expect(attributes).toHaveProperty('device', device)
-    expect(attributes).toHaveProperty('id', 1)
+    expect(attributes).toHaveProperty('id', '1')
   })
 
   it('should create a DeviceConfigurationAttributes from an object', () => {
@@ -17,14 +17,14 @@ describe('DeviceConfigurationAttributes', () => {
     const prop2 = new DeviceProperty()
 
     const device = new Device()
-    device.id = 1
+    device.id = '1'
     device.properties = [prop1, prop2]
 
     const now = new Date()
     const attributes = DeviceConfigurationAttributes.createFromObject({ device, offsetX: 1, offsetY: 1, offsetZ: 1, calibrationDate: now, deviceProperties: [prop1] })
     expect(typeof attributes).toBe('object')
     expect(attributes.device).toBe(device)
-    expect(attributes).toHaveProperty('id', 1)
+    expect(attributes).toHaveProperty('id', '1')
     expect(attributes).toHaveProperty('offsetX', 1)
     expect(attributes).toHaveProperty('offsetY', 1)
     expect(attributes).toHaveProperty('offsetZ', 1)
@@ -52,7 +52,7 @@ describe('DeviceConfigurationAttributes', () => {
 
   it('should assign a deviceProperty that is a member of the device by its id', () => {
     const prop1 = new DeviceProperty()
-    prop1.id = 1
+    prop1.id = '1'
     const device = new Device()
     device.properties = [prop1]
 
@@ -64,7 +64,7 @@ describe('DeviceConfigurationAttributes', () => {
 
   it('should throw an error when assigning a property by its id that is not a member of the device', () => {
     const prop1 = new DeviceProperty()
-    prop1.id = 1
+    prop1.id = '1'
     const device = new Device()
 
     const attributes = new DeviceConfigurationAttributes(device)
@@ -85,7 +85,7 @@ describe('DeviceConfigurationAttributes', () => {
 
   it('should remove a deviceProperty by its id', () => {
     const prop1 = new DeviceProperty()
-    prop1.id = 1
+    prop1.id = '1'
     const device = new Device()
     device.properties = [prop1]
 
@@ -98,7 +98,7 @@ describe('DeviceConfigurationAttributes', () => {
 
   it('should throw an error when removing a property that is not assigned', () => {
     const prop1 = new DeviceProperty()
-    prop1.id = 1
+    prop1.id = '1'
     const device = new Device()
 
     const attributes = new DeviceConfigurationAttributes(device)

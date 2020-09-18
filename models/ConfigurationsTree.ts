@@ -221,11 +221,11 @@ export class ConfigurationsTree implements Iterable<ConfigurationsTreeNode> {
   /**
    * finds a platform node in the tree by its id
    *
-   * @param {number} nodeId - the id of the node to search
+   * @param {string} nodeId - the id of the node to search
    * @return {PlatformNode|null} the found node, null if it was not found
    */
-  getPlatformById (platformId: number): PlatformNode | null {
-    const getByIdRecursive = (platformId: number, nodes: ConfigurationsTree): PlatformNode | null => {
+  getPlatformById (platformId: string): PlatformNode | null {
+    const getByIdRecursive = (platformId: string, nodes: ConfigurationsTree): PlatformNode | null => {
       for (const node of nodes) {
         if (node instanceof PlatformNode && node.unpack().id === platformId) {
           return node
@@ -247,11 +247,11 @@ export class ConfigurationsTree implements Iterable<ConfigurationsTreeNode> {
   /**
    * finds a device node in the tree by its id
    *
-   * @param {number} nodeId - the id of the node to search
+   * @param {string} nodeId - the id of the node to search
    * @return {DeviceNode|null} the found node, null if it was not found
    */
-  getDeviceById (deviceId: number): DeviceNode | null {
-    const getByIdRecursive = (deviceId: number, nodes: ConfigurationsTree): DeviceNode | null => {
+  getDeviceById (deviceId: string): DeviceNode | null {
+    const getByIdRecursive = (deviceId: string, nodes: ConfigurationsTree): DeviceNode | null => {
       for (const node of nodes) {
         if (node instanceof DeviceNode && node.unpack().id === deviceId) {
           return node

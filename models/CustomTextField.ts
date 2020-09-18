@@ -1,11 +1,11 @@
 export interface ICustomTextField {
-  id: number | null,
+  id: string | null,
   key: string,
   value: string
 }
 
 export class CustomTextField implements ICustomTextField {
-  private _id: number | null = null
+  private _id: string | null = null
   private _key: string = ''
   private _value: string = ''
 
@@ -27,11 +27,11 @@ export class CustomTextField implements ICustomTextField {
     return newObject
   }
 
-  get id (): number | null {
+  get id (): string | null {
     return this._id
   }
 
-  set id (newId: number | null) {
+  set id (newId: string | null) {
     this._id = newId
   }
 

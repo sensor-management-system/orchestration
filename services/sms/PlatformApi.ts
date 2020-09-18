@@ -35,8 +35,8 @@ export default class PlatformApi {
     })
   }
 
-  deleteById (id: number): Promise<void> {
-    return this.axiosApi.delete<string, void>(String(id))
+  deleteById (id: string): Promise<void> {
+    return this.axiosApi.delete<string, void>(id)
   }
 
   save (platform: Platform): Promise<Platform> {
@@ -324,7 +324,7 @@ export function serverResponseToEntity (entry: any, included: any[]) : Platform 
   const attributes = entry.attributes
   const relationships = entry.relationships
 
-  result.id = Number.parseInt(entry.id)
+  result.id = entry.id
 
   result.description = attributes.description || ''
   result.shortName = attributes.short_name || ''
@@ -355,7 +355,7 @@ export function serverResponseToEntity (entry: any, included: any[]) : Platform 
 
   for (const attachmentFromServer of attributes.attachments) {
     const attachment = new Attachment()
-    attachment.id = Number.parseInt(attachmentFromServer.id)
+    attachment.id = attachmentFromServer.id
     attachment.label = attachmentFromServer.label || ''
     attachment.url = attachmentFromServer.url || ''
 
@@ -367,16 +367,16 @@ export function serverResponseToEntity (entry: any, included: any[]) : Platform 
   const contactIds = []
   if (relationships.contacts && relationships.contacts.data && relationships.contacts.data.length > 0) {
     for (const relationShipContactData of relationships.contacts.data) {
-      const contactId = Number.parseInt(relationShipContactData.id)
+      const contactId = relationShipContactData.id
       contactIds.push(contactId)
     }
   }
 
-  const possibleContacts: {[key: number]: Contact} = {}
+  const possibleContacts: {[key: string]: Contact} = {}
   if (included && included.length > 0) {
     for (const includedEntry of included) {
       if (includedEntry.type === 'contact') {
-        const contactId = Number.parseInt(includedEntry.id)
+        const contactId = includedEntry.id
         if (contactIds.includes(contactId)) {
           const contact = serverResponseToContact(includedEntry)
           possibleContacts[contactId] = contact

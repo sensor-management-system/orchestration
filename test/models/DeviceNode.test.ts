@@ -4,7 +4,7 @@ import { DeviceNode } from '@/models/DeviceNode'
 describe('DeviceNode', () => {
   it('should create a DeviceNode object', () => {
     const device = new Device()
-    device.id = 1
+    device.id = '1'
 
     const node = new DeviceNode(device)
     expect(Object.is(node.unpack(), device)).toBeTruthy()
@@ -13,7 +13,7 @@ describe('DeviceNode', () => {
 
   it('should create a DeviceNode from another one', () => {
     const firstDevice = new Device()
-    firstDevice.id = 1
+    firstDevice.id = '1'
 
     const firstNode = new DeviceNode(firstDevice)
     const secondNode = DeviceNode.createFromObject(firstNode)

@@ -108,11 +108,11 @@ describe('ConfigurationsTree', () => {
 
   it('should return an array of node names for a given node id', () => {
     const platform = new Platform()
-    platform.id = 1
+    platform.id = '1'
     platform.shortName = 'Platform'
 
     const device = new Device()
-    device.id = 2
+    device.id = '2'
     device.shortName = 'Device'
 
     const platformNode = new PlatformNode(platform)
@@ -129,11 +129,11 @@ describe('ConfigurationsTree', () => {
 
   it('should return a node by its id recursively', () => {
     const platform = new Platform()
-    platform.id = 1
+    platform.id = '1'
     platform.shortName = 'Platform'
 
     const device = new Device()
-    device.id = 2
+    device.id = '2'
     device.shortName = 'Device'
 
     const platformNode = new PlatformNode(platform)
@@ -143,8 +143,8 @@ describe('ConfigurationsTree', () => {
 
     const tree = ConfigurationsTree.fromArray([platformNode])
 
-    expect(Object.is(tree.getPlatformById(1), platformNode)).toBeTruthy()
-    expect(Object.is(tree.getDeviceById(2), deviceNode)).toBeTruthy()
+    expect(Object.is(tree.getPlatformById('1'), platformNode)).toBeTruthy()
+    expect(Object.is(tree.getDeviceById('2'), deviceNode)).toBeTruthy()
   })
 
   it('should return the parent node of a node', () => {

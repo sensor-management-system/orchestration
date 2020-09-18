@@ -34,7 +34,7 @@ export class DeviceConfigurationAttributes implements IDeviceConfigurationAttrib
     return newObject
   }
 
-  get id (): number | null {
+  get id (): string | null {
     return this._device.id
   }
 
@@ -90,7 +90,7 @@ export class DeviceConfigurationAttributes implements IDeviceConfigurationAttrib
     return this._deviceProperties.push(property)
   }
 
-  addDevicePropertyById (id: number | null): number {
+  addDevicePropertyById (id: string | null): number {
     const property = this.device.properties.find(e => e.id === id)
     if (!property) {
       throw new Error('unknown property id')
@@ -107,7 +107,7 @@ export class DeviceConfigurationAttributes implements IDeviceConfigurationAttrib
     return index
   }
 
-  removeDevicePropertyById (id: number | null): number {
+  removeDevicePropertyById (id: string | null): number {
     const index = this.device.properties.findIndex(e => e.id === id)
     if (index === -1) {
       throw new Error('unknown property id')

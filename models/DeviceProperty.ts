@@ -1,7 +1,7 @@
 import { IMeasuringRange, MeasuringRange } from '@/models/MeasuringRange'
 
 export interface IDeviceProperty {
-  id: number | null
+  id: string | null
   label: string
   compartmentUri: string
   compartmentName: string
@@ -17,7 +17,7 @@ export interface IDeviceProperty {
 }
 
 export class DeviceProperty implements IDeviceProperty {
-  private _id: number | null = null
+  private _id: string | null = null
   private _label: string = ''
   private _compartmentUri: string = ''
   private _compartmentName: string = ''
@@ -58,11 +58,11 @@ export class DeviceProperty implements IDeviceProperty {
     return newObject
   }
 
-  get id (): number | null {
+  get id (): string | null {
     return this._id
   }
 
-  set id (id: number | null) {
+  set id (id: string | null) {
     this._id = id
   }
 
