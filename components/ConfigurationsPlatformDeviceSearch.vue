@@ -55,6 +55,7 @@
                   <v-btn
                     :key="'btn-add-platform-' + item.id"
                     :disabled="isPlatformUsedFunc(item)"
+                    data-role="add-platform"
                     @click="addPlatform(item)"
                   >
                     add
@@ -93,6 +94,7 @@
                   <v-btn
                     :key="'btn-add-device-' + item.id"
                     :disabled="isDeviceUsedFunc(item)"
+                    data-role="add-device"
                     @click="addDevice(item)"
                   >
                     add
