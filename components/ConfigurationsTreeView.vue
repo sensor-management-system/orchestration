@@ -38,8 +38,6 @@ import { PlatformNode } from '@/models/PlatformNode'
 @Component
 // @ts-ignore
 export default class ConfigurationsTreeView extends Vue {
-  private selectedNodeIds: string[] = []
-
   @Prop({
     required: true,
     type: Object
@@ -52,7 +50,7 @@ export default class ConfigurationsTreeView extends Vue {
     type: Object
   })
   // @ts-ignore
-  readonly selected: ConfigurationsTreeNode | null = null
+  readonly selected: ConfigurationsTreeNode | null
 
   get items (): ConfigurationsTreeNode[] {
     return this.value.toArray()
