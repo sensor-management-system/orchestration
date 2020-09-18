@@ -29,7 +29,7 @@ describe('ConfigurationsSelectedItem', () => {
 
   it('should test if the given device node is a device or platform', () => {
     const device = new Device()
-    device.id = 1
+    device.id = '1'
 
     const wrapper: any = createWrapper(new DeviceNode(device))
     expect(wrapper.vm.isPlatform).toBeFalsy()
@@ -38,7 +38,7 @@ describe('ConfigurationsSelectedItem', () => {
 
   it('should test if the given platform node is a device or platform', () => {
     const platform = new Platform()
-    platform.id = 1
+    platform.id = '1'
 
     const wrapper: any = createWrapper(new PlatformNode(platform))
     expect(wrapper.vm.isPlatform).toBeTruthy()
@@ -47,7 +47,7 @@ describe('ConfigurationsSelectedItem', () => {
 
   it('should return the description of a given device', () => {
     const device = new Device()
-    device.id = 1
+    device.id = '1'
     device.description = 'foo bar baz'
 
     const wrapper: any = createWrapper(new DeviceNode(device))
@@ -56,7 +56,7 @@ describe('ConfigurationsSelectedItem', () => {
 
   it('should trigger an input event when the remove button is clicked', async () => {
     const device = new Device()
-    device.id = 1
+    device.id = '1'
     device.description = 'foo bar baz'
 
     const node = new DeviceNode(device)

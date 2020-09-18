@@ -31,10 +31,10 @@ describe('ConfigurationsTreeView', () => {
 
   it('should return an empty array when no node is selected', () => {
     const platform = new Platform()
-    platform.id = 1
+    platform.id = '1'
     platform.shortName = 'a platform'
     const device = new Device()
-    device.id = 1
+    device.id = '1'
     device.shortName = 'a sensor'
     const node = new PlatformNode(platform)
     node.getTree().push(new DeviceNode(device))
@@ -48,10 +48,10 @@ describe('ConfigurationsTreeView', () => {
 
   it('should return an array with one node id when a node is selected', () => {
     const platform = new Platform()
-    platform.id = 1
+    platform.id = '1'
     platform.shortName = 'a platform'
     const device = new Device()
-    device.id = 1
+    device.id = '1'
     device.shortName = 'a sensor'
     const node = new PlatformNode(platform)
     node.getTree().push(new DeviceNode(device))
@@ -66,10 +66,10 @@ describe('ConfigurationsTreeView', () => {
 
   it('should trigger a select event when a node is selected', () => {
     const platform = new Platform()
-    platform.id = 1
+    platform.id = '1'
     platform.shortName = 'a platform'
     const device = new Device()
-    device.id = 1
+    device.id = '1'
     device.shortName = 'a sensor'
     const node = new PlatformNode(platform)
     node.getTree().push(new DeviceNode(device))

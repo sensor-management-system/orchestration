@@ -29,7 +29,7 @@ describe('ConfigurationsPlatformDeviceSearch', () => {
 
   it('should trigger an add-platform event when a platform is added', async () => {
     const platform = new Platform()
-    platform.id = 1
+    platform.id = '1'
     platform.shortName = 'a platform'
 
     const wrapper: any = createWrapper([platform], [])
@@ -42,7 +42,7 @@ describe('ConfigurationsPlatformDeviceSearch', () => {
 
   it('should trigger an add-device event when a device is added', async () => {
     const device = new Device()
-    device.id = 1
+    device.id = '1'
     device.shortName = 'a device'
 
     const wrapper: any = createWrapper([], [device])

@@ -21,7 +21,7 @@ export default class ConfigurationApi {
   findById (id: string): Promise<Configuration> {
     return new Promise((resolve) => {
       const configuration = this._createDemoConfiguration()
-      configuration.id = parseInt(id)
+      configuration.id = id
       resolve(configuration)
     })
   }
