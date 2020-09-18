@@ -168,7 +168,7 @@
         bottom
         right
         color="secondary"
-        @click="toggleEditMode"
+        @click="onEditButtonClick"
       >
         <v-icon>
           mdi-pencil
@@ -224,6 +224,7 @@ export default class PlatformIdPage extends mixins(Rules) {
 
   // then for our platform that we want to change
   private platform: Platform = Platform.createEmpty()
+  private platformCopy: Platform | null = null
 
   // and some general data for the page
   private activeTab: number = 0
@@ -235,11 +236,7 @@ export default class PlatformIdPage extends mixins(Rules) {
       this.save()
     })
     this.$nuxt.$on('AppBarContent:cancel-button-click', () => {
-      if (this.platform && this.platform.id) {
-        this.toggleEditMode()
-      } else {
-        this.$router.push('/search/platforms')
-      }
+      this.cancel()
     })
 
     this.$nuxt.$emit('app-bar-extension', AppBarTabsExtensionExtended)
@@ -280,17 +277,18 @@ export default class PlatformIdPage extends mixins(Rules) {
 
   loadPlatform () {
     const platformId = this.$route.params.id
-    if (platformId) {
-      this.isInEditMode = false
-      this.$api.platforms.findById(platformId).then((foundPlatform) => {
-        this.platform = foundPlatform
-      }).catch(() => {
-        // We don't take the error directly
-        this.$store.commit('snackbar/setError', 'Loading platform failed')
-      })
-    } else {
+    if (!platformId) {
+      this.createWorkingCopy()
       this.isInEditMode = true
+      return
     }
+    this.isInEditMode = false
+    this.$api.platforms.findById(platformId).then((foundPlatform) => {
+      this.platform = foundPlatform
+    }).catch(() => {
+      // We don't take the error directly
+      this.$store.commit('snackbar/setError', 'Loading platform failed')
+    })
   }
 
   get isInEditMode (): boolean {
@@ -301,10 +299,6 @@ export default class PlatformIdPage extends mixins(Rules) {
     this.editMode = editMode
   }
 
-  toggleEditMode () {
-    this.isInEditMode = !this.isInEditMode
-  }
-
   @Watch('editMode', { immediate: true, deep: true })
   // @ts-ignore
   onEditModeChanged (editMode: boolean) {
@@ -312,16 +306,43 @@ export default class PlatformIdPage extends mixins(Rules) {
     this.$nuxt.$emit('AppBarContent:cancel-button-hidden', !editMode)
   }
 
+  createWorkingCopy () {
+    this.platformCopy = this.platform
+    this.platform = Platform.createFromObject(this.platformCopy)
+  }
+
+  restoreWorkingCopy () {
+    if (!this.platformCopy) {
+      return
+    }
+    this.platform = this.platformCopy
+    this.platformCopy = null
+  }
+
   // methods
   save () {
     this.$api.platforms.save(this.platform).then((savedPlatform) => {
       this.platform = savedPlatform
+      this.platformCopy = null
+      this.isInEditMode = false
       this.$store.commit('snackbar/setSuccess', 'Save successful')
-      // this.$router.push('/seach/platforms')
-      this.toggleEditMode()
     }).catch((_error) => {
       this.$store.commit('snackbar/setError', 'Save failed')
     })
+  }
+
+  cancel () {
+    this.restoreWorkingCopy()
+    if (this.platform && this.platform.id) {
+      this.isInEditMode = false
+    } else {
+      this.$router.push('/search/platforms')
+    }
+  }
+
+  onEditButtonClick () {
+    this.createWorkingCopy()
+    this.isInEditMode = true
   }
 
   get platformURN () {

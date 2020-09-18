@@ -275,7 +275,7 @@
         bottom
         right
         color="secondary"
-        @click="toggleEditMode"
+        @click="onEditButtonClick"
       >
         <v-icon>
           mdi-pencil
@@ -339,6 +339,7 @@ export default class DeviceIdPage extends mixins(Rules) {
   private activeTab: number = 0
 
   private device: Device = new Device()
+  private deviceCopy: Device | null = null
 
   private states: Status[] = []
   private manufacturers: Manufacturer[] = []
@@ -357,11 +358,7 @@ export default class DeviceIdPage extends mixins(Rules) {
       this.save()
     })
     this.$nuxt.$on('AppBarContent:cancel-button-click', () => {
-      if (this.device && this.device.id) {
-        this.toggleEditMode()
-      } else {
-        this.$router.push('/search/devices')
-      }
+      this.cancel()
     })
 
     this.$nuxt.$emit('app-bar-extension', AppBarTabsExtensionExtended)
@@ -412,16 +409,17 @@ export default class DeviceIdPage extends mixins(Rules) {
 
   loadDevice () {
     const deviceId = this.$route.params.id
-    if (deviceId) {
-      this.isInEditMode = false
-      this.$api.devices.findById(deviceId).then((foundDevice) => {
-        this.device = foundDevice
-      }).catch((_error) => {
-        this.$store.commit('snackbar/setError', 'Loading device failed')
-      })
-    } else {
+    if (!deviceId) {
+      this.createWorkingCopy()
       this.isInEditMode = true
+      return
     }
+    this.isInEditMode = false
+    this.$api.devices.findById(deviceId).then((foundDevice) => {
+      this.device = foundDevice
+    }).catch((_error) => {
+      this.$store.commit('snackbar/setError', 'Loading device failed')
+    })
   }
 
   get isInEditMode (): boolean {
@@ -431,11 +429,26 @@ export default class DeviceIdPage extends mixins(Rules) {
   save () {
     this.$api.devices.save(this.device).then((savedDevice) => {
       this.device = savedDevice
-      this.toggleEditMode()
+      this.deviceCopy = null
+      this.isInEditMode = false
       this.$store.commit('snackbar/setSuccess', 'Save successful')
     }).catch((_error) => {
       this.$store.commit('snackbar/setError', 'Save failed')
     })
+  }
+
+  cancel () {
+    this.restoreWorkingCopy()
+    if (this.device && this.device.id) {
+      this.isInEditMode = false
+    } else {
+      this.$router.push('/search/devices')
+    }
+  }
+
+  onEditButtonClick () {
+    this.createWorkingCopy()
+    this.isInEditMode = true
   }
 
   get deviceURN () {
@@ -478,8 +491,17 @@ export default class DeviceIdPage extends mixins(Rules) {
     this.$nuxt.$emit('AppBarContent:cancel-button-hidden', !editMode)
   }
 
-  toggleEditMode () {
-    this.isInEditMode = !this.isInEditMode
+  createWorkingCopy () {
+    this.deviceCopy = this.device
+    this.device = Device.createFromObject(this.deviceCopy)
+  }
+
+  restoreWorkingCopy () {
+    if (!this.deviceCopy) {
+      return
+    }
+    this.device = this.deviceCopy
+    this.deviceCopy = null
   }
 
   get readonly () {
