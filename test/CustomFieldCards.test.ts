@@ -28,7 +28,7 @@ describe('CustomFieldCards', () => {
       propsData: {
         value: [
           CustomTextField.createFromObject({
-            id: 2,
+            id: '2',
             key: 'foo',
             value: 'bar'
           })

@@ -24,11 +24,11 @@ describe('EntitySelect', () => {
       localVue,
       vuetify,
       propsData: {
-        value: [Concact.createWithIdEMailAndNames(1, 'p1@mail.org', 'Per', 'son 1', 'stuff/per/son1')],
+        value: [Concact.createWithIdEMailAndNames('1', 'p1@mail.org', 'Per', 'son 1', 'stuff/per/son1')],
         fetchFunction: () => new Promise((resolve) => {
           resolve([
-            Concact.createWithIdEMailAndNames(1, 'p1@mail.org', 'Per', 'son 1', 'stuff/per/son1'),
-            Concact.createWithIdEMailAndNames(2, 'p2@mail.org', 'Pers', 'On 2', 'stuff/pers/On2')
+            Concact.createWithIdEMailAndNames('1', 'p1@mail.org', 'Per', 'son 1', 'stuff/per/son1'),
+            Concact.createWithIdEMailAndNames('2', 'p2@mail.org', 'Pers', 'On 2', 'stuff/pers/On2')
           ])
         }),
         color: 'red',
@@ -37,8 +37,8 @@ describe('EntitySelect', () => {
       data () {
         return {
           elements: [
-            Concact.createWithIdEMailAndNames(1, 'p1@mail.org', 'Per', 'son 1', 'stuff/per/son1'),
-            Concact.createWithIdEMailAndNames(2, 'p2@mail.org', 'Pers', 'On 2', 'stuff/pers/On2')]
+            Concact.createWithIdEMailAndNames('1', 'p1@mail.org', 'Per', 'son 1', 'stuff/per/son1'),
+            Concact.createWithIdEMailAndNames('2', 'p2@mail.org', 'Pers', 'On 2', 'stuff/pers/On2')]
         }
       }
     })
@@ -61,12 +61,12 @@ describe('EntitySelect', () => {
    */
 
   it('should trigger an update event when a contact is removed', () => {
-    wrapper.vm.remove(1)
+    wrapper.vm.remove('1')
     expect(wrapper.emitted('input')).toBeTruthy()
   })
 
   it('should trigger an event with a contact array with a length decreased by 1 when a contact is removed', () => {
-    wrapper.vm.remove(1)
+    wrapper.vm.remove('1')
     expect(wrapper.emitted('input')[0][0]).toHaveLength(0)
   })
 
@@ -75,12 +75,12 @@ describe('EntitySelect', () => {
    */
 
   it('should trigger an update event when a contact is added', () => {
-    wrapper.vm.add(2)
+    wrapper.vm.add('2')
     expect(wrapper.emitted('input')).toBeTruthy()
   })
 
   it('should trigger an event with a contact array with a length increased by 1 when a contact is added', () => {
-    wrapper.vm.add(2)
+    wrapper.vm.add('2')
     expect(wrapper.emitted('input')[0][0]).toHaveLength(2)
   })
 })

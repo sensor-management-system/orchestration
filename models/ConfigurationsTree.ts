@@ -166,11 +166,11 @@ export class ConfigurationsTree implements Iterable<ConfigurationsTreeNode> {
   /**
    * returns the path to the node in the tree
    *
-   * @param {number} nodeId - the node to get the path for
+   * @param {string} nodeId - the node to get the path for
    * @return {string[]} an array of node names
    */
-  getPath (nodeId: number): string[] {
-    const getPathRecursive = (nodeId: number, nodes: ConfigurationsTree, path: string[]): boolean => {
+  getPath (nodeId: string): string[] {
+    const getPathRecursive = (nodeId: string, nodes: ConfigurationsTree, path: string[]): boolean => {
       for (const node of nodes) {
         if (node.id === nodeId) {
           path.push(node.name)
@@ -198,8 +198,8 @@ export class ConfigurationsTree implements Iterable<ConfigurationsTreeNode> {
    * @param {number} nodeId - the id of the node to search
    * @return {ConfigurationsTreeNode|null} the found node, null if it was not found
    */
-  getById (nodeId: number): ConfigurationsTreeNode | null {
-    const getByIdRecursive = (nodeId: number, nodes: ConfigurationsTree): ConfigurationsTreeNode | null => {
+  getById (nodeId: string): ConfigurationsTreeNode | null {
+    const getByIdRecursive = (nodeId: string, nodes: ConfigurationsTree): ConfigurationsTreeNode | null => {
       for (const node of nodes) {
         if (node.id === nodeId) {
           return node

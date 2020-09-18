@@ -25,7 +25,7 @@ describe('AttachmentListItem', () => {
       vuetify,
       propsData: {
         value: Attachment.createFromObject({
-          id: 1,
+          id: '1',
           url: 'https://foo.bar/Document.docx',
           label: 'Assembling Instructions'
         })

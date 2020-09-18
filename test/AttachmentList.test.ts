@@ -28,12 +28,12 @@ describe('AttachmentList', () => {
       propsData: {
         value: [
           Attachment.createFromObject({
-            id: 1,
+            id: '1',
             url: 'https://foo.pdf',
             label: 'Manual'
           }),
           Attachment.createFromObject({
-            id: 2,
+            id: '2',
             url: 'https://bar.png',
             label: 'Product Image'
           })

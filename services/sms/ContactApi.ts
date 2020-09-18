@@ -22,7 +22,7 @@ export function serverResponseToEntity (entry: any): Contact {
   const attributes = entry.attributes
   const newEntry = Contact.createEmpty()
 
-  newEntry.id = Number.parseInt(entry.id)
+  newEntry.id = entry.id
   newEntry.givenName = attributes.given_name || ''
   newEntry.familyName = attributes.family_name || ''
   newEntry.website = attributes.website || ''

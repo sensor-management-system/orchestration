@@ -550,7 +550,7 @@ export default class ConfigurationsIdPage extends Vue {
 
   private contacts: Contact[] = []
 
-  private selectedNodeIds: number[] = []
+  private selectedNodeIds: string[] = []
   private selectedPlatform: Platform | null = null
   private selectedDevice: Device | null = null
 
@@ -672,7 +672,7 @@ export default class ConfigurationsIdPage extends Vue {
    * @param {number} nodeId - the id of the node
    * @return {boolean} wheter the node was found or not
    */
-  isNodeInTree (nodeId: number): boolean {
+  isNodeInTree (nodeId: string): boolean {
     return !!this.tree.getById(nodeId)
   }
 
@@ -902,7 +902,7 @@ export default class ConfigurationsIdPage extends Vue {
           const n = new PlatformNode(
             ((): Platform => {
               const o = new Platform()
-              o.id = -1
+              o.id = '-1'
               o.shortName = 'Platform 01'
               o.longName = 'Platform 01 Bla blub'
               o.description = 'A platform on which various light instruments can be mounted. Consists of wood, dry and rotten wood.'
@@ -916,7 +916,7 @@ export default class ConfigurationsIdPage extends Vue {
                   const n = new PlatformNode(
                     ((): Platform => {
                       const o = new Platform()
-                      o.id = -2
+                      o.id = '-2'
                       o.shortName = 'Platform 02'
                       return o
                     })()
@@ -927,7 +927,7 @@ export default class ConfigurationsIdPage extends Vue {
                         new DeviceNode(
                           ((): Device => {
                             const o = new Device()
-                            o.id = -3
+                            o.id = '-3'
                             o.shortName = 'Device 01'
                             return o
                           })()
@@ -935,7 +935,7 @@ export default class ConfigurationsIdPage extends Vue {
                         new DeviceNode(
                           ((): Device => {
                             const o = new Device()
-                            o.id = -4
+                            o.id = '-4'
                             o.shortName = 'Device 02'
                             return o
                           })()
@@ -943,7 +943,7 @@ export default class ConfigurationsIdPage extends Vue {
                         new DeviceNode(
                           ((): Device => {
                             const o = new Device()
-                            o.id = -5
+                            o.id = '-5'
                             o.shortName = 'Device 03'
                             return o
                           })()
@@ -961,7 +961,7 @@ export default class ConfigurationsIdPage extends Vue {
         new PlatformNode(
           ((): Platform => {
             const o = new Platform()
-            o.id = -6
+            o.id = '-6'
             o.shortName = 'Platform 03'
             return o
           })()

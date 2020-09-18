@@ -1,21 +1,21 @@
 import Contact, { IContact } from '@/models/Contact'
 
 export interface IUser {
-  id: number | null
+  id: string | null
   subject: string
   contact: IContact | null
 }
 
 export default class User implements IUser {
-  private _id: number | null = null
+  private _id: string | null = null
   private _subject: string = ''
   private _contact: Contact | null = null
 
-  get id (): number | null {
+  get id (): string | null {
     return this._id
   }
 
-  set id (newId: number | null) {
+  set id (newId: string | null) {
     this._id = newId
   }
 

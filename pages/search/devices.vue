@@ -106,7 +106,7 @@
                 Do you really want to delete the device <em>{{ result.shortName }}</em>?
               </v-card-text>
               <v-card-actions>
-                <v-btn @click="hideDeleteDialog(result.id)">
+                <v-btn @click="hideDeleteDialogFor(result.id)">
                   No
                 </v-btn>
                 <v-spacer />
@@ -195,7 +195,7 @@ export default class SeachDevicesPage extends Vue {
   private searchResults: Device[] = []
   private searchText: string | null = null
 
-  private showDeleteDialog: { [id: number]: boolean} = {}
+  private showDeleteDialog: { [id: string]: boolean} = {}
 
   created () {
     this.$nuxt.$emit('app-bar-content', AppBarEditModeContent)
@@ -338,7 +338,7 @@ export default class SeachDevicesPage extends Vue {
     return this.loader != null && this.loader.funToLoadNext != null
   }
 
-  deleteAndCloseDialog (id: number) {
+  deleteAndCloseDialog (id: string) {
     this.$api.devices.deleteById(id).then(() => {
       this.showDeleteDialog = {}
 
@@ -381,11 +381,11 @@ export default class SeachDevicesPage extends Vue {
     return 'Unknown status'
   }
 
-  showDeleteDialogFor (id: number) {
+  showDeleteDialogFor (id: string) {
     Vue.set(this.showDeleteDialog, id, true)
   }
 
-  hideDeleteDialogFor (id: number) {
+  hideDeleteDialogFor (id: string) {
     Vue.set(this.showDeleteDialog, id, false)
   }
 }
