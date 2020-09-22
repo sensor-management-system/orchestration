@@ -7,6 +7,8 @@
       :item-value="(device) => device"
       :label="deviceSelectLabel"
       clearable
+      :readonly="readonly"
+      :disabled="readonly"
       @change="addDevice"
     />
     <v-select
@@ -17,6 +19,8 @@
       :item-value="(property) => property"
       :label="propertySelectLabel"
       clearable
+      :readonly="readonly"
+      :disabled="readonly"
       @change="addProperty"
     />
   </div>
@@ -66,6 +70,13 @@ export default class DevicePropertyHierarchySelect extends Vue {
   })
   // @ts-ignore
   readonly value: DeviceProperty
+
+  @Prop({
+    default: false,
+    type: Boolean
+  })
+  // @ts-ignore
+  readonly readonly: boolean
 
   private selectedDevice: Device | null = null
 
