@@ -92,7 +92,7 @@ export default class DevicePropertyHierarchySelect extends Vue {
     if (device && device.properties.length === 1) {
       this.selectProperty(device.properties[0])
     } else if (oldState !== null) {
-      this.selectProperty()
+      this.selectProperty(null)
     }
   }
 
@@ -109,13 +109,13 @@ export default class DevicePropertyHierarchySelect extends Vue {
    * @param {DeviceProperty} property - the device property which is selected
    * @fires DevicePropertyHierarchySelect#input
    */
-  selectProperty (property?: DeviceProperty) {
+  selectProperty (property: DeviceProperty | null = null) {
     /**
      * input event
      * @event DevicePropertyHierarchySelect#input
      * @type DeviceProperty|null
      */
-    this.$emit('input', property || null)
+    this.$emit('input', property)
   }
 }
 </script>
