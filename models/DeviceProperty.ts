@@ -163,6 +163,6 @@ export class DeviceProperty implements IDeviceProperty {
   }
 
   toString (): string {
-    return this.propertyName
+    return this.label || this.propertyName
   }
 }
