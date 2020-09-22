@@ -101,7 +101,7 @@ import DevicePropertySelect from '@/components/DevicePropertySelect.vue'
 
 import { DeviceConfigurationAttributes } from '@/models/DeviceConfigurationAttributes'
 import { parseFloatOrDefault } from '@/utils/numericsHelper'
-import { dateToString } from '@/utils/dateHelper'
+import { dateToString, stringToDate } from '@/utils/dateHelper'
 
 /**
  * A class component for device configuration attributes
@@ -153,9 +153,7 @@ export default class DeviceConfigurationAttributesForm extends Vue {
         newObj.offsetZ = parseFloatOrDefault(value, 0) as number
         break
       case 'calibrationDate':
-        newDate = new Date(value)
-        newDate.setHours(0, 0, 0)
-        newObj.calibrationDate = newDate
+        newObj.calibrationDate = stringToDate(value)
         break
       case 'deviceProperties':
         newObj.deviceProperties = value
