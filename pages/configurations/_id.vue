@@ -203,7 +203,7 @@
                     </InfoBox>
                     <ConfigurationsSelectedItem
                       :value="selectedNode"
-                      :breadcrumbs="breadcrumbs"
+                      :breadcrumbs="hierarchyNodeNames"
                       :readonly="readonly"
                       @remove="removeSelectedNode"
                     />
@@ -458,7 +458,7 @@ export default class ConfigurationsIdPage extends Vue {
     ]
   }
 
-  get breadcrumbs (): Object[] {
+  get hierarchyNodeNames (): Object[] {
     if (!this.selectedNode) {
       return []
     }
