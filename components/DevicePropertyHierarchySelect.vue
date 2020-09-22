@@ -9,7 +9,7 @@
       clearable
       :readonly="readonly"
       :disabled="readonly"
-      @change="addDevice"
+      @change="selectDevice"
     />
     <v-select
       v-if="selectedDevice"
@@ -21,7 +21,7 @@
       clearable
       :readonly="readonly"
       :disabled="readonly"
-      @change="addProperty"
+      @change="selectProperty"
     />
   </div>
 </template>
@@ -85,14 +85,14 @@ export default class DevicePropertyHierarchySelect extends Vue {
    *
    * @param {Device} device - the device whose properties should be displayed
    */
-  addDevice (device?: Device) {
+  selectDevice (device?: Device) {
     const oldState = this.selectedDevice
     this.selectedDevice = device || null
 
     if (device && device.properties.length === 1) {
-      this.addProperty(device.properties[0])
+      this.selectProperty(device.properties[0])
     } else if (oldState !== null) {
-      this.addProperty()
+      this.selectProperty()
     }
   }
 
@@ -104,12 +104,12 @@ export default class DevicePropertyHierarchySelect extends Vue {
   }
 
   /**
-   * update the internal model at a given key
+   * triggers the selected property
    *
-   * @param {DeviceProperty} property - the device property to select
+   * @param {DeviceProperty} property - the device property which is selected
    * @fires DevicePropertyHierarchySelect#input
    */
-  addProperty (property?: DeviceProperty) {
+  selectProperty (property?: DeviceProperty) {
     /**
      * input event
      * @event DevicePropertyHierarchySelect#input

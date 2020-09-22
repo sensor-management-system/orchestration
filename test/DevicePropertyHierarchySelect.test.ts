@@ -58,7 +58,7 @@ describe('DevicePropertyHierarchySelect', () => {
 
   it('should return the properties of a device when a device is selected', () => {
     // select the first device
-    wrapper.vm.addDevice(device1)
+    wrapper.vm.selectDevice(device1)
     expect(wrapper.vm.propertiesOfDevice).toHaveLength(2)
     expect(wrapper.vm.propertiesOfDevice).toContain(prop1)
     expect(wrapper.vm.propertiesOfDevice).toContain(prop2)
@@ -66,9 +66,9 @@ describe('DevicePropertyHierarchySelect', () => {
 
   it('should trigger an input event with a null value when a device is unselected', () => {
     // select the first device
-    wrapper.vm.addDevice(device1)
+    wrapper.vm.selectDevice(device1)
     // unset the device
-    wrapper.vm.addDevice()
+    wrapper.vm.selectDevice()
 
     expect(wrapper.emitted().input).toBeTruthy()
     expect(wrapper.emitted().input.length).toBe(1)
@@ -77,9 +77,9 @@ describe('DevicePropertyHierarchySelect', () => {
 
   it('should trigger an input event with a property when a property is selected', () => {
     // select the first device
-    wrapper.vm.addDevice(device1)
+    wrapper.vm.selectDevice(device1)
     // select the first property
-    wrapper.vm.addProperty(prop1)
+    wrapper.vm.selectProperty(prop1)
 
     expect(wrapper.emitted().input).toBeTruthy()
     expect(wrapper.emitted().input.length).toBe(1)
@@ -88,11 +88,11 @@ describe('DevicePropertyHierarchySelect', () => {
 
   it('should trigger an input event with a null value when a property is unselected', () => {
     // select the first device
-    wrapper.vm.addDevice(device1)
+    wrapper.vm.selectDevice(device1)
     // select the first property
-    wrapper.vm.addProperty(prop1)
+    wrapper.vm.selectProperty(prop1)
     // unset the property
-    wrapper.vm.addProperty()
+    wrapper.vm.selectProperty()
 
     expect(wrapper.emitted().input).toBeTruthy()
     expect(wrapper.emitted().input.length).toBe(2)
@@ -101,7 +101,7 @@ describe('DevicePropertyHierarchySelect', () => {
 
   it('should trigger an input event with a property when a device with just one property is selected', () => {
     // select the second device
-    wrapper.vm.addDevice(device2)
+    wrapper.vm.selectDevice(device2)
 
     expect(wrapper.emitted().input).toBeTruthy()
     expect(wrapper.emitted().input.length).toBe(1)
