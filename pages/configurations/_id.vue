@@ -198,9 +198,9 @@
                     />
                   </v-col>
                   <v-col cols="6" md="6">
-                    <Info v-if="!selectedNode && !readonly">
+                    <InfoBox v-if="!selectedNode && !readonly">
                       Select a platform on the left side to add devices or platforms to it. To add a device or platform to the root of this configuration, deselect any previously selected device or platform.
-                    </Info>
+                    </InfoBox>
                     <ConfigurationsSelectedItem
                       :value="selectedNode"
                       :breadcrumbs="breadcrumbs"
@@ -281,7 +281,7 @@ import PlatformConfigurationAttributesExpansionPanels from '@/components/Platfor
 import ConfigurationsPlatformDeviceSearch from '@/components/ConfigurationsPlatformDeviceSearch.vue'
 import ConfigurationsTreeView from '@/components/ConfigurationsTreeView.vue'
 import ConfigurationsSelectedItem from '@/components/ConfigurationsSelectedItem.vue'
-import Info from '@/components/Info.vue'
+import InfoBox from '@/components/InfoBox.vue'
 
 import Contact from '@/models/Contact'
 import Device from '@/models/Device'
@@ -325,7 +325,7 @@ export class AppBarTabsExtensionExtended extends AppBarTabsExtension {
     ConfigurationsPlatformDeviceSearch,
     ConfigurationsTreeView,
     ConfigurationsSelectedItem,
-    Info
+    InfoBox
   }
 })
 // @ts-ignore

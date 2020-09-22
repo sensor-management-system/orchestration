@@ -23,6 +23,6 @@ import { Vue, Component } from 'nuxt-property-decorator'
  */
 @Component
 // @ts-ignore
-export default class Info extends Vue {
+export default class InfoBox extends Vue {
 }
 </script>
