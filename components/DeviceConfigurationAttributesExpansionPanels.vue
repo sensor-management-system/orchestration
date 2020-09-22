@@ -12,7 +12,7 @@
         v-if="!devicePanelsHidden"
         text
         small
-        @click="devicePanelsHidden = true"
+        @click="hideAllPanels"
       >
         hide all
       </v-btn>
@@ -20,14 +20,14 @@
         v-if="devicePanelsHidden"
         text
         small
-        @click="devicePanelsHidden = false"
+        @click="expandAllPanels"
       >
         expand all
       </v-btn>
     </v-subheader>
     <v-expansion-panels
       v-if="value.length"
-      :value="openedDevicePanels"
+      v-model="openedDevicePanels"
       multiple
     >
       <v-expansion-panel
@@ -51,7 +51,7 @@
  * @file provides a component for to list device configuration attributes
  * @author <marc.hanisch@gfz-potsdam.de>
  */
-import { Vue, Component, Prop } from 'nuxt-property-decorator'
+import { Vue, Component, Prop, Watch } from 'nuxt-property-decorator'
 
 import Info from '@/components/Info.vue'
 import DeviceConfigurationAttributesForm from '@/components/DeviceConfigurationAttributesForm.vue'
@@ -70,7 +70,7 @@ import { DeviceConfigurationAttributes } from '@/models/DeviceConfigurationAttri
 })
 // @ts-ignore
 export default class DeviceConfigurationAttributesExpansionPanels extends Vue {
-  private devicePanelsHidden: boolean = false
+  private openedDevicePanels: number[] = []
 
   @Prop({
     default: () => [] as DeviceConfigurationAttributes[],
@@ -87,8 +87,43 @@ export default class DeviceConfigurationAttributesExpansionPanels extends Vue {
   // @ts-ignore
   readonly readonly: boolean
 
-  get openedDevicePanels (): number[] {
-    return !this.devicePanelsHidden ? this.value.map((_, i) => i) : []
+  hideAllPanels (): void {
+    this.openedDevicePanels = []
+  }
+
+  expandAllPanels (): void {
+    this.openedDevicePanels = this.value.map((_, i) => i)
+  }
+
+  get devicePanelsHidden (): boolean {
+    return this.value.map((_, i) => i).length > this.openedDevicePanels.length
+  }
+
+  /**
+   * Updates the openedDevicePanels property for each device that was added or
+   * removed. New devices are opened by default.
+   */
+  @Watch('value')
+  // @ts-ignore
+  onValueChanged (value: DeviceConfigurationAttributes[], oldValue: DeviceConfigurationAttributes[] = []) {
+    if (!oldValue) {
+      oldValue = []
+    }
+    // find the indices of the items that were removed
+    oldValue.forEach((attribute, i) => {
+      if (!value.includes(attribute)) {
+        const index = this.openedDevicePanels.indexOf(i)
+        if (index > -1) {
+          this.openedDevicePanels.splice(index, 1)
+        }
+      }
+    })
+    // find the indices of the items that were added
+    value.forEach((attribute, i) => {
+      if (!oldValue.includes(attribute)) {
+        this.openedDevicePanels.push(i)
+      }
+    })
   }
 }
 </script>

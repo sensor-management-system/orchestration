@@ -12,7 +12,7 @@
         v-if="!platformPanelsHidden"
         text
         small
-        @click="platformPanelsHidden = true"
+        @click="hideAllPanels"
       >
         hide all
       </v-btn>
@@ -20,14 +20,14 @@
         v-if="platformPanelsHidden"
         text
         small
-        @click="platformPanelsHidden = false"
+        @click="expandAllPanels"
       >
         expand all
       </v-btn>
     </v-subheader>
     <v-expansion-panels
       v-if="value.length"
-      :value="openedPlatformPanels"
+      v-model="openedPlatformPanels"
       multiple
     >
       <v-expansion-panel
@@ -51,7 +51,7 @@
  * @file provides a component for to list platform configuration attributes
  * @author <marc.hanisch@gfz-potsdam.de>
  */
-import { Vue, Component, Prop } from 'nuxt-property-decorator'
+import { Vue, Component, Prop, Watch } from 'nuxt-property-decorator'
 
 import Info from '@/components/Info.vue'
 import PlatformConfigurationAttributesForm from '@/components/PlatformConfigurationAttributesForm.vue'
@@ -70,7 +70,7 @@ import { PlatformConfigurationAttributes } from '@/models/PlatformConfigurationA
 })
 // @ts-ignore
 export default class PlatformConfigurationAttributesExpansionPanels extends Vue {
-  private platformPanelsHidden: boolean = false
+  private openedPlatformPanels: number[] = []
 
   @Prop({
     default: () => [] as PlatformConfigurationAttributes[],
@@ -87,8 +87,40 @@ export default class PlatformConfigurationAttributesExpansionPanels extends Vue 
   // @ts-ignore
   readonly readonly: boolean
 
-  get openedPlatformPanels (): number[] {
-    return !this.platformPanelsHidden ? this.value.map((_, i) => i) : []
+  hideAllPanels (): void {
+    this.openedPlatformPanels = []
+  }
+
+  expandAllPanels (): void {
+    this.openedPlatformPanels = this.value.map((_, i) => i)
+  }
+
+  get platformPanelsHidden (): boolean {
+    return this.value.map((_, i) => i).length > this.openedPlatformPanels.length
+  }
+
+  /**
+   * Updates the openedPlatformPanels property for each platform that was added or
+   * removed. New platforms are opened by default.
+   */
+  @Watch('value')
+  // @ts-ignore
+  onValueChanged (value: PlatformConfigurationAttributes[], oldValue: PlatformConfigurationAttributes[] = []) {
+    // find the indices of the items that were removed
+    oldValue.forEach((attribute, i) => {
+      if (!value.includes(attribute)) {
+        const index = this.openedPlatformPanels.indexOf(i)
+        if (index > -1) {
+          this.openedPlatformPanels.splice(index, 1)
+        }
+      }
+    })
+    // find the indices of the items that were added
+    value.forEach((attribute, i) => {
+      if (!oldValue.includes(attribute)) {
+        this.openedPlatformPanels.push(i)
+      }
+    })
   }
 }
 </script>
