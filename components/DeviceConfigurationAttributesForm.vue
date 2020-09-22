@@ -142,13 +142,13 @@ export default class DeviceConfigurationAttributesForm extends Vue {
 
     switch (key) {
       case 'offsetX':
-        newObj.offsetX = parseFloatOrDefault(value, 0)
+        newObj.offsetX = parseFloatOrDefault(value, 0) as number
         break
       case 'offsetY':
-        newObj.offsetY = parseFloatOrDefault(value, 0)
+        newObj.offsetY = parseFloatOrDefault(value, 0) as number
         break
       case 'offsetZ':
-        newObj.offsetZ = parseFloatOrDefault(value, 0)
+        newObj.offsetZ = parseFloatOrDefault(value, 0) as number
         break
       case 'calibrationDate':
         newObj.calibrationDate = stringToDate(value)
