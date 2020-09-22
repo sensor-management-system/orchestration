@@ -26,11 +26,13 @@
                       <template v-slot:activator="{ on, attrs }">
                         <v-text-field
                           v-model="configuration.startDate"
+                          v-bind="attrs"
                           label="Start date"
+                          :clearable="!readonly"
                           prepend-icon="mdi-calendar-range"
                           readonly
-                          v-bind="attrs"
                           v-on="on"
+                          @click:clear="configuration.startDate = null"
                         />
                       </template>
                       <v-date-picker
@@ -54,11 +56,13 @@
                       <template v-slot:activator="{ on, attrs }">
                         <v-text-field
                           v-model="configuration.endDate"
+                          v-bind="attrs"
                           label="End date"
+                          :clearable="!readonly"
                           prepend-icon="mdi-calendar-range"
                           readonly
-                          v-bind="attrs"
                           v-on="on"
+                          @click:clear="configuration.endDate = null"
                         />
                       </template>
                       <v-date-picker
