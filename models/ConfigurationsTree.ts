@@ -144,15 +144,15 @@ export class ConfigurationsTree implements Iterable<ConfigurationsTreeNode> {
   remove (node: ConfigurationsTreeNode): boolean {
     const removeRecursive = (node: ConfigurationsTreeNode, nodes: ConfigurationsTree): boolean => {
       for (let i: number = 0; i < nodes.length; i++) {
-        const aNode: ConfigurationsTreeNode = nodes.at(i)
-        if (aNode === node) {
+        const iteratedNode: ConfigurationsTreeNode = nodes.at(i)
+        if (iteratedNode === node) {
           nodes.removeAt(i)
           return true
         }
-        if (!aNode.canHaveChildren()) {
+        if (!iteratedNode.canHaveChildren()) {
           continue
         }
-        const removed = removeRecursive(node, (aNode as PlatformNode).getTree())
+        const removed = removeRecursive(node, (iteratedNode as PlatformNode).getTree())
         if (!removed) {
           continue
         }
@@ -171,16 +171,16 @@ export class ConfigurationsTree implements Iterable<ConfigurationsTreeNode> {
    */
   getPath (node: ConfigurationsTreeNode): string[] {
     const getPathRecursive = (node: ConfigurationsTreeNode, nodes: ConfigurationsTree, path: string[]): boolean => {
-      for (const aNode of nodes) {
-        if (aNode === node) {
-          path.push(aNode.name)
+      for (const iteratedNode of nodes) {
+        if (iteratedNode === node) {
+          path.push(iteratedNode.name)
           return true
         }
-        if (!aNode.canHaveChildren()) {
+        if (!iteratedNode.canHaveChildren()) {
           continue
         }
-        if (getPathRecursive(node, (aNode as PlatformNode).getTree(), path)) {
-          path.unshift(aNode.name)
+        if (getPathRecursive(node, (iteratedNode as PlatformNode).getTree(), path)) {
+          path.unshift(iteratedNode.name)
           return true
         }
       }
@@ -278,14 +278,14 @@ export class ConfigurationsTree implements Iterable<ConfigurationsTreeNode> {
    */
   getParent (node: ConfigurationsTreeNode): ConfigurationsTreeNode | null {
     const getParentRecursive = (node: ConfigurationsTreeNode, parentNode: ConfigurationsTreeNode | null, nodes: ConfigurationsTree): ConfigurationsTreeNode | null => {
-      for (const aNode of nodes) {
-        if (node === aNode) {
+      for (const iteratedNode of nodes) {
+        if (node === iteratedNode) {
           return parentNode
         }
-        if (!aNode.canHaveChildren()) {
+        if (!iteratedNode.canHaveChildren()) {
           continue
         }
-        const found = getParentRecursive(node, aNode, (aNode as PlatformNode).getTree())
+        const found = getParentRecursive(node, iteratedNode, (iteratedNode as PlatformNode).getTree())
         if (!found) {
           continue
         }
