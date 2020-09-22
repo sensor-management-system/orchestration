@@ -19,7 +19,9 @@
         </v-col>
       </v-row>
     </v-card-text>
-    <v-card-actions>
+    <v-card-actions
+      v-if="!readonly"
+    >
       <v-btn
         v-if="value"
         color="red"
@@ -64,6 +66,13 @@ export default class ConfigurationsSelectedItem extends Vue {
   })
   // @ts-ignore
   readonly breadcrumbs: string[]
+
+  @Prop({
+    default: false,
+    type: Boolean
+  })
+  // @ts-ignore
+  readonly readonly: boolean
 
   /**
    * returns whether a node is a PlatformNode or not
