@@ -16,6 +16,7 @@
                 <v-row>
                   <v-col cols="12" md="3">
                     <v-menu
+                      v-if="!readonly"
                       v-model="startDateMenu"
                       :close-on-content-click="false"
                       :nudge-right="40"
@@ -28,7 +29,7 @@
                           v-model="configuration.startDate"
                           v-bind="attrs"
                           label="Start date"
-                          :clearable="!readonly"
+                          clearable
                           prepend-icon="mdi-calendar-range"
                           readonly
                           v-on="on"
@@ -43,9 +44,18 @@
                         @input="startDateMenu = false"
                       />
                     </v-menu>
+                    <v-text-field
+                      v-else
+                      v-model="configuration.startDate"
+                      label="Start date"
+                      prepend-icon="mdi-calendar-range"
+                      readonly
+                      disabled
+                    />
                   </v-col>
                   <v-col cols="12" md="3">
                     <v-menu
+                      v-if="!readonly"
                       v-model="endDateMenu"
                       :close-on-content-click="false"
                       :nudge-right="40"
@@ -58,7 +68,7 @@
                           v-model="configuration.endDate"
                           v-bind="attrs"
                           label="End date"
-                          :clearable="!readonly"
+                          clearable
                           prepend-icon="mdi-calendar-range"
                           readonly
                           v-on="on"
@@ -73,6 +83,14 @@
                         @input="endDateMenu = false"
                       />
                     </v-menu>
+                    <v-text-field
+                      v-else
+                      v-model="configuration.endDate"
+                      label="End date"
+                      prepend-icon="mdi-calendar-range"
+                      readonly
+                      disabled
+                    />
                   </v-col>
                 </v-row>
                 <v-row>
@@ -81,6 +99,8 @@
                       v-model="locationType"
                       label="Location type"
                       :items="['Stationary', 'Dynamic']"
+                      :readonly="readonly"
+                      :disabled="readonly"
                     />
                   </v-col>
                 </v-row>
@@ -91,6 +111,8 @@
                         v-model.number.lazy="configuration.location.latitude"
                         label="Latitude (WGS84)"
                         type="number"
+                        :readonly="readonly"
+                        :disabled="readonly"
                       />
                     </v-col>
                     <v-col cols="12" md="3">
@@ -98,6 +120,8 @@
                         v-model.number.lazy="configuration.location.longitude"
                         label="Longitude (WGS84)"
                         type="number"
+                        :readonly="readonly"
+                        :disabled="readonly"
                       />
                     </v-col>
                     <v-col cols="12" md="3">
@@ -105,6 +129,8 @@
                         v-model.number="configuration.location.elevation"
                         label="Elevation (m asl)"
                         type="number"
+                        :readonly="readonly"
+                        :disabled="readonly"
                       />
                     </v-col>
                   </v-row>
@@ -129,6 +155,7 @@
                         :devices="allDevices"
                         device-select-label="Device that measures latitude"
                         property-select-label="Property for latitude"
+                        :readonly="readonly"
                       />
                     </v-col>
                     <v-col cols="12" md="3">
@@ -137,6 +164,7 @@
                         :devices="allDevices"
                         device-select-label="Device that measures longitude"
                         property-select-label="Property for longitude"
+                        :readonly="readonly"
                       />
                     </v-col>
                     <v-col cols="12" md="3">
@@ -145,6 +173,7 @@
                         :devices="allDevices"
                         device-select-label="Device that measures elevation"
                         property-select-label="Property for elevation"
+                        :readonly="readonly"
                       />
                     </v-col>
                   </v-row>
@@ -169,16 +198,17 @@
                     />
                   </v-col>
                   <v-col cols="6" md="6">
-                    <Info v-if="!selectedNode">
+                    <Info v-if="!selectedNode && !readonly">
                       Select a platform on the left side to add devices or platforms to it. To add a device or platform to the root of this configuration, deselect any previously selected device or platform.
                     </Info>
                     <ConfigurationsSelectedItem
                       :value="selectedNode"
                       :breadcrumbs="breadcrumbs"
+                      :readonly="readonly"
                       @remove="removeSelectedNode"
                     />
                     <ConfigurationsPlatformDeviceSearch
-                      v-if="!selectedNode || selectedNodeIsPlatform"
+                      v-if="!readonly && (!selectedNode || selectedNodeIsPlatform)"
                       :is-platform-used-func="isPlatformInTree"
                       :is-device-used-func="isDeviceInTree"
                       @add-platform="addPlatformNode"
@@ -210,7 +240,7 @@
               <v-card-text>
                 <v-row>
                   <v-col cols="3">
-                    <ContactSelect v-model="contacts" label="Add a contact" :readonly="false" />
+                    <ContactSelect v-model="contacts" label="Add a contact" :readonly="readonly" />
                   </v-col>
                 </v-row>
               </v-card-text>
