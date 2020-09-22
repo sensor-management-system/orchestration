@@ -140,8 +140,6 @@ export default class DeviceConfigurationAttributesForm extends Vue {
   update (key: string, value: any) {
     const newObj: DeviceConfigurationAttributes = DeviceConfigurationAttributes.createFromObject(this.value)
 
-    let newDate: Date
-
     switch (key) {
       case 'offsetX':
         newObj.offsetX = parseFloatOrDefault(value, 0) as number
