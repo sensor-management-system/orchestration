@@ -9,13 +9,13 @@
             <v-text-field v-model="searchText" label="Name" placeholder="Name of device" />
           </v-col>
           <v-col cols="12" md="2">
-            <v-btn 
+            <v-btn
               color="primary"
               @click="basicSearch"
             >
               Search
             </v-btn>
-            <v-btn 
+            <v-btn
               text
               @click="clearBasicSearch"
             >
@@ -47,13 +47,13 @@
         </v-row>
         <v-row>
           <v-col cols="12" md="3">
-            <v-btn 
+            <v-btn
               color="primary"
               @click="extendedSearch"
             >
               Search
             </v-btn>
-            <v-btn 
+            <v-btn
               text
               @click="clearExtendedSearch"
             >
@@ -164,7 +164,9 @@
             <v-row
               no-gutters
             >
-              <v-col class="text-subtitle-1">{{ result.shortName }}</v-col>
+              <v-col class="text-subtitle-1">
+                {{ result.shortName }}
+              </v-col>
               <v-col
                 align-self="end"
                 class="text-right"
@@ -240,7 +242,7 @@
                   No
                 </v-btn>
                 <v-spacer />
-                <v-btn 
+                <v-btn
                   color="error"
                   text
                   @click="deleteAndCloseDialog(result.id)"
