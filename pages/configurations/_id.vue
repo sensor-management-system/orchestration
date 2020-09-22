@@ -483,7 +483,13 @@ export default class ConfigurationsIdPage extends Vue {
   addPlatformConfigurationAttribute (platform: Platform): number {
     const index = this.configuration.platformAttributes.findIndex(a => a.platform === platform)
     if (index === -1) {
-      this.configuration.platformAttributes.push(new PlatformConfigurationAttributes(platform))
+      /*
+       * instead of adding the attribute directly via push,
+       * create a copy of the array with the new attribute
+       * added to it, so that Vue can register the change
+       * with its watchers. See https://vuejs.org/v2/api/#vm-watch
+       */
+      this.configuration.platformAttributes = [...this.configuration.platformAttributes, new PlatformConfigurationAttributes(platform)]
     }
     return this.configuration.platformAttributes.length
   }
@@ -514,7 +520,12 @@ export default class ConfigurationsIdPage extends Vue {
   addDeviceConfigurationAttribute (device: Device): number {
     const index = this.configuration.deviceAttributes.findIndex(a => a.device === device)
     if (index === -1) {
-      this.configuration.deviceAttributes.push(new DeviceConfigurationAttributes(device))
+      /*
+       * instead of adding the attribute directly via push, create a copy of
+       * the array with the new attribute added to it, so that Vue can register
+       * the change with its watchers. See https://vuejs.org/v2/api/#vm-watch
+       */
+      this.configuration.deviceAttributes = [...this.configuration.deviceAttributes, new DeviceConfigurationAttributes(device)]
     }
     return this.configuration.deviceAttributes.length
   }
@@ -550,7 +561,15 @@ export default class ConfigurationsIdPage extends Vue {
   removePlatformConfigurationAttribute (platform: Platform): number {
     const index = this.configuration.platformAttributes.findIndex(a => a.platform === platform)
     if (index > -1) {
-      this.configuration.platformAttributes.splice(index, 1)
+      /*
+       * instead of removing the attribute directly via splice, create a copy
+       * of the array and remove the attribute from the copy, so that Vue can
+       * register the change with its watchers. See
+       * https://vuejs.org/v2/api/#vm-watch
+       */
+      const newArray: PlatformConfigurationAttributes[] = [...this.configuration.platformAttributes]
+      newArray.splice(index, 1)
+      this.configuration.platformAttributes = newArray
     }
     return this.configuration.platformAttributes.length
   }
@@ -558,7 +577,15 @@ export default class ConfigurationsIdPage extends Vue {
   removeDeviceConfigurationAttribute (device: Device): number {
     const index = this.configuration.deviceAttributes.findIndex(a => a.device === device)
     if (index > -1) {
-      this.configuration.deviceAttributes.splice(index, 1)
+      /*
+       * instead of removing the attribute directly via splice, create a copy
+       * of the array and remove the attribute from the copy, so that Vue can
+       * register the change with its watchers. See
+       * https://vuejs.org/v2/api/#vm-watch
+       */
+      const newArray: DeviceConfigurationAttributes[] = [...this.configuration.deviceAttributes]
+      newArray.splice(index, 1)
+      this.configuration.deviceAttributes = newArray
     }
     return this.configuration.deviceAttributes.length
   }
