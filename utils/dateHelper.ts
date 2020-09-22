@@ -8,3 +8,9 @@ export const dateToString = (aDate: Date | null): string => {
 
   return year + '-' + month.toString().padStart(2, '0') + '-' + day.toString().padStart(2, '0')
 }
+
+export const stringToDate = (aDate: string): Date => {
+  const newDate: Date = new Date(aDate)
+  newDate.setHours(0, 0, 0)
+  return newDate
+}
