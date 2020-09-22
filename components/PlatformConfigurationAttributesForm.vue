@@ -85,13 +85,13 @@ export default class PlatformConfigurationAttributesForm extends Vue {
 
     switch (key) {
       case 'offsetX':
-        newObj.offsetX = parseFloatOrDefault(value, 0) as number
+        newObj.offsetX = parseFloatOrDefault(value, 0)
         break
       case 'offsetY':
-        newObj.offsetY = parseFloatOrDefault(value, 0) as number
+        newObj.offsetY = parseFloatOrDefault(value, 0)
         break
       case 'offsetZ':
-        newObj.offsetZ = parseFloatOrDefault(value, 0) as number
+        newObj.offsetZ = parseFloatOrDefault(value, 0)
         break
       default:
         throw new TypeError('key ' + key + ' is not valid')
