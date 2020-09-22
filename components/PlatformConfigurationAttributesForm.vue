@@ -94,7 +94,7 @@ export default class PlatformConfigurationAttributesForm extends Vue {
         newObj.offsetZ = parseFloatOrDefault(value, 0) as number
         break
       default:
-        throw new TypeError('path ' + key + ' is not valid')
+        throw new TypeError('key ' + key + ' is not valid')
     }
 
     /**

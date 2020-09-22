@@ -157,7 +157,7 @@ export default class DeviceConfigurationAttributesForm extends Vue {
         newObj.deviceProperties = value
         break
       default:
-        throw new TypeError('path ' + key + ' is not valid')
+        throw new TypeError('key ' + key + ' is not valid')
     }
 
     /**
