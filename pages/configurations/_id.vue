@@ -152,7 +152,7 @@
                     <v-col cols="12" md="3">
                       <DevicePropertyHierarchySelect
                         v-model="configuration.location.latitude"
-                        :devices="allDevices"
+                        :devices="getAllDevices()"
                         device-select-label="Device that measures latitude"
                         property-select-label="Property for latitude"
                         :readonly="readonly"
@@ -161,7 +161,7 @@
                     <v-col cols="12" md="3">
                       <DevicePropertyHierarchySelect
                         v-model="configuration.location.longitude"
-                        :devices="allDevices"
+                        :devices="getAllDevices()"
                         device-select-label="Device that measures longitude"
                         property-select-label="Property for longitude"
                         :readonly="readonly"
@@ -170,7 +170,7 @@
                     <v-col cols="12" md="3">
                       <DevicePropertyHierarchySelect
                         v-model="configuration.location.elevation"
-                        :devices="allDevices"
+                        :devices="getAllDevices()"
                         device-select-label="Device that measures elevation"
                         property-select-label="Property for elevation"
                         :readonly="readonly"
@@ -646,10 +646,6 @@ export default class ConfigurationsIdPage extends Vue {
     const deviceNodes: DeviceNode[] = []
     getDeviceNodesRecursive(this.configuration.tree, deviceNodes)
     return deviceNodes.map(n => n.unpack())
-  }
-
-  get allDevices (): Device[] {
-    return this.getAllDevices()
   }
 
   get selectedNodeIsPlatform (): boolean {
