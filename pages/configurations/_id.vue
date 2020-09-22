@@ -667,12 +667,5 @@ export default class ConfigurationsIdPage extends Vue {
   stringToDate (aDate: string): Date {
     return stringToDate(aDate)
   }
-
-  @Watch('configuration', { immediate: true, deep: true })
-  // @ts-ignore
-  onConfigurationChanged (configuration: Configuration) {
-    console.log(configuration.startDate)
-    console.log(configuration.endDate)
-  }
 }
 </script>
