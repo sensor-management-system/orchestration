@@ -87,28 +87,27 @@
       app
     >
       <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
-      <v-toolbar-title v-text="title" />
-      <v-spacer />
-      <v-btn
-        v-if="!isLoggedIn"
-        color="primary"
-        @click="loginPopup"
-      >
-        OIDC_login
-      </v-btn>
-      <v-btn
-        v-if="isLoggedIn"
-        color="primary"
-        light
-        @click="logoutPopup"
-      >
-        Logout
-      </v-btn>
       <template v-if="appBarContent">
         <Component :is="appBarContent" />
       </template>
       <template v-else>
         <v-toolbar-title v-text="title" />
+        <v-spacer />
+        <v-btn
+          v-if="!isLoggedIn"
+          color="primary"
+          @click="loginPopup"
+        >
+          Login
+        </v-btn>
+        <v-btn
+          v-if="isLoggedIn"
+          color="primary"
+          light
+          @click="logoutPopup"
+        >
+          Logout
+        </v-btn>
       </template>
       <template v-if="appBarExtension" v-slot:extension>
         <Component :is="appBarExtension" />

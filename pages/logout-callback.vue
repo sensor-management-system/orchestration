@@ -1,29 +1,22 @@
 <template>
-    <div></div>
+  <div />
 </template>
 
 <script>
-    import {mapActions} from 'vuex'
+import { mapActions } from 'vuex'
 
-    export default {
-        name: "logout-callback",
-        fetch ({ store }) {
-            store.commit('increment')
-        },
-        methods: {
-            ...mapActions( 'auth',[
-                'handleSignoutPopupCallback'
-            ])
-        },
-        created() {
-            this.handleSignoutPopupCallback()
-                .catch((err) => {
-                    console.error(err) // Handle errors any way you want
-                })
-        }
-    }
+export default {
+  name: 'LogoutCallback',
+  fetch ({ store }) {
+    store.commit('increment')
+  },
+  created () {
+    this.handleSignoutPopupCallback().catch((err) => {
+      console.error(err) // Handle errors any way you want
+    })
+  },
+  methods: {
+    ...mapActions('auth', ['handleSignoutPopupCallback'])
+  }
+}
 </script>
-
-<style scoped>
-
-</style>
