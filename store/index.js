@@ -1,22 +1,14 @@
 export const state = () => ({
-  counter: 1,
-  env: {},
-  meta: []
+  env: {}
 })
 
 export const mutations = {
-  increment(state) {
-    state.counter++
-  },
-  setMeta(state, meta) {
-    state.meta = meta
-  },
-  setEnv(state, env) {
+  setEnv (state, env) {
     state.env = env
   }
 }
 export const actions = {
-  nuxtServerInit({commit}) {
+  nuxtServerInit ({ commit }) {
     if (process.server) {
       commit('setEnv', {
         VAR1: process.env.VUE_APP_REDIRECT_URI,
