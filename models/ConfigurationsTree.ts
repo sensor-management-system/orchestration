@@ -73,7 +73,7 @@ export class ConfigurationsTree implements Iterable<ConfigurationsTreeNode> {
   static createFromObject (someObject: ConfigurationsTree): ConfigurationsTree {
     return ConfigurationsTree.fromArray(
       someObject.toArray().map((e) => {
-        if (e instanceof PlatformNode) {
+        if (e.isPlatform()) {
           return PlatformNode.createFromObject(e as PlatformNode)
         }
         return DeviceNode.createFromObject(e as DeviceNode)
@@ -226,14 +226,14 @@ export class ConfigurationsTree implements Iterable<ConfigurationsTreeNode> {
    */
   getPlatformById (platformId: string): PlatformNode | null {
     const getByIdRecursive = (platformId: string, nodes: ConfigurationsTree): PlatformNode | null => {
-      for (const node of nodes) {
-        if (node instanceof PlatformNode && node.unpack().id === platformId) {
-          return node
+      for (const iteratedNode of nodes) {
+        if (iteratedNode.isPlatform() && iteratedNode.unpack().id === platformId) {
+          return iteratedNode as PlatformNode
         }
-        if (!node.canHaveChildren()) {
+        if (!iteratedNode.canHaveChildren()) {
           continue
         }
-        const found = getByIdRecursive(platformId, (node as PlatformNode).getTree())
+        const found = getByIdRecursive(platformId, (iteratedNode as PlatformNode).getTree())
         if (!found) {
           continue
         }
@@ -252,14 +252,14 @@ export class ConfigurationsTree implements Iterable<ConfigurationsTreeNode> {
    */
   getDeviceById (deviceId: string): DeviceNode | null {
     const getByIdRecursive = (deviceId: string, nodes: ConfigurationsTree): DeviceNode | null => {
-      for (const node of nodes) {
-        if (node instanceof DeviceNode && node.unpack().id === deviceId) {
-          return node
+      for (const iteratedNode of nodes) {
+        if (iteratedNode.isDevice() && iteratedNode.unpack().id === deviceId) {
+          return iteratedNode as DeviceNode
         }
-        if (!node.canHaveChildren()) {
+        if (!iteratedNode.canHaveChildren()) {
           continue
         }
-        const found = getByIdRecursive(deviceId, (node as PlatformNode).getTree())
+        const found = getByIdRecursive(deviceId, (iteratedNode as PlatformNode).getTree())
         if (!found) {
           continue
         }

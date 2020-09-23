@@ -37,6 +37,14 @@ export class DeviceNode implements IConfigurationsTreeNode<Device> {
     return false
   }
 
+  isPlatform (): boolean {
+    return false
+  }
+
+  isDevice (): boolean {
+    return true
+  }
+
   unpack (): Device {
     return this.node
   }

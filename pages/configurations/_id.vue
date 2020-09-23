@@ -208,7 +208,7 @@
                       @remove="removeSelectedNode"
                     />
                     <ConfigurationsPlatformDeviceSearch
-                      v-if="!readonly && (!selectedNode || selectedNodeIsPlatform)"
+                      v-if="!readonly && (!selectedNode || selectedNode.isPlatform())"
                       :is-platform-used-func="isPlatformInTree"
                       :is-device-used-func="isDeviceInTree"
                       @add-platform="addPlatformNode"
@@ -583,13 +583,13 @@ export default class ConfigurationsIdPage extends Vue {
   }
 
   removeConfigurationAttributes (node: ConfigurationsTreeNode) {
-    if (node instanceof PlatformNode) {
+    if (node.isPlatform()) {
       // as the platform can have childs in the tree, remove also the attributes of the children
-      for (const child of node.children) {
+      for (const child of (node as PlatformNode).children) {
         this.removeConfigurationAttributes(child)
       }
       this.removePlatformConfigurationAttribute((node as PlatformNode).unpack())
-    } else if (node instanceof DeviceNode) {
+    } else if (node.isDevice()) {
       this.removeDeviceConfigurationAttribute((node as DeviceNode).unpack())
     }
   }
@@ -634,8 +634,8 @@ export default class ConfigurationsIdPage extends Vue {
   getAllDevices (): Device[] {
     const getDeviceNodesRecursive = (nodes: ConfigurationsTree, devices: DeviceNode[]) => {
       for (const node of nodes) {
-        if (node instanceof DeviceNode) {
-          devices.push(node)
+        if (node.isDevice()) {
+          devices.push(node as DeviceNode)
         }
         if (!node.canHaveChildren()) {
           continue
@@ -646,10 +646,6 @@ export default class ConfigurationsIdPage extends Vue {
     const deviceNodes: DeviceNode[] = []
     getDeviceNodesRecursive(this.configuration.tree, deviceNodes)
     return deviceNodes.map(n => n.unpack())
-  }
-
-  get selectedNodeIsPlatform (): boolean {
-    return this.selectedNode instanceof PlatformNode
   }
 
   setSelectedNode (node: ConfigurationsTreeNode) {

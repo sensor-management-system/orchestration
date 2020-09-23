@@ -9,7 +9,7 @@
       open-all
     >
       <template v-slot:prepend="{ item }">
-        <v-icon v-if="nodeIsPlatform(item)">
+        <v-icon v-if="item.isPlatform()">
           mdi-rocket-outline
         </v-icon>
         <v-icon v-else>
@@ -29,7 +29,6 @@ import { Vue, Component, Prop } from 'nuxt-property-decorator'
 
 import { ConfigurationsTree } from '@/models/ConfigurationsTree'
 import { ConfigurationsTreeNode } from '@/models/ConfigurationsTreeNode'
-import { PlatformNode } from '@/models/PlatformNode'
 
 /**
  * A class component to select platforms and devices for a configuration
@@ -69,16 +68,6 @@ export default class ConfigurationsTreeView extends Vue {
       node = this.value.getById(nodeIds[0])
     }
     this.$emit('select', node)
-  }
-
-  /**
-   * returns whether a node is a PlatformNode or not
-   *
-   * @param {ConfigurationsTreeNode} node - the node to check for
-   * @return {boolean} true if the node is a PlatformNode
-   */
-  nodeIsPlatform (node: ConfigurationsTreeNode): boolean {
-    return node instanceof PlatformNode
   }
 }
 </script>

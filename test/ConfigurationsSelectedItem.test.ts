@@ -6,9 +6,7 @@ import { mount, createLocalVue } from '@vue/test-utils'
 // @ts-ignore
 import ConfigurationsSelectedItem from '@/components/ConfigurationsSelectedItem.vue'
 import Device from '@/models/Device'
-import Platform from '@/models/Platform'
 import { DeviceNode } from '@/models/DeviceNode'
-import { PlatformNode } from '@/models/PlatformNode'
 import { ConfigurationsTreeNode } from '@/models/ConfigurationsTreeNode'
 
 Vue.use(Vuetify)
@@ -26,24 +24,6 @@ describe('ConfigurationsSelectedItem', () => {
       }
     })
   }
-
-  it('should test if the given device node is a device or platform', () => {
-    const device = new Device()
-    device.id = '1'
-
-    const wrapper: any = createWrapper(new DeviceNode(device))
-    expect(wrapper.vm.isPlatform).toBeFalsy()
-    expect(wrapper.vm.isDevice).toBeTruthy()
-  })
-
-  it('should test if the given platform node is a device or platform', () => {
-    const platform = new Platform()
-    platform.id = '1'
-
-    const wrapper: any = createWrapper(new PlatformNode(platform))
-    expect(wrapper.vm.isPlatform).toBeTruthy()
-    expect(wrapper.vm.isDevice).toBeFalsy()
-  })
 
   it('should return the description of a given device', () => {
     const device = new Device()

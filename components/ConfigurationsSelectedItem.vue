@@ -10,10 +10,10 @@
           <template v-if="description">
             {{ description }}
           </template>
-          <template v-else-if="isPlatform">
+          <template v-else-if="value.isPlatform()">
             The selected platform has no description.
           </template>
-          <template v-else-if="isDevice">
+          <template v-else-if="value.isDevice()">
             The selected device has no description.
           </template>
         </v-col>
@@ -43,8 +43,6 @@
 import { Vue, Component, Prop } from 'nuxt-property-decorator'
 
 import { ConfigurationsTreeNode } from '@/models/ConfigurationsTreeNode'
-import { PlatformNode } from '@/models/PlatformNode'
-import { DeviceNode } from '@/models/DeviceNode'
 
 /**
 * A class component to select platforms and devices for a configuration
@@ -73,24 +71,6 @@ export default class ConfigurationsSelectedItem extends Vue {
   })
   // @ts-ignore
   readonly readonly: boolean
-
-  /**
-   * returns whether a node is a PlatformNode or not
-   *
-   * @return {boolean} true if the node is a PlatformNode
-   */
-  get isPlatform (): boolean {
-    return this.value instanceof PlatformNode
-  }
-
-  /**
-   * returns whether a node is a DeviceNode or not
-   *
-   * @return {boolean} true if the node is a DeviceNode
-   */
-  get isDevice (): boolean {
-    return this.value instanceof DeviceNode
-  }
 
   get description (): string {
     if (!this.value) {

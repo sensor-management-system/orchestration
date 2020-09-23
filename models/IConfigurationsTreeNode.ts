@@ -12,5 +12,7 @@ export interface IConfigurationsTreeNode<T> {
   disabled: boolean
 
   canHaveChildren (): boolean
+  isPlatform (): boolean
+  isDevice (): boolean
   unpack (): T
 }
