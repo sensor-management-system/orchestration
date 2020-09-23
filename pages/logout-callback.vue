@@ -12,6 +12,7 @@ export default {
   },
   created () {
     this.handleSignoutPopupCallback().catch((err) => {
+      // eslint-disable-next-line
       console.error(err) // Handle errors any way you want
     })
   },
