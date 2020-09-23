@@ -43,7 +43,7 @@ describe('ConfigurationsTreeView', () => {
 
     const wrapper: any = createWrapper(tree)
     // the used v-treeview requires an array of node ids
-    expect(wrapper.vm.selectedNode).toHaveLength(0)
+    expect(wrapper.vm.selectedNodeSingletonList).toHaveLength(0)
   })
 
   it('should return an array with one node id when a node is selected', () => {
@@ -60,8 +60,8 @@ describe('ConfigurationsTreeView', () => {
 
     const wrapper: any = createWrapper(tree, node as ConfigurationsTreeNode)
     // the used v-treeview requires an array of node ids
-    expect(wrapper.vm.selectedNode).toHaveLength(1)
-    expect(wrapper.vm.selectedNode[0]).toEqual(node.id)
+    expect(wrapper.vm.selectedNodeSingletonList).toHaveLength(1)
+    expect(wrapper.vm.selectedNodeSingletonList[0]).toEqual(node.id)
   })
 
   it('should trigger a select event when a node is selected', () => {
@@ -78,7 +78,7 @@ describe('ConfigurationsTreeView', () => {
 
     const wrapper: any = createWrapper(tree)
     // the used v-treeview requires an array of node ids
-    wrapper.vm.selectedNode = [node.id]
+    wrapper.vm.selectedNodeSingletonList = [node.id]
 
     expect(wrapper.emitted().select).toBeTruthy()
     expect(wrapper.emitted().select.length).toBe(1)

@@ -1,7 +1,7 @@
 <template>
   <div>
     <v-treeview
-      :active.sync="selectedNode"
+      :active.sync="selectedNodeSingletonList"
       :items="items"
       activatable
       hoverable
@@ -56,14 +56,14 @@ export default class ConfigurationsTreeView extends Vue {
     return this.value.toArray()
   }
 
-  get selectedNode (): string[] {
+  get selectedNodeSingletonList (): string[] {
     if (!this.selected || !this.selected.id) {
       return []
     }
     return [this.selected.id]
   }
 
-  set selectedNode (nodeIds: string[]) {
+  set selectedNodeSingletonList (nodeIds: string[]) {
     let node: ConfigurationsTreeNode | null = null
     if (nodeIds.length) {
       node = this.value.getById(nodeIds[0])
