@@ -45,7 +45,8 @@
  * @author <marc.hanisch@gfz-potsdam.de>
  */
 import { Vue, Component, Prop } from 'nuxt-property-decorator'
-import { Attachment } from '../models/Attachment'
+
+import { Attachment } from '@/models/Attachment'
 
 /**
  * A class component that displays a single attached file
@@ -118,7 +119,17 @@ export default class AttachmentListItem extends Vue {
    */
   update (key: string, value: string) {
     const newObj: Attachment = Attachment.createFromObject(this.value)
-    newObj.setPath(key, value)
+
+    switch (key) {
+      case 'url':
+        newObj.url = value
+        break
+      case 'label':
+        newObj.label = value
+        break
+      default:
+        throw new TypeError('path ' + key + ' is not valid')
+    }
 
     /**
      * input event

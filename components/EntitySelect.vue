@@ -2,10 +2,11 @@
   <div>
     <v-autocomplete
       v-if="!readonly"
+      ref="autocompletefield"
       :items="allExceptSelected"
       :item-text="(x) => x"
       :item-value="(x) => x.id"
-      :label="addLabel"
+      :label="label"
       @change="add"
     />
     <v-chip
@@ -34,7 +35,8 @@
  * @author <nils.brinckmann@gfz-potsdam.de>
  */
 import { Vue, Component, Prop } from 'nuxt-property-decorator'
-import { INumericId } from '../models/INumericId'
+
+import { IStringId } from '@/models/IStringId'
 
 type EntityLoaderFunction<E> = () => Promise<E[]>
 
@@ -44,7 +46,7 @@ type EntityLoaderFunction<E> = () => Promise<E[]>
  */
 @Component
 // @ts-ignore
-export default class EntitySelect<E extends INumericId> extends Vue {
+export default class EntitySelect<E extends IStringId> extends Vue {
   private elements: E[] = []
 
   @Prop({
@@ -69,11 +71,11 @@ export default class EntitySelect<E extends INumericId> extends Vue {
   readonly fetchFunction!: EntityLoaderFunction<E>
 
   @Prop({
-    default: () => 'Add',
+    required: true,
     type: String
   })
   // @ts-ignore
-  readonly addLabel: string
+  readonly label!: string
 
   @Prop({
     default: () => '',
@@ -103,7 +105,7 @@ export default class EntitySelect<E extends INumericId> extends Vue {
    * @fires EntitySelect#input
    */
   add (someId: string) {
-    const selectedElement: E | undefined = this.elements.find(e => e.id === parseInt(someId))
+    const selectedElement: E | undefined = this.elements.find(e => e.id === someId)
     if (selectedElement) {
       /**
        * Update event
@@ -114,7 +116,21 @@ export default class EntitySelect<E extends INumericId> extends Vue {
         ...this.value,
         selectedElement
       ] as E[])
+      this.clearInputField()
     }
+  }
+
+  clearInputField () {
+    // the autocompletefield is an instance of this
+    // https://github.com/vuetifyjs/vuetify/blob/master/packages/vuetify/src/components/VAutocomplete/VAutocomplete.ts
+    // It is necessary as it doesn't work to use a v-model and set it to null
+    // (as this just updates the chosen value but not the search string;
+    // and working with the search string explicitly gives us trouble as well
+    // as we then have problems to handle text inputs - it hangs on the input
+    // field)
+    // --> We use the clear callback of the autocomplete field
+    const field: any = this.$refs.autocompletefield
+    field.clearableCallback()
   }
 
   /**
@@ -123,7 +139,7 @@ export default class EntitySelect<E extends INumericId> extends Vue {
    * @param {number} someId - the id of the element to remove
    * @fires EntitySelect#input
    */
-  remove (someId: number) {
+  remove (someId: string) {
     const elementIndex: number = this.value.findIndex(e => e.id === someId)
     if (elementIndex > -1) {
       /**

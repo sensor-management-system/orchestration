@@ -86,20 +86,23 @@
                   <v-row>
                     <v-col cols="12" md="3">
                       <v-text-field
-                        v-model.lazy="longitude"
-                        label="Longitude (WGS84)"
-                      />
-                    </v-col>
-                    <v-col cols="12" md="3">
-                      <v-text-field
-                        v-model.lazy="latitude"
+                        v-model.number.lazy="latitude"
                         label="Latitude (WGS84)"
+                        type="number"
                       />
                     </v-col>
                     <v-col cols="12" md="3">
                       <v-text-field
-                        v-model="elevation"
+                        v-model.number.lazy="longitude"
+                        label="Longitude (WGS84)"
+                        type="number"
+                      />
+                    </v-col>
+                    <v-col cols="12" md="3">
+                      <v-text-field
+                        v-model.number="elevation"
                         label="Elevation (m asl)"
+                        type="number"
                       />
                     </v-col>
                   </v-row>
@@ -108,7 +111,7 @@
                       <div id="map-wrap" style="height: 300px">
                         <no-ssr>
                           <l-map :zoom="10" :center="location" style="z-index:0">
-                            <l-tile-layer url="http://{s}.tile.osm.org/{z}/{x}/{y}.png" />
+                            <l-tile-layer url="https://{s}.tile.osm.org/{z}/{x}/{y}.png" />
                             <l-marker :lat-lng="location" />
                           </l-map>
                         </no-ssr>
@@ -456,7 +459,7 @@
               <v-card-text>
                 <v-row>
                   <v-col cols="3">
-                    <ContactSelect v-model="contacts" :readonly="false" />
+                    <ContactSelect v-model="contacts" label="Add a contact" :readonly="false" />
                   </v-col>
                 </v-row>
               </v-card-text>
@@ -488,32 +491,18 @@
 <script lang="ts">
 import { Vue, Component, Watch } from 'nuxt-property-decorator'
 
-// @ts-ignore
 import AppBarEditModeContent from '@/components/AppBarEditModeContent.vue'
-// @ts-ignore
 import AppBarTabsExtension from '@/components/AppBarTabsExtension.vue'
-
-// @ts-ignore
 import ContactSelect from '@/components/ContactSelect.vue'
-// @ts-ignore
-import Contact from '@/models/Contact'
 
-// @ts-ignore
-import Platform from '@/models/Platform'
-// @ts-ignore
+import Contact from '@/models/Contact'
 import Device from '@/models/Device'
-// @ts-ignore
-import { PlatformNode } from '@/models/PlatformNode'
-// @ts-ignore
-import { DeviceNode } from '@/models/DeviceNode'
-// @ts-ignore
-import Manufacturer from '@/models/Manufacturer'
-// @ts-ignore
-import SmsService from '@/services/SmsService'
-// @ts-ignore
+import Platform from '@/models/Platform'
+
 import { ConfigurationsTree } from '@/models/ConfigurationsTree'
-// @ts-ignore
 import { ConfigurationsTreeNode } from '@/models/ConfigurationsTreeNode'
+import { DeviceNode } from '@/models/DeviceNode'
+import { PlatformNode } from '@/models/PlatformNode'
 
 enum SearchType {
   Platform = 'Platform',
@@ -561,7 +550,7 @@ export default class ConfigurationsIdPage extends Vue {
 
   private contacts: Contact[] = []
 
-  private selectedNodeIds: number[] = []
+  private selectedNodeIds: string[] = []
   private selectedPlatform: Platform | null = null
   private selectedDevice: Device | null = null
 
@@ -654,8 +643,8 @@ export default class ConfigurationsIdPage extends Vue {
 
   get location (): number[] {
     return [
-      this.longitude,
-      this.latitude
+      this.latitude,
+      this.longitude
     ]
   }
 
@@ -683,7 +672,7 @@ export default class ConfigurationsIdPage extends Vue {
    * @param {number} nodeId - the id of the node
    * @return {boolean} wheter the node was found or not
    */
-  isNodeInTree (nodeId: number): boolean {
+  isNodeInTree (nodeId: string): boolean {
     return !!this.tree.getById(nodeId)
   }
 
@@ -844,16 +833,16 @@ export default class ConfigurationsIdPage extends Vue {
   async search () {
     switch (this.searchOptions.searchType) {
       case SearchType.Platform:
-        this.platforms = await SmsService.findPlatforms(
-          this.searchOptions.text,
-          [] as Manufacturer[]
-        )
+        this.platforms = await this.$api.platforms.newSearchBuilder()
+          .withTextInName(this.searchOptions.text)
+          .build()
+          .findMatchingAsList()
         break
       case SearchType.Device:
-        this.devices = await SmsService.findDevices(
-          this.searchOptions.text,
-          [] as Manufacturer[]
-        )
+        this.devices = await this.$api.devices.newSearchBuilder()
+          .withTextInName(this.searchOptions.text)
+          .build()
+          .findMatchingAsList()
         break
       default:
         throw new TypeError('search function not defined for unknown value')
@@ -913,7 +902,7 @@ export default class ConfigurationsIdPage extends Vue {
           const n = new PlatformNode(
             ((): Platform => {
               const o = new Platform()
-              o.id = -1
+              o.id = '-1'
               o.shortName = 'Platform 01'
               o.longName = 'Platform 01 Bla blub'
               o.description = 'A platform on which various light instruments can be mounted. Consists of wood, dry and rotten wood.'
@@ -927,7 +916,7 @@ export default class ConfigurationsIdPage extends Vue {
                   const n = new PlatformNode(
                     ((): Platform => {
                       const o = new Platform()
-                      o.id = -2
+                      o.id = '-2'
                       o.shortName = 'Platform 02'
                       return o
                     })()
@@ -938,7 +927,7 @@ export default class ConfigurationsIdPage extends Vue {
                         new DeviceNode(
                           ((): Device => {
                             const o = new Device()
-                            o.id = -3
+                            o.id = '-3'
                             o.shortName = 'Device 01'
                             return o
                           })()
@@ -946,7 +935,7 @@ export default class ConfigurationsIdPage extends Vue {
                         new DeviceNode(
                           ((): Device => {
                             const o = new Device()
-                            o.id = -4
+                            o.id = '-4'
                             o.shortName = 'Device 02'
                             return o
                           })()
@@ -954,7 +943,7 @@ export default class ConfigurationsIdPage extends Vue {
                         new DeviceNode(
                           ((): Device => {
                             const o = new Device()
-                            o.id = -5
+                            o.id = '-5'
                             o.shortName = 'Device 03'
                             return o
                           })()
@@ -972,7 +961,7 @@ export default class ConfigurationsIdPage extends Vue {
         new PlatformNode(
           ((): Platform => {
             const o = new Platform()
-            o.id = -6
+            o.id = '-6'
             o.shortName = 'Platform 03'
             return o
           })()

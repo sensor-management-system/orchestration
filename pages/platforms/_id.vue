@@ -1,19 +1,5 @@
 <template>
   <div>
-    <!-- The very first: the snackback if we have some messages from the system -->
-    <v-snackbar v-model="showSaveSuccess" top color="success">
-      Save successful
-      <v-btn fab @click="showSaveSuccess = false">
-        <v-icon>mdi-close</v-icon>
-      </v-btn>
-    </v-snackbar>
-    <v-snackbar v-model="showLoadingError" top color="error">
-      Loading platform failed
-      <v-btn fab @click="showLoadingError = false">
-        <v-icon>mdi-close</v-icon>
-      </v-btn>
-    </v-snackbar>
-
     <v-card outlined>
       <v-tabs-items
         v-model="activeTab"
@@ -57,18 +43,18 @@
                 <v-row>
                   <v-col cols="12" md="3">
                     <v-combobox
-                      v-model="platformPlatformTypeName"
-                      label="Platform type"
-                      :items="platformTypeNames"
+                      v-model="platformStatusName"
+                      label="Status"
+                      :items="statusNames"
                       :readonly="readonly"
                       :disabled="readonly"
                     />
                   </v-col>
                   <v-col cols="12" md="3">
                     <v-combobox
-                      v-model="platformStatusName"
-                      label="Status"
-                      :items="statusNames"
+                      v-model="platformPlatformTypeName"
+                      label="Platform type"
+                      :items="platformTypeNames"
                       :readonly="readonly"
                       :disabled="readonly"
                     />
@@ -116,6 +102,13 @@
                         </a>
                       </template>
                     </v-text-field>
+                    <v-text-field
+                      v-else
+                      v-model="platform.website"
+                      label="Website"
+                      placeholder="https://"
+                      type="url"
+                    />
                   </v-col>
                 </v-row>
                 <v-row>
@@ -147,7 +140,7 @@
               <v-card-text>
                 <v-row>
                   <v-col cols="3">
-                    <ContactSelect v-model="platform.contacts" :readonly="!isInEditMode" />
+                    <ContactSelect v-model="platform.contacts" :readonly="!isInEditMode" label="Add a contact" />
                   </v-col>
                 </v-row>
               </v-card-text>
@@ -191,26 +184,17 @@
 
 <script lang="ts">
 import { Component, Watch, mixins } from 'nuxt-property-decorator'
-
-import CVService from '../../services/CVService'
-import SmsService from '../../services/SmsService'
-
-import Platform from '../../models/Platform'
-
-// @ts-ignore
-import ContactSelect from '../../components/ContactSelect.vue'
-import AttachmentList from '../../components/AttachmentList.vue'
-
-import Manufacturer from '../../models/Manufacturer'
-import PlatformType from '../../models/PlatformType'
-import Status from '../../models/Status'
-
-// @ts-ignore
-import AppBarEditModeContent from '@/components/AppBarEditModeContent.vue'
-// @ts-ignore
-import AppBarTabsExtension from '@/components/AppBarTabsExtension.vue'
-// @ts-ignore
 import { Rules } from '@/mixins/Rules'
+
+import AppBarEditModeContent from '@/components/AppBarEditModeContent.vue'
+import AppBarTabsExtension from '@/components/AppBarTabsExtension.vue'
+import AttachmentList from '@/components/AttachmentList.vue'
+import ContactSelect from '@/components/ContactSelect.vue'
+
+import Manufacturer from '@/models/Manufacturer'
+import Platform from '@/models/Platform'
+import PlatformType from '@/models/PlatformType'
+import Status from '@/models/Status'
 
 @Component
 // @ts-ignore
@@ -218,7 +202,7 @@ export class AppBarTabsExtensionExtended extends AppBarTabsExtension {
   get tabs (): String[] {
     return [
       'Basic Data',
-      'Persons',
+      'Contacts',
       'Attachments'
     ]
   }
@@ -243,8 +227,6 @@ export default class PlatformIdPage extends mixins(Rules) {
 
   // and some general data for the page
   private activeTab: number = 0
-  private showSaveSuccess: boolean = false
-  private showLoadingError: boolean = false
   private editMode: boolean = false
 
   created () {
@@ -267,14 +249,13 @@ export default class PlatformIdPage extends mixins(Rules) {
   }
 
   mounted () {
-    this.showLoadingError = false
-    CVService.findAllManufacturers().then((foundManufacturers) => {
+    this.$api.manufacturer.findAll().then((foundManufacturers) => {
       this.manufacturers = foundManufacturers
     })
-    CVService.findAllPlatformTypes().then((foundPlatformTypes) => {
+    this.$api.platformTypes.findAll().then((foundPlatformTypes) => {
       this.platformTypes = foundPlatformTypes
     })
-    CVService.findAllStates().then((foundStates) => {
+    this.$api.states.findAll().then((foundStates) => {
       this.states = foundStates
     })
     this.loadPlatform()
@@ -301,11 +282,11 @@ export default class PlatformIdPage extends mixins(Rules) {
     const platformId = this.$route.params.id
     if (platformId) {
       this.isInEditMode = false
-      SmsService.findPlatformById(platformId).then((foundPlatform) => {
+      this.$api.platforms.findById(platformId).then((foundPlatform) => {
         this.platform = foundPlatform
       }).catch(() => {
         // We don't take the error directly
-        this.showLoadingError = true
+        this.$store.commit('snackbar/setError', 'Loading platform failed')
       })
     } else {
       this.isInEditMode = true
@@ -333,12 +314,13 @@ export default class PlatformIdPage extends mixins(Rules) {
 
   // methods
   save () {
-    this.showSaveSuccess = false
-    SmsService.savePlatform(this.platform).then((savedPlatform) => {
+    this.$api.platforms.save(this.platform).then((savedPlatform) => {
       this.platform = savedPlatform
-      this.showSaveSuccess = true
+      this.$store.commit('snackbar/setSuccess', 'Save successful')
       // this.$router.push('/seach/platforms')
       this.toggleEditMode()
+    }).catch((_error) => {
+      this.$store.commit('snackbar/setError', 'Save failed')
     })
   }
 

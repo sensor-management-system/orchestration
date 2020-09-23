@@ -28,6 +28,7 @@ describe('CustomFieldCards', () => {
       propsData: {
         value: [
           CustomTextField.createFromObject({
+            id: '2',
             key: 'foo',
             value: 'bar'
           })
@@ -41,7 +42,7 @@ describe('CustomFieldCards', () => {
    */
 
   it('should be a Vue instance', () => {
-    expect(wrapper.isVueInstance()).toBeTruthy()
+    expect(wrapper.vm).toBeTruthy()
   })
 
   /*

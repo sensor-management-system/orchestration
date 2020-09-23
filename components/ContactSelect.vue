@@ -3,7 +3,7 @@
     v-model="wrappedValue"
     :readonly="readonly"
     :fetch-function="findAllContacts"
-    add-label="Add a contact"
+    :label="label"
     color="indigo"
     avatar-icon="mdi-account-circle"
   />
@@ -16,11 +16,10 @@
  * @author <nils.brinckmann@gfz-potsdam.de>
  */
 import { Vue, Component, Prop } from 'nuxt-property-decorator'
-import Contact from '../models/Contact'
-import SmsService from '../services/SmsService'
 
-// @ts-ignore
-import EntitySelect from '@/components/EntitySelect'
+import EntitySelect from '@/components/EntitySelect.vue'
+
+import Contact from '@/models/Contact'
 
 type ContactsLoaderFunction = () => Promise<Contact[]>
 
@@ -50,8 +49,14 @@ export default class ContactSelect extends Vue {
   // @ts-ignore
   readonly readonly: boolean
 
+  @Prop({
+    required: true,
+    type: String
+  })
+  readonly label!: string
+
   get findAllContacts () : ContactsLoaderFunction {
-    return SmsService.findAllContacts
+    return () => { return this.$api.contacts.findAll() }
   }
 
   get wrappedValue () {
@@ -60,15 +65,6 @@ export default class ContactSelect extends Vue {
 
   set wrappedValue (newValue) {
     this.$emit('input', newValue)
-  }
-
-  /**
-   * fetches all available contacts from the SmsService
-   *
-   * @async
-   */
-  async fetch () {
-    this.contacts = await SmsService.findAllContacts()
   }
 }
 </script>

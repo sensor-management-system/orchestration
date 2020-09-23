@@ -57,7 +57,14 @@
           </v-row>
         </v-expansion-panel-header>
         <v-expansion-panel-content>
-          <DevicePropertyForm v-model="value[index]" :readonly="readonly" />
+          <DevicePropertyForm
+            v-model="value[index]"
+            :readonly="readonly"
+            :compartments="compartments"
+            :sampling-medias="samplingMedias"
+            :properties="properties"
+            :units="units"
+          />
         </v-expansion-panel-content>
       </v-expansion-panel>
     </v-expansion-panels>
@@ -70,10 +77,14 @@
  * @author <marc.hanisch@gfz-potsdam.de>
  */
 import { Vue, Component, Prop } from 'nuxt-property-decorator'
-import { DeviceProperty } from '../models/DeviceProperty'
 
-// @ts-ignore
-import DevicePropertyForm from './DevicePropertyForm.vue'
+import DevicePropertyForm from '@/components/DevicePropertyForm.vue'
+
+import Compartment from '@/models/Compartment'
+import Property from '@/models/Property'
+import SamplingMedia from '@/models/SamplingMedia'
+import Unit from '@/models/Unit'
+import { DeviceProperty } from '@/models/DeviceProperty'
 
 /**
  * A class component that lists DevicePropertyForms as ExpansionPanels
@@ -98,6 +109,34 @@ export default class DevicePropertyExpansionPanels extends Vue {
   })
   // @ts-ignore
   readonly readonly: boolean
+
+  @Prop({
+    default: () => [] as Compartment[],
+    required: true,
+    type: Array
+  })
+  compartments!: Compartment[]
+
+  @Prop({
+    default: () => [] as SamplingMedia[],
+    required: true,
+    type: Array
+  })
+  samplingMedias!: SamplingMedia[]
+
+  @Prop({
+    default: () => [] as Property[],
+    required: true,
+    type: Array
+  })
+  properties!: Property[]
+
+  @Prop({
+    default: () => [] as Unit[],
+    required: true,
+    type: Array
+  })
+  units!: Unit[]
 
   /**
    * adds a new DeviceProperty instance

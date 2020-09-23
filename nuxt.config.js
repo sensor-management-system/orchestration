@@ -1,11 +1,15 @@
 // eslint-disable-next-line
 import colors from 'vuetify/es5/util/colors'
-import path from 'path'
-import fs from 'fs'
 export default {
   mode: 'spa',
+  /*
+  ** Nuxt target
+  ** See https://nuxtjs.org/api/configuration-target
+  */
+  target: 'server',
   env: {
-    backendUrl: process.env.BACKEND_URL || 'http://localhost:5000'
+    smsBackendUrl: process.env.SMS_BACKEND_URL || 'http://localhost:5000/rdm/svm-api/v1',
+    cvBackendUrl: process.env.CV_BACKEND_URL || 'http://localhost:5001/api'
   },
   /*
   ** Headers of the page
@@ -35,6 +39,7 @@ export default {
   ** Plugins to load before mounting the App
   */
   plugins: [
+    '~/plugins/api.ts'
   ],
   /*
   ** Nuxt.js dev-modules
@@ -82,13 +87,6 @@ export default {
     }
   },
   router: {
-    mode: 'history',
-    base: process.env.BASE_URL,
-  },
-  server: {
-  https: {
-    key: fs.readFileSync(path.resolve(__dirname, 'server.key')),
-    cert: fs.readFileSync(path.resolve(__dirname, 'server.crt'))
+    base: process.env.BASE_URL || '/'
   }
-}
 }

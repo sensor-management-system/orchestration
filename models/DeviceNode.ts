@@ -16,7 +16,7 @@ export class DeviceNode implements IConfigurationsTreeNode<Device> {
     this.node = node
   }
 
-  get id (): number | null {
+  get id (): string | null {
     return this.node.id
   }
 
@@ -34,5 +34,10 @@ export class DeviceNode implements IConfigurationsTreeNode<Device> {
 
   unpack (): Device {
     return this.node
+  }
+
+  static createFromObject (someObject: DeviceNode): DeviceNode {
+    const newObject = new DeviceNode(someObject.unpack())
+    return newObject
   }
 }

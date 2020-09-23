@@ -1,11 +1,11 @@
-import IPathSetter from './IPathSetter'
-
 export interface ICustomTextField {
+  id: string | null,
   key: string,
   value: string
 }
 
-export class CustomTextField implements ICustomTextField, IPathSetter {
+export class CustomTextField implements ICustomTextField {
+  private _id: string | null = null
   private _key: string = ''
   private _value: string = ''
 
@@ -19,29 +19,20 @@ export class CustomTextField implements ICustomTextField, IPathSetter {
   static createFromObject (someObject: ICustomTextField) : CustomTextField {
     const newObject = new CustomTextField()
 
+    newObject.id = someObject.id
+
     newObject.key = someObject.key
     newObject.value = someObject.value
 
     return newObject
   }
 
-  /**
-   * sets the value at the given path
-   *
-   * @param {string} path - the path (property name) to the value
-   * @param {any} value - the value to set
-   */
-  setPath (path: string, value: any): void {
-    switch (path) {
-      case 'key':
-        this.key = String(value)
-        break
-      case 'value':
-        this.value = String(value)
-        break
-      default:
-        throw new TypeError('path ' + path + ' is not valid')
-    }
+  get id (): string | null {
+    return this._id
+  }
+
+  set id (newId: string | null) {
+    this._id = newId
   }
 
   get key (): string {

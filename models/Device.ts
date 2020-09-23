@@ -1,12 +1,11 @@
-import Contact, { IContact } from './Contact'
-import { DeviceProperty } from './DeviceProperty'
-import { CustomTextField, ICustomTextField } from './CustomTextField'
+import Contact, { IContact } from '@/models/Contact'
+import { DeviceProperty } from '@/models/DeviceProperty'
+import { CustomTextField, ICustomTextField } from '@/models/CustomTextField'
 
-import { Attachment, IAttachment } from './Attachment'
-import IPathSetter from './IPathSetter'
+import { Attachment, IAttachment } from '@/models/Attachment'
 
 export interface IDevice {
-  id: number | null
+  id: string | null
   persistentIdentifier: string
   shortName: string
   longName: string
@@ -17,6 +16,9 @@ export interface IDevice {
   manufacturerUri: string
   manufacturerName: string
 
+  deviceTypeUri: string
+  deviceTypeName: string
+
   model: string
   description: string
   website: string
@@ -25,9 +27,9 @@ export interface IDevice {
   dualUse: boolean
 
   createdAt: Date | null
-  modifiedAt: Date | null
+  updatedAt: Date | null
   createdByUserId: number | null
-  modifiedByUserId: number | null
+  updatedByUserId: number | null
 
   contacts: IContact[]
   properties: DeviceProperty[]
@@ -35,8 +37,8 @@ export interface IDevice {
   attachments: IAttachment[]
 }
 
-export default class Device implements IDevice, IPathSetter {
-  private _id: number | null = null
+export default class Device implements IDevice {
+  private _id: string | null = null
   private _persistentIdentifier: string = ''
   private _shortName: string = ''
   private _longName: string = ''
@@ -46,6 +48,10 @@ export default class Device implements IDevice, IPathSetter {
 
   private _manufacturerUri: string = ''
   private _manufacturerName: string = ''
+
+  private _deviceTypeUri: string = ''
+  private _deviceTypeName: string = ''
+
   private _model: string = ''
 
   private _description: string = ''
@@ -55,10 +61,10 @@ export default class Device implements IDevice, IPathSetter {
   private _dualUse: boolean = false
 
   private _createdAt: Date | null = null
-  private _modifiedAt: Date | null = null
+  private _updatedAt: Date | null = null
 
   private _createdByUserId: number | null = null
-  private _modifiedByUserId: number | null = null
+  private _updatedByUserId: number | null = null
 
   private _contacts: Contact[] = []
   private _properties: DeviceProperty[] = []
@@ -67,11 +73,11 @@ export default class Device implements IDevice, IPathSetter {
 
   // TODO: Events
 
-  get id (): number | null {
+  get id (): string | null {
     return this._id
   }
 
-  set id (id: number | null) {
+  set id (id: string | null) {
     this._id = id
   }
 
@@ -131,6 +137,22 @@ export default class Device implements IDevice, IPathSetter {
     this._manufacturerName = manufacturerName
   }
 
+  get deviceTypeUri (): string {
+    return this._deviceTypeUri
+  }
+
+  set deviceTypeUri (deviceTypeUri: string) {
+    this._deviceTypeUri = deviceTypeUri
+  }
+
+  get deviceTypeName (): string {
+    return this._deviceTypeName
+  }
+
+  set deviceTypeName (deviceTypeName: string) {
+    this._deviceTypeName = deviceTypeName
+  }
+
   get model (): string {
     return this._model
   }
@@ -187,12 +209,12 @@ export default class Device implements IDevice, IPathSetter {
     this._createdAt = newCreatedAt
   }
 
-  get modifiedAt (): Date | null {
-    return this._modifiedAt
+  get updatedAt (): Date | null {
+    return this._updatedAt
   }
 
-  set modifiedAt (newModifiedAt: Date | null) {
-    this._modifiedAt = newModifiedAt
+  set updatedAt (newUpdatedAt: Date | null) {
+    this._updatedAt = newUpdatedAt
   }
 
   get createdByUserId (): number | null {
@@ -203,12 +225,12 @@ export default class Device implements IDevice, IPathSetter {
     this._createdByUserId = newCreatedByUserId
   }
 
-  get modifiedByUserId (): number | null {
-    return this._modifiedByUserId
+  get updatedByUserId (): number | null {
+    return this._updatedByUserId
   }
 
-  set modifiedByUserId (newModifiedByUserId: number | null) {
-    this._modifiedByUserId = newModifiedByUserId
+  set updatedByUserId (newUpdatedByUserId: number | null) {
+    this._updatedByUserId = newUpdatedByUserId
   }
 
   get contacts (): Contact[] {
@@ -243,102 +265,6 @@ export default class Device implements IDevice, IPathSetter {
     this._attachments = attachments
   }
 
-  setPath (path: string, value: any): void {
-    const pathArray = path.split('.')
-    const topLevelElement = pathArray.splice(0, 1)[0]
-
-    switch (topLevelElement) {
-      case 'id':
-        if (value !== null) {
-          this.id = Number(value)
-        } else {
-          this.id = null
-        }
-        break
-      case 'persistentIdentifier':
-        this.persistentIdentifier = String(value)
-        break
-      case 'shortName':
-        this.shortName = String(value)
-        break
-      case 'longName':
-        this.longName = String(value)
-        break
-      case 'statusUri':
-        this.statusUri = String(value)
-        break
-      case 'statusName':
-        this.statusName = String(value)
-        break
-      case 'manufacturerUri':
-        this.manufacturerUri = String(value)
-        break
-      case 'manufacturerName':
-        this.manufacturerName = String(value)
-        break
-      case 'model':
-        this.model = String(value)
-        break
-      case 'description':
-        this.description = String(value)
-        break
-      case 'website':
-        this.website = String(value)
-        break
-      case 'serialNumber':
-        this.serialNumber = String(value)
-        break
-      case 'inventoryNumber':
-        this.inventoryNumber = String(value)
-        break
-      case 'dualUse':
-        this.dualUse = Boolean(value)
-        break
-      case 'createdAt':
-        if (value !== null) {
-          this.createdAt = value as Date
-        } else {
-          this.createdAt = null
-        }
-        break
-      case 'modifiedAt':
-        if (value !== null) {
-          this.modifiedAt = value as Date
-        } else {
-          this.modifiedAt = null
-        }
-        break
-      case 'createdByUserId':
-        if (value !== null) {
-          this.createdByUserId = Number(value)
-        } else {
-          this.createdByUserId = null
-        }
-        break
-      case 'modifiedByUserId':
-        if (value !== null) {
-          this.modifiedByUserId = Number(value)
-        } else {
-          this.modifiedByUserId = null
-        }
-        break
-      case 'contacts':
-        this.contacts = value.map(Contact.createFromObject)
-        break
-      case 'properties':
-        this.properties = value.map(DeviceProperty.createFromObject)
-        break
-      case 'customFields':
-        this.customFields = value.map(CustomTextField.createFromObject)
-        break
-      case 'attachments':
-        this.attachments = value.map(Attachment.createFromObject)
-        break
-      default:
-        throw new TypeError('path ' + path + ' is not valid')
-    }
-  }
-
   static createFromObject (someObject: IDevice): Device {
     const newObject = new Device()
 
@@ -353,6 +279,9 @@ export default class Device implements IDevice, IPathSetter {
     newObject.manufacturerUri = someObject.manufacturerUri
     newObject.manufacturerName = someObject.manufacturerName
 
+    newObject.deviceTypeUri = someObject.deviceTypeUri
+    newObject.deviceTypeName = someObject.deviceTypeName
+
     newObject.model = someObject.model
     newObject.description = someObject.description
     newObject.website = someObject.website
@@ -361,9 +290,9 @@ export default class Device implements IDevice, IPathSetter {
     newObject.dualUse = someObject.dualUse
 
     newObject.createdAt = someObject.createdAt
-    newObject.modifiedAt = someObject.modifiedAt
+    newObject.updatedAt = someObject.updatedAt
     newObject.createdByUserId = someObject.createdByUserId
-    newObject.modifiedByUserId = someObject.modifiedByUserId
+    newObject.updatedByUserId = someObject.updatedByUserId
 
     newObject.contacts = someObject.contacts.map(Contact.createFromObject)
     newObject.properties = someObject.properties.map(DeviceProperty.createFromObject)

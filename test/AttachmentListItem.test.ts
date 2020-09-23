@@ -25,7 +25,7 @@ describe('AttachmentListItem', () => {
       vuetify,
       propsData: {
         value: Attachment.createFromObject({
-          id: 1,
+          id: '1',
           url: 'https://foo.bar/Document.docx',
           label: 'Assembling Instructions'
         })
@@ -38,7 +38,7 @@ describe('AttachmentListItem', () => {
    */
 
   it('should be a Vue instance', () => {
-    expect(wrapper.isVueInstance()).toBeTruthy()
+    expect(wrapper.vm).toBeTruthy()
   })
 
   it('should trigger an input event on change', () => {

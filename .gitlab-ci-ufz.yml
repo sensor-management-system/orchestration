@@ -40,6 +40,8 @@ build_app:
   stage: build-ufz
   variables:
     BASE_URL: "/rdm/svm"
+    SMS_BACKEND_URL: "https://webapp-stage.intranet.ufz.de/rdm/svm-api/v1"
+    CV_BACKEND_URL: "http://rdm-test.intranet.ufz.de:5000/api"
     NUXT_ENV_REDIRECT_URI: "https://webapp-stage.intranet.ufz.de/rdm/svm/login-callback"
     NUXT_ENV_CLIENT_ID: "rdmsvm-implicit-flow"
     NUXT_ENV_AUTHORITY: "https://webapp.ufz.de/idp/oidc/v1"
@@ -53,7 +55,7 @@ build_app:
   image: node:latest
   script:
     - npm install
-    - npm run generate
+    - npm run build
 
 
 build_image:

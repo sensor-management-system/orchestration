@@ -90,19 +90,19 @@
       <v-toolbar-title v-text="title" />
       <v-spacer />
       <v-btn
-          color="primary"
-          v-if="!isLoggedIn"
-          @click="loginPopup"
+        v-if="!isLoggedIn"
+        color="primary"
+        @click="loginPopup"
       >
         OIDC_login
       </v-btn>
       <v-btn
-          color="primary"
-          v-if="isLoggedIn"
-          light
-          @click="logoutPopup"
+        v-if="isLoggedIn"
+        color="primary"
+        light
+        @click="logoutPopup"
       >
-          Logout
+        Logout
       </v-btn>
       <template v-if="appBarContent">
         <Component :is="appBarContent" />
@@ -116,6 +116,22 @@
     </v-app-bar>
     <v-content>
       <v-container>
+        <v-snackbar v-model="hasSuccess" top color="green">
+          {{ success }}
+          <template v-slot:action="{ attrs }">
+            <v-btn fab small v-bind="attrs" @click="closeSuccessSnackbar">
+              <v-icon>mdi-close</v-icon>
+            </v-btn>
+          </template>
+        </v-snackbar>
+        <v-snackbar v-model="hasError" top color="error">
+          {{ error }}
+          <template v-slot:action="{ attrs }">
+            <v-btn fab small v-bind="attrs" @click="closeErrorSnackbar">
+              <v-icon>mdi-close</v-icon>
+            </v-btn>
+          </template>
+        </v-snackbar>
         <nuxt />
       </v-container>
     </v-content>
@@ -129,6 +145,7 @@
 </template>
 
 <script>
+
 export default {
   data () {
     return {
@@ -141,6 +158,37 @@ export default {
       appBarExtension: null
     }
   },
+  computed: {
+    error () {
+      return this.$store.state.snackbar.error
+    },
+    hasError: {
+      get () {
+        return this.$store.state.snackbar.error !== ''
+      },
+      set (newValue) {
+        if (!newValue) {
+          this.$store.commit('snackbar/clearError')
+        }
+      }
+    },
+    success () {
+      return this.$store.state.snackbar.success
+    },
+    hasSuccess: {
+      get () {
+        return this.$store.state.snackbar.success !== ''
+      },
+      set (newValue) {
+        if (!newValue) {
+          this.$store.commit('snackbar/clearSuccess')
+        }
+      }
+    },
+    isLoggedIn () {
+      return this.$store.getters['auth/isAuthenticated']
+    }
+  },
   created () {
     this.$nuxt.$on('app-bar-content', (component) => {
       this.appBarContent = component
@@ -149,28 +197,29 @@ export default {
       this.appBarExtension = component
     })
   },
-    mounted() {
-      this.$store.dispatch('auth/loadStoredUser');
+  mounted () {
+    this.$store.dispatch('auth/loadStoredUser')
+  },
+  methods: {
+    closeErrorSnackbar () {
+      this.$store.commit('snackbar/clearError')
     },
-    methods: {
-      loginPopup() {
-        this.$store.dispatch('auth/loginPopup');
-      },
-      logoutPopup() {
-        let routing = {
-          router: this.$router,
-          currentRoute: this.$route.path
-        };
-        this.$store.dispatch('auth/logoutPopup', routing);
-      },
-      silentRenew(){
-        this.$store.dispatch('auth/silentRenew');
-      }
+    closeSuccessSnackbar () {
+      this.$store.commit('snackbar/clearSuccess')
     },
-    computed: {
-      isLoggedIn() {
-        return this.$store.getters["auth/isAuthenticated"]
+    loginPopup () {
+      this.$store.dispatch('auth/loginPopup')
+    },
+    logoutPopup () {
+      const routing = {
+        router: this.$router,
+        currentRoute: this.$route.path
       }
+      this.$store.dispatch('auth/logoutPopup', routing)
+    },
+    silentRenew () {
+      this.$store.dispatch('auth/silentRenew')
     }
+  }
 }
 </script>

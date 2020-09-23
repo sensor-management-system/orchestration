@@ -1,10 +1,8 @@
-import Contact, { IContact } from './Contact'
-import { Attachment, IAttachment } from './Attachment'
-
-import IPathSetter from './IPathSetter'
+import Contact, { IContact } from '@/models/Contact'
+import { Attachment, IAttachment } from '@/models/Attachment'
 
 export interface IPlatform {
-  id: number | null
+  id: string | null
 
   platformTypeUri: string
   platformTypeName: string
@@ -27,17 +25,17 @@ export interface IPlatform {
   persistentIdentifier: string
 
   createdAt: Date | null
-  modifiedAt: Date | null
+  updatedAt: Date | null
 
   createdByUserId: number | null
-  modifiedByUserId: number | null
+  updatedByUserId: number | null
 
   contacts: IContact[]
   attachments: IAttachment[]
 }
 
-export default class Platform implements IPlatform, IPathSetter {
-  private _id: number | null = null
+export default class Platform implements IPlatform {
+  private _id: string | null = null
 
   private _platformTypeUri: string = ''
   private _platformTypeName: string = ''
@@ -59,19 +57,19 @@ export default class Platform implements IPlatform, IPathSetter {
   private _website: string = ''
   private _persistentIdentifier: string = ''
   private _createdAt: Date | null = null
-  private _modifiedAt: Date | null = null
+  private _updatedAt: Date | null = null
 
   private _createdByUserId: number | null = null
-  private _modifiedByUserId: number | null = null
+  private _updatedByUserId: number | null = null
 
   private _contacts: Contact[] = []
   private _attachments: Attachment[] = []
 
-  get id (): number | null {
+  get id (): string | null {
     return this._id
   }
 
-  set id (newId: number | null) {
+  set id (newId: string | null) {
     this._id = newId
   }
 
@@ -203,12 +201,12 @@ export default class Platform implements IPlatform, IPathSetter {
     this._createdAt = newCreatedAt
   }
 
-  get modifiedAt (): Date | null {
-    return this._modifiedAt
+  get updatedAt (): Date | null {
+    return this._updatedAt
   }
 
-  set modifiedAt (newModifiedAt: Date | null) {
-    this._modifiedAt = newModifiedAt
+  set updatedAt (newUpdatedAt: Date | null) {
+    this._updatedAt = newUpdatedAt
   }
 
   get createdByUserId (): number | null {
@@ -219,12 +217,12 @@ export default class Platform implements IPlatform, IPathSetter {
     this._createdByUserId = newCreatedByUserId
   }
 
-  get modifiedByUserId (): number | null {
-    return this._modifiedByUserId
+  get updatedByUserId (): number | null {
+    return this._updatedByUserId
   }
 
-  set modifiedByUserId (newModifiedByUserId: number | null) {
-    this._modifiedByUserId = newModifiedByUserId
+  set updatedByUserId (newUpdatedByUserId: number | null) {
+    this._updatedByUserId = newUpdatedByUserId
   }
 
   get attachments (): Attachment[] {
@@ -233,99 +231,6 @@ export default class Platform implements IPlatform, IPathSetter {
 
   set attachments (attachments: Attachment[]) {
     this._attachments = attachments
-  }
-
-  setPath (path: string, value: any): void {
-    const pathArray = path.split('.')
-    const topLevelElement = pathArray.splice(0, 1)[0]
-
-    switch (topLevelElement) {
-      case 'id':
-        if (value !== null) {
-          this.id = Number(value)
-        } else {
-          this.id = null
-        }
-        break
-      case 'platformTypeUri':
-        this.platformTypeUri = String(value)
-        break
-      case 'platformTypeName':
-        this.platformTypeName = String(value)
-        break
-      case 'shortName':
-        this.shortName = String(value)
-        break
-      case 'longName':
-        this.longName = String(value)
-        break
-      case 'description':
-        this.description = String(value)
-        break
-      case 'manufacturerUri':
-        this.manufacturerUri = String(value)
-        break
-      case 'manufacturerName':
-        this.manufacturerName = String(value)
-        break
-      case 'model':
-        this.model = String(value)
-        break
-      case 'statusUri':
-        this.statusUri = String(value)
-        break
-      case 'statusName':
-        this.statusName = String(value)
-        break
-      case 'inventoryNumber':
-        this.inventoryNumber = String(value)
-        break
-      case 'serialNumber':
-        this.serialNumber = String(value)
-        break
-      case 'website':
-        this.website = String(value)
-        break
-      case 'persistentIdentifier':
-        this.persistentIdentifier = String(value)
-        break
-      case 'createdAt':
-        if (value !== null) {
-          this.createdAt = value as Date
-        } else {
-          this.createdAt = null
-        }
-        break
-      case 'modifiedAt':
-        if (value !== null) {
-          this.modifiedAt = value as Date
-        } else {
-          this.modifiedAt = null
-        }
-        break
-      case 'createdByUserId':
-        if (value !== null) {
-          this.createdByUserId = Number(value)
-        } else {
-          this.createdByUserId = null
-        }
-        break
-      case 'modifiedByUserId':
-        if (value !== null) {
-          this.modifiedByUserId = Number(value)
-        } else {
-          this.modifiedByUserId = null
-        }
-        break
-      case 'contacts':
-        this.contacts = value.map(Contact.createFromObject)
-        break
-      case 'attachments':
-        this.attachments = value.map(Attachment.createFromObject)
-        break
-      default:
-        throw new TypeError('path ' + path + ' is not valid')
-    }
   }
 
   static createEmpty (): Platform {
@@ -359,10 +264,10 @@ export default class Platform implements IPlatform, IPathSetter {
     newObject.persistentIdentifier = someObject.persistentIdentifier
 
     newObject.createdAt = someObject.createdAt
-    newObject.modifiedAt = someObject.modifiedAt
+    newObject.updatedAt = someObject.updatedAt
 
     newObject.createdByUserId = someObject.createdByUserId
-    newObject.modifiedByUserId = someObject.modifiedByUserId
+    newObject.updatedByUserId = someObject.updatedByUserId
 
     newObject.contacts = someObject.contacts.map(Contact.createFromObject)
     newObject.attachments = someObject.attachments.map(Attachment.createFromObject)

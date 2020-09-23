@@ -3,7 +3,7 @@
  * @author <marc.hanisch@gfz-potsdam.de>
  */
 
-import { PlatformNode } from './PlatformNode'
-import { DeviceNode } from './DeviceNode'
+import { PlatformNode } from '@/models/PlatformNode'
+import { DeviceNode } from '@/models/DeviceNode'
 
 export type ConfigurationsTreeNode = PlatformNode | DeviceNode

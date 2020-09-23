@@ -3,8 +3,9 @@
  * @author <marc.hanisch@gfz-potsdam.de>
  */
 
-import { ConfigurationsTreeNode } from './ConfigurationsTreeNode'
-import { PlatformNode } from './PlatformNode'
+import { ConfigurationsTreeNode } from '@/models/ConfigurationsTreeNode'
+import { DeviceNode } from '@/models/DeviceNode'
+import { PlatformNode } from '@/models/PlatformNode'
 
 /**
  * a class to iterate over the direct children of a ConfigurationsTree
@@ -67,6 +68,17 @@ export class ConfigurationsTree implements Iterable<ConfigurationsTreeNode> {
    */
   toArray (): ConfigurationsTreeNode[] {
     return this.tree
+  }
+
+  static createFromObject (someObject: ConfigurationsTree): ConfigurationsTree {
+    return ConfigurationsTree.fromArray(
+      someObject.toArray().map((e) => {
+        if (e instanceof PlatformNode) {
+          return PlatformNode.createFromObject(e as PlatformNode)
+        }
+        return DeviceNode.createFromObject(e as DeviceNode)
+      })
+    )
   }
 
   [Symbol.iterator] (): Iterator<ConfigurationsTreeNode> {
@@ -154,11 +166,11 @@ export class ConfigurationsTree implements Iterable<ConfigurationsTreeNode> {
   /**
    * returns the path to the node in the tree
    *
-   * @param {number} nodeId - the node to get the path for
+   * @param {string} nodeId - the node to get the path for
    * @return {string[]} an array of node names
    */
-  getPath (nodeId: number): string[] {
-    const getPathRecursive = (nodeId: number, nodes: ConfigurationsTree, path: string[]): boolean => {
+  getPath (nodeId: string): string[] {
+    const getPathRecursive = (nodeId: string, nodes: ConfigurationsTree, path: string[]): boolean => {
       for (const node of nodes) {
         if (node.id === nodeId) {
           path.push(node.name)
@@ -186,8 +198,8 @@ export class ConfigurationsTree implements Iterable<ConfigurationsTreeNode> {
    * @param {number} nodeId - the id of the node to search
    * @return {ConfigurationsTreeNode|null} the found node, null if it was not found
    */
-  getById (nodeId: number): ConfigurationsTreeNode | null {
-    const getByIdRecursive = (nodeId: number, nodes: ConfigurationsTree): ConfigurationsTreeNode | null => {
+  getById (nodeId: string): ConfigurationsTreeNode | null {
+    const getByIdRecursive = (nodeId: string, nodes: ConfigurationsTree): ConfigurationsTreeNode | null => {
       for (const node of nodes) {
         if (node.id === nodeId) {
           return node

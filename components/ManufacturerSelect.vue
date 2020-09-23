@@ -3,7 +3,7 @@
     v-model="wrappedValue"
     :readonly="readonly"
     :fetch-function="findAllManufacturers"
-    add-label="Add a manufacturer"
+    :label="label"
     color="brown"
   />
 </template>
@@ -16,11 +16,9 @@
  */
 import { Vue, Component, Prop } from 'nuxt-property-decorator'
 
-import Manufacturer from '../models/Manufacturer'
-import CVService from '../services/CVService'
+import EntitySelect from '@/components/EntitySelect.vue'
 
-// @ts-ignore
-import EntitySelect from '@/components/EntitySelect'
+import Manufacturer from '@/models/Manufacturer'
 
 type ManufacturersLoaderFunction = () => Promise<Manufacturer[]>
 
@@ -50,8 +48,14 @@ export default class ManufacturerSelect extends Vue {
   // @ts-ignore
   readonly readonly: boolean
 
+  @Prop({
+    required: true,
+    type: String
+  })
+  readonly label!: String
+
   get findAllManufacturers (): ManufacturersLoaderFunction {
-    return CVService.findAllManufacturers
+    return () => { return this.$api.manufacturer.findAll() }
   }
 
   get wrappedValue () {

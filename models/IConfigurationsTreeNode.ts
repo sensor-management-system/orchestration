@@ -7,7 +7,7 @@
  * an interface to implement wrapper classes for the usage in a ConfigurationsTreeNode
  */
 export interface IConfigurationsTreeNode<T> {
-  id: number | null
+  id: string | null
   name: string
   disabled: boolean
 

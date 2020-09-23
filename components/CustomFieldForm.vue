@@ -33,8 +33,10 @@
  * @author <marc.hanisch@gfz-potsdam.de>
  */
 import { Component, Prop, mixins } from 'nuxt-property-decorator'
-import { CustomTextField } from '../models/CustomTextField'
+
 import { Rules } from '@/mixins/Rules'
+
+import { CustomTextField } from '@/models/CustomTextField'
 
 /**
  * A class component for a custom field
@@ -67,7 +69,17 @@ export default class CustomFieldForm extends mixins(Rules) {
    */
   update (key: string, value: string) {
     const newObj: CustomTextField = CustomTextField.createFromObject(this.value)
-    newObj.setPath(key, value)
+
+    switch (key) {
+      case 'key':
+        newObj.key = value
+        break
+      case 'value':
+        newObj.value = value
+        break
+      default:
+        throw new TypeError('path ' + key + ' is not valid')
+    }
 
     /**
      * input event

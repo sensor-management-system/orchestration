@@ -1,7 +1,7 @@
-import { IMeasuringRange, MeasuringRange } from './MeasuringRange'
-import IPathSetter from './IPathSetter'
+import { IMeasuringRange, MeasuringRange } from '@/models/MeasuringRange'
 
 export interface IDeviceProperty {
+  id: string | null
   label: string
   compartmentUri: string
   compartmentName: string
@@ -16,7 +16,8 @@ export interface IDeviceProperty {
   failureValue: number | null
 }
 
-export class DeviceProperty implements IDeviceProperty, IPathSetter {
+export class DeviceProperty implements IDeviceProperty {
+  private _id: string | null = null
   private _label: string = ''
   private _compartmentUri: string = ''
   private _compartmentName: string = ''
@@ -40,6 +41,7 @@ export class DeviceProperty implements IDeviceProperty, IPathSetter {
   static createFromObject (someObject: IDeviceProperty) : DeviceProperty {
     const newObject = new DeviceProperty()
 
+    newObject.id = someObject.id
     newObject.label = someObject.label
     newObject.compartmentUri = someObject.compartmentUri
     newObject.compartmentName = someObject.compartmentName
@@ -56,55 +58,12 @@ export class DeviceProperty implements IDeviceProperty, IPathSetter {
     return newObject
   }
 
-  setPath (path: string, value: any): void {
-    const properties = path.split('.')
-    const property = properties.splice(0, 1)[0]
-    let mrProperty
+  get id (): string | null {
+    return this._id
+  }
 
-    switch (property) {
-      case 'label':
-        this.label = String(value)
-        break
-      case 'compartmentUri':
-        this.compartmentUri = String(value)
-        break
-      case 'compartmentName':
-        this.compartmentName = String(value)
-        break
-      case 'unitUri':
-        this.unitUri = String(value)
-        break
-      case 'unitName':
-        this.unitName = String(value)
-        break
-      case 'samplingMediaUri':
-        this.samplingMediaUri = String(value)
-        break
-      case 'samplingMediaName':
-        this.samplingMediaName = String(value)
-        break
-      case 'propertyUri':
-        this.propertyUri = String(value)
-        break
-      case 'propertyName':
-        this.propertyName = String(value)
-        break
-      case 'measuringRange':
-        if (properties.length < 1) {
-          throw new TypeError('missing second level in path')
-        }
-        mrProperty = properties.splice(0, 1)[0]
-        this.measuringRange.setPath(mrProperty, value)
-        break
-      case 'accuracy':
-        this.accuracy = parseFloat(value)
-        break
-      case 'failureValue':
-        this.failureValue = parseFloat(value)
-        break
-      default:
-        throw new TypeError('path ' + path + ' is not valid')
-    }
+  set id (id: string | null) {
+    this._id = id
   }
 
   get label (): string {

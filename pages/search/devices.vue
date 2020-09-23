@@ -1,11 +1,5 @@
 <template>
   <div>
-    <v-snackbar v-model="showSuccessMessage" top color="success">
-      {{ successMessage }}
-      <v-btn fab @click="showSaveSuccess = false">
-        <v-icon>mdi-close</v-icon>
-      </v-btn>
-    </v-snackbar>
     <v-card>
       <v-tabs-items
         v-model="activeTab"
@@ -43,7 +37,17 @@
               </v-row>
               <v-row>
                 <v-col cols="12" md="3">
-                  <ManufacturerSelect v-model="selectedSearchManufacturers" />
+                  <ManufacturerSelect v-model="selectedSearchManufacturers" label="Select a manufacturer" />
+                </v-col>
+              </v-row>
+              <v-row>
+                <v-col cols="12" md="3">
+                  <StatusSelect v-model="selectedSearchStates" label="Select a status" />
+                </v-col>
+              </v-row>
+              <v-row>
+                <v-col cols="12" md="3">
+                  <DeviceTypeSelect v-model="selectedSearchDeviceTypes" label="Select a device type" />
                 </v-col>
               </v-row>
             </v-card-text>
@@ -61,47 +65,63 @@
     </v-card>
 
     <h2>Results:</h2>
-    <v-card v-for="result in searchResults" :key="result.searchType + result.id">
-      <v-card-title>
-        {{ result.shortName }}
-      </v-card-title>
-      <v-card-text>
-        <p>{{ getType(result) }}</p>
-        <p>Project {{ getProject(result) }}</p>
-        <p>Status {{ getStatus(result) }}</p>
-      </v-card-text>
-      <v-card-actions>
-        <v-btn :to="'/devices/' + result.id">
-          View
-        </v-btn>
-        <v-btn>Copy</v-btn>
-        <v-btn @click.stop="showDeleteDialog = true">
-          Delete
-        </v-btn>
-        <v-dialog v-model="showDeleteDialog" max-width="290">
-          <v-card>
-            <v-card-title class="headline">
-              Delete device
-            </v-card-title>
-            <v-card-text>
-              Do you really want to delete the device <em>{{ result.shortName }}</em>?
-            </v-card-text>
-            <v-card-actions>
-              <v-btn @click="showDeleteDialog = false">
-                No
-              </v-btn>
-              <v-spacer />
-              <v-btn color="error" @click="deleteAndCloseDialog(result.id)">
-                <v-icon left>
-                  mdi-delete
-                </v-icon>
-                Delete
-              </v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-dialog>
-      </v-card-actions>
-    </v-card>
+    <div v-if="loading">
+      <div class="text-center pt-2">
+        <v-progress-circular indeterminate />
+      </div>
+    </div>
+    <div v-if="searchResults.length == 0 && !loading">
+      <v-card>
+        <v-card-text>
+          <p class="text-center">
+            There are no devices that match our search criteria.
+          </p>
+        </v-card-text>
+      </v-card>
+    </div>
+    <div v-else>
+      <v-card v-for="result in searchResults" :key="result.id" :disabled="loading">
+        <v-card-title>
+          {{ result.shortName }}
+        </v-card-title>
+        <v-card-text>
+          <p>{{ getType(result) }}</p>
+          <p>Project {{ getProject(result) }}</p>
+          <p>Status {{ getStatus(result) }}</p>
+        </v-card-text>
+        <v-card-actions>
+          <v-btn :to="'/devices/' + result.id">
+            View
+          </v-btn>
+          <v-btn>Copy</v-btn>
+          <v-btn @click.stop="showDeleteDialogFor(result.id)">
+            Delete
+          </v-btn>
+          <v-dialog v-model="showDeleteDialog[result.id]" max-width="290">
+            <v-card>
+              <v-card-title class="headline">
+                Delete device
+              </v-card-title>
+              <v-card-text>
+                Do you really want to delete the device <em>{{ result.shortName }}</em>?
+              </v-card-text>
+              <v-card-actions>
+                <v-btn @click="hideDeleteDialogFor(result.id)">
+                  No
+                </v-btn>
+                <v-spacer />
+                <v-btn color="error" @click="deleteAndCloseDialog(result.id)">
+                  <v-icon left>
+                    mdi-delete
+                  </v-icon>
+                  Delete
+                </v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-dialog>
+        </v-card-actions>
+      </v-card>
+    </div>
     <v-speed-dial
       v-model="fab"
       fixed
@@ -130,21 +150,18 @@
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 
-import CVService from '../../services/CVService'
-import SmsService from '../../services/SmsService'
-
-import Device from '../../models/Device'
-import Manufacturer from '../../models/Manufacturer'
-import PlatformType from '../../models/PlatformType'
-import Status from '../../models/Status'
-
-// @ts-ignore
-import ManufacturerSelect from '@/components/ManufacturerSelect.vue'
-
-// @ts-ignore
 import AppBarEditModeContent from '@/components/AppBarEditModeContent.vue'
-// @ts-ignore
 import AppBarTabsExtension from '@/components/AppBarTabsExtension.vue'
+import DeviceTypeSelect from '@/components/DeviceTypeSelect.vue'
+import ManufacturerSelect from '@/components/ManufacturerSelect.vue'
+import StatusSelect from '@/components/StatusSelect.vue'
+
+import { IPaginationLoader } from '@/utils/PaginatedLoader'
+
+import Device from '@/models/Device'
+import DeviceType from '@/models/DeviceType'
+import Manufacturer from '@/models/Manufacturer'
+import Status from '@/models/Status'
 
 @Component
 // @ts-ignore
@@ -158,23 +175,27 @@ export class AppBarTabsExtensionExtended extends AppBarTabsExtension {
 }
 
 @Component({
-  components: { ManufacturerSelect }
+  components: { ManufacturerSelect, StatusSelect, DeviceTypeSelect }
 })
 export default class SeachDevicesPage extends Vue {
+  private pageSize: number = 20
   private activeTab: number = 0
   private fab: boolean = false
+  private loading: boolean = true
+
+  private loader: null | IPaginationLoader<Device> = null
 
   private selectedSearchManufacturers: Manufacturer[] = []
+  private selectedSearchStates: Status[] = []
+  private selectedSearchDeviceTypes: DeviceType[] = []
 
-  private platformTypeLookup: Map<string, PlatformType> = new Map<string, PlatformType>()
+  private deviceTypeLookup: Map<string, DeviceType> = new Map<string, DeviceType>()
   private statusLookup: Map<string, Status> = new Map<string, Status>()
 
   private searchResults: Device[] = []
   private searchText: string | null = null
 
-  private showDeleteDialog: boolean = false
-  private showSuccessMessage: boolean = false
-  private successMessage = ''
+  private showDeleteDialog: { [id: string]: boolean} = {}
 
   created () {
     this.$nuxt.$emit('app-bar-content', AppBarEditModeContent)
@@ -185,31 +206,44 @@ export default class SeachDevicesPage extends Vue {
   }
 
   mounted () {
-    const promisePlatformTypes = CVService.findAllPlatformTypes()
-    const promiseStates = CVService.findAllStates()
+    const promiseDeviceTypes = this.$api.deviceTypes.findAll()
+    const promiseStates = this.$api.states.findAll()
 
-    promisePlatformTypes.then((platformTypes) => {
+    promiseDeviceTypes.then((deviceTypes) => {
       promiseStates.then((states) => {
-        const platformTypeLookup = new Map<string, PlatformType>()
+        const deviceTypeTypeLookup = new Map<string, DeviceType>()
         const statusLookup = new Map<string, Status>()
 
-        for (const platformType of platformTypes) {
-          platformTypeLookup.set(platformType.uri, platformType)
+        for (const deviceType of deviceTypes) {
+          deviceTypeTypeLookup.set(deviceType.uri, deviceType)
         }
         for (const status of states) {
           statusLookup.set(status.uri, status)
         }
 
-        this.platformTypeLookup = platformTypeLookup
+        this.deviceTypeLookup = deviceTypeTypeLookup
         this.statusLookup = statusLookup
 
         this.runSelectedSearch()
+      }).catch((_error) => {
+        this.$store.commit('snackbar/setError', 'Loading of states failed')
+      }).catch((_error) => {
+        this.$store.commit('snackbar/setError', 'Loading of device types failed')
       })
     })
     // make sure that all components (especially the dynamically passed ones) are rendered
     this.$nextTick(() => {
       this.$nuxt.$emit('AppBarContent:title', 'Devices')
     })
+
+    window.onscroll = () => {
+      // from https://www.digitalocean.com/community/tutorials/vuejs-implementing-infinite-scroll
+      const isOnBottom = document.documentElement.scrollTop + window.innerHeight === document.documentElement.offsetHeight
+
+      if (isOnBottom && this.canLoadNext()) {
+        this.loadNext()
+      }
+    }
   }
 
   beforeDestroy () {
@@ -228,7 +262,7 @@ export default class SeachDevicesPage extends Vue {
 
   basicSearch () {
     // only uses the text and the type (sensor or platform)
-    this.runSearch(this.searchText, [])
+    this.runSearch(this.searchText, [], [], [])
   }
 
   clearBasicSearch () {
@@ -236,39 +270,99 @@ export default class SeachDevicesPage extends Vue {
   }
 
   extendedSearch () {
-    this.runSearch(this.searchText, this.selectedSearchManufacturers)
+    this.runSearch(
+      this.searchText,
+      this.selectedSearchManufacturers,
+      this.selectedSearchStates,
+      this.selectedSearchDeviceTypes
+    )
   }
 
   clearExtendedSearch () {
     this.clearBasicSearch()
 
     this.selectedSearchManufacturers = []
+    this.selectedSearchStates = []
+    this.selectedSearchDeviceTypes = []
   }
 
-  runSearch (searchText: string | null, manufacturer: Manufacturer[]) {
-    SmsService.findDevices(
-      searchText, manufacturer
-    ).then((findResults) => {
-      this.searchResults = findResults
-    })
+  runSearch (
+    searchText: string | null,
+    manufacturer: Manufacturer[],
+    states: Status[],
+    types: DeviceType[]
+  ) {
+    this.loading = true
+    this.searchResults = []
+    this.$api.devices
+      .newSearchBuilder()
+      .withTextInName(searchText)
+      .withOneMachtingManufacturerOf(manufacturer)
+      .withOneMatchingStatusOf(states)
+      .withOneMatchingDeviceTypeOf(types)
+      .build()
+      .findMatchingAsPaginationLoader(this.pageSize)
+      .then(this.loadUntilWeHaveSomeEntries).catch((_error) => {
+        this.$store.commit('snackbar/setError', 'Loading of devices failed')
+      })
   }
 
-  deleteAndCloseDialog (id: number) {
-    SmsService.deleteDevice(id).then(() => {
-      this.showDeleteDialog = false
+  loadUntilWeHaveSomeEntries (loader: IPaginationLoader<Device>) {
+    this.loader = loader
+    this.loading = false
+    this.searchResults = [...this.searchResults, ...loader.elements]
+
+    if (this.searchResults.length >= this.pageSize || !this.canLoadNext()) {
+      this.loading = false
+    } else if (this.canLoadNext() && loader.funToLoadNext != null) {
+      loader.funToLoadNext().then((nextLoader) => {
+        this.loadUntilWeHaveSomeEntries(nextLoader)
+      }).catch((_error) => {
+        this.$store.commit('snackbar/setError', 'Loading of additional devices failed')
+      })
+    }
+  }
+
+  loadNext () {
+    if (this.loader != null && this.loader.funToLoadNext != null) {
+      this.loader.funToLoadNext().then((nextLoader) => {
+        this.loader = nextLoader
+        this.searchResults = [...this.searchResults, ...nextLoader.elements]
+      }).catch((_error) => {
+        this.$store.commit('snackbar/setError', 'Loading of additional devices failed')
+      })
+    }
+  }
+
+  canLoadNext () {
+    return this.loader != null && this.loader.funToLoadNext != null
+  }
+
+  deleteAndCloseDialog (id: string) {
+    this.$api.devices.deleteById(id).then(() => {
+      this.showDeleteDialog = {}
 
       const searchIndex = this.searchResults.findIndex(r => r.id === id)
       if (searchIndex > -1) {
         this.searchResults.splice(searchIndex, 1)
       }
 
-      this.successMessage = 'Device deleted'
-      this.showSuccessMessage = true
+      this.$store.commit('snackbar/setSuccess', 'Device deleted')
+    }).catch((_error) => {
+      this.showDeleteDialog = {}
+      this.$store.commit('snackbar/setError', 'Device could not be deleted')
     })
   }
 
-  getType (_device: Device) {
-    return 'Device'
+  getType (device: Device) {
+    if (this.deviceTypeLookup.has(device.deviceTypeUri)) {
+      const deviceType: DeviceType = this.deviceTypeLookup.get(device.deviceTypeUri) as DeviceType
+      return deviceType.name
+    }
+    if (device.deviceTypeName) {
+      return device.deviceTypeName
+    }
+    return 'Unknown type'
   }
 
   getProject (_device: Device) {
@@ -285,6 +379,14 @@ export default class SeachDevicesPage extends Vue {
       return device.statusName
     }
     return 'Unknown status'
+  }
+
+  showDeleteDialogFor (id: string) {
+    Vue.set(this.showDeleteDialog, id, true)
+  }
+
+  hideDeleteDialogFor (id: string) {
+    Vue.set(this.showDeleteDialog, id, false)
   }
 }
 

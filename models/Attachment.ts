@@ -1,12 +1,10 @@
-import IPathSetter from './IPathSetter'
-
 export interface IAttachment {
-  id: number | null
+  id: string | null
   url: string
   label: string
 }
 
-export class Attachment implements IAttachment, IPathSetter {
+export class Attachment implements IAttachment {
   static readonly mimeTypes: Object = {
     'image/png': ['png'],
     'images/jpeg': ['jpg', 'jpeg'],
@@ -18,7 +16,7 @@ export class Attachment implements IAttachment, IPathSetter {
     'application/vnd.oasis.opendocument.text': ['odt']
   }
 
-  private _id: number | null = null
+  private _id: string | null = null
   private _url: string = ''
   private _label: string = ''
   // @TODO: add an _uploadedAt field
@@ -38,35 +36,11 @@ export class Attachment implements IAttachment, IPathSetter {
     return attachment
   }
 
-  /**
-   * sets the path of the instance to value
-   *
-   * @param {string} path - the path to the property to be changed
-   * @param {any} value - the value to set the property to
-   */
-  setPath (path: string, value: any): void {
-    const properties = path.split('.')
-    const property = properties.splice(0, 1)[0]
-    switch (property) {
-      case 'id':
-        this.id = parseInt(value)
-        break
-      case 'url':
-        this.url = String(value)
-        break
-      case 'label':
-        this.label = String(value)
-        break
-      default:
-        throw new TypeError('path ' + path + ' is not valid')
-    }
-  }
-
-  get id (): number | null {
+  get id (): string | null {
     return this._id
   }
 
-  set id (id: number | null) {
+  set id (id: string | null) {
     this._id = id
   }
 
