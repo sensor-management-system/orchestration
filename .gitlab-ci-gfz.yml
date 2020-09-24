@@ -65,7 +65,7 @@ deploy-gfz-image:
     name: gfzstaging
     url: https://$STAGING_HOST
   variables:
-    HTTP_ORIGINS: ${STAGING_HTTP_ORIGINS}
+    HTTP_ORIGINS: $STAGING_HTTP_ORIGINS
   tags:
     - deploy
     - staging
