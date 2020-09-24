@@ -64,6 +64,8 @@ deploy-gfz-image:
   environment:
     name: gfzstaging
     url: https://$STAGING_HOST
+  variables:
+    HTTP_ORIGINS: ${STAGING_HTTP_ORIGINS}
   tags:
     - deploy
     - staging
@@ -91,8 +93,6 @@ test-availability:
   environment:
     name: gfzstaging
     url: https://$STAGING_HOST
-  variables:
-    HTTP_ORIGINS: ${STAGING_HTTP_ORIGINS}
   tags:
     - deploy
     - staging
