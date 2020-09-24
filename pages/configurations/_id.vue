@@ -27,6 +27,7 @@
                       <template v-slot:activator="{ on, attrs }">
                         <v-text-field
                           :value="startDateStringHelper"
+                          :rules="[rules.startDate]"
                           v-bind="attrs"
                           label="Start date"
                           clearable
@@ -40,7 +41,6 @@
                         :value="startDateStringHelper"
                         first-day-of-week="1"
                         :show-week="true"
-                        :max="endDateStringHelper"
                         @input="startDateStringHelper = $event; startDateMenu = false"
                       />
                     </v-menu>
@@ -66,6 +66,7 @@
                       <template v-slot:activator="{ on, attrs }">
                         <v-text-field
                           :value="endDateStringHelper"
+                          :rules="[rules.endDate]"
                           v-bind="attrs"
                           label="End date"
                           clearable
@@ -79,7 +80,6 @@
                         :value="endDateStringHelper"
                         first-day-of-week="1"
                         :show-week="true"
-                        :min="startDateStringHelper"
                         @input="endDateStringHelper = $event; endDateMenu = false"
                       />
                     </v-menu>
@@ -343,6 +343,11 @@ export default class ConfigurationsIdPage extends Vue {
   private selectedNode: ConfigurationsTreeNode | null = null
 
   private tree: ConfigurationsTree = new ConfigurationsTree()
+
+  private rules: Object = {
+    startDate: (v: string): boolean | string => v === null || !this.configuration.endDate || stringToDate(v) <= this.configuration.endDate || 'Start date must not be after end date',
+    endDate: (v: string): boolean | string => v === null || !this.configuration.startDate || stringToDate(v) >= this.configuration.startDate || 'End date must not be before start date'
+  }
 
   created () {
     this.$nuxt.$emit('app-bar-content', AppBarEditModeContent)
