@@ -26,7 +26,7 @@
                     >
                       <template v-slot:activator="{ on, attrs }">
                         <v-text-field
-                          :value="dateToString(configuration.startDate)"
+                          :value="startDateStringHelper"
                           v-bind="attrs"
                           label="Start date"
                           clearable
@@ -37,16 +37,16 @@
                         />
                       </template>
                       <v-date-picker
-                        :value="dateToString(configuration.startDate)"
+                        :value="startDateStringHelper"
                         first-day-of-week="1"
                         :show-week="true"
-                        :max="dateToString(configuration.endDate)"
-                        @input="configuration.startDate = stringToDate($event); startDateMenu = false"
+                        :max="endDateStringHelper"
+                        @input="startDateStringHelper = $event; startDateMenu = false"
                       />
                     </v-menu>
                     <v-text-field
                       v-else
-                      :value="dateToString(configuration.startDate)"
+                      :value="startDateStringHelper"
                       label="Start date"
                       prepend-icon="mdi-calendar-range"
                       readonly
@@ -65,7 +65,7 @@
                     >
                       <template v-slot:activator="{ on, attrs }">
                         <v-text-field
-                          :value="dateToString(configuration.endDate)"
+                          :value="endDateStringHelper"
                           v-bind="attrs"
                           label="End date"
                           clearable
@@ -76,16 +76,16 @@
                         />
                       </template>
                       <v-date-picker
-                        :value="dateToString(configuration.endDate)"
+                        :value="endDateStringHelper"
                         first-day-of-week="1"
                         :show-week="true"
-                        :min="dateToString(configuration.startDate)"
-                        @input="configuration.endDate = stringToDate($event); endDateMenu = false"
+                        :min="startDateStringHelper"
+                        @input="endDateStringHelper = $event; endDateMenu = false"
                       />
                     </v-menu>
                     <v-text-field
                       v-else
-                      :value="dateToString(configuration.endDate)"
+                      :value="endDateStringHelper"
                       label="End date"
                       prepend-icon="mdi-calendar-range"
                       readonly
@@ -652,12 +652,20 @@ export default class ConfigurationsIdPage extends Vue {
     this.selectedNode = node
   }
 
-  dateToString (aDate: Date | null): string {
-    return dateToString(aDate)
+  get startDateStringHelper (): string {
+    return dateToString(this.configuration.startDate)
   }
 
-  stringToDate (aDate: string): Date {
-    return stringToDate(aDate)
+  set startDateStringHelper (aDate: string) {
+    this.configuration.startDate = stringToDate(aDate)
+  }
+
+  get endDateStringHelper (): string {
+    return dateToString(this.configuration.endDate)
+  }
+
+  set endDateStringHelper (aDate: string) {
+    this.configuration.endDate = stringToDate(aDate)
   }
 }
 </script>

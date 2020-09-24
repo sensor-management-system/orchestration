@@ -54,17 +54,19 @@
         >
           <template v-slot:activator="{ on, attrs }">
             <v-text-field
-              :value="dateToString(value.calibrationDate)"
+              :value="calibrationDateStringHelper"
               label="Calibration date"
               prepend-icon="mdi-calendar-range"
               readonly
+              clearable
               :disabled="readonly"
               v-bind="attrs"
               v-on="on"
+              @click:clear="value.calibrationDate = null"
             />
           </template>
           <v-date-picker
-            :value="dateToString(value.calibrationDate)"
+            :value="calibrationDateStringHelper"
             :readonly="readonly"
             :disabled="readonly"
             @input="update('calibrationDate', $event); calibrationDateMenu = false"
@@ -168,8 +170,8 @@ export default class DeviceConfigurationAttributesForm extends Vue {
     this.$emit('input', newObj)
   }
 
-  dateToString (aDate: Date | null): string {
-    return dateToString(aDate)
+  get calibrationDateStringHelper (): string {
+    return dateToString(this.value.calibrationDate)
   }
 }
 </script>
