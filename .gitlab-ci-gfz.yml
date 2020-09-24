@@ -1,9 +1,6 @@
 stages:
   - build-gfz-image
   - deploy-gfz-image
-  - after-deployment-gfz-create-database
-  - after-deployment-gfz-create-tables
-  - after-deployment-gfz-init-tables
   - after-deployment-test-gfz
 
 variables:
@@ -78,48 +75,13 @@ deploy-gfz-image:
   script:
     - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml pull
     - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml up -d
+    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T db psql -U postgres -c 'CREATE DATABASE db_prod' || echo "prod database already exists"
+    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T db psql -U postgres -c 'CREATE DATABASE db_dev' || echo "dev database already exists"
+    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T db psql -U postgres -c 'CREATE DATABASE db_test;' || echo "test database already exists"
+    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T ssmbackend python3 manage.py db upgrade
   when: manual
   dependencies:
     - build-gfz-image
-  allow_failure: true
-
-
-after-deploy-gfz-image-create-dbs:
-  stage: after-deployment-gfz-create-database
-  environment:
-    name: gfzstaging
-    url: https://$STAGING_HOST
-  tags:
-    - deploy
-    - staging
-    - id2
-  variables:
-    COMPOSE_PROJECT_NAME: ssmbackend
-  script:
-      - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T db psql -U postgres -c 'CREATE DATABASE db_prod' || echo "prod database already exists"
-      - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T db psql -U postgres -c 'CREATE DATABASE db_dev' || echo "dev database already exists"
-      - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T db psql -U postgres -c 'CREATE DATABASE db_test;' || echo "test database already exists"
-  when: manual
-  dependencies:
-    - deploy-gfz-image
-  allow_failure: true
-
-after-deploy-gfz-image-migrate-tables:
-  stage: after-deployment-gfz-create-tables
-  environment:
-    name: gfzstaging
-    url: https://$STAGING_HOST
-  tags:
-    - deploy
-    - staging
-    - id2
-  variables:
-    COMPOSE_PROJECT_NAME: ssmbackend
-  script:
-      - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T ssmbackend python3 manage.py db upgrade
-  when: manual
-  dependencies:
-    - after-deploy-gfz-image-create-dbs
   allow_failure: true
 
 
@@ -129,6 +91,8 @@ test-availability:
   environment:
     name: gfzstaging
     url: https://$STAGING_HOST
+  variables:
+    HTTP_ORIGINS: ${STAGING_HTTP_ORIGINS}
   tags:
     - deploy
     - staging
@@ -137,5 +101,5 @@ test-availability:
     - curl -f http://$STAGING_HOST:5000/rdm/svm-api/v1/ping
   when: manual
   dependencies:
-    - after-deploy-gfz-image-migrate-tables
+    - deploy-gfz-image
   allow_failure: true
