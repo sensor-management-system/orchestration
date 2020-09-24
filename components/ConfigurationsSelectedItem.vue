@@ -5,19 +5,15 @@
   >
     <v-breadcrumbs :items="breadcrumbs" divider=">" />
     <v-card-text>
-      <v-row>
-        <v-col cols="12" md="9">
-          <template v-if="description">
-            {{ description }}
-          </template>
-          <template v-else-if="value.isPlatform()">
-            The selected platform has no description.
-          </template>
-          <template v-else-if="value.isDevice()">
-            The selected device has no description.
-          </template>
-        </v-col>
-      </v-row>
+      <template v-if="description">
+        {{ description }}
+      </template>
+      <template v-else-if="value.isPlatform()">
+        <span class="text--disabled">The selected platform has no description.</span>
+      </template>
+      <template v-else-if="value.isDevice()">
+        <span class="text--disabled">The selected device has no description.</span>
+      </template>
     </v-card-text>
     <v-card-actions
       v-if="!readonly"
