@@ -128,7 +128,7 @@ export default class AttachmentListItem extends Vue {
         newObj.label = value
         break
       default:
-        throw new TypeError('path ' + key + ' is not valid')
+        throw new TypeError('key ' + key + ' is not valid')
     }
 
     /**

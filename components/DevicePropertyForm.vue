@@ -251,7 +251,7 @@ export default class DevicePropertyForm extends Vue {
         newObj.failureValue = parseFloatOrDefault(value)
         break
       default:
-        throw new TypeError('path ' + key + ' is not valid')
+        throw new TypeError('key ' + key + ' is not valid')
     }
 
     /**
