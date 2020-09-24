@@ -116,7 +116,7 @@ import Property from '@/models/Property'
 import SamplingMedia from '@/models/SamplingMedia'
 import Unit from '@/models/Unit'
 import { DeviceProperty } from '@/models/DeviceProperty'
-import { parseFloatOrDefault } from '@/utils/numericsHelper'
+import { parseFloatOrNull } from '@/utils/numericsHelper'
 
 interface INameAndUri {
   name: string
@@ -239,16 +239,16 @@ export default class DevicePropertyForm extends Vue {
         newObj.propertyUri = getUriValue('propertyName', value)
         break
       case 'measuringRange.min':
-        newObj.measuringRange.min = parseFloatOrDefault(value)
+        newObj.measuringRange.min = parseFloatOrNull(value)
         break
       case 'measuringRange.max':
-        newObj.measuringRange.max = parseFloatOrDefault(value)
+        newObj.measuringRange.max = parseFloatOrNull(value)
         break
       case 'accuracy':
-        newObj.accuracy = parseFloatOrDefault(value)
+        newObj.accuracy = parseFloatOrNull(value)
         break
       case 'failureValue':
-        newObj.failureValue = parseFloatOrDefault(value)
+        newObj.failureValue = parseFloatOrNull(value)
         break
       default:
         throw new TypeError('key ' + key + ' is not valid')
