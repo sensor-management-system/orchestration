@@ -73,7 +73,6 @@ deploy-gfz-image:
     HTTP_ORIGINS: ${STAGING_HTTP_ORIGINS}
   before_script:
     - *docker_login_gitlab_registry
-    - echo $HTTP_ORIGINS
   script:
     - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml pull
     - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml up -d
