@@ -20,7 +20,12 @@ def create_app():
     app = Flask(__name__)
 
     # enable CORS
-    CORS(app)
+    # get space separated list from environment var
+    origins_raw = os.getenv("HTTP_ORIGINS")
+    # create a list of origins
+    origins = origins_raw.split()
+    # initialize cors with list of allowed origins
+    CORS(app, origins=origins)
 
     # set config
     app_settings = os.getenv("APP_SETTINGS")
@@ -40,15 +45,6 @@ def create_app():
     # test to ensure the proper config was loaded
     # import sys
     # print(app.config, file=sys.stderr)
-    @app.after_request
-    def add_header(response):
-        #response.headers['Access-Control-Allow-Origin'] = 'https://git.ufz.de'
-        response.headers['Access-Control-Allow-Methods'] = 'GET,POST,PATCH,DELETE,OPTIONS,PUT,HEAD'
-        response.headers['Access-Control-Allow-Origin'] = '*'
-        response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
-
-        return response
-
 
     app.register_blueprint(auth_blueprint)
 
