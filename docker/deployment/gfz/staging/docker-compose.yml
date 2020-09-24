@@ -15,7 +15,7 @@ services:
       - APP_SETTINGS=project.config.DevelopmentConfig
       - DATABASE_URL=postgres://postgres:postgres123456666666666666@db:5432/db_dev
       - DATABASE_TEST_URL=postgres://postgres:postgres123456666666666666@db:5432/db_test
-      - HTTP_ORIGINS='*'
+      - HTTP_ORIGINS=*
     ports:
       - 5000:5000
 
