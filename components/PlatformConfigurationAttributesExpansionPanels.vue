@@ -9,7 +9,7 @@
       Platforms
       <v-spacer />
       <v-btn
-        v-if="!platformPanelsHidden"
+        v-if="!allPlatformPanelsHidden"
         text
         small
         @click="hideAllPanels"
@@ -17,7 +17,7 @@
         hide all
       </v-btn>
       <v-btn
-        v-if="platformPanelsHidden"
+        v-if="allPlatformPanelsHidden"
         text
         small
         @click="expandAllPanels"
@@ -95,8 +95,8 @@ export default class PlatformConfigurationAttributesExpansionPanels extends Vue 
     this.openedPlatformPanels = this.value.map((_, i) => i)
   }
 
-  get platformPanelsHidden (): boolean {
-    return this.value.map((_, i) => i).length > this.openedPlatformPanels.length
+  get allPlatformPanelsHidden (): boolean {
+    return this.openedPlatformPanels.length === 0
   }
 
   /**

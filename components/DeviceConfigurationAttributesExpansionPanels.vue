@@ -9,7 +9,7 @@
       Devices
       <v-spacer />
       <v-btn
-        v-if="!devicePanelsHidden"
+        v-if="!allDevicePanelsHidden"
         text
         small
         @click="hideAllPanels"
@@ -17,7 +17,7 @@
         hide all
       </v-btn>
       <v-btn
-        v-if="devicePanelsHidden"
+        v-if="allDevicePanelsHidden"
         text
         small
         @click="expandAllPanels"
@@ -95,8 +95,8 @@ export default class DeviceConfigurationAttributesExpansionPanels extends Vue {
     this.openedDevicePanels = this.value.map((_, i) => i)
   }
 
-  get devicePanelsHidden (): boolean {
-    return this.value.map((_, i) => i).length > this.openedDevicePanels.length
+  get allDevicePanelsHidden (): boolean {
+    return this.openedDevicePanels.length === 0
   }
 
   /**
