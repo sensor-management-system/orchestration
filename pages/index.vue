@@ -1,12 +1,6 @@
 <template>
   <v-container>
     <v-row>
-      <!-- TODO: Delete Row again-->
-      <h1>TODO: Delete</h1>
-      <p>Login-callback-uri</p>
-      <p>'{{ loginCallbackUri }}'</p>
-    </v-row>
-    <v-row>
       <v-col class="text-center">
         <v-btn
           v-if="isLoggedIn"
@@ -46,7 +40,6 @@
 export default {
   name: 'Home',
   data: () => ({
-    loginCallbackUri: process.env.NUXT_ENV_REDIRECT_URI
   }),
   computed: {
     isLoggedIn () {
