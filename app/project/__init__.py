@@ -21,7 +21,7 @@ def create_app():
 
     # enable CORS
     # get space separated list from environment var
-    origins_raw = os.getenv("HTTP_ORIGINS")
+    origins_raw = os.getenv("HTTP_ORIGINS", "")
     # create a list of origins
     origins = origins_raw.split()
     # initialize cors with list of allowed origins
