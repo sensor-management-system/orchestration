@@ -50,7 +50,10 @@ class ConfigurationSchema(Schema):
         attribute="contacts",
         self_view_kwargs={"id": "<id>"},
         related_view="contact_list",
-        related_view_kwargs={"configuration_id": "<id>"},
+        related_view_kwargs={
+          'filter=[{"name":"configurations","op":"any","val": {"name": "id","op": "eq","val": "1"}':
+            "<id>"
+        },
         many=True,
         schema="ContactSchema",
         type_="contact",
@@ -61,22 +64,18 @@ class ConfigurationSchema(Schema):
         attribute="configuration_platforms",
         self_view_kwargs={"id": "<id>"},
         related_view="configuration_platform_list",
-        related_view_kwargs={"configuration_id": "<id>"},
+        related_view_kwargs={"filter[configuration_id]": "<id>"},
         many=True,
         schema="ConfigurationPlatformSchema",
         type_="configuration_platform",
         id_field="id",
     )
 
-    # configuration_devices = fields.Nested(
-    #     "ConfigurationDeviceSchema", many=True, allow_none=True
-    # )
-
     configuration_devices = Relationship(
         attribute="configuration_devices",
         self_view_kwargs={"id": "<id>"},
         related_view="configuration_device_list",
-        related_view_kwargs={"configuration_id": "<id>"},
+        related_view_kwargs={"filter[configuration_id]": "<id>"},
         many=True,
         schema="ConfigurationDeviceSchema",
         type_="configuration_device",
