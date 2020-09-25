@@ -20,6 +20,10 @@ dummmy:
           echo mitte
           echo ende
         fi
+  tags:
+    - ssm
+    - id2
+    - docker
 
 check-lint:
   stage: check
