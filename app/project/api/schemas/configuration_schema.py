@@ -50,10 +50,10 @@ class ConfigurationSchema(Schema):
         attribute="contacts",
         self_view_kwargs={"id": "<id>"},
         related_view="contact_list",
-        related_view_kwargs={
-          'filter=[{"name":"configurations","op":"any","val": {"name": "id","op": "eq","val": "1"}':
-            "<id>"
-        },
+        related_view_kwargs={"filter": '[{"name":"configurations","op":"any","val":'
+                                       '{"name": "id","op": "eq","val": <id>}'
+                                       '}]'
+                             },
         many=True,
         schema="ContactSchema",
         type_="contact",
