@@ -36,7 +36,7 @@ describe('stringToDate', () => {
 
 describe('stringToDate and dateToString', () => {
   const they = it
-  they('should should work together', () => {
+  they('should work together', () => {
     const inputValue = '2020-09-25'
     const asDate = stringToDate(inputValue)
     const asStr = dateToString(asDate)
