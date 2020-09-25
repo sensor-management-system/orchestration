@@ -16,9 +16,9 @@ ENV NUXT_ENV_AUTHORITY $AUTHORITY_ARG
 
 # The redirect uris (those must be different per host on that the frontend runs)
 ARG HOST_ARG
-ENV NUXT_ENV_REDIRECT_URI http://${HOST}/login-callback
-ENV NUXT_ENV_POST_LOGOUT_REDIRECT_URI http://${HOST}/logout-callback
-ENV NUXT_ENV_SILENT_REDIRECT_URI http://${HOST}/silent-callback
+ENV NUXT_ENV_REDIRECT_URI http://${HOST_ARG}/login-callback
+ENV NUXT_ENV_POST_LOGOUT_REDIRECT_URI http://${HOST_ARG}/logout-callback
+ENV NUXT_ENV_SILENT_REDIRECT_URI http://${HOST_ARG}/silent-callback
 
 # And those remaining settings
 ENV NUXT_ENV_RESPONSE_TYPE id_token
