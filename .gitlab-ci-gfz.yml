@@ -63,23 +63,26 @@ build-deploy-image:
   script:
     - >
       if [ -z "$CI_COMMIT_TAG" ]; then
-        docker build --pull -t "$CI_REGISTRY_IMAGE:latest" --tag "$CI_REGISTRY_IMAGE:latest" -f docker/deployment/gfz/Dockerfile \
-            --build-arg SMS_BACKEND_URL_ARG=$SMS_BACKEND_URL \
-            --build-arg CV_BACKEND_URL_ARG=$CV_BACKEND_URL \
-            --build-arg HOST_ARG=$HOST \
-            --build-arg CLIENT_ID_ARG=$CLIENT_ID \
-            --build-arg AUTHORITY_ARG=$AUTHORITY \
+        docker build --pull -t "$CI_REGISTRY_IMAGE:latest" --tag "$CI_REGISTRY_IMAGE:latest" -f docker/deployment/gfz/Dockerfile
+            --build-arg SMS_BACKEND_URL_ARG=$SMS_BACKEND_URL
+            --build-arg CV_BACKEND_URL_ARG=$CV_BACKEND_URL
+            --build-arg HOST_ARG=$HOST
+            --build-arg CLIENT_ID_ARG=$CLIENT_ID
+            --build-arg AUTHORITY_ARG=$AUTHORITY
             .
+
         docker push "$CI_REGISTRY_IMAGE:latest"
       else
-        docker build --pull -t "$CI_REGISTRY_IMAGE:latest" --tag "$CI_REGISTRY_IMAGE:$CI_COMMIT_TAG" --tag "$CI_REGISTRY_IMAGE:latest" -f docker/deployment/gfz/Dockerfile \
-            --build-arg SMS_BACKEND_URL_ARG=$SMS_BACKEND_URL \
-            --build-arg CV_BACKEND_URL_ARG=$CV_BACKEND_URL \
-            --build-arg HOST_ARG=$HOST \
-            --build-arg CLIENT_ID_ARG=$CLIENT_ID \
-            --build-arg AUTHORITY_ARG=$AUTHORITY \
+        docker build --pull -t "$CI_REGISTRY_IMAGE:latest" --tag "$CI_REGISTRY_IMAGE:$CI_COMMIT_TAG" --tag "$CI_REGISTRY_IMAGE:latest" -f docker/deployment/gfz/Dockerfile
+            --build-arg SMS_BACKEND_URL_ARG=$SMS_BACKEND_URL
+            --build-arg CV_BACKEND_URL_ARG=$CV_BACKEND_URL
+            --build-arg HOST_ARG=$HOST
+            --build-arg CLIENT_ID_ARG=$CLIENT_ID
+            --build-arg AUTHORITY_ARG=$AUTHORITY
             .
+
         docker push "$CI_REGISTRY_IMAGE:latest"
+
         docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_TAG"
       fi
   cache:
@@ -110,15 +113,16 @@ build-deploy-image-manual:
     - echo $SMS_BACKEND_URL
     - echo $CV_BACKEND_URL
   script:
-    - |
+    - >
         if [ 100 -g 10 ]; then
-          docker build --tag "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA" -f docker/deployment/gfz/Dockerfile \
-            --build-arg SMS_BACKEND_URL_ARG=$SMS_BACKEND_URL \
-            --build-arg CV_BACKEND_URL_ARG=$CV_BACKEND_URL \
-            --build-arg HOST_ARG=$HOST \
-            --build-arg CLIENT_ID_ARG=$CLIENT_ID \
-            --build-arg AUTHORITY_ARG=$AUTHORITY \
+          docker build --tag "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA" -f docker/deployment/gfz/Dockerfile
+            --build-arg SMS_BACKEND_URL_ARG=$SMS_BACKEND_URL
+            --build-arg CV_BACKEND_URL_ARG=$CV_BACKEND_URL
+            --build-arg HOST_ARG=$HOST
+            --build-arg CLIENT_ID_ARG=$CLIENT_ID
+            --build-arg AUTHORITY_ARG=$AUTHORITY
             .
+
           docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA"
         fi
   cache:
