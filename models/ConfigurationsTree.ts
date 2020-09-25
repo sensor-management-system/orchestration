@@ -73,7 +73,7 @@ export class ConfigurationsTree implements Iterable<ConfigurationsTreeNode> {
   static createFromObject (someObject: ConfigurationsTree): ConfigurationsTree {
     return ConfigurationsTree.fromArray(
       someObject.toArray().map((e) => {
-        if (e instanceof PlatformNode) {
+        if (e.isPlatform()) {
           return PlatformNode.createFromObject(e as PlatformNode)
         }
         return DeviceNode.createFromObject(e as DeviceNode)
@@ -144,15 +144,15 @@ export class ConfigurationsTree implements Iterable<ConfigurationsTreeNode> {
   remove (node: ConfigurationsTreeNode): boolean {
     const removeRecursive = (node: ConfigurationsTreeNode, nodes: ConfigurationsTree): boolean => {
       for (let i: number = 0; i < nodes.length; i++) {
-        const aNode: ConfigurationsTreeNode = nodes.at(i)
-        if (aNode === node) {
+        const iteratedNode: ConfigurationsTreeNode = nodes.at(i)
+        if (iteratedNode === node) {
           nodes.removeAt(i)
           return true
         }
-        if (!aNode.canHaveChildren()) {
+        if (!iteratedNode.canHaveChildren()) {
           continue
         }
-        const removed = removeRecursive(node, (aNode as PlatformNode).getTree())
+        const removed = removeRecursive(node, (iteratedNode as PlatformNode).getTree())
         if (!removed) {
           continue
         }
@@ -166,21 +166,21 @@ export class ConfigurationsTree implements Iterable<ConfigurationsTreeNode> {
   /**
    * returns the path to the node in the tree
    *
-   * @param {string} nodeId - the node to get the path for
+   * @param {ConfigurationsTreeNode} node - the node to get the path for
    * @return {string[]} an array of node names
    */
-  getPath (nodeId: string): string[] {
-    const getPathRecursive = (nodeId: string, nodes: ConfigurationsTree, path: string[]): boolean => {
-      for (const node of nodes) {
-        if (node.id === nodeId) {
-          path.push(node.name)
+  getPath (node: ConfigurationsTreeNode): string[] {
+    const getPathRecursive = (node: ConfigurationsTreeNode, nodes: ConfigurationsTree, path: string[]): boolean => {
+      for (const iteratedNode of nodes) {
+        if (iteratedNode === node) {
+          path.push(iteratedNode.name)
           return true
         }
-        if (!node.canHaveChildren()) {
+        if (!iteratedNode.canHaveChildren()) {
           continue
         }
-        if (getPathRecursive(nodeId, (node as PlatformNode).getTree(), path)) {
-          path.unshift(node.name)
+        if (getPathRecursive(node, (iteratedNode as PlatformNode).getTree(), path)) {
+          path.unshift(iteratedNode.name)
           return true
         }
       }
@@ -188,14 +188,14 @@ export class ConfigurationsTree implements Iterable<ConfigurationsTreeNode> {
     }
 
     const paths: string[] = []
-    getPathRecursive(nodeId, this, paths)
+    getPathRecursive(node, this, paths)
     return paths
   }
 
   /**
    * finds a node in the tree by its id
    *
-   * @param {number} nodeId - the id of the node to search
+   * @param {string} nodeId - the id of the node to search
    * @return {ConfigurationsTreeNode|null} the found node, null if it was not found
    */
   getById (nodeId: string): ConfigurationsTreeNode | null {
@@ -219,6 +219,58 @@ export class ConfigurationsTree implements Iterable<ConfigurationsTreeNode> {
   }
 
   /**
+   * finds a platform node in the tree by its id
+   *
+   * @param {string} nodeId - the id of the node to search
+   * @return {PlatformNode|null} the found node, null if it was not found
+   */
+  getPlatformById (platformId: string): PlatformNode | null {
+    const getByIdRecursive = (platformId: string, nodes: ConfigurationsTree): PlatformNode | null => {
+      for (const iteratedNode of nodes) {
+        if (iteratedNode.isPlatform() && iteratedNode.unpack().id === platformId) {
+          return iteratedNode as PlatformNode
+        }
+        if (!iteratedNode.canHaveChildren()) {
+          continue
+        }
+        const found = getByIdRecursive(platformId, (iteratedNode as PlatformNode).getTree())
+        if (!found) {
+          continue
+        }
+        return found
+      }
+      return null
+    }
+    return getByIdRecursive(platformId, this)
+  }
+
+  /**
+   * finds a device node in the tree by its id
+   *
+   * @param {string} nodeId - the id of the node to search
+   * @return {DeviceNode|null} the found node, null if it was not found
+   */
+  getDeviceById (deviceId: string): DeviceNode | null {
+    const getByIdRecursive = (deviceId: string, nodes: ConfigurationsTree): DeviceNode | null => {
+      for (const iteratedNode of nodes) {
+        if (iteratedNode.isDevice() && iteratedNode.unpack().id === deviceId) {
+          return iteratedNode as DeviceNode
+        }
+        if (!iteratedNode.canHaveChildren()) {
+          continue
+        }
+        const found = getByIdRecursive(deviceId, (iteratedNode as PlatformNode).getTree())
+        if (!found) {
+          continue
+        }
+        return found
+      }
+      return null
+    }
+    return getByIdRecursive(deviceId, this)
+  }
+
+  /**
    * returns the parent of a node in the tree
    *
    * @param {ConfigurationsTreeNode} node - the node to get the parent of
@@ -226,14 +278,14 @@ export class ConfigurationsTree implements Iterable<ConfigurationsTreeNode> {
    */
   getParent (node: ConfigurationsTreeNode): ConfigurationsTreeNode | null {
     const getParentRecursive = (node: ConfigurationsTreeNode, parentNode: ConfigurationsTreeNode | null, nodes: ConfigurationsTree): ConfigurationsTreeNode | null => {
-      for (const aNode of nodes) {
-        if (node === aNode) {
+      for (const iteratedNode of nodes) {
+        if (node === iteratedNode) {
           return parentNode
         }
-        if (!aNode.canHaveChildren()) {
+        if (!iteratedNode.canHaveChildren()) {
           continue
         }
-        const found = getParentRecursive(node, aNode, (aNode as PlatformNode).getTree())
+        const found = getParentRecursive(node, iteratedNode, (iteratedNode as PlatformNode).getTree())
         if (!found) {
           continue
         }

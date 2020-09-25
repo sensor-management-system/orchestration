@@ -15,12 +15,17 @@ export class PlatformNode implements IConfigurationsTreeNode<Platform> {
   private node: Platform
   private tree: ConfigurationsTree = new ConfigurationsTree()
 
+  static readonly ID_PREFIX = 'PlatformNode-'
+
   constructor (node: Platform) {
     this.node = node
   }
 
   get id (): string | null {
-    return this.node.id
+    if (!this.node.id) {
+      return null
+    }
+    return PlatformNode.ID_PREFIX + this.node.id
   }
 
   get name (): string {
@@ -33,6 +38,14 @@ export class PlatformNode implements IConfigurationsTreeNode<Platform> {
 
   canHaveChildren (): boolean {
     return true
+  }
+
+  isPlatform (): boolean {
+    return true
+  }
+
+  isDevice (): boolean {
+    return false
   }
 
   unpack (): Platform {
