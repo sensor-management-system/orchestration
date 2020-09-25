@@ -14,7 +14,7 @@ dummmy:
   stage: dummy
   script:
     - |
-     if [ 100 -g 10 ]; then
+     if [ 100 -gt 10 ]; then
           echo a b \
             c d
           echo mitte
