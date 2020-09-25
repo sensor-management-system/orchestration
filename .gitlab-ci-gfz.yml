@@ -110,7 +110,7 @@ build-deploy-image-manual:
     - echo $SMS_BACKEND_URL
     - echo $CV_BACKEND_URL
   script:
-    -|
+    - |
         if [ 100 -g 10 ]; then
           docker build --tag "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA" -f docker/deployment/gfz/Dockerfile \
             --build-arg SMS_BACKEND_URL_ARG=$SMS_BACKEND_URL \
