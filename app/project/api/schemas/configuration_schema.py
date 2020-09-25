@@ -25,24 +25,60 @@ class ConfigurationSchema(Schema):
     project_uri = fields.String()
     project_name = fields.String()
 
-    longitude_src_device_property = fields.Nested(
-        DevicePropertySchema, allow_none=True
-    )
-    latitude_src_device_property = fields.Nested(
-        DevicePropertySchema, allow_none=True
-    )
-    elevation_src_device_property = fields.Nested(
-        DevicePropertySchema, allow_none=True
+    longitude_src_device_property = Relationship(
+        self_view_kwargs={"id": "<id>"},
+        related_view="device_property_detail",
+        related_view_kwargs={"id": "<longitude_src_device_property_id>"},
+        type_="device_property",
     )
 
-    contacts = fields.Nested(
-        ContactSchema, many=True, allow_none=True,
+    latitude_src_device_property = Relationship(
+        self_view_kwargs={"id": "<id>"},
+        related_view="device_property_detail",
+        related_view_kwargs={"id": "<latitude_src_device_property_id>"},
+        type_="device_property",
     )
 
-    configuration_platforms = fields.Nested(
-        "ConfigurationPlatformSchema", many=True, allow_none=True
+    elevation_src_device_property = Relationship(
+        self_view_kwargs={"id": "<id>"},
+        related_view="device_property_detail",
+        related_view_kwargs={"id": "<elevation_src_device_property_id>"},
+        type_="device_property",
     )
 
-    configuration_devices = fields.Nested(
-        "ConfigurationDeviceSchema", many=True, allow_none=True
+    contacts = Relationship(
+        attribute="contacts",
+        self_view_kwargs={"id": "<id>"},
+        related_view="contact_list",
+        related_view_kwargs={"configuration_id": "<id>"},
+        many=True,
+        schema="ContactSchema",
+        type_="contact",
+        id_field="id",
+    )
+
+    configuration_platforms = Relationship(
+        attribute="configuration_platforms",
+        self_view_kwargs={"id": "<id>"},
+        related_view="configuration_platform_list",
+        related_view_kwargs={"configuration_id": "<id>"},
+        many=True,
+        schema="ConfigurationPlatformSchema",
+        type_="configuration_platform",
+        id_field="id",
+    )
+
+    # configuration_devices = fields.Nested(
+    #     "ConfigurationDeviceSchema", many=True, allow_none=True
+    # )
+
+    configuration_devices = Relationship(
+        attribute="configuration_devices",
+        self_view_kwargs={"id": "<id>"},
+        related_view="configuration_device_list",
+        related_view_kwargs={"configuration_id": "<id>"},
+        many=True,
+        schema="ConfigurationDeviceSchema",
+        type_="configuration_device",
+        id_field="id",
     )

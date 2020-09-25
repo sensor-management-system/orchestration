@@ -1,4 +1,5 @@
 from project.api.models.base_model import db
+from project.api.models.device import Device
 
 
 class DeviceProperty(db.Model):
@@ -20,5 +21,7 @@ class DeviceProperty(db.Model):
     # vermutlich CV, z.B. Atmosphere, Pedosphere
     sampling_media_uri = db.Column(db.String(256), nullable=True)
     sampling_media_name = db.Column(db.String(256), nullable=True)
-    device_id = db.Column(db.Integer, db.ForeignKey('device.id'),
-                          nullable=False)
+    device_id = db.Column(db.Integer, db.ForeignKey('device.id'), nullable=False)
+    device = db.relationship(
+        Device, uselist=False, foreign_keys=[device_id]
+    )

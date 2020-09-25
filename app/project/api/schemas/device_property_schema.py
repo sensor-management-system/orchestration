@@ -1,8 +1,8 @@
-from marshmallow import Schema as MarshmallowSchema
 from marshmallow_jsonapi import fields
+from marshmallow_jsonapi.flask import Schema, Relationship
 
 
-class DevicePropertySchema(MarshmallowSchema):
+class DevicePropertySchema(Schema):
     """
     This class create a schema for a property.
     Every attribute in the schema going to expose through the api.
@@ -12,19 +12,15 @@ class DevicePropertySchema(MarshmallowSchema):
     """
 
     class Meta:
-        type_ = "property"
+        type_ = "device_property"
+        self_view = "device_property_detail"
+        self_view_kwargs = {"id": "<id>"}
 
-    id = fields.Integer(as_string=True, dump_only=True)
-    measuring_range_min = fields.Float(
-        as_string=True, allow_none=True
-    )
-    measuring_range_max = fields.Float(
-        as_string=True, allow_none=True
-    )
-    failure_value = fields.Float(
-        as_string=True, allow_none=True
-    )
-    accuracy = fields.Float(as_string=True, allow_none=True)
+    id = fields.Integer(dump_only=True)
+    measuring_range_min = fields.Float(allow_none=True)
+    measuring_range_max = fields.Float(allow_none=True)
+    failure_value = fields.Float(allow_none=True)
+    accuracy = fields.Float(allow_none=True)
     label = fields.Str(allow_none=True)
     unit_uri = fields.Str(allow_none=True)
     unit_name = fields.Str(allow_none=True)
@@ -34,3 +30,10 @@ class DevicePropertySchema(MarshmallowSchema):
     property_name = fields.Str(allow_none=True)
     sampling_media_uri = fields.Str(allow_none=True)
     sampling_media_name = fields.Str(allow_none=True)
+
+    device = Relationship(
+        self_view_kwargs={"id": "<id>"},
+        related_view="device_detail",
+        related_view_kwargs={"id": "<device_id>"},
+        type_="device",
+    )
