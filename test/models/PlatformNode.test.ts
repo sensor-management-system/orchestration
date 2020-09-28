@@ -8,7 +8,7 @@ describe('PlatformNode', () => {
 
     const node = new PlatformNode(platform)
     expect(Object.is(node.unpack(), platform)).toBeTruthy()
-    expect(node).toHaveProperty('id', '1')
+    expect(node).toHaveProperty('id', PlatformNode.ID_PREFIX + platform.id)
   })
 
   it('should create a PlatformNode from another one', () => {

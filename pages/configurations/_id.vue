@@ -15,62 +15,82 @@
               <v-card-text>
                 <v-row>
                   <v-col cols="12" md="3">
-                    <v-dialog
-                      ref="startDateDialog"
-                      v-model="startDateModal"
-                      :return-value.sync="startDate"
-                      persistent
-                      width="290px"
+                    <v-menu
+                      v-if="!readonly"
+                      v-model="startDateMenu"
+                      :close-on-content-click="false"
+                      :nudge-right="40"
+                      transition="scale-transition"
+                      offset-y
+                      min-width="290px"
                     >
                       <template v-slot:activator="{ on, attrs }">
                         <v-text-field
-                          v-model="startDate"
+                          :value="startDateStringHelper"
+                          :rules="[rules.startDate]"
+                          v-bind="attrs"
                           label="Start date"
+                          clearable
                           prepend-icon="mdi-calendar-range"
                           readonly
-                          v-bind="attrs"
                           v-on="on"
+                          @click:clear="configuration.startDate = null"
                         />
                       </template>
-                      <v-date-picker v-model="startDate" scrollable>
-                        <v-spacer />
-                        <v-btn text color="primary" @click="startDateModal = false">
-                          Cancel
-                        </v-btn>
-                        <v-btn text color="primary" @click="$refs.startDateDialog.save(startDate)">
-                          OK
-                        </v-btn>
-                      </v-date-picker>
-                    </v-dialog>
+                      <v-date-picker
+                        :value="startDateStringHelper"
+                        first-day-of-week="1"
+                        :show-week="true"
+                        @input="startDateStringHelper = $event; startDateMenu = false"
+                      />
+                    </v-menu>
+                    <v-text-field
+                      v-else
+                      :value="startDateStringHelper"
+                      label="Start date"
+                      prepend-icon="mdi-calendar-range"
+                      readonly
+                      disabled
+                    />
                   </v-col>
                   <v-col cols="12" md="3">
-                    <v-dialog
-                      ref="endDateDialog"
-                      v-model="endDateModal"
-                      :return-value.sync="endDate"
-                      persistent
-                      width="290px"
+                    <v-menu
+                      v-if="!readonly"
+                      v-model="endDateMenu"
+                      :close-on-content-click="false"
+                      :nudge-right="40"
+                      transition="scale-transition"
+                      offset-y
+                      min-width="290px"
                     >
                       <template v-slot:activator="{ on, attrs }">
                         <v-text-field
-                          v-model="endDate"
+                          :value="endDateStringHelper"
+                          :rules="[rules.endDate]"
+                          v-bind="attrs"
                           label="End date"
+                          clearable
                           prepend-icon="mdi-calendar-range"
                           readonly
-                          v-bind="attrs"
                           v-on="on"
+                          @click:clear="configuration.endDate = null"
                         />
                       </template>
-                      <v-date-picker v-model="endDate" scrollable>
-                        <v-spacer />
-                        <v-btn text color="primary" @click="endDateModal = false">
-                          Cancel
-                        </v-btn>
-                        <v-btn text color="primary" @click="$refs.endDateDialog.save(endDate)">
-                          OK
-                        </v-btn>
-                      </v-date-picker>
-                    </v-dialog>
+                      <v-date-picker
+                        :value="endDateStringHelper"
+                        first-day-of-week="1"
+                        :show-week="true"
+                        @input="endDateStringHelper = $event; endDateMenu = false"
+                      />
+                    </v-menu>
+                    <v-text-field
+                      v-else
+                      :value="endDateStringHelper"
+                      label="End date"
+                      prepend-icon="mdi-calendar-range"
+                      readonly
+                      disabled
+                    />
                   </v-col>
                 </v-row>
                 <v-row>
@@ -79,6 +99,8 @@
                       v-model="locationType"
                       label="Location type"
                       :items="['Stationary', 'Dynamic']"
+                      :readonly="readonly"
+                      :disabled="readonly"
                     />
                   </v-col>
                 </v-row>
@@ -86,23 +108,29 @@
                   <v-row>
                     <v-col cols="12" md="3">
                       <v-text-field
-                        v-model.number.lazy="latitude"
+                        v-model.number.lazy="configuration.location.latitude"
                         label="Latitude (WGS84)"
                         type="number"
+                        :readonly="readonly"
+                        :disabled="readonly"
                       />
                     </v-col>
                     <v-col cols="12" md="3">
                       <v-text-field
-                        v-model.number.lazy="longitude"
+                        v-model.number.lazy="configuration.location.longitude"
                         label="Longitude (WGS84)"
                         type="number"
+                        :readonly="readonly"
+                        :disabled="readonly"
                       />
                     </v-col>
                     <v-col cols="12" md="3">
                       <v-text-field
-                        v-model.number="elevation"
+                        v-model.number="configuration.location.elevation"
                         label="Elevation (m asl)"
                         type="number"
+                        :readonly="readonly"
+                        :disabled="readonly"
                       />
                     </v-col>
                   </v-row>
@@ -119,6 +147,37 @@
                     </v-col>
                   </v-row>
                 </div>
+                <div v-if="locationType === 'Dynamic'">
+                  <v-row>
+                    <v-col cols="12" md="3">
+                      <DevicePropertyHierarchySelect
+                        v-model="configuration.location.latitude"
+                        :devices="getAllDevices()"
+                        device-select-label="Device that measures latitude"
+                        property-select-label="Property for latitude"
+                        :readonly="readonly"
+                      />
+                    </v-col>
+                    <v-col cols="12" md="3">
+                      <DevicePropertyHierarchySelect
+                        v-model="configuration.location.longitude"
+                        :devices="getAllDevices()"
+                        device-select-label="Device that measures longitude"
+                        property-select-label="Property for longitude"
+                        :readonly="readonly"
+                      />
+                    </v-col>
+                    <v-col cols="12" md="3">
+                      <DevicePropertyHierarchySelect
+                        v-model="configuration.location.elevation"
+                        :devices="getAllDevices()"
+                        device-select-label="Device that measures elevation"
+                        property-select-label="Property for elevation"
+                        :readonly="readonly"
+                      />
+                    </v-col>
+                  </v-row>
+                </div>
               </v-card-text>
             </v-card>
           </v-tab-item>
@@ -131,173 +190,30 @@
               <v-card-text>
                 <v-row>
                   <v-col cols="12" md="6">
-                    <v-treeview
-                      :active.sync="selectedNodeIds"
-                      :items="tree.toArray()"
-                      activatable
-                      hoverable
-                      rounded
-                      open-all
-                    >
-                      <template v-slot:prepend="{ item }">
-                        <v-icon v-if="nodeIsPlatform(item)">
-                          mdi-rocket-outline
-                        </v-icon>
-                        <v-icon v-else>
-                          mdi-network-outline
-                        </v-icon>
-                      </template>
-                    </v-treeview>
+                    <ConfigurationsTreeView
+                      ref="treeView"
+                      v-model="configuration.tree"
+                      :selected="selectedNode"
+                      @select="setSelectedNode"
+                    />
                   </v-col>
                   <v-col cols="6" md="6">
-                    <v-card v-if="selectedPlatform || selectedDevice">
-                      <v-breadcrumbs :items="breadcrumbs" divider=">" />
-                      <v-card-text>
-                        <v-row v-if="selectedPlatform">
-                          <v-col cols="12" md="9">
-                            <template v-if="selectedPlatform.description">
-                              {{ selectedPlatform.description }}
-                            </template>
-                            <template v-else>
-                              The selected platform has no description.
-                            </template>
-                          </v-col>
-                        </v-row>
-                        <v-row v-else-if="selectedDevice">
-                          <v-col cols="12" md="9">
-                            <template v-if="selectedDevice.description">
-                              {{ selectedDevice.description }}
-                            </template>
-                            <template v-else>
-                              The selected device has no description.
-                            </template>
-                          </v-col>
-                        </v-row>
-                      </v-card-text>
-                      <v-card-actions>
-                        <v-btn
-                          v-if="selectedPlatform || selectedDevice"
-                          color="red"
-                          text
-                          @click="removeSelectedNode"
-                        >
-                          remove
-                        </v-btn>
-                      </v-card-actions>
-                    </v-card>
-                    <v-alert
-                      v-else
-                      type="info"
-                      outlined
-                    >
-                      Select a platform on the left side to add devices or platforms to it.<br>
-                      To add a device or platform to the root of this configuration, deselect any previously selected device or platform.
-                    </v-alert>
-                    <template v-if="!selectedDevice">
-                      <v-subheader v-if="selectedPlatform">
-                        Add platforms and devices to the selected platform:
-                      </v-subheader>
-                      <v-subheader v-else>
-                        Add platforms and devices to the configuration:
-                      </v-subheader>
-                      <v-row>
-                        <v-col cols="12" md="3">
-                          <v-select
-                            v-model="searchOptions.searchType"
-                            label="Type"
-                            :items="searchTypes"
-                          />
-                        </v-col>
-                        <v-col cols="12" md="6">
-                          <v-text-field
-                            v-model="searchOptions.text"
-                            label="Name"
-                          />
-                        </v-col>
-                        <v-col cols="12" md="3">
-                          <v-btn
-                            color="primary"
-                            @click="search"
-                          >
-                            search
-                          </v-btn>
-                        </v-col>
-                      </v-row>
-                      <v-row v-if="platforms">
-                        <v-col cols="12">
-                          <v-list two-line>
-                            <v-list-item-group
-                              v-model="platformItem"
-                              color="primary"
-                            >
-                              <template
-                                v-for="(item, index) in platforms"
-                              >
-                                <v-list-item
-                                  :key="item.shortName"
-                                  :disabled="isNodeInTree(item.id) ? true : false"
-                                >
-                                  <v-list-item-content>
-                                    <v-list-item-title v-text="item.shortName" />
-                                    <v-list-item-subtitle class="text--primary" v-text="item.longName" />
-                                    <v-list-item-subtitle>URN (TODO)</v-list-item-subtitle>
-                                  </v-list-item-content>
-                                  <v-list-item-action>
-                                    <v-btn
-                                      :disabled="isNodeInTree(item.id) ? true : false"
-                                      @click="addPlatformNode(item)"
-                                    >
-                                      add
-                                    </v-btn>
-                                  </v-list-item-action>
-                                </v-list-item>
-                                <v-divider
-                                  v-if="index + 1 < platforms.length"
-                                  :key="index"
-                                />
-                              </template>
-                            </v-list-item-group>
-                          </v-list>
-                        </v-col>
-                      </v-row>
-                      <v-row v-if="devices">
-                        <v-col cols="12">
-                          <v-list two-line>
-                            <v-list-item-group
-                              v-model="deviceItem"
-                              color="primary"
-                            >
-                              <template
-                                v-for="(item, index) in devices"
-                              >
-                                <v-list-item
-                                  :key="item.shortName"
-                                  :disabled="isNodeInTree(item.id) ? true : false"
-                                >
-                                  <v-list-item-content>
-                                    <v-list-item-title v-text="item.shortName" />
-                                    <v-list-item-subtitle class="text--primary" v-text="item.longName" />
-                                    <v-list-item-subtitle>URN (TODO)</v-list-item-subtitle>
-                                  </v-list-item-content>
-                                  <v-list-item-action>
-                                    <v-btn
-                                      :disabled="isNodeInTree(item.id) ? true : false"
-                                      @click="addDeviceNode(item)"
-                                    >
-                                      add
-                                    </v-btn>
-                                  </v-list-item-action>
-                                </v-list-item>
-                                <v-divider
-                                  v-if="index + 1 < devices.length"
-                                  :key="index"
-                                />
-                              </template>
-                            </v-list-item-group>
-                          </v-list>
-                        </v-col>
-                      </v-row>
-                    </template>
+                    <InfoBox v-if="!selectedNode && !readonly">
+                      Select a platform on the left side to add devices or platforms to it. To add a device or platform to the root of this configuration, deselect any previously selected device or platform.
+                    </InfoBox>
+                    <ConfigurationsSelectedItem
+                      :value="selectedNode"
+                      :breadcrumbs="hierarchyNodeNames"
+                      :readonly="readonly"
+                      @remove="removeSelectedNode"
+                    />
+                    <ConfigurationsPlatformDeviceSearch
+                      v-if="!readonly && (!selectedNode || selectedNode.isPlatform())"
+                      :is-platform-used-func="isPlatformInTree"
+                      :is-device-used-func="isDeviceInTree"
+                      @add-platform="addPlatformNode"
+                      @add-device="addDeviceNode"
+                    />
                   </v-col>
                 </v-row>
               </v-card-text>
@@ -306,149 +222,14 @@
 
           <!-- Setup -->
           <v-tab-item :eager="true">
-            <v-subheader>
-              Platforms
-              <v-spacer />
-              <v-btn
-                v-if="!platformPanelsHidden"
-                text
-                small
-                @click="platformPanelsHidden = true"
-              >
-                hide all
-              </v-btn>
-              <v-btn
-                v-if="platformPanelsHidden"
-                text
-                small
-                @click="platformPanelsHidden = false"
-              >
-                expand all
-              </v-btn>
-            </v-subheader>
-            <v-expansion-panels
-              :value="openedPlatformPanels"
-              multiple
-            >
-              <v-expansion-panel
-                v-for="(item) in getAllPlatforms()"
-                :key="item.id"
-              >
-                <v-expansion-panel-header>{{ item.shortName }}</v-expansion-panel-header>
-                <v-expansion-panel-content>
-                  <v-row>
-                    <v-col
-                      cols="12"
-                      md="2"
-                    >
-                      <v-text-field
-                        label="offset (x)"
-                      />
-                    </v-col>
-                    <v-col
-                      cols="12"
-                      md="2"
-                    >
-                      <v-text-field
-                        label="offset (y)"
-                      />
-                    </v-col>
-                    <v-col
-                      cols="12"
-                      md="2"
-                    >
-                      <v-text-field
-                        label="offset (z)"
-                      />
-                    </v-col>
-                  </v-row>
-                </v-expansion-panel-content>
-              </v-expansion-panel>
-            </v-expansion-panels>
-            <v-subheader>
-              Devices
-              <v-spacer />
-              <v-btn
-                v-if="!devicePanelsHidden"
-                text
-                small
-                @click="devicePanelsHidden = true"
-              >
-                hide all
-              </v-btn>
-              <v-btn
-                v-if="devicePanelsHidden"
-                text
-                small
-                @click="devicePanelsHidden = false"
-              >
-                expand all
-              </v-btn>
-            </v-subheader>
-            <v-expansion-panels
-              :value="openedDevicePanels"
-              multiple
-            >
-              <v-expansion-panel
-                v-for="(item) in getAllDevices()"
-                :key="item.id"
-              >
-                <v-expansion-panel-header>{{ item.shortName }}</v-expansion-panel-header>
-                <v-expansion-panel-content>
-                  <v-row>
-                    <v-col
-                      cols="12"
-                      md="2"
-                    >
-                      <v-select
-                        label="property"
-                        :items="getPropertyNames(item)"
-                      />
-                    </v-col>
-                    <v-col
-                      cols="12"
-                      md="2"
-                    >
-                      <v-text-field
-                        label="offset (x)"
-                      />
-                    </v-col>
-                    <v-col
-                      cols="12"
-                      md="2"
-                    >
-                      <v-text-field
-                        label="offset (y)"
-                      />
-                    </v-col>
-                    <v-col
-                      cols="12"
-                      md="2"
-                    >
-                      <v-text-field
-                        label="offset (z)"
-                      />
-                    </v-col>
-                    <v-col
-                      cols="12"
-                      md="2"
-                    >
-                      <v-text-field
-                        label="calibration date"
-                      />
-                    </v-col>
-                    <v-col
-                      cols="12"
-                      md="2"
-                    >
-                      <v-btn>
-                        add
-                      </v-btn>
-                    </v-col>
-                  </v-row>
-                </v-expansion-panel-content>
-              </v-expansion-panel>
-            </v-expansion-panels>
+            <PlatformConfigurationAttributesExpansionPanels
+              v-model="configuration.platformAttributes"
+              :readonly="readonly"
+            />
+            <DeviceConfigurationAttributesExpansionPanels
+              v-model="configuration.deviceAttributes"
+              :readonly="readonly"
+            />
           </v-tab-item>
 
           <!-- Contact -->
@@ -459,7 +240,7 @@
               <v-card-text>
                 <v-row>
                   <v-col cols="3">
-                    <ContactSelect v-model="contacts" label="Add a contact" :readonly="false" />
+                    <ContactSelect v-model="contacts" label="Add a contact" :readonly="readonly" />
                   </v-col>
                 </v-row>
               </v-card-text>
@@ -494,24 +275,32 @@ import { Vue, Component, Watch } from 'nuxt-property-decorator'
 import AppBarEditModeContent from '@/components/AppBarEditModeContent.vue'
 import AppBarTabsExtension from '@/components/AppBarTabsExtension.vue'
 import ContactSelect from '@/components/ContactSelect.vue'
+import DevicePropertyHierarchySelect from '@/components/DevicePropertyHierarchySelect.vue'
+import DeviceConfigurationAttributesExpansionPanels from '@/components/DeviceConfigurationAttributesExpansionPanels.vue'
+import PlatformConfigurationAttributesExpansionPanels from '@/components/PlatformConfigurationAttributesExpansionPanels.vue'
+import ConfigurationsPlatformDeviceSearch from '@/components/ConfigurationsPlatformDeviceSearch.vue'
+import ConfigurationsTreeView from '@/components/ConfigurationsTreeView.vue'
+import ConfigurationsSelectedItem from '@/components/ConfigurationsSelectedItem.vue'
+import InfoBox from '@/components/InfoBox.vue'
 
 import Contact from '@/models/Contact'
 import Device from '@/models/Device'
 import Platform from '@/models/Platform'
 
+import { StationaryLocation, DynamicLocation } from '@/models/Location'
+import { Configuration } from '@/models/Configuration'
 import { ConfigurationsTree } from '@/models/ConfigurationsTree'
 import { ConfigurationsTreeNode } from '@/models/ConfigurationsTreeNode'
 import { DeviceNode } from '@/models/DeviceNode'
 import { PlatformNode } from '@/models/PlatformNode'
+import { DeviceConfigurationAttributes } from '@/models/DeviceConfigurationAttributes'
+import { PlatformConfigurationAttributes } from '@/models/PlatformConfigurationAttributes'
 
-enum SearchType {
-  Platform = 'Platform',
-  Device = 'Device'
-}
+import { dateToString, stringToDate } from '@/utils/dateHelper'
 
-interface ISearchOptions {
-  searchType: SearchType
-  text: string
+enum LocationType {
+  Stationary = 'Stationary',
+  Dynamic = 'Dynamic'
 }
 
 @Component
@@ -529,7 +318,14 @@ export class AppBarTabsExtensionExtended extends AppBarTabsExtension {
 
 @Component({
   components: {
-    ContactSelect
+    ContactSelect,
+    DevicePropertyHierarchySelect,
+    DeviceConfigurationAttributesExpansionPanels,
+    PlatformConfigurationAttributesExpansionPanels,
+    ConfigurationsPlatformDeviceSearch,
+    ConfigurationsTreeView,
+    ConfigurationsSelectedItem,
+    InfoBox
   }
 })
 // @ts-ignore
@@ -537,46 +333,21 @@ export default class ConfigurationsIdPage extends Vue {
   private activeTab: number = 0
   private editMode: boolean = false
 
-  private startDateModal: boolean = false
-  private endDateModal: boolean = false
-  private startDate: Date | null = null
-  private endDate: Date | null = null
+  private configuration = new Configuration()
 
-  private locationType: string = ''
-
-  private longitude: number = 0
-  private latitude: number = 0
-  private elevation: number = 0
+  private startDateMenu: boolean = false
+  private endDateMenu: boolean = false
 
   private contacts: Contact[] = []
 
-  private selectedNodeIds: string[] = []
-  private selectedPlatform: Platform | null = null
-  private selectedDevice: Device | null = null
-
-  private searchTypes: string[] = [
-    SearchType.Platform,
-    SearchType.Device
-  ]
-
-  private searchOptions: ISearchOptions = {
-    searchType: SearchType.Platform,
-    text: ''
-  }
-
-  private platformsResult: Platform[] = [] as Platform[]
-  private devicesResult: Device[] = [] as Device[]
+  private selectedNode: ConfigurationsTreeNode | null = null
 
   private tree: ConfigurationsTree = new ConfigurationsTree()
 
-  private platformItem: string = ''
-  private deviceItem: string = ''
-
-  private platformPanels: number[] = []
-  private devicePanels: number[] = []
-
-  private platformPanelsHidden: boolean = false
-  private devicePanelsHidden: boolean = false
+  private rules: Object = {
+    startDate: (v: string): boolean | string => v === null || !this.configuration.endDate || stringToDate(v) <= this.configuration.endDate || 'Start date must not be after end date',
+    endDate: (v: string): boolean | string => v === null || !this.configuration.startDate || stringToDate(v) >= this.configuration.startDate || 'End date must not be before start date'
+  }
 
   created () {
     this.$nuxt.$emit('app-bar-content', AppBarEditModeContent)
@@ -592,11 +363,10 @@ export default class ConfigurationsIdPage extends Vue {
     this.$nuxt.$on('AppBarExtension:change', (tab: number) => {
       this.activeTab = tab
     })
-
-    this.tree = this.getDemoConfigurationsTree()
   }
 
   mounted () {
+    this.loadConfiguration()
     this.$nextTick(() => {
       if (!this.$route.params.id) {
         this.$nuxt.$emit('AppBarContent:title', 'Add Configuration')
@@ -604,6 +374,20 @@ export default class ConfigurationsIdPage extends Vue {
       this.$nuxt.$emit('AppBarContent:save-button-hidden', !this.editMode)
       this.$nuxt.$emit('AppBarContent:cancel-button-hidden', !this.editMode)
     })
+  }
+
+  loadConfiguration () {
+    const configurationId = this.$route.params.id
+    if (configurationId) {
+      this.isInEditMode = false
+      this.$api.configurations.findById(configurationId).then((foundConfiguration) => {
+        this.configuration = foundConfiguration
+      }).catch((_error) => {
+        this.$store.commit('snackbar/setError', 'Loading configuration failed')
+      })
+    } else {
+      this.isInEditMode = true
+    }
   }
 
   beforeDestroy () {
@@ -641,89 +425,77 @@ export default class ConfigurationsIdPage extends Vue {
     return !this.isInEditMode
   }
 
+  get locationType (): string | null {
+    switch (true) {
+      case (this.configuration.location instanceof StationaryLocation):
+        return LocationType.Stationary
+      case (this.configuration.location instanceof DynamicLocation):
+        return LocationType.Dynamic
+      default:
+        return null
+    }
+  }
+
+  set locationType (locationType: string | null) {
+    switch (locationType) {
+      case LocationType.Stationary:
+        if (!(this.configuration.location instanceof StationaryLocation)) {
+          this.configuration.location = new StationaryLocation()
+        }
+        break
+      case LocationType.Dynamic:
+        if (!(this.configuration.location instanceof DynamicLocation)) {
+          this.configuration.location = new DynamicLocation()
+        }
+        break
+      default:
+        this.configuration.location = null
+    }
+  }
+
   get location (): number[] {
+    if (!this.configuration.location || !(this.configuration.location instanceof StationaryLocation)) {
+      return [0, 0]
+    }
     return [
-      this.latitude,
-      this.longitude
+      this.configuration.location.latitude || 0,
+      this.configuration.location.longitude || 0
     ]
   }
 
-  /**
-   * returns whether a node is a PlatformNode or not
-   *
-   * @param {ConfigurationsTreeNode} node - the node to check for
-   * @return {boolean} true if the node is a PlatformNode
-   */
-  nodeIsPlatform (node: ConfigurationsTreeNode): boolean {
-    return node instanceof PlatformNode
-  }
-
-  get breadcrumbs (): Object[] {
-    if (!this.selectedNodeIds.length) {
+  get hierarchyNodeNames (): Object[] {
+    if (!this.selectedNode) {
       return []
     }
-    const nodeId = this.selectedNodeIds[0]
-    return this.tree.getPath(nodeId).map((t: string): Object => { return { text: t } })
+    return this.configuration.tree.getPath(this.selectedNode).map((t: string): Object => { return { text: t } })
   }
 
   /**
-   * returns whether a node is in the tree or not
+   * returns whether a platform is in the tree or not
    *
    * @param {number} nodeId - the id of the node
    * @return {boolean} wheter the node was found or not
    */
-  isNodeInTree (nodeId: string): boolean {
-    return !!this.tree.getById(nodeId)
+  isPlatformInTree (platform: Platform): boolean {
+    const platformId = platform.id
+    if (platformId === null) {
+      return false
+    }
+    return !!this.configuration.tree.getPlatformById(platformId)
   }
 
   /**
-   * returns the selected node in the tree
+   * returns whether a device is in the tree or not
    *
-   * @return {ConfigurationsTreeNode|null} the selected node
+   * @param {number} nodeId - the id of the node
+   * @return {boolean} wheter the node was found or not
    */
-  getSelectedNode (): ConfigurationsTreeNode | null {
-    if (!this.selectedNodeIds.length) {
-      return null
+  isDeviceInTree (device: Device): boolean {
+    const deviceId = device.id
+    if (deviceId === null) {
+      return false
     }
-    return this.tree.getById(this.selectedNodeIds[0])
-  }
-
-  /**
-   * sets the selected node in the tree
-   *
-   * @param {ConfigurationsTreeNode|null} node - the node to select
-   */
-  setSelectedNode (node: ConfigurationsTreeNode | null) {
-    if (node) {
-      const id = node.unpack().id
-      if (id) {
-        this.selectedNodeIds = [id]
-      }
-    } else {
-      this.selectedNodeIds = []
-    }
-  }
-
-  get platforms (): Platform[] {
-    return this.platformsResult
-  }
-
-  set platforms (platforms: Platform[]) {
-    this.platformsResult = platforms
-    if (platforms.length) {
-      this.devicesResult = [] as Device[]
-    }
-  }
-
-  get devices (): Device[] {
-    return this.devicesResult
-  }
-
-  set devices (devices: Device[]) {
-    this.devicesResult = devices
-    if (devices.length) {
-      this.platformsResult = [] as Platform[]
-    }
+    return !!this.configuration.tree.getDeviceById(deviceId)
   }
 
   /**
@@ -731,12 +503,13 @@ export default class ConfigurationsIdPage extends Vue {
    *
    * @param {Platform} platform - the node to add
    */
-  addPlatformNode (platform: Platform) {
-    const node: ConfigurationsTreeNode | null = this.getSelectedNode()
+  addPlatformNode (platform: Platform): void {
+    const node: ConfigurationsTreeNode | null = this.selectedNode
     if (!node) {
-      this.tree.push(
+      this.configuration.tree.push(
         new PlatformNode(platform)
       )
+      this.addPlatformConfigurationAttribute(platform)
       return
     }
 
@@ -745,6 +518,21 @@ export default class ConfigurationsIdPage extends Vue {
     }
 
     (node as PlatformNode).getTree().push(new PlatformNode(platform))
+    this.addPlatformConfigurationAttribute(platform)
+  }
+
+  addPlatformConfigurationAttribute (platform: Platform): number {
+    const index = this.configuration.platformAttributes.findIndex(a => a.platform === platform)
+    if (index === -1) {
+      /*
+       * instead of adding the attribute directly via push,
+       * create a copy of the array with the new attribute
+       * added to it, so that Vue can register the change
+       * with its watchers. See https://vuejs.org/v2/api/#vm-watch
+       */
+      this.configuration.platformAttributes = [...this.configuration.platformAttributes, new PlatformConfigurationAttributes(platform)]
+    }
+    return this.configuration.platformAttributes.length
   }
 
   /**
@@ -752,12 +540,13 @@ export default class ConfigurationsIdPage extends Vue {
    *
    * @param {Device} device - the node to add
    */
-  addDeviceNode (device: Device) {
-    const node: ConfigurationsTreeNode | null = this.getSelectedNode()
+  addDeviceNode (device: Device): void {
+    const node: ConfigurationsTreeNode | null = this.selectedNode
     if (!node) {
-      this.tree.push(
+      this.configuration.tree.push(
         new DeviceNode(device)
       )
+      this.addDeviceConfigurationAttribute(device)
       return
     }
 
@@ -766,41 +555,80 @@ export default class ConfigurationsIdPage extends Vue {
     }
 
     (node as PlatformNode).getTree().push(new DeviceNode(device))
+    this.addDeviceConfigurationAttribute(device)
+  }
+
+  addDeviceConfigurationAttribute (device: Device): number {
+    const index = this.configuration.deviceAttributes.findIndex(a => a.device === device)
+    if (index === -1) {
+      /*
+       * instead of adding the attribute directly via push, create a copy of
+       * the array with the new attribute added to it, so that Vue can register
+       * the change with its watchers. See https://vuejs.org/v2/api/#vm-watch
+       */
+      this.configuration.deviceAttributes = [...this.configuration.deviceAttributes, new DeviceConfigurationAttributes(device)]
+    }
+    return this.configuration.deviceAttributes.length
   }
 
   /**
    * removes the selected node and sets the selected node to the parent
    */
   removeSelectedNode () {
-    const node: ConfigurationsTreeNode | null = this.getSelectedNode()
+    const node: ConfigurationsTreeNode | null = this.selectedNode
     if (!node) {
       return
     }
-    const parentNode = this.tree.getParent(node)
-    this.tree.remove(node)
-    this.setSelectedNode(parentNode)
+
+    this.removeConfigurationAttributes(node)
+
+    const parentNode = this.configuration.tree.getParent(node)
+    this.configuration.tree.remove(node)
+    this.selectedNode = parentNode
   }
 
-  /**
-   * returns an Array of all platforms in the tree
-   *
-   * @return {Platform[]} an Array of Platforms
-   */
-  getAllPlatforms (): Platform[] {
-    const getPlatformNodesRecursive = (nodes: ConfigurationsTree, platforms: PlatformNode[]) => {
-      for (const node of nodes) {
-        if (node instanceof PlatformNode) {
-          platforms.push(node)
-        }
-        if (!node.canHaveChildren()) {
-          continue
-        }
-        getPlatformNodesRecursive((node as PlatformNode).getTree(), platforms)
+  removeConfigurationAttributes (node: ConfigurationsTreeNode) {
+    if (node.isPlatform()) {
+      // as the platform can have childs in the tree, remove also the attributes of the children
+      for (const child of (node as PlatformNode).children) {
+        this.removeConfigurationAttributes(child)
       }
+      this.removePlatformConfigurationAttribute((node as PlatformNode).unpack())
+    } else if (node.isDevice()) {
+      this.removeDeviceConfigurationAttribute((node as DeviceNode).unpack())
     }
-    const platformNodes: PlatformNode[] = []
-    getPlatformNodesRecursive(this.tree, platformNodes)
-    return platformNodes.map(n => n.unpack())
+  }
+
+  removePlatformConfigurationAttribute (platform: Platform): number {
+    const index = this.configuration.platformAttributes.findIndex(a => a.platform === platform)
+    if (index > -1) {
+      /*
+       * instead of removing the attribute directly via splice, create a copy
+       * of the array and remove the attribute from the copy, so that Vue can
+       * register the change with its watchers. See
+       * https://vuejs.org/v2/api/#vm-watch
+       */
+      const newArray: PlatformConfigurationAttributes[] = [...this.configuration.platformAttributes]
+      newArray.splice(index, 1)
+      this.configuration.platformAttributes = newArray
+    }
+    return this.configuration.platformAttributes.length
+  }
+
+  removeDeviceConfigurationAttribute (device: Device): number {
+    const index = this.configuration.deviceAttributes.findIndex(a => a.device === device)
+    if (index > -1) {
+      /*
+       * instead of removing the attribute directly via splice, create a copy
+       * of the array and remove the attribute from the copy, so that Vue can
+       * register the change with its watchers. See
+       * https://vuejs.org/v2/api/#vm-watch
+       */
+      const newArray: DeviceConfigurationAttributes[] = [...this.configuration.deviceAttributes]
+      newArray.splice(index, 1)
+      this.configuration.deviceAttributes = newArray
+    }
+    return this.configuration.deviceAttributes.length
   }
 
   /**
@@ -811,8 +639,8 @@ export default class ConfigurationsIdPage extends Vue {
   getAllDevices (): Device[] {
     const getDeviceNodesRecursive = (nodes: ConfigurationsTree, devices: DeviceNode[]) => {
       for (const node of nodes) {
-        if (node instanceof DeviceNode) {
-          devices.push(node)
+        if (node.isDevice()) {
+          devices.push(node as DeviceNode)
         }
         if (!node.canHaveChildren()) {
           continue
@@ -821,153 +649,28 @@ export default class ConfigurationsIdPage extends Vue {
       }
     }
     const deviceNodes: DeviceNode[] = []
-    getDeviceNodesRecursive(this.tree, deviceNodes)
+    getDeviceNodesRecursive(this.configuration.tree, deviceNodes)
     return deviceNodes.map(n => n.unpack())
   }
 
-  /**
-   * searches for platforms or devices depending on the searchType
-   *
-   * @async
-   */
-  async search () {
-    switch (this.searchOptions.searchType) {
-      case SearchType.Platform:
-        this.platforms = await this.$api.platforms.newSearchBuilder()
-          .withTextInName(this.searchOptions.text)
-          .build()
-          .findMatchingAsList()
-        break
-      case SearchType.Device:
-        this.devices = await this.$api.devices.newSearchBuilder()
-          .withTextInName(this.searchOptions.text)
-          .build()
-          .findMatchingAsList()
-        break
-      default:
-        throw new TypeError('search function not defined for unknown value')
-    }
+  setSelectedNode (node: ConfigurationsTreeNode) {
+    this.selectedNode = node
   }
 
-  get openedPlatformPanels (): number[] {
-    return !this.platformPanelsHidden ? this.getAllPlatforms().map((_, i) => i) : []
+  get startDateStringHelper (): string {
+    return dateToString(this.configuration.startDate)
   }
 
-  get openedDevicePanels (): number[] {
-    return !this.devicePanelsHidden ? this.getAllDevices().map((_, i) => i) : []
+  set startDateStringHelper (aDate: string) {
+    this.configuration.startDate = stringToDate(aDate)
   }
 
-  /**
-   * returns all property names of a given Device
-   *
-   * @param {Device} device - the device to get the property names from
-   * @return {string[]} an Array of property names
-   */
-  getPropertyNames (device: Device): string[] {
-    return device.properties.map(p => p.propertyName)
+  get endDateStringHelper (): string {
+    return dateToString(this.configuration.endDate)
   }
 
-  /**
-   * sets the selected platform or device, when a node is selected
-   */
-  @Watch('selectedNodeIds')
-  onItemSelect () {
-    const node: ConfigurationsTreeNode | null = this.getSelectedNode()
-    if (!node) {
-      this.selectedPlatform = null
-      this.selectedDevice = null
-      return
-    }
-    switch (true) {
-      case node instanceof PlatformNode:
-        this.selectedPlatform = (node as PlatformNode).unpack() as Platform
-        this.selectedDevice = null
-        break
-      case node instanceof DeviceNode:
-        this.selectedDevice = (node as DeviceNode).unpack() as Device
-        this.selectedPlatform = null
-        break
-    }
-  }
-
-  /**
-   * creates a ConfigurationsTree for demo purposes
-   *
-   * @return {ConfigurationsTree} the demo tree
-   */
-  getDemoConfigurationsTree (): ConfigurationsTree {
-    return ConfigurationsTree.fromArray(
-      [
-        ((): PlatformNode => {
-          const n = new PlatformNode(
-            ((): Platform => {
-              const o = new Platform()
-              o.id = '-1'
-              o.shortName = 'Platform 01'
-              o.longName = 'Platform 01 Bla blub'
-              o.description = 'A platform on which various light instruments can be mounted. Consists of wood, dry and rotten wood.'
-              return o
-            })()
-          )
-          n.setTree(
-            ConfigurationsTree.fromArray(
-              [
-                ((): PlatformNode => {
-                  const n = new PlatformNode(
-                    ((): Platform => {
-                      const o = new Platform()
-                      o.id = '-2'
-                      o.shortName = 'Platform 02'
-                      return o
-                    })()
-                  )
-                  n.setTree(
-                    ConfigurationsTree.fromArray(
-                      [
-                        new DeviceNode(
-                          ((): Device => {
-                            const o = new Device()
-                            o.id = '-3'
-                            o.shortName = 'Device 01'
-                            return o
-                          })()
-                        ),
-                        new DeviceNode(
-                          ((): Device => {
-                            const o = new Device()
-                            o.id = '-4'
-                            o.shortName = 'Device 02'
-                            return o
-                          })()
-                        ),
-                        new DeviceNode(
-                          ((): Device => {
-                            const o = new Device()
-                            o.id = '-5'
-                            o.shortName = 'Device 03'
-                            return o
-                          })()
-                        )
-                      ]
-                    )
-                  )
-                  return n
-                })()
-              ]
-            )
-          )
-          return n
-        })(),
-        new PlatformNode(
-          ((): Platform => {
-            const o = new Platform()
-            o.id = '-6'
-            o.shortName = 'Platform 03'
-            return o
-          })()
-        )
-      ]
-    )
+  set endDateStringHelper (aDate: string) {
+    this.configuration.endDate = stringToDate(aDate)
   }
 }
 </script>
