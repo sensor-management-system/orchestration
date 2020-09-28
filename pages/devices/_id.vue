@@ -269,7 +269,7 @@
         </v-tab-item>
       </v-tabs-items>
       <v-btn
-        v-if="!isInEditMode"
+        v-if="!editMode"
         fab
         fixed
         bottom
@@ -411,10 +411,10 @@ export default class DeviceIdPage extends mixins(Rules) {
     const deviceId = this.$route.params.id
     if (!deviceId) {
       this.createWorkingCopy()
-      this.isInEditMode = true
+      this.editMode = true
       return
     }
-    this.isInEditMode = false
+    this.editMode = false
     this.$api.devices.findById(deviceId).then((foundDevice) => {
       this.device = foundDevice
     }).catch((_error) => {
@@ -422,15 +422,11 @@ export default class DeviceIdPage extends mixins(Rules) {
     })
   }
 
-  get isInEditMode (): boolean {
-    return this.editMode
-  }
-
   save () {
     this.$api.devices.save(this.device).then((savedDevice) => {
       this.device = savedDevice
       this.deviceCopy = null
-      this.isInEditMode = false
+      this.editMode = false
       this.$store.commit('snackbar/setSuccess', 'Save successful')
     }).catch((_error) => {
       this.$store.commit('snackbar/setError', 'Save failed')
@@ -440,7 +436,7 @@ export default class DeviceIdPage extends mixins(Rules) {
   cancel () {
     this.restoreWorkingCopy()
     if (this.device && this.device.id) {
-      this.isInEditMode = false
+      this.editMode = false
     } else {
       this.$router.push('/search/devices')
     }
@@ -448,7 +444,7 @@ export default class DeviceIdPage extends mixins(Rules) {
 
   onEditButtonClick () {
     this.createWorkingCopy()
-    this.isInEditMode = true
+    this.editMode = true
   }
 
   get deviceURN () {
@@ -480,10 +476,6 @@ export default class DeviceIdPage extends mixins(Rules) {
     )
   }
 
-  set isInEditMode (editMode: boolean) {
-    this.editMode = editMode
-  }
-
   @Watch('editMode', { immediate: true, deep: true })
   // @ts-ignore
   onEditModeChanged (editMode: boolean) {
@@ -505,7 +497,7 @@ export default class DeviceIdPage extends mixins(Rules) {
   }
 
   get readonly () {
-    return !this.isInEditMode
+    return !this.editMode
   }
 
   get manufacturerNames (): string[] {

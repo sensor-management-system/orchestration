@@ -140,7 +140,7 @@
               <v-card-text>
                 <v-row>
                   <v-col cols="3">
-                    <ContactSelect v-model="platform.contacts" :readonly="!isInEditMode" label="Add a contact" />
+                    <ContactSelect v-model="platform.contacts" :readonly="!editMode" label="Add a contact" />
                   </v-col>
                 </v-row>
               </v-card-text>
@@ -155,14 +155,14 @@
               Platform URN: {{ platformURN }}
             </v-card-title>
             <v-card-text>
-              <AttachmentList v-model="platform.attachments" :readonly="!isInEditMode" />
+              <AttachmentList v-model="platform.attachments" :readonly="!editMode" />
             </v-card-text>
           </v-card>
         </v-tab-item>
       </v-tabs-items>
       <!-- Buttons for all tabs -->
       <v-btn
-        v-if="!isInEditMode"
+        v-if="!editMode"
         fab
         fixed
         bottom
@@ -279,24 +279,16 @@ export default class PlatformIdPage extends mixins(Rules) {
     const platformId = this.$route.params.id
     if (!platformId) {
       this.createWorkingCopy()
-      this.isInEditMode = true
+      this.editMode = true
       return
     }
-    this.isInEditMode = false
+    this.editMode = false
     this.$api.platforms.findById(platformId).then((foundPlatform) => {
       this.platform = foundPlatform
     }).catch(() => {
       // We don't take the error directly
       this.$store.commit('snackbar/setError', 'Loading platform failed')
     })
-  }
-
-  get isInEditMode (): boolean {
-    return this.editMode
-  }
-
-  set isInEditMode (editMode: boolean) {
-    this.editMode = editMode
   }
 
   @Watch('editMode', { immediate: true, deep: true })
@@ -324,7 +316,7 @@ export default class PlatformIdPage extends mixins(Rules) {
     this.$api.platforms.save(this.platform).then((savedPlatform) => {
       this.platform = savedPlatform
       this.platformCopy = null
-      this.isInEditMode = false
+      this.editMode = false
       this.$store.commit('snackbar/setSuccess', 'Save successful')
     }).catch((_error) => {
       this.$store.commit('snackbar/setError', 'Save failed')
@@ -334,7 +326,7 @@ export default class PlatformIdPage extends mixins(Rules) {
   cancel () {
     this.restoreWorkingCopy()
     if (this.platform && this.platform.id) {
-      this.isInEditMode = false
+      this.editMode = false
     } else {
       this.$router.push('/search/platforms')
     }
@@ -342,7 +334,7 @@ export default class PlatformIdPage extends mixins(Rules) {
 
   onEditButtonClick () {
     this.createWorkingCopy()
-    this.isInEditMode = true
+    this.editMode = true
   }
 
   get platformURN () {
@@ -367,7 +359,7 @@ export default class PlatformIdPage extends mixins(Rules) {
   }
 
   get readonly () {
-    return !this.isInEditMode
+    return !this.editMode
   }
 
   get manufacturerNames () : string[] {

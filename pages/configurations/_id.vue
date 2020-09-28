@@ -248,7 +248,7 @@
           </v-tab-item>
         </v-tabs-items>
         <v-btn
-          v-if="!isInEditMode"
+          v-if="!editMode"
           fab
           fixed
           bottom
@@ -379,14 +379,14 @@ export default class ConfigurationsIdPage extends Vue {
   loadConfiguration () {
     const configurationId = this.$route.params.id
     if (configurationId) {
-      this.isInEditMode = false
+      this.editMode = false
       this.$api.configurations.findById(configurationId).then((foundConfiguration) => {
         this.configuration = foundConfiguration
       }).catch((_error) => {
         this.$store.commit('snackbar/setError', 'Loading configuration failed')
       })
     } else {
-      this.isInEditMode = true
+      this.editMode = true
     }
   }
 
@@ -398,16 +398,8 @@ export default class ConfigurationsIdPage extends Vue {
     this.$nuxt.$off('AppBarExtension:change')
   }
 
-  get isInEditMode (): boolean {
-    return this.editMode
-  }
-
   save () {
     this.toggleEditMode()
-  }
-
-  set isInEditMode (editMode: boolean) {
-    this.editMode = editMode
   }
 
   @Watch('editMode', { immediate: true, deep: true })
@@ -418,11 +410,11 @@ export default class ConfigurationsIdPage extends Vue {
   }
 
   toggleEditMode () {
-    this.isInEditMode = !this.isInEditMode
+    this.editMode = !this.editMode
   }
 
   get readonly () {
-    return !this.isInEditMode
+    return !this.editMode
   }
 
   get locationType (): string | null {
