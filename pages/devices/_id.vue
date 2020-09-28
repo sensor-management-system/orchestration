@@ -339,7 +339,7 @@ export default class DeviceIdPage extends mixins(Rules) {
   private activeTab: number = 0
 
   private device: Device = new Device()
-  private deviceCopy: Device | null = null
+  private deviceBackup: Device | null = null
 
   private states: Status[] = []
   private manufacturers: Manufacturer[] = []
@@ -410,7 +410,7 @@ export default class DeviceIdPage extends mixins(Rules) {
   loadDevice () {
     const deviceId = this.$route.params.id
     if (!deviceId) {
-      this.createWorkingCopy()
+      this.createBackup()
       this.editMode = true
       return
     }
@@ -425,7 +425,7 @@ export default class DeviceIdPage extends mixins(Rules) {
   save () {
     this.$api.devices.save(this.device).then((savedDevice) => {
       this.device = savedDevice
-      this.deviceCopy = null
+      this.deviceBackup = null
       this.editMode = false
       this.$store.commit('snackbar/setSuccess', 'Save successful')
     }).catch((_error) => {
@@ -434,7 +434,7 @@ export default class DeviceIdPage extends mixins(Rules) {
   }
 
   cancel () {
-    this.restoreWorkingCopy()
+    this.restoreBackup()
     if (this.device.id) {
       this.editMode = false
     } else {
@@ -443,7 +443,7 @@ export default class DeviceIdPage extends mixins(Rules) {
   }
 
   onEditButtonClick () {
-    this.createWorkingCopy()
+    this.createBackup()
     this.editMode = true
   }
 
@@ -483,17 +483,16 @@ export default class DeviceIdPage extends mixins(Rules) {
     this.$nuxt.$emit('AppBarContent:cancel-button-hidden', !editMode)
   }
 
-  createWorkingCopy () {
-    this.deviceCopy = this.device
-    this.device = Device.createFromObject(this.deviceCopy)
+  createBackup () {
+    this.deviceBackup = Device.createFromObject(this.device)
   }
 
-  restoreWorkingCopy () {
-    if (!this.deviceCopy) {
+  restoreBackup () {
+    if (!this.deviceBackup) {
       return
     }
-    this.device = this.deviceCopy
-    this.deviceCopy = null
+    this.device = this.deviceBackup
+    this.deviceBackup = null
   }
 
   get readonly () {

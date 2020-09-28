@@ -224,7 +224,7 @@ export default class PlatformIdPage extends mixins(Rules) {
 
   // then for our platform that we want to change
   private platform: Platform = Platform.createEmpty()
-  private platformCopy: Platform | null = null
+  private platformBackup: Platform | null = null
 
   // and some general data for the page
   private activeTab: number = 0
@@ -278,7 +278,7 @@ export default class PlatformIdPage extends mixins(Rules) {
   loadPlatform () {
     const platformId = this.$route.params.id
     if (!platformId) {
-      this.createWorkingCopy()
+      this.createBackup()
       this.editMode = true
       return
     }
@@ -298,24 +298,23 @@ export default class PlatformIdPage extends mixins(Rules) {
     this.$nuxt.$emit('AppBarContent:cancel-button-hidden', !editMode)
   }
 
-  createWorkingCopy () {
-    this.platformCopy = this.platform
-    this.platform = Platform.createFromObject(this.platformCopy)
+  createBackup () {
+    this.platformBackup = Platform.createFromObject(this.platform)
   }
 
-  restoreWorkingCopy () {
-    if (!this.platformCopy) {
+  restoreBackup () {
+    if (!this.platformBackup) {
       return
     }
-    this.platform = this.platformCopy
-    this.platformCopy = null
+    this.platform = this.platformBackup
+    this.platformBackup = null
   }
 
   // methods
   save () {
     this.$api.platforms.save(this.platform).then((savedPlatform) => {
       this.platform = savedPlatform
-      this.platformCopy = null
+      this.platformBackup = null
       this.editMode = false
       this.$store.commit('snackbar/setSuccess', 'Save successful')
     }).catch((_error) => {
@@ -324,7 +323,7 @@ export default class PlatformIdPage extends mixins(Rules) {
   }
 
   cancel () {
-    this.restoreWorkingCopy()
+    this.restoreBackup()
     if (this.platform.id) {
       this.editMode = false
     } else {
@@ -333,7 +332,7 @@ export default class PlatformIdPage extends mixins(Rules) {
   }
 
   onEditButtonClick () {
-    this.createWorkingCopy()
+    this.createBackup()
     this.editMode = true
   }
 
