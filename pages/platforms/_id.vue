@@ -325,7 +325,7 @@ export default class PlatformIdPage extends mixins(Rules) {
 
   cancel () {
     this.restoreWorkingCopy()
-    if (this.platform && this.platform.id) {
+    if (this.platform.id) {
       this.editMode = false
     } else {
       this.$router.push('/search/platforms')

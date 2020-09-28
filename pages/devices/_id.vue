@@ -435,7 +435,7 @@ export default class DeviceIdPage extends mixins(Rules) {
 
   cancel () {
     this.restoreWorkingCopy()
-    if (this.device && this.device.id) {
+    if (this.device.id) {
       this.editMode = false
     } else {
       this.$router.push('/search/devices')
