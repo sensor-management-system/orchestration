@@ -25,6 +25,7 @@ class ConfigurationSchema(Schema):
     project_uri = fields.String()
     project_name = fields.String()
     label = fields.String()
+    status = fields.String(default="draft")
 
     longitude_src_device_property = Relationship(
         self_view_kwargs={"id": "<id>"},

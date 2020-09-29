@@ -14,6 +14,7 @@ class ConfigurationPlatformSchema(Schema):
     offset_y = fields.Float()
     offset_z = fields.Float()
     configuration_id = fields.Integer()
+    platform_id = fields.Integer()
 
     configuration = Relationship(
         self_view_kwargs={"id": "<id>"},
