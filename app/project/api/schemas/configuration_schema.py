@@ -24,6 +24,7 @@ class ConfigurationSchema(Schema):
     elevation = fields.Float()
     project_uri = fields.String()
     project_name = fields.String()
+    label = fields.String()
 
     longitude_src_device_property = Relationship(
         self_view_kwargs={"id": "<id>"},
