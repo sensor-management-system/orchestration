@@ -28,7 +28,7 @@
         </v-btn>
       </v-col>
     </v-row>
-    <v-row v-if="platforms">
+    <v-row v-if="searchOptions.searchType === 'Platform' && platforms.length">
       <v-col cols="12">
         <v-list
           two-line
@@ -71,9 +71,13 @@
         </v-list>
       </v-col>
     </v-row>
-    <v-row v-if="devices">
+    <v-row v-if="searchOptions.searchType === 'Device' && devices.length">
       <v-col cols="12">
-        <v-list two-line>
+        <v-list
+          two-line
+          max-height="450"
+          class="overflow-y-auto"
+        >
           <v-list-item-group
             v-model="deviceItem"
             color="primary"
