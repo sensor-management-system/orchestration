@@ -11,6 +11,7 @@ import Device from '@/models/Device'
  */
 export class DeviceNode implements IConfigurationsTreeNode<Device> {
   private node: Device
+  private _disabled: boolean = false
 
   static readonly ID_PREFIX = 'DeviceNode-'
 
@@ -30,7 +31,11 @@ export class DeviceNode implements IConfigurationsTreeNode<Device> {
   }
 
   get disabled (): boolean {
-    return false
+    return this._disabled
+  }
+
+  set disabled (isDisabled: boolean) {
+    this._disabled = isDisabled
   }
 
   canHaveChildren (): boolean {
