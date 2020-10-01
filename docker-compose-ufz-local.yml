@@ -23,6 +23,7 @@ services:
 #      NUXT_ENV_FILTER_PROTOCOL_CLAIMS: 'false'
 #      NUXT_ENV_AUTOMATIC_SILENT_RENEW: 'true'
 #      NUXT_ENV_SILENT_RENEW_INTERVAL:  6900000 # 115 minutes in milliseconds
+#      NUXT_ENV_LOAD_USER_INFO: 'true'
     volumes:
       - .:/home/node/
     command: >
