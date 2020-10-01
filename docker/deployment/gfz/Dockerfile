@@ -30,8 +30,7 @@ ENV NUXT_ENV_FILTER_PROTOCOL_CLAIMS false
 ENV NUXT_ENV_AUTOMATIC_SILENT_RENEW true
 # TODO; Check here if we still need this one
 ENV NUXT_ENV_SILENT_RENEW_INTERVAL 6900000
-# TODO: Fix to false (but just to see that this setting works)
-ENV NUXT_ENV_LOAD_USER_INFO true
+ENV NUXT_ENV_LOAD_USER_INFO false
 
 
 RUN mkdir /ssmfrontend
