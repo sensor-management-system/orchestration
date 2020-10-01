@@ -1,6 +1,9 @@
 <template>
   <div>
-    <v-form>
+    <v-form
+      ref="form"
+      v-model="formIsValid"
+    >
       <v-card
         outlined
       >
@@ -41,7 +44,7 @@
                         :value="startDateStringHelper"
                         first-day-of-week="1"
                         :show-week="true"
-                        @input="startDateStringHelper = $event; startDateMenu = false"
+                        @input="setStartDate"
                       />
                     </v-menu>
                     <v-text-field
@@ -80,7 +83,7 @@
                         :value="endDateStringHelper"
                         first-day-of-week="1"
                         :show-week="true"
-                        @input="endDateStringHelper = $event; endDateMenu = false"
+                        @input="setEndDate"
                       />
                     </v-menu>
                     <v-text-field
@@ -297,6 +300,7 @@ import { DeviceConfigurationAttributes } from '@/models/DeviceConfigurationAttri
 import { PlatformConfigurationAttributes } from '@/models/PlatformConfigurationAttributes'
 
 import { dateToString, stringToDate } from '@/utils/dateHelper'
+import { getParentByClass } from '@/utils/domHelper'
 
 enum LocationType {
   Stationary = 'Stationary',
@@ -349,9 +353,15 @@ export default class ConfigurationsIdPage extends Vue {
     endDate: (v: string): boolean | string => v === null || !this.configuration.startDate || stringToDate(v) >= this.configuration.startDate || 'End date must not be before start date'
   }
 
+  private formIsValid: boolean = true
+
   created () {
     this.$nuxt.$emit('app-bar-content', AppBarEditModeContent)
     this.$nuxt.$on('AppBarContent:save-button-click', () => {
+      if (!this.formIsValid) {
+        this.showValidationError()
+        return
+      }
       this.save()
     })
     this.$nuxt.$on('AppBarContent:cancel-button-click', () => {
@@ -671,6 +681,44 @@ export default class ConfigurationsIdPage extends Vue {
 
   set endDateStringHelper (aDate: string) {
     this.configuration.endDate = stringToDate(aDate)
+  }
+
+  setStartDate (aDate: string) {
+    this.startDateStringHelper = aDate
+    this.startDateMenu = false
+    if (this.configuration.endDate !== null) {
+      (this.$refs.form as Vue & { validate: () => boolean }).validate()
+    }
+  }
+
+  setEndDate (aDate: string) {
+    this.endDateStringHelper = aDate
+    this.endDateMenu = false
+    if (this.configuration.startDate !== null) {
+      (this.$refs.form as Vue & { validate: () => boolean }).validate()
+    }
+  }
+
+  showValidationError () {
+    const invalidElement: Element | null = document.querySelector('.v-input.error--text')
+    if (!invalidElement) {
+      return
+    }
+    const parentElem: Element | null = getParentByClass(invalidElement, ['v-window-item'])
+    if (!parentElem) {
+      return
+    }
+    let tabIndex: number = -1
+    document.querySelectorAll('.v-window-item').forEach((node, index) => {
+      if (node === parentElem) {
+        tabIndex = index
+      }
+    })
+    if (tabIndex === -1) {
+      return
+    }
+    this.$nuxt.$emit('AppBarExtension:change', tabIndex)
+    this.$store.commit('snackbar/setError', 'Please correct your errors.')
   }
 }
 </script>
