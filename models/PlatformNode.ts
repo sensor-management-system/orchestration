@@ -14,6 +14,7 @@ import Platform from '@/models/Platform'
 export class PlatformNode implements IConfigurationsTreeNode<Platform> {
   private node: Platform
   private tree: ConfigurationsTree = new ConfigurationsTree()
+  private _disabled: boolean = false
 
   static readonly ID_PREFIX = 'PlatformNode-'
 
@@ -33,7 +34,11 @@ export class PlatformNode implements IConfigurationsTreeNode<Platform> {
   }
 
   get disabled (): boolean {
-    return false
+    return this._disabled
+  }
+
+  set disabled (isDisabled: boolean) {
+    this._disabled = isDisabled
   }
 
   canHaveChildren (): boolean {
