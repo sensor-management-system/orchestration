@@ -190,7 +190,11 @@
               <v-card-text>
                 <v-row>
                   <v-col cols="12" md="6">
+                    <ConfigurationsDemoTreeView
+                      v-if="!configuration.tree.length"
+                    />
                     <ConfigurationsTreeView
+                      v-else
                       ref="treeView"
                       v-model="configuration.tree"
                       :selected="selectedNode"
@@ -280,6 +284,7 @@ import DeviceConfigurationAttributesExpansionPanels from '@/components/DeviceCon
 import PlatformConfigurationAttributesExpansionPanels from '@/components/PlatformConfigurationAttributesExpansionPanels.vue'
 import ConfigurationsPlatformDeviceSearch from '@/components/ConfigurationsPlatformDeviceSearch.vue'
 import ConfigurationsTreeView from '@/components/ConfigurationsTreeView.vue'
+import ConfigurationsDemoTreeView from '@/components/ConfigurationsDemoTreeView.vue'
 import ConfigurationsSelectedItem from '@/components/ConfigurationsSelectedItem.vue'
 import InfoBox from '@/components/InfoBox.vue'
 
@@ -324,6 +329,7 @@ export class AppBarTabsExtensionExtended extends AppBarTabsExtension {
     PlatformConfigurationAttributesExpansionPanels,
     ConfigurationsPlatformDeviceSearch,
     ConfigurationsTreeView,
+    ConfigurationsDemoTreeView,
     ConfigurationsSelectedItem,
     InfoBox
   }
