@@ -29,7 +29,7 @@
                     >
                       <template v-slot:activator="{ on, attrs }">
                         <v-text-field
-                          :value="startDateStringHelper"
+                          :value="getStartDate()"
                           :rules="[rules.startDate]"
                           v-bind="attrs"
                           label="Start date"
@@ -37,19 +37,19 @@
                           prepend-icon="mdi-calendar-range"
                           readonly
                           v-on="on"
-                          @click:clear="configuration.startDate = null"
+                          @click:clear="setStartDateAndValidate(null)"
                         />
                       </template>
                       <v-date-picker
-                        :value="startDateStringHelper"
+                        :value="getStartDate()"
                         first-day-of-week="1"
                         :show-week="true"
-                        @input="setStartDate"
+                        @input="setStartDateAndValidate"
                       />
                     </v-menu>
                     <v-text-field
                       v-else
-                      :value="startDateStringHelper"
+                      :value="getStartDate()"
                       label="Start date"
                       prepend-icon="mdi-calendar-range"
                       readonly
@@ -68,7 +68,7 @@
                     >
                       <template v-slot:activator="{ on, attrs }">
                         <v-text-field
-                          :value="endDateStringHelper"
+                          :value="getEndDate()"
                           :rules="[rules.endDate]"
                           v-bind="attrs"
                           label="End date"
@@ -76,19 +76,19 @@
                           prepend-icon="mdi-calendar-range"
                           readonly
                           v-on="on"
-                          @click:clear="configuration.endDate = null"
+                          @click:clear="setEndDateAndValidate(null)"
                         />
                       </template>
                       <v-date-picker
-                        :value="endDateStringHelper"
+                        :value="getEndDate()"
                         first-day-of-week="1"
                         :show-week="true"
-                        @input="setEndDate"
+                        @input="setEndDateAndValidate"
                       />
                     </v-menu>
                     <v-text-field
                       v-else
-                      :value="endDateStringHelper"
+                      :value="getEndDate()"
                       label="End date"
                       prepend-icon="mdi-calendar-range"
                       readonly
@@ -667,32 +667,32 @@ export default class ConfigurationsIdPage extends Vue {
     this.selectedNode = node
   }
 
-  get startDateStringHelper (): string {
+  getStartDate (): string {
     return dateToString(this.configuration.startDate)
   }
 
-  set startDateStringHelper (aDate: string) {
-    this.configuration.startDate = stringToDate(aDate)
-  }
-
-  get endDateStringHelper (): string {
+  getEndDate (): string {
     return dateToString(this.configuration.endDate)
   }
 
-  set endDateStringHelper (aDate: string) {
-    this.configuration.endDate = stringToDate(aDate)
+  setStartDate (aDate: string | null) {
+    this.configuration.startDate = aDate !== null ? stringToDate(aDate) : null
   }
 
-  setStartDate (aDate: string) {
-    this.startDateStringHelper = aDate
+  setEndDate (aDate: string | null) {
+    this.configuration.endDate = aDate !== null ? stringToDate(aDate) : null
+  }
+
+  setStartDateAndValidate (aDate: string) {
+    this.setStartDate(aDate)
     this.startDateMenu = false
     if (this.configuration.endDate !== null) {
       (this.$refs.form as Vue & { validate: () => boolean }).validate()
     }
   }
 
-  setEndDate (aDate: string) {
-    this.endDateStringHelper = aDate
+  setEndDateAndValidate (aDate: string | null) {
+    this.setEndDate(aDate)
     this.endDateMenu = false
     if (this.configuration.startDate !== null) {
       (this.$refs.form as Vue & { validate: () => boolean }).validate()
