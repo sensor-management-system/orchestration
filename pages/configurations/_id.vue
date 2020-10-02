@@ -197,7 +197,7 @@
                       @select="setSelectedNode"
                     />
                   </v-col>
-                  <v-col cols="6" md="6">
+                  <v-col cols="12" md="6">
                     <InfoBox v-if="!selectedNode && !readonly">
                       Select a platform on the left side to add devices or platforms to it. To add a device or platform to the root of this configuration, deselect any previously selected device or platform.
                     </InfoBox>
