@@ -16,6 +16,11 @@
         </v-icon>
       </template>
     </v-treeview>
+    <p
+      class="font-italic text--secondary"
+    >
+      This is a demo hierarchy. Replace it with your own platform and devices.
+    </p>
   </div>
 </template>
 
