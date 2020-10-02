@@ -49,8 +49,6 @@ export default class ConfigurationsDemoTreeView extends Vue {
               const o = new Platform()
               o.id = '-1'
               o.shortName = 'Platform 01'
-              o.longName = 'Platform 01 Bla blub'
-              o.description = 'A platform on which various light instruments can be mounted. Consists of wood, dry and rotten wood.'
               return o
             })()
           )
