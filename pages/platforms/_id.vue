@@ -140,7 +140,7 @@
               <v-card-text>
                 <v-row>
                   <v-col cols="3">
-                    <ContactSelect v-model="platform.contacts" :readonly="!isInEditMode" label="Add a contact" />
+                    <ContactSelect v-model="platform.contacts" :readonly="!editMode" label="Add a contact" />
                   </v-col>
                 </v-row>
               </v-card-text>
@@ -155,20 +155,20 @@
               Platform URN: {{ platformURN }}
             </v-card-title>
             <v-card-text>
-              <AttachmentList v-model="platform.attachments" :readonly="!isInEditMode" />
+              <AttachmentList v-model="platform.attachments" :readonly="!editMode" />
             </v-card-text>
           </v-card>
         </v-tab-item>
       </v-tabs-items>
       <!-- Buttons for all tabs -->
       <v-btn
-        v-if="!isInEditMode"
+        v-if="!editMode"
         fab
         fixed
         bottom
         right
         color="secondary"
-        @click="toggleEditMode"
+        @click="onEditButtonClick"
       >
         <v-icon>
           mdi-pencil
@@ -224,6 +224,7 @@ export default class PlatformIdPage extends mixins(Rules) {
 
   // then for our platform that we want to change
   private platform: Platform = Platform.createEmpty()
+  private platformBackup: Platform | null = null
 
   // and some general data for the page
   private activeTab: number = 0
@@ -235,11 +236,7 @@ export default class PlatformIdPage extends mixins(Rules) {
       this.save()
     })
     this.$nuxt.$on('AppBarContent:cancel-button-click', () => {
-      if (this.platform && this.platform.id) {
-        this.toggleEditMode()
-      } else {
-        this.$router.push('/search/platforms')
-      }
+      this.cancel()
     })
 
     this.$nuxt.$emit('app-bar-extension', AppBarTabsExtensionExtended)
@@ -280,29 +277,18 @@ export default class PlatformIdPage extends mixins(Rules) {
 
   loadPlatform () {
     const platformId = this.$route.params.id
-    if (platformId) {
-      this.isInEditMode = false
-      this.$api.platforms.findById(platformId).then((foundPlatform) => {
-        this.platform = foundPlatform
-      }).catch(() => {
-        // We don't take the error directly
-        this.$store.commit('snackbar/setError', 'Loading platform failed')
-      })
-    } else {
-      this.isInEditMode = true
+    if (!platformId) {
+      this.createBackup()
+      this.editMode = true
+      return
     }
-  }
-
-  get isInEditMode (): boolean {
-    return this.editMode
-  }
-
-  set isInEditMode (editMode: boolean) {
-    this.editMode = editMode
-  }
-
-  toggleEditMode () {
-    this.isInEditMode = !this.isInEditMode
+    this.editMode = false
+    this.$api.platforms.findById(platformId).then((foundPlatform) => {
+      this.platform = foundPlatform
+    }).catch(() => {
+      // We don't take the error directly
+      this.$store.commit('snackbar/setError', 'Loading platform failed')
+    })
   }
 
   @Watch('editMode', { immediate: true, deep: true })
@@ -312,16 +298,42 @@ export default class PlatformIdPage extends mixins(Rules) {
     this.$nuxt.$emit('AppBarContent:cancel-button-hidden', !editMode)
   }
 
+  createBackup () {
+    this.platformBackup = Platform.createFromObject(this.platform)
+  }
+
+  restoreBackup () {
+    if (!this.platformBackup) {
+      return
+    }
+    this.platform = this.platformBackup
+    this.platformBackup = null
+  }
+
   // methods
   save () {
     this.$api.platforms.save(this.platform).then((savedPlatform) => {
       this.platform = savedPlatform
+      this.platformBackup = null
+      this.editMode = false
       this.$store.commit('snackbar/setSuccess', 'Save successful')
-      // this.$router.push('/seach/platforms')
-      this.toggleEditMode()
     }).catch((_error) => {
       this.$store.commit('snackbar/setError', 'Save failed')
     })
+  }
+
+  cancel () {
+    this.restoreBackup()
+    if (this.platform.id) {
+      this.editMode = false
+    } else {
+      this.$router.push('/search/platforms')
+    }
+  }
+
+  onEditButtonClick () {
+    this.createBackup()
+    this.editMode = true
   }
 
   get platformURN () {
@@ -346,7 +358,7 @@ export default class PlatformIdPage extends mixins(Rules) {
   }
 
   get readonly () {
-    return !this.isInEditMode
+    return !this.editMode
   }
 
   get manufacturerNames () : string[] {
