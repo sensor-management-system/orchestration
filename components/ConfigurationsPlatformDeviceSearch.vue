@@ -32,7 +32,7 @@
       <v-col cols="12">
         <v-list
           two-line
-          max-height="450"
+          max-height="50vh"
           class="overflow-y-auto"
         >
           <v-list-item-group
@@ -75,7 +75,7 @@
       <v-col cols="12">
         <v-list
           two-line
-          max-height="450"
+          max-height="50vh"
           class="overflow-y-auto"
         >
           <v-list-item-group
