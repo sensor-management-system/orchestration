@@ -21,7 +21,10 @@ describe('ConfigurationsPlatformDeviceSearch', () => {
       data () {
         return {
           platformsResult,
-          devicesResult
+          devicesResult,
+          searchOptions: {
+            searchType: devicesResult.length ? 'Device' : 'Platform'
+          }
         }
       }
     })
