@@ -200,7 +200,7 @@
                       @select="setSelectedNode"
                     />
                   </v-col>
-                  <v-col cols="6" md="6">
+                  <v-col cols="12" md="6">
                     <InfoBox v-if="!selectedNode && !readonly">
                       Select a platform on the left side to add devices or platforms to it. To add a device or platform to the root of this configuration, deselect any previously selected device or platform.
                     </InfoBox>
@@ -251,13 +251,13 @@
           </v-tab-item>
         </v-tabs-items>
         <v-btn
-          v-if="!isInEditMode"
+          v-if="!editMode"
           fab
           fixed
           bottom
           right
           color="secondary"
-          @click="toggleEditMode"
+          @click="onEditButtonClick"
         >
           <v-icon>
             mdi-pencil
@@ -337,7 +337,8 @@ export default class ConfigurationsIdPage extends Vue {
   private activeTab: number = 0
   private editMode: boolean = false
 
-  private configuration = new Configuration()
+  private configuration: Configuration = new Configuration()
+  private configurationBackup: Configuration | null = null
 
   private startDateMenu: boolean = false
   private endDateMenu: boolean = false
@@ -345,8 +346,6 @@ export default class ConfigurationsIdPage extends Vue {
   private contacts: Contact[] = []
 
   private selectedNode: ConfigurationsTreeNode | null = null
-
-  private tree: ConfigurationsTree = new ConfigurationsTree()
 
   private rules: Object = {
     startDate: (v: string): boolean | string => v === null || !this.configuration.endDate || stringToDate(v) <= this.configuration.endDate || 'Start date must not be after end date',
@@ -365,8 +364,7 @@ export default class ConfigurationsIdPage extends Vue {
       this.save()
     })
     this.$nuxt.$on('AppBarContent:cancel-button-click', () => {
-      this.toggleEditMode()
-      // this.$router.push('/configurations')
+      this.cancel()
     })
 
     this.$nuxt.$emit('app-bar-extension', AppBarTabsExtensionExtended)
@@ -388,16 +386,17 @@ export default class ConfigurationsIdPage extends Vue {
 
   loadConfiguration () {
     const configurationId = this.$route.params.id
-    if (configurationId) {
-      this.isInEditMode = false
-      this.$api.configurations.findById(configurationId).then((foundConfiguration) => {
-        this.configuration = foundConfiguration
-      }).catch((_error) => {
-        this.$store.commit('snackbar/setError', 'Loading configuration failed')
-      })
-    } else {
-      this.isInEditMode = true
+    if (!configurationId) {
+      this.createBackup()
+      this.editMode = true
+      return
     }
+    this.editMode = false
+    this.$api.configurations.findById(configurationId).then((foundConfiguration) => {
+      this.configuration = foundConfiguration
+    }).catch((_error) => {
+      this.$store.commit('snackbar/setError', 'Loading configuration failed')
+    })
   }
 
   beforeDestroy () {
@@ -408,16 +407,34 @@ export default class ConfigurationsIdPage extends Vue {
     this.$nuxt.$off('AppBarExtension:change')
   }
 
-  get isInEditMode (): boolean {
-    return this.editMode
-  }
-
   save () {
-    this.toggleEditMode()
+    this.editMode = false
   }
 
-  set isInEditMode (editMode: boolean) {
-    this.editMode = editMode
+  cancel () {
+    this.restoreBackup()
+    if (this.configuration.id) {
+      this.editMode = false
+    } else {
+      this.$router.push('/search/configurations')
+    }
+  }
+
+  onEditButtonClick () {
+    this.createBackup()
+    this.editMode = true
+  }
+
+  createBackup () {
+    this.configurationBackup = Configuration.createFromObject(this.configuration)
+  }
+
+  restoreBackup () {
+    if (!this.configurationBackup) {
+      return
+    }
+    this.configuration = this.configurationBackup
+    this.configurationBackup = null
   }
 
   @Watch('editMode', { immediate: true, deep: true })
@@ -427,12 +444,8 @@ export default class ConfigurationsIdPage extends Vue {
     this.$nuxt.$emit('AppBarContent:cancel-button-hidden', !editMode)
   }
 
-  toggleEditMode () {
-    this.isInEditMode = !this.isInEditMode
-  }
-
   get readonly () {
-    return !this.isInEditMode
+    return !this.editMode
   }
 
   get locationType (): string | null {
