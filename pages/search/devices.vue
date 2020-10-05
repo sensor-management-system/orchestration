@@ -184,7 +184,7 @@
                 <v-btn
                   :to="'/devices/' + result.id"
                   color="primary"
-                  elevation="1"
+                  text
                   @click.stop.prevent
                 >
                   View
