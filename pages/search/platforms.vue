@@ -1,70 +1,69 @@
 <template>
   <div>
-    <v-card>
-      <v-tabs-items
-        v-model="activeTab"
-      >
-        <v-tab-item :eager="true">
-          <v-card
-            flat
-          >
-            <v-card-text>
-              <v-row>
-                <v-col cols="12" md="5">
-                  <v-text-field v-model="searchText" label="Name" placeholder="Name of platform" />
-                </v-col>
-                <v-col cols="12" md="2">
-                  <v-btn @click="basicSearch">
-                    Search
-                  </v-btn>
-                </v-col>
-                <v-col cols="12" md="1">
-                  <v-btn @click="clearBasicSearch">
-                    Clear
-                  </v-btn>
-                </v-col>
-              </v-row>
-            </v-card-text>
-          </v-card>
-        </v-tab-item>
-        <v-tab-item :eager="true">
-          <v-card>
-            <v-card-text>
-              <v-row>
-                <v-col cols="12" md="6">
-                  <v-text-field v-model="searchText" label="Name" placeholder="Name of platform" />
-                </v-col>
-              </v-row>
-              <v-row>
-                <v-col cols="12" md="3">
-                  <ManufacturerSelect v-model="selectedSearchManufacturers" label="Select a manufacturer" />
-                </v-col>
-              </v-row>
-              <v-row>
-                <v-col cols="12" md="3">
-                  <StatusSelect v-model="selectedSearchStates" label="Select a status" />
-                </v-col>
-              </v-row>
-              <v-row>
-                <v-col cols="12" md="3">
-                  <PlatformTypeSelect v-model="selectedSearchPlatformTypes" label="Select a platform type" />
-                </v-col>
-              </v-row>
-            </v-card-text>
-            <v-card-actions>
-              <v-btn @click="extendedSearch">
-                Search
-              </v-btn>
-              <v-btn @click="clearExtendedSearch">
-                Clear
-              </v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-tab-item>
-      </v-tabs-items>
-    </v-card>
+    <v-tabs-items
+      v-model="activeTab"
+    >
+      <v-tab-item :eager="true">
+        <v-row>
+          <v-col cols="12" md="5">
+            <v-text-field v-model="searchText" label="Name" placeholder="Name of platform" />
+          </v-col>
+          <v-col cols="12" md="2">
+            <v-btn
+              color="primary"
+              @click="basicSearch"
+            >
+              Search
+            </v-btn>
+            <v-btn
+              text
+              @click="clearBasicSearch"
+            >
+              Clear
+            </v-btn>
+          </v-col>
+        </v-row>
+      </v-tab-item>
+      <v-tab-item :eager="true">
+        <v-row>
+          <v-col cols="12" md="6">
+            <v-text-field v-model="searchText" label="Name" placeholder="Name of platform" />
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col cols="12" md="3">
+            <ManufacturerSelect v-model="selectedSearchManufacturers" label="Select a manufacturer" />
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col cols="12" md="3">
+            <StatusSelect v-model="selectedSearchStates" label="Select a status" />
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col cols="12" md="3">
+            <PlatformTypeSelect v-model="selectedSearchPlatformTypes" label="Select a platform type" />
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col cols="12" md="3">
+            <v-btn
+              color="primary"
+              @click="extendedSearch"
+            >
+              Search
+            </v-btn>
+            <v-btn
+              text
+              @click="clearExtendedSearch"
+            >
+              Clear
+            </v-btn>
+          </v-col>
+        </v-row>
+      </v-tab-item>
+    </v-tabs-items>
 
-    <h2>Results:</h2>
     <div v-if="loading">
       <div class="text-center pt-2">
         <v-progress-circular indeterminate />
@@ -79,24 +78,164 @@
         </v-card-text>
       </v-card>
     </div>
-    <div v-else>
-      <v-card v-for="result in searchResults" :key="result.id" :disabled="loading">
-        <v-card-title>
-          {{ result.shortName }}
-        </v-card-title>
-        <v-card-text>
-          <p>{{ getPlatformType(result) }}</p>
-          <p>Project {{ getProject(result) }}</p>
-          <p>Status {{ getStatus(result) }}</p>
-        </v-card-text>
-        <v-card-actions>
-          <v-btn :to="'/platforms/' + result.id">
-            View
-          </v-btn>
-          <v-btn>Copy</v-btn>
-          <v-btn @click.stop="showDeleteDialogFor(result.id)">
-            Delete
-          </v-btn>
+    <div v-if="searchResults.length && !loading">
+      <v-subheader>
+        600 platforms found
+      </v-subheader>
+      <v-hover
+        v-for="result in searchResults"
+        v-slot:default="{ hover }"
+        :key="result.id"
+      >
+        <v-card
+          :disabled="loading"
+          :elevation="hover ? 6 : 2"
+          class="ma-2"
+        >
+          <v-card-text
+            @click.stop.prevent="showResultItem(result.id)"
+          >
+            <v-row
+              no-gutters
+            >
+              <v-col>
+                <v-badge
+                  :color="getStatusColor(result)"
+                  :content="getStatus(result)"
+                  :value="!!getStatus(result)"
+                  inline
+                >
+                  <div :class="'text-caption' + (getType(result) === NO_TYPE ? ' text--disabled' : '')">
+                    {{ getType(result) }}
+                  </div>
+                </v-badge>
+              </v-col>
+              <v-col
+                align-self="end"
+                class="text-right"
+              >
+                <v-menu
+                  close-on-click
+                  close-on-content-click
+                  offset-x
+                  left
+                  z-index="999"
+                >
+                  <template v-slot:activator="{ on }">
+                    <v-btn
+                      data-role="property-menu"
+                      icon
+                      small
+                      v-on="on"
+                    >
+                      <v-icon
+                        dense
+                        small
+                      >
+                        mdi-dots-vertical
+                      </v-icon>
+                    </v-btn>
+                  </template>
+
+                  <v-list>
+                    <v-list-item>
+                      <v-list-item-content>
+                        <v-list-item-title>
+                          <v-icon
+                            left
+                          >
+                            mdi-content-copy
+                          </v-icon>
+                          Copy
+                        </v-list-item-title>
+                      </v-list-item-content>
+                    </v-list-item>
+                    <v-list-item
+                      @click.stop.prevent="showDeleteDialogFor(result.id)"
+                    >
+                      <v-list-item-content>
+                        <v-list-item-title
+                          class="red--text"
+                        >
+                          <v-icon
+                            left
+                            color="red"
+                          >
+                            mdi-delete
+                          </v-icon>
+                          Delete
+                        </v-list-item-title>
+                      </v-list-item-content>
+                    </v-list-item>
+                  </v-list>
+                </v-menu>
+              </v-col>
+            </v-row>
+            <v-row
+              no-gutters
+            >
+              <v-col class="text-subtitle-1">
+                {{ result.shortName }}
+              </v-col>
+              <v-col
+                align-self="end"
+                class="text-right"
+              >
+                <v-btn
+                  :to="'/platforms/' + result.id"
+                  color="primary"
+                  text
+                  @click.stop.prevent
+                >
+                  View
+                </v-btn>
+                <v-btn
+                  icon
+                  @click.stop.prevent="showResultItem(result.id)"
+                >
+                  <v-icon>{{ isResultItemShown(result.id) ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
+                </v-btn>
+              </v-col>
+            </v-row>
+          </v-card-text>
+          <v-expand-transition>
+            <v-card
+              v-show="isResultItemShown(result.id)"
+              flat
+              tile
+              color="grey lighten-5"
+            >
+              <v-card-text>
+                <v-row
+                  dense
+                >
+                  <v-col cols="12" md="4">
+                    <span class="font-weight-medium">Manufacturer: </span>{{ result.manufacturerName }}
+                  </v-col>
+                  <v-col cols="12" md="4">
+                    <span class="font-weight-medium">Model: </span>{{ result.model }}
+                  </v-col>
+                </v-row>
+                <v-row
+                  dense
+                >
+                  <v-col cols="12" md="4">
+                    <span class="font-weight-medium">Serial number: </span>{{ result.serialNumber }}
+                  </v-col>
+                  <v-col cols="12" md="4">
+                    <span class="font-weight-medium">Inventory number: </span>{{ result.inventoryNumber }}
+                  </v-col>
+                </v-row>
+                <v-row
+                  dense
+                >
+                  <v-col cols="12">
+                    <span class="font-weight-medium">Description: </span>{{ result.description }}
+                  </v-col>
+                </v-row>
+              </v-card-text>
+            </v-card>
+          </v-expand-transition>
           <v-dialog v-model="showDeleteDialog[result.id]" max-width="290">
             <v-card>
               <v-card-title class="headline">
@@ -106,11 +245,18 @@
                 Do you really want to delete the platform <em>{{ result.shortName }}</em>?
               </v-card-text>
               <v-card-actions>
-                <v-btn @click="hideDeleteDialogFor(result.id)">
+                <v-btn
+                  text
+                  @click="hideDeleteDialogFor(result.id)"
+                >
                   No
                 </v-btn>
                 <v-spacer />
-                <v-btn color="error" @click="deleteAndCloseDialog(result.id)">
+                <v-btn
+                  color="error"
+                  text
+                  @click="deleteAndCloseDialog(result.id)"
+                >
                   <v-icon left>
                     mdi-delete
                   </v-icon>
@@ -119,30 +265,23 @@
               </v-card-actions>
             </v-card>
           </v-dialog>
-        </v-card-actions>
-      </v-card>
+        </v-card>
+      </v-hover>
     </div>
-    <v-speed-dial
-      v-model="fab"
-      fixed
+    <v-btn
       bottom
+      color="primary"
+      dark
+      elevation="10"
+      fab
+      fixed
       right
-      direction="top"
-      open-on-hover
+      to="/platforms"
     >
-      <template v-slot:activator>
-        <v-btn
-          color="primary"
-          dark
-          fab
-          to="/platforms"
-        >
-          <v-icon>
-            mdi-plus
-          </v-icon>
-        </v-btn>
-      </template>
-    </v-speed-dial>
+      <v-icon>
+        mdi-plus
+      </v-icon>
+    </v-btn>
   </div>
 </template>
 
@@ -199,6 +338,10 @@ export default class SeachPlatformsPage extends Vue {
   private searchText: string | null = null
 
   private showDeleteDialog: {[index: string]: boolean } = {}
+
+  private searchResultItemsShown: { [id: string]: boolean } = {}
+
+  public readonly NO_TYPE: string = 'Unknown type'
 
   created () {
     this.$nuxt.$emit('app-bar-content', AppBarEditModeContent)
@@ -356,7 +499,7 @@ export default class SeachPlatformsPage extends Vue {
     })
   }
 
-  getPlatformType (platform: Platform) {
+  getType (platform: Platform) {
     if (this.platformTypeLookup.has(platform.platformTypeUri)) {
       const platformType: PlatformType = this.platformTypeLookup.get(platform.platformTypeUri) as PlatformType
       return platformType.name
@@ -364,7 +507,7 @@ export default class SeachPlatformsPage extends Vue {
     if (platform.platformTypeName) {
       return platform.platformTypeName
     }
-    return 'Unknown type'
+    return this.NO_TYPE
   }
 
   getProject (_platform: Platform) {
@@ -380,7 +523,22 @@ export default class SeachPlatformsPage extends Vue {
     if (platform.statusName) {
       return platform.statusName
     }
-    return 'Unknown status'
+    return ''
+  }
+
+  getStatusColor (platform: Platform): string {
+    const colors: { [key: string]: string } = {
+      blocked: 'red',
+      'in use': 'green',
+      'in warehouse': 'blue',
+      scrapped: 'blue-grey',
+      'under construction': 'brown'
+    }
+    const status: string = this.getStatus(platform).toLowerCase()
+    if (!colors[status]) {
+      return ''
+    }
+    return colors[status]
   }
 
   showDeleteDialogFor (id: string) {
@@ -389,6 +547,15 @@ export default class SeachPlatformsPage extends Vue {
 
   hideDeleteDialogFor (id: string) {
     Vue.set(this.showDeleteDialog, id, false)
+  }
+
+  showResultItem (id: string) {
+    const show = !!this.searchResultItemsShown[id]
+    Vue.set(this.searchResultItemsShown, id, !show)
+  }
+
+  isResultItemShown (id: string): boolean {
+    return this.searchResultItemsShown[id]
   }
 }
 
