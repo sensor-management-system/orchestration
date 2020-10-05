@@ -156,7 +156,7 @@
                       </v-list-item-content>
                     </v-list-item>
                     <v-list-item
-                      @click.stop.prevent="showDeleteDialogFor(result.id)"
+                      @click="showDeleteDialogFor(result.id)"
                     >
                       <v-list-item-content>
                         <v-list-item-title
