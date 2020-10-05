@@ -29,13 +29,21 @@ import { Vue, Component } from 'nuxt-property-decorator'
 export default class AppBarTabsExtension extends Vue {
   private activeTab: number = 0
 
+  created () {
+    this.$nuxt.$on('AppBarExtension:change', (tab: number) => {
+      if (tab !== this.activeTab) {
+        this.activeTab = tab
+      }
+    })
+  }
+
   get tabs (): String[] {
     return [] as String[]
   }
 
   changeTab (tab: number) {
     this.activeTab = tab
-    this.$nuxt.$emit('AppBarExtension:change', tab)
+    this.$nuxt.$emit('AppBarExtension:change', this.activeTab)
   }
 }
 </script>
