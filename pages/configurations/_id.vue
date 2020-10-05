@@ -190,14 +190,18 @@
               <v-card-text>
                 <v-row>
                   <v-col cols="12" md="6">
+                    <ConfigurationsDemoTreeView
+                      v-if="!configuration.tree.length"
+                    />
                     <ConfigurationsTreeView
+                      v-else
                       ref="treeView"
                       v-model="configuration.tree"
                       :selected="selectedNode"
                       @select="setSelectedNode"
                     />
                   </v-col>
-                  <v-col cols="6" md="6">
+                  <v-col cols="12" md="6">
                     <InfoBox v-if="!selectedNode && !readonly">
                       Select a platform on the left side to add devices or platforms to it. To add a device or platform to the root of this configuration, deselect any previously selected device or platform.
                     </InfoBox>
@@ -280,6 +284,7 @@ import DeviceConfigurationAttributesExpansionPanels from '@/components/DeviceCon
 import PlatformConfigurationAttributesExpansionPanels from '@/components/PlatformConfigurationAttributesExpansionPanels.vue'
 import ConfigurationsPlatformDeviceSearch from '@/components/ConfigurationsPlatformDeviceSearch.vue'
 import ConfigurationsTreeView from '@/components/ConfigurationsTreeView.vue'
+import ConfigurationsDemoTreeView from '@/components/ConfigurationsDemoTreeView.vue'
 import ConfigurationsSelectedItem from '@/components/ConfigurationsSelectedItem.vue'
 import InfoBox from '@/components/InfoBox.vue'
 
@@ -324,6 +329,7 @@ export class AppBarTabsExtensionExtended extends AppBarTabsExtension {
     PlatformConfigurationAttributesExpansionPanels,
     ConfigurationsPlatformDeviceSearch,
     ConfigurationsTreeView,
+    ConfigurationsDemoTreeView,
     ConfigurationsSelectedItem,
     InfoBox
   }
