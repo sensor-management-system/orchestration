@@ -80,12 +80,12 @@
     </div>
     <div v-if="searchResults.length && !loading">
       <v-subheader>
-        <div v-if="totalCount == 1">
+        <template v-if="totalCount == 1">
           1 device found
-        </div>
-        <div v-else>
+        </template>
+        <template v-else>
           {{ totalCount }} devices found
-        </div>
+        </template>
       </v-subheader>
       <v-hover
         v-for="result in searchResults"
