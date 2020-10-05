@@ -282,7 +282,6 @@
         mdi-plus
       </v-icon>
     </v-btn>
-    </v-speed-dial>
   </div>
 </template>
 
