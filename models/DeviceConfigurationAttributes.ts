@@ -29,7 +29,7 @@ export class DeviceConfigurationAttributes implements IDeviceConfigurationAttrib
     newObject.offsetY = someObject.offsetY
     newObject.offsetZ = someObject.offsetZ
     newObject.calibrationDate = someObject.calibrationDate instanceof Date ? new Date(someObject.calibrationDate.getTime()) : null
-    someObject.deviceProperties = [...someObject.deviceProperties]
+    newObject.deviceProperties = [...someObject.deviceProperties]
 
     return newObject
   }

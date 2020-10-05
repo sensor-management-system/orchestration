@@ -14,13 +14,19 @@ import Platform from '@/models/Platform'
 export class PlatformNode implements IConfigurationsTreeNode<Platform> {
   private node: Platform
   private tree: ConfigurationsTree = new ConfigurationsTree()
+  private _disabled: boolean = false
+
+  static readonly ID_PREFIX = 'PlatformNode-'
 
   constructor (node: Platform) {
     this.node = node
   }
 
   get id (): string | null {
-    return this.node.id
+    if (!this.node.id) {
+      return null
+    }
+    return PlatformNode.ID_PREFIX + this.node.id
   }
 
   get name (): string {
@@ -28,11 +34,23 @@ export class PlatformNode implements IConfigurationsTreeNode<Platform> {
   }
 
   get disabled (): boolean {
-    return false
+    return this._disabled
+  }
+
+  set disabled (isDisabled: boolean) {
+    this._disabled = isDisabled
   }
 
   canHaveChildren (): boolean {
     return true
+  }
+
+  isPlatform (): boolean {
+    return true
+  }
+
+  isDevice (): boolean {
+    return false
   }
 
   unpack (): Platform {

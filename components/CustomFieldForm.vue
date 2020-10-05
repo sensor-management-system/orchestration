@@ -78,7 +78,7 @@ export default class CustomFieldForm extends mixins(Rules) {
         newObj.value = value
         break
       default:
-        throw new TypeError('path ' + key + ' is not valid')
+        throw new TypeError('key ' + key + ' is not valid')
     }
 
     /**
