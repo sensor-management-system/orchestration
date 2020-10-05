@@ -115,15 +115,25 @@
                 class="text-right"
               >
                 <v-menu
+                  close-on-click
+                  close-on-content-click
+                  offset-x
+                  left
                   z-index="999"
                 >
                   <template v-slot:activator="{ on }">
                     <v-btn
                       data-role="property-menu"
                       icon
+                      small
                       v-on="on"
                     >
-                      <v-icon>mdi-dots-vertical</v-icon>
+                      <v-icon
+                        dense
+                        small
+                      >
+                        mdi-dots-vertical
+                      </v-icon>
                     </v-btn>
                   </template>
 
