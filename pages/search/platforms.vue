@@ -80,7 +80,12 @@
     </div>
     <div v-if="searchResults.length && !loading">
       <v-subheader>
-        600 platforms found
+        <div v-if="totalCount == 1">
+          1 platform found
+        </div>
+        <div v-else>
+          {{ totalCount }} platforms found
+        </div>
       </v-subheader>
       <v-hover
         v-for="result in searchResults"
@@ -325,6 +330,7 @@ export default class SeachPlatformsPage extends Vue {
   private fab: boolean = false
   private loading: boolean = true
 
+  private totalCount: number = 0
   private loader: null | IPaginationLoader<Platform> = null
 
   private selectedSearchManufacturers: Manufacturer[] = []
@@ -456,6 +462,7 @@ export default class SeachPlatformsPage extends Vue {
     this.loader = loader
     this.loading = false
     this.searchResults = [...this.searchResults, ...loader.elements]
+    this.totalCount = loader.totalCount
 
     if (this.searchResults.length >= this.pageSize || !this.canLoadNext()) {
       this.loading = false
@@ -473,6 +480,7 @@ export default class SeachPlatformsPage extends Vue {
       this.loader.funToLoadNext().then((nextLoader) => {
         this.loader = nextLoader
         this.searchResults = [...this.searchResults, ...nextLoader.elements]
+        this.totalCount = nextLoader.totalCount
       }).catch((_error) => {
         this.$store.commit('snackbar/setError', 'Loading of additional platforms failed')
       })
