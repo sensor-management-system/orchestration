@@ -597,6 +597,7 @@ export default class SeachPlatformsPage extends Vue {
       const searchIndex = this.searchResults.findIndex(r => r.id === id)
       if (searchIndex > -1) {
         this.searchResults.splice(searchIndex, 1)
+        this.totalCount -= 1
       }
 
       this.$store.commit('snackbar/setSuccess', 'Platform deleted')
