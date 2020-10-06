@@ -214,28 +214,123 @@
                 <v-row
                   dense
                 >
-                  <v-col cols="12" md="4">
-                    <span class="font-weight-medium">Manufacturer: </span>{{ result.manufacturerName }}
+                  <v-col
+                    cols="4"
+                    xs="4"
+                    sm="3"
+                    md="2"
+                    lg="2"
+                    xl="1"
+                    class="font-weight-medium"
+                  >
+                    Manufacturer:
                   </v-col>
-                  <v-col cols="12" md="4">
-                    <span class="font-weight-medium">Model: </span>{{ result.model }}
+                  <v-col
+                    cols="8"
+                    xs="8"
+                    sm="9"
+                    md="4"
+                    lg="4"
+                    xl="5"
+                    class="nowrap-truncate"
+                  >
+                    {{ getTextOrDefault(result.manufacturerName) }}
+                  </v-col>
+                  <v-col
+                    cols="4"
+                    xs="4"
+                    sm="3"
+                    md="2"
+                    lg="2"
+                    xl="1"
+                    class="font-weight-medium"
+                  >
+                    Model:
+                  </v-col>
+                  <v-col
+                    cols="8"
+                    xs="8"
+                    sm="9"
+                    md="4"
+                    lg="4"
+                    xl="5"
+                    class="nowrap-truncate"
+                  >
+                    {{ getTextOrDefault(result.model) }}
                   </v-col>
                 </v-row>
                 <v-row
                   dense
                 >
-                  <v-col cols="12" md="4">
-                    <span class="font-weight-medium">Serial number: </span>{{ result.serialNumber }}
+                  <v-col
+                    cols="4"
+                    xs="4"
+                    sm="3"
+                    md="2"
+                    lg="2"
+                    xl="1"
+                    class="font-weight-medium"
+                  >
+                    Serial number:
                   </v-col>
-                  <v-col cols="12" md="4">
-                    <span class="font-weight-medium">Inventory number: </span>{{ result.inventoryNumber }}
+                  <v-col
+                    cols="8"
+                    xs="8"
+                    sm="9"
+                    md="4"
+                    lg="4"
+                    xl="5"
+                    class="nowrap-truncate"
+                  >
+                    {{ getTextOrDefault(result.serialNumber) }}
+                  </v-col>
+                  <v-col
+                    cols="4"
+                    xs="4"
+                    sm="3"
+                    md="2"
+                    lg="2"
+                    xl="1"
+                    class="font-weight-medium"
+                  >
+                    Inventory number:
+                  </v-col>
+                  <v-col
+                    cols="8"
+                    xs="8"
+                    sm="9"
+                    md="4"
+                    lg="4"
+                    xl="5"
+                    class="nowrap-truncate"
+                  >
+                    {{ getTextOrDefault(result.inventoryNumber) }}
                   </v-col>
                 </v-row>
                 <v-row
                   dense
                 >
-                  <v-col cols="12">
-                    <span class="font-weight-medium">Description: </span>{{ result.description }}
+                  <v-col
+                    cols="4"
+                    xs="4"
+                    sm="3"
+                    md="2"
+                    lg="2"
+                    xl="1"
+                    class="font-weight-medium"
+                  >
+                    Description:
+                  </v-col>
+                  <v-col
+                    cols="8"
+                    xs="8"
+                    sm="9"
+                    md="10"
+                    lg="10"
+                    xl="11"
+                    class="nowrap-truncate"
+                  >
+                    {{ getTextOrDefault(result.description) }}
                   </v-col>
                 </v-row>
               </v-card-text>
@@ -289,6 +384,10 @@
     </v-btn>
   </div>
 </template>
+
+<style lang="scss">
+@import "~/assets/styles/_search.scss";
+</style>
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
@@ -565,6 +664,8 @@ export default class SeachPlatformsPage extends Vue {
   isResultItemShown (id: string): boolean {
     return this.searchResultItemsShown[id]
   }
+
+  getTextOrDefault = (text: string): string => text || '-'
 }
 
 </script>

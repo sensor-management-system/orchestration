@@ -1,0 +1,8 @@
+@import '~vuetify/src/styles/styles.sass';
+
+.nowrap-truncate {
+  vertical-align: middle;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
