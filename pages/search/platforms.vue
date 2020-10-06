@@ -426,7 +426,6 @@ export class AppBarTabsExtensionExtended extends AppBarTabsExtension {
 export default class SeachPlatformsPage extends Vue {
   private pageSize: number = 20
   private activeTab: number = 0
-  private fab: boolean = false
   private loading: boolean = true
 
   private totalCount: number = 0
