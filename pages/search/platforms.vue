@@ -621,11 +621,6 @@ export default class SeachPlatformsPage extends Vue {
     return this.NO_TYPE
   }
 
-  getProject (_platform: Platform) {
-    // TODO
-    return 'No project yet'
-  }
-
   getStatus (platform: Platform) {
     if (this.statusLookup.has(platform.statusUri)) {
       const platformStatus: Status = this.statusLookup.get(platform.statusUri) as Status
