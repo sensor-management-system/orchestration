@@ -501,6 +501,8 @@ export default class SeachPlatformsPage extends Vue {
     this.$nuxt.$emit('app-bar-content', null)
     this.$nuxt.$emit('app-bar-extension', null)
     this.$nuxt.$off('AppBarExtension:change')
+    this.unsetResultItemsShown()
+    this.showDeleteDialog = {}
   }
 
   runSelectedSearch () {
@@ -544,6 +546,8 @@ export default class SeachPlatformsPage extends Vue {
   ) {
     this.loading = true
     this.searchResults = []
+    this.unsetResultItemsShown()
+    this.showDeleteDialog = {}
     this.$api.platforms
       .newSearchBuilder()
       .withTextInName(searchText)
@@ -664,6 +668,10 @@ export default class SeachPlatformsPage extends Vue {
 
   isResultItemShown (id: string): boolean {
     return this.searchResultItemsShown[id]
+  }
+
+  unsetResultItemsShown (): void {
+    this.searchResultItemsShown = {}
   }
 
   getTextOrDefault = (text: string): string => text || '-'
