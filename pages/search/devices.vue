@@ -618,11 +618,6 @@ export default class SeachDevicesPage extends Vue {
     return this.NO_TYPE
   }
 
-  getProject (_device: Device) {
-    // TODO
-    return 'No project yet'
-  }
-
   getStatus (device: Device): string {
     if (this.statusLookup.has(device.statusUri)) {
       const deviceStatus: Status = this.statusLookup.get(device.statusUri) as Status
