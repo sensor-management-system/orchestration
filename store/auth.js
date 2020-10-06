@@ -1,10 +1,7 @@
-import { UserManager, Log } from 'oidc-client'
+import { UserManager } from 'oidc-client'
 import settings from '@/config/oidc'
 
 const userManager = new UserManager(settings)
-
-// For testing and debugging purposes
-Log.logger = console
 
 const isAuthenticated = (state) => {
   if (state.id_token) {
