@@ -12,11 +12,10 @@ import { Attachment } from '@/models/Attachment'
 
 import { IFlaskJSONAPIFilter } from '@/utils/JSONApiInterfaces'
 
-import { serverResponseToEntity as serverResponseToContact } from '@/services/sms/ContactApi'
-
 import {
   IPaginationLoader, FilteredPaginationedLoader
 } from '@/utils/PaginatedLoader'
+import ContactSerializer from '@/serializers/jsonapi/ContactSerializer'
 
 export default class DeviceApi {
   private axiosApi: AxiosInstance
@@ -367,6 +366,7 @@ export class DeviceSearcher {
 
 export function serverResponseToEntity (entry: any, included: any[]) : Device {
   const result: Device = new Device()
+  const contactSerializer = new ContactSerializer()
 
   const attributes = entry.attributes
   const relationships = entry.relationships
@@ -462,7 +462,7 @@ export function serverResponseToEntity (entry: any, included: any[]) : Device {
       if (includedEntry.type === 'contact') {
         const contactId = includedEntry.id
         if (contactIds.includes(contactId)) {
-          const contact = serverResponseToContact(includedEntry)
+          const contact = contactSerializer.convertJsonApiDataToModel(includedEntry)
           possibleContacts[contactId] = contact
         }
       }

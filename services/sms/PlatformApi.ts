@@ -13,7 +13,7 @@ import {
   IPaginationLoader, FilteredPaginationedLoader
 } from '@/utils/PaginatedLoader'
 
-import { serverResponseToEntity as serverResponseToContact } from '@/services/sms/ContactApi'
+import ContactSerializer from '@/serializers/jsonapi/ContactSerializer'
 
 export default class PlatformApi {
   private axiosApi: AxiosInstance
@@ -321,6 +321,8 @@ export class PlatformSearcher {
 export function serverResponseToEntity (entry: any, included: any[]) : Platform {
   const result: Platform = Platform.createEmpty()
 
+  const contactSerializer = new ContactSerializer()
+
   const attributes = entry.attributes
   const relationships = entry.relationships
 
@@ -378,7 +380,7 @@ export function serverResponseToEntity (entry: any, included: any[]) : Platform 
       if (includedEntry.type === 'contact') {
         const contactId = includedEntry.id
         if (contactIds.includes(contactId)) {
-          const contact = serverResponseToContact(includedEntry)
+          const contact = contactSerializer.convertJsonApiDataToModel(includedEntry)
           possibleContacts[contactId] = contact
         }
       }

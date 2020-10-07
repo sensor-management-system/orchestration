@@ -1,6 +1,7 @@
 import { AxiosInstance } from 'axios'
 
 import Contact from '@/models/Contact'
+import ContactSerializer from '@/serializers/jsonapi/ContactSerializer'
 
 export default class ContactApi {
   private axiosApi: AxiosInstance
@@ -41,15 +42,17 @@ export class ContactSearchBuilder {
   }
 
   build (): ContactSearcher {
-    return new ContactSearcher(this.axiosApi)
+    return new ContactSearcher(this.axiosApi, new ContactSerializer())
   }
 }
 
 export class ContactSearcher {
   private axiosApi: AxiosInstance
+  private serializer: ContactSerializer
 
-  constructor (axiosApi: AxiosInstance) {
+  constructor (axiosApi: AxiosInstance, serializer: ContactSerializer) {
     this.axiosApi = axiosApi
+    this.serializer = serializer
   }
 
   findMatchingAsList (): Promise<Contact[]> {
@@ -62,13 +65,7 @@ export class ContactSearcher {
           sort: 'email'
         }
       }).then((rawResponse: any) => {
-      const rawData = rawResponse.data
-      const result: Contact[] = []
-
-      for (const entry of rawData.data) {
-        result.push(serverResponseToEntity(entry))
-      }
-      return result
+      return this.serializer.convertJsonApiObjectListToModelList(rawResponse.data)
     })
   }
 }
