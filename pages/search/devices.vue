@@ -140,7 +140,7 @@
                   </template>
 
                   <v-list>
-                    <v-list-item 
+                    <v-list-item
                       dense
                     >
                       <v-list-item-content>

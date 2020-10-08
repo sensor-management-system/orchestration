@@ -22,7 +22,7 @@
             <v-col cols="11">
               Property {{ index+1 }} {{ item.label ? ' - ' + item.label : '' }}
             </v-col>
-            <v-col 
+            <v-col
               cols="1"
               align-self="end"
               class="text-right"
