@@ -1,26 +1,10 @@
+import Contact from '@/models/Contact'
 import Device from '@/models/Device'
 
-import { Attachment } from '@/models/Attachment'
-import Contact from '@/models/Contact'
-
+import AttachmentSerializer from '@/serializers/jsonapi/AttachmentSerializer'
 import ContactSerializer from '@/serializers/jsonapi/ContactSerializer'
 import CustomTextFieldSerializer from '@/serializers/jsonapi/CustomTextFieldSerializer'
 import DevicePropertySerializer from '@/serializers/jsonapi/DevicePropertySerializer'
-
-export class AttachmentSerializer {
-  convertJsonApiElementToModel (attachment: any): Attachment {
-    const result = new Attachment()
-    result.id = attachment.id
-    result.label = attachment.label || ''
-    result.url = attachment.url || ''
-
-    return result
-  }
-
-  convertNestedJsonApiToModelList (attachments: any[]): Attachment[] {
-    return attachments.map(this.convertJsonApiElementToModel)
-  }
-}
 
 export default class DeviceSerializer {
   convertJsonApiObjectToModel (jsonApiObject: any): Device {
