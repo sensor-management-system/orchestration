@@ -104,16 +104,13 @@
               no-gutters
             >
               <v-col>
-                <v-badge
-                  :color="getStatusColor(result)"
-                  :content="getStatus(result)"
-                  :value="!!getStatus(result)"
-                  inline
+                <StatusBadge
+                  :value="getStatus(result)"
                 >
                   <div :class="'text-caption' + (getType(result) === NO_TYPE ? ' text--disabled' : '')">
                     {{ getType(result) }}
                   </div>
-                </v-badge>
+                </StatusBadge>
               </v-col>
               <v-col
                 align-self="end"
@@ -397,6 +394,7 @@ import AppBarTabsExtension from '@/components/AppBarTabsExtension.vue'
 import DeviceTypeSelect from '@/components/DeviceTypeSelect.vue'
 import ManufacturerSelect from '@/components/ManufacturerSelect.vue'
 import StatusSelect from '@/components/StatusSelect.vue'
+import StatusBadge from '@/components/StatusBadge.vue'
 
 import { IPaginationLoader } from '@/utils/PaginatedLoader'
 
@@ -417,7 +415,12 @@ export class AppBarTabsExtensionExtended extends AppBarTabsExtension {
 }
 
 @Component({
-  components: { ManufacturerSelect, StatusSelect, DeviceTypeSelect }
+  components: {
+    DeviceTypeSelect,
+    ManufacturerSelect,
+    StatusBadge,
+    StatusSelect
+  }
 })
 export default class SeachDevicesPage extends Vue {
   private pageSize: number = 20
@@ -627,21 +630,6 @@ export default class SeachDevicesPage extends Vue {
       return device.statusName
     }
     return ''
-  }
-
-  getStatusColor (device: Device): string {
-    const colors: { [key: string]: string } = {
-      blocked: 'red',
-      'in use': 'green',
-      'in warehouse': 'blue',
-      scrapped: 'blue-grey',
-      'under construction': 'brown'
-    }
-    const status: string = this.getStatus(device).toLowerCase()
-    if (!colors[status]) {
-      return ''
-    }
-    return colors[status]
   }
 
   showDeleteDialogFor (id: string) {
