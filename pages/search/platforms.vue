@@ -423,7 +423,7 @@ export class AppBarTabsExtensionExtended extends AppBarTabsExtension {
     PlatformTypeSelect
   }
 })
-export default class SeachPlatformsPage extends Vue {
+export default class SearchPlatformsPage extends Vue {
   private pageSize: number = 20
   private activeTab: number = 0
   private loading: boolean = true

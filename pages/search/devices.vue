@@ -422,7 +422,7 @@ export class AppBarTabsExtensionExtended extends AppBarTabsExtension {
     StatusSelect
   }
 })
-export default class SeachDevicesPage extends Vue {
+export default class SearchDevicesPage extends Vue {
   private pageSize: number = 20
   private activeTab: number = 0
   private loading: boolean = true
