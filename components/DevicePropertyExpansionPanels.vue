@@ -22,7 +22,11 @@
             <v-col cols="11">
               Property {{ index+1 }} {{ item.label ? ' - ' + item.label : '' }}
             </v-col>
-            <v-col cols="1">
+            <v-col 
+              cols="1"
+              align-self="end"
+              class="text-right"
+            >
               <v-menu
                 v-if="!readonly"
                 right
@@ -32,24 +36,52 @@
                   <v-btn
                     data-role="property-menu"
                     icon
+                    small
                     v-on="on"
                   >
-                    <v-icon>mdi-dots-vertical</v-icon>
+                    <v-icon
+                      dense
+                      small
+                    >
+                      mdi-dots-vertical
+                    </v-icon>
                   </v-btn>
                 </template>
 
-                <v-list>
+                <v-list
+                  dense
+                >
                   <v-list-item
                     data-role="copy-property"
                     @click="copyProperty(index)"
                   >
-                    <v-list-item-title>Copy</v-list-item-title>
+                    <v-list-item-title>
+                      <v-icon
+                        left
+                        small
+                      >
+                        mdi-content-copy
+                      </v-icon>
+                      Copy
+                    </v-list-item-title>
                   </v-list-item>
                   <v-list-item
+                    dense
                     data-role="delete-property"
                     @click="removeProperty(index)"
                   >
-                    <v-list-item-title>Delete</v-list-item-title>
+                    <v-list-item-title
+                      class="red--text"
+                    >
+                      <v-icon
+                        left
+                        small
+                        color="red"
+                      >
+                        mdi-delete
+                      </v-icon>
+                      Delete
+                    </v-list-item-title>
                   </v-list-item>
                 </v-list>
               </v-menu>
