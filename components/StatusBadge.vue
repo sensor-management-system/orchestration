@@ -61,7 +61,8 @@ export default class StatusBadge extends Vue {
    */
   getColor (): string {
     const status: string = this.value.toLowerCase()
-    if (!(Object.values(KnownStatus).includes(status)) || !(status in this.colors)) {
+    // check if status is a known status and has a color assigned to it
+    if (!((Object.values(KnownStatus) as string[]).includes(status)) || !(status in this.colors)) {
       return ''
     }
     return this.colors[status as keyof StatusColors]
