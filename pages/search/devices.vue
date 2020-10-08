@@ -140,11 +140,14 @@
                   </template>
 
                   <v-list>
-                    <v-list-item>
+                    <v-list-item 
+                      dense
+                    >
                       <v-list-item-content>
                         <v-list-item-title>
                           <v-icon
                             left
+                            small
                           >
                             mdi-content-copy
                           </v-icon>
@@ -153,6 +156,7 @@
                       </v-list-item-content>
                     </v-list-item>
                     <v-list-item
+                      dense
                       @click="showDeleteDialogFor(result.id)"
                     >
                       <v-list-item-content>
@@ -161,6 +165,7 @@
                         >
                           <v-icon
                             left
+                            small
                             color="red"
                           >
                             mdi-delete
