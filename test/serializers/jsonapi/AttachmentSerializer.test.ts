@@ -3,6 +3,20 @@ import { Attachment } from '@/models/Attachment'
 import AttachmentSerializer from '@/serializers/jsonapi/AttachmentSerializer'
 
 describe('AttachmentSerializer', () => {
+  describe('#convertJsonApiElementToModel', () => {
+    const jsonApiElement = {
+      id: '3'
+      // no label, no url
+    }
+
+    const expectedAttachment = new Attachment()
+    expectedAttachment.id = '3'
+
+    const serializer = new AttachmentSerializer()
+    const attachment = serializer.convertJsonApiElementToModel(jsonApiElement)
+
+    expect(attachment).toEqual(expectedAttachment)
+  })
   describe('#convertNestedJsonApiToModelList', () => {
     it('should convert a list of entries to models', () => {
       const jsonApiElements = [{
