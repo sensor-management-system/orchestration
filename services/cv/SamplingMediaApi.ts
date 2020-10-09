@@ -1,19 +1,19 @@
 import { AxiosInstance } from 'axios'
 
 import SamplingMedia from '@/models/SamplingMedia'
-import { removeBaseUrl } from '@/utils/urlHelpers'
+import SamplingMediaSerializer from '@/serializers/jsonapi/SamplingMediaSerializer'
 
 export default class SamplingMediaApi {
   private axiosApi: AxiosInstance
-  private cvBaseUrl: string | undefined
+  private serializer: SamplingMediaSerializer
 
   constructor (axiosInstance: AxiosInstance, cvBaseUrl: string | undefined) {
     this.axiosApi = axiosInstance
-    this.cvBaseUrl = cvBaseUrl
+    this.serializer = new SamplingMediaSerializer(cvBaseUrl)
   }
 
   newSearchBuilder (): SamplingMediaSearchBuilder {
-    return new SamplingMediaSearchBuilder(this.axiosApi, this.cvBaseUrl)
+    return new SamplingMediaSearchBuilder(this.axiosApi, this.serializer)
   }
 
   findAll (): Promise<SamplingMedia[]> {
@@ -21,35 +21,27 @@ export default class SamplingMediaApi {
   }
 }
 
-export function serverResponseToEntity (entry: any, cvBaseUrl: string | undefined): SamplingMedia {
-  const id = entry.id
-  const name = entry.attributes.name
-  const url = removeBaseUrl(entry.links.self, cvBaseUrl)
-
-  return SamplingMedia.createWithData(id, name, url)
-}
-
 export class SamplingMediaSearchBuilder {
   private axiosApi: AxiosInstance
-  private cvBaseUrl: string | undefined
+  private serializer: SamplingMediaSerializer
 
-  constructor (axiosApi: AxiosInstance, cvBaseUrl: string | undefined) {
+  constructor (axiosApi: AxiosInstance, serializer: SamplingMediaSerializer) {
     this.axiosApi = axiosApi
-    this.cvBaseUrl = cvBaseUrl
+    this.serializer = serializer
   }
 
   build (): SamplingMediaSearcher {
-    return new SamplingMediaSearcher(this.axiosApi, this.cvBaseUrl)
+    return new SamplingMediaSearcher(this.axiosApi, this.serializer)
   }
 }
 
 export class SamplingMediaSearcher {
   private axiosApi: AxiosInstance
-  private cvBaseUrl: string | undefined
+  private serializer: SamplingMediaSerializer
 
-  constructor (axiosApi: AxiosInstance, cvBaseUrl: string | undefined) {
+  constructor (axiosApi: AxiosInstance, serializer: SamplingMediaSerializer) {
     this.axiosApi = axiosApi
-    this.cvBaseUrl = cvBaseUrl
+    this.serializer = serializer
   }
 
   findMatchingAsList (): Promise<SamplingMedia[]> {
@@ -64,13 +56,7 @@ export class SamplingMediaSearcher {
       }
     ).then((rawResponse) => {
       const response = rawResponse.data
-      const result: SamplingMedia[] = []
-
-      for (const entry of response.data) {
-        result.push(serverResponseToEntity(entry, this.cvBaseUrl))
-      }
-
-      return result
+      return this.serializer.convertJsonApiObjectListToModelList(response)
     })
   }
 }

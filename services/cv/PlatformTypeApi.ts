@@ -1,19 +1,19 @@
 import { AxiosInstance } from 'axios'
 
 import PlatformType from '@/models/PlatformType'
-import { removeBaseUrl } from '@/utils/urlHelpers'
+import PlatformTypeSerializer from '@/serializers/jsonapi/PlatformTypeSerializer'
 
 export default class PlatformTypeApi {
   private axiosApi: AxiosInstance
-  private cvBaseUrl: string | undefined
+  private serializer: PlatformTypeSerializer
 
   constructor (axiosInstance: AxiosInstance, cvBaseUrl: string | undefined) {
     this.axiosApi = axiosInstance
-    this.cvBaseUrl = cvBaseUrl
+    this.serializer = new PlatformTypeSerializer(cvBaseUrl)
   }
 
   newSearchBuilder (): PlatformTypeSearchBuilder {
-    return new PlatformTypeSearchBuilder(this.axiosApi, this.cvBaseUrl)
+    return new PlatformTypeSearchBuilder(this.axiosApi, this.serializer)
   }
 
   findAll (): Promise<PlatformType[]> {
@@ -21,35 +21,27 @@ export default class PlatformTypeApi {
   }
 }
 
-export function serverResponseToEntity (entry: any, cvBaseUrl: string | undefined): PlatformType {
-  const id = entry.id
-  const name = entry.attributes.name
-  const url = removeBaseUrl(entry.links.self, cvBaseUrl)
-
-  return PlatformType.createWithData(id, name, url)
-}
-
 export class PlatformTypeSearchBuilder {
   private axiosApi: AxiosInstance
-  private cvBaseUrl: string | undefined
+  private serializer: PlatformTypeSerializer
 
-  constructor (axiosApi: AxiosInstance, cvBaseUrl: string | undefined) {
+  constructor (axiosApi: AxiosInstance, serializer: PlatformTypeSerializer) {
     this.axiosApi = axiosApi
-    this.cvBaseUrl = cvBaseUrl
+    this.serializer = serializer
   }
 
   build (): PlatformTypeSearcher {
-    return new PlatformTypeSearcher(this.axiosApi, this.cvBaseUrl)
+    return new PlatformTypeSearcher(this.axiosApi, this.serializer)
   }
 }
 
 export class PlatformTypeSearcher {
   private axiosApi: AxiosInstance
-  private cvBaseUrl: string | undefined
+  private serializer: PlatformTypeSerializer
 
-  constructor (axiosApi: AxiosInstance, cvBaseUrl: string | undefined) {
+  constructor (axiosApi: AxiosInstance, serializer: PlatformTypeSerializer) {
     this.axiosApi = axiosApi
-    this.cvBaseUrl = cvBaseUrl
+    this.serializer = serializer
   }
 
   findMatchingAsList (): Promise<PlatformType[]> {
@@ -64,13 +56,7 @@ export class PlatformTypeSearcher {
       }
     ).then((rawResponse) => {
       const response = rawResponse.data
-      const result: PlatformType[] = []
-
-      for (const entry of response.data) {
-        result.push(serverResponseToEntity(entry, this.cvBaseUrl))
-      }
-
-      return result
+      return this.serializer.convertJsonApiObjectListToModelList(response)
     })
   }
 }

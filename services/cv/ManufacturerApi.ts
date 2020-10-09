@@ -1,19 +1,19 @@
 import { AxiosInstance } from 'axios'
 
 import Manufacturer from '@/models/Manufacturer'
-import { removeBaseUrl } from '@/utils/urlHelpers'
+import ManufacturerSerializer from '@/serializers/jsonapi/ManufacturerSerializer'
 
 export default class ManufacturerApi {
   private axiosApi: AxiosInstance
-  private cvBaseUrl: string | undefined
+  private serializer: ManufacturerSerializer
 
   constructor (axiosInstance: AxiosInstance, cvBaseUrl: string | undefined) {
     this.axiosApi = axiosInstance
-    this.cvBaseUrl = cvBaseUrl
+    this.serializer = new ManufacturerSerializer(cvBaseUrl)
   }
 
   newSearchBuilder (): ManufacturerSearchBuilder {
-    return new ManufacturerSearchBuilder(this.axiosApi, this.cvBaseUrl)
+    return new ManufacturerSearchBuilder(this.axiosApi, this.serializer)
   }
 
   findAll (): Promise<Manufacturer[]> {
@@ -21,35 +21,27 @@ export default class ManufacturerApi {
   }
 }
 
-export function serverResponseToEntity (entry: any, cvBaseUrl: string | undefined): Manufacturer {
-  const id = entry.id
-  const name = entry.attributes.name
-  const url = removeBaseUrl(entry.links.self, cvBaseUrl)
-
-  return Manufacturer.createWithData(id, name, url)
-}
-
 export class ManufacturerSearchBuilder {
   private axiosApi: AxiosInstance
-  private cvBaseUrl: string | undefined
+  private serializer: ManufacturerSerializer
 
-  constructor (axiosApi: AxiosInstance, cvBaseUrl: string | undefined) {
+  constructor (axiosApi: AxiosInstance, serializer: ManufacturerSerializer) {
     this.axiosApi = axiosApi
-    this.cvBaseUrl = cvBaseUrl
+    this.serializer = serializer
   }
 
   build (): ManufacturerSearcher {
-    return new ManufacturerSearcher(this.axiosApi, this.cvBaseUrl)
+    return new ManufacturerSearcher(this.axiosApi, this.serializer)
   }
 }
 
 export class ManufacturerSearcher {
   private axiosApi: AxiosInstance
-  private cvBaseUrl: string | undefined
+  private serializer: ManufacturerSerializer
 
-  constructor (axiosApi: AxiosInstance, cvBaseUrl: string | undefined) {
+  constructor (axiosApi: AxiosInstance, serializer: ManufacturerSerializer) {
     this.axiosApi = axiosApi
-    this.cvBaseUrl = cvBaseUrl
+    this.serializer = serializer
   }
 
   findMatchingAsList (): Promise<Manufacturer[]> {
@@ -64,13 +56,7 @@ export class ManufacturerSearcher {
       }
     ).then((rawResponse) => {
       const response = rawResponse.data
-      const result: Manufacturer[] = []
-
-      for (const entry of response.data) {
-        result.push(serverResponseToEntity(entry, this.cvBaseUrl))
-      }
-
-      return result
+      return this.serializer.convertJsonApiObjectListToModelList(response)
     })
   }
 }
