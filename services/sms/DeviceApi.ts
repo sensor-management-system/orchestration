@@ -1,27 +1,24 @@
 import { AxiosInstance, Method } from 'axios'
 
-import Contact from '@/models/Contact'
 import Device from '@/models/Device'
 import DeviceType from '@/models/DeviceType'
 import Manufacturer from '@/models/Manufacturer'
 import Status from '@/models/Status'
-import { DeviceProperty } from '@/models/DeviceProperty'
-import { MeasuringRange } from '@/models/MeasuringRange'
-import { CustomTextField } from '@/models/CustomTextField'
-import { Attachment } from '@/models/Attachment'
 
 import { IFlaskJSONAPIFilter } from '@/utils/JSONApiInterfaces'
 
 import {
   IPaginationLoader, FilteredPaginationedLoader
 } from '@/utils/PaginatedLoader'
-import ContactSerializer from '@/serializers/jsonapi/ContactSerializer'
+import DeviceSerializer from '~/serializers/jsonapi/DeviceSerializer'
 
 export default class DeviceApi {
   private axiosApi: AxiosInstance
+  private serializer: DeviceSerializer
 
   constructor (axiosInstance: AxiosInstance) {
     this.axiosApi = axiosInstance
+    this.serializer = new DeviceSerializer()
   }
 
   findById (id: string): Promise<Device> {
@@ -31,9 +28,7 @@ export default class DeviceApi {
       }
     }).then((rawResponse) => {
       const rawData = rawResponse.data
-      const entry = rawData.data
-      const included: any[] = rawData.included || []
-      return serverResponseToEntity(entry, included)
+      return this.serializer.convertJsonApiObjectToModel(rawData)
     })
   }
 
@@ -166,7 +161,7 @@ export default class DeviceApi {
   }
 
   newSearchBuilder (): DeviceSearchBuilder {
-    return new DeviceSearchBuilder(this.axiosApi)
+    return new DeviceSearchBuilder(this.axiosApi, this.serializer)
   }
 }
 
@@ -174,10 +169,12 @@ export class DeviceSearchBuilder {
   private axiosApi: AxiosInstance
   private clientSideFilterFunc: (device: Device) => boolean
   private serverSideFilterSettings: IFlaskJSONAPIFilter[] = []
+  private serializer: DeviceSerializer
 
-  constructor (axiosApi: AxiosInstance) {
+  constructor (axiosApi: AxiosInstance, serializer: DeviceSerializer) {
     this.axiosApi = axiosApi
     this.clientSideFilterFunc = (_d: Device) => true
+    this.serializer = serializer
   }
 
   withTextInName (text: string | null) {
@@ -271,7 +268,8 @@ export class DeviceSearchBuilder {
     return new DeviceSearcher(
       this.axiosApi,
       this.clientSideFilterFunc,
-      this.serverSideFilterSettings
+      this.serverSideFilterSettings,
+      this.serializer
     )
   }
 }
@@ -280,15 +278,18 @@ export class DeviceSearcher {
   private axiosApi: AxiosInstance
   private clientSideFilterFunc: (device: Device) => boolean
   private serverSideFilterSettings: IFlaskJSONAPIFilter[]
+  private serialier: DeviceSerializer
 
   constructor (
     axiosApi: AxiosInstance,
     clientSideFilterFunc: (device: Device) => boolean,
-    serverSideFilterSettings: IFlaskJSONAPIFilter[]
+    serverSideFilterSettings: IFlaskJSONAPIFilter[],
+    serializer: DeviceSerializer
   ) {
     this.axiosApi = axiosApi
     this.clientSideFilterFunc = clientSideFilterFunc
     this.serverSideFilterSettings = serverSideFilterSettings
+    this.serialier = serializer
   }
 
   private get commonParams (): any {
@@ -313,7 +314,7 @@ export class DeviceSearcher {
       const included: any[] = rawData.included || []
 
       for (const entry of rawData.data) {
-        const device = serverResponseToEntity(entry, included)
+        const device = this.serialier.convertJsonApiDataToModel(entry, included)
         if (this.clientSideFilterFunc(device)) {
           result.push(device)
         }
@@ -341,15 +342,11 @@ export class DeviceSearcher {
       }
     ).then((rawResponse) => {
       const rawData = rawResponse.data
-      const result: Device[] = []
-      const included: any[] = rawData.included || []
-      for (const entry of rawData.data) {
-        // client side filtering will not be done here
-        // (but in the FilteredPaginationedLoader)
-        // so that we know if we still have elements here
-        // there may be others to load as well
-        result.push(serverResponseToEntity(entry, included))
-      }
+      // client side filtering will not be done here
+      // (but in the FilteredPaginationedLoader)
+      // so that we know if we still have elements here
+      // there may be others to load as well
+      const result: Device[] = this.serialier.convertJsonApiObjectListToModelList(rawData)
 
       let funToLoadNext = null
       if (result.length > 0) {
@@ -362,126 +359,4 @@ export class DeviceSearcher {
       }
     })
   }
-}
-
-export function serverResponseToEntity (entry: any, included: any[]) : Device {
-  const result: Device = new Device()
-  const contactSerializer = new ContactSerializer()
-
-  const attributes = entry.attributes
-  const relationships = entry.relationships
-
-  result.id = entry.id
-
-  result.description = attributes.description || ''
-  result.shortName = attributes.short_name || ''
-  result.longName = attributes.long_name || ''
-  result.serialNumber = attributes.serial_number || ''
-  result.manufacturerUri = attributes.manufacturer_uri || ''
-  result.manufacturerName = attributes.manufacturer_name || ''
-  result.deviceTypeUri = attributes.device_type_uri || ''
-  result.deviceTypeName = attributes.device_type_name || ''
-  result.statusUri = attributes.status_uri || ''
-  result.statusName = attributes.status_name || ''
-  result.model = attributes.model || ''
-  result.dualUse = attributes.dual_use || false
-  result.inventoryNumber = attributes.inventory_number || ''
-  result.persistentIdentifier = attributes.persistent_identifier || ''
-  result.website = attributes.website || ''
-  result.createdAt = attributes.created_at
-  result.updatedAt = attributes.updated_at
-  // TODO
-  // result.createdBy = attributes.created_by
-  // result.updatedBy = attributes.updated_by
-  // result.events = []
-  result.attachments = []
-  result.contacts = []
-  const properties: DeviceProperty[] = []
-
-  for (const propertyFromServer of attributes.properties) {
-    const property = new DeviceProperty()
-    property.id = propertyFromServer.id
-    property.measuringRange = new MeasuringRange(
-      propertyFromServer.measuring_range_min,
-      propertyFromServer.measuring_range_max
-    )
-    property.failureValue = propertyFromServer.failure_value
-    property.accuracy = propertyFromServer.accuracy
-    property.label = propertyFromServer.label || ''
-    property.unitUri = propertyFromServer.unit_uri || ''
-    property.unitName = propertyFromServer.unit_name || ''
-    property.compartmentUri = propertyFromServer.compartment_uri || ''
-    property.compartmentName = propertyFromServer.compartment_name || ''
-    property.propertyUri = propertyFromServer.property_uri || ''
-    property.propertyName = propertyFromServer.property_name || ''
-    property.samplingMediaUri = propertyFromServer.sampling_media_uri || ''
-    property.samplingMediaName = propertyFromServer.sampling_media_name || ''
-
-    properties.push(property)
-  }
-
-  result.properties = properties
-
-  const customFields: CustomTextField[] = []
-
-  for (const customFieldFromServer of attributes.customfields) {
-    const customField = new CustomTextField()
-    customField.id = customFieldFromServer.id
-    customField.key = customFieldFromServer.key || ''
-    customField.value = customFieldFromServer.value || ''
-
-    customFields.push(customField)
-  }
-
-  result.customFields = customFields
-
-  const attachments: Attachment[] = []
-
-  for (const attachmentFromServer of attributes.attachments) {
-    const attachment = new Attachment()
-    attachment.id = attachmentFromServer.id
-    attachment.label = attachmentFromServer.label || ''
-    attachment.url = attachmentFromServer.url || ''
-
-    attachments.push(attachment)
-  }
-
-  result.attachments = attachments
-
-  const contactIds = []
-  if (relationships.contacts && relationships.contacts.data && relationships.contacts.data.length > 0) {
-    for (const relationShipContactData of relationships.contacts.data) {
-      const contactId = relationShipContactData.id
-      contactIds.push(contactId)
-    }
-  }
-
-  const possibleContacts: {[key: string]: Contact} = {}
-  if (included && included.length > 0) {
-    for (const includedEntry of included) {
-      if (includedEntry.type === 'contact') {
-        const contactId = includedEntry.id
-        if (contactIds.includes(contactId)) {
-          const contact = contactSerializer.convertJsonApiDataToModel(includedEntry)
-          possibleContacts[contactId] = contact
-        }
-      }
-    }
-  }
-
-  const contacts = []
-
-  for (const contactId of contactIds) {
-    if (possibleContacts[contactId]) {
-      contacts.push(possibleContacts[contactId])
-    } else {
-      const contact = new Contact()
-      contact.id = contactId
-      contacts.push(contact)
-    }
-  }
-
-  result.contacts = contacts
-
-  return result
 }
