@@ -99,4 +99,111 @@ export default class DeviceSerializer {
       return this.convertJsonApiDataToModel(model, included)
     })
   }
+
+  convertModelToJsonApiData (device: Device): any {
+    const properties = []
+
+    for (const property of device.properties) {
+      const propertyToSave: any = {}
+      if (property.id != null) {
+        // currently it seems that the id is always set to a higher value
+        // I can set it to 8, but it will be saved with a new id (9)
+        // there is already an issue for the backend, so hopefully it will be fixed there
+        propertyToSave.id = property.id
+      }
+
+      propertyToSave.measuring_range_min = property.measuringRange.min
+      propertyToSave.measuring_range_max = property.measuringRange.max
+      propertyToSave.failure_value = property.failureValue
+      propertyToSave.accuracy = property.accuracy
+      propertyToSave.label = property.label
+      propertyToSave.unit_uri = property.unitUri
+      propertyToSave.unit_name = property.unitName
+      propertyToSave.compartment_uri = property.compartmentUri
+      propertyToSave.compartment_name = property.compartmentName
+      propertyToSave.property_uri = property.propertyUri
+      propertyToSave.property_name = property.propertyName
+      propertyToSave.sampling_media_uri = property.samplingMediaUri
+      propertyToSave.sampling_media_name = property.samplingMediaName
+
+      properties.push(propertyToSave)
+    }
+
+    const customfields = []
+    for (const customField of device.customFields) {
+      const customFieldToSave: any = {}
+
+      if (customField.id != null) {
+        customFieldToSave.id = customField.id
+      }
+
+      customFieldToSave.key = customField.key
+      customFieldToSave.value = customField.value
+
+      customfields.push(customFieldToSave)
+    }
+
+    const attachments = []
+    for (const attachment of device.attachments) {
+      const attachmentToSave: any = {}
+      if (attachment.id != null) {
+        attachmentToSave.id = attachment.id
+      }
+      attachmentToSave.label = attachment.label
+      attachmentToSave.url = attachment.url
+
+      attachments.push(attachmentToSave)
+    }
+
+    const contacts = []
+    for (const contact of device.contacts) {
+      contacts.push({
+        id: contact.id,
+        type: 'contact'
+      })
+    }
+
+    const data: any = {
+      type: 'device',
+      attributes: {
+        description: device.description,
+        short_name: device.shortName,
+        long_name: device.longName,
+        serial_number: device.serialNumber,
+        inventory_number: device.inventoryNumber,
+        manufacturer_uri: device.manufacturerUri,
+        manufacturer_name: device.manufacturerName,
+        device_type_uri: device.deviceTypeUri,
+        device_type_name: device.deviceTypeName,
+        status_uri: device.statusUri,
+        status_name: device.statusName,
+        model: device.model,
+        persistent_identifier: device.persistentIdentifier === '' ? null : device.persistentIdentifier,
+        website: device.website,
+        dual_use: device.dualUse,
+        // those two time slots are set by the db, no matter what we deliver here
+        created_at: device.createdAt?.toISOString(),
+        updated_at: device.updatedAt?.toISOString(),
+        // TODO
+        // created_by: device.createdBy,
+        // updated_by: device.updatedBy,
+
+        customfields,
+        properties,
+        attachments
+      },
+      relationships: {
+        contacts: {
+          data: contacts
+        }
+        // TODO: events
+      }
+    }
+
+    if (device.id !== null) {
+      data.id = device.id
+    }
+
+    return data
+  }
 }

@@ -6,6 +6,110 @@ import { DeviceProperty } from '@/models/DeviceProperty'
 import { MeasuringRange } from '@/models/MeasuringRange'
 import { CustomTextField } from '@/models/CustomTextField'
 
+const createTestDevice = () => {
+  const device = new Device()
+  device.description = 'This is a dummy description'
+  device.shortName = 'Dummy short name'
+  device.longName = 'Dummy long long long name'
+  device.serialNumber = '12345'
+  device.inventoryNumber = '6789'
+  device.manufacturerUri = 'manufacturer/manu1'
+  device.manufacturerName = 'Manu1'
+  device.deviceTypeUri = 'deviceType/typeA'
+  device.deviceTypeName = 'Type A'
+  device.statusUri = 'status/Ok'
+  device.statusName = 'Okay'
+  device.model = '0815'
+  device.persistentIdentifier = 'doi:4354545'
+  device.website = 'http://gfz-potsdam.de'
+  device.dualUse = true
+  device.createdAt = new Date('2020-08-28T13:49:48.015620+00:00')
+  device.updatedAt = new Date('2020-08-30T13:49:48.015620+00:00')
+
+  device.customFields = [
+    CustomTextField.createFromObject({
+      id: '1',
+      key: 'First custom field',
+      value: 'First custom value'
+    }),
+    CustomTextField.createFromObject({
+      id: null,
+      key: 'Second custom field',
+      value: ''
+    })
+  ]
+
+  device.attachments = [
+    Attachment.createFromObject({
+      id: '2',
+      label: 'GFZ',
+      url: 'http://www.gfz-potsdam.de'
+    }),
+    Attachment.createFromObject({
+      id: null,
+      label: 'UFZ',
+      url: 'http://www.ufz.de'
+    })
+  ]
+
+  device.properties = [
+    DeviceProperty.createFromObject({
+      id: '3',
+      label: 'Prop 1',
+      compartmentUri: 'compartment/Comp1',
+      compartmentName: 'Comp 1',
+      unitUri: 'unit/Unit1',
+      unitName: 'Unit 1',
+      samplingMediaUri: 'medium/Medium1',
+      samplingMediaName: 'Medium 1',
+      propertyUri: 'property/Prop1',
+      propertyName: 'Property 1',
+      measuringRange: MeasuringRange.createFromObject({
+        min: -7,
+        max: 7
+      }),
+      accuracy: 0.5,
+      failureValue: -999
+    }),
+    DeviceProperty.createFromObject({
+      id: null,
+      label: 'Prop 2',
+      compartmentUri: '',
+      compartmentName: '',
+      unitUri: '',
+      unitName: '',
+      samplingMediaUri: '',
+      samplingMediaName: '',
+      propertyUri: '',
+      propertyName: '',
+      measuringRange: MeasuringRange.createFromObject({
+        min: null,
+        max: null
+      }),
+      accuracy: null,
+      failureValue: null
+    })
+  ]
+
+  device.contacts = [
+    Contact.createFromObject({
+      id: '4',
+      givenName: 'Max',
+      familyName: 'Mustermann',
+      email: 'max@mustermann.de',
+      website: ''
+    }),
+    Contact.createFromObject({
+      id: '5',
+      givenName: 'Mux',
+      familyName: 'Mastermunn',
+      email: 'mux@mastermunn.de',
+      website: ''
+    })
+  ]
+  return device
+}
+
 describe('DeviceSerializer', () => {
   describe('#convertJsonApiObjectListToModelList', () => {
     it('should convert a json api object with multiple entries to a device model list', () => {
@@ -713,6 +817,160 @@ describe('DeviceSerializer', () => {
       const device = serializer.convertJsonApiDataToModel(jsonApiData, included)
 
       expect(device).toEqual(expectedDevice)
+    })
+  })
+  describe('#convertModelToJsonApiData', () => {
+    it('should convert a model to json data object with all of the subelements', () => {
+      const device = createTestDevice()
+
+      const serializer = new DeviceSerializer()
+
+      const jsonApiData = serializer.convertModelToJsonApiData(device)
+
+      expect(typeof jsonApiData).toEqual('object')
+
+      expect(jsonApiData).not.toHaveProperty('id')
+
+      expect(jsonApiData).toHaveProperty('type')
+      expect(jsonApiData.type).toEqual('device')
+
+      expect(jsonApiData).toHaveProperty('attributes')
+      const attributes = jsonApiData.attributes
+      expect(typeof attributes).toBe('object')
+
+      expect(attributes).toHaveProperty('description')
+      expect(attributes.description).toEqual('This is a dummy description')
+      expect(attributes).toHaveProperty('short_name')
+      expect(attributes.short_name).toEqual('Dummy short name')
+      expect(attributes).toHaveProperty('long_name')
+      expect(attributes.long_name).toEqual('Dummy long long long name')
+      expect(attributes).toHaveProperty('serial_number')
+      expect(attributes.serial_number).toEqual('12345')
+      expect(attributes).toHaveProperty('inventory_number')
+      expect(attributes.inventory_number).toEqual('6789')
+      expect(attributes).toHaveProperty('manufacturer_uri')
+      expect(attributes.manufacturer_uri).toEqual('manufacturer/manu1')
+      expect(attributes).toHaveProperty('manufacturer_name')
+      expect(attributes.manufacturer_name).toEqual('Manu1')
+      expect(attributes).toHaveProperty('device_type_uri')
+      expect(attributes.device_type_uri).toEqual('deviceType/typeA')
+      expect(attributes).toHaveProperty('device_type_name')
+      expect(attributes.device_type_name).toEqual('Type A')
+      expect(attributes).toHaveProperty('status_uri')
+      expect(attributes.status_uri).toEqual('status/Ok')
+      expect(attributes).toHaveProperty('status_name')
+      expect(attributes.status_name).toEqual('Okay')
+      expect(attributes).toHaveProperty('model')
+      expect(attributes.model).toEqual('0815')
+      expect(attributes).toHaveProperty('persistent_identifier')
+      expect(attributes.persistent_identifier).toEqual('doi:4354545')
+      expect(attributes).toHaveProperty('website')
+      expect(attributes.website).toEqual('http://gfz-potsdam.de')
+      expect(attributes).toHaveProperty('dual_use')
+      expect(attributes.dual_use).toEqual(true)
+      expect(attributes).toHaveProperty('created_at')
+      // expect(attributes.created_at).toEqual('2020-08-28T13:49:48.015620+00:00')
+      // I wasn't able to find the exact date time format, so we use ISO date times
+      expect(attributes.created_at).toEqual('2020-08-28T13:49:48.015Z')
+      expect(attributes).toHaveProperty('updated_at')
+      // expect(attributes.updated_at).toEqual('2020-08-30T13:49:48.015620+00:00')
+      // again, iso date times
+      expect(attributes.updated_at).toEqual('2020-08-30T13:49:48.015Z')
+
+      expect(attributes).toHaveProperty('customfields')
+      const customfields = attributes.customfields
+      expect(Array.isArray(customfields)).toBeTruthy()
+      expect(customfields.length).toEqual(2)
+      expect(customfields[0]).toEqual({
+        id: '1',
+        key: 'First custom field',
+        value: 'First custom value'
+      })
+      expect(customfields[1]).toEqual({
+        key: 'Second custom field',
+        value: ''
+      })
+
+      expect(attributes).toHaveProperty('attachments')
+      const attachments = attributes.attachments
+      expect(Array.isArray(attachments)).toBeTruthy()
+      expect(attachments.length).toEqual(2)
+      expect(attachments[0]).toEqual({
+        id: '2',
+        label: 'GFZ',
+        url: 'http://www.gfz-potsdam.de'
+      })
+      expect(attachments[1]).toEqual({
+        label: 'UFZ',
+        url: 'http://www.ufz.de'
+      })
+
+      expect(attributes).toHaveProperty('properties')
+      const properties = attributes.properties
+      expect(Array.isArray(properties)).toBeTruthy()
+      expect(properties[0]).toEqual({
+        id: '3',
+        label: 'Prop 1',
+        compartment_uri: 'compartment/Comp1',
+        compartment_name: 'Comp 1',
+        unit_uri: 'unit/Unit1',
+        unit_name: 'Unit 1',
+        sampling_media_uri: 'medium/Medium1',
+        sampling_media_name: 'Medium 1',
+        property_uri: 'property/Prop1',
+        property_name: 'Property 1',
+        measuring_range_min: -7,
+        measuring_range_max: 7,
+        accuracy: 0.5,
+        failure_value: -999
+      })
+      expect(properties[1]).toEqual({
+        label: 'Prop 2',
+        compartment_uri: '',
+        compartment_name: '',
+        unit_uri: '',
+        unit_name: '',
+        sampling_media_uri: '',
+        sampling_media_name: '',
+        property_uri: '',
+        property_name: '',
+        measuring_range_min: null,
+        measuring_range_max: null,
+        accuracy: null,
+        failure_value: null
+      })
+
+      expect(jsonApiData).toHaveProperty('relationships')
+      expect(typeof jsonApiData.relationships).toEqual('object')
+      expect(jsonApiData.relationships).toHaveProperty('contacts')
+      expect(typeof jsonApiData.relationships.contacts).toBe('object')
+      expect(jsonApiData.relationships.contacts).toHaveProperty('data')
+      const contactData = jsonApiData.relationships.contacts.data
+      expect(Array.isArray(contactData)).toBeTruthy()
+      expect(contactData.length).toEqual(2)
+      expect(contactData[0]).toEqual({
+        id: '4',
+        type: 'contact'
+      })
+      expect(contactData[1]).toEqual({
+        id: '5',
+        type: 'contact'
+      })
+    })
+    it('should serialize an empty string as persistent identifier as null', () => {
+      const device = createTestDevice()
+      device.persistentIdentifier = ''
+
+      const serializer = new DeviceSerializer()
+
+      const jsonApiData = serializer.convertModelToJsonApiData(device)
+
+      expect(typeof jsonApiData).toEqual('object')
+      expect(jsonApiData).toHaveProperty('attributes')
+      const attributes = jsonApiData.attributes
+      expect(typeof attributes).toBe('object')
+      expect(attributes).toHaveProperty('persistent_identifier')
+      expect(attributes.persistent_identifier).toBeNull()
     })
   })
 })

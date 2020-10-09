@@ -6,6 +6,57 @@ import {
 
 import PlatformSerializer from '@/serializers/jsonapi/PlatformSerializer'
 
+const createTestPlatform = () => {
+  const platform = new Platform()
+  platform.description = 'This is a dummy description'
+  platform.shortName = 'Dummy short name'
+  platform.longName = 'Dummy long long long name'
+  platform.serialNumber = '12345'
+  platform.inventoryNumber = '6789'
+  platform.manufacturerUri = 'manufacturer/manu1'
+  platform.manufacturerName = 'Manu1'
+  platform.platformTypeUri = 'platformType/typeA'
+  platform.platformTypeName = 'Type A'
+  platform.statusUri = 'status/Ok'
+  platform.statusName = 'Okay'
+  platform.model = '0815'
+  platform.persistentIdentifier = 'doi:4354545'
+  platform.website = 'http://gfz-potsdam.de'
+  platform.createdAt = new Date('2020-08-28T13:49:48.015620+00:00')
+  platform.updatedAt = new Date('2020-08-30T13:49:48.015620+00:00')
+
+  platform.attachments = [
+    Attachment.createFromObject({
+      id: '2',
+      label: 'GFZ',
+      url: 'http://www.gfz-potsdam.de'
+    }),
+    Attachment.createFromObject({
+      id: null,
+      label: 'UFZ',
+      url: 'http://www.ufz.de'
+    })
+  ]
+
+  platform.contacts = [
+    Contact.createFromObject({
+      id: '4',
+      givenName: 'Max',
+      familyName: 'Mustermann',
+      email: 'max@mustermann.de',
+      website: ''
+    }),
+    Contact.createFromObject({
+      id: '5',
+      givenName: 'Mux',
+      familyName: 'Mastermunn',
+      email: 'mux@mastermunn.de',
+      website: ''
+    })
+  ]
+  return platform
+}
+
 describe('PlatformSerializer', () => {
   describe('#convertJsonApiObjectListToModelList', () => {
     it('should convert a json api object with multiple entries to a platform model list', () => {
@@ -501,6 +552,109 @@ describe('PlatformSerializer', () => {
       const platform = serializer.convertJsonApiDataToModel(jsonApiData, included)
 
       expect(platform).toEqual(expectedPlatform)
+    })
+  })
+  describe('#convertModelToJsonApiData', () => {
+    it('should convert a model to json data object with all of the subelements', () => {
+      const platform = createTestPlatform()
+
+      const serializer = new PlatformSerializer()
+
+      const jsonApiData = serializer.convertModelToJsonApiData(platform)
+
+      expect(typeof jsonApiData).toEqual('object')
+
+      expect(jsonApiData).not.toHaveProperty('id')
+
+      expect(jsonApiData).toHaveProperty('type')
+      expect(jsonApiData.type).toEqual('platform')
+
+      expect(jsonApiData).toHaveProperty('attributes')
+      const attributes = jsonApiData.attributes
+      expect(typeof attributes).toBe('object')
+
+      expect(attributes).toHaveProperty('description')
+      expect(attributes.description).toEqual('This is a dummy description')
+      expect(attributes).toHaveProperty('short_name')
+      expect(attributes.short_name).toEqual('Dummy short name')
+      expect(attributes).toHaveProperty('long_name')
+      expect(attributes.long_name).toEqual('Dummy long long long name')
+      expect(attributes).toHaveProperty('serial_number')
+      expect(attributes.serial_number).toEqual('12345')
+      expect(attributes).toHaveProperty('inventory_number')
+      expect(attributes.inventory_number).toEqual('6789')
+      expect(attributes).toHaveProperty('manufacturer_uri')
+      expect(attributes.manufacturer_uri).toEqual('manufacturer/manu1')
+      expect(attributes).toHaveProperty('manufacturer_name')
+      expect(attributes.manufacturer_name).toEqual('Manu1')
+      expect(attributes).toHaveProperty('platform_type_uri')
+      expect(attributes.platform_type_uri).toEqual('platformType/typeA')
+      expect(attributes).toHaveProperty('platform_type_name')
+      expect(attributes.platform_type_name).toEqual('Type A')
+      expect(attributes).toHaveProperty('status_uri')
+      expect(attributes.status_uri).toEqual('status/Ok')
+      expect(attributes).toHaveProperty('status_name')
+      expect(attributes.status_name).toEqual('Okay')
+      expect(attributes).toHaveProperty('model')
+      expect(attributes.model).toEqual('0815')
+      expect(attributes).toHaveProperty('persistent_identifier')
+      expect(attributes.persistent_identifier).toEqual('doi:4354545')
+      expect(attributes).toHaveProperty('website')
+      expect(attributes.website).toEqual('http://gfz-potsdam.de')
+      expect(attributes).toHaveProperty('created_at')
+      // expect(attributes.created_at).toEqual('2020-08-28T13:49:48.015620+00:00')
+      // I wasn't able to find the exact date time format, so we use ISO date times
+      expect(attributes.created_at).toEqual('2020-08-28T13:49:48.015Z')
+      expect(attributes).toHaveProperty('updated_at')
+      // expect(attributes.updated_at).toEqual('2020-08-30T13:49:48.015620+00:00')
+      // again, iso date times
+      expect(attributes.updated_at).toEqual('2020-08-30T13:49:48.015Z')
+
+      expect(attributes).toHaveProperty('attachments')
+      const attachments = attributes.attachments
+      expect(Array.isArray(attachments)).toBeTruthy()
+      expect(attachments.length).toEqual(2)
+      expect(attachments[0]).toEqual({
+        id: '2',
+        label: 'GFZ',
+        url: 'http://www.gfz-potsdam.de'
+      })
+      expect(attachments[1]).toEqual({
+        label: 'UFZ',
+        url: 'http://www.ufz.de'
+      })
+
+      expect(jsonApiData).toHaveProperty('relationships')
+      expect(typeof jsonApiData.relationships).toEqual('object')
+      expect(jsonApiData.relationships).toHaveProperty('contacts')
+      expect(typeof jsonApiData.relationships.contacts).toBe('object')
+      expect(jsonApiData.relationships.contacts).toHaveProperty('data')
+      const contactData = jsonApiData.relationships.contacts.data
+      expect(Array.isArray(contactData)).toBeTruthy()
+      expect(contactData.length).toEqual(2)
+      expect(contactData[0]).toEqual({
+        id: '4',
+        type: 'contact'
+      })
+      expect(contactData[1]).toEqual({
+        id: '5',
+        type: 'contact'
+      })
+    })
+    it('should serialize an empty string as persistent identifier as null', () => {
+      const platform = createTestPlatform()
+      platform.persistentIdentifier = ''
+
+      const serializer = new PlatformSerializer()
+
+      const jsonApiData = serializer.convertModelToJsonApiData(platform)
+
+      expect(typeof jsonApiData).toEqual('object')
+      expect(jsonApiData).toHaveProperty('attributes')
+      const attributes = jsonApiData.attributes
+      expect(typeof attributes).toBe('object')
+      expect(attributes).toHaveProperty('persistent_identifier')
+      expect(attributes.persistent_identifier).toBeNull()
     })
   })
 })

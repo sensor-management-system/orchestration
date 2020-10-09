@@ -38,61 +38,7 @@ export default class PlatformApi {
   }
 
   save (platform: Platform): Promise<Platform> {
-    const attachments = []
-
-    for (const attachment of platform.attachments) {
-      const attachmentToSave: any = {}
-      if (attachment.id != null) {
-        attachmentToSave.id = attachment.id
-      }
-      attachmentToSave.label = attachment.label
-      attachmentToSave.url = attachment.url
-
-      attachments.push(attachmentToSave)
-    }
-
-    const contacts = []
-    for (const contact of platform.contacts) {
-      contacts.push({
-        id: contact.id,
-        type: 'contact'
-      })
-    }
-
-    const data: any = {
-      type: 'platform',
-      attributes: {
-        description: platform.description,
-        short_name: platform.shortName,
-        long_name: platform.longName,
-        manufacturer_uri: platform.manufacturerUri,
-        manufacturer_name: platform.manufacturerName,
-        model: platform.model,
-        platform_type_uri: platform.platformTypeUri,
-        platform_type_name: platform.platformTypeName,
-        status_uri: platform.statusUri,
-        status_name: platform.statusName,
-        website: platform.website,
-        // those two time slots are set by the db, no matter what we deliver here
-        created_at: platform.createdAt,
-        updated_at: platform.updatedAt,
-        // TODO
-        // created_by: platform.createdBy,
-        // updated_by: platform.updatedBy,
-        inventory_number: platform.inventoryNumber,
-        serial_number: platform.serialNumber,
-        // as the persistent_identifier must be unique, we sent null in case
-        // that we don't have an identifier here
-        persistent_identifier: platform.persistentIdentifier === '' ? null : platform.persistentIdentifier,
-        attachments
-      },
-      relationships: {
-        contacts: {
-          data: contacts
-        }
-        // TODO: events
-      }
-    }
+    const data: any = this.serializer.convertModelToJsonApiData(platform)
     let method: Method = 'patch'
     let url = ''
 
@@ -101,7 +47,6 @@ export default class PlatformApi {
       method = 'post'
     } else {
       // old -> patch
-      data.id = platform.id
       url = String(platform.id)
     }
 
