@@ -2,6 +2,7 @@ export type PaginationLoaderFunction<E> = () => Promise<IPaginationLoader<E>>
 
 export interface IPaginationLoader<E> {
   elements: E[]
+  totalCount: number,
   funToLoadNext: null | PaginationLoaderFunction<E>
 }
 
@@ -16,6 +17,11 @@ export class FilteredPaginationedLoader<E> implements IPaginationLoader<E> {
 
   get elements () : E[] {
     return this.innerLoader.elements.filter(this.filterFunc)
+  }
+
+  get totalCount (): number {
+    const countThatDoesNotFulfillFilterFunc = this.innerLoader.elements.length - this.elements.length
+    return this.innerLoader.totalCount - countThatDoesNotFulfillFilterFunc
   }
 
   get funToLoadNext () : null | PaginationLoaderFunction<E> {

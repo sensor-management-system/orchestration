@@ -352,6 +352,8 @@ export class DeviceSearcher {
         result.push(serverResponseToEntity(entry, included))
       }
 
+      const totalCount = rawData.meta.count
+
       let funToLoadNext = null
       if (result.length > 0) {
         funToLoadNext = () => this.findAllOnPage(page + 1, pageSize)
@@ -359,6 +361,7 @@ export class DeviceSearcher {
 
       return {
         elements: result,
+        totalCount,
         funToLoadNext
       }
     })

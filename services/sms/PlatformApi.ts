@@ -305,6 +305,10 @@ export class PlatformSearcher {
         result.push(serverResponseToEntity(entry, included))
       }
 
+      // This is given by the json api. Regardless of the pagination it
+      // represents the total amount of entries found.
+      const totalCount = rawData.meta.count
+
       let funToLoadNext = null
       if (result.length > 0) {
         funToLoadNext = () => this.findAllOnPage(page + 1, pageSize)
@@ -312,6 +316,7 @@ export class PlatformSearcher {
 
       return {
         elements: result,
+        totalCount,
         funToLoadNext
       }
     })
