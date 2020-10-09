@@ -294,15 +294,15 @@ export class PlatformSearcher {
       // (but in the FilteredPaginationedLoader)
       // so that we know if we still have elements here
       // there may be others to load as well
-      const result: Platform[] = this.serializer.convertJsonApiObjectListToModelList(rawData)
+      const elements: Platform[] = this.serializer.convertJsonApiObjectListToModelList(rawData)
 
       let funToLoadNext = null
-      if (result.length > 0) {
+      if (elements.length > 0) {
         funToLoadNext = () => this.findAllOnPage(page + 1, pageSize)
       }
 
       return {
-        elements: result,
+        elements,
         funToLoadNext
       }
     })

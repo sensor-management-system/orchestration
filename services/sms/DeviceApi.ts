@@ -310,16 +310,7 @@ export class DeviceSearcher {
       }
     ).then((rawResponse: any) => {
       const rawData = rawResponse.data
-      const result: Device[] = []
-      const included: any[] = rawData.included || []
-
-      for (const entry of rawData.data) {
-        const device = this.serialier.convertJsonApiDataToModel(entry, included)
-        if (this.clientSideFilterFunc(device)) {
-          result.push(device)
-        }
-      }
-      return result
+      return this.serialier.convertJsonApiObjectListToModelList(rawData)
     })
   }
 
@@ -346,15 +337,15 @@ export class DeviceSearcher {
       // (but in the FilteredPaginationedLoader)
       // so that we know if we still have elements here
       // there may be others to load as well
-      const result: Device[] = this.serialier.convertJsonApiObjectListToModelList(rawData)
+      const elements: Device[] = this.serialier.convertJsonApiObjectListToModelList(rawData)
 
       let funToLoadNext = null
-      if (result.length > 0) {
+      if (elements.length > 0) {
         funToLoadNext = () => this.findAllOnPage(page + 1, pageSize)
       }
 
       return {
-        elements: result,
+        elements,
         funToLoadNext
       }
     })
