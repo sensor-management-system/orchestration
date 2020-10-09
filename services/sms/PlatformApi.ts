@@ -1,11 +1,11 @@
 import { AxiosInstance, Method } from 'axios'
 
-import Contact from '@/models/Contact'
 import Platform from '@/models/Platform'
 import PlatformType from '@/models/PlatformType'
-import { Attachment } from '@/models/Attachment'
 import Manufacturer from '@/models/Manufacturer'
 import Status from '@/models/Status'
+
+import PlatformSerializer from '@/serializers/jsonapi/PlatformSerializer'
 
 import { IFlaskJSONAPIFilter } from '@/utils/JSONApiInterfaces'
 
@@ -13,13 +13,13 @@ import {
   IPaginationLoader, FilteredPaginationedLoader
 } from '@/utils/PaginatedLoader'
 
-import ContactSerializer from '@/serializers/jsonapi/ContactSerializer'
-
 export default class PlatformApi {
   private axiosApi: AxiosInstance
+  private serializer: PlatformSerializer
 
   constructor (axiosInstance: AxiosInstance) {
     this.axiosApi = axiosInstance
+    this.serializer = new PlatformSerializer()
   }
 
   findById (id: string): Promise<Platform> {
@@ -29,9 +29,7 @@ export default class PlatformApi {
       }
     }).then((rawResponse) => {
       const rawData = rawResponse.data
-      const entry = rawData.data
-      const included: any[] = rawData.included || []
-      return serverResponseToEntity(entry, included)
+      return this.serializer.convertJsonApiObjectToModel(rawData)
     })
   }
 
@@ -120,7 +118,7 @@ export default class PlatformApi {
   }
 
   newSearchBuilder (): PlatformSearchBuilder {
-    return new PlatformSearchBuilder(this.axiosApi)
+    return new PlatformSearchBuilder(this.axiosApi, this.serializer)
   }
 }
 
@@ -128,9 +126,11 @@ export class PlatformSearchBuilder {
   private axiosApi: AxiosInstance
   private clientSideFilterFunc: (platform: Platform) => boolean
   private serverSideFilterSettings: IFlaskJSONAPIFilter[] = []
+  private serializer: PlatformSerializer
 
-  constructor (axiosApi: AxiosInstance) {
+  constructor (axiosApi: AxiosInstance, serializer: PlatformSerializer) {
     this.axiosApi = axiosApi
+    this.serializer = serializer
     this.clientSideFilterFunc = (_p: Platform) => true
   }
 
@@ -225,7 +225,8 @@ export class PlatformSearchBuilder {
     return new PlatformSearcher(
       this.axiosApi,
       this.clientSideFilterFunc,
-      this.serverSideFilterSettings
+      this.serverSideFilterSettings,
+      this.serializer
     )
   }
 }
@@ -234,15 +235,18 @@ export class PlatformSearcher {
   private axiosApi: AxiosInstance
   private clientSideFilterFunc: (platform: Platform) => boolean
   private serverSideFilterSettings: IFlaskJSONAPIFilter[]
+  private serializer: PlatformSerializer
 
   constructor (
     axiosApi: AxiosInstance,
     clientSideFilterFunc: (platform: Platform) => boolean,
-    serverSideFilterSetting: IFlaskJSONAPIFilter[]
+    serverSideFilterSetting: IFlaskJSONAPIFilter[],
+    serializer: PlatformSerializer
   ) {
     this.axiosApi = axiosApi
     this.clientSideFilterFunc = clientSideFilterFunc
     this.serverSideFilterSettings = serverSideFilterSetting
+    this.serializer = serializer
   }
 
   private get commonParams (): any {
@@ -263,16 +267,7 @@ export class PlatformSearcher {
       }
     ).then((rawResponse: any) => {
       const rawData = rawResponse.data
-      const result: Platform[] = []
-      const included: any[] = rawData.included || []
-
-      for (const entry of rawData.data) {
-        const platform = serverResponseToEntity(entry, included)
-        if (this.clientSideFilterFunc(platform)) {
-          result.push(platform)
-        }
-      }
-      return result
+      return this.serializer.convertJsonApiObjectListToModelList(rawData)
     })
   }
 
@@ -295,15 +290,11 @@ export class PlatformSearcher {
       }
     ).then((rawResponse) => {
       const rawData = rawResponse.data
-      const result: Platform[] = []
-      const included: any[] = rawData.included || []
-      for (const entry of rawData.data) {
-        // client side filtering will not be done here
-        // (but in the FilteredPaginationedLoader)
-        // so that we know if we still have elements here
-        // there may be others to load as well
-        result.push(serverResponseToEntity(entry, included))
-      }
+      // client side filtering will not be done here
+      // (but in the FilteredPaginationedLoader)
+      // so that we know if we still have elements here
+      // there may be others to load as well
+      const result: Platform[] = this.serializer.convertJsonApiObjectListToModelList(rawData)
 
       let funToLoadNext = null
       if (result.length > 0) {
@@ -316,90 +307,4 @@ export class PlatformSearcher {
       }
     })
   }
-}
-
-export function serverResponseToEntity (entry: any, included: any[]) : Platform {
-  const result: Platform = Platform.createEmpty()
-
-  const contactSerializer = new ContactSerializer()
-
-  const attributes = entry.attributes
-  const relationships = entry.relationships
-
-  result.id = entry.id
-
-  result.description = attributes.description || ''
-  result.shortName = attributes.short_name || ''
-  result.longName = attributes.long_name || ''
-  result.manufacturerUri = attributes.manufacturer_uri || ''
-  result.manufacturerName = attributes.manufacturer_name || ''
-  result.model = attributes.model || ''
-  result.platformTypeUri = attributes.platform_type_uri || ''
-  result.platformTypeName = attributes.platform_type_name || ''
-  result.statusUri = attributes.status_uri || ''
-  result.statusName = attributes.status_name || ''
-  result.website = attributes.website || ''
-  result.createdAt = attributes.created_at
-  result.updatedAt = attributes.updated_at
-
-  // TODO
-  // result.createdBy = attributes.created_by
-  // result.updatedBy = attributes.updated_by
-
-  result.inventoryNumber = attributes.inventory_number || ''
-  result.serialNumber = attributes.serial_number || ''
-  result.persistentIdentifier = attributes.persistent_identifier || ''
-
-  // TODO
-  // result.events = []
-
-  const attachments: Attachment[] = []
-
-  for (const attachmentFromServer of attributes.attachments) {
-    const attachment = new Attachment()
-    attachment.id = attachmentFromServer.id
-    attachment.label = attachmentFromServer.label || ''
-    attachment.url = attachmentFromServer.url || ''
-
-    attachments.push(attachment)
-  }
-
-  result.attachments = attachments
-
-  const contactIds = []
-  if (relationships.contacts && relationships.contacts.data && relationships.contacts.data.length > 0) {
-    for (const relationShipContactData of relationships.contacts.data) {
-      const contactId = relationShipContactData.id
-      contactIds.push(contactId)
-    }
-  }
-
-  const possibleContacts: {[key: string]: Contact} = {}
-  if (included && included.length > 0) {
-    for (const includedEntry of included) {
-      if (includedEntry.type === 'contact') {
-        const contactId = includedEntry.id
-        if (contactIds.includes(contactId)) {
-          const contact = contactSerializer.convertJsonApiDataToModel(includedEntry)
-          possibleContacts[contactId] = contact
-        }
-      }
-    }
-  }
-
-  const contacts = []
-
-  for (const contactId of contactIds) {
-    if (possibleContacts[contactId]) {
-      contacts.push(possibleContacts[contactId])
-    } else {
-      const contact = new Contact()
-      contact.id = contactId
-      contacts.push(contact)
-    }
-  }
-
-  result.contacts = contacts
-
-  return result
 }

@@ -187,7 +187,7 @@ describe('DeviceSerializer', () => {
       expect(devices[1]).toEqual(expectedDevice2)
     })
   })
-  describe('#convertJsonApiDataToModel', () => {
+  describe('#convertJsonApiObjectToModel', () => {
     it('should convert a json api object to a device model', () => {
       const jsonApiObject: any = {
         data: {
