@@ -17,16 +17,6 @@
 
 import { Vue, Component, Prop } from 'nuxt-property-decorator'
 
-enum KnownStatus {
-  BLOCKED = 'blocked',
-  IN_USE = 'in use',
-  IN_WAREHOUSE = 'in warehouse',
-  SCRAPPED = 'scrapped',
-  UNDER_CONSTRUCTION = 'under construction'
-}
-
-type StatusColors = { [key in KnownStatus]: string }
-
 /**
  * A class component that wraps a badge component and sets a color depending on
  * the value property provided
@@ -46,12 +36,12 @@ export default class StatusBadge extends Vue {
    * refer to the material colors as listed here:
    * https://dev.vuetifyjs.com/en/styles/colors/#material-colors
    */
-  private colors: StatusColors = {
-    [KnownStatus.BLOCKED]: 'red',
-    [KnownStatus.IN_USE]: 'green',
-    [KnownStatus.IN_WAREHOUSE]: 'blue',
-    [KnownStatus.SCRAPPED]: 'blue-grey',
-    [KnownStatus.UNDER_CONSTRUCTION]: 'brown'
+  private colors: { [status: string]: string } = {
+    blocked: 'red',
+    'in use': 'green',
+    'in warehouse': 'blue',
+    scrapped: 'blue-grey',
+    'under construction': 'brown'
   }
 
   /**
@@ -61,11 +51,11 @@ export default class StatusBadge extends Vue {
    */
   getColor (): string {
     const status: string = this.value.toLowerCase()
-    // check if status is a known status and has a color assigned to it
-    if (!((Object.values(KnownStatus) as string[]).includes(status)) || !(status in this.colors)) {
+    // check if status has a color assigned to it
+    if (!(status in this.colors)) {
       return ''
     }
-    return this.colors[status as keyof StatusColors]
+    return this.colors[status]
   }
 }
 </script>
