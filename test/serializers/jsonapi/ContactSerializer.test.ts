@@ -203,4 +203,95 @@ describe('ContactSerializer', () => {
       expect(contact).toEqual(expectedContact)
     })
   })
+  describe('#convertModelListToRelationshipObject', () => {
+    it('should convert a list of contacts to a relationship object with ids', () => {
+      const contacts = [
+        Contact.createFromObject({
+          id: '4',
+          givenName: 'Max',
+          familyName: 'Mustermann',
+          email: 'max@mustermann.de',
+          website: ''
+        }),
+        Contact.createFromObject({
+          id: '5',
+          givenName: 'Mux',
+          familyName: 'Mastermunn',
+          email: 'mux@mastermunn.de',
+          website: ''
+        })
+      ]
+
+      const serializer = new ContactSerializer()
+
+      const relationships = serializer.convertModelListToRelationshipObject(contacts)
+
+      expect(typeof relationships).toEqual('object')
+      expect(relationships).toHaveProperty('contacts')
+      expect(typeof relationships.contacts).toBe('object')
+      expect(relationships.contacts).toHaveProperty('data')
+      const contactData = relationships.contacts.data
+      expect(Array.isArray(contactData)).toBeTruthy()
+      expect(contactData.length).toEqual(2)
+      expect(contactData[0]).toEqual({
+        id: '4',
+        type: 'contact'
+      })
+      expect(contactData[1]).toEqual({
+        id: '5',
+        type: 'contact'
+      })
+    })
+  })
+  describe('#convertJsonApiRelationshipsModelList', () => {
+    it('should construct a list of contacts', () => {
+      const relationships = {
+        contacts: {
+          data: [{
+            id: '1'
+          }, {
+            id: '2'
+          }]
+        }
+      }
+
+      const included = [{
+        type: 'contact',
+        id: '1',
+        attributes: {
+          given_name: 'AA',
+          family_name: 'BB',
+          email: 'AA@BB',
+          website: ''
+        }
+      }, {
+        type: 'contact',
+        id: '3',
+        attributes: {
+          given_name: 'AA',
+          family_name: 'BB',
+          email: 'AA@BB',
+          website: ''
+        }
+      }]
+
+      const expectedContact1 = Contact.createFromObject({
+        id: '1',
+        givenName: 'AA',
+        familyName: 'BB',
+        email: 'AA@BB',
+        website: ''
+      })
+      const expectedContact2 = new Contact()
+      expectedContact2.id = '2'
+
+      const serializer = new ContactSerializer()
+      const contacts = serializer.convertJsonApiRelationshipsModelList(relationships, included)
+
+      expect(Array.isArray(contacts)).toBeTruthy()
+      expect(contacts.length).toEqual(2)
+      expect(contacts[0]).toEqual(expectedContact1)
+      expect(contacts[1]).toEqual(expectedContact2)
+    })
+  })
 })

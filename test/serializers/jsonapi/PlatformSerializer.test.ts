@@ -656,5 +656,17 @@ describe('PlatformSerializer', () => {
       expect(attributes).toHaveProperty('persistent_identifier')
       expect(attributes.persistent_identifier).toBeNull()
     })
+    it('should set an id if given for the platform', () => {
+      const platform = createTestPlatform()
+      platform.id = 'abc'
+
+      const serializer = new PlatformSerializer()
+
+      const jsonApiData = serializer.convertModelToJsonApiData(platform)
+
+      expect(typeof jsonApiData).toEqual('object')
+      expect(jsonApiData).toHaveProperty('id')
+      expect(jsonApiData.id).toEqual('abc')
+    })
   })
 })

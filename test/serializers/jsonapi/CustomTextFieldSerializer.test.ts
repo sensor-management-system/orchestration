@@ -55,4 +55,36 @@ describe('CustomTextFieldSerializer', () => {
       expect(customfield).toEqual(expectedCustomField)
     })
   })
+  describe('#convertModelListToNestedJsonApiArray', () => {
+    it('should convert a list of custom text fields to a list of json objects', () => {
+      const customfields = [
+        CustomTextField.createFromObject({
+          id: '1',
+          key: 'First custom field',
+          value: 'First custom value'
+        }),
+        CustomTextField.createFromObject({
+          id: null,
+          key: 'Second custom field',
+          value: ''
+        })
+      ]
+
+      const serializer = new CustomTextFieldSerializer()
+
+      const elements = serializer.convertModelListToNestedJsonApiArray(customfields)
+
+      expect(Array.isArray(elements)).toBeTruthy()
+      expect(elements.length).toEqual(2)
+      expect(elements[0]).toEqual({
+        id: '1',
+        key: 'First custom field',
+        value: 'First custom value'
+      })
+      expect(elements[1]).toEqual({
+        key: 'Second custom field',
+        value: ''
+      })
+    })
+  })
 })

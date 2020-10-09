@@ -1,10 +1,12 @@
-import Contact from '@/models/Contact'
 import Platform from '@/models/Platform'
 
 import AttachmentSerializer from '@/serializers/jsonapi/AttachmentSerializer'
 import ContactSerializer from '@/serializers/jsonapi/ContactSerializer'
 
 export default class PlatformSerializer {
+  private attachmentSerializer: AttachmentSerializer = new AttachmentSerializer()
+  private contactSerializer: ContactSerializer = new ContactSerializer()
+
   convertJsonApiObjectToModel (jsonApiObject: any): Platform {
     const included = jsonApiObject.included || []
     return this.convertJsonApiDataToModel(jsonApiObject.data, included)
@@ -12,9 +14,6 @@ export default class PlatformSerializer {
 
   convertJsonApiDataToModel (jsonApiData: any, included: any[]): Platform {
     const result: Platform = Platform.createEmpty()
-
-    const contactSerializer = new ContactSerializer()
-    const attachmentSerializer = new AttachmentSerializer()
 
     const attributes = jsonApiData.attributes
     const relationships = jsonApiData.relationships
@@ -46,42 +45,8 @@ export default class PlatformSerializer {
     // TODO
     // result.events = []
 
-    result.attachments = attachmentSerializer.convertNestedJsonApiToModelList(attributes.attachments)
-
-    const contactIds = []
-    if (relationships.contacts && relationships.contacts.data && relationships.contacts.data.length > 0) {
-      for (const relationShipContactData of relationships.contacts.data) {
-        const contactId = relationShipContactData.id
-        contactIds.push(contactId)
-      }
-    }
-
-    const possibleContacts: {[key: string]: Contact} = {}
-    if (included && included.length > 0) {
-      for (const includedEntry of included) {
-        if (includedEntry.type === 'contact') {
-          const contactId = includedEntry.id
-          if (contactIds.includes(contactId)) {
-            const contact = contactSerializer.convertJsonApiDataToModel(includedEntry)
-            possibleContacts[contactId] = contact
-          }
-        }
-      }
-    }
-
-    const contacts = []
-
-    for (const contactId of contactIds) {
-      if (possibleContacts[contactId]) {
-        contacts.push(possibleContacts[contactId])
-      } else {
-        const contact = new Contact()
-        contact.id = contactId
-        contacts.push(contact)
-      }
-    }
-
-    result.contacts = contacts
+    result.attachments = this.attachmentSerializer.convertNestedJsonApiToModelList(attributes.attachments)
+    result.contacts = this.contactSerializer.convertJsonApiRelationshipsModelList(relationships, included)
 
     return result
   }
@@ -94,26 +59,8 @@ export default class PlatformSerializer {
   }
 
   convertModelToJsonApiData (platform: Platform): any {
-    const attachments = []
-
-    for (const attachment of platform.attachments) {
-      const attachmentToSave: any = {}
-      if (attachment.id != null) {
-        attachmentToSave.id = attachment.id
-      }
-      attachmentToSave.label = attachment.label
-      attachmentToSave.url = attachment.url
-
-      attachments.push(attachmentToSave)
-    }
-
-    const contacts = []
-    for (const contact of platform.contacts) {
-      contacts.push({
-        id: contact.id,
-        type: 'contact'
-      })
-    }
+    const attachments = this.attachmentSerializer.convertModelListToNestedJsonApiArray(platform.attachments)
+    const contacts = this.contactSerializer.convertModelListToRelationshipObject(platform.contacts)
 
     const data: any = {
       type: 'platform',
@@ -143,9 +90,7 @@ export default class PlatformSerializer {
         attachments
       },
       relationships: {
-        contacts: {
-          data: contacts
-        }
+        ...contacts
         // TODO: events
       }
     }

@@ -13,4 +13,21 @@ export default class CustomTextFieldSerializer {
   convertNestedJsonApiToModelList (customfields: any[]): CustomTextField[] {
     return customfields.map(this.convertJsonApiElementToModel)
   }
+
+  convertModelListToNestedJsonApiArray (customfields: CustomTextField[]): any[] {
+    const result = []
+    for (const customField of customfields) {
+      const customFieldToSave: any = {}
+
+      if (customField.id != null) {
+        customFieldToSave.id = customField.id
+      }
+
+      customFieldToSave.key = customField.key
+      customFieldToSave.value = customField.value
+
+      result.push(customFieldToSave)
+    }
+    return result
+  }
 }

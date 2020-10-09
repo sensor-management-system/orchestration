@@ -972,5 +972,17 @@ describe('DeviceSerializer', () => {
       expect(attributes).toHaveProperty('persistent_identifier')
       expect(attributes.persistent_identifier).toBeNull()
     })
+    it('should set an id if given for the device', () => {
+      const device = createTestDevice()
+      device.id = 'abc'
+
+      const serializer = new DeviceSerializer()
+
+      const jsonApiData = serializer.convertModelToJsonApiData(device)
+
+      expect(typeof jsonApiData).toEqual('object')
+      expect(jsonApiData).toHaveProperty('id')
+      expect(jsonApiData.id).toEqual('abc')
+    })
   })
 })

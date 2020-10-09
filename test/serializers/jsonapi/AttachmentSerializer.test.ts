@@ -55,4 +55,36 @@ describe('AttachmentSerializer', () => {
       expect(attachment).toEqual(expectedAttachment)
     })
   })
+  describe('#convertModelListToNestedJsonApiArray', () => {
+    it('should convert a list of attachments to a list of json objects', () => {
+      const attachments = [
+        Attachment.createFromObject({
+          id: '2',
+          label: 'GFZ',
+          url: 'http://www.gfz-potsdam.de'
+        }),
+        Attachment.createFromObject({
+          id: null,
+          label: 'UFZ',
+          url: 'http://www.ufz.de'
+        })
+      ]
+
+      const serializer = new AttachmentSerializer()
+
+      const elements = serializer.convertModelListToNestedJsonApiArray(attachments)
+
+      expect(Array.isArray(elements)).toBeTruthy()
+      expect(elements.length).toEqual(2)
+      expect(elements[0]).toEqual({
+        id: '2',
+        label: 'GFZ',
+        url: 'http://www.gfz-potsdam.de'
+      })
+      expect(elements[1]).toEqual({
+        label: 'UFZ',
+        url: 'http://www.ufz.de'
+      })
+    })
+  })
 })

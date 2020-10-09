@@ -134,4 +134,83 @@ describe('DevicePropertySerializer', () => {
       expect(property).toEqual(expectedProperty)
     })
   })
+  describe('#convertModelListToNestedJsonApiArray', () => {
+    it('should convert a list of device properties to a list of json objects', () => {
+      const properties = [
+        DeviceProperty.createFromObject({
+          id: '3',
+          label: 'Prop 1',
+          compartmentUri: 'compartment/Comp1',
+          compartmentName: 'Comp 1',
+          unitUri: 'unit/Unit1',
+          unitName: 'Unit 1',
+          samplingMediaUri: 'medium/Medium1',
+          samplingMediaName: 'Medium 1',
+          propertyUri: 'property/Prop1',
+          propertyName: 'Property 1',
+          measuringRange: MeasuringRange.createFromObject({
+            min: -7,
+            max: 7
+          }),
+          accuracy: 0.5,
+          failureValue: -999
+        }),
+        DeviceProperty.createFromObject({
+          id: null,
+          label: 'Prop 2',
+          compartmentUri: '',
+          compartmentName: '',
+          unitUri: '',
+          unitName: '',
+          samplingMediaUri: '',
+          samplingMediaName: '',
+          propertyUri: '',
+          propertyName: '',
+          measuringRange: MeasuringRange.createFromObject({
+            min: null,
+            max: null
+          }),
+          accuracy: null,
+          failureValue: null
+        })
+      ]
+
+      const serializer = new DevicePropertySerializer()
+
+      const elements = serializer.convertModelListToNestedJsonApiArray(properties)
+
+      expect(Array.isArray(elements)).toBeTruthy()
+      expect(elements[0]).toEqual({
+        id: '3',
+        label: 'Prop 1',
+        compartment_uri: 'compartment/Comp1',
+        compartment_name: 'Comp 1',
+        unit_uri: 'unit/Unit1',
+        unit_name: 'Unit 1',
+        sampling_media_uri: 'medium/Medium1',
+        sampling_media_name: 'Medium 1',
+        property_uri: 'property/Prop1',
+        property_name: 'Property 1',
+        measuring_range_min: -7,
+        measuring_range_max: 7,
+        accuracy: 0.5,
+        failure_value: -999
+      })
+      expect(elements[1]).toEqual({
+        label: 'Prop 2',
+        compartment_uri: '',
+        compartment_name: '',
+        unit_uri: '',
+        unit_name: '',
+        sampling_media_uri: '',
+        sampling_media_name: '',
+        property_uri: '',
+        property_name: '',
+        measuring_range_min: null,
+        measuring_range_max: null,
+        accuracy: null,
+        failure_value: null
+      })
+    })
+  })
 })
