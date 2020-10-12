@@ -1,6 +1,6 @@
 import Contact from '@/models/Contact'
 
-export default class ContactSerializer {
+export class ContactSerializer {
   convertJsonApiObjectToModel (jsonApiObject: any): Contact {
     const data = jsonApiObject.data
     return this.convertJsonApiDataToModel(data)

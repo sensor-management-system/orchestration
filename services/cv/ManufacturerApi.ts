@@ -1,7 +1,7 @@
 import { AxiosInstance } from 'axios'
 
 import Manufacturer from '@/models/Manufacturer'
-import ManufacturerSerializer from '@/serializers/jsonapi/ManufacturerSerializer'
+import { ManufacturerSerializer } from '@/serializers/jsonapi/ManufacturerSerializer'
 
 export default class ManufacturerApi {
   private axiosApi: AxiosInstance

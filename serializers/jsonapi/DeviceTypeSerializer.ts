@@ -2,7 +2,7 @@ import DeviceType from '@/models/DeviceType'
 
 import { removeBaseUrl } from '@/utils/urlHelpers'
 
-export default class DeviceTypeSerializer {
+export class DeviceTypeSerializer {
     private cvBaseUrl: string | undefined
 
     constructor (cvBaseUrl: string | undefined) {

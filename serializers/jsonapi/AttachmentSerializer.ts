@@ -2,7 +2,7 @@ import {
   Attachment
 } from '@/models/Attachment'
 
-export default class AttachmentSerializer {
+export class AttachmentSerializer {
   convertJsonApiElementToModel (attachment: any): Attachment {
     const result = new Attachment()
     result.id = attachment.id

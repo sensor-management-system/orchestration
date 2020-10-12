@@ -2,7 +2,7 @@ import Compartment from '@/models/Compartment'
 
 import { removeBaseUrl } from '@/utils/urlHelpers'
 
-export default class CompartmentSerializer {
+export class CompartmentSerializer {
   private cvBaseUrl: string | undefined
 
   constructor (cvBaseUrl: string | undefined) {

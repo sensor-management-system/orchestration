@@ -1,11 +1,11 @@
 import Device from '@/models/Device'
 
-import AttachmentSerializer from '@/serializers/jsonapi/AttachmentSerializer'
-import ContactSerializer from '@/serializers/jsonapi/ContactSerializer'
-import CustomTextFieldSerializer from '@/serializers/jsonapi/CustomTextFieldSerializer'
-import DevicePropertySerializer from '@/serializers/jsonapi/DevicePropertySerializer'
+import { AttachmentSerializer } from '@/serializers/jsonapi/AttachmentSerializer'
+import { ContactSerializer } from '@/serializers/jsonapi/ContactSerializer'
+import { CustomTextFieldSerializer } from '@/serializers/jsonapi/CustomTextFieldSerializer'
+import { DevicePropertySerializer } from '@/serializers/jsonapi/DevicePropertySerializer'
 
-export default class DeviceSerializer {
+export class DeviceSerializer {
   private attachmentSerializer: AttachmentSerializer = new AttachmentSerializer()
   private contactSerializer: ContactSerializer = new ContactSerializer()
   private customTextFieldSerializer: CustomTextFieldSerializer = new CustomTextFieldSerializer()

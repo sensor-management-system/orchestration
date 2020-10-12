@@ -2,7 +2,7 @@ import SamplingMedia from '@/models/SamplingMedia'
 
 import { removeBaseUrl } from '@/utils/urlHelpers'
 
-export default class StatusSerializer {
+export class SamplingMediaSerializer {
     private cvBaseUrl: string | undefined
 
     constructor (cvBaseUrl: string | undefined) {

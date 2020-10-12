@@ -2,7 +2,7 @@ import Status from '@/models/Status'
 
 import { removeBaseUrl } from '@/utils/urlHelpers'
 
-export default class StatusSerializer {
+export class StatusSerializer {
     private cvBaseUrl: string | undefined
 
     constructor (cvBaseUrl: string | undefined) {

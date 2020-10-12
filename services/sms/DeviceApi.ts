@@ -10,7 +10,7 @@ import { IFlaskJSONAPIFilter } from '@/utils/JSONApiInterfaces'
 import {
   IPaginationLoader, FilteredPaginationedLoader
 } from '@/utils/PaginatedLoader'
-import DeviceSerializer from '~/serializers/jsonapi/DeviceSerializer'
+import { DeviceSerializer } from '~/serializers/jsonapi/DeviceSerializer'
 
 export default class DeviceApi {
   private axiosApi: AxiosInstance

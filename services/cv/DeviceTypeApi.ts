@@ -1,7 +1,7 @@
 import { AxiosInstance } from 'axios'
 
 import DeviceType from '@/models/DeviceType'
-import DeviceTypeSerializer from '@/serializers/jsonapi/DeviceTypeSerializer'
+import { DeviceTypeSerializer } from '@/serializers/jsonapi/DeviceTypeSerializer'
 
 export default class DeviceTypeApi {
   private axiosApi: AxiosInstance

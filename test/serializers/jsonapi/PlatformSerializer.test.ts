@@ -1,10 +1,8 @@
 import Contact from '@/models/Contact'
 import Platform from '@/models/Platform'
-import {
-  Attachment
-} from '@/models/Attachment'
+import { Attachment } from '@/models/Attachment'
 
-import PlatformSerializer from '@/serializers/jsonapi/PlatformSerializer'
+import { PlatformSerializer } from '@/serializers/jsonapi/PlatformSerializer'
 
 const createTestPlatform = () => {
   const platform = new Platform()

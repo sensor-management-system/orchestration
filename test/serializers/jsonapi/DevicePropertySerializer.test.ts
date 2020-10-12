@@ -1,11 +1,7 @@
-import {
-  DeviceProperty
-} from '@/models/DeviceProperty'
-import {
-  MeasuringRange
-} from '@/models/MeasuringRange'
+import { DeviceProperty } from '@/models/DeviceProperty'
+import { MeasuringRange } from '@/models/MeasuringRange'
 
-import DevicePropertySerializer from '@/serializers/jsonapi/DevicePropertySerializer'
+import { DevicePropertySerializer } from '@/serializers/jsonapi/DevicePropertySerializer'
 
 describe('DevicePropertySerializer', () => {
   describe('#convertNestedJsonApiToModelList', () => {

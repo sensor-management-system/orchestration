@@ -2,7 +2,7 @@ import PlatformType from '@/models/PlatformType'
 
 import { removeBaseUrl } from '@/utils/urlHelpers'
 
-export default class PlatformTypeSerializer {
+export class PlatformTypeSerializer {
     private cvBaseUrl: string | undefined
 
     constructor (cvBaseUrl: string | undefined) {

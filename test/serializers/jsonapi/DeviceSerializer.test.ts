@@ -1,6 +1,6 @@
 import Contact from '@/models/Contact'
 import Device from '@/models/Device'
-import DeviceSerializer from '@/serializers/jsonapi/DeviceSerializer'
+import { DeviceSerializer } from '@/serializers/jsonapi/DeviceSerializer'
 import { Attachment } from '@/models/Attachment'
 import { DeviceProperty } from '@/models/DeviceProperty'
 import { MeasuringRange } from '@/models/MeasuringRange'

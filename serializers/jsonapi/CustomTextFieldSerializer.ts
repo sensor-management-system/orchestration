@@ -1,6 +1,6 @@
 import { CustomTextField } from '@/models/CustomTextField'
 
-export default class CustomTextFieldSerializer {
+export class CustomTextFieldSerializer {
   convertJsonApiElementToModel (customfield: any): CustomTextField {
     const result = new CustomTextField()
     result.id = customfield.id

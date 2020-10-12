@@ -1,5 +1,5 @@
 import Unit from '@/models/Unit'
-import UnitSerializer from '@/serializers/jsonapi/UnitSerializer'
+import { UnitSerializer } from '@/serializers/jsonapi/UnitSerializer'
 
 describe('UnitSerializer', () => {
   describe('#convertJsonApiObjectListToModelList', () => {

@@ -2,7 +2,7 @@ import Unit from '@/models/Unit'
 
 import { removeBaseUrl } from '@/utils/urlHelpers'
 
-export default class UnitSerializer {
+export class UnitSerializer {
   private cvBaseUrl: string | undefined
 
   constructor (cvBaseUrl: string | undefined) {

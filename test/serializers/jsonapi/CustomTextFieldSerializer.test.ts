@@ -1,6 +1,6 @@
 import { CustomTextField } from '@/models/CustomTextField'
 
-import CustomTextFieldSerializer from '@/serializers/jsonapi/CustomTextFieldSerializer'
+import { CustomTextFieldSerializer } from '@/serializers/jsonapi/CustomTextFieldSerializer'
 
 describe('CustomTextFieldSerializer', () => {
   describe('#convertNestedJsonApiToModelList', () => {

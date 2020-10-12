@@ -1,5 +1,5 @@
 import Property from '@/models/Property'
-import PropertySerializer from '@/serializers/jsonapi/PropertySerializer'
+import { PropertySerializer } from '@/serializers/jsonapi/PropertySerializer'
 
 describe('PropertySerializer', () => {
   describe('#convertJsonApiObjectListToModelList', () => {

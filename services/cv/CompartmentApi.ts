@@ -1,7 +1,7 @@
 import { AxiosInstance } from 'axios'
 
 import Compartment from '@/models/Compartment'
-import CompartmentSerializer from '@/serializers/jsonapi/CompartmentSerializer'
+import { CompartmentSerializer } from '@/serializers/jsonapi/CompartmentSerializer'
 
 export default class DeviceTypeApi {
   private axiosApi: AxiosInstance

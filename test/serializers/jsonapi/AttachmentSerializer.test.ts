@@ -1,6 +1,6 @@
 import { Attachment } from '@/models/Attachment'
 
-import AttachmentSerializer from '@/serializers/jsonapi/AttachmentSerializer'
+import { AttachmentSerializer } from '@/serializers/jsonapi/AttachmentSerializer'
 
 describe('AttachmentSerializer', () => {
   describe('#convertJsonApiElementToModel', () => {

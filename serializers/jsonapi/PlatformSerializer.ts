@@ -1,9 +1,9 @@
 import Platform from '@/models/Platform'
 
-import AttachmentSerializer from '@/serializers/jsonapi/AttachmentSerializer'
-import ContactSerializer from '@/serializers/jsonapi/ContactSerializer'
+import { AttachmentSerializer } from '@/serializers/jsonapi/AttachmentSerializer'
+import { ContactSerializer } from '@/serializers/jsonapi/ContactSerializer'
 
-export default class PlatformSerializer {
+export class PlatformSerializer {
   private attachmentSerializer: AttachmentSerializer = new AttachmentSerializer()
   private contactSerializer: ContactSerializer = new ContactSerializer()
 

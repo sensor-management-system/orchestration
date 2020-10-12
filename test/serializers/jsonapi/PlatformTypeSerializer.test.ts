@@ -1,5 +1,5 @@
 import PlatformType from '@/models/PlatformType'
-import PlatformTypeSerializer from '@/serializers/jsonapi/PlatformTypeSerializer'
+import { PlatformTypeSerializer } from '@/serializers/jsonapi/PlatformTypeSerializer'
 
 describe('PlatformTypeSerializer', () => {
   describe('#convertJsonApiObjectListToModelList', () => {

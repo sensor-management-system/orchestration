@@ -1,7 +1,7 @@
 import { AxiosInstance } from 'axios'
 
 import Status from '@/models/Status'
-import StatusSerializer from '@/serializers/jsonapi/StatusSerializer'
+import { StatusSerializer } from '@/serializers/jsonapi/StatusSerializer'
 
 export default class StatusApi {
   private axiosApi: AxiosInstance

@@ -2,7 +2,7 @@ import Manufacturer from '@/models/Manufacturer'
 
 import { removeBaseUrl } from '@/utils/urlHelpers'
 
-export default class ManufacturerSerializer {
+export class ManufacturerSerializer {
     private cvBaseUrl: string | undefined
 
     constructor (cvBaseUrl: string | undefined) {

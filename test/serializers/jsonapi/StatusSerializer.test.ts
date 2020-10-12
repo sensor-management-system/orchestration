@@ -1,5 +1,5 @@
 import Status from '@/models/Status'
-import StatusSerializer from '@/serializers/jsonapi/StatusSerializer'
+import { StatusSerializer } from '@/serializers/jsonapi/StatusSerializer'
 
 describe('StatusSerializer', () => {
   describe('#convertJsonApiObjectListToModelList', () => {

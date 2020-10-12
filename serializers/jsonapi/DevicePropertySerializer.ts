@@ -1,7 +1,7 @@
 import { DeviceProperty } from '@/models/DeviceProperty'
 import { MeasuringRange } from '@/models/MeasuringRange'
 
-export default class DevicePropertySerializer {
+export class DevicePropertySerializer {
   convertJsonApiElementToModel (property: any): DeviceProperty {
     const result = new DeviceProperty()
     result.id = property.id

@@ -5,7 +5,7 @@ import PlatformType from '@/models/PlatformType'
 import Manufacturer from '@/models/Manufacturer'
 import Status from '@/models/Status'
 
-import PlatformSerializer from '@/serializers/jsonapi/PlatformSerializer'
+import { PlatformSerializer } from '@/serializers/jsonapi/PlatformSerializer'
 
 import { IFlaskJSONAPIFilter } from '@/utils/JSONApiInterfaces'
 

@@ -2,7 +2,7 @@ import Property from '@/models/Property'
 
 import { removeBaseUrl } from '@/utils/urlHelpers'
 
-export default class PropertySerializer {
+export class PropertySerializer {
     private cvBaseUrl: string | undefined
 
     constructor (cvBaseUrl: string | undefined) {
