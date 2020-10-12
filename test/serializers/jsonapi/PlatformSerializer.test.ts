@@ -668,5 +668,23 @@ describe('PlatformSerializer', () => {
       expect(jsonApiData).toHaveProperty('id')
       expect(jsonApiData.id).toEqual('abc')
     })
+    it('should stay with a null createdAt/updatedAt date', () => {
+      const platform = createTestPlatform()
+      platform.createdAt = null
+      platform.updatedAt = null
+
+      const serializer = new PlatformSerializer()
+
+      const jsonApiData = serializer.convertModelToJsonApiData(platform)
+
+      expect(typeof jsonApiData).toEqual('object')
+      expect(jsonApiData).toHaveProperty('attributes')
+      const attributes = jsonApiData.attributes
+      expect(typeof attributes).toEqual('object')
+      expect(attributes).toHaveProperty('created_at')
+      expect(attributes.created_at).toBeNull()
+      expect(attributes).toHaveProperty('updated_at')
+      expect(attributes.updated_at).toBeNull()
+    })
   })
 })

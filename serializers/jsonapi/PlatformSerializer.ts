@@ -77,8 +77,8 @@ export default class PlatformSerializer {
         status_name: platform.statusName,
         website: platform.website,
         // those two time slots are set by the db, no matter what we deliver here
-        created_at: platform.createdAt?.toISOString(),
-        updated_at: platform.updatedAt?.toISOString(),
+        created_at: platform.createdAt != null ? platform.createdAt.toISOString() : null,
+        updated_at: platform.updatedAt != null ? platform.updatedAt.toISOString() : null,
         // TODO
         // created_by: platform.createdBy,
         // updated_by: platform.updatedBy,
