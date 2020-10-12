@@ -65,7 +65,7 @@ export default class DeviceSerializer {
     const properties = this.devicePropertySerializer.convertModelListToNestedJsonApiArray(device.properties)
     const customfields = this.customTextFieldSerializer.convertModelListToNestedJsonApiArray(device.customFields)
     const attachments = this.attachmentSerializer.convertModelListToNestedJsonApiArray(device.attachments)
-    const contacts = this.contactSerializer.convertModelListToRelationshipObject(device.contacts)
+    const contacts = this.contactSerializer.convertModelListToJsonApiRelationshipObject(device.contacts)
 
     const data: any = {
       type: 'device',

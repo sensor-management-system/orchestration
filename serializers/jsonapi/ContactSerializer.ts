@@ -24,7 +24,7 @@ export default class ContactSerializer {
     return jsonApiObjectList.data.map(this.convertJsonApiDataToModel)
   }
 
-  convertModelListToRelationshipObject (contacts: Contact[]): any {
+  convertModelListToJsonApiRelationshipObject (contacts: Contact[]): any {
     return {
       contacts: {
         data: this.convertModelListToTupleListWithIdAndType(contacts)

@@ -60,7 +60,7 @@ export default class PlatformSerializer {
 
   convertModelToJsonApiData (platform: Platform): any {
     const attachments = this.attachmentSerializer.convertModelListToNestedJsonApiArray(platform.attachments)
-    const contacts = this.contactSerializer.convertModelListToRelationshipObject(platform.contacts)
+    const contacts = this.contactSerializer.convertModelListToJsonApiRelationshipObject(platform.contacts)
 
     const data: any = {
       type: 'platform',

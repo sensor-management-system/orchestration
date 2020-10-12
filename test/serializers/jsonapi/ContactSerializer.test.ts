@@ -203,7 +203,7 @@ describe('ContactSerializer', () => {
       expect(contact).toEqual(expectedContact)
     })
   })
-  describe('#convertModelListToRelationshipObject', () => {
+  describe('#convertModelListToJsonApiRelationshipObject', () => {
     it('should convert a list of contacts to a relationship object with ids', () => {
       const contacts = [
         Contact.createFromObject({
@@ -224,7 +224,7 @@ describe('ContactSerializer', () => {
 
       const serializer = new ContactSerializer()
 
-      const relationships = serializer.convertModelListToRelationshipObject(contacts)
+      const relationships = serializer.convertModelListToJsonApiRelationshipObject(contacts)
 
       expect(typeof relationships).toEqual('object')
       expect(relationships).toHaveProperty('contacts')
