@@ -125,7 +125,7 @@ describe('DeviceSerializer', () => {
             attachments: [],
             status_uri: null,
             website: '',
-            updated_at: '2020-08-28T13:49:48.015620+00:00',
+            updated_at: '2020-08-29T13:49:48.015620+00:00',
             long_name: 'Campbell CR1000 logger unit',
             created_at: '2020-08-28T13:49:48.015620+00:00',
             inventory_number: '',
@@ -177,9 +177,9 @@ describe('DeviceSerializer', () => {
             attachments: [],
             status_uri: null,
             website: 'https://www.campbellsci.de/cr200x',
-            updated_at: '2020-08-28T13:49:47.814134+00:00',
+            updated_at: null,
             long_name: 'Campbell CR200X logger unit',
-            created_at: '2020-08-28T13:49:47.814134+00:00',
+            created_at: null,
             inventory_number: '',
             manufacturer_name: 'Campbell Scientific',
             device_type_uri: 'Logger',
@@ -243,7 +243,7 @@ describe('DeviceSerializer', () => {
       expectedDevice1.attachments = []
       expectedDevice1.statusUri = ''
       expectedDevice1.website = ''
-      expectedDevice1.updatedAt = new Date('2020-08-28T13:49:48.015620+00:00')
+      expectedDevice1.updatedAt = new Date('2020-08-29T13:49:48.015620+00:00')
       expectedDevice1.longName = 'Campbell CR1000 logger unit'
       expectedDevice1.createdAt = new Date('2020-08-28T13:49:48.015620+00:00')
       expectedDevice1.inventoryNumber = ''
@@ -267,9 +267,9 @@ describe('DeviceSerializer', () => {
       expectedDevice2.attachments = []
       expectedDevice2.statusUri = ''
       expectedDevice2.website = 'https://www.campbellsci.de/cr200x'
-      expectedDevice2.updatedAt = new Date('2020-08-28T13:49:47.814134+00:00')
+      expectedDevice2.updatedAt = null
       expectedDevice2.longName = 'Campbell CR200X logger unit'
-      expectedDevice2.createdAt = new Date('2020-08-28T13:49:47.814134+00:00')
+      expectedDevice2.createdAt = null
       expectedDevice2.inventoryNumber = ''
       expectedDevice2.manufacturerName = 'Campbell Scientific'
       expectedDevice2.deviceTypeUri = 'Logger'

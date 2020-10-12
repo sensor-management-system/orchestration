@@ -39,8 +39,8 @@ export default class DeviceSerializer {
     result.inventoryNumber = attributes.inventory_number || ''
     result.persistentIdentifier = attributes.persistent_identifier || ''
     result.website = attributes.website || ''
-    result.createdAt = new Date(attributes.created_at)
-    result.updatedAt = new Date(attributes.updated_at)
+    result.createdAt = attributes.created_at != null ? new Date(attributes.created_at) : null
+    result.updatedAt = attributes.updated_at != null ? new Date(attributes.updated_at) : null
     // TODO
     // result.createdBy = attributes.created_by
     // result.updatedBy = attributes.updated_by
