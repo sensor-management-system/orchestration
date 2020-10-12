@@ -86,8 +86,8 @@ export default class DeviceSerializer {
         website: device.website,
         dual_use: device.dualUse,
         // those two time slots are set by the db, no matter what we deliver here
-        created_at: device.createdAt?.toISOString(),
-        updated_at: device.updatedAt?.toISOString(),
+        created_at: device.createdAt != null ? device.createdAt.toISOString() : null,
+        updated_at: device.updatedAt != null ? device.updatedAt.toISOString() : null,
         // TODO
         // created_by: device.createdBy,
         // updated_by: device.updatedBy,

@@ -984,5 +984,23 @@ describe('DeviceSerializer', () => {
       expect(jsonApiData).toHaveProperty('id')
       expect(jsonApiData.id).toEqual('abc')
     })
+    it('should stay with a null createdAt/updatedAt date', () => {
+      const device = createTestDevice()
+      device.createdAt = null
+      device.updatedAt = null
+
+      const serializer = new DeviceSerializer()
+
+      const jsonApiData = serializer.convertModelToJsonApiData(device)
+
+      expect(typeof jsonApiData).toEqual('object')
+      expect(jsonApiData).toHaveProperty('attributes')
+      const attributes = jsonApiData.attributes
+      expect(typeof attributes).toEqual('object')
+      expect(attributes).toHaveProperty('created_at')
+      expect(attributes.created_at).toBeNull()
+      expect(attributes).toHaveProperty('updated_at')
+      expect(attributes.updated_at).toBeNull()
+    })
   })
 })
