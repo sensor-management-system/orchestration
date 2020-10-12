@@ -75,7 +75,7 @@ describe('PlatformSerializer', () => {
             platform_type_uri: 'type/Station',
             status_uri: 'status/inuse',
             website: 'http://www.tereno.net',
-            updated_at: '2020-08-28T13:48:35.740944+00:00',
+            updated_at: '2020-08-29T13:48:35.740944+00:00',
             long_name: 'Soil moisture station Boeken BF1, Germany',
             created_at: '2020-08-28T13:48:35.740944+00:00',
             inventory_number: '0001234',
@@ -122,9 +122,9 @@ describe('PlatformSerializer', () => {
             platform_type_uri: 'Station',
             status_uri: null,
             website: null,
-            updated_at: '2020-08-28T13:48:37.220186+00:00',
+            updated_at: null,
             long_name: 'Groundwater level KleinTrebbow',
-            created_at: '2020-08-28T13:48:37.220186+00:00',
+            created_at: null,
             inventory_number: null,
             manufacturer_name: null,
             short_name: 'klein_trebbow',
@@ -224,7 +224,7 @@ describe('PlatformSerializer', () => {
       expectedPlatform1.platformTypeUri = 'type/Station'
       expectedPlatform1.statusUri = 'status/inuse'
       expectedPlatform1.website = 'http://www.tereno.net'
-      expectedPlatform1.updatedAt = new Date('2020-08-28T13:48:35.740944+00:00')
+      expectedPlatform1.updatedAt = new Date('2020-08-29T13:48:35.740944+00:00')
       expectedPlatform1.longName = 'Soil moisture station Boeken BF1, Germany'
       expectedPlatform1.createdAt = new Date('2020-08-28T13:48:35.740944+00:00')
       expectedPlatform1.inventoryNumber = '0001234'
@@ -251,9 +251,9 @@ describe('PlatformSerializer', () => {
       expectedPlatform2.platformTypeUri = 'Station'
       expectedPlatform2.statusUri = ''
       expectedPlatform2.website = ''
-      expectedPlatform2.updatedAt = new Date('2020-08-28T13:48:37.220186+00:00')
+      expectedPlatform2.updatedAt = null
       expectedPlatform2.longName = 'Groundwater level KleinTrebbow'
-      expectedPlatform2.createdAt = new Date('2020-08-28T13:48:37.220186+00:00')
+      expectedPlatform2.createdAt = null
       expectedPlatform2.inventoryNumber = ''
       expectedPlatform2.manufacturerName = ''
       expectedPlatform2.shortName = 'klein_trebbow'

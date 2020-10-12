@@ -31,8 +31,8 @@ export default class PlatformSerializer {
     result.statusUri = attributes.status_uri || ''
     result.statusName = attributes.status_name || ''
     result.website = attributes.website || ''
-    result.createdAt = new Date(attributes.created_at)
-    result.updatedAt = new Date(attributes.updated_at)
+    result.createdAt = attributes.created_at != null ? new Date(attributes.created_at) : null
+    result.updatedAt = attributes.updated_at != null ? new Date(attributes.updated_at) : null
 
     // TODO
     // result.createdBy = attributes.created_by
