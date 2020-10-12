@@ -10,7 +10,7 @@ export default class PlatformTypeSerializer {
     }
 
     convertJsonApiObjectListToModelList (jsonApiObjectList: any): PlatformType[] {
-      return jsonApiObjectList.data.map((x: any) => this.convertJsonApiDataToModel(x))
+      return jsonApiObjectList.data.map(this.convertJsonApiDataToModel.bind(this))
     }
 
     convertJsonApiDataToModel (jsonApiData: any): PlatformType {

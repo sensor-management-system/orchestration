@@ -10,7 +10,7 @@ export default class CompartmentSerializer {
   }
 
   convertJsonApiObjectListToModelList (jsonApiObjectList: any): Compartment[] {
-    return jsonApiObjectList.data.map((x: any) => this.convertJsonApiDataToModel(x))
+    return jsonApiObjectList.data.map(this.convertJsonApiDataToModel.bind(this))
   }
 
   convertJsonApiDataToModel (jsonApiData: any): Compartment {

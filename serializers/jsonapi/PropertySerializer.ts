@@ -10,7 +10,7 @@ export default class PropertySerializer {
     }
 
     convertJsonApiObjectListToModelList (jsonApiObjectList: any): Property[] {
-      return jsonApiObjectList.data.map((x: any) => this.convertJsonApiDataToModel(x))
+      return jsonApiObjectList.data.map(this.convertJsonApiDataToModel.bind(this))
     }
 
     convertJsonApiDataToModel (jsonApiData: any): Property {
