@@ -241,6 +241,8 @@ export class DeviceSearcher {
       // there may be others to load as well
       const elements: Device[] = this.serialier.convertJsonApiObjectListToModelList(rawData)
 
+      const totalCount = rawData.meta.count
+
       let funToLoadNext = null
       if (elements.length > 0) {
         funToLoadNext = () => this.findAllOnPage(page + 1, pageSize)
@@ -248,6 +250,7 @@ export class DeviceSearcher {
 
       return {
         elements,
+        totalCount,
         funToLoadNext
       }
     })

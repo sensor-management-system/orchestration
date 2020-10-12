@@ -241,6 +241,10 @@ export class PlatformSearcher {
       // there may be others to load as well
       const elements: Platform[] = this.serializer.convertJsonApiObjectListToModelList(rawData)
 
+      // This is given by the json api. Regardless of the pagination it
+      // represents the total amount of entries found.
+      const totalCount = rawData.meta.count
+
       let funToLoadNext = null
       if (elements.length > 0) {
         funToLoadNext = () => this.findAllOnPage(page + 1, pageSize)
@@ -248,6 +252,7 @@ export class PlatformSearcher {
 
       return {
         elements,
+        totalCount,
         funToLoadNext
       }
     })
