@@ -1,5 +1,7 @@
 import Contact from '@/models/Contact'
 
+import { IJsonApiObjectList, IJsonApiObject, IJsonApiTypeIdDataListDict, IJsonApiTypeIdAttributes } from '@/serializers/jsonapi/JsonApiTypes'
+
 export interface IMissingContactData {
   ids: string[]
 }
@@ -10,12 +12,12 @@ export interface IContactsAndMissing {
 }
 
 export class ContactSerializer {
-  convertJsonApiObjectToModel (jsonApiObject: any): Contact {
+  convertJsonApiObjectToModel (jsonApiObject: IJsonApiObject): Contact {
     const data = jsonApiObject.data
     return this.convertJsonApiDataToModel(data)
   }
 
-  convertJsonApiDataToModel (jsonApiData: any): Contact {
+  convertJsonApiDataToModel (jsonApiData: IJsonApiTypeIdAttributes): Contact {
     const attributes = jsonApiData.attributes
 
     const newEntry = Contact.createEmpty()
@@ -29,11 +31,11 @@ export class ContactSerializer {
     return newEntry
   }
 
-  convertJsonApiObjectListToModelList (jsonApiObjectList: any): Contact[] {
+  convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiObjectList): Contact[] {
     return jsonApiObjectList.data.map(this.convertJsonApiDataToModel)
   }
 
-  convertModelListToJsonApiRelationshipObject (contacts: Contact[]): any {
+  convertModelListToJsonApiRelationshipObject (contacts: Contact[]): IJsonApiTypeIdDataListDict {
     return {
       contacts: {
         data: this.convertModelListToTupleListWithIdAndType(contacts)
@@ -52,7 +54,7 @@ export class ContactSerializer {
     return result
   }
 
-  convertJsonApiRelationshipsModelList (relationships: any, included: any[]): IContactsAndMissing {
+  convertJsonApiRelationshipsModelList (relationships: IJsonApiTypeIdDataListDict, included: IJsonApiTypeIdAttributes[]): IContactsAndMissing {
     const contactIds = []
     if (relationships.contacts && relationships.contacts.data && relationships.contacts.data.length > 0) {
       for (const relationShipContactData of relationships.contacts.data) {

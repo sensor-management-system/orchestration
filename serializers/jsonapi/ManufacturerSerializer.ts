@@ -1,5 +1,7 @@
 import Manufacturer from '@/models/Manufacturer'
 
+import { IJsonApiObjectList, IJsonApiDataWithId } from '@/serializers/jsonapi/JsonApiTypes'
+
 import { removeBaseUrl } from '@/utils/urlHelpers'
 
 export class ManufacturerSerializer {
@@ -9,11 +11,11 @@ export class ManufacturerSerializer {
       this.cvBaseUrl = cvBaseUrl
     }
 
-    convertJsonApiObjectListToModelList (jsonApiObjectList: any): Manufacturer[] {
+    convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiObjectList): Manufacturer[] {
       return jsonApiObjectList.data.map(this.convertJsonApiDataToModel.bind(this))
     }
 
-    convertJsonApiDataToModel (jsonApiData: any): Manufacturer {
+    convertJsonApiDataToModel (jsonApiData: IJsonApiDataWithId): Manufacturer {
       const id = jsonApiData.id
       const name = jsonApiData.attributes.name
       const url = removeBaseUrl(jsonApiData.links.self, this.cvBaseUrl)

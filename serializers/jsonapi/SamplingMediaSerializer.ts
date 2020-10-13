@@ -1,5 +1,7 @@
 import SamplingMedia from '@/models/SamplingMedia'
 
+import { IJsonApiObjectList, IJsonApiDataWithId } from '@/serializers/jsonapi/JsonApiTypes'
+
 import { removeBaseUrl } from '@/utils/urlHelpers'
 
 export class SamplingMediaSerializer {
@@ -9,11 +11,11 @@ export class SamplingMediaSerializer {
       this.cvBaseUrl = cvBaseUrl
     }
 
-    convertJsonApiObjectListToModelList (jsonApiObjectList: any): SamplingMedia[] {
+    convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiObjectList): SamplingMedia[] {
       return jsonApiObjectList.data.map(this.convertJsonApiDataToModel.bind(this))
     }
 
-    convertJsonApiDataToModel (jsonApiData: any): SamplingMedia {
+    convertJsonApiDataToModel (jsonApiData: IJsonApiDataWithId): SamplingMedia {
       const id = jsonApiData.id
       const name = jsonApiData.attributes.name
       const url = removeBaseUrl(jsonApiData.links.self, this.cvBaseUrl)

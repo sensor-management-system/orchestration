@@ -1,5 +1,7 @@
 import Status from '@/models/Status'
 
+import { IJsonApiObjectList, IJsonApiDataWithId } from '@/serializers/jsonapi/JsonApiTypes'
+
 import { removeBaseUrl } from '@/utils/urlHelpers'
 
 export class StatusSerializer {
@@ -9,11 +11,11 @@ export class StatusSerializer {
       this.cvBaseUrl = cvBaseUrl
     }
 
-    convertJsonApiObjectListToModelList (jsonApiObjectList: any): Status[] {
+    convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiObjectList): Status[] {
       return jsonApiObjectList.data.map(this.convertJsonApiDataToModel.bind(this))
     }
 
-    convertJsonApiDataToModel (jsonApiData: any): Status {
+    convertJsonApiDataToModel (jsonApiData: IJsonApiDataWithId): Status {
       const id = jsonApiData.id
       const name = jsonApiData.attributes.name
       const url = removeBaseUrl(jsonApiData.links.self, this.cvBaseUrl)

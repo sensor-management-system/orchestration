@@ -1,5 +1,7 @@
 import Compartment from '@/models/Compartment'
 
+import { IJsonApiObjectList, IJsonApiDataWithId } from '@/serializers/jsonapi/JsonApiTypes'
+
 import { removeBaseUrl } from '@/utils/urlHelpers'
 
 export class CompartmentSerializer {
@@ -9,11 +11,11 @@ export class CompartmentSerializer {
     this.cvBaseUrl = cvBaseUrl
   }
 
-  convertJsonApiObjectListToModelList (jsonApiObjectList: any): Compartment[] {
+  convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiObjectList): Compartment[] {
     return jsonApiObjectList.data.map(this.convertJsonApiDataToModel.bind(this))
   }
 
-  convertJsonApiDataToModel (jsonApiData: any): Compartment {
+  convertJsonApiDataToModel (jsonApiData: IJsonApiDataWithId): Compartment {
     const id = jsonApiData.id
     const name = jsonApiData.attributes.name
     const url = removeBaseUrl(jsonApiData.links.self, this.cvBaseUrl)

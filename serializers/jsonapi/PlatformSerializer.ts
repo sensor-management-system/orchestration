@@ -1,6 +1,8 @@
 import Contact from '@/models/Contact'
 import Platform from '@/models/Platform'
 
+import { IJsonApiObjectList, IJsonApiObject, IJsonApiDataWithId, IJsonApiTypeIdAttributes, IJsonApiDataWithOptionalId } from '@/serializers/jsonapi/JsonApiTypes'
+
 import { AttachmentSerializer } from '@/serializers/jsonapi/AttachmentSerializer'
 import { ContactSerializer, IMissingContactData } from '@/serializers/jsonapi/ContactSerializer'
 
@@ -17,12 +19,12 @@ export class PlatformSerializer {
   private attachmentSerializer: AttachmentSerializer = new AttachmentSerializer()
   private contactSerializer: ContactSerializer = new ContactSerializer()
 
-  convertJsonApiObjectToModel (jsonApiObject: any): IPlatformWithMeta {
+  convertJsonApiObjectToModel (jsonApiObject: IJsonApiObject): IPlatformWithMeta {
     const included = jsonApiObject.included || []
     return this.convertJsonApiDataToModel(jsonApiObject.data, included)
   }
 
-  convertJsonApiDataToModel (jsonApiData: any, included: any[]): IPlatformWithMeta {
+  convertJsonApiDataToModel (jsonApiData: IJsonApiDataWithId, included: IJsonApiTypeIdAttributes[]): IPlatformWithMeta {
     const result: Platform = Platform.createEmpty()
 
     const attributes = jsonApiData.attributes
@@ -70,18 +72,18 @@ export class PlatformSerializer {
     }
   }
 
-  convertJsonApiObjectListToModelList (jsonApiObjectList: any): IPlatformWithMeta[] {
+  convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiObjectList): IPlatformWithMeta[] {
     const included = jsonApiObjectList.included || []
-    return jsonApiObjectList.data.map((model: any) => {
+    return jsonApiObjectList.data.map((model: IJsonApiDataWithId) => {
       return this.convertJsonApiDataToModel(model, included)
     })
   }
 
-  convertModelToJsonApiData (platform: Platform): any {
+  convertModelToJsonApiData (platform: Platform): IJsonApiDataWithOptionalId {
     const attachments = this.attachmentSerializer.convertModelListToNestedJsonApiArray(platform.attachments)
     const contacts = this.contactSerializer.convertModelListToJsonApiRelationshipObject(platform.contacts)
 
-    const data: any = {
+    const data: IJsonApiDataWithOptionalId = {
       type: 'platform',
       attributes: {
         description: platform.description,

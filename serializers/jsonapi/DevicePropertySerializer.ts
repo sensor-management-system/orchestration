@@ -1,8 +1,10 @@
 import { DeviceProperty } from '@/models/DeviceProperty'
 import { MeasuringRange } from '@/models/MeasuringRange'
 
+import { IJsonApiNestedElement } from '@/serializers/jsonapi/JsonApiTypes'
+
 export class DevicePropertySerializer {
-  convertJsonApiElementToModel (property: any): DeviceProperty {
+  convertJsonApiElementToModel (property: IJsonApiNestedElement): DeviceProperty {
     const result = new DeviceProperty()
     result.id = property.id
     result.measuringRange = new MeasuringRange(
@@ -24,15 +26,15 @@ export class DevicePropertySerializer {
     return result
   }
 
-  convertNestedJsonApiToModelList (properties: any[]): DeviceProperty[] {
+  convertNestedJsonApiToModelList (properties: IJsonApiNestedElement[]): DeviceProperty[] {
     return properties.map(this.convertJsonApiElementToModel)
   }
 
-  convertModelListToNestedJsonApiArray (properties: DeviceProperty[]): any[] {
+  convertModelListToNestedJsonApiArray (properties: DeviceProperty[]): IJsonApiNestedElement[] {
     const result = []
 
     for (const property of properties) {
-      const propertyToSave: any = {}
+      const propertyToSave: IJsonApiNestedElement = {}
       if (property.id != null) {
         // currently it seems that the id is always set to a higher value
         // I can set it to 8, but it will be saved with a new id (9)

@@ -1,5 +1,7 @@
 import Property from '@/models/Property'
 
+import { IJsonApiObjectList, IJsonApiDataWithId } from '@/serializers/jsonapi/JsonApiTypes'
+
 import { removeBaseUrl } from '@/utils/urlHelpers'
 
 export class PropertySerializer {
@@ -9,11 +11,11 @@ export class PropertySerializer {
       this.cvBaseUrl = cvBaseUrl
     }
 
-    convertJsonApiObjectListToModelList (jsonApiObjectList: any): Property[] {
+    convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiObjectList): Property[] {
       return jsonApiObjectList.data.map(this.convertJsonApiDataToModel.bind(this))
     }
 
-    convertJsonApiDataToModel (jsonApiData: any): Property {
+    convertJsonApiDataToModel (jsonApiData: IJsonApiDataWithId): Property {
       const id = jsonApiData.id
       const name = jsonApiData.attributes.name
       const url = removeBaseUrl(jsonApiData.links.self, this.cvBaseUrl)

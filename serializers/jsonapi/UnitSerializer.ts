@@ -1,5 +1,7 @@
 import Unit from '@/models/Unit'
 
+import { IJsonApiObjectList, IJsonApiDataWithId } from '@/serializers/jsonapi/JsonApiTypes'
+
 import { removeBaseUrl } from '@/utils/urlHelpers'
 
 export class UnitSerializer {
@@ -9,11 +11,11 @@ export class UnitSerializer {
     this.cvBaseUrl = cvBaseUrl
   }
 
-  convertJsonApiObjectListToModelList (jsonApiObjectList: any): Unit[] {
+  convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiObjectList): Unit[] {
     return jsonApiObjectList.data.map(this.convertJsonApiDataToModel.bind(this))
   }
 
-  convertJsonApiDataToModel (jsonApiData: any): Unit {
+  convertJsonApiDataToModel (jsonApiData: IJsonApiDataWithId): Unit {
     const id = jsonApiData.id
     let name = jsonApiData.attributes.unitsname
     if (jsonApiData.attributes.unitsabbreviation) {

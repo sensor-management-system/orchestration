@@ -2,8 +2,10 @@ import {
   Attachment
 } from '@/models/Attachment'
 
+import { IJsonApiNestedElement } from '@/serializers/jsonapi/JsonApiTypes'
+
 export class AttachmentSerializer {
-  convertJsonApiElementToModel (attachment: any): Attachment {
+  convertJsonApiElementToModel (attachment: IJsonApiNestedElement): Attachment {
     const result = new Attachment()
     result.id = attachment.id
     result.label = attachment.label || ''
@@ -12,11 +14,11 @@ export class AttachmentSerializer {
     return result
   }
 
-  convertNestedJsonApiToModelList (attachments: any[]): Attachment[] {
+  convertNestedJsonApiToModelList (attachments: IJsonApiNestedElement[]): Attachment[] {
     return attachments.map(this.convertJsonApiElementToModel)
   }
 
-  convertModelListToNestedJsonApiArray (attachments: Attachment[]): any[] {
+  convertModelListToNestedJsonApiArray (attachments: Attachment[]): IJsonApiNestedElement[] {
     const result = []
     for (const attachment of attachments) {
       const attachmentToSave: any = {}

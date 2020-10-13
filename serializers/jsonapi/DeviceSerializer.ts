@@ -1,10 +1,12 @@
+import Contact from '@/models/Contact'
 import Device from '@/models/Device'
+
+import { IJsonApiObjectList, IJsonApiObject, IJsonApiDataWithId, IJsonApiDataWithOptionalId, IJsonApiTypeIdAttributes } from '@/serializers/jsonapi/JsonApiTypes'
 
 import { AttachmentSerializer } from '@/serializers/jsonapi/AttachmentSerializer'
 import { ContactSerializer, IMissingContactData } from '@/serializers/jsonapi/ContactSerializer'
 import { CustomTextFieldSerializer } from '@/serializers/jsonapi/CustomTextFieldSerializer'
 import { DevicePropertySerializer } from '@/serializers/jsonapi/DevicePropertySerializer'
-import Contact from '~/models/Contact'
 
 export interface IDeviceMissingData {
   contacts: IMissingContactData
@@ -21,12 +23,12 @@ export class DeviceSerializer {
   private customTextFieldSerializer: CustomTextFieldSerializer = new CustomTextFieldSerializer()
   private devicePropertySerializer: DevicePropertySerializer = new DevicePropertySerializer()
 
-  convertJsonApiObjectToModel (jsonApiObject: any): IDeviceWithMeta {
+  convertJsonApiObjectToModel (jsonApiObject: IJsonApiObject): IDeviceWithMeta {
     const included = jsonApiObject.included || []
     return this.convertJsonApiDataToModel(jsonApiObject.data, included)
   }
 
-  convertJsonApiDataToModel (jsonApiData: any, included: any[]): IDeviceWithMeta {
+  convertJsonApiDataToModel (jsonApiData: IJsonApiDataWithId, included: IJsonApiTypeIdAttributes[]): IDeviceWithMeta {
     const result: Device = new Device()
 
     const attributes = jsonApiData.attributes
@@ -74,20 +76,20 @@ export class DeviceSerializer {
     }
   }
 
-  convertJsonApiObjectListToModelList (jsonApiObjectList: any): IDeviceWithMeta[] {
+  convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiObjectList): IDeviceWithMeta[] {
     const included = jsonApiObjectList.included || []
-    return jsonApiObjectList.data.map((model: any) => {
+    return jsonApiObjectList.data.map((model: IJsonApiDataWithId) => {
       return this.convertJsonApiDataToModel(model, included)
     })
   }
 
-  convertModelToJsonApiData (device: Device): any {
+  convertModelToJsonApiData (device: Device): IJsonApiDataWithOptionalId {
     const properties = this.devicePropertySerializer.convertModelListToNestedJsonApiArray(device.properties)
     const customfields = this.customTextFieldSerializer.convertModelListToNestedJsonApiArray(device.customFields)
     const attachments = this.attachmentSerializer.convertModelListToNestedJsonApiArray(device.attachments)
     const contacts = this.contactSerializer.convertModelListToJsonApiRelationshipObject(device.contacts)
 
-    const data: any = {
+    const data: IJsonApiDataWithOptionalId = {
       type: 'device',
       attributes: {
         description: device.description,

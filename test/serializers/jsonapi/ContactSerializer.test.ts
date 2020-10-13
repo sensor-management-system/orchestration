@@ -248,9 +248,11 @@ describe('ContactSerializer', () => {
       const relationships = {
         contacts: {
           data: [{
-            id: '1'
+            id: '1',
+            type: 'contact'
           }, {
-            id: '2'
+            id: '2',
+            type: 'contact'
           }]
         }
       }

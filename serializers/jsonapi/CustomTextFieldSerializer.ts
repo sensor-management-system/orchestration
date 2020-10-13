@@ -1,7 +1,8 @@
 import { CustomTextField } from '@/models/CustomTextField'
+import { IJsonApiNestedElement } from '@/serializers/jsonapi/JsonApiTypes'
 
 export class CustomTextFieldSerializer {
-  convertJsonApiElementToModel (customfield: any): CustomTextField {
+  convertJsonApiElementToModel (customfield: IJsonApiNestedElement): CustomTextField {
     const result = new CustomTextField()
     result.id = customfield.id
     result.key = customfield.key || ''
@@ -10,14 +11,14 @@ export class CustomTextFieldSerializer {
     return result
   }
 
-  convertNestedJsonApiToModelList (customfields: any[]): CustomTextField[] {
+  convertNestedJsonApiToModelList (customfields: IJsonApiNestedElement[]): CustomTextField[] {
     return customfields.map(this.convertJsonApiElementToModel)
   }
 
-  convertModelListToNestedJsonApiArray (customfields: CustomTextField[]): any[] {
+  convertModelListToNestedJsonApiArray (customfields: CustomTextField[]): IJsonApiNestedElement[] {
     const result = []
     for (const customField of customfields) {
-      const customFieldToSave: any = {}
+      const customFieldToSave: IJsonApiNestedElement = {}
 
       if (customField.id != null) {
         customFieldToSave.id = customField.id
