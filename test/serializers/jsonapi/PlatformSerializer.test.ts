@@ -2,7 +2,7 @@ import Contact from '@/models/Contact'
 import Platform from '@/models/Platform'
 import { Attachment } from '@/models/Attachment'
 
-import { PlatformSerializer } from '@/serializers/jsonapi/PlatformSerializer'
+import { PlatformSerializer, IPlatformWithMeta, platformWithMetaToPlatformByThrowingErrorOnMissing, platformWithMetaToPlatformByAddingDummyObjects } from '@/serializers/jsonapi/PlatformSerializer'
 
 const createTestPlatform = () => {
   const platform = new Platform()
@@ -263,13 +263,24 @@ describe('PlatformSerializer', () => {
 
       const serializer = new PlatformSerializer()
 
-      const platforms = serializer.convertJsonApiObjectListToModelList(jsonApiObjectList)
+      const platformsWithMeta = serializer.convertJsonApiObjectListToModelList(jsonApiObjectList)
+      const platforms = platformsWithMeta.map((x: IPlatformWithMeta) => x.platform)
 
       expect(Array.isArray(platforms)).toBeTruthy()
       expect(platforms.length).toEqual(2)
 
       expect(platforms[0]).toEqual(expectedPlatform1)
       expect(platforms[1]).toEqual(expectedPlatform2)
+
+      const missingContactIds = platformsWithMeta.map((x: IPlatformWithMeta) => {
+        return x.missing.contacts.ids
+      })
+
+      expect(Array.isArray(missingContactIds)).toBeTruthy()
+      expect(missingContactIds.length).toEqual(2)
+
+      expect(missingContactIds[0]).toEqual([])
+      expect(missingContactIds[1]).toEqual([])
     })
   })
   describe('#convertJsonApiObjectToModel', () => {
@@ -411,9 +422,14 @@ describe('PlatformSerializer', () => {
 
       const serializer = new PlatformSerializer()
 
-      const platform = serializer.convertJsonApiObjectToModel(jsonApiObject)
+      const platformWithMeta = serializer.convertJsonApiObjectToModel(jsonApiObject)
+      const platform = platformWithMeta.platform
 
       expect(platform).toEqual(expectedPlatform)
+
+      const missingContactIds = platformWithMeta.missing.contacts.ids
+      expect(Array.isArray(missingContactIds)).toBeTruthy()
+      expect(missingContactIds.length).toEqual(0)
     })
   })
   describe('#convertJsonApiDataToModel', () => {
@@ -546,10 +562,14 @@ describe('PlatformSerializer', () => {
       })]
 
       const serializer = new PlatformSerializer()
-
-      const platform = serializer.convertJsonApiDataToModel(jsonApiData, included)
+      const platfromWithMeta = serializer.convertJsonApiDataToModel(jsonApiData, included)
+      const platform = platfromWithMeta.platform
 
       expect(platform).toEqual(expectedPlatform)
+
+      const missingContactIds = platfromWithMeta.missing.contacts.ids
+      expect(Array.isArray(missingContactIds)).toBeTruthy()
+      expect(missingContactIds.length).toEqual(0)
     })
   })
   describe('#convertModelToJsonApiData', () => {
@@ -684,5 +704,154 @@ describe('PlatformSerializer', () => {
       expect(attributes).toHaveProperty('updated_at')
       expect(attributes.updated_at).toBeNull()
     })
+  })
+})
+describe('platformWithMetaToPlatformByThrowingErrorOnMissing', () => {
+  it('should work without missing data', () => {
+    const platform = new Platform()
+    const missing = {
+      contacts: {
+        ids: []
+      }
+    }
+
+    const result = platformWithMetaToPlatformByThrowingErrorOnMissing({
+      platform,
+      missing
+    })
+
+    expect(result).toEqual(platform)
+    expect(result.contacts).toEqual([])
+  })
+  it('should also work if there is an contact', () => {
+    const platform = new Platform()
+    const contact = Contact.createFromObject({
+      id: '1',
+      familyName: 'Mustermann',
+      givenName: 'Max',
+      website: '',
+      email: 'max@mustermann.de'
+    })
+    platform.contacts.push(contact)
+
+    const missing = {
+      contacts: {
+        ids: []
+      }
+    }
+
+    const result = platformWithMetaToPlatformByThrowingErrorOnMissing({
+      platform,
+      missing
+    })
+
+    expect(result).toEqual(platform)
+    expect(result.contacts).toEqual([contact])
+  })
+  it('should throw an error if there are missing data', () => {
+    const platform = new Platform()
+    const missing = {
+      contacts: {
+        ids: ['1']
+      }
+    }
+
+    try {
+      platformWithMetaToPlatformByThrowingErrorOnMissing({
+        platform,
+        missing
+      })
+      fail('There must be an error')
+    } catch (error) {
+      expect(error.toString()).toMatch(/Contacts are missing/)
+    }
+  })
+})
+describe('platformWithMetaToPlatformByAddingDummyObjects', () => {
+  it('should leave the data as it is if there are no missing data', () => {
+    const platform = new Platform()
+    const missing = {
+      contacts: {
+        ids: []
+      }
+    }
+
+    const result = platformWithMetaToPlatformByAddingDummyObjects({
+      platform,
+      missing
+    })
+
+    expect(result).toEqual(platform)
+    expect(result.contacts).toEqual([])
+  })
+  it('should stay with existing contacts without adding dummy data', () => {
+    const platform = new Platform()
+    const contact = Contact.createFromObject({
+      id: '1',
+      familyName: 'Mustermann',
+      givenName: 'Max',
+      website: '',
+      email: 'max@mustermann.de'
+    })
+    platform.contacts.push(contact)
+    const missing = {
+      contacts: {
+        ids: []
+      }
+    }
+
+    const result = platformWithMetaToPlatformByAddingDummyObjects({
+      platform,
+      missing
+    })
+
+    expect(result).toEqual(platform)
+    expect(result.contacts).toEqual([contact])
+  })
+  it('should add a dummy contact if there are missing data', () => {
+    const platform = new Platform()
+
+    const missing = {
+      contacts: {
+        ids: ['2']
+      }
+    }
+
+    const newExpectedContact = new Contact()
+    newExpectedContact.id = '2'
+
+    const result = platformWithMetaToPlatformByAddingDummyObjects({
+      platform,
+      missing
+    })
+
+    expect(result.contacts).toEqual([newExpectedContact])
+  })
+  it('should also add a dummy contact if there are contact data - together with the missing', () => {
+    const platform = new Platform()
+    const contact = Contact.createFromObject({
+      id: '1',
+      familyName: 'Mustermann',
+      givenName: 'Max',
+      website: '',
+      email: 'max@mustermann.de'
+    })
+    platform.contacts.push(contact)
+
+    const missing = {
+      contacts: {
+        ids: ['2']
+      }
+    }
+
+    const newExpectedContact = new Contact()
+    newExpectedContact.id = '2'
+
+    const result = platformWithMetaToPlatformByAddingDummyObjects({
+      platform,
+      missing
+    })
+
+    expect(result.contacts).toEqual([contact, newExpectedContact])
   })
 })

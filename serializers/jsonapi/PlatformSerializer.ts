@@ -1,18 +1,28 @@
+import Contact from '@/models/Contact'
 import Platform from '@/models/Platform'
 
 import { AttachmentSerializer } from '@/serializers/jsonapi/AttachmentSerializer'
-import { ContactSerializer } from '@/serializers/jsonapi/ContactSerializer'
+import { ContactSerializer, IMissingContactData } from '@/serializers/jsonapi/ContactSerializer'
+
+export interface IPlatformMissingData {
+  contacts: IMissingContactData
+}
+
+export interface IPlatformWithMeta {
+  platform: Platform
+  missing: IPlatformMissingData
+}
 
 export class PlatformSerializer {
   private attachmentSerializer: AttachmentSerializer = new AttachmentSerializer()
   private contactSerializer: ContactSerializer = new ContactSerializer()
 
-  convertJsonApiObjectToModel (jsonApiObject: any): Platform {
+  convertJsonApiObjectToModel (jsonApiObject: any): IPlatformWithMeta {
     const included = jsonApiObject.included || []
     return this.convertJsonApiDataToModel(jsonApiObject.data, included)
   }
 
-  convertJsonApiDataToModel (jsonApiData: any, included: any[]): Platform {
+  convertJsonApiDataToModel (jsonApiData: any, included: any[]): IPlatformWithMeta {
     const result: Platform = Platform.createEmpty()
 
     const attributes = jsonApiData.attributes
@@ -46,12 +56,21 @@ export class PlatformSerializer {
     // result.events = []
 
     result.attachments = this.attachmentSerializer.convertNestedJsonApiToModelList(attributes.attachments)
-    result.contacts = this.contactSerializer.convertJsonApiRelationshipsModelList(relationships, included)
+    const contactsWithMissing = this.contactSerializer.convertJsonApiRelationshipsModelList(relationships, included)
+    result.contacts = contactsWithMissing.contacts
+    const missingDataForContactIds = contactsWithMissing.missing.ids
 
-    return result
+    return {
+      platform: result,
+      missing: {
+        contacts: {
+          ids: missingDataForContactIds
+        }
+      }
+    }
   }
 
-  convertJsonApiObjectListToModelList (jsonApiObjectList: any): Platform[] {
+  convertJsonApiObjectListToModelList (jsonApiObjectList: any): IPlatformWithMeta[] {
     const included = jsonApiObjectList.included || []
     return jsonApiObjectList.data.map((model: any) => {
       return this.convertJsonApiDataToModel(model, included)
@@ -101,4 +120,26 @@ export class PlatformSerializer {
 
     return data
   }
+}
+
+export const platformWithMetaToPlatformByThrowingErrorOnMissing = (platformWithMeta: IPlatformWithMeta) : Platform => {
+  const platform = platformWithMeta.platform
+
+  if (platformWithMeta.missing.contacts.ids.length > 0) {
+    throw new Error('Contacts are missing')
+  }
+
+  return platform
+}
+
+export const platformWithMetaToPlatformByAddingDummyObjects = (platformWithMeta: IPlatformWithMeta) : Platform => {
+  const platform = platformWithMeta.platform
+
+  for (const missingContactId of platformWithMeta.missing.contacts.ids) {
+    const contact = new Contact()
+    contact.id = missingContactId
+    platform.contacts.push(contact)
+  }
+
+  return platform
 }

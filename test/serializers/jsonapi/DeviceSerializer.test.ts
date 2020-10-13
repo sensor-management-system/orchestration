@@ -1,6 +1,6 @@
 import Contact from '@/models/Contact'
 import Device from '@/models/Device'
-import { DeviceSerializer } from '@/serializers/jsonapi/DeviceSerializer'
+import { DeviceSerializer, IDeviceWithMeta, deviceWithMetaToDeviceByThrowingErrorOnMissing, deviceWithMetaToDeviceByAddingDummyObjects } from '@/serializers/jsonapi/DeviceSerializer'
 import { Attachment } from '@/models/Attachment'
 import { DeviceProperty } from '@/models/DeviceProperty'
 import { MeasuringRange } from '@/models/MeasuringRange'
@@ -282,13 +282,24 @@ describe('DeviceSerializer', () => {
       expectedDevice2.contacts = []
 
       const serializer = new DeviceSerializer()
-      const devices = serializer.convertJsonApiObjectListToModelList(jsonApiObjectList)
+      const devicesWithMeta = serializer.convertJsonApiObjectListToModelList(jsonApiObjectList)
+      const devices = devicesWithMeta.map((x: IDeviceWithMeta) => x.device)
 
       expect(Array.isArray(devices)).toBeTruthy()
       expect(devices.length).toEqual(2)
 
       expect(devices[0]).toEqual(expectedDevice1)
       expect(devices[1]).toEqual(expectedDevice2)
+
+      const missingContactIds = devicesWithMeta.map((x: IDeviceWithMeta) => {
+        return x.missing.contacts.ids
+      })
+
+      expect(Array.isArray(missingContactIds)).toBeTruthy()
+      expect(missingContactIds.length).toEqual(2)
+
+      expect(missingContactIds[0]).toEqual([])
+      expect(missingContactIds[1]).toEqual([])
     })
   })
   describe('#convertJsonApiObjectToModel', () => {
@@ -389,9 +400,11 @@ describe('DeviceSerializer', () => {
       expectedDevice.contacts = []
 
       const serializer = new DeviceSerializer()
-      const device = serializer.convertJsonApiObjectToModel(jsonApiObject)
+      const deviceWithMeta = serializer.convertJsonApiObjectToModel(jsonApiObject)
+      const device = deviceWithMeta.device
 
       expect(device).toEqual(expectedDevice)
+      expect(deviceWithMeta.missing.contacts.ids).toEqual([])
     })
     it('should convert also a device with information for contacts, customFields & properties', () => {
       const jsonApiObject: any = {
@@ -622,9 +635,11 @@ describe('DeviceSerializer', () => {
       ]
 
       const serializer = new DeviceSerializer()
-      const device = serializer.convertJsonApiObjectToModel(jsonApiObject)
+      const deviceWithMeta = serializer.convertJsonApiObjectToModel(jsonApiObject)
+      const device = deviceWithMeta.device
 
       expect(device).toEqual(expectedDevice)
+      expect(deviceWithMeta.missing.contacts.ids).toEqual([])
     })
   })
   describe('#convertJsonApiDataToModel', () => {
@@ -719,9 +734,11 @@ describe('DeviceSerializer', () => {
       const included: any[] = []
 
       const serializer = new DeviceSerializer()
-      const device = serializer.convertJsonApiDataToModel(jsonApiData, included)
+      const deviceWeithMeta = serializer.convertJsonApiDataToModel(jsonApiData, included)
+      const device = deviceWeithMeta.device
 
       expect(device).toEqual(expectedDevice)
+      expect(deviceWeithMeta.missing.contacts.ids).toEqual([])
     })
     it('should convert also work with different devicetype name and uri values', () => {
       const jsonApiData: any = {
@@ -814,9 +831,11 @@ describe('DeviceSerializer', () => {
       const included: any[] = []
 
       const serializer = new DeviceSerializer()
-      const device = serializer.convertJsonApiDataToModel(jsonApiData, included)
+      const deviceWithMeta = serializer.convertJsonApiDataToModel(jsonApiData, included)
+      const device = deviceWithMeta.device
 
       expect(device).toEqual(expectedDevice)
+      expect(deviceWithMeta.missing.contacts.ids).toEqual([])
     })
   })
   describe('#convertModelToJsonApiData', () => {
@@ -1002,5 +1021,154 @@ describe('DeviceSerializer', () => {
       expect(attributes).toHaveProperty('updated_at')
       expect(attributes.updated_at).toBeNull()
     })
+  })
+})
+describe('deviceWithMetaToDeviceByThrowingErrorOnMissing', () => {
+  it('should work without missing data', () => {
+    const device = new Device()
+    const missing = {
+      contacts: {
+        ids: []
+      }
+    }
+
+    const result = deviceWithMetaToDeviceByThrowingErrorOnMissing({
+      device,
+      missing
+    })
+
+    expect(result).toEqual(device)
+    expect(result.contacts).toEqual([])
+  })
+  it('should also work if there is an contact', () => {
+    const device = new Device()
+    const contact = Contact.createFromObject({
+      id: '1',
+      familyName: 'Mustermann',
+      givenName: 'Max',
+      website: '',
+      email: 'max@mustermann.de'
+    })
+    device.contacts.push(contact)
+
+    const missing = {
+      contacts: {
+        ids: []
+      }
+    }
+
+    const result = deviceWithMetaToDeviceByThrowingErrorOnMissing({
+      device,
+      missing
+    })
+
+    expect(result).toEqual(device)
+    expect(result.contacts).toEqual([contact])
+  })
+  it('should throw an error if there are missing data', () => {
+    const device = new Device()
+    const missing = {
+      contacts: {
+        ids: ['1']
+      }
+    }
+
+    try {
+      deviceWithMetaToDeviceByThrowingErrorOnMissing({
+        device,
+        missing
+      })
+      fail('There must be an error')
+    } catch (error) {
+      expect(error.toString()).toMatch(/Contacts are missing/)
+    }
+  })
+})
+describe('deviceWithMetaToDeviceByAddingDummyObjects', () => {
+  it('should leave the data as it is if there are no missing data', () => {
+    const device = new Device()
+    const missing = {
+      contacts: {
+        ids: []
+      }
+    }
+
+    const result = deviceWithMetaToDeviceByAddingDummyObjects({
+      device,
+      missing
+    })
+
+    expect(result).toEqual(device)
+    expect(result.contacts).toEqual([])
+  })
+  it('should stay with existing contacts without adding dummy data', () => {
+    const device = new Device()
+    const contact = Contact.createFromObject({
+      id: '1',
+      familyName: 'Mustermann',
+      givenName: 'Max',
+      website: '',
+      email: 'max@mustermann.de'
+    })
+    device.contacts.push(contact)
+    const missing = {
+      contacts: {
+        ids: []
+      }
+    }
+
+    const result = deviceWithMetaToDeviceByAddingDummyObjects({
+      device,
+      missing
+    })
+
+    expect(result).toEqual(device)
+    expect(result.contacts).toEqual([contact])
+  })
+  it('should add a dummy contact if there are missing data', () => {
+    const device = new Device()
+
+    const missing = {
+      contacts: {
+        ids: ['2']
+      }
+    }
+
+    const newExpectedContact = new Contact()
+    newExpectedContact.id = '2'
+
+    const result = deviceWithMetaToDeviceByAddingDummyObjects({
+      device,
+      missing
+    })
+
+    expect(result.contacts).toEqual([newExpectedContact])
+  })
+  it('should also add a dummy contact if there are contact data - together with the missing', () => {
+    const device = new Device()
+    const contact = Contact.createFromObject({
+      id: '1',
+      familyName: 'Mustermann',
+      givenName: 'Max',
+      website: '',
+      email: 'max@mustermann.de'
+    })
+    device.contacts.push(contact)
+
+    const missing = {
+      contacts: {
+        ids: ['2']
+      }
+    }
+
+    const newExpectedContact = new Contact()
+    newExpectedContact.id = '2'
+
+    const result = deviceWithMetaToDeviceByAddingDummyObjects({
+      device,
+      missing
+    })
+
+    expect(result.contacts).toEqual([contact, newExpectedContact])
   })
 })

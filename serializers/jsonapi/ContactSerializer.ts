@@ -1,5 +1,14 @@
 import Contact from '@/models/Contact'
 
+export interface IMissingContactData {
+  ids: string[]
+}
+
+export interface IContactsAndMissing {
+  contacts: Contact[]
+  missing: IMissingContactData
+}
+
 export class ContactSerializer {
   convertJsonApiObjectToModel (jsonApiObject: any): Contact {
     const data = jsonApiObject.data
@@ -43,7 +52,7 @@ export class ContactSerializer {
     return result
   }
 
-  convertJsonApiRelationshipsModelList (relationships: any, included: any[]): Contact[] {
+  convertJsonApiRelationshipsModelList (relationships: any, included: any[]): IContactsAndMissing {
     const contactIds = []
     if (relationships.contacts && relationships.contacts.data && relationships.contacts.data.length > 0) {
       for (const relationShipContactData of relationships.contacts.data) {
@@ -66,17 +75,21 @@ export class ContactSerializer {
     }
 
     const contacts = []
+    const missingDataForContactIds = []
 
     for (const contactId of contactIds) {
       if (possibleContacts[contactId]) {
         contacts.push(possibleContacts[contactId])
       } else {
-        const contact = new Contact()
-        contact.id = contactId
-        contacts.push(contact)
+        missingDataForContactIds.push(contactId)
       }
     }
 
-    return contacts
+    return {
+      contacts,
+      missing: {
+        ids: missingDataForContactIds
+      }
+    }
   }
 }

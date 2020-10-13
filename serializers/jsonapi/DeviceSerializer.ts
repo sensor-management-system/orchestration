@@ -1,9 +1,19 @@
 import Device from '@/models/Device'
 
 import { AttachmentSerializer } from '@/serializers/jsonapi/AttachmentSerializer'
-import { ContactSerializer } from '@/serializers/jsonapi/ContactSerializer'
+import { ContactSerializer, IMissingContactData } from '@/serializers/jsonapi/ContactSerializer'
 import { CustomTextFieldSerializer } from '@/serializers/jsonapi/CustomTextFieldSerializer'
 import { DevicePropertySerializer } from '@/serializers/jsonapi/DevicePropertySerializer'
+import Contact from '~/models/Contact'
+
+export interface IDeviceMissingData {
+  contacts: IMissingContactData
+}
+
+export interface IDeviceWithMeta {
+  device: Device
+  missing: IDeviceMissingData
+}
 
 export class DeviceSerializer {
   private attachmentSerializer: AttachmentSerializer = new AttachmentSerializer()
@@ -11,12 +21,12 @@ export class DeviceSerializer {
   private customTextFieldSerializer: CustomTextFieldSerializer = new CustomTextFieldSerializer()
   private devicePropertySerializer: DevicePropertySerializer = new DevicePropertySerializer()
 
-  convertJsonApiObjectToModel (jsonApiObject: any): Device {
+  convertJsonApiObjectToModel (jsonApiObject: any): IDeviceWithMeta {
     const included = jsonApiObject.included || []
     return this.convertJsonApiDataToModel(jsonApiObject.data, included)
   }
 
-  convertJsonApiDataToModel (jsonApiData: any, included: any[]): Device {
+  convertJsonApiDataToModel (jsonApiData: any, included: any[]): IDeviceWithMeta {
     const result: Device = new Device()
 
     const attributes = jsonApiData.attributes
@@ -49,12 +59,22 @@ export class DeviceSerializer {
     result.attachments = this.attachmentSerializer.convertNestedJsonApiToModelList(attributes.attachments)
     result.customFields = this.customTextFieldSerializer.convertNestedJsonApiToModelList(attributes.customfields)
     result.properties = this.devicePropertySerializer.convertNestedJsonApiToModelList(attributes.properties)
-    result.contacts = this.contactSerializer.convertJsonApiRelationshipsModelList(relationships, included)
 
-    return result
+    const contactsWithMissing = this.contactSerializer.convertJsonApiRelationshipsModelList(relationships, included)
+    result.contacts = contactsWithMissing.contacts
+    const missingDataForContactIds = contactsWithMissing.missing.ids
+
+    return {
+      device: result,
+      missing: {
+        contacts: {
+          ids: missingDataForContactIds
+        }
+      }
+    }
   }
 
-  convertJsonApiObjectListToModelList (jsonApiObjectList: any): Device[] {
+  convertJsonApiObjectListToModelList (jsonApiObjectList: any): IDeviceWithMeta[] {
     const included = jsonApiObjectList.included || []
     return jsonApiObjectList.data.map((model: any) => {
       return this.convertJsonApiDataToModel(model, included)
@@ -108,4 +128,26 @@ export class DeviceSerializer {
 
     return data
   }
+}
+
+export const deviceWithMetaToDeviceByThrowingErrorOnMissing = (deviceWitHMeta: IDeviceWithMeta) : Device => {
+  const device = deviceWitHMeta.device
+
+  if (deviceWitHMeta.missing.contacts.ids.length > 0) {
+    throw new Error('Contacts are missing')
+  }
+
+  return device
+}
+
+export const deviceWithMetaToDeviceByAddingDummyObjects = (deviceWithMeta: IDeviceWithMeta) : Device => {
+  const device = deviceWithMeta.device
+
+  for (const missingContactId of deviceWithMeta.missing.contacts.ids) {
+    const contact = new Contact()
+    contact.id = missingContactId
+    device.contacts.push(contact)
+  }
+
+  return device
 }

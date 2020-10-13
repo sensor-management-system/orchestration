@@ -244,7 +244,7 @@ describe('ContactSerializer', () => {
     })
   })
   describe('#convertJsonApiRelationshipsModelList', () => {
-    it('should construct a list of contacts', () => {
+    it('should construct a list of contacts - and store missing ids', () => {
       const relationships = {
         contacts: {
           data: [{
@@ -275,23 +275,26 @@ describe('ContactSerializer', () => {
         }
       }]
 
-      const expectedContact1 = Contact.createFromObject({
+      const expectedContact = Contact.createFromObject({
         id: '1',
         givenName: 'AA',
         familyName: 'BB',
         email: 'AA@BB',
         website: ''
       })
-      const expectedContact2 = new Contact()
-      expectedContact2.id = '2'
 
       const serializer = new ContactSerializer()
-      const contacts = serializer.convertJsonApiRelationshipsModelList(relationships, included)
+      const contactsWithMissing = serializer.convertJsonApiRelationshipsModelList(relationships, included)
+      const contacts = contactsWithMissing.contacts
 
       expect(Array.isArray(contacts)).toBeTruthy()
-      expect(contacts.length).toEqual(2)
-      expect(contacts[0]).toEqual(expectedContact1)
-      expect(contacts[1]).toEqual(expectedContact2)
+      expect(contacts.length).toEqual(1)
+      expect(contacts[0]).toEqual(expectedContact)
+
+      const missingIds = contactsWithMissing.missing.ids
+      expect(Array.isArray(missingIds)).toBeTruthy()
+      expect(missingIds.length).toEqual(1)
+      expect(missingIds[0]).toEqual('2')
     })
   })
 })

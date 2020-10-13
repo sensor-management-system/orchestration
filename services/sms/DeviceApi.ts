@@ -10,7 +10,11 @@ import { IFlaskJSONAPIFilter } from '@/utils/JSONApiInterfaces'
 import {
   IPaginationLoader, FilteredPaginationedLoader
 } from '@/utils/PaginatedLoader'
-import { DeviceSerializer } from '~/serializers/jsonapi/DeviceSerializer'
+import {
+  DeviceSerializer,
+  deviceWithMetaToDeviceByThrowingErrorOnMissing,
+  deviceWithMetaToDeviceByAddingDummyObjects
+} from '@/serializers/jsonapi/DeviceSerializer'
 
 export default class DeviceApi {
   private axiosApi: AxiosInstance
@@ -28,7 +32,9 @@ export default class DeviceApi {
       }
     }).then((rawResponse) => {
       const rawData = rawResponse.data
-      return this.serializer.convertJsonApiObjectToModel(rawData)
+      // as we load the contacts, we want them to be included
+      // otherwise we throw an Error
+      return deviceWithMetaToDeviceByThrowingErrorOnMissing(this.serializer.convertJsonApiObjectToModel(rawData))
     })
   }
 
@@ -212,7 +218,11 @@ export class DeviceSearcher {
       }
     ).then((rawResponse: any) => {
       const rawData = rawResponse.data
-      return this.serialier.convertJsonApiObjectListToModelList(rawData)
+      // We don't ask the api to load the contacts, so we just add dummy objects
+      // to stay with the relationships
+      return this.serialier
+        .convertJsonApiObjectListToModelList(rawData)
+        .map(deviceWithMetaToDeviceByAddingDummyObjects)
     })
   }
 
@@ -239,7 +249,12 @@ export class DeviceSearcher {
       // (but in the FilteredPaginationedLoader)
       // so that we know if we still have elements here
       // there may be others to load as well
-      const elements: Device[] = this.serialier.convertJsonApiObjectListToModelList(rawData)
+
+      // And - again - we don't ask the api here to load the contact data as well
+      // so we will add the dummy objects to stay with the relationships
+      const elements: Device[] = this.serialier.convertJsonApiObjectListToModelList(
+        rawData
+      ).map(deviceWithMetaToDeviceByAddingDummyObjects)
 
       const totalCount = rawData.meta.count
 

@@ -5,7 +5,11 @@ import PlatformType from '@/models/PlatformType'
 import Manufacturer from '@/models/Manufacturer'
 import Status from '@/models/Status'
 
-import { PlatformSerializer } from '@/serializers/jsonapi/PlatformSerializer'
+import {
+  PlatformSerializer,
+  platformWithMetaToPlatformByThrowingErrorOnMissing,
+  platformWithMetaToPlatformByAddingDummyObjects
+} from '@/serializers/jsonapi/PlatformSerializer'
 
 import { IFlaskJSONAPIFilter } from '@/utils/JSONApiInterfaces'
 
@@ -29,7 +33,9 @@ export default class PlatformApi {
       }
     }).then((rawResponse) => {
       const rawData = rawResponse.data
-      return this.serializer.convertJsonApiObjectToModel(rawData)
+      // As we ask the api to include all the contacts, we want to have them here
+      // if they are missing => throw an error
+      return platformWithMetaToPlatformByThrowingErrorOnMissing(this.serializer.convertJsonApiObjectToModel(rawData))
     })
   }
 
@@ -212,7 +218,11 @@ export class PlatformSearcher {
       }
     ).then((rawResponse: any) => {
       const rawData = rawResponse.data
-      return this.serializer.convertJsonApiObjectListToModelList(rawData)
+      // We don't ask the api to include the contacts, so we add dummy objects.
+      // This way we at least stay with the relationships.
+      return this.serializer
+        .convertJsonApiObjectListToModelList(rawData)
+        .map(platformWithMetaToPlatformByAddingDummyObjects)
     })
   }
 
@@ -239,7 +249,12 @@ export class PlatformSearcher {
       // (but in the FilteredPaginationedLoader)
       // so that we know if we still have elements here
       // there may be others to load as well
-      const elements: Platform[] = this.serializer.convertJsonApiObjectListToModelList(rawData)
+
+      // And - again - as we don't ask the api to include the contacts, we just handle
+      // the missing contact data by adding dummy objects for those.
+      const elements: Platform[] = this.serializer
+        .convertJsonApiObjectListToModelList(rawData)
+        .map(platformWithMetaToPlatformByAddingDummyObjects)
 
       // This is given by the json api. Regardless of the pagination it
       // represents the total amount of entries found.
