@@ -1,6 +1,6 @@
 import Unit from '@/models/Unit'
 
-import { IJsonApiObjectList, IJsonApiDataWithId } from '@/serializers/jsonapi/JsonApiTypes'
+import { IJsonApiObjectListWithLinks, IJsonApiDataWithIdAndLinks } from '@/serializers/jsonapi/JsonApiTypes'
 
 import { removeBaseUrl } from '@/utils/urlHelpers'
 
@@ -11,11 +11,11 @@ export class UnitSerializer {
     this.cvBaseUrl = cvBaseUrl
   }
 
-  convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiObjectList): Unit[] {
+  convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiObjectListWithLinks): Unit[] {
     return jsonApiObjectList.data.map(this.convertJsonApiDataToModel.bind(this))
   }
 
-  convertJsonApiDataToModel (jsonApiData: IJsonApiDataWithId): Unit {
+  convertJsonApiDataToModel (jsonApiData: IJsonApiDataWithIdAndLinks): Unit {
     const id = jsonApiData.id
     let name = jsonApiData.attributes.unitsname
     if (jsonApiData.attributes.unitsabbreviation) {

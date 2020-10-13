@@ -1,6 +1,6 @@
 import PlatformType from '@/models/PlatformType'
 
-import { IJsonApiObjectList, IJsonApiDataWithId } from '@/serializers/jsonapi/JsonApiTypes'
+import { IJsonApiObjectListWithLinks, IJsonApiDataWithIdAndLinks } from '@/serializers/jsonapi/JsonApiTypes'
 
 import { removeBaseUrl } from '@/utils/urlHelpers'
 
@@ -11,11 +11,11 @@ export class PlatformTypeSerializer {
       this.cvBaseUrl = cvBaseUrl
     }
 
-    convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiObjectList): PlatformType[] {
+    convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiObjectListWithLinks): PlatformType[] {
       return jsonApiObjectList.data.map(this.convertJsonApiDataToModel.bind(this))
     }
 
-    convertJsonApiDataToModel (jsonApiData: IJsonApiDataWithId): PlatformType {
+    convertJsonApiDataToModel (jsonApiData: IJsonApiDataWithIdAndLinks): PlatformType {
       const id = jsonApiData.id
       const name = jsonApiData.attributes.name
       const url = removeBaseUrl(jsonApiData.links.self, this.cvBaseUrl)

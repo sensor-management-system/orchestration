@@ -1,6 +1,6 @@
 import DeviceType from '@/models/DeviceType'
 
-import { IJsonApiObjectList, IJsonApiDataWithId } from '@/serializers/jsonapi/JsonApiTypes'
+import { IJsonApiObjectListWithLinks, IJsonApiDataWithIdAndLinks } from '@/serializers/jsonapi/JsonApiTypes'
 
 import { removeBaseUrl } from '@/utils/urlHelpers'
 
@@ -11,11 +11,11 @@ export class DeviceTypeSerializer {
       this.cvBaseUrl = cvBaseUrl
     }
 
-    convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiObjectList): DeviceType[] {
+    convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiObjectListWithLinks): DeviceType[] {
       return jsonApiObjectList.data.map(this.convertJsonApiDataToModel.bind(this))
     }
 
-    convertJsonApiDataToModel (jsonApiData: IJsonApiDataWithId): DeviceType {
+    convertJsonApiDataToModel (jsonApiData: IJsonApiDataWithIdAndLinks): DeviceType {
       const id = jsonApiData.id
       const name = jsonApiData.attributes.name
       const url = removeBaseUrl(jsonApiData.links.self, this.cvBaseUrl)
