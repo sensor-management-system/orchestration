@@ -403,10 +403,10 @@ import StatusBadge from '@/components/StatusBadge.vue'
 
 import { IPaginationLoader } from '@/utils/PaginatedLoader'
 
-import Manufacturer from '@/models/Manufacturer'
-import Platform from '@/models/Platform'
-import PlatformType from '@/models/PlatformType'
-import Status from '@/models/Status'
+import { Manufacturer } from '@/models/Manufacturer'
+import { Platform } from '@/models/Platform'
+import { PlatformType } from '@/models/PlatformType'
+import { Status } from '@/models/Status'
 
 @Component
 // @ts-ignore

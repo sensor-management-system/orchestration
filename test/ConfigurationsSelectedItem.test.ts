@@ -5,7 +5,7 @@ import { mount, createLocalVue } from '@vue/test-utils'
 
 // @ts-ignore
 import ConfigurationsSelectedItem from '@/components/ConfigurationsSelectedItem.vue'
-import Device from '@/models/Device'
+import { Device } from '@/models/Device'
 import { DeviceNode } from '@/models/DeviceNode'
 import { ConfigurationsTreeNode } from '@/models/ConfigurationsTreeNode'
 

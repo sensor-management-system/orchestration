@@ -1,4 +1,4 @@
-import Compartment from '@/models/Compartment'
+import { Compartment } from '@/models/Compartment'
 import { CompartmentSerializer } from '@/serializers/jsonapi/CompartmentSerializer'
 
 describe('CompartmentSerializer', () => {

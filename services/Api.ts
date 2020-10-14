@@ -1,23 +1,23 @@
 import axios, { AxiosInstance, AxiosRequestConfig } from 'axios'
 
-import ContactApi from '@/services/sms/ContactApi'
-import DeviceApi from '@/services/sms/DeviceApi'
-import PlatformApi from '@/services/sms/PlatformApi'
-import ConfigurationApi from '@/services/sms/ConfigurationApi'
+import { ContactApi } from '@/services/sms/ContactApi'
+import { DeviceApi } from '@/services/sms/DeviceApi'
+import { PlatformApi } from '@/services/sms/PlatformApi'
+import { ConfigurationApi } from '@/services/sms/ConfigurationApi'
 
-import CompartmentApi from '@/services/cv/CompartmentApi'
-import DeviceTypeApi from '@/services/cv/DeviceTypeApi'
-import ManufacturerApi from '@/services/cv/ManufacturerApi'
-import PlatformTypeApi from '@/services/cv/PlatformTypeApi'
-import PropertyApi from '@/services/cv/PropertyApi'
-import SamplingMediaApi from '@/services/cv/SamplingMediaApi'
-import StatusApi from '@/services/cv/StatusApi'
-import UnitApi from '@/services/cv/UnitApi'
+import { CompartmentApi } from '@/services/cv/CompartmentApi'
+import { DeviceTypeApi } from '@/services/cv/DeviceTypeApi'
+import { ManufacturerApi } from '@/services/cv/ManufacturerApi'
+import { PlatformTypeApi } from '@/services/cv/PlatformTypeApi'
+import { PropertyApi } from '@/services/cv/PropertyApi'
+import { SamplingMediaApi } from '@/services/cv/SamplingMediaApi'
+import { StatusApi } from '@/services/cv/StatusApi'
+import { UnitApi } from '@/services/cv/UnitApi'
 
 const SMS_BASE_URL = process.env.smsBackendUrl
 const CV_BASE_URL = process.env.cvBackendUrl
 
-export default class Api {
+export class Api {
   private readonly _contactApi: ContactApi
   private readonly _deviceApi: DeviceApi
   private readonly _platformApi: PlatformApi

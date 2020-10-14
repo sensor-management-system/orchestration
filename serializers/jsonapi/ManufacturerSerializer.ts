@@ -1,4 +1,4 @@
-import Manufacturer from '@/models/Manufacturer'
+import { Manufacturer } from '@/models/Manufacturer'
 
 import { IJsonApiObjectListWithLinks, IJsonApiDataWithIdAndLinks } from '@/serializers/jsonapi/JsonApiTypes'
 

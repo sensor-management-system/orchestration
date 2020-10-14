@@ -1,4 +1,4 @@
-import Contact from '@/models/Contact'
+import { Contact } from '@/models/Contact'
 
 import { IJsonApiObjectList, IJsonApiObject, IJsonApiTypeIdDataListDict, IJsonApiTypeIdAttributes } from '@/serializers/jsonapi/JsonApiTypes'
 

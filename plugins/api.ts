@@ -1,5 +1,5 @@
 import { Plugin } from '@nuxt/types'
-import Api from '@/services/Api'
+import { Api } from '@/services/Api'
 
 declare module 'vue/types/vue' {
   interface Vue {

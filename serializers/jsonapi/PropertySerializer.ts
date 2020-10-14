@@ -1,4 +1,4 @@
-import Property from '@/models/Property'
+import { Property } from '@/models/Property'
 
 import { IJsonApiObjectListWithLinks, IJsonApiDataWithIdAndLinks } from '@/serializers/jsonapi/JsonApiTypes'
 

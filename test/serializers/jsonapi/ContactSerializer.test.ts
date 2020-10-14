@@ -1,4 +1,4 @@
-import Contact from '@/models/Contact'
+import { Contact } from '@/models/Contact'
 import { ContactSerializer } from '@/serializers/jsonapi/ContactSerializer'
 
 describe('ContactSerializer', () => {

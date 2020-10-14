@@ -1,4 +1,4 @@
-import Compartment from '@/models/Compartment'
+import { Compartment } from '@/models/Compartment'
 
 import { IJsonApiObjectListWithLinks, IJsonApiDataWithIdAndLinks } from '@/serializers/jsonapi/JsonApiTypes'
 

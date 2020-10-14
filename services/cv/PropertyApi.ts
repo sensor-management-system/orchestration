@@ -1,9 +1,9 @@
 import { AxiosInstance } from 'axios'
 
-import Property from '@/models/Property'
+import { Property } from '@/models/Property'
 import { PropertySerializer } from '@/serializers/jsonapi/PropertySerializer'
 
-export default class PropertyApi {
+export class PropertyApi {
   private axiosApi: AxiosInstance
   private serializer: PropertySerializer
 

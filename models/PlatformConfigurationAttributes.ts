@@ -1,4 +1,4 @@
-import Platform from '@/models/Platform'
+import { Platform } from '@/models/Platform'
 
 export interface IPlatformConfigurationAttributes {
   platform: Platform

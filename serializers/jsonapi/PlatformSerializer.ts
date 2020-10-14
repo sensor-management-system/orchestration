@@ -1,5 +1,5 @@
-import Contact from '@/models/Contact'
-import Platform from '@/models/Platform'
+import { Contact } from '@/models/Contact'
+import { Platform } from '@/models/Platform'
 
 import { IJsonApiObjectList, IJsonApiObject, IJsonApiDataWithId, IJsonApiTypeIdAttributes, IJsonApiDataWithOptionalId } from '@/serializers/jsonapi/JsonApiTypes'
 

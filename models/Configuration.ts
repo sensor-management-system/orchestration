@@ -1,4 +1,4 @@
-import Contact, { IContact } from '@/models/Contact'
+import { IContact, Contact } from '@/models/Contact'
 import { ConfigurationsTree } from '@/models/ConfigurationsTree'
 import { ConfigurationsTreeNode } from '@/models/ConfigurationsTreeNode'
 import { DeviceConfigurationAttributes } from '@/models/DeviceConfigurationAttributes'

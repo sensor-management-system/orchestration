@@ -1,9 +1,9 @@
 import { AxiosInstance } from 'axios'
 
-import PlatformType from '@/models/PlatformType'
+import { PlatformType } from '@/models/PlatformType'
 import { PlatformTypeSerializer } from '@/serializers/jsonapi/PlatformTypeSerializer'
 
-export default class PlatformTypeApi {
+export class PlatformTypeApi {
   private axiosApi: AxiosInstance
   private serializer: PlatformTypeSerializer
 

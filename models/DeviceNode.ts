@@ -4,7 +4,7 @@
  */
 
 import { IConfigurationsTreeNode } from '@/models/IConfigurationsTreeNode'
-import Device from '@/models/Device'
+import { Device } from '@/models/Device'
 
 /**
  * a class that wraps a Device instance for the usage in a ConfigurationsTree

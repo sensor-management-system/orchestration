@@ -1,9 +1,9 @@
 import { AxiosInstance, Method } from 'axios'
 
-import Platform from '@/models/Platform'
-import PlatformType from '@/models/PlatformType'
-import Manufacturer from '@/models/Manufacturer'
-import Status from '@/models/Status'
+import { Platform } from '@/models/Platform'
+import { PlatformType } from '@/models/PlatformType'
+import { Manufacturer } from '@/models/Manufacturer'
+import { Status } from '@/models/Status'
 
 import {
   PlatformSerializer,
@@ -17,7 +17,7 @@ import {
   IPaginationLoader, FilteredPaginationedLoader
 } from '@/utils/PaginatedLoader'
 
-export default class PlatformApi {
+export class PlatformApi {
   private axiosApi: AxiosInstance
   private serializer: PlatformSerializer
 

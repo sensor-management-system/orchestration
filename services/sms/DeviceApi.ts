@@ -1,9 +1,9 @@
 import { AxiosInstance, Method } from 'axios'
 
-import Device from '@/models/Device'
-import DeviceType from '@/models/DeviceType'
-import Manufacturer from '@/models/Manufacturer'
-import Status from '@/models/Status'
+import { Device } from '@/models/Device'
+import { DeviceType } from '@/models/DeviceType'
+import { Manufacturer } from '@/models/Manufacturer'
+import { Status } from '@/models/Status'
 
 import { IFlaskJSONAPIFilter } from '@/utils/JSONApiInterfaces'
 
@@ -16,7 +16,7 @@ import {
   deviceWithMetaToDeviceByAddingDummyObjects
 } from '@/serializers/jsonapi/DeviceSerializer'
 
-export default class DeviceApi {
+export class DeviceApi {
   private axiosApi: AxiosInstance
   private serializer: DeviceSerializer
 

@@ -1,4 +1,4 @@
-import Platform from '@/models/Platform'
+import { Platform } from '@/models/Platform'
 import { PlatformNode } from '@/models/PlatformNode'
 
 describe('PlatformNode', () => {

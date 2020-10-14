@@ -1,5 +1,5 @@
-import Contact from '@/models/Contact'
-import Device from '@/models/Device'
+import { Contact } from '@/models/Contact'
+import { Device } from '@/models/Device'
 import { DeviceSerializer, IDeviceWithMeta, deviceWithMetaToDeviceByThrowingErrorOnMissing, deviceWithMetaToDeviceByAddingDummyObjects } from '@/serializers/jsonapi/DeviceSerializer'
 import { Attachment } from '@/models/Attachment'
 import { DeviceProperty } from '@/models/DeviceProperty'

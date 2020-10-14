@@ -1,9 +1,9 @@
 import { AxiosInstance } from 'axios'
 
-import Contact from '@/models/Contact'
+import { Contact } from '@/models/Contact'
 import { ContactSerializer } from '@/serializers/jsonapi/ContactSerializer'
 
-export default class ContactApi {
+export class ContactApi {
   private axiosApi: AxiosInstance
 
   constructor (axiosInstance: AxiosInstance) {

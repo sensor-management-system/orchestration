@@ -1,4 +1,4 @@
-import Device from '@/models/Device'
+import { Device } from '@/models/Device'
 import { DeviceConfigurationAttributes } from '@/models/DeviceConfigurationAttributes'
 import { DeviceProperty } from '@/models/DeviceProperty'
 

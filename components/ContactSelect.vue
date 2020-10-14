@@ -19,7 +19,7 @@ import { Vue, Component, Prop } from 'nuxt-property-decorator'
 
 import EntitySelect from '@/components/EntitySelect.vue'
 
-import Contact from '@/models/Contact'
+import { Contact } from '@/models/Contact'
 
 type ContactsLoaderFunction = () => Promise<Contact[]>
 

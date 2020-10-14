@@ -1,9 +1,9 @@
 import { AxiosInstance } from 'axios'
 
-import Unit from '@/models/Unit'
+import { Unit } from '@/models/Unit'
 import { UnitSerializer } from '@/serializers/jsonapi/UnitSerializer'
 
-export default class UnitApi {
+export class UnitApi {
   private axiosApi: AxiosInstance
   private serializer: UnitSerializer
 

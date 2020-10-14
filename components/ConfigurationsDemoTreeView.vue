@@ -35,8 +35,8 @@ import { ConfigurationsTree } from '@/models/ConfigurationsTree'
 import { ConfigurationsTreeNode } from '@/models/ConfigurationsTreeNode'
 import { PlatformNode } from '@/models/PlatformNode'
 import { DeviceNode } from '@/models/DeviceNode'
-import Platform from '@/models/Platform'
-import Device from '@/models/Device'
+import { Platform } from '@/models/Platform'
+import { Device } from '@/models/Device'
 
 /**
  * A class component to select platforms and devices for a configuration

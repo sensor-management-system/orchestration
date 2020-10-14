@@ -1,4 +1,4 @@
-import PlatformType from '@/models/PlatformType'
+import { PlatformType } from '@/models/PlatformType'
 import { PlatformTypeSerializer } from '@/serializers/jsonapi/PlatformTypeSerializer'
 
 describe('PlatformTypeSerializer', () => {

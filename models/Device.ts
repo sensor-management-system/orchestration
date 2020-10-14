@@ -1,4 +1,4 @@
-import Contact, { IContact } from '@/models/Contact'
+import { IContact, Contact } from '@/models/Contact'
 import { DeviceProperty } from '@/models/DeviceProperty'
 import { CustomTextField, ICustomTextField } from '@/models/CustomTextField'
 
@@ -37,7 +37,7 @@ export interface IDevice {
   attachments: IAttachment[]
 }
 
-export default class Device implements IDevice {
+export class Device implements IDevice {
   private _id: string | null = null
   private _persistentIdentifier: string = ''
   private _shortName: string = ''

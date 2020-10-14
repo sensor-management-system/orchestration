@@ -1,4 +1,4 @@
-import Status from '@/models/Status'
+import { Status } from '@/models/Status'
 import { StatusSerializer } from '@/serializers/jsonapi/StatusSerializer'
 
 describe('StatusSerializer', () => {

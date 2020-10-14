@@ -1,4 +1,4 @@
-import Property from '@/models/Property'
+import { Property } from '@/models/Property'
 import { PropertySerializer } from '@/serializers/jsonapi/PropertySerializer'
 
 describe('PropertySerializer', () => {

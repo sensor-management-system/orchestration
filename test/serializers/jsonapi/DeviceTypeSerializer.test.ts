@@ -1,4 +1,4 @@
-import DeviceType from '@/models/DeviceType'
+import { DeviceType } from '@/models/DeviceType'
 import { DeviceTypeSerializer } from '@/serializers/jsonapi/DeviceTypeSerializer'
 
 describe('DeviceTypeSerializer', () => {

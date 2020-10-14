@@ -1,9 +1,9 @@
 import { AxiosInstance } from 'axios'
 
-import SamplingMedia from '@/models/SamplingMedia'
+import { SamplingMedia } from '@/models/SamplingMedia'
 import { SamplingMediaSerializer } from '@/serializers/jsonapi/SamplingMediaSerializer'
 
-export default class SamplingMediaApi {
+export class SamplingMediaApi {
   private axiosApi: AxiosInstance
   private serializer: SamplingMediaSerializer
 

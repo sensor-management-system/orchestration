@@ -1,5 +1,5 @@
-import Contact from '@/models/Contact'
-import Device from '@/models/Device'
+import { Contact } from '@/models/Contact'
+import { Device } from '@/models/Device'
 
 import { IJsonApiObjectList, IJsonApiObject, IJsonApiDataWithId, IJsonApiDataWithOptionalId, IJsonApiTypeIdAttributes } from '@/serializers/jsonapi/JsonApiTypes'
 

@@ -4,7 +4,7 @@ export interface IPlatformType {
   uri: string
 }
 
-export default class PlatformType implements IPlatformType {
+export class PlatformType implements IPlatformType {
     private _id: string = ''
     private _name: string = ''
     private _uri: string = ''

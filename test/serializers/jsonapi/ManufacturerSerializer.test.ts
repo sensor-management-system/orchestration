@@ -1,4 +1,4 @@
-import Manufacturer from '@/models/Manufacturer'
+import { Manufacturer } from '@/models/Manufacturer'
 import { ManufacturerSerializer } from '@/serializers/jsonapi/ManufacturerSerializer'
 
 describe('ManufacturerSerializer', () => {

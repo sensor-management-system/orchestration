@@ -1,4 +1,4 @@
-import Device from '@/models/Device'
+import { Device } from '@/models/Device'
 import { DeviceNode } from '@/models/DeviceNode'
 
 describe('DeviceNode', () => {

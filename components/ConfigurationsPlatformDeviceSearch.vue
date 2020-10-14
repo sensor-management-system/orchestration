@@ -120,8 +120,8 @@
  */
 import { Vue, Component, Prop } from 'nuxt-property-decorator'
 
-import Platform from '@/models/Platform'
-import Device from '@/models/Device'
+import { Platform } from '@/models/Platform'
+import { Device } from '@/models/Device'
 
 enum SearchType {
   Platform = 'Platform',

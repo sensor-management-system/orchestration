@@ -1,4 +1,4 @@
-import DeviceType from '@/models/DeviceType'
+import { DeviceType } from '@/models/DeviceType'
 
 import { IJsonApiObjectListWithLinks, IJsonApiDataWithIdAndLinks } from '@/serializers/jsonapi/JsonApiTypes'
 

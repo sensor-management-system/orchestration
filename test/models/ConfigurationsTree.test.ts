@@ -1,5 +1,5 @@
-import Device from '@/models/Device'
-import Platform from '@/models/Platform'
+import { Device } from '@/models/Device'
+import { Platform } from '@/models/Platform'
 import { DeviceNode } from '@/models/DeviceNode'
 import { PlatformNode } from '@/models/PlatformNode'
 import { ConfigurationsTree } from '@/models/ConfigurationsTree'

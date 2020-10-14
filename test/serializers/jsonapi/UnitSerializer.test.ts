@@ -1,4 +1,4 @@
-import Unit from '@/models/Unit'
+import { Unit } from '@/models/Unit'
 import { UnitSerializer } from '@/serializers/jsonapi/UnitSerializer'
 
 describe('UnitSerializer', () => {

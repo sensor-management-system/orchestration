@@ -1,4 +1,4 @@
-import Contact, { IContact } from '@/models/Contact'
+import { IContact, Contact } from '@/models/Contact'
 
 export interface IUser {
   id: string | null
@@ -6,7 +6,7 @@ export interface IUser {
   contact: IContact | null
 }
 
-export default class User implements IUser {
+export class User implements IUser {
   private _id: string | null = null
   private _subject: string = ''
   private _contact: Contact | null = null

@@ -1,4 +1,4 @@
-import SamplingMedia from '@/models/SamplingMedia'
+import { SamplingMedia } from '@/models/SamplingMedia'
 
 import { IJsonApiObjectListWithLinks, IJsonApiDataWithIdAndLinks } from '@/serializers/jsonapi/JsonApiTypes'
 

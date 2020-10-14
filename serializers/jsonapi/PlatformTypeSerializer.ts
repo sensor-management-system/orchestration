@@ -1,4 +1,4 @@
-import PlatformType from '@/models/PlatformType'
+import { PlatformType } from '@/models/PlatformType'
 
 import { IJsonApiObjectListWithLinks, IJsonApiDataWithIdAndLinks } from '@/serializers/jsonapi/JsonApiTypes'
 

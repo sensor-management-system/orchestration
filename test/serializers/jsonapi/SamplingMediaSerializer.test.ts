@@ -1,4 +1,4 @@
-import SamplingMedia from '@/models/SamplingMedia'
+import { SamplingMedia } from '@/models/SamplingMedia'
 import { SamplingMediaSerializer } from '@/serializers/jsonapi/SamplingMediaSerializer'
 
 describe('SamplingMediaSerializer', () => {

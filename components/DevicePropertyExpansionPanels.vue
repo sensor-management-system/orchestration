@@ -112,10 +112,10 @@ import { Vue, Component, Prop } from 'nuxt-property-decorator'
 
 import DevicePropertyForm from '@/components/DevicePropertyForm.vue'
 
-import Compartment from '@/models/Compartment'
-import Property from '@/models/Property'
-import SamplingMedia from '@/models/SamplingMedia'
-import Unit from '@/models/Unit'
+import { Compartment } from '@/models/Compartment'
+import { Property } from '@/models/Property'
+import { SamplingMedia } from '@/models/SamplingMedia'
+import { Unit } from '@/models/Unit'
 import { DeviceProperty } from '@/models/DeviceProperty'
 
 /**

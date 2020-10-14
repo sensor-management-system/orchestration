@@ -4,8 +4,8 @@ import Vuetify from 'vuetify'
 import { mount, createLocalVue } from '@vue/test-utils'
 
 // @ts-ignore
-import EntitySelect from '../components/EntitySelect.vue'
-import Concact from '~/models/Contact'
+import EntitySelect from '~/components/EntitySelect.vue'
+import { Contact } from '~/models/Contact'
 
 Vue.use(Vuetify)
 
@@ -24,11 +24,11 @@ describe('EntitySelect', () => {
       localVue,
       vuetify,
       propsData: {
-        value: [Concact.createWithIdEMailAndNames('1', 'p1@mail.org', 'Per', 'son 1', 'stuff/per/son1')],
+        value: [Contact.createWithIdEMailAndNames('1', 'p1@mail.org', 'Per', 'son 1', 'stuff/per/son1')],
         fetchFunction: () => new Promise((resolve) => {
           resolve([
-            Concact.createWithIdEMailAndNames('1', 'p1@mail.org', 'Per', 'son 1', 'stuff/per/son1'),
-            Concact.createWithIdEMailAndNames('2', 'p2@mail.org', 'Pers', 'On 2', 'stuff/pers/On2')
+            Contact.createWithIdEMailAndNames('1', 'p1@mail.org', 'Per', 'son 1', 'stuff/per/son1'),
+            Contact.createWithIdEMailAndNames('2', 'p2@mail.org', 'Pers', 'On 2', 'stuff/pers/On2')
           ])
         }),
         color: 'red',
@@ -37,8 +37,8 @@ describe('EntitySelect', () => {
       data () {
         return {
           elements: [
-            Concact.createWithIdEMailAndNames('1', 'p1@mail.org', 'Per', 'son 1', 'stuff/per/son1'),
-            Concact.createWithIdEMailAndNames('2', 'p2@mail.org', 'Pers', 'On 2', 'stuff/pers/On2')]
+            Contact.createWithIdEMailAndNames('1', 'p1@mail.org', 'Per', 'son 1', 'stuff/per/son1'),
+            Contact.createWithIdEMailAndNames('2', 'p2@mail.org', 'Pers', 'On 2', 'stuff/pers/On2')]
         }
       }
     })

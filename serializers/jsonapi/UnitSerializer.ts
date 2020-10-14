@@ -1,4 +1,4 @@
-import Unit from '@/models/Unit'
+import { Unit } from '@/models/Unit'
 
 import { IJsonApiObjectListWithLinks, IJsonApiDataWithIdAndLinks } from '@/serializers/jsonapi/JsonApiTypes'
 

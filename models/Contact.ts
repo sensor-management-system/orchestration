@@ -6,7 +6,7 @@ export interface IContact {
   website: string
 }
 
-export default class Contact implements IContact {
+export class Contact implements IContact {
   private _id: string | null = null
   private _email: string = ''
   private _givenName: string = ''
