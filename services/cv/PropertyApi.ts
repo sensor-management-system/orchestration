@@ -1,19 +1,19 @@
 import { AxiosInstance } from 'axios'
 
 import Property from '@/models/Property'
-import { removeBaseUrl } from '@/utils/urlHelpers'
+import { PropertySerializer } from '@/serializers/jsonapi/PropertySerializer'
 
 export default class PropertyApi {
   private axiosApi: AxiosInstance
-  private cvBaseUrl: string | undefined
+  private serializer: PropertySerializer
 
   constructor (axiosInstance: AxiosInstance, cvBaseUrl: string | undefined) {
     this.axiosApi = axiosInstance
-    this.cvBaseUrl = cvBaseUrl
+    this.serializer = new PropertySerializer(cvBaseUrl)
   }
 
   newSearchBuilder (): PropertySearchBuilder {
-    return new PropertySearchBuilder(this.axiosApi, this.cvBaseUrl)
+    return new PropertySearchBuilder(this.axiosApi, this.serializer)
   }
 
   findAll (): Promise<Property[]> {
@@ -21,35 +21,27 @@ export default class PropertyApi {
   }
 }
 
-export function serverResponseToEntity (entry: any, cvBaseUrl: string | undefined): Property {
-  const id = entry.id
-  const name = entry.attributes.name
-  const url = removeBaseUrl(entry.links.self, cvBaseUrl)
-
-  return Property.createWithData(id, name, url)
-}
-
 export class PropertySearchBuilder {
   private axiosApi: AxiosInstance
-  private cvBaseUrl: string | undefined
+  private serializer: PropertySerializer
 
-  constructor (axiosApi: AxiosInstance, cvBaseUrl: string | undefined) {
+  constructor (axiosApi: AxiosInstance, serializer: PropertySerializer) {
     this.axiosApi = axiosApi
-    this.cvBaseUrl = cvBaseUrl
+    this.serializer = serializer
   }
 
   build (): PropertySearcher {
-    return new PropertySearcher(this.axiosApi, this.cvBaseUrl)
+    return new PropertySearcher(this.axiosApi, this.serializer)
   }
 }
 
 export class PropertySearcher {
   private axiosApi: AxiosInstance
-  private cvBaseUrl: string | undefined
+  private serializer: PropertySerializer
 
-  constructor (axiosApi: AxiosInstance, cvBaseUrl: string | undefined) {
+  constructor (axiosApi: AxiosInstance, serializer: PropertySerializer) {
     this.axiosApi = axiosApi
-    this.cvBaseUrl = cvBaseUrl
+    this.serializer = serializer
   }
 
   findMatchingAsList (): Promise<Property[]> {
@@ -64,13 +56,7 @@ export class PropertySearcher {
       }
     ).then((rawResponse) => {
       const response = rawResponse.data
-      const result: Property[] = []
-
-      for (const entry of response.data) {
-        result.push(serverResponseToEntity(entry, this.cvBaseUrl))
-      }
-
-      return result
+      return this.serializer.convertJsonApiObjectListToModelList(response)
     })
   }
 }

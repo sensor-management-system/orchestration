@@ -1,19 +1,19 @@
 import { AxiosInstance } from 'axios'
 
 import Unit from '@/models/Unit'
-import { removeBaseUrl } from '@/utils/urlHelpers'
+import { UnitSerializer } from '@/serializers/jsonapi/UnitSerializer'
 
 export default class UnitApi {
   private axiosApi: AxiosInstance
-  private cvBaseUrl: string | undefined
+  private serializer: UnitSerializer
 
   constructor (axiosInstance: AxiosInstance, cvBaseUrl: string | undefined) {
     this.axiosApi = axiosInstance
-    this.cvBaseUrl = cvBaseUrl
+    this.serializer = new UnitSerializer(cvBaseUrl)
   }
 
   newSearchBuilder (): UnitSearchBuilder {
-    return new UnitSearchBuilder(this.axiosApi, this.cvBaseUrl)
+    return new UnitSearchBuilder(this.axiosApi, this.serializer)
   }
 
   findAll (): Promise<Unit[]> {
@@ -21,38 +21,27 @@ export default class UnitApi {
   }
 }
 
-export function serverResponseToEntity (entry: any, cvBaseUrl: string | undefined): Unit {
-  const id = entry.id
-  let name = entry.attributes.unitsname
-  if (entry.attributes.unitsabbreviation) {
-    name += ' [' + entry.attributes.unitsabbreviation + ']'
-  }
-  const url = removeBaseUrl(entry.links.self, cvBaseUrl)
-
-  return Unit.createWithData(id, name, url)
-}
-
 export class UnitSearchBuilder {
   private axiosApi: AxiosInstance
-  private cvBaseUrl: string | undefined
+  private serializer: UnitSerializer
 
-  constructor (axiosApi: AxiosInstance, cvBaseUrl: string | undefined) {
+  constructor (axiosApi: AxiosInstance, serializer: UnitSerializer) {
     this.axiosApi = axiosApi
-    this.cvBaseUrl = cvBaseUrl
+    this.serializer = serializer
   }
 
   build (): UnitSearcher {
-    return new UnitSearcher(this.axiosApi, this.cvBaseUrl)
+    return new UnitSearcher(this.axiosApi, this.serializer)
   }
 }
 
 export class UnitSearcher {
   private axiosApi: AxiosInstance
-  private cvBaseUrl: string | undefined
+  private serializer: UnitSerializer
 
-  constructor (axiosApi: AxiosInstance, cvBaseUrl: string | undefined) {
+  constructor (axiosApi: AxiosInstance, serializer: UnitSerializer) {
     this.axiosApi = axiosApi
-    this.cvBaseUrl = cvBaseUrl
+    this.serializer = serializer
   }
 
   findMatchingAsList (): Promise<Unit[]> {
@@ -67,13 +56,7 @@ export class UnitSearcher {
       }
     ).then((rawResponse) => {
       const response = rawResponse.data
-      const result: Unit[] = []
-
-      for (const entry of response.data) {
-        result.push(serverResponseToEntity(entry, this.cvBaseUrl))
-      }
-
-      return result
+      return this.serializer.convertJsonApiObjectListToModelList(response)
     })
   }
 }

@@ -19,7 +19,8 @@ module.exports = {
   collectCoverageFrom: [
     '<rootDir>/components/**/*.vue',
     '<rootDir>/pages/**/*.vue',
-    '<rootDir>/models/**/*.ts'
+    '<rootDir>/models/**/*.ts',
+    '<rootDir>/serializers/**/*.ts'
   ],
   verbose: true
 }

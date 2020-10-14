@@ -1,19 +1,19 @@
 import { AxiosInstance } from 'axios'
 
 import Status from '@/models/Status'
-import { removeBaseUrl } from '@/utils/urlHelpers'
+import { StatusSerializer } from '@/serializers/jsonapi/StatusSerializer'
 
 export default class StatusApi {
   private axiosApi: AxiosInstance
-  private cvBaseUrl: string | undefined
+  private serializer: StatusSerializer
 
   constructor (axiosInstance: AxiosInstance, cvBaseUrl: string | undefined) {
     this.axiosApi = axiosInstance
-    this.cvBaseUrl = cvBaseUrl
+    this.serializer = new StatusSerializer(cvBaseUrl)
   }
 
   newSearchBuilder (): StatusSearchBuilder {
-    return new StatusSearchBuilder(this.axiosApi, this.cvBaseUrl)
+    return new StatusSearchBuilder(this.axiosApi, this.serializer)
   }
 
   findAll (): Promise<Status[]> {
@@ -21,35 +21,27 @@ export default class StatusApi {
   }
 }
 
-export function serverResponseToEntity (entry: any, cvBaseUrl: string | undefined): Status {
-  const id = entry.id
-  const name = entry.attributes.name
-  const url = removeBaseUrl(entry.links.self, cvBaseUrl)
-
-  return Status.createWithData(id, name, url)
-}
-
 export class StatusSearchBuilder {
   private axiosApi: AxiosInstance
-  private cvBaseUrl: string | undefined
+  private serializer: StatusSerializer
 
-  constructor (axiosApi: AxiosInstance, cvBaseUrl: string | undefined) {
+  constructor (axiosApi: AxiosInstance, serializer: StatusSerializer) {
     this.axiosApi = axiosApi
-    this.cvBaseUrl = cvBaseUrl
+    this.serializer = serializer
   }
 
   build (): StatusSearcher {
-    return new StatusSearcher(this.axiosApi, this.cvBaseUrl)
+    return new StatusSearcher(this.axiosApi, this.serializer)
   }
 }
 
 export class StatusSearcher {
   private axiosApi: AxiosInstance
-  private cvBaseUrl: string | undefined
+  private serializer: StatusSerializer
 
-  constructor (axiosApi: AxiosInstance, cvBaseUrl: string | undefined) {
+  constructor (axiosApi: AxiosInstance, serializer: StatusSerializer) {
     this.axiosApi = axiosApi
-    this.cvBaseUrl = cvBaseUrl
+    this.serializer = serializer
   }
 
   findMatchingAsList (): Promise<Status[]> {
@@ -64,13 +56,7 @@ export class StatusSearcher {
       }
     ).then((rawResponse) => {
       const response = rawResponse.data
-      const result: Status[] = []
-
-      for (const entry of response.data) {
-        result.push(serverResponseToEntity(entry, this.cvBaseUrl))
-      }
-
-      return result
+      return this.serializer.convertJsonApiObjectListToModelList(response)
     })
   }
 }

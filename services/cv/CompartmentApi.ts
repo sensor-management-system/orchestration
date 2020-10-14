@@ -1,19 +1,19 @@
 import { AxiosInstance } from 'axios'
 
 import Compartment from '@/models/Compartment'
-import { removeBaseUrl } from '@/utils/urlHelpers'
+import { CompartmentSerializer } from '@/serializers/jsonapi/CompartmentSerializer'
 
 export default class DeviceTypeApi {
   private axiosApi: AxiosInstance
-  private cvBaseUrl: string | undefined
+  private serializer: CompartmentSerializer
 
   constructor (axiosInstance: AxiosInstance, cvBaseUrl: string | undefined) {
     this.axiosApi = axiosInstance
-    this.cvBaseUrl = cvBaseUrl
+    this.serializer = new CompartmentSerializer(cvBaseUrl)
   }
 
   newSearchBuilder (): CompartmentSearchBuilder {
-    return new CompartmentSearchBuilder(this.axiosApi, this.cvBaseUrl)
+    return new CompartmentSearchBuilder(this.axiosApi, this.serializer)
   }
 
   findAll (): Promise<Compartment[]> {
@@ -21,35 +21,27 @@ export default class DeviceTypeApi {
   }
 }
 
-export function serverResponseToEntity (entry: any, cvBaseUrl: string | undefined): Compartment {
-  const id = entry.id
-  const name = entry.attributes.name
-  const url = removeBaseUrl(entry.links.self, cvBaseUrl)
-
-  return Compartment.createWithData(id, name, url)
-}
-
 export class CompartmentSearchBuilder {
   private axiosApi: AxiosInstance
-  private cvBaseUrl: string | undefined
+  private serializer: CompartmentSerializer
 
-  constructor (axiosApi: AxiosInstance, cvBaseUrl: string | undefined) {
+  constructor (axiosApi: AxiosInstance, serializer: CompartmentSerializer) {
     this.axiosApi = axiosApi
-    this.cvBaseUrl = cvBaseUrl
+    this.serializer = serializer
   }
 
   build (): CompartmentSearcher {
-    return new CompartmentSearcher(this.axiosApi, this.cvBaseUrl)
+    return new CompartmentSearcher(this.axiosApi, this.serializer)
   }
 }
 
 export class CompartmentSearcher {
   private axiosApi: AxiosInstance
-  private cvBaseUrl: string | undefined
+  private serializer: CompartmentSerializer
 
-  constructor (axiosApi: AxiosInstance, cvBaseUrl: string | undefined) {
+  constructor (axiosApi: AxiosInstance, serializer: CompartmentSerializer) {
     this.axiosApi = axiosApi
-    this.cvBaseUrl = cvBaseUrl
+    this.serializer = serializer
   }
 
   findMatchingAsList (): Promise<Compartment[]> {
@@ -64,13 +56,7 @@ export class CompartmentSearcher {
       }
     ).then((rawResponse) => {
       const response = rawResponse.data
-      const result: Compartment[] = []
-
-      for (const entry of response.data) {
-        result.push(serverResponseToEntity(entry, this.cvBaseUrl))
-      }
-
-      return result
+      return this.serializer.convertJsonApiObjectListToModelList(response)
     })
   }
 }
