@@ -38,11 +38,23 @@ but This is the power of Docker.
     ```
 
 
-2. When running the first time or when you have to cleanup the database:
+2. When running the first time or after changing the schema create or
+   upgrade the database schema before the first request
 
     ```bash
-    docker-compose exec app python manage.py recreate_db
+    docker-compose exec app python3 manage.py db upgrade
     ```
+
+3. When ORM models change create alembic migration scripts
+
+   1. create script
+       ```bash
+       docker-compose exec app python3 manage.py db migrate
+       ```
+   2. apply script
+        ```bash
+        docker-compose exec app python3 manage.py db upgrade
+        ```
 
 ## Docker
 
@@ -65,7 +77,7 @@ but This is the power of Docker.
          -e DATABASE_URL="postgres://postgres:postgres@localhost:5432/db_dev" \
          -e APP_SETTINGS="project.config.DevelopmentConfig" \
          git.ufz.de:4567/rdm-software/svm/backend:latest \
-         python manage.py recreate_db
+         python manage.py db upgrade
     ```
 
 4. Run the container
@@ -105,7 +117,7 @@ To run the server local without docker, please execute the following from the ap
     ```
 
 2. Temporarily change the database credentials to adm-user to allow schema modification
-3. Run `python manage.py recreate_db`
+3. Run `python manage.py db upgrade`
 
 
 After recreation of database schema:
