@@ -1,6 +1,13 @@
+import collections
+from sqlalchemy.ext.hybrid import hybrid_property
+
 from project.api.models.base_model import db
 from project.api.models.device_property import DeviceProperty
 from project.api.models.mixin import AuditMixin
+
+ConfigurationsTuple = collections.namedtuple(
+    "ConfigurationsTuple", ["configuration_device", "configuration_platform"]
+)
 
 
 class Configuration(db.Model, AuditMixin):
@@ -41,10 +48,50 @@ class Configuration(db.Model, AuditMixin):
         DeviceProperty, uselist=False, foreign_keys=[elevation_src_device_property_id]
     )
 
-    configuration_platforms = db.relationship(
-        "ConfigurationPlatform"
-    )
+    @hybrid_property
+    def hierarchy(self):
+        return ConfigurationsTuple(
+            configuration_device=self.configuration_device,
+            configuration_platform=self.configuration_platform,
+        )
 
-    configuration_devices = db.relationship(
-        "ConfigurationDevice"
-    )
+    @hierarchy.setter
+    def hierarchy(self, value):
+        configuration_device = value.configuration_device
+        configuration_platform = value.configuration_platform
+
+        current_configuration_device_by_device_id = {}
+        current_configuration_platform_by_platform_id = {}
+
+        for device_configuration in self.configuration_device:
+            current_configuration_device_by_device_id[
+                device_configuration.device_id
+            ] = device_configuration
+
+        for platform_configuration in self.configuration_platform:
+            current_configuration_platform_by_platform_id[
+                platform_configuration.platform_id
+            ] = platform_configuration
+            print(current_configuration_platform_by_platform_id)
+
+        for device_configuration in configuration_device:
+            device_configuration.configuration = self
+            if (
+                    device_configuration.device_id
+                    in current_configuration_device_by_device_id.keys()
+            ):
+                device_configuration.id = current_configuration_device_by_device_id[
+                    configuration_device.device_id
+                ].id
+
+        for platform_configuration in configuration_platform:
+            platform_configuration.configuration = self
+            if (
+                    platform_configuration.platform_id
+                    in current_configuration_platform_by_platform_id.keys()
+            ):
+                platform_configuration.id = current_configuration_platform_by_platform_id[
+                    platform_configuration.platform_id
+                ].id
+        self.configuration_device = configuration_device
+        self.configuration_platform = configuration_platform
