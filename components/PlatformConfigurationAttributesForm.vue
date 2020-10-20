@@ -89,6 +89,9 @@ import { parseFloatOrDefault } from '@/utils/numericsHelper'
 @Component
 // @ts-ignore
 export default class PlatformConfigurationAttributesForm extends Vue {
+  /**
+   * the PlatformConfigurationAttributes
+   */
   @Prop({
     required: true,
     type: PlatformConfigurationAttributes
@@ -96,6 +99,9 @@ export default class PlatformConfigurationAttributesForm extends Vue {
   // @ts-ignore
   readonly value!: PlatformConfigurationAttributes
 
+  /**
+   * whether the component is in readonly mode or not
+   */
   @Prop({
     default: false,
     type: Boolean
@@ -104,7 +110,7 @@ export default class PlatformConfigurationAttributesForm extends Vue {
   readonly readonly: boolean
 
   /**
-   * update the internal model at a given key
+   * update copy of the internal model at a given key and triggers an event
    *
    * @param {string} key - a path to the property to set
    * @param {any} value - the value to set
@@ -130,7 +136,7 @@ export default class PlatformConfigurationAttributesForm extends Vue {
     /**
      * input event
      * @event PlatformConfigurationAttributes#input
-     * @type PlatformConfigurationAttributes
+     * @type {PlatformConfigurationAttributes}
      */
     this.$emit('input', newObj)
   }

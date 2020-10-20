@@ -32,7 +32,7 @@ permissions and limitations under the Licence.
   <v-list-item>
     <v-list-item-avatar>
       <v-icon large>
-        {{ filetype }}
+        {{ filetypeIcon }}
       </v-icon>
     </v-list-item-avatar>
     <v-list-item-content>
@@ -85,6 +85,9 @@ import { Attachment } from '@/models/Attachment'
 @Component
 // @ts-ignore
 export default class AttachmentListItem extends Vue {
+  /**
+   * an Attachment
+   */
   @Prop({
     required: true,
     type: Attachment
@@ -92,6 +95,9 @@ export default class AttachmentListItem extends Vue {
   // @ts-ignore
   readonly value!: Attachment
 
+  /**
+   * whether the component is in readonly mode or not
+   */
   @Prop({
     default: false,
     type: Boolean
@@ -99,6 +105,11 @@ export default class AttachmentListItem extends Vue {
   // @ts-ignore
   readonly readonly: boolean
 
+  /**
+   * returns a filename from a full filepath
+   *
+   * @return {string} the filename
+   */
   get filename (): string {
     const UNKNOWN_FILENAME = 'unknown filename'
 
@@ -113,11 +124,22 @@ export default class AttachmentListItem extends Vue {
     return paths.pop()
   }
 
+  /**
+   * returns the timestamp of the upload date
+   *
+   * @TODO this must be implemented when the file API is ready
+   * @return {string} a readable timestamp
+   */
   get uploadedDateTime (): string {
     return '2020-06-17 16:35 (TODO)'
   }
 
-  get filetype (): string {
+  /**
+   * returns a material design icon name based on the file type extension
+   *
+   * @return {string} a material design icon name
+   */
+  get filetypeIcon (): string {
     let extension = ''
     const paths = this.filename.split('.')
     if (paths.length) {
@@ -162,9 +184,9 @@ export default class AttachmentListItem extends Vue {
     }
 
     /**
-     * input event
+     * fires an input event
      * @event AttachmentListItem#input
-     * @type Attachment
+     * @type {Attachment}
      */
     this.$emit('input', newObj)
   }

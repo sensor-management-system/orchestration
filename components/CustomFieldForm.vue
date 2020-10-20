@@ -59,7 +59,7 @@ permissions and limitations under the Licence.
 
 <script lang="ts">
 /**
- * @file provides a component for a custom field
+ * @file provides a component for a custom field which consists of an key and a value
  * @author <marc.hanisch@gfz-potsdam.de>
  */
 import { Component, Prop, mixins } from 'nuxt-property-decorator'
@@ -75,6 +75,9 @@ import { CustomTextField } from '@/models/CustomTextField'
 @Component
 // @ts-ignore
 export default class CustomFieldForm extends mixins(Rules) {
+  /**
+   * a CustomTextField
+   */
   @Prop({
     default: () => new CustomTextField(),
     required: true,
@@ -83,6 +86,9 @@ export default class CustomFieldForm extends mixins(Rules) {
   // @ts-ignore
   readonly value!: CustomTextField
 
+  /**
+   * whether the component is in readonly mode or not
+   */
   @Prop({
     default: false,
     type: Boolean
@@ -91,7 +97,7 @@ export default class CustomFieldForm extends mixins(Rules) {
   readonly readonly: boolean
 
   /**
-   * update the internal model at a given key
+   * updates a copy of the internal model at a given key and triggers an input event
    *
    * @param {string} key - a path to the property to set
    * @param {string} value - the value to set
@@ -114,7 +120,7 @@ export default class CustomFieldForm extends mixins(Rules) {
     /**
      * input event
      * @event CustomTextFieldForm#input
-     * @type CustomTextField
+     * @type {CustomTextField}
      */
     this.$emit('input', newObj)
   }

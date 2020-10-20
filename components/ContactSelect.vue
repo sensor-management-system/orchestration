@@ -64,6 +64,9 @@ type ContactsLoaderFunction = () => Promise<Contact[]>
 export default class ContactSelect extends Vue {
   private contacts: Contact[] = []
 
+  /**
+   * a list of Contacts
+   */
   @Prop({
     default: () => [] as Contact[],
     required: true,
@@ -72,6 +75,9 @@ export default class ContactSelect extends Vue {
   // @ts-ignore
   readonly value!: Contact[]
 
+  /**
+   * whether the component is in readonly mode or not
+   */
   @Prop({
     default: false,
     type: Boolean
@@ -79,21 +85,45 @@ export default class ContactSelect extends Vue {
   // @ts-ignore
   readonly readonly: boolean
 
+  /**
+   * the label of the component
+   */
   @Prop({
     required: true,
     type: String
   })
   readonly label!: string
 
+  /**
+   * fetches all contacts from the API
+   *
+   * @return {ContactsLoaderFunction} a function that returns a promise which returns a list of contacts
+   */
   get findAllContacts () : ContactsLoaderFunction {
     return () => { return this.$api.contacts.findAll() }
   }
 
+  /**
+   * returns the list of contacts
+   *
+   * @return {Contact[]} a list of contacts
+   */
   get wrappedValue () {
     return this.value
   }
 
+  /**
+   * triggers an input event when the list of contacts has changed
+   *
+   * @param {Contact[]} newValue - a list of contacts
+   * @fires ContactSelect#input
+   */
   set wrappedValue (newValue) {
+    /**
+     * fires an input event
+     * @event ContactSelect#input
+     * @type {Contact[]}
+     */
     this.$emit('input', newValue)
   }
 }

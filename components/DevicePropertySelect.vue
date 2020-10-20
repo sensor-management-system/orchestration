@@ -63,6 +63,9 @@ type DevicePropertysLoaderFunction = () => Promise<DeviceProperty[]>
 export default class DevicePropertySelect extends Vue {
   private deviceProperties: DeviceProperty[] = []
 
+  /**
+   * a list of DeviceProperties
+   */
   @Prop({
     default: () => [] as DeviceProperty[],
     required: true,
@@ -71,6 +74,9 @@ export default class DevicePropertySelect extends Vue {
   // @ts-ignore
   readonly value!: DeviceProperty[]
 
+  /**
+   * whether the component is in readonly mode or not
+   */
   @Prop({
     default: false,
     type: Boolean
@@ -78,6 +84,9 @@ export default class DevicePropertySelect extends Vue {
   // @ts-ignore
   readonly readonly: boolean
 
+  /**
+   * the label of the component
+   */
   @Prop({
     required: true,
     type: String
@@ -85,6 +94,9 @@ export default class DevicePropertySelect extends Vue {
   // @ts-ignore
   readonly label!: string
 
+  /**
+   * a list of DeviceProperties
+   */
   @Prop({
     default: () => [] as DeviceProperty[],
     required: true,
@@ -93,6 +105,13 @@ export default class DevicePropertySelect extends Vue {
   // @ts-ignore
   readonly properties!: DeviceProperty[]
 
+  /**
+   * returns a list if DeviceProperties
+   *
+   * the method returns a function which is passed to the EntitySelect component
+   *
+   * @return {DevicePropertysLoaderFunction} a function that returns the list of DeviceProperties
+   */
   get getAvailableDeviceProperties () : DevicePropertysLoaderFunction {
     return () => new Promise((resolve) => {
       resolve(
@@ -101,11 +120,27 @@ export default class DevicePropertySelect extends Vue {
     })
   }
 
+  /**
+   * returns the list of DeviceProperties
+   *
+   * @return {DeviceProperty[]} a list of DeviceProperties
+   */
   get wrappedValue () {
     return this.value
   }
 
+  /**
+   * triggers an input event when the list of device properties has changed
+   *
+   * @param {DeviceProperty[]} newValue - a list of DeviceProperties
+   * @fires DevicePropertySelect#input
+   */
   set wrappedValue (newValue) {
+    /**
+     * fires an input event
+     * @event DevicePropertySelect#input
+     * @type {DeviceProperty[]}
+     */
     this.$emit('input', newValue)
   }
 }

@@ -146,6 +146,9 @@ import { Attachment } from '@/models/Attachment'
 })
 // @ts-ignore
 export default class AttachmentList extends mixins(Rules) {
+  /**
+   * an Array of Attachments
+   */
   @Prop({
     default: () => [] as Attachment[],
     required: true,
@@ -154,6 +157,9 @@ export default class AttachmentList extends mixins(Rules) {
   // @ts-ignore
   readonly value!: Attachment[]
 
+  /**
+   * whether the component is in readonly mode or not
+   */
   @Prop({
     default: false,
     type: Boolean
@@ -179,9 +185,9 @@ export default class AttachmentList extends mixins(Rules) {
     (this.$refs.attachmentsForm as Vue & { resetValidation: () => boolean }).resetValidation()
 
     /**
-     * Update event
+     * fires an input event
      * @event AttachmentList#input
-     * @type Attachment[]
+     * @type {Attachment[]}
      */
     this.$emit('input', [
       ...this.value,
@@ -193,9 +199,9 @@ export default class AttachmentList extends mixins(Rules) {
   }
 
   /**
-   * removes as Attachment instance
+   * removes an Attachment instance
    *
-   * @param {number} index - the index of the property to remove
+   * @param {number} index - the index of the attachment to remove
    * @fires AttachmentList#input
    */
   remove (index: number) {
@@ -203,9 +209,9 @@ export default class AttachmentList extends mixins(Rules) {
       const properties = [...this.value] as Attachment[]
       properties.splice(index, 1)
       /**
-       * Update event
+       * fires an input event
        * @event AttachmentList#input
-       * @type Attachment[]
+       * @type {Attachment[]}
        */
       this.$emit('input', properties)
     }

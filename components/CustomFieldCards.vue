@@ -94,6 +94,9 @@ import { CustomTextField } from '@/models/CustomTextField'
 })
 // @ts-ignore
 export default class CustomFieldCards extends Vue {
+  /**
+   * a list of CustomTextFields
+   */
   @Prop({
     default: () => [] as CustomTextField[],
     required: true,
@@ -102,6 +105,9 @@ export default class CustomFieldCards extends Vue {
   // @ts-ignore
   readonly value!: CustomTextField[]
 
+  /**
+   * whether the component is in readonly mode or not
+   */
   @Prop({
     default: false,
     type: Boolean
@@ -110,15 +116,15 @@ export default class CustomFieldCards extends Vue {
   readonly readonly: boolean
 
   /**
-   * adds a new CustomTextField instance
+   * adds a new CustomTextField instance and triggers an event
    *
    * @fires CustomFieldCards#input
    */
   addField () {
     /**
-     * Update event
+     * fires an input event
      * @event CustomFieldCards#input
-     * @type CustomTextField[]
+     * @type {CustomTextField[]}
      */
     this.$emit('input', [
       ...this.value,
@@ -127,7 +133,7 @@ export default class CustomFieldCards extends Vue {
   }
 
   /**
-   * removes a CustomTextField instance
+   * removes a CustomTextField instance and triggers an event
    *
    * @param {CustomTextField} index - the index of the property to remove
    * @fires CustomFieldCards#input
@@ -139,7 +145,7 @@ export default class CustomFieldCards extends Vue {
       /**
       * Update event
       * @event CustomFieldCards#input
-      * @type CustomTextField[]
+      * @type {CustomTextField[]}
       */
       this.$emit('input', properties)
     }

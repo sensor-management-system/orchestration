@@ -78,7 +78,7 @@ permissions and limitations under the Licence.
 
 <script lang="ts">
 /**
- * @file provides a component for to list device configuration attributes
+ * @file provides a component to list device configuration attributes
  * @author <marc.hanisch@gfz-potsdam.de>
  */
 import { Vue, Component, Prop, Watch } from 'nuxt-property-decorator'
@@ -102,6 +102,9 @@ import { DeviceConfigurationAttributes } from '@/models/DeviceConfigurationAttri
 export default class DeviceConfigurationAttributesExpansionPanels extends Vue {
   private openedDevicePanels: number[] = []
 
+  /**
+   * a list of DeviceConfigurationAttributes
+   */
   @Prop({
     default: () => [] as DeviceConfigurationAttributes[],
     required: true,
@@ -110,6 +113,9 @@ export default class DeviceConfigurationAttributesExpansionPanels extends Vue {
   // @ts-ignore
   readonly value: DeviceConfigurationAttributes[]
 
+  /**
+   * whether the component is in readonly mode or not
+   */
   @Prop({
     default: false,
     type: Boolean
@@ -117,14 +123,27 @@ export default class DeviceConfigurationAttributesExpansionPanels extends Vue {
   // @ts-ignore
   readonly readonly: boolean
 
+  /**
+   * closes all device panels
+   *
+   */
   hideAllPanels (): void {
     this.openedDevicePanels = []
   }
 
+  /**
+   * expands all device panels
+   *
+   */
   expandAllPanels (): void {
     this.openedDevicePanels = this.value.map((_, i) => i)
   }
 
+  /**
+   * returns of all device panels are hidden
+   *
+   * @return {boolean} whether all device panels are hidden or not
+   */
   get allDevicePanelsHidden (): boolean {
     return this.openedDevicePanels.length === 0
   }

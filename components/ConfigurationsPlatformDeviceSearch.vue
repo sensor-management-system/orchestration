@@ -167,7 +167,7 @@ type IsPlatformUsedFunc = (p: Platform) => boolean
 type IsDeviceUsedFunc = (d: Device) => boolean
 
 /**
- * A class component to select platforms and devices for a configuration
+ * A class component to search for platforms and devices
  * @extends Vue
  */
 @Component
@@ -189,6 +189,9 @@ export default class ConfigurationsPlatformDeviceSearch extends Vue {
   private platformItem: string = ''
   private deviceItem: string = ''
 
+  /**
+   * a function that returns if a device is already present in a tree or not
+   */
   @Prop({
     default: () => false,
     type: Function
@@ -196,6 +199,9 @@ export default class ConfigurationsPlatformDeviceSearch extends Vue {
   // @ts-ignore
   readonly isDeviceUsedFunc: IsDeviceUsedFunc
 
+  /**
+   * a function that returns if a platform is already present in a tree or not
+   */
   @Prop({
     default: () => false,
     type: Function
@@ -203,10 +209,22 @@ export default class ConfigurationsPlatformDeviceSearch extends Vue {
   // @ts-ignore
   readonly isPlatformUsedFunc: IsPlatformUsedFunc
 
+  /**
+   * returns a list of platforms
+   *
+   * @return {Platform[]} an Array of platforms
+   */
   get platforms (): Platform[] {
     return this.platformsResult
   }
 
+  /**
+   * sets the list of platforms
+   *
+   * when the list is not empty, the list of devices gets cleared
+   *
+   * @param {Platform[]} platforms - an Array of platforms to set
+   */
   set platforms (platforms: Platform[]) {
     this.platformsResult = platforms
     if (platforms.length) {
@@ -214,10 +232,22 @@ export default class ConfigurationsPlatformDeviceSearch extends Vue {
     }
   }
 
+  /**
+   * returns a list of devices
+   *
+   * @return {Device[]} an Array of devices
+   */
   get devices (): Device[] {
     return this.devicesResult
   }
 
+  /**
+   * sets the list of devices
+   *
+   * when the list is not empty, the list of platforms gets cleared
+   *
+   * @param {Device[]} devices - an Array of devices to set
+   */
   set devices (devices: Device[]) {
     this.devicesResult = devices
     if (devices.length) {
@@ -249,11 +279,33 @@ export default class ConfigurationsPlatformDeviceSearch extends Vue {
     }
   }
 
+  /**
+   * triggers an add-platform event
+   *
+   * @param {Platform} platform - the platform to add
+   * @fires ConfigurationsPlatformDeviceSearch#add-platform
+   */
   addPlatform (platform: Platform) {
+    /**
+     * fires an add-plaform event
+     * @event ConfigurationsPlatformDeviceSearch#add-platform
+     * @type {Platform}
+     */
     this.$emit('add-platform', platform)
   }
 
+  /**
+   * triggers an add-device event
+   *
+   * @param {Device} device - the device to add
+   * @fires ConfigurationsPlatformDeviceSearch#add-device
+   */
   addDevice (device: Device) {
+    /**
+     * fires an add-device event
+     * @event ConfigurationsPlatformDeviceSearch#add-device
+     * @type {Device}
+     */
     this.$emit('add-device', device)
   }
 }

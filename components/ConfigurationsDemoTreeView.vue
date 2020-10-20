@@ -75,6 +75,11 @@ import { Device } from '@/models/Device'
 @Component
 // @ts-ignore
 export default class ConfigurationsDemoTreeView extends Vue {
+  /**
+   * returns a demo tree
+   *
+   * @return {ConfigurationsTreeNode[]} a demo tree
+   */
   get items (): ConfigurationsTreeNode[] {
     return ConfigurationsTree.fromArray(
       [
