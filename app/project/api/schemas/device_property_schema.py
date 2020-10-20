@@ -1,5 +1,33 @@
+from marshmallow import Schema as MarshmallowSchema
 from marshmallow_jsonapi import fields
 from marshmallow_jsonapi.flask import Schema, Relationship
+
+
+class InnerDevicePropertySchema(MarshmallowSchema):
+    """
+    This is the very same class as DevicePropertySchema,
+    but it uses just a normal marshmallow schema in order
+    to support its usage as a nested element within the
+    devices schema.
+    """
+
+    class Meta:
+        type_ = "property"
+
+    id = fields.Integer(as_string=True, dump_only=True)
+    measuring_range_min = fields.Float(allow_none=True)
+    measuring_range_max = fields.Float(allow_none=True)
+    failure_value = fields.Float(allow_none=True)
+    accuracy = fields.Float(allow_none=True)
+    label = fields.Str(allow_none=True)
+    unit_uri = fields.Str(allow_none=True)
+    unit_name = fields.Str(allow_none=True)
+    compartment_uri = fields.Str(allow_none=True)
+    compartment_name = fields.Str(allow_none=True)
+    property_uri = fields.Str(allow_none=True)
+    property_name = fields.Str(allow_none=True)
+    sampling_media_uri = fields.Str(allow_none=True)
+    sampling_media_name = fields.Str(allow_none=True)
 
 
 class DevicePropertySchema(Schema):
