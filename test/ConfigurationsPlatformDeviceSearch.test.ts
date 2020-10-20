@@ -36,8 +36,8 @@ import { mount, createLocalVue } from '@vue/test-utils'
 
 // @ts-ignore
 import ConfigurationsPlatformDeviceSearch from '@/components/ConfigurationsPlatformDeviceSearch.vue'
-import Device from '@/models/Device'
-import Platform from '@/models/Platform'
+import { Device } from '@/models/Device'
+import { Platform } from '@/models/Platform'
 
 Vue.use(Vuetify)
 

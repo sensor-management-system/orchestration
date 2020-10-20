@@ -43,7 +43,7 @@ import {
   IPaginationLoader, FilteredPaginationedLoader
 } from '@/utils/PaginatedLoader'
 
-export default class ConfigurationApi {
+export class ConfigurationApi {
   private axiosApi: AxiosInstance
 
   constructor (axiosInstance: AxiosInstance) {

@@ -63,7 +63,7 @@ permissions and limitations under the Licence.
  */
 import { Vue, Component, Prop } from 'nuxt-property-decorator'
 
-import Device from '@/models/Device'
+import { Device } from '@/models/Device'
 import { DeviceProperty } from '@/models/DeviceProperty'
 
 /**

@@ -29,8 +29,8 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
-import Contact from '@/models/Contact'
-import Platform from '@/models/Platform'
+import { Contact } from '@/models/Contact'
+import { Platform } from '@/models/Platform'
 import { Attachment } from '@/models/Attachment'
 
 import { PlatformSerializer, IPlatformWithMeta, platformWithMetaToPlatformByThrowingErrorOnMissing, platformWithMetaToPlatformByAddingDummyObjects } from '@/serializers/jsonapi/PlatformSerializer'

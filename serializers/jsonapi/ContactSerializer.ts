@@ -29,7 +29,7 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
-import Contact from '@/models/Contact'
+import { Contact } from '@/models/Contact'
 
 import { IJsonApiObjectList, IJsonApiObject, IJsonApiTypeIdDataListDict, IJsonApiTypeIdAttributes } from '@/serializers/jsonapi/JsonApiTypes'
 

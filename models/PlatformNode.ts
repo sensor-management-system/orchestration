@@ -38,7 +38,7 @@
 import { IConfigurationsTreeNode } from '@/models/IConfigurationsTreeNode'
 import { ConfigurationsTree } from '@/models/ConfigurationsTree'
 import { ConfigurationsTreeNode } from '@/models/ConfigurationsTreeNode'
-import Platform from '@/models/Platform'
+import { Platform } from '@/models/Platform'
 
 /**
  * a class that wraps a Platform instance for the usage in a ConfigurationsTree

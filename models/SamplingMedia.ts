@@ -35,7 +35,7 @@ export interface ISamplingMedia {
   uri: string
 }
 
-export default class SamplingMedia implements ISamplingMedia {
+export class SamplingMedia implements ISamplingMedia {
   private _id: string = ''
   private _name: string = ''
   private _uri: string = ''

@@ -31,10 +31,10 @@
  */
 import { AxiosInstance } from 'axios'
 
-import Manufacturer from '@/models/Manufacturer'
+import { Manufacturer } from '@/models/Manufacturer'
 import { ManufacturerSerializer } from '@/serializers/jsonapi/ManufacturerSerializer'
 
-export default class ManufacturerApi {
+export class ManufacturerApi {
   private axiosApi: AxiosInstance
   private serializer: ManufacturerSerializer
 

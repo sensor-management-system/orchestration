@@ -29,7 +29,7 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
-import Platform from '@/models/Platform'
+import { Platform } from '@/models/Platform'
 import { PlatformNode } from '@/models/PlatformNode'
 
 describe('PlatformNode', () => {

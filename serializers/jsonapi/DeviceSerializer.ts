@@ -29,8 +29,8 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
-import Contact from '@/models/Contact'
-import Device from '@/models/Device'
+import { Contact } from '@/models/Contact'
+import { Device } from '@/models/Device'
 
 import { IJsonApiObjectList, IJsonApiObject, IJsonApiDataWithId, IJsonApiDataWithOptionalId, IJsonApiTypeIdAttributes } from '@/serializers/jsonapi/JsonApiTypes'
 

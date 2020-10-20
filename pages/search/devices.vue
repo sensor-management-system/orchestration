@@ -418,7 +418,7 @@ permissions and limitations under the Licence.
 </template>
 
 <style lang="scss">
-@import "~/assets/styles/_search.scss";
+@import "@/assets/styles/_search.scss";
 </style>
 
 <script lang="ts">
@@ -433,10 +433,10 @@ import StatusBadge from '@/components/StatusBadge.vue'
 
 import { IPaginationLoader } from '@/utils/PaginatedLoader'
 
-import Device from '@/models/Device'
-import DeviceType from '@/models/DeviceType'
-import Manufacturer from '@/models/Manufacturer'
-import Status from '@/models/Status'
+import { Device } from '@/models/Device'
+import { DeviceType } from '@/models/DeviceType'
+import { Manufacturer } from '@/models/Manufacturer'
+import { Status } from '@/models/Status'
 
 @Component
 // @ts-ignore

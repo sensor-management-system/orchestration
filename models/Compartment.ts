@@ -35,7 +35,7 @@ export interface ICompartment {
   uri: string
 }
 
-export default class Compartment implements ICompartment {
+export class Compartment implements ICompartment {
   private _id: string = ''
   private _name: string = ''
   private _uri: string = ''

@@ -36,7 +36,8 @@ import { mount, createLocalVue } from '@vue/test-utils'
 
 // @ts-ignore
 import DevicePropertyHierarchySelect from '@/components/DevicePropertyHierarchySelect.vue'
-import Device from '@/models/Device'
+
+import { Device } from '@/models/Device'
 import { DeviceProperty } from '@/models/DeviceProperty'
 
 Vue.use(Vuetify)

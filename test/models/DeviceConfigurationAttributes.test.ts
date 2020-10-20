@@ -29,7 +29,7 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
-import Device from '@/models/Device'
+import { Device } from '@/models/Device'
 import { DeviceConfigurationAttributes } from '@/models/DeviceConfigurationAttributes'
 import { DeviceProperty } from '@/models/DeviceProperty'
 

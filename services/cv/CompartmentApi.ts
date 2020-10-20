@@ -31,10 +31,10 @@
  */
 import { AxiosInstance } from 'axios'
 
-import Compartment from '@/models/Compartment'
+import { Compartment } from '@/models/Compartment'
 import { CompartmentSerializer } from '@/serializers/jsonapi/CompartmentSerializer'
 
-export default class DeviceTypeApi {
+export class CompartmentApi {
   private axiosApi: AxiosInstance
   private serializer: CompartmentSerializer
 

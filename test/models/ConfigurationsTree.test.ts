@@ -29,8 +29,8 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
-import Device from '@/models/Device'
-import Platform from '@/models/Platform'
+import { Device } from '@/models/Device'
+import { Platform } from '@/models/Platform'
 import { DeviceNode } from '@/models/DeviceNode'
 import { PlatformNode } from '@/models/PlatformNode'
 import { ConfigurationsTree } from '@/models/ConfigurationsTree'

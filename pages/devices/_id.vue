@@ -316,7 +316,7 @@ permissions and limitations under the Licence.
 </template>
 
 <style lang="scss">
-@import "~/assets/styles/_forms.scss";
+@import "@/assets/styles/_forms.scss";
 </style>
 
 <script lang="ts">
@@ -324,14 +324,14 @@ import { Component, Watch, mixins } from 'nuxt-property-decorator'
 
 import { Rules } from '@/mixins/Rules'
 
-import Compartment from '@/models/Compartment'
-import Device from '@/models/Device'
-import DeviceType from '@/models/DeviceType'
-import Manufacturer from '@/models/Manufacturer'
-import Property from '@/models/Property'
-import SamplingMedia from '@/models/SamplingMedia'
-import Status from '@/models/Status'
-import Unit from '@/models/Unit'
+import { Compartment } from '@/models/Compartment'
+import { Device } from '@/models/Device'
+import { DeviceType } from '@/models/DeviceType'
+import { Manufacturer } from '@/models/Manufacturer'
+import { Property } from '@/models/Property'
+import { SamplingMedia } from '@/models/SamplingMedia'
+import { Status } from '@/models/Status'
+import { Unit } from '@/models/Unit'
 
 import AppBarEditModeContent from '@/components/AppBarEditModeContent.vue'
 import AppBarTabsExtension from '@/components/AppBarTabsExtension.vue'

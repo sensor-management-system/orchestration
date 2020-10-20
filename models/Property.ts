@@ -29,13 +29,13 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
-export interface IVariable {
+export interface IProperty {
   id: string
   name: string
   uri: string
 }
 
-export default class Variable implements IVariable {
+export class Property implements IProperty {
   private _id: string = ''
   private _name: string = ''
   private _uri: string = ''
@@ -68,16 +68,16 @@ export default class Variable implements IVariable {
     return this._name
   }
 
-  static createWithData (id: string, name: string, uri: string): Variable {
-    const result = new Variable()
+  static createWithData (id: string, name: string, uri: string): Property {
+    const result = new Property()
     result.id = id
     result.name = name
     result.uri = uri
     return result
   }
 
-  static createFromObject (someObject: IVariable): Variable {
-    const newObject = new Variable()
+  static createFromObject (someObject: IProperty): Property {
+    const newObject = new Property()
 
     newObject.id = someObject.id
     newObject.name = someObject.name

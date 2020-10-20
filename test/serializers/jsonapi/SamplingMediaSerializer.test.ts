@@ -29,7 +29,7 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
-import SamplingMedia from '@/models/SamplingMedia'
+import { SamplingMedia } from '@/models/SamplingMedia'
 import { SamplingMediaSerializer } from '@/serializers/jsonapi/SamplingMediaSerializer'
 
 describe('SamplingMediaSerializer', () => {

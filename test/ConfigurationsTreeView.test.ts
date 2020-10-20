@@ -36,8 +36,8 @@ import { mount, createLocalVue } from '@vue/test-utils'
 
 // @ts-ignore
 import ConfigurationsTreeView from '@/components/ConfigurationsTreeView.vue'
-import Device from '@/models/Device'
-import Platform from '@/models/Platform'
+import { Device } from '@/models/Device'
+import { Platform } from '@/models/Platform'
 import { DeviceNode } from '@/models/DeviceNode'
 import { PlatformNode } from '@/models/PlatformNode'
 import { ConfigurationsTreeNode } from '@/models/ConfigurationsTreeNode'

@@ -29,7 +29,7 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
-import PlatformType from '@/models/PlatformType'
+import { PlatformType } from '@/models/PlatformType'
 import { PlatformTypeSerializer } from '@/serializers/jsonapi/PlatformTypeSerializer'
 
 describe('PlatformTypeSerializer', () => {

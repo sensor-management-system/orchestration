@@ -35,7 +35,7 @@ export interface IDeviceType {
   uri: string
 }
 
-export default class DeviceType implements IDeviceType {
+export class DeviceType implements IDeviceType {
   private _id: string = ''
   private _name: string = ''
   private _uri: string = ''

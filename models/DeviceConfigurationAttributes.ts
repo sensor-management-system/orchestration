@@ -30,7 +30,7 @@
  * permissions and limitations under the Licence.
  */
 import { DeviceProperty } from '@/models/DeviceProperty'
-import Device from '@/models/Device'
+import { Device } from '@/models/Device'
 
 export interface IDeviceConfigurationAttributes {
   device: Device

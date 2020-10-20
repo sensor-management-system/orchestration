@@ -29,7 +29,7 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
-import DeviceType from '@/models/DeviceType'
+import { DeviceType } from '@/models/DeviceType'
 import { DeviceTypeSerializer } from '@/serializers/jsonapi/DeviceTypeSerializer'
 
 describe('DeviceTypeSerializer', () => {

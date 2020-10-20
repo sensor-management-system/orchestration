@@ -303,7 +303,7 @@ permissions and limitations under the Licence.
 </template>
 
 <style lang="scss">
-@import "~/assets/styles/_forms.scss";
+@import "@/assets/styles/_forms.scss";
 </style>
 
 <script lang="ts">
@@ -321,9 +321,9 @@ import ConfigurationsDemoTreeView from '@/components/ConfigurationsDemoTreeView.
 import ConfigurationsSelectedItem from '@/components/ConfigurationsSelectedItem.vue'
 import InfoBox from '@/components/InfoBox.vue'
 
-import Contact from '@/models/Contact'
-import Device from '@/models/Device'
-import Platform from '@/models/Platform'
+import { Contact } from '@/models/Contact'
+import { Device } from '@/models/Device'
+import { Platform } from '@/models/Platform'
 
 import { StationaryLocation, DynamicLocation } from '@/models/Location'
 import { Configuration } from '@/models/Configuration'

@@ -29,7 +29,7 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
-import Contact, { IContact } from '@/models/Contact'
+import { IContact, Contact } from '@/models/Contact'
 import { ConfigurationsTree } from '@/models/ConfigurationsTree'
 import { ConfigurationsTreeNode } from '@/models/ConfigurationsTreeNode'
 import { DeviceConfigurationAttributes } from '@/models/DeviceConfigurationAttributes'

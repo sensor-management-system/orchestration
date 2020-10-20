@@ -35,7 +35,7 @@ export interface IUnit {
   uri: string
 }
 
-export default class Unit implements IUnit {
+export class Unit implements IUnit {
   private _id: string = ''
   private _name: string = ''
   private _uri: string = ''

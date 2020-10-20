@@ -209,7 +209,7 @@ permissions and limitations under the Licence.
 </template>
 
 <style lang="scss">
-@import "~/assets/styles/_forms.scss";
+@import "@/assets/styles/_forms.scss";
 </style>
 
 <script lang="ts">
@@ -221,10 +221,10 @@ import AppBarTabsExtension from '@/components/AppBarTabsExtension.vue'
 import AttachmentList from '@/components/AttachmentList.vue'
 import ContactSelect from '@/components/ContactSelect.vue'
 
-import Manufacturer from '@/models/Manufacturer'
-import Platform from '@/models/Platform'
-import PlatformType from '@/models/PlatformType'
-import Status from '@/models/Status'
+import { Manufacturer } from '@/models/Manufacturer'
+import { Platform } from '@/models/Platform'
+import { PlatformType } from '@/models/PlatformType'
+import { Status } from '@/models/Status'
 
 @Component
 // @ts-ignore

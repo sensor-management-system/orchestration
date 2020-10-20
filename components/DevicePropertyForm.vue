@@ -141,10 +141,10 @@ permissions and limitations under the Licence.
  */
 import { Vue, Component, Prop } from 'nuxt-property-decorator'
 
-import Compartment from '@/models/Compartment'
-import Property from '@/models/Property'
-import SamplingMedia from '@/models/SamplingMedia'
-import Unit from '@/models/Unit'
+import { Compartment } from '@/models/Compartment'
+import { Property } from '@/models/Property'
+import { SamplingMedia } from '@/models/SamplingMedia'
+import { Unit } from '@/models/Unit'
 import { DeviceProperty } from '@/models/DeviceProperty'
 import { parseFloatOrNull } from '@/utils/numericsHelper'
 

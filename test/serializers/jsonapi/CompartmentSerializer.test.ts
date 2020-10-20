@@ -29,7 +29,7 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
-import Compartment from '@/models/Compartment'
+import { Compartment } from '@/models/Compartment'
 import { CompartmentSerializer } from '@/serializers/jsonapi/CompartmentSerializer'
 
 describe('CompartmentSerializer', () => {

@@ -48,7 +48,7 @@ import { Vue, Component, Prop } from 'nuxt-property-decorator'
 
 import EntitySelect from '@/components/EntitySelect.vue'
 
-import DeviceType from '@/models/DeviceType'
+import { DeviceType } from '@/models/DeviceType'
 
 type DeviceTypeLoaderFunction = () => Promise<DeviceType[]>
 

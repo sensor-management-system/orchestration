@@ -29,7 +29,7 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
-import Contact, { IContact } from '@/models/Contact'
+import { IContact, Contact } from '@/models/Contact'
 import { Attachment, IAttachment } from '@/models/Attachment'
 
 export interface IPlatform {
@@ -65,7 +65,7 @@ export interface IPlatform {
   attachments: IAttachment[]
 }
 
-export default class Platform implements IPlatform {
+export class Platform implements IPlatform {
   private _id: string | null = null
 
   private _platformTypeUri: string = ''

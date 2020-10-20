@@ -35,7 +35,7 @@ export interface IStatus {
   uri: string
 }
 
-export default class Status implements IStatus {
+export class Status implements IStatus {
   private _id: string = ''
   private _name: string = ''
   private _uri: string = ''

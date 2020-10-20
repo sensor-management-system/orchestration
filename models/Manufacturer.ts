@@ -35,7 +35,7 @@ export interface IManufacturer {
   uri: string
 }
 
-export default class Manufacturer implements IManufacturer {
+export class Manufacturer implements IManufacturer {
   private _id: string = ''
   private _name: string = ''
   private _uri: string = ''
