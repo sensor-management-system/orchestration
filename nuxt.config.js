@@ -3,8 +3,11 @@ Web client of the Sensor Management System software developed within
 the Helmholtz DataHub Initiative by GFZ and UFZ.
 
 Copyright (C) 2020
+- Kotyba Alhaj Taha (UFZ, kotyba.alhaj-taha@ufz.de)
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
+- Helmholtz Centre for Environmental Research GmbH - UFZ
+  (UFZ, https://www.ufz.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
   Geosciences (GFZ, https://www.gfz-potsdam.de)
 
