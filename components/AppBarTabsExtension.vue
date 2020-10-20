@@ -45,7 +45,7 @@ permissions and limitations under the Licence.
 
 <script lang="ts">
 /**
- * @file provides a component with save and cancel buttons for the App-Bar
+ * @file provides a component with tabs for the App-Bar
  * @author <marc.hanisch@gfz-potsdam.de>
  */
 import { Vue, Component } from 'nuxt-property-decorator'
@@ -67,12 +67,32 @@ export default class AppBarTabsExtension extends Vue {
     })
   }
 
+  /**
+   * returns the list of tab names to display
+   *
+   * this implementation here only returns an empty list as it
+   * is the responsibility of the child classes to provide their
+   * own tabs (by overriding this method)
+   *
+   * @return {String[]} a list of tab names
+   */
   get tabs (): String[] {
     return [] as String[]
   }
 
+  /**
+   * changes the current tab
+   *
+   * @param {number} tab - number of the active tab
+   * @fires AppBarExtension#AppBarExtension:change
+   */
   changeTab (tab: number) {
     this.activeTab = tab
+    /**
+     * fires an AppBarExtension:change event
+     * @event AppBarExtension#AppBarExtension:change
+     * @type {number}
+     */
     this.$nuxt.$emit('AppBarExtension:change', this.activeTab)
   }
 }

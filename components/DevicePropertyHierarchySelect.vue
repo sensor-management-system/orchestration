@@ -58,7 +58,7 @@ permissions and limitations under the Licence.
 
 <script lang="ts">
 /**
- * @file provides a component for an attachment
+ * @file provides a component to select a property from a list of devices
  * @author <marc.hanisch@gfz-potsdam.de>
  */
 import { Vue, Component, Prop } from 'nuxt-property-decorator'
@@ -67,12 +67,15 @@ import { Device } from '@/models/Device'
 import { DeviceProperty } from '@/models/DeviceProperty'
 
 /**
- * A class component that displays a single attached file
+ * A class component to select a property from a list of devices
  * @extends Vue
  */
 @Component
 // @ts-ignore
 export default class DevicePropertyHierarchySelect extends Vue {
+  /**
+   * the list of devices
+   */
   @Prop({
     required: true,
     type: Array
@@ -80,6 +83,9 @@ export default class DevicePropertyHierarchySelect extends Vue {
   // @ts-ignore
   readonly devices!: Device[]
 
+  /**
+   * the label of the device select
+   */
   @Prop({
     default: 'Select a device',
     type: String
@@ -87,6 +93,9 @@ export default class DevicePropertyHierarchySelect extends Vue {
   // @ts-ignore
   readonly deviceSelectLabel: string
 
+  /**
+   * the label of the property select
+   */
   @Prop({
     default: 'Select a property',
     type: String
@@ -94,6 +103,9 @@ export default class DevicePropertyHierarchySelect extends Vue {
   // @ts-ignore
   readonly propertySelectLabel: string
 
+  /**
+   * a DeviceProperty
+   */
   @Prop({
     default: null,
     type: Object
@@ -101,6 +113,9 @@ export default class DevicePropertyHierarchySelect extends Vue {
   // @ts-ignore
   readonly value: DeviceProperty
 
+  /**
+   * whether the component is in readonly mode or not
+   */
   @Prop({
     default: false,
     type: Boolean
@@ -112,6 +127,10 @@ export default class DevicePropertyHierarchySelect extends Vue {
 
   /**
    * selects a devices that is used to display its properties
+   *
+   * when no device parameter is given, the currently selected device is set to null
+   * when another device than the selected device is given, the selected property is set to null
+   * when the device has only one property, it is automatically selected
    *
    * @param {Device} device - the device whose properties should be displayed
    */
@@ -126,6 +145,11 @@ export default class DevicePropertyHierarchySelect extends Vue {
     }
   }
 
+  /**
+   * returns a list of Properties for the selected device
+   *
+   * @return {DeviceProperty[]} a list of Properties
+   */
   get propertiesOfDevice (): DeviceProperty[] {
     if (!this.selectedDevice) {
       return []
@@ -143,7 +167,7 @@ export default class DevicePropertyHierarchySelect extends Vue {
     /**
      * input event
      * @event DevicePropertyHierarchySelect#input
-     * @type DeviceProperty|null
+     * @type {DeviceProperty|null}
      */
     this.$emit('input', property)
   }

@@ -79,6 +79,9 @@ type EntityLoaderFunction<E> = () => Promise<E[]>
 export default class EntitySelect<E extends IStringId> extends Vue {
   private elements: E[] = []
 
+  /**
+   * a list of Entities
+   */
   @Prop({
     default: () => [] as E[],
     required: true,
@@ -87,6 +90,9 @@ export default class EntitySelect<E extends IStringId> extends Vue {
   // @ts-ignore
   readonly value!: E[]
 
+  /**
+   * whether the component is in readonly mode or not
+   */
   @Prop({
     default: false,
     type: Boolean
@@ -94,12 +100,19 @@ export default class EntitySelect<E extends IStringId> extends Vue {
   // @ts-ignore
   readonly readonly: boolean
 
+  /**
+   * a function to fetch the entities
+   */
   @Prop({
     required: true,
     type: Function
   })
+  // @ts-ignore
   readonly fetchFunction!: EntityLoaderFunction<E>
 
+  /**
+   * the label of the component
+   */
   @Prop({
     required: true,
     type: String
@@ -107,12 +120,18 @@ export default class EntitySelect<E extends IStringId> extends Vue {
   // @ts-ignore
   readonly label!: string
 
+  /**
+   * an icon for the selected entities
+   */
   @Prop({
     default: () => '',
     type: String
   })
   readonly avatarIcon!: string
 
+  /**
+   * a color for the selected entities
+   */
   @Prop({
     type: String,
     required: true
@@ -129,7 +148,7 @@ export default class EntitySelect<E extends IStringId> extends Vue {
   }
 
   /**
-   * adds an element to the value property
+   * adds an element to the value property and triggers an event
    *
    * @param {string} someId - the id of the element to add
    * @fires EntitySelect#input
@@ -140,7 +159,7 @@ export default class EntitySelect<E extends IStringId> extends Vue {
       /**
        * Update event
        * @event EntitySelect#input
-       * @type E[]
+       * @type {E[]}
        */
       this.$emit('input', [
         ...this.value,
@@ -150,6 +169,10 @@ export default class EntitySelect<E extends IStringId> extends Vue {
     }
   }
 
+  /**
+   * clears the input field
+   *
+   */
   clearInputField () {
     // the autocompletefield is an instance of this
     // https://github.com/vuetifyjs/vuetify/blob/master/packages/vuetify/src/components/VAutocomplete/VAutocomplete.ts
@@ -164,7 +187,7 @@ export default class EntitySelect<E extends IStringId> extends Vue {
   }
 
   /**
-   * removes an element from the value property
+   * removes an element from the value property and triggers an event
    *
    * @param {number} someId - the id of the element to remove
    * @fires EntitySelect#input
@@ -175,7 +198,7 @@ export default class EntitySelect<E extends IStringId> extends Vue {
       /**
        * Update event
        * @event EntitySelect#input
-       * @type E[]
+       * @type {E[]}
        */
       const selectedElements = [...this.value] as E[]
       selectedElements.splice(elementIndex, 1)

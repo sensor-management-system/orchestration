@@ -63,6 +63,9 @@ type PlatformTypeLoaderFunction = () => Promise<PlatformType[]>
 })
 // @ts-ignore
 export default class PlatformTypeSelect extends Vue {
+  /**
+   * a list of PlatformTypes
+   */
   @Prop({
     default: () => [] as PlatformType[],
     required: true,
@@ -71,6 +74,9 @@ export default class PlatformTypeSelect extends Vue {
   // @ts-ignore
   readonly value!: PlatformType[]
 
+  /**
+   * whether the component is in readonly mode or not
+   */
   @Prop({
     default: false,
     type: Boolean
@@ -78,21 +84,45 @@ export default class PlatformTypeSelect extends Vue {
   // @ts-ignore
   readonly readonly: boolean
 
+  /**
+   * the label of the component
+   */
   @Prop({
     required: true,
     type: String
   })
   readonly label!: string
 
+  /**
+   * fetches all PlatformTypes from the API
+   *
+   * @return {PlatformTypeLoaderFunction} a function that returns a promise which returns a list of PlatformTypes
+   */
   get findAllPlatformTypes (): PlatformTypeLoaderFunction {
     return () => { return this.$api.platformTypes.findAll() }
   }
 
+  /**
+   * returns the list of platformtypes
+   *
+   * @return {PlatformType[]} a list of PlatformTypes
+   */
   get wrappedValue () {
     return this.value
   }
 
+  /**
+   * triggers an input event when the list of PlatformTypes has changed
+   *
+   * @param {PlatformType[]} newValue - a list of PlatformTypes
+   * @fires PlatformTypeSelect#input
+   */
   set wrappedValue (newValue) {
+    /**
+     * fires an input event
+     * @event PlatformTypeSelect#input
+     * @type {PlatformType[]}
+     */
     this.$emit('input', newValue)
   }
 }

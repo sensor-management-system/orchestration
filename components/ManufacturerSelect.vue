@@ -63,6 +63,9 @@ type ManufacturersLoaderFunction = () => Promise<Manufacturer[]>
 })
 // @ts-ignore
 export default class ManufacturerSelect extends Vue {
+  /**
+   * a list of Manufacturer
+   */
   @Prop({
     default: () => [] as Manufacturer[],
     required: true,
@@ -71,6 +74,9 @@ export default class ManufacturerSelect extends Vue {
   // @ts-ignore
   readonly value!: Manufacturer[]
 
+  /**
+   * whether the component is in readonly mode or not
+   */
   @Prop({
     default: false,
     type: Boolean
@@ -78,21 +84,46 @@ export default class ManufacturerSelect extends Vue {
   // @ts-ignore
   readonly readonly: boolean
 
+  /**
+   * the label of the component
+   */
   @Prop({
     required: true,
     type: String
   })
+  // @ts-ignore
   readonly label!: String
 
+  /**
+   * fetches a list of Manufacturer
+   *
+   * @return {ManufacturersLoaderFunction} a list of Manufacturer
+   */
   get findAllManufacturers (): ManufacturersLoaderFunction {
     return () => { return this.$api.manufacturer.findAll() }
   }
 
+  /**
+   * returns the list of manufacturers
+   *
+   * @return {Manufacturer[]} a list of contacts
+   */
   get wrappedValue () {
     return this.value
   }
 
+  /**
+   * triggers an input event when the list of manufacturers has changed
+   *
+   * @param {Manufacturer[]} newValue - a list of manufacturers
+   * @fires ManufacturerSelect#input
+   */
   set wrappedValue (newValue) {
+    /**
+     * fires an input event
+     * @event ManufacturerSelect#input
+     * @type {Manufacturer[]}
+     */
     this.$emit('input', newValue)
   }
 }

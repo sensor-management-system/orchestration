@@ -124,7 +124,7 @@ permissions and limitations under the Licence.
 
 <script lang="ts">
 /**
- * @file provides a component for device configuration attributes
+ * @file provides a component that renders a form for device configuration attributes
  * @author <marc.hanisch@gfz-potsdam.de>
  */
 import { Vue, Component, Prop } from 'nuxt-property-decorator'
@@ -136,7 +136,7 @@ import { parseFloatOrDefault } from '@/utils/numericsHelper'
 import { dateToString, stringToDate } from '@/utils/dateHelper'
 
 /**
- * A class component for device configuration attributes
+ * A class component that renders a form for device configuration attributes
  * @extends Vue
  */
 @Component({
@@ -148,6 +148,9 @@ import { dateToString, stringToDate } from '@/utils/dateHelper'
 export default class DeviceConfigurationAttributesForm extends Vue {
   private calibrationDateMenu: boolean = false
 
+  /**
+   * a list of DeviceConfigurationAttributes
+   */
   @Prop({
     required: true,
     type: DeviceConfigurationAttributes
@@ -155,6 +158,9 @@ export default class DeviceConfigurationAttributesForm extends Vue {
   // @ts-ignore
   readonly value!: DeviceConfigurationAttributes
 
+  /**
+   * whether the component is in readonly mode or not
+   */
   @Prop({
     default: false,
     type: Boolean
@@ -163,7 +169,7 @@ export default class DeviceConfigurationAttributesForm extends Vue {
   readonly readonly: boolean
 
   /**
-   * update the internal model at a given key
+   * update a copy of the internal model at a given key and triggers an input event
    *
    * @param {string} key - a path to the property to set
    * @param {any} value - the value to set
@@ -195,11 +201,16 @@ export default class DeviceConfigurationAttributesForm extends Vue {
     /**
      * input event
      * @event DeviceConfigurationAttributes#input
-     * @type DeviceConfigurationAttributes
+     * @type {DeviceConfigurationAttributes}
      */
     this.$emit('input', newObj)
   }
 
+  /**
+   * returns the calibration date as a string
+   *
+   * @return {string} the calibration date
+   */
   get calibrationDateStringHelper (): string {
     return dateToString(this.value.calibrationDate)
   }

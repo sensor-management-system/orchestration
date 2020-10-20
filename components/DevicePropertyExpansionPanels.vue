@@ -157,6 +157,9 @@ import { DeviceProperty } from '@/models/DeviceProperty'
 })
 // @ts-ignore
 export default class DevicePropertyExpansionPanels extends Vue {
+  /**
+   * a list of DeviceProperty
+   */
   @Prop({
     default: () => [] as DeviceProperty[],
     required: true,
@@ -165,6 +168,9 @@ export default class DevicePropertyExpansionPanels extends Vue {
   // @ts-ignore
   readonly value!: DeviceProperty[]
 
+  /**
+   * whether the component is in readonly mode or not
+   */
   @Prop({
     default: false,
     type: Boolean
@@ -172,6 +178,9 @@ export default class DevicePropertyExpansionPanels extends Vue {
   // @ts-ignore
   readonly readonly: boolean
 
+  /**
+   * a list of Compartments
+   */
   @Prop({
     default: () => [] as Compartment[],
     required: true,
@@ -179,6 +188,9 @@ export default class DevicePropertyExpansionPanels extends Vue {
   })
   compartments!: Compartment[]
 
+  /**
+   * a list of SamplingMedias
+   */
   @Prop({
     default: () => [] as SamplingMedia[],
     required: true,
@@ -186,6 +198,9 @@ export default class DevicePropertyExpansionPanels extends Vue {
   })
   samplingMedias!: SamplingMedia[]
 
+  /**
+   * a list of Properties
+   */
   @Prop({
     default: () => [] as Property[],
     required: true,
@@ -193,6 +208,9 @@ export default class DevicePropertyExpansionPanels extends Vue {
   })
   properties!: Property[]
 
+  /**
+   * a list of Units
+   */
   @Prop({
     default: () => [] as Unit[],
     required: true,
@@ -201,7 +219,7 @@ export default class DevicePropertyExpansionPanels extends Vue {
   units!: Unit[]
 
   /**
-   * adds a new DeviceProperty instance
+   * adds a new DeviceProperty instance and triggers an input event
    *
    * @fires DevicePropertyExpansionPanels#input
    */
@@ -209,7 +227,7 @@ export default class DevicePropertyExpansionPanels extends Vue {
     /**
      * Update event
      * @event DevicePropertyExpansionPanels#input
-     * @type DeviceProperty[]
+     * @type {DeviceProperty[]}
      */
     this.$emit('input', [
       ...this.value,
@@ -218,7 +236,7 @@ export default class DevicePropertyExpansionPanels extends Vue {
   }
 
   /**
-   * removes a DeviceProperty instance
+   * removes a DeviceProperty instance and triggers an input event
    *
    * @param {DeviceProperty} index - the index of the property to remove
    * @fires DevicePropertyExpansionPanels#input
@@ -230,14 +248,14 @@ export default class DevicePropertyExpansionPanels extends Vue {
       /**
       * Update event
       * @event DevicePropertyExpansionPanels#input
-      * @type DeviceProperty[]
+      * @type {DeviceProperty[]}
       */
       this.$emit('input', properties)
     }
   }
 
   /**
-   * copies a DevicceProperty instance
+   * copies a DeviceProperty instance and triggers an input event
    *
    * @param {DeviceProperty} index - the index of the property to copy
    * @fires DevicePropertyExpansionPanels#input
@@ -250,7 +268,7 @@ export default class DevicePropertyExpansionPanels extends Vue {
       /**
        * Update event
        * @event DevicePropertyExpansionPanels#input
-       * @type DeviceProperty[]
+       * @type {DeviceProperty[]}
        */
       this.$emit('input', [
         ...this.value,

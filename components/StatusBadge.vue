@@ -49,12 +49,15 @@ import { Vue, Component, Prop } from 'nuxt-property-decorator'
 
 /**
  * A class component that wraps a badge component and sets a color depending on
- * the value property provided
+ * the value property
  * @extends Vue
  */
 @Component
 // @ts-ignore
 export default class StatusBadge extends Vue {
+  /**
+   * the text of the badge
+   */
   @Prop({
     default: '',
     type: String
@@ -63,6 +66,8 @@ export default class StatusBadge extends Vue {
   readonly value: string
 
   /**
+   * a status color mapping
+   *
    * refer to the material colors as listed here:
    * https://dev.vuetifyjs.com/en/styles/colors/#material-colors
    */

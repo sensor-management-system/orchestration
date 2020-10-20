@@ -52,7 +52,7 @@ permissions and limitations under the Licence.
 
 <script lang="ts">
 /**
- * @file provides a component to select platforms and devices for a configuration
+ * @file provides a component to display platforms and devices in a tree
  * @author <marc.hanisch@gfz-potsdam.de>
  */
 import { Vue, Component, Prop } from 'nuxt-property-decorator'
@@ -61,12 +61,15 @@ import { ConfigurationsTree } from '@/models/ConfigurationsTree'
 import { ConfigurationsTreeNode } from '@/models/ConfigurationsTreeNode'
 
 /**
- * A class component to select platforms and devices for a configuration
+ * A class component to display platforms and devices in a tree
  * @extends Vue
  */
 @Component
 // @ts-ignore
 export default class ConfigurationsTreeView extends Vue {
+  /**
+   * the tree
+   */
   @Prop({
     required: true,
     type: Object
@@ -74,6 +77,9 @@ export default class ConfigurationsTreeView extends Vue {
   // @ts-ignore
   readonly value!: ConfigurationsTree
 
+  /**
+   * the selected node
+   */
   @Prop({
     default: null,
     type: Object
@@ -81,10 +87,23 @@ export default class ConfigurationsTreeView extends Vue {
   // @ts-ignore
   readonly selected: ConfigurationsTreeNode | null
 
+  /**
+   * returns the tree as a flat array of nodes
+   *
+   * @return {ConfigurationsTreeNode[]} an Array of nodes
+   */
   get items (): ConfigurationsTreeNode[] {
     return this.value.toArray()
   }
 
+  /**
+   * returns a list of selected notes
+   *
+   * notice that in this component the selection of only one node is supported
+   * so this method returns an array with 0 or 1 items
+   *
+   * @return {string[]} an empty array or an Array with the id of exactly one selected node
+   */
   get selectedNodeSingletonList (): string[] {
     if (!this.selected || !this.selected.id) {
       return []
@@ -92,11 +111,25 @@ export default class ConfigurationsTreeView extends Vue {
     return [this.selected.id]
   }
 
+  /**
+   * sets the selected nodes, triggers a select event
+   *
+   * notice that in this component the selection of only one node is supported
+   * so this method sets the first item of the argument array
+   *
+   * @param {string[]} nodeIds - an Array with the ids of the selected nodes
+   * @fires ConfigurationsTreeView#select
+   */
   set selectedNodeSingletonList (nodeIds: string[]) {
     let node: ConfigurationsTreeNode | null = null
     if (nodeIds.length) {
       node = this.value.getById(nodeIds[0])
     }
+    /**
+     * fires a select event
+     * @event ConfigurationsTreeView#select
+     * @type {ConfigurationsTreeNode}
+     */
     this.$emit('select', node)
   }
 }

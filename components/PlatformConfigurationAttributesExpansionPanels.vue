@@ -78,7 +78,7 @@ permissions and limitations under the Licence.
 
 <script lang="ts">
 /**
- * @file provides a component for to list platform configuration attributes
+ * @file provides a component to list platform configuration attributes
  * @author <marc.hanisch@gfz-potsdam.de>
  */
 import { Vue, Component, Prop, Watch } from 'nuxt-property-decorator'
@@ -102,6 +102,9 @@ import { PlatformConfigurationAttributes } from '@/models/PlatformConfigurationA
 export default class PlatformConfigurationAttributesExpansionPanels extends Vue {
   private openedPlatformPanels: number[] = []
 
+  /**
+   * a list of PlatformConfigurationAttributes
+   */
   @Prop({
     default: () => [] as PlatformConfigurationAttributes[],
     required: true,
@@ -110,6 +113,9 @@ export default class PlatformConfigurationAttributesExpansionPanels extends Vue 
   // @ts-ignore
   readonly value: PlatformConfigurationAttributes[]
 
+  /**
+   * whether the component is in readonly mode or not
+   */
   @Prop({
     default: false,
     type: Boolean
@@ -117,14 +123,27 @@ export default class PlatformConfigurationAttributesExpansionPanels extends Vue 
   // @ts-ignore
   readonly readonly: boolean
 
+  /**
+   * closes all platform panels
+   *
+   */
   hideAllPanels (): void {
     this.openedPlatformPanels = []
   }
 
+  /**
+   * expands all platform panels
+   *
+   */
   expandAllPanels (): void {
     this.openedPlatformPanels = this.value.map((_, i) => i)
   }
 
+  /**
+   * returns of all platform panels are hidden
+   *
+   * @return {boolean} whether all platform panels are hidden or not
+   */
   get allPlatformPanelsHidden (): boolean {
     return this.openedPlatformPanels.length === 0
   }

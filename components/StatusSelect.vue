@@ -63,6 +63,9 @@ type StatesLoaderFunction = () => Promise<Status[]>
 })
 // @ts-ignore
 export default class StatusSelect extends Vue {
+  /**
+   * a list of states
+   */
   @Prop({
     default: () => [] as Status[],
     required: true,
@@ -71,6 +74,9 @@ export default class StatusSelect extends Vue {
   // @ts-ignore
   readonly value!: Status[]
 
+  /**
+   * whether the component is in readonly mode or not
+   */
   @Prop({
     default: false,
     type: Boolean
@@ -78,21 +84,46 @@ export default class StatusSelect extends Vue {
   // @ts-ignore
   readonly readonly: boolean
 
+  /**
+   * the label of the component
+   */
   @Prop({
     required: true,
     type: String
   })
+  // @ts-ignore
   readonly label!: string
 
+  /**
+   * fetches all states from the API
+   *
+   * @return {StatesLoaderFunction} a function that returns a promise which returns a list of states
+   */
   get findAllStates (): StatesLoaderFunction {
     return () => { return this.$api.states.findAll() }
   }
 
+  /**
+   * returns the list of states
+   *
+   * @return {Status[]} a list of states
+   */
   get wrappedValue () {
     return this.value
   }
 
+  /**
+   * triggers an input event when the list of states has changed
+   *
+   * @param {Status[]} newValue - a list of states
+   * @fires StatusSelect#input
+   */
   set wrappedValue (newValue) {
+    /**
+     * fires an input event
+     * @event StatusSelect#input
+     * @type {States[]}
+     */
     this.$emit('input', newValue)
   }
 }

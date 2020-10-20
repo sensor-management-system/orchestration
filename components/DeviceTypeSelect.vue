@@ -63,6 +63,9 @@ type DeviceTypeLoaderFunction = () => Promise<DeviceType[]>
 })
 // @ts-ignore
 export default class DeviceTypeSelect extends Vue {
+  /**
+   * a list of DeviceTypes
+   */
   @Prop({
     default: () => [] as DeviceType[],
     required: true,
@@ -71,6 +74,9 @@ export default class DeviceTypeSelect extends Vue {
   // @ts-ignore
   readonly value!: DeviceType[]
 
+  /**
+   * whether the component is in readonly mode or not
+   */
   @Prop({
     default: false,
     type: Boolean
@@ -78,21 +84,44 @@ export default class DeviceTypeSelect extends Vue {
   // @ts-ignore
   readonly readonly: boolean
 
+  /**
+   * the label of the component
+   */
   @Prop({
     required: true,
     type: String
   })
+  // @ts-ignore
   readonly label!: string
 
+  /**
+   * fetches a list of DeviceTypes
+   */
   get findAllDeviceTypes (): DeviceTypeLoaderFunction {
     return () => { return this.$api.deviceTypes.findAll() }
   }
 
+  /**
+   * returns the list of DeviceTypes
+   *
+   * @return {DeviceType[]} a list of DeviceTypes
+   */
   get wrappedValue () {
     return this.value
   }
 
+  /**
+   * triggers an input event when the list of DeviceTypes has changed
+   *
+   * @param {DeviceType[]} newValue - a list of DeviceTypes
+   * @fires DeviceTypeSelect#input
+   */
   set wrappedValue (newValue) {
+    /**
+     * fires an input event
+     * @event DeviceTypeSelect#input
+     * @type {DeviceType[]}
+     */
     this.$emit('input', newValue)
   }
 }

@@ -63,7 +63,7 @@ permissions and limitations under the Licence.
 
 <script lang="ts">
 /**
-* @file provides a component to select platforms and devices for a configuration
+* @file provides a component to display information about a selected tree node
 * @author <marc.hanisch@gfz-potsdam.de>
 */
 import { Vue, Component, Prop } from 'nuxt-property-decorator'
@@ -71,12 +71,15 @@ import { Vue, Component, Prop } from 'nuxt-property-decorator'
 import { ConfigurationsTreeNode } from '@/models/ConfigurationsTreeNode'
 
 /**
-* A class component to select platforms and devices for a configuration
+* A class component to display information about a selected tree node
 * @extends Vue
 */
 @Component
 // @ts-ignore
 export default class ConfigurationsSelectedItem extends Vue {
+  /**
+   * the selected node
+   */
   @Prop({
     default: null,
     type: Object
@@ -84,6 +87,9 @@ export default class ConfigurationsSelectedItem extends Vue {
   // @ts-ignore
   readonly value: ConfigurationsTreeNode | null
 
+  /**
+   * the breadcrumbs string array
+   */
   @Prop({
     default: () => [],
     type: Array
@@ -91,6 +97,9 @@ export default class ConfigurationsSelectedItem extends Vue {
   // @ts-ignore
   readonly breadcrumbs: string[]
 
+  /**
+   * whether the component is in readonly mode or not
+   */
   @Prop({
     default: false,
     type: Boolean
@@ -98,6 +107,11 @@ export default class ConfigurationsSelectedItem extends Vue {
   // @ts-ignore
   readonly readonly: boolean
 
+  /**
+   * returns the description of a node
+   *
+   * @return {string} the description
+   */
   get description (): string {
     if (!this.value) {
       return ''
@@ -105,7 +119,17 @@ export default class ConfigurationsSelectedItem extends Vue {
     return this.value.unpack().description
   }
 
+  /**
+   * triggers a remove event for a node
+   *
+   * @fires ConfigurationsSelectedItem#remove
+   */
   remove () {
+    /**
+     * fires an input event
+     * @event ConfigurationsSelectedItem#remove
+     * @type {ConfigurationsTreeNode}
+     */
     this.$emit('remove', this.value)
   }
 }
