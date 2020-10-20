@@ -21,11 +21,12 @@ def create_app():
 
     # enable CORS
     # get space separated list from environment var
-    origins_raw = os.getenv("HTTP_ORIGINS")
-    # create a list of origins
-    origins = origins_raw.split()
-    # initialize cors with list of allowed origins
-    CORS(app, origins=origins)
+    origins_raw = os.getenv("HTTP_ORIGINS", None)
+    if origins_raw:
+        # create a list of origins
+        origins = origins_raw.split()
+        # initialize cors with list of allowed origins
+        CORS(app, origins=origins)
 
     # set config
     app_settings = os.getenv("APP_SETTINGS")

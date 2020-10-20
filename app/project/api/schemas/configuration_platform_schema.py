@@ -1,9 +1,6 @@
 from marshmallow_jsonapi import fields
 from marshmallow_jsonapi.flask import Schema, Relationship
 
-from project.api.schemas.configuration_schema import ConfigurationSchema
-from project.api.schemas.platform_schema import PlatformSchema
-
 
 class ConfigurationPlatformSchema(Schema):
 
@@ -16,13 +13,24 @@ class ConfigurationPlatformSchema(Schema):
     offset_x = fields.Float()
     offset_y = fields.Float()
     offset_z = fields.Float()
-    #
-    # configuration = fields.Nested(
-    #     ConfigurationSchema
-    # )
-    parent_platform = fields.Nested(
-        PlatformSchema, allow_none=True
+    configuration_id = fields.Integer()
+    platform_id = fields.Integer()
+
+    configuration = Relationship(
+        self_view_kwargs={"id": "<id>"},
+        related_view="configuration_detail",
+        related_view_kwargs={"id": "<configuration_id>"},
+        type_="configuration",
     )
-    platform = fields.Nested(
-        PlatformSchema
+    parent_platform = Relationship(
+        self_view_kwargs={"id": "<id>"},
+        related_view="platform_detail",
+        related_view_kwargs={"id": "<parent_platform_id>"},
+        type_="platform",
+    )
+    platform = Relationship(
+        self_view_kwargs={"id": "<id>"},
+        related_view="platform_detail",
+        related_view_kwargs={"id": "<platform_id>"},
+        type_="platform",
     )

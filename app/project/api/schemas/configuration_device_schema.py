@@ -1,9 +1,6 @@
 from marshmallow_jsonapi import fields
 from marshmallow_jsonapi.flask import Schema, Relationship
 
-from project.api.schemas.platform_schema import PlatformSchema
-from project.api.schemas.device_schema import DeviceSchema
-
 
 class ConfigurationDeviceSchema(Schema):
 
@@ -17,13 +14,25 @@ class ConfigurationDeviceSchema(Schema):
     offset_y = fields.Float()
     offset_z = fields.Float()
     calibration_date = fields.DateTime()
-    #
-    # configuration = fields.Nested(
-    #     ConfigurationSchema
-    # )
-    device = fields.Nested(
-        DeviceSchema
+    configuration_id = fields.Integer()
+
+    configuration = Relationship(
+        self_view_kwargs={"id": "<id>"},
+        related_view="configuration_detail",
+        related_view_kwargs={"id": "<configuration_id>"},
+        type_="configuration",
     )
-    platform = fields.Nested(
-        PlatformSchema
+
+    device = Relationship(
+        self_view_kwargs={"id": "<id>"},
+        related_view="device_detail",
+        related_view_kwargs={"id": "<device_id>"},
+        type_="device",
+    )
+
+    platform = Relationship(
+        self_view_kwargs={"id": "<id>"},
+        related_view="platform_detail",
+        related_view_kwargs={"id": "<platform_id>"},
+        type_="platform",
     )
