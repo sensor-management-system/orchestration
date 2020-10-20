@@ -1,3 +1,33 @@
+<!--
+Web client of the Sensor Management System software developed within the
+Helmholtz DataHub Initiative by GFZ and UFZ.
+
+Copyright (C) 2020
+- Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
+- Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
+- Helmholtz Centre Potsdam - GFZ German Research Centre for
+  Geosciences (GFZ, https://www.gfz-potsdam.de)
+
+Parts of this program were developed within the context of the
+following publicly funded projects or measures:
+- Helmholtz Earth and Environment DataHub
+  (https://www.helmholtz.de/en/research/earth_and_environment/initiatives/#h51095)
+
+Licensed under the HEESIL, Version 1.0 or - as soon they will be
+approved by the "Community" - subsequent versions of the HEESIL
+(the "Licence").
+
+You may not use this work except in compliance with the Licence.
+
+You may obtain a copy of the Licence at:
+https://gitext.gfz-potsdam.de/software/heesil
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the Licence is distributed on an "AS IS" basis,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+implied. See the Licence for the specific language governing
+permissions and limitations under the Licence.
+-->
 <template>
   <v-form ref="attachmentsForm" @submit.prevent>
     <v-row v-if="!readonly">
@@ -116,6 +146,9 @@ import { Attachment } from '@/models/Attachment'
 })
 // @ts-ignore
 export default class AttachmentList extends mixins(Rules) {
+  /**
+   * an Array of Attachments
+   */
   @Prop({
     default: () => [] as Attachment[],
     required: true,
@@ -124,6 +157,9 @@ export default class AttachmentList extends mixins(Rules) {
   // @ts-ignore
   readonly value!: Attachment[]
 
+  /**
+   * whether the component is in readonly mode or not
+   */
   @Prop({
     default: false,
     type: Boolean
@@ -149,9 +185,9 @@ export default class AttachmentList extends mixins(Rules) {
     (this.$refs.attachmentsForm as Vue & { resetValidation: () => boolean }).resetValidation()
 
     /**
-     * Update event
+     * fires an input event
      * @event AttachmentList#input
-     * @type Attachment[]
+     * @type {Attachment[]}
      */
     this.$emit('input', [
       ...this.value,
@@ -163,9 +199,9 @@ export default class AttachmentList extends mixins(Rules) {
   }
 
   /**
-   * removes as Attachment instance
+   * removes an Attachment instance
    *
-   * @param {number} index - the index of the property to remove
+   * @param {number} index - the index of the attachment to remove
    * @fires AttachmentList#input
    */
   remove (index: number) {
@@ -173,9 +209,9 @@ export default class AttachmentList extends mixins(Rules) {
       const properties = [...this.value] as Attachment[]
       properties.splice(index, 1)
       /**
-       * Update event
+       * fires an input event
        * @event AttachmentList#input
-       * @type Attachment[]
+       * @type {Attachment[]}
        */
       this.$emit('input', properties)
     }

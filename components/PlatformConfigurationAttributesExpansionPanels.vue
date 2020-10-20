@@ -1,3 +1,33 @@
+<!--
+Web client of the Sensor Management System software developed within the
+Helmholtz DataHub Initiative by GFZ and UFZ.
+
+Copyright (C) 2020
+- Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
+- Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
+- Helmholtz Centre Potsdam - GFZ German Research Centre for
+  Geosciences (GFZ, https://www.gfz-potsdam.de)
+
+Parts of this program were developed within the context of the
+following publicly funded projects or measures:
+- Helmholtz Earth and Environment DataHub
+  (https://www.helmholtz.de/en/research/earth_and_environment/initiatives/#h51095)
+
+Licensed under the HEESIL, Version 1.0 or - as soon they will be
+approved by the "Community" - subsequent versions of the HEESIL
+(the "Licence").
+
+You may not use this work except in compliance with the Licence.
+
+You may obtain a copy of the Licence at:
+https://gitext.gfz-potsdam.de/software/heesil
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the Licence is distributed on an "AS IS" basis,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+implied. See the Licence for the specific language governing
+permissions and limitations under the Licence.
+-->
 <template>
   <div>
     <InfoBox v-if="!value.length">
@@ -48,7 +78,7 @@
 
 <script lang="ts">
 /**
- * @file provides a component for to list platform configuration attributes
+ * @file provides a component to list platform configuration attributes
  * @author <marc.hanisch@gfz-potsdam.de>
  */
 import { Vue, Component, Prop, Watch } from 'nuxt-property-decorator'
@@ -72,6 +102,9 @@ import { PlatformConfigurationAttributes } from '@/models/PlatformConfigurationA
 export default class PlatformConfigurationAttributesExpansionPanels extends Vue {
   private openedPlatformPanels: number[] = []
 
+  /**
+   * a list of PlatformConfigurationAttributes
+   */
   @Prop({
     default: () => [] as PlatformConfigurationAttributes[],
     required: true,
@@ -80,6 +113,9 @@ export default class PlatformConfigurationAttributesExpansionPanels extends Vue 
   // @ts-ignore
   readonly value: PlatformConfigurationAttributes[]
 
+  /**
+   * whether the component is in readonly mode or not
+   */
   @Prop({
     default: false,
     type: Boolean
@@ -87,14 +123,27 @@ export default class PlatformConfigurationAttributesExpansionPanels extends Vue 
   // @ts-ignore
   readonly readonly: boolean
 
+  /**
+   * closes all platform panels
+   *
+   */
   hideAllPanels (): void {
     this.openedPlatformPanels = []
   }
 
+  /**
+   * expands all platform panels
+   *
+   */
   expandAllPanels (): void {
     this.openedPlatformPanels = this.value.map((_, i) => i)
   }
 
+  /**
+   * returns of all platform panels are hidden
+   *
+   * @return {boolean} whether all platform panels are hidden or not
+   */
   get allPlatformPanelsHidden (): boolean {
     return this.openedPlatformPanels.length === 0
   }

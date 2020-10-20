@@ -1,3 +1,33 @@
+<!--
+Web client of the Sensor Management System software developed within the
+Helmholtz DataHub Initiative by GFZ and UFZ.
+
+Copyright (C) 2020
+- Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
+- Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
+- Helmholtz Centre Potsdam - GFZ German Research Centre for
+  Geosciences (GFZ, https://www.gfz-potsdam.de)
+
+Parts of this program were developed within the context of the
+following publicly funded projects or measures:
+- Helmholtz Earth and Environment DataHub
+  (https://www.helmholtz.de/en/research/earth_and_environment/initiatives/#h51095)
+
+Licensed under the HEESIL, Version 1.0 or - as soon they will be
+approved by the "Community" - subsequent versions of the HEESIL
+(the "Licence").
+
+You may not use this work except in compliance with the Licence.
+
+You may obtain a copy of the Licence at:
+https://gitext.gfz-potsdam.de/software/heesil
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the Licence is distributed on an "AS IS" basis,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+implied. See the Licence for the specific language governing
+permissions and limitations under the Licence.
+-->
 <template>
   <v-form ref="customFieldsForm">
     <v-btn
@@ -64,6 +94,9 @@ import { CustomTextField } from '@/models/CustomTextField'
 })
 // @ts-ignore
 export default class CustomFieldCards extends Vue {
+  /**
+   * a list of CustomTextFields
+   */
   @Prop({
     default: () => [] as CustomTextField[],
     required: true,
@@ -72,6 +105,9 @@ export default class CustomFieldCards extends Vue {
   // @ts-ignore
   readonly value!: CustomTextField[]
 
+  /**
+   * whether the component is in readonly mode or not
+   */
   @Prop({
     default: false,
     type: Boolean
@@ -80,15 +116,15 @@ export default class CustomFieldCards extends Vue {
   readonly readonly: boolean
 
   /**
-   * adds a new CustomTextField instance
+   * adds a new CustomTextField instance and triggers an event
    *
    * @fires CustomFieldCards#input
    */
   addField () {
     /**
-     * Update event
+     * fires an input event
      * @event CustomFieldCards#input
-     * @type CustomTextField[]
+     * @type {CustomTextField[]}
      */
     this.$emit('input', [
       ...this.value,
@@ -97,7 +133,7 @@ export default class CustomFieldCards extends Vue {
   }
 
   /**
-   * removes a CustomTextField instance
+   * removes a CustomTextField instance and triggers an event
    *
    * @param {CustomTextField} index - the index of the property to remove
    * @fires CustomFieldCards#input
@@ -109,7 +145,7 @@ export default class CustomFieldCards extends Vue {
       /**
       * Update event
       * @event CustomFieldCards#input
-      * @type CustomTextField[]
+      * @type {CustomTextField[]}
       */
       this.$emit('input', properties)
     }

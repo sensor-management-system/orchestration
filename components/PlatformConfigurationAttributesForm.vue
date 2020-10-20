@@ -1,3 +1,33 @@
+<!--
+Web client of the Sensor Management System software developed within the
+Helmholtz DataHub Initiative by GFZ and UFZ.
+
+Copyright (C) 2020
+- Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
+- Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
+- Helmholtz Centre Potsdam - GFZ German Research Centre for
+  Geosciences (GFZ, https://www.gfz-potsdam.de)
+
+Parts of this program were developed within the context of the
+following publicly funded projects or measures:
+- Helmholtz Earth and Environment DataHub
+  (https://www.helmholtz.de/en/research/earth_and_environment/initiatives/#h51095)
+
+Licensed under the HEESIL, Version 1.0 or - as soon they will be
+approved by the "Community" - subsequent versions of the HEESIL
+(the "Licence").
+
+You may not use this work except in compliance with the Licence.
+
+You may obtain a copy of the Licence at:
+https://gitext.gfz-potsdam.de/software/heesil
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the Licence is distributed on an "AS IS" basis,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+implied. See the Licence for the specific language governing
+permissions and limitations under the Licence.
+-->
 <template>
   <v-row>
     <v-col
@@ -59,6 +89,9 @@ import { parseFloatOrDefault } from '@/utils/numericsHelper'
 @Component
 // @ts-ignore
 export default class PlatformConfigurationAttributesForm extends Vue {
+  /**
+   * the PlatformConfigurationAttributes
+   */
   @Prop({
     required: true,
     type: PlatformConfigurationAttributes
@@ -66,6 +99,9 @@ export default class PlatformConfigurationAttributesForm extends Vue {
   // @ts-ignore
   readonly value!: PlatformConfigurationAttributes
 
+  /**
+   * whether the component is in readonly mode or not
+   */
   @Prop({
     default: false,
     type: Boolean
@@ -74,7 +110,7 @@ export default class PlatformConfigurationAttributesForm extends Vue {
   readonly readonly: boolean
 
   /**
-   * update the internal model at a given key
+   * update copy of the internal model at a given key and triggers an event
    *
    * @param {string} key - a path to the property to set
    * @param {any} value - the value to set
@@ -100,7 +136,7 @@ export default class PlatformConfigurationAttributesForm extends Vue {
     /**
      * input event
      * @event PlatformConfigurationAttributes#input
-     * @type PlatformConfigurationAttributes
+     * @type {PlatformConfigurationAttributes}
      */
     this.$emit('input', newObj)
   }

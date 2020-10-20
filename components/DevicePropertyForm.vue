@@ -1,3 +1,33 @@
+<!--
+Web client of the Sensor Management System software developed within the
+Helmholtz DataHub Initiative by GFZ and UFZ.
+
+Copyright (C) 2020
+- Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
+- Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
+- Helmholtz Centre Potsdam - GFZ German Research Centre for
+  Geosciences (GFZ, https://www.gfz-potsdam.de)
+
+Parts of this program were developed within the context of the
+following publicly funded projects or measures:
+- Helmholtz Earth and Environment DataHub
+  (https://www.helmholtz.de/en/research/earth_and_environment/initiatives/#h51095)
+
+Licensed under the HEESIL, Version 1.0 or - as soon they will be
+approved by the "Community" - subsequent versions of the HEESIL
+(the "Licence").
+
+You may not use this work except in compliance with the Licence.
+
+You may obtain a copy of the Licence at:
+https://gitext.gfz-potsdam.de/software/heesil
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the Licence is distributed on an "AS IS" basis,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+implied. See the Licence for the specific language governing
+permissions and limitations under the Licence.
+-->
 <template>
   <div>
     <p>
@@ -106,15 +136,15 @@
 
 <script lang="ts">
 /**
- * @file provides a component for a device property
+ * @file provides a component that renders a form for a device property
  * @author <marc.hanisch@gfz-potsdam.de>
  */
 import { Vue, Component, Prop } from 'nuxt-property-decorator'
 
-import Compartment from '@/models/Compartment'
-import Property from '@/models/Property'
-import SamplingMedia from '@/models/SamplingMedia'
-import Unit from '@/models/Unit'
+import { Compartment } from '@/models/Compartment'
+import { Property } from '@/models/Property'
+import { SamplingMedia } from '@/models/SamplingMedia'
+import { Unit } from '@/models/Unit'
 import { DeviceProperty } from '@/models/DeviceProperty'
 import { parseFloatOrNull } from '@/utils/numericsHelper'
 
@@ -124,12 +154,15 @@ interface INameAndUri {
 }
 
 /**
- * A class component for a device property
+ * A class component that renders a form for a device property
  * @extends Vue
  */
 @Component
 // @ts-ignore
 export default class DevicePropertyForm extends Vue {
+  /**
+   * a DeviceProperty
+   */
   @Prop({
     default: () => new DeviceProperty(),
     required: true,
@@ -138,6 +171,9 @@ export default class DevicePropertyForm extends Vue {
   // @ts-ignore
   readonly value!: DeviceProperty
 
+  /**
+   * whether the component is in readonly mode or not
+   */
   @Prop({
     default: false,
     type: Boolean
@@ -145,6 +181,9 @@ export default class DevicePropertyForm extends Vue {
   // @ts-ignore
   readonly readonly: boolean
 
+  /**
+   * a list of Compartments
+   */
   @Prop({
     default: () => [] as Compartment[],
     required: true,
@@ -152,6 +191,9 @@ export default class DevicePropertyForm extends Vue {
   })
   compartments!: Compartment[]
 
+  /**
+   * a list of SamplingMedias
+   */
   @Prop({
     default: () => [] as SamplingMedia[],
     required: true,
@@ -159,6 +201,9 @@ export default class DevicePropertyForm extends Vue {
   })
   samplingMedias!: SamplingMedia[]
 
+  /**
+   * a list of Properties
+   */
   @Prop({
     default: () => [] as Property[],
     required: true,
@@ -166,6 +211,9 @@ export default class DevicePropertyForm extends Vue {
   })
   properties!: Property[]
 
+  /**
+   * a list of Units
+   */
   @Prop({
     default: () => [] as Unit[],
     required: true,
@@ -174,7 +222,7 @@ export default class DevicePropertyForm extends Vue {
   units!: Unit[]
 
   /**
-   * update the internal model at a given key
+   * update a copy of the internal model at a given key and trigger an event
    *
    * @param {string} key - a path to the property to set
    * @param {string} value - the value to set
@@ -257,15 +305,25 @@ export default class DevicePropertyForm extends Vue {
     /**
      * input event
      * @event DevicePropertyForm#input
-     * @type DeviceProperty
+     * @type {DeviceProperty}
      */
     this.$emit('input', newObj)
   }
 
+  /**
+   * return a list of compartment names
+   *
+   * @return {string[]} list of compartment names
+   */
   get compartmentNames () : string[] {
     return this.compartments.map(c => c.name)
   }
 
+  /**
+   * returns the name of a compartment based on the compartment URI
+   *
+   * @return {string} the name of the compartment
+   */
   get valueCompartmentName (): string {
     const compartmentIndex = this.compartments.findIndex(c => c.uri === this.value.compartmentUri)
     if (compartmentIndex > -1) {
@@ -274,10 +332,20 @@ export default class DevicePropertyForm extends Vue {
     return this.value.compartmentName
   }
 
+  /**
+   * returns a list of unit names
+   *
+   * @return {string[]} list of unit names
+   */
   get unitNames (): string[] {
     return this.units.map(u => u.name)
   }
 
+  /**
+   * returns the name of a unit based on the unit URI
+   *
+   * @return {string} the name of the unit
+   */
   get valueUnitName (): string {
     const unitIndex = this.units.findIndex(u => u.uri === this.value.unitUri)
     if (unitIndex > -1) {
@@ -286,10 +354,20 @@ export default class DevicePropertyForm extends Vue {
     return this.value.unitName
   }
 
+  /**
+   * returns a list of samplingMedia names
+   *
+   * @return {string[]} list of samplingMedia names
+   */
   get samplingMediaNames (): string[] {
     return this.samplingMedias.map(s => s.name)
   }
 
+  /**
+   * returns the name of a samplingMedia based on the samplingMedia URI
+   *
+   * @return {string} the name of the samplingMedia
+   */
   get valueSamplingMediaName (): string {
     const samplingMediaIndex = this.samplingMedias.findIndex(s => s.uri === this.value.samplingMediaUri)
     if (samplingMediaIndex > -1) {
@@ -298,10 +376,20 @@ export default class DevicePropertyForm extends Vue {
     return this.value.samplingMediaName
   }
 
+  /**
+   * returns a list of property names
+   *
+   * @return {string[]} list of property names
+   */
   get propertyNames (): string[] {
     return this.properties.map(p => p.name)
   }
 
+  /**
+   * returns the name of a property based on the property URI
+   *
+   * @return {string} the name of the property
+   */
   get valuePropertyName (): string {
     const propertyIndex = this.properties.findIndex(p => p.uri === this.value.propertyUri)
     if (propertyIndex > -1) {

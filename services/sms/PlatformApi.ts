@@ -1,11 +1,46 @@
+/**
+ * @license
+ * Web client of the Sensor Management System software developed within
+ * the Helmholtz DataHub Initiative by GFZ and UFZ.
+ *
+ * Copyright (C) 2020
+ * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
+ * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
+ * - Helmholtz Centre Potsdam - GFZ German Research Centre for
+ *   Geosciences (GFZ, https://www.gfz-potsdam.de)
+ *
+ * Parts of this program were developed within the context of the
+ * following publicly funded projects or measures:
+ * - Helmholtz Earth and Environment DataHub
+ *   (https://www.helmholtz.de/en/research/earth_and_environment/initiatives/#h51095)
+ *
+ * Licensed under the HEESIL, Version 1.0 or - as soon they will be
+ * approved by the "Community" - subsequent versions of the HEESIL
+ * (the "Licence").
+ *
+ * You may not use this work except in compliance with the Licence.
+ *
+ * You may obtain a copy of the Licence at:
+ * https://gitext.gfz-potsdam.de/software/heesil
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the Licence is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+ * implied. See the Licence for the specific language governing
+ * permissions and limitations under the Licence.
+ */
 import { AxiosInstance, Method } from 'axios'
 
-import Contact from '@/models/Contact'
-import Platform from '@/models/Platform'
-import PlatformType from '@/models/PlatformType'
-import { Attachment } from '@/models/Attachment'
-import Manufacturer from '@/models/Manufacturer'
-import Status from '@/models/Status'
+import { Platform } from '@/models/Platform'
+import { PlatformType } from '@/models/PlatformType'
+import { Manufacturer } from '@/models/Manufacturer'
+import { Status } from '@/models/Status'
+
+import {
+  PlatformSerializer,
+  platformWithMetaToPlatformByThrowingErrorOnMissing,
+  platformWithMetaToPlatformByAddingDummyObjects
+} from '@/serializers/jsonapi/PlatformSerializer'
 
 import { IFlaskJSONAPIFilter } from '@/utils/JSONApiInterfaces'
 
@@ -13,13 +48,13 @@ import {
   IPaginationLoader, FilteredPaginationedLoader
 } from '@/utils/PaginatedLoader'
 
-import { serverResponseToEntity as serverResponseToContact } from '@/services/sms/ContactApi'
-
-export default class PlatformApi {
+export class PlatformApi {
   private axiosApi: AxiosInstance
+  private serializer: PlatformSerializer
 
   constructor (axiosInstance: AxiosInstance) {
     this.axiosApi = axiosInstance
+    this.serializer = new PlatformSerializer()
   }
 
   findById (id: string): Promise<Platform> {
@@ -29,9 +64,9 @@ export default class PlatformApi {
       }
     }).then((rawResponse) => {
       const rawData = rawResponse.data
-      const entry = rawData.data
-      const included: any[] = rawData.included || []
-      return serverResponseToEntity(entry, included)
+      // As we ask the api to include all the contacts, we want to have them here
+      // if they are missing => throw an error
+      return platformWithMetaToPlatformByThrowingErrorOnMissing(this.serializer.convertJsonApiObjectToModel(rawData))
     })
   }
 
@@ -40,61 +75,7 @@ export default class PlatformApi {
   }
 
   save (platform: Platform): Promise<Platform> {
-    const attachments = []
-
-    for (const attachment of platform.attachments) {
-      const attachmentToSave: any = {}
-      if (attachment.id != null) {
-        attachmentToSave.id = attachment.id
-      }
-      attachmentToSave.label = attachment.label
-      attachmentToSave.url = attachment.url
-
-      attachments.push(attachmentToSave)
-    }
-
-    const contacts = []
-    for (const contact of platform.contacts) {
-      contacts.push({
-        id: contact.id,
-        type: 'contact'
-      })
-    }
-
-    const data: any = {
-      type: 'platform',
-      attributes: {
-        description: platform.description,
-        short_name: platform.shortName,
-        long_name: platform.longName,
-        manufacturer_uri: platform.manufacturerUri,
-        manufacturer_name: platform.manufacturerName,
-        model: platform.model,
-        platform_type_uri: platform.platformTypeUri,
-        platform_type_name: platform.platformTypeName,
-        status_uri: platform.statusUri,
-        status_name: platform.statusName,
-        website: platform.website,
-        // those two time slots are set by the db, no matter what we deliver here
-        created_at: platform.createdAt,
-        updated_at: platform.updatedAt,
-        // TODO
-        // created_by: platform.createdBy,
-        // updated_by: platform.updatedBy,
-        inventory_number: platform.inventoryNumber,
-        serial_number: platform.serialNumber,
-        // as the persistent_identifier must be unique, we sent null in case
-        // that we don't have an identifier here
-        persistent_identifier: platform.persistentIdentifier === '' ? null : platform.persistentIdentifier,
-        attachments
-      },
-      relationships: {
-        contacts: {
-          data: contacts
-        }
-        // TODO: events
-      }
-    }
+    const data: any = this.serializer.convertModelToJsonApiData(platform)
     let method: Method = 'patch'
     let url = ''
 
@@ -103,7 +84,6 @@ export default class PlatformApi {
       method = 'post'
     } else {
       // old -> patch
-      data.id = platform.id
       url = String(platform.id)
     }
 
@@ -120,7 +100,7 @@ export default class PlatformApi {
   }
 
   newSearchBuilder (): PlatformSearchBuilder {
-    return new PlatformSearchBuilder(this.axiosApi)
+    return new PlatformSearchBuilder(this.axiosApi, this.serializer)
   }
 }
 
@@ -128,9 +108,11 @@ export class PlatformSearchBuilder {
   private axiosApi: AxiosInstance
   private clientSideFilterFunc: (platform: Platform) => boolean
   private serverSideFilterSettings: IFlaskJSONAPIFilter[] = []
+  private serializer: PlatformSerializer
 
-  constructor (axiosApi: AxiosInstance) {
+  constructor (axiosApi: AxiosInstance, serializer: PlatformSerializer) {
     this.axiosApi = axiosApi
+    this.serializer = serializer
     this.clientSideFilterFunc = (_p: Platform) => true
   }
 
@@ -225,7 +207,8 @@ export class PlatformSearchBuilder {
     return new PlatformSearcher(
       this.axiosApi,
       this.clientSideFilterFunc,
-      this.serverSideFilterSettings
+      this.serverSideFilterSettings,
+      this.serializer
     )
   }
 }
@@ -234,15 +217,18 @@ export class PlatformSearcher {
   private axiosApi: AxiosInstance
   private clientSideFilterFunc: (platform: Platform) => boolean
   private serverSideFilterSettings: IFlaskJSONAPIFilter[]
+  private serializer: PlatformSerializer
 
   constructor (
     axiosApi: AxiosInstance,
     clientSideFilterFunc: (platform: Platform) => boolean,
-    serverSideFilterSetting: IFlaskJSONAPIFilter[]
+    serverSideFilterSetting: IFlaskJSONAPIFilter[],
+    serializer: PlatformSerializer
   ) {
     this.axiosApi = axiosApi
     this.clientSideFilterFunc = clientSideFilterFunc
     this.serverSideFilterSettings = serverSideFilterSetting
+    this.serializer = serializer
   }
 
   private get commonParams (): any {
@@ -263,16 +249,11 @@ export class PlatformSearcher {
       }
     ).then((rawResponse: any) => {
       const rawData = rawResponse.data
-      const result: Platform[] = []
-      const included: any[] = rawData.included || []
-
-      for (const entry of rawData.data) {
-        const platform = serverResponseToEntity(entry, included)
-        if (this.clientSideFilterFunc(platform)) {
-          result.push(platform)
-        }
-      }
-      return result
+      // We don't ask the api to include the contacts, so we add dummy objects.
+      // This way we at least stay with the relationships.
+      return this.serializer
+        .convertJsonApiObjectListToModelList(rawData)
+        .map(platformWithMetaToPlatformByAddingDummyObjects)
     })
   }
 
@@ -295,109 +276,31 @@ export class PlatformSearcher {
       }
     ).then((rawResponse) => {
       const rawData = rawResponse.data
-      const result: Platform[] = []
-      const included: any[] = rawData.included || []
-      for (const entry of rawData.data) {
-        // client side filtering will not be done here
-        // (but in the FilteredPaginationedLoader)
-        // so that we know if we still have elements here
-        // there may be others to load as well
-        result.push(serverResponseToEntity(entry, included))
-      }
+      // client side filtering will not be done here
+      // (but in the FilteredPaginationedLoader)
+      // so that we know if we still have elements here
+      // there may be others to load as well
+
+      // And - again - as we don't ask the api to include the contacts, we just handle
+      // the missing contact data by adding dummy objects for those.
+      const elements: Platform[] = this.serializer
+        .convertJsonApiObjectListToModelList(rawData)
+        .map(platformWithMetaToPlatformByAddingDummyObjects)
+
+      // This is given by the json api. Regardless of the pagination it
+      // represents the total amount of entries found.
+      const totalCount = rawData.meta.count
 
       let funToLoadNext = null
-      if (result.length > 0) {
+      if (elements.length > 0) {
         funToLoadNext = () => this.findAllOnPage(page + 1, pageSize)
       }
 
       return {
-        elements: result,
+        elements,
+        totalCount,
         funToLoadNext
       }
     })
   }
-}
-
-export function serverResponseToEntity (entry: any, included: any[]) : Platform {
-  const result: Platform = Platform.createEmpty()
-
-  const attributes = entry.attributes
-  const relationships = entry.relationships
-
-  result.id = entry.id
-
-  result.description = attributes.description || ''
-  result.shortName = attributes.short_name || ''
-  result.longName = attributes.long_name || ''
-  result.manufacturerUri = attributes.manufacturer_uri || ''
-  result.manufacturerName = attributes.manufacturer_name || ''
-  result.model = attributes.model || ''
-  result.platformTypeUri = attributes.platform_type_uri || ''
-  result.platformTypeName = attributes.platform_type_name || ''
-  result.statusUri = attributes.status_uri || ''
-  result.statusName = attributes.status_name || ''
-  result.website = attributes.website || ''
-  result.createdAt = attributes.created_at
-  result.updatedAt = attributes.updated_at
-
-  // TODO
-  // result.createdBy = attributes.created_by
-  // result.updatedBy = attributes.updated_by
-
-  result.inventoryNumber = attributes.inventory_number || ''
-  result.serialNumber = attributes.serial_number || ''
-  result.persistentIdentifier = attributes.persistent_identifier || ''
-
-  // TODO
-  // result.events = []
-
-  const attachments: Attachment[] = []
-
-  for (const attachmentFromServer of attributes.attachments) {
-    const attachment = new Attachment()
-    attachment.id = attachmentFromServer.id
-    attachment.label = attachmentFromServer.label || ''
-    attachment.url = attachmentFromServer.url || ''
-
-    attachments.push(attachment)
-  }
-
-  result.attachments = attachments
-
-  const contactIds = []
-  if (relationships.contacts && relationships.contacts.data && relationships.contacts.data.length > 0) {
-    for (const relationShipContactData of relationships.contacts.data) {
-      const contactId = relationShipContactData.id
-      contactIds.push(contactId)
-    }
-  }
-
-  const possibleContacts: {[key: string]: Contact} = {}
-  if (included && included.length > 0) {
-    for (const includedEntry of included) {
-      if (includedEntry.type === 'contact') {
-        const contactId = includedEntry.id
-        if (contactIds.includes(contactId)) {
-          const contact = serverResponseToContact(includedEntry)
-          possibleContacts[contactId] = contact
-        }
-      }
-    }
-  }
-
-  const contacts = []
-
-  for (const contactId of contactIds) {
-    if (possibleContacts[contactId]) {
-      contacts.push(possibleContacts[contactId])
-    } else {
-      const contact = new Contact()
-      contact.id = contactId
-      contacts.push(contact)
-    }
-  }
-
-  result.contacts = contacts
-
-  return result
 }

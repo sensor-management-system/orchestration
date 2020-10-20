@@ -1,3 +1,33 @@
+<!--
+Web client of the Sensor Management System software developed within the
+Helmholtz DataHub Initiative by GFZ and UFZ.
+
+Copyright (C) 2020
+- Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
+- Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
+- Helmholtz Centre Potsdam - GFZ German Research Centre for
+  Geosciences (GFZ, https://www.gfz-potsdam.de)
+
+Parts of this program were developed within the context of the
+following publicly funded projects or measures:
+- Helmholtz Earth and Environment DataHub
+  (https://www.helmholtz.de/en/research/earth_and_environment/initiatives/#h51095)
+
+Licensed under the HEESIL, Version 1.0 or - as soon they will be
+approved by the "Community" - subsequent versions of the HEESIL
+(the "Licence").
+
+You may not use this work except in compliance with the Licence.
+
+You may obtain a copy of the Licence at:
+https://gitext.gfz-potsdam.de/software/heesil
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the Licence is distributed on an "AS IS" basis,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+implied. See the Licence for the specific language governing
+permissions and limitations under the Licence.
+-->
 <template>
   <div>
     Add platforms and devices:
@@ -120,8 +150,8 @@
  */
 import { Vue, Component, Prop } from 'nuxt-property-decorator'
 
-import Platform from '@/models/Platform'
-import Device from '@/models/Device'
+import { Platform } from '@/models/Platform'
+import { Device } from '@/models/Device'
 
 enum SearchType {
   Platform = 'Platform',
@@ -137,7 +167,7 @@ type IsPlatformUsedFunc = (p: Platform) => boolean
 type IsDeviceUsedFunc = (d: Device) => boolean
 
 /**
- * A class component to select platforms and devices for a configuration
+ * A class component to search for platforms and devices
  * @extends Vue
  */
 @Component
@@ -159,6 +189,9 @@ export default class ConfigurationsPlatformDeviceSearch extends Vue {
   private platformItem: string = ''
   private deviceItem: string = ''
 
+  /**
+   * a function that returns if a device is already present in a tree or not
+   */
   @Prop({
     default: () => false,
     type: Function
@@ -166,6 +199,9 @@ export default class ConfigurationsPlatformDeviceSearch extends Vue {
   // @ts-ignore
   readonly isDeviceUsedFunc: IsDeviceUsedFunc
 
+  /**
+   * a function that returns if a platform is already present in a tree or not
+   */
   @Prop({
     default: () => false,
     type: Function
@@ -173,10 +209,22 @@ export default class ConfigurationsPlatformDeviceSearch extends Vue {
   // @ts-ignore
   readonly isPlatformUsedFunc: IsPlatformUsedFunc
 
+  /**
+   * returns a list of platforms
+   *
+   * @return {Platform[]} an Array of platforms
+   */
   get platforms (): Platform[] {
     return this.platformsResult
   }
 
+  /**
+   * sets the list of platforms
+   *
+   * when the list is not empty, the list of devices gets cleared
+   *
+   * @param {Platform[]} platforms - an Array of platforms to set
+   */
   set platforms (platforms: Platform[]) {
     this.platformsResult = platforms
     if (platforms.length) {
@@ -184,10 +232,22 @@ export default class ConfigurationsPlatformDeviceSearch extends Vue {
     }
   }
 
+  /**
+   * returns a list of devices
+   *
+   * @return {Device[]} an Array of devices
+   */
   get devices (): Device[] {
     return this.devicesResult
   }
 
+  /**
+   * sets the list of devices
+   *
+   * when the list is not empty, the list of platforms gets cleared
+   *
+   * @param {Device[]} devices - an Array of devices to set
+   */
   set devices (devices: Device[]) {
     this.devicesResult = devices
     if (devices.length) {
@@ -219,11 +279,33 @@ export default class ConfigurationsPlatformDeviceSearch extends Vue {
     }
   }
 
+  /**
+   * triggers an add-platform event
+   *
+   * @param {Platform} platform - the platform to add
+   * @fires ConfigurationsPlatformDeviceSearch#add-platform
+   */
   addPlatform (platform: Platform) {
+    /**
+     * fires an add-plaform event
+     * @event ConfigurationsPlatformDeviceSearch#add-platform
+     * @type {Platform}
+     */
     this.$emit('add-platform', platform)
   }
 
+  /**
+   * triggers an add-device event
+   *
+   * @param {Device} device - the device to add
+   * @fires ConfigurationsPlatformDeviceSearch#add-device
+   */
   addDevice (device: Device) {
+    /**
+     * fires an add-device event
+     * @event ConfigurationsPlatformDeviceSearch#add-device
+     * @type {Device}
+     */
     this.$emit('add-device', device)
   }
 }

@@ -1,23 +1,54 @@
+/**
+ * @license
+ * Web client of the Sensor Management System software developed within
+ * the Helmholtz DataHub Initiative by GFZ and UFZ.
+ *
+ * Copyright (C) 2020
+ * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
+ * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
+ * - Helmholtz Centre Potsdam - GFZ German Research Centre for
+ *   Geosciences (GFZ, https://www.gfz-potsdam.de)
+ *
+ * Parts of this program were developed within the context of the
+ * following publicly funded projects or measures:
+ * - Helmholtz Earth and Environment DataHub
+ *   (https://www.helmholtz.de/en/research/earth_and_environment/initiatives/#h51095)
+ *
+ * Licensed under the HEESIL, Version 1.0 or - as soon they will be
+ * approved by the "Community" - subsequent versions of the HEESIL
+ * (the "Licence").
+ *
+ * You may not use this work except in compliance with the Licence.
+ *
+ * You may obtain a copy of the Licence at:
+ * https://gitext.gfz-potsdam.de/software/heesil
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the Licence is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+ * implied. See the Licence for the specific language governing
+ * permissions and limitations under the Licence.
+ */
 import axios, { AxiosInstance, AxiosRequestConfig } from 'axios'
 
-import ContactApi from '@/services/sms/ContactApi'
-import DeviceApi from '@/services/sms/DeviceApi'
-import PlatformApi from '@/services/sms/PlatformApi'
-import ConfigurationApi from '@/services/sms/ConfigurationApi'
+import { ContactApi } from '@/services/sms/ContactApi'
+import { DeviceApi } from '@/services/sms/DeviceApi'
+import { PlatformApi } from '@/services/sms/PlatformApi'
+import { ConfigurationApi } from '@/services/sms/ConfigurationApi'
 
-import CompartmentApi from '@/services/cv/CompartmentApi'
-import DeviceTypeApi from '@/services/cv/DeviceTypeApi'
-import ManufacturerApi from '@/services/cv/ManufacturerApi'
-import PlatformTypeApi from '@/services/cv/PlatformTypeApi'
-import PropertyApi from '@/services/cv/PropertyApi'
-import SamplingMediaApi from '@/services/cv/SamplingMediaApi'
-import StatusApi from '@/services/cv/StatusApi'
-import UnitApi from '@/services/cv/UnitApi'
+import { CompartmentApi } from '@/services/cv/CompartmentApi'
+import { DeviceTypeApi } from '@/services/cv/DeviceTypeApi'
+import { ManufacturerApi } from '@/services/cv/ManufacturerApi'
+import { PlatformTypeApi } from '@/services/cv/PlatformTypeApi'
+import { PropertyApi } from '@/services/cv/PropertyApi'
+import { SamplingMediaApi } from '@/services/cv/SamplingMediaApi'
+import { StatusApi } from '@/services/cv/StatusApi'
+import { UnitApi } from '@/services/cv/UnitApi'
 
 const SMS_BASE_URL = process.env.smsBackendUrl
 const CV_BASE_URL = process.env.cvBackendUrl
 
-export default class Api {
+export class Api {
   private readonly _contactApi: ContactApi
   private readonly _deviceApi: DeviceApi
   private readonly _platformApi: PlatformApi

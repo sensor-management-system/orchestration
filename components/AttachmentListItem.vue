@@ -1,8 +1,38 @@
+<!--
+Web client of the Sensor Management System software developed within the
+Helmholtz DataHub Initiative by GFZ and UFZ.
+
+Copyright (C) 2020
+- Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
+- Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
+- Helmholtz Centre Potsdam - GFZ German Research Centre for
+  Geosciences (GFZ, https://www.gfz-potsdam.de)
+
+Parts of this program were developed within the context of the
+following publicly funded projects or measures:
+- Helmholtz Earth and Environment DataHub
+  (https://www.helmholtz.de/en/research/earth_and_environment/initiatives/#h51095)
+
+Licensed under the HEESIL, Version 1.0 or - as soon they will be
+approved by the "Community" - subsequent versions of the HEESIL
+(the "Licence").
+
+You may not use this work except in compliance with the Licence.
+
+You may obtain a copy of the Licence at:
+https://gitext.gfz-potsdam.de/software/heesil
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the Licence is distributed on an "AS IS" basis,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+implied. See the Licence for the specific language governing
+permissions and limitations under the Licence.
+-->
 <template>
   <v-list-item>
     <v-list-item-avatar>
       <v-icon large>
-        {{ filetype }}
+        {{ filetypeIcon }}
       </v-icon>
     </v-list-item-avatar>
     <v-list-item-content>
@@ -55,6 +85,9 @@ import { Attachment } from '@/models/Attachment'
 @Component
 // @ts-ignore
 export default class AttachmentListItem extends Vue {
+  /**
+   * an Attachment
+   */
   @Prop({
     required: true,
     type: Attachment
@@ -62,6 +95,9 @@ export default class AttachmentListItem extends Vue {
   // @ts-ignore
   readonly value!: Attachment
 
+  /**
+   * whether the component is in readonly mode or not
+   */
   @Prop({
     default: false,
     type: Boolean
@@ -69,6 +105,11 @@ export default class AttachmentListItem extends Vue {
   // @ts-ignore
   readonly readonly: boolean
 
+  /**
+   * returns a filename from a full filepath
+   *
+   * @return {string} the filename
+   */
   get filename (): string {
     const UNKNOWN_FILENAME = 'unknown filename'
 
@@ -83,11 +124,22 @@ export default class AttachmentListItem extends Vue {
     return paths.pop()
   }
 
+  /**
+   * returns the timestamp of the upload date
+   *
+   * @TODO this must be implemented when the file API is ready
+   * @return {string} a readable timestamp
+   */
   get uploadedDateTime (): string {
     return '2020-06-17 16:35 (TODO)'
   }
 
-  get filetype (): string {
+  /**
+   * returns a material design icon name based on the file type extension
+   *
+   * @return {string} a material design icon name
+   */
+  get filetypeIcon (): string {
     let extension = ''
     const paths = this.filename.split('.')
     if (paths.length) {
@@ -132,9 +184,9 @@ export default class AttachmentListItem extends Vue {
     }
 
     /**
-     * input event
+     * fires an input event
      * @event AttachmentListItem#input
-     * @type Attachment
+     * @type {Attachment}
      */
     this.$emit('input', newObj)
   }
