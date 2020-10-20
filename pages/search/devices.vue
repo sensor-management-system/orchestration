@@ -418,7 +418,7 @@ permissions and limitations under the Licence.
 </template>
 
 <style lang="scss">
-@import "~/assets/styles/_search.scss";
+@import "@/assets/styles/_search.scss";
 </style>
 
 <script lang="ts">

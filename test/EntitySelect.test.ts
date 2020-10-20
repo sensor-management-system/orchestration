@@ -35,8 +35,8 @@ import Vuetify from 'vuetify'
 import { mount, createLocalVue } from '@vue/test-utils'
 
 // @ts-ignore
-import EntitySelect from '~/components/EntitySelect.vue'
-import { Contact } from '~/models/Contact'
+import EntitySelect from '@/components/EntitySelect.vue'
+import { Contact } from '@/models/Contact'
 
 Vue.use(Vuetify)
 

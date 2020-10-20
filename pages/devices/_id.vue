@@ -316,7 +316,7 @@ permissions and limitations under the Licence.
 </template>
 
 <style lang="scss">
-@import "~/assets/styles/_forms.scss";
+@import "@/assets/styles/_forms.scss";
 </style>
 
 <script lang="ts">

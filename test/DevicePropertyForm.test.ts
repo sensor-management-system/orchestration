@@ -35,13 +35,13 @@ import Vuetify from 'vuetify'
 import { mount, createLocalVue } from '@vue/test-utils'
 
 // @ts-ignore
-import DevicePropertyForm from '../components/DevicePropertyForm.vue'
+import DevicePropertyForm from '@/components/DevicePropertyForm.vue'
 
-import { DeviceProperty } from '~/models/DeviceProperty'
-import { Compartment } from '~/models/Compartment'
-import { SamplingMedia } from '~/models/SamplingMedia'
-import { Property } from '~/models/Property'
-import { Unit } from '~/models/Unit'
+import { DeviceProperty } from '@/models/DeviceProperty'
+import { Compartment } from '@/models/Compartment'
+import { SamplingMedia } from '@/models/SamplingMedia'
+import { Property } from '@/models/Property'
+import { Unit } from '@/models/Unit'
 
 Vue.use(Vuetify)
 
