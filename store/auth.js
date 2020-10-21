@@ -102,7 +102,6 @@ const actions = {
       .then((user) => {
         dispatch('oidcWasAuthenticated', user)
         dispatch('automaticSilentRenew')
-        console.log('auth loginPopop sucessful')
         return user
       })
   },

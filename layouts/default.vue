@@ -295,11 +295,10 @@ export default {
       this.$store.commit('snackbar/clearSuccess')
     },
     loginPopup () {
-      this.$store.dispatch('auth/loginPopup').then((value) => {
-        console.log('default loginPopup succesful')
-        return value
+      this.$store.dispatch('auth/loginPopup').then((user) => {
+        const message = 'Successful login as ' + user.name
+        this.$store.commit('snackbar/setSuccess', message)
       }).catch((_err) => {
-        console.log('default loginPopup failed')
         this.$store.commit('snackbar/setError', 'Login failed')
       })
     },
@@ -308,7 +307,13 @@ export default {
         router: this.$router,
         currentRoute: this.$route.path
       }
-      this.$store.dispatch('auth/logoutPopup', routing)
+      this.$store.dispatch('auth/logoutPopup', routing).then(() => {
+        this.$store.commit('snackbar/setSuccess', 'Logout successful')
+      }).catch((err) => {
+        // eslint-disable-next-line
+        console.err(err)
+        this.$store.commit('snackbar/setError', 'Problem on logout')
+      })
     },
     silentRenew () {
       this.$store.dispatch('auth/silentRenew')
