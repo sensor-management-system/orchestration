@@ -53,6 +53,27 @@ const state = () => ({
   isAutomaticSilentRenewOn: false
 })
 
+const logoutStrategies = {
+  redirect: {
+    logout (userManager) {
+      return userManager.signoutRedirect()
+    },
+    handleCallback (userManager) {
+      return userManager.signoutRedirectCallback()
+    }
+  },
+  popup: {
+    logout (userManager) {
+      return userManager.signoutPopup()
+    },
+    handleCallback (userManager) {
+      return userManager.signoutPopupCallback()
+    }
+  }
+}
+
+const logoutStrategy = logoutStrategies.redirect
+
 const getters = {
   isAuthenticated (state) {
     return isAuthenticated(state)
@@ -109,7 +130,7 @@ const actions = {
     commit('setOidcAuth', user)
   },
   logout ({ commit, dispatch }, routing) {
-    return userManager.signoutRedirect()
+    return logoutStrategy.logout(userManager)
       .then(() => {
         commit('unsetOidcAuth')
         dispatch('stopAutomaticSilentRenew')
@@ -143,7 +164,7 @@ const actions = {
     return userManager.signinPopupCallback()
   },
   handleSignoutCallback () {
-    return userManager.signoutRedirectCallback()
+    return logoutStrategy.handleCallback(userManager)
   },
   loadStoredUser ({ commit, dispatch }) {
     userManager.getUser()
