@@ -164,7 +164,7 @@ permissions and limitations under the Licence.
             </v-list-item>
           </template>
           <template v-if="isLoggedIn">
-            <v-list-item dense @click="logoutPopup">
+            <v-list-item dense @click="logout">
               <v-list-item-content>
                 <v-list-item-title>
                   <v-avatar small left>
@@ -305,12 +305,12 @@ export default {
         this.$store.commit('snackbar/setError', 'Login failed')
       })
     },
-    logoutPopup () {
+    logout () {
       const routing = {
         router: this.$router,
         currentRoute: this.$route.path
       }
-      this.$store.dispatch('auth/logoutPopup', routing).then(() => {
+      this.$store.dispatch('auth/logout', routing).then(() => {
         this.$store.commit('snackbar/setSuccess', 'Logout successful')
       }).catch((err) => {
         // eslint-disable-next-line

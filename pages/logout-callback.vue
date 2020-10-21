@@ -44,13 +44,13 @@ export default {
     store.commit('increment')
   },
   created () {
-    this.handleSignoutPopupCallback().catch((err) => {
+    this.handleSignoutCallback().catch((err) => {
       // eslint-disable-next-line
       console.error(err)
     })
   },
   methods: {
-    ...mapActions('auth', ['handleSignoutPopupCallback'])
+    ...mapActions('auth', ['handleSignoutCallback'])
   }
 }
 </script>

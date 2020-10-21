@@ -108,9 +108,7 @@ const actions = {
   oidcWasAuthenticated ({ commit }, user) {
     commit('setOidcAuth', user)
   },
-  logoutPopup ({ commit, dispatch }, routing) {
-    // TODO: Try it with the signout redirect instead of the popup window
-    // return userManager.signoutPopup()
+  logout ({ commit, dispatch }, routing) {
     return userManager.signoutRedirect()
       .then(() => {
         commit('unsetOidcAuth')
@@ -144,11 +142,8 @@ const actions = {
   handleSigninPopupCallback () {
     return userManager.signinPopupCallback()
   },
-  handleSignoutPopupCallback () {
-    // TODO: As I switch to signoutRedirect,
-    // we also have to switch here
+  handleSignoutCallback () {
     return userManager.signoutRedirectCallback()
-    // return userManager.signoutPopupCallback()
   },
   loadStoredUser ({ commit, dispatch }) {
     userManager.getUser()
