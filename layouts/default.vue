@@ -295,7 +295,9 @@ export default {
       this.$store.commit('snackbar/clearSuccess')
     },
     loginPopup () {
-      this.$store.dispatch('auth/loginPopup')
+      this.$store.dispatch('auth/loginPopup').catch((_err) => {
+        this.$store.commit('snackbar/setError', 'Login failed')
+      })
     },
     logoutPopup () {
       const routing = {

@@ -42,8 +42,12 @@ export default {
   name: 'SilentRenewCallback',
   created () {
     this.handleSilentRenewCallback().catch((err) => {
+      // We don't want to bother the user if the callback fails once.
+      // logging the error to the console should be enough for now.
+      //
+      // this.$store.commit('snackbar/setError', 'Problem on Open ID Connect renew')
       // eslint-disable-next-line
-      console.error(err) // Handle errors any way you want
+      console.error(err)
     })
   },
   methods: {

@@ -98,7 +98,7 @@ const getters = {
 
 const actions = {
   loginPopup ({ dispatch }) {
-    userManager.signinPopup()
+    return userManager.signinPopup()
       .then((user) => {
         dispatch('oidcWasAuthenticated', user)
         dispatch('automaticSilentRenew')
@@ -108,7 +108,7 @@ const actions = {
     commit('setOidcAuth', user)
   },
   logoutPopup ({ commit, dispatch }, routing) {
-    userManager.signoutPopup()
+    return userManager.signoutPopup()
       .then(() => {
         commit('unsetOidcAuth')
         dispatch('stopAutomaticSilentRenew')
@@ -118,9 +118,10 @@ const actions = {
       })
   },
   silentRenew ({ dispatch }) {
-    userManager.signinSilent()
+    return userManager.signinSilent()
       .then((user) => {
         dispatch('oidcWasAuthenticated', user)
+        return user
       })
   },
   automaticSilentRenew ({ state, dispatch, commit }) {
@@ -135,29 +136,13 @@ const actions = {
     commit('disableAutomaticSilentRenewOn')
   },
   handleSilentRenewCallback () {
-    // eslint-disable-next-line
-    return new Promise((resolve, reject) => {
-      userManager.signinSilentCallback()
-        .catch(err => reject(err))
-    })
+    return userManager.signinSilentCallback()
   },
   handleSigninPopupCallback () {
-    // eslint-disable-next-line
-    return new Promise((resolve, reject) => {
-      userManager.signinPopupCallback()
-        .catch((err) => {
-          reject(err)
-        })
-    })
+    return userManager.signinPopupCallback()
   },
   handleSignoutPopupCallback () {
-    // eslint-disable-next-line
-    return new Promise((resolve, reject) => {
-      userManager.signoutPopupCallback()
-        .catch((err) => {
-          reject(err)
-        })
-    })
+    return userManager.signoutPopupCallback()
   },
   loadStoredUser ({ commit, dispatch }) {
     userManager.getUser()

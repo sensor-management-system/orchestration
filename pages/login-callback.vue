@@ -44,10 +44,14 @@ export default {
     store.commit('increment')
   },
   created () {
-    this.handleSigninPopupCallback().catch((err) => {
-      // eslint-disable-next-line
-      console.error(err) // Handle errors any way you want
-    })
+    this.handleSigninPopupCallback()
+      .then((_value) => {
+        this.$store.commit('snackbar/setSuccess', 'Login successful')
+      }).catch((err) => {
+        this.$store.commit('snackbar/setError', 'Login failed')
+        // eslint-disable-next-line
+        console.error(err)
+      })
   },
   methods: {
     ...mapActions('auth', ['handleSigninPopupCallback'])
