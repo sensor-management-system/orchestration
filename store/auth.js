@@ -145,7 +145,10 @@ const actions = {
     return userManager.signinPopupCallback()
   },
   handleSignoutPopupCallback () {
-    return userManager.signoutPopupCallback()
+    // TODO: As I switch to signoutRedirect,
+    // we also have to switch here
+    return userManager.signoutRedirectCallback()
+    // return userManager.signoutPopupCallback()
   },
   loadStoredUser ({ commit, dispatch }) {
     userManager.getUser()
