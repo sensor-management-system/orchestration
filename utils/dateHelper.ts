@@ -46,21 +46,28 @@ export const stringToDate = (aDate: string): Date => {
   return newDate
 }
 
-export const timeStampToFormattedGermanDateTime = (value: number) : string => {
+export const timeStampToUTCDateTime = (value: number) : string => {
   if (!value) {
     return ''
   }
   const date = new Date(value * 1000)
-  const day = '0' + date.getDate()
-  const month = '0' + (date.getMonth() + 1)
-  const year = date.getFullYear()
-  const hours = date.getHours()
-  const minutes = '0' + date.getMinutes()
-  const seconds = '0' + date.getSeconds()
-  return day.substr(-2) + '.' +
-    month.substr(-2) + '.' +
-    year + ' ' +
-    hours + ':' +
-    minutes.substr(-2) + ':' +
-    seconds.substr(-2)
+  const day = '0' + date.getUTCDate()
+  const month = '0' + (date.getUTCMonth() + 1)
+  const year = date.getUTCFullYear()
+  const hours = '0' + date.getUTCHours()
+  const minutes = '0' + date.getUTCMinutes()
+  const seconds = '0' + date.getUTCSeconds()
+
+  return year +
+    '-' +
+    month.substr(-2) +
+    '-' +
+    day.substr(-2) +
+    ' ' +
+    hours.substr(-2) +
+    ':' +
+    minutes.substr(-2) +
+    ':' +
+    seconds.substr(-2) +
+    ' UTC'
 }

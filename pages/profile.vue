@@ -42,7 +42,7 @@ permissions and limitations under the Licence.
         {{ claim }}: {{ value }}
       </p>
       <p>
-        exp: {{ claims.exp | timeStampToFormattedGermanDateTime }}
+        exp: {{ claims.exp | timeStampToUTCDateTime }}
       </p>
     </div>
   </div>
@@ -51,11 +51,11 @@ permissions and limitations under the Licence.
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 
-import { timeStampToFormattedGermanDateTime } from '@/utils/dateHelper'
+import { timeStampToUTCDateTime } from '@/utils/dateHelper'
 
 @Component({
   filters: {
-    timeStampToFormattedGermanDateTime
+    timeStampToUTCDateTime
   }
 })
 export default class ProfilePage extends Vue {
