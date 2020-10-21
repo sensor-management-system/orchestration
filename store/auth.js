@@ -140,10 +140,7 @@ const actions = {
     return userManager.signinSilentCallback()
   },
   handleSigninPopupCallback () {
-    return userManager.signinPopupCallback().then((value) => {
-      console.log('auth handleSgininPopup sucessful')
-      return value
-    })
+    return userManager.signinPopupCallback()
   },
   handleSignoutPopupCallback () {
     return userManager.signoutPopupCallback()
