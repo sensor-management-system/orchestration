@@ -295,7 +295,11 @@ export default {
       this.$store.commit('snackbar/clearSuccess')
     },
     loginPopup () {
-      this.$store.dispatch('auth/loginPopup').catch((_err) => {
+      this.$store.dispatch('auth/loginPopup').then((value) => {
+        console.log('default loginPopup succesful')
+        return value
+      }).catch((_err) => {
+        console.log('default loginPopup failed')
         this.$store.commit('snackbar/setError', 'Login failed')
       })
     },

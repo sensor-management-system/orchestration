@@ -102,6 +102,8 @@ const actions = {
       .then((user) => {
         dispatch('oidcWasAuthenticated', user)
         dispatch('automaticSilentRenew')
+        console.log('auth loginPopop sucessful')
+        return user
       })
   },
   oidcWasAuthenticated ({ commit }, user) {
@@ -139,7 +141,10 @@ const actions = {
     return userManager.signinSilentCallback()
   },
   handleSigninPopupCallback () {
-    return userManager.signinPopupCallback()
+    return userManager.signinPopupCallback().then((value) => {
+      console.log('auth handleSgininPopup sucessful')
+      return value
+    })
   },
   handleSignoutPopupCallback () {
     return userManager.signoutPopupCallback()
