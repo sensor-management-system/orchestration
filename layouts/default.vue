@@ -126,25 +126,77 @@ permissions and limitations under the Licence.
       <template v-else>
         <v-toolbar-title v-text="title" />
         <v-spacer />
-        <v-btn
-          v-if="!isLoggedIn"
-          color="primary"
-          @click="loginPopup"
-        >
-          Login
-        </v-btn>
-        <v-btn
-          v-if="isLoggedIn"
-          color="primary"
-          light
-          @click="logoutPopup"
-        >
-          Logout
-        </v-btn>
       </template>
       <template v-if="appBarExtension" v-slot:extension>
         <Component :is="appBarExtension" />
       </template>
+      <v-menu close-on-click close-on-content-click offset-x>
+        <template v-slot:activator="{ on }">
+          <v-btn
+            data-role="property-menu"
+            icon
+            small
+            v-on="on"
+          >
+            <v-avatar>
+              <template v-if="isLoggedIn">
+                {{ userAcronym }}
+              </template>
+              <template v-else>
+                <v-icon>
+                  mdi-account
+                </v-icon>
+              </template>
+            </v-avatar>
+          </v-btn>
+        </template>
+        <v-list>
+          <template v-if="!isLoggedIn">
+            <v-list-item dense @click="loginPopup">
+              <v-list-item-content>
+                <v-list-item-title>
+                  <v-avatar small left>
+                    LI
+                  </v-avatar>
+                  <span>Login</span>
+                </v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
+          </template>
+          <template v-if="isLoggedIn">
+            <v-list-item dense @click="logoutPopup">
+              <v-list-item-content>
+                <v-list-item-title>
+                  <v-avatar small left>
+                    LO
+                  </v-avatar>
+                  <span>Logout</span>
+                </v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
+            <v-list-item dense @click="silentRenew">
+              <v-list-item-content>
+                <v-list-item-title>
+                  <v-avatar small left>
+                    SR
+                  </v-avatar>
+                  <span>Silent renew</span>
+                </v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
+            <v-list-item dense to="/profile">
+              <v-list-item-content>
+                <v-list-item-title>
+                  <v-avatar small left>
+                    PR
+                  </v-avatar>
+                  <span>Profile</span>
+                </v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
+          </template>
+        </v-list>
+      </v-menu>
     </v-app-bar>
     <v-content>
       <v-container>
@@ -219,6 +271,9 @@ export default {
     },
     isLoggedIn () {
       return this.$store.getters['auth/isAuthenticated']
+    },
+    userAcronym () {
+      return this.$store.getters['auth/acronym']
     }
   },
   created () {
