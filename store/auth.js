@@ -63,6 +63,24 @@ const getters = {
     }
     return null
   },
+  initials (state) {
+    if (state.user) {
+      const givenName = state.user.given_name
+      const familyName = state.user.family_name
+
+      if (
+        givenName != null && givenName.length > 0 &&
+        familyName != null && familyName.length > 0
+      ) {
+        return givenName[0] + familyName[0]
+      }
+
+      if (state.user.name.length > 2) {
+        return state.user.name[0] + state.user.name[1]
+      }
+    }
+    return null
+  },
   userEmail (state) {
     if (state.user) {
       return state.user.email

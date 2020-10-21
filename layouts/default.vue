@@ -140,7 +140,7 @@ permissions and limitations under the Licence.
           >
             <v-avatar>
               <template v-if="isLoggedIn">
-                {{ userAcronym }}
+                {{ initials }}
               </template>
               <template v-else>
                 <v-icon>
@@ -272,8 +272,8 @@ export default {
     isLoggedIn () {
       return this.$store.getters['auth/isAuthenticated']
     },
-    userAcronym () {
-      return this.$store.getters['auth/acronym']
+    initials () {
+      return this.$store.getters['auth/initials']
     }
   },
   created () {
