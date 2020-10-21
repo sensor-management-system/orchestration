@@ -109,7 +109,9 @@ const actions = {
     commit('setOidcAuth', user)
   },
   logoutPopup ({ commit, dispatch }, routing) {
-    return userManager.signoutPopup()
+    // TODO: Try it with the signout redirect instead of the popup window
+    // return userManager.signoutPopup()
+    return userManager.signoutRedirect()
       .then(() => {
         commit('unsetOidcAuth')
         dispatch('stopAutomaticSilentRenew')
