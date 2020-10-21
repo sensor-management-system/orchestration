@@ -314,7 +314,7 @@ export default {
         this.$store.commit('snackbar/setSuccess', 'Logout successful')
       }).catch((err) => {
         // eslint-disable-next-line
-        console.err(err)
+        console.error(err)
         this.$store.commit('snackbar/setError', 'Problem on logout')
       })
     },
