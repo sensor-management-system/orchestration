@@ -29,7 +29,7 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
-import { dateToString, stringToDate } from '@/utils/dateHelper'
+import { dateToString, stringToDate, timeStampToFormattedGermanDateTime } from '@/utils/dateHelper'
 
 describe('dateToString', () => {
   it('should work with by birthday', () => {
@@ -73,5 +73,15 @@ describe('stringToDate and dateToString', () => {
     const asStr = dateToString(asDate)
 
     expect(asStr).toBe(inputValue)
+  })
+})
+
+describe('timeStampToFormattedGermanDateTime', () => {
+  it('should work with a current timestamp given by perl', () => {
+    // by perl -e 'print time()'
+    const timestamp = 1603285945
+    const formatted = timeStampToFormattedGermanDateTime(timestamp)
+
+    expect(formatted).toEqual('21.10.2020 15:12:25')
   })
 })

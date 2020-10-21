@@ -42,49 +42,32 @@ permissions and limitations under the Licence.
         {{ claim }}: {{ value }}
       </p>
       <p>
-        exp: {{ claims.exp | timeStampToDate }}
+        exp: {{ claims.exp | timeStampToFormattedGermanDateTime }}
       </p>
     </div>
   </div>
 </template>
 
-<script>
+<script lang="ts">
+import { Component, Vue } from 'nuxt-property-decorator'
 
-export default {
-  name: 'Profile',
+import { timeStampToFormattedGermanDateTime } from '@/utils/dateHelper'
+
+@Component({
   filters: {
-    timeStampToDate (value) {
-      if (!value) {
-        return ''
-      }
-      const date = new Date(value * 1000)
-      const day = '0' + date.getDate()
-      const month = '0' + (date.getMonth() + 1)
-      const year = date.getFullYear()
-      const hours = date.getHours()
-      const minutes = '0' + date.getMinutes()
-      const seconds = '0' + date.getSeconds()
+    timeStampToFormattedGermanDateTime
+  }
+})
+export default class ProfilePage extends Vue {
+  get userName (): string {
+    return this.$store.getters['auth/username']
+  }
 
-      return day.substr(-2) + '.' +
-        month.substr(-2) + '.' +
-        year + ' ' +
-        hours + ':' +
-        minutes.substr(-2) + ':' +
-        seconds.substr(-2)
-    }
-  },
-  data: () => ({
-    //
-  }),
-  computed: {
-    userName () {
-      return this.$store.getters['auth/username']
-    },
-    claims () {
-      return this.$store.getters['auth/allUserClaims']
-    }
+  get claims () {
+    return this.$store.getters['auth/allUserClaims']
   }
 }
+
 </script>
 
 <style scoped>
