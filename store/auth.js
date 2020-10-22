@@ -72,7 +72,7 @@ const logoutStrategies = {
   }
 }
 
-const logoutStrategy = logoutStrategies.redirect
+const logoutStrategy = logoutStrategies.popup
 
 const getters = {
   isAuthenticated (state) {
