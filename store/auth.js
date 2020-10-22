@@ -64,7 +64,28 @@ const logoutStrategies = {
   },
   popup: {
     logout (userManager) {
-      return userManager.signoutPopup()
+      // userManager.signoutPopup() returns a Promise<void>
+      // so we can try to catch an window closed error
+      // in case that we get one (the gfz IDP just prints
+      // a message ala: "Ok you are logged out")
+      const isPopupClosedError = (error) => {
+        if (error.message === 'Popup window closed') {
+          return true
+        }
+        return false
+      }
+      return new Promise((resolve, reject) => {
+        userManager.signoutPopup()
+          .then(() => resolve())
+          .catch((error) => {
+            if (isPopupClosedError(error)) {
+              // we ignore this here and say it is fine
+              resolve()
+            } else {
+              reject(error)
+            }
+          })
+      })
     },
     handleCallback (userManager) {
       return userManager.signoutPopupCallback()
