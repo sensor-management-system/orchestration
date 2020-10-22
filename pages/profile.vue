@@ -51,53 +51,54 @@ permissions and limitations under the Licence.
               </b-btn>
             </v-col>
           </v-row>
-          <v-expand-transition>
-            <v-card v-show="isPersonalSectionVisible" flat tile>
-              <v-card-text>
-                <v-row no-gutters>
-                  <v-col class="text-subtitle-2" :cols="firstCol">
-                    Name
-                  </v-col>
-                  <v-col align-self="end" :cols="secondCol">
-                    {{ claims.name }}
-                  </v-col>
-                </v-row>
-                <v-row no-gutters>
-                  <v-col class="text-subtitle-2" :cols="firstCol">
-                    User name
-                  </v-col>
-                  <v-col align-self="end" :cols="secondCol">
-                    {{ claims.preferred_username }}
-                  </v-col>
-                </v-row>
-                <v-row no-gutters>
-                  <v-col class="text-subtitle-2" :cols="firstCol">
-                    Email address
-                  </v-col>
-                  <v-col align-self="end" :cols="secondCol">
-                    {{ claims.email }}
-                  </v-col>
-                </v-row>
-                <v-row no-gutters>
-                  <v-col class="text-subtitle-2" :cols="firstCol">
-                    Given name
-                  </v-col>
-                  <v-col align-self="end" :cols="secondCol">
-                    {{ claims.given_name }}
-                  </v-col>
-                </v-row>
-                <v-row no-gutters>
-                  <v-col class="text-subtitle-2" :cols="firstCol">
-                    Family name
-                  </v-col>
-                  <v-col align-self="end" :cols="secondCol">
-                    {{ claims.family_name }}
-                  </v-col>
-                </v-row>
-              </v-card-text>
-            </v-card>
-          </v-expand-transition>
         </v-card-text>
+
+        <v-expand-transition>
+          <v-card v-show="isPersonalSectionVisible" flat tile>
+            <v-card-text>
+              <v-row no-gutters>
+                <v-col class="text-subtitle-2" :cols="firstCol">
+                  Name
+                </v-col>
+                <v-col align-self="end" :cols="secondCol">
+                  {{ claims.name }}
+                </v-col>
+              </v-row>
+              <v-row no-gutters>
+                <v-col class="text-subtitle-2" :cols="firstCol">
+                  User name
+                </v-col>
+                <v-col align-self="end" :cols="secondCol">
+                  {{ claims.preferred_username }}
+                </v-col>
+              </v-row>
+              <v-row no-gutters>
+                <v-col class="text-subtitle-2" :cols="firstCol">
+                  Email address
+                </v-col>
+                <v-col align-self="end" :cols="secondCol">
+                  {{ claims.email }}
+                </v-col>
+              </v-row>
+              <v-row no-gutters>
+                <v-col class="text-subtitle-2" :cols="firstCol">
+                  Given name
+                </v-col>
+                <v-col align-self="end" :cols="secondCol">
+                  {{ claims.given_name }}
+                </v-col>
+              </v-row>
+              <v-row no-gutters>
+                <v-col class="text-subtitle-2" :cols="firstCol">
+                  Family name
+                </v-col>
+                <v-col align-self="end" :cols="secondCol">
+                  {{ claims.family_name }}
+                </v-col>
+              </v-row>
+            </v-card-text>
+          </v-card>
+        </v-expand-transition>
       </v-card>
       <v-card class="ma-2">
         <v-card-text @click.stop.prevent="toggleOpenIdConnectSection">
@@ -113,21 +114,21 @@ permissions and limitations under the Licence.
               </b-btn>
             </v-col>
           </v-row>
-          <v-expand-transition>
-            <v-card v-show="isOpenIdConnectSectionVisible" flat tile>
-              <v-card-text>
-                <v-row v-for="(value, claim) of notExplicitPrintedClaims" :key="claim" no-gutters>
-                  <v-col class="text-subtitle-2" :cols="firstCol">
-                    {{ claim }}
-                  </v-col>
-                  <v-col align-self="end" :cols="secondCol">
-                    {{ value }}
-                  </v-col>
-                </v-row>
-              </v-card-text>
-            </v-card>
-          </v-expand-transition>
         </v-card-text>
+        <v-expand-transition>
+          <v-card v-show="isOpenIdConnectSectionVisible" flat tile>
+            <v-card-text>
+              <v-row v-for="(value, claim) of notExplicitPrintedClaims" :key="claim" no-gutters>
+                <v-col class="text-subtitle-2" :cols="firstCol">
+                  {{ claim }}
+                </v-col>
+                <v-col align-self="end" :cols="secondCol">
+                  {{ value }}
+                </v-col>
+              </v-row>
+            </v-card-text>
+          </v-card>
+        </v-expand-transition>
       </v-card>
       <v-card class="ma-2">
         <v-card-text @click.stop.prevent="toggleTokenSection">
@@ -143,29 +144,29 @@ permissions and limitations under the Licence.
               </b-btn>
             </v-col>
           </v-row>
-          <v-expand-transition>
-            <v-card v-show="isTokenSectionVisible" flat tile>
-              <v-card-text>
-                <v-row no-gutters>
-                  <v-col class="text-subtitle-2" :cols="firstCol">
-                    Authentification
-                  </v-col>
-                  <v-col align-self="end" :cols="secondCol">
-                    {{ claims.auth_time | timeStampToUTCDateTime }}
-                  </v-col>
-                </v-row>
-                <v-row no-gutters>
-                  <v-col class="text-subtitle-2" :cols="firstCol">
-                    Your token expires
-                  </v-col>
-                  <v-col align-self="end" :cols="secondCol">
-                    {{ claims.exp | timeStampToUTCDateTime }}
-                  </v-col>
-                </v-row>
-              </v-card-text>
-            </v-card>
-          </v-expand-transition>
         </v-card-text>
+        <v-expand-transition>
+          <v-card v-show="isTokenSectionVisible" flat tile>
+            <v-card-text>
+              <v-row no-gutters>
+                <v-col class="text-subtitle-2" :cols="firstCol">
+                  Authentification
+                </v-col>
+                <v-col align-self="end" :cols="secondCol">
+                  {{ claims.auth_time | timeStampToUTCDateTime }}
+                </v-col>
+              </v-row>
+              <v-row no-gutters>
+                <v-col class="text-subtitle-2" :cols="firstCol">
+                  Your token expires
+                </v-col>
+                <v-col align-self="end" :cols="secondCol">
+                  {{ claims.exp | timeStampToUTCDateTime }}
+                </v-col>
+              </v-row>
+            </v-card-text>
+          </v-card>
+        </v-expand-transition>
       </v-card>
     </template>
   </div>
