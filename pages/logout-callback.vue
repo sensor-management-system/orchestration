@@ -40,9 +40,6 @@ import { mapActions } from 'vuex'
 
 export default {
   name: 'LogoutCallback',
-  fetch ({ store }) {
-    store.commit('increment')
-  },
   created () {
     this.handleSignoutCallback().catch((err) => {
       // eslint-disable-next-line
