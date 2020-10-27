@@ -51,7 +51,7 @@ export default {
     })
   },
   methods: {
-    ...mapActions('auth', ['handleSilentRenewCallback'])
+    ...mapActions('oidc', ['handleSilentRenewCallback'])
   }
 }
 </script>

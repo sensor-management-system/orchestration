@@ -53,14 +53,14 @@ export default {
   }),
   computed: {
     isLoggedIn () {
-      return this.$store.getters['auth/isAuthenticated']
+      return this.$store.getters['oidc/isAuthenticated']
     },
     username () {
-      return this.$store.getters['auth/username']
+      return this.$store.getters['oidc/username']
     }
   },
   mounted () {
-    this.$store.dispatch('auth/loadStoredUser')
+    // this.$store.dispatch('auth/loadStoredUser') kann raus
   },
   methods: {
   }

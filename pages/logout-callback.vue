@@ -47,7 +47,7 @@ export default {
     })
   },
   methods: {
-    ...mapActions('auth', ['handleSignoutCallback'])
+    ...mapActions('oidc', ['handleSignoutCallback'])
   }
 }
 </script>

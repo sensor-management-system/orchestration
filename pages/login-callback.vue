@@ -47,7 +47,7 @@ export default {
     })
   },
   methods: {
-    ...mapActions('auth', ['handleSigninPopupCallback'])
+    ...mapActions('oidc', ['handleSigninPopupCallback'])
   }
 }
 </script>

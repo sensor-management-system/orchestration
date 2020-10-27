@@ -208,7 +208,7 @@ export default class ProfilePage extends Vue {
   }
 
   get claims () {
-    return this.$store.getters['auth/allUserClaims']
+    return this.$store.getters['oidc/allUserClaims']
   }
 
   get notExplicitPrintedClaims () {

@@ -34,7 +34,18 @@ permissions and limitations under the Licence.
 
 // eslint-disable-next-line
 import colors from 'vuetify/es5/util/colors'
+import fs from 'fs';
+import path from 'path';
+
 export default {
+  server: {
+    port: 3000, // default: 3000
+    host: '0.0.0.0', // default: localhost
+    https: {
+      key: fs.readFileSync(path.resolve(__dirname, 'server.key')),
+      cert: fs.readFileSync(path.resolve(__dirname, 'server.crt'))
+    }
+  },
   ssr: false,
   /*
   ** Nuxt target

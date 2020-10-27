@@ -66,7 +66,7 @@ export default {
   name: 'AccessDenied',
   computed: {
     isLoggedIn () {
-      return this.$store.getters['auth/isAuthenticated']
+      return this.$store.getters['oidc/isAuthenticated']
     }
   },
   watch: {

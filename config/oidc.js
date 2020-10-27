@@ -47,5 +47,6 @@ export default {
   automaticSilentRenew: process.env.NUXT_ENV_AUTOMATIC_SILENT_RENEW === 'true',
   silent_redirect_uri: process.env.NUXT_ENV_SILENT_REDIRECT_URI,
   popupWindowFeatures: 'location=no,toolbar=no,width=500,height=600,left=100,top=100', // adjusted height
-  loadUserInfo: process.env.NUXT_ENV_LOAD_USER_INFO === 'true'
+  loadUserInfo: process.env.NUXT_ENV_LOAD_USER_INFO === 'true',
+  renewIntervall: process.env.NUXT_ENV_SILENT_RENEW_INTERVAL
 }

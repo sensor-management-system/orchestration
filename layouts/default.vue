@@ -174,16 +174,16 @@ permissions and limitations under the Licence.
                 </v-list-item-title>
               </v-list-item-content>
             </v-list-item>
-            <v-list-item dense @click="silentRenew">
-              <v-list-item-content>
-                <v-list-item-title>
-                  <v-avatar small left>
-                    SR
-                  </v-avatar>
-                  <span>Silent renew</span>
-                </v-list-item-title>
-              </v-list-item-content>
-            </v-list-item>
+<!--            <v-list-item dense @click="silentRenew">-->
+<!--              <v-list-item-content>-->
+<!--                <v-list-item-title>-->
+<!--                  <v-avatar small left>-->
+<!--                    SR-->
+<!--                  </v-avatar>-->
+<!--                  <span>Silent renew</span>-->
+<!--                </v-list-item-title>-->
+<!--              </v-list-item-content>-->
+<!--            </v-list-item>-->
             <v-list-item dense to="/profile">
               <v-list-item-content>
                 <v-list-item-title>
@@ -270,10 +270,10 @@ export default {
       }
     },
     isLoggedIn () {
-      return this.$store.getters['auth/isAuthenticated']
+      return this.$store.getters['oidc/isAuthenticated']
     },
     initials () {
-      return this.$store.getters['auth/initials']
+      return this.$store.getters['oidc/username']//todo anpassen
     }
   },
   created () {
@@ -285,7 +285,7 @@ export default {
     })
   },
   mounted () {
-    this.$store.dispatch('auth/loadStoredUser')
+    this.$store.dispatch('oidc/loadStoredUser') // kann raus, braucht man nicht mehr
   },
   methods: {
     closeErrorSnackbar () {
@@ -295,12 +295,18 @@ export default {
       this.$store.commit('snackbar/clearSuccess')
     },
     loginPopup () {
-      this.$store.dispatch('auth/loginPopup').then((userObject) => {
-        let message = 'Login successful'
-        if (userObject.profile && userObject.profile.name) {
-          message = 'Successful login as ' + userObject.profile.name
-        }
-        this.$store.commit('snackbar/setSuccess', message)
+      // this.$store.dispatch('oidc/loginPopup').then((userObject) => {
+      //   let message = 'Login successful'
+      //   if (userObject.profile && userObject.profile.name) {
+      //     message = 'Successful login as ' + userObject.profile.name
+      //   }
+      //   this.$store.commit('snackbar/setSuccess', message)
+      // }).catch((_err) => {
+      //   console.log(_err);
+      //   this.$store.commit('snackbar/setError', 'Login failed')
+      // })
+      this.$store.dispatch('oidc/loginPopup').then((redirectPath) => {
+        this.$router.push(redirectPath);
       }).catch((_err) => {
         this.$store.commit('snackbar/setError', 'Login failed')
       })
@@ -310,7 +316,7 @@ export default {
         router: this.$router,
         currentRoute: this.$route.path
       }
-      this.$store.dispatch('auth/logout', routing).then(() => {
+      this.$store.dispatch('oidc/logout', routing).then(() => {
         this.$store.commit('snackbar/setSuccess', 'Logout successful')
       }).catch((err) => {
         // eslint-disable-next-line
@@ -318,9 +324,9 @@ export default {
         this.$store.commit('snackbar/setError', 'Problem on logout')
       })
     },
-    silentRenew () {
-      this.$store.dispatch('auth/silentRenew')
-    }
+    // silentRenew () { kann raus
+    //   this.$store.dispatch('auth/silentRenew')
+    // }
   }
 }
 </script>
