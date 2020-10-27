@@ -298,7 +298,7 @@ export default {
       this.$store.dispatch('auth/loginPopup').then((userObject) => {
         let message = 'Login successful'
         if (userObject.profile && userObject.profile.name) {
-          message = 'Successful login as ' + userObject.profile.name
+          message = 'Successfully logged in as ' + userObject.profile.name
         }
         this.$store.commit('snackbar/setSuccess', message)
       }).catch((_err) => {
