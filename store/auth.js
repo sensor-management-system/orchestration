@@ -53,6 +53,48 @@ const state = () => ({
   isAutomaticSilentRenewOn: false
 })
 
+const logoutStrategies = {
+  redirect: {
+    logout (userManager) {
+      return userManager.signoutRedirect()
+    },
+    handleCallback (userManager) {
+      return userManager.signoutRedirectCallback()
+    }
+  },
+  popup: {
+    logout (userManager) {
+      // userManager.signoutPopup() returns a Promise<void>
+      // so we can try to catch an window closed error
+      // in case that we get one (the gfz IDP just prints
+      // a message ala: "Ok you are logged out")
+      const isPopupClosedError = (error) => {
+        if (error.message === 'Popup window closed') {
+          return true
+        }
+        return false
+      }
+      return new Promise((resolve, reject) => {
+        userManager.signoutPopup()
+          .then(() => resolve())
+          .catch((error) => {
+            if (isPopupClosedError(error)) {
+              // we ignore this here and say it is fine
+              resolve()
+            } else {
+              reject(error)
+            }
+          })
+      })
+    },
+    handleCallback (userManager) {
+      return userManager.signoutPopupCallback()
+    }
+  }
+}
+
+const logoutStrategy = logoutStrategies.popup
+
 const getters = {
   isAuthenticated (state) {
     return isAuthenticated(state)
@@ -60,6 +102,24 @@ const getters = {
   username (state) {
     if (state.user) {
       return state.user.name
+    }
+    return null
+  },
+  initials (state) {
+    if (state.user) {
+      const givenName = state.user.given_name
+      const familyName = state.user.family_name
+
+      if (
+        givenName != null && givenName.length > 0 &&
+        familyName != null && familyName.length > 0
+      ) {
+        return givenName[0] + familyName[0]
+      }
+
+      if (state.user.name.length > 2) {
+        return state.user.name[0] + state.user.name[1]
+      }
     }
     return null
   },
@@ -80,17 +140,18 @@ const getters = {
 
 const actions = {
   loginPopup ({ dispatch }) {
-    userManager.signinPopup()
+    return userManager.signinPopup()
       .then((user) => {
         dispatch('oidcWasAuthenticated', user)
         dispatch('automaticSilentRenew')
+        return user
       })
   },
   oidcWasAuthenticated ({ commit }, user) {
     commit('setOidcAuth', user)
   },
-  logoutPopup ({ commit, dispatch }, routing) {
-    userManager.signoutPopup()
+  logout ({ commit, dispatch }, routing) {
+    return logoutStrategy.logout(userManager)
       .then(() => {
         commit('unsetOidcAuth')
         dispatch('stopAutomaticSilentRenew')
@@ -100,9 +161,10 @@ const actions = {
       })
   },
   silentRenew ({ dispatch }) {
-    userManager.signinSilent()
+    return userManager.signinSilent()
       .then((user) => {
         dispatch('oidcWasAuthenticated', user)
+        return user
       })
   },
   automaticSilentRenew ({ state, dispatch, commit }) {
@@ -117,29 +179,13 @@ const actions = {
     commit('disableAutomaticSilentRenewOn')
   },
   handleSilentRenewCallback () {
-    // eslint-disable-next-line
-    return new Promise((resolve, reject) => {
-      userManager.signinSilentCallback()
-        .catch(err => reject(err))
-    })
+    return userManager.signinSilentCallback()
   },
   handleSigninPopupCallback () {
-    // eslint-disable-next-line
-    return new Promise((resolve, reject) => {
-      userManager.signinPopupCallback()
-        .catch((err) => {
-          reject(err)
-        })
-    })
+    return userManager.signinPopupCallback()
   },
-  handleSignoutPopupCallback () {
-    // eslint-disable-next-line
-    return new Promise((resolve, reject) => {
-      userManager.signoutPopupCallback()
-        .catch((err) => {
-          reject(err)
-        })
-    })
+  handleSignoutCallback () {
+    return logoutStrategy.handleCallback(userManager)
   },
   loadStoredUser ({ commit, dispatch }) {
     userManager.getUser()

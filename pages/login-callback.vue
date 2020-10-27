@@ -40,13 +40,10 @@ import { mapActions } from 'vuex'
 
 export default {
   name: 'LoginCallback',
-  fetch ({ store }) {
-    store.commit('increment')
-  },
   created () {
     this.handleSigninPopupCallback().catch((err) => {
       // eslint-disable-next-line
-      console.error(err) // Handle errors any way you want
+      console.error(err)
     })
   },
   methods: {

@@ -40,17 +40,14 @@ import { mapActions } from 'vuex'
 
 export default {
   name: 'LogoutCallback',
-  fetch ({ store }) {
-    store.commit('increment')
-  },
   created () {
-    this.handleSignoutPopupCallback().catch((err) => {
+    this.handleSignoutCallback().catch((err) => {
       // eslint-disable-next-line
-      console.error(err) // Handle errors any way you want
+      console.error(err)
     })
   },
   methods: {
-    ...mapActions('auth', ['handleSignoutPopupCallback'])
+    ...mapActions('auth', ['handleSignoutCallback'])
   }
 }
 </script>

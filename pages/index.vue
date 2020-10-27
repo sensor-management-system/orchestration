@@ -33,29 +33,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <v-container>
-    <v-row>
-      <v-col class="text-center">
-        <v-btn
-          v-if="isLoggedIn"
-          color="primary"
-          @click="silentRenew"
-        >
-          Silent Renew
-        </v-btn>
-      </v-col>
-    </v-row>
-    <v-row
-      v-if="isLoggedIn"
-      class="text-center"
-    >
-      <v-col>
-        <h1><kbd>{{ username }}</kbd> you're now logged in.</h1>
-        <h2>Go check you Profile</h2>
-        <v-btn to="/profile">
-          Show Profile
-        </v-btn>
-      </v-col>
-    </v-row>
     <v-row justify="center">
       <v-col cols="12">
         <h1>Welcome to the Sensor Management System</h1>
@@ -86,19 +63,6 @@ export default {
     this.$store.dispatch('auth/loadStoredUser')
   },
   methods: {
-    loginPopup () {
-      this.$store.dispatch('auth/loginPopup')
-    },
-    logoutPopup () {
-      const routing = {
-        router: this.$router,
-        currentRoute: this.$route.path
-      }
-      this.$store.dispatch('auth/logoutPopup', routing)
-    },
-    silentRenew () {
-      this.$store.dispatch('auth/silentRenew')
-    }
   }
 }
 </script>
