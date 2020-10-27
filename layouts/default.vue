@@ -155,9 +155,9 @@ permissions and limitations under the Licence.
             <v-list-item dense @click="loginPopup">
               <v-list-item-content>
                 <v-list-item-title>
-                  <v-avatar small left>
-                    LI
-                  </v-avatar>
+                  <v-icon small left>
+                    mdi-login
+                  </v-icon>
                   <span>Login</span>
                 </v-list-item-title>
               </v-list-item-content>
@@ -167,9 +167,9 @@ permissions and limitations under the Licence.
             <v-list-item dense @click="logout">
               <v-list-item-content>
                 <v-list-item-title>
-                  <v-avatar small left>
-                    LO
-                  </v-avatar>
+                  <v-icon small left>
+                    mdi-logout
+                  </v-icon>
                   <span>Logout</span>
                 </v-list-item-title>
               </v-list-item-content>
@@ -177,9 +177,9 @@ permissions and limitations under the Licence.
             <v-list-item dense @click="silentRenew">
               <v-list-item-content>
                 <v-list-item-title>
-                  <v-avatar small left>
-                    SR
-                  </v-avatar>
+                  <v-icon small left>
+                    mdi-refresh
+                  </v-icon>
                   <span>Silent renew</span>
                 </v-list-item-title>
               </v-list-item-content>
@@ -187,9 +187,9 @@ permissions and limitations under the Licence.
             <v-list-item dense to="/profile">
               <v-list-item-content>
                 <v-list-item-title>
-                  <v-avatar small left>
-                    PR
-                  </v-avatar>
+                  <v-icon small left>
+                    mdi-account-details
+                  </v-icon>
                   <span>Profile</span>
                 </v-list-item-title>
               </v-list-item-content>
