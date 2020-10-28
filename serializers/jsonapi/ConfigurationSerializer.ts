@@ -35,7 +35,8 @@ import { Contact } from '@/models/Contact'
 
 import { IJsonApiObjectList, IJsonApiObject, IJsonApiDataWithId, IJsonApiDataWithOptionalId, IJsonApiTypeIdAttributes } from '@/serializers/jsonapi/JsonApiTypes'
 
-import { IMissingContactData } from '@/serializers/jsonapi/ContactSerializer'
+import { ContactSerializer, IMissingContactData } from '@/serializers/jsonapi/ContactSerializer'
+import { DynamicLocation, StationaryLocation } from '~/models/Location'
 
 export interface IConfigurationMissingData {
   contacts: IMissingContactData
@@ -47,6 +48,8 @@ export interface IConfigurationWithMeta {
 }
 
 export class ConfigurationSerializer {
+  private contactSerializer: ContactSerializer = new ContactSerializer()
+
   convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiObjectList): IConfigurationWithMeta[] {
     const included = jsonApiObjectList.included || []
     return jsonApiObjectList.data.map((model: IJsonApiDataWithId) => {
@@ -61,24 +64,84 @@ export class ConfigurationSerializer {
 
   convertJsonApiDataToModel (jsonApiData: IJsonApiDataWithId, included: IJsonApiTypeIdAttributes[]): IConfigurationWithMeta {
     const configuration = new Configuration()
-    const missing = {
-      contacts: {
-        ids: []
+
+    const attributes = jsonApiData.attributes
+    const relationships = jsonApiData.relationships
+
+    configuration.id = jsonApiData.id
+    configuration.label = attributes.label || ''
+    configuration.projectUri = attributes.project_uri || ''
+    configuration.projectName = attributes.project_name || ''
+    configuration.status = attributes.status || ''
+
+    configuration.startDate = attributes.start_date ? new Date(attributes.start_date) : null
+    configuration.endDate = attributes.end_date ? new Date(attributes.end_date) : null
+
+    if (attributes.location_type === 'stationary') {
+      const location = new StationaryLocation()
+      if (attributes.longitude != null) { // allow 0 as real values as well
+        location.longitude = attributes.longitude
       }
+      if (attributes.latitude != null) { // allow 0 as real values as well
+        location.latitude = attributes.latitude
+      }
+      if (attributes.elevation != null) {
+        location.elevation = attributes.elevation
+      }
+      configuration.location = location
+    } else if (attributes.location_type === 'dynamic') {
+      const location = new DynamicLocation()
+      // TODO: handle longitude_src_device_property
+      // and for latitude & elevation as well
+      configuration.location = location
     }
+
+    const contactsWithMissing = this.contactSerializer.convertJsonApiRelationshipsModelList(relationships, included)
+    configuration.contacts = contactsWithMissing.contacts
+    const missingDataForContactIds = contactsWithMissing.missing.ids
+
     return {
       configuration,
-      missing
+      missing: {
+        contacts: {
+          ids: missingDataForContactIds
+        }
+      }
     }
   }
 
   convertModelToJsonApiData (configuration: Configuration): IJsonApiDataWithOptionalId {
+    const contacts = this.contactSerializer.convertModelListToJsonApiRelationshipObject(configuration.contacts)
+
+    let locationAttributes = {}
+
+    const location = configuration.location
+    if (location instanceof StationaryLocation) {
+      locationAttributes = {
+        location_type: 'stationary',
+        longitude: location.longitude,
+        latitude: location.latitude,
+        elevation: location.elevation
+      }
+    } else if (location instanceof DynamicLocation) {
+      locationAttributes = {
+        location_type: 'dynamic'
+      }
+      // TODO: Add location relationships for the device properties
+    }
+
     const result: IJsonApiDataWithOptionalId = {
-      attributes: {},
+      attributes: {
+        label: configuration.label,
+        project_uri: configuration.projectUri,
+        project_name: configuration.projectName,
+        status: configuration.status,
+        start_date: configuration.startDate != null ? configuration.startDate.toISOString() : null,
+        end_date: configuration.endDate != null ? configuration.endDate.toISOString() : null,
+        ...locationAttributes
+      },
       relationships: {
-        contacts: {
-          data: []
-        }
+        ...contacts
       },
       type: 'configuration'
     }

@@ -29,7 +29,7 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
-import { Contact } from '@/models/Contact'
+import { Contact, IContact } from '@/models/Contact'
 
 import { IJsonApiObjectList, IJsonApiObject, IJsonApiTypeIdDataListDict, IJsonApiTypeIdAttributes } from '@/serializers/jsonapi/JsonApiTypes'
 
@@ -66,7 +66,7 @@ export class ContactSerializer {
     return jsonApiObjectList.data.map(this.convertJsonApiDataToModel)
   }
 
-  convertModelListToJsonApiRelationshipObject (contacts: Contact[]): IJsonApiTypeIdDataListDict {
+  convertModelListToJsonApiRelationshipObject (contacts: IContact[]): IJsonApiTypeIdDataListDict {
     return {
       contacts: {
         data: this.convertModelListToTupleListWithIdAndType(contacts)
@@ -74,7 +74,7 @@ export class ContactSerializer {
     }
   }
 
-  convertModelListToTupleListWithIdAndType (contacts: Contact[]): any {
+  convertModelListToTupleListWithIdAndType (contacts: IContact[]): any {
     const result = []
     for (const contact of contacts) {
       result.push({
