@@ -49,8 +49,9 @@ services:
       NUXT_ENV_SILENT_REDIRECT_URI: "https://localhost.localdomain:3000/silent-callback"
       NUXT_ENV_FILTER_PROTOCOL_CLAIMS: 'false'
       NUXT_ENV_AUTOMATIC_SILENT_RENEW: 'false'
-      NUXT_ENV_SILENT_RENEW_INTERVAL:  6900000 # 115 minutes in milliseconds
+      NUXT_ENV_SILENT_RENEW_INTERVAL: 6900000 # 115 minutes in milliseconds
       NUXT_ENV_LOAD_USER_INFO: 'true'
+      NUXT_ENV_PUBLIC_PATH: ''
     volumes:
       - .:/home/node/
     command: >
