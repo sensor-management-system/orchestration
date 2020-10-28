@@ -101,7 +101,7 @@ permissions and limitations under the Licence.
           </v-list-item-content>
         </v-list-item>
 
-        <v-divider />
+        <v-divider/>
 
         <!-- Help -->
         <v-list-item to="/help" nuxt exact>
@@ -119,16 +119,16 @@ permissions and limitations under the Licence.
       fixed
       app
     >
-      <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
+      <v-app-bar-nav-icon @click.stop="drawer = !drawer"/>
       <template v-if="appBarContent">
-        <Component :is="appBarContent" />
+        <Component :is="appBarContent"/>
       </template>
       <template v-else>
-        <v-toolbar-title v-text="title" />
-        <v-spacer />
+        <v-toolbar-title v-text="title"/>
+        <v-spacer/>
       </template>
       <template v-if="appBarExtension" v-slot:extension>
-        <Component :is="appBarExtension" />
+        <Component :is="appBarExtension"/>
       </template>
       <v-menu close-on-click close-on-content-click offset-x>
         <template v-slot:activator="{ on }">
@@ -174,16 +174,16 @@ permissions and limitations under the Licence.
                 </v-list-item-title>
               </v-list-item-content>
             </v-list-item>
-<!--            <v-list-item dense @click="silentRenew">-->
-<!--              <v-list-item-content>-->
-<!--                <v-list-item-title>-->
-<!--                  <v-avatar small left>-->
-<!--                    SR-->
-<!--                  </v-avatar>-->
-<!--                  <span>Silent renew</span>-->
-<!--                </v-list-item-title>-->
-<!--              </v-list-item-content>-->
-<!--            </v-list-item>-->
+            <!--            <v-list-item dense @click="silentRenew">-->
+            <!--              <v-list-item-content>-->
+            <!--                <v-list-item-title>-->
+            <!--                  <v-avatar small left>-->
+            <!--                    SR-->
+            <!--                  </v-avatar>-->
+            <!--                  <span>Silent renew</span>-->
+            <!--                </v-list-item-title>-->
+            <!--              </v-list-item-content>-->
+            <!--            </v-list-item>-->
             <v-list-item dense to="/profile">
               <v-list-item-content>
                 <v-list-item-title>
@@ -216,7 +216,7 @@ permissions and limitations under the Licence.
             </v-btn>
           </template>
         </v-snackbar>
-        <nuxt />
+        <nuxt/>
       </v-container>
     </v-content>
     <v-footer
@@ -233,7 +233,7 @@ permissions and limitations under the Licence.
 import {mapActions} from 'vuex';
 
 export default {
-  data () {
+  data() {
     return {
       clipped: false,
       drawer: false,
@@ -245,40 +245,40 @@ export default {
     }
   },
   computed: {
-    error () {
+    error() {
       return this.$store.state.snackbar.error
     },
     hasError: {
-      get () {
+      get() {
         return this.$store.state.snackbar.error !== ''
       },
-      set (newValue) {
+      set(newValue) {
         if (!newValue) {
           this.$store.commit('snackbar/clearError')
         }
       }
     },
-    success () {
+    success() {
       return this.$store.state.snackbar.success
     },
     hasSuccess: {
-      get () {
+      get() {
         return this.$store.state.snackbar.success !== ''
       },
-      set (newValue) {
+      set(newValue) {
         if (!newValue) {
           this.$store.commit('snackbar/clearSuccess')
         }
       }
     },
-    isLoggedIn () {
+    isLoggedIn() {
       return this.$store.getters['oidc/isAuthenticated']
     },
-    initials () {
-      return this.$store.getters['oidc/username']//todo anpassen
+    initials() {
+      return this.$store.getters['oidc/initials']
     }
   },
-  created () {
+  created() {
     this.$nuxt.$on('app-bar-content', (component) => {
       this.appBarContent = component
     })
@@ -286,18 +286,18 @@ export default {
       this.appBarExtension = component
     })
   },
-  mounted () {
+  mounted() {
     this.$store.dispatch('oidc/loadStoredUser') // kann raus, braucht man nicht mehr
   },
   methods: {
-    ...mapActions('oidc', ['removeOidcUser', 'logoutPopup','loginPopup']),
-    closeErrorSnackbar () {
+    ...mapActions('oidc', ['removeOidcUser', 'logoutPopup', 'loginPopup']),
+    closeErrorSnackbar() {
       this.$store.commit('snackbar/clearError')
     },
-    closeSuccessSnackbar () {
+    closeSuccessSnackbar() {
       this.$store.commit('snackbar/clearSuccess')
     },
-    login () {
+    login() {
 
       // this.$store.dispatch('oidc/loginPopup').then((userObject) => {
       //   let message = 'Login successful'
@@ -315,9 +315,9 @@ export default {
         this.$store.commit('snackbar/setError', 'Login failed')
       })
     },
-    logout () {
-      this.removeOidcUser().then(()=>{
-        this.$router.push('/login')
+    logout() {
+      this.removeOidcUser().then(() => {
+        this.$router.push('/')
       })
       // const routing = {
       //   router: this.$router,
