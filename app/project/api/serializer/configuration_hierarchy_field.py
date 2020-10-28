@@ -59,6 +59,8 @@ class ConfigurationHierarchyField(fields.Field):
                 "id": platform_id,
                 "type": "platform",
                 "offset_x": platform_configuration.offset_x,
+                "offset_y": platform_configuration.offset_y,
+                "offset_z": platform_configuration.offset_z,
             }
 
         tree = []
@@ -84,6 +86,8 @@ class ConfigurationHierarchyField(fields.Field):
                 "id": device_id,
                 "type": "device",
                 "offset_x": device_configuration.offset_x,
+                "offset_y": device_configuration.offset_y,
+                "offset_z": device_configuration.offset_z,
             }
 
         for device_configuration in configuration_device:
@@ -147,6 +151,8 @@ class ConfigurationHierarchyField(fields.Field):
                         platform_id=platform_id,
                         parent_platform_id=parent,
                         offset_x=entry.get("offset_x"),
+                        offset_y=entry.get("offset_y"),
+                        offset_z=entry.get("offset_z"),
                     )
                 children = entry.get("children", [])
                 yield from yield_platforms(children, parent=platform_id)
@@ -160,6 +166,8 @@ class ConfigurationHierarchyField(fields.Field):
                         device_id=device_id,
                         parent_platform_id=parent,
                         offset_x=entry.get("offset_x"),
+                        offset_y=entry.get("offset_y"),
+                        offset_z=entry.get("offset_z"),
                     )
                 children = entry.get("children", [])
                 yield from yield_devices(children, parent=device_id)
