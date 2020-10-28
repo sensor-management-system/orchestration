@@ -29,7 +29,7 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
-import { dateToString, stringToDate } from '@/utils/dateHelper'
+import { dateToString, stringToDate, timeStampToUTCDateTime } from '@/utils/dateHelper'
 
 describe('dateToString', () => {
   it('should work with by birthday', () => {
@@ -73,5 +73,17 @@ describe('stringToDate and dateToString', () => {
     const asStr = dateToString(asDate)
 
     expect(asStr).toBe(inputValue)
+  })
+})
+
+describe('timeStampToUTCDateTime', () => {
+  it('should work with a current timestamp given by perl', () => {
+    // by perl -e 'print time()'
+    const timestamp = 1603285945
+    const formatted = timeStampToUTCDateTime(timestamp)
+
+    // in german summer time it is 15:12:25
+    // in utc it is 13:12:25
+    expect(formatted).toEqual('2020-10-21 13:12:25 UTC')
   })
 })

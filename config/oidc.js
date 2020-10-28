@@ -4,8 +4,12 @@
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
  * Copyright (C) 2020
+ * - Martin Abbrent (UFZ, martin.abbrent@ufz.de)
+ * - Kotyba Alhaj Taha (UFZ, kotyba.alhaj-taha@ufz.de)
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
+ * - Helmholtz Centre for Environmental Research GmbH - UFZ
+ *   (UFZ, https://www.ufz.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
  *   Geosciences (GFZ, https://www.gfz-potsdam.de)
  *
@@ -29,45 +33,19 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
-export const dateToString = (aDate: Date | null): string => {
-  if (!aDate) {
-    return ''
-  }
-  const year = aDate.getFullYear()
-  const month = aDate.getMonth() + 1
-  const day = aDate.getDate()
+import { WebStorageStateStore } from 'oidc-client'
 
-  return year + '-' + month.toString().padStart(2, '0') + '-' + day.toString().padStart(2, '0')
-}
-
-export const stringToDate = (aDate: string): Date => {
-  const newDate: Date = new Date(aDate)
-  newDate.setHours(0, 0, 0)
-  return newDate
-}
-
-export const timeStampToUTCDateTime = (value: number) : string => {
-  if (!value) {
-    return ''
-  }
-  const date = new Date(value * 1000)
-  const day = '0' + date.getUTCDate()
-  const month = '0' + (date.getUTCMonth() + 1)
-  const year = date.getUTCFullYear()
-  const hours = '0' + date.getUTCHours()
-  const minutes = '0' + date.getUTCMinutes()
-  const seconds = '0' + date.getUTCSeconds()
-
-  return year +
-    '-' +
-    month.substr(-2) +
-    '-' +
-    day.substr(-2) +
-    ' ' +
-    hours.substr(-2) +
-    ':' +
-    minutes.substr(-2) +
-    ':' +
-    seconds.substr(-2) +
-    ' UTC'
+export default {
+  userStore: new WebStorageStateStore({ store: window.localStorage }),
+  authority: process.env.NUXT_ENV_AUTHORITY,
+  client_id: process.env.NUXT_ENV_CLIENT_ID,
+  redirect_uri: process.env.NUXT_ENV_REDIRECT_URI,
+  response_type: process.env.NUXT_ENV_RESPONSE_TYPE,
+  scope: process.env.NUXT_ENV_SCOPE,
+  post_logout_redirect_uri: process.env.NUXT_ENV_POST_LOGOUT_REDIRECT_URI,
+  filterProtocolClaims: process.env.NUXT_ENV_FILTER_PROTOCOL_CLAIMS === 'true',
+  automaticSilentRenew: process.env.NUXT_ENV_AUTOMATIC_SILENT_RENEW === 'true',
+  silent_redirect_uri: process.env.NUXT_ENV_SILENT_REDIRECT_URI,
+  popupWindowFeatures: 'location=no,toolbar=no,width=500,height=600,left=100,top=100', // adjusted height
+  loadUserInfo: process.env.NUXT_ENV_LOAD_USER_INFO === 'true'
 }
