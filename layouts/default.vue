@@ -123,8 +123,12 @@ permissions and limitations under the Licence.
       <template v-else>
         <v-toolbar-title v-text="title" />
       </template>
-      <template v-if="appBarExtension" v-slot:extension>
-        <Component :is="appBarExtension" />
+      <template v-if="tabs.length" v-slot:extension>
+        <AppBarTabsExtension
+          :value="activeTab"
+          :tabs="tabs"
+          @change="changeTab"
+        />
       </template>
     </v-app-bar>
     <v-content>
@@ -159,7 +163,12 @@ permissions and limitations under the Licence.
 
 <script>
 
+import AppBarTabsExtension from '@/components/AppBarTabsExtension'
+
 export default {
+  components: {
+    AppBarTabsExtension
+  },
   data () {
     return {
       clipped: false,
@@ -197,6 +206,12 @@ export default {
           this.$store.commit('snackbar/clearSuccess')
         }
       }
+    },
+    tabs () {
+      return this.$store.state.appbartabs.tabs
+    },
+    activeTab () {
+      return this.$store.state.appbartabs.active
     }
   },
   created () {
@@ -213,6 +228,9 @@ export default {
     },
     closeSuccessSnackbar () {
       this.$store.commit('snackbar/clearSuccess')
+    },
+    changeTab (tab) {
+      this.$store.commit('appbartabs/setActive', tab)
     }
   }
 }

@@ -425,7 +425,6 @@ permissions and limitations under the Licence.
 import { Component, Vue } from 'nuxt-property-decorator'
 
 import AppBarEditModeContent from '@/components/AppBarEditModeContent.vue'
-import AppBarTabsExtension from '@/components/AppBarTabsExtension.vue'
 import DeviceTypeSelect from '@/components/DeviceTypeSelect.vue'
 import ManufacturerSelect from '@/components/ManufacturerSelect.vue'
 import StatusSelect from '@/components/StatusSelect.vue'
@@ -438,17 +437,6 @@ import { DeviceType } from '@/models/DeviceType'
 import { Manufacturer } from '@/models/Manufacturer'
 import { Status } from '@/models/Status'
 
-@Component
-// @ts-ignore
-export class AppBarTabsExtensionExtended extends AppBarTabsExtension {
-  get tabs (): String[] {
-    return [
-      'Search',
-      'Extended Search'
-    ]
-  }
-}
-
 @Component({
   components: {
     DeviceTypeSelect,
@@ -459,7 +447,6 @@ export class AppBarTabsExtensionExtended extends AppBarTabsExtension {
 })
 export default class SearchDevicesPage extends Vue {
   private pageSize: number = 20
-  private activeTab: number = 0
   private loading: boolean = true
 
   private totalCount: number = 0
@@ -483,10 +470,10 @@ export default class SearchDevicesPage extends Vue {
 
   created () {
     this.$nuxt.$emit('app-bar-content', AppBarEditModeContent)
-    this.$nuxt.$emit('app-bar-extension', AppBarTabsExtensionExtended)
-    this.$nuxt.$on('AppBarExtension:change', (tab: number) => {
-      this.activeTab = tab
-    })
+    this.$store.commit('appbartabs/setTabs', [
+      'Search',
+      'Extended Search'
+    ])
   }
 
   mounted () {
@@ -531,11 +518,18 @@ export default class SearchDevicesPage extends Vue {
   }
 
   beforeDestroy () {
+    this.$store.commit('appbartabs/setTabs', [])
     this.$nuxt.$emit('app-bar-content', null)
-    this.$nuxt.$emit('app-bar-extension', null)
-    this.$nuxt.$off('AppBarExtension:change')
     this.unsetResultItemsShown()
     this.showDeleteDialog = {}
+  }
+
+  get activeTab (): number | null {
+    return this.$store.state.appbartabs.active
+  }
+
+  set activeTab (tab: number | null) {
+    this.$store.commit('appbartabs/setActive', tab)
   }
 
   runSelectedSearch () {

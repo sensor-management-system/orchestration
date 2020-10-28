@@ -310,7 +310,6 @@ permissions and limitations under the Licence.
 import { Vue, Component, Watch } from 'nuxt-property-decorator'
 
 import AppBarEditModeContent from '@/components/AppBarEditModeContent.vue'
-import AppBarTabsExtension from '@/components/AppBarTabsExtension.vue'
 import ContactSelect from '@/components/ContactSelect.vue'
 import DevicePropertyHierarchySelect from '@/components/DevicePropertyHierarchySelect.vue'
 import DeviceConfigurationAttributesExpansionPanels from '@/components/DeviceConfigurationAttributesExpansionPanels.vue'
@@ -342,19 +341,6 @@ enum LocationType {
   Dynamic = 'Dynamic'
 }
 
-@Component
-// @ts-ignore
-export class AppBarTabsExtensionExtended extends AppBarTabsExtension {
-  get tabs (): String[] {
-    return [
-      'Configuration',
-      'Platforms and Devices',
-      'Setup',
-      'Contacts'
-    ]
-  }
-}
-
 @Component({
   components: {
     ContactSelect,
@@ -370,7 +356,6 @@ export class AppBarTabsExtensionExtended extends AppBarTabsExtension {
 })
 // @ts-ignore
 export default class ConfigurationsIdPage extends Vue {
-  private activeTab: number = 0
   private editMode: boolean = false
 
   private configuration: Configuration = new Configuration()
@@ -403,10 +388,12 @@ export default class ConfigurationsIdPage extends Vue {
       this.cancel()
     })
 
-    this.$nuxt.$emit('app-bar-extension', AppBarTabsExtensionExtended)
-    this.$nuxt.$on('AppBarExtension:change', (tab: number) => {
-      this.activeTab = tab
-    })
+    this.$store.commit('appbartabs/setTabs', [
+      'Configuration',
+      'Platforms and Devices',
+      'Setup',
+      'Contacts'
+    ])
   }
 
   mounted () {
@@ -437,10 +424,17 @@ export default class ConfigurationsIdPage extends Vue {
 
   beforeDestroy () {
     this.$nuxt.$emit('app-bar-content', null)
-    this.$nuxt.$emit('app-bar-extension', null)
     this.$nuxt.$off('AppBarContent:save-button-click')
     this.$nuxt.$off('AppBarContent:cancel-button-click')
-    this.$nuxt.$off('AppBarExtension:change')
+    this.$store.commit('appbartabs/setTabs', [])
+  }
+
+  get activeTab (): number | null {
+    return this.$store.state.appbartabs.active
+  }
+
+  set activeTab (tab: number | null) {
+    this.$store.commit('appbartabs/setActive', tab)
   }
 
   save () {
@@ -766,7 +760,7 @@ export default class ConfigurationsIdPage extends Vue {
     if (tabIndex === -1) {
       return
     }
-    this.$nuxt.$emit('AppBarExtension:change', tabIndex)
+    this.$store.commit('appbartabs/setActive', tabIndex)
     this.$store.commit('snackbar/setError', 'Please correct your errors.')
   }
 }

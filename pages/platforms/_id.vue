@@ -217,7 +217,6 @@ import { Component, Watch, mixins } from 'nuxt-property-decorator'
 import { Rules } from '@/mixins/Rules'
 
 import AppBarEditModeContent from '@/components/AppBarEditModeContent.vue'
-import AppBarTabsExtension from '@/components/AppBarTabsExtension.vue'
 import AttachmentList from '@/components/AttachmentList.vue'
 import ContactSelect from '@/components/ContactSelect.vue'
 
@@ -225,18 +224,6 @@ import { Manufacturer } from '@/models/Manufacturer'
 import { Platform } from '@/models/Platform'
 import { PlatformType } from '@/models/PlatformType'
 import { Status } from '@/models/Status'
-
-@Component
-// @ts-ignore
-export class AppBarTabsExtensionExtended extends AppBarTabsExtension {
-  get tabs (): String[] {
-    return [
-      'Basic Data',
-      'Contacts',
-      'Attachments'
-    ]
-  }
-}
 
 @Component({
   components: {
@@ -257,7 +244,6 @@ export default class PlatformIdPage extends mixins(Rules) {
   private platformBackup: Platform | null = null
 
   // and some general data for the page
-  private activeTab: number = 0
   private editMode: boolean = false
 
   created () {
@@ -269,10 +255,11 @@ export default class PlatformIdPage extends mixins(Rules) {
       this.cancel()
     })
 
-    this.$nuxt.$emit('app-bar-extension', AppBarTabsExtensionExtended)
-    this.$nuxt.$on('AppBarExtension:change', (tab: number) => {
-      this.activeTab = tab
-    })
+    this.$store.commit('appbartabs/setTabs', [
+      'Basic Data',
+      'Contacts',
+      'Attachments'
+    ])
   }
 
   mounted () {
@@ -298,11 +285,18 @@ export default class PlatformIdPage extends mixins(Rules) {
   }
 
   beforeDestroy () {
+    this.$store.commit('appbartabs/setTabs', [])
     this.$nuxt.$emit('app-bar-content', null)
-    this.$nuxt.$emit('app-bar-extension', null)
     this.$nuxt.$off('AppBarContent:save-button-click')
     this.$nuxt.$off('AppBarContent:cancel-button-click')
-    this.$nuxt.$off('AppBarExtension:change')
+  }
+
+  get activeTab (): number | null {
+    return this.$store.state.appbartabs.active
+  }
+
+  set activeTab (tab: number | null) {
+    this.$store.commit('appbartabs/setActive', tab)
   }
 
   loadPlatform () {

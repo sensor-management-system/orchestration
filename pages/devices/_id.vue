@@ -334,26 +334,10 @@ import { Status } from '@/models/Status'
 import { Unit } from '@/models/Unit'
 
 import AppBarEditModeContent from '@/components/AppBarEditModeContent.vue'
-import AppBarTabsExtension from '@/components/AppBarTabsExtension.vue'
 import AttachmentList from '@/components/AttachmentList.vue'
 import ContactSelect from '@/components/ContactSelect.vue'
 import CustomFieldCards from '@/components/CustomFieldCards.vue'
 import DevicePropertyExpansionPanels from '@/components/DevicePropertyExpansionPanels.vue'
-
-@Component
-// @ts-ignore
-export class AppBarTabsExtensionExtended extends AppBarTabsExtension {
-  get tabs (): String[] {
-    return [
-      'Basic Data',
-      'Contacts',
-      'Properties',
-      'Custom Fields',
-      'Attachments',
-      'Events'
-    ]
-  }
-}
 
 @Component({
   components: {
@@ -366,7 +350,6 @@ export class AppBarTabsExtensionExtended extends AppBarTabsExtension {
 // @ts-ignore
 export default class DeviceIdPage extends mixins(Rules) {
   private numberOfTabs: number = 5
-  private activeTab: number = 0
 
   private device: Device = new Device()
   private deviceBackup: Device | null = null
@@ -391,10 +374,14 @@ export default class DeviceIdPage extends mixins(Rules) {
       this.cancel()
     })
 
-    this.$nuxt.$emit('app-bar-extension', AppBarTabsExtensionExtended)
-    this.$nuxt.$on('AppBarExtension:change', (tab: number) => {
-      this.activeTab = tab
-    })
+    this.$store.commit('appbartabs/setTabs', [
+      'Basic Data',
+      'Contacts',
+      'Properties',
+      'Custom Fields',
+      'Attachments',
+      'Events'
+    ])
   }
 
   mounted () {
@@ -431,10 +418,17 @@ export default class DeviceIdPage extends mixins(Rules) {
 
   beforeDestroy () {
     this.$nuxt.$emit('app-bar-content', null)
-    this.$nuxt.$emit('app-bar-extension', null)
     this.$nuxt.$off('AppBarContent:save-button-click')
     this.$nuxt.$off('AppBarContent:cancel-button-click')
-    this.$nuxt.$off('AppBarExtension:change')
+    this.$store.commit('appbartabs/setTabs', [])
+  }
+
+  get activeTab (): number | null {
+    return this.$store.state.appbartabs.active
+  }
+
+  set activeTab (tab: number | null) {
+    this.$store.commit('appbartabs/setActive', tab)
   }
 
   loadDevice () {
