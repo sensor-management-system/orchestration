@@ -30,63 +30,267 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <v-card>
-      <v-tabs-items
-        v-model="activeTab"
-      >
-        <v-tab-item :eager="true">
-          <v-card
-            flat
-          >
-            <v-card-text>
-              <v-row>
-                <v-col cols="12" md="5">
-                  <v-text-field v-model="searchText" label="Name" placeholder="Name of device" />
-                </v-col>
-                <v-col cols="12" md="2">
-                  <v-btn @click="basicSearch">
-                    Search
-                  </v-btn>
-                </v-col>
-                <v-col cols="12" md="1">
-                  <v-btn @click="clearBasicSearch">
-                    Clear
-                  </v-btn>
-                </v-col>
-              </v-row>
-            </v-card-text>
-          </v-card>
-        </v-tab-item>
-        <v-tab-item :eager="true">
-          <v-card>
-            <v-card-text>
-              <v-row>
-                <v-col cols="12" md="6">
-                  <v-text-field v-model="searchText" label="Name" placeholder="Name of device" />
-                </v-col>
-              </v-row>
-            </v-card-text>
-            <v-card-actions>
-              <v-btn @click="extendedSearch">
-                Search
-              </v-btn>
-              <v-btn @click="clearExtendedSearch">
-                Clear
-              </v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-tab-item>
-      </v-tabs-items>
-    </v-card>
+    <v-tabs-items
+      v-model="activeTab"
+    >
+      <v-tab-item :eager="true">
+        <v-row>
+          <v-col cols="12" md="5">
+            <v-text-field v-model="searchText" label="Label" placeholder="Label of configuration" />
+          </v-col>
+          <v-col cols="12" md="2">
+            <v-btn
+              color="primary"
+              @click="basicSearch"
+            >
+              Search
+            </v-btn>
+            <v-btn
+              text
+              @click="clearBasicSearch"
+            >
+              Clear
+            </v-btn>
+          </v-col>
+        </v-row>
+      </v-tab-item>
+      <v-tab-item :eager="true">
+        <v-row>
+          <v-col cols="12" md="6">
+            <v-text-field v-model="searchText" label="Label" placeholder="Label of configurations" />
+          </v-col>
+        </v-row>
+        <!-- TODO: Add filter for projects & status values -->
+        <v-row>
+          <v-col cols="12" md="3">
+            <v-btn
+              color="primary"
+              @click="extendedSearch"
+            >
+              Search
+            </v-btn>
+            <v-btn
+              text
+              @click="clearExtendedSearch"
+            >
+              Clear
+            </v-btn>
+          </v-col>
+        </v-row>
+      </v-tab-item>
+    </v-tabs-items>
 
+    <div v-if="loading">
+      <div class="text-center pt-2">
+        <v-progress-circular indeterminate />
+      </div>
+    </div>
+    <div v-if="searchResults.length == 0 && !loading">
+      <v-card>
+        <v-card-text>
+          <p class="text-center">
+            There are no configurations that match our your search criteria
+          </p>
+        </v-card-text>
+      </v-card>
+    </div>
+    <div v-if="searchResults.length && !loading">
+      <v-subheader>
+        <template v-if="totalCount == 1">
+          1 configuration found
+        </template>
+        <template v-else>
+          {{ totalCount }} configurations found
+        </template>
+      </v-subheader>
+      <v-hover
+        v-for="result in searchResults"
+        v-slot:default="{ hover }"
+        :key="result.id"
+      >
+        <v-card
+          :disabled="loading"
+          :elevation="hover ? 6 : 2"
+          class="ma-2"
+        >
+          <v-card-text
+            @click.stop.prevent="showResultItem(result.id)"
+          >
+            <v-row
+              no-gutters
+            >
+              <!-- Maybe an StatusBadge -->
+              <v-col
+                align-self="end"
+                class="text-right"
+              >
+                <v-menu
+                  close-on-click
+                  close-on-content-click
+                  offset-x
+                  left
+                  z-index="999"
+                >
+                  <template v-slot:activator="{ on }">
+                    <v-btn
+                      data-role="property-menu"
+                      icon
+                      small
+                      v-on="on"
+                    >
+                      <v-icon
+                        dense
+                        small
+                      >
+                        mdi-dots-vertical
+                      </v-icon>
+                    </v-btn>
+                  </template>
+                  <v-list>
+                    <v-list-item
+                      dense
+                    >
+                      <v-list-item-content>
+                        <v-list-item-title>
+                          <v-icon
+                            left
+                            small
+                          >
+                            mdi-content-copy
+                          </v-icon>
+                          Copy
+                        </v-list-item-title>
+                      </v-list-item-content>
+                    </v-list-item>
+                    <v-list-item
+                      dense
+                      @click="showDeleteDialogFor(result.id)"
+                    >
+                      <v-list-item-content>
+                        <v-list-item-title
+                          class="red--text"
+                        >
+                          <v-icon
+                            left
+                            small
+                            color="red"
+                          >
+                            mdi-delete
+                          </v-icon>
+                          Delete
+                        </v-list-item-title>
+                      </v-list-item-content>
+                    </v-list-item>
+                  </v-list>
+                </v-menu>
+              </v-col>
+            </v-row>
+            <v-row
+              no-gutters
+            >
+              <v-col class="text-subtitle-1">
+                {{ result.label }}
+              </v-col>
+              <v-col
+                align-self="end"
+                class="text-right"
+              >
+                <v-btn
+                  :to="'/configurations/' + result.id"
+                  color="primary"
+                  text
+                  @click.stop.prevent
+                >
+                  View
+                </v-btn>
+                <v-btn
+                  icon
+                  @click.stop.prevent="showResultItem(result.id)"
+                >
+                  <v-icon>{{ isResultItemShown(result.id) ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
+                </v-btn>
+              </v-col>
+            </v-row>
+          </v-card-text>
+          <v-expand-transition>
+            <v-card
+              v-show="isResultItemShown(result.id)"
+              flat
+              tile
+              color="grey lighten-5"
+            >
+              <v-card-text>
+                <v-row
+                  dense
+                >
+                  <v-col
+                    cols="4"
+                    xs="4"
+                    sm="3"
+                    md="2"
+                    lg="2"
+                    xl="1"
+                    class="font-weight-medium"
+                  >
+                    Project:
+                  </v-col>
+                  <v-col
+                    cols="8"
+                    xs="8"
+                    sm="9"
+                    md="4"
+                    lg="4"
+                    xl="5"
+                    class="nowrap-truncate"
+                  >
+                    {{ getTextOrDefault(result.projectName) }}
+                  </v-col>
+                  <!-- TODO: add start & end + location type -->
+                </v-row>
+              </v-card-text>
+            </v-card>
+          </v-expand-transition>
+          <v-dialog v-model="showDeleteDialog[result.id]" max-width="290">
+            <v-card>
+              <v-card-title class="headline">
+                Delete configuration
+              </v-card-title>
+              <v-card-text>
+                Do you really want to delete the configuration <em>{{ result.label }}</em>
+              </v-card-text>
+              <v-card-actions>
+                <v-btn
+                  text
+                  @click="hideDeleteDialogFor(result.id)"
+                >
+                  No
+                </v-btn>
+                <v-spacer />
+                <v-btn
+                  color="error"
+                  text
+                  @click="deleteAndCloseDialog(result.id)"
+                >
+                  <v-icon left>
+                    mdi-delete
+                  </v-icon>
+                  Delete
+                </v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-dialog>
+        </v-card>
+      </v-hover>
+    </div>
     <v-btn
-      fab
-      color="primary"
-      to="/configurations"
-      nuxt
-      absolute
       bottom
+      color="primary"
+      dark
+      elevation="10"
+      fab
+      fixed
       right
+      to="/configurations"
     >
       <v-icon>
         mdi-plus
@@ -95,11 +299,19 @@ permissions and limitations under the Licence.
   </div>
 </template>
 
+<style lang="scss">
+@import "@/assets/styles/_search.scss";
+</style>
+
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 
 import AppBarEditModeContent from '@/components/AppBarEditModeContent.vue'
 import AppBarTabsExtension from '@/components/AppBarTabsExtension.vue'
+
+import { IPaginationLoader } from '@/utils/PaginatedLoader'
+
+import { Configuration } from '@/models/Configuration'
 
 @Component
 // @ts-ignore
@@ -115,9 +327,19 @@ export class AppBarTabsExtensionExtended extends AppBarTabsExtension {
 @Component
 // @ts-ignore
 export default class SearchConfigurationsPage extends Vue {
+  private pageSize: number = 20
   private activeTab: number = 0
+  private loading: boolean = true
 
+  private totalCount: number = 0
+  private loader: null | IPaginationLoader<Configuration> = null
+
+  private searchResults: Configuration[] = []
   private searchText: string | null = null
+
+  private showDeleteDialog: { [id: string]: boolean} = {}
+
+  private searchResultItemsShown: { [id: string]: boolean} = {}
 
   created () {
     this.$nuxt.$emit('app-bar-content', AppBarEditModeContent)
@@ -128,19 +350,39 @@ export default class SearchConfigurationsPage extends Vue {
   }
 
   mounted () {
+    this.runSelectedSearch()
     // make sure that all components (especially the dynamically passed ones) are rendered
     this.$nextTick(() => {
       this.$nuxt.$emit('AppBarContent:title', 'Configurations')
     })
+
+    window.onscroll = () => {
+      const isOnBottom = document.documentElement.scrollTop + window.innerHeight === document.documentElement.offsetHeight
+
+      if (isOnBottom && this.canLoadNext()) {
+        this.loadNext()
+      }
+    }
   }
 
   beforeDestroy () {
     this.$nuxt.$emit('app-bar-content', null)
     this.$nuxt.$emit('app-bar-extension', null)
     this.$nuxt.$off('AppBarExtension:change')
+    this.unsetResultItemsShown()
+    this.showDeleteDialog = {}
+  }
+
+  runSelectedSearch () {
+    if (this.activeTab === 0) {
+      this.basicSearch()
+    } else {
+      this.extendedSearch()
+    }
   }
 
   basicSearch () {
+    this.runSearch(this.searchText)
   }
 
   clearBasicSearch () {
@@ -148,11 +390,102 @@ export default class SearchConfigurationsPage extends Vue {
   }
 
   extendedSearch () {
+    this.runSearch(this.searchText)
   }
 
   clearExtendedSearch () {
     this.clearBasicSearch()
   }
+
+  runSearch (
+    searchText: string | null
+  ) {
+    this.loading = true
+    this.searchResults = []
+    this.unsetResultItemsShown()
+    this.showDeleteDialog = {}
+    this.$api.configurations
+      .newSearchBuilder()
+      .withTextInLabel(searchText)
+      .build()
+      .findMatchingAsPaginationLoader(this.pageSize)
+      .then(this.loadUntilWeHaveSomeEntries).catch((_error) => {
+        this.$store.commit('snackbar/setError', 'Loading of configurations failed')
+      })
+  }
+
+  loadUntilWeHaveSomeEntries (loader: IPaginationLoader<Configuration>) {
+    this.loader = loader
+    this.loading = false
+    this.searchResults = [...this.searchResults, ...loader.elements]
+    this.totalCount = loader.totalCount
+
+    if (this.searchResults.length >= this.pageSize || !this.canLoadNext()) {
+      this.loading = false
+    } else if (this.canLoadNext() && loader.funToLoadNext != null) {
+      loader.funToLoadNext().then((nextLoader) => {
+        this.loadUntilWeHaveSomeEntries(nextLoader)
+      }).catch((_error) => {
+        this.$store.commit('snackbar/setError', 'Loading of additional configurations failed')
+      })
+    }
+  }
+
+  loadNext () {
+    if (this.loader != null && this.loader.funToLoadNext != null) {
+      this.loader.funToLoadNext().then((nextLoader) => {
+        this.loader = nextLoader
+        this.searchResults = [...this.searchResults, ...nextLoader.elements]
+        this.totalCount = nextLoader.totalCount
+      }).catch((_error) => {
+        this.$store.commit('snackbar/setError', 'Loading of additional configurations failed')
+      })
+    }
+  }
+
+  canLoadNext () {
+    return this.loader != null && this.loader.funToLoadNext != null
+  }
+
+  deleteAndCloseDialog (id: string) {
+    this.$api.configurations.deleteById(id).then(() => {
+      this.showDeleteDialog = {}
+
+      const searchIndex = this.searchResults.findIndex(r => r.id === id)
+      if (searchIndex > -1) {
+        this.searchResults.splice(searchIndex, 1)
+        this.totalCount -= 1
+      }
+
+      this.$store.commit('snackbar/setSuccess', 'Configuration deleted')
+    }).catch((_error) => {
+      this.showDeleteDialog = {}
+      this.$store.commit('snackbar/setError', 'Configuration could not be deleted')
+    })
+  }
+
+  showDeleteDialogFor (id: string) {
+    Vue.set(this.showDeleteDialog, id, true)
+  }
+
+  hideDeleteDialogFor (id: string) {
+    Vue.set(this.showDeleteDialog, id, false)
+  }
+
+  showResultItem (id: string) {
+    const show = !!this.searchResultItemsShown[id]
+    Vue.set(this.searchResultItemsShown, id, !show)
+  }
+
+  isResultItemShown (id: string): boolean {
+    return this.searchResultItemsShown[id]
+  }
+
+  unsetResultItemsShown (): void {
+    this.searchResultItemsShown = {}
+  }
+
+  getTextOrDefault = (text: string): string => text || '-'
 }
 
 </script>
