@@ -132,6 +132,7 @@ export default {
     }
   },
   router: {
-    base: process.env.BASE_URL || '/'
+    base: process.env.BASE_URL || '/',
+    middleware: 'vuex-oidc-router'
   }
 }

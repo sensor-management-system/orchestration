@@ -152,7 +152,7 @@ permissions and limitations under the Licence.
         </template>
         <v-list>
           <template v-if="!isLoggedIn">
-            <v-list-item dense @click="loginPopup">
+            <v-list-item dense @click="login">
               <v-list-item-content>
                 <v-list-item-title>
                   <v-avatar small left>
@@ -230,6 +230,8 @@ permissions and limitations under the Licence.
 
 <script>
 
+import {mapActions} from 'vuex';
+
 export default {
   data () {
     return {
@@ -288,13 +290,15 @@ export default {
     this.$store.dispatch('oidc/loadStoredUser') // kann raus, braucht man nicht mehr
   },
   methods: {
+    ...mapActions('oidc', ['removeOidcUser', 'logoutPopup','loginPopup']),
     closeErrorSnackbar () {
       this.$store.commit('snackbar/clearError')
     },
     closeSuccessSnackbar () {
       this.$store.commit('snackbar/clearSuccess')
     },
-    loginPopup () {
+    login () {
+
       // this.$store.dispatch('oidc/loginPopup').then((userObject) => {
       //   let message = 'Login successful'
       //   if (userObject.profile && userObject.profile.name) {
@@ -305,24 +309,27 @@ export default {
       //   console.log(_err);
       //   this.$store.commit('snackbar/setError', 'Login failed')
       // })
-      this.$store.dispatch('oidc/loginPopup').then((redirectPath) => {
+      this.loginPopup().then((redirectPath) => {
         this.$router.push(redirectPath);
       }).catch((_err) => {
         this.$store.commit('snackbar/setError', 'Login failed')
       })
     },
     logout () {
-      const routing = {
-        router: this.$router,
-        currentRoute: this.$route.path
-      }
-      this.$store.dispatch('oidc/logout', routing).then(() => {
-        this.$store.commit('snackbar/setSuccess', 'Logout successful')
-      }).catch((err) => {
-        // eslint-disable-next-line
-        console.error(err)
-        this.$store.commit('snackbar/setError', 'Problem on logout')
+      this.removeOidcUser().then(()=>{
+        this.$router.push('/login')
       })
+      // const routing = {
+      //   router: this.$router,
+      //   currentRoute: this.$route.path
+      // }
+      // this.$store.dispatch('oidc/logout', routing).then(() => {
+      //   this.$store.commit('snackbar/setSuccess', 'Logout successful')
+      // }).catch((err) => {
+      //   // eslint-disable-next-line
+      //   console.error(err)
+      //   this.$store.commit('snackbar/setError', 'Problem on logout')
+      // })
     },
     // silentRenew () { kann raus
     //   this.$store.dispatch('auth/silentRenew')

@@ -199,7 +199,6 @@ export const createAuthModul = (oidcSettings, storeSettings={})=>{
                        });
         },
         automaticSilentRenew({state,dispatch,commit}) {
-          console.log('process.env.VUE_APP_SILENT_RENEW_INTERVAL',oidcSettings.renewIntervall);
             if(!state.intervalId){
                 let intervalId = setInterval(() => dispatch('silentRenew'), oidcSettings.renewIntervall);
                 commit('setIntervalId',intervalId);
