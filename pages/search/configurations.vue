@@ -267,32 +267,6 @@ permissions and limitations under the Licence.
                     xl="1"
                     class="font-weight-medium"
                   >
-                    Project:
-                  </v-col>
-                  <v-col
-                    cols="8"
-                    xs="8"
-                    sm="9"
-                    md="4"
-                    lg="4"
-                    xl="5"
-                    class="nowrap-truncate"
-                  >
-                    {{ getTextOrDefault(result.projectName, '-') }}
-                  </v-col>
-                </v-row>
-                <v-row
-                  dense
-                >
-                  <v-col
-                    cols="4"
-                    xs="4"
-                    sm="3"
-                    md="2"
-                    lg="2"
-                    xl="1"
-                    class="font-weight-medium"
-                  >
                     Start:
                   </v-col>
                   <v-col
@@ -327,6 +301,32 @@ permissions and limitations under the Licence.
                     class="nowrap-truncate"
                   >
                     {{ result.endDate | formatDate }}
+                  </v-col>
+                </v-row>
+                <v-row
+                  dense
+                >
+                  <v-col
+                    cols="4"
+                    xs="4"
+                    sm="3"
+                    md="2"
+                    lg="2"
+                    xl="1"
+                    class="font-weight-medium"
+                  >
+                    Project:
+                  </v-col>
+                  <v-col
+                    cols="8"
+                    xs="8"
+                    sm="9"
+                    md="4"
+                    lg="4"
+                    xl="5"
+                    class="nowrap-truncate"
+                  >
+                    {{ getTextOrDefault(result.projectName, '-') }}
                   </v-col>
                 </v-row>
               </v-card-text>
