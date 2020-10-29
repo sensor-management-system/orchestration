@@ -80,7 +80,7 @@ export class ConfigurationApi {
     let method: Method = 'patch'
     let url = ''
 
-    if (configuration.id === null) {
+    if (!configuration.id) {
       method = 'post'
     } else {
       url = configuration.id

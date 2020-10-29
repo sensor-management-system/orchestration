@@ -48,6 +48,34 @@ permissions and limitations under the Licence.
               <v-card-text>
                 <v-row>
                   <v-col cols="12" md="3">
+                    <v-text-field
+                      v-model="configuration.label"
+                      label="Label"
+                      :readonly="readonly"
+                      :disabled="readonly"
+                    />
+                  </v-col>
+                  <v-col cols="12" md="3">
+                    <v-combobox
+                      v-model="configuration.status"
+                      :items="configurationStates"
+                      label="Status"
+                      :readonly="readonly"
+                      :disabled="readonly"
+                    />
+                  </v-col>
+                  <v-col cols="12" md="3">
+                    <v-combobox
+                      v-model="configurationProjectName"
+                      :items="projectNames"
+                      label="Project"
+                      :readonly="readonly"
+                      :disabled="readonly"
+                    />
+                  </v-col>
+                </v-row>
+                <v-row>
+                  <v-col cols="12" md="3">
                     <v-menu
                       v-if="!readonly"
                       v-model="startDateMenu"
@@ -131,6 +159,7 @@ permissions and limitations under the Licence.
                     <v-select
                       v-model="locationType"
                       label="Location type"
+                      :rules="[rules.locationType]"
                       :items="['Stationary', 'Dynamic']"
                       :readonly="readonly"
                       :disabled="readonly"
@@ -277,7 +306,7 @@ permissions and limitations under the Licence.
               <v-card-text>
                 <v-row>
                   <v-col cols="3">
-                    <ContactSelect v-model="contacts" label="Add a contact" :readonly="readonly" />
+                    <ContactSelect v-model="configuration.contacts" label="Add a contact" :readonly="readonly" />
                   </v-col>
                 </v-row>
               </v-card-text>
@@ -321,11 +350,11 @@ import ConfigurationsDemoTreeView from '@/components/ConfigurationsDemoTreeView.
 import ConfigurationsSelectedItem from '@/components/ConfigurationsSelectedItem.vue'
 import InfoBox from '@/components/InfoBox.vue'
 
-import { Contact } from '@/models/Contact'
 import { Device } from '@/models/Device'
 import { Platform } from '@/models/Platform'
+import { Project } from '@/models/Project'
 
-import { StationaryLocation, DynamicLocation } from '@/models/Location'
+import { StationaryLocation, DynamicLocation, LocationType } from '@/models/Location'
 import { Configuration } from '@/models/Configuration'
 import { ConfigurationsTree } from '@/models/ConfigurationsTree'
 import { ConfigurationsTreeNode } from '@/models/ConfigurationsTreeNode'
@@ -336,11 +365,6 @@ import { PlatformConfigurationAttributes } from '@/models/PlatformConfigurationA
 
 import { dateToString, stringToDate } from '@/utils/dateHelper'
 import { getParentByClass } from '@/utils/domHelper'
-
-enum LocationType {
-  Stationary = 'Stationary',
-  Dynamic = 'Dynamic'
-}
 
 @Component
 // @ts-ignore
@@ -376,16 +400,19 @@ export default class ConfigurationsIdPage extends Vue {
   private configuration: Configuration = new Configuration()
   private configurationBackup: Configuration | null = null
 
+  private projects: Project[] = []
+  private configurationStates: string[] = []
+
   private startDateMenu: boolean = false
   private endDateMenu: boolean = false
-
-  private contacts: Contact[] = []
 
   private selectedNode: ConfigurationsTreeNode | null = null
 
   private rules: Object = {
     startDate: (v: string): boolean | string => v === null || !this.configuration.endDate || stringToDate(v) <= this.configuration.endDate || 'Start date must not be after end date',
-    endDate: (v: string): boolean | string => v === null || !this.configuration.startDate || stringToDate(v) >= this.configuration.startDate || 'End date must not be before start date'
+    endDate: (v: string): boolean | string => v === null || !this.configuration.startDate || stringToDate(v) >= this.configuration.startDate || 'End date must not be before start date',
+
+    locationType: (v: string): boolean | string => v === LocationType.Stationary || v === LocationType.Dynamic || 'Location type must be set'
   }
 
   private formIsValid: boolean = true
@@ -410,6 +437,12 @@ export default class ConfigurationsIdPage extends Vue {
   }
 
   mounted () {
+    this.$api.configurationStates.findAll().then((foundStates) => {
+      this.configurationStates = foundStates
+    })
+    this.$api.projects.findAll().then((foundProjects) => {
+      this.projects = foundProjects
+    })
     this.loadConfiguration()
     this.$nextTick(() => {
       if (!this.$route.params.id) {
@@ -444,7 +477,14 @@ export default class ConfigurationsIdPage extends Vue {
   }
 
   save () {
-    this.editMode = false
+    this.$api.configurations.save(this.configuration).then((savedConfiguration) => {
+      this.configuration = savedConfiguration
+      this.configurationBackup = null
+      this.editMode = false
+      this.$store.commit('snackbar/setSuccess', 'Save successful')
+    }).catch((_error) => {
+      this.$store.commit('snackbar/setError', 'Save failed')
+    })
   }
 
   cancel () {
@@ -501,11 +541,13 @@ export default class ConfigurationsIdPage extends Vue {
         if (!(this.configuration.location instanceof StationaryLocation)) {
           this.configuration.location = new StationaryLocation()
         }
+        (this.$refs.form as Vue & { validate: () => boolean }).validate()
         break
       case LocationType.Dynamic:
         if (!(this.configuration.location instanceof DynamicLocation)) {
           this.configuration.location = new DynamicLocation()
         }
+        (this.$refs.form as Vue & { validate: () => boolean }).validate()
         break
       default:
         this.configuration.location = null
@@ -768,6 +810,29 @@ export default class ConfigurationsIdPage extends Vue {
     }
     this.$nuxt.$emit('AppBarExtension:change', tabIndex)
     this.$store.commit('snackbar/setError', 'Please correct your errors.')
+  }
+
+  get configurationProjectName () {
+    const uri = this.configuration.projectUri
+    const projectIndex = this.projects.findIndex(p => p.uri === uri)
+    if (projectIndex > -1) {
+      return this.projects[projectIndex].name
+    }
+    return this.configuration.projectName
+  }
+
+  set configurationProjectName (newProjectName: string) {
+    this.configuration.projectName = newProjectName
+    const projectIndex = this.projects.findIndex(p => p.name === newProjectName)
+    if (projectIndex > -1) {
+      this.configuration.projectUri = this.projects[projectIndex].uri
+    } else {
+      this.configuration.projectUri = ''
+    }
+  }
+
+  get projectNames () {
+    return this.projects.map(p => p.name)
   }
 }
 </script>

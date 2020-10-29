@@ -32,7 +32,7 @@
 
 import { Configuration } from '@/models/Configuration'
 import { Contact } from '@/models/Contact'
-import { StationaryLocation, DynamicLocation } from '@/models/Location'
+import { StationaryLocation, DynamicLocation, LocationType } from '@/models/Location'
 
 import {
   ConfigurationSerializer,
@@ -41,6 +41,12 @@ import {
   configurationWithMetaToConfigurationByAddingDummyObjects
 } from '@/serializers/jsonapi/ConfigurationSerializer'
 
+describe('LocationType', () => {
+  it('should be fixed what values can be given - and those should be consistent with the serializer', () => {
+    expect(LocationType.Stationary).toEqual('Stationary')
+    expect(LocationType.Dynamic).toEqual('Dynamic')
+  })
+})
 describe('ConfigurationSerializer', () => {
   describe('#convertJsonApiObjectListToModelList', () => {
     it('should convert a json api object with multiple entries to a configuration model list', () => {
@@ -50,7 +56,7 @@ describe('ConfigurationSerializer', () => {
           attributes: {
             start_date: '2020-08-28T13:49:48.015620+00:00',
             end_date: '2020-08-29T13:49:48.015620+00:00',
-            location_type: 'stationary',
+            location_type: LocationType.Stationary,
             longitude: 13.0,
             latitude: 52.0,
             elevation: 100.0,
@@ -69,7 +75,7 @@ describe('ConfigurationSerializer', () => {
           type: 'configuration',
           attributes: {
             // no start and no end date
-            location_type: 'dynamic',
+            location_type: LocationType.Dynamic,
             // no fields for longitude, latitude & elevation,
             // no fields for project_uri or project_name
             // no field for label
@@ -154,7 +160,7 @@ describe('ConfigurationSerializer', () => {
           attributes: {
             start_date: '2020-08-28T13:49:48.015620+00:00',
             end_date: '2020-08-29T13:49:48.015620+00:00',
-            location_type: 'stationary',
+            location_type: LocationType.Stationary,
             longitude: 13.0,
             latitude: 52.0,
             elevation: 100.0,
@@ -203,7 +209,7 @@ describe('ConfigurationSerializer', () => {
           attributes: {
             start_date: '2020-08-28T13:49:48.015620+00:00',
             end_date: '2020-08-29T13:49:48.015620+00:00',
-            location_type: 'stationary',
+            location_type: LocationType.Stationary,
             longitude: 13.0,
             latitude: 52.0,
             elevation: 100.0,
@@ -293,7 +299,7 @@ describe('ConfigurationSerializer', () => {
         attributes: {
           start_date: '2020-08-28T13:49:48.015620+00:00',
           end_date: '2020-08-29T13:49:48.015620+00:00',
-          location_type: 'stationary',
+          location_type: LocationType.Stationary,
           longitude: 13.0,
           latitude: 52.0,
           elevation: 100.0,
@@ -340,7 +346,7 @@ describe('ConfigurationSerializer', () => {
         attributes: {
           start_date: '2020-08-28T13:49:48.015620+00:00',
           end_date: '2020-08-29T13:49:48.015620+00:00',
-          location_type: 'stationary',
+          location_type: LocationType.Stationary,
           longitude: null,
           latitude: null,
           elevation: null,
@@ -427,7 +433,7 @@ describe('ConfigurationSerializer', () => {
       expect(attributes).toHaveProperty('project_name')
       expect(attributes.project_name).toEqual('TERENO NO')
       expect(attributes).toHaveProperty('location_type')
-      expect(attributes.location_type).toEqual('stationary')
+      expect(attributes.location_type).toEqual(LocationType.Stationary)
       expect(attributes).toHaveProperty('longitude')
       expect(attributes.longitude).toEqual(12.0)
       expect(attributes).toHaveProperty('latitude')
@@ -486,7 +492,7 @@ describe('ConfigurationSerializer', () => {
       const attributes = jsonApiData.attributes
 
       expect(attributes).toHaveProperty('location_type')
-      expect(attributes.location_type).toEqual('dynamic')
+      expect(attributes.location_type).toEqual(LocationType.Dynamic)
       // TODO: platforms & devices
     })
     it('should also work with an empty stationary location type', () => {
@@ -506,7 +512,7 @@ describe('ConfigurationSerializer', () => {
       const attributes = jsonApiData.attributes
 
       expect(attributes).toHaveProperty('location_type')
-      expect(attributes.location_type).toEqual('stationary')
+      expect(attributes.location_type).toEqual(LocationType.Stationary)
       expect(attributes).toHaveProperty('longitude')
       expect(attributes.longitude).toEqual(null)
       expect(attributes).toHaveProperty('latitude')

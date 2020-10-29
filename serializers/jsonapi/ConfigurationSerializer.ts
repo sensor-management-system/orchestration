@@ -36,7 +36,7 @@ import { Contact } from '@/models/Contact'
 import { IJsonApiObjectList, IJsonApiObject, IJsonApiDataWithId, IJsonApiDataWithOptionalId, IJsonApiTypeIdAttributes } from '@/serializers/jsonapi/JsonApiTypes'
 
 import { ContactSerializer, IMissingContactData } from '@/serializers/jsonapi/ContactSerializer'
-import { DynamicLocation, StationaryLocation } from '~/models/Location'
+import { DynamicLocation, StationaryLocation, LocationType } from '~/models/Location'
 
 export interface IConfigurationMissingData {
   contacts: IMissingContactData
@@ -77,7 +77,7 @@ export class ConfigurationSerializer {
     configuration.startDate = attributes.start_date ? new Date(attributes.start_date) : null
     configuration.endDate = attributes.end_date ? new Date(attributes.end_date) : null
 
-    if (attributes.location_type === 'stationary') {
+    if (attributes.location_type === LocationType.Stationary) {
       const location = new StationaryLocation()
       if (attributes.longitude != null) { // allow 0 as real values as well
         location.longitude = attributes.longitude
@@ -89,7 +89,7 @@ export class ConfigurationSerializer {
         location.elevation = attributes.elevation
       }
       configuration.location = location
-    } else if (attributes.location_type === 'dynamic') {
+    } else if (attributes.location_type === LocationType.Dynamic) {
       const location = new DynamicLocation()
       // TODO: handle longitude_src_device_property
       // and for latitude & elevation as well
@@ -118,14 +118,14 @@ export class ConfigurationSerializer {
     const location = configuration.location
     if (location instanceof StationaryLocation) {
       locationAttributes = {
-        location_type: 'stationary',
+        location_type: LocationType.Stationary,
         longitude: location.longitude,
         latitude: location.latitude,
         elevation: location.elevation
       }
     } else if (location instanceof DynamicLocation) {
       locationAttributes = {
-        location_type: 'dynamic'
+        location_type: LocationType.Dynamic
       }
       // TODO: Add location relationships for the device properties
     }
