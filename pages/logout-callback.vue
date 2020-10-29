@@ -32,37 +32,22 @@ implied. See the Licence for the specific language governing
 permissions and limitations under the Licence.
 -->
 <template>
-  <v-container>
-    <v-row justify="center">
-      <v-col cols="12">
-        <h1>Welcome to the Sensor Management System</h1>
-        <p>The purpose of this application is to help scientists and technicans to...</p>
-        <p>
-          If you don't have an account, you can browse and view all datasets.<br>
-          If you're already registered, you can login above.
-        </p>
-      </v-col>
-    </v-row>
-  </v-container>
+  <div />
 </template>
+
 <script>
+import { mapActions } from 'vuex'
 
 export default {
-  name: 'Home',
-  data: () => ({
-  }),
-  computed: {
-    isLoggedIn () {
-      return this.$store.getters['auth/isAuthenticated']
-    },
-    username () {
-      return this.$store.getters['auth/username']
-    }
-  },
-  mounted () {
-    this.$store.dispatch('auth/loadStoredUser')
+  name: 'LogoutCallback',
+  created () {
+    this.handleSignoutCallback().catch((err) => {
+      // eslint-disable-next-line
+      console.error(err)
+    })
   },
   methods: {
+    ...mapActions('auth', ['handleSignoutCallback'])
   }
 }
 </script>

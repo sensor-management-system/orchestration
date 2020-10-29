@@ -32,37 +32,61 @@ implied. See the Licence for the specific language governing
 permissions and limitations under the Licence.
 -->
 <template>
-  <v-container>
-    <v-row justify="center">
-      <v-col cols="12">
-        <h1>Welcome to the Sensor Management System</h1>
-        <p>The purpose of this application is to help scientists and technicans to...</p>
-        <p>
-          If you don't have an account, you can browse and view all datasets.<br>
-          If you're already registered, you can login above.
-        </p>
+  <v-container fill-height fluid>
+    <v-row
+      align="center"
+      justify="center"
+    >
+      <v-col>
+        <v-card>
+          <v-alert type="error" class="text-center" :icon="false">
+            <h1 class="display-4">
+              Access not allowed!
+            </h1>
+            <h2 class="display-2">
+              Log in!
+            </h2>
+          </v-alert>
+        </v-card>
+        <div class="text-center">
+          <h4>Redirect Uri</h4>
+          {{ $route.query.redirect }}
+        </div>
+        <div>
+          <h4>IsLoggedIn</h4>
+          {{ isLoggedIn }}
+        </div>
       </v-col>
     </v-row>
   </v-container>
 </template>
-<script>
 
+<script>
 export default {
-  name: 'Home',
-  data: () => ({
-  }),
+  name: 'AccessDenied',
   computed: {
     isLoggedIn () {
       return this.$store.getters['auth/isAuthenticated']
-    },
-    username () {
-      return this.$store.getters['auth/username']
+    }
+  },
+  watch: {
+    isLoggedIn () {
+      this.redirectUserIfLoggedIn()
     }
   },
   mounted () {
-    this.$store.dispatch('auth/loadStoredUser')
+    this.redirectUserIfLoggedIn()
   },
   methods: {
+    redirectUserIfLoggedIn () {
+      if (this.isLoggedIn) {
+        let redirectRoute = '/'
+        if (this.$route.query.redirect !== undefined) {
+          redirectRoute = this.$route.query.redirect
+        }
+        this.$router.push(redirectRoute)
+      }
+    }
   }
 }
 </script>
