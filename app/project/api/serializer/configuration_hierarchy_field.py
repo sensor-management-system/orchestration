@@ -88,6 +88,7 @@ class ConfigurationHierarchyField(fields.Field):
                 "offset_x": device_configuration.offset_x,
                 "offset_y": device_configuration.offset_y,
                 "offset_z": device_configuration.offset_z,
+                "callibration_date": device_configuration.callibration_date,
             }
 
         for device_configuration in configuration_device:
@@ -165,6 +166,7 @@ class ConfigurationHierarchyField(fields.Field):
                         offset_x=entry.get("offset_x"),
                         offset_y=entry.get("offset_y"),
                         offset_z=entry.get("offset_z"),
+                        callibration_date=entry.get("callibration_date"),
                     )
                 children = entry.get("children", [])
                 yield from yield_devices(children, parent=device_id)
