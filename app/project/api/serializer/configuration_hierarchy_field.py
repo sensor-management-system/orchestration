@@ -2,7 +2,12 @@
 # Helmholtz DataHub Initiative by GFZ and UFZ.
 #
 # Copyright (C) 2020
+# - Martin Abbrent (UFZ, martin.abbrent@ufz.de)
+# - Kotyba Alhaj Taha (UFZ, kotyba.alhaj-taha@ufz.de)
 # - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
+# - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
+# - Helmholtz Centre for Environmental Research GmbH - UFZ
+#   (UFZ, https://www.ufz.de)
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for
 #   Geosciences (GFZ, https://www.gfz-potsdam.de)
 #
@@ -88,7 +93,8 @@ class ConfigurationHierarchyField(fields.Field):
                 "offset_x": device_configuration.offset_x,
                 "offset_y": device_configuration.offset_y,
                 "offset_z": device_configuration.offset_z,
-                "calibration_date": device_configuration.calibration_date,
+                "calibration_date": fields.DateTime().
+                    deserialize(str(device_configuration.calibration_date)),
             }
 
         for device_configuration in configuration_device:
