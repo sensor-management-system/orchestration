@@ -72,11 +72,18 @@ export default class StatusBadge extends Vue {
    * https://dev.vuetifyjs.com/en/styles/colors/#material-colors
    */
   private colors: { [status: string]: string } = {
+
+    // for platforms & devices
     blocked: 'red',
     'in use': 'green',
     'in warehouse': 'blue',
     scrapped: 'blue-grey',
-    'under construction': 'brown'
+    'under construction': 'brown',
+
+    // for configurations
+    active: 'green',
+    deprecated: 'red',
+    draft: 'blue'
   }
 
   /**

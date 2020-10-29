@@ -157,6 +157,17 @@ export class ConfigurationSearchBuilder {
     return this
   }
 
+  withOneLocationTypeOf (locationTypes: string[]) {
+    if (locationTypes.length > 0) {
+      this.serverSideFilterSettings.push({
+        name: 'location_type',
+        op: 'in_',
+        val: locationTypes
+      })
+    }
+    return this
+  }
+
   withOneStatusOf (states: string[]) {
     if (states.length > 0) {
       this.serverSideFilterSettings.push({

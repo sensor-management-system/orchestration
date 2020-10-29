@@ -60,7 +60,34 @@ permissions and limitations under the Licence.
             <v-text-field v-model="searchText" label="Label" placeholder="Label of configurations" />
           </v-col>
         </v-row>
-        <!-- TODO: Add filter for projects & status values -->
+        <v-row>
+          <v-col cols="12" md="3">
+            <StringSelect
+              v-model="selectedConfigurationStates"
+              label="Select a status"
+              :items="configurationStates"
+              color="green"
+            />
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col cols="12" md="3">
+            <StringSelect
+              v-model="selectedLocationTypes"
+              label="Select a location type"
+              :items="locationTypes"
+              color="blue"
+            />
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col cols="12" md="3">
+            <ProjectSelect
+              v-model="selectedProjects"
+              label="Select a project"
+            />
+          </v-col>
+        </v-row>
         <v-row>
           <v-col cols="12" md="3">
             <v-btn
@@ -119,7 +146,15 @@ permissions and limitations under the Licence.
             <v-row
               no-gutters
             >
-              <!-- Maybe an StatusBadge -->
+              <v-col>
+                <StatusBadge
+                  :value="result.status"
+                >
+                  <div class="text-caption">
+                    {{ getLocationType(result) }}
+                  </div>
+                </StatusBadge>
+              </v-col>
               <v-col
                 align-self="end"
                 class="text-right"
@@ -245,28 +280,6 @@ permissions and limitations under the Licence.
                   >
                     {{ getTextOrDefault(result.projectName, '-') }}
                   </v-col>
-                  <v-col
-                    cols="4"
-                    xs="4"
-                    sm="3"
-                    md="2"
-                    lg="2"
-                    xl="1"
-                    class="font-weight-medium"
-                  >
-                    Location type:
-                  </v-col>
-                  <v-col
-                    cols="8"
-                    xs="8"
-                    sm="9"
-                    md="4"
-                    lg="4"
-                    xl="5"
-                    class="nowrap-truncate"
-                  >
-                    {{ getLocationType(result) }}
-                  </v-col>
                 </v-row>
                 <v-row
                   dense
@@ -316,7 +329,6 @@ permissions and limitations under the Licence.
                     {{ result.endDate | formatDate }}
                   </v-col>
                 </v-row>
-                  <!-- TODO: add start & end + location type -->
               </v-card-text>
             </v-card>
           </v-expand-transition>
@@ -378,11 +390,15 @@ import { Component, Vue } from 'nuxt-property-decorator'
 
 import AppBarEditModeContent from '@/components/AppBarEditModeContent.vue'
 import AppBarTabsExtension from '@/components/AppBarTabsExtension.vue'
+import ProjectSelect from '@/components/ProjectSelect.vue'
+import StatusBadge from '@/components/StatusBadge.vue'
+import StringSelect from '@/components/StringSelect.vue'
 
 import { IPaginationLoader } from '@/utils/PaginatedLoader'
 
 import { Configuration } from '@/models/Configuration'
 import { StationaryLocation, DynamicLocation, LocationType } from '@/models/Location'
+import { Project } from '@/models/Project'
 
 import { dateToString } from '@/utils/dateHelper'
 
@@ -401,10 +417,16 @@ export class AppBarTabsExtensionExtended extends AppBarTabsExtension {
   filters: {
     formatDate: (possibleDate: Date | null) => {
       if (possibleDate != null) {
+        // TODO: handle also the time
         return dateToString(possibleDate)
       }
       return '-'
     }
+  },
+  components: {
+    ProjectSelect,
+    StatusBadge,
+    StringSelect
   }
 })
 // @ts-ignore
@@ -415,6 +437,14 @@ export default class SearchConfigurationsPage extends Vue {
 
   private totalCount: number = 0
   private loader: null | IPaginationLoader<Configuration> = null
+
+  private selectedConfigurationStates: string[] = []
+  private selectedLocationTypes: string[] = []
+  private selectedProjects: Project[] = []
+
+  private configurationStates: string[] = []
+  private locationTypes: string[] = []
+  private projects: Project[] = []
 
   private searchResults: Configuration[] = []
   private searchText: string | null = null
@@ -432,6 +462,20 @@ export default class SearchConfigurationsPage extends Vue {
   }
 
   mounted () {
+    this.$api.configurationStates.findAll().then((foundStates) => {
+      this.configurationStates = foundStates
+    }).catch((_error) => {
+      this.$store.commit('snackbar/setError', 'Loading configuration states failed')
+    })
+    this.locationTypes = [
+      LocationType.Stationary,
+      LocationType.Dynamic
+    ]
+    this.$api.projects.findAll().then((foundProjects) => {
+      this.projects = foundProjects
+    }).catch((_error) => {
+      this.$store.commit('snackbar/setError', 'Loading of projects failed')
+    })
     this.runSelectedSearch()
     // make sure that all components (especially the dynamically passed ones) are rendered
     this.$nextTick(() => {
@@ -464,7 +508,7 @@ export default class SearchConfigurationsPage extends Vue {
   }
 
   basicSearch () {
-    this.runSearch(this.searchText)
+    this.runSearch(this.searchText, [], [], [])
   }
 
   clearBasicSearch () {
@@ -472,15 +516,26 @@ export default class SearchConfigurationsPage extends Vue {
   }
 
   extendedSearch () {
-    this.runSearch(this.searchText)
+    this.runSearch(
+      this.searchText,
+      this.selectedConfigurationStates,
+      this.selectedLocationTypes,
+      this.selectedProjects
+    )
   }
 
   clearExtendedSearch () {
     this.clearBasicSearch()
+    this.selectedConfigurationStates = []
+    this.selectedLocationTypes = []
+    this.selectedProjects = []
   }
 
   runSearch (
-    searchText: string | null
+    searchText: string | null,
+    configurationStates: string[],
+    locationTypes: string[],
+    projects: Project[]
   ) {
     this.loading = true
     this.searchResults = []
@@ -489,6 +544,9 @@ export default class SearchConfigurationsPage extends Vue {
     this.$api.configurations
       .newSearchBuilder()
       .withTextInLabel(searchText)
+      .withOneStatusOf(configurationStates)
+      .withOneLocationTypeOf(locationTypes)
+      .withOneMatchingProjectOf(projects)
       .build()
       .findMatchingAsPaginationLoader(this.pageSize)
       .then(this.loadUntilWeHaveSomeEntries).catch((_error) => {
