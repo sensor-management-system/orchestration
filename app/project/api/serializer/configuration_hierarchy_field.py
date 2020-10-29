@@ -166,7 +166,7 @@ class ConfigurationHierarchyField(fields.Field):
                         offset_x=entry.get("offset_x"),
                         offset_y=entry.get("offset_y"),
                         offset_z=entry.get("offset_z"),
-                        callibration_date=entry.get("callibration_date"),
+                        calibration_date=entry.get("calibration_date"),
                     )
                 children = entry.get("children", [])
                 yield from yield_devices(children, parent=device_id)
