@@ -16,16 +16,16 @@ class ConfigurationSchema(Schema):
         self_view_kwargs = {"id": "<id>"}
 
     id = fields.Integer(as_string=True, dump_only=True)
-    start_date = fields.DateTime()
-    end_date = fields.DateTime()
+    start_date = fields.DateTime(allow_none=True)
+    end_date = fields.DateTime(allow_none=True)
     location_type = fields.String(required=True)
-    longitude = fields.Float()
-    latitude = fields.Float()
-    elevation = fields.Float()
-    project_uri = fields.String()
-    project_name = fields.String()
-    label = fields.String()
-    status = fields.String(default="draft")
+    longitude = fields.Float(allow_none=True)
+    latitude = fields.Float(allow_none=True)
+    elevation = fields.Float(allow_none=True)
+    project_uri = fields.String(allow_none=True)
+    project_name = fields.String(allow_none=True)
+    label = fields.String(allow_none=True)
+    status = fields.String(default="draft", allow_none=True)
 
     longitude_src_device_property = Relationship(
         self_view_kwargs={"id": "<id>"},
