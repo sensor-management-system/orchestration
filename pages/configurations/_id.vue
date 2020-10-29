@@ -834,5 +834,17 @@ export default class ConfigurationsIdPage extends Vue {
   get projectNames () {
     return this.projects.map(p => p.name)
   }
+
+  @Watch('configuration', { immediate: true, deep: true })
+  // @ts-ignore
+  onConfigurationChanged (val: Configuration) {
+    if (val.id) {
+      let title = 'Edit Configuration'
+      if (val.label) {
+        title = 'Configuration ' + val.label
+      }
+      this.$nuxt.$emit('AppBarContent:title', title)
+    }
+  }
 }
 </script>

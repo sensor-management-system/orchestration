@@ -189,7 +189,7 @@ permissions and limitations under the Licence.
               no-gutters
             >
               <v-col class="text-subtitle-1">
-                {{ result.label }}
+                {{ getTextOrDefault(result.label, 'Configuration') }}
               </v-col>
               <v-col
                 align-self="end"
@@ -243,10 +243,80 @@ permissions and limitations under the Licence.
                     xl="5"
                     class="nowrap-truncate"
                   >
-                    {{ getTextOrDefault(result.projectName) }}
+                    {{ getTextOrDefault(result.projectName, '-') }}
                   </v-col>
-                  <!-- TODO: add start & end + location type -->
+                  <v-col
+                    cols="4"
+                    xs="4"
+                    sm="3"
+                    md="2"
+                    lg="2"
+                    xl="1"
+                    class="font-weight-medium"
+                  >
+                    Location type:
+                  </v-col>
+                  <v-col
+                    cols="8"
+                    xs="8"
+                    sm="9"
+                    md="4"
+                    lg="4"
+                    xl="5"
+                    class="nowrap-truncate"
+                  >
+                    {{ getLocationType(result) }}
+                  </v-col>
                 </v-row>
+                <v-row
+                  dense
+                >
+                  <v-col
+                    cols="4"
+                    xs="4"
+                    sm="3"
+                    md="2"
+                    lg="2"
+                    xl="1"
+                    class="font-weight-medium"
+                  >
+                    Start:
+                  </v-col>
+                  <v-col
+                    cols="8"
+                    xs="8"
+                    sm="9"
+                    md="4"
+                    lg="4"
+                    xl="5"
+                    class="nowrap-truncate"
+                  >
+                    {{ result.startDate | formatDate }}
+                  </v-col>
+                  <v-col
+                    cols="4"
+                    xs="4"
+                    sm="3"
+                    md="2"
+                    lg="2"
+                    xl="1"
+                    class="font-weight-medium"
+                  >
+                    End:
+                  </v-col>
+                  <v-col
+                    cols="8"
+                    xs="8"
+                    sm="9"
+                    md="4"
+                    lg="4"
+                    xl="5"
+                    class="nowrap-truncate"
+                  >
+                    {{ result.endDate | formatDate }}
+                  </v-col>
+                </v-row>
+                  <!-- TODO: add start & end + location type -->
               </v-card-text>
             </v-card>
           </v-expand-transition>
@@ -312,6 +382,9 @@ import AppBarTabsExtension from '@/components/AppBarTabsExtension.vue'
 import { IPaginationLoader } from '@/utils/PaginatedLoader'
 
 import { Configuration } from '@/models/Configuration'
+import { StationaryLocation, DynamicLocation, LocationType } from '@/models/Location'
+
+import { dateToString } from '@/utils/dateHelper'
 
 @Component
 // @ts-ignore
@@ -324,7 +397,16 @@ export class AppBarTabsExtensionExtended extends AppBarTabsExtension {
   }
 }
 
-@Component
+@Component({
+  filters: {
+    formatDate: (possibleDate: Date | null) => {
+      if (possibleDate != null) {
+        return dateToString(possibleDate)
+      }
+      return '-'
+    }
+  }
+})
 // @ts-ignore
 export default class SearchConfigurationsPage extends Vue {
   private pageSize: number = 20
@@ -485,7 +567,17 @@ export default class SearchConfigurationsPage extends Vue {
     this.searchResultItemsShown = {}
   }
 
-  getTextOrDefault = (text: string): string => text || '-'
+  getTextOrDefault = (text: string, defaultValue: string): string => text || defaultValue
+
+  getLocationType (configuration: Configuration): string {
+    if (configuration.location instanceof StationaryLocation) {
+      return LocationType.Stationary
+    }
+    if (configuration.location instanceof DynamicLocation) {
+      return LocationType.Dynamic
+    }
+    return ''
+  }
 }
 
 </script>
