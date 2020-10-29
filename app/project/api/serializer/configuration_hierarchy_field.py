@@ -47,8 +47,8 @@ class ConfigurationHierarchyField(fields.Field):
     def _serialize(self, value, *args, **kwargs):
         # build the tree out of the attributes
 
-        configuration_platform = value.configuration_platform
-        configuration_device = value.configuration_device
+        configuration_platform = value.configurations_platform
+        configuration_device = value.configurations_device
 
         # adopted from here: https://stackoverflow.com/a/35049729
         platform_nodes = {}
@@ -142,8 +142,6 @@ class ConfigurationHierarchyField(fields.Field):
                 platform_id = entry.get("id", None)
                 if entry.get("type", None) == "platform":
                     yield ConfigurationPlatform(
-                        # Where do I get the configuration_id from?
-                        configuration_id=platform_id,
                         platform_id=platform_id,
                         parent_platform_id=parent,
                         offset_x=entry.get("offset_x"),
@@ -156,7 +154,6 @@ class ConfigurationHierarchyField(fields.Field):
                 device_id = entry.get("id", None)
                 if entry.get("type", None) == "device":
                     yield ConfigurationDevice(
-                        # Where do I get the configuration_id from?
                         device_id=device_id,
                         parent_platform_id=parent,
                         offset_x=entry.get("offset_x"),
@@ -164,10 +161,10 @@ class ConfigurationHierarchyField(fields.Field):
                 children = entry.get("children", [])
                 yield from yield_devices(children, parent=device_id)
 
-        configuration_platform = list(yield_platforms(value))
-        configuration_device = list(yield_devices(value))
+        configurations_platform = list(yield_platforms(value))
+        configurations_device = list(yield_devices(value))
 
         return ConfigurationsTuple(
-            configuration_platform=configuration_platform,
-            configuration_device=configuration_device,
+            configurations_platform=configurations_platform,
+            configurations_device=configurations_device,
         )

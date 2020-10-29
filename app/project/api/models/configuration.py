@@ -6,7 +6,7 @@ from project.api.models.device_property import DeviceProperty
 from project.api.models.mixin import AuditMixin
 
 ConfigurationsTuple = collections.namedtuple(
-    "ConfigurationsTuple", ["configuration_device", "configuration_platform"]
+    "ConfigurationsTuple", ["configurations_device", "configurations_platform"]
 )
 
 
@@ -51,14 +51,14 @@ class Configuration(db.Model, AuditMixin):
     @hybrid_property
     def hierarchy(self):
         return ConfigurationsTuple(
-            configuration_device=self.configuration_device,
-            configuration_platform=self.configuration_platform,
+            configurations_device=self.configuration_device,
+            configurations_platform=self.configuration_platform,
         )
 
     @hierarchy.setter
     def hierarchy(self, value):
-        configuration_device = value.configuration_device
-        configuration_platform = value.configuration_platform
+        configuration_device = value.configurations_device
+        configuration_platform = value.configurations_platform
 
         current_configuration_device_by_device_id = {}
         current_configuration_platform_by_platform_id = {}
@@ -72,7 +72,6 @@ class Configuration(db.Model, AuditMixin):
             current_configuration_platform_by_platform_id[
                 platform_configuration.platform_id
             ] = platform_configuration
-            print(current_configuration_platform_by_platform_id)
 
         for device_configuration in configuration_device:
             device_configuration.configuration = self
