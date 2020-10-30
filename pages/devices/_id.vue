@@ -364,7 +364,6 @@ export default class DeviceIdPage extends mixins(Rules) {
 
   private editMode: boolean = false
 
-
   created () {
     this.initializeAppBar()
     this.registerButtonActions()

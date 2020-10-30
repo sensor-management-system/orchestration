@@ -98,8 +98,6 @@ permissions and limitations under the Licence.
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 
-import AppBarEditModeContent from '@/components/AppBarEditModeContent.vue'
-
 @Component
 // @ts-ignore
 export default class SearchConfigurationsPage extends Vue {
