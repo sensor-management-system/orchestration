@@ -117,17 +117,18 @@ permissions and limitations under the Licence.
       app
     >
       <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
-      <template v-if="appBarContent">
-        <Component :is="appBarContent" />
-      </template>
-      <template v-else>
-        <v-toolbar-title v-text="title" />
-      </template>
+      <AppBarEditModeContent
+        :title="appBarTitle"
+        :save-btn-hidden="saveBtnHidden"
+        :cancel-btn-hidden="cancelBtnHidden"
+        :save-btn-disabled="saveBtnDisabled"
+        :cancel-btn-disabled="cancelBtnDisabled"
+      />
       <template v-if="tabs.length" v-slot:extension>
         <AppBarTabsExtension
           :value="activeTab"
           :tabs="tabs"
-          @change="changeTab"
+          @change="onChangeTab"
         />
       </template>
     </v-app-bar>
@@ -164,10 +165,12 @@ permissions and limitations under the Licence.
 <script>
 
 import AppBarTabsExtension from '@/components/AppBarTabsExtension'
+import AppBarEditModeContent from '@/components/AppBarEditModeContent'
 
 export default {
   components: {
-    AppBarTabsExtension
+    AppBarTabsExtension,
+    AppBarEditModeContent
   },
   data () {
     return {
@@ -208,10 +211,25 @@ export default {
       }
     },
     tabs () {
-      return this.$store.state.appbartabs.tabs
+      return this.$store.state.appbar.tabs
     },
     activeTab () {
-      return this.$store.state.appbartabs.active
+      return this.$store.state.appbar.activeTab
+    },
+    appBarTitle () {
+      return this.$store.state.appbar.title || this.title
+    },
+    saveBtnHidden () {
+      return this.$store.state.appbar.saveBtnHidden
+    },
+    saveBtnDisabled () {
+      return this.$store.state.appbar.saveBtnDisabled
+    },
+    cancelBtnHidden () {
+      return this.$store.state.appbar.cancelBtnHidden
+    },
+    cancelBtnDisabled () {
+      return this.$store.state.appbar.cancelBtnDisabled
     }
   },
   created () {
@@ -229,8 +247,8 @@ export default {
     closeSuccessSnackbar () {
       this.$store.commit('snackbar/clearSuccess')
     },
-    changeTab (tab) {
-      this.$store.commit('appbartabs/setActive', tab)
+    onChangeTab (tab) {
+      this.$store.commit('appbar/setActiveTab', tab)
     }
   }
 }
