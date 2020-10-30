@@ -106,31 +106,43 @@ export default class SearchConfigurationsPage extends Vue {
   private searchText: string | null = null
 
   created () {
-    this.$nuxt.$emit('app-bar-content', AppBarEditModeContent)
-    this.$store.commit('appbartabs/setTabs', [
-      'Search',
-      'Extended Search'
-    ])
+    this.initializeAppBar()
   }
 
   mounted () {
-    // make sure that all components (especially the dynamically passed ones) are rendered
-    this.$nextTick(() => {
-      this.$nuxt.$emit('AppBarContent:title', 'Configurations')
-    })
   }
 
   beforeDestroy () {
-    this.$store.commit('appbartabs/setTabs', [])
-    this.$nuxt.$emit('app-bar-content', null)
+    this.clearAppBar()
+  }
+
+  initializeAppBar () {
+    this.$store.dispatch('appbar/init', {
+      tabs: [
+        'Search',
+        'Extended Search'
+      ],
+      title: 'Configurations',
+      saveBtnHidden: true,
+      cancelBtnHidden: true
+    })
+  }
+
+  clearAppBar () {
+    this.$store.dispatch('appbar/init', {
+      tabs: [],
+      title: '',
+      saveBtnHidden: true,
+      cancelBtnHidden: true
+    })
   }
 
   get activeTab (): number | null {
-    return this.$store.state.appbartabs.active
+    return this.$store.state.appbar.activeTab
   }
 
   set activeTab (tab: number | null) {
-    this.$store.commit('appbartabs/setActive', tab)
+    this.$store.commit('appbar/setActiveTab', tab)
   }
 
   basicSearch () {

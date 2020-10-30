@@ -424,7 +424,6 @@ permissions and limitations under the Licence.
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 
-import AppBarEditModeContent from '@/components/AppBarEditModeContent.vue'
 import ManufacturerSelect from '@/components/ManufacturerSelect.vue'
 import PlatformTypeSelect from '@/components/PlatformTypeSelect.vue'
 import StatusSelect from '@/components/StatusSelect.vue'
@@ -469,11 +468,7 @@ export default class SearchPlatformsPage extends Vue {
   public readonly NO_TYPE: string = 'Unknown type'
 
   created () {
-    this.$nuxt.$emit('app-bar-content', AppBarEditModeContent)
-    this.$store.commit('appbartabs/setTabs', [
-      'Search',
-      'Extended Search'
-    ])
+    this.initializeAppBar()
   }
 
   mounted () {
@@ -502,10 +497,6 @@ export default class SearchPlatformsPage extends Vue {
     }).catch((_error) => {
       this.$store.commit('snackbar/setError', 'Loading of platform types failed')
     })
-    // make sure that all components (especially the dynamically passed ones) are rendered
-    this.$nextTick(() => {
-      this.$nuxt.$emit('AppBarContent:title', 'Platforms')
-    })
 
     window.onscroll = () => {
       // from https://www.digitalocean.com/community/tutorials/vuejs-implementing-infinite-scroll
@@ -518,18 +509,38 @@ export default class SearchPlatformsPage extends Vue {
   }
 
   beforeDestroy () {
-    this.$store.commit('appbartabs/setTabs', [])
-    this.$nuxt.$emit('app-bar-content', null)
+    this.clearAppBar()
     this.unsetResultItemsShown()
     this.showDeleteDialog = {}
   }
 
+  initializeAppBar () {
+    this.$store.dispatch('appbar/init', {
+      tabs: [
+        'Search',
+        'Extended Search'
+      ],
+      title: 'Platforms',
+      saveBtnHidden: true,
+      cancelBtnHidden: true
+    })
+  }
+
+  clearAppBar () {
+    this.$store.dispatch('appbar/init', {
+      tabs: [],
+      title: '',
+      saveBtnHidden: true,
+      cancelBtnHidden: true
+    })
+  }
+
   get activeTab (): number | null {
-    return this.$store.state.appbartabs.active
+    return this.$store.state.appbar.activeTab
   }
 
   set activeTab (tab: number | null) {
-    this.$store.commit('appbartabs/setActive', tab)
+    this.$store.commit('appbar/setActiveTab', tab)
   }
 
   runSelectedSearch () {

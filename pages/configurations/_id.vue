@@ -309,7 +309,6 @@ permissions and limitations under the Licence.
 <script lang="ts">
 import { Vue, Component, Watch } from 'nuxt-property-decorator'
 
-import AppBarEditModeContent from '@/components/AppBarEditModeContent.vue'
 import ContactSelect from '@/components/ContactSelect.vue'
 import DevicePropertyHierarchySelect from '@/components/DevicePropertyHierarchySelect.vue'
 import DeviceConfigurationAttributesExpansionPanels from '@/components/DeviceConfigurationAttributesExpansionPanels.vue'
@@ -376,69 +375,98 @@ export default class ConfigurationsIdPage extends Vue {
   private formIsValid: boolean = true
 
   created () {
-    this.$nuxt.$emit('app-bar-content', AppBarEditModeContent)
-    this.$nuxt.$on('AppBarContent:save-button-click', () => {
-      if (!this.formIsValid) {
-        this.showValidationError()
-        return
-      }
-      this.save()
-    })
-    this.$nuxt.$on('AppBarContent:cancel-button-click', () => {
-      this.cancel()
-    })
-
-    this.$store.commit('appbartabs/setTabs', [
-      'Configuration',
-      'Platforms and Devices',
-      'Setup',
-      'Contacts'
-    ])
+    this.registerButtonActions()
+    this.initializeAppBar()
   }
 
   mounted () {
-    this.loadConfiguration()
-    this.$nextTick(() => {
-      if (!this.$route.params.id) {
-        this.$nuxt.$emit('AppBarContent:title', 'Add Configuration')
+    this.loadConfiguration().then((device) => {
+      if (device === null) {
+        this.$store.commit('appbar/setTitle', 'Add Configuration')
       }
-      this.$nuxt.$emit('AppBarContent:save-button-hidden', !this.editMode)
-      this.$nuxt.$emit('AppBarContent:cancel-button-hidden', !this.editMode)
-    })
-  }
-
-  loadConfiguration () {
-    const configurationId = this.$route.params.id
-    if (!configurationId) {
-      this.createBackup()
-      this.editMode = true
-      return
-    }
-    this.editMode = false
-    this.$api.configurations.findById(configurationId).then((foundConfiguration) => {
-      this.configuration = foundConfiguration
-    }).catch((_error) => {
+    }).catch(() => {
       this.$store.commit('snackbar/setError', 'Loading configuration failed')
     })
   }
 
+  loadConfiguration (): Promise<Configuration|null> {
+    return new Promise((resolve, reject) => {
+      const configurationId = this.$route.params.id
+      if (!configurationId) {
+        this.createBackup()
+        this.editMode = true
+        resolve(null)
+        return
+      }
+      this.editMode = false
+      this.$api.configurations.findById(configurationId).then((foundConfiguration) => {
+        this.configuration = foundConfiguration
+        resolve(foundConfiguration)
+      }).catch((_error) => {
+        reject(_error)
+      })
+    })
+  }
+
   beforeDestroy () {
-    this.$nuxt.$emit('app-bar-content', null)
-    this.$nuxt.$off('AppBarContent:save-button-click')
-    this.$nuxt.$off('AppBarContent:cancel-button-click')
-    this.$store.commit('appbartabs/setTabs', [])
+    this.unregisterButtonActions()
+    this.clearAppBar()
+  }
+
+  registerButtonActions () {
+    this.$nuxt.$on('AppBarEditModeContent:save-btn-click', () => {
+      this.save().then(() => {
+        this.$store.commit('snackbar/setSuccess', 'Save successful')
+      }).catch(() => {
+        this.$store.commit('snackbar/setError', 'Save failed')
+      })
+    })
+    this.$nuxt.$on('AppBarEditModeContent:cancel-btn-click', () => {
+      this.cancel()
+    })
+  }
+
+  unregisterButtonActions () {
+    this.$nuxt.$off('AppBarEditModeContent:save-btn-click')
+    this.$nuxt.$off('AppBarEditModeContent:cancel-btn-click')
+  }
+
+  initializeAppBar () {
+    this.$store.dispatch('appbar/init', {
+      tabs: [
+        'Configuration',
+        'Platforms and Devices',
+        'Setup',
+        'Contacts'
+      ],
+      title: 'Configurations',
+      saveBtnHidden: true,
+      cancelBtnHidden: true
+    })
+  }
+
+  clearAppBar () {
+    this.$store.dispatch('appbar/init', {
+      tabs: [],
+      title: '',
+      saveBtnHidden: true,
+      cancelBtnHidden: true
+    })
   }
 
   get activeTab (): number | null {
-    return this.$store.state.appbartabs.active
+    return this.$store.state.appbar.activeTab
   }
 
   set activeTab (tab: number | null) {
-    this.$store.commit('appbartabs/setActive', tab)
+    this.$store.commit('appbar/setActiveTab', tab)
   }
 
-  save () {
-    this.editMode = false
+  save (): Promise<Configuration|null> {
+    return new Promise((resolve) => {
+      this.editMode = false
+      resolve(null)
+    })
   }
 
   cancel () {
@@ -465,13 +493,6 @@ export default class ConfigurationsIdPage extends Vue {
     }
     this.configuration = this.configurationBackup
     this.configurationBackup = null
-  }
-
-  @Watch('editMode', { immediate: true, deep: true })
-  // @ts-ignore
-  onEditModeChanged (editMode: boolean) {
-    this.$nuxt.$emit('AppBarContent:save-button-hidden', !editMode)
-    this.$nuxt.$emit('AppBarContent:cancel-button-hidden', !editMode)
   }
 
   get readonly () {
@@ -760,8 +781,23 @@ export default class ConfigurationsIdPage extends Vue {
     if (tabIndex === -1) {
       return
     }
-    this.$store.commit('appbartabs/setActive', tabIndex)
+    this.$store.commit('appbar/setActiveTab', tabIndex)
     this.$store.commit('snackbar/setError', 'Please correct your errors.')
+  }
+
+  @Watch('configuration', { immediate: true, deep: true })
+  // @ts-ignore
+  onConfigurationChanged (val: Configuration) {
+    if (val.id) {
+      this.$store.commit('appbar/setTitle', 'Some Configuration' || 'Add Configuration')
+    }
+  }
+
+  @Watch('editMode', { immediate: true, deep: true })
+  // @ts-ignore
+  onEditModeChanged (editMode: boolean) {
+    this.$store.commit('appbar/setSaveBtnHidden', !editMode)
+    this.$store.commit('appbar/setCancelBtnHidden', !editMode)
   }
 }
 </script>

@@ -333,7 +333,6 @@ import { SamplingMedia } from '@/models/SamplingMedia'
 import { Status } from '@/models/Status'
 import { Unit } from '@/models/Unit'
 
-import AppBarEditModeContent from '@/components/AppBarEditModeContent.vue'
 import AttachmentList from '@/components/AttachmentList.vue'
 import ContactSelect from '@/components/ContactSelect.vue'
 import CustomFieldCards from '@/components/CustomFieldCards.vue'
@@ -365,23 +364,10 @@ export default class DeviceIdPage extends mixins(Rules) {
 
   private editMode: boolean = false
 
-  created () {
-    this.$nuxt.$emit('app-bar-content', AppBarEditModeContent)
-    this.$nuxt.$on('AppBarContent:save-button-click', () => {
-      this.save()
-    })
-    this.$nuxt.$on('AppBarContent:cancel-button-click', () => {
-      this.cancel()
-    })
 
-    this.$store.commit('appbartabs/setTabs', [
-      'Basic Data',
-      'Contacts',
-      'Properties',
-      'Custom Fields',
-      'Attachments',
-      'Events'
-    ])
+  created () {
+    this.initializeAppBar()
+    this.registerButtonActions()
   }
 
   mounted () {
@@ -406,54 +392,100 @@ export default class DeviceIdPage extends mixins(Rules) {
     this.$api.units.findAll().then((foundUnits) => {
       this.units = foundUnits
     })
-    this.loadDevice()
-    this.$nextTick(() => {
-      if (!this.$route.params.id) {
-        this.$nuxt.$emit('AppBarContent:title', 'Add Device')
+    this.loadDevice().then((device) => {
+      if (device === null) {
+        this.$store.commit('appbar/setTitle', 'Add Device')
       }
-      this.$nuxt.$emit('AppBarContent:save-button-hidden', !this.editMode)
-      this.$nuxt.$emit('AppBarContent:cancel-button-hidden', !this.editMode)
-    })
-  }
-
-  beforeDestroy () {
-    this.$nuxt.$emit('app-bar-content', null)
-    this.$nuxt.$off('AppBarContent:save-button-click')
-    this.$nuxt.$off('AppBarContent:cancel-button-click')
-    this.$store.commit('appbartabs/setTabs', [])
-  }
-
-  get activeTab (): number | null {
-    return this.$store.state.appbartabs.active
-  }
-
-  set activeTab (tab: number | null) {
-    this.$store.commit('appbartabs/setActive', tab)
-  }
-
-  loadDevice () {
-    const deviceId = this.$route.params.id
-    if (!deviceId) {
-      this.createBackup()
-      this.editMode = true
-      return
-    }
-    this.editMode = false
-    this.$api.devices.findById(deviceId).then((foundDevice) => {
-      this.device = foundDevice
-    }).catch((_error) => {
+    }).catch(() => {
       this.$store.commit('snackbar/setError', 'Loading device failed')
     })
   }
 
-  save () {
-    this.$api.devices.save(this.device).then((savedDevice) => {
-      this.device = savedDevice
-      this.deviceBackup = null
+  beforeDestroy () {
+    this.unregisterButtonActions()
+    this.clearAppBar()
+  }
+
+  registerButtonActions () {
+    this.$nuxt.$on('AppBarEditModeContent:save-btn-click', () => {
+      this.save().then(() => {
+        this.$store.commit('snackbar/setSuccess', 'Save successful')
+      }).catch(() => {
+        this.$store.commit('snackbar/setError', 'Save failed')
+      })
+    })
+    this.$nuxt.$on('AppBarEditModeContent:cancel-btn-click', () => {
+      this.cancel()
+    })
+  }
+
+  unregisterButtonActions () {
+    this.$nuxt.$off('AppBarEditModeContent:save-btn-click')
+    this.$nuxt.$off('AppBarEditModeContent:cancel-btn-click')
+  }
+
+  initializeAppBar () {
+    this.$store.dispatch('appbar/init', {
+      tabs: [
+        'Basic Data',
+        'Contacts',
+        'Properties',
+        'Custom Fields',
+        'Attachments',
+        'Events'
+      ],
+      title: 'Devices',
+      saveBtnHidden: true,
+      cancelBtnHidden: true
+    })
+  }
+
+  clearAppBar () {
+    this.$store.dispatch('appbar/init', {
+      tabs: [],
+      title: '',
+      saveBtnHidden: true,
+      cancelBtnHidden: true
+    })
+  }
+
+  get activeTab (): number | null {
+    return this.$store.state.appbar.activeTab
+  }
+
+  set activeTab (tab: number | null) {
+    this.$store.commit('appbar/setActiveTab', tab)
+  }
+
+  loadDevice (): Promise<Device|null> {
+    return new Promise((resolve, reject) => {
+      const deviceId = this.$route.params.id
+      if (!deviceId) {
+        this.createBackup()
+        this.editMode = true
+        resolve(null)
+        return
+      }
       this.editMode = false
-      this.$store.commit('snackbar/setSuccess', 'Save successful')
-    }).catch((_error) => {
-      this.$store.commit('snackbar/setError', 'Save failed')
+      this.$api.devices.findById(deviceId).then((foundDevice) => {
+        this.device = foundDevice
+        resolve(foundDevice)
+      }).catch((_error) => {
+        reject(_error)
+      })
+    })
+  }
+
+  save (): Promise<Device|null> {
+    return new Promise((resolve, reject) => {
+      this.$api.devices.save(this.device).then((savedDevice) => {
+        this.device = savedDevice
+        this.deviceBackup = null
+        this.editMode = false
+        resolve(savedDevice)
+      }).catch((_error) => {
+        reject(_error)
+      })
     })
   }
 
@@ -498,13 +530,6 @@ export default class DeviceIdPage extends mixins(Rules) {
     return [partManufacturer, partModel, partSerialNumber].join('_').replace(
       ' ', '_'
     )
-  }
-
-  @Watch('editMode', { immediate: true, deep: true })
-  // @ts-ignore
-  onEditModeChanged (editMode: boolean) {
-    this.$nuxt.$emit('AppBarContent:save-button-hidden', !editMode)
-    this.$nuxt.$emit('AppBarContent:cancel-button-hidden', !editMode)
   }
 
   createBackup () {
@@ -593,8 +618,15 @@ export default class DeviceIdPage extends mixins(Rules) {
   // @ts-ignore
   onDeviceChanged (val: Device) {
     if (val.id) {
-      this.$nuxt.$emit('AppBarContent:title', 'Device ' + val.shortName)
+      this.$store.commit('appbar/setTitle', val?.shortName || 'Add Device')
     }
+  }
+
+  @Watch('editMode', { immediate: true, deep: true })
+  // @ts-ignore
+  onEditModeChanged (editMode: boolean) {
+    this.$store.commit('appbar/setSaveBtnHidden', !editMode)
+    this.$store.commit('appbar/setCancelBtnHidden', !editMode)
   }
 }
 </script>
