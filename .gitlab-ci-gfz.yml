@@ -81,17 +81,32 @@ build-deploy-image:
   variables:
     SMS_BACKEND_URL: ${STAGING_BACKEND_URL}/rdm/svm-api/v1
     CV_BACKEND_URL: ${STAGING_CV_BACKEND_URL}/api
+    HOST: ${STAGING_HOST}
+    CLIENT_ID: ${STAGING_CLIENT_ID}
+    AUTHORITY: ${STAGING_IDP_AUTORITY}
   before_script:
     - *docker_login_gitlab_registry
     - echo $SMS_BACKEND_URL
     - echo $CV_BACKEND_URL
   script:
-    - >
+    - |
       if [ -z "$CI_COMMIT_TAG" ]; then
-        docker build --pull -t "$CI_REGISTRY_IMAGE:latest" --tag "$CI_REGISTRY_IMAGE:latest" -f docker/deployment/gfz/Dockerfile --build-arg SMS_BACKEND_URL_ARG=$SMS_BACKEND_URL --build-arg CV_BACKEND_URL_ARG=$CV_BACKEND_URL .
+        docker build --pull -t "$CI_REGISTRY_IMAGE:latest" --tag "$CI_REGISTRY_IMAGE:latest" -f docker/deployment/gfz/Dockerfile \
+            --build-arg SMS_BACKEND_URL_ARG=$SMS_BACKEND_URL \
+            --build-arg CV_BACKEND_URL_ARG=$CV_BACKEND_URL \
+            --build-arg HOST_ARG=$HOST \
+            --build-arg CLIENT_ID_ARG=$CLIENT_ID \
+            --build-arg AUTHORITY_ARG=$AUTHORITY \
+            .
         docker push "$CI_REGISTRY_IMAGE:latest"
       else
-        docker build --pull -t "$CI_REGISTRY_IMAGE:latest" --tag "$CI_REGISTRY_IMAGE:$CI_COMMIT_TAG" --tag "$CI_REGISTRY_IMAGE:latest" -f docker/deployment/gfz/Dockerfile --build-arg SMS_BACKEND_URL_ARG=$SMS_BACKEND_URL --build-arg CV_BACKEND_URL_ARG=$CV_BACKEND_URL .
+        docker build --pull -t "$CI_REGISTRY_IMAGE:latest" --tag "$CI_REGISTRY_IMAGE:$CI_COMMIT_TAG" --tag "$CI_REGISTRY_IMAGE:latest" -f docker/deployment/gfz/Dockerfile \
+            --build-arg SMS_BACKEND_URL_ARG=$SMS_BACKEND_URL \
+            --build-arg CV_BACKEND_URL_ARG=$CV_BACKEND_URL \
+            --build-arg HOST_ARG=$HOST \
+            --build-arg CLIENT_ID_ARG=$CLIENT_ID \
+            --build-arg AUTHORITY_ARG=$AUTHORITY \
+            .
         docker push "$CI_REGISTRY_IMAGE:latest"
         docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_TAG"
       fi
@@ -114,12 +129,23 @@ build-deploy-image-manual:
   variables:
     SMS_BACKEND_URL: ${STAGING_BACKEND_URL}/rdm/svm-api/v1
     CV_BACKEND_URL: ${STAGING_CV_BACKEND_URL}/api
+    HOST: ${STAGING_HOST}:8080
+    # Not sure, if we need another client id for the staging on 8080
+    CLIENT_ID: ${STAGING_CLIENT_ID}
+    AUTHORITY: ${STAGING_IDP_AUTORITY}
   before_script:
     - *docker_login_gitlab_registry
     - echo $SMS_BACKEND_URL
     - echo $CV_BACKEND_URL
   script:
-    - docker build --tag "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA" -f docker/deployment/gfz/Dockerfile --build-arg SMS_BACKEND_URL_ARG=$SMS_BACKEND_URL --build-arg CV_BACKEND_URL_ARG=$CV_BACKEND_URL .
+    - |
+        docker build --tag "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA" -f docker/deployment/gfz/Dockerfile \
+          --build-arg SMS_BACKEND_URL_ARG=$SMS_BACKEND_URL \
+          --build-arg CV_BACKEND_URL_ARG=$CV_BACKEND_URL \
+          --build-arg HOST_ARG=$HOST \
+          --build-arg CLIENT_ID_ARG=$CLIENT_ID \
+          --build-arg AUTHORITY_ARG=$AUTHORITY \
+          .
     - docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA"
   cache:
     key: ${CI_COMMIT_REF_SLUG}
@@ -135,7 +161,7 @@ deploy-staging:
   stage: deploy-staging
   environment:
     name: gfzstaging
-    url: https://$STAGING_HOST
+    url: http://$STAGING_HOST
   tags:
     - deploy
     - staging
@@ -155,7 +181,7 @@ deploy-staging-manual-8080:
   stage: deploy-staging
   environment:
     name: gfzstaging8080
-    url: https://${STAGING_HOST}:8080
+    url: http://${STAGING_HOST}:8080
   tags:
     - deploy
     - staging
@@ -176,7 +202,7 @@ test-availability-staging:
   image: python:3
   environment:
     name: gfzstaging
-    url: https://$STAGING_HOST
+    url: http://$STAGING_HOST
   tags:
     - deploy
     - staging
@@ -194,7 +220,7 @@ test-availability-staging8080:
   image: python:3
   environment:
     name: gfzstaging8080
-    url: https://${STAGING_HOST}:8080
+    url: http://${STAGING_HOST}:8080
   tags:
     - deploy
     - staging

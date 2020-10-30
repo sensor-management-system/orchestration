@@ -3,8 +3,11 @@ Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
 Copyright (C) 2020
+- Kotyba Alhaj Taha (UFZ, kotyba.alhaj-taha@ufz.de)
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
+- Helmholtz Centre for Environmental Research GmbH - UFZ
+  (UFZ, https://www.ufz.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
   Geosciences (GFZ, https://www.gfz-potsdam.de)
 
@@ -131,6 +134,73 @@ permissions and limitations under the Licence.
           @change="onChangeTab"
         />
       </template>
+      <v-menu close-on-click close-on-content-click offset-x>
+        <template v-slot:activator="{ on }">
+          <v-btn
+            data-role="property-menu"
+            icon
+            small
+            v-on="on"
+          >
+            <v-avatar>
+              <template v-if="isLoggedIn">
+                {{ initials }}
+              </template>
+              <template v-else>
+                <v-icon>
+                  mdi-account
+                </v-icon>
+              </template>
+            </v-avatar>
+          </v-btn>
+        </template>
+        <v-list>
+          <template v-if="!isLoggedIn">
+            <v-list-item dense @click="loginPopup">
+              <v-list-item-content>
+                <v-list-item-title>
+                  <v-icon small left>
+                    mdi-login
+                  </v-icon>
+                  <span>Login</span>
+                </v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
+          </template>
+          <template v-if="isLoggedIn">
+            <v-list-item dense @click="logout">
+              <v-list-item-content>
+                <v-list-item-title>
+                  <v-icon small left>
+                    mdi-logout
+                  </v-icon>
+                  <span>Logout</span>
+                </v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
+            <v-list-item dense @click="silentRenew">
+              <v-list-item-content>
+                <v-list-item-title>
+                  <v-icon small left>
+                    mdi-refresh
+                  </v-icon>
+                  <span>Silent renew</span>
+                </v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
+            <v-list-item dense to="/profile">
+              <v-list-item-content>
+                <v-list-item-title>
+                  <v-icon small left>
+                    mdi-account-details
+                  </v-icon>
+                  <span>Profile</span>
+                </v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
+          </template>
+        </v-list>
+      </v-menu>
     </v-app-bar>
     <v-main>
       <v-container>
@@ -230,6 +300,12 @@ export default {
     },
     cancelBtnDisabled () {
       return this.$store.state.appbar.cancelBtnDisabled
+    },
+    isLoggedIn () {
+      return this.$store.getters['auth/isAuthenticated']
+    },
+    initials () {
+      return this.$store.getters['auth/initials']
     }
   },
   created () {
@@ -240,6 +316,9 @@ export default {
       this.appBarExtension = component
     })
   },
+  mounted () {
+    this.$store.dispatch('auth/loadStoredUser')
+  },
   methods: {
     closeErrorSnackbar () {
       this.$store.commit('snackbar/clearError')
@@ -249,6 +328,33 @@ export default {
     },
     onChangeTab (tab) {
       this.$store.commit('appbar/setActiveTab', tab)
+    },
+    loginPopup () {
+      this.$store.dispatch('auth/loginPopup').then((userObject) => {
+        let message = 'Login successful'
+        if (userObject.profile && userObject.profile.name) {
+          message = 'Successfully logged in as ' + userObject.profile.name
+        }
+        this.$store.commit('snackbar/setSuccess', message)
+      }).catch((_err) => {
+        this.$store.commit('snackbar/setError', 'Login failed')
+      })
+    },
+    logout () {
+      const routing = {
+        router: this.$router,
+        currentRoute: this.$route.path
+      }
+      this.$store.dispatch('auth/logout', routing).then(() => {
+        this.$store.commit('snackbar/setSuccess', 'Logout successful')
+      }).catch((err) => {
+        // eslint-disable-next-line
+        console.error(err)
+        this.$store.commit('snackbar/setError', 'Problem on logout')
+      })
+    },
+    silentRenew () {
+      this.$store.dispatch('auth/silentRenew')
     }
   }
 }
