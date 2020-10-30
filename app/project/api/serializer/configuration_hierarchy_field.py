@@ -93,8 +93,7 @@ class ConfigurationHierarchyField(fields.Field):
                 "offset_x": device_configuration.offset_x,
                 "offset_y": device_configuration.offset_y,
                 "offset_z": device_configuration.offset_z,
-                "calibration_date": fields.DateTime().
-                    deserialize(str(device_configuration.calibration_date)),
+                "calibration_date": device_configuration.calibration_date,
             }
 
         for device_configuration in configuration_device:
