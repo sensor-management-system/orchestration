@@ -177,6 +177,11 @@ def create_endpoints(api):
     api.route(
         ConfigurationDetail, "configuration_detail", base_url + "/configurations/<int:id>",
     )
+    api.route(
+        PlatformRelationship,
+        "configuration_contacts",
+        base_url + "/configurations/<int:id>/relationships/contacts",
+    )
     # ConfigurationPlatform
     api.route(
         ConfigurationPlatformList,

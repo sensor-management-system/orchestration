@@ -1,9 +1,6 @@
 from marshmallow_jsonapi import fields
 from marshmallow_jsonapi.flask import Schema, Relationship
 
-from project.api.schemas.contact_schema import ContactSchema
-from project.api.schemas.device_property_schema import DevicePropertySchema
-
 from project.api.serializer.configuration_hierarchy_field import ConfigurationHierarchyField
 
 
@@ -54,12 +51,10 @@ class ConfigurationSchema(Schema):
 
     contacts = Relationship(
         attribute="contacts",
+        self_view="configuration_contacts",
         self_view_kwargs={"id": "<id>"},
         related_view="contact_list",
-        related_view_kwargs={"filter": '[{"name":"configurations","op":"any","val":'
-                                       '{"name": "id","op": "eq","val": <id>}'
-                                       '}]'
-                             },
+        related_view_kwargs={"configuration_id": "<id>"},
         many=True,
         schema="ContactSchema",
         type_="contact",
