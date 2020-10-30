@@ -131,7 +131,7 @@ permissions and limitations under the Licence.
         />
       </template>
     </v-app-bar>
-    <v-content>
+    <v-main>
       <v-container>
         <v-snackbar v-model="hasSuccess" top color="green">
           {{ success }}
@@ -151,7 +151,7 @@ permissions and limitations under the Licence.
         </v-snackbar>
         <nuxt />
       </v-container>
-    </v-content>
+    </v-main>
     <v-footer
       :fixed="fixed"
       app
