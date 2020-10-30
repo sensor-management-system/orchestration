@@ -1,0 +1,24 @@
+{
+  "configuration": [
+    {
+      "longitude": 56.1,
+      "elevation": 42.23,
+      "location_type": "test",
+      "hierarchy": [
+        {
+          "children": [
+            {
+              "id": 1,
+              "offset_x": 0.5,
+              "calibration_date": "20201111",
+              "type": "device"
+            }
+          ],
+          "id": 1,
+          "offset_x": 1.0,
+          "type": "platform"
+        }
+      ]
+    }
+  ]
+}
