@@ -48,9 +48,14 @@ Running the linter (eslint) over all `*.js`, `*.ts` and `*.vue` files:
 $ npm run lint
 ```
 
-Fixing linter problems:
+Fixing linter problems on a specific file:
 ```bash
-$ npm run lint:fix path/to/script.ts
+$ npm run format path/to/script.ts
+```
+
+Fixing problems for all files:
+```bash
+$ npm run format .
 ```
 
 **Note:** when used with the `npm` script, the linter ignores all files and
