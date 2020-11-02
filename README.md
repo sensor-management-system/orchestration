@@ -29,6 +29,38 @@ $ npm run start
 
 For detailed explanation on how things work, check out [Nuxt.js docs](https://nuxtjs.org).
 
+#### Running tests
+
+Running all tests:
+```bash
+$ npm run test
+```
+
+Running a specific test:
+```bash
+$ npm run path/to/test.ts
+```
+
+#### Running the linter
+
+Running the linter (eslint) over all `*.js`, `*.ts` and `*.vue` files:
+```bash
+$ npm run lint
+```
+
+Fixing linter problems on a specific file:
+```bash
+$ npm run format path/to/script.ts
+```
+
+Fixing problems for all files:
+```bash
+$ npm run format .
+```
+
+**Note:** when used with the `npm` script, the linter ignores all files and
+directories that are ignored by `.gitignore` (eg. the `dist` folder).
+
 ## Run development environment with docker
 
 ### Docker
