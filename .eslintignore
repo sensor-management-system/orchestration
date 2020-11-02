@@ -1,0 +1,6 @@
+.config/
+.git/
+.npm/
+.nuxt/
+dist/
+node_modules/
