@@ -7,7 +7,6 @@ from project.api.models.platform import Platform
 
 
 class ConfigurationDevice(db.Model, AuditMixin):
-
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     offset_x = db.Column(db.Float(), nullable=True)
     offset_y = db.Column(db.Float(), nullable=True)
@@ -18,14 +17,18 @@ class ConfigurationDevice(db.Model, AuditMixin):
         db.Integer, db.ForeignKey("configuration.id"), nullable=False
     )
     configuration = db.relationship(
-        Configuration, uselist=False, foreign_keys=[configuration_id]
+        "Configuration", backref=db.backref("configuration_device"), cascade="all"
     )
-
     device_id = db.Column(db.Integer, db.ForeignKey("device.id"), nullable=False)
-    device = db.relationship(Device, uselist=False, foreign_keys=[device_id])
-
-    platform_id = db.Column(db.Integer, db.ForeignKey("platform.id"), nullable=False)
-    platform = db.relationship(Platform, uselist=False, foreign_keys=[platform_id])
+    device = db.relationship(
+        "Device", backref=db.backref("configuration_device"), cascade="all"
+    )
+    parent_platform_id = db.Column(
+        db.Integer, db.ForeignKey("platform.id"), nullable=False
+    )
+    parent_platform = db.relationship(
+        "Platform", backref=db.backref("inner_configuration_device"), cascade="all"
+    )
 
     __table_args__ = (
         UniqueConstraint(

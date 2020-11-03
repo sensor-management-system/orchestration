@@ -1,7 +1,7 @@
 from marshmallow_jsonapi import fields
 from marshmallow_jsonapi.flask import Schema, Relationship
-from project.api.schemas.contact_schema import ContactSchema
-from project.api.schemas.device_property_schema import DevicePropertySchema
+
+from project.api.serializer.configuration_hierarchy_field import ConfigurationHierarchyField
 
 
 class ConfigurationSchema(Schema):
@@ -26,6 +26,7 @@ class ConfigurationSchema(Schema):
     project_name = fields.String(allow_none=True)
     label = fields.String(allow_none=True)
     status = fields.String(default="draft", allow_none=True)
+    hierarchy = ConfigurationHierarchyField(allow_none=True)
 
     longitude_src_device_property = Relationship(
         self_view_kwargs={"id": "<id>"},
@@ -50,36 +51,12 @@ class ConfigurationSchema(Schema):
 
     contacts = Relationship(
         attribute="contacts",
+        self_view="configuration_contacts",
         self_view_kwargs={"id": "<id>"},
         related_view="contact_list",
-        related_view_kwargs={"filter": '[{"name":"configurations","op":"any","val":'
-                                       '{"name": "id","op": "eq","val": <id>}'
-                                       '}]'
-                             },
+        related_view_kwargs={"configuration_id": "<id>"},
         many=True,
         schema="ContactSchema",
         type_="contact",
-        id_field="id",
-    )
-
-    configuration_platforms = Relationship(
-        attribute="configuration_platforms",
-        self_view_kwargs={"id": "<id>"},
-        related_view="configuration_platform_list",
-        related_view_kwargs={"filter[configuration_id]": "<id>"},
-        many=True,
-        schema="ConfigurationPlatformSchema",
-        type_="configuration_platform",
-        id_field="id",
-    )
-
-    configuration_devices = Relationship(
-        attribute="configuration_devices",
-        self_view_kwargs={"id": "<id>"},
-        related_view="configuration_device_list",
-        related_view_kwargs={"filter[configuration_id]": "<id>"},
-        many=True,
-        schema="ConfigurationDeviceSchema",
-        type_="configuration_device",
         id_field="id",
     )
