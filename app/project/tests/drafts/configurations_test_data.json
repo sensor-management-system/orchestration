@@ -19,6 +19,44 @@
           "type": "platform"
         }
       ]
+    },
+    {
+      "longitude": 56.1,
+      "location_type": "test2",
+      "hierarchy": [
+        {
+          "children": [
+            {
+              "id": 1,
+              "offset_x": 0.52,
+              "calibration_date": 20201111,
+              "type": "device"
+            }
+          ],
+          "id": 1,
+          "offset_x": 2.0,
+          "type": "platform"
+        }
+      ]
+    },
+    {
+      "longitude": 56.1,
+      "location_type": "test3",
+      "hierarchy": [
+        {
+          "children": [
+            {
+              "id": 1,
+              "offset_x": 0.52,
+              "calibration_date": "datetime",
+              "type": "device"
+            }
+          ],
+          "id": 1,
+          "offset_x": 2.0,
+          "type": "platform"
+        }
+      ]
     }
   ]
 }

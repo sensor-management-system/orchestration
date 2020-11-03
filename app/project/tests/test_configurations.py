@@ -1,4 +1,6 @@
+import datetime
 import unittest
+import json
 
 from project.api.models.base_model import db
 from project.tests.base import BaseTestCase
@@ -127,15 +129,124 @@ class TestConfigurationsService(BaseTestCase):
             self.json_data_url,
             "configuration")
 
-        device_data = {
+        config_data = {
             "data": {
                 "type": "configuration",
                 "attributes": config_json[0]}
 
         }
-        super().add_object(
-            url=self.configurations_url, data_object=device_data,
+        res = super().add_object(
+            url=self.configurations_url, data_object=config_data,
             object_type=self.object_type)
+        self.assertEqual('2020-11-11T00:00:00',
+                         res['data']['attributes']['hierarchy'][0]['children'][0]
+                         ['calibration_date'])
+
+    def test_add_configuration_with_int_as_calibration_type(self):
+        """Ensure That a Post for a new configuration
+        with value-type for calibration-date = integer throw
+        a type error."""
+
+        devices_json = extract_data_from_json_file(
+            self.device_json_data_url,
+            "devices")
+
+        device_data = {
+            "data": {
+                "type": "device",
+                "attributes": devices_json[0]}
+
+        }
+        super().add_object(
+            url=self.device_url, data_object=device_data,
+            object_type='device')
+
+        platforms_json = extract_data_from_json_file(
+            self.platform_json_data_url,
+            "platforms")
+
+        platform_data = {
+            "data": {
+                "type": "platform",
+                "attributes": platforms_json[0]
+            }
+        }
+
+        super().add_object(
+            url=self.platform_url, data_object=platform_data,
+            object_type='platform')
+
+        config_json = extract_data_from_json_file(
+            self.json_data_url,
+            "configuration")
+
+        config_data = {
+            "data": {
+                "type": "configuration",
+                "attributes": config_json[1]}
+
+        }
+        with self.client:
+            response = self.client.post(
+                self.configurations_url,
+                data=json.dumps(config_data),
+                content_type='application/vnd.api+json',
+            )
+        json.loads(response.data.decode())
+        self.assertEqual(response.status_code, 500)
+
+    def test_add_configuration_with_false_string_as_calibration_type(self):
+        """Ensure That a Post for a new configuration
+        with false string value for calibration-date throw
+        a type error."""
+
+        devices_json = extract_data_from_json_file(
+            self.device_json_data_url,
+            "devices")
+
+        device_data = {
+            "data": {
+                "type": "device",
+                "attributes": devices_json[0]}
+
+        }
+        super().add_object(
+            url=self.device_url, data_object=device_data,
+            object_type='device')
+
+        platforms_json = extract_data_from_json_file(
+            self.platform_json_data_url,
+            "platforms")
+
+        platform_data = {
+            "data": {
+                "type": "platform",
+                "attributes": platforms_json[0]
+            }
+        }
+
+        super().add_object(
+            url=self.platform_url, data_object=platform_data,
+            object_type='platform')
+
+        config_json = extract_data_from_json_file(
+            self.json_data_url,
+            "configuration")
+
+        config_data = {
+            "data": {
+                "type": "configuration",
+                "attributes": config_json[2]}
+
+        }
+        with self.client:
+            response = self.client.post(
+                self.configurations_url,
+                data=json.dumps(config_data),
+                content_type='application/vnd.api+json',
+            )
+        json.loads(response.data.decode())
+        self.assertEqual(response.status_code, 500)
 
 
 if __name__ == '__main__':
