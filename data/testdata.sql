@@ -44,7 +44,8 @@ VALUES (null, null, 'ewrtewr', 'wertwre', 'ewrtew', 'ewrtwe', 'ewrtwer', 'wert',
 
 
 INSERT INTO public.configuration_device (created_at, updated_at, offset_x, offset_y, offset_z, calibration_date,
-                                         configuration_id, device_id, platform_id, created_by_id, updated_by_id)
+                                         configuration_id, device_id, parent_platform_id,
+                                         created_by_id, updated_by_id)
 VALUES (null, null, 1, 2, 3, '2020-09-09 13:14:28.000000', 1, 1, 1, 1, 1);
 INSERT INTO public.configuration_platform (created_at, updated_at, offset_x, offset_y, offset_z, configuration_id,
                                            parent_platform_id, platform_id, created_by_id, updated_by_id)
