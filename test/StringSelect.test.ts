@@ -57,7 +57,7 @@ describe('StringSelect', () => {
         value: ['A'],
         items: ['A', 'B'],
         color: 'red',
-        label: 'Add a contact'
+        label: 'Add a string'
       }
     })
   })
@@ -78,12 +78,12 @@ describe('StringSelect', () => {
    * removing
    */
 
-  it('should trigger an update event when a contact is removed', () => {
+  it('should trigger an update event when a string-item is removed', () => {
     wrapper.vm.remove('A')
     expect(wrapper.emitted('input')).toBeTruthy()
   })
 
-  it('should trigger an event with a contact array with a length decreased by 1 when a contact is removed', () => {
+  it('should trigger an event with a string array with a length decreased by 1 when a string-item is removed', () => {
     wrapper.vm.remove('A')
     expect(wrapper.emitted('input')[0][0]).toHaveLength(0)
   })
@@ -92,12 +92,12 @@ describe('StringSelect', () => {
    * adding
    */
 
-  it('should trigger an update event when a contact is added', () => {
+  it('should trigger an update event when a string-item is added', () => {
     wrapper.vm.add('B')
     expect(wrapper.emitted('input')).toBeTruthy()
   })
 
-  it('should trigger an event with a contact array with a length increased by 1 when a contact is added', () => {
+  it('should trigger an event with a string array with a length increased by 1 when a string-item is added', () => {
     wrapper.vm.add('B')
     expect(wrapper.emitted('input')[0][0]).toHaveLength(2)
   })
