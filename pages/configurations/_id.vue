@@ -424,7 +424,11 @@ export default class ConfigurationsIdPage extends Vue {
         this.showValidationError()
         return
       }
-      this.save()
+      this.save().then(() => {
+        this.$store.commit('snackbar/setSuccess', 'Save successful')
+      }).catch(() => {
+        this.$store.commit('snackbar/setError', 'Save failed')
+      })
     })
     this.$nuxt.$on('AppBarContent:cancel-button-click', () => {
       this.cancel()
@@ -443,7 +447,12 @@ export default class ConfigurationsIdPage extends Vue {
     this.$api.projects.findAll().then((foundProjects) => {
       this.projects = foundProjects
     })
-    this.loadConfiguration()
+    this.loadConfiguration().then((_configuration) => {
+      // In the branch for the refactoring of the appbar handling
+      // we may want to set the appbar title here
+    }).catch(() => {
+      this.$store.commit('snackbar/setError', 'Loading configuration failed')
+    })
     this.$nextTick(() => {
       if (!this.$route.params.id) {
         this.$nuxt.$emit('AppBarContent:title', 'Add Configuration')
@@ -453,18 +462,22 @@ export default class ConfigurationsIdPage extends Vue {
     })
   }
 
-  loadConfiguration () {
-    const configurationId = this.$route.params.id
-    if (!configurationId) {
-      this.createBackup()
-      this.editMode = true
-      return
-    }
-    this.editMode = false
-    this.$api.configurations.findById(configurationId).then((foundConfiguration) => {
-      this.configuration = foundConfiguration
-    }).catch((_error) => {
-      this.$store.commit('snackbar/setError', 'Loading configuration failed')
+  loadConfiguration () : Promise<Configuration|null> {
+    return new Promise((resolve, reject) => {
+      const configurationId = this.$route.params.id
+      if (!configurationId) {
+        this.createBackup()
+        this.editMode = true
+        resolve(null)
+        return
+      }
+      this.editMode = false
+      this.$api.configurations.findById(configurationId).then((foundConfiguration) => {
+        this.configuration = foundConfiguration
+        resolve(foundConfiguration)
+      }).catch((error) => {
+        reject(error)
+      })
     })
   }
 
@@ -476,14 +489,16 @@ export default class ConfigurationsIdPage extends Vue {
     this.$nuxt.$off('AppBarExtension:change')
   }
 
-  save () {
-    this.$api.configurations.save(this.configuration).then((savedConfiguration) => {
-      this.configuration = savedConfiguration
-      this.configurationBackup = null
-      this.editMode = false
-      this.$store.commit('snackbar/setSuccess', 'Save successful')
-    }).catch((_error) => {
-      this.$store.commit('snackbar/setError', 'Save failed')
+  save (): Promise<Configuration> {
+    return new Promise((resolve, reject) => {
+      this.$api.configurations.save(this.configuration).then((savedConfiguration) => {
+        this.configuration = savedConfiguration
+        this.configurationBackup = null
+        this.editMode = false
+        resolve(savedConfiguration)
+      }).catch((error) => {
+        reject(error)
+      })
     })
   }
 
