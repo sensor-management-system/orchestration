@@ -30,10 +30,7 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <v-form
-      ref="form"
-      v-model="formIsValid"
-    >
+    <v-form>
       <v-card
         outlined
       >
@@ -74,96 +71,106 @@ permissions and limitations under the Licence.
                     />
                   </v-col>
                 </v-row>
-                <v-row>
-                  <v-col cols="12" md="3">
-                    <v-menu
-                      v-if="!readonly"
-                      v-model="startDateMenu"
-                      :close-on-content-click="false"
-                      :nudge-right="40"
-                      transition="scale-transition"
-                      offset-y
-                      min-width="290px"
-                    >
-                      <template v-slot:activator="{ on, attrs }">
-                        <v-text-field
+                <v-form
+                  ref="datesForm"
+                  v-model="datesAreValid"
+                >
+                  <v-row>
+                    <v-col cols="12" md="3">
+                      <v-menu
+                        v-if="!readonly"
+                        v-model="startDateMenu"
+                        :close-on-content-click="false"
+                        :nudge-right="40"
+                        transition="scale-transition"
+                        offset-y
+                        min-width="290px"
+                      >
+                        <template v-slot:activator="{ on, attrs }">
+                          <v-text-field
+                            :value="getStartDate()"
+                            :rules="[rules.startDate]"
+                            v-bind="attrs"
+                            label="Start date"
+                            clearable
+                            prepend-icon="mdi-calendar-range"
+                            readonly
+                            v-on="on"
+                            @click:clear="setStartDateAndValidate(null)"
+                          />
+                        </template>
+                        <v-date-picker
                           :value="getStartDate()"
-                          :rules="[rules.startDate]"
-                          v-bind="attrs"
-                          label="Start date"
-                          clearable
-                          prepend-icon="mdi-calendar-range"
-                          readonly
-                          v-on="on"
-                          @click:clear="setStartDateAndValidate(null)"
+                          first-day-of-week="1"
+                          :show-week="true"
+                          @input="setStartDateAndValidate"
                         />
-                      </template>
-                      <v-date-picker
+                      </v-menu>
+                      <v-text-field
+                        v-else
                         :value="getStartDate()"
-                        first-day-of-week="1"
-                        :show-week="true"
-                        @input="setStartDateAndValidate"
+                        label="Start date"
+                        prepend-icon="mdi-calendar-range"
+                        readonly
+                        disabled
                       />
-                    </v-menu>
-                    <v-text-field
-                      v-else
-                      :value="getStartDate()"
-                      label="Start date"
-                      prepend-icon="mdi-calendar-range"
-                      readonly
-                      disabled
-                    />
-                  </v-col>
-                  <v-col cols="12" md="3">
-                    <v-menu
-                      v-if="!readonly"
-                      v-model="endDateMenu"
-                      :close-on-content-click="false"
-                      :nudge-right="40"
-                      transition="scale-transition"
-                      offset-y
-                      min-width="290px"
-                    >
-                      <template v-slot:activator="{ on, attrs }">
-                        <v-text-field
+                    </v-col>
+                    <v-col cols="12" md="3">
+                      <v-menu
+                        v-if="!readonly"
+                        v-model="endDateMenu"
+                        :close-on-content-click="false"
+                        :nudge-right="40"
+                        transition="scale-transition"
+                        offset-y
+                        min-width="290px"
+                      >
+                        <template v-slot:activator="{ on, attrs }">
+                          <v-text-field
+                            :value="getEndDate()"
+                            :rules="[rules.endDate]"
+                            v-bind="attrs"
+                            label="End date"
+                            clearable
+                            prepend-icon="mdi-calendar-range"
+                            readonly
+                            v-on="on"
+                            @click:clear="setEndDateAndValidate(null)"
+                          />
+                        </template>
+                        <v-date-picker
                           :value="getEndDate()"
-                          :rules="[rules.endDate]"
-                          v-bind="attrs"
-                          label="End date"
-                          clearable
-                          prepend-icon="mdi-calendar-range"
-                          readonly
-                          v-on="on"
-                          @click:clear="setEndDateAndValidate(null)"
+                          first-day-of-week="1"
+                          :show-week="true"
+                          @input="setEndDateAndValidate"
                         />
-                      </template>
-                      <v-date-picker
+                      </v-menu>
+                      <v-text-field
+                        v-else
                         :value="getEndDate()"
-                        first-day-of-week="1"
-                        :show-week="true"
-                        @input="setEndDateAndValidate"
+                        label="End date"
+                        prepend-icon="mdi-calendar-range"
+                        readonly
+                        disabled
                       />
-                    </v-menu>
-                    <v-text-field
-                      v-else
-                      :value="getEndDate()"
-                      label="End date"
-                      prepend-icon="mdi-calendar-range"
-                      readonly
-                      disabled
-                    />
-                  </v-col>
-                </v-row>
+                    </v-col>
+                  </v-row>
+                </v-form>
                 <v-row>
                   <v-col cols="12" md="3">
-                    <v-select
-                      v-model="locationType"
-                      label="Location type"
-                      :rules="[rules.locationType]"
-                      :items="['Stationary', 'Dynamic']"
-                      :readonly="readonly"
-                      :disabled="readonly"
-                    />
+                    <v-form
+                      ref="locationTypeForm"
+                      v-model="locationTypeIsValid"
+                    >
+                      <v-select
+                        v-model="locationType"
+                        label="Location type"
+                        :rules="[rules.locationType]"
+                        :items="['Stationary', 'Dynamic']"
+                        :readonly="readonly"
+                        :disabled="readonly"
+                      />
+                    </v-form>
                   </v-col>
                 </v-row>
                 <div v-if="locationType === 'Stationary'">
@@ -409,17 +416,72 @@ export default class ConfigurationsIdPage extends Vue {
   private selectedNode: ConfigurationsTreeNode | null = null
 
   private rules: Object = {
-    startDate: (v: string): boolean | string => v === null || !this.configuration.endDate || stringToDate(v) <= this.configuration.endDate || 'Start date must not be after end date',
-    endDate: (v: string): boolean | string => v === null || !this.configuration.startDate || stringToDate(v) >= this.configuration.startDate || 'End date must not be before start date',
-
-    locationType: (v: string): boolean | string => v === LocationType.Stationary || v === LocationType.Dynamic || 'Location type must be set'
+    startDate: this.validateInputForStartDate,
+    endDate: this.validateInputForEndDate,
+    locationType: this.validateInputForLocationType
   }
 
-  private formIsValid: boolean = true
+  validateInputForStartDate (v: string): boolean | string {
+    if (v === null || v === '') {
+      return true
+    }
+    if (!this.configuration.endDate) {
+      return true
+    }
+    if (stringToDate(v) <= this.configuration.endDate) {
+      return true
+    }
+    return 'Start date must not be after end date'
+  }
+
+  validateInputForEndDate (v: string): boolean | string {
+    if (v === null || v === '') {
+      return true
+    }
+    if (!this.configuration.startDate) {
+      return true
+    }
+    if (stringToDate(v) >= this.configuration.startDate) {
+      return true
+    }
+    return 'End date must not be before start date'
+  }
+
+  validateInputForLocationType (v: string): boolean | string {
+    if (v === LocationType.Stationary) {
+      return true
+    }
+    if (v === LocationType.Dynamic) {
+      return true
+    }
+    return 'Location type must be set'
+  }
+
+  checkValidationOfAllFields () {
+    // run the registered validations and show errors on the page
+    this.checkValidationOfDates()
+    this.checkValidationOfLocationType()
+  }
+
+  checkValidationOfDates () {
+    (this.$refs.datesForm as Vue & { validate: () => boolean }).validate()
+  }
+
+  checkValidationOfLocationType () {
+    (this.$refs.locationTypeForm as Vue & { validate: () => boolean }).validate()
+  }
+
+  private datesAreValid: boolean = true
+  private locationTypeIsValid: boolean = true
+
+  get formIsValid () : boolean {
+    return this.datesAreValid && this.locationTypeIsValid
+  }
 
   created () {
     this.$nuxt.$emit('app-bar-content', AppBarEditModeContent)
     this.$nuxt.$on('AppBarContent:save-button-click', () => {
+      this.checkValidationOfAllFields()
       if (!this.formIsValid) {
         this.showValidationError()
         return
@@ -556,13 +618,13 @@ export default class ConfigurationsIdPage extends Vue {
         if (!(this.configuration.location instanceof StationaryLocation)) {
           this.configuration.location = new StationaryLocation()
         }
-        (this.$refs.form as Vue & { validate: () => boolean }).validate()
+        this.checkValidationOfLocationType()
         break
       case LocationType.Dynamic:
         if (!(this.configuration.location instanceof DynamicLocation)) {
           this.configuration.location = new DynamicLocation()
         }
-        (this.$refs.form as Vue & { validate: () => boolean }).validate()
+        this.checkValidationOfLocationType()
         break
       default:
         this.configuration.location = null
@@ -793,7 +855,7 @@ export default class ConfigurationsIdPage extends Vue {
     this.setStartDate(aDate)
     this.startDateMenu = false
     if (this.configuration.endDate !== null) {
-      (this.$refs.form as Vue & { validate: () => boolean }).validate()
+      this.checkValidationOfDates()
     }
   }
 
@@ -801,7 +863,7 @@ export default class ConfigurationsIdPage extends Vue {
     this.setEndDate(aDate)
     this.endDateMenu = false
     if (this.configuration.startDate !== null) {
-      (this.$refs.form as Vue & { validate: () => boolean }).validate()
+      this.checkValidationOfDates()
     }
   }
 
