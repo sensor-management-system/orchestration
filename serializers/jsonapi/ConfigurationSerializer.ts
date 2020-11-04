@@ -36,7 +36,7 @@ import { Contact } from '@/models/Contact'
 import { IJsonApiObjectList, IJsonApiObject, IJsonApiDataWithId, IJsonApiDataWithOptionalId, IJsonApiTypeIdAttributes } from '@/serializers/jsonapi/JsonApiTypes'
 
 import { ContactSerializer, IMissingContactData } from '@/serializers/jsonapi/ContactSerializer'
-import { DynamicLocation, StationaryLocation, LocationType } from '~/models/Location'
+import { DynamicLocation, StationaryLocation, LocationType } from '@/models/Location'
 
 export interface IConfigurationMissingData {
   contacts: IMissingContactData
