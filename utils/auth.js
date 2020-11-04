@@ -58,9 +58,20 @@ export const createAuthModul = (oidcSettings, storeSettings = {}) => {
   }
 
   const routeIsPublic = (route) => {
+    /* original code */
+    /*
     if (route.meta && route.meta.isPublic) {
       return true
     }
+    */
+
+    // corrently we don't differ between public and non public routes.
+    // And - additionally - the route.meta is an array.
+    // it is not an object for its own, but a container containing
+    // this object.
+    //
+    // And I also don't know how to set if a route is public or not...
+    return true
   }
 
   const errorPayload = (context, error) => {
