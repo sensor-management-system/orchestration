@@ -1,4 +1,4 @@
-import {UserManager} from "oidc-client";
+import { UserManager } from 'oidc-client'
 
 export const createAuthModul = (oidcSettings, storeSettings = {}) => {
   const objectAssign = (objects) => {
@@ -21,18 +21,18 @@ export const createAuthModul = (oidcSettings, storeSettings = {}) => {
   const getOidcCallbackPath = (callbackUri, routeBase = '/') => {
     if (callbackUri) {
       const domainStartsAt = '://'
-      const hostAndPath = callbackUri.substr(callbackUri.indexOf(domainStartsAt) + domainStartsAt.length);
-      const routeBaseLength = routeBase === '/' ? 0 : routeBase.length;
-      return hostAndPath.substr(hostAndPath.indexOf(routeBase) + routeBaseLength);
+      const hostAndPath = callbackUri.substr(callbackUri.indexOf(domainStartsAt) + domainStartsAt.length)
+      const routeBaseLength = routeBase === '/' ? 0 : routeBase.length
+      return hostAndPath.substr(hostAndPath.indexOf(routeBase) + routeBaseLength)
     }
     return null
   }
 
   const dispatchCustomBrowserEvent = (eventName, detail = {}, params = {}) => {
     if (window) {
-      params = params || {bubbles: false, cancelable: false}
-      params = objectAssign([params, {detail: detail}])
-      var event = document.createEvent('CustomEvent')
+      params = params || { bubbles: false, cancelable: false }
+      params = objectAssign([params, { detail }])
+      const event = document.createEvent('CustomEvent')
       event.initCustomEvent(
         eventName,
         params.bubbles,
@@ -43,23 +43,23 @@ export const createAuthModul = (oidcSettings, storeSettings = {}) => {
     }
   }
 
-  const userManager = new UserManager(oidcSettings);
+  const userManager = new UserManager(oidcSettings)
 
-  const oidcCallbackPath = getOidcCallbackPath(oidcSettings.redirect_uri, storeSettings.routeBase || '/');
-  const oidcPopupCallbackPath = getOidcCallbackPath(oidcSettings.popup_redirect_uri, storeSettings.routeBase || '/');
-  const oidcSilentCallbackPath = getOidcCallbackPath(oidcSettings.silent_redirect_uri, storeSettings.routeBase || '/');
-  const oidcLogoutCallbackPath = getOidcCallbackPath(oidcSettings.post_logout_redirect_uri, storeSettings.routeBase || '/');
+  const oidcCallbackPath = getOidcCallbackPath(oidcSettings.redirect_uri, storeSettings.routeBase || '/')
+  const oidcPopupCallbackPath = getOidcCallbackPath(oidcSettings.popup_redirect_uri, storeSettings.routeBase || '/')
+  const oidcSilentCallbackPath = getOidcCallbackPath(oidcSettings.silent_redirect_uri, storeSettings.routeBase || '/')
+  const oidcLogoutCallbackPath = getOidcCallbackPath(oidcSettings.post_logout_redirect_uri, storeSettings.routeBase || '/')
 
   const isAuthenticated = (state) => {
     if (state.id_token) {
       return true
     }
     return false
-  };
+  }
 
   const routeIsPublic = (route) => {
     if (route.meta && route.meta.isPublic) {
-      return true;
+      return true
     }
   }
 
@@ -91,8 +91,8 @@ export const createAuthModul = (oidcSettings, storeSettings = {}) => {
 
   const parseJwt = (token) => {
     try {
-      var base64Url = token.split('.')[1]
-      var base64 = base64Url.replace('-', '+').replace('_', '/')
+      const base64Url = token.split('.')[1]
+      const base64 = base64Url.replace('-', '+').replace('_', '/')
       return JSON.parse(window.atob(base64))
     } catch (error) {
       return {}
@@ -115,7 +115,7 @@ export const createAuthModul = (oidcSettings, storeSettings = {}) => {
     return false
   }
 
-  //**********************************Store******************************************************//
+  // **********************************Store******************************************************
 
   const state = {
     id_token: null,
@@ -124,22 +124,22 @@ export const createAuthModul = (oidcSettings, storeSettings = {}) => {
     error: null,
     intervalId: null,
     isAutomaticSilentRenewOn: false
-  };
+  }
 
   const getters = {
     oidcIdToken: (state) => {
-      return state.id_token;
+      return state.id_token
     },
     isAuthenticated: (state) => {
-      return isAuthenticated(state);
+      return isAuthenticated(state)
     },
     username: (state) => {
       if (state.user) {
-        return state.user.name;
+        return state.user.name
       }
-      return null;
+      return null
     },
-    initials(state) {
+    initials (state) {
       if (state.user) {
         const givenName = state.user.given_name
         const familyName = state.user.family_name
@@ -160,122 +160,118 @@ export const createAuthModul = (oidcSettings, storeSettings = {}) => {
 
     userEmail: (state) => {
       if (state.user) {
-        return state.user.email;
+        return state.user.email
       }
-      return null;
+      return null
     },
     allUserClaims: (state) => {
       if (state.user) {
-        return state.user;
+        return state.user
       }
-      return [];
+      return []
     },
     oidcUser: (state) => {
       return state.user
     }
-  };
+  }
 
   const actions = {
-    async loginPopup({dispatch, commit}) {
-
+    async loginPopup ({ dispatch, commit }) {
       return new Promise((resolve, reject) => {
         userManager.signinPopup()
-          .then(user => {
-            dispatch('oidcWasAuthenticated', user);
-            dispatch('automaticSilentRenew');
+          .then((user) => {
+            dispatch('oidcWasAuthenticated', user)
+            dispatch('automaticSilentRenew')
             resolve(sessionStorage.getItem('ufz_vuex_oidc_active_route') || '/')
-            dispatchCustomBrowserEvent('userLoaded', user);
+            dispatchCustomBrowserEvent('userLoaded', user)
           })
-          .catch(err => {
+          .catch((err) => {
             commit('setOidcError', errorPayload('oidcSignInCallback', err))
             reject(err)
           })
       })
-    }
-    ,
-    oidcSignInPopupCallback(context, url) {
+    },
+    oidcSignInPopupCallback (context, url) {
       return new Promise((resolve, reject) => {
         userManager.signinPopupCallback(url)
-          .catch(err => {
+          .catch((err) => {
             context.commit('setOidcError', errorPayload('oidcSignInPopupCallback', err))
             reject(err)
           })
       })
     },
-    oidcWasAuthenticated({commit}, user) {
-      commit('setOidcAuth', user);
+    oidcWasAuthenticated ({ commit }, user) {
+      commit('setOidcAuth', user)
     },
-    async logoutPopup({commit}) {
-      await userManager.signoutPopup();
-      commit('unsetOidcAuth');
-      commit('clearInterval');
+    async logoutPopup ({ commit }) {
+      await userManager.signoutPopup()
+      commit('unsetOidcAuth')
+      commit('clearInterval')
     },
-    silentRenew({dispatch}) {
+    silentRenew ({ dispatch }) {
       userManager.signinSilent()
-        .then(user => {
-          dispatch('oidcWasAuthenticated', user);
-          dispatchCustomBrowserEvent('userLoaded', user);
-        });
+        .then((user) => {
+          dispatch('oidcWasAuthenticated', user)
+          dispatchCustomBrowserEvent('userLoaded', user)
+        })
     },
-    automaticSilentRenew({state, dispatch, commit}) {
+    automaticSilentRenew ({ state, dispatch, commit }) {
       if (!state.intervalId) {
-        let intervalId = setInterval(() => dispatch('silentRenew'), oidcSettings.renewIntervall);
-        commit('setIntervalId', intervalId);
+        const intervalId = setInterval(() => dispatch('silentRenew'), oidcSettings.renewIntervall)
+        commit('setIntervalId', intervalId)
       }
-
     },
-    handleSilentRenewCallback() {
-      return new Promise(((resolve, reject) => {
+    handleSilentRenewCallback () {
+      return new Promise((resolve, reject) => {
         userManager.signinSilentCallback()
-          .catch(err => reject(err));
-      }))
+          .catch(err => reject(err))
+      })
     },
-    handleSigninPopupCallback() {
+    handleSigninPopupCallback () {
       return new Promise((resolve, reject) => {
         userManager.signinPopupCallback()
-          .catch(err => {
+          .catch((err) => {
             reject(err)
           })
       })
     },
-    handleSignoutPopupCallback() {
+    handleSignoutPopupCallback () {
       return new Promise((resolve, reject) => {
         userManager.signoutPopupCallback()
-          .catch(err => {
+          .catch((err) => {
             reject(err)
           })
       })
     },
-    loadStoredUser({commit, dispatch}) {
+    loadStoredUser({ commit, dispatch }) {
       userManager.getUser()
         .then((user) => {
           if (user !== null) {
-            commit('setOidcAuth', user);
-            dispatch('automaticSilentRenew');
+            commit('setOidcAuth', user)
+            dispatch('automaticSilentRenew')
           }
         })
     },
-    async oidcCheckAccess(context, route) {
-      return new Promise(resolve => {
-
+    async oidcCheckAccess (context, route) {
+      return new Promise((resolve) => {
         if (routeIsOidcCallback(route)) {
           resolve(true)
           return
         }
 
-        let hasAccess = true;
+        let hasAccess = true
 
-        const getUserPromise = new Promise(resolve => {
-          userManager.getUser().then(user => {
+        const getUserPromise = new Promise((resolve) => {
+          userManager.getUser().then((user) => {
             resolve(user)
           }).catch(() => {
             resolve(null)
           })
-        });
+        })
 
-        const isAuthenticatedInStore = isAuthenticated(context.state);
+        const isAuthenticatedInStore = isAuthenticated(context.state)
 
-        getUserPromise.then(user => {
+        getUserPromise.then((user) => {
           if (!user || tokenIsExpired(user.id_token)) {
             if (routeIsPublic(route)) {
               if (isAuthenticatedInStore) {
@@ -296,57 +292,55 @@ export const createAuthModul = (oidcSettings, storeSettings = {}) => {
             }
           } else {
             context.dispatch('oidcWasAuthenticated', user)
-            context.dispatch('automaticSilentRenew');
+            context.dispatch('automaticSilentRenew')
           }
           resolve(hasAccess)
         })
-
       })
     },
-    authenticateOidc(context, payload = {}) {
+    authenticateOidc (context, payload = {}) {
       if (typeof payload === 'string') {
-        payload = {redirectPath: payload}
+        payload = { redirectPath: payload }
       }
       if (payload.redirectPath) {
         sessionStorage.setItem('ufz_vuex_oidc_active_route', payload.redirectPath)
       } else {
-        sessionStorage.removeItem('ufz_vuex_oidc_active_route');
+        sessionStorage.removeItem('ufz_vuex_oidc_active_route')
       }
     },
-    removeOidcUser({commit}) {
+    removeOidcUser ({ commit }) {
       /* istanbul ignore next */
       return userManager.removeUser().then(() => {
-        commit('unsetOidcAuth');
-        commit('clearInterval');
-
+        commit('unsetOidcAuth')
+        commit('clearInterval')
       })
     }
-  };
+  }
 
   const mutations = {
-    setOidcAuth(state, user) {
-      state.id_token = user.id_token;
-      state.user = user.profile;
-      state.scopes = user.scopes;
-      state.error = null;
+    setOidcAuth (state, user) {
+      state.id_token = user.id_token
+      state.user = user.profile
+      state.scopes = user.scopes
+      state.error = null
     },
-    unsetOidcAuth(state) {
-      state.id_token = null;
-      state.user = null;
-      state.scopes = null;
-      sessionStorage.removeItem('ufz_vuex_oidc_active_route');
+    unsetOidcAuth (state) {
+      state.id_token = null
+      state.user = null
+      state.scopes = null
+      sessionStorage.removeItem('ufz_vuex_oidc_active_route')
     },
-    setIntervalId(state, intervalId) {
+    setIntervalId (state, intervalId) {
       state.intervalId = intervalId
     },
-    clearInterval(state) {
-      clearInterval(state.intervalId);
-      state.intervalId = null;
+    clearInterval (state) {
+      clearInterval(state.intervalId)
+      state.intervalId = null
     },
-    setOidcError(state, payload) {
+    setOidcError (state, payload) {
       state.error = payload.error
     }
-  };
+  }
 
   const storeModule = objectAssign([
     storeSettings,

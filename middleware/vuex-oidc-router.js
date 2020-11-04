@@ -1,13 +1,12 @@
 export default function (context) {
   return new Promise((resolve, reject) => {
     context.store.dispatch('oidc/oidcCheckAccess', context.route)
-           .then((hasAccess) => {
-             if (hasAccess) {
-               resolve()
-             }
-           })
-           .catch(() => {
-           })
+      .then((hasAccess) => {
+        if (hasAccess) {
+          resolve()
+        }
+      }).catch((error) => {
+      })
   })
 }
 

@@ -1,6 +1,5 @@
-import oidcSettings from "~/config/oidc";
-import {createAuthModul} from "~/utils/auth";
-
+import oidcSettings from '@/config/oidc'
+import { createAuthModul } from '@/utils/auth'
 
 const storeModule = createAuthModul(oidcSettings, {
   namespaced: true,
