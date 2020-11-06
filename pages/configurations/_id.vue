@@ -30,311 +30,309 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <v-form>
-      <v-card
-        outlined
+    <v-card
+      outlined
+    >
+      <v-tabs-items
+        v-model="activeTab"
       >
-        <v-tabs-items
-          v-model="activeTab"
-        >
-          <!-- Configuration -->
-          <v-tab-item :eager="true">
-            <v-card
-              flat
-            >
-              <v-card-text>
+        <!-- Configuration -->
+        <v-tab-item :eager="true">
+          <v-card
+            flat
+          >
+            <v-card-text>
+              <v-row>
+                <v-col cols="12" md="3">
+                  <v-text-field
+                    v-model="configuration.label"
+                    label="Label"
+                    :readonly="readonly"
+                    :disabled="readonly"
+                  />
+                </v-col>
+                <v-col cols="12" md="3">
+                  <v-combobox
+                    v-model="configuration.status"
+                    :items="configurationStates"
+                    label="Status"
+                    :readonly="readonly"
+                    :disabled="readonly"
+                  />
+                </v-col>
+                <v-col cols="12" md="3">
+                  <v-combobox
+                    v-model="configurationProjectName"
+                    :items="projectNames"
+                    label="Project"
+                    :readonly="readonly"
+                    :disabled="readonly"
+                  />
+                </v-col>
+              </v-row>
+              <v-form
+                ref="datesForm"
+                v-model="datesAreValid"
+              >
+                <v-row>
+                  <v-col cols="12" md="3">
+                    <v-menu
+                      v-if="!readonly"
+                      v-model="startDateMenu"
+                      :close-on-content-click="false"
+                      :nudge-right="40"
+                      transition="scale-transition"
+                      offset-y
+                      min-width="290px"
+                    >
+                      <template v-slot:activator="{ on, attrs }">
+                        <v-text-field
+                          :value="getStartDate()"
+                          :rules="[rules.startDate]"
+                          v-bind="attrs"
+                          label="Start date"
+                          clearable
+                          prepend-icon="mdi-calendar-range"
+                          readonly
+                          v-on="on"
+                          @click:clear="setStartDateAndValidate(null)"
+                        />
+                      </template>
+                      <v-date-picker
+                        :value="getStartDate()"
+                        first-day-of-week="1"
+                        :show-week="true"
+                        @input="setStartDateAndValidate"
+                      />
+                    </v-menu>
+                    <v-text-field
+                      v-else
+                      :value="getStartDate()"
+                      label="Start date"
+                      prepend-icon="mdi-calendar-range"
+                      readonly
+                      disabled
+                    />
+                  </v-col>
+                  <v-col cols="12" md="3">
+                    <v-menu
+                      v-if="!readonly"
+                      v-model="endDateMenu"
+                      :close-on-content-click="false"
+                      :nudge-right="40"
+                      transition="scale-transition"
+                      offset-y
+                      min-width="290px"
+                    >
+                      <template v-slot:activator="{ on, attrs }">
+                        <v-text-field
+                          :value="getEndDate()"
+                          :rules="[rules.endDate]"
+                          v-bind="attrs"
+                          label="End date"
+                          clearable
+                          prepend-icon="mdi-calendar-range"
+                          readonly
+                          v-on="on"
+                          @click:clear="setEndDateAndValidate(null)"
+                        />
+                      </template>
+                      <v-date-picker
+                        :value="getEndDate()"
+                        first-day-of-week="1"
+                        :show-week="true"
+                        @input="setEndDateAndValidate"
+                      />
+                    </v-menu>
+                    <v-text-field
+                      v-else
+                      :value="getEndDate()"
+                      label="End date"
+                      prepend-icon="mdi-calendar-range"
+                      readonly
+                      disabled
+                    />
+                  </v-col>
+                </v-row>
+              </v-form>
+              <v-row>
+                <v-col cols="12" md="3">
+                  <v-form
+                    ref="locationTypeForm"
+                    v-model="locationTypeIsValid"
+                  >
+                    <v-select
+                      v-model="locationType"
+                      label="Location type"
+                      :rules="[rules.locationType]"
+                      :items="['Stationary', 'Dynamic']"
+                      :readonly="readonly"
+                      :disabled="readonly"
+                    />
+                  </v-form>
+                </v-col>
+              </v-row>
+              <div v-if="locationType === 'Stationary'">
                 <v-row>
                   <v-col cols="12" md="3">
                     <v-text-field
-                      v-model="configuration.label"
-                      label="Label"
+                      v-model.number.lazy="configuration.location.latitude"
+                      label="Latitude (WGS84)"
+                      type="number"
                       :readonly="readonly"
                       :disabled="readonly"
                     />
                   </v-col>
                   <v-col cols="12" md="3">
-                    <v-combobox
-                      v-model="configuration.status"
-                      :items="configurationStates"
-                      label="Status"
+                    <v-text-field
+                      v-model.number.lazy="configuration.location.longitude"
+                      label="Longitude (WGS84)"
+                      type="number"
                       :readonly="readonly"
                       :disabled="readonly"
                     />
                   </v-col>
                   <v-col cols="12" md="3">
-                    <v-combobox
-                      v-model="configurationProjectName"
-                      :items="projectNames"
-                      label="Project"
+                    <v-text-field
+                      v-model.number="configuration.location.elevation"
+                      label="Elevation (m asl)"
+                      type="number"
                       :readonly="readonly"
                       :disabled="readonly"
                     />
                   </v-col>
                 </v-row>
-                <v-form
-                  ref="datesForm"
-                  v-model="datesAreValid"
-                >
-                  <v-row>
-                    <v-col cols="12" md="3">
-                      <v-menu
-                        v-if="!readonly"
-                        v-model="startDateMenu"
-                        :close-on-content-click="false"
-                        :nudge-right="40"
-                        transition="scale-transition"
-                        offset-y
-                        min-width="290px"
-                      >
-                        <template v-slot:activator="{ on, attrs }">
-                          <v-text-field
-                            :value="getStartDate()"
-                            :rules="[rules.startDate]"
-                            v-bind="attrs"
-                            label="Start date"
-                            clearable
-                            prepend-icon="mdi-calendar-range"
-                            readonly
-                            v-on="on"
-                            @click:clear="setStartDateAndValidate(null)"
-                          />
-                        </template>
-                        <v-date-picker
-                          :value="getStartDate()"
-                          first-day-of-week="1"
-                          :show-week="true"
-                          @input="setStartDateAndValidate"
-                        />
-                      </v-menu>
-                      <v-text-field
-                        v-else
-                        :value="getStartDate()"
-                        label="Start date"
-                        prepend-icon="mdi-calendar-range"
-                        readonly
-                        disabled
-                      />
-                    </v-col>
-                    <v-col cols="12" md="3">
-                      <v-menu
-                        v-if="!readonly"
-                        v-model="endDateMenu"
-                        :close-on-content-click="false"
-                        :nudge-right="40"
-                        transition="scale-transition"
-                        offset-y
-                        min-width="290px"
-                      >
-                        <template v-slot:activator="{ on, attrs }">
-                          <v-text-field
-                            :value="getEndDate()"
-                            :rules="[rules.endDate]"
-                            v-bind="attrs"
-                            label="End date"
-                            clearable
-                            prepend-icon="mdi-calendar-range"
-                            readonly
-                            v-on="on"
-                            @click:clear="setEndDateAndValidate(null)"
-                          />
-                        </template>
-                        <v-date-picker
-                          :value="getEndDate()"
-                          first-day-of-week="1"
-                          :show-week="true"
-                          @input="setEndDateAndValidate"
-                        />
-                      </v-menu>
-                      <v-text-field
-                        v-else
-                        :value="getEndDate()"
-                        label="End date"
-                        prepend-icon="mdi-calendar-range"
-                        readonly
-                        disabled
-                      />
-                    </v-col>
-                  </v-row>
-                </v-form>
-                <v-row>
-                  <v-col cols="12" md="3">
-                    <v-form
-                      ref="locationTypeForm"
-                      v-model="locationTypeIsValid"
-                    >
-                      <v-select
-                        v-model="locationType"
-                        label="Location type"
-                        :rules="[rules.locationType]"
-                        :items="['Stationary', 'Dynamic']"
-                        :readonly="readonly"
-                        :disabled="readonly"
-                      />
-                    </v-form>
-                  </v-col>
-                </v-row>
-                <div v-if="locationType === 'Stationary'">
-                  <v-row>
-                    <v-col cols="12" md="3">
-                      <v-text-field
-                        v-model.number.lazy="configuration.location.latitude"
-                        label="Latitude (WGS84)"
-                        type="number"
-                        :readonly="readonly"
-                        :disabled="readonly"
-                      />
-                    </v-col>
-                    <v-col cols="12" md="3">
-                      <v-text-field
-                        v-model.number.lazy="configuration.location.longitude"
-                        label="Longitude (WGS84)"
-                        type="number"
-                        :readonly="readonly"
-                        :disabled="readonly"
-                      />
-                    </v-col>
-                    <v-col cols="12" md="3">
-                      <v-text-field
-                        v-model.number="configuration.location.elevation"
-                        label="Elevation (m asl)"
-                        type="number"
-                        :readonly="readonly"
-                        :disabled="readonly"
-                      />
-                    </v-col>
-                  </v-row>
-                  <v-row>
-                    <v-col cols="12" md="6">
-                      <div id="map-wrap" style="height: 300px">
-                        <no-ssr>
-                          <l-map :zoom="10" :center="location" style="z-index:0">
-                            <l-tile-layer url="https://{s}.tile.osm.org/{z}/{x}/{y}.png" />
-                            <l-marker :lat-lng="location" />
-                          </l-map>
-                        </no-ssr>
-                      </div>
-                    </v-col>
-                  </v-row>
-                </div>
-                <div v-if="locationType === 'Dynamic'">
-                  <v-row>
-                    <v-col cols="12" md="3">
-                      <DevicePropertyHierarchySelect
-                        v-model="configuration.location.latitude"
-                        :devices="getAllDevices()"
-                        device-select-label="Device that measures latitude"
-                        property-select-label="Property for latitude"
-                        :readonly="readonly"
-                      />
-                    </v-col>
-                    <v-col cols="12" md="3">
-                      <DevicePropertyHierarchySelect
-                        v-model="configuration.location.longitude"
-                        :devices="getAllDevices()"
-                        device-select-label="Device that measures longitude"
-                        property-select-label="Property for longitude"
-                        :readonly="readonly"
-                      />
-                    </v-col>
-                    <v-col cols="12" md="3">
-                      <DevicePropertyHierarchySelect
-                        v-model="configuration.location.elevation"
-                        :devices="getAllDevices()"
-                        device-select-label="Device that measures elevation"
-                        property-select-label="Property for elevation"
-                        :readonly="readonly"
-                      />
-                    </v-col>
-                  </v-row>
-                </div>
-              </v-card-text>
-            </v-card>
-          </v-tab-item>
-
-          <!-- Platforms and Devices -->
-          <v-tab-item :eager="true">
-            <v-card
-              flat
-            >
-              <v-card-text>
                 <v-row>
                   <v-col cols="12" md="6">
-                    <ConfigurationsDemoTreeView
-                      v-if="!configuration.tree.length"
-                    />
-                    <ConfigurationsTreeView
-                      v-else
-                      ref="treeView"
-                      v-model="configuration.tree"
-                      :selected="selectedNode"
-                      @select="setSelectedNode"
-                    />
-                  </v-col>
-                  <v-col cols="12" md="6">
-                    <InfoBox v-if="!selectedNode && !readonly">
-                      Select a platform on the left side to add devices or platforms to it. To add a device or platform to the root of this configuration, deselect any previously selected device or platform.
-                    </InfoBox>
-                    <ConfigurationsSelectedItem
-                      :value="selectedNode"
-                      :breadcrumbs="hierarchyNodeNames"
-                      :readonly="readonly"
-                      @remove="removeSelectedNode"
-                    />
-                    <ConfigurationsPlatformDeviceSearch
-                      v-if="!readonly && (!selectedNode || selectedNode.isPlatform())"
-                      :is-platform-used-func="isPlatformInTree"
-                      :is-device-used-func="isDeviceInTree"
-                      @add-platform="addPlatformNode"
-                      @add-device="addDeviceNode"
-                    />
+                    <div id="map-wrap" style="height: 300px">
+                      <no-ssr>
+                        <l-map :zoom="10" :center="location" style="z-index:0">
+                          <l-tile-layer url="https://{s}.tile.osm.org/{z}/{x}/{y}.png" />
+                          <l-marker :lat-lng="location" />
+                        </l-map>
+                      </no-ssr>
+                    </div>
                   </v-col>
                 </v-row>
-              </v-card-text>
-            </v-card>
-          </v-tab-item>
-
-          <!-- Setup -->
-          <v-tab-item :eager="true">
-            <PlatformConfigurationAttributesExpansionPanels
-              v-model="configuration.platformAttributes"
-              :readonly="readonly"
-            />
-            <DeviceConfigurationAttributesExpansionPanels
-              v-model="configuration.deviceAttributes"
-              :readonly="readonly"
-            />
-          </v-tab-item>
-
-          <!-- Contact -->
-          <v-tab-item :eager="true">
-            <v-card
-              flat
-            >
-              <v-card-text>
+              </div>
+              <div v-if="locationType === 'Dynamic'">
                 <v-row>
-                  <v-col cols="3">
-                    <ContactSelect v-model="configuration.contacts" label="Add a contact" :readonly="readonly" />
+                  <v-col cols="12" md="3">
+                    <DevicePropertyHierarchySelect
+                      v-model="configuration.location.latitude"
+                      :devices="getAllDevices()"
+                      device-select-label="Device that measures latitude"
+                      property-select-label="Property for latitude"
+                      :readonly="readonly"
+                    />
+                  </v-col>
+                  <v-col cols="12" md="3">
+                    <DevicePropertyHierarchySelect
+                      v-model="configuration.location.longitude"
+                      :devices="getAllDevices()"
+                      device-select-label="Device that measures longitude"
+                      property-select-label="Property for longitude"
+                      :readonly="readonly"
+                    />
+                  </v-col>
+                  <v-col cols="12" md="3">
+                    <DevicePropertyHierarchySelect
+                      v-model="configuration.location.elevation"
+                      :devices="getAllDevices()"
+                      device-select-label="Device that measures elevation"
+                      property-select-label="Property for elevation"
+                      :readonly="readonly"
+                    />
                   </v-col>
                 </v-row>
-              </v-card-text>
-            </v-card>
-          </v-tab-item>
-        </v-tabs-items>
-        <v-btn
-          v-if="!editMode"
-          fab
-          fixed
-          bottom
-          right
-          color="secondary"
-          @click="onEditButtonClick"
-        >
-          <v-icon>
-            mdi-pencil
-          </v-icon>
-        </v-btn>
-      </v-card>
-    </v-form>
+              </div>
+            </v-card-text>
+          </v-card>
+        </v-tab-item>
+
+        <!-- Platforms and Devices -->
+        <v-tab-item :eager="true">
+          <v-card
+            flat
+          >
+            <v-card-text>
+              <v-row>
+                <v-col cols="12" md="6">
+                  <ConfigurationsDemoTreeView
+                    v-if="!configuration.tree.length"
+                  />
+                  <ConfigurationsTreeView
+                    v-else
+                    ref="treeView"
+                    v-model="configuration.tree"
+                    :selected="selectedNode"
+                    @select="setSelectedNode"
+                  />
+                </v-col>
+                <v-col cols="12" md="6">
+                  <InfoBox v-if="!selectedNode && !readonly">
+                    Select a platform on the left side to add devices or platforms to it. To add a device or platform to the root of this configuration, deselect any previously selected device or platform.
+                  </InfoBox>
+                  <ConfigurationsSelectedItem
+                    :value="selectedNode"
+                    :breadcrumbs="hierarchyNodeNames"
+                    :readonly="readonly"
+                    @remove="removeSelectedNode"
+                  />
+                  <ConfigurationsPlatformDeviceSearch
+                    v-if="!readonly && (!selectedNode || selectedNode.isPlatform())"
+                    :is-platform-used-func="isPlatformInTree"
+                    :is-device-used-func="isDeviceInTree"
+                    @add-platform="addPlatformNode"
+                    @add-device="addDeviceNode"
+                  />
+                </v-col>
+              </v-row>
+            </v-card-text>
+          </v-card>
+        </v-tab-item>
+
+        <!-- Setup -->
+        <v-tab-item :eager="true">
+          <PlatformConfigurationAttributesExpansionPanels
+            v-model="configuration.platformAttributes"
+            :readonly="readonly"
+          />
+          <DeviceConfigurationAttributesExpansionPanels
+            v-model="configuration.deviceAttributes"
+            :readonly="readonly"
+          />
+        </v-tab-item>
+
+        <!-- Contact -->
+        <v-tab-item :eager="true">
+          <v-card
+            flat
+          >
+            <v-card-text>
+              <v-row>
+                <v-col cols="3">
+                  <ContactSelect v-model="configuration.contacts" label="Add a contact" :readonly="readonly" />
+                </v-col>
+              </v-row>
+            </v-card-text>
+          </v-card>
+        </v-tab-item>
+      </v-tabs-items>
+      <v-btn
+        v-if="!editMode"
+        fab
+        fixed
+        bottom
+        right
+        color="secondary"
+        @click="onEditButtonClick"
+      >
+        <v-icon>
+          mdi-pencil
+        </v-icon>
+      </v-btn>
+    </v-card>
   </div>
 </template>
 
