@@ -163,10 +163,10 @@ export class DeviceSerializer {
   }
 }
 
-export const deviceWithMetaToDeviceByThrowingErrorOnMissing = (deviceWitHMeta: IDeviceWithMeta) : Device => {
-  const device = deviceWitHMeta.device
+export const deviceWithMetaToDeviceByThrowingErrorOnMissing = (deviceWithMeta: IDeviceWithMeta) : Device => {
+  const device = deviceWithMeta.device
 
-  if (deviceWitHMeta.missing.contacts.ids.length > 0) {
+  if (deviceWithMeta.missing.contacts.ids.length > 0) {
     throw new Error('Contacts are missing')
   }
 

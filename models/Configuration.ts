@@ -37,9 +37,13 @@ import { IStationaryLocation, IDynamicLocation, StationaryLocation, DynamicLocat
 import { PlatformConfigurationAttributes } from '@/models/PlatformConfigurationAttributes'
 
 export interface IConfiguration {
-  id: string | null
+  id: string
   startDate: Date | null
   endDate: Date | null
+  projectUri: string
+  projectName: string
+  label: string
+  status: string
   location: IStationaryLocation | IDynamicLocation | null
   contacts: IContact[]
   children: ConfigurationsTreeNode[]
@@ -48,20 +52,24 @@ export interface IConfiguration {
 }
 
 export class Configuration implements IConfiguration {
-  private _id: string | null = null
+  private _id: string = ''
   private _startDate: Date | null = null
   private _endDate: Date | null = null
+  private _projectUri: string = ''
+  private _projectName: string = ''
+  private _label: string = ''
+  private _status: string = ''
   private _location: IStationaryLocation | IDynamicLocation | null = null
   private _contacts: IContact[] = [] as IContact[]
   private _tree: ConfigurationsTree = new ConfigurationsTree()
   private _platformAttributes: PlatformConfigurationAttributes[] = [] as PlatformConfigurationAttributes[]
   private _deviceAttributes: DeviceConfigurationAttributes[] = [] as DeviceConfigurationAttributes[]
 
-  get id (): string | null {
+  get id (): string {
     return this._id
   }
 
-  set id (id: string | null) {
+  set id (id: string) {
     this._id = id
   }
 
@@ -79,6 +87,38 @@ export class Configuration implements IConfiguration {
 
   set endDate (date: Date | null) {
     this._endDate = date
+  }
+
+  get projectName (): string {
+    return this._projectName
+  }
+
+  set projectName (newProjectName: string) {
+    this._projectName = newProjectName
+  }
+
+  get projectUri (): string {
+    return this._projectUri
+  }
+
+  set projectUri (newProjectUri: string) {
+    this._projectUri = newProjectUri
+  }
+
+  get label (): string {
+    return this._label
+  }
+
+  set label (newLabel: string) {
+    this._label = newLabel
+  }
+
+  get status (): string {
+    return this._status
+  }
+
+  set status (newStatus: string) {
+    this._status = newStatus
   }
 
   get location (): IStationaryLocation | IDynamicLocation | null {
@@ -135,6 +175,12 @@ export class Configuration implements IConfiguration {
     newObject.id = someObject.id
     newObject.startDate = someObject.startDate instanceof Date ? new Date(someObject.startDate.getTime()) : null
     newObject.endDate = someObject.endDate instanceof Date ? new Date(someObject.endDate.getTime()) : null
+
+    newObject.projectName = someObject.projectName
+    newObject.projectUri = someObject.projectUri
+
+    newObject.label = someObject.label
+    newObject.status = someObject.status
 
     switch (true) {
       case someObject.location instanceof StationaryLocation:

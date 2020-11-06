@@ -103,7 +103,7 @@ permissions and limitations under the Licence.
       <v-card>
         <v-card-text>
           <p class="text-center">
-            There are no devices that match our search criteria.
+            There are no devices that match your search criteria.
           </p>
         </v-card-text>
       </v-card>

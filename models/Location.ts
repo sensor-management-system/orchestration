@@ -31,6 +31,11 @@
  */
 import { DeviceProperty } from '@/models/DeviceProperty'
 
+export enum LocationType {
+  Stationary = 'Stationary',
+  Dynamic = 'Dynamic'
+}
+
 export interface IStationaryLocation {
   latitude: number | null
   longitude: number | null
