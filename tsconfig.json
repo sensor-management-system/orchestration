@@ -16,10 +16,10 @@
     "experimentalDecorators": true,
     "baseUrl": ".",
     "paths": {
-      "~/*": [
+      "@/*": [
         "./*"
       ],
-      "@/*": [
+      "~/*": [
         "./*"
       ]
     },

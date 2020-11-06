@@ -35,6 +35,7 @@ import { ContactApi } from '@/services/sms/ContactApi'
 import { DeviceApi } from '@/services/sms/DeviceApi'
 import { PlatformApi } from '@/services/sms/PlatformApi'
 import { ConfigurationApi } from '@/services/sms/ConfigurationApi'
+import { ConfigurationStatusApi } from '@/services/sms/ConfigurationStatusApi'
 
 import { CompartmentApi } from '@/services/cv/CompartmentApi'
 import { DeviceTypeApi } from '@/services/cv/DeviceTypeApi'
@@ -45,6 +46,8 @@ import { SamplingMediaApi } from '@/services/cv/SamplingMediaApi'
 import { StatusApi } from '@/services/cv/StatusApi'
 import { UnitApi } from '@/services/cv/UnitApi'
 
+import { ProjectApi } from '@/services/project/ProjectApi'
+
 const SMS_BASE_URL = process.env.smsBackendUrl
 const CV_BASE_URL = process.env.cvBackendUrl
 
@@ -53,6 +56,7 @@ export class Api {
   private readonly _deviceApi: DeviceApi
   private readonly _platformApi: PlatformApi
   private readonly _configurationApi: ConfigurationApi
+  private readonly _configurationStatesApi: ConfigurationStatusApi
 
   private readonly _manufacturerApi: ManufacturerApi
   private readonly _platformTypeApi: PlatformTypeApi
@@ -62,6 +66,8 @@ export class Api {
   private readonly _samplingMediaApi: SamplingMediaApi
   private readonly _propertyApi: PropertyApi
   private readonly _unitApi: UnitApi
+
+  private readonly _projectApi: ProjectApi
 
   constructor (smsBaseUrl: string | undefined = SMS_BASE_URL, cvBaseUrl: string | undefined = CV_BASE_URL) {
     // here we can set settings for all the sms api calls
@@ -80,6 +86,7 @@ export class Api {
     this._configurationApi = new ConfigurationApi(
       this.createAxios(smsBaseUrl, '/configurations', smsConfig)
     )
+    this._configurationStatesApi = new ConfigurationStatusApi()
 
     // and here we can set settings for all the cv api calls
     const cvConfig: AxiosRequestConfig = {
@@ -117,6 +124,8 @@ export class Api {
       this.createAxios(cvBaseUrl, '/unit', cvConfig),
       cvBaseUrl
     )
+
+    this._projectApi = new ProjectApi()
   }
 
   private createAxios (baseUrl: string | undefined, path: string, baseConfig: AxiosRequestConfig): AxiosInstance {
@@ -137,6 +146,10 @@ export class Api {
 
   get configurations (): ConfigurationApi {
     return this._configurationApi
+  }
+
+  get configurationStates (): ConfigurationStatusApi {
+    return this._configurationStatesApi
   }
 
   get contacts (): ContactApi {
@@ -173,5 +186,9 @@ export class Api {
 
   get units (): UnitApi {
     return this._unitApi
+  }
+
+  get projects (): ProjectApi {
+    return this._projectApi
   }
 }

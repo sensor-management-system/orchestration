@@ -76,7 +76,7 @@ permissions and limitations under the Licence.
                 </v-row>
                 <v-row>
                   <v-col cols="12" md="3">
-                    <v-select
+                    <v-combobox
                       v-model="deviceStatusName"
                       :items="statusNames"
                       label="Status"
