@@ -45,6 +45,9 @@ import {
   configurationWithMetaToConfigurationByThrowingErrorOnMissing,
   configurationWithMetaToConfigurationByAddingDummyObjects
 } from '@/serializers/jsonapi/ConfigurationSerializer'
+import { PlatformConfigurationAttributes } from '@/models/PlatformConfigurationAttributes'
+import { DeviceConfigurationAttributes } from '@/models/DeviceConfigurationAttributes'
+import { stringToDate } from '@/utils/dateHelper'
 
 describe('LocationType', () => {
   it('should be fixed what values can be given - and those should be consistent with the serializer', () => {
@@ -527,57 +530,58 @@ describe('ConfigurationSerializer', () => {
     })
   })
   it('should also serialize a platform & device hierarchy', () => {
+    const platform1 = ((): Platform => {
+      const o = new Platform()
+      o.id = '1'
+      o.shortName = 'Platform 01'
+      return o
+    })()
+    const platform2 = ((): Platform => {
+      const o = new Platform()
+      o.id = '2'
+      o.shortName = 'Platform 02'
+      return o
+    })()
+    const device3 = ((): Device => {
+      const o = new Device()
+      o.id = '3'
+      o.shortName = 'Device 01'
+      return o
+    })()
+    const device4 = ((): Device => {
+      const o = new Device()
+      o.id = '4'
+      o.shortName = 'Device 02'
+      return o
+    })()
+    const device5 = ((): Device => {
+      const o = new Device()
+      o.id = '5'
+      o.shortName = 'Device 03'
+      return o
+    })()
+    const platform6 = ((): Platform => {
+      const o = new Platform()
+      o.id = '6'
+      o.shortName = 'Platform 03'
+      return o
+    })()
     const configuration = new Configuration()
     configuration.children = ConfigurationsTree.fromArray(
       [
         ((): PlatformNode => {
-          const n = new PlatformNode(
-            ((): Platform => {
-              const o = new Platform()
-              o.id = '1'
-              o.shortName = 'Platform 01'
-              return o
-            })()
-          )
+          const n = new PlatformNode(platform1)
           n.setTree(
             ConfigurationsTree.fromArray(
               [
                 ((): PlatformNode => {
-                  const n = new PlatformNode(
-                    ((): Platform => {
-                      const o = new Platform()
-                      o.id = '2'
-                      o.shortName = 'Platform 02'
-                      return o
-                    })()
-                  )
+                  const n = new PlatformNode(platform2)
                   n.setTree(
                     ConfigurationsTree.fromArray(
                       [
-                        new DeviceNode(
-                          ((): Device => {
-                            const o = new Device()
-                            o.id = '3'
-                            o.shortName = 'Device 01'
-                            return o
-                          })()
-                        ),
-                        new DeviceNode(
-                          ((): Device => {
-                            const o = new Device()
-                            o.id = '4'
-                            o.shortName = 'Device 02'
-                            return o
-                          })()
-                        ),
-                        new DeviceNode(
-                          ((): Device => {
-                            const o = new Device()
-                            o.id = '5'
-                            o.shortName = 'Device 03'
-                            return o
-                          })()
-                        )
+                        new DeviceNode(device3),
+                        new DeviceNode(device4),
+                        new DeviceNode(device5)
                       ]
                     )
                   )
@@ -589,18 +593,47 @@ describe('ConfigurationSerializer', () => {
           return n
         })(),
         (() => {
-          const n = new PlatformNode(
-            ((): Platform => {
-              const o = new Platform()
-              o.id = '6'
-              o.shortName = 'Platform 03'
-              return o
-            })()
-          )
+          const n = new PlatformNode(platform6)
           return n
         })()
       ]
     ).toArray()
+    configuration.platformAttributes = [
+      PlatformConfigurationAttributes.createFromObject({
+        platform: platform1,
+        offsetX: 1.0,
+        offsetY: 2.0,
+        offsetZ: 3.0
+      }),
+      // none for platform2
+      PlatformConfigurationAttributes.createFromObject({
+        platform: platform6,
+        offsetX: 6.0,
+        offsetY: 7.0,
+        offsetZ: 8.0
+      })
+    ]
+    configuration.deviceAttributes = [
+      DeviceConfigurationAttributes.createFromObject({
+        device: device3,
+        offsetX: 11.0,
+        offsetY: 12.0,
+        offsetZ: 13.0,
+        calibrationDate: null,
+        // the device property will be ignored here
+        deviceProperties: []
+      }),
+      // none for device4
+      DeviceConfigurationAttributes.createFromObject({
+        device: device5,
+        offsetX: 22.0,
+        offsetY: 23.0,
+        offsetZ: 24.0,
+        calibrationDate: new Date('2020-11-09T00:00:00.000Z'),
+        deviceProperties: []
+      })
+
+    ]
 
     const serializer = new ConfigurationSerializer()
     const jsonApiData = serializer.convertModelToJsonApiData(configuration)
@@ -611,23 +644,36 @@ describe('ConfigurationSerializer', () => {
     const expectedHierarchy = [{
       type: 'platform',
       id: '1',
+      offset_x: 1.0,
+      offset_y: 2.0,
+      offset_z: 3.0,
       children: [{
         type: 'platform',
         id: '2',
         children: [{
           type: 'device',
-          id: '3'
+          id: '3',
+          offset_x: 11.0,
+          offset_y: 12.0,
+          offset_z: 13.0
         }, {
           type: 'device',
           id: '4'
         }, {
           type: 'device',
-          id: '5'
+          id: '5',
+          offset_x: 22.0,
+          offset_y: 23.0,
+          offset_z: 24.0,
+          calibration_date: '2020-11-09T00:00:00.000Z'
         }]
       }]
     }, {
       type: 'platform',
-      id: '6'
+      id: '6',
+      offset_x: 6.0,
+      offset_y: 7.0,
+      offset_z: 8.0
     }]
 
     expect(hierarchy).toEqual(expectedHierarchy)

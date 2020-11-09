@@ -40,6 +40,8 @@ import { DynamicLocation, StationaryLocation, LocationType } from '@/models/Loca
 import { PlatformNode } from '@/models/PlatformNode'
 import { ConfigurationsTreeNode } from '@/models/ConfigurationsTreeNode'
 import { DeviceNode } from '@/models/DeviceNode'
+import { PlatformConfigurationAttributes } from '@/models/PlatformConfigurationAttributes'
+import { DeviceConfigurationAttributes } from '@/models/DeviceConfigurationAttributes'
 
 export interface IConfigurationMissingData {
   contacts: IMissingContactData
@@ -133,14 +135,35 @@ export class ConfigurationSerializer {
       // TODO: Add location relationships for the device properties
     }
 
+    const platformAttributeLookupById: {[index: string]: PlatformConfigurationAttributes} = {}
+    for (const platformAttribute of configuration.platformAttributes) {
+      const id = platformAttribute.platform.id
+      if (id !== null) {
+        platformAttributeLookupById[id] = platformAttribute
+      }
+    }
+    const deviceAttributeLookupById: {[index: string]: DeviceConfigurationAttributes} = {}
+    for (const deviceAttribute of configuration.deviceAttributes) {
+      const id = deviceAttribute.device.id
+      if (id !== null) {
+        deviceAttributeLookupById[id] = deviceAttribute
+      }
+    }
+
     const hierarchy: any[] = []
 
     const addChildrenRecursivly = (node: ConfigurationsTreeNode, listOfChildren: any[]) => {
       if (node.isPlatform()) {
         const platformNode = node as PlatformNode
+        const id = platformNode.unpack().id
         const elementData : any = {
-          id: platformNode.unpack().id,
+          id,
           type: 'platform'
+        }
+        if (id != null && platformAttributeLookupById[id]) {
+          elementData.offset_x = platformAttributeLookupById[id].offsetX
+          elementData.offset_y = platformAttributeLookupById[id].offsetY
+          elementData.offset_z = platformAttributeLookupById[id].offsetZ
         }
         const childrenList = platformNode.children
         if (childrenList.length > 0) {
@@ -152,9 +175,20 @@ export class ConfigurationSerializer {
         listOfChildren.push(elementData)
       } else if (node.isDevice()) {
         const deviceNode = node as DeviceNode
+        const id = deviceNode.unpack().id
         const elementData: any = {
-          id: deviceNode.unpack().id,
+          id,
           type: 'device'
+        }
+        if (id != null && deviceAttributeLookupById[id]) {
+          elementData.offset_x = deviceAttributeLookupById[id].offsetX
+          elementData.offset_y = deviceAttributeLookupById[id].offsetY
+          elementData.offset_z = deviceAttributeLookupById[id].offsetZ
+
+          const calibrationDate = deviceAttributeLookupById[id].calibrationDate
+          if (calibrationDate != null) {
+            elementData.calibration_date = calibrationDate.toISOString()
+          }
         }
         listOfChildren.push(elementData)
       }
