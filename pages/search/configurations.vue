@@ -388,8 +388,6 @@ permissions and limitations under the Licence.
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 
-import AppBarEditModeContent from '@/components/AppBarEditModeContent.vue'
-import AppBarTabsExtension from '@/components/AppBarTabsExtension.vue'
 import ProjectSelect from '@/components/ProjectSelect.vue'
 import StatusBadge from '@/components/StatusBadge.vue'
 import StringSelect from '@/components/StringSelect.vue'
@@ -401,17 +399,6 @@ import { StationaryLocation, DynamicLocation, LocationType } from '@/models/Loca
 import { Project } from '@/models/Project'
 
 import { dateToString } from '@/utils/dateHelper'
-
-@Component
-// @ts-ignore
-export class AppBarTabsExtensionExtended extends AppBarTabsExtension {
-  get tabs (): String[] {
-    return [
-      'Search',
-      'Extended Search'
-    ]
-  }
-}
 
 @Component({
   filters: {
@@ -432,7 +419,6 @@ export class AppBarTabsExtensionExtended extends AppBarTabsExtension {
 // @ts-ignore
 export default class SearchConfigurationsPage extends Vue {
   private pageSize: number = 20
-  private activeTab: number = 0
   private loading: boolean = true
 
   private totalCount: number = 0
@@ -454,11 +440,7 @@ export default class SearchConfigurationsPage extends Vue {
   private searchResultItemsShown: { [id: string]: boolean} = {}
 
   created () {
-    this.$nuxt.$emit('app-bar-content', AppBarEditModeContent)
-    this.$nuxt.$emit('app-bar-extension', AppBarTabsExtensionExtended)
-    this.$nuxt.$on('AppBarExtension:change', (tab: number) => {
-      this.activeTab = tab
-    })
+    this.initializeAppBar()
   }
 
   mounted () {
@@ -477,10 +459,6 @@ export default class SearchConfigurationsPage extends Vue {
       this.$store.commit('snackbar/setError', 'Loading of projects failed')
     })
     this.runSelectedSearch()
-    // make sure that all components (especially the dynamically passed ones) are rendered
-    this.$nextTick(() => {
-      this.$nuxt.$emit('AppBarContent:title', 'Configurations')
-    })
 
     window.onscroll = () => {
       const isOnBottom = document.documentElement.scrollTop + window.innerHeight === document.documentElement.offsetHeight
@@ -492,11 +470,29 @@ export default class SearchConfigurationsPage extends Vue {
   }
 
   beforeDestroy () {
-    this.$nuxt.$emit('app-bar-content', null)
-    this.$nuxt.$emit('app-bar-extension', null)
-    this.$nuxt.$off('AppBarExtension:change')
     this.unsetResultItemsShown()
     this.showDeleteDialog = {}
+    this.$store.dispatch('appbar/setDefaults')
+  }
+
+  initializeAppBar () {
+    this.$store.dispatch('appbar/init', {
+      tabs: [
+        'Search',
+        'Extended Search'
+      ],
+      title: 'Configurations',
+      saveBtnHidden: true,
+      cancelBtnHidden: true
+    })
+  }
+
+  get activeTab (): number | null {
+    return this.$store.state.appbar.activeTab
+  }
+
+  set activeTab (tab: number | null) {
+    this.$store.commit('appbar/setActiveTab', tab)
   }
 
   runSelectedSearch () {

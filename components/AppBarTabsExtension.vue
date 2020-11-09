@@ -30,7 +30,7 @@ permissions and limitations under the Licence.
 -->
 <template>
   <v-tabs
-    :value="activeTab"
+    :value="value"
     background-color="grey lighten-3"
     @change="changeTab"
   >
@@ -48,7 +48,7 @@ permissions and limitations under the Licence.
  * @file provides a component with tabs for the App-Bar
  * @author <marc.hanisch@gfz-potsdam.de>
  */
-import { Vue, Component } from 'nuxt-property-decorator'
+import { Vue, Component, Prop } from 'nuxt-property-decorator'
 
 /**
  * A class component to provide tabs to an app-bar extension
@@ -57,43 +57,39 @@ import { Vue, Component } from 'nuxt-property-decorator'
 @Component
 // @ts-ignore
 export default class AppBarTabsExtension extends Vue {
-  private activeTab: number = 0
-
-  created () {
-    this.$nuxt.$on('AppBarExtension:change', (tab: number) => {
-      if (tab !== this.activeTab) {
-        this.activeTab = tab
-      }
-    })
-  }
+  /**
+   * the active tab
+   */
+  @Prop({
+    default: null,
+    type: Number
+  })
+  // @ts-ignore
+  readonly value: number | null
 
   /**
-   * returns the list of tab names to display
-   *
-   * this implementation here only returns an empty list as it
-   * is the responsibility of the child classes to provide their
-   * own tabs (by overriding this method)
-   *
-   * @return {String[]} a list of tab names
+   * an array of tabs
    */
-  get tabs (): String[] {
-    return [] as String[]
-  }
+  @Prop({
+    default: () => [],
+    type: Array
+  })
+  // @ts-ignore
+  readonly tabs: string[]
 
   /**
    * changes the current tab
    *
    * @param {number} tab - number of the active tab
-   * @fires AppBarExtension#AppBarExtension:change
+   * @fires AppBarExtension#change
    */
   changeTab (tab: number) {
-    this.activeTab = tab
     /**
-     * fires an AppBarExtension:change event
-     * @event AppBarExtension#AppBarExtension:change
+     * fires an change event
+     * @event AppBarExtension#change
      * @type {number}
      */
-    this.$nuxt.$emit('AppBarExtension:change', this.activeTab)
+    this.$emit('change', tab)
   }
 }
 </script>
