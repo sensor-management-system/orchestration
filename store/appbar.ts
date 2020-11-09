@@ -133,7 +133,10 @@ export const mutations = {
   }
 }
 
-type StoreContext = { commit: (mutation: string, payload: any) => void}
+type StoreContext = {
+  commit: (mutation: string, payload: any) => void,
+  dispatch: (action: string, payload: any) => void
+}
 
 export const actions = {
   /**
@@ -166,5 +169,14 @@ export const actions = {
     if (typeof payload.cancelBtnDisabled !== 'undefined') {
       context.commit('setCancelBtnDisabled', payload.cancelBtnDisabled)
     }
+  },
+
+  /**
+   * sets the Appbar to its default settings
+   *
+   * @param {StoreContext} context - the context of the store
+   */
+  setDefaults (context: StoreContext): void {
+    context.dispatch('init', state())
   }
 }

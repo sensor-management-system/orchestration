@@ -509,9 +509,9 @@ export default class SearchPlatformsPage extends Vue {
   }
 
   beforeDestroy () {
-    this.clearAppBar()
     this.unsetResultItemsShown()
     this.showDeleteDialog = {}
+    this.$store.dispatch('appbar/setDefaults')
   }
 
   initializeAppBar () {
@@ -521,15 +521,6 @@ export default class SearchPlatformsPage extends Vue {
         'Extended Search'
       ],
       title: 'Platforms',
-      saveBtnHidden: true,
-      cancelBtnHidden: true
-    })
-  }
-
-  clearAppBar () {
-    this.$store.dispatch('appbar/init', {
-      tabs: [],
-      title: '',
       saveBtnHidden: true,
       cancelBtnHidden: true
     })

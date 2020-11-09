@@ -271,7 +271,7 @@ export default class PlatformIdPage extends mixins(Rules) {
 
   beforeDestroy () {
     this.unregisterButtonActions()
-    this.clearAppBar()
+    this.$store.dispatch('appbar/setDefaults')
   }
 
   registerButtonActions () {
@@ -300,15 +300,6 @@ export default class PlatformIdPage extends mixins(Rules) {
         'Attachments'
       ],
       title: 'Platforms',
-      saveBtnHidden: true,
-      cancelBtnHidden: true
-    })
-  }
-
-  clearAppBar () {
-    this.$store.dispatch('appbar/init', {
-      tabs: [],
-      title: '',
       saveBtnHidden: true,
       cancelBtnHidden: true
     })

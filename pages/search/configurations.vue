@@ -472,7 +472,7 @@ export default class SearchConfigurationsPage extends Vue {
   beforeDestroy () {
     this.unsetResultItemsShown()
     this.showDeleteDialog = {}
-    this.clearAppBar()
+    this.$store.dispatch('appbar/setDefaults')
   }
 
   initializeAppBar () {
@@ -482,15 +482,6 @@ export default class SearchConfigurationsPage extends Vue {
         'Extended Search'
       ],
       title: 'Configurations',
-      saveBtnHidden: true,
-      cancelBtnHidden: true
-    })
-  }
-
-  clearAppBar () {
-    this.$store.dispatch('appbar/init', {
-      tabs: [],
-      title: '',
       saveBtnHidden: true,
       cancelBtnHidden: true
     })
