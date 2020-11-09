@@ -31,7 +31,12 @@
  */
 
 import { Configuration } from '@/models/Configuration'
+import { ConfigurationsTree } from '@/models/ConfigurationsTree'
 import { Contact } from '@/models/Contact'
+import { Device } from '@/models/Device'
+import { DeviceNode } from '@/models/DeviceNode'
+import { PlatformNode } from '@/models/PlatformNode'
+import { Platform } from '@/models/Platform'
 import { StationaryLocation, DynamicLocation, LocationType } from '@/models/Location'
 
 import {
@@ -520,6 +525,112 @@ describe('ConfigurationSerializer', () => {
       expect(attributes).toHaveProperty('elevation')
       expect(attributes.elevation).toEqual(null)
     })
+  })
+  it('should also serialize a platform & device hierarchy', () => {
+    const configuration = new Configuration()
+    configuration.children = ConfigurationsTree.fromArray(
+      [
+        ((): PlatformNode => {
+          const n = new PlatformNode(
+            ((): Platform => {
+              const o = new Platform()
+              o.id = '1'
+              o.shortName = 'Platform 01'
+              return o
+            })()
+          )
+          n.setTree(
+            ConfigurationsTree.fromArray(
+              [
+                ((): PlatformNode => {
+                  const n = new PlatformNode(
+                    ((): Platform => {
+                      const o = new Platform()
+                      o.id = '2'
+                      o.shortName = 'Platform 02'
+                      return o
+                    })()
+                  )
+                  n.setTree(
+                    ConfigurationsTree.fromArray(
+                      [
+                        new DeviceNode(
+                          ((): Device => {
+                            const o = new Device()
+                            o.id = '3'
+                            o.shortName = 'Device 01'
+                            return o
+                          })()
+                        ),
+                        new DeviceNode(
+                          ((): Device => {
+                            const o = new Device()
+                            o.id = '4'
+                            o.shortName = 'Device 02'
+                            return o
+                          })()
+                        ),
+                        new DeviceNode(
+                          ((): Device => {
+                            const o = new Device()
+                            o.id = '5'
+                            o.shortName = 'Device 03'
+                            return o
+                          })()
+                        )
+                      ]
+                    )
+                  )
+                  return n
+                })()
+              ]
+            )
+          )
+          return n
+        })(),
+        (() => {
+          const n = new PlatformNode(
+            ((): Platform => {
+              const o = new Platform()
+              o.id = '6'
+              o.shortName = 'Platform 03'
+              return o
+            })()
+          )
+          return n
+        })()
+      ]
+    ).toArray()
+
+    const serializer = new ConfigurationSerializer()
+    const jsonApiData = serializer.convertModelToJsonApiData(configuration)
+
+    const attributes = jsonApiData.attributes
+    const hierarchy = attributes.hierarchy
+
+    const expectedHierarchy = [{
+      type: 'platform',
+      id: '1',
+      children: [{
+        type: 'platform',
+        id: '2',
+        children: [{
+          type: 'device',
+          id: '3'
+        }, {
+          type: 'device',
+          id: '4'
+        }, {
+          type: 'device',
+          id: '5'
+        }]
+      }]
+    }, {
+      type: 'platform',
+      id: '6'
+    }]
+
+    expect(hierarchy).toEqual(expectedHierarchy)
   })
 })
 describe('configurationWithMetaToConfigurationByThrowingErrorOnMissing', () => {

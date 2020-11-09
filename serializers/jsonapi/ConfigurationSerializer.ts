@@ -37,6 +37,9 @@ import { IJsonApiObjectList, IJsonApiObject, IJsonApiDataWithId, IJsonApiDataWit
 
 import { ContactSerializer, IMissingContactData } from '@/serializers/jsonapi/ContactSerializer'
 import { DynamicLocation, StationaryLocation, LocationType } from '@/models/Location'
+import { PlatformNode } from '@/models/PlatformNode'
+import { ConfigurationsTreeNode } from '@/models/ConfigurationsTreeNode'
+import { DeviceNode } from '@/models/DeviceNode'
 
 export interface IConfigurationMissingData {
   contacts: IMissingContactData
@@ -130,6 +133,36 @@ export class ConfigurationSerializer {
       // TODO: Add location relationships for the device properties
     }
 
+    const hierarchy: any[] = []
+
+    const addChildrenRecursivly = (node: ConfigurationsTreeNode, listOfChildren: any[]) => {
+      if (node.isPlatform()) {
+        const platformNode = node as PlatformNode
+        const elementData : any = {
+          id: platformNode.unpack().id,
+          type: 'platform'
+        }
+        const childrenList = platformNode.children
+        if (childrenList.length > 0) {
+          elementData.children = []
+          for (const childNode of childrenList) {
+            addChildrenRecursivly(childNode, elementData.children)
+          }
+        }
+        listOfChildren.push(elementData)
+      } else if (node.isDevice()) {
+        const deviceNode = node as DeviceNode
+        const elementData: any = {
+          id: deviceNode.unpack().id,
+          type: 'device'
+        }
+        listOfChildren.push(elementData)
+      }
+    }
+    for (const childNode of configuration.children) {
+      addChildrenRecursivly(childNode, hierarchy)
+    }
+
     const result: IJsonApiDataWithOptionalId = {
       attributes: {
         label: configuration.label,
@@ -138,6 +171,7 @@ export class ConfigurationSerializer {
         status: configuration.status,
         start_date: configuration.startDate != null ? configuration.startDate.toISOString() : null,
         end_date: configuration.endDate != null ? configuration.endDate.toISOString() : null,
+        hierarchy,
         ...locationAttributes
       },
       relationships: {
