@@ -919,7 +919,7 @@ export default class ConfigurationsIdPage extends Vue {
     if (val.id) {
       let title = 'Edit Configuration'
       if (val.label) {
-        title = 'Configuration ' + val.label
+        title = val.label
       }
       this.$store.commit('appbar/setTitle', title)
     }
