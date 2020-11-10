@@ -1,6 +1,5 @@
 from sqlalchemy import UniqueConstraint
 from project.api.models.base_model import db
-from project.api.models.configuration import Configuration
 from project.api.models.device import Device
 from project.api.models.mixin import AuditMixin
 from project.api.models.platform import Platform
@@ -17,17 +16,22 @@ class ConfigurationDevice(db.Model, AuditMixin):
         db.Integer, db.ForeignKey("configuration.id"), nullable=False
     )
     configuration = db.relationship(
-        "Configuration", backref=db.backref("configuration_device"), cascade="all"
+        "Configuration",
+        backref=db.backref(
+            "configuration_devices",
+            cascade="all, save-update, merge, delete, delete-orphan",
+        ),
+        cascade="all",
     )
     device_id = db.Column(db.Integer, db.ForeignKey("device.id"), nullable=False)
     device = db.relationship(
-        "Device", backref=db.backref("configuration_device"), cascade="all"
+        "Device", backref=db.backref("configuration_device", cascade="all")
     )
     parent_platform_id = db.Column(
         db.Integer, db.ForeignKey("platform.id"), nullable=False
     )
     parent_platform = db.relationship(
-        "Platform", backref=db.backref("inner_configuration_device"), cascade="all"
+        "Platform", backref=db.backref("inner_configuration_device", cascade="all")
     )
 
     __table_args__ = (
