@@ -3,7 +3,6 @@ from marshmallow_jsonapi.flask import Schema, Relationship
 
 
 class ConfigurationDeviceSchema(Schema):
-
     class Meta:
         type_ = "configuration_device"
         self_view = "configuration_device_detail"
@@ -30,9 +29,9 @@ class ConfigurationDeviceSchema(Schema):
         type_="device",
     )
 
-    platform = Relationship(
+    parent_platform = Relationship(
         self_view_kwargs={"id": "<id>"},
         related_view="platform_detail",
-        related_view_kwargs={"id": "<platform_id>"},
+        related_view_kwargs={"id": "<parent_platform_id>"},
         type_="platform",
     )

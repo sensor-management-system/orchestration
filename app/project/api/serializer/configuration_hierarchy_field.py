@@ -38,6 +38,12 @@ from project.api.models.configuration_device import ConfigurationDevice
 from project.api.models.configuration_platform import ConfigurationPlatform
 
 
+def int_or_none(x):
+    if x is not None:
+        return int(x)
+    return None
+
+
 class ConfigurationHierarchyField(fields.Field):
     """
     Create a custom-formatted field for a hierarchy Schema
@@ -52,13 +58,13 @@ class ConfigurationHierarchyField(fields.Field):
     def _serialize(self, value, *args, **kwargs):
         # build the tree out of the attributes
 
-        configuration_platform = value.configurations_platform
-        configuration_device = value.configurations_device
+        configuration_platforms = value.configuration_platforms
+        configuration_devices = value.configuration_devices
 
         # adopted from here: https://stackoverflow.com/a/35049729
         platform_nodes = {}
 
-        for platform_configuration in configuration_platform:
+        for platform_configuration in configuration_platforms:
             platform_id = platform_configuration.platform_id
             platform_nodes[platform_id] = {
                 "id": platform_id,
@@ -69,7 +75,7 @@ class ConfigurationHierarchyField(fields.Field):
             }
 
         tree = []
-        for platform_configuration in configuration_platform:
+        for platform_configuration in configuration_platforms:
             platform_id = platform_configuration.platform_id
             parent_id = platform_configuration.parent_platform_id
 
@@ -85,7 +91,7 @@ class ConfigurationHierarchyField(fields.Field):
                 children.append(platform_node)
 
         device_nodes = {}
-        for device_configuration in configuration_device:
+        for device_configuration in configuration_devices:
             device_id = device_configuration.device_id
             device_nodes[device_id] = {
                 "id": device_id,
@@ -96,7 +102,7 @@ class ConfigurationHierarchyField(fields.Field):
                 "calibration_date": device_configuration.calibration_date,
             }
 
-        for device_configuration in configuration_device:
+        for device_configuration in configuration_devices:
             device_id = device_configuration.device_id
             parent_id = device_configuration.parent_platform_id
 
@@ -152,8 +158,8 @@ class ConfigurationHierarchyField(fields.Field):
                 platform_id = entry.get("id", None)
                 if entry.get("type", None) == "platform":
                     yield ConfigurationPlatform(
-                        platform_id=platform_id,
-                        parent_platform_id=parent,
+                        platform_id=int(platform_id),
+                        parent_platform_id=int_or_none(parent),
                         offset_x=entry.get("offset_x"),
                         offset_y=entry.get("offset_y"),
                         offset_z=entry.get("offset_z"),
@@ -166,8 +172,8 @@ class ConfigurationHierarchyField(fields.Field):
                 device_id = entry.get("id", None)
                 if entry.get("type", None) == "device":
                     yield ConfigurationDevice(
-                        device_id=device_id,
-                        parent_platform_id=parent,
+                        device_id=int(device_id),
+                        parent_platform_id=int(parent),
                         offset_x=entry.get("offset_x"),
                         offset_y=entry.get("offset_y"),
                         offset_z=entry.get("offset_z"),
@@ -176,10 +182,10 @@ class ConfigurationHierarchyField(fields.Field):
                 children = entry.get("children", [])
                 yield from yield_devices(children, parent=device_id)
 
-        configurations_platform = list(yield_platforms(value))
-        configurations_device = list(yield_devices(value))
+        configuration_platforms = list(yield_platforms(value))
+        configuration_devices = list(yield_devices(value))
 
         return ConfigurationsTuple(
-            configurations_platform=configurations_platform,
-            configurations_device=configurations_device,
+            configuration_platforms=configuration_platforms,
+            configuration_devices=configuration_devices,
         )
