@@ -50,7 +50,10 @@ describe('DeviceProperty Models', () => {
         max: 1000
       },
       accuracy: 0.1,
-      failureValue: 0.01
+      failureValue: 0.01,
+      resolution: 0.001,
+      resolutionUnitUri: 'http://foo/unit/1',
+      resolutionUnitName: 'mm'
     })
     expect(typeof prop).toBe('object')
     expect(prop).toHaveProperty('id', null)
@@ -65,6 +68,9 @@ describe('DeviceProperty Models', () => {
     expect(prop).toHaveProperty('propertyName', 'foo.bar')
     expect(prop).toHaveProperty('accuracy', 0.1)
     expect(prop).toHaveProperty('failureValue', 0.01)
+    expect(prop).toHaveProperty('resolution', 0.001)
+    expect(prop).toHaveProperty('resolutionUnitUri', 'http://foo/unit/1')
+    expect(prop).toHaveProperty('resolutionUnitName', 'mm')
     expect(prop.measuringRange instanceof MeasuringRange).toBe(true)
   })
 })
