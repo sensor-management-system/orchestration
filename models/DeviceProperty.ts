@@ -45,6 +45,9 @@ export interface IDeviceProperty {
   measuringRange: IMeasuringRange
   accuracy: number | null
   failureValue: number | null
+  resolution: number | null
+  resolutionUnitUri: string
+  resolutionUnitName: string
 }
 
 export class DeviceProperty implements IDeviceProperty {
@@ -61,6 +64,9 @@ export class DeviceProperty implements IDeviceProperty {
   private _measuringRange: MeasuringRange = new MeasuringRange()
   private _accuracy: number | null = null
   private _failureValue: number | null = null
+  private _resolution: number | null = null
+  private _resolutionUnitUri: string = ''
+  private _resolutionUnitName: string = ''
 
   /**
    * creates an instance from another object
@@ -85,6 +91,9 @@ export class DeviceProperty implements IDeviceProperty {
     newObject.measuringRange = MeasuringRange.createFromObject(someObject.measuringRange)
     newObject.accuracy = someObject.accuracy
     newObject.failureValue = someObject.failureValue
+    newObject.resolution = someObject.resolution
+    newObject.resolutionUnitUri = someObject.resolutionUnitUri
+    newObject.resolutionUnitName = someObject.resolutionUnitName
 
     return newObject
   }
@@ -191,6 +200,30 @@ export class DeviceProperty implements IDeviceProperty {
 
   set failureValue (failureValue: number | null) {
     this._failureValue = failureValue
+  }
+
+  get resolution (): number | null {
+    return this._resolution
+  }
+
+  set resolution (resolution: number | null) {
+    this._resolution = resolution
+  }
+
+  get resolutionUnitUri (): string {
+    return this._resolutionUnitUri
+  }
+
+  set resolutionUnitUri (resolutionUnitUri: string) {
+    this._resolutionUnitUri = resolutionUnitUri
+  }
+
+  get resolutionUnitName (): string {
+    return this._resolutionUnitName
+  }
+
+  set resolutionUnitName (resolutionUnitName: string) {
+    this._resolutionUnitName = resolutionUnitName
   }
 
   toString (): string {
