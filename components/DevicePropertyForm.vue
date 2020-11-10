@@ -37,7 +37,7 @@ permissions and limitations under the Licence.
     <v-row>
       <v-col cols="12" md="3">
         <v-combobox
-          label="Property"
+          label="Measured Quantity"
           :items="propertyNames"
           :value="valuePropertyName"
           :readonly="readonly"
