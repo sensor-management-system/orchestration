@@ -73,6 +73,7 @@ permissions and limitations under the Licence.
               <v-form
                 ref="datesForm"
                 v-model="datesAreValid"
+                @submit.prevent
               >
                 <v-row>
                   <v-col cols="12" md="3">
@@ -160,6 +161,7 @@ permissions and limitations under the Licence.
                   <v-form
                     ref="locationTypeForm"
                     v-model="locationTypeIsValid"
+                    @submit.prevent
                   >
                     <v-select
                       v-model="locationType"
