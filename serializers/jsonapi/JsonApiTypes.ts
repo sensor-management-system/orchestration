@@ -231,6 +231,10 @@ export interface IJsonApiTypeIdAttributes extends IJsonApiTypeId {
     attributes: IJsonApiAttributes
 }
 
+export interface IJsonApiTypeIdAttributesWithOptionalRelationships extends IJsonApiTypeIdAttributes {
+    relationships?: IJsonApiTypeIdDataListDict
+}
+
 export interface IJsonApiObject {
     data: IJsonApiDataWithId
     included: IJsonApiTypeIdAttributes[]

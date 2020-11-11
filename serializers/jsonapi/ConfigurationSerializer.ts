@@ -36,12 +36,17 @@ import { Contact } from '@/models/Contact'
 import { IJsonApiObjectList, IJsonApiObject, IJsonApiDataWithId, IJsonApiDataWithOptionalId, IJsonApiTypeIdAttributes } from '@/serializers/jsonapi/JsonApiTypes'
 
 import { ContactSerializer, IMissingContactData } from '@/serializers/jsonapi/ContactSerializer'
+import { DeviceSerializer } from '@/serializers/jsonapi/DeviceSerializer'
+import { PlatformSerializer } from '@/serializers/jsonapi/PlatformSerializer'
 import { DynamicLocation, StationaryLocation, LocationType } from '@/models/Location'
 import { PlatformNode } from '@/models/PlatformNode'
 import { ConfigurationsTreeNode } from '@/models/ConfigurationsTreeNode'
 import { DeviceNode } from '@/models/DeviceNode'
 import { PlatformConfigurationAttributes } from '@/models/PlatformConfigurationAttributes'
 import { DeviceConfigurationAttributes } from '@/models/DeviceConfigurationAttributes'
+import { Platform } from '@/models/Platform'
+import { Device } from '@/models/Device'
+import { ConfigurationsTree } from '@/models/ConfigurationsTree'
 
 export interface IConfigurationMissingData {
   contacts: IMissingContactData
@@ -54,6 +59,8 @@ export interface IConfigurationWithMeta {
 
 export class ConfigurationSerializer {
   private contactSerializer: ContactSerializer = new ContactSerializer()
+  private deviceSerializer: DeviceSerializer = new DeviceSerializer()
+  private platformSerializer: PlatformSerializer = new PlatformSerializer()
 
   convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiObjectList): IConfigurationWithMeta[] {
     const included = jsonApiObjectList.included || []
@@ -104,6 +111,77 @@ export class ConfigurationSerializer {
     const contactsWithMissing = this.contactSerializer.convertJsonApiRelationshipsModelList(relationships, included)
     configuration.contacts = contactsWithMissing.contacts
     const missingDataForContactIds = contactsWithMissing.missing.ids
+
+    const devices = this.deviceSerializer.convertJsonApiRelationshipsModelList(included)
+    const platforms = this.platformSerializer.convertJsonApiRelationshipsModelList(included)
+
+    const deviceLookupById: {[idx: string]: Device} = {}
+    for (const device of devices) {
+      const deviceId = device.id
+      if (deviceId != null) {
+        deviceLookupById[deviceId] = device
+      }
+    }
+
+    const platformLookupById: {[idx: string]: Platform} = {}
+    for (const platform of platforms) {
+      const platformId = platform.id
+      if (platformId != null) {
+        platformLookupById[platformId] = platform
+      }
+    }
+
+    const addChildrenRecursivly = (element: any, listOfChildren: ConfigurationsTreeNode[], listOfPlatformAttributes: PlatformConfigurationAttributes[], listOfDeviceAttributes: DeviceConfigurationAttributes[]) => {
+      if (element.type === 'platform') {
+        const id = String(element.id)
+        const platform = platformLookupById[id]
+        const platformNode = new PlatformNode(platform)
+        listOfChildren.push(platformNode)
+
+        const platformAttribute = PlatformConfigurationAttributes.createFromObject({
+          platform,
+          offsetX: element.offset_x || 0.0,
+          offsetY: element.offset_y || 0.0,
+          offsetZ: element.offset_z || 0.0
+        })
+
+        listOfPlatformAttributes.push(platformAttribute)
+
+        if (element.children) {
+          const children: ConfigurationsTreeNode[] = []
+          for (const child of element.children) {
+            addChildrenRecursivly(child, children, listOfPlatformAttributes, listOfDeviceAttributes)
+          }
+          platformNode.setTree(ConfigurationsTree.fromArray(children))
+        }
+      } else if (element.type === 'device') {
+        const id = String(element.id)
+        const device = deviceLookupById[id]
+        const deviceNode = new DeviceNode(device)
+        listOfChildren.push(deviceNode)
+
+        const deviceAttribute = DeviceConfigurationAttributes.createFromObject({
+          device,
+          offsetX: element.offset_x || 0.0,
+          offsetY: element.offset_y || 0.0,
+          offsetZ: element.offset_z || 0.0,
+          calibrationDate: element.calibration_date != null ? new Date(element.calibration_date) : null,
+          deviceProperties: []
+        })
+
+        listOfDeviceAttributes.push(deviceAttribute)
+      }
+    }
+    const listOfPlatformAttributes: PlatformConfigurationAttributes[] = []
+    const listOfDeviceAttributes: DeviceConfigurationAttributes[] = []
+    const hierarchy: ConfigurationsTreeNode[] = []
+    for (const childNode of jsonApiData.attributes.hierarchy || []) {
+      addChildrenRecursivly(childNode, hierarchy, listOfPlatformAttributes, listOfDeviceAttributes)
+    }
+
+    configuration.children = hierarchy
+    configuration.platformAttributes = listOfPlatformAttributes
+    configuration.deviceAttributes = listOfDeviceAttributes
 
     return {
       configuration,

@@ -47,7 +47,6 @@ import {
 } from '@/serializers/jsonapi/ConfigurationSerializer'
 import { PlatformConfigurationAttributes } from '@/models/PlatformConfigurationAttributes'
 import { DeviceConfigurationAttributes } from '@/models/DeviceConfigurationAttributes'
-import { stringToDate } from '@/utils/dateHelper'
 
 describe('LocationType', () => {
   it('should be fixed what values can be given - and those should be consistent with the serializer', () => {
@@ -71,8 +70,44 @@ describe('ConfigurationSerializer', () => {
             project_uri: 'projects/Tereno-NO',
             project_name: 'Tereno NO',
             label: 'Tereno NO Boeken',
-            status: 'draft'
-            // TODO: add hierarchy
+            status: 'draft',
+            hierarchy: [
+              {
+                type: 'platform',
+                id: '37',
+                offset_x: 1.0,
+                offset_y: 2.0,
+                offset_z: 3.0,
+                children: [{
+                  type: 'platform',
+                  id: '38',
+                  offset_x: 4.0,
+                  offset_y: 5.0,
+                  offset_z: 6.0,
+                  children: [{
+                    type: 'device',
+                    id: '39',
+                    offset_x: 7.0,
+                    offset_y: 8.0,
+                    offset_z: 9.0,
+                    calibration_date: '2020-01-01T13:49:48.015620+00:00'
+                  }, {
+                    type: 'device',
+                    id: '40',
+                    offset_x: 10.0,
+                    offset_y: 11.0,
+                    offset_z: 12.0,
+                    calibration_date: null
+                  }]
+                }]
+              }, {
+                type: 'platform',
+                id: '41',
+                offset_x: 13.0,
+                offset_y: 14.0,
+                offset_z: 15.0
+              }
+            ]
           },
           relationships: {
             // TODO: add platforms & devices
@@ -103,6 +138,139 @@ describe('ConfigurationSerializer', () => {
           relationships: {},
           id: '3'
         }],
+        // The point of which platforms and devices are used is mentiond in the hierarchy.
+        // so there is no further need to add other relationships
+        included: [{
+          type: 'platform',
+          id: '37',
+          attributes: {
+            inventory_number: '',
+            platform_type_uri: 'type/station',
+            short_name: 'boeken_BF1',
+            created_at: '2020-08-28T13:48:35.740944+00:00',
+            manufacturer_name: '',
+            attachments: [],
+            description: 'Boeken BF1',
+            updated_at: '2020-08-29T13:48:35.740944+00:00',
+            long_name: 'Boeken BF1',
+            manufacturer_uri: '',
+            platform_type_name: 'Station',
+            serial_number: '',
+            persistent_identifier: null,
+            model: '',
+            website: '',
+            status_uri: '',
+            status_name: ''
+          },
+          relationships: {
+            // nothing more to make the test case not too complex
+          }
+        },
+        {
+          type: 'platform',
+          id: '38',
+          attributes: {
+            inventory_number: '',
+            platform_type_uri: 'type/station',
+            short_name: 'boeken_BF12',
+            created_at: '2020-09-28T13:48:35.740944+00:00',
+            manufacturer_name: '',
+            attachments: [],
+            description: 'Boeken BF2',
+            updated_at: '2020-09-29T13:48:35.740944+00:00',
+            long_name: 'Boeken BF2',
+            manufacturer_uri: '',
+            platform_type_name: 'Station',
+            serial_number: '',
+            persistent_identifier: null,
+            model: '',
+            website: '',
+            status_uri: '',
+            status_name: ''
+          },
+          relationships: {
+            // nothing more to make the test case not too complex
+          }
+        },
+        {
+          type: 'platform',
+          id: '41',
+          attributes: {
+            inventory_number: '',
+            platform_type_uri: 'type/station',
+            short_name: 'boeken_BF123',
+            created_at: '2020-09-29T13:48:35.740944+00:00',
+            manufacturer_name: '',
+            attachments: [],
+            description: 'Boeken BF3',
+            updated_at: '2020-09-30T13:48:35.740944+00:00',
+            long_name: 'Boeken BF3',
+            manufacturer_uri: '',
+            platform_type_name: 'Station',
+            serial_number: '',
+            persistent_identifier: null,
+            model: '',
+            website: '',
+            status_uri: '',
+            status_name: ''
+          }
+        }, {
+          type: 'device',
+          id: '39',
+          attributes: {
+            properties: [],
+            inventory_number: '',
+            short_name: 'Adcon wind vane',
+            customfields: [],
+            device_type_uri: '',
+            created_at: '2020-08-28T13:49:48.799090+00:00',
+            manufacturer_name: 'OTT Hydromet GmbH',
+            attachments: [],
+            dual_use: false,
+            description: '',
+            device_type_name: '',
+            updated_at: '2020-08-29T13:49:48.799090+00:00',
+            manufacturer_uri: '',
+            long_name: 'Adcon wind vane',
+            serial_number: '',
+            persistent_identifier: null,
+            model: 'Wind Vane',
+            website: 'www.adcon.com',
+            status_uri: '',
+            status_name: ''
+          },
+          relationships: {
+            // nothing more to make the test case not too complex
+          }
+        }, {
+          type: 'device',
+          id: '40',
+          attributes: {
+            properties: [],
+            inventory_number: '',
+            short_name: 'Adcon leafwetness',
+            customfields: [],
+            device_type_uri: '',
+            created_at: '2020-08-29T13:49:48.799090+00:00',
+            manufacturer_name: 'OTT Hydromet GmbH',
+            attachments: [],
+            dual_use: false,
+            description: '',
+            device_type_name: '',
+            updated_at: '2020-09-29T13:49:48.799090+00:00',
+            manufacturer_uri: '',
+            long_name: 'Adcon leafwetness',
+            serial_number: '',
+            persistent_identifier: null,
+            model: 'Leaf Wetness',
+            website: 'http://www.adcon.com',
+            status_uri: '',
+            status_name: ''
+          },
+          relationships: {
+            // nothing more to make the test case not too complex
+          }
+        }],
         meta: {
           count: 2
         },
@@ -110,6 +278,128 @@ describe('ConfigurationSerializer', () => {
           version: '1.0'
         }
       }
+
+      const expectedPlatform1 = Platform.createFromObject({
+        id: '37',
+        inventoryNumber: '',
+        platformTypeUri: 'type/station',
+        shortName: 'boeken_BF1',
+        createdAt: new Date('2020-08-28T13:48:35.740944+00:00'),
+        manufacturerName: '',
+        attachments: [],
+        description: 'Boeken BF1',
+        updatedAt: new Date('2020-08-29T13:48:35.740944+00:00'),
+        longName: 'Boeken BF1',
+        manufacturerUri: '',
+        platformTypeName: 'Station',
+        serialNumber: '',
+        persistentIdentifier: '',
+        model: '',
+        website: '',
+        statusUri: '',
+        statusName: '',
+        contacts: [],
+        createdByUserId: null,
+        updatedByUserId: null
+      })
+      const expectedPlatform2 = Platform.createFromObject({
+        id: '38',
+        inventoryNumber: '',
+        platformTypeUri: 'type/station',
+        shortName: 'boeken_BF12',
+        createdAt: new Date('2020-09-28T13:48:35.740944+00:00'),
+        manufacturerName: '',
+        attachments: [],
+        description: 'Boeken BF2',
+        updatedAt: new Date('2020-09-29T13:48:35.740944+00:00'),
+        longName: 'Boeken BF2',
+        manufacturerUri: '',
+        platformTypeName: 'Station',
+        serialNumber: '',
+        persistentIdentifier: '',
+        model: '',
+        website: '',
+        statusUri: '',
+        statusName: '',
+        contacts: [],
+        createdByUserId: null,
+        updatedByUserId: null
+      })
+      const expectedPlatform3 = Platform.createFromObject({
+        id: '41',
+        inventoryNumber: '',
+        platformTypeUri: 'type/station',
+        shortName: 'boeken_BF123',
+        createdAt: new Date('2020-09-29T13:48:35.740944+00:00'),
+        manufacturerName: '',
+        attachments: [],
+        description: 'Boeken BF3',
+        updatedAt: new Date('2020-09-30T13:48:35.740944+00:00'),
+        longName: 'Boeken BF3',
+        manufacturerUri: '',
+        platformTypeName: 'Station',
+        serialNumber: '',
+        persistentIdentifier: '',
+        model: '',
+        website: '',
+        statusUri: '',
+        statusName: '',
+        contacts: [],
+        createdByUserId: null,
+        updatedByUserId: null
+      })
+      const expectedDevice1 = Device.createFromObject({
+        id: '39',
+        properties: [],
+        inventoryNumber: '',
+        shortName: 'Adcon wind vane',
+        customFields: [],
+        deviceTypeUri: '',
+        createdAt: new Date('2020-08-28T13:49:48.799090+00:00'),
+        manufacturerName: 'OTT Hydromet GmbH',
+        attachments: [],
+        dualUse: false,
+        description: '',
+        deviceTypeName: '',
+        updatedAt: new Date('2020-08-29T13:49:48.799090+00:00'),
+        manufacturerUri: '',
+        longName: 'Adcon wind vane',
+        serialNumber: '',
+        persistentIdentifier: '',
+        model: 'Wind Vane',
+        website: 'www.adcon.com',
+        statusUri: '',
+        statusName: '',
+        contacts: [],
+        createdByUserId: null,
+        updatedByUserId: null
+      })
+      const expectedDevice2 = Device.createFromObject({
+        id: '40',
+        properties: [],
+        inventoryNumber: '',
+        shortName: 'Adcon leafwetness',
+        customFields: [],
+        deviceTypeUri: '',
+        createdAt: new Date('2020-08-29T13:49:48.799090+00:00'),
+        manufacturerName: 'OTT Hydromet GmbH',
+        attachments: [],
+        dualUse: false,
+        description: '',
+        deviceTypeName: '',
+        updatedAt: new Date('2020-09-29T13:49:48.799090+00:00'),
+        manufacturerUri: '',
+        longName: 'Adcon leafwetness',
+        serialNumber: '',
+        persistentIdentifier: '',
+        model: 'Leaf Wetness',
+        website: 'http://www.adcon.com',
+        statusUri: '',
+        statusName: '',
+        contacts: [],
+        createdByUserId: null,
+        updatedByUserId: null
+      })
 
       const expectedConfiguration1 = new Configuration()
       expectedConfiguration1.id = '1'
@@ -124,7 +414,71 @@ describe('ConfigurationSerializer', () => {
       expectedConfiguration1.projectName = 'Tereno NO'
       expectedConfiguration1.label = 'Tereno NO Boeken'
       expectedConfiguration1.status = 'draft'
-      // TODO add platforms & devices
+      expectedConfiguration1.children = ConfigurationsTree.fromArray(
+        [
+          ((): PlatformNode => {
+            const n = new PlatformNode(expectedPlatform1)
+            n.setTree(
+              ConfigurationsTree.fromArray(
+                [
+                  ((): PlatformNode => {
+                    const n = new PlatformNode(expectedPlatform2)
+                    n.setTree(
+                      ConfigurationsTree.fromArray(
+                        [
+                          new DeviceNode(expectedDevice1),
+                          new DeviceNode(expectedDevice2)
+                        ]
+                      )
+                    )
+                    return n
+                  })()
+                ]
+              )
+            )
+            return n
+          })(),
+          new PlatformNode(expectedPlatform3)
+        ]
+      ).toArray()
+      expectedConfiguration1.platformAttributes = [
+        PlatformConfigurationAttributes.createFromObject({
+          platform: expectedPlatform1,
+          offsetX: 1.0,
+          offsetY: 2.0,
+          offsetZ: 3.0
+        }),
+        PlatformConfigurationAttributes.createFromObject({
+          platform: expectedPlatform2,
+          offsetX: 4.0,
+          offsetY: 5.0,
+          offsetZ: 6.0
+        }),
+        PlatformConfigurationAttributes.createFromObject({
+          platform: expectedPlatform3,
+          offsetX: 13.0,
+          offsetY: 14.0,
+          offsetZ: 15.0
+        })
+      ]
+      expectedConfiguration1.deviceAttributes = [
+        DeviceConfigurationAttributes.createFromObject({
+          device: expectedDevice1,
+          offsetX: 7.0,
+          offsetY: 8.0,
+          offsetZ: 9.0,
+          calibrationDate: new Date('2020-01-01T13:49:48.015620+00:00'),
+          deviceProperties: []
+        }),
+        DeviceConfigurationAttributes.createFromObject({
+          device: expectedDevice2,
+          offsetX: 10.0,
+          offsetY: 11.0,
+          offsetZ: 12.0,
+          calibrationDate: null,
+          deviceProperties: []
+        })
+      ]
 
       const expectedConfiguration2 = new Configuration()
       expectedConfiguration2.id = '2'
@@ -146,7 +500,11 @@ describe('ConfigurationSerializer', () => {
       expect(configurations.length).toEqual(3)
 
       expect(configurations[0]).toEqual(expectedConfiguration1)
+      expect(configurations[0].deviceAttributes.length).toEqual(2)
+      expect(configurations[0].platformAttributes.length).toEqual(3)
       expect(configurations[1]).toEqual(expectedConfiguration2)
+      expect(configurations[1].deviceAttributes.length).toEqual(0)
+      expect(configurations[1].platformAttributes.length).toEqual(0)
       expect(configurations[2]).toEqual(expectedConfiguration3)
 
       const missingContactIds = configurationsWithMeta.map((x: IConfigurationWithMeta) => {

@@ -32,7 +32,7 @@
 import { Contact } from '@/models/Contact'
 import { Platform } from '@/models/Platform'
 
-import { IJsonApiObjectList, IJsonApiObject, IJsonApiDataWithId, IJsonApiTypeIdAttributes, IJsonApiDataWithOptionalId } from '@/serializers/jsonapi/JsonApiTypes'
+import { IJsonApiObjectList, IJsonApiObject, IJsonApiDataWithId, IJsonApiTypeIdAttributes, IJsonApiDataWithOptionalId, IJsonApiTypeIdAttributesWithOptionalRelationships } from '@/serializers/jsonapi/JsonApiTypes'
 
 import { AttachmentSerializer } from '@/serializers/jsonapi/AttachmentSerializer'
 import { ContactSerializer, IMissingContactData } from '@/serializers/jsonapi/ContactSerializer'
@@ -55,11 +55,11 @@ export class PlatformSerializer {
     return this.convertJsonApiDataToModel(jsonApiObject.data, included)
   }
 
-  convertJsonApiDataToModel (jsonApiData: IJsonApiDataWithId, included: IJsonApiTypeIdAttributes[]): IPlatformWithMeta {
+  convertJsonApiDataToModel (jsonApiData: IJsonApiDataWithId | IJsonApiTypeIdAttributesWithOptionalRelationships, included: IJsonApiTypeIdAttributes[]): IPlatformWithMeta {
     const result: Platform = Platform.createEmpty()
 
     const attributes = jsonApiData.attributes
-    const relationships = jsonApiData.relationships
+    const relationships = jsonApiData.relationships || {}
 
     result.id = jsonApiData.id
 
@@ -108,6 +108,21 @@ export class PlatformSerializer {
     return jsonApiObjectList.data.map((model: IJsonApiDataWithId) => {
       return this.convertJsonApiDataToModel(model, included)
     })
+  }
+
+  convertJsonApiRelationshipsModelList (included: IJsonApiTypeIdAttributes[]): Platform[] {
+    // it takes all the platforms, as those are the only ones included in the query per configuration.
+    // if you want to use it in a broader scope, you may have to change several things
+    const result = []
+    if (included && included.length > 0) {
+      for (const includedEntry of included) {
+        if (includedEntry.type === 'platform') {
+          const platform = this.convertJsonApiDataToModel(includedEntry, []).platform
+          result.push(platform)
+        }
+      }
+    }
+    return result
   }
 
   convertModelToJsonApiData (platform: Platform): IJsonApiDataWithOptionalId {

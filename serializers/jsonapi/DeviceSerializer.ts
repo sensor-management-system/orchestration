@@ -32,7 +32,7 @@
 import { Contact } from '@/models/Contact'
 import { Device } from '@/models/Device'
 
-import { IJsonApiObjectList, IJsonApiObject, IJsonApiDataWithId, IJsonApiDataWithOptionalId, IJsonApiTypeIdAttributes } from '@/serializers/jsonapi/JsonApiTypes'
+import { IJsonApiObjectList, IJsonApiObject, IJsonApiDataWithId, IJsonApiDataWithOptionalId, IJsonApiTypeIdAttributes, IJsonApiTypeIdAttributesWithOptionalRelationships } from '@/serializers/jsonapi/JsonApiTypes'
 
 import { AttachmentSerializer } from '@/serializers/jsonapi/AttachmentSerializer'
 import { ContactSerializer, IMissingContactData } from '@/serializers/jsonapi/ContactSerializer'
@@ -59,11 +59,11 @@ export class DeviceSerializer {
     return this.convertJsonApiDataToModel(jsonApiObject.data, included)
   }
 
-  convertJsonApiDataToModel (jsonApiData: IJsonApiDataWithId, included: IJsonApiTypeIdAttributes[]): IDeviceWithMeta {
+  convertJsonApiDataToModel (jsonApiData: IJsonApiDataWithId | IJsonApiTypeIdAttributesWithOptionalRelationships, included: IJsonApiTypeIdAttributes[]): IDeviceWithMeta {
     const result: Device = new Device()
 
     const attributes = jsonApiData.attributes
-    const relationships = jsonApiData.relationships
+    const relationships = jsonApiData.relationships || {}
 
     result.id = jsonApiData.id
 
@@ -112,6 +112,21 @@ export class DeviceSerializer {
     return jsonApiObjectList.data.map((model: IJsonApiDataWithId) => {
       return this.convertJsonApiDataToModel(model, included)
     })
+  }
+
+  convertJsonApiRelationshipsModelList (included: IJsonApiTypeIdAttributes[]): Device[] {
+    // it takes all the devices, as those are the only ones included in the query per configuration.
+    // if you want to use it in a broader scope, you may have to change several things
+    const result = []
+    if (included && included.length > 0) {
+      for (const includedEntry of included) {
+        if (includedEntry.type === 'device') {
+          const device = this.convertJsonApiDataToModel(includedEntry, []).device
+          result.push(device)
+        }
+      }
+    }
+    return result
   }
 
   convertModelToJsonApiData (device: Device): IJsonApiDataWithOptionalId {
