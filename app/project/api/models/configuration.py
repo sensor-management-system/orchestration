@@ -2,8 +2,8 @@ import collections
 from sqlalchemy.ext.hybrid import hybrid_property
 
 from project.api.models.base_model import db
-from project.api.models.device_property import DeviceProperty
 from project.api.models.mixin import AuditMixin
+
 
 ConfigurationsTuple = collections.namedtuple(
     "ConfigurationsTuple", ["configuration_devices", "configuration_platforms"]
@@ -31,21 +31,21 @@ class Configuration(db.Model, AuditMixin):
         db.Integer, db.ForeignKey("device_property.id"), nullable=True
     )
     longitude_src_device_property = db.relationship(
-        DeviceProperty, uselist=False, foreign_keys=[longitude_src_device_property_id]
+        "DeviceProperty", uselist=False, foreign_keys=[longitude_src_device_property_id]
     )
 
     latitude_src_device_property_id = db.Column(
         db.Integer, db.ForeignKey("device_property.id"), nullable=True
     )
     latitude_src_device_property = db.relationship(
-        DeviceProperty, uselist=False, foreign_keys=[latitude_src_device_property_id]
+        "DeviceProperty", uselist=False, foreign_keys=[latitude_src_device_property_id]
     )
 
     elevation_src_device_property_id = db.Column(
         db.Integer, db.ForeignKey("device_property.id"), nullable=True
     )
     elevation_src_device_property = db.relationship(
-        DeviceProperty, uselist=False, foreign_keys=[elevation_src_device_property_id]
+        "DeviceProperty", uselist=False, foreign_keys=[elevation_src_device_property_id]
     )
 
     @hybrid_property
