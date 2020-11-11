@@ -1,11 +1,21 @@
 from project.api.ping import Ping
 from project.api.resourceManager.configuration_detail import ConfigurationDetail
-from project.api.resourceManager.configuration_device_detail import ConfigurationDeviceDetail
-from project.api.resourceManager.configuration_device_list import ConfigurationDeviceList
+from project.api.resourceManager.configuration_device_detail import (
+    ConfigurationDeviceDetail,
+)
+from project.api.resourceManager.configuration_device_list import (
+    ConfigurationDeviceList,
+)
 from project.api.resourceManager.configuration_list import ConfigurationList
-from project.api.resourceManager.configuration_platform_detail import ConfigurationPlatformDetail
-from project.api.resourceManager.configuration_platform_list import ConfigurationPlatformList
-from project.api.resourceManager.configuration_relationship import ConfigurationRelationship
+from project.api.resourceManager.configuration_platform_detail import (
+    ConfigurationPlatformDetail,
+)
+from project.api.resourceManager.configuration_platform_list import (
+    ConfigurationPlatformList,
+)
+from project.api.resourceManager.configuration_relationship import (
+    ConfigurationRelationship,
+)
 from project.api.resourceManager.contact_detail import ContactDetail
 from project.api.resourceManager.contact_list import ContactList
 from project.api.resourceManager.contact_relationship import ContactRelationship
@@ -13,7 +23,9 @@ from project.api.resourceManager.device_detail import DeviceDetail
 from project.api.resourceManager.device_list import DeviceList
 from project.api.resourceManager.device_property_detail import DevicePropertyDetail
 from project.api.resourceManager.device_property_list import DevicePropertyList
-from project.api.resourceManager.device_property_relationship import DevicePropertyRelationship
+from project.api.resourceManager.device_property_relationship import (
+    DevicePropertyRelationship,
+)
 from project.api.resourceManager.device_relationship import DeviceRelationship
 from project.api.resourceManager.event_detail import EventDetail
 from project.api.resourceManager.event_list import EventList
@@ -105,19 +117,17 @@ def create_endpoints(api):
     api.route(
         DevicePropertyDetail,
         "device_property_detail",
-        base_url + "/device-properties/<int:id>"
+        base_url + "/device-properties/<int:id>",
     )
 
     api.route(
-        DevicePropertyList,
-        "device_property_list",
-        base_url + "/device-properties"
+        DevicePropertyList, "device_property_list", base_url + "/device-properties"
     )
 
     api.route(
         DevicePropertyRelationship,
         "device_property_device",
-        base_url + "/device-properties/<int:id>/relationships/device"
+        base_url + "/device-properties/<int:id>/relationships/device",
     )
 
     # Contact
@@ -170,17 +180,27 @@ def create_endpoints(api):
 
     # Configuration
     api.route(
-        ConfigurationList,
-        "configuration_list",
-        base_url + "/configurations",
+        ConfigurationList, "configuration_list", base_url + "/configurations",
     )
     api.route(
-        ConfigurationDetail, "configuration_detail", base_url + "/configurations/<int:id>",
+        ConfigurationDetail,
+        "configuration_detail",
+        base_url + "/configurations/<int:id>",
     )
     api.route(
         ConfigurationRelationship,
         "configuration_contacts",
         base_url + "/configurations/<int:id>/relationships/contacts",
+    )
+    api.route(
+        ConfigurationRelationship,
+        "configuration_platforms",
+        base_url + "/configurations/<int:id>/relationships/configuration-platforms",
+    )
+    api.route(
+        ConfigurationRelationship,
+        "configuration_devices",
+        base_url + "/configurations/<int:id>/relationships/configuration-devices",
     )
     # ConfigurationPlatform
     api.route(
