@@ -35,6 +35,7 @@ class ConfigurationSchema(Schema):
         related_view="device_property_detail",
         related_view_kwargs={"id": "<longitude_src_device_property_id>"},
         type_="device_property",
+        schema="DevicePropertySchema",
     )
 
     latitude_src_device_property = Relationship(
@@ -42,6 +43,7 @@ class ConfigurationSchema(Schema):
         related_view="device_property_detail",
         related_view_kwargs={"id": "<latitude_src_device_property_id>"},
         type_="device_property",
+        schema="DevicePropertySchema",
     )
 
     elevation_src_device_property = Relationship(
@@ -49,6 +51,7 @@ class ConfigurationSchema(Schema):
         related_view="device_property_detail",
         related_view_kwargs={"id": "<elevation_src_device_property_id>"},
         type_="device_property",
+        schema="DevicePropertySchema",
     )
 
     contacts = Relationship(
