@@ -33,7 +33,7 @@
 import { Configuration } from '@/models/Configuration'
 import { Contact } from '@/models/Contact'
 
-import { IJsonApiObjectList, IJsonApiObject, IJsonApiDataWithId, IJsonApiDataWithOptionalId, IJsonApiTypeIdAttributes } from '@/serializers/jsonapi/JsonApiTypes'
+import { IJsonApiObjectList, IJsonApiObject, IJsonApiDataWithId, IJsonApiDataWithOptionalId, IJsonApiTypeIdAttributes, IJsonApiTypeId } from '@/serializers/jsonapi/JsonApiTypes'
 
 import { ContactSerializer, IMissingContactData } from '@/serializers/jsonapi/ContactSerializer'
 import { DeviceSerializer } from '@/serializers/jsonapi/DeviceSerializer'
@@ -47,6 +47,7 @@ import { DeviceConfigurationAttributes } from '@/models/DeviceConfigurationAttri
 import { Platform } from '@/models/Platform'
 import { Device } from '@/models/Device'
 import { ConfigurationsTree } from '@/models/ConfigurationsTree'
+import { DeviceProperty } from '@/models/DeviceProperty'
 
 export interface IConfigurationMissingData {
   contacts: IMissingContactData
@@ -89,6 +90,23 @@ export class ConfigurationSerializer {
     configuration.startDate = attributes.start_date ? new Date(attributes.start_date) : null
     configuration.endDate = attributes.end_date ? new Date(attributes.end_date) : null
 
+    const devices = this.deviceSerializer.convertJsonApiRelationshipsModelList(included)
+    const deviceLookupById: {[idx: string]: Device} = {}
+    const devicePropertyLookupById : {[idx: string]: DeviceProperty} = {}
+
+    for (const device of devices) {
+      const deviceId = device.id
+      if (deviceId != null) {
+        deviceLookupById[deviceId] = device
+      }
+      for (const deviceProperty of device.properties) {
+        const devicePropertyId = deviceProperty.id
+        if (devicePropertyId != null) {
+          devicePropertyLookupById[devicePropertyId] = deviceProperty
+        }
+      }
+    }
+
     if (attributes.location_type === LocationType.Stationary) {
       const location = new StationaryLocation()
       if (attributes.longitude != null) { // allow 0 as real values as well
@@ -103,8 +121,20 @@ export class ConfigurationSerializer {
       configuration.location = location
     } else if (attributes.location_type === LocationType.Dynamic) {
       const location = new DynamicLocation()
-      // TODO: handle longitude_src_device_property
-      // and for latitude & elevation as well
+      const toCheck = [
+        { key: 'latitude_src_device_property', setFunction (value: DeviceProperty) { location.latitude = value } },
+        { key: 'longitude_src_device_property', setFunction (value: DeviceProperty) { location.longitude = value } },
+        { key: 'elevation_src_device_property', setFunction (value: DeviceProperty) { location.elevation = value } }
+      ]
+      for (const check of toCheck) {
+        if (relationships && relationships[check.key] && relationships[check.key].data) {
+          const data = relationships[check.key].data as IJsonApiTypeId
+          const id = data.id
+          if (id != null && devicePropertyLookupById[id]) {
+            check.setFunction(devicePropertyLookupById[id])
+          }
+        }
+      }
       configuration.location = location
     }
 
@@ -112,16 +142,8 @@ export class ConfigurationSerializer {
     configuration.contacts = contactsWithMissing.contacts
     const missingDataForContactIds = contactsWithMissing.missing.ids
 
-    const devices = this.deviceSerializer.convertJsonApiRelationshipsModelList(included)
+    // we get all the devices and platforms
     const platforms = this.platformSerializer.convertJsonApiRelationshipsModelList(included)
-
-    const deviceLookupById: {[idx: string]: Device} = {}
-    for (const device of devices) {
-      const deviceId = device.id
-      if (deviceId != null) {
-        deviceLookupById[deviceId] = device
-      }
-    }
 
     const platformLookupById: {[idx: string]: Platform} = {}
     for (const platform of platforms) {
@@ -197,6 +219,7 @@ export class ConfigurationSerializer {
     const contacts = this.contactSerializer.convertModelListToJsonApiRelationshipObject(configuration.contacts)
 
     let locationAttributes = {}
+    const locationRelationships: {[idx: string]: any} = {}
 
     const location = configuration.location
     if (location instanceof StationaryLocation) {
@@ -210,7 +233,24 @@ export class ConfigurationSerializer {
       locationAttributes = {
         location_type: LocationType.Dynamic
       }
-      // TODO: Add location relationships for the device properties
+      const toAdd = [
+        { key: 'latitude_src_device_property', value: location.latitude },
+        { key: 'longitude_src_device_property', value: location.longitude },
+        { key: 'elevation_src_device_property', value: location.elevation }
+      ]
+      for (const check of toAdd) {
+        const key = check.key
+        if (check.value != null) {
+          locationRelationships[key] = {
+            data: {
+              id: check.value.id,
+              type: 'device_property'
+            }
+          }
+        } else {
+          // TODO: Figure out how to set those to be deleted then
+        }
+      }
     }
 
     const platformAttributeLookupById: {[index: string]: PlatformConfigurationAttributes} = {}
@@ -287,7 +327,8 @@ export class ConfigurationSerializer {
         ...locationAttributes
       },
       relationships: {
-        ...contacts
+        ...contacts,
+        ...locationRelationships
       },
       type: 'configuration'
     }

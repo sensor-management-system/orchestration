@@ -62,7 +62,14 @@ export class ConfigurationApi {
   findById (id: string): Promise<Configuration> {
     return this.axiosApi.get(id, {
       params: {
-        include: ['contacts', 'configuration_platforms.platform', 'configuration_devices.device'].join(',')
+        include: [
+          'contacts',
+          'configuration_platforms.platform',
+          'configuration_devices.device',
+          'longitude_src_device_property',
+          'latitude_src_device_property',
+          'elevation_src_device_property'
+        ].join(',')
       }
     }).then((rawResponse) => {
       const rawData = rawResponse.data

@@ -39,6 +39,7 @@ import { PlatformNode } from '@/models/PlatformNode'
 import { Platform } from '@/models/Platform'
 import { StationaryLocation, DynamicLocation, LocationType } from '@/models/Location'
 
+import { IJsonApiTypeIdDataList, IJsonApiTypeIdData } from '@/serializers/jsonapi/JsonApiTypes'
 import {
   ConfigurationSerializer,
   IConfigurationWithMeta,
@@ -65,10 +66,7 @@ describe('ConfigurationSerializer', () => {
           attributes: {
             start_date: '2020-08-28T13:49:48.015620+00:00',
             end_date: '2020-08-29T13:49:48.015620+00:00',
-            location_type: LocationType.Stationary,
-            longitude: 13.0,
-            latitude: 52.0,
-            elevation: 100.0,
+            location_type: LocationType.Dynamic,
             project_uri: 'projects/Tereno-NO',
             project_name: 'Tereno NO',
             label: 'Tereno NO Boeken',
@@ -112,8 +110,21 @@ describe('ConfigurationSerializer', () => {
             ]
           },
           relationships: {
-            // TODO: add platforms & devices
-            // but no contacts, as we expect an empty case here
+            longitude_src_device_property: {
+              data: {
+                type: 'device_property',
+                id: '100'
+              }
+            },
+            latitude_src_device_property: {
+              data: {
+                type: 'device_property',
+                id: '101'
+              }
+            },
+            elevation_src_device_property: {
+            }
+            // no contacts, as we expect an empty case here
           },
           id: '1'
         }, {
@@ -516,10 +527,10 @@ describe('ConfigurationSerializer', () => {
 
       const expectedConfiguration1 = new Configuration()
       expectedConfiguration1.id = '1'
-      expectedConfiguration1.location = StationaryLocation.createFromObject({
-        longitude: 13.0,
-        latitude: 52.0,
-        elevation: 100.0
+      expectedConfiguration1.location = DynamicLocation.createFromObject({
+        longitude: expectedDeviceProperty1,
+        latitude: expectedDeviceProperty2,
+        elevation: null
       })
       expectedConfiguration1.startDate = new Date('2020-08-28T13:49:48.015620+00:00')
       expectedConfiguration1.endDate = new Date('2020-08-29T13:49:48.015620+00:00')
@@ -940,7 +951,9 @@ describe('ConfigurationSerializer', () => {
       expect(typeof jsonApiData.relationships.contacts).toEqual('object')
       expect(jsonApiData.relationships.contacts).toHaveProperty('data')
 
-      const contactData = jsonApiData.relationships.contacts.data
+      const contactObject = jsonApiData.relationships.contacts as IJsonApiTypeIdDataList
+
+      const contactData = contactObject.data
       expect(Array.isArray(contactData)).toBeTruthy()
       expect(contactData.length).toEqual(2)
       expect(contactData[0]).toEqual({
@@ -967,7 +980,48 @@ describe('ConfigurationSerializer', () => {
     it('should also work with a dynamic location type', () => {
       const configuration = new Configuration()
       expect(configuration.id).toEqual('')
+
+      const property1 = DeviceProperty.createFromObject({
+        id: '100',
+        samplingMediaName: 'Air',
+        samplingMediaUri: 'medium/air',
+        compartmentName: 'C1',
+        compartmentUri: 'compartment/c1',
+        propertyName: 'Temperature',
+        propertyUri: 'property/temperature',
+        unitName: 'degree',
+        unitUri: 'unit/degree',
+        failureValue: -999,
+        measuringRange: MeasuringRange.createFromObject({
+          min: -273,
+          max: 100
+        }),
+        label: 'air_temperature',
+        accuracy: 0.1
+      })
+      const property2 = DeviceProperty.createFromObject({
+        id: '101',
+        samplingMediaName: 'Water',
+        samplingMediaUri: 'medium/water',
+        compartmentName: 'C1',
+        compartmentUri: 'compartment/c1',
+        propertyName: 'Temperature',
+        propertyUri: 'property/temperature',
+        unitName: 'degree',
+        unitUri: 'unit/degree',
+        failureValue: -999,
+        measuringRange: MeasuringRange.createFromObject({
+          min: -10,
+          max: 100
+        }),
+        label: 'water_temperature',
+        accuracy: 0.1
+      })
+
       configuration.location = new DynamicLocation()
+      configuration.location.latitude = property1
+      configuration.location.longitude = property2
+      configuration.location.elevation = null
 
       const serializer = new ConfigurationSerializer()
 
@@ -982,7 +1036,24 @@ describe('ConfigurationSerializer', () => {
 
       expect(attributes).toHaveProperty('location_type')
       expect(attributes.location_type).toEqual(LocationType.Dynamic)
-      // TODO: platforms & devices
+      expect(jsonApiData).toHaveProperty('relationships')
+      const relationships = jsonApiData.relationships
+      expect(relationships).toHaveProperty('longitude_src_device_property')
+      const lonSrcProperty = relationships.longitude_src_device_property as IJsonApiTypeIdData
+      expect(lonSrcProperty).toHaveProperty('data')
+      expect(lonSrcProperty.data).toHaveProperty('id')
+      expect(lonSrcProperty.data.id).toEqual('101')
+      expect(lonSrcProperty.data).toHaveProperty('type')
+      expect(lonSrcProperty.data.type).toEqual('device_property')
+      expect(relationships).toHaveProperty('latitude_src_device_property')
+      const latSrcProperty = relationships.latitude_src_device_property as IJsonApiTypeIdData
+      expect(latSrcProperty).toHaveProperty('data')
+      expect(latSrcProperty.data).toHaveProperty('id')
+      expect(latSrcProperty.data.id).toEqual('100')
+      expect(latSrcProperty.data).toHaveProperty('type')
+      expect(latSrcProperty.data.type).toEqual('device_property')
+      // TODO check how it must look like to delete them later...
+      expect(relationships).not.toHaveProperty('elevation_src_device_property')
     })
     it('should also work with an empty stationary location type', () => {
       const configuration = new Configuration()

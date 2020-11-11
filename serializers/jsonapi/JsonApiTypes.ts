@@ -203,11 +203,15 @@ export interface IJsonApiTypeId {
     id: string
 }
 
+export interface IJsonApiTypeIdData {
+  data: IJsonApiTypeId
+}
+
 export interface IJsonApiTypeIdDataList {
     data: IJsonApiTypeId[]
 }
 
-export type IJsonApiTypeIdDataListDict = {[idx: string]: IJsonApiTypeIdDataList}
+export type IJsonApiTypeIdDataListDict = {[idx: string]: IJsonApiTypeIdDataList | IJsonApiTypeIdData}
 
 export interface IJsonApiData {
     attributes: IJsonApiAttributes
