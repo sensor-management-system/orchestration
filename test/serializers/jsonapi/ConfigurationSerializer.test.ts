@@ -47,6 +47,8 @@ import {
 } from '@/serializers/jsonapi/ConfigurationSerializer'
 import { PlatformConfigurationAttributes } from '@/models/PlatformConfigurationAttributes'
 import { DeviceConfigurationAttributes } from '@/models/DeviceConfigurationAttributes'
+import { DeviceProperty } from '@/models/DeviceProperty'
+import { MeasuringRange } from '@/models/MeasuringRange'
 
 describe('LocationType', () => {
   it('should be fixed what values can be given - and those should be consistent with the serializer', () => {
@@ -137,6 +139,16 @@ describe('ConfigurationSerializer', () => {
           attributes: {},
           relationships: {},
           id: '3'
+        }, {
+          type: 'configuration',
+          attributes: {
+            location_type: LocationType.Stationary,
+            longitude: 13.0,
+            latitude: 52.0,
+            elevation: 100.0
+          },
+          relationships: {},
+          id: '4'
         }],
         // The point of which platforms and devices are used is mentiond in the hierarchy.
         // so there is no further need to add other relationships
@@ -218,7 +230,37 @@ describe('ConfigurationSerializer', () => {
           type: 'device',
           id: '39',
           attributes: {
-            properties: [],
+            properties: [{
+              id: '100',
+              sampling_media_name: 'Air',
+              sampling_media_uri: 'medium/air',
+              compartment_name: 'C1',
+              compartment_uri: 'compartment/c1',
+              property_name: 'Temperature',
+              property_uri: 'property/temperature',
+              unit_name: 'degree',
+              unit_uri: 'unit/degree',
+              failure_value: -999,
+              measuring_range_min: -273,
+              measuring_range_max: 100,
+              label: 'air_temperature',
+              accuracy: 0.1
+            }, {
+              id: '101',
+              sampling_media_name: 'Water',
+              sampling_media_uri: 'medium/water',
+              compartment_name: 'C1',
+              compartment_uri: 'compartment/c1',
+              property_name: 'Temperature',
+              property_uri: 'property/temperature',
+              unit_name: 'degree',
+              unit_uri: 'unit/degree',
+              failure_value: -999,
+              measuring_range_min: -10,
+              measuring_range_max: 100,
+              label: 'water_temperature',
+              accuracy: 0.1
+            }],
             inventory_number: '',
             short_name: 'Adcon wind vane',
             customfields: [],
@@ -246,7 +288,22 @@ describe('ConfigurationSerializer', () => {
           type: 'device',
           id: '40',
           attributes: {
-            properties: [],
+            properties: [{
+              id: '102',
+              sampling_media_name: 'Snow',
+              sampling_media_uri: 'medium/snow',
+              compartment_name: 'C1',
+              compartment_uri: 'compartment/c1',
+              property_name: 'Temperature',
+              property_uri: 'property/temperature',
+              unit_name: 'degree',
+              unit_uri: 'unit/degree',
+              failure_value: -999,
+              measuring_range_min: -273,
+              measuring_range_max: 5,
+              label: 'snow_temperature',
+              accuracy: 0.1
+            }],
             inventory_number: '',
             short_name: 'Adcon leafwetness',
             customfields: [],
@@ -348,9 +405,65 @@ describe('ConfigurationSerializer', () => {
         createdByUserId: null,
         updatedByUserId: null
       })
+
+      const expectedDeviceProperty1 = DeviceProperty.createFromObject({
+        id: '100',
+        samplingMediaName: 'Air',
+        samplingMediaUri: 'medium/air',
+        compartmentName: 'C1',
+        compartmentUri: 'compartment/c1',
+        propertyName: 'Temperature',
+        propertyUri: 'property/temperature',
+        unitName: 'degree',
+        unitUri: 'unit/degree',
+        failureValue: -999,
+        measuringRange: MeasuringRange.createFromObject({
+          min: -273,
+          max: 100
+        }),
+        label: 'air_temperature',
+        accuracy: 0.1
+      })
+      const expectedDeviceProperty2 = DeviceProperty.createFromObject({
+        id: '101',
+        samplingMediaName: 'Water',
+        samplingMediaUri: 'medium/water',
+        compartmentName: 'C1',
+        compartmentUri: 'compartment/c1',
+        propertyName: 'Temperature',
+        propertyUri: 'property/temperature',
+        unitName: 'degree',
+        unitUri: 'unit/degree',
+        failureValue: -999,
+        measuringRange: MeasuringRange.createFromObject({
+          min: -10,
+          max: 100
+        }),
+        label: 'water_temperature',
+        accuracy: 0.1
+      })
+      const expectedDeviceProperty3 = DeviceProperty.createFromObject({
+        id: '102',
+        samplingMediaName: 'Snow',
+        samplingMediaUri: 'medium/snow',
+        compartmentName: 'C1',
+        compartmentUri: 'compartment/c1',
+        propertyName: 'Temperature',
+        propertyUri: 'property/temperature',
+        unitName: 'degree',
+        unitUri: 'unit/degree',
+        failureValue: -999,
+        measuringRange: MeasuringRange.createFromObject({
+          min: -273,
+          max: 5
+        }),
+        label: 'snow_temperature',
+        accuracy: 0.1
+      })
+
       const expectedDevice1 = Device.createFromObject({
         id: '39',
-        properties: [],
+        properties: [expectedDeviceProperty1, expectedDeviceProperty2],
         inventoryNumber: '',
         shortName: 'Adcon wind vane',
         customFields: [],
@@ -376,7 +489,7 @@ describe('ConfigurationSerializer', () => {
       })
       const expectedDevice2 = Device.createFromObject({
         id: '40',
-        properties: [],
+        properties: [expectedDeviceProperty3],
         inventoryNumber: '',
         shortName: 'Adcon leafwetness',
         customFields: [],
@@ -490,6 +603,14 @@ describe('ConfigurationSerializer', () => {
       const expectedConfiguration3 = new Configuration()
       expectedConfiguration3.id = '3'
 
+      const expectedConfiguration4 = new Configuration()
+      expectedConfiguration4.id = '4'
+      expectedConfiguration4.location = StationaryLocation.createFromObject({
+        longitude: 13.0,
+        latitude: 52.0,
+        elevation: 100.0
+      })
+
       const serializer = new ConfigurationSerializer()
       const configurationsWithMeta = serializer.convertJsonApiObjectListToModelList(jsonApiObjectList)
       const configurations = configurationsWithMeta.map((x: IConfigurationWithMeta) => {
@@ -497,7 +618,7 @@ describe('ConfigurationSerializer', () => {
       })
 
       expect(Array.isArray(configurations)).toBeTruthy()
-      expect(configurations.length).toEqual(3)
+      expect(configurations.length).toEqual(4)
 
       expect(configurations[0]).toEqual(expectedConfiguration1)
       expect(configurations[0].deviceAttributes.length).toEqual(2)
@@ -506,16 +627,18 @@ describe('ConfigurationSerializer', () => {
       expect(configurations[1].deviceAttributes.length).toEqual(0)
       expect(configurations[1].platformAttributes.length).toEqual(0)
       expect(configurations[2]).toEqual(expectedConfiguration3)
+      expect(configurations[3]).toEqual(expectedConfiguration4)
 
       const missingContactIds = configurationsWithMeta.map((x: IConfigurationWithMeta) => {
         return x.missing.contacts.ids
       })
 
       expect(Array.isArray(missingContactIds)).toBeTruthy()
-      expect(missingContactIds.length).toEqual(3)
+      expect(missingContactIds.length).toEqual(4)
       expect(missingContactIds[0]).toEqual([])
       expect(missingContactIds[1]).toEqual([])
       expect(missingContactIds[2]).toEqual([])
+      expect(missingContactIds[3]).toEqual([])
     })
   })
   describe('#convertJsonApiObjectToModel', () => {
