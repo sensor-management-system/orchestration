@@ -187,8 +187,7 @@ export class ConfigurationSerializer {
           offsetX: element.offset_x || 0.0,
           offsetY: element.offset_y || 0.0,
           offsetZ: element.offset_z || 0.0,
-          calibrationDate: element.calibration_date != null ? new Date(element.calibration_date) : null,
-          deviceProperties: []
+          calibrationDate: element.calibration_date != null ? new Date(element.calibration_date) : null
         })
 
         listOfDeviceAttributes.push(deviceAttribute)

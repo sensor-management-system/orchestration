@@ -588,16 +588,14 @@ describe('ConfigurationSerializer', () => {
           offsetX: 7.0,
           offsetY: 8.0,
           offsetZ: 9.0,
-          calibrationDate: new Date('2020-01-01T13:49:48.015620+00:00'),
-          deviceProperties: []
+          calibrationDate: new Date('2020-01-01T13:49:48.015620+00:00')
         }),
         DeviceConfigurationAttributes.createFromObject({
           device: expectedDevice2,
           offsetX: 10.0,
           offsetY: 11.0,
           offsetZ: 12.0,
-          calibrationDate: null,
-          deviceProperties: []
+          calibrationDate: null
         })
       ]
 
@@ -1160,9 +1158,7 @@ describe('ConfigurationSerializer', () => {
         offsetX: 11.0,
         offsetY: 12.0,
         offsetZ: 13.0,
-        calibrationDate: null,
-        // the device property will be ignored here
-        deviceProperties: []
+        calibrationDate: null
       }),
       // none for device4
       DeviceConfigurationAttributes.createFromObject({
@@ -1170,8 +1166,7 @@ describe('ConfigurationSerializer', () => {
         offsetX: 22.0,
         offsetY: 23.0,
         offsetZ: 24.0,
-        calibrationDate: new Date('2020-11-09T00:00:00.000Z'),
-        deviceProperties: []
+        calibrationDate: new Date('2020-11-09T00:00:00.000Z')
       })
 
     ]

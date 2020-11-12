@@ -104,21 +104,6 @@ permissions and limitations under the Licence.
         </v-menu>
       </v-col>
     </v-row>
-    <v-row>
-      <v-col
-        cols="12"
-        md="3"
-      >
-        <DevicePropertySelect
-          :value="value.deviceProperties"
-          :properties="value.device.properties"
-          label="Add one or more properties"
-          :readonly="readonly"
-          :disabled="readonly"
-          @input="update('deviceProperties', $event)"
-        />
-      </v-col>
-    </v-row>
   </div>
 </template>
 
@@ -190,9 +175,6 @@ export default class DeviceConfigurationAttributesForm extends Vue {
         break
       case 'calibrationDate':
         newObj.calibrationDate = stringToDate(value)
-        break
-      case 'deviceProperties':
-        newObj.deviceProperties = value
         break
       default:
         throw new TypeError('key ' + key + ' is not valid')

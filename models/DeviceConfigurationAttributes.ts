@@ -29,7 +29,6 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
-import { DeviceProperty } from '@/models/DeviceProperty'
 import { Device } from '@/models/Device'
 
 export interface IDeviceConfigurationAttributes {
@@ -38,7 +37,6 @@ export interface IDeviceConfigurationAttributes {
   offsetY: number
   offsetZ: number
   calibrationDate: Date | null
-  deviceProperties: DeviceProperty[]
 }
 
 export class DeviceConfigurationAttributes implements IDeviceConfigurationAttributes {
@@ -47,7 +45,6 @@ export class DeviceConfigurationAttributes implements IDeviceConfigurationAttrib
   private _offsetY: number = 0
   private _offsetZ: number = 0
   private _calibrationDate: Date | null = null
-  private _deviceProperties: DeviceProperty[] = []
 
   constructor (device: Device) {
     this._device = device
@@ -60,7 +57,6 @@ export class DeviceConfigurationAttributes implements IDeviceConfigurationAttrib
     newObject.offsetY = someObject.offsetY
     newObject.offsetZ = someObject.offsetZ
     newObject.calibrationDate = someObject.calibrationDate instanceof Date ? new Date(someObject.calibrationDate.getTime()) : null
-    newObject.deviceProperties = [...someObject.deviceProperties]
 
     return newObject
   }
@@ -103,47 +99,5 @@ export class DeviceConfigurationAttributes implements IDeviceConfigurationAttrib
 
   set calibrationDate (date: Date | null) {
     this._calibrationDate = date
-  }
-
-  get deviceProperties (): DeviceProperty[] {
-    return this._deviceProperties
-  }
-
-  set deviceProperties (properties: DeviceProperty[]) {
-    this._deviceProperties = []
-    properties.forEach(property => this.addDeviceProperty(property))
-  }
-
-  addDeviceProperty (property: DeviceProperty): number {
-    if (!this.device.properties.find(e => e === property)) {
-      throw new Error('property is not a member of the device')
-    }
-    return this._deviceProperties.push(property)
-  }
-
-  addDevicePropertyById (id: string | null): number {
-    const property = this.device.properties.find(e => e.id === id)
-    if (!property) {
-      throw new Error('unknown property id')
-    }
-    return this._deviceProperties.push(property)
-  }
-
-  removeDeviceProperty (property: DeviceProperty): number {
-    const index = this.device.properties.findIndex(e => e === property)
-    if (index === -1) {
-      throw new Error('unknown property')
-    }
-    this._deviceProperties.splice(index, 1)
-    return index
-  }
-
-  removeDevicePropertyById (id: string | null): number {
-    const index = this.device.properties.findIndex(e => e.id === id)
-    if (index === -1) {
-      throw new Error('unknown property id')
-    }
-    this._deviceProperties.splice(index, 1)
-    return index
   }
 }
