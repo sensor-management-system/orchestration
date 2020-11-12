@@ -202,6 +202,21 @@ def create_endpoints(api):
         "configuration_devices",
         base_url + "/configurations/<int:id>/relationships/configuration-devices",
     )
+    api.route(
+        ConfigurationRelationship,
+        "configuration-src_longitude",
+        base_url + "/configurations/<int:id>/relationships/src-longitude",
+    )
+    api.route(
+        ConfigurationRelationship,
+        "configuration-src_latitude",
+        base_url + "/configurations/<int:id>/relationships/src-latitude",
+    )
+    api.route(
+        ConfigurationRelationship,
+        "configuration-src_elevation",
+        base_url + "/configurations/<int:id>/relationships/src-elevation",
+    )
     # ConfigurationPlatform
     api.route(
         ConfigurationPlatformList,
