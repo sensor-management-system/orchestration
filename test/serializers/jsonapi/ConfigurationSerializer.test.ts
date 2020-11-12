@@ -135,13 +135,10 @@ describe('ConfigurationSerializer', () => {
             // no fields for longitude, latitude & elevation,
             // no fields for project_uri or project_name
             // no field for label
-            // TODO: Test other status once we introduced others (and their names)
             status: 'draft'
-            // TODO
           },
           relationships: {
-            // TODO: add platforms & devices
-            // but no contacts, as we expect an empty case here
+            // no contacts, as we expect an empty case here
             // and handle device properties somehow
           },
           id: '2'
@@ -608,8 +605,6 @@ describe('ConfigurationSerializer', () => {
       expectedConfiguration2.id = '2'
       expectedConfiguration2.location = new DynamicLocation()
       expectedConfiguration2.status = 'draft'
-      // TODO add device properties
-      // TODO
 
       const expectedConfiguration3 = new Configuration()
       expectedConfiguration3.id = '3'
@@ -668,11 +663,9 @@ describe('ConfigurationSerializer', () => {
             project_name: 'Tereno NO',
             label: 'Tereno NO Boeken',
             status: 'draft'
-            // TODO: add hierarchy
           },
           relationships: {
-            // TODO: add platforms & devices
-            // but no contacts, as we expect an empty case here
+            // no contacts, as we expect an empty case here
           },
           id: '1'
         },
@@ -693,7 +686,6 @@ describe('ConfigurationSerializer', () => {
       expectedConfiguration.projectName = 'Tereno NO'
       expectedConfiguration.label = 'Tereno NO Boeken'
       expectedConfiguration.status = 'draft'
-      // TODO
 
       const serializer = new ConfigurationSerializer()
       const configurationWithMeta = serializer.convertJsonApiObjectToModel(jsonApiObject)
@@ -783,7 +775,6 @@ describe('ConfigurationSerializer', () => {
           email: 'test@tost.test'
         })
       ]
-      // TODO platforms & devies
 
       const serializer = new ConfigurationSerializer()
       const configurationWithMeta = serializer.convertJsonApiObjectToModel(jsonApiObject)
@@ -829,8 +820,6 @@ describe('ConfigurationSerializer', () => {
       expectedConfiguration.projectName = 'Tereno NO'
       expectedConfiguration.label = 'Tereno NO Boeken'
       expectedConfiguration.status = 'draft'
-      // TODO
-      // add platforms & devices
 
       const included: any[] = []
 
@@ -872,8 +861,6 @@ describe('ConfigurationSerializer', () => {
       expectedConfiguration.projectName = 'Tereno NO'
       expectedConfiguration.label = 'Tereno NO Boeken'
       expectedConfiguration.status = 'draft'
-      // TODO
-      // add platforms & devices
 
       const included: any[] = []
 
@@ -968,8 +955,6 @@ describe('ConfigurationSerializer', () => {
         id: '2',
         type: 'contact'
       })
-
-      // TODO: platforms & devices
     })
     it('should set an id if given for the configuration', () => {
       const configuration = new Configuration()
