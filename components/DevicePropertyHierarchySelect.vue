@@ -125,6 +125,25 @@ export default class DevicePropertyHierarchySelect extends Vue {
 
   private selectedDevice: Device | null = null
 
+  mounted () {
+    if (this.selectedDevice == null && this.value != null) {
+      const deviceByPropertyIdLookup: {[idx: string]: Device} = {}
+      for (const device of this.devices) {
+        for (const property of device.properties) {
+          const propertyId = property.id
+          if (propertyId != null) {
+            deviceByPropertyIdLookup[propertyId] = device
+          }
+        }
+      }
+
+      const propertyId = this.value.id
+      if (propertyId != null && deviceByPropertyIdLookup[propertyId]) {
+        this.selectedDevice = deviceByPropertyIdLookup[propertyId]
+      }
+    }
+  }
+
   /**
    * selects a devices that is used to display its properties
    *
