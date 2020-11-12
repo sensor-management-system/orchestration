@@ -951,6 +951,10 @@ describe('ConfigurationSerializer', () => {
       expect(typeof jsonApiData.relationships.contacts).toEqual('object')
       expect(jsonApiData.relationships.contacts).toHaveProperty('data')
 
+      // we test for the inner structure of the result anyway
+      // this cast is just to tell typescript that
+      // we have an array of data, so that it doesn't show
+      // typeerrors here
       const contactObject = jsonApiData.relationships.contacts as IJsonApiTypeIdDataList
 
       const contactData = contactObject.data

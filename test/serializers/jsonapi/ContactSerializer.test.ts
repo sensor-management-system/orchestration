@@ -31,6 +31,7 @@
  */
 import { Contact } from '@/models/Contact'
 import { ContactSerializer } from '@/serializers/jsonapi/ContactSerializer'
+import { IJsonApiTypeIdDataList } from '@/serializers/jsonapi/JsonApiTypes'
 
 describe('ContactSerializer', () => {
   describe('#convertJsonApiObjectListToModelList', () => {
@@ -260,8 +261,13 @@ describe('ContactSerializer', () => {
       expect(typeof relationships).toEqual('object')
       expect(relationships).toHaveProperty('contacts')
       expect(typeof relationships.contacts).toBe('object')
-      expect(relationships.contacts).toHaveProperty('data')
-      const contactData = relationships.contacts.data
+      // we test for the inner structure of the result anyway
+      // this cast is just to tell typescript that
+      // we have an array of data, so that it doesn't show
+      // typeerrors here
+      const contactObject = relationships.contacts as IJsonApiTypeIdDataList
+      expect(contactObject).toHaveProperty('data')
+      const contactData = contactObject.data
       expect(Array.isArray(contactData)).toBeTruthy()
       expect(contactData.length).toEqual(2)
       expect(contactData[0]).toEqual({
