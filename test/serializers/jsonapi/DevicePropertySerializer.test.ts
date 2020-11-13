@@ -51,7 +51,10 @@ describe('DevicePropertySerializer', () => {
         id: '39',
         unit_name: '',
         failure_value: null,
-        sampling_media_uri: 'medium/Other'
+        sampling_media_uri: 'medium/Other',
+        resolution: 0.001,
+        resolution_unit_uri: 'http://foo/unit/1',
+        resolution_unit_name: 'mm'
       }, {
         compartment_name: 'a',
         unit_uri: 'b',
@@ -66,7 +69,10 @@ describe('DevicePropertySerializer', () => {
         id: '40',
         unit_name: 'j',
         failure_value: 4,
-        sampling_media_uri: 'k'
+        sampling_media_uri: 'k',
+        resolution: 0.001,
+        resolution_unit_uri: 'http://foo/unit/1',
+        resolution_unit_name: 'mm'
       }]
 
       const expectedProperty1 = DeviceProperty.createFromObject({
@@ -85,7 +91,10 @@ describe('DevicePropertySerializer', () => {
         id: '39',
         unitName: '',
         failureValue: null,
-        samplingMediaUri: 'medium/Other'
+        samplingMediaUri: 'medium/Other',
+        resolution: 0.001,
+        resolutionUnitUri: 'http://foo/unit/1',
+        resolutionUnitName: 'mm'
       })
 
       const expectedProperty2 = DeviceProperty.createFromObject({
@@ -104,7 +113,10 @@ describe('DevicePropertySerializer', () => {
         id: '40',
         unitName: 'j',
         failureValue: 4,
-        samplingMediaUri: 'k'
+        samplingMediaUri: 'k',
+        resolution: 0.001,
+        resolutionUnitUri: 'http://foo/unit/1',
+        resolutionUnitName: 'mm'
       })
 
       const serializer = new DevicePropertySerializer()
@@ -133,7 +145,10 @@ describe('DevicePropertySerializer', () => {
         id: '39',
         unit_name: '',
         failure_value: null,
-        sampling_media_uri: 'medium/Other'
+        sampling_media_uri: 'medium/Other',
+        resolution: 0.001,
+        resolution_unit_uri: 'http://foo/unit/1',
+        resolution_unit_name: 'mm'
       }
 
       const expectedProperty = DeviceProperty.createFromObject({
@@ -152,7 +167,10 @@ describe('DevicePropertySerializer', () => {
         id: '39',
         unitName: '',
         failureValue: null,
-        samplingMediaUri: 'medium/Other'
+        samplingMediaUri: 'medium/Other',
+        resolution: 0.001,
+        resolutionUnitUri: 'http://foo/unit/1',
+        resolutionUnitName: 'mm'
       })
       const serializer = new DevicePropertySerializer()
 
@@ -180,7 +198,10 @@ describe('DevicePropertySerializer', () => {
             max: 7
           }),
           accuracy: 0.5,
-          failureValue: -999
+          failureValue: -999,
+          resolution: 0.001,
+          resolutionUnitUri: 'http://foo/unit/1',
+          resolutionUnitName: 'mm'
         }),
         DeviceProperty.createFromObject({
           id: null,
@@ -198,7 +219,10 @@ describe('DevicePropertySerializer', () => {
             max: null
           }),
           accuracy: null,
-          failureValue: null
+          failureValue: null,
+          resolution: 0.001,
+          resolutionUnitUri: 'http://foo/unit/1',
+          resolutionUnitName: 'mm'
         })
       ]
 
@@ -221,7 +245,10 @@ describe('DevicePropertySerializer', () => {
         measuring_range_min: -7,
         measuring_range_max: 7,
         accuracy: 0.5,
-        failure_value: -999
+        failure_value: -999,
+        resolution: 0.001,
+        resolution_unit_uri: 'http://foo/unit/1',
+        resolution_unit_name: 'mm'
       })
       expect(elements[1]).toEqual({
         label: 'Prop 2',
@@ -236,7 +263,10 @@ describe('DevicePropertySerializer', () => {
         measuring_range_min: null,
         measuring_range_max: null,
         accuracy: null,
-        failure_value: null
+        failure_value: null,
+        resolution: 0.001,
+        resolution_unit_uri: 'http://foo/unit/1',
+        resolution_unit_name: 'mm'
       })
     })
   })

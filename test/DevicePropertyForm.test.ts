@@ -76,7 +76,10 @@ describe('DevicePropertyForm', () => {
             max: 1000
           },
           accuracy: 0.1,
-          failureValue: 0.01
+          failureValue: 0.01,
+          resolution: 0.001,
+          resolutionUnitUri: 'http://foo/unit/1',
+          resolutionUnitName: 'mm'
         }),
         compartments: [
           Compartment.createWithData('1', 'bar', 'http://foo/compartment/1'),
