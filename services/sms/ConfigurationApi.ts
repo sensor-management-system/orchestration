@@ -49,6 +49,7 @@ import {
   configurationWithMetaToConfigurationByAddingDummyObjects,
   configurationWithMetaToConfigurationByThrowingErrorOnMissing
 } from '@/serializers/jsonapi/ConfigurationSerializer'
+import { DynamicLocation } from '@/models/Location'
 
 export class ConfigurationApi {
   private axiosApi: AxiosInstance
@@ -86,11 +87,29 @@ export class ConfigurationApi {
     const data: any = this.serializer.convertModelToJsonApiData(configuration)
     let method: Method = 'patch'
     let url = ''
+    const relationshipsToDelete : string[] = []
 
     if (!configuration.id) {
       method = 'post'
     } else {
       url = configuration.id
+
+      if (configuration.location instanceof DynamicLocation) {
+        if (configuration.location.elevation == null) {
+          // it uses here the url views to send a delete request
+          relationshipsToDelete.push('src-elevation')
+        }
+        if (configuration.location.latitude == null) {
+          relationshipsToDelete.push('src-latitude')
+        }
+        if (configuration.location.longitude == null) {
+          relationshipsToDelete.push('src-longitude')
+        }
+      } else {
+        relationshipsToDelete.push('src-elevation')
+        relationshipsToDelete.push('src-latitude')
+        relationshipsToDelete.push('src-longitude')
+      }
     }
     return this.axiosApi.request({
       url,
@@ -99,9 +118,38 @@ export class ConfigurationApi {
         data
       }
     }).then((serverAnswer) => {
-      // no contacts here => reload completely
-      return this.findById(serverAnswer.data.data.id)
+      return this.tryToDeleteRelationshipsAndFindById(relationshipsToDelete, serverAnswer.data.data.id)
     })
+  }
+
+  private tryToDeleteRelationshipsAndFindById (relationshipsToDelete: string[], id: string) : Promise<Configuration> {
+    const tryToDelete = Promise.all(relationshipsToDelete.map((r: string) => {
+      return new Promise((resolve, reject) => {
+        const url = id + '/relationships/' + r
+        this.axiosApi.get(url).then((rawResponse: any) => {
+          const type = rawResponse.data.data.type
+          const typeId = rawResponse.data.data.id
+
+          this.axiosApi.request({
+            url,
+            method: 'delete',
+            data: {
+              data: {
+                type,
+                id: typeId
+              }
+            }
+          }).then(() => {
+            resolve()
+          }).catch((error) => {
+            reject(error)
+          })
+        }).catch(() => {
+          resolve()
+        })
+      })
+    }))
+    return tryToDelete.then(() => this.findById(id))
   }
 
   newSearchBuilder (): ConfigurationSearchBuilder {
