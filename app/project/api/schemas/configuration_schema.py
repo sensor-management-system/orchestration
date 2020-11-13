@@ -30,7 +30,9 @@ class ConfigurationSchema(Schema):
     status = fields.String(default="draft", allow_none=True)
     hierarchy = ConfigurationHierarchyField(allow_none=True)
 
-    longitude_src_device_property = Relationship(
+    src_longitude = Relationship(
+        attribute="src_longitude",
+        self_view="configuration_src_longitude",
         self_view_kwargs={"id": "<id>"},
         related_view="device_property_detail",
         related_view_kwargs={"id": "<longitude_src_device_property_id>"},
@@ -38,7 +40,9 @@ class ConfigurationSchema(Schema):
         schema="DevicePropertySchema",
     )
 
-    latitude_src_device_property = Relationship(
+    src_latitude = Relationship(
+        attribute="src_latitude",
+        self_view="configuration_src_latitude",
         self_view_kwargs={"id": "<id>"},
         related_view="device_property_detail",
         related_view_kwargs={"id": "<latitude_src_device_property_id>"},
@@ -46,7 +50,9 @@ class ConfigurationSchema(Schema):
         schema="DevicePropertySchema",
     )
 
-    elevation_src_device_property = Relationship(
+    src_elevation = Relationship(
+        attribute="src_elevation",
+        self_view="configuration_src_elevation",
         self_view_kwargs={"id": "<id>"},
         related_view="device_property_detail",
         related_view_kwargs={"id": "<elevation_src_device_property_id>"},
