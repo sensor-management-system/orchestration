@@ -252,7 +252,10 @@ describe('ConfigurationSerializer', () => {
               measuring_range_min: -273,
               measuring_range_max: 100,
               label: 'air_temperature',
-              accuracy: 0.1
+              accuracy: 0.1,
+              resolution: 0.05,
+              resolution_unit_name: 'TemperatureRes',
+              resolution_unit_uri: 'property/res/temperature'
             }, {
               id: '101',
               sampling_media_name: 'Water',
@@ -267,7 +270,10 @@ describe('ConfigurationSerializer', () => {
               measuring_range_min: -10,
               measuring_range_max: 100,
               label: 'water_temperature',
-              accuracy: 0.1
+              accuracy: 0.1,
+              resolution: 0.05,
+              resolution_unit_name: 'TemperatureRes',
+              resolution_unit_uri: 'property/res/temperature'
             }],
             inventory_number: '',
             short_name: 'Adcon wind vane',
@@ -310,7 +316,10 @@ describe('ConfigurationSerializer', () => {
               measuring_range_min: -273,
               measuring_range_max: 5,
               label: 'snow_temperature',
-              accuracy: 0.1
+              accuracy: 0.1,
+              resolution: 0.05,
+              resolution_unit_name: 'TemperatureRes',
+              resolution_unit_uri: 'property/res/temperature'
             }],
             inventory_number: '',
             short_name: 'Adcon leafwetness',
@@ -430,7 +439,10 @@ describe('ConfigurationSerializer', () => {
           max: 100
         }),
         label: 'air_temperature',
-        accuracy: 0.1
+        accuracy: 0.1,
+        resolution: 0.05,
+        resolutionUnitName: 'TemperatureRes',
+        resolutionUnitUri: 'property/res/temperature'
       })
       const expectedDeviceProperty2 = DeviceProperty.createFromObject({
         id: '101',
@@ -448,7 +460,10 @@ describe('ConfigurationSerializer', () => {
           max: 100
         }),
         label: 'water_temperature',
-        accuracy: 0.1
+        accuracy: 0.1,
+        resolution: 0.05,
+        resolutionUnitName: 'TemperatureRes',
+        resolutionUnitUri: 'property/res/temperature'
       })
       const expectedDeviceProperty3 = DeviceProperty.createFromObject({
         id: '102',
@@ -466,7 +481,10 @@ describe('ConfigurationSerializer', () => {
           max: 5
         }),
         label: 'snow_temperature',
-        accuracy: 0.1
+        accuracy: 0.1,
+        resolution: 0.05,
+        resolutionUnitName: 'TemperatureRes',
+        resolutionUnitUri: 'property/res/temperature'
       })
 
       const expectedDevice1 = Device.createFromObject({
@@ -984,7 +1002,10 @@ describe('ConfigurationSerializer', () => {
           max: 100
         }),
         label: 'air_temperature',
-        accuracy: 0.1
+        accuracy: 0.1,
+        resolution: 0.05,
+        resolutionUnitName: 'TemperatureRes',
+        resolutionUnitUri: 'property/res/temperature'
       })
       const property2 = DeviceProperty.createFromObject({
         id: '101',
@@ -1002,7 +1023,10 @@ describe('ConfigurationSerializer', () => {
           max: 100
         }),
         label: 'water_temperature',
-        accuracy: 0.1
+        accuracy: 0.1,
+        resolution: 0.05,
+        resolutionUnitName: 'TemperatureRes',
+        resolutionUnitUri: 'property/res/temperature'
       })
 
       configuration.location = new DynamicLocation()
