@@ -66,9 +66,9 @@ export class ConfigurationApi {
           'contacts',
           'configuration_platforms.platform',
           'configuration_devices.device',
-          'longitude_src_device_property',
-          'latitude_src_device_property',
-          'elevation_src_device_property'
+          'src_longitude',
+          'src_latitude',
+          'src_elevation'
         ].join(',')
       }
     }).then((rawResponse) => {

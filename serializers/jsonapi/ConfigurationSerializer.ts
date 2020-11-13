@@ -122,9 +122,9 @@ export class ConfigurationSerializer {
     } else if (attributes.location_type === LocationType.Dynamic) {
       const location = new DynamicLocation()
       const toCheck = [
-        { key: 'latitude_src_device_property', setFunction (value: DeviceProperty) { location.latitude = value } },
-        { key: 'longitude_src_device_property', setFunction (value: DeviceProperty) { location.longitude = value } },
-        { key: 'elevation_src_device_property', setFunction (value: DeviceProperty) { location.elevation = value } }
+        { key: 'src_latitude', setFunction (value: DeviceProperty) { location.latitude = value } },
+        { key: 'src_longitude', setFunction (value: DeviceProperty) { location.longitude = value } },
+        { key: 'src_elevation', setFunction (value: DeviceProperty) { location.elevation = value } }
       ]
       for (const check of toCheck) {
         if (relationships && relationships[check.key] && relationships[check.key].data) {
@@ -233,9 +233,9 @@ export class ConfigurationSerializer {
         location_type: LocationType.Dynamic
       }
       const toAdd = [
-        { key: 'latitude_src_device_property', value: location.latitude },
-        { key: 'longitude_src_device_property', value: location.longitude },
-        { key: 'elevation_src_device_property', value: location.elevation }
+        { key: 'src_latitude', value: location.latitude },
+        { key: 'src_longitude', value: location.longitude },
+        { key: 'src_elevation', value: location.elevation }
       ]
       for (const check of toAdd) {
         const key = check.key

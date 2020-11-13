@@ -110,19 +110,19 @@ describe('ConfigurationSerializer', () => {
             ]
           },
           relationships: {
-            longitude_src_device_property: {
+            src_longitude: {
               data: {
                 type: 'device_property',
                 id: '100'
               }
             },
-            latitude_src_device_property: {
+            src_latitude: {
               data: {
                 type: 'device_property',
                 id: '101'
               }
             },
-            elevation_src_device_property: {
+            src_elevation: {
             }
             // no contacts, as we expect an empty case here
           },
@@ -1049,22 +1049,22 @@ describe('ConfigurationSerializer', () => {
       expect(attributes.location_type).toEqual(LocationType.Dynamic)
       expect(jsonApiData).toHaveProperty('relationships')
       const relationships = jsonApiData.relationships
-      expect(relationships).toHaveProperty('longitude_src_device_property')
-      const lonSrcProperty = relationships.longitude_src_device_property as IJsonApiTypeIdData
+      expect(relationships).toHaveProperty('src_longitude')
+      const lonSrcProperty = relationships.src_longitude as IJsonApiTypeIdData
       expect(lonSrcProperty).toHaveProperty('data')
       expect(lonSrcProperty.data).toHaveProperty('id')
       expect(lonSrcProperty.data.id).toEqual('101')
       expect(lonSrcProperty.data).toHaveProperty('type')
       expect(lonSrcProperty.data.type).toEqual('device_property')
-      expect(relationships).toHaveProperty('latitude_src_device_property')
-      const latSrcProperty = relationships.latitude_src_device_property as IJsonApiTypeIdData
+      expect(relationships).toHaveProperty('src_latitude')
+      const latSrcProperty = relationships.src_latitude as IJsonApiTypeIdData
       expect(latSrcProperty).toHaveProperty('data')
       expect(latSrcProperty.data).toHaveProperty('id')
       expect(latSrcProperty.data.id).toEqual('100')
       expect(latSrcProperty.data).toHaveProperty('type')
       expect(latSrcProperty.data.type).toEqual('device_property')
       // TODO check how it must look like to delete them later...
-      expect(relationships).not.toHaveProperty('elevation_src_device_property')
+      expect(relationships).not.toHaveProperty('src_elevation')
     })
     it('should also work with an empty stationary location type', () => {
       const configuration = new Configuration()
