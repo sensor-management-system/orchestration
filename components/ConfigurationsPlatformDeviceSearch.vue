@@ -121,9 +121,12 @@ permissions and limitations under the Licence.
                   <v-list-item-subtitle>URN (TODO)</v-list-item-subtitle>
                 </v-list-item-content>
                 <v-list-item-action>
+                  <div v-if="!canAddDevices">
+                    Devices can only be added to platforms.
+                  </div>
                   <v-btn
                     :key="'btn-add-device-' + item.id"
-                    :disabled="isDeviceUsedFunc(item)"
+                    :disabled="isDeviceUsedFunc(item) || (!canAddDevices)"
                     data-role="add-device"
                     @click="addDevice(item)"
                   >
@@ -212,6 +215,8 @@ export default class ConfigurationsPlatformDeviceSearch extends Vue {
 
   get searchTypes (): string[] {
     const result = [SearchType.Platform]
+    // maybe it makes more sense to allow the search
+    // but show that devices need a platform to be added to
     if (this.canAddDevices) {
       result.push(SearchType.Device)
     }
@@ -315,7 +320,9 @@ export default class ConfigurationsPlatformDeviceSearch extends Vue {
      * @event ConfigurationsPlatformDeviceSearch#add-device
      * @type {Device}
      */
-    this.$emit('add-device', device)
+    if (this.canAddDevices) {
+      this.$emit('add-device', device)
+    }
   }
 }
 </script>
