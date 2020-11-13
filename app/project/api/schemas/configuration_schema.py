@@ -27,6 +27,9 @@ class ConfigurationSchema(Schema):
     label = fields.String(allow_none=True)
     status = fields.String(default="draft", allow_none=True)
     hierarchy = ConfigurationHierarchyField(allow_none=True)
+    resolution = fields.Integer(allow_none=True)
+    resolution_unit_uri = fields.String(allow_none=True)
+    resolutionUnitName = fields.String(allow_none=True)
 
     longitude_src_device_property = Relationship(
         self_view_kwargs={"id": "<id>"},
