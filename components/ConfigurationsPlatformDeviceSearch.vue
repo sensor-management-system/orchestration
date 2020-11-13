@@ -208,7 +208,7 @@ export default class ConfigurationsPlatformDeviceSearch extends Vue {
     default: () => false,
     type: Boolean
   })
-  readonly canAddDevices!: boolean;
+  readonly canAddDevices!: boolean
 
   get searchTypes (): string[] {
     const result = [SearchType.Platform]
