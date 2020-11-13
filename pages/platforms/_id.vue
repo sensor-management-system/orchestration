@@ -216,8 +216,6 @@ permissions and limitations under the Licence.
 import { Component, Watch, mixins } from 'nuxt-property-decorator'
 import { Rules } from '@/mixins/Rules'
 
-import AppBarEditModeContent from '@/components/AppBarEditModeContent.vue'
-import AppBarTabsExtension from '@/components/AppBarTabsExtension.vue'
 import AttachmentList from '@/components/AttachmentList.vue'
 import ContactSelect from '@/components/ContactSelect.vue'
 
@@ -225,18 +223,6 @@ import { Manufacturer } from '@/models/Manufacturer'
 import { Platform } from '@/models/Platform'
 import { PlatformType } from '@/models/PlatformType'
 import { Status } from '@/models/Status'
-
-@Component
-// @ts-ignore
-export class AppBarTabsExtensionExtended extends AppBarTabsExtension {
-  get tabs (): String[] {
-    return [
-      'Basic Data',
-      'Contacts',
-      'Attachments'
-    ]
-  }
-}
 
 @Component({
   components: {
@@ -257,22 +243,11 @@ export default class PlatformIdPage extends mixins(Rules) {
   private platformBackup: Platform | null = null
 
   // and some general data for the page
-  private activeTab: number = 0
   private editMode: boolean = false
 
   created () {
-    this.$nuxt.$emit('app-bar-content', AppBarEditModeContent)
-    this.$nuxt.$on('AppBarContent:save-button-click', () => {
-      this.save()
-    })
-    this.$nuxt.$on('AppBarContent:cancel-button-click', () => {
-      this.cancel()
-    })
-
-    this.$nuxt.$emit('app-bar-extension', AppBarTabsExtensionExtended)
-    this.$nuxt.$on('AppBarExtension:change', (tab: number) => {
-      this.activeTab = tab
-    })
+    this.initializeAppBar()
+    this.registerButtonActions()
   }
 
   mounted () {
@@ -285,47 +260,76 @@ export default class PlatformIdPage extends mixins(Rules) {
     this.$api.states.findAll().then((foundStates) => {
       this.states = foundStates
     })
-    this.loadPlatform()
-
-    // make sure that all components (especially the dynamically passed ones) are rendered
-    this.$nextTick(() => {
-      if (!this.$route.params.id) {
-        this.$nuxt.$emit('AppBarContent:title', 'Add Platform')
+    this.loadPlatform().then((platform) => {
+      if (platform === null) {
+        this.$store.commit('appbar/setTitle', 'Add Platform')
       }
-      this.$nuxt.$emit('AppBarContent:save-button-hidden', !this.editMode)
-      this.$nuxt.$emit('AppBarContent:cancel-button-hidden', !this.editMode)
-    })
-  }
-
-  beforeDestroy () {
-    this.$nuxt.$emit('app-bar-content', null)
-    this.$nuxt.$emit('app-bar-extension', null)
-    this.$nuxt.$off('AppBarContent:save-button-click')
-    this.$nuxt.$off('AppBarContent:cancel-button-click')
-    this.$nuxt.$off('AppBarExtension:change')
-  }
-
-  loadPlatform () {
-    const platformId = this.$route.params.id
-    if (!platformId) {
-      this.createBackup()
-      this.editMode = true
-      return
-    }
-    this.editMode = false
-    this.$api.platforms.findById(platformId).then((foundPlatform) => {
-      this.platform = foundPlatform
     }).catch(() => {
-      // We don't take the error directly
       this.$store.commit('snackbar/setError', 'Loading platform failed')
     })
   }
 
-  @Watch('editMode', { immediate: true, deep: true })
-  // @ts-ignore
-  onEditModeChanged (editMode: boolean) {
-    this.$nuxt.$emit('AppBarContent:save-button-hidden', !editMode)
-    this.$nuxt.$emit('AppBarContent:cancel-button-hidden', !editMode)
+  beforeDestroy () {
+    this.unregisterButtonActions()
+    this.$store.dispatch('appbar/setDefaults')
+  }
+
+  registerButtonActions () {
+    this.$nuxt.$on('AppBarEditModeContent:save-btn-click', () => {
+      this.save().then(() => {
+        this.$store.commit('snackbar/setSuccess', 'Save successful')
+      }).catch(() => {
+        this.$store.commit('snackbar/setError', 'Save failed')
+      })
+    })
+    this.$nuxt.$on('AppBarEditModeContent:cancel-btn-click', () => {
+      this.cancel()
+    })
+  }
+
+  unregisterButtonActions () {
+    this.$nuxt.$off('AppBarEditModeContent:save-btn-click')
+    this.$nuxt.$off('AppBarEditModeContent:cancel-btn-click')
+  }
+
+  initializeAppBar () {
+    this.$store.dispatch('appbar/init', {
+      tabs: [
+        'Basic Data',
+        'Contacts',
+        'Attachments'
+      ],
+      title: 'Platforms',
+      saveBtnHidden: true,
+      cancelBtnHidden: true
+    })
+  }
+
+  get activeTab (): number | null {
+    return this.$store.state.appbar.activeTab
+  }
+
+  set activeTab (tab: number | null) {
+    this.$store.commit('appbar/setActiveTab', tab)
+  }
+
+  loadPlatform (): Promise<Platform|null> {
+    return new Promise((resolve, reject) => {
+      const platformId = this.$route.params.id
+      if (!platformId) {
+        this.createBackup()
+        this.editMode = true
+        resolve(null)
+        return
+      }
+      this.editMode = false
+      this.$api.platforms.findById(platformId).then((foundPlatform) => {
+        this.platform = foundPlatform
+        resolve(foundPlatform)
+      }).catch((_error) => {
+        reject(_error)
+      })
+    })
   }
 
   createBackup () {
@@ -341,14 +345,16 @@ export default class PlatformIdPage extends mixins(Rules) {
   }
 
   // methods
-  save () {
-    this.$api.platforms.save(this.platform).then((savedPlatform) => {
-      this.platform = savedPlatform
-      this.platformBackup = null
-      this.editMode = false
-      this.$store.commit('snackbar/setSuccess', 'Save successful')
-    }).catch((_error) => {
-      this.$store.commit('snackbar/setError', 'Save failed')
+  save (): Promise<Platform|null> {
+    return new Promise((resolve, reject) => {
+      this.$api.platforms.save(this.platform).then((savedPlatform) => {
+        this.platform = savedPlatform
+        this.platformBackup = null
+        this.editMode = false
+        resolve(savedPlatform)
+      }).catch((_error) => {
+        reject(_error)
+      })
     })
   }
 
@@ -457,12 +463,19 @@ export default class PlatformIdPage extends mixins(Rules) {
     }
   }
 
-@Watch('platform', { immediate: true, deep: true })
+  @Watch('platform', { immediate: true, deep: true })
   // @ts-ignore
   onPlatformChanged (val: Platform) {
     if (val.id) {
-      this.$nuxt.$emit('AppBarContent:title', 'Platform ' + val.shortName)
+      this.$store.commit('appbar/setTitle', val?.shortName || 'Add Platform')
     }
+  }
+
+  @Watch('editMode', { immediate: true, deep: true })
+  // @ts-ignore
+  onEditModeChanged (editMode: boolean) {
+    this.$store.commit('appbar/setSaveBtnHidden', !editMode)
+    this.$store.commit('appbar/setCancelBtnHidden', !editMode)
   }
 }
 

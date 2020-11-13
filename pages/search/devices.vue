@@ -424,8 +424,6 @@ permissions and limitations under the Licence.
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 
-import AppBarEditModeContent from '@/components/AppBarEditModeContent.vue'
-import AppBarTabsExtension from '@/components/AppBarTabsExtension.vue'
 import DeviceTypeSelect from '@/components/DeviceTypeSelect.vue'
 import ManufacturerSelect from '@/components/ManufacturerSelect.vue'
 import StatusSelect from '@/components/StatusSelect.vue'
@@ -438,17 +436,6 @@ import { DeviceType } from '@/models/DeviceType'
 import { Manufacturer } from '@/models/Manufacturer'
 import { Status } from '@/models/Status'
 
-@Component
-// @ts-ignore
-export class AppBarTabsExtensionExtended extends AppBarTabsExtension {
-  get tabs (): String[] {
-    return [
-      'Search',
-      'Extended Search'
-    ]
-  }
-}
-
 @Component({
   components: {
     DeviceTypeSelect,
@@ -459,7 +446,6 @@ export class AppBarTabsExtensionExtended extends AppBarTabsExtension {
 })
 export default class SearchDevicesPage extends Vue {
   private pageSize: number = 20
-  private activeTab: number = 0
   private loading: boolean = true
 
   private totalCount: number = 0
@@ -482,11 +468,7 @@ export default class SearchDevicesPage extends Vue {
   public readonly NO_TYPE: string = 'Unknown type'
 
   created () {
-    this.$nuxt.$emit('app-bar-content', AppBarEditModeContent)
-    this.$nuxt.$emit('app-bar-extension', AppBarTabsExtensionExtended)
-    this.$nuxt.$on('AppBarExtension:change', (tab: number) => {
-      this.activeTab = tab
-    })
+    this.initializeAppBar()
   }
 
   mounted () {
@@ -515,10 +497,6 @@ export default class SearchDevicesPage extends Vue {
         this.$store.commit('snackbar/setError', 'Loading of device types failed')
       })
     })
-    // make sure that all components (especially the dynamically passed ones) are rendered
-    this.$nextTick(() => {
-      this.$nuxt.$emit('AppBarContent:title', 'Devices')
-    })
 
     window.onscroll = () => {
       // from https://www.digitalocean.com/community/tutorials/vuejs-implementing-infinite-scroll
@@ -531,11 +509,29 @@ export default class SearchDevicesPage extends Vue {
   }
 
   beforeDestroy () {
-    this.$nuxt.$emit('app-bar-content', null)
-    this.$nuxt.$emit('app-bar-extension', null)
-    this.$nuxt.$off('AppBarExtension:change')
     this.unsetResultItemsShown()
     this.showDeleteDialog = {}
+    this.$store.dispatch('appbar/setDefaults')
+  }
+
+  initializeAppBar () {
+    this.$store.dispatch('appbar/init', {
+      tabs: [
+        'Search',
+        'Extended Search'
+      ],
+      title: 'Devices',
+      saveBtnHidden: true,
+      cancelBtnHidden: true
+    })
+  }
+
+  get activeTab (): number | null {
+    return this.$store.state.appbar.activeTab
+  }
+
+  set activeTab (tab: number | null) {
+    this.$store.commit('appbar/setActiveTab', tab)
   }
 
   runSelectedSearch () {

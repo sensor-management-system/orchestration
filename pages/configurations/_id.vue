@@ -73,6 +73,7 @@ permissions and limitations under the Licence.
               <v-form
                 ref="datesForm"
                 v-model="datesAreValid"
+                @submit.prevent
               >
                 <v-row>
                   <v-col cols="12" md="3">
@@ -160,6 +161,7 @@ permissions and limitations under the Licence.
                   <v-form
                     ref="locationTypeForm"
                     v-model="locationTypeIsValid"
+                    @submit.prevent
                   >
                     <v-select
                       v-model="locationType"
@@ -343,8 +345,6 @@ permissions and limitations under the Licence.
 <script lang="ts">
 import { Vue, Component, Watch } from 'nuxt-property-decorator'
 
-import AppBarEditModeContent from '@/components/AppBarEditModeContent.vue'
-import AppBarTabsExtension from '@/components/AppBarTabsExtension.vue'
 import ContactSelect from '@/components/ContactSelect.vue'
 import DevicePropertyHierarchySelect from '@/components/DevicePropertyHierarchySelect.vue'
 import DeviceConfigurationAttributesExpansionPanels from '@/components/DeviceConfigurationAttributesExpansionPanels.vue'
@@ -371,19 +371,6 @@ import { PlatformConfigurationAttributes } from '@/models/PlatformConfigurationA
 import { dateToString, stringToDate } from '@/utils/dateHelper'
 import { getParentByClass } from '@/utils/domHelper'
 
-@Component
-// @ts-ignore
-export class AppBarTabsExtensionExtended extends AppBarTabsExtension {
-  get tabs (): String[] {
-    return [
-      'Configuration',
-      'Platforms and Devices',
-      'Setup',
-      'Contacts'
-    ]
-  }
-}
-
 @Component({
   components: {
     ContactSelect,
@@ -399,7 +386,6 @@ export class AppBarTabsExtensionExtended extends AppBarTabsExtension {
 })
 // @ts-ignore
 export default class ConfigurationsIdPage extends Vue {
-  private activeTab: number = 0
   private editMode: boolean = false
 
   private configuration: Configuration = new Configuration()
@@ -477,27 +463,8 @@ export default class ConfigurationsIdPage extends Vue {
   }
 
   created () {
-    this.$nuxt.$emit('app-bar-content', AppBarEditModeContent)
-    this.$nuxt.$on('AppBarContent:save-button-click', () => {
-      this.checkValidationOfAllFields()
-      if (!this.formIsValid) {
-        this.showValidationError()
-        return
-      }
-      this.save().then(() => {
-        this.$store.commit('snackbar/setSuccess', 'Save successful')
-      }).catch(() => {
-        this.$store.commit('snackbar/setError', 'Save failed')
-      })
-    })
-    this.$nuxt.$on('AppBarContent:cancel-button-click', () => {
-      this.cancel()
-    })
-
-    this.$nuxt.$emit('app-bar-extension', AppBarTabsExtensionExtended)
-    this.$nuxt.$on('AppBarExtension:change', (tab: number) => {
-      this.activeTab = tab
-    })
+    this.registerButtonActions()
+    this.initializeAppBar()
   }
 
   mounted () {
@@ -508,21 +475,15 @@ export default class ConfigurationsIdPage extends Vue {
       this.projects = foundProjects
     })
     this.loadConfiguration().then((_configuration) => {
-      // In the branch for the refactoring of the appbar handling
-      // we may want to set the appbar title here
+      if (_configuration === null) {
+        this.$store.commit('appbar/setTitle', 'Add Configuration')
+      }
     }).catch(() => {
       this.$store.commit('snackbar/setError', 'Loading configuration failed')
     })
-    this.$nextTick(() => {
-      if (!this.$route.params.id) {
-        this.$nuxt.$emit('AppBarContent:title', 'Add Configuration')
-      }
-      this.$nuxt.$emit('AppBarContent:save-button-hidden', !this.editMode)
-      this.$nuxt.$emit('AppBarContent:cancel-button-hidden', !this.editMode)
-    })
   }
 
-  loadConfiguration () : Promise<Configuration|null> {
+  loadConfiguration (): Promise<Configuration|null> {
     return new Promise((resolve, reject) => {
       const configurationId = this.$route.params.id
       if (!configurationId) {
@@ -542,11 +503,53 @@ export default class ConfigurationsIdPage extends Vue {
   }
 
   beforeDestroy () {
-    this.$nuxt.$emit('app-bar-content', null)
-    this.$nuxt.$emit('app-bar-extension', null)
-    this.$nuxt.$off('AppBarContent:save-button-click')
-    this.$nuxt.$off('AppBarContent:cancel-button-click')
-    this.$nuxt.$off('AppBarExtension:change')
+    this.unregisterButtonActions()
+    this.$store.dispatch('appbar/setDefaults')
+  }
+
+  registerButtonActions () {
+    this.$nuxt.$on('AppBarEditModeContent:save-btn-click', () => {
+      this.checkValidationOfAllFields()
+      if (!this.formIsValid) {
+        this.showValidationError()
+        return
+      }
+      this.save().then(() => {
+        this.$store.commit('snackbar/setSuccess', 'Save successful')
+      }).catch(() => {
+        this.$store.commit('snackbar/setError', 'Save failed')
+      })
+    })
+    this.$nuxt.$on('AppBarEditModeContent:cancel-btn-click', () => {
+      this.cancel()
+    })
+  }
+
+  unregisterButtonActions () {
+    this.$nuxt.$off('AppBarEditModeContent:save-btn-click')
+    this.$nuxt.$off('AppBarEditModeContent:cancel-btn-click')
+  }
+
+  initializeAppBar () {
+    this.$store.dispatch('appbar/init', {
+      tabs: [
+        'Configuration',
+        'Platforms and Devices',
+        'Setup',
+        'Contacts'
+      ],
+      title: 'Configurations',
+      saveBtnHidden: true,
+      cancelBtnHidden: true
+    })
+  }
+
+  get activeTab (): number | null {
+    return this.$store.state.appbar.activeTab
+  }
+
+  set activeTab (tab: number | null) {
+    this.$store.commit('appbar/setActiveTab', tab)
   }
 
   save (): Promise<Configuration> {
@@ -586,13 +589,6 @@ export default class ConfigurationsIdPage extends Vue {
     }
     this.configuration = this.configurationBackup
     this.configurationBackup = null
-  }
-
-  @Watch('editMode', { immediate: true, deep: true })
-  // @ts-ignore
-  onEditModeChanged (editMode: boolean) {
-    this.$nuxt.$emit('AppBarContent:save-button-hidden', !editMode)
-    this.$nuxt.$emit('AppBarContent:cancel-button-hidden', !editMode)
   }
 
   get readonly () {
@@ -883,7 +879,7 @@ export default class ConfigurationsIdPage extends Vue {
     if (tabIndex === -1) {
       return
     }
-    this.$nuxt.$emit('AppBarExtension:change', tabIndex)
+    this.$store.commit('appbar/setActiveTab', tabIndex)
     this.$store.commit('snackbar/setError', 'Please correct your errors.')
   }
 
@@ -916,10 +912,17 @@ export default class ConfigurationsIdPage extends Vue {
     if (val.id) {
       let title = 'Edit Configuration'
       if (val.label) {
-        title = 'Configuration ' + val.label
+        title = val.label
       }
-      this.$nuxt.$emit('AppBarContent:title', title)
+      this.$store.commit('appbar/setTitle', title)
     }
+  }
+
+  @Watch('editMode', { immediate: true, deep: true })
+  // @ts-ignore
+  onEditModeChanged (editMode: boolean) {
+    this.$store.commit('appbar/setSaveBtnHidden', !editMode)
+    this.$store.commit('appbar/setCancelBtnHidden', !editMode)
   }
 }
 </script>

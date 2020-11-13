@@ -120,15 +120,19 @@ permissions and limitations under the Licence.
       app
     >
       <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
-      <template v-if="appBarContent">
-        <Component :is="appBarContent" />
-      </template>
-      <template v-else>
-        <v-toolbar-title v-text="title" />
-        <v-spacer />
-      </template>
-      <template v-if="appBarExtension" v-slot:extension>
-        <Component :is="appBarExtension" />
+      <AppBarEditModeContent
+        :title="appBarTitle"
+        :save-btn-hidden="saveBtnHidden"
+        :cancel-btn-hidden="cancelBtnHidden"
+        :save-btn-disabled="saveBtnDisabled"
+        :cancel-btn-disabled="cancelBtnDisabled"
+      />
+      <template v-if="tabs.length" v-slot:extension>
+        <AppBarTabsExtension
+          :value="activeTab"
+          :tabs="tabs"
+          @change="onChangeTab"
+        />
       </template>
       <v-menu close-on-click close-on-content-click offset-x>
         <template v-slot:activator="{ on }">
@@ -198,7 +202,7 @@ permissions and limitations under the Licence.
         </v-list>
       </v-menu>
     </v-app-bar>
-    <v-content>
+    <v-main>
       <v-container>
         <v-snackbar v-model="hasSuccess" top color="green">
           {{ success }}
@@ -218,7 +222,7 @@ permissions and limitations under the Licence.
         </v-snackbar>
         <nuxt />
       </v-container>
-    </v-content>
+    </v-main>
     <v-footer
       :fixed="fixed"
       app
@@ -230,7 +234,14 @@ permissions and limitations under the Licence.
 
 <script>
 
+import AppBarTabsExtension from '@/components/AppBarTabsExtension'
+import AppBarEditModeContent from '@/components/AppBarEditModeContent'
+
 export default {
+  components: {
+    AppBarTabsExtension,
+    AppBarEditModeContent
+  },
   data () {
     return {
       clipped: false,
@@ -269,6 +280,27 @@ export default {
         }
       }
     },
+    tabs () {
+      return this.$store.state.appbar.tabs
+    },
+    activeTab () {
+      return this.$store.state.appbar.activeTab
+    },
+    appBarTitle () {
+      return this.$store.state.appbar.title || this.title
+    },
+    saveBtnHidden () {
+      return this.$store.state.appbar.saveBtnHidden
+    },
+    saveBtnDisabled () {
+      return this.$store.state.appbar.saveBtnDisabled
+    },
+    cancelBtnHidden () {
+      return this.$store.state.appbar.cancelBtnHidden
+    },
+    cancelBtnDisabled () {
+      return this.$store.state.appbar.cancelBtnDisabled
+    },
     isLoggedIn () {
       return this.$store.getters['auth/isAuthenticated']
     },
@@ -293,6 +325,9 @@ export default {
     },
     closeSuccessSnackbar () {
       this.$store.commit('snackbar/clearSuccess')
+    },
+    onChangeTab (tab) {
+      this.$store.commit('appbar/setActiveTab', tab)
     },
     loginPopup () {
       this.$store.dispatch('auth/loginPopup').then((userObject) => {
