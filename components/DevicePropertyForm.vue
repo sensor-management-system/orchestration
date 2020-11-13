@@ -37,7 +37,7 @@ permissions and limitations under the Licence.
     <v-row>
       <v-col cols="12" md="3">
         <v-combobox
-          label="Property"
+          label="Measured Quantity"
           :items="propertyNames"
           :value="valuePropertyName"
           :readonly="readonly"
@@ -128,6 +128,28 @@ permissions and limitations under the Licence.
           :disabled="readonly"
           type="number"
           @input="update('failureValue', $event)"
+        />
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="12" md="3">
+        <v-text-field
+          label="Resolution"
+          :value="value.resolution"
+          :readonly="readonly"
+          :disabled="readonly"
+          type="number"
+          @input="update('resolution', $event)"
+        />
+      </v-col>
+      <v-col cols="12" md="3">
+        <v-combobox
+          label="Unit of Resolution"
+          :items="unitNames"
+          :value="valueResolutionUnitName"
+          :readonly="readonly"
+          :disabled="readonly"
+          @input="update('resolutionUnitName', $event)"
         />
       </v-col>
     </v-row>
@@ -298,6 +320,13 @@ export default class DevicePropertyForm extends Vue {
       case 'failureValue':
         newObj.failureValue = parseFloatOrNull(value)
         break
+      case 'resolution':
+        newObj.resolution = parseFloatOrNull(value)
+        break
+      case 'resolutionUnitName':
+        newObj.resolutionUnitName = value
+        newObj.resolutionUnitUri = getUriValue('unitName', value)
+        break
       default:
         throw new TypeError('key ' + key + ' is not valid')
     }
@@ -352,6 +381,19 @@ export default class DevicePropertyForm extends Vue {
       return this.units[unitIndex].name
     }
     return this.value.unitName
+  }
+
+  /**
+   * returns the name of a unit based on the unit URI
+   *
+   * @return {string} the name of the unit
+   */
+  get valueResolutionUnitName (): string {
+    const unitIndex = this.units.findIndex(u => u.uri === this.value.resolutionUnitUri)
+    if (unitIndex > -1) {
+      return this.units[unitIndex].name
+    }
+    return this.value.resolutionUnitName
   }
 
   /**
