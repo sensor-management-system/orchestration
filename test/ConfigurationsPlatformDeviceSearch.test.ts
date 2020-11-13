@@ -42,13 +42,16 @@ import { Platform } from '@/models/Platform'
 Vue.use(Vuetify)
 
 describe('ConfigurationsPlatformDeviceSearch', () => {
-  const createWrapper = (platformsResult: Platform[], devicesResult: Device[]) => {
+  const createWrapper = (platformsResult: Platform[], devicesResult: Device[], canAddDevices: boolean) => {
     const localVue = createLocalVue()
     const vuetify = new Vuetify()
 
     return mount(ConfigurationsPlatformDeviceSearch, {
       localVue,
       vuetify,
+      propsData: {
+        canAddDevices
+      },
       data () {
         return {
           platformsResult,
@@ -66,7 +69,7 @@ describe('ConfigurationsPlatformDeviceSearch', () => {
     platform.id = '1'
     platform.shortName = 'a platform'
 
-    const wrapper: any = createWrapper([platform], [])
+    const wrapper: any = createWrapper([platform], [], true)
 
     await wrapper.get('button[data-role="add-platform"]').trigger('click')
     expect(wrapper.emitted('add-platform')).toBeTruthy()
@@ -79,11 +82,30 @@ describe('ConfigurationsPlatformDeviceSearch', () => {
     device.id = '1'
     device.shortName = 'a device'
 
-    const wrapper: any = createWrapper([], [device])
+    const wrapper: any = createWrapper([], [device], true)
 
     await wrapper.get('button[data-role="add-device"]').trigger('click')
     expect(wrapper.emitted('add-device')).toBeTruthy()
     expect(wrapper.emitted('add-device').length).toBe(1)
     expect(wrapper.emitted('add-device')[0]).toEqual([device])
+  })
+
+  it('should not be possible to search for devices if you should not (no parent platform)', () => {
+    const platform = new Platform()
+    platform.id = '1'
+    platform.shortName = 'a platform'
+
+    const device = new Device()
+    device.id = '1'
+    device.shortName = 'a device'
+
+    const wrapperWithPossiblilityToSearchForDevices: any = createWrapper([platform], [device], true)
+    const wrapperWithoutPossiblilityToSearchForDevices: any = createWrapper([platform], [device], false)
+
+    // the length of searchTypes should be 2 in the first case, 1 in the second
+    expect(wrapperWithPossiblilityToSearchForDevices.vm.canAddDevices).toBeTruthy()
+    expect(wrapperWithPossiblilityToSearchForDevices.vm.searchTypes).toEqual(['Platform', 'Device'])
+    expect(wrapperWithoutPossiblilityToSearchForDevices.vm.canAddDevices).not.toBeTruthy()
+    expect(wrapperWithoutPossiblilityToSearchForDevices.vm.searchTypes).toEqual(['Platform'])
   })
 })

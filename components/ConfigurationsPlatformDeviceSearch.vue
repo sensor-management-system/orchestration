@@ -173,11 +173,6 @@ type IsDeviceUsedFunc = (d: Device) => boolean
 @Component
 // @ts-ignore
 export default class ConfigurationsPlatformDeviceSearch extends Vue {
-  private searchTypes: string[] = [
-    SearchType.Platform,
-    SearchType.Device
-  ]
-
   private searchOptions: ISearchOptions = {
     searchType: SearchType.Platform,
     text: ''
@@ -208,6 +203,20 @@ export default class ConfigurationsPlatformDeviceSearch extends Vue {
   })
   // @ts-ignore
   readonly isPlatformUsedFunc: IsPlatformUsedFunc
+
+  @Prop({
+    default: () => false,
+    type: Boolean
+  })
+  readonly canAddDevices!: boolean;
+
+  get searchTypes (): string[] {
+    const result = [SearchType.Platform]
+    if (this.canAddDevices) {
+      result.push(SearchType.Device)
+    }
+    return result
+  }
 
   /**
    * returns a list of platforms

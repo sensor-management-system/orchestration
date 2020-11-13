@@ -283,6 +283,7 @@ permissions and limitations under the Licence.
                   />
                   <ConfigurationsPlatformDeviceSearch
                     v-if="!readonly && (!selectedNode || selectedNode.isPlatform())"
+                    :can-add-devices="(selectedNode != null && selectedNode.isPlatform())"
                     :is-platform-used-func="isPlatformInTree"
                     :is-device-used-func="isDeviceInTree"
                     @add-platform="addPlatformNode"
