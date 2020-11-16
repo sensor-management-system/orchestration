@@ -43,25 +43,23 @@ export const createOidcModul = (oidcSettings, storeSettings = {}) => {
   }
 
   const routeIsPublic = (route) => {
-    /* original code */
-    /*
-    if (route.meta && route.meta.isPublic) {
-      return true
-    }
-    */
-
-    // corrently we don't differ between public and non public routes.
-    // And - additionally - the route.meta is an array.
-    // it is not an object for its own, but a container containing
-    // this object.
-    //
-    // And I also don't know how to set if a route is public or not...
-    console.log(route)
     if (route.meta) {
-      const meta = route.meta
+      // locally and on the server this meta attribute is a list of objects
+      const metaList = route.meta
+      const meta = mergeObjectsAndMaybeOverwrite(metaList)
+      // the values can be specified in the meta section of the
+      // component decorator
+      // something like:
+      // @Component({
+      //  meta: {
+      //    loginRequired: true
+      //  }
+      // })
+      if (meta.loginRequired) {
+        return false
+      }
       if (meta.isPublic) {
-        const isPublic = meta.isPublic
-        console.log(isPublic)
+        return true
       }
     }
     return true
@@ -154,7 +152,9 @@ export const createOidcModul = (oidcSettings, storeSettings = {}) => {
   }
 
   const actions = {
-    async loginPopup ({ dispatch, commit }) {
+    // ESLint wants to have an await in an async function.
+    // As we don't have it, I comment it out
+    /* async */ loginPopup ({ dispatch, commit }) {
       return new Promise((resolve, reject) => {
         userManager.signinPopup()
           .then((user) => {
@@ -171,11 +171,12 @@ export const createOidcModul = (oidcSettings, storeSettings = {}) => {
     },
     oidcSignInPopupCallback (context, url) {
       return new Promise((resolve, reject) => {
-        userManager.signinPopupCallback(url)
-          .catch((err) => {
-            context.commit('setOidcError', errorPayload('oidcSignInPopupCallback', err))
-            reject(err)
-          })
+        userManager.signinPopupCallback(url).then((result) => {
+          resolve(result)
+        }).catch((err) => {
+          context.commit('setOidcError', errorPayload('oidcSignInPopupCallback', err))
+          reject(err)
+        })
       })
     },
     oidcWasAuthenticated ({ commit }, user) {
@@ -201,27 +202,30 @@ export const createOidcModul = (oidcSettings, storeSettings = {}) => {
     },
     handleSilentRenewCallback () {
       return new Promise((resolve, reject) => {
-        userManager.signinSilentCallback()
-          .catch(err => reject(err))
+        userManager.signinSilentCallback().then((result) => {
+          resolve(result)
+        }).catch(err => reject(err))
       })
     },
     handleSigninPopupCallback () {
       return new Promise((resolve, reject) => {
-        userManager.signinPopupCallback()
-          .catch((err) => {
-            reject(err)
-          })
+        userManager.signinPopupCallback().then((result) => {
+          resolve(result)
+        }).catch((err) => {
+          reject(err)
+        })
       })
     },
     handleSignoutPopupCallback () {
       return new Promise((resolve, reject) => {
-        userManager.signoutPopupCallback()
-          .catch((err) => {
-            reject(err)
-          })
+        userManager.signoutPopupCallback().then((result) => {
+          resolve(result)
+        }).catch((err) => {
+          reject(err)
+        })
       })
     },
-    loadStoredUser({ commit, dispatch }) {
+    loadStoredUser ({ commit, dispatch }) {
       userManager.getUser()
         .then((user) => {
           if (user !== null) {
@@ -230,7 +234,7 @@ export const createOidcModul = (oidcSettings, storeSettings = {}) => {
           }
         })
     },
-    async oidcCheckAccess (context, route) {
+    /* async */ oidcCheckAccess (context, route) {
       return new Promise((resolve) => {
         if (routeIsOidcCallback(route)) {
           resolve(true)
@@ -276,7 +280,7 @@ export const createOidcModul = (oidcSettings, storeSettings = {}) => {
         })
       })
     },
-    authenticateOidc (context, payload = {}) {
+    authenticateOidc (_context, payload = {}) {
       if (typeof payload === 'string') {
         payload = { redirectPath: payload }
       }
@@ -287,7 +291,6 @@ export const createOidcModul = (oidcSettings, storeSettings = {}) => {
       }
     },
     removeOidcUser ({ commit }) {
-      /* istanbul ignore next */
       return userManager.removeUser().then(() => {
         commit('unsetOidcAuth')
         commit('clearInterval')
