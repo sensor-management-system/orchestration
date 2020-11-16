@@ -1,16 +1,11 @@
 import { UserManager } from 'oidc-client'
 
-export const createAuthModul = (oidcSettings, storeSettings = {}) => {
-  const objectAssign = (objects) => {
-    return objects.reduce(function (r, o) {
-      Object.keys(o || {}).forEach(function (k) {
-        r[k] = o[k]
-      })
-      return r
-    }, {})
-  }
+import { mergeObjectsAndMaybeOverwrite } from '@/utils/objectHelpers'
+import { tokenIsExpired } from '@/utils/tokenHelpers'
+import { toRouterPath, removeTrailingSlash } from '@/utils/urlHelpers'
 
-  storeSettings = objectAssign([
+export const createOidcModul = (oidcSettings, storeSettings = {}) => {
+  storeSettings = mergeObjectsAndMaybeOverwrite([
     {
       namespaced: false,
       isAuthenticatedBy: 'id_token'
@@ -18,20 +13,10 @@ export const createAuthModul = (oidcSettings, storeSettings = {}) => {
     storeSettings
   ])
 
-  const getOidcCallbackPath = (callbackUri, routeBase = '/') => {
-    if (callbackUri) {
-      const domainStartsAt = '://'
-      const hostAndPath = callbackUri.substr(callbackUri.indexOf(domainStartsAt) + domainStartsAt.length)
-      const routeBaseLength = routeBase === '/' ? 0 : routeBase.length
-      return hostAndPath.substr(hostAndPath.indexOf(routeBase) + routeBaseLength)
-    }
-    return null
-  }
-
   const dispatchCustomBrowserEvent = (eventName, detail = {}, params = {}) => {
     if (window) {
       params = params || { bubbles: false, cancelable: false }
-      params = objectAssign([params, { detail }])
+      params = mergeObjectsAndMaybeOverwrite([params, { detail }])
       const event = document.createEvent('CustomEvent')
       event.initCustomEvent(
         eventName,
@@ -45,12 +30,12 @@ export const createAuthModul = (oidcSettings, storeSettings = {}) => {
 
   const userManager = new UserManager(oidcSettings)
 
-  const oidcCallbackPath = getOidcCallbackPath(oidcSettings.redirect_uri, storeSettings.routeBase || '/')
-  const oidcPopupCallbackPath = getOidcCallbackPath(oidcSettings.popup_redirect_uri, storeSettings.routeBase || '/')
-  const oidcSilentCallbackPath = getOidcCallbackPath(oidcSettings.silent_redirect_uri, storeSettings.routeBase || '/')
-  const oidcLogoutCallbackPath = getOidcCallbackPath(oidcSettings.post_logout_redirect_uri, storeSettings.routeBase || '/')
+  const oidcCallbackPath = toRouterPath(oidcSettings.redirect_uri, storeSettings.routeBase || '/')
+  const oidcPopupCallbackPath = toRouterPath(oidcSettings.popup_redirect_uri, storeSettings.routeBase || '/')
+  const oidcSilentCallbackPath = toRouterPath(oidcSettings.silent_redirect_uri, storeSettings.routeBase || '/')
+  const oidcLogoutCallbackPath = toRouterPath(oidcSettings.post_logout_redirect_uri, storeSettings.routeBase || '/')
 
-  const isAuthenticated = (state) => {
+  const hasTokenId = (state) => {
     if (state.id_token) {
       return true
     }
@@ -71,6 +56,14 @@ export const createAuthModul = (oidcSettings, storeSettings = {}) => {
     // this object.
     //
     // And I also don't know how to set if a route is public or not...
+    console.log(route)
+    if (route.meta) {
+      const meta = route.meta
+      if (meta.isPublic) {
+        const isPublic = meta.isPublic
+        console.log(isPublic)
+      }
+    }
     return true
   }
 
@@ -85,43 +78,17 @@ export const createAuthModul = (oidcSettings, storeSettings = {}) => {
     if (route.meta && route.meta.isOidcCallback) {
       return true
     }
-    if (route.path && route.path.replace(/\/$/, '') === oidcCallbackPath) {
+    if (route.path && removeTrailingSlash(route.path) === oidcCallbackPath) {
       return true
     }
-    if (route.path && route.path.replace(/\/$/, '') === oidcPopupCallbackPath) {
+    if (route.path && removeTrailingSlash(route.path) === oidcPopupCallbackPath) {
       return true
     }
-    if (route.path && route.path.replace(/\/$/, '') === oidcSilentCallbackPath) {
+    if (route.path && removeTrailingSlash(route.path) === oidcSilentCallbackPath) {
       return true
     }
-    if (route.path && route.path.replace(/\/$/, '') === oidcLogoutCallbackPath) {
+    if (route.path && removeTrailingSlash(route.path) === oidcLogoutCallbackPath) {
       return true
-    }
-    return false
-  }
-
-  const parseJwt = (token) => {
-    try {
-      const base64Url = token.split('.')[1]
-      const base64 = base64Url.replace('-', '+').replace('_', '/')
-      return JSON.parse(window.atob(base64))
-    } catch (error) {
-      return {}
-    }
-  }
-
-  const tokenExp = (token) => {
-    if (token) {
-      const parsed = parseJwt(token)
-      return parsed.exp ? parsed.exp * 1000 : null
-    }
-    return null
-  }
-
-  const tokenIsExpired = (token) => {
-    const tokenExpiryTime = tokenExp(token)
-    if (tokenExpiryTime) {
-      return tokenExpiryTime < new Date().getTime()
     }
     return false
   }
@@ -142,7 +109,7 @@ export const createAuthModul = (oidcSettings, storeSettings = {}) => {
       return state.id_token
     },
     isAuthenticated: (state) => {
-      return isAuthenticated(state)
+      return hasTokenId(state)
     },
     username: (state) => {
       if (state.user) {
@@ -280,7 +247,7 @@ export const createAuthModul = (oidcSettings, storeSettings = {}) => {
           })
         })
 
-        const isAuthenticatedInStore = isAuthenticated(context.state)
+        const isAuthenticatedInStore = hasTokenId(context.state)
 
         getUserPromise.then((user) => {
           if (!user || tokenIsExpired(user.id_token)) {
@@ -353,7 +320,7 @@ export const createAuthModul = (oidcSettings, storeSettings = {}) => {
     }
   }
 
-  const storeModule = objectAssign([
+  const storeModule = mergeObjectsAndMaybeOverwrite([
     storeSettings,
     {
       state,

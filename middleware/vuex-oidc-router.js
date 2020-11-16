@@ -3,7 +3,7 @@ export default function (context) {
   // We use it here to prevent unauthorized access to our routes.
   // Basically we ask our Open ID Connect store if the user is allowed
   // to access our route.
-  // Otherwise we redirect to the a plain page.
+  // Otherwise we redirect to the a plain page (like the index page).
   return new Promise((resolve) => {
     const redirect = (textToDisplay) => {
       if (textToDisplay) {

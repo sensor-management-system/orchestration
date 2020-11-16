@@ -53,3 +53,13 @@ export function removeTrailingSlash (str: string): string {
   }
   return str
 }
+
+export function toRouterPath (callbackUri: string, routeBase = '/') {
+  if (callbackUri) {
+    const domainStartsAt = '://'
+    const hostAndPath = callbackUri.substr(callbackUri.indexOf(domainStartsAt) + domainStartsAt.length)
+    const routeBaseLength = routeBase === '/' ? 0 : routeBase.length
+    return hostAndPath.substr(hostAndPath.indexOf(routeBase) + routeBaseLength)
+  }
+  return null
+}

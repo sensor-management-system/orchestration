@@ -277,7 +277,7 @@ export default {
     })
   },
   mounted () {
-    this.$store.dispatch('oidc/loadStoredUser') // kann raus, braucht man nicht mehr
+    // Place for some custom actions
   },
   methods: {
     ...mapActions('oidc', ['removeOidcUser', 'logoutPopup', 'loginPopup']),
@@ -288,16 +288,6 @@ export default {
       this.$store.commit('snackbar/clearSuccess')
     },
     login () {
-      // this.$store.dispatch('oidc/loginPopup').then((userObject) => {
-      //   let message = 'Login successful'
-      //   if (userObject.profile && userObject.profile.name) {
-      //     message = 'Successful login as ' + userObject.profile.name
-      //   }
-      //   this.$store.commit('snackbar/setSuccess', message)
-      // }).catch((_err) => {
-      //   console.log(_err);
-      //   this.$store.commit('snackbar/setError', 'Login failed')
-      // })
       this.loginPopup().then((redirectPath) => {
         this.$router.push(redirectPath)
       }).catch((_err) => {
@@ -308,17 +298,6 @@ export default {
       this.removeOidcUser().then(() => {
         this.$router.push('/')
       })
-      // const routing = {
-      //   router: this.$router,
-      //   currentRoute: this.$route.path
-      // }
-      // this.$store.dispatch('oidc/logout', routing).then(() => {
-      //   this.$store.commit('snackbar/setSuccess', 'Logout successful')
-      // }).catch((err) => {
-      //   // eslint-disable-next-line
-      //   console.error(err)
-      //   this.$store.commit('snackbar/setError', 'Problem on logout')
-      // })
     }
   }
 }

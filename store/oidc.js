@@ -1,7 +1,7 @@
 import oidcSettings from '@/config/oidc'
-import { createAuthModul } from '@/utils/auth'
+import { createOidcModul } from '@/oidc/module'
 
-const storeModule = createAuthModul(oidcSettings, {
+const storeModule = createOidcModul(oidcSettings, {
   namespaced: true,
   routeBase: process.env.NUXT_ENV_PUBLIC_PATH
 })
