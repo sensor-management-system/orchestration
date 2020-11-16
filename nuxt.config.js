@@ -34,8 +34,8 @@ permissions and limitations under the Licence.
 
 // eslint-disable-next-line
 import colors from 'vuetify/es5/util/colors'
-import fs from 'fs';
-import path from 'path';
+import fs from 'fs'
+import path from 'path'
 
 export default {
   server: {
