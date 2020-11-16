@@ -30,7 +30,7 @@ class InnerDevicePropertySchema(MarshmallowSchema):
     sampling_media_name = fields.Str(allow_none=True)
     resolution = fields.Float(allow_none=True)
     resolution_unit_uri = fields.String(allow_none=True)
-    resolutionUnitName = fields.String(allow_none=True)
+    resolution_unit_name = fields.String(allow_none=True)
 
 
 class DevicePropertySchema(Schema):

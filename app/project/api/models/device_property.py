@@ -23,7 +23,7 @@ class DeviceProperty(db.Model):
     sampling_media_name = db.Column(db.String(256), nullable=True)
     resolution = db.Column(db.Float(), nullable=True)
     resolution_unit_uri = db.Column(db.String(256), nullable=True)
-    resolutionUnitName = db.Column(db.String(256), nullable=True)
+    resolution_unit_name = db.Column(db.String(256), nullable=True)
     device_id = db.Column(db.Integer, db.ForeignKey('device.id'), nullable=False)
     device = db.relationship(
         Device, uselist=False, foreign_keys=[device_id]
