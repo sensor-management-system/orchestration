@@ -197,17 +197,15 @@ export const createOidcModul = (oidcSettings, storeSettings = {}) => {
     // As we don't have it, I comment it out
     /* async */ loginPopup ({ dispatch, commit }) {
       return new Promise((resolve, reject) => {
-        userManager.signinPopup()
-          .then((user) => {
-            dispatch('oidcWasAuthenticated', user)
-            dispatch('automaticSilentRenew')
-            resolve(sessionStorage.getItem(sessionStorageItemName) || '/')
-            dispatchCustomBrowserEvent('userLoaded', user)
-          })
-          .catch((err) => {
-            commit('setOidcError', errorPayload('oidcSignInCallback', err))
-            reject(err)
-          })
+        userManager.signinPopup().then((user) => {
+          dispatch('oidcWasAuthenticated', user)
+          dispatch('automaticSilentRenew')
+          resolve(sessionStorage.getItem(sessionStorageItemName) || '/')
+          dispatchCustomBrowserEvent('userLoaded', user)
+        }).catch((err) => {
+          commit('setOidcError', errorPayload('oidcSignInCallback', err))
+          reject(err)
+        })
       })
     },
     oidcSignInPopupCallback (context, url) {
