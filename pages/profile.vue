@@ -6,6 +6,7 @@ Copyright (C) 2020
 - Kotyba Alhaj Taha (UFZ, kotyba.alhaj-taha@ufz.de)
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
+- Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
 - Helmholtz Centre for Environmental Research GmbH - UFZ
   (UFZ, https://www.ufz.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -245,24 +246,3 @@ export default class ProfilePage extends Vue {
 }
 
 </script>
-
-<style scoped>
-.profile-card {
-  background-color: #fff;
-  color: #000;
-  padding: 15vmin 20vmin;
-  text-align: center;
-}
-
-.profile-card__title {
-  margin: 0;
-  font-size: 36px;
-}
-
-.profile-card__subtitle {
-  margin: 0;
-  color: #c0c0c0;
-  font-size: 18px;
-  margin-bottom: 5px;
-}
-</style>

@@ -1,3 +1,38 @@
+/**
+ * @license
+ * Web client of the Sensor Management System software developed within
+ * the Helmholtz DataHub Initiative by GFZ and UFZ.
+ *
+ * Copyright (C) 2020
+ * - Kotyba Alhaj Taha (UFZ, kotyba.alhaj-taha@ufz.de)
+ * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
+ * - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
+ * - Helmholtz Centre for Environmental Research GmbH - UFZ
+ *   (UFZ, https://www.ufz.de)
+ * - Helmholtz Centre Potsdam - GFZ German Research Centre for
+ *   Geosciences (GFZ, https://www.gfz-potsdam.de)
+ *
+ * Parts of this program were developed within the context of the
+ * following publicly funded projects or measures:
+ * - Helmholtz Earth and Environment DataHub
+ *   (https://www.helmholtz.de/en/research/earth_and_environment/initiatives/#h51095)
+ *
+ * Licensed under the HEESIL, Version 1.0 or - as soon they will be
+ * approved by the "Community" - subsequent versions of the HEESIL
+ * (the "Licence").
+ *
+ * You may not use this work except in compliance with the Licence.
+ *
+ * You may obtain a copy of the Licence at:
+ * https://gitext.gfz-potsdam.de/software/heesil
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the Licence is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+ * implied. See the Licence for the specific language governing
+ * permissions and limitations under the Licence.
+ */
+
 import { UserManager } from 'oidc-client'
 
 import { mergeObjectsAndMaybeOverwrite } from '@/utils/objectHelpers'
@@ -12,6 +47,10 @@ export const createOidcModul = (oidcSettings, storeSettings = {}) => {
     },
     storeSettings
   ])
+
+  // originally
+  // const sessionStorageItemName = 'ufz_vuex_oidc_active_route'
+  const sessionStorageItemName = 'sms_oidc_active_route'
 
   const dispatchCustomBrowserEvent = (eventName, detail = {}, params = {}) => {
     if (window) {
@@ -45,6 +84,8 @@ export const createOidcModul = (oidcSettings, storeSettings = {}) => {
   const routeIsPublic = (route) => {
     if (route.meta) {
       // locally and on the server this meta attribute is a list of objects
+      // it would be easier to asume that it is just one meta object (for the
+      // currently active route, but it is not that way...)
       const metaList = route.meta
       const meta = mergeObjectsAndMaybeOverwrite(metaList)
       // the values can be specified in the meta section of the
@@ -160,7 +201,7 @@ export const createOidcModul = (oidcSettings, storeSettings = {}) => {
           .then((user) => {
             dispatch('oidcWasAuthenticated', user)
             dispatch('automaticSilentRenew')
-            resolve(sessionStorage.getItem('ufz_vuex_oidc_active_route') || '/')
+            resolve(sessionStorage.getItem(sessionStorageItemName) || '/')
             dispatchCustomBrowserEvent('userLoaded', user)
           })
           .catch((err) => {
@@ -188,11 +229,10 @@ export const createOidcModul = (oidcSettings, storeSettings = {}) => {
       commit('clearInterval')
     },
     silentRenew ({ dispatch }) {
-      userManager.signinSilent()
-        .then((user) => {
-          dispatch('oidcWasAuthenticated', user)
-          dispatchCustomBrowserEvent('userLoaded', user)
-        })
+      userManager.signinSilent().then((user) => {
+        dispatch('oidcWasAuthenticated', user)
+        dispatchCustomBrowserEvent('userLoaded', user)
+      })
     },
     automaticSilentRenew ({ state, dispatch, commit }) {
       if (!state.intervalId) {
@@ -226,13 +266,12 @@ export const createOidcModul = (oidcSettings, storeSettings = {}) => {
       })
     },
     loadStoredUser ({ commit, dispatch }) {
-      userManager.getUser()
-        .then((user) => {
-          if (user !== null) {
-            commit('setOidcAuth', user)
-            dispatch('automaticSilentRenew')
-          }
-        })
+      userManager.getUser().then((user) => {
+        if (user !== null) {
+          commit('setOidcAuth', user)
+          dispatch('automaticSilentRenew')
+        }
+      })
     },
     /* async */ oidcCheckAccess (context, route) {
       return new Promise((resolve) => {
@@ -285,9 +324,9 @@ export const createOidcModul = (oidcSettings, storeSettings = {}) => {
         payload = { redirectPath: payload }
       }
       if (payload.redirectPath) {
-        sessionStorage.setItem('ufz_vuex_oidc_active_route', payload.redirectPath)
+        sessionStorage.setItem(sessionStorageItemName, payload.redirectPath)
       } else {
-        sessionStorage.removeItem('ufz_vuex_oidc_active_route')
+        sessionStorage.removeItem(sessionStorageItemName)
       }
     },
     removeOidcUser ({ commit }) {
@@ -309,7 +348,7 @@ export const createOidcModul = (oidcSettings, storeSettings = {}) => {
       state.id_token = null
       state.user = null
       state.scopes = null
-      sessionStorage.removeItem('ufz_vuex_oidc_active_route')
+      sessionStorage.removeItem(sessionStorageItemName)
     },
     setIntervalId (state, intervalId) {
       state.intervalId = intervalId

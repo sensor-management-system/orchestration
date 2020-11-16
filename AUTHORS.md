@@ -5,3 +5,4 @@ changes to the project.
   * Kotyba Alhaj Taha (UFZ, kotyba.alhaj-taha@ufz.de)
   * Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
   * Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
+  * Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
