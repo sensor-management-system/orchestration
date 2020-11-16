@@ -30,22 +30,51 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <v-form
-      ref="form"
-      v-model="formIsValid"
+    <v-card
+      outlined
     >
-      <v-card
-        outlined
+      <v-tabs-items
+        v-model="activeTab"
       >
-        <v-tabs-items
-          v-model="activeTab"
-        >
-          <!-- Configuration -->
-          <v-tab-item :eager="true">
-            <v-card
-              flat
-            >
-              <v-card-text>
+        <!-- Configuration -->
+        <v-tab-item :eager="true">
+          <v-card
+            flat
+          >
+            <v-card-text>
+              <v-row>
+                <v-col cols="12" md="3">
+                  <v-text-field
+                    v-model="configuration.label"
+                    label="Label"
+                    :readonly="readonly"
+                    :disabled="readonly"
+                  />
+                </v-col>
+                <v-col cols="12" md="3">
+                  <v-combobox
+                    v-model="configuration.status"
+                    :items="configurationStates"
+                    label="Status"
+                    :readonly="readonly"
+                    :disabled="readonly"
+                  />
+                </v-col>
+                <v-col cols="12" md="3">
+                  <v-combobox
+                    v-model="configurationProjectName"
+                    :items="projectNames"
+                    label="Project"
+                    :readonly="readonly"
+                    :disabled="readonly"
+                  />
+                </v-col>
+              </v-row>
+              <v-form
+                ref="datesForm"
+                v-model="datesAreValid"
+                @submit.prevent
+              >
                 <v-row>
                   <v-col cols="12" md="3">
                     <v-menu
@@ -126,179 +155,186 @@ permissions and limitations under the Licence.
                     />
                   </v-col>
                 </v-row>
-                <v-row>
-                  <v-col cols="12" md="3">
+              </v-form>
+              <v-row>
+                <v-col cols="12" md="3">
+                  <v-form
+                    ref="locationTypeForm"
+                    v-model="locationTypeIsValid"
+                    @submit.prevent
+                  >
                     <v-select
                       v-model="locationType"
                       label="Location type"
+                      :rules="[rules.locationType]"
                       :items="['Stationary', 'Dynamic']"
+                      :readonly="readonly"
+                      :disabled="readonly"
+                    />
+                  </v-form>
+                </v-col>
+              </v-row>
+              <div v-if="locationType === 'Stationary'">
+                <v-row>
+                  <v-col cols="12" md="3">
+                    <v-text-field
+                      v-model.number.lazy="configuration.location.latitude"
+                      label="Latitude (WGS84)"
+                      type="number"
+                      :readonly="readonly"
+                      :disabled="readonly"
+                    />
+                  </v-col>
+                  <v-col cols="12" md="3">
+                    <v-text-field
+                      v-model.number.lazy="configuration.location.longitude"
+                      label="Longitude (WGS84)"
+                      type="number"
+                      :readonly="readonly"
+                      :disabled="readonly"
+                    />
+                  </v-col>
+                  <v-col cols="12" md="3">
+                    <v-text-field
+                      v-model.number="configuration.location.elevation"
+                      label="Elevation (m asl)"
+                      type="number"
                       :readonly="readonly"
                       :disabled="readonly"
                     />
                   </v-col>
                 </v-row>
-                <div v-if="locationType === 'Stationary'">
-                  <v-row>
-                    <v-col cols="12" md="3">
-                      <v-text-field
-                        v-model.number.lazy="configuration.location.latitude"
-                        label="Latitude (WGS84)"
-                        type="number"
-                        :readonly="readonly"
-                        :disabled="readonly"
-                      />
-                    </v-col>
-                    <v-col cols="12" md="3">
-                      <v-text-field
-                        v-model.number.lazy="configuration.location.longitude"
-                        label="Longitude (WGS84)"
-                        type="number"
-                        :readonly="readonly"
-                        :disabled="readonly"
-                      />
-                    </v-col>
-                    <v-col cols="12" md="3">
-                      <v-text-field
-                        v-model.number="configuration.location.elevation"
-                        label="Elevation (m asl)"
-                        type="number"
-                        :readonly="readonly"
-                        :disabled="readonly"
-                      />
-                    </v-col>
-                  </v-row>
-                  <v-row>
-                    <v-col cols="12" md="6">
-                      <div id="map-wrap" style="height: 300px">
-                        <no-ssr>
-                          <l-map :zoom="10" :center="location" style="z-index:0">
-                            <l-tile-layer url="https://{s}.tile.osm.org/{z}/{x}/{y}.png" />
-                            <l-marker :lat-lng="location" />
-                          </l-map>
-                        </no-ssr>
-                      </div>
-                    </v-col>
-                  </v-row>
-                </div>
-                <div v-if="locationType === 'Dynamic'">
-                  <v-row>
-                    <v-col cols="12" md="3">
-                      <DevicePropertyHierarchySelect
-                        v-model="configuration.location.latitude"
-                        :devices="getAllDevices()"
-                        device-select-label="Device that measures latitude"
-                        property-select-label="Property for latitude"
-                        :readonly="readonly"
-                      />
-                    </v-col>
-                    <v-col cols="12" md="3">
-                      <DevicePropertyHierarchySelect
-                        v-model="configuration.location.longitude"
-                        :devices="getAllDevices()"
-                        device-select-label="Device that measures longitude"
-                        property-select-label="Property for longitude"
-                        :readonly="readonly"
-                      />
-                    </v-col>
-                    <v-col cols="12" md="3">
-                      <DevicePropertyHierarchySelect
-                        v-model="configuration.location.elevation"
-                        :devices="getAllDevices()"
-                        device-select-label="Device that measures elevation"
-                        property-select-label="Property for elevation"
-                        :readonly="readonly"
-                      />
-                    </v-col>
-                  </v-row>
-                </div>
-              </v-card-text>
-            </v-card>
-          </v-tab-item>
-
-          <!-- Platforms and Devices -->
-          <v-tab-item :eager="true">
-            <v-card
-              flat
-            >
-              <v-card-text>
                 <v-row>
                   <v-col cols="12" md="6">
-                    <ConfigurationsDemoTreeView
-                      v-if="!configuration.tree.length"
-                    />
-                    <ConfigurationsTreeView
-                      v-else
-                      ref="treeView"
-                      v-model="configuration.tree"
-                      :selected="selectedNode"
-                      @select="setSelectedNode"
-                    />
+                    <div id="map-wrap" style="height: 300px">
+                      <no-ssr>
+                        <l-map :zoom="10" :center="location" style="z-index:0">
+                          <l-tile-layer url="https://{s}.tile.osm.org/{z}/{x}/{y}.png" />
+                          <l-marker :lat-lng="location" />
+                        </l-map>
+                      </no-ssr>
+                    </div>
                   </v-col>
-                  <v-col cols="12" md="6">
-                    <InfoBox v-if="!selectedNode && !readonly">
-                      Select a platform on the left side to add devices or platforms to it. To add a device or platform to the root of this configuration, deselect any previously selected device or platform.
-                    </InfoBox>
-                    <ConfigurationsSelectedItem
-                      :value="selectedNode"
-                      :breadcrumbs="hierarchyNodeNames"
+                </v-row>
+              </div>
+              <div v-if="locationType === 'Dynamic'">
+                <v-row>
+                  <v-col cols="12" md="3">
+                    <DevicePropertyHierarchySelect
+                      v-model="configuration.location.latitude"
+                      :devices="getAllDevices()"
+                      device-select-label="Device that measures latitude"
+                      property-select-label="Property for latitude"
                       :readonly="readonly"
-                      @remove="removeSelectedNode"
                     />
-                    <ConfigurationsPlatformDeviceSearch
-                      v-if="!readonly && (!selectedNode || selectedNode.isPlatform())"
-                      :is-platform-used-func="isPlatformInTree"
-                      :is-device-used-func="isDeviceInTree"
-                      @add-platform="addPlatformNode"
-                      @add-device="addDeviceNode"
+                  </v-col>
+                  <v-col cols="12" md="3">
+                    <DevicePropertyHierarchySelect
+                      v-model="configuration.location.longitude"
+                      :devices="getAllDevices()"
+                      device-select-label="Device that measures longitude"
+                      property-select-label="Property for longitude"
+                      :readonly="readonly"
+                    />
+                  </v-col>
+                  <v-col cols="12" md="3">
+                    <DevicePropertyHierarchySelect
+                      v-model="configuration.location.elevation"
+                      :devices="getAllDevices()"
+                      device-select-label="Device that measures elevation"
+                      property-select-label="Property for elevation"
+                      :readonly="readonly"
                     />
                   </v-col>
                 </v-row>
-              </v-card-text>
-            </v-card>
-          </v-tab-item>
+              </div>
+            </v-card-text>
+          </v-card>
+        </v-tab-item>
 
-          <!-- Setup -->
-          <v-tab-item :eager="true">
-            <PlatformConfigurationAttributesExpansionPanels
-              v-model="configuration.platformAttributes"
-              :readonly="readonly"
-            />
-            <DeviceConfigurationAttributesExpansionPanels
-              v-model="configuration.deviceAttributes"
-              :readonly="readonly"
-            />
-          </v-tab-item>
+        <!-- Platforms and Devices -->
+        <v-tab-item :eager="true">
+          <v-card
+            flat
+          >
+            <v-card-text>
+              <v-row>
+                <v-col cols="12" md="6">
+                  <ConfigurationsDemoTreeView
+                    v-if="!configuration.tree.length"
+                  />
+                  <ConfigurationsTreeView
+                    v-else
+                    ref="treeView"
+                    v-model="configuration.tree"
+                    :selected="selectedNode"
+                    @select="setSelectedNode"
+                  />
+                </v-col>
+                <v-col cols="12" md="6">
+                  <InfoBox v-if="!selectedNode && !readonly">
+                    Select a platform on the left side to add devices or platforms to it. To add a device or platform to the root of this configuration, deselect any previously selected device or platform.
+                  </InfoBox>
+                  <ConfigurationsSelectedItem
+                    :value="selectedNode"
+                    :breadcrumbs="hierarchyNodeNames"
+                    :readonly="readonly"
+                    @remove="removeSelectedNode"
+                  />
+                  <ConfigurationsPlatformDeviceSearch
+                    v-if="!readonly && (!selectedNode || selectedNode.isPlatform())"
+                    :is-platform-used-func="isPlatformInTree"
+                    :is-device-used-func="isDeviceInTree"
+                    @add-platform="addPlatformNode"
+                    @add-device="addDeviceNode"
+                  />
+                </v-col>
+              </v-row>
+            </v-card-text>
+          </v-card>
+        </v-tab-item>
 
-          <!-- Contact -->
-          <v-tab-item :eager="true">
-            <v-card
-              flat
-            >
-              <v-card-text>
-                <v-row>
-                  <v-col cols="3">
-                    <ContactSelect v-model="contacts" label="Add a contact" :readonly="readonly" />
-                  </v-col>
-                </v-row>
-              </v-card-text>
-            </v-card>
-          </v-tab-item>
-        </v-tabs-items>
-        <v-btn
-          v-if="!editMode"
-          fab
-          fixed
-          bottom
-          right
-          color="secondary"
-          @click="onEditButtonClick"
-        >
-          <v-icon>
-            mdi-pencil
-          </v-icon>
-        </v-btn>
-      </v-card>
-    </v-form>
+        <!-- Setup -->
+        <v-tab-item :eager="true">
+          <PlatformConfigurationAttributesExpansionPanels
+            v-model="configuration.platformAttributes"
+            :readonly="readonly"
+          />
+          <DeviceConfigurationAttributesExpansionPanels
+            v-model="configuration.deviceAttributes"
+            :readonly="readonly"
+          />
+        </v-tab-item>
+
+        <!-- Contact -->
+        <v-tab-item :eager="true">
+          <v-card
+            flat
+          >
+            <v-card-text>
+              <v-row>
+                <v-col cols="3">
+                  <ContactSelect v-model="configuration.contacts" label="Add a contact" :readonly="readonly" />
+                </v-col>
+              </v-row>
+            </v-card-text>
+          </v-card>
+        </v-tab-item>
+      </v-tabs-items>
+      <v-btn
+        v-if="!editMode"
+        fab
+        fixed
+        bottom
+        right
+        color="secondary"
+        @click="onEditButtonClick"
+      >
+        <v-icon>
+          mdi-pencil
+        </v-icon>
+      </v-btn>
+    </v-card>
   </div>
 </template>
 
@@ -309,8 +345,6 @@ permissions and limitations under the Licence.
 <script lang="ts">
 import { Vue, Component, Watch } from 'nuxt-property-decorator'
 
-import AppBarEditModeContent from '@/components/AppBarEditModeContent.vue'
-import AppBarTabsExtension from '@/components/AppBarTabsExtension.vue'
 import ContactSelect from '@/components/ContactSelect.vue'
 import DevicePropertyHierarchySelect from '@/components/DevicePropertyHierarchySelect.vue'
 import DeviceConfigurationAttributesExpansionPanels from '@/components/DeviceConfigurationAttributesExpansionPanels.vue'
@@ -321,11 +355,11 @@ import ConfigurationsDemoTreeView from '@/components/ConfigurationsDemoTreeView.
 import ConfigurationsSelectedItem from '@/components/ConfigurationsSelectedItem.vue'
 import InfoBox from '@/components/InfoBox.vue'
 
-import { Contact } from '@/models/Contact'
 import { Device } from '@/models/Device'
 import { Platform } from '@/models/Platform'
+import { Project } from '@/models/Project'
 
-import { StationaryLocation, DynamicLocation } from '@/models/Location'
+import { StationaryLocation, DynamicLocation, LocationType } from '@/models/Location'
 import { Configuration } from '@/models/Configuration'
 import { ConfigurationsTree } from '@/models/ConfigurationsTree'
 import { ConfigurationsTreeNode } from '@/models/ConfigurationsTreeNode'
@@ -336,24 +370,6 @@ import { PlatformConfigurationAttributes } from '@/models/PlatformConfigurationA
 
 import { dateToString, stringToDate } from '@/utils/dateHelper'
 import { getParentByClass } from '@/utils/domHelper'
-
-enum LocationType {
-  Stationary = 'Stationary',
-  Dynamic = 'Dynamic'
-}
-
-@Component
-// @ts-ignore
-export class AppBarTabsExtensionExtended extends AppBarTabsExtension {
-  get tabs (): String[] {
-    return [
-      'Configuration',
-      'Platforms and Devices',
-      'Setup',
-      'Contacts'
-    ]
-  }
-}
 
 @Component({
   components: {
@@ -370,81 +386,183 @@ export class AppBarTabsExtensionExtended extends AppBarTabsExtension {
 })
 // @ts-ignore
 export default class ConfigurationsIdPage extends Vue {
-  private activeTab: number = 0
   private editMode: boolean = false
 
   private configuration: Configuration = new Configuration()
   private configurationBackup: Configuration | null = null
 
+  private projects: Project[] = []
+  private configurationStates: string[] = []
+
   private startDateMenu: boolean = false
   private endDateMenu: boolean = false
-
-  private contacts: Contact[] = []
 
   private selectedNode: ConfigurationsTreeNode | null = null
 
   private rules: Object = {
-    startDate: (v: string): boolean | string => v === null || !this.configuration.endDate || stringToDate(v) <= this.configuration.endDate || 'Start date must not be after end date',
-    endDate: (v: string): boolean | string => v === null || !this.configuration.startDate || stringToDate(v) >= this.configuration.startDate || 'End date must not be before start date'
+    startDate: this.validateInputForStartDate,
+    endDate: this.validateInputForEndDate,
+    locationType: this.validateInputForLocationType
   }
 
-  private formIsValid: boolean = true
+  validateInputForStartDate (v: string): boolean | string {
+    if (v === null || v === '') {
+      return true
+    }
+    if (!this.configuration.endDate) {
+      return true
+    }
+    if (stringToDate(v) <= this.configuration.endDate) {
+      return true
+    }
+    return 'Start date must not be after end date'
+  }
+
+  validateInputForEndDate (v: string): boolean | string {
+    if (v === null || v === '') {
+      return true
+    }
+    if (!this.configuration.startDate) {
+      return true
+    }
+    if (stringToDate(v) >= this.configuration.startDate) {
+      return true
+    }
+    return 'End date must not be before start date'
+  }
+
+  validateInputForLocationType (v: string): boolean | string {
+    if (v === LocationType.Stationary) {
+      return true
+    }
+    if (v === LocationType.Dynamic) {
+      return true
+    }
+    return 'Location type must be set'
+  }
+
+  checkValidationOfAllFields () {
+    // run the registered validations and show errors on the page
+    this.checkValidationOfDates()
+    this.checkValidationOfLocationType()
+  }
+
+  checkValidationOfDates () {
+    (this.$refs.datesForm as Vue & { validate: () => boolean }).validate()
+  }
+
+  checkValidationOfLocationType () {
+    (this.$refs.locationTypeForm as Vue & { validate: () => boolean }).validate()
+  }
+
+  private datesAreValid: boolean = true
+  private locationTypeIsValid: boolean = true
+
+  get formIsValid () : boolean {
+    return this.datesAreValid && this.locationTypeIsValid
+  }
 
   created () {
-    this.$nuxt.$emit('app-bar-content', AppBarEditModeContent)
-    this.$nuxt.$on('AppBarContent:save-button-click', () => {
-      if (!this.formIsValid) {
-        this.showValidationError()
-        return
-      }
-      this.save()
-    })
-    this.$nuxt.$on('AppBarContent:cancel-button-click', () => {
-      this.cancel()
-    })
-
-    this.$nuxt.$emit('app-bar-extension', AppBarTabsExtensionExtended)
-    this.$nuxt.$on('AppBarExtension:change', (tab: number) => {
-      this.activeTab = tab
-    })
+    this.registerButtonActions()
+    this.initializeAppBar()
   }
 
   mounted () {
-    this.loadConfiguration()
-    this.$nextTick(() => {
-      if (!this.$route.params.id) {
-        this.$nuxt.$emit('AppBarContent:title', 'Add Configuration')
-      }
-      this.$nuxt.$emit('AppBarContent:save-button-hidden', !this.editMode)
-      this.$nuxt.$emit('AppBarContent:cancel-button-hidden', !this.editMode)
+    this.$api.configurationStates.findAll().then((foundStates) => {
+      this.configurationStates = foundStates
     })
-  }
-
-  loadConfiguration () {
-    const configurationId = this.$route.params.id
-    if (!configurationId) {
-      this.createBackup()
-      this.editMode = true
-      return
-    }
-    this.editMode = false
-    this.$api.configurations.findById(configurationId).then((foundConfiguration) => {
-      this.configuration = foundConfiguration
-    }).catch((_error) => {
+    this.$api.projects.findAll().then((foundProjects) => {
+      this.projects = foundProjects
+    })
+    this.loadConfiguration().then((_configuration) => {
+      if (_configuration === null) {
+        this.$store.commit('appbar/setTitle', 'Add Configuration')
+      }
+    }).catch(() => {
       this.$store.commit('snackbar/setError', 'Loading configuration failed')
     })
   }
 
-  beforeDestroy () {
-    this.$nuxt.$emit('app-bar-content', null)
-    this.$nuxt.$emit('app-bar-extension', null)
-    this.$nuxt.$off('AppBarContent:save-button-click')
-    this.$nuxt.$off('AppBarContent:cancel-button-click')
-    this.$nuxt.$off('AppBarExtension:change')
+  loadConfiguration (): Promise<Configuration|null> {
+    return new Promise((resolve, reject) => {
+      const configurationId = this.$route.params.id
+      if (!configurationId) {
+        this.createBackup()
+        this.editMode = true
+        resolve(null)
+        return
+      }
+      this.editMode = false
+      this.$api.configurations.findById(configurationId).then((foundConfiguration) => {
+        this.configuration = foundConfiguration
+        resolve(foundConfiguration)
+      }).catch((error) => {
+        reject(error)
+      })
+    })
   }
 
-  save () {
-    this.editMode = false
+  beforeDestroy () {
+    this.unregisterButtonActions()
+    this.$store.dispatch('appbar/setDefaults')
+  }
+
+  registerButtonActions () {
+    this.$nuxt.$on('AppBarEditModeContent:save-btn-click', () => {
+      this.checkValidationOfAllFields()
+      if (!this.formIsValid) {
+        this.showValidationError()
+        return
+      }
+      this.save().then(() => {
+        this.$store.commit('snackbar/setSuccess', 'Save successful')
+      }).catch(() => {
+        this.$store.commit('snackbar/setError', 'Save failed')
+      })
+    })
+    this.$nuxt.$on('AppBarEditModeContent:cancel-btn-click', () => {
+      this.cancel()
+    })
+  }
+
+  unregisterButtonActions () {
+    this.$nuxt.$off('AppBarEditModeContent:save-btn-click')
+    this.$nuxt.$off('AppBarEditModeContent:cancel-btn-click')
+  }
+
+  initializeAppBar () {
+    this.$store.dispatch('appbar/init', {
+      tabs: [
+        'Configuration',
+        'Platforms and Devices',
+        'Setup',
+        'Contacts'
+      ],
+      title: 'Configurations',
+      saveBtnHidden: true,
+      cancelBtnHidden: true
+    })
+  }
+
+  get activeTab (): number | null {
+    return this.$store.state.appbar.activeTab
+  }
+
+  set activeTab (tab: number | null) {
+    this.$store.commit('appbar/setActiveTab', tab)
+  }
+
+  save (): Promise<Configuration> {
+    return new Promise((resolve, reject) => {
+      this.$api.configurations.save(this.configuration).then((savedConfiguration) => {
+        this.configuration = savedConfiguration
+        this.configurationBackup = null
+        this.editMode = false
+        resolve(savedConfiguration)
+      }).catch((error) => {
+        reject(error)
+      })
+    })
   }
 
   cancel () {
@@ -473,13 +591,6 @@ export default class ConfigurationsIdPage extends Vue {
     this.configurationBackup = null
   }
 
-  @Watch('editMode', { immediate: true, deep: true })
-  // @ts-ignore
-  onEditModeChanged (editMode: boolean) {
-    this.$nuxt.$emit('AppBarContent:save-button-hidden', !editMode)
-    this.$nuxt.$emit('AppBarContent:cancel-button-hidden', !editMode)
-  }
-
   get readonly () {
     return !this.editMode
   }
@@ -501,11 +612,13 @@ export default class ConfigurationsIdPage extends Vue {
         if (!(this.configuration.location instanceof StationaryLocation)) {
           this.configuration.location = new StationaryLocation()
         }
+        this.checkValidationOfLocationType()
         break
       case LocationType.Dynamic:
         if (!(this.configuration.location instanceof DynamicLocation)) {
           this.configuration.location = new DynamicLocation()
         }
+        this.checkValidationOfLocationType()
         break
       default:
         this.configuration.location = null
@@ -736,7 +849,7 @@ export default class ConfigurationsIdPage extends Vue {
     this.setStartDate(aDate)
     this.startDateMenu = false
     if (this.configuration.endDate !== null) {
-      (this.$refs.form as Vue & { validate: () => boolean }).validate()
+      this.checkValidationOfDates()
     }
   }
 
@@ -744,7 +857,7 @@ export default class ConfigurationsIdPage extends Vue {
     this.setEndDate(aDate)
     this.endDateMenu = false
     if (this.configuration.startDate !== null) {
-      (this.$refs.form as Vue & { validate: () => boolean }).validate()
+      this.checkValidationOfDates()
     }
   }
 
@@ -766,8 +879,50 @@ export default class ConfigurationsIdPage extends Vue {
     if (tabIndex === -1) {
       return
     }
-    this.$nuxt.$emit('AppBarExtension:change', tabIndex)
+    this.$store.commit('appbar/setActiveTab', tabIndex)
     this.$store.commit('snackbar/setError', 'Please correct your errors.')
+  }
+
+  get configurationProjectName () {
+    const uri = this.configuration.projectUri
+    const projectIndex = this.projects.findIndex(p => p.uri === uri)
+    if (projectIndex > -1) {
+      return this.projects[projectIndex].name
+    }
+    return this.configuration.projectName
+  }
+
+  set configurationProjectName (newProjectName: string) {
+    this.configuration.projectName = newProjectName
+    const projectIndex = this.projects.findIndex(p => p.name === newProjectName)
+    if (projectIndex > -1) {
+      this.configuration.projectUri = this.projects[projectIndex].uri
+    } else {
+      this.configuration.projectUri = ''
+    }
+  }
+
+  get projectNames () {
+    return this.projects.map(p => p.name)
+  }
+
+  @Watch('configuration', { immediate: true, deep: true })
+  // @ts-ignore
+  onConfigurationChanged (val: Configuration) {
+    if (val.id) {
+      let title = 'Edit Configuration'
+      if (val.label) {
+        title = val.label
+      }
+      this.$store.commit('appbar/setTitle', title)
+    }
+  }
+
+  @Watch('editMode', { immediate: true, deep: true })
+  // @ts-ignore
+  onEditModeChanged (editMode: boolean) {
+    this.$store.commit('appbar/setSaveBtnHidden', !editMode)
+    this.$store.commit('appbar/setCancelBtnHidden', !editMode)
   }
 }
 </script>

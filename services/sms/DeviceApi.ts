@@ -217,7 +217,7 @@ export class DeviceSearcher {
   private axiosApi: AxiosInstance
   private clientSideFilterFunc: (device: Device) => boolean
   private serverSideFilterSettings: IFlaskJSONAPIFilter[]
-  private serialier: DeviceSerializer
+  private serializer: DeviceSerializer
 
   constructor (
     axiosApi: AxiosInstance,
@@ -228,7 +228,7 @@ export class DeviceSearcher {
     this.axiosApi = axiosApi
     this.clientSideFilterFunc = clientSideFilterFunc
     this.serverSideFilterSettings = serverSideFilterSettings
-    this.serialier = serializer
+    this.serializer = serializer
   }
 
   private get commonParams (): any {
@@ -251,7 +251,7 @@ export class DeviceSearcher {
       const rawData = rawResponse.data
       // We don't ask the api to load the contacts, so we just add dummy objects
       // to stay with the relationships
-      return this.serialier
+      return this.serializer
         .convertJsonApiObjectListToModelList(rawData)
         .map(deviceWithMetaToDeviceByAddingDummyObjects)
     })
@@ -283,7 +283,7 @@ export class DeviceSearcher {
 
       // And - again - we don't ask the api here to load the contact data as well
       // so we will add the dummy objects to stay with the relationships
-      const elements: Device[] = this.serialier.convertJsonApiObjectListToModelList(
+      const elements: Device[] = this.serializer.convertJsonApiObjectListToModelList(
         rawData
       ).map(deviceWithMetaToDeviceByAddingDummyObjects)
 

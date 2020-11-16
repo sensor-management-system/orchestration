@@ -79,7 +79,10 @@ describe('DevicePropertyExpansionPanels', () => {
               max: 1000
             },
             accuracy: 0.1,
-            failureValue: 0.01
+            failureValue: 0.01,
+            resolution: 0.001,
+            resolutionUnitUri: 'http://foo/unit/1',
+            resolutionUnitName: 'mm'
           })
         ] as DeviceProperty[],
         compartments: [

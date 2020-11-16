@@ -121,15 +121,19 @@ permissions and limitations under the Licence.
       app
     >
       <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
-      <template v-if="appBarContent">
-        <Component :is="appBarContent" />
-      </template>
-      <template v-else>
-        <v-toolbar-title v-text="title" />
-        <v-spacer />
-      </template>
-      <template v-if="appBarExtension" v-slot:extension>
-        <Component :is="appBarExtension" />
+      <AppBarEditModeContent
+        :title="appBarTitle"
+        :save-btn-hidden="saveBtnHidden"
+        :cancel-btn-hidden="cancelBtnHidden"
+        :save-btn-disabled="saveBtnDisabled"
+        :cancel-btn-disabled="cancelBtnDisabled"
+      />
+      <template v-if="tabs.length" v-slot:extension>
+        <AppBarTabsExtension
+          :value="activeTab"
+          :tabs="tabs"
+          @change="onChangeTab"
+        />
       </template>
       <v-menu close-on-click close-on-content-click offset-x>
         <template v-slot:activator="{ on }">
@@ -156,9 +160,9 @@ permissions and limitations under the Licence.
             <v-list-item dense @click="login">
               <v-list-item-content>
                 <v-list-item-title>
-                  <v-avatar small left>
-                    LI
-                  </v-avatar>
+                  <v-icon small left>
+                    mdi-login
+                  </v-icon>
                   <span>Login</span>
                 </v-list-item-title>
               </v-list-item-content>
@@ -168,9 +172,9 @@ permissions and limitations under the Licence.
             <v-list-item dense @click="logout">
               <v-list-item-content>
                 <v-list-item-title>
-                  <v-avatar small left>
-                    LO
-                  </v-avatar>
+                  <v-icon small left>
+                    mdi-logout
+                  </v-icon>
                   <span>Logout</span>
                 </v-list-item-title>
               </v-list-item-content>
@@ -178,9 +182,9 @@ permissions and limitations under the Licence.
             <v-list-item dense to="/profile">
               <v-list-item-content>
                 <v-list-item-title>
-                  <v-avatar small left>
-                    PR
-                  </v-avatar>
+                  <v-icon small left>
+                    mdi-account-details
+                  </v-icon>
                   <span>Profile</span>
                 </v-list-item-title>
               </v-list-item-content>
@@ -189,7 +193,7 @@ permissions and limitations under the Licence.
         </v-list>
       </v-menu>
     </v-app-bar>
-    <v-content>
+    <v-main>
       <v-container>
         <v-snackbar v-model="hasSuccess" top color="green">
           {{ success }}
@@ -209,7 +213,7 @@ permissions and limitations under the Licence.
         </v-snackbar>
         <nuxt />
       </v-container>
-    </v-content>
+    </v-main>
     <v-footer
       :fixed="fixed"
       app
@@ -223,7 +227,14 @@ permissions and limitations under the Licence.
 
 import { mapActions } from 'vuex'
 
+import AppBarTabsExtension from '@/components/AppBarTabsExtension'
+import AppBarEditModeContent from '@/components/AppBarEditModeContent'
+
 export default {
+  components: {
+    AppBarTabsExtension,
+    AppBarEditModeContent
+  },
   data () {
     return {
       clipped: false,
@@ -262,6 +273,27 @@ export default {
         }
       }
     },
+    tabs () {
+      return this.$store.state.appbar.tabs
+    },
+    activeTab () {
+      return this.$store.state.appbar.activeTab
+    },
+    appBarTitle () {
+      return this.$store.state.appbar.title || this.title
+    },
+    saveBtnHidden () {
+      return this.$store.state.appbar.saveBtnHidden
+    },
+    saveBtnDisabled () {
+      return this.$store.state.appbar.saveBtnDisabled
+    },
+    cancelBtnHidden () {
+      return this.$store.state.appbar.cancelBtnHidden
+    },
+    cancelBtnDisabled () {
+      return this.$store.state.appbar.cancelBtnDisabled
+    },
     isLoggedIn () {
       return this.$store.getters['oidc/isAuthenticated']
     },
@@ -284,6 +316,9 @@ export default {
     },
     closeSuccessSnackbar () {
       this.$store.commit('snackbar/clearSuccess')
+    },
+    onChangeTab (tab) {
+      this.$store.commit('appbar/setActiveTab', tab)
     },
     login () {
       this.loginPopup().then((redirectPath) => {

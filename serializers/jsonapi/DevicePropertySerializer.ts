@@ -44,6 +44,7 @@ export class DevicePropertySerializer {
     )
     result.failureValue = property.failure_value
     result.accuracy = property.accuracy
+    result.resolution = property.resolution
     result.label = property.label || ''
     result.unitUri = property.unit_uri || ''
     result.unitName = property.unit_name || ''
@@ -53,6 +54,8 @@ export class DevicePropertySerializer {
     result.propertyName = property.property_name || ''
     result.samplingMediaUri = property.sampling_media_uri || ''
     result.samplingMediaName = property.sampling_media_name || ''
+    result.resolutionUnitUri = property.resolution_unit_uri || ''
+    result.resolutionUnitName = property.resolution_unit_name || ''
 
     return result
   }
@@ -77,6 +80,7 @@ export class DevicePropertySerializer {
       propertyToSave.measuring_range_max = property.measuringRange.max
       propertyToSave.failure_value = property.failureValue
       propertyToSave.accuracy = property.accuracy
+      propertyToSave.resolution = property.resolution
       propertyToSave.label = property.label
       propertyToSave.unit_uri = property.unitUri
       propertyToSave.unit_name = property.unitName
@@ -86,6 +90,8 @@ export class DevicePropertySerializer {
       propertyToSave.property_name = property.propertyName
       propertyToSave.sampling_media_uri = property.samplingMediaUri
       propertyToSave.sampling_media_name = property.samplingMediaName
+      propertyToSave.resolution_unit_uri = property.resolutionUnitUri
+      propertyToSave.resolution_unit_name = property.resolutionUnitName
 
       result.push(propertyToSave)
     }

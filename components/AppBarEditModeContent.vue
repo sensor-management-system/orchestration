@@ -33,19 +33,19 @@ permissions and limitations under the Licence.
     <v-toolbar-title>{{ title }}</v-toolbar-title>
     <v-spacer />
     <v-btn
-      v-if="!isCancelBtnHidden"
+      v-if="!cancelBtnHidden"
       color="secondary"
       class="mr-1"
-      :disabled="isCancelBtnDisabled"
-      @click="$nuxt.$emit('AppBarContent:cancel-button-click')"
+      :disabled="cancelBtnDisabled"
+      @click="onCancelButtonClick($event)"
     >
       Cancel
     </v-btn>
     <v-btn
-      v-if="!isSaveBtnHidden"
+      v-if="!saveBtnHidden"
       color="primary"
-      :disabled="isSaveBtnDisabled"
-      @click="$nuxt.$emit('AppBarContent:save-button-click')"
+      :disabled="saveBtnDisabled"
+      @click="onSaveButtonClick($event)"
     >
       Save
     </v-btn>
@@ -57,7 +57,7 @@ permissions and limitations under the Licence.
  * @file provides a component with save and cancel buttons for the App-Bar
  * @author <marc.hanisch@gfz-potsdam.de>
  */
-import { Vue, Component } from 'nuxt-property-decorator'
+import { Vue, Component, Prop } from 'nuxt-property-decorator'
 
 /**
  * A class component to provide a title and two buttons in the App-Bar
@@ -66,44 +66,84 @@ import { Vue, Component } from 'nuxt-property-decorator'
 @Component
 // @ts-ignore
 export default class AppBarEditModeContent extends Vue {
-  private title: string = ''
-  private saveBtnHidden: boolean = true
-  private cancelBtnHidden: boolean = true
-  private saveBtnDisabled: boolean = false
-  private cancelBtnDisabled: boolean = false
+  /**
+   * the Appbar title
+   */
+  @Prop({
+    default: '',
+    type: String
+  })
+  // @ts-ignore
+  readonly title: string
 
-  get isSaveBtnHidden () {
-    return this.saveBtnHidden
+  /**
+   * whether to hide the save button or not
+   */
+  @Prop({
+    default: true,
+    type: Boolean
+  })
+  // @ts-ignore
+  readonly saveBtnHidden: boolean
+
+  /**
+   * whether to hide the cancel button or not
+   */
+  @Prop({
+    default: true,
+    type: Boolean
+  })
+  // @ts-ignore
+  readonly cancelBtnHidden: boolean
+
+  /**
+   * whether to disable the save button or not
+   */
+  @Prop({
+    default: false,
+    type: Boolean
+  })
+  // @ts-ignore
+  readonly saveBtnDisabled: boolean
+
+  /**
+   * whether to disable the cancel button or not
+   */
+  @Prop({
+    default: false,
+    type: Boolean
+  })
+  // @ts-ignore
+  readonly cancelBtnDisabled: boolean
+
+  /**
+   * fires the cancel button click event
+   *
+   * @param {Event} event - the DOM event
+   * @fires AppBarEditModeContent:cancel-btn-click
+   */
+  onCancelButtonClick (event: Event) {
+    /**
+     * fires the cancel button click event
+     * @event AppBarEditModeContent:cancel-btn-click
+     * @type {Event}
+     */
+    this.$nuxt.$emit('AppBarEditModeContent:cancel-btn-click', event)
   }
 
-  get isCancelBtnHidden () {
-    return this.cancelBtnHidden
-  }
-
-  get isSaveBtnDisabled () {
-    return this.saveBtnDisabled
-  }
-
-  get isCancelBtnDisabled () {
-    return this.cancelBtnDisabled
-  }
-
-  created () {
-    this.$nuxt.$on('AppBarContent:title', (title: string) => {
-      this.title = title
-    })
-    this.$nuxt.$on('AppBarContent:save-button-hidden', (hidden: boolean) => {
-      this.saveBtnHidden = hidden
-    })
-    this.$nuxt.$on('AppBarContent:save-button-disabled', (disabled: boolean) => {
-      this.saveBtnDisabled = disabled
-    })
-    this.$nuxt.$on('AppBarContent:cancel-button-hidden', (hidden: boolean) => {
-      this.cancelBtnHidden = hidden
-    })
-    this.$nuxt.$on('AppBarContent:cancel-button-disabled', (disabled: boolean) => {
-      this.cancelBtnDisabled = disabled
-    })
+  /**
+   * fires the save button click event
+   *
+   * @param {Event} event - the DOM event
+   * @fires AppBarEditModeContent:save-btn-click
+   */
+  onSaveButtonClick (event: Event) {
+    /**
+     * fires the save button click event
+     * @event AppBarEditModeContent:save-btn-click
+     * @type {Event}
+     */
+    this.$nuxt.$emit('AppBarEditModeContent:save-btn-click', event)
   }
 }
 </script>
