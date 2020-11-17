@@ -2,11 +2,10 @@ import collections
 from sqlalchemy.ext.hybrid import hybrid_property
 
 from project.api.models.base_model import db
-from project.api.models.device_property import DeviceProperty
 from project.api.models.mixin import AuditMixin
 
 ConfigurationsTuple = collections.namedtuple(
-    "ConfigurationsTuple", ["configurations_device", "configurations_platform"]
+    "ConfigurationsTuple", ["configuration_devices", "configuration_platforms"]
 )
 
 
@@ -28,69 +27,73 @@ class Configuration(db.Model, AuditMixin):
     status = db.Column(db.String(256), nullable=True, default="draft")
 
     longitude_src_device_property_id = db.Column(
-        db.Integer, db.ForeignKey('device_property.id'), nullable=True
+        db.Integer, db.ForeignKey("device_property.id"), nullable=True
     )
-    longitude_src_device_property = db.relationship(
-        DeviceProperty, uselist=False, foreign_keys=[longitude_src_device_property_id]
+    src_longitude = db.relationship(
+        "DeviceProperty", uselist=False, foreign_keys=[longitude_src_device_property_id]
     )
 
     latitude_src_device_property_id = db.Column(
-        db.Integer, db.ForeignKey('device_property.id'), nullable=True
+        db.Integer, db.ForeignKey("device_property.id"), nullable=True
     )
-    latitude_src_device_property = db.relationship(
-        DeviceProperty, uselist=False, foreign_keys=[latitude_src_device_property_id]
+    src_latitude = db.relationship(
+        "DeviceProperty", uselist=False, foreign_keys=[latitude_src_device_property_id]
     )
 
     elevation_src_device_property_id = db.Column(
-        db.Integer, db.ForeignKey('device_property.id'), nullable=True
+        db.Integer, db.ForeignKey("device_property.id"), nullable=True
     )
-    elevation_src_device_property = db.relationship(
-        DeviceProperty, uselist=False, foreign_keys=[elevation_src_device_property_id]
+    src_elevation = db.relationship(
+        "DeviceProperty", uselist=False, foreign_keys=[elevation_src_device_property_id]
     )
 
     @hybrid_property
     def hierarchy(self):
         return ConfigurationsTuple(
-            configurations_device=self.configuration_device,
-            configurations_platform=self.configuration_platform,
+            configuration_devices=self.configuration_devices,
+            configuration_platforms=self.configuration_platforms,
         )
 
     @hierarchy.setter
     def hierarchy(self, value):
-        configuration_device = value.configurations_device
-        configuration_platform = value.configurations_platform
+        new_configuration_devices = value.configuration_devices
+        new_configuration_platforms = value.configuration_platforms
 
         current_configuration_device_by_device_id = {}
-        current_configuration_platform_by_platform_id = {}
 
-        for device_configuration in self.configuration_device:
+        for device_configuration in self.configuration_devices:
             current_configuration_device_by_device_id[
                 device_configuration.device_id
             ] = device_configuration
 
-        for platform_configuration in self.configuration_platform:
+        current_configuration_platform_by_platform_id = {}
+
+        for platform_configuration in self.configuration_platforms:
             current_configuration_platform_by_platform_id[
                 platform_configuration.platform_id
             ] = platform_configuration
 
-        for device_configuration in configuration_device:
-            device_configuration.configuration = self
-            if (
-                    device_configuration.device_id
-                    in current_configuration_device_by_device_id.keys()
-            ):
-                device_configuration.id = current_configuration_device_by_device_id[
-                    configuration_device.device_id
-                ].id
+        for new_cd in new_configuration_devices:
+            device_id = new_cd.device_id
+            old_configuration_device = current_configuration_device_by_device_id.get(
+                device_id, None
+            )
+            if old_configuration_device is not None:
+                new_cd.id = old_configuration_device.id
+                new_cd.created_at = old_configuration_device.created_at
+                new_cd.created_by = old_configuration_device.created_by
+            new_cd.configuration = self
 
-        for platform_configuration in configuration_platform:
-            platform_configuration.configuration = self
-            if (
-                    platform_configuration.platform_id
-                    in current_configuration_platform_by_platform_id.keys()
-            ):
-                platform_configuration.id = current_configuration_platform_by_platform_id[
-                    platform_configuration.platform_id
-                ].id
-        self.configuration_device = configuration_device
-        self.configuration_platform = configuration_platform
+        for new_cp in new_configuration_platforms:
+            platform_id = new_cp.platform_id
+            old_configuration_platform = current_configuration_platform_by_platform_id.get(
+                platform_id, None
+            )
+            if old_configuration_platform is not None:
+                new_cp.id = old_configuration_platform.id
+                new_cp.created_at = old_configuration_platform.created_at
+                new_cp.created_by = old_configuration_platform.created_by
+            new_cp.configuration = self
+
+        self.configuration_devices = new_configuration_devices
+        self.configuration_platforms = new_configuration_platforms

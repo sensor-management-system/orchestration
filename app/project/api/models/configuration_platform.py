@@ -1,5 +1,4 @@
 from project.api.models.base_model import db
-from project.api.models.configuration import Configuration
 from project.api.models.mixin import AuditMixin
 from project.api.models.platform import Platform
 
@@ -14,21 +13,21 @@ class ConfigurationPlatform(db.Model, AuditMixin):
         db.Integer, db.ForeignKey("configuration.id"), nullable=False
     )
     configuration = db.relationship(
-        "Configuration", backref=db.backref("configuration_platform"), cascade="all"
+        "Configuration",
+        backref=db.backref("configuration_platforms", cascade="all, delete-orphan"),
+        cascade="all",
     )
     platform_id = db.Column(db.Integer, db.ForeignKey("platform.id"), nullable=False)
     platform = db.relationship(
         "Platform",
-        backref=db.backref("configuration_platform"),
+        backref=db.backref("configuration_platform", cascade="all"),
         foreign_keys=[platform_id],
-        cascade="all",
     )
     parent_platform_id = db.Column(
         db.Integer, db.ForeignKey("platform.id"), nullable=True
     )
     parent_platform = db.relationship(
         "Platform",
-        backref=db.backref("inner_configuration_platform"),
+        backref=db.backref("inner_configuration_platform", cascade="all"),
         foreign_keys=[parent_platform_id],
-        cascade="all",
     )
