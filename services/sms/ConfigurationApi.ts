@@ -51,6 +51,11 @@ import {
 } from '@/serializers/jsonapi/ConfigurationSerializer'
 import { DynamicLocation } from '@/models/Location'
 
+interface IRelationshipData {
+  id: string
+  type: string
+}
+
 export class ConfigurationApi {
   private axiosApi: AxiosInstance
   private serializer: ConfigurationSerializer
@@ -122,34 +127,48 @@ export class ConfigurationApi {
     })
   }
 
-  private tryToDeleteRelationshipsAndFindById (relationshipsToDelete: string[], id: string) : Promise<Configuration> {
-    const tryToDelete = Promise.all(relationshipsToDelete.map((r: string) => {
-      return new Promise((resolve, reject) => {
-        const url = id + '/relationships/' + r
-        this.axiosApi.get(url).then((rawResponse: any) => {
-          const type = rawResponse.data.data.type
-          const typeId = rawResponse.data.data.id
-
-          this.axiosApi.request({
-            url,
-            method: 'delete',
-            data: {
-              data: {
-                type,
-                id: typeId
-              }
-            }
-          }).then(() => {
-            resolve()
-          }).catch((error) => {
-            reject(error)
-          })
-        }).catch(() => {
-          resolve()
-        })
-      })
+  private async tryToDeleteRelationshipsAndFindById (relationshipsToDelete: string[], id: string) : Promise<Configuration> {
+    await Promise.all(relationshipsToDelete.map(async (r: string) => {
+      await this.tryToDeleteRelationship(r, id)
     }))
-    return tryToDelete.then(() => this.findById(id))
+    return this.findById(id)
+  }
+
+  private async tryToDeleteRelationship (relationshipToDelete: string, id: string) {
+    const url = id + '/relationships/' + relationshipToDelete
+
+    let relationshipTypeToDelete: string | null = null
+    let relationshipIdToDelete: string | null = null
+
+    try {
+      const getResponse = await this.axiosApi.get(url)
+      relationshipTypeToDelete = getResponse.data.data.type
+      relationshipIdToDelete = getResponse.data.data.id
+      // if there is no element, the id may still be null
+    } catch (_errorFromGet) {
+      // We can ignore the error here
+      // as we will not try to delete relationships
+      // that don't exist
+      //
+      // the if check will make sure we only go on
+      // with deleting for those relationships that exist
+    }
+
+    if (relationshipTypeToDelete != null && relationshipIdToDelete != null) {
+      // Please note: We don't have a try/catch block here
+      // as we want the exception - in case we can't delete
+      // an existing relationship.
+      await this.axiosApi.request({
+        url,
+        method: 'delete',
+        data: {
+          data: {
+            type: relationshipTypeToDelete,
+            id: relationshipIdToDelete
+          }
+        }
+      })
+    }
   }
 
   newSearchBuilder (): ConfigurationSearchBuilder {
