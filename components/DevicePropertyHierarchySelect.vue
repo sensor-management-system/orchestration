@@ -126,20 +126,18 @@ export default class DevicePropertyHierarchySelect extends Vue {
   private selectedDevice: Device | null = null
 
   mounted () {
+    // Lets check if we have already an property
     if (this.selectedDevice == null && this.value != null) {
-      const deviceByPropertyIdLookup: {[idx: string]: Device} = {}
+      // and if we can find the device of it, so that
+      // it is prefilled when we open this component...
       for (const device of this.devices) {
         for (const property of device.properties) {
           const propertyId = property.id
-          if (propertyId != null) {
-            deviceByPropertyIdLookup[propertyId] = device
+          if (propertyId === this.value.id) {
+            this.selectedDevice = device
+            break
           }
         }
-      }
-
-      const propertyId = this.value.id
-      if (propertyId != null && deviceByPropertyIdLookup[propertyId]) {
-        this.selectedDevice = deviceByPropertyIdLookup[propertyId]
       }
     }
   }
