@@ -36,6 +36,7 @@ import { Attachment } from '@/models/Attachment'
 import { DeviceProperty } from '@/models/DeviceProperty'
 import { MeasuringRange } from '@/models/MeasuringRange'
 import { CustomTextField } from '@/models/CustomTextField'
+import { IJsonApiTypeIdDataList } from '@/serializers/jsonapi/JsonApiTypes'
 
 const createTestDevice = () => {
   const device = new Device()
@@ -1018,8 +1019,13 @@ describe('DeviceSerializer', () => {
       expect(typeof jsonApiData.relationships).toEqual('object')
       expect(jsonApiData.relationships).toHaveProperty('contacts')
       expect(typeof jsonApiData.relationships.contacts).toBe('object')
-      expect(jsonApiData.relationships.contacts).toHaveProperty('data')
-      const contactData = jsonApiData.relationships.contacts.data
+      // we test for the inner structure of the result anyway
+      // this cast is just to tell typescript that
+      // we have an array of data, so that it doesn't show
+      // typeerrors here
+      const contactObject = jsonApiData.relationships.contacts as IJsonApiTypeIdDataList
+      expect(contactObject).toHaveProperty('data')
+      const contactData = contactObject.data
       expect(Array.isArray(contactData)).toBeTruthy()
       expect(contactData.length).toEqual(2)
       expect(contactData[0]).toEqual({

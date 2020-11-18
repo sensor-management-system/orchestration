@@ -203,11 +203,15 @@ export interface IJsonApiTypeId {
     id: string
 }
 
+export interface IJsonApiTypeIdData {
+  data: IJsonApiTypeId
+}
+
 export interface IJsonApiTypeIdDataList {
     data: IJsonApiTypeId[]
 }
 
-export type IJsonApiTypeIdDataListDict = {[idx: string]: IJsonApiTypeIdDataList}
+export type IJsonApiTypeIdDataListDict = {[idx: string]: IJsonApiTypeIdDataList | IJsonApiTypeIdData}
 
 export interface IJsonApiData {
     attributes: IJsonApiAttributes
@@ -229,6 +233,10 @@ export interface IJsonApiDataWithIdAndLinks extends IJsonApiDataWithId {
 
 export interface IJsonApiTypeIdAttributes extends IJsonApiTypeId {
     attributes: IJsonApiAttributes
+}
+
+export interface IJsonApiTypeIdAttributesWithOptionalRelationships extends IJsonApiTypeIdAttributes {
+    relationships?: IJsonApiTypeIdDataListDict
 }
 
 export interface IJsonApiObject {

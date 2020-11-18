@@ -31,15 +31,25 @@
  */
 
 import { Configuration } from '@/models/Configuration'
+import { ConfigurationsTree } from '@/models/ConfigurationsTree'
 import { Contact } from '@/models/Contact'
+import { Device } from '@/models/Device'
+import { DeviceNode } from '@/models/DeviceNode'
+import { PlatformNode } from '@/models/PlatformNode'
+import { Platform } from '@/models/Platform'
 import { StationaryLocation, DynamicLocation, LocationType } from '@/models/Location'
 
+import { IJsonApiTypeIdDataList, IJsonApiTypeIdData } from '@/serializers/jsonapi/JsonApiTypes'
 import {
   ConfigurationSerializer,
   IConfigurationWithMeta,
   configurationWithMetaToConfigurationByThrowingErrorOnMissing,
   configurationWithMetaToConfigurationByAddingDummyObjects
 } from '@/serializers/jsonapi/ConfigurationSerializer'
+import { PlatformConfigurationAttributes } from '@/models/PlatformConfigurationAttributes'
+import { DeviceConfigurationAttributes } from '@/models/DeviceConfigurationAttributes'
+import { DeviceProperty } from '@/models/DeviceProperty'
+import { MeasuringRange } from '@/models/MeasuringRange'
 
 describe('LocationType', () => {
   it('should be fixed what values can be given - and those should be consistent with the serializer', () => {
@@ -56,19 +66,65 @@ describe('ConfigurationSerializer', () => {
           attributes: {
             start_date: '2020-08-28T13:49:48.015620+00:00',
             end_date: '2020-08-29T13:49:48.015620+00:00',
-            location_type: LocationType.Stationary,
-            longitude: 13.0,
-            latitude: 52.0,
-            elevation: 100.0,
+            location_type: LocationType.Dynamic,
             project_uri: 'projects/Tereno-NO',
             project_name: 'Tereno NO',
             label: 'Tereno NO Boeken',
-            status: 'draft'
-            // TODO: add hierarchy
+            status: 'draft',
+            hierarchy: [
+              {
+                type: 'platform',
+                id: '37',
+                offset_x: 1.0,
+                offset_y: 2.0,
+                offset_z: 3.0,
+                children: [{
+                  type: 'platform',
+                  id: '38',
+                  offset_x: 4.0,
+                  offset_y: 5.0,
+                  offset_z: 6.0,
+                  children: [{
+                    type: 'device',
+                    id: '39',
+                    offset_x: 7.0,
+                    offset_y: 8.0,
+                    offset_z: 9.0,
+                    calibration_date: '2020-01-01T13:49:48.015620+00:00'
+                  }, {
+                    type: 'device',
+                    id: '40',
+                    offset_x: 10.0,
+                    offset_y: 11.0,
+                    offset_z: 12.0,
+                    calibration_date: null
+                  }]
+                }]
+              }, {
+                type: 'platform',
+                id: '41',
+                offset_x: 13.0,
+                offset_y: 14.0,
+                offset_z: 15.0
+              }
+            ]
           },
           relationships: {
-            // TODO: add platforms & devices
-            // but no contacts, as we expect an empty case here
+            src_longitude: {
+              data: {
+                type: 'device_property',
+                id: '100'
+              }
+            },
+            src_latitude: {
+              data: {
+                type: 'device_property',
+                id: '101'
+              }
+            },
+            src_elevation: {
+            }
+            // no contacts, as we expect an empty case here
           },
           id: '1'
         }, {
@@ -79,13 +135,10 @@ describe('ConfigurationSerializer', () => {
             // no fields for longitude, latitude & elevation,
             // no fields for project_uri or project_name
             // no field for label
-            // TODO: Test other status once we introduced others (and their names)
             status: 'draft'
-            // TODO
           },
           relationships: {
-            // TODO: add platforms & devices
-            // but no contacts, as we expect an empty case here
+            // no contacts, as we expect an empty case here
             // and handle device properties somehow
           },
           id: '2'
@@ -94,6 +147,203 @@ describe('ConfigurationSerializer', () => {
           attributes: {},
           relationships: {},
           id: '3'
+        }, {
+          type: 'configuration',
+          attributes: {
+            location_type: LocationType.Stationary,
+            longitude: 13.0,
+            latitude: 52.0,
+            elevation: 100.0
+          },
+          relationships: {},
+          id: '4'
+        }],
+        // The point of which platforms and devices are used is mentiond in the hierarchy.
+        // so there is no further need to add other relationships
+        included: [{
+          type: 'platform',
+          id: '37',
+          attributes: {
+            inventory_number: '',
+            platform_type_uri: 'type/station',
+            short_name: 'boeken_BF1',
+            created_at: '2020-08-28T13:48:35.740944+00:00',
+            manufacturer_name: '',
+            attachments: [],
+            description: 'Boeken BF1',
+            updated_at: '2020-08-29T13:48:35.740944+00:00',
+            long_name: 'Boeken BF1',
+            manufacturer_uri: '',
+            platform_type_name: 'Station',
+            serial_number: '',
+            persistent_identifier: null,
+            model: '',
+            website: '',
+            status_uri: '',
+            status_name: ''
+          },
+          relationships: {
+            // nothing more to make the test case not too complex
+          }
+        },
+        {
+          type: 'platform',
+          id: '38',
+          attributes: {
+            inventory_number: '',
+            platform_type_uri: 'type/station',
+            short_name: 'boeken_BF12',
+            created_at: '2020-09-28T13:48:35.740944+00:00',
+            manufacturer_name: '',
+            attachments: [],
+            description: 'Boeken BF2',
+            updated_at: '2020-09-29T13:48:35.740944+00:00',
+            long_name: 'Boeken BF2',
+            manufacturer_uri: '',
+            platform_type_name: 'Station',
+            serial_number: '',
+            persistent_identifier: null,
+            model: '',
+            website: '',
+            status_uri: '',
+            status_name: ''
+          },
+          relationships: {
+            // nothing more to make the test case not too complex
+          }
+        },
+        {
+          type: 'platform',
+          id: '41',
+          attributes: {
+            inventory_number: '',
+            platform_type_uri: 'type/station',
+            short_name: 'boeken_BF123',
+            created_at: '2020-09-29T13:48:35.740944+00:00',
+            manufacturer_name: '',
+            attachments: [],
+            description: 'Boeken BF3',
+            updated_at: '2020-09-30T13:48:35.740944+00:00',
+            long_name: 'Boeken BF3',
+            manufacturer_uri: '',
+            platform_type_name: 'Station',
+            serial_number: '',
+            persistent_identifier: null,
+            model: '',
+            website: '',
+            status_uri: '',
+            status_name: ''
+          }
+        }, {
+          type: 'device',
+          id: '39',
+          attributes: {
+            properties: [{
+              id: '100',
+              sampling_media_name: 'Air',
+              sampling_media_uri: 'medium/air',
+              compartment_name: 'C1',
+              compartment_uri: 'compartment/c1',
+              property_name: 'Temperature',
+              property_uri: 'property/temperature',
+              unit_name: 'degree',
+              unit_uri: 'unit/degree',
+              failure_value: -999,
+              measuring_range_min: -273,
+              measuring_range_max: 100,
+              label: 'air_temperature',
+              accuracy: 0.1,
+              resolution: 0.05,
+              resolution_unit_name: 'TemperatureRes',
+              resolution_unit_uri: 'property/res/temperature'
+            }, {
+              id: '101',
+              sampling_media_name: 'Water',
+              sampling_media_uri: 'medium/water',
+              compartment_name: 'C1',
+              compartment_uri: 'compartment/c1',
+              property_name: 'Temperature',
+              property_uri: 'property/temperature',
+              unit_name: 'degree',
+              unit_uri: 'unit/degree',
+              failure_value: -999,
+              measuring_range_min: -10,
+              measuring_range_max: 100,
+              label: 'water_temperature',
+              accuracy: 0.1,
+              resolution: 0.05,
+              resolution_unit_name: 'TemperatureRes',
+              resolution_unit_uri: 'property/res/temperature'
+            }],
+            inventory_number: '',
+            short_name: 'Adcon wind vane',
+            customfields: [],
+            device_type_uri: '',
+            created_at: '2020-08-28T13:49:48.799090+00:00',
+            manufacturer_name: 'OTT Hydromet GmbH',
+            attachments: [],
+            dual_use: false,
+            description: '',
+            device_type_name: '',
+            updated_at: '2020-08-29T13:49:48.799090+00:00',
+            manufacturer_uri: '',
+            long_name: 'Adcon wind vane',
+            serial_number: '',
+            persistent_identifier: null,
+            model: 'Wind Vane',
+            website: 'www.adcon.com',
+            status_uri: '',
+            status_name: ''
+          },
+          relationships: {
+            // nothing more to make the test case not too complex
+          }
+        }, {
+          type: 'device',
+          id: '40',
+          attributes: {
+            properties: [{
+              id: '102',
+              sampling_media_name: 'Snow',
+              sampling_media_uri: 'medium/snow',
+              compartment_name: 'C1',
+              compartment_uri: 'compartment/c1',
+              property_name: 'Temperature',
+              property_uri: 'property/temperature',
+              unit_name: 'degree',
+              unit_uri: 'unit/degree',
+              failure_value: -999,
+              measuring_range_min: -273,
+              measuring_range_max: 5,
+              label: 'snow_temperature',
+              accuracy: 0.1,
+              resolution: 0.05,
+              resolution_unit_name: 'TemperatureRes',
+              resolution_unit_uri: 'property/res/temperature'
+            }],
+            inventory_number: '',
+            short_name: 'Adcon leafwetness',
+            customfields: [],
+            device_type_uri: '',
+            created_at: '2020-08-29T13:49:48.799090+00:00',
+            manufacturer_name: 'OTT Hydromet GmbH',
+            attachments: [],
+            dual_use: false,
+            description: '',
+            device_type_name: '',
+            updated_at: '2020-09-29T13:49:48.799090+00:00',
+            manufacturer_uri: '',
+            long_name: 'Adcon leafwetness',
+            serial_number: '',
+            persistent_identifier: null,
+            model: 'Leaf Wetness',
+            website: 'http://www.adcon.com',
+            status_uri: '',
+            status_name: ''
+          },
+          relationships: {
+            // nothing more to make the test case not too complex
+          }
         }],
         meta: {
           count: 2
@@ -103,12 +353,199 @@ describe('ConfigurationSerializer', () => {
         }
       }
 
+      const expectedPlatform1 = Platform.createFromObject({
+        id: '37',
+        inventoryNumber: '',
+        platformTypeUri: 'type/station',
+        shortName: 'boeken_BF1',
+        createdAt: new Date('2020-08-28T13:48:35.740944+00:00'),
+        manufacturerName: '',
+        attachments: [],
+        description: 'Boeken BF1',
+        updatedAt: new Date('2020-08-29T13:48:35.740944+00:00'),
+        longName: 'Boeken BF1',
+        manufacturerUri: '',
+        platformTypeName: 'Station',
+        serialNumber: '',
+        persistentIdentifier: '',
+        model: '',
+        website: '',
+        statusUri: '',
+        statusName: '',
+        contacts: [],
+        createdByUserId: null,
+        updatedByUserId: null
+      })
+      const expectedPlatform2 = Platform.createFromObject({
+        id: '38',
+        inventoryNumber: '',
+        platformTypeUri: 'type/station',
+        shortName: 'boeken_BF12',
+        createdAt: new Date('2020-09-28T13:48:35.740944+00:00'),
+        manufacturerName: '',
+        attachments: [],
+        description: 'Boeken BF2',
+        updatedAt: new Date('2020-09-29T13:48:35.740944+00:00'),
+        longName: 'Boeken BF2',
+        manufacturerUri: '',
+        platformTypeName: 'Station',
+        serialNumber: '',
+        persistentIdentifier: '',
+        model: '',
+        website: '',
+        statusUri: '',
+        statusName: '',
+        contacts: [],
+        createdByUserId: null,
+        updatedByUserId: null
+      })
+      const expectedPlatform3 = Platform.createFromObject({
+        id: '41',
+        inventoryNumber: '',
+        platformTypeUri: 'type/station',
+        shortName: 'boeken_BF123',
+        createdAt: new Date('2020-09-29T13:48:35.740944+00:00'),
+        manufacturerName: '',
+        attachments: [],
+        description: 'Boeken BF3',
+        updatedAt: new Date('2020-09-30T13:48:35.740944+00:00'),
+        longName: 'Boeken BF3',
+        manufacturerUri: '',
+        platformTypeName: 'Station',
+        serialNumber: '',
+        persistentIdentifier: '',
+        model: '',
+        website: '',
+        statusUri: '',
+        statusName: '',
+        contacts: [],
+        createdByUserId: null,
+        updatedByUserId: null
+      })
+
+      const expectedDeviceProperty1 = DeviceProperty.createFromObject({
+        id: '100',
+        samplingMediaName: 'Air',
+        samplingMediaUri: 'medium/air',
+        compartmentName: 'C1',
+        compartmentUri: 'compartment/c1',
+        propertyName: 'Temperature',
+        propertyUri: 'property/temperature',
+        unitName: 'degree',
+        unitUri: 'unit/degree',
+        failureValue: -999,
+        measuringRange: MeasuringRange.createFromObject({
+          min: -273,
+          max: 100
+        }),
+        label: 'air_temperature',
+        accuracy: 0.1,
+        resolution: 0.05,
+        resolutionUnitName: 'TemperatureRes',
+        resolutionUnitUri: 'property/res/temperature'
+      })
+      const expectedDeviceProperty2 = DeviceProperty.createFromObject({
+        id: '101',
+        samplingMediaName: 'Water',
+        samplingMediaUri: 'medium/water',
+        compartmentName: 'C1',
+        compartmentUri: 'compartment/c1',
+        propertyName: 'Temperature',
+        propertyUri: 'property/temperature',
+        unitName: 'degree',
+        unitUri: 'unit/degree',
+        failureValue: -999,
+        measuringRange: MeasuringRange.createFromObject({
+          min: -10,
+          max: 100
+        }),
+        label: 'water_temperature',
+        accuracy: 0.1,
+        resolution: 0.05,
+        resolutionUnitName: 'TemperatureRes',
+        resolutionUnitUri: 'property/res/temperature'
+      })
+      const expectedDeviceProperty3 = DeviceProperty.createFromObject({
+        id: '102',
+        samplingMediaName: 'Snow',
+        samplingMediaUri: 'medium/snow',
+        compartmentName: 'C1',
+        compartmentUri: 'compartment/c1',
+        propertyName: 'Temperature',
+        propertyUri: 'property/temperature',
+        unitName: 'degree',
+        unitUri: 'unit/degree',
+        failureValue: -999,
+        measuringRange: MeasuringRange.createFromObject({
+          min: -273,
+          max: 5
+        }),
+        label: 'snow_temperature',
+        accuracy: 0.1,
+        resolution: 0.05,
+        resolutionUnitName: 'TemperatureRes',
+        resolutionUnitUri: 'property/res/temperature'
+      })
+
+      const expectedDevice1 = Device.createFromObject({
+        id: '39',
+        properties: [expectedDeviceProperty1, expectedDeviceProperty2],
+        inventoryNumber: '',
+        shortName: 'Adcon wind vane',
+        customFields: [],
+        deviceTypeUri: '',
+        createdAt: new Date('2020-08-28T13:49:48.799090+00:00'),
+        manufacturerName: 'OTT Hydromet GmbH',
+        attachments: [],
+        dualUse: false,
+        description: '',
+        deviceTypeName: '',
+        updatedAt: new Date('2020-08-29T13:49:48.799090+00:00'),
+        manufacturerUri: '',
+        longName: 'Adcon wind vane',
+        serialNumber: '',
+        persistentIdentifier: '',
+        model: 'Wind Vane',
+        website: 'www.adcon.com',
+        statusUri: '',
+        statusName: '',
+        contacts: [],
+        createdByUserId: null,
+        updatedByUserId: null
+      })
+      const expectedDevice2 = Device.createFromObject({
+        id: '40',
+        properties: [expectedDeviceProperty3],
+        inventoryNumber: '',
+        shortName: 'Adcon leafwetness',
+        customFields: [],
+        deviceTypeUri: '',
+        createdAt: new Date('2020-08-29T13:49:48.799090+00:00'),
+        manufacturerName: 'OTT Hydromet GmbH',
+        attachments: [],
+        dualUse: false,
+        description: '',
+        deviceTypeName: '',
+        updatedAt: new Date('2020-09-29T13:49:48.799090+00:00'),
+        manufacturerUri: '',
+        longName: 'Adcon leafwetness',
+        serialNumber: '',
+        persistentIdentifier: '',
+        model: 'Leaf Wetness',
+        website: 'http://www.adcon.com',
+        statusUri: '',
+        statusName: '',
+        contacts: [],
+        createdByUserId: null,
+        updatedByUserId: null
+      })
+
       const expectedConfiguration1 = new Configuration()
       expectedConfiguration1.id = '1'
-      expectedConfiguration1.location = StationaryLocation.createFromObject({
-        longitude: 13.0,
-        latitude: 52.0,
-        elevation: 100.0
+      expectedConfiguration1.location = DynamicLocation.createFromObject({
+        longitude: expectedDeviceProperty1,
+        latitude: expectedDeviceProperty2,
+        elevation: null
       })
       expectedConfiguration1.startDate = new Date('2020-08-28T13:49:48.015620+00:00')
       expectedConfiguration1.endDate = new Date('2020-08-29T13:49:48.015620+00:00')
@@ -116,17 +553,85 @@ describe('ConfigurationSerializer', () => {
       expectedConfiguration1.projectName = 'Tereno NO'
       expectedConfiguration1.label = 'Tereno NO Boeken'
       expectedConfiguration1.status = 'draft'
-      // TODO add platforms & devices
+      expectedConfiguration1.children = ConfigurationsTree.fromArray(
+        [
+          ((): PlatformNode => {
+            const n = new PlatformNode(expectedPlatform1)
+            n.setTree(
+              ConfigurationsTree.fromArray(
+                [
+                  ((): PlatformNode => {
+                    const n = new PlatformNode(expectedPlatform2)
+                    n.setTree(
+                      ConfigurationsTree.fromArray(
+                        [
+                          new DeviceNode(expectedDevice1),
+                          new DeviceNode(expectedDevice2)
+                        ]
+                      )
+                    )
+                    return n
+                  })()
+                ]
+              )
+            )
+            return n
+          })(),
+          new PlatformNode(expectedPlatform3)
+        ]
+      ).toArray()
+      expectedConfiguration1.platformAttributes = [
+        PlatformConfigurationAttributes.createFromObject({
+          platform: expectedPlatform1,
+          offsetX: 1.0,
+          offsetY: 2.0,
+          offsetZ: 3.0
+        }),
+        PlatformConfigurationAttributes.createFromObject({
+          platform: expectedPlatform2,
+          offsetX: 4.0,
+          offsetY: 5.0,
+          offsetZ: 6.0
+        }),
+        PlatformConfigurationAttributes.createFromObject({
+          platform: expectedPlatform3,
+          offsetX: 13.0,
+          offsetY: 14.0,
+          offsetZ: 15.0
+        })
+      ]
+      expectedConfiguration1.deviceAttributes = [
+        DeviceConfigurationAttributes.createFromObject({
+          device: expectedDevice1,
+          offsetX: 7.0,
+          offsetY: 8.0,
+          offsetZ: 9.0,
+          calibrationDate: new Date('2020-01-01T13:49:48.015620+00:00')
+        }),
+        DeviceConfigurationAttributes.createFromObject({
+          device: expectedDevice2,
+          offsetX: 10.0,
+          offsetY: 11.0,
+          offsetZ: 12.0,
+          calibrationDate: null
+        })
+      ]
 
       const expectedConfiguration2 = new Configuration()
       expectedConfiguration2.id = '2'
       expectedConfiguration2.location = new DynamicLocation()
       expectedConfiguration2.status = 'draft'
-      // TODO add device properties
-      // TODO
 
       const expectedConfiguration3 = new Configuration()
       expectedConfiguration3.id = '3'
+
+      const expectedConfiguration4 = new Configuration()
+      expectedConfiguration4.id = '4'
+      expectedConfiguration4.location = StationaryLocation.createFromObject({
+        longitude: 13.0,
+        latitude: 52.0,
+        elevation: 100.0
+      })
 
       const serializer = new ConfigurationSerializer()
       const configurationsWithMeta = serializer.convertJsonApiObjectListToModelList(jsonApiObjectList)
@@ -135,21 +640,27 @@ describe('ConfigurationSerializer', () => {
       })
 
       expect(Array.isArray(configurations)).toBeTruthy()
-      expect(configurations.length).toEqual(3)
+      expect(configurations.length).toEqual(4)
 
       expect(configurations[0]).toEqual(expectedConfiguration1)
+      expect(configurations[0].deviceAttributes.length).toEqual(2)
+      expect(configurations[0].platformAttributes.length).toEqual(3)
       expect(configurations[1]).toEqual(expectedConfiguration2)
+      expect(configurations[1].deviceAttributes.length).toEqual(0)
+      expect(configurations[1].platformAttributes.length).toEqual(0)
       expect(configurations[2]).toEqual(expectedConfiguration3)
+      expect(configurations[3]).toEqual(expectedConfiguration4)
 
       const missingContactIds = configurationsWithMeta.map((x: IConfigurationWithMeta) => {
         return x.missing.contacts.ids
       })
 
       expect(Array.isArray(missingContactIds)).toBeTruthy()
-      expect(missingContactIds.length).toEqual(3)
+      expect(missingContactIds.length).toEqual(4)
       expect(missingContactIds[0]).toEqual([])
       expect(missingContactIds[1]).toEqual([])
       expect(missingContactIds[2]).toEqual([])
+      expect(missingContactIds[3]).toEqual([])
     })
   })
   describe('#convertJsonApiObjectToModel', () => {
@@ -168,11 +679,9 @@ describe('ConfigurationSerializer', () => {
             project_name: 'Tereno NO',
             label: 'Tereno NO Boeken',
             status: 'draft'
-            // TODO: add hierarchy
           },
           relationships: {
-            // TODO: add platforms & devices
-            // but no contacts, as we expect an empty case here
+            // no contacts, as we expect an empty case here
           },
           id: '1'
         },
@@ -193,7 +702,6 @@ describe('ConfigurationSerializer', () => {
       expectedConfiguration.projectName = 'Tereno NO'
       expectedConfiguration.label = 'Tereno NO Boeken'
       expectedConfiguration.status = 'draft'
-      // TODO
 
       const serializer = new ConfigurationSerializer()
       const configurationWithMeta = serializer.convertJsonApiObjectToModel(jsonApiObject)
@@ -283,7 +791,6 @@ describe('ConfigurationSerializer', () => {
           email: 'test@tost.test'
         })
       ]
-      // TODO platforms & devies
 
       const serializer = new ConfigurationSerializer()
       const configurationWithMeta = serializer.convertJsonApiObjectToModel(jsonApiObject)
@@ -329,8 +836,6 @@ describe('ConfigurationSerializer', () => {
       expectedConfiguration.projectName = 'Tereno NO'
       expectedConfiguration.label = 'Tereno NO Boeken'
       expectedConfiguration.status = 'draft'
-      // TODO
-      // add platforms & devices
 
       const included: any[] = []
 
@@ -372,8 +877,6 @@ describe('ConfigurationSerializer', () => {
       expectedConfiguration.projectName = 'Tereno NO'
       expectedConfiguration.label = 'Tereno NO Boeken'
       expectedConfiguration.status = 'draft'
-      // TODO
-      // add platforms & devices
 
       const included: any[] = []
 
@@ -451,7 +954,13 @@ describe('ConfigurationSerializer', () => {
       expect(typeof jsonApiData.relationships.contacts).toEqual('object')
       expect(jsonApiData.relationships.contacts).toHaveProperty('data')
 
-      const contactData = jsonApiData.relationships.contacts.data
+      // we test for the inner structure of the result anyway
+      // this cast is just to tell typescript that
+      // we have an array of data, so that it doesn't show
+      // typeerrors here
+      const contactObject = jsonApiData.relationships.contacts as IJsonApiTypeIdDataList
+
+      const contactData = contactObject.data
       expect(Array.isArray(contactData)).toBeTruthy()
       expect(contactData.length).toEqual(2)
       expect(contactData[0]).toEqual({
@@ -462,8 +971,6 @@ describe('ConfigurationSerializer', () => {
         id: '2',
         type: 'contact'
       })
-
-      // TODO: platforms & devices
     })
     it('should set an id if given for the configuration', () => {
       const configuration = new Configuration()
@@ -478,7 +985,54 @@ describe('ConfigurationSerializer', () => {
     it('should also work with a dynamic location type', () => {
       const configuration = new Configuration()
       expect(configuration.id).toEqual('')
+
+      const property1 = DeviceProperty.createFromObject({
+        id: '100',
+        samplingMediaName: 'Air',
+        samplingMediaUri: 'medium/air',
+        compartmentName: 'C1',
+        compartmentUri: 'compartment/c1',
+        propertyName: 'Temperature',
+        propertyUri: 'property/temperature',
+        unitName: 'degree',
+        unitUri: 'unit/degree',
+        failureValue: -999,
+        measuringRange: MeasuringRange.createFromObject({
+          min: -273,
+          max: 100
+        }),
+        label: 'air_temperature',
+        accuracy: 0.1,
+        resolution: 0.05,
+        resolutionUnitName: 'TemperatureRes',
+        resolutionUnitUri: 'property/res/temperature'
+      })
+      const property2 = DeviceProperty.createFromObject({
+        id: '101',
+        samplingMediaName: 'Water',
+        samplingMediaUri: 'medium/water',
+        compartmentName: 'C1',
+        compartmentUri: 'compartment/c1',
+        propertyName: 'Temperature',
+        propertyUri: 'property/temperature',
+        unitName: 'degree',
+        unitUri: 'unit/degree',
+        failureValue: -999,
+        measuringRange: MeasuringRange.createFromObject({
+          min: -10,
+          max: 100
+        }),
+        label: 'water_temperature',
+        accuracy: 0.1,
+        resolution: 0.05,
+        resolutionUnitName: 'TemperatureRes',
+        resolutionUnitUri: 'property/res/temperature'
+      })
+
       configuration.location = new DynamicLocation()
+      configuration.location.latitude = property1
+      configuration.location.longitude = property2
+      configuration.location.elevation = null
 
       const serializer = new ConfigurationSerializer()
 
@@ -493,7 +1047,24 @@ describe('ConfigurationSerializer', () => {
 
       expect(attributes).toHaveProperty('location_type')
       expect(attributes.location_type).toEqual(LocationType.Dynamic)
-      // TODO: platforms & devices
+      expect(jsonApiData).toHaveProperty('relationships')
+      const relationships = jsonApiData.relationships
+      expect(relationships).toHaveProperty('src_longitude')
+      const lonSrcProperty = relationships.src_longitude as IJsonApiTypeIdData
+      expect(lonSrcProperty).toHaveProperty('data')
+      expect(lonSrcProperty.data).toHaveProperty('id')
+      expect(lonSrcProperty.data.id).toEqual('101')
+      expect(lonSrcProperty.data).toHaveProperty('type')
+      expect(lonSrcProperty.data.type).toEqual('device_property')
+      expect(relationships).toHaveProperty('src_latitude')
+      const latSrcProperty = relationships.src_latitude as IJsonApiTypeIdData
+      expect(latSrcProperty).toHaveProperty('data')
+      expect(latSrcProperty.data).toHaveProperty('id')
+      expect(latSrcProperty.data.id).toEqual('100')
+      expect(latSrcProperty.data).toHaveProperty('type')
+      expect(latSrcProperty.data.type).toEqual('device_property')
+      // TODO check how it must look like to delete them later...
+      expect(relationships).not.toHaveProperty('src_elevation')
     })
     it('should also work with an empty stationary location type', () => {
       const configuration = new Configuration()
@@ -520,6 +1091,152 @@ describe('ConfigurationSerializer', () => {
       expect(attributes).toHaveProperty('elevation')
       expect(attributes.elevation).toEqual(null)
     })
+  })
+  it('should also serialize a platform & device hierarchy', () => {
+    const platform1 = ((): Platform => {
+      const o = new Platform()
+      o.id = '1'
+      o.shortName = 'Platform 01'
+      return o
+    })()
+    const platform2 = ((): Platform => {
+      const o = new Platform()
+      o.id = '2'
+      o.shortName = 'Platform 02'
+      return o
+    })()
+    const device3 = ((): Device => {
+      const o = new Device()
+      o.id = '3'
+      o.shortName = 'Device 01'
+      return o
+    })()
+    const device4 = ((): Device => {
+      const o = new Device()
+      o.id = '4'
+      o.shortName = 'Device 02'
+      return o
+    })()
+    const device5 = ((): Device => {
+      const o = new Device()
+      o.id = '5'
+      o.shortName = 'Device 03'
+      return o
+    })()
+    const platform6 = ((): Platform => {
+      const o = new Platform()
+      o.id = '6'
+      o.shortName = 'Platform 03'
+      return o
+    })()
+    const configuration = new Configuration()
+    configuration.children = ConfigurationsTree.fromArray(
+      [
+        ((): PlatformNode => {
+          const n = new PlatformNode(platform1)
+          n.setTree(
+            ConfigurationsTree.fromArray(
+              [
+                ((): PlatformNode => {
+                  const n = new PlatformNode(platform2)
+                  n.setTree(
+                    ConfigurationsTree.fromArray(
+                      [
+                        new DeviceNode(device3),
+                        new DeviceNode(device4),
+                        new DeviceNode(device5)
+                      ]
+                    )
+                  )
+                  return n
+                })()
+              ]
+            )
+          )
+          return n
+        })(),
+        (() => {
+          const n = new PlatformNode(platform6)
+          return n
+        })()
+      ]
+    ).toArray()
+    configuration.platformAttributes = [
+      PlatformConfigurationAttributes.createFromObject({
+        platform: platform1,
+        offsetX: 1.0,
+        offsetY: 2.0,
+        offsetZ: 3.0
+      }),
+      // none for platform2
+      PlatformConfigurationAttributes.createFromObject({
+        platform: platform6,
+        offsetX: 6.0,
+        offsetY: 7.0,
+        offsetZ: 8.0
+      })
+    ]
+    configuration.deviceAttributes = [
+      DeviceConfigurationAttributes.createFromObject({
+        device: device3,
+        offsetX: 11.0,
+        offsetY: 12.0,
+        offsetZ: 13.0,
+        calibrationDate: null
+      }),
+      // none for device4
+      DeviceConfigurationAttributes.createFromObject({
+        device: device5,
+        offsetX: 22.0,
+        offsetY: 23.0,
+        offsetZ: 24.0,
+        calibrationDate: new Date('2020-11-09T00:00:00.000Z')
+      })
+
+    ]
+
+    const serializer = new ConfigurationSerializer()
+    const jsonApiData = serializer.convertModelToJsonApiData(configuration)
+
+    const attributes = jsonApiData.attributes
+    const hierarchy = attributes.hierarchy
+
+    const expectedHierarchy = [{
+      type: 'platform',
+      id: '1',
+      offset_x: 1.0,
+      offset_y: 2.0,
+      offset_z: 3.0,
+      children: [{
+        type: 'platform',
+        id: '2',
+        children: [{
+          type: 'device',
+          id: '3',
+          offset_x: 11.0,
+          offset_y: 12.0,
+          offset_z: 13.0
+        }, {
+          type: 'device',
+          id: '4'
+        }, {
+          type: 'device',
+          id: '5',
+          offset_x: 22.0,
+          offset_y: 23.0,
+          offset_z: 24.0,
+          calibration_date: '2020-11-09T00:00:00.000Z'
+        }]
+      }]
+    }, {
+      type: 'platform',
+      id: '6',
+      offset_x: 6.0,
+      offset_y: 7.0,
+      offset_z: 8.0
+    }]
+
+    expect(hierarchy).toEqual(expectedHierarchy)
   })
 })
 describe('configurationWithMetaToConfigurationByThrowingErrorOnMissing', () => {

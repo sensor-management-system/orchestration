@@ -49,6 +49,12 @@ import {
   configurationWithMetaToConfigurationByAddingDummyObjects,
   configurationWithMetaToConfigurationByThrowingErrorOnMissing
 } from '@/serializers/jsonapi/ConfigurationSerializer'
+import { DynamicLocation } from '@/models/Location'
+
+interface IRelationshipData {
+  id: string
+  type: string
+}
 
 export class ConfigurationApi {
   private axiosApi: AxiosInstance
@@ -62,7 +68,14 @@ export class ConfigurationApi {
   findById (id: string): Promise<Configuration> {
     return this.axiosApi.get(id, {
       params: {
-        include: 'contacts'
+        include: [
+          'contacts',
+          'configuration_platforms.platform',
+          'configuration_devices.device',
+          'src_longitude',
+          'src_latitude',
+          'src_elevation'
+        ].join(',')
       }
     }).then((rawResponse) => {
       const rawData = rawResponse.data
@@ -79,11 +92,29 @@ export class ConfigurationApi {
     const data: any = this.serializer.convertModelToJsonApiData(configuration)
     let method: Method = 'patch'
     let url = ''
+    const relationshipsToDelete : string[] = []
 
     if (!configuration.id) {
       method = 'post'
     } else {
       url = configuration.id
+
+      if (configuration.location instanceof DynamicLocation) {
+        if (configuration.location.elevation == null) {
+          // it uses here the url views to send a delete request
+          relationshipsToDelete.push('src-elevation')
+        }
+        if (configuration.location.latitude == null) {
+          relationshipsToDelete.push('src-latitude')
+        }
+        if (configuration.location.longitude == null) {
+          relationshipsToDelete.push('src-longitude')
+        }
+      } else {
+        relationshipsToDelete.push('src-elevation')
+        relationshipsToDelete.push('src-latitude')
+        relationshipsToDelete.push('src-longitude')
+      }
     }
     return this.axiosApi.request({
       url,
@@ -92,9 +123,52 @@ export class ConfigurationApi {
         data
       }
     }).then((serverAnswer) => {
-      // no contacts here => reload completely
-      return this.findById(serverAnswer.data.data.id)
+      return this.tryToDeleteRelationshipsAndFindById(relationshipsToDelete, serverAnswer.data.data.id)
     })
+  }
+
+  private async tryToDeleteRelationshipsAndFindById (relationshipsToDelete: string[], id: string) : Promise<Configuration> {
+    await Promise.all(relationshipsToDelete.map(async (r: string) => {
+      await this.tryToDeleteRelationship(r, id)
+    }))
+    return this.findById(id)
+  }
+
+  private async tryToDeleteRelationship (relationshipToDelete: string, id: string) {
+    const url = id + '/relationships/' + relationshipToDelete
+
+    let relationshipTypeToDelete: string | null = null
+    let relationshipIdToDelete: string | null = null
+
+    try {
+      const getResponse = await this.axiosApi.get(url)
+      relationshipTypeToDelete = getResponse.data.data.type
+      relationshipIdToDelete = getResponse.data.data.id
+      // if there is no element, the id may still be null
+    } catch (_errorFromGet) {
+      // We can ignore the error here
+      // as we will not try to delete relationships
+      // that don't exist
+      //
+      // the if check will make sure we only go on
+      // with deleting for those relationships that exist
+    }
+
+    if (relationshipTypeToDelete != null && relationshipIdToDelete != null) {
+      // Please note: We don't have a try/catch block here
+      // as we want the exception - in case we can't delete
+      // an existing relationship.
+      await this.axiosApi.request({
+        url,
+        method: 'delete',
+        data: {
+          data: {
+            type: relationshipTypeToDelete,
+            id: relationshipIdToDelete
+          }
+        }
+      })
+    }
   }
 
   newSearchBuilder (): ConfigurationSearchBuilder {

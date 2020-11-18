@@ -139,4 +139,64 @@ describe('DevicePropertyHierarchySelect', () => {
     expect(wrapper.emitted().input.length).toBe(1)
     expect(wrapper.emitted().input[0]).toEqual([prop3])
   })
+
+  it('should set the device if only the device property is given on mount stage', () => {
+    // the initial wrapper has no device set
+    expect(wrapper.vm.propertiesOfDevice.length).toBe(0)
+
+    // now we create another wrapper, but we already set the value
+    const localVue = createLocalVue()
+    const vuetify = new Vuetify()
+
+    device1 = new Device()
+    device1.shortName = 'Device 1'
+
+    prop1 = new DeviceProperty()
+    prop1.id = '1'
+    prop1.propertyName = 'hPa'
+    prop1.propertyUri = 'foo/bar'
+
+    prop2 = new DeviceProperty()
+    prop2.id = '2'
+    prop2.propertyName = 'm'
+    prop2.propertyUri = 'foo/bar'
+
+    device1.properties.push(prop1)
+    device1.properties.push(prop2)
+
+    device2 = new Device()
+    device2.shortName = 'Device 2'
+
+    prop3 = new DeviceProperty()
+    prop3.id = '3'
+    prop3.propertyName = 'degree Celsius'
+    prop3.propertyUri = 'foo/degcelsius'
+
+    device2.properties.push(prop3)
+
+    const devices = [device1, device2]
+
+    const wrapperWithValue: any = mount(DevicePropertyHierarchySelect, {
+      localVue,
+      vuetify,
+      propsData: {
+        devices,
+        value: prop3
+      }
+    })
+
+    // prop3 is part of device2, which has only one property
+    expect(wrapperWithValue.vm.propertiesOfDevice.length).toBe(1)
+
+    const wrapperWithValues: any = mount(DevicePropertyHierarchySelect, {
+      localVue,
+      vuetify,
+      propsData: {
+        devices,
+        value: prop2
+      }
+    })
+    // prop2 is part of device1, which has two different properties
+    expect(wrapperWithValues.vm.propertiesOfDevice.length).toBe(2)
+  })
 })
