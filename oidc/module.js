@@ -48,8 +48,6 @@ export const createOidcModul = (oidcSettings, storeSettings = {}) => {
     storeSettings
   ])
 
-  // originally
-  // const sessionStorageItemName = 'ufz_vuex_oidc_active_route'
   const sessionStorageItemName = 'sms_oidc_active_route'
 
   const dispatchCustomBrowserEvent = (eventName, detail = {}, params = {}) => {
