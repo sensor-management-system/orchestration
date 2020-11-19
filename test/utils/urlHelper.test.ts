@@ -29,7 +29,7 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
-import { removeBaseUrl, removeFirstSlash, removeTrailingSlash } from '@/utils/urlHelpers'
+import { removeBaseUrl, removeFirstSlash, removeTrailingSlash, toRouterPath } from '@/utils/urlHelpers'
 
 describe('removeBaseUrl', () => {
   it('should return the url if the base url is undefined', () => {
@@ -94,5 +94,18 @@ describe('removeTrailingSlash', () => {
     const input = '/f/oo'
     const result = removeTrailingSlash(input)
     expect(result).toBe(input)
+  })
+})
+
+describe('toRouterPath', () => {
+  it('should remove the base url', () => {
+    const callbackPath = 'https://localhost:8080/login-callback'
+    const result = toRouterPath(callbackPath)
+    expect(result).toEqual('/login-callback')
+  })
+  it('should work with another static path element', () => {
+    const callbackPath = 'https://localhost:8080/static/logout-callback'
+    const result = toRouterPath(callbackPath, '/static')
+    expect(result).toEqual('/logout-callback')
   })
 })

@@ -4,6 +4,7 @@
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
  * Copyright (C) 2020
+ * - Martin Abbrent (UFZ, martin.abbrent@ufz.de)
  * - Kotyba Alhaj Taha (UFZ, kotyba.alhaj-taha@ufz.de)
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
@@ -33,38 +34,20 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
+import { WebStorageStateStore } from 'oidc-client'
 
-export function removeBaseUrl (url: string, baseUrl: string | undefined): string {
-  if (!baseUrl) {
-    return url
-  }
-  const splitted = url.split(baseUrl)
-  const canditate = splitted[splitted.length - 1]
-
-  // now also remove a first slash if necessary, as well as a trailing slash
-  return removeFirstSlash(removeTrailingSlash(canditate))
-}
-
-export function removeFirstSlash (str: string): string {
-  if (str.startsWith('/')) {
-    return str.substring(1)
-  }
-  return str
-}
-
-export function removeTrailingSlash (str: string): string {
-  if (str.endsWith('/')) {
-    return str.substring(0, str.length - 1)
-  }
-  return str
-}
-
-export function toRouterPath (callbackUri: string, routeBase = '/') {
-  if (callbackUri) {
-    const domainStartsAt = '://'
-    const hostAndPath = callbackUri.substr(callbackUri.indexOf(domainStartsAt) + domainStartsAt.length)
-    const routeBaseLength = routeBase === '/' ? 0 : routeBase.length
-    return hostAndPath.substr(hostAndPath.indexOf(routeBase) + routeBaseLength)
-  }
-  return null
+export default {
+  userStore: new WebStorageStateStore({ store: window.localStorage }),
+  authority: process.env.NUXT_ENV_AUTHORITY,
+  client_id: process.env.NUXT_ENV_CLIENT_ID,
+  redirect_uri: process.env.NUXT_ENV_REDIRECT_URI,
+  response_type: process.env.NUXT_ENV_RESPONSE_TYPE,
+  scope: process.env.NUXT_ENV_SCOPE,
+  post_logout_redirect_uri: process.env.NUXT_ENV_POST_LOGOUT_REDIRECT_URI,
+  filterProtocolClaims: process.env.NUXT_ENV_FILTER_PROTOCOL_CLAIMS === 'true',
+  automaticSilentRenew: process.env.NUXT_ENV_AUTOMATIC_SILENT_RENEW === 'true',
+  silent_redirect_uri: process.env.NUXT_ENV_SILENT_REDIRECT_URI,
+  popupWindowFeatures: 'location=no,toolbar=no,width=500,height=600,left=100,top=100', // adjusted height
+  loadUserInfo: process.env.NUXT_ENV_LOAD_USER_INFO === 'true',
+  renewIntervall: process.env.NUXT_ENV_SILENT_RENEW_INTERVAL
 }

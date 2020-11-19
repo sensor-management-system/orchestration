@@ -6,6 +6,7 @@ Copyright (C) 2020
 - Kotyba Alhaj Taha (UFZ, kotyba.alhaj-taha@ufz.de)
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
+- Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
 - Helmholtz Centre for Environmental Research GmbH - UFZ
   (UFZ, https://www.ufz.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -41,13 +42,13 @@ import { mapActions } from 'vuex'
 export default {
   name: 'LogoutCallback',
   created () {
-    this.handleSignoutCallback().catch((err) => {
+    this.handleSignoutPopupCallback().catch((err) => {
       // eslint-disable-next-line
       console.error(err)
     })
   },
   methods: {
-    ...mapActions('auth', ['handleSignoutCallback'])
+    ...mapActions('oidc', ['handleSignoutPopupCallback'])
   }
 }
 </script>

@@ -6,7 +6,6 @@
  * Copyright (C) 2020
  * - Kotyba Alhaj Taha (UFZ, kotyba.alhaj-taha@ufz.de)
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
- * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
  * - Helmholtz Centre for Environmental Research GmbH - UFZ
  *   (UFZ, https://www.ufz.de)
@@ -34,37 +33,14 @@
  * permissions and limitations under the Licence.
  */
 
-export function removeBaseUrl (url: string, baseUrl: string | undefined): string {
-  if (!baseUrl) {
-    return url
-  }
-  const splitted = url.split(baseUrl)
-  const canditate = splitted[splitted.length - 1]
+type IObject = {[idx: string]: any}
 
-  // now also remove a first slash if necessary, as well as a trailing slash
-  return removeFirstSlash(removeTrailingSlash(canditate))
-}
-
-export function removeFirstSlash (str: string): string {
-  if (str.startsWith('/')) {
-    return str.substring(1)
-  }
-  return str
-}
-
-export function removeTrailingSlash (str: string): string {
-  if (str.endsWith('/')) {
-    return str.substring(0, str.length - 1)
-  }
-  return str
-}
-
-export function toRouterPath (callbackUri: string, routeBase = '/') {
-  if (callbackUri) {
-    const domainStartsAt = '://'
-    const hostAndPath = callbackUri.substr(callbackUri.indexOf(domainStartsAt) + domainStartsAt.length)
-    const routeBaseLength = routeBase === '/' ? 0 : routeBase.length
-    return hostAndPath.substr(hostAndPath.indexOf(routeBase) + routeBaseLength)
-  }
-  return null
+// normally we would just the spread operator
+export function mergeObjectsAndMaybeOverwrite (objects: IObject[]): IObject {
+  return objects.reduce(function (r: IObject, o: IObject) {
+    Object.keys(o || {}).forEach(function (k) {
+      r[k] = o[k]
+    })
+    return r
+  }, {})
 }

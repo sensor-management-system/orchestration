@@ -1,11 +1,9 @@
-<!--
-Web client of the Sensor Management System software developed within the
-Helmholtz DataHub Initiative by GFZ and UFZ.
+/*
+Web client of the Sensor Management System software developed within
+the Helmholtz DataHub Initiative by GFZ and UFZ.
 
 Copyright (C) 2020
-- Kotyba Alhaj Taha (UFZ, kotyba.alhaj-taha@ufz.de)
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
-- Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
 - Helmholtz Centre for Environmental Research GmbH - UFZ
   (UFZ, https://www.ufz.de)
@@ -31,24 +29,34 @@ distributed under the Licence is distributed on an "AS IS" basis,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
 implied. See the Licence for the specific language governing
 permissions and limitations under the Licence.
--->
-<template>
-  <div />
-</template>
+*/
 
-<script>
-import { mapActions } from 'vuex'
+export default function (context) {
+  // We call this function every time we change the routes of our pages.
+  // We use it here to prevent unauthorized access to our routes.
+  // Basically we ask our Open ID Connect store if the user is allowed
+  // to access our route.
+  // Otherwise we redirect to the a plain page (like the index page).
+  return new Promise((resolve) => {
+    const redirect = (textToDisplay) => {
+      if (textToDisplay) {
+        context.store.commit('snackbar/setError', textToDisplay)
+      }
+      const indexPage = '/'
+      return context.redirect(indexPage)
+    }
 
-export default {
-  name: 'LoginCallback',
-  created () {
-    this.handleSigninPopupCallback().catch((err) => {
-      // eslint-disable-next-line
-      console.error(err)
+    const accessPromise = context.store.dispatch('oidc/oidcCheckAccess', context.route)
+
+    accessPromise.then((hasAccess) => {
+      if (hasAccess) {
+        // ok, we don't need to change anything
+        resolve(true)
+      } else {
+        resolve(redirect('Unauthorized'))
+      }
+    }).catch((error) => {
+      resolve(redirect(error))
     })
-  },
-  methods: {
-    ...mapActions('oidc', ['handleSigninPopupCallback'])
-  }
+  })
 }
-</script>

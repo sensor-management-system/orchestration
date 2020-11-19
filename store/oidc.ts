@@ -1,11 +1,10 @@
-<!--
-Web client of the Sensor Management System software developed within the
-Helmholtz DataHub Initiative by GFZ and UFZ.
+/*
+Web client of the Sensor Management System software developed within
+the Helmholtz DataHub Initiative by GFZ and UFZ.
 
 Copyright (C) 2020
 - Kotyba Alhaj Taha (UFZ, kotyba.alhaj-taha@ufz.de)
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
-- Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
 - Helmholtz Centre for Environmental Research GmbH - UFZ
   (UFZ, https://www.ufz.de)
@@ -31,24 +30,20 @@ distributed under the Licence is distributed on an "AS IS" basis,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
 implied. See the Licence for the specific language governing
 permissions and limitations under the Licence.
--->
-<template>
-  <div />
-</template>
+*/
 
-<script>
-import { mapActions } from 'vuex'
+import oidcSettings from '@/config/oidc'
+import { createOidcModul } from '@/oidc/module'
 
-export default {
-  name: 'LoginCallback',
-  created () {
-    this.handleSigninPopupCallback().catch((err) => {
-      // eslint-disable-next-line
-      console.error(err)
-    })
-  },
-  methods: {
-    ...mapActions('oidc', ['handleSigninPopupCallback'])
-  }
-}
-</script>
+const storeModule = createOidcModul(oidcSettings, {
+  namespaced: true,
+  routeBase: process.env.NUXT_ENV_PUBLIC_PATH
+})
+
+export const state = () => (storeModule.state)
+
+export const getters = storeModule.getters
+
+export const actions = storeModule.actions
+
+export const mutations = storeModule.mutations

@@ -6,6 +6,7 @@ Copyright (C) 2020
 - Kotyba Alhaj Taha (UFZ, kotyba.alhaj-taha@ufz.de)
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
+- Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
 - Helmholtz Centre for Environmental Research GmbH - UFZ
   (UFZ, https://www.ufz.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -156,7 +157,7 @@ permissions and limitations under the Licence.
         </template>
         <v-list>
           <template v-if="!isLoggedIn">
-            <v-list-item dense @click="loginPopup">
+            <v-list-item dense @click="login">
               <v-list-item-content>
                 <v-list-item-title>
                   <v-icon small left>
@@ -175,16 +176,6 @@ permissions and limitations under the Licence.
                     mdi-logout
                   </v-icon>
                   <span>Logout</span>
-                </v-list-item-title>
-              </v-list-item-content>
-            </v-list-item>
-            <v-list-item dense @click="silentRenew">
-              <v-list-item-content>
-                <v-list-item-title>
-                  <v-icon small left>
-                    mdi-refresh
-                  </v-icon>
-                  <span>Silent renew</span>
                 </v-list-item-title>
               </v-list-item-content>
             </v-list-item>
@@ -233,6 +224,8 @@ permissions and limitations under the Licence.
 </template>
 
 <script>
+
+import { mapActions } from 'vuex'
 
 import AppBarTabsExtension from '@/components/AppBarTabsExtension'
 import AppBarEditModeContent from '@/components/AppBarEditModeContent'
@@ -302,10 +295,10 @@ export default {
       return this.$store.state.appbar.cancelBtnDisabled
     },
     isLoggedIn () {
-      return this.$store.getters['auth/isAuthenticated']
+      return this.$store.getters['oidc/isAuthenticated']
     },
     initials () {
-      return this.$store.getters['auth/initials']
+      return this.$store.getters['oidc/initials']
     }
   },
   created () {
@@ -316,10 +309,8 @@ export default {
       this.appBarExtension = component
     })
   },
-  mounted () {
-    this.$store.dispatch('auth/loadStoredUser')
-  },
   methods: {
+    ...mapActions('oidc', ['removeOidcUser', 'logoutPopup', 'loginPopup']),
     closeErrorSnackbar () {
       this.$store.commit('snackbar/clearError')
     },
@@ -329,32 +320,17 @@ export default {
     onChangeTab (tab) {
       this.$store.commit('appbar/setActiveTab', tab)
     },
-    loginPopup () {
-      this.$store.dispatch('auth/loginPopup').then((userObject) => {
-        let message = 'Login successful'
-        if (userObject.profile && userObject.profile.name) {
-          message = 'Successfully logged in as ' + userObject.profile.name
-        }
-        this.$store.commit('snackbar/setSuccess', message)
+    login () {
+      this.loginPopup().then((redirectPath) => {
+        this.$router.push(redirectPath)
       }).catch((_err) => {
         this.$store.commit('snackbar/setError', 'Login failed')
       })
     },
     logout () {
-      const routing = {
-        router: this.$router,
-        currentRoute: this.$route.path
-      }
-      this.$store.dispatch('auth/logout', routing).then(() => {
-        this.$store.commit('snackbar/setSuccess', 'Logout successful')
-      }).catch((err) => {
-        // eslint-disable-next-line
-        console.error(err)
-        this.$store.commit('snackbar/setError', 'Problem on logout')
+      this.removeOidcUser().then(() => {
+        this.$router.push('/')
       })
-    },
-    silentRenew () {
-      this.$store.dispatch('auth/silentRenew')
     }
   }
 }

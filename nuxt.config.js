@@ -6,6 +6,7 @@ Copyright (C) 2020
 - Kotyba Alhaj Taha (UFZ, kotyba.alhaj-taha@ufz.de)
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
+- Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
 - Helmholtz Centre for Environmental Research GmbH - UFZ
   (UFZ, https://www.ufz.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -34,7 +35,18 @@ permissions and limitations under the Licence.
 
 // eslint-disable-next-line
 import colors from 'vuetify/es5/util/colors'
+import fs from 'fs'
+import path from 'path'
+
 export default {
+  server: {
+    port: 3000, // default: 3000
+    host: '0.0.0.0', // default: localhost
+    https: {
+      key: fs.readFileSync(path.resolve(__dirname, 'server.key')),
+      cert: fs.readFileSync(path.resolve(__dirname, 'server.crt'))
+    }
+  },
   ssr: false,
   /*
   ** Nuxt target
@@ -121,6 +133,7 @@ export default {
     }
   },
   router: {
-    base: process.env.BASE_URL || '/'
+    base: process.env.BASE_URL || '/',
+    middleware: 'vuex-oidc-router'
   }
 }
