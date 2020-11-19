@@ -1,5 +1,65 @@
 version: '3.3'
 services:
+  smses01:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.10.0
+    container_name: smses01
+    environment:
+      - node.name=smses01
+      - cluster.name=sms-es-cluster
+      - discovery.seed_hosts=smses02,smses03
+      - cluster.initial_master_nodes=smses01,smses02,smses03
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - esdata01:/usr/share/elasticsearch/data
+    ports:
+      - 9200:9200
+    networks:
+      - elastic
+  smses02:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.10.0
+    container_name: smses02
+    environment:
+      - node.name=smses02
+      - cluster.name=sms-es-cluster
+      - discovery.seed_hosts=smses01,smses03
+      - cluster.initial_master_nodes=smses01,smses02,smses03
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - esdata02:/usr/share/elasticsearch/data
+    ports:
+      - 9201:9201
+    networks:
+      - elastic
+  smses03:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.10.0
+    container_name: smses03
+    environment:
+      - node.name=smses03
+      - cluster.name=sms-es-cluster
+      - discovery.seed_hosts=smses01,smses02
+      - cluster.initial_master_nodes=smses01,smses02,smses03
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    ports:
+      - 9202:9202
+    volumes:
+      - esdata03:/usr/share/elasticsearch/data
+    networks:
+      - elastic
 
   app:
     image: python:3-alpine
@@ -32,3 +92,15 @@ services:
       - ./app_env/db_secrets.env
     volumes:
     - ./app/project/db/create.sql:/docker-entrypoint-initdb.d/create.sql
+
+volumes:
+  esdata01:
+    driver: local
+  esdata02:
+    driver: local
+  esdata03:
+    driver: local
+  
+networks:
+  elastic:
+    driver: bridge
