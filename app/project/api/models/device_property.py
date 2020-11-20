@@ -28,3 +28,14 @@ class DeviceProperty(db.Model):
     device = db.relationship(
         Device, uselist=False, foreign_keys=[device_id]
     )
+
+    def to_search_entry(self):
+        # to be included in devices
+        return {
+            "label": self.label,
+            "unit_name": self.unit_name,
+            "compartment_name": self.compartment_name,
+            "property_name": self.property_name,
+            "sample_medium_name": self.sampling_media_name,
+            "resolution_unit_name": self.resolution_unit_name,
+        }

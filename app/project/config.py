@@ -9,6 +9,7 @@ class BaseConfig:
 
     DEFAULT_POOL_TIMEOUT = 600
     SQLALCHEMY_POOL_TIMEOUT = os.environ.get('POOL_TIMEOUT', DEFAULT_POOL_TIMEOUT)
+    ELASTICSEARCH_URL = os.environ.get('ELASTICSEARCH_URL')
 
 
 class DevelopmentConfig(BaseConfig):

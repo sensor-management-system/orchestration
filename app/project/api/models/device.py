@@ -1,8 +1,8 @@
 from project.api.models.base_model import db
-from project.api.models.mixin import AuditMixin
+from project.api.models.mixin import AuditMixin, SearchableMixin
 
 
-class Device(db.Model, AuditMixin):
+class Device(db.Model, AuditMixin, SearchableMixin):
     """
     Device class
     """
@@ -36,3 +36,22 @@ class Device(db.Model, AuditMixin):
     device_attachments = db.relationship(
         "DeviceAttachment", cascade="save-update, merge, delete, delete-orphan"
     )
+
+    def to_search_entry(self):
+        return {
+            "short_name": self.short_name,
+            "long_name": self.long_name,
+            "description": self.description,
+            "serial_number": self.serial_number,
+            "manufacturer_name": self.manufacturer_name,
+            "dual_use": self.dual_use,
+            "model": self.model,
+            "inventory_number": self.inventory_number,
+            "persistent_identifier": self.persistent_identifier,
+            "website": self.website,
+            "device_type_name": self.device_type_name,
+            "status_name": self.name,
+            "attachements": [a.to_search_entry() for a in self.device_attachments],
+            "contacts": [c.to_search_entry() for c in self.contacts],
+            "properties": [p.to_search_entry() for p in self.device_properties],
+        }

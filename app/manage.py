@@ -66,6 +66,19 @@ def db_init():
         db.session.add(pl_attachment)
         db.session.commit()
 
+# TODO:
+# 1) new group: search with a command index
+# 2) integration into ci
+@cli.command("es_reindex")
+def es_reindex():
+    from project.api.models.configuration import Configuration
+    from project.api.models.device import Device
+    from project.api.models.platform import Platform
+
+    for model_type in [Platform, Device, Configuration]:
+        model_type.reindex()
+
+
 
 @app.after_request
 def add_header(response):

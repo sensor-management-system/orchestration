@@ -2,14 +2,14 @@ import collections
 from sqlalchemy.ext.hybrid import hybrid_property
 
 from project.api.models.base_model import db
-from project.api.models.mixin import AuditMixin
+from project.api.models.mixin import AuditMixin, SearchableMixin
 
 ConfigurationsTuple = collections.namedtuple(
     "ConfigurationsTuple", ["configuration_devices", "configuration_platforms"]
 )
 
 
-class Configuration(db.Model, AuditMixin):
+class Configuration(db.Model, AuditMixin, SearchableMixin):
     """
     Configuration class
     """
@@ -97,3 +97,18 @@ class Configuration(db.Model, AuditMixin):
 
         self.configuration_devices = new_configuration_devices
         self.configuration_platforms = new_configuration_platforms
+
+    def to_search_entry(self):
+        platforms = []
+        for configuration_platform in self.configuration_platforms:
+            platforms.append(configuration_platform.platform)
+        devices = []
+        for configuration_device in self.configuration_devices:
+            devices.append(configuration_device.device)
+        return {
+            "label": self.label,
+            "project_name": self.project_name,
+            "platforms": [p.to_search_entry() for p in platforms],
+            "devices": [d.to_search_entry() for d in devices],
+            # calibration dates?
+        }
