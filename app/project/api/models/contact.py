@@ -58,8 +58,8 @@ class Contact(db.Model):
     def to_search_entry(self):
         # to be included in platforms, devices, etc.
         return {
-            "given_name": x.given_name,
-            "family_name": x.family_name,
-            "website": x.website,
-            "email": x.email,
+            "given_name": self.given_name,
+            "family_name": self.family_name,
+            "website": self.website,
+            "email": self.email,
         }
