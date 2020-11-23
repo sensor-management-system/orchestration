@@ -1,4 +1,6 @@
 from datetime import datetime
+
+import sqlalchemy
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.sql import func
 
@@ -61,10 +63,10 @@ class AuditMixin:
 
 class SearchableMixin:
     @classmethod
-    def search(cls, expression, page, per_page):
-        ids, total = query_index(cls.__tablename__, expression, page, per_page)
-        if total == 0:
-            return cls.query.filter_by(id=0), 0
+    def search(cls, query, page, per_page):
+        ids, total = query_index(cls.__tablename__, query, page, per_page)
+        if total == 0 or not ids:
+            return cls.query.filter(sqlalchemy.sql.false()), total
         when = []
         for i in range(len(ids)):
             when.append((ids[i], i))
