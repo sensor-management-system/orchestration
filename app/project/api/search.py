@@ -1,5 +1,6 @@
 from flask import current_app
 
+
 # mostly from here:
 # https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-xvi-full-text-search
 def add_to_index(index, model):
@@ -7,6 +8,7 @@ def add_to_index(index, model):
         return
     payload = model.to_search_entry()
     current_app.elasticsearch.index(index=index, id=model.id, body=payload)
+
 
 def remove_from_index(index, model):
     if not current_app.elasticsearch:

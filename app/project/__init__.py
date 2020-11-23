@@ -43,7 +43,11 @@ def create_app():
 
     # add elasticsearch as mentioned here
     # https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-xvi-full-text-search
-    app.elasticsearch = Elasticsearch([app.config['ELASTICSEARCH_URL']]) if app.config['ELASTICSEARCH_URL'] else None
+    app.elasticsearch = (
+        Elasticsearch([app.config["ELASTICSEARCH_URL"]])
+        if app.config["ELASTICSEARCH_URL"]
+        else None
+    )
 
     # Create endpoints
     api = Api(app)
