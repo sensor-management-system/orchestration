@@ -10,13 +10,26 @@ def to_es(jsonapi):
     if "or" in jsonapi.keys():
         parts = jsonapi["or"]
         terms = [to_es(part) for part in parts]
-        return {"bool": {"should": terms,}}
+        return {
+            "bool": {
+                # should => one of the elements must be fulfilled
+                # which is exactly the "or"
+                "should": terms,
+            }
+        }
     op = jsonapi["op"]
     if op == "in_":
         values = jsonapi["val"]
         name = jsonapi["name"]
         terms = [to_term(name, val) for val in values]
-        return {"bool": {"should": terms,}}
+        return {
+            "bool": {
+                # Again we use the should to have one of the clauses
+                # fulfilled. In this time we check equality for each of
+                # the cases
+                "should": terms,
+            }
+        }
     elif op == "eq":
         value = jsonapi["val"]
         name = jsonapi["name"]
@@ -182,7 +195,22 @@ class EsQueryBuilder:
 
     def with_filter_args(self, filters):
         # How does the filters look like?
-        #  [{'or': [{'name': 'manufacturer_name', 'op': 'in_', 'val': ['Campbell']}, {'name': 'manufacturer_uri', 'op': 'in_', 'val': ['manufacturer/Campbell']}]}]
+        #  [
+        #    {
+        #      'or': [
+        #        {
+        #          'name': 'manufacturer_name',
+        #          'op': 'in_',
+        #          'val': ['Campbell']
+        #        },
+        #        {
+        #          'name': 'manufacturer_uri',
+        #          'op': 'in_',
+        #          'val': ['manufacturer/Campbell']
+        #        }
+        #      ]
+        #    }
+        #  ]
         self.terms = to_es(filters)
         return self
 
