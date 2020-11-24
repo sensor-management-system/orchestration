@@ -1,4 +1,6 @@
+import collections
 from datetime import datetime
+import itertools
 
 import sqlalchemy
 from sqlalchemy.ext.declarative import declared_attr
@@ -77,24 +79,48 @@ class SearchableMixin:
 
     @classmethod
     def before_commit(cls, session):
+        # First we create a list with all the new, updated or
+        # deleted elements
+        # This is also what is suggested to do here as well
+        # https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-xvi-full-text-search
+        # However, in contrast do the idea there, we need also to query
+        # the search entries now, as we are not allowed to run
+        # any further sql in the after_commit stage.
+        # And still - we don't have the new ids before the commit
+        # nor can we be sure that all the elements are committed correctly,
+        # so we still need to handle most of the logic in the after_commit
+        # method
         session._changes = {
             "add": list(session.new),
             "update": list(session.dirty),
             "delete": list(session.deleted),
         }
+        # And we want to store the payload here as well
+        session._search_add = []
+
+        for obj in itertools.chain(session._changes["add"], session._changes["update"]):
+            if isinstance(obj, SearchableMixin):
+                session._search_add.append(
+                    SearchModelWithEntry(model=obj, entry=obj.to_search_entry())
+                )
 
     @classmethod
     def after_commit(cls, session):
-        for obj in session._changes["add"]:
+        ids_to_add = collections.defaultdict(set)
+        for obj in itertools.chain(session._changes["add"], session._changes["update"]):
             if isinstance(obj, SearchableMixin):
-                add_to_index(obj.__tablename__, obj)
-        for obj in session._changes["update"]:
-            if isinstance(obj, SearchableMixin):
-                add_to_index(obj.__tablename__, obj)
+                ids_to_add[obj.__tablename__].add(obj.id)
+        for search_model_with_entry in session._search_add:
+            model = search_model_with_entry.model
+            if model.id in ids_to_add[model.__tablename__]:
+                add_to_index(model.__tablename__, model, search_model_with_entry.entry)
+
         for obj in session._changes["delete"]:
             if isinstance(obj, SearchableMixin):
                 remove_from_index(obj.__tablename__, obj)
+
         session._changes = None
+        session._search_add = None
 
     @classmethod
     def reindex(cls):
@@ -104,3 +130,7 @@ class SearchableMixin:
 
 db.event.listen(db.session, "before_commit", SearchableMixin.before_commit)
 db.event.listen(db.session, "after_commit", SearchableMixin.after_commit)
+
+SearchModelWithEntry = collections.namedtuple(
+    "SearchModelWithEntry", ["model", "entry"]
+)

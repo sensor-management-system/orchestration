@@ -101,10 +101,13 @@ class Configuration(db.Model, AuditMixin, SearchableMixin):
     def to_search_entry(self):
         platforms = []
         for configuration_platform in self.configuration_platforms:
-            platforms.append(configuration_platform.platform)
+            if configuration_platform.platform is not None:
+                platforms.append(configuration_platform.platform)
         devices = []
         for configuration_device in self.configuration_devices:
-            devices.append(configuration_device.device)
+            if configuration_device.device is not None:
+                devices.append(configuration_device.device)
+
         return {
             "label": self.label,
             "project_name": self.project_name,
