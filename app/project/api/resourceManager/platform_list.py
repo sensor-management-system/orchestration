@@ -2,7 +2,7 @@ from flask_rest_jsonapi import ResourceList
 from project.api.models.base_model import db
 from project.api.models.platform import Platform
 from project.api.schemas.platform_schema import PlatformSchema
-from project.api.data_layers.esalchemy import EsSqlalchemyDataLayer
+from project.api.datalayers.esalchemy import EsSqlalchemyDataLayer
 from project.api.token_checker import token_required
 
 

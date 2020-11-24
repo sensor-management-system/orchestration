@@ -39,6 +39,6 @@ class Platform(db.Model, AuditMixin, SearchableMixin):
             "inventory_number": self.inventory_number,
             "serial_number": self.serial_number,
             "persistent_identifier": self.persistent_identifier,
-            "attachements": [a.to_search_entry() for a in self.platform_attachments],
+            "attachments": [a.to_search_entry() for a in self.platform_attachments],
             "contacts": [c.to_search_entry() for c in self.contacts],
         }

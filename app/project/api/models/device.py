@@ -51,7 +51,8 @@ class Device(db.Model, AuditMixin, SearchableMixin):
             "website": self.website,
             "device_type_name": self.device_type_name,
             "status_name": self.name,
-            "attachements": [a.to_search_entry() for a in self.device_attachments],
+            "attachments": [a.to_search_entry() for a in self.device_attachments],
             "contacts": [c.to_search_entry() for c in self.contacts],
             "properties": [p.to_search_entry() for p in self.device_properties],
+            "customfields": [c.to_search_entry() for c in self.customfields],
         }
