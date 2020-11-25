@@ -2,243 +2,165 @@ from flask_rest_jsonapi.data_layers.alchemy import SqlalchemyDataLayer
 from flask import request, current_app
 
 
-def to_term(name, value):
-    return {"term": {f"{name}": {"value": value}}}
+class MultiFieldMatchFilter:
+    def __init__(self, query):
+        self.query = query
 
-
-def to_es(jsonapi):
-    if "or" in jsonapi.keys():
-        parts = jsonapi["or"]
-        terms = [to_es(part) for part in parts]
+    def to_query(self):
         return {
-            "bool": {
-                # should => one of the elements must be fulfilled
-                # which is exactly the "or"
-                "should": terms,
-            }
-        }
-    op = jsonapi["op"]
-    if op == "in_":
-        values = jsonapi["val"]
-        name = jsonapi["name"]
-        terms = [to_term(name, val) for val in values]
-        return {
-            "bool": {
-                # Again we use the should to have one of the clauses
-                # fulfilled. In this time we check equality for each of
-                # the cases
-                "should": terms,
-            }
-        }
-    elif op == "eq":
-        value = jsonapi["val"]
-        name = jsonapi["name"]
-        return {"bool": to_term(name, value)}
-
-
-"""
-def test_one_manufacturer_name():
-    for value in ['Campell', 'Someother']:
-        jsonapi = {'name': 'manufacturer_name', 'op': 'eq', 'val': value}
-        output = to_es(jsonapi)
-
-        expected = {
-            'bool': {
-                'term': {
-                    'manufacturer_name': {
-                        'value': value,
-                    }
-                }
-            }
+            "multi_match": {"query": self.query, "fields": ["*"]},
         }
 
-        assert output == expected
-
-def test_one_manufacturer_uri():
-    for value in ['uri1', 'uri2']:
-        jsonapi = {'name': 'manufacturer_uri', 'op': 'eq', 'val': value}
-        output = to_es(jsonapi)
-
-        expected = {
-            'bool': {
-                'term': {
-                    'manufacturer_uri': {
-                        'value': value,
-                    }
-                }
-            }
-        }
-
-        assert output == expected
+    def __eq__(self, other):
+        if not isinstance(other, MultiFieldMatchFilter):
+            return False
+        if not self.query == other.query:
+            return False
+        return True
 
 
-def test_two_manufacturer_name():
-    manufacturers = ['Campell', 'Someother']
-    jsonapi = {'name': 'manufacturer_name', 'op': 'in_', 'val': manufacturers}
-    output = to_es(jsonapi)
+class TermEqualsExactStringFilter:
+    def __init__(self, term, value):
+        self.term = term
+        self.value = value
 
-    expected = {
-        'bool': {
-            'should': [
-                {
-                    'term': {
-                        'manufacturer_name': {
-                            'value': manufacturers[0],
-                        },
-                    },
-                },
-                {
-                    'term': {
-                        'manufacturer_name': {
-                            'value': manufacturers[1]
-                        },
-                    },
-                },
-           ]
-        }
+    def to_query(self):
+        return {"bool": {f"{self.term}": {"value": self.value}}}
+
+    def __eq__(self, other):
+        if not isinstance(other, TermEqualsExactStringFilter):
+            return False
+        if not self.term == other.term:
+            return False
+        if not self.value == other.value:
+            return False
+        return True
+
+
+class TermExactInListFilter:
+    def __init__(self, term, values):
+        self.term = term
+        self.values = values
+
+    def to_query(self):
+        sub_filters = [
+            TermEqualsExactStringFilter(term=self.term, value=v) for v in self.values
+        ]
+        or_filter = OrFilter(sub_filters=sub_filters)
+        return or_filter.to_query()
+
+    def __eq__(self, other):
+        if not isinstance(other, TermExactInListFilter):
+            return False
+        if not self.term == other.term:
+            return False
+        if not self.values == other.values:
+            return False
+        return True
+
+
+class OrFilter:
+    def __init__(self, sub_filters):
+        self.sub_filters = sub_filters
+
+    def to_query(self):
+        sub_queries = [f.to_query() for f in self.sub_filters]
+        return {"bool": {"should": sub_queries}}
+
+    def __eq__(self, other):
+        if not isinstance(other, OrFilter):
+            return False
+        if not self.sub_filters == other.sub_filters:
+            return False
+        return True
+
+
+class AndFilter:
+    def __init__(self, sub_filters):
+        self.sub_filters = sub_filters
+
+    def to_query(self):
+        sub_queries = [f.to_query() for f in self.sub_filters]
+        return {"bool": {"must": sub_queries}}
+
+    def __eq__(self, other):
+        if not isinstance(other, AndFilter):
+            return False
+        if not self.sub_filters == other.sub_filters:
+            return False
+        return True
+
+    def simplify(self):
+        if len(self.sub_filters) == 1:
+            return self.sub_filters[0]
+        return self
+
+
+class FilterParser:
+
+    SUPPORTED_OPS = {
+        "eq": lambda name, val: TermEqualsExactStringFilter(term=name, value=val),
+        "in_": lambda name, val: TermExactInListFilter(term=name, values=val),
     }
-    assert output == expected
-def test_two_manufacturer_uris():
-    manufacturers = ['uri1', 'uri2']
-    jsonapi = {'name': 'manufacturer_uri', 'op': 'in_', 'val': manufacturers}
-    output = to_es(jsonapi)
 
-    expected = {
-        'bool': {
-            'should': [
-                {
-                    'term': {
-                        'manufacturer_uri': {
-                            'value': manufacturers[0],
-                        },
-                    },
-                },
-                {
-                    'term': {
-                        'manufacturer_uri': {
-                            'value': manufacturers[1]
-                        },
-                    },
-                },
-           ]
-        }
-    }
-    assert output == expected
+    @classmethod
+    def parse(cls, filter_list):
+        if not filter_list:
+            return None
+        sub_filters = [cls.parse_single_filter(f) for f in filter_list]
+        sub_filters = [f for f in sub_filters if f is not None]
+        if not sub_filters:
+            return None
+        if len(sub_filters) == 1:
+            return sub_filters[0]
+        return AndFilter(sub_filters=sub_filters)
 
-def test_manufacturer_name_or_uri():
-    manufacturers = ['Campell', 'Someother']
-    part_names = {'name': 'manufacturer_name', 'op': 'in_', 'val': manufacturers}
-    manufacturer_uris = ['uri1', 'uri2']
-    part_uris = {'name': 'manufacturer_uri', 'op': 'in_', 'val': manufacturer_uris}
-    part_or = {'or': [part_names, part_uris]}
-
-    expected = {
-        'bool': {
-            'should': [
-                {
-                    'bool': {
-                        'should': [
-                            {
-                                'term': {
-                                    'manufacturer_name': {
-                                        'value': manufacturers[0],
-                                    },
-                                },
-                            },
-                            {
-                                'term': {
-                                    'manufacturer_name': {
-                                        'value': manufacturers[1]
-                                    },
-                                },
-                            },
-                        ]
-                    }
-                },
-                {
-                    'bool': {
-                        'should': [
-                            {
-                                'term': {
-                                    'manufacturer_uri': {
-                                        'value': manufacturer_uris[0],
-                                    },
-                                },
-                            },
-                            {
-                                'term': {
-                                    'manufacturer_uri': {
-                                        'value': manufacturer_uris[1]
-                                    },
-                                },
-                            },
-                        ]
-                    }
-                }
-           ]
-        }
-    }
-    output = to_es(part_or)
-    assert output == expected
-
-"""
+    @classmethod
+    def parse_single_filter(cls, filter_dict):
+        # First check if we have a more complex filter
+        if "or" in filter_dict.keys():
+            sub_filters = [cls.parse_single_filter(f) for f in filter_dict["or"]]
+            return OrFilter(sub_filters)
+        if "and" in filter_dict.keys():
+            sub_filters = [cls.parse_single_filter(f) for f in filter_dict["and"]]
+            return AndFilter(sub_filters)
+        # Then check if the op syntax is used (name=x, op=eq, val=value)
+        op = filter_dict.get("op")
+        if op in cls.SUPPORTED_OPS.keys():
+            return cls.SUPPORTED_OPS[op](filter_dict["name"], filter_dict["val"])
+        # And last, check if we have a simple x:y filter
+        if len(filter_dict.keys()) == 1:
+            term = [x for x in filter_dict.keys()][0]
+            value = filter_dict[term]
+            return TermEqualsExactStringFilter(term=term, value=value)
+        return None
 
 
 class EsQueryBuilder:
     def __init__(self):
         self.q = None
-        self.terms = None
+        self.filters = []
 
     def with_request_args(self, request_args):
         self.q = request_args.get("q")
         return self
 
     def with_filter_args(self, filters):
-        # How does the filters look like?
-        #  [
-        #    {
-        #      'or': [
-        #        {
-        #          'name': 'manufacturer_name',
-        #          'op': 'in_',
-        #          'val': ['Campbell']
-        #        },
-        #        {
-        #          'name': 'manufacturer_uri',
-        #          'op': 'in_',
-        #          'val': ['manufacturer/Campbell']
-        #        }
-        #      ]
-        #    }
-        #  ]
-        self.terms = to_es(filters)
+        self.filters = filters
         return self
 
     def is_set(self):
-        return self.q is not None or self.terms is not None
+        if not self.q and not self.filters:
+            return False
+        return True
 
-    def to_query(self):
-        # TODO: write real tests for this
-        # if I have a query string then I want it to be used
-        # if I additionally have a filter, then this filter should be used
-        # as well (both must)
-        # however the filter can be quite complex regarding its inner structure
+    def to_filter(self):
+        sub_filters = []
         if self.q:
-            if self.terms:
-                return {
-                    "bool": {
-                        "must": [
-                            {"multi_match": {"query": self.q, "fields": ["*"]}},
-                            {"bool": self.terms["bool"]},
-                        ]
-                    }
-                }
-            else:
-                return {
-                    "multi_match": {"query": self.q, "fields": ["*"]},
-                }
-        else:
-            return {"bool": self.terms["bool"]}
+            sub_filters.append(MultiFieldMatchFilter(query=self.q))
+        if self.filters:
+            sub_filters.append(FilterParser.parse(filter_list=self.filters))
+        return AndFilter(sub_filters).simplify()
 
 
 class EsSqlalchemyDataLayer(SqlalchemyDataLayer):
@@ -279,7 +201,7 @@ class EsSqlalchemyDataLayer(SqlalchemyDataLayer):
 
         # Then we run our search.
         query, object_count = self.model.search(
-            query_builder.to_query(), page, per_page
+            query_builder.to_filter().to_query(), page, per_page
         )
         # And as Elasticsearch handles pagination, we don't have to care here.
         # Normally same is true for sorting. Elasticsearch sorts by relevance.
