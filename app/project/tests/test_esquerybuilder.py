@@ -154,7 +154,7 @@ class TestTermEqualsExactStringFilter(unittest.TestCase):
         for term, value in terms.items():
             term_equals_filter = TermEqualsExactStringFilter(term=term, value=value)
             es_query = term_equals_filter.to_query()
-            expected = {"bool": {f"{term}": {"value": value}}}
+            expected = {"term": {f"{term}": {"value": value}}}
             self.assertEqual(es_query, expected)
 
     def test_eq(self):
@@ -186,7 +186,7 @@ class TestTermExactInListFilter(unittest.TestCase):
             es_query = term_in_filter.to_query()
 
             expected_should_array = [
-                {"bool": {f"{term}": {"value": v}}} for v in values
+                {"term": {f"{term}": {"value": v}}} for v in values
             ]
             expected = {"bool": {"should": expected_should_array}}
 
@@ -221,8 +221,8 @@ class TestOrFilter(unittest.TestCase):
         expected = {
             "bool": {
                 "should": [
-                    {"bool": {"field1": {"value": "value1"}}},
-                    {"bool": {"field2": {"value": "value2"}}},
+                    {"term": {"field1": {"value": "value1"}}},
+                    {"term": {"field2": {"value": "value2"}}},
                 ]
             }
         }
@@ -263,8 +263,8 @@ class TestAndFilter(unittest.TestCase):
         expected = {
             "bool": {
                 "must": [
-                    {"bool": {"field1": {"value": "value1"}}},
-                    {"bool": {"field2": {"value": "value2"}}},
+                    {"term": {"field1": {"value": "value1"}}},
+                    {"term": {"field2": {"value": "value2"}}},
                 ]
             }
         }

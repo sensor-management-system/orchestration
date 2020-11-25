@@ -25,7 +25,7 @@ class TermEqualsExactStringFilter:
         self.value = value
 
     def to_query(self):
-        return {"bool": {f"{self.term}": {"value": self.value}}}
+        return {"term": {f"{self.term}": {"value": self.value}}}
 
     def __eq__(self, other):
         if not isinstance(other, TermEqualsExactStringFilter):
@@ -200,9 +200,9 @@ class EsSqlalchemyDataLayer(SqlalchemyDataLayer):
         per_page = pagination["size"]
 
         # Then we run our search.
-        query, object_count = self.model.search(
-            query_builder.to_filter().to_query(), page, per_page
-        )
+        search_filter = query_builder.to_filter()
+        search_query = search_filter.to_query()
+        query, object_count = self.model.search(search_query, page, per_page)
         # And as Elasticsearch handles pagination, we don't have to care here.
         # Normally same is true for sorting. Elasticsearch sorts by relevance.
         # But in case an explicit sorting is given, we want to support it
