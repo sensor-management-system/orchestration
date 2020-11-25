@@ -1,3 +1,5 @@
+"""Tests for the es query builder & filter classes."""
+
 import unittest
 
 from project.api.datalayers.esalchemy import (
@@ -21,7 +23,8 @@ class TestEsQueryBuilder(unittest.TestCase):
         In case that we don't give any arguments for the elasticsearch
         query, then the query should not be active (so that it is
         clear that the basic search functionality of the json api
-        should be used)."""
+        should be used).
+        """
         builder = EsQueryBuilder()
         is_set = builder.is_set()
         self.assertFalse(is_set)
@@ -131,6 +134,7 @@ class TestMultiMatchStringFilter(unittest.TestCase):
             self.assertEqual(es_query, expected)
 
     def test_eq(self):
+        """Test the __eq__ method."""
         filter1 = MultiFieldMatchFilter(query="a")
         filter2 = MultiFieldMatchFilter(query="a")
         filter3 = MultiFieldMatchFilter(query="b")
@@ -158,6 +162,7 @@ class TestTermEqualsExactStringFilter(unittest.TestCase):
             self.assertEqual(es_query, expected)
 
     def test_eq(self):
+        """Test the __eq__ method."""
         filter1 = TermEqualsExactStringFilter(term="term1", value="value1")
         filter2 = TermEqualsExactStringFilter(term="term1", value="value1")
         filter3 = TermEqualsExactStringFilter(term="term2", value="value1")
@@ -177,6 +182,7 @@ class TestTermExactInListFilter(unittest.TestCase):
     """
 
     def test_to_query(self):
+        """Test the to_query method."""
         terms = {
             "field1": ["value1", "value2", "someother value"],
             "field2": ["x", "y", "some loonger element", "and a forth value"],
@@ -193,6 +199,7 @@ class TestTermExactInListFilter(unittest.TestCase):
             self.assertEqual(es_query, expected)
 
     def test_eq(self):
+        """Test the __eq__ method."""
         filter1 = TermExactInListFilter(term="term1", values=["val1", "val2"])
         filter2 = TermExactInListFilter(term="term1", values=["val1", "val2"])
         filter3 = TermExactInListFilter(term="term2", values=["val1", "val2"])
@@ -212,6 +219,7 @@ class TestOrFilter(unittest.TestCase):
     """
 
     def test_to_query(self):
+        """Test the to_query method."""
         filter1 = TermEqualsExactStringFilter(term="field1", value="value1")
         filter2 = TermEqualsExactStringFilter(term="field2", value="value2")
 
@@ -230,6 +238,7 @@ class TestOrFilter(unittest.TestCase):
         self.assertEqual(es_query, expected)
 
     def test_eq(self):
+        """Test the __eq__ method."""
         filter1 = OrFilter([TermEqualsExactStringFilter(term="term", value="value")])
         filter2 = OrFilter([TermEqualsExactStringFilter(term="term", value="value")])
         filter3 = OrFilter([TermExactInListFilter(term="term", values=["value"])])
@@ -254,6 +263,7 @@ class TestAndFilter(unittest.TestCase):
     """
 
     def test_to_query(self):
+        """Test the to_query method."""
         filter1 = TermEqualsExactStringFilter(term="field1", value="value1")
         filter2 = TermEqualsExactStringFilter(term="field2", value="value2")
 
@@ -272,6 +282,7 @@ class TestAndFilter(unittest.TestCase):
         self.assertEqual(es_query, expected)
 
     def test_eq(self):
+        """Test the __eq__ method."""
         filter1 = AndFilter([TermEqualsExactStringFilter(term="term", value="value")])
         filter2 = AndFilter([TermEqualsExactStringFilter(term="term", value="value")])
         filter3 = AndFilter([TermExactInListFilter(term="term", values=["value"])])
@@ -297,11 +308,13 @@ class TestFilterParser(unittest.TestCase):
     """
 
     def test_parse_empty(self):
+        """Test the parsing of an empty filter list."""
         filter_raw = []
         output_filter = FilterParser.parse(filter_raw)
         self.assertIsNone(output_filter)
 
     def test_parse_eq(self):
+        """Test the parsing of an eq clause."""
         filter_raw = [{"name": "manufacturer_name", "op": "eq", "val": "Campbell"}]
         output_filter = FilterParser.parse(filter_raw)
 
@@ -311,6 +324,7 @@ class TestFilterParser(unittest.TestCase):
         self.assertEqual(output_filter, expected)
 
     def test_parse_in(self):
+        """Test parsing of an in_ filter."""
         filter_raw = [{"name": "manufacturer_name", "op": "in_", "val": ["Campbell"]}]
         output_filter = FilterParser.parse(filter_raw)
 
@@ -318,6 +332,7 @@ class TestFilterParser(unittest.TestCase):
         self.assertEqual(output_filter, expected)
 
     def test_parse_or_filter(self):
+        """Test the parsing of an or clause."""
         filter_raw = [
             {
                 "or": [
@@ -345,6 +360,7 @@ class TestFilterParser(unittest.TestCase):
         self.assertEqual(output_filter, expected)
 
     def test_parse_implicit_and_filter(self):
+        """Test the parsing of multiple filters (implicit and clause)."""
         filter_raw = [
             {"name": "manufacturer_name", "op": "in_", "val": ["Campbell"]},
             {"name": "manufacturer_uri", "op": "in_", "val": ["manufacturer/campbell"]},
@@ -364,6 +380,7 @@ class TestFilterParser(unittest.TestCase):
         self.assertEqual(output_filter, expected)
 
     def test_parse_explicit_and_filter(self):
+        """Test the parsing of an explicit and clause."""
         filter_raw = [
             {
                 "and": [
@@ -390,6 +407,7 @@ class TestFilterParser(unittest.TestCase):
         self.assertEqual(output_filter, expected)
 
     def test_parse_simple_field(self):
+        """Test the parsing of a very simple filter field."""
         filter_raw = [{"manufacturer_name": "Campbell"}]
         output_filter = FilterParser.parse(filter_raw)
 
