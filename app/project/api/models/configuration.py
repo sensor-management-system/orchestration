@@ -1,3 +1,5 @@
+"""Class and helpers for the configurations."""
+
 import collections
 from sqlalchemy.ext.hybrid import hybrid_property
 
@@ -10,9 +12,7 @@ ConfigurationsTuple = collections.namedtuple(
 
 
 class Configuration(db.Model, AuditMixin, SearchableMixin):
-    """
-    Configuration class
-    """
+    """Data model for the configurations."""
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     start_date = db.Column(db.DateTime, nullable=True)
@@ -49,6 +49,18 @@ class Configuration(db.Model, AuditMixin, SearchableMixin):
 
     @hybrid_property
     def hierarchy(self):
+        """
+        Return a tuple with that the hierarchy can be build.
+
+        The tuple contains the data with the links to the used
+        devices and platforms. It also includes how the
+        devices and platforms are used in the configuration (offsets,
+        calibration dates) and how the hiearchy is structured (
+        on which device is a platform, and what are those parent
+        platforms).
+
+        With the data here a real tree can be build.
+        """
         return ConfigurationsTuple(
             configuration_devices=self.configuration_devices,
             configuration_platforms=self.configuration_platforms,
@@ -99,6 +111,12 @@ class Configuration(db.Model, AuditMixin, SearchableMixin):
         self.configuration_platforms = new_configuration_platforms
 
     def to_search_entry(self):
+        """
+        Return the configuration as dict for full text search.
+
+        All the fields here will be searchable and can be used as
+        filters in our full text search.
+        """
         platforms = []
         for configuration_platform in self.configuration_platforms:
             if configuration_platform.platform is not None:
@@ -113,5 +131,7 @@ class Configuration(db.Model, AuditMixin, SearchableMixin):
             "project_name": self.project_name,
             "platforms": [p.to_search_entry() for p in platforms],
             "devices": [d.to_search_entry() for d in devices],
-            # calibration dates?
+            "contacts": [c.to_search_entry() for c in self.contacts],
+            # start & end dates?
+            # location type & data?
         }
