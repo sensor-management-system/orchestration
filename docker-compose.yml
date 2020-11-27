@@ -4,9 +4,7 @@ services:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.10.0
     container_name: smses01
     environment:
-      - node.name=smses01
-      - cluster.name=sms-es-cluster
-      - cluster.initial_master_nodes=smses01
+      - discovery.type=single-node
       - bootstrap.memory_lock=true
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
       - cluster.routing.allocation.disk.threshold_enabled=false
