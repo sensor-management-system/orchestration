@@ -8,19 +8,22 @@ import inspect
 
 from flask import request, url_for
 from flask.views import MethodView, MethodViewType
+from flask_rest_jsonapi.data_layers.alchemy import SqlalchemyDataLayer
+from flask_rest_jsonapi.data_layers.base import BaseDataLayer
+from flask_rest_jsonapi.decorators import (
+    check_method_requirements,
+    jsonapi_exception_formatter,
+)
+from flask_rest_jsonapi.pagination import add_pagination_links
+from flask_rest_jsonapi.querystring import QueryStringManager as QSManager
+from flask_rest_jsonapi.schema import compute_schema
 from marshmallow import ValidationError
 from marshmallow_jsonapi.exceptions import IncorrectTypeError
 from marshmallow_jsonapi.fields import BaseRelationship
 from six import with_metaclass
 
 from .content import parse_json, render_json
-from flask_rest_jsonapi.data_layers.alchemy import SqlalchemyDataLayer
-from flask_rest_jsonapi.data_layers.base import BaseDataLayer
-from flask_rest_jsonapi.decorators import check_method_requirements, jsonapi_exception_formatter
 from .exceptions import InvalidAcceptType
-from flask_rest_jsonapi.pagination import add_pagination_links
-from flask_rest_jsonapi.querystring import QueryStringManager as QSManager
-from flask_rest_jsonapi.schema import compute_schema
 
 
 class ResourceMeta(MethodViewType):
@@ -38,7 +41,7 @@ class ResourceMeta(MethodViewType):
                 )
 
             if d["data_layer"].get(
-                    "class"
+                "class"
             ) is not None and BaseDataLayer not in inspect.getmro(
                 d["data_layer"]["class"]
             ):
@@ -168,15 +171,15 @@ class ResourceList(with_metaclass(ResourceMeta, Resource)):
             data = schema.load(json_data)
         except IncorrectTypeError as e:
             errors = e.messages
-            for error in errors['errors']:
-                error['status'] = '409'
-                error['title'] = "Incorrect type"
+            for error in errors["errors"]:
+                error["status"] = "409"
+                error["title"] = "Incorrect type"
             return errors, 409
         except ValidationError as e:
             errors = e.messages
-            for message in errors['errors']:
-                message['status'] = '422'
-                message['title'] = "Validation error"
+            for message in errors["errors"]:
+                message["status"] = "422"
+                message["title"] = "Validation error"
             return errors, 422
 
         self.before_post(args, kwargs, data=data)
