@@ -4,9 +4,8 @@ import json
 
 from flask import make_response
 from flask.wrappers import Response as FlaskResponse
-from werkzeug.wrappers import Response
-
 from flask_rest_jsonapi.utils import JSONEncoder
+from werkzeug.wrappers import Response
 
 
 def parse_json(request):
