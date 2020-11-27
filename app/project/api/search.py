@@ -1,21 +1,30 @@
+"""
+Functions to work with the full text search.
+
+You may look at
+https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-xvi-full-text-search
+after most of the source code here was adapted.
+"""
+
 from flask import current_app
 
 
-# mostly from here:
-# https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-xvi-full-text-search
 def add_to_index(index, model, payload):
+    """Add an entry to the index in the full text search."""
     if not current_app.elasticsearch:
         return
     current_app.elasticsearch.index(index=index, id=model.id, body=payload)
 
 
 def remove_from_index(index, model):
+    """Remove an entry from the index in the full text search."""
     if not current_app.elasticsearch:
         return
     current_app.elasticsearch.delete(index=index, id=model.id)
 
 
 def query_index(index, query, page, per_page):
+    """Query the index with custom filters & pagination settings."""
     if not current_app.elasticsearch:
         return [], 0
     search = current_app.elasticsearch.search(
@@ -29,3 +38,18 @@ def query_index(index, query, page, per_page):
     )
     ids = [int(hit["_id"]) for hit in search["hits"]["hits"]]
     return ids, search["hits"]["total"]["value"]
+
+
+def remove_index(index):
+    """Remove an index for the full text search."""
+    if not current_app.elasticsearch:
+        return
+    # if we don't have an index, it is fine
+    current_app.elasticsearch.indices.delete(index, ignore=[404])
+
+
+def create_index(index, payload):
+    """Create an index for the full text search."""
+    if not current_app.elasticsearch:
+        return
+    current_app.elasticsearch.indices.create(index, payload)

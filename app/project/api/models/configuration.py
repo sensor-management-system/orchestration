@@ -135,3 +135,44 @@ class Configuration(db.Model, AuditMixin, SearchableMixin):
             # start & end dates?
             # location type & data?
         }
+
+    @staticmethod
+    def get_search_index_definition():
+        """
+        Return the index configuration for the elasticsearch.
+
+        Describes which fields will be searchable by some text (with stemmer, etc)
+        and via keyword (raw equality checks).
+        """
+        from project.api.models.platform import Platform
+        from project.api.models.device import Device
+        from project.api.models.contact import Contact
+
+        return {
+            "aliases": {},
+            "mappings": {
+                "properties": {
+                    # Label & project name should be filterable (keyword) & searchable (text).
+                    "label": {"type": "keyword", "fields": {"text": {"type": "text"}}},
+                    "project_name": {
+                        "type": "keyword",
+                        "fields": {"text": {"type": "text"}},
+                    },
+                    # The uri just for an keyword filter.
+                    "project_uri": {"type": "keyword"},
+                    "platforms": {
+                        "type": "nested",
+                        "properties": Platform.get_search_index_properties(),
+                    },
+                    "devices": {
+                        "type": "nested",
+                        "properties": Device.get_search_index_properties(),
+                    },
+                    "contacts": {
+                        "type": "nested",
+                        "properties": Contact.get_search_index_properties(),
+                    },
+                }
+            },
+            "settings": {"index": {"number_of_shards": "1"}},
+        }

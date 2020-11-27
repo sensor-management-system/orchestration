@@ -1,11 +1,12 @@
+"""Model for device properties."""
+
 from project.api.models.base_model import db
 from project.api.models.device import Device
 
 
 class DeviceProperty(db.Model):
-    """
-    DeviceProperty class
-    """
+    """DeviceProperty class."""
+
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     measuring_range_min = db.Column(db.Float(), nullable=True)
     measuring_range_max = db.Column(db.Float(), nullable=True)
@@ -24,18 +25,22 @@ class DeviceProperty(db.Model):
     resolution = db.Column(db.Float(), nullable=True)
     resolution_unit_uri = db.Column(db.String(256), nullable=True)
     resolution_unit_name = db.Column(db.String(256), nullable=True)
-    device_id = db.Column(db.Integer, db.ForeignKey('device.id'), nullable=False)
-    device = db.relationship(
-        Device, uselist=False, foreign_keys=[device_id]
-    )
+    device_id = db.Column(db.Integer, db.ForeignKey("device.id"), nullable=False)
+    device = db.relationship(Device, uselist=False, foreign_keys=[device_id])
 
     def to_search_entry(self):
+        """Convert the model to a dict to store it in the full text search."""
         # to be included in devices
         return {
             "label": self.label,
             "unit_name": self.unit_name,
+            "unit_uri": self.unit_uri,
             "compartment_name": self.compartment_name,
+            "compartment_uri": self.compartment_uri,
             "property_name": self.property_name,
+            "property_uri": self.property_uri,
             "sample_medium_name": self.sampling_media_name,
+            "sample_medium_uri": self.sampling_media_uri,
             "resolution_unit_name": self.resolution_unit_name,
+            "resolution_unit_uri": self.resolution_unit_uri,
         }

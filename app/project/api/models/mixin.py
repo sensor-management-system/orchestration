@@ -9,7 +9,13 @@ from sqlalchemy.sql import func
 from project.api.models.base_model import db
 from project.api.token_checker import current_user_id
 
-from project.api.search import add_to_index, remove_from_index, query_index
+from project.api.search import (
+    add_to_index,
+    remove_from_index,
+    query_index,
+    remove_index,
+    create_index,
+)
 
 
 def _current_user_id_or_none():
@@ -64,8 +70,11 @@ class AuditMixin:
 
 
 class SearchableMixin:
+    """Mixin to make a model searchable via full text search."""
+
     @classmethod
     def search(cls, query, page, per_page):
+        """Search the model with a given query and pagination settings."""
         ids, total = query_index(cls.__tablename__, query, page, per_page)
         if total == 0 or not ids:
             return cls.query.filter(sqlalchemy.sql.false()), total
@@ -79,6 +88,7 @@ class SearchableMixin:
 
     @classmethod
     def before_commit(cls, session):
+        """Prepare the commit stage."""
         # First we create a list with all the new, updated or
         # deleted elements
         # This is also what is suggested to do here as well
@@ -106,6 +116,7 @@ class SearchableMixin:
 
     @classmethod
     def after_commit(cls, session):
+        """Update the search after the sqlalchemy commit."""
         ids_to_add = collections.defaultdict(set)
         for obj in itertools.chain(session._changes["add"], session._changes["update"]):
             if isinstance(obj, SearchableMixin):
@@ -124,6 +135,11 @@ class SearchableMixin:
 
     @classmethod
     def reindex(cls):
+        """Recreate the index for the model."""
+        remove_index(cls.__tablename__)
+        idx_definition = cls.get_search_index_definition()
+        create_index(cls.__tablename__, idx_definition)
+
         for obj in cls.query:
             entry = obj.to_search_entry()
             add_to_index(cls.__tablename__, obj, entry)

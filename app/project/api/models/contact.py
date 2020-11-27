@@ -1,3 +1,6 @@
+"""Model for contacts & reference tables."""
+
+
 from project.api.models.base_model import db
 
 platform_contacts = db.Table(
@@ -27,9 +30,7 @@ configuration_contacts = db.Table(
 
 
 class Contact(db.Model):
-    """
-    Contact class
-    """
+    """Contact class."""
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     given_name = db.Column(db.String(256), nullable=False)
@@ -56,10 +57,43 @@ class Contact(db.Model):
     )
 
     def to_search_entry(self):
+        """Transform the model to an entry to store in the full text search."""
         # to be included in platforms, devices, etc.
         return {
             "given_name": self.given_name,
             "family_name": self.family_name,
             "website": self.website,
             "email": self.email,
+        }
+
+    @staticmethod
+    def get_search_index_properties():
+        """Get the properties for the index configuration."""
+        return {
+            "given_name": {
+                "type": "keyword",
+                "fields": {
+                    "text": {
+                        "type": "text"
+                    }
+                },
+            },
+            "family_name": {
+                "type": "keyword",
+                "fields": {
+                    "text": {
+                        "type": "text"
+                    }
+                },
+            },
+            # Not necessary to allow exact search for the personal website.
+            "website": {"type": "text"},
+            "email": {
+                "type": "keyword",
+                "fields": {
+                    "text": {
+                        "type": "text"
+                    }
+                },
+            },
         }
