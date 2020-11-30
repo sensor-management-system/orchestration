@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 
-"""This module contains the main class of the Api to initialize the Api, plug default decorators for each resources
-methods, speficy which blueprint to use, define the Api routes and plug additional oauth manager and permission manager
+"""This module contains the main class of the Api to initialize the Api,
+plug default decorators for each resources
+methods, speficy which blueprint to use, define the Api routes and plug
+additional oauth manager and permission manager
 - Modifications: Adopted form Custom content negotiation #171 ( miLibris /
 flask-rest-jsonapi )
 """
@@ -75,7 +77,8 @@ class Api(object):
     def route(self, resource, view, *urls, **kwargs):
         """Create an api view.
 
-        :param Resource resource: a resource class inherited from flask_rest_jsonapi.resource.Resource
+        :param Resource resource: a resource class inherited from
+        flask_rest_jsonapi.resource.Resource
         :param str view: the view name
         :param list urls: the urls of the view
         :param dict kwargs: additional options of the route

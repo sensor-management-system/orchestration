@@ -66,14 +66,16 @@ class BadRequest(JsonApiException):
 
 
 class InvalidField(BadRequest):
-    """Error to warn that a field specified in fields querystring is not in the requested resource schema"""
+    """Error to warn that a field specified in fields querystring is not in
+    the requested resource schema"""
 
     title = "Invalid fields querystring parameter."
     source = {"parameter": "fields"}
 
 
 class InvalidInclude(BadRequest):
-    """Error to warn that a field specified in include querystring parameter is not a relationship of the requested
+    """Error to warn that a field specified in include querystring parameter is not a
+    relationship of the requested
     resource schema
     """
 
@@ -89,7 +91,8 @@ class InvalidFilters(BadRequest):
 
 
 class InvalidSort(BadRequest):
-    """Error to warn that a field specified in sort querystring parameter is not in the requested resource schema"""
+    """Error to warn that a field specified in sort querystring parameter is not in the
+    requested resource schema"""
 
     title = "Invalid sort querystring parameter."
     source = {"parameter": "sort"}
