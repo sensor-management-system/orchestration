@@ -81,7 +81,7 @@ deploy-gfz-image:
     - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T db psql -U postgres -c 'CREATE DATABASE db_dev' || echo "dev database already exists"
     - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T db psql -U postgres -c 'CREATE DATABASE db_test;' || echo "test database already exists"
     - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T ssmbackend python3 manage.py db upgrade
-    - sleep 2m
+    - sleep 1m
     - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T ssmbackend python3 manage.py es reindex
   when: manual
   dependencies:
