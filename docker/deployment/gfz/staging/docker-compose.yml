@@ -16,7 +16,7 @@ services:
       - DATABASE_URL=postgres://postgres:postgres123456666666666666@db:5432/db_dev
       - DATABASE_TEST_URL=postgres://postgres:postgres123456666666666666@db:5432/db_test
       - HTTP_ORIGINS=$HTTP_ORIGINS
-      - ELASTICSEARCH_URL=http//smses01:9200
+      - ELASTICSEARCH_URL=http://smses01:9200
     ports:
       - 5000:5000
     networks:
