@@ -129,6 +129,7 @@ class Configuration(db.Model, AuditMixin, SearchableMixin):
         return {
             "label": self.label,
             "status": self.status,
+            "location_type": self.location_type,
             "project_uri": self.project_uri,
             "project_name": self.project_name,
             "platforms": [p.to_search_entry() for p in platforms],
@@ -157,6 +158,14 @@ class Configuration(db.Model, AuditMixin, SearchableMixin):
                     # Label & project name should be filterable (keyword) & searchable (text).
                     "label": {"type": "keyword", "fields": {"text": {"type": "text"}}},
                     "status": {"type": "keyword", "fields": {"text": {"type": "text"}}},
+                    "location_type": {
+                        "type": "keyword",
+                        "fields": {
+                            "text": {
+                                "type": "text"
+                            }
+                        }
+                    },
                     "project_name": {
                         "type": "keyword",
                         "fields": {"text": {"type": "text"}},
