@@ -108,6 +108,7 @@ export class PlatformSearchBuilder {
   private axiosApi: AxiosInstance
   private clientSideFilterFunc: (platform: Platform) => boolean
   private serverSideFilterSettings: IFlaskJSONAPIFilter[] = []
+  private esTextFilter: string | null = null
   private serializer: PlatformSerializer
 
   constructor (axiosApi: AxiosInstance, serializer: PlatformSerializer) {
@@ -118,27 +119,7 @@ export class PlatformSearchBuilder {
 
   withTextInName (text: string | null) : PlatformSearchBuilder {
     if (text) {
-      const ilikeValue = '%' + text + '%'
-      const fieldsToSearchIn = [
-        'short_name',
-        'long_name'
-        // here we can add description
-        // as well
-        // --> if so, also change the method name here
-      ]
-
-      const filter: IFlaskJSONAPIFilter[] = []
-      for (const field of fieldsToSearchIn) {
-        filter.push({
-          name: field,
-          op: 'ilike',
-          val: ilikeValue
-        })
-      }
-
-      this.serverSideFilterSettings.push({
-        or: filter
-      })
+      this.esTextFilter = text
     }
     return this
   }
@@ -208,6 +189,7 @@ export class PlatformSearchBuilder {
       this.axiosApi,
       this.clientSideFilterFunc,
       this.serverSideFilterSettings,
+      this.esTextFilter,
       this.serializer
     )
   }
@@ -217,25 +199,33 @@ export class PlatformSearcher {
   private axiosApi: AxiosInstance
   private clientSideFilterFunc: (platform: Platform) => boolean
   private serverSideFilterSettings: IFlaskJSONAPIFilter[]
+  private esTextFilter: string | null
   private serializer: PlatformSerializer
 
   constructor (
     axiosApi: AxiosInstance,
     clientSideFilterFunc: (platform: Platform) => boolean,
     serverSideFilterSetting: IFlaskJSONAPIFilter[],
+    esTextFilter: string | null,
     serializer: PlatformSerializer
   ) {
     this.axiosApi = axiosApi
     this.clientSideFilterFunc = clientSideFilterFunc
     this.serverSideFilterSettings = serverSideFilterSetting
+    this.esTextFilter = esTextFilter
     this.serializer = serializer
   }
 
   private get commonParams (): any {
-    return {
-      filter: JSON.stringify(this.serverSideFilterSettings),
-      sort: 'short_name'
+    const result: any = {
+      filter: JSON.stringify(this.serverSideFilterSettings)
     }
+    if (this.esTextFilter) {
+      result.q = this.esTextFilter
+    } else {
+      result.sort = 'short_name'
+    }
+    return result
   }
 
   findMatchingAsList (): Promise<Platform[]> {
@@ -243,7 +233,7 @@ export class PlatformSearcher {
       '',
       {
         params: {
-          'page[size]': 100000,
+          'page[size]': 10000,
           ...this.commonParams
         }
       }

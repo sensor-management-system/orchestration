@@ -108,6 +108,7 @@ export class DeviceSearchBuilder {
   private axiosApi: AxiosInstance
   private clientSideFilterFunc: (device: Device) => boolean
   private serverSideFilterSettings: IFlaskJSONAPIFilter[] = []
+  private esTextFilter: string | null = null
   private serializer: DeviceSerializer
 
   constructor (axiosApi: AxiosInstance, serializer: DeviceSerializer) {
@@ -118,27 +119,7 @@ export class DeviceSearchBuilder {
 
   withTextInName (text: string | null) {
     if (text) {
-      const ilikeValue = '%' + text + '%'
-      const fieldsToSearchIn = [
-        'short_name',
-        'long_name'
-        // here we can add description
-        // as well
-        // --> if so, also change the method name here
-      ]
-
-      const filter: IFlaskJSONAPIFilter[] = []
-      for (const field of fieldsToSearchIn) {
-        filter.push({
-          name: field,
-          op: 'ilike',
-          val: ilikeValue
-        })
-      }
-
-      this.serverSideFilterSettings.push({
-        or: filter
-      })
+      this.esTextFilter = text
     }
     return this
   }
@@ -208,6 +189,7 @@ export class DeviceSearchBuilder {
       this.axiosApi,
       this.clientSideFilterFunc,
       this.serverSideFilterSettings,
+      this.esTextFilter,
       this.serializer
     )
   }
@@ -217,25 +199,33 @@ export class DeviceSearcher {
   private axiosApi: AxiosInstance
   private clientSideFilterFunc: (device: Device) => boolean
   private serverSideFilterSettings: IFlaskJSONAPIFilter[]
+  private esTextFilter: string | null
   private serializer: DeviceSerializer
 
   constructor (
     axiosApi: AxiosInstance,
     clientSideFilterFunc: (device: Device) => boolean,
     serverSideFilterSettings: IFlaskJSONAPIFilter[],
+    esTextFilter: string | null,
     serializer: DeviceSerializer
   ) {
     this.axiosApi = axiosApi
     this.clientSideFilterFunc = clientSideFilterFunc
     this.serverSideFilterSettings = serverSideFilterSettings
+    this.esTextFilter = esTextFilter
     this.serializer = serializer
   }
 
   private get commonParams (): any {
-    return {
-      filter: JSON.stringify(this.serverSideFilterSettings),
-      sort: 'short_name'
+    const result: any = {
+      filter: JSON.stringify(this.serverSideFilterSettings)
     }
+    if (this.esTextFilter) {
+      result.q = this.esTextFilter
+    } else {
+      result.sort = 'short_name'
+    }
+    return result
   }
 
   findMatchingAsList (): Promise<Device[]> {
@@ -243,7 +233,7 @@ export class DeviceSearcher {
       '',
       {
         params: {
-          'page[size]': 100000,
+          'page[size]': 10000,
           ...this.commonParams
         }
       }

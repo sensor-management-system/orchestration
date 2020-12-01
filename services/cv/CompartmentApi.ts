@@ -80,7 +80,7 @@ export class CompartmentSearcher {
       '',
       {
         params: {
-          'page[limit]': 100000,
+          'page[limit]': 10000,
           'filter[active]': true,
           sort: 'name'
         }
