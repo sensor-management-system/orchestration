@@ -16,8 +16,12 @@ services:
       - DATABASE_URL=postgres://postgres:postgres123456666666666666@db:5432/db_dev
       - DATABASE_TEST_URL=postgres://postgres:postgres123456666666666666@db:5432/db_test
       - HTTP_ORIGINS=$HTTP_ORIGINS
+      - ELASTICSEARCH_URL=http//smses01:9200
     ports:
       - 5000:5000
+    networks:
+      - elastic
+      - db
 
   db:
     image: postgres:12-alpine
@@ -37,6 +41,33 @@ services:
     volumes:
       - "postgres-data-staging:/var/lib/postgresql/data"
     shm_size: 128M
+    networks:
+      - db
+
+  smses01:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.10.0
+    container_name: smses01
+    environment:
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - cluster.routing.allocation.disk.threshold_enabled=false
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - esdata01:/usr/share/elasticsearch/data
+    ports:
+      - 9200:9200
+    networks:
+      - elastic
 
 volumes:
   postgres-data-staging:
+  esdata01:
+    driver: local
+networks:
+  elastic:
+    driver: bridge
+  db:
