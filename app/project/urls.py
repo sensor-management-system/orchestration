@@ -1,18 +1,6 @@
 from project.api.ping import Ping
 from project.api.resourceManager.configuration_detail import ConfigurationDetail
-from project.api.resourceManager.configuration_device_detail import (
-    ConfigurationDeviceDetail,
-)
-from project.api.resourceManager.configuration_device_list import (
-    ConfigurationDeviceList,
-)
 from project.api.resourceManager.configuration_list import ConfigurationList
-from project.api.resourceManager.configuration_platform_detail import (
-    ConfigurationPlatformDetail,
-)
-from project.api.resourceManager.configuration_platform_list import (
-    ConfigurationPlatformList,
-)
 from project.api.resourceManager.configuration_relationship import (
     ConfigurationRelationship,
 )
@@ -21,11 +9,6 @@ from project.api.resourceManager.contact_list import ContactList
 from project.api.resourceManager.contact_relationship import ContactRelationship
 from project.api.resourceManager.device_detail import DeviceDetail
 from project.api.resourceManager.device_list import DeviceList
-from project.api.resourceManager.device_property_detail import DevicePropertyDetail
-from project.api.resourceManager.device_property_list import DevicePropertyList
-from project.api.resourceManager.device_property_relationship import (
-    DevicePropertyRelationship,
-)
 from project.api.resourceManager.device_relationship import DeviceRelationship
 from project.api.resourceManager.event_detail import EventDetail
 from project.api.resourceManager.event_list import EventList
@@ -113,22 +96,22 @@ def create_endpoints(api):
         base_url + "/devices/<int:id>/relationships/updatedUser",
     )
 
-    # Device Property
-    api.route(
-        DevicePropertyDetail,
-        "device_property_detail",
-        base_url + "/device-properties/<int:id>",
-    )
-
-    api.route(
-        DevicePropertyList, "device_property_list", base_url + "/device-properties"
-    )
-
-    api.route(
-        DevicePropertyRelationship,
-        "device_property_device",
-        base_url + "/device-properties/<int:id>/relationships/device",
-    )
+    # # Device Property
+    # api.route(
+    #     DevicePropertyDetail,
+    #     "device_property_detail",
+    #     base_url + "/device-properties/<int:id>",
+    # )
+    #
+    # api.route(
+    #     DevicePropertyList, "device_property_list", base_url + "/device-properties"
+    # )
+    #
+    # api.route(
+    #     DevicePropertyRelationship,
+    #     "device_property_device",
+    #     base_url + "/device-properties/<int:id>/relationships/device",
+    # )
 
     # Contact
     api.route(
@@ -217,25 +200,25 @@ def create_endpoints(api):
         "configuration_src_elevation",
         base_url + "/configurations/<int:id>/relationships/src-elevation",
     )
-    # ConfigurationPlatform
-    api.route(
-        ConfigurationPlatformList,
-        "configuration_platform_list",
-        base_url + "/configuration-platforms",
-    )
-    api.route(
-        ConfigurationPlatformDetail,
-        "configuration_platform_detail",
-        base_url + "/configuration-platforms/<int:id>",
-    )
-    # ConfigurationDevice
-    api.route(
-        ConfigurationDeviceList,
-        "configuration_device_list",
-        base_url + "/configuration-devices",
-    )
-    api.route(
-        ConfigurationDeviceDetail,
-        "configuration_device_detail",
-        base_url + "/configuration-devices/<int:id>",
-    )
+    # # ConfigurationPlatform
+    # api.route(
+    #     ConfigurationPlatformList,
+    #     "configuration_platform_list",
+    #     base_url + "/configuration-platforms",
+    # )
+    # api.route(
+    #     ConfigurationPlatformDetail,
+    #     "configuration_platform_detail",
+    #     base_url + "/configuration-platforms/<int:id>",
+    # )
+    # # ConfigurationDevice
+    # api.route(
+    #     ConfigurationDeviceList,
+    #     "configuration_device_list",
+    #     base_url + "/configuration-devices",
+    # )
+    # api.route(
+    #     ConfigurationDeviceDetail,
+    #     "configuration_device_detail",
+    #     base_url + "/configuration-devices/<int:id>",
+    # )
