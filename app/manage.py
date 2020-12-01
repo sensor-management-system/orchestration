@@ -11,7 +11,10 @@ app = create_app()
 cli = FlaskGroup(create_app=create_app)
 
 COV = coverage.coverage(
-    branch=True, include="project/*", omit=["project/tests/*", "project/config.py",]
+    branch=True,
+    include="project/*",
+    # skip the tests itself for the coverage
+    omit=["project/tests/*", "project/config.py",],
 )
 COV.start()
 
@@ -26,7 +29,12 @@ def recreate_db():
 @cli.command()
 def test():
     """ Runs the tests without code coverage """
-    tests = unittest.TestLoader().discover("project/tests", pattern="test_*.py")
+    tests = unittest.TestLoader().discover(
+        "project/tests",
+        # Only execute the files starting with test_
+        # as we have some helper files here as well.
+        pattern="test_*.py",
+    )
     result = unittest.TextTestRunner(verbosity=2).run(tests)
     if result.wasSuccessful():
         return 0
@@ -65,6 +73,23 @@ def db_init():
         db.session.add(attachment)
         db.session.add(pl_attachment)
         db.session.commit()
+
+
+@cli.group()
+def es():
+    """Group for elasticsearch so that the sub commands are grouped there."""
+    pass
+
+
+@es.command("reindex")
+def es_reindex():
+    """Reindex all of the models that should be used in the es."""
+    from project.api.models.configuration import Configuration
+    from project.api.models.device import Device
+    from project.api.models.platform import Platform
+
+    for model_type in [Platform, Device, Configuration]:
+        model_type.reindex()
 
 
 @app.after_request
