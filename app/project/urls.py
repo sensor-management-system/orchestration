@@ -20,6 +20,10 @@ from project.api.resourceManager.user_detail import UserDetail
 from project.api.resourceManager.user_list import UserList
 from project.api.resourceManager.user_relationship import UserRelationship
 
+from project.api.resourceManager.device_property_detail import DevicePropertyDetail
+from project.api.resourceManager.device_property_list import DevicePropertyList
+from project.api.resourceManager.device_property_relationship import DevicePropertyRelationship
+
 base_url = "/rdm/svm-api/v1"
 
 
@@ -96,22 +100,22 @@ def create_endpoints(api):
         base_url + "/devices/<int:id>/relationships/updatedUser",
     )
 
-    # # Device Property
-    # api.route(
-    #     DevicePropertyDetail,
-    #     "device_property_detail",
-    #     base_url + "/device-properties/<int:id>",
-    # )
-    #
-    # api.route(
-    #     DevicePropertyList, "device_property_list", base_url + "/device-properties"
-    # )
-    #
-    # api.route(
-    #     DevicePropertyRelationship,
-    #     "device_property_device",
-    #     base_url + "/device-properties/<int:id>/relationships/device",
-    # )
+    # Device Property
+    api.route(
+        DevicePropertyDetail,
+        "device_property_detail",
+        base_url + "/device-properties/<int:id>",
+    )
+
+    api.route(
+        DevicePropertyList, "device_property_list", base_url + "/device-properties"
+    )
+
+    api.route(
+        DevicePropertyRelationship,
+        "device_property_device",
+        base_url + "/device-properties/<int:id>/relationships/device",
+    )
 
     # Contact
     api.route(
