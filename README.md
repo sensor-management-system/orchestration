@@ -61,6 +61,10 @@ After having installed the dependencies, then just run the following commands to
 
 
 
-### Author
+### Authors
 
+- Martin Abbrent
 - Kotyba Alhaj Taha
+- Nils Brinckmann
+- Marc Hanisch
+- Dirk Pohle
