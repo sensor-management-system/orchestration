@@ -117,7 +117,7 @@ export class DeviceSearchBuilder {
     this.serializer = serializer
   }
 
-  withTextInName (text: string | null) {
+  withText (text: string | null) {
     if (text) {
       this.esTextFilter = text
     }

@@ -189,7 +189,7 @@ export class ConfigurationSearchBuilder {
     this.serializer = serializer
   }
 
-  withTextInLabel (text: string | null) {
+  withText (text: string | null) {
     if (text) {
       this.esTextFilter = text
     }

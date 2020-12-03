@@ -580,7 +580,7 @@ export default class SearchDevicesPage extends Vue {
     this.showDeleteDialog = {}
     this.$api.devices
       .newSearchBuilder()
-      .withTextInName(searchText)
+      .withText(searchText)
       .withOneMachtingManufacturerOf(manufacturer)
       .withOneMatchingStatusOf(states)
       .withOneMatchingDeviceTypeOf(types)
