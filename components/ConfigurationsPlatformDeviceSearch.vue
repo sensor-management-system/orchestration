@@ -278,13 +278,13 @@ export default class ConfigurationsPlatformDeviceSearch extends Vue {
     switch (this.searchOptions.searchType) {
       case SearchType.Platform:
         this.platforms = await this.$api.platforms.newSearchBuilder()
-          .withTextInName(this.searchOptions.text)
+          .withText(this.searchOptions.text)
           .build()
           .findMatchingAsList()
         break
       case SearchType.Device:
         this.devices = await this.$api.devices.newSearchBuilder()
-          .withTextInName(this.searchOptions.text)
+          .withText(this.searchOptions.text)
           .build()
           .findMatchingAsList()
         break

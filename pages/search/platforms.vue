@@ -579,7 +579,7 @@ export default class SearchPlatformsPage extends Vue {
     this.showDeleteDialog = {}
     this.$api.platforms
       .newSearchBuilder()
-      .withTextInName(searchText)
+      .withText(searchText)
       .withOneMatchingManufacturerOf(manufacturer)
       .withOneMatchingStatusOf(states)
       .withOneMatchingPlatformTypeOf(platformTypes)

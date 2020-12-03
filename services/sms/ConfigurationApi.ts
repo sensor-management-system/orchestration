@@ -180,6 +180,7 @@ export class ConfigurationSearchBuilder {
   private axiosApi: AxiosInstance
   private clientSideFilterFunc: (configuration: Configuration) => boolean
   private serverSideFilterSettings: IFlaskJSONAPIFilter[] = []
+  private esTextFilter: string | null = null
   private serializer: ConfigurationSerializer
 
   constructor (axiosApi: AxiosInstance, serializer: ConfigurationSerializer) {
@@ -188,25 +189,9 @@ export class ConfigurationSearchBuilder {
     this.serializer = serializer
   }
 
-  withTextInLabel (text: string | null) {
+  withText (text: string | null) {
     if (text) {
-      const ilikeValue = '%' + text + '%'
-      const fieldsToSearchIn = [
-        'label'
-      ]
-
-      const filter: IFlaskJSONAPIFilter[] = []
-      for (const field of fieldsToSearchIn) {
-        filter.push({
-          name: field,
-          op: 'ilike',
-          val: ilikeValue
-        })
-      }
-
-      this.serverSideFilterSettings.push({
-        or: filter
-      })
+      this.esTextFilter = text
     }
     return this
   }
@@ -258,6 +243,7 @@ export class ConfigurationSearchBuilder {
       this.axiosApi,
       this.clientSideFilterFunc,
       this.serverSideFilterSettings,
+      this.esTextFilter,
       this.serializer
     )
   }
@@ -267,25 +253,36 @@ export class ConfigurationSearcher {
   private axiosApi: AxiosInstance
   private clientSideFilterFunc: (configuration: Configuration) => boolean
   private serverSideFilterSettings: IFlaskJSONAPIFilter[]
+  private esTextFilter: string | null
   private serializer: ConfigurationSerializer
 
   constructor (
     axiosApi: AxiosInstance,
     clientSideFilterFunc: (configuration: Configuration) => boolean,
     serverSideFilterSettings: IFlaskJSONAPIFilter[],
+    esTextFilter: string | null,
     serializer: ConfigurationSerializer
   ) {
     this.axiosApi = axiosApi
     this.clientSideFilterFunc = clientSideFilterFunc
     this.serverSideFilterSettings = serverSideFilterSettings
+    this.esTextFilter = esTextFilter
     this.serializer = serializer
   }
 
   private get commonParams (): any {
-    return {
-      filter: JSON.stringify(this.serverSideFilterSettings),
-      sort: 'label'
+    const result: any = {
+      filter: JSON.stringify(this.serverSideFilterSettings)
     }
+    if (this.esTextFilter != null) {
+      // In case we have a search string, then we want to
+      // sort by relevance (which is the default)
+      result.q = this.esTextFilter
+    } else {
+      // otherwise we want to search alphabetically
+      result.sort = 'label'
+    }
+    return result
   }
 
   findMatchingAsList (): Promise<Configuration[]> {

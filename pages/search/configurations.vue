@@ -539,7 +539,7 @@ export default class SearchConfigurationsPage extends Vue {
     this.showDeleteDialog = {}
     this.$api.configurations
       .newSearchBuilder()
-      .withTextInLabel(searchText)
+      .withText(searchText)
       .withOneStatusOf(configurationStates)
       .withOneLocationTypeOf(locationTypes)
       .withOneMatchingProjectOf(projects)

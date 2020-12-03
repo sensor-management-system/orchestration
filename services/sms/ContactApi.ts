@@ -92,7 +92,7 @@ export class ContactSearcher {
       '',
       {
         params: {
-          'page[size]': 100000,
+          'page[size]': 10000,
           sort: 'email'
         }
       }).then((rawResponse: any) => {
