@@ -62,7 +62,7 @@ export class Api {
   private readonly _platformTypeApi: PlatformTypeApi
   private readonly _statusApi: StatusApi
   private readonly _deviceTypeApi: DeviceTypeApi
-  private readonly _comparmentApi: CompartmentApi
+  private readonly _compartmentApi: CompartmentApi
   private readonly _samplingMediaApi: SamplingMediaApi
   private readonly _propertyApi: PropertyApi
   private readonly _unitApi: UnitApi
@@ -72,6 +72,10 @@ export class Api {
   constructor (smsBaseUrl: string | undefined = SMS_BASE_URL, cvBaseUrl: string | undefined = CV_BASE_URL) {
     // here we can set settings for all the sms api calls
     const smsConfig: AxiosRequestConfig = {
+      // for the SMS Backend we need the explicit vnd.api+json
+      headers: {
+        'Content-Type': 'application/vnd.api+json'
+      }
     }
 
     this._contactApi = new ContactApi(
@@ -92,7 +96,7 @@ export class Api {
     const cvConfig: AxiosRequestConfig = {
     }
 
-    this._comparmentApi = new CompartmentApi(
+    this._compartmentApi = new CompartmentApi(
       this.createAxios(cvBaseUrl, '/variabletype', cvConfig),
       cvBaseUrl
     )
@@ -173,7 +177,7 @@ export class Api {
   }
 
   get compartments (): CompartmentApi {
-    return this._comparmentApi
+    return this._compartmentApi
   }
 
   get samplingMedia (): SamplingMediaApi {
