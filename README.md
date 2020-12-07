@@ -39,7 +39,12 @@ You can choose between running the api with or without Docker.
 [How to install](./docs/installation.md)
 
 
+Note: For running elasticsearch it may be necessary to increase the maximal
+map count for the virtual memory:
 
+```
+sudo sysctl vm.max_map_count=262144
+```
 ### Usage
 
 After having installed the dependencies, then just run the following commands to use it:
@@ -56,6 +61,10 @@ After having installed the dependencies, then just run the following commands to
 
 
 
-### Author
+### Authors
 
+- Martin Abbrent
 - Kotyba Alhaj Taha
+- Nils Brinckmann
+- Marc Hanisch
+- Dirk Pohle

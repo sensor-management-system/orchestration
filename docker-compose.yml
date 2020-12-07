@@ -1,6 +1,23 @@
 version: '3.3'
 services:
-
+  smses01:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.10.0
+    container_name: smses01
+    environment:
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - cluster.routing.allocation.disk.threshold_enabled=false
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - esdata01:/usr/share/elasticsearch/data
+    ports:
+      - 9200:9200
+    networks:
+      - elastic
   app:
     image: python:3-alpine
     working_dir: /usr/src/app
@@ -11,6 +28,9 @@ services:
     env_file:
          - ./app_env/compose.env
     depends_on:
+      - db
+    networks:
+      - elastic
       - db
     command: >
       sh -c "
@@ -31,4 +51,15 @@ services:
     env_file:
       - ./app_env/db_secrets.env
     volumes:
-    - ./app/project/db/create.sql:/docker-entrypoint-initdb.d/create.sql
+      - ./app/project/db/create.sql:/docker-entrypoint-initdb.d/create.sql
+    networks:
+      - db
+
+volumes:
+  esdata01:
+    driver: local
+  
+networks:
+  elastic:
+    driver: bridge
+  db:
