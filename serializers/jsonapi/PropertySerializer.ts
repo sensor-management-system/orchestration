@@ -48,7 +48,7 @@ export class PropertySerializer {
 
     convertJsonApiDataToModel (jsonApiData: IJsonApiDataWithIdAndLinks): Property {
       const id = jsonApiData.id
-      const name = jsonApiData.attributes.name
+      const name = jsonApiData.attributes.term
       const url = removeBaseUrl(jsonApiData.links.self, this.cvBaseUrl)
 
       return Property.createWithData(id, name, url)

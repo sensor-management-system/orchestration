@@ -62,7 +62,7 @@ export class Api {
   private readonly _platformTypeApi: PlatformTypeApi
   private readonly _statusApi: StatusApi
   private readonly _deviceTypeApi: DeviceTypeApi
-  private readonly _comparmentApi: CompartmentApi
+  private readonly _compartmentApi: CompartmentApi
   private readonly _samplingMediaApi: SamplingMediaApi
   private readonly _propertyApi: PropertyApi
   private readonly _unitApi: UnitApi
@@ -97,36 +97,36 @@ export class Api {
       }
     }
 
-    this._comparmentApi = new CompartmentApi(
-      this.createAxios(cvBaseUrl, '/variabletype', cvConfig),
+    this._compartmentApi = new CompartmentApi(
+      this.createAxios(cvBaseUrl, '/compartments/', cvConfig),
       cvBaseUrl
     )
     this._deviceTypeApi = new DeviceTypeApi(
-      this.createAxios(cvBaseUrl, '/equipmenttype', cvConfig),
+      this.createAxios(cvBaseUrl, '/equipmenttypes/', cvConfig),
       cvBaseUrl
     )
     this._manufacturerApi = new ManufacturerApi(
-      this.createAxios(cvBaseUrl, '/manufacturer', cvConfig),
+      this.createAxios(cvBaseUrl, '/manufacturers/', cvConfig),
       cvBaseUrl
     )
     this._platformTypeApi = new PlatformTypeApi(
-      this.createAxios(cvBaseUrl, '/platformtype', cvConfig),
+      this.createAxios(cvBaseUrl, '/platformtypes/', cvConfig),
       cvBaseUrl
     )
     this._propertyApi = new PropertyApi(
-      this.createAxios(cvBaseUrl, '/variablename', cvConfig),
+      this.createAxios(cvBaseUrl, '/measuredquantities/', cvConfig),
       cvBaseUrl
     )
     this._samplingMediaApi = new SamplingMediaApi(
-      this.createAxios(cvBaseUrl, '/medium', cvConfig),
+      this.createAxios(cvBaseUrl, '/samplingmedium/', cvConfig),
       cvBaseUrl
     )
     this._statusApi = new StatusApi(
-      this.createAxios(cvBaseUrl, '/equipmentstatus', cvConfig),
+      this.createAxios(cvBaseUrl, '/equipmentstatus/', cvConfig),
       cvBaseUrl
     )
     this._unitApi = new UnitApi(
-      this.createAxios(cvBaseUrl, '/unit', cvConfig),
+      this.createAxios(cvBaseUrl, '/units/', cvConfig),
       cvBaseUrl
     )
 
@@ -178,7 +178,7 @@ export class Api {
   }
 
   get compartments (): CompartmentApi {
-    return this._comparmentApi
+    return this._compartmentApi
   }
 
   get samplingMedia (): SamplingMediaApi {

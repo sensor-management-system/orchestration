@@ -48,9 +48,9 @@ export class UnitSerializer {
 
   convertJsonApiDataToModel (jsonApiData: IJsonApiDataWithIdAndLinks): Unit {
     const id = jsonApiData.id
-    let name = jsonApiData.attributes.unitsname
-    if (jsonApiData.attributes.unitsabbreviation) {
-      name += ' [' + jsonApiData.attributes.unitsabbreviation + ']'
+    let name = jsonApiData.attributes.term
+    if (jsonApiData.attributes.provenance) {
+      name += ' (' + jsonApiData.attributes.provenance + ')'
     }
     const url = removeBaseUrl(jsonApiData.links.self, this.cvBaseUrl)
 

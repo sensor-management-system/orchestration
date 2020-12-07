@@ -48,7 +48,7 @@ export class CompartmentSerializer {
 
   convertJsonApiDataToModel (jsonApiData: IJsonApiDataWithIdAndLinks): Compartment {
     const id = jsonApiData.id
-    const name = jsonApiData.attributes.name
+    const name = jsonApiData.attributes.term
     const url = removeBaseUrl(jsonApiData.links.self, this.cvBaseUrl)
 
     return Compartment.createWithData(id, name, url)

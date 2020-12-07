@@ -48,7 +48,7 @@ export class StatusSerializer {
 
     convertJsonApiDataToModel (jsonApiData: IJsonApiDataWithIdAndLinks): Status {
       const id = jsonApiData.id
-      const name = jsonApiData.attributes.name
+      const name = jsonApiData.attributes.term
       const url = removeBaseUrl(jsonApiData.links.self, this.cvBaseUrl)
 
       return Status.createWithData(id, name, url)

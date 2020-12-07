@@ -80,9 +80,9 @@ export class StatusSearcher {
       '',
       {
         params: {
-          'page[limit]': 10000,
-          'filter[active]': true,
-          sort: 'name'
+          'page[size]': 10000,
+          'filter[status.icontains]': 'ACCEPTED',
+          sort: 'term'
         }
       }
     ).then((rawResponse) => {

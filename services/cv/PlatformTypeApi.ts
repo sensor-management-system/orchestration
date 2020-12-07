@@ -81,8 +81,8 @@ export class PlatformTypeSearcher {
       {
         params: {
           'page[limit]': 10000,
-          'filter[active]': true,
-          sort: 'name'
+          'filter[status.icontains]': 'ACCEPTED',
+          sort: 'term'
         }
       }
     ).then((rawResponse) => {

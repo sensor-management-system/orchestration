@@ -48,7 +48,7 @@ export class PlatformTypeSerializer {
 
     convertJsonApiDataToModel (jsonApiData: IJsonApiDataWithIdAndLinks): PlatformType {
       const id = jsonApiData.id
-      const name = jsonApiData.attributes.name
+      const name = jsonApiData.attributes.term
       const url = removeBaseUrl(jsonApiData.links.self, this.cvBaseUrl)
 
       return PlatformType.createWithData(id, name, url)

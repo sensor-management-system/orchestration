@@ -48,7 +48,7 @@ export class SamplingMediaSerializer {
 
     convertJsonApiDataToModel (jsonApiData: IJsonApiDataWithIdAndLinks): SamplingMedia {
       const id = jsonApiData.id
-      const name = jsonApiData.attributes.name
+      const name = jsonApiData.attributes.term
       const url = removeBaseUrl(jsonApiData.links.self, this.cvBaseUrl)
 
       return SamplingMedia.createWithData(id, name, url)
