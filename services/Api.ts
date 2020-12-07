@@ -90,6 +90,11 @@ export class Api {
 
     // and here we can set settings for all the cv api calls
     const cvConfig: AxiosRequestConfig = {
+      headers: {
+        get: {
+          Accept: 'application/vnd.api+json'
+        }
+      }
     }
 
     this._comparmentApi = new CompartmentApi(
