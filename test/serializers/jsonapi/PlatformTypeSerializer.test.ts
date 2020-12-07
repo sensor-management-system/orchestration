@@ -38,35 +38,33 @@ describe('PlatformTypeSerializer', () => {
       const jsonApiObjectList: any = {
         data: [{
           attributes: {
-            active: true,
             category: null,
             definition: null,
-            name: 'Station',
             note: null,
             provenance: null,
             provenance_uri: null,
-            term: 'station'
+            status: 'Accepted',
+            term: 'Station'
           },
-          id: 'Station',
+          id: '1',
           links: {
-            self: 'http://rz-vm64.gfz-potsdam.de:5001/api/platformtype/Station/'
+            self: 'http://rz-vm64.gfz-potsdam.de:5001/api/platformtypes/1/'
           },
           relationships: {},
           type: 'Platformtype'
         }, {
           attributes: {
-            active: true,
             category: null,
             definition: null,
-            name: 'Drone +',
             note: null,
             provenance: null,
             provenance_uri: null,
-            term: 'drone'
+            status: 'Accepted',
+            term: 'Drone'
           },
-          id: 'Drone',
+          id: '2',
           links: {
-            self: 'http://rz-vm64.gfz-potsdam.de:5001/api/platformtype/Drone/'
+            self: 'http://rz-vm64.gfz-potsdam.de:5001/api/platformtypes/2/'
           },
           relationships: {},
           type: 'Platformtype'
@@ -81,14 +79,14 @@ describe('PlatformTypeSerializer', () => {
       }
 
       const expectedPlatformType1 = PlatformType.createFromObject({
-        id: 'Station',
+        id: '1',
         name: 'Station',
-        uri: 'platformtype/Station'
+        uri: 'platformtypes/1'
       })
       const expectedPlatformType2 = PlatformType.createFromObject({
-        id: 'Drone',
-        name: 'Drone +',
-        uri: 'platformtype/Drone'
+        id: '2',
+        name: 'Drone',
+        uri: 'platformtypes/2'
       })
 
       const serializer = new PlatformTypeSerializer('http://rz-vm64.gfz-potsdam.de:5001/api')

@@ -38,35 +38,33 @@ describe('DeviceTypeSerializer', () => {
       const jsonApiObjectList: any = {
         data: [{
           attributes: {
-            active: true,
             category: 'Communications component',
             definition: 'An electrical device that converts electric power into radio waves and vice versa.',
-            name: 'Antenna',
             note: null,
             provenance: 'Definition adapted from Wikipedia. See http://en.wikipedia.org/wiki/Antenna_(radio)',
             provenance_uri: null,
-            term: 'antenna'
+            status: 'Accepted',
+            term: 'Antenna'
           },
-          id: 'Antenna',
+          id: '1',
           links: {
-            self: 'http://rz-vm64.gfz-potsdam.de:5001/api/equipmenttype/Antenna/'
+            self: 'http://rz-vm64.gfz-potsdam.de:5001/api/equipmenttypes/1/'
           },
           relationships: {},
           type: 'Equipmenttype'
         }, {
           attributes: {
-            active: true,
             category: 'Instrument',
             definition: 'A survey level that makes use of a compensator that ensures the line of sight remains horizontal once the operator has roughly leveled the instrument.',
-            name: 'Automatic level ..',
             note: null,
             provenance: 'Definition adapted from Wikipedia. See http://en.wikipedia.org/wiki/Levelling',
             provenance_uri: null,
-            term: 'automaticLevel'
+            status: 'Accepted',
+            term: 'AutomaticLevel'
           },
-          id: 'Automatic level',
+          id: '2',
           links: {
-            self: 'http://rz-vm64.gfz-potsdam.de:5001/api/equipmenttype/Automatic%20level/'
+            self: 'http://rz-vm64.gfz-potsdam.de:5001/api/equipmenttypes/2/'
           },
           relationships: {},
           type: 'Equipmenttype'
@@ -81,14 +79,14 @@ describe('DeviceTypeSerializer', () => {
       }
 
       const expectedDeviceType1 = DeviceType.createFromObject({
-        id: 'Antenna',
+        id: '1',
         name: 'Antenna',
-        uri: 'equipmenttype/Antenna'
+        uri: 'equipmenttypes/1'
       })
       const expectedDeviceType2 = DeviceType.createFromObject({
-        id: 'Automatic level',
-        name: 'Automatic level ..',
-        uri: 'equipmenttype/Automatic%20level'
+        id: '2',
+        name: 'AutomaticLevel',
+        uri: 'equipmenttypes/2'
       })
 
       const serializer = new DeviceTypeSerializer('http://rz-vm64.gfz-potsdam.de:5001/api')

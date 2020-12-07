@@ -38,35 +38,33 @@ describe('ManufacturerSerializer', () => {
       const jsonApiObjectList: any = {
         data: [{
           attributes: {
-            active: true,
             category: null,
             definition: 'ecoTech Umwelt-Meßsysteme GmbH',
-            name: 'Ecotech',
             note: null,
             provenance: null,
             provenance_uri: null,
-            term: 'ecotech'
+            status: 'Accepted',
+            term: 'ecoTech'
           },
-          id: 'Ecotech',
+          id: '1',
           links: {
-            self: 'http://rz-vm64.gfz-potsdam.de:5001/api/manufacturer/Ecotech/'
+            self: 'http://rz-vm64.gfz-potsdam.de:5001/api/manufacturers/1/'
           },
           relationships: {},
           type: 'Manufacturer'
         }, {
           attributes: {
-            active: true,
             category: null,
             definition: 'Campbell Scientific Ltd.',
-            name: 'Campbell ++',
             note: null,
             provenance: null,
             provenance_uri: null,
-            term: 'campbell'
+            status: 'Accepted',
+            term: 'Campbell'
           },
-          id: 'Campbell',
+          id: '2',
           links: {
-            self: 'http://rz-vm64.gfz-potsdam.de:5001/api/manufacturer/Campbell/'
+            self: 'http://rz-vm64.gfz-potsdam.de:5001/api/manufacturers/2/'
           },
           relationships: {},
           type: 'Manufacturer'
@@ -81,14 +79,14 @@ describe('ManufacturerSerializer', () => {
       }
 
       const expectedManufacturer1 = Manufacturer.createFromObject({
-        id: 'Ecotech',
-        name: 'Ecotech',
-        uri: 'manufacturer/Ecotech'
+        id: '1',
+        name: 'ecoTech',
+        uri: 'manufacturers/1'
       })
       const expectedManufacturer2 = Manufacturer.createFromObject({
-        id: 'Campbell',
-        name: 'Campbell ++',
-        uri: 'manufacturer/Campbell'
+        id: '2',
+        name: 'Campbell',
+        uri: 'manufacturers/2'
       })
 
       const serializer = new ManufacturerSerializer('http://rz-vm64.gfz-potsdam.de:5001/api')

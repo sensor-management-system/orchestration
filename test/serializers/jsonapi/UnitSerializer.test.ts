@@ -38,16 +38,17 @@ describe('UnitSerializer', () => {
       const jsonApiObjectList: any = {
         data: [{
           attributes: {
-            active: true,
-            term: 'gray',
-            unitsabbreviation: 'Gy',
-            unitslink: 'http://qudt.org/vocab/unit#Gray; http://unitsofmeasure.org/ucum.html#para-30',
-            unitsname: 'Gray',
-            unitstypecv: 'Absorbed dose'
+            category: null,
+            definition: null,
+            note: null,
+            provenance: 'ONE_PER_METER',
+            provenance_uri: null,
+            status: 'ACCEPTED',
+            term: '1/m'
           },
-          id: 'Gray',
+          id: '1',
           links: {
-            self: 'http://rz-vm64.gfz-potsdam.de:5001/api/unit/Gray/'
+            self: 'http://rz-vm64.gfz-potsdam.de:5001/api/units/1/'
           },
           relationships: {
             unitstype: {
@@ -61,16 +62,17 @@ describe('UnitSerializer', () => {
         },
         {
           attributes: {
-            active: true,
-            term: 'rad',
-            unitsabbreviation: '',
-            unitslink: 'http://qudt.org/vocab/unit#Rad; http://unitsofmeasure.org/ucum.html#para-33',
-            unitsname: 'RAD',
-            unitstypecv: 'Absorbed dose'
+            category: null,
+            definition: null,
+            note: null,
+            provenance: 'ONE_PER_TIME',
+            provenance_uri: null,
+            status: 'ACCEPTED',
+            term: '1/t'
           },
-          id: 'RAD',
+          id: '2',
           links: {
-            self: 'http://rz-vm64.gfz-potsdam.de:5001/api/unit/RAD/'
+            self: 'http://rz-vm64.gfz-potsdam.de:5001/api/units/2/'
           },
           relationships: {
             unitstype: {
@@ -92,15 +94,15 @@ describe('UnitSerializer', () => {
       }
 
       const expectedUnit1 = Unit.createFromObject({
-        id: 'Gray',
-        name: 'Gray [Gy]',
-        uri: 'unit/Gray'
+        id: '1',
+        name: '1/m',
+        uri: 'units/1'
       })
 
       const expectedUnit2 = Unit.createFromObject({
-        id: 'RAD',
-        name: 'RAD',
-        uri: 'unit/RAD'
+        id: '2',
+        name: '1/t',
+        uri: 'units/2'
       })
 
       const serializer = new UnitSerializer('http://rz-vm64.gfz-potsdam.de:5001/api')

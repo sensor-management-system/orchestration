@@ -38,38 +38,36 @@ describe('SamplingMediaSerializer', () => {
       const jsonApiObjectList: any = {
         data: [{
           attributes: {
-            active: true,
             category: null,
             definition: 'Specimen collection of ambient air or sensor emplaced to measure properties of ambient air.',
-            name: 'Air',
             note: null,
             provenance: null,
             provenance_uri: null,
-            term: 'air'
+            status: 'Accepted',
+            term: 'Air'
           },
-          id: 'Air',
+          id: '1',
           links: {
-            self: 'http://rz-vm64.gfz-potsdam.de:5001/api/medium/Air/'
+            self: 'http://rz-vm64.gfz-potsdam.de:5001/api/samplingmedium/1/'
           },
           relationships: {},
-          type: 'Medium'
+          type: 'Samplingmedium'
         }, {
           attributes: {
-            active: true,
             category: null,
             definition: 'An instrument, sensor or other piece of human-made equipment upon which a measurement is made, such as datalogger temperature or battery voltage.',
-            name: 'Equipment++',
             note: null,
             provenance: null,
             provenance_uri: null,
-            term: 'equipment'
+            status: 'Accepted',
+            term: 'Equipment'
           },
-          id: 'Equipment',
+          id: '2',
           links: {
-            self: 'http://rz-vm64.gfz-potsdam.de:5001/api/medium/Equipment/'
+            self: 'http://rz-vm64.gfz-potsdam.de:5001/api/samplingmedium/2/'
           },
           relationships: {},
-          type: 'Medium'
+          type: 'Samplingmedium'
         }],
         included: [],
         jsonapi: {
@@ -81,14 +79,14 @@ describe('SamplingMediaSerializer', () => {
       }
 
       const expectedSamplingMedium1 = SamplingMedia.createFromObject({
-        id: 'Air',
+        id: '1',
         name: 'Air',
-        uri: 'medium/Air'
+        uri: 'samplingmedium/1'
       })
       const expectedSamplingMedium2 = SamplingMedia.createFromObject({
-        id: 'Equipment',
-        name: 'Equipment++',
-        uri: 'medium/Equipment'
+        id: '2',
+        name: 'Equipment',
+        uri: 'samplingmedium/2'
       })
 
       const serializer = new SamplingMediaSerializer('http://rz-vm64.gfz-potsdam.de:5001/api')
