@@ -72,6 +72,10 @@ export class Api {
   constructor (smsBaseUrl: string | undefined = SMS_BASE_URL, cvBaseUrl: string | undefined = CV_BASE_URL) {
     // here we can set settings for all the sms api calls
     const smsConfig: AxiosRequestConfig = {
+      // for the SMS Backend we need the explicit vnd.api+json
+      headers: {
+        'Content-Type': 'application/vnd.api+json'
+      }
     }
 
     this._contactApi = new ContactApi(
