@@ -14,6 +14,6 @@ class CustomFieldSchema(MarshmallowSchema):
     class Meta:
         type_ = 'customfield'
 
-    id = fields.Integer(as_string=True, dump_only=True)
+    id = fields.Integer(as_string=True)
     key = fields.Str(required=True)
     value = fields.Str(allow_none=True)
