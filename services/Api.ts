@@ -102,36 +102,28 @@ export class Api {
     }
 
     this._compartmentApi = new CompartmentApi(
-      this.createAxios(cvBaseUrl, '/compartments/', cvConfig),
-      cvBaseUrl
+      this.createAxios(cvBaseUrl, '/compartments/', cvConfig)
     )
     this._deviceTypeApi = new DeviceTypeApi(
-      this.createAxios(cvBaseUrl, '/equipmenttypes/', cvConfig),
-      cvBaseUrl
+      this.createAxios(cvBaseUrl, '/equipmenttypes/', cvConfig)
     )
     this._manufacturerApi = new ManufacturerApi(
-      this.createAxios(cvBaseUrl, '/manufacturers/', cvConfig),
-      cvBaseUrl
+      this.createAxios(cvBaseUrl, '/manufacturers/', cvConfig)
     )
     this._platformTypeApi = new PlatformTypeApi(
-      this.createAxios(cvBaseUrl, '/platformtypes/', cvConfig),
-      cvBaseUrl
+      this.createAxios(cvBaseUrl, '/platformtypes/', cvConfig)
     )
     this._propertyApi = new PropertyApi(
-      this.createAxios(cvBaseUrl, '/measuredquantities/', cvConfig),
-      cvBaseUrl
+      this.createAxios(cvBaseUrl, '/measuredquantities/', cvConfig)
     )
     this._samplingMediaApi = new SamplingMediaApi(
-      this.createAxios(cvBaseUrl, '/samplingmedium/', cvConfig),
-      cvBaseUrl
+      this.createAxios(cvBaseUrl, '/samplingmedium/', cvConfig)
     )
     this._statusApi = new StatusApi(
-      this.createAxios(cvBaseUrl, '/equipmentstatus/', cvConfig),
-      cvBaseUrl
+      this.createAxios(cvBaseUrl, '/equipmentstatus/', cvConfig)
     )
     this._unitApi = new UnitApi(
-      this.createAxios(cvBaseUrl, '/units/', cvConfig),
-      cvBaseUrl
+      this.createAxios(cvBaseUrl, '/units/', cvConfig)
     )
 
     this._projectApi = new ProjectApi()

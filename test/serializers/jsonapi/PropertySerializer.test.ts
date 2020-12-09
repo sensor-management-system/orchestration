@@ -81,15 +81,15 @@ describe('PropertySerializer', () => {
       const expectedProperty1 = Property.createFromObject({
         id: '1',
         name: 'Snow Layer Hardness',
-        uri: 'measuredquantities/1'
+        uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/measuredquantities/1/'
       })
       const expectedProperty2 = Property.createFromObject({
         id: '2',
         name: 'Snow Water Equivalent',
-        uri: 'measuredquantities/2'
+        uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/measuredquantities/2/'
       })
 
-      const serializer = new PropertySerializer('http://rz-vm64.gfz-potsdam.de:5001/api')
+      const serializer = new PropertySerializer()
 
       const properties = serializer.convertJsonApiObjectListToModelList(jsonApiObjectList)
 

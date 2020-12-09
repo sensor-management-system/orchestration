@@ -81,15 +81,15 @@ describe('PlatformTypeSerializer', () => {
       const expectedPlatformType1 = PlatformType.createFromObject({
         id: '1',
         name: 'Station',
-        uri: 'platformtypes/1'
+        uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/platformtypes/1/'
       })
       const expectedPlatformType2 = PlatformType.createFromObject({
         id: '2',
         name: 'Drone',
-        uri: 'platformtypes/2'
+        uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/platformtypes/2/'
       })
 
-      const serializer = new PlatformTypeSerializer('http://rz-vm64.gfz-potsdam.de:5001/api')
+      const serializer = new PlatformTypeSerializer()
 
       const platformTypes = serializer.convertJsonApiObjectListToModelList(jsonApiObjectList)
 

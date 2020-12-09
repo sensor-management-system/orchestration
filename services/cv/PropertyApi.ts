@@ -38,9 +38,9 @@ export class PropertyApi {
   private axiosApi: AxiosInstance
   private serializer: PropertySerializer
 
-  constructor (axiosInstance: AxiosInstance, cvBaseUrl: string | undefined) {
+  constructor (axiosInstance: AxiosInstance) {
     this.axiosApi = axiosInstance
-    this.serializer = new PropertySerializer(cvBaseUrl)
+    this.serializer = new PropertySerializer()
   }
 
   newSearchBuilder (): PropertySearchBuilder {

@@ -38,9 +38,9 @@ export class DeviceTypeApi {
   private axiosApi: AxiosInstance
   private serializer: DeviceTypeSerializer
 
-  constructor (axiosInstance: AxiosInstance, cvBaseUrl: string | undefined) {
+  constructor (axiosInstance: AxiosInstance) {
     this.axiosApi = axiosInstance
-    this.serializer = new DeviceTypeSerializer(cvBaseUrl)
+    this.serializer = new DeviceTypeSerializer()
   }
 
   newSearchBuilder (): DeviceTypeSearchBuilder {

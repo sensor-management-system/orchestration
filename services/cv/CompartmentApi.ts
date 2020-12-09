@@ -38,9 +38,9 @@ export class CompartmentApi {
   private axiosApi: AxiosInstance
   private serializer: CompartmentSerializer
 
-  constructor (axiosInstance: AxiosInstance, cvBaseUrl: string | undefined) {
+  constructor (axiosInstance: AxiosInstance) {
     this.axiosApi = axiosInstance
-    this.serializer = new CompartmentSerializer(cvBaseUrl)
+    this.serializer = new CompartmentSerializer()
   }
 
   newSearchBuilder (): CompartmentSearchBuilder {

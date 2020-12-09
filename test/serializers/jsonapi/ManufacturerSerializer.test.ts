@@ -81,15 +81,15 @@ describe('ManufacturerSerializer', () => {
       const expectedManufacturer1 = Manufacturer.createFromObject({
         id: '1',
         name: 'ecoTech',
-        uri: 'manufacturers/1'
+        uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/manufacturers/1/'
       })
       const expectedManufacturer2 = Manufacturer.createFromObject({
         id: '2',
         name: 'Campbell',
-        uri: 'manufacturers/2'
+        uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/manufacturers/2/'
       })
 
-      const serializer = new ManufacturerSerializer('http://rz-vm64.gfz-potsdam.de:5001/api')
+      const serializer = new ManufacturerSerializer()
 
       const manufacturers = serializer.convertJsonApiObjectListToModelList(jsonApiObjectList)
 

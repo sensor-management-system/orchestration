@@ -81,15 +81,15 @@ describe('StatusSerializer', () => {
       const expectedStatus1 = Status.createFromObject({
         id: '1',
         name: 'Complete',
-        uri: 'status/1'
+        uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/status/1/'
       })
       const expectedStatus2 = Status.createFromObject({
         id: '2',
         name: 'Ongoing',
-        uri: 'status/2'
+        uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/status/2/'
       })
 
-      const serializer = new StatusSerializer('http://rz-vm64.gfz-potsdam.de:5001/api')
+      const serializer = new StatusSerializer()
 
       const states = serializer.convertJsonApiObjectListToModelList(jsonApiObjectList)
 

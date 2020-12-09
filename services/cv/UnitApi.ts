@@ -38,9 +38,9 @@ export class UnitApi {
   private axiosApi: AxiosInstance
   private serializer: UnitSerializer
 
-  constructor (axiosInstance: AxiosInstance, cvBaseUrl: string | undefined) {
+  constructor (axiosInstance: AxiosInstance) {
     this.axiosApi = axiosInstance
-    this.serializer = new UnitSerializer(cvBaseUrl)
+    this.serializer = new UnitSerializer()
   }
 
   newSearchBuilder (): UnitSearchBuilder {

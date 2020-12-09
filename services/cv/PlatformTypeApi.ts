@@ -38,9 +38,9 @@ export class PlatformTypeApi {
   private axiosApi: AxiosInstance
   private serializer: PlatformTypeSerializer
 
-  constructor (axiosInstance: AxiosInstance, cvBaseUrl: string | undefined) {
+  constructor (axiosInstance: AxiosInstance) {
     this.axiosApi = axiosInstance
-    this.serializer = new PlatformTypeSerializer(cvBaseUrl)
+    this.serializer = new PlatformTypeSerializer()
   }
 
   newSearchBuilder (): PlatformTypeSearchBuilder {

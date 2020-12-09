@@ -81,15 +81,15 @@ describe('SamplingMediaSerializer', () => {
       const expectedSamplingMedium1 = SamplingMedia.createFromObject({
         id: '1',
         name: 'Air',
-        uri: 'samplingmedium/1'
+        uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/samplingmedium/1/'
       })
       const expectedSamplingMedium2 = SamplingMedia.createFromObject({
         id: '2',
         name: 'Equipment',
-        uri: 'samplingmedium/2'
+        uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/samplingmedium/2/'
       })
 
-      const serializer = new SamplingMediaSerializer('http://rz-vm64.gfz-potsdam.de:5001/api')
+      const serializer = new SamplingMediaSerializer()
 
       const samplingMedia = serializer.convertJsonApiObjectListToModelList(jsonApiObjectList)
 

@@ -33,24 +33,16 @@ import { Property } from '@/models/Property'
 
 import { IJsonApiObjectListWithLinks, IJsonApiDataWithIdAndLinks } from '@/serializers/jsonapi/JsonApiTypes'
 
-import { removeBaseUrl } from '@/utils/urlHelpers'
-
 export class PropertySerializer {
-    private cvBaseUrl: string | undefined
+  convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiObjectListWithLinks): Property[] {
+    return jsonApiObjectList.data.map(this.convertJsonApiDataToModel.bind(this))
+  }
 
-    constructor (cvBaseUrl: string | undefined) {
-      this.cvBaseUrl = cvBaseUrl
-    }
+  convertJsonApiDataToModel (jsonApiData: IJsonApiDataWithIdAndLinks): Property {
+    const id = jsonApiData.id
+    const name = jsonApiData.attributes.term
+    const url = jsonApiData.links.self
 
-    convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiObjectListWithLinks): Property[] {
-      return jsonApiObjectList.data.map(this.convertJsonApiDataToModel.bind(this))
-    }
-
-    convertJsonApiDataToModel (jsonApiData: IJsonApiDataWithIdAndLinks): Property {
-      const id = jsonApiData.id
-      const name = jsonApiData.attributes.term
-      const url = removeBaseUrl(jsonApiData.links.self, this.cvBaseUrl)
-
-      return Property.createWithData(id, name, url)
-    }
+    return Property.createWithData(id, name, url)
+  }
 }

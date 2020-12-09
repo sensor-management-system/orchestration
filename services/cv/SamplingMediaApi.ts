@@ -38,9 +38,9 @@ export class SamplingMediaApi {
   private axiosApi: AxiosInstance
   private serializer: SamplingMediaSerializer
 
-  constructor (axiosInstance: AxiosInstance, cvBaseUrl: string | undefined) {
+  constructor (axiosInstance: AxiosInstance) {
     this.axiosApi = axiosInstance
-    this.serializer = new SamplingMediaSerializer(cvBaseUrl)
+    this.serializer = new SamplingMediaSerializer()
   }
 
   newSearchBuilder (): SamplingMediaSearchBuilder {

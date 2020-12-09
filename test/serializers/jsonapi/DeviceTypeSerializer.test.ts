@@ -81,15 +81,15 @@ describe('DeviceTypeSerializer', () => {
       const expectedDeviceType1 = DeviceType.createFromObject({
         id: '1',
         name: 'Antenna',
-        uri: 'equipmenttypes/1'
+        uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/equipmenttypes/1/'
       })
       const expectedDeviceType2 = DeviceType.createFromObject({
         id: '2',
         name: 'AutomaticLevel',
-        uri: 'equipmenttypes/2'
+        uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/equipmenttypes/2/'
       })
 
-      const serializer = new DeviceTypeSerializer('http://rz-vm64.gfz-potsdam.de:5001/api')
+      const serializer = new DeviceTypeSerializer()
 
       const deviceTypes = serializer.convertJsonApiObjectListToModelList(jsonApiObjectList)
 

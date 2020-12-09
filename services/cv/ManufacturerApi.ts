@@ -38,9 +38,9 @@ export class ManufacturerApi {
   private axiosApi: AxiosInstance
   private serializer: ManufacturerSerializer
 
-  constructor (axiosInstance: AxiosInstance, cvBaseUrl: string | undefined) {
+  constructor (axiosInstance: AxiosInstance) {
     this.axiosApi = axiosInstance
-    this.serializer = new ManufacturerSerializer(cvBaseUrl)
+    this.serializer = new ManufacturerSerializer()
   }
 
   newSearchBuilder (): ManufacturerSearchBuilder {

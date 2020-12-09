@@ -38,9 +38,9 @@ export class StatusApi {
   private axiosApi: AxiosInstance
   private serializer: StatusSerializer
 
-  constructor (axiosInstance: AxiosInstance, cvBaseUrl: string | undefined) {
+  constructor (axiosInstance: AxiosInstance) {
     this.axiosApi = axiosInstance
-    this.serializer = new StatusSerializer(cvBaseUrl)
+    this.serializer = new StatusSerializer()
   }
 
   newSearchBuilder (): StatusSearchBuilder {

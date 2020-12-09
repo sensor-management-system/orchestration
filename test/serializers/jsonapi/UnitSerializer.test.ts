@@ -96,16 +96,16 @@ describe('UnitSerializer', () => {
       const expectedUnit1 = Unit.createFromObject({
         id: '1',
         name: '1/m',
-        uri: 'units/1'
+        uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/units/1/'
       })
 
       const expectedUnit2 = Unit.createFromObject({
         id: '2',
         name: '1/t',
-        uri: 'units/2'
+        uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/units/2/'
       })
 
-      const serializer = new UnitSerializer('http://rz-vm64.gfz-potsdam.de:5001/api')
+      const serializer = new UnitSerializer()
 
       const units = serializer.convertJsonApiObjectListToModelList(jsonApiObjectList)
 

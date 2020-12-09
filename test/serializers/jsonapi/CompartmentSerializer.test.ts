@@ -81,15 +81,15 @@ describe('CompartmentSerializer', () => {
       const expectedCompartment1 = Compartment.createFromObject({
         id: '1',
         name: 'Age',
-        uri: 'variabletypes/1'
+        uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/variabletypes/1/'
       })
       const expectedCompartment2 = Compartment.createFromObject({
         id: '2',
         name: 'Biota',
-        uri: 'variabletypes/2'
+        uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/variabletypes/2/'
       })
 
-      const serializer = new CompartmentSerializer('http://rz-vm64.gfz-potsdam.de:5001/api')
+      const serializer = new CompartmentSerializer()
 
       const compartments = serializer.convertJsonApiObjectListToModelList(jsonApiObjectList)
 
