@@ -81,7 +81,7 @@ export class PlatformTypeSearcher {
       {
         params: {
           'page[limit]': 10000,
-          'filter[status.icontains]': 'ACCEPTED',
+          'filter[status.iexact]': 'ACCEPTED',
           sort: 'term'
         }
       }

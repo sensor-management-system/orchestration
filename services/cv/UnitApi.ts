@@ -81,7 +81,7 @@ export class UnitSearcher {
       {
         params: {
           'page[size]': 10000,
-          'filter[status.icontains]': 'ACCEPTED',
+          'filter[status.iexact]': 'ACCEPTED',
           sort: 'term'
         }
       }
