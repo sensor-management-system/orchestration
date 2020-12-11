@@ -40,7 +40,7 @@ services:
     environment:
       BASE_URL: "/"
       SMS_BACKEND_URL: "http://rz-vm64.gfz-potsdam.de:5000/rdm/svm-api/v1"
-      CV_BACKEND_URL: "http://rz-vm64.gfz-potsdam.de:5001/api"
+      CV_BACKEND_URL: "http://rz-vm64.gfz-potsdam.de:8000/api/v1"
     volumes:
       - .:/home/node/
     command: >
