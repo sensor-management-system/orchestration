@@ -7,10 +7,8 @@ flask-rest-jsonapi ) """
 
 from flask import request, url_for
 from flask.views import MethodView
-from flask_rest_jsonapi.decorators import (
-    check_method_requirements,
-    jsonapi_exception_formatter,
-)
+from flask_rest_jsonapi.decorators import (check_method_requirements,
+                                           jsonapi_exception_formatter)
 from flask_rest_jsonapi.pagination import add_pagination_links
 from flask_rest_jsonapi.querystring import QueryStringManager as QSManager
 from flask_rest_jsonapi.resource import ResourceMeta
