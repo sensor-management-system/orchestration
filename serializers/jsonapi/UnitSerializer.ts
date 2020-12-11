@@ -39,7 +39,7 @@ export class UnitSerializer {
   }
 
   convertJsonApiDataToModel (jsonApiData: IJsonApiDataWithIdAndLinks): Unit {
-    const id = jsonApiData.id
+    const id = jsonApiData.id.toString()
     const name = jsonApiData.attributes.term
     const url = jsonApiData.links.self
 

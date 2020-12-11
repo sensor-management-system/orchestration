@@ -37,7 +37,7 @@ import { IJsonApiNestedElement } from '@/serializers/jsonapi/JsonApiTypes'
 export class DevicePropertySerializer {
   convertJsonApiElementToModel (property: IJsonApiNestedElement): DeviceProperty {
     const result = new DeviceProperty()
-    result.id = property.id
+    result.id = property.id.toString()
     result.measuringRange = new MeasuringRange(
       property.measuring_range_min,
       property.measuring_range_max

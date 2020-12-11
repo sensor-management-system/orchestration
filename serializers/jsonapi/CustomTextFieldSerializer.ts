@@ -35,7 +35,7 @@ import { IJsonApiNestedElement } from '@/serializers/jsonapi/JsonApiTypes'
 export class CustomTextFieldSerializer {
   convertJsonApiElementToModel (customfield: IJsonApiNestedElement): CustomTextField {
     const result = new CustomTextField()
-    result.id = customfield.id
+    result.id = customfield.id.toString()
     result.key = customfield.key || ''
     result.value = customfield.value || ''
 

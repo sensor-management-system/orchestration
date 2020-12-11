@@ -65,7 +65,7 @@ export class DeviceSerializer {
     const attributes = jsonApiData.attributes
     const relationships = jsonApiData.relationships || {}
 
-    result.id = jsonApiData.id
+    result.id = jsonApiData.id.toString()
 
     result.description = attributes.description || ''
     result.shortName = attributes.short_name || ''

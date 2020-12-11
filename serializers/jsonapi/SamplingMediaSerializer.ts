@@ -39,7 +39,7 @@ export class SamplingMediaSerializer {
   }
 
   convertJsonApiDataToModel (jsonApiData: IJsonApiDataWithIdAndLinks): SamplingMedia {
-    const id = jsonApiData.id
+    const id = jsonApiData.id.toString()
     const name = jsonApiData.attributes.term
     const url = jsonApiData.links.self
 
