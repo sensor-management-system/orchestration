@@ -4,18 +4,16 @@
 Modifications: Adopted form Custom content negotiation #171 ( miLibris /
 flask-rest-jsonapi ) """
 
-import inspect
 
 from flask import request, url_for
-from flask.views import MethodView, MethodViewType
-from flask_rest_jsonapi.data_layers.alchemy import SqlalchemyDataLayer
-from flask_rest_jsonapi.data_layers.base import BaseDataLayer
+from flask.views import MethodView
 from flask_rest_jsonapi.decorators import (
     check_method_requirements,
     jsonapi_exception_formatter,
 )
 from flask_rest_jsonapi.pagination import add_pagination_links
 from flask_rest_jsonapi.querystring import QueryStringManager as QSManager
+from flask_rest_jsonapi.resource import ResourceMeta
 from flask_rest_jsonapi.schema import compute_schema
 from marshmallow import ValidationError
 from marshmallow_jsonapi.exceptions import IncorrectTypeError
@@ -24,42 +22,6 @@ from six import with_metaclass
 
 from .content import parse_json, render_json
 from .exceptions import InvalidAcceptType
-
-
-class ResourceMeta(MethodViewType):
-    """Meta class to initilize the data layer and decorators of a resource"""
-
-    def __new__(cls, name, bases, d):
-        """Constructor of a resource class"""
-        rv = super(ResourceMeta, cls).__new__(cls, name, bases, d)
-        if "data_layer" in d:
-            if not isinstance(d["data_layer"], dict):
-                raise Exception(
-                    "You must provide a data layer information as dict in {}".format(
-                        cls.__name__
-                    )
-                )
-
-            if d["data_layer"].get(
-                "class"
-            ) is not None and BaseDataLayer not in inspect.getmro(
-                d["data_layer"]["class"]
-            ):
-                raise Exception(
-                    "You must provide a data layer class inherited from BaseDataLayer in {}".format(
-                        cls.__name__
-                    )
-                )
-
-            data_layer_cls = d["data_layer"].get("class", SqlalchemyDataLayer)
-            data_layer_kwargs = d["data_layer"]
-            rv._data_layer = data_layer_cls(data_layer_kwargs)
-
-        rv.decorators = ()
-        if "decorators" in d:
-            rv.decorators += d["decorators"]
-
-        return rv
 
 
 class Resource(MethodView):
