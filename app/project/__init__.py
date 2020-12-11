@@ -6,7 +6,7 @@ from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 
 from project.api.token_checker import auth_blueprint
-from project.frj_monkey_patching.api import Api
+from project.frj_monkey_patching.api import ApiMP
 from project.frj_monkey_patching.render_csv import render_csv
 from project.urls import create_endpoints
 
@@ -42,7 +42,7 @@ def create_app():
     app.shell_context_processor({"app": app, "db": DB})
 
     # Create endpoints
-    api = Api(app, response_renderers={"text/csv": render_csv})
+    api = ApiMP(app, response_renderers={"text/csv": render_csv})
     create_endpoints(api)
 
     # test to ensure the proper config was loaded
