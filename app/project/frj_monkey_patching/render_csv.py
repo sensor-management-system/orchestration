@@ -11,13 +11,11 @@ def flatten_json(y):
 
     def flatten(x, name=""):
         if type(x) is dict:
-            for a in x:
-                flatten(x[a], name + a + ".")
+            for key, val in x.items():
+                flatten(val, name + key + ".")
         elif type(x) is list:
-            i = 0
-            for a in x:
+            for i, a in enumerate(x):
                 flatten(a, name + str(i) + ".")
-                i += 1
         else:
             out[name[:-1]] = x
 
