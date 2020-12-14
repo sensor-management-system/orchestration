@@ -1,4 +1,4 @@
-from project.frj_monkey_patching.resource import ResourceList
+from project.frj_csv_export.resource import ResourceList
 from project.api.models.base_model import db
 from project.api.models.configuration_platform import ConfigurationPlatform
 from project.api.schemas.configuration_platform_schema import ConfigurationPlatformSchema

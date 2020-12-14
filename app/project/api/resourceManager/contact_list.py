@@ -1,4 +1,4 @@
-from project.frj_monkey_patching.resource import ResourceList
+from project.frj_csv_export.resource import ResourceList
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.orm.exc import NoResultFound
 

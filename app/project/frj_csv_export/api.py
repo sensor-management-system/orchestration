@@ -8,11 +8,10 @@ additional oauth manager and permission manager
 flask-rest-jsonapi )
 """
 
+from flask_rest_jsonapi import Api as APIBase
 
-from flask_rest_jsonapi import Api
 
-
-class ApiMP(Api):
+class Api(APIBase):
     """The main class of the Api"""
 
     def __init__(
