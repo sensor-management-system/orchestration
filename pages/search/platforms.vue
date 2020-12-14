@@ -94,6 +94,14 @@ permissions and limitations under the Licence.
       </v-tab-item>
     </v-tabs-items>
 
+    <!-- TODO:
+       * Find a better place to put the button (right upper corner?)
+       * Add icon
+     -->
+    <v-btn @click.prevent="exportCsv">
+      CSV
+    </v-btn>
+
     <div v-if="loading">
       <div class="text-center pt-2">
         <v-progress-circular indeterminate />
@@ -424,6 +432,8 @@ permissions and limitations under the Licence.
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 
+import { saveAs } from 'file-saver'
+
 import ManufacturerSelect from '@/components/ManufacturerSelect.vue'
 import PlatformTypeSelect from '@/components/PlatformTypeSelect.vue'
 import StatusSelect from '@/components/StatusSelect.vue'
@@ -621,6 +631,15 @@ export default class SearchPlatformsPage extends Vue {
 
   canLoadNext () {
     return this.loader != null && this.loader.funToLoadNext != null
+  }
+
+  exportCsv () {
+    // TODO: Get the last used current searcher (to export what you see)
+    this.$api.platforms.csvBlob().then((blob) => {
+      saveAs(blob, 'platforms.csv')
+    }).catch((_err) => {
+      this.$store.commit('snackbar/setError', 'CSV export failed')
+    })
   }
 
   deleteAndCloseDialog (id: string) {

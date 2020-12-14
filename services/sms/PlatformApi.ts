@@ -102,6 +102,21 @@ export class PlatformApi {
   newSearchBuilder (): PlatformSearchBuilder {
     return new PlatformSearchBuilder(this.axiosApi, this.serializer)
   }
+
+  csvBlob (): Promise<Blob> {
+    // TODO: Set it to the platform searcher (so that we use the search & sort settings)
+    // TODO: Set pagination so that we query all the entries
+    const url = ''
+    return this.axiosApi.request({
+      url,
+      method: 'get',
+      headers: {
+        accept: 'text/csv'
+      }
+    }).then((response) => {
+      return new Blob([response.data], { type: 'text/csv;charset=utf-8' })
+    })
+  }
 }
 
 export class PlatformSearchBuilder {
