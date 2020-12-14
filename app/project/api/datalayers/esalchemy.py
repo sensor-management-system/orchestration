@@ -220,7 +220,7 @@ class EsSqlalchemyDataLayer(SqlalchemyDataLayer):
 
         return {"size": size, "number": number}
 
-    def get_collection(self, qs, view_kwargs):
+    def get_collection(self, qs, view_kwargs, filters=None):
         """
         Return the collection according to the arguments and filters.
 
@@ -235,7 +235,7 @@ class EsSqlalchemyDataLayer(SqlalchemyDataLayer):
         # then we want just to use the basic json api features
         # (filtering, sorting, pagination)
         if current_app.elasticsearch is None:
-            return super().get_collection(qs, view_kwargs)
+            return super().get_collection(qs, view_kwargs, filters)
 
         # All the filter should be used in the search method.
         query_builder = EsQueryBuilder()
@@ -245,7 +245,7 @@ class EsSqlalchemyDataLayer(SqlalchemyDataLayer):
 
         # Also, if we don't get a search string, we do the very same.
         if not query_builder.is_set():
-            return super().get_collection(qs, view_kwargs)
+            return super().get_collection(qs, view_kwargs, filters)
 
         # now we have a search string, so we want to go with our search logic
         # As in the initial get_collection method we give a hook here.
