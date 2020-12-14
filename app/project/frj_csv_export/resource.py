@@ -4,14 +4,15 @@
 Modifications: Adopted form Custom content negotiation #171 ( miLibris /
 flask-rest-jsonapi ) """
 
-
 from flask import request, url_for
-from flask.views import MethodView
-from flask_rest_jsonapi.decorators import (check_method_requirements,
-                                           jsonapi_exception_formatter)
+from flask_rest_jsonapi.decorators import (
+    check_method_requirements,
+    jsonapi_exception_formatter,
+)
 from flask_rest_jsonapi.pagination import add_pagination_links
 from flask_rest_jsonapi.querystring import QueryStringManager as QSManager
-from flask_rest_jsonapi.resource import ResourceMeta
+from flask_rest_jsonapi.resource import Resource as ResourceBase
+from flask_rest_jsonapi.resource import ResourceMeta as ResourceMetaBase
 from flask_rest_jsonapi.schema import compute_schema
 from marshmallow import ValidationError
 from marshmallow_jsonapi.exceptions import IncorrectTypeError
@@ -22,7 +23,7 @@ from .content import parse_json, render_json
 from .exceptions import InvalidAcceptType
 
 
-class Resource(MethodView):
+class Resource(ResourceBase):
     """Base resource class"""
 
     def __new__(cls, request_parsers=None, response_renderers=None):
@@ -80,7 +81,7 @@ class Resource(MethodView):
         return renderer(response)
 
 
-class ResourceList(with_metaclass(ResourceMeta, Resource)):
+class ResourceList(with_metaclass(ResourceMetaBase, ResourceBase)):
     """Base class of a resource list manager"""
 
     @check_method_requirements
