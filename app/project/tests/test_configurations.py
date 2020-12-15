@@ -213,6 +213,66 @@ class TestConfigurationsService(BaseTestCase):
             # clean up after each run
             self.tearDown()
 
+    def test_add_configuration_with_firmware_version(self):
+        """Ensure POST a new configuration (+ firmware) can be added to the database."""
+
+        # we want to run the very same test with multiple dates
+        firmware_version = "v.1.0"
+
+        devices_json = extract_data_from_json_file(
+            self.device_json_data_url, "devices"
+        )
+
+        device_data = {"data": {"type": "device", "attributes": devices_json[0]}}
+        super().add_object(
+            url=self.device_url, data_object=device_data, object_type="device"
+        )
+
+        platforms_json = extract_data_from_json_file(
+            self.platform_json_data_url, "platforms"
+        )
+
+        platform_data = {
+            "data": {"type": "platform", "attributes": platforms_json[0]}
+        }
+
+        super().add_object(
+            url=self.platform_url, data_object=platform_data, object_type="platform"
+        )
+
+        config_json = extract_data_from_json_file(
+            self.json_data_url, "configuration"
+        )
+
+        config_json[0]["hierarchy"][0]["children"][0][
+            "firmware_version"
+        ] = firmware_version
+
+        config_data = {
+            "data": {"type": "configuration", "attributes": config_json[0]}
+        }
+        res = super().add_object(
+            url=self.configurations_url,
+            data_object=config_data,
+            object_type=self.object_type,
+        )
+        self.assertEqual(
+            firmware_version,
+            res["data"]["attributes"]["hierarchy"][0]["children"][0][
+                "firmware_version"
+            ],
+        )
+
+        configuration_device = (
+            db.session.query(ConfigurationDevice)
+            .filter_by(device_id=1, configuration_id=1)
+            .first()
+        )
+        self.assertEqual(
+            configuration_device.firmware_version,
+            firmware_version
+        )
+
     def test_add_configuration_with_int_as_calibration_type(self):
         """Ensure That a Post for a new configuration
         with value-type for calibration-date = integer throw
