@@ -43,6 +43,7 @@ permissions and limitations under the Licence.
         <v-text-field
           v-model="searchOptions.text"
           label="Name"
+          @keydown="checkIfEnterIsPressedAndRunSearch"
         />
       </v-col>
       <v-col cols="12" md="3">
@@ -322,6 +323,12 @@ export default class ConfigurationsPlatformDeviceSearch extends Vue {
      */
     if (this.canAddDevices) {
       this.$emit('add-device', device)
+    }
+  }
+
+  checkIfEnterIsPressedAndRunSearch (keyboardEvent: KeyboardEvent) {
+    if (keyboardEvent.key === 'Enter') {
+      this.search()
     }
   }
 }
