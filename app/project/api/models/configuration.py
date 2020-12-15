@@ -98,8 +98,8 @@ class Configuration(db.Model, AuditMixin, SearchableMixin):
 
         for new_cp in new_configuration_platforms:
             platform_id = new_cp.platform_id
-            old_configuration_platform = current_configuration_platform_by_platform_id.get(
-                platform_id, None
+            old_configuration_platform = (
+                current_configuration_platform_by_platform_id.get(platform_id, None)
             )
             if old_configuration_platform is not None:
                 new_cp.id = old_configuration_platform.id
@@ -128,7 +128,6 @@ class Configuration(db.Model, AuditMixin, SearchableMixin):
                 devices.append(configuration_device.device)
             if configuration_device.firmware_version is not None:
                 firmware_versions.append(configuration_device.firmware_version)
-
 
         return {
             "label": self.label,
@@ -165,11 +164,7 @@ class Configuration(db.Model, AuditMixin, SearchableMixin):
                     "status": {"type": "keyword", "fields": {"text": {"type": "text"}}},
                     "location_type": {
                         "type": "keyword",
-                        "fields": {
-                            "text": {
-                                "type": "text"
-                            }
-                        }
+                        "fields": {"text": {"type": "text"}},
                     },
                     "project_name": {
                         "type": "keyword",

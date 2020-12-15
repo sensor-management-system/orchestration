@@ -219,9 +219,7 @@ class TestConfigurationsService(BaseTestCase):
         # we want to run the very same test with multiple dates
         firmware_version = "v.1.0"
 
-        devices_json = extract_data_from_json_file(
-            self.device_json_data_url, "devices"
-        )
+        devices_json = extract_data_from_json_file(self.device_json_data_url, "devices")
 
         device_data = {"data": {"type": "device", "attributes": devices_json[0]}}
         super().add_object(
@@ -232,25 +230,19 @@ class TestConfigurationsService(BaseTestCase):
             self.platform_json_data_url, "platforms"
         )
 
-        platform_data = {
-            "data": {"type": "platform", "attributes": platforms_json[0]}
-        }
+        platform_data = {"data": {"type": "platform", "attributes": platforms_json[0]}}
 
         super().add_object(
             url=self.platform_url, data_object=platform_data, object_type="platform"
         )
 
-        config_json = extract_data_from_json_file(
-            self.json_data_url, "configuration"
-        )
+        config_json = extract_data_from_json_file(self.json_data_url, "configuration")
 
         config_json[0]["hierarchy"][0]["children"][0][
             "firmware_version"
         ] = firmware_version
 
-        config_data = {
-            "data": {"type": "configuration", "attributes": config_json[0]}
-        }
+        config_data = {"data": {"type": "configuration", "attributes": config_json[0]}}
         res = super().add_object(
             url=self.configurations_url,
             data_object=config_data,
@@ -268,10 +260,7 @@ class TestConfigurationsService(BaseTestCase):
             .filter_by(device_id=1, configuration_id=1)
             .first()
         )
-        self.assertEqual(
-            configuration_device.firmware_version,
-            firmware_version
-        )
+        self.assertEqual(configuration_device.firmware_version, firmware_version)
 
     def test_add_configuration_with_int_as_calibration_type(self):
         """Ensure That a Post for a new configuration
