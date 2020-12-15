@@ -103,6 +103,18 @@ permissions and limitations under the Licence.
           />
         </v-menu>
       </v-col>
+      <v-col
+        cols="12"
+        md="2"
+      >
+        <v-text-field
+          :value="value.firemwareVersion"
+          label="Firmware version"
+          :readonly="readonly"
+          :disabled="readonly"
+          @change="update('firmwareVersion', $event)"
+        />
+      </v-col>
     </v-row>
   </div>
 </template>
@@ -175,6 +187,9 @@ export default class DeviceConfigurationAttributesForm extends Vue {
         break
       case 'calibrationDate':
         newObj.calibrationDate = stringToDate(value)
+        break
+      case 'firmwareVersion':
+        newObj.firmwareVersion = String(value)
         break
       default:
         throw new TypeError('key ' + key + ' is not valid')

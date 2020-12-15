@@ -90,14 +90,16 @@ describe('ConfigurationSerializer', () => {
                     offset_x: 7.0,
                     offset_y: 8.0,
                     offset_z: 9.0,
-                    calibration_date: '2020-01-01T13:49:48.015620+00:00'
+                    calibration_date: '2020-01-01T13:49:48.015620+00:00',
+                    firmware_version: 'v1.0'
                   }, {
                     type: 'device',
                     id: '40',
                     offset_x: 10.0,
                     offset_y: 11.0,
                     offset_z: 12.0,
-                    calibration_date: null
+                    calibration_date: null,
+                    firmware_version: null
                   }]
                 }]
               }, {
@@ -606,14 +608,16 @@ describe('ConfigurationSerializer', () => {
           offsetX: 7.0,
           offsetY: 8.0,
           offsetZ: 9.0,
-          calibrationDate: new Date('2020-01-01T13:49:48.015620+00:00')
+          calibrationDate: new Date('2020-01-01T13:49:48.015620+00:00'),
+          firmwareVersion: 'v1.0'
         }),
         DeviceConfigurationAttributes.createFromObject({
           device: expectedDevice2,
           offsetX: 10.0,
           offsetY: 11.0,
           offsetZ: 12.0,
-          calibrationDate: null
+          calibrationDate: null,
+          firmwareVersion: ''
         })
       ]
 
@@ -1182,7 +1186,8 @@ describe('ConfigurationSerializer', () => {
         offsetX: 11.0,
         offsetY: 12.0,
         offsetZ: 13.0,
-        calibrationDate: null
+        calibrationDate: null,
+        firmwareVersion: ''
       }),
       // none for device4
       DeviceConfigurationAttributes.createFromObject({
@@ -1190,7 +1195,8 @@ describe('ConfigurationSerializer', () => {
         offsetX: 22.0,
         offsetY: 23.0,
         offsetZ: 24.0,
-        calibrationDate: new Date('2020-11-09T00:00:00.000Z')
+        calibrationDate: new Date('2020-11-09T00:00:00.000Z'),
+        firmwareVersion: 'v.2.0'
       })
 
     ]
@@ -1215,7 +1221,8 @@ describe('ConfigurationSerializer', () => {
           id: '3',
           offset_x: 11.0,
           offset_y: 12.0,
-          offset_z: 13.0
+          offset_z: 13.0,
+          firmware_version: ''
         }, {
           type: 'device',
           id: '4'
@@ -1225,7 +1232,8 @@ describe('ConfigurationSerializer', () => {
           offset_x: 22.0,
           offset_y: 23.0,
           offset_z: 24.0,
-          calibration_date: '2020-11-09T00:00:00.000Z'
+          calibration_date: '2020-11-09T00:00:00.000Z',
+          firmware_version: 'v.2.0'
         }]
       }]
     }, {

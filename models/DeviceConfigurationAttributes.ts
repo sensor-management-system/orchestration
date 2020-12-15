@@ -37,6 +37,7 @@ export interface IDeviceConfigurationAttributes {
   offsetY: number
   offsetZ: number
   calibrationDate: Date | null
+  firmwareVersion: string
 }
 
 export class DeviceConfigurationAttributes implements IDeviceConfigurationAttributes {
@@ -45,6 +46,7 @@ export class DeviceConfigurationAttributes implements IDeviceConfigurationAttrib
   private _offsetY: number = 0
   private _offsetZ: number = 0
   private _calibrationDate: Date | null = null
+  private _firmwareVersion: string = ''
 
   constructor (device: Device) {
     this._device = device
@@ -57,6 +59,7 @@ export class DeviceConfigurationAttributes implements IDeviceConfigurationAttrib
     newObject.offsetY = someObject.offsetY
     newObject.offsetZ = someObject.offsetZ
     newObject.calibrationDate = someObject.calibrationDate instanceof Date ? new Date(someObject.calibrationDate.getTime()) : null
+    newObject.firmwareVersion = someObject.firmwareVersion
 
     return newObject
   }
@@ -99,5 +102,13 @@ export class DeviceConfigurationAttributes implements IDeviceConfigurationAttrib
 
   set calibrationDate (date: Date | null) {
     this._calibrationDate = date
+  }
+
+  get firmwareVersion (): string {
+    return this._firmwareVersion
+  }
+
+  set firmwareVersion (newFirmwareVersion: string) {
+    this._firmwareVersion = newFirmwareVersion
   }
 }

@@ -187,7 +187,8 @@ export class ConfigurationSerializer {
           offsetX: element.offset_x || 0.0,
           offsetY: element.offset_y || 0.0,
           offsetZ: element.offset_z || 0.0,
-          calibrationDate: element.calibration_date != null ? new Date(element.calibration_date) : null
+          calibrationDate: element.calibration_date != null ? new Date(element.calibration_date) : null,
+          firmwareVersion: element.firmware_version || ''
         })
 
         listOfDeviceAttributes.push(deviceAttribute)
@@ -306,6 +307,7 @@ export class ConfigurationSerializer {
           if (calibrationDate != null) {
             elementData.calibration_date = calibrationDate.toISOString()
           }
+          elementData.firmware_version = deviceAttributeLookupById[id].firmwareVersion
         }
         listOfChildren.push(elementData)
       }
