@@ -72,26 +72,26 @@ class ConfigurationSchema(Schema):
         id_field="id",
     )
 
-    configuration_platforms = Relationship(
-        attribute="configuration_platforms",
-        self_view="configuration_platforms",
-        self_view_kwargs={"id": "<id>"},
-        related_view="configuration_platform_list",
-        related_view_kwargs={"configuration_id": "<id>"},
-        many=True,
-        schema="ConfigurationPlatformSchema",
-        type_="configuration_platform",
-        id_field="id",
-    )
-
-    configuration_devices = Relationship(
-        attribute="configuration_devices",
-        self_view="configuration_devices",
-        self_view_kwargs={"id": "<id>"},
-        realted_view="configuration_device_list",
-        related_view_kwargs={"configuration_id": "<id>"},
-        many=True,
-        schema="ConfigurationDeviceSchema",
-        type="configuration_device",
-        id_field="id",
-    )
+    # configuration_platforms = Relationship(
+    #     attribute="configuration_platforms",
+    #     self_view="configuration_platforms",
+    #     self_view_kwargs={"id": "<id>"},
+    #     related_view="configuration_platform_list",
+    #     related_view_kwargs={"configuration_id": "<id>"},
+    #     many=True,
+    #     schema="ConfigurationPlatformSchema",
+    #     type_="configuration_platform",
+    #     id_field="id",
+    # )
+    #
+    # configuration_devices = Relationship(
+    #     attribute="configuration_devices",
+    #     self_view="configuration_devices",
+    #     self_view_kwargs={"id": "<id>"},
+    #     realted_view="configuration_device_list",
+    #     related_view_kwargs={"configuration_id": "<id>"},
+    #     many=True,
+    #     schema="ConfigurationDeviceSchema",
+    #     type="configuration_device",
+    #     id_field="id",
+    # )
