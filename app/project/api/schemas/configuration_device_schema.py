@@ -14,6 +14,7 @@ class ConfigurationDeviceSchema(Schema):
     offset_z = fields.Float()
     calibration_date = fields.DateTime()
     configuration_id = fields.Integer()
+    firmware_version = fields.Str()
 
     configuration = Relationship(
         self_view_kwargs={"id": "<id>"},
