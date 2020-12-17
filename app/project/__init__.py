@@ -1,14 +1,14 @@
 import os
 
+from elasticsearch import Elasticsearch
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
+from flask_cors import CORS
 from flask_migrate import Migrate
 from flask_rest_jsonapi import Api
-from flask_cors import CORS
-from project.urls import create_endpoints
+from flask_sqlalchemy import SQLAlchemy
 from project.api.token_checker import auth_blueprint
-
-from elasticsearch import Elasticsearch
+from project.api.upload_files import upload_blueprint
+from project.urls import create_endpoints
 
 DB = SQLAlchemy()
 migrate = Migrate()
@@ -58,5 +58,6 @@ def create_app():
     # print(app.config, file=sys.stderr)
 
     app.register_blueprint(auth_blueprint)
+    app.register_blueprint(upload_blueprint)
 
     return app
