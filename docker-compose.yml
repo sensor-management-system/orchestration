@@ -26,12 +26,13 @@ services:
     ports:
       - "${HTTP_LOCAL_BINDING:-127.0.0.1:5000}:5000"
     env_file:
-         - ./app_env/compose.env
+      - ./app_env/compose.env
     depends_on:
       - db
     networks:
       - elastic
       - db
+      - minio
     command: >
       sh -c "
       apk add --no-cache --virtual .build-deps \
@@ -54,12 +55,51 @@ services:
       - ./app/project/db/create.sql:/docker-entrypoint-initdb.d/create.sql
     networks:
       - db
+  minio:
+    image: minio/minio:RELEASE.2020-12-16T05-05-17Z
+    volumes:
+      - data1:/data1
+    expose:
+      - "9000"
+    ports:
+      - "127.0.0.1:9000:9000"
+    networks:
+      minio:
+        ipv4_address: 172.16.238.10
+    environment:
+      MINIO_ACCESS_KEY: minio
+      MINIO_SECRET_KEY: minio123
+    command: server /data1
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+#  mc:
+#    image: minio/mc:latest
+#    depends_on:
+#      - minio
+#    entrypoint: >
+#      /bin/sh -c "
+#      /usr/bin/mc config host rm local;"
+#      /usr/bin/mc config host add --quiet --api s3v4 local http://172.16.238.10:9000 minio minio123;
+#      /usr/bin/mc rb --force local/miniopublicbucket/;
+#      /usr/bin/mc mb --quiet local/miniopublicbucket/;
+#      /usr/bin/mc policy set public local/miniopublicbucket;
+#      "
 
 volumes:
   esdata01:
     driver: local
-  
+  data1:
+
 networks:
   elastic:
     driver: bridge
   db:
+  minio:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.16.238.0/24
