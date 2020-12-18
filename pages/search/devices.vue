@@ -116,6 +116,56 @@ permissions and limitations under the Licence.
         <template v-else>
           {{ totalCount }} devices found
         </template>
+        <v-spacer />
+
+        <template v-if="lastActiveSearcher != null">
+          <v-dialog v-model="processing" max-width="100">
+            <v-card>
+              <v-card-text>
+                <div class="text-center pt-2">
+                  <v-progress-circular indeterminate />
+                </div>
+              </v-card-text>
+            </v-card>
+          </v-dialog>
+          <v-menu
+            close-on-click
+            close-on-content-click
+            offset-x
+            left
+            z-index="999"
+          >
+            <template v-slot:activator="{ on }">
+              <v-btn
+                icon
+                v-on="on"
+              >
+                <v-icon
+                  dense
+                >
+                  mdi-file-download
+                </v-icon>
+              </v-btn>
+            </template>
+            <v-list>
+              <v-list-item
+                dense
+                @click.prevent="exportCsv"
+              >
+                <v-list-item-content>
+                  <v-list-item-title>
+                    <v-icon
+                      left
+                    >
+                      mdi-table
+                    </v-icon>
+                    CSV
+                  </v-list-item-title>
+                </v-list-item-content>
+              </v-list-item>
+            </v-list>
+          </v-menu>
+        </template>
       </v-subheader>
       <v-hover
         v-for="result in searchResults"
@@ -424,6 +474,8 @@ permissions and limitations under the Licence.
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 
+import { saveAs } from 'file-saver'
+
 import DeviceTypeSelect from '@/components/DeviceTypeSelect.vue'
 import ManufacturerSelect from '@/components/ManufacturerSelect.vue'
 import StatusSelect from '@/components/StatusSelect.vue'
@@ -435,6 +487,7 @@ import { Device } from '@/models/Device'
 import { DeviceType } from '@/models/DeviceType'
 import { Manufacturer } from '@/models/Manufacturer'
 import { Status } from '@/models/Status'
+import { DeviceSearcher } from '@/services/sms/DeviceApi'
 
 @Component({
   components: {
@@ -447,9 +500,11 @@ import { Status } from '@/models/Status'
 export default class SearchDevicesPage extends Vue {
   private pageSize: number = 20
   private loading: boolean = true
+  private processing: boolean = false
 
   private totalCount: number = 0
   private loader: null | IPaginationLoader<Device> = null
+  private lastActiveSearcher: DeviceSearcher | null = null
 
   private selectedSearchManufacturers: Manufacturer[] = []
   private selectedSearchStates: Status[] = []
@@ -578,13 +633,14 @@ export default class SearchDevicesPage extends Vue {
     this.searchResults = []
     this.unsetResultItemsShown()
     this.showDeleteDialog = {}
-    this.$api.devices
+    this.lastActiveSearcher = this.$api.devices
       .newSearchBuilder()
       .withText(searchText)
       .withOneMachtingManufacturerOf(manufacturer)
       .withOneMatchingStatusOf(states)
       .withOneMatchingDeviceTypeOf(types)
       .build()
+    this.lastActiveSearcher
       .findMatchingAsPaginationLoader(this.pageSize)
       .then(this.loadUntilWeHaveSomeEntries).catch((_error) => {
         this.$store.commit('snackbar/setError', 'Loading of devices failed')
@@ -622,6 +678,19 @@ export default class SearchDevicesPage extends Vue {
 
   canLoadNext () {
     return this.loader != null && this.loader.funToLoadNext != null
+  }
+
+  exportCsv () {
+    if (this.lastActiveSearcher != null) {
+      this.processing = true
+      this.lastActiveSearcher.findMatchingAsCsvBlob().then((blob) => {
+        this.processing = false
+        saveAs(blob, 'devices.csv')
+      }).catch((_err) => {
+        this.processing = false
+        this.$store.commit('snackbar/setError', 'CSV export failed')
+      })
+    }
   }
 
   deleteAndCloseDialog (id: string) {
