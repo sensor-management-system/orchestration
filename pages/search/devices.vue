@@ -36,7 +36,7 @@ permissions and limitations under the Licence.
       <v-tab-item :eager="true">
         <v-row>
           <v-col cols="12" md="5">
-            <v-text-field v-model="searchText" label="Name" placeholder="Name of device" @keydown="checkIfEnterIsPressedAndRunBasicSearch" />
+            <v-text-field v-model="searchText" label="Name" placeholder="Name of device" @keydown.enter="basicSearch" />
           </v-col>
           <v-col cols="12" md="2">
             <v-btn
@@ -57,7 +57,7 @@ permissions and limitations under the Licence.
       <v-tab-item :eager="true">
         <v-row>
           <v-col cols="12" md="6">
-            <v-text-field v-model="searchText" label="Name" placeholder="Name of device" @keydown="checkIfEnterIsPressedAndRunExtendedSearch" />
+            <v-text-field v-model="searchText" label="Name" placeholder="Name of device" @keydown.enter="extendedSearch" />
           </v-col>
         </v-row>
         <v-row>
@@ -622,20 +622,6 @@ export default class SearchDevicesPage extends Vue {
 
   canLoadNext () {
     return this.loader != null && this.loader.funToLoadNext != null
-  }
-
-  checkIfEnterIsPressedAndRunBasicSearch (keyboardEvent: KeyboardEvent) {
-    this.checkIfEnterIsPressedAndRunFun(keyboardEvent, this.basicSearch)
-  }
-
-  checkIfEnterIsPressedAndRunExtendedSearch (keyboardEvent: KeyboardEvent) {
-    this.checkIfEnterIsPressedAndRunFun(keyboardEvent, this.extendedSearch)
-  }
-
-  private checkIfEnterIsPressedAndRunFun (keyboardEvent: KeyboardEvent, fun: () => void) {
-    if (keyboardEvent.key === 'Enter') {
-      fun()
-    }
   }
 
   deleteAndCloseDialog (id: string) {
