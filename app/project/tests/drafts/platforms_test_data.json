@@ -10,7 +10,6 @@
       "inventory_number": "platform_inventory_number_test1",
       "persistent_identifier": "platform_persistent_identifier1",
       "website": "http://device.wepsite1.de",
-      "label": "platform_label_test1",
       "platform_type_name": "platform_type_name_test1"
     },
     {
@@ -23,7 +22,6 @@
       "inventory_number": "platform_inventory_number_test2",
       "persistent_identifier": "platform_persistent_identifier2",
       "website": "http://device.wepsite2.de",
-      "label": "platform_label_test2",
       "platform_type_name": "platform_type_name_test2"
     }
   ]
