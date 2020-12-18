@@ -81,7 +81,7 @@ class Resource(ResourceBase):
         return renderer(response)
 
 
-class ResourceList(with_metaclass(ResourceMetaBase, ResourceBase)):
+class ResourceList(with_metaclass(ResourceMetaBase, Resource)):
     """Base class of a resource list manager"""
 
     @check_method_requirements
