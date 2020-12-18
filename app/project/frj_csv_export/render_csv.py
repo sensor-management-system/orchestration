@@ -76,7 +76,8 @@ def flatten_json(y):
                 flatten(val, name + key + ".")
         elif type(x) is list:
             for i, a in enumerate(x):
-                flatten(a, name + str(i) + ".")
+                # flatten(a, name + str(i) + ".")
+                flatten(a, name)
         else:
             out[name[:-1]] = x
 
