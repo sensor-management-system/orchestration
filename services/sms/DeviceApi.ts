@@ -228,6 +228,23 @@ export class DeviceSearcher {
     return result
   }
 
+  findMatchingAsCsvBlob (): Promise<Blob> {
+    const url = ''
+    return this.axiosApi.request({
+      url,
+      method: 'get',
+      headers: {
+        accept: 'text/csv'
+      },
+      params: {
+        'page[size]': 10000,
+        ...this.commonParams
+      }
+    }).then((response) => {
+      return new Blob([response.data], { type: 'text/csv;charset=utf-8' })
+    })
+  }
+
   findMatchingAsList (): Promise<Device[]> {
     return this.axiosApi.get(
       '',
