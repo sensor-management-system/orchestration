@@ -115,7 +115,7 @@ class Test(BaseTestCase):
         DeviceSchema().dump(sensor2)
         db.session.add(sensor2)
         db.session.commit()
-        response = self.client.get(
+        _ = self.client.get(
             self.device_url,
             headers={"Content-Type": "application/vnd.api+json", "Accept": "text/csv"},
         )
