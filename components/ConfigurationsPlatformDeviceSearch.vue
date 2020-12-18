@@ -43,6 +43,7 @@ permissions and limitations under the Licence.
         <v-text-field
           v-model="searchOptions.text"
           label="Name"
+          @keydown.enter="search"
         />
       </v-col>
       <v-col cols="12" md="3">
