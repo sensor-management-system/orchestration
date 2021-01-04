@@ -1,9 +1,12 @@
 import os
+import time
 import uuid
 
 from flask import Blueprint, jsonify, make_response, request
 from minio import Minio
 from urllib3.exceptions import ResponseError
+
+from project.urls import base_url
 
 upload_blueprint = Blueprint("upload", __name__)
 ALLOWED_EXTENSIONS = {"txt", "pdf", "png", "jpg", "jpeg", "gif"}
@@ -13,7 +16,7 @@ def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
-@upload_blueprint.route("/rdm/svm-api/v1/upload", methods=["GET", "POST"])
+@upload_blueprint.route(f"{base_url}/upload", methods=["GET", "POST"])
 def upload_file():
     if request.method == "POST":
         # check if the post request has a file
@@ -53,12 +56,13 @@ def upload_file():
 
 
 def upload_object(uploaded_file):
-    bucket_name = os.getenv("MINIO_BUCKET_NAME", "miniopublicbucket")
+    bucket_name = os.getenv("MINIO_BUCKET_NAME", "smsdownloadbucket")
     size = os.fstat(uploaded_file.fileno()).st_size
     endpoint = os.getenv("MINIO_ENDPOINT", "172.16.238.10:9000")
     access_key = os.getenv("MINIO_ACCESS_KEY", "minio")
     secret_key = os.getenv("MINIO_SECRET_KEY", "minio123")
-    secure = os.getenv("MINIO_SECURE", True)
+    secure = os.getenv("MINIO_SECURE", False)
+    ym = time.strftime("%Y-%m")
     try:
         minio_client = Minio(
             endpoint=endpoint,
@@ -74,10 +78,11 @@ def upload_object(uploaded_file):
             filename = "{}.{}".format(
                 uuid.uuid4().hex, uploaded_file.filename.rsplit(".", 1)[1].lower()
             )
-            minio_client.put_object(bucket_name, filename, uploaded_file, size)
+            fn = f"{ym}/{filename}"
+            minio_client.put_object(bucket_name, fn, uploaded_file, size)
             data = {
-                "message": "object stored in {}".format(bucket_name),
-                "url": "http://{}/{}/{}".format(endpoint, bucket_name, filename),
+                "message": f"object stored in {bucket_name}",
+                "url": f"http://{endpoint}/{bucket_name}/{fn}",
             }
             response = custom_response(data, 201)
 
@@ -91,9 +96,10 @@ def upload_object(uploaded_file):
 
 
 def custom_response(data, code):
-    response = make_response(jsonify(data), code)
+    response = make_response(
+        jsonify({"data": data, "jsonapi": {"version": "1.0"}}), code
+    )
     response.headers["Content-Type"] = "application/vnd.api+json"
-    response.update({"jsonapi": {"version": "1.0"}})
     return response
 
 

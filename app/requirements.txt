@@ -22,6 +22,7 @@ MarkupSafe==1.1.1
 marshmallow==2.18.0
 marshmallow-jsonapi==0.23.1
 mccabe==0.6.1
+minio==7.0.0
 psycopg2==2.8.5
 pycodestyle==2.5.0
 pycryptodomex==3.9.8
