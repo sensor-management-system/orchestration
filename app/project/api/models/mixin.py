@@ -1,33 +1,23 @@
 import collections
-from datetime import datetime
 import itertools
+from datetime import datetime
 
 import sqlalchemy
-from sqlalchemy.ext.declarative import declared_attr
-from sqlalchemy.sql import func
-
 from project.api.models.base_model import db
-from project.api.token_checker import current_user_id
-
 from project.api.search import (
     add_to_index,
-    remove_from_index,
-    query_index,
-    remove_index,
     create_index,
+    query_index,
+    remove_from_index,
+    remove_index,
 )
-
-
-def _current_user_id_or_none():
-    try:
-        return current_user_id()
-    except BaseException:
-        return None
+from sqlalchemy.ext.declarative import declared_attr
+from sqlalchemy.sql import func
 
 
 class AuditMixin:
     created_at = db.Column(db.DateTime, default=func.now())
-    updated_at = db.Column(db.DateTime, default=func.now(), onupdate=datetime.now)
+    updated_at = db.Column(db.DateTime, default=None, onupdate=datetime.now)
 
     @declared_attr
     def created_by_id(self):
@@ -37,7 +27,6 @@ class AuditMixin:
                 "user.id", name="fk_%s_created_by_id" % self.__name__, use_alter=True
             ),
             # nullable=False,
-            default=_current_user_id_or_none,
         )
 
     @declared_attr
@@ -56,8 +45,6 @@ class AuditMixin:
                 "user.id", name="fk_%s_updated_by_id" % self.__name__, use_alter=True
             ),
             # nullable=False,
-            default=_current_user_id_or_none,
-            onupdate=_current_user_id_or_none,
         )
 
     @declared_attr
