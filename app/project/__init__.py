@@ -1,16 +1,14 @@
 import os
 
+from elasticsearch import Elasticsearch
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
+from flask_cors import CORS
 from flask_migrate import Migrate
 from flask_rest_jsonapi import Api
-from flask_cors import CORS
+from project.api.models.base_model import db
+from project.api.token_checker import auth_blueprint, jwt
 from project.urls import create_endpoints
-from project.api.token_checker import auth_blueprint
 
-from elasticsearch import Elasticsearch
-
-DB = SQLAlchemy()
 migrate = Migrate()
 
 
@@ -35,11 +33,11 @@ def create_app():
     app.config.from_object(app_settings)
 
     # instantiate the db
-    DB.init_app(app)
-    migrate.init_app(app, DB)
+    db.init_app(app)
+    migrate.init_app(app, db)
 
     # shell context for flask cli
-    app.shell_context_processor({"app": app, "db": DB})
+    app.shell_context_processor({"app": app, "db": db})
 
     # add elasticsearch as mentioned here
     # https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-xvi-full-text-search
@@ -52,6 +50,8 @@ def create_app():
     # Create endpoints
     api = Api(app)
     create_endpoints(api)
+
+    jwt.init_app(app)
 
     # test to ensure the proper config was loaded
     # import sys
