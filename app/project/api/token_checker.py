@@ -1,130 +1,65 @@
-import datetime
 import os
-from calendar import timegm
 from functools import wraps
-from typing import Dict
 
 import requests
-from flask import Blueprint, jsonify, request
-from flask_rest_jsonapi.exceptions import AccessDenied
-from jwkest import JWKESTException
-from jwkest.jwk import KEYS
-from jwkest.jws import JWS
+from flask import Blueprint, request
+from flask_jwt_extended import JWTManager, get_raw_jwt, verify_jwt_in_request
+from flask_login import LoginManager
 from project.api.models.base_model import db
 from project.api.models.contact import Contact
 from project.api.models.user import User
 
-auth_blueprint = Blueprint('auth', __name__)
+auth_blueprint = Blueprint("auth", __name__)
+jwt = JWTManager()
 
-current_user_id = None
+OIDC_ISSUER_URL = os.environ.get("WELL_KNOW_URL")
 
+# retrieve master openid-configuration endpoint for issuer realm
+oidc_config = requests.get(OIDC_ISSUER_URL, verify=False).json()
+# retrieve data from jwks_uri endpoint
+oidc_jwks_uri = requests.get(oidc_config["jwks_uri"], verify=False).json()
 
-class TokenChecker():
-    def __init__(self):
-        self.config_url: str = os.environ.get('WELL_KNOW_URL')
-        self._load_config()
-        self._load_jwks_data()
-        self.id_token = None
-
-    def __str__(self):
-        return ": email %s" % (self.id_token['sub'])
-
-    def _load_config(self):
-        # Loads issuer and jwks url
-        self.oidc_config: Dict = requests.get(
-            self.config_url, verify=True).json()
-        self.issuer = self.oidc_config['issuer']
-
-    def _load_jwks_data(self):
-        # jwks data contains the key you need to extract the token
-        self.jwks_keys: KEYS = KEYS()
-        self.jwks_keys.load_from_url(self.oidc_config['jwks_uri'])
-
-    def _decode_token(self, token: str):
-        try:
-            self.id_token = JWS().verify_compact(token, keys=self.jwks_keys)
-        except JWKESTException:
-            msg = 'Invalid Authorization header. ' \
-                  'JWT Signature verification failed'
-            raise AccessDenied(msg)
-
-    def _validate_claims(self):
-        if self.id_token.get('iss') != self.issuer:
-            msg = 'Invalid Authorization header. Invalid JWT issuer.'
-            raise AccessDenied(msg)
-
-        # Check if token is expired
-        utc_timestamp = timegm(datetime.datetime.utcnow().utctimetuple())
-        if utc_timestamp > self.id_token.get('exp', 0):
-            msg = 'Invalid Authorization header. JWT has expired.'
-            raise AccessDenied(msg)
-        if 'nbf' in self.id_token and utc_timestamp < self.id_token['nbf']:
-            msg = 'Invalid Authorization header. JWT not yet valid.'
-            raise AccessDenied(msg)
-
-    def check_token(self, token: str):
-        self._decode_token(token=token)
-        self._validate_claims()
-        return self.id_token
+login_manager = LoginManager()
 
 
-def token_required(f):
-    @wraps(f)
-    def decorator(*args, **kwargs):
-        if not request.method == 'GET':
-            token = None
+def token_required(fn):
+    @wraps(fn)
+    def wrapper(*args, **kwargs):
+        if request.method != "GET":
+            verify_jwt_in_request()
+        return fn(*args, **kwargs)
 
-            if 'token' in request.headers:
-                token = request.headers['token']
-
-            if not token:
-                return jsonify({'message': 'a valid token is missing'}), 400
-
-            try:
-                current_user = TokenChecker().check_token(token=token)
-                u = add_user_to_database(current_user)
-                global current_user_id
-                current_user_id = u
-            except JWKESTException:
-                return jsonify({'message': 'token is invalid'}), 400
-
-            return f(current_user, *args, **kwargs)
-        else:
-            return f(*args, **kwargs)
-
-    return decorator
+    return wrapper
 
 
+@jwt.user_loader_callback_loader
 def add_user_to_database(current_user):
-    exists = db.session.query(User).filter_by(
-        subject=current_user['sub']).first()
+    exists = db.session.query(User).filter_by(subject=current_user).first()
     if not exists:
-        given_name = current_user['given_name']
-        family_name = current_user['family_name']
-        email = current_user['email']
-        subject = current_user['sub']
-        contact = Contact(given_name=given_name, family_name=family_name,
-                          email=email)
+        given_name = get_raw_jwt()["given_name"]
+        family_name = get_raw_jwt()["family_name"]
+        email = get_raw_jwt()["email"]
+        subject = get_raw_jwt()["sub"]
+        contact = Contact(given_name=given_name, family_name=family_name, email=email)
         db.session.add(contact)
         db.session.commit()
         user = User(subject=subject, contact_id=contact.id)
         db.session.add(user)
         db.session.commit()
-        return user.id
-    return exists.id
+        return user
+    return exists
 
 
-@auth_blueprint.route('/rdm/svm-api/v1/auth', methods=['GET'])
+@auth_blueprint.route("/rdm/svm-api/v1/auth", methods=["GET"])
 @token_required
-def test(current_user):
+def test():
     """Just to test the functionality of the JWT encoding.
 
     :param current_user: JWT
     :return: dict
     """
     response = {
-        'status': 'success',
-        'message': 'Hello {} from Sensor API!'.format(
-            current_user['given_name'])
+        "status": "success",
+        "message": "Hello {} from Sensor API!".format(get_raw_jwt()["given_name"]),
     }
     return response
