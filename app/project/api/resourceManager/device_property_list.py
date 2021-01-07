@@ -12,6 +12,5 @@ class DevicePropertyList(ResourceList):
     """
 
     schema = DevicePropertySchema
-    # decorators = (token_required,)
-    data_layer = {'session': db.session,
-                  'model': DeviceProperty}
+    decorators = (token_required,)
+    data_layer = {"session": db.session, "model": DeviceProperty}

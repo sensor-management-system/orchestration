@@ -1,5 +1,4 @@
 from flask_rest_jsonapi import ResourceList
-
 from project.api.models.base_model import db
 from project.api.models.event import Event
 from project.api.schemas.event_schema import EventSchema
@@ -13,5 +12,5 @@ class EventList(ResourceList):
     """
 
     schema = EventSchema
-    # decorators = (token_required,)
+    decorators = (token_required,)
     data_layer = {"session": db.session, "model": Event}

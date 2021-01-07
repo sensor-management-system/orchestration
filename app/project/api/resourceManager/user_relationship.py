@@ -1,5 +1,4 @@
 from flask_rest_jsonapi import ResourceRelationship
-
 from project.api.models.base_model import db
 from project.api.models.user import User
 from project.api.schemas.user_schema import UserSchema
@@ -14,5 +13,5 @@ class UserRelationship(ResourceRelationship):
     """
 
     schema = UserSchema
-    # decorators = (token_required,)
+    decorators = (token_required,)
     data_layer = {"session": db.session, "model": User}
