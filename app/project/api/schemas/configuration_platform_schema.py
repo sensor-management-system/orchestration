@@ -8,7 +8,7 @@ class ConfigurationPlatformSchema(Schema):
         self_view = "configuration_platform_detail"
         self_view_kwargs = {"id": "<id>"}
 
-    id = fields.Integer(as_string=True, dump_only=True)
+    id = fields.Integer(as_string=True, )
     offset_x = fields.Float()
     offset_y = fields.Float()
     offset_z = fields.Float()

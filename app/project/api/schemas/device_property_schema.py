@@ -47,7 +47,7 @@ class DevicePropertySchema(Schema):
         self_view = "device_property_detail"
         self_view_kwargs = {"id": "<id>"}
 
-    id = fields.Integer(as_string=True, dump_only=True)
+    id = fields.Integer(as_string=True, )
     measuring_range_min = fields.Float(allow_none=True)
     measuring_range_max = fields.Float(allow_none=True)
     failure_value = fields.Float(allow_none=True)
