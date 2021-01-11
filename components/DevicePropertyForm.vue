@@ -30,10 +30,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <p>
-      {{ value.compartmentName }}
-      {{ value.compartmentUri }}
-    </p>
     <v-row>
       <v-col cols="12" md="3">
         <v-text-field
