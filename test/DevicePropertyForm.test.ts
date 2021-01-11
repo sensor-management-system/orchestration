@@ -86,12 +86,12 @@ describe('DevicePropertyForm', () => {
           Compartment.createWithData('2', 'foo', 'http://foo/compartment/2')
         ] as Compartment[],
         samplingMedias: [
-          SamplingMedia.createWithData('1', 'water', 'http://foo/samplingMedia/1'),
-          SamplingMedia.createWithData('2', 'media2', 'http://foo/samplingMedia/2')
+          SamplingMedia.createWithData('1', 'water', 'http://foo/samplingMedia/1', '5'),
+          SamplingMedia.createWithData('2', 'media2', 'http://foo/samplingMedia/2', '2')
         ] as SamplingMedia[],
         properties: [
-          Property.createWithData('1', 'foo.bar', 'http://foo/property/1'),
-          Property.createWithData('2', 'property2', 'http://foo/property/2')
+          Property.createWithData('1', 'foo.bar', 'http://foo/property/1', '8'),
+          Property.createWithData('2', 'property2', 'http://foo/property/2', '3')
         ] as Property[],
         units: [
           Unit.createWithData('1', 'mm', 'http://foo/unit/1'),

@@ -90,12 +90,12 @@ describe('DevicePropertyExpansionPanels', () => {
           Compartment.createWithData('2', 'compartment2', 'http://foo/compartment/2')
         ],
         samplingMedias: [
-          SamplingMedia.createWithData('1', 'water', 'http://foo/samplingMedia/1'),
-          SamplingMedia.createWithData('2', 'media2', 'http://foo/samplingMedia/2')
+          SamplingMedia.createWithData('1', 'water', 'http://foo/samplingMedia/1', '5'),
+          SamplingMedia.createWithData('2', 'media2', 'http://foo/samplingMedia/2', '2')
         ],
         properties: [
-          Property.createWithData('1', 'foo.bar', 'http://foo/property/1'),
-          Property.createWithData('2', 'property2', 'http://foo/property/2')
+          Property.createWithData('1', 'foo.bar', 'http://foo/property/1', '8'),
+          Property.createWithData('2', 'property2', 'http://foo/property/2', '3')
         ],
         units: [
           Unit.createWithData('1', 'mm', 'http://foo/unit/1'),
