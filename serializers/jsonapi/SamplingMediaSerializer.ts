@@ -31,7 +31,7 @@
  */
 import { SamplingMedia } from '@/models/SamplingMedia'
 
-import { IJsonApiObjectListWithLinks, IJsonApiDataWithIdAndLinks } from '@/serializers/jsonapi/JsonApiTypes'
+import { IJsonApiObjectListWithLinks, IJsonApiDataWithIdAndLinks, IJsonApiTypeIdData } from '@/serializers/jsonapi/JsonApiTypes'
 
 export class SamplingMediaSerializer {
   convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiObjectListWithLinks): SamplingMedia[] {
@@ -42,7 +42,8 @@ export class SamplingMediaSerializer {
     const id = jsonApiData.id.toString()
     const name = jsonApiData.attributes.term
     const url = jsonApiData.links.self
+    const compartmentId = (jsonApiData.relationships.compartment as IJsonApiTypeIdData).data.id
 
-    return SamplingMedia.createWithData(id, name, url)
+    return SamplingMedia.createWithData(id, name, url, compartmentId)
   }
 }

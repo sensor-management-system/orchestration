@@ -32,13 +32,15 @@
 export interface ISamplingMedia {
   id: string
   name: string
-  uri: string
+  uri: string,
+  compartmentId: string
 }
 
 export class SamplingMedia implements ISamplingMedia {
   private _id: string = ''
   private _name: string = ''
   private _uri: string = ''
+  private _compartmentId: string = ''
 
   get id (): string {
     return this._id
@@ -64,15 +66,24 @@ export class SamplingMedia implements ISamplingMedia {
     this._uri = newUri
   }
 
+  get compartmentId (): string {
+    return this._compartmentId
+  }
+
+  set compartmentId (newCompartmentId: string) {
+    this._compartmentId = newCompartmentId
+  }
+
   toString (): string {
     return this._name
   }
 
-  static createWithData (id: string, name: string, uri: string): SamplingMedia {
+  static createWithData (id: string, name: string, uri: string, compartmentId: string): SamplingMedia {
     const result = new SamplingMedia()
     result.id = id
     result.name = name
     result.uri = uri
+    result.compartmentId = compartmentId
     return result
   }
 
@@ -82,6 +93,7 @@ export class SamplingMedia implements ISamplingMedia {
     newObject.id = someObject.id
     newObject.name = someObject.name
     newObject.uri = someObject.uri
+    newObject.compartmentId = someObject.compartmentId
 
     return newObject
   }
