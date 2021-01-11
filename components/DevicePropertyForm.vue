@@ -299,6 +299,12 @@ export default class DevicePropertyForm extends Vue {
       case 'compartmentName':
         newObj.compartmentName = value
         newObj.compartmentUri = getUriValue('compartmentName', value)
+        if (this.value.compartmentUri !== newObj.compartmentUri) {
+          newObj.samplingMediaName = ''
+          newObj.samplingMediaUri = ''
+          newObj.propertyName = ''
+          newObj.propertyUri = ''
+        }
         break
       case 'unitName':
         newObj.unitName = value
@@ -307,6 +313,10 @@ export default class DevicePropertyForm extends Vue {
       case 'samplingMediaName':
         newObj.samplingMediaName = value
         newObj.samplingMediaUri = getUriValue('samplingMediaName', value)
+        if (this.value.samplingMediaUri !== newObj.samplingMediaUri) {
+          newObj.propertyName = ''
+          newObj.propertyUri = ''
+        }
         break
       case 'propertyName':
         newObj.propertyName = value
