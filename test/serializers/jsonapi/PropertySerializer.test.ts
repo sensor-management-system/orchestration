@@ -50,7 +50,14 @@ describe('PropertySerializer', () => {
           links: {
             self: 'http://rz-vm64.gfz-potsdam.de:5001/api/measuredquantities/1/'
           },
-          relationships: {},
+          relationships: {
+            sampling_medium: {
+              data: {
+                type: 'SamplingMedia',
+                id: '5'
+              }
+            }
+          },
           type: 'MeasuredQuantity'
         }, {
           attributes: {
@@ -66,7 +73,14 @@ describe('PropertySerializer', () => {
           links: {
             self: 'http://rz-vm64.gfz-potsdam.de:5001/api/measuredquantities/2/'
           },
-          relationships: {},
+          relationships: {
+            sampling_medium: {
+              data: {
+                type: 'SamplingMedia',
+                id: '2'
+              }
+            }
+          },
           type: 'MeasuredQuantity'
         }],
         included: [],
@@ -81,12 +95,14 @@ describe('PropertySerializer', () => {
       const expectedProperty1 = Property.createFromObject({
         id: '1',
         name: 'Snow Layer Hardness',
-        uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/measuredquantities/1/'
+        uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/measuredquantities/1/',
+        samplingMediaId: '5'
       })
       const expectedProperty2 = Property.createFromObject({
         id: '2',
         name: 'Snow Water Equivalent',
-        uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/measuredquantities/2/'
+        uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/measuredquantities/2/',
+        samplingMediaId: '2'
       })
 
       const serializer = new PropertySerializer()
