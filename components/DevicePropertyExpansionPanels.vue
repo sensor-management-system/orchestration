@@ -41,6 +41,7 @@ permissions and limitations under the Licence.
     </v-btn>
     <br><br>
     <v-expansion-panels
+      v-model="openedPanels"
       multiple
     >
       <v-expansion-panel
@@ -157,6 +158,8 @@ import { DeviceProperty } from '@/models/DeviceProperty'
 })
 // @ts-ignore
 export default class DevicePropertyExpansionPanels extends Vue {
+  private openedPanels: number[] = []
+
   /**
    * a list of DeviceProperty
    */
@@ -233,6 +236,9 @@ export default class DevicePropertyExpansionPanels extends Vue {
       ...this.value,
       new DeviceProperty()
     ] as DeviceProperty[])
+
+    this.openedPanels.push(this.value.length)
+    // @TODO: scroll to new property with this.$vuetify.goTo()
   }
 
   /**
