@@ -36,7 +36,7 @@ permissions and limitations under the Licence.
       <v-tab-item :eager="true">
         <v-row>
           <v-col cols="12" md="5">
-            <v-text-field v-model="searchText" label="Label" placeholder="Label of configuration" />
+            <v-text-field v-model="searchText" label="Label" placeholder="Label of configuration" @keydown.enter="basicSearch" />
           </v-col>
           <v-col cols="12" md="2">
             <v-btn
@@ -57,7 +57,7 @@ permissions and limitations under the Licence.
       <v-tab-item :eager="true">
         <v-row>
           <v-col cols="12" md="6">
-            <v-text-field v-model="searchText" label="Label" placeholder="Label of configurations" />
+            <v-text-field v-model="searchText" label="Label" placeholder="Label of configurations" @keydown.enter="extendedSearch" />
           </v-col>
         </v-row>
         <v-row>
@@ -128,6 +128,56 @@ permissions and limitations under the Licence.
         </template>
         <template v-else>
           {{ totalCount }} configurations found
+        </template>
+        <v-spacer />
+
+        <template v-if="lastActiveSearcher != null">
+          <v-dialog v-model="processing" max-width="100">
+            <v-card>
+              <v-card-text>
+                <div class="text-center pt-2">
+                  <v-progress-circular indeterminate />
+                </div>
+              </v-card-text>
+            </v-card>
+          </v-dialog>
+          <v-menu
+            close-on-click
+            close-on-content-click
+            offset-x
+            left
+            z-index="999"
+          >
+            <template v-slot:activator="{ on }">
+              <v-btn
+                icon
+                v-on="on"
+              >
+                <v-icon
+                  dense
+                >
+                  mdi-file-download
+                </v-icon>
+              </v-btn>
+            </template>
+            <v-list>
+              <v-list-item
+                dense
+                @click.prevent="exportCsv"
+              >
+                <v-list-item-content>
+                  <v-list-item-title>
+                    <v-icon
+                      left
+                    >
+                      mdi-table
+                    </v-icon>
+                    CSV
+                  </v-list-item-title>
+                </v-list-item-content>
+              </v-list-item>
+            </v-list>
+          </v-menu>
         </template>
       </v-subheader>
       <v-hover
@@ -388,6 +438,8 @@ permissions and limitations under the Licence.
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 
+import { saveAs } from 'file-saver'
+
 import ProjectSelect from '@/components/ProjectSelect.vue'
 import StatusBadge from '@/components/StatusBadge.vue'
 import StringSelect from '@/components/StringSelect.vue'
@@ -397,6 +449,8 @@ import { IPaginationLoader } from '@/utils/PaginatedLoader'
 import { Configuration } from '@/models/Configuration'
 import { StationaryLocation, DynamicLocation, LocationType } from '@/models/Location'
 import { Project } from '@/models/Project'
+
+import { ConfigurationSearcher } from '@/services/sms/ConfigurationApi'
 
 import { dateToString } from '@/utils/dateHelper'
 
@@ -420,9 +474,11 @@ import { dateToString } from '@/utils/dateHelper'
 export default class SearchConfigurationsPage extends Vue {
   private pageSize: number = 20
   private loading: boolean = true
+  private processing: boolean = false
 
   private totalCount: number = 0
   private loader: null | IPaginationLoader<Configuration> = null
+  private lastActiveSearcher: ConfigurationSearcher | null = null
 
   private selectedConfigurationStates: string[] = []
   private selectedLocationTypes: string[] = []
@@ -537,13 +593,14 @@ export default class SearchConfigurationsPage extends Vue {
     this.searchResults = []
     this.unsetResultItemsShown()
     this.showDeleteDialog = {}
-    this.$api.configurations
+    this.lastActiveSearcher = this.$api.configurations
       .newSearchBuilder()
       .withText(searchText)
       .withOneStatusOf(configurationStates)
       .withOneLocationTypeOf(locationTypes)
       .withOneMatchingProjectOf(projects)
       .build()
+    this.lastActiveSearcher
       .findMatchingAsPaginationLoader(this.pageSize)
       .then(this.loadUntilWeHaveSomeEntries).catch((_error) => {
         this.$store.commit('snackbar/setError', 'Loading of configurations failed')
@@ -581,6 +638,19 @@ export default class SearchConfigurationsPage extends Vue {
 
   canLoadNext () {
     return this.loader != null && this.loader.funToLoadNext != null
+  }
+
+  exportCsv () {
+    if (this.lastActiveSearcher != null) {
+      this.processing = true
+      this.lastActiveSearcher.findMatchingAsCsvBlob().then((blob) => {
+        this.processing = false
+        saveAs(blob, 'configurations.csv')
+      }).catch((_err) => {
+        this.processing = false
+        this.$store.commit('snackbar/setError', 'CSV export failed')
+      })
+    }
   }
 
   deleteAndCloseDialog (id: string) {
