@@ -38,6 +38,7 @@ permissions and limitations under the Licence.
       <v-col cols="12" md="3">
         <v-combobox
           label="Measured Quantity"
+          clearable
           :items="propertyNames"
           :value="valuePropertyName"
           :readonly="readonly"
@@ -59,6 +60,7 @@ permissions and limitations under the Licence.
       <v-col cols="12" md="3">
         <v-combobox
           label="Compartment"
+          clearable
           :items="compartmentNames"
           :value="valueCompartmentName"
           :readonly="readonly"
@@ -69,6 +71,7 @@ permissions and limitations under the Licence.
       <v-col cols="12" md="3">
         <v-combobox
           label="Sampling media"
+          clearable
           :items="samplingMediaNames"
           :value="valueSamplingMediaName"
           :readonly="readonly"
@@ -81,6 +84,7 @@ permissions and limitations under the Licence.
       <v-col cols="12" md="3">
         <v-combobox
           label="Unit"
+          clearable
           :items="unitNames"
           :value="valueUnitName"
           :readonly="readonly"
@@ -402,7 +406,12 @@ export default class DevicePropertyForm extends Vue {
    * @return {string[]} list of samplingMedia names
    */
   get samplingMediaNames (): string[] {
-    return this.samplingMedias.map(s => s.name)
+    let samplingMedias = this.samplingMedias
+    // if a compartment is choosen, restrict the list of samplingMedias
+    if (this.value.compartmentUri !== '') {
+      samplingMedias = samplingMedias.filter(s => s.compartmentId === '' || this.value.compartmentUri.match(new RegExp('^.+/' + s.compartmentId + '/$')))
+    }
+    return samplingMedias.map(s => s.name)
   }
 
   /**
@@ -424,7 +433,12 @@ export default class DevicePropertyForm extends Vue {
    * @return {string[]} list of property names
    */
   get propertyNames (): string[] {
-    return this.properties.map(p => p.name)
+    let properties = this.properties
+    // if a samplingMedia is choosen, restrict the list of properties
+    if (this.value.samplingMediaUri !== '') {
+      properties = properties.filter(s => s.samplingMediaId === '' || this.value.samplingMediaUri.match(new RegExp('^.+/' + s.samplingMediaId + '/$')))
+    }
+    return properties.map(p => p.name)
   }
 
   /**
