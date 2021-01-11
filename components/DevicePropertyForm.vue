@@ -36,17 +36,6 @@ permissions and limitations under the Licence.
     </p>
     <v-row>
       <v-col cols="12" md="3">
-        <v-combobox
-          label="Measured Quantity"
-          clearable
-          :items="propertyNames"
-          :value="valuePropertyName"
-          :readonly="readonly"
-          :disabled="readonly"
-          @input="update('propertyName', $event)"
-        />
-      </v-col>
-      <v-col cols="12" md="3">
         <v-text-field
           label="Label"
           :value="value.label"
@@ -77,6 +66,17 @@ permissions and limitations under the Licence.
           :readonly="readonly"
           :disabled="readonly"
           @input="update('samplingMediaName', $event)"
+        />
+      </v-col>
+      <v-col cols="12" md="3">
+        <v-combobox
+          label="Measured Quantity"
+          clearable
+          :items="propertyNames"
+          :value="valuePropertyName"
+          :readonly="readonly"
+          :disabled="readonly"
+          @input="update('propertyName', $event)"
         />
       </v-col>
     </v-row>
