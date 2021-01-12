@@ -19,7 +19,7 @@ class UserDetail(ResourceDetail):
                 _ = self.session.query(User).filter_by(id=view_kwargs["id"]).one()
             except NoResultFound:
                 raise ObjectNotFound(
-                    {"parameter": "User_id"},
+                    {"parameter": "id"},
                     "User: {} not found".format(view_kwargs["id"]),
                 )
 
