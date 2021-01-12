@@ -2,7 +2,7 @@ import os
 from functools import wraps
 
 import requests
-from flask import  request
+from flask import request
 from flask_jwt_extended import JWTManager, get_raw_jwt, verify_jwt_in_request
 from project.api.models.base_model import db
 from project.api.models.contact import Contact
@@ -37,8 +37,12 @@ def add_user_to_database(current_user):
         family_name = raw_jwt_object["family_name"]
         email = raw_jwt_object["email"]
         subject = raw_jwt_object["sub"]
-        current_contact_exists = db.session.query(Contact).filter_by(email=email).first()
-        contact = add_contact_if_not_exists(current_contact_exists, email, family_name, given_name)
+        current_contact_exists = (
+            db.session.query(Contact).filter_by(email=email).first()
+        )
+        contact = add_contact_if_not_exists(
+            current_contact_exists, email, family_name, given_name
+        )
         user = User(subject=subject, contact_id=contact.id)
         db.session.add(user)
         db.session.commit()
@@ -53,4 +57,3 @@ def add_contact_if_not_exists(current_contact_exists, email, family_name, given_
         db.session.commit()
         return contact
     return current_contact_exists
-

@@ -1,14 +1,28 @@
 from flask_rest_jsonapi import Api
 from project.api.ping import Ping
-from project.api.resourceManager import (ConfigurationDetail, ConfigurationList,
-                                         ConfigurationRelationship, ContactDetail, ContactList,
-                                         ContactRelationship, DeviceDetail, DeviceDetail,
-                                         DeviceList, DeviceRelationship, EventDetail,
-                                         EventList, EventRelationship, PlatformDetail, PlatformList,
-                                         PlatformRelationship, UserDetail, UserList,
-                                         UserRelationship,
-                                         DevicePropertyDetail, DevicePropertyList,
-                                         DevicePropertyRelationship)
+from project.api.resourceManager import (
+    ConfigurationDetail,
+    ConfigurationList,
+    ConfigurationRelationship,
+    ContactDetail,
+    ContactList,
+    ContactRelationship,
+    DeviceDetail,
+    DeviceList,
+    DevicePropertyDetail,
+    DevicePropertyList,
+    DevicePropertyRelationship,
+    DeviceRelationship,
+    EventDetail,
+    EventList,
+    EventRelationship,
+    PlatformDetail,
+    PlatformList,
+    PlatformRelationship,
+    UserDetail,
+    UserList,
+    UserRelationship,
+)
 
 api = Api()
 
@@ -22,7 +36,9 @@ api.route(
     "/contacts/<int:contact_id>/platforms",
 )
 api.route(
-    PlatformDetail, "platform_detail", "/platforms/<int:id>",
+    PlatformDetail,
+    "platform_detail",
+    "/platforms/<int:id>",
 )
 api.route(
     PlatformRelationship,
@@ -42,7 +58,9 @@ api.route(
 # Events
 api.route(EventList, "event_list", "/events")
 api.route(
-    EventDetail, "event_detail", "/events/<int:id>",
+    EventDetail,
+    "event_detail",
+    "/events/<int:id>",
 )
 api.route(
     EventRelationship,
@@ -58,7 +76,9 @@ api.route(
     "/contacts/<int:id>/devices",
 )
 api.route(
-    DeviceDetail, "device_detail", "/devices/<int:id>",
+    DeviceDetail,
+    "device_detail",
+    "/devices/<int:id>",
 )
 api.route(
     DeviceRelationship,
@@ -88,9 +108,7 @@ api.route(
     "/device-properties/<int:id>",
 )
 
-api.route(
-    DevicePropertyList, "device_property_list", "/device-properties"
-)
+api.route(DevicePropertyList, "device_property_list", "/device-properties")
 
 api.route(
     DevicePropertyRelationship,
@@ -148,7 +166,9 @@ api.route(
 
 # Configuration
 api.route(
-    ConfigurationList, "configuration_list", "/configurations",
+    ConfigurationList,
+    "configuration_list",
+    "/configurations",
 )
 api.route(
     ConfigurationDetail,
