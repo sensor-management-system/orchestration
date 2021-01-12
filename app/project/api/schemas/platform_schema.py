@@ -25,16 +25,16 @@ class PlatformSchema(Schema):
     created_at = fields.DateTime(allow_none=True)
     updated_at = fields.DateTime(allow_none=True)
     created_by = Relationship(
-        self_view="platform_created_user",
+        self_view="api.platform_created_user",
         self_view_kwargs={"id": "<id>"},
-        related_view="user_detail",
+        related_view="api.user_detail",
         related_view_kwargs={"id": "<created_by_id>"},
         type_="user",
     )
     updated_by = Relationship(
-        self_view="platform_updated_user",
+        self_view="api.platform_updated_user",
         self_view_kwargs={"id": "<id>"},
-        related_view="user_detail",
+        related_view="api.user_detail",
         related_view_kwargs={"id": "<updated_by_id>"},
         type_="user",
     )
@@ -46,9 +46,9 @@ class PlatformSchema(Schema):
     )
     contacts = Relationship(
         attribute="contacts",
-        self_view="platform_contacts",
+        self_view="api.platform_contacts",
         self_view_kwargs={"id": "<id>"},
-        related_view="contact_list",
+        related_view="api.contact_list",
         related_view_kwargs={"platform_id": "<id>"},
         many=True,
         schema="ContactSchema",
