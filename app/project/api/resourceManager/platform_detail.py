@@ -2,7 +2,7 @@ from flask_rest_jsonapi import ResourceDetail
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from project.api.models.base_model import db
 from project.api.models.platform import Platform
-from project.api.resourceManager.base_resource import add_create_by_id
+from project.api.resourceManager.base_resource import add_updated_by_id
 from project.api.schemas.platform_schema import PlatformSchema
 from project.api.token_checker import token_required
 from sqlalchemy.orm.exc import NoResultFound
@@ -26,7 +26,7 @@ class PlatformDetail(ResourceDetail):
 
     def before_patch(self, args, kwargs, data):
         """Add Created by user id to the data"""
-        add_create_by_id()
+        add_updated_by_id(data)
 
     schema = PlatformSchema
     decorators = (token_required,)

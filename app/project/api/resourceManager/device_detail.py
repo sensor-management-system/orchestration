@@ -2,7 +2,7 @@ from flask_rest_jsonapi import ResourceDetail
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from project.api.models.base_model import db
 from project.api.models.device import Device
-from project.api.resourceManager.base_resource import add_create_by_id
+from project.api.resourceManager.base_resource import add_updated_by_id
 from project.api.schemas.device_schema import DeviceSchema
 from project.api.token_checker import token_required
 from sqlalchemy.orm.exc import NoResultFound
@@ -26,7 +26,7 @@ class DeviceDetail(ResourceDetail):
 
     def before_patch(self, args, kwargs, data):
         """Add Created by user id to the data"""
-        add_create_by_id()
+        add_updated_by_id(data)
 
     schema = DeviceSchema
     decorators = (token_required,)

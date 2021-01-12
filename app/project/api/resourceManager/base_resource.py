@@ -21,6 +21,20 @@ def add_create_by_id(data):
     data["created_by_id"] = user_entry.id
 
 
+def add_updated_by_id(data):
+    """
+    Use jwt to add user id to dataset after updating the data.
+    :param data:
+    :param args:
+    :param kwargs:
+    :return:
+
+    """
+    current_user = get_jwt_identity()
+    user_entry = db.session.query(User).filter_by(subject=current_user).first()
+    data["updated_by_id"] = user_entry.id
+
+
 def add_contact_to_object(entity_with_contact_list):
     user_entry = db.session.query(User).filter_by(id=entity_with_contact_list.created_by_id).first()
     contact_id = user_entry.contact_id

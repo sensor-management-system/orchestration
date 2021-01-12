@@ -2,7 +2,7 @@ from flask_rest_jsonapi import ResourceDetail
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from project.api.models.base_model import db
 from project.api.models.configuration import Configuration
-from project.api.resourceManager.base_resource import add_create_by_id
+from project.api.resourceManager.base_resource import add_updated_by_id
 from project.api.schemas.configuration_schema import ConfigurationSchema
 from project.api.token_checker import token_required
 from sqlalchemy.orm.exc import NoResultFound
@@ -19,18 +19,18 @@ class ConfigurationDetail(ResourceDetail):
             try:
                 _ = (
                     self.session.query(Configuration)
-                    .filter_by(id=view_kwargs["id"])
-                    .one()
+                        .filter_by(id=view_kwargs["id"])
+                        .one()
                 )
             except NoResultFound:
                 raise ObjectNotFound(
-                    {"parameter": "Configuration_id"},
+                    {"parameter": "id"},
                     "Configuration: {} not found".format(view_kwargs["id"]),
                 )
 
     def before_patch(self, args, kwargs, data):
         """Add Created by user id to the data"""
-        add_create_by_id()
+        add_updated_by_id(data)
 
     schema = ConfigurationSchema
     decorators = (token_required,)
