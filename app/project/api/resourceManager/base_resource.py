@@ -36,9 +36,16 @@ def add_updated_by_id(data):
 
 
 def add_contact_to_object(entity_with_contact_list):
+    """
+    Add created user to the object-contacts if it is not added in the data
+    :param entity_with_contact_list:
+    :return:
+    """
     user_entry = db.session.query(User).filter_by(id=entity_with_contact_list.created_by_id).first()
     contact_id = user_entry.contact_id
     contact_entry = db.session.query(Contact).filter_by(id=contact_id).first()
-    entity_with_contact_list.contacts.append(contact_entry)
-    db.session.add(entity_with_contact_list)
-    db.session.commit()
+    contacts = entity_with_contact_list.contacts
+    if contact_entry not in contacts:
+        contacts.append(contact_entry)
+        db.session.add(entity_with_contact_list)
+        db.session.commit()
