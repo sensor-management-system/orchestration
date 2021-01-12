@@ -13,7 +13,7 @@ class EventSchema(Schema):
 
     class Meta:
         type_ = 'event'
-        self_view='api.event_detail'
+        self_view = 'api.event_detail'
         self_view_kwargs = {'id': '<id>'}
         self_view_many = 'event_list'
 
