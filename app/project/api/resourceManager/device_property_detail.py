@@ -23,8 +23,8 @@ class DevicePropertyDetail(ResourceDetail):
                 )
             except NoResultFound:
                 raise ObjectNotFound(
-                    {"parameter": "Configuration_id"},
-                    "Configuration: {} not found".format(view_kwargs["id"]),
+                    {"parameter": "id"},
+                    "DeviceProperty: {} not found".format(view_kwargs["id"]),
                 )
 
     schema = DevicePropertySchema
