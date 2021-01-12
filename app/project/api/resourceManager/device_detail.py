@@ -20,7 +20,7 @@ class DeviceDetail(ResourceDetail):
                 _ = self.session.query(Device).filter_by(id=view_kwargs["id"]).one()
             except NoResultFound:
                 raise ObjectNotFound(
-                    {"parameter": "device_id"},
+                    {"parameter": "id"},
                     "Device: {} not found".format(view_kwargs["id"]),
                 )
 
