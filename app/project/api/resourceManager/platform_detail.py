@@ -20,7 +20,7 @@ class PlatformDetail(ResourceDetail):
                 _ = self.session.query(Platform).filter_by(id=view_kwargs["id"]).one()
             except NoResultFound:
                 raise ObjectNotFound(
-                    {"parameter": "Platform_id"},
+                    {"parameter": "id"},
                     "Platform: {} not found".format(view_kwargs["id"]),
                 )
 
