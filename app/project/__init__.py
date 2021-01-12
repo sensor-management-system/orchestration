@@ -1,13 +1,12 @@
 import os
 
 from elasticsearch import Elasticsearch
-from flask import Flask
+from flask import Flask, Blueprint
 from flask_cors import CORS
 from flask_migrate import Migrate
-from flask_rest_jsonapi import Api
 from project.api.models.base_model import db
-from project.api.token_checker import auth_blueprint, jwt
-from project.urls import create_endpoints
+from project.api.token_checker import jwt
+from project.urls import api
 
 migrate = Migrate()
 
@@ -34,7 +33,10 @@ def create_app():
 
     # instantiate the db
     db.init_app(app)
+    api.init_app(app, Blueprint('api', __name__,
+                                url_prefix=os.getenv("URL_PREFIX", '/rdm/svm-api/v1')))
     migrate.init_app(app, db)
+    jwt.init_app(app)
 
     # shell context for flask cli
     app.shell_context_processor({"app": app, "db": db})
@@ -47,16 +49,8 @@ def create_app():
         else None
     )
 
-    # Create endpoints
-    api = Api(app)
-    create_endpoints(api)
-
-    jwt.init_app(app)
-
     # test to ensure the proper config was loaded
     # import sys
     # print(app.config, file=sys.stderr)
-
-    app.register_blueprint(auth_blueprint)
 
     return app

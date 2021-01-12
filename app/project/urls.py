@@ -1,228 +1,187 @@
+from flask_rest_jsonapi import Api
 from project.api.ping import Ping
-from project.api.resourceManager.configuration_detail import ConfigurationDetail
-from project.api.resourceManager.configuration_list import ConfigurationList
-from project.api.resourceManager.configuration_relationship import (
-    ConfigurationRelationship,
+from project.api.resourceManager import (ConfigurationDetail, ConfigurationList,
+                                         ConfigurationRelationship, ContactDetail, ContactList,
+                                         ContactRelationship, DeviceDetail, DeviceDetail,
+                                         DeviceList, DeviceRelationship, EventDetail,
+                                         EventList, EventRelationship, PlatformDetail, PlatformList,
+                                         PlatformRelationship, UserDetail, UserList,
+                                         UserRelationship,
+                                         DevicePropertyDetail, DevicePropertyList,
+                                         DevicePropertyRelationship)
+
+api = Api()
+
+api.route(Ping, "test_connection", "/ping")
+
+# Platform
+api.route(
+    PlatformList,
+    "platform_list",
+    "/platforms",
+    "/contacts/<int:contact_id>/platforms",
 )
-from project.api.resourceManager.contact_detail import ContactDetail
-from project.api.resourceManager.contact_list import ContactList
-from project.api.resourceManager.contact_relationship import ContactRelationship
-from project.api.resourceManager.device_detail import DeviceDetail
-from project.api.resourceManager.device_list import DeviceList
-from project.api.resourceManager.device_relationship import DeviceRelationship
-from project.api.resourceManager.event_detail import EventDetail
-from project.api.resourceManager.event_list import EventList
-from project.api.resourceManager.event_relationship import EventRelationship
-from project.api.resourceManager.platform_detail import PlatformDetail
-from project.api.resourceManager.platform_list import PlatformList
-from project.api.resourceManager.platform_relationship import PlatformRelationship
-from project.api.resourceManager.user_detail import UserDetail
-from project.api.resourceManager.user_list import UserList
-from project.api.resourceManager.user_relationship import UserRelationship
+api.route(
+    PlatformDetail, "platform_detail", "/platforms/<int:id>",
+)
+api.route(
+    PlatformRelationship,
+    "platform_contacts",
+    "/platforms/<int:id>/relationships/contacts",
+)
+api.route(
+    PlatformRelationship,
+    "platform_created_user",
+    "/platforms/<int:id>/relationships/createdUser",
+)
+api.route(
+    PlatformRelationship,
+    "platform_updated_user",
+    "/platforms/<int:id>/relationships/updatedUser",
+)
+# Events
+api.route(EventList, "event_list", "/events")
+api.route(
+    EventDetail, "event_detail", "/events/<int:id>",
+)
+api.route(
+    EventRelationship,
+    "event_user",
+    "/events/<int:id>/relationships/user",
+)
 
-from project.api.resourceManager.device_property_detail import DevicePropertyDetail
-from project.api.resourceManager.device_property_list import DevicePropertyList
-from project.api.resourceManager.device_property_relationship import DevicePropertyRelationship
+# Device
+api.route(
+    DeviceList,
+    "device_list",
+    "/devices",
+    "/contacts/<int:id>/devices",
+)
+api.route(
+    DeviceDetail, "device_detail", "/devices/<int:id>",
+)
+api.route(
+    DeviceRelationship,
+    "device_contacts",
+    "/devices/<int:id>/relationships/contacts",
+)
+api.route(
+    DeviceRelationship,
+    "device_events",
+    "/devices/<int:id>/relationships/events",
+)
+api.route(
+    DeviceRelationship,
+    "device_created_user",
+    "/devices/<int:id>/relationships/createdUser",
+)
+api.route(
+    DeviceRelationship,
+    "device_updated_user",
+    "/devices/<int:id>/relationships/updatedUser",
+)
 
-base_url = "/rdm/svm-api/v1"
+# Device Property
+api.route(
+    DevicePropertyDetail,
+    "device_property_detail",
+    "/device-properties/<int:id>",
+)
 
+api.route(
+    DevicePropertyList, "device_property_list", "/device-properties"
+)
 
-def create_endpoints(api):
-    """"
-    The routing system
-    """
-    api.route(Ping, "test_connection", base_url + "/ping")
+api.route(
+    DevicePropertyRelationship,
+    "device_property_device",
+    "/device-properties/<int:id>/relationships/device",
+)
 
-    # Platform
-    api.route(
-        PlatformList,
-        "platform_list",
-        base_url + "/platforms",
-        base_url + "/contacts/<int:contact_id>/platforms",
-    )
-    api.route(
-        PlatformDetail, "platform_detail", base_url + "/platforms/<int:id>",
-    )
-    api.route(
-        PlatformRelationship,
-        "platform_contacts",
-        base_url + "/platforms/<int:id>/relationships/contacts",
-    )
-    api.route(
-        PlatformRelationship,
-        "platform_created_user",
-        base_url + "/platforms/<int:id>/relationships/createdUser",
-    )
-    api.route(
-        PlatformRelationship,
-        "platform_updated_user",
-        base_url + "/platforms/<int:id>/relationships/updatedUser",
-    )
-    # Events
-    api.route(EventList, "event_list", base_url + "/events")
-    api.route(
-        EventDetail, "event_detail", base_url + "/events/<int:id>",
-    )
-    api.route(
-        EventRelationship,
-        "event_user",
-        base_url + "/events/<int:id>/relationships/user",
-    )
+# Contact
+api.route(
+    ContactList,
+    "contact_list",
+    "/contacts",
+    "/devices/<int:device_id>/contacts",
+    "/platforms/<int:platform_id>/contacts",
+)
+api.route(ContactDetail, "contact_detail", "/contacts/<int:id>")
+api.route(
+    ContactRelationship,
+    "contact_devices",
+    "/contacts/<int:id>/relationships/devices",
+)
+api.route(
+    ContactRelationship,
+    "contact_platforms",
+    "/contacts/<int:id>/relationships/platforms",
+)
+api.route(
+    ContactRelationship,
+    "contact_configurations",
+    "/contacts/<int:id>/relationships/configurations",
+)
+api.route(
+    ContactRelationship,
+    "contact_user",
+    "/contacts/<int:id>/relationships/user",
+)
+# Users
+api.route(
+    UserList,
+    "user_list",
+    "/users",
+    "/contacts/<int:id>/users",
+)
+api.route(UserDetail, "user_detail", "/users/<int:id>")
+api.route(
+    UserRelationship,
+    "user_contact",
+    "/users/<int:id>/relationships/contact",
+)
+api.route(
+    UserRelationship,
+    "user_events",
+    "/users/<int:id>/relationships/events",
+)
 
-    # Device
-    api.route(
-        DeviceList,
-        "device_list",
-        base_url + "/devices",
-        base_url + "/contacts/<int:id>/devices",
-    )
-    api.route(
-        DeviceDetail, "device_detail", base_url + "/devices/<int:id>",
-    )
-    api.route(
-        DeviceRelationship,
-        "device_contacts",
-        base_url + "/devices/<int:id>/relationships/contacts",
-    )
-    api.route(
-        DeviceRelationship,
-        "device_events",
-        base_url + "/devices/<int:id>/relationships/events",
-    )
-    api.route(
-        DeviceRelationship,
-        "device_created_user",
-        base_url + "/devices/<int:id>/relationships/createdUser",
-    )
-    api.route(
-        DeviceRelationship,
-        "device_updated_user",
-        base_url + "/devices/<int:id>/relationships/updatedUser",
-    )
-
-    # Device Property
-    api.route(
-        DevicePropertyDetail,
-        "device_property_detail",
-        base_url + "/device-properties/<int:id>",
-    )
-
-    api.route(
-        DevicePropertyList, "device_property_list", base_url + "/device-properties"
-    )
-
-    api.route(
-        DevicePropertyRelationship,
-        "device_property_device",
-        base_url + "/device-properties/<int:id>/relationships/device",
-    )
-
-    # Contact
-    api.route(
-        ContactList,
-        "contact_list",
-        base_url + "/contacts",
-        base_url + "/devices/<int:device_id>/contacts",
-        base_url + "/platforms/<int:platform_id>/contacts",
-    )
-    api.route(ContactDetail, "contact_detail", base_url + "/contacts/<int:id>")
-    api.route(
-        ContactRelationship,
-        "contact_devices",
-        base_url + "/contacts/<int:id>/relationships/devices",
-    )
-    api.route(
-        ContactRelationship,
-        "contact_platforms",
-        base_url + "/contacts/<int:id>/relationships/platforms",
-    )
-    api.route(
-        ContactRelationship,
-        "contact_configurations",
-        base_url + "/contacts/<int:id>/relationships/configurations",
-    )
-    api.route(
-        ContactRelationship,
-        "contact_user",
-        base_url + "/contacts/<int:id>/relationships/user",
-    )
-    # Users
-    api.route(
-        UserList,
-        "user_list",
-        base_url + "/users",
-        base_url + "/contacts/<int:id>/users",
-    )
-    api.route(UserDetail, "user_detail", base_url + "/users/<int:id>")
-    api.route(
-        UserRelationship,
-        "user_contact",
-        base_url + "/users/<int:id>/relationships/contact",
-    )
-    api.route(
-        UserRelationship,
-        "user_events",
-        base_url + "/users/<int:id>/relationships/events",
-    )
-
-    # Configuration
-    api.route(
-        ConfigurationList, "configuration_list", base_url + "/configurations",
-    )
-    api.route(
-        ConfigurationDetail,
-        "configuration_detail",
-        base_url + "/configurations/<int:id>",
-    )
-    api.route(
-        ConfigurationRelationship,
-        "configuration_contacts",
-        base_url + "/configurations/<int:id>/relationships/contacts",
-    )
-    api.route(
-        ConfigurationRelationship,
-        "configuration_platforms",
-        base_url + "/configurations/<int:id>/relationships/configuration-platforms",
-    )
-    api.route(
-        ConfigurationRelationship,
-        "configuration_devices",
-        base_url + "/configurations/<int:id>/relationships/configuration-devices",
-    )
-    api.route(
-        ConfigurationRelationship,
-        "configuration_src_longitude",
-        base_url + "/configurations/<int:id>/relationships/src-longitude",
-    )
-    api.route(
-        ConfigurationRelationship,
-        "configuration_src_latitude",
-        base_url + "/configurations/<int:id>/relationships/src-latitude",
-    )
-    api.route(
-        ConfigurationRelationship,
-        "configuration_src_elevation",
-        base_url + "/configurations/<int:id>/relationships/src-elevation",
-    )
-    # # ConfigurationPlatform
-    # api.route(
-    #     ConfigurationPlatformList,
-    #     "configuration_platform_list",
-    #     base_url + "/configuration-platforms",
-    # )
-    # api.route(
-    #     ConfigurationPlatformDetail,
-    #     "configuration_platform_detail",
-    #     base_url + "/configuration-platforms/<int:id>",
-    # )
-    # # ConfigurationDevice
-    # api.route(
-    #     ConfigurationDeviceList,
-    #     "configuration_device_list",
-    #     base_url + "/configuration-devices",
-    # )
-    # api.route(
-    #     ConfigurationDeviceDetail,
-    #     "configuration_device_detail",
-    #     base_url + "/configuration-devices/<int:id>",
-    # )
+# Configuration
+api.route(
+    ConfigurationList, "configuration_list", "/configurations",
+)
+api.route(
+    ConfigurationDetail,
+    "configuration_detail",
+    "/configurations/<int:id>",
+)
+api.route(
+    ConfigurationRelationship,
+    "configuration_contacts",
+    "/configurations/<int:id>/relationships/contacts",
+)
+api.route(
+    ConfigurationRelationship,
+    "configuration_platforms",
+    "/configurations/<int:id>/relationships/configuration-platforms",
+)
+api.route(
+    ConfigurationRelationship,
+    "configuration_devices",
+    "/configurations/<int:id>/relationships/configuration-devices",
+)
+api.route(
+    ConfigurationRelationship,
+    "configuration_src_longitude",
+    "/configurations/<int:id>/relationships/src-longitude",
+)
+api.route(
+    ConfigurationRelationship,
+    "configuration_src_latitude",
+    "/configurations/<int:id>/relationships/src-latitude",
+)
+api.route(
+    ConfigurationRelationship,
+    "configuration_src_elevation",
+    "/configurations/<int:id>/relationships/src-elevation",
+)

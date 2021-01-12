@@ -2,13 +2,12 @@ import os
 from functools import wraps
 
 import requests
-from flask import Blueprint, request
+from flask import  request
 from flask_jwt_extended import JWTManager, get_raw_jwt, verify_jwt_in_request
 from project.api.models.base_model import db
 from project.api.models.contact import Contact
 from project.api.models.user import User
 
-auth_blueprint = Blueprint("auth", __name__)
 jwt = JWTManager()
 
 OIDC_ISSUER_URL = os.environ.get("WELL_KNOW_URL")
@@ -55,17 +54,3 @@ def add_contact_if_not_exists(current_contact_exists, email, family_name, given_
         return contact
     return current_contact_exists
 
-
-@auth_blueprint.route("/rdm/svm-api/v1/auth", methods=["GET"])
-@token_required
-def test():
-    """Just to test the functionality of the JWT encoding.
-
-    :param current_user: JWT
-    :return: dict
-    """
-    response = {
-        "status": "success",
-        "message": "Hello {} from Sensor API!".format(get_raw_jwt()["given_name"]),
-    }
-    return response
