@@ -9,6 +9,7 @@ from project.api.token_checker import jwt
 from project.urls import api
 
 migrate = Migrate()
+base_url = os.getenv("URL_PREFIX", "/rdm/svm-api/v1")
 
 
 def create_app():
@@ -36,7 +37,7 @@ def create_app():
     api.init_app(
         app,
         Blueprint(
-            "api", __name__, url_prefix=os.getenv("URL_PREFIX", "/rdm/svm-api/v1")
+            "api", __name__, url_prefix=base_url
         ),
     )
     migrate.init_app(app, db)

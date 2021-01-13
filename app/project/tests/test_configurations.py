@@ -1,15 +1,16 @@
 import datetime
-import unittest
 import json
+import unittest
 
+
+from project import base_url
 from project.api.models.base_model import db
-from project.tests.base import BaseTestCase
-from project.urls import base_url
-from project.api.models.device import Device
 from project.api.models.configuration import Configuration
 from project.api.models.configuration_device import ConfigurationDevice
 from project.api.models.configuration_platform import ConfigurationPlatform
+from project.api.models.device import Device
 from project.api.models.platform import Platform
+from project.tests.base import BaseTestCase, create_token
 from project.tests.read_from_json import extract_data_from_json_file
 
 
@@ -287,11 +288,13 @@ class TestConfigurationsService(BaseTestCase):
         config_json = extract_data_from_json_file(self.json_data_url, "configuration")
 
         config_data = {"data": {"type": "configuration", "attributes": config_json[1]}}
+        access_headers = create_token()
         with self.client:
             response = self.client.post(
                 self.configurations_url,
                 data=json.dumps(config_data),
                 content_type="application/vnd.api+json",
+                headers=access_headers,
             )
         json.loads(response.data.decode())
         self.assertEqual(response.status_code, 500)
@@ -321,11 +324,13 @@ class TestConfigurationsService(BaseTestCase):
         config_json = extract_data_from_json_file(self.json_data_url, "configuration")
 
         config_data = {"data": {"type": "configuration", "attributes": config_json[2]}}
+        access_headers = create_token()
         with self.client:
             response = self.client.post(
                 self.configurations_url,
                 data=json.dumps(config_data),
                 content_type="application/vnd.api+json",
+                headers=access_headers,
             )
         json.loads(response.data.decode())
         self.assertEqual(response.status_code, 500)

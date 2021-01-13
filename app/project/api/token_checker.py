@@ -1,7 +1,7 @@
 from functools import wraps
 
 from flask import request
-from flask_jwt_extended import JWTManager, get_raw_jwt, verify_jwt_in_request
+from flask_jwt_extended import JWTManager, get_raw_jwt, verify_jwt_in_request, get_jwt_claims
 
 from project.api.models.base_model import db
 from project.api.models.contact import Contact
@@ -23,8 +23,13 @@ def token_required(fn):
 @jwt.user_loader_callback_loader
 def add_user_to_database(current_user):
     current_user_exists = db.session.query(User).filter_by(subject=current_user).first()
+
     if not current_user_exists:
         raw_jwt_object = get_raw_jwt()
+        # the mocked jwt for the tests has no iss
+        # and the our claims are stored in user-claims
+        if 'iss' not in raw_jwt_object:
+            raw_jwt_object = get_jwt_claims()
         given_name = raw_jwt_object["given_name"]
         family_name = raw_jwt_object["family_name"]
         email = raw_jwt_object["email"]

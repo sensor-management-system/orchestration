@@ -3,13 +3,13 @@
 import unittest
 
 from project.api.datalayers.esalchemy import (
+    AndFilter,
     EsQueryBuilder,
+    FilterParser,
     MultiFieldMatchFilter,
+    OrFilter,
     TermEqualsExactStringFilter,
     TermExactInListFilter,
-    OrFilter,
-    AndFilter,
-    FilterParser,
 )
 
 

@@ -56,6 +56,10 @@ class TestingConfig(BaseConfig):
     TESTING = True
     SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_TEST_URL")
     ELASTICSEARCH_URL = None
+    JWT_SECRET_KEY = 'super-secret'
+    JWT_ALGORITHM = 'HS256'
+    JWT_IDENTITY_CLAIM = "identity"
+    JWT_DECODE_AUDIENCE = None
 
 
 class ProductionConfig(BaseConfig):
