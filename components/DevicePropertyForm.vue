@@ -408,12 +408,8 @@ export default class DevicePropertyForm extends Vue {
    * @return {string[]} list of unit names
    */
   get measuredQuantityUnitNames (): string[] {
-    let measuredQuantityUnits = this.measuredQuantityUnits
-    // if a property is choosen, restrict the list of measuredQuantityUnits
-    if (this.value.propertyUri !== '') {
-      measuredQuantityUnits = measuredQuantityUnits.filter(u => u.measuredQuantityId === '' || this.value.propertyUri.match(new RegExp('^.+/' + u.measuredQuantityId + '/$')))
-    }
-    return measuredQuantityUnits.map(u => u.name)
+    // restrict the list of measuredQuantityUnits based on the choosen property
+    return this.measuredQuantityUnits.filter(u => this.value.propertyUri.match(new RegExp('^.+/' + u.measuredQuantityId + '/$'))).map(u => u.name).sort()
   }
 
   /**
