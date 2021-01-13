@@ -15,7 +15,7 @@ class EventSchema(Schema):
         type_ = 'event'
         self_view = 'api.event_detail'
         self_view_kwargs = {'id': '<id>'}
-        self_view_many = 'event_list'
+        self_view_many = 'api.event_list'
 
     id = fields.Integer(as_string=True, )
     description = fields.Str(required=True)

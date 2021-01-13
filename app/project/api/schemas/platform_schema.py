@@ -6,9 +6,9 @@ from project.api.schemas.attachment_schema import AttachmentSchema
 class PlatformSchema(Schema):
     class Meta:
         type_ = "platform"
-        self_view = "platform_detail"
+        self_view = "api.platform_detail"
         self_view_kwargs = {"id": "<id>"}
-        self_view_many = "platform_list"
+        self_view_many = "api.platform_list"
 
     id = fields.Integer(as_string=True, )
     description = fields.Str(allow_none=True)

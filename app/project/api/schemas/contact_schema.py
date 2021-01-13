@@ -13,7 +13,7 @@ class ContactSchema(Schema):
 
     class Meta:
         type_ = "contact"
-        self_view = "contact_detail"
+        self_view = "api.contact_detail"
         self_view_kwargs = {"id": "<id>"}
 
     id = fields.Integer(as_string=True, )

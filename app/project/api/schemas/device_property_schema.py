@@ -44,7 +44,7 @@ class DevicePropertySchema(Schema):
 
     class Meta:
         type_ = "device_property"
-        self_view = "device_property_detail"
+        self_view = "api.device_property_detail"
         self_view_kwargs = {"id": "<id>"}
 
     id = fields.Integer(as_string=True, )

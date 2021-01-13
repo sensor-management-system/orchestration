@@ -13,7 +13,7 @@ class UserSchema(Schema):
 
     class Meta:
         type_ = "user"
-        self_view = "user_detail"
+        self_view = "api.user_detail"
         self_view_kwargs = {"id": "<id>"}
 
     id = fields.Integer(as_string=True, )

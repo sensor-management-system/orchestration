@@ -182,16 +182,6 @@ api.route(
 )
 api.route(
     ConfigurationRelationship,
-    "configuration_platforms",
-    "/configurations/<int:id>/relationships/configuration-platforms",
-)
-api.route(
-    ConfigurationRelationship,
-    "configuration_devices",
-    "/configurations/<int:id>/relationships/configuration-devices",
-)
-api.route(
-    ConfigurationRelationship,
     "configuration_src_longitude",
     "/configurations/<int:id>/relationships/src-longitude",
 )

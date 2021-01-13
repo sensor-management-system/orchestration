@@ -1,5 +1,7 @@
 from flask_rest_jsonapi import ResourceList
 from flask_rest_jsonapi.exceptions import ObjectNotFound
+from sqlalchemy.orm.exc import NoResultFound
+
 from project.api.models.base_model import db
 from project.api.models.configuration import Configuration
 from project.api.models.contact import Contact
@@ -7,7 +9,6 @@ from project.api.models.device import Device
 from project.api.models.platform import Platform
 from project.api.schemas.contact_schema import ContactSchema
 from project.api.token_checker import token_required
-from sqlalchemy.orm.exc import NoResultFound
 
 
 class ContactList(ResourceList):
@@ -28,7 +29,7 @@ class ContactList(ResourceList):
                 self.session.query(Configuration).filter_by(id=configuration_id).one()
             except NoResultFound:
                 raise ObjectNotFound(
-                    {"parameter": "id"},
+                    {"parameter": "configuration_id"},
                     "Configuration: {} not found".format(configuration_id),
                 )
             else:
@@ -41,7 +42,8 @@ class ContactList(ResourceList):
                 self.session.query(Platform).filter_by(id=platform_id).one()
             except NoResultFound:
                 raise ObjectNotFound(
-                    {"parameter": "platform_id"}, "Platform: {} not found".format(platform_id)
+                    {"parameter": "platform_id"},
+                    "Platform: {} not found".format(platform_id),
                 )
             else:
                 query_ = query_.join(Contact.platforms).filter(
