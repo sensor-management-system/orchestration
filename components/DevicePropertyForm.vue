@@ -81,8 +81,8 @@ permissions and limitations under the Licence.
         <v-combobox
           label="Unit"
           clearable
-          :items="unitNames"
-          :value="valueUnitName"
+          :items="measuredQuantityUnitNames"
+          :value="valueMeasuredQuantityUnitName"
           :readonly="readonly"
           :disabled="readonly"
           @input="update('unitName', $event)"
@@ -167,6 +167,7 @@ import { Compartment } from '@/models/Compartment'
 import { Property } from '@/models/Property'
 import { SamplingMedia } from '@/models/SamplingMedia'
 import { Unit } from '@/models/Unit'
+import { MeasuredQuantityUnit } from '@/models/MeasuredQuantityUnit'
 import { DeviceProperty } from '@/models/DeviceProperty'
 import { parseFloatOrNull } from '@/utils/numericsHelper'
 
@@ -244,6 +245,16 @@ export default class DevicePropertyForm extends Vue {
   units!: Unit[]
 
   /**
+   * a list of MeasuredQuantityUnits
+   */
+  @Prop({
+    default: () => [] as MeasuredQuantityUnit[],
+    required: true,
+    type: Array
+  })
+  measuredQuantityUnits!: MeasuredQuantityUnit[]
+
+  /**
    * update a copy of the internal model at a given key and trigger an event
    *
    * @param {string} key - a path to the property to set
@@ -262,6 +273,9 @@ export default class DevicePropertyForm extends Vue {
         },
         unitName: {
           elements: this.units
+        },
+        measuredQuantityUnitName: {
+          elements: this.measuredQuantityUnits
         },
         samplingMediaName: {
           elements: this.samplingMedias
@@ -300,11 +314,13 @@ export default class DevicePropertyForm extends Vue {
           newObj.samplingMediaUri = ''
           newObj.propertyName = ''
           newObj.propertyUri = ''
+          newObj.unitName = ''
+          newObj.unitUri = ''
         }
         break
       case 'unitName':
         newObj.unitName = value
-        newObj.unitUri = getUriValue('unitName', value)
+        newObj.unitUri = getUriValue('measuredQuantityUnitName', value)
         break
       case 'samplingMediaName':
         newObj.samplingMediaName = value
@@ -312,11 +328,17 @@ export default class DevicePropertyForm extends Vue {
         if (this.value.samplingMediaUri !== newObj.samplingMediaUri) {
           newObj.propertyName = ''
           newObj.propertyUri = ''
+          newObj.unitName = ''
+          newObj.unitUri = ''
         }
         break
       case 'propertyName':
         newObj.propertyName = value
         newObj.propertyUri = getUriValue('propertyName', value)
+        if (this.value.propertyUri !== newObj.propertyUri) {
+          newObj.unitName = ''
+          newObj.unitUri = ''
+        }
         break
       case 'measuringRange.min':
         newObj.measuringRange.min = parseFloatOrNull(value)
@@ -381,14 +403,28 @@ export default class DevicePropertyForm extends Vue {
   }
 
   /**
+   * returns a list of unit names
+   *
+   * @return {string[]} list of unit names
+   */
+  get measuredQuantityUnitNames (): string[] {
+    let measuredQuantityUnits = this.measuredQuantityUnits
+    // if a property is choosen, restrict the list of measuredQuantityUnits
+    if (this.value.propertyUri !== '') {
+      measuredQuantityUnits = measuredQuantityUnits.filter(u => u.measuredQuantityId === '' || this.value.propertyUri.match(new RegExp('^.+/' + u.measuredQuantityId + '/$')))
+    }
+    return measuredQuantityUnits.map(u => u.name)
+  }
+
+  /**
    * returns the name of a unit based on the unit URI
    *
    * @return {string} the name of the unit
    */
-  get valueUnitName (): string {
-    const unitIndex = this.units.findIndex(u => u.uri === this.value.unitUri)
+  get valueMeasuredQuantityUnitName (): string {
+    const unitIndex = this.measuredQuantityUnits.findIndex(u => u.uri === this.value.unitUri)
     if (unitIndex > -1) {
-      return this.units[unitIndex].name
+      return this.measuredQuantityUnits[unitIndex].name
     }
     return this.value.unitName
   }
