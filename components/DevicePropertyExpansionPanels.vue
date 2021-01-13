@@ -127,6 +127,7 @@ permissions and limitations under the Licence.
             :sampling-medias="samplingMedias"
             :properties="properties"
             :units="units"
+            :measured-quantity-units="measuredQuantityUnits"
           />
         </v-expansion-panel-content>
       </v-expansion-panel>
@@ -147,6 +148,7 @@ import { Compartment } from '@/models/Compartment'
 import { Property } from '@/models/Property'
 import { SamplingMedia } from '@/models/SamplingMedia'
 import { Unit } from '@/models/Unit'
+import { MeasuredQuantityUnit } from '@/models/MeasuredQuantityUnit'
 import { DeviceProperty } from '@/models/DeviceProperty'
 
 /**
@@ -220,6 +222,16 @@ export default class DevicePropertyExpansionPanels extends Vue {
     type: Array
   })
   units!: Unit[]
+
+  /**
+   * a list of MeasuredQuantityUnits
+   */
+  @Prop({
+    default: () => [] as MeasuredQuantityUnit[],
+    required: true,
+    type: Array
+  })
+  measuredQuantityUnits!: MeasuredQuantityUnit[]
 
   /**
    * adds a new DeviceProperty instance and triggers an input event
