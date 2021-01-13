@@ -1,21 +1,13 @@
-import os
 from functools import wraps
 
-import requests
 from flask import request
 from flask_jwt_extended import JWTManager, get_raw_jwt, verify_jwt_in_request
+
 from project.api.models.base_model import db
 from project.api.models.contact import Contact
 from project.api.models.user import User
 
 jwt = JWTManager()
-
-OIDC_ISSUER_URL = os.environ.get("WELL_KNOW_URL")
-
-# retrieve master openid-configuration endpoint for issuer realm
-oidc_config = requests.get(OIDC_ISSUER_URL, verify=False).json()
-# retrieve data from jwks_uri endpoint
-oidc_jwks_uri = requests.get(oidc_config["jwks_uri"], verify=False).json()
 
 
 def token_required(fn):
