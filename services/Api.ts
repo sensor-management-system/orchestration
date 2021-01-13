@@ -45,6 +45,7 @@ import { PropertyApi } from '@/services/cv/PropertyApi'
 import { SamplingMediaApi } from '@/services/cv/SamplingMediaApi'
 import { StatusApi } from '@/services/cv/StatusApi'
 import { UnitApi } from '@/services/cv/UnitApi'
+import { MeasuredQuantityUnitApi } from '@/services/cv/MeasuredQuantityUnitApi'
 
 import { ProjectApi } from '@/services/project/ProjectApi'
 
@@ -66,6 +67,7 @@ export class Api {
   private readonly _samplingMediaApi: SamplingMediaApi
   private readonly _propertyApi: PropertyApi
   private readonly _unitApi: UnitApi
+  private readonly _measuredQuantityUnitApi: MeasuredQuantityUnitApi
 
   private readonly _projectApi: ProjectApi
 
@@ -124,6 +126,9 @@ export class Api {
     )
     this._unitApi = new UnitApi(
       this.createAxios(cvBaseUrl, '/units/', cvConfig)
+    )
+    this._measuredQuantityUnitApi = new MeasuredQuantityUnitApi(
+      this.createAxios(cvBaseUrl, '/measuredquantityunits/', cvConfig)
     )
 
     this._projectApi = new ProjectApi()
@@ -187,6 +192,10 @@ export class Api {
 
   get units (): UnitApi {
     return this._unitApi
+  }
+
+  get measuredQuantityUnits (): MeasuredQuantityUnitApi {
+    return this._measuredQuantityUnitApi
   }
 
   get projects (): ProjectApi {
