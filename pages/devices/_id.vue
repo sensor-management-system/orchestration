@@ -216,6 +216,7 @@ permissions and limitations under the Licence.
                 :sampling-medias="samplingMedias"
                 :properties="properties"
                 :units="units"
+                :measured-quantity-units="measuredQuantityUnits"
               />
             </v-card-text>
           </v-card>
@@ -332,6 +333,7 @@ import { Property } from '@/models/Property'
 import { SamplingMedia } from '@/models/SamplingMedia'
 import { Status } from '@/models/Status'
 import { Unit } from '@/models/Unit'
+import { MeasuredQuantityUnit } from '@/models/MeasuredQuantityUnit'
 
 import AttachmentList from '@/components/AttachmentList.vue'
 import ContactSelect from '@/components/ContactSelect.vue'
@@ -361,6 +363,7 @@ export default class DeviceIdPage extends mixins(Rules) {
   private samplingMedias: SamplingMedia[] = []
   private properties: Property[] = []
   private units: Unit[] = []
+  private measuredQuantityUnits: MeasuredQuantityUnit[] = []
 
   private editMode: boolean = false
 
@@ -390,6 +393,9 @@ export default class DeviceIdPage extends mixins(Rules) {
     })
     this.$api.units.findAll().then((foundUnits) => {
       this.units = foundUnits
+    })
+    this.$api.measuredQuantityUnits.findAll().then((foundMeasuredQuantityUnits) => {
+      this.measuredQuantityUnits = foundMeasuredQuantityUnits
     })
     this.loadDevice().then((device) => {
       if (device === null) {
