@@ -17,7 +17,7 @@ class ConfigurationSchema(Schema):
         self_view = "configuration_detail"
         self_view_kwargs = {"id": "<id>"}
 
-    id = fields.Integer(as_string=True, dump_only=True)
+    id = fields.Integer(as_string=True)
     start_date = fields.DateTime(allow_none=True)
     end_date = fields.DateTime(allow_none=True)
     location_type = fields.String(required=True)
