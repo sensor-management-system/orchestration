@@ -34,6 +34,8 @@ import { AxiosInstance } from 'axios'
 import { MeasuredQuantityUnit } from '@/models/MeasuredQuantityUnit'
 import { MeasuredQuantityUnitSerializer } from '@/serializers/jsonapi/MeasuredQuantityUnitSerializer'
 
+import { IPaginationLoader } from '@/utils/PaginatedLoader'
+
 export class MeasuredQuantityUnitApi {
   private axiosApi: AxiosInstance
   private serializer: MeasuredQuantityUnitSerializer
@@ -49,6 +51,10 @@ export class MeasuredQuantityUnitApi {
 
   findAll (): Promise<MeasuredQuantityUnit[]> {
     return this.newSearchBuilder().build().findMatchingAsList()
+  }
+
+  findAllPaginated (pageSize: number = 100): Promise<IPaginationLoader<MeasuredQuantityUnit>> {
+    return this.newSearchBuilder().build().findMatchingAsPaginationLoader(pageSize)
   }
 }
 
@@ -75,6 +81,35 @@ export class MeasuredQuantityUnitSearcher {
     this.serializer = serializer
   }
 
+  private findAllOnPage (page: number, pageSize: number): Promise<IPaginationLoader<MeasuredQuantityUnit>> {
+    return this.axiosApi.get(
+      '',
+      {
+        params: {
+          'page[size]': pageSize,
+          'page[number]': page,
+          include: 'unit'
+        }
+      }
+    ).then((rawResponse) => {
+      const response = rawResponse.data
+      this.serializer.included = response.included
+      const elements: MeasuredQuantityUnit[] = this.serializer.convertJsonApiObjectListToModelList(response)
+      const totalCount = response.meta.count
+
+      let funToLoadNext = null
+      if (response.meta.pagination.page < response.meta.pagination.pages) {
+        funToLoadNext = () => this.findAllOnPage(page + 1, pageSize)
+      }
+
+      return {
+        elements,
+        totalCount,
+        funToLoadNext
+      }
+    })
+  }
+
   findMatchingAsList (): Promise<MeasuredQuantityUnit[]> {
     return this.axiosApi.get(
       '',
@@ -89,5 +124,9 @@ export class MeasuredQuantityUnitSearcher {
       this.serializer.included = response.included
       return this.serializer.convertJsonApiObjectListToModelList(response)
     })
+  }
+
+  findMatchingAsPaginationLoader (pageSize: number): Promise<IPaginationLoader<MeasuredQuantityUnit>> {
+    return this.findAllOnPage(1, pageSize)
   }
 }
