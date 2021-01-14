@@ -46,6 +46,13 @@ services:
 
   smses01:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.10.0
+    deploy:
+      restart_policy:
+        condition: unless-stopped
+        delay: 1s
+        max_attempts: 5
+        window: 30s
+    restart: unless-stopped
     container_name: smses01
     environment:
       - discovery.type=single-node
