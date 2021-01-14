@@ -335,6 +335,8 @@ import { Status } from '@/models/Status'
 import { Unit } from '@/models/Unit'
 import { MeasuredQuantityUnit } from '@/models/MeasuredQuantityUnit'
 
+import { IPaginationLoader } from '@/utils/PaginatedLoader'
+
 import AttachmentList from '@/components/AttachmentList.vue'
 import ContactSelect from '@/components/ContactSelect.vue'
 import CustomFieldCards from '@/components/CustomFieldCards.vue'
@@ -394,9 +396,12 @@ export default class DeviceIdPage extends mixins(Rules) {
     this.$api.units.findAll().then((foundUnits) => {
       this.units = foundUnits
     })
-    this.$api.measuredQuantityUnits.findAll().then((foundMeasuredQuantityUnits) => {
-      this.measuredQuantityUnits = foundMeasuredQuantityUnits
+    this.loadMeasuredQuantityUnits().then((foundUnits) => {
+      this.measuredQuantityUnits = foundUnits
+    }).catch(() => {
+      this.$store.commit('snackbar/setError', 'Loading of additional units failed')
     })
+
     this.loadDevice().then((device) => {
       if (device === null) {
         this.$store.commit('appbar/setTitle', 'Add Device')
@@ -608,6 +613,29 @@ export default class DeviceIdPage extends mixins(Rules) {
     } else {
       this.device.deviceTypeUri = ''
     }
+  }
+
+  loadMeasuredQuantityUnits (): Promise<MeasuredQuantityUnit[]> {
+    return this.$api.measuredQuantityUnits.findAllPaginated().then(loader => this.loadPaginatedCvEntities<MeasuredQuantityUnit>(loader))
+  }
+
+  private loadPaginatedCvEntities<T> (loader: IPaginationLoader<T>): Promise<T[]> {
+    let result: T[] = loader.elements
+    const promise = new Promise<T[]>((resolve, reject) => {
+      if (!loader.funToLoadNext) {
+        resolve(result)
+        return
+      }
+      loader.funToLoadNext().then((nextLoader) => {
+        this.loadPaginatedCvEntities(nextLoader).then((loadedEntities) => {
+          result = [...result, ...loadedEntities] as T[]
+          resolve(result)
+        })
+      }).catch((_error) => {
+        reject(_error)
+      })
+    })
+    return promise
   }
 
   @Watch('device', { immediate: true, deep: true })
