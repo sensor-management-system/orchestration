@@ -34,7 +34,7 @@ permissions and limitations under the Licence.
       <v-form ref="basicForm">
         <v-card flat>
           <v-card-title>
-            Contact {{ fullName }}
+            {{ title }}
           </v-card-title>
           <v-card-text>
             <v-row>
@@ -251,5 +251,13 @@ export default class ContactIdPage extends mixins(Rules) {
 
   getFullName (contact: Contact) : string {
     return contact.givenName + ' ' + contact.familyName
+  }
+
+  get title () : string {
+    const fullName = this.getFullName(this.contact).trim()
+    if (fullName) {
+      return 'Contact: ' + fullName
+    }
+    return 'Contact'
   }
 }
