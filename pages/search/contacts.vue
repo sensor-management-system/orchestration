@@ -69,7 +69,7 @@ permissions and limitations under the Licence.
           1 contact found
         </template>
         <template v-else>
-          {{ totalCount }} devices found
+          {{ totalCount }} contacts found
         </template>
         <!-- No export to pdf due to data privacy reasons -->
       </v-subheader>
@@ -89,6 +89,11 @@ permissions and limitations under the Licence.
             <v-row
               no.gutters
             >
+              <v-col>
+                <div class="'text-caption text-disabled">
+                  {{ result.email }}
+                </div>
+              </v-col>
               <v-col
                 align-self="end"
                 class="text-right"
@@ -225,28 +230,6 @@ permissions and limitations under the Licence.
                 <v-row
                   dense
                 >
-                  <v-col
-                    cols="4"
-                    xs="4"
-                    sm="3"
-                    md="2"
-                    lg="2"
-                    xl="1"
-                    class="font-weight-medium"
-                  >
-                    E-mail:
-                  </v-col>
-                  <v-col
-                    cols="8"
-                    xs="8"
-                    sm="9"
-                    md="4"
-                    lg="4"
-                    xl="5"
-                    class="nowrap-truncate"
-                  >
-                    {{ result.email }}
-                  </v-col>
                   <v-col
                     cols="4"
                     xs="4"

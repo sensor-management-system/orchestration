@@ -29,7 +29,7 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
-import { AxiosInstance } from 'axios'
+import { AxiosInstance, Method } from 'axios'
 
 import { Contact } from '@/models/Contact'
 import { ContactSerializer } from '@/serializers/jsonapi/ContactSerializer'
@@ -44,8 +44,43 @@ export class ContactApi {
     this.serializer = new ContactSerializer()
   }
 
+  findById (id: string): Promise<Contact> {
+    return this.axiosApi.get(id, {
+      params: {
+        // maybe add something later
+      }
+    }).then((rawResponse) => {
+      const rawData = rawResponse.data
+      return this.serializer.convertJsonApiDataToModel(rawData.data)
+    })
+  }
+
   deleteById (id: string): Promise<void> {
     return this.axiosApi.delete<string, void>(id)
+  }
+
+  save (contact: Contact) {
+    const data: any = this.serializer.convertModelToJsonApiData(contact)
+    let method: Method = 'patch'
+    let url = ''
+
+    if (contact.id === null) {
+      // new -> post
+      method = 'post'
+    } else {
+      // old -> patch
+      url = String(contact.id)
+    }
+
+    return this.axiosApi.request({
+      url,
+      method,
+      data: {
+        data
+      }
+    }).then((serverAnswer) => {
+      return this.findById(serverAnswer.data.data.id)
+    })
   }
 
   newSearchBuilder (): ContactSearchBuilder {
