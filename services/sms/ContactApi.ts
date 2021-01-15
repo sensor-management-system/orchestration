@@ -143,8 +143,7 @@ export class ContactSearcher {
   private get commonParams (): any {
     const result: any = {}
     if (this.esTextFilter) {
-      // TODO: Use ES (but implement it in the backend first)
-      // result.q = this.esTextFilter
+      result.q = this.esTextFilter
     } else {
       result.sort = 'family_name'
     }
