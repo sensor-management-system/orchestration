@@ -8,6 +8,7 @@ from project.api.models.contact import Contact
 from project.api.models.device import Device
 from project.api.models.platform import Platform
 from project.api.schemas.contact_schema import ContactSchema
+from project.api.datalayers.esalchemy import EsSqlalchemyDataLayer
 from project.api.token_checker import token_required
 
 
@@ -65,6 +66,7 @@ class ContactList(ResourceList):
     schema = ContactSchema
     # decorators = (token_required,)
     data_layer = {
+        "class": EsSqlalchemyDataLayer,
         'session': db.session,
         'model': Contact,
         'methods': {
