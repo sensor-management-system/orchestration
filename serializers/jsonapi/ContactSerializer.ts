@@ -31,7 +31,7 @@
  */
 import { Contact, IContact } from '@/models/Contact'
 
-import { IJsonApiObjectList, IJsonApiObject, IJsonApiTypeIdDataListDict, IJsonApiTypeIdAttributes, IJsonApiTypeIdDataList, IJsonApiDataWithOptionalId } from '@/serializers/jsonapi/JsonApiTypes'
+import { IJsonApiObjectList, IJsonApiObject, IJsonApiTypeIdDataListDict, IJsonApiTypeIdAttributes, IJsonApiTypeIdDataList } from '@/serializers/jsonapi/JsonApiTypes'
 
 export interface IMissingContactData {
   ids: string[]
