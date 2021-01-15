@@ -119,14 +119,12 @@ permissions and limitations under the Licence.
 </style>
 
 <script lang="ts">
-import { Component, Watch, mixins } from 'nuxt-property-decorator'
-import { Rules } from '@/mixins/Rules'
+import { Component, Watch, Vue } from 'nuxt-property-decorator'
 
 import { Contact } from '@/models/Contact'
 
-@Component({
-})
-export default class ContactIdPage extends mixins(Rules) {
+@Component
+export default class ContactIdPage extends Vue {
   private contact: Contact = Contact.createEmpty()
   private contactBackup: Contact | null = null
 
@@ -147,7 +145,7 @@ export default class ContactIdPage extends mixins(Rules) {
     })
   }
 
-  beforeDestory () {
+  beforeDestroy () {
     this.unregisterButtonActions()
     this.$store.dispatch('appbar/setDefaults')
   }
@@ -249,6 +247,12 @@ export default class ContactIdPage extends mixins(Rules) {
     }
   }
 
+  @Watch('editMode', { immediate: true, deep: true })
+  onEditModeChange (editMode: boolean) {
+    this.$store.commit('appbar/setSaveBtnHidden', !editMode)
+    this.$store.commit('appbar/setCancelBtnHidden', !editMode)
+  }
+
   getFullName (contact: Contact) : string {
     return contact.givenName + ' ' + contact.familyName
   }
@@ -261,3 +265,4 @@ export default class ContactIdPage extends mixins(Rules) {
     return 'Contact'
   }
 }
+</script>
