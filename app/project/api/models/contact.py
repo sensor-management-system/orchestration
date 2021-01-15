@@ -88,8 +88,7 @@ class Contact(db.Model, SearchableMixin):
             },
         }
 
-    classmethod
-
+    @classmethod
     def get_search_index_definition(cls):
         """
         Return the index configuration for the elasticsearch.
