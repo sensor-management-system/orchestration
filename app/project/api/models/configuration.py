@@ -98,8 +98,8 @@ class Configuration(db.Model, AuditMixin, SearchableMixin):
 
         for new_cp in new_configuration_platforms:
             platform_id = new_cp.platform_id
-            old_configuration_platform = current_configuration_platform_by_platform_id.get(
-                platform_id, None
+            old_configuration_platform = (
+                current_configuration_platform_by_platform_id.get(platform_id, None)
             )
             if old_configuration_platform is not None:
                 new_cp.id = old_configuration_platform.id
@@ -122,9 +122,12 @@ class Configuration(db.Model, AuditMixin, SearchableMixin):
             if configuration_platform.platform is not None:
                 platforms.append(configuration_platform.platform)
         devices = []
+        firmware_versions = []
         for configuration_device in self.configuration_devices:
             if configuration_device.device is not None:
                 devices.append(configuration_device.device)
+            if configuration_device.firmware_version is not None:
+                firmware_versions.append(configuration_device.firmware_version)
 
         return {
             "label": self.label,
@@ -135,6 +138,7 @@ class Configuration(db.Model, AuditMixin, SearchableMixin):
             "platforms": [p.to_search_entry() for p in platforms],
             "devices": [d.to_search_entry() for d in devices],
             "contacts": [c.to_search_entry() for c in self.contacts],
+            "firmware_versions": firmware_versions,
             # start & end dates?
             # location type & data?
         }
@@ -160,11 +164,7 @@ class Configuration(db.Model, AuditMixin, SearchableMixin):
                     "status": {"type": "keyword", "fields": {"text": {"type": "text"}}},
                     "location_type": {
                         "type": "keyword",
-                        "fields": {
-                            "text": {
-                                "type": "text"
-                            }
-                        }
+                        "fields": {"text": {"type": "text"}},
                     },
                     "project_name": {
                         "type": "keyword",
@@ -183,6 +183,10 @@ class Configuration(db.Model, AuditMixin, SearchableMixin):
                     "contacts": {
                         "type": "nested",
                         "properties": Contact.get_search_index_properties(),
+                    },
+                    "firmware_versions": {
+                        "type": "keyword",
+                        "fields": {"text": {"type": "text"}},
                     },
                 }
             },

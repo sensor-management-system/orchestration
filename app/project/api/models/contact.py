@@ -2,6 +2,8 @@
 
 
 from project.api.models.base_model import db
+from project.api.models.mixin import SearchableMixin
+
 
 platform_contacts = db.Table(
     "platform_contacts",
@@ -29,7 +31,7 @@ configuration_contacts = db.Table(
 )
 
 
-class Contact(db.Model):
+class Contact(db.Model, SearchableMixin):
     """Contact class."""
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -72,28 +74,31 @@ class Contact(db.Model):
         return {
             "given_name": {
                 "type": "keyword",
-                "fields": {
-                    "text": {
-                        "type": "text"
-                    }
-                },
+                "fields": {"text": {"type": "text"}},
             },
             "family_name": {
                 "type": "keyword",
-                "fields": {
-                    "text": {
-                        "type": "text"
-                    }
-                },
+                "fields": {"text": {"type": "text"}},
             },
             # Not necessary to allow exact search for the personal website.
             "website": {"type": "text"},
             "email": {
                 "type": "keyword",
-                "fields": {
-                    "text": {
-                        "type": "text"
-                    }
-                },
+                "fields": {"text": {"type": "text"}},
             },
+        }
+
+    classmethod
+
+    def get_search_index_definition(cls):
+        """
+        Return the index configuration for the elasticsearch.
+
+        Describes which fields will be searchable by some text (with stemmer, etc)
+        and via keyword (raw equality checks).
+        """
+        return {
+            "aliases": {},
+            "mappings": {"properties": cls.get_search_index_properties()},
+            "settings": {"index": {"number_of_shards": "1"}},
         }

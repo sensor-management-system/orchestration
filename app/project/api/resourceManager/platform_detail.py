@@ -1,4 +1,7 @@
 from flask_rest_jsonapi import ResourceDetail
+from flask_rest_jsonapi.exceptions import ObjectNotFound
+from sqlalchemy.orm.exc import NoResultFound
+
 from project.api.models.base_model import db
 from project.api.models.platform import Platform
 from project.api.schemas.platform_schema import PlatformSchema
@@ -10,9 +13,19 @@ class PlatformDetail(ResourceDetail):
      of an object, update an object and delete an Event
     """
 
+    def before_get_object(self, view_kwargs):
+        if view_kwargs.get('id') is not None:
+            try:
+                _ = self.session.query(Platform).filter_by(
+                    id=view_kwargs['id']).one()
+            except NoResultFound:
+                raise ObjectNotFound({'parameter': 'Platform_id'},
+                                     "Platform: {} not found".format(view_kwargs['id']))
+
     schema = PlatformSchema
     # decorators = (token_required,)
     data_layer = {
         "session": db.session,
         "model": Platform,
+        'methods': {'before_get_object': before_get_object}
     }

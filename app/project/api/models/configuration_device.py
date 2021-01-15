@@ -11,6 +11,7 @@ class ConfigurationDevice(db.Model, AuditMixin):
     offset_y = db.Column(db.Float(), nullable=True)
     offset_z = db.Column(db.Float(), nullable=True)
     calibration_date = db.Column(db.DateTime, nullable=True)
+    firmware_version = db.Column(db.String(256), nullable=True)
 
     configuration_id = db.Column(
         db.Integer, db.ForeignKey("configuration.id"), nullable=False
