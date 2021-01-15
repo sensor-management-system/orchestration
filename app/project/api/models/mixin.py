@@ -7,7 +7,6 @@ from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.sql import func
 
 from project.api.models.base_model import db
-from project.api.token_checker import current_user_id
 
 from project.api.search import (
     add_to_index,
@@ -19,6 +18,8 @@ from project.api.search import (
 
 
 def _current_user_id_or_none():
+    from project.api.token_checker import current_user_id
+
     try:
         return current_user_id()
     except BaseException:
