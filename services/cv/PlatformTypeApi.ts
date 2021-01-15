@@ -33,13 +33,15 @@ import { AxiosInstance } from 'axios'
 
 import { PlatformType } from '@/models/PlatformType'
 import { PlatformTypeSerializer } from '@/serializers/jsonapi/PlatformTypeSerializer'
+import { CVApi } from '@/services/cv/CVApi'
 
-export class PlatformTypeApi {
-  private axiosApi: AxiosInstance
+import { IPaginationLoader } from '@/utils/PaginatedLoader'
+
+export class PlatformTypeApi extends CVApi<PlatformType> {
   private serializer: PlatformTypeSerializer
 
   constructor (axiosInstance: AxiosInstance) {
-    this.axiosApi = axiosInstance
+    super(axiosInstance)
     this.serializer = new PlatformTypeSerializer()
   }
 
@@ -49,6 +51,10 @@ export class PlatformTypeApi {
 
   findAll (): Promise<PlatformType[]> {
     return this.newSearchBuilder().build().findMatchingAsList()
+  }
+
+  findAllPaginated (pageSize: number = 100): Promise<PlatformType[]> {
+    return this.newSearchBuilder().build().findMatchingAsPaginationLoader(pageSize).then(loader => this.loadPaginated(loader))
   }
 }
 
@@ -75,6 +81,35 @@ export class PlatformTypeSearcher {
     this.serializer = serializer
   }
 
+  private findAllOnPage (page: number, pageSize: number): Promise<IPaginationLoader<PlatformType>> {
+    return this.axiosApi.get(
+      '',
+      {
+        params: {
+          'page[size]': pageSize,
+          'page[number]': page,
+          'filter[status.iexact]': 'ACCEPTED',
+          sort: 'term'
+        }
+      }
+    ).then((rawResponse) => {
+      const response = rawResponse.data
+      const elements: PlatformType[] = this.serializer.convertJsonApiObjectListToModelList(response)
+      const totalCount = response.meta.pagination.count
+
+      let funToLoadNext = null
+      if (response.meta.pagination.page < response.meta.pagination.pages) {
+        funToLoadNext = () => this.findAllOnPage(page + 1, pageSize)
+      }
+
+      return {
+        elements,
+        totalCount,
+        funToLoadNext
+      }
+    })
+  }
+
   findMatchingAsList (): Promise<PlatformType[]> {
     return this.axiosApi.get(
       '',
@@ -89,5 +124,9 @@ export class PlatformTypeSearcher {
       const response = rawResponse.data
       return this.serializer.convertJsonApiObjectListToModelList(response)
     })
+  }
+
+  findMatchingAsPaginationLoader (pageSize: number): Promise<IPaginationLoader<PlatformType>> {
+    return this.findAllOnPage(1, pageSize)
   }
 }

@@ -33,13 +33,15 @@ import { AxiosInstance } from 'axios'
 
 import { Status } from '@/models/Status'
 import { StatusSerializer } from '@/serializers/jsonapi/StatusSerializer'
+import { CVApi } from '@/services/cv/CVApi'
 
-export class StatusApi {
-  private axiosApi: AxiosInstance
+import { IPaginationLoader } from '@/utils/PaginatedLoader'
+
+export class StatusApi extends CVApi<Status> {
   private serializer: StatusSerializer
 
   constructor (axiosInstance: AxiosInstance) {
-    this.axiosApi = axiosInstance
+    super(axiosInstance)
     this.serializer = new StatusSerializer()
   }
 
@@ -49,6 +51,10 @@ export class StatusApi {
 
   findAll (): Promise<Status[]> {
     return this.newSearchBuilder().build().findMatchingAsList()
+  }
+
+  findAllPaginated (pageSize: number = 100): Promise<Status[]> {
+    return this.newSearchBuilder().build().findMatchingAsPaginationLoader(pageSize).then(loader => this.loadPaginated(loader))
   }
 }
 
@@ -75,6 +81,35 @@ export class StatusSearcher {
     this.serializer = serializer
   }
 
+  private findAllOnPage (page: number, pageSize: number): Promise<IPaginationLoader<Status>> {
+    return this.axiosApi.get(
+      '',
+      {
+        params: {
+          'page[size]': pageSize,
+          'page[number]': page,
+          'filter[status.iexact]': 'ACCEPTED',
+          sort: 'term'
+        }
+      }
+    ).then((rawResponse) => {
+      const response = rawResponse.data
+      const elements: Status[] = this.serializer.convertJsonApiObjectListToModelList(response)
+      const totalCount = response.meta.pagination.count
+
+      let funToLoadNext = null
+      if (response.meta.pagination.page < response.meta.pagination.pages) {
+        funToLoadNext = () => this.findAllOnPage(page + 1, pageSize)
+      }
+
+      return {
+        elements,
+        totalCount,
+        funToLoadNext
+      }
+    })
+  }
+
   findMatchingAsList (): Promise<Status[]> {
     return this.axiosApi.get(
       '',
@@ -89,5 +124,9 @@ export class StatusSearcher {
       const response = rawResponse.data
       return this.serializer.convertJsonApiObjectListToModelList(response)
     })
+  }
+
+  findMatchingAsPaginationLoader (pageSize: number): Promise<IPaginationLoader<Status>> {
+    return this.findAllOnPage(1, pageSize)
   }
 }

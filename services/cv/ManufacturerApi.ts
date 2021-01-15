@@ -33,13 +33,15 @@ import { AxiosInstance } from 'axios'
 
 import { Manufacturer } from '@/models/Manufacturer'
 import { ManufacturerSerializer } from '@/serializers/jsonapi/ManufacturerSerializer'
+import { CVApi } from '@/services/cv/CVApi'
 
-export class ManufacturerApi {
-  private axiosApi: AxiosInstance
+import { IPaginationLoader } from '@/utils/PaginatedLoader'
+
+export class ManufacturerApi extends CVApi<Manufacturer> {
   private serializer: ManufacturerSerializer
 
   constructor (axiosInstance: AxiosInstance) {
-    this.axiosApi = axiosInstance
+    super(axiosInstance)
     this.serializer = new ManufacturerSerializer()
   }
 
@@ -49,6 +51,10 @@ export class ManufacturerApi {
 
   findAll (): Promise<Manufacturer[]> {
     return this.newSearchBuilder().build().findMatchingAsList()
+  }
+
+  findAllPaginated (pageSize: number = 100): Promise<Manufacturer[]> {
+    return this.newSearchBuilder().build().findMatchingAsPaginationLoader(pageSize).then(loader => this.loadPaginated(loader))
   }
 }
 
@@ -75,6 +81,35 @@ export class ManufacturerSearcher {
     this.serializer = serializer
   }
 
+  private findAllOnPage (page: number, pageSize: number): Promise<IPaginationLoader<Manufacturer>> {
+    return this.axiosApi.get(
+      '',
+      {
+        params: {
+          'page[size]': pageSize,
+          'page[number]': page,
+          'filter[status.iexact]': 'ACCEPTED',
+          sort: 'term'
+        }
+      }
+    ).then((rawResponse) => {
+      const response = rawResponse.data
+      const elements: Manufacturer[] = this.serializer.convertJsonApiObjectListToModelList(response)
+      const totalCount = response.meta.pagination.count
+
+      let funToLoadNext = null
+      if (response.meta.pagination.page < response.meta.pagination.pages) {
+        funToLoadNext = () => this.findAllOnPage(page + 1, pageSize)
+      }
+
+      return {
+        elements,
+        totalCount,
+        funToLoadNext
+      }
+    })
+  }
+
   findMatchingAsList (): Promise<Manufacturer[]> {
     return this.axiosApi.get(
       '',
@@ -89,5 +124,9 @@ export class ManufacturerSearcher {
       const response = rawResponse.data
       return this.serializer.convertJsonApiObjectListToModelList(response)
     })
+  }
+
+  findMatchingAsPaginationLoader (pageSize: number): Promise<IPaginationLoader<Manufacturer>> {
+    return this.findAllOnPage(1, pageSize)
   }
 }

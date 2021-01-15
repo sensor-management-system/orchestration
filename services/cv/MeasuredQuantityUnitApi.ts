@@ -33,15 +33,15 @@ import { AxiosInstance } from 'axios'
 
 import { MeasuredQuantityUnit } from '@/models/MeasuredQuantityUnit'
 import { MeasuredQuantityUnitSerializer } from '@/serializers/jsonapi/MeasuredQuantityUnitSerializer'
+import { CVApi } from '@/services/cv/CVApi'
 
 import { IPaginationLoader } from '@/utils/PaginatedLoader'
 
-export class MeasuredQuantityUnitApi {
-  private axiosApi: AxiosInstance
+export class MeasuredQuantityUnitApi extends CVApi<MeasuredQuantityUnit> {
   private serializer: MeasuredQuantityUnitSerializer
 
   constructor (axiosInstance: AxiosInstance) {
-    this.axiosApi = axiosInstance
+    super(axiosInstance)
     this.serializer = new MeasuredQuantityUnitSerializer()
   }
 
@@ -53,8 +53,8 @@ export class MeasuredQuantityUnitApi {
     return this.newSearchBuilder().build().findMatchingAsList()
   }
 
-  findAllPaginated (pageSize: number = 100): Promise<IPaginationLoader<MeasuredQuantityUnit>> {
-    return this.newSearchBuilder().build().findMatchingAsPaginationLoader(pageSize)
+  findAllPaginated (pageSize: number = 100): Promise<MeasuredQuantityUnit[]> {
+    return this.newSearchBuilder().build().findMatchingAsPaginationLoader(pageSize).then(loader => this.loadPaginated(loader))
   }
 }
 
@@ -95,7 +95,7 @@ export class MeasuredQuantityUnitSearcher {
       const response = rawResponse.data
       this.serializer.included = response.included
       const elements: MeasuredQuantityUnit[] = this.serializer.convertJsonApiObjectListToModelList(response)
-      const totalCount = response.meta.count
+      const totalCount = response.meta.pagination.count
 
       let funToLoadNext = null
       if (response.meta.pagination.page < response.meta.pagination.pages) {
