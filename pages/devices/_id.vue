@@ -375,31 +375,45 @@ export default class DeviceIdPage extends mixins(Rules) {
   }
 
   mounted () {
-    this.$api.states.findAll().then((foundStates) => {
+    this.$api.states.findAllPaginated().then((foundStates) => {
       this.states = foundStates
+    }).catch(() => {
+      this.$store.commit('snackbar/setError', 'Loading of states failed')
     })
-    this.$api.manufacturer.findAll().then((foundManufacturers) => {
+    this.$api.manufacturer.findAllPaginated().then((foundManufacturers) => {
       this.manufacturers = foundManufacturers
+    }).catch(() => {
+      this.$store.commit('snackbar/setError', 'Loading of manufactures failed')
     })
-    this.$api.deviceTypes.findAll().then((foundDeviceTypes) => {
+    this.$api.deviceTypes.findAllPaginated().then((foundDeviceTypes) => {
       this.deviceTypes = foundDeviceTypes
+    }).catch(() => {
+      this.$store.commit('snackbar/setError', 'Loading of device types failed')
     })
-    this.$api.compartments.findAll().then((foundCompartments) => {
+    this.$api.compartments.findAllPaginated().then((foundCompartments) => {
       this.compartments = foundCompartments
+    }).catch(() => {
+      this.$store.commit('snackbar/setError', 'Loading of compartments failed')
     })
-    this.$api.samplingMedia.findAll().then((foundSamplingMedias) => {
+    this.$api.samplingMedia.findAllPaginated().then((foundSamplingMedias) => {
       this.samplingMedias = foundSamplingMedias
+    }).catch(() => {
+      this.$store.commit('snackbar/setError', 'Loading of sampling medias failed')
     })
-    this.$api.properties.findAll().then((foundProperties) => {
+    this.$api.properties.findAllPaginated().then((foundProperties) => {
       this.properties = foundProperties
+    }).catch(() => {
+      this.$store.commit('snackbar/setError', 'Loading of units properties')
     })
-    this.$api.units.findAll().then((foundUnits) => {
+    this.$api.units.findAllPaginated().then((foundUnits) => {
       this.units = foundUnits
+    }).catch(() => {
+      this.$store.commit('snackbar/setError', 'Loading of units failed')
     })
-    this.loadMeasuredQuantityUnits().then((foundUnits) => {
+    this.$api.measuredQuantityUnits.findAllPaginated().then((foundUnits) => {
       this.measuredQuantityUnits = foundUnits
     }).catch(() => {
-      this.$store.commit('snackbar/setError', 'Loading of additional units failed')
+      this.$store.commit('snackbar/setError', 'Loading of measuredquantityunits failed')
     })
 
     this.loadDevice().then((device) => {
@@ -616,6 +630,8 @@ export default class DeviceIdPage extends mixins(Rules) {
   }
 
   loadMeasuredQuantityUnits (): Promise<MeasuredQuantityUnit[]> {
+    // unfortunately it is not possible to pass a specialized function directly, so the function is called explicitly in an arrow function
+    // @ts-ignore
     return this.$api.measuredQuantityUnits.findAllPaginated().then(loader => this.loadPaginatedCvEntities<MeasuredQuantityUnit>(loader))
   }
 
