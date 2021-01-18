@@ -78,11 +78,12 @@ permissions and limitations under the Licence.
     </v-row>
     <v-row>
       <v-col cols="12" md="3">
+        <!-- @TODO: load the units dynamically based on the choosen property -->
         <v-combobox
           label="Unit"
           clearable
           :items="measuredQuantityUnitNames"
-          :value="valueMeasuredQuantityUnitName"
+          :value="valueUnitName"
           :readonly="readonly"
           :disabled="readonly"
           @input="update('unitName', $event)"
@@ -320,7 +321,9 @@ export default class DevicePropertyForm extends Vue {
         break
       case 'unitName':
         newObj.unitName = value
-        newObj.unitUri = getUriValue('measuredQuantityUnitName', value)
+        // Note: although we display a list of measuredQuantityUnits, the
+        // actual URI to be saved is the URI of the original unit
+        newObj.unitUri = getUriValue('unitName', value)
         break
       case 'samplingMediaName':
         newObj.samplingMediaName = value
@@ -417,10 +420,10 @@ export default class DevicePropertyForm extends Vue {
    *
    * @return {string} the name of the unit
    */
-  get valueMeasuredQuantityUnitName (): string {
-    const unitIndex = this.measuredQuantityUnits.findIndex(u => u.uri === this.value.unitUri)
+  get valueUnitName (): string {
+    const unitIndex = this.units.findIndex(u => u.uri === this.value.unitUri)
     if (unitIndex > -1) {
-      return this.measuredQuantityUnits[unitIndex].name
+      return this.units[unitIndex].name
     }
     return this.value.unitName
   }
