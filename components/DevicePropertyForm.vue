@@ -82,11 +82,11 @@ permissions and limitations under the Licence.
         <v-combobox
           label="Unit"
           clearable
-          :items="measuredQuantityUnitNames"
+          :items="measuredQuantityUnitComboboxValues"
           :value="valueUnitName"
           :readonly="readonly"
           :disabled="readonly"
-          @input="update('unitName', $event)"
+          @input="updateUnit($event)"
         />
       </v-col>
       <v-col cols="12" md="3">
@@ -177,6 +177,11 @@ interface INameAndUri {
   uri: string
 }
 
+interface MeasuredQuantityUnitComboboxValue {
+  text: string
+  value: MeasuredQuantityUnit
+}
+
 /**
  * A class component that renders a form for a device property
  * @extends Vue
@@ -256,6 +261,84 @@ export default class DevicePropertyForm extends Vue {
   measuredQuantityUnits!: MeasuredQuantityUnit[]
 
   /**
+   * returns the URI of an value
+   *
+   * @param {string} name - the name of the dictionary to look in
+   * @param {string} value - the value to look the URI for
+   * @return {string} the URI or an empty string
+   */
+  private getUriByValue (name: string, value: string): string {
+    let valueToSet = ''
+
+    const elementsByName: { [name: string]: { elements: INameAndUri[] } } = {
+      compartmentName: {
+        elements: this.compartments
+      },
+      unitName: {
+        elements: this.units
+      },
+      measuredQuantityUnitName: {
+        elements: this.measuredQuantityUnits
+      },
+      samplingMediaName: {
+        elements: this.samplingMedias
+      },
+      propertyName: {
+        elements: this.properties
+      }
+    }
+    if (!elementsByName[name]) {
+      return valueToSet
+    }
+    // the comoboboxes may set the value to null,
+    // but we don't want to work further with nulls
+    //
+    // all of the comboboxes see the empty string as the
+    // "no value" choice
+    if (value === null) {
+      value = ''
+    }
+    const index = elementsByName[name].elements.findIndex(x => x.name === value)
+    if (index > -1) {
+      valueToSet = elementsByName[name].elements[index].uri
+    }
+    return valueToSet
+  }
+
+  /**
+   * updates the unit property
+   *
+   * @param {MeasuredQuantityUnitComboboxValue} unitObject - an object as provided by the combobox
+   * @fires DevicePropertyForm#input
+   */
+  updateUnit (unitObject: MeasuredQuantityUnitComboboxValue | undefined): void {
+    const newObj: DeviceProperty = DeviceProperty.createFromObject(this.value)
+
+    if (unitObject) {
+      newObj.unitName = unitObject.text
+      // Note: although we display a list of measuredQuantityUnits, the
+      // actual URI to be saved is the URI of the original unit
+      newObj.unitUri = this.getUriByValue('unitName', unitObject.text)
+      // if the unit has numerical default values, apply them to measuringRange min and max
+      if (unitObject.value.defaultLimitMin) {
+        newObj.measuringRange.min = parseFloatOrNull(unitObject.value.defaultLimitMin)
+      }
+      if (unitObject.value.defaultLimitMax) {
+        newObj.measuringRange.max = parseFloatOrNull(unitObject.value.defaultLimitMax)
+      }
+    } else {
+      newObj.unitName = ''
+      newObj.unitUri = ''
+    }
+    /**
+     * input event
+     * @event DevicePropertyForm#input
+     * @type {DeviceProperty}
+     */
+    this.$emit('input', newObj)
+  }
+
+  /**
    * update a copy of the internal model at a given key and trigger an event
    *
    * @param {string} key - a path to the property to set
@@ -265,51 +348,13 @@ export default class DevicePropertyForm extends Vue {
   update (key: string, value: string) {
     const newObj: DeviceProperty = DeviceProperty.createFromObject(this.value)
 
-    const getUriValue = (name: string, value: string) => {
-      let valueToSet = ''
-
-      const elementsByName: { [name: string]: { elements: INameAndUri[] } } = {
-        compartmentName: {
-          elements: this.compartments
-        },
-        unitName: {
-          elements: this.units
-        },
-        measuredQuantityUnitName: {
-          elements: this.measuredQuantityUnits
-        },
-        samplingMediaName: {
-          elements: this.samplingMedias
-        },
-        propertyName: {
-          elements: this.properties
-        }
-      }
-      if (!elementsByName[name]) {
-        return valueToSet
-      }
-      // the comoboboxes may set the value to null,
-      // but we don't want to work further with nulls
-      //
-      // all of the comboboxes see the empty string as the
-      // "no value" choice
-      if (value === null) {
-        value = ''
-      }
-      const index = elementsByName[name].elements.findIndex(x => x.name === value)
-      if (index > -1) {
-        valueToSet = elementsByName[name].elements[index].uri
-      }
-      return valueToSet
-    }
-
     switch (key) {
       case 'label':
         newObj.label = value
         break
       case 'compartmentName':
         newObj.compartmentName = value
-        newObj.compartmentUri = getUriValue('compartmentName', value)
+        newObj.compartmentUri = this.getUriByValue('compartmentName', value)
         if (this.value.compartmentUri !== newObj.compartmentUri) {
           newObj.samplingMediaName = ''
           newObj.samplingMediaUri = ''
@@ -319,15 +364,9 @@ export default class DevicePropertyForm extends Vue {
           newObj.unitUri = ''
         }
         break
-      case 'unitName':
-        newObj.unitName = value
-        // Note: although we display a list of measuredQuantityUnits, the
-        // actual URI to be saved is the URI of the original unit
-        newObj.unitUri = getUriValue('unitName', value)
-        break
       case 'samplingMediaName':
         newObj.samplingMediaName = value
-        newObj.samplingMediaUri = getUriValue('samplingMediaName', value)
+        newObj.samplingMediaUri = this.getUriByValue('samplingMediaName', value)
         if (this.value.samplingMediaUri !== newObj.samplingMediaUri) {
           newObj.propertyName = ''
           newObj.propertyUri = ''
@@ -337,7 +376,7 @@ export default class DevicePropertyForm extends Vue {
         break
       case 'propertyName':
         newObj.propertyName = value
-        newObj.propertyUri = getUriValue('propertyName', value)
+        newObj.propertyUri = this.getUriByValue('propertyName', value)
         if (this.value.propertyUri !== newObj.propertyUri) {
           newObj.unitName = ''
           newObj.unitUri = ''
@@ -360,7 +399,7 @@ export default class DevicePropertyForm extends Vue {
         break
       case 'resolutionUnitName':
         newObj.resolutionUnitName = value
-        newObj.resolutionUnitUri = getUriValue('unitName', value)
+        newObj.resolutionUnitUri = this.getUriByValue('unitName', value)
         break
       default:
         throw new TypeError('key ' + key + ' is not valid')
@@ -406,13 +445,18 @@ export default class DevicePropertyForm extends Vue {
   }
 
   /**
-   * returns a list of unit names
+   * returns a list of unit objects suitable for the combobox
    *
-   * @return {string[]} list of unit names
+   * @return {MeasuredQuantityUnitComboboxValue[]} list of units
    */
-  get measuredQuantityUnitNames (): string[] {
+  get measuredQuantityUnitComboboxValues (): MeasuredQuantityUnitComboboxValue[] {
     // restrict the list of measuredQuantityUnits based on the choosen property
-    return this.measuredQuantityUnits.filter(u => this.value.propertyUri.match(new RegExp('^.+/' + u.measuredQuantityId + '/$'))).map(u => u.name).sort()
+    return this.measuredQuantityUnits.filter(u => this.value.propertyUri.match(new RegExp('^.+/' + u.measuredQuantityId + '/$'))).map((u) => {
+      return {
+        text: u.name,
+        value: u
+      }
+    }).sort()
   }
 
   /**
