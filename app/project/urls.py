@@ -22,6 +22,8 @@ from project.api.resourceManager import (
     UserDetail,
     UserList,
     UserRelationship,
+    ConfigurationPlatformList,
+    ConfigurationDeviceList
 )
 
 api = Api()
@@ -194,4 +196,16 @@ api.route(
     ConfigurationRelationship,
     "configuration_src_elevation",
     "/configurations/<int:id>/relationships/src-elevation",
+)
+# ConfigurationPlatform
+api.route(
+    ConfigurationPlatformList,
+    "configuration_platform_list",
+    "/configuration-platforms",
+)
+# ConfigurationDevice
+api.route(
+    ConfigurationDeviceList,
+    "configuration_device_list",
+    "/configuration-devices",
 )
