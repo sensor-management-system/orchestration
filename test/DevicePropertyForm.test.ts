@@ -42,6 +42,7 @@ import { Compartment } from '@/models/Compartment'
 import { SamplingMedia } from '@/models/SamplingMedia'
 import { Property } from '@/models/Property'
 import { Unit } from '@/models/Unit'
+import { MeasuredQuantityUnit } from '@/models/MeasuredQuantityUnit'
 
 Vue.use(Vuetify)
 
@@ -96,7 +97,11 @@ describe('DevicePropertyForm', () => {
         units: [
           Unit.createWithData('1', 'mm', 'http://foo/unit/1'),
           Unit.createWithData('2', 's', 'http://foo/unit/2')
-        ] as Unit[]
+        ] as Unit[],
+        measuredQuantityUnits: [
+          MeasuredQuantityUnit.createWithData('1', 'mm', 'http://foo/measuredquantityunits/1', '0.01', '10', '1', '1'),
+          MeasuredQuantityUnit.createWithData('2', 's', 'http://foo/measuredquantityunits/2', '0.001', '60', '2', '1')
+        ] as MeasuredQuantityUnit[]
       }
     })
   })
