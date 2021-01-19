@@ -1,14 +1,16 @@
 from marshmallow_jsonapi import fields
-from marshmallow_jsonapi.flask import Schema, Relationship
+from marshmallow_jsonapi.flask import Relationship, Schema
 
 
 class ConfigurationPlatformSchema(Schema):
     class Meta:
         type_ = "configuration_platform"
-        self_view = "configuration_platform_detail"
+        self_view = "api.configuration_platform_detail"
         self_view_kwargs = {"id": "<id>"}
 
-    id = fields.Integer(as_string=True, )
+    id = fields.Integer(
+        as_string=True,
+    )
     offset_x = fields.Float()
     offset_y = fields.Float()
     offset_z = fields.Float()

@@ -1,5 +1,5 @@
 from marshmallow_jsonapi import fields
-from marshmallow_jsonapi.flask import Schema, Relationship
+from marshmallow_jsonapi.flask import Relationship, Schema
 
 
 class ContactSchema(Schema):
@@ -16,7 +16,9 @@ class ContactSchema(Schema):
         self_view = "api.contact_detail"
         self_view_kwargs = {"id": "<id>"}
 
-    id = fields.Integer(as_string=True, )
+    id = fields.Integer(
+        as_string=True,
+    )
     given_name = fields.Str(required=True)
     family_name = fields.Str(required=True)
     website = fields.Str(allow_none=True)
