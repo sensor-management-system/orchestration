@@ -5,10 +5,12 @@ from marshmallow_jsonapi.flask import Schema, Relationship
 class ConfigurationDeviceSchema(Schema):
     class Meta:
         type_ = "configuration_device"
-        self_view = "configuration_device_detail"
+        self_view = "api.configuration_device_detail"
         self_view_kwargs = {"id": "<id>"}
 
-    id = fields.Integer(as_string=True, )
+    id = fields.Integer(
+        as_string=True,
+    )
     offset_x = fields.Float()
     offset_y = fields.Float()
     offset_z = fields.Float()

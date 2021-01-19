@@ -23,7 +23,9 @@ from project.api.resourceManager import (
     UserList,
     UserRelationship,
     ConfigurationPlatformList,
-    ConfigurationDeviceList
+    ConfigurationPlatformDetail,
+    ConfigurationDeviceList,
+    ConfigurationDeviceDetail,
 )
 
 api = Api()
@@ -185,12 +187,12 @@ api.route(
 api.route(
     ConfigurationRelationship,
     "configuration_platforms",
-    "/configurations/<int:id>/relationships/configurationPlatforms"
+    "/configurations/<int:id>/relationships/configurationPlatforms",
 )
 api.route(
     ConfigurationRelationship,
     "configuration_devices",
-    "/configurations/<int:id>/relationships/configurationDevices"
+    "/configurations/<int:id>/relationships/configurationDevices",
 )
 api.route(
     ConfigurationRelationship,
@@ -213,9 +215,19 @@ api.route(
     "configuration_platform_list",
     "/configuration-platforms",
 )
+api.route(
+    ConfigurationPlatformDetail,
+    "configuration_platform_detail",
+    "/configuration-platforms/<int:id>",
+)
 # ConfigurationDevice
 api.route(
     ConfigurationDeviceList,
     "configuration_device_list",
     "/configuration-devices",
+)
+api.route(
+    ConfigurationDeviceDetail,
+    "configuration_device_detail",
+    "/configuration-devices/<int:id>",
 )

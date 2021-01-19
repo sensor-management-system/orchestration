@@ -335,6 +335,149 @@ class TestConfigurationsService(BaseTestCase):
         json.loads(response.data.decode())
         self.assertEqual(response.status_code, 500)
 
+    def test_support_include_devices_and_platforms_on_rest_call(self):
+        """
+        Ensure that we can ask to include devices & platforms.
+
+        When we ask for a configuration via the rest interface,
+        we also want to query the devices & platforms together
+        within this call.
+        """
+        # add a configuration, the same way as
+        # in test_add_configuration_model
+        platform1 = Platform(short_name="Platform 1")
+        platform2 = Platform(short_name="Platform 2")
+        platform3 = Platform(short_name="Platform 3")
+
+        db.session.add(platform1)
+        db.session.add(platform2)
+        db.session.add(platform3)
+
+        device1 = Device(short_name="Device 1")
+        device2 = Device(short_name="Device 2")
+        device3 = Device(short_name="Device 3")
+
+        db.session.add(device1)
+        db.session.add(device2)
+        db.session.add(device3)
+
+        config1 = Configuration(label="Config1", location_type="static")
+        db.session.add(config1)
+        db.session.commit()
+
+        platform1_conf = ConfigurationPlatform(
+            platform=platform1,
+            configuration=config1,
+            offset_x=1.0,
+            offset_y=1.0,
+            offset_z=1.0,
+        )
+        db.session.add(platform1_conf)
+
+        platform2_conf = ConfigurationPlatform(
+            platform=platform2,
+            configuration=config1,
+            parent_platform=platform1,
+            offset_x=2.0,
+            offset_y=2.0,
+            offset_z=2.0,
+        )
+        platform3_conf = ConfigurationPlatform(
+            platform=platform3,
+            configuration=config1,
+            offset_x=13.5,
+            offset_y=13.5,
+            offset_z=13.5,
+        )
+
+        db.session.add(platform2_conf)
+        db.session.add(platform3_conf)
+
+        device1_conf = ConfigurationDevice(
+            device=device1,
+            configuration=config1,
+            parent_platform=platform2,
+            offset_x=0.5,
+            offset_y=0.5,
+            offset_z=0.5,
+        )
+        device2_conf = ConfigurationDevice(
+            device=device2,
+            configuration=config1,
+            parent_platform=platform2,
+            offset_x=0.6,
+            offset_y=0.6,
+            offset_z=0.6,
+        )
+        device3_conf = ConfigurationDevice(
+            device=device3,
+            configuration=config1,
+            parent_platform=platform2,
+            offset_x=0.65,
+            offset_y=0.65,
+            offset_z=0.65,
+        )
+
+        db.session.add(device1_conf)
+        db.session.add(device2_conf)
+        db.session.add(device3_conf)
+
+        db.session.commit()
+
+        with self.client:
+            url = "".join(
+                [
+                    self.configurations_url,
+                    "/",
+                    str(config1.id),
+                    "?",
+                    "include",
+                    "=",
+                    ",".join(
+                        [
+                            "contacts",
+                            "configuration_platforms.platform",
+                            "configuration_devices.device",
+                            "src_longitude",
+                            "src_latitude",
+                            "src_elevation",
+                        ]
+                    ),
+                ]
+            )
+            response = self.client.get(url)
+            self.assertEqual(response.status_code, 200)
+            for key in ["data", "included"]:
+                self.assertIn(key, response.json.keys())
+
+            data = response.json["data"]
+            self.assertNotEqual(data["attributes"]["hierarchy"], [])
+            self.assertEqual(data["attributes"]["label"], config1.label)
+
+            included = response.json["included"]
+
+            self.assertTrue(len(included) >= 6)
+
+            for device in [device1, device2, device3]:
+                found = False
+                for entry in included:
+                    if entry["type"] == "device" and entry["id"] == str(device.id):
+                        found = True
+                        self.assertEqual(
+                            entry["attributes"]["short_name"], device.short_name
+                        )
+                self.assertTrue(found)
+
+            for platform in [platform1, platform2, platform3]:
+                found = False
+                for entry in included:
+                    if entry["type"] == "platform" and entry["id"] == str(platform.id):
+                        found = True
+                        self.assertEqual(
+                            entry["attributes"]["short_name"], platform.short_name
+                        )
+                self.assertTrue(found)
+
 
 if __name__ == "__main__":
     unittest.main()

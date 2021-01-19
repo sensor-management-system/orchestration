@@ -20,4 +20,6 @@ from .user_detail import UserDetail
 from .user_list import UserList
 from .user_relationship import UserRelationship
 from .configuration_device_list import ConfigurationDeviceList
+from .configuration_device_detail import ConfigurationDeviceDetail
 from .configuration_platform_list import ConfigurationPlatformList
+from .configuration_platform_detail import ConfigurationPlatformDetail
