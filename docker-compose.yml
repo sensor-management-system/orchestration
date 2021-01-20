@@ -75,19 +75,6 @@ services:
       interval: 30s
       timeout: 20s
       retries: 3
-#  mc:
-#    image: minio/mc:latest
-#    depends_on:
-#      - minio
-#    entrypoint: >
-#      /bin/sh -c "
-#      /usr/bin/mc config host rm local;"
-#      /usr/bin/mc config host add --quiet --api s3v4 local http://172.16.238.10:9000 minio minio123;
-#      /usr/bin/mc rb --force local/miniopublicbucket/;
-#      /usr/bin/mc mb --quiet local/miniopublicbucket/;
-#      /usr/bin/mc policy set public local/miniopublicbucket;
-#      "
-
 volumes:
   esdata01:
     driver: local
