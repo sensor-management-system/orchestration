@@ -57,7 +57,7 @@ permissions and limitations under the Licence.
       <v-tab-item :eager="true">
         <v-row>
           <v-col cols="12" md="6">
-            <v-text-field v-model="searchText" label="Label" placeholder="Label of configurations" @keydown.enter="extendedSearch" />
+            <v-text-field v-model="searchText" label="Label" placeholder="Label of configuration" @keydown.enter="extendedSearch" />
           </v-col>
         </v-row>
         <v-row>
