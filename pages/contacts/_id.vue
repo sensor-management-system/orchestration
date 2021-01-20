@@ -214,11 +214,24 @@ export default class ContactIdPage extends Vue {
         this.contact = savedContact
         this.contactBackup = null
         this.editMode = false
+        if (!this.$route.params.id && savedContact.id) {
+          this.setUrlWithNewId(savedContact.id)
+          // and we set the parameter so that we don't and up with
+          // multiple ids in the url
+          this.$route.params.id = savedContact.id
+        }
         resolve(savedContact)
       }).catch((error) => {
         reject(error)
       })
     })
+  }
+
+  setUrlWithNewId (id: string) {
+    const oldUrl = this.$route.path
+    const newUrl = oldUrl + (oldUrl.endsWith('/') ? '' : '/') + id
+
+    history.pushState({}, '', newUrl)
   }
 
   cancel () {
