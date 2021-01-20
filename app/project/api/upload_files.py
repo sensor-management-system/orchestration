@@ -1,15 +1,13 @@
 import os
-import time
-import uuid
 
-from flask import Blueprint, jsonify, make_response, request
-from minio import Minio
-from urllib3.exceptions import ResponseError
-
+from flask import Blueprint, request
+from project.api.flask_minio import (ALLOWED_EXTENSIONS, FlaskMinio,
+                                     error_response)
 from project.urls import base_url
 
 upload_blueprint = Blueprint("upload", __name__)
-ALLOWED_EXTENSIONS = {"txt", "pdf", "png", "jpg", "jpeg", "gif"}
+
+bucket_name = os.getenv("MINIO_BUCKET_NAME", "smsdownloadbucket")
 
 
 def allowed_file(filename):
@@ -33,7 +31,10 @@ def upload_file():
             return response
         if file and allowed_file(file.filename):
             uploaded_file = request.files["file"]
-            return upload_object(uploaded_file)
+            minio = FlaskMinio()
+            response = minio.upload_object(bucket_name, uploaded_file)
+
+            return response
         else:
 
             response = error_response(
@@ -53,71 +54,3 @@ def upload_file():
       <input type=submit value=Upload>
     </form>
     """
-
-
-def upload_object(uploaded_file):
-    bucket_name = os.getenv("MINIO_BUCKET_NAME", "smsdownloadbucket")
-    size = os.fstat(uploaded_file.fileno()).st_size
-    endpoint = os.getenv("MINIO_ENDPOINT", "172.16.238.10:9000")
-    access_key = os.getenv("MINIO_ACCESS_KEY", "minio")
-    secret_key = os.getenv("MINIO_SECRET_KEY", "minio123")
-    secure = os.getenv("MINIO_SECURE", False)
-    ym = time.strftime("%Y-%m")
-    try:
-        minio_client = Minio(
-            endpoint=endpoint,
-            access_key=access_key,
-            secret_key=secret_key,
-            secure=secure,
-        )
-        found = minio_client.bucket_exists(bucket_name)
-        if not found:
-            minio_client.make_bucket(bucket_name)
-
-        if uploaded_file and allowed_file(uploaded_file.filename):
-            filename = "{}.{}".format(
-                uuid.uuid4().hex, uploaded_file.filename.rsplit(".", 1)[1].lower()
-            )
-            fn = f"{ym}/{filename}"
-            minio_client.put_object(bucket_name, fn, uploaded_file, size)
-            data = {
-                "message": f"object stored in {bucket_name}",
-                "url": f"http://{endpoint}/{bucket_name}/{fn}",
-            }
-            response = custom_response(data, 201)
-
-            return response
-    except ResponseError as e:
-        return error_response(500, "MinIO server", "please contact your admin", str(e))
-    except FileNotFoundError as e:
-        return error_response(500, "MinIO server", "please contact your admin", str(e))
-    except Exception as e:
-        return error_response(500, "MinIO server", "please contact your admin", str(e))
-
-
-def custom_response(data, code):
-    response = make_response(
-        jsonify({"data": data, "jsonapi": {"version": "1.0"}}), code
-    )
-    response.headers["Content-Type"] = "application/vnd.api+json"
-    return response
-
-
-def error_response(code, parameter, title, detail):
-    response = make_response(
-        jsonify(
-            {
-                "errors": [
-                    {
-                        "status": code,
-                        "source": {"parameter": parameter},
-                        "title": title,
-                        "detail": detail,
-                    }
-                ],
-                "jsonapi": {"version": "1.0"},
-            }
-        )
-    )
-    response.headers["Content-Type"] = "application/vnd.api+json"
-    return response
