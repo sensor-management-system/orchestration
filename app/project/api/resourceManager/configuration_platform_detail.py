@@ -10,12 +10,9 @@ from project.api.token_checker import token_required
 class ConfigurationPlatformDetail(ResourceDetail):
     """
     provides get, patch and delete methods to retrieve details
-    of an object, update an object and delete a Device
+    of an object, update an object and delete a configuration platform
     """
 
     schema = ConfigurationPlatformSchema
     decorators = (token_required,)
-    data_layer = {
-        "session": db.session,
-        "model": ConfigurationPlatform,
-    }
+    data_layer = {"session": db.session, "model": ConfigurationPlatform}

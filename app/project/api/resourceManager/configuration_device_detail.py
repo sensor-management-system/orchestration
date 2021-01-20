@@ -8,12 +8,10 @@ from project.api.token_checker import token_required
 class ConfigurationDeviceDetail(ResourceDetail):
     """
     provides get, patch and delete methods to retrieve details
-    of an object, update an object and delete a Device
+    of an object, update an object and delete a configuration device
     """
 
     schema = ConfigurationDeviceSchema
     decorators = (token_required,)
-    data_layer = {
-        "session": db.session,
-        "model": ConfigurationDevice,
-    }
+
+    data_layer = {"session": db.session, "model": ConfigurationDevice}

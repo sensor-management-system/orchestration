@@ -28,7 +28,6 @@ from project.api.resourceManager import (
     ConfigurationPlatformDetail,
     ConfigurationPlatformRelationship,
     ConfigurationDeviceRelationship,
-
 )
 
 api = Api()
@@ -189,6 +188,16 @@ api.route(
 )
 api.route(
     ConfigurationRelationship,
+    "configuration_platforms",
+    "/configurations/<int:id>/relationships/configurationPlatforms",
+)
+api.route(
+    ConfigurationRelationship,
+    "configuration_devices",
+    "/configurations/<int:id>/relationships/configurationDevices",
+)
+api.route(
+    ConfigurationRelationship,
     "configuration_src_longitude",
     "/configurations/<int:id>/relationships/src-longitude",
 )
@@ -215,7 +224,7 @@ api.route(
 )
 api.route(
     ConfigurationPlatformRelationship,
-    "configuration_platforms",
+    "configuration_platform",
     "/configuration-platforms/<int:id>/relationships/platform",
 )
 # ConfigurationDevice
@@ -231,6 +240,6 @@ api.route(
 )
 api.route(
     ConfigurationDeviceRelationship,
-    "configuration_devices",
+    "configuration_device",
     "/configuration-devices/<int:id>/relationships/device",
 )
