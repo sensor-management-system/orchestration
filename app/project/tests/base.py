@@ -79,7 +79,6 @@ class BaseTestCase(TestCase):
         has invalid data key."""
 
         rs256_token = create_access_token("testusr@test.de")
-        print(rs256_token)
         access_headers = {"Authorization": "Bearer {}".format(rs256_token)}
         with self.client:
             response = self.client.post(

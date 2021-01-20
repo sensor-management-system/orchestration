@@ -13,5 +13,4 @@ class ConfigurationDeviceList(ResourceList):
 
     schema = ConfigurationDeviceSchema
     decorators = (token_required,)
-    data_layer = {'session': db.session,
-                  'model': ConfigurationDevice}
+    data_layer = {"session": db.session, "model": ConfigurationDevice}

@@ -9,8 +9,8 @@ from project.api.token_checker import token_required
 
 class ConfigurationPlatformDetail(ResourceDetail):
     """
-    provides get, patch and delete methods
-    of an object, update and object and delete a configuration platform.
+    provides get, patch and delete methods to retrieve details
+    of an object, update an object and delete a configuration platform
     """
 
     schema = ConfigurationPlatformSchema

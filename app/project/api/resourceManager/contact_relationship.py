@@ -1,5 +1,4 @@
 from flask_rest_jsonapi import ResourceRelationship
-
 from project.api.models.base_model import db
 from project.api.models.contact import Contact
 from project.api.schemas.contact_schema import ContactSchema

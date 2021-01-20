@@ -1,10 +1,11 @@
 from flask_rest_jsonapi import ResourceList
-
 from project.api.datalayers.esalchemy import EsSqlalchemyDataLayer
 from project.api.models.base_model import db
 from project.api.models.platform import Platform
-from project.api.resourceManager.base_resource import (add_contact_to_object,
-                                                       add_create_by_id)
+from project.api.resourceManager.base_resource import (
+    add_contact_to_object,
+    add_created_by_id,
+)
 from project.api.schemas.platform_schema import PlatformSchema
 from project.api.token_checker import token_required
 
@@ -23,7 +24,7 @@ class PlatformList(ResourceList):
         :param kwargs:
         :return:
         """
-        add_create_by_id(data)
+        add_created_by_id(data)
 
     def after_post(self, result):
         """

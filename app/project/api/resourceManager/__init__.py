@@ -23,3 +23,5 @@ from .configuration_device_list import ConfigurationDeviceList
 from .configuration_device_detail import ConfigurationDeviceDetail
 from .configuration_platform_list import ConfigurationPlatformList
 from .configuration_platform_detail import ConfigurationPlatformDetail
+from .configuration_device_relationship import ConfigurationDeviceRelationship
+from .configuration_platform_relationship import ConfigurationPlatformRelationship

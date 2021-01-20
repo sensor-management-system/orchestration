@@ -1,5 +1,5 @@
 from marshmallow_jsonapi import fields
-from marshmallow_jsonapi.flask import Schema, Relationship
+from marshmallow_jsonapi.flask import Relationship, Schema
 from project.api.schemas.attachment_schema import AttachmentSchema
 
 
@@ -10,7 +10,9 @@ class PlatformSchema(Schema):
         self_view_kwargs = {"id": "<id>"}
         self_view_many = "api.platform_list"
 
-    id = fields.Integer(as_string=True, )
+    id = fields.Integer(
+        as_string=True,
+    )
     description = fields.Str(allow_none=True)
     short_name = fields.Str(required=True)
     long_name = fields.Str(allow_none=True)

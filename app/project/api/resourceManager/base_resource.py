@@ -1,11 +1,10 @@
 from flask_jwt_extended import get_jwt_identity
-
 from project.api.models.base_model import db
 from project.api.models.contact import Contact
 from project.api.models.user import User
 
 
-def add_create_by_id(data):
+def add_created_by_id(data):
     """
     Use jwt to add user id to dataset.
     :param data:

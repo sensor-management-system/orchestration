@@ -1,12 +1,9 @@
 from marshmallow_jsonapi import fields
-from marshmallow_jsonapi.flask import Schema, Relationship
+from marshmallow_jsonapi.flask import Relationship, Schema
 from project.api.schemas.attachment_schema import AttachmentSchema
 from project.api.schemas.customfield_schema import CustomFieldSchema
-from project.api.schemas.event_schema import EventSchema
-from project.api.schemas.device_property_schema import (
-    InnerDevicePropertySchema,
-    DevicePropertySchema,
-)
+from project.api.schemas.device_property_schema import \
+    InnerDevicePropertySchema
 
 
 class DeviceSchema(Schema):
@@ -26,7 +23,9 @@ class DeviceSchema(Schema):
         self_view = "api.device_detail"
         self_view_kwargs = {"id": "<id>"}
 
-    id = fields.Integer(as_string=True, )
+    id = fields.Integer(
+        as_string=True,
+    )
     description = fields.Str(allow_none=True)
     short_name = fields.Str(required=True)
     long_name = fields.Str(allow_none=True)
