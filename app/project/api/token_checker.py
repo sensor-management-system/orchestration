@@ -11,7 +11,6 @@ from jwkest import JWKESTException
 from jwkest.jwk import KEYS
 from jwkest.jws import JWS
 from project.api.models.base_model import db
-from project.api.models.contact import Contact
 from project.api.models.user import User
 
 auth_blueprint = Blueprint('auth', __name__)
@@ -103,6 +102,7 @@ def add_user_to_database(current_user):
         family_name = current_user['family_name']
         email = current_user['email']
         subject = current_user['sub']
+        from project.api.models.contact import Contact
         contact = Contact(given_name=given_name, family_name=family_name,
                           email=email)
         db.session.add(contact)
