@@ -96,6 +96,7 @@ permissions and limitations under the Licence.
           :disabled="readonly"
           type="number"
           @input="update('measuringRange.min', $event)"
+          @wheel.prevent
         />
       </v-col>
       <v-col cols="12" md="3">
@@ -106,6 +107,7 @@ permissions and limitations under the Licence.
           :disabled="readonly"
           type="number"
           @input="update('measuringRange.max', $event)"
+          @wheel.prevent
         />
       </v-col>
     </v-row>
@@ -118,6 +120,7 @@ permissions and limitations under the Licence.
           :disabled="readonly"
           type="number"
           @input="update('accuracy', $event)"
+          @wheel.prevent
         />
       </v-col>
       <v-col cols="12" md="3">
@@ -128,6 +131,7 @@ permissions and limitations under the Licence.
           :disabled="readonly"
           type="number"
           @input="update('failureValue', $event)"
+          @wheel.prevent
         />
       </v-col>
     </v-row>
@@ -140,6 +144,7 @@ permissions and limitations under the Licence.
           :disabled="readonly"
           type="number"
           @input="update('resolution', $event)"
+          @wheel.prevent
         />
       </v-col>
       <v-col cols="12" md="3">

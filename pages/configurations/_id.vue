@@ -183,6 +183,7 @@ permissions and limitations under the Licence.
                       type="number"
                       :readonly="readonly"
                       :disabled="readonly"
+                      @wheel.prevent
                     />
                   </v-col>
                   <v-col cols="12" md="3">
@@ -192,6 +193,7 @@ permissions and limitations under the Licence.
                       type="number"
                       :readonly="readonly"
                       :disabled="readonly"
+                      @wheel.prevent
                     />
                   </v-col>
                   <v-col cols="12" md="3">
@@ -201,6 +203,7 @@ permissions and limitations under the Licence.
                       type="number"
                       :readonly="readonly"
                       :disabled="readonly"
+                      @wheel.prevent
                     />
                   </v-col>
                 </v-row>
