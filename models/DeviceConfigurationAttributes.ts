@@ -29,6 +29,7 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
+import { DateTime } from 'luxon'
 import { Device } from '@/models/Device'
 
 export interface IDeviceConfigurationAttributes {
@@ -36,7 +37,7 @@ export interface IDeviceConfigurationAttributes {
   offsetX: number
   offsetY: number
   offsetZ: number
-  calibrationDate: Date | null
+  calibrationDate: DateTime | null
 }
 
 export class DeviceConfigurationAttributes implements IDeviceConfigurationAttributes {
@@ -44,7 +45,7 @@ export class DeviceConfigurationAttributes implements IDeviceConfigurationAttrib
   private _offsetX: number = 0
   private _offsetY: number = 0
   private _offsetZ: number = 0
-  private _calibrationDate: Date | null = null
+  private _calibrationDate: DateTime | null = null
 
   constructor (device: Device) {
     this._device = device
@@ -56,7 +57,8 @@ export class DeviceConfigurationAttributes implements IDeviceConfigurationAttrib
     newObject.offsetX = someObject.offsetX
     newObject.offsetY = someObject.offsetY
     newObject.offsetZ = someObject.offsetZ
-    newObject.calibrationDate = someObject.calibrationDate instanceof Date ? new Date(someObject.calibrationDate.getTime()) : null
+    // luxon DateTime objects are immutable
+    newObject.calibrationDate = someObject.calibrationDate
 
     return newObject
   }
@@ -93,11 +95,11 @@ export class DeviceConfigurationAttributes implements IDeviceConfigurationAttrib
     this._offsetZ = offsetZ
   }
 
-  get calibrationDate (): Date | null {
+  get calibrationDate (): DateTime | null {
     return this._calibrationDate
   }
 
-  set calibrationDate (date: Date | null) {
+  set calibrationDate (date: DateTime | null) {
     this._calibrationDate = date
   }
 }

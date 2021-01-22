@@ -29,6 +29,7 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
+import { DateTime } from 'luxon'
 import { Device } from '@/models/Device'
 import { DeviceConfigurationAttributes } from '@/models/DeviceConfigurationAttributes'
 
@@ -46,7 +47,7 @@ describe('DeviceConfigurationAttributes', () => {
     const device = new Device()
     device.id = '1'
 
-    const now = new Date()
+    const now = DateTime.utc()
     const attributes = DeviceConfigurationAttributes.createFromObject({ device, offsetX: 1, offsetY: 1, offsetZ: 1, calibrationDate: now })
     expect(typeof attributes).toBe('object')
     expect(attributes.device).toBe(device)

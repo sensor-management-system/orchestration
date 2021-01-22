@@ -29,6 +29,8 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
+import { DateTime } from 'luxon'
+
 import { IContact, Contact } from '@/models/Contact'
 import { Attachment, IAttachment } from '@/models/Attachment'
 
@@ -55,8 +57,8 @@ export interface IPlatform {
   website: string
   persistentIdentifier: string
 
-  createdAt: Date | null
-  updatedAt: Date | null
+  createdAt: DateTime | null
+  updatedAt: DateTime | null
 
   createdByUserId: number | null
   updatedByUserId: number | null
@@ -87,8 +89,8 @@ export class Platform implements IPlatform {
   private _serialNumber: string = ''
   private _website: string = ''
   private _persistentIdentifier: string = ''
-  private _createdAt: Date | null = null
-  private _updatedAt: Date | null = null
+  private _createdAt: DateTime | null = null
+  private _updatedAt: DateTime | null = null
 
   private _createdByUserId: number | null = null
   private _updatedByUserId: number | null = null
@@ -224,19 +226,19 @@ export class Platform implements IPlatform {
     this._persistentIdentifier = newPersistentIdentifier
   }
 
-  get createdAt (): Date | null {
+  get createdAt (): DateTime | null {
     return this._createdAt
   }
 
-  set createdAt (newCreatedAt: Date | null) {
+  set createdAt (newCreatedAt: DateTime | null) {
     this._createdAt = newCreatedAt
   }
 
-  get updatedAt (): Date | null {
+  get updatedAt (): DateTime | null {
     return this._updatedAt
   }
 
-  set updatedAt (newUpdatedAt: Date | null) {
+  set updatedAt (newUpdatedAt: DateTime | null) {
     this._updatedAt = newUpdatedAt
   }
 

@@ -29,6 +29,8 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
+import { DateTime } from 'luxon'
+
 import { Contact } from '@/models/Contact'
 import { Platform } from '@/models/Platform'
 
@@ -74,8 +76,8 @@ export class PlatformSerializer {
     result.statusUri = attributes.status_uri || ''
     result.statusName = attributes.status_name || ''
     result.website = attributes.website || ''
-    result.createdAt = attributes.created_at != null ? new Date(attributes.created_at) : null
-    result.updatedAt = attributes.updated_at != null ? new Date(attributes.updated_at) : null
+    result.createdAt = attributes.created_at != null ? DateTime.fromISO(attributes.created_at, { zone: 'UTC' }) : null
+    result.updatedAt = attributes.updated_at != null ? DateTime.fromISO(attributes.updated_at, { zone: 'UTC' }) : null
 
     // TODO
     // result.createdBy = attributes.created_by
@@ -144,8 +146,8 @@ export class PlatformSerializer {
         status_name: platform.statusName,
         website: platform.website,
         // those two time slots are set by the db, no matter what we deliver here
-        created_at: platform.createdAt != null ? platform.createdAt.toISOString() : null,
-        updated_at: platform.updatedAt != null ? platform.updatedAt.toISOString() : null,
+        created_at: platform.createdAt != null ? platform.createdAt.setZone('UTC').toISO() : null,
+        updated_at: platform.updatedAt != null ? platform.updatedAt.setZone('UTC').toISO() : null,
         // TODO
         // created_by: platform.createdBy,
         // updated_by: platform.updatedBy,

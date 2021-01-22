@@ -29,17 +29,18 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
+import { DateTime } from 'luxon'
 import { dateToString, stringToDate, timeStampToUTCDateTime } from '@/utils/dateHelper'
 
 describe('dateToString', () => {
   it('should work with by birthday', () => {
-    const date = new Date('1990-09-18')
+    const date = DateTime.fromISO('1990-09-18', { zone: 'UTC' })
     const result = dateToString(date)
 
     expect(result).toBe('1990-09-18')
   })
   it('should also work with the date on that I write the tests', () => {
-    const date = new Date('2020-09-25')
+    const date = DateTime.fromISO('2020-09-25', { zone: 'UTC' })
     const result = dateToString(date)
 
     expect(result).toBe('2020-09-25')
@@ -51,17 +52,17 @@ describe('stringToDate', () => {
     const day = '1990-09-18'
     const result = stringToDate(day)
 
-    expect(result.getFullYear()).toBe(1990)
-    expect(result.getMonth()).toBe(8) // it has a zero based count for months
-    expect(result.getDate()).toBe(18)
+    expect(result.year).toBe(1990)
+    expect(result.month).toBe(9)
+    expect(result.day).toBe(18)
   })
   it('should also work with the date on that I write the tests', () => {
     const day = '2020-09-25'
     const result = stringToDate(day)
 
-    expect(result.getFullYear()).toBe(2020)
-    expect(result.getMonth()).toBe(8) // it has a zero based count for months
-    expect(result.getDate()).toBe(25)
+    expect(result.year).toBe(2020)
+    expect(result.month).toBe(9)
+    expect(result.day).toBe(25)
   })
 })
 

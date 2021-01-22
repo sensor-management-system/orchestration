@@ -29,6 +29,8 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
+
+import { DateTime } from 'luxon'
 import { Contact } from '@/models/Contact'
 import { Platform } from '@/models/Platform'
 import { Attachment } from '@/models/Attachment'
@@ -52,8 +54,8 @@ const createTestPlatform = () => {
   platform.model = '0815'
   platform.persistentIdentifier = 'doi:4354545'
   platform.website = 'http://gfz-potsdam.de'
-  platform.createdAt = new Date('2020-08-28T13:49:48.015620+00:00')
-  platform.updatedAt = new Date('2020-08-30T13:49:48.015620+00:00')
+  platform.createdAt = DateTime.utc(2020, 8, 28, 13, 49, 48, 15)
+  platform.updatedAt = DateTime.utc(2020, 8, 30, 13, 49, 48, 15)
 
   platform.attachments = [
     Attachment.createFromObject({
@@ -254,9 +256,9 @@ describe('PlatformSerializer', () => {
       expectedPlatform1.platformTypeUri = 'type/Station'
       expectedPlatform1.statusUri = 'status/inuse'
       expectedPlatform1.website = 'http://www.tereno.net'
-      expectedPlatform1.updatedAt = new Date('2020-08-29T13:48:35.740944+00:00')
+      expectedPlatform1.updatedAt = DateTime.utc(2020, 8, 29, 13, 48, 35, 740)
       expectedPlatform1.longName = 'Soil moisture station Boeken BF1, Germany'
-      expectedPlatform1.createdAt = new Date('2020-08-28T13:48:35.740944+00:00')
+      expectedPlatform1.createdAt = DateTime.utc(2020, 8, 28, 13, 48, 35, 740)
       expectedPlatform1.inventoryNumber = '0001234'
       expectedPlatform1.manufacturerName = 'XYZ'
       expectedPlatform1.shortName = 'boeken_BF1'
@@ -434,9 +436,9 @@ describe('PlatformSerializer', () => {
       expectedPlatform.platformTypeUri = 'type/Station'
       expectedPlatform.statusUri = 'status/inuse'
       expectedPlatform.website = 'http://www.tereno.net'
-      expectedPlatform.updatedAt = new Date('2020-08-28T13:48:35.740944+00:00')
+      expectedPlatform.updatedAt = DateTime.utc(2020, 8, 28, 13, 48, 35, 740)
       expectedPlatform.longName = 'Soil moisture station Boeken BF1, Germany'
-      expectedPlatform.createdAt = new Date('2020-08-28T13:48:35.740944+00:00')
+      expectedPlatform.createdAt = DateTime.utc(2020, 8, 28, 13, 48, 35, 740)
       expectedPlatform.inventoryNumber = '0001234'
       expectedPlatform.manufacturerName = 'XYZ'
       expectedPlatform.shortName = 'boeken_BF1'
@@ -575,9 +577,9 @@ describe('PlatformSerializer', () => {
       expectedPlatform.platformTypeUri = 'type/Station'
       expectedPlatform.statusUri = 'status/inuse'
       expectedPlatform.website = 'http://www.tereno.net'
-      expectedPlatform.updatedAt = new Date('2020-08-28T13:48:35.740944+00:00')
+      expectedPlatform.updatedAt = DateTime.utc(2020, 8, 28, 13, 48, 35, 740)
       expectedPlatform.longName = 'Soil moisture station Boeken BF1, Germany'
-      expectedPlatform.createdAt = new Date('2020-08-28T13:48:35.740944+00:00')
+      expectedPlatform.createdAt = DateTime.utc(2020, 8, 28, 13, 48, 35, 740)
       expectedPlatform.inventoryNumber = '0001234'
       expectedPlatform.manufacturerName = 'XYZ'
       expectedPlatform.shortName = 'boeken_BF1'

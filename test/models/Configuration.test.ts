@@ -30,6 +30,7 @@
  * permissions and limitations under the Licence.
  */
 
+import { DateTime } from 'luxon'
 import { Configuration } from '@/models/Configuration'
 
 describe('Configuration', () => {
@@ -85,12 +86,66 @@ describe('Configuration', () => {
       configurationToCopyFrom.label = 'Boeken'
       configurationToCopyFrom.status = 'draft'
 
+      expect(configurationToCopyFrom.startDate).toBeNull()
+      expect(configurationToCopyFrom.endDate).toBeNull()
+
       const result = Configuration.createFromObject(configurationToCopyFrom)
 
       expect(result.projectName).toEqual('Tereno NO')
       expect(result.projectUri).toEqual('projects/tereno-no')
       expect(result.label).toEqual('Boeken')
       expect(result.status).toEqual('draft')
+      expect(result.startDate).toBeNull()
+      expect(result.endDate).toBeNull()
+    })
+    it('should also copy the start and end dates', () => {
+      const configurationToCopyFrom = new Configuration()
+      configurationToCopyFrom.projectName = 'Tereno NO'
+      configurationToCopyFrom.projectUri = 'projects/tereno-no'
+      configurationToCopyFrom.label = 'Boeken'
+      configurationToCopyFrom.status = 'draft'
+
+      configurationToCopyFrom.startDate = DateTime.utc(
+        2021, // year
+        1, // month (1 based)
+        22, // day
+        7, // hour
+        15, // minute
+        57 // second
+      )
+      configurationToCopyFrom.endDate = DateTime.utc(2021, 1, 31, 23, 59, 59)
+
+      const result = Configuration.createFromObject(configurationToCopyFrom)
+
+      expect(result.startDate).not.toBeNull()
+      if (result.startDate !== null) {
+        expect(result.startDate.year).toEqual(2021)
+        expect(result.startDate.month).toEqual(1)
+        expect(result.startDate.day).toEqual(22)
+        expect(result.startDate.hour).toEqual(7)
+        expect(result.startDate.minute).toEqual(15)
+        expect(result.startDate.second).toEqual(57)
+        expect(result.startDate.zoneName).toEqual('UTC')
+      }
+      expect(result.endDate).not.toBeNull()
+      if (result.endDate !== null) {
+        expect(result.endDate.day).toEqual(31)
+        expect(result.endDate.hour).toEqual(23)
+        expect(result.endDate.minute).toEqual(59)
+        expect(result.endDate.second).toEqual(59)
+        expect(result.endDate.zoneName).toEqual('UTC')
+      }
+
+      // and as the luxon DateTime objects are immutable, we don't
+      // change anything
+      const newDate = configurationToCopyFrom.startDate.set({
+        year: 2030
+      })
+      expect(newDate.year).toEqual(2030)
+      expect(configurationToCopyFrom.startDate.year).toEqual(2021)
+      if (result.startDate !== null) {
+        expect(result.startDate.year).toEqual(2021)
+      }
     })
   })
 })

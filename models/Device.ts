@@ -29,6 +29,8 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
+import { DateTime } from 'luxon'
+
 import { IContact, Contact } from '@/models/Contact'
 import { DeviceProperty } from '@/models/DeviceProperty'
 import { CustomTextField, ICustomTextField } from '@/models/CustomTextField'
@@ -57,8 +59,8 @@ export interface IDevice {
   inventoryNumber: string
   dualUse: boolean
 
-  createdAt: Date | null
-  updatedAt: Date | null
+  createdAt: DateTime | null
+  updatedAt: DateTime | null
   createdByUserId: number | null
   updatedByUserId: number | null
 
@@ -91,8 +93,8 @@ export class Device implements IDevice {
   private _inventoryNumber: string = ''
   private _dualUse: boolean = false
 
-  private _createdAt: Date | null = null
-  private _updatedAt: Date | null = null
+  private _createdAt: DateTime | null = null
+  private _updatedAt: DateTime | null = null
 
   private _createdByUserId: number | null = null
   private _updatedByUserId: number | null = null
@@ -232,19 +234,19 @@ export class Device implements IDevice {
     this._dualUse = dualUse
   }
 
-  get createdAt (): Date | null {
+  get createdAt (): DateTime | null {
     return this._createdAt
   }
 
-  set createdAt (newCreatedAt: Date | null) {
+  set createdAt (newCreatedAt: DateTime | null) {
     this._createdAt = newCreatedAt
   }
 
-  get updatedAt (): Date | null {
+  get updatedAt (): DateTime | null {
     return this._updatedAt
   }
 
-  set updatedAt (newUpdatedAt: Date | null) {
+  set updatedAt (newUpdatedAt: DateTime | null) {
     this._updatedAt = newUpdatedAt
   }
 
