@@ -3,22 +3,29 @@ import time
 import uuid
 
 import minio
-from flask import jsonify, make_response
+from flask import jsonify, make_response, current_app
 from urllib3.exceptions import ResponseError
 
-ALLOWED_EXTENSIONS = {"txt", "pdf", "png", "jpg", "jpeg", "gif"}
-minio_endpoint = os.getenv("MINIO_ENDPOINT", "172.16.238.10:9000")
-access_key = os.getenv("MINIO_ACCESS_KEY", "minio")
-secret_key = os.getenv("MINIO_SECRET_KEY", "minio123")
-secure = os.getenv("MINIO_SECURE", False)
-region = os.getenv("REGION", None)
-http_client = os.getenv("HTTP_CLIENT", None)
+from project.config import BaseConfig
+
+config = BaseConfig()
+minio_endpoint = config.MINIO_ENDPOINT
+access_key = config.MINIO_ACCESS_KEY
+secret_key = config.MINIO_SECRET_KEY
+secure = config.MINIO_SECURE
+region = config.REGION
+http_client = config.HTTP_CLIENT
 
 
-class FlaskMinio(object):
+class MinioNotAvailableException(Exception):
+    pass
+
+
+class FlaskMinio:
     """This class is used to control the Minio integration to a Flask
     applications.
     """
+    ALLOWED_EXTENSIONS = {".txt", ".pdf", ".png", ".jpg", ".jpeg", ".gif"}
 
     def __init__(self):
         self.minio_endpoint = minio_endpoint
@@ -27,27 +34,34 @@ class FlaskMinio(object):
         self.secure = secure
         self.region = region
         self.http_client = http_client
-        self.client = self.client()
+        self._client = None
+        self._exception_on_creating_client = None
 
+    @property
     def client(self):
-        try:
-            client = minio.Minio(
-                endpoint=self.minio_endpoint,
-                access_key=self.access_key,
-                secret_key=self.secret_key,
-                secure=self.secure,
-                region=self.region,
-                http_client=self.http_client,
-            )
-        except ResponseError as e:
-            return custom_response(str(e), 500)
+        if self._exception_on_creating_client is not None:
+            raise MinioNotAvailableException(self._exception_on_creating_client)
 
-        return client
+        if self._client is None:
+            try:
+                self._client = minio.Minio(
+                    endpoint=self.minio_endpoint,
+                    access_key=self.access_key,
+                    secret_key=self.secret_key,
+                    secure=self.secure,
+                    region=self.region,
+                    http_client=self.http_client,
+                )
+            except ResponseError as e:
+                self._exception_on_creating_client = e
+                raise MinioNotAvailableException(self._exception_on_creating_client)
 
-    @staticmethod
-    def allowed_file(filename):
+        return self._client
+
+    @classmethod
+    def allowed_file(cls, filename):
         return (
-            "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+                "." in filename and os.path.splitext(filename)[-1] in cls.ALLOWED_EXTENSIONS
         )
 
     def upload_object(self, bucket_name, uploaded_file):
@@ -60,7 +74,7 @@ class FlaskMinio(object):
 
             if uploaded_file and self.allowed_file(uploaded_file.filename):
                 filename = "{}.{}".format(
-                    uuid.uuid4().hex, uploaded_file.filename.rsplit(".", 1)[1].lower()
+                    uuid.uuid4().hex, os.path.splitext(uploaded_file.filename)[-1]
                 )
                 ordered_filed = f"{act_year_month}/{filename}"
                 self.client.put_object(bucket_name, ordered_filed, uploaded_file, size)
@@ -100,7 +114,7 @@ def custom_response(data, code):
     return response
 
 
-def error_response(code, parameter, title, detail):
+def error_response(code, parameter, title, detail=None):
     response = make_response(
         jsonify(
             {

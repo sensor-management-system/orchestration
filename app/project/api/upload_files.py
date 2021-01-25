@@ -1,17 +1,12 @@
 import os
 
 from flask import Blueprint, request
-from project.api.flask_minio import (ALLOWED_EXTENSIONS, FlaskMinio,
-                                     error_response)
+from project.api.flask_minio import (FlaskMinio, error_response)
 from project.urls import base_url
 
 upload_blueprint = Blueprint("upload", __name__)
 
 bucket_name = os.getenv("MINIO_BUCKET_NAME", "smsdownloadbucket")
-
-
-def allowed_file(filename):
-    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
 @upload_blueprint.route(f"{base_url}/upload", methods=["GET", "POST"])
@@ -29,9 +24,9 @@ def upload_file():
                 404, "file", "No file selected", "You didn't select file"
             )
             return response
-        if file and allowed_file(file.filename):
+        minio = FlaskMinio()
+        if file and minio.allowed_file(file.filename):
             uploaded_file = request.files["file"]
-            minio = FlaskMinio()
             response = minio.upload_object(bucket_name, uploaded_file)
 
             return response
@@ -41,7 +36,7 @@ def upload_file():
                 404,
                 "file",
                 "Format not allowed",
-                "allowed extensions are :{}".format(ALLOWED_EXTENSIONS),
+                "allowed extensions are :{}".format(minio.ALLOWED_EXTENSIONS),
             )
             return response
 
