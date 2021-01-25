@@ -1,12 +1,11 @@
-import os
-
 from flask import Blueprint, request
-from project.api.flask_minio import (FlaskMinio, error_response)
+from project.api.flask_minio import FlaskMinio, error_response
+from project.config import BaseConfig
 from project.urls import base_url
 
 upload_blueprint = Blueprint("upload", __name__)
 
-bucket_name = os.getenv("MINIO_BUCKET_NAME", "smsdownloadbucket")
+bucket_name = BaseConfig().MINIO_BUCKET_NAME
 
 
 @upload_blueprint.route(f"{base_url}/upload", methods=["GET", "POST"])

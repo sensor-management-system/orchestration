@@ -2,7 +2,15 @@ import os
 
 
 def env_value_to_boolean(param):
-    return param.lower() in ("true", 'yes', True)
+    """
+    convert a string to boolean
+    :param param: str
+    :return: boolean
+    """
+    if isinstance(param, str):
+        _bool = param.lower() in ("true", 'yes', True)
+        return _bool
+    return param
 
 
 class BaseConfig:
@@ -28,6 +36,7 @@ class BaseConfig:
     # (Optional) Customized HTTP client.
     # learn more https://docs.min.io/docs/python-client-api-reference.html
     HTTP_CLIENT = os.getenv("HTTP_CLIENT", None)
+    MINIO_BUCKET_NAME = os.getenv("MINIO_BUCKET_NAME", "smsdownloadbucket")
 
 
 class DevelopmentConfig(BaseConfig):
