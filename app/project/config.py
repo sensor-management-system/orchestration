@@ -1,6 +1,10 @@
 import os
 
 
+def env_value_to_boolean(param):
+    return param.lower() in ("true", 'yes', True)
+
+
 class BaseConfig:
     """Base configuration"""
 
@@ -18,7 +22,7 @@ class BaseConfig:
     MINIO_SECRET_KEY = os.getenv("MINIO_SECRET_KEY", "minio123")
     # (Optional) Flag to indicate to use secure (TLS) connection to S3 service or not.
     # False for local testing
-    MINIO_SECURE = os.getenv("MINIO_SECURE", False)
+    MINIO_SECURE = env_value_to_boolean(os.getenv("MINIO_SECURE", False))
     # (Optional) Region name of buckets in S3 service.
     REGION = os.getenv("REGION", None)
     # (Optional) Customized HTTP client.
