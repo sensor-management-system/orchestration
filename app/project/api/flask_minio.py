@@ -61,7 +61,8 @@ class FlaskMinio:
     @classmethod
     def allowed_file(cls, filename):
         return (
-                "." in filename and os.path.splitext(filename)[-1].lower() in cls.ALLOWED_EXTENSIONS
+            "." in filename
+            and os.path.splitext(filename)[-1].lower() in cls.ALLOWED_EXTENSIONS
         )
 
     def upload_object(self, bucket_name, uploaded_file):
@@ -80,7 +81,8 @@ class FlaskMinio:
 
             if uploaded_file and self.allowed_file(uploaded_file.filename):
                 filename = "{}{}".format(
-                    uuid.uuid4().hex, os.path.splitext(uploaded_file.filename)[-1].lower()
+                    uuid.uuid4().hex,
+                    os.path.splitext(uploaded_file.filename)[-1].lower(),
                 )
                 ordered_filed = f"{act_year_month}/{filename}"
                 self.client.put_object(bucket_name, ordered_filed, uploaded_file, size)
@@ -104,7 +106,9 @@ class FlaskMinio:
         :param object_path:
         :return:
         """
-        _bucket_name, _object_name = self.extract_bucket_and_file_names_from_url(object_path)
+        _bucket_name, _object_name = self.extract_bucket_and_file_names_from_url(
+            object_path
+        )
         try:
             self.client.remove_object(_bucket_name, _object_name)
             return make_response("ok", 200)
@@ -126,8 +130,7 @@ class FlaskMinio:
 
 def custom_response(data, code):
     response = make_response(
-        jsonify({"data": data, "jsonapi": {"version": "1.0"}}),
-        code
+        jsonify({"data": data, "jsonapi": {"version": "1.0"}}), code
     )
     response.headers["Content-Type"] = "application/vnd.api+json"
     return response

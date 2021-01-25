@@ -16,8 +16,8 @@ def delete_attachments_in_minio_by_device_id(device_id_intended_for_deletion):
     """
     attachments_related_to_device = (
         db.session.query(DeviceAttachment)
-            .filter_by(device_id=device_id_intended_for_deletion)
-            .all()
+        .filter_by(device_id=device_id_intended_for_deletion)
+        .all()
     )
     minio = FlaskMinio()
     for attachment in attachments_related_to_device:
