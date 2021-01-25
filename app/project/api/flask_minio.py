@@ -61,10 +61,16 @@ class FlaskMinio:
     @classmethod
     def allowed_file(cls, filename):
         return (
-            "." in filename and os.path.splitext(filename)[-1].lower() in cls.ALLOWED_EXTENSIONS
+                "." in filename and os.path.splitext(filename)[-1].lower() in cls.ALLOWED_EXTENSIONS
         )
 
     def upload_object(self, bucket_name, uploaded_file):
+        """
+
+        :param bucket_name:
+        :param uploaded_file:
+        :return:
+        """
         size = os.fstat(uploaded_file.fileno()).st_size
         act_year_month = time.strftime("%Y-%m")
         try:
@@ -93,22 +99,35 @@ class FlaskMinio:
             return custom_response(str(e), 500)
 
     def remove_an_object(self, object_path):
-        object_name_with_bucket = object_path.partition(self.minio_endpoint + "/")[
-            -1
-        ].split("/")
-        bucket_name = object_name_with_bucket[0]
-        object_name = object_path.partition(bucket_name + "/")
+        """
 
+        :param object_path:
+        :return:
+        """
+        _bucket_name, _object_name = self.extract_bucket_and_file_names_from_url(object_path)
         try:
-            self.client.remove_object(bucket_name, object_name)
+            self.client.remove_object(_bucket_name, _object_name)
             return make_response("ok", 200)
         except ResponseError as err:
             return custom_response(str(err), 500)
 
+    def extract_bucket_and_file_names_from_url(self, object_path):
+        """
+        Just in case that an other bucket name is used, we extract the name directly
+        from the url.
+        :param self:
+        :param object_path:
+        :return:
+        """
+        _start, _minio_endpoint, rest = object_path.partition(self.minio_endpoint + "/")
+        _bucket_name, _first_slash, _object_name = rest.partition("/")
+        return _bucket_name, _object_name
+
 
 def custom_response(data, code):
     response = make_response(
-        jsonify({"data": data, "jsonapi": {"version": "1.0"}}), code
+        jsonify({"data": data, "jsonapi": {"version": "1.0"}}),
+        code
     )
     response.headers["Content-Type"] = "application/vnd.api+json"
     return response
