@@ -61,7 +61,7 @@ class FlaskMinio:
     @classmethod
     def allowed_file(cls, filename):
         return (
-            "." in filename and os.path.splitext(filename)[-1] in cls.ALLOWED_EXTENSIONS
+            "." in filename and os.path.splitext(filename)[-1].lower() in cls.ALLOWED_EXTENSIONS
         )
 
     def upload_object(self, bucket_name, uploaded_file):
@@ -73,8 +73,8 @@ class FlaskMinio:
                 self.client.make_bucket(bucket_name)
 
             if uploaded_file and self.allowed_file(uploaded_file.filename):
-                filename = "{}.{}".format(
-                    uuid.uuid4().hex, os.path.splitext(uploaded_file.filename)[-1]
+                filename = "{}{}".format(
+                    uuid.uuid4().hex, os.path.splitext(uploaded_file.filename)[-1].lower()
                 )
                 ordered_filed = f"{act_year_month}/{filename}"
                 self.client.put_object(bucket_name, ordered_filed, uploaded_file, size)
@@ -97,7 +97,7 @@ class FlaskMinio:
             -1
         ].split("/")
         bucket_name = object_name_with_bucket[0]
-        object_name = object_path.partition(bucket_name + "/")[-1]
+        object_name = object_path.partition(bucket_name + "/")
 
         try:
             self.client.remove_object(bucket_name, object_name)
