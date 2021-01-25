@@ -61,8 +61,8 @@ class FlaskMinio:
     @classmethod
     def allowed_file(cls, filename):
         return (
-            "." in filename
-            and os.path.splitext(filename)[-1].lower() in cls.ALLOWED_EXTENSIONS
+            "." in filename and
+            os.path.splitext(filename)[-1].lower() in cls.ALLOWED_EXTENSIONS
         )
 
     def upload_object(self, bucket_name, uploaded_file):
