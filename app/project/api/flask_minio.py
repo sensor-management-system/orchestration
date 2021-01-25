@@ -3,10 +3,9 @@ import time
 import uuid
 
 import minio
-from flask import jsonify, make_response, current_app
-from urllib3.exceptions import ResponseError
-
+from flask import jsonify, make_response
 from project.config import BaseConfig
+from urllib3.exceptions import ResponseError
 
 config = BaseConfig()
 minio_endpoint = config.MINIO_ENDPOINT
@@ -25,6 +24,7 @@ class FlaskMinio:
     """This class is used to control the Minio integration to a Flask
     applications.
     """
+
     ALLOWED_EXTENSIONS = {".txt", ".pdf", ".png", ".jpg", ".jpeg", ".gif"}
 
     def __init__(self):
@@ -61,7 +61,7 @@ class FlaskMinio:
     @classmethod
     def allowed_file(cls, filename):
         return (
-                "." in filename and os.path.splitext(filename)[-1] in cls.ALLOWED_EXTENSIONS
+            "." in filename and os.path.splitext(filename)[-1] in cls.ALLOWED_EXTENSIONS
         )
 
     def upload_object(self, bucket_name, uploaded_file):
