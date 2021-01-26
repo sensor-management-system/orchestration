@@ -123,10 +123,9 @@ class FlaskMinio:
         self.connection.set_bucket_policy(bucket_name, json.dumps(policy))
 
     def allowed_file(self, filename):
-        return (
-                "." in filename and os.path.splitext(filename)[-1].lower() in set(
-            self.allowed_extensions)
-        )
+        return ("." in filename and os.path.splitext(filename)[-1].lower() in
+                set(self.allowed_extensions)
+                )
 
     def upload_object(self, uploaded_file):
         """
