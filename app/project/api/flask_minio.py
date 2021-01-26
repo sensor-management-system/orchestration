@@ -124,8 +124,8 @@ class FlaskMinio:
 
     def allowed_file(self, filename):
         return (
-                "." in filename and
-                os.path.splitext(filename)[-1].lower() in set(self.allowed_extensions)
+                "." in filename and os.path.splitext(filename)[-1].lower() in set(
+            self.allowed_extensions)
         )
 
     def upload_object(self, uploaded_file):
