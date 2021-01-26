@@ -1,11 +1,10 @@
 from flask import Blueprint, request
 from project.api.flask_minio import FlaskMinio, error_response
-from project.config import BaseConfig
 from project.urls import base_url
 
-upload_blueprint = Blueprint("upload", __name__)
+from project.api import minio
 
-bucket_name = BaseConfig().MINIO_BUCKET_NAME
+upload_blueprint = Blueprint("upload", __name__)
 
 
 @upload_blueprint.route(f"{base_url}/upload", methods=["GET", "POST"])
@@ -23,20 +22,10 @@ def upload_file():
                 404, "file", "No file selected", "You didn't select file"
             )
             return response
-        minio = FlaskMinio()
-        if file and minio.allowed_file(file.filename):
+        if file:
             uploaded_file = request.files["file"]
-            response = minio.upload_object(bucket_name, uploaded_file)
+            response = minio.upload_object(uploaded_file)
 
-            return response
-        else:
-
-            response = error_response(
-                404,
-                "file",
-                "Format not allowed",
-                "allowed extensions are :{}".format(minio.ALLOWED_EXTENSIONS),
-            )
             return response
 
     return """

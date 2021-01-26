@@ -10,6 +10,8 @@ from project.api.token_checker import auth_blueprint
 from project.api.upload_files import upload_blueprint
 from project.urls import create_endpoints
 
+from project.api import minio
+
 DB = SQLAlchemy()
 migrate = Migrate()
 
@@ -20,15 +22,6 @@ def create_app():
     """
     # init the app
     app = Flask(__name__)
-
-    # enable CORS
-    # get space separated list from environment var
-    origins_raw = os.getenv("HTTP_ORIGINS", None)
-    if origins_raw:
-        # create a list of origins
-        origins = origins_raw.split()
-        # initialize cors with list of allowed origins
-        CORS(app, origins=origins)
 
     # set config
     app_settings = os.getenv("APP_SETTINGS")
@@ -53,9 +46,12 @@ def create_app():
     api = Api(app)
     create_endpoints(api)
 
-    # test to ensure the proper config was loaded
-    # import sys
-    # print(app.config, file=sys.stderr)
+    # instantiate minio client
+    minio.init_app(app)
+
+    # enable CORS
+    # initialize cors with list of allowed origins
+    CORS(app, origins=app.config["HTTP_ORIGINS"])
 
     app.register_blueprint(auth_blueprint)
     app.register_blueprint(upload_blueprint)

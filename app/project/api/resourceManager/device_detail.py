@@ -7,6 +7,8 @@ from project.api.models.device_attachment import DeviceAttachment
 from project.api.schemas.device_schema import DeviceSchema
 from sqlalchemy.orm.exc import NoResultFound
 
+from project.api import minio
+
 
 def delete_attachments_in_minio_by_device_id(device_id_intended_for_deletion):
     """
@@ -19,7 +21,6 @@ def delete_attachments_in_minio_by_device_id(device_id_intended_for_deletion):
         .filter_by(device_id=device_id_intended_for_deletion)
         .all()
     )
-    minio = FlaskMinio()
     for attachment in attachments_related_to_device:
         minio.remove_an_object(attachment.url)
 
