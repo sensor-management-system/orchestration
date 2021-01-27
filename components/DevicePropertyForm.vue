@@ -524,7 +524,7 @@ export default class DevicePropertyForm extends Vue {
     let properties = this.properties
     // if a samplingMedia is choosen, restrict the list of properties
     if (this.value.samplingMediaUri !== '') {
-      properties = properties.filter(s => s.samplingMediaId === '' || this.value.samplingMediaUri.match(new RegExp('^.+/' + s.samplingMediaId + '/$')))
+      properties = properties.filter(s => s.samplingMediaId === '' || this.checkUriEndsWithId(this.value.samplingMediaUri, s.samplingMediaId))
     }
     return properties.map(p => p.name)
   }
