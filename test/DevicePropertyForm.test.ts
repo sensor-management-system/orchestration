@@ -126,4 +126,13 @@ describe('DevicePropertyForm', () => {
     await wrapper.vm.$nextTick()
     expect(wrapper.emitted('input')).toBeTruthy()
   })
+
+  it('checks if an URI ends with an id', () => {
+    const uri1 = '/foo/bar/42/'
+    const uri2 = '/foo/bar/23'
+
+    expect(wrapper.vm.checkUriEndsWithId(uri1, '42')).toBeTruthy()
+    expect(wrapper.vm.checkUriEndsWithId(uri1, '43')).toBeFalsy()
+    expect(wrapper.vm.checkUriEndsWithId(uri2, '23')).toBeTruthy()
+  })
 })
