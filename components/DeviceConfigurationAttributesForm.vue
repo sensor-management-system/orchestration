@@ -42,6 +42,7 @@ permissions and limitations under the Licence.
           :readonly="readonly"
           :disabled="readonly"
           @change="update('offsetX', $event)"
+          @wheel.prevent
         />
       </v-col>
       <v-col
@@ -55,6 +56,7 @@ permissions and limitations under the Licence.
           :readonly="readonly"
           :disabled="readonly"
           @change="update('offsetY', $event)"
+          @wheel.prevent
         />
       </v-col>
       <v-col
@@ -68,6 +70,7 @@ permissions and limitations under the Licence.
           :readonly="readonly"
           :disabled="readonly"
           @change="update('offsetZ', $event)"
+          @wheel.prevent
         />
       </v-col>
       <v-col
