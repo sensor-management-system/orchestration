@@ -26,7 +26,7 @@ class DeviceSchema(Schema):
         self_view = "device_detail"
         self_view_kwargs = {"id": "<id>"}
 
-    id = fields.Integer(as_string=True, dump_only=True)
+    id = fields.Integer(as_string=True)
     description = fields.Str(allow_none=True)
     short_name = fields.Str(required=True)
     long_name = fields.Str(allow_none=True)

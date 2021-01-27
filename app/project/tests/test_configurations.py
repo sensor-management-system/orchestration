@@ -1,16 +1,16 @@
 import datetime
-import unittest
 import json
+import unittest
 
 from project.api.models.base_model import db
-from project.tests.base import BaseTestCase
-from project.urls import base_url
-from project.api.models.device import Device
 from project.api.models.configuration import Configuration
 from project.api.models.configuration_device import ConfigurationDevice
 from project.api.models.configuration_platform import ConfigurationPlatform
+from project.api.models.device import Device
 from project.api.models.platform import Platform
+from project.tests.base import BaseTestCase
 from project.tests.read_from_json import extract_data_from_json_file
+from project.urls import base_url
 
 
 class TestConfigurationsService(BaseTestCase):
