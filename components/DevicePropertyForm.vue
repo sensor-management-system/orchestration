@@ -464,7 +464,7 @@ export default class DevicePropertyForm extends Vue {
   }
 
   private checkUriEndsWithId (uri: string, id: string) {
-    return uri.match(new RegExp('^.+/' + id + '/{0,1}$')) !== null
+    return uri.match(new RegExp('^.+/' + id + '/?$')) !== null
   }
 
   /**
