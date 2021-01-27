@@ -403,7 +403,7 @@ export default class DeviceIdPage extends mixins(Rules) {
     this.$api.properties.findAllPaginated().then((foundProperties) => {
       this.properties = foundProperties
     }).catch(() => {
-      this.$store.commit('snackbar/setError', 'Loading of units properties')
+      this.$store.commit('snackbar/setError', 'Loading of properties failed')
     })
     this.$api.units.findAllPaginated().then((foundUnits) => {
       this.units = foundUnits
