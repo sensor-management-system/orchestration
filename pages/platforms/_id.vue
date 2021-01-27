@@ -251,14 +251,20 @@ export default class PlatformIdPage extends mixins(Rules) {
   }
 
   mounted () {
-    this.$api.manufacturer.findAll().then((foundManufacturers) => {
+    this.$api.manufacturer.findAllPaginated().then((foundManufacturers) => {
       this.manufacturers = foundManufacturers
+    }).catch(() => {
+      this.$store.commit('snackbar/setError', 'Loading of manufactures failed')
     })
-    this.$api.platformTypes.findAll().then((foundPlatformTypes) => {
+    this.$api.platformTypes.findAllPaginated().then((foundPlatformTypes) => {
       this.platformTypes = foundPlatformTypes
+    }).catch(() => {
+      this.$store.commit('snackbar/setError', 'Loading of platform types failed')
     })
-    this.$api.states.findAll().then((foundStates) => {
+    this.$api.states.findAllPaginated().then((foundStates) => {
       this.states = foundStates
+    }).catch(() => {
+      this.$store.commit('snackbar/setError', 'Loading of states failed')
     })
     this.loadPlatform().then((platform) => {
       if (platform === null) {

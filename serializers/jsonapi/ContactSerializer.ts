@@ -53,7 +53,7 @@ export class ContactSerializer {
 
     const newEntry = Contact.createEmpty()
 
-    newEntry.id = jsonApiData.id
+    newEntry.id = jsonApiData.id.toString()
     newEntry.givenName = attributes.given_name || ''
     newEntry.familyName = attributes.family_name || ''
     newEntry.website = attributes.website || ''

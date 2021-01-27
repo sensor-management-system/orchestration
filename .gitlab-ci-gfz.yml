@@ -80,7 +80,7 @@ build-deploy-image:
   image: docker:19.03.1
   variables:
     SMS_BACKEND_URL: ${STAGING_BACKEND_URL}/rdm/svm-api/v1
-    CV_BACKEND_URL: ${STAGING_CV_BACKEND_URL}/api
+    CV_BACKEND_URL: ${STAGING_SMS_CV_BACKEND_URL}/api/v1
     HOST: ${STAGING_HOST}
     CLIENT_ID: ${STAGING_CLIENT_ID}
     AUTHORITY: ${STAGING_IDP_AUTORITY}
@@ -128,7 +128,7 @@ build-deploy-image-manual:
   image: docker:19.03.1
   variables:
     SMS_BACKEND_URL: ${STAGING_BACKEND_URL}/rdm/svm-api/v1
-    CV_BACKEND_URL: ${STAGING_CV_BACKEND_URL}/api
+    CV_BACKEND_URL: ${STAGING_SMS_CV_BACKEND_URL}/api/v1
     HOST: ${STAGING_HOST}:8080
     # Not sure, if we need another client id for the staging on 8080
     CLIENT_ID: ${STAGING_CLIENT_ID}

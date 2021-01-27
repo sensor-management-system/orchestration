@@ -42,6 +42,7 @@ import { Compartment } from '@/models/Compartment'
 import { SamplingMedia } from '@/models/SamplingMedia'
 import { Property } from '@/models/Property'
 import { Unit } from '@/models/Unit'
+import { MeasuredQuantityUnit } from '@/models/MeasuredQuantityUnit'
 
 Vue.use(Vuetify)
 
@@ -90,16 +91,20 @@ describe('DevicePropertyExpansionPanels', () => {
           Compartment.createWithData('2', 'compartment2', 'http://foo/compartment/2')
         ],
         samplingMedias: [
-          SamplingMedia.createWithData('1', 'water', 'http://foo/samplingMedia/1'),
-          SamplingMedia.createWithData('2', 'media2', 'http://foo/samplingMedia/2')
+          SamplingMedia.createWithData('1', 'water', 'http://foo/samplingMedia/1', '5'),
+          SamplingMedia.createWithData('2', 'media2', 'http://foo/samplingMedia/2', '2')
         ],
         properties: [
-          Property.createWithData('1', 'foo.bar', 'http://foo/property/1'),
-          Property.createWithData('2', 'property2', 'http://foo/property/2')
+          Property.createWithData('1', 'foo.bar', 'http://foo/property/1', '8'),
+          Property.createWithData('2', 'property2', 'http://foo/property/2', '3')
         ],
         units: [
           Unit.createWithData('1', 'mm', 'http://foo/unit/1'),
           Unit.createWithData('2', 's', 'http://foo/unit/2')
+        ],
+        measuredQuantityUnits: [
+          MeasuredQuantityUnit.createWithData('1', 'mm', 'http://foo/measuredquantityunits/1', '0.01', '10', '1', '1'),
+          MeasuredQuantityUnit.createWithData('2', 's', 'http://foo/measuredquantityunits/2', '0.001', '60', '2', '1')
         ]
       }
     })

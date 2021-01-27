@@ -81,7 +81,7 @@ export class ConfigurationSerializer {
     const attributes = jsonApiData.attributes
     const relationships = jsonApiData.relationships
 
-    configuration.id = jsonApiData.id
+    configuration.id = jsonApiData.id.toString()
     configuration.label = attributes.label || ''
     configuration.projectUri = attributes.project_uri || ''
     configuration.projectName = attributes.project_name || ''

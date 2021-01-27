@@ -38,35 +38,33 @@ describe('CompartmentSerializer', () => {
       const jsonApiObjectList: any = {
         data: [{
           attributes: {
-            active: true,
             category: null,
             definition: 'Variables associated with age',
-            name: 'Age',
             note: null,
             provenance: 'Originally from PetDB. Syntax modified to remove underscores.',
             provenance_uri: null,
-            term: 'age'
+            status: 'ACCEPTED',
+            term: 'Age'
           },
-          id: 'Age',
+          id: '1',
           links: {
-            self: 'http://rz-vm64.gfz-potsdam.de:5001/api/variabletype/Age/'
+            self: 'http://rz-vm64.gfz-potsdam.de:5001/api/variabletypes/1/'
           },
           relationships: {},
           type: 'Variabletype'
         }, {
           attributes: {
-            active: true,
             category: null,
             definition: 'Variables associated with biological organisms',
-            name: 'Biota...',
             note: null,
             provenance: 'Originally from CUAHSI HIS GeneralCategoryCV. See http://his.cuahsi.org/mastercvreg/edit_cv11.aspx?tbl=GeneralCategoryCV.',
             provenance_uri: null,
+            status: 'ACCEPTED',
             term: 'Biota'
           },
-          id: 'Biota',
+          id: '2',
           links: {
-            self: 'http://rz-vm64.gfz-potsdam.de:5001/api/variabletype/Biota/'
+            self: 'http://rz-vm64.gfz-potsdam.de:5001/api/variabletypes/2/'
           },
           relationships: {},
           type: 'Variabletype'
@@ -81,17 +79,17 @@ describe('CompartmentSerializer', () => {
       }
 
       const expectedCompartment1 = Compartment.createFromObject({
-        id: 'Age',
+        id: '1',
         name: 'Age',
-        uri: 'variabletype/Age'
+        uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/variabletypes/1/'
       })
       const expectedCompartment2 = Compartment.createFromObject({
-        id: 'Biota',
-        name: 'Biota...',
-        uri: 'variabletype/Biota'
+        id: '2',
+        name: 'Biota',
+        uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/variabletypes/2/'
       })
 
-      const serializer = new CompartmentSerializer('http://rz-vm64.gfz-potsdam.de:5001/api')
+      const serializer = new CompartmentSerializer()
 
       const compartments = serializer.convertJsonApiObjectListToModelList(jsonApiObjectList)
 

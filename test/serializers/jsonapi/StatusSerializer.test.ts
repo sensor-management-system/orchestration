@@ -38,35 +38,33 @@ describe('StatusSerializer', () => {
       const jsonApiObjectList: any = {
         data: [{
           attributes: {
-            active: true,
             category: null,
             definition: 'Data collection is complete. No new data values will be added.',
-            name: 'Complete',
             note: null,
             provenance: null,
             provenance_uri: null,
-            term: 'complete'
+            status: 'Accepted',
+            term: 'Complete'
           },
-          id: 'Complete',
+          id: '1',
           links: {
-            self: 'http://rz-vm64.gfz-potsdam.de:5001/api/status/Complete/'
+            self: 'http://rz-vm64.gfz-potsdam.de:5001/api/status/1/'
           },
           relationships: {},
           type: 'Status'
         }, {
           attributes: {
-            active: true,
             category: null,
             definition: 'Data collection is ongoing.  New data values will be added periodically.',
-            name: 'Ongoing...',
             note: null,
             provenance: null,
             provenance_uri: null,
-            term: 'ongoing'
+            status: 'Accepted',
+            term: 'Ongoing'
           },
-          id: 'Ongoing',
+          id: '2',
           links: {
-            self: 'http://rz-vm64.gfz-potsdam.de:5001/api/status/Ongoing/'
+            self: 'http://rz-vm64.gfz-potsdam.de:5001/api/status/2/'
           },
           relationships: {},
           type: 'Status'
@@ -81,17 +79,17 @@ describe('StatusSerializer', () => {
       }
 
       const expectedStatus1 = Status.createFromObject({
-        id: 'Complete',
+        id: '1',
         name: 'Complete',
-        uri: 'status/Complete'
+        uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/status/1/'
       })
       const expectedStatus2 = Status.createFromObject({
-        id: 'Ongoing',
-        name: 'Ongoing...',
-        uri: 'status/Ongoing'
+        id: '2',
+        name: 'Ongoing',
+        uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/status/2/'
       })
 
-      const serializer = new StatusSerializer('http://rz-vm64.gfz-potsdam.de:5001/api')
+      const serializer = new StatusSerializer()
 
       const states = serializer.convertJsonApiObjectListToModelList(jsonApiObjectList)
 

@@ -30,21 +30,7 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <p>
-      {{ value.compartmentName }}
-      {{ value.compartmentUri }}
-    </p>
     <v-row>
-      <v-col cols="12" md="3">
-        <v-combobox
-          label="Measured Quantity"
-          :items="propertyNames"
-          :value="valuePropertyName"
-          :readonly="readonly"
-          :disabled="readonly"
-          @input="update('propertyName', $event)"
-        />
-      </v-col>
       <v-col cols="12" md="3">
         <v-text-field
           label="Label"
@@ -59,6 +45,7 @@ permissions and limitations under the Licence.
       <v-col cols="12" md="3">
         <v-combobox
           label="Compartment"
+          clearable
           :items="compartmentNames"
           :value="valueCompartmentName"
           :readonly="readonly"
@@ -69,6 +56,7 @@ permissions and limitations under the Licence.
       <v-col cols="12" md="3">
         <v-combobox
           label="Sampling media"
+          clearable
           :items="samplingMediaNames"
           :value="valueSamplingMediaName"
           :readonly="readonly"
@@ -76,16 +64,28 @@ permissions and limitations under the Licence.
           @input="update('samplingMediaName', $event)"
         />
       </v-col>
+      <v-col cols="12" md="3">
+        <v-combobox
+          label="Measured Quantity"
+          clearable
+          :items="propertyNames"
+          :value="valuePropertyName"
+          :readonly="readonly"
+          :disabled="readonly"
+          @input="update('propertyName', $event)"
+        />
+      </v-col>
     </v-row>
     <v-row>
       <v-col cols="12" md="3">
         <v-combobox
           label="Unit"
-          :items="unitNames"
+          clearable
+          :items="measuredQuantityUnitComboboxValues"
           :value="valueUnitName"
           :readonly="readonly"
           :disabled="readonly"
-          @input="update('unitName', $event)"
+          @input="updateUnit($event)"
         />
       </v-col>
       <v-col cols="12" md="3">
@@ -172,12 +172,18 @@ import { Compartment } from '@/models/Compartment'
 import { Property } from '@/models/Property'
 import { SamplingMedia } from '@/models/SamplingMedia'
 import { Unit } from '@/models/Unit'
+import { MeasuredQuantityUnit } from '@/models/MeasuredQuantityUnit'
 import { DeviceProperty } from '@/models/DeviceProperty'
 import { parseFloatOrNull } from '@/utils/numericsHelper'
 
 interface INameAndUri {
   name: string
   uri: string
+}
+
+interface MeasuredQuantityUnitComboboxValue {
+  text: string
+  value: MeasuredQuantityUnit
 }
 
 /**
@@ -249,6 +255,94 @@ export default class DevicePropertyForm extends Vue {
   units!: Unit[]
 
   /**
+   * a list of MeasuredQuantityUnits
+   */
+  @Prop({
+    default: () => [] as MeasuredQuantityUnit[],
+    required: true,
+    type: Array
+  })
+  measuredQuantityUnits!: MeasuredQuantityUnit[]
+
+  /**
+   * returns the URI of an value
+   *
+   * @param {string} name - the name of the dictionary to look in
+   * @param {string} value - the value to look the URI for
+   * @return {string} the URI or an empty string
+   */
+  private getUriByValue (name: string, value: string): string {
+    let valueToSet = ''
+
+    const elementsByName: { [name: string]: { elements: INameAndUri[] } } = {
+      compartmentName: {
+        elements: this.compartments
+      },
+      unitName: {
+        elements: this.units
+      },
+      measuredQuantityUnitName: {
+        elements: this.measuredQuantityUnits
+      },
+      samplingMediaName: {
+        elements: this.samplingMedias
+      },
+      propertyName: {
+        elements: this.properties
+      }
+    }
+    if (!elementsByName[name]) {
+      return valueToSet
+    }
+    // the comoboboxes may set the value to null,
+    // but we don't want to work further with nulls
+    //
+    // all of the comboboxes see the empty string as the
+    // "no value" choice
+    if (value === null) {
+      value = ''
+    }
+    const index = elementsByName[name].elements.findIndex(x => x.name === value)
+    if (index > -1) {
+      valueToSet = elementsByName[name].elements[index].uri
+    }
+    return valueToSet
+  }
+
+  /**
+   * updates the unit property
+   *
+   * @param {MeasuredQuantityUnitComboboxValue} unitObject - an object as provided by the combobox
+   * @fires DevicePropertyForm#input
+   */
+  updateUnit (unitObject: MeasuredQuantityUnitComboboxValue | undefined): void {
+    const newObj: DeviceProperty = DeviceProperty.createFromObject(this.value)
+
+    if (unitObject) {
+      newObj.unitName = unitObject.text
+      // Note: although we display a list of measuredQuantityUnits, the
+      // actual URI to be saved is the URI of the original unit
+      newObj.unitUri = this.getUriByValue('unitName', unitObject.text)
+      // if the unit has numerical default values, apply them to measuringRange min and max
+      if (unitObject.value.defaultLimitMin) {
+        newObj.measuringRange.min = parseFloatOrNull(unitObject.value.defaultLimitMin)
+      }
+      if (unitObject.value.defaultLimitMax) {
+        newObj.measuringRange.max = parseFloatOrNull(unitObject.value.defaultLimitMax)
+      }
+    } else {
+      newObj.unitName = ''
+      newObj.unitUri = ''
+    }
+    /**
+     * input event
+     * @event DevicePropertyForm#input
+     * @type {DeviceProperty}
+     */
+    this.$emit('input', newObj)
+  }
+
+  /**
    * update a copy of the internal model at a given key and trigger an event
    *
    * @param {string} key - a path to the property to set
@@ -258,60 +352,39 @@ export default class DevicePropertyForm extends Vue {
   update (key: string, value: string) {
     const newObj: DeviceProperty = DeviceProperty.createFromObject(this.value)
 
-    const getUriValue = (name: string, value: string) => {
-      let valueToSet = ''
-
-      const elementsByName: { [name: string]: { elements: INameAndUri[] } } = {
-        compartmentName: {
-          elements: this.compartments
-        },
-        unitName: {
-          elements: this.units
-        },
-        samplingMediaName: {
-          elements: this.samplingMedias
-        },
-        propertyName: {
-          elements: this.properties
-        }
-      }
-      if (!elementsByName[name]) {
-        return valueToSet
-      }
-      // the comoboboxes may set the value to null,
-      // but we don't want to work further with nulls
-      //
-      // all of the comboboxes see the empty string as the
-      // "no value" choice
-      if (value === null) {
-        value = ''
-      }
-      const index = elementsByName[name].elements.findIndex(x => x.name === value)
-      if (index > -1) {
-        valueToSet = elementsByName[name].elements[index].uri
-      }
-      return valueToSet
-    }
-
     switch (key) {
       case 'label':
         newObj.label = value
         break
       case 'compartmentName':
         newObj.compartmentName = value
-        newObj.compartmentUri = getUriValue('compartmentName', value)
-        break
-      case 'unitName':
-        newObj.unitName = value
-        newObj.unitUri = getUriValue('unitName', value)
+        newObj.compartmentUri = this.getUriByValue('compartmentName', value)
+        if (this.value.compartmentUri !== newObj.compartmentUri) {
+          newObj.samplingMediaName = ''
+          newObj.samplingMediaUri = ''
+          newObj.propertyName = ''
+          newObj.propertyUri = ''
+          newObj.unitName = ''
+          newObj.unitUri = ''
+        }
         break
       case 'samplingMediaName':
         newObj.samplingMediaName = value
-        newObj.samplingMediaUri = getUriValue('samplingMediaName', value)
+        newObj.samplingMediaUri = this.getUriByValue('samplingMediaName', value)
+        if (this.value.samplingMediaUri !== newObj.samplingMediaUri) {
+          newObj.propertyName = ''
+          newObj.propertyUri = ''
+          newObj.unitName = ''
+          newObj.unitUri = ''
+        }
         break
       case 'propertyName':
         newObj.propertyName = value
-        newObj.propertyUri = getUriValue('propertyName', value)
+        newObj.propertyUri = this.getUriByValue('propertyName', value)
+        if (this.value.propertyUri !== newObj.propertyUri) {
+          newObj.unitName = ''
+          newObj.unitUri = ''
+        }
         break
       case 'measuringRange.min':
         newObj.measuringRange.min = parseFloatOrNull(value)
@@ -330,7 +403,7 @@ export default class DevicePropertyForm extends Vue {
         break
       case 'resolutionUnitName':
         newObj.resolutionUnitName = value
-        newObj.resolutionUnitUri = getUriValue('unitName', value)
+        newObj.resolutionUnitUri = this.getUriByValue('unitName', value)
         break
       default:
         throw new TypeError('key ' + key + ' is not valid')
@@ -376,6 +449,25 @@ export default class DevicePropertyForm extends Vue {
   }
 
   /**
+   * returns a list of unit objects suitable for the combobox
+   *
+   * @return {MeasuredQuantityUnitComboboxValue[]} list of units
+   */
+  get measuredQuantityUnitComboboxValues (): MeasuredQuantityUnitComboboxValue[] {
+    // restrict the list of measuredQuantityUnits based on the choosen property
+    return this.measuredQuantityUnits.filter(u => this.checkUriEndsWithId(this.value.propertyUri, u.measuredQuantityId)).map((u) => {
+      return {
+        text: u.name,
+        value: u
+      }
+    }).sort()
+  }
+
+  private checkUriEndsWithId (uri: string, id: string) {
+    return uri.match(new RegExp('^.+/' + id + '/?$')) !== null
+  }
+
+  /**
    * returns the name of a unit based on the unit URI
    *
    * @return {string} the name of the unit
@@ -407,7 +499,12 @@ export default class DevicePropertyForm extends Vue {
    * @return {string[]} list of samplingMedia names
    */
   get samplingMediaNames (): string[] {
-    return this.samplingMedias.map(s => s.name)
+    let samplingMedias = this.samplingMedias
+    // if a compartment is choosen, restrict the list of samplingMedias
+    if (this.value.compartmentUri !== '') {
+      samplingMedias = samplingMedias.filter(s => s.compartmentId === '' || this.checkUriEndsWithId(this.value.compartmentUri, s.compartmentId))
+    }
+    return samplingMedias.map(s => s.name)
   }
 
   /**
@@ -429,7 +526,12 @@ export default class DevicePropertyForm extends Vue {
    * @return {string[]} list of property names
    */
   get propertyNames (): string[] {
-    return this.properties.map(p => p.name)
+    let properties = this.properties
+    // if a samplingMedia is choosen, restrict the list of properties
+    if (this.value.samplingMediaUri !== '') {
+      properties = properties.filter(s => s.samplingMediaId === '' || this.checkUriEndsWithId(this.value.samplingMediaUri, s.samplingMediaId))
+    }
+    return properties.map(p => p.name)
   }
 
   /**

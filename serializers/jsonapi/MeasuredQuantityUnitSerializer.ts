@@ -29,21 +29,40 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
-import { Property } from '@/models/Property'
+import { MeasuredQuantityUnit } from '@/models/MeasuredQuantityUnit'
 
-import { IJsonApiObjectListWithLinks, IJsonApiDataWithIdAndLinks, IJsonApiTypeIdData } from '@/serializers/jsonapi/JsonApiTypes'
+import { IJsonApiObjectListWithLinks, IJsonApiDataWithIdAndLinks, IJsonApiTypeIdData, IJsonApiTypeIdAttributes } from '@/serializers/jsonapi/JsonApiTypes'
 
-export class PropertySerializer {
-  convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiObjectListWithLinks): Property[] {
+export class MeasuredQuantityUnitSerializer {
+  private _included: IJsonApiTypeIdAttributes[] = []
+
+  get included (): IJsonApiTypeIdAttributes[] {
+    return this._included
+  }
+
+  set included (includedList: IJsonApiTypeIdAttributes[]) {
+    this._included = includedList.filter(i => i.type === 'Unit')
+  }
+
+  convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiObjectListWithLinks): MeasuredQuantityUnit[] {
     return jsonApiObjectList.data.map(this.convertJsonApiDataToModel.bind(this))
   }
 
-  convertJsonApiDataToModel (jsonApiData: IJsonApiDataWithIdAndLinks): Property {
+  convertJsonApiDataToModel (jsonApiData: IJsonApiDataWithIdAndLinks): MeasuredQuantityUnit {
     const id = jsonApiData.id.toString()
-    const name = jsonApiData.attributes.term
     const url = jsonApiData.links.self
-    const samplingMediaId = (jsonApiData.relationships.sampling_media as IJsonApiTypeIdData).data.id
+    const defaultLimitMin = jsonApiData.attributes.default_limit_min
+    const defaultLimitMax = jsonApiData.attributes.default_limit_max
+    const unitId = (jsonApiData.relationships.unit as IJsonApiTypeIdData).data.id
+    const measuredQuantityId = (jsonApiData.relationships.measured_quantity as IJsonApiTypeIdData).data.id
 
-    return Property.createWithData(id, name, url, samplingMediaId)
+    // find the corresponding Unit and take the name from there
+    let name = ''
+    const relatedUnit = this.included.find(i => i.id === unitId)
+    if (relatedUnit) {
+      name = relatedUnit.attributes.term
+    }
+
+    return MeasuredQuantityUnit.createWithData(id, name, url, defaultLimitMin, defaultLimitMax, unitId, measuredQuantityId)
   }
 }
