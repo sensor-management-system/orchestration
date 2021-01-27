@@ -78,7 +78,6 @@ permissions and limitations under the Licence.
     </v-row>
     <v-row>
       <v-col cols="12" md="3">
-        <!-- @TODO: load the units dynamically based on the choosen property -->
         <v-combobox
           label="Unit"
           clearable
