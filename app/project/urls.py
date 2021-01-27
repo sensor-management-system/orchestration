@@ -1,4 +1,4 @@
-from flask_rest_jsonapi import Api
+from project.frj_csv_export.api import Api
 from project.api.ping import Ping
 from project.api.resourceManager import (
     ConfigurationDetail,

@@ -7,6 +7,7 @@ from project.api.resourceManager.base_resource import (
 )
 from project.api.schemas.platform_schema import PlatformSchema
 from project.api.token_checker import token_required
+from project.api.datalayers.esalchemy import EsSqlalchemyDataLayer
 
 
 class PlatformList(ResourceList):
