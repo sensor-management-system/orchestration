@@ -51,9 +51,9 @@ describe('PropertySerializer', () => {
             self: 'http://rz-vm64.gfz-potsdam.de:5001/api/measuredquantities/1/'
           },
           relationships: {
-            sampling_medium: {
+            sampling_media: {
               data: {
-                type: 'SamplingMedia',
+                type: 'SamplingMedium',
                 id: '5'
               }
             }
@@ -74,9 +74,9 @@ describe('PropertySerializer', () => {
             self: 'http://rz-vm64.gfz-potsdam.de:5001/api/measuredquantities/2/'
           },
           relationships: {
-            sampling_medium: {
+            sampling_media: {
               data: {
-                type: 'SamplingMedia',
+                type: 'SamplingMedium',
                 id: '2'
               }
             }

@@ -48,7 +48,7 @@ describe('SamplingMediaSerializer', () => {
           },
           id: '1',
           links: {
-            self: 'http://rz-vm64.gfz-potsdam.de:5001/api/samplingmedium/1/'
+            self: 'http://rz-vm64.gfz-potsdam.de:5001/api/samplingmedia/1/'
           },
           relationships: {
             compartment: {
@@ -58,7 +58,7 @@ describe('SamplingMediaSerializer', () => {
               }
             }
           },
-          type: 'Samplingmedium'
+          type: 'SamplingMedium'
         }, {
           attributes: {
             category: null,
@@ -71,7 +71,7 @@ describe('SamplingMediaSerializer', () => {
           },
           id: '2',
           links: {
-            self: 'http://rz-vm64.gfz-potsdam.de:5001/api/samplingmedium/2/'
+            self: 'http://rz-vm64.gfz-potsdam.de:5001/api/samplingmedia/2/'
           },
           relationships: {
             compartment: {
@@ -81,7 +81,7 @@ describe('SamplingMediaSerializer', () => {
               }
             }
           },
-          type: 'Samplingmedium'
+          type: 'SamplingMedium'
         }],
         included: [],
         jsonapi: {
@@ -95,13 +95,13 @@ describe('SamplingMediaSerializer', () => {
       const expectedSamplingMedium1 = SamplingMedia.createFromObject({
         id: '1',
         name: 'Air',
-        uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/samplingmedium/1/',
+        uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/samplingmedia/1/',
         compartmentId: '5'
       })
       const expectedSamplingMedium2 = SamplingMedia.createFromObject({
         id: '2',
         name: 'Equipment',
-        uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/samplingmedium/2/',
+        uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/samplingmedia/2/',
         compartmentId: '2'
       })
 

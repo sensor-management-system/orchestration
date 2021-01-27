@@ -119,7 +119,7 @@ export class Api {
       this.createAxios(cvBaseUrl, '/measuredquantities/', cvConfig)
     )
     this._samplingMediaApi = new SamplingMediaApi(
-      this.createAxios(cvBaseUrl, '/samplingmedium/', cvConfig)
+      this.createAxios(cvBaseUrl, '/samplingmedia/', cvConfig)
     )
     this._statusApi = new StatusApi(
       this.createAxios(cvBaseUrl, '/equipmentstatus/', cvConfig)

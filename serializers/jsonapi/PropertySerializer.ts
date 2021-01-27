@@ -42,8 +42,7 @@ export class PropertySerializer {
     const id = jsonApiData.id.toString()
     const name = jsonApiData.attributes.term
     const url = jsonApiData.links.self
-    // @TODO change sampling_medium to sampling_media (see https://git.ufz.de/rdm-software/svm/sms-cv/-/issues/11)
-    const samplingMediaId = (jsonApiData.relationships.sampling_medium as IJsonApiTypeIdData).data.id
+    const samplingMediaId = (jsonApiData.relationships.sampling_media as IJsonApiTypeIdData).data.id
 
     return Property.createWithData(id, name, url, samplingMediaId)
   }
