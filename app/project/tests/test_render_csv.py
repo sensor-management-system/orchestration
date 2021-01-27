@@ -7,7 +7,8 @@ from project.api.models.device import Device
 from project.api.schemas.device_schema import DeviceSchema
 from project.frj_csv_export.render_csv import flatten_json
 from project.tests.base import BaseTestCase
-from project.urls import base_url
+
+from project import base_url
 
 
 class Test(BaseTestCase):

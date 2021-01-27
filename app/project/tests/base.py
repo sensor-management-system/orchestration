@@ -77,8 +77,7 @@ class BaseTestCase(TestCase):
         """Ensure error is thrown if the JSON object
         has invalid data key."""
 
-        rs256_token = create_access_token("testusr@test.de")
-        access_headers = {"Authorization": "Bearer {}".format(rs256_token)}
+        access_headers = create_token()
         with self.client:
             response = self.client.post(
                 url=url,

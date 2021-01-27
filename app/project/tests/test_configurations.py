@@ -1,8 +1,6 @@
 import datetime
-import unittest
 import json
 import unittest
-
 
 from project import base_url
 from project.api.models.base_model import db
@@ -331,6 +329,7 @@ class TestConfigurationsService(BaseTestCase):
                 self.configurations_url,
                 data=json.dumps(config_data),
                 content_type="application/vnd.api+json",
+                headers=access_headers,
             )
         json.loads(response.data.decode())
         self.assertEqual(response.status_code, 500)
