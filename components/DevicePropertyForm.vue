@@ -497,7 +497,7 @@ export default class DevicePropertyForm extends Vue {
     let samplingMedias = this.samplingMedias
     // if a compartment is choosen, restrict the list of samplingMedias
     if (this.value.compartmentUri !== '') {
-      samplingMedias = samplingMedias.filter(s => s.compartmentId === '' || this.value.compartmentUri.match(new RegExp('^.+/' + s.compartmentId + '/$')))
+      samplingMedias = samplingMedias.filter(s => s.compartmentId === '' || this.checkUriEndsWithId(this.value.compartmentUri, s.compartmentId))
     }
     return samplingMedias.map(s => s.name)
   }
