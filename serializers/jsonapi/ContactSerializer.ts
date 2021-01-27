@@ -31,7 +31,7 @@
  */
 import { Contact, IContact } from '@/models/Contact'
 
-import { IJsonApiObjectList, IJsonApiObject, IJsonApiTypeIdDataListDict, IJsonApiTypeIdAttributes, IJsonApiTypeIdDataList } from '@/serializers/jsonapi/JsonApiTypes'
+import { IJsonApiObjectList, IJsonApiObject, IJsonApiTypeIdDataListDict, IJsonApiTypeIdAttributes, IJsonApiTypeIdDataList, IJsonApiDataWithOptionalIdWithoutRelationships, IJsonApiTypeId } from '@/serializers/jsonapi/JsonApiTypes'
 
 export interface IMissingContactData {
   ids: string[]
@@ -74,7 +74,7 @@ export class ContactSerializer {
     }
   }
 
-  convertModelToJsonApiData (contact: IContact): any {
+  convertModelToJsonApiData (contact: IContact): IJsonApiDataWithOptionalIdWithoutRelationships {
     const data: any = {
       type: 'contact',
       attributes: {
@@ -90,13 +90,15 @@ export class ContactSerializer {
     return data
   }
 
-  convertModelListToTupleListWithIdAndType (contacts: IContact[]): any {
-    const result = []
+  convertModelListToTupleListWithIdAndType (contacts: IContact[]): IJsonApiTypeId[] {
+    const result: IJsonApiTypeId[] = []
     for (const contact of contacts) {
-      result.push({
-        id: contact.id,
-        type: 'contact'
-      })
+      if (contact.id !== null) {
+        result.push({
+          id: contact.id,
+          type: 'contact'
+        })
+      }
     }
     return result
   }

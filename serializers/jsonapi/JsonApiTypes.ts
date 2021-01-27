@@ -223,6 +223,12 @@ export interface IJsonApiDataWithOptionalId extends IJsonApiData {
     id?: string
 }
 
+export interface IJsonApiDataWithOptionalIdWithoutRelationships {
+    id?: string
+    attributes: IJsonApiAttributes
+    type: string
+}
+
 export interface IJsonApiDataWithId extends IJsonApiData {
     id: string
 }
