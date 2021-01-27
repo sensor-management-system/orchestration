@@ -450,12 +450,16 @@ export default class DevicePropertyForm extends Vue {
    */
   get measuredQuantityUnitComboboxValues (): MeasuredQuantityUnitComboboxValue[] {
     // restrict the list of measuredQuantityUnits based on the choosen property
-    return this.measuredQuantityUnits.filter(u => this.value.propertyUri.match(new RegExp('^.+/' + u.measuredQuantityId + '/$'))).map((u) => {
+    return this.measuredQuantityUnits.filter(u => this.checkUriEndsWithId(this.value.propertyUri, u.measuredQuantityId)).map((u) => {
       return {
         text: u.name,
         value: u
       }
     }).sort()
+  }
+
+  private checkUriEndsWithId (uri: string, id: string) {
+    return uri.match(new RegExp('^.+/' + id + '/{0,1}$')) !== null
   }
 
   /**
