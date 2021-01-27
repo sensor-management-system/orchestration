@@ -28,8 +28,8 @@ class ContactList(ResourceList):
                 self.session.query(Configuration).filter_by(id=configuration_id).one()
             except NoResultFound:
                 raise ObjectNotFound(
-                    {"parameter": "configuration_id"},
-                    "Configuration: {} not found".format(configuration_id),
+                    {'parameter': 'id'},
+                    "Configuration: {} not found".format(configuration_id)
                 )
             else:
                 query_ = query_.join(Contact.configurations).filter(
@@ -41,8 +41,8 @@ class ContactList(ResourceList):
                 self.session.query(Platform).filter_by(id=platform_id).one()
             except NoResultFound:
                 raise ObjectNotFound(
-                    {"parameter": "platform_id"},
-                    "Platform: {} not found".format(platform_id),
+                    {'parameter': 'id'},
+                    "Platform: {} not found".format(platform_id)
                 )
             else:
                 query_ = query_.join(Contact.platforms).filter(
@@ -54,7 +54,8 @@ class ContactList(ResourceList):
                 self.session.query(Device).filter_by(id=device_id).one()
             except NoResultFound:
                 raise ObjectNotFound(
-                    {"parameter": "device_id"}, "Device: {} not found".format(device_id)
+                    {'parameter': 'id'},
+                    "Device: {} not found".format(platform_id)
                 )
             else:
                 query_ = query_.join(Contact.devices).filter(Device.id == device_id)

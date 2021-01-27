@@ -14,7 +14,10 @@ COV = coverage.coverage(
     branch=True,
     include="project/*",
     # skip the tests itself for the coverage
-    omit=["project/tests/*", "project/config.py",],
+    omit=[
+        "project/tests/*",
+        "project/config.py",
+    ],
 )
 COV.start()
 
@@ -87,8 +90,9 @@ def es_reindex():
     from project.api.models.configuration import Configuration
     from project.api.models.device import Device
     from project.api.models.platform import Platform
+    from project.api.models.contact import Contact
 
-    for model_type in [Platform, Device, Configuration]:
+    for model_type in [Platform, Device, Configuration, Contact]:
         model_type.reindex()
 
 

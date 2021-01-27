@@ -1,8 +1,9 @@
-from flask_rest_jsonapi import ResourceList
 from project.api.models.base_model import db
 from project.api.models.configuration_device import ConfigurationDevice
 from project.api.schemas.configuration_device_schema import ConfigurationDeviceSchema
 from project.api.token_checker import token_required
+
+from project.frj_csv_export.resource import ResourceList
 
 
 class ConfigurationDeviceList(ResourceList):

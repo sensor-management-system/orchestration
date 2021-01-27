@@ -17,9 +17,7 @@ class EventSchema(Schema):
         self_view_kwargs = {"id": "<id>"}
         self_view_many = "api.event_list"
 
-    id = fields.Integer(
-        as_string=True,
-    )
+    id = fields.Integer(as_string=True)
     description = fields.Str(required=True)
     timestamp = fields.DateTime(required=True)
     user = Relationship(

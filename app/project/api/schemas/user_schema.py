@@ -16,9 +16,7 @@ class UserSchema(Schema):
         self_view = "api.user_detail"
         self_view_kwargs = {"id": "<id>"}
 
-    id = fields.Integer(
-        as_string=True,
-    )
+    id = fields.Integer(as_string=True)
     subject = fields.Str(required=True)
 
     contact = Relationship(

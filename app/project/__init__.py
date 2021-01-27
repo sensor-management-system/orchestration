@@ -39,6 +39,7 @@ def create_app():
         Blueprint(
             "api", __name__, url_prefix=base_url
         ),
+        response_renderers={"text/csv": render_csv}
     )
     migrate.init_app(app, db)
     jwt.init_app(app)
