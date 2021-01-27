@@ -335,8 +335,6 @@ import { Status } from '@/models/Status'
 import { Unit } from '@/models/Unit'
 import { MeasuredQuantityUnit } from '@/models/MeasuredQuantityUnit'
 
-import { IPaginationLoader } from '@/utils/PaginatedLoader'
-
 import AttachmentList from '@/components/AttachmentList.vue'
 import ContactSelect from '@/components/ContactSelect.vue'
 import CustomFieldCards from '@/components/CustomFieldCards.vue'
