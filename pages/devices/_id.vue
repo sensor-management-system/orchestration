@@ -629,31 +629,6 @@ export default class DeviceIdPage extends mixins(Rules) {
     }
   }
 
-  loadMeasuredQuantityUnits (): Promise<MeasuredQuantityUnit[]> {
-    // unfortunately it is not possible to pass a specialized function directly, so the function is called explicitly in an arrow function
-    // @ts-ignore
-    return this.$api.measuredQuantityUnits.findAllPaginated().then(loader => this.loadPaginatedCvEntities<MeasuredQuantityUnit>(loader))
-  }
-
-  private loadPaginatedCvEntities<T> (loader: IPaginationLoader<T>): Promise<T[]> {
-    let result: T[] = loader.elements
-    const promise = new Promise<T[]>((resolve, reject) => {
-      if (!loader.funToLoadNext) {
-        resolve(result)
-        return
-      }
-      loader.funToLoadNext().then((nextLoader) => {
-        this.loadPaginatedCvEntities(nextLoader).then((loadedEntities) => {
-          result = [...result, ...loadedEntities] as T[]
-          resolve(result)
-        })
-      }).catch((_error) => {
-        reject(_error)
-      })
-    })
-    return promise
-  }
-
   @Watch('device', { immediate: true, deep: true })
   // @ts-ignore
   onDeviceChanged (val: Device) {
