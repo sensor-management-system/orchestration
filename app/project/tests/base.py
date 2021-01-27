@@ -39,7 +39,6 @@ class BaseTestCase(TestCase):
         """
         app.config.from_object("project.config.TestingConfig")
         app.elasticsearch = None
-        # jwt.init_app(app)
         return app
 
     def setUp(self):
