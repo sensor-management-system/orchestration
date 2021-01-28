@@ -2,11 +2,15 @@
 
 import unittest
 
-from project.api.datalayers.esalchemy import (AndFilter, EsQueryBuilder,
-                                              FilterParser,
-                                              MultiFieldMatchFilter, OrFilter,
-                                              TermEqualsExactStringFilter,
-                                              TermExactInListFilter)
+from project.api.datalayers.esalchemy import (
+    AndFilter,
+    EsQueryBuilder,
+    FilterParser,
+    MultiFieldMatchFilter,
+    OrFilter,
+    TermEqualsExactStringFilter,
+    TermExactInListFilter,
+)
 
 
 class TestEsQueryBuilder(unittest.TestCase):

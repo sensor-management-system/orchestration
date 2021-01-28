@@ -1,11 +1,11 @@
 from marshmallow_jsonapi import fields
-from marshmallow_jsonapi.flask import Schema, Relationship
+from marshmallow_jsonapi.flask import Relationship, Schema
 
 
 class ConfigurationPlatformSchema(Schema):
     class Meta:
         type_ = "configuration_platform"
-        self_view = "configuration_platform_detail"
+        self_view = "api.configuration_platform_detail"
         self_view_kwargs = {"id": "<id>"}
 
     id = fields.Integer(as_string=True)
@@ -17,21 +17,21 @@ class ConfigurationPlatformSchema(Schema):
 
     configuration = Relationship(
         self_view_kwargs={"id": "<id>"},
-        related_view="configuration_detail",
+        related_view="api.configuration_detail",
         related_view_kwargs={"id": "<configuration_id>"},
         type_="configuration",
         schema="ConfigurationSchema",
     )
     parent_platform = Relationship(
         self_view_kwargs={"id": "<id>"},
-        related_view="platform_detail",
+        related_view="api.platform_detail",
         related_view_kwargs={"id": "<parent_platform_id>"},
         type_="platform",
         schema="PlatformSchema",
     )
     platform = Relationship(
         self_view_kwargs={"id": "<id>"},
-        related_view="platform_detail",
+        related_view="api.platform_detail",
         related_view_kwargs={"id": "<platform_id>"},
         type_="platform",
         schema="PlatformSchema",

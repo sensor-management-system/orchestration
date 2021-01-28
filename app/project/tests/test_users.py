@@ -1,11 +1,11 @@
 import unittest
 
+from project import base_url
 from project.api.models.base_model import db
 from project.api.models.user import User
 from project.api.schemas.user_schema import UserSchema
 from project.tests.base import BaseTestCase
 from project.tests.test_contacts import TestContactServices
-from project.urls import base_url
 
 
 class TestUsersServices(BaseTestCase):

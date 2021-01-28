@@ -11,7 +11,7 @@ class UserList(ResourceList):
     provides get and post methods to retrieve a
     collection of Events or create one.
     """
+
     schema = UserSchema
-    # decorators = (token_required,)
-    data_layer = {'session': db.session,
-                  'model': User}
+    decorators = (token_required,)
+    data_layer = {"session": db.session, "model": User}

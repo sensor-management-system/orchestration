@@ -1,11 +1,11 @@
 import unittest
 
+from project import base_url
 from project.api.models.base_model import db
 from project.api.models.contact import Contact
 from project.api.schemas.contact_schema import ContactSchema
 from project.tests.base import BaseTestCase
 from project.tests.read_from_json import extract_data_from_json_file
-from project.urls import base_url
 
 
 class TestContactServices(BaseTestCase):
