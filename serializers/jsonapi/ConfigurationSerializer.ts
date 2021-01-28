@@ -83,7 +83,7 @@ export class ConfigurationSerializer {
     const attributes = jsonApiData.attributes
     const relationships = jsonApiData.relationships
 
-    configuration.id = jsonApiData.id
+    configuration.id = jsonApiData.id.toString()
     configuration.label = attributes.label || ''
     configuration.projectUri = attributes.project_uri || ''
     configuration.projectName = attributes.project_name || ''
@@ -189,7 +189,8 @@ export class ConfigurationSerializer {
           offsetX: element.offset_x || 0.0,
           offsetY: element.offset_y || 0.0,
           offsetZ: element.offset_z || 0.0,
-          calibrationDate: element.calibration_date != null ? DateTime.fromISO(element.calibration_date, { zone: 'UTC' }) : null
+          calibrationDate: element.calibration_date != null ? DateTime.fromISO(element.calibration_date, { zone: 'UTC' }) : null,
+          firmwareVersion: element.firmware_version || ''
         })
 
         listOfDeviceAttributes.push(deviceAttribute)
@@ -308,6 +309,7 @@ export class ConfigurationSerializer {
           if (calibrationDate != null) {
             elementData.calibration_date = calibrationDate.setZone('UTC').toISO()
           }
+          elementData.firmware_version = deviceAttributeLookupById[id].firmwareVersion
         }
         listOfChildren.push(elementData)
       }

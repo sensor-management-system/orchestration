@@ -29,21 +29,32 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
-import { Property } from '@/models/Property'
+import { AxiosInstance } from 'axios'
+import { IPaginationLoader } from '@/utils/PaginatedLoader'
 
-import { IJsonApiObjectListWithLinks, IJsonApiDataWithIdAndLinks, IJsonApiTypeIdData } from '@/serializers/jsonapi/JsonApiTypes'
+export abstract class CVApi<T> {
+  protected axiosApi: AxiosInstance
 
-export class PropertySerializer {
-  convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiObjectListWithLinks): Property[] {
-    return jsonApiObjectList.data.map(this.convertJsonApiDataToModel.bind(this))
+  constructor (axiosInstance: AxiosInstance) {
+    this.axiosApi = axiosInstance
   }
 
-  convertJsonApiDataToModel (jsonApiData: IJsonApiDataWithIdAndLinks): Property {
-    const id = jsonApiData.id.toString()
-    const name = jsonApiData.attributes.term
-    const url = jsonApiData.links.self
-    const samplingMediaId = (jsonApiData.relationships.sampling_media as IJsonApiTypeIdData).data.id
-
-    return Property.createWithData(id, name, url, samplingMediaId)
+  protected loadPaginated (loader: IPaginationLoader<T>): Promise<T[]> {
+    let result: T[] = loader.elements
+    const promise = new Promise<T[]>((resolve, reject) => {
+      if (!loader.funToLoadNext) {
+        resolve(result)
+        return
+      }
+      loader.funToLoadNext().then((nextLoader) => {
+        this.loadPaginated(nextLoader).then((loadedEntities) => {
+          result = [...result, ...loadedEntities] as T[]
+          resolve(result)
+        })
+      }).catch((_error) => {
+        reject(_error)
+      })
+    })
+    return promise
   }
 }

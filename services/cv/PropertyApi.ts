@@ -33,14 +33,16 @@ import { AxiosInstance } from 'axios'
 
 import { Property } from '@/models/Property'
 import { PropertySerializer } from '@/serializers/jsonapi/PropertySerializer'
+import { CVApi } from '@/services/cv/CVApi'
 
-export class PropertyApi {
-  private axiosApi: AxiosInstance
+import { IPaginationLoader } from '@/utils/PaginatedLoader'
+
+export class PropertyApi extends CVApi<Property> {
   private serializer: PropertySerializer
 
-  constructor (axiosInstance: AxiosInstance, cvBaseUrl: string | undefined) {
-    this.axiosApi = axiosInstance
-    this.serializer = new PropertySerializer(cvBaseUrl)
+  constructor (axiosInstance: AxiosInstance) {
+    super(axiosInstance)
+    this.serializer = new PropertySerializer()
   }
 
   newSearchBuilder (): PropertySearchBuilder {
@@ -49,6 +51,10 @@ export class PropertyApi {
 
   findAll (): Promise<Property[]> {
     return this.newSearchBuilder().build().findMatchingAsList()
+  }
+
+  findAllPaginated (pageSize: number = 100): Promise<Property[]> {
+    return this.newSearchBuilder().build().findMatchingAsPaginationLoader(pageSize).then(loader => this.loadPaginated(loader))
   }
 }
 
@@ -75,19 +81,52 @@ export class PropertySearcher {
     this.serializer = serializer
   }
 
+  private findAllOnPage (page: number, pageSize: number): Promise<IPaginationLoader<Property>> {
+    return this.axiosApi.get(
+      '',
+      {
+        params: {
+          'page[size]': pageSize,
+          'page[number]': page,
+          'filter[status.iexact]': 'ACCEPTED',
+          sort: 'term'
+        }
+      }
+    ).then((rawResponse) => {
+      const response = rawResponse.data
+      const elements: Property[] = this.serializer.convertJsonApiObjectListToModelList(response)
+      const totalCount = response.meta.pagination.count
+
+      let funToLoadNext = null
+      if (response.meta.pagination.page < response.meta.pagination.pages) {
+        funToLoadNext = () => this.findAllOnPage(page + 1, pageSize)
+      }
+
+      return {
+        elements,
+        totalCount,
+        funToLoadNext
+      }
+    })
+  }
+
   findMatchingAsList (): Promise<Property[]> {
     return this.axiosApi.get(
       '',
       {
         params: {
-          'page[limit]': 10000,
-          'filter[active]': true,
-          sort: 'name'
+          'page[size]': 10000,
+          'filter[status.iexact]': 'ACCEPTED',
+          sort: 'term'
         }
       }
     ).then((rawResponse) => {
       const response = rawResponse.data
       return this.serializer.convertJsonApiObjectListToModelList(response)
     })
+  }
+
+  findMatchingAsPaginationLoader (pageSize: number): Promise<IPaginationLoader<Property>> {
+    return this.findAllOnPage(1, pageSize)
   }
 }

@@ -29,18 +29,24 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
-export interface ISamplingMedia {
+export interface IMeasuredQuantityUnit {
   id: string
   name: string
-  uri: string,
-  compartmentId: string
+  uri: string
+  defaultLimitMin: string | null
+  defaultLimitMax: string | null
+  unitId: string
+  measuredQuantityId: string
 }
 
-export class SamplingMedia implements ISamplingMedia {
+export class MeasuredQuantityUnit implements IMeasuredQuantityUnit {
   private _id: string = ''
   private _name: string = ''
   private _uri: string = ''
-  private _compartmentId: string = ''
+  private _defaultLimitMin: string | null = null
+  private _defaultLimitMax: string | null = null
+  private _unitId: string = ''
+  private _measuredQuantityId: string = ''
 
   get id (): string {
     return this._id
@@ -66,34 +72,60 @@ export class SamplingMedia implements ISamplingMedia {
     this._uri = newUri
   }
 
-  get compartmentId (): string {
-    return this._compartmentId
+  get defaultLimitMin (): string | null {
+    return this._defaultLimitMin
   }
 
-  set compartmentId (newCompartmentId: string) {
-    this._compartmentId = newCompartmentId
+  set defaultLimitMin (newDefaultLimitMin: string | null) {
+    this._defaultLimitMin = newDefaultLimitMin
   }
 
-  toString (): string {
-    return this._name
+  get defaultLimitMax (): string | null {
+    return this._defaultLimitMax
   }
 
-  static createWithData (id: string, name: string, uri: string, compartmentId: string): SamplingMedia {
-    const result = new SamplingMedia()
+  set defaultLimitMax (newDefaultLimitMax: string | null) {
+    this._defaultLimitMax = newDefaultLimitMax
+  }
+
+  get unitId (): string {
+    return this._unitId
+  }
+
+  set unitId (newUnitId: string) {
+    this._unitId = newUnitId
+  }
+
+  get measuredQuantityId (): string {
+    return this._measuredQuantityId
+  }
+
+  set measuredQuantityId (newUnitId: string) {
+    this._measuredQuantityId = newUnitId
+  }
+
+  static createWithData (id: string, name: string, uri: string, defaultLimitMin: string, defaultLimitMax: string, unitId: string, measuredQuantityId: string): MeasuredQuantityUnit {
+    const result = new MeasuredQuantityUnit()
     result.id = id
     result.name = name
     result.uri = uri
-    result.compartmentId = compartmentId
+    result.defaultLimitMin = defaultLimitMin
+    result.defaultLimitMax = defaultLimitMax
+    result.unitId = unitId
+    result.measuredQuantityId = measuredQuantityId
     return result
   }
 
-  static createFromObject (someObject: ISamplingMedia): SamplingMedia {
-    const newObject = new SamplingMedia()
+  static createFromObject (someObject: IMeasuredQuantityUnit): MeasuredQuantityUnit {
+    const newObject = new MeasuredQuantityUnit()
 
     newObject.id = someObject.id
     newObject.name = someObject.name
     newObject.uri = someObject.uri
-    newObject.compartmentId = someObject.compartmentId
+    newObject.defaultLimitMin = someObject.defaultLimitMin
+    newObject.defaultLimitMax = someObject.defaultLimitMax
+    newObject.unitId = someObject.unitId
+    newObject.measuredQuantityId = someObject.measuredQuantityId
 
     return newObject
   }

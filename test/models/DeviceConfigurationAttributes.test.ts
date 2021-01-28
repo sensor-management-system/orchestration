@@ -48,7 +48,15 @@ describe('DeviceConfigurationAttributes', () => {
     device.id = '1'
 
     const now = DateTime.utc()
-    const attributes = DeviceConfigurationAttributes.createFromObject({ device, offsetX: 1, offsetY: 1, offsetZ: 1, calibrationDate: now })
+    const attributes = DeviceConfigurationAttributes.createFromObject({
+      device,
+      offsetX: 1,
+      offsetY: 1,
+      offsetZ: 1,
+      calibrationDate: now,
+      firmwareVersion: 'v.1.0'
+    })
+
     expect(typeof attributes).toBe('object')
     expect(attributes.device).toBe(device)
     expect(attributes).toHaveProperty('id', '1')
@@ -56,5 +64,6 @@ describe('DeviceConfigurationAttributes', () => {
     expect(attributes).toHaveProperty('offsetY', 1)
     expect(attributes).toHaveProperty('offsetZ', 1)
     expect(attributes).toHaveProperty('calibrationDate', now)
+    expect(attributes).toHaveProperty('firmwareVersion', 'v.1.0')
   })
 })

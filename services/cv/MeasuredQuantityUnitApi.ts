@@ -31,70 +31,70 @@
  */
 import { AxiosInstance } from 'axios'
 
-import { SamplingMedia } from '@/models/SamplingMedia'
-import { SamplingMediaSerializer } from '@/serializers/jsonapi/SamplingMediaSerializer'
+import { MeasuredQuantityUnit } from '@/models/MeasuredQuantityUnit'
+import { MeasuredQuantityUnitSerializer } from '@/serializers/jsonapi/MeasuredQuantityUnitSerializer'
 import { CVApi } from '@/services/cv/CVApi'
 
 import { IPaginationLoader } from '@/utils/PaginatedLoader'
 
-export class SamplingMediaApi extends CVApi<SamplingMedia> {
-  private serializer: SamplingMediaSerializer
+export class MeasuredQuantityUnitApi extends CVApi<MeasuredQuantityUnit> {
+  private serializer: MeasuredQuantityUnitSerializer
 
   constructor (axiosInstance: AxiosInstance) {
     super(axiosInstance)
-    this.serializer = new SamplingMediaSerializer()
+    this.serializer = new MeasuredQuantityUnitSerializer()
   }
 
-  newSearchBuilder (): SamplingMediaSearchBuilder {
-    return new SamplingMediaSearchBuilder(this.axiosApi, this.serializer)
+  newSearchBuilder (): MeasuredQuantityUnitSearchBuilder {
+    return new MeasuredQuantityUnitSearchBuilder(this.axiosApi, this.serializer)
   }
 
-  findAll (): Promise<SamplingMedia[]> {
+  findAll (): Promise<MeasuredQuantityUnit[]> {
     return this.newSearchBuilder().build().findMatchingAsList()
   }
 
-  findAllPaginated (pageSize: number = 100): Promise<SamplingMedia[]> {
+  findAllPaginated (pageSize: number = 100): Promise<MeasuredQuantityUnit[]> {
     return this.newSearchBuilder().build().findMatchingAsPaginationLoader(pageSize).then(loader => this.loadPaginated(loader))
   }
 }
 
-export class SamplingMediaSearchBuilder {
+export class MeasuredQuantityUnitSearchBuilder {
   private axiosApi: AxiosInstance
-  private serializer: SamplingMediaSerializer
+  private serializer: MeasuredQuantityUnitSerializer
 
-  constructor (axiosApi: AxiosInstance, serializer: SamplingMediaSerializer) {
+  constructor (axiosApi: AxiosInstance, serializer: MeasuredQuantityUnitSerializer) {
     this.axiosApi = axiosApi
     this.serializer = serializer
   }
 
-  build (): SamplingMediaSearcher {
-    return new SamplingMediaSearcher(this.axiosApi, this.serializer)
+  build (): MeasuredQuantityUnitSearcher {
+    return new MeasuredQuantityUnitSearcher(this.axiosApi, this.serializer)
   }
 }
 
-export class SamplingMediaSearcher {
+export class MeasuredQuantityUnitSearcher {
   private axiosApi: AxiosInstance
-  private serializer: SamplingMediaSerializer
+  private serializer: MeasuredQuantityUnitSerializer
 
-  constructor (axiosApi: AxiosInstance, serializer: SamplingMediaSerializer) {
+  constructor (axiosApi: AxiosInstance, serializer: MeasuredQuantityUnitSerializer) {
     this.axiosApi = axiosApi
     this.serializer = serializer
   }
 
-  private findAllOnPage (page: number, pageSize: number): Promise<IPaginationLoader<SamplingMedia>> {
+  private findAllOnPage (page: number, pageSize: number): Promise<IPaginationLoader<MeasuredQuantityUnit>> {
     return this.axiosApi.get(
       '',
       {
         params: {
           'page[size]': pageSize,
           'page[number]': page,
-          'filter[status.iexact]': 'ACCEPTED',
-          sort: 'term'
+          include: 'unit'
         }
       }
     ).then((rawResponse) => {
       const response = rawResponse.data
-      const elements: SamplingMedia[] = this.serializer.convertJsonApiObjectListToModelList(response)
+      this.serializer.included = response.included
+      const elements: MeasuredQuantityUnit[] = this.serializer.convertJsonApiObjectListToModelList(response)
       const totalCount = response.meta.pagination.count
 
       let funToLoadNext = null
@@ -110,23 +110,23 @@ export class SamplingMediaSearcher {
     })
   }
 
-  findMatchingAsList (): Promise<SamplingMedia[]> {
+  findMatchingAsList (): Promise<MeasuredQuantityUnit[]> {
     return this.axiosApi.get(
       '',
       {
         params: {
           'page[size]': 10000,
-          'filter[status.iexact]': 'ACCEPTED',
-          sort: 'term'
+          include: 'unit'
         }
       }
     ).then((rawResponse) => {
       const response = rawResponse.data
+      this.serializer.included = response.included
       return this.serializer.convertJsonApiObjectListToModelList(response)
     })
   }
 
-  findMatchingAsPaginationLoader (pageSize: number): Promise<IPaginationLoader<SamplingMedia>> {
+  findMatchingAsPaginationLoader (pageSize: number): Promise<IPaginationLoader<MeasuredQuantityUnit>> {
     return this.findAllOnPage(1, pageSize)
   }
 }

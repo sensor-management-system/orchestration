@@ -41,6 +41,7 @@ permissions and limitations under the Licence.
     </v-btn>
     <br><br>
     <v-expansion-panels
+      v-model="openedPanels"
       multiple
     >
       <v-expansion-panel
@@ -126,6 +127,7 @@ permissions and limitations under the Licence.
             :sampling-medias="samplingMedias"
             :properties="properties"
             :units="units"
+            :measured-quantity-units="measuredQuantityUnits"
           />
         </v-expansion-panel-content>
       </v-expansion-panel>
@@ -146,6 +148,7 @@ import { Compartment } from '@/models/Compartment'
 import { Property } from '@/models/Property'
 import { SamplingMedia } from '@/models/SamplingMedia'
 import { Unit } from '@/models/Unit'
+import { MeasuredQuantityUnit } from '@/models/MeasuredQuantityUnit'
 import { DeviceProperty } from '@/models/DeviceProperty'
 
 /**
@@ -157,6 +160,8 @@ import { DeviceProperty } from '@/models/DeviceProperty'
 })
 // @ts-ignore
 export default class DevicePropertyExpansionPanels extends Vue {
+  private openedPanels: number[] = []
+
   /**
    * a list of DeviceProperty
    */
@@ -219,6 +224,16 @@ export default class DevicePropertyExpansionPanels extends Vue {
   units!: Unit[]
 
   /**
+   * a list of MeasuredQuantityUnits
+   */
+  @Prop({
+    default: () => [] as MeasuredQuantityUnit[],
+    required: true,
+    type: Array
+  })
+  measuredQuantityUnits!: MeasuredQuantityUnit[]
+
+  /**
    * adds a new DeviceProperty instance and triggers an input event
    *
    * @fires DevicePropertyExpansionPanels#input
@@ -233,6 +248,9 @@ export default class DevicePropertyExpansionPanels extends Vue {
       ...this.value,
       new DeviceProperty()
     ] as DeviceProperty[])
+
+    this.openedPanels.push(this.value.length)
+    // @TODO: scroll to new property with this.$vuetify.goTo()
   }
 
   /**

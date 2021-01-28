@@ -38,6 +38,7 @@ export interface IDeviceConfigurationAttributes {
   offsetY: number
   offsetZ: number
   calibrationDate: DateTime | null
+  firmwareVersion: string
 }
 
 export class DeviceConfigurationAttributes implements IDeviceConfigurationAttributes {
@@ -46,6 +47,7 @@ export class DeviceConfigurationAttributes implements IDeviceConfigurationAttrib
   private _offsetY: number = 0
   private _offsetZ: number = 0
   private _calibrationDate: DateTime | null = null
+  private _firmwareVersion: string = ''
 
   constructor (device: Device) {
     this._device = device
@@ -59,6 +61,7 @@ export class DeviceConfigurationAttributes implements IDeviceConfigurationAttrib
     newObject.offsetZ = someObject.offsetZ
     // luxon DateTime objects are immutable
     newObject.calibrationDate = someObject.calibrationDate
+    newObject.firmwareVersion = someObject.firmwareVersion
 
     return newObject
   }
@@ -101,5 +104,13 @@ export class DeviceConfigurationAttributes implements IDeviceConfigurationAttrib
 
   set calibrationDate (date: DateTime | null) {
     this._calibrationDate = date
+  }
+
+  get firmwareVersion (): string {
+    return this._firmwareVersion
+  }
+
+  set firmwareVersion (newFirmwareVersion: string) {
+    this._firmwareVersion = newFirmwareVersion
   }
 }

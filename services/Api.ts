@@ -45,6 +45,7 @@ import { PropertyApi } from '@/services/cv/PropertyApi'
 import { SamplingMediaApi } from '@/services/cv/SamplingMediaApi'
 import { StatusApi } from '@/services/cv/StatusApi'
 import { UnitApi } from '@/services/cv/UnitApi'
+import { MeasuredQuantityUnitApi } from '@/services/cv/MeasuredQuantityUnitApi'
 
 import { ProjectApi } from '@/services/project/ProjectApi'
 
@@ -66,6 +67,7 @@ export class Api {
   private readonly _samplingMediaApi: SamplingMediaApi
   private readonly _propertyApi: PropertyApi
   private readonly _unitApi: UnitApi
+  private readonly _measuredQuantityUnitApi: MeasuredQuantityUnitApi
 
   private readonly _projectApi: ProjectApi
 
@@ -94,39 +96,39 @@ export class Api {
 
     // and here we can set settings for all the cv api calls
     const cvConfig: AxiosRequestConfig = {
+      headers: {
+        get: {
+          Accept: 'application/vnd.api+json'
+        }
+      }
     }
 
     this._compartmentApi = new CompartmentApi(
-      this.createAxios(cvBaseUrl, '/variabletype', cvConfig),
-      cvBaseUrl
+      this.createAxios(cvBaseUrl, '/compartments/', cvConfig)
     )
     this._deviceTypeApi = new DeviceTypeApi(
-      this.createAxios(cvBaseUrl, '/equipmenttype', cvConfig),
-      cvBaseUrl
+      this.createAxios(cvBaseUrl, '/equipmenttypes/', cvConfig)
     )
     this._manufacturerApi = new ManufacturerApi(
-      this.createAxios(cvBaseUrl, '/manufacturer', cvConfig),
-      cvBaseUrl
+      this.createAxios(cvBaseUrl, '/manufacturers/', cvConfig)
     )
     this._platformTypeApi = new PlatformTypeApi(
-      this.createAxios(cvBaseUrl, '/platformtype', cvConfig),
-      cvBaseUrl
+      this.createAxios(cvBaseUrl, '/platformtypes/', cvConfig)
     )
     this._propertyApi = new PropertyApi(
-      this.createAxios(cvBaseUrl, '/variablename', cvConfig),
-      cvBaseUrl
+      this.createAxios(cvBaseUrl, '/measuredquantities/', cvConfig)
     )
     this._samplingMediaApi = new SamplingMediaApi(
-      this.createAxios(cvBaseUrl, '/medium', cvConfig),
-      cvBaseUrl
+      this.createAxios(cvBaseUrl, '/samplingmedia/', cvConfig)
     )
     this._statusApi = new StatusApi(
-      this.createAxios(cvBaseUrl, '/equipmentstatus', cvConfig),
-      cvBaseUrl
+      this.createAxios(cvBaseUrl, '/equipmentstatus/', cvConfig)
     )
     this._unitApi = new UnitApi(
-      this.createAxios(cvBaseUrl, '/unit', cvConfig),
-      cvBaseUrl
+      this.createAxios(cvBaseUrl, '/units/', cvConfig)
+    )
+    this._measuredQuantityUnitApi = new MeasuredQuantityUnitApi(
+      this.createAxios(cvBaseUrl, '/measuredquantityunits/', cvConfig)
     )
 
     this._projectApi = new ProjectApi()
@@ -190,6 +192,10 @@ export class Api {
 
   get units (): UnitApi {
     return this._unitApi
+  }
+
+  get measuredQuantityUnits (): MeasuredQuantityUnitApi {
+    return this._measuredQuantityUnitApi
   }
 
   get projects (): ProjectApi {

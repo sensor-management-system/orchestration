@@ -38,7 +38,7 @@ import { IJsonApiNestedElement } from '@/serializers/jsonapi/JsonApiTypes'
 export class AttachmentSerializer {
   convertJsonApiElementToModel (attachment: IJsonApiNestedElement): Attachment {
     const result = new Attachment()
-    result.id = attachment.id
+    result.id = attachment.id.toString()
     result.label = attachment.label || ''
     result.url = attachment.url || ''
 

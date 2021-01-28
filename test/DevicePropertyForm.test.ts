@@ -42,6 +42,7 @@ import { Compartment } from '@/models/Compartment'
 import { SamplingMedia } from '@/models/SamplingMedia'
 import { Property } from '@/models/Property'
 import { Unit } from '@/models/Unit'
+import { MeasuredQuantityUnit } from '@/models/MeasuredQuantityUnit'
 
 Vue.use(Vuetify)
 
@@ -86,17 +87,21 @@ describe('DevicePropertyForm', () => {
           Compartment.createWithData('2', 'foo', 'http://foo/compartment/2')
         ] as Compartment[],
         samplingMedias: [
-          SamplingMedia.createWithData('1', 'water', 'http://foo/samplingMedia/1'),
-          SamplingMedia.createWithData('2', 'media2', 'http://foo/samplingMedia/2')
+          SamplingMedia.createWithData('1', 'water', 'http://foo/samplingMedia/1', '5'),
+          SamplingMedia.createWithData('2', 'media2', 'http://foo/samplingMedia/2', '2')
         ] as SamplingMedia[],
         properties: [
-          Property.createWithData('1', 'foo.bar', 'http://foo/property/1'),
-          Property.createWithData('2', 'property2', 'http://foo/property/2')
+          Property.createWithData('1', 'foo.bar', 'http://foo/property/1', '8'),
+          Property.createWithData('2', 'property2', 'http://foo/property/2', '3')
         ] as Property[],
         units: [
           Unit.createWithData('1', 'mm', 'http://foo/unit/1'),
           Unit.createWithData('2', 's', 'http://foo/unit/2')
-        ] as Unit[]
+        ] as Unit[],
+        measuredQuantityUnits: [
+          MeasuredQuantityUnit.createWithData('1', 'mm', 'http://foo/measuredquantityunits/1', '0.01', '10', '1', '1'),
+          MeasuredQuantityUnit.createWithData('2', 's', 'http://foo/measuredquantityunits/2', '0.001', '60', '2', '1')
+        ] as MeasuredQuantityUnit[]
       }
     })
   })
@@ -120,5 +125,14 @@ describe('DevicePropertyForm', () => {
     // it call async
     await wrapper.vm.$nextTick()
     expect(wrapper.emitted('input')).toBeTruthy()
+  })
+
+  it('checks if an URI ends with an id', () => {
+    const uri1 = '/foo/bar/42/'
+    const uri2 = '/foo/bar/23'
+
+    expect(wrapper.vm.checkUriEndsWithId(uri1, '42')).toBeTruthy()
+    expect(wrapper.vm.checkUriEndsWithId(uri1, '43')).toBeFalsy()
+    expect(wrapper.vm.checkUriEndsWithId(uri2, '23')).toBeTruthy()
   })
 })

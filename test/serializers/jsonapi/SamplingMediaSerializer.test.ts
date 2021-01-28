@@ -38,38 +38,50 @@ describe('SamplingMediaSerializer', () => {
       const jsonApiObjectList: any = {
         data: [{
           attributes: {
-            active: true,
             category: null,
             definition: 'Specimen collection of ambient air or sensor emplaced to measure properties of ambient air.',
-            name: 'Air',
             note: null,
             provenance: null,
             provenance_uri: null,
-            term: 'air'
+            status: 'Accepted',
+            term: 'Air'
           },
-          id: 'Air',
+          id: '1',
           links: {
-            self: 'http://rz-vm64.gfz-potsdam.de:5001/api/medium/Air/'
+            self: 'http://rz-vm64.gfz-potsdam.de:5001/api/samplingmedia/1/'
           },
-          relationships: {},
-          type: 'Medium'
+          relationships: {
+            compartment: {
+              data: {
+                type: 'Compartment',
+                id: '5'
+              }
+            }
+          },
+          type: 'SamplingMedium'
         }, {
           attributes: {
-            active: true,
             category: null,
             definition: 'An instrument, sensor or other piece of human-made equipment upon which a measurement is made, such as datalogger temperature or battery voltage.',
-            name: 'Equipment++',
             note: null,
             provenance: null,
             provenance_uri: null,
-            term: 'equipment'
+            status: 'Accepted',
+            term: 'Equipment'
           },
-          id: 'Equipment',
+          id: '2',
           links: {
-            self: 'http://rz-vm64.gfz-potsdam.de:5001/api/medium/Equipment/'
+            self: 'http://rz-vm64.gfz-potsdam.de:5001/api/samplingmedia/2/'
           },
-          relationships: {},
-          type: 'Medium'
+          relationships: {
+            compartment: {
+              data: {
+                type: 'Compartment',
+                id: '2'
+              }
+            }
+          },
+          type: 'SamplingMedium'
         }],
         included: [],
         jsonapi: {
@@ -81,17 +93,19 @@ describe('SamplingMediaSerializer', () => {
       }
 
       const expectedSamplingMedium1 = SamplingMedia.createFromObject({
-        id: 'Air',
+        id: '1',
         name: 'Air',
-        uri: 'medium/Air'
+        uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/samplingmedia/1/',
+        compartmentId: '5'
       })
       const expectedSamplingMedium2 = SamplingMedia.createFromObject({
-        id: 'Equipment',
-        name: 'Equipment++',
-        uri: 'medium/Equipment'
+        id: '2',
+        name: 'Equipment',
+        uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/samplingmedia/2/',
+        compartmentId: '2'
       })
 
-      const serializer = new SamplingMediaSerializer('http://rz-vm64.gfz-potsdam.de:5001/api')
+      const serializer = new SamplingMediaSerializer()
 
       const samplingMedia = serializer.convertJsonApiObjectListToModelList(jsonApiObjectList)
 

@@ -33,12 +33,14 @@ export interface IProperty {
   id: string
   name: string
   uri: string
+  samplingMediaId: string
 }
 
 export class Property implements IProperty {
   private _id: string = ''
   private _name: string = ''
   private _uri: string = ''
+  private _samplingMediaId: string = ''
 
   get id (): string {
     return this._id
@@ -64,15 +66,24 @@ export class Property implements IProperty {
     this._uri = newUri
   }
 
+  get samplingMediaId (): string {
+    return this._samplingMediaId
+  }
+
+  set samplingMediaId (newSamplingMediaId: string) {
+    this._samplingMediaId = newSamplingMediaId
+  }
+
   toString (): string {
     return this._name
   }
 
-  static createWithData (id: string, name: string, uri: string): Property {
+  static createWithData (id: string, name: string, uri: string, samplingMediaId: string): Property {
     const result = new Property()
     result.id = id
     result.name = name
     result.uri = uri
+    result.samplingMediaId = samplingMediaId
     return result
   }
 
@@ -82,6 +93,7 @@ export class Property implements IProperty {
     newObject.id = someObject.id
     newObject.name = someObject.name
     newObject.uri = someObject.uri
+    newObject.samplingMediaId = someObject.samplingMediaId
 
     return newObject
   }

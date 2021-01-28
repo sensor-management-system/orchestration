@@ -38,38 +38,50 @@ describe('PropertySerializer', () => {
       const jsonApiObjectList: any = {
         data: [{
           attributes: {
-            active: true,
             category: null,
             definition: 'Snow layers within the snowpack are a record of the winter’s weather. Like tree rings or strata of rock, layers can be traced to dates and conditions that formed them. One of the most important characteristics of a layer is its hardness. Harder snow is stronger and cohesive, while softer snow is weaker. ',
-            name: 'Snow layer hardness',
             note: 'Added to support Critical Zone Observatory (CZO) data use cases. ',
             provenance: null,
             provenance_uri: 'http://cbavalanchecenter.org/interpreting-snowpack-layers-and-hardness/',
-            term: 'snowLayerHardness'
+            status: 'Accepted',
+            term: 'Snow Layer Hardness'
           },
-          id: 'Snow layer hardness',
+          id: '1',
           links: {
-            self: 'http://rz-vm64.gfz-potsdam.de:5001/api/variablename/Snow%20layer%20hardness/'
+            self: 'http://rz-vm64.gfz-potsdam.de:5001/api/measuredquantities/1/'
           },
-          relationships: {},
-          type: 'Variablename'
+          relationships: {
+            sampling_media: {
+              data: {
+                type: 'SamplingMedium',
+                id: '5'
+              }
+            }
+          },
+          type: 'MeasuredQuantity'
         }, {
           attributes: {
-            active: true,
             category: null,
             definition: 'The depth of water if a snow cover is completely melted, expressed in units of depth, on a corresponding horizontal surface area.',
-            name: 'Snow water equivalent...',
             note: null,
             provenance: 'Originally from the CUAHSI HIS VariableNameCV.  See: http://his.cuahsi.org/mastercvreg/edit_cv11.aspx?tbl=VariableNameCV.',
             provenance_uri: null,
-            term: 'snowWaterEquivalent'
+            status: 'Accepted',
+            term: 'Snow Water Equivalent'
           },
-          id: 'Snow water equivalent',
+          id: '2',
           links: {
-            self: 'http://rz-vm64.gfz-potsdam.de:5001/api/variablename/Snow%20water%20equivalent/'
+            self: 'http://rz-vm64.gfz-potsdam.de:5001/api/measuredquantities/2/'
           },
-          relationships: {},
-          type: 'Variablename'
+          relationships: {
+            sampling_media: {
+              data: {
+                type: 'SamplingMedium',
+                id: '2'
+              }
+            }
+          },
+          type: 'MeasuredQuantity'
         }],
         included: [],
         jsonapi: {
@@ -81,17 +93,19 @@ describe('PropertySerializer', () => {
       }
 
       const expectedProperty1 = Property.createFromObject({
-        id: 'Snow layer hardness',
-        name: 'Snow layer hardness',
-        uri: 'variablename/Snow%20layer%20hardness'
+        id: '1',
+        name: 'Snow Layer Hardness',
+        uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/measuredquantities/1/',
+        samplingMediaId: '5'
       })
       const expectedProperty2 = Property.createFromObject({
-        id: 'Snow water equivalent',
-        name: 'Snow water equivalent...',
-        uri: 'variablename/Snow%20water%20equivalent'
+        id: '2',
+        name: 'Snow Water Equivalent',
+        uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/measuredquantities/2/',
+        samplingMediaId: '2'
       })
 
-      const serializer = new PropertySerializer('http://rz-vm64.gfz-potsdam.de:5001/api')
+      const serializer = new PropertySerializer()
 
       const properties = serializer.convertJsonApiObjectListToModelList(jsonApiObjectList)
 

@@ -216,6 +216,7 @@ permissions and limitations under the Licence.
                 :sampling-medias="samplingMedias"
                 :properties="properties"
                 :units="units"
+                :measured-quantity-units="measuredQuantityUnits"
               />
             </v-card-text>
           </v-card>
@@ -332,6 +333,7 @@ import { Property } from '@/models/Property'
 import { SamplingMedia } from '@/models/SamplingMedia'
 import { Status } from '@/models/Status'
 import { Unit } from '@/models/Unit'
+import { MeasuredQuantityUnit } from '@/models/MeasuredQuantityUnit'
 
 import AttachmentList from '@/components/AttachmentList.vue'
 import ContactSelect from '@/components/ContactSelect.vue'
@@ -361,6 +363,7 @@ export default class DeviceIdPage extends mixins(Rules) {
   private samplingMedias: SamplingMedia[] = []
   private properties: Property[] = []
   private units: Unit[] = []
+  private measuredQuantityUnits: MeasuredQuantityUnit[] = []
 
   private editMode: boolean = false
 
@@ -370,27 +373,47 @@ export default class DeviceIdPage extends mixins(Rules) {
   }
 
   mounted () {
-    this.$api.states.findAll().then((foundStates) => {
+    this.$api.states.findAllPaginated().then((foundStates) => {
       this.states = foundStates
+    }).catch(() => {
+      this.$store.commit('snackbar/setError', 'Loading of states failed')
     })
-    this.$api.manufacturer.findAll().then((foundManufacturers) => {
+    this.$api.manufacturer.findAllPaginated().then((foundManufacturers) => {
       this.manufacturers = foundManufacturers
+    }).catch(() => {
+      this.$store.commit('snackbar/setError', 'Loading of manufactures failed')
     })
-    this.$api.deviceTypes.findAll().then((foundDeviceTypes) => {
+    this.$api.deviceTypes.findAllPaginated().then((foundDeviceTypes) => {
       this.deviceTypes = foundDeviceTypes
+    }).catch(() => {
+      this.$store.commit('snackbar/setError', 'Loading of device types failed')
     })
-    this.$api.compartments.findAll().then((foundCompartments) => {
+    this.$api.compartments.findAllPaginated().then((foundCompartments) => {
       this.compartments = foundCompartments
+    }).catch(() => {
+      this.$store.commit('snackbar/setError', 'Loading of compartments failed')
     })
-    this.$api.samplingMedia.findAll().then((foundSamplingMedias) => {
+    this.$api.samplingMedia.findAllPaginated().then((foundSamplingMedias) => {
       this.samplingMedias = foundSamplingMedias
+    }).catch(() => {
+      this.$store.commit('snackbar/setError', 'Loading of sampling medias failed')
     })
-    this.$api.properties.findAll().then((foundProperties) => {
+    this.$api.properties.findAllPaginated().then((foundProperties) => {
       this.properties = foundProperties
+    }).catch(() => {
+      this.$store.commit('snackbar/setError', 'Loading of properties failed')
     })
-    this.$api.units.findAll().then((foundUnits) => {
+    this.$api.units.findAllPaginated().then((foundUnits) => {
       this.units = foundUnits
+    }).catch(() => {
+      this.$store.commit('snackbar/setError', 'Loading of units failed')
     })
+    this.$api.measuredQuantityUnits.findAllPaginated().then((foundUnits) => {
+      this.measuredQuantityUnits = foundUnits
+    }).catch(() => {
+      this.$store.commit('snackbar/setError', 'Loading of measuredquantityunits failed')
+    })
+
     this.loadDevice().then((device) => {
       if (device === null) {
         this.$store.commit('appbar/setTitle', 'Add Device')
