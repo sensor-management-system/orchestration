@@ -29,20 +29,62 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
-import { AxiosInstance } from 'axios'
+import { AxiosInstance, Method } from 'axios'
 
 import { Contact } from '@/models/Contact'
 import { ContactSerializer } from '@/serializers/jsonapi/ContactSerializer'
+import { IPaginationLoader, FilteredPaginationedLoader } from '@/utils/PaginatedLoader'
 
 export class ContactApi {
   private axiosApi: AxiosInstance
+  private serializer: ContactSerializer
 
   constructor (axiosInstance: AxiosInstance) {
     this.axiosApi = axiosInstance
+    this.serializer = new ContactSerializer()
+  }
+
+  findById (id: string): Promise<Contact> {
+    return this.axiosApi.get(id, {
+      params: {
+        // maybe add something later
+      }
+    }).then((rawResponse) => {
+      const rawData = rawResponse.data
+      return this.serializer.convertJsonApiDataToModel(rawData.data)
+    })
+  }
+
+  deleteById (id: string): Promise<void> {
+    return this.axiosApi.delete<string, void>(id)
+  }
+
+  save (contact: Contact) {
+    const data: any = this.serializer.convertModelToJsonApiData(contact)
+    let method: Method = 'patch'
+    let url = ''
+
+    if (contact.id === null) {
+      // new -> post
+      method = 'post'
+    } else {
+      // old -> patch
+      url = String(contact.id)
+    }
+
+    return this.axiosApi.request({
+      url,
+      method,
+      data: {
+        data
+      }
+    }).then((serverAnswer) => {
+      return this.findById(serverAnswer.data.data.id)
+    })
   }
 
   newSearchBuilder (): ContactSearchBuilder {
-    return new ContactSearchBuilder(this.axiosApi)
+    return new ContactSearchBuilder(this.axiosApi, this.serializer)
   }
 
   findAll (): Promise<Contact[]> {
@@ -67,23 +109,45 @@ export function serverResponseToEntity (entry: any): Contact {
 
 export class ContactSearchBuilder {
   private axiosApi: AxiosInstance
+  private serializer: ContactSerializer
+  private esTextFilter: string | null = null
 
-  constructor (axiosApi: AxiosInstance) {
+  constructor (axiosApi: AxiosInstance, serializer: ContactSerializer) {
     this.axiosApi = axiosApi
+    this.serializer = serializer
+  }
+
+  withText (text: string) {
+    if (text) {
+      this.esTextFilter = text
+    }
+    return this
   }
 
   build (): ContactSearcher {
-    return new ContactSearcher(this.axiosApi, new ContactSerializer())
+    return new ContactSearcher(this.axiosApi, this.serializer, this.esTextFilter)
   }
 }
 
 export class ContactSearcher {
   private axiosApi: AxiosInstance
   private serializer: ContactSerializer
+  private esTextFilter: string | null
 
-  constructor (axiosApi: AxiosInstance, serializer: ContactSerializer) {
+  constructor (axiosApi: AxiosInstance, serializer: ContactSerializer, esTextFilter: string | null) {
     this.axiosApi = axiosApi
     this.serializer = serializer
+    this.esTextFilter = esTextFilter
+  }
+
+  private get commonParams (): any {
+    const result: any = {}
+    if (this.esTextFilter) {
+      result.q = this.esTextFilter
+    } else {
+      result.sort = 'family_name'
+    }
+    return result
   }
 
   findMatchingAsList (): Promise<Contact[]> {
@@ -93,10 +157,47 @@ export class ContactSearcher {
       {
         params: {
           'page[size]': 10000,
-          sort: 'email'
+          ...this.commonParams
         }
       }).then((rawResponse: any) => {
       return this.serializer.convertJsonApiObjectListToModelList(rawResponse.data)
+    })
+  }
+
+  findMatchingAsPaginationLoader (pageSize: number): Promise<IPaginationLoader<Contact>> {
+    const acceptAllContacts = (_contact: Contact) => { return true }
+    const loaderPromise : Promise<IPaginationLoader<Contact>> = this.findAllOnePage(1, pageSize)
+    return loaderPromise.then((loader) => {
+      return new FilteredPaginationedLoader<Contact>(loader, acceptAllContacts)
+    })
+  }
+
+  private findAllOnePage (page: number, pageSize: number): Promise<IPaginationLoader<Contact>> {
+    return this.axiosApi.get(
+      '',
+      {
+        params: {
+          'page[size]': pageSize,
+          'page[number]': page,
+          ...this.commonParams
+        }
+      }
+    ).then((rawResponse) => {
+      const rawData = rawResponse.data
+      const elements: Contact[] = this.serializer.convertJsonApiObjectListToModelList(rawData)
+
+      const totalCount = rawData.meta.count
+
+      let funToLoadNext = null
+      if (elements.length > 0) {
+        funToLoadNext = () => this.findAllOnePage(page + 1, pageSize)
+      }
+
+      return {
+        elements,
+        totalCount,
+        funToLoadNext
+      }
     })
   }
 }

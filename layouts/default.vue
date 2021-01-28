@@ -92,13 +92,13 @@ permissions and limitations under the Licence.
           </v-list-item-content>
         </v-list-item>
 
-        <!-- Users -->
-        <v-list-item to="/users" exact nuxt>
+        <!-- Contacts -->
+        <v-list-item to="/search/contacts" exact nuxt>
           <v-list-item-action>
             <v-icon>mdi-account-multiple</v-icon>
           </v-list-item-action>
           <v-list-item-content>
-            <v-list-item-title>Users</v-list-item-title>
+            <v-list-item-title>Contacts</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
 
