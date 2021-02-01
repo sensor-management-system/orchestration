@@ -79,6 +79,13 @@ permissions and limitations under the Licence.
                   <v-list-item-subtitle>URN (TODO)</v-list-item-subtitle>
                 </v-list-item-content>
                 <v-list-item-action>
+                  <v-btn :to="'/platforms/' + item.id" target="_blank" icon x-small :disabled="false">
+                    <v-icon>
+                      mdi-open-in-new
+                    </v-icon>
+                  </v-btn>
+                </v-list-item-action>
+                <v-list-item-action>
                   <v-btn
                     :key="'btn-add-platform-' + item.id"
                     :disabled="isPlatformUsedFunc(item)"
@@ -121,6 +128,13 @@ permissions and limitations under the Licence.
                   <v-list-item-subtitle class="text--primary" v-text="item.longName" />
                   <v-list-item-subtitle>URN (TODO)</v-list-item-subtitle>
                 </v-list-item-content>
+                <v-list-item-action>
+                  <v-btn :to="'/devices/' + item.id" target="_blank" icon x-small>
+                    <v-icon>
+                      mdi-open-in-new
+                    </v-icon>
+                  </v-btn>
+                </v-list-item-action>
                 <v-list-item-action>
                   <div v-if="!canAddDevices">
                     Devices can only be added to platforms.
