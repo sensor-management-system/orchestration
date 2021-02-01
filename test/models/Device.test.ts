@@ -29,41 +29,37 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
+
 import { DateTime } from 'luxon'
 import { Device } from '@/models/Device'
-import { DeviceConfigurationAttributes } from '@/models/DeviceConfigurationAttributes'
 
-describe('DeviceConfigurationAttributes', () => {
-  it('should create a DeviceConfigurationAttributes object', () => {
-    const device = new Device()
-    device.id = '1'
-
-    const attributes = new DeviceConfigurationAttributes(device)
-    expect(attributes).toHaveProperty('device', device)
-    expect(attributes).toHaveProperty('id', '1')
-  })
-
-  it('should create a DeviceConfigurationAttributes from an object', () => {
-    const device = new Device()
-    device.id = '1'
-
-    const now = DateTime.utc()
-    const attributes = DeviceConfigurationAttributes.createFromObject({
-      device,
-      offsetX: 1,
-      offsetY: 1,
-      offsetZ: 1,
-      calibrationDate: now,
-      firmwareVersion: 'v.1.0'
+describe('Device', () => {
+  describe('#createdAt', () => {
+    it('should allow to set a datetime', () => {
+      const device = new Device()
+      expect(device.createdAt).toBeNull()
+      device.createdAt = DateTime.utc(2021, 1, 22, 7, 32, 42)
+      expect(device.createdAt.year).toEqual(2021)
+      expect(device.createdAt.month).toEqual(1)
+      expect(device.createdAt.day).toEqual(22)
+      expect(device.createdAt.hour).toEqual(7)
+      expect(device.createdAt.minute).toEqual(32)
+      expect(device.createdAt.second).toEqual(42)
+      expect(device.createdAt.zoneName).toEqual('UTC')
     })
-
-    expect(typeof attributes).toBe('object')
-    expect(attributes.device).toBe(device)
-    expect(attributes).toHaveProperty('id', '1')
-    expect(attributes).toHaveProperty('offsetX', 1)
-    expect(attributes).toHaveProperty('offsetY', 1)
-    expect(attributes).toHaveProperty('offsetZ', 1)
-    expect(attributes).toHaveProperty('calibrationDate', now)
-    expect(attributes).toHaveProperty('firmwareVersion', 'v.1.0')
+  })
+  describe('#updatedAt', () => {
+    it('should allow to set a datetime', () => {
+      const device = new Device()
+      expect(device.updatedAt).toBeNull()
+      device.updatedAt = DateTime.utc(2020, 12, 24, 8, 42, 52)
+      expect(device.updatedAt.year).toEqual(2020)
+      expect(device.updatedAt.month).toEqual(12)
+      expect(device.updatedAt.day).toEqual(24)
+      expect(device.updatedAt.hour).toEqual(8)
+      expect(device.updatedAt.minute).toEqual(42)
+      expect(device.updatedAt.second).toEqual(52)
+      expect(device.updatedAt.zoneName).toEqual('UTC')
+    })
   })
 })

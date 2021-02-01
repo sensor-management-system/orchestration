@@ -28,6 +28,7 @@
       "@nuxt/types",
       "@nuxtjs/axios",
       "@types/jest",
+      "@types/luxon",
       "nuxt-leaflet"
     ],
     "allowSyntheticDefaultImports": true,

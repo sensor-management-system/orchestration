@@ -30,6 +30,8 @@
  * permissions and limitations under the Licence.
  */
 
+import { DateTime } from 'luxon'
+
 import { Configuration } from '@/models/Configuration'
 import { Contact } from '@/models/Contact'
 
@@ -87,8 +89,8 @@ export class ConfigurationSerializer {
     configuration.projectName = attributes.project_name || ''
     configuration.status = attributes.status || ''
 
-    configuration.startDate = attributes.start_date ? new Date(attributes.start_date) : null
-    configuration.endDate = attributes.end_date ? new Date(attributes.end_date) : null
+    configuration.startDate = attributes.start_date ? DateTime.fromISO(attributes.start_date, { zone: 'UTC' }) : null
+    configuration.endDate = attributes.end_date ? DateTime.fromISO(attributes.end_date, { zone: 'UTC' }) : null
 
     const devices = this.deviceSerializer.convertJsonApiRelationshipsModelList(included)
     const deviceLookupById: {[idx: string]: Device} = {}
@@ -187,7 +189,7 @@ export class ConfigurationSerializer {
           offsetX: element.offset_x || 0.0,
           offsetY: element.offset_y || 0.0,
           offsetZ: element.offset_z || 0.0,
-          calibrationDate: element.calibration_date != null ? new Date(element.calibration_date) : null,
+          calibrationDate: element.calibration_date != null ? DateTime.fromISO(element.calibration_date, { zone: 'UTC' }) : null,
           firmwareVersion: element.firmware_version || ''
         })
 
@@ -305,7 +307,7 @@ export class ConfigurationSerializer {
 
           const calibrationDate = deviceAttributeLookupById[id].calibrationDate
           if (calibrationDate != null) {
-            elementData.calibration_date = calibrationDate.toISOString()
+            elementData.calibration_date = calibrationDate.setZone('UTC').toISO()
           }
           elementData.firmware_version = deviceAttributeLookupById[id].firmwareVersion
         }
@@ -322,8 +324,8 @@ export class ConfigurationSerializer {
         project_uri: configuration.projectUri,
         project_name: configuration.projectName,
         status: configuration.status,
-        start_date: configuration.startDate != null ? configuration.startDate.toISOString() : null,
-        end_date: configuration.endDate != null ? configuration.endDate.toISOString() : null,
+        start_date: configuration.startDate != null ? configuration.startDate.setZone('UTC').toISO() : null,
+        end_date: configuration.endDate != null ? configuration.endDate.setZone('UTC').toISO() : null,
         hierarchy,
         ...locationAttributes
       },

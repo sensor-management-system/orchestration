@@ -439,6 +439,7 @@ permissions and limitations under the Licence.
 import { Component, Vue } from 'nuxt-property-decorator'
 
 import { saveAs } from 'file-saver'
+import { DateTime } from 'luxon'
 
 import ProjectSelect from '@/components/ProjectSelect.vue'
 import StatusBadge from '@/components/StatusBadge.vue'
@@ -456,7 +457,7 @@ import { dateToString } from '@/utils/dateHelper'
 
 @Component({
   filters: {
-    formatDate: (possibleDate: Date | null) => {
+    formatDate: (possibleDate: DateTime | null) => {
       if (possibleDate != null) {
         // TODO: handle also the time
         return dateToString(possibleDate)

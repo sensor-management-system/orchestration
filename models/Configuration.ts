@@ -29,6 +29,8 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
+import { DateTime } from 'luxon'
+
 import { IContact, Contact } from '@/models/Contact'
 import { ConfigurationsTree } from '@/models/ConfigurationsTree'
 import { ConfigurationsTreeNode } from '@/models/ConfigurationsTreeNode'
@@ -38,8 +40,8 @@ import { PlatformConfigurationAttributes } from '@/models/PlatformConfigurationA
 
 export interface IConfiguration {
   id: string
-  startDate: Date | null
-  endDate: Date | null
+  startDate: DateTime | null
+  endDate: DateTime | null
   projectUri: string
   projectName: string
   label: string
@@ -53,8 +55,8 @@ export interface IConfiguration {
 
 export class Configuration implements IConfiguration {
   private _id: string = ''
-  private _startDate: Date | null = null
-  private _endDate: Date | null = null
+  private _startDate: DateTime | null = null
+  private _endDate: DateTime | null = null
   private _projectUri: string = ''
   private _projectName: string = ''
   private _label: string = ''
@@ -73,19 +75,19 @@ export class Configuration implements IConfiguration {
     this._id = id
   }
 
-  get startDate (): Date | null {
+  get startDate (): DateTime | null {
     return this._startDate
   }
 
-  set startDate (date: Date | null) {
+  set startDate (date: DateTime | null) {
     this._startDate = date
   }
 
-  get endDate (): Date | null {
+  get endDate (): DateTime | null {
     return this._endDate
   }
 
-  set endDate (date: Date | null) {
+  set endDate (date: DateTime | null) {
     this._endDate = date
   }
 
@@ -173,8 +175,9 @@ export class Configuration implements IConfiguration {
     const newObject = new Configuration()
 
     newObject.id = someObject.id
-    newObject.startDate = someObject.startDate instanceof Date ? new Date(someObject.startDate.getTime()) : null
-    newObject.endDate = someObject.endDate instanceof Date ? new Date(someObject.endDate.getTime()) : null
+    // luxon DateTime objects are immutable
+    newObject.startDate = someObject.startDate
+    newObject.endDate = someObject.endDate
 
     newObject.projectName = someObject.projectName
     newObject.projectUri = someObject.projectUri

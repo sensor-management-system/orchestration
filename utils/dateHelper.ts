@@ -29,45 +29,24 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
-export const dateToString = (aDate: Date | null): string => {
+
+import { DateTime } from 'luxon'
+
+export const dateToString = (aDate: DateTime | null): string => {
   if (!aDate) {
     return ''
   }
-  const year = aDate.getFullYear()
-  const month = aDate.getMonth() + 1
-  const day = aDate.getDate()
-
-  return year + '-' + month.toString().padStart(2, '0') + '-' + day.toString().padStart(2, '0')
+  return aDate.setZone('UTC').toFormat('yyyy-MM-dd')
 }
 
-export const stringToDate = (aDate: string): Date => {
-  const newDate: Date = new Date(aDate)
-  newDate.setHours(0, 0, 0)
-  return newDate
+export const stringToDate = (aDate: string): DateTime => {
+  return DateTime.fromISO(aDate, { zone: 'UTC' })
 }
 
 export const timeStampToUTCDateTime = (value: number) : string => {
   if (!value) {
     return ''
   }
-  const date = new Date(value * 1000)
-  const day = '0' + date.getUTCDate()
-  const month = '0' + (date.getUTCMonth() + 1)
-  const year = date.getUTCFullYear()
-  const hours = '0' + date.getUTCHours()
-  const minutes = '0' + date.getUTCMinutes()
-  const seconds = '0' + date.getUTCSeconds()
-
-  return year +
-    '-' +
-    month.substr(-2) +
-    '-' +
-    day.substr(-2) +
-    ' ' +
-    hours.substr(-2) +
-    ':' +
-    minutes.substr(-2) +
-    ':' +
-    seconds.substr(-2) +
-    ' UTC'
+  const date = DateTime.fromSeconds(value).setZone('UTC')
+  return date.toFormat('yyyy-MM-dd HH:mm:ss') + ' UTC'
 }

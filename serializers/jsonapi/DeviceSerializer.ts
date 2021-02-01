@@ -29,6 +29,8 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
+
+import { DateTime } from 'luxon'
 import { Contact } from '@/models/Contact'
 import { Device } from '@/models/Device'
 
@@ -82,8 +84,8 @@ export class DeviceSerializer {
     result.inventoryNumber = attributes.inventory_number || ''
     result.persistentIdentifier = attributes.persistent_identifier || ''
     result.website = attributes.website || ''
-    result.createdAt = attributes.created_at != null ? new Date(attributes.created_at) : null
-    result.updatedAt = attributes.updated_at != null ? new Date(attributes.updated_at) : null
+    result.createdAt = attributes.created_at != null ? DateTime.fromISO(attributes.created_at, { zone: 'UTC' }) : null
+    result.updatedAt = attributes.updated_at != null ? DateTime.fromISO(attributes.updated_at, { zone: 'UTC' }) : null
     // TODO
     // result.createdBy = attributes.created_by
     // result.updatedBy = attributes.updated_by
@@ -154,8 +156,8 @@ export class DeviceSerializer {
         website: device.website,
         dual_use: device.dualUse,
         // those two time slots are set by the db, no matter what we deliver here
-        created_at: device.createdAt != null ? device.createdAt.toISOString() : null,
-        updated_at: device.updatedAt != null ? device.updatedAt.toISOString() : null,
+        created_at: device.createdAt != null ? device.createdAt.setZone('UTC').toISO() : null,
+        updated_at: device.updatedAt != null ? device.updatedAt.setZone('UTC').toISO() : null,
         // TODO
         // created_by: device.createdBy,
         // updated_by: device.updatedBy,

@@ -29,6 +29,7 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
+import { DateTime } from 'luxon'
 
 import { Configuration } from '@/models/Configuration'
 import { ConfigurationsTree } from '@/models/ConfigurationsTree'
@@ -360,11 +361,14 @@ describe('ConfigurationSerializer', () => {
         inventoryNumber: '',
         platformTypeUri: 'type/station',
         shortName: 'boeken_BF1',
-        createdAt: new Date('2020-08-28T13:48:35.740944+00:00'),
+        createdAt: DateTime.utc(
+          2020, 8, 28, 13, 48, 35, 740 // no sub milliseconds
+        ),
         manufacturerName: '',
         attachments: [],
         description: 'Boeken BF1',
-        updatedAt: new Date('2020-08-29T13:48:35.740944+00:00'),
+        updatedAt: DateTime.utc(
+          2020, 8, 29, 13, 48, 35, 740),
         longName: 'Boeken BF1',
         manufacturerUri: '',
         platformTypeName: 'Station',
@@ -383,11 +387,11 @@ describe('ConfigurationSerializer', () => {
         inventoryNumber: '',
         platformTypeUri: 'type/station',
         shortName: 'boeken_BF12',
-        createdAt: new Date('2020-09-28T13:48:35.740944+00:00'),
+        createdAt: DateTime.utc(2020, 9, 28, 13, 48, 35, 740),
         manufacturerName: '',
         attachments: [],
         description: 'Boeken BF2',
-        updatedAt: new Date('2020-09-29T13:48:35.740944+00:00'),
+        updatedAt: DateTime.utc(2020, 9, 29, 13, 48, 35, 740),
         longName: 'Boeken BF2',
         manufacturerUri: '',
         platformTypeName: 'Station',
@@ -406,11 +410,11 @@ describe('ConfigurationSerializer', () => {
         inventoryNumber: '',
         platformTypeUri: 'type/station',
         shortName: 'boeken_BF123',
-        createdAt: new Date('2020-09-29T13:48:35.740944+00:00'),
+        createdAt: DateTime.utc(2020, 9, 29, 13, 48, 35, 740),
         manufacturerName: '',
         attachments: [],
         description: 'Boeken BF3',
-        updatedAt: new Date('2020-09-30T13:48:35.740944+00:00'),
+        updatedAt: DateTime.utc(2020, 9, 30, 13, 48, 35, 740),
         longName: 'Boeken BF3',
         manufacturerUri: '',
         platformTypeName: 'Station',
@@ -496,13 +500,13 @@ describe('ConfigurationSerializer', () => {
         shortName: 'Adcon wind vane',
         customFields: [],
         deviceTypeUri: '',
-        createdAt: new Date('2020-08-28T13:49:48.799090+00:00'),
+        createdAt: DateTime.utc(2020, 8, 28, 13, 49, 48, 799),
         manufacturerName: 'OTT Hydromet GmbH',
         attachments: [],
         dualUse: false,
         description: '',
         deviceTypeName: '',
-        updatedAt: new Date('2020-08-29T13:49:48.799090+00:00'),
+        updatedAt: DateTime.utc(2020, 8, 29, 13, 49, 48, 799),
         manufacturerUri: '',
         longName: 'Adcon wind vane',
         serialNumber: '',
@@ -522,13 +526,13 @@ describe('ConfigurationSerializer', () => {
         shortName: 'Adcon leafwetness',
         customFields: [],
         deviceTypeUri: '',
-        createdAt: new Date('2020-08-29T13:49:48.799090+00:00'),
+        createdAt: DateTime.utc(2020, 8, 29, 13, 49, 48, 799),
         manufacturerName: 'OTT Hydromet GmbH',
         attachments: [],
         dualUse: false,
         description: '',
         deviceTypeName: '',
-        updatedAt: new Date('2020-09-29T13:49:48.799090+00:00'),
+        updatedAt: DateTime.utc(2020, 9, 29, 13, 49, 48, 799),
         manufacturerUri: '',
         longName: 'Adcon leafwetness',
         serialNumber: '',
@@ -549,8 +553,8 @@ describe('ConfigurationSerializer', () => {
         latitude: expectedDeviceProperty2,
         elevation: null
       })
-      expectedConfiguration1.startDate = new Date('2020-08-28T13:49:48.015620+00:00')
-      expectedConfiguration1.endDate = new Date('2020-08-29T13:49:48.015620+00:00')
+      expectedConfiguration1.startDate = DateTime.utc(2020, 8, 28, 13, 49, 48, 15)
+      expectedConfiguration1.endDate = DateTime.utc(2020, 8, 29, 13, 49, 48, 15)
       expectedConfiguration1.projectUri = 'projects/Tereno-NO'
       expectedConfiguration1.projectName = 'Tereno NO'
       expectedConfiguration1.label = 'Tereno NO Boeken'
@@ -608,7 +612,7 @@ describe('ConfigurationSerializer', () => {
           offsetX: 7.0,
           offsetY: 8.0,
           offsetZ: 9.0,
-          calibrationDate: new Date('2020-01-01T13:49:48.015620+00:00'),
+          calibrationDate: DateTime.utc(2020, 1, 1, 13, 49, 48, 15),
           firmwareVersion: 'v1.0'
         }),
         DeviceConfigurationAttributes.createFromObject({
@@ -700,8 +704,8 @@ describe('ConfigurationSerializer', () => {
         latitude: 52.0,
         elevation: 100.0
       })
-      expectedConfiguration.startDate = new Date('2020-08-28T13:49:48.015620+00:00')
-      expectedConfiguration.endDate = new Date('2020-08-29T13:49:48.015620+00:00')
+      expectedConfiguration.startDate = DateTime.utc(2020, 8, 28, 13, 49, 48, 15)
+      expectedConfiguration.endDate = DateTime.utc(2020, 8, 29, 13, 49, 48, 15)
       expectedConfiguration.projectUri = 'projects/Tereno-NO'
       expectedConfiguration.projectName = 'Tereno NO'
       expectedConfiguration.label = 'Tereno NO Boeken'
@@ -773,8 +777,8 @@ describe('ConfigurationSerializer', () => {
         latitude: 52.0,
         elevation: 100.0
       })
-      expectedConfiguration.startDate = new Date('2020-08-28T13:49:48.015620+00:00')
-      expectedConfiguration.endDate = new Date('2020-08-29T13:49:48.015620+00:00')
+      expectedConfiguration.startDate = DateTime.utc(2020, 8, 28, 13, 49, 48, 15)
+      expectedConfiguration.endDate = DateTime.utc(2020, 8, 29, 13, 49, 48, 15)
       expectedConfiguration.projectUri = 'projects/Tereno-NO'
       expectedConfiguration.projectName = 'Tereno NO'
       expectedConfiguration.label = 'Tereno NO Boeken'
@@ -834,8 +838,8 @@ describe('ConfigurationSerializer', () => {
         latitude: 52.0,
         elevation: 100.0
       })
-      expectedConfiguration.startDate = new Date('2020-08-28T13:49:48.015620+00:00')
-      expectedConfiguration.endDate = new Date('2020-08-29T13:49:48.015620+00:00')
+      expectedConfiguration.startDate = DateTime.utc(2020, 8, 28, 13, 49, 48, 15)
+      expectedConfiguration.endDate = DateTime.utc(2020, 8, 29, 13, 49, 48, 15)
       expectedConfiguration.projectUri = 'projects/Tereno-NO'
       expectedConfiguration.projectName = 'Tereno NO'
       expectedConfiguration.label = 'Tereno NO Boeken'
@@ -875,8 +879,8 @@ describe('ConfigurationSerializer', () => {
       const expectedConfiguration = new Configuration()
       expectedConfiguration.id = '1'
       expectedConfiguration.location = new StationaryLocation()
-      expectedConfiguration.startDate = new Date('2020-08-28T13:49:48.015620+00:00')
-      expectedConfiguration.endDate = new Date('2020-08-29T13:49:48.015620+00:00')
+      expectedConfiguration.startDate = DateTime.utc(2020, 8, 28, 13, 49, 48, 15)
+      expectedConfiguration.endDate = DateTime.utc(2020, 8, 29, 13, 49, 48, 15)
       expectedConfiguration.projectUri = 'projects/Tereno-NO'
       expectedConfiguration.projectName = 'Tereno NO'
       expectedConfiguration.label = 'Tereno NO Boeken'
@@ -904,8 +908,8 @@ describe('ConfigurationSerializer', () => {
         latitude: 51.0,
         elevation: 60.0
       })
-      configuration.startDate = new Date('2020-08-28T13:49:48.015620+00:00')
-      configuration.endDate = new Date('2021-08-28T13:49:48.015620+00:00')
+      configuration.startDate = DateTime.utc(2020, 8, 28, 13, 49, 48, 15)
+      configuration.endDate = DateTime.utc(2021, 8, 28, 13, 49, 48, 15)
       configuration.contacts = [
         Contact.createFromObject({
           id: '1',
@@ -1195,7 +1199,7 @@ describe('ConfigurationSerializer', () => {
         offsetX: 22.0,
         offsetY: 23.0,
         offsetZ: 24.0,
-        calibrationDate: new Date('2020-11-09T00:00:00.000Z'),
+        calibrationDate: DateTime.utc(2020, 11, 9, 0, 0, 0, 0),
         firmwareVersion: 'v.2.0'
       })
 

@@ -29,6 +29,8 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
+
+import { DateTime } from 'luxon'
 import { Contact } from '@/models/Contact'
 import { Device } from '@/models/Device'
 import { DeviceSerializer, IDeviceWithMeta, deviceWithMetaToDeviceByThrowingErrorOnMissing, deviceWithMetaToDeviceByAddingDummyObjects } from '@/serializers/jsonapi/DeviceSerializer'
@@ -55,8 +57,8 @@ const createTestDevice = () => {
   device.persistentIdentifier = 'doi:4354545'
   device.website = 'http://gfz-potsdam.de'
   device.dualUse = true
-  device.createdAt = new Date('2020-08-28T13:49:48.015620+00:00')
-  device.updatedAt = new Date('2020-08-30T13:49:48.015620+00:00')
+  device.createdAt = DateTime.utc(2020, 8, 28, 13, 49, 48, 15)
+  device.updatedAt = DateTime.utc(2020, 8, 30, 13, 49, 48, 15)
 
   device.customFields = [
     CustomTextField.createFromObject({
@@ -281,9 +283,9 @@ describe('DeviceSerializer', () => {
       expectedDevice1.attachments = []
       expectedDevice1.statusUri = ''
       expectedDevice1.website = ''
-      expectedDevice1.updatedAt = new Date('2020-08-29T13:49:48.015620+00:00')
+      expectedDevice1.updatedAt = DateTime.utc(2020, 8, 29, 13, 49, 48, 15)
       expectedDevice1.longName = 'Campbell CR1000 logger unit'
-      expectedDevice1.createdAt = new Date('2020-08-28T13:49:48.015620+00:00')
+      expectedDevice1.createdAt = DateTime.utc(2020, 8, 28, 13, 49, 48, 15)
       expectedDevice1.inventoryNumber = ''
       expectedDevice1.manufacturerName = 'Campbell Scientific'
       expectedDevice1.deviceTypeUri = 'Logger'
@@ -423,9 +425,9 @@ describe('DeviceSerializer', () => {
       })]
       expectedDevice.statusUri = ''
       expectedDevice.website = ''
-      expectedDevice.updatedAt = new Date('2020-08-28T13:00:46.295058+00:00')
+      expectedDevice.updatedAt = DateTime.utc(2020, 8, 28, 13, 0, 46, 295)
       expectedDevice.longName = 'Device long name'
-      expectedDevice.createdAt = new Date('2020-08-28T13:00:46.295058+00:00')
+      expectedDevice.createdAt = DateTime.utc(2020, 8, 28, 13, 0, 46, 295)
       expectedDevice.inventoryNumber = '0000001'
       expectedDevice.manufacturerName = ''
       expectedDevice.deviceTypeUri = ''
@@ -656,9 +658,9 @@ describe('DeviceSerializer', () => {
       })]
       expectedDevice.statusUri = ''
       expectedDevice.website = ''
-      expectedDevice.updatedAt = new Date('2020-08-28T13:00:46.295058+00:00')
+      expectedDevice.updatedAt = DateTime.utc(2020, 8, 28, 13, 0, 46, 295)
       expectedDevice.longName = 'Device long name'
-      expectedDevice.createdAt = new Date('2020-08-28T13:00:46.295058+00:00')
+      expectedDevice.createdAt = DateTime.utc(2020, 8, 28, 13, 0, 46, 295)
       expectedDevice.inventoryNumber = '0000001'
       expectedDevice.manufacturerName = ''
       expectedDevice.deviceTypeUri = ''
@@ -767,9 +769,9 @@ describe('DeviceSerializer', () => {
       })]
       expectedDevice.statusUri = ''
       expectedDevice.website = ''
-      expectedDevice.updatedAt = new Date('2020-08-28T13:00:46.295058+00:00')
+      expectedDevice.updatedAt = DateTime.utc(2020, 8, 28, 13, 0, 46, 295)
       expectedDevice.longName = 'Device long name'
-      expectedDevice.createdAt = new Date('2020-08-28T13:00:46.295058+00:00')
+      expectedDevice.createdAt = DateTime.utc(2020, 8, 28, 13, 0, 46, 295)
       expectedDevice.inventoryNumber = '0000001'
       expectedDevice.manufacturerName = ''
       expectedDevice.deviceTypeUri = ''
@@ -864,9 +866,9 @@ describe('DeviceSerializer', () => {
       })]
       expectedDevice.statusUri = ''
       expectedDevice.website = ''
-      expectedDevice.updatedAt = new Date('2020-08-28T13:00:46.295058+00:00')
+      expectedDevice.updatedAt = DateTime.utc(2020, 8, 28, 13, 0, 46, 295)
       expectedDevice.longName = 'Device long name'
-      expectedDevice.createdAt = new Date('2020-08-28T13:00:46.295058+00:00')
+      expectedDevice.createdAt = DateTime.utc(2020, 8, 28, 13, 0, 46, 295)
       expectedDevice.inventoryNumber = '0000001'
       expectedDevice.manufacturerName = ''
       expectedDevice.deviceTypeUri = 'type uri'
