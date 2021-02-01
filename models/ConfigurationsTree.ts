@@ -202,24 +202,34 @@ export class ConfigurationsTree implements Iterable<ConfigurationsTreeNode> {
    * @return {string[]} an array of node names
    */
   getPath (node: ConfigurationsTreeNode): string[] {
-    const getPathRecursive = (node: ConfigurationsTreeNode, nodes: ConfigurationsTree, path: string[]): boolean => {
+    return this.getPathObjects(node).map((treeNode: ConfigurationsTreeNode) => treeNode.name)
+  }
+
+  /**
+   * returns the path to the node in the tree
+   *
+   * @param {ConfigurationsTreeNode} node - the node to get the path for
+   * @return {string[]} an array of node names
+   */
+  getPathObjects (node: ConfigurationsTreeNode): ConfigurationsTreeNode[] {
+    const getPathRecursive = (node: ConfigurationsTreeNode, nodes: ConfigurationsTree, path: ConfigurationsTreeNode[]): boolean => {
       for (const iteratedNode of nodes) {
         if (iteratedNode === node) {
-          path.push(iteratedNode.name)
+          path.push(iteratedNode)
           return true
         }
         if (!iteratedNode.canHaveChildren()) {
           continue
         }
         if (getPathRecursive(node, (iteratedNode as PlatformNode).getTree(), path)) {
-          path.unshift(iteratedNode.name)
+          path.unshift(iteratedNode)
           return true
         }
       }
       return false
     }
 
-    const paths: string[] = []
+    const paths: ConfigurationsTreeNode[] = []
     getPathRecursive(node, this, paths)
     return paths
   }

@@ -643,7 +643,21 @@ export default class ConfigurationsIdPage extends Vue {
     if (!this.selectedNode) {
       return []
     }
-    return this.configuration.tree.getPath(this.selectedNode).map((t: string): Object => { return { text: t } })
+
+    const openInNewTab = false
+    return this.configuration.tree.getPathObjects(this.selectedNode).map((selectedNode) => {
+      // we not only handle the names here, but we also allow to have links to our
+      // platforms and devices
+      const subRoute = selectedNode.isPlatform() ? 'platforms' : 'devices'
+      const id = selectedNode.unpack().id
+      const path = '/' + subRoute + '/' + id
+
+      return {
+        text: selectedNode.name,
+        to: path,
+        target: openInNewTab ? '_blank' : undefined
+      }
+    })
   }
 
   /**
