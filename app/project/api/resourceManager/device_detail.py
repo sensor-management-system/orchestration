@@ -43,7 +43,7 @@ class DeviceDetail(ResourceDetail):
 
     def before_delete(self, args, kwargs):
         """
-        Delete the device attachments at the minio server
+        Delete the device attachments at the minio server.
         :param args:
         :param kwargs:
         :return:
