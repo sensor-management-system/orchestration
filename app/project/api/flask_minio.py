@@ -88,7 +88,7 @@ class FlaskMinio:
     def set_bucket_policy(self, bucket_name):
         """
         Set bucket policy to download only so that we can
-        get a permanent url
+        get a permanent url.
         :param bucket_name:
         """
         # download_only bucket policy.
