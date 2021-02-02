@@ -27,7 +27,7 @@ def delete_attachments_in_minio_by_device_id(device_id_intended_for_deletion):
 
 class DeviceDetail(ResourceDetail):
     """
-    provides get, patch and delete methods to retrieve details
+    Provides get, patch and delete methods to retrieve details
     of an object, update an object and delete a device.
     """
 
