@@ -12,7 +12,7 @@ from project.api import minio
 
 def delete_attachments_in_minio_by_device_id(platform_id_intended_for_deletion):
     """
-    use the minio class to delete an attachment or a list of attachments
+    Use the minio class to delete an attachment or a list of attachments.
     :param platform_intended_for_deletion:
     :return:
     """
