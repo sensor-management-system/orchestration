@@ -75,7 +75,7 @@ class FlaskMinio:
     @property
     def connection(self):
         """
-        property that on first access opens the client
+        A property that on first access opens the client
         connection and stores it on the context.
         :return:
         """
