@@ -76,7 +76,7 @@ class FlaskMinio:
     def connection(self):
         """
         property that on first access opens the client
-        connection and stores it on the context
+        connection and stores it on the context.
         :return:
         """
         ctx = _app_ctx_stack.top
