@@ -191,7 +191,7 @@ class FlaskMinio:
 
     def extract_bucket_and_file_names_from_url(self, object_path):
         """
-        Just in case that an other bucket name is used, we extract the name directly
+        Just in case that another bucket name is used, we extract the name directly
         from the url.
         :param self:
         :param object_path:
