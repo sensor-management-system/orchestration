@@ -15,7 +15,7 @@ def env_value_to_boolean(param):
 
 def env_values_to_list(param):
     """
-    convert a string to a list
+    Convert a string to a list.
     :param param:
     :return:
     """
