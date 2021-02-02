@@ -28,7 +28,7 @@ def delete_attachments_in_minio_by_device_id(platform_id_intended_for_deletion):
 class PlatformDetail(ResourceDetail):
     """
     provides get, patch and delete methods to retrieve details
-    of an object, update an object and delete an Event
+    of an object, update an object and delete an Event.
     """
 
     def before_get_object(self, view_kwargs):
