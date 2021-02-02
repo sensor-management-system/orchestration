@@ -3,7 +3,7 @@ import os
 
 def env_value_to_boolean(param):
     """
-    convert a string to boolean
+    Convert a string to boolean.
     :param param: str
     :return: boolean
     """
