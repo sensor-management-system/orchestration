@@ -15,7 +15,7 @@ class MinioNotAvailableException(Exception):
 
 class FlaskMinio:
     """The core Minio client object.
-    This class isa Class based Flask extensions used to control
+    This class is a class based Flask extensions used to control
     the Minio integration to a Flask applications.
 
     see https://flask.palletsprojects.com/en/1.1.x/extensiondev/
