@@ -33,12 +33,14 @@ export interface IUnit {
   id: string
   name: string
   uri: string
+  definition: string
 }
 
 export class Unit implements IUnit {
   private _id: string = ''
   private _name: string = ''
   private _uri: string = ''
+  private _definition: string = ''
 
   get id (): string {
     return this._id
@@ -64,15 +66,24 @@ export class Unit implements IUnit {
     this._uri = newUri
   }
 
+  get definition (): string {
+    return this._definition
+  }
+
+  set definition (newDefinition: string) {
+    this._definition = newDefinition
+  }
+
   toString (): string {
     return this._name
   }
 
-  static createWithData (id: string, name: string, uri: string): Unit {
+  static createWithData (id: string, name: string, uri: string, definition: string): Unit {
     const result = new Unit()
     result.id = id
     result.name = name
     result.uri = uri
+    result.definition = definition
     return result
   }
 
@@ -82,6 +93,7 @@ export class Unit implements IUnit {
     newObject.id = someObject.id
     newObject.name = someObject.name
     newObject.uri = someObject.uri
+    newObject.definition = someObject.definition
 
     return newObject
   }

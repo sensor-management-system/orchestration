@@ -33,6 +33,7 @@ export interface IProperty {
   id: string
   name: string
   uri: string
+  definition: string
   samplingMediaId: string
 }
 
@@ -40,6 +41,7 @@ export class Property implements IProperty {
   private _id: string = ''
   private _name: string = ''
   private _uri: string = ''
+  private _definition: string = ''
   private _samplingMediaId: string = ''
 
   get id (): string {
@@ -66,6 +68,14 @@ export class Property implements IProperty {
     this._uri = newUri
   }
 
+  get definition (): string {
+    return this._definition
+  }
+
+  set definition (newDefinition: string) {
+    this._definition = newDefinition
+  }
+
   get samplingMediaId (): string {
     return this._samplingMediaId
   }
@@ -78,11 +88,12 @@ export class Property implements IProperty {
     return this._name
   }
 
-  static createWithData (id: string, name: string, uri: string, samplingMediaId: string): Property {
+  static createWithData (id: string, name: string, uri: string, definition: string, samplingMediaId: string): Property {
     const result = new Property()
     result.id = id
     result.name = name
     result.uri = uri
+    result.definition = definition
     result.samplingMediaId = samplingMediaId
     return result
   }
@@ -93,6 +104,7 @@ export class Property implements IProperty {
     newObject.id = someObject.id
     newObject.name = someObject.name
     newObject.uri = someObject.uri
+    newObject.definition = someObject.definition
     newObject.samplingMediaId = someObject.samplingMediaId
 
     return newObject

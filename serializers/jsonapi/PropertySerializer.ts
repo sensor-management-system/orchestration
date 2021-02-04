@@ -42,8 +42,9 @@ export class PropertySerializer {
     const id = jsonApiData.id.toString()
     const name = jsonApiData.attributes.term
     const url = jsonApiData.links.self
+    const definition = jsonApiData.attributes.definition
     const samplingMediaId = (jsonApiData.relationships.sampling_media as IJsonApiTypeIdData).data.id
 
-    return Property.createWithData(id, name, url, samplingMediaId)
+    return Property.createWithData(id, name, url, definition, samplingMediaId)
   }
 }

@@ -32,6 +32,7 @@
 export interface ICompartment {
   id: string
   name: string
+  definition: string
   uri: string
 }
 
@@ -39,6 +40,7 @@ export class Compartment implements ICompartment {
   private _id: string = ''
   private _name: string = ''
   private _uri: string = ''
+  private _definition: string = ''
 
   get id (): string {
     return this._id
@@ -64,15 +66,24 @@ export class Compartment implements ICompartment {
     this._uri = newUri
   }
 
+  get definition (): string {
+    return this._definition
+  }
+
+  set definition (newdefinition: string) {
+    this._definition = newdefinition
+  }
+
   toString (): string {
     return this._name
   }
 
-  static createWithData (id: string, name: string, uri: string): Compartment {
+  static createWithData (id: string, name: string, uri: string, definition: string): Compartment {
     const result = new Compartment()
     result.id = id
     result.name = name
     result.uri = uri
+    result.definition = definition
     return result
   }
 
@@ -82,6 +93,7 @@ export class Compartment implements ICompartment {
     newObject.id = someObject.id
     newObject.name = someObject.name
     newObject.uri = someObject.uri
+    newObject.definition = someObject.definition
 
     return newObject
   }

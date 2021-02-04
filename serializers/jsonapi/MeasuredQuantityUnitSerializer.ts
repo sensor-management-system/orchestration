@@ -56,13 +56,15 @@ export class MeasuredQuantityUnitSerializer {
     const unitId = (jsonApiData.relationships.unit as IJsonApiTypeIdData).data.id
     const measuredQuantityId = (jsonApiData.relationships.measured_quantity as IJsonApiTypeIdData).data.id
 
-    // find the corresponding Unit and take the name from there
+    // find the corresponding Unit and take the name and the definition from there
     let name = ''
+    let definition = ''
     const relatedUnit = this.included.find(i => i.id === unitId)
     if (relatedUnit) {
       name = relatedUnit.attributes.term
+      definition = relatedUnit.attributes.definition
     }
 
-    return MeasuredQuantityUnit.createWithData(id, name, url, defaultLimitMin, defaultLimitMax, unitId, measuredQuantityId)
+    return MeasuredQuantityUnit.createWithData(id, name, url, definition, defaultLimitMin, defaultLimitMax, unitId, measuredQuantityId)
   }
 }

@@ -39,7 +39,7 @@ describe('UnitSerializer', () => {
         data: [{
           attributes: {
             category: null,
-            definition: null,
+            definition: 'Unit 1',
             note: null,
             provenance: 'ONE_PER_METER',
             provenance_uri: null,
@@ -63,7 +63,7 @@ describe('UnitSerializer', () => {
         {
           attributes: {
             category: null,
-            definition: null,
+            definition: 'Unit 2',
             note: null,
             provenance: 'ONE_PER_TIME',
             provenance_uri: null,
@@ -96,13 +96,15 @@ describe('UnitSerializer', () => {
       const expectedUnit1 = Unit.createFromObject({
         id: '1',
         name: '1/m',
-        uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/units/1/'
+        uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/units/1/',
+        definition: 'Unit 1'
       })
 
       const expectedUnit2 = Unit.createFromObject({
         id: '2',
         name: '1/t',
-        uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/units/2/'
+        uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/units/2/',
+        definition: 'Unit 2'
       })
 
       const serializer = new UnitSerializer()

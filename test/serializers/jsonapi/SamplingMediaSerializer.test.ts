@@ -96,12 +96,14 @@ describe('SamplingMediaSerializer', () => {
         id: '1',
         name: 'Air',
         uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/samplingmedia/1/',
+        definition: 'Specimen collection of ambient air or sensor emplaced to measure properties of ambient air.',
         compartmentId: '5'
       })
       const expectedSamplingMedium2 = SamplingMedia.createFromObject({
         id: '2',
         name: 'Equipment',
         uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/samplingmedia/2/',
+        definition: 'An instrument, sensor or other piece of human-made equipment upon which a measurement is made, such as datalogger temperature or battery voltage.',
         compartmentId: '2'
       })
 

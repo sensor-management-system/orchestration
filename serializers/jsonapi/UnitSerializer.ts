@@ -42,7 +42,8 @@ export class UnitSerializer {
     const id = jsonApiData.id.toString()
     const name = jsonApiData.attributes.term
     const url = jsonApiData.links.self
+    const definition = jsonApiData.attributes.definition
 
-    return Unit.createWithData(id, name, url)
+    return Unit.createWithData(id, name, url, definition)
   }
 }

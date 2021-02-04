@@ -96,12 +96,14 @@ describe('PropertySerializer', () => {
         id: '1',
         name: 'Snow Layer Hardness',
         uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/measuredquantities/1/',
+        definition: 'Snow layers within the snowpack are a record of the winter’s weather. Like tree rings or strata of rock, layers can be traced to dates and conditions that formed them. One of the most important characteristics of a layer is its hardness. Harder snow is stronger and cohesive, while softer snow is weaker. ',
         samplingMediaId: '5'
       })
       const expectedProperty2 = Property.createFromObject({
         id: '2',
         name: 'Snow Water Equivalent',
         uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/measuredquantities/2/',
+        definition: 'The depth of water if a snow cover is completely melted, expressed in units of depth, on a corresponding horizontal surface area.',
         samplingMediaId: '2'
       })
 
