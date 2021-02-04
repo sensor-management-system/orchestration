@@ -12,7 +12,7 @@ class CustomFieldSchema(MarshmallowSchema):
     """
 
     class Meta:
-        type_ = 'customfield'
+        type_ = "customfield"
 
     id = fields.Integer(as_string=True)
     key = fields.Str(required=True)

@@ -1,12 +1,9 @@
 from marshmallow_jsonapi import fields
-from marshmallow_jsonapi.flask import Schema, Relationship
+from marshmallow_jsonapi.flask import Relationship, Schema
 from project.api.schemas.attachment_schema import AttachmentSchema
 from project.api.schemas.customfield_schema import CustomFieldSchema
-from project.api.schemas.event_schema import EventSchema
-from project.api.schemas.device_property_schema import (
-    InnerDevicePropertySchema,
-    DevicePropertySchema,
-)
+from project.api.schemas.device_property_schema import \
+    InnerDevicePropertySchema
 
 
 class DeviceSchema(Schema):
@@ -23,10 +20,10 @@ class DeviceSchema(Schema):
 
     class Meta:
         type_ = "device"
-        self_view = "device_detail"
+        self_view = "api.device_detail"
         self_view_kwargs = {"id": "<id>"}
 
-    id = fields.Integer(as_string=True, dump_only=True)
+    id = fields.Integer(as_string=True)
     description = fields.Str(allow_none=True)
     short_name = fields.Str(required=True)
     long_name = fields.Str(allow_none=True)
@@ -45,24 +42,24 @@ class DeviceSchema(Schema):
     created_at = fields.DateTime(allow_none=True)
     updated_at = fields.DateTime(allow_none=True)
     created_by = Relationship(
-        self_view="device_created_user",
+        self_view="api.device_created_user",
         self_view_kwargs={"id": "<id>"},
-        related_view="user_detail",
+        related_view="api.user_detail",
         related_view_kwargs={"id": "<created_by_id>"},
         type_="user",
     )
     updated_by = Relationship(
-        self_view="device_updated_user",
+        self_view="api.device_updated_user",
         self_view_kwargs={"id": "<id>"},
-        related_view="user_detail",
+        related_view="api.user_detail",
         related_view_kwargs={"id": "<updated_by_id>"},
         type_="user",
     )
     customfields = fields.Nested(CustomFieldSchema, many=True, allow_none=True)
     events = Relationship(
-        self_view="device_events",
+        self_view="api.device_events",
         self_view_kwargs={"id": "<id>"},
-        related_view="event_list",
+        related_view="api.event_list",
         related_view_kwargs={"device_id": "<id>"},
         many=True,
         allow_none=True,
@@ -80,9 +77,9 @@ class DeviceSchema(Schema):
     )
     contacts = Relationship(
         attribute="contacts",
-        self_view="device_contacts",
+        self_view="api.device_contacts",
         self_view_kwargs={"id": "<id>"},
-        related_view="contact_list",
+        related_view="api.contact_list",
         related_view_kwargs={"device_id": "<id>"},
         many=True,
         schema="ContactSchema",

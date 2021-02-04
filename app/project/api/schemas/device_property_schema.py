@@ -1,6 +1,6 @@
 from marshmallow import Schema as MarshmallowSchema
 from marshmallow_jsonapi import fields
-from marshmallow_jsonapi.flask import Schema, Relationship
+from marshmallow_jsonapi.flask import Relationship, Schema
 
 
 class InnerDevicePropertySchema(MarshmallowSchema):
@@ -44,10 +44,10 @@ class DevicePropertySchema(Schema):
 
     class Meta:
         type_ = "device_property"
-        self_view = "device_property_detail"
+        self_view = "api.device_property_detail"
         self_view_kwargs = {"id": "<id>"}
 
-    id = fields.Integer(as_string=True, dump_only=True)
+    id = fields.Integer(as_string=True)
     measuring_range_min = fields.Float(allow_none=True)
     measuring_range_max = fields.Float(allow_none=True)
     failure_value = fields.Float(allow_none=True)
@@ -64,7 +64,7 @@ class DevicePropertySchema(Schema):
 
     device = Relationship(
         self_view_kwargs={"id": "<id>"},
-        related_view="device_detail",
+        related_view="api.device_detail",
         related_view_kwargs={"id": "<device_id>"},
         type_="device",
     )

@@ -1,5 +1,4 @@
 from flask_rest_jsonapi import ResourceRelationship
-
 from project.api.models.base_model import db
 from project.api.models.contact import Contact
 from project.api.schemas.contact_schema import ContactSchema
@@ -12,7 +11,7 @@ class ContactRelationship(ResourceRelationship):
     create relationships, update relationships and delete
     relationships between Contact and other objects.
     """
+
     schema = ContactSchema
-    # decorators = (token_required,)
-    data_layer = {'session': db.session,
-                  'model': Contact}
+    decorators = (token_required,)
+    data_layer = {"session": db.session, "model": Contact}

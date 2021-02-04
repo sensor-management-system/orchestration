@@ -1,5 +1,4 @@
 from flask_rest_jsonapi import ResourceRelationship
-
 from project.api.models.base_model import db
 from project.api.models.platform import Platform
 from project.api.schemas.platform_schema import PlatformSchema
@@ -12,7 +11,7 @@ class PlatformRelationship(ResourceRelationship):
     create relationships, update relationships and delete
     relationships between Platforms.
     """
+
     schema = PlatformSchema
-    # decorators = (token_required,)
-    data_layer = {'session': db.session,
-                  'model': Platform}
+    decorators = (token_required,)
+    data_layer = {"session": db.session, "model": Platform}

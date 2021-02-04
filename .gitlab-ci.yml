@@ -11,7 +11,7 @@ build-image:
   stage: build
   image:
     name: gcr.io/kaniko-project/executor:debug
-    entrypoint: [""]
+    entrypoint: [ "" ]
   script:
     - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
     - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --destination $CONTAINER_TEST_IMAGE
@@ -33,18 +33,33 @@ unittest-lint:
 
   artifacts:
     paths:
-        - pylint.txt
+      - pylint.txt
 
 test-image:
+  services:
+    - postgres:12.2-alpine
+  variables:
+    POSTGRES_DB: db_test
+    POSTGRES_USER: postgres
+    POSTGRES_PASSWORD: postgres
+    POSTGRES_HOST_AUTH_METHOD: trust
   stage: test
+  image: $CONTAINER_TEST_IMAGE
+  before_script:
+    - apk add --no-cache --update build-base libressl-dev  libffi-dev
+    - pip install --upgrade setuptools
+    - pip install cryptography
+    - export APP_SETTINGS=project.config.TestingConfig
+    - export DATABASE_TEST_URL=postgres://$POSTGRES_USER:@$POSTGRES_PASSWORD:5432/$POSTGRES_DB
+    - export WELL_KNOWN_URL=https://webapp-stage.intranet.ufz.de/idp/oidc/v1/.well-known/openid-configuration
   script:
-    - echo "This is just dummy test - waitting for the databse connection."
+    - cd $CI_PROJECT_DIR/app/ && python manage.py test
 
 release-image:
   stage: release
   image:
     name: gcr.io/kaniko-project/executor:debug
-    entrypoint: [""]
+    entrypoint: [ "" ]
   script:
     - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
     - echo "FROM  ${CONTAINER_TEST_IMAGE}" | /kaniko/executor --context $CI_PROJECT_DIR --dockerfile /dev/stdin --destination ${CONTAINER_RELEASE_IMAGE}

@@ -1,11 +1,10 @@
 from flask_rest_jsonapi import ResourceDetail
-from flask_rest_jsonapi.exceptions import ObjectNotFound
-from project.api.flask_minio import FlaskMinio
 from project.api.models.base_model import db
 from project.api.models.device import Device
-from project.api.models.device_attachment import DeviceAttachment
+from project.api.resourceManager.base_resource import add_updated_by_id
 from project.api.schemas.device_schema import DeviceSchema
-from sqlalchemy.orm.exc import NoResultFound
+from project.api.models.device_attachment import DeviceAttachment
+from project.api.token_checker import token_required
 
 from project.api import minio
 
@@ -18,8 +17,8 @@ def delete_attachments_in_minio_by_device_id(device_id_intended_for_deletion):
     """
     attachments_related_to_device = (
         db.session.query(DeviceAttachment)
-        .filter_by(device_id=device_id_intended_for_deletion)
-        .all()
+            .filter_by(device_id=device_id_intended_for_deletion)
+            .all()
     )
     for attachment in attachments_related_to_device:
         minio.remove_an_object(attachment.url)
@@ -27,19 +26,13 @@ def delete_attachments_in_minio_by_device_id(device_id_intended_for_deletion):
 
 class DeviceDetail(ResourceDetail):
     """
-    Provides get, patch and delete methods to retrieve details
-    of an object, update an object and delete a device.
+    provides get, patch and delete methods to retrieve details
+    of an object, update an object and delete a Device
     """
 
-    def before_get_object(self, view_kwargs):
-        if view_kwargs.get("id") is not None:
-            try:
-                _ = self.session.query(Device).filter_by(id=view_kwargs["id"]).one()
-            except NoResultFound:
-                raise ObjectNotFound(
-                    {"parameter": "device_id"},
-                    "Device: {} not found".format(view_kwargs["id"]),
-                )
+    def before_patch(self, args, kwargs, data):
+        """Add Created by user id to the data"""
+        add_updated_by_id(data)
 
     def before_delete(self, args, kwargs):
         """
@@ -53,9 +46,8 @@ class DeviceDetail(ResourceDetail):
         return kwargs
 
     schema = DeviceSchema
-    # decorators = (token_required,)
+    decorators = (token_required,)
     data_layer = {
         "session": db.session,
         "model": Device,
-        "methods": {"before_get_object": before_get_object},
     }

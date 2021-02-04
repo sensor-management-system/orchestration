@@ -1,7 +1,5 @@
-from flask_rest_jsonapi import ResourceList
+from project.frj_csv_export.resource import ResourceList
 from flask_rest_jsonapi.exceptions import ObjectNotFound
-from sqlalchemy.orm.exc import NoResultFound
-
 from project.api.models.base_model import db
 from project.api.models.configuration import Configuration
 from project.api.models.contact import Contact
@@ -9,6 +7,7 @@ from project.api.models.device import Device
 from project.api.models.platform import Platform
 from project.api.schemas.contact_schema import ContactSchema
 from project.api.token_checker import token_required
+from sqlalchemy.orm.exc import NoResultFound
 
 
 class ContactList(ResourceList):
@@ -20,9 +19,9 @@ class ContactList(ResourceList):
     def query(self, view_kwargs):
 
         query_ = self.session.query(Contact)
-        configuration_id = view_kwargs.get('configuration_id')
-        platform_id = view_kwargs.get('platform_id')
-        device_id = view_kwargs.get('device_id')
+        configuration_id = view_kwargs.get("configuration_id")
+        platform_id = view_kwargs.get("platform_id")
+        device_id = view_kwargs.get("device_id")
 
         if configuration_id is not None:
             try:
@@ -34,7 +33,8 @@ class ContactList(ResourceList):
                 )
             else:
                 query_ = query_.join(Contact.configurations).filter(
-                    Configuration.id == configuration_id)
+                    Configuration.id == configuration_id
+                )
 
         if platform_id is not None:
             try:
@@ -46,7 +46,8 @@ class ContactList(ResourceList):
                 )
             else:
                 query_ = query_.join(Contact.platforms).filter(
-                    Platform.id == platform_id)
+                    Platform.id == platform_id
+                )
 
         if device_id is not None:
             try:
@@ -57,17 +58,16 @@ class ContactList(ResourceList):
                     "Device: {} not found".format(platform_id)
                 )
             else:
-                query_ = query_.join(Contact.devices).filter(
-                    Device.id == device_id)
+                query_ = query_.join(Contact.devices).filter(Device.id == device_id)
 
         return query_
 
     schema = ContactSchema
-    # decorators = (token_required,)
+    decorators = (token_required,)
     data_layer = {
-        'session': db.session,
-        'model': Contact,
-        'methods': {
-            'query': query,
-        }
+        "session": db.session,
+        "model": Contact,
+        "methods": {
+            "query": query,
+        },
     }
