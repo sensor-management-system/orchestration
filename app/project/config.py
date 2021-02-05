@@ -30,7 +30,7 @@ class BaseConfig:
     TESTING = False
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SECRET_KEY = "top_secret"
-    HTTP_ORIGINS = env.list("HTTP_ORIGINS", None)
+    HTTP_ORIGINS = env.list("HTTP_ORIGINS", None, delimiter=" ")
     DEFAULT_POOL_TIMEOUT = 600
     SQLALCHEMY_POOL_TIMEOUT = env.int("POOL_TIMEOUT", DEFAULT_POOL_TIMEOUT)
 
