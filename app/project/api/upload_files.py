@@ -31,8 +31,8 @@ class UploadFilesWithMinio(ResourceList):
             else:
                 raise JsonApiException(
                     {"error": "Sorry, This File Type Is Not Permitted"},
-                    status=406,
-                    title="Not Acceptable",
+                    status=415,
+                    title="Unsupported Media Type",
                 )
 
         except BadRequestKeyError as err:
