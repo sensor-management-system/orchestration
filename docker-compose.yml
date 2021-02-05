@@ -39,6 +39,14 @@ services:
           python3-dev \
           musl-dev \
           postgresql-dev \
+          libressl-dev \
+          musl-dev \
+          libffi-dev && \
+          pip install --no-cache-dir cryptography==2.1.4 && \
+          apk del \
+                  libressl-dev \
+                  musl-dev \
+                  libffi-dev\
       && pip install --no-cache-dir --upgrade pip
       && pip install --no-cache-dir -r requirements.txt
       && gunicorn -b 0.0.0.0:5000 manage:app

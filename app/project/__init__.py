@@ -1,19 +1,17 @@
 import os
 
-from flask import Flask
+from elasticsearch import Elasticsearch
+from flask import Blueprint, Flask
 from flask_cors import CORS
 from flask_migrate import Migrate
-from flask_sqlalchemy import SQLAlchemy
+from project.api.models.base_model import db
+from project.api.token_checker import jwt
+from project.urls import api
 
-from project.api.token_checker import auth_blueprint
-from project.frj_monkey_patching.api import ApiMP
-from project.frj_monkey_patching.render_csv import render_csv
-from project.urls import create_endpoints
+from project.frj_csv_export.render_csv import render_csv
 
-from elasticsearch import Elasticsearch
-
-DB = SQLAlchemy()
 migrate = Migrate()
+base_url = os.getenv("URL_PREFIX", "/rdm/svm-api/v1")
 
 
 def create_app():
@@ -37,11 +35,19 @@ def create_app():
     app.config.from_object(app_settings)
 
     # instantiate the db
-    DB.init_app(app)
-    migrate.init_app(app, DB)
+    db.init_app(app)
+    api.init_app(
+        app,
+        Blueprint(
+            "api", __name__, url_prefix=base_url
+        ),
+        response_renderers={"text/csv": render_csv}
+    )
+    migrate.init_app(app, db)
+    jwt.init_app(app)
 
     # shell context for flask cli
-    app.shell_context_processor({"app": app, "db": DB})
+    app.shell_context_processor({"app": app, "db": db})
 
     # add elasticsearch as mentioned here
     # https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-xvi-full-text-search
@@ -51,14 +57,8 @@ def create_app():
         else None
     )
 
-    # Create endpoints
-    api = ApiMP(app, response_renderers={"text/csv": render_csv})
-    create_endpoints(api)
-
     # test to ensure the proper config was loaded
     # import sys
     # print(app.config, file=sys.stderr)
-
-    app.register_blueprint(auth_blueprint)
 
     return app

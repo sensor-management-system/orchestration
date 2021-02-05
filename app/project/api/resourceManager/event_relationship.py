@@ -1,5 +1,4 @@
 from flask_rest_jsonapi import ResourceRelationship
-
 from project.api.models.base_model import db
 from project.api.models.event import Event
 from project.api.schemas.event_schema import EventSchema
@@ -14,7 +13,7 @@ class EventRelationship(ResourceRelationship):
     """
 
     schema = EventSchema
-    # decorators = (token_required,)
+    decorators = (token_required,)
     data_layer = {
         "session": db.session,
         "model": Event,

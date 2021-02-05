@@ -1,4 +1,4 @@
-from project.frj_monkey_patching.resource import ResourceList
+from project.frj_csv_export.resource import ResourceList
 from project.api.models.base_model import db
 from project.api.models.device_property import DeviceProperty
 from project.api.schemas.device_property_schema import DevicePropertySchema
@@ -12,6 +12,5 @@ class DevicePropertyList(ResourceList):
     """
 
     schema = DevicePropertySchema
-    # decorators = (token_required,)
-    data_layer = {'session': db.session,
-                  'model': DeviceProperty}
+    decorators = (token_required,)
+    data_layer = {"session": db.session, "model": DeviceProperty}

@@ -17,6 +17,8 @@ services:
       - DATABASE_TEST_URL=postgres://postgres:postgres123456666666666666@db:5432/db_test
       - HTTP_ORIGINS=$HTTP_ORIGINS
       - ELASTICSEARCH_URL=http://smses01:9200
+      - WELL_KNOWN_URL=$WELL_KNOWN_URL
+      - OIDC_CLIENT_ID=$OIDC_CLIENT_ID
     ports:
       - 5000:5000
     networks:

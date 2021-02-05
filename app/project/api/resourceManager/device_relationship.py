@@ -1,5 +1,4 @@
 from flask_rest_jsonapi import ResourceRelationship
-
 from project.api.models.base_model import db
 from project.api.models.device import Device
 from project.api.schemas.device_schema import DeviceSchema
@@ -12,7 +11,7 @@ class DeviceRelationship(ResourceRelationship):
     create relationships, update relationships and delete
     relationships between Device and objects.
     """
+
     schema = DeviceSchema
-    # decorators = (token_required,)
-    data_layer = {'session': db.session,
-                  'model': Device}
+    decorators = (token_required,)
+    data_layer = {"session": db.session, "model": Device}

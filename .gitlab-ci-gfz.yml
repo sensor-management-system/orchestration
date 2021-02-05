@@ -71,6 +71,8 @@ deploy-gfz-image:
   variables:
     COMPOSE_PROJECT_NAME: ssmbackend
     HTTP_ORIGINS: ${STAGING_HTTP_ORIGINS}
+    WELL_KNOWN_URL: ${STAGING_OIDC_WELL_KNOWN_URL}
+    OIDC_CLIENT_ID: ${STAGING_OIDC_CLIENT_ID}
   before_script:
     - *docker_login_gitlab_registry
   script:
