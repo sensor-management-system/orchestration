@@ -30,13 +30,11 @@ def create_app():
     db.init_app(app)
     api.init_app(
         app,
-        Blueprint(
-            "api", __name__, url_prefix=base_url
-        ),
-        response_renderers={"text/csv": render_csv}
+        Blueprint("api", __name__, url_prefix=base_url),
+        response_renderers={"text/csv": render_csv},
     )
     migrate.init_app(app, db)
-    # jwt.init_app(app)
+    jwt.init_app(app)
 
     # instantiate minio client
     minio.init_app(app)
@@ -52,13 +50,8 @@ def create_app():
         else None
     )
 
-    # test to ensure the proper config was loaded
-    # import sys
-    # print(app.config, file=sys.stderr)
-
     # enable CORS
     # initialize cors with list of allowed origins
     CORS(app, origins=app.config["HTTP_ORIGINS"])
-
 
     return app

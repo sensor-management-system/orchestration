@@ -17,7 +17,7 @@ class UploadFilesWithMinio(ResourceList):
         """Create an object"""
         try:
             file = request.files["file"]
-            if file.filename == '':
+            if file.filename == "":
                 raise JsonApiException({"parameter": "file"}, "No selected file")
             if file and minio.allowed_file(file.filename):
                 try:
@@ -25,13 +25,20 @@ class UploadFilesWithMinio(ResourceList):
                     return response, 201
 
                 except MinioNotAvailableException as e:
-                    raise JsonApiException(str(e),
-                                           title="Connection to MinIO server could not be done")
+                    raise JsonApiException(
+                        str(e), title="Connection to MinIO server could not be done"
+                    )
             else:
-                raise JsonApiException({"error": f"Sorry, This File Type Is Not Permitted"},
-                                       status=406, title="Not Acceptable")
+                raise JsonApiException(
+                    {"error": f"Sorry, This File Type Is Not Permitted"},
+                    status=406,
+                    title="Not Acceptable",
+                )
 
         except BadRequestKeyError as err:
-            raise JsonApiException({"description": str(err.description)},
-                                   "There is no file found in request",
-                                   status=err.code, title=err.name)
+            raise JsonApiException(
+                {"description": str(err.description)},
+                "There is no file found in request",
+                status=err.code,
+                title=err.name,
+            )

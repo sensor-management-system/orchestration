@@ -17,8 +17,8 @@ def delete_attachments_in_minio_by_device_id(platform_id_intended_for_deletion):
     """
     attachments_related_to_platform = (
         db.session.query(PlatformAttachment)
-            .filter_by(platform_id=platform_id_intended_for_deletion)
-            .all()
+        .filter_by(platform_id=platform_id_intended_for_deletion)
+        .all()
     )
     for attachment in attachments_related_to_platform:
         minio.remove_an_object(attachment.url)

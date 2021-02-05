@@ -33,24 +33,32 @@ class ResourceMetaWithoutHeaderCheck(ResourceMetaBase):
     def __new__(cls, name, bases, d):
         """Constructor of a resource class"""
         rv = super(ResourceMetaWithoutHeaderCheck, cls).__new__(cls, name, bases, d)
-        if 'data_layer' in d:
-            if not isinstance(d['data_layer'], dict):
+        if "data_layer" in d:
+            if not isinstance(d["data_layer"], dict):
                 raise Exception(
-                    "You must provide a data layer information as dict in {}".format(cls.__name__))
+                    "You must provide a data layer information as dict in {}".format(
+                        cls.__name__
+                    )
+                )
 
-            if d['data_layer'].get('class') is not None \
-                    and BaseDataLayer not in inspect.getmro(d['data_layer']['class']):
+            if d["data_layer"].get(
+                "class"
+            ) is not None and BaseDataLayer not in inspect.getmro(
+                d["data_layer"]["class"]
+            ):
                 raise Exception(
-                    "You must provide a data layer class inherited from BaseDataLayer in {}"
-                        .format(cls.__name__))
+                    "You must provide a data layer class inherited from BaseDataLayer in {}".format(
+                        cls.__name__
+                    )
+                )
 
-            data_layer_cls = d['data_layer'].get('class', SqlalchemyDataLayer)
-            data_layer_kwargs = d['data_layer']
+            data_layer_cls = d["data_layer"].get("class", SqlalchemyDataLayer)
+            data_layer_kwargs = d["data_layer"]
             rv._data_layer = data_layer_cls(data_layer_kwargs)
 
         rv.decorators = ()
-        if 'decorators' in d:
-            rv.decorators += d['decorators']
+        if "decorators" in d:
+            rv.decorators += d["decorators"]
 
         return rv
 
