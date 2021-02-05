@@ -7,8 +7,9 @@ from flask_migrate import Migrate
 from project.api.models.base_model import db
 from project.api.token_checker import jwt
 from project.urls import api
-from project.api.upload_files import upload_blueprint
 from project.frj_csv_export.render_csv import render_csv
+
+from project.api import minio
 
 migrate = Migrate()
 base_url = os.getenv("URL_PREFIX", "/rdm/svm-api/v1")
@@ -35,7 +36,10 @@ def create_app():
         response_renderers={"text/csv": render_csv}
     )
     migrate.init_app(app, db)
-    jwt.init_app(app)
+    # jwt.init_app(app)
+
+    # instantiate minio client
+    minio.init_app(app)
 
     # shell context for flask cli
     app.shell_context_processor({"app": app, "db": db})
@@ -56,6 +60,5 @@ def create_app():
     # initialize cors with list of allowed origins
     CORS(app, origins=app.config["HTTP_ORIGINS"])
 
-    app.register_blueprint(upload_blueprint)
 
     return app

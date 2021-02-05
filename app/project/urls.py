@@ -30,6 +30,8 @@ from project.api.resourceManager import (
     ConfigurationDeviceRelationship,
 )
 
+from project.api.upload_files import UploadFilesWithMinio
+
 api = Api()
 
 api.route(Ping, "test_connection", "/ping")
@@ -243,3 +245,4 @@ api.route(
     "configuration_device",
     "/configuration-devices/<int:id>/relationships/device",
 )
+api.route(UploadFilesWithMinio, "upload_to_minio", "/upload")

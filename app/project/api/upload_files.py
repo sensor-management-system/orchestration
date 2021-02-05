@@ -1,39 +1,37 @@
-from flask import Blueprint, request
-from project.api.flask_minio import FlaskMinio, error_response
-from project.urls import base_url
+from flask import request
 
 from project.api import minio
+from project.frj_csv_export.resource import ResourceList
+from flask_rest_jsonapi.exceptions import JsonApiException, ObjectNotFound
+from werkzeug.exceptions import BadRequestKeyError
 
-upload_blueprint = Blueprint("upload", __name__)
+from project.api.flask_minio import MinioNotAvailableException
 
 
-@upload_blueprint.route(f"{base_url}/upload", methods=["GET", "POST"])
-def upload_file():
-    if request.method == "POST":
-        # check if the post request has a file
-        if "file" not in request.files:
-            response = error_response(404, "file", "No file found", None)
-            return response
-        file = request.files["file"]
-        # if user does not select file, browser also
-        # submit an empty part without filename
-        if file.filename == "":
-            response = error_response(
-                404, "file", "No file selected", "You didn't select file"
-            )
-            return response
-        if file:
-            uploaded_file = request.files["file"]
-            response = minio.upload_object(uploaded_file)
-
-            return response
-
-    return """
-    <!doctype html>
-    <title>Upload a File to Minio</title>
-    <h1>Upload your File</h1>
-    <form method=post enctype=multipart/form-data>
-      <input type=file name=file>
-      <input type=submit value=Upload>
-    </form>
+class UploadFilesWithMinio(ResourceList):
     """
+    This class allow client to ping the API.
+    """
+
+    def post(self, *args, **kwargs):
+        """Create an object"""
+        try:
+            file = request.files["file"]
+            if file.filename == '':
+                raise JsonApiException({"parameter": "file"}, "No selected file")
+            if file and minio.allowed_file(file.filename):
+                try:
+                    response = minio.upload_object(file)
+                    return response, 201
+
+                except MinioNotAvailableException as e:
+                    raise JsonApiException(str(e),
+                                           title="Connection to MinIO server could not be done")
+            else:
+                raise JsonApiException({"error": f"Sorry, This File Type Is Not Permitted"},
+                                       status=406, title="Not Acceptable")
+
+        except BadRequestKeyError as err:
+            raise JsonApiException({"description": str(err.description)},
+                                   "There is no file found in request",
+                                   status=err.code, title=err.name)

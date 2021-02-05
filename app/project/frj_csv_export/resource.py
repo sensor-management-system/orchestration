@@ -3,8 +3,12 @@
 """This module contains the logic of resource management
 Modifications: Adopted form Custom content negotiation #171 ( miLibris /
 flask-rest-jsonapi ) """
+import inspect
 
 from flask import request, url_for
+from flask.views import MethodViewType
+from flask_rest_jsonapi.data_layers.alchemy import SqlalchemyDataLayer
+from flask_rest_jsonapi.data_layers.base import BaseDataLayer
 from flask_rest_jsonapi.decorators import (
     check_method_requirements,
     jsonapi_exception_formatter,
@@ -21,6 +25,34 @@ from six import with_metaclass
 
 from .content import parse_json, render_json
 from .exceptions import InvalidAcceptType
+
+
+class ResourceMetaWithoutHeaderCheck(ResourceMetaBase):
+    """Meta class to initilize the data layer and decorators of a resource"""
+
+    def __new__(cls, name, bases, d):
+        """Constructor of a resource class"""
+        rv = super(ResourceMetaWithoutHeaderCheck, cls).__new__(cls, name, bases, d)
+        if 'data_layer' in d:
+            if not isinstance(d['data_layer'], dict):
+                raise Exception(
+                    "You must provide a data layer information as dict in {}".format(cls.__name__))
+
+            if d['data_layer'].get('class') is not None \
+                    and BaseDataLayer not in inspect.getmro(d['data_layer']['class']):
+                raise Exception(
+                    "You must provide a data layer class inherited from BaseDataLayer in {}"
+                        .format(cls.__name__))
+
+            data_layer_cls = d['data_layer'].get('class', SqlalchemyDataLayer)
+            data_layer_kwargs = d['data_layer']
+            rv._data_layer = data_layer_cls(data_layer_kwargs)
+
+        rv.decorators = ()
+        if 'decorators' in d:
+            rv.decorators += d['decorators']
+
+        return rv
 
 
 class Resource(ResourceBase):
@@ -81,7 +113,7 @@ class Resource(ResourceBase):
         return renderer(response)
 
 
-class ResourceList(with_metaclass(ResourceMetaBase, Resource)):
+class ResourceList(with_metaclass(ResourceMetaWithoutHeaderCheck, Resource)):
     """Base class of a resource list manager"""
 
     @check_method_requirements

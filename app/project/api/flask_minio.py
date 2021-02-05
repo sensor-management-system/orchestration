@@ -3,10 +3,11 @@ import os
 import time
 import uuid
 
-from flask import current_app, _app_ctx_stack
+from flask import current_app, _app_ctx_stack, make_response
 import minio
-from flask import jsonify, make_response
-from urllib3.exceptions import ResponseError
+from minio.error import S3Error
+from urllib3.exceptions import ResponseError, MaxRetryError
+from flask_rest_jsonapi.exceptions import JsonApiException
 
 
 class MinioNotAvailableException(Exception):
@@ -89,7 +90,47 @@ class FlaskMinio:
         """
         Set bucket policy to download only so that we can
         get a permanent url.
-        :param bucket_name:
+
+        :param bucket_name: a string However, only characters that are
+        valid in URLs should be used
+
+            :Example:
+                Download bucket policy
+                {
+                  "Version": "2012-10-17",
+                  "Statement": [
+                    {
+                      "Effect": "Allow",
+                      "Principal": {
+                        "AWS": [
+                          "*"
+                        ]
+                      },
+                      "Action": [
+                        "s3:GetBucketLocation",
+                        "s3:ListBucket"
+                      ],
+                      "Resource": [
+                        "arn:aws:s3:::sms"
+                      ]
+                    },
+                    {
+                      "Effect": "Allow",
+                      "Principal": {
+                        "AWS": [
+                          "*"
+                        ]
+                      },
+                      "Action": [
+                        "s3:GetObject"
+                      ],
+                      "Resource": [
+                        "arn:aws:s3:::sms/*"
+                      ]
+                    }
+                  ]
+                }
+
         """
         # download_only bucket policy.
         policy = {
@@ -100,8 +141,7 @@ class FlaskMinio:
                     "Principal": {"AWS": ["*"]},
                     "Action": [
                         "s3:GetBucketLocation",
-                        "s3:ListBucket",
-                        "s3:ListBucketMultipartUploads",
+                        "s3:ListBucket"
                     ],
                     "Resource": [f"arn:aws:s3:::{bucket_name}"],
                 },
@@ -110,11 +150,8 @@ class FlaskMinio:
                     "Principal": {"AWS": ["*"]},
                     "Action": [
                         "s3:GetObject",
-                        # "s3:PutObject",
-                        # "s3:DeleteObject",
-                        # "s3:ListMultipartUploadParts",
-                        # "s3:AbortMultipartUpload",
                     ],
+                    # allow to get all object under a bucket name
                     "Resource": [f"arn:aws:s3:::{bucket_name}/*"],
                 },
             ],
@@ -123,15 +160,21 @@ class FlaskMinio:
         self.connection.set_bucket_policy(bucket_name, json.dumps(policy))
 
     def allowed_file(self, filename):
+        """
+        Check if a file extension is allowed, which is part of the file name.
+
+        :param filename: a string
+        :return: a Boolean
+        """
         return ("." in filename and os.path.splitext(filename)[-1].lower() in
                 set(self.allowed_extensions)
                 )
 
     def upload_object(self, uploaded_file):
         """
-
-        :param uploaded_file:
-        :return:
+        Uploads a file as an object to the Minio Storage.
+        :param uploaded_file: a file to upload.
+        :return: jons:api response with a permanent url to reach that object.
         """
         size = os.fstat(uploaded_file.fileno()).st_size
         act_year_month = time.strftime("%Y-%m")
@@ -158,21 +201,16 @@ class FlaskMinio:
                         minio_endpoint, minio_bucket_name, ordered_filed
                     ),
                 }
-                response = custom_response(data, 201)
+                response = make_response(data, 201)
 
                 return response
-            else:
-                response = error_response(
-                    404,
-                    "file",
-                    "Format not allowed",
-                    "allowed extensions are :{}".format(self.allowed_extensions),
-                )
-                return response
-        except FileNotFoundError as e:
-            return custom_response(str(e), 500)
-        except Exception as e:
-            return custom_response(str(e), 500)
+
+        except S3Error as s3err:
+            raise JsonApiException({"error": s3err.message},
+                                   title=s3err.code)
+        except MaxRetryError as e:
+            self._exception_on_creating_client = e
+            raise MinioNotAvailableException(self._exception_on_creating_client)
 
     def remove_an_object(self, object_path):
         """
@@ -185,9 +223,9 @@ class FlaskMinio:
         )
         try:
             self.connection.remove_object(_bucket_name, _object_name)
-            return make_response("ok", 200)
+            return make_response(f"{_object_name} has been successfully removed")
         except ResponseError as err:
-            return custom_response(str(err), 500)
+            raise JsonApiException({'parameter': err})
 
     def extract_bucket_and_file_names_from_url(self, object_path):
         """
@@ -201,31 +239,3 @@ class FlaskMinio:
         _start, _minio_endpoint, rest = object_path.partition(minio_endpoint + "/")
         _bucket_name, _first_slash, _object_name = rest.partition("/")
         return _bucket_name, _object_name
-
-
-def custom_response(data, code):
-    response = make_response(
-        jsonify({"data": data, "jsonapi": {"version": "1.0"}}), code
-    )
-    response.headers["Content-Type"] = "application/vnd.api+json"
-    return response
-
-
-def error_response(code, parameter, title, detail=None):
-    response = make_response(
-        jsonify(
-            {
-                "errors": [
-                    {
-                        "status": code,
-                        "source": {"parameter": parameter},
-                        "title": title,
-                        "detail": detail,
-                    }
-                ],
-                "jsonapi": {"version": "1.0"},
-            }
-        )
-    )
-    response.headers["Content-Type"] = "application/vnd.api+json"
-    return response
