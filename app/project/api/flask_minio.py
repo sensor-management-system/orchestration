@@ -71,7 +71,7 @@ class FlaskMinio:
     def teardown(self, exception):
         ctx = _app_ctx_stack.top
         if hasattr(ctx, "minio"):
-            ctx.minio._http.clear()
+            ctx.minio = None
 
     @property
     def connection(self):
@@ -88,7 +88,7 @@ class FlaskMinio:
 
     def set_bucket_policy(self, bucket_name):
         """
-        Set bucket policy to download only so that we can
+        Set bucket policy to download only, so that we can
         get a permanent url.
 
         :param bucket_name: a string However, only characters that are
@@ -167,7 +167,7 @@ class FlaskMinio:
         :return: a Boolean
         """
         return ("." in filename and os.path.splitext(filename)[-1].lower() in
-                set(self.allowed_extensions)
+                self.allowed_extensions
                 )
 
     def upload_object(self, uploaded_file):
