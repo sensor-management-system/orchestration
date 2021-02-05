@@ -30,7 +30,11 @@ RUN apk add --no-cache --virtual .build-deps \
     python3-dev \
     musl-dev \
     postgresql-dev \
+    build-base \
+    libressl-dev \
+    libffi-dev \
     && pip install --upgrade pip \
+    && pip install --upgrade setuptools \
     && pip install --prefix /install --no-cache-dir -r /tmp/requirements.txt \
     && apk del --no-cache .build-deps
 
