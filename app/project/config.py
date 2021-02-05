@@ -24,7 +24,6 @@ class OidcJwksConfig(object):
         self.oidc_jwks_uri = requests.get(self.oidc_config["jwks_uri"], verify=False).json()
 
 
-
 class BaseConfig:
     """Base configuration"""
 
