@@ -73,7 +73,9 @@ export class Api {
 
   constructor (
     getIdToken: () => string | null,
-    smsBaseUrl: string | undefined = SMS_BASE_URL, cvBaseUrl: string | undefined = CV_BASE_URL) {
+    smsBaseUrl: string | undefined = SMS_BASE_URL,
+    cvBaseUrl: string | undefined = CV_BASE_URL
+  ) {
     // here we can set settings for all the sms api calls
     const smsConfig: AxiosRequestConfig = {
       // for the SMS Backend we need the explicit vnd.api+json
@@ -81,18 +83,19 @@ export class Api {
         'Content-Type': 'application/vnd.api+json'
       }
     }
-
+    // For the sms we also want to send the id token, if we currently
+    // have one in the store.
     this._contactApi = new ContactApi(
-      this.createAxios(smsBaseUrl, '/contacts', smsConfig), getIdToken
+      this.createAxios(smsBaseUrl, '/contacts', smsConfig, getIdToken)
     )
     this._platformApi = new PlatformApi(
-      this.createAxios(smsBaseUrl, '/platforms', smsConfig)
+      this.createAxios(smsBaseUrl, '/platforms', smsConfig, getIdToken)
     )
     this._deviceApi = new DeviceApi(
-      this.createAxios(smsBaseUrl, '/devices', smsConfig)
+      this.createAxios(smsBaseUrl, '/devices', smsConfig, getIdToken)
     )
     this._configurationApi = new ConfigurationApi(
-      this.createAxios(smsBaseUrl, '/configurations', smsConfig)
+      this.createAxios(smsBaseUrl, '/configurations', smsConfig, getIdToken)
     )
     this._configurationStatesApi = new ConfigurationStatusApi()
 
@@ -136,12 +139,28 @@ export class Api {
     this._projectApi = new ProjectApi()
   }
 
-  private createAxios (baseUrl: string | undefined, path: string, baseConfig: AxiosRequestConfig): AxiosInstance {
+  private createAxios (baseUrl: string | undefined, path: string, baseConfig: AxiosRequestConfig, getIdToken?: () => (string | null)): AxiosInstance {
     const config = {
       ...baseConfig,
       baseURL: baseUrl + path
     }
-    return axios.create(config)
+    const instance = axios.create(config)
+
+    // If we have a function to query our id tokens on the time of the request
+    // we want to use it here.
+    if (getIdToken) {
+      instance.interceptors.request.use((config) => {
+        const idToken = getIdToken()
+        // But it can be that we are not logged in, so that our idToken is null.
+        // So in this case, we don't send the id token with the request.
+        if (idToken) {
+          // But once we have it, we want to send it with.
+          config.headers.Authorization = 'Bearer ' + idToken
+        }
+        return config
+      })
+    }
+    return instance
   }
 
   get devices (): DeviceApi {

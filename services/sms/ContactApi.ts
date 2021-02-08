@@ -37,12 +37,10 @@ import { IPaginationLoader, FilteredPaginationedLoader } from '@/utils/Paginated
 
 export class ContactApi {
   private axiosApi: AxiosInstance
-  private getIdToken: () => string | null
   private serializer: ContactSerializer
 
-  constructor (axiosInstance: AxiosInstance, getIdToken: () => string | null) {
+  constructor (axiosInstance: AxiosInstance) {
     this.axiosApi = axiosInstance
-    this.getIdToken = getIdToken
     this.serializer = new ContactSerializer()
   }
 
@@ -58,19 +56,7 @@ export class ContactApi {
   }
 
   deleteById (id: string): Promise<void> {
-    let accessHeaders = {}
-    const token = this.getIdToken()
-    if (token) {
-      accessHeaders = {
-        Authorization: 'Bearer ' + token
-      }
-    }
-    return this.axiosApi.delete<string, void>(id,
-      {
-        headers: {
-          ...accessHeaders
-        }
-      })
+    return this.axiosApi.delete<string, void>(id)
   }
 
   save (contact: Contact) {
