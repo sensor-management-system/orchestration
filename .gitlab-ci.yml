@@ -46,9 +46,6 @@ test-image:
   stage: test
   image: $CONTAINER_TEST_IMAGE
   before_script:
-    - apk add --no-cache --update build-base libressl-dev  libffi-dev
-    - pip install --upgrade setuptools
-    - pip install cryptography
     - export APP_SETTINGS=project.config.TestingConfig
     - export DATABASE_TEST_URL=postgres://$POSTGRES_USER:@$POSTGRES_PASSWORD:5432/$POSTGRES_DB
     - export WELL_KNOWN_URL=https://webapp-stage.intranet.ufz.de/idp/oidc/v1/.well-known/openid-configuration
