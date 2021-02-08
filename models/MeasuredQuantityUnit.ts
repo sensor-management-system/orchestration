@@ -33,6 +33,7 @@ export interface IMeasuredQuantityUnit {
   id: string
   name: string
   uri: string
+  definition: string
   defaultLimitMin: string | null
   defaultLimitMax: string | null
   unitId: string
@@ -43,6 +44,7 @@ export class MeasuredQuantityUnit implements IMeasuredQuantityUnit {
   private _id: string = ''
   private _name: string = ''
   private _uri: string = ''
+  private _definition: string = ''
   private _defaultLimitMin: string | null = null
   private _defaultLimitMax: string | null = null
   private _unitId: string = ''
@@ -70,6 +72,14 @@ export class MeasuredQuantityUnit implements IMeasuredQuantityUnit {
 
   set uri (newUri: string) {
     this._uri = newUri
+  }
+
+  get definition (): string {
+    return this._definition
+  }
+
+  set definition (newDefinition: string) {
+    this._definition = newDefinition
   }
 
   get defaultLimitMin (): string | null {
@@ -104,11 +114,12 @@ export class MeasuredQuantityUnit implements IMeasuredQuantityUnit {
     this._measuredQuantityId = newUnitId
   }
 
-  static createWithData (id: string, name: string, uri: string, defaultLimitMin: string, defaultLimitMax: string, unitId: string, measuredQuantityId: string): MeasuredQuantityUnit {
+  static createWithData (id: string, name: string, uri: string, definition: string, defaultLimitMin: string, defaultLimitMax: string, unitId: string, measuredQuantityId: string): MeasuredQuantityUnit {
     const result = new MeasuredQuantityUnit()
     result.id = id
     result.name = name
     result.uri = uri
+    result.definition = definition
     result.defaultLimitMin = defaultLimitMin
     result.defaultLimitMax = defaultLimitMax
     result.unitId = unitId
@@ -122,6 +133,7 @@ export class MeasuredQuantityUnit implements IMeasuredQuantityUnit {
     newObject.id = someObject.id
     newObject.name = someObject.name
     newObject.uri = someObject.uri
+    newObject.definition = someObject.definition
     newObject.defaultLimitMin = someObject.defaultLimitMin
     newObject.defaultLimitMax = someObject.defaultLimitMax
     newObject.unitId = someObject.unitId

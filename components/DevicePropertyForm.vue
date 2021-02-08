@@ -46,34 +46,178 @@ permissions and limitations under the Licence.
         <v-combobox
           label="Compartment"
           clearable
-          :items="compartmentNames"
-          :value="valueCompartmentName"
+          :items="compartmentItems"
+          item-name="name"
+          :value="valueCompartmentItem"
           :readonly="readonly"
           :disabled="readonly"
-          @input="update('compartmentName', $event)"
-        />
+          @input="updateCompartment"
+        >
+          <template v-slot:append-outer>
+            <v-tooltip
+              v-if="itemHasDefinition(valueCompartmentItem)"
+              right
+            >
+              <template v-slot:activator="{ on, attrs }">
+                <v-icon
+                  color="primary"
+                  small
+                  v-bind="attrs"
+                  v-on="on"
+                >
+                  mdi-help-circle-outline
+                </v-icon>
+              </template>
+              <span>{{ valueCompartmentItem.definition }}</span>
+            </v-tooltip>
+          </template>
+          <template v-slot:item="data">
+            <template v-if="typeof data.item !== 'object'">
+              <v-list-item-content>{{ data.item }}</v-list-item-content>
+            </template>
+            <template v-else>
+              <v-list-item-content>
+                <v-list-item-title>
+                  {{ data.item.name }}
+                  <v-tooltip
+                    v-if="data.item.definition"
+                    bottom
+                  >
+                    <template v-slot:activator="{ on, attrs }">
+                      <v-icon
+                        color="primary"
+                        small
+                        v-bind="attrs"
+                        v-on="on"
+                      >
+                        mdi-help-circle-outline
+                      </v-icon>
+                    </template>
+                    <span>{{ data.item.definition }}</span>
+                  </v-tooltip>
+                </v-list-item-title>
+              </v-list-item-content>
+            </template>
+          </template>
+        </v-combobox>
       </v-col>
       <v-col cols="12" md="3">
         <v-combobox
           label="Sampling media"
           clearable
-          :items="samplingMediaNames"
-          :value="valueSamplingMediaName"
+          :items="samplingMediaItems"
+          item-text="name"
+          :value="valueSamplingMediaItem"
           :readonly="readonly"
           :disabled="readonly"
-          @input="update('samplingMediaName', $event)"
-        />
+          @input="updateSamplingMedia"
+        >
+          <template v-slot:append-outer>
+            <v-tooltip
+              v-if="itemHasDefinition(valueSamplingMediaItem)"
+              right
+            >
+              <template v-slot:activator="{ on, attrs }">
+                <v-icon
+                  color="primary"
+                  small
+                  v-bind="attrs"
+                  v-on="on"
+                >
+                  mdi-help-circle-outline
+                </v-icon>
+              </template>
+              <span>{{ valueSamplingMediaItem.definition }}</span>
+            </v-tooltip>
+          </template>
+          <template v-slot:item="data">
+            <template v-if="typeof data.item !== 'object'">
+              <v-list-item-content>{{ data.item }}</v-list-item-content>
+            </template>
+            <template v-else>
+              <v-list-item-content>
+                <v-list-item-title>
+                  {{ data.item.name }}
+                  <v-tooltip
+                    v-if="data.item.definition"
+                    bottom
+                  >
+                    <template v-slot:activator="{ on, attrs }">
+                      <v-icon
+                        color="primary"
+                        small
+                        v-bind="attrs"
+                        v-on="on"
+                      >
+                        mdi-help-circle-outline
+                      </v-icon>
+                    </template>
+                    <span>{{ data.item.definition }}</span>
+                  </v-tooltip>
+                </v-list-item-title>
+              </v-list-item-content>
+            </template>
+          </template>
+        </v-combobox>
       </v-col>
       <v-col cols="12" md="3">
         <v-combobox
           label="Measured Quantity"
           clearable
-          :items="propertyNames"
-          :value="valuePropertyName"
+          :items="propertyItems"
+          item-text="name"
+          :value="valuePropertyItem"
           :readonly="readonly"
           :disabled="readonly"
-          @input="update('propertyName', $event)"
-        />
+          @input="updateProperty"
+        >
+          <template v-slot:append-outer>
+            <v-tooltip
+              v-if="itemHasDefinition(valuePropertyItem)"
+              right
+            >
+              <template v-slot:activator="{ on, attrs }">
+                <v-icon
+                  color="primary"
+                  small
+                  v-bind="attrs"
+                  v-on="on"
+                >
+                  mdi-help-circle-outline
+                </v-icon>
+              </template>
+              <span>{{ valuePropertyItem.definition }}</span>
+            </v-tooltip>
+          </template>
+          <template v-slot:item="data">
+            <template v-if="typeof data.item !== 'object'">
+              <v-list-item-content>{{ data.item }}</v-list-item-content>
+            </template>
+            <template v-else>
+              <v-list-item-content>
+                <v-list-item-title>
+                  {{ data.item.name }}
+                  <v-tooltip
+                    v-if="data.item.definition"
+                    bottom
+                  >
+                    <template v-slot:activator="{ on, attrs }">
+                      <v-icon
+                        color="primary"
+                        small
+                        v-bind="attrs"
+                        v-on="on"
+                      >
+                        mdi-help-circle-outline
+                      </v-icon>
+                    </template>
+                    <span>{{ data.item.definition }}</span>
+                  </v-tooltip>
+                </v-list-item-title>
+              </v-list-item-content>
+            </template>
+          </template>
+        </v-combobox>
       </v-col>
     </v-row>
     <v-row>
@@ -81,12 +225,60 @@ permissions and limitations under the Licence.
         <v-combobox
           label="Unit"
           clearable
-          :items="measuredQuantityUnitComboboxValues"
-          :value="valueUnitName"
+          :items="measuredQuantityUnitItems"
+          item-text="name"
+          :value="valueUnitItem"
           :readonly="readonly"
           :disabled="readonly"
-          @input="updateUnit($event)"
-        />
+          @input="updateUnit"
+        >
+          <template v-slot:append-outer>
+            <v-tooltip
+              v-if="itemHasDefinition(valueUnitItem)"
+              right
+            >
+              <template v-slot:activator="{ on, attrs }">
+                <v-icon
+                  color="primary"
+                  small
+                  v-bind="attrs"
+                  v-on="on"
+                >
+                  mdi-help-circle-outline
+                </v-icon>
+              </template>
+              <span>{{ valueUnitItem.definition }}</span>
+            </v-tooltip>
+          </template>
+          <template v-slot:item="data">
+            <template v-if="typeof data.item !== 'object'">
+              <v-list-item-content>{{ data.item }}</v-list-item-content>
+            </template>
+            <template v-else>
+              <v-list-item-content>
+                <v-list-item-title>
+                  {{ data.item.name }}
+                  <v-tooltip
+                    v-if="data.item.definition"
+                    bottom
+                  >
+                    <template v-slot:activator="{ on, attrs }">
+                      <v-icon
+                        color="primary"
+                        small
+                        v-bind="attrs"
+                        v-on="on"
+                      >
+                        mdi-help-circle-outline
+                      </v-icon>
+                    </template>
+                    <span>{{ data.item.definition }}</span>
+                  </v-tooltip>
+                </v-list-item-title>
+              </v-list-item-content>
+            </template>
+          </template>
+        </v-combobox>
       </v-col>
       <v-col cols="12" md="3">
         <v-text-field
@@ -150,12 +342,60 @@ permissions and limitations under the Licence.
       <v-col cols="12" md="3">
         <v-combobox
           label="Unit of Resolution"
-          :items="unitNames"
-          :value="valueResolutionUnitName"
+          :items="unitItems"
+          item-text="name"
+          :value="valueResolutionUnitItem"
           :readonly="readonly"
           :disabled="readonly"
-          @input="update('resolutionUnitName', $event)"
-        />
+          @input="updateResolutionUnit"
+        >
+          <template v-slot:append-outer>
+            <v-tooltip
+              v-if="itemHasDefinition(valueResolutionUnitItem)"
+              right
+            >
+              <template v-slot:activator="{ on, attrs }">
+                <v-icon
+                  color="primary"
+                  small
+                  v-bind="attrs"
+                  v-on="on"
+                >
+                  mdi-help-circle-outline
+                </v-icon>
+              </template>
+              <span>{{ valueResolutionUnitItem.definition }}</span>
+            </v-tooltip>
+          </template>
+          <template v-slot:item="data">
+            <template v-if="typeof data.item !== 'object'">
+              <v-list-item-content>{{ data.item }}</v-list-item-content>
+            </template>
+            <template v-else>
+              <v-list-item-content>
+                <v-list-item-title>
+                  {{ data.item.name }}
+                  <v-tooltip
+                    v-if="data.item.definition"
+                    bottom
+                  >
+                    <template v-slot:activator="{ on, attrs }">
+                      <v-icon
+                        color="primary"
+                        small
+                        v-bind="attrs"
+                        v-on="on"
+                      >
+                        mdi-help-circle-outline
+                      </v-icon>
+                    </template>
+                    <span>{{ data.item.definition }}</span>
+                  </v-tooltip>
+                </v-list-item-title>
+              </v-list-item-content>
+            </template>
+          </template>
+        </v-combobox>
       </v-col>
     </v-row>
   </div>
@@ -181,10 +421,16 @@ interface INameAndUri {
   uri: string
 }
 
-interface MeasuredQuantityUnitComboboxValue {
-  text: string
-  value: MeasuredQuantityUnit
+interface ICvComboboxItem {
+  uri: string
+  name: string
+  definition: string
 }
+
+type CompartmentComboboxValue = Compartment | string | undefined
+type SamplingMediaComboboxValue = SamplingMedia | string | undefined
+type PropertyComboboxValue = Property | string | undefined
+type UnitComboboxValue = MeasuredQuantityUnit | string | undefined
 
 /**
  * A class component that renders a form for a device property
@@ -269,7 +515,7 @@ export default class DevicePropertyForm extends Vue {
    *
    * @param {string} name - the name of the dictionary to look in
    * @param {string} value - the value to look the URI for
-   * @return {string} the URI or an empty string
+   * @returns {string} the URI or an empty string
    */
   private getUriByValue (name: string, value: string): string {
     let valueToSet = ''
@@ -310,29 +556,169 @@ export default class DevicePropertyForm extends Vue {
   }
 
   /**
-   * updates the unit property
+   * updates the compartment
    *
-   * @param {MeasuredQuantityUnitComboboxValue} unitObject - an object as provided by the combobox
+   * @param {CompartmentComboboxValue} value - an object as provided by the combobox
    * @fires DevicePropertyForm#input
    */
-  updateUnit (unitObject: MeasuredQuantityUnitComboboxValue | undefined): void {
+  updateCompartment (value: CompartmentComboboxValue): void {
     const newObj: DeviceProperty = DeviceProperty.createFromObject(this.value)
 
-    if (unitObject) {
-      newObj.unitName = unitObject.text
-      // Note: although we display a list of measuredQuantityUnits, the
-      // actual URI to be saved is the URI of the original unit
-      newObj.unitUri = this.getUriByValue('unitName', unitObject.text)
-      // if the unit has numerical default values, apply them to measuringRange min and max
-      if (unitObject.value.defaultLimitMin) {
-        newObj.measuringRange.min = parseFloatOrNull(unitObject.value.defaultLimitMin)
+    if (value) {
+      if (typeof value === 'string') {
+        newObj.compartmentName = value
+        newObj.compartmentUri = this.getUriByValue('compartmentName', value)
+      } else {
+        newObj.compartmentName = value.name
+        newObj.compartmentUri = value.uri
       }
-      if (unitObject.value.defaultLimitMax) {
-        newObj.measuringRange.max = parseFloatOrNull(unitObject.value.defaultLimitMax)
+    } else {
+      newObj.compartmentName = ''
+      newObj.compartmentUri = ''
+    }
+    if (this.value.compartmentUri !== newObj.compartmentUri) {
+      newObj.samplingMediaName = ''
+      newObj.samplingMediaUri = ''
+      newObj.propertyName = ''
+      newObj.propertyUri = ''
+      newObj.unitName = ''
+      newObj.unitUri = ''
+    }
+    /**
+     * input event
+     * @event DevicePropertyForm#input
+     * @type {DeviceProperty}
+     */
+    this.$emit('input', newObj)
+  }
+
+  /**
+   * updates the sampling media
+   *
+   * @param {SamplingMediaComboboxValue} value - an object as provided by the combobox
+   * @fires DevicePropertyForm#input
+   */
+  updateSamplingMedia (value: SamplingMediaComboboxValue): void {
+    const newObj: DeviceProperty = DeviceProperty.createFromObject(this.value)
+
+    if (value) {
+      if (typeof value === 'string') {
+        newObj.samplingMediaName = value
+        newObj.samplingMediaUri = this.getUriByValue('samplingMediaName', value)
+      } else {
+        newObj.samplingMediaName = value.name
+        newObj.samplingMediaUri = value.uri
+      }
+    } else {
+      newObj.samplingMediaName = ''
+      newObj.samplingMediaUri = ''
+    }
+    if (this.value.samplingMediaUri !== newObj.samplingMediaUri) {
+      newObj.propertyName = ''
+      newObj.propertyUri = ''
+      newObj.unitName = ''
+      newObj.unitUri = ''
+    }
+    /**
+     * input event
+     * @event DevicePropertyForm#input
+     * @type {DeviceProperty}
+     */
+    this.$emit('input', newObj)
+  }
+
+  /**
+   * updates the property (measured quantity)
+   *
+   * @param {PropertyComboboxValue} value - an object as provided by the combobox
+   * @fires DevicePropertyForm#input
+   */
+  updateProperty (value: PropertyComboboxValue): void {
+    const newObj: DeviceProperty = DeviceProperty.createFromObject(this.value)
+
+    if (value) {
+      if (typeof value === 'string') {
+        newObj.propertyName = value
+        newObj.propertyUri = this.getUriByValue('propertyName', value)
+      } else {
+        newObj.propertyName = value.name
+        newObj.propertyUri = value.uri
+      }
+    } else {
+      newObj.propertyName = ''
+      newObj.propertyUri = ''
+    }
+    if (this.value.propertyUri !== newObj.propertyUri) {
+      newObj.unitName = ''
+      newObj.unitUri = ''
+    }
+    /**
+     * input event
+     * @event DevicePropertyForm#input
+     * @type {DeviceProperty}
+     */
+    this.$emit('input', newObj)
+  }
+
+  /**
+   * updates the unit
+   *
+   * Note: although we display a list of measuredQuantityUnits, the actual URI
+   * to be saved is the URI of the original unit
+   *
+   * @param {UnitComboboxValue} value - an object as provided by the combobox
+   * @fires DevicePropertyForm#input
+   */
+  updateUnit (value: UnitComboboxValue): void {
+    const newObj: DeviceProperty = DeviceProperty.createFromObject(this.value)
+
+    if (value) {
+      if (typeof value === 'string') {
+        newObj.unitName = value
+        newObj.unitUri = this.getUriByValue('unitName', value)
+      } else {
+        newObj.unitName = value.name
+        newObj.unitUri = this.getUriByValue('unitName', value.name)
+        // if the unit has numerical default values, apply them to measuringRange min and max
+        if (value.defaultLimitMin) {
+          newObj.measuringRange.min = parseFloatOrNull(value.defaultLimitMin)
+        }
+        if (value.defaultLimitMax) {
+          newObj.measuringRange.max = parseFloatOrNull(value.defaultLimitMax)
+        }
       }
     } else {
       newObj.unitName = ''
       newObj.unitUri = ''
+    }
+    /**
+     * input event
+     * @event DevicePropertyForm#input
+     * @type {DeviceProperty}
+     */
+    this.$emit('input', newObj)
+  }
+
+  /**
+   * updates the resolutionUnit
+   *
+   * @param {UnitComboboxValue} value - an object as provided by the combobox
+   * @fires DevicePropertyForm#input
+   */
+  updateResolutionUnit (value: UnitComboboxValue): void {
+    const newObj: DeviceProperty = DeviceProperty.createFromObject(this.value)
+
+    if (value) {
+      if (typeof value === 'string') {
+        newObj.resolutionUnitName = value
+        newObj.resolutionUnitUri = this.getUriByValue('unitName', value)
+      } else {
+        newObj.resolutionUnitName = value.name
+        newObj.resolutionUnitUri = value.uri
+      }
+    } else {
+      newObj.resolutionUnitName = ''
+      newObj.resolutionUnitUri = ''
     }
     /**
      * input event
@@ -356,36 +742,6 @@ export default class DevicePropertyForm extends Vue {
       case 'label':
         newObj.label = value
         break
-      case 'compartmentName':
-        newObj.compartmentName = value
-        newObj.compartmentUri = this.getUriByValue('compartmentName', value)
-        if (this.value.compartmentUri !== newObj.compartmentUri) {
-          newObj.samplingMediaName = ''
-          newObj.samplingMediaUri = ''
-          newObj.propertyName = ''
-          newObj.propertyUri = ''
-          newObj.unitName = ''
-          newObj.unitUri = ''
-        }
-        break
-      case 'samplingMediaName':
-        newObj.samplingMediaName = value
-        newObj.samplingMediaUri = this.getUriByValue('samplingMediaName', value)
-        if (this.value.samplingMediaUri !== newObj.samplingMediaUri) {
-          newObj.propertyName = ''
-          newObj.propertyUri = ''
-          newObj.unitName = ''
-          newObj.unitUri = ''
-        }
-        break
-      case 'propertyName':
-        newObj.propertyName = value
-        newObj.propertyUri = this.getUriByValue('propertyName', value)
-        if (this.value.propertyUri !== newObj.propertyUri) {
-          newObj.unitName = ''
-          newObj.unitUri = ''
-        }
-        break
       case 'measuringRange.min':
         newObj.measuringRange.min = parseFloatOrNull(value)
         break
@@ -401,10 +757,6 @@ export default class DevicePropertyForm extends Vue {
       case 'resolution':
         newObj.resolution = parseFloatOrNull(value)
         break
-      case 'resolutionUnitName':
-        newObj.resolutionUnitName = value
-        newObj.resolutionUnitUri = this.getUriByValue('unitName', value)
-        break
       default:
         throw new TypeError('key ' + key + ' is not valid')
     }
@@ -418,133 +770,214 @@ export default class DevicePropertyForm extends Vue {
   }
 
   /**
-   * return a list of compartment names
+   * return a list of compartments
    *
-   * @return {string[]} list of compartment names
+   * @returns {Compartment[]} list of compartments
    */
-  get compartmentNames () : string[] {
-    return this.compartments.map(c => c.name)
+  get compartmentItems () : Compartment[] {
+    return this.compartments
   }
 
   /**
-   * returns the name of a compartment based on the compartment URI
+   * returns an item to be used as the value of a combobox
    *
-   * @return {string} the name of the compartment
+   * Checks whether value.propertyName and value.propertyUri can be found in
+   * the list of CV properties. Returns the found property, otherwise
+   * constructs one from the name and the uri. Returns null if both fields are
+   * empty.
+   *
+   * @returns {ICvComboboxItem|null} the property, a constructed one or null
    */
-  get valueCompartmentName (): string {
-    const compartmentIndex = this.compartments.findIndex(c => c.uri === this.value.compartmentUri)
-    if (compartmentIndex > -1) {
-      return this.compartments[compartmentIndex].name
+  get valueCompartmentItem (): ICvComboboxItem | null {
+    if (!this.value.compartmentName && !this.value.compartmentUri) {
+      return null
     }
-    return this.value.compartmentName
-  }
-
-  /**
-   * returns a list of unit names
-   *
-   * @return {string[]} list of unit names
-   */
-  get unitNames (): string[] {
-    return this.units.map(u => u.name)
-  }
-
-  /**
-   * returns a list of unit objects suitable for the combobox
-   *
-   * @return {MeasuredQuantityUnitComboboxValue[]} list of units
-   */
-  get measuredQuantityUnitComboboxValues (): MeasuredQuantityUnitComboboxValue[] {
-    // restrict the list of measuredQuantityUnits based on the choosen property
-    return this.measuredQuantityUnits.filter(u => this.checkUriEndsWithId(this.value.propertyUri, u.measuredQuantityId)).map((u) => {
-      return {
-        text: u.name,
-        value: u
-      }
-    }).sort()
-  }
-
-  private checkUriEndsWithId (uri: string, id: string) {
-    return uri.match(new RegExp('^.+/' + id + '/?$')) !== null
-  }
-
-  /**
-   * returns the name of a unit based on the unit URI
-   *
-   * @return {string} the name of the unit
-   */
-  get valueUnitName (): string {
-    const unitIndex = this.units.findIndex(u => u.uri === this.value.unitUri)
-    if (unitIndex > -1) {
-      return this.units[unitIndex].name
+    const compartment = this.compartments.find(c => c.uri === this.value.compartmentUri)
+    if (compartment) {
+      return compartment
     }
-    return this.value.unitName
-  }
-
-  /**
-   * returns the name of a unit based on the unit URI
-   *
-   * @return {string} the name of the unit
-   */
-  get valueResolutionUnitName (): string {
-    const unitIndex = this.units.findIndex(u => u.uri === this.value.resolutionUnitUri)
-    if (unitIndex > -1) {
-      return this.units[unitIndex].name
+    return {
+      name: this.value.compartmentName,
+      uri: this.value.compartmentUri,
+      definition: ''
     }
-    return this.value.resolutionUnitName
   }
 
   /**
-   * returns a list of samplingMedia names
+   * returns a list of sampling medias
    *
-   * @return {string[]} list of samplingMedia names
+   * When the compartment exists, restricts the list of sampling medias to
+   * those that have a relation to the selected compartment
+   *
+   * @returns {SamplingMedia[]} list of samplingMedia names
    */
-  get samplingMediaNames (): string[] {
+  get samplingMediaItems (): SamplingMedia[] {
     let samplingMedias = this.samplingMedias
     // if a compartment is choosen, restrict the list of samplingMedias
     if (this.value.compartmentUri !== '') {
       samplingMedias = samplingMedias.filter(s => s.compartmentId === '' || this.checkUriEndsWithId(this.value.compartmentUri, s.compartmentId))
     }
-    return samplingMedias.map(s => s.name)
+    return samplingMedias
   }
 
   /**
-   * returns the name of a samplingMedia based on the samplingMedia URI
+   * returns an item to be used as the value of a combobox
    *
-   * @return {string} the name of the samplingMedia
+   * Checks whether value.propertyName and value.propertyUri can be found in
+   * the list of CV properties. Returns the found property, otherwise
+   * constructs one from the name and the uri. Returns null if both fields are
+   * empty.
+   *
+   * @returns {ICvComboboxItem|null} the property, a constructed one or null
    */
-  get valueSamplingMediaName (): string {
-    const samplingMediaIndex = this.samplingMedias.findIndex(s => s.uri === this.value.samplingMediaUri)
-    if (samplingMediaIndex > -1) {
-      return this.samplingMedias[samplingMediaIndex].name
+  get valueSamplingMediaItem (): ICvComboboxItem | null {
+    if (!this.value.samplingMediaName && !this.value.samplingMediaUri) {
+      return null
     }
-    return this.value.samplingMediaName
+    const samplingMedia = this.samplingMedias.find(m => m.uri === this.value.samplingMediaUri)
+    if (samplingMedia) {
+      return samplingMedia
+    }
+    return {
+      name: this.value.samplingMediaName,
+      uri: this.value.samplingMediaUri,
+      definition: ''
+    }
   }
 
   /**
-   * returns a list of property names
+   * returns a list of properties
    *
-   * @return {string[]} list of property names
+   * When the samplingMedia exists, restricts the list of properties to those
+   * that have a relation to the selected samplingMedia
+   *
+   * @returns {Property[]} list of properties
    */
-  get propertyNames (): string[] {
+  get propertyItems (): Property[] {
     let properties = this.properties
     // if a samplingMedia is choosen, restrict the list of properties
     if (this.value.samplingMediaUri !== '') {
       properties = properties.filter(s => s.samplingMediaId === '' || this.checkUriEndsWithId(this.value.samplingMediaUri, s.samplingMediaId))
     }
-    return properties.map(p => p.name)
+    return properties
   }
 
   /**
-   * returns the name of a property based on the property URI
+   * returns an item to be used as the value of a combobox
    *
-   * @return {string} the name of the property
+   * Checks whether value.propertyName and value.propertyUri can be found in
+   * the list of CV properties. Returns the found property, otherwise
+   * constructs one from the name and the uri. Returns null if both fields are
+   * empty.
+   *
+   * @returns {ICvComboboxItem|null} the property, a constructed one or null
    */
-  get valuePropertyName (): string {
-    const propertyIndex = this.properties.findIndex(p => p.uri === this.value.propertyUri)
-    if (propertyIndex > -1) {
-      return this.properties[propertyIndex].name
+  get valuePropertyItem (): ICvComboboxItem | null {
+    if (!this.value.propertyName && !this.value.propertyUri) {
+      return null
     }
-    return this.value.propertyName
+    const property = this.properties.find(p => p.uri === this.value.propertyUri)
+    if (property) {
+      return property
+    }
+    return {
+      name: this.value.propertyName,
+      uri: this.value.propertyUri,
+      definition: ''
+    }
+  }
+
+  /**
+   * returns a list of unit objects
+   *
+   * @returns {Unit[]} list of units
+   */
+  get unitItems (): Unit[] {
+    // restrict the list of measuredQuantityUnits based on the choosen property
+    return this.units
+  }
+
+  /**
+   * returns a list of unit objects
+   *
+   * When the property exists, restricts the list of units to those that have a
+   * relation to the selected property
+   *
+   * @returns {MeasuredQuantityUnit[]} list of units
+   */
+  get measuredQuantityUnitItems (): MeasuredQuantityUnit[] {
+    // restrict the list of measuredQuantityUnits based on the choosen property
+    return this.measuredQuantityUnits.filter(u => this.checkUriEndsWithId(this.value.propertyUri, u.measuredQuantityId))
+  }
+
+  /**
+   * returns an item to be used as the value of a combobox
+   *
+   * Checks whether value.unitName and value.unitUri can be found in the list
+   * of CV units. Returns the found unit, otherwise constructs one from the
+   * name and the uri. Returns null if both fields are empty.
+   *
+   * @returns {ICvComboboxItem|null} the unit, a constructed one or null
+   */
+  get valueUnitItem (): ICvComboboxItem | null {
+    if (!this.value.unitName && !this.value.unitUri) {
+      return null
+    }
+    const unit = this.units.find(u => u.uri === this.value.unitUri)
+    if (unit) {
+      return unit
+    }
+    return {
+      name: this.value.unitName,
+      uri: this.value.unitUri,
+      definition: ''
+    }
+  }
+
+  /**
+   * returns an item to be used as the value of a combobox
+   *
+   * Checks whether value.resolutionUnitName and value.resolutionUnitUri can be
+   * found in the list of CV units. Returns the found unit, otherwise
+   * constructs one from the name and the uri. Returns null if both fields are
+   * empty.
+   *
+   * @returns {ICvComboboxItem|null} the unit, a constructed one or null
+   */
+  get valueResolutionUnitItem (): ICvComboboxItem | null {
+    if (!this.value.resolutionUnitName && !this.value.resolutionUnitUri) {
+      return null
+    }
+    const unit = this.units.find(u => u.uri === this.value.resolutionUnitUri)
+    if (unit) {
+      return unit
+    }
+    return {
+      name: this.value.resolutionUnitName,
+      uri: this.value.resolutionUnitUri,
+      definition: ''
+    }
+  }
+
+  /**
+   * checks if an URI ends with a specific id
+   *
+   * @param {string} uri - the URI to check the id for
+   * @param {string} id - the id
+   * @returns {boolean} returns true when the id was found, otherwise false
+   */
+  private checkUriEndsWithId (uri: string, id: string): boolean {
+    return uri.match(new RegExp('^.+/' + id + '/?$')) !== null
+  }
+
+  /**
+   * checks wheter the item has a non-empty definition property
+   *
+   * @param {[TODO:type]} item - the item to check for
+   * @returns {boolean} returns true when the definition property exists and is not falsy
+   */
+  itemHasDefinition (item: { definition?: string }): boolean {
+    return item && !!item.definition
   }
 }
 </script>

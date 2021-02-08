@@ -42,8 +42,9 @@ export class SamplingMediaSerializer {
     const id = jsonApiData.id.toString()
     const name = jsonApiData.attributes.term
     const url = jsonApiData.links.self
+    const definition = jsonApiData.attributes.definition
     const compartmentId = (jsonApiData.relationships.compartment as IJsonApiTypeIdData).data.id
 
-    return SamplingMedia.createWithData(id, name, url, compartmentId)
+    return SamplingMedia.createWithData(id, name, url, definition, compartmentId)
   }
 }

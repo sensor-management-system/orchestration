@@ -104,7 +104,7 @@ describe('MeasuredQuantityUnitSerializer', () => {
             id: '61',
             attributes: {
               term: 'mg/l',
-              definition: null,
+              definition: 'Unit 1',
               provenance: 'MILLIGRAMS_PER_LITER',
               provenance_uri: null,
               category: null,
@@ -120,7 +120,7 @@ describe('MeasuredQuantityUnitSerializer', () => {
             id: '67',
             attributes: {
               term: 'µg/l',
-              definition: null,
+              definition: 'Unit 2',
               provenance: 'MICROGRAMS_PER_LITER',
               provenance_uri: null,
               category: null,
@@ -144,6 +144,7 @@ describe('MeasuredQuantityUnitSerializer', () => {
         id: '1',
         name: 'mg/l',
         uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/measuredquantityunits/1/',
+        definition: 'Unit 1',
         defaultLimitMin: '0.01',
         defaultLimitMax: '100',
         unitId: '61',
@@ -154,6 +155,7 @@ describe('MeasuredQuantityUnitSerializer', () => {
         id: '2',
         name: 'µg/l',
         uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/measuredquantityunits/2/',
+        definition: 'Unit 2',
         defaultLimitMin: '0.01',
         defaultLimitMax: '100',
         unitId: '67',

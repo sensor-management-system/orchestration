@@ -87,25 +87,25 @@ describe('DevicePropertyExpansionPanels', () => {
           })
         ] as DeviceProperty[],
         compartments: [
-          Compartment.createWithData('1', 'bar', 'http://foo/compartment/1'),
-          Compartment.createWithData('2', 'compartment2', 'http://foo/compartment/2')
-        ],
+          Compartment.createWithData('1', 'bar', 'http://foo/compartment/1', 'foo'),
+          Compartment.createWithData('2', 'foo', 'http://foo/compartment/2', 'bar')
+        ] as Compartment[],
         samplingMedias: [
-          SamplingMedia.createWithData('1', 'water', 'http://foo/samplingMedia/1', '5'),
-          SamplingMedia.createWithData('2', 'media2', 'http://foo/samplingMedia/2', '2')
-        ],
+          SamplingMedia.createWithData('1', 'water', 'http://foo/samplingMedia/1', 'foo', '5'),
+          SamplingMedia.createWithData('2', 'media2', 'http://foo/samplingMedia/2', 'bar', '2')
+        ] as SamplingMedia[],
         properties: [
-          Property.createWithData('1', 'foo.bar', 'http://foo/property/1', '8'),
-          Property.createWithData('2', 'property2', 'http://foo/property/2', '3')
-        ],
+          Property.createWithData('1', 'foo.bar', 'http://foo/property/1', 'foo', '8'),
+          Property.createWithData('2', 'property2', 'http://foo/property/2', 'bar', '3')
+        ] as Property[],
         units: [
-          Unit.createWithData('1', 'mm', 'http://foo/unit/1'),
-          Unit.createWithData('2', 's', 'http://foo/unit/2')
-        ],
+          Unit.createWithData('1', 'mm', 'http://foo/unit/1', 'foo'),
+          Unit.createWithData('2', 's', 'http://foo/unit/2', 'bar')
+        ] as Unit[],
         measuredQuantityUnits: [
-          MeasuredQuantityUnit.createWithData('1', 'mm', 'http://foo/measuredquantityunits/1', '0.01', '10', '1', '1'),
-          MeasuredQuantityUnit.createWithData('2', 's', 'http://foo/measuredquantityunits/2', '0.001', '60', '2', '1')
-        ]
+          MeasuredQuantityUnit.createWithData('1', 'mm', 'http://foo/measuredquantityunits/1', 'foo', '0.01', '10', '1', '1'),
+          MeasuredQuantityUnit.createWithData('2', 's', 'http://foo/measuredquantityunits/2', 'bar', '0.001', '60', '2', '1')
+        ] as MeasuredQuantityUnit[]
       }
     })
   })

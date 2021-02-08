@@ -42,7 +42,8 @@ export class CompartmentSerializer {
     const id = jsonApiData.id.toString()
     const name = jsonApiData.attributes.term
     const url = jsonApiData.links.self
+    const definition = jsonApiData.attributes.definition
 
-    return Compartment.createWithData(id, name, url)
+    return Compartment.createWithData(id, name, url, definition)
   }
 }
