@@ -71,7 +71,9 @@ export class Api {
 
   private readonly _projectApi: ProjectApi
 
-  constructor (smsBaseUrl: string | undefined = SMS_BASE_URL, cvBaseUrl: string | undefined = CV_BASE_URL) {
+  constructor (
+    getIdToken: () => string | null,
+    smsBaseUrl: string | undefined = SMS_BASE_URL, cvBaseUrl: string | undefined = CV_BASE_URL) {
     // here we can set settings for all the sms api calls
     const smsConfig: AxiosRequestConfig = {
       // for the SMS Backend we need the explicit vnd.api+json
@@ -81,7 +83,7 @@ export class Api {
     }
 
     this._contactApi = new ContactApi(
-      this.createAxios(smsBaseUrl, '/contacts', smsConfig)
+      this.createAxios(smsBaseUrl, '/contacts', smsConfig), getIdToken
     )
     this._platformApi = new PlatformApi(
       this.createAxios(smsBaseUrl, '/platforms', smsConfig)
