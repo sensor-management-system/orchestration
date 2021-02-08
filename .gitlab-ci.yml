@@ -12,8 +12,6 @@ build-image:
   image:
     name: gcr.io/kaniko-project/executor:debug
     entrypoint: [ "" ]
-  before_script:
-    - apk add --no-cache --update gcc python3-dev musl-dev postgresql-dev libressl-dev musl-dev cargo libffi-dev
   script:
     - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
     - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --destination $CONTAINER_TEST_IMAGE
@@ -58,8 +56,6 @@ release-image:
   image:
     name: gcr.io/kaniko-project/executor:debug
     entrypoint: [ "" ]
-  before_script:
-    - apk add --no-cache --update gcc python3-dev musl-dev postgresql-dev libressl-dev musl-dev cargo libffi-dev
   script:
     - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
     - echo "FROM  ${CONTAINER_TEST_IMAGE}" | /kaniko/executor --context $CI_PROJECT_DIR --dockerfile /dev/stdin --destination ${CONTAINER_RELEASE_IMAGE}
