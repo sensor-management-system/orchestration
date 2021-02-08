@@ -192,7 +192,7 @@ permissions and limitations under the Licence.
       </v-tabs-items>
       <!-- Buttons for all tabs -->
       <v-btn
-        v-if="!editMode"
+        v-if="!editMode && isLoggedIn"
         fab
         fixed
         bottom
@@ -324,7 +324,7 @@ export default class PlatformIdPage extends mixins(Rules) {
       const platformId = this.$route.params.id
       if (!platformId) {
         this.createBackup()
-        this.editMode = true
+        this.editMode = true && this.isLoggedIn
         resolve(null)
         return
       }
@@ -375,7 +375,7 @@ export default class PlatformIdPage extends mixins(Rules) {
 
   onEditButtonClick () {
     this.createBackup()
-    this.editMode = true
+    this.editMode = true && this.isLoggedIn
   }
 
   get platformURN () {
@@ -482,6 +482,10 @@ export default class PlatformIdPage extends mixins(Rules) {
   onEditModeChanged (editMode: boolean) {
     this.$store.commit('appbar/setSaveBtnHidden', !editMode)
     this.$store.commit('appbar/setCancelBtnHidden', !editMode)
+  }
+
+  get isLoggedIn () {
+    return this.$store.getters['oidc/isAuthenticated']
   }
 }
 

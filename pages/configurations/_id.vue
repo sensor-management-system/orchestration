@@ -326,7 +326,7 @@ permissions and limitations under the Licence.
         </v-tab-item>
       </v-tabs-items>
       <v-btn
-        v-if="!editMode"
+        v-if="!editMode && isLoggedIn"
         fab
         fixed
         bottom
@@ -492,7 +492,7 @@ export default class ConfigurationsIdPage extends Vue {
       const configurationId = this.$route.params.id
       if (!configurationId) {
         this.createBackup()
-        this.editMode = true
+        this.editMode = true && this.isLoggedIn
         resolve(null)
         return
       }
@@ -580,7 +580,7 @@ export default class ConfigurationsIdPage extends Vue {
 
   onEditButtonClick () {
     this.createBackup()
-    this.editMode = true
+    this.editMode = true && this.isLoggedIn
   }
 
   createBackup () {
@@ -927,6 +927,10 @@ export default class ConfigurationsIdPage extends Vue {
   onEditModeChanged (editMode: boolean) {
     this.$store.commit('appbar/setSaveBtnHidden', !editMode)
     this.$store.commit('appbar/setCancelBtnHidden', !editMode)
+  }
+
+  get isLoggedIn () {
+    return this.$store.getters['oidc/isAuthenticated']
   }
 }
 </script>
