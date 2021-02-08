@@ -245,7 +245,7 @@ export default class ContactIdPage extends Vue {
 
   onEditButtonClick () {
     this.createBackup()
-    this.editMode = true
+    this.editMode = true && this.isLoggedIn
   }
 
   get readonly () {
