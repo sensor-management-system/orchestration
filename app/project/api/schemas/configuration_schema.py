@@ -85,7 +85,7 @@ class ConfigurationSchema(Schema):
         attribute="configuration_devices",
         self_view="api.configuration_devices",
         self_view_kwargs={"id": "<id>"},
-        realted_view="api.configuration_device_list",
+        related_view="api.configuration_device_list",
         related_view_kwargs={"configuration_id": "<id>"},
         many=True,
         schema="ConfigurationDeviceSchema",
