@@ -49,7 +49,7 @@ test-image:
     - export APP_SETTINGS=project.config.TestingConfig
     - export DATABASE_TEST_URL=postgres://$POSTGRES_USER:@$POSTGRES_PASSWORD:5432/$POSTGRES_DB
     - export WELL_KNOWN_URL=https://webapp-stage.intranet.ufz.de/idp/oidc/v1/.well-known/openid-configuration
-    - export HTTP_ORIGINS=https://git.ufz.de http://rdm-test.intranet.ufz.de:5002
+    - export HTTP_ORIGINS="https://git.ufz.de http://rdm-test.intranet.ufz.de:5002"
   script:
     - cd $CI_PROJECT_DIR/app/ && python manage.py test
 
