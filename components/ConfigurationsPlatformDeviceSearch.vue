@@ -79,7 +79,7 @@ permissions and limitations under the Licence.
                   <v-list-item-subtitle>URN (TODO)</v-list-item-subtitle>
                 </v-list-item-content>
                 <v-list-item-action>
-                  <v-btn :to="'/platforms/' + item.id" target="_blank" icon x-small :disabled="false">
+                  <v-btn :href="'/platforms/' + item.id" target="_blank" icon x-small :disabled="false">
                     <v-icon>
                       mdi-open-in-new
                     </v-icon>
@@ -129,7 +129,7 @@ permissions and limitations under the Licence.
                   <v-list-item-subtitle>URN (TODO)</v-list-item-subtitle>
                 </v-list-item-content>
                 <v-list-item-action>
-                  <v-btn :to="'/devices/' + item.id" target="_blank" icon x-small>
+                  <v-btn :href="'/devices/' + item.id" target="_blank" icon x-small>
                     <v-icon>
                       mdi-open-in-new
                     </v-icon>

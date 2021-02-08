@@ -644,7 +644,7 @@ export default class ConfigurationsIdPage extends Vue {
       return []
     }
 
-    const openInNewTab = false
+    const openInNewTab = true
     return this.configuration.tree.getPathObjects(this.selectedNode).map((selectedNode) => {
       // we not only handle the names here, but we also allow to have links to our
       // platforms and devices
@@ -652,10 +652,25 @@ export default class ConfigurationsIdPage extends Vue {
       const id = selectedNode.unpack().id
       const path = '/' + subRoute + '/' + id
 
+      let partTarget = {}
+      let partLink = {}
+      if (openInNewTab) {
+        partTarget = {
+          target: '_blank'
+        }
+        partLink = {
+          href: path
+        }
+      } else {
+        partLink = {
+          to: path
+        }
+      }
+
       return {
         text: selectedNode.name,
-        to: path,
-        target: openInNewTab ? '_blank' : undefined
+        ...partLink,
+        ...partTarget
       }
     })
   }
