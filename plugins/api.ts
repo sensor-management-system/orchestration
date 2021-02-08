@@ -46,7 +46,7 @@ declare module '@nuxt/types' {
 
 const apiPlugin: Plugin = (context, inject) => {
   const getIdToken = (): string | null => {
-    return context.store.getters.oidcIdToken()
+    return context.store.getters['oidc/oidcIdToken']
   }
   inject('api', new Api(getIdToken))
 }
