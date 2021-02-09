@@ -7,6 +7,8 @@ from werkzeug.exceptions import BadRequestKeyError
 
 from project.api.flask_minio import MinioNotAvailableException
 
+from project.api.token_checker import token_required
+
 
 class UploadFilesWithMinio(ResourceList):
     """
@@ -42,3 +44,5 @@ class UploadFilesWithMinio(ResourceList):
                 status=err.code,
                 title=err.name,
             )
+
+    decorators = (token_required,)
