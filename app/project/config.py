@@ -1,5 +1,4 @@
 import json
-import os
 import requests
 from environs import Env
 from jwt.algorithms import RSAAlgorithm
@@ -30,37 +29,39 @@ class BaseConfig:
     TESTING = False
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SECRET_KEY = "top_secret"
-    HTTP_ORIGINS = env.list("HTTP_ORIGINS", None, delimiter=" ")
     DEFAULT_POOL_TIMEOUT = 600
     SQLALCHEMY_POOL_TIMEOUT = env.int("POOL_TIMEOUT", DEFAULT_POOL_TIMEOUT)
-
+    if env("HTTP_ORIGINS", None) is not None:
+        HTTP_ORIGINS = env.list("HTTP_ORIGINS", delimiter=" ")
+    else:
+        HTTP_ORIGINS = None
     # Hostname of a S3 service.
-    MINIO_ENDPOINT = env.str("MINIO_ENDPOINT", "172.16.238.10:9000")
+    MINIO_ENDPOINT = env("MINIO_ENDPOINT", "172.16.238.10:9000")
     # Access key (aka user ID) of your account in S3 service.
-    MINIO_ACCESS_KEY = env.str("MINIO_ACCESS_KEY", "minio")
+    MINIO_ACCESS_KEY = env("MINIO_ACCESS_KEY", "minio")
     # Secret Key (aka password) of your account in S3 service.
-    MINIO_SECRET_KEY = env.str("MINIO_SECRET_KEY", "minio123")
+    MINIO_SECRET_KEY = env("MINIO_SECRET_KEY", "minio123")
     # (Optional) Flag to indicate to use secure (TLS) connection to S3 service or not.
     # False for local testing
-    MINIO_SECURE = env.bool("MINIO_SECURE", False)
+    MINIO_SECURE = env("MINIO_SECURE", False)
     # (Optional) Region name of buckets in S3 service.
-    MINIO_REGION = env.str("MINIO_REGION", None)
+    MINIO_REGION = env("MINIO_REGION", None)
     # (Optional) Customized HTTP client.
     # learn more https://docs.min.io/docs/python-client-api-reference.html
-    MINIO_HTTP_CLIENT = env.str("MINIO_HTTP_CLIENT", None)
-    MINIO_BUCKET_NAME = env.str("MINIO_BUCKET_NAME", "sms")
+    MINIO_HTTP_CLIENT = env("MINIO_HTTP_CLIENT", None)
+    MINIO_BUCKET_NAME = env("MINIO_BUCKET_NAME", "sms")
     # ALLOWED_EXTENSIONS = env.str("ALLOWED_EXTENSIONS")
 
 
 class DevelopmentConfig(BaseConfig):
     """Development configuration"""
 
-    SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL")
-    ELASTICSEARCH_URL = os.environ.get("ELASTICSEARCH_URL")
+    SQLALCHEMY_DATABASE_URI = env("DATABASE_URL", None)
+    ELASTICSEARCH_URL = env("ELASTICSEARCH_URL", None)
     # Setup Token Verification
     # force use of RS265
     JWT_ALGORITHM = "RS256"
-    oidc_issuer_url = env.str("WELL_KNOWN_URL")
+    oidc_issuer_url = env("WELL_KNOWN_URL")
     oidc_jwks_uri = OidcJwksConfig(oidc_issuer_url).oidc_jwks_uri
     # retrieve first jwk entry from jwks_uri endpoint and use it to construct the RSA public key
     JWT_PUBLIC_KEY = RSAAlgorithm.from_jwk(json.dumps(oidc_jwks_uri["keys"][0]))
@@ -69,14 +70,14 @@ class DevelopmentConfig(BaseConfig):
     JWT_DECODE_AUDIENCE = ["rdmsvm-implicit-flow", "oidcdebugger-implicit-flow"]
     # name of token entry that will become distinct flask identity username
     # example in our case it is {'sub':'username@ufz.de'}
-    JWT_IDENTITY_CLAIM = env.str("OIDC_USERNAME_CLAIM")
+    JWT_IDENTITY_CLAIM = env("OIDC_USERNAME_CLAIM", "sub")
 
 
 class TestingConfig(BaseConfig):
     """Testing configuration"""
 
     TESTING = True
-    SQLALCHEMY_DATABASE_URI = env.str("DATABASE_TEST_URL")
+    SQLALCHEMY_DATABASE_URI = env("DATABASE_TEST_URL")
     ELASTICSEARCH_URL = None
     JWT_SECRET_KEY = 'super-secret'
     JWT_ALGORITHM = 'HS256'
@@ -87,5 +88,5 @@ class TestingConfig(BaseConfig):
 class ProductionConfig(BaseConfig):
     """Production configuration"""
 
-    SQLALCHEMY_DATABASE_URI = env.str("DATABASE_URL")
-    ELASTICSEARCH_URL = env.str("ELASTICSEARCH_URL")
+    SQLALCHEMY_DATABASE_URI = env("DATABASE_URL", None)
+    ELASTICSEARCH_URL = env("ELASTICSEARCH_URL", None)
