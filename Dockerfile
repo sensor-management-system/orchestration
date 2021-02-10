@@ -1,4 +1,5 @@
 FROM python:3 as base
+# TODO: use alpine as base image
 
 ARG BUILD_DATE
 ARG VCS_REF
@@ -15,8 +16,6 @@ LABEL maintainer="Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>" \
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
 
-RUN apk --no-cache add libpq
-
 FROM base as builder
 
 RUN mkdir /install
@@ -26,7 +25,7 @@ WORKDIR /install
 COPY app/requirements.txt /tmp/requirements.txt
 
 RUN pip install --upgrade pip \
-    && pip install --prefix /install --no-cache-dir -r /tmp/requirements.txt \
+    && pip install --prefix /install --no-cache-dir -r /tmp/requirements.txt
 
 FROM base
 
