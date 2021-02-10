@@ -1,4 +1,4 @@
-FROM python:3-alpine as base
+FROM python:3 as base
 
 ARG BUILD_DATE
 ARG VCS_REF
@@ -25,14 +25,8 @@ WORKDIR /install
 # add requirements
 COPY app/requirements.txt /tmp/requirements.txt
 
-RUN apk add --no-cache --virtual .build-deps \
-    gcc \
-    python3-dev \
-    musl-dev \
-    postgresql-dev \
-    && pip install --upgrade pip \
+RUN pip install --upgrade pip \
     && pip install --prefix /install --no-cache-dir -r /tmp/requirements.txt \
-    && apk del --no-cache .build-deps
 
 FROM base
 
