@@ -43,6 +43,7 @@ services:
       BASE_URL: "/"
       SMS_BACKEND_URL: "http://rz-vm64.gfz-potsdam.de:5000/rdm/svm-api/v1"
       CV_BACKEND_URL: "http://rz-vm64.gfz-potsdam.de:8000/api/v1"
+      STAY_WITH_HTTP: "true"
       NUXT_ENV_REDIRECT_URI: "http://localhost:3000/login-callback"
       NUXT_ENV_POST_LOGOUT_REDIRECT_URI: "http://localhost:3000/logout-callback"
       NUXT_ENV_SILENT_REDIRECT_URI: "http://localhost:3000/silent-callback"
