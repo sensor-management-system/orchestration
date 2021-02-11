@@ -18,7 +18,9 @@ class OidcJwksConfig(object):
         # retrieve master openid-configuration endpoint for issuer realm
         self.oidc_config = requests.get(oidc_issuer_url, verify=False).json()
         # # retrieve data from jwks_uri endpoint
-        self.oidc_jwks_uri = requests.get(self.oidc_config["jwks_uri"], verify=False).json()
+        self.oidc_jwks_uri = requests.get(
+            self.oidc_config["jwks_uri"], verify=False
+        ).json()
 
 
 class BaseConfig:
@@ -58,10 +60,9 @@ class TestingConfig(BaseConfig):
     TESTING = True
     SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_TEST_URL")
     ELASTICSEARCH_URL = None
-    JWT_SECRET_KEY = 'super-secret'
-    JWT_ALGORITHM = 'HS256'
-    JWT_IDENTITY_CLAIM = "identity"
-    JWT_DECODE_AUDIENCE = None
+    JWT_SECRET_KEY = "super-secret"
+    JWT_ALGORITHM = "HS256"
+    JWT_DECODE_AUDIENCE = "SMS"
 
 
 class ProductionConfig(BaseConfig):
