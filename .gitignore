@@ -93,3 +93,4 @@ sw.*
 .bash_history
 /.config/configstore/update-notifier-npm.json
 *.swo
+gfz-staging-oidc.env
