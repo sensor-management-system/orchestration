@@ -43,7 +43,6 @@ const server = {
   host: '0.0.0.0'
 }
 
-
 if (!process.env.STAY_WITH_HTTP) {
   server.https = {
     key: fs.readFileSync(path.resolve(__dirname, 'server.key')),
