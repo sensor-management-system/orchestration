@@ -49,10 +49,11 @@ class DevelopmentConfig(BaseConfig):
     # GFZ: Currently for the idp-dev the aud field and the client id seems to
     # be the very same values, so we want it to be part of the JWT_DECODE_AUDIENCE
     # that we trust.
-    OIDC_CLIENT_ID = os.environ.get("OIDC_CLIENT_ID")
+    OIDC_CLIENT_IDS = os.environ.get("OIDC_CLIENT_IDS").split(" ")
     JWT_DECODE_AUDIENCE = ["rdmsvm-implicit-flow", "oidcdebugger-implicit-flow"]
-    if OIDC_CLIENT_ID:
-        JWT_DECODE_AUDIENCE.append(OIDC_CLIENT_ID)
+    if OIDC_CLIENT_IDS:
+        for client_id in OIDC_CLIENT_IDS:
+            JWT_DECODE_AUDIENCE.append(client_id)
     # name of token entry that will become distinct flask identity username
     # example in our case it is {'sub':'username@ufz.de'}
     JWT_IDENTITY_CLAIM = os.environ.get("OIDC_USERNAME_CLAIM")
