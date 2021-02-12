@@ -32,6 +32,8 @@ class BaseConfig:
 
     DEFAULT_POOL_TIMEOUT = 600
     SQLALCHEMY_POOL_TIMEOUT = os.environ.get("POOL_TIMEOUT", DEFAULT_POOL_TIMEOUT)
+    # example in our case it is {'sub':'username@ufz.de'}
+    JWT_IDENTITY_CLAIM = os.environ.get("OIDC_USERNAME_CLAIM")
 
 
 class DevelopmentConfig(BaseConfig):
@@ -50,8 +52,6 @@ class DevelopmentConfig(BaseConfig):
     # https://github.com/vimalloc/flask-jwt-extended/issues/219)
     JWT_DECODE_AUDIENCE = ["rdmsvm-implicit-flow", "oidcdebugger-implicit-flow"]
     # name of token entry that will become distinct flask identity username
-    # example in our case it is {'sub':'username@ufz.de'}
-    JWT_IDENTITY_CLAIM = os.environ.get("OIDC_USERNAME_CLAIM")
 
 
 class TestingConfig(BaseConfig):
