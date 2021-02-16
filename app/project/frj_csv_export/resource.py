@@ -6,7 +6,7 @@ flask-rest-jsonapi ) """
 
 import pandas as pd
 from cherrypicker import CherryPicker
-from flask import Response, request, url_for
+from flask import request, url_for
 from flask_rest_jsonapi.decorators import (
     check_method_requirements,
     jsonapi_exception_formatter,
@@ -21,29 +21,29 @@ from marshmallow_jsonapi.exceptions import IncorrectTypeError
 from marshmallow_jsonapi.fields import BaseRelationship
 from six import with_metaclass
 
-from .content import parse_json, render_json
+from .content import parse_json, render_json, render_csv
 from .exceptions import InvalidAcceptType
 
 
-def transform_to_series(objects):
+def transform_to_series(objects, schema):
     """
     Convert list of dictionaries to a pandas DataFrame and returns a flat CSV file.
+    :param schema: MarshmallowSchema for the object
     :param objects: a list of the objects
-    :return: csv file
+    :return: dataframe
     """
     # CherryPicker for restructuring the data into flat tables
     # use the to_search_entry() to get the mode as a dict
-    _list_of_flat_dicts = [
-        CherryPicker(obj.to_search_entry()).flatten().get() for obj in objects
-    ]
+    list_of_flat_dicts = []
+    for obj in objects:
+        picker = CherryPicker(schema().nested_dict_serializer(obj))
+        flat_dict = picker.flatten().get()
+        list_of_flat_dicts.append(flat_dict)
+
     # json_normalize() works with lists of dictionaries (records) to convert the list
     # to a pandas DataFrame, and in addition can also handle nested dictionaries.
-    _df = pd.json_normalize(_list_of_flat_dicts)
-    return Response(
-        _df.to_csv(),
-        mimetype="text/csv",
-        headers={"Content-disposition": "attachment; filename=export.csv"},
-    )
+    df = pd.json_normalize(list_of_flat_dicts)
+    return df
 
 
 class Resource(ResourceBase):
@@ -70,6 +70,7 @@ class Resource(ResourceBase):
             "application/vnd.api+json": render_json,
             "application/json": render_json,
             "text/html": render_json,
+            "text/csv": render_csv,
         }
         if response_renderers is not None:
             self.response_renderers.update(response_renderers)
@@ -116,8 +117,10 @@ class ResourceList(with_metaclass(ResourceMetaBase, Resource)):
 
         parent_filter = self._get_parent_filter(request.url, kwargs)
         objects_count, objects = self.get_collection(qs, kwargs, filters=parent_filter)
-        if request.content_type == "text/csv":
-            return transform_to_series(objects)
+        if "HTTP_ACCEPT" in request.headers.environ:
+            http_accept = request.headers.environ['HTTP_ACCEPT']
+            if http_accept == "text/csv":
+                return transform_to_series(objects, self.schema)
         schema_kwargs = getattr(self, "get_schema_kwargs", dict())
         schema_kwargs.update({"many": True})
 
