@@ -4,8 +4,13 @@ stages:
   - release
 
 variables:
-  CONTAINER_TEST_IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
+  CONTAINER_TEST_IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
   CONTAINER_RELEASE_IMAGE: $CI_REGISTRY_IMAGE:latest
+  DATABASE_TEST_URL: postgres://$POSTGRES_USER:@$POSTGRES_PASSWORD:5432/$POSTGRES_DB
+  WELL_KNOWN_URL: https://webapp-stage.intranet.ufz.de/idp/oidc/v1/.well-known/openid-configuration
+  HTTP_ORIGINS: "https://git.ufz.de http://rdm-test.intranet.ufz.de:5002"
+  OIDC_USERNAME_CLAIM: "sub"
+
 
 build-image:
   stage: build
@@ -13,12 +18,15 @@ build-image:
     name: gcr.io/kaniko-project/executor:debug
     entrypoint: [ "" ]
   script:
+    - echo "ENV WELL_KNOWN_URL" $WELL_KNOWN_URL >> $CI_PROJECT_DIR/Dockerfile.ci
+    - echo "ENV HTTP_ORIGINS" $HTTP_ORIGINS >> $CI_PROJECT_DIR/Dockerfile.ci
+    - echo "ENV OIDC_USERNAME_CLAIM" $OIDC_USERNAME_CLAIM >> $CI_PROJECT_DIR/Dockerfile.ci
     - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
     - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --destination $CONTAINER_TEST_IMAGE
 
 unittest-lint:
   stage: test
-  image: $CI_REGISTRY_IMAGE
+  image: $CONTAINER_TEST_IMAGE
   before_script:
     - pip install --upgrade setuptools
     - pip install --upgrade flake8
@@ -44,10 +52,8 @@ test-image:
   stage: test
   image: $CONTAINER_TEST_IMAGE
   before_script:
-    - pip install --upgrade setuptools
+    - export DATABASE_TEST_URL=$DATABASE_TEST_URL
     - export APP_SETTINGS=project.config.TestingConfig
-    - export DATABASE_TEST_URL=postgres://$POSTGRES_USER:@$POSTGRES_PASSWORD:5432/$POSTGRES_DB
-    - export WELL_KNOWN_URL=https://webapp-stage.intranet.ufz.de/idp/oidc/v1/.well-known/openid-configuration
   script:
     - cd $CI_PROJECT_DIR/app/ && python manage.py test
 
