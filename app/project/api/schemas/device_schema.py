@@ -1,12 +1,12 @@
 from marshmallow_jsonapi import fields
 from marshmallow_jsonapi.flask import Relationship, Schema
-from project.api.schemas.attachment_schema import AttachmentSchema
-from project.api.schemas.customfield_schema import CustomFieldSchema
-from project.api.schemas.device_property_schema import \
-    InnerDevicePropertySchema
 
+from project.api.schemas.attachment_schema import AttachmentSchema
 from project.api.schemas.contact_schema import ContactSchema
-from project.api.schemas.device_property_schema import DevicePropertySchema
+from project.api.schemas.customfield_schema import CustomFieldSchema
+from project.api.schemas.device_property_schema import (
+    InnerDevicePropertySchema,
+)
 
 
 class DeviceSchema(Schema):
@@ -125,11 +125,18 @@ class DeviceToNestedDictSerializer:
                 "device_type_uri": device.device_type_uri,
                 "status_name": device.status_name,
                 "status_uri": device.status_uri,
-                "attachments": [AttachmentSchema().dict_serializer(a) for a in
-                                device.device_attachments],
-                "contacts": [ContactSchema().dict_serializer(c) for c in device.contacts],
-                "properties": [InnerDevicePropertySchema().dict_serializer(p) for p in
-                               device.device_properties],
-                "customfields": [CustomFieldSchema.dict_serializer(c) for c in
-                                 device.customfields],
+                "attachments": [
+                    AttachmentSchema().dict_serializer(a)
+                    for a in device.device_attachments
+                ],
+                "contacts": [
+                    ContactSchema().dict_serializer(c) for c in device.contacts
+                ],
+                "properties": [
+                    InnerDevicePropertySchema().dict_serializer(p)
+                    for p in device.device_properties
+                ],
+                "customfields": [
+                    CustomFieldSchema.dict_serializer(c) for c in device.customfields
+                ],
             }

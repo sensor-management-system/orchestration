@@ -60,5 +60,6 @@ class ConfigurationPlatformToNestedDictSerializer:
                 "offset_z": obj.offset_z,
                 "platform": PlatformSchema().nested_dict_serializer(obj.platform),
                 "parent_platform": PlatformSchema().nested_dict_serializer(
-                    obj.parent_platform),
+                    obj.parent_platform
+                ),
             }

@@ -1,8 +1,6 @@
 from marshmallow_jsonapi import fields
 from marshmallow_jsonapi.flask import Relationship, Schema
 
-from project.api.schemas.configuration_platform_schema import ConfigurationPlatformSchema
-
 from project.api.schemas.device_schema import DeviceSchema
 from project.api.schemas.platform_schema import PlatformSchema
 
@@ -68,5 +66,6 @@ class ConfigurationDeviceToNestedDictSerializer:
                 "firmware_version": obj.firmware_version,
                 "device": DeviceSchema().nested_dict_serializer(obj.device),
                 "parent_platform": PlatformSchema().nested_dict_serializer(
-                    obj.parent_platform),
+                    obj.parent_platform
+                ),
             }

@@ -7,10 +7,8 @@ flask-rest-jsonapi ) """
 import pandas as pd
 from cherrypicker import CherryPicker
 from flask import request, url_for
-from flask_rest_jsonapi.decorators import (
-    check_method_requirements,
-    jsonapi_exception_formatter,
-)
+from flask_rest_jsonapi.decorators import (check_method_requirements,
+                                           jsonapi_exception_formatter)
 from flask_rest_jsonapi.pagination import add_pagination_links
 from flask_rest_jsonapi.querystring import QueryStringManager as QSManager
 from flask_rest_jsonapi.resource import Resource as ResourceBase
@@ -21,7 +19,7 @@ from marshmallow_jsonapi.exceptions import IncorrectTypeError
 from marshmallow_jsonapi.fields import BaseRelationship
 from six import with_metaclass
 
-from .content import parse_json, render_json, render_csv
+from .content import parse_json, render_csv, render_json
 from .exceptions import InvalidAcceptType
 
 
@@ -118,7 +116,7 @@ class ResourceList(with_metaclass(ResourceMetaBase, Resource)):
         parent_filter = self._get_parent_filter(request.url, kwargs)
         objects_count, objects = self.get_collection(qs, kwargs, filters=parent_filter)
         if "HTTP_ACCEPT" in request.headers.environ:
-            http_accept = request.headers.environ['HTTP_ACCEPT']
+            http_accept = request.headers.environ["HTTP_ACCEPT"]
             if http_accept == "text/csv":
                 return transform_to_series(objects, self.schema)
         schema_kwargs = getattr(self, "get_schema_kwargs", dict())

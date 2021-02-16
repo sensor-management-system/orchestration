@@ -1,7 +1,7 @@
 from marshmallow_jsonapi import fields
 from marshmallow_jsonapi.flask import Relationship, Schema
-from project.api.schemas.attachment_schema import AttachmentSchema
 
+from project.api.schemas.attachment_schema import AttachmentSchema
 from project.api.schemas.contact_schema import ContactSchema
 
 
@@ -86,7 +86,11 @@ class PlatformToNestedDictSerializer:
                 "inventory_number": platform.inventory_number,
                 "serial_number": platform.serial_number,
                 "persistent_identifier": platform.persistent_identifier,
-                "attachments": [AttachmentSchema().dict_serializer(a) for a in
-                                platform.platform_attachments],
-                "contacts": [ContactSchema().dict_serializer(c) for c in platform.contacts],
+                "attachments": [
+                    AttachmentSchema().dict_serializer(a)
+                    for a in platform.platform_attachments
+                ],
+                "contacts": [
+                    ContactSchema().dict_serializer(c) for c in platform.contacts
+                ],
             }
