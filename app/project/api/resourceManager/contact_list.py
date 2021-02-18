@@ -1,4 +1,5 @@
 from project.frj_csv_export.resource import ResourceList
+from project.api.datalayers.esalchemy import EsSqlalchemyDataLayer
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from project.api.models.base_model import db
 from project.api.models.configuration import Configuration
@@ -67,6 +68,7 @@ class ContactList(ResourceList):
     data_layer = {
         "session": db.session,
         "model": Contact,
+        "class": EsSqlalchemyDataLayer,
         "methods": {
             "query": query,
         },
