@@ -38,15 +38,20 @@ import colors from 'vuetify/es5/util/colors'
 import fs from 'fs'
 import path from 'path'
 
+const server = {
+  port: 3000,
+  host: '0.0.0.0'
+}
+
+if (!process.env.STAY_WITH_HTTP) {
+  server.https = {
+    key: fs.readFileSync(path.resolve(__dirname, 'server.key')),
+    cert: fs.readFileSync(path.resolve(__dirname, 'server.crt'))
+  }
+}
+
 export default {
-  server: {
-    port: 3000, // default: 3000
-    host: '0.0.0.0', // default: localhost
-    https: {
-      key: fs.readFileSync(path.resolve(__dirname, 'server.key')),
-      cert: fs.readFileSync(path.resolve(__dirname, 'server.crt'))
-    }
-  },
+  server,
   ssr: false,
   /*
   ** Nuxt target
