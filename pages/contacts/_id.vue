@@ -98,7 +98,7 @@ permissions and limitations under the Licence.
         </v-card>
       </v-form>
       <v-btn
-        v-if="!editMode"
+        v-if="!editMode && isLoggedIn"
         fab
         fixed
         bottom
@@ -182,7 +182,7 @@ export default class ContactIdPage extends Vue {
       const contactId = this.$route.params.id
       if (!contactId) {
         this.createBackup()
-        this.editMode = true
+        this.editMode = true && this.isLoggedIn
         resolve(null)
         return
       }
@@ -245,7 +245,7 @@ export default class ContactIdPage extends Vue {
 
   onEditButtonClick () {
     this.createBackup()
-    this.editMode = true
+    this.editMode = true && this.isLoggedIn
   }
 
   get readonly () {
@@ -276,6 +276,10 @@ export default class ContactIdPage extends Vue {
       return 'Contact: ' + fullName
     }
     return 'Contact'
+  }
+
+  get isLoggedIn () {
+    return this.$store.getters['oidc/isAuthenticated']
   }
 }
 </script>

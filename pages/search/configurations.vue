@@ -233,13 +233,17 @@ permissions and limitations under the Licence.
                   </template>
                   <v-list>
                     <v-list-item
+                      :disabled="!isLoggedIn"
                       dense
                     >
                       <v-list-item-content>
-                        <v-list-item-title>
+                        <v-list-item-title
+                          :class="isLoggedIn ? 'text' : 'grey-text'"
+                        >
                           <v-icon
                             left
                             small
+                            :color="isLoggedIn ? 'black' : 'grey'"
                           >
                             mdi-content-copy
                           </v-icon>
@@ -248,17 +252,18 @@ permissions and limitations under the Licence.
                       </v-list-item-content>
                     </v-list-item>
                     <v-list-item
+                      :disabled="!isLoggedIn"
                       dense
                       @click="showDeleteDialogFor(result.id)"
                     >
                       <v-list-item-content>
                         <v-list-item-title
-                          class="red--text"
+                          :class="isLoggedIn ? 'red--text' : 'grey--text'"
                         >
                           <v-icon
                             left
                             small
-                            color="red"
+                            :color="isLoggedIn ? 'red' : 'grey'"
                           >
                             mdi-delete
                           </v-icon>
@@ -415,6 +420,7 @@ permissions and limitations under the Licence.
       </v-hover>
     </div>
     <v-btn
+      v-if="isLoggedIn"
       bottom
       color="primary"
       dark
@@ -702,6 +708,10 @@ export default class SearchConfigurationsPage extends Vue {
       return LocationType.Dynamic
     }
     return ''
+  }
+
+  get isLoggedIn () {
+    return this.$store.getters['oidc/isAuthenticated']
   }
 }
 
