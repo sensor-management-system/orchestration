@@ -25,28 +25,3 @@ from .configuration_platform_list import ConfigurationPlatformList
 from .configuration_platform_detail import ConfigurationPlatformDetail
 from .configuration_device_relationship import ConfigurationDeviceRelationship
 from .configuration_platform_relationship import ConfigurationPlatformRelationship
-# This data model import is temporal and done just to force alembic migration to make the tables
-from project.api.models.mount_actions import (DeviceMountAction,  # noqa: F401
-                                              PlatformMountAction)
-from project.api.models.unmount_actions import (DeviceUnmountAction,  # noqa: F401
-                                                PlatformUnmountAction)
-from project.api.models.generic_actions import (GenericDeviceAction,  # noqa: F401
-                                                GenericConfigurationAction,
-                                                GenericPlatformAction)
-from project.api.models.configuration_attachment import ConfigurationAttachment  # noqa: F401
-from project.api.models.generic_action_attachments import (  # noqa: F401
-    GenericDeviceActionAttachment,
-    GenericConfigurationActionAttachment,
-    GenericPlatformActionAttachment)
-from project.api.models.calibration_actions import (DeviceCalibrationAction,  # noqa: F401
-                                                    DevicePropertyCalibration)
-from project.api.models.software_update_action_attachments import (  # noqa: F401
-    PlatformSoftwareUpdateActionAttachment,
-    DeviceSoftwareUpdateActionAttachment)
-from project.api.models.software_update_actions import (  # noqa: F401
-    DeviceSoftwareUpdateAction,
-    PlatformSoftwareUpdateAction)
-from project.api.models.configuration_location_actions import (  # noqa: F401
-    ConfigurationStaticLocationEndAction, ConfigurationDynamicLocationBeginAction,
-    ConfigurationStaticLocationBeginAction, ConfigurationDynamicLocationEndAction)
-from project.api.models.calibration_attachments import DeviceCalibrationAttachment  # noqa: F401
