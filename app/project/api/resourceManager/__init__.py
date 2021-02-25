@@ -27,19 +27,19 @@ from .configuration_device_relationship import ConfigurationDeviceRelationship
 from .configuration_platform_relationship import ConfigurationPlatformRelationship
 # This data model import is temporal and done just to force alembic migration to make the tables
 from project.api.models.mount_actions import (DeviceMountAction,  # noqa: F401
-                                                  PlatformMountAction)
+                                              PlatformMountAction)
 from project.api.models.unmount_actions import (DeviceUnmountAction,  # noqa: F401
-                                                    PlatformUnmountAction)
+                                                PlatformUnmountAction)
 from project.api.models.generic_actions import (GenericDeviceAction,  # noqa: F401
-                                                    GenericConfigurationAction,
-                                                    GenericPlatformAction)
+                                                GenericConfigurationAction,
+                                                GenericPlatformAction)
 from project.api.models.configuration_attachment import ConfigurationAttachment  # noqa: F401
 from project.api.models.generic_action_attachments import (  # noqa: F401
     GenericDeviceActionAttachment,
     GenericConfigurationActionAttachment,
     GenericPlatformActionAttachment)
 from project.api.models.calibration_actions import (DeviceCalibrationAction,  # noqa: F401
-                                                        DevicePropertyCalibration)
+                                                    DevicePropertyCalibration)
 from project.api.models.software_update_action_attachments import (  # noqa: F401
     PlatformSoftwareUpdateActionAttachment,
     DeviceSoftwareUpdateActionAttachment)
