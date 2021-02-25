@@ -7,11 +7,15 @@ class DeviceCalibrationAttachment(db.Model):
         db.Integer, db.ForeignKey("device_calibration_action.id"), nullable=False
     )
     action = db.relationship(
-        "DeviceCalibrationAttachment", uselist=False, foreign_keys=[action_id]
+        "DeviceCalibrationAction", uselist=False, foreign_keys=[action_id],
+        backref=db.backref("device_calibration_attachment")
     )
     attachment_id = db.Column(
         db.Integer, db.ForeignKey("device_attachment.id"), nullable=False
     )
     attachment = db.relationship(
-        "DeviceAttachment", uselist=False, foreign_keys=[attachment_id]
+        "DeviceAttachment",
+        uselist=False,
+        foreign_keys=[attachment_id],
+        backref=db.backref("device_calibration_attachment")
     )
