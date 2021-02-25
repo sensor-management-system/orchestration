@@ -21,7 +21,7 @@ class PlatformMountAction(db.Model, AuditMixin):
     parent_platform_id = db.Column(
         db.Integer, db.ForeignKey("platform.id"), nullable=True
     )
-    parent_platform = db.Column(
+    parent_platform = db.relationship(
         "Platform",
         uselist=False,
         foreign_keys=[parent_platform_id],
