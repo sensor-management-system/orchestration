@@ -41,7 +41,7 @@ services:
           postgresql-dev \
           libressl-dev \
           musl-dev \
-          libffi-dev && \
+          libffi-dev \
       && pip install --no-cache-dir --upgrade pip
       && pip install --no-cache-dir -r requirements.txt
       && gunicorn -b 0.0.0.0:5000 manage:app

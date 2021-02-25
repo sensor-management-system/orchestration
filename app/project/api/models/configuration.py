@@ -1,6 +1,7 @@
 """Class and helpers for the configurations."""
 
 import collections
+
 from sqlalchemy.ext.hybrid import hybrid_property
 
 from project.api.models.base_model import db

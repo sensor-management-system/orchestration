@@ -54,57 +54,24 @@ class Platform(db.Model, AuditMixin, SearchableMixin):
             # Search the description just via text (and not via keyword).
             "description": {"type": "text"},
             # Long & Short name via both text & keyword.
-            "long_name": {
-                "type": "keyword",
-                "fields": {
-                    "text": {
-                        "type": "text"
-                    }
-                }
-            },
-            "short_name": {
-                "type": "keyword",
-                "fields": {
-                    "text": {
-                        "type": "text"
-                    }
-                }
-            },
+            "long_name": {"type": "keyword", "fields": {"text": {"type": "text"}}},
+            "short_name": {"type": "keyword", "fields": {"text": {"type": "text"}}},
             # Names for Manufacturer, Status & Type searchable via both.
             "manufacturer_name": {
                 "type": "keyword",
-                "fields": {
-                    "text": {
-                        "type": "text"
-                    }
-                },
+                "fields": {"text": {"type": "text"}},
             },
             # Uris just via keyword (for filtering).
             "manufacturer_uri": {"type": "keyword"},
-            "model": {
-                "type": "keyword",
-                "fields": {
-                    "text": {
-                        "type": "text"
-                    }
-                }
-            },
+            "model": {"type": "keyword", "fields": {"text": {"type": "text"}}},
             "platform_type_name": {
                 "type": "keyword",
-                "fields": {
-                    "text": {
-                        "type": "text"
-                    }
-                },
+                "fields": {"text": {"type": "text"}},
             },
             "platform_type_uri": {"type": "keyword"},
             "status_name": {
                 "type": "keyword",
-                "fields": {
-                    "text": {
-                        "type": "text"
-                    }
-                },
+                "fields": {"text": {"type": "text"}},
             },
             "status_uri": {"type": "keyword"},
             # Website just via text, as we won't search exactly the same website.
@@ -112,27 +79,15 @@ class Platform(db.Model, AuditMixin, SearchableMixin):
             # Inventory, serrial number & pid, allow search via both text and keyword.
             "inventory_number": {
                 "type": "keyword",
-                "fields": {
-                    "text": {
-                        "type": "text"
-                    }
-                },
+                "fields": {"text": {"type": "text"}},
             },
             "serial_number": {
                 "type": "keyword",
-                "fields": {
-                    "text": {
-                        "type": "text"
-                    }
-                },
+                "fields": {"text": {"type": "text"}},
             },
             "persistent_identifier": {
                 "type": "keyword",
-                "fields": {
-                    "text": {
-                        "type": "text"
-                    }
-                },
+                "fields": {"text": {"type": "text"}},
             },
             "attachments": {
                 "type": "nested",
@@ -140,11 +95,7 @@ class Platform(db.Model, AuditMixin, SearchableMixin):
                     # Allow search via text & keyword
                     "label": {
                         "type": "keyword",
-                        "fields": {
-                            "text": {
-                                "type": "text"
-                            }
-                        },
+                        "fields": {"text": {"type": "text"}},
                     },
                     # But don't allow search for the very same url (unlikely to be needed).
                     "url": {"type": "text"},
