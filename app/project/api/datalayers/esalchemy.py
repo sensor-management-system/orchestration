@@ -1,7 +1,7 @@
 """Classes to help searching in the elasticsearch."""
 
+from flask import current_app, request
 from flask_rest_jsonapi.data_layers.alchemy import SqlalchemyDataLayer
-from flask import request, current_app
 
 
 class MultiFieldMatchFilter:

@@ -66,3 +66,14 @@ class ContactSchema(Schema):
         type_="user",
         id_field="id",
     )
+
+    @staticmethod
+    def dict_serializer(obj):
+        """Convert the object to a dict."""
+        if obj is not None:
+            return {
+                "given_name": obj.given_name,
+                "family_name": obj.family_name,
+                "website": obj.website,
+                "email": obj.email,
+            }

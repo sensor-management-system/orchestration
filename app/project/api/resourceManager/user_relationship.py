@@ -1,4 +1,5 @@
 from flask_rest_jsonapi import ResourceRelationship
+
 from project.api.models.base_model import db
 from project.api.models.user import User
 from project.api.schemas.user_schema import UserSchema

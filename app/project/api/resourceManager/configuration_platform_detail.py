@@ -1,4 +1,5 @@
 from flask_rest_jsonapi import ResourceDetail
+
 from project.api.models.base_model import db
 from project.api.models.configuration_platform import ConfigurationPlatform
 from project.api.schemas.configuration_platform_schema import (

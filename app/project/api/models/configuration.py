@@ -152,9 +152,9 @@ class Configuration(db.Model, AuditMixin, SearchableMixin):
         Describes which fields will be searchable by some text (with stemmer, etc)
         and via keyword (raw equality checks).
         """
-        from project.api.models.platform import Platform
-        from project.api.models.device import Device
         from project.api.models.contact import Contact
+        from project.api.models.device import Device
+        from project.api.models.platform import Platform
 
         return {
             "aliases": {},

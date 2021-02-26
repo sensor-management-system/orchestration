@@ -7,8 +7,13 @@ from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.sql import func
 
 from project.api.models.base_model import db
-from project.api.search import (add_to_index, create_index, query_index,
-                                remove_from_index, remove_index)
+from project.api.search import (
+    add_to_index,
+    create_index,
+    query_index,
+    remove_from_index,
+    remove_index,
+)
 
 
 class AuditMixin:

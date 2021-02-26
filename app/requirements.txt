@@ -1,6 +1,7 @@
 alembic==1.4.3
 certifi==2020.6.20
 chardet==3.0.4
+cherrypicker==0.3.1
 click==7.1.1
 coverage==5.1
 cryptography==2.1.4
@@ -8,7 +9,6 @@ elasticsearch==7.10.0
 entrypoints==0.3
 environs==9.3.0
 Faker==5.8.0
-flake8==3.7.9
 Flask-Cors==3.0.9
 Flask-Migrate==2.5.3
 Flask-REST-JSONAPI==0.31.2
@@ -26,11 +26,11 @@ MarkupSafe==1.1.1
 marshmallow-jsonapi==0.23.2
 marshmallow==3.9.0
 mccabe==0.6.1
-psycopg2==2.8.5
+pandas==1.2.2
+psycopg2-binary==2.8.6
 pycodestyle==2.5.0
 pycparser==2.20
 pycryptodomex==3.9.8
-pyflakes==2.1.1
 pyjwkest==1.4.2
 PyJWT==1.6.4
 python-dateutil==2.8.1

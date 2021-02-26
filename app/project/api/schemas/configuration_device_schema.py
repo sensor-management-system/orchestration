@@ -1,6 +1,9 @@
 from marshmallow_jsonapi import fields
 from marshmallow_jsonapi.flask import Relationship, Schema
 
+from project.api.schemas.device_schema import DeviceSchema
+from project.api.schemas.platform_schema import PlatformSchema
+
 
 class ConfigurationDeviceSchema(Schema):
     class Meta:
@@ -39,3 +42,30 @@ class ConfigurationDeviceSchema(Schema):
         type_="platform",
         schema="PlatformSchema",
     )
+
+    @staticmethod
+    def nested_dict_serializer(obj):
+        """
+        serialize the object to a nested dict.
+        :param obj: a sensor object
+        :return:
+        """
+        return ConfigurationDeviceToNestedDictSerializer().to_nested_dict(obj)
+
+
+class ConfigurationDeviceToNestedDictSerializer:
+    @staticmethod
+    def to_nested_dict(obj):
+        """Convert the object to a dict."""
+        if obj is not None:
+            return {
+                "offset_x": obj.offset_x,
+                "offset_y": obj.offset_y,
+                "offset_z": obj.offset_z,
+                "calibration_date": obj.calibration_date,
+                "firmware_version": obj.firmware_version,
+                "device": DeviceSchema().nested_dict_serializer(obj.device),
+                "parent_platform": PlatformSchema().nested_dict_serializer(
+                    obj.parent_platform
+                ),
+            }
