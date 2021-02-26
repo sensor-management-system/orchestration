@@ -28,7 +28,7 @@ marshmallow-jsonapi==0.23.2
 marshmallow==3.9.0
 mccabe==0.6.1
 pandas==1.2.2
-psycopg2==2.8.5
+psycopg2-binary==2.8.6
 pycodestyle==2.5.0
 pycparser==2.20
 pycryptodomex==3.9.8

@@ -1,5 +1,4 @@
-FROM python:3 as base
-# TODO: use alpine as base image
+FROM python:3.8-slim-buster as base
 
 ARG BUILD_DATE
 ARG VCS_REF
@@ -24,7 +23,14 @@ WORKDIR /install
 # add requirements
 COPY app/requirements.txt /tmp/requirements.txt
 
-RUN pip install --upgrade pip \
+RUN apt-get update && apt-get install -y  --no-install-recommends \
+        gcc \
+        libssl-dev \
+        libffi-dev \
+        musl-dev \
+        cargo \
+    && apt-get clean\
+    && pip install --upgrade pip \
     && pip install --prefix /install --no-cache-dir -r /tmp/requirements.txt
 
 FROM base
