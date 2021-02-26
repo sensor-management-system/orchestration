@@ -1,3 +1,5 @@
+from csv import DictReader
+
 from project.api.models.base_model import db
 from project.api.models.device import Device
 from project.api.schemas.device_schema import DeviceSchema
@@ -47,8 +49,15 @@ class Test(BaseTestCase):
         DeviceSchema().dump(sensor2)
         db.session.add(sensor2)
         db.session.commit()
-        _ = self.client.get(
+        response = self.client.get(
             self.device_url,
-            headers={"Content-Type": "text/csv", "Accept": "application/vnd.api+json"},
+            headers={"Content-Type": "application/vnd.api+json", "Accept": "text/csv"},
         )
-# TODO: write test for csv export
+        # still need to be converted to dict WIP
+        rows = list(DictReader(response.data.decode().split('\n')))
+        # Since we only have sensor1 and sensor2, there should be just 2 rows
+        assert len(rows) == 2
+        # The names should be in the dictionary
+        names = set([row['short_name'] for row in rows])
+        assert 'device_short_name test' in names
+        assert 'device_short_name test2' in names
