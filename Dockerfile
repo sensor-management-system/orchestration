@@ -1,4 +1,4 @@
-FROM python:3.8-slim-buster as base
+FROM python:3.9-slim-buster as base
 
 ARG BUILD_DATE
 ARG VCS_REF

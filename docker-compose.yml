@@ -19,7 +19,7 @@ services:
     networks:
       - elastic
   app:
-    image: python:3.8-slim-buster
+    image: python:3.9-slim-buster
     working_dir: /usr/src/app
     volumes:
       - './app:/usr/src/app'
