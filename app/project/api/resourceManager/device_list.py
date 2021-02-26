@@ -1,4 +1,3 @@
-from project.frj_csv_export.resource import ResourceList
 from project.api.datalayers.esalchemy import EsSqlalchemyDataLayer
 from project.api.models.base_model import db
 from project.api.models.device import Device
@@ -8,6 +7,7 @@ from project.api.resourceManager.base_resource import (
 )
 from project.api.schemas.device_schema import DeviceSchema
 from project.api.token_checker import token_required
+from project.frj_csv_export.resource import ResourceList
 
 
 class DeviceList(ResourceList):

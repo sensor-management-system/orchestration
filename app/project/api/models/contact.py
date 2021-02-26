@@ -4,7 +4,6 @@
 from project.api.models.base_model import db
 from project.api.models.mixin import SearchableMixin
 
-
 platform_contacts = db.Table(
     "platform_contacts",
     db.Column(

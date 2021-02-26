@@ -4,6 +4,7 @@ from elasticsearch import Elasticsearch
 from flask import Blueprint, Flask
 from flask_cors import CORS
 from flask_migrate import Migrate
+
 from project.api.models.base_model import db
 from project.api.token_checker import jwt
 from project.urls import api
@@ -34,12 +35,7 @@ def create_app():
 
     # instantiate the db
     db.init_app(app)
-    api.init_app(
-        app,
-        Blueprint(
-            "api", __name__, url_prefix=base_url
-        )
-    )
+    api.init_app(app, Blueprint("api", __name__, url_prefix=base_url))
     migrate.init_app(app, db)
     jwt.init_app(app)
 
