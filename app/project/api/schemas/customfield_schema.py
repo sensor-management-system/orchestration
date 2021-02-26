@@ -17,3 +17,12 @@ class CustomFieldSchema(MarshmallowSchema):
     id = fields.Integer(as_string=True)
     key = fields.Str(required=True)
     value = fields.Str(allow_none=True)
+
+    @staticmethod
+    def dict_serializer(obj):
+        """Convert the object to a dict."""
+        if obj is not None:
+            return {
+                "key": obj.key,
+                "value": obj.value,
+            }

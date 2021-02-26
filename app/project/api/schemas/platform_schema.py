@@ -1,6 +1,8 @@
 from marshmallow_jsonapi import fields
 from marshmallow_jsonapi.flask import Relationship, Schema
+
 from project.api.schemas.attachment_schema import AttachmentSchema
+from project.api.schemas.contact_schema import ContactSchema
 
 
 class PlatformSchema(Schema):
@@ -55,3 +57,40 @@ class PlatformSchema(Schema):
         type_="contact",
         id_field="id",
     )
+
+    @staticmethod
+    def nested_dict_serializer(obj):
+        """serialize the object to a nested dict."""
+        return PlatformToNestedDictSerializer().to_nested_dict(obj)
+
+
+class PlatformToNestedDictSerializer:
+    @staticmethod
+    def to_nested_dict(platform):
+        """
+        Convert to nested dict.
+        :param platform:
+        :return:
+        """
+        if platform is not None:
+            return {
+                "short_name": platform.short_name,
+                "long_name": platform.long_name,
+                "description": platform.description,
+                "manufacturer_name": platform.manufacturer_name,
+                "manufacturer_uri": platform.manufacturer_uri,
+                "model": platform.model,
+                "platform_type_name": platform.platform_type_name,
+                "status_name": platform.status_name,
+                "website": platform.website,
+                "inventory_number": platform.inventory_number,
+                "serial_number": platform.serial_number,
+                "persistent_identifier": platform.persistent_identifier,
+                "attachments": [
+                    AttachmentSchema().dict_serializer(a)
+                    for a in platform.platform_attachments
+                ],
+                "contacts": [
+                    ContactSchema().dict_serializer(c) for c in platform.contacts
+                ],
+            }

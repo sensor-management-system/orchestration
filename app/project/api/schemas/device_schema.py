@@ -1,9 +1,12 @@
 from marshmallow_jsonapi import fields
 from marshmallow_jsonapi.flask import Relationship, Schema
+
 from project.api.schemas.attachment_schema import AttachmentSchema
+from project.api.schemas.contact_schema import ContactSchema
 from project.api.schemas.customfield_schema import CustomFieldSchema
-from project.api.schemas.device_property_schema import \
-    InnerDevicePropertySchema
+from project.api.schemas.device_property_schema import (
+    InnerDevicePropertySchema,
+)
 
 
 class DeviceSchema(Schema):
@@ -86,3 +89,54 @@ class DeviceSchema(Schema):
         type_="contact",
         id_field="id",
     )
+
+    @staticmethod
+    def nested_dict_serializer(obj):
+        """
+        serialize the object to a nested dict.
+        :param obj: a sensor object
+        :return:
+        """
+        return DeviceToNestedDictSerializer().to_nested_dict(obj)
+
+
+class DeviceToNestedDictSerializer:
+    @staticmethod
+    def to_nested_dict(device):
+        """
+         Convert to nested dict.
+        :param device:
+        :return:
+        """
+        if device is not None:
+            return {
+                "short_name": device.short_name,
+                "long_name": device.long_name,
+                "description": device.description,
+                "serial_number": device.serial_number,
+                "manufacturer_name": device.manufacturer_name,
+                "manufacturer_uri": device.manufacturer_uri,
+                "dual_use": device.dual_use,
+                "model": device.model,
+                "inventory_number": device.inventory_number,
+                "persistent_identifier": device.persistent_identifier,
+                "website": device.website,
+                "device_type_name": device.device_type_name,
+                "device_type_uri": device.device_type_uri,
+                "status_name": device.status_name,
+                "status_uri": device.status_uri,
+                "attachments": [
+                    AttachmentSchema().dict_serializer(a)
+                    for a in device.device_attachments
+                ],
+                "contacts": [
+                    ContactSchema().dict_serializer(c) for c in device.contacts
+                ],
+                "properties": [
+                    InnerDevicePropertySchema().dict_serializer(p)
+                    for p in device.device_properties
+                ],
+                "customfields": [
+                    CustomFieldSchema.dict_serializer(c) for c in device.customfields
+                ],
+            }

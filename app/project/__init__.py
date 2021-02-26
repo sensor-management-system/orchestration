@@ -8,8 +8,6 @@ from project.api.models.base_model import db
 from project.api.token_checker import jwt
 from project.urls import api
 
-from project.frj_csv_export.render_csv import render_csv
-
 migrate = Migrate()
 base_url = os.getenv("URL_PREFIX", "/rdm/svm-api/v1")
 
@@ -40,8 +38,7 @@ def create_app():
         app,
         Blueprint(
             "api", __name__, url_prefix=base_url
-        ),
-        response_renderers={"text/csv": render_csv}
+        )
     )
     migrate.init_app(app, db)
     jwt.init_app(app)

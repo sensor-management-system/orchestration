@@ -15,12 +15,12 @@ class Api(APIBase):
     """The main class of the Api"""
 
     def __init__(
-            self,
-            app=None,
-            blueprint=None,
-            decorators=None,
-            request_parsers=None,
-            response_renderers=None,
+        self,
+        app=None,
+        blueprint=None,
+        decorators=None,
+        request_parsers=None,
+        response_renderers=None,
     ):
         """Initialize an instance of the Api
 
@@ -37,12 +37,14 @@ class Api(APIBase):
         self.request_parsers = request_parsers or {}
         self.response_renderers = response_renderers or {}
 
-    def init_app(self,
-                 app=None,
-                 blueprint=None,
-                 additional_blueprints=None,
-                 request_parsers=None,
-                 response_renderers=None, ):
+    def init_app(
+        self,
+        app=None,
+        blueprint=None,
+        additional_blueprints=None,
+        request_parsers=None,
+        response_renderers=None,
+    ):
         """Update flask application with our api
 
         :param Application app: a flask application
@@ -54,10 +56,12 @@ class Api(APIBase):
             self.blueprint = blueprint
 
         for resource in self.resources:
-            self.route(resource['resource'],
-                       resource['view'],
-                       *resource['urls'],
-                       url_rule_options=resource['url_rule_options'])
+            self.route(
+                resource["resource"],
+                resource["view"],
+                *resource["urls"],
+                url_rule_options=resource["url_rule_options"],
+            )
 
         if self.blueprint is not None:
             self.app.register_blueprint(self.blueprint)
@@ -66,7 +70,7 @@ class Api(APIBase):
             for blueprint in additional_blueprints:
                 self.app.register_blueprint(blueprint)
 
-        self.app.config.setdefault('PAGE_SIZE', 30)
+        self.app.config.setdefault("PAGE_SIZE", 30)
         # Store any custom parsers and renderers, which will be passed to the resources
         self.request_parsers = request_parsers or {}
         self.response_renderers = response_renderers or {}
