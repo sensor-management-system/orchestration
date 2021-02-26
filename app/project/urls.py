@@ -1,8 +1,13 @@
-from project.frj_csv_export.api import Api
 from project.api.ping import Ping
 from project.api.resourceManager import (
     ConfigurationDetail,
+    ConfigurationDeviceDetail,
+    ConfigurationDeviceList,
+    ConfigurationDeviceRelationship,
     ConfigurationList,
+    ConfigurationPlatformDetail,
+    ConfigurationPlatformList,
+    ConfigurationPlatformRelationship,
     ConfigurationRelationship,
     ContactDetail,
     ContactList,
@@ -22,13 +27,8 @@ from project.api.resourceManager import (
     UserDetail,
     UserList,
     UserRelationship,
-    ConfigurationPlatformList,
-    ConfigurationDeviceList,
-    ConfigurationDeviceDetail,
-    ConfigurationPlatformDetail,
-    ConfigurationPlatformRelationship,
-    ConfigurationDeviceRelationship,
 )
+from project.frj_csv_export.api import Api
 
 api = Api()
 

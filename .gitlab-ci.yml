@@ -28,18 +28,10 @@ unittest-lint:
   stage: test
   image: $CONTAINER_TEST_IMAGE
   before_script:
-    - pip install --upgrade setuptools
-    - pip install --upgrade flake8
-    - pip install setuptools pylint pylint-exit pylint_flask pylint_flask_sqlalchemy
+    - apt-get update
+    - apt-get install -y  --no-install-recommends gcc libssl-dev libffi-dev musl-dev cargo
   script:
-    - flake8 --max-line-length=100 --ignore F401,W504 $CI_PROJECT_DIR/app/project
-    - pylint $CI_PROJECT_DIR/app/project --rcfile=$CI_PROJECT_DIR/app/.pylintrc| tee pylint.txt || pylint-exit $?
-    - score=$(sed -n 's/^Your code has been rated at \([-0-9.]*\)\/.*/\1/p' pylint.txt)
-    - echo "Pylint score was $score"
-
-  artifacts:
-    paths:
-      - pylint.txt
+    - cd $CI_PROJECT_DIR/app/ && tox
 
 test-image:
   services:

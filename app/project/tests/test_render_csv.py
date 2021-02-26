@@ -1,5 +1,6 @@
 from csv import DictReader
 
+from project import base_url
 from project.api.models.base_model import db
 from project.api.models.device import Device
 from project.api.schemas.device_schema import DeviceSchema
@@ -54,10 +55,10 @@ class Test(BaseTestCase):
             headers={"Content-Type": "application/vnd.api+json", "Accept": "text/csv"},
         )
         # still need to be converted to dict WIP
-        rows = list(DictReader(response.data.decode().split('\n')))
+        rows = list(DictReader(response.data.decode().split("\n")))
         # Since we only have sensor1 and sensor2, there should be just 2 rows
         assert len(rows) == 2
         # The names should be in the dictionary
-        names = set([row['short_name'] for row in rows])
-        assert 'device_short_name test' in names
-        assert 'device_short_name test2' in names
+        names = set([row["short_name"] for row in rows])
+        assert "device_short_name test" in names
+        assert "device_short_name test2" in names

@@ -4,9 +4,7 @@ from marshmallow_jsonapi.flask import Relationship, Schema
 from project.api.schemas.attachment_schema import AttachmentSchema
 from project.api.schemas.contact_schema import ContactSchema
 from project.api.schemas.customfield_schema import CustomFieldSchema
-from project.api.schemas.device_property_schema import (
-    InnerDevicePropertySchema,
-)
+from project.api.schemas.device_property_schema import InnerDevicePropertySchema
 
 
 class DeviceSchema(Schema):
