@@ -51,5 +51,5 @@ class GenericConfigurationAction(db.Model, AuditMixin):
         "Contact",
         uselist=False,
         foreign_keys=[contact_id],
-        backref=db.backref("generic_device_actions")
+        backref=db.backref("generic_configuration_actions")
     )
