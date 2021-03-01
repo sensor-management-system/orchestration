@@ -1,4 +1,5 @@
 from flask_rest_jsonapi import ResourceRelationship
+
 from project.api.models.base_model import db
 from project.api.models.device import Device
 from project.api.schemas.device_schema import DeviceSchema

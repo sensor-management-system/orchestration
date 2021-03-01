@@ -4,11 +4,10 @@ from elasticsearch import Elasticsearch
 from flask import Blueprint, Flask
 from flask_cors import CORS
 from flask_migrate import Migrate
+
 from project.api.models.base_model import db
 from project.api.token_checker import jwt
 from project.urls import api
-
-from project.frj_csv_export.render_csv import render_csv
 
 migrate = Migrate()
 base_url = os.getenv("URL_PREFIX", "/rdm/svm-api/v1")
@@ -36,13 +35,7 @@ def create_app():
 
     # instantiate the db
     db.init_app(app)
-    api.init_app(
-        app,
-        Blueprint(
-            "api", __name__, url_prefix=base_url
-        ),
-        response_renderers={"text/csv": render_csv}
-    )
+    api.init_app(app, Blueprint("api", __name__, url_prefix=base_url))
     migrate.init_app(app, db)
     jwt.init_app(app)
 

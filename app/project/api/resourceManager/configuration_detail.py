@@ -1,4 +1,5 @@
 from flask_rest_jsonapi import ResourceDetail
+
 from project.api.models.base_model import db
 from project.api.models.configuration import Configuration
 from project.api.resourceManager.base_resource import add_updated_by_id

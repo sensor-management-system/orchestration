@@ -1,4 +1,4 @@
-from project.frj_csv_export.resource import ResourceList
+from project.api.datalayers.esalchemy import EsSqlalchemyDataLayer
 from project.api.models.base_model import db
 from project.api.models.configuration import Configuration
 from project.api.resourceManager.base_resource import (
@@ -6,8 +6,8 @@ from project.api.resourceManager.base_resource import (
     add_created_by_id,
 )
 from project.api.schemas.configuration_schema import ConfigurationSchema
-from project.api.datalayers.esalchemy import EsSqlalchemyDataLayer
 from project.api.token_checker import token_required
+from project.frj_csv_export.resource import ResourceList
 
 
 class ConfigurationList(ResourceList):

@@ -10,8 +10,5 @@ class Ping(ResourceList):
         """Using GET method to ping API
         :return: response
         """
-        response = {
-            'status': 'success',
-            'message': 'Hello Sensor!'
-        }
+        response = {"status": "success", "message": "Hello Sensor!"}
         return response
