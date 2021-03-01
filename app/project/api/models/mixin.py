@@ -3,6 +3,9 @@ import itertools
 from datetime import datetime
 
 import sqlalchemy
+from sqlalchemy.ext.declarative import declared_attr
+from sqlalchemy.sql import func
+
 from project.api.models.base_model import db
 from project.api.search import (
     add_to_index,
@@ -11,8 +14,6 @@ from project.api.search import (
     remove_from_index,
     remove_index,
 )
-from sqlalchemy.ext.declarative import declared_attr
-from sqlalchemy.sql import func
 
 
 class AuditMixin:

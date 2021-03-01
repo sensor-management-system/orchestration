@@ -1,7 +1,15 @@
 from marshmallow_jsonapi import fields
 from marshmallow_jsonapi.flask import Relationship, Schema
-from project.api.serializer.configuration_hierarchy_field import \
-    ConfigurationHierarchyField
+
+from project.api.schemas.configuration_device_schema import ConfigurationDeviceSchema
+from project.api.schemas.configuration_platform_schema import (
+    ConfigurationPlatformSchema,
+)
+from project.api.schemas.contact_schema import ContactSchema
+from project.api.schemas.device_property_schema import InnerDevicePropertySchema
+from project.api.serializer.configuration_hierarchy_field import (
+    ConfigurationHierarchyField,
+)
 
 
 class ConfigurationSchema(Schema):
@@ -92,3 +100,57 @@ class ConfigurationSchema(Schema):
         type="configuration_device",
         id_field="id",
     )
+
+    @staticmethod
+    def nested_dict_serializer(configuration):
+        """serialize the object to a nested dict."""
+        return ConfigurationToNestedDictSerializer().to_nested_dict(configuration)
+
+
+class ConfigurationToNestedDictSerializer:
+    @staticmethod
+    def to_nested_dict(configuration):
+        """
+        Convert the configuration-object to a nested dict.
+        :param configuration:
+        :return:
+        """
+        if configuration is not None:
+            configuration_platforms = []
+            configuration_devices = []
+            for cd in configuration.configuration_devices:
+                configuration_device = (
+                    ConfigurationDeviceSchema().nested_dict_serializer(cd)
+                )
+                configuration_devices.append(configuration_device)
+            for cp in configuration.configuration_platforms:
+                configuration_platform = (
+                    ConfigurationPlatformSchema().nested_dict_serializer(cp)
+                )
+                configuration_platforms.append(configuration_platform)
+            return {
+                "label": configuration.label,
+                "status": configuration.status,
+                "location_type": configuration.location_type,
+                "project_uri": configuration.project_uri,
+                "project_name": configuration.project_name,
+                "contacts": [
+                    ContactSchema().dict_serializer(c) for c in configuration.contacts
+                ],
+                "start_date": configuration.start_date,
+                "end_date": configuration.end_date,
+                "configuration_platforms": configuration_platforms,
+                "configuration_devices": configuration_devices,
+                "longitude": configuration.longitude,
+                "src_longitude": InnerDevicePropertySchema().dict_serializer(
+                    configuration.src_longitude
+                ),
+                "latitude": configuration.latitude,
+                "src_latitude": InnerDevicePropertySchema().dict_serializer(
+                    configuration.src_latitude
+                ),
+                "elevation": configuration.elevation,
+                "src_elevation": InnerDevicePropertySchema().dict_serializer(
+                    configuration.src_elevation
+                ),
+            }

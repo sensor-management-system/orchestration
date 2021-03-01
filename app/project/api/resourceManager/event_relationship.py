@@ -1,4 +1,5 @@
 from flask_rest_jsonapi import ResourceRelationship
+
 from project.api.models.base_model import db
 from project.api.models.event import Event
 from project.api.schemas.event_schema import EventSchema

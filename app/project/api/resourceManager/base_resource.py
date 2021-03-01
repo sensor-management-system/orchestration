@@ -1,4 +1,5 @@
 from flask_jwt_extended import get_jwt_identity
+
 from project.api.models.base_model import db
 from project.api.models.contact import Contact
 from project.api.models.user import User

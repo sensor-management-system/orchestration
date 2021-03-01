@@ -1,4 +1,4 @@
-from project.frj_csv_export.resource import ResourceList
+from project.api.datalayers.esalchemy import EsSqlalchemyDataLayer
 from project.api.models.base_model import db
 from project.api.models.platform import Platform
 from project.api.resourceManager.base_resource import (
@@ -7,7 +7,7 @@ from project.api.resourceManager.base_resource import (
 )
 from project.api.schemas.platform_schema import PlatformSchema
 from project.api.token_checker import token_required
-from project.api.datalayers.esalchemy import EsSqlalchemyDataLayer
+from project.frj_csv_export.resource import ResourceList
 
 
 class PlatformList(ResourceList):

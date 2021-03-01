@@ -19,14 +19,14 @@ services:
     networks:
       - elastic
   app:
-    image: python:3-alpine
+    image: python:3.9-slim-buster
     working_dir: /usr/src/app
     volumes:
       - './app:/usr/src/app'
     ports:
       - "${HTTP_LOCAL_BINDING:-127.0.0.1:5000}:5000"
     env_file:
-         - ./app_env/compose.env
+      - ./app_env/compose.env
     depends_on:
       - db
     networks:
@@ -34,17 +34,14 @@ services:
       - db
     command: >
       sh -c "
-      apk add --no-cache --virtual .build-deps \
-          gcc \
-          python3-dev \
-          musl-dev \
-          postgresql-dev \
-          libressl-dev \
-          musl-dev \
-          cargo \
-          libffi-dev\
+      apt-get update && apt-get install -y  --no-install-recommends \
+        gcc \
+        libssl-dev \
+        libffi-dev \
+        musl-dev \
+        cargo \
+      && apt-get clean
       && pip install --no-cache-dir --upgrade pip
-      && pip install setuptools-rust
       && pip install --no-cache-dir -r requirements.txt
       && gunicorn -b 0.0.0.0:5000 manage:app
       "
@@ -63,7 +60,7 @@ services:
 volumes:
   esdata01:
     driver: local
-  
+
 networks:
   elastic:
     driver: bridge
