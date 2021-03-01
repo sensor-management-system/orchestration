@@ -1,5 +1,7 @@
 from project.api.models.base_model import db
 
+from project.api.models.configuration_attachment import ConfigurationAttachment
+
 
 class GenericPlatformActionAttachment(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -50,6 +52,6 @@ class GenericConfigurationActionAttachment(db.Model):
         db.Integer, db.ForeignKey("configuration_attachment.id"), nullable=False
     )
     attachment = db.relationship(
-        "ConfigurationAttachment", uselist=False, foreign_keys=[attachment_id],
+        ConfigurationAttachment, uselist=False, foreign_keys=[attachment_id],
         backref=db.backref("generic_configuration_action_attachments")
     )

@@ -6,13 +6,15 @@ from flask_testing import TestCase
 
 from project import create_app
 from project.api.models.base_model import db
+from faker import Faker
 
 app = create_app()
+fake = Faker()
 
 
 def encode_token_date_with_hs256(
-    token_data,
-    headers=None,
+        token_data,
+        headers=None,
 ):
     """
     Make use of the flask_jwt_extended methode (_encode_jwt) to
@@ -71,11 +73,8 @@ def generate_token_data():
     """
     # get current time in seconds
     now = int(time.time())
-    from faker import Faker
-
-    f = Faker()
     # generate a random name will bw like "test test"
-    name = f.unique.name()
+    name = fake.unique.name()
     # separate the name to a list
     name_l = name.lower().split(" ")
     family_name = name_l[1]
