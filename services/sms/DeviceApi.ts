@@ -31,10 +31,13 @@
  */
 import { AxiosInstance, Method } from 'axios'
 
+import { Contact } from '@/models/Contact'
 import { Device } from '@/models/Device'
 import { DeviceType } from '@/models/DeviceType'
 import { Manufacturer } from '@/models/Manufacturer'
 import { Status } from '@/models/Status'
+
+import { ContactSerializer } from '@/serializers/jsonapi/ContactSerializer'
 
 import { IFlaskJSONAPIFilter } from '@/utils/JSONApiInterfaces'
 
@@ -101,6 +104,36 @@ export class DeviceApi {
 
   newSearchBuilder (): DeviceSearchBuilder {
     return new DeviceSearchBuilder(this.axiosApi, this.serializer)
+  }
+
+  findRelatedContacts (deviceId: string): Promise<Contact[]> {
+    const url = deviceId + '/contacts'
+    const params = {
+      'page[size]': 10000
+    }
+    return this.axiosApi.get(url, { params }).then((rawServerResponse) => {
+      return new ContactSerializer().convertJsonApiObjectListToModelList(rawServerResponse.data)
+    })
+  }
+
+  removeContact (deviceId: string, contactId: string): Promise<void> {
+    const url = deviceId + '/relationships/contacts'
+    const params = {
+      data: [{
+        type: 'contact',
+        id: contactId
+      }]
+    }
+    return this.axiosApi.delete(url, { data: params })
+  }
+
+  addContact (deviceId: string, contactId: string): Promise<void> {
+    const url = deviceId + '/relationships/contacts'
+    const data = [{
+      type: 'contact',
+      id: contactId
+    }]
+    return this.axiosApi.post(url, { data })
   }
 }
 
