@@ -1,4 +1,14 @@
-"""empty message
+"""
+This MR introduces actions to the SMS.
+
+It includes:
+* Generic device actions
+* Generic platform actions
+* Generic configuration actions (including configuration attachments)
+* device calibration actions (with can be associated with a list of device properties)
+* software update actions (for both devices & platforms)
+* device & platform mount & unmount actions on configurations
+* start & end actions for configuration locations (both static & dynamic)
 
 Revision ID: ce029fd02198
 Revises: eac266534186

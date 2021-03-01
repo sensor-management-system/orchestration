@@ -8,7 +8,7 @@ class DeviceCalibrationAttachment(db.Model):
     )
     action = db.relationship(
         "DeviceCalibrationAction", uselist=False, foreign_keys=[action_id],
-        backref=db.backref("device_calibration_attachment")
+        backref=db.backref("device_calibration_attachments")
     )
     attachment_id = db.Column(
         db.Integer, db.ForeignKey("device_attachment.id"), nullable=False
@@ -17,5 +17,5 @@ class DeviceCalibrationAttachment(db.Model):
         "DeviceAttachment",
         uselist=False,
         foreign_keys=[attachment_id],
-        backref=db.backref("device_calibration_attachment")
+        backref=db.backref("device_calibration_attachments")
     )

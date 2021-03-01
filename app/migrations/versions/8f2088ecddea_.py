@@ -1,4 +1,13 @@
-"""empty message
+"""
+This migration fixes some issues with the ce029fd02198 migration.
+
+The ce029fd02198 migration was used to introduce the model classes for
+actions in the SMS backend.
+As things often don't work perfectly the very first try, here are some improvements:
+
+* enforce some foreign keys by not allowing them to be null
+* fix some constraints regarding to the _name & _uri handling for references to the CV
+
 
 Revision ID: 8f2088ecddea
 Revises: ce029fd02198
