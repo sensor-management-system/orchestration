@@ -25,7 +25,7 @@ class PlatformMountAction(db.Model, AuditMixin):
         "Platform",
         uselist=False,
         foreign_keys=[parent_platform_id],
-        backref=db.backref("nested_platform_mount_actions"),
+        backref=db.backref("outer_platform_mount_actions"),
     )
     begin_date = db.Column(db.DateTime, nullable=False)
     description = db.Column(db.Text, nullable=True)
@@ -58,7 +58,7 @@ class DeviceMountAction(db.Model, AuditMixin):
     )
     parent_platform = db.relationship(
         "Platform", uselist=False, foreign_keys=[parent_platform_id],
-        backref=db.backref("nested_device_mount_actions")
+        backref=db.backref("outer_device_mount_actions")
     )
     begin_date = db.Column(db.DateTime, nullable=False)
     description = db.Column(db.Text, nullable=True)
