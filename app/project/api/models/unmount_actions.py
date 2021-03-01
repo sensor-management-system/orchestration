@@ -28,7 +28,7 @@ class DeviceUnmountAction(db.Model, AuditMixin):
     )
     configuration = db.relationship(
         "Configuration", uselist=False, foreign_keys=[configuration_id],
-        backref=db.backref("device_unmount_action")
+        backref=db.backref("device_unmount_actions")
     )
     device_id = db.Column(db.Integer, db.ForeignKey("device.id"), nullable=False)
     device = db.relationship("Device", uselist=False, foreign_keys=[device_id],
