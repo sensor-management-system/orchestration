@@ -1,13 +1,8 @@
+from project.frj_csv_export.api import Api
 from project.api.ping import Ping
 from project.api.resourceManager import (
     ConfigurationDetail,
-    ConfigurationDeviceDetail,
-    ConfigurationDeviceList,
-    ConfigurationDeviceRelationship,
     ConfigurationList,
-    ConfigurationPlatformDetail,
-    ConfigurationPlatformList,
-    ConfigurationPlatformRelationship,
     ConfigurationRelationship,
     ContactDetail,
     ContactList,
@@ -27,8 +22,37 @@ from project.api.resourceManager import (
     UserDetail,
     UserList,
     UserRelationship,
+    ConfigurationPlatformList,
+    ConfigurationDeviceList,
+    ConfigurationDeviceDetail,
+    ConfigurationPlatformDetail,
+    ConfigurationPlatformRelationship,
+    ConfigurationDeviceRelationship,
 )
-from project.frj_csv_export.api import Api
+
+from project.api.resourceManager.generic_device_action_resources import (
+    GenericDeviceActionList,
+    GenericDeviceActionDetail,
+    GenericDeviceActionRelationship)
+
+from project.api.resourceManager.generic_device_action_attachment_resources import \
+    GenericDeviceActionAttachmentList, GenericDeviceActionAttachmentDetail, \
+    GenericDeviceActionAttachmentRelationship
+
+from project.api.resourceManager.generic_platform_action_resources import \
+    GenericPlatformActionList, GenericPlatformActionRelationship, GenericPlatformActionDetail
+
+from project.api.resourceManager.generic_platform_action_attachment_resources import \
+    GenericPlatformActionAttachmentList, GenericPlatformActionAttachmentDetail, \
+    GenericPlatformActionAttachmentRelationship
+
+from project.api.resourceManager.generic_configuration_action_resources import \
+    GenericConfigurationActionRelationship, GenericConfigurationActionList, \
+    GenericConfigurationActionDetail
+
+from project.api.resourceManager.generic_configuration_action_attachment_resources import \
+    GenericConfigurationActionAttachmentList, GenericConfigurationActionAttachmentDetail, \
+    GenericConfigurationActionAttachmentRelationship
 
 api = Api()
 
@@ -243,3 +267,74 @@ api.route(
     "configuration_device",
     "/configuration-devices/<int:id>/relationships/device",
 )
+# GenericDeviceAction
+api.route(GenericDeviceActionList, "generic_device_action_list", "/generic-device-actions")
+api.route(
+    GenericDeviceActionDetail,
+    "generic_device_action_detail",
+    "/generic-device-actions/<int:id>"
+)
+api.route(GenericDeviceActionRelationship, "generic_device_action_device",
+          "/generic-device-actions/<int:id>/relationships/device")
+api.route(GenericDeviceActionRelationship, "generic_device_action_contact",
+          "/generic-device-actions/<int:id>/relationhips/contact")
+api.route(GenericDeviceActionRelationship, "generic_device_action_attachments",
+          "/generic-device-actions/<int:id>/relationships/attachments")
+# GenericDeviceActionAttachment
+api.route(GenericDeviceActionAttachmentList, "generic_device_action_attachment_list",
+          "/generic-device-action-attachments")
+api.route(GenericDeviceActionAttachmentDetail, "generic_device_action_attachment_detail",
+          "/generic-device-action-attachments/<int:id>")
+api.route(GenericDeviceActionAttachmentRelationship, "generic_device_action_attachment_action",
+          "/generic-device-action-attachments/<int:id>/relationships/action")
+api.route(GenericDeviceActionAttachmentRelationship, "generic_device_action_attachment_attachments",
+          "/generic-device-action-attachments/<int:id>/relationships/attachments")
+# GenericPlatformAction
+api.route(GenericPlatformActionList, "generic_platform_action_list", "/generic-platform-actions")
+api.route(
+    GenericPlatformActionDetail,
+    "generic_platform_action_detail",
+    "/generic-platform-actions/<int:id>"
+)
+api.route(GenericPlatformActionRelationship, "generic_platform_action_platform",
+          "/generic-platform-actions/<int:id>/relationships/platform")
+api.route(GenericPlatformActionRelationship, "generic_platform_action_contact",
+          "/generic-platform-actions/<int:id>/relationhips/contact")
+api.route(GenericPlatformActionRelationship, "generic_platform_action_attachments",
+          "/generic-platform-actions/<int:id>/relationships/attachments")
+# GenericPlatformActionAttachment
+api.route(GenericPlatformActionAttachmentList, "generic_platform_action_attachment_list",
+          "/generic-platform-action-attachments")
+api.route(GenericPlatformActionAttachmentDetail, "generic_platform_action_attachment_detail",
+          "/generic-platform-action-attachments/<int:id>")
+api.route(GenericPlatformActionAttachmentRelationship, "generic_platform_action_attachment_action",
+          "/generic-platform-action-attachments/<int:id>/relationships/action")
+api.route(GenericPlatformActionAttachmentRelationship,
+          "generic_platform_action_attachment_attachments",
+          "/generic-platform-action-attachments/<int:id>/relationships/attachments")
+# GenericConfigurationAction
+api.route(GenericConfigurationActionList, "generic_configuration_action_list",
+          "/generic-configuration-actions")
+api.route(
+    GenericConfigurationActionDetail,
+    "generic_configuration_action_detail",
+    "/generic-configuration-actions/<int:id>"
+)
+api.route(GenericConfigurationActionRelationship, "generic_configuration_action_configuration",
+          "/generic-configuration-actions/<int:id>/relationships/configuration")
+api.route(GenericConfigurationActionRelationship, "generic_configuration_action_contact",
+          "/generic-configuration-actions/<int:id>/relationhips/contact")
+api.route(GenericConfigurationActionRelationship, "generic_configuration_action_attachments",
+          "/generic-configuration-actions/<int:id>/relationships/attachments")
+# GenericConfigurationActionAttachment
+api.route(GenericConfigurationActionAttachmentList, "generic_configuration_action_attachment_list",
+          "/generic-configuration-action-attachments")
+api.route(GenericConfigurationActionAttachmentDetail,
+          "generic_configuration_action_attachment_detail",
+          "/generic-configuration-action-attachments/<int:id>")
+api.route(GenericConfigurationActionAttachmentRelationship,
+          "generic_configuration_action_attachment_action",
+          "/generic-configuration-action-attachments/<int:id>/relationships/action")
+api.route(GenericConfigurationActionAttachmentRelationship,
+          "generic_configuration_action_attachment_attachments",
+          "/generic-configuration-action-attachments/<int:id>/relationships/attachments")
