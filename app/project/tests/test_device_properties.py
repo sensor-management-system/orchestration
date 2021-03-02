@@ -1,7 +1,6 @@
 """Tests for the device property endpoints."""
 
 import json
-import unittest
 
 from project import base_url
 from project.api.models.base_model import db
@@ -67,7 +66,6 @@ class TestDevicePropertyServices(BaseTestCase):
                 device_id=device.id,
             )
         )
-        # For converting it to a list
         # We now have one property
         self.assertEqual(len(device_properties), 1)
 
@@ -90,14 +88,7 @@ class TestDevicePropertyServices(BaseTestCase):
                 "attributes": {
                     "label": "device property1",
                 },
-                "relationships": {
-                    "device": {
-                        "data": {
-                            "type": "device",
-                            "id": None
-                        }
-                    }
-                },
+                "relationships": {"device": {"data": {"type": "device", "id": None}}},
             }
         }
         with self.client:
@@ -158,9 +149,9 @@ class TestDevicePropertyServices(BaseTestCase):
 
             device_property1_data = None
             for property in payload["data"]:
-                property["id"] in [str(pa.id) for pa in all_device_properties]
+                property["id"] in [str(dp.id) for dp in all_device_properties]
                 property["attributes"]["label"] in [
-                    pa.label for pa in all_device_properties
+                    dp.label for dp in all_device_properties
                 ]
 
                 if property["id"] == str(device_property1.id):
@@ -242,9 +233,7 @@ class TestDevicePropertyServices(BaseTestCase):
             }
         }
         with self.client:
-            url_patch = (
-                base_url + "/device-properties/" + str(device_property1.id)
-            )
+            url_patch = base_url + "/device-properties/" + str(device_property1.id)
             response = self.client.patch(
                 url_patch,
                 data=json.dumps(payload),
@@ -255,9 +244,7 @@ class TestDevicePropertyServices(BaseTestCase):
         self.assertEqual(response.status_code, 200)
 
         device_property_reloaded = (
-            db.session.query(DeviceProperty)
-            .filter_by(id=device_property1.id)
-            .one()
+            db.session.query(DeviceProperty).filter_by(id=device_property1.id).one()
         )
         self.assertEqual(device_property_reloaded.label, "property 2")
         self.assertEqual(device_property_reloaded.device_id, device2.id)

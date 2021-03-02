@@ -1,7 +1,6 @@
 """Tests for the platform attachment endpoints."""
 
 import json
-import unittest
 
 from project import base_url
 from project.api.models.base_model import db
@@ -66,7 +65,6 @@ class TestPlatformAttachmentServices(BaseTestCase):
                 platform_id=platform.id,
             )
         )
-        # For converting it to a list
         # We now have one attachment
         self.assertEqual(len(platform_attachments), 1)
 
@@ -111,9 +109,13 @@ class TestPlatformAttachmentServices(BaseTestCase):
         # it will not work, as we miss an important part (the url)
         # 422 => unprocessable entity
         self.assertEqual(response.status_code, 422)
-        count_attachments = db.session.query(PlatformAttachment).filter_by(
-            platform_id=platform.id,
-        ).count()
+        count_attachments = (
+            db.session.query(PlatformAttachment)
+            .filter_by(
+                platform_id=platform.id,
+            )
+            .count()
+        )
         self.assertEqual(count_attachments, 0)
 
     def test_post_platform_attachment_api_missing_platform(self):
@@ -127,12 +129,7 @@ class TestPlatformAttachmentServices(BaseTestCase):
                     "label": "GFZ Homepage",
                 },
                 "relationships": {
-                    "platform": {
-                        "data": {
-                            "type": "platform",
-                            "id": None
-                        }
-                    }
+                    "platform": {"data": {"type": "platform", "id": None}}
                 },
             }
         }
@@ -147,7 +144,9 @@ class TestPlatformAttachmentServices(BaseTestCase):
         # it will not work, as we miss an important part (the platform)
         self.assertEqual(response.status_code, 500)
         count_platform_attachments_after = db.session.query(PlatformAttachment).count()
-        self.assertEqual(count_platform_attachments_before, count_platform_attachments_after)
+        self.assertEqual(
+            count_platform_attachments_before, count_platform_attachments_after
+        )
 
     def test_get_platform_attachment_api(self):
         """Ensure that we can get a list of platform attachments."""
