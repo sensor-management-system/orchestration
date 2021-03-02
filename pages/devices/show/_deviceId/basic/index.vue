@@ -1,13 +1,18 @@
 <template>
   <div>
-    <v-row>
-      <v-col>
-        <v-btn v-if="isLoggedIn" nuxt :to="'/devices/show/' + deviceId + '/basic/edit'">
-          Edit
-        </v-btn>
-      </v-col>
-    </v-row>
-    <DeviceBasicDataForm v-model="device" :readonly="true" />
+    <div v-if="isLoading">
+      <v-progress-circular indeterminate />
+    </div>
+    <div v-else>
+      <v-row>
+        <v-col>
+          <v-btn v-if="isLoggedIn" nuxt :to="'/devices/show/' + deviceId + '/basic/edit'">
+            Edit
+          </v-btn>
+        </v-col>
+      </v-row>
+      <DeviceBasicDataForm v-model="device" :readonly="true" />
+    </div>
   </div>
 </template>
 
@@ -25,12 +30,15 @@ import { Device } from '@/models/Device'
 })
 export default class DeviceShowBasicPage extends Vue {
   private device: Device = new Device()
+  private isLoading: boolean = true
 
   mounted () {
     this.$api.devices.findById(this.deviceId).then((device) => {
       this.device = device
+      this.isLoading = false
     }).catch((_error) => {
       this.$store.commit('snackbar/setError', 'Loading device failed')
+      this.isLoading = false
     })
   }
 

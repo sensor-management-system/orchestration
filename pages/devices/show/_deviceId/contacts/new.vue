@@ -30,18 +30,28 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <v-row>
-      <v-col cols="3">
-        <v-autocomplete :items="allExceptSelected" :item-text="(x) => x" :item-value="(x) => x.id" label="New contact" @change="select" />
-      </v-col>
-    </v-row>
-    <v-row>
-      <v-col>
-        <v-btn :disabled="selectedContact == null" @click="addContact">
-          Add
-        </v-btn>
-      </v-col>
-    </v-row>
+    <div v-if="isLoading">
+      <div class="text-center pt-2">
+        <v-progress-circular indeterminate />
+      </div>
+    </div>
+    <div v-else>
+      <v-row>
+        <v-col cols="3">
+          <v-autocomplete :items="allExceptSelected" :item-text="(x) => x" :item-value="(x) => x.id" label="New contact" @change="select" />
+        </v-col>
+      </v-row>
+      <v-row>
+        <v-col>
+          <v-btn :disabled="selectedContact == null" @click="addContact">
+            Add
+          </v-btn>
+          <v-btn nuxt :to="'/devices/show/' + deviceId + '/contacts'">
+            Cancel
+          </v-btn>
+        </v-col>
+      </v-row>
+    </div>
   </div>
 </template>
 
@@ -58,18 +68,22 @@ export default class DeviceAddContactPage extends Vue {
   private alreadyUsedContacts: Contact[] = []
   private allContacts: Contact[] = []
   private selectedContact: Contact | null = null
+  private loadingUsedContacts = true
+  private loadingAllContacts = true
 
   mounted () {
     this.$api.devices.findRelatedContacts(this.deviceId).then((foundContacts) => {
       this.alreadyUsedContacts = foundContacts
+      this.loadingUsedContacts = false
     })
     this.$api.contacts.findAll().then((foundContacts) => {
       this.allContacts = foundContacts
+      this.loadingAllContacts = false
     })
   }
 
   addContact () {
-    if (this.selectedContact && this.selectedContact.id) {
+    if (this.selectedContact && this.selectedContact.id && this.isLoggedIn) {
       this.$api.devices.addContact(this.deviceId, this.selectedContact.id).then(() => {
         this.$router.push('/devices/show/' + this.deviceId + '/contacts')
       })
@@ -85,12 +99,20 @@ export default class DeviceAddContactPage extends Vue {
     }
   }
 
+  get isLoading () {
+    return this.loadingUsedContacts || this.loadingAllContacts
+  }
+
   get allExceptSelected () {
     return this.allContacts.filter(c => !this.alreadyUsedContacts.find(rc => rc.id === c.id))
   }
 
   get deviceId () {
     return this.$route.params.deviceId
+  }
+
+  get isLoggedIn () {
+    return this.$store.getters['oidc/isAuthenticated']
   }
 }
 </script>

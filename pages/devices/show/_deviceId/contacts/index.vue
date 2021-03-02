@@ -1,125 +1,130 @@
 <template>
   <div>
-    <v-row>
+    <v-row v-if="isLoggedIn">
       <v-col>
         <v-btn nuxt :to="'/devices/show/' + deviceId + '/contacts/new'">
           Add contact
         </v-btn>
       </v-col>
     </v-row>
-    <v-expansion-panels>
-      <v-expansion-panel
-        v-for="contact in contacts"
-        :key="contact.id"
-      >
-        <v-expansion-panel-header>
-          {{ contact.toString() }}
-        </v-expansion-panel-header>
-        <v-expansion-panel-content>
-          <template>
-            <div>
-              <v-row
-                dense
-              >
-                <v-col
-                  cols="4"
-                  xs="4"
-                  sm="3"
-                  md="2"
-                  lg="2"
-                  xl="1"
-                  class="font-weight-medium"
+    <div v-if="isLoading">
+      <v-progress-circular indeterminate />
+    </div>
+    <div v-else>
+      <v-expansion-panels>
+        <v-expansion-panel
+          v-for="contact in contacts"
+          :key="contact.id"
+        >
+          <v-expansion-panel-header>
+            {{ contact.toString() }}
+          </v-expansion-panel-header>
+          <v-expansion-panel-content>
+            <template>
+              <div>
+                <v-row
+                  dense
                 >
-                  Given name:
-                </v-col>
-                <v-col
-                  cols="8"
-                  xs="8"
-                  sm="9"
-                  md="4"
-                  lg="4"
-                  xl="5"
+                  <v-col
+                    cols="4"
+                    xs="4"
+                    sm="3"
+                    md="2"
+                    lg="2"
+                    xl="1"
+                    class="font-weight-medium"
+                  >
+                    Given name:
+                  </v-col>
+                  <v-col
+                    cols="8"
+                    xs="8"
+                    sm="9"
+                    md="4"
+                    lg="4"
+                    xl="5"
+                  >
+                    {{ contact.givenName }}
+                  </v-col>
+                  <v-col
+                    cols="4"
+                    xs="4"
+                    sm="3"
+                    md="2"
+                    lg="2"
+                    xl="1"
+                    class="font-weight-medium"
+                  >
+                    Family name:
+                  </v-col>
+                  <v-col
+                    cols="8"
+                    xs="8"
+                    sm="9"
+                    md="4"
+                    lg="4"
+                    xl="5"
+                  >
+                    {{ contact.familyName }}
+                  </v-col>
+                </v-row>
+                <v-row
+                  dense
                 >
-                  {{ contact.givenName }}
-                </v-col>
-                <v-col
-                  cols="4"
-                  xs="4"
-                  sm="3"
-                  md="2"
-                  lg="2"
-                  xl="1"
-                  class="font-weight-medium"
-                >
-                  Family name:
-                </v-col>
-                <v-col
-                  cols="8"
-                  xs="8"
-                  sm="9"
-                  md="4"
-                  lg="4"
-                  xl="5"
-                >
-                  {{ contact.familyName }}
-                </v-col>
-              </v-row>
-              <v-row
-                dense
-              >
-                <v-col
-                  cols="4"
-                  xs="4"
-                  sm="3"
-                  md="2"
-                  lg="2"
-                  xl="1"
-                  class="font-weight-medium"
-                >
-                  E-Mail:
-                </v-col>
-                <v-col
-                  cols="8"
-                  xs="8"
-                  sm="9"
-                  md="4"
-                  lg="4"
-                  xl="5"
-                >
-                  {{ contact.email }}
-                </v-col>
-                <v-col
-                  cols="4"
-                  xs="4"
-                  sm="3"
-                  md="2"
-                  lg="2"
-                  xl="1"
-                  class="font-weight-medium"
-                >
-                  Website:
-                </v-col>
-                <v-col
-                  cols="8"
-                  xs="8"
-                  sm="9"
-                  md="4"
-                  lg="4"
-                  xl="5"
-                >
-                  {{ contact.website }}
-                </v-col>
-              </v-row>
-              <v-row>
-                <v-btn @click="removeContact(contact.id)">
-                  Remove from device
-                </v-btn>
-              </v-row>
-            </div>
-          </template>
-        </v-expansion-panel-content>
-      </v-expansion-panel>
-    </v-expansion-panels>
+                  <v-col
+                    cols="4"
+                    xs="4"
+                    sm="3"
+                    md="2"
+                    lg="2"
+                    xl="1"
+                    class="font-weight-medium"
+                  >
+                    E-Mail:
+                  </v-col>
+                  <v-col
+                    cols="8"
+                    xs="8"
+                    sm="9"
+                    md="4"
+                    lg="4"
+                    xl="5"
+                  >
+                    {{ contact.email }}
+                  </v-col>
+                  <v-col
+                    cols="4"
+                    xs="4"
+                    sm="3"
+                    md="2"
+                    lg="2"
+                    xl="1"
+                    class="font-weight-medium"
+                  >
+                    Website:
+                  </v-col>
+                  <v-col
+                    cols="8"
+                    xs="8"
+                    sm="9"
+                    md="4"
+                    lg="4"
+                    xl="5"
+                  >
+                    {{ contact.website }}
+                  </v-col>
+                </v-row>
+                <v-row v-if="isLoggedIn">
+                  <v-btn @click="removeContact(contact.id)">
+                    Remove from device
+                  </v-btn>
+                </v-row>
+              </div>
+            </template>
+          </v-expansion-panel-content>
+        </v-expansion-panel>
+      </v-expansion-panels>
+    </div>
   </div>
 </template>
 
@@ -131,10 +136,12 @@ import { Contact } from '@/models/Contact'
 })
 export default class DeviceShowContactsPage extends Vue {
   private contacts: Contact[] = []
+  private isLoading = true
 
   mounted () {
     this.$api.devices.findRelatedContacts(this.deviceId).then((foundContacts) => {
       this.contacts = foundContacts
+      this.isLoading = false
     })
   }
 
@@ -142,8 +149,8 @@ export default class DeviceShowContactsPage extends Vue {
     return this.$route.params.deviceId
   }
 
-  headerByContact (contact: Contact) {
-    return contact.givenName + ' ' + contact.familyName
+  get isLoggedIn () {
+    return this.$store.getters['oidc/isAuthenticated']
   }
 
   removeContact (contactId: string) {
