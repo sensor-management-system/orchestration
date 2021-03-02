@@ -13,7 +13,7 @@ from project.tests.base import BaseTestCase, create_token, query_result_to_list
 class TestPlatformAttachmentServices(BaseTestCase):
     """Test platform attachments."""
 
-    def test_add_platform_attachment_api(self):
+    def test_post_platform_attachment_api(self):
         """Ensure that we can add a platform attachment."""
         # First we need to make sure that we have a platform
         platform = Platform(
@@ -188,3 +188,54 @@ class TestPlatformAttachmentServices(BaseTestCase):
             self.assertEqual(response.status_code, 200)
             self.assertEqual(len(response.get_json()["data"]), 1)
 
+    def test_patch_platform_attachment_api(self):
+        """Ensure that we can update a platform attachment."""
+        platform1 = Platform(short_name="Just a platform")
+        platform2 = Platform(short_name="Another platform")
+
+        db.session.add(platform1)
+        db.session.add(platform2)
+        db.session.commit()
+
+        platform_attachment1 = PlatformAttachment(
+            label="GFZ",
+            url="https://www.gfz-potsdam.de",
+            platform=platform1,
+        )
+        db.session.add(platform_attachment1)
+        db.session.commit()
+
+        payload = {
+            "data": {
+                "type": "platform_attachment",
+                "id": str(platform_attachment1.id),
+                "attributes": {
+                    "label": "UFZ",
+                    "url": "https://www.ufz.de",
+                },
+                "relationships": {
+                    "platform": {"data": {"type": "platform", "id": str(platform2.id)}}
+                },
+            }
+        }
+        with self.client:
+            url_patch = (
+                base_url + "/platform-attachments/" + str(platform_attachment1.id)
+            )
+            response = self.client.patch(
+                url_patch,
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+                headers=create_token(),
+            )
+
+        self.assertEqual(response.status_code, 200)
+
+        platform_attachment_reloaded = (
+            db.session.query(PlatformAttachment)
+            .filter_by(id=platform_attachment1.id)
+            .one()
+        )
+        self.assertEqual(platform_attachment_reloaded.url, "https://www.ufz.de")
+        self.assertEqual(platform_attachment_reloaded.label, "UFZ")
+        self.assertEqual(platform_attachment_reloaded.platform_id, platform2.id)
