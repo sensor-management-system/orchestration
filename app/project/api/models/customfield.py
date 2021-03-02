@@ -10,6 +10,7 @@ class CustomField(db.Model):
     key = db.Column(db.String(256), nullable=False)
     value = db.Column(db.String(1024), nullable=True)
     device_id = db.Column(db.Integer, db.ForeignKey("device.id"), nullable=False)
+    device = db.relationship("Device")
 
     def to_search_entry(self):
         return {
