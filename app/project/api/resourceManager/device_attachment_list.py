@@ -25,7 +25,7 @@ class DeviceAttachmentList(ResourceList):
         Handle also additional logic to query the device
         attachments for a specific device.
         """
-        query = self.session.query(DeviceAttachment)
+        query_ = self.session.query(DeviceAttachment)
         device_id = view_kwargs.get("device_id")
 
         if device_id is not None:

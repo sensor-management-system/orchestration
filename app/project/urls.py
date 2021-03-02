@@ -186,7 +186,7 @@ api.route(
 api.route(
     CustomFieldRelationship,
     "customfield_device",
-    "/customfields/int:id>/relationships/device",
+    "/customfields/<int:id>/relationships/device",
 )
 
 # Contact
