@@ -1,3 +1,4 @@
+"""Module to collect all the resource classes."""
 from .configuration_detail import ConfigurationDetail  # noqa: F401
 from .configuration_device_detail import ConfigurationDeviceDetail  # noqa: F401
 from .configuration_device_list import ConfigurationDeviceList  # noqa: F401
@@ -14,6 +15,12 @@ from .configuration_relationship import ConfigurationRelationship  # noqa: F401
 from .contact_detail import ContactDetail  # noqa: F401
 from .contact_list import ContactList  # noqa: F401
 from .contact_relationship import ContactRelationship  # noqa: F401
+from .customfield_detail import CustomfieldDetail  # noqa: F401
+from .customfield_list import CustomfieldList  # noqa: F401
+from .customfield_relationship import CustomfieldRelationship  # noqa: F401
+from .device_attachment_detail import DeviceAttachmentDetail  # noqa: F401
+from .device_attachment_list import DeviceAttachmentList  # noqa: F401
+from .device_attachment_relationship import DeviceAttachmentRelationship  # noqa: F401
 from .device_detail import DeviceDetail  # noqa: F401
 from .device_list import DeviceList  # noqa: F401
 from .device_property_detail import DevicePropertyDetail  # noqa: F401
@@ -23,6 +30,11 @@ from .device_relationship import DeviceRelationship  # noqa: F401
 from .event_detail import EventDetail  # noqa: F401
 from .event_list import EventList  # noqa: F401
 from .event_relationship import EventRelationship  # noqa: F401
+from .platform_attachment_detail import PlatformAttachmentDetail  # noqa: F401
+from .platform_attachment_list import PlatformAttachmentList  # noqa: F401
+from .platform_attachment_relationship import (
+    PlatformAttachmentRelationship,
+)  # noqa: F401
 from .platform_detail import PlatformDetail  # noqa: F401
 from .platform_list import PlatformList  # noqa: F401
 from .platform_relationship import PlatformRelationship  # noqa: F401

@@ -1,31 +1,31 @@
-"""Module for the device property list resource."""
+"""Module for the device attachment list resource."""
 from flask_rest_jsonapi import ResourceList
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.orm.exc import NoResultFound
 
 from project.api.models.base_model import db
+from project.api.models.device_attachment import DeviceAttachment
 from project.api.models.device import Device
-from project.api.models.device_property import DeviceProperty
-from project.api.schemas.device_property_schema import DevicePropertySchema
+from project.api.schemas.device_attachment_schema import DeviceAttachmentSchema
 from project.api.token_checker import token_required
 
 
-class DevicePropertyList(ResourceList):
+class DeviceAttachmentList(ResourceList):
     """
-    List resource for device properties.
+    List resource for device attachments.
 
-    Provides get and post methods to retrieve
-    a collection of device properties or create one.
+    Provices get and most methods to retrieve a
+    collection of device attachments or to create new ones.
     """
 
     def query(self, view_kwargs):
         """
-        Query all the entries from the database.
+        Query the entries from the database.
 
-        Also handle cases to search for all the device
-        properties of a specific device.
+        Handle also additional logic to query the device
+        attachments for a specific device.
         """
-        query_ = self.session.query(DeviceProperty)
+        query = self.session.query(DeviceAttachment)
         device_id = view_kwargs.get("device_id")
 
         if device_id is not None:
@@ -39,14 +39,14 @@ class DevicePropertyList(ResourceList):
                     "Device: {} not found".format(device_id),
                 )
             else:
-                query_ = query_.filter(DeviceProperty.device_id == device_id)
+                query_ = query_.filter(DeviceAttachment.device_id == device_id)
         return query_
 
-    schema = DevicePropertySchema
+    schema = DeviceAttachmentSchema
     decorators = (token_required,)
     data_layer = {
         "session": db.session,
-        "model": DeviceProperty,
+        "model": DeviceAttachment,
         "methods": {
             "query": query,
         },

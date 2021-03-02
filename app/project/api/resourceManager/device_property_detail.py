@@ -1,3 +1,4 @@
+"""Module for the device property detail resource."""
 from flask_rest_jsonapi import ResourceDetail
 
 from project.api.models.base_model import db
