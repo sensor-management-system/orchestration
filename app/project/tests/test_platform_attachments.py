@@ -125,7 +125,7 @@ class TestPlatformAttachmentServices(BaseTestCase):
 
             self.assertEqual(len(payload["data"]), 3)
 
-            one_attachment_checked_in_detail = False
+            platform_attachment1_data = None
             for attachment in payload["data"]:
                 attachment["id"] in [str(pa.id) for pa in all_platform_attachments]
                 attachment["attributes"]["url"] in [
@@ -136,6 +136,7 @@ class TestPlatformAttachmentServices(BaseTestCase):
                 ]
 
                 if attachment["id"] == str(platform_attachment1.id):
+                    platform_attachment1_data = attachment
                     self.assertEqual(
                         attachment["attributes"]["url"], platform_attachment1.url
                     )
@@ -159,6 +160,31 @@ class TestPlatformAttachmentServices(BaseTestCase):
                         resp_platform.get_json()["data"]["attributes"]["short_name"],
                         platform_attachment1.platform.short_name,
                     )
-                    one_attachment_checked_in_detail = True
 
-            self.assertTrue(one_attachment_checked_in_detail)
+            self.assertTrue(platform_attachment1_data is not None)
+
+            # Now we tested the get request for the list response
+            # It is time to check the detail one as well
+            response = self.client.get(
+                base_url + "/platform-attachments/" + str(platform_attachment1.id),
+                content_type="application/vnd.api+json",
+            )
+            self.assertEqual(response.status_code, 200)
+            # I already tested the response for this attachment
+            self.assertEqual(response.get_json()["data"], platform_attachment1_data)
+
+            # And now we want to make sure that we already filter the platform attachments
+            # with a given platform id
+            response = self.client.get(
+                base_url + "/platforms/" + str(platform1.id) + "/platform-attachments",
+                content_type="application/vnd.api+json",
+            )
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(len(response.get_json()["data"]), 2)
+            response = self.client.get(
+                base_url + "/platforms/" + str(platform2.id) + "/platform-attachments",
+                content_type="application/vnd.api+json",
+            )
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(len(response.get_json()["data"]), 1)
+

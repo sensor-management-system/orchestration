@@ -75,7 +75,7 @@ api.route(
     PlatformAttachmentList,
     "platform_attachment_list",
     "/platform-attachments",
-    "/platform/<int:platform_id>/platform-attachments",
+    "/platforms/<int:platform_id>/platform-attachments",
 )
 api.route(
     PlatformAttachmentDetail,
