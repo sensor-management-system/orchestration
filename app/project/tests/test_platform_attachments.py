@@ -79,6 +79,76 @@ class TestPlatformAttachmentServices(BaseTestCase):
             str(platform_attachment.platform_id), response.get_json()["data"]["id"]
         )
 
+    def test_post_platform_attachment_api_missing_url(self):
+        """Ensure that we don't add a platform attachment with missing url."""
+        platform = Platform(
+            short_name="Very new platform",
+        )
+        db.session.add(platform)
+        db.session.commit()
+
+        # Now we can write the request to add a platform attachment
+        payload = {
+            "data": {
+                "type": "platform_attachment",
+                "attributes": {
+                    "url": None,
+                    "label": "GFZ Homepage",
+                },
+                "relationships": {
+                    "platform": {"data": {"type": "platform", "id": str(platform.id)}}
+                },
+            }
+        }
+        with self.client:
+            url_post = base_url + "/platform-attachments"
+            response = self.client.post(
+                url_post,
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+                headers=create_token(),
+            )
+        # it will not work, as we miss an important part (the url)
+        # 422 => unprocessable entity
+        self.assertEqual(response.status_code, 422)
+        count_attachments = db.session.query(PlatformAttachment).filter_by(
+            platform_id=platform.id,
+        ).count()
+        self.assertEqual(count_attachments, 0)
+
+    def test_post_platform_attachment_api_missing_platform(self):
+        """Ensure that we don't add a platform attachment with missing platform."""
+        count_platform_attachments_before = db.session.query(PlatformAttachment).count()
+        payload = {
+            "data": {
+                "type": "platform_attachment",
+                "attributes": {
+                    "url": "GFZ",
+                    "label": "GFZ Homepage",
+                },
+                "relationships": {
+                    "platform": {
+                        "data": {
+                            "type": "platform",
+                            "id": None
+                        }
+                    }
+                },
+            }
+        }
+        with self.client:
+            url_post = base_url + "/platform-attachments"
+            response = self.client.post(
+                url_post,
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+                headers=create_token(),
+            )
+        # it will not work, as we miss an important part (the platform)
+        self.assertEqual(response.status_code, 500)
+        count_platform_attachments_after = db.session.query(PlatformAttachment).count()
+        self.assertEqual(count_platform_attachments_before, count_platform_attachments_after)
+
     def test_get_platform_attachment_api(self):
         """Ensure that we can get a list of platform attachments."""
         platform1 = Platform(short_name="Just a platform")

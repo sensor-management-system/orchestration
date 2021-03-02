@@ -13,7 +13,7 @@ class DeviceAttachmentSchema(Schema):
     class Meta:
         """Meta class for the DeviceAttachmentSchema."""
 
-        type = "device_attachment"
+        type_ = "device_attachment"
         self_view = "api.device_attachment_detail"
         self_view_kwargs = {"id": "<id>"}
 
