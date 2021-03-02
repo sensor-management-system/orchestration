@@ -25,7 +25,7 @@ class PlatformAttachmentList(ResourceList):
         Handle also cases to get all the platform attachments
         for a specific platform.
         """
-        query = self.session.query(PlatformAttachment)
+        query_ = self.session.query(PlatformAttachment)
         platform_id = view_kwargs.get("platform_id")
 
         if platform_id is not None:
