@@ -2,12 +2,12 @@
 from flask_rest_jsonapi import ResourceDetail
 
 from project.api.models.base_model import db
-from project.api.models.customfield import Customfield
-from project.api.schemas.customfield_schema import CustomfieldSchema
+from project.api.models.customfield import CustomField
+from project.api.schemas.customfield_schema import CustomFieldSchema
 from project.api.token_checker import token_required
 
 
-class CustomfieldDetail(ResourceDetail):
+class CustomFieldDetail(ResourceDetail):
     """
     Detail resource for custom fields.
 
@@ -15,9 +15,9 @@ class CustomfieldDetail(ResourceDetail):
     a custom field, update it or to delete it.
     """
 
-    schema = CustomfieldSchema
+    schema = CustomFieldSchema
     decorators = (token_required,)
     data_layer = {
         "session": db.session,
-        "model": Customfield,
+        "model": CustomField,
     }

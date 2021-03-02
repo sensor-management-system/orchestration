@@ -15,9 +15,9 @@ from .configuration_relationship import ConfigurationRelationship  # noqa: F401
 from .contact_detail import ContactDetail  # noqa: F401
 from .contact_list import ContactList  # noqa: F401
 from .contact_relationship import ContactRelationship  # noqa: F401
-from .customfield_detail import CustomfieldDetail  # noqa: F401
-from .customfield_list import CustomfieldList  # noqa: F401
-from .customfield_relationship import CustomfieldRelationship  # noqa: F401
+from .customfield_detail import CustomFieldDetail  # noqa: F401
+from .customfield_list import CustomFieldList  # noqa: F401
+from .customfield_relationship import CustomFieldRelationship  # noqa: F401
 from .device_attachment_detail import DeviceAttachmentDetail  # noqa: F401
 from .device_attachment_list import DeviceAttachmentList  # noqa: F401
 from .device_attachment_relationship import DeviceAttachmentRelationship  # noqa: F401

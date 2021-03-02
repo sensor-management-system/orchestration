@@ -12,9 +12,9 @@ from project.api.resourceManager import (
     ContactDetail,
     ContactList,
     ContactRelationship,
-    CustomfieldDetail,
-    CustomfieldList,
-    CustomfieldRelationship,
+    CustomFieldDetail,
+    CustomFieldList,
+    CustomFieldRelationship,
     DeviceAttachmentDetail,
     DeviceAttachmentList,
     DeviceAttachmentRelationship,
@@ -171,20 +171,20 @@ api.route(
     "/device-attachments/<int:id>/relationships/device",
 )
 
-# Customfield
+# CustomField
 api.route(
-    CustomfieldList,
+    CustomFieldList,
     "customfield_list",
     "/customfields",
     "/devices/<int:device_id>/customfields",
 )
 api.route(
-    CustomfieldDetail,
+    CustomFieldDetail,
     "customfield_detail",
     "/customfields/<int:id>",
 )
 api.route(
-    CustomfieldRelationship,
+    CustomFieldRelationship,
     "customfield_device",
     "/customfields/int:id>/relationships/device",
 )

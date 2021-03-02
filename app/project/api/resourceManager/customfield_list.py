@@ -4,13 +4,13 @@ from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.orm.exc import NoResultFound
 
 from project.api.models.base_model import db
-from project.api.models.customfield import Customfield
+from project.api.models.customfield import CustomField
 from project.api.models.device import Device
-from project.api.schemas.customfield_schema import CustomfieldSchema
+from project.api.schemas.customfield_schema import CustomFieldSchema
 from project.api.token_checker import token_required
 
 
-class CustomfieldList(ResourceList):
+class CustomFieldList(ResourceList):
     """
     List resource for custom fields.
 
@@ -27,7 +27,7 @@ class CustomfieldList(ResourceList):
         /devices/<device_id>/customfields
         we want to filter according to them.
         """
-        query_ = self.session.query(Customfield)
+        query_ = self.session.query(CustomField)
         device_id = view_kwargs.get("device_id")
 
         if device_id is not None:
@@ -41,14 +41,14 @@ class CustomfieldList(ResourceList):
                     "Device: {} not found".format(device_id),
                 )
             else:
-                query_ = query_.filter(Customfield.device_id == device_id)
+                query_ = query_.filter(CustomField.device_id == device_id)
         return query_
 
-    schema = CustomfieldSchema
+    schema = CustomFieldSchema
     decorators = (token_required,)
     data_layer = {
         "session": db.session,
-        "model": Customfield,
+        "model": CustomField,
         "methods": {
             "query": query,
         },

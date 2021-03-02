@@ -29,11 +29,11 @@ class InnerCustomFieldSchema(MarshmallowSchema):
             }
 
 
-class CustomfieldSchema(Schema):
+class CustomFieldSchema(Schema):
     """Schema for custom fields."""
 
     class Meta:
-        """Meta class for the CustomfieldSchema."""
+        """Meta class for the CustomFieldSchema."""
 
         type_ = "customfield"
         self_view = "api.customfield_detail"
