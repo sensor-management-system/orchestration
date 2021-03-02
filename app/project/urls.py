@@ -114,7 +114,12 @@ api.route(
     "/device-properties/<int:id>",
 )
 
-api.route(DevicePropertyList, "device_property_list", "/device-properties")
+api.route(
+    DevicePropertyList,
+    "device_property_list",
+    "/device-properties",
+    "/devices/<int:device_id>/device-properties",
+)
 
 api.route(
     DevicePropertyRelationship,
