@@ -235,6 +235,16 @@ api.route(
     "configuration_src_elevation",
     "/configurations/<int:id>/relationships/src-elevation",
 )
+api.route(
+    PlatformRelationship,
+    "configuration_created_user",
+    "/configurations/<int:id>/relationships/createdUser",
+)
+api.route(
+    PlatformRelationship,
+    "configuration_updated_user",
+    "/configurations/<int:id>/relationships/updatedUser",
+)
 # ConfigurationPlatform
 api.route(
     ConfigurationPlatformList,

@@ -156,3 +156,32 @@ class BaseTestCase(TestCase):
         data = json.loads(response.data.decode())
         self.assertEqual(response.status_code, 422)
         self.assertIn("Not a valid string.", data["errors"][0]["detail"])
+
+    def update_object(self, url, data_object, object_type):
+        """Ensure a old object can be updated."""
+        access_headers = create_token()
+        with self.client:
+            response = self.client.patch(
+                url,
+                data=json.dumps(data_object),
+                content_type="application/vnd.api+json",
+                headers=access_headers,
+            )
+        data = json.loads(response.data.decode())
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(object_type, data["data"]["type"])
+        return data
+
+    def delete_object(self, url):
+        """Ensure delete an object."""
+        access_headers = create_token()
+        with self.client:
+            response = self.client.delete(
+                url,
+                content_type="application/vnd.api+json",
+                headers=access_headers,
+            )
+        data = json.loads(response.data.decode())
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("Object successfully deleted", data["meta"]["message"])
+        return data

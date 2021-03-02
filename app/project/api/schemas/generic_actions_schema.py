@@ -15,9 +15,11 @@ class GenericPlatformActionSchema(Schema):
     action_type_uri = fields.Str(allow_none=True)
     begin_date = fields.DateTime(required=True)
     end_date = fields.DateTime(allow_none=True)
+    created_at = fields.DateTime(allow_none=False)
+    updated_at = fields.DateTime(allow_none=True)
 
     platform = Relationship(
-        self_view="api.generic_platform_action_device",
+        self_view="api.generic_platform_action_platform",
         self_view_kwargs={"id": "<id>"},
         related_view="api.platform_detail",
         related_view_kwargs={"id": "<platform_id>"},
@@ -35,6 +37,22 @@ class GenericPlatformActionSchema(Schema):
         type_="contact",
         id_field="id",
     )
+    created_by = Relationship(
+        self_view="api.platform_created_user",
+        self_view_kwargs={"id": "<id>"},
+        related_view="api.user_detail",
+        related_view_kwargs={"id": "<created_by_id>"},
+        type_="user",
+        id_field="id",
+    )
+    updated_by = Relationship(
+        self_view="api.platform_updated_user",
+        self_view_kwargs={"id": "<id>"},
+        related_view="api.user_detail",
+        related_view_kwargs={"id": "<updated_by_id>"},
+        type_="user",
+        id_field="id",
+    )
 
 
 class GenericDeviceActionSchema(Schema):
@@ -50,6 +68,8 @@ class GenericDeviceActionSchema(Schema):
     action_type_uri = fields.Str(allow_none=True)
     begin_date = fields.DateTime(required=True)
     end_date = fields.DateTime(allow_none=True)
+    created_at = fields.DateTime(allow_none=False)
+    updated_at = fields.DateTime(allow_none=True)
 
     device = Relationship(
         self_view="api.generic_device_action_device",
@@ -70,6 +90,22 @@ class GenericDeviceActionSchema(Schema):
         type_="contact",
         id_field="id",
     )
+    created_by = Relationship(
+        self_view="api.device_created_user",
+        self_view_kwargs={"id": "<id>"},
+        related_view="api.user_detail",
+        related_view_kwargs={"id": "<created_by_id>"},
+        type_="user",
+        id_field="id",
+    )
+    updated_by = Relationship(
+        self_view="api.device_updated_user",
+        self_view_kwargs={"id": "<id>"},
+        related_view="api.user_detail",
+        related_view_kwargs={"id": "<updated_by_id>"},
+        type_="user",
+        id_field="id",
+    )
 
 
 class GenericConfigurationActionSchema(Schema):
@@ -85,6 +121,8 @@ class GenericConfigurationActionSchema(Schema):
     action_type_uri = fields.Str(allow_none=True)
     begin_date = fields.DateTime(required=True)
     end_date = fields.DateTime(allow_none=True)
+    created_at = fields.DateTime(allow_none=False)
+    updated_at = fields.DateTime(allow_none=True)
 
     configuration = Relationship(
         self_view="api.generic_configuration_action_configuration",
@@ -104,4 +142,20 @@ class GenericConfigurationActionSchema(Schema):
         schema="ContactSchema",
         type_="contact",
         id_field="id",
+    )
+
+    created_by = Relationship(
+        self_view="api.configuration_created_user",
+        self_view_kwargs={"id": "<id>"},
+        related_view="api.user_detail",
+        related_view_kwargs={"id": "<created_by_id>"},
+        type_="user",
+    )
+
+    updated_by = Relationship(
+        self_view="api.configuration_updated_user",
+        self_view_kwargs={"id": "<id>"},
+        related_view="api.user_detail",
+        related_view_kwargs={"id": "<updated_by_id>"},
+        type_="user",
     )

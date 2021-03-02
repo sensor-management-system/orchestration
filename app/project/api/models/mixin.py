@@ -18,7 +18,7 @@ from project.api.search import (
 
 class AuditMixin:
     created_at = db.Column(db.DateTime, default=func.now())
-    updated_at = db.Column(db.DateTime, default=None, onupdate=datetime.now)
+    updated_at = db.Column(db.DateTime, default=None, onupdate=datetime.now())
 
     @declared_attr
     def created_by_id(self):
@@ -45,7 +45,6 @@ class AuditMixin:
             db.ForeignKey(
                 "user.id", name="fk_%s_updated_by_id" % self.__name__, use_alter=True
             ),
-            # nullable=False,
         )
 
     @declared_attr
