@@ -239,3 +239,48 @@ class TestPlatformAttachmentServices(BaseTestCase):
         self.assertEqual(platform_attachment_reloaded.url, "https://www.ufz.de")
         self.assertEqual(platform_attachment_reloaded.label, "UFZ")
         self.assertEqual(platform_attachment_reloaded.platform_id, platform2.id)
+
+    def test_delete_platform_attachment_api(self):
+        """Ensure that we can delete a platform attachemnt."""
+        platform1 = Platform(short_name="Just a platform")
+        db.session.add(platform1)
+        db.session.commit()
+        platform_attachment1 = PlatformAttachment(
+            label="GFZ",
+            url="https://www.gfz-potsdam.de",
+            platform=platform1,
+        )
+        db.session.add(platform_attachment1)
+        db.session.commit()
+
+        with self.client:
+            response = self.client.get(
+                base_url + "/platforms/" + str(platform1.id) + "/platform-attachments",
+                content_type="application/vnd.api+json",
+            )
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(len(response.get_json()["data"]), 1)
+
+            response = self.client.delete(
+                base_url + "/platform-attachments/" + str(platform_attachment1.id),
+                headers=create_token(),
+            )
+
+            # I would expect a 204 (no content), but 200 is good as well
+            self.assertTrue(response.status_code in [200, 204])
+
+            response = self.client.get(
+                base_url + "/platforms/" + str(platform1.id) + "/platform-attachments",
+                content_type="application/vnd.api+json",
+            )
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(len(response.get_json()["data"]), 0)
+
+        count_platform_attachments = (
+            db.session.query(PlatformAttachment)
+            .filter_by(
+                platform_id=platform1.id,
+            )
+            .count()
+        )
+        self.assertEqual(count_platform_attachments, 0)
