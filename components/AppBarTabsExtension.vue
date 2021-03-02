@@ -34,12 +34,31 @@ permissions and limitations under the Licence.
     background-color="grey lighten-3"
     @change="changeTab"
   >
-    <v-tab
+    <template
       v-for="(tab, index) in tabs"
-      :key="index"
     >
-      {{ tab }}
-    </v-tab>
+      <v-tab
+        v-if="isString(tab)"
+        :key="index"
+      >
+        {{ tab }}
+      </v-tab>
+      <v-tab
+        v-else-if="isRoute(tab)"
+        :key="index"
+        nuxt
+        :to="tab.to"
+      >
+        {{ tab.name }}
+      </v-tab>
+      <v-tab
+        v-else-if="isLink(tab)"
+        :key="index"
+        :href="tab.href"
+      >
+        {{ tab.name }}
+      </v-tab>
+    </template>
   </v-tabs>
 </template>
 
@@ -49,6 +68,7 @@ permissions and limitations under the Licence.
  * @author <marc.hanisch@gfz-potsdam.de>
  */
 import { Vue, Component, Prop } from 'nuxt-property-decorator'
+import { TabItemConfiguration } from '@/models/TabItemConfiguration'
 
 /**
  * A class component to provide tabs to an app-bar extension
@@ -71,11 +91,11 @@ export default class AppBarTabsExtension extends Vue {
    * an array of tabs
    */
   @Prop({
-    default: () => [],
+    default: () => [] as TabItemConfiguration[],
     type: Array
   })
   // @ts-ignore
-  readonly tabs: string[]
+  readonly tabs: TabItemConfiguration[]
 
   /**
    * changes the current tab
@@ -90,6 +110,18 @@ export default class AppBarTabsExtension extends Vue {
      * @type {number}
      */
     this.$emit('change', tab)
+  }
+
+  isRoute (tab: TabItemConfiguration): boolean {
+    return typeof tab === 'object' && 'to' in tab
+  }
+
+  isLink (tab: TabItemConfiguration): boolean {
+    return typeof tab === 'object' && 'href' in tab
+  }
+
+  isString (tab: TabItemConfiguration): boolean {
+    return typeof tab === 'string'
   }
 }
 </script>
