@@ -311,7 +311,7 @@ class TestDeviceAttachmentServices(BaseTestCase):
         self.assertEqual(device_attachment_reloaded.device_id, device2.id)
 
     def test_delete_device_attachment_api(self):
-        """Ensure that we can delete a device attachemnt."""
+        """Ensure that we can delete a device attachment."""
         device1 = Device(short_name="Just a device")
         db.session.add(device1)
         db.session.commit()

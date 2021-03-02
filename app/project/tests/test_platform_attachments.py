@@ -311,7 +311,7 @@ class TestPlatformAttachmentServices(BaseTestCase):
         self.assertEqual(platform_attachment_reloaded.platform_id, platform2.id)
 
     def test_delete_platform_attachment_api(self):
-        """Ensure that we can delete a platform attachemnt."""
+        """Ensure that we can delete a platform attachment."""
         platform1 = Platform(short_name="Just a platform")
         db.session.add(platform1)
         db.session.commit()
