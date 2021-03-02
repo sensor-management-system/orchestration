@@ -4,20 +4,37 @@
       <v-progress-circular indeterminate />
     </div>
     <div v-else>
-      <v-row>
-        <v-col>
-          <v-btn v-if="isLoggedIn" @click="onSaveButtonClicked">
-            Save
+      <DeviceBasicDataForm
+        v-model="value"
+        :readonly="false"
+      >
+        <template v-slot:actions>
+          <v-spacer />
+          <v-btn
+            v-if="isLoggedIn"
+            small
+            text
+            nuxt
+            :to="'/devices/show/' + deviceId + '/basic'"
+          >
+            cancel
           </v-btn>
-        </v-col>
-      </v-row>
-      <DeviceBasicDataForm v-model="device" :readonly="false" />
+          <v-btn
+            v-if="isLoggedIn"
+            color="primary"
+            small
+            @click="onSaveButtonClicked"
+          >
+            apply
+          </v-btn>
+        </template>
+      </DeviceBasicDataForm>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
+import { Component, Vue, Prop } from 'nuxt-property-decorator'
 
 import DeviceBasicDataForm from '@/components/DeviceBasicDataForm.vue'
 
@@ -29,17 +46,11 @@ import { Device } from '@/models/Device'
   }
 })
 export default class DeviceEditBasicPage extends Vue {
-  private device: Device = new Device()
-  private isLoading: boolean = true
-
-  mounted () {
-    this.$api.devices.findById(this.deviceId).then((device) => {
-      this.device = device
-      this.isLoading = false
-    }).catch((_error) => {
-      this.$store.commit('snackbar/setError', 'Loading device failed')
-    })
-  }
+  @Prop({
+    required: true,
+    type: Object
+  })
+  readonly value!: Device
 
   onSaveButtonClicked () {
     this.save().then(() => {

@@ -32,6 +32,9 @@ permissions and limitations under the Licence.
   <v-form ref="basicForm">
     <v-card flat>
       <v-card-title>Device URN: {{ deviceURN }}</v-card-title>
+      <v-card-actions>
+        <slot name="actions" />
+      </v-card-actions>
       <v-card-text>
         <v-row>
           <v-col cols="12" md="3">
@@ -178,6 +181,9 @@ permissions and limitations under the Licence.
           </v-col>
         </v-row>
       </v-card-text>
+      <v-card-actions>
+        <slot name="actions" />
+      </v-card-actions>
     </v-card>
   </v-form>
 </template>

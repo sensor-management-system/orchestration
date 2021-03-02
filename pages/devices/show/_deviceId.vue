@@ -1,34 +1,67 @@
 <template>
   <div>
-    <h1>Edit Device</h1>
-    <v-tabs
-      v-model="activeTab"
-    >
-      <v-tab nuxt :to="'/devices/show/' + deviceId + '/basic'">
-        Basic
-      </v-tab>
-      <v-tab nuxt :to="'/devices/show/' + deviceId + '/contacts'">
-        Contacts
-      </v-tab>
-    </v-tabs>
-    <NuxtChild />
+    <v-progress-circular
+      v-if="isLoading"
+      class="center-absolute"
+      indeterminate
+    />
+    <NuxtChild
+      :value="device"
+    />
   </div>
 </template>
+
+<style>
+  .center-absolute {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    margin-top: -16px;
+    margin-left: -16px;
+  }
+</style>
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 
-@Component({
+import { Device } from '@/models/Device'
 
-})
-export default class DeviceShowPage extends Vue {
-  private numberOfTabs: number = 5
-  private activeTab: number = 1
+@Component
+export default class DevicePage extends Vue {
+  private device: Device = new Device()
+  private isLoading: boolean = true
 
   created () {
     if (this.isBasePath()) {
       this.$router.push('/devices/show/' + this.deviceId + '/basic')
     }
+  }
+
+  mounted () {
+    this.initializeAppBar()
+    this.$api.devices.findById(this.deviceId).then((device) => {
+      this.device = device
+      this.isLoading = false
+    }).catch((_error) => {
+      this.$store.commit('snackbar/setError', 'Loading device failed')
+      this.isLoading = false
+    })
+  }
+
+  initializeAppBar () {
+    this.$store.dispatch('appbar/init', {
+      tabs: [
+        {
+          to: '/devices/show/' + this.deviceId + '/basic',
+          name: 'Basic Data'
+        },
+        {
+          to: '/devices/show/' + this.deviceId + '/contacts',
+          name: 'Contacts'
+        }
+      ],
+      title: 'Devices'
+    })
   }
 
   isBasePath () {
