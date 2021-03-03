@@ -1,35 +1,51 @@
 <template>
   <div>
-    <div v-if="isLoading">
-      <v-progress-circular indeterminate />
-    </div>
-    <div v-else>
-      <DeviceBasicDataForm
-        v-model="value"
-        :readonly="false"
+    <v-card-actions>
+      <v-spacer />
+      <v-btn
+        v-if="isLoggedIn"
+        small
+        text
+        nuxt
+        :to="'/devices/show/' + deviceId + '/basic'"
       >
-        <template v-slot:actions>
-          <v-spacer />
-          <v-btn
-            v-if="isLoggedIn"
-            small
-            text
-            nuxt
-            :to="'/devices/show/' + deviceId + '/basic'"
-          >
-            cancel
-          </v-btn>
-          <v-btn
-            v-if="isLoggedIn"
-            color="primary"
-            small
-            @click="onSaveButtonClicked"
-          >
-            apply
-          </v-btn>
-        </template>
-      </DeviceBasicDataForm>
-    </div>
+        cancel
+      </v-btn>
+      <v-btn
+        v-if="isLoggedIn"
+        color="green"
+        small
+        @click="onSaveButtonClicked"
+      >
+        apply
+      </v-btn>
+    </v-card-actions>
+    <v-card-text>
+      <DeviceBasicDataForm
+        v-model="deviceCopy"
+        :readonly="false"
+      />
+    </v-card-text>
+    <v-card-actions>
+      <v-spacer />
+      <v-btn
+        v-if="isLoggedIn"
+        small
+        text
+        nuxt
+        :to="'/devices/show/' + deviceId + '/basic'"
+      >
+        cancel
+      </v-btn>
+      <v-btn
+        v-if="isLoggedIn"
+        color="green"
+        small
+        @click="onSaveButtonClicked"
+      >
+        apply
+      </v-btn>
+    </v-card-actions>
   </div>
 </template>
 
@@ -46,14 +62,21 @@ import { Device } from '@/models/Device'
   }
 })
 export default class DeviceEditBasicPage extends Vue {
+  private deviceCopy!: Device
+
   @Prop({
     required: true,
     type: Object
   })
   readonly value!: Device
 
+  created () {
+    this.deviceCopy = Device.createFromObject(this.value)
+  }
+
   onSaveButtonClicked () {
-    this.save().then(() => {
+    this.save().then((device) => {
+      this.$emit('input', device)
       this.$router.push('/devices/show/' + this.deviceId + '/basic')
     }).catch((_error) => {
       this.$store.commit('snackbar/setError', 'Save failed')
@@ -62,7 +85,7 @@ export default class DeviceEditBasicPage extends Vue {
 
   save (): Promise<Device> {
     return new Promise((resolve, reject) => {
-      this.$api.devices.save(this.device).then((savedDevice) => {
+      this.$api.devices.save(this.deviceCopy).then((savedDevice) => {
         resolve(savedDevice)
       }).catch((_error) => {
         reject(_error)

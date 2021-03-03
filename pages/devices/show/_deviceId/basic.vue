@@ -1,6 +1,6 @@
 <template>
   <NuxtChild
-    :value="value"
+    v-model="device"
   />
 </template>
 
@@ -16,5 +16,13 @@ export default class DeviceBasicPage extends Vue {
     type: Object
   })
   readonly value!: Device
+
+  get device (): Device {
+    return this.value
+  }
+
+  set device (value: Device) {
+    this.$emit('input', value)
+  }
 }
 </script>
