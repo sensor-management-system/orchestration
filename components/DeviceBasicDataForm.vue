@@ -30,161 +30,150 @@ permissions and limitations under the Licence.
 -->
 <template>
   <v-form ref="basicForm">
-    <v-card flat>
-      <v-card-title>Device URN: {{ deviceURN }}</v-card-title>
-      <v-card-actions>
-        <slot name="actions" />
-      </v-card-actions>
-      <v-card-text>
-        <v-row>
-          <v-col cols="12" md="3">
-            <v-text-field
-              :value="value.persistentIdentifier"
-              :readonly="readonly"
-              :disabled="readonly"
-              label="Persistent identifier (PID)"
-              @input="update('persistentIdentifier', $event)"
-            />
-          </v-col>
-        </v-row>
-        <v-row>
-          <v-col cols="12" md="6">
-            <v-text-field
-              :value="value.shortName"
-              :readonly="readonly"
-              :disabled="readonly"
-              label="Short name"
-              required
-              class="required"
-              :rules="[rules.required]"
-              @input="update('shortName', $event)"
-            />
-          </v-col>
-          <v-col cols="12" md="6">
-            <v-text-field
-              :value="value.longName"
-              :readonly="readonly"
-              :disabled="readonly"
-              label="Long name"
-              @input="update('longName', $event)"
-            />
-          </v-col>
-        </v-row>
-        <v-row>
-          <v-col cols="12" md="3">
-            <v-combobox
-              :value="deviceStatusName"
-              :items="statusNames"
-              :readonly="readonly"
-              :disabled="readonly"
-              label="Status"
-              @input="update('statusName', $event)"
-            />
-          </v-col>
-          <v-col cols="12" md="3">
-            <v-combobox
-              :value="deviceTypeName"
-              :items="deviceTypeNames"
-              :readonly="readonly"
-              :disabled="readonly"
-              label="Device type"
-              @input="update('deviceTypeName', $event)"
-            />
-          </v-col>
-          <v-col cols="12" md="3">
-            <v-combobox
-              :value="deviceManufacturerName"
-              :items="manufacturerNames"
-              :readonly="readonly"
-              :disabled="readonly"
-              label="Manufacturer"
-              @input="update('manufacturerName', $event)"
-            />
-          </v-col>
-          <v-col cols="12" md="3">
-            <v-text-field
-              :value="value.model"
-              :readonly="readonly"
-              :disabled="readonly"
-              label="Model"
-              @input="update('model', $event)"
-            />
-          </v-col>
-        </v-row>
-        <v-divider />
-        <v-row>
-          <v-col cols="12" md="9">
-            <v-textarea
-              :value="value.description"
-              :readonly="readonly"
-              :disabled="readonly"
-              label="Description"
-              rows="3"
-              @input="update('description', $event)"
-            />
-          </v-col>
-        </v-row>
-        <v-row>
-          <v-col cols="12" md="9">
-            <v-text-field
-              :value="value.website"
-              :readonly="readonly"
-              :disabled="readonly"
-              label="Website"
-              placeholder="https://"
-              type="url"
-              @input="update('website', $event)"
-            >
-              <template slot="append">
-                <a v-if="value.website.length > 0" :href="value.website" target="_blank">
-                  <v-icon>
-                    mdi-open-in-new
-                  </v-icon>
-                </a>
-              </template>
-            </v-text-field>
-          </v-col>
-        </v-row>
-        <v-divider />
-        <v-row>
-          <v-col cols="12" md="3">
-            <v-text-field
-              :value="value.serialNumber"
-              :readonly="readonly"
-              :disabled="readonly"
-              label="Serial number"
-              @input="update('serialNumber', $event)"
-            />
-          </v-col>
-          <v-col cols="12" md="3">
-            <v-text-field
-              :value="value.inventoryNumber"
-              :readonly="readonly"
-              :disabled="readonly"
-              label="Inventory number"
-              @input="update('inventoryNumber', $event)"
-            />
-          </v-col>
-        </v-row>
-        <v-row>
-          <v-col cols="12" md="3">
-            <v-checkbox
-              :value="value.dualUse"
-              :readonly="readonly"
-              :disabled="readonly"
-              label="Dual use"
-              hint="can be used for military aims"
-              :persistent-hint="true"
-              color="red darken-3"
-              @input="update('dualUse', $event)"
-            />
-          </v-col>
-        </v-row>
-      </v-card-text>
-      <v-card-actions>
-        <slot name="actions" />
-      </v-card-actions>
-    </v-card>
+    <v-row>
+      <v-col cols="12" md="3">
+        <v-text-field
+          :value="value.persistentIdentifier"
+          :readonly="readonly"
+          :disabled="readonly"
+          label="Persistent identifier (PID)"
+          @input="update('persistentIdentifier', $event)"
+        />
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="12" md="6">
+        <v-text-field
+          :value="value.shortName"
+          :readonly="readonly"
+          :disabled="readonly"
+          label="Short name"
+          required
+          class="required"
+          :rules="[rules.required]"
+          @input="update('shortName', $event)"
+        />
+      </v-col>
+      <v-col cols="12" md="6">
+        <v-text-field
+          :value="value.longName"
+          :readonly="readonly"
+          :disabled="readonly"
+          label="Long name"
+          @input="update('longName', $event)"
+        />
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="12" md="3">
+        <v-combobox
+          :value="deviceStatusName"
+          :items="statusNames"
+          :readonly="readonly"
+          :disabled="readonly"
+          label="Status"
+          @input="update('statusName', $event)"
+        />
+      </v-col>
+      <v-col cols="12" md="3">
+        <v-combobox
+          :value="deviceTypeName"
+          :items="deviceTypeNames"
+          :readonly="readonly"
+          :disabled="readonly"
+          label="Device type"
+          @input="update('deviceTypeName', $event)"
+        />
+      </v-col>
+      <v-col cols="12" md="3">
+        <v-combobox
+          :value="deviceManufacturerName"
+          :items="manufacturerNames"
+          :readonly="readonly"
+          :disabled="readonly"
+          label="Manufacturer"
+          @input="update('manufacturerName', $event)"
+        />
+      </v-col>
+      <v-col cols="12" md="3">
+        <v-text-field
+          :value="value.model"
+          :readonly="readonly"
+          :disabled="readonly"
+          label="Model"
+          @input="update('model', $event)"
+        />
+      </v-col>
+    </v-row>
+    <v-divider />
+    <v-row>
+      <v-col cols="12" md="9">
+        <v-textarea
+          :value="value.description"
+          :readonly="readonly"
+          :disabled="readonly"
+          label="Description"
+          rows="3"
+          @input="update('description', $event)"
+        />
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="12" md="9">
+        <v-text-field
+          :value="value.website"
+          :readonly="readonly"
+          :disabled="readonly"
+          label="Website"
+          placeholder="https://"
+          type="url"
+          @input="update('website', $event)"
+        >
+          <template slot="append">
+            <a v-if="value.website.length > 0" :href="value.website" target="_blank">
+              <v-icon>
+                mdi-open-in-new
+              </v-icon>
+            </a>
+          </template>
+        </v-text-field>
+      </v-col>
+    </v-row>
+    <v-divider />
+    <v-row>
+      <v-col cols="12" md="3">
+        <v-text-field
+          :value="value.serialNumber"
+          :readonly="readonly"
+          :disabled="readonly"
+          label="Serial number"
+          @input="update('serialNumber', $event)"
+        />
+      </v-col>
+      <v-col cols="12" md="3">
+        <v-text-field
+          :value="value.inventoryNumber"
+          :readonly="readonly"
+          :disabled="readonly"
+          label="Inventory number"
+          @input="update('inventoryNumber', $event)"
+        />
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="12" md="3">
+        <v-checkbox
+          :value="value.dualUse"
+          :readonly="readonly"
+          :disabled="readonly"
+          label="Dual use"
+          hint="can be used for military aims"
+          :persistent-hint="true"
+          color="red darken-3"
+          @input="update('dualUse', $event)"
+        />
+      </v-col>
+    </v-row>
   </v-form>
 </template>
 <script lang="ts">
@@ -340,35 +329,6 @@ export default class DeviceBasicDataForm extends mixins(Rules) {
       return this.deviceTypes[deviceTypeIndex].name
     }
     return this.value.deviceTypeName
-  }
-
-  get deviceURN () {
-    let partManufacturer = '[manufacturer]'
-    let partModel = '[model]'
-    let partSerialNumber = '[serial_number]'
-
-    if (this.value.manufacturerUri !== '') {
-      const manIndex = this.manufacturers.findIndex(m => m.uri === this.value.manufacturerUri)
-      if (manIndex > -1) {
-        partManufacturer = this.manufacturers[manIndex].name
-      } else if (this.value.manufacturerName !== '') {
-        partManufacturer = this.value.manufacturerName
-      }
-    } else if (this.value.manufacturerName !== '') {
-      partManufacturer = this.value.manufacturerName
-    }
-
-    if (this.value.model !== '') {
-      partModel = this.value.model
-    }
-
-    if (this.value.serialNumber !== '') {
-      partSerialNumber = this.value.serialNumber
-    }
-
-    return [partManufacturer, partModel, partSerialNumber].join('_').replace(
-      ' ', '_'
-    )
   }
 }
 </script>
