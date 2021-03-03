@@ -15,7 +15,7 @@ class GenericPlatformActionSchema(Schema):
     action_type_uri = fields.Str(allow_none=True)
     begin_date = fields.DateTime(required=True)
     end_date = fields.DateTime(allow_none=True)
-    created_at = fields.DateTime(allow_none=False)
+    created_at = fields.DateTime(dump_only=True)
     updated_at = fields.DateTime(dump_only=True)
 
     platform = Relationship(
@@ -68,7 +68,7 @@ class GenericDeviceActionSchema(Schema):
     action_type_uri = fields.Str(allow_none=True)
     begin_date = fields.DateTime(required=True)
     end_date = fields.DateTime(allow_none=True)
-    created_at = fields.DateTime(allow_none=False)
+    created_at = fields.DateTime(dump_only=True)
     updated_at = fields.DateTime(dump_only=True)
 
     device = Relationship(
@@ -121,7 +121,7 @@ class GenericConfigurationActionSchema(Schema):
     action_type_uri = fields.Str(allow_none=True)
     begin_date = fields.DateTime(required=True)
     end_date = fields.DateTime(allow_none=True)
-    created_at = fields.DateTime(allow_none=False)
+    created_at = fields.DateTime(dump_only=True)
     updated_at = fields.DateTime(dump_only=True)
 
     configuration = Relationship(
