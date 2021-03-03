@@ -86,7 +86,7 @@ api.route(
 api.route(
     PlatformRelationship,
     "platform_updated_user",
-    "/platforms/<int:id>/relationships/created-user",
+    "/platforms/<int:id>/relationships/updated-user",
 )
 # Events
 api.route(EventList, "event_list", "/events")
@@ -131,7 +131,7 @@ api.route(
 api.route(
     DeviceRelationship,
     "device_updated_user",
-    "/devices/<int:id>/relationships/created-user",
+    "/devices/<int:id>/relationships/updated-user",
 )
 
 # Device Property
@@ -246,7 +246,7 @@ api.route(
 api.route(
     PlatformRelationship,
     "configuration_updated_user",
-    "/configurations/<int:id>/relationships/created-user",
+    "/configurations/<int:id>/relationships/updated-user",
 )
 # ConfigurationPlatform
 api.route(

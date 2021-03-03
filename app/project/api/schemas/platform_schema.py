@@ -24,8 +24,8 @@ class PlatformSchema(Schema):
     status_uri = fields.Str(allow_none=True)
     status_name = fields.Str(allow_none=True)
     website = fields.Str(allow_none=True)
-    created_at = fields.DateTime(allow_none=True)
-    updated_at = fields.DateTime(allow_none=True)
+    created_at = fields.DateTime(dump_only=True)
+    updated_at = fields.DateTime(dump_only=True)
     created_by = Relationship(
         self_view="api.platform_created_user",
         self_view_kwargs={"id": "<id>"},

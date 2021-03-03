@@ -20,9 +20,9 @@ class GenericDeviceActionAttachmentSchema(Schema):
         id_field="id",
     )
     attachment = Relationship(
-        self_view="api.generic_device_action_attachment_attachments",
+        self_view="api.generic_device_action_attachment_attachment",
         self_view_kwargs={"id": "<id>"},
-        related_view="api.generic_device_action_attachment_list",
+        related_view="api.generic_device_action_attachment_detail",
         related_view_kwargs={"action_id": "<id>"},
         schema="GenericDeviceActionAttachmentSchema",
         type_="generic_device_action_attachment",
@@ -48,9 +48,9 @@ class GenericPlatformActionAttachmentSchema(Schema):
         id_field="id",
     )
     attachment = Relationship(
-        self_view="api.generic_platform_action_attachment_attachments",
+        self_view="api.generic_platform_action_attachment_attachment",
         self_view_kwargs={"id": "<id>"},
-        related_view="api.generic_platform_action_attachment_list",
+        related_view="api.generic_platform_action_attachment_detail",
         related_view_kwargs={"action_id": "<id>"},
         schema="GenericPlatformActionAttachmentSchema",
         type_="generic_platform_action_attachment",
@@ -76,9 +76,9 @@ class GenericConfigurationActionAttachmentSchema(Schema):
         id_field="id",
     )
     attachment = Relationship(
-        self_view="api.generic_configuration_action_attachment_attachments",
+        self_view="api.generic_configuration_action_attachment_attachment",
         self_view_kwargs={"id": "<id>"},
-        related_view="api.generic_configuration_action_attachment_list",
+        related_view="api.generic_configuration_action_attachment_detail",
         related_view_kwargs={"action_id": "<id>"},
         schema="GenericConfigurationActionAttachmentSchema",
         type_="generic_configuration_action_attachment",

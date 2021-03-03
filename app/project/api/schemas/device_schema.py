@@ -40,8 +40,8 @@ class DeviceSchema(Schema):
     inventory_number = fields.Str(allow_none=True)
     persistent_identifier = fields.Str(allow_none=True)
     website = fields.Str(allow_none=True)
-    created_at = fields.DateTime(allow_none=True)
-    updated_at = fields.DateTime(allow_none=True)
+    created_at = fields.DateTime(dump_only=True)
+    updated_at = fields.DateTime(dump_only=True)
     created_by = Relationship(
         self_view="api.device_created_user",
         self_view_kwargs={"id": "<id>"},
