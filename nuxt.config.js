@@ -90,7 +90,8 @@ export default {
   ** Plugins to load before mounting the App
   */
   plugins: [
-    '~/plugins/api.ts'
+    '~/plugins/api.ts',
+    '~/plugins/filters.ts'
   ],
   /*
   ** Nuxt.js dev-modules
