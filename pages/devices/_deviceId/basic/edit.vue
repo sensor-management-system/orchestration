@@ -7,7 +7,7 @@
         small
         text
         nuxt
-        :to="'/devices/show/' + deviceId + '/basic'"
+        :to="'/devices/' + deviceId + '/basic'"
       >
         cancel
       </v-btn>
@@ -33,7 +33,7 @@
         small
         text
         nuxt
-        :to="'/devices/show/' + deviceId + '/basic'"
+        :to="'/devices/' + deviceId + '/basic'"
       >
         cancel
       </v-btn>
@@ -77,7 +77,7 @@ export default class DeviceEditBasicPage extends Vue {
   onSaveButtonClicked () {
     this.save().then((device) => {
       this.$emit('input', device)
-      this.$router.push('/devices/show/' + this.deviceId + '/basic')
+      this.$router.push('/devices/' + this.deviceId + '/basic')
     }).catch((_error) => {
       this.$store.commit('snackbar/setError', 'Save failed')
     })

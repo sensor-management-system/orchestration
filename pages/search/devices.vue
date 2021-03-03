@@ -274,7 +274,7 @@ permissions and limitations under the Licence.
                 class="text-right"
               >
                 <v-btn
-                  :to="'/devices/show/' + result.id"
+                  :to="'/devices/' + result.id"
                   color="primary"
                   text
                   @click.stop.prevent

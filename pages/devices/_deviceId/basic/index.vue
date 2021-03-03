@@ -7,7 +7,7 @@
         color="primary"
         small
         nuxt
-        :to="'/devices/show/' + deviceId + '/basic/edit'"
+        :to="'/devices/' + deviceId + '/basic/edit'"
       >
         Edit
       </v-btn>
@@ -24,7 +24,7 @@
         color="primary"
         small
         nuxt
-        :to="'/devices/show/' + deviceId + '/basic/edit'"
+        :to="'/devices/' + deviceId + '/basic/edit'"
       >
         Edit
       </v-btn>

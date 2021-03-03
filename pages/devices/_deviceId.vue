@@ -39,7 +39,7 @@ export default class DevicePage extends Vue {
 
   created () {
     if (this.isBasePath()) {
-      this.$router.push('/devices/show/' + this.deviceId + '/basic')
+      this.$router.push('/devices/' + this.deviceId + '/basic')
     }
   }
 
@@ -65,11 +65,11 @@ export default class DevicePage extends Vue {
     this.$store.dispatch('appbar/init', {
       tabs: [
         {
-          to: '/devices/show/' + this.deviceId + '/basic',
+          to: '/devices/' + this.deviceId + '/basic',
           name: 'Basic Data'
         },
         {
-          to: '/devices/show/' + this.deviceId + '/contacts',
+          to: '/devices/' + this.deviceId + '/contacts',
           name: 'Contacts'
         }
       ],
@@ -78,7 +78,7 @@ export default class DevicePage extends Vue {
   }
 
   isBasePath () {
-    return this.$route.path === '/devices/show/' + this.deviceId || this.$route.path === '/devices/show/' + this.deviceId + '/'
+    return this.$route.path === '/devices/' + this.deviceId || this.$route.path === '/devices/' + this.deviceId + '/'
   }
 
   get deviceId () {
