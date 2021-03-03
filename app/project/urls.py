@@ -54,6 +54,9 @@ from project.api.resourceManager.generic_configuration_action_attachment_resourc
     GenericConfigurationActionAttachmentList, GenericConfigurationActionAttachmentDetail, \
     GenericConfigurationActionAttachmentRelationship
 
+from project.api.resourceManager.device_mount_action_resources import DeviceMountActionList, \
+    DeviceMountActionDetail, DeviceMountActionRelationship
+
 api = Api()
 
 api.route(Ping, "test_connection", "/ping")
@@ -78,12 +81,12 @@ api.route(
 api.route(
     PlatformRelationship,
     "platform_created_user",
-    "/platforms/<int:id>/relationships/createdUser",
+    "/platforms/<int:id>/relationships/created-user",
 )
 api.route(
     PlatformRelationship,
     "platform_updated_user",
-    "/platforms/<int:id>/relationships/updatedUser",
+    "/platforms/<int:id>/relationships/created-user",
 )
 # Events
 api.route(EventList, "event_list", "/events")
@@ -123,12 +126,12 @@ api.route(
 api.route(
     DeviceRelationship,
     "device_created_user",
-    "/devices/<int:id>/relationships/createdUser",
+    "/devices/<int:id>/relationships/created-user",
 )
 api.route(
     DeviceRelationship,
     "device_updated_user",
-    "/devices/<int:id>/relationships/updatedUser",
+    "/devices/<int:id>/relationships/created-user",
 )
 
 # Device Property
@@ -238,12 +241,12 @@ api.route(
 api.route(
     PlatformRelationship,
     "configuration_created_user",
-    "/configurations/<int:id>/relationships/createdUser",
+    "/configurations/<int:id>/relationships/created-user",
 )
 api.route(
     PlatformRelationship,
     "configuration_updated_user",
-    "/configurations/<int:id>/relationships/updatedUser",
+    "/configurations/<int:id>/relationships/created-user",
 )
 # ConfigurationPlatform
 api.route(
@@ -348,3 +351,18 @@ api.route(GenericConfigurationActionAttachmentRelationship,
 api.route(GenericConfigurationActionAttachmentRelationship,
           "generic_configuration_action_attachment_attachments",
           "/generic-configuration-action-attachments/<int:id>/relationships/attachments")
+# MountDeviceAction
+api.route(DeviceMountActionList, "mount_device_action_list", "/mount-device-actions")
+api.route(
+    DeviceMountActionDetail,
+    "device_mount_action_detail",
+    "/mount-device-actions/<int:id>"
+)
+api.route(DeviceMountActionRelationship, "mount_device_action_device",
+          "/mount-device-actions/<int:id>/relationships/device")
+api.route(DeviceMountActionRelationship, "mount_device_action_contact",
+          "/mount-device-actions/<int:id>/relationships/contact")
+api.route(DeviceMountActionRelationship, "mount_device_action_configuration",
+          "/mount-device-actions/<int:id>/relationships/configuration")
+api.route(DeviceMountActionRelationship, "mount_device_action_parent_platform",
+          "/mount-device-actions/<int:id>/relationships/parent-platform")
