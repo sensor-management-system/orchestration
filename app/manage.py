@@ -5,7 +5,6 @@ from flask.cli import FlaskGroup
 from project import create_app
 from project.api.insert_initial_values import *
 from project.api.models.base_model import db
-from project.tests.base import BaseTestCase
 
 app = create_app()
 cli = FlaskGroup(create_app=create_app)
@@ -51,12 +50,12 @@ def cov():
     result = unittest.TextTestRunner(verbosity=2).run(tests)
     if result.wasSuccessful():
         COV.stop()
-    COV.save()
-    print("Coverage Summary:")
-    COV.report()
-    COV.html_report()
-    COV.erase()
-    return 0
+        COV.save()
+        print("Coverage Summary:")
+        COV.report()
+        COV.html_report()
+        COV.erase()
+        return 0
     return 1
 
 

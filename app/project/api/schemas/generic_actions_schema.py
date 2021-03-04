@@ -38,7 +38,7 @@ class GenericPlatformActionSchema(Schema):
         id_field="id",
     )
     created_by = Relationship(
-        self_view="api.platform_created_user",
+        self_view="api.generic_platform_action_created_user",
         self_view_kwargs={"id": "<id>"},
         related_view="api.user_detail",
         related_view_kwargs={"id": "<created_by_id>"},
@@ -46,7 +46,7 @@ class GenericPlatformActionSchema(Schema):
         id_field="id",
     )
     updated_by = Relationship(
-        self_view="api.platform_updated_user",
+        self_view="api.generic_platform_action_updated_user",
         self_view_kwargs={"id": "<id>"},
         related_view="api.user_detail",
         related_view_kwargs={"id": "<updated_by_id>"},
@@ -91,7 +91,7 @@ class GenericDeviceActionSchema(Schema):
         id_field="id",
     )
     created_by = Relationship(
-        self_view="api.device_created_user",
+        self_view="api.generic_device_action_created_user",
         self_view_kwargs={"id": "<id>"},
         related_view="api.user_detail",
         related_view_kwargs={"id": "<created_by_id>"},
@@ -99,7 +99,7 @@ class GenericDeviceActionSchema(Schema):
         id_field="id",
     )
     updated_by = Relationship(
-        self_view="api.device_updated_user",
+        self_view="api.generic_device_action_updated_user",
         self_view_kwargs={"id": "<id>"},
         related_view="api.user_detail",
         related_view_kwargs={"id": "<updated_by_id>"},
@@ -145,7 +145,7 @@ class GenericConfigurationActionSchema(Schema):
     )
 
     created_by = Relationship(
-        self_view="api.configuration_created_user",
+        self_view="api.generic_configuration_action_created_user",
         self_view_kwargs={"id": "<id>"},
         related_view="api.user_detail",
         related_view_kwargs={"id": "<created_by_id>"},
@@ -153,7 +153,7 @@ class GenericConfigurationActionSchema(Schema):
     )
 
     updated_by = Relationship(
-        self_view="api.configuration_updated_user",
+        self_view="api.generic_configuration_action_updated_user",
         self_view_kwargs={"id": "<id>"},
         related_view="api.user_detail",
         related_view_kwargs={"id": "<updated_by_id>"},
