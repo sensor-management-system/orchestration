@@ -1,3 +1,5 @@
+"""Module for the platform schema."""
+
 from marshmallow_jsonapi import fields
 from marshmallow_jsonapi.flask import Relationship, Schema
 
@@ -6,7 +8,15 @@ from project.api.schemas.contact_schema import ContactSchema
 
 
 class PlatformSchema(Schema):
+    """
+    Schema to serialize platform model instances.
+
+    Intended to work with a JSON:API.
+    """
+
     class Meta:
+        """Meta class for PlatformSchema class."""
+
         type_ = "platform"
         self_view = "api.platform_detail"
         self_view_kwargs = {"id": "<id>"}
@@ -43,8 +53,16 @@ class PlatformSchema(Schema):
     inventory_number = fields.Str(allow_none=True)
     serial_number = fields.Str(allow_none=True)
     persistent_identifier = fields.Str(allow_none=True)
-    attachments = fields.Nested(
-        AttachmentSchema, many=True, allow_none=True, attribute="platform_attachments"
+    platform_attachments = Relationship(
+        self_view="api.platform_platform_attachments",
+        self_view_kwargs={"id": "<id>"},
+        related_view="api.platform_attachment_list",
+        related_view_kwargs={"platform_id": "<id>"},
+        many=True,
+        allow_none=True,
+        schema="PlatformAttachmentSchema",
+        type_="platform_attachment",
+        id_field="id",
     )
     contacts = Relationship(
         attribute="contacts",
@@ -60,15 +78,26 @@ class PlatformSchema(Schema):
 
     @staticmethod
     def nested_dict_serializer(obj):
-        """serialize the object to a nested dict."""
+        """Serialize the object to a nested dict."""
         return PlatformToNestedDictSerializer().to_nested_dict(obj)
 
 
 class PlatformToNestedDictSerializer:
+    """
+    Serializer to create nested dicts from platforms.
+
+    While the "normal" serializer is used for the JSON:API, this
+    here can be used to just create a nested dict of the content of
+    a platform.
+
+    This can then be flattened and used for example for a csv export.
+    """
+
     @staticmethod
     def to_nested_dict(platform):
         """
         Convert to nested dict.
+
         :param platform:
         :return:
         """

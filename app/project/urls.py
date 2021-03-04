@@ -70,6 +70,11 @@ api.route(
     "platform_updated_user",
     "/platforms/<int:id>/relationships/updatedUser",
 )
+api.route(
+    PlatformRelationship,
+    "platform_platform_attachments",
+    "/platforms/<int:id>/relationships/platform-attachments",
+)
 # Platform Attachment
 api.route(
     PlatformAttachmentList,
@@ -132,6 +137,21 @@ api.route(
     "device_updated_user",
     "/devices/<int:id>/relationships/updatedUser",
 )
+api.route(
+    DeviceRelationship,
+    "device_device_attachments",
+    "/devices/<int:id>/relationships/device-attachments",
+)
+api.route(
+    DeviceRelationship,
+    "device_device_properties",
+    "/devices/<int:id>/relationships/device-properties",
+)
+api.route(
+    DeviceRelationship,
+    "device_customfields",
+    "/devices/<int:id>/relationships/customfields",
+)
 
 # Device Property
 api.route(
@@ -167,7 +187,7 @@ api.route(
 )
 api.route(
     DeviceAttachmentRelationship,
-    "device_attachemnt_device",
+    "device_attachment_device",
     "/device-attachments/<int:id>/relationships/device",
 )
 
