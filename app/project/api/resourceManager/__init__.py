@@ -15,71 +15,87 @@ from .contact_detail import ContactDetail  # noqa: F401
 from .contact_list import ContactList  # noqa: F401
 from .contact_relationship import ContactRelationship  # noqa: F401
 from .device_calibration_action_attachment_resources import (  # noqa: F401
-    DeviceCalibrationAttachmentList,
     DeviceCalibrationAttachmentDetail,
-    DeviceCalibrationAttachmentRelationship)
+    DeviceCalibrationAttachmentList,
+    DeviceCalibrationAttachmentRelationship,
+)
 from .device_calibration_action_resources import (  # noqa: F401
-    DeviceCalibrationActionList,
     DeviceCalibrationActionDetail,
-    DeviceCalibrationActionRelationship
+    DeviceCalibrationActionList,
+    DeviceCalibrationActionRelationship,
 )
 from .device_detail import DeviceDetail  # noqa: F401
 from .device_list import DeviceList  # noqa: F401
 from .device_mount_action_resources import (  # noqa: F401
-    DeviceMountActionList,
     DeviceMountActionDetail,
-    DeviceMountActionRelationship)
+    DeviceMountActionList,
+    DeviceMountActionRelationship,
+)
 from .device_property_detail import DevicePropertyDetail  # noqa: F401
 from .device_property_list import DevicePropertyList  # noqa: F401
 from .device_property_relationship import DevicePropertyRelationship  # noqa: F401
 from .device_relationship import DeviceRelationship  # noqa: F401
 from .device_software_update_action_resource import (  # noqa: F401
-    DeviceSoftwareUpdateActionList,
     DeviceSoftwareUpdateActionDetail,
-    DeviceSoftwareUpdateActionRelationship
+    DeviceSoftwareUpdateActionList,
+    DeviceSoftwareUpdateActionRelationship,
 )
 from .device_unmount_action_resources import (  # noqa: F401
-    DeviceUnmountActionList,
     DeviceUnmountActionDetail,
-    DeviceUnmountActionRelationship)
+    DeviceUnmountActionList,
+    DeviceUnmountActionRelationship,
+)
 from .event_detail import EventDetail  # noqa: F401
 from .event_list import EventList  # noqa: F401
 from .event_relationship import EventRelationship  # noqa: F401
 from .generic_configuration_action_attachment_resources import (  # noqa: F401
-    GenericConfigurationActionAttachmentList, GenericConfigurationActionAttachmentDetail,
-    GenericConfigurationActionAttachmentRelationship)
+    GenericConfigurationActionAttachmentDetail,
+    GenericConfigurationActionAttachmentList,
+    GenericConfigurationActionAttachmentRelationship,
+)
 from .generic_configuration_action_resources import (  # noqa: F401
-    GenericConfigurationActionRelationship, GenericConfigurationActionList,
-    GenericConfigurationActionDetail)
+    GenericConfigurationActionDetail,
+    GenericConfigurationActionList,
+    GenericConfigurationActionRelationship,
+)
 from .generic_device_action_attachment_resources import (  # noqa: F401
-    GenericDeviceActionAttachmentList, GenericDeviceActionAttachmentDetail,
-    GenericDeviceActionAttachmentRelationship)
+    GenericDeviceActionAttachmentDetail,
+    GenericDeviceActionAttachmentList,
+    GenericDeviceActionAttachmentRelationship,
+)
 from .generic_device_action_resources import (  # noqa: F401
-    GenericDeviceActionList,
     GenericDeviceActionDetail,
-    GenericDeviceActionRelationship)
+    GenericDeviceActionList,
+    GenericDeviceActionRelationship,
+)
 from .generic_platform_action_attachment_resources import (  # noqa: F401
-    GenericPlatformActionAttachmentList, GenericPlatformActionAttachmentDetail,
-    GenericPlatformActionAttachmentRelationship)
+    GenericPlatformActionAttachmentDetail,
+    GenericPlatformActionAttachmentList,
+    GenericPlatformActionAttachmentRelationship,
+)
 from .generic_platform_action_resources import (  # noqa: F401
-    GenericPlatformActionList, GenericPlatformActionRelationship, GenericPlatformActionDetail)
+    GenericPlatformActionDetail,
+    GenericPlatformActionList,
+    GenericPlatformActionRelationship,
+)
 from .platform_detail import PlatformDetail  # noqa: F401
 from .platform_list import PlatformList  # noqa: F401
 from .platform_mount_action_resources import (  # noqa: F401
-    PlatformMountActionList,
     PlatformMountActionDetail,
-    PlatformMountActionRelationship)
+    PlatformMountActionList,
+    PlatformMountActionRelationship,
+)
 from .platform_relationship import PlatformRelationship  # noqa: F401
 from .platform_software_update_action_resource import (  # noqa: F401
-    PlatformSoftwareUpdateActionList,
     PlatformSoftwareUpdateActionDetail,
-    PlatformSoftwareUpdateActionRelationship
-
+    PlatformSoftwareUpdateActionList,
+    PlatformSoftwareUpdateActionRelationship,
 )
 from .platform_unmount_action_resources import (  # noqa: F401
-    PlatformUnmountActionList,
     PlatformUnmountActionDetail,
-    PlatformUnmountActionRelationship)
+    PlatformUnmountActionList,
+    PlatformUnmountActionRelationship,
+)
 from .user_detail import UserDetail  # noqa: F401
 from .user_list import UserList  # noqa: F401
 from .user_relationship import UserRelationship  # noqa: F401

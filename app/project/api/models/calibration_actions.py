@@ -10,11 +10,19 @@ class DeviceCalibrationAction(db.Model, AuditMixin):
     formula = db.Column(db.String(256), nullable=True)
     value = db.Column(db.Float, nullable=True)
     device_id = db.Column(db.Integer, db.ForeignKey("device.id"), nullable=False)
-    device = db.relationship("Device", uselist=False, foreign_keys=[device_id],
-                             backref=db.backref("device_calibration_actions"))
+    device = db.relationship(
+        "Device",
+        uselist=False,
+        foreign_keys=[device_id],
+        backref=db.backref("device_calibration_actions"),
+    )
     contact_id = db.Column(db.Integer, db.ForeignKey("contact.id"), nullable=False)
-    contact = db.relationship("Contact", uselist=False, foreign_keys=[contact_id],
-                              backref=db.backref("device_calibration_actions"))
+    contact = db.relationship(
+        "Contact",
+        uselist=False,
+        foreign_keys=[contact_id],
+        backref=db.backref("device_calibration_actions"),
+    )
 
 
 class DevicePropertyCalibration(db.Model):
@@ -23,13 +31,17 @@ class DevicePropertyCalibration(db.Model):
         db.Integer, db.ForeignKey("device_calibration_action.id"), nullable=False
     )
     calibration_action = db.relationship(
-        "DeviceCalibrationAction", uselist=False, foreign_keys=[calibration_action_id],
-        backref=db.backref("device_property_calibrations")
+        "DeviceCalibrationAction",
+        uselist=False,
+        foreign_keys=[calibration_action_id],
+        backref=db.backref("device_property_calibrations"),
     )
     device_property_id = db.Column(
         db.Integer, db.ForeignKey("device_property.id"), nullable=False
     )
     device_property = db.relationship(
-        "DeviceProperty", uselist=False, foreign_keys=[device_property_id],
-        backref=db.backref("device_property_calibrations")
+        "DeviceProperty",
+        uselist=False,
+        foreign_keys=[device_property_id],
+        backref=db.backref("device_property_calibrations"),
     )

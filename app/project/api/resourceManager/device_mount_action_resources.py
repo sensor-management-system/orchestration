@@ -1,12 +1,13 @@
 from flask_rest_jsonapi import ResourceDetail, ResourceRelationship
 
 from project.api.models.base_model import db
-from project.frj_csv_export.resource import ResourceList
-from project.api.resourceManager.base_resource import add_created_by_id
-from project.api.resourceManager.base_resource import add_updated_by_id
-
 from project.api.models.mount_actions import DeviceMountAction
+from project.api.resourceManager.base_resource import (
+    add_created_by_id,
+    add_updated_by_id,
+)
 from project.api.schemas.mount_actions_schema import DeviceMountActionSchema
+from project.frj_csv_export.resource import ResourceList
 
 
 class DeviceMountActionList(ResourceList):

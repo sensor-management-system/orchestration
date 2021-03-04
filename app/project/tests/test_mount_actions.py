@@ -1,7 +1,7 @@
 from project.api.models.base_model import db
 from project.api.models.contact import Contact
 from project.api.models.device import Device
-from project.api.models.mount_actions import PlatformMountAction, DeviceMountAction
+from project.api.models.mount_actions import DeviceMountAction, PlatformMountAction
 from project.api.models.platform import Platform
 from project.api.models.user import User
 from project.tests.base import BaseTestCase, fake, generate_token_data
@@ -47,10 +47,12 @@ class TestMountActions(BaseTestCase):
         db.session.commit()
         mpa_r = (
             db.session.query(PlatformMountAction)
-                .filter_by(description="test mount platform action model")
-                .one()
+            .filter_by(description="test mount platform action model")
+            .one()
         )
-        self.assertEqual(mpa.parent_platform.short_name, mpa_r.parent_platform.short_name)
+        self.assertEqual(
+            mpa.parent_platform.short_name, mpa_r.parent_platform.short_name
+        )
         self.assertDictEqual(mpa.__dict__, mpa_r.__dict__)
 
     def test_mount_device_action_model(self):
@@ -86,8 +88,10 @@ class TestMountActions(BaseTestCase):
         db.session.commit()
         mpa_r = (
             db.session.query(DeviceMountAction)
-                .filter_by(description="test mount device action model")
-                .one()
+            .filter_by(description="test mount device action model")
+            .one()
         )
-        self.assertEqual(mpa.parent_platform.short_name, mpa_r.parent_platform.short_name)
+        self.assertEqual(
+            mpa.parent_platform.short_name, mpa_r.parent_platform.short_name
+        )
         self.assertDictEqual(mpa.__dict__, mpa_r.__dict__)

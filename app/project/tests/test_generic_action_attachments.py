@@ -5,13 +5,11 @@ from project.api.models.generic_action_attachments import (
     GenericPlatformActionAttachment,
 )
 from project.api.models.platform_attachment import PlatformAttachment
-from project.tests.base import BaseTestCase
+from project.tests.base import BaseTestCase, fake
 from project.tests.test_generic_actions_models import (
     generate_device_action_model,
     generate_platform_action_model,
 )
-
-from project.tests.base import fake
 
 
 class TestGenericActions(BaseTestCase):
@@ -23,11 +21,15 @@ class TestGenericActions(BaseTestCase):
         """""Ensure Add generic platform action attachment model """
         gpa = generate_platform_action_model()
         a1 = PlatformAttachment(
-            label="platform attachment1", url=fake.image_url(), platform_id=gpa.platform_id
+            label="platform attachment1",
+            url=fake.image_url(),
+            platform_id=gpa.platform_id,
         )
 
         a2 = PlatformAttachment(
-            label="platform attachment2", url=fake.image_url(), platform_id=gpa.platform_id
+            label="platform attachment2",
+            url=fake.image_url(),
+            platform_id=gpa.platform_id,
         )
         gpa_attachment = GenericPlatformActionAttachment()
         gpa_attachment.action = gpa
@@ -37,8 +39,8 @@ class TestGenericActions(BaseTestCase):
         db.session.commit()
         gpa_t = (
             db.session.query(GenericPlatformActionAttachment)
-                .filter_by(action_id=gpa.id)
-                .one()
+            .filter_by(action_id=gpa.id)
+            .one()
         )
         self.assertEqual("test GenericPlatformAction", gpa_t.action.description)
 
@@ -59,7 +61,7 @@ class TestGenericActions(BaseTestCase):
         db.session.commit()
         gpa_t = (
             db.session.query(GenericDeviceActionAttachment)
-                .filter_by(action_id=gpa.id)
-                .one()
+            .filter_by(action_id=gpa.id)
+            .one()
         )
         self.assertEqual("test GenericDeviceAction", gpa_t.action.description)

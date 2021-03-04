@@ -6,8 +6,6 @@ from project.api.models.device import Device
 from project.api.schemas.device_schema import DeviceSchema
 from project.tests.base import BaseTestCase
 
-from project import base_url
-
 
 class Test(BaseTestCase):
     device_url = base_url + "/devices"

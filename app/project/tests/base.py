@@ -1,20 +1,20 @@
 import json
 import time
 
+from faker import Faker
 from flask_jwt_extended.tokens import _encode_jwt
 from flask_testing import TestCase
 
 from project import create_app
 from project.api.models.base_model import db
-from faker import Faker
 
 app = create_app()
 fake = Faker()
 
 
 def encode_token_date_with_hs256(
-        token_data,
-        headers=None,
+    token_data,
+    headers=None,
 ):
     """
     Make use of the flask_jwt_extended methode (_encode_jwt) to

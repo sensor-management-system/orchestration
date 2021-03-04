@@ -104,8 +104,8 @@ class TestGenericActions(BaseTestCase):
         gpa = generate_platform_action_model()
         gpa_r = (
             db.session.query(GenericPlatformAction)
-                .filter_by(action_type_name="testing")
-                .one()
+            .filter_by(action_type_name="testing")
+            .one()
         )
         self.assertDictEqual(gpa.__dict__, gpa_r.__dict__)
 
@@ -114,8 +114,8 @@ class TestGenericActions(BaseTestCase):
         gpa = generate_device_action_model()
         gpa_r = (
             db.session.query(GenericDeviceAction)
-                .filter_by(action_type_name="testing")
-                .one()
+            .filter_by(action_type_name="testing")
+            .one()
         )
         self.assertDictEqual(gpa.__dict__, gpa_r.__dict__)
 
@@ -124,7 +124,7 @@ class TestGenericActions(BaseTestCase):
         gpa = generate_configuration_action_model()
         gpa_r = (
             db.session.query(GenericConfigurationAction)
-                .filter_by(action_type_name="testing")
-                .one()
+            .filter_by(action_type_name="testing")
+            .one()
         )
         self.assertDictEqual(gpa.__dict__, gpa_r.__dict__)

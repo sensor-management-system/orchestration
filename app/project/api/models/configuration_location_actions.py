@@ -8,14 +8,20 @@ class ConfigurationStaticLocationBeginAction(db.Model, AuditMixin):
         db.Integer, db.ForeignKey("configuration.id"), nullable=False
     )
     configuration = db.relationship(
-        "Configuration", uselist=False, foreign_keys=[configuration_id],
-        backref=db.backref("configuration_static_location_begin_actions")
+        "Configuration",
+        uselist=False,
+        foreign_keys=[configuration_id],
+        backref=db.backref("configuration_static_location_begin_actions"),
     )
     begin_date = db.Column(db.DateTime, nullable=False)
     description = db.Column(db.Text, nullable=True)
     contact_id = db.Column(db.Integer, db.ForeignKey("contact.id"), nullable=False)
-    contact = db.relationship("Contact", uselist=False, foreign_keys=[contact_id],
-                              backref=db.backref("configuration_static_location_begin_actions"))
+    contact = db.relationship(
+        "Contact",
+        uselist=False,
+        foreign_keys=[contact_id],
+        backref=db.backref("configuration_static_location_begin_actions"),
+    )
     x = db.Column(db.Float, nullable=True)
     y = db.Column(db.Float, nullable=True)
     z = db.Column(db.Float, nullable=True)
@@ -30,8 +36,10 @@ class ConfigurationStaticLocationEndAction(db.Model, AuditMixin):
         db.Integer, db.ForeignKey("configuration.id"), nullable=False
     )
     configuration = db.relationship(
-        "Configuration", uselist=False, foreign_keys=[configuration_id],
-        backref=db.backref("configuration_static_location_end_actions")
+        "Configuration",
+        uselist=False,
+        foreign_keys=[configuration_id],
+        backref=db.backref("configuration_static_location_end_actions"),
     )
     end_date = db.Column(db.DateTime, nullable=False)
     description = db.Column(db.Text, nullable=True)
@@ -40,7 +48,7 @@ class ConfigurationStaticLocationEndAction(db.Model, AuditMixin):
         "Contact",
         uselist=False,
         foreign_keys=[contact_id],
-        backref=db.backref("configuration_static_location_end_actions")
+        backref=db.backref("configuration_static_location_end_actions"),
     )
 
 
@@ -50,34 +58,46 @@ class ConfigurationDynamicLocationBeginAction(db.Model, AuditMixin):
         db.Integer, db.ForeignKey("configuration.id"), nullable=False
     )
     configuration = db.relationship(
-        "Configuration", uselist=False, foreign_keys=[configuration_id],
-        backref=db.backref("configuration_dynamic_location_begin_actions")
+        "Configuration",
+        uselist=False,
+        foreign_keys=[configuration_id],
+        backref=db.backref("configuration_dynamic_location_begin_actions"),
     )
     begin_date = db.Column(db.DateTime, nullable=False)
     description = db.Column(db.Text, nullable=True)
     contact_id = db.Column(db.Integer, db.ForeignKey("contact.id"), nullable=False)
-    contact = db.relationship("Contact", uselist=False, foreign_keys=[contact_id],
-                              backref=db.backref("configuration_dynamic_location_begin_actions"))
+    contact = db.relationship(
+        "Contact",
+        uselist=False,
+        foreign_keys=[contact_id],
+        backref=db.backref("configuration_dynamic_location_begin_actions"),
+    )
     x_property_id = db.Column(
         db.Integer, db.ForeignKey("device_property.id"), nullable=True
     )
     x_property = db.relationship(
-        "DeviceProperty", uselist=False, foreign_keys=[x_property_id],
-        backref=db.backref("configuration_dynamic_location_begin_actions")
+        "DeviceProperty",
+        uselist=False,
+        foreign_keys=[x_property_id],
+        backref=db.backref("configuration_dynamic_location_begin_actions"),
     )
     y_property_id = db.Column(
         db.Integer, db.ForeignKey("device_property.id"), nullable=True
     )
     y_property = db.relationship(
-        "DeviceProperty", uselist=False, foreign_keys=[y_property_id],
-        backref=db.backref("configuration_dynamic_location_begin_actions")
+        "DeviceProperty",
+        uselist=False,
+        foreign_keys=[y_property_id],
+        backref=db.backref("configuration_dynamic_location_begin_actions"),
     )
     z_property_id = db.Column(
         db.Integer, db.ForeignKey("device_property.id"), nullable=True
     )
     z_property = db.relationship(
-        "DeviceProperty", uselist=False, foreign_keys=[z_property_id],
-        backref=db.backref("configuration_dynamic_location_begin_actions")
+        "DeviceProperty",
+        uselist=False,
+        foreign_keys=[z_property_id],
+        backref=db.backref("configuration_dynamic_location_begin_actions"),
     )
     epsg_code = db.Column(db.String(256), default="4326")
     elevation_datum_name = db.Column(db.String(256), default="MSL")  # mean sea level
@@ -90,8 +110,10 @@ class ConfigurationDynamicLocationEndAction(db.Model, AuditMixin):
         db.Integer, db.ForeignKey("configuration.id"), nullable=False
     )
     configuration = db.relationship(
-        "Configuration", uselist=False, foreign_keys=[configuration_id],
-        backref=db.backref("configuration_dynamic_location_end_actions")
+        "Configuration",
+        uselist=False,
+        foreign_keys=[configuration_id],
+        backref=db.backref("configuration_dynamic_location_end_actions"),
     )
     end_date = db.Column(db.DateTime, nullable=False)
     description = db.Column(db.Text, nullable=True)
@@ -100,5 +122,5 @@ class ConfigurationDynamicLocationEndAction(db.Model, AuditMixin):
         "Contact",
         uselist=False,
         foreign_keys=[contact_id],
-        backref=db.backref("configuration_dynamic_location_end_actions")
+        backref=db.backref("configuration_dynamic_location_end_actions"),
     )
