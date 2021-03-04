@@ -10,6 +10,21 @@ from project.api.models.base_model import db
 app = create_app()
 
 
+def query_result_to_list(query_result):
+    """
+    Convert a query result to a list.
+
+    Query results from sqlalchemy are ok to work with
+    (so for further filtering, to retrieve the length, etc.)
+    as they are lazy.
+
+    However sometimes it is easier to deal with them as
+    simple plain python lists - this is what this utility function
+    here does.
+    """
+    return [r for r in query_result]
+
+
 def encode_token_date_with_hs256(
     token_data,
     headers=None,

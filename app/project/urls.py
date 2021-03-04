@@ -12,6 +12,12 @@ from project.api.resourceManager import (
     ContactDetail,
     ContactList,
     ContactRelationship,
+    CustomFieldDetail,
+    CustomFieldList,
+    CustomFieldRelationship,
+    DeviceAttachmentDetail,
+    DeviceAttachmentList,
+    DeviceAttachmentRelationship,
     DeviceDetail,
     DeviceList,
     DevicePropertyDetail,
@@ -21,6 +27,9 @@ from project.api.resourceManager import (
     EventDetail,
     EventList,
     EventRelationship,
+    PlatformAttachmentDetail,
+    PlatformAttachmentList,
+    PlatformAttachmentRelationship,
     PlatformDetail,
     PlatformList,
     PlatformRelationship,
@@ -60,6 +69,23 @@ api.route(
     PlatformRelationship,
     "platform_updated_user",
     "/platforms/<int:id>/relationships/updatedUser",
+)
+# Platform Attachment
+api.route(
+    PlatformAttachmentList,
+    "platform_attachment_list",
+    "/platform-attachments",
+    "/platforms/<int:platform_id>/platform-attachments",
+)
+api.route(
+    PlatformAttachmentDetail,
+    "platform_attachment_detail",
+    "/platform-attachments/<int:id>",
+)
+api.route(
+    PlatformAttachmentRelationship,
+    "platform_attachment_platform",
+    "/platform-attachments/<int:id>/relationships/platform",
 )
 # Events
 api.route(EventList, "event_list", "/events")
@@ -114,12 +140,53 @@ api.route(
     "/device-properties/<int:id>",
 )
 
-api.route(DevicePropertyList, "device_property_list", "/device-properties")
+api.route(
+    DevicePropertyList,
+    "device_property_list",
+    "/device-properties",
+    "/devices/<int:device_id>/device-properties",
+)
 
 api.route(
     DevicePropertyRelationship,
     "device_property_device",
     "/device-properties/<int:id>/relationships/device",
+)
+
+# Device Attachment
+api.route(
+    DeviceAttachmentList,
+    "device_attachment_list",
+    "/device-attachments",
+    "/devices/<int:device_id>/device-attachments",
+)
+api.route(
+    DeviceAttachmentDetail,
+    "device_attachment_detail",
+    "/device-attachments/<int:id>",
+)
+api.route(
+    DeviceAttachmentRelationship,
+    "device_attachment_device",
+    "/device-attachments/<int:id>/relationships/device",
+)
+
+# CustomField
+api.route(
+    CustomFieldList,
+    "customfield_list",
+    "/customfields",
+    "/devices/<int:device_id>/customfields",
+)
+api.route(
+    CustomFieldDetail,
+    "customfield_detail",
+    "/customfields/<int:id>",
+)
+api.route(
+    CustomFieldRelationship,
+    "customfield_device",
+    "/customfields/<int:id>/relationships/device",
 )
 
 # Contact

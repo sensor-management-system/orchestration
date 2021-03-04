@@ -3,7 +3,7 @@ from marshmallow_jsonapi.flask import Relationship, Schema
 
 from project.api.schemas.attachment_schema import AttachmentSchema
 from project.api.schemas.contact_schema import ContactSchema
-from project.api.schemas.customfield_schema import CustomFieldSchema
+from project.api.schemas.customfield_schema import InnerCustomFieldSchema
 from project.api.schemas.device_property_schema import InnerDevicePropertySchema
 
 
@@ -56,7 +56,7 @@ class DeviceSchema(Schema):
         related_view_kwargs={"id": "<updated_by_id>"},
         type_="user",
     )
-    customfields = fields.Nested(CustomFieldSchema, many=True, allow_none=True)
+    customfields = fields.Nested(InnerCustomFieldSchema, many=True, allow_none=True)
     events = Relationship(
         self_view="api.device_events",
         self_view_kwargs={"id": "<id>"},
@@ -135,6 +135,7 @@ class DeviceToNestedDictSerializer:
                     for p in device.device_properties
                 ],
                 "customfields": [
-                    CustomFieldSchema.dict_serializer(c) for c in device.customfields
+                    InnerCustomFieldSchema.dict_serializer(c)
+                    for c in device.customfields
                 ],
             }
