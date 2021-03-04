@@ -1,3 +1,5 @@
+"""Tests for the devices."""
+
 import json
 import unittest
 
@@ -31,7 +33,7 @@ class TestDeviceService(BaseTestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_add_device_model(self):
-        """""Ensure Add device model """
+        """Ensure Add device model."""
         sensor = Device(
             id=22,
             short_name="device_short_name test",
@@ -62,16 +64,24 @@ class TestDeviceService(BaseTestCase):
             url=self.device_url, data_object=device_data, object_type=self.object_type
         )
 
-    def add_device_contacts_relationship(self):
-        """Ensure a new relationship between a device and a contact
-        can be established.
-        """
-        contact = TestContactServices().test_add_contact()
+    def test_add_device_contacts_relationship(self):
+        """Ensure a new relationship between a device & contact can be created."""
+        contact_service = TestContactServices()
+        # We need to inject the client (not done on just creating the contact_service)
+        contact_service.client = self.client
+        contact = contact_service.test_add_contact()
         devices_json = extract_data_from_json_file(self.json_data_url, "devices")
 
         device_data = {
-            "data": {"type": "device", "attributes": devices_json[0]},
-            "relationships": {"data": [{"type": "contact", "id": contact.id}]},
+            "data": {
+                "type": "device",
+                "attributes": devices_json[0],
+                "relationships": {
+                    "contacts": {
+                        "data": [{"type": "contact", "id": contact["data"]["id"]}]
+                    }
+                },
+            },
         }
         data = super().add_object(
             url=self.device_url + "?include=contacts",
@@ -79,9 +89,10 @@ class TestDeviceService(BaseTestCase):
             object_type=self.object_type,
         )
 
-        self.assertIn(
-            contact.id, data["data"]["relationships"]["contacts"]["data"]["id"]
-        )
+        result_contact_ids = [
+            x["id"] for x in data["data"]["relationships"]["contacts"]["data"]
+        ]
+        self.assertIn(contact["data"]["id"], result_contact_ids)
 
 
 if __name__ == "__main__":

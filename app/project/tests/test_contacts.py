@@ -1,3 +1,5 @@
+"""Tests for the contacts."""
+
 import unittest
 
 from project import base_url
@@ -9,9 +11,7 @@ from project.tests.read_from_json import extract_data_from_json_file
 
 
 class TestContactServices(BaseTestCase):
-    """
-    Test Contact Services
-    """
+    """Test Contact Services."""
 
     contact_url = base_url + "/contacts"
     object_type = "contact"
@@ -23,7 +23,7 @@ class TestContactServices(BaseTestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_add_contact_model(self):
-        """""Ensure Add platform model """
+        """Ensure Add platform model."""
         contact = Contact(
             id=45,
             given_name="test_user",
@@ -44,10 +44,10 @@ class TestContactServices(BaseTestCase):
         contact_json = extract_data_from_json_file(self.json_data_url, "contacts")
 
         contact_data = {"data": {"type": "contact", "attributes": contact_json[0]}}
-        super().add_object(
+        contact_response = super().add_object(
             url=self.contact_url, data_object=contact_data, object_type=self.object_type
         )
-        return contact_data
+        return contact_response
 
 
 if __name__ == "__main__":

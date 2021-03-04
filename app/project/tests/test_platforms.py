@@ -1,3 +1,5 @@
+"""Tests for the platforms."""
+
 import unittest
 
 from project import base_url
@@ -10,16 +12,14 @@ from project.tests.test_contacts import TestContactServices
 
 
 class TestPlatformServices(BaseTestCase):
-    """
-    Test Event Services
-    """
+    """Test Platform Services."""
 
     platform_url = base_url + "/platforms"
     object_type = "platform"
     json_data_url = "/usr/src/app/project/tests/drafts/platforms_test_data.json"
 
     def test_add_platform_model(self):
-        """""Ensure Add platform model """
+        """Ensure Add platform model."""
         platform = Platform(
             id=13,
             short_name="short_name test",
@@ -46,7 +46,6 @@ class TestPlatformServices(BaseTestCase):
 
     def test_add_platform(self):
         """Ensure a new platform can be added to the database."""
-
         platforms_json = extract_data_from_json_file(self.json_data_url, "platforms")
 
         platform_data = {"data": {"type": "platform", "attributes": platforms_json[0]}}
@@ -57,16 +56,24 @@ class TestPlatformServices(BaseTestCase):
             object_type=self.object_type,
         )
 
-    def add_platform_contacts_relationship(self):
-        """Ensure a new relationship between a platform and a contact
-        can be established.
-        """
-        contact = TestContactServices().test_add_contact()
-        platform_json = extract_data_from_json_file(self.json_data_url, "devices")
+    def test_add_platform_contacts_relationship(self):
+        """Ensure a new relationship between a platform & contact can be created."""
+        contact_service = TestContactServices()
+        # We need to inject the client (not done on just creating the contact_service)
+        contact_service.client = self.client
+        contact = contact_service.test_add_contact()
+        platform_json = extract_data_from_json_file(self.json_data_url, "platforms")
 
         platform_data = {
-            "data": {"type": "device", "attributes": platform_json[0]},
-            "relationships": {"data": [{"type": "contact", "id": contact.id}]},
+            "data": {
+                "type": "platform",
+                "attributes": platform_json[0],
+                "relationships": {
+                    "contacts": {
+                        "data": [{"type": "contact", "id": contact["data"]["id"]}]
+                    },
+                },
+            }
         }
         data = super().add_object(
             url=self.platform_url + "?include=contacts",
@@ -74,9 +81,11 @@ class TestPlatformServices(BaseTestCase):
             object_type=self.object_type,
         )
 
-        self.assertIn(
-            contact.id, data["data"]["relationships"]["contacts"]["data"]["id"]
-        )
+        result_contact_ids = [
+            x["id"] for x in data["data"]["relationships"]["contacts"]["data"]
+        ]
+
+        self.assertIn(contact["data"]["id"], result_contact_ids)
 
 
 if __name__ == "__main__":
