@@ -26,4 +26,6 @@ class DeviceAttachmentSchema(Schema):
         related_view="api.device_detail",
         related_view_kwargs={"id": "<device_id>"},
         type_="device",
+        schema="DeviceSchema",
+        id_field="id"
     )

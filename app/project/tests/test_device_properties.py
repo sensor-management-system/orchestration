@@ -100,7 +100,7 @@ class TestDevicePropertyServices(BaseTestCase):
                 headers=create_token(),
             )
         # it will not work, as we miss an important part (the device)
-        self.assertEqual(response.status_code, 500)
+        self.assertEqual(response.status_code, 422)
         count_device_properties_after = db.session.query(DeviceProperty).count()
         self.assertEqual(count_device_properties_before, count_device_properties_after)
 

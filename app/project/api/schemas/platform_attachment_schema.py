@@ -21,4 +21,6 @@ class PlatformAttachmentSchema(Schema):
         related_view="api.platform_detail",
         related_view_kwargs={"id": "<platform_id>"},
         type_="platform",
+        schema="PlatformSchema",
+        id_field="id",
     )

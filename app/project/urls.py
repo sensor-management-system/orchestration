@@ -168,7 +168,7 @@ api.route(
 )
 api.route(
     DeviceAttachmentRelationship,
-    "device_attachemnt_device",
+    "device_attachment_device",
     "/device-attachments/<int:id>/relationships/device",
 )
 

@@ -140,7 +140,7 @@ class TestDeviceAttachmentServices(BaseTestCase):
                 headers=create_token(),
             )
         # it will not work, as we miss an important part (the device)
-        self.assertEqual(response.status_code, 500)
+        self.assertEqual(response.status_code, 422)
         count_device_attachments_after = db.session.query(DeviceAttachment).count()
         self.assertEqual(
             count_device_attachments_before, count_device_attachments_after
