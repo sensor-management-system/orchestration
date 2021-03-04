@@ -142,7 +142,7 @@ class TestPlatformAttachmentServices(BaseTestCase):
                 headers=create_token(),
             )
         # it will not work, as we miss an important part (the platform)
-        self.assertEqual(response.status_code, 500)
+        self.assertEqual(response.status_code, 422)
         count_platform_attachments_after = db.session.query(PlatformAttachment).count()
         self.assertEqual(
             count_platform_attachments_before, count_platform_attachments_after
