@@ -46,6 +46,7 @@ permissions and limitations under the Licence.
       <v-tab
         v-else-if="isRoute(tab)"
         :key="index"
+        :disabled="tab.disabled"
         nuxt
         :to="tab.to"
       >
@@ -54,7 +55,15 @@ permissions and limitations under the Licence.
       <v-tab
         v-else-if="isLink(tab)"
         :key="index"
+        :disabled="tab.disabled"
         :href="tab.href"
+      >
+        {{ tab.name }}
+      </v-tab>
+      <v-tab
+        v-else
+        :key="index"
+        :disabled="tab.disabled"
       >
         {{ tab.name }}
       </v-tab>
