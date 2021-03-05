@@ -20,11 +20,10 @@
         apply
       </v-btn>
     </v-card-actions>
-    <v-card-text>
-      <DeviceBasicDataForm
-        v-model="deviceCopy"
-      />
-    </v-card-text>
+    <DeviceBasicDataForm
+      ref="basicForm"
+      v-model="deviceCopy"
+    />
     <v-card-actions>
       <v-spacer />
       <v-btn
@@ -76,6 +75,10 @@ export default class DeviceEditBasicPage extends Vue {
   }
 
   onSaveButtonClicked () {
+    if (!(this.$refs.basicForm as Vue & { validateForm: () => boolean }).validateForm()) {
+      this.$store.commit('snackbar/setError', 'Please correct your input')
+      return
+    }
     this.save().then((device) => {
       this.$emit('input', device)
       this.$router.push('/devices/' + this.deviceId + '/basic')
