@@ -29,19 +29,34 @@ implied. See the Licence for the specific language governing
 permissions and limitations under the Licence.
 -->
 <template>
-  <div>
-    <v-card
-      outlined
-    >
-      <v-tabs-items
-        v-model="activeTab"
+  <v-card
+    flat
+  >
+    <v-card-actions>
+      <v-spacer />
+      <v-btn
+        v-if="isLoggedIn"
+        small
+        text
+        nuxt
+        to="/search/devices"
       >
-        <v-tab-item :eager="true">
-          <DeviceBasicDataForm v-model="device" />
-        </v-tab-item>
-      </v-tabs-items>
-    </v-card>
-  </div>
+        cancel
+      </v-btn>
+      <v-btn
+        v-if="isLoggedIn"
+        color="green"
+        small
+        @click="onSaveButtonClicked"
+      >
+        create
+      </v-btn>
+    </v-card-actions>
+    <DeviceBasicDataForm
+      ref="basicForm"
+      v-model="device"
+    />
+  </v-card>
 </template>
 
 <style lang="scss">
@@ -55,10 +70,6 @@ import { Rules } from '@/mixins/Rules'
 
 import { Device } from '@/models/Device'
 
-import AttachmentList from '@/components/AttachmentList.vue'
-import ContactSelect from '@/components/ContactSelect.vue'
-import CustomFieldCards from '@/components/CustomFieldCards.vue'
-import DevicePropertyExpansionPanels from '@/components/DevicePropertyExpansionPanels.vue'
 import DeviceBasicDataForm from '@/components/DeviceBasicDataForm.vue'
 
 @Component({
@@ -72,57 +83,23 @@ export default class DeviceNewPage extends mixins(Rules) {
 
   private device: Device = new Device()
 
-  created () {
-    this.initializeAppBar()
-    this.registerButtonActions()
-  }
-
   mounted () {
-    this.$store.commit('appbar/setTitle', 'Add Device')
+    this.initializeAppBar()
   }
 
   beforeDestroy () {
-    this.unregisterButtonActions()
     this.$store.dispatch('appbar/setDefaults')
   }
 
-  registerButtonActions () {
-    this.$nuxt.$on('AppBarEditModeContent:save-btn-click', () => {
-      this.save()
-    })
-    this.$nuxt.$on('AppBarEditModeContent:cancel-btn-click', () => {
-      this.cancel()
-    })
-  }
-
-  unregisterButtonActions () {
-    this.$nuxt.$off('AppBarEditModeContent:save-btn-click')
-    this.$nuxt.$off('AppBarEditModeContent:cancel-btn-click')
-  }
-
-  initializeAppBar () {
-    this.$store.dispatch('appbar/init', {
-      tabs: [
-        'Basic Data'
-      ],
-      title: 'Add Device',
-      saveBtnHidden: false,
-      cancelBtnHidden: false
-    })
-  }
-
-  get activeTab (): number | null {
-    return this.$store.state.appbar.activeTab
-  }
-
-  set activeTab (tab: number | null) {
-    this.$store.commit('appbar/setActiveTab', tab)
-  }
-
-  save (): void {
+  onSaveButtonClicked (): void {
+    if (!(this.$refs.basicForm as Vue & { validateForm: () => boolean }).validateForm()) {
+      this.$store.commit('snackbar/setError', 'Please correct your input')
+      return
+    }
     this.$api.devices.save(this.device).then((savedDevice) => {
       if (this.isLoggedIn) {
-        this.$router.push('/devices/show/' + savedDevice.id + '')
+        this.$store.commit('snackbar/setSuccess', 'Device created')
+        this.$router.push('/devices/' + savedDevice.id + '')
       } else {
         throw new Error('You need to be logged in to save the device')
       }
@@ -131,8 +108,20 @@ export default class DeviceNewPage extends mixins(Rules) {
     })
   }
 
-  cancel () {
-    this.$router.push('/search/devices')
+  initializeAppBar () {
+    this.$store.dispatch('appbar/init', {
+      tabs: [
+        {
+          to: '/devices/new',
+          name: 'Basic Data'
+        },
+        {
+          name: 'Contacts',
+          disabled: true
+        }
+      ],
+      title: 'Add Device'
+    })
   }
 
   get isLoggedIn () {
