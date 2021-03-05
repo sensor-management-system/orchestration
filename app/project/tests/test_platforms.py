@@ -5,6 +5,7 @@ import unittest
 from project import base_url
 from project.api.models.base_model import db
 from project.api.models.platform import Platform
+from project.api.models.platform_attachment import PlatformAttachment
 from project.api.schemas.platform_schema import PlatformSchema
 from project.tests.base import BaseTestCase
 from project.tests.read_from_json import extract_data_from_json_file
@@ -86,6 +87,107 @@ class TestPlatformServices(BaseTestCase):
         ]
 
         self.assertIn(contact["data"]["id"], result_contact_ids)
+
+    def test_add_platform_platform_attachment_included(self):
+        """Ensure that we can include attachments on getting a platform."""
+        # We want to create here a platform, add two platform attachments
+        # and want to make sure that we can query the attachments
+        # together with the platform itself.
+
+        platform = Platform(short_name="platform")
+        db.session.add(platform)
+
+        attachment1 = PlatformAttachment(
+            url="www.gfz-potsdam.de", label="GFZ", platform=platform
+        )
+        db.session.add(attachment1)
+        attachment2 = PlatformAttachment(
+            url="www.ufz.de", label="UFZ", platform=platform
+        )
+        db.session.add(attachment2)
+        db.session.commit()
+
+        with self.client:
+            response = self.client.get(
+                base_url
+                + "/platforms/"
+                + str(platform.id)
+                + "?include=platform_attachments",
+                content_type="application/vnd.api+json",
+            )
+        self.assertEqual(response.status_code, 200)
+
+        response_data = response.get_json()
+
+        self.assertEqual(response_data["data"]["id"], str(platform.id))
+
+        attachment_ids = [
+            x["id"]
+            for x in response_data["data"]["relationships"]["platform_attachments"][
+                "data"
+            ]
+        ]
+
+        self.assertEqual(len(attachment_ids), 2)
+
+        for attachment in [attachment1, attachment2]:
+            self.assertIn(str(attachment.id), attachment_ids)
+
+        included_attachments = {}
+
+        for included_entry in response_data["included"]:
+            if included_entry["type"] == "platform_attachment":
+                attachment_id = included_entry["id"]
+                included_attachments[attachment_id] = included_entry
+
+        self.assertEqual(len(included_attachments.keys()), 2)
+
+        for attachment in [attachment1, attachment2]:
+            self.assertIn(str(attachment.id), included_attachments.keys())
+            self.assertEqual(
+                attachment.url,
+                included_attachments[str(attachment.id)]["attributes"]["url"],
+            )
+            self.assertEqual(
+                attachment.label,
+                included_attachments[str(attachment.id)]["attributes"]["label"],
+            )
+
+    def test_add_platform_platform_attachment_relationship(self):
+        """Ensure that we can work with the attachment relationship."""
+        platform = Platform(short_name="platform")
+        db.session.add(platform)
+
+        attachment1 = PlatformAttachment(
+            url="www.gfz-potsdam.de", label="GFZ", platform=platform
+        )
+        db.session.add(attachment1)
+        attachment2 = PlatformAttachment(
+            url="www.ufz.de", label="UFZ", platform=platform
+        )
+        db.session.add(attachment2)
+        db.session.commit()
+
+        with self.client:
+            response = self.client.get(
+                base_url
+                + "/platforms/"
+                + str(platform.id)
+                + "/relationships/platform-attachments",
+                content_type="application/vnd.api+json",
+            )
+        self.assertEqual(response.status_code, 200)
+
+        response_data = response.get_json()
+
+        # it seems that this relationships are plain integer values
+        # so we convert them explicitly
+        attachment_ids = [str(x["id"]) for x in response_data["data"]]
+
+        self.assertEqual(len(attachment_ids), 2)
+
+        for attachment in [attachment1, attachment2]:
+            self.assertIn(str(attachment.id), attachment_ids)
 
 
 if __name__ == "__main__":
