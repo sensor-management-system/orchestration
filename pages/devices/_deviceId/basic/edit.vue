@@ -49,7 +49,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop } from 'nuxt-property-decorator'
+import { Component, Vue, Prop, Watch } from 'nuxt-property-decorator'
 
 import DeviceBasicDataForm from '@/components/DeviceBasicDataForm.vue'
 
@@ -100,6 +100,12 @@ export default class DeviceEditBasicPage extends Vue {
 
   get isLoggedIn () {
     return this.$store.getters['oidc/isAuthenticated']
+  }
+
+  @Watch('value', { immediate: true, deep: true })
+  // @ts-ignore
+  onDeviceChanged (val: Device) {
+    this.deviceCopy = Device.createFromObject(val)
   }
 }
 </script>
