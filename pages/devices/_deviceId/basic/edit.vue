@@ -23,7 +23,6 @@
     <v-card-text>
       <DeviceBasicDataForm
         v-model="deviceCopy"
-        :readonly="false"
       />
     </v-card-text>
     <v-card-actions>
@@ -62,7 +61,9 @@ import { Device } from '@/models/Device'
   }
 })
 export default class DeviceEditBasicPage extends Vue {
-  private deviceCopy!: Device
+  // we need to initialize the instance variable with an empty Device instance
+  // here, otherwise the form is not reactive
+  private deviceCopy: Device = new Device()
 
   @Prop({
     required: true,
