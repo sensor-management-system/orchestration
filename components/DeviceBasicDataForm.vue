@@ -29,7 +29,10 @@ implied. See the Licence for the specific language governing
 permissions and limitations under the Licence.
 -->
 <template>
-  <v-form ref="basicForm">
+  <v-form
+    ref="basicForm"
+    @submit.prevent
+  >
     <v-row>
       <v-col cols="12" md="3">
         <v-text-field
@@ -364,6 +367,17 @@ export default class DeviceBasicDataForm extends mixins(Rules) {
     return [partManufacturer, partModel, partSerialNumber].join('_').replace(
       ' ', '_'
     )
+  }
+
+  /**
+   * validates the user input
+   *
+   * Note: we can't use 'validate' as a method name, so I used 'validateForm'
+   *
+   * @return {boolean} true when input is valid, otherwise false
+   */
+  public validateForm (): boolean {
+    return (this.$refs.basicForm as Vue & { validate: () => boolean }).validate()
   }
 }
 </script>
