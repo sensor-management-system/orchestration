@@ -32,6 +32,10 @@ permissions and limitations under the Licence.
   <div>
     <v-row>
       <v-col cols="12" md="3">
+        <label>URN</label>
+        {{ deviceURN }}
+      </v-col>
+      <v-col cols="12" md="3">
         <label>Persistent identifier (PID)</label>
         {{ value.persistentIdentifier | orDefault }}
       </v-col>
@@ -186,6 +190,35 @@ export default class DeviceBasicData extends Vue {
       return this.deviceTypes[deviceTypeIndex].name
     }
     return this.value.deviceTypeName
+  }
+
+  get deviceURN () {
+    let partManufacturer = '[manufacturer]'
+    let partModel = '[model]'
+    let partSerialNumber = '[serial_number]'
+
+    if (this.value.manufacturerUri !== '') {
+      const manIndex = this.manufacturers.findIndex(m => m.uri === this.value.manufacturerUri)
+      if (manIndex > -1) {
+        partManufacturer = this.manufacturers[manIndex].name
+      } else if (this.value.manufacturerName !== '') {
+        partManufacturer = this.value.manufacturerName
+      }
+    } else if (this.value.manufacturerName !== '') {
+      partManufacturer = this.value.manufacturerName
+    }
+
+    if (this.value.model !== '') {
+      partModel = this.value.model
+    }
+
+    if (this.value.serialNumber !== '') {
+      partSerialNumber = this.value.serialNumber
+    }
+
+    return [partManufacturer, partModel, partSerialNumber].join('_').replace(
+      ' ', '_'
+    )
   }
 }
 </script>
