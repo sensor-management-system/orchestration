@@ -1,10 +1,14 @@
 <template>
   <div>
-    <v-progress-circular
-      v-if="isLoading"
-      class="center-absolute"
-      indeterminate
-    />
+    <v-overlay
+      :value="isLoading"
+      opacity="0.05"
+    >
+      <v-progress-circular
+        indeterminate
+        class="center-absolute"
+      />
+    </v-overlay>
     <v-card flat>
       <NuxtChild
         v-model="device"
@@ -49,6 +53,10 @@ export default class DevicePage extends Vue {
       this.$store.commit('snackbar/setError', 'Loading device failed')
       this.isLoading = false
     })
+  }
+
+  beforeDestroy () {
+    this.$store.dispatch('appbar/setDefaults')
   }
 
   initializeAppBar () {
