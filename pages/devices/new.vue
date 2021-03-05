@@ -118,6 +118,22 @@ export default class DeviceNewPage extends mixins(Rules) {
         {
           name: 'Contacts',
           disabled: true
+        },
+        {
+          name: 'Properties',
+          disabled: true
+        },
+        {
+          name: 'Custom Fields',
+          disabled: true
+        },
+        {
+          name: 'Attachments',
+          disabled: true
+        },
+        {
+          name: 'Events',
+          disabled: true
         }
       ],
       title: 'Add Device'
