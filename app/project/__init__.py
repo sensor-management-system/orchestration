@@ -5,6 +5,7 @@ from flask import Blueprint, Flask
 from flask_cors import CORS
 from flask_migrate import Migrate
 
+from project.api import create_api
 from project.api.models.base_model import db
 from project.api.token_checker import jwt
 from project.urls import api
@@ -53,5 +54,6 @@ def create_app():
     # test to ensure the proper config was loaded
     # import sys
     # print(app.config, file=sys.stderr)
-
-    return app
+    with app.app_context():
+        create_api(app, API_PREFIX=base_url)
+        return app

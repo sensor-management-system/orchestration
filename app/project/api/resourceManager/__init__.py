@@ -35,6 +35,11 @@ from .device_property_detail import DevicePropertyDetail  # noqa: F401
 from .device_property_list import DevicePropertyList  # noqa: F401
 from .device_property_relationship import DevicePropertyRelationship  # noqa: F401
 from .device_relationship import DeviceRelationship  # noqa: F401
+from .device_software_update_action_attachment_resources import (  # noqa: F401
+    DeviceSoftwareUpdateActionAttachmentDetail,
+    DeviceSoftwareUpdateActionAttachmentList,
+    DeviceSoftwareUpdateActionAttachmentRelationship,
+)
 from .device_software_update_action_resource import (  # noqa: F401
     DeviceSoftwareUpdateActionDetail,
     DeviceSoftwareUpdateActionList,
@@ -86,6 +91,11 @@ from .platform_mount_action_resources import (  # noqa: F401
     PlatformMountActionRelationship,
 )
 from .platform_relationship import PlatformRelationship  # noqa: F401
+from .platform_software_update_action_attachment_resources import (  # noqa: F401
+    PlatformSoftwareUpdateActionAttachmentDetail,
+    PlatformSoftwareUpdateActionAttachmentList,
+    PlatformSoftwareUpdateActionAttachmentRelationship,
+)
 from .platform_software_update_action_resource import (  # noqa: F401
     PlatformSoftwareUpdateActionDetail,
     PlatformSoftwareUpdateActionList,

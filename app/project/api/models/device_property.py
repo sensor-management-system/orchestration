@@ -1,10 +1,12 @@
 """Model for device properties."""
 
+from safrs import SAFRSBase
+
 from project.api.models.base_model import db
 from project.api.models.device import Device
 
 
-class DeviceProperty(db.Model):
+class DeviceProperty(db.Model, SAFRSBase):
     """DeviceProperty class."""
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)

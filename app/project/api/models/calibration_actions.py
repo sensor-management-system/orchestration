@@ -1,8 +1,10 @@
+from safrs import SAFRSBase
+
 from project.api.models.base_model import db
 from project.api.models.mixin import AuditMixin
 
 
-class DeviceCalibrationAction(db.Model, AuditMixin):
+class DeviceCalibrationAction(db.Model, AuditMixin, SAFRSBase):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     description = db.Column(db.Text, nullable=True)
     current_calibration_date = db.Column(db.DateTime, nullable=False)
@@ -25,7 +27,7 @@ class DeviceCalibrationAction(db.Model, AuditMixin):
     )
 
 
-class DevicePropertyCalibration(db.Model):
+class DevicePropertyCalibration(db.Model, SAFRSBase):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     calibration_action_id = db.Column(
         db.Integer, db.ForeignKey("device_calibration_action.id"), nullable=False

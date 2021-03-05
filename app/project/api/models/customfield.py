@@ -1,7 +1,9 @@
+from safrs import SAFRSBase
+
 from project.api.models.base_model import db
 
 
-class CustomField(db.Model):
+class CustomField(db.Model, SAFRSBase):
     """
     Custom Field class
     """

@@ -1,7 +1,9 @@
+from safrs import SAFRSBase
+
 from project.api.models.base_model import db
 
 
-class PlatformAttachment(db.Model):
+class PlatformAttachment(db.Model, SAFRSBase):
     """
     Platform Attachment class
     """

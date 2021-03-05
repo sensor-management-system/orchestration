@@ -1,10 +1,11 @@
+from safrs import SAFRSBase
 from sqlalchemy import UniqueConstraint
 
 from project.api.models.base_model import db
 from project.api.models.mixin import AuditMixin
 
 
-class ConfigurationDevice(db.Model, AuditMixin):
+class ConfigurationDevice(db.Model, AuditMixin, SAFRSBase):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     offset_x = db.Column(db.Float(), nullable=True)
     offset_y = db.Column(db.Float(), nullable=True)

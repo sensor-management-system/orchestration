@@ -1,7 +1,9 @@
+from safrs import SAFRSBase
+
 from project.api.models.base_model import db
 
 
-class DeviceSoftwareUpdateActionAttachment(db.Model):
+class DeviceSoftwareUpdateActionAttachment(db.Model, SAFRSBase):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     action_id = db.Column(
         db.Integer, db.ForeignKey("device_software_update_action.id"), nullable=False
@@ -23,7 +25,7 @@ class DeviceSoftwareUpdateActionAttachment(db.Model):
     )
 
 
-class PlatformSoftwareUpdateActionAttachment(db.Model):
+class PlatformSoftwareUpdateActionAttachment(db.Model, SAFRSBase):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     action_id = db.Column(
         db.Integer, db.ForeignKey("platform_software_update_action.id"), nullable=False

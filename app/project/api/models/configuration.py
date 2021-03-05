@@ -2,6 +2,7 @@
 
 import collections
 
+from safrs import SAFRSBase
 from sqlalchemy.ext.hybrid import hybrid_property
 
 from project.api.models.base_model import db
@@ -12,7 +13,7 @@ ConfigurationsTuple = collections.namedtuple(
 )
 
 
-class Configuration(db.Model, AuditMixin, SearchableMixin):
+class Configuration(db.Model, AuditMixin, SearchableMixin, SAFRSBase):
     """Data model for the configurations."""
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)

@@ -550,3 +550,43 @@ api.route(
     f"{dsu}_updated_user",
     f"/{dsu_url}s/<int:id>/relationships/updated-user",
 )
+
+# DeviceSoftwareUpdateActionAttachment
+dsu_a = stringcase.snakecase("deviceSoftwareUpdateActionAttachment")
+dsu_a_url = stringcase.spinalcase(dsu_a)
+api.route(DeviceSoftwareUpdateActionAttachmentList, f"{dsu_a}_list", f"/{dsu_a_url}s")
+api.route(
+    DeviceSoftwareUpdateActionAttachmentDetail,
+    f"{dsu_a}_detail",
+    f"/{dsu_a_url}s/<int:id>",
+)
+api.route(
+    DeviceSoftwareUpdateActionAttachmentRelationship,
+    f"{dsu_a}_action",
+    f"/{dsu_a_url}s/<int:id>/relationships/action",
+)
+api.route(
+    DeviceSoftwareUpdateActionAttachmentRelationship,
+    f"{dsu_a}_attachment",
+    f"/{dsu_a_url}s/<int:id>/relationships/attachment",
+)
+
+# PlatformSoftwareUpdateActionAttachment
+psu_a = stringcase.snakecase("platformSoftwareUpdateActionAttachment")
+psu_a_url = stringcase.spinalcase(psu_a)
+api.route(PlatformSoftwareUpdateActionAttachmentList, f"{psu_a}_list", f"/{psu_a_url}s")
+api.route(
+    PlatformSoftwareUpdateActionAttachmentDetail,
+    f"{psu_a}_detail",
+    f"/{psu_a_url}s/<int:id>",
+)
+api.route(
+    PlatformSoftwareUpdateActionAttachmentRelationship,
+    f"{psu_a}_action",
+    f"/{psu_a_url}s/<int:id>/relationships/action",
+)
+api.route(
+    PlatformSoftwareUpdateActionAttachmentRelationship,
+    f"{psu_a}_attachment",
+    f"/{psu_a_url}s/<int:id>/relationships/attachment",
+)

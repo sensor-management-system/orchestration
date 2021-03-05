@@ -1,8 +1,10 @@
+from safrs import SAFRSBase
+
 from project.api.models.base_model import db
 from project.api.models.mixin import AuditMixin
 
 
-class PlatformMountAction(db.Model, AuditMixin):
+class PlatformMountAction(db.Model, AuditMixin, SAFRSBase):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     configuration_id = db.Column(
         db.Integer, db.ForeignKey("configuration.id"), nullable=False
@@ -43,7 +45,7 @@ class PlatformMountAction(db.Model, AuditMixin):
     offset_z = db.Column(db.Float, default=0)
 
 
-class DeviceMountAction(db.Model, AuditMixin):
+class DeviceMountAction(db.Model, AuditMixin, SAFRSBase):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     configuration_id = db.Column(
         db.Integer, db.ForeignKey("configuration.id"), nullable=False

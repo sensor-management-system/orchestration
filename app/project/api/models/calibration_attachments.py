@@ -1,7 +1,9 @@
+from safrs import SAFRSBase
+
 from project.api.models.base_model import db
 
 
-class DeviceCalibrationAttachment(db.Model):
+class DeviceCalibrationAttachment(db.Model, SAFRSBase):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     action_id = db.Column(
         db.Integer, db.ForeignKey("device_calibration_action.id"), nullable=False

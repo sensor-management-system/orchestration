@@ -1,10 +1,12 @@
 """Model for the devices."""
 
+from safrs import SAFRSBase
+
 from project.api.models.base_model import db
 from project.api.models.mixin import AuditMixin, SearchableMixin
 
 
-class Device(db.Model, AuditMixin, SearchableMixin):
+class Device(db.Model, AuditMixin, SearchableMixin, SAFRSBase):
     """Device class."""
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)

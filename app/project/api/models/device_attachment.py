@@ -1,7 +1,9 @@
+from safrs import SAFRSBase
+
 from project.api.models.base_model import db
 
 
-class DeviceAttachment(db.Model):
+class DeviceAttachment(db.Model, SAFRSBase):
     """
     Attachment class
     """

@@ -1,5 +1,6 @@
 """Model for contacts & reference tables."""
 
+from safrs import SAFRSBase
 
 from project.api.models.base_model import db
 from project.api.models.mixin import SearchableMixin
@@ -30,7 +31,7 @@ configuration_contacts = db.Table(
 )
 
 
-class Contact(db.Model, SearchableMixin):
+class Contact(db.Model, SearchableMixin, SAFRSBase):
     """Contact class."""
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
