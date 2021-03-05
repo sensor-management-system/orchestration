@@ -201,7 +201,6 @@ export default class DeviceBasicDataForm extends mixins(Rules) {
   private deviceTypes: DeviceType[] = []
 
   @Prop({
-    default: () => new Device(),
     required: true,
     type: Device
   })
@@ -209,7 +208,6 @@ export default class DeviceBasicDataForm extends mixins(Rules) {
 
   @Prop({
     default: () => false,
-    required: true,
     type: Boolean
   })
   readonly readonly!: boolean
@@ -337,6 +335,35 @@ export default class DeviceBasicDataForm extends mixins(Rules) {
       return this.deviceTypes[deviceTypeIndex].name
     }
     return this.value.deviceTypeName
+  }
+
+  get deviceURN () {
+    let partManufacturer = '[manufacturer]'
+    let partModel = '[model]'
+    let partSerialNumber = '[serial_number]'
+
+    if (this.value.manufacturerUri !== '') {
+      const manIndex = this.manufacturers.findIndex(m => m.uri === this.value.manufacturerUri)
+      if (manIndex > -1) {
+        partManufacturer = this.manufacturers[manIndex].name
+      } else if (this.value.manufacturerName !== '') {
+        partManufacturer = this.value.manufacturerName
+      }
+    } else if (this.value.manufacturerName !== '') {
+      partManufacturer = this.value.manufacturerName
+    }
+
+    if (this.value.model !== '') {
+      partModel = this.value.model
+    }
+
+    if (this.value.serialNumber !== '') {
+      partSerialNumber = this.value.serialNumber
+    }
+
+    return [partManufacturer, partModel, partSerialNumber].join('_').replace(
+      ' ', '_'
+    )
   }
 }
 </script>
