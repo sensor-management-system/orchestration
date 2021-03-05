@@ -12,11 +12,9 @@
         Edit
       </v-btn>
     </v-card-actions>
-    <v-card-text>
-      <DeviceBasicData
-        v-model="device"
-      />
-    </v-card-text>
+    <DeviceBasicData
+      v-model="device"
+    />
     <v-card-actions>
       <v-spacer />
       <v-btn
