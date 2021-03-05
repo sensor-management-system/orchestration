@@ -56,6 +56,26 @@ permissions and limitations under the Licence.
       ref="basicForm"
       v-model="device"
     />
+    <v-card-actions>
+      <v-spacer />
+      <v-btn
+        v-if="isLoggedIn"
+        small
+        text
+        nuxt
+        to="/search/devices"
+      >
+        cancel
+      </v-btn>
+      <v-btn
+        v-if="isLoggedIn"
+        color="green"
+        small
+        @click="onSaveButtonClicked"
+      >
+        create
+      </v-btn>
+    </v-card-actions>
   </v-card>
 </template>
 
