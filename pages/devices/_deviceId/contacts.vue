@@ -1,6 +1,8 @@
 <template>
   <div>
-    <NuxtChild />
+    <NuxtChild
+      v-model="contacts"
+    />
     <v-card-actions
       v-if="!isAddContactPage"
     >

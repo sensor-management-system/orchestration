@@ -54,7 +54,7 @@ permissions and limitations under the Licence.
           small
           text
           nuxt
-          :to="'/devices/show/' + deviceId + '/contacts'"
+          :to="'/devices/' + deviceId + '/contacts'"
         >
           Cancel
         </v-btn>
@@ -64,7 +64,7 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
+import { Component, Vue, Prop } from 'nuxt-property-decorator'
 
 import { Contact } from '@/models/Contact'
 
@@ -76,23 +76,29 @@ export default class DeviceAddContactPage extends Vue {
   private alreadyUsedContacts: Contact[] = []
   private allContacts: Contact[] = []
   private selectedContact: Contact | null = null
-  private loadingUsedContacts = true
-  private loadingAllContacts = true
+
+  @Prop({
+    default: () => [] as Contact[],
+    required: true,
+    type: Array
+  })
+  readonly value!: Contact[]
+
+  created () {
+    this.alreadyUsedContacts = [...this.value] as Contact[]
+  }
 
   mounted () {
-    this.$api.devices.findRelatedContacts(this.deviceId).then((foundContacts) => {
-      this.alreadyUsedContacts = foundContacts
-      this.loadingUsedContacts = false
-    })
     this.$api.contacts.findAll().then((foundContacts) => {
       this.allContacts = foundContacts
-      this.loadingAllContacts = false
     })
   }
 
   addContact () {
     if (this.selectedContact && this.selectedContact.id && this.isLoggedIn) {
       this.$api.devices.addContact(this.deviceId, this.selectedContact.id).then(() => {
+        this.alreadyUsedContacts.push(this.selectedContact as Contact)
+        this.$emit('input', this.alreadyUsedContacts)
         this.$router.push('/devices/' + this.deviceId + '/contacts')
       })
     }
@@ -105,10 +111,6 @@ export default class DeviceAddContactPage extends Vue {
     } else {
       this.selectedContact = null
     }
-  }
-
-  get isLoading () {
-    return this.loadingUsedContacts || this.loadingAllContacts
   }
 
   get allExceptSelected () {
