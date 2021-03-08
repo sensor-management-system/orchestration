@@ -30,7 +30,7 @@ class DeviceCalibrationActionSchema(Schema):
         self_view="api.device_calibration_action_contact",
         self_view_kwargs={"id": "<id>"},
         related_view="api.contact_detail",
-        related_view_kwargs={"id": "<contact_id>"},
+        related_view_kwargs={"id": "<id>"},
         schema="ContactSchema",
         type_="contact",
         id_field="id",

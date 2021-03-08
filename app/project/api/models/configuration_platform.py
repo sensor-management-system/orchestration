@@ -1,10 +1,10 @@
-from safrs import SAFRSBase
+
 
 from project.api.models.base_model import db
 from project.api.models.mixin import AuditMixin
 
 
-class ConfigurationPlatform(db.Model, AuditMixin, SAFRSBase):
+class ConfigurationPlatform(db.Model, AuditMixin):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     offset_x = db.Column(db.Float(), nullable=True)
     offset_y = db.Column(db.Float(), nullable=True)

@@ -109,3 +109,8 @@ from .platform_unmount_action_resources import (  # noqa: F401
 from .user_detail import UserDetail  # noqa: F401
 from .user_list import UserList  # noqa: F401
 from .user_relationship import UserRelationship  # noqa: F401
+from .device_property_calibration_resources import (
+    DevicePropertyCalibrationList,
+    DevicePropertyCalibrationDetail,
+    DevicePropertyCalibrationRelationship
+)

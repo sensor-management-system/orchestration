@@ -1,10 +1,10 @@
-from safrs import SAFRSBase
+
 
 from project.api.models.base_model import db
 from project.api.models.mixin import AuditMixin
 
 
-class ConfigurationStaticLocationBeginAction(db.Model, AuditMixin, SAFRSBase):
+class ConfigurationStaticLocationBeginAction(db.Model, AuditMixin):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     configuration_id = db.Column(
         db.Integer, db.ForeignKey("configuration.id"), nullable=False
@@ -32,7 +32,7 @@ class ConfigurationStaticLocationBeginAction(db.Model, AuditMixin, SAFRSBase):
     elevation_datum_uri = db.Column(db.String(256), nullable=True)
 
 
-class ConfigurationStaticLocationEndAction(db.Model, AuditMixin, SAFRSBase):
+class ConfigurationStaticLocationEndAction(db.Model, AuditMixin):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     configuration_id = db.Column(
         db.Integer, db.ForeignKey("configuration.id"), nullable=False
@@ -54,7 +54,7 @@ class ConfigurationStaticLocationEndAction(db.Model, AuditMixin, SAFRSBase):
     )
 
 
-class ConfigurationDynamicLocationBeginAction(db.Model, AuditMixin, SAFRSBase):
+class ConfigurationDynamicLocationBeginAction(db.Model, AuditMixin):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     configuration_id = db.Column(
         db.Integer, db.ForeignKey("configuration.id"), nullable=False
@@ -106,7 +106,7 @@ class ConfigurationDynamicLocationBeginAction(db.Model, AuditMixin, SAFRSBase):
     elevation_datum_uri = db.Column(db.String(256), nullable=True)
 
 
-class ConfigurationDynamicLocationEndAction(db.Model, AuditMixin, SAFRSBase):
+class ConfigurationDynamicLocationEndAction(db.Model, AuditMixin):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     configuration_id = db.Column(
         db.Integer, db.ForeignKey("configuration.id"), nullable=False

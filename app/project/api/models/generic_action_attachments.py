@@ -1,10 +1,10 @@
-from safrs import SAFRSBase
+
 
 from project.api.models.base_model import db
 from project.api.models.configuration_attachment import ConfigurationAttachment
 
 
-class GenericPlatformActionAttachment(db.Model, SAFRSBase):
+class GenericPlatformActionAttachment(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     action_id = db.Column(
         db.Integer, db.ForeignKey("generic_platform_action.id"), nullable=False
@@ -26,7 +26,7 @@ class GenericPlatformActionAttachment(db.Model, SAFRSBase):
     )
 
 
-class GenericDeviceActionAttachment(db.Model, SAFRSBase):
+class GenericDeviceActionAttachment(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     action_id = db.Column(
         db.Integer, db.ForeignKey("generic_device_action.id"), nullable=False
@@ -48,7 +48,7 @@ class GenericDeviceActionAttachment(db.Model, SAFRSBase):
     )
 
 
-class GenericConfigurationActionAttachment(db.Model, SAFRSBase):
+class GenericConfigurationActionAttachment(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     action_id = db.Column(
         db.Integer, db.ForeignKey("generic_configuration_action.id"), nullable=False

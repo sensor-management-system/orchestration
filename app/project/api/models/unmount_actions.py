@@ -1,10 +1,8 @@
-from safrs import SAFRSBase
-
 from project.api.models.base_model import db
 from project.api.models.mixin import AuditMixin
 
 
-class PlatformUnmountAction(db.Model, AuditMixin, SAFRSBase):
+class PlatformUnmountAction(db.Model, AuditMixin):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     configuration_id = db.Column(
         db.Integer, db.ForeignKey("configuration.id"), nullable=False
@@ -33,7 +31,7 @@ class PlatformUnmountAction(db.Model, AuditMixin, SAFRSBase):
     )
 
 
-class DeviceUnmountAction(db.Model, AuditMixin, SAFRSBase):
+class DeviceUnmountAction(db.Model, AuditMixin):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     configuration_id = db.Column(
         db.Integer, db.ForeignKey("configuration.id"), nullable=False

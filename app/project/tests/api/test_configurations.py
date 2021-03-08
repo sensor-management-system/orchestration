@@ -13,78 +13,6 @@ from project.tests.base import BaseTestCase, create_token
 from project.tests.read_from_json import extract_data_from_json_file
 
 
-def generate_configuration_model():
-    platform1 = Platform(short_name="Platform 1")
-    platform2 = Platform(short_name="Platform 2")
-    platform3 = Platform(short_name="Platform 3")
-    db.session.add(platform1)
-    db.session.add(platform2)
-    db.session.add(platform3)
-    device1 = Device(short_name="Device 1")
-    device2 = Device(short_name="Device 2")
-    device3 = Device(short_name="Device 3")
-    db.session.add(device1)
-    db.session.add(device2)
-    db.session.add(device3)
-    config1 = Configuration(label="Config1", location_type="static")
-    db.session.add(config1)
-    db.session.commit()
-    platform1_conf = ConfigurationPlatform(
-        platform=platform1,
-        configuration=config1,
-        offset_x=1.0,
-        offset_y=1.0,
-        offset_z=1.0,
-    )
-    db.session.add(platform1_conf)
-    platform2_conf = ConfigurationPlatform(
-        platform=platform2,
-        configuration=config1,
-        parent_platform=platform1,
-        offset_x=2.0,
-        offset_y=2.0,
-        offset_z=2.0,
-    )
-    platform3_conf = ConfigurationPlatform(
-        platform=platform3,
-        configuration=config1,
-        offset_x=13.5,
-        offset_y=13.5,
-        offset_z=13.5,
-    )
-    db.session.add(platform2_conf)
-    db.session.add(platform3_conf)
-    device1_conf = ConfigurationDevice(
-        device=device1,
-        configuration=config1,
-        parent_platform=platform2,
-        offset_x=0.5,
-        offset_y=0.5,
-        offset_z=0.5,
-    )
-    device2_conf = ConfigurationDevice(
-        device=device2,
-        configuration=config1,
-        parent_platform=platform2,
-        offset_x=0.6,
-        offset_y=0.6,
-        offset_z=0.6,
-    )
-    device3_conf = ConfigurationDevice(
-        device=device3,
-        configuration=config1,
-        parent_platform=platform2,
-        offset_x=0.65,
-        offset_y=0.65,
-        offset_z=0.65,
-    )
-    db.session.add(device1_conf)
-    db.session.add(device2_conf)
-    db.session.add(device3_conf)
-    db.session.commit()
-    return config1
-
-
 class TestConfigurationsService(BaseTestCase):
     """Tests for the Configurations Service."""
 
@@ -104,15 +32,6 @@ class TestConfigurationsService(BaseTestCase):
         self.assertEqual(response.status_code, 200)
         # There are no data sets inserted yet.
         self.assertEqual(response.json["data"], [])
-
-    def test_add_configuration_model(self):
-        """""Ensure Add Configuration model """
-
-        generate_configuration_model()
-
-        c = db.session.query(Configuration).filter_by(label="Config1").first()
-        self.assertEqual("static", c.location_type)
-        return c
 
     def test_add_configuration(self):
         """Ensure POST a new configuration can be added to the database."""
@@ -146,8 +65,8 @@ class TestConfigurationsService(BaseTestCase):
             },
         }
         for (
-            input_calibration_date,
-            expected_output_calibration_date,
+                input_calibration_date,
+                expected_output_calibration_date,
         ) in calibration_dates.items():
             # set up for each single run
             self.setUp()
@@ -198,8 +117,8 @@ class TestConfigurationsService(BaseTestCase):
 
             configuration_device = (
                 db.session.query(ConfigurationDevice)
-                .filter_by(device_id=1, configuration_id=1)
-                .first()
+                    .filter_by(device_id=1, configuration_id=1)
+                    .first()
             )
             self.assertEqual(
                 configuration_device.calibration_date,
@@ -253,8 +172,8 @@ class TestConfigurationsService(BaseTestCase):
 
         configuration_device = (
             db.session.query(ConfigurationDevice)
-            .filter_by(device_id=1, configuration_id=1)
-            .first()
+                .filter_by(device_id=1, configuration_id=1)
+                .first()
         )
         self.assertEqual(configuration_device.firmware_version, firmware_version)
 

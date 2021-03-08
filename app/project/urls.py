@@ -373,7 +373,7 @@ api.route(
 )
 
 # MountDeviceAction
-mda = stringcase.snakecase("mountDeviceAction")
+mda = stringcase.snakecase("DeviceMountAction")
 mda_url = stringcase.spinalcase(mda)
 api.route(DeviceMountActionList, f"{mda}_list", f"/{mda_url}s")
 api.route(DeviceMountActionDetail, f"{mda}_detail", f"/{mda_url}s/<int:id>")
@@ -408,7 +408,7 @@ api.route(
     f"/{mda_url}s/<int:id>/relationships/updated-user",
 )
 # MountPlatformAction
-mpa = stringcase.snakecase("mountPlatformAction")
+mpa = stringcase.snakecase("PlatformMountAction")
 mpa_url = stringcase.spinalcase(mpa)
 api.route(PlatformMountActionList, f"{mpa}_list", f"/{mpa_url}s")
 api.route(PlatformMountActionDetail, f"{mpa}_detail", f"/{mpa_url}s/<int:id>")
@@ -443,7 +443,7 @@ api.route(
     f"/{mpa_url}s/<int:id>/relationships/updated-user",
 )
 # UnMountDeviceAction
-uda = stringcase.snakecase("unMountDeviceAction")
+uda = stringcase.snakecase("deviceUnmountAction")
 uda_url = stringcase.spinalcase(uda)
 api.route(DeviceUnmountActionList, f"{uda}_list", f"/{uda_url}s")
 api.route(DeviceUnmountActionDetail, f"{uda}_detail", f"/{uda_url}s/<int:id>")
@@ -468,7 +468,7 @@ api.route(
     f"/{uda_url}s/<int:id>/relationships/parent-platform",
 )
 # UnMountPlatformAction
-upa = stringcase.snakecase("unMountPlatformAction")
+upa = stringcase.snakecase("platformUnmountAction")
 upa_url = stringcase.spinalcase(upa)
 api.route(PlatformUnmountActionList, f"{upa}_list", f"/{upa_url}s")
 api.route(PlatformUnmountActionDetail, f"{upa}_detail", f"/{upa_url}s/<int:id>")
@@ -533,12 +533,12 @@ api.route(DeviceSoftwareUpdateActionDetail, f"{dsu}_detail", f"/{dsu_url}s/<int:
 api.route(
     DeviceSoftwareUpdateActionRelationship,
     f"{dsu}_device",
-    f"/{dsu_url}s/<int:id>/relationships/action",
+    f"/{dsu_url}s/<int:id>/relationships/device",
 )
 api.route(
     DeviceSoftwareUpdateActionRelationship,
     f"{dsu}_contact",
-    f"/{dsu_url}s/<int:id>/relationships/action",
+    f"/{dsu_url}s/<int:id>/relationships/contact",
 )
 api.route(
     DeviceSoftwareUpdateActionRelationship,
@@ -570,6 +570,35 @@ api.route(
     f"{dsu_a}_attachment",
     f"/{dsu_a_url}s/<int:id>/relationships/attachment",
 )
+# PlatformSoftwareUpdateAction
+psu = stringcase.snakecase("platformSoftwareUpdateAction")
+psu_url = stringcase.spinalcase(psu)
+api.route(PlatformSoftwareUpdateActionList, f"{psu}_list", f"/{psu_url}s")
+api.route(
+    PlatformSoftwareUpdateActionDetail,
+    f"{psu}_detail",
+    f"/{psu_url}s/<int:id>",
+)
+api.route(
+    PlatformSoftwareUpdateActionRelationship,
+    f"{psu}_platform",
+    f"/{psu_url}s/<int:id>/relationships/platform",
+)
+api.route(
+    PlatformSoftwareUpdateActionRelationship,
+    f"{psu}_contact",
+    f"/{psu_url}s/<int:id>/relationships/contact",
+)
+api.route(
+    PlatformSoftwareUpdateActionRelationship,
+    f"{psu}_created_user",
+    f"/{psu_url}s/<int:id>/relationships/created-user",
+)
+api.route(
+    PlatformSoftwareUpdateActionRelationship,
+    f"{psu}_updated_user",
+    f"/{psu_url}s/<int:id>/relationships/updated-user",
+)
 
 # PlatformSoftwareUpdateActionAttachment
 psu_a = stringcase.snakecase("platformSoftwareUpdateActionAttachment")
@@ -589,4 +618,24 @@ api.route(
     PlatformSoftwareUpdateActionAttachmentRelationship,
     f"{psu_a}_attachment",
     f"/{psu_a_url}s/<int:id>/relationships/attachment",
+)
+
+# DevicePropertyCalibration
+dpa = stringcase.snakecase("devicePropertyCalibration")
+dpa_url = stringcase.spinalcase(dpa)
+api.route(DevicePropertyCalibrationList, f"{dpa}_list", f"/{dpa_url}s")
+api.route(
+    DevicePropertyCalibrationDetail,
+    f"{dpa}_detail",
+    f"/{dpa_url}s/<int:id>",
+)
+api.route(
+    DevicePropertyCalibrationRelationship,
+    f"{dpa}_calibration_action",
+    f"/{dpa_url}s/<int:id>/relationships/calibration_action",
+)
+api.route(
+    DevicePropertyCalibrationRelationship,
+    f"{dpa}_device",
+    f"/{dpa_url}s/<int:id>/relationships/device",
 )

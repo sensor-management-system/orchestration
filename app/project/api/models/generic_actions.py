@@ -1,10 +1,10 @@
-from safrs import SAFRSBase
+
 
 from project.api.models.base_model import db
 from project.api.models.mixin import AuditMixin
 
 
-class GenericPlatformAction(db.Model, AuditMixin, SAFRSBase):
+class GenericPlatformAction(db.Model, AuditMixin):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     platform_id = db.Column(db.Integer, db.ForeignKey("platform.id"), nullable=False)
     platform = db.relationship(
@@ -27,7 +27,7 @@ class GenericPlatformAction(db.Model, AuditMixin, SAFRSBase):
     )
 
 
-class GenericDeviceAction(db.Model, AuditMixin, SAFRSBase):
+class GenericDeviceAction(db.Model, AuditMixin):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     device_id = db.Column(db.Integer, db.ForeignKey("device.id"), nullable=False)
     device = db.relationship(
@@ -50,7 +50,7 @@ class GenericDeviceAction(db.Model, AuditMixin, SAFRSBase):
     )
 
 
-class GenericConfigurationAction(db.Model, AuditMixin, SAFRSBase):
+class GenericConfigurationAction(db.Model, AuditMixin):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     configuration_id = db.Column(
         db.Integer, db.ForeignKey("configuration.id"), nullable=False

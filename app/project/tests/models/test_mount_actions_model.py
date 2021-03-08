@@ -5,12 +5,13 @@ from project.api.models.mount_actions import DeviceMountAction, PlatformMountAct
 from project.api.models.platform import Platform
 from project.api.models.user import User
 from project.tests.base import BaseTestCase, fake, generate_token_data
-from project.tests.test_configurations import generate_configuration_model
+
+from project.tests.models.test_configurations_model import generate_configuration_model
 
 
-class TestMountActions(BaseTestCase):
+class TestMountActionsModel(BaseTestCase):
     """
-    Test mount action
+    Test mount actions models
     """
 
     def test_mount_platform_action_model(self):
@@ -47,8 +48,8 @@ class TestMountActions(BaseTestCase):
         db.session.commit()
         mpa_r = (
             db.session.query(PlatformMountAction)
-            .filter_by(description="test mount platform action model")
-            .one()
+                .filter_by(description="test mount platform action model")
+                .one()
         )
         self.assertEqual(
             mpa.parent_platform.short_name, mpa_r.parent_platform.short_name
@@ -88,8 +89,8 @@ class TestMountActions(BaseTestCase):
         db.session.commit()
         mpa_r = (
             db.session.query(DeviceMountAction)
-            .filter_by(description="test mount device action model")
-            .one()
+                .filter_by(description="test mount device action model")
+                .one()
         )
         self.assertEqual(
             mpa.parent_platform.short_name, mpa_r.parent_platform.short_name

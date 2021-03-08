@@ -1,12 +1,13 @@
 import unittest
 
 from project import base_url
+from project.api.models import Contact
 from project.api.models.base_model import db
 from project.api.models.platform import Platform
 from project.api.schemas.platform_schema import PlatformSchema
 from project.tests.base import BaseTestCase
+from project.tests.base import generate_token_data
 from project.tests.read_from_json import extract_data_from_json_file
-from project.tests.test_contacts import TestContactServices
 
 
 class TestPlatformServices(BaseTestCase):
@@ -61,7 +62,14 @@ class TestPlatformServices(BaseTestCase):
         """Ensure a new relationship between a platform and a contact
         can be established.
         """
-        contact = TestContactServices().test_add_contact()
+        jwt = generate_token_data()
+        contact = Contact(
+            given_name=jwt["given_name"],
+            family_name=jwt["family_name"],
+            email=jwt["email"],
+        )
+        db.session.add(contact)
+        db.session.commit()
         platform_json = extract_data_from_json_file(self.json_data_url, "devices")
 
         platform_data = {

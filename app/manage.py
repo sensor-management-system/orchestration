@@ -2,8 +2,8 @@ import unittest
 
 import coverage
 from flask.cli import FlaskGroup
+
 from project import create_app
-from project.api.insert_initial_values import *
 from project.api.models.base_model import db
 
 app = create_app()
@@ -57,24 +57,6 @@ def cov():
         COV.erase()
         return 0
     return 1
-
-
-@cli.command("db_init")
-def db_init():
-    with app.app_context():
-        device = add_device()
-        event = add_event(device)
-        contact = add_contact()
-        platform = add_platform()
-        attachment = add_device_attachment(device)
-        pl_attachment = add_platform_attachment(platform)
-        db.session.add(device)
-        db.session.add(platform)
-        db.session.add(event)
-        db.session.add(contact)
-        db.session.add(attachment)
-        db.session.add(pl_attachment)
-        db.session.commit()
 
 
 @cli.group()

@@ -1,12 +1,12 @@
 """Model for platforms."""
 
-from safrs import SAFRSBase
+
 
 from project.api.models.base_model import db
 from project.api.models.mixin import AuditMixin, SearchableMixin
 
 
-class Platform(db.Model, AuditMixin, SearchableMixin, SAFRSBase):
+class Platform(db.Model, AuditMixin, SearchableMixin):
     """Platform class."""
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)

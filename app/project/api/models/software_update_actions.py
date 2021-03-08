@@ -1,10 +1,10 @@
-from safrs import SAFRSBase
+
 
 from project.api.models.base_model import db
 from project.api.models.mixin import AuditMixin
 
 
-class DeviceSoftwareUpdateAction(db.Model, AuditMixin, SAFRSBase):
+class DeviceSoftwareUpdateAction(db.Model, AuditMixin):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     device_id = db.Column(db.Integer, db.ForeignKey("device.id"), nullable=False)
     device = db.relationship(
@@ -28,7 +28,7 @@ class DeviceSoftwareUpdateAction(db.Model, AuditMixin, SAFRSBase):
     )
 
 
-class PlatformSoftwareUpdateAction(db.Model, AuditMixin, SAFRSBase):
+class PlatformSoftwareUpdateAction(db.Model, AuditMixin):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     platform_id = db.Column(db.Integer, db.ForeignKey("platform.id"), nullable=False)
     platform = db.relationship(

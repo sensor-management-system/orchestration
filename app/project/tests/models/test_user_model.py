@@ -3,9 +3,10 @@ import unittest
 from project import base_url
 from project.api.models.base_model import db
 from project.api.models.user import User
-from project.api.schemas.user_schema import UserSchema
 from project.tests.base import BaseTestCase
-from project.tests.test_contacts import TestContactServices
+
+from project.api.models import Contact
+from project.tests.base import generate_token_data
 
 
 class TestUsersServices(BaseTestCase):
@@ -18,11 +19,16 @@ class TestUsersServices(BaseTestCase):
     json_data_url = "/usr/src/app/project/tests/drafts/users_test_data.json"
 
     def test_add_user_model(self):
-        """""Ensure Add platform model """
-        contact = TestContactServices().test_add_contact_model()
-        user = User(id=445, subject="test_user@test.test", contact_id=contact.id)
-        UserSchema().dump(user)
-        db.session.add(user)
+        """""Ensure Add user model """
+        jwt1 = generate_token_data()
+        c = Contact(
+            given_name=jwt1["given_name"],
+            family_name=jwt1["family_name"],
+            email=jwt1["email"],
+        )
+        user = User(id=445, subject="test_user@test.test", contact=c)
+
+        db.session.add_all([c, user])
         db.session.commit()
 
         u = db.session.query(User).filter_by(id=user.id).one()
