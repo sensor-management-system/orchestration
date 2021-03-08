@@ -30,28 +30,36 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <div v-if="isLoading">
-      <div class="text-center pt-2">
-        <v-progress-circular indeterminate />
-      </div>
-    </div>
-    <div v-else>
-      <v-row>
-        <v-col cols="3">
-          <v-autocomplete :items="allExceptSelected" :item-text="(x) => x" :item-value="(x) => x.id" label="New contact" @change="select" />
-        </v-col>
-      </v-row>
-      <v-row>
-        <v-col>
-          <v-btn :disabled="selectedContact == null" @click="addContact">
-            Add
-          </v-btn>
-          <v-btn nuxt :to="'/devices/show/' + deviceId + '/contacts'">
-            Cancel
-          </v-btn>
-        </v-col>
-      </v-row>
-    </div>
+    <v-row>
+      <v-col
+        cols="12"
+        md="5"
+      >
+        <v-autocomplete :items="allExceptSelected" :item-text="(x) => x" :item-value="(x) => x.id" label="New contact" @change="select" />
+      </v-col>
+      <v-col
+        cols="12"
+        md="2"
+        align-self="center"
+      >
+        <v-btn
+          small
+          color="primary"
+          :disabled="selectedContact == null"
+          @click="addContact"
+        >
+          Add
+        </v-btn>
+        <v-btn
+          small
+          text
+          nuxt
+          :to="'/devices/show/' + deviceId + '/contacts'"
+        >
+          Cancel
+        </v-btn>
+      </v-col>
+    </v-row>
   </div>
 </template>
 
@@ -85,7 +93,7 @@ export default class DeviceAddContactPage extends Vue {
   addContact () {
     if (this.selectedContact && this.selectedContact.id && this.isLoggedIn) {
       this.$api.devices.addContact(this.deviceId, this.selectedContact.id).then(() => {
-        this.$router.push('/devices/show/' + this.deviceId + '/contacts')
+        this.$router.push('/devices/' + this.deviceId + '/contacts')
       })
     }
   }
