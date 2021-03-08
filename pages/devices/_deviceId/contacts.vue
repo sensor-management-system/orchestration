@@ -126,7 +126,7 @@
       </v-expansion-panel>
     </v-expansion-panels>
     <v-card-actions
-      v-if="!isAddContactPage"
+      v-if="!isAddContactPage && contacts.length > 3"
     >
       <v-spacer />
       <v-btn
