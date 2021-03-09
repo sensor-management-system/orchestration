@@ -33,10 +33,7 @@ def recreate_db():
 def test():
     """ Runs the tests without code coverage """
     runner = unittest.TextTestRunner(verbosity=2)
-    result = runner.run(suite())
-    if result.wasSuccessful():
-        return 0
-    return 1
+    runner.run(suite())
 
 
 @cli.command()

@@ -168,7 +168,6 @@ class BaseTestCase(TestCase):
                 headers=access_headers,
             )
         data = json.loads(response.data.decode())
-        print(data)
         self.assertEqual(response.status_code, 200)
         self.assertIn(object_type, data["data"]["type"])
         return data
