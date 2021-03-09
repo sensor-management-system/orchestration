@@ -94,7 +94,7 @@ export default class DeviceAddContactPage extends Vue {
     })
   }
 
-  addContact () {
+  addContact (): void {
     if (this.selectedContact && this.selectedContact.id && this.isLoggedIn) {
       this.$api.devices.addContact(this.deviceId, this.selectedContact.id).then(() => {
         this.alreadyUsedContacts.push(this.selectedContact as Contact)
@@ -104,7 +104,7 @@ export default class DeviceAddContactPage extends Vue {
     }
   }
 
-  select (newContactId: string) {
+  select (newContactId: string): void {
     const idx = this.allContacts.findIndex((c: Contact) => c.id === newContactId)
     if (idx > -1) {
       this.selectedContact = this.allContacts[idx]
@@ -113,15 +113,15 @@ export default class DeviceAddContactPage extends Vue {
     }
   }
 
-  get allExceptSelected () {
+  get allExceptSelected (): Contact[] {
     return this.allContacts.filter(c => !this.alreadyUsedContacts.find(rc => rc.id === c.id))
   }
 
-  get deviceId () {
+  get deviceId (): string {
     return this.$route.params.deviceId
   }
 
-  get isLoggedIn () {
+  get isLoggedIn (): boolean {
     return this.$store.getters['oidc/isAuthenticated']
   }
 }

@@ -159,11 +159,11 @@ export default class DeviceContactsPage extends Vue {
     })
   }
 
-  get deviceId () {
+  get deviceId (): string {
     return this.$route.params.deviceId
   }
 
-  get isLoggedIn () {
+  get isLoggedIn (): boolean {
     return this.$store.getters['oidc/isAuthenticated']
   }
 
@@ -171,7 +171,7 @@ export default class DeviceContactsPage extends Vue {
     return this.$route.path === '/devices/' + this.deviceId + '/contacts/new'
   }
 
-  removeContact (contactId: string) {
+  removeContact (contactId: string): void {
     this.$api.devices.removeContact(this.deviceId, contactId).then(() => {
       const searchIndex = this.contacts.findIndex(c => c.id === contactId)
       if (searchIndex > -1) {
