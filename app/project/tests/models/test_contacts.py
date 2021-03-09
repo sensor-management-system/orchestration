@@ -2,8 +2,7 @@ import unittest
 
 from project.api.models.base_model import db
 from project.api.models.contact import Contact
-from project.tests.base import BaseTestCase
-from project.tests.base import generate_token_data
+from project.tests.base import BaseTestCase, generate_token_data
 
 
 class TestContactModels(BaseTestCase):

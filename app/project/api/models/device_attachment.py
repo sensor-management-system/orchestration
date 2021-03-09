@@ -1,6 +1,4 @@
-
-
-from project.api.models.base_model import db
+from .base_model import db
 
 
 class DeviceAttachment(db.Model):

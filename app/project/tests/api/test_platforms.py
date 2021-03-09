@@ -1,12 +1,9 @@
-import unittest
-
 from project import base_url
 from project.api.models import Contact
 from project.api.models.base_model import db
 from project.api.models.platform import Platform
 from project.api.schemas.platform_schema import PlatformSchema
-from project.tests.base import BaseTestCase
-from project.tests.base import generate_token_data
+from project.tests.base import BaseTestCase, generate_token_data
 from project.tests.read_from_json import extract_data_from_json_file
 
 
@@ -85,7 +82,3 @@ class TestPlatformServices(BaseTestCase):
         self.assertIn(
             contact.id, data["data"]["relationships"]["contacts"]["data"]["id"]
         )
-
-
-if __name__ == "__main__":
-    unittest.main()

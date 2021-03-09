@@ -1,15 +1,13 @@
 import unittest
 
 from project import base_url
+from project.api.models import Contact
 from project.api.models.base_model import db
 from project.api.models.user import User
-from project.tests.base import BaseTestCase
-
-from project.api.models import Contact
-from project.tests.base import generate_token_data
+from project.tests.base import BaseTestCase, generate_token_data
 
 
-class TestUsersServices(BaseTestCase):
+class TestUsersModel(BaseTestCase):
     """
     Test User Services
     """

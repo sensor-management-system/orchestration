@@ -25,16 +25,12 @@ class TestPlatformSoftwareUpdateAction(BaseTestCase):
 
     def test_get_platform_software_update_action_collection(self):
         """Test retrieve a collection of PlatformSoftwareUpdateAction objects"""
-        pass
 
     def test_post_platform_software_update_action(self):
         """Create PlatformSoftwareUpdateAction"""
-        pass
 
     def test_update_platform_software_update_action(self):
         """Update PlatformSoftwareUpdateAction"""
-        pass
 
     def test_delete_platform_software_update_action(self):
         """Delete PlatformSoftwareUpdateAction """
-        pass

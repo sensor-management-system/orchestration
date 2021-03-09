@@ -1,9 +1,9 @@
 """Model for contacts & reference tables."""
 
 
-
-from project.api.models.base_model import db
 from project.api.models.mixin import SearchableMixin
+
+from .base_model import db
 
 platform_contacts = db.Table(
     "platform_contacts",

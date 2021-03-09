@@ -3,7 +3,6 @@ from csv import DictReader
 from project import base_url
 from project.api.models.base_model import db
 from project.api.models.device import Device
-from project.api.schemas.device_schema import DeviceSchema
 from project.tests.base import BaseTestCase
 
 
@@ -28,7 +27,6 @@ class Test(BaseTestCase):
             inventory_number="inventory_number test",
             persistent_identifier="persistent_identifier_test",
         )
-        DeviceSchema().dump(sensor1)
         db.session.add(sensor1)
         db.session.commit()
         sensor2 = Device(
@@ -45,7 +43,6 @@ class Test(BaseTestCase):
             inventory_number="inventory_number test2",
             persistent_identifier="persistent_identifier_test2",
         )
-        DeviceSchema().dump(sensor2)
         db.session.add(sensor2)
         db.session.commit()
         response = self.client.get(

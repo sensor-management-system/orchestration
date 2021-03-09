@@ -19,7 +19,8 @@ def add_created_by_id(data):
     """
     current_user = get_jwt_identity()
     user_entry = db.session.query(User).filter_by(subject=current_user).first()
-    data["created_by_id"] = user_entry.id
+    if user_entry is not None:
+        data["created_by_id"] = user_entry.id
 
 
 def add_updated_by_id(data):
@@ -33,7 +34,8 @@ def add_updated_by_id(data):
     """
     current_user = get_jwt_identity()
     user_entry = db.session.query(User).filter_by(subject=current_user).first()
-    data["updated_by_id"] = user_entry.id
+    if user_entry is not None:
+        data["updated_by_id"] = user_entry.id
 
 
 def add_contact_to_object(entity_with_contact_list):

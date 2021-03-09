@@ -7,7 +7,7 @@ from project.api.schemas.platform_schema import PlatformSchema
 from project.tests.base import BaseTestCase
 
 
-class TestPlatformServices(BaseTestCase):
+class TestPlatformModel(BaseTestCase):
     """
     Test Event Services
     """

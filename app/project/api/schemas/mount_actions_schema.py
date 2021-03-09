@@ -92,7 +92,7 @@ class DeviceMountActionSchema(Schema):
 
     device = Relationship(
         attribute="device",
-        self_view="api.mount_device_action_device",
+        self_view="api.device_mount_action_device",
         self_view_kwargs={"id": "<id>"},
         related_view="api.device_detail",
         related_view_kwargs={"id": "<device_id>"},
@@ -102,7 +102,7 @@ class DeviceMountActionSchema(Schema):
     )
     parent_platform = Relationship(
         attribute="parent_platform",
-        self_view="api.mount_device_action_parent_platform",
+        self_view="api.device_mount_action_parent_platform",
         self_view_kwargs={"id": "<id>"},
         related_view="api.platform_detail",
         related_view_kwargs={"id": "<parent_platform_id>"},
@@ -112,7 +112,7 @@ class DeviceMountActionSchema(Schema):
     )
     configuration = Relationship(
         attribute="configuration",
-        self_view="api.mount_device_action_configuration",
+        self_view="api.device_mount_action_configuration",
         self_view_kwargs={"id": "<id>"},
         related_view="api.configuration_detail",
         related_view_kwargs={"id": "<configuration_id>"},
@@ -122,7 +122,7 @@ class DeviceMountActionSchema(Schema):
     )
     contact = Relationship(
         attribute="contact",
-        self_view="api.mount_device_action_contact",
+        self_view="api.device_mount_action_contact",
         self_view_kwargs={"id": "<id>"},
         related_view="api.contact_detail",
         related_view_kwargs={"id": "<id>"},

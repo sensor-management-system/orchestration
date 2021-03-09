@@ -1,9 +1,13 @@
-from project.api.models import Contact, Platform, PlatformUnmountAction, Device, \
-    DeviceUnmountAction
+from project.api.models import (
+    Contact,
+    Device,
+    DeviceUnmountAction,
+    Platform,
+    PlatformUnmountAction,
+)
 from project.api.models.base_model import db
 from project.api.models.user import User
-from project.tests.base import BaseTestCase
-from project.tests.base import generate_token_data, fake
+from project.tests.base import BaseTestCase, fake, generate_token_data
 from project.tests.models.test_configurations_model import generate_configuration_model
 
 
@@ -75,8 +79,8 @@ class TestUnMountActionModel(BaseTestCase):
         mpa = add_unmount_platform_action()
         mpa_r = (
             db.session.query(PlatformUnmountAction)
-                .filter_by(description="test unmount platform action model")
-                .one()
+            .filter_by(description="test unmount platform action model")
+            .one()
         )
         self.assertEqual(
             mpa.parent_platform.short_name, mpa_r.parent_platform.short_name
@@ -88,8 +92,8 @@ class TestUnMountActionModel(BaseTestCase):
         mpa = add_unmount_device_action()
         mpa_r = (
             db.session.query(DeviceUnmountAction)
-                .filter_by(description="test unmount device action model")
-                .one()
+            .filter_by(description="test unmount device action model")
+            .one()
         )
         self.assertEqual(
             mpa.parent_platform.short_name, mpa_r.parent_platform.short_name

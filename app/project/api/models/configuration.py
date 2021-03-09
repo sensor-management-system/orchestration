@@ -2,11 +2,10 @@
 
 import collections
 
-
 from sqlalchemy.ext.hybrid import hybrid_property
 
-from project.api.models.base_model import db
-from project.api.models.mixin import AuditMixin, SearchableMixin
+from .base_model import db
+from .mixin import AuditMixin, SearchableMixin
 
 ConfigurationsTuple = collections.namedtuple(
     "ConfigurationsTuple", ["configuration_devices", "configuration_platforms"]

@@ -5,7 +5,9 @@ from project.tests.base import BaseTestCase
 class TestGenericDeviceActionAttachment(BaseTestCase):
     """Tests for the GenericDeviceActionAttachment endpoints."""
 
-    generic_device_action_attachment_url = base_url + "/generic-device-action-attachments"
+    generic_device_action_attachment_url = (
+        base_url + "/generic-device-action-attachments"
+    )
     platform_url = base_url + "/platforms"
     device_url = base_url + "/devices"
     contact_url = base_url + "/contacts"
@@ -25,16 +27,12 @@ class TestGenericDeviceActionAttachment(BaseTestCase):
 
     def test_get_generic_device_action_attachment_collection(self):
         """Test retrieve a collection of GenericDeviceActionAttachment objects"""
-        pass
 
     def test_post_generic_device_action_attachment(self):
         """Create GenericDeviceActionAttachment"""
-        pass
 
     def test_update_generic_device_action_attachment(self):
         """Update GenericDeviceActionAttachment"""
-        pass
 
     def test_delete_generic_device_action_attachment(self):
         """Delete GenericDeviceActionAttachment """
-        pass

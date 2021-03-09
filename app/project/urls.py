@@ -467,6 +467,16 @@ api.route(
     f"{uda}_parent_platform",
     f"/{uda_url}s/<int:id>/relationships/parent-platform",
 )
+api.route(
+    DeviceSoftwareUpdateActionRelationship,
+    f"{uda}_created_user",
+    f"/{uda_url}s/<int:id>/relationships/created-user",
+)
+api.route(
+    DeviceSoftwareUpdateActionRelationship,
+    f"{uda}_updated_user",
+    f"/{uda_url}s/<int:id>/relationships/updated-user",
+)
 # UnMountPlatformAction
 upa = stringcase.snakecase("platformUnmountAction")
 upa_url = stringcase.spinalcase(upa)
@@ -492,8 +502,18 @@ api.route(
     f"{upa}_parent_platform",
     f"/{upa_url}s/<int:id>/relationships/parent-platform",
 )
+api.route(
+    DeviceSoftwareUpdateActionRelationship,
+    f"{upa}_created_user",
+    f"/{upa_url}s/<int:id>/relationships/created-user",
+)
+api.route(
+    DeviceSoftwareUpdateActionRelationship,
+    f"{upa}_updated_user",
+    f"/{upa_url}s/<int:id>/relationships/updated-user",
+)
 
-# device_calibration_action
+# DeviceCalibrationAction
 dca = stringcase.snakecase("deviceCalibrationAction")
 dca_url = stringcase.spinalcase(dca)
 api.route(DeviceCalibrationActionList, f"{dca}_list", f"/{dca_url}s")

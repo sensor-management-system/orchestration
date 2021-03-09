@@ -1,11 +1,9 @@
 import json
-import unittest
 
 from project import base_url
 from project.api.models import Contact
 from project.api.models.base_model import db
-from project.tests.base import BaseTestCase
-from project.tests.base import generate_token_data
+from project.tests.base import BaseTestCase, generate_token_data
 
 
 def add_a_contact():
@@ -61,7 +59,14 @@ class TestContactServices(BaseTestCase):
         """Ensure update contact behaves correctly."""
         c = add_a_contact()
         c_updated = {
-            "data": {"type": "contact", "id": c.id, "attributes": {"given_name": "updated", }}}
+            "data": {
+                "type": "contact",
+                "id": c.id,
+                "attributes": {
+                    "given_name": "updated",
+                },
+            }
+        }
         _ = super().update_object(
             url=f"{self.contact_url}/{c.id}",
             data_object=c_updated,
@@ -75,7 +80,3 @@ class TestContactServices(BaseTestCase):
         _ = super().delete_object(
             url=f"{self.contact_url}/{c.id}",
         )
-
-
-if __name__ == "__main__":
-    unittest.main()

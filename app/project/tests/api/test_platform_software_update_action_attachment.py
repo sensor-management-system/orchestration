@@ -5,7 +5,9 @@ from project.tests.base import BaseTestCase
 class TestPlatformSoftwareUpdateActionAttachment(BaseTestCase):
     """Tests for the PlatformSoftwareUpdateActionAttachment endpoints."""
 
-    platform_software_update_action_attachment_url = base_url + "/platform-software-update-action-attachments"
+    platform_software_update_action_attachment_url = (
+        base_url + "/platform-software-update-action-attachments"
+    )
     platform_url = base_url + "/platforms"
     device_url = base_url + "/devices"
     contact_url = base_url + "/contacts"
@@ -25,16 +27,12 @@ class TestPlatformSoftwareUpdateActionAttachment(BaseTestCase):
 
     def test_get_platform_software_update_action_attachment_collection(self):
         """Test retrieve a collection of PlatformSoftwareUpdateActionAttachment objects"""
-        pass
 
     def test_post_platform_software_update_action_attachment(self):
         """Create PlatformSoftwareUpdateActionAttachment"""
-        pass
 
     def test_update_platform_software_update_action_attachment(self):
         """Update PlatformSoftwareUpdateActionAttachment"""
-        pass
 
     def test_delete_platform_software_update_action_attachment(self):
         """Delete PlatformSoftwareUpdateActionAttachment """
-        pass

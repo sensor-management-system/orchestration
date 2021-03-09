@@ -5,8 +5,39 @@ from project.api.models.mount_actions import DeviceMountAction, PlatformMountAct
 from project.api.models.platform import Platform
 from project.api.models.user import User
 from project.tests.base import BaseTestCase, fake, generate_token_data
-
 from project.tests.models.test_configurations_model import generate_configuration_model
+
+
+def add_mount_device_action_model():
+    d = Device(
+        short_name=fake.linux_processor(),
+    )
+    p_p = Platform(
+        short_name="device parent platform",
+    )
+    jwt1 = generate_token_data()
+    c1 = Contact(
+        given_name=jwt1["given_name"],
+        family_name=jwt1["family_name"],
+        email=jwt1["email"],
+    )
+    u1 = User(subject=jwt1["sub"], contact=c1)
+    config = generate_configuration_model()
+    mpa = DeviceMountAction(
+        begin_date=fake.date(),
+        description="test mount device action model",
+        offset_x=fake.coordinate(),
+        offset_y=fake.coordinate(),
+        offset_z=fake.coordinate(),
+        created_by=u1,
+        device=d,
+    )
+    mpa.parent_platform = p_p
+    mpa.configuration = config
+    mpa.contact = c1
+    db.session.add_all([d, p_p, c1, u1, config, mpa])
+    db.session.commit()
+    return mpa
 
 
 class TestMountActionsModel(BaseTestCase):
@@ -48,8 +79,8 @@ class TestMountActionsModel(BaseTestCase):
         db.session.commit()
         mpa_r = (
             db.session.query(PlatformMountAction)
-                .filter_by(description="test mount platform action model")
-                .one()
+            .filter_by(description="test mount platform action model")
+            .one()
         )
         self.assertEqual(
             mpa.parent_platform.short_name, mpa_r.parent_platform.short_name
@@ -58,39 +89,11 @@ class TestMountActionsModel(BaseTestCase):
 
     def test_mount_device_action_model(self):
         """""Ensure Add mount device action model """
-        d = Device(
-            short_name=fake.linux_processor(),
-        )
-        p_p = Platform(
-            short_name="device parent platform",
-        )
-        jwt1 = generate_token_data()
-        c1 = Contact(
-            given_name=jwt1["given_name"],
-            family_name=jwt1["family_name"],
-            email=jwt1["email"],
-        )
-        u1 = User(subject=jwt1["sub"], contact=c1)
-        config = generate_configuration_model()
-        mpa = DeviceMountAction(
-            begin_date=fake.date(),
-            description="test mount device action model",
-            offset_x=fake.coordinate(),
-            offset_y=fake.coordinate(),
-            offset_z=fake.coordinate(),
-            created_by=u1,
-            device=d,
-        )
-
-        mpa.parent_platform = p_p
-        mpa.configuration = config
-        mpa.contact = c1
-        db.session.add_all([d, p_p, c1, u1, config, mpa])
-        db.session.commit()
+        mpa = add_mount_device_action_model()
         mpa_r = (
             db.session.query(DeviceMountAction)
-                .filter_by(description="test mount device action model")
-                .one()
+            .filter_by(description="test mount device action model")
+            .one()
         )
         self.assertEqual(
             mpa.parent_platform.short_name, mpa_r.parent_platform.short_name

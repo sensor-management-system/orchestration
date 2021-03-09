@@ -17,7 +17,7 @@ class DeviceCalibrationActionSchema(Schema):
 
     device = Relationship(
         attribute="device",
-        self_view="api.device_calibration_action_platform",
+        self_view="api.device_calibration_action_device",
         self_view_kwargs={"id": "<id>"},
         related_view="api.device_detail",
         related_view_kwargs={"id": "<device_id>"},
@@ -47,7 +47,7 @@ class DevicePropertyCalibrationSchema(Schema):
 
     device = Relationship(
         attribute="device",
-        self_view="api.mount_device_action_device",
+        self_view="api.device_property_calibration_device",
         self_view_kwargs={"id": "<id>"},
         related_view="api.device_detail",
         related_view_kwargs={"id": "<id>"},
@@ -58,7 +58,7 @@ class DevicePropertyCalibrationSchema(Schema):
 
     calibration_action = Relationship(
         attribute="device_calibration_action",
-        self_view="api.mount_device_action_calibration_action",
+        self_view="api.device_property_calibration_action",
         self_view_kwargs={"id": "<id>"},
         related_view="api.device_calibration_action_detail",
         related_view_kwargs={"id": "<device_calibration_action_id>"},

@@ -1,8 +1,8 @@
 import os
-import unittest
 
 from flask import current_app
 from flask_testing import TestCase
+
 from project.tests.base import app
 
 
@@ -77,7 +77,3 @@ class TestProductionConfig(TestCase):
         """
         self.assertTrue(app.config["SECRET_KEY"] == "top_secret")
         self.assertFalse(app.config["TESTING"])
-
-
-if __name__ == "__main__":
-    unittest.main()

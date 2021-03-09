@@ -1,6 +1,5 @@
 import datetime
 import json
-import unittest
 
 from project import base_url
 from project.api.models.base_model import db
@@ -65,8 +64,8 @@ class TestConfigurationsService(BaseTestCase):
             },
         }
         for (
-                input_calibration_date,
-                expected_output_calibration_date,
+            input_calibration_date,
+            expected_output_calibration_date,
         ) in calibration_dates.items():
             # set up for each single run
             self.setUp()
@@ -117,8 +116,8 @@ class TestConfigurationsService(BaseTestCase):
 
             configuration_device = (
                 db.session.query(ConfigurationDevice)
-                    .filter_by(device_id=1, configuration_id=1)
-                    .first()
+                .filter_by(device_id=1, configuration_id=1)
+                .first()
             )
             self.assertEqual(
                 configuration_device.calibration_date,
@@ -172,8 +171,8 @@ class TestConfigurationsService(BaseTestCase):
 
         configuration_device = (
             db.session.query(ConfigurationDevice)
-                .filter_by(device_id=1, configuration_id=1)
-                .first()
+            .filter_by(device_id=1, configuration_id=1)
+            .first()
         )
         self.assertEqual(configuration_device.firmware_version, firmware_version)
 
@@ -391,7 +390,3 @@ class TestConfigurationsService(BaseTestCase):
                             entry["attributes"]["short_name"], platform.short_name
                         )
                 self.assertTrue(found)
-
-
-if __name__ == "__main__":
-    unittest.main()

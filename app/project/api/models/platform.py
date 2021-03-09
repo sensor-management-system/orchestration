@@ -1,9 +1,9 @@
 """Model for platforms."""
 
 
-
-from project.api.models.base_model import db
 from project.api.models.mixin import AuditMixin, SearchableMixin
+
+from .base_model import db
 
 
 class Platform(db.Model, AuditMixin, SearchableMixin):

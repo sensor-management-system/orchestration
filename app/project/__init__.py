@@ -4,9 +4,10 @@ from elasticsearch import Elasticsearch
 from flask import Blueprint, Flask
 from flask_cors import CORS
 from flask_migrate import Migrate
-from project.api.models.base_model import db
-from project.api.token_checker import jwt
-from project.urls import api
+
+from .api.models.base_model import db
+from .api.token_checker import jwt
+from .urls import api
 
 migrate = Migrate()
 base_url = os.getenv("URL_PREFIX", "/rdm/svm-api/v1")

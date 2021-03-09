@@ -25,16 +25,12 @@ class TestDeviceSoftwareUpdateAction(BaseTestCase):
 
     def test_get_device_software_update_action_collection(self):
         """Test retrieve a collection of DeviceSoftwareUpdateAction objects"""
-        pass
 
     def test_post_device_software_update_action(self):
         """Create DeviceSoftwareUpdateAction"""
-        pass
 
     def test_update_device_software_update_action(self):
         """Update DeviceSoftwareUpdateAction"""
-        pass
 
     def test_delete_device_software_update_action(self):
         """Delete DeviceSoftwareUpdateAction"""
-        pass

@@ -5,6 +5,7 @@ from flask.cli import FlaskGroup
 
 from project import create_app
 from project.api.models.base_model import db
+from project.tests import suite
 
 app = create_app()
 cli = FlaskGroup(create_app=create_app)
@@ -31,13 +32,8 @@ def recreate_db():
 @cli.command()
 def test():
     """ Runs the tests without code coverage """
-    tests = unittest.TestLoader().discover(
-        "project/tests",
-        # Only execute the files starting with test_
-        # as we have some helper files here as well.
-        pattern="test_*.py",
-    )
-    result = unittest.TextTestRunner(verbosity=2).run(tests)
+    runner = unittest.TextTestRunner(verbosity=2)
+    result = runner.run(suite())
     if result.wasSuccessful():
         return 0
     return 1

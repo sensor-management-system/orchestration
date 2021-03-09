@@ -12,7 +12,7 @@ class TestDeviceUnmountAction(BaseTestCase):
     platform_url = base_url + "/platforms"
     device_url = base_url + "/devices"
     contact_url = base_url + "/contacts"
-    object_type = "generic_device_action"
+    object_type = "device_unmount_action"
     json_data_url = "/usr/src/app/project/tests/drafts/configurations_test_data.json"
     device_json_data_url = "/usr/src/app/project/tests/drafts/devices_test_data.json"
     platform_json_data_url = (
@@ -29,21 +29,30 @@ class TestDeviceUnmountAction(BaseTestCase):
     def test_get_device_unmount_action_collection(self):
         """Test retrieve a collection of DeviceUnmountAction objects"""
         mpa = add_unmount_device_action()
-        response = self.client.get(self.device_unmount_action_url)
+        with self.client:
+            response = self.client.get(self.device_unmount_action_url)
         data = json.loads(response.data.decode())
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(mpa.end_date, data["data"][0]["attributes"]["end_date"])
+        self.assertEqual(
+            mpa.end_date.strftime("%Y-%m-%dT%H:%M:%S"),
+            data["data"][0]["attributes"]["end_date"],
+        )
 
     def test_post_device_unmount_action(self):
         """Create DeviceUnmountAction"""
-        pass
 
     def test_update_device_unmount_action(self):
         """Update DeviceUnmountAction"""
         mpa = add_unmount_device_action()
         mpa_updated = {
-            "data": {"type": self.object_type, "id": mpa.id,
-                     "attributes": {"given_name": "updated", }}}
+            "data": {
+                "type": self.object_type,
+                "id": mpa.id,
+                "attributes": {
+                    "description": "updated",
+                },
+            }
+        }
         _ = super().update_object(
             url=f"{self.device_unmount_action_url}/{mpa.id}",
             data_object=mpa_updated,

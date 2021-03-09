@@ -5,7 +5,7 @@ from project.tests.base import BaseTestCase, fake, generate_token_data
 from project.tests.read_from_json import extract_data_from_json_file
 
 
-class TestGenericConfigurationAction(BaseTestCase):
+class TestGenericConfigurationActionServices(BaseTestCase):
     """Tests for the GenericConfigurationAction endpoints."""
 
     generic_configuration_actions_url = base_url + "/generic-configuration-actions"

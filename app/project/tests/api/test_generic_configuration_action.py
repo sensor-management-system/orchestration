@@ -25,16 +25,12 @@ class TestGenericConfigurationAction(BaseTestCase):
 
     def test_get_generic_configuration_action_collection(self):
         """Test retrieve a collection of GenericConfigurationAction objects"""
-        pass
 
     def test_post_generic_configuration_action(self):
         """Create GenericConfigurationAction"""
-        pass
 
     def test_update_generic_configuration_action(self):
         """Update GenericConfigurationAction"""
-        pass
 
     def test_delete_generic_configuration_action(self):
         """Delete GenericConfigurationAction """
-        pass

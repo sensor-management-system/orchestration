@@ -1,5 +1,8 @@
 from project import base_url
 from project.tests.base import BaseTestCase
+from project.tests.models.test_device_calibration_action_model import (
+    add_device_property_calibration_model,
+)
 
 
 class TestDevicePropertyCalibration(BaseTestCase):
@@ -9,7 +12,7 @@ class TestDevicePropertyCalibration(BaseTestCase):
     platform_url = base_url + "/platforms"
     device_url = base_url + "/devices"
     contact_url = base_url + "/contacts"
-    object_type = "generic_device_action"
+    object_type = "device_calibration_action"
     json_data_url = "/usr/src/app/project/tests/drafts/configurations_test_data.json"
     device_json_data_url = "/usr/src/app/project/tests/drafts/devices_test_data.json"
     platform_json_data_url = (
@@ -25,16 +28,16 @@ class TestDevicePropertyCalibration(BaseTestCase):
 
     def test_get_device_property_calibration_collection(self):
         """Test retrieve a collection of DevicePropertyCalibration objects"""
-        pass
 
     def test_post_device_property_calibration(self):
         """Create DevicePropertyCalibration"""
-        pass
 
     def test_update_device_property_calibration(self):
         """Update DevicePropertyCalibration"""
-        pass
 
     def test_delete_device_property_calibration(self):
         """Delete DevicePropertyCalibration """
-        pass
+        dpa = add_device_property_calibration_model()
+        _ = super().delete_object(
+            url=f"{self.device_property_calibration_url}/{dpa.id}",
+        )
