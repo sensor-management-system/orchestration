@@ -6,7 +6,6 @@
     <v-card flat>
       <NuxtChild
         v-model="device"
-        is-in-progress="isLoading"
       />
     </v-card>
   </div>
