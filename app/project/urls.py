@@ -468,12 +468,12 @@ api.route(
     f"/{uda_url}s/<int:id>/relationships/parent-platform",
 )
 api.route(
-    DeviceSoftwareUpdateActionRelationship,
+    DeviceUnmountActionRelationship,
     f"{uda}_created_user",
     f"/{uda_url}s/<int:id>/relationships/created-user",
 )
 api.route(
-    DeviceSoftwareUpdateActionRelationship,
+    DeviceUnmountActionRelationship,
     f"{uda}_updated_user",
     f"/{uda_url}s/<int:id>/relationships/updated-user",
 )
@@ -503,12 +503,12 @@ api.route(
     f"/{upa_url}s/<int:id>/relationships/parent-platform",
 )
 api.route(
-    DeviceSoftwareUpdateActionRelationship,
+    PlatformUnmountActionRelationship,
     f"{upa}_created_user",
     f"/{upa_url}s/<int:id>/relationships/created-user",
 )
 api.route(
-    DeviceSoftwareUpdateActionRelationship,
+    PlatformUnmountActionRelationship,
     f"{upa}_updated_user",
     f"/{upa_url}s/<int:id>/relationships/updated-user",
 )
