@@ -1,5 +1,9 @@
 <template>
   <div>
+    <ProgressIndicator
+      v-model="isLoading"
+      dark
+    />
     <v-card-actions>
       <v-spacer />
       <v-btn
@@ -51,18 +55,22 @@
 import { Component, Vue, Prop, Watch } from 'nuxt-property-decorator'
 
 import DeviceBasicDataForm from '@/components/DeviceBasicDataForm.vue'
+import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
 import { Device } from '@/models/Device'
 
 @Component({
   components: {
-    DeviceBasicDataForm
+    DeviceBasicDataForm,
+    ProgressIndicator
   }
 })
 export default class DeviceEditBasicPage extends Vue {
   // we need to initialize the instance variable with an empty Device instance
   // here, otherwise the form is not reactive
   private deviceCopy: Device = new Device()
+
+  private isLoading: boolean = false
 
   @Prop({
     required: true,
@@ -79,10 +87,13 @@ export default class DeviceEditBasicPage extends Vue {
       this.$store.commit('snackbar/setError', 'Please correct your input')
       return
     }
+    this.isLoading = true
     this.save().then((device) => {
+      this.isLoading = false
       this.$emit('input', device)
       this.$router.push('/devices/' + this.deviceId + '/basic')
     }).catch((_error) => {
+      this.isLoading = false
       this.$store.commit('snackbar/setError', 'Save failed')
     })
   }

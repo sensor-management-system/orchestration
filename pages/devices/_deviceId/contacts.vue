@@ -1,5 +1,9 @@
 <template>
   <div>
+    <ProgressIndicator
+      v-model="isInProgress"
+      :dark="isSaving"
+    />
     <NuxtChild
       v-model="contacts"
     />
@@ -146,17 +150,31 @@
 import { Component, Vue } from 'nuxt-property-decorator'
 import { Contact } from '@/models/Contact'
 
+import ProgressIndicator from '@/components/ProgressIndicator.vue'
+
 @Component({
+  components: {
+    ProgressIndicator
+  }
 })
 export default class DeviceContactsPage extends Vue {
   private contacts: Contact[] = []
-  private isLoading = true
+  private isLoading = false
+  private isSaving = false
 
   mounted () {
+    this.isLoading = true
     this.$api.devices.findRelatedContacts(this.deviceId).then((foundContacts) => {
       this.contacts = foundContacts
       this.isLoading = false
+    }).catch((e) => {
+      this.$store.commit('snackbar/setError', 'Failed to fetch contacts')
+      this.isLoading = false
     })
+  }
+
+  get isInProgress (): boolean {
+    return this.isLoading || this.isSaving
   }
 
   get deviceId (): string {
@@ -172,13 +190,16 @@ export default class DeviceContactsPage extends Vue {
   }
 
   removeContact (contactId: string): void {
+    this.isSaving = true
     this.$api.devices.removeContact(this.deviceId, contactId).then(() => {
       const searchIndex = this.contacts.findIndex(c => c.id === contactId)
       if (searchIndex > -1) {
         this.contacts.splice(searchIndex, 1)
       }
+      this.isSaving = false
     }).catch((_error) => {
       this.$store.commit('snackbar/setError', 'Removing contact failed')
+      this.isSaving = false
     })
   }
 }

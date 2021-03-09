@@ -30,6 +30,10 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
+    <ProgressIndicator
+      v-model="isInProgress"
+      :dark="isSaving"
+    />
     <v-row>
       <v-col
         cols="12"
@@ -68,14 +72,19 @@ import { Component, Vue, Prop } from 'nuxt-property-decorator'
 
 import { Contact } from '@/models/Contact'
 
+import ProgressIndicator from '@/components/ProgressIndicator.vue'
+
 @Component({
   components: {
+    ProgressIndicator
   }
 })
 export default class DeviceAddContactPage extends Vue {
   private alreadyUsedContacts: Contact[] = []
   private allContacts: Contact[] = []
   private selectedContact: Contact | null = null
+  private isLoading: boolean = false
+  private isSaving: boolean = false
 
   @Prop({
     default: () => [] as Contact[],
@@ -89,17 +98,31 @@ export default class DeviceAddContactPage extends Vue {
   }
 
   mounted () {
+    this.isLoading = true
     this.$api.contacts.findAll().then((foundContacts) => {
       this.allContacts = foundContacts
+      this.isLoading = false
+    }).catch((e) => {
+      this.$store.commit('snackbar/setError', 'Failed to fetch related contacts')
+      this.isLoading = false
     })
+  }
+
+  get isInProgress (): boolean {
+    return this.isLoading || this.isSaving
   }
 
   addContact (): void {
     if (this.selectedContact && this.selectedContact.id && this.isLoggedIn) {
+      this.isSaving = true
       this.$api.devices.addContact(this.deviceId, this.selectedContact.id).then(() => {
+        this.isSaving = false
         this.alreadyUsedContacts.push(this.selectedContact as Contact)
         this.$emit('input', this.alreadyUsedContacts)
         this.$router.push('/devices/' + this.deviceId + '/contacts')
+      }).catch((e) => {
+        this.isSaving = false
+        this.$store.commit('snackbar/setError', 'Failed to save contacts')
       })
     }
   }

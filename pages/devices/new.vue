@@ -29,54 +29,60 @@ implied. See the Licence for the specific language governing
 permissions and limitations under the Licence.
 -->
 <template>
-  <v-card
-    flat
-  >
-    <v-card-actions>
-      <v-spacer />
-      <v-btn
-        v-if="isLoggedIn"
-        small
-        text
-        nuxt
-        to="/search/devices"
-      >
-        cancel
-      </v-btn>
-      <v-btn
-        v-if="isLoggedIn"
-        color="green"
-        small
-        @click="onSaveButtonClicked"
-      >
-        create
-      </v-btn>
-    </v-card-actions>
-    <DeviceBasicDataForm
-      ref="basicForm"
-      v-model="device"
+  <div>
+    <ProgressIndicator
+      v-model="isLoading"
+      dark
     />
-    <v-card-actions>
-      <v-spacer />
-      <v-btn
-        v-if="isLoggedIn"
-        small
-        text
-        nuxt
-        to="/search/devices"
-      >
-        cancel
-      </v-btn>
-      <v-btn
-        v-if="isLoggedIn"
-        color="green"
-        small
-        @click="onSaveButtonClicked"
-      >
-        create
-      </v-btn>
-    </v-card-actions>
-  </v-card>
+    <v-card
+      flat
+    >
+      <v-card-actions>
+        <v-spacer />
+        <v-btn
+          v-if="isLoggedIn"
+          small
+          text
+          nuxt
+          to="/search/devices"
+        >
+          cancel
+        </v-btn>
+        <v-btn
+          v-if="isLoggedIn"
+          color="green"
+          small
+          @click="onSaveButtonClicked"
+        >
+          create
+        </v-btn>
+      </v-card-actions>
+      <DeviceBasicDataForm
+        ref="basicForm"
+        v-model="device"
+      />
+      <v-card-actions>
+        <v-spacer />
+        <v-btn
+          v-if="isLoggedIn"
+          small
+          text
+          nuxt
+          to="/search/devices"
+        >
+          cancel
+        </v-btn>
+        <v-btn
+          v-if="isLoggedIn"
+          color="green"
+          small
+          @click="onSaveButtonClicked"
+        >
+          create
+        </v-btn>
+      </v-card-actions>
+    </v-card>
+  </div>
 </template>
 
 <style lang="scss">
@@ -91,10 +97,12 @@ import { Rules } from '@/mixins/Rules'
 import { Device } from '@/models/Device'
 
 import DeviceBasicDataForm from '@/components/DeviceBasicDataForm.vue'
+import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
 @Component({
   components: {
-    DeviceBasicDataForm
+    DeviceBasicDataForm,
+    ProgressIndicator
   }
 })
 // @ts-ignore
@@ -102,6 +110,7 @@ export default class DeviceNewPage extends mixins(Rules) {
   private numberOfTabs: number = 1
 
   private device: Device = new Device()
+  private isLoading: boolean = false
 
   mounted () {
     this.initializeAppBar()
@@ -116,14 +125,17 @@ export default class DeviceNewPage extends mixins(Rules) {
       this.$store.commit('snackbar/setError', 'Please correct your input')
       return
     }
+    if (!this.isLoggedIn) {
+      this.$store.commit('snackbar/setError', 'You need to be logged in to save the device')
+      return
+    }
+    this.isLoading = true
     this.$api.devices.save(this.device).then((savedDevice) => {
-      if (this.isLoggedIn) {
-        this.$store.commit('snackbar/setSuccess', 'Device created')
-        this.$router.push('/devices/' + savedDevice.id + '')
-      } else {
-        throw new Error('You need to be logged in to save the device')
-      }
+      this.isLoading = false
+      this.$store.commit('snackbar/setSuccess', 'Device created')
+      this.$router.push('/devices/' + savedDevice.id + '')
     }).catch((_error) => {
+      this.isLoading = false
       this.$store.commit('snackbar/setError', 'Save failed')
     })
   }

@@ -1,38 +1,29 @@
 <template>
   <div>
-    <v-overlay
-      :value="isLoading"
-      opacity="0.05"
-    >
-      <v-progress-circular
-        indeterminate
-        class="center-absolute"
-      />
-    </v-overlay>
+    <ProgressIndicator
+      v-model="isLoading"
+    />
     <v-card flat>
       <NuxtChild
         v-model="device"
+        is-in-progress="isLoading"
       />
     </v-card>
   </div>
 </template>
-
-<style>
-  .center-absolute {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    margin-top: -16px;
-    margin-left: -16px;
-  }
-</style>
 
 <script lang="ts">
 import { Component, Vue, Watch } from 'nuxt-property-decorator'
 
 import { Device } from '@/models/Device'
 
-@Component
+import ProgressIndicator from '@/components/ProgressIndicator.vue'
+
+@Component({
+  components: {
+    ProgressIndicator
+  }
+})
 export default class DevicePage extends Vue {
   private device: Device = new Device()
   private isLoading: boolean = true
