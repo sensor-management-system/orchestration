@@ -32,12 +32,14 @@
 import { AxiosInstance, Method } from 'axios'
 
 import { Contact } from '@/models/Contact'
+import { CustomTextField } from '@/models/CustomTextField'
 import { Device } from '@/models/Device'
 import { DeviceType } from '@/models/DeviceType'
 import { Manufacturer } from '@/models/Manufacturer'
 import { Status } from '@/models/Status'
 
 import { ContactSerializer } from '@/serializers/jsonapi/ContactSerializer'
+import { CustomTextFieldSerializer } from '@/serializers/jsonapi/CustomTextFieldSerializer'
 
 import { IFlaskJSONAPIFilter } from '@/utils/JSONApiInterfaces'
 
@@ -134,6 +136,16 @@ export class DeviceApi {
       id: contactId
     }]
     return this.axiosApi.post(url, { data })
+  }
+
+  findRelatedCustomFields (deviceId: string): Promise<CustomTextField[]> {
+    const url = deviceId + '/customfields'
+    const params = {
+      'page[size]': 10000
+    }
+    return this.axiosApi.get(url, { params }).then((rawServerResponse) => {
+      return new CustomTextFieldSerializer().convertJsonApiObjectListToModelList(rawServerResponse.data)
+    })
   }
 }
 
