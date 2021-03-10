@@ -29,8 +29,16 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
-import { CustomTextField } from '@/models/CustomTextField'
-import { IJsonApiNestedElement } from '@/serializers/jsonapi/JsonApiTypes'
+import { ICustomTextField, CustomTextField } from '@/models/CustomTextField'
+import {
+  IJsonApiDataWithOptionalIdWithoutRelationships,
+  IJsonApiNestedElement,
+  IJsonApiObject,
+  IJsonApiObjectList,
+  IJsonApiTypeId,
+  IJsonApiTypeIdAttributes,
+  IJsonApiTypeIdDataListDict
+} from '@/serializers/jsonapi/JsonApiTypes'
 
 export class CustomTextFieldSerializer {
   convertJsonApiElementToModel (customfield: IJsonApiNestedElement): CustomTextField {
@@ -59,6 +67,62 @@ export class CustomTextFieldSerializer {
       customFieldToSave.value = customField.value
 
       result.push(customFieldToSave)
+    }
+    return result
+  }
+
+  convertJsonApiObjectToModel (jsonApiObject: IJsonApiObject): CustomTextField {
+    const data = jsonApiObject.data
+    return this.convertJsonApiDataToModel(data)
+  }
+
+  convertJsonApiDataToModel (jsonApiData: IJsonApiTypeIdAttributes): CustomTextField {
+    const attributes = jsonApiData.attributes
+
+    const newEntry = new CustomTextField()
+
+    newEntry.id = jsonApiData.id.toString()
+    newEntry.key = attributes.key || ''
+    newEntry.value = attributes.value || ''
+
+    return newEntry
+  }
+
+  convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiObjectList): CustomTextField[] {
+    return jsonApiObjectList.data.map(this.convertJsonApiDataToModel)
+  }
+
+  convertModelListToJsonApiRelationshipObject (customFields: ICustomTextField[]): IJsonApiTypeIdDataListDict {
+    return {
+      customfields: {
+        data: this.convertModelListToTupleListWithIdAndType(customFields)
+      }
+    }
+  }
+
+  convertModelToJsonApiData (customField: ICustomTextField): IJsonApiDataWithOptionalIdWithoutRelationships {
+    const data: any = {
+      type: 'customfield',
+      attributes: {
+        key: customField.key,
+        value: customField.value
+      }
+    }
+    if (customField.id) {
+      data.id = customField.id
+    }
+    return data
+  }
+
+  convertModelListToTupleListWithIdAndType (customFields: ICustomTextField[]): IJsonApiTypeId[] {
+    const result: IJsonApiTypeId[] = []
+    for (const field of customFields) {
+      if (field.id !== null) {
+        result.push({
+          id: field.id,
+          type: 'customfield'
+        })
+      }
     }
     return result
   }
