@@ -1,7 +1,15 @@
 import json
 
 from project import base_url
+from project.api.models import (
+    Contact,
+    Device,
+    Platform,
+)
+from project.api.models.base_model import db
 from project.tests.base import BaseTestCase
+from project.tests.base import fake, generate_token_data
+from project.tests.models.test_configurations_model import generate_configuration_model
 from project.tests.models.test_unmount_actions_model import add_unmount_device_action
 
 
@@ -32,6 +40,40 @@ class TestDeviceUnmountAction(BaseTestCase):
 
     def test_post_device_unmount_action(self):
         """Create DeviceUnmountAction"""
+        d = Device(
+            short_name=fake.linux_processor(),
+        )
+        p_p = Platform(
+            short_name="device parent platform",
+        )
+        jwt1 = generate_token_data()
+        c1 = Contact(
+            given_name=jwt1["given_name"],
+            family_name=jwt1["family_name"],
+            email=jwt1["email"],
+        )
+        config = generate_configuration_model()
+        db.session.add_all([d, p_p, c1, config])
+        db.session.commit()
+        data = {
+            "data": {
+                "type": self.object_type,
+                "attributes": {
+                    "description": "test unmount device action",
+                    "end_date": fake.future_datetime().__str__(),
+                },
+                "relationships": {
+                    "device": {"data": {"type": "device", "id": d.id}},
+                    "contact": {"data": {"type": "contact", "id": c1.id}},
+                    "configuration": {"data": {"type": "configuration", "id": config.id}},
+                },
+            }
+        }
+        _ = super().add_object(
+            url=f"{self.device_unmount_action_url}?include=device,contact,configuration",
+            data_object=data,
+            object_type=self.object_type,
+        )
 
     def test_update_device_unmount_action(self):
         """Update DeviceUnmountAction"""

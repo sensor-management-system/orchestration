@@ -45,23 +45,23 @@ class DevicePropertyCalibrationSchema(Schema):
 
     id = fields.Integer(as_string=True)
 
-    device = Relationship(
-        attribute="device",
-        self_view="api.device_property_calibration_device",
+    device_property = Relationship(
+        attribute="device_property",
+        self_view="api.device_property_calibration_device_property",
         self_view_kwargs={"id": "<id>"},
-        related_view="api.device_detail",
+        related_view="api.device_property_detail",
         related_view_kwargs={"id": "<id>"},
-        schema="DeviceSchema",
-        type_="device",
+        schema="DevicePropertySchema",
+        type_="device_property",
         id_field="id",
     )
 
     calibration_action = Relationship(
-        attribute="device_calibration_action",
-        self_view="api.device_property_calibration_action",
+        attribute="calibration_action",
+        self_view="api.device_property_calibration_calibration_action",
         self_view_kwargs={"id": "<id>"},
-        related_view="api.device_calibration_action_detail",
-        related_view_kwargs={"id": "<device_calibration_action_id>"},
+        related_view="api.device_property_calibration_detail",
+        related_view_kwargs={"id": "<id>"},
         schema="DeviceCalibrationActionSchema",
         type_="device_calibration_action",
         id_field="id",

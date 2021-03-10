@@ -652,10 +652,10 @@ api.route(
 api.route(
     DevicePropertyCalibrationRelationship,
     f"{dpa}_calibration_action",
-    f"/{dpa_url}s/<int:id>/relationships/calibration_action",
+    f"/{dpa_url}s/<int:id>/relationships/calibration-action",
 )
 api.route(
     DevicePropertyCalibrationRelationship,
-    f"{dpa}_device",
-    f"/{dpa_url}s/<int:id>/relationships/device",
+    f"{dpa}_device_property",
+    f"/{dpa_url}s/<int:id>/relationships/device-property",
 )

@@ -1,12 +1,11 @@
 from flask_rest_jsonapi import ResourceDetail, ResourceRelationship
-
 from project.api.models.base_model import db
 from project.api.models.calibration_actions import DevicePropertyCalibration
 from project.api.resourceManager.base_resource import (
     add_created_by_id,
     add_updated_by_id,
 )
-from project.api.schemas.calibration_actions_schema import DeviceCalibrationActionSchema
+from project.api.schemas.calibration_actions_schema import DevicePropertyCalibrationSchema
 from project.frj_csv_export.resource import ResourceList
 
 
@@ -15,7 +14,7 @@ class DevicePropertyCalibrationList(ResourceList):
         """Use jwt to add user id to dataset"""
         add_created_by_id(data)
 
-    schema = DeviceCalibrationActionSchema
+    schema = DevicePropertyCalibrationSchema
     data_layer = {
         "session": db.session,
         "model": DevicePropertyCalibration,
@@ -30,7 +29,7 @@ class DevicePropertyCalibrationDetail(ResourceDetail):
         """Add Created by user id to the data"""
         add_updated_by_id(data)
 
-    schema = DeviceCalibrationActionSchema
+    schema = DevicePropertyCalibrationSchema
     data_layer = {
         "session": db.session,
         "model": DevicePropertyCalibration,
@@ -38,7 +37,7 @@ class DevicePropertyCalibrationDetail(ResourceDetail):
 
 
 class DevicePropertyCalibrationRelationship(ResourceRelationship):
-    schema = DeviceCalibrationActionSchema
+    schema = DevicePropertyCalibrationSchema
     data_layer = {
         "session": db.session,
         "model": DevicePropertyCalibration,

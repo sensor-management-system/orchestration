@@ -22,10 +22,10 @@ class TestDeviceCalibrationAttachment(BaseTestCase):
 
     def test_get_device_calibration_action_attachment_collection(self):
         """Test retrieve a collection of DeviceCalibrationAttachment objects"""
-        dca = add_device_calibration_attachment()
+        _ = add_device_calibration_attachment()
         with self.client:
             response = self.client.get(self.device_calibration_attachment_url)
-        data = json.loads(response.data.decode())
+        _ = json.loads(response.data.decode())
         self.assertEqual(response.status_code, 200)
 
     def test_post_generic_device_action_attachment(self):

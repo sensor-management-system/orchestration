@@ -4,9 +4,10 @@ from project.api.models import (
     DeviceUnmountAction,
     Platform,
     PlatformUnmountAction,
+    User,
 )
 from project.api.models.base_model import db
-from project.api.models.user import User
+
 from project.tests.base import BaseTestCase, fake, generate_token_data
 from project.tests.models.test_configurations_model import generate_configuration_model
 
@@ -14,9 +15,6 @@ from project.tests.models.test_configurations_model import generate_configuratio
 def add_unmount_device_action():
     d = Device(
         short_name=fake.linux_processor(),
-    )
-    p_p = Platform(
-        short_name="device parent platform",
     )
     jwt1 = generate_token_data()
     c1 = Contact(
@@ -32,10 +30,9 @@ def add_unmount_device_action():
         created_by=u1,
         device=d,
     )
-    mpa.parent_platform = p_p
     mpa.configuration = config
     mpa.contact = c1
-    db.session.add_all([d, p_p, c1, u1, config, mpa])
+    db.session.add_all([d, c1, u1, config, mpa])
     db.session.commit()
     return mpa
 
@@ -43,9 +40,6 @@ def add_unmount_device_action():
 def add_unmount_platform_action():
     p = Platform(
         short_name="Platform 2322",
-    )
-    p_p = Platform(
-        short_name="parent platform 2345",
     )
     jwt1 = generate_token_data()
     c1 = Contact(
@@ -61,10 +55,9 @@ def add_unmount_platform_action():
         created_by=u1,
         platform=p,
     )
-    mpa.parent_platform = p_p
     mpa.configuration = config
     mpa.contact = c1
-    db.session.add_all([p, p_p, c1, u1, config, mpa])
+    db.session.add_all([p, c1, u1, config, mpa])
     db.session.commit()
     return mpa
 
@@ -79,8 +72,8 @@ class TestUnMountActionModel(BaseTestCase):
         mpa = add_unmount_platform_action()
         mpa_r = (
             db.session.query(PlatformUnmountAction)
-            .filter_by(description="test unmount platform action model")
-            .one()
+                .filter_by(description="test unmount platform action model")
+                .one()
         )
         self.assertEqual(
             mpa.parent_platform.short_name, mpa_r.parent_platform.short_name
@@ -92,8 +85,8 @@ class TestUnMountActionModel(BaseTestCase):
         mpa = add_unmount_device_action()
         mpa_r = (
             db.session.query(DeviceUnmountAction)
-            .filter_by(description="test unmount device action model")
-            .one()
+                .filter_by(description="test unmount device action model")
+                .one()
         )
         self.assertEqual(
             mpa.parent_platform.short_name, mpa_r.parent_platform.short_name

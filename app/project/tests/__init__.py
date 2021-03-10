@@ -12,6 +12,7 @@ from .api.test_device_property_calibration import TestDevicePropertyCalibration
 from .api.test_device_software_update_action_attachment import (
     TestDeviceSoftwareUpdateActionAttachment,
 )
+from .api.test_device_software_update_actions import TestDeviceSoftwareUpdateAction
 from .api.test_device_unmount_action import TestDeviceUnmountAction
 from .api.test_devices import TestDeviceService
 from .api.test_generic_configuration_action import TestGenericConfigurationAction
@@ -97,4 +98,5 @@ def suite():
     suite.addTest(unittest.makeSuite(TestPlatformUnmountAction))
     suite.addTest(unittest.makeSuite(TestPlatformServices))
     suite.addTest(unittest.makeSuite(TestDeviceCalibrationAttachment))
+    suite.addTest(unittest.makeSuite(TestDeviceSoftwareUpdateAction))
     return suite

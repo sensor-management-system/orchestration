@@ -1,7 +1,11 @@
 import json
 
 from project import base_url
+from project.api.models import Device, Contact
+from project.api.models.base_model import db
 from project.tests.base import BaseTestCase
+from project.tests.base import fake
+from project.tests.base import generate_token_data
 from project.tests.models.test_device_calibration_action_model import (
     add_device_calibration_action,
 )
@@ -31,7 +35,36 @@ class TestDeviceCalibrationAction(BaseTestCase):
 
     def test_post_device_calibration_action(self):
         """Create DeviceCalibrationAction"""
-        pass
+        d = Device(short_name="Device 12")
+        jwt1 = generate_token_data()
+        c = Contact(
+            given_name=jwt1["given_name"],
+            family_name=jwt1["family_name"],
+            email=jwt1["email"],
+        )
+        db.session.add_all([d, c])
+        db.session.commit()
+        data = {
+            "data": {
+                "type": self.object_type,
+                "attributes": {
+                    "description": "Test DeviceCalibrationAction",
+                    "formula": fake.pystr(),
+                    "value": fake.pyfloat(),
+                    "current_calibration_date": fake.future_datetime().__str__(),
+                    "next_calibration_date": fake.future_datetime().__str__(),
+                },
+                "relationships": {
+                    "device": {"data": {"type": "device", "id": d.id}},
+                    "contact": {"data": {"type": "contact", "id": c.id}},
+                },
+            }
+        }
+        _ = super().add_object(
+            url=f"{self.device_calibration_action_url}?include=device,contact",
+            data_object=data,
+            object_type=self.object_type,
+        )
 
     def test_update_device_calibration_action(self):
         """Update DeviceCalibration"""

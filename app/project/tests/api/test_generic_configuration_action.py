@@ -1,8 +1,12 @@
 import json
 
 from project import base_url
+from project.api.models import Contact
+from project.api.models.base_model import db
 from project.tests.base import BaseTestCase
-
+from project.tests.base import fake
+from project.tests.base import generate_token_data
+from project.tests.models.test_configurations_model import generate_configuration_model
 from project.tests.models.test_generic_actions_models import generate_configuration_action_model
 
 
@@ -41,7 +45,38 @@ class TestGenericConfigurationAction(BaseTestCase):
 
     def test_post_generic_configuration_action(self):
         """Create GenericConfigurationAction"""
-        pass
+        config = generate_configuration_model()
+        jwt1 = generate_token_data()
+        c1 = Contact(
+            given_name=jwt1["given_name"],
+            family_name=jwt1["family_name"],
+            email=jwt1["email"],
+        )
+        db.session.add_all([config, c1])
+        db.session.commit()
+        data = {
+            "data": {
+                "type": self.object_type,
+                "attributes": {
+                    "description": "Test GenericConfigurationAction",
+                    "action_type_name": fake.pystr(),
+                    "action_type_uri": fake.uri(),
+                    "begin_date": fake.future_datetime().__str__(),
+                    "end_date": fake.future_datetime().__str__(),
+                },
+                "relationships": {
+                    "configuration": {
+                        "data": {"type": "configuration", "id": config.id}
+                    },
+                    "contact": {"data": {"type": "contact", "id": c1.id}},
+                },
+            }
+        }
+        _ = super().add_object(
+            url=f"{self.generic_configuration_action_url}?include=configuration,contact",
+            data_object=data,
+            object_type=self.object_type,
+        )
 
     def test_update_generic_configuration_action(self):
         """Update GenericConfigurationAction"""
