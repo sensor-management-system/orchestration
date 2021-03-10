@@ -1,25 +1,29 @@
+"""Module for the device schema."""
+
 from marshmallow_jsonapi import fields
 from marshmallow_jsonapi.flask import Relationship, Schema
 
 from project.api.schemas.attachment_schema import AttachmentSchema
 from project.api.schemas.contact_schema import ContactSchema
-from project.api.schemas.customfield_schema import CustomFieldSchema
+from project.api.schemas.customfield_schema import InnerCustomFieldSchema
 from project.api.schemas.device_property_schema import InnerDevicePropertySchema
 
 
 class DeviceSchema(Schema):
     """
-    This class create a schema for a device. Every attribute in the
-    schema going to expose through the api.
+    This class create a schema for a device.
+
+    Every attribute in the schema going to expose through the api.
     DeviceSchema has an attribute named “deviceURN” that is the result
      of concatenation manufacturer, model,
     type and serialNumber.
     It uses library called marshmallow-jsonapi that fit the JSONAPI 1.0
     specification and provides Flask integration.
-
     """
 
     class Meta:
+        """Meta class for the DeviceSchema."""
+
         type_ = "device"
         self_view = "api.device_detail"
         self_view_kwargs = {"id": "<id>"}
@@ -56,7 +60,17 @@ class DeviceSchema(Schema):
         related_view_kwargs={"id": "<updated_by_id>"},
         type_="user",
     )
-    customfields = fields.Nested(CustomFieldSchema, many=True, allow_none=True)
+    customfields = Relationship(
+        self_view="api.device_customfields",
+        self_view_kwargs={"id": "<id>"},
+        related_view="api.customfield_list",
+        related_view_kwargs={"device_id": "<id>"},
+        many=True,
+        allow_none=True,
+        schema="CustomFieldSchema",
+        type_="customfield",
+        id_field="id",
+    )
     events = Relationship(
         self_view="api.device_events",
         self_view_kwargs={"id": "<id>"},
@@ -67,14 +81,27 @@ class DeviceSchema(Schema):
         schema="EventSchema",
         type_="event",
     )
-    properties = fields.Nested(
-        InnerDevicePropertySchema,
+    device_properties = Relationship(
+        self_view="api.device_device_properties",
+        self_view_kwargs={"id": "<id>"},
+        related_view="api.device_property_list",
+        related_view_kwargs={"device_id": "<id>"},
         many=True,
         allow_none=True,
-        attribute="device_properties",
+        schema="DevicePropertySchema",
+        type_="device_property",
+        id_field="id",
     )
-    attachments = fields.Nested(
-        AttachmentSchema, many=True, allow_none=True, attribute="device_attachments"
+    device_attachments = Relationship(
+        self_view="api.device_device_attachments",
+        self_view_kwargs={"id": "<id>"},
+        related_view="api.device_attachment_list",
+        related_view_kwargs={"device_id": "<id>"},
+        many=True,
+        allow_none=True,
+        schema="DeviceAttachmentSchema",
+        type_="device_attachment",
+        id_field="id",
     )
     contacts = Relationship(
         attribute="contacts",
@@ -91,7 +118,8 @@ class DeviceSchema(Schema):
     @staticmethod
     def nested_dict_serializer(obj):
         """
-        serialize the object to a nested dict.
+        Serialize the object to a nested dict.
+
         :param obj: a sensor object
         :return:
         """
@@ -99,10 +127,21 @@ class DeviceSchema(Schema):
 
 
 class DeviceToNestedDictSerializer:
+    """
+    Serializer to a nested dict.
+
+    Intended to be used to export the device in a differnt way
+    then the "normal" device serializer.
+
+    This here for example can be used to create a nested dict, that
+    may be flattened and then is used in a csv export.
+    """
+
     @staticmethod
     def to_nested_dict(device):
         """
-         Convert to nested dict.
+        Convert to nested dict.
+
         :param device:
         :return:
         """
@@ -135,6 +174,7 @@ class DeviceToNestedDictSerializer:
                     for p in device.device_properties
                 ],
                 "customfields": [
-                    CustomFieldSchema.dict_serializer(c) for c in device.customfields
+                    InnerCustomFieldSchema.dict_serializer(c)
+                    for c in device.customfields
                 ],
             }
