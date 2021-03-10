@@ -6,6 +6,7 @@ from .api.test_configuration_generic_action import (
 from .api.test_configurations import TestConfigurationsService
 from .api.test_contacts import TestContactServices
 from .api.test_device_calibration_action import TestDeviceCalibrationAction
+from .api.test_device_calibration_attachment import TestDeviceCalibrationAttachment
 from .api.test_device_mount_action import TestDeviceMountAction
 from .api.test_device_property_calibration import TestDevicePropertyCalibration
 from .api.test_device_software_update_action_attachment import (
@@ -95,4 +96,5 @@ def suite():
     suite.addTest(unittest.makeSuite(TestPlatformSoftwareUpdateAction))
     suite.addTest(unittest.makeSuite(TestPlatformUnmountAction))
     suite.addTest(unittest.makeSuite(TestPlatformServices))
+    suite.addTest(unittest.makeSuite(TestDeviceCalibrationAttachment))
     return suite

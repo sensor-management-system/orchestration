@@ -43,8 +43,8 @@ def test():
 @cli.command()
 def cov():
     """Runs the unit tests with coverage."""
-    tests = unittest.TestLoader().discover("project/tests")
-    result = unittest.TextTestRunner(verbosity=2).run(tests)
+    runner = unittest.TextTestRunner(verbosity=2)
+    result = runner.run(suite())
     if result.wasSuccessful():
         COV.stop()
         COV.save()

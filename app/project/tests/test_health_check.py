@@ -14,5 +14,3 @@ class HealthCheck(BaseTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn("Hello Sensor!", data["message"])
         self.assertIn("success", data["status"])
-        # Dummy assert just to make ci failed
-        self.assertEqual(response.status_code, 500)
