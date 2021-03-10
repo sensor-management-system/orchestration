@@ -1,15 +1,12 @@
 """Tests for the devices."""
 
-import json
-import unittest
 
 from project import base_url
 from project.api.models.base_model import db
 from project.api.models.customfield import CustomField
-from project.api.models.device_attachment import DeviceAttachment
 from project.api.models.device import Device
+from project.api.models.device_attachment import DeviceAttachment
 from project.api.models.device_property import DeviceProperty
-from project.api.schemas.device_schema import DeviceSchema
 from project.tests.base import BaseTestCase
 from project.tests.read_from_json import extract_data_from_json_file
 from project.tests.test_contacts import TestContactServices

@@ -38,7 +38,7 @@ def add_unmount_device_action():
 
 def add_unmount_platform_action():
     p = Platform(
-        short_name="Platform 2322",
+        short_name="Platform 55",
     )
     jwt1 = generate_token_data()
     c1 = Contact(
@@ -71,12 +71,10 @@ class TestUnMountActionModel(BaseTestCase):
         mpa = add_unmount_platform_action()
         mpa_r = (
             db.session.query(PlatformUnmountAction)
-                .filter_by(description="test unmount platform action model")
-                .one()
+            .filter_by(description="test unmount platform action model")
+            .one()
         )
-        self.assertEqual(
-            mpa.description, mpa_r.description
-        )
+        self.assertEqual(mpa.description, mpa_r.description)
         self.assertDictEqual(mpa.__dict__, mpa_r.__dict__)
 
     def test_unmount_device_action_model(self):
@@ -84,10 +82,8 @@ class TestUnMountActionModel(BaseTestCase):
         mpa = add_unmount_device_action()
         mpa_r = (
             db.session.query(DeviceUnmountAction)
-                .filter_by(description="test unmount device action model")
-                .one()
+            .filter_by(description="test unmount device action model")
+            .one()
         )
-        self.assertEqual(
-            mpa.description, mpa_r.description
-        )
+        self.assertEqual(mpa.description, mpa_r.description)
         self.assertDictEqual(mpa.__dict__, mpa_r.__dict__)

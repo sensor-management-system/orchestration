@@ -28,8 +28,8 @@ def query_result_to_list(query_result):
 
 
 def encode_token_date_with_hs256(
-        token_data,
-        headers=None,
+    token_data,
+    headers=None,
 ):
     """
     Make use of the flask_jwt_extended methode (_encode_jwt) to
@@ -152,7 +152,6 @@ class BaseTestCase(TestCase):
                 headers=access_headers,
             )
         data = json.loads(response.data.decode())
-        print(data)
         self.assertEqual(response.status_code, 201)
         self.assertIn(object_type, data["data"]["type"])
         return data

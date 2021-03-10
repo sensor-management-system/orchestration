@@ -4,8 +4,8 @@ from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.orm.exc import NoResultFound
 
 from project.api.models.base_model import db
-from project.api.models.platform_attachment import PlatformAttachment
 from project.api.models.platform import Platform
+from project.api.models.platform_attachment import PlatformAttachment
 from project.api.schemas.platform_attachment_schema import PlatformAttachmentSchema
 from project.api.token_checker import token_required
 

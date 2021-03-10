@@ -1,18 +1,10 @@
 import json
 
-from project.api.models import (
-    Contact,
-    Device,
-    DeviceAttachment,
-    DeviceCalibrationAction,
-)
-from project.api.models.base_model import db
-from project.tests.base import BaseTestCase, fake, generate_token_data
+from project import base_url
+from project.tests.base import BaseTestCase
 from project.tests.models.test_device_calibration_attachment_model import (
     add_device_calibration_attachment,
 )
-
-from project import base_url
 
 
 class TestDeviceCalibrationAttachment(BaseTestCase):

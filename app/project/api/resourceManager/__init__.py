@@ -30,12 +30,6 @@ from .device_calibration_action_resources import (  # noqa: F401
     DeviceCalibrationActionList,
     DeviceCalibrationActionRelationship,
 )
-from .customfield_detail import CustomFieldDetail  # noqa: F401
-from .customfield_list import CustomFieldList  # noqa: F401
-from .customfield_relationship import CustomFieldRelationship  # noqa: F401
-from .device_attachment_detail import DeviceAttachmentDetail  # noqa: F401
-from .device_attachment_list import DeviceAttachmentList  # noqa: F401
-from .device_attachment_relationship import DeviceAttachmentRelationship  # noqa: F401
 from .device_detail import DeviceDetail  # noqa: F401
 from .device_list import DeviceList  # noqa: F401
 from .device_mount_action_resources import (  # noqa: F401
@@ -70,11 +64,6 @@ from .device_unmount_action_resources import (  # noqa: F401
 from .event_detail import EventDetail  # noqa: F401
 from .event_list import EventList  # noqa: F401
 from .event_relationship import EventRelationship  # noqa: F401
-from .platform_attachment_detail import PlatformAttachmentDetail  # noqa: F401
-from .platform_attachment_list import PlatformAttachmentList  # noqa: F401
-from .platform_attachment_relationship import (
-    PlatformAttachmentRelationship,
-)  # noqa: F401
 from .generic_configuration_action_attachment_resources import (  # noqa: F401
     GenericConfigurationActionAttachmentDetail,
     GenericConfigurationActionAttachmentList,
@@ -104,6 +93,11 @@ from .generic_platform_action_resources import (  # noqa: F401
     GenericPlatformActionDetail,
     GenericPlatformActionList,
     GenericPlatformActionRelationship,
+)
+from .platform_attachment_detail import PlatformAttachmentDetail  # noqa: F401
+from .platform_attachment_list import PlatformAttachmentList  # noqa: F401
+from .platform_attachment_relationship import (  # noqa: F401
+    PlatformAttachmentRelationship,
 )
 from .platform_detail import PlatformDetail  # noqa: F401
 from .platform_list import PlatformList  # noqa: F401
