@@ -71,11 +71,11 @@ class TestUnMountActionModel(BaseTestCase):
         mpa = add_unmount_platform_action()
         mpa_r = (
             db.session.query(PlatformUnmountAction)
-            .filter_by(description="test unmount platform action model")
-            .one()
+                .filter_by(description="test unmount platform action model")
+                .one()
         )
         self.assertEqual(
-            mpa.parent_platform.short_name, mpa_r.parent_platform.short_name
+            mpa.description, mpa_r.description
         )
         self.assertDictEqual(mpa.__dict__, mpa_r.__dict__)
 
@@ -84,10 +84,10 @@ class TestUnMountActionModel(BaseTestCase):
         mpa = add_unmount_device_action()
         mpa_r = (
             db.session.query(DeviceUnmountAction)
-            .filter_by(description="test unmount device action model")
-            .one()
+                .filter_by(description="test unmount device action model")
+                .one()
         )
         self.assertEqual(
-            mpa.parent_platform.short_name, mpa_r.parent_platform.short_name
+            mpa.description, mpa_r.description
         )
         self.assertDictEqual(mpa.__dict__, mpa_r.__dict__)
