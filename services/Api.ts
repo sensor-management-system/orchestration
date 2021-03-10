@@ -36,6 +36,7 @@ import { DeviceApi } from '@/services/sms/DeviceApi'
 import { PlatformApi } from '@/services/sms/PlatformApi'
 import { ConfigurationApi } from '@/services/sms/ConfigurationApi'
 import { ConfigurationStatusApi } from '@/services/sms/ConfigurationStatusApi'
+import { CustomFieldsApi } from '@/services/sms/CustomFieldsApi'
 
 import { CompartmentApi } from '@/services/cv/CompartmentApi'
 import { DeviceTypeApi } from '@/services/cv/DeviceTypeApi'
@@ -58,6 +59,7 @@ export class Api {
   private readonly _platformApi: PlatformApi
   private readonly _configurationApi: ConfigurationApi
   private readonly _configurationStatesApi: ConfigurationStatusApi
+  private readonly _customFieldsApi: CustomFieldsApi
 
   private readonly _manufacturerApi: ManufacturerApi
   private readonly _platformTypeApi: PlatformTypeApi
@@ -98,6 +100,10 @@ export class Api {
       this.createAxios(smsBaseUrl, '/configurations', smsConfig, getIdToken)
     )
     this._configurationStatesApi = new ConfigurationStatusApi()
+
+    this._customFieldsApi = new CustomFieldsApi(
+      this.createAxios(smsBaseUrl, '/customfields', smsConfig, getIdToken)
+    )
 
     // and here we can set settings for all the cv api calls
     const cvConfig: AxiosRequestConfig = {
@@ -177,6 +183,10 @@ export class Api {
 
   get configurationStates (): ConfigurationStatusApi {
     return this._configurationStatesApi
+  }
+
+  get customFields (): CustomFieldsApi {
+    return this._customFieldsApi
   }
 
   get contacts (): ContactApi {
