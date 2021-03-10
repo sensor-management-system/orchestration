@@ -1,14 +1,7 @@
 import json
 
 from project import base_url
-from project.api.models import (
-    Contact,
-    Device,
-    DeviceAttachment,
-    DeviceSoftwareUpdateAction,
-)
-from project.api.models.base_model import db
-from project.tests.base import BaseTestCase, fake, generate_token_data
+from project.tests.base import BaseTestCase
 from project.tests.models.test_software_update_actions_attachment_model import (
     add_device_software_update_action_attachment,
 )
@@ -18,7 +11,7 @@ class TestDeviceSoftwareUpdateActionAttachment(BaseTestCase):
     """Tests for the DeviceSoftwareUpdateActionAttachment endpoints."""
 
     device_software_update_action_attachment_url = (
-            base_url + "/device-software-update-action-attachments"
+        base_url + "/device-software-update-action-attachments"
     )
     object_type = "device_software_update_action_attachment"
 
@@ -41,7 +34,6 @@ class TestDeviceSoftwareUpdateActionAttachment(BaseTestCase):
 
     def test_post_device_software_update_action_attachment(self):
         """TEST Create DeviceSoftwareUpdateActionAttachment"""
-        pass
         # d = Device(short_name="Device 277")
         # jwt1 = generate_token_data()
         # c = Contact(
@@ -81,7 +73,6 @@ class TestDeviceSoftwareUpdateActionAttachment(BaseTestCase):
 
     def test_update_device_software_update_action_attachment(self):
         """TEST Update DeviceSoftwareUpdateActionAttachment"""
-        pass
 
     def test_delete_device_software_update_action_attachment(self):
         """TEST Delete DeviceSoftwareUpdateActionAttachment"""

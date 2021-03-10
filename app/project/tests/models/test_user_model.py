@@ -1,5 +1,3 @@
-import unittest
-
 from project import base_url
 from project.api.models import Contact
 from project.api.models.base_model import db
@@ -31,6 +29,3 @@ class TestUsersModel(BaseTestCase):
 
         u = db.session.query(User).filter_by(id=user.id).one()
         self.assertIn(u.subject, user.subject)
-
-
-

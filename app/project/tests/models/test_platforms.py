@@ -1,5 +1,3 @@
-import unittest
-
 from project import base_url
 from project.api.models.base_model import db
 from project.api.models.platform import Platform
@@ -41,6 +39,3 @@ class TestPlatformModel(BaseTestCase):
 
         p = db.session.query(Platform).filter_by(id=platform.id).one()
         self.assertIn(p.persistent_identifier, "persistent_identifier_test")
-
-
-

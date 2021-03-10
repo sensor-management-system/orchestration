@@ -1,3 +1,7 @@
+from project.api.models import (
+    ConfigurationAttachment,
+    GenericConfigurationActionAttachment,
+)
 from project.api.models.base_model import db
 from project.api.models.device_attachment import DeviceAttachment
 from project.api.models.generic_action_attachments import (
@@ -6,13 +10,11 @@ from project.api.models.generic_action_attachments import (
 )
 from project.api.models.platform_attachment import PlatformAttachment
 from project.tests.base import BaseTestCase, fake
-from project.tests.models.test_generic_actions_models import generate_configuration_action_model
 from project.tests.models.test_generic_actions_models import (
+    generate_configuration_action_model,
     generate_device_action_model,
     generate_platform_action_model,
 )
-
-from project.api.models import ConfigurationAttachment, GenericConfigurationActionAttachment
 
 
 def add_generic_configuration_action_attachment_model():
@@ -84,8 +86,8 @@ class TestGenericActionModel(BaseTestCase):
         gpa = add_generic_platform_action_attachment_model()
         gpa_t = (
             db.session.query(GenericPlatformActionAttachment)
-                .filter_by(action_id=gpa.id)
-                .one()
+            .filter_by(action_id=gpa.id)
+            .one()
         )
         self.assertEqual("test GenericPlatformAction", gpa_t.action.description)
 
@@ -94,8 +96,8 @@ class TestGenericActionModel(BaseTestCase):
         gpa = add_generic_device_action_attachment_model()
         gpa_t = (
             db.session.query(GenericDeviceActionAttachment)
-                .filter_by(action_id=gpa.id)
-                .one()
+            .filter_by(action_id=gpa.id)
+            .one()
         )
         self.assertEqual("test GenericDeviceAction", gpa_t.action.description)
 
@@ -104,7 +106,7 @@ class TestGenericActionModel(BaseTestCase):
         gca = add_generic_configuration_action_attachment_model()
         gpa_t = (
             db.session.query(GenericConfigurationActionAttachment)
-                .filter_by(action_id=gca.id)
-                .one()
+            .filter_by(action_id=gca.id)
+            .one()
         )
         self.assertEqual("test GenericConfigurationAction", gpa_t.action.description)

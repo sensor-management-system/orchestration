@@ -1,15 +1,15 @@
 from project import base_url
 from project.tests.base import BaseTestCase
-
-from project.tests.models.test_software_update_actions_attachment_model import \
-    add_platform_software_update_action_attachment_model
+from project.tests.models.test_software_update_actions_attachment_model import (
+    add_platform_software_update_action_attachment_model,
+)
 
 
 class TestPlatformSoftwareUpdateActionAttachment(BaseTestCase):
     """Tests for the PlatformSoftwareUpdateActionAttachment endpoints."""
 
     platform_software_update_action_attachment_url = (
-            base_url + "/platform-software-update-action-attachments"
+        base_url + "/platform-software-update-action-attachments"
     )
     object_type = "platform_software_update_action_attachment"
 
@@ -28,11 +28,9 @@ class TestPlatformSoftwareUpdateActionAttachment(BaseTestCase):
 
     def test_post_platform_software_update_action_attachment(self):
         """Create PlatformSoftwareUpdateActionAttachment"""
-        pass
 
     def test_update_platform_software_update_action_attachment(self):
         """Update PlatformSoftwareUpdateActionAttachment"""
-        pass
 
     def test_delete_platform_software_update_action_attachment(self):
         """Delete PlatformSoftwareUpdateActionAttachment """

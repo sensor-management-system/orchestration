@@ -30,11 +30,9 @@ class TestDeviceCalibrationAttachment(BaseTestCase):
 
     def test_post_generic_device_action_attachment(self):
         """Create DeviceCalibrationAttachment"""
-        pass
 
     def test_update_generic_device_action_attachment(self):
         """Update DeviceCalibrationAttachment"""
-        pass
 
     def test_delete_generic_device_action_attachment(self):
         """Delete DeviceCalibrationAttachment"""

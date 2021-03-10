@@ -32,9 +32,9 @@ from .device_mount_action_resources import (  # noqa: F401
     DeviceMountActionRelationship,
 )
 from .device_property_calibration_resources import (  # noqa: F401
-    DevicePropertyCalibrationList,
     DevicePropertyCalibrationDetail,
-    DevicePropertyCalibrationRelationship
+    DevicePropertyCalibrationList,
+    DevicePropertyCalibrationRelationship,
 )
 from .device_property_detail import DevicePropertyDetail  # noqa: F401
 from .device_property_list import DevicePropertyList  # noqa: F401

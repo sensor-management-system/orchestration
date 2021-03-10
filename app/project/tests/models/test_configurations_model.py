@@ -1,5 +1,3 @@
-import unittest
-
 from project.api.models.base_model import db
 from project.api.models.configuration import Configuration
 from project.api.models.configuration_device import ConfigurationDevice
@@ -91,4 +89,3 @@ class TestConfigurationsModel(BaseTestCase):
 
         c = db.session.query(Configuration).filter_by(label="Config1").first()
         self.assertEqual("static", c.location_type)
-

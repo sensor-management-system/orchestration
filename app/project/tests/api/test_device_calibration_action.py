@@ -1,11 +1,9 @@
 import json
 
 from project import base_url
-from project.api.models import Device, Contact
+from project.api.models import Contact, Device
 from project.api.models.base_model import db
-from project.tests.base import BaseTestCase
-from project.tests.base import fake
-from project.tests.base import generate_token_data
+from project.tests.base import BaseTestCase, fake, generate_token_data
 from project.tests.models.test_device_calibration_action_model import (
     add_device_calibration_action,
 )

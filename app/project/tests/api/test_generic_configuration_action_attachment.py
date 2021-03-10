@@ -2,15 +2,16 @@ import json
 
 from project import base_url
 from project.tests.base import BaseTestCase
-from project.tests.models.test_generic_action_attachment_model import \
-    add_generic_configuration_action_attachment_model
+from project.tests.models.test_generic_action_attachment_model import (
+    add_generic_configuration_action_attachment_model,
+)
 
 
 class TestGenericConfigurationActionAttachment(BaseTestCase):
     """Tests for the GenericConfigurationActionAttachment endpoints."""
 
     generic_configuration_action_attachment_url = (
-            base_url + "/generic-configuration-action-attachments"
+        base_url + "/generic-configuration-action-attachments"
     )
     object_type = "generic_configuration_action_attachment"
 
@@ -31,11 +32,9 @@ class TestGenericConfigurationActionAttachment(BaseTestCase):
 
     def test_post_generic_configuration_action_attachment(self):
         """Create GenericConfigurationActionAttachment"""
-        pass
 
     def test_update_generic_configuration_action_attachment(self):
         """Update GenericConfigurationActionAttachment"""
-        pass
 
     def test_delete_generic_configuration_action_attachment(self):
         """Delete GenericConfigurationActionAttachment """

@@ -3,11 +3,11 @@ import json
 from project import base_url
 from project.api.models import Contact
 from project.api.models.base_model import db
-from project.tests.base import BaseTestCase
-from project.tests.base import fake
-from project.tests.base import generate_token_data
+from project.tests.base import BaseTestCase, fake, generate_token_data
 from project.tests.models.test_configurations_model import generate_configuration_model
-from project.tests.models.test_generic_actions_models import generate_configuration_action_model
+from project.tests.models.test_generic_actions_models import (
+    generate_configuration_action_model,
+)
 
 
 class TestGenericConfigurationAction(BaseTestCase):

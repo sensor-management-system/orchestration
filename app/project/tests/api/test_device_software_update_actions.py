@@ -1,13 +1,12 @@
 import json
 
 from project import base_url
-from project.api.models import Device, Contact
+from project.api.models import Contact, Device
 from project.api.models.base_model import db
-from project.tests.base import BaseTestCase
-from project.tests.base import fake
-from project.tests.base import generate_token_data
-from project.tests.models.test_software_update_actions_model import \
-    add_device_software_update_action_model
+from project.tests.base import BaseTestCase, fake, generate_token_data
+from project.tests.models.test_software_update_actions_model import (
+    add_device_software_update_action_model,
+)
 
 
 class TestDeviceSoftwareUpdateAction(BaseTestCase):
@@ -55,9 +54,7 @@ class TestDeviceSoftwareUpdateAction(BaseTestCase):
                     "update_date": fake.future_datetime().__str__(),
                 },
                 "relationships": {
-                    "device": {
-                        "data": {"type": "device", "id": d.id}
-                    },
+                    "device": {"data": {"type": "device", "id": d.id}},
                     "contact": {"data": {"type": "contact", "id": c.id}},
                 },
             }

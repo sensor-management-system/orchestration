@@ -1,5 +1,3 @@
-import unittest
-
 from project.api.models.base_model import db
 from project.api.models.contact import Contact
 from project.tests.base import BaseTestCase, generate_token_data
@@ -23,6 +21,3 @@ class TestContactModels(BaseTestCase):
 
         c = db.session.query(Contact).filter_by(id=c.id).one()
         self.assertIn(c.email, c.email)
-
-
-

@@ -1,8 +1,8 @@
 from project import base_url
 from project.tests.base import BaseTestCase
-
-from project.tests.models.test_software_update_actions_model import \
-    add_platform_software_update_action_model
+from project.tests.models.test_software_update_actions_model import (
+    add_platform_software_update_action_model,
+)
 
 
 class TestPlatformSoftwareUpdateAction(BaseTestCase):
@@ -26,7 +26,6 @@ class TestPlatformSoftwareUpdateAction(BaseTestCase):
 
     def test_post_platform_software_update_action(self):
         """Create PlatformSoftwareUpdateAction"""
-        pass
 
     def test_update_platform_software_update_action(self):
         """Update PlatformSoftwareUpdateAction"""

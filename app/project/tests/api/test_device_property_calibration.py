@@ -1,9 +1,7 @@
 from project import base_url
-from project.api.models import Device, DeviceProperty, Contact, DeviceCalibrationAction
+from project.api.models import Contact, Device, DeviceCalibrationAction, DeviceProperty
 from project.api.models.base_model import db
-from project.tests.base import BaseTestCase
-from project.tests.base import fake
-from project.tests.base import generate_token_data
+from project.tests.base import BaseTestCase, fake, generate_token_data
 from project.tests.models.test_device_calibration_action_model import (
     add_device_property_calibration_model,
 )
@@ -69,9 +67,12 @@ class TestDevicePropertyCalibration(BaseTestCase):
                 "type": self.object_type,
                 "attributes": {},
                 "relationships": {
-                    "device_property": {"data": {"type": "device_property", "id": dp.id}},
+                    "device_property": {
+                        "data": {"type": "device_property", "id": dp.id}
+                    },
                     "calibration_action": {
-                        "data": {"type": "device_calibration_action", "id": dca.id}},
+                        "data": {"type": "device_calibration_action", "id": dca.id}
+                    },
                 },
             }
         }
@@ -110,7 +111,8 @@ class TestDevicePropertyCalibration(BaseTestCase):
                 "attributes": {},
                 "relationships": {
                     "calibration_action": {
-                        "data": {"type": "device_calibration_action", "id": dca_neu.id}},
+                        "data": {"type": "device_calibration_action", "id": dca_neu.id}
+                    },
                 },
             }
         }
