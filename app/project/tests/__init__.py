@@ -13,6 +13,16 @@ from .api.test_device_software_update_action_attachment import (
 )
 from .api.test_device_unmount_action import TestDeviceUnmountAction
 from .api.test_devices import TestDeviceService
+from .api.test_generic_configuration_action import TestGenericConfigurationAction
+from .api.test_generic_configuration_action_attachment import \
+    TestGenericConfigurationActionAttachment
+from .api.test_generic_device_action import TestGenericDeviceAction
+from .api.test_generic_device_action_attachment import TestGenericDeviceActionAttachment
+from .api.test_generic_platform_action import TestGenericPlatformAction
+from .api.test_generic_platform_action_attachment import TestGenericPlatformActionAttachment
+from .api.test_platform_software_update_action import TestPlatformSoftwareUpdateAction
+from .api.test_platform_unmount_action import TestPlatformUnmountAction
+from .api.test_platforms import TestPlatformServices
 from .models.test_configuration_generic_action_model import (
     TestConfigurationObjectsModel,
 )
@@ -76,4 +86,13 @@ def suite():
     suite.addTest(unittest.makeSuite(TestDeviceSoftwareUpdateActionAttachment))
     suite.addTest(unittest.makeSuite(TestDeviceUnmountAction))
     suite.addTest(unittest.makeSuite(TestDeviceService))
+    suite.addTest(unittest.makeSuite(TestGenericConfigurationAction))
+    suite.addTest(unittest.makeSuite(TestGenericConfigurationActionAttachment))
+    suite.addTest(unittest.makeSuite(TestGenericDeviceAction))
+    suite.addTest(unittest.makeSuite(TestGenericDeviceActionAttachment))
+    suite.addTest(unittest.makeSuite(TestGenericPlatformAction))
+    suite.addTest(unittest.makeSuite(TestGenericPlatformActionAttachment))
+    suite.addTest(unittest.makeSuite(TestPlatformSoftwareUpdateAction))
+    suite.addTest(unittest.makeSuite(TestPlatformUnmountAction))
+    suite.addTest(unittest.makeSuite(TestPlatformServices))
     return suite

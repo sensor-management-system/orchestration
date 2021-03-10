@@ -9,15 +9,7 @@ class TestDeviceUnmountAction(BaseTestCase):
     """Tests for the DeviceUnmountAction endpoints."""
 
     device_unmount_action_url = base_url + "/device-unmount-actions"
-    platform_url = base_url + "/platforms"
-    device_url = base_url + "/devices"
-    contact_url = base_url + "/contacts"
     object_type = "device_unmount_action"
-    json_data_url = "/usr/src/app/project/tests/drafts/configurations_test_data.json"
-    device_json_data_url = "/usr/src/app/project/tests/drafts/devices_test_data.json"
-    platform_json_data_url = (
-        "/usr/src/app/project/tests/drafts/platforms_test_data.json"
-    )
 
     def test_get_device_unmount_action(self):
         """Ensure the GET /device_unmount_actions route reachable."""

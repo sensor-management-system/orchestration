@@ -92,6 +92,3 @@ class TestConfigurationsModel(BaseTestCase):
         c = db.session.query(Configuration).filter_by(label="Config1").first()
         self.assertEqual("static", c.location_type)
 
-
-if __name__ == "__main__":
-    unittest.main()

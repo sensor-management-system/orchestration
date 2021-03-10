@@ -9,15 +9,7 @@ class TestDeviceMountAction(BaseTestCase):
     """Tests for the DeviceMountAction endpoints."""
 
     device_mount_action_url = base_url + "/device-mount-actions"
-    platform_url = base_url + "/platforms"
-    device_url = base_url + "/devices"
-    contact_url = base_url + "/contacts"
     object_type = "device_mount_action"
-    json_data_url = "/usr/src/app/project/tests/drafts/configurations_test_data.json"
-    device_json_data_url = "/usr/src/app/project/tests/drafts/devices_test_data.json"
-    platform_json_data_url = (
-        "/usr/src/app/project/tests/drafts/platforms_test_data.json"
-    )
 
     def test_get_device_mount_action(self):
         """Ensure the GET /device_mount_actions route reachable."""

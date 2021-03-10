@@ -33,5 +33,4 @@ class TestUsersModel(BaseTestCase):
         self.assertIn(u.subject, user.subject)
 
 
-if __name__ == "__main__":
-    unittest.main()
+

@@ -43,5 +43,4 @@ class TestPlatformModel(BaseTestCase):
         self.assertIn(p.persistent_identifier, "persistent_identifier_test")
 
 
-if __name__ == "__main__":
-    unittest.main()
+

@@ -6,15 +6,7 @@ class TestDeviceSoftwareUpdateAction(BaseTestCase):
     """Tests for the DeviceSoftwareUpdateAction endpoints."""
 
     device_software_update_action_url = base_url + "/device-software-update-actions"
-    platform_url = base_url + "/platforms"
-    device_url = base_url + "/devices"
-    contact_url = base_url + "/contacts"
-    object_type = "generic_device_action"
-    json_data_url = "/usr/src/app/project/tests/drafts/configurations_test_data.json"
-    device_json_data_url = "/usr/src/app/project/tests/drafts/devices_test_data.json"
-    platform_json_data_url = (
-        "/usr/src/app/project/tests/drafts/platforms_test_data.json"
-    )
+    object_type = "device_software_update_action"
 
     def test_get_device_software_update_action(self):
         """Ensure the GET /device_software_update_action route reachable."""

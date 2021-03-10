@@ -23,7 +23,7 @@ class GenericDeviceActionAttachmentSchema(Schema):
         self_view="api.generic_device_action_attachment_attachment",
         self_view_kwargs={"id": "<id>"},
         related_view="api.generic_device_action_attachment_detail",
-        related_view_kwargs={"action_id": "<attachment_id>"},
+        related_view_kwargs={"id": "<attachment_id>"},
         schema="DeviceAttachment",
         type_="device_attachment",
         id_field="id",

@@ -1,3 +1,4 @@
+import sys
 import unittest
 
 import coverage
@@ -33,7 +34,10 @@ def recreate_db():
 def test():
     """ Runs the tests without code coverage """
     runner = unittest.TextTestRunner(verbosity=2)
-    runner.run(suite())
+    result = runner.run(suite())
+    if result.wasSuccessful():
+        return sys.exit(0)
+    return sys.exit(1)
 
 
 @cli.command()
@@ -48,8 +52,8 @@ def cov():
         COV.report()
         COV.html_report()
         COV.erase()
-        return 0
-    return 1
+        return sys.exit(0)
+    return sys.exit(1)
 
 
 @cli.group()

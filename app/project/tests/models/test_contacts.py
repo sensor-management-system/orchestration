@@ -25,5 +25,4 @@ class TestContactModels(BaseTestCase):
         self.assertIn(c.email, c.email)
 
 
-if __name__ == "__main__":
-    unittest.main()
+

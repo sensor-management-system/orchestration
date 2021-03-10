@@ -33,7 +33,7 @@ class TestConfigurationObjectsModel(BaseTestCase):
     def test_add_configuration_platform_model(self):
         """""Ensure Add configuration platform model """
         p1 = Platform(short_name="Platform 133")
-        p2 = Device(short_name="Platform 233")
+        p2 = Platform(short_name="Platform 233")
         conf = generate_configuration_model()
         cp = ConfigurationPlatform(
             parent_platform=p1,
@@ -42,7 +42,6 @@ class TestConfigurationObjectsModel(BaseTestCase):
             offset_z=fake.coordinate(),
             configuration=conf,
             platform=p2,
-            firmware_version="0.3",
         )
         db.session.add_all([p1, p2, cp])
         db.session.commit()
