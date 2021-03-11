@@ -16,15 +16,20 @@
         Add Property
       </v-btn>
     </v-card-actions>
-    <template
-      v-for="(field, index) in properties"
+    <v-expansion-panels
+      v-model="openedPanels"
+      multiple
     >
-      <NuxtChild
-        :key="'property-' + index"
-        v-model="properties[index]"
-        @delete="deleteProperty"
-      />
-    </template>
+      <template
+        v-for="(field, index) in properties"
+      >
+        <NuxtChild
+          :key="'property-' + index"
+          v-model="properties[index]"
+          @delete="deleteProperty"
+        />
+      </template>
+    </v-expansion-panels>
     <v-card-actions
       v-if="properties.length > 3"
     >
@@ -54,6 +59,7 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
   }
 })
 export default class DevicePropertiesPage extends Vue {
+  private openedPanels: number[] = []
   private properties: DeviceProperty[] = []
   private isLoading = false
   private isSaving = false
