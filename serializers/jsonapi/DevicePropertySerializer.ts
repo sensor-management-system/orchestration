@@ -32,7 +32,7 @@
 import { DeviceProperty } from '@/models/DeviceProperty'
 import { MeasuringRange } from '@/models/MeasuringRange'
 
-import { IJsonApiNestedElement } from '@/serializers/jsonapi/JsonApiTypes'
+import { IJsonApiNestedElement, IJsonApiTypeIdAttributes, IJsonApiObjectList } from '@/serializers/jsonapi/JsonApiTypes'
 
 export class DevicePropertySerializer {
   convertJsonApiElementToModel (property: IJsonApiNestedElement): DeviceProperty {
@@ -97,5 +97,37 @@ export class DevicePropertySerializer {
     }
 
     return result
+  }
+
+  convertJsonApiDataToModel (jsonApiData: IJsonApiTypeIdAttributes): DeviceProperty {
+    const attributes = jsonApiData.attributes
+
+    const newEntry = new DeviceProperty()
+
+    newEntry.id = jsonApiData.id.toString()
+    newEntry.measuringRange = new MeasuringRange(
+      attributes.measuring_range_min,
+      attributes.measuring_range_max
+    )
+    newEntry.failureValue = attributes.failure_value
+    newEntry.accuracy = attributes.accuracy
+    newEntry.resolution = attributes.resolution
+    newEntry.label = attributes.label || ''
+    newEntry.unitUri = attributes.unit_uri || ''
+    newEntry.unitName = attributes.unit_name || ''
+    newEntry.compartmentUri = attributes.compartment_uri || ''
+    newEntry.compartmentName = attributes.compartment_name || ''
+    newEntry.propertyUri = attributes.property_uri || ''
+    newEntry.propertyName = attributes.property_name || ''
+    newEntry.samplingMediaUri = attributes.sampling_media_uri || ''
+    newEntry.samplingMediaName = attributes.sampling_media_name || ''
+    newEntry.resolutionUnitUri = attributes.resolution_unit_uri || ''
+    newEntry.resolutionUnitName = attributes.resolution_unit_name || ''
+
+    return newEntry
+  }
+
+  convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiObjectList): DeviceProperty[] {
+    return jsonApiObjectList.data.map(this.convertJsonApiDataToModel)
   }
 }
