@@ -73,11 +73,11 @@ export default class DeviceCustomFieldsShowPage extends Vue {
 
   save (): void {
     this.isSaving = true
-    this.$api.customfields.update(this.deviceId, this.valueCopy).then(() => {
+    this.$api.customfields.update(this.deviceId, this.valueCopy).then((newField: CustomTextField) => {
       this.isSaving = false
-      this.$emit('input', this.valueCopy)
+      this.$emit('input', newField)
       this.$router.push('/devices/' + this.deviceId + '/customfields')
-    }).catch((_e: Error) => {
+    }).catch(() => {
       this.isSaving = false
       this.$store.commit('snackbar/setError', 'Failed to save custom field')
     })
