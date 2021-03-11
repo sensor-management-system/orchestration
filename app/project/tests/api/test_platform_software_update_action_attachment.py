@@ -1,9 +1,12 @@
 from project import base_url
-from project.api.models import Platform, Contact, PlatformAttachment, \
-    PlatformSoftwareUpdateAction
+from project.api.models import (
+    Contact,
+    Platform,
+    PlatformAttachment,
+    PlatformSoftwareUpdateAction,
+)
 from project.api.models.base_model import db
-from project.tests.base import BaseTestCase
-from project.tests.base import generate_token_data, fake
+from project.tests.base import BaseTestCase, fake, generate_token_data
 from project.tests.models.test_software_update_actions_attachment_model import (
     add_platform_software_update_action_attachment_model,
 )
@@ -13,7 +16,7 @@ class TestPlatformSoftwareUpdateActionAttachment(BaseTestCase):
     """Tests for the PlatformSoftwareUpdateActionAttachment endpoints."""
 
     platform_software_update_action_attachment_url = (
-            base_url + "/platform-software-update-action-attachments"
+        base_url + "/platform-software-update-action-attachments"
     )
     object_type = "platform_software_update_action_attachment"
 
@@ -28,7 +31,9 @@ class TestPlatformSoftwareUpdateActionAttachment(BaseTestCase):
         """Test retrieve a collection of PlatformSoftwareUpdateActionAttachment objects"""
         _ = add_platform_software_update_action_attachment_model()
         with self.client:
-            response = self.client.get(self.platform_software_update_action_attachment_url)
+            response = self.client.get(
+                self.platform_software_update_action_attachment_url
+            )
         self.assertEqual(response.status_code, 200)
 
     def test_post_platform_software_update_action_attachment(self):
@@ -60,8 +65,14 @@ class TestPlatformSoftwareUpdateActionAttachment(BaseTestCase):
                 "type": self.object_type,
                 "attributes": {},
                 "relationships": {
-                    "action": {"data": {"type": "platform_software_update_action", "id": psu.id}},
-                    "attachment": {"data": {"type": "platform_attachment", "id": a.id}}, },
+                    "action": {
+                        "data": {
+                            "type": "platform_software_update_action",
+                            "id": psu.id,
+                        }
+                    },
+                    "attachment": {"data": {"type": "platform_attachment", "id": a.id}},
+                },
             }
         }
         _ = super().add_object(
@@ -85,7 +96,8 @@ class TestPlatformSoftwareUpdateActionAttachment(BaseTestCase):
                 "id": old.id,
                 "attributes": {},
                 "relationships": {
-                    "attachment": {"data": {"type": "platform_attachment", "id": a.id}}, },
+                    "attachment": {"data": {"type": "platform_attachment", "id": a.id}},
+                },
             }
         }
         _ = super().update_object(

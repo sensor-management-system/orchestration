@@ -1,22 +1,21 @@
 import json
 
-from project import base_url
-from project import db
+from project import base_url, db
 from project.api.models import ConfigurationAttachment
-from project.tests.base import BaseTestCase
-from project.tests.base import create_token
-from project.tests.base import fake
+from project.tests.base import BaseTestCase, create_token, fake
 from project.tests.models.test_generic_action_attachment_model import (
     add_generic_configuration_action_attachment_model,
 )
-from project.tests.models.test_generic_actions_models import generate_configuration_action_model
+from project.tests.models.test_generic_actions_models import (
+    generate_configuration_action_model,
+)
 
 
 class TestGenericConfigurationActionAttachment(BaseTestCase):
     """Tests for the GenericConfigurationActionAttachment endpoints."""
 
     generic_configuration_action_attachment_url = (
-            base_url + "/generic-configuration-action-attachments"
+        base_url + "/generic-configuration-action-attachments"
     )
     object_type = "generic_configuration_action_attachment"
 
@@ -50,8 +49,13 @@ class TestGenericConfigurationActionAttachment(BaseTestCase):
                 "type": self.object_type,
                 "attributes": {},
                 "relationships": {
-                    "action": {"data": {"type": "generic_configuration_action", "id": gca.id}},
-                    "attachment": {"data": {"type": "configuration_attachment", "id": a1.id}}, },
+                    "action": {
+                        "data": {"type": "generic_configuration_action", "id": gca.id}
+                    },
+                    "attachment": {
+                        "data": {"type": "configuration_attachment", "id": a1.id}
+                    },
+                },
             }
         }
         _ = super().add_object(
@@ -76,7 +80,10 @@ class TestGenericConfigurationActionAttachment(BaseTestCase):
                 "id": old.id,
                 "attributes": {},
                 "relationships": {
-                    "attachment": {"data": {"type": "configuration_attachment", "id": a.id}}, },
+                    "attachment": {
+                        "data": {"type": "configuration_attachment", "id": a.id}
+                    },
+                },
             }
         }
         _ = super().update_object(
@@ -109,8 +116,11 @@ class TestGenericConfigurationActionAttachment(BaseTestCase):
                 "type": self.object_type,
                 "attributes": {},
                 "relationships": {
-                    "action": {"data": {"type": "generic_configuration_action", "id": gca.id}},
-                    "attachment": {"data": {"type": "device_attachment", "id": a1.id}}, },
+                    "action": {
+                        "data": {"type": "generic_configuration_action", "id": gca.id}
+                    },
+                    "attachment": {"data": {"type": "device_attachment", "id": a1.id}},
+                },
             }
         }
         access_headers = create_token()

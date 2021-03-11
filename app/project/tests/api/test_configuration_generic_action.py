@@ -1,11 +1,8 @@
-import json
 from datetime import datetime
 
 from project import base_url
 from project.tests.base import BaseTestCase, fake, generate_token_data
 from project.tests.read_from_json import extract_data_from_json_file
-
-from project.tests.base import create_token
 
 
 class TestGenericConfigurationActionServices(BaseTestCase):

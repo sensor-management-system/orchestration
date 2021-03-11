@@ -1,19 +1,20 @@
 from project import base_url
 from project.api.models import PlatformAttachment
 from project.api.models.base_model import db
-from project.tests.base import BaseTestCase
-from project.tests.base import fake
+from project.tests.base import BaseTestCase, fake
 from project.tests.models.test_generic_action_attachment_model import (
     add_generic_platform_action_attachment_model,
 )
-from project.tests.models.test_generic_actions_models import generate_platform_action_model
+from project.tests.models.test_generic_actions_models import (
+    generate_platform_action_model,
+)
 
 
 class TestGenericPlatformActionAttachment(BaseTestCase):
     """Tests for the GenericPlatformActionAttachment endpoints."""
 
     generic_platform_action_attachment_url = (
-            base_url + "/generic-platform-action-attachments"
+        base_url + "/generic-platform-action-attachments"
     )
     object_type = "generic_platform_action_attachment"
 
@@ -47,8 +48,11 @@ class TestGenericPlatformActionAttachment(BaseTestCase):
                 "type": self.object_type,
                 "attributes": {},
                 "relationships": {
-                    "action": {"data": {"type": "generic_platform_action", "id": gpa.id}},
-                    "attachment": {"data": {"type": "platform_attachment", "id": a.id}}, },
+                    "action": {
+                        "data": {"type": "generic_platform_action", "id": gpa.id}
+                    },
+                    "attachment": {"data": {"type": "platform_attachment", "id": a.id}},
+                },
             }
         }
         _ = super().add_object(
@@ -74,7 +78,10 @@ class TestGenericPlatformActionAttachment(BaseTestCase):
                 "id": old.id,
                 "attributes": {},
                 "relationships": {
-                    "attachment": {"data": {"type": "platform_attachment", "id": a_new.id}}, },
+                    "attachment": {
+                        "data": {"type": "platform_attachment", "id": a_new.id}
+                    },
+                },
             }
         }
         _ = super().update_object(

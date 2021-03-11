@@ -1,10 +1,13 @@
 import json
 
-from project import base_url
-from project import db
-from project.api.models import (Device, Contact, DeviceAttachment, DeviceSoftwareUpdateAction)
-from project.tests.base import BaseTestCase
-from project.tests.base import generate_token_data, fake
+from project import base_url, db
+from project.api.models import (
+    Contact,
+    Device,
+    DeviceAttachment,
+    DeviceSoftwareUpdateAction,
+)
+from project.tests.base import BaseTestCase, fake, generate_token_data
 from project.tests.models.test_software_update_actions_attachment_model import (
     add_device_software_update_action_attachment,
 )
@@ -14,7 +17,7 @@ class TestDeviceSoftwareUpdateActionAttachment(BaseTestCase):
     """Tests for the DeviceSoftwareUpdateActionAttachment endpoints."""
 
     device_software_update_action_attachment_url = (
-            base_url + "/device-software-update-action-attachments"
+        base_url + "/device-software-update-action-attachments"
     )
     object_type = "device_software_update_action_attachment"
 
@@ -64,8 +67,11 @@ class TestDeviceSoftwareUpdateActionAttachment(BaseTestCase):
                 "type": self.object_type,
                 "attributes": {},
                 "relationships": {
-                    "action": {"data": {"type": "device_software_update_action", "id": dsu.id}},
-                    "attachment": {"data": {"type": "device_attachment", "id": a.id}}, },
+                    "action": {
+                        "data": {"type": "device_software_update_action", "id": dsu.id}
+                    },
+                    "attachment": {"data": {"type": "device_attachment", "id": a.id}},
+                },
             }
         }
         _ = super().add_object(
@@ -89,7 +95,8 @@ class TestDeviceSoftwareUpdateActionAttachment(BaseTestCase):
                 "id": old.id,
                 "attributes": {},
                 "relationships": {
-                    "attachment": {"data": {"type": "device_attachment", "id": a.id}}, },
+                    "attachment": {"data": {"type": "device_attachment", "id": a.id}},
+                },
             }
         }
         _ = super().update_object(

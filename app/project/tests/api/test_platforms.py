@@ -4,8 +4,7 @@ from project import base_url
 from project.api.models.base_model import db
 from project.api.models.platform import Platform
 from project.api.models.platform_attachment import PlatformAttachment
-from project.tests.base import BaseTestCase
-from project.tests.base import fake, generate_token_data
+from project.tests.base import BaseTestCase, fake, generate_token_data
 from project.tests.read_from_json import extract_data_from_json_file
 
 

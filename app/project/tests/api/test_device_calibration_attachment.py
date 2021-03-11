@@ -1,10 +1,13 @@
 import json
 
-from project import base_url
-from project import db
-from project.api.models import (Device, Contact, DeviceAttachment, DeviceCalibrationAction)
-from project.tests.base import BaseTestCase
-from project.tests.base import generate_token_data, fake
+from project import base_url, db
+from project.api.models import (
+    Contact,
+    Device,
+    DeviceAttachment,
+    DeviceCalibrationAction,
+)
+from project.tests.base import BaseTestCase, fake, generate_token_data
 from project.tests.models.test_device_calibration_attachment_model import (
     add_device_calibration_attachment,
 )
@@ -57,8 +60,11 @@ class TestDeviceCalibrationAttachment(BaseTestCase):
                 "type": self.object_type,
                 "attributes": {},
                 "relationships": {
-                    "action": {"data": {"type": "device_calibration_action", "id": dca.id}},
-                    "attachment": {"data": {"type": "device_attachment", "id": a.id}}, },
+                    "action": {
+                        "data": {"type": "device_calibration_action", "id": dca.id}
+                    },
+                    "attachment": {"data": {"type": "device_attachment", "id": a.id}},
+                },
             }
         }
         _ = super().add_object(
@@ -82,7 +88,8 @@ class TestDeviceCalibrationAttachment(BaseTestCase):
                 "id": old.id,
                 "attributes": {},
                 "relationships": {
-                    "attachment": {"data": {"type": "device_attachment", "id": a.id}}, },
+                    "attachment": {"data": {"type": "device_attachment", "id": a.id}},
+                },
             }
         }
         _ = super().update_object(

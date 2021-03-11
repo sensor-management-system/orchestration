@@ -1,19 +1,20 @@
 from project import base_url
 from project.api.models import DeviceAttachment
 from project.api.models.base_model import db
-from project.tests.base import BaseTestCase
-from project.tests.base import fake
+from project.tests.base import BaseTestCase, fake
 from project.tests.models.test_generic_action_attachment_model import (
     add_generic_device_action_attachment_model,
 )
-from project.tests.models.test_generic_actions_models import generate_device_action_model
+from project.tests.models.test_generic_actions_models import (
+    generate_device_action_model,
+)
 
 
 class TestGenericDeviceActionAttachment(BaseTestCase):
     """Tests for the GenericDeviceActionAttachment endpoints."""
 
     generic_device_action_attachment_url = (
-            base_url + "/generic-device-action-attachments"
+        base_url + "/generic-device-action-attachments"
     )
     object_type = "generic_device_action_attachment"
 
@@ -35,7 +36,9 @@ class TestGenericDeviceActionAttachment(BaseTestCase):
         """Create GenericDeviceActionAttachment"""
         gpa = generate_device_action_model()
         a = DeviceAttachment(
-            label="test device attachment", url=fake.image_url(), device_id=gpa.device_id
+            label="test device attachment",
+            url=fake.image_url(),
+            device_id=gpa.device_id,
         )
         db.session.add(a)
         db.session.commit()
@@ -45,7 +48,8 @@ class TestGenericDeviceActionAttachment(BaseTestCase):
                 "attributes": {},
                 "relationships": {
                     "action": {"data": {"type": "generic_device_action", "id": gpa.id}},
-                    "attachment": {"data": {"type": "device_attachment", "id": a.id}}, },
+                    "attachment": {"data": {"type": "device_attachment", "id": a.id}},
+                },
             }
         }
         _ = super().add_object(
@@ -68,7 +72,10 @@ class TestGenericDeviceActionAttachment(BaseTestCase):
                 "id": old.id,
                 "attributes": {},
                 "relationships": {
-                    "attachment": {"data": {"type": "device_attachment", "id": a_new.id}}, },
+                    "attachment": {
+                        "data": {"type": "device_attachment", "id": a_new.id}
+                    },
+                },
             }
         }
         _ = super().update_object(
