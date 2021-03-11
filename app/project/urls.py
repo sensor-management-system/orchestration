@@ -216,6 +216,7 @@ api.route(
     "/contacts",
     "/devices/<int:device_id>/contacts",
     "/platforms/<int:platform_id>/contacts",
+    "/configurations/<int:configuration_id>/contacts",
 )
 api.route(ContactDetail, "contact_detail", "/contacts/<int:id>")
 api.route(
