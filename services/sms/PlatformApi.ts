@@ -32,10 +32,13 @@
 import { AxiosInstance, Method } from 'axios'
 
 import { Attachment } from '@/models/Attachment'
+import { Contact } from '@/models/Contact'
 import { Platform } from '@/models/Platform'
 import { PlatformType } from '@/models/PlatformType'
 import { Manufacturer } from '@/models/Manufacturer'
 import { Status } from '@/models/Status'
+
+import { ContactSerializer } from '@/serializers/jsonapi/ContactSerializer'
 
 import {
   PlatformSerializer,
@@ -105,6 +108,16 @@ export class PlatformApi {
     return new PlatformSearchBuilder(this.axiosApi, this.serializer)
   }
 
+  findRelatedContacts (platformId: string): Promise<Contact[]> {
+    const url = platformId + '/contacts'
+    const params = {
+      'page[size]': 10000
+    }
+    return this.axiosApi.get(url, { params }).then((rawServerResponse) => {
+      return new ContactSerializer().convertJsonApiObjectListToModelList(rawServerResponse.data)
+    })
+  }
+
   findRelatedDeviceAttachments (deviceId: string): Promise<Attachment[]> {
     const url = deviceId + '/device-attachments'
     const params = {
@@ -113,6 +126,26 @@ export class PlatformApi {
     return this.axiosApi.get(url, { params }).then((rawServerResponse) => {
       return new PlatformAttachmentSerializer().convertJsonApiObjectListToModelList(rawServerResponse.data)
     })
+  }
+
+  removeContact (platformId: string, contactId: string): Promise<void> {
+    const url = platformId + '/relationships/contacts'
+    const params = {
+      data: [{
+        type: 'contact',
+        id: contactId
+      }]
+    }
+    return this.axiosApi.delete(url, { data: params })
+  }
+
+  addContact (platformId: string, contactId: string): Promise<void> {
+    const url = platformId + '/relationships/contacts'
+    const data = [{
+      type: 'contact',
+      id: contactId
+    }]
+    return this.axiosApi.post(url, { data })
   }
 }
 
