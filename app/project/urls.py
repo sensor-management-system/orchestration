@@ -57,6 +57,23 @@ api.route(
     "platform_attachment_platform",
     "/platform-attachments/<int:id>/relationships/platform",
 )
+# configuration Attachment
+api.route(
+    ConfigurationAttachmentList,
+    "configuration_attachment_list",
+    "/configuration-attachments",
+    "/configuration/<int:platform_id>/configuration-attachments",
+)
+api.route(
+    ConfigurationAttachmentDetail,
+    "configuration_attachment_detail",
+    "/configuration-attachments/<int:id>",
+)
+api.route(
+    ConfigurationAttachmentRelationship,
+    "configuration_attachment_configuration",
+    "/configuration-attachments/<int:id>/relationships/configuration",
+)
 # Events
 api.route(EventList, "event_list", "/events")
 api.route(

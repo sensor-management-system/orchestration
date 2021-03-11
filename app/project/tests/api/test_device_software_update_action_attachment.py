@@ -1,7 +1,10 @@
 import json
 
 from project import base_url
+from project import db
+from project.api.models import (Device, Contact, DeviceAttachment, DeviceSoftwareUpdateAction)
 from project.tests.base import BaseTestCase
+from project.tests.base import generate_token_data, fake
 from project.tests.models.test_software_update_actions_attachment_model import (
     add_device_software_update_action_attachment,
 )
@@ -11,7 +14,7 @@ class TestDeviceSoftwareUpdateActionAttachment(BaseTestCase):
     """Tests for the DeviceSoftwareUpdateActionAttachment endpoints."""
 
     device_software_update_action_attachment_url = (
-        base_url + "/device-software-update-action-attachments"
+            base_url + "/device-software-update-action-attachments"
     )
     object_type = "device_software_update_action_attachment"
 
@@ -34,45 +37,66 @@ class TestDeviceSoftwareUpdateActionAttachment(BaseTestCase):
 
     def test_post_device_software_update_action_attachment(self):
         """TEST Create DeviceSoftwareUpdateActionAttachment"""
-        # d = Device(short_name="Device 277")
-        # jwt1 = generate_token_data()
-        # c = Contact(
-        #     given_name=jwt1["given_name"],
-        #     family_name=jwt1["family_name"],
-        #     email=jwt1["email"],
-        # )
-        # db.session.add(d)
-        # db.session.commit()
-        # a = DeviceAttachment(label=fake.pystr(), url=fake.url(), device_id=d.id)
-        # dsu = DeviceSoftwareUpdateAction(
-        #     device=d,
-        #     software_type_name=fake.pystr(),
-        #     software_type_uri=fake.uri(),
-        #     update_date=fake.date(),
-        #     version="0.5455",
-        #     repository_url=fake.url(),
-        #     description=fake.paragraph(nb_sentences=3),
-        #     contact=c,
-        # )
-        # db.session.add_all([d, a, c, dsu])
-        # db.session.commit()
-        # data = {
-        #     "data": {
-        #         "type": self.object_type,
-        #         "attributes": {},
-        #         "relationships": {
-        #             "action": {"data": {"type": "action", "id": dsu.id}},
-        #             "attachment": {"data": {"type": "attachment", "id": a.id}}, },
-        #     }
-        # }
-        # _ = super().add_object(
-        #     url=f"{self.device_software_update_action_attachment_url}?include=action,attachment",
-        #     data_object=data,
-        #     object_type=self.object_type,
-        # )
+        d = Device(short_name="Device 277")
+        jwt1 = generate_token_data()
+        c = Contact(
+            given_name=jwt1["given_name"],
+            family_name=jwt1["family_name"],
+            email=jwt1["email"],
+        )
+        db.session.add(d)
+        db.session.commit()
+        a = DeviceAttachment(label=fake.pystr(), url=fake.url(), device_id=d.id)
+        dsu = DeviceSoftwareUpdateAction(
+            device=d,
+            software_type_name=fake.pystr(),
+            software_type_uri=fake.uri(),
+            update_date=fake.date(),
+            version="0.5455",
+            repository_url=fake.url(),
+            description=fake.paragraph(nb_sentences=3),
+            contact=c,
+        )
+        db.session.add_all([d, a, c, dsu])
+        db.session.commit()
+        data = {
+            "data": {
+                "type": self.object_type,
+                "attributes": {},
+                "relationships": {
+                    "action": {"data": {"type": "device_software_update_action", "id": dsu.id}},
+                    "attachment": {"data": {"type": "device_attachment", "id": a.id}}, },
+            }
+        }
+        _ = super().add_object(
+            url=f"{self.device_software_update_action_attachment_url}?include=action,attachment",
+            data_object=data,
+            object_type=self.object_type,
+        )
 
     def test_update_device_software_update_action_attachment(self):
         """TEST Update DeviceSoftwareUpdateActionAttachment"""
+        old = add_device_software_update_action_attachment()
+        d = Device(short_name="Device new 277")
+        db.session.add(d)
+        db.session.commit()
+        a = DeviceAttachment(label=fake.pystr(), url=fake.url(), device_id=d.id)
+        db.session.add(a)
+        db.session.commit()
+        data = {
+            "data": {
+                "type": self.object_type,
+                "id": old.id,
+                "attributes": {},
+                "relationships": {
+                    "attachment": {"data": {"type": "device_attachment", "id": a.id}}, },
+            }
+        }
+        _ = super().update_object(
+            url=f"{self.device_software_update_action_attachment_url}/{old.id}?include=attachment",
+            data_object=data,
+            object_type=self.object_type,
+        )
 
     def test_delete_device_software_update_action_attachment(self):
         """TEST Delete DeviceSoftwareUpdateActionAttachment"""

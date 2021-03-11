@@ -97,7 +97,7 @@ class ConfigurationSchema(Schema):
         related_view_kwargs={"configuration_id": "<id>"},
         many=True,
         schema="ConfigurationDeviceSchema",
-        type="configuration_device",
+        type_="configuration_device",
         id_field="id",
     )
 

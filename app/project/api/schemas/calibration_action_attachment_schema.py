@@ -16,13 +16,13 @@ class DeviceCalibrationAttachmentSchema(Schema):
         related_view="api.device_calibration_action_detail",
         related_view_kwargs={"id": "<id>"},
         schema="DeviceCalibrationActionSchema",
-        type="device_calibration_action",
+        type_="device_calibration_action",
         id_field="id",
     )
     attachment = Relationship(
         self_view="api.device_calibration_attachment_attachment",
         self_view_kwargs={"id": "<id>"},
-        related_view="api.device_calibration_attachment_detail",
+        related_view="api.device_attachment_detail",
         related_view_kwargs={"id": "<id>"},
         schema="DeviceAttachmentSchema",
         type_="device_attachment",

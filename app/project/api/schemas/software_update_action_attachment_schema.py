@@ -16,13 +16,13 @@ class DeviceSoftwareUpdateActionAttachmentSchema(Schema):
         related_view="api.device_software_update_action_attachment_detail",
         related_view_kwargs={"id": "<id>"},
         schema="DeviceSoftwareUpdateActionSchema",
-        type="device_software_update_action",
+        type_="device_software_update_action",
         id_field="id",
     )
     attachment = Relationship(
         self_view="api.device_software_update_action_attachment_attachment",
         self_view_kwargs={"id": "<id>"},
-        related_view="api.device_software_update_action_attachment_detail",
+        related_view="api.device_attachment_detail",
         related_view_kwargs={"id": "<id>"},
         schema="DeviceAttachmentSchema",
         type_="device_attachment",
@@ -43,14 +43,14 @@ class PlatformSoftwareUpdateActionAttachmentSchema(Schema):
         self_view_kwargs={"id": "<id>"},
         related_view="api.platform_software_update_action_attachment_detail",
         related_view_kwargs={"id": "<id>"},
-        schema="PlatformSoftwareUpdateAction",
-        type="platform_software_update_action",
+        schema="PlatformSoftwareUpdateActionSchema",
+        type_="platform_software_update_action",
         id_field="id",
     )
     attachment = Relationship(
         self_view="api.platform_software_update_action_attachment_attachment",
         self_view_kwargs={"id": "<id>"},
-        related_view="api.platform_software_update_action_attachment_detail",
+        related_view="api.platform_attachment_detail",
         related_view_kwargs={"id": "<id>"},
         schema="PlatformAttachmentSchema",
         type_="platform_attachment",

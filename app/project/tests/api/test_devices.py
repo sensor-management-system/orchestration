@@ -1,6 +1,5 @@
 """Tests for the devices."""
 
-
 from project import base_url
 from project.api.models.base_model import db
 from project.api.models.customfield import CustomField
@@ -8,14 +7,15 @@ from project.api.models.device import Device
 from project.api.models.device_attachment import DeviceAttachment
 from project.api.models.device_property import DeviceProperty
 from project.tests.base import BaseTestCase
+from project.tests.base import fake, generate_token_data
 from project.tests.read_from_json import extract_data_from_json_file
-from project.tests.test_contacts import TestContactServices
 
 
 class TestDeviceService(BaseTestCase):
     """Tests for the Device Service."""
 
     device_url = base_url + "/devices"
+    contact_url = base_url + "/contacts"
     object_type = "device"
     json_data_url = "/usr/src/app/project/tests/drafts/devices_test_data.json"
 
@@ -35,10 +35,21 @@ class TestDeviceService(BaseTestCase):
 
     def test_add_device_contacts_relationship(self):
         """Ensure a new relationship between a device & contact can be created."""
-        contact_service = TestContactServices()
-        # We need to inject the client (not done on just creating the contact_service)
-        contact_service.client = self.client
-        contact = contact_service.test_add_contact()
+        jwt1 = generate_token_data()
+        contact_data = {
+            "data": {
+                "type": "contact",
+                "attributes": {
+                    "given_name": jwt1["given_name"],
+                    "family_name": jwt1["family_name"],
+                    "email": jwt1["email"],
+                    "website": fake.url(),
+                },
+            }
+        }
+        contact = super().add_object(
+            url=self.contact_url, data_object=contact_data, object_type="contact"
+        )
         devices_json = extract_data_from_json_file(self.json_data_url, "devices")
 
         device_data = {

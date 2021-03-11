@@ -33,12 +33,11 @@ class TestGenericDeviceAction(BaseTestCase):
         """
         data = self.make_generic_device_action_data()
 
-        _ = super().add_object(
+        result = super().add_object(
             url=f"{self.generic_device_actions_url}?include=device,contact",
             data_object=data,
             object_type=self.object_type,
         )
-        return data
 
     def make_generic_device_action_data(self):
         devices_json = extract_data_from_json_file(self.device_json_data_url, "devices")

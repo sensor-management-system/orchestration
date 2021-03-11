@@ -20,7 +20,9 @@ class ContactSchema(Schema):
     given_name = fields.Str(required=True)
     family_name = fields.Str(required=True)
     website = fields.Str(allow_none=True)
-    email = fields.Email(required=True)
+    #  fields.Email: use fields.Str instead as
+    #  validation make some Problems
+    email = fields.Str(required=True)
 
     platforms = Relationship(
         attribute="platforms",
