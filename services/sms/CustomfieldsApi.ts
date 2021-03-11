@@ -56,13 +56,16 @@ export class CustomfieldsApi {
     return this.axiosApi.delete<string, void>(id)
   }
 
-  add (deviceId: string, field: CustomTextField) {
+  add (deviceId: string, field: CustomTextField): Promise<CustomTextField> {
     const url = ''
     const data: any = this.serializer.convertModelToJsonApiData(field, deviceId)
-    return this.axiosApi.post(url, { data })
+    return this.axiosApi.post(url, { data }).then((rawResponse) => {
+      const rawData = rawResponse.data
+      return this.serializer.convertJsonApiObjectToModel(rawData)
+    })
   }
 
-  update (deviceId: string, field: CustomTextField) {
+  update (deviceId: string, field: CustomTextField): Promise<CustomTextField> {
     return new Promise<string>((resolve, reject) => {
       if (field.id) {
         resolve(field.id)
@@ -72,6 +75,9 @@ export class CustomfieldsApi {
     }).then((fieldId) => {
       const data: any = this.serializer.convertModelToJsonApiData(field, deviceId)
       return this.axiosApi.patch(fieldId, { data })
+    }).then((rawResponse) => {
+      const rawData = rawResponse.data
+      return this.serializer.convertJsonApiObjectToModel(rawData)
     })
   }
 }
