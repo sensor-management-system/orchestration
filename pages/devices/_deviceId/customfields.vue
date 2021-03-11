@@ -90,9 +90,10 @@ export default class DeviceCustomFieldsPage extends Vue {
   addField (): void {
     const field = new CustomTextField()
     this.isSaving = true
-    this.$api.customfields.add(this.deviceId, field).then(() => {
+    this.$api.customfields.add(this.deviceId, field).then((newField: CustomTextField) => {
       this.isSaving = false
-      this.$router.push('/devices/' + this.deviceId + '/customfields')
+      this.customFields.push(newField)
+      this.$router.push('/devices/' + this.deviceId + '/customfields/' + newField.id + '/edit')
     }).catch(() => {
       this.isSaving = false
       this.$store.commit('snackbar/setError', 'Failed to save custom field')
