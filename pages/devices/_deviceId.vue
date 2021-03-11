@@ -61,6 +61,10 @@ export default class DevicePage extends Vue {
           name: 'Contacts'
         },
         {
+          to: '/devices/' + this.deviceId + '/properties',
+          name: 'Properties'
+        },
+        {
           to: '/devices/' + this.deviceId + '/customfields',
           name: 'Custom Fields'
         }
