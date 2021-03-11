@@ -54,13 +54,15 @@ export class DeviceAttachmentApi {
     return this.axiosApi.delete<string, void>(id)
   }
 
-  add (deviceId: string, attachment: Attachment) {
+  add (deviceId: string, attachment: Attachment): Promise<Attachment> {
     const url = ''
     const data = this.serializer.convertModelToJsonApiData(attachment, deviceId)
-    return this.axiosApi.post(url, { data })
+    return this.axiosApi.post(url, { data }).then((serverResponse) => {
+      return this.serializer.convertJsonApiObjectToModel(serverResponse.data)
+    })
   }
 
-  update (deviceId: string, attachment: Attachment) {
+  update (deviceId: string, attachment: Attachment): Promise<Attachment> {
     return new Promise<string>((resolve, reject) => {
       if (attachment.id) {
         resolve(attachment.id)
@@ -69,7 +71,9 @@ export class DeviceAttachmentApi {
       }
     }).then((attachmentId) => {
       const data = this.serializer.convertModelToJsonApiData(attachment, deviceId)
-      return this.axiosApi.patch(attachmentId, { data })
+      return this.axiosApi.patch(attachmentId, { data }).then((serverResponse) => {
+        return this.serializer.convertJsonApiObjectToModel(serverResponse.data)
+      })
     })
   }
 }

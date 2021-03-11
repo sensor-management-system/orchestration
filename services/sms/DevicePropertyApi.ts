@@ -54,13 +54,15 @@ export class DevicePropertyApi {
     return this.axiosApi.delete<string, void>(id)
   }
 
-  add (deviceId: string, deviceProperty: DeviceProperty) {
+  add (deviceId: string, deviceProperty: DeviceProperty): Promise<DeviceProperty> {
     const url = ''
     const data = this.serializer.convertModelToJsonApiData(deviceProperty, deviceId)
-    return this.axiosApi.post(url, { data })
+    return this.axiosApi.post(url, { data }).then((serverResponse) => {
+      return this.serializer.convertJsonApiObjectToModel(serverResponse.data)
+    })
   }
 
-  update (deviceId: string, deviceProperty: DeviceProperty) {
+  update (deviceId: string, deviceProperty: DeviceProperty) : Promise<DeviceProperty> {
     return new Promise<string>((resolve, reject) => {
       if (deviceProperty.id) {
         resolve(deviceProperty.id)
@@ -69,7 +71,9 @@ export class DevicePropertyApi {
       }
     }).then((devicePropertyId) => {
       const data = this.serializer.convertModelToJsonApiData(deviceProperty, deviceId)
-      return this.axiosApi.patch(devicePropertyId, { data })
+      return this.axiosApi.patch(devicePropertyId, { data }).then((serverResponse) => {
+        return this.serializer.convertJsonApiObjectToModel(serverResponse.data)
+      })
     })
   }
 }
