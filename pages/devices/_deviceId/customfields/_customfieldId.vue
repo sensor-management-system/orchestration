@@ -2,11 +2,11 @@
   <div>
     <NuxtChild
       v-if="isEditModeForField"
-      v-model="value"
+      v-model="field"
     />
     <CustomFieldCard
       v-else
-      v-model="value"
+      v-model="field"
     />
   </div>
 </template>
