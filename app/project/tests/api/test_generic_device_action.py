@@ -33,7 +33,7 @@ class TestGenericDeviceAction(BaseTestCase):
         """
         data = self.make_generic_device_action_data()
 
-        result = super().add_object(
+        _ = super().add_object(
             url=f"{self.generic_device_actions_url}?include=device,contact",
             data_object=data,
             object_type=self.object_type,
