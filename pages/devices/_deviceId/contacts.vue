@@ -167,7 +167,7 @@ export default class DeviceContactsPage extends Vue {
     this.$api.devices.findRelatedContacts(this.deviceId).then((foundContacts) => {
       this.contacts = foundContacts
       this.isLoading = false
-    }).catch((e) => {
+    }).catch(() => {
       this.$store.commit('snackbar/setError', 'Failed to fetch contacts')
       this.isLoading = false
     })

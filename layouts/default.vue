@@ -199,7 +199,9 @@ permissions and limitations under the Licence.
           {{ success }}
           <template v-slot:action="{ attrs }">
             <v-btn icon small color="white" v-bind="attrs" @click="closeSuccessSnackbar">
-              <v-icon small>mdi-close</v-icon>
+              <v-icon small>
+                mdi-close
+              </v-icon>
             </v-btn>
           </template>
         </v-snackbar>
@@ -207,7 +209,9 @@ permissions and limitations under the Licence.
           {{ error }}
           <template v-slot:action="{ attrs }">
             <v-btn icon small color="white" v-bind="attrs" @click="closeErrorSnackbar">
-              <v-icon small>mdi-close</v-icon>
+              <v-icon small>
+                mdi-close
+              </v-icon>
             </v-btn>
           </template>
         </v-snackbar>

@@ -102,7 +102,7 @@ export default class DeviceAddContactPage extends Vue {
     this.$api.contacts.findAll().then((foundContacts) => {
       this.allContacts = foundContacts
       this.isLoading = false
-    }).catch((e) => {
+    }).catch(() => {
       this.$store.commit('snackbar/setError', 'Failed to fetch related contacts')
       this.isLoading = false
     })
@@ -120,7 +120,7 @@ export default class DeviceAddContactPage extends Vue {
         this.alreadyUsedContacts.push(this.selectedContact as Contact)
         this.$emit('input', this.alreadyUsedContacts)
         this.$router.push('/devices/' + this.deviceId + '/contacts')
-      }).catch((e) => {
+      }).catch(() => {
         this.isSaving = false
         this.$store.commit('snackbar/setError', 'Failed to save contacts')
       })
