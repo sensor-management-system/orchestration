@@ -118,4 +118,35 @@ describe('CustomTextFieldSerializer', () => {
       })
     })
   })
+  describe('#convertModelToJsonApiData', () => {
+    it('should convert a simple model to a json:api payload', () => {
+      const customfield = CustomTextField.createFromObject({
+        id: '123',
+        key: 'some key',
+        value: 'test test test'
+      })
+      const serializer = new CustomTextFieldSerializer()
+      const deviceId = '456'
+
+      const jsonApiPayload = serializer.convertModelToJsonApiData(customfield, deviceId)
+
+      expect(jsonApiPayload).toHaveProperty('id')
+      expect(jsonApiPayload.id).toEqual('123')
+      expect(jsonApiPayload).toHaveProperty('type')
+      expect(jsonApiPayload.type).toEqual('customfield')
+      expect(jsonApiPayload).toHaveProperty('attributes')
+      expect(jsonApiPayload.attributes).toHaveProperty('key')
+      expect(jsonApiPayload.attributes.key).toEqual('some key')
+      expect(jsonApiPayload.attributes).toHaveProperty('value')
+      expect(jsonApiPayload.attributes.value).toEqual('test test test')
+      expect(jsonApiPayload).toHaveProperty('relationships')
+      expect(jsonApiPayload.relationships).toHaveProperty('device')
+      expect(jsonApiPayload.relationships.device).toHaveProperty('data')
+      const deviceData: any = jsonApiPayload.relationships.device.data
+      expect(deviceData).toHaveProperty('id')
+      expect(deviceData.id).toEqual('456')
+      expect(deviceData).toHaveProperty('type')
+      expect(deviceData.type).toEqual('device')
+    })
+  })
 })
