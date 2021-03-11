@@ -17,6 +17,8 @@ import { Component, Vue, Prop } from 'nuxt-property-decorator'
 import CustomFieldCard from '@/components/CustomFieldCard.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
+import { CustomTextField } from '@/models/CustomTextField'
+
 @Component({
   components: {
     CustomFieldCard,

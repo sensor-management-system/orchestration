@@ -90,7 +90,7 @@ export default class DeviceCustomFieldsPage extends Vue {
   addField (): void {
     const field = new CustomTextField()
     this.isSaving = true
-    this.$api.customFields.add(this.deviceId, field).then(() => {
+    this.$api.customfields.add(this.deviceId, field).then(() => {
       this.isSaving = false
       this.$router.push('/devices/' + this.deviceId + '/customfields')
     }).catch(() => {
@@ -103,7 +103,7 @@ export default class DeviceCustomFieldsPage extends Vue {
     if (!field.id) {
       return
     }
-    this.$api.customFields.deleteById(field.id).then(() => {
+    this.$api.customfields.deleteById(field.id).then(() => {
       const index: number = this.customFields.findIndex((f: CustomTextField) => f.id === field.id)
       if (index > -1) {
         this.customFields.splice(index, 1)

@@ -31,7 +31,7 @@
  */
 import { ICustomTextField, CustomTextField } from '@/models/CustomTextField'
 import {
-  IJsonApiDataWithOptionalIdWithoutRelationships,
+  IJsonApiDataWithOptionalId,
   IJsonApiNestedElement,
   IJsonApiObject,
   IJsonApiObjectList,
@@ -100,12 +100,20 @@ export class CustomTextFieldSerializer {
     }
   }
 
-  convertModelToJsonApiData (customField: ICustomTextField): IJsonApiDataWithOptionalIdWithoutRelationships {
+  convertModelToJsonApiData (customField: ICustomTextField, deviceId: string): IJsonApiDataWithOptionalId {
     const data: any = {
       type: 'customfield',
       attributes: {
         key: customField.key,
         value: customField.value
+      },
+      relationships: {
+        device: {
+          data: {
+            type: 'device',
+            id: deviceId
+          }
+        }
       }
     }
     if (customField.id) {

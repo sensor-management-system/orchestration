@@ -29,12 +29,12 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
-import { AxiosInstance, Method } from 'axios'
+import { AxiosInstance } from 'axios'
 
 import { CustomTextField } from '@/models/CustomTextField'
 import { CustomTextFieldSerializer } from '@/serializers/jsonapi/CustomTextFieldSerializer'
 
-export class CustomFieldsApi {
+export class CustomfieldsApi {
   private axiosApi: AxiosInstance
   private serializer: CustomTextFieldSerializer
 
@@ -45,9 +45,7 @@ export class CustomFieldsApi {
 
   findById (id: string): Promise<CustomTextField> {
     return this.axiosApi.get(id, {
-      params: {
-        include: 'contacts'
-      }
+      // params: {}
     }).then((rawResponse) => {
       const rawData = rawResponse.data
       return this.serializer.convertJsonApiObjectToModel(rawData)
@@ -59,31 +57,21 @@ export class CustomFieldsApi {
   }
 
   add (deviceId: string, field: CustomTextField) {
+    const url = ''
+    const data: any = this.serializer.convertModelToJsonApiData(field, deviceId)
+    return this.axiosApi.post(url, { data })
   }
 
-  save (deviceId: string, field: CustomTextField) {
-    const data: any = this.serializer.convertModelToJsonApiData(field)
-    let method: Method = 'patch'
-    let url = deviceId + '/customfields'
-
-    if (field.id === null) {
-      // new -> post
-      method = 'post'
-    } else {
-      // old -> patch
-      url += '/' + String(field.id)
-    }
-
-    console.log(data)
-
-    return this.axiosApi.request({
-      url,
-      method,
-      data: {
-        data
+  update (deviceId: string, field: CustomTextField) {
+    return new Promise<string>((resolve, reject) => {
+      if (field.id) {
+        resolve(field.id)
+      } else {
+        reject(new Error('no id for the CustomTextField'))
       }
-    }).then((rawServerResponse) => {
-      console.log(rawServerResponse)
+    }).then((fieldId) => {
+      const data: any = this.serializer.convertModelToJsonApiData(field, deviceId)
+      return this.axiosApi.patch(fieldId, { data })
     })
   }
 }
