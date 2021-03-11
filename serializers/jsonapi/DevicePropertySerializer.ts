@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020
+ * Copyright (C) 2020, 2021
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -32,7 +32,7 @@
 import { DeviceProperty } from '@/models/DeviceProperty'
 import { MeasuringRange } from '@/models/MeasuringRange'
 
-import { IJsonApiNestedElement } from '@/serializers/jsonapi/JsonApiTypes'
+import { IJsonApiNestedElement, IJsonApiObject, IJsonApiObjectList, IJsonApiTypeIdAttributes, IJsonApiDataWithOptionalId } from '@/serializers/jsonapi/JsonApiTypes'
 
 export class DevicePropertySerializer {
   convertJsonApiElementToModel (property: IJsonApiNestedElement): DeviceProperty {
@@ -97,5 +97,75 @@ export class DevicePropertySerializer {
     }
 
     return result
+  }
+
+  convertJsonApiObjectToModel (jsonApiObject: IJsonApiObject): DeviceProperty {
+    const data = jsonApiObject.data
+    return this.convertJsonApiDataToModel(data)
+  }
+
+  convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiObjectList): DeviceProperty[] {
+    return jsonApiObjectList.data.map(this.convertJsonApiDataToModel)
+  }
+
+  convertJsonApiDataToModel (jsonApiData: IJsonApiTypeIdAttributes): DeviceProperty {
+    const result = new DeviceProperty()
+    result.id = jsonApiData.id.toString()
+    result.measuringRange = new MeasuringRange(
+      jsonApiData.attributes.measuring_range_min || null,
+      jsonApiData.attributes.measuring_range_max || null
+    )
+    result.failureValue = jsonApiData.attributes.failure_value || null
+    result.accuracy = jsonApiData.attributes.accuracy || null
+    result.resolution = jsonApiData.attributes.resolution || null
+    result.label = jsonApiData.attributes.label || ''
+    result.unitUri = jsonApiData.attributes.unit_uri || ''
+    result.unitName = jsonApiData.attributes.unit_name || ''
+    result.compartmentUri = jsonApiData.attributes.compartment_uri || ''
+    result.compartmentName = jsonApiData.attributes.compartment_name || ''
+    result.propertyUri = jsonApiData.attributes.property_uri || ''
+    result.propertyName = jsonApiData.attributes.property_name || ''
+    result.samplingMediaUri = jsonApiData.attributes.sampling_media_uri || ''
+    result.samplingMediaName = jsonApiData.attributes.sampling_media_name || ''
+    result.resolutionUnitUri = jsonApiData.attributes.resolution_unit_uri || ''
+    result.resolutionUnitName = jsonApiData.attributes.resolution_unit_name || ''
+
+    return result
+  }
+
+  convertModelToJsonApiData (deviceProperty: DeviceProperty, deviceId: string): IJsonApiDataWithOptionalId {
+    const data: any = {
+      type: 'device_property',
+      attributes: {
+        measuring_range_min: deviceProperty.measuringRange.min,
+        measuring_range_max: deviceProperty.measuringRange.max,
+        failure_value: deviceProperty.failureValue,
+        accuracy: deviceProperty.accuracy,
+        resolution: deviceProperty.resolution,
+        label: deviceProperty.label,
+        unit_uri: deviceProperty.unitUri,
+        unit_name: deviceProperty.unitName,
+        compartment_uri: deviceProperty.compartmentUri,
+        compartment_name: deviceProperty.compartmentName,
+        property_uri: deviceProperty.propertyUri,
+        property_name: deviceProperty.propertyName,
+        sampling_media_uri: deviceProperty.samplingMediaUri,
+        sampling_media_name: deviceProperty.samplingMediaName,
+        resolution_unit_uri: deviceProperty.resolutionUnitUri,
+        resolution_unit_name: deviceProperty.resolutionUnitName
+      },
+      relationships: {
+        device: {
+          data: {
+            type: 'device',
+            id: deviceId
+          }
+        }
+      }
+    }
+    if (deviceProperty.id) {
+      data.id = deviceProperty.id
+    }
+    return data
   }
 }

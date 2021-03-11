@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020
+ * Copyright (C) 2020, 2021
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -34,6 +34,8 @@
 import { AxiosInstance, Method } from 'axios'
 
 import { Configuration } from '@/models/Configuration'
+import { Contact } from '@/models/Contact'
+import { DynamicLocation } from '@/models/Location'
 import { Project } from '@/models/Project'
 
 // eslint-disable-next-line
@@ -49,7 +51,8 @@ import {
   configurationWithMetaToConfigurationByAddingDummyObjects,
   configurationWithMetaToConfigurationByThrowingErrorOnMissing
 } from '@/serializers/jsonapi/ConfigurationSerializer'
-import { DynamicLocation } from '@/models/Location'
+
+import { ContactSerializer } from '@/serializers/jsonapi/ContactSerializer'
 
 interface IRelationshipData {
   id: string
@@ -173,6 +176,36 @@ export class ConfigurationApi {
 
   newSearchBuilder (): ConfigurationSearchBuilder {
     return new ConfigurationSearchBuilder(this.axiosApi, this.serializer)
+  }
+
+  findRelatedContacts (configurationId: string): Promise<Contact[]> {
+    const url = configurationId + '/contacts'
+    const params = {
+      'page[size]': 10000
+    }
+    return this.axiosApi.get(url, { params }).then((rawServerResponse) => {
+      return new ContactSerializer().convertJsonApiObjectListToModelList(rawServerResponse.data)
+    })
+  }
+
+  removeContact (configurationId: string, contactId: string): Promise<void> {
+    const url = configurationId + '/relationships/contacts'
+    const params = {
+      data: [{
+        type: 'contact',
+        id: contactId
+      }]
+    }
+    return this.axiosApi.delete(url, { data: params })
+  }
+
+  addContact (configurationId: string, contactId: string): Promise<void> {
+    const url = configurationId + '/relationships/contacts'
+    const data = [{
+      type: 'contact',
+      id: contactId
+    }]
+    return this.axiosApi.post(url, { data })
   }
 }
 
