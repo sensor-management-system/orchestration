@@ -35,9 +35,7 @@ import {
   IJsonApiNestedElement,
   IJsonApiObject,
   IJsonApiObjectList,
-  IJsonApiTypeId,
-  IJsonApiTypeIdAttributes,
-  IJsonApiTypeIdDataListDict
+  IJsonApiTypeIdAttributes
 } from '@/serializers/jsonapi/JsonApiTypes'
 
 export class CustomTextFieldSerializer {
@@ -92,14 +90,6 @@ export class CustomTextFieldSerializer {
     return jsonApiObjectList.data.map(this.convertJsonApiDataToModel)
   }
 
-  convertModelListToJsonApiRelationshipObject (customFields: ICustomTextField[]): IJsonApiTypeIdDataListDict {
-    return {
-      customfields: {
-        data: this.convertModelListToTupleListWithIdAndType(customFields)
-      }
-    }
-  }
-
   convertModelToJsonApiData (customField: ICustomTextField, deviceId: string): IJsonApiDataWithOptionalId {
     const data: any = {
       type: 'customfield',
@@ -120,18 +110,5 @@ export class CustomTextFieldSerializer {
       data.id = customField.id
     }
     return data
-  }
-
-  convertModelListToTupleListWithIdAndType (customFields: ICustomTextField[]): IJsonApiTypeId[] {
-    const result: IJsonApiTypeId[] = []
-    for (const field of customFields) {
-      if (field.id !== null) {
-        result.push({
-          id: field.id,
-          type: 'customfield'
-        })
-      }
-    }
-    return result
   }
 }
