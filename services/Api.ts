@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020
+ * Copyright (C) 2020, 2021
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -37,6 +37,8 @@ import { PlatformApi } from '@/services/sms/PlatformApi'
 import { ConfigurationApi } from '@/services/sms/ConfigurationApi'
 import { ConfigurationStatusApi } from '@/services/sms/ConfigurationStatusApi'
 import { CustomfieldsApi } from '@/services/sms/CustomfieldsApi'
+import { DeviceAttachmentApi } from '@/services/sms/DeviceAttachmentApi'
+import { PlatformAttachmentApi } from '@/services/sms/PlatformAttachmentApi'
 
 import { CompartmentApi } from '@/services/cv/CompartmentApi'
 import { DeviceTypeApi } from '@/services/cv/DeviceTypeApi'
@@ -60,6 +62,8 @@ export class Api {
   private readonly _configurationApi: ConfigurationApi
   private readonly _configurationStatesApi: ConfigurationStatusApi
   private readonly _customfieldsApi: CustomfieldsApi
+  private readonly _deviceAttachmentApi: DeviceAttachmentApi
+  private readonly _platformAttachmentApi: PlatformAttachmentApi
 
   private readonly _manufacturerApi: ManufacturerApi
   private readonly _platformTypeApi: PlatformTypeApi
@@ -103,6 +107,14 @@ export class Api {
 
     this._customfieldsApi = new CustomfieldsApi(
       this.createAxios(smsBaseUrl, '/customfields', smsConfig, getIdToken)
+    )
+
+    this._deviceAttachmentApi = new DeviceAttachmentApi(
+      this.createAxios(smsBaseUrl, '/device-attachments', smsConfig, getIdToken)
+    )
+
+    this._platformAttachmentApi = new PlatformAttachmentApi(
+      this.createAxios(smsBaseUrl, '/platform-attachments', smsConfig, getIdToken)
     )
 
     // and here we can set settings for all the cv api calls
@@ -187,6 +199,14 @@ export class Api {
 
   get customfields (): CustomfieldsApi {
     return this._customfieldsApi
+  }
+
+  get deviceAttachments (): DeviceAttachmentApi {
+    return this._deviceAttachmentApi
+  }
+
+  get platformAttachments (): PlatformAttachmentApi {
+    return this._platformAttachmentApi
   }
 
   get contacts (): ContactApi {

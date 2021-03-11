@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020
+ * Copyright (C) 2020, 2021
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -31,6 +31,7 @@
  */
 import { AxiosInstance, Method } from 'axios'
 
+import { Attachment } from '@/models/Attachment'
 import { Platform } from '@/models/Platform'
 import { PlatformType } from '@/models/PlatformType'
 import { Manufacturer } from '@/models/Manufacturer'
@@ -41,6 +42,7 @@ import {
   platformWithMetaToPlatformByThrowingErrorOnMissing,
   platformWithMetaToPlatformByAddingDummyObjects
 } from '@/serializers/jsonapi/PlatformSerializer'
+import { PlatformAttachmentSerializer } from '@/serializers/jsonapi/PlatformAttachmentSerializer'
 
 import { IFlaskJSONAPIFilter } from '@/utils/JSONApiInterfaces'
 
@@ -101,6 +103,16 @@ export class PlatformApi {
 
   newSearchBuilder (): PlatformSearchBuilder {
     return new PlatformSearchBuilder(this.axiosApi, this.serializer)
+  }
+
+  findRelatedDeviceAttachments (deviceId: string): Promise<Attachment[]> {
+    const url = deviceId + '/device-attachments'
+    const params = {
+      'page[size]': 10000
+    }
+    return this.axiosApi.get(url, { params }).then((rawServerResponse) => {
+      return new PlatformAttachmentSerializer().convertJsonApiObjectListToModelList(rawServerResponse.data)
+    })
   }
 }
 

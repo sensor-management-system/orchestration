@@ -31,47 +31,45 @@
  */
 import { AxiosInstance } from 'axios'
 
-import { CustomTextField } from '@/models/CustomTextField'
-import { CustomTextFieldSerializer } from '@/serializers/jsonapi/CustomTextFieldSerializer'
+import { Attachment } from '@/models/Attachment'
+import { DeviceAttachmentSerializer } from '@/serializers/jsonapi/DeviceAttachmentSerializer'
 
-export class CustomfieldsApi {
+export class DeviceAttachmentApi {
   private axiosApi: AxiosInstance
-  private serializer: CustomTextFieldSerializer
+  private serializer: DeviceAttachmentSerializer
 
   constructor (axiosInstance: AxiosInstance) {
     this.axiosApi = axiosInstance
-    this.serializer = new CustomTextFieldSerializer()
+    this.serializer = new DeviceAttachmentSerializer()
   }
 
-  findById (id: string): Promise<CustomTextField> {
-    return this.axiosApi.get(id, {
-      // params: {}
-    }).then((rawResponse) => {
-      const rawData = rawResponse.data
+  findById (id: string): Promise<Attachment> {
+    return this.axiosApi.get(id).then((rawRespmse) => {
+      const rawData = rawRespmse.data
       return this.serializer.convertJsonApiObjectToModel(rawData)
     })
   }
 
-  deleteById (id: string) : Promise<void> {
+  deleteById (id: string): Promise<void> {
     return this.axiosApi.delete<string, void>(id)
   }
 
-  add (deviceId: string, field: CustomTextField) {
+  add (deviceId: string, attachment: Attachment) {
     const url = ''
-    const data: any = this.serializer.convertModelToJsonApiData(field, deviceId)
+    const data = this.serializer.convertModelToJsonApiData(attachment, deviceId)
     return this.axiosApi.post(url, { data })
   }
 
-  update (deviceId: string, field: CustomTextField) {
+  update (deviceId: string, attachment: Attachment) {
     return new Promise<string>((resolve, reject) => {
-      if (field.id) {
-        resolve(field.id)
+      if (attachment.id) {
+        resolve(attachment.id)
       } else {
-        reject(new Error('no id for the CustomTextField'))
+        reject(new Error('no id for the Attachment'))
       }
-    }).then((fieldId) => {
-      const data: any = this.serializer.convertModelToJsonApiData(field, deviceId)
-      return this.axiosApi.patch(fieldId, { data })
+    }).then((attachmentId) => {
+      const data = this.serializer.convertModelToJsonApiData(attachment, deviceId)
+      return this.axiosApi.patch(attachmentId, { data })
     })
   }
 }
