@@ -33,6 +33,7 @@ import axios, { AxiosInstance, AxiosRequestConfig } from 'axios'
 
 import { ContactApi } from '@/services/sms/ContactApi'
 import { DeviceApi } from '@/services/sms/DeviceApi'
+import { DevicePropertyApi } from '@/services/sms/DevicePropertyApi'
 import { PlatformApi } from '@/services/sms/PlatformApi'
 import { ConfigurationApi } from '@/services/sms/ConfigurationApi'
 import { ConfigurationStatusApi } from '@/services/sms/ConfigurationStatusApi'
@@ -64,6 +65,7 @@ export class Api {
   private readonly _customfieldsApi: CustomfieldsApi
   private readonly _deviceAttachmentApi: DeviceAttachmentApi
   private readonly _platformAttachmentApi: PlatformAttachmentApi
+  private readonly _devicePropertyApi: DevicePropertyApi
 
   private readonly _manufacturerApi: ManufacturerApi
   private readonly _platformTypeApi: PlatformTypeApi
@@ -115,6 +117,10 @@ export class Api {
 
     this._platformAttachmentApi = new PlatformAttachmentApi(
       this.createAxios(smsBaseUrl, '/platform-attachments', smsConfig, getIdToken)
+    )
+
+    this._devicePropertyApi = new DevicePropertyApi(
+      this.createAxios(smsBaseUrl, '/device-properties', smsConfig, getIdToken)
     )
 
     // and here we can set settings for all the cv api calls
@@ -207,6 +213,10 @@ export class Api {
 
   get platformAttachments (): PlatformAttachmentApi {
     return this._platformAttachmentApi
+  }
+
+  get deviceProperties (): DevicePropertyApi {
+    return this._devicePropertyApi
   }
 
   get contacts (): ContactApi {
