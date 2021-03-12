@@ -19,7 +19,8 @@ from .base_model import db
 
 class AuditMixin:
     created_at = db.Column(db.DateTime, default=func.now())
-    updated_at = db.Column(db.DateTime, default=None, onupdate=datetime.now())
+    # define 'updated at' to be populated with datetime.now()
+    updated_at = db.Column(db.DateTime, default=None, onupdate=datetime.now)
 
     @declared_attr
     def created_by_id(self):

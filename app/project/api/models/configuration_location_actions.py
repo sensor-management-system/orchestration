@@ -113,7 +113,7 @@ class ConfigurationDynamicLocationEndAction(db.Model, AuditMixin):
         "Configuration",
         uselist=False,
         foreign_keys=[configuration_id],
-        backref=db.backref("configuration_dynamic_location_end_action"),
+        backref=db.backref("configuration_dynamic_location_end_actions"),
     )
     end_date = db.Column(db.DateTime, nullable=False)
     description = db.Column(db.Text, nullable=True)
@@ -122,5 +122,5 @@ class ConfigurationDynamicLocationEndAction(db.Model, AuditMixin):
         "Contact",
         uselist=False,
         foreign_keys=[contact_id],
-        backref=db.backref("configuration_dynamic_location_end_action"),
+        backref=db.backref("configuration_dynamic_location_end_actions"),
     )
