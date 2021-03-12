@@ -85,7 +85,7 @@ export default class DeviceCustomFieldsShowPage extends Vue {
 
   @Watch('value', { immediate: true, deep: true })
   // @ts-ignore
-  onValueChanged (val: Device) {
+  onValueChanged (val: CustomTextField) {
     this.valueCopy = CustomTextField.createFromObject(val)
   }
 }
