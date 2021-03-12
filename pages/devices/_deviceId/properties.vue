@@ -69,6 +69,7 @@ export default class DevicePropertiesPage extends Vue {
     this.$api.devices.findRelatedDeviceProperties(this.deviceId).then((foundProperties) => {
       this.properties = foundProperties
       this.isLoading = false
+      this.openSelectedPanel()
     }).catch(() => {
       this.$store.commit('snackbar/setError', 'Failed to fetch custom fields')
       this.isLoading = false
@@ -91,6 +92,28 @@ export default class DevicePropertiesPage extends Vue {
     // eslint-disable-next-line no-useless-escape
     const editUrl = '^\/devices\/' + this.deviceId + '\/properties\/([0-9]+)\/edit$'
     return !!this.$route.path.match(editUrl)
+  }
+
+  getPropertyIdFromUrl (): string | undefined {
+    // eslint-disable-next-line no-useless-escape
+    const editUrl = '^\/devices\/' + this.deviceId + '\/properties\/([0-9]+)\/?.*$'
+    const matches = this.$route.path.match(editUrl)
+    if (!matches) {
+      return
+    }
+    return matches[1]
+  }
+
+  openSelectedPanel (): void {
+    const propertyId = this.getPropertyIdFromUrl()
+    if (!propertyId) {
+      return
+    }
+    const propertyIndex: number = this.properties.findIndex((prop: DeviceProperty) => prop.id === propertyId)
+    if (propertyIndex === -1) {
+      return
+    }
+    this.openedPanels = [propertyIndex]
   }
 
   addProperty (): void {

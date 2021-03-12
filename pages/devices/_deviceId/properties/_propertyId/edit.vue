@@ -1,66 +1,28 @@
 <template>
   <DevicePropertyExpansionPanel
-    v-model="value"
+    v-model="valueCopy"
   >
     <template #actions>
       <v-btn
         v-if="isLoggedIn"
-        color="primary"
         text
         small
         nuxt
-        :to="'/devices/' + deviceId + '/properties/' + value.id + '/edit'"
+        :to="'/devices/' + deviceId + '/properties'"
       >
-        Edit
+        Cancel
       </v-btn>
-      <v-menu
+      <v-btn
         v-if="isLoggedIn"
-        close-on-click
-        close-on-content-click
-        offset-x
-        left
-        z-index="999"
+        color="green"
+        small
+        @click="save()"
       >
-        <template v-slot:activator="{ on }">
-          <v-btn
-            data-role="property-menu"
-            icon
-            small
-            v-on="on"
-          >
-            <v-icon
-              dense
-              small
-            >
-              mdi-dots-vertical
-            </v-icon>
-          </v-btn>
-        </template>
-        <v-list>
-          <v-list-item
-            dense
-            @click="deleteProperty"
-          >
-            <v-list-item-content>
-              <v-list-item-title
-                class="red--text"
-              >
-                <v-icon
-                  left
-                  small
-                  color="red"
-                >
-                  mdi-delete
-                </v-icon>
-                Remove Property
-              </v-list-item-title>
-            </v-list-item-content>
-          </v-list-item>
-        </v-list>
-      </v-menu>
+        Apply
+      </v-btn>
     </template>
-    <DevicePropertyInfo
-      v-model="value"
+    <DevicePropertyForm
+      v-model="valueCopy"
       :compartments="compartments"
       :sampling-medias="samplingMedias"
       :properties="properties"
@@ -71,7 +33,8 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop } from 'nuxt-property-decorator'
+import { Component, Vue, Prop, Watch } from 'nuxt-property-decorator'
+
 import { DeviceProperty } from '@/models/DeviceProperty'
 import { Compartment } from '@/models/Compartment'
 import { Property } from '@/models/Property'
@@ -79,35 +42,36 @@ import { SamplingMedia } from '@/models/SamplingMedia'
 import { Unit } from '@/models/Unit'
 import { MeasuredQuantityUnit } from '@/models/MeasuredQuantityUnit'
 
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import DevicePropertyExpansionPanel from '@/components/DevicePropertyExpansionPanel.vue'
-import DevicePropertyInfo from '@/components/DevicePropertyInfo.vue'
+import DevicePropertyForm from '@/components/DevicePropertyForm.vue'
+import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
 @Component({
   components: {
     DevicePropertyExpansionPanel,
-    DevicePropertyInfo,
+    DevicePropertyForm,
     ProgressIndicator
   }
 })
-export default class DevicePropertiesShowPage extends Vue {
-  private isLoading = false
-  private isSaving = false
+export default class DeviceCustomFieldsShowPage extends Vue {
+  private isSaving: boolean = false
+  private valueCopy: DeviceProperty = new DeviceProperty()
+
   private compartments: Compartment[] = []
   private samplingMedias: SamplingMedia[] = []
   private properties: Property[] = []
   private units: Unit[] = []
   private measuredQuantityUnits: MeasuredQuantityUnit[] = []
 
-  /**
-   * a DeviceProperty
-   */
   @Prop({
     required: true,
     type: Object
   })
-  // @ts-ignore
   readonly value!: DeviceProperty
+
+  created () {
+    this.valueCopy = DeviceProperty.createFromObject(this.value)
+  }
 
   mounted () {
     this.$api.compartments.findAllPaginated().then((foundCompartments) => {
@@ -134,11 +98,8 @@ export default class DevicePropertiesShowPage extends Vue {
       this.measuredQuantityUnits = foundUnits
     }).catch(() => {
       this.$store.commit('snackbar/setError', 'Loading of measuredquantityunits failed')
-    })
-  }
-
-  get isInProgress (): boolean {
-    return this.isLoading || this.isSaving
+    });
+    //(this.$refs.devicePropertyForm as Vue & { focus: () => void}).focus()
   }
 
   get deviceId (): string {
@@ -149,7 +110,13 @@ export default class DevicePropertiesShowPage extends Vue {
     return this.$store.getters['oidc/isAuthenticated']
   }
 
-  deleteProperty () {
+  save (): void {
+  }
+
+  @Watch('value', { immediate: true, deep: true })
+  // @ts-ignore
+  onValueChanged (val: DeviceProperty) {
+    this.valueCopy = DeviceProperty.createFromObject(val)
   }
 }
 </script>

@@ -1,77 +1,28 @@
 <template>
-  <DevicePropertyExpansionPanel
-    v-model="value"
-  >
-    <template #actions>
-      <v-btn
-        v-if="isLoggedIn"
-        color="primary"
-        text
-        small
-        nuxt
-        :to="'/devices/' + deviceId + '/properties/' + value.id + '/edit'"
-      >
-        Edit
-      </v-btn>
-      <v-menu
-        v-if="isLoggedIn"
-        close-on-click
-        close-on-content-click
-        offset-x
-        left
-        z-index="999"
-      >
-        <template v-slot:activator="{ on }">
-          <v-btn
-            data-role="property-menu"
-            icon
-            small
-            v-on="on"
-          >
-            <v-icon
-              dense
-              small
-            >
-              mdi-dots-vertical
-            </v-icon>
-          </v-btn>
-        </template>
-        <v-list>
-          <v-list-item
-            dense
-            @click="deleteProperty"
-          >
-            <v-list-item-content>
-              <v-list-item-title
-                class="red--text"
-              >
-                <v-icon
-                  left
-                  small
-                  color="red"
-                >
-                  mdi-delete
-                </v-icon>
-                Remove Property
-              </v-list-item-title>
-            </v-list-item-content>
-          </v-list-item>
-        </v-list>
-      </v-menu>
-    </template>
-    <DevicePropertyInfo
-      v-model="value"
-      :compartments="compartments"
-      :sampling-medias="samplingMedias"
-      :properties="properties"
-      :units="units"
-      :measured-quantity-units="measuredQuantityUnits"
+  <div class="mb-1" style="flex: 0 0 100%; align-self: flex-start;">
+    <NuxtChild
+      v-if="isEditModeForProperty"
+      v-model="property"
     />
-  </DevicePropertyExpansionPanel>
+    <DevicePropertyExpansionPanel
+      v-else
+      v-model="property"
+    >
+      <DevicePropertyInfo
+        v-model="property"
+        :compartments="compartments"
+        :sampling-medias="samplingMedias"
+        :properties="properties"
+        :units="units"
+        :measured-quantity-units="measuredQuantityUnits"
+      />
+    </DevicePropertyExpansionPanel>
+  </div>
 </template>
 
 <script lang="ts">
 import { Component, Vue, Prop } from 'nuxt-property-decorator'
+
 import { DeviceProperty } from '@/models/DeviceProperty'
 import { Compartment } from '@/models/Compartment'
 import { Property } from '@/models/Property'
@@ -90,23 +41,17 @@ import DevicePropertyInfo from '@/components/DevicePropertyInfo.vue'
     ProgressIndicator
   }
 })
-export default class DevicePropertiesShowPage extends Vue {
-  private isLoading = false
-  private isSaving = false
+export default class DevicePropertyIdPage extends Vue {
   private compartments: Compartment[] = []
   private samplingMedias: SamplingMedia[] = []
   private properties: Property[] = []
   private units: Unit[] = []
   private measuredQuantityUnits: MeasuredQuantityUnit[] = []
 
-  /**
-   * a DeviceProperty
-   */
   @Prop({
     required: true,
     type: Object
   })
-  // @ts-ignore
   readonly value!: DeviceProperty
 
   mounted () {
@@ -137,19 +82,20 @@ export default class DevicePropertiesShowPage extends Vue {
     })
   }
 
-  get isInProgress (): boolean {
-    return this.isLoading || this.isSaving
+  get property (): DeviceProperty {
+    return this.value
+  }
+
+  set property (value: DeviceProperty) {
+    this.$emit('input', value)
   }
 
   get deviceId (): string {
     return this.$route.params.deviceId
   }
 
-  get isLoggedIn (): boolean {
-    return this.$store.getters['oidc/isAuthenticated']
-  }
-
-  deleteProperty () {
+  get isEditModeForProperty () {
+    return this.$route.path === '/devices/' + this.deviceId + '/properties/' + this.value.id + '/edit'
   }
 }
 </script>
