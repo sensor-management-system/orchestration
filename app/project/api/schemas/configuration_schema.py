@@ -42,6 +42,7 @@ class ConfigurationSchema(Schema):
         self_view_kwargs={"id": "<id>"},
         related_view="api.device_property_detail",
         related_view_kwargs={"id": "<longitude_src_device_property_id>"},
+        include_resource_linkage=True,
         type_="device_property",
         schema="DevicePropertySchema",
     )
@@ -52,6 +53,7 @@ class ConfigurationSchema(Schema):
         self_view_kwargs={"id": "<id>"},
         related_view="api.device_property_detail",
         related_view_kwargs={"id": "<latitude_src_device_property_id>"},
+        include_resource_linkage=True,
         type_="device_property",
         schema="DevicePropertySchema",
     )
@@ -62,16 +64,16 @@ class ConfigurationSchema(Schema):
         self_view_kwargs={"id": "<id>"},
         related_view="api.device_property_detail",
         related_view_kwargs={"id": "<elevation_src_device_property_id>"},
+        include_resource_linkage=True,
         type_="device_property",
         schema="DevicePropertySchema",
     )
 
     contacts = Relationship(
         attribute="contacts",
-        self_view="api.configuration_contacts",
-        self_view_kwargs={"id": "<id>"},
-        related_view="api.contact_list",
-        related_view_kwargs={"configuration_id": "<id>"},
+        related_view="api.configuration_contacts",
+        related_view_kwargs={"id": "<id>"},
+        include_resource_linkage=True,
         many=True,
         schema="ContactSchema",
         type_="contact",
@@ -79,10 +81,9 @@ class ConfigurationSchema(Schema):
     )
     configuration_platforms = Relationship(
         attribute="configuration_platforms",
-        self_view="api.configuration_platforms",
-        self_view_kwargs={"id": "<id>"},
-        related_view="api.configuration_platform_list",
-        related_view_kwargs={"configuration_id": "<id>"},
+        related_view="api.configuration_platforms",
+        related_view_kwargs={"id": "<id>"},
+        include_resource_linkage=True,
         many=True,
         schema="ConfigurationPlatformSchema",
         type_="configuration_platform",
@@ -91,10 +92,9 @@ class ConfigurationSchema(Schema):
 
     configuration_devices = Relationship(
         attribute="configuration_devices",
-        self_view="api.configuration_devices",
-        self_view_kwargs={"id": "<id>"},
-        related_view="api.configuration_device_list",
-        related_view_kwargs={"configuration_id": "<id>"},
+        related_view="api.configuration_devices",
+        related_view_kwargs={"id": "<id>"},
+        include_resource_linkage=True,
         many=True,
         schema="ConfigurationDeviceSchema",
         type_="configuration_device",

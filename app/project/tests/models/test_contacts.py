@@ -10,11 +10,11 @@ class TestContactModels(BaseTestCase):
 
     def test_add_contact_model(self):
         """""Ensure Add contact model """
-        jwt1 = generate_token_data()
+        mock_jwt = generate_token_data()
         c = Contact(
-            given_name=jwt1["given_name"],
-            family_name=jwt1["family_name"],
-            email=jwt1["email"],
+            given_name=mock_jwt["given_name"],
+            family_name=mock_jwt["family_name"],
+            email=mock_jwt["email"],
         )
         db.session.add(c)
         db.session.commit()

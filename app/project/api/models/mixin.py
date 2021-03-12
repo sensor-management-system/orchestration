@@ -4,7 +4,6 @@ from datetime import datetime
 
 import sqlalchemy
 from sqlalchemy.ext.declarative import declared_attr
-from sqlalchemy.sql import func
 
 from project.api.search import (
     add_to_index,
@@ -18,9 +17,9 @@ from .base_model import db
 
 
 class AuditMixin:
-    created_at = db.Column(db.DateTime, default=func.now())
-    # define 'updated at' to be populated with datetime.now()
-    updated_at = db.Column(db.DateTime, default=None, onupdate=datetime.now)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    # define 'updated at' to be populated with datetime.utcnow()
+    updated_at = db.Column(db.DateTime, default=None, onupdate=datetime.utcnow)
 
     @declared_attr
     def created_by_id(self):

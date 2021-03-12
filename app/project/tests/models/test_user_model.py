@@ -16,11 +16,11 @@ class TestUsersModel(BaseTestCase):
 
     def test_add_user_model(self):
         """""Ensure Add user model """
-        jwt1 = generate_token_data()
+        mock_jwt = generate_token_data()
         c = Contact(
-            given_name=jwt1["given_name"],
-            family_name=jwt1["family_name"],
-            email=jwt1["email"],
+            given_name=mock_jwt["given_name"],
+            family_name=mock_jwt["family_name"],
+            email=mock_jwt["email"],
         )
         user = User(id=445, subject="test_user@test.test", contact=c)
 

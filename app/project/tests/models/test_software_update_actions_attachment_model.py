@@ -15,11 +15,11 @@ from project.tests.base import BaseTestCase, fake, generate_token_data
 
 def add_device_software_update_action_attachment():
     d = Device(short_name="Device 133")
-    jwt1 = generate_token_data()
+    mock_jwt = generate_token_data()
     c = Contact(
-        given_name=jwt1["given_name"],
-        family_name=jwt1["family_name"],
-        email=jwt1["email"],
+        given_name=mock_jwt["given_name"],
+        family_name=mock_jwt["family_name"],
+        email=mock_jwt["email"],
     )
     db.session.add(d)
     db.session.commit()
@@ -42,11 +42,11 @@ def add_device_software_update_action_attachment():
 
 def add_platform_software_update_action_attachment_model():
     p = Platform(short_name="Platform 144")
-    jwt1 = generate_token_data()
+    mock_jwt = generate_token_data()
     c = Contact(
-        given_name=jwt1["given_name"],
-        family_name=jwt1["family_name"],
-        email=jwt1["email"],
+        given_name=mock_jwt["given_name"],
+        family_name=mock_jwt["family_name"],
+        email=mock_jwt["email"],
     )
     db.session.add(p)
     db.session.commit()

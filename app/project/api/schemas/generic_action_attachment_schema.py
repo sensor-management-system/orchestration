@@ -3,6 +3,12 @@ from marshmallow_jsonapi.flask import Relationship, Schema
 
 
 class GenericDeviceActionAttachmentSchema(Schema):
+    """
+    This class create a schema for a generic_device_action_attachment.
+    It uses the  marshmallow-jsonapi library that fit
+    the JSONAPI 1.0 specification and provides Flask integration.
+    """
+
     class Meta:
         type_ = "generic_device_action_attachment"
         self_view = "api.generic_device_action_attachment_detail"
@@ -14,7 +20,7 @@ class GenericDeviceActionAttachmentSchema(Schema):
         self_view="api.generic_device_action_attachment_action",
         self_view_kwargs={"id": "<id>"},
         related_view="api.generic_device_action_detail",
-        related_view_kwargs={"id": "<id>"},
+        related_view_kwargs={"id": "<action_id>"},
         schema="GenericDeviceActionSchema",
         type_="generic_device_action",
         id_field="id",
@@ -31,6 +37,12 @@ class GenericDeviceActionAttachmentSchema(Schema):
 
 
 class GenericPlatformActionAttachmentSchema(Schema):
+    """
+    This class create a schema for a generic_platform_action_attachment.
+    It uses the  marshmallow-jsonapi library that fit
+    the JSONAPI 1.0 specification and provides Flask integration.
+    """
+
     class Meta:
         type_ = "generic_platform_action_attachment"
         self_view = "api.generic_platform_action_attachment_detail"
@@ -51,7 +63,7 @@ class GenericPlatformActionAttachmentSchema(Schema):
         self_view="api.generic_platform_action_attachment_attachment",
         self_view_kwargs={"id": "<id>"},
         related_view="api.platform_attachment_detail",
-        related_view_kwargs={"id": "<id>"},
+        related_view_kwargs={"id": "<action_id>"},
         schema="PlatformAttachmentSchema",
         type_="platform_attachment",
         id_field="id",
@@ -59,6 +71,12 @@ class GenericPlatformActionAttachmentSchema(Schema):
 
 
 class GenericConfigurationActionAttachmentSchema(Schema):
+    """
+    This class create a schema for a generic_configuration_action_attachment.
+    It uses the  marshmallow-jsonapi library that fit
+    the JSONAPI 1.0 specification and provides Flask integration.
+    """
+
     class Meta:
         type_ = "generic_configuration_action_attachment"
         self_view = "api.generic_configuration_action_attachment_detail"
@@ -70,7 +88,7 @@ class GenericConfigurationActionAttachmentSchema(Schema):
         self_view="api.generic_configuration_action_attachment_action",
         self_view_kwargs={"id": "<id>"},
         related_view="api.generic_configuration_action_detail",
-        related_view_kwargs={"id": "<id>"},
+        related_view_kwargs={"id": "<action_id>"},
         schema="GenericConfigurationActionSchema",
         type_="generic_configuration_action",
         id_field="id",
@@ -79,7 +97,7 @@ class GenericConfigurationActionAttachmentSchema(Schema):
         self_view="api.generic_configuration_action_attachment_attachment",
         self_view_kwargs={"id": "<id>"},
         related_view="api.configuration_attachment_detail",
-        related_view_kwargs={"id": "<id>"},
+        related_view_kwargs={"id": "<attachment_id>"},
         schema="ConfigurationAttachmentSchema",
         type_="configuration_attachment",
         id_field="id",

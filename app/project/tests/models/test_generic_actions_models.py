@@ -18,13 +18,13 @@ def generate_platform_action_model():
     p = Platform(
         short_name="short_name test",
     )
-    jwt1 = generate_token_data()
+    mock_jwt = generate_token_data()
     c = Contact(
-        given_name=jwt1["given_name"],
-        family_name=jwt1["family_name"],
-        email=jwt1["email"],
+        given_name=mock_jwt["given_name"],
+        family_name=mock_jwt["family_name"],
+        email=mock_jwt["email"],
     )
-    u = User(subject=jwt1["sub"], contact=c)
+    u = User(subject=mock_jwt["sub"], contact=c)
     gpa = GenericPlatformAction(
         description="test GenericPlatformAction",
         action_type_name="testing",
@@ -45,14 +45,14 @@ def generate_device_action_model():
         short_name="test device",
     )
 
-    jwt1 = generate_token_data()
+    mock_jwt = generate_token_data()
     c1 = Contact(
-        given_name=jwt1["given_name"],
-        family_name=jwt1["family_name"],
-        email=jwt1["email"],
+        given_name=mock_jwt["given_name"],
+        family_name=mock_jwt["family_name"],
+        email=mock_jwt["email"],
     )
 
-    u1 = User(subject=jwt1["sub"], contact=c1)
+    u1 = User(subject=mock_jwt["sub"], contact=c1)
 
     gpa = GenericDeviceAction(
         description="test GenericDeviceAction",
@@ -71,13 +71,13 @@ def generate_device_action_model():
 
 def generate_configuration_action_model():
     config = generate_configuration_model()
-    jwt1 = generate_token_data()
+    mock_jwt = generate_token_data()
     c1 = Contact(
-        given_name=jwt1["given_name"],
-        family_name=jwt1["family_name"],
-        email=jwt1["email"],
+        given_name=mock_jwt["given_name"],
+        family_name=mock_jwt["family_name"],
+        email=mock_jwt["email"],
     )
-    u1 = User(subject=jwt1["sub"], contact=c1)
+    u1 = User(subject=mock_jwt["sub"], contact=c1)
 
     gpa = GenericConfigurationAction(
         description="test GenericConfigurationAction",

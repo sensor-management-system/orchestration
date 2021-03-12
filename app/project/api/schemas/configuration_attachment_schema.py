@@ -19,9 +19,11 @@ class ConfigurationAttachmentSchema(Schema):
     url = fields.Str(required=True)
 
     configuration = Relationship(
+        self_view="api.configuration_attachment_configuration",
         self_view_kwargs={"id": "<id>"},
         related_view="api.configuration_detail",
         related_view_kwargs={"id": "<configuration_id>"},
+        include_resource_linkage=True,
         type_="configuration",
         schema="ConfigurationSchema",
         id_field="id",

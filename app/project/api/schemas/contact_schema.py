@@ -20,16 +20,13 @@ class ContactSchema(Schema):
     given_name = fields.Str(required=True)
     family_name = fields.Str(required=True)
     website = fields.Str(allow_none=True)
-    #  fields.Email: use fields.Str instead as
-    #  validation make some Problems
-    email = fields.Str(required=True)
+    email = fields.Email(required=True)
 
     platforms = Relationship(
         attribute="platforms",
-        self_view="api.contact_platforms",
-        self_view_kwargs={"id": "<id>"},
-        related_view="api.platform_list",
-        related_view_kwargs={"contact_id": "<id>"},
+        related_view="api.contact_platforms",
+        related_view_kwargs={"id": "<id>"},
+        include_resource_linkage=True,
         many=True,
         schema="PlatformSchema",
         type_="platform",
@@ -37,32 +34,32 @@ class ContactSchema(Schema):
     )
     configurations = Relationship(
         attribute="configurations",
-        self_view="api.contact_configurations",
-        self_view_kwargs={"id": "<id>"},
-        related_view="api.configuration_list",
-        related_view_kwargs={"contact_id": "<id>"},
+        related_view="api.contact_configurations",
+        related_view_kwargs={"id": "<id>"},
         many=True,
+        include_resource_linkage=True,
         schema="ConfigurationSchema",
         type_="configuration",
         id_field="id",
     )
     devices = Relationship(
         attribute="devices",
-        self_view="api.contact_devices",
-        self_view_kwargs={"id": "<id>"},
-        related_view="api.device_list",
-        related_view_kwargs={"contact_id": "<id>"},
+        related_view="api.contact_devices",
+        related_view_kwargs={"id": "<id>"},
         many=True,
+        include_resource_linkage=True,
         schema="DeviceSchema",
         type_="device",
         id_field="id",
     )
+    # This relationship should be optional as we want to
+    # allow to add extern contacts without user accounts.
     user = Relationship(
-        attribute="user",
+        required=False,
+        allow_none=True,
         self_view="api.contact_user",
         self_view_kwargs={"id": "<id>"},
-        related_view="api.user_detail",
-        related_view_kwargs={"id": "<id>"},
+        include_resource_linkage=True,
         schema="UserSchema",
         type_="user",
         id_field="id",

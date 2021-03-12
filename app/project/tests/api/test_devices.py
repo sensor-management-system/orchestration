@@ -34,14 +34,14 @@ class TestDeviceService(BaseTestCase):
 
     def test_add_device_contacts_relationship(self):
         """Ensure a new relationship between a device & contact can be created."""
-        jwt1 = generate_token_data()
+        mock_jwt = generate_token_data()
         contact_data = {
             "data": {
                 "type": "contact",
                 "attributes": {
-                    "given_name": jwt1["given_name"],
-                    "family_name": jwt1["family_name"],
-                    "email": jwt1["email"],
+                    "given_name": mock_jwt["given_name"],
+                    "family_name": mock_jwt["family_name"],
+                    "email": mock_jwt["email"],
                     "website": fake.url(),
                 },
             }

@@ -25,7 +25,7 @@ class DeviceCalibrationAction(db.Model, AuditMixin):
     )
 
 
-class DevicePropertyCalibration(db.Model):
+class DevicePropertyCalibration(db.Model, AuditMixin):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     calibration_action_id = db.Column(
         db.Integer, db.ForeignKey("device_calibration_action.id"), nullable=False

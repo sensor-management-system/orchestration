@@ -1,8 +1,16 @@
+# Define Schema for
+# PlatformSoftwareUpdateAction & DeviceSoftwareUpdateAction
 from marshmallow_jsonapi import fields
 from marshmallow_jsonapi.flask import Relationship, Schema
 
 
 class PlatformSoftwareUpdateActionSchema(Schema):
+    """
+    This class create a schema for a platform_software_update_action.
+    It uses library called marshmallow-jsonapi that fit
+    the JSONAPI 1.0 specification and provides Flask integration.
+    """
+
     class Meta:
         type_ = "platform_software_update_action"
         self_view = "api.platform_software_update_action_detail"
@@ -24,6 +32,7 @@ class PlatformSoftwareUpdateActionSchema(Schema):
         self_view_kwargs={"id": "<id>"},
         related_view="api.platform_detail",
         related_view_kwargs={"id": "<platform_id>"},
+        include_resource_linkage=True,
         schema="PlatformSchema",
         type_="platform",
         id_field="id",
@@ -33,7 +42,8 @@ class PlatformSoftwareUpdateActionSchema(Schema):
         self_view="api.platform_software_update_action_contact",
         self_view_kwargs={"id": "<id>"},
         related_view="api.contact_detail",
-        related_view_kwargs={"id": "<id>"},
+        related_view_kwargs={"id": "<contact_id>"},
+        include_resource_linkage=True,
         schema="ContactSchema",
         type_="contact",
         id_field="id",
@@ -43,6 +53,8 @@ class PlatformSoftwareUpdateActionSchema(Schema):
         self_view_kwargs={"id": "<id>"},
         related_view="api.user_detail",
         related_view_kwargs={"id": "<created_by_id>"},
+        include_resource_linkage=True,
+        schema="UserSchema",
         type_="user",
         id_field="id",
     )
@@ -51,12 +63,20 @@ class PlatformSoftwareUpdateActionSchema(Schema):
         self_view_kwargs={"id": "<id>"},
         related_view="api.user_detail",
         related_view_kwargs={"id": "<updated_by_id>"},
+        include_resource_linkage=True,
+        schema="UserSchema",
         type_="user",
         id_field="id",
     )
 
 
 class DeviceSoftwareUpdateActionSchema(Schema):
+    """
+    This class create a schema for a device_software_update_action.
+    It uses library called marshmallow-jsonapi that fit
+    the JSONAPI 1.0 specification and provides Flask integration.
+    """
+
     class Meta:
         type_ = "device_software_update_action"
         self_view = "api.device_software_update_action_detail"
@@ -78,6 +98,7 @@ class DeviceSoftwareUpdateActionSchema(Schema):
         self_view_kwargs={"id": "<id>"},
         related_view="api.device_detail",
         related_view_kwargs={"id": "<device_id>"},
+        include_resource_linkage=True,
         schema="DeviceSchema",
         type_="device",
         id_field="id",
@@ -87,7 +108,8 @@ class DeviceSoftwareUpdateActionSchema(Schema):
         self_view="api.device_software_update_action_contact",
         self_view_kwargs={"id": "<id>"},
         related_view="api.contact_detail",
-        related_view_kwargs={"id": "<id>"},
+        related_view_kwargs={"id": "<contact_id>"},
+        include_resource_linkage=True,
         schema="ContactSchema",
         type_="contact",
         id_field="id",
@@ -97,6 +119,8 @@ class DeviceSoftwareUpdateActionSchema(Schema):
         self_view_kwargs={"id": "<id>"},
         related_view="api.user_detail",
         related_view_kwargs={"id": "<created_by_id>"},
+        include_resource_linkage=True,
+        schema="UserSchema",
         type_="user",
         id_field="id",
     )
@@ -105,6 +129,8 @@ class DeviceSoftwareUpdateActionSchema(Schema):
         self_view_kwargs={"id": "<id>"},
         related_view="api.user_detail",
         related_view_kwargs={"id": "<updated_by_id>"},
+        include_resource_linkage=True,
+        schema="UserSchema",
         type_="user",
         id_field="id",
     )

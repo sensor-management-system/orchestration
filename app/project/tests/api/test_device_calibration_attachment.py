@@ -16,12 +16,12 @@ from project.tests.models.test_device_calibration_attachment_model import (
 class TestDeviceCalibrationAttachment(BaseTestCase):
     """Tests for the DeviceCalibrationAttachment endpoints."""
 
-    device_calibration_attachment_url = base_url + "/device-calibration-attachments"
+    url = base_url + "/device-calibration-attachments"
     object_type = "device_calibration_attachment"
 
     def test_get_generic_device_action_attachment(self):
         """Ensure the GET /device_calibration_attachment route reachable."""
-        response = self.client.get(self.device_calibration_attachment_url)
+        response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
         # no data yet
         self.assertEqual(response.json["data"], [])
@@ -30,30 +30,32 @@ class TestDeviceCalibrationAttachment(BaseTestCase):
         """Test retrieve a collection of DeviceCalibrationAttachment objects"""
         _ = add_device_calibration_attachment()
         with self.client:
-            response = self.client.get(self.device_calibration_attachment_url)
+            response = self.client.get(self.url)
         _ = json.loads(response.data.decode())
         self.assertEqual(response.status_code, 200)
 
     def test_post_generic_device_action_attachment(self):
         """Create DeviceCalibrationAttachment"""
-        d = Device(short_name="Device 1")
-        jwt1 = generate_token_data()
-        c = Contact(
-            given_name=jwt1["given_name"],
-            family_name=jwt1["family_name"],
-            email=jwt1["email"],
+        device = Device(short_name="Device 1")
+        mock_jwt = generate_token_data()
+        contact = Contact(
+            given_name=mock_jwt["given_name"],
+            family_name=mock_jwt["family_name"],
+            email=mock_jwt["email"],
         )
-        db.session.add(d)
+        db.session.add(device)
         db.session.commit()
-        a = DeviceAttachment(label=fake.pystr(), url=fake.url(), device_id=d.id)
-        dca = DeviceCalibrationAction(
+        attachment = DeviceAttachment(
+            label=fake.pystr(), url=fake.url(), device_id=device.id
+        )
+        device_calibration_action = DeviceCalibrationAction(
             description="Test DeviceCalibrationAction",
             current_calibration_date=fake.date(),
             next_calibration_date=fake.date(),
-            device=d,
-            contact=c,
+            device=device,
+            contact=contact,
         )
-        db.session.add_all([d, a, c, dca])
+        db.session.add_all([device, attachment, contact, device_calibration_action])
         db.session.commit()
         data = {
             "data": {
@@ -61,39 +63,48 @@ class TestDeviceCalibrationAttachment(BaseTestCase):
                 "attributes": {},
                 "relationships": {
                     "action": {
-                        "data": {"type": "device_calibration_action", "id": dca.id}
+                        "data": {
+                            "type": "device_calibration_action",
+                            "id": device_calibration_action.id,
+                        }
                     },
-                    "attachment": {"data": {"type": "device_attachment", "id": a.id}},
+                    "attachment": {
+                        "data": {"type": "device_attachment", "id": attachment.id}
+                    },
                 },
             }
         }
         _ = super().add_object(
-            url=f"{self.device_calibration_attachment_url}?include=action,attachment",
+            url=f"{self.url}?include=action,attachment",
             data_object=data,
             object_type=self.object_type,
         )
 
     def test_update_generic_device_action_attachment(self):
         """Update DeviceCalibrationAttachment"""
-        old = add_device_calibration_attachment()
-        d = Device(short_name="Device new")
-        db.session.add(d)
+        device_calibration_attachment = add_device_calibration_attachment()
+        device = Device(short_name="Device new")
+        db.session.add(device)
         db.session.commit()
-        a = DeviceAttachment(label=fake.pystr(), url=fake.url(), device_id=d.id)
-        db.session.add(a)
+        attachment = DeviceAttachment(
+            label=fake.pystr(), url=fake.url(), device_id=device.id
+        )
+        db.session.add(attachment)
         db.session.commit()
         data = {
             "data": {
                 "type": self.object_type,
-                "id": old.id,
+                "id": device_calibration_attachment.id,
                 "attributes": {},
                 "relationships": {
-                    "attachment": {"data": {"type": "device_attachment", "id": a.id}},
+                    "attachment": {
+                        "data": {"type": "device_attachment", "id": attachment.id}
+                    },
                 },
             }
         }
         _ = super().update_object(
-            url=f"{self.device_calibration_attachment_url}/{old.id}?include=attachment",
+            url=f"{self.url}/{device_calibration_attachment.id}?include=attachment",
             data_object=data,
             object_type=self.object_type,
         )
@@ -102,5 +113,5 @@ class TestDeviceCalibrationAttachment(BaseTestCase):
         """Delete DeviceCalibrationAttachment"""
         dca = add_device_calibration_attachment()
         _ = super().delete_object(
-            url=f"{self.device_calibration_attachment_url}/{dca.id}",
+            url=f"{self.url}/{dca.id}",
         )

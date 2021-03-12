@@ -11,11 +11,11 @@ from project.tests.base import BaseTestCase, fake, generate_token_data
 
 def add_device_software_update_action_model():
     d = Device(short_name="Device 1")
-    jwt1 = generate_token_data()
+    mock_jwt = generate_token_data()
     c = Contact(
-        given_name=jwt1["given_name"],
-        family_name=jwt1["family_name"],
-        email=jwt1["email"],
+        given_name=mock_jwt["given_name"],
+        family_name=mock_jwt["family_name"],
+        email=mock_jwt["email"],
     )
     dsu = DeviceSoftwareUpdateAction(
         device=d,
@@ -34,11 +34,11 @@ def add_device_software_update_action_model():
 
 def add_platform_software_update_action_model():
     p = Platform(short_name="Platform 1")
-    jwt1 = generate_token_data()
+    mock_jwt = generate_token_data()
     c = Contact(
-        given_name=jwt1["given_name"],
-        family_name=jwt1["family_name"],
-        email=jwt1["email"],
+        given_name=mock_jwt["given_name"],
+        family_name=mock_jwt["family_name"],
+        email=mock_jwt["email"],
     )
     psu = PlatformSoftwareUpdateAction(
         platform=p,

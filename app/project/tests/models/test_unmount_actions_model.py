@@ -15,13 +15,13 @@ def add_unmount_device_action():
     d = Device(
         short_name=fake.linux_processor(),
     )
-    jwt1 = generate_token_data()
+    mock_jwt = generate_token_data()
     c1 = Contact(
-        given_name=jwt1["given_name"],
-        family_name=jwt1["family_name"],
-        email=jwt1["email"],
+        given_name=mock_jwt["given_name"],
+        family_name=mock_jwt["family_name"],
+        email=mock_jwt["email"],
     )
-    u1 = User(subject=jwt1["sub"], contact=c1)
+    u1 = User(subject=mock_jwt["sub"], contact=c1)
     config = generate_configuration_model()
     mpa = DeviceUnmountAction(
         end_date=fake.date(),
@@ -40,13 +40,13 @@ def add_unmount_platform_action():
     p = Platform(
         short_name="Platform 55",
     )
-    jwt1 = generate_token_data()
+    mock_jwt = generate_token_data()
     c1 = Contact(
-        given_name=jwt1["given_name"],
-        family_name=jwt1["family_name"],
-        email=jwt1["email"],
+        given_name=mock_jwt["given_name"],
+        family_name=mock_jwt["family_name"],
+        email=mock_jwt["email"],
     )
-    u1 = User(subject=jwt1["sub"], contact=c1)
+    u1 = User(subject=mock_jwt["sub"], contact=c1)
     config = generate_configuration_model()
     mpa = PlatformUnmountAction(
         end_date=fake.date(),

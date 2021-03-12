@@ -1,5 +1,3 @@
-import stringcase
-
 from project.api.ping import Ping
 from project.api.resourceManager import *
 from project.frj_csv_export.api import Api
@@ -303,8 +301,18 @@ api.route(
 )
 api.route(
     ConfigurationPlatformRelationship,
-    "configuration_platform",
+    "configuration_platform_platform",
     "/configuration-platforms/<int:id>/relationships/platform",
+)
+api.route(
+    ConfigurationPlatformRelationship,
+    "configuration_platform_configuration",
+    "/configuration-platforms/<int:id>/relationships/configuration",
+)
+api.route(
+    ConfigurationPlatformRelationship,
+    "configuration_platform_parent_platform",
+    "/configuration-platforms/<int:id>/relationships/parent_platform",
 )
 # ConfigurationDevice
 api.route(
@@ -319,438 +327,515 @@ api.route(
 )
 api.route(
     ConfigurationDeviceRelationship,
-    "configuration_device",
+    "configuration_device_device",
     "/configuration-devices/<int:id>/relationships/device",
 )
+api.route(
+    ConfigurationDeviceRelationship,
+    "configuration_device_configuration",
+    "/configuration-devices/<int:id>/relationships/configuration",
+)
+api.route(
+    ConfigurationDeviceRelationship,
+    "configuration_device_parent_platform",
+    "/configuration-devices/<int:id>/relationships/parent_platform",
+)
 # GenericDeviceAction
-gda = stringcase.snakecase("genericDeviceAction")
-gda_url = stringcase.spinalcase(gda)
-api.route(GenericDeviceActionList, f"{gda}_list", f"/{gda_url}s")
-api.route(GenericDeviceActionDetail, f"{gda}_detail", f"/{gda_url}s/<int:id>")
 api.route(
-    GenericDeviceActionRelationship,
-    f"{gda}_device",
-    f"/{gda_url}s/<int:id>/relationships/device",
+    GenericDeviceActionList, "generic_device_action_list", "/generic-device-actions"
+)
+api.route(
+    GenericDeviceActionDetail,
+    "generic_device_action_detail",
+    "/generic-device-actions/<int:id>",
 )
 api.route(
     GenericDeviceActionRelationship,
-    f"{gda}_contact",
-    f"/{gda_url}s/<int:id>/relationships/contact",
+    "generic_device_action_device",
+    "/generic-device-actions/<int:id>/relationships/device",
 )
 api.route(
     GenericDeviceActionRelationship,
-    f"{gda}s_attachment",
-    f"/{gda_url}s/<int:id>/relationships/attachment",
+    "generic_device_action_contact",
+    "/generic-device-actions/<int:id>/relationships/contact",
 )
 api.route(
     GenericDeviceActionRelationship,
-    f"{gda}_created_user",
-    f"/{gda_url}s/<int:id>/relationships/created-user",
+    "generic_device_action_attachment",
+    "/generic-device-actions/<int:id>/relationships/attachment",
 )
 api.route(
     GenericDeviceActionRelationship,
-    f"{gda}_updated_user",
-    f"/{gda_url}s/<int:id>/relationships/updated-user",
+    "generic_device_action_created_user",
+    "/generic-device-actions/<int:id>/relationships/created-user",
+)
+api.route(
+    GenericDeviceActionRelationship,
+    "generic_device_action_updated_user",
+    "/generic-device-actions/<int:id>/relationships/updated-user",
 )
 # GenericDeviceActionAttachment
-gda_a = stringcase.snakecase("genericDeviceActionAttachment")
-gda_a_url = stringcase.spinalcase(gda_a)
-api.route(GenericDeviceActionAttachmentList, f"{gda_a}_list", f"/{gda_a_url}s")
 api.route(
-    GenericDeviceActionAttachmentDetail, f"{gda_a}_detail", f"/{gda_a_url}s/<int:id>"
+    GenericDeviceActionAttachmentList,
+    "generic_device_action_attachment_list",
+    "/generic-device-action-attachments",
+)
+api.route(
+    GenericDeviceActionAttachmentDetail,
+    "generic_device_action_attachment_detail",
+    "/generic-device-action-attachments/<int:id>",
 )
 api.route(
     GenericDeviceActionAttachmentRelationship,
-    f"{gda_a}_action",
-    f"/{gda_a_url}s/<int:id>/relationships/action",
+    "generic_device_action_attachment_action",
+    "/generic-device-action-attachments/<int:id>/relationships/action",
 )
 api.route(
     GenericDeviceActionAttachmentRelationship,
-    f"{gda_a}_attachment",
-    f"/{gda_a_url}s/<int:id>/relationships/attachment",
+    "generic_device_action_attachment_attachment",
+    "/generic-device-action-attachments/<int:id>/relationships/attachment",
 )
 # GenericPlatformAction
-gpa = stringcase.snakecase("genericPlatformAction")
-gpa_url = stringcase.spinalcase(gpa)
-api.route(GenericPlatformActionList, f"{gpa}_list", f"/{gpa_url}s")
-api.route(GenericPlatformActionDetail, f"{gpa}_detail", f"/{gpa_url}s/<int:id>")
 api.route(
-    GenericPlatformActionRelationship,
-    f"{gpa}_platform",
-    f"/{gpa_url}s/<int:id>/relationships/platform",
+    GenericPlatformActionList,
+    "generic_platform_action_list",
+    "/generic-platform-actions",
+)
+api.route(
+    GenericPlatformActionDetail,
+    "generic_platform_action_detail",
+    "/generic-platform-actions/<int:id>",
 )
 api.route(
     GenericPlatformActionRelationship,
-    f"{gpa}_contact",
-    f"/{gpa_url}s/<int:id>/relationships/contact",
+    "generic_platform_action_platform",
+    "/generic-platform-actions/<int:id>/relationships/platform",
 )
 api.route(
     GenericPlatformActionRelationship,
-    f"{gpa}s_attachment",
-    f"/{gpa_url}s/<int:id>/relationships/attachment",
+    "generic_platform_action_contact",
+    "/generic-platform-actions/<int:id>/relationships/contact",
 )
 api.route(
     GenericPlatformActionRelationship,
-    f"{gpa}_created_user",
-    f"/{gpa_url}s/<int:id>/relationships/created-user",
+    "generic_platform_action_attachment",
+    "/generic-platform-actions/<int:id>/relationships/attachment",
 )
 api.route(
     GenericPlatformActionRelationship,
-    f"{gpa}_updated_user",
-    f"/{gpa_url}s/<int:id>/relationships/updated-user",
+    "generic_platform_action_created_user",
+    "/generic-platform-actions/<int:id>/relationships/created-user",
+)
+api.route(
+    GenericPlatformActionRelationship,
+    "generic_platform_action_updated_user",
+    "/generic-platform-actions/<int:id>/relationships/updated-user",
 )
 # GenericPlatformActionAttachment
-gpa_a = stringcase.snakecase("genericPlatformActionAttachment")
-gpa_a_url = stringcase.spinalcase(gpa_a)
-api.route(GenericPlatformActionAttachmentList, f"{gpa_a}_list", f"/{gpa_a_url}s")
 api.route(
-    GenericPlatformActionAttachmentDetail, f"{gpa_a}_detail", f"/{gpa_a_url}s/<int:id>"
+    GenericPlatformActionAttachmentList,
+    "generic_platform_action_attachment_list",
+    "/generic-platform-action-attachments",
+)
+api.route(
+    GenericPlatformActionAttachmentDetail,
+    "generic_platform_action_attachment_detail",
+    "/generic-platform-action-attachments/<int:id>",
 )
 api.route(
     GenericPlatformActionAttachmentRelationship,
-    f"{gpa_a}_action",
-    f"/{gpa_a_url}s/<int:id>/relationships/action",
+    "generic_platform_action_attachment_action",
+    "/generic-platform-action-attachments/<int:id>/relationships/action",
 )
 api.route(
     GenericPlatformActionAttachmentRelationship,
-    f"{gpa_a}_attachment",
-    f"/{gpa_a_url}s/<int:id>/relationships/attachment",
+    "generic_platform_action_attachment_attachment",
+    "/generic-platform-action-attachments/<int:id>/relationships/attachment",
 )
 
 # GenericConfigurationAction
-gca = stringcase.snakecase("genericConfigurationAction")
-gca_url = stringcase.spinalcase(gca)
-api.route(GenericConfigurationActionList, f"{gca}_list", f"/{gca_url}s")
-api.route(GenericConfigurationActionDetail, f"{gca}_detail", f"/{gca_url}s/<int:id>")
 api.route(
-    GenericConfigurationActionRelationship,
-    f"{gca}_configuration",
-    f"/{gca_url}s/<int:id>/relationships/configuration",
+    GenericConfigurationActionList,
+    "generic_configuration_action_list",
+    "/generic-configuration-actions",
+)
+api.route(
+    GenericConfigurationActionDetail,
+    "generic_configuration_action_detail",
+    "/generic-configuration-actions/<int:id>",
 )
 api.route(
     GenericConfigurationActionRelationship,
-    f"{gca}_contact",
-    f"/{gca_url}s/<int:id>/relationships/contact",
+    "generic_configuration_action_configuration",
+    "/generic-configuration-actions/<int:id>/relationships/configuration",
 )
 api.route(
     GenericConfigurationActionRelationship,
-    f"{gca}s",
-    f"/{gca_url}s/<int:id>/relationships/attachment",
+    "generic_configuration_action_contact",
+    "/generic-configuration-actions/<int:id>/relationships/contact",
 )
 api.route(
     GenericConfigurationActionRelationship,
-    f"{gca}_created_user",
-    f"/{gca_url}s/<int:id>/relationships/created-user",
+    "generic_configuration_action_attachment",
+    "/generic-configuration-actions/<int:id>/relationships/attachment",
 )
 api.route(
     GenericConfigurationActionRelationship,
-    f"{gca}_updated_user",
-    f"/{gca_url}s/<int:id>/relationships/updated-user",
+    "generic_configuration_action_created_user",
+    "/generic-configuration-actions/<int:id>/relationships/created-user",
+)
+api.route(
+    GenericConfigurationActionRelationship,
+    "generic_configuration_action_updated_user",
+    "/generic-configuration-actions/<int:id>/relationships/updated-user",
 )
 # GenericConfigurationActionAttachment
-gca_a = stringcase.snakecase("genericConfigurationActionAttachment")
-gca_a_url = stringcase.spinalcase(gca_a)
-api.route(GenericConfigurationActionAttachmentList, f"{gca_a}_list", f"/{gca_a_url}s")
+api.route(
+    GenericConfigurationActionAttachmentList,
+    "generic_configuration_action_attachment_list",
+    "/generic-configuration-action-attachments",
+)
 api.route(
     GenericConfigurationActionAttachmentDetail,
-    f"{gca_a}_detail",
-    f"/{gca_a_url}s/<int:id>",
+    "generic_configuration_action_attachment_detail",
+    "/generic-configuration-action-attachments/<int:id>",
 )
 api.route(
     GenericConfigurationActionAttachmentRelationship,
-    f"{gca_a}_action",
-    f"/{gca_a_url}s/<int:id>/relationships/action",
+    "generic_configuration_action_attachment_action",
+    "/generic-configuration-action-attachments/<int:id>/relationships/action",
 )
 api.route(
     GenericConfigurationActionAttachmentRelationship,
-    f"{gca_a}_attachment",
-    f"/{gca_a_url}s/<int:id>/relationships/attachment",
+    "generic_configuration_action_attachment_attachment",
+    "/generic-configuration-action-attachments/<int:id>/relationships/attachment",
 )
 
 # MountDeviceAction
-mda = stringcase.snakecase("DeviceMountAction")
-mda_url = stringcase.spinalcase(mda)
-api.route(DeviceMountActionList, f"{mda}_list", f"/{mda_url}s")
-api.route(DeviceMountActionDetail, f"{mda}_detail", f"/{mda_url}s/<int:id>")
+api.route(DeviceMountActionList, "device_mount_action_list", "/device-mount-actions")
 api.route(
-    DeviceMountActionRelationship,
-    f"{mda}_device",
-    f"/{mda_url}s/<int:id>/relationships/device",
+    DeviceMountActionDetail,
+    "device_mount_action_detail",
+    "/device-mount-actions/<int:id>",
 )
 api.route(
     DeviceMountActionRelationship,
-    f"{mda}_contact",
-    f"/{mda_url}s/<int:id>/relationships/contact",
+    "device_mount_action_device",
+    "/device-mount-actions/<int:id>/relationships/device",
 )
 api.route(
     DeviceMountActionRelationship,
-    f"{mda}_configuration",
-    f"/{mda_url}s/<int:id>/relationships/configuration",
+    "device_mount_action_contact",
+    "/device-mount-actions/<int:id>/relationships/contact",
 )
 api.route(
     DeviceMountActionRelationship,
-    f"{mda}_parent_platform",
-    f"/{mda_url}s/<int:id>/relationships/parent-platform",
+    "device_mount_action_configuration",
+    "/device-mount-actions/<int:id>/relationships/configuration",
 )
 api.route(
     DeviceMountActionRelationship,
-    f"{mda}_created_user",
-    f"/{mda_url}s/<int:id>/relationships/created-user",
+    "device_mount_action_parent_platform",
+    "/device-mount-actions/<int:id>/relationships/parent-platform",
 )
 api.route(
     DeviceMountActionRelationship,
-    f"{mda}_updated_user",
-    f"/{mda_url}s/<int:id>/relationships/updated-user",
+    "device_mount_action_created_user",
+    "/device-mount-actions/<int:id>/relationships/created-user",
+)
+api.route(
+    DeviceMountActionRelationship,
+    "device_mount_action_updated_user",
+    "/device-mount-actions/<int:id>/relationships/updated-user",
 )
 # MountPlatformAction
-mpa = stringcase.snakecase("PlatformMountAction")
-mpa_url = stringcase.spinalcase(mpa)
-api.route(PlatformMountActionList, f"{mpa}_list", f"/{mpa_url}s")
-api.route(PlatformMountActionDetail, f"{mpa}_detail", f"/{mpa_url}s/<int:id>")
 api.route(
-    PlatformMountActionRelationship,
-    f"{mpa}_platform",
-    f"/{mpa_url}s/<int:id>/relationships/device",
+    PlatformMountActionList, "platform_mount_action_list", "/platform-mount-actions"
+)
+api.route(
+    PlatformMountActionDetail,
+    "platform_mount_action_detail",
+    "/platform-mount-actions/<int:id>",
 )
 api.route(
     PlatformMountActionRelationship,
-    f"{mpa}_contact",
-    f"/{mpa_url}s/<int:id>/relationships/contact",
+    "platform_mount_action_platform",
+    "/platform-mount-actions/<int:id>/relationships/device",
 )
 api.route(
     PlatformMountActionRelationship,
-    f"{mpa}_configuration",
-    f"/{mpa_url}s/<int:id>/relationships/configuration",
+    "platform_mount_action_contact",
+    "/platform-mount-actions/<int:id>/relationships/contact",
 )
 api.route(
     PlatformMountActionRelationship,
-    f"{mpa}_parent_platform",
-    f"/{mpa_url}s/<int:id>/relationships/parent-platform",
+    "platform_mount_action_configuration",
+    "/platform-mount-actions/<int:id>/relationships/configuration",
 )
 api.route(
     PlatformMountActionRelationship,
-    f"{mpa}_created_user",
-    f"/{mpa_url}s/<int:id>/relationships/created-user",
+    "platform_mount_action_parent_platform",
+    "/platform-mount-actions/<int:id>/relationships/parent-platform",
 )
 api.route(
     PlatformMountActionRelationship,
-    f"{mpa}_updated_user",
-    f"/{mpa_url}s/<int:id>/relationships/updated-user",
-)
-# UnMountDeviceAction
-uda = stringcase.snakecase("deviceUnmountAction")
-uda_url = stringcase.spinalcase(uda)
-api.route(DeviceUnmountActionList, f"{uda}_list", f"/{uda_url}s")
-api.route(DeviceUnmountActionDetail, f"{uda}_detail", f"/{uda_url}s/<int:id>")
-api.route(
-    DeviceUnmountActionRelationship,
-    f"{uda}_device",
-    f"/{uda_url}s/<int:id>/relationships/device",
+    "platform_mount_action_created_user",
+    "/platform-mount-actions/<int:id>/relationships/created-user",
 )
 api.route(
-    DeviceUnmountActionRelationship,
-    f"{uda}_contact",
-    f"/{uda_url}s/<int:id>/relationships/contact",
+    PlatformMountActionRelationship,
+    "platform_mount_action_updated_user",
+    "/platform-mount-actions/<int:id>/relationships/updated-user",
+)
+# DeviceUnmountAction
+api.route(
+    DeviceUnmountActionList, "device_unmount_action_list", "/device-unmount-actions"
 )
 api.route(
-    DeviceUnmountActionRelationship,
-    f"{uda}_configuration",
-    f"/{uda_url}s/<int:id>/relationships/configuration",
+    DeviceUnmountActionDetail,
+    "device_unmount_action_detail",
+    "/device-unmount-actions/<int:id>",
 )
 api.route(
     DeviceUnmountActionRelationship,
-    f"{uda}_parent_platform",
-    f"/{uda_url}s/<int:id>/relationships/parent-platform",
+    "device_unmount_action_device",
+    "/device-unmount-actions/<int:id>/relationships/device",
 )
 api.route(
     DeviceUnmountActionRelationship,
-    f"{uda}_created_user",
-    f"/{uda_url}s/<int:id>/relationships/created-user",
+    "device_unmount_action_contact",
+    "/device-unmount-actions/<int:id>/relationships/contact",
 )
 api.route(
     DeviceUnmountActionRelationship,
-    f"{uda}_updated_user",
-    f"/{uda_url}s/<int:id>/relationships/updated-user",
+    "device_unmount_action_configuration",
+    "/device-unmount-actions/<int:id>/relationships/configuration",
+)
+api.route(
+    DeviceUnmountActionRelationship,
+    "device_unmount_action_parent_platform",
+    "/device-unmount-actions/<int:id>/relationships/parent-platform",
+)
+api.route(
+    DeviceUnmountActionRelationship,
+    "device_unmount_action_created_user",
+    "/device-unmount-actions/<int:id>/relationships/created-user",
+)
+api.route(
+    DeviceUnmountActionRelationship,
+    "device_unmount_action_updated_user",
+    "/device-unmount-actions/<int:id>/relationships/updated-user",
 )
 # UnMountPlatformAction
-upa = stringcase.snakecase("platformUnmountAction")
-upa_url = stringcase.spinalcase(upa)
-api.route(PlatformUnmountActionList, f"{upa}_list", f"/{upa_url}s")
-api.route(PlatformUnmountActionDetail, f"{upa}_detail", f"/{upa_url}s/<int:id>")
 api.route(
-    PlatformUnmountActionRelationship,
-    f"{upa}_platform",
-    f"/{upa_url}s/<int:id>/relationships/device",
+    PlatformUnmountActionList,
+    "platform_unmount_action_list",
+    "/platform-unmount-actions",
+)
+api.route(
+    PlatformUnmountActionDetail,
+    "platform_unmount_action_detail",
+    "/platform-unmount-actions/<int:id>",
 )
 api.route(
     PlatformUnmountActionRelationship,
-    f"{upa}_contact",
-    f"/{upa_url}s/<int:id>/relationships/contact",
+    "platform_unmount_action_platform",
+    "/platform-unmount-actions/<int:id>/relationships/device",
 )
 api.route(
     PlatformUnmountActionRelationship,
-    f"{upa}_configuration",
-    f"/{upa_url}s/<int:id>/relationships/configuration",
+    "platform_unmount_action_contact",
+    "/platform-unmount-actions/<int:id>/relationships/contact",
 )
 api.route(
     PlatformUnmountActionRelationship,
-    f"{upa}_parent_platform",
-    f"/{upa_url}s/<int:id>/relationships/parent-platform",
+    "platform_unmount_action_configuration",
+    "/platform-unmount-actions/<int:id>/relationships/configuration",
 )
 api.route(
     PlatformUnmountActionRelationship,
-    f"{upa}_created_user",
-    f"/{upa_url}s/<int:id>/relationships/created-user",
+    "platform_unmount_action_parent_platform",
+    "/platform-unmount-actions/<int:id>/relationships/parent-platform",
 )
 api.route(
     PlatformUnmountActionRelationship,
-    f"{upa}_updated_user",
-    f"/{upa_url}s/<int:id>/relationships/updated-user",
+    "platform_unmount_action_created_user",
+    "/platform-unmount-actions/<int:id>/relationships/created-user",
+)
+api.route(
+    PlatformUnmountActionRelationship,
+    "platform_unmount_action_updated_user",
+    "/{upa_url}s/<int:id>/relationships/updated-user",
 )
 
 # DeviceCalibrationAction
-dca = stringcase.snakecase("deviceCalibrationAction")
-dca_url = stringcase.spinalcase(dca)
-api.route(DeviceCalibrationActionList, f"{dca}_list", f"/{dca_url}s")
-api.route(DeviceCalibrationActionDetail, f"{dca}_detail", f"/{dca_url}s/<int:id>")
 api.route(
-    DeviceCalibrationActionRelationship,
-    f"{dca}_device",
-    f"/{dca_url}s/<int:id>/relationships/device",
+    DeviceCalibrationActionList,
+    "device_calibration_action_list",
+    "/device-calibration-actions",
+)
+api.route(
+    DeviceCalibrationActionDetail,
+    "device_calibration_action_detail",
+    "/device-calibration-actions/<int:id>",
 )
 api.route(
     DeviceCalibrationActionRelationship,
-    f"{dca}_contact",
-    f"/{dca_url}s/<int:id>/relationships/contact",
+    "device_calibration_action_device",
+    "/device-calibration-actions/<int:id>/relationships/device",
+)
+api.route(
+    DeviceCalibrationActionRelationship,
+    "device_calibration_action_contact",
+    "/device-calibration-actions/<int:id>/relationships/contact",
 )
 # DeviceCalibrationAttachment
-dca_a = stringcase.snakecase("deviceCalibrationAttachment")
-dca_a_url = stringcase.spinalcase(dca_a)
-api.route(DeviceCalibrationAttachmentList, f"{dca_a}_list", f"/{dca_a_url}s")
 api.route(
-    DeviceCalibrationAttachmentDetail, f"{dca_a}_detail", f"/{dca_a_url}s/<int:id>"
+    DeviceCalibrationAttachmentList,
+    "device_calibration_attachment_list",
+    "/device-calibration-attachments",
+)
+api.route(
+    DeviceCalibrationAttachmentDetail,
+    "device_calibration_attachment_detail",
+    "/device-calibration-attachments/<int:id>",
 )
 api.route(
     DeviceCalibrationAttachmentRelationship,
-    f"{dca_a}_action",
-    f"/{dca_a_url}s/<int:id>/relationships/action",
+    "device_calibration_attachment_action",
+    "/device-calibration-attachments/<int:id>/relationships/action",
 )
 api.route(
     DeviceCalibrationAttachmentRelationship,
-    f"{dca_a}_attachment",
-    f"/{dca_a_url}s/<int:id>/relationships/attachment",
+    "device_calibration_attachment_attachment",
+    "/device-calibration-attachments/<int:id>/relationships/attachment",
 )
 # DeviceSoftwareUpdateAction
-dsu = stringcase.snakecase("deviceSoftwareUpdateAction")
-dsu_url = stringcase.spinalcase(dsu)
-api.route(DeviceSoftwareUpdateActionList, f"{dsu}_list", f"/{dsu_url}s")
-api.route(DeviceSoftwareUpdateActionDetail, f"{dsu}_detail", f"/{dsu_url}s/<int:id>")
 api.route(
-    DeviceSoftwareUpdateActionRelationship,
-    f"{dsu}_device",
-    f"/{dsu_url}s/<int:id>/relationships/device",
+    DeviceSoftwareUpdateActionList,
+    "device_software_update_action_list",
+    "/device-software-update-actions",
+)
+api.route(
+    DeviceSoftwareUpdateActionDetail,
+    "device_software_update_action_detail",
+    "/device-software-update-actions/<int:id>",
 )
 api.route(
     DeviceSoftwareUpdateActionRelationship,
-    f"{dsu}_contact",
-    f"/{dsu_url}s/<int:id>/relationships/contact",
+    "device_software_update_action_device",
+    "/device-software-update-actions/<int:id>/relationships/device",
 )
 api.route(
     DeviceSoftwareUpdateActionRelationship,
-    f"{dsu}_created_user",
-    f"/{dsu_url}s/<int:id>/relationships/created-user",
+    "device_software_update_action_contact",
+    "/device-software-update-actions/<int:id>/relationships/contact",
 )
 api.route(
     DeviceSoftwareUpdateActionRelationship,
-    f"{dsu}_updated_user",
-    f"/{dsu_url}s/<int:id>/relationships/updated-user",
+    "device_software_update_action_created_user",
+    "/device-software-update-actions/<int:id>/relationships/created-user",
+)
+api.route(
+    DeviceSoftwareUpdateActionRelationship,
+    "device_software_update_action_updated_user",
+    "/device-software-update-actions/<int:id>/relationships/updated-user",
 )
 
 # DeviceSoftwareUpdateActionAttachment
-dsu_a = stringcase.snakecase("deviceSoftwareUpdateActionAttachment")
-dsu_a_url = stringcase.spinalcase(dsu_a)
-api.route(DeviceSoftwareUpdateActionAttachmentList, f"{dsu_a}_list", f"/{dsu_a_url}s")
+api.route(
+    DeviceSoftwareUpdateActionAttachmentList,
+    "device_software_update_action_attachment_list",
+    "/device-software-update-action-attachments",
+)
 api.route(
     DeviceSoftwareUpdateActionAttachmentDetail,
-    f"{dsu_a}_detail",
-    f"/{dsu_a_url}s/<int:id>",
+    "device_software_update_action_attachment_detail",
+    "/device-software-update-action-attachments/<int:id>",
 )
 api.route(
     DeviceSoftwareUpdateActionAttachmentRelationship,
-    f"{dsu_a}_action",
-    f"/{dsu_a_url}s/<int:id>/relationships/action",
+    "device_software_update_action_attachment_action",
+    "/device-software-update-action-attachments/<int:id>/relationships/action",
 )
 api.route(
     DeviceSoftwareUpdateActionAttachmentRelationship,
-    f"{dsu_a}_attachment",
-    f"/{dsu_a_url}s/<int:id>/relationships/attachment",
+    "device_software_update_action_attachment_attachment",
+    "/device-software-update-action-attachments/<int:id>/relationships/attachment",
 )
 # PlatformSoftwareUpdateAction
-psu = stringcase.snakecase("platformSoftwareUpdateAction")
-psu_url = stringcase.spinalcase(psu)
-api.route(PlatformSoftwareUpdateActionList, f"{psu}_list", f"/{psu_url}s")
+api.route(
+    PlatformSoftwareUpdateActionList,
+    "platform_software_update_action_list",
+    "/platform-software-update-actions",
+)
 api.route(
     PlatformSoftwareUpdateActionDetail,
-    f"{psu}_detail",
-    f"/{psu_url}s/<int:id>",
+    "platform_software_update_action_detail",
+    "/platform-software-update-actions/<int:id>",
 )
 api.route(
     PlatformSoftwareUpdateActionRelationship,
-    f"{psu}_platform",
-    f"/{psu_url}s/<int:id>/relationships/platform",
+    "platform_software_update_action_platform",
+    "/platform-software-update-actions/<int:id>/relationships/platform",
 )
 api.route(
     PlatformSoftwareUpdateActionRelationship,
-    f"{psu}_contact",
-    f"/{psu_url}s/<int:id>/relationships/contact",
+    "platform_software_update_action_contact",
+    "/platform-software-update-actions/<int:id>/relationships/contact",
 )
 api.route(
     PlatformSoftwareUpdateActionRelationship,
-    f"{psu}_created_user",
-    f"/{psu_url}s/<int:id>/relationships/created-user",
+    "platform_software_update_action_created_user",
+    "/platform-software-update-actions/<int:id>/relationships/created-user",
 )
 api.route(
     PlatformSoftwareUpdateActionRelationship,
-    f"{psu}_updated_user",
-    f"/{psu_url}s/<int:id>/relationships/updated-user",
+    "platform_software_update_action_updated_user",
+    "/platform-software-update-actions/<int:id>/relationships/updated-user",
 )
 
 # PlatformSoftwareUpdateActionAttachment
-psu_a = stringcase.snakecase("platformSoftwareUpdateActionAttachment")
-psu_a_url = stringcase.spinalcase(psu_a)
-api.route(PlatformSoftwareUpdateActionAttachmentList, f"{psu_a}_list", f"/{psu_a_url}s")
+api.route(
+    PlatformSoftwareUpdateActionAttachmentList,
+    "platform_software_update_action_attachment_list",
+    "/platform-software-update-action-attachments",
+)
 api.route(
     PlatformSoftwareUpdateActionAttachmentDetail,
-    f"{psu_a}_detail",
-    f"/{psu_a_url}s/<int:id>",
+    "platform_software_update_action_attachment_detail",
+    "/platform-software-update-action-attachments/<int:id>",
 )
 api.route(
     PlatformSoftwareUpdateActionAttachmentRelationship,
-    f"{psu_a}_action",
-    f"/{psu_a_url}s/<int:id>/relationships/action",
+    "platform_software_update_action_attachment_action",
+    "/platform-software-update-action-attachments/<int:id>/relationships/action",
 )
 api.route(
     PlatformSoftwareUpdateActionAttachmentRelationship,
-    f"{psu_a}_attachment",
-    f"/{psu_a_url}s/<int:id>/relationships/attachment",
+    "platform_software_update_action_attachment_attachment",
+    "/platform-software-update-action-attachments/<int:id>/relationships/attachment",
 )
 
 # DevicePropertyCalibration
-dpa = stringcase.snakecase("devicePropertyCalibration")
-dpa_url = stringcase.spinalcase(dpa)
-api.route(DevicePropertyCalibrationList, f"{dpa}_list", f"/{dpa_url}s")
+
+api.route(
+    DevicePropertyCalibrationList,
+    "device_property_calibration_list",
+    "/device-property-calibrations",
+)
 api.route(
     DevicePropertyCalibrationDetail,
-    f"{dpa}_detail",
-    f"/{dpa_url}s/<int:id>",
+    "device_property_calibration_detail",
+    "/device-property-calibrations/<int:id>",
 )
 api.route(
     DevicePropertyCalibrationRelationship,
-    f"{dpa}_calibration_action",
-    f"/{dpa_url}s/<int:id>/relationships/calibration-action",
+    "device_property_calibration_calibration_action",
+    "/device-property-calibrations/<int:id>/relationships/calibration-action",
 )
 api.route(
     DevicePropertyCalibrationRelationship,
-    f"{dpa}_device_property",
-    f"/{dpa_url}s/<int:id>/relationships/device-property",
+    "device_property_calibration_device_property",
+    "/device-property-calibrations/<int:id>/relationships/device-property",
 )

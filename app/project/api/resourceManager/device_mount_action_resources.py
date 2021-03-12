@@ -7,6 +7,7 @@ from project.api.resourceManager.base_resource import (
     add_updated_by_id,
 )
 from project.api.schemas.mount_actions_schema import DeviceMountActionSchema
+from project.api.token_checker import token_required
 from project.frj_csv_export.resource import ResourceList
 
 
@@ -16,6 +17,7 @@ class DeviceMountActionList(ResourceList):
         add_created_by_id(data)
 
     schema = DeviceMountActionSchema
+    decorators = (token_required,)
     data_layer = {
         "session": db.session,
         "model": DeviceMountAction,
@@ -31,6 +33,7 @@ class DeviceMountActionDetail(ResourceDetail):
         add_updated_by_id(data)
 
     schema = DeviceMountActionSchema
+    decorators = (token_required,)
     data_layer = {
         "session": db.session,
         "model": DeviceMountAction,
@@ -39,6 +42,7 @@ class DeviceMountActionDetail(ResourceDetail):
 
 class DeviceMountActionRelationship(ResourceRelationship):
     schema = DeviceMountActionSchema
+    decorators = (token_required,)
     data_layer = {
         "session": db.session,
         "model": DeviceMountAction,

@@ -10,12 +10,12 @@ from project.tests.models.test_device_calibration_action_model import (
 class TestDevicePropertyCalibration(BaseTestCase):
     """Tests for the DevicePropertyCalibration endpoints."""
 
-    device_property_calibration_url = base_url + "/device-property-calibrations"
+    url = base_url + "/device-property-calibrations"
     object_type = "device_property_calibration"
 
     def test_get_device_property_calibration(self):
         """Ensure the GET /device_property_calibration route reachable."""
-        response = self.client.get(self.device_property_calibration_url)
+        response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
         # no data yet
         self.assertEqual(response.json["data"], [])
@@ -23,14 +23,14 @@ class TestDevicePropertyCalibration(BaseTestCase):
     def test_get_device_property_calibration_collection(self):
         """Test retrieve a collection of DevicePropertyCalibration objects"""
         _ = add_device_property_calibration_model
-        response = self.client.get(self.device_property_calibration_url)
+        response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
 
     def test_post_device_property_calibration(self):
         """Create DevicePropertyCalibration"""
-        d = Device(short_name="Device 200")
-        dp = DeviceProperty(
-            device=d,
+        device = Device(short_name="Device 200")
+        device_property = DeviceProperty(
+            device=device,
             measuring_range_min=fake.pyfloat(),
             measuring_range_max=fake.pyfloat(),
             failure_value=fake.pyfloat(),
@@ -45,22 +45,24 @@ class TestDevicePropertyCalibration(BaseTestCase):
             sampling_media_uri=fake.uri(),
             sampling_media_name=fake.pystr(),
         )
-        jwt1 = generate_token_data()
-        c = Contact(
-            given_name=jwt1["given_name"],
-            family_name=jwt1["family_name"],
-            email=jwt1["email"],
+        mock_jwt = generate_token_data()
+        contact = Contact(
+            given_name=mock_jwt["given_name"],
+            family_name=mock_jwt["family_name"],
+            email=mock_jwt["email"],
         )
-        dca = DeviceCalibrationAction(
+        device_calibration_action = DeviceCalibrationAction(
             description="Test DeviceCalibrationAction",
             formula=fake.pystr(),
             value=fake.pyfloat(),
             current_calibration_date=fake.date(),
             next_calibration_date=fake.date(),
-            device=d,
-            contact=c,
+            device=device,
+            contact=contact,
         )
-        db.session.add_all([d, c, dp, dca])
+        db.session.add_all(
+            [device, contact, device_property, device_calibration_action]
+        )
         db.session.commit()
         data = {
             "data": {
@@ -68,40 +70,43 @@ class TestDevicePropertyCalibration(BaseTestCase):
                 "attributes": {},
                 "relationships": {
                     "device_property": {
-                        "data": {"type": "device_property", "id": dp.id}
+                        "data": {"type": "device_property", "id": device_property.id}
                     },
                     "calibration_action": {
-                        "data": {"type": "device_calibration_action", "id": dca.id}
+                        "data": {
+                            "type": "device_calibration_action",
+                            "id": device_calibration_action.id,
+                        }
                     },
                 },
             }
         }
         _ = super().add_object(
-            url=f"{self.device_property_calibration_url}?include=device_property,calibration_action",
+            url=f"{self.url}?include=device_property,calibration_action",
             data_object=data,
             object_type=self.object_type,
         )
 
     def test_update_device_property_calibration(self):
         """Update DevicePropertyCalibration"""
-        d = Device(short_name="Device 300")
-        jwt1 = generate_token_data()
-        c = Contact(
-            given_name=jwt1["given_name"],
-            family_name=jwt1["family_name"],
-            email=jwt1["email"],
+        device = Device(short_name="Device 300")
+        mock_jwt = generate_token_data()
+        contact = Contact(
+            given_name=mock_jwt["given_name"],
+            family_name=mock_jwt["family_name"],
+            email=mock_jwt["email"],
         )
 
-        dca_neu = DeviceCalibrationAction(
+        device_calibration_action = DeviceCalibrationAction(
             description="Test DeviceCalibrationAction",
             formula=fake.pystr(),
             value=fake.pyfloat(),
             current_calibration_date=fake.date(),
             next_calibration_date=fake.date(),
-            device=d,
-            contact=c,
+            device=device,
+            contact=contact,
         )
-        db.session.add_all([d, c, dca_neu])
+        db.session.add_all([device, contact, device_calibration_action])
         db.session.commit()
         dpa = add_device_property_calibration_model()
         data = {
@@ -111,20 +116,23 @@ class TestDevicePropertyCalibration(BaseTestCase):
                 "attributes": {},
                 "relationships": {
                     "calibration_action": {
-                        "data": {"type": "device_calibration_action", "id": dca_neu.id}
+                        "data": {
+                            "type": "device_calibration_action",
+                            "id": device_calibration_action.id,
+                        }
                     },
                 },
             }
         }
         _ = super().update_object(
-            url=f"{self.device_property_calibration_url}/{dpa.id}?include=calibration_action",
+            url=f"{self.url}/{dpa.id}?include=calibration_action",
             data_object=data,
             object_type=self.object_type,
         )
 
     def test_delete_device_property_calibration(self):
         """Delete DevicePropertyCalibration """
-        dpa = add_device_property_calibration_model()
+        device_property_calibration = add_device_property_calibration_model()
         _ = super().delete_object(
-            url=f"{self.device_property_calibration_url}/{dpa.id}",
+            url=f"{self.url}/{device_property_calibration.id}",
         )

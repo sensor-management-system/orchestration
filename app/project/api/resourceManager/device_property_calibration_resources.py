@@ -9,6 +9,7 @@ from project.api.resourceManager.base_resource import (
 from project.api.schemas.calibration_actions_schema import (
     DevicePropertyCalibrationSchema,
 )
+from project.api.token_checker import token_required
 from project.frj_csv_export.resource import ResourceList
 
 
@@ -18,6 +19,7 @@ class DevicePropertyCalibrationList(ResourceList):
         add_created_by_id(data)
 
     schema = DevicePropertyCalibrationSchema
+    decorators = (token_required,)
     data_layer = {
         "session": db.session,
         "model": DevicePropertyCalibration,
@@ -33,6 +35,7 @@ class DevicePropertyCalibrationDetail(ResourceDetail):
         add_updated_by_id(data)
 
     schema = DevicePropertyCalibrationSchema
+    decorators = (token_required,)
     data_layer = {
         "session": db.session,
         "model": DevicePropertyCalibration,
@@ -41,6 +44,7 @@ class DevicePropertyCalibrationDetail(ResourceDetail):
 
 class DevicePropertyCalibrationRelationship(ResourceRelationship):
     schema = DevicePropertyCalibrationSchema
+    decorators = (token_required,)
     data_layer = {
         "session": db.session,
         "model": DevicePropertyCalibration,

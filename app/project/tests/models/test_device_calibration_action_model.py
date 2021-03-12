@@ -11,11 +11,11 @@ from project.tests.base import BaseTestCase, fake, generate_token_data
 
 def add_device_calibration_action():
     d = Device(short_name="Device 12")
-    jwt1 = generate_token_data()
+    mock_jwt = generate_token_data()
     c = Contact(
-        given_name=jwt1["given_name"],
-        family_name=jwt1["family_name"],
-        email=jwt1["email"],
+        given_name=mock_jwt["given_name"],
+        family_name=mock_jwt["family_name"],
+        email=mock_jwt["email"],
     )
     dca = DeviceCalibrationAction(
         description="Test DeviceCalibrationAction",
@@ -49,11 +49,11 @@ def add_device_property_calibration_model():
         sampling_media_uri=fake.uri(),
         sampling_media_name=fake.pystr(),
     )
-    jwt1 = generate_token_data()
+    mock_jwt = generate_token_data()
     c = Contact(
-        given_name=jwt1["given_name"],
-        family_name=jwt1["family_name"],
-        email=jwt1["email"],
+        given_name=mock_jwt["given_name"],
+        family_name=mock_jwt["family_name"],
+        email=mock_jwt["email"],
     )
     dca = DeviceCalibrationAction(
         description="Test DeviceCalibrationAction",

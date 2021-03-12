@@ -12,12 +12,12 @@ from project.tests.models.test_software_update_actions_model import (
 class TestDeviceSoftwareUpdateAction(BaseTestCase):
     """Tests for the DeviceSoftwareUpdateAction endpoints."""
 
-    device_software_update_action_url = base_url + "/device-software-update-actions"
+    url = base_url + "/device-software-update-actions"
     object_type = "device_software_update_action"
 
     def test_get_device_software_update_action(self):
         """Ensure the GET /device_software_update_action route reachable."""
-        response = self.client.get(self.device_software_update_action_url)
+        response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
         # no data yet
         self.assertEqual(response.json["data"], [])
@@ -26,21 +26,21 @@ class TestDeviceSoftwareUpdateAction(BaseTestCase):
         """Test retrieve a collection of DeviceSoftwareUpdateAction objects"""
         sau = add_device_software_update_action_model()
         with self.client:
-            response = self.client.get(self.device_software_update_action_url)
+            response = self.client.get(self.url)
         data = json.loads(response.data.decode())
         self.assertEqual(response.status_code, 200)
         self.assertEqual(sau.description, data["data"][0]["attributes"]["description"])
 
     def test_post_device_software_update_action(self):
         """Create DeviceSoftwareUpdateAction"""
-        d = Device(short_name="Device 1")
-        jwt1 = generate_token_data()
-        c = Contact(
-            given_name=jwt1["given_name"],
-            family_name=jwt1["family_name"],
-            email=jwt1["email"],
+        device = Device(short_name="Device 1")
+        mock_jwt = generate_token_data()
+        contact = Contact(
+            given_name=mock_jwt["given_name"],
+            family_name=mock_jwt["family_name"],
+            email=mock_jwt["email"],
         )
-        db.session.add_all([d, c])
+        db.session.add_all([device, contact])
         db.session.commit()
         data = {
             "data": {
@@ -54,38 +54,38 @@ class TestDeviceSoftwareUpdateAction(BaseTestCase):
                     "update_date": fake.future_datetime().__str__(),
                 },
                 "relationships": {
-                    "device": {"data": {"type": "device", "id": d.id}},
-                    "contact": {"data": {"type": "contact", "id": c.id}},
+                    "device": {"data": {"type": "device", "id": device.id}},
+                    "contact": {"data": {"type": "contact", "id": contact.id}},
                 },
             }
         }
         _ = super().add_object(
-            url=f"{self.device_software_update_action_url}?include=device,contact",
+            url=f"{self.url}?include=device,contact",
             data_object=data,
             object_type=self.object_type,
         )
 
     def test_update_device_software_update_action(self):
         """Update DeviceSoftwareUpdateAction"""
-        sau = add_device_software_update_action_model()
-        c_updated = {
+        device_software_update_action = add_device_software_update_action_model()
+        device_software_update_action_updated = {
             "data": {
                 "type": self.object_type,
-                "id": sau.id,
+                "id": device_software_update_action.id,
                 "attributes": {
                     "description": "updated",
                 },
             }
         }
         _ = super().update_object(
-            url=f"{self.device_software_update_action_url}/{sau.id}",
-            data_object=c_updated,
+            url=f"{self.url}/{device_software_update_action.id}",
+            data_object=device_software_update_action_updated,
             object_type=self.object_type,
         )
 
     def test_delete_device_software_update_action(self):
         """Delete DeviceSoftwareUpdateAction"""
-        sau = add_device_software_update_action_model()
+        device_software_update_action = add_device_software_update_action_model()
         _ = super().delete_object(
-            url=f"{self.device_software_update_action_url}/{sau.id}",
+            url=f"{self.url}/{device_software_update_action.id}",
         )

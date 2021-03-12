@@ -41,6 +41,8 @@ class PlatformSchema(Schema):
         self_view_kwargs={"id": "<id>"},
         related_view="api.user_detail",
         related_view_kwargs={"id": "<created_by_id>"},
+        include_resource_linkage=True,
+        schema="UserSchema",
         type_="user",
     )
     updated_by = Relationship(
@@ -48,16 +50,17 @@ class PlatformSchema(Schema):
         self_view_kwargs={"id": "<id>"},
         related_view="api.user_detail",
         related_view_kwargs={"id": "<updated_by_id>"},
+        include_resource_linkage=True,
+        schema="UserSchema",
         type_="user",
     )
     inventory_number = fields.Str(allow_none=True)
     serial_number = fields.Str(allow_none=True)
     persistent_identifier = fields.Str(allow_none=True)
     platform_attachments = Relationship(
-        self_view="api.platform_platform_attachments",
-        self_view_kwargs={"id": "<id>"},
-        related_view="api.platform_attachment_list",
-        related_view_kwargs={"platform_id": "<id>"},
+        related_view="api.platform_platform_attachments",
+        related_view_kwargs={"id": "<id>"},
+        include_resource_linkage=True,
         many=True,
         allow_none=True,
         schema="PlatformAttachmentSchema",
@@ -65,11 +68,9 @@ class PlatformSchema(Schema):
         id_field="id",
     )
     contacts = Relationship(
-        attribute="contacts",
-        self_view="api.platform_contacts",
-        self_view_kwargs={"id": "<id>"},
-        related_view="api.contact_list",
-        related_view_kwargs={"platform_id": "<id>"},
+        related_view="api.platform_contacts",
+        related_view_kwargs={"id": "<id>"},
+        include_resource_linkage=True,
         many=True,
         schema="ContactSchema",
         type_="contact",

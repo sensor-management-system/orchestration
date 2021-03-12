@@ -11,43 +11,40 @@ from project.tests.models.test_unmount_actions_model import add_unmount_platform
 class TestPlatformUnmountAction(BaseTestCase):
     """Tests for the PlatformUnmountAction endpoints."""
 
-    platform_unmount_action_url = base_url + "/platform-unmount-actions"
+    url = base_url + "/platform-unmount-actions"
     object_type = "platform_unmount_action"
 
     def test_get_platform_unmount_action(self):
         """Ensure the GET /platform_unmount_actions route reachable."""
-        response = self.client.get(self.platform_unmount_action_url)
+        response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
         # no data yet
         self.assertEqual(response.json["data"], [])
 
     def test_get_platform_unmount_action_collection(self):
         """Test retrieve a collection of PlatformUnmountAction objects"""
-        uda = add_unmount_platform_action()
-        response = self.client.get(self.platform_unmount_action_url)
+        unmount_platform_action = add_unmount_platform_action()
+        response = self.client.get(self.url)
         data = json.loads(response.data.decode())
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
-            uda.end_date.strftime("%Y-%m-%dT%H:%M:%S"),
+            unmount_platform_action.end_date.strftime("%Y-%m-%dT%H:%M:%S"),
             data["data"][0]["attributes"]["end_date"],
         )
 
     def test_post_platform_unmount_action(self):
         """Create PlatformUnmountAction"""
-        p = Platform(
+        platform = Platform(
             short_name="Test platform",
         )
-        p_p = Platform(
-            short_name="parent platform",
-        )
-        jwt1 = generate_token_data()
-        c1 = Contact(
-            given_name=jwt1["given_name"],
-            family_name=jwt1["family_name"],
-            email=jwt1["email"],
+        mock_jwt = generate_token_data()
+        contact = Contact(
+            given_name=mock_jwt["given_name"],
+            family_name=mock_jwt["family_name"],
+            email=mock_jwt["email"],
         )
         config = generate_configuration_model()
-        db.session.add_all([p, p_p, c1, config])
+        db.session.add_all([platform, contact, config])
         db.session.commit()
         data = {
             "data": {
@@ -57,8 +54,8 @@ class TestPlatformUnmountAction(BaseTestCase):
                     "end_date": fake.future_datetime().__str__(),
                 },
                 "relationships": {
-                    "platform": {"data": {"type": "platform", "id": p.id}},
-                    "contact": {"data": {"type": "contact", "id": c1.id}},
+                    "platform": {"data": {"type": "platform", "id": platform.id}},
+                    "contact": {"data": {"type": "contact", "id": contact.id}},
                     "configuration": {
                         "data": {"type": "configuration", "id": config.id}
                     },
@@ -66,32 +63,32 @@ class TestPlatformUnmountAction(BaseTestCase):
             }
         }
         _ = super().add_object(
-            url=f"{self.platform_unmount_action_url}?include=platform,contact,configuration",
+            url=f"{self.url}?include=platform,contact,configuration",
             data_object=data,
             object_type=self.object_type,
         )
 
     def test_update_platform_unmount_action(self):
         """Update PlatformUnmountAction"""
-        upa = add_unmount_platform_action()
-        c_updated = {
+        unmount_platform_action = add_unmount_platform_action()
+        unmount_platform_action_updated = {
             "data": {
                 "type": self.object_type,
-                "id": upa.id,
+                "id": unmount_platform_action.id,
                 "attributes": {
                     "description": "updated",
                 },
             }
         }
         _ = super().update_object(
-            url=f"{self.platform_unmount_action_url}/{upa.id}",
-            data_object=c_updated,
+            url=f"{self.url}/{unmount_platform_action.id}",
+            data_object=unmount_platform_action_updated,
             object_type=self.object_type,
         )
 
     def test_delete_platform_unmount_action(self):
         """Delete PlatformUnmountAction """
-        upa = add_unmount_platform_action()
+        unmount_platform_action = add_unmount_platform_action()
         _ = super().delete_object(
-            url=f"{self.platform_unmount_action_url}/{upa.id}",
+            url=f"{self.url}/{unmount_platform_action.id}",
         )

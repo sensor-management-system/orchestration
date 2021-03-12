@@ -15,13 +15,13 @@ def add_mount_device_action_model():
     p_p = Platform(
         short_name="device parent platform",
     )
-    jwt1 = generate_token_data()
+    mock_jwt = generate_token_data()
     c1 = Contact(
-        given_name=jwt1["given_name"],
-        family_name=jwt1["family_name"],
-        email=jwt1["email"],
+        given_name=mock_jwt["given_name"],
+        family_name=mock_jwt["family_name"],
+        email=mock_jwt["email"],
     )
-    u1 = User(subject=jwt1["sub"], contact=c1)
+    u1 = User(subject=mock_jwt["sub"], contact=c1)
     config = generate_configuration_model()
     mpa = DeviceMountAction(
         begin_date=fake.date(),
@@ -53,13 +53,13 @@ class TestMountActionsModel(BaseTestCase):
         p_p = Platform(
             short_name="parent platform",
         )
-        jwt1 = generate_token_data()
+        mock_jwt = generate_token_data()
         c1 = Contact(
-            given_name=jwt1["given_name"],
-            family_name=jwt1["family_name"],
-            email=jwt1["email"],
+            given_name=mock_jwt["given_name"],
+            family_name=mock_jwt["family_name"],
+            email=mock_jwt["email"],
         )
-        u1 = User(subject=jwt1["sub"], contact=c1)
+        u1 = User(subject=mock_jwt["sub"], contact=c1)
         config = generate_configuration_model()
 
         mpa = PlatformMountAction(

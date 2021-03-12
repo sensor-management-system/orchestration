@@ -51,6 +51,8 @@ class DeviceSchema(Schema):
         self_view_kwargs={"id": "<id>"},
         related_view="api.user_detail",
         related_view_kwargs={"id": "<created_by_id>"},
+        include_resource_linkage=True,
+        schema="UserSchema",
         type_="user",
     )
     updated_by = Relationship(
@@ -58,13 +60,14 @@ class DeviceSchema(Schema):
         self_view_kwargs={"id": "<id>"},
         related_view="api.user_detail",
         related_view_kwargs={"id": "<updated_by_id>"},
+        include_resource_linkage=True,
+        schema="UserSchema",
         type_="user",
     )
     customfields = Relationship(
-        self_view="api.device_customfields",
-        self_view_kwargs={"id": "<id>"},
-        related_view="api.customfield_list",
-        related_view_kwargs={"device_id": "<id>"},
+        related_view="api.device_customfields",
+        related_view_kwargs={"id": "<id>"},
+        include_resource_linkage=True,
         many=True,
         allow_none=True,
         schema="CustomFieldSchema",
@@ -72,20 +75,18 @@ class DeviceSchema(Schema):
         id_field="id",
     )
     events = Relationship(
-        self_view="api.device_events",
-        self_view_kwargs={"id": "<id>"},
-        related_view="api.event_list",
-        related_view_kwargs={"device_id": "<id>"},
+        related_view="api.device_events",
+        related_view_kwargs={"id": "<id>"},
+        include_resource_linkage=True,
         many=True,
         allow_none=True,
         schema="EventSchema",
         type_="event",
     )
     device_properties = Relationship(
-        self_view="api.device_device_properties",
-        self_view_kwargs={"id": "<id>"},
-        related_view="api.device_property_list",
-        related_view_kwargs={"device_id": "<id>"},
+        related_view="api.device_device_properties",
+        related_view_kwargs={"id": "<id>"},
+        include_resource_linkage=True,
         many=True,
         allow_none=True,
         schema="DevicePropertySchema",
@@ -93,10 +94,9 @@ class DeviceSchema(Schema):
         id_field="id",
     )
     device_attachments = Relationship(
-        self_view="api.device_device_attachments",
-        self_view_kwargs={"id": "<id>"},
-        related_view="api.device_attachment_list",
-        related_view_kwargs={"device_id": "<id>"},
+        related_view="api.device_device_attachments",
+        related_view_kwargs={"id": "<id>"},
+        include_resource_linkage=True,
         many=True,
         allow_none=True,
         schema="DeviceAttachmentSchema",
@@ -104,11 +104,9 @@ class DeviceSchema(Schema):
         id_field="id",
     )
     contacts = Relationship(
-        attribute="contacts",
-        self_view="api.device_contacts",
-        self_view_kwargs={"id": "<id>"},
-        related_view="api.contact_list",
-        related_view_kwargs={"device_id": "<id>"},
+        related_view="api.device_contacts",
+        related_view_kwargs={"id": "<id>"},
+        include_resource_linkage=True,
         many=True,
         schema="ContactSchema",
         type_="contact",
