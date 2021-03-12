@@ -14,7 +14,7 @@ class DeviceAttachmentList(ResourceList):
     """
     List resource for device attachments.
 
-    Provices get and most methods to retrieve a
+    Provides get and most methods to retrieve a
     collection of device attachments or to create new ones.
     """
 

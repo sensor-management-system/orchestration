@@ -9,7 +9,7 @@ from project.api.token_checker import token_required
 
 class CustomFieldRelationship(ResourceRelationship):
     """
-    Detail resource for custom fields.
+    Relationship resource for custom fields.
 
     Provides methods to work with relationships
     between customfields and other objects.

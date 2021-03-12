@@ -68,7 +68,7 @@ class ConfigurationAttachmentRelationship(ResourceRelationship):
     Relationship resource for ConfigurationAttachments.
     """
 
-    schema = ConfigurationAttachment
+    schema = ConfigurationAttachmentSchema
     decorators = (token_required,)
     data_layer = {
         "session": db.session,
