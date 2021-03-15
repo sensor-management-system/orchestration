@@ -1,4 +1,5 @@
 """Tests for the devices."""
+import os
 
 from project import base_url
 from project.api.models.base_model import db
@@ -6,7 +7,7 @@ from project.api.models.customfield import CustomField
 from project.api.models.device import Device
 from project.api.models.device_attachment import DeviceAttachment
 from project.api.models.device_property import DeviceProperty
-from project.tests.base import BaseTestCase, fake, generate_token_data
+from project.tests.base import BaseTestCase, fake, generate_token_data, test_file_path
 from project.tests.read_from_json import extract_data_from_json_file
 
 
@@ -16,7 +17,7 @@ class TestDeviceService(BaseTestCase):
     device_url = base_url + "/devices"
     contact_url = base_url + "/contacts"
     object_type = "device"
-    json_data_url = "/usr/src/app/project/tests/drafts/devices_test_data.json"
+    json_data_url = os.path.join(test_file_path, "drafts", "devices_test_data.json")
 
     def test_get_devices(self):
         """Ensure the GET /devices route behaves correctly."""

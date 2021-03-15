@@ -1,10 +1,11 @@
 """Tests for the platforms."""
+import os
 
 from project import base_url
 from project.api.models.base_model import db
 from project.api.models.platform import Platform
 from project.api.models.platform_attachment import PlatformAttachment
-from project.tests.base import BaseTestCase, fake, generate_token_data
+from project.tests.base import BaseTestCase, fake, generate_token_data, test_file_path
 from project.tests.read_from_json import extract_data_from_json_file
 
 
@@ -14,7 +15,7 @@ class TestPlatformServices(BaseTestCase):
     platform_url = base_url + "/platforms"
     contact_url = base_url + "/contacts"
     object_type = "platform"
-    json_data_url = "/usr/src/app/project/tests/drafts/platforms_test_data.json"
+    json_data_url = os.path.join(test_file_path, "drafts", "platforms_test_data.json")
 
     def test_add_platform(self):
         """Ensure a new platform can be added to the database."""

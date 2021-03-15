@@ -1,9 +1,10 @@
 import json
+import os
 
 from project import base_url
 from project.api.models import Contact
 from project.api.models.base_model import db
-from project.tests.base import BaseTestCase, generate_token_data
+from project.tests.base import BaseTestCase, generate_token_data, test_file_path
 
 
 def add_a_contact():
@@ -25,7 +26,7 @@ class TestContactServices(BaseTestCase):
 
     url = base_url + "/contacts"
     object_type = "contact"
-    json_data_url = "/usr/src/app/project/tests/drafts/contacts_test_data.json"
+    json_data_url = os.path.join(test_file_path, "drafts", "contacts_test_data.json")
 
     def test_get_contacts(self):
         """Ensure the /contacts route behaves correctly."""
