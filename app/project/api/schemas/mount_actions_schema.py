@@ -15,7 +15,7 @@ class PlatformMountActionSchema(Schema):
         self_view_kwargs = {"id": "<id>"}
 
     id = fields.Integer(as_string=True)
-    begin_date = fields.DateTime(allow_none=False)
+    begin_date = fields.DateTime(required=True)
     description = fields.Str(allow_none=True)
     offset_x = fields.Float(allow_none=True)
     offset_y = fields.Float(allow_none=True)
@@ -102,7 +102,7 @@ class DeviceMountActionSchema(Schema):
         self_view_kwargs = {"id": "<id>"}
 
     id = fields.Integer(as_string=True)
-    begin_date = fields.DateTime(allow_none=False)
+    begin_date = fields.DateTime(required=True)
     description = fields.Str(allow_none=True)
     offset_x = fields.Float(allow_none=True)
     offset_y = fields.Float(allow_none=True)

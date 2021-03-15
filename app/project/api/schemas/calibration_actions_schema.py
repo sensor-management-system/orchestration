@@ -15,7 +15,7 @@ class DeviceCalibrationActionSchema(Schema):
         self_view_kwargs = {"id": "<id>"}
 
     id = fields.Integer(as_string=True)
-    current_calibration_date = fields.DateTime(allow_none=False)
+    current_calibration_date = fields.DateTime(required=True)
     next_calibration_date = fields.DateTime(allow_none=True)
     description = fields.Str(allow_none=True)
     formula = fields.Str(allow_none=True)

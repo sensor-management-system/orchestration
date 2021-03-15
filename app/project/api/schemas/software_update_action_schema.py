@@ -18,7 +18,7 @@ class PlatformSoftwareUpdateActionSchema(Schema):
         self_view_many = "api.platform_software_update_action_list"
 
     id = fields.Integer(as_string=True)
-    software_type_name = fields.Str(allow_none=False)
+    software_type_name = fields.Str(required=True)
     software_type_uri = fields.Str(allow_none=True)
     version = fields.Str(allow_none=True)
     repository_url = fields.Str(allow_none=True)
@@ -84,7 +84,7 @@ class DeviceSoftwareUpdateActionSchema(Schema):
         self_view_many = "api.device_software_update_action_list"
 
     id = fields.Integer(as_string=True)
-    software_type_name = fields.Str(allow_none=False)
+    software_type_name = fields.Str(required=True)
     software_type_uri = fields.Str(allow_none=True)
     version = fields.Str(allow_none=True)
     repository_url = fields.Str(allow_none=True)

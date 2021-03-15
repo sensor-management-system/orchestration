@@ -15,7 +15,7 @@ class PlatformUnmountActionSchema(Schema):
         self_view_kwargs = {"id": "<id>"}
 
     id = fields.Integer(as_string=True)
-    end_date = fields.DateTime(allow_none=False)
+    end_date = fields.DateTime(required=True)
     description = fields.Str(allow_none=True)
     created_at = fields.DateTime(dump_only=True)
     updated_at = fields.DateTime(dump_only=True)
@@ -88,7 +88,7 @@ class DeviceUnmountActionSchema(Schema):
         self_view_kwargs = {"id": "<id>"}
 
     id = fields.Integer(as_string=True)
-    end_date = fields.DateTime(allow_none=False)
+    end_date = fields.DateTime(required=True)
     description = fields.Str(allow_none=True)
     created_at = fields.DateTime(dump_only=True)
     updated_at = fields.DateTime(dump_only=True)
