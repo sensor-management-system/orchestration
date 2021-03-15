@@ -31,49 +31,47 @@
  */
 import { AxiosInstance } from 'axios'
 
-import { CustomTextField } from '@/models/CustomTextField'
-import { CustomTextFieldSerializer } from '@/serializers/jsonapi/CustomTextFieldSerializer'
+import { DeviceProperty } from '@/models/DeviceProperty'
+import { DevicePropertySerializer } from '@/serializers/jsonapi/DevicePropertySerializer'
 
-export class CustomfieldsApi {
+export class DevicePropertyApi {
   private axiosApi: AxiosInstance
-  private serializer: CustomTextFieldSerializer
+  private serializer: DevicePropertySerializer
 
   constructor (axiosInstance: AxiosInstance) {
     this.axiosApi = axiosInstance
-    this.serializer = new CustomTextFieldSerializer()
+    this.serializer = new DevicePropertySerializer()
   }
 
-  findById (id: string): Promise<CustomTextField> {
-    return this.axiosApi.get(id, {
-      // params: {}
-    }).then((rawResponse) => {
-      const rawData = rawResponse.data
+  findById (id: string): Promise<DeviceProperty> {
+    return this.axiosApi.get(id).then((rawRespmse) => {
+      const rawData = rawRespmse.data
       return this.serializer.convertJsonApiObjectToModel(rawData)
     })
   }
 
-  deleteById (id: string) : Promise<void> {
+  deleteById (id: string): Promise<void> {
     return this.axiosApi.delete<string, void>(id)
   }
 
-  add (deviceId: string, field: CustomTextField): Promise<CustomTextField> {
+  add (deviceId: string, deviceProperty: DeviceProperty): Promise<DeviceProperty> {
     const url = ''
-    const data: any = this.serializer.convertModelToJsonApiData(field, deviceId)
+    const data = this.serializer.convertModelToJsonApiData(deviceProperty, deviceId)
     return this.axiosApi.post(url, { data }).then((serverResponse) => {
       return this.serializer.convertJsonApiObjectToModel(serverResponse.data)
     })
   }
 
-  update (deviceId: string, field: CustomTextField): Promise<CustomTextField> {
+  update (deviceId: string, deviceProperty: DeviceProperty) : Promise<DeviceProperty> {
     return new Promise<string>((resolve, reject) => {
-      if (field.id) {
-        resolve(field.id)
+      if (deviceProperty.id) {
+        resolve(deviceProperty.id)
       } else {
-        reject(new Error('no id for the CustomTextField'))
+        reject(new Error('no id for the Attachment'))
       }
-    }).then((fieldId) => {
-      const data: any = this.serializer.convertModelToJsonApiData(field, deviceId)
-      return this.axiosApi.patch(fieldId, { data }).then((serverResponse) => {
+    }).then((devicePropertyId) => {
+      const data = this.serializer.convertModelToJsonApiData(deviceProperty, deviceId)
+      return this.axiosApi.patch(devicePropertyId, { data }).then((serverResponse) => {
         return this.serializer.convertJsonApiObjectToModel(serverResponse.data)
       })
     })
