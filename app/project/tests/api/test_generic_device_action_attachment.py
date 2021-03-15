@@ -25,10 +25,14 @@ class TestGenericDeviceActionAttachment(BaseTestCase):
 
     def test_get_generic_device_action_attachment_collection(self):
         """Test retrieve a collection of GenericDeviceActionAttachment objects"""
-        _ = add_generic_device_action_attachment_model()
+        generic_device_action_attachment = add_generic_device_action_attachment_model()
         with self.client:
             response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
+        # should be only one
+        self.assertEqual(response.json["meta"]["count"], 1)
+        self.assertEqual(response.json["data"][0]["id"],
+                         str(generic_device_action_attachment.id))
 
     def test_post_generic_device_action_attachment(self):
         """Create GenericDeviceActionAttachment"""

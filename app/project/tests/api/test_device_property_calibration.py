@@ -22,9 +22,12 @@ class TestDevicePropertyCalibration(BaseTestCase):
 
     def test_get_device_property_calibration_collection(self):
         """Test retrieve a collection of DevicePropertyCalibration objects"""
-        _ = add_device_property_calibration_model
+        device_property_calibration_model = add_device_property_calibration_model()
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
+        # should be only one
+        self.assertEqual(response.json["meta"]["count"], 1)
+        self.assertEqual(response.json["data"][0]["id"], str(device_property_calibration_model.id))
 
     def test_post_device_property_calibration(self):
         """Create DevicePropertyCalibration"""

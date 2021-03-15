@@ -1,12 +1,12 @@
 import sys
 import unittest
 
+import click
 import coverage
 from flask.cli import FlaskGroup
 
 from project import create_app
 from project.api.models.base_model import db
-from project.tests import suite
 
 app = create_app()
 cli = FlaskGroup(create_app=create_app)
@@ -31,20 +31,41 @@ def recreate_db():
 
 
 @cli.command()
-def test():
+@click.argument('test_names', nargs=-1)
+def test(test_names):
     """ Runs the tests without code coverage """
-    runner = unittest.TextTestRunner(verbosity=2)
-    result = runner.run(suite())
+    if test_names:
+        tests = unittest.TestLoader().loadTestsFromNames(test_names)
+    else:
+        tests = unittest.TestLoader().discover(
+            "project/tests",
+            # Only execute the files starting with test_
+            # as we have some helper files here as well.
+            pattern="test_*.py",
+        )
+    result = unittest.TextTestRunner(verbosity=2).run(tests)
     if result.wasSuccessful():
         return sys.exit(0)
     return sys.exit(1)
 
 
 @cli.command()
-def cov():
+@click.argument('test_names', nargs=-1)
+def cov(test_names):
     """Runs the unit tests with coverage."""
-    runner = unittest.TextTestRunner(verbosity=2)
-    result = runner.run(suite())
+    # To run an oly test just pass th test-model-name
+    # an example:
+    # "python manage.py test project.tests.api.test_platform_software_update_action_attachment"
+    if test_names:
+        tests = unittest.TestLoader().loadTestsFromNames(test_names)
+    else:
+        tests = unittest.TestLoader().discover(
+            "project/tests",
+            # Only execute the files starting with test_
+            # as we have some helper files here as well.
+            pattern="test_*.py",
+        )
+    result = unittest.TextTestRunner(verbosity=2).run(tests)
     if result.wasSuccessful():
         COV.stop()
         COV.save()

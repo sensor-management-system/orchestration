@@ -1,5 +1,3 @@
-import json
-
 from project import base_url, db
 from project.api.models import (
     Contact,
@@ -28,11 +26,14 @@ class TestDeviceSoftwareUpdateActionAttachment(BaseTestCase):
 
     def test_get_device_software_update_action_attachment_collection(self):
         """Test retrieve a collection of DeviceSoftwareUpdateActionAttachment objects"""
-        _ = add_device_software_update_action_attachment()
+        device_software_update_action_attachment = add_device_software_update_action_attachment()
         with self.client:
             response = self.client.get(self.url)
-        _ = json.loads(response.data.decode())
         self.assertEqual(response.status_code, 200)
+        # should be only one
+        self.assertEqual(response.json["meta"]["count"], 1)
+        self.assertEqual(response.json["data"][0]["id"],
+                         str(device_software_update_action_attachment.id))
 
     def test_post_device_software_update_action_attachment(self):
         """TEST Create DeviceSoftwareUpdateActionAttachment"""

@@ -21,9 +21,13 @@ class TestPlatformSoftwareUpdateAction(BaseTestCase):
 
     def test_get_platform_software_update_action_collection(self):
         """Test retrieve a collection of PlatformSoftwareUpdateAction objects"""
-        _ = add_platform_software_update_action_model()
+        platform_software_update_action = add_platform_software_update_action_model()
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
+        # should be only one
+        self.assertEqual(response.json["meta"]["count"], 1)
+        self.assertEqual(response.json["data"][0]["id"],
+                         str(platform_software_update_action.id))
 
     def test_post_platform_software_update_action(self):
         """Create PlatformSoftwareUpdateAction"""
