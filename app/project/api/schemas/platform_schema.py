@@ -94,6 +94,15 @@ class PlatformSchema(Schema):
         type_="platform_mount_actions",
         id_field="id",
     )
+    platform_unmount_actions = Relationship(
+        related_view="api.platform_platform_unmount_actions",
+        related_view_kwargs={"id": "<id>"},
+        include_resource_linkage=True,
+        many=True,
+        schema="PlatformUnmountActionSchema",
+        type_="platform_unmount_actions",
+        id_field="id",
+    )
     platform_software_update_actions = Relationship(
         related_view="api.platform_platform_software_update_actions",
         related_view_kwargs={"id": "<id>"},

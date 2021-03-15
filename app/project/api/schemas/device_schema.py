@@ -131,6 +131,15 @@ class DeviceSchema(Schema):
         type_="device_mount_action",
         id_field="id",
     )
+    device_unmount_actions = Relationship(
+        related_view="api.device_device_unmount_actions",
+        related_view_kwargs={"id": "<id>"},
+        include_resource_linkage=True,
+        many=True,
+        schema="DeviceUnmountActionSchema",
+        type_="device_unmount_action",
+        id_field="id",
+    )
     device_calibration_actions = Relationship(
         related_view="api.device_device_calibration_actions",
         related_view_kwargs={"id": "<id>"},

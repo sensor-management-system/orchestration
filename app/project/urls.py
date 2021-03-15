@@ -50,6 +50,11 @@ api.route(
 )
 api.route(
     PlatformRelationship,
+    "platform_platform_unmount_actions",
+    "/platforms/<int:id>/relationships/platform-unmount-actions",
+)
+api.route(
+    PlatformRelationship,
     "platform_platform_software_update_actions",
     "/platforms/<int:id>/relationships/platform-software-update-actions",
 )
@@ -154,12 +159,18 @@ api.route(
 )
 api.route(
     DeviceRelationship,
-    "device_device_calibration_actions",
+    "device_device_mount_actions",
     "/devices/<int:id>/relationships/device-mount-actions",
 )
 api.route(
     DeviceRelationship,
-    "device_device_mount_actions",
+    "device_device_unmount_actions",
+    "/devices/<int:id>/relationships/device-unmount-actions",
+)
+
+api.route(
+    DeviceRelationship,
+    "device_device_calibration_actions",
     "/devices/<int:id>/relationships/device-calibration-actions",
 )
 api.route(
@@ -291,12 +302,12 @@ api.route(
 api.route(
     ConfigurationRelationship,
     "configuration_platforms",
-    "/configurations/<int:id>/relationships/configurationPlatforms",
+    "/configurations/<int:id>/relationships/configuration-platforms",
 )
 api.route(
     ConfigurationRelationship,
     "configuration_devices",
-    "/configurations/<int:id>/relationships/configurationDevices",
+    "/configurations/<int:id>/relationships/configuration-devices",
 )
 api.route(
     ConfigurationRelationship,
@@ -335,8 +346,18 @@ api.route(
 )
 api.route(
     PlatformRelationship,
+    "configuration_device_unmount_actions",
+    "/configurations/<int:id>/relationships/device-unmount-actions",
+)
+api.route(
+    PlatformRelationship,
     "configuration_platform_mount_actions",
     "/configurations/<int:id>/relationships/platform-mount-actions",
+)
+api.route(
+    PlatformRelationship,
+    "configuration_platform_unmount_actions",
+    "/configurations/<int:id>/relationships/platform-unmount-actions",
 )
 # ConfigurationPlatform
 api.route(

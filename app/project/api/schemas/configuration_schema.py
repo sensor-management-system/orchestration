@@ -127,6 +127,24 @@ class ConfigurationSchema(Schema):
         type_="platform_mount_actions",
         id_field="id",
     )
+    device_unmount_actions = Relationship(
+        related_view="api.configuration_device_unmount_actions",
+        related_view_kwargs={"id": "<id>"},
+        include_resource_linkage=True,
+        many=True,
+        schema="DeviceUnmountActionSchema",
+        type_="device_unmount_action",
+        id_field="id",
+    )
+    platform_unmount_actions = Relationship(
+        related_view="api.configuration_platform_unmount_actions",
+        related_view_kwargs={"id": "<id>"},
+        include_resource_linkage=True,
+        many=True,
+        schema="PlatformUnmountActionSchema",
+        type_="platform_unmount_actions",
+        id_field="id",
+    )
 
     @staticmethod
     def nested_dict_serializer(configuration):
