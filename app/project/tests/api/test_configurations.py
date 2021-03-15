@@ -20,9 +20,15 @@ class TestConfigurationsService(BaseTestCase):
     platform_url = base_url + "/platforms"
     device_url = base_url + "/devices"
     object_type = "configuration"
-    json_data_url = os.path.join(test_file_path, "drafts", "configurations_test_data.json")
-    device_json_data_url = os.path.join(test_file_path, "drafts", "devices_test_data.json")
-    platform_json_data_url = os.path.join(test_file_path, "drafts", "platforms_test_data.json")
+    json_data_url = os.path.join(
+        test_file_path, "drafts", "configurations_test_data.json"
+    )
+    device_json_data_url = os.path.join(
+        test_file_path, "drafts", "devices_test_data.json"
+    )
+    platform_json_data_url = os.path.join(
+        test_file_path, "drafts", "platforms_test_data.json"
+    )
 
     def test_get_configurations(self):
         """Ensure the GET /configurations route behaves correctly."""
@@ -63,8 +69,8 @@ class TestConfigurationsService(BaseTestCase):
             },
         }
         for (
-                input_calibration_date,
-                expected_output_calibration_date,
+            input_calibration_date,
+            expected_output_calibration_date,
         ) in calibration_dates.items():
             # set up for each single run
             self.setUp()
@@ -115,8 +121,8 @@ class TestConfigurationsService(BaseTestCase):
 
             configuration_device = (
                 db.session.query(ConfigurationDevice)
-                    .filter_by(device_id=1, configuration_id=1)
-                    .first()
+                .filter_by(device_id=1, configuration_id=1)
+                .first()
             )
             self.assertEqual(
                 configuration_device.calibration_date,
@@ -170,8 +176,8 @@ class TestConfigurationsService(BaseTestCase):
 
         configuration_device = (
             db.session.query(ConfigurationDevice)
-                .filter_by(device_id=1, configuration_id=1)
-                .first()
+            .filter_by(device_id=1, configuration_id=1)
+            .first()
         )
         self.assertEqual(configuration_device.firmware_version, firmware_version)
 

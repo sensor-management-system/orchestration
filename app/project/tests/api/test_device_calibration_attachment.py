@@ -1,5 +1,3 @@
-import json
-
 from project import base_url, db
 from project.api.models import (
     Contact,
@@ -34,7 +32,9 @@ class TestDeviceCalibrationAttachment(BaseTestCase):
         self.assertEqual(response.status_code, 200)
         # should be only one
         self.assertEqual(response.json["meta"]["count"], 1)
-        self.assertEqual(response.json["data"][0]["id"], str(device_calibration_attachment.id))
+        self.assertEqual(
+            response.json["data"][0]["id"], str(device_calibration_attachment.id)
+        )
 
     def test_post_generic_device_action_attachment(self):
         """Create DeviceCalibrationAttachment"""

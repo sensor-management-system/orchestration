@@ -15,17 +15,17 @@ from project.tests.models.test_configurations_model import generate_configuratio
 
 
 def generate_platform_action_model():
-    p = Platform(
+    platform = Platform(
         short_name="short_name test",
     )
     mock_jwt = generate_token_data()
-    c = Contact(
+    contact = Contact(
         given_name=mock_jwt["given_name"],
         family_name=mock_jwt["family_name"],
         email=mock_jwt["email"],
     )
-    u = User(subject=mock_jwt["sub"], contact=c)
-    gpa = GenericPlatformAction(
+    u = User(subject=mock_jwt["sub"], contact=contact)
+    generic_platform_action = GenericPlatformAction(
         description="test GenericPlatformAction",
         action_type_name="testing",
         action_type_uri="testing.unittest.de",
@@ -33,11 +33,11 @@ def generate_platform_action_model():
         end_date=None,
         created_by=u,
     )
-    gpa.contact = c
-    gpa.platform = p
-    db.session.add_all([p, c, u, gpa])
+    generic_platform_action.contact = contact
+    generic_platform_action.platform = platform
+    db.session.add_all([platform, contact, u, generic_platform_action])
     db.session.commit()
-    return gpa
+    return generic_platform_action
 
 
 def generate_device_action_model():
@@ -54,7 +54,7 @@ def generate_device_action_model():
 
     u1 = User(subject=mock_jwt["sub"], contact=c1)
 
-    gpa = GenericDeviceAction(
+    generic_device_action = GenericDeviceAction(
         description="test GenericDeviceAction",
         action_type_name="testing",
         action_type_uri="testing.unittest.de",
@@ -62,11 +62,11 @@ def generate_device_action_model():
         end_date=None,
         created_by=u1,
     )
-    gpa.contact = c1
-    gpa.device = d
-    db.session.add_all([d, c1, u1, gpa])
+    generic_device_action.contact = c1
+    generic_device_action.device = d
+    db.session.add_all([d, c1, u1, generic_device_action])
     db.session.commit()
-    return gpa
+    return generic_device_action
 
 
 def generate_configuration_action_model():
@@ -79,7 +79,7 @@ def generate_configuration_action_model():
     )
     u1 = User(subject=mock_jwt["sub"], contact=c1)
 
-    gpa = GenericConfigurationAction(
+    generic_configuration_action = GenericConfigurationAction(
         description="test GenericConfigurationAction",
         action_type_name="testing",
         action_type_uri="testing.unittest.de",
@@ -87,11 +87,11 @@ def generate_configuration_action_model():
         end_date=None,
         created_by=u1,
     )
-    gpa.contact = c1
-    gpa.configuration = config
-    db.session.add_all([config, c1, u1, gpa])
+    generic_configuration_action.contact = c1
+    generic_configuration_action.configuration = config
+    db.session.add_all([config, c1, u1, generic_configuration_action])
     db.session.commit()
-    return gpa
+    return generic_configuration_action
 
 
 class TestGenericActions(BaseTestCase):
@@ -101,30 +101,36 @@ class TestGenericActions(BaseTestCase):
 
     def test_add_generic_platform_action_model(self):
         """""Ensure Add generic platform action model """
-        gpa = generate_platform_action_model()
-        gpa_r = (
+        platform_action_model = generate_platform_action_model()
+        generic_platform_action = (
             db.session.query(GenericPlatformAction)
             .filter_by(action_type_name="testing")
             .one()
         )
-        self.assertDictEqual(gpa.__dict__, gpa_r.__dict__)
+        self.assertDictEqual(
+            platform_action_model.__dict__, generic_platform_action.__dict__
+        )
 
     def test_add_generic_device_action_model(self):
         """""Ensure Add generic device action model """
-        gpa = generate_device_action_model()
-        gpa_r = (
+        device_action_model = generate_device_action_model()
+        generic_device_action = (
             db.session.query(GenericDeviceAction)
             .filter_by(action_type_name="testing")
             .one()
         )
-        self.assertDictEqual(gpa.__dict__, gpa_r.__dict__)
+        self.assertDictEqual(
+            device_action_model.__dict__, generic_device_action.__dict__
+        )
 
     def test_add_generic_configuration_action_model(self):
         """""Ensure Add generic configuration action model """
-        gpa = generate_configuration_action_model()
-        gpa_r = (
+        configuration_action_model = generate_configuration_action_model()
+        generic_configuration_action = (
             db.session.query(GenericConfigurationAction)
             .filter_by(action_type_name="testing")
             .one()
         )
-        self.assertDictEqual(gpa.__dict__, gpa_r.__dict__)
+        self.assertDictEqual(
+            configuration_action_model.__dict__, generic_configuration_action.__dict__
+        )

@@ -2,7 +2,7 @@ import os
 from datetime import datetime
 
 from project import base_url
-from project.tests.base import (BaseTestCase, fake, generate_token_data, test_file_path)
+from project.tests.base import BaseTestCase, fake, generate_token_data, test_file_path
 from project.tests.read_from_json import extract_data_from_json_file
 
 
@@ -16,9 +16,15 @@ class TestGenericConfigurationActionServices(BaseTestCase):
     configurations_url = base_url + "/configurations"
     object_type = "generic_configuration_action"
 
-    json_data_url = os.path.join(test_file_path, "drafts", "configurations_test_data.json")
-    device_json_data_url = os.path.join(test_file_path, "drafts", "devices_test_data.json")
-    platform_json_data_url = os.path.join(test_file_path, "drafts", "platforms_test_data.json")
+    json_data_url = os.path.join(
+        test_file_path, "drafts", "configurations_test_data.json"
+    )
+    device_json_data_url = os.path.join(
+        test_file_path, "drafts", "devices_test_data.json"
+    )
+    platform_json_data_url = os.path.join(
+        test_file_path, "drafts", "platforms_test_data.json"
+    )
 
     def test_get_generic_configuration_action(self):
         """Ensure the List /generic_configuration_action route behaves correctly."""

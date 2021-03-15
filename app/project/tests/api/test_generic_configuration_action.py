@@ -19,9 +19,15 @@ class TestGenericConfigurationAction(BaseTestCase):
     device_url = base_url + "/devices"
     contact_url = base_url + "/contacts"
     object_type = "generic_configuration_action"
-    json_data_url = os.path.join(test_file_path, "drafts", "configurations_test_data.json")
-    device_json_data_url = os.path.join(test_file_path, "drafts", "devices_test_data.json")
-    platform_json_data_url = os.path.join(test_file_path, "drafts", "platforms_test_data.json")
+    json_data_url = os.path.join(
+        test_file_path, "drafts", "configurations_test_data.json"
+    )
+    device_json_data_url = os.path.join(
+        test_file_path, "drafts", "devices_test_data.json"
+    )
+    platform_json_data_url = os.path.join(
+        test_file_path, "drafts", "platforms_test_data.json"
+    )
 
     def test_get_generic_configuration_action(self):
         """Ensure the GET /generic_configuration_actions route reachable."""

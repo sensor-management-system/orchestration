@@ -24,7 +24,7 @@ def add_device_software_update_action_attachment():
     db.session.add(d)
     db.session.commit()
     a = DeviceAttachment(label=fake.pystr(), url=fake.url(), device_id=d.id)
-    dsu = DeviceSoftwareUpdateAction(
+    device_software_update_action = DeviceSoftwareUpdateAction(
         device=d,
         software_type_name=fake.pystr(),
         software_type_uri=fake.uri(),
@@ -34,8 +34,10 @@ def add_device_software_update_action_attachment():
         description=fake.paragraph(nb_sentences=3),
         contact=c,
     )
-    dca_a = DeviceSoftwareUpdateActionAttachment(action=dsu, attachment=a)
-    db.session.add_all([d, a, c, dsu, dca_a])
+    dca_a = DeviceSoftwareUpdateActionAttachment(
+        action=device_software_update_action, attachment=a
+    )
+    db.session.add_all([d, a, c, device_software_update_action, dca_a])
     db.session.commit()
     return dca_a
 
@@ -51,7 +53,7 @@ def add_platform_software_update_action_attachment_model():
     db.session.add(p)
     db.session.commit()
     a = PlatformAttachment(label=fake.pystr(), url=fake.url(), platform_id=p.id)
-    psu = PlatformSoftwareUpdateAction(
+    platform_software_update_action = PlatformSoftwareUpdateAction(
         platform=p,
         software_type_name=fake.pystr(),
         software_type_uri=fake.uri(),
@@ -61,8 +63,10 @@ def add_platform_software_update_action_attachment_model():
         description=fake.paragraph(nb_sentences=3),
         contact=c,
     )
-    dca_a = PlatformSoftwareUpdateActionAttachment(action=psu, attachment=a)
-    db.session.add_all([p, a, c, psu, dca_a])
+    dca_a = PlatformSoftwareUpdateActionAttachment(
+        action=platform_software_update_action, attachment=a
+    )
+    db.session.add_all([p, a, c, platform_software_update_action, dca_a])
     db.session.commit()
     return dca_a
 
@@ -73,10 +77,14 @@ class TestSoftwareUpdateActionAttachmentModel(BaseTestCase):
 
     def test_device_software_update_action_attachment_model(self):
         """""Ensure Add DeviceSoftwareUpdateActionAttachment  model."""
-        dca_a = add_device_software_update_action_attachment()
-        self.assertTrue(dca_a.id is not None)
+        device_software_update_action_attachment = (
+            add_device_software_update_action_attachment()
+        )
+        self.assertTrue(device_software_update_action_attachment.id is not None)
 
     def test_platform_software_update_action_attachment_model(self):
         """""Ensure Add PlatformSoftwareUpdateActionAttachment  model."""
-        dca_a = add_platform_software_update_action_attachment_model()
-        self.assertTrue(dca_a.id is not None)
+        platform_software_update_action_attachment = (
+            add_platform_software_update_action_attachment_model()
+        )
+        self.assertTrue(platform_software_update_action_attachment.id is not None)

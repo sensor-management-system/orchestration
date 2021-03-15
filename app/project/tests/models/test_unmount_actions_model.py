@@ -23,17 +23,17 @@ def add_unmount_device_action():
     )
     u1 = User(subject=mock_jwt["sub"], contact=c1)
     config = generate_configuration_model()
-    mpa = DeviceUnmountAction(
+    unmount_device_action = DeviceUnmountAction(
         end_date=fake.date(),
         description="test unmount device action model",
         created_by=u1,
         device=d,
     )
-    mpa.configuration = config
-    mpa.contact = c1
-    db.session.add_all([d, c1, u1, config, mpa])
+    unmount_device_action.configuration = config
+    unmount_device_action.contact = c1
+    db.session.add_all([d, c1, u1, config, unmount_device_action])
     db.session.commit()
-    return mpa
+    return unmount_device_action
 
 
 def add_unmount_platform_action():
@@ -48,17 +48,17 @@ def add_unmount_platform_action():
     )
     u1 = User(subject=mock_jwt["sub"], contact=c1)
     config = generate_configuration_model()
-    mpa = PlatformUnmountAction(
+    unmount_platform_action = PlatformUnmountAction(
         end_date=fake.date(),
         description="test unmount platform action model",
         created_by=u1,
         platform=p,
     )
-    mpa.configuration = config
-    mpa.contact = c1
-    db.session.add_all([p, c1, u1, config, mpa])
+    unmount_platform_action.configuration = config
+    unmount_platform_action.contact = c1
+    db.session.add_all([p, c1, u1, config, unmount_platform_action])
     db.session.commit()
-    return mpa
+    return unmount_platform_action
 
 
 class TestUnMountActionModel(BaseTestCase):
@@ -68,22 +68,31 @@ class TestUnMountActionModel(BaseTestCase):
 
     def test_unmount_platform_action_model(self):
         """""Ensure Add unmount platform action model """
-        mpa = add_unmount_platform_action()
-        mpa_r = (
+        unmount_platform_action_model = add_unmount_platform_action()
+        unmount_platform_action = (
             db.session.query(PlatformUnmountAction)
             .filter_by(description="test unmount platform action model")
             .one()
         )
-        self.assertEqual(mpa.description, mpa_r.description)
-        self.assertDictEqual(mpa.__dict__, mpa_r.__dict__)
+        self.assertEqual(
+            unmount_platform_action_model.description,
+            unmount_platform_action.description,
+        )
+        self.assertDictEqual(
+            unmount_platform_action_model.__dict__, unmount_platform_action.__dict__
+        )
 
     def test_unmount_device_action_model(self):
         """""Ensure Add unmount device action model """
-        mpa = add_unmount_device_action()
-        mpa_r = (
+        unmount_device_action_model = add_unmount_device_action()
+        unmount_device_action = (
             db.session.query(DeviceUnmountAction)
             .filter_by(description="test unmount device action model")
             .one()
         )
-        self.assertEqual(mpa.description, mpa_r.description)
-        self.assertDictEqual(mpa.__dict__, mpa_r.__dict__)
+        self.assertEqual(
+            unmount_device_action_model.description, unmount_device_action.description
+        )
+        self.assertDictEqual(
+            unmount_device_action_model.__dict__, unmount_device_action.__dict__
+        )

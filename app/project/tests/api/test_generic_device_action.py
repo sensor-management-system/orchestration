@@ -1,7 +1,8 @@
 import os
 from datetime import datetime
 
-from project import base_url
+from project import base_url, db
+from project.api.models import Contact
 from project.tests.base import BaseTestCase, fake, generate_token_data, test_file_path
 from project.tests.read_from_json import extract_data_from_json_file
 
@@ -14,9 +15,15 @@ class TestGenericDeviceAction(BaseTestCase):
     device_url = base_url + "/devices"
     contact_url = base_url + "/contacts"
     object_type = "generic_device_action"
-    json_data_url = os.path.join(test_file_path, "drafts", "configurations_test_data.json")
-    device_json_data_url = os.path.join(test_file_path, "drafts", "devices_test_data.json")
-    platform_json_data_url = os.path.join(test_file_path, "drafts", "platforms_test_data.json")
+    json_data_url = os.path.join(
+        test_file_path, "drafts", "configurations_test_data.json"
+    )
+    device_json_data_url = os.path.join(
+        test_file_path, "drafts", "devices_test_data.json"
+    )
+    platform_json_data_url = os.path.join(
+        test_file_path, "drafts", "platforms_test_data.json"
+    )
 
     def test_get_generic_device_action(self):
         """Ensure the GET /generic_device_action route behaves correctly."""
@@ -89,20 +96,13 @@ class TestGenericDeviceAction(BaseTestCase):
             object_type=self.object_type,
         )
         mock_jwt = generate_token_data()
-        contact_data1 = {
-            "data": {
-                "type": "contact",
-                "attributes": {
-                    "given_name": mock_jwt["given_name"],
-                    "family_name": mock_jwt["family_name"],
-                    "email": mock_jwt["email"],
-                    "website": fake.url(),
-                },
-            }
-        }
-        contact = super().add_object(
-            url=self.contact_url, data_object=contact_data1, object_type="contact"
+        contact = Contact(
+            given_name=mock_jwt["given_name"],
+            family_name=mock_jwt["family_name"],
+            email=mock_jwt["email"],
         )
+        db.session.add_all([contact])
+        db.session.commit()
         new_data = {
             "data": {
                 "type": self.object_type,
@@ -117,9 +117,7 @@ class TestGenericDeviceAction(BaseTestCase):
                 },
                 "relationships": {
                     "device": {"data": {"type": "device", "id": "1"}},
-                    "contact": {
-                        "data": {"type": "contact", "id": contact["data"]["id"]}
-                    },
+                    "contact": {"data": {"type": "contact", "id": contact.id}},
                 },
             }
         }

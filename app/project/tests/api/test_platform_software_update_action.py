@@ -26,8 +26,9 @@ class TestPlatformSoftwareUpdateAction(BaseTestCase):
         self.assertEqual(response.status_code, 200)
         # should be only one
         self.assertEqual(response.json["meta"]["count"], 1)
-        self.assertEqual(response.json["data"][0]["id"],
-                         str(platform_software_update_action.id))
+        self.assertEqual(
+            response.json["data"][0]["id"], str(platform_software_update_action.id)
+        )
 
     def test_post_platform_software_update_action(self):
         """Create PlatformSoftwareUpdateAction"""

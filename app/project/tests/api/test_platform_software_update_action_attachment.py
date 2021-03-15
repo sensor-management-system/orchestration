@@ -27,14 +27,18 @@ class TestPlatformSoftwareUpdateActionAttachment(BaseTestCase):
 
     def test_get_platform_software_update_action_attachment_collection(self):
         """Test retrieve attachment collection of PlatformSoftwareUpdateActionAttachment objects"""
-        platform_software_update_action_attachment = add_platform_software_update_action_attachment_model()
+        platform_software_update_action_attachment = (
+            add_platform_software_update_action_attachment_model()
+        )
         with self.client:
             response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
         # should be only one
         self.assertEqual(response.json["meta"]["count"], 1)
-        self.assertEqual(response.json["data"][0]["id"],
-                         str(platform_software_update_action_attachment.id))
+        self.assertEqual(
+            response.json["data"][0]["id"],
+            str(platform_software_update_action_attachment.id),
+        )
 
     def test_post_platform_software_update_action_attachment(self):
         """Create PlatformSoftwareUpdateActionAttachment"""

@@ -18,62 +18,68 @@ from project.tests.models.test_generic_actions_models import (
 
 
 def add_generic_configuration_action_attachment_model():
-    gca = generate_configuration_action_model()
-    a1 = ConfigurationAttachment(
+    configuration_action_model = generate_configuration_action_model()
+    attachment1 = ConfigurationAttachment(
         label="configuration attachment1",
         url=fake.image_url(),
-        configuration_id=gca.configuration_id,
+        configuration_id=configuration_action_model.configuration_id,
     )
-    a2 = ConfigurationAttachment(
+    attachment2 = ConfigurationAttachment(
         label="configuration attachment2",
         url=fake.image_url(),
-        configuration_id=gca.configuration_id,
+        configuration_id=configuration_action_model.configuration_id,
     )
-    gpa_attachment = GenericConfigurationActionAttachment()
-    gpa_attachment.action = gca
-    gpa_attachment.attachment = a1
-    gpa_attachment.attachment = a2
-    db.session.add_all([a1, a2, gpa_attachment])
+    generic_configuration_action_attachment = GenericConfigurationActionAttachment()
+    generic_configuration_action_attachment.action = configuration_action_model
+    generic_configuration_action_attachment.attachment = attachment1
+    generic_configuration_action_attachment.attachment = attachment2
+    db.session.add_all(
+        [attachment1, attachment2, generic_configuration_action_attachment]
+    )
     db.session.commit()
-    return gca
+    return configuration_action_model
 
 
 def add_generic_device_action_attachment_model():
-    gpa = generate_device_action_model()
-    a1 = DeviceAttachment(
-        label="device attachment1", url=fake.image_url(), device_id=gpa.device_id
+    device_action_model = generate_device_action_model()
+    attachment1 = DeviceAttachment(
+        label="device attachment1",
+        url=fake.image_url(),
+        device_id=device_action_model.device_id,
     )
-    a2 = DeviceAttachment(
-        label="device attachment2", url=fake.image_url(), device_id=gpa.device_id
+    attachment2 = DeviceAttachment(
+        label="device attachment2",
+        url=fake.image_url(),
+        device_id=device_action_model.device_id,
     )
     gpa_attachment = GenericDeviceActionAttachment()
-    gpa_attachment.action = gpa
-    gpa_attachment.attachment = a1
-    gpa_attachment.attachment = a2
-    db.session.add_all([a1, a2, gpa_attachment])
+    gpa_attachment.action = device_action_model
+    gpa_attachment.attachment = attachment1
+    gpa_attachment.attachment = attachment2
+    db.session.add_all([attachment1, attachment2, gpa_attachment])
     db.session.commit()
-    return gpa
+    return device_action_model
 
 
 def add_generic_platform_action_attachment_model():
-    gpa = generate_platform_action_model()
-    a1 = PlatformAttachment(
+    platform_action_model = generate_platform_action_model()
+    attachment1 = PlatformAttachment(
         label="platform attachment1",
         url=fake.image_url(),
-        platform_id=gpa.platform_id,
+        platform_id=platform_action_model.platform_id,
     )
-    a2 = PlatformAttachment(
+    attachment2 = PlatformAttachment(
         label="platform attachment2",
         url=fake.image_url(),
-        platform_id=gpa.platform_id,
+        platform_id=platform_action_model.platform_id,
     )
-    gpa_attachment = GenericPlatformActionAttachment()
-    gpa_attachment.action = gpa
-    gpa_attachment.attachment = a1
-    gpa_attachment.attachment = a2
-    db.session.add_all([a1, a2, gpa_attachment])
+    generic_platform_action_attachment = GenericPlatformActionAttachment()
+    generic_platform_action_attachment.action = platform_action_model
+    generic_platform_action_attachment.attachment = attachment1
+    generic_platform_action_attachment.attachment = attachment2
+    db.session.add_all([attachment1, attachment2, generic_platform_action_attachment])
     db.session.commit()
-    return gpa
+    return platform_action_model
 
 
 class TestGenericActionModel(BaseTestCase):
@@ -83,30 +89,45 @@ class TestGenericActionModel(BaseTestCase):
 
     def test_add_generic_platform_action_attachment_model(self):
         """""Ensure Add generic platform action attachment model """
-        gpa = add_generic_platform_action_attachment_model()
-        gpa_t = (
+        generic_platform_action_attachment_model = (
+            add_generic_platform_action_attachment_model()
+        )
+        generic_platform_action_attachment = (
             db.session.query(GenericPlatformActionAttachment)
-            .filter_by(action_id=gpa.id)
+            .filter_by(action_id=generic_platform_action_attachment_model.id)
             .one()
         )
-        self.assertEqual("test GenericPlatformAction", gpa_t.action.description)
+        self.assertEqual(
+            "test GenericPlatformAction",
+            generic_platform_action_attachment.action.description,
+        )
 
     def test_add_generic_device_action_attachment_model(self):
         """""Ensure Add generic device action attachment model """
-        gpa = add_generic_device_action_attachment_model()
-        gpa_t = (
+        generic_device_action_attachment_model = (
+            add_generic_device_action_attachment_model()
+        )
+        generic_device_action_attachment = (
             db.session.query(GenericDeviceActionAttachment)
-            .filter_by(action_id=gpa.id)
+            .filter_by(action_id=generic_device_action_attachment_model.id)
             .one()
         )
-        self.assertEqual("test GenericDeviceAction", gpa_t.action.description)
+        self.assertEqual(
+            "test GenericDeviceAction",
+            generic_device_action_attachment.action.description,
+        )
 
     def test_add_generic_configuration_action_attachment_model(self):
         """""Ensure Add generic configuration action attachment model """
-        gca = add_generic_configuration_action_attachment_model()
-        gpa_t = (
+        generic_device_action_attachment_model = (
+            add_generic_configuration_action_attachment_model()
+        )
+        generic_device_action_attachment = (
             db.session.query(GenericConfigurationActionAttachment)
-            .filter_by(action_id=gca.id)
+            .filter_by(action_id=generic_device_action_attachment_model.id)
             .one()
         )
-        self.assertEqual("test GenericConfigurationAction", gpa_t.action.description)
+        self.assertEqual(
+            "test GenericConfigurationAction",
+            generic_device_action_attachment.action.description,
+        )

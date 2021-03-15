@@ -27,7 +27,9 @@ class TestDevicePropertyCalibration(BaseTestCase):
         self.assertEqual(response.status_code, 200)
         # should be only one
         self.assertEqual(response.json["meta"]["count"], 1)
-        self.assertEqual(response.json["data"][0]["id"], str(device_property_calibration_model.id))
+        self.assertEqual(
+            response.json["data"][0]["id"], str(device_property_calibration_model.id)
+        )
 
     def test_post_device_property_calibration(self):
         """Create DevicePropertyCalibration"""

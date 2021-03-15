@@ -17,7 +17,7 @@ def add_device_software_update_action_model():
         family_name=mock_jwt["family_name"],
         email=mock_jwt["email"],
     )
-    dsu = DeviceSoftwareUpdateAction(
+    device_software_update_action = DeviceSoftwareUpdateAction(
         device=d,
         software_type_name=fake.pystr(),
         software_type_uri=fake.uri(),
@@ -27,9 +27,9 @@ def add_device_software_update_action_model():
         description=fake.paragraph(nb_sentences=3),
         contact=c,
     )
-    db.session.add_all([d, c, dsu])
+    db.session.add_all([d, c, device_software_update_action])
     db.session.commit()
-    return dsu
+    return device_software_update_action
 
 
 def add_platform_software_update_action_model():
@@ -40,7 +40,7 @@ def add_platform_software_update_action_model():
         family_name=mock_jwt["family_name"],
         email=mock_jwt["email"],
     )
-    psu = PlatformSoftwareUpdateAction(
+    platform_software_update_action = PlatformSoftwareUpdateAction(
         platform=p,
         software_type_name=fake.pystr(),
         software_type_uri=fake.uri(),
@@ -50,9 +50,9 @@ def add_platform_software_update_action_model():
         description=fake.paragraph(nb_sentences=3),
         contact=c,
     )
-    db.session.add_all([p, c, psu])
+    db.session.add_all([p, c, platform_software_update_action])
     db.session.commit()
-    return psu
+    return platform_software_update_action
 
 
 class TestDeviceSoftwareUpdateActionModel(BaseTestCase):
@@ -60,10 +60,10 @@ class TestDeviceSoftwareUpdateActionModel(BaseTestCase):
 
     def test_add_device_software_update_action_model(self):
         """""Ensure Add DeviceSoftwareUpdateAction model."""
-        dsu = add_device_software_update_action_model()
-        self.assertTrue(dsu.id is not None)
+        device_software_update_action = add_device_software_update_action_model()
+        self.assertTrue(device_software_update_action.id is not None)
 
     def test_add_platform_software_update_action_model(self):
         """""Ensure Add PlatformSoftwareUpdateAction model."""
-        psu = add_platform_software_update_action_model()
-        self.assertTrue(psu.id is not None)
+        platform_software_update_action = add_platform_software_update_action_model()
+        self.assertTrue(platform_software_update_action.id is not None)
