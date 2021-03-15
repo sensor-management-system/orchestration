@@ -149,7 +149,6 @@ export default class DevicePropertiesPage extends Vue {
     const propertyId = this.getPropertyIdFromUrl()
     console.log('propertyId by URL is', propertyId)
     if (!propertyId) {
-      Vue.set(this, 'openedPanels', [])
       return
     }
     const propertyIndex: number = this.deviceProperties.findIndex((prop: DeviceProperty) => prop.id === propertyId)
@@ -161,9 +160,30 @@ export default class DevicePropertiesPage extends Vue {
   }
 
   addProperty (): void {
+    const property = new DeviceProperty()
+    this.isSaving = true
+    this.$api.deviceProperties.add(this.deviceId, property).then((newProperty: DeviceProperty) => {
+      this.isSaving = false
+      this.deviceProperties.push(newProperty)
+      this.$router.push('/devices/' + this.deviceId + '/properties/' + newProperty.id + '/edit')
+    }).catch(() => {
+      this.isSaving = false
+      this.$store.commit('snackbar/setError', 'Failed to save property')
+    })
   }
 
   deleteProperty (property: DeviceProperty) {
+    if (!property.id) {
+      return
+    }
+    this.$api.deviceProperties.deleteById(property.id).then(() => {
+      const index: number = this.deviceProperties.findIndex((p: DeviceProperty) => p.id === property.id)
+      if (index > -1) {
+        this.deviceProperties.splice(index, 1)
+      }
+    }).catch(() => {
+      this.$store.commit('snackbar/setError', 'Failed to delete property')
+    })
   }
 
   @Watch('$route', { immediate: true, deep: true })

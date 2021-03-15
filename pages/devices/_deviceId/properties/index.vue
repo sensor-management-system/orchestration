@@ -175,6 +175,7 @@ export default class DevicePropertiesShowPage extends Vue {
   }
 
   deleteProperty () {
+    this.$emit('delete', this.value)
   }
 }
 </script>

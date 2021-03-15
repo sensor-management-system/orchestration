@@ -135,6 +135,15 @@ export default class DeviceCustomFieldsShowPage extends Vue {
   }
 
   save (): void {
+    this.isSaving = true
+    this.$api.deviceProperties.update(this.deviceId, this.valueCopy).then((newProperty: DeviceProperty) => {
+      this.isSaving = false
+      this.$emit('input', newProperty)
+      this.$router.push('/devices/' + this.deviceId + '/properties')
+    }).catch(() => {
+      this.isSaving = false
+      this.$store.commit('snackbar/setError', 'Failed to save property')
+    })
   }
 
   @Watch('value', { immediate: true, deep: true })
