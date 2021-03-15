@@ -47,6 +47,7 @@ class DeviceSchema(Schema):
     created_at = fields.DateTime(dump_only=True)
     updated_at = fields.DateTime(dump_only=True)
     created_by = Relationship(
+        attribute="created_by",
         self_view="api.device_created_user",
         self_view_kwargs={"id": "<id>"},
         related_view="api.user_detail",
@@ -110,6 +111,42 @@ class DeviceSchema(Schema):
         many=True,
         schema="ContactSchema",
         type_="contact",
+        id_field="id",
+    )
+    generic_device_actions = Relationship(
+        related_view="api.device_generic_device_actions",
+        related_view_kwargs={"id": "<id>"},
+        include_resource_linkage=True,
+        many=True,
+        schema="GenericDeviceActionSchema",
+        type_="generic_device_action",
+        id_field="id",
+    )
+    device_mount_actions = Relationship(
+        related_view="api.device_device_mount_actions",
+        related_view_kwargs={"id": "<id>"},
+        include_resource_linkage=True,
+        many=True,
+        schema="DeviceMountActionSchema",
+        type_="device_mount_action",
+        id_field="id",
+    )
+    device_calibration_actions = Relationship(
+        related_view="api.device_device_calibration_actions",
+        related_view_kwargs={"id": "<id>"},
+        include_resource_linkage=True,
+        many=True,
+        schema="DeviceCalibrationActionSchema",
+        type_="device_calibration_action",
+        id_field="id",
+    )
+    device_software_update_actions = Relationship(
+        related_view="api.device_device_software_update_actions",
+        related_view_kwargs={"id": "<id>"},
+        include_resource_linkage=True,
+        many=True,
+        schema="DeviceSoftwareUpdateActionAttachmentSchema",
+        type_="device_software_update_action_attachment",
         id_field="id",
     )
 

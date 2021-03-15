@@ -100,6 +100,33 @@ class ConfigurationSchema(Schema):
         type_="configuration_device",
         id_field="id",
     )
+    generic_configuration_actions = Relationship(
+        related_view="api.configuration_generic_configuration_actions",
+        related_view_kwargs={"id": "<id>"},
+        include_resource_linkage=True,
+        many=True,
+        schema="GenericConfigurationActionSchema",
+        type_="generic_configuration_action",
+        id_field="id",
+    )
+    device_mount_actions = Relationship(
+        related_view="api.configuration_device_device_mount_actions",
+        related_view_kwargs={"id": "<id>"},
+        include_resource_linkage=True,
+        many=True,
+        schema="DeviceMountActionSchema",
+        type_="device_mount_action",
+        id_field="id",
+    )
+    platform_mount_actions = Relationship(
+        related_view="api.configuration_platform_mount_actions",
+        related_view_kwargs={"id": "<id>"},
+        include_resource_linkage=True,
+        many=True,
+        schema="PlatformMountActionSchema",
+        type_="platform_mount_actions",
+        id_field="id",
+    )
 
     @staticmethod
     def nested_dict_serializer(configuration):

@@ -10,10 +10,6 @@ class TestPlatformModel(BaseTestCase):
     Test Event Services
     """
 
-    platform_url = base_url + "/platforms"
-    object_type = "platform"
-    json_data_url = "/usr/src/app/project/tests/drafts/platforms_test_data.json"
-
     def test_add_platform_model(self):
         """""Ensure Add platform model """
         platform = Platform(

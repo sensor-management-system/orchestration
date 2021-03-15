@@ -68,6 +68,15 @@ class PlatformSoftwareUpdateActionSchema(Schema):
         type_="user",
         id_field="id",
     )
+    platform_software_update_action_attachments = Relationship(
+        related_view="api.platform_software_update_action_attachments",
+        related_view_kwargs={"id": "<id>"},
+        include_resource_linkage=True,
+        many=True,
+        schema="PlatformSoftwareUpdateActionAttachmentSchema",
+        type_="platform_software_update_action_attachment",
+        id_field="id",
+    )
 
 
 class DeviceSoftwareUpdateActionSchema(Schema):
@@ -132,5 +141,14 @@ class DeviceSoftwareUpdateActionSchema(Schema):
         include_resource_linkage=True,
         schema="UserSchema",
         type_="user",
+        id_field="id",
+    )
+    device_software_update_action_attachments = Relationship(
+        related_view="api.device_software_update_action_attachments",
+        related_view_kwargs={"id": "<id>"},
+        include_resource_linkage=True,
+        many=True,
+        schema="DeviceSoftwareUpdateActionAttachmentSchema",
+        type_="device_software_update_action_attachment",
         id_field="id",
     )

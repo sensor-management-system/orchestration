@@ -101,7 +101,7 @@ class TestGenericDeviceAction(BaseTestCase):
             family_name=mock_jwt["family_name"],
             email=mock_jwt["email"],
         )
-        db.session.add_all([contact])
+        db.session.add(contact)
         db.session.commit()
         new_data = {
             "data": {

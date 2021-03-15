@@ -5,6 +5,9 @@ from project import base_url
 from project.tests.base import BaseTestCase, fake, generate_token_data, test_file_path
 from project.tests.read_from_json import extract_data_from_json_file
 
+from project import db
+from project.api.models import Contact
+
 
 class TestGenericPlatformAction(BaseTestCase):
     """Tests for the GenericPlatformAction endpoints."""
@@ -87,20 +90,13 @@ class TestGenericPlatformAction(BaseTestCase):
             object_type=self.object_type,
         )
         mock_jwt = generate_token_data()
-        contact_data1 = {
-            "data": {
-                "type": "contact",
-                "attributes": {
-                    "given_name": mock_jwt["given_name"],
-                    "family_name": mock_jwt["family_name"],
-                    "email": mock_jwt["email"],
-                    "website": fake.url(),
-                },
-            }
-        }
-        contact = super().add_object(
-            url=self.contact_url, data_object=contact_data1, object_type="contact"
+        contact = Contact(
+            given_name=mock_jwt["given_name"],
+            family_name=mock_jwt["family_name"],
+            email=mock_jwt["email"],
         )
+        db.session.add(contact)
+        db.session.commit()
         new_data = {
             "data": {
                 "type": self.object_type,
@@ -116,7 +112,7 @@ class TestGenericPlatformAction(BaseTestCase):
                 "relationships": {
                     "platform": {"data": {"type": "platform", "id": "1"}},
                     "contact": {
-                        "data": {"type": "contact", "id": contact["data"]["id"]}
+                        "data": {"type": "contact", "id": contact.id}
                     },
                 },
             }

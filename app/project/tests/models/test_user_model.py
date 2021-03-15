@@ -10,10 +10,6 @@ class TestUsersModel(BaseTestCase):
     Test User Services
     """
 
-    user_url = base_url + "/users"
-    object_type = "user"
-    json_data_url = "/usr/src/app/project/tests/drafts/users_test_data.json"
-
     def test_add_user_model(self):
         """""Ensure Add user model """
         mock_jwt = generate_token_data()

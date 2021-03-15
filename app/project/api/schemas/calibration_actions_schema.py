@@ -43,6 +43,24 @@ class DeviceCalibrationActionSchema(Schema):
         type_="contact",
         id_field="id",
     )
+    device_calibration_attachments = Relationship(
+        related_view="api.device_calibration_attachments",
+        related_view_kwargs={"id": "<id>"},
+        include_resource_linkage=True,
+        many=True,
+        schema="DeviceCalibrationAttachmentSchema",
+        type_="device_calibration_attachment",
+        id_field="id",
+    )
+    device_property_calibrations = Relationship(
+        related_view="api.device_calibration_device_property_calibrations",
+        related_view_kwargs={"id": "<id>"},
+        include_resource_linkage=True,
+        many=True,
+        schema="DevicePropertyCalibrationSchema",
+        type_="device_property_calibration",
+        id_field="id",
+    )
 
 
 class DevicePropertyCalibrationSchema(Schema):

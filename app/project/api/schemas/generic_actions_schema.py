@@ -65,6 +65,15 @@ class GenericPlatformActionSchema(Schema):
         type_="user",
         id_field="id",
     )
+    generic_platform_action_attachments = Relationship(
+        related_view="api.generic_platform_action_attachments",
+        related_view_kwargs={"id": "<id>"},
+        include_resource_linkage=True,
+        many=True,
+        schema="GenericPlatformActionAttachmentSchema",
+        type_="generic_platform_action_attachment",
+        id_field="id",
+    )
 
 
 class GenericDeviceActionSchema(Schema):
@@ -122,6 +131,15 @@ class GenericDeviceActionSchema(Schema):
         include_resource_linkage=True,
         schema="UserSchema",
         type_="user",
+        id_field="id",
+    )
+    generic_device_action_attachments = Relationship(
+        related_view="api.generic_device_action_attachments",
+        related_view_kwargs={"id": "<id>"},
+        include_resource_linkage=True,
+        many=True,
+        schema="GenericDeviceActionAttachmentSchema",
+        type_="generic_device_action_attachment",
         id_field="id",
     )
 
@@ -182,4 +200,13 @@ class GenericConfigurationActionSchema(Schema):
         include_resource_linkage=True,
         schema="UserSchema",
         type_="user",
+    )
+    generic_configuration_action_attachments = Relationship(
+        related_view="api.generic_configuration_action_attachments",
+        related_view_kwargs={"id": "<id>"},
+        include_resource_linkage=True,
+        many=True,
+        schema="GenericConfigurationActionAttachmentSchema",
+        type_="generic_configuration_action_attachment",
+        id_field="id",
     )

@@ -76,7 +76,33 @@ class PlatformSchema(Schema):
         type_="contact",
         id_field="id",
     )
-
+    generic_platform_actions = Relationship(
+        related_view="api.generic_platform_actions",
+        related_view_kwargs={"id": "<id>"},
+        include_resource_linkage=True,
+        many=True,
+        schema="GenericPlatformActionSchema",
+        type_="generic_platform_action",
+        id_field="id",
+    )
+    platform_mount_actions = Relationship(
+        related_view="api.platform_platform_mount_actions",
+        related_view_kwargs={"id": "<id>"},
+        include_resource_linkage=True,
+        many=True,
+        schema="PlatformMountActionSchema",
+        type_="platform_mount_actions",
+        id_field="id",
+    )
+    platform_software_update_actions = Relationship(
+        related_view="api.platform_platform_software_update_actions",
+        related_view_kwargs={"id": "<id>"},
+        include_resource_linkage=True,
+        many=True,
+        schema="PlatformSoftwareUpdateActionAttachmentSchema",
+        type_="platform_software_update_action_attachment",
+        id_field="id",
+    )
     @staticmethod
     def nested_dict_serializer(obj):
         """Serialize the object to a nested dict."""
