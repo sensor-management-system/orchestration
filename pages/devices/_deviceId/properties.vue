@@ -21,17 +21,22 @@
       multiple
     >
       <template
-        v-for="(field, index) in properties"
+        v-for="(field, index) in deviceProperties"
       >
         <NuxtChild
           :key="'property-' + index"
-          v-model="properties[index]"
+          v-model="deviceProperties[index]"
+          :compartments="compartments"
+          :sampling-medias="samplingMedias"
+          :properties="properties"
+          :units="units"
+          :measured-quantity-units="measuredQuantityUnits"
           @delete="deleteProperty"
         />
       </template>
     </v-expansion-panels>
     <v-card-actions
-      v-if="properties.length > 3"
+      v-if="deviceProperties.length > 3"
     >
       <v-spacer />
       <v-btn
@@ -48,8 +53,13 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
+import { Component, Vue, Watch } from 'nuxt-property-decorator'
 import { DeviceProperty } from '@/models/DeviceProperty'
+import { Compartment } from '@/models/Compartment'
+import { Property } from '@/models/Property'
+import { SamplingMedia } from '@/models/SamplingMedia'
+import { Unit } from '@/models/Unit'
+import { MeasuredQuantityUnit } from '@/models/MeasuredQuantityUnit'
 
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
@@ -60,19 +70,50 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
 })
 export default class DevicePropertiesPage extends Vue {
   private openedPanels: number[] = []
-  private properties: DeviceProperty[] = []
+  private deviceProperties: DeviceProperty[] = []
   private isLoading = false
   private isSaving = false
+
+  private compartments: Compartment[] = []
+  private samplingMedias: SamplingMedia[] = []
+  private properties: Property[] = []
+  private units: Unit[] = []
+  private measuredQuantityUnits: MeasuredQuantityUnit[] = []
 
   mounted () {
     this.isLoading = true
     this.$api.devices.findRelatedDeviceProperties(this.deviceId).then((foundProperties) => {
-      this.properties = foundProperties
+      this.deviceProperties = foundProperties
       this.isLoading = false
       this.openSelectedPanel()
     }).catch(() => {
-      this.$store.commit('snackbar/setError', 'Failed to fetch custom fields')
+      this.$store.commit('snackbar/setError', 'Failed to fetch properties')
       this.isLoading = false
+    })
+    this.$api.compartments.findAllPaginated().then((foundCompartments) => {
+      this.compartments = foundCompartments
+    }).catch(() => {
+      this.$store.commit('snackbar/setError', 'Loading of compartments failed')
+    })
+    this.$api.samplingMedia.findAllPaginated().then((foundSamplingMedias) => {
+      this.samplingMedias = foundSamplingMedias
+    }).catch(() => {
+      this.$store.commit('snackbar/setError', 'Loading of sampling medias failed')
+    })
+    this.$api.properties.findAllPaginated().then((foundProperties) => {
+      this.properties = foundProperties
+    }).catch(() => {
+      this.$store.commit('snackbar/setError', 'Loading of properties failed')
+    })
+    this.$api.units.findAllPaginated().then((foundUnits) => {
+      this.units = foundUnits
+    }).catch(() => {
+      this.$store.commit('snackbar/setError', 'Loading of units failed')
+    })
+    this.$api.measuredQuantityUnits.findAllPaginated().then((foundUnits) => {
+      this.measuredQuantityUnits = foundUnits
+    }).catch(() => {
+      this.$store.commit('snackbar/setError', 'Loading of measuredquantityunits failed')
     })
   }
 
@@ -106,20 +147,30 @@ export default class DevicePropertiesPage extends Vue {
 
   openSelectedPanel (): void {
     const propertyId = this.getPropertyIdFromUrl()
+    console.log('propertyId by URL is', propertyId)
     if (!propertyId) {
+      Vue.set(this, 'openedPanels', [])
       return
     }
-    const propertyIndex: number = this.properties.findIndex((prop: DeviceProperty) => prop.id === propertyId)
+    const propertyIndex: number = this.deviceProperties.findIndex((prop: DeviceProperty) => prop.id === propertyId)
+    console.log('propertyIndex is', propertyIndex)
     if (propertyIndex === -1) {
       return
     }
-    this.openedPanels = [propertyIndex]
+    Vue.set(this, 'openedPanels', [propertyIndex])
   }
 
   addProperty (): void {
   }
 
   deleteProperty (property: DeviceProperty) {
+  }
+
+  @Watch('$route', { immediate: true, deep: true })
+  // @ts-ignore
+  onRouteChanged () {
+    this.openSelectedPanel()
+    console.log('route changed', this.openedPanels)
   }
 }
 </script>

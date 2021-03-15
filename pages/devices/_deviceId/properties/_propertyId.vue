@@ -3,6 +3,11 @@
     <NuxtChild
       v-if="isEditModeForProperty"
       v-model="property"
+      :compartments="compartments"
+      :sampling-medias="samplingMedias"
+      :properties="properties"
+      :units="units"
+      :measured-quantity-units="measuredQuantityUnits"
     />
     <DevicePropertyExpansionPanel
       v-else
@@ -42,44 +47,68 @@ import DevicePropertyInfo from '@/components/DevicePropertyInfo.vue'
   }
 })
 export default class DevicePropertyIdPage extends Vue {
-  private compartments: Compartment[] = []
-  private samplingMedias: SamplingMedia[] = []
-  private properties: Property[] = []
-  private units: Unit[] = []
-  private measuredQuantityUnits: MeasuredQuantityUnit[] = []
-
   @Prop({
     required: true,
     type: Object
   })
   readonly value!: DeviceProperty
 
+  /**
+   * a list of compartments
+   */
+  @Prop({
+    default: () => [] as Compartment[],
+    required: false,
+    type: Array
+  })
+  // @ts-ignore
+  readonly compartments!: Compartment[]
+
+  /**
+   * a list of samplingMedias
+   */
+  @Prop({
+    default: () => [] as SamplingMedia[],
+    required: false,
+    type: Array
+  })
+  // @ts-ignore
+  readonly samplingMedias!: SamplingMedia[]
+
+  /**
+   * a list of properties
+   */
+  @Prop({
+    default: () => [] as Property[],
+    required: false,
+    type: Array
+  })
+  // @ts-ignore
+  readonly properties!: Property[]
+
+  /**
+   * a list of units
+   */
+  @Prop({
+    default: () => [] as Unit[],
+    required: false,
+    type: Array
+  })
+  // @ts-ignore
+  readonly units!: Unit[]
+
+  /**
+   * a list of measuredQuantityUnits
+   */
+  @Prop({
+    default: () => [] as MeasuredQuantityUnit[],
+    required: false,
+    type: Array
+  })
+  // @ts-ignore
+  readonly measuredQuantityUnits!: MeasuredQuantityUnit[]
+
   mounted () {
-    this.$api.compartments.findAllPaginated().then((foundCompartments) => {
-      this.compartments = foundCompartments
-    }).catch(() => {
-      this.$store.commit('snackbar/setError', 'Loading of compartments failed')
-    })
-    this.$api.samplingMedia.findAllPaginated().then((foundSamplingMedias) => {
-      this.samplingMedias = foundSamplingMedias
-    }).catch(() => {
-      this.$store.commit('snackbar/setError', 'Loading of sampling medias failed')
-    })
-    this.$api.properties.findAllPaginated().then((foundProperties) => {
-      this.properties = foundProperties
-    }).catch(() => {
-      this.$store.commit('snackbar/setError', 'Loading of properties failed')
-    })
-    this.$api.units.findAllPaginated().then((foundUnits) => {
-      this.units = foundUnits
-    }).catch(() => {
-      this.$store.commit('snackbar/setError', 'Loading of units failed')
-    })
-    this.$api.measuredQuantityUnits.findAllPaginated().then((foundUnits) => {
-      this.measuredQuantityUnits = foundUnits
-    }).catch(() => {
-      this.$store.commit('snackbar/setError', 'Loading of measuredquantityunits failed')
-    })
   }
 
   get property (): DeviceProperty {
