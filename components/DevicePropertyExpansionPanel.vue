@@ -32,11 +32,11 @@ permissions and limitations under the Licence.
   <v-expansion-panel>
     <v-expansion-panel-header>
       <v-row no-gutters>
-        <v-col cols="11">
-          {{ value.label }}
+        <v-col cols="10">
+          {{ value.label | orDefault('unknown property') }}
         </v-col>
         <v-col
-          cols="1"
+          cols="2"
           align-self="end"
           class="text-right"
         >
