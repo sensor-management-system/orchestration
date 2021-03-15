@@ -34,6 +34,9 @@ def recreate_db():
 @click.argument('test_names', nargs=-1)
 def test(test_names):
     """ Runs the tests without code coverage """
+    # To run an oly test just pass th test-model-name
+    # an example:
+    # "python manage.py test project.tests.api.test_platform_software_update_action_attachment"
     if test_names:
         tests = unittest.TestLoader().loadTestsFromNames(test_names)
     else:
@@ -53,9 +56,6 @@ def test(test_names):
 @click.argument('test_names', nargs=-1)
 def cov(test_names):
     """Runs the unit tests with coverage."""
-    # To run an oly test just pass th test-model-name
-    # an example:
-    # "python manage.py test project.tests.api.test_platform_software_update_action_attachment"
     if test_names:
         tests = unittest.TestLoader().loadTestsFromNames(test_names)
     else:

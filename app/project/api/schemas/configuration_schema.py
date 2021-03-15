@@ -110,7 +110,7 @@ class ConfigurationSchema(Schema):
         id_field="id",
     )
     device_mount_actions = Relationship(
-        related_view="api.configuration_device_device_mount_actions",
+        related_view="api.configuration_device_mount_actions",
         related_view_kwargs={"id": "<id>"},
         include_resource_linkage=True,
         many=True,

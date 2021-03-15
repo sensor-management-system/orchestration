@@ -77,7 +77,7 @@ class PlatformSchema(Schema):
         id_field="id",
     )
     generic_platform_actions = Relationship(
-        related_view="api.generic_platform_actions",
+        related_view="api.platform_generic_platform_actions",
         related_view_kwargs={"id": "<id>"},
         include_resource_linkage=True,
         many=True,
