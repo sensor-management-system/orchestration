@@ -46,12 +46,13 @@ permissions and limitations under the Licence.
         v-if="isLoggedIn"
         color="green"
         small
-        @click="save()"
+        @click.prevent.stop="save()"
       >
         Apply
       </v-btn>
     </template>
     <DevicePropertyForm
+      ref="propertyForm"
       v-model="valueCopy"
       :compartments="compartments"
       :sampling-medias="samplingMedias"
@@ -153,7 +154,8 @@ export default class DeviceCustomFieldsShowPage extends Vue {
   }
 
   mounted () {
-    //(this.$refs.devicePropertyForm as Vue & { focus: () => void}).focus()
+    // @TODO: disabled, as this.$refs is empty for the first nuxt-child - why?
+    // (this.$refs.propertyForm as Vue & { focus: () => void}).focus()
   }
 
   get deviceId (): string {
