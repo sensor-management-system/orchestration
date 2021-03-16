@@ -58,6 +58,32 @@ api.route(
     "platform_platform_software_update_actions",
     "/platforms/<int:id>/relationships/platform-software-update-actions",
 )
+api.route(
+    PlatformRelationship,
+    "platform_configuration_platform",
+    "/platforms/<int:id>/relationships/configuration-platform",
+)
+api.route(
+    PlatformRelationship,
+    "platform_inner_configuration_platform",
+    "/platforms/<int:id>/relationships/inner-configuration-platform",
+)
+api.route(
+    PlatformRelationship,
+    "platform_inner_configuration_device",
+    "/platforms/<int:id>/relationships/inner-configuration-device",
+)
+api.route(
+    PlatformRelationship,
+    "platform_outer_platform_mount_actions",
+    "/platforms/<int:id>/relationships/outer-platform-mount-actions",
+)
+api.route(
+    PlatformRelationship,
+    "platform_outer_device_mount_actions",
+    "/platforms/<int:id>/relationships/outer-device-mount-actions",
+)
+
 # Platform Attachment
 api.route(
     PlatformAttachmentList,
@@ -177,6 +203,11 @@ api.route(
     DeviceRelationship,
     "device_device_software_update_actions",
     "/devices/<int:id>/relationships/device-software-update-actions",
+)
+api.route(
+    DeviceRelationship,
+    "device_configuration_device",
+    "/devices/<int:id>/relationships/configuration-device",
 )
 
 # Device Property
@@ -358,6 +389,26 @@ api.route(
     PlatformRelationship,
     "configuration_platform_unmount_actions",
     "/configurations/<int:id>/relationships/platform-unmount-actions",
+)
+api.route(
+    PlatformRelationship,
+    "configuration_configuration_static_location_begin_actions",
+    "/configurations/<int:id>/relationships/configuration-static-location-begin-actions",
+)
+api.route(
+    PlatformRelationship,
+    "configuration_configuration_static_location_end_actions",
+    "/configurations/<int:id>/relationships/configuration-static-location-end-actions",
+)
+api.route(
+    PlatformRelationship,
+    "configuration_configuration_dynamic_location_begin_actions",
+    "/configurations/<int:id>/relationships/configuration-dynamic-location-begin-actions",
+)
+api.route(
+    PlatformRelationship,
+    "configuration_configuration_dynamic_location_end_actions",
+    "/configurations/<int:id>/relationships/configuration-dynamic-location-end-actions",
 )
 # ConfigurationPlatform
 api.route(

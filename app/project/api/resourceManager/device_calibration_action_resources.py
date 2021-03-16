@@ -12,6 +12,10 @@ from project.frj_csv_export.resource import ResourceList
 
 
 class DeviceCalibrationActionList(ResourceList):
+    """
+        List resource for device calibration action.
+    """
+
     def before_create_object(self, data, *args, **kwargs):
         """Use jwt to add user id to dataset"""
         add_created_by_id(data)

@@ -112,6 +112,55 @@ class PlatformSchema(Schema):
         type_="platform_software_update_action_attachment",
         id_field="id",
     )
+    configuration_platform = Relationship(
+        self_view="api.platform_configuration_platform",
+        self_view_kwargs={"id": "<id>"},
+        related_view="api.configuration_platform_platform",
+        related_view_kwargs={"id": "<configuration_platform.id>"},
+        include_resource_linkage=True,
+        schema="ConfigurationPlatformSchema",
+        type_="configuration_platform",
+        id_field="id",
+    )
+    inner_configuration_platform = Relationship(
+        self_view="api.platform_inner_configuration_platform",
+        self_view_kwargs={"id": "<id>"},
+        related_view="api.configuration_platform_parent_platform",
+        related_view_kwargs={"id": "<inner_configuration_platform.id>"},
+        include_resource_linkage=True,
+        schema="ConfigurationPlatformSchema",
+        type_="configuration_platform",
+        id_field="id",
+    )
+    inner_configuration_device = Relationship(
+        self_view="api.platform_inner_configuration_device",
+        self_view_kwargs={"id": "<id>"},
+        related_view="api.configuration_device_parent_platform",
+        related_view_kwargs={"id": "<inner_configuration_device.id>"},
+        include_resource_linkage=True,
+        schema="ConfigurationDeviceSchema",
+        type_="configuration_device",
+        id_field="id",
+    )
+    outer_platform_mount_actions = Relationship(
+        related_view="api.platform_outer_platform_mount_actions",
+        related_view_kwargs={"id": "<id>"},
+        include_resource_linkage=True,
+        many=True,
+        schema="PlatformMountActionSchema",
+        type_="platform_mount_actions",
+        id_field="id",
+    )
+    outer_device_mount_actions = Relationship(
+        related_view="api.platform_outer_device_mount_actions",
+        related_view_kwargs={"id": "<id>"},
+        include_resource_linkage=True,
+        many=True,
+        schema="DeviceMountActionSchema",
+        type_="device_mount_action",
+        id_field="id",
+    )
+
     @staticmethod
     def nested_dict_serializer(obj):
         """Serialize the object to a nested dict."""
