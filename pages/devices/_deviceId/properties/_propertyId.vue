@@ -138,9 +138,6 @@ export default class DevicePropertyIdPage extends Vue {
   // @ts-ignore
   readonly measuredQuantityUnits!: MeasuredQuantityUnit[]
 
-  mounted () {
-  }
-
   get property (): DeviceProperty {
     return this.value
   }
