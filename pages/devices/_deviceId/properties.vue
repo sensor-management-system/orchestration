@@ -51,10 +51,10 @@ permissions and limitations under the Licence.
       multiple
     >
       <template
-        v-for="(field, index) in deviceProperties"
+        v-for="(property, index) in deviceProperties"
       >
         <NuxtChild
-          :key="'property-' + index"
+          :key="'property-' + property.id"
           v-model="deviceProperties[index]"
           :compartments="compartments"
           :sampling-medias="samplingMedias"
