@@ -161,8 +161,6 @@ class DeviceSchema(Schema):
     configuration_device = Relationship(
         self_view="api.device_configuration_device",
         self_view_kwargs={"id": "<id>"},
-        related_view="api.configuration_device_device",
-        related_view_kwargs={"id": "<configuration_device.id>"},
         include_resource_linkage=True,
         schema="ConfigurationDeviceSchema",
         type_="configuration_device",
