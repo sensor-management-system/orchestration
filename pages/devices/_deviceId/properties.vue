@@ -161,16 +161,15 @@ export default class DevicePropertiesPage extends Vue {
 
   openSelectedPanel (): void {
     const propertyId = this.getPropertyIdFromUrl()
-    console.log('propertyId by URL is', propertyId)
     if (!propertyId) {
       return
     }
     const propertyIndex: number = this.deviceProperties.findIndex((prop: DeviceProperty) => prop.id === propertyId)
-    console.log('propertyIndex is', propertyIndex)
     if (propertyIndex === -1) {
       return
     }
-    Vue.set(this, 'openedPanels', [propertyIndex])
+    this.openedPanels.forEach((_, i) => this.openedPanels.splice(i, 1))
+    this.openedPanels.push(propertyIndex)
   }
 
   addProperty (): void {
@@ -204,7 +203,6 @@ export default class DevicePropertiesPage extends Vue {
   // @ts-ignore
   onRouteChanged () {
     this.openSelectedPanel()
-    console.log('route changed', this.openedPanels)
   }
 }
 </script>
