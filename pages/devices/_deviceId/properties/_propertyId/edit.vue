@@ -154,8 +154,7 @@ export default class DeviceCustomFieldsShowPage extends Vue {
   }
 
   mounted () {
-    // @TODO: disabled, as this.$refs is empty for the first nuxt-child - why?
-    // (this.$refs.propertyForm as Vue & { focus: () => void}).focus()
+    (this.$refs.propertyForm as Vue & { focus: () => void}).focus()
   }
 
   get deviceId (): string {
