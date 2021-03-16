@@ -110,41 +110,25 @@ export default class DevicePropertiesPage extends Vue {
   private units: Unit[] = []
   private measuredQuantityUnits: MeasuredQuantityUnit[] = []
 
-  mounted () {
-    this.isLoading = true
-    this.$api.devices.findRelatedDeviceProperties(this.deviceId).then((foundProperties) => {
-      this.deviceProperties = foundProperties
+  async fetch () {
+    try {
+      this.isLoading = true
+      this.deviceProperties = await this.$api.devices.findRelatedDeviceProperties(this.deviceId)
       this.isLoading = false
       this.openSelectedPanel()
-    }).catch(() => {
+    } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to fetch properties')
       this.isLoading = false
-    })
-    this.$api.compartments.findAllPaginated().then((foundCompartments) => {
-      this.compartments = foundCompartments
-    }).catch(() => {
-      this.$store.commit('snackbar/setError', 'Loading of compartments failed')
-    })
-    this.$api.samplingMedia.findAllPaginated().then((foundSamplingMedias) => {
-      this.samplingMedias = foundSamplingMedias
-    }).catch(() => {
-      this.$store.commit('snackbar/setError', 'Loading of sampling medias failed')
-    })
-    this.$api.properties.findAllPaginated().then((foundProperties) => {
-      this.properties = foundProperties
-    }).catch(() => {
-      this.$store.commit('snackbar/setError', 'Loading of properties failed')
-    })
-    this.$api.units.findAllPaginated().then((foundUnits) => {
-      this.units = foundUnits
-    }).catch(() => {
-      this.$store.commit('snackbar/setError', 'Loading of units failed')
-    })
-    this.$api.measuredQuantityUnits.findAllPaginated().then((foundUnits) => {
-      this.measuredQuantityUnits = foundUnits
-    }).catch(() => {
-      this.$store.commit('snackbar/setError', 'Loading of measuredquantityunits failed')
-    })
+    }
+    try {
+      this.compartments = await this.$api.compartments.findAllPaginated()
+      this.samplingMedias = await this.$api.samplingMedia.findAllPaginated()
+      this.properties = await this.$api.properties.findAllPaginated()
+      this.units = await this.$api.units.findAllPaginated()
+      this.measuredQuantityUnits = await this.$api.measuredQuantityUnits.findAllPaginated()
+    } catch (e) {
+      this.$store.commit('snackbar/setError', 'Loading of system values failed')
+    }
   }
 
   get isInProgress (): boolean {
