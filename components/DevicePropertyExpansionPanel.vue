@@ -44,7 +44,9 @@ permissions and limitations under the Licence.
         </v-col>
       </v-row>
     </v-expansion-panel-header>
-    <v-expansion-panel-content>
+    <v-expansion-panel-content
+      eager
+    >
       <slot />
     </v-expansion-panel-content>
   </v-expansion-panel>
