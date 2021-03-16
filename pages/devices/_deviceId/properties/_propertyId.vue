@@ -38,6 +38,7 @@ permissions and limitations under the Licence.
       :properties="properties"
       :units="units"
       :measured-quantity-units="measuredQuantityUnits"
+      @open="$emit('open', $event)"
     />
     <DevicePropertyExpansionPanel
       v-else

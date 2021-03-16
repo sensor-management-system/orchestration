@@ -62,6 +62,7 @@ permissions and limitations under the Licence.
           :units="units"
           :measured-quantity-units="measuredQuantityUnits"
           @delete="deleteProperty"
+          @open="openPanel(index, $event)"
         />
       </template>
     </v-expansion-panels>
@@ -99,7 +100,7 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
   }
 })
 export default class DevicePropertiesPage extends Vue {
-  private openedPanels: number[] = []
+  private openedPanels: number[] = [] as number[]
   private deviceProperties: DeviceProperty[] = []
   private isLoading = false
   private isSaving = false
@@ -115,7 +116,7 @@ export default class DevicePropertiesPage extends Vue {
       this.isLoading = true
       this.deviceProperties = await this.$api.devices.findRelatedDeviceProperties(this.deviceId)
       this.isLoading = false
-      this.openSelectedPanel()
+      //this.openSelectedPanel()
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to fetch properties')
       this.isLoading = false
@@ -168,7 +169,7 @@ export default class DevicePropertiesPage extends Vue {
     if (propertyIndex === -1) {
       return
     }
-    this.openedPanels.forEach((_, i) => this.openedPanels.splice(i, 1))
+    this.openedPanels = []
     this.openedPanels.push(propertyIndex)
   }
 
@@ -199,10 +200,23 @@ export default class DevicePropertiesPage extends Vue {
     })
   }
 
+  @Watch('openedPanels', { immediate: true, deep: true })
+  // @ts-ignore
+  onPanelsChanged (newPanels, oldPanels) {
+    console.log(newPanels, oldPanels)
+  }
+
   @Watch('$route', { immediate: true, deep: true })
   // @ts-ignore
   onRouteChanged () {
-    this.openSelectedPanel()
+    //this.openSelectedPanel()
+  }
+
+  openPanel (panelIndex: number, opened: boolean) {
+    this.openedPanels = []
+    if (opened) {
+      this.openedPanels.push(panelIndex)
+    }
   }
 }
 </script>

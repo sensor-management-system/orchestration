@@ -154,6 +154,7 @@ export default class DeviceCustomFieldsShowPage extends Vue {
   }
 
   mounted () {
+    this.$emit('open', true);
     (this.$refs.propertyForm as Vue & { focus: () => void}).focus()
   }
 
