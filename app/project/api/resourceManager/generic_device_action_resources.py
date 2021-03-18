@@ -17,7 +17,7 @@ from project.frj_csv_export.resource import ResourceList
 
 
 class GenericDeviceActionList(ResourceList):
-    """List resource for generic device acitons (get & post)."""
+    """List resource for generic device actions (get & post)."""
 
     def before_create_object(self, data, *args, **kwargs):
         """Use jwt to add user id to dataset."""

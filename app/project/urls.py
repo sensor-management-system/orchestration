@@ -530,6 +530,7 @@ api.route(
     GenericPlatformActionList,
     "generic_platform_action_list",
     "/generic-platform-actions",
+    "/platforms/<int:platform_id>/generic-platform-actions",
 )
 api.route(
     GenericPlatformActionDetail,
