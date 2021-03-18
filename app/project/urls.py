@@ -464,7 +464,10 @@ api.route(
 )
 # GenericDeviceAction
 api.route(
-    GenericDeviceActionList, "generic_device_action_list", "/generic-device-actions"
+    GenericDeviceActionList,
+    "generic_device_action_list",
+    "/generic-device-actions",
+    "/devices/<int:device_id>/generic-device-actions",
 )
 api.route(
     GenericDeviceActionDetail,
