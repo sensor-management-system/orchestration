@@ -815,6 +815,7 @@ api.route(
     DeviceCalibrationActionList,
     "device_calibration_action_list",
     "/device-calibration-actions",
+    "/devices/<int:device_id>/device-calibration-actions",
 )
 api.route(
     DeviceCalibrationActionDetail,
