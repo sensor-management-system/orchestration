@@ -594,6 +594,7 @@ api.route(
     GenericConfigurationActionList,
     "generic_configuration_action_list",
     "/generic-configuration-actions",
+    "/configurations/<int:configuration_id>/generic-configuration-actions",
 )
 api.route(
     GenericConfigurationActionDetail,
