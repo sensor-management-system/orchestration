@@ -1,7 +1,14 @@
+"""Resource classes for device property calibrations."""
+
 from flask_rest_jsonapi import ResourceDetail, ResourceRelationship
+from flask_rest_jsonapi.exceptions import ObjectNotFound
+from sqlalchemy.orm.exc import NoResultFound
 
 from project.api.models.base_model import db
-from project.api.models.calibration_actions import DevicePropertyCalibration
+from project.api.models.calibration_actions import (
+    DeviceCalibrationAction,
+    DevicePropertyCalibration,
+)
 from project.api.resourceManager.base_resource import (
     add_created_by_id,
     add_updated_by_id,
@@ -14,9 +21,42 @@ from project.frj_csv_export.resource import ResourceList
 
 
 class DevicePropertyCalibrationList(ResourceList):
+    """List resource for device property calibrations (get, post)."""
+
     def before_create_object(self, data, *args, **kwargs):
-        """Use jwt to add user id to dataset"""
+        """Use jwt to add user id to dataset."""
         add_created_by_id(data)
+
+    def query(self, view_kwargs):
+        """
+        Query the actions from the database.
+
+        Also handle optional pre-filters (for specific devices, for example).
+        """
+        query_ = self.session.query(DevicePropertyCalibration)
+        # device_id = view_kwargs.get("device_id")
+        device_calibration_action_id = view_kwargs.get("device_calibration_action_id")
+
+        if device_calibration_action_id is not None:
+            try:
+                self.session.query(DeviceCalibrationAction).filter_by(
+                    id=device_calibration_action_id
+                ).one()
+            except NoResultFound:
+                raise ObjectNotFound(
+                    {
+                        "parameter": "id",
+                    },
+                    "DeviceCalibrationAction: {} not found".format(
+                        device_calibration_action_id
+                    ),
+                )
+            else:
+                query_ = query_.filter(
+                    DevicePropertyCalibration.calibration_action_id
+                    == device_calibration_action_id
+                )
+        return query_
 
     schema = DevicePropertyCalibrationSchema
     decorators = (token_required,)
@@ -25,13 +65,16 @@ class DevicePropertyCalibrationList(ResourceList):
         "model": DevicePropertyCalibration,
         "methods": {
             "before_create_object": before_create_object,
+            "query": query,
         },
     }
 
 
 class DevicePropertyCalibrationDetail(ResourceDetail):
+    """Detail resource for the device property calibrations (get, delete, patch)."""
+
     def before_patch(self, args, kwargs, data):
-        """Add Created by user id to the data"""
+        """Add Created by user id to the data."""
         add_updated_by_id(data)
 
     schema = DevicePropertyCalibrationSchema
@@ -43,6 +86,8 @@ class DevicePropertyCalibrationDetail(ResourceDetail):
 
 
 class DevicePropertyCalibrationRelationship(ResourceRelationship):
+    """Relationship resource for the device property calibrations."""
+
     schema = DevicePropertyCalibrationSchema
     decorators = (token_required,)
     data_layer = {
