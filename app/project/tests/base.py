@@ -1,6 +1,5 @@
 import json
 import os
-import random
 import time
 
 from faker import Faker
@@ -97,7 +96,6 @@ def generate_token_data():
     name_l = name.lower().split(" ")
     family_name = name_l[1]
     given_name = name_l[0]
-    n = random.randint(0, 1000)
     # Should be like the sub which comes from the IDP
     identity = f"{''.join(name_l)[:8]}@unittest.test"
     token_data = {
