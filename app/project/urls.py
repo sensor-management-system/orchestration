@@ -742,7 +742,11 @@ api.route(
 )
 # DeviceUnmountAction
 api.route(
-    DeviceUnmountActionList, "device_unmount_action_list", "/device-unmount-actions"
+    DeviceUnmountActionList,
+    "device_unmount_action_list",
+    "/device-unmount-actions",
+    "/configurations/<int:configuration_id>/device-unmount-actions",
+    "/devices/<int:device_id>/device-unmount-actions",
 )
 api.route(
     DeviceUnmountActionDetail,
