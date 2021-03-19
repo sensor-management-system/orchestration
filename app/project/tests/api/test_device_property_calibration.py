@@ -241,7 +241,7 @@ class TestDevicePropertyCalibration(BaseTestCase):
         }
 
     def test_filtered_by_device_calibration_action(self):
-        """Ensure that I can prefilter by a specific device."""
+        """Ensure that I can prefilter by a specific device calibration action."""
         data = self._create_some_device_property_calibrations()
 
         # first check to get them all
@@ -300,6 +300,55 @@ class TestDevicePropertyCalibration(BaseTestCase):
             url_get_for_non_existing_device = (
                 base_url
                 + f"/device-calibration-actions/{action2_id + 9999}/device-property-calibrations"
+            )
+            response = self.client.get(
+                url_get_for_non_existing_device, content_type="application/vnd.api+json"
+            )
+        self.assertEqual(response.status_code, 404)
+
+    def test_filtered_by_device_property(self):
+        """Ensure that I can prefilter by a specific device property."""
+        data = self._create_some_device_property_calibrations()
+
+        # test only for the first device property
+        device_property1_id = data["device_property_ids"][0]
+        with self.client:
+            url_get_for_device_property1 = (
+                base_url
+                + f"/device-properties/{device_property1_id}/device-property-calibrations"
+            )
+            response = self.client.get(
+                url_get_for_device_property1, content_type="application/vnd.api+json"
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json["data"]), 1)
+        self.assertEqual(
+            response.json["data"][0]["relationships"]["device_property"]["data"]["id"],
+            str(device_property1_id),
+        )
+
+        # and test the second device property
+        device_property2_id = data["device_property_ids"][1]
+        with self.client:
+            url_get_for_device_property2 = (
+                base_url
+                + f"/device-properties/{device_property2_id}/device-property-calibrations"
+            )
+            response = self.client.get(
+                url_get_for_device_property2, content_type="application/vnd.api+json"
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json["data"]), 1)
+        self.assertEqual(
+            response.json["data"][0]["relationships"]["device_property"]["data"]["id"],
+            str(device_property2_id),
+        )
+
+        # and for a non existing
+        with self.client:
+            url_get_for_non_existing_device = (
+                base_url
+                + f"/device-properties/{device_property2_id + 9999}/device-property-calibrations"
             )
             response = self.client.get(
                 url_get_for_non_existing_device, content_type="application/vnd.api+json"
