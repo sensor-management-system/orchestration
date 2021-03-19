@@ -660,6 +660,7 @@ api.route(
     "/device-mount-actions",
     "/configurations/<int:configuration_id>/device-mount-actions",
     "/devices/<int:device_id>/device-mount-actions",
+    "/platforms/<int:platform_id>/device-mount-actions",
 )
 api.route(
     DeviceMountActionDetail,

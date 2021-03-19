@@ -8,6 +8,7 @@ from project.api.models.base_model import db
 from project.api.models.configuration import Configuration
 from project.api.models.device import Device
 from project.api.models.mount_actions import DeviceMountAction
+from project.api.models.platform import Platform
 from project.api.resourceManager.base_resource import (
     add_created_by_id,
     add_updated_by_id,
@@ -33,6 +34,7 @@ class DeviceMountActionList(ResourceList):
         query_ = self.session.query(DeviceMountAction)
         configuration_id = view_kwargs.get("configuration_id")
         device_id = view_kwargs.get("device_id")
+        platform_id = view_kwargs.get("platform_id")
 
         if configuration_id is not None:
             try:
@@ -60,6 +62,21 @@ class DeviceMountActionList(ResourceList):
                 )
             else:
                 query_ = query_.filter(DeviceMountAction.device_id == device_id)
+        if platform_id is not None:
+            try:
+                self.session.query(Platform).filter_by(id=platform_id).one()
+            except NoResultFound:
+                raise ObjectNotFound(
+                    {
+                        "parameter": "id",
+                    },
+                    "Platform: {} not found".format(platform_id),
+                )
+            else:
+                query_ = query_.filter(
+                    DeviceMountAction.parent_platform_id == platform_id
+                )
+
         return query_
 
     schema = DeviceMountActionSchema
