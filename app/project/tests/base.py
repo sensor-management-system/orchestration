@@ -1,11 +1,11 @@
 import json
 import os
+import random
 import time
 
 from faker import Faker
 from flask_jwt_extended.tokens import _encode_jwt
 from flask_testing import TestCase
-
 from project import create_app
 from project.api.models.base_model import db
 
@@ -31,8 +31,8 @@ def query_result_to_list(query_result):
 
 
 def encode_token_date_with_hs256(
-    token_data,
-    headers=None,
+        token_data,
+        headers=None,
 ):
     """
     Make use of the flask_jwt_extended methode (_encode_jwt) to
@@ -97,6 +97,7 @@ def generate_token_data():
     name_l = name.lower().split(" ")
     family_name = name_l[1]
     given_name = name_l[0]
+    n = random.randint(0, 1000)
     # Should be like the sub which comes from the IDP
     identity = f"{''.join(name_l)[:8]}@unittest.test"
     token_data = {
@@ -105,7 +106,7 @@ def generate_token_data():
         "name": name,
         "family_name": family_name,
         "given_name": given_name,
-        "email": f"{given_name}.{family_name}@unittest.test",
+        "email": fake.unique.email(),
         "iat": now,  # Issued At: Date/time when the token was issued
         "exp": now + 60,  # Expiration: expire after one minute.
         "aud": "SMS",  # recipient of this token
