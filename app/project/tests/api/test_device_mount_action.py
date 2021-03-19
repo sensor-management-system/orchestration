@@ -200,3 +200,85 @@ class TestDeviceMountAction(BaseTestCase):
                 content_type="application/vnd.api+json",
             )
         self.assertEqual(response.status_code, 404)
+
+    def test_filtered_by_device(self):
+        """Ensure that I can prefilter by a specific devices."""
+        configuration1 = Configuration(
+            label="sample configuration", location_type="static"
+        )
+        db.session.add(configuration1)
+        configuration2 = Configuration(
+            label="sample configuration II", location_type="static"
+        )
+        db.session.add(configuration2)
+
+        contact = Contact(
+            given_name="Nils", family_name="Brinckmann", email="nils@gfz-potsdam.de"
+        )
+        db.session.add(contact)
+
+        device1 = Device(short_name="device1")
+        db.session.add(device1)
+
+        device2 = Device(short_name="device2")
+        db.session.add(device2)
+
+        action1 = DeviceMountAction(
+            configuration=configuration1,
+            contact=contact,
+            device=device1,
+            parent_platform=None,
+            description="Some first action",
+            begin_date=fake.date_time(),
+        )
+        db.session.add(action1)
+
+        action2 = DeviceMountAction(
+            configuration=configuration2,
+            contact=contact,
+            device=device2,
+            description="Some other action",
+            begin_date=fake.date_time(),
+        )
+        db.session.add(action2)
+
+        db.session.commit()
+
+        # test only for the first configuration
+        with self.client:
+            url_get_for_device1 = (
+                base_url + f"/devices/{device1.id}/device-mount-actions"
+            )
+            response = self.client.get(
+                url_get_for_device1, content_type="application/vnd.api+json"
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json["data"]), 1)
+        self.assertEqual(
+            response.json["data"][0]["attributes"]["description"], "Some first action"
+        )
+
+        # and test the second device
+        with self.client:
+            url_get_for_device2 = (
+                base_url + f"/devices/{device2.id}/device-mount-actions"
+            )
+            response = self.client.get(
+                url_get_for_device2, content_type="application/vnd.api+json"
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json["data"]), 1)
+        self.assertEqual(
+            response.json["data"][0]["attributes"]["description"], "Some other action"
+        )
+
+        # and for a non existing
+        with self.client:
+            url_get_for_non_existing_device = (
+                base_url + f"/devices/{device2.id + 9999}/device-mount-actions"
+            )
+            response = self.client.get(
+                url_get_for_non_existing_device,
+                content_type="application/vnd.api+json",
+            )
+        self.assertEqual(response.status_code, 404)

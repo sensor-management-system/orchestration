@@ -6,6 +6,7 @@ from sqlalchemy.orm.exc import NoResultFound
 
 from project.api.models.base_model import db
 from project.api.models.configuration import Configuration
+from project.api.models.device import Device
 from project.api.models.mount_actions import DeviceMountAction
 from project.api.resourceManager.base_resource import (
     add_created_by_id,
@@ -31,6 +32,7 @@ class DeviceMountActionList(ResourceList):
         """
         query_ = self.session.query(DeviceMountAction)
         configuration_id = view_kwargs.get("configuration_id")
+        device_id = view_kwargs.get("device_id")
 
         if configuration_id is not None:
             try:
@@ -46,6 +48,18 @@ class DeviceMountActionList(ResourceList):
                 query_ = query_.filter(
                     DeviceMountAction.configuration_id == configuration_id
                 )
+        if device_id is not None:
+            try:
+                self.session.query(Device).filter_by(id=device_id).one()
+            except NoResultFound:
+                raise ObjectNotFound(
+                    {
+                        "parameter": "id",
+                    },
+                    "Device: {} not found".format(device_id),
+                )
+            else:
+                query_ = query_.filter(DeviceMountAction.device_id == device_id)
         return query_
 
     schema = DeviceMountActionSchema
