@@ -654,7 +654,12 @@ api.route(
 )
 
 # MountDeviceAction
-api.route(DeviceMountActionList, "device_mount_action_list", "/device-mount-actions")
+api.route(
+    DeviceMountActionList,
+    "device_mount_action_list",
+    "/device-mount-actions",
+    "/configurations/<int:configuration_id>/device-mount-actions",
+)
 api.route(
     DeviceMountActionDetail,
     "device_mount_action_detail",
