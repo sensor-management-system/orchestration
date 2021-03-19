@@ -988,6 +988,7 @@ api.route(
     "/device-property-calibrations",
     "/device-calibration-actions/<int:device_calibration_action_id>/device-property-calibrations",
     "/device-properties/<int:device_property_id>/device-property-calibrations",
+    "/devices/<int:device_id>/device-property-calibrations",
 )
 api.route(
     DevicePropertyCalibrationDetail,

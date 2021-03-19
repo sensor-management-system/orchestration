@@ -9,6 +9,7 @@ from project.api.models.calibration_actions import (
     DeviceCalibrationAction,
     DevicePropertyCalibration,
 )
+from project.api.models.device import Device
 from project.api.models.device_property import DeviceProperty
 from project.api.resourceManager.base_resource import (
     add_created_by_id,
@@ -35,7 +36,7 @@ class DevicePropertyCalibrationList(ResourceList):
         Also handle optional pre-filters (for specific devices, for example).
         """
         query_ = self.session.query(DevicePropertyCalibration)
-        # device_id = view_kwargs.get("device_id")
+        device_id = view_kwargs.get("device_id")
         device_calibration_action_id = view_kwargs.get("device_calibration_action_id")
         device_property_id = view_kwargs.get("device_property_id")
 
@@ -73,6 +74,20 @@ class DevicePropertyCalibrationList(ResourceList):
             else:
                 query_ = query_.filter(
                     DevicePropertyCalibration.device_property_id == device_property_id
+                )
+        if device_id is not None:
+            try:
+                self.session.query(Device).filter_by(id=device_id).one()
+            except NoResultFound:
+                raise ObjectNotFound(
+                    {
+                        "parameter": "id",
+                    },
+                    "Device: {} not found".format(device_id),
+                )
+            else:
+                query_ = query_.join(DeviceCalibrationAction).filter(
+                    DeviceCalibrationAction.device_id == device_id
                 )
 
         return query_
