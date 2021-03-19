@@ -29,7 +29,7 @@ class DeviceSoftwareUpdateActionList(ResourceList):
         """
         Query the actions from the database.
 
-        Also handle optional pre-filters (for specific configurations, for example).
+        Also handle optional pre-filters (for specific devices, for example).
         """
         query_ = self.session.query(DeviceSoftwareUpdateAction)
         device_id = view_kwargs.get("device_id")

@@ -942,6 +942,7 @@ api.route(
     PlatformSoftwareUpdateActionList,
     "platform_software_update_action_list",
     "/platform-software-update-actions",
+    "/platforms/<int:platform_id>/platform-software-update-actions",
 )
 api.route(
     PlatformSoftwareUpdateActionDetail,
