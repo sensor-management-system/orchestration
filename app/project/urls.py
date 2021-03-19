@@ -883,6 +883,7 @@ api.route(
     DeviceSoftwareUpdateActionList,
     "device_software_update_action_list",
     "/device-software-update-actions",
+    "/devices/<int:device_id>/device-software-update-actions",
 )
 api.route(
     DeviceSoftwareUpdateActionDetail,

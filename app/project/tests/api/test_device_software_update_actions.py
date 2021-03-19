@@ -1,7 +1,9 @@
+"""Tests for the device software update action api."""
+
 import json
 
 from project import base_url
-from project.api.models import Contact, Device
+from project.api.models import Contact, Device, DeviceSoftwareUpdateAction
 from project.api.models.base_model import db
 from project.tests.base import BaseTestCase, fake, generate_token_data
 from project.tests.models.test_software_update_actions_model import (
@@ -23,7 +25,7 @@ class TestDeviceSoftwareUpdateAction(BaseTestCase):
         self.assertEqual(response.json["data"], [])
 
     def test_get_device_software_update_action_collection(self):
-        """Test retrieve a collection of DeviceSoftwareUpdateAction objects"""
+        """Test retrieve a collection of DeviceSoftwareUpdateAction objects."""
         sau = add_device_software_update_action_model()
         with self.client:
             response = self.client.get(self.url)
@@ -32,7 +34,7 @@ class TestDeviceSoftwareUpdateAction(BaseTestCase):
         self.assertEqual(sau.description, data["data"][0]["attributes"]["description"])
 
     def test_post_device_software_update_action(self):
-        """Create DeviceSoftwareUpdateAction"""
+        """Create DeviceSoftwareUpdateAction."""
         device = Device(short_name="Device 1")
         mock_jwt = generate_token_data()
         contact = Contact(
@@ -66,7 +68,7 @@ class TestDeviceSoftwareUpdateAction(BaseTestCase):
         )
 
     def test_update_device_software_update_action(self):
-        """Update DeviceSoftwareUpdateAction"""
+        """Update DeviceSoftwareUpdateAction."""
         device_software_update_action = add_device_software_update_action_model()
         device_software_update_action_updated = {
             "data": {
@@ -84,8 +86,90 @@ class TestDeviceSoftwareUpdateAction(BaseTestCase):
         )
 
     def test_delete_device_software_update_action(self):
-        """Delete DeviceSoftwareUpdateAction"""
+        """Delete DeviceSoftwareUpdateAction."""
         device_software_update_action = add_device_software_update_action_model()
         _ = super().delete_object(
             url=f"{self.url}/{device_software_update_action.id}",
         )
+
+    def test_filtered_by_device(self):
+        """Ensure that I can prefilter by a specific devices."""
+        contact = Contact(
+            given_name="Nils", family_name="Brinckmann", email="nils@gfz-potsdam.de"
+        )
+        db.session.add(contact)
+
+        device1 = Device(short_name="device1")
+        db.session.add(device1)
+
+        device2 = Device(short_name="device2")
+        db.session.add(device2)
+
+        action1 = DeviceSoftwareUpdateAction(
+            contact=contact,
+            device=device1,
+            description="Some first action",
+            software_type_name="firmware",
+            update_date=fake.date_time(),
+        )
+        db.session.add(action1)
+
+        action2 = DeviceSoftwareUpdateAction(
+            contact=contact,
+            device=device2,
+            description="Some other action",
+            software_type_name="sampleScript",
+            update_date=fake.date_time(),
+        )
+        db.session.add(action2)
+
+        db.session.commit()
+
+        # first check to get them all
+        with self.client:
+            url_get_all = base_url + "/device-software-update-actions"
+            response = self.client.get(
+                url_get_all, content_type="application/vnd.api+json"
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json["data"]), 2)
+
+        # test only for the first device
+        with self.client:
+            url_get_for_device1 = (
+                base_url + f"/devices/{device1.id}/device-software-update-actions"
+            )
+            response = self.client.get(
+                url_get_for_device1, content_type="application/vnd.api+json"
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json["data"]), 1)
+        self.assertEqual(
+            response.json["data"][0]["attributes"]["description"], "Some first action"
+        )
+
+        # and test the second device
+        with self.client:
+            url_get_for_device2 = (
+                base_url + f"/devices/{device2.id}/device-software-update-actions"
+            )
+            response = self.client.get(
+                url_get_for_device2, content_type="application/vnd.api+json"
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json["data"]), 1)
+        self.assertEqual(
+            response.json["data"][0]["attributes"]["description"], "Some other action"
+        )
+
+        # and for a non existing
+        with self.client:
+            url_get_for_non_existing_device = (
+                base_url
+                + f"/devices/{device2.id + 9999}/device-software-update-actions"
+            )
+            response = self.client.get(
+                url_get_for_non_existing_device,
+                content_type="application/vnd.api+json",
+            )
+        self.assertEqual(response.status_code, 404)
