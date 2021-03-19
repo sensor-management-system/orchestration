@@ -167,6 +167,7 @@ class TestGenericPlatformAction(BaseTestCase):
             action_type_name="PlatformActivity",
         )
         db.session.add(action2)
+        db.session.commit()
 
         # first check to get them all
         with self.client:

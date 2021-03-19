@@ -173,6 +173,7 @@ class TestGenericDeviceAction(BaseTestCase):
             action_type_name="DeviceActivity",
         )
         db.session.add(action2)
+        db.session.commit()
 
         # first check to get them all
         with self.client:

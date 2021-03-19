@@ -143,6 +143,7 @@ class TestGenericConfigurationAction(BaseTestCase):
             action_type_name="ConfigurationActivity",
         )
         db.session.add(action2)
+        db.session.commit()
 
         # first check to get them all
         with self.client:

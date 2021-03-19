@@ -121,6 +121,7 @@ class TestDeviceCalibrationAction(BaseTestCase):
             current_calibration_date=fake.date_time(),
         )
         db.session.add(action2)
+        db.session.commit()
 
         # first check to get them all
         with self.client:
