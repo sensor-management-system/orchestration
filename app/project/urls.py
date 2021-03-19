@@ -699,7 +699,10 @@ api.route(
 )
 # MountPlatformAction
 api.route(
-    PlatformMountActionList, "platform_mount_action_list", "/platform-mount-actions"
+    PlatformMountActionList,
+    "platform_mount_action_list",
+    "/platform-mount-actions",
+    "/configurations/<int:configuration_id>/platform-mount-actions",
 )
 api.route(
     PlatformMountActionDetail,
