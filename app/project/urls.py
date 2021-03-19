@@ -788,6 +788,8 @@ api.route(
     PlatformUnmountActionList,
     "platform_unmount_action_list",
     "/platform-unmount-actions",
+    "/configurations/<int:configuration_id>/platform-unmount-actions",
+    "/platforms/<int:platform_id>/platform-unmount-actions",
 )
 api.route(
     PlatformUnmountActionDetail,
