@@ -7,6 +7,7 @@ from sqlalchemy.orm.exc import NoResultFound
 from project.api.models.base_model import db
 from project.api.models.configuration import Configuration
 from project.api.models.mount_actions import PlatformMountAction
+from project.api.models.platform import Platform
 from project.api.resourceManager.base_resource import (
     add_created_by_id,
     add_updated_by_id,
@@ -31,6 +32,7 @@ class PlatformMountActionList(ResourceList):
         """
         query_ = self.session.query(PlatformMountAction)
         configuration_id = view_kwargs.get("configuration_id")
+        platform_id = view_kwargs.get("platform_id")
         if configuration_id is not None:
             try:
                 self.session.query(Configuration).filter_by(id=configuration_id).one()
@@ -45,6 +47,18 @@ class PlatformMountActionList(ResourceList):
                 query_ = query_.filter(
                     PlatformMountAction.configuration_id == configuration_id
                 )
+        if platform_id is not None:
+            try:
+                self.session.query(Platform).filter_by(id=platform_id).one()
+            except NoResultFound:
+                raise ObjectNotFound(
+                    {
+                        "parameter": "id",
+                    },
+                    "Platform: {} not found".format(platform_id),
+                )
+            else:
+                query_ = query_.filter(PlatformMountAction.platform_id == platform_id)
         return query_
 
     schema = PlatformMountActionSchema
