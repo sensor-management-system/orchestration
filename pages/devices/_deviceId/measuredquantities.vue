@@ -154,62 +154,14 @@ permissions and limitations under the Licence.
             />
           </template>
           <template v-else>
-            <div>
-              <v-row dense>
-                <v-col cols="12" md="3">
-                  <label>Label:</label>
-                  {{ property.label }}
-                </v-col>
-              </v-row>
-              <v-row>
-                <v-col cols="12" md="3">
-                  <label>Compartment</label>
-                  {{ compartmentValue(property) | orDefault }}
-                </v-col>
-                <v-col cols="12" md="3">
-                  <label>Sampling Media</label>
-                  {{ samplingMediaValue(property) | orDefault }}
-                </v-col>
-                <v-col cols="12" md="3">
-                  <label>Measured Quantity</label>
-                  {{ measuredQuantityValue(property) | orDefault }}
-                </v-col>
-              </v-row>
-              <v-row>
-                <v-col cols="12" md="3">
-                  <label>Unit</label>
-                  {{ unitValue(property) | orDefault }}
-                </v-col>
-                <v-col cols="12" md="3">
-                  <label>Measuring range min</label>
-                  {{ property.measuringRange.min | orDefault }}
-                </v-col>
-                <v-col cols="12" md="3">
-                  <label>Measuring range max</label>
-                  {{ property.measuringRange.max | orDefault }}
-                </v-col>
-              </v-row>
-              <v-row>
-                <v-col cols="12" md="3">
-                  <label>Accuracy</label>
-                  {{ property.accuracy | orDefault }}
-                </v-col>
-                <v-col cols="12" md="3">
-                  <label>Failure Value</label>
-                  {{ property.failureValue | orDefault }}
-                </v-col>
-              </v-row>
-              <v-row>
-                <v-col cols="12" md="3">
-                  <label>Resolution</label>
-                  {{ property.resolution | orDefault }}
-                </v-col>
-                <v-col cols="12" md="3">
-                  <label>Unit of Resolution</label>
-                  {{ resolutionUnitValue(property) | orDefault }}
-                </v-col>
-              </v-row>
-            </div>
+            <DevicePropertyInfo
+              v-model="deviceProperties[index]"
+              :compartments="compartments"
+              :sampling-medias="samplingMedias"
+              :properties="properties"
+              :units="units"
+              :measured-quantity-units="measuredQuantityUnits"
+            />
           </template>
         </v-expansion-panel-content>
       </v-expansion-panel>
@@ -233,6 +185,9 @@ permissions and limitations under the Licence.
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
+
+import DevicePropertyInfo from '@/components/DevicePropertyInfo.vue'
+
 import { DeviceProperty } from '@/models/DeviceProperty'
 import { Compartment } from '@/models/Compartment'
 import { Property } from '@/models/Property'
@@ -244,7 +199,8 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
 @Component({
   components: {
-    ProgressIndicator
+    ProgressIndicator,
+    DevicePropertyInfo
   }
 })
 export default class DevicePropertiesPage extends Vue {
@@ -389,61 +345,6 @@ export default class DevicePropertiesPage extends Vue {
 
   cancelEditMode () {
     this.$router.push('/devices/' + this.deviceId + '/measuredquantities')
-  }
-
-  compartmentValue (property: DeviceProperty): string {
-    if (!property.compartmentName && !property.compartmentUri) {
-      return ''
-    }
-    const compartment = this.compartments.find(c => c.uri === property.compartmentUri)
-    if (compartment) {
-      return compartment.name
-    }
-    return property.compartmentName
-  }
-
-  samplingMediaValue (property: DeviceProperty): string {
-    if (!property.samplingMediaName && !property.samplingMediaUri) {
-      return ''
-    }
-    const samplingMedia = this.samplingMedias.find(c => c.uri === property.samplingMediaUri)
-    if (samplingMedia) {
-      return samplingMedia.name
-    }
-    return property.samplingMediaName
-  }
-
-  measuredQuantityValue (propertyEntity: DeviceProperty): string {
-    if (!propertyEntity.propertyName && !propertyEntity.propertyUri) {
-      return ''
-    }
-    const property = this.properties.find(c => c.uri === propertyEntity.propertyUri)
-    if (property) {
-      return property.name
-    }
-    return propertyEntity.propertyName
-  }
-
-  unitValue (property: DeviceProperty): string {
-    if (!property.unitName && !property.unitUri) {
-      return ''
-    }
-    const unit = this.units.find(c => c.uri === property.unitUri)
-    if (unit) {
-      return unit.name
-    }
-    return property.unitName
-  }
-
-  resolutionUnitValue (property: DeviceProperty): string {
-    if (!property.resolutionUnitName && !property.resolutionUnitUri) {
-      return ''
-    }
-    const unit = this.units.find(c => c.uri === property.resolutionUnitUri)
-    if (unit) {
-      return unit.name
-    }
-    return property.resolutionUnitName
   }
 }
 </script>
