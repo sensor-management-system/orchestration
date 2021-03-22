@@ -90,11 +90,10 @@ export default class AppBarTabsExtension extends Vue {
    * the active tab
    */
   @Prop({
-    default: null,
-    type: Number
+    default: null
   })
   // @ts-ignore
-  readonly value: number | null
+  readonly value: string | number | null
 
   /**
    * an array of tabs
