@@ -57,7 +57,7 @@ permissions and limitations under the Licence.
         <v-expansion-panel-header>
           <v-row no-gutters>
             <v-col class="text-subtitle-1" cols="11">
-              Property {{ index+1 }} {{ property.label ? ' - ' + property.label : '' }}
+              Measured quantity {{ index+1 }} {{ property.label ? ' - ' + property.label : '' }}
             </v-col>
             <v-col
               algin-self="end"

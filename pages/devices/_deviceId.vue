@@ -62,7 +62,7 @@ export default class DevicePage extends Vue {
         },
         {
           to: '/devices/' + this.deviceId + '/measuredquantities',
-          name: 'Properties'
+          name: 'Measured Quantities'
         },
         {
           to: '/devices/' + this.deviceId + '/customfields',
