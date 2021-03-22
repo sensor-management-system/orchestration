@@ -143,7 +143,15 @@ permissions and limitations under the Licence.
         </v-expansion-panel-header>
         <v-expansion-panel-content>
           <template v-if="isEditModeForProperty(property)">
-            <NuxtChild v-model="deviceProperties[index]" />
+            <NuxtChild
+              v-model="deviceProperties[index]"
+              :compartments="compartments"
+              :sampling-medias="samplingMedias"
+              :properties="properties"
+              :units="units"
+              :measured-quantity-units="measuredQuantityUnits"
+              @showsave="showsave"
+            />
           </template>
           <template v-else>
             <div>
@@ -204,19 +212,6 @@ permissions and limitations under the Licence.
             </div>
           </template>
         </v-expansion-panel-content>
-        <!--
-        <NuxtChild
-          :key="'property-' + property.id"
-          v-model="deviceProperties[index]"
-          :compartments="compartments"
-          :sampling-medias="samplingMedias"
-          :properties="properties"
-          :units="units"
-          :measured-quantity-units="measuredQuantityUnits"
-          @delete="deleteProperty"
-          @open="openPanel(index, $event)"
-        />
-        -->
       </v-expansion-panel>
     </v-expansion-panels>
     <v-card-actions
@@ -327,6 +322,33 @@ export default class DevicePropertiesPage extends Vue {
 
   addProperty (): void {
     const property = new DeviceProperty()
+    this.copyProperty(property)
+  }
+
+  deleteProperty (property: DeviceProperty) {
+    if (!property.id) {
+      return
+    }
+    this.isSaving = true
+    this.$api.deviceProperties.deleteById(property.id).then(() => {
+      const index: number = this.deviceProperties.findIndex((p: DeviceProperty) => p.id === property.id)
+      if (index > -1) {
+        this.deviceProperties.splice(index, 1)
+      }
+      this.isSaving = false
+    }).catch(() => {
+      this.isSaving = false
+      this.$store.commit('snackbar/setError', 'Failed to delete property')
+    })
+  }
+
+  showsave (isSaving: boolean) {
+    this.isSaving = isSaving
+  }
+
+  copyProperty (oldProperty: DeviceProperty) {
+    const property = DeviceProperty.createFromObject(oldProperty)
+    property.id = null
     this.isSaving = true
     this.$api.deviceProperties.add(this.deviceId, property).then((newProperty: DeviceProperty) => {
       this.isSaving = false
@@ -338,24 +360,6 @@ export default class DevicePropertiesPage extends Vue {
       this.isSaving = false
       this.$store.commit('snackbar/setError', 'Failed to save property')
     })
-  }
-
-  deleteProperty (property: DeviceProperty) {
-    if (!property.id) {
-      return
-    }
-    this.$api.deviceProperties.deleteById(property.id).then(() => {
-      const index: number = this.deviceProperties.findIndex((p: DeviceProperty) => p.id === property.id)
-      if (index > -1) {
-        this.deviceProperties.splice(index, 1)
-      }
-    }).catch(() => {
-      this.$store.commit('snackbar/setError', 'Failed to delete property')
-    })
-  }
-
-  copyProperty (_property: DeviceProperty) {
-    // TODO
   }
 
   isEditModeForProperty (property: DeviceProperty): boolean {
