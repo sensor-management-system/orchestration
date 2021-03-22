@@ -125,7 +125,7 @@ permissions and limitations under the Licence.
                   </v-list-item>
                   <v-list-item
                     dense
-                    @click="deleteProperty(property)"
+                    @click="showDeleteDialogFor(property.id)"
                   >
                     <v-list-item-content>
                       <v-list-item-title class="red--text">
@@ -140,6 +140,35 @@ permissions and limitations under the Licence.
               </v-menu>
             </v-col>
           </v-row>
+          <v-dialog v-model="showDeleteDialog[property.id]" max-width="400">
+            <v-card>
+              <v-card-title class="headline">
+                Delete Measured Quantity
+              </v-card-title>
+              <v-card-text>
+                Do you really want to delete the measured quantity <em>{{ property.label }}</em>?
+              </v-card-text>
+              <v-card-actions>
+                <v-btn
+                  text
+                  @click="hideDeleteDialogFor(property.id)"
+                >
+                  No
+                </v-btn>
+                <v-spacer />
+                <v-btn
+                  color="error"
+                  text
+                  @click="deleteAndCloseDialog(property.id)"
+                >
+                  <v-icon left>
+                    mdi-delete
+                  </v-icon>
+                  Delete
+                </v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-dialog>
         </v-expansion-panel-header>
         <v-expansion-panel-content>
           <template v-if="isEditModeForProperty(property)">
@@ -208,6 +237,8 @@ export default class DevicePropertiesPage extends Vue {
   private deviceProperties: DeviceProperty[] = []
   private isLoading = false
   private isSaving = false
+
+  private showDeleteDialog: {[idx: string]: boolean} = {}
 
   private compartments: Compartment[] = []
   private samplingMedias: SamplingMedia[] = []
@@ -281,21 +312,28 @@ export default class DevicePropertiesPage extends Vue {
     this.copyProperty(property)
   }
 
-  deleteProperty (property: DeviceProperty) {
-    if (!property.id) {
-      return
-    }
+  deleteAndCloseDialog (id: string) {
     this.isSaving = true
-    this.$api.deviceProperties.deleteById(property.id).then(() => {
-      const index: number = this.deviceProperties.findIndex((p: DeviceProperty) => p.id === property.id)
-      if (index > -1) {
-        this.deviceProperties.splice(index, 1)
+    this.showDeleteDialog = {}
+
+    this.$api.deviceProperties.deleteById(id).then(() => {
+      const searchIndex = this.deviceProperties.findIndex(p => p.id === id)
+      if (searchIndex > -1) {
+        this.deviceProperties.splice(searchIndex, 1)
       }
       this.isSaving = false
-    }).catch(() => {
+    }).catch((_error) => {
       this.isSaving = false
-      this.$store.commit('snackbar/setError', 'Failed to delete property')
+      this.$store.commit('snackbar/setError', 'Failed to delete measured quantity')
     })
+  }
+
+  showDeleteDialogFor (id: string) {
+    Vue.set(this.showDeleteDialog, id, true)
+  }
+
+  hideDeleteDialogFor (id: string) {
+    Vue.set(this.showDeleteDialog, id, false)
   }
 
   showsave (isSaving: boolean) {
@@ -314,7 +352,7 @@ export default class DevicePropertiesPage extends Vue {
       this.openPanelIfStartedInEditMode()
     }).catch(() => {
       this.isSaving = false
-      this.$store.commit('snackbar/setError', 'Failed to save property')
+      this.$store.commit('snackbar/setError', 'Failed to save measured quantity')
     })
   }
 
