@@ -1,6 +1,7 @@
-from project.api.ping import Ping
 from project.api.resourceManager import *
-from project.frj_csv_export.api import Api
+
+from .api.ping import Ping
+from .frj_csv_export.api import Api
 
 api = Api()
 
@@ -464,7 +465,10 @@ api.route(
 )
 # GenericDeviceAction
 api.route(
-    GenericDeviceActionList, "generic_device_action_list", "/generic-device-actions"
+    GenericDeviceActionList,
+    "generic_device_action_list",
+    "/generic-device-actions",
+    "/devices/<int:device_id>/generic-device-actions",
 )
 api.route(
     GenericDeviceActionDetail,
@@ -527,6 +531,7 @@ api.route(
     GenericPlatformActionList,
     "generic_platform_action_list",
     "/generic-platform-actions",
+    "/platforms/<int:platform_id>/generic-platform-actions",
 )
 api.route(
     GenericPlatformActionDetail,
@@ -590,6 +595,7 @@ api.route(
     GenericConfigurationActionList,
     "generic_configuration_action_list",
     "/generic-configuration-actions",
+    "/configurations/<int:configuration_id>/generic-configuration-actions",
 )
 api.route(
     GenericConfigurationActionDetail,
@@ -649,7 +655,14 @@ api.route(
 )
 
 # MountDeviceAction
-api.route(DeviceMountActionList, "device_mount_action_list", "/device-mount-actions")
+api.route(
+    DeviceMountActionList,
+    "device_mount_action_list",
+    "/device-mount-actions",
+    "/configurations/<int:configuration_id>/device-mount-actions",
+    "/devices/<int:device_id>/device-mount-actions",
+    "/platforms/<int:parent_platform_id>/device-mount-actions",
+)
 api.route(
     DeviceMountActionDetail,
     "device_mount_action_detail",
@@ -687,7 +700,12 @@ api.route(
 )
 # MountPlatformAction
 api.route(
-    PlatformMountActionList, "platform_mount_action_list", "/platform-mount-actions"
+    PlatformMountActionList,
+    "platform_mount_action_list",
+    "/platform-mount-actions",
+    "/configurations/<int:configuration_id>/platform-mount-actions",
+    "/platforms/<int:platform_id>/platform-mount-actions",
+    "/platforms/<int:parent_platform_id>/parent-platform-mount-actions"
 )
 api.route(
     PlatformMountActionDetail,
@@ -726,7 +744,11 @@ api.route(
 )
 # DeviceUnmountAction
 api.route(
-    DeviceUnmountActionList, "device_unmount_action_list", "/device-unmount-actions"
+    DeviceUnmountActionList,
+    "device_unmount_action_list",
+    "/device-unmount-actions",
+    "/configurations/<int:configuration_id>/device-unmount-actions",
+    "/devices/<int:device_id>/device-unmount-actions",
 )
 api.route(
     DeviceUnmountActionDetail,
@@ -768,6 +790,8 @@ api.route(
     PlatformUnmountActionList,
     "platform_unmount_action_list",
     "/platform-unmount-actions",
+    "/configurations/<int:configuration_id>/platform-unmount-actions",
+    "/platforms/<int:platform_id>/platform-unmount-actions",
 )
 api.route(
     PlatformUnmountActionDetail,
@@ -810,6 +834,7 @@ api.route(
     DeviceCalibrationActionList,
     "device_calibration_action_list",
     "/device-calibration-actions",
+    "/devices/<int:device_id>/device-calibration-actions",
 )
 api.route(
     DeviceCalibrationActionDetail,
@@ -862,6 +887,7 @@ api.route(
     DeviceSoftwareUpdateActionList,
     "device_software_update_action_list",
     "/device-software-update-actions",
+    "/devices/<int:device_id>/device-software-update-actions",
 )
 api.route(
     DeviceSoftwareUpdateActionDetail,
@@ -920,6 +946,7 @@ api.route(
     PlatformSoftwareUpdateActionList,
     "platform_software_update_action_list",
     "/platform-software-update-actions",
+    "/platforms/<int:platform_id>/platform-software-update-actions",
 )
 api.route(
     PlatformSoftwareUpdateActionDetail,
@@ -980,6 +1007,9 @@ api.route(
     DevicePropertyCalibrationList,
     "device_property_calibration_list",
     "/device-property-calibrations",
+    "/device-calibration-actions/<int:device_calibration_action_id>/device-property-calibrations",
+    "/device-properties/<int:device_property_id>/device-property-calibrations",
+    "/devices/<int:device_id>/device-property-calibrations",
 )
 api.route(
     DevicePropertyCalibrationDetail,

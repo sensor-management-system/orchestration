@@ -1,8 +1,8 @@
-from project.api.models.base_model import db
-from project.api.models.user import User
-from project.api.schemas.user_schema import UserSchema
-from project.api.token_checker import token_required
-from project.frj_csv_export.resource import ResourceList
+from ..models.base_model import db
+from ..models.user import User
+from ..schemas.user_schema import UserSchema
+from ..token_checker import token_required
+from ...frj_csv_export.resource import ResourceList
 
 
 class UserList(ResourceList):

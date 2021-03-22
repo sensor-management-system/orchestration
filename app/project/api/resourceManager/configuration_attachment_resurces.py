@@ -3,12 +3,12 @@ from flask_rest_jsonapi import ResourceDetail, ResourceList, ResourceRelationshi
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.orm.exc import NoResultFound
 
-from project.api.models import Configuration, ConfigurationAttachment
-from project.api.models.base_model import db
-from project.api.schemas.configuration_attachment_schema import (
+from ..models import Configuration, ConfigurationAttachment
+from ..models.base_model import db
+from ..schemas.configuration_attachment_schema import (
     ConfigurationAttachmentSchema,
 )
-from project.api.token_checker import token_required
+from ..token_checker import token_required
 
 
 class ConfigurationAttachmentList(ResourceList):

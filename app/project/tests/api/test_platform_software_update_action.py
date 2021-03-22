@@ -1,5 +1,7 @@
+"""Tests for the platform software update actions api."""
+
 from project import base_url, db
-from project.api.models import Contact, Platform
+from project.api.models import Contact, Platform, PlatformSoftwareUpdateAction
 from project.tests.base import BaseTestCase, fake, generate_token_data
 from project.tests.models.test_software_update_actions_model import (
     add_platform_software_update_action_model,
@@ -20,7 +22,7 @@ class TestPlatformSoftwareUpdateAction(BaseTestCase):
         self.assertEqual(response.json["data"], [])
 
     def test_get_platform_software_update_action_collection(self):
-        """Test retrieve a collection of PlatformSoftwareUpdateAction objects"""
+        """Test retrieve a collection of PlatformSoftwareUpdateAction objects."""
         platform_software_update_action = add_platform_software_update_action_model()
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
@@ -31,7 +33,7 @@ class TestPlatformSoftwareUpdateAction(BaseTestCase):
         )
 
     def test_post_platform_software_update_action(self):
-        """Create PlatformSoftwareUpdateAction"""
+        """Create PlatformSoftwareUpdateAction."""
         platform = Platform(short_name="Platform 111")
         mock_jwt = generate_token_data()
         contact = Contact(
@@ -65,7 +67,7 @@ class TestPlatformSoftwareUpdateAction(BaseTestCase):
         )
 
     def test_update_platform_software_update_action(self):
-        """Update PlatformSoftwareUpdateAction"""
+        """Update PlatformSoftwareUpdateAction."""
         platform_software_update_action = add_platform_software_update_action_model()
         platform_software_update_action_updated = {
             "data": {
@@ -83,8 +85,90 @@ class TestPlatformSoftwareUpdateAction(BaseTestCase):
         )
 
     def test_delete_platform_software_update_action(self):
-        """Delete PlatformSoftwareUpdateAction """
+        """Delete PlatformSoftwareUpdateAction."""
         platform_software_update_action = add_platform_software_update_action_model()
         _ = super().delete_object(
             url=f"{self.url}/{platform_software_update_action.id}",
         )
+
+    def test_filtered_by_platform(self):
+        """Ensure that I can prefilter by a specific platform."""
+        contact = Contact(
+            given_name="Nils", family_name="Brinckmann", email="nils@gfz-potsdam.de"
+        )
+        db.session.add(contact)
+
+        platform1 = Platform(short_name="platform1")
+        db.session.add(platform1)
+
+        platform2 = Platform(short_name="platform2")
+        db.session.add(platform2)
+
+        action1 = PlatformSoftwareUpdateAction(
+            contact=contact,
+            platform=platform1,
+            description="Some first action",
+            software_type_name="firmware",
+            update_date=fake.date_time(),
+        )
+        db.session.add(action1)
+
+        action2 = PlatformSoftwareUpdateAction(
+            contact=contact,
+            platform=platform2,
+            description="Some other action",
+            software_type_name="sampleScript",
+            update_date=fake.date_time(),
+        )
+        db.session.add(action2)
+
+        db.session.commit()
+
+        # first check to get them all
+        with self.client:
+            url_get_all = base_url + "/platform-software-update-actions"
+            response = self.client.get(
+                url_get_all, content_type="application/vnd.api+json"
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json["data"]), 2)
+
+        # test only for the first platform
+        with self.client:
+            url_get_for_platform1 = (
+                base_url + f"/platforms/{platform1.id}/platform-software-update-actions"
+            )
+            response = self.client.get(
+                url_get_for_platform1, content_type="application/vnd.api+json"
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json["data"]), 1)
+        self.assertEqual(
+            response.json["data"][0]["attributes"]["description"], "Some first action"
+        )
+
+        # and test the second platform
+        with self.client:
+            url_get_for_platform2 = (
+                base_url + f"/platforms/{platform2.id}/platform-software-update-actions"
+            )
+            response = self.client.get(
+                url_get_for_platform2, content_type="application/vnd.api+json"
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json["data"]), 1)
+        self.assertEqual(
+            response.json["data"][0]["attributes"]["description"], "Some other action"
+        )
+
+        # and for a non existing
+        with self.client:
+            url_get_for_non_existing_platform = (
+                base_url
+                + f"/platforms/{platform2.id + 9999}/platform-software-update-actions"
+            )
+            response = self.client.get(
+                url_get_for_non_existing_platform,
+                content_type="application/vnd.api+json",
+            )
+        self.assertEqual(response.status_code, 404)

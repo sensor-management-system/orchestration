@@ -1,8 +1,10 @@
+"""Tests for the generic device actions api."""
+
 import os
 from datetime import datetime
 
 from project import base_url, db
-from project.api.models import Contact
+from project.api.models import Contact, Device, GenericDeviceAction
 from project.tests.base import BaseTestCase, fake, generate_token_data, test_file_path
 from project.tests.read_from_json import extract_data_from_json_file
 
@@ -33,10 +35,7 @@ class TestGenericDeviceAction(BaseTestCase):
         self.assertEqual(response.json["data"], [])
 
     def test_add_generic_device_action(self):
-        """
-        Ensure POST a new generic device
-        action can be added to the database.
-        """
+        """Ensure POST a new generic device action can be added to the database."""
         data = self.make_generic_device_action_data()
 
         _ = super().add_object(
@@ -46,6 +45,11 @@ class TestGenericDeviceAction(BaseTestCase):
         )
 
     def make_generic_device_action_data(self):
+        """
+        Create the json payload for a generic device action.
+
+        This also creates some associated objects in the database.
+        """
         devices_json = extract_data_from_json_file(self.device_json_data_url, "devices")
         device_data = {"data": {"type": "device", "attributes": devices_json[0]}}
         device = super().add_object(
@@ -128,8 +132,7 @@ class TestGenericDeviceAction(BaseTestCase):
         )
 
     def test_delete_generic_device_action(self):
-        """Ensure a generic_device_action can be deleted"""
-
+        """Ensure a generic_device_action can be deleted."""
         data = self.make_generic_device_action_data()
 
         obj = super().add_object(
@@ -140,3 +143,81 @@ class TestGenericDeviceAction(BaseTestCase):
         _ = super().delete_object(
             url=f"{self.url}/{obj['data']['id']}",
         )
+
+    def test_filtered_by_device(self):
+        """Ensure that I can prefilter by a specific device."""
+        device1 = Device(short_name="sample device")
+        db.session.add(device1)
+        device2 = Device(short_name="sample device II")
+        db.session.add(device2)
+
+        contact = Contact(
+            given_name="Nils", family_name="Brinckmann", email="nils@gfz-potsdam.de"
+        )
+        db.session.add(contact)
+
+        action1 = GenericDeviceAction(
+            device=device1,
+            contact=contact,
+            description="Some first action",
+            begin_date=fake.date_time(),
+            action_type_name="DeviceActivity",
+        )
+        db.session.add(action1)
+
+        action2 = GenericDeviceAction(
+            device=device2,
+            contact=contact,
+            description="Some other action",
+            begin_date=fake.date_time(),
+            action_type_name="DeviceActivity",
+        )
+        db.session.add(action2)
+        db.session.commit()
+
+        # first check to get them all
+        with self.client:
+            url_get_all = base_url + "/generic-device-actions"
+            response = self.client.get(
+                url_get_all, content_type="application/vnd.api+json"
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json["data"]), 2)
+
+        # then test only for the first device
+        with self.client:
+            url_get_for_device1 = (
+                base_url + f"/devices/{device1.id}/generic-device-actions"
+            )
+            response = self.client.get(
+                url_get_for_device1, content_type="application/vnd.api+json"
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json["data"]), 1)
+        self.assertEqual(
+            response.json["data"][0]["attributes"]["description"], "Some first action"
+        )
+
+        # and test the second device
+        with self.client:
+            url_get_for_device2 = (
+                base_url + f"/devices/{device2.id}/generic-device-actions"
+            )
+            response = self.client.get(
+                url_get_for_device2, content_type="application/vnd.api+json"
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json["data"]), 1)
+        self.assertEqual(
+            response.json["data"][0]["attributes"]["description"], "Some other action"
+        )
+
+        # and for a non existing
+        with self.client:
+            url_get_for_non_existing_device = (
+                base_url + f"/devices/{device2.id + 9999}/generic-device-actions"
+            )
+            response = self.client.get(
+                url_get_for_non_existing_device, content_type="application/vnd.api+json"
+            )
+        self.assertEqual(response.status_code, 404)

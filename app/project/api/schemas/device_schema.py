@@ -3,10 +3,10 @@
 from marshmallow_jsonapi import fields
 from marshmallow_jsonapi.flask import Relationship, Schema
 
-from project.api.schemas.attachment_schema import AttachmentSchema
-from project.api.schemas.contact_schema import ContactSchema
-from project.api.schemas.customfield_schema import InnerCustomFieldSchema
-from project.api.schemas.device_property_schema import InnerDevicePropertySchema
+from ..schemas.attachment_schema import AttachmentSchema
+from ..schemas.contact_schema import ContactSchema
+from ..schemas.customfield_schema import InnerCustomFieldSchema
+from ..schemas.device_property_schema import InnerDevicePropertySchema
 
 
 class DeviceSchema(Schema):

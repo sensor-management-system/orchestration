@@ -1,7 +1,9 @@
+"""Tests for the device calibration api."""
+
 import json
 
 from project import base_url
-from project.api.models import Contact, Device
+from project.api.models import Contact, Device, DeviceCalibrationAction
 from project.api.models.base_model import db
 from project.tests.base import BaseTestCase, fake, generate_token_data
 from project.tests.models.test_device_calibration_action_model import (
@@ -23,7 +25,7 @@ class TestDeviceCalibrationAction(BaseTestCase):
         self.assertEqual(response.json["data"], [])
 
     def test_get_device_calibration_action_collection(self):
-        """Test retrieve a collection of DeviceCalibrationAction objects"""
+        """Test retrieve a collection of DeviceCalibrationAction objects."""
         device_calibration_action = add_device_calibration_action()
         with self.client:
             response = self.client.get(self.url)
@@ -35,7 +37,7 @@ class TestDeviceCalibrationAction(BaseTestCase):
         )
 
     def test_post_device_calibration_action(self):
-        """Create DeviceCalibrationAction"""
+        """Create DeviceCalibrationAction."""
         device = Device(short_name="Device 12")
         mock_jwt = generate_token_data()
         contact = Contact(
@@ -68,7 +70,7 @@ class TestDeviceCalibrationAction(BaseTestCase):
         )
 
     def test_update_device_calibration_action(self):
-        """Update DeviceCalibration"""
+        """Update DeviceCalibration."""
         device_calibration_action = add_device_calibration_action()
         device_calibration_action_updated = {
             "data": {
@@ -86,8 +88,84 @@ class TestDeviceCalibrationAction(BaseTestCase):
         )
 
     def test_delete_device_calibration_action(self):
-        """Delete DeviceCalibrationAction"""
+        """Delete DeviceCalibrationAction."""
         device_calibration_action = add_device_calibration_action()
         _ = super().delete_object(
             url=f"{self.url}/{device_calibration_action.id}",
         )
+
+    def test_filtered_by_device(self):
+        """Ensure that I can prefilter by a specific device."""
+        device1 = Device(short_name="sample device")
+        db.session.add(device1)
+        device2 = Device(short_name="sample device II")
+        db.session.add(device2)
+
+        contact = Contact(
+            given_name="Nils", family_name="Brinckmann", email="nils@gfz-potsdam.de"
+        )
+        db.session.add(contact)
+
+        action1 = DeviceCalibrationAction(
+            device=device1,
+            contact=contact,
+            description="Some first action",
+            current_calibration_date=fake.date_time(),
+        )
+        db.session.add(action1)
+
+        action2 = DeviceCalibrationAction(
+            device=device2,
+            contact=contact,
+            description="Some other action",
+            current_calibration_date=fake.date_time(),
+        )
+        db.session.add(action2)
+        db.session.commit()
+
+        # first check to get them all
+        with self.client:
+            url_get_all = base_url + "/device-calibration-actions"
+            response = self.client.get(
+                url_get_all, content_type="application/vnd.api+json"
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json["data"]), 2)
+
+        # then test only for the first device
+        with self.client:
+            url_get_for_device1 = (
+                base_url + f"/devices/{device1.id}/device-calibration-actions"
+            )
+            response = self.client.get(
+                url_get_for_device1, content_type="application/vnd.api+json"
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json["data"]), 1)
+        self.assertEqual(
+            response.json["data"][0]["attributes"]["description"], "Some first action"
+        )
+
+        # and test the second device
+        with self.client:
+            url_get_for_device2 = (
+                base_url + f"/devices/{device2.id}/device-calibration-actions"
+            )
+            response = self.client.get(
+                url_get_for_device2, content_type="application/vnd.api+json"
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json["data"]), 1)
+        self.assertEqual(
+            response.json["data"][0]["attributes"]["description"], "Some other action"
+        )
+
+        # and for a non existing
+        with self.client:
+            url_get_for_non_existing_device = (
+                base_url + f"/devices/{device2.id + 9999}/device-calibration-actions"
+            )
+            response = self.client.get(
+                url_get_for_non_existing_device, content_type="application/vnd.api+json"
+            )
+        self.assertEqual(response.status_code, 404)

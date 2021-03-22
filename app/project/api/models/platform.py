@@ -1,7 +1,7 @@
 """Model for platforms."""
 
 
-from project.api.models.mixin import AuditMixin, SearchableMixin
+from ..models.mixin import AuditMixin, SearchableMixin
 
 from .base_model import db
 
@@ -50,7 +50,7 @@ class Platform(db.Model, AuditMixin, SearchableMixin):
     @staticmethod
     def get_search_index_properties():
         """Get the properties for the index configuration."""
-        from project.api.models.contact import Contact
+        from ..models.contact import Contact
 
         return {
             # Search the description just via text (and not via keyword).

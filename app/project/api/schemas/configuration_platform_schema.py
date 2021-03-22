@@ -1,7 +1,7 @@
 from marshmallow_jsonapi import fields
 from marshmallow_jsonapi.flask import Relationship, Schema
 
-from project.api.schemas.platform_schema import PlatformSchema
+from ..schemas.platform_schema import PlatformSchema
 
 
 class ConfigurationPlatformSchema(Schema):

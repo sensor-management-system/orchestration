@@ -3,11 +3,11 @@ from flask_rest_jsonapi import ResourceList
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.orm.exc import NoResultFound
 
-from project.api.models.base_model import db
-from project.api.models.customfield import CustomField
-from project.api.models.device import Device
-from project.api.schemas.customfield_schema import CustomFieldSchema
-from project.api.token_checker import token_required
+from ..models.base_model import db
+from ..models.customfield import CustomField
+from ..models.device import Device
+from ..schemas.customfield_schema import CustomFieldSchema
+from ..token_checker import token_required
 
 
 class CustomFieldList(ResourceList):

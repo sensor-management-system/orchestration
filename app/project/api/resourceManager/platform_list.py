@@ -1,13 +1,13 @@
-from project.api.datalayers.esalchemy import EsSqlalchemyDataLayer
-from project.api.models.base_model import db
-from project.api.models.platform import Platform
-from project.api.resourceManager.base_resource import (
+from ..datalayers.esalchemy import EsSqlalchemyDataLayer
+from ..models.base_model import db
+from ..models.platform import Platform
+from ..resourceManager.base_resource import (
     add_contact_to_object,
     add_created_by_id,
 )
-from project.api.schemas.platform_schema import PlatformSchema
-from project.api.token_checker import token_required
-from project.frj_csv_export.resource import ResourceList
+from ..schemas.platform_schema import PlatformSchema
+from ..token_checker import token_required
+from ...frj_csv_export.resource import ResourceList
 
 
 class PlatformList(ResourceList):
