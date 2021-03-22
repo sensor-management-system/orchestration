@@ -43,7 +43,7 @@ permissions and limitations under the Licence.
         small
         @click="addProperty"
       >
-        Add Property
+        Add Measured Quantity
       </v-btn>
     </v-card-actions>
     <v-expansion-panels
@@ -177,7 +177,7 @@ permissions and limitations under the Licence.
         small
         @click="addProperty"
       >
-        Add Property
+        Add Measured Quantity
       </v-btn>
     </v-card-actions>
   </div>
