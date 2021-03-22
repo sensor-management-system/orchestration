@@ -56,7 +56,7 @@ permissions and limitations under the Licence.
       >
         <v-expansion-panel-header>
           <v-row no-gutters>
-            <v-col class="text-subtitle-1" cols="11">
+            <v-col class="text-subtitle-1" cols="10">
               Measured quantity {{ index+1 }} {{ property.label ? ' - ' + property.label : '' }}
             </v-col>
             <v-col
@@ -78,10 +78,16 @@ permissions and limitations under the Licence.
                 <v-btn
                   text
                   small
-                  nuxt
                   @click.prevent.stop="cancelEditMode()"
                 >
                   Cancel
+                </v-btn>
+                <v-btn
+                  color="green"
+                  small
+                  @click.prevent.stop="saveProperty(property)"
+                >
+                  Apply
                 </v-btn>
               </template>
 
@@ -173,6 +179,7 @@ permissions and limitations under the Licence.
         <v-expansion-panel-content>
           <template v-if="isEditModeForProperty(property)">
             <NuxtChild
+              :ref="'deviceProperty_' + property.id"
               v-model="deviceProperties[index]"
               :compartments="compartments"
               :sampling-medias="samplingMedias"
@@ -354,6 +361,20 @@ export default class DevicePropertiesPage extends Vue {
       this.isSaving = false
       this.$store.commit('snackbar/setError', 'Failed to save measured quantity')
     })
+  }
+
+  saveProperty (property: DeviceProperty) {
+    const childComponents = this.$refs['deviceProperty_' + property.id]
+    if (Array.isArray(childComponents)) {
+      const firstChild: any = childComponents[0]
+      if (firstChild.save) {
+        firstChild.save()
+      } else {
+        throw new Error('Can\'t save with the given child reference: No method given.')
+      }
+    } else {
+      throw new TypeError('Can\'t access the child component to run the save method')
+    }
   }
 
   isEditModeForProperty (property: DeviceProperty): boolean {
