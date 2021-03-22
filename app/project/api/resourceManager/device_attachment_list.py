@@ -3,11 +3,11 @@ from flask_rest_jsonapi import ResourceList
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.orm.exc import NoResultFound
 
-from project.api.models.base_model import db
-from project.api.models.device import Device
-from project.api.models.device_attachment import DeviceAttachment
-from project.api.schemas.device_attachment_schema import DeviceAttachmentSchema
-from project.api.token_checker import token_required
+from ..models.base_model import db
+from ..models.device import Device
+from ..models.device_attachment import DeviceAttachment
+from ..schemas.device_attachment_schema import DeviceAttachmentSchema
+from ..token_checker import token_required
 
 
 class DeviceAttachmentList(ResourceList):

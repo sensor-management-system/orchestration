@@ -4,22 +4,22 @@ from flask_rest_jsonapi import ResourceDetail, ResourceRelationship
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.orm.exc import NoResultFound
 
-from project.api.models.base_model import db
-from project.api.models.calibration_actions import (
+from ..models.base_model import db
+from ..models.calibration_actions import (
     DeviceCalibrationAction,
     DevicePropertyCalibration,
 )
-from project.api.models.device import Device
-from project.api.models.device_property import DeviceProperty
-from project.api.resourceManager.base_resource import (
+from ..models.device import Device
+from ..models.device_property import DeviceProperty
+from ..resourceManager.base_resource import (
     add_created_by_id,
     add_updated_by_id,
 )
-from project.api.schemas.calibration_actions_schema import (
+from ..schemas.calibration_actions_schema import (
     DevicePropertyCalibrationSchema,
 )
-from project.api.token_checker import token_required
-from project.frj_csv_export.resource import ResourceList
+from ..token_checker import token_required
+from ...frj_csv_export.resource import ResourceList
 
 
 class DevicePropertyCalibrationList(ResourceList):

@@ -1,8 +1,7 @@
 from flask_jwt_extended import get_jwt_identity
 
-from project.api.models.base_model import db
-from project.api.models.contact import Contact
-from project.api.models.user import User
+from ..models import Contact, User
+from ..models.base_model import db
 
 
 def add_created_by_id(data):
@@ -44,8 +43,8 @@ def add_contact_to_object(entity_with_contact_list):
     """
     user_entry = (
         db.session.query(User)
-        .filter_by(id=entity_with_contact_list.created_by_id)
-        .first()
+            .filter_by(id=entity_with_contact_list.created_by_id)
+            .first()
     )
     contact_id = user_entry.contact_id
     contact_entry = db.session.query(Contact).filter_by(id=contact_id).first()

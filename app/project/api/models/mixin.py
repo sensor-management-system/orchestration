@@ -5,7 +5,7 @@ from datetime import datetime
 import sqlalchemy
 from sqlalchemy.ext.declarative import declared_attr
 
-from project.api.search import (
+from ..search import (
     add_to_index,
     create_index,
     query_index,

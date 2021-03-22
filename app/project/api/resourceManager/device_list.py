@@ -1,13 +1,13 @@
-from project.api.datalayers.esalchemy import EsSqlalchemyDataLayer
-from project.api.models.base_model import db
-from project.api.models.device import Device
-from project.api.resourceManager.base_resource import (
+from ..datalayers.esalchemy import EsSqlalchemyDataLayer
+from ..models.base_model import db
+from ..models.device import Device
+from ..resourceManager.base_resource import (
     add_contact_to_object,
     add_created_by_id,
 )
-from project.api.schemas.device_schema import DeviceSchema
-from project.api.token_checker import token_required
-from project.frj_csv_export.resource import ResourceList
+from ..schemas.device_schema import DeviceSchema
+from ..token_checker import token_required
+from ...frj_csv_export.resource import ResourceList
 
 
 class DeviceList(ResourceList):

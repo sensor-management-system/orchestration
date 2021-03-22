@@ -86,10 +86,7 @@ def es():
 @es.command("reindex")
 def es_reindex():
     """Reindex all of the models that should be used in the es."""
-    from project.api.models.configuration import Configuration
-    from project.api.models.device import Device
-    from project.api.models.platform import Platform
-    from project.api.models.contact import Contact
+    from project.api.models import (Configuration, Device, Platform, Contact)
 
     for model_type in [Platform, Device, Configuration, Contact]:
         model_type.reindex()

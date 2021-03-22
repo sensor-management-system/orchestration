@@ -1,6 +1,7 @@
-from project.api.ping import Ping
 from project.api.resourceManager import *
-from project.frj_csv_export.api import Api
+
+from .api.ping import Ping
+from .frj_csv_export.api import Api
 
 api = Api()
 
@@ -660,7 +661,7 @@ api.route(
     "/device-mount-actions",
     "/configurations/<int:configuration_id>/device-mount-actions",
     "/devices/<int:device_id>/device-mount-actions",
-    "/platforms/<int:platform_id>/device-mount-actions",
+    "/platforms/<int:parent_platform_id>/device-mount-actions",
 )
 api.route(
     DeviceMountActionDetail,
@@ -704,6 +705,7 @@ api.route(
     "/platform-mount-actions",
     "/configurations/<int:configuration_id>/platform-mount-actions",
     "/platforms/<int:platform_id>/platform-mount-actions",
+    "/platforms/<int:parent_platform_id>/parent-platform-mount-actions"
 )
 api.route(
     PlatformMountActionDetail,

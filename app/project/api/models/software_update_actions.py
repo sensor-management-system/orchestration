@@ -1,4 +1,4 @@
-from project.api.models.mixin import AuditMixin
+from ..models.mixin import AuditMixin
 
 from .base_model import db
 

@@ -1,4 +1,4 @@
-from project.api.models.configuration_attachment import ConfigurationAttachment
+from ..models.configuration_attachment import ConfigurationAttachment
 
 from .base_model import db
 

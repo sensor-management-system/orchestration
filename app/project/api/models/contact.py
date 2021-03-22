@@ -1,7 +1,7 @@
 """Model for contacts & reference tables."""
 
 
-from project.api.models.mixin import SearchableMixin
+from ..models.mixin import SearchableMixin
 
 from .base_model import db
 

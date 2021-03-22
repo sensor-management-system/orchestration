@@ -4,18 +4,18 @@ from flask_rest_jsonapi import ResourceDetail, ResourceRelationship
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.orm.exc import NoResultFound
 
-from project.api.models.base_model import db
-from project.api.models.configuration import Configuration
-from project.api.models.device import Device
-from project.api.models.mount_actions import DeviceMountAction
-from project.api.models.platform import Platform
-from project.api.resourceManager.base_resource import (
+from ..models.base_model import db
+from ..models.configuration import Configuration
+from ..models.device import Device
+from ..models.mount_actions import DeviceMountAction
+from ..models.platform import Platform
+from ..resourceManager.base_resource import (
     add_created_by_id,
     add_updated_by_id,
 )
-from project.api.schemas.mount_actions_schema import DeviceMountActionSchema
-from project.api.token_checker import token_required
-from project.frj_csv_export.resource import ResourceList
+from ..schemas.mount_actions_schema import DeviceMountActionSchema
+from ..token_checker import token_required
+from ...frj_csv_export.resource import ResourceList
 
 
 class DeviceMountActionList(ResourceList):
@@ -34,7 +34,7 @@ class DeviceMountActionList(ResourceList):
         query_ = self.session.query(DeviceMountAction)
         configuration_id = view_kwargs.get("configuration_id")
         device_id = view_kwargs.get("device_id")
-        platform_id = view_kwargs.get("platform_id")
+        parent_platform_id = view_kwargs.get("parent_platform_id")
 
         if configuration_id is not None:
             try:
@@ -62,19 +62,19 @@ class DeviceMountActionList(ResourceList):
                 )
             else:
                 query_ = query_.filter(DeviceMountAction.device_id == device_id)
-        if platform_id is not None:
+        if parent_platform_id is not None:
             try:
-                self.session.query(Platform).filter_by(id=platform_id).one()
+                self.session.query(Platform).filter_by(id=parent_platform_id).one()
             except NoResultFound:
                 raise ObjectNotFound(
                     {
                         "parameter": "id",
                     },
-                    "Platform: {} not found".format(platform_id),
+                    "Platform: {} not found".format(parent_platform_id),
                 )
             else:
                 query_ = query_.filter(
-                    DeviceMountAction.parent_platform_id == platform_id
+                    DeviceMountAction.parent_platform_id == parent_platform_id
                 )
 
         return query_
