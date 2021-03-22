@@ -108,7 +108,7 @@ export default class DevicePropertyEditPage extends Vue {
       this.$router.push('/devices/' + this.deviceId + '/measuredquantities')
     }).catch(() => {
       this.$emit('showsave', false)
-      this.$store.commit('snackbar/setError', 'Failed to save property')
+      this.$store.commit('snackbar/setError', 'Failed to save measured quantity')
     })
   }
 
