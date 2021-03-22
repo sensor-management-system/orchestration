@@ -40,6 +40,38 @@ def add_mount_device_action_model():
     return device_mount_action
 
 
+def add_mount_platform_action_model():
+    p = Platform(
+        short_name="short_name test",
+    )
+    p_p = Platform(
+        short_name="parent platform",
+    )
+    mock_jwt = generate_token_data()
+    c1 = Contact(
+        given_name=mock_jwt["given_name"],
+        family_name=mock_jwt["family_name"],
+        email=mock_jwt["email"],
+    )
+    u1 = User(subject=mock_jwt["sub"], contact=c1)
+    config = generate_configuration_model()
+    platform_mount_action = PlatformMountAction(
+        begin_date=fake.date(),
+        description="test mount platform action model",
+        offset_x=fake.coordinate(),
+        offset_y=fake.coordinate(),
+        offset_z=fake.coordinate(),
+        created_by=u1,
+        platform=p,
+    )
+    platform_mount_action.parent_platform = p_p
+    platform_mount_action.configuration = config
+    platform_mount_action.contact = c1
+    db.session.add_all([p, p_p, c1, u1, config, platform_mount_action])
+    db.session.commit()
+    return platform_mount_action
+
+
 class TestMountActionsModel(BaseTestCase):
     """
     Test mount actions models
@@ -47,40 +79,11 @@ class TestMountActionsModel(BaseTestCase):
 
     def test_mount_platform_action_model(self):
         """""Ensure Add mount platform action model """
-        p = Platform(
-            short_name="short_name test",
-        )
-        p_p = Platform(
-            short_name="parent platform",
-        )
-        mock_jwt = generate_token_data()
-        c1 = Contact(
-            given_name=mock_jwt["given_name"],
-            family_name=mock_jwt["family_name"],
-            email=mock_jwt["email"],
-        )
-        u1 = User(subject=mock_jwt["sub"], contact=c1)
-        config = generate_configuration_model()
-
-        platform_mount_action = PlatformMountAction(
-            begin_date=fake.date(),
-            description="test mount platform action model",
-            offset_x=fake.coordinate(),
-            offset_y=fake.coordinate(),
-            offset_z=fake.coordinate(),
-            created_by=u1,
-            platform=p,
-        )
-
-        platform_mount_action.parent_platform = p_p
-        platform_mount_action.configuration = config
-        platform_mount_action.contact = c1
-        db.session.add_all([p, p_p, c1, u1, config, platform_mount_action])
-        db.session.commit()
+        platform_mount_action = add_mount_platform_action_model()
         mpa_r = (
             db.session.query(PlatformMountAction)
-            .filter_by(description="test mount platform action model")
-            .one()
+                .filter_by(description="test mount platform action model")
+                .one()
         )
         self.assertEqual(
             platform_mount_action.parent_platform.short_name,
@@ -93,8 +96,8 @@ class TestMountActionsModel(BaseTestCase):
         mount_device_action_model = add_mount_device_action_model()
         mount_device_action = (
             db.session.query(DeviceMountAction)
-            .filter_by(description="test mount device action model")
-            .one()
+                .filter_by(description="test mount device action model")
+                .one()
         )
         self.assertEqual(
             mount_device_action_model.parent_platform.short_name,
