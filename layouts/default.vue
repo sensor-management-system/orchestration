@@ -341,7 +341,14 @@ export default {
     },
     logout () {
       this.removeOidcUser().then(() => {
-        this.$router.push('/')
+        // same logic as in the vuex-oidc-router.js middleware
+        // but don't display an error message
+        const accessPromise = this.$store.dispatch('oidc/oidcCheckAccess', this.$fullContext.route)
+        accessPromise.then((hasAccess) => {
+          if (!hasAccess) {
+            this.$router.push('/')
+          }
+        })
       })
     }
   }
