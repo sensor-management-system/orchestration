@@ -41,11 +41,11 @@ permissions and limitations under the Licence.
             Personal info
           </v-col>
           <v-col align-self="end" class="text-right">
-            <b-btn icon @click.stop.prevent="togglePersonalSection">
+            <v-btn icon @click.stop.prevent="togglePersonalSection">
               <v-icon>
                 {{ isPersonalSectionVisible ? 'mdi-chevron-up' : 'mdi-chevron-down' }}
               </v-icon>
-            </b-btn>
+            </v-btn>
           </v-col>
         </v-row>
       </v-card-text>
@@ -104,11 +104,11 @@ permissions and limitations under the Licence.
             OpenID Connect
           </v-col>
           <v-col align-self="end" class="text-right">
-            <b-btn icon @click.stop.prevent="toggleOpenIdConnectSection">
+            <v-btn icon @click.stop.prevent="toggleOpenIdConnectSection">
               <v-icon>
                 {{ isOpenIdConnectSectionVisible ? 'mdi-chevron-up' : 'mdi-chevron-down' }}
               </v-icon>
-            </b-btn>
+            </v-btn>
           </v-col>
         </v-row>
       </v-card-text>
@@ -134,11 +134,11 @@ permissions and limitations under the Licence.
             Token
           </v-col>
           <v-col align-self="end" class="text-right">
-            <b-btn icon @click.stop.prevent="toggleTokenSection">
+            <v-btn icon @click.stop.prevent="toggleTokenSection">
               <v-icon>
                 {{ isTokenSectionVisible ? 'mdi-chevron-up' : 'mdi-chevron-down' }}
               </v-icon>
-            </b-btn>
+            </v-btn>
           </v-col>
         </v-row>
       </v-card-text>
