@@ -138,7 +138,7 @@ permissions and limitations under the Licence.
                         <v-icon left small color="red">
                           mdi-delete
                         </v-icon>
-                        Delete
+                        Remove measured quantity...
                       </v-list-item-title>
                     </v-list-item-content>
                   </v-list-item>
@@ -149,10 +149,10 @@ permissions and limitations under the Licence.
           <v-dialog v-model="showDeleteDialog[property.id]" max-width="400">
             <v-card>
               <v-card-title class="headline">
-                Delete Measured Quantity
+                Remove Measured Quantity
               </v-card-title>
               <v-card-text>
-                Do you really want to delete the measured quantity <em>{{ property.label }}</em>?
+                Do you really want to remove the measured quantity <em>{{ property.label }}</em>?
               </v-card-text>
               <v-card-actions>
                 <v-btn
