@@ -60,7 +60,7 @@ permissions and limitations under the Licence.
               Measured quantity {{ index+1 }} {{ property.label ? ' - ' + property.label : '' }}
             </v-col>
             <v-col
-              algin-self="end"
+              align-self="end"
               class="text-right"
             >
               <v-btn
