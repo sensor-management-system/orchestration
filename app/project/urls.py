@@ -705,7 +705,7 @@ api.route(
     "/platform-mount-actions",
     "/configurations/<int:configuration_id>/platform-mount-actions",
     "/platforms/<int:platform_id>/platform-mount-actions",
-    "/platforms/<int:parent_platform_id>/parent-platform-mount-actions"
+    "/platforms/<int:parent_platform_id>/parent-platform-mount-actions",
 )
 api.route(
     PlatformMountActionDetail,

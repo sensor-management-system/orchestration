@@ -1,12 +1,11 @@
 import json
 
-from project import base_url
-from project import db
+from project import base_url, db
 from project.api.models import Contact
-from project.tests.base import BaseTestCase, fake
-from project.tests.base import generate_token_data
-from project.tests.models.test_configuration_static_action_model import \
-    add_static_location_begin_action_model
+from project.tests.base import BaseTestCase, fake, generate_token_data
+from project.tests.models.test_configuration_static_action_model import (
+    add_static_location_begin_action_model,
+)
 from project.tests.models.test_configurations_model import generate_configuration_model
 
 
@@ -41,7 +40,9 @@ class TestConfigurationStaticLocationActionServices(BaseTestCase):
         Ensure POST a new configuration static location begin action
         can be added to the database.
         """
-        data, _ = self.prepare_request_data("test configuration_static_location_begin_action")
+        data, _ = self.prepare_request_data(
+            "test configuration_static_location_begin_action"
+        )
 
         _ = super().add_object(
             url=f"{self.url}?include=configuration,contact",
@@ -77,7 +78,7 @@ class TestConfigurationStaticLocationActionServices(BaseTestCase):
                     "configuration": {
                         "data": {"type": "configuration", "id": config.id}
                     },
-                }
+                },
             }
         }
         return data, config
@@ -156,7 +157,7 @@ class TestConfigurationStaticLocationActionServices(BaseTestCase):
         # Test only for the first one
         with self.client:
             url_get_for_config1 = (
-                    base_url + f"/configurations/{config1.id}/static-location-begin-actions"
+                base_url + f"/configurations/{config1.id}/static-location-begin-actions"
             )
             response = self.client.get(
                 url_get_for_config1, content_type="application/vnd.api+json"
@@ -165,5 +166,5 @@ class TestConfigurationStaticLocationActionServices(BaseTestCase):
         self.assertEqual(len(response.json["data"]), 1)
         self.assertEqual(
             response.json["data"][0]["attributes"]["description"],
-            "test static_location_begin_action1"
+            "test static_location_begin_action1",
         )

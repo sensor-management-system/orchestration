@@ -1,9 +1,9 @@
 from project.api.models import (
+    ConfigurationDynamicLocationBeginAction,
+    ConfigurationDynamicLocationEndAction,
     Contact,
     Device,
     DeviceProperty,
-    ConfigurationDynamicLocationBeginAction,
-    ConfigurationDynamicLocationEndAction
 )
 from project.api.models.base_model import db
 from project.tests.base import BaseTestCase, fake, generate_token_data
@@ -36,15 +36,24 @@ def add_dynamic_location_begin_action_model():
         family_name=mock_jwt["family_name"],
         email=mock_jwt["email"],
     )
-    configuration_dynamic_location_begin_action = ConfigurationDynamicLocationBeginAction(
-        begin_date=fake.date(),
-        description="test configuration_dynamic_location_begin_action",
-        x_property=x_property,
-        configuration=config,
-        contact=contact,
+    configuration_dynamic_location_begin_action = (
+        ConfigurationDynamicLocationBeginAction(
+            begin_date=fake.date(),
+            description="test configuration_dynamic_location_begin_action",
+            x_property=x_property,
+            configuration=config,
+            contact=contact,
+        )
     )
     db.session.add_all(
-        [device, x_property, config, contact, configuration_dynamic_location_begin_action])
+        [
+            device,
+            x_property,
+            config,
+            contact,
+            configuration_dynamic_location_begin_action,
+        ]
+    )
     db.session.commit()
     return configuration_dynamic_location_begin_action
 
@@ -75,14 +84,22 @@ class TestConfigurationDynamicLocationActionModel(BaseTestCase):
     def test_add_configuration_dynamic_location_begin_action_model(self):
         """""Ensure Add configuration dynamic location begin action model."""
 
-        configuration_dynamic_location_begin_action = add_dynamic_location_begin_action_model()
+        configuration_dynamic_location_begin_action = (
+            add_dynamic_location_begin_action_model()
+        )
         self.assertTrue(configuration_dynamic_location_begin_action.id is not None)
-        self.assertEqual(configuration_dynamic_location_begin_action.description,
-                         "test configuration_dynamic_location_begin_action")
+        self.assertEqual(
+            configuration_dynamic_location_begin_action.description,
+            "test configuration_dynamic_location_begin_action",
+        )
 
     def test_add_configuration_dynamic_location_end_action_model(self):
         """""Ensure Add configuration dynamic location end action model."""
-        configuration_dynamic_location_end_action = add_dynamic_location_end_action_model()
+        configuration_dynamic_location_end_action = (
+            add_dynamic_location_end_action_model()
+        )
         self.assertTrue(configuration_dynamic_location_end_action.id is not None)
-        self.assertEqual(configuration_dynamic_location_end_action.description,
-                         "test configuration_dynamic_location_end_action")
+        self.assertEqual(
+            configuration_dynamic_location_end_action.description,
+            "test configuration_dynamic_location_end_action",
+        )

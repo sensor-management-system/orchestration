@@ -1,12 +1,11 @@
 import json
 
-from project import base_url
-from project import db
-from project.api.models import Contact, Device, DeviceProperty
-from project.tests.base import BaseTestCase, fake
-from project.tests.base import generate_token_data
-from project.tests.models.test_configuration_dynamic_action_model import \
-    add_dynamic_location_end_action_model
+from project import base_url, db
+from project.api.models import Contact, Device
+from project.tests.base import BaseTestCase, fake, generate_token_data
+from project.tests.models.test_configuration_dynamic_action_model import (
+    add_dynamic_location_end_action_model,
+)
 from project.tests.models.test_configurations_model import generate_configuration_model
 
 
@@ -64,7 +63,7 @@ class TestConfigurationDynamicLocationEndActionServices(BaseTestCase):
                     "configuration": {
                         "data": {"type": "configuration", "id": config.id}
                     },
-                }
+                },
             }
         }
 

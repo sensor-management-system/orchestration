@@ -4,12 +4,13 @@ from flask_rest_jsonapi import ResourceDetail, ResourceRelationship
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.orm.exc import NoResultFound
 
-from ..models import ConfigurationStaticLocationBeginAction, Configuration
-from ..models.base_model import db
-from ..schemas.configuration_static_location_actions_schema import \
-    ConfigurationStaticLocationBeginActionSchema
-from ..token_checker import token_required
 from ...frj_csv_export.resource import ResourceList
+from ..models import Configuration, ConfigurationStaticLocationBeginAction
+from ..models.base_model import db
+from ..schemas.configuration_static_location_actions_schema import (
+    ConfigurationStaticLocationBeginActionSchema,
+)
+from ..token_checker import token_required
 
 
 class ConfigurationStaticLocationBeginActionList(ResourceList):
@@ -36,7 +37,9 @@ class ConfigurationStaticLocationBeginActionList(ResourceList):
                 )
             else:
                 query_ = query_.filter(
-                    ConfigurationStaticLocationBeginAction.configuration_id == configuration_id)
+                    ConfigurationStaticLocationBeginAction.configuration_id
+                    == configuration_id
+                )
         return query_
 
     schema = ConfigurationStaticLocationBeginActionSchema

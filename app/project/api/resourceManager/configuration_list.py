@@ -1,13 +1,10 @@
+from ...frj_csv_export.resource import ResourceList
 from ..datalayers.esalchemy import EsSqlalchemyDataLayer
 from ..models.base_model import db
 from ..models.configuration import Configuration
-from ..resourceManager.base_resource import (
-    add_contact_to_object,
-    add_created_by_id,
-)
+from ..resourceManager.base_resource import add_contact_to_object, add_created_by_id
 from ..schemas.configuration_schema import ConfigurationSchema
 from ..token_checker import token_required
-from ...frj_csv_export.resource import ResourceList
 
 
 class ConfigurationList(ResourceList):

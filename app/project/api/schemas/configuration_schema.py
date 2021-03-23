@@ -2,14 +2,10 @@ from marshmallow_jsonapi import fields
 from marshmallow_jsonapi.flask import Relationship, Schema
 
 from ..schemas.configuration_device_schema import ConfigurationDeviceSchema
-from ..schemas.configuration_platform_schema import (
-    ConfigurationPlatformSchema,
-)
+from ..schemas.configuration_platform_schema import ConfigurationPlatformSchema
 from ..schemas.contact_schema import ContactSchema
 from ..schemas.device_property_schema import InnerDevicePropertySchema
-from ..serializer.configuration_hierarchy_field import (
-    ConfigurationHierarchyField,
-)
+from ..serializer.configuration_hierarchy_field import ConfigurationHierarchyField
 
 
 class ConfigurationSchema(Schema):

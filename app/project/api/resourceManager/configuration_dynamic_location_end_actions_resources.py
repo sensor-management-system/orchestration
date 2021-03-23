@@ -4,12 +4,13 @@ from flask_rest_jsonapi import ResourceDetail, ResourceRelationship
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.orm.exc import NoResultFound
 
-from ..models import ConfigurationDynamicLocationEndAction, Configuration
-from ..models.base_model import db
-from ..schemas.configuration_dynamic_location_actions_schema import \
-    ConfigurationDynamicLocationEndActionSchema
-from ..token_checker import token_required
 from ...frj_csv_export.resource import ResourceList
+from ..models import Configuration, ConfigurationDynamicLocationEndAction
+from ..models.base_model import db
+from ..schemas.configuration_dynamic_location_actions_schema import (
+    ConfigurationDynamicLocationEndActionSchema,
+)
+from ..token_checker import token_required
 
 
 class ConfigurationDynamicLocationEndActionList(ResourceList):
@@ -36,7 +37,9 @@ class ConfigurationDynamicLocationEndActionList(ResourceList):
                 )
             else:
                 query_ = query_.filter(
-                    ConfigurationDynamicLocationEndAction.configuration_id == configuration_id)
+                    ConfigurationDynamicLocationEndAction.configuration_id
+                    == configuration_id
+                )
         return query_
 
     schema = ConfigurationDynamicLocationEndActionSchema

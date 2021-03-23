@@ -1,12 +1,11 @@
 import json
 
-from project import base_url
-from project import db
+from project import base_url, db
 from project.api.models import Contact
-from project.tests.base import BaseTestCase, fake
-from project.tests.base import generate_token_data
-from project.tests.models.test_configuration_static_action_model import \
-    add_static_location_end_action_model
+from project.tests.base import BaseTestCase, fake, generate_token_data
+from project.tests.models.test_configuration_static_action_model import (
+    add_static_location_end_action_model,
+)
 from project.tests.models.test_configurations_model import generate_configuration_model
 
 
@@ -27,7 +26,7 @@ class TestConfigurationStaticLocationEndActionServices(BaseTestCase):
     def test_get_device_calibration_action_collection(self):
         """Test retrieve a collection of configuration_static_location_end_action objects."""
         static_location_end_action = add_static_location_end_action_model()
-        print(f'd: {static_location_end_action.description}')
+        print(f"d: {static_location_end_action.description}")
         with self.client:
             response = self.client.get(self.url)
         data = json.loads(response.data.decode())
@@ -64,7 +63,7 @@ class TestConfigurationStaticLocationEndActionServices(BaseTestCase):
                     "configuration": {
                         "data": {"type": "configuration", "id": config.id}
                     },
-                }
+                },
             }
         }
 

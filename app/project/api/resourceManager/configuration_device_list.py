@@ -1,8 +1,8 @@
+from ...frj_csv_export.resource import ResourceList
 from ..models.base_model import db
 from ..models.configuration_device import ConfigurationDevice
 from ..schemas.configuration_device_schema import ConfigurationDeviceSchema
 from ..token_checker import token_required
-from ...frj_csv_export.resource import ResourceList
 
 
 class ConfigurationDeviceList(ResourceList):

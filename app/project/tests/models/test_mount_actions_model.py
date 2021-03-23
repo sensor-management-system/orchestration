@@ -82,8 +82,8 @@ class TestMountActionsModel(BaseTestCase):
         platform_mount_action = add_mount_platform_action_model()
         mpa_r = (
             db.session.query(PlatformMountAction)
-                .filter_by(description="test mount platform action model")
-                .one()
+            .filter_by(description="test mount platform action model")
+            .one()
         )
         self.assertEqual(
             platform_mount_action.parent_platform.short_name,
@@ -96,8 +96,8 @@ class TestMountActionsModel(BaseTestCase):
         mount_device_action_model = add_mount_device_action_model()
         mount_device_action = (
             db.session.query(DeviceMountAction)
-                .filter_by(description="test mount device action model")
-                .one()
+            .filter_by(description="test mount device action model")
+            .one()
         )
         self.assertEqual(
             mount_device_action_model.parent_platform.short_name,

@@ -1,12 +1,11 @@
 import json
 
-from project import base_url
-from project import db
+from project import base_url, db
 from project.api.models import Contact, Device, DeviceProperty
-from project.tests.base import BaseTestCase, fake
-from project.tests.base import generate_token_data
-from project.tests.models.test_configuration_dynamic_action_model import \
-    add_dynamic_location_begin_action_model
+from project.tests.base import BaseTestCase, fake, generate_token_data
+from project.tests.models.test_configuration_dynamic_action_model import (
+    add_dynamic_location_begin_action_model,
+)
 from project.tests.models.test_configurations_model import generate_configuration_model
 
 
@@ -97,7 +96,9 @@ class TestConfigurationDynamicLocationBeginActionServices(BaseTestCase):
             family_name=mock_jwt["family_name"],
             email=mock_jwt["email"],
         )
-        db.session.add_all([device, x_property, y_property, z_property, contact, config])
+        db.session.add_all(
+            [device, x_property, y_property, z_property, contact, config]
+        )
         db.session.commit()
         data = {
             "data": {
@@ -108,13 +109,19 @@ class TestConfigurationDynamicLocationBeginActionServices(BaseTestCase):
                 },
                 "relationships": {
                     "contact": {"data": {"type": "contact", "id": contact.id}},
-                    "x_property": {"data": {"type": "device_property", "id": x_property.id}},
-                    "y_property": {"data": {"type": "device_property", "id": y_property.id}},
-                    "z_property": {"data": {"type": "device_property", "id": z_property.id}},
+                    "x_property": {
+                        "data": {"type": "device_property", "id": x_property.id}
+                    },
+                    "y_property": {
+                        "data": {"type": "device_property", "id": y_property.id}
+                    },
+                    "z_property": {
+                        "data": {"type": "device_property", "id": z_property.id}
+                    },
                     "configuration": {
                         "data": {"type": "configuration", "id": config.id}
                     },
-                }
+                },
             }
         }
         _ = super().add_object(
@@ -147,7 +154,7 @@ class TestConfigurationDynamicLocationBeginActionServices(BaseTestCase):
                     "configuration": {
                         "data": {"type": "configuration", "id": config.id}
                     },
-                }
+                },
             }
         }
         return data, config
@@ -203,15 +210,17 @@ class TestConfigurationDynamicLocationBeginActionServices(BaseTestCase):
     def test_filtered_by_configuration(self):
         """Ensure that filter by a specific configuration works."""
         data1, config1 = self.prepare_request_data_with_config(
-            "test dynamic_location_begin_action1")
+            "test dynamic_location_begin_action1"
+        )
 
         _ = super().add_object(
             url=f"{self.url}?include=configuration,contact,x_property,y_property,z_property",
             data_object=data1,
             object_type=self.object_type,
         )
-        data2, config2 = self.prepare_request_data_with_config(
-            "test dynamic_location_begin_action2")
+        data2, _ = self.prepare_request_data_with_config(
+            "test dynamic_location_begin_action2"
+        )
 
         _ = super().add_object(
             url=f"{self.url}?include=configuration,contact,x_property,y_property,z_property",
@@ -228,7 +237,7 @@ class TestConfigurationDynamicLocationBeginActionServices(BaseTestCase):
         # Test only for the first one
         with self.client:
             url_get_for_config1 = (
-                    base_url + f"/configurations/{config1.id}/dynamic-location-begin-action"
+                base_url + f"/configurations/{config1.id}/dynamic-location-begin-action"
             )
             response = self.client.get(
                 url_get_for_config1, content_type="application/vnd.api+json"
@@ -237,7 +246,7 @@ class TestConfigurationDynamicLocationBeginActionServices(BaseTestCase):
         self.assertEqual(len(response.json["data"]), 1)
         self.assertEqual(
             response.json["data"][0]["attributes"]["description"],
-            "test dynamic_location_begin_action1"
+            "test dynamic_location_begin_action1",
         )
 
     def prepare_request_data_with_x_property(self, description):
@@ -276,27 +285,31 @@ class TestConfigurationDynamicLocationBeginActionServices(BaseTestCase):
                 },
                 "relationships": {
                     "contact": {"data": {"type": "contact", "id": contact.id}},
-                    "x_property": {"data": {"type": "device_property", "id": x_property.id}},
+                    "x_property": {
+                        "data": {"type": "device_property", "id": x_property.id}
+                    },
                     "configuration": {
                         "data": {"type": "configuration", "id": config.id}
                     },
-                }
+                },
             }
         }
         return data, x_property
 
-    def test_filtered_by_configuration(self):
+    def test_filtered_by_x_property(self):
         """Ensure that filter by a specific device-property works."""
         data1, x_property1 = self.prepare_request_data_with_x_property(
-            "test dynamic_location_begin_action1")
+            "test dynamic_location_begin_action1"
+        )
 
         _ = super().add_object(
             url=f"{self.url}?include=configuration,contact,x_property",
             data_object=data1,
             object_type=self.object_type,
         )
-        data2, x_property2 = self.prepare_request_data_with_x_property(
-            "test dynamic_location_begin_action2")
+        data2, _ = self.prepare_request_data_with_x_property(
+            "test dynamic_location_begin_action2"
+        )
 
         _ = super().add_object(
             url=f"{self.url}?include=configuration,contact,x_property",
@@ -313,7 +326,8 @@ class TestConfigurationDynamicLocationBeginActionServices(BaseTestCase):
         # Test only for the first one
         with self.client:
             url_get_for_config1 = (
-                    base_url + f"/device-properties/{x_property1.id}/dynamic-location-begin-actions-x"
+                base_url
+                + f"/device-properties/{x_property1.id}/dynamic-location-begin-actions-x"
             )
             response = self.client.get(
                 url_get_for_config1, content_type="application/vnd.api+json"
@@ -323,5 +337,5 @@ class TestConfigurationDynamicLocationBeginActionServices(BaseTestCase):
         self.assertEqual(len(response.json["data"]), 1)
         self.assertEqual(
             response.json["data"][0]["attributes"]["description"],
-            "test dynamic_location_begin_action1"
+            "test dynamic_location_begin_action1",
         )

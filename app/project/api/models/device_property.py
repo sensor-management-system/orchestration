@@ -2,7 +2,6 @@
 
 
 from ..models.device import Device
-
 from .base_model import db
 
 

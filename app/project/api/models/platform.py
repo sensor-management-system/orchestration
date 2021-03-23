@@ -2,7 +2,6 @@
 
 
 from ..models.mixin import AuditMixin, SearchableMixin
-
 from .base_model import db
 
 
