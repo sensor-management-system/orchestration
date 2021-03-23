@@ -128,7 +128,7 @@ permissions and limitations under the Licence.
                             >
                               mdi-delete
                             </v-icon>
-                            Remove attachment
+                            Remove attachment...
                           </v-list-item-title>
                         </v-list-item-content>
                       </v-list-item>
@@ -142,10 +142,10 @@ permissions and limitations under the Licence.
         <v-dialog v-model="showDeleteDialog[attachment.id]" max-width="290">
           <v-card>
             <v-card-title class="headline">
-              Delete Attachment
+              Remove Attachment
             </v-card-title>
             <v-card-text>
-              Do you really want to delete the attachment <em>{{ attachment.label }}</em>?
+              Do you really want to remove the attachment <em>{{ attachment.label }}</em>?
             </v-card-text>
             <v-card-actions>
               <v-btn
