@@ -260,7 +260,7 @@ export default class DevicePropertiesPage extends Vue {
       this.openPanelIfStartedInEditMode()
       this.isLoading = false
     } catch (e) {
-      this.$store.commit('snackbar/setError', 'Failed to fetch properties')
+      this.$store.commit('snackbar/setError', 'Failed to fetch measured quantities')
       this.isLoading = false
     }
     try {
