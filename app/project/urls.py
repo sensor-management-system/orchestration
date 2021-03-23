@@ -1026,3 +1026,117 @@ api.route(
     "device_property_calibration_device_property",
     "/device-property-calibrations/<int:id>/relationships/device-property",
 )
+
+# ConfigurationStaticLocationBeginAction
+
+api.route(
+    ConfigurationStaticLocationBeginActionList,
+    "configuration_static_location_begin_action_list",
+    "/static-location-begin-actions",
+    "/configurations/<int:configuration_id>/static-location-begin-actions",
+)
+api.route(
+    ConfigurationStaticLocationBeginActionDetail,
+    "configuration_static_location_begin_action_detail",
+    "/static-location-begin-actions/<int:id>",
+)
+api.route(
+    ConfigurationStaticLocationBeginActionRelationship,
+    "configuration_static_location_begin_action_contact",
+    "/static-location-begin-actions/<int:id>/relationships/contacts",
+)
+api.route(
+    ConfigurationStaticLocationBeginActionRelationship,
+    "configuration_static_location_begin_action_configuration",
+    "/static-location-begin-actions/<int:id>/relationships/configuration",
+)
+
+# ConfigurationStaticLocationEndAction
+
+api.route(
+    ConfigurationStaticLocationEndActionList,
+    "configuration_static_location_end_action_list",
+    "/static-location-end-actions",
+    "/configurations/<int:configuration_id>/static-location-end-actions",
+)
+api.route(
+    ConfigurationStaticLocationEndActionDetail,
+    "configuration_static_location_end_action_detail",
+    "/static-location-end-actions/<int:id>",
+)
+api.route(
+    ConfigurationStaticLocationEndActionRelationship,
+    "configuration_static_location_end_action_contact",
+    "/static-location-end-actions/<int:id>/relationships/contact",
+)
+api.route(
+    ConfigurationStaticLocationEndActionRelationship,
+    "configuration_static_location_end_action_configuration",
+    "/static-location-end-actions/<int:id>/relationships/configuration",
+)
+
+# ConfigurationDynamicLocationBeginAction
+
+api.route(
+    ConfigurationDynamicLocationBeginActionList,
+    "configuration_dynamic_location_begin_action_list",
+    "/dynamic-location-begin-actions",
+    "/configurations/<int:configuration_id>/dynamic-location-begin-action",
+    "/device-properties/<int:x_property_id>/dynamic-location-begin-actions-x",
+    "/device-properties/<int:y_property_id>/dynamic-location-begin-actions-y",
+    "/device-properties/<int:z_property_id>/dynamic-location-begin-actions-z",
+)
+api.route(
+    ConfigurationDynamicLocationBeginActionDetail,
+    "configuration_dynamic_location_begin_action_detail",
+    "/dynamic-location-begin-actions/<int:id>",
+)
+api.route(
+    ConfigurationDynamicLocationBeginActionRelationship,
+    "configuration_dynamic_location_begin_action_contact",
+    "/dynamic-location-begin-actions/<int:id>/relationships/contacts",
+)
+api.route(
+    ConfigurationDynamicLocationBeginActionRelationship,
+    "configuration_dynamic_location_begin_action_configuration",
+    "/dynamic-location-begin-actions/<int:id>/relationships/configuration",
+)
+api.route(
+    ConfigurationDynamicLocationBeginActionRelationship,
+    "configuration_dynamic_location_begin_action_x_property",
+    "/dynamic-location-begin-actions/<int:id>/relationships/x-property",
+)
+api.route(
+    ConfigurationDynamicLocationBeginActionRelationship,
+    "configuration_dynamic_location_begin_action_y_property",
+    "/dynamic-location-begin-actions/<int:id>/relationships/y-property",
+)
+api.route(
+    ConfigurationDynamicLocationBeginActionRelationship,
+    "configuration_dynamic_location_begin_action_z_property",
+    "/dynamic-location-begin-actions/<int:id>/relationships/z-property",
+)
+
+# ConfigurationDynamicLocationEndAction
+
+api.route(
+    ConfigurationDynamicLocationEndActionList,
+    "configuration_dynamic_location_end_action_list",
+    "/dynamic-location-end-actions",
+    "/configurations/<int:configuration_id>/dynamic-location-end-actions",
+)
+api.route(
+    ConfigurationDynamicLocationEndActionDetail,
+    "configuration_dynamic_location_end_action_detail",
+    "/dynamic-location-end-actions/<int:id>",
+)
+api.route(
+    ConfigurationDynamicLocationEndActionRelationship,
+    "configuration_dynamic_location_end_action_contact",
+    "/dynamic-location-end-actions/<int:id>/relationships/contact",
+)
+api.route(
+    ConfigurationDynamicLocationEndActionRelationship,
+    "configuration_dynamic_location_end_action_configuration",
+    "/dynamic-location-end-actions/<int:id>/relationships/configuration",
+)
