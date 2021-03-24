@@ -330,15 +330,34 @@ export default {
       this.$store.commit('appbar/setActiveTab', tab)
     },
     login () {
-      this.loginPopup().then((redirectPath) => {
-        this.$router.push(redirectPath)
+      this.loginPopup().then((_redirectPath) => {
+        /*
+           The redirect path is normally just a path to '/'.
+           However - as we are now logged in we are fine that
+           the user still can access the current page.
+           So we will not do the redirect.
+
+           In case you want to re-introduce this redirect, you
+           can use the following snippet:
+
+           ```javascript
+           this.$router.push(redirectPath)
+           ```
+        */
       }).catch((_err) => {
         this.$store.commit('snackbar/setError', 'Login failed')
       })
     },
     logout () {
       this.removeOidcUser().then(() => {
-        this.$router.push('/')
+        // same logic as in the vuex-oidc-router.js middleware
+        // but don't display an error message
+        const accessPromise = this.$store.dispatch('oidc/oidcCheckAccess', this.$fullContext.route)
+        accessPromise.then((hasAccess) => {
+          if (!hasAccess) {
+            this.$router.push('/')
+          }
+        })
       })
     }
   },

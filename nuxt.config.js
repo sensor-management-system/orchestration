@@ -89,6 +89,7 @@ export default {
   ** Plugins to load before mounting the App
   */
   plugins: [
+    '~/plugins/fullContext.ts',
     '~/plugins/api.ts'
   ],
   /*
