@@ -60,6 +60,7 @@ permissions and limitations under the Licence.
               </v-icon>
             </v-btn>
             <v-btn
+              ref="cancelButton"
               text
               small
               :to="'/devices/' + deviceId + '/attachments'"
@@ -106,6 +107,14 @@ export default class AttachmentEditPage extends Vue {
 
   created () {
     this.valueCopy = Attachment.createFromObject(this.value)
+  }
+
+  mounted () {
+    const cancelButton = this.$refs.cancelButton as Vue
+    // due to the active route (and the button being a router link)
+    // this button has the active class
+    // however, we don't want this special behaviour for this button
+    cancelButton.$el.classList.remove('v-btn--active')
   }
 
   get deviceId (): string {
