@@ -247,6 +247,15 @@ export default {
     }
   },
   computed: {
+    browserTitle () {
+      if (this.title === this.appBarTitle) {
+        return this.title
+      }
+      if (!this.appBarTitle) {
+        return this.title
+      }
+      return this.title + ' - ' + this.appBarTitle
+    },
     error () {
       return this.$store.state.snackbar.error
     },
@@ -331,6 +340,11 @@ export default {
       this.removeOidcUser().then(() => {
         this.$router.push('/')
       })
+    }
+  },
+  head () {
+    return {
+      title: this.browserTitle
     }
   }
 }
