@@ -84,7 +84,7 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue, Watch } from 'nuxt-property-decorator'
+import { Component, Vue } from 'nuxt-property-decorator'
 import { DeviceProperty } from '@/models/DeviceProperty'
 import { Compartment } from '@/models/Compartment'
 import { Property } from '@/models/Property'
@@ -116,7 +116,7 @@ export default class DevicePropertiesPage extends Vue {
       this.isLoading = true
       this.deviceProperties = await this.$api.devices.findRelatedDeviceProperties(this.deviceId)
       this.isLoading = false
-      //this.openSelectedPanel()
+      // this.openSelectedPanel()
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to fetch properties')
       this.isLoading = false
@@ -198,18 +198,6 @@ export default class DevicePropertiesPage extends Vue {
     }).catch(() => {
       this.$store.commit('snackbar/setError', 'Failed to delete property')
     })
-  }
-
-  @Watch('openedPanels', { immediate: true, deep: true })
-  // @ts-ignore
-  onPanelsChanged (newPanels, oldPanels) {
-    console.log(newPanels, oldPanels)
-  }
-
-  @Watch('$route', { immediate: true, deep: true })
-  // @ts-ignore
-  onRouteChanged () {
-    //this.openSelectedPanel()
   }
 
   openPanel (panelIndex: number, opened: boolean) {
