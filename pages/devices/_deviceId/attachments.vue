@@ -335,5 +335,4 @@ export default class DeviceAttachmentspage extends Vue {
     }
   }
 }
-
 </script>
