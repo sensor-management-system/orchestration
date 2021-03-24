@@ -40,17 +40,6 @@ permissions and limitations under the Licence.
       :units="units"
       :measured-quantity-units="measuredQuantityUnits"
     />
-    <v-row>
-      <col>
-      <v-btn
-        v-if="isLoggedIn"
-        color="green"
-        small
-        @click.prevent.stop="save"
-      >
-        Apply
-      </v-btn>
-    </v-row>
   </div>
 </template>
 
