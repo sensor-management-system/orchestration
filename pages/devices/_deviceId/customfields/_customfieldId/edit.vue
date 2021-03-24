@@ -41,6 +41,7 @@ permissions and limitations under the Licence.
       <template #actions>
         <v-btn
           v-if="isLoggedIn"
+          ref="cancelButton"
           text
           small
           nuxt
@@ -91,6 +92,11 @@ export default class DeviceCustomFieldsShowPage extends Vue {
 
   mounted () {
     (this.$refs.customFieldCardForm as Vue & { focus: () => void}).focus()
+    const cancelButton = this.$refs.cancelButton as Vue
+    // due to the active route (and the button being a router link)
+    // this button has the active class
+    // however, we don't want this special behaviour for this button
+    cancelButton.$el.classList.remove('v-btn--active')
   }
 
   get deviceId (): string {
