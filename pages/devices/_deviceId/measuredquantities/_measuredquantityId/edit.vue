@@ -1,6 +1,7 @@
 <template>
   <div>
     <DevicePropertyForm
+      ref="propertyForm"
       v-model="valueCopy"
       :readonly="false"
       :compartments="compartments"
