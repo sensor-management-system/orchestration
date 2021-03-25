@@ -74,7 +74,7 @@ export default class DevicePropertyEditPage extends Vue {
     required: true,
     type: Array
   })
-  compartments!: Compartment[]
+  readonly compartments!: Compartment[]
 
   /**
    * a list of SamplingMedias
@@ -84,7 +84,7 @@ export default class DevicePropertyEditPage extends Vue {
     required: true,
     type: Array
   })
-  samplingMedias!: SamplingMedia[]
+  readonly samplingMedias!: SamplingMedia[]
 
   /**
    * a list of Properties
@@ -94,7 +94,7 @@ export default class DevicePropertyEditPage extends Vue {
     required: true,
     type: Array
   })
-  properties!: Property[]
+  readonly properties!: Property[]
 
   /**
    * a list of Units
@@ -104,7 +104,7 @@ export default class DevicePropertyEditPage extends Vue {
     required: true,
     type: Array
   })
-  units!: Unit[]
+  readonly units!: Unit[]
 
   /**
    * a list of MeasuredQuantityUnits
@@ -114,7 +114,7 @@ export default class DevicePropertyEditPage extends Vue {
     required: true,
     type: Array
   })
-  measuredQuantityUnits!: MeasuredQuantityUnit[]
+  readonly measuredQuantityUnits!: MeasuredQuantityUnit[]
 
   created () {
     this.valueCopy = DeviceProperty.createFromObject(this.value)

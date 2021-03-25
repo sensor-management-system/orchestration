@@ -138,7 +138,7 @@ permissions and limitations under the Licence.
                         <v-icon left small color="red">
                           mdi-delete
                         </v-icon>
-                        Remove measured quantity...
+                        Delete
                       </v-list-item-title>
                     </v-list-item-content>
                   </v-list-item>
@@ -149,10 +149,10 @@ permissions and limitations under the Licence.
           <v-dialog v-model="showDeleteDialog[property.id]" max-width="400">
             <v-card>
               <v-card-title class="headline">
-                Remove Measured Quantity
+                Delete Measured Quantity
               </v-card-title>
               <v-card-text>
-                Do you really want to remove the measured quantity <em>{{ property.label }}</em>?
+                Do you really want to delete the measured quantity <em>{{ property.label }}</em>?
               </v-card-text>
               <v-card-actions>
                 <v-btn
@@ -260,7 +260,7 @@ export default class DevicePropertiesPage extends Vue {
       this.openPanelIfStartedInEditMode()
       this.isLoading = false
     } catch (e) {
-      this.$store.commit('snackbar/setError', 'Failed to fetch properties')
+      this.$store.commit('snackbar/setError', 'Failed to fetch measured quantities')
       this.isLoading = false
     }
     try {

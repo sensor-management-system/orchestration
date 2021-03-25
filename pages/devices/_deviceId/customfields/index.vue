@@ -29,67 +29,69 @@ implied. See the Licence for the specific language governing
 permissions and limitations under the Licence.
 -->
 <template>
-  <CustomFieldCard
-    v-model="value"
-  >
-    <template #actions>
-      <v-btn
-        v-if="isLoggedIn"
-        color="primary"
-        text
-        small
-        nuxt
-        :to="'/devices/' + deviceId + '/customfields/' + value.id + '/edit'"
-      >
-        Edit
-      </v-btn>
-      <v-menu
-        v-if="isLoggedIn"
-        close-on-click
-        close-on-content-click
-        offset-x
-        left
-        z-index="999"
-      >
-        <template v-slot:activator="{ on }">
-          <v-btn
-            data-role="property-menu"
-            icon
-            small
-            v-on="on"
-          >
-            <v-icon
-              dense
+  <div>
+    <CustomFieldCard
+      v-model="value"
+    >
+      <template #actions>
+        <v-btn
+          v-if="isLoggedIn"
+          color="primary"
+          text
+          small
+          nuxt
+          :to="'/devices/' + deviceId + '/customfields/' + value.id + '/edit'"
+        >
+          Edit
+        </v-btn>
+        <v-menu
+          v-if="isLoggedIn"
+          close-on-click
+          close-on-content-click
+          offset-x
+          left
+          z-index="999"
+        >
+          <template v-slot:activator="{ on }">
+            <v-btn
+              data-role="property-menu"
+              icon
               small
+              v-on="on"
             >
-              mdi-dots-vertical
-            </v-icon>
-          </v-btn>
-        </template>
-        <v-list>
-          <v-list-item
-            dense
-            @click="deleteField"
-          >
-            <v-list-item-content>
-              <v-list-item-title
-                class="red--text"
+              <v-icon
+                dense
+                small
               >
-                <v-icon
-                  left
-                  small
-                  color="red"
+                mdi-dots-vertical
+              </v-icon>
+            </v-btn>
+          </template>
+          <v-list>
+            <v-list-item
+              dense
+              @click="openDeleteDialog"
+            >
+              <v-list-item-content>
+                <v-list-item-title
+                  class="red--text"
                 >
-                  mdi-delete
-                </v-icon>
-                Remove field
-              </v-list-item-title>
-            </v-list-item-content>
-          </v-list-item>
-        </v-list>
-      </v-menu>
-    </template>
-  </CustomFieldCard>
+                  <v-icon
+                    left
+                    small
+                    color="red"
+                  >
+                    mdi-delete
+                  </v-icon>
+                  Delete
+                </v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
+          </v-list>
+        </v-menu>
+      </template>
+    </CustomFieldCard>
+  </div>
 </template>
 
 <script lang="ts">
@@ -126,8 +128,8 @@ export default class DeviceCustomFieldsShowPage extends Vue {
     return this.$store.getters['oidc/isAuthenticated']
   }
 
-  deleteField (): void {
-    this.$emit('delete', this.value)
+  openDeleteDialog (): void {
+    this.$emit('openDeleteDialog', this.value.id)
   }
 }
 </script>

@@ -49,11 +49,41 @@ permissions and limitations under the Licence.
     <template
       v-for="(field, index) in customFields"
     >
-      <NuxtChild
-        :key="'customfield-' + index"
-        v-model="customFields[index]"
-        @delete="deleteField"
-      />
+      <div :key="'customfield-' + index">
+        <NuxtChild
+          v-model="customFields[index]"
+          @openDeleteDialog="showDeleteDialogFor"
+        />
+        <v-dialog v-model="showDeleteDialog[field.id]" max-width="290">
+          <v-card>
+            <v-card-title class="headline">
+              Delete Field
+            </v-card-title>
+            <v-card-text>
+              Do you really want to delete the field <em>{{ field.key }}</em>?
+            </v-card-text>
+            <v-card-actions>
+              <v-btn
+                text
+                @click="hideDeleteDialogFor(field.id)"
+              >
+                No
+              </v-btn>
+              <v-spacer />
+              <v-btn
+                color="error"
+                text
+                @click="deleteAndCloseDialog(field)"
+              >
+                <v-icon left>
+                  mdi-delete
+                </v-icon>
+                Delete
+              </v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
+      </div>
     </template>
     <v-card-actions
       v-if="customFields.length > 3"
@@ -87,6 +117,8 @@ export default class DeviceCustomFieldsPage extends Vue {
   private customFields: CustomTextField[] = []
   private isLoading = false
   private isSaving = false
+
+  private showDeleteDialog: {[idx: string]: boolean} = {}
 
   mounted () {
     this.isLoading = true
@@ -130,7 +162,7 @@ export default class DeviceCustomFieldsPage extends Vue {
     })
   }
 
-  deleteField (field: CustomTextField) {
+  deleteAndCloseDialog (field: CustomTextField) {
     if (!field.id) {
       return
     }
@@ -142,6 +174,16 @@ export default class DeviceCustomFieldsPage extends Vue {
     }).catch(() => {
       this.$store.commit('snackbar/setError', 'Failed to delete custom field')
     })
+
+    this.showDeleteDialog = {}
+  }
+
+  showDeleteDialogFor (id: string) {
+    Vue.set(this.showDeleteDialog, id, true)
+  }
+
+  hideDeleteDialogFor (id: string) {
+    Vue.set(this.showDeleteDialog, id, false)
   }
 }
 </script>
