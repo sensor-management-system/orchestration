@@ -332,7 +332,6 @@ class TestConfigurationDynamicLocationBeginActionServices(BaseTestCase):
             response = self.client.get(
                 url_get_for_config1, content_type="application/vnd.api+json"
             )
-        print(response.json)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.json["data"]), 1)
         self.assertEqual(

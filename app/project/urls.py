@@ -1043,7 +1043,7 @@ api.route(
 api.route(
     ConfigurationStaticLocationBeginActionRelationship,
     "configuration_static_location_begin_action_contact",
-    "/static-location-begin-actions/<int:id>/relationships/contacts",
+    "/static-location-begin-actions/<int:id>/relationships/contact",
 )
 api.route(
     ConfigurationStaticLocationBeginActionRelationship,
@@ -1094,7 +1094,7 @@ api.route(
 api.route(
     ConfigurationDynamicLocationBeginActionRelationship,
     "configuration_dynamic_location_begin_action_contact",
-    "/dynamic-location-begin-actions/<int:id>/relationships/contacts",
+    "/dynamic-location-begin-actions/<int:id>/relationships/contact",
 )
 api.route(
     ConfigurationDynamicLocationBeginActionRelationship,
