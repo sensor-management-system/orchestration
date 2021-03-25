@@ -138,7 +138,7 @@ permissions and limitations under the Licence.
                         <v-icon left small color="red">
                           mdi-delete
                         </v-icon>
-                        Delete measured quantity...
+                        Delete
                       </v-list-item-title>
                     </v-list-item-content>
                   </v-list-item>

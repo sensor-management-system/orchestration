@@ -128,7 +128,7 @@ permissions and limitations under the Licence.
                             >
                               mdi-delete
                             </v-icon>
-                            Delete attachment...
+                            Delete
                           </v-list-item-title>
                         </v-list-item-content>
                       </v-list-item>
