@@ -227,7 +227,7 @@ permissions and limitations under the Licence.
                       v-model="configuration.location.latitude"
                       :devices="getAllDevices()"
                       device-select-label="Device that measures latitude"
-                      property-select-label="Property for latitude"
+                      property-select-label="Measured quantity for latitude"
                       :readonly="readonly"
                     />
                   </v-col>
@@ -236,7 +236,7 @@ permissions and limitations under the Licence.
                       v-model="configuration.location.longitude"
                       :devices="getAllDevices()"
                       device-select-label="Device that measures longitude"
-                      property-select-label="Property for longitude"
+                      property-select-label="Measured quantity for longitude"
                       :readonly="readonly"
                     />
                   </v-col>
@@ -245,7 +245,7 @@ permissions and limitations under the Licence.
                       v-model="configuration.location.elevation"
                       :devices="getAllDevices()"
                       device-select-label="Device that measures elevation"
-                      property-select-label="Property for elevation"
+                      property-select-label="Measured quantity for elevation"
                       :readonly="readonly"
                     />
                   </v-col>

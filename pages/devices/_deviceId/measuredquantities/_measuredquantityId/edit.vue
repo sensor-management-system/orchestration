@@ -29,55 +29,37 @@ implied. See the Licence for the specific language governing
 permissions and limitations under the Licence.
 -->
 <template>
-  <div class="mb-1" style="flex: 0 0 100%; align-self: flex-start;">
-    <NuxtChild
-      v-if="isEditModeForProperty"
-      v-model="property"
+  <div>
+    <DevicePropertyForm
+      ref="propertyForm"
+      v-model="valueCopy"
+      :readonly="false"
       :compartments="compartments"
       :sampling-medias="samplingMedias"
       :properties="properties"
       :units="units"
       :measured-quantity-units="measuredQuantityUnits"
-      @open="$emit('open', $event)"
     />
-    <DevicePropertyExpansionPanel
-      v-else
-      v-model="property"
-    >
-      <DevicePropertyInfo
-        v-model="property"
-        :compartments="compartments"
-        :sampling-medias="samplingMedias"
-        :properties="properties"
-        :units="units"
-        :measured-quantity-units="measuredQuantityUnits"
-      />
-    </DevicePropertyExpansionPanel>
   </div>
 </template>
 
 <script lang="ts">
 import { Component, Vue, Prop } from 'nuxt-property-decorator'
 
-import { DeviceProperty } from '@/models/DeviceProperty'
+import DevicePropertyForm from '@/components/DevicePropertyForm.vue'
+
 import { Compartment } from '@/models/Compartment'
+import { DeviceProperty } from '@/models/DeviceProperty'
 import { Property } from '@/models/Property'
 import { SamplingMedia } from '@/models/SamplingMedia'
 import { Unit } from '@/models/Unit'
 import { MeasuredQuantityUnit } from '@/models/MeasuredQuantityUnit'
 
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
-import DevicePropertyExpansionPanel from '@/components/DevicePropertyExpansionPanel.vue'
-import DevicePropertyInfo from '@/components/DevicePropertyInfo.vue'
-
 @Component({
-  components: {
-    DevicePropertyExpansionPanel,
-    DevicePropertyInfo,
-    ProgressIndicator
-  }
+  components: { DevicePropertyForm }
 })
-export default class DevicePropertyIdPage extends Vue {
+export default class DevicePropertyEditPage extends Vue {
+  private valueCopy: DeviceProperty = new DeviceProperty()
   @Prop({
     required: true,
     type: Object
@@ -85,74 +67,77 @@ export default class DevicePropertyIdPage extends Vue {
   readonly value!: DeviceProperty
 
   /**
-   * a list of compartments
+   * a list of Compartments
    */
   @Prop({
     default: () => [] as Compartment[],
-    required: false,
+    required: true,
     type: Array
   })
-  // @ts-ignore
-  readonly compartments!: Compartment[]
+  compartments!: Compartment[]
 
   /**
-   * a list of samplingMedias
+   * a list of SamplingMedias
    */
   @Prop({
     default: () => [] as SamplingMedia[],
-    required: false,
+    required: true,
     type: Array
   })
-  // @ts-ignore
-  readonly samplingMedias!: SamplingMedia[]
+  samplingMedias!: SamplingMedia[]
 
   /**
-   * a list of properties
+   * a list of Properties
    */
   @Prop({
     default: () => [] as Property[],
-    required: false,
+    required: true,
     type: Array
   })
-  // @ts-ignore
-  readonly properties!: Property[]
+  properties!: Property[]
 
   /**
-   * a list of units
+   * a list of Units
    */
   @Prop({
     default: () => [] as Unit[],
-    required: false,
+    required: true,
     type: Array
   })
-  // @ts-ignore
-  readonly units!: Unit[]
+  units!: Unit[]
 
   /**
-   * a list of measuredQuantityUnits
+   * a list of MeasuredQuantityUnits
    */
   @Prop({
     default: () => [] as MeasuredQuantityUnit[],
-    required: false,
+    required: true,
     type: Array
   })
-  // @ts-ignore
-  readonly measuredQuantityUnits!: MeasuredQuantityUnit[]
+  measuredQuantityUnits!: MeasuredQuantityUnit[]
 
-  get property (): DeviceProperty {
-    return this.value
+  created () {
+    this.valueCopy = DeviceProperty.createFromObject(this.value)
   }
 
-  set property (value: DeviceProperty) {
-    this.$emit('input', value)
+  save () {
+    this.$emit('showsave', true)
+    this.$api.deviceProperties.update(this.deviceId, this.valueCopy).then((newProperty: DeviceProperty) => {
+      this.$emit('showsave', false)
+      this.$emit('input', newProperty)
+      this.$router.push('/devices/' + this.deviceId + '/measuredquantities')
+    }).catch(() => {
+      this.$emit('showsave', false)
+      this.$store.commit('snackbar/setError', 'Failed to save measured quantity')
+    })
   }
 
   get deviceId (): string {
     return this.$route.params.deviceId
   }
 
-  get isEditModeForProperty () {
-    return this.$route.path === '/devices/' + this.deviceId + '/properties/' + this.value.id + '/edit'
+  get isLoggedIn (): boolean {
+    return this.$store.getters['oidc/isAuthenticated']
   }
 }
 </script>
