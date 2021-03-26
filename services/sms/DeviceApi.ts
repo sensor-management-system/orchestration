@@ -35,6 +35,7 @@ import { Attachment } from '@/models/Attachment'
 import { Contact } from '@/models/Contact'
 import { CustomTextField } from '@/models/CustomTextField'
 import { Device } from '@/models/Device'
+import { DeviceProperty } from '@/models/DeviceProperty'
 import { DeviceType } from '@/models/DeviceType'
 import { Manufacturer } from '@/models/Manufacturer'
 import { Status } from '@/models/Status'
@@ -54,7 +55,6 @@ import {
   deviceWithMetaToDeviceByThrowingErrorOnMissing,
   deviceWithMetaToDeviceByAddingDummyObjects
 } from '@/serializers/jsonapi/DeviceSerializer'
-import { DeviceProperty } from '@/models/DeviceProperty'
 
 export class DeviceApi {
   private axiosApi: AxiosInstance

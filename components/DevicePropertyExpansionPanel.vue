@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020, 2021
+Copyright (C) 2020
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -29,53 +29,51 @@ implied. See the Licence for the specific language governing
 permissions and limitations under the Licence.
 -->
 <template>
-  <div>
-    <NuxtChild
-      v-if="isEditModeForField"
-      v-model="field"
-    />
-    <CustomFieldCard
-      v-else
-      v-model="field"
-    />
-  </div>
+  <v-expansion-panel>
+    <v-expansion-panel-header>
+      <v-row no-gutters>
+        <v-col cols="10">
+          {{ value.label | orDefault('unknown property') }}
+        </v-col>
+        <v-col
+          cols="2"
+          align-self="end"
+          class="text-right"
+        >
+          <slot name="actions" />
+        </v-col>
+      </v-row>
+    </v-expansion-panel-header>
+    <v-expansion-panel-content
+      eager
+    >
+      <slot />
+    </v-expansion-panel-content>
+  </v-expansion-panel>
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop } from 'nuxt-property-decorator'
+/**
+ * @file provides a component for collections of DevicePropertyForms
+ * @author <marc.hanisch@gfz-potsdam.de>
+ */
+import { Vue, Component, Prop } from 'nuxt-property-decorator'
 
-import CustomFieldCard from '@/components/CustomFieldCard.vue'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
-
-import { CustomTextField } from '@/models/CustomTextField'
-
-@Component({
-  components: {
-    CustomFieldCard,
-    ProgressIndicator
-  }
-})
-export default class DeviceCustomFieldsIdPage extends Vue {
+/**
+ * A class component that lists DevicePropertyForms as ExpansionPanels
+ * @extends Vue
+ */
+@Component
+// @ts-ignore
+export default class DevicePropertyExpansionPanel extends Vue {
+  /**
+   * a DeviceProperty
+   */
   @Prop({
     required: true,
     type: Object
   })
-  readonly value!: CustomTextField
-
-  get field (): CustomTextField {
-    return this.value
-  }
-
-  set field (value: CustomTextField) {
-    this.$emit('input', value)
-  }
-
-  get deviceId (): string {
-    return this.$route.params.deviceId
-  }
-
-  get isEditModeForField () {
-    return this.$route.path === '/devices/' + this.deviceId + '/customfields/' + this.value.id + '/edit'
-  }
+  // @ts-ignore
+  readonly value!: DeviceProperty
 }
 </script>
