@@ -464,7 +464,7 @@ permissions and limitations under the Licence.
       fab
       fixed
       right
-      to="/platforms"
+      to="/platforms/new"
     >
       <v-icon>
         mdi-plus
