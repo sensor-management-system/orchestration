@@ -174,14 +174,14 @@ permissions and limitations under the Licence.
     <v-row>
       <v-col cols="12" md="3">
         <v-checkbox
-          :value="value.dualUse"
+          :input-value="value.dualUse"
           :readonly="readonly"
           :disabled="readonly"
           label="Dual use"
           hint="can be used for military aims"
           :persistent-hint="true"
           color="red darken-3"
-          @input="update('dualUse', $event)"
+          @change="update('dualUse', $event)"
         />
       </v-col>
     </v-row>
@@ -295,7 +295,13 @@ export default class DeviceBasicDataForm extends mixins(Rules) {
         newObj.inventoryNumber = value
         break
       case 'dualUse':
-        newObj.dualUse = value === 'true'
+        // Boolean(true) => true
+        // Boolean(false) => false
+        // but Boolean('false') => true
+        // due to the change handler, this is already a boolean
+        // only typescript doesn't know about this
+        // so we can be sure to go with it here
+        newObj.dualUse = Boolean(value)
         break
       default:
         throw new TypeError('key ' + key + ' is not valid')
