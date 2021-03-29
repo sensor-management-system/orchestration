@@ -118,8 +118,8 @@ export class PlatformApi {
     })
   }
 
-  findRelatedDeviceAttachments (deviceId: string): Promise<Attachment[]> {
-    const url = deviceId + '/device-attachments'
+  findRelatedPlatformAttachments (platformId: string): Promise<Attachment[]> {
+    const url = platformId + '/platform-attachments'
     const params = {
       'page[size]': 10000
     }

@@ -29,18 +29,25 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
-import { DateTime } from 'luxon'
-
 import { Contact } from '@/models/Contact'
 import { Platform } from '@/models/Platform'
 
-import { IJsonApiObjectList, IJsonApiObject, IJsonApiDataWithId, IJsonApiTypeIdAttributes, IJsonApiDataWithOptionalId, IJsonApiTypeIdAttributesWithOptionalRelationships } from '@/serializers/jsonapi/JsonApiTypes'
+import {
+  IJsonApiDataWithId,
+  IJsonApiDataWithOptionalId,
+  IJsonApiObject,
+  IJsonApiObjectList,
+  IJsonApiTypeIdAttributes,
+  IJsonApiTypeIdAttributesWithOptionalRelationships
+} from '@/serializers/jsonapi/JsonApiTypes'
 
-import { AttachmentSerializer } from '@/serializers/jsonapi/AttachmentSerializer'
+import { IMissingAttachmentData } from '@/serializers/jsonapi/AttachmentSerializer'
 import { ContactSerializer, IMissingContactData } from '@/serializers/jsonapi/ContactSerializer'
+import { PlatformAttachmentSerializer } from '@/serializers/jsonapi/PlatformAttachmentSerializer'
 
 export interface IPlatformMissingData {
   contacts: IMissingContactData
+  platformAttachments: IMissingAttachmentData
 }
 
 export interface IPlatformWithMeta {
@@ -49,7 +56,7 @@ export interface IPlatformWithMeta {
 }
 
 export class PlatformSerializer {
-  private attachmentSerializer: AttachmentSerializer = new AttachmentSerializer()
+  private attachmentSerializer: PlatformAttachmentSerializer = new PlatformAttachmentSerializer()
   private contactSerializer: ContactSerializer = new ContactSerializer()
 
   convertJsonApiObjectToModel (jsonApiObject: IJsonApiObject): IPlatformWithMeta {
@@ -76,8 +83,8 @@ export class PlatformSerializer {
     result.statusUri = attributes.status_uri || ''
     result.statusName = attributes.status_name || ''
     result.website = attributes.website || ''
-    result.createdAt = attributes.created_at != null ? DateTime.fromISO(attributes.created_at, { zone: 'UTC' }) : null
-    result.updatedAt = attributes.updated_at != null ? DateTime.fromISO(attributes.updated_at, { zone: 'UTC' }) : null
+    // result.createdAt = attributes.created_at != null ? DateTime.fromISO(attributes.created_at, { zone: 'UTC' }) : null
+    // result.updatedAt = attributes.updated_at != null ? DateTime.fromISO(attributes.updated_at, { zone: 'UTC' }) : null
 
     // TODO
     // result.createdBy = attributes.created_by
@@ -90,7 +97,10 @@ export class PlatformSerializer {
     // TODO
     // result.events = []
 
-    result.attachments = this.attachmentSerializer.convertNestedJsonApiToModelList(attributes.attachments)
+    const attachmentsWithMissing = this.attachmentSerializer.convertJsonApiRelationshipsModelList(relationships, included)
+    result.attachments = attachmentsWithMissing.attachments
+    const missingDataForAttachmentIds = attachmentsWithMissing.missing.ids
+
     const contactsWithMissing = this.contactSerializer.convertJsonApiRelationshipsModelList(relationships, included)
     result.contacts = contactsWithMissing.contacts
     const missingDataForContactIds = contactsWithMissing.missing.ids
@@ -100,6 +110,9 @@ export class PlatformSerializer {
       missing: {
         contacts: {
           ids: missingDataForContactIds
+        },
+        platformAttachments: {
+          ids: missingDataForAttachmentIds
         }
       }
     }
@@ -128,7 +141,7 @@ export class PlatformSerializer {
   }
 
   convertModelToJsonApiData (platform: Platform): IJsonApiDataWithOptionalId {
-    const attachments = this.attachmentSerializer.convertModelListToNestedJsonApiArray(platform.attachments)
+    const attachments = this.attachmentSerializer.convertModelListToJsonApiRelationshipObject(platform.attachments)
     const contacts = this.contactSerializer.convertModelListToJsonApiRelationshipObject(platform.contacts)
 
     const data: IJsonApiDataWithOptionalId = {
@@ -146,8 +159,8 @@ export class PlatformSerializer {
         status_name: platform.statusName,
         website: platform.website,
         // those two time slots are set by the db, no matter what we deliver here
-        created_at: platform.createdAt != null ? platform.createdAt.setZone('UTC').toISO() : null,
-        updated_at: platform.updatedAt != null ? platform.updatedAt.setZone('UTC').toISO() : null,
+        // created_at: platform.createdAt != null ? platform.createdAt.setZone('UTC').toISO() : null,
+        // updated_at: platform.updatedAt != null ? platform.updatedAt.setZone('UTC').toISO() : null,
         // TODO
         // created_by: platform.createdBy,
         // updated_by: platform.updatedBy,
@@ -155,12 +168,11 @@ export class PlatformSerializer {
         serial_number: platform.serialNumber,
         // as the persistent_identifier must be unique, we sent null in case
         // that we don't have an identifier here
-        persistent_identifier: platform.persistentIdentifier === '' ? null : platform.persistentIdentifier,
-        attachments
+        persistent_identifier: platform.persistentIdentifier === '' ? null : platform.persistentIdentifier
       },
       relationships: {
-        ...contacts
-        // TODO: events
+        ...contacts,
+        ...attachments
       }
     }
 
@@ -172,7 +184,7 @@ export class PlatformSerializer {
   }
 }
 
-export const platformWithMetaToPlatformByThrowingErrorOnMissing = (platformWithMeta: IPlatformWithMeta) : Platform => {
+export const platformWithMetaToPlatformByThrowingErrorOnMissing = (platformWithMeta: { missing: { contacts: { ids: any[] } }; platform: Platform }): Platform => {
   const platform = platformWithMeta.platform
 
   if (platformWithMeta.missing.contacts.ids.length > 0) {
@@ -182,7 +194,7 @@ export const platformWithMetaToPlatformByThrowingErrorOnMissing = (platformWithM
   return platform
 }
 
-export const platformWithMetaToPlatformByAddingDummyObjects = (platformWithMeta: IPlatformWithMeta) : Platform => {
+export const platformWithMetaToPlatformByAddingDummyObjects = (platformWithMeta: { missing: { contacts: { ids: string[] } }; platform: Platform }): Platform => {
   const platform = platformWithMeta.platform
 
   for (const missingContactId of platformWithMeta.missing.contacts.ids) {
