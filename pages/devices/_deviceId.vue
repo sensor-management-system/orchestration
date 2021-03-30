@@ -71,6 +71,10 @@ export default class DevicePage extends Vue {
         {
           to: '/devices/' + this.deviceId + '/attachments',
           name: 'Attachments'
+        },
+        {
+          to: '/devices/' + this.deviceId + '/actions',
+          name: 'Actions'
         }
       ],
       title: 'Devices'
