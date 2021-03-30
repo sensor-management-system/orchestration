@@ -4,14 +4,16 @@ import json
 from project import base_url
 from project.api.models import Configuration, Contact, Platform, PlatformMountAction
 from project.api.models.base_model import db
-from project.tests.base import BaseTestCase, fake
-from project.tests.base import generate_token_data
+from project.tests.base import BaseTestCase, fake, generate_token_data
 from project.tests.models.test_configurations_model import generate_configuration_model
-from project.tests.models.test_mount_actions_model import add_mount_platform_action_model
+from project.tests.models.test_mount_actions_model import (
+    add_mount_platform_action_model,
+)
 
 
 class TestPlatformMountAction(BaseTestCase):
     """Tests for the PlatformMountAction endpoints."""
+
     url = base_url + "/platform-mount-actions"
     object_type = "platform_mount_action"
 
@@ -70,7 +72,7 @@ class TestPlatformMountAction(BaseTestCase):
         # then test only for the first configuration
         with self.client:
             url_get_for_configuration1 = (
-                    base_url + f"/configurations/{configuration1.id}/platform-mount-actions"
+                base_url + f"/configurations/{configuration1.id}/platform-mount-actions"
             )
             response = self.client.get(
                 url_get_for_configuration1, content_type="application/vnd.api+json"
@@ -84,7 +86,7 @@ class TestPlatformMountAction(BaseTestCase):
         # and test the second configuration
         with self.client:
             url_get_for_configuration2 = (
-                    base_url + f"/configurations/{configuration2.id}/platform-mount-actions"
+                base_url + f"/configurations/{configuration2.id}/platform-mount-actions"
             )
             response = self.client.get(
                 url_get_for_configuration2, content_type="application/vnd.api+json"
@@ -98,8 +100,8 @@ class TestPlatformMountAction(BaseTestCase):
         # and for a non existing
         with self.client:
             url_get_for_non_existing_configuration = (
-                    base_url
-                    + f"/configurations/{configuration2.id + 9999}/platform-mount-actions"
+                base_url
+                + f"/configurations/{configuration2.id + 9999}/platform-mount-actions"
             )
             response = self.client.get(
                 url_get_for_non_existing_configuration,
@@ -153,7 +155,7 @@ class TestPlatformMountAction(BaseTestCase):
         # test only for the first platform
         with self.client:
             url_get_for_platform1 = (
-                    base_url + f"/platforms/{platform1.id}/platform-mount-actions"
+                base_url + f"/platforms/{platform1.id}/platform-mount-actions"
             )
             response = self.client.get(
                 url_get_for_platform1, content_type="application/vnd.api+json"
@@ -167,7 +169,7 @@ class TestPlatformMountAction(BaseTestCase):
         # and test the second platform
         with self.client:
             url_get_for_platform2 = (
-                    base_url + f"/platforms/{platform2.id}/platform-mount-actions"
+                base_url + f"/platforms/{platform2.id}/platform-mount-actions"
             )
             response = self.client.get(
                 url_get_for_platform2, content_type="application/vnd.api+json"
@@ -181,7 +183,7 @@ class TestPlatformMountAction(BaseTestCase):
         # and for a non existing
         with self.client:
             url_get_for_non_existing = (
-                    base_url + f"/platforms/{platform2.id + 9999}/platform-mount-actions"
+                base_url + f"/platforms/{platform2.id + 9999}/platform-mount-actions"
             )
             response = self.client.get(
                 url_get_for_non_existing,
@@ -229,14 +231,24 @@ class TestPlatformMountAction(BaseTestCase):
             begin_date=fake.date_time(),
         )
         db.session.add_all(
-            [configuration1, configuration2, contact, platform1, platform2, platform3, platform4,
-             action1, action2])
+            [
+                configuration1,
+                configuration2,
+                contact,
+                platform1,
+                platform2,
+                platform3,
+                platform4,
+                action1,
+                action2,
+            ]
+        )
         db.session.commit()
 
         # test only for the first platform
         with self.client:
             url_get_for_platform1 = (
-                    base_url + f"/platforms/{platform3.id}/parent-platform-mount-actions"
+                base_url + f"/platforms/{platform3.id}/parent-platform-mount-actions"
             )
             response = self.client.get(
                 url_get_for_platform1, content_type="application/vnd.api+json"
@@ -250,7 +262,7 @@ class TestPlatformMountAction(BaseTestCase):
         # and test the second platform
         with self.client:
             url_get_for_platform2 = (
-                    base_url + f"/platforms/{platform4.id}/parent-platform-mount-actions"
+                base_url + f"/platforms/{platform4.id}/parent-platform-mount-actions"
             )
             response = self.client.get(
                 url_get_for_platform2, content_type="application/vnd.api+json"
@@ -264,7 +276,8 @@ class TestPlatformMountAction(BaseTestCase):
         # and for a non existing
         with self.client:
             url_get_for_non_existing = (
-                    base_url + f"/platforms/{platform2.id + 9999}/parent-platform-mount-actions"
+                base_url
+                + f"/platforms/{platform2.id + 9999}/parent-platform-mount-actions"
             )
             response = self.client.get(
                 url_get_for_non_existing,

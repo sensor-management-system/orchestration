@@ -1,5 +1,4 @@
 from ..models.mixin import AuditMixin
-
 from .base_model import db
 
 

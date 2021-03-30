@@ -2,7 +2,6 @@
 
 
 from ..models.mixin import SearchableMixin
-
 from .base_model import db
 
 platform_contacts = db.Table(

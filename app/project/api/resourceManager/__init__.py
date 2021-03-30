@@ -9,6 +9,16 @@ from .configuration_device_list import ConfigurationDeviceList  # noqa: F401
 from .configuration_device_relationship import (  # noqa: F401
     ConfigurationDeviceRelationship,
 )
+from .configuration_dynamic_location_begin_actions_resources import (  # noqa: F401
+    ConfigurationDynamicLocationBeginActionDetail,
+    ConfigurationDynamicLocationBeginActionList,
+    ConfigurationDynamicLocationBeginActionRelationship,
+)
+from .configuration_dynamic_location_end_actions_resources import (  # noqa: F401
+    ConfigurationDynamicLocationEndActionDetail,
+    ConfigurationDynamicLocationEndActionList,
+    ConfigurationDynamicLocationEndActionRelationship,
+)
 from .configuration_list import ConfigurationList  # noqa: F401
 from .configuration_platform_detail import ConfigurationPlatformDetail  # noqa: F401
 from .configuration_platform_list import ConfigurationPlatformList  # noqa: F401
@@ -16,6 +26,16 @@ from .configuration_platform_relationship import (  # noqa: F401
     ConfigurationPlatformRelationship,
 )
 from .configuration_relationship import ConfigurationRelationship  # noqa: F401
+from .configuration_static_location_begin_actions_resources import (  # noqa: F401
+    ConfigurationStaticLocationBeginActionDetail,
+    ConfigurationStaticLocationBeginActionList,
+    ConfigurationStaticLocationBeginActionRelationship,
+)
+from .configuration_static_location_end_actions_resources import (  # noqa: F401
+    ConfigurationStaticLocationEndActionDetail,
+    ConfigurationStaticLocationEndActionList,
+    ConfigurationStaticLocationEndActionRelationship,
+)
 from .contact_detail import ContactDetail  # noqa: F401
 from .contact_list import ContactList  # noqa: F401
 from .contact_relationship import ContactRelationship  # noqa: F401

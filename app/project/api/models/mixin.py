@@ -12,7 +12,6 @@ from ..search import (
     remove_from_index,
     remove_index,
 )
-
 from .base_model import db
 
 

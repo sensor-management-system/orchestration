@@ -5,9 +5,7 @@ from sqlalchemy.orm.exc import NoResultFound
 
 from ..models import Configuration, ConfigurationAttachment
 from ..models.base_model import db
-from ..schemas.configuration_attachment_schema import (
-    ConfigurationAttachmentSchema,
-)
+from ..schemas.configuration_attachment_schema import ConfigurationAttachmentSchema
 from ..token_checker import token_required
 
 

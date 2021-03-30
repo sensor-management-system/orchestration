@@ -1,8 +1,8 @@
+from ...frj_csv_export.resource import ResourceList
 from ..models.base_model import db
 from ..models.event import Event
 from ..schemas.event_schema import EventSchema
 from ..token_checker import token_required
-from ...frj_csv_export.resource import ResourceList
 
 
 class EventList(ResourceList):

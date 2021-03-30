@@ -1,10 +1,8 @@
+from ...frj_csv_export.resource import ResourceList
 from ..models.base_model import db
 from ..models.configuration_platform import ConfigurationPlatform
-from ..schemas.configuration_platform_schema import (
-    ConfigurationPlatformSchema,
-)
+from ..schemas.configuration_platform_schema import ConfigurationPlatformSchema
 from ..token_checker import token_required
-from ...frj_csv_export.resource import ResourceList
 
 
 class ConfigurationPlatformList(ResourceList):

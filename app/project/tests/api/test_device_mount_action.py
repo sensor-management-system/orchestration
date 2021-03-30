@@ -165,7 +165,7 @@ class TestDeviceMountAction(BaseTestCase):
         # then test only for the first configuration
         with self.client:
             url_get_for_configuration1 = (
-                    base_url + f"/configurations/{configuration1.id}/device-mount-actions"
+                base_url + f"/configurations/{configuration1.id}/device-mount-actions"
             )
             response = self.client.get(
                 url_get_for_configuration1, content_type="application/vnd.api+json"
@@ -179,7 +179,7 @@ class TestDeviceMountAction(BaseTestCase):
         # and test the second configuration
         with self.client:
             url_get_for_configuration2 = (
-                    base_url + f"/configurations/{configuration2.id}/device-mount-actions"
+                base_url + f"/configurations/{configuration2.id}/device-mount-actions"
             )
             response = self.client.get(
                 url_get_for_configuration2, content_type="application/vnd.api+json"
@@ -193,8 +193,8 @@ class TestDeviceMountAction(BaseTestCase):
         # and for a non existing
         with self.client:
             url_get_for_non_existing_configuration = (
-                    base_url
-                    + f"/configurations/{configuration2.id + 9999}/device-mount-actions"
+                base_url
+                + f"/configurations/{configuration2.id + 9999}/device-mount-actions"
             )
             response = self.client.get(
                 url_get_for_non_existing_configuration,
@@ -248,7 +248,7 @@ class TestDeviceMountAction(BaseTestCase):
         # test only for the first device
         with self.client:
             url_get_for_device1 = (
-                    base_url + f"/devices/{device1.id}/device-mount-actions"
+                base_url + f"/devices/{device1.id}/device-mount-actions"
             )
             response = self.client.get(
                 url_get_for_device1, content_type="application/vnd.api+json"
@@ -262,7 +262,7 @@ class TestDeviceMountAction(BaseTestCase):
         # and test the second device
         with self.client:
             url_get_for_device2 = (
-                    base_url + f"/devices/{device2.id}/device-mount-actions"
+                base_url + f"/devices/{device2.id}/device-mount-actions"
             )
             response = self.client.get(
                 url_get_for_device2, content_type="application/vnd.api+json"
@@ -276,7 +276,7 @@ class TestDeviceMountAction(BaseTestCase):
         # and for a non existing
         with self.client:
             url_get_for_non_existing_device = (
-                    base_url + f"/devices/{device2.id + 9999}/device-mount-actions"
+                base_url + f"/devices/{device2.id + 9999}/device-mount-actions"
             )
             response = self.client.get(
                 url_get_for_non_existing_device,
@@ -337,7 +337,7 @@ class TestDeviceMountAction(BaseTestCase):
         # test only for the first platform
         with self.client:
             url_get_for_platform1 = (
-                    base_url + f"/platforms/{platform1.id}/device-mount-actions"
+                base_url + f"/platforms/{platform1.id}/device-mount-actions"
             )
             response = self.client.get(
                 url_get_for_platform1, content_type="application/vnd.api+json"
@@ -351,7 +351,7 @@ class TestDeviceMountAction(BaseTestCase):
         # and test the second platform
         with self.client:
             url_get_for_platform2 = (
-                    base_url + f"/platforms/{platform2.id}/device-mount-actions"
+                base_url + f"/platforms/{platform2.id}/device-mount-actions"
             )
             response = self.client.get(
                 url_get_for_platform2, content_type="application/vnd.api+json"
@@ -365,7 +365,7 @@ class TestDeviceMountAction(BaseTestCase):
         # and for a non existing
         with self.client:
             url_get_for_non_existing = (
-                    base_url + f"/platforms/{platform2.id + 9999}/device-mount-actions"
+                base_url + f"/platforms/{platform2.id + 9999}/device-mount-actions"
             )
             response = self.client.get(
                 url_get_for_non_existing,

@@ -1,4 +1,3 @@
-from project import base_url
 from project.api.models import Contact
 from project.api.models.base_model import db
 from project.api.models.user import User
