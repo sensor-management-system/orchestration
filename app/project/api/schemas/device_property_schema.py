@@ -83,10 +83,17 @@ class DevicePropertySchema(Schema):
     property_name = fields.Str(allow_none=True)
     sampling_media_uri = fields.Str(allow_none=True)
     sampling_media_name = fields.Str(allow_none=True)
+    resolution = fields.Float(allow_none=True)
+    resolution_unit_uri = fields.String(allow_none=True)
+    resolution_unit_name = fields.String(allow_none=True)
 
     device = Relationship(
+        self_view="api.device_property_device",
         self_view_kwargs={"id": "<id>"},
         related_view="api.device_detail",
         related_view_kwargs={"id": "<device_id>"},
+        include_resource_linkage=True,
         type_="device",
+        schema="DeviceSchema",
+        id_field="id",
     )

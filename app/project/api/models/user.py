@@ -1,4 +1,4 @@
-from project.api.models.base_model import db
+from .base_model import db
 
 
 class User(db.Model):
@@ -6,7 +6,7 @@ class User(db.Model):
     subject = db.Column(db.String(256), nullable=False, unique=True)
     contact_id = db.Column(db.Integer, db.ForeignKey("contact.id"), nullable=False)
     # uselist: To convert one-to-many into one-to-one
-    contact = db.relationship("Contact", uselist=False, backref=db.backref("user"))
+    contact = db.relationship("Contact", backref=db.backref("user", uselist=False))
 
     def __str__(self):
         return "User(username='%s')" % self.subject.split("@")[0]

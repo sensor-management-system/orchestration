@@ -1,20 +1,38 @@
 import json
+import os
 import time
 
+from faker import Faker
 from flask_jwt_extended.tokens import _encode_jwt
 from flask_testing import TestCase
 
 from project import create_app
 from project.api.models.base_model import db
-from faker import Faker
 
 app = create_app()
 fake = Faker()
 
+test_file_path = os.path.abspath(os.path.dirname(__file__))
+
+
+def query_result_to_list(query_result):
+    """
+    Convert a query result to a list.
+
+    Query results from sqlalchemy are ok to work with
+    (so for further filtering, to retrieve the length, etc.)
+    as they are lazy.
+
+    However sometimes it is easier to deal with them as
+    simple plain python lists - this is what this utility function
+    here does.
+    """
+    return [r for r in query_result]
+
 
 def encode_token_date_with_hs256(
-        token_data,
-        headers=None,
+    token_data,
+    headers=None,
 ):
     """
     Make use of the flask_jwt_extended methode (_encode_jwt) to
@@ -87,7 +105,7 @@ def generate_token_data():
         "name": name,
         "family_name": family_name,
         "given_name": given_name,
-        "email": f"{given_name}.{family_name}@unittest.test",
+        "email": fake.unique.email(),
         "iat": now,  # Issued At: Date/time when the token was issued
         "exp": now + 60,  # Expiration: expire after one minute.
         "aud": "SMS",  # recipient of this token
@@ -156,3 +174,32 @@ class BaseTestCase(TestCase):
         data = json.loads(response.data.decode())
         self.assertEqual(response.status_code, 422)
         self.assertIn("Not a valid string.", data["errors"][0]["detail"])
+
+    def update_object(self, url, data_object, object_type):
+        """Ensure a old object can be updated."""
+        access_headers = create_token()
+        with self.client:
+            response = self.client.patch(
+                url,
+                data=json.dumps(data_object),
+                content_type="application/vnd.api+json",
+                headers=access_headers,
+            )
+        data = json.loads(response.data.decode())
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(object_type, data["data"]["type"])
+        return data
+
+    def delete_object(self, url):
+        """Ensure delete an object."""
+        access_headers = create_token()
+        with self.client:
+            response = self.client.delete(
+                url,
+                content_type="application/vnd.api+json",
+                headers=access_headers,
+            )
+        data = json.loads(response.data.decode())
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("Object successfully deleted", data["meta"]["message"])
+        return data

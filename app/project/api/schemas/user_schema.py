@@ -15,6 +15,7 @@ class UserSchema(Schema):
         type_ = "user"
         self_view = "api.user_detail"
         self_view_kwargs = {"id": "<id>"}
+        self_view_many = "api.user_list"
 
     id = fields.Integer(as_string=True)
     subject = fields.Str(required=True)
@@ -24,7 +25,7 @@ class UserSchema(Schema):
         self_view="api.user_contact",
         self_view_kwargs={"id": "<id>"},
         related_view="api.contact_detail",
-        related_view_kwargs={"id": "<id>"},
+        related_view_kwargs={"id": "<contact_id>"},
         include_resource_linkage=True,
         schema="ContactSchema",
         type_="contact",

@@ -3,9 +3,8 @@ from functools import wraps
 from flask import request
 from flask_jwt_extended import JWTManager, get_raw_jwt, verify_jwt_in_request
 
-from project.api.models.base_model import db
-from project.api.models.contact import Contact
-from project.api.models.user import User
+from .models import Contact, User
+from .models.base_model import db
 
 jwt = JWTManager()
 

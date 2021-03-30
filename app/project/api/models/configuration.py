@@ -4,8 +4,8 @@ import collections
 
 from sqlalchemy.ext.hybrid import hybrid_property
 
-from project.api.models.base_model import db
-from project.api.models.mixin import AuditMixin, SearchableMixin
+from .base_model import db
+from .mixin import AuditMixin, SearchableMixin
 
 ConfigurationsTuple = collections.namedtuple(
     "ConfigurationsTuple", ["configuration_devices", "configuration_platforms"]
@@ -152,9 +152,9 @@ class Configuration(db.Model, AuditMixin, SearchableMixin):
         Describes which fields will be searchable by some text (with stemmer, etc)
         and via keyword (raw equality checks).
         """
-        from project.api.models.contact import Contact
-        from project.api.models.device import Device
-        from project.api.models.platform import Platform
+        from ..models.contact import Contact
+        from ..models.device import Device
+        from ..models.platform import Platform
 
         return {
             "aliases": {},
