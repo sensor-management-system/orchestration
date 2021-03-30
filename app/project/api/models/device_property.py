@@ -1,7 +1,8 @@
 """Model for device properties."""
 
-from project.api.models.base_model import db
-from project.api.models.device import Device
+
+from ..models.device import Device
+from .base_model import db
 
 
 class DeviceProperty(db.Model):

@@ -1,7 +1,8 @@
 """Model for the devices."""
 
-from project.api.models.base_model import db
-from project.api.models.mixin import AuditMixin, SearchableMixin
+
+from ..models.mixin import AuditMixin, SearchableMixin
+from .base_model import db
 
 
 class Device(db.Model, AuditMixin, SearchableMixin):
@@ -64,7 +65,7 @@ class Device(db.Model, AuditMixin, SearchableMixin):
     @staticmethod
     def get_search_index_properties():
         """Get the properties for the index configuration."""
-        from project.api.models.contact import Contact
+        from ..models.contact import Contact
 
         return {
             # We won't check the very equal description, so using text right away is fine.

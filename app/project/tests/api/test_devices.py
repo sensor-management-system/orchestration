@@ -1,62 +1,28 @@
 """Tests for the devices."""
-
-import json
-import unittest
+import os
 
 from project import base_url
 from project.api.models.base_model import db
 from project.api.models.customfield import CustomField
-from project.api.models.device_attachment import DeviceAttachment
 from project.api.models.device import Device
+from project.api.models.device_attachment import DeviceAttachment
 from project.api.models.device_property import DeviceProperty
-from project.api.schemas.device_schema import DeviceSchema
-from project.tests.base import BaseTestCase
+from project.tests.base import BaseTestCase, fake, generate_token_data, test_file_path
 from project.tests.read_from_json import extract_data_from_json_file
-from project.tests.test_contacts import TestContactServices
 
 
 class TestDeviceService(BaseTestCase):
     """Tests for the Device Service."""
 
     device_url = base_url + "/devices"
+    contact_url = base_url + "/contacts"
     object_type = "device"
-    json_data_url = "/usr/src/app/project/tests/drafts/devices_test_data.json"
-
-    def test_ping(self):
-        """Ensure the /ping route behaves correctly."""
-        response = self.client.get(base_url + "/ping")
-        data = json.loads(response.data.decode())
-        self.assertEqual(response.status_code, 200)
-        self.assertIn("Hello Sensor!", data["message"])
-        self.assertIn("success", data["status"])
+    json_data_url = os.path.join(test_file_path, "drafts", "devices_test_data.json")
 
     def test_get_devices(self):
         """Ensure the GET /devices route behaves correctly."""
         response = self.client.get(self.device_url)
         self.assertEqual(response.status_code, 200)
-
-    def test_add_device_model(self):
-        """Ensure Add device model."""
-        sensor = Device(
-            id=22,
-            short_name="device_short_name test",
-            description="device_description test",
-            long_name="device_long_name test",
-            manufacturer_name="manufacturer_name test",
-            manufacturer_uri="http://cv/manufacturer_uri",
-            model="device_model test",
-            dual_use=True,
-            serial_number="device_serial_number test",
-            website="http://website/device",
-            inventory_number="inventory_number test",
-            persistent_identifier="persistent_identifier_test",
-        )
-        DeviceSchema().dump(sensor)
-        db.session.add(sensor)
-        db.session.commit()
-
-        device = db.session.query(Device).filter_by(id=sensor.id).one()
-        self.assertIn(device.model, sensor.model)
 
     def test_add_device(self):
         """Ensure a new device can be added to the database."""
@@ -69,10 +35,21 @@ class TestDeviceService(BaseTestCase):
 
     def test_add_device_contacts_relationship(self):
         """Ensure a new relationship between a device & contact can be created."""
-        contact_service = TestContactServices()
-        # We need to inject the client (not done on just creating the contact_service)
-        contact_service.client = self.client
-        contact = contact_service.test_add_contact()
+        mock_jwt = generate_token_data()
+        contact_data = {
+            "data": {
+                "type": "contact",
+                "attributes": {
+                    "given_name": mock_jwt["given_name"],
+                    "family_name": mock_jwt["family_name"],
+                    "email": mock_jwt["email"],
+                    "website": fake.url(),
+                },
+            }
+        }
+        contact = super().add_object(
+            url=self.contact_url, data_object=contact_data, object_type="contact"
+        )
         devices_json = extract_data_from_json_file(self.json_data_url, "devices")
 
         device_data = {
@@ -355,7 +332,3 @@ class TestDeviceService(BaseTestCase):
 
         for customfield in [customfield1, customfield2]:
             self.assertIn(str(customfield.id), customfield_ids)
-
-
-if __name__ == "__main__":
-    unittest.main()

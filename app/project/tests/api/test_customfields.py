@@ -4,8 +4,8 @@ import json
 
 from project import base_url
 from project.api.models.base_model import db
-from project.api.models.device import Device
 from project.api.models.customfield import CustomField
+from project.api.models.device import Device
 from project.tests.base import BaseTestCase, create_token, query_result_to_list
 
 

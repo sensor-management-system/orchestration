@@ -3,8 +3,8 @@
 from marshmallow_jsonapi import fields
 from marshmallow_jsonapi.flask import Relationship, Schema
 
-from project.api.schemas.attachment_schema import AttachmentSchema
-from project.api.schemas.contact_schema import ContactSchema
+from ..schemas.attachment_schema import AttachmentSchema
+from ..schemas.contact_schema import ContactSchema
 
 
 class PlatformSchema(Schema):
@@ -34,13 +34,15 @@ class PlatformSchema(Schema):
     status_uri = fields.Str(allow_none=True)
     status_name = fields.Str(allow_none=True)
     website = fields.Str(allow_none=True)
-    created_at = fields.DateTime(allow_none=True)
-    updated_at = fields.DateTime(allow_none=True)
+    created_at = fields.DateTime(dump_only=True)
+    updated_at = fields.DateTime(dump_only=True)
     created_by = Relationship(
         self_view="api.platform_created_user",
         self_view_kwargs={"id": "<id>"},
         related_view="api.user_detail",
         related_view_kwargs={"id": "<created_by_id>"},
+        include_resource_linkage=True,
+        schema="UserSchema",
         type_="user",
     )
     updated_by = Relationship(
@@ -48,16 +50,17 @@ class PlatformSchema(Schema):
         self_view_kwargs={"id": "<id>"},
         related_view="api.user_detail",
         related_view_kwargs={"id": "<updated_by_id>"},
+        include_resource_linkage=True,
+        schema="UserSchema",
         type_="user",
     )
     inventory_number = fields.Str(allow_none=True)
     serial_number = fields.Str(allow_none=True)
     persistent_identifier = fields.Str(allow_none=True)
     platform_attachments = Relationship(
-        self_view="api.platform_platform_attachments",
-        self_view_kwargs={"id": "<id>"},
-        related_view="api.platform_attachment_list",
-        related_view_kwargs={"platform_id": "<id>"},
+        related_view="api.platform_platform_attachments",
+        related_view_kwargs={"id": "<id>"},
+        include_resource_linkage=True,
         many=True,
         allow_none=True,
         schema="PlatformAttachmentSchema",
@@ -65,14 +68,90 @@ class PlatformSchema(Schema):
         id_field="id",
     )
     contacts = Relationship(
-        attribute="contacts",
-        self_view="api.platform_contacts",
-        self_view_kwargs={"id": "<id>"},
-        related_view="api.contact_list",
-        related_view_kwargs={"platform_id": "<id>"},
+        related_view="api.platform_contacts",
+        related_view_kwargs={"id": "<id>"},
+        include_resource_linkage=True,
         many=True,
         schema="ContactSchema",
         type_="contact",
+        id_field="id",
+    )
+    generic_platform_actions = Relationship(
+        related_view="api.platform_generic_platform_actions",
+        related_view_kwargs={"id": "<id>"},
+        include_resource_linkage=True,
+        many=True,
+        schema="GenericPlatformActionSchema",
+        type_="generic_platform_action",
+        id_field="id",
+    )
+    platform_mount_actions = Relationship(
+        related_view="api.platform_platform_mount_actions",
+        related_view_kwargs={"id": "<id>"},
+        include_resource_linkage=True,
+        many=True,
+        schema="PlatformMountActionSchema",
+        type_="platform_mount_actions",
+        id_field="id",
+    )
+    platform_unmount_actions = Relationship(
+        related_view="api.platform_platform_unmount_actions",
+        related_view_kwargs={"id": "<id>"},
+        include_resource_linkage=True,
+        many=True,
+        schema="PlatformUnmountActionSchema",
+        type_="platform_unmount_actions",
+        id_field="id",
+    )
+    platform_software_update_actions = Relationship(
+        related_view="api.platform_platform_software_update_actions",
+        related_view_kwargs={"id": "<id>"},
+        include_resource_linkage=True,
+        many=True,
+        schema="PlatformSoftwareUpdateActionAttachmentSchema",
+        type_="platform_software_update_action_attachment",
+        id_field="id",
+    )
+    configuration_platform = Relationship(
+        self_view="api.platform_configuration_platform",
+        self_view_kwargs={"id": "<id>"},
+        include_resource_linkage=True,
+        schema="ConfigurationPlatformSchema",
+        type_="configuration_platform",
+        id_field="id",
+    )
+    inner_configuration_platform = Relationship(
+        self_view="api.platform_inner_configuration_platform",
+        self_view_kwargs={"id": "<id>"},
+        include_resource_linkage=True,
+        schema="ConfigurationPlatformSchema",
+        type_="configuration_platform",
+        id_field="id",
+    )
+    inner_configuration_device = Relationship(
+        self_view="api.platform_inner_configuration_device",
+        self_view_kwargs={"id": "<id>"},
+        include_resource_linkage=True,
+        schema="ConfigurationDeviceSchema",
+        type_="configuration_device",
+        id_field="id",
+    )
+    outer_platform_mount_actions = Relationship(
+        related_view="api.platform_outer_platform_mount_actions",
+        related_view_kwargs={"id": "<id>"},
+        include_resource_linkage=True,
+        many=True,
+        schema="PlatformMountActionSchema",
+        type_="platform_mount_actions",
+        id_field="id",
+    )
+    outer_device_mount_actions = Relationship(
+        related_view="api.platform_outer_device_mount_actions",
+        related_view_kwargs={"id": "<id>"},
+        include_resource_linkage=True,
+        many=True,
+        schema="DeviceMountActionSchema",
+        type_="device_mount_action",
         id_field="id",
     )
 

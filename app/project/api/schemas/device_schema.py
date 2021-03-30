@@ -3,10 +3,10 @@
 from marshmallow_jsonapi import fields
 from marshmallow_jsonapi.flask import Relationship, Schema
 
-from project.api.schemas.attachment_schema import AttachmentSchema
-from project.api.schemas.contact_schema import ContactSchema
-from project.api.schemas.customfield_schema import InnerCustomFieldSchema
-from project.api.schemas.device_property_schema import InnerDevicePropertySchema
+from ..schemas.attachment_schema import AttachmentSchema
+from ..schemas.contact_schema import ContactSchema
+from ..schemas.customfield_schema import InnerCustomFieldSchema
+from ..schemas.device_property_schema import InnerDevicePropertySchema
 
 
 class DeviceSchema(Schema):
@@ -44,13 +44,16 @@ class DeviceSchema(Schema):
     inventory_number = fields.Str(allow_none=True)
     persistent_identifier = fields.Str(allow_none=True)
     website = fields.Str(allow_none=True)
-    created_at = fields.DateTime(allow_none=True)
-    updated_at = fields.DateTime(allow_none=True)
+    created_at = fields.DateTime(dump_only=True)
+    updated_at = fields.DateTime(dump_only=True)
     created_by = Relationship(
+        attribute="created_by",
         self_view="api.device_created_user",
         self_view_kwargs={"id": "<id>"},
         related_view="api.user_detail",
         related_view_kwargs={"id": "<created_by_id>"},
+        include_resource_linkage=True,
+        schema="UserSchema",
         type_="user",
     )
     updated_by = Relationship(
@@ -58,13 +61,14 @@ class DeviceSchema(Schema):
         self_view_kwargs={"id": "<id>"},
         related_view="api.user_detail",
         related_view_kwargs={"id": "<updated_by_id>"},
+        include_resource_linkage=True,
+        schema="UserSchema",
         type_="user",
     )
     customfields = Relationship(
-        self_view="api.device_customfields",
-        self_view_kwargs={"id": "<id>"},
-        related_view="api.customfield_list",
-        related_view_kwargs={"device_id": "<id>"},
+        related_view="api.device_customfields",
+        related_view_kwargs={"id": "<id>"},
+        include_resource_linkage=True,
         many=True,
         allow_none=True,
         schema="CustomFieldSchema",
@@ -72,20 +76,18 @@ class DeviceSchema(Schema):
         id_field="id",
     )
     events = Relationship(
-        self_view="api.device_events",
-        self_view_kwargs={"id": "<id>"},
-        related_view="api.event_list",
-        related_view_kwargs={"device_id": "<id>"},
+        related_view="api.device_events",
+        related_view_kwargs={"id": "<id>"},
+        include_resource_linkage=True,
         many=True,
         allow_none=True,
         schema="EventSchema",
         type_="event",
     )
     device_properties = Relationship(
-        self_view="api.device_device_properties",
-        self_view_kwargs={"id": "<id>"},
-        related_view="api.device_property_list",
-        related_view_kwargs={"device_id": "<id>"},
+        related_view="api.device_device_properties",
+        related_view_kwargs={"id": "<id>"},
+        include_resource_linkage=True,
         many=True,
         allow_none=True,
         schema="DevicePropertySchema",
@@ -93,10 +95,9 @@ class DeviceSchema(Schema):
         id_field="id",
     )
     device_attachments = Relationship(
-        self_view="api.device_device_attachments",
-        self_view_kwargs={"id": "<id>"},
-        related_view="api.device_attachment_list",
-        related_view_kwargs={"device_id": "<id>"},
+        related_view="api.device_device_attachments",
+        related_view_kwargs={"id": "<id>"},
+        include_resource_linkage=True,
         many=True,
         allow_none=True,
         schema="DeviceAttachmentSchema",
@@ -104,14 +105,65 @@ class DeviceSchema(Schema):
         id_field="id",
     )
     contacts = Relationship(
-        attribute="contacts",
-        self_view="api.device_contacts",
-        self_view_kwargs={"id": "<id>"},
-        related_view="api.contact_list",
-        related_view_kwargs={"device_id": "<id>"},
+        related_view="api.device_contacts",
+        related_view_kwargs={"id": "<id>"},
+        include_resource_linkage=True,
         many=True,
         schema="ContactSchema",
         type_="contact",
+        id_field="id",
+    )
+    generic_device_actions = Relationship(
+        related_view="api.device_generic_device_actions",
+        related_view_kwargs={"id": "<id>"},
+        include_resource_linkage=True,
+        many=True,
+        schema="GenericDeviceActionSchema",
+        type_="generic_device_action",
+        id_field="id",
+    )
+    device_mount_actions = Relationship(
+        related_view="api.device_device_mount_actions",
+        related_view_kwargs={"id": "<id>"},
+        include_resource_linkage=True,
+        many=True,
+        schema="DeviceMountActionSchema",
+        type_="device_mount_action",
+        id_field="id",
+    )
+    device_unmount_actions = Relationship(
+        related_view="api.device_device_unmount_actions",
+        related_view_kwargs={"id": "<id>"},
+        include_resource_linkage=True,
+        many=True,
+        schema="DeviceUnmountActionSchema",
+        type_="device_unmount_action",
+        id_field="id",
+    )
+    device_calibration_actions = Relationship(
+        related_view="api.device_device_calibration_actions",
+        related_view_kwargs={"id": "<id>"},
+        include_resource_linkage=True,
+        many=True,
+        schema="DeviceCalibrationActionSchema",
+        type_="device_calibration_action",
+        id_field="id",
+    )
+    device_software_update_actions = Relationship(
+        related_view="api.device_device_software_update_actions",
+        related_view_kwargs={"id": "<id>"},
+        include_resource_linkage=True,
+        many=True,
+        schema="DeviceSoftwareUpdateActionAttachmentSchema",
+        type_="device_software_update_action_attachment",
+        id_field="id",
+    )
+    configuration_device = Relationship(
+        self_view="api.device_configuration_device",
+        self_view_kwargs={"id": "<id>"},
+        include_resource_linkage=True,
+        schema="ConfigurationDeviceSchema",
+        type_="configuration_device",
         id_field="id",
     )
 
