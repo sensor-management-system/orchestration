@@ -66,8 +66,8 @@ export class PlatformAttachmentSerializer {
 
   convertJsonApiRelationshipsModelList (relationships: IJsonApiTypeIdDataListDict, included: IJsonApiTypeIdAttributes[]): IAttachmentsAndMissing {
     const attachmentIds = []
-    if (relationships.attachments) {
-      const attachmentObject = relationships.attachments as IJsonApiTypeIdDataList
+    if (relationships.platform_attachments) {
+      const attachmentObject = relationships.platform_attachments as IJsonApiTypeIdDataList
       if (attachmentObject.data && attachmentObject.data.length > 0) {
         for (const relationShipAttachmentData of attachmentObject.data) {
           const attachmentId = relationShipAttachmentData.id

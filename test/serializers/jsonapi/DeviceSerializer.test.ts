@@ -1041,14 +1041,14 @@ describe('DeviceSerializer', () => {
       expect(attributes.website).toEqual('http://gfz-potsdam.de')
       expect(attributes).toHaveProperty('dual_use')
       expect(attributes.dual_use).toEqual(true)
-      expect(attributes).toHaveProperty('created_at')
+      // expect(attributes).toHaveProperty('created_at')
       // expect(attributes.created_at).toEqual('2020-08-28T13:49:48.015620+00:00')
       // I wasn't able to find the exact date time format, so we use ISO date times
-      expect(attributes.created_at).toEqual('2020-08-28T13:49:48.015Z')
-      expect(attributes).toHaveProperty('updated_at')
+      // expect(attributes.created_at).toEqual('2020-08-28T13:49:48.015Z')
+      // expect(attributes).toHaveProperty('updated_at')
       // expect(attributes.updated_at).toEqual('2020-08-30T13:49:48.015620+00:00')
       // again, iso date times
-      expect(attributes.updated_at).toEqual('2020-08-30T13:49:48.015Z')
+      // expect(attributes.updated_at).toEqual('2020-08-30T13:49:48.015Z')
 
       expect(jsonApiData.relationships).toHaveProperty('customfields')
       const customFields = jsonApiData.relationships.customfields as IJsonApiTypeIdDataList
@@ -1084,7 +1084,6 @@ describe('DeviceSerializer', () => {
       const propertyObject = jsonApiData.relationships.device_properties as IJsonApiTypeIdDataList
       expect(propertyObject).toHaveProperty('data')
       const propertyData = propertyObject.data
-      console.log(propertyObject)
       expect(propertyData.length).toEqual(2)
       expect(propertyData[0]).toEqual({
         id: '3',
@@ -1143,24 +1142,6 @@ describe('DeviceSerializer', () => {
       expect(typeof jsonApiData).toEqual('object')
       expect(jsonApiData).toHaveProperty('id')
       expect(jsonApiData.id).toEqual('abc')
-    })
-    it('should stay with a null createdAt/updatedAt date', () => {
-      const device = createTestDevice()
-      device.createdAt = null
-      device.updatedAt = null
-
-      const serializer = new DeviceSerializer()
-
-      const jsonApiData = serializer.convertModelToJsonApiData(device)
-
-      expect(typeof jsonApiData).toEqual('object')
-      expect(jsonApiData).toHaveProperty('attributes')
-      const attributes = jsonApiData.attributes
-      expect(typeof attributes).toEqual('object')
-      expect(attributes).toHaveProperty('created_at')
-      expect(attributes.created_at).toBeNull()
-      expect(attributes).toHaveProperty('updated_at')
-      expect(attributes.updated_at).toBeNull()
     })
   })
 })

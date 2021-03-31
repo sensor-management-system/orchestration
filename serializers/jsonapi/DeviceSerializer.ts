@@ -190,8 +190,6 @@ export class DeviceSerializer {
         website: device.website,
         dual_use: device.dualUse,
         // those two time slots are set by the db, no matter what we deliver here
-        created_at: device.createdAt != null ? device.createdAt.setZone('UTC').toISO() : null,
-        updated_at: device.updatedAt != null ? device.updatedAt.setZone('UTC').toISO() : null,
         // TODO
         // created_by: device.createdBy,
         // updated_by: device.updatedBy,

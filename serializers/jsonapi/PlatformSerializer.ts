@@ -44,6 +44,7 @@ import {
 import { IMissingAttachmentData } from '@/serializers/jsonapi/AttachmentSerializer'
 import { ContactSerializer, IMissingContactData } from '@/serializers/jsonapi/ContactSerializer'
 import { PlatformAttachmentSerializer } from '@/serializers/jsonapi/PlatformAttachmentSerializer'
+import {DateTime} from "luxon";
 
 export interface IPlatformMissingData {
   contacts: IMissingContactData
@@ -83,8 +84,8 @@ export class PlatformSerializer {
     result.statusUri = attributes.status_uri || ''
     result.statusName = attributes.status_name || ''
     result.website = attributes.website || ''
-    // result.createdAt = attributes.created_at != null ? DateTime.fromISO(attributes.created_at, { zone: 'UTC' }) : null
-    // result.updatedAt = attributes.updated_at != null ? DateTime.fromISO(attributes.updated_at, { zone: 'UTC' }) : null
+    result.createdAt = attributes.created_at != null ? DateTime.fromISO(attributes.created_at, { zone: 'UTC' }) : null
+    result.updatedAt = attributes.updated_at != null ? DateTime.fromISO(attributes.updated_at, { zone: 'UTC' }) : null
 
     // TODO
     // result.createdBy = attributes.created_by
@@ -159,8 +160,6 @@ export class PlatformSerializer {
         status_name: platform.statusName,
         website: platform.website,
         // those two time slots are set by the db, no matter what we deliver here
-        // created_at: platform.createdAt != null ? platform.createdAt.setZone('UTC').toISO() : null,
-        // updated_at: platform.updatedAt != null ? platform.updatedAt.setZone('UTC').toISO() : null,
         // TODO
         // created_by: platform.createdBy,
         // updated_by: platform.updatedBy,

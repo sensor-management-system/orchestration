@@ -65,7 +65,7 @@ export class PlatformApi {
   findById (id: string): Promise<Platform> {
     return this.axiosApi.get(id, {
       params: {
-        include: 'contacts'
+        include: 'contacts,platform_attachments'
       }
     }).then((rawResponse) => {
       const rawData = rawResponse.data
