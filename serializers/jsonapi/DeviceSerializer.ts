@@ -53,6 +53,7 @@ import {
   IMissingDevicePropertyData
 } from '@/serializers/jsonapi/DevicePropertySerializer'
 import { DeviceAttachmentSerializer } from '@/serializers/jsonapi/DeviceAttachmentSerializer'
+import {DateTime} from "luxon";
 
 export interface IDeviceMissingData {
   contacts: IMissingContactData
@@ -100,8 +101,8 @@ export class DeviceSerializer {
     result.inventoryNumber = attributes.inventory_number || ''
     result.persistentIdentifier = attributes.persistent_identifier || ''
     result.website = attributes.website || ''
-    // result.createdAt = attributes.created_at != null ? DateTime.fromISO(attributes.created_at, {zone: 'UTC'}) : null
-    // result.updatedAt = attributes.updated_at != null ? DateTime.fromISO(attributes.updated_at, {zone: 'UTC'}) : null
+    result.createdAt = attributes.created_at != null ? DateTime.fromISO(attributes.created_at, {zone: 'UTC'}) : null
+    result.updatedAt = attributes.updated_at != null ? DateTime.fromISO(attributes.updated_at, {zone: 'UTC'}) : null
     // TODO
     // result.createdBy = attributes.created_by
     // result.updatedBy = attributes.updated_by
@@ -187,10 +188,10 @@ export class DeviceSerializer {
         model: device.model,
         persistent_identifier: device.persistentIdentifier === '' ? null : device.persistentIdentifier,
         website: device.website,
-        dual_use: device.dualUse
+        dual_use: device.dualUse,
         // those two time slots are set by the db, no matter what we deliver here
-        // created_at: device.createdAt != null ? device.createdAt.setZone('UTC').toISO() : null,
-        // updated_at: device.updatedAt != null ? device.updatedAt.setZone('UTC').toISO() : null,
+        created_at: device.createdAt != null ? device.createdAt.setZone('UTC').toISO() : null,
+        updated_at: device.updatedAt != null ? device.updatedAt.setZone('UTC').toISO() : null,
         // TODO
         // created_by: device.createdBy,
         // updated_by: device.updatedBy,

@@ -29,7 +29,7 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
-import { Attachment, IAttachment } from '@/models/Attachment'
+import {Attachment, IAttachment} from '@/models/Attachment'
 import {
   IJsonApiDataWithOptionalId,
   IJsonApiObject,
@@ -39,22 +39,19 @@ import {
   IJsonApiTypeIdDataList,
   IJsonApiTypeIdDataListDict
 } from '@/serializers/jsonapi/JsonApiTypes'
-import { IAttachmentsAndMissing } from '@/serializers/jsonapi/AttachmentSerializer'
+import {IAttachmentsAndMissing} from '@/serializers/jsonapi/AttachmentSerializer'
 
 export class DeviceAttachmentSerializer {
-  convertJsonApiObjectToModel (jsonApiObject: IJsonApiObject): Attachment {
+  convertJsonApiObjectToModel(jsonApiObject: IJsonApiObject): Attachment {
     const data = jsonApiObject.data
     return this.convertJsonApiDataToModel(data)
   }
 
-  convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiObjectList): Attachment[] {
-    return jsonApiObjectList.data.map(this.convertJsonApiDataToModel)
-  }
 
-  convertJsonApiDataToModel (jsonApiData: IJsonApiTypeIdAttributes): Attachment {
+  convertJsonApiDataToModel(jsonApiData: IJsonApiTypeIdAttributes): Attachment {
     const attribues = jsonApiData.attributes
 
-    const newEntry = new Attachment()
+    const newEntry = Attachment.createEmpty()
 
     newEntry.id = jsonApiData.id.toString()
     newEntry.url = attribues.url || ''
@@ -62,11 +59,13 @@ export class DeviceAttachmentSerializer {
 
     return newEntry
   }
-
-  convertJsonApiRelationshipsModelList (relationships: IJsonApiTypeIdDataListDict, included: IJsonApiTypeIdAttributes[]): IAttachmentsAndMissing {
+  convertJsonApiObjectListToModelList(jsonApiObjectList: IJsonApiObjectList): Attachment[] {
+    return jsonApiObjectList.data.map(this.convertJsonApiDataToModel)
+  }
+  convertJsonApiRelationshipsModelList(relationships: IJsonApiTypeIdDataListDict, included: IJsonApiTypeIdAttributes[]): IAttachmentsAndMissing {
     const attachmentIds = []
-    if (relationships.attachments) {
-      const attachmentObject = relationships.attachments as IJsonApiTypeIdDataList
+    if (relationships.device_attachments) {
+      const attachmentObject = relationships.device_attachments as IJsonApiTypeIdDataList
       if (attachmentObject.data && attachmentObject.data.length > 0) {
         for (const relationShipAttachmentData of attachmentObject.data) {
           const attachmentId = relationShipAttachmentData.id
@@ -107,7 +106,7 @@ export class DeviceAttachmentSerializer {
     }
   }
 
-  convertModelListToJsonApiRelationshipObject (attachments: IAttachment[]): IJsonApiTypeIdDataListDict {
+  convertModelListToJsonApiRelationshipObject(attachments: IAttachment[]): IJsonApiTypeIdDataListDict {
     return {
       device_attachments: {
         data: this.convertModelListToTupleListWithIdAndType(attachments)
@@ -115,7 +114,7 @@ export class DeviceAttachmentSerializer {
     }
   }
 
-  convertModelListToTupleListWithIdAndType (attachments: IAttachment[]): IJsonApiTypeId[] {
+  convertModelListToTupleListWithIdAndType(attachments: IAttachment[]): IJsonApiTypeId[] {
     const result: IJsonApiTypeId[] = []
     for (const attachment of attachments) {
       if (attachment.id !== null) {
@@ -128,7 +127,7 @@ export class DeviceAttachmentSerializer {
     return result
   }
 
-  convertModelToJsonApiData (attachment: Attachment, deviceId: string): IJsonApiDataWithOptionalId {
+  convertModelToJsonApiData(attachment: Attachment, deviceId: string): IJsonApiDataWithOptionalId {
     const data: any = {
       type: 'device_attachment',
       attributes: {

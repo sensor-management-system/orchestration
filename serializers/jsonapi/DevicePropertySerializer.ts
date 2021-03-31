@@ -170,8 +170,8 @@ export class DevicePropertySerializer {
 
   convertJsonApiRelationshipsModelList (relationships: IJsonApiTypeIdDataListDict, included: IJsonApiTypeIdAttributes[]): IDevicePropertiesAndMissing {
     const devicePropertyIds = []
-    if (relationships.properties) {
-      const devicePropertyObject = relationships.properties as IJsonApiTypeIdDataList
+    if (relationships.device_properties) {
+      const devicePropertyObject = relationships.device_properties as IJsonApiTypeIdDataList
       if (devicePropertyObject.data && devicePropertyObject.data.length > 0) {
         for (const relationShipDevicePropertyData of devicePropertyObject.data) {
           const devicePropertyId = relationShipDevicePropertyData.id

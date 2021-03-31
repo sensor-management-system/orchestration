@@ -104,8 +104,8 @@ export class CustomTextFieldSerializer {
 
   convertJsonApiRelationshipsModelList (relationships: IJsonApiTypeIdDataListDict, included: IJsonApiTypeIdAttributes[]): ICustomTextFieldsAndMissing {
     const customFieldsIds = []
-    if (relationships.customFields) {
-      const customFieldObject = relationships.customFields as IJsonApiTypeIdDataList
+    if (relationships.customfields) {
+      const customFieldObject = relationships.customfields as IJsonApiTypeIdDataList
       if (customFieldObject.data && customFieldObject.data.length > 0) {
         for (const relationShipCustomFieldData of customFieldObject.data) {
           const customFieldsId = relationShipCustomFieldData.id
