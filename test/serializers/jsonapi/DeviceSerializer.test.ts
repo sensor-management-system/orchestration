@@ -30,20 +30,20 @@
  * permissions and limitations under the Licence.
  */
 
-import {DateTime} from 'luxon'
-import {Contact} from '@/models/Contact'
-import {Device} from '@/models/Device'
+import { DateTime } from 'luxon'
+import { Contact } from '@/models/Contact'
+import { Device } from '@/models/Device'
 import {
   DeviceSerializer,
   deviceWithMetaToDeviceByAddingDummyObjects,
   deviceWithMetaToDeviceByThrowingErrorOnMissing,
   IDeviceWithMeta
 } from '@/serializers/jsonapi/DeviceSerializer'
-import {Attachment} from '@/models/Attachment'
-import {DeviceProperty} from '@/models/DeviceProperty'
-import {MeasuringRange} from '@/models/MeasuringRange'
-import {CustomTextField} from '@/models/CustomTextField'
-import {IJsonApiTypeIdDataList} from "@/serializers/jsonapi/JsonApiTypes";
+import { Attachment } from '@/models/Attachment'
+import { DeviceProperty } from '@/models/DeviceProperty'
+import { MeasuringRange } from '@/models/MeasuringRange'
+import { CustomTextField } from '@/models/CustomTextField'
+import { IJsonApiTypeIdDataList } from '@/serializers/jsonapi/JsonApiTypes'
 
 const createTestDevice = () => {
   const device = new Device()
@@ -205,19 +205,19 @@ describe('DeviceSerializer', () => {
             },
             customfields: {
               links: {
-                related: "/rdm/svm-api/v1/devices/1/relationships/customfields"
+                related: '/rdm/svm-api/v1/devices/1/relationships/customfields'
               },
               data: []
             },
             device_properties: {
               links: {
-                related: "/rdm/svm-api/v1/devices/1/relationships/device-properties"
+                related: '/rdm/svm-api/v1/devices/1/relationships/device-properties'
               },
               data: []
             },
             device_attachments: {
               links: {
-                related: "/rdm/svm-api/v1/devices/1/relationships/device-attachments"
+                related: '/rdm/svm-api/v1/devices/1/relationships/device-attachments'
               },
               data: []
             }
@@ -591,125 +591,125 @@ describe('DeviceSerializer', () => {
             }
           },
           {
-            type: "customfield",
+            type: 'customfield',
             relationships: {
               device: {
                 links: {
-                  self: "/rdm/svm-api/v1/customfields/1/relationships/device",
-                  related: "/rdm/svm-api/v1/devices/1"
+                  self: '/rdm/svm-api/v1/customfields/1/relationships/device',
+                  related: '/rdm/svm-api/v1/devices/1'
                 },
                 data: {
-                  type: "device",
-                  id: "1"
+                  type: 'device',
+                  id: '1'
                 }
               }
             },
-            id: "44",
+            id: '44',
             attributes: {
-              key: "a",
-              value: "b"
+              key: 'a',
+              value: 'b'
             },
             links: {
-              self: "/rdm/svm-api/v1/customfields/44"
+              self: '/rdm/svm-api/v1/customfields/44'
             }
           },
           {
-            type: "device_attachment",
+            type: 'device_attachment',
             attributes: {
-              url: "http://test.test",
-              label: "test label"
+              url: 'http://test.test',
+              label: 'test label'
             },
             relationships: {
               device: {
                 links: {
-                  self: "/rdm/svm-api/v1/device-attachments/1/relationships/device",
-                  related: "/rdm/svm-api/v1/devices/3"
+                  self: '/rdm/svm-api/v1/device-attachments/1/relationships/device',
+                  related: '/rdm/svm-api/v1/devices/3'
                 },
                 data: {
-                  type: "device",
-                  id: "1"
+                  type: 'device',
+                  id: '1'
                 }
               }
             },
-            id: "1",
+            id: '1',
             links: {
-              self: "/rdm/svm-api/v1/device-attachments/1"
+              self: '/rdm/svm-api/v1/device-attachments/1'
             }
           },
           {
-            type: "device_property",
+            type: 'device_property',
             attributes: {
               measuring_range_min: null,
-              label: "water vapor",
-              sampling_media_name: "Other",
+              label: 'water vapor',
+              sampling_media_name: 'Other',
               resolution: 0.001,
-              property_uri: "variablename/Water%20vapor%20concentration",
+              property_uri: 'variablename/Water%20vapor%20concentration',
               measuring_range_max: null,
-              unit_name: "",
-              compartment_uri: "variabletype/Climate",
-              property_name: "Water vapor concentration",
-              resolution_unit_uri: "http://foo/unit/1",
-              sampling_media_uri: "medium/Other",
-              compartment_name: "Climate",
+              unit_name: '',
+              compartment_uri: 'variabletype/Climate',
+              property_name: 'Water vapor concentration',
+              resolution_unit_uri: 'http://foo/unit/1',
+              sampling_media_uri: 'medium/Other',
+              compartment_name: 'Climate',
               accuracy: null,
-              resolution_unit_name: "mm",
-              unit_uri: "",
+              resolution_unit_name: 'mm',
+              unit_uri: '',
               failure_value: null
             },
-            id: "39",
+            id: '39',
             relationships: {
               device: {
                 links: {
-                  self: "/rdm/svm-api/v1/device-properties/2/relationships/device",
-                  related: "/rdm/svm-api/v1/devices/4"
+                  self: '/rdm/svm-api/v1/device-properties/2/relationships/device',
+                  related: '/rdm/svm-api/v1/devices/4'
                 },
                 data: {
-                  type: "device",
-                  id: "1"
+                  type: 'device',
+                  id: '1'
                 }
               }
             },
             links: {
-              self: "/rdm/svm-api/v1/device-properties/2"
+              self: '/rdm/svm-api/v1/device-properties/2'
             }
           },
           {
-            type: "device_property",
+            type: 'device_property',
             attributes: {
               measuring_range_min: 2,
-              label: "f",
-              sampling_media_name: "c",
+              label: 'f',
+              sampling_media_name: 'c',
               resolution: 0.001,
-              property_uri: "g",
+              property_uri: 'g',
               measuring_range_max: 3,
-              unit_name: "j",
-              compartment_uri: "d",
-              property_name: "e",
-              resolution_unit_uri: "http://foo/unit/1",
-              sampling_media_uri: "k",
-              compartment_name: "a",
+              unit_name: 'j',
+              compartment_uri: 'd',
+              property_name: 'e',
+              resolution_unit_uri: 'http://foo/unit/1',
+              sampling_media_uri: 'k',
+              compartment_name: 'a',
               accuracy: 1,
-              resolution_unit_name: "mm",
-              unit_uri: "b",
+              resolution_unit_name: 'mm',
+              unit_uri: 'b',
               failure_value: 4
             },
-            id: "40",
+            id: '40',
             relationships: {
               device: {
                 links: {
-                  self: "/rdm/svm-api/v1/device-properties/2/relationships/device",
-                  related: "/rdm/svm-api/v1/devices/4"
+                  self: '/rdm/svm-api/v1/device-properties/2/relationships/device',
+                  related: '/rdm/svm-api/v1/devices/4'
                 },
                 data: {
-                  type: "device",
-                  id: "1"
+                  type: 'device',
+                  id: '1'
                 }
               }
             },
             links: {
-              self: "/rdm/svm-api/v1/device-properties/2"
+              self: '/rdm/svm-api/v1/device-properties/2'
             }
-          },
+          }
         ],
         jsonapi: {
           version: '1.0'
@@ -1058,11 +1058,11 @@ describe('DeviceSerializer', () => {
       expect(customFieldsData.length).toEqual(2)
       expect(customFieldsData[0]).toEqual({
         id: '1',
-        type: "customfield"
+        type: 'customfield'
       })
       expect(customFieldsData[1]).toEqual({
         id: '2',
-        type: "customfield"
+        type: 'customfield'
       })
 
       expect(jsonApiData.relationships).toHaveProperty('device_attachments')
@@ -1072,12 +1072,12 @@ describe('DeviceSerializer', () => {
       expect(attachments.data.length).toEqual(2)
       expect(attachments.data[0]).toEqual({
         id: '2',
-        type: "device_attachment"
+        type: 'device_attachment'
 
       })
       expect(attachments.data[1]).toEqual({
-        id: "1",
-        type: "device_attachment"
+        id: '1',
+        type: 'device_attachment'
       })
 
       expect(jsonApiData.relationships).toHaveProperty('device_properties')
@@ -1087,11 +1087,11 @@ describe('DeviceSerializer', () => {
       expect(propertyData.length).toEqual(2)
       expect(propertyData[0]).toEqual({
         id: '3',
-        type: "device_property"
+        type: 'device_property'
       })
       expect(propertyData[1]).toEqual({
         id: '4',
-        type: "device_property"
+        type: 'device_property'
       })
 
       expect(jsonApiData).toHaveProperty('relationships')

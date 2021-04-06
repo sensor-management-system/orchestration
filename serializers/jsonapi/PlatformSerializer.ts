@@ -44,7 +44,7 @@ import {
 import { IMissingAttachmentData } from '@/serializers/jsonapi/AttachmentSerializer'
 import { ContactSerializer, IMissingContactData } from '@/serializers/jsonapi/ContactSerializer'
 import { PlatformAttachmentSerializer } from '@/serializers/jsonapi/PlatformAttachmentSerializer'
-import {DateTime} from "luxon";
+import { DateTime } from 'luxon'
 
 export interface IPlatformMissingData {
   contacts: IMissingContactData

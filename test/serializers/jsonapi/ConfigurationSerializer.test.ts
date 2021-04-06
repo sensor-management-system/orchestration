@@ -59,618 +59,491 @@ describe('LocationType', () => {
   })
 })
 describe('ConfigurationSerializer', () => {
-  // describe('#convertJsonApiObjectListToModelList', () => {
-  //   it('should convert a json api object with multiple entries to a configuration model list', () => {
-  //     const jsonApiObjectList: any = {
-  //       data: [{
-  //         type: 'configuration',
-  //         attributes: {
-  //           start_date: '2020-08-28T13:49:48.015620+00:00',
-  //           end_date: '2020-08-29T13:49:48.015620+00:00',
-  //           location_type: LocationType.Dynamic,
-  //           project_uri: 'projects/Tereno-NO',
-  //           project_name: 'Tereno NO',
-  //           label: 'Tereno NO Boeken',
-  //           status: 'draft',
-  //           hierarchy: [
-  //             {
-  //               type: 'platform',
-  //               id: '37',
-  //               offset_x: 1.0,
-  //               offset_y: 2.0,
-  //               offset_z: 3.0,
-  //               children: [{
-  //                 type: 'platform',
-  //                 id: '38',
-  //                 offset_x: 4.0,
-  //                 offset_y: 5.0,
-  //                 offset_z: 6.0,
-  //                 children: [{
-  //                   type: 'device',
-  //                   id: '39',
-  //                   offset_x: 7.0,
-  //                   offset_y: 8.0,
-  //                   offset_z: 9.0,
-  //                   calibration_date: '2020-01-01T13:49:48.015620+00:00',
-  //                   firmware_version: 'v1.0'
-  //                 }, {
-  //                   type: 'device',
-  //                   id: '40',
-  //                   offset_x: 10.0,
-  //                   offset_y: 11.0,
-  //                   offset_z: 12.0,
-  //                   calibration_date: null,
-  //                   firmware_version: null
-  //                 }]
-  //               }]
-  //             }, {
-  //               type: 'platform',
-  //               id: '41',
-  //               offset_x: 13.0,
-  //               offset_y: 14.0,
-  //               offset_z: 15.0
-  //             }
-  //           ]
-  //         },
-  //         relationships: {
-  //           src_longitude: {
-  //             data: {
-  //               type: 'device_property',
-  //               id: '100'
-  //             }
-  //           },
-  //           src_latitude: {
-  //             data: {
-  //               type: 'device_property',
-  //               id: '101'
-  //             }
-  //           },
-  //           src_elevation: {
-  //           }
-  //           // no contacts, as we expect an empty case here
-  //         },
-  //         id: '1'
-  //       }, {
-  //         type: 'configuration',
-  //         attributes: {
-  //           // no start and no end date
-  //           location_type: LocationType.Dynamic,
-  //           // no fields for longitude, latitude & elevation,
-  //           // no fields for project_uri or project_name
-  //           // no field for label
-  //           status: 'draft'
-  //         },
-  //         relationships: {
-  //           // no contacts, as we expect an empty case here
-  //           // and handle device properties somehow
-  //         },
-  //         id: '2'
-  //       }, {
-  //         type: 'configuration',
-  //         attributes: {},
-  //         relationships: {},
-  //         id: '3'
-  //       }, {
-  //         type: 'configuration',
-  //         attributes: {
-  //           location_type: LocationType.Stationary,
-  //           longitude: 13.0,
-  //           latitude: 52.0,
-  //           elevation: 100.0
-  //         },
-  //         relationships: {},
-  //         id: '4'
-  //       }],
-  //       // The point of which platforms and devices are used is mentiond in the hierarchy.
-  //       // so there is no further need to add other relationships
-  //       included: [{
-  //         type: 'platform',
-  //         id: '37',
-  //         attributes: {
-  //           inventory_number: '',
-  //           platform_type_uri: 'type/station',
-  //           short_name: 'boeken_BF1',
-  //           created_at: '2020-08-28T13:48:35.740944+00:00',
-  //           manufacturer_name: '',
-  //           attachments: [],
-  //           description: 'Boeken BF1',
-  //           updated_at: '2020-08-29T13:48:35.740944+00:00',
-  //           long_name: 'Boeken BF1',
-  //           manufacturer_uri: '',
-  //           platform_type_name: 'Station',
-  //           serial_number: '',
-  //           persistent_identifier: null,
-  //           model: '',
-  //           website: '',
-  //           status_uri: '',
-  //           status_name: ''
-  //         },
-  //         relationships: {
-  //           // nothing more to make the test case not too complex
-  //         }
-  //       },
-  //       {
-  //         type: 'platform',
-  //         id: '38',
-  //         attributes: {
-  //           inventory_number: '',
-  //           platform_type_uri: 'type/station',
-  //           short_name: 'boeken_BF12',
-  //           created_at: '2020-09-28T13:48:35.740944+00:00',
-  //           manufacturer_name: '',
-  //           attachments: [],
-  //           description: 'Boeken BF2',
-  //           updated_at: '2020-09-29T13:48:35.740944+00:00',
-  //           long_name: 'Boeken BF2',
-  //           manufacturer_uri: '',
-  //           platform_type_name: 'Station',
-  //           serial_number: '',
-  //           persistent_identifier: null,
-  //           model: '',
-  //           website: '',
-  //           status_uri: '',
-  //           status_name: ''
-  //         },
-  //         relationships: {
-  //           // nothing more to make the test case not too complex
-  //         }
-  //       },
-  //       {
-  //         type: 'platform',
-  //         id: '41',
-  //         attributes: {
-  //           inventory_number: '',
-  //           platform_type_uri: 'type/station',
-  //           short_name: 'boeken_BF123',
-  //           created_at: '2020-09-29T13:48:35.740944+00:00',
-  //           manufacturer_name: '',
-  //           attachments: [],
-  //           description: 'Boeken BF3',
-  //           updated_at: '2020-09-30T13:48:35.740944+00:00',
-  //           long_name: 'Boeken BF3',
-  //           manufacturer_uri: '',
-  //           platform_type_name: 'Station',
-  //           serial_number: '',
-  //           persistent_identifier: null,
-  //           model: '',
-  //           website: '',
-  //           status_uri: '',
-  //           status_name: ''
-  //         }
-  //       }, {
-  //         type: 'device',
-  //         id: '39',
-  //         attributes: {
-  //           properties: [{
-  //             id: '100',
-  //             sampling_media_name: 'Air',
-  //             sampling_media_uri: 'medium/air',
-  //             compartment_name: 'C1',
-  //             compartment_uri: 'compartment/c1',
-  //             property_name: 'Temperature',
-  //             property_uri: 'property/temperature',
-  //             unit_name: 'degree',
-  //             unit_uri: 'unit/degree',
-  //             failure_value: -999,
-  //             measuring_range_min: -273,
-  //             measuring_range_max: 100,
-  //             label: 'air_temperature',
-  //             accuracy: 0.1,
-  //             resolution: 0.05,
-  //             resolution_unit_name: 'TemperatureRes',
-  //             resolution_unit_uri: 'property/res/temperature'
-  //           }, {
-  //             id: '101',
-  //             sampling_media_name: 'Water',
-  //             sampling_media_uri: 'medium/water',
-  //             compartment_name: 'C1',
-  //             compartment_uri: 'compartment/c1',
-  //             property_name: 'Temperature',
-  //             property_uri: 'property/temperature',
-  //             unit_name: 'degree',
-  //             unit_uri: 'unit/degree',
-  //             failure_value: -999,
-  //             measuring_range_min: -10,
-  //             measuring_range_max: 100,
-  //             label: 'water_temperature',
-  //             accuracy: 0.1,
-  //             resolution: 0.05,
-  //             resolution_unit_name: 'TemperatureRes',
-  //             resolution_unit_uri: 'property/res/temperature'
-  //           }],
-  //           inventory_number: '',
-  //           short_name: 'Adcon wind vane',
-  //           customfields: [],
-  //           device_type_uri: '',
-  //           created_at: '2020-08-28T13:49:48.799090+00:00',
-  //           manufacturer_name: 'OTT Hydromet GmbH',
-  //           attachments: [],
-  //           dual_use: false,
-  //           description: '',
-  //           device_type_name: '',
-  //           updated_at: '2020-08-29T13:49:48.799090+00:00',
-  //           manufacturer_uri: '',
-  //           long_name: 'Adcon wind vane',
-  //           serial_number: '',
-  //           persistent_identifier: null,
-  //           model: 'Wind Vane',
-  //           website: 'www.adcon.com',
-  //           status_uri: '',
-  //           status_name: ''
-  //         },
-  //         relationships: {
-  //           // nothing more to make the test case not too complex
-  //         }
-  //       }, {
-  //         type: 'device',
-  //         id: '40',
-  //         attributes: {
-  //           properties: [{
-  //             id: '102',
-  //             sampling_media_name: 'Snow',
-  //             sampling_media_uri: 'medium/snow',
-  //             compartment_name: 'C1',
-  //             compartment_uri: 'compartment/c1',
-  //             property_name: 'Temperature',
-  //             property_uri: 'property/temperature',
-  //             unit_name: 'degree',
-  //             unit_uri: 'unit/degree',
-  //             failure_value: -999,
-  //             measuring_range_min: -273,
-  //             measuring_range_max: 5,
-  //             label: 'snow_temperature',
-  //             accuracy: 0.1,
-  //             resolution: 0.05,
-  //             resolution_unit_name: 'TemperatureRes',
-  //             resolution_unit_uri: 'property/res/temperature'
-  //           }],
-  //           inventory_number: '',
-  //           short_name: 'Adcon leafwetness',
-  //           customfields: [],
-  //           device_type_uri: '',
-  //           created_at: '2020-08-29T13:49:48.799090+00:00',
-  //           manufacturer_name: 'OTT Hydromet GmbH',
-  //           attachments: [],
-  //           dual_use: false,
-  //           description: '',
-  //           device_type_name: '',
-  //           updated_at: '2020-09-29T13:49:48.799090+00:00',
-  //           manufacturer_uri: '',
-  //           long_name: 'Adcon leafwetness',
-  //           serial_number: '',
-  //           persistent_identifier: null,
-  //           model: 'Leaf Wetness',
-  //           website: 'http://www.adcon.com',
-  //           status_uri: '',
-  //           status_name: ''
-  //         },
-  //         relationships: {
-  //           // nothing more to make the test case not too complex
-  //         }
-  //       }],
-  //       meta: {
-  //         count: 2
-  //       },
-  //       jsonapi: {
-  //         version: '1.0'
-  //       }
-  //     }
-  //
-  //     const expectedPlatform1 = Platform.createFromObject({
-  //       id: '37',
-  //       inventoryNumber: '',
-  //       platformTypeUri: 'type/station',
-  //       shortName: 'boeken_BF1',
-  //       createdAt: DateTime.utc(
-  //         2020, 8, 28, 13, 48, 35, 740 // no sub milliseconds
-  //       ),
-  //       manufacturerName: '',
-  //       attachments: [],
-  //       description: 'Boeken BF1',
-  //       updatedAt: DateTime.utc(
-  //         2020, 8, 29, 13, 48, 35, 740),
-  //       longName: 'Boeken BF1',
-  //       manufacturerUri: '',
-  //       platformTypeName: 'Station',
-  //       serialNumber: '',
-  //       persistentIdentifier: '',
-  //       model: '',
-  //       website: '',
-  //       statusUri: '',
-  //       statusName: '',
-  //       contacts: [],
-  //       createdByUserId: null,
-  //       updatedByUserId: null
-  //     })
-  //     const expectedPlatform2 = Platform.createFromObject({
-  //       id: '38',
-  //       inventoryNumber: '',
-  //       platformTypeUri: 'type/station',
-  //       shortName: 'boeken_BF12',
-  //       createdAt: DateTime.utc(2020, 9, 28, 13, 48, 35, 740),
-  //       manufacturerName: '',
-  //       attachments: [],
-  //       description: 'Boeken BF2',
-  //       updatedAt: DateTime.utc(2020, 9, 29, 13, 48, 35, 740),
-  //       longName: 'Boeken BF2',
-  //       manufacturerUri: '',
-  //       platformTypeName: 'Station',
-  //       serialNumber: '',
-  //       persistentIdentifier: '',
-  //       model: '',
-  //       website: '',
-  //       statusUri: '',
-  //       statusName: '',
-  //       contacts: [],
-  //       createdByUserId: null,
-  //       updatedByUserId: null
-  //     })
-  //     const expectedPlatform3 = Platform.createFromObject({
-  //       id: '41',
-  //       inventoryNumber: '',
-  //       platformTypeUri: 'type/station',
-  //       shortName: 'boeken_BF123',
-  //       createdAt: DateTime.utc(2020, 9, 29, 13, 48, 35, 740),
-  //       manufacturerName: '',
-  //       attachments: [],
-  //       description: 'Boeken BF3',
-  //       updatedAt: DateTime.utc(2020, 9, 30, 13, 48, 35, 740),
-  //       longName: 'Boeken BF3',
-  //       manufacturerUri: '',
-  //       platformTypeName: 'Station',
-  //       serialNumber: '',
-  //       persistentIdentifier: '',
-  //       model: '',
-  //       website: '',
-  //       statusUri: '',
-  //       statusName: '',
-  //       contacts: [],
-  //       createdByUserId: null,
-  //       updatedByUserId: null
-  //     })
-  //
-  //     const expectedDeviceProperty1 = DeviceProperty.createFromObject({
-  //       id: '100',
-  //       samplingMediaName: 'Air',
-  //       samplingMediaUri: 'medium/air',
-  //       compartmentName: 'C1',
-  //       compartmentUri: 'compartment/c1',
-  //       propertyName: 'Temperature',
-  //       propertyUri: 'property/temperature',
-  //       unitName: 'degree',
-  //       unitUri: 'unit/degree',
-  //       failureValue: -999,
-  //       measuringRange: MeasuringRange.createFromObject({
-  //         min: -273,
-  //         max: 100
-  //       }),
-  //       label: 'air_temperature',
-  //       accuracy: 0.1,
-  //       resolution: 0.05,
-  //       resolutionUnitName: 'TemperatureRes',
-  //       resolutionUnitUri: 'property/res/temperature'
-  //     })
-  //     const expectedDeviceProperty2 = DeviceProperty.createFromObject({
-  //       id: '101',
-  //       samplingMediaName: 'Water',
-  //       samplingMediaUri: 'medium/water',
-  //       compartmentName: 'C1',
-  //       compartmentUri: 'compartment/c1',
-  //       propertyName: 'Temperature',
-  //       propertyUri: 'property/temperature',
-  //       unitName: 'degree',
-  //       unitUri: 'unit/degree',
-  //       failureValue: -999,
-  //       measuringRange: MeasuringRange.createFromObject({
-  //         min: -10,
-  //         max: 100
-  //       }),
-  //       label: 'water_temperature',
-  //       accuracy: 0.1,
-  //       resolution: 0.05,
-  //       resolutionUnitName: 'TemperatureRes',
-  //       resolutionUnitUri: 'property/res/temperature'
-  //     })
-  //     const expectedDeviceProperty3 = DeviceProperty.createFromObject({
-  //       id: '102',
-  //       samplingMediaName: 'Snow',
-  //       samplingMediaUri: 'medium/snow',
-  //       compartmentName: 'C1',
-  //       compartmentUri: 'compartment/c1',
-  //       propertyName: 'Temperature',
-  //       propertyUri: 'property/temperature',
-  //       unitName: 'degree',
-  //       unitUri: 'unit/degree',
-  //       failureValue: -999,
-  //       measuringRange: MeasuringRange.createFromObject({
-  //         min: -273,
-  //         max: 5
-  //       }),
-  //       label: 'snow_temperature',
-  //       accuracy: 0.1,
-  //       resolution: 0.05,
-  //       resolutionUnitName: 'TemperatureRes',
-  //       resolutionUnitUri: 'property/res/temperature'
-  //     })
-  //
-  //     const expectedDevice1 = Device.createFromObject({
-  //       id: '39',
-  //       properties: [expectedDeviceProperty1, expectedDeviceProperty2],
-  //       inventoryNumber: '',
-  //       shortName: 'Adcon wind vane',
-  //       customFields: [],
-  //       deviceTypeUri: '',
-  //       createdAt: DateTime.utc(2020, 8, 28, 13, 49, 48, 799),
-  //       manufacturerName: 'OTT Hydromet GmbH',
-  //       attachments: [],
-  //       dualUse: false,
-  //       description: '',
-  //       deviceTypeName: '',
-  //       updatedAt: DateTime.utc(2020, 8, 29, 13, 49, 48, 799),
-  //       manufacturerUri: '',
-  //       longName: 'Adcon wind vane',
-  //       serialNumber: '',
-  //       persistentIdentifier: '',
-  //       model: 'Wind Vane',
-  //       website: 'www.adcon.com',
-  //       statusUri: '',
-  //       statusName: '',
-  //       contacts: [],
-  //       createdByUserId: null,
-  //       updatedByUserId: null
-  //     })
-  //     const expectedDevice2 = Device.createFromObject({
-  //       id: '40',
-  //       properties: [expectedDeviceProperty3],
-  //       inventoryNumber: '',
-  //       shortName: 'Adcon leafwetness',
-  //       customFields: [],
-  //       deviceTypeUri: '',
-  //       createdAt: DateTime.utc(2020, 8, 29, 13, 49, 48, 799),
-  //       manufacturerName: 'OTT Hydromet GmbH',
-  //       attachments: [],
-  //       dualUse: false,
-  //       description: '',
-  //       deviceTypeName: '',
-  //       updatedAt: DateTime.utc(2020, 9, 29, 13, 49, 48, 799),
-  //       manufacturerUri: '',
-  //       longName: 'Adcon leafwetness',
-  //       serialNumber: '',
-  //       persistentIdentifier: '',
-  //       model: 'Leaf Wetness',
-  //       website: 'http://www.adcon.com',
-  //       statusUri: '',
-  //       statusName: '',
-  //       contacts: [],
-  //       createdByUserId: null,
-  //       updatedByUserId: null
-  //     })
-  //
-  //     const expectedConfiguration1 = new Configuration()
-  //     expectedConfiguration1.id = '1'
-  //     expectedConfiguration1.location = DynamicLocation.createFromObject({
-  //       longitude: expectedDeviceProperty1,
-  //       latitude: expectedDeviceProperty2,
-  //       elevation: null
-  //     })
-  //     expectedConfiguration1.startDate = DateTime.utc(2020, 8, 28, 13, 49, 48, 15)
-  //     expectedConfiguration1.endDate = DateTime.utc(2020, 8, 29, 13, 49, 48, 15)
-  //     expectedConfiguration1.projectUri = 'projects/Tereno-NO'
-  //     expectedConfiguration1.projectName = 'Tereno NO'
-  //     expectedConfiguration1.label = 'Tereno NO Boeken'
-  //     expectedConfiguration1.status = 'draft'
-  //     expectedConfiguration1.children = ConfigurationsTree.fromArray(
-  //       [
-  //         ((): PlatformNode => {
-  //           const n = new PlatformNode(expectedPlatform1)
-  //           n.setTree(
-  //             ConfigurationsTree.fromArray(
-  //               [
-  //                 ((): PlatformNode => {
-  //                   const n = new PlatformNode(expectedPlatform2)
-  //                   n.setTree(
-  //                     ConfigurationsTree.fromArray(
-  //                       [
-  //                         new DeviceNode(expectedDevice1),
-  //                         new DeviceNode(expectedDevice2)
-  //                       ]
-  //                     )
-  //                   )
-  //                   return n
-  //                 })()
-  //               ]
-  //             )
-  //           )
-  //           return n
-  //         })(),
-  //         new PlatformNode(expectedPlatform3)
-  //       ]
-  //     ).toArray()
-  //     expectedConfiguration1.platformAttributes = [
-  //       PlatformConfigurationAttributes.createFromObject({
-  //         platform: expectedPlatform1,
-  //         offsetX: 1.0,
-  //         offsetY: 2.0,
-  //         offsetZ: 3.0
-  //       }),
-  //       PlatformConfigurationAttributes.createFromObject({
-  //         platform: expectedPlatform2,
-  //         offsetX: 4.0,
-  //         offsetY: 5.0,
-  //         offsetZ: 6.0
-  //       }),
-  //       PlatformConfigurationAttributes.createFromObject({
-  //         platform: expectedPlatform3,
-  //         offsetX: 13.0,
-  //         offsetY: 14.0,
-  //         offsetZ: 15.0
-  //       })
-  //     ]
-  //     expectedConfiguration1.deviceAttributes = [
-  //       DeviceConfigurationAttributes.createFromObject({
-  //         device: expectedDevice1,
-  //         offsetX: 7.0,
-  //         offsetY: 8.0,
-  //         offsetZ: 9.0,
-  //         calibrationDate: DateTime.utc(2020, 1, 1, 13, 49, 48, 15),
-  //         firmwareVersion: 'v1.0'
-  //       }),
-  //       DeviceConfigurationAttributes.createFromObject({
-  //         device: expectedDevice2,
-  //         offsetX: 10.0,
-  //         offsetY: 11.0,
-  //         offsetZ: 12.0,
-  //         calibrationDate: null,
-  //         firmwareVersion: ''
-  //       })
-  //     ]
-  //
-  //     const expectedConfiguration2 = new Configuration()
-  //     expectedConfiguration2.id = '2'
-  //     expectedConfiguration2.location = new DynamicLocation()
-  //     expectedConfiguration2.status = 'draft'
-  //
-  //     const expectedConfiguration3 = new Configuration()
-  //     expectedConfiguration3.id = '3'
-  //
-  //     const expectedConfiguration4 = new Configuration()
-  //     expectedConfiguration4.id = '4'
-  //     expectedConfiguration4.location = StationaryLocation.createFromObject({
-  //       longitude: 13.0,
-  //       latitude: 52.0,
-  //       elevation: 100.0
-  //     })
-  //
-  //     const serializer = new ConfigurationSerializer()
-  //     const configurationsWithMeta = serializer.convertJsonApiObjectListToModelList(jsonApiObjectList)
-  //     const configurations = configurationsWithMeta.map((x: IConfigurationWithMeta) => {
-  //       return x.configuration
-  //     })
-  //
-  //     expect(Array.isArray(configurations)).toBeTruthy()
-  //     expect(configurations.length).toEqual(4)
-  //
-  //     expect(configurations[0]).toEqual(expectedConfiguration1)
-  //     expect(configurations[0].deviceAttributes.length).toEqual(2)
-  //     expect(configurations[0].platformAttributes.length).toEqual(3)
-  //     expect(configurations[1]).toEqual(expectedConfiguration2)
-  //     expect(configurations[1].deviceAttributes.length).toEqual(0)
-  //     expect(configurations[1].platformAttributes.length).toEqual(0)
-  //     expect(configurations[2]).toEqual(expectedConfiguration3)
-  //     expect(configurations[3]).toEqual(expectedConfiguration4)
-  //
-  //     const missingContactIds = configurationsWithMeta.map((x: IConfigurationWithMeta) => {
-  //       return x.missing.contacts.ids
-  //     })
-  //
-  //     expect(Array.isArray(missingContactIds)).toBeTruthy()
-  //     expect(missingContactIds.length).toEqual(4)
-  //     expect(missingContactIds[0]).toEqual([])
-  //     expect(missingContactIds[1]).toEqual([])
-  //     expect(missingContactIds[2]).toEqual([])
-  //     expect(missingContactIds[3]).toEqual([])
-  //   })
-  // })
+  describe('#convertJsonApiObjectListToModelList', () => {
+    it('should convert a json api object with multiple entries to a configuration model list', () => {
+      const jsonApiObjectList: any = {
+        data: [{
+          type: 'configuration',
+          attributes: {
+            start_date: '2020-08-28T13:49:48.015620+00:00',
+            end_date: '2020-08-29T13:49:48.015620+00:00',
+            location_type: LocationType.Dynamic,
+            project_uri: 'projects/Tereno-NO',
+            project_name: 'Tereno NO',
+            label: 'Tereno NO Boeken',
+            status: 'draft',
+            hierarchy: [
+              {
+                type: 'platform',
+                id: '37',
+                offset_x: 1.0,
+                offset_y: 2.0,
+                offset_z: 3.0,
+                children: [{
+                  type: 'platform',
+                  id: '38',
+                  offset_x: 4.0,
+                  offset_y: 5.0,
+                  offset_z: 6.0,
+                  children: [{
+                    type: 'device',
+                    id: '39',
+                    offset_x: 7.0,
+                    offset_y: 8.0,
+                    offset_z: 9.0,
+                    calibration_date: '2020-01-01T13:49:48.015620+00:00',
+                    firmware_version: 'v1.0'
+                  }, {
+                    type: 'device',
+                    id: '40',
+                    offset_x: 10.0,
+                    offset_y: 11.0,
+                    offset_z: 12.0,
+                    calibration_date: null,
+                    firmware_version: null
+                  }]
+                }]
+              }, {
+                type: 'platform',
+                id: '41',
+                offset_x: 13.0,
+                offset_y: 14.0,
+                offset_z: 15.0
+              }
+            ]
+          },
+          relationships: {
+            src_longitude: {
+              data: {
+                type: 'device_property',
+                id: '100'
+              }
+            },
+            src_latitude: {
+              data: {
+                type: 'device_property',
+                id: '101'
+              }
+            },
+            src_elevation: {
+            }
+            // no contacts, as we expect an empty case here
+          },
+          id: '1'
+        }, {
+          type: 'configuration',
+          attributes: {
+            // no start and no end date
+            location_type: LocationType.Dynamic,
+            // no fields for longitude, latitude & elevation,
+            // no fields for project_uri or project_name
+            // no field for label
+            status: 'draft'
+          },
+          relationships: {
+            // no contacts, as we expect an empty case here
+            // and handle device properties somehow
+          },
+          id: '2'
+        }, {
+          type: 'configuration',
+          attributes: {},
+          relationships: {},
+          id: '3'
+        }, {
+          type: 'configuration',
+          attributes: {
+            location_type: LocationType.Stationary,
+            longitude: 13.0,
+            latitude: 52.0,
+            elevation: 100.0
+          },
+          relationships: {},
+          id: '4'
+        }],
+        // The point of which platforms and devices are used is mentiond in the hierarchy.
+        // so there is no further need to add other relationships
+        included: [{
+          type: 'platform',
+          id: '37',
+          attributes: {
+            inventory_number: '',
+            platform_type_uri: 'type/station',
+            short_name: 'boeken_BF1',
+            created_at: '2020-08-28T13:48:35.740944+00:00',
+            manufacturer_name: '',
+            description: 'Boeken BF1',
+            updated_at: '2020-08-29T13:48:35.740944+00:00',
+            long_name: 'Boeken BF1',
+            manufacturer_uri: '',
+            platform_type_name: 'Station',
+            serial_number: '',
+            persistent_identifier: null,
+            model: '',
+            website: '',
+            status_uri: '',
+            status_name: ''
+          },
+          relationships: {
+            // nothing more to make the test case not too complex
+          }
+        },
+        {
+          type: 'platform',
+          id: '38',
+          attributes: {
+            inventory_number: '',
+            platform_type_uri: 'type/station',
+            short_name: 'boeken_BF12',
+            created_at: '2020-09-28T13:48:35.740944+00:00',
+            manufacturer_name: '',
+            description: 'Boeken BF2',
+            updated_at: '2020-09-29T13:48:35.740944+00:00',
+            long_name: 'Boeken BF2',
+            manufacturer_uri: '',
+            platform_type_name: 'Station',
+            serial_number: '',
+            persistent_identifier: null,
+            model: '',
+            website: '',
+            status_uri: '',
+            status_name: ''
+          },
+          relationships: {
+            // nothing more to make the test case not too complex
+          }
+        },
+        {
+          type: 'platform',
+          id: '41',
+          attributes: {
+            inventory_number: '',
+            platform_type_uri: 'type/station',
+            short_name: 'boeken_BF123',
+            created_at: '2020-09-29T13:48:35.740944+00:00',
+            manufacturer_name: '',
+            description: 'Boeken BF3',
+            updated_at: '2020-09-30T13:48:35.740944+00:00',
+            long_name: 'Boeken BF3',
+            manufacturer_uri: '',
+            platform_type_name: 'Station',
+            serial_number: '',
+            persistent_identifier: null,
+            model: '',
+            website: '',
+            status_uri: '',
+            status_name: ''
+          }
+        }, {
+          type: 'device',
+          id: '39',
+          attributes: {
+            inventory_number: '',
+            short_name: 'Adcon wind vane',
+            device_type_uri: '',
+            created_at: '2020-08-28T13:49:48.799090+00:00',
+            manufacturer_name: 'OTT Hydromet GmbH',
+            dual_use: false,
+            description: '',
+            device_type_name: '',
+            updated_at: '2020-08-29T13:49:48.799090+00:00',
+            manufacturer_uri: '',
+            long_name: 'Adcon wind vane',
+            serial_number: '',
+            persistent_identifier: null,
+            model: 'Wind Vane',
+            website: 'www.adcon.com',
+            status_uri: '',
+            status_name: ''
+          },
+          relationships: {
+            // nothing more to make the test case not too complex
+          }
+        }, {
+          type: 'device',
+          id: '40',
+          attributes: {
+            inventory_number: '',
+            short_name: 'Adcon leafwetness',
+            device_type_uri: '',
+            created_at: '2020-08-29T13:49:48.799090+00:00',
+            manufacturer_name: 'OTT Hydromet GmbH',
+            dual_use: false,
+            description: '',
+            device_type_name: '',
+            updated_at: '2020-09-29T13:49:48.799090+00:00',
+            manufacturer_uri: '',
+            long_name: 'Adcon leafwetness',
+            serial_number: '',
+            persistent_identifier: null,
+            model: 'Leaf Wetness',
+            website: 'http://www.adcon.com',
+            status_uri: '',
+            status_name: ''
+          },
+          relationships: {
+            // nothing more to make the test case not too complex
+          }
+        }],
+        meta: {
+          count: 2
+        },
+        jsonapi: {
+          version: '1.0'
+        }
+      }
+
+      const expectedPlatform1 = Platform.createFromObject({
+        id: '37',
+        inventoryNumber: '',
+        platformTypeUri: 'type/station',
+        shortName: 'boeken_BF1',
+        createdAt: DateTime.utc(
+          2020, 8, 28, 13, 48, 35, 740 // no sub milliseconds
+        ),
+        manufacturerName: '',
+        attachments: [],
+        description: 'Boeken BF1',
+        updatedAt: DateTime.utc(
+          2020, 8, 29, 13, 48, 35, 740),
+        longName: 'Boeken BF1',
+        manufacturerUri: '',
+        platformTypeName: 'Station',
+        serialNumber: '',
+        persistentIdentifier: '',
+        model: '',
+        website: '',
+        statusUri: '',
+        statusName: '',
+        contacts: [],
+        createdByUserId: null,
+        updatedByUserId: null
+      })
+      const expectedPlatform2 = Platform.createFromObject({
+        id: '38',
+        inventoryNumber: '',
+        platformTypeUri: 'type/station',
+        shortName: 'boeken_BF12',
+        createdAt: DateTime.utc(2020, 9, 28, 13, 48, 35, 740),
+        manufacturerName: '',
+        attachments: [],
+        description: 'Boeken BF2',
+        updatedAt: DateTime.utc(2020, 9, 29, 13, 48, 35, 740),
+        longName: 'Boeken BF2',
+        manufacturerUri: '',
+        platformTypeName: 'Station',
+        serialNumber: '',
+        persistentIdentifier: '',
+        model: '',
+        website: '',
+        statusUri: '',
+        statusName: '',
+        contacts: [],
+        createdByUserId: null,
+        updatedByUserId: null
+      })
+      const expectedPlatform3 = Platform.createFromObject({
+        id: '41',
+        inventoryNumber: '',
+        platformTypeUri: 'type/station',
+        shortName: 'boeken_BF123',
+        createdAt: DateTime.utc(2020, 9, 29, 13, 48, 35, 740),
+        manufacturerName: '',
+        attachments: [],
+        description: 'Boeken BF3',
+        updatedAt: DateTime.utc(2020, 9, 30, 13, 48, 35, 740),
+        longName: 'Boeken BF3',
+        manufacturerUri: '',
+        platformTypeName: 'Station',
+        serialNumber: '',
+        persistentIdentifier: '',
+        model: '',
+        website: '',
+        statusUri: '',
+        statusName: '',
+        contacts: [],
+        createdByUserId: null,
+        updatedByUserId: null
+      })
+
+      const expectedDevice1 = Device.createFromObject({
+        id: '39',
+        properties: [],
+        inventoryNumber: '',
+        shortName: 'Adcon wind vane',
+        customFields: [],
+        deviceTypeUri: '',
+        createdAt: DateTime.utc(2020, 8, 28, 13, 49, 48, 799),
+        manufacturerName: 'OTT Hydromet GmbH',
+        attachments: [],
+        dualUse: false,
+        description: '',
+        deviceTypeName: '',
+        updatedAt: DateTime.utc(2020, 8, 29, 13, 49, 48, 799),
+        manufacturerUri: '',
+        longName: 'Adcon wind vane',
+        serialNumber: '',
+        persistentIdentifier: '',
+        model: 'Wind Vane',
+        website: 'www.adcon.com',
+        statusUri: '',
+        statusName: '',
+        contacts: [],
+        createdByUserId: null,
+        updatedByUserId: null
+      })
+      const expectedDevice2 = Device.createFromObject({
+        id: '40',
+        properties: [],
+        inventoryNumber: '',
+        shortName: 'Adcon leafwetness',
+        customFields: [],
+        deviceTypeUri: '',
+        createdAt: DateTime.utc(2020, 8, 29, 13, 49, 48, 799),
+        manufacturerName: 'OTT Hydromet GmbH',
+        attachments: [],
+        dualUse: false,
+        description: '',
+        deviceTypeName: '',
+        updatedAt: DateTime.utc(2020, 9, 29, 13, 49, 48, 799),
+        manufacturerUri: '',
+        longName: 'Adcon leafwetness',
+        serialNumber: '',
+        persistentIdentifier: '',
+        model: 'Leaf Wetness',
+        website: 'http://www.adcon.com',
+        statusUri: '',
+        statusName: '',
+        contacts: [],
+        createdByUserId: null,
+        updatedByUserId: null
+      })
+
+      const expectedConfiguration1 = new Configuration()
+      expectedConfiguration1.id = '1'
+      expectedConfiguration1.location = DynamicLocation.createFromObject({
+        longitude: null,
+        latitude: null,
+        elevation: null
+      })
+      expectedConfiguration1.startDate = DateTime.utc(2020, 8, 28, 13, 49, 48, 15)
+      expectedConfiguration1.endDate = DateTime.utc(2020, 8, 29, 13, 49, 48, 15)
+      expectedConfiguration1.projectUri = 'projects/Tereno-NO'
+      expectedConfiguration1.projectName = 'Tereno NO'
+      expectedConfiguration1.label = 'Tereno NO Boeken'
+      expectedConfiguration1.status = 'draft'
+      expectedConfiguration1.children = ConfigurationsTree.fromArray(
+        [
+          ((): PlatformNode => {
+            const n = new PlatformNode(expectedPlatform1)
+            n.setTree(
+              ConfigurationsTree.fromArray(
+                [
+                  ((): PlatformNode => {
+                    const n = new PlatformNode(expectedPlatform2)
+                    n.setTree(
+                      ConfigurationsTree.fromArray(
+                        [
+                          new DeviceNode(expectedDevice1),
+                          new DeviceNode(expectedDevice2)
+                        ]
+                      )
+                    )
+                    return n
+                  })()
+                ]
+              )
+            )
+            return n
+          })(),
+          new PlatformNode(expectedPlatform3)
+        ]
+      ).toArray()
+      expectedConfiguration1.platformAttributes = [
+        PlatformConfigurationAttributes.createFromObject({
+          platform: expectedPlatform1,
+          offsetX: 1.0,
+          offsetY: 2.0,
+          offsetZ: 3.0
+        }),
+        PlatformConfigurationAttributes.createFromObject({
+          platform: expectedPlatform2,
+          offsetX: 4.0,
+          offsetY: 5.0,
+          offsetZ: 6.0
+        }),
+        PlatformConfigurationAttributes.createFromObject({
+          platform: expectedPlatform3,
+          offsetX: 13.0,
+          offsetY: 14.0,
+          offsetZ: 15.0
+        })
+      ]
+      expectedConfiguration1.deviceAttributes = [
+        DeviceConfigurationAttributes.createFromObject({
+          device: expectedDevice1,
+          offsetX: 7.0,
+          offsetY: 8.0,
+          offsetZ: 9.0,
+          calibrationDate: DateTime.utc(2020, 1, 1, 13, 49, 48, 15),
+          firmwareVersion: 'v1.0'
+        }),
+        DeviceConfigurationAttributes.createFromObject({
+          device: expectedDevice2,
+          offsetX: 10.0,
+          offsetY: 11.0,
+          offsetZ: 12.0,
+          calibrationDate: null,
+          firmwareVersion: ''
+        })
+      ]
+
+      const expectedConfiguration2 = new Configuration()
+      expectedConfiguration2.id = '2'
+      expectedConfiguration2.location = new DynamicLocation()
+      expectedConfiguration2.status = 'draft'
+
+      const expectedConfiguration3 = new Configuration()
+      expectedConfiguration3.id = '3'
+
+      const expectedConfiguration4 = new Configuration()
+      expectedConfiguration4.id = '4'
+      expectedConfiguration4.location = StationaryLocation.createFromObject({
+        longitude: 13.0,
+        latitude: 52.0,
+        elevation: 100.0
+      })
+
+      const serializer = new ConfigurationSerializer()
+      const configurationsWithMeta = serializer.convertJsonApiObjectListToModelList(jsonApiObjectList)
+      const configurations = configurationsWithMeta.map((x: IConfigurationWithMeta) => {
+        return x.configuration
+      })
+
+      expect(Array.isArray(configurations)).toBeTruthy()
+      expect(configurations.length).toEqual(4)
+
+      expect(configurations[0]).toEqual(expectedConfiguration1)
+      expect(configurations[0].deviceAttributes.length).toEqual(2)
+      expect(configurations[0].platformAttributes.length).toEqual(3)
+      expect(configurations[1]).toEqual(expectedConfiguration2)
+      expect(configurations[1].deviceAttributes.length).toEqual(0)
+      expect(configurations[1].platformAttributes.length).toEqual(0)
+      expect(configurations[2]).toEqual(expectedConfiguration3)
+      expect(configurations[3]).toEqual(expectedConfiguration4)
+
+      const missingContactIds = configurationsWithMeta.map((x: IConfigurationWithMeta) => {
+        return x.missing.contacts.ids
+      })
+
+      expect(Array.isArray(missingContactIds)).toBeTruthy()
+      expect(missingContactIds.length).toEqual(4)
+      expect(missingContactIds[0]).toEqual([])
+      expect(missingContactIds[1]).toEqual([])
+      expect(missingContactIds[2]).toEqual([])
+      expect(missingContactIds[3]).toEqual([])
+    })
+  })
   describe('#convertJsonApiObjectToModel', () => {
     it('should convert a json api object to a configuration model', () => {
       const jsonApiObject: any = {
