@@ -57,8 +57,8 @@ class BaseConfig:
 class DevelopmentConfig(BaseConfig):
     """Development configuration"""
 
-    SQLALCHEMY_DATABASE_URI = env("DATABASE_URL")
-    ELASTICSEARCH_URL = env("ELASTICSEARCH_URL")
+    SQLALCHEMY_DATABASE_URI = env("DATABASE_URL", None)
+    ELASTICSEARCH_URL = env("ELASTICSEARCH_URL", None)
     # Setup Token Verification
     # force use of RS265
     JWT_ALGORITHM = "RS256"
@@ -88,5 +88,5 @@ class TestingConfig(BaseConfig):
 class ProductionConfig(BaseConfig):
     """Production configuration"""
 
-    SQLALCHEMY_DATABASE_URI = env("DATABASE_URL")
-    ELASTICSEARCH_URL = env("ELASTICSEARCH_URL")
+    SQLALCHEMY_DATABASE_URI = env("DATABASE_URL", None)
+    ELASTICSEARCH_URL = env("ELASTICSEARCH_URL", None)
