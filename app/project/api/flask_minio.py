@@ -1,13 +1,12 @@
-import json
 import os
 import time
 import uuid
 
-from flask import current_app, _app_ctx_stack, make_response
 import minio
+from flask import current_app, _app_ctx_stack, make_response, abort, jsonify
+from flask_rest_jsonapi.exceptions import JsonApiException
 from minio.error import S3Error
 from urllib3.exceptions import ResponseError, MaxRetryError
-from flask_rest_jsonapi.exceptions import JsonApiException
 
 
 class MinioNotAvailableException(Exception):
@@ -86,78 +85,78 @@ class FlaskMinio:
                 ctx.minio = self.connect()
             return ctx.minio
 
-    def set_bucket_policy(self, bucket_name):
-        """
-        Set bucket policy to download only, so that we can
-        get a permanent url.
-
-        :param bucket_name: a string However, only characters that are
-        valid in URLs should be used
-
-            :Example:
-                Download bucket policy
-                {
-                  "Version": "2012-10-17",
-                  "Statement": [
-                    {
-                      "Effect": "Allow",
-                      "Principal": {
-                        "AWS": [
-                          "*"
-                        ]
-                      },
-                      "Action": [
-                        "s3:GetBucketLocation",
-                        "s3:ListBucket"
-                      ],
-                      "Resource": [
-                        "arn:aws:s3:::sms"
-                      ]
-                    },
-                    {
-                      "Effect": "Allow",
-                      "Principal": {
-                        "AWS": [
-                          "*"
-                        ]
-                      },
-                      "Action": [
-                        "s3:GetObject"
-                      ],
-                      "Resource": [
-                        "arn:aws:s3:::sms/*"
-                      ]
-                    }
-                  ]
-                }
-
-        """
-        # download_only bucket policy.
-        policy = {
-            "Version": "2012-10-17",
-            "Statement": [
-                {
-                    "Effect": "Allow",
-                    "Principal": {"AWS": ["*"]},
-                    "Action": [
-                        "s3:GetBucketLocation",
-                        "s3:ListBucket"
-                    ],
-                    "Resource": [f"arn:aws:s3:::{bucket_name}"],
-                },
-                {
-                    "Effect": "Allow",
-                    "Principal": {"AWS": ["*"]},
-                    "Action": [
-                        "s3:GetObject",
-                    ],
-                    # allow to get all object under a bucket name
-                    "Resource": [f"arn:aws:s3:::{bucket_name}/*"],
-                },
-            ],
-        }
-
-        self.connection.set_bucket_policy(bucket_name, json.dumps(policy))
+    # def set_bucket_policy(self, bucket_name):
+    #     """
+    #     Set bucket policy to download only, so that we can
+    #     get a permanent url.
+    #
+    #     :param bucket_name: a string However, only characters that are
+    #     valid in URLs should be used
+    #
+    #         :Example:
+    #             Download bucket policy
+    #             {
+    #               "Version": "2012-10-17",
+    #               "Statement": [
+    #                 {
+    #                   "Effect": "Allow",
+    #                   "Principal": {
+    #                     "AWS": [
+    #                       "*"
+    #                     ]
+    #                   },
+    #                   "Action": [
+    #                     "s3:GetBucketLocation",
+    #                     "s3:ListBucket"
+    #                   ],
+    #                   "Resource": [
+    #                     "arn:aws:s3:::sms"
+    #                   ]
+    #                 },
+    #                 {
+    #                   "Effect": "Allow",
+    #                   "Principal": {
+    #                     "AWS": [
+    #                       "*"
+    #                     ]
+    #                   },
+    #                   "Action": [
+    #                     "s3:GetObject"
+    #                   ],
+    #                   "Resource": [
+    #                     "arn:aws:s3:::sms/*"
+    #                   ]
+    #                 }
+    #               ]
+    #             }
+    #
+    #     """
+    #     # download_only bucket policy.
+    #     policy = {
+    #         "Version": "2012-10-17",
+    #         "Statement": [
+    #             {
+    #                 "Effect": "Allow",
+    #                 "Principal": {"AWS": ["*"]},
+    #                 "Action": [
+    #                     "s3:GetBucketLocation",
+    #                     "s3:ListBucket"
+    #                 ],
+    #                 "Resource": [f"arn:aws:s3:::{bucket_name}"],
+    #             },
+    #             {
+    #                 "Effect": "Allow",
+    #                 "Principal": {"AWS": ["*"]},
+    #                 "Action": [
+    #                     "s3:GetObject",
+    #                 ],
+    #                 # allow to get all object under a bucket name
+    #                 "Resource": [f"arn:aws:s3:::{bucket_name}/*"],
+    #             },
+    #         ],
+    #     }
+    #
+    #     self.connection.set_bucket_policy(bucket_name, json.dumps(policy))
 
     def allowed_file(self, filename):
         """
@@ -183,8 +182,12 @@ class FlaskMinio:
         try:
             found = self.connection.bucket_exists(minio_bucket_name)
             if not found:
-                self.connection.make_bucket(minio_bucket_name)
-                self.set_bucket_policy(minio_bucket_name)
+                # self.connection.make_bucket(minio_bucket_name)
+                # self.set_bucket_policy(minio_bucket_name)
+                abort(make_response(
+                    jsonify(
+                        error="A Bucket with the name: {} is not Found.".format(minio_bucket_name)),
+                    400))
 
             if uploaded_file and self.allowed_file(filename=uploaded_file.filename):
                 filename = "{}{}".format(

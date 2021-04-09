@@ -3,7 +3,6 @@ from project.api.resourceManager import *
 from .api.ping import Ping
 from .frj_csv_export.api import Api
 
-from project.api.upload_files import UploadFilesWithMinio
 
 api = Api()
 
@@ -1143,4 +1142,3 @@ api.route(
     "configuration_dynamic_location_end_action_configuration",
     "/dynamic-location-end-actions/<int:id>/relationships/configuration",
 )
-api.route(UploadFilesWithMinio, "upload_to_minio", "/upload")

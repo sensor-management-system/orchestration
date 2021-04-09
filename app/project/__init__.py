@@ -7,6 +7,7 @@ from flask_migrate import Migrate
 
 from .api.models.base_model import db
 from .api.token_checker import jwt
+from .api.upload_files import upload_routes
 from .urls import api
 from .api import minio
 
@@ -58,4 +59,6 @@ def create_app():
     # import sys
     # print(app.config, file=sys.stderr)
 
+    # upload_routes
+    app.register_blueprint(upload_routes)
     return app

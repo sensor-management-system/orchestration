@@ -2,6 +2,7 @@ from flask_jwt_extended import get_jwt_identity
 
 from ..models import Contact, User
 from ..models.base_model import db
+from ...api import minio
 
 
 def add_created_by_id(data):
@@ -43,8 +44,8 @@ def add_contact_to_object(entity_with_contact_list):
     """
     user_entry = (
         db.session.query(User)
-        .filter_by(id=entity_with_contact_list.created_by_id)
-        .first()
+            .filter_by(id=entity_with_contact_list.created_by_id)
+            .first()
     )
     contact_id = user_entry.contact_id
     contact_entry = db.session.query(Contact).filter_by(id=contact_id).first()
@@ -53,3 +54,18 @@ def add_contact_to_object(entity_with_contact_list):
         contacts.append(contact_entry)
         db.session.add(entity_with_contact_list)
         db.session.commit()
+
+
+def delete_attachments_in_minio_by_id(_class, object_id_intended_for_deletion):
+    """
+    Use the minio class to delete an attachment or a list of attachments.
+    :param object_id_intended_for_deletion:
+    :param _class:
+    :return:
+    """
+    attachment = (
+        db.session.query(_class)
+            .filter_by(id=object_id_intended_for_deletion)
+            .first()
+    )
+    minio.remove_an_object(attachment.url)

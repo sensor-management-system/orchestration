@@ -81,7 +81,8 @@ services:
 volumes:
   esdata01:
     driver: local
-  
+  data1:
+
 networks:
   elastic:
     driver: bridge
