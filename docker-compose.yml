@@ -19,7 +19,7 @@ services:
     networks:
       - elastic
   app:
-    image: python:3-alpine
+    image: python:3.9-slim-buster
     working_dir: /usr/src/app
     volumes:
       - './app:/usr/src/app'
@@ -35,17 +35,17 @@ services:
       - minio
     command: >
       sh -c "
-      apk add --no-cache --virtual .build-deps \
-          gcc \
-          python3-dev \
-          musl-dev \
-          postgresql-dev \
-          libressl-dev \
-          musl-dev \
-          libffi-dev \
+      apt-get update && apt-get install -y  --no-install-recommends \
+        gcc \
+        libssl-dev \
+        libffi-dev \
+        musl-dev \
+        cargo \
+      && apt-get clean
       && pip install --no-cache-dir --upgrade pip
       && pip install --no-cache-dir -r requirements.txt
-      && gunicorn -b 0.0.0.0:5000 manage:app
+      && python manage.py db upgrade
+      && gunicorn -b 0.0.0.0:5000 manage:app --reload
       "
 
   db:
@@ -81,8 +81,7 @@ services:
 volumes:
   esdata01:
     driver: local
-  data1:
-
+  
 networks:
   elastic:
     driver: bridge

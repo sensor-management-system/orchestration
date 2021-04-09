@@ -1,8 +1,9 @@
 from flask_rest_jsonapi import ResourceDetail
-from project.api.models.base_model import db
-from project.api.models.event import Event
-from project.api.schemas.event_schema import EventSchema
-from project.api.token_checker import token_required
+
+from ..models.base_model import db
+from ..models.event import Event
+from ..schemas.event_schema import EventSchema
+from ..token_checker import token_required
 
 
 class EventDetail(ResourceDetail):

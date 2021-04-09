@@ -1,9 +1,8 @@
-from project.frj_csv_export.resource import ResourceList
-
-from project.api.models.base_model import db
-from project.api.models.event import Event
-from project.api.schemas.event_schema import EventSchema
-from project.api.token_checker import token_required
+from ...frj_csv_export.resource import ResourceList
+from ..models.base_model import db
+from ..models.event import Event
+from ..schemas.event_schema import EventSchema
+from ..token_checker import token_required
 
 
 class EventList(ResourceList):

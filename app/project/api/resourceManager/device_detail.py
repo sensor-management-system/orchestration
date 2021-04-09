@@ -1,12 +1,12 @@
 from flask_rest_jsonapi import ResourceDetail
-from project.api.models.base_model import db
-from project.api.models.device import Device
-from project.api.resourceManager.base_resource import add_updated_by_id
-from project.api.schemas.device_schema import DeviceSchema
-from project.api.models.device_attachment import DeviceAttachment
-from project.api.token_checker import token_required
 
-from project.api import minio
+from ..models.base_model import db
+from ..models.device import Device
+from ..resourceManager.base_resource import add_updated_by_id
+from ..schemas.device_schema import DeviceSchema
+from ..token_checker import token_required
+from ..models.device_attachment import DeviceAttachment
+from ...api import minio
 
 
 def delete_attachments_in_minio_by_device_id(device_id_intended_for_deletion):

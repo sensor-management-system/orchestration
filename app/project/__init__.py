@@ -4,12 +4,11 @@ from elasticsearch import Elasticsearch
 from flask import Blueprint, Flask
 from flask_cors import CORS
 from flask_migrate import Migrate
-from project.api.models.base_model import db
-from project.api.token_checker import jwt
-from project.urls import api
-from project.frj_csv_export.render_csv import render_csv
 
-from project.api import minio
+from .api.models.base_model import db
+from .api.token_checker import jwt
+from .urls import api
+from .api import minio
 
 migrate = Migrate()
 base_url = os.getenv("URL_PREFIX", "/rdm/svm-api/v1")
@@ -22,17 +21,22 @@ def create_app():
     # init the app
     app = Flask(__name__)
 
+    # enable CORS
+    # get space separated list from environment var
+    origins_raw = os.getenv("HTTP_ORIGINS", None)
+    if origins_raw:
+        # create a list of origins
+        origins = origins_raw.split()
+        # initialize cors with list of allowed origins
+        CORS(app, origins=origins)
+
     # set config
     app_settings = os.getenv("APP_SETTINGS")
     app.config.from_object(app_settings)
 
     # instantiate the db
     db.init_app(app)
-    api.init_app(
-        app,
-        Blueprint("api", __name__, url_prefix=base_url),
-        response_renderers={"text/csv": render_csv},
-    )
+    api.init_app(app, Blueprint("api", __name__, url_prefix=base_url))
     migrate.init_app(app, db)
     jwt.init_app(app)
 
@@ -50,8 +54,8 @@ def create_app():
         else None
     )
 
-    # enable CORS
-    # initialize cors with list of allowed origins
-    CORS(app, origins=app.config["HTTP_ORIGINS"])
+    # test to ensure the proper config was loaded
+    # import sys
+    # print(app.config, file=sys.stderr)
 
     return app

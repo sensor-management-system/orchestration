@@ -1,6 +1,6 @@
 from sqlalchemy.sql import func
 
-from project.api.models.base_model import db
+from .base_model import db
 
 
 class Event(db.Model):

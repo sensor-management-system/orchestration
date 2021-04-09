@@ -1,4 +1,6 @@
 import json
+import os
+
 import requests
 from environs import Env
 from jwt.algorithms import RSAAlgorithm
@@ -20,7 +22,9 @@ class OidcJwksConfig(object):
         # retrieve master openid-configuration endpoint for issuer realm
         self.oidc_config = requests.get(oidc_issuer_url, verify=False).json()
         # # retrieve data from jwks_uri endpoint
-        self.oidc_jwks_uri = requests.get(self.oidc_config["jwks_uri"], verify=False).json()
+        self.oidc_jwks_uri = requests.get(
+            self.oidc_config["jwks_uri"], verify=False
+        ).json()
 
 
 class BaseConfig:
@@ -31,10 +35,7 @@ class BaseConfig:
     SECRET_KEY = "top_secret"
     DEFAULT_POOL_TIMEOUT = 600
     SQLALCHEMY_POOL_TIMEOUT = env.int("POOL_TIMEOUT", DEFAULT_POOL_TIMEOUT)
-    if env("HTTP_ORIGINS", None) is not None:
-        HTTP_ORIGINS = env.list("HTTP_ORIGINS", delimiter=" ")
-    else:
-        HTTP_ORIGINS = None
+    JWT_IDENTITY_CLAIM = env("OIDC_USERNAME_CLAIM")
     # Hostname of a S3 service.
     MINIO_ENDPOINT = env("MINIO_ENDPOINT", "172.16.238.10:9000")
     # Access key (aka user ID) of your account in S3 service.
@@ -70,7 +71,7 @@ class DevelopmentConfig(BaseConfig):
     JWT_DECODE_AUDIENCE = ["rdmsvm-implicit-flow", "oidcdebugger-implicit-flow"]
     # name of token entry that will become distinct flask identity username
     # example in our case it is {'sub':'username@ufz.de'}
-    JWT_IDENTITY_CLAIM = env("OIDC_USERNAME_CLAIM", "sub")
+    JWT_IDENTITY_CLAIM = os.environ.get("OIDC_USERNAME_CLAIM")
 
 
 class TestingConfig(BaseConfig):
@@ -79,14 +80,13 @@ class TestingConfig(BaseConfig):
     TESTING = True
     SQLALCHEMY_DATABASE_URI = env("DATABASE_TEST_URL")
     ELASTICSEARCH_URL = None
-    JWT_SECRET_KEY = 'super-secret'
-    JWT_ALGORITHM = 'HS256'
-    JWT_IDENTITY_CLAIM = "identity"
-    JWT_DECODE_AUDIENCE = None
+    JWT_SECRET_KEY = "super-secret"
+    JWT_ALGORITHM = "HS256"
+    JWT_DECODE_AUDIENCE = "SMS"
 
 
 class ProductionConfig(BaseConfig):
     """Production configuration"""
 
-    SQLALCHEMY_DATABASE_URI = env("DATABASE_URL", None)
-    ELASTICSEARCH_URL = env("ELASTICSEARCH_URL", None)
+    SQLALCHEMY_DATABASE_URI = env("DATABASE_URL")
+    ELASTICSEARCH_URL = env("ELASTICSEARCH_URL")
