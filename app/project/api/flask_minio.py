@@ -222,16 +222,20 @@ class FlaskMinio:
             "http://172.16.238.10:9000/sms3/2021-02/860904cd822146b399a6d5ea48d39787.png"
         :return:
         """
+
         _bucket_name, _object_name = self.extract_bucket_and_file_names_from_url(
             object_path
         )
-        try:
-            self.connection.remove_object(_bucket_name, _object_name)
-            return make_response(f"{_object_name} has been successfully removed")
-        except ResponseError as err:
-            raise JsonApiException({'parameter': err})
+        # check if the url is not related with s3 storage
+        if _bucket_name != "" and _object_name != "":
+            try:
+                self.connection.remove_object(_bucket_name, _object_name)
+                return make_response(f"{_object_name} has been successfully removed")
+            except ResponseError as err:
+                raise JsonApiException({'parameter': err})
 
-    def extract_bucket_and_file_names_from_url(self, object_path):
+    @staticmethod
+    def extract_bucket_and_file_names_from_url(object_path):
         """
         Just in case that another bucket name is used, we extract the name directly
         from the url.
