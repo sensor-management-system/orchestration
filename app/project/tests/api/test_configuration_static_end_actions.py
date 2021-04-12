@@ -26,11 +26,9 @@ class TestConfigurationStaticLocationEndActionServices(BaseTestCase):
     def test_get_device_calibration_action_collection(self):
         """Test retrieve a collection of configuration_static_location_end_action objects."""
         static_location_end_action = add_static_location_end_action_model()
-        print(f"d: {static_location_end_action.description}")
         with self.client:
             response = self.client.get(self.url)
         data = json.loads(response.data.decode())
-        print(data)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
             static_location_end_action.description,
