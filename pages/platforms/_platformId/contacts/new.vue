@@ -49,7 +49,7 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
     ProgressIndicator
   }
 })
-export default class DeviceAddContactPage extends Vue {
+export default class PlatformAddContactPage extends Vue {
   private alreadyUsedContacts: Contact[] = []
   private allContacts: Contact[] = []
   private selectedContact: Contact | null = null
