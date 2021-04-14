@@ -235,3 +235,8 @@ export const deviceWithMetaToDeviceByAddingDummyObjects = (deviceWithMeta: { mis
 
   return device
 }
+
+export const deviceWithMetaToDeviceThrowingNoErrorOnMissing = (deviceWithMeta: { missing: { contacts: { ids: any[] } }; device: Device }): Device => {
+  const device = deviceWithMeta.device
+  return device
+}

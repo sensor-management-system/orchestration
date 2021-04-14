@@ -47,13 +47,11 @@ import { DevicePropertySerializer } from '@/serializers/jsonapi/DevicePropertySe
 
 import { IFlaskJSONAPIFilter } from '@/utils/JSONApiInterfaces'
 
-import {
-  IPaginationLoader, FilteredPaginationedLoader
-} from '@/utils/PaginatedLoader'
+import { FilteredPaginationedLoader, IPaginationLoader } from '@/utils/PaginatedLoader'
 import {
   DeviceSerializer,
-  deviceWithMetaToDeviceByThrowingErrorOnMissing,
-  deviceWithMetaToDeviceByAddingDummyObjects
+  deviceWithMetaToDeviceByAddingDummyObjects,
+  deviceWithMetaToDeviceThrowingNoErrorOnMissing
 } from '@/serializers/jsonapi/DeviceSerializer'
 
 export class DeviceApi {
@@ -65,20 +63,40 @@ export class DeviceApi {
     this.serializer = new DeviceSerializer()
   }
 
-  findById (id: string): Promise<Device> {
+  findById (id: string, includes: {
+    includeContacts: boolean, includeCustomFields: boolean,
+    includeDeviceProperties: boolean, includeDeviceAttachments: boolean
+  }): Promise<Device> {
+    function addIncludesToRequest () {
+      const include: string[] = []
+      if (includes.includeContacts) {
+        include.push('contacts')
+      }
+      if (includes.includeDeviceProperties) {
+        include.push('device_properties')
+      }
+      if (includes.includeCustomFields) {
+        include.push('customfields')
+      }
+      if (includes.includeDeviceAttachments) {
+        include.push('device_attachments')
+      }
+      return include.join(',')
+    }
+
+    const include = addIncludesToRequest()
     return this.axiosApi.get(id, {
       params: {
-        include: 'contacts,device_attachments,device_properties,customfields'
+        include
       }
     }).then((rawResponse) => {
       const rawData = rawResponse.data
-      // as we load the contacts, we want them to be included
-      // otherwise we throw an Error
-      return deviceWithMetaToDeviceByThrowingErrorOnMissing(this.serializer.convertJsonApiObjectToModel(rawData))
+      return deviceWithMetaToDeviceThrowingNoErrorOnMissing(
+        this.serializer.convertJsonApiObjectToModel(rawData))
     })
   }
 
-  deleteById (id: string) : Promise<void> {
+  deleteById (id: string): Promise<void> {
     return this.axiosApi.delete<string, void>(id)
   }
 
@@ -102,9 +120,7 @@ export class DeviceApi {
         data
       }
     }).then((serverAnswer) => {
-      // the server answer doesn't include the contacts
-      // so we will reload from the database
-      return this.findById(serverAnswer.data.data.id)
+      return serverAnswer.data.data.id
     })
   }
 
