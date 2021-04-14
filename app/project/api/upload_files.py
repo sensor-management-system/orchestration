@@ -6,7 +6,7 @@ from project.api.token_checker import token_required
 
 from werkzeug.exceptions import abort
 
-upload_routes = Blueprint('upload', __name__, url_prefix="/v1")
+upload_routes = Blueprint('upload', __name__, url_prefix=os.getenv("URL_PREFIX", "/rdm/svm-api/v1"))
 
 
 @upload_routes.route('/upload', methods=['POST'])
