@@ -1,12 +1,13 @@
 from flask import request, Blueprint, jsonify, make_response
 from flask_rest_jsonapi.exceptions import JsonApiException
-from project.api import minio
-from project.api.flask_minio import MinioNotAvailableException
-from project.api.token_checker import token_required
-
 from werkzeug.exceptions import abort
 
-upload_routes = Blueprint('upload', __name__, url_prefix=os.getenv("URL_PREFIX", "/rdm/svm-api/v1"))
+from .flask_minio import MinioNotAvailableException
+from .token_checker import token_required
+from ..api import minio
+from ..config import env
+
+upload_routes = Blueprint('upload', __name__, url_prefix=env("URL_PREFIX", "/rdm/svm-api/v1"))
 
 
 @upload_routes.route('/upload', methods=['POST'])
