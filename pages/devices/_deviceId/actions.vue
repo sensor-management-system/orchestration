@@ -34,7 +34,7 @@ permissions and limitations under the Licence.
       v-model="isInProgress"
       :dark="isSaving"
     />
-    <v-timeline dense clipped>
+    <v-timeline>
       <v-timeline-item
         v-for="action in actions"
         :key="action.getId()"
@@ -42,149 +42,161 @@ permissions and limitations under the Licence.
         class="mb-4"
         small
       >
-        <v-row justify="space-between">
+        <template v-slot:opposite>
           <template v-if="action.isGenericDeviceAction">
-            <v-col cols="2">
-              <label>
-                Begin
-              </label>
-              {{ action.beginDate | toUtcDate }}
-              <br>
-              <label>
-                End
-              </label>
-              {{ action.endDate | toUtcDate }}
-            </v-col>
-            <v-col cols="10">
-              <strong>
-                {{ action.actionTypeName }}
-              </strong>
-              <small>
-                by {{ action.contact.toString() }}
-              </small>
-              <label>Description</label>
-              {{ action.description }}
-            </v-col>
+            <label>
+              Begin
+            </label>
+            {{ action.beginDate | toUtcDate }}
+            <br>
+            <label>
+              End
+            </label>
+            {{ action.endDate | toUtcDate }}
           </template>
           <template v-else-if="action.isUpdateAction">
-            <v-col cols="2">
-              <label>
-                Date
-              </label>
-              {{ action.updateDate | toUtcDate }}
-            </v-col>
-            <v-col cols="10">
-              <strong>
-                {{ action.softwareTypeName }} update
-              </strong>
-              <small>
-                by {{ action.contact.toString() }}
-              </small>
-              <v-row>
-                <v-col cols="12" md="1">
+            <label>
+              Date
+            </label>
+            {{ action.updateDate | toUtcDate }}
+          </template>
+          <template v-else-if="action.isDeviceCalibrationAction">
+            <label>
+              Date
+            </label>
+            {{ action.currentCalibrationDate | toUtcDate }}
+          </template>
+          <template v-else-if="action.isDeviceMountAction">
+            <label>
+              Date
+            </label>
+            {{ action.beginDate | toUtcDate }}
+          </template>
+          <template v-else-if="action.isDeviceUnmountAction">
+            <label>
+              Date
+            </label>
+            {{ action.endDate | toUtcDate }}
+          </template>
+        </template>
+        <template v-if="action.isGenericDeviceAction">
+          <v-card>
+            <v-card-title>
+              {{ action.actionTypeName }}
+            </v-card-title>
+            <v-card-subtitle>
+              {{ action.contact.toString() }}
+            </v-card-subtitle>
+            <v-card-text>
+              <label>Description</label>
+              {{ action.description }}
+            </v-card-text>
+          </v-card>
+        </template>
+        <template v-if="action.isUpdateAction">
+          <v-card>
+            <v-card-title>
+              {{ action.softwareTypeName }} update
+            </v-card-title>
+            <v-card-subtitle>
+              {{ action.contact.toString() }}
+            </v-card-subtitle>
+            <v-card-text>
+              <v-row dense>
+                <v-col cols="12" md="2">
                   <label>
                     Version
                   </label>
                   {{ action.version }}
                 </v-col>
-                <v-col cols="12" md="11">
+                <v-col cols="12" md="10">
                   <label>
                     Repository
                   </label>
                   {{ action.repositoryUrl }}
                 </v-col>
               </v-row>
-              <v-row>
+              <v-row dense>
                 <v-col>
                   <label>Description</label>
                   {{ action.description }}
                 </v-col>
               </v-row>
-            </v-col>
-          </template>
-          <template v-else-if="action.isDeviceCalibrationAction">
-            <v-col cols="2">
-              <label>
-                Date
-              </label>
-              {{ action.currentCalibrationDate | toUtcDate }}
-            </v-col>
-            <v-col cols="10">
-              <strong>Device calibration</strong>
-              <small>by {{ action.contact.toString() }}</small>
-              <v-row>
+            </v-card-text>
+          </v-card>
+        </template>
+        <template v-if="action.isDeviceCalibrationAction">
+          <v-card>
+            <v-card-title>
+              Device calibration
+            </v-card-title>
+            <v-card-subtitle>
+              {{ action.contact.toString() }}
+            </v-card-subtitle>
+            <v-card-text>
+              <v-row dense>
                 <v-col cols="12" md="3">
                   <label>Formula</label> {{ action.formula }}
                 </v-col>
                 <v-col cols="12" md="3">
                   <label>value</label> {{ action.value }}
                 </v-col>
-                <v-col cols="12" md="3">
+                <v-col cols="12" md="6">
                   <label>
                     Next calibration date
                   </label>
                   {{ action.nextCalibrationDate | toUtcDate }}
                 </v-col>
               </v-row>
-              <v-row>
-                <v-col>
-                  <label>Measured quantities</label>
-                  <ul>
-                    <li v-for="deviceProperty in action.deviceProperties" :key="deviceProperty.id">
-                      {{ deviceProperty.label }}
-                    </li>
-                  </ul>
-                </v-col>
-              </v-row>
-              <v-row>
-                <v-col>
-                  <label>Description</label>
-                  {{ action.description }}
-                </v-col>
-              </v-row>
-            </v-col>
-          </template>
-          <template v-else-if="action.isDeviceMountAction">
-            <v-col cols="2">
-              <label>
-                Date
-              </label>
-              {{ action.beginDate | toUtcDate }}
-            </v-col>
-            <v-col cols="10">
-              <strong>Mounted on {{ action.configurationName }}</strong>
-              <small>by {{ action.contact.toString() }}</small>
-              <v-row>
-                <v-col>
-                  <label>Parent platform</label>{{ action.parentPlatformName }}
-                </v-col>
-              </v-row>
-              <v-row>
-                <v-col cols="12" md="1">
+              <label>Measured quantities</label>
+              <ul>
+                <li v-for="deviceProperty in action.deviceProperties" :key="deviceProperty.id">
+                  {{ deviceProperty.label }}
+                </li>
+              </ul>
+              <label>Description</label>
+              {{ action.description }}
+            </v-card-text>
+          </v-card>
+        </template>
+        <template v-if="action.isDeviceMountAction">
+          <v-card>
+            <v-card-title>
+              Mounted on {{ action.configurationName }}
+            </v-card-title>
+            <v-card-subtitle>
+              {{ action.contact.toString() }}
+            </v-card-subtitle>
+            <v-card-text>
+              <label>Parent platform</label>{{ action.parentPlatformName }}
+              <v-row dense>
+                <v-col cols="12" md="4">
                   <label>Offset x</label>{{ action.offsetX }} m
                 </v-col>
-                <v-col cols="12" md="1">
+                <v-col cols="12" md="4">
                   <label>Offset y</label>{{ action.offsetY }} m
                 </v-col>
-                <v-col cols="12" md="1">
+                <v-col cols="12" md="4">
                   <label>Offset z</label>{{ action.offsetZ }} m
                 </v-col>
               </v-row>
-            </v-col>
-          </template>
-          <template v-else-if="action.isDeviceUnmountAction">
-            <v-col cols="2">
-              <label>
-                Date
-              </label>
-              {{ action.endDate | toUtcDate }}
-            </v-col>
-            <v-col cols="10">
-              <strong>Unmounted on {{ action.configurationName }}</strong>
-              <small>by {{ action.contact.toString() }}</small>
-            </v-col>
-          </template>
-        </v-row>
+            </v-card-text>
+          </v-card>
+        </template>
+        <template v-if="action.isDeviceUnmountAction">
+          <v-card>
+            <v-card-title>
+              Unmounted on {{ action.configurationName }}
+            </v-card-title>
+            <v-card-subtitle>
+              {{ action.contact.toString() }}
+            </v-card-subtitle>
+            <v-card-text>
+              <label>Description</label>
+              {{ action.description }}
+            </v-card-text>
+          </v-card>
+        </template>
       </v-timeline-item>
     </v-timeline>
   </div>
