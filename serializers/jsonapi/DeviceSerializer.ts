@@ -30,19 +30,36 @@
  * permissions and limitations under the Licence.
  */
 
-import { DateTime } from 'luxon'
 import { Contact } from '@/models/Contact'
 import { Device } from '@/models/Device'
 
-import { IJsonApiObjectList, IJsonApiObject, IJsonApiDataWithId, IJsonApiDataWithOptionalId, IJsonApiTypeIdAttributes, IJsonApiTypeIdAttributesWithOptionalRelationships } from '@/serializers/jsonapi/JsonApiTypes'
+import {
+  IJsonApiDataWithId,
+  IJsonApiDataWithOptionalId,
+  IJsonApiObject,
+  IJsonApiObjectList,
+  IJsonApiTypeIdAttributes,
+  IJsonApiTypeIdAttributesWithOptionalRelationships
+} from '@/serializers/jsonapi/JsonApiTypes'
 
-import { AttachmentSerializer } from '@/serializers/jsonapi/AttachmentSerializer'
+import { IMissingAttachmentData } from '@/serializers/jsonapi/AttachmentSerializer'
 import { ContactSerializer, IMissingContactData } from '@/serializers/jsonapi/ContactSerializer'
-import { CustomTextFieldSerializer } from '@/serializers/jsonapi/CustomTextFieldSerializer'
-import { DevicePropertySerializer } from '@/serializers/jsonapi/DevicePropertySerializer'
+import {
+  CustomTextFieldSerializer,
+  IMissingCustomTextFieldData
+} from '@/serializers/jsonapi/CustomTextFieldSerializer'
+import {
+  DevicePropertySerializer,
+  IMissingDevicePropertyData
+} from '@/serializers/jsonapi/DevicePropertySerializer'
+import { DeviceAttachmentSerializer } from '@/serializers/jsonapi/DeviceAttachmentSerializer'
+import { DateTime } from 'luxon'
 
 export interface IDeviceMissingData {
   contacts: IMissingContactData
+  deviceAttachments: IMissingAttachmentData
+  customfields: IMissingCustomTextFieldData
+  properties: IMissingDevicePropertyData
 }
 
 export interface IDeviceWithMeta {
@@ -51,7 +68,7 @@ export interface IDeviceWithMeta {
 }
 
 export class DeviceSerializer {
-  private attachmentSerializer: AttachmentSerializer = new AttachmentSerializer()
+  private attachmentSerializer: DeviceAttachmentSerializer = new DeviceAttachmentSerializer()
   private contactSerializer: ContactSerializer = new ContactSerializer()
   private customTextFieldSerializer: CustomTextFieldSerializer = new CustomTextFieldSerializer()
   private devicePropertySerializer: DevicePropertySerializer = new DevicePropertySerializer()
@@ -91,9 +108,17 @@ export class DeviceSerializer {
     // result.updatedBy = attributes.updated_by
     // result.events = []
 
-    result.attachments = this.attachmentSerializer.convertNestedJsonApiToModelList(attributes.attachments)
-    result.customFields = this.customTextFieldSerializer.convertNestedJsonApiToModelList(attributes.customfields)
-    result.properties = this.devicePropertySerializer.convertNestedJsonApiToModelList(attributes.properties)
+    const attachmentsWithMissing = this.attachmentSerializer.convertJsonApiRelationshipsModelList(relationships, included)
+    result.attachments = attachmentsWithMissing.attachments
+    const missingDataForAttachmentIds = attachmentsWithMissing.missing.ids
+
+    const customFieldsWithMissing = this.customTextFieldSerializer.convertJsonApiRelationshipsModelList(relationships, included)
+    result.customFields = customFieldsWithMissing.customFields
+    const missingDataForCustomFieldIds = customFieldsWithMissing.missing.ids
+
+    const propertiesWithMissing = this.devicePropertySerializer.convertJsonApiRelationshipsModelList(relationships, included)
+    result.properties = propertiesWithMissing.properties
+    const missingDataForDevicePropertyIds = propertiesWithMissing.missing.ids
 
     const contactsWithMissing = this.contactSerializer.convertJsonApiRelationshipsModelList(relationships, included)
     result.contacts = contactsWithMissing.contacts
@@ -104,6 +129,15 @@ export class DeviceSerializer {
       missing: {
         contacts: {
           ids: missingDataForContactIds
+        },
+        deviceAttachments: {
+          ids: missingDataForAttachmentIds
+        },
+        customfields: {
+          ids: missingDataForCustomFieldIds
+        },
+        properties: {
+          ids: missingDataForDevicePropertyIds
         }
       }
     }
@@ -132,9 +166,9 @@ export class DeviceSerializer {
   }
 
   convertModelToJsonApiData (device: Device): IJsonApiDataWithOptionalId {
-    const properties = this.devicePropertySerializer.convertModelListToNestedJsonApiArray(device.properties)
-    const customfields = this.customTextFieldSerializer.convertModelListToNestedJsonApiArray(device.customFields)
-    const attachments = this.attachmentSerializer.convertModelListToNestedJsonApiArray(device.attachments)
+    const properties = this.devicePropertySerializer.convertModelListToJsonApiRelationshipObject(device.properties)
+    const customfields = this.customTextFieldSerializer.convertModelListToJsonApiRelationshipObject(device.customFields)
+    const attachments = this.attachmentSerializer.convertModelListToJsonApiRelationshipObject(device.attachments)
     const contacts = this.contactSerializer.convertModelListToJsonApiRelationshipObject(device.contacts)
 
     const data: IJsonApiDataWithOptionalId = {
@@ -154,20 +188,17 @@ export class DeviceSerializer {
         model: device.model,
         persistent_identifier: device.persistentIdentifier === '' ? null : device.persistentIdentifier,
         website: device.website,
-        dual_use: device.dualUse,
+        dual_use: device.dualUse
         // those two time slots are set by the db, no matter what we deliver here
-        created_at: device.createdAt != null ? device.createdAt.setZone('UTC').toISO() : null,
-        updated_at: device.updatedAt != null ? device.updatedAt.setZone('UTC').toISO() : null,
         // TODO
         // created_by: device.createdBy,
         // updated_by: device.updatedBy,
-
-        customfields,
-        properties,
-        attachments
       },
       relationships: {
-        ...contacts
+        ...contacts,
+        ...properties,
+        ...attachments,
+        ...customfields
         // TODO: events
       }
     }
@@ -180,7 +211,7 @@ export class DeviceSerializer {
   }
 }
 
-export const deviceWithMetaToDeviceByThrowingErrorOnMissing = (deviceWithMeta: IDeviceWithMeta) : Device => {
+export const deviceWithMetaToDeviceByThrowingErrorOnMissing = (deviceWithMeta: { missing: { contacts: { ids: any[] } }; device: Device }): Device => {
   const device = deviceWithMeta.device
 
   if (deviceWithMeta.missing.contacts.ids.length > 0) {
@@ -190,7 +221,7 @@ export const deviceWithMetaToDeviceByThrowingErrorOnMissing = (deviceWithMeta: I
   return device
 }
 
-export const deviceWithMetaToDeviceByAddingDummyObjects = (deviceWithMeta: IDeviceWithMeta) : Device => {
+export const deviceWithMetaToDeviceByAddingDummyObjects = (deviceWithMeta: { missing: { contacts: { ids: string[] } }; device: Device }): Device => {
   const device = deviceWithMeta.device
 
   for (const missingContactId of deviceWithMeta.missing.contacts.ids) {

@@ -65,7 +65,7 @@ export class PlatformApi {
   findById (id: string): Promise<Platform> {
     return this.axiosApi.get(id, {
       params: {
-        include: 'contacts'
+        include: 'contacts,platform_attachments'
       }
     }).then((rawResponse) => {
       const rawData = rawResponse.data
@@ -118,8 +118,8 @@ export class PlatformApi {
     })
   }
 
-  findRelatedDeviceAttachments (deviceId: string): Promise<Attachment[]> {
-    const url = deviceId + '/device-attachments'
+  findRelatedPlatformAttachments (platformId: string): Promise<Attachment[]> {
+    const url = platformId + '/platform-attachments'
     const params = {
       'page[size]': 10000
     }

@@ -68,7 +68,7 @@ export class DeviceApi {
   findById (id: string): Promise<Device> {
     return this.axiosApi.get(id, {
       params: {
-        include: 'contacts'
+        include: 'contacts,device_attachments,device_properties,customfields'
       }
     }).then((rawResponse) => {
       const rawData = rawResponse.data

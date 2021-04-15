@@ -29,14 +29,26 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
-import { ICustomTextField, CustomTextField } from '@/models/CustomTextField'
+import { CustomTextField, ICustomTextField } from '@/models/CustomTextField'
 import {
   IJsonApiDataWithOptionalId,
   IJsonApiNestedElement,
   IJsonApiObject,
   IJsonApiObjectList,
-  IJsonApiTypeIdAttributes
+  IJsonApiTypeId,
+  IJsonApiTypeIdAttributes,
+  IJsonApiTypeIdDataList,
+  IJsonApiTypeIdDataListDict
 } from '@/serializers/jsonapi/JsonApiTypes'
+
+export interface IMissingCustomTextFieldData {
+  ids: string[]
+}
+
+export interface ICustomTextFieldsAndMissing {
+  customFields: CustomTextField[]
+  missing: IMissingCustomTextFieldData
+}
 
 export class CustomTextFieldSerializer {
   convertJsonApiElementToModel (customfield: IJsonApiNestedElement): CustomTextField {
@@ -88,6 +100,71 @@ export class CustomTextFieldSerializer {
 
   convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiObjectList): CustomTextField[] {
     return jsonApiObjectList.data.map(this.convertJsonApiDataToModel)
+  }
+
+  convertJsonApiRelationshipsModelList (relationships: IJsonApiTypeIdDataListDict, included: IJsonApiTypeIdAttributes[]): ICustomTextFieldsAndMissing {
+    const customFieldsIds = []
+    if (relationships.customfields) {
+      const customFieldObject = relationships.customfields as IJsonApiTypeIdDataList
+      if (customFieldObject.data && customFieldObject.data.length > 0) {
+        for (const relationShipCustomFieldData of customFieldObject.data) {
+          const customFieldsId = relationShipCustomFieldData.id
+          customFieldsIds.push(customFieldsId)
+        }
+      }
+    }
+
+    const possibleCustomFields: {[key: string]: CustomTextField} = {}
+    if (included && included.length > 0) {
+      for (const includedEntry of included) {
+        if (includedEntry.type === 'customfield') {
+          const customFieldId = includedEntry.id
+          if (customFieldsIds.includes(customFieldId)) {
+            const customTextField = this.convertJsonApiDataToModel(includedEntry)
+            possibleCustomFields[customFieldId] = customTextField
+          }
+        }
+      }
+    }
+
+    const customFields = []
+    const missingDataForCustomFieldIds = []
+
+    for (const customFieldId of customFieldsIds) {
+      if (possibleCustomFields[customFieldId]) {
+        customFields.push(possibleCustomFields[customFieldId])
+      } else {
+        missingDataForCustomFieldIds.push(customFieldId)
+      }
+    }
+
+    return {
+      customFields,
+      missing: {
+        ids: missingDataForCustomFieldIds
+      }
+    }
+  }
+
+  convertModelListToJsonApiRelationshipObject (customFields: CustomTextField[]): IJsonApiTypeIdDataListDict {
+    return {
+      customfields: {
+        data: this.convertModelListToTupleListWithIdAndType(customFields)
+      }
+    }
+  }
+
+  convertModelListToTupleListWithIdAndType (customfields: CustomTextField[]): IJsonApiTypeId[] {
+    const result: IJsonApiTypeId[] = []
+    for (const customfield of customfields) {
+      if (customfield.id !== null) {
+        result.push({
+          id: customfield.id,
+          type: 'customfield'
+        })
+      }
+    }
+    return result
   }
 
   convertModelToJsonApiData (customField: ICustomTextField, deviceId: string): IJsonApiDataWithOptionalId {

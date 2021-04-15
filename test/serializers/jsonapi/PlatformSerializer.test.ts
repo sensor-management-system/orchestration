@@ -107,9 +107,7 @@ describe('PlatformSerializer', () => {
             platform_type_uri: 'type/Station',
             status_uri: 'status/inuse',
             website: 'http://www.tereno.net',
-            updated_at: '2020-08-29T13:48:35.740944+00:00',
             long_name: 'Soil moisture station Boeken BF1, Germany',
-            created_at: '2020-08-28T13:48:35.740944+00:00',
             inventory_number: '0001234',
             manufacturer_name: 'XYZ',
             short_name: 'boeken_BF1',
@@ -134,6 +132,16 @@ describe('PlatformSerializer', () => {
                 id: '1'
               }]
             },
+            platform_attachments: {
+              links: {
+                self: '/rdm/svm-api/v1/platforms/37/relationships/platform-attachments',
+                related: '/rdm/svm-api/v1/platforms/37/platform-attachments'
+              },
+              data: [{
+                type: 'platform_attachment',
+                id: '12'
+              }]
+            },
             created_by: {
               links: {
                 self: '/rdm/svm-api/v1/platforms/37/relationships/createdUser'
@@ -150,13 +158,10 @@ describe('PlatformSerializer', () => {
             serial_number: null,
             model: null,
             description: 'Groundwater level KleinTrebbow',
-            attachments: [],
             platform_type_uri: 'Station',
             status_uri: null,
             website: null,
-            updated_at: null,
             long_name: 'Groundwater level KleinTrebbow',
-            created_at: null,
             inventory_number: null,
             manufacturer_name: null,
             short_name: 'klein_trebbow',
@@ -178,6 +183,13 @@ describe('PlatformSerializer', () => {
               },
               data: []
             },
+            platform_attachments: {
+              links: {
+                self: '/rdm/svm-api/v1/platforms/52/relationships/platform-attachments',
+                related: '/rdm/svm-api/v1/platforms/52/platform-attachments'
+              },
+              data: []
+            },
             created_by: {
               links: {
                 self: '/rdm/svm-api/v1/platforms/52/relationships/createdUser'
@@ -192,49 +204,74 @@ describe('PlatformSerializer', () => {
         links: {
           self: 'http://rz-vm64.gfz-potsdam.de:5000/rdm/svm-api/v1/platforms?include=contacts&filter=%5B%7B%22name%22%3A%22short_name%22%2C%22op%22%3A%22ilike%22%2C%22val%22%3A%22%25bo%25%25%22%7D%5D'
         },
-        included: [{
-          type: 'contact',
-          relationships: {
-            configurations: {
-              links: {
-                self: '/rdm/svm-api/v1/contacts/1/relationships/configurations',
-                related: '/rdm/svm-api/v1/configurations?contact_id=1'
-              }
-            },
-            user: {
-              links: {
-                self: '/rdm/svm-api/v1/contacts/1/relationships/user',
-                related: '/rdm/svm-api/v1/contacts/1/users'
+        included: [
+          {
+            type: 'contact',
+            relationships: {
+              configurations: {
+                links: {
+                  self: '/rdm/svm-api/v1/contacts/1/relationships/configurations',
+                  related: '/rdm/svm-api/v1/configurations?contact_id=1'
+                }
               },
-              data: {
-                type: 'user',
-                id: '[<User 1>]'
+              user: {
+                links: {
+                  self: '/rdm/svm-api/v1/contacts/1/relationships/user',
+                  related: '/rdm/svm-api/v1/contacts/1/users'
+                },
+                data: {
+                  type: 'user',
+                  id: '[<User 1>]'
+                }
+              },
+              devices: {
+                links: {
+                  self: '/rdm/svm-api/v1/contacts/1/relationships/devices',
+                  related: '/rdm/svm-api/v1/devices?contact_id=1'
+                }
+              },
+              platforms: {
+                links: {
+                  self: '/rdm/svm-api/v1/contacts/1/relationships/platforms',
+                  related: '/rdm/svm-api/v1/contacts/1/platforms'
+                }
               }
             },
-            devices: {
-              links: {
-                self: '/rdm/svm-api/v1/contacts/1/relationships/devices',
-                related: '/rdm/svm-api/v1/devices?contact_id=1'
-              }
+            attributes: {
+              given_name: 'Max',
+              email: 'test@test.test',
+              website: null,
+              family_name: 'Mustermann'
             },
-            platforms: {
-              links: {
-                self: '/rdm/svm-api/v1/contacts/1/relationships/platforms',
-                related: '/rdm/svm-api/v1/contacts/1/platforms'
-              }
+            id: '1',
+            links: {
+              self: '/rdm/svm-api/v1/contacts/1'
             }
           },
-          attributes: {
-            given_name: 'Max',
-            email: 'test@test.test',
-            website: null,
-            family_name: 'Mustermann'
-          },
-          id: '1',
-          links: {
-            self: '/rdm/svm-api/v1/contacts/1'
+          {
+            type: 'platform_attachment',
+            attributes: {
+              url: 'http://test.test',
+              label: 'test label'
+            },
+            relationships: {
+              platform: {
+                links: {
+                  self: '/rdm/svm-api/v1/platform-attachments/1/relationships/platform',
+                  related: '/rdm/svm-api/v1/platforms/52'
+                },
+                data: {
+                  type: 'platform',
+                  id: '52'
+                }
+              }
+            },
+            id: '12',
+            links: {
+              self: '/rdm/svm-api/v1/platform-attachments/1'
+            }
           }
-        }],
+        ],
         meta: {
           count: 2
         },
@@ -250,15 +287,15 @@ describe('PlatformSerializer', () => {
       expectedPlatform1.description = 'Soil Moisture station Boeken_BF1'
       expectedPlatform1.attachments = [Attachment.createFromObject({
         id: '12',
-        label: 'GFZ',
-        url: 'http://www.gfz-potsdam.de'
+        label: 'test label',
+        url: 'http://test.test'
       })]
       expectedPlatform1.platformTypeUri = 'type/Station'
       expectedPlatform1.statusUri = 'status/inuse'
       expectedPlatform1.website = 'http://www.tereno.net'
-      expectedPlatform1.updatedAt = DateTime.utc(2020, 8, 29, 13, 48, 35, 740)
+      // expectedPlatform1.updatedAt = DateTime.utc(2020, 8, 29, 13, 48, 35, 740)
       expectedPlatform1.longName = 'Soil moisture station Boeken BF1, Germany'
-      expectedPlatform1.createdAt = DateTime.utc(2020, 8, 28, 13, 48, 35, 740)
+      // expectedPlatform1.createdAt = DateTime.utc(2020, 8, 28, 13, 48, 35, 740)
       expectedPlatform1.inventoryNumber = '0001234'
       expectedPlatform1.manufacturerName = 'XYZ'
       expectedPlatform1.shortName = 'boeken_BF1'
@@ -299,7 +336,6 @@ describe('PlatformSerializer', () => {
 
       const platformsWithMeta = serializer.convertJsonApiObjectListToModelList(jsonApiObjectList)
       const platforms = platformsWithMeta.map((x: IPlatformWithMeta) => x.platform)
-
       expect(Array.isArray(platforms)).toBeTruthy()
       expect(platforms.length).toEqual(2)
 
@@ -326,11 +362,6 @@ describe('PlatformSerializer', () => {
             serial_number: '000123',
             model: '0815',
             description: 'Soil Moisture station Boeken_BF1',
-            attachments: [{
-              label: 'GFZ',
-              url: 'http://www.gfz-potsdam.de',
-              id: '12'
-            }],
             platform_type_uri: 'type/Station',
             status_uri: 'status/inuse',
             website: 'http://www.tereno.net',
@@ -361,6 +392,16 @@ describe('PlatformSerializer', () => {
                 id: '1'
               }]
             },
+            platform_attachments: {
+              links: {
+                self: '/rdm/svm-api/v1/platforms/52/relationships/platform-attachments',
+                related: '/rdm/svm-api/v1/platforms/52/platform-attachments'
+              },
+              data: [{
+                type: 'platform_attachment',
+                id: '12'
+              }]
+            },
             created_by: {
               links: {
                 self: '/rdm/svm-api/v1/platforms/37/relationships/createdUser'
@@ -372,49 +413,74 @@ describe('PlatformSerializer', () => {
             self: '/rdm/svm-api/v1/platforms/37'
           }
         },
-        included: [{
-          type: 'contact',
-          relationships: {
-            configurations: {
-              links: {
-                self: '/rdm/svm-api/v1/contacts/1/relationships/configurations',
-                related: '/rdm/svm-api/v1/configurations?contact_id=1'
-              }
-            },
-            user: {
-              links: {
-                self: '/rdm/svm-api/v1/contacts/1/relationships/user',
-                related: '/rdm/svm-api/v1/contacts/1/users'
+        included: [
+          {
+            type: 'contact',
+            relationships: {
+              configurations: {
+                links: {
+                  self: '/rdm/svm-api/v1/contacts/1/relationships/configurations',
+                  related: '/rdm/svm-api/v1/configurations?contact_id=1'
+                }
               },
-              data: {
-                type: 'user',
-                id: '[<User 1>]'
+              user: {
+                links: {
+                  self: '/rdm/svm-api/v1/contacts/1/relationships/user',
+                  related: '/rdm/svm-api/v1/contacts/1/users'
+                },
+                data: {
+                  type: 'user',
+                  id: '[<User 1>]'
+                }
+              },
+              devices: {
+                links: {
+                  self: '/rdm/svm-api/v1/contacts/1/relationships/devices',
+                  related: '/rdm/svm-api/v1/devices?contact_id=1'
+                }
+              },
+              platforms: {
+                links: {
+                  self: '/rdm/svm-api/v1/contacts/1/relationships/platforms',
+                  related: '/rdm/svm-api/v1/contacts/1/platforms'
+                }
               }
             },
-            devices: {
-              links: {
-                self: '/rdm/svm-api/v1/contacts/1/relationships/devices',
-                related: '/rdm/svm-api/v1/devices?contact_id=1'
-              }
+            attributes: {
+              given_name: 'Max',
+              email: 'test@test.test',
+              website: null,
+              family_name: 'Mustermann'
             },
-            platforms: {
-              links: {
-                self: '/rdm/svm-api/v1/contacts/1/relationships/platforms',
-                related: '/rdm/svm-api/v1/contacts/1/platforms'
-              }
+            id: '1',
+            links: {
+              self: '/rdm/svm-api/v1/contacts/1'
             }
           },
-          attributes: {
-            given_name: 'Max',
-            email: 'test@test.test',
-            website: null,
-            family_name: 'Mustermann'
-          },
-          id: '1',
-          links: {
-            self: '/rdm/svm-api/v1/contacts/1'
+          {
+            type: 'platform_attachment',
+            attributes: {
+              url: 'http://www.gfz-potsdam.de',
+              label: 'GFZ'
+            },
+            relationships: {
+              platform: {
+                links: {
+                  self: '/rdm/svm-api/v1/platform-attachments/1/relationships/platform',
+                  related: '/rdm/svm-api/v1/platforms/52'
+                },
+                data: {
+                  type: 'platform',
+                  id: '52'
+                }
+              }
+            },
+            id: '12',
+            links: {
+              self: '/rdm/svm-api/v1/platform-attachments/1'
+            }
           }
-        }],
+        ],
         meta: {
           count: 2
         },
@@ -474,11 +540,6 @@ describe('PlatformSerializer', () => {
           serial_number: '000123',
           model: '0815',
           description: 'Soil Moisture station Boeken_BF1',
-          attachments: [{
-            label: 'GFZ',
-            url: 'http://www.gfz-potsdam.de',
-            id: '12'
-          }],
           platform_type_uri: 'type/Station',
           status_uri: 'status/inuse',
           website: 'http://www.tereno.net',
@@ -509,6 +570,18 @@ describe('PlatformSerializer', () => {
               id: '1'
             }]
           },
+          platform_attachments: {
+            links: {
+              self: '/rdm/svm-api/v1/platforms/37/relationships/platform-attachments',
+              related: '/rdm/svm-api/v1/platforms/37/platform-attachments'
+            },
+            data: [
+              {
+                type: 'platform_attachment',
+                id: '12'
+              }
+            ]
+          },
           created_by: {
             links: {
               self: '/rdm/svm-api/v1/platforms/37/relationships/createdUser'
@@ -520,49 +593,74 @@ describe('PlatformSerializer', () => {
           self: '/rdm/svm-api/v1/platforms/37'
         }
       }
-      const included = [{
-        type: 'contact',
-        relationships: {
-          configurations: {
-            links: {
-              self: '/rdm/svm-api/v1/contacts/1/relationships/configurations',
-              related: '/rdm/svm-api/v1/configurations?contact_id=1'
-            }
-          },
-          user: {
-            links: {
-              self: '/rdm/svm-api/v1/contacts/1/relationships/user',
-              related: '/rdm/svm-api/v1/contacts/1/users'
+      const included = [
+        {
+          type: 'contact',
+          relationships: {
+            configurations: {
+              links: {
+                self: '/rdm/svm-api/v1/contacts/1/relationships/configurations',
+                related: '/rdm/svm-api/v1/configurations?contact_id=1'
+              }
             },
-            data: {
-              type: 'user',
-              id: '[<User 1>]'
+            user: {
+              links: {
+                self: '/rdm/svm-api/v1/contacts/1/relationships/user',
+                related: '/rdm/svm-api/v1/contacts/1/users'
+              },
+              data: {
+                type: 'user',
+                id: '[<User 1>]'
+              }
+            },
+            devices: {
+              links: {
+                self: '/rdm/svm-api/v1/contacts/1/relationships/devices',
+                related: '/rdm/svm-api/v1/devices?contact_id=1'
+              }
+            },
+            platforms: {
+              links: {
+                self: '/rdm/svm-api/v1/contacts/1/relationships/platforms',
+                related: '/rdm/svm-api/v1/contacts/1/platforms'
+              }
             }
           },
-          devices: {
-            links: {
-              self: '/rdm/svm-api/v1/contacts/1/relationships/devices',
-              related: '/rdm/svm-api/v1/devices?contact_id=1'
-            }
+          attributes: {
+            given_name: 'Max',
+            email: 'test@test.test',
+            website: null,
+            family_name: 'Mustermann'
           },
-          platforms: {
-            links: {
-              self: '/rdm/svm-api/v1/contacts/1/relationships/platforms',
-              related: '/rdm/svm-api/v1/contacts/1/platforms'
-            }
+          id: '1',
+          links: {
+            self: '/rdm/svm-api/v1/contacts/1'
           }
         },
-        attributes: {
-          given_name: 'Max',
-          email: 'test@test.test',
-          website: null,
-          family_name: 'Mustermann'
-        },
-        id: '1',
-        links: {
-          self: '/rdm/svm-api/v1/contacts/1'
+        {
+          type: 'platform_attachment',
+          attributes: {
+            url: 'http://www.gfz-potsdam.de',
+            label: 'GFZ'
+          },
+          relationships: {
+            platform: {
+              links: {
+                self: '/rdm/svm-api/v1/platform-attachments/1/relationships/platform',
+                related: '/rdm/svm-api/v1/platforms/37'
+              },
+              data: {
+                type: 'platform',
+                id: '37'
+              }
+            }
+          },
+          id: '12',
+          links: {
+            self: '/rdm/svm-api/v1/platform-attachments/1'
+          }
         }
-      }]
+      ]
 
       const expectedPlatform = new Platform()
       expectedPlatform.id = '37'
@@ -574,6 +672,7 @@ describe('PlatformSerializer', () => {
         label: 'GFZ',
         url: 'http://www.gfz-potsdam.de'
       })]
+
       expectedPlatform.platformTypeUri = 'type/Station'
       expectedPlatform.statusUri = 'status/inuse'
       expectedPlatform.website = 'http://www.tereno.net'
@@ -653,27 +752,24 @@ describe('PlatformSerializer', () => {
       expect(attributes.persistent_identifier).toEqual('doi:4354545')
       expect(attributes).toHaveProperty('website')
       expect(attributes.website).toEqual('http://gfz-potsdam.de')
-      expect(attributes).toHaveProperty('created_at')
+      // expect(attributes).toHaveProperty('created_at')
       // expect(attributes.created_at).toEqual('2020-08-28T13:49:48.015620+00:00')
       // I wasn't able to find the exact date time format, so we use ISO date times
-      expect(attributes.created_at).toEqual('2020-08-28T13:49:48.015Z')
-      expect(attributes).toHaveProperty('updated_at')
+      // expect(attributes.created_at).toEqual('2020-08-28T13:49:48.015Z')
+      // expect(attributes).toHaveProperty('updated_at')
       // expect(attributes.updated_at).toEqual('2020-08-30T13:49:48.015620+00:00')
       // again, iso date times
-      expect(attributes.updated_at).toEqual('2020-08-30T13:49:48.015Z')
+      // expect(attributes.updated_at).toEqual('2020-08-30T13:49:48.015Z')
 
-      expect(attributes).toHaveProperty('attachments')
-      const attachments = attributes.attachments
-      expect(Array.isArray(attachments)).toBeTruthy()
-      expect(attachments.length).toEqual(2)
-      expect(attachments[0]).toEqual({
+      expect(jsonApiData.relationships).toHaveProperty('platform_attachments')
+      const attachments = jsonApiData.relationships.platform_attachments as IJsonApiTypeIdDataList
+      expect(attachments).toHaveProperty('data')
+      const attachmentData = attachments.data
+      expect(Array.isArray(attachmentData)).toBeTruthy()
+      expect(attachmentData.length).toEqual(1)
+      expect(attachmentData[0]).toEqual({
         id: '2',
-        label: 'GFZ',
-        url: 'http://www.gfz-potsdam.de'
-      })
-      expect(attachments[1]).toEqual({
-        label: 'UFZ',
-        url: 'http://www.ufz.de'
+        type: 'platform_attachment'
       })
 
       expect(jsonApiData).toHaveProperty('relationships')
@@ -724,24 +820,6 @@ describe('PlatformSerializer', () => {
       expect(typeof jsonApiData).toEqual('object')
       expect(jsonApiData).toHaveProperty('id')
       expect(jsonApiData.id).toEqual('abc')
-    })
-    it('should stay with a null createdAt/updatedAt date', () => {
-      const platform = createTestPlatform()
-      platform.createdAt = null
-      platform.updatedAt = null
-
-      const serializer = new PlatformSerializer()
-
-      const jsonApiData = serializer.convertModelToJsonApiData(platform)
-
-      expect(typeof jsonApiData).toEqual('object')
-      expect(jsonApiData).toHaveProperty('attributes')
-      const attributes = jsonApiData.attributes
-      expect(typeof attributes).toEqual('object')
-      expect(attributes).toHaveProperty('created_at')
-      expect(attributes.created_at).toBeNull()
-      expect(attributes).toHaveProperty('updated_at')
-      expect(attributes.updated_at).toBeNull()
     })
   })
 })
