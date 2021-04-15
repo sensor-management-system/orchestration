@@ -190,8 +190,10 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
+import { Component, Vue, mixins } from 'nuxt-property-decorator'
 import { Attachment } from '@/models/Attachment'
+
+import { AttachmentsMixin } from '@/mixins/AttachmentsMixin'
 
 import AttachmentListItem from '@/components/AttachmentListItem.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
@@ -202,7 +204,7 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
     ProgressIndicator
   }
 })
-export default class PlatformAttachmentsPage extends Vue {
+export default class PlatformAttachmentsPage extends mixins(AttachmentsMixin) {
   private attachments: Attachment[] = []
   private showDeleteDialog: {[idx: string]: boolean} = {}
   private isLoading = false
@@ -279,63 +281,6 @@ export default class PlatformAttachmentsPage extends Vue {
 
   isEditModeForAttachment (attachment: Attachment): boolean {
     return this.$route.path === '/platforms/' + this.platformId + '/attachments/' + attachment.id + '/edit'
-  }
-
-  /**
-   * returns a filename from a full filepath
-   *
-   * @return {string} the filename
-   */
-  filename (attachment: Attachment): string {
-    const UNKNOWN_FILENAME = 'unknown filename'
-
-    if (attachment.url === '') {
-      return UNKNOWN_FILENAME
-    }
-    const paths = attachment.url.split('/')
-    if (!paths.length) {
-      return UNKNOWN_FILENAME
-    }
-    // @ts-ignore
-    return paths.pop()
-  }
-
-  /**
-   * returns the timestamp of the upload date
-   *
-   * @TODO this must be implemented when the file API is ready
-   * @return {string} a readable timestamp
-   */
-  uploadedDateTime (_attachment: Attachment): string {
-    return '2020-06-17 16:35 (TODO)'
-  }
-
-  /**
-   * returns a material design icon name based on the file type extension
-   *
-   * @return {string} a material design icon name
-   */
-  filetypeIcon (attachment: Attachment): string {
-    let extension = ''
-    const paths = this.filename(attachment).split('.')
-    if (paths.length) {
-      // @ts-ignore
-      extension = paths.pop().toLowerCase()
-    }
-    switch (extension) {
-      case 'png':
-      case 'jpg':
-      case 'jpeg':
-        return 'mdi-image'
-      case 'pdf':
-        return 'mdi-file-pdf-box'
-      case 'doc':
-      case 'docx':
-      case 'odt':
-        return 'mdi-text-box'
-      default:
-        return 'mdi-paperclip'
-    }
   }
 }
 </script>
