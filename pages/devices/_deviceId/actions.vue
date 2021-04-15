@@ -34,266 +34,283 @@ permissions and limitations under the Licence.
       v-model="isInProgress"
       :dark="isSaving"
     />
-    <v-timeline dense>
-      <v-timeline-item
-        v-for="action in actions"
-        :key="action.getId()"
-        :color="action.getColor()"
-        class="mb-4"
+    <v-card-actions>
+      <v-spacer />
+      <v-btn
+        v-if="isLoggedIn && !(isAddActionPage)"
+        color="primary"
         small
+        :disabled="isEditActionPage"
+        :to="'/devices/' + deviceId + '/actions/new'"
       >
-        <template v-if="action.isGenericDeviceAction">
-          <v-card>
-            <v-card-subtitle class="pb-0">
-              {{ action.beginDate | toUtcDate }} - {{ action.endDate | toUtcDate }}
-            </v-card-subtitle>
-            <v-card-title class="pt-0">
-              {{ action.actionTypeName }}
-            </v-card-title>
-            <v-card-subtitle>
-              <v-row
-                no-gutters
-              >
-                <v-col
-                  cols="11"
+        Add Action
+      </v-btn>
+    </v-card-actions>
+    <template v-if="isAddActionPage">
+      <NuxtChild />
+    </template>
+    <template v-else>
+      <v-timeline dense>
+        <v-timeline-item
+          v-for="action in actions"
+          :key="action.getId()"
+          :color="action.getColor()"
+          class="mb-4"
+          small
+        >
+          <template v-if="action.isGenericDeviceAction">
+            <v-card>
+              <v-card-subtitle class="pb-0">
+                {{ action.beginDate | toUtcDate }} - {{ action.endDate | toUtcDate }}
+              </v-card-subtitle>
+              <v-card-title class="pt-0">
+                {{ action.actionTypeName }}
+              </v-card-title>
+              <v-card-subtitle>
+                <v-row
+                  no-gutters
                 >
-                  {{ action.contact.toString() }}
-                </v-col>
-                <v-col
-                  align-self="end"
-                  class="text-right"
-                >
-                  <v-btn
-                    icon
-                    @click.stop.prevent="showActionItem(action.getId())"
+                  <v-col
+                    cols="11"
                   >
-                    <v-icon>{{ isActionItemShown(action.getId()) ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
-                  </v-btn>
-                </v-col>
-              </v-row>
-            </v-card-subtitle>
-            <v-expand-transition>
-              <v-card-text
-                v-show="isActionItemShown(action.getId())"
-                class="text--primary"
-              >
-                <label>Description</label>
-                {{ action.description }}
-              </v-card-text>
-            </v-expand-transition>
-          </v-card>
-        </template>
-        <template v-if="action.isUpdateAction">
-          <v-card>
-            <v-card-subtitle class="pb-0">
-              {{ action.updateDate | toUtcDate }}
-            </v-card-subtitle>
-            <v-card-title class="pt-0">
-              {{ action.softwareTypeName }} update
-            </v-card-title>
-            <v-card-subtitle>
-              <v-row
-                no-gutters
-              >
-                <v-col
-                  cols="11"
-                >
-                  {{ action.contact.toString() }}
-                </v-col>
-                <v-col
-                  align-self="end"
-                  class="text-right"
-                >
-                  <v-btn
-                    icon
-                    @click.stop.prevent="showActionItem(action.getId())"
-                  >
-                    <v-icon>{{ isActionItemShown(action.getId()) ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
-                  </v-btn>
-                </v-col>
-              </v-row>
-            </v-card-subtitle>
-            <v-expand-transition>
-              <v-card-text
-                v-show="isActionItemShown(action.getId())"
-                class="text--primary"
-              >
-                <v-row dense>
-                  <v-col cols="12" md="4">
-                    <label>
-                      Version
-                    </label>
-                    {{ action.version }}
+                    {{ action.contact.toString() }}
                   </v-col>
-                  <v-col cols="12" md="4">
-                    <label>
-                      Repository
-                    </label>
-                    {{ action.repositoryUrl }}
+                  <v-col
+                    align-self="end"
+                    class="text-right"
+                  >
+                    <v-btn
+                      icon
+                      @click.stop.prevent="showActionItem(action.getId())"
+                    >
+                      <v-icon>{{ isActionItemShown(action.getId()) ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
+                    </v-btn>
                   </v-col>
                 </v-row>
-                <v-row dense>
-                  <v-col>
-                    <label>Description</label>
-                    {{ action.description }}
+              </v-card-subtitle>
+              <v-expand-transition>
+                <v-card-text
+                  v-show="isActionItemShown(action.getId())"
+                  class="text--primary"
+                >
+                  <label>Description</label>
+                  {{ action.description }}
+                </v-card-text>
+              </v-expand-transition>
+            </v-card>
+          </template>
+          <template v-if="action.isUpdateAction">
+            <v-card>
+              <v-card-subtitle class="pb-0">
+                {{ action.updateDate | toUtcDate }}
+              </v-card-subtitle>
+              <v-card-title class="pt-0">
+                {{ action.softwareTypeName }} update
+              </v-card-title>
+              <v-card-subtitle>
+                <v-row
+                  no-gutters
+                >
+                  <v-col
+                    cols="11"
+                  >
+                    {{ action.contact.toString() }}
+                  </v-col>
+                  <v-col
+                    align-self="end"
+                    class="text-right"
+                  >
+                    <v-btn
+                      icon
+                      @click.stop.prevent="showActionItem(action.getId())"
+                    >
+                      <v-icon>{{ isActionItemShown(action.getId()) ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
+                    </v-btn>
                   </v-col>
                 </v-row>
-              </v-card-text>
-            </v-expand-transition>
-          </v-card>
-        </template>
-        <template v-if="action.isDeviceCalibrationAction">
-          <v-card>
-            <v-card-subtitle class="pb-0">
-              {{ action.currentCalibrationDate | toUtcDate }}
-            </v-card-subtitle>
-            <v-card-title class="pt-0">
-              Device calibration
-            </v-card-title>
-            <v-card-subtitle>
-              <v-row
-                no-gutters
-              >
-                <v-col
-                  cols="11"
+              </v-card-subtitle>
+              <v-expand-transition>
+                <v-card-text
+                  v-show="isActionItemShown(action.getId())"
+                  class="text--primary"
                 >
-                  {{ action.contact.toString() }}
-                </v-col>
-                <v-col
-                  align-self="end"
-                  class="text-right"
+                  <v-row dense>
+                    <v-col cols="12" md="4">
+                      <label>
+                        Version
+                      </label>
+                      {{ action.version }}
+                    </v-col>
+                    <v-col cols="12" md="4">
+                      <label>
+                        Repository
+                      </label>
+                      {{ action.repositoryUrl }}
+                    </v-col>
+                  </v-row>
+                  <v-row dense>
+                    <v-col>
+                      <label>Description</label>
+                      {{ action.description }}
+                    </v-col>
+                  </v-row>
+                </v-card-text>
+              </v-expand-transition>
+            </v-card>
+          </template>
+          <template v-if="action.isDeviceCalibrationAction">
+            <v-card>
+              <v-card-subtitle class="pb-0">
+                {{ action.currentCalibrationDate | toUtcDate }}
+              </v-card-subtitle>
+              <v-card-title class="pt-0">
+                Device calibration
+              </v-card-title>
+              <v-card-subtitle>
+                <v-row
+                  no-gutters
                 >
-                  <v-btn
-                    icon
-                    @click.stop.prevent="showActionItem(action.getId())"
+                  <v-col
+                    cols="11"
                   >
-                    <v-icon>{{ isActionItemShown(action.getId()) ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
-                  </v-btn>
-                </v-col>
-              </v-row>
-            </v-card-subtitle>
-            <v-expand-transition>
-              <v-card-text
-                v-show="isActionItemShown(action.getId())"
-                class="text--primary"
-              >
-                <v-row dense>
-                  <v-col cols="12" md="4">
-                    <label>Formula</label> {{ action.formula }}
+                    {{ action.contact.toString() }}
                   </v-col>
-                  <v-col cols="12" md="4">
-                    <label>value</label> {{ action.value }}
-                  </v-col>
-                  <v-col cols="12" md="4">
-                    <label>
-                      Next calibration date
-                    </label>
-                    {{ action.nextCalibrationDate | toUtcDate }}
+                  <v-col
+                    align-self="end"
+                    class="text-right"
+                  >
+                    <v-btn
+                      icon
+                      @click.stop.prevent="showActionItem(action.getId())"
+                    >
+                      <v-icon>{{ isActionItemShown(action.getId()) ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
+                    </v-btn>
                   </v-col>
                 </v-row>
-                <label>Measured quantities</label>
-                <ul>
-                  <li v-for="deviceProperty in action.deviceProperties" :key="deviceProperty.id">
-                    {{ deviceProperty.label }}
-                  </li>
-                </ul>
-                <label>Description</label>
-                {{ action.description }}
-              </v-card-text>
-            </v-expand-transition>
-          </v-card>
-        </template>
-        <template v-if="action.isDeviceMountAction">
-          <v-card>
-            <v-card-subtitle class="pb-0">
-              {{ action.beginDate | toUtcDate }}
-            </v-card-subtitle>
-            <v-card-title class="pt-0">
-              Mounted on {{ action.configurationName }}
-            </v-card-title>
-            <v-card-subtitle>
-              <v-row
-                no-gutters
-              >
-                <v-col
-                  cols="11"
+              </v-card-subtitle>
+              <v-expand-transition>
+                <v-card-text
+                  v-show="isActionItemShown(action.getId())"
+                  class="text--primary"
                 >
-                  {{ action.contact.toString() }}
-                </v-col>
-                <v-col
-                  align-self="end"
-                  class="text-right"
+                  <v-row dense>
+                    <v-col cols="12" md="4">
+                      <label>Formula</label> {{ action.formula }}
+                    </v-col>
+                    <v-col cols="12" md="4">
+                      <label>value</label> {{ action.value }}
+                    </v-col>
+                    <v-col cols="12" md="4">
+                      <label>
+                        Next calibration date
+                      </label>
+                      {{ action.nextCalibrationDate | toUtcDate }}
+                    </v-col>
+                  </v-row>
+                  <label>Measured quantities</label>
+                  <ul>
+                    <li v-for="deviceProperty in action.deviceProperties" :key="deviceProperty.id">
+                      {{ deviceProperty.label }}
+                    </li>
+                  </ul>
+                  <label>Description</label>
+                  {{ action.description }}
+                </v-card-text>
+              </v-expand-transition>
+            </v-card>
+          </template>
+          <template v-if="action.isDeviceMountAction">
+            <v-card>
+              <v-card-subtitle class="pb-0">
+                {{ action.beginDate | toUtcDate }}
+              </v-card-subtitle>
+              <v-card-title class="pt-0">
+                Mounted on {{ action.configurationName }}
+              </v-card-title>
+              <v-card-subtitle>
+                <v-row
+                  no-gutters
                 >
-                  <v-btn
-                    icon
-                    @click.stop.prevent="showActionItem(action.getId())"
+                  <v-col
+                    cols="11"
                   >
-                    <v-icon>{{ isActionItemShown(action.getId()) ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
-                  </v-btn>
-                </v-col>
-              </v-row>
-            </v-card-subtitle>
-            <v-expand-transition>
-              <v-card-text
-                v-show="isActionItemShown(action.getId())"
-                class="text--primary"
-              >
-                <label>Parent platform</label>{{ action.parentPlatformName }}
-                <v-row dense>
-                  <v-col cols="12" md="4">
-                    <label>Offset x</label>{{ action.offsetX }} m
+                    {{ action.contact.toString() }}
                   </v-col>
-                  <v-col cols="12" md="4">
-                    <label>Offset y</label>{{ action.offsetY }} m
-                  </v-col>
-                  <v-col cols="12" md="4">
-                    <label>Offset z</label>{{ action.offsetZ }} m
+                  <v-col
+                    align-self="end"
+                    class="text-right"
+                  >
+                    <v-btn
+                      icon
+                      @click.stop.prevent="showActionItem(action.getId())"
+                    >
+                      <v-icon>{{ isActionItemShown(action.getId()) ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
+                    </v-btn>
                   </v-col>
                 </v-row>
-              </v-card-text>
-            </v-expand-transition>
-          </v-card>
-        </template>
-        <template v-if="action.isDeviceUnmountAction">
-          <v-card>
-            <v-card-subtitle class="pb-0">
-              {{ action.endDate | toUtcDate }}
-            </v-card-subtitle>
-            <v-card-title class="pt-0">
-              Unmounted on {{ action.configurationName }}
-            </v-card-title>
-            <v-card-subtitle>
-              <v-row
-                no-gutters
-              >
-                <v-col
-                  cols="11"
+              </v-card-subtitle>
+              <v-expand-transition>
+                <v-card-text
+                  v-show="isActionItemShown(action.getId())"
+                  class="text--primary"
                 >
-                  {{ action.contact.toString() }}
-                </v-col>
-                <v-col
-                  align-self="end"
-                  class="text-right"
+                  <label>Parent platform</label>{{ action.parentPlatformName }}
+                  <v-row dense>
+                    <v-col cols="12" md="4">
+                      <label>Offset x</label>{{ action.offsetX }} m
+                    </v-col>
+                    <v-col cols="12" md="4">
+                      <label>Offset y</label>{{ action.offsetY }} m
+                    </v-col>
+                    <v-col cols="12" md="4">
+                      <label>Offset z</label>{{ action.offsetZ }} m
+                    </v-col>
+                  </v-row>
+                </v-card-text>
+              </v-expand-transition>
+            </v-card>
+          </template>
+          <template v-if="action.isDeviceUnmountAction">
+            <v-card>
+              <v-card-subtitle class="pb-0">
+                {{ action.endDate | toUtcDate }}
+              </v-card-subtitle>
+              <v-card-title class="pt-0">
+                Unmounted on {{ action.configurationName }}
+              </v-card-title>
+              <v-card-subtitle>
+                <v-row
+                  no-gutters
                 >
-                  <v-btn
-                    icon
-                    @click.stop.prevent="showActionItem(action.getId())"
+                  <v-col
+                    cols="11"
                   >
-                    <v-icon>{{ isActionItemShown(action.getId()) ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
-                  </v-btn>
-                </v-col>
-              </v-row>
-            </v-card-subtitle>
-            <v-expand-transition>
-              <v-card-text
-                v-show="isActionItemShown(action.getId())"
-                class="text--primary"
-              />
-            </v-expand-transition>
-          </v-card>
-        </template>
-      </v-timeline-item>
-    </v-timeline>
+                    {{ action.contact.toString() }}
+                  </v-col>
+                  <v-col
+                    align-self="end"
+                    class="text-right"
+                  >
+                    <v-btn
+                      icon
+                      @click.stop.prevent="showActionItem(action.getId())"
+                    >
+                      <v-icon>{{ isActionItemShown(action.getId()) ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
+                    </v-btn>
+                  </v-col>
+                </v-row>
+              </v-card-subtitle>
+              <v-expand-transition>
+                <v-card-text
+                  v-show="isActionItemShown(action.getId())"
+                  class="text--primary"
+                />
+              </v-expand-transition>
+            </v-card>
+          </template>
+        </v-timeline-item>
+      </v-timeline>
+    </template>
   </div>
 </template>
 <style lang="scss">
@@ -616,6 +633,26 @@ export default class DeviceActionsPage extends Vue {
 
   unsetActionItemsShown (): void {
     this.searchResultItemsShown = {}
+  }
+
+  get isLoggedIn (): boolean {
+    return this.$store.getters['oidc/isAuthenticated']
+  }
+
+  get isEditActionPage (): boolean {
+    // eslint-disable-next-line no-useless-escape
+    const editUrl = '^\/devices\/' + this.deviceId + '\/actions\/([0-9]+)\/edit$'
+    return !!this.$route.path.match(editUrl)
+  }
+
+  get isAddActionPage (): boolean {
+    // eslint-disable-next-line no-useless-escape
+    const addUrl = '^\/devices\/' + this.deviceId + '\/actions\/new$'
+    return !!this.$route.path.match(addUrl)
+  }
+
+  get deviceId (): string {
+    return this.$route.params.deviceId
   }
 }
 </script>
