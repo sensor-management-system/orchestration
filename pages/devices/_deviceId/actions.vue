@@ -34,7 +34,7 @@ permissions and limitations under the Licence.
       v-model="isInProgress"
       :dark="isSaving"
     />
-    <v-timeline>
+    <v-timeline dense>
       <v-timeline-item
         v-for="action in actions"
         :key="action.getId()"
@@ -42,52 +42,18 @@ permissions and limitations under the Licence.
         class="mb-4"
         small
       >
-        <template v-slot:opposite>
-          <template v-if="action.isGenericDeviceAction">
-            <label>
-              Begin
-            </label>
-            {{ action.beginDate | toUtcDate }}
-            <br>
-            <label>
-              End
-            </label>
-            {{ action.endDate | toUtcDate }}
-          </template>
-          <template v-else-if="action.isUpdateAction">
-            <label>
-              Date
-            </label>
-            {{ action.updateDate | toUtcDate }}
-          </template>
-          <template v-else-if="action.isDeviceCalibrationAction">
-            <label>
-              Date
-            </label>
-            {{ action.currentCalibrationDate | toUtcDate }}
-          </template>
-          <template v-else-if="action.isDeviceMountAction">
-            <label>
-              Date
-            </label>
-            {{ action.beginDate | toUtcDate }}
-          </template>
-          <template v-else-if="action.isDeviceUnmountAction">
-            <label>
-              Date
-            </label>
-            {{ action.endDate | toUtcDate }}
-          </template>
-        </template>
         <template v-if="action.isGenericDeviceAction">
           <v-card>
-            <v-card-title>
+            <v-card-subtitle class="pb-0">
+              {{ action.beginDate | toUtcDate }} - {{ action.endDate | toUtcDate }}
+            </v-card-subtitle>
+            <v-card-title class="pt-0">
               {{ action.actionTypeName }}
             </v-card-title>
             <v-card-subtitle>
               {{ action.contact.toString() }}
             </v-card-subtitle>
-            <v-card-text>
+            <v-card-text class="text--primary">
               <label>Description</label>
               {{ action.description }}
             </v-card-text>
@@ -95,21 +61,24 @@ permissions and limitations under the Licence.
         </template>
         <template v-if="action.isUpdateAction">
           <v-card>
-            <v-card-title>
+            <v-card-subtitle class="pb-0">
+              {{ action.updateDate | toUtcDate }}
+            </v-card-subtitle>
+            <v-card-title class="pt-0">
               {{ action.softwareTypeName }} update
             </v-card-title>
             <v-card-subtitle>
               {{ action.contact.toString() }}
             </v-card-subtitle>
-            <v-card-text>
+            <v-card-text class="text--primary">
               <v-row dense>
-                <v-col cols="12" md="2">
+                <v-col cols="12" md="4">
                   <label>
                     Version
                   </label>
                   {{ action.version }}
                 </v-col>
-                <v-col cols="12" md="10">
+                <v-col cols="12" md="4">
                   <label>
                     Repository
                   </label>
@@ -127,21 +96,24 @@ permissions and limitations under the Licence.
         </template>
         <template v-if="action.isDeviceCalibrationAction">
           <v-card>
-            <v-card-title>
+            <v-card-subtitle class="pb-0">
+              {{ action.currentCalibrationDate | toUtcDate }}
+            </v-card-subtitle>
+            <v-card-title class="pt-0">
               Device calibration
             </v-card-title>
             <v-card-subtitle>
               {{ action.contact.toString() }}
             </v-card-subtitle>
-            <v-card-text>
+            <v-card-text class="text--primary">
               <v-row dense>
-                <v-col cols="12" md="3">
+                <v-col cols="12" md="4">
                   <label>Formula</label> {{ action.formula }}
                 </v-col>
-                <v-col cols="12" md="3">
+                <v-col cols="12" md="4">
                   <label>value</label> {{ action.value }}
                 </v-col>
-                <v-col cols="12" md="6">
+                <v-col cols="12" md="4">
                   <label>
                     Next calibration date
                   </label>
@@ -161,13 +133,16 @@ permissions and limitations under the Licence.
         </template>
         <template v-if="action.isDeviceMountAction">
           <v-card>
-            <v-card-title>
+            <v-card-subtitle class="pb-0">
+              {{ action.beginDate | toUtcDate }}
+            </v-card-subtitle>
+            <v-card-title class="pt-0">
               Mounted on {{ action.configurationName }}
             </v-card-title>
             <v-card-subtitle>
               {{ action.contact.toString() }}
             </v-card-subtitle>
-            <v-card-text>
+            <v-card-text class="text--primary">
               <label>Parent platform</label>{{ action.parentPlatformName }}
               <v-row dense>
                 <v-col cols="12" md="4">
@@ -185,15 +160,16 @@ permissions and limitations under the Licence.
         </template>
         <template v-if="action.isDeviceUnmountAction">
           <v-card>
-            <v-card-title>
+            <v-card-subtitle class="pb-0">
+              {{ action.endDate | toUtcDate }}
+            </v-card-subtitle>
+            <v-card-title class="pt-0">
               Unmounted on {{ action.configurationName }}
             </v-card-title>
             <v-card-subtitle>
               {{ action.contact.toString() }}
             </v-card-subtitle>
-            <v-card-text>
-              <label>Description</label>
-              {{ action.description }}
+            <v-card-text class="text--primary">
             </v-card-text>
           </v-card>
         </template>
