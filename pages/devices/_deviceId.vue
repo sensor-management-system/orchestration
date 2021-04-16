@@ -67,10 +67,10 @@ export default class DevicePage extends Vue {
     this.initializeAppBar()
 
     this.$api.devices.findById(this.deviceId, {
-      includeContacts: true,
-      includeCustomFields: true,
-      includeDeviceProperties: true,
-      includeDeviceAttachments: true
+      includeContacts: false,
+      includeCustomFields: false,
+      includeDeviceProperties: false,
+      includeDeviceAttachments: false
     }).then((device) => {
       this.device = device
       this.isLoading = false

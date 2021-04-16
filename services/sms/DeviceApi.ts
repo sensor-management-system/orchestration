@@ -54,6 +54,13 @@ import {
   deviceWithMetaToDeviceThrowingNoErrorOnMissing
 } from '@/serializers/jsonapi/DeviceSerializer'
 
+interface IncludedRelationships {
+  includeContacts?: boolean
+  includeCustomFields?: boolean
+  includeDeviceProperties?: boolean
+  includeDeviceAttachments?: boolean
+}
+
 export class DeviceApi {
   private axiosApi: AxiosInstance
   private serializer: DeviceSerializer
@@ -63,28 +70,22 @@ export class DeviceApi {
     this.serializer = new DeviceSerializer()
   }
 
-  findById (id: string, includes: {
-    includeContacts: boolean, includeCustomFields: boolean,
-    includeDeviceProperties: boolean, includeDeviceAttachments: boolean
-  }): Promise<Device> {
-    function addIncludesToRequest () {
-      const include: string[] = []
-      if (includes.includeContacts) {
-        include.push('contacts')
-      }
-      if (includes.includeDeviceProperties) {
-        include.push('device_properties')
-      }
-      if (includes.includeCustomFields) {
-        include.push('customfields')
-      }
-      if (includes.includeDeviceAttachments) {
-        include.push('device_attachments')
-      }
-      return include.join(',')
+  findById (id: string, includes: IncludedRelationships): Promise<Device> {
+    const listIncludedRelationships: string[] = []
+    if (includes.includeContacts) {
+      listIncludedRelationships.push('contacts')
     }
+    if (includes.includeDeviceProperties) {
+      listIncludedRelationships.push('device_properties')
+    }
+    if (includes.includeCustomFields) {
+      listIncludedRelationships.push('customfields')
+    }
+    if (includes.includeDeviceAttachments) {
+      listIncludedRelationships.push('device_attachments')
+    }
+    const include = listIncludedRelationships.join(',')
 
-    const include = addIncludesToRequest()
     return this.axiosApi.get(id, {
       params: {
         include
