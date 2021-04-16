@@ -63,17 +63,14 @@ permissions and limitations under the Licence.
               <v-card-subtitle class="pb-0">
                 {{ action.beginDate | toUtcDate }} - {{ action.endDate | toUtcDate }}
               </v-card-subtitle>
-              <v-card-title class="pt-0">
-                {{ action.actionTypeName }}
-              </v-card-title>
-              <v-card-subtitle>
+              <v-card-title class="py-0">
                 <v-row
                   no-gutters
                 >
                   <v-col
                     cols="11"
                   >
-                    {{ action.contact.toString() }}
+                    {{ action.actionTypeName }}
                   </v-col>
                   <v-col
                     align-self="end"
@@ -87,15 +84,23 @@ permissions and limitations under the Licence.
                     </v-btn>
                   </v-col>
                 </v-row>
-              </v-card-subtitle>
+              </v-card-title>
               <v-expand-transition>
-                <v-card-text
+                <div
                   v-show="isActionItemShown(action.getId())"
-                  class="text--primary"
                 >
-                  <label>Description</label>
-                  {{ action.description }}
-                </v-card-text>
+                  <v-card-subtitle
+                    class="pt-0"
+                  >
+                    {{ action.contact.toString() }}
+                  </v-card-subtitle>
+                  <v-card-text
+                    class="grey lighten-5 text--primary pt-2"
+                  >
+                    <label>Description</label>
+                    {{ action.description }}
+                  </v-card-text>
+                </div>
               </v-expand-transition>
             </v-card>
           </template>
