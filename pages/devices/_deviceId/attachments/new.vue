@@ -145,7 +145,7 @@ export default class AttachmentAddPage extends mixins(Rules) {
       this.$router.push('/devices/' + this.deviceId + '/attachments')
     }).catch(() => {
       this.$emit('showsave', false)
-      this.$store.commit('snackbar/setError', 'Failed to save attachments')
+      this.$store.commit('snackbar/setError', 'Failed to save an attachment')
     })
   }
 
