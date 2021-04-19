@@ -35,9 +35,9 @@ permissions and limitations under the Licence.
         <v-col>
           <v-select
             v-model="chosenKindOfAction"
-            :items="kindOfActionChoices"
-            :item-value="(x) => x.id"
-            :item-text="(x) => x.label"
+            :items="optionsForActionType"
+            :item-text="(x) => x.name"
+            :item-value="(x) => x"
             clearable
             label="Kind of action"
           />
@@ -282,11 +282,6 @@ permissions and limitations under the Licence.
     <v-card v-else-if="otherChosen" class="pa-2">
       <v-row>
         <v-col md="6">
-          <v-select :items="deviceActionTypes" :item-text="(x) => x.name" label="Action type" />
-        </v-col>
-      </v-row>
-      <v-row>
-        <v-col md="6">
           <v-select :items="contacts" label="Contact" />
         </v-col>
       </v-row>
@@ -420,13 +415,17 @@ import { Platform } from '@/models/Platform'
 
 import { dateToString, stringToDate } from '@/utils/dateHelper'
 
-const ID_DEVICE_CALIBRATION = 1
-const ID_SOFTWARE_UPDATE = 2
-const ID_OTHER = 5
+type KindOfActionType = 'device_calibration' | 'software_update' | 'generic_device_action'
 
-interface IDeviceActionType {
-  id: string,
+interface IGenericActionType {
+  id: string
   uri: string
+  name: string
+}
+
+interface IOptionsForActionType {
+  id: string
+  kind: KindOfActionType
   name: string
 }
 
@@ -439,10 +438,11 @@ export default class ActionAddPage extends Vue {
 
   private datesAreValid = true
 
-  private kindOfActionChoices = [
-    { id: ID_DEVICE_CALIBRATION, label: 'Device calibration' },
-    { id: ID_SOFTWARE_UPDATE, label: 'Software update' },
-    { id: ID_OTHER, label: 'Other...' }
+  private optionsForActionType: IOptionsForActionType[] = [
+    { id: 'device-calibration', kind: 'device_calibration', name: 'Device calibration' },
+    { id: 'software-update', kind: 'software_update', name: 'Software update' },
+    { id: 'generic-action-1', kind: 'generic_device_action', /* uri: 'actionTypes/device_visit', */ name: 'Device visit' },
+    { id: 'generic-action-2', kind: 'generic_device_action', /* uri: 'actionTypes/device_maintainance', */ name: 'Device maintainance' }
   ]
 
   private contacts = [
@@ -499,17 +499,12 @@ export default class ActionAddPage extends Vue {
     this.createConfiguration('3', 'Configuration C')
   ]
 
-  private deviceActionTypes = [
-    { id: '1', uri: 'actionTypes/device_visit', name: 'Device visit' },
-    { id: '2', uri: 'actionTypes/device_maintainance', name: 'Device maintainance' }
-  ]
-
   private softwareTypes = [
     { id: '1', uri: 'softwareTypes/firmware', name: 'Firmware' },
     { id: '2', uri: 'softwareTypes/software', name: 'Software' }
   ]
 
-  private _chosenKindOfAction: number | null = null
+  private _chosenKindOfAction: IOptionsForActionType | null = null
   private startDateMenu = false
   private endDateMenu = false
 
@@ -520,10 +515,12 @@ export default class ActionAddPage extends Vue {
     return this.$data._chosenKindOfAction
   }
 
-  set chosenKindOfAction (newValue: number | null) {
+  set chosenKindOfAction (newValue: IOptionsForActionType | null) {
     if (this.$data._chosenKindOfAction !== newValue) {
       this.$data._chosenKindOfAction = newValue
-      this.resetAllActionSpecificInputs()
+      if (this.$data._chosenKindOfAction?.kind !== newValue?.kind) {
+        this.resetAllActionSpecificInputs()
+      }
     }
   }
 
@@ -538,15 +535,15 @@ export default class ActionAddPage extends Vue {
   }
 
   get deviceCalibrationChosen () {
-    return this.chosenKindOfAction === ID_DEVICE_CALIBRATION
+    return this.$data._chosenKindOfAction?.kind === 'device_calibration'
   }
 
   get softwareUpdateChosen () {
-    return this.chosenKindOfAction === ID_SOFTWARE_UPDATE
+    return this.$data._chosenKindOfAction?.kind === 'software_update'
   }
 
   get otherChosen () {
-    return this.chosenKindOfAction === ID_OTHER
+    return this.$data._chosenKindOfAction?.kind === 'generic_device_action'
   }
 
   getStartDate (): string {
