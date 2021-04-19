@@ -45,7 +45,7 @@ permissions and limitations under the Licence.
       </v-row>
     </v-card>
     <v-card v-if="deviceCalibrationChosen" class="pa-2">
-       <v-form
+      <v-form
         ref="datesForm"
         v-model="datesAreValid"
         @submit.prevent
