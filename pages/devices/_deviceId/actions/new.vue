@@ -135,7 +135,7 @@ permissions and limitations under the Licence.
 
       <v-row>
         <v-col md="5">
-          <v-select v-model="selectedContact" :items="contacts" label="Contact" />
+          <v-autocomplete v-model="selectedContact" :items="contacts" label="Contact" clearable :item-text="(x) => x.toString()" />
         </v-col>
         <v-col md="1">
           <v-btn v-if="isLoggedIn" @click="selectCurrentUserAsContact">
@@ -201,7 +201,7 @@ permissions and limitations under the Licence.
       </v-row>
       <v-row>
         <v-col md="5">
-          <v-select v-model="selectedContact" :items="contacts" label="Contact" />
+          <v-autocomplete v-model="selectedContact" :items="contacts" label="Contact" clearable :item-text="(x) => x.toString()" />
         </v-col>
         <v-col md="1">
           <v-btn v-if="isLoggedIn" @click="selectCurrentUserAsContact">
@@ -292,7 +292,7 @@ permissions and limitations under the Licence.
     <v-card v-else-if="otherChosen" class="pa-2">
       <v-row>
         <v-col md="5">
-          <v-select v-model="selectedContact" :items="contacts" label="Contact" />
+          <v-autocomplete v-model="selectedContact" :items="contacts" label="Contact" clearable :item-text="(x) => x.toString()" />
         </v-col>
         <v-col md="1">
           <v-btn v-if="isLoggedIn" @click="selectCurrentUserAsContact">
