@@ -425,8 +425,6 @@ import { DateTime } from 'luxon'
 import { Contact } from '@/models/Contact'
 import { Attachment } from '@/models/Attachment'
 import { DeviceProperty } from '@/models/DeviceProperty'
-import { Configuration } from '@/models/Configuration'
-import { Platform } from '@/models/Platform'
 
 import { dateToString, stringToDate } from '@/utils/dateHelper'
 
@@ -464,53 +462,9 @@ export default class ActionAddPage extends Vue {
   private selectedContact: Contact | null = null
   private readonly labelForSelectMeButton = 'Select me'
 
-  private attachments = [
-    Attachment.createFromObject({
-      id: '1', url: 'http://www.gfz-potsdam.de', label: 'GFZ Homepage'
-    }),
-    Attachment.createFromObject({
-      id: '2', url: 'http://www.ufz.de', label: 'UFZ Homepage'
-    })
-  ]
+  private attachments: Attachment[] = []
 
-  createDeviceProperty (id: string, label: string) {
-    const result = new DeviceProperty()
-    result.id = id
-    result.label = label
-    return result
-  }
-
-  createConfiguration (id: string, label: string) {
-    const result = new Configuration()
-    result.id = id
-    result.label = label
-    return result
-  }
-
-  createPlatform (id: string, shortName: string) {
-    const result = new Platform()
-    result.id = id
-    result.shortName = shortName
-    return result
-  }
-
-  private measuredQuantities = [
-    this.createDeviceProperty('1', 'Air temperature'),
-    this.createDeviceProperty('2', 'Wind speed'),
-    this.createDeviceProperty('3', 'Wind direction')
-  ]
-
-  private platforms = [
-    this.createPlatform('1', 'Platform A'),
-    this.createPlatform('2', 'Platform B'),
-    this.createPlatform('3', 'Platform C')
-  ]
-
-  private configurations = [
-    this.createConfiguration('1', 'Configuration A'),
-    this.createConfiguration('2', 'Configuration B'),
-    this.createConfiguration('3', 'Configuration C')
-  ]
+  private measuredQuantities: DeviceProperty[] = []
 
   private softwareTypes = [
     { id: '1', uri: 'softwareTypes/firmware', name: 'Firmware' },
@@ -529,6 +483,16 @@ export default class ActionAddPage extends Vue {
       this.contacts = foundContacts
     }).catch((_error) => {
       this.$store.commit('snackbar/setError', 'Failed to fetch contacts')
+    })
+    this.$api.devices.findRelatedDeviceAttachments(this.deviceId).then((foundAttachments) => {
+      this.attachments = foundAttachments
+    }).catch((_error) => {
+      this.$store.commit('snackbar/setError', 'Failed to fetch attachments')
+    })
+    this.$api.devices.findRelatedDeviceProperties(this.deviceId).then((foundMeasuredQuantities) => {
+      this.measuredQuantities = foundMeasuredQuantities
+    }).catch((_error) => {
+      this.$store.commit('snackbar/setError', 'Failed to fetch measured quantities')
     })
   }
 
