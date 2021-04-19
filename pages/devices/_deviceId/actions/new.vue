@@ -45,15 +45,7 @@ permissions and limitations under the Licence.
       </v-row>
     </v-card>
     <v-card v-if="deviceCalibrationChosen" class="pa-2">
-      <v-row>
-        <v-col md="6">
-          <v-text-field label="formula" />
-        </v-col>
-        <v-col>
-          <v-text-field label="value" />
-        </v-col>
-      </v-row>
-      <v-form
+       <v-form
         ref="datesForm"
         v-model="datesAreValid"
         @submit.prevent
@@ -122,6 +114,14 @@ permissions and limitations under the Licence.
         </v-row>
       </v-form>
       <v-row>
+        <v-col md="6">
+          <v-text-field label="formula" />
+        </v-col>
+        <v-col>
+          <v-text-field label="value" />
+        </v-col>
+      </v-row>
+      <v-row>
         <v-col>
           <v-select
             multiple
@@ -132,23 +132,22 @@ permissions and limitations under the Licence.
           />
         </v-col>
       </v-row>
-
-      <v-row>
-        <v-col md="5">
-          <v-autocomplete v-model="selectedContact" :items="contacts" label="Contact" clearable :item-text="(x) => x.toString()" />
-        </v-col>
-        <v-col md="1">
-          <v-btn v-if="isLoggedIn" @click="selectCurrentUserAsContact">
-            {{ labelForSelectMeButton }}
-          </v-btn>
-        </v-col>
-      </v-row>
       <v-row>
         <v-col cols="12" md="9">
           <v-textarea
             label="Description"
             rows="3"
           />
+        </v-col>
+      </v-row>
+      <v-row>
+        <v-col md="5">
+          <v-autocomplete v-model="selectedContact" :items="contacts" label="Contact" clearable :item-text="(x) => x.toString()" />
+        </v-col>
+        <v-col md="1">
+          <v-btn v-if="isLoggedIn" small @click="selectCurrentUserAsContact">
+            {{ labelForSelectMeButton }}
+          </v-btn>
         </v-col>
       </v-row>
       <v-row>
@@ -186,29 +185,6 @@ permissions and limitations under the Licence.
       </v-row>
     </v-card>
     <v-card v-else-if="softwareUpdateChosen" class="pa-2">
-      <v-row>
-        <v-col md="6">
-          <v-select :items="softwareTypes" :item-text="(x) => x.name" label="Software type" />
-        </v-col>
-      </v-row>
-      <v-row>
-        <v-col md="3">
-          <v-text-field label="Version" placeholder="1.2.3" />
-        </v-col>
-        <v-col md="9">
-          <v-text-field label="Repository URL" placeholder="https://github.com/" />
-        </v-col>
-      </v-row>
-      <v-row>
-        <v-col md="5">
-          <v-autocomplete v-model="selectedContact" :items="contacts" label="Contact" clearable :item-text="(x) => x.toString()" />
-        </v-col>
-        <v-col md="1">
-          <v-btn v-if="isLoggedIn" @click="selectCurrentUserAsContact">
-            {{ labelForSelectMeButton }}
-          </v-btn>
-        </v-col>
-      </v-row>
       <v-form
         ref="datesForm"
         v-model="datesAreValid"
@@ -248,11 +224,34 @@ permissions and limitations under the Licence.
         </v-row>
       </v-form>
       <v-row>
+        <v-col md="6">
+          <v-select :items="softwareTypes" :item-text="(x) => x.name" label="Software type" />
+        </v-col>
+      </v-row>
+      <v-row>
+        <v-col md="3">
+          <v-text-field label="Version" placeholder="1.2.3" />
+        </v-col>
+        <v-col md="9">
+          <v-text-field label="Repository URL" placeholder="https://github.com/" />
+        </v-col>
+      </v-row>
+      <v-row>
         <v-col cols="12" md="9">
           <v-textarea
             label="Description"
             rows="3"
           />
+        </v-col>
+      </v-row>
+      <v-row>
+        <v-col md="5">
+          <v-autocomplete v-model="selectedContact" :items="contacts" label="Contact" clearable :item-text="(x) => x.toString()" />
+        </v-col>
+        <v-col md="1">
+          <v-btn v-if="isLoggedIn" small @click="selectCurrentUserAsContact">
+            {{ labelForSelectMeButton }}
+          </v-btn>
         </v-col>
       </v-row>
       <v-row>
@@ -290,16 +289,6 @@ permissions and limitations under the Licence.
       </v-row>
     </v-card>
     <v-card v-else-if="otherChosen" class="pa-2">
-      <v-row>
-        <v-col md="5">
-          <v-autocomplete v-model="selectedContact" :items="contacts" label="Contact" clearable :item-text="(x) => x.toString()" />
-        </v-col>
-        <v-col md="1">
-          <v-btn v-if="isLoggedIn" @click="selectCurrentUserAsContact">
-            {{ labelForSelectMeButton }}
-          </v-btn>
-        </v-col>
-      </v-row>
       <v-form
         ref="datesForm"
         v-model="datesAreValid"
@@ -374,6 +363,16 @@ permissions and limitations under the Licence.
             label="Description"
             rows="3"
           />
+        </v-col>
+      </v-row>
+      <v-row>
+        <v-col md="5">
+          <v-autocomplete v-model="selectedContact" :items="contacts" label="Contact" clearable :item-text="(x) => x.toString()" />
+        </v-col>
+        <v-col md="1">
+          <v-btn v-if="isLoggedIn" small @click="selectCurrentUserAsContact">
+            {{ labelForSelectMeButton }}
+          </v-btn>
         </v-col>
       </v-row>
       <v-row>
