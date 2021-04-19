@@ -123,16 +123,16 @@ permissions and limitations under the Licence.
       </v-form>
       <v-row>
         <v-col>
-          <div v-if="attachments.length > 0">
-            <p>Affacted measured quantities</p>
-            <v-checkbox
-              v-for="ms in measuredQuantities"
-              :key="ms.id"
-              :label="ms.label"
-            />
-          </div>
+          <v-select
+            multiple
+            clearable
+            label="Affected measured quantities"
+            :items="measuredQuantities"
+            :item-text="(x) => x.label"
+          />
         </v-col>
       </v-row>
+
       <v-row>
         <v-col md="6">
           <v-select :items="contacts" label="Contact" />
@@ -148,14 +148,14 @@ permissions and limitations under the Licence.
       </v-row>
       <v-row>
         <v-col>
-          <div v-if="attachments.length > 0">
-            <p>Attachments</p>
-            <v-checkbox
-              v-for="attachment in attachments"
-              :key="attachment.id"
-              :label="attachment.label"
-            />
-          </div>
+          <v-select
+            v-if="attachments.length > 0"
+            multiple
+            clearable
+            label="Attachments"
+            :items="attachments"
+            :item-text="(x) => x.label"
+          />
         </v-col>
       </v-row>
       <v-row>
@@ -247,233 +247,14 @@ permissions and limitations under the Licence.
       </v-row>
       <v-row>
         <v-col>
-          <div v-if="attachments.length > 0">
-            <p>Attachments</p>
-            <v-checkbox
-              v-for="attachment in attachments"
-              :key="attachment.id"
-              :label="attachment.label"
-            />
-          </div>
-        </v-col>
-      </v-row>
-      <v-row>
-        <v-col cols="12">
-          <v-spacer />
-          <v-btn
-            v-if="isLoggedIn"
-            ref="cancelButton"
-            text
-            small
-            :to="'/devices/' + deviceId + '/actions'"
-          >
-            Cancel
-          </v-btn>
-          <v-btn
-            v-if="isLoggedIn"
-            color="green"
-            small
-          >
-            Add
-          </v-btn>
-        </v-col>
-      </v-row>
-    </v-card>
-    <v-card v-else-if="mountChosen" class="pa-2">
-      <v-row>
-        <v-col md="9">
-          <v-select :items="configurations" :item-text="(x) => x.label" label="Configuration" />
-        </v-col>
-      </v-row>
-      <v-row>
-        <v-col md="9">
-          <v-select :items="platforms" :item-text="(x) => x.shortName" label="Parent platform" />
-        </v-col>
-      </v-row>
-      <v-row>
-        <v-col
-          cols="12"
-          md="2"
-        >
-          <v-text-field
-            label="Offset (x)"
-            type="number"
-            @wheel.prevent
+          <v-select
+            v-if="attachments.length > 0"
+            multiple
+            clearable
+            label="Attachments"
+            :items="attachments"
+            :item-text="(x) => x.label"
           />
-        </v-col>
-        <v-col
-          cols="12"
-          md="2"
-        >
-          <v-text-field
-            label="Offset (y)"
-            type="number"
-            @wheel.prevent
-          />
-        </v-col>
-        <v-col
-          cols="12"
-          md="2"
-        >
-          <v-text-field
-            label="Offset (z)"
-            type="number"
-            @wheel.prevent
-          />
-        </v-col>
-      </v-row>
-      <v-row>
-        <v-col md="6">
-          <v-select :items="contacts" label="Contact" />
-        </v-col>
-      </v-row>
-      <v-form
-        ref="datesForm"
-        v-model="datesAreValid"
-        @submit.prevent
-      >
-        <v-row>
-          <v-col cols="12" md="3">
-            <v-menu
-              v-model="startDateMenu"
-              :close-on-content-click="false"
-              :nudge-right="40"
-              transition="scale-transition"
-              offset-y
-              min-width="290px"
-            >
-              <template v-slot:activator="{ on, attrs }">
-                <v-text-field
-                  :value="getStartDate()"
-                  :rules="[rules.startDate]"
-                  v-bind="attrs"
-                  label="Start date"
-                  clearable
-                  prepend-icon="mdi-calendar-range"
-                  readonly
-                  v-on="on"
-                  @click:clear="setStartDateAndValidate(null)"
-                />
-              </template>
-              <v-date-picker
-                :value="getStartDate()"
-                first-day-of-week="1"
-                :show-week="true"
-                @input="setStartDateAndValidate"
-              />
-            </v-menu>
-          </v-col>
-        </v-row>
-      </v-form>
-      <v-row>
-        <v-col cols="12" md="9">
-          <v-textarea
-            label="Description"
-            rows="3"
-          />
-        </v-col>
-      </v-row>
-      <v-row>
-        <v-col>
-          <div v-if="attachments.length > 0">
-            <p>Attachments</p>
-            <v-checkbox
-              v-for="attachment in attachments"
-              :key="attachment.id"
-              :label="attachment.label"
-            />
-          </div>
-        </v-col>
-      </v-row>
-      <v-row>
-        <v-col cols="12">
-          <v-spacer />
-          <v-btn
-            v-if="isLoggedIn"
-            ref="cancelButton"
-            text
-            small
-            :to="'/devices/' + deviceId + '/actions'"
-          >
-            Cancel
-          </v-btn>
-          <v-btn
-            v-if="isLoggedIn"
-            color="green"
-            small
-          >
-            Add
-          </v-btn>
-        </v-col>
-      </v-row>
-    </v-card>
-    <v-card v-else-if="unmountChosen" class="pa-2">
-      <v-row>
-        <v-col md="9">
-          <v-select :items="configurations" :item-text="(x) => x.label" label="Configuration" />
-        </v-col>
-      </v-row>
-      <v-row>
-        <v-col md="6">
-          <v-select :items="contacts" label="Contact" />
-        </v-col>
-      </v-row>
-      <v-form
-        ref="datesForm"
-        v-model="datesAreValid"
-        @submit.prevent
-      >
-        <v-row>
-          <v-col cols="12" md="3">
-            <v-menu
-              v-model="startDateMenu"
-              :close-on-content-click="false"
-              :nudge-right="40"
-              transition="scale-transition"
-              offset-y
-              min-width="290px"
-            >
-              <template v-slot:activator="{ on, attrs }">
-                <v-text-field
-                  :value="getEndDate()"
-                  :rules="[rules.startDate]"
-                  v-bind="attrs"
-                  label="End date"
-                  clearable
-                  prepend-icon="mdi-calendar-range"
-                  readonly
-                  v-on="on"
-                  @click:clear="setEndDateAndValidate(null)"
-                />
-              </template>
-              <v-date-picker
-                :value="getEndDate()"
-                first-day-of-week="1"
-                :show-week="true"
-                @input="setStartDateAndValidate"
-              />
-            </v-menu>
-          </v-col>
-        </v-row>
-      </v-form>
-      <v-row>
-        <v-col cols="12" md="9">
-          <v-textarea
-            label="Description"
-            rows="3"
-          />
-        </v-col>
-      </v-row>
-      <v-row>
-        <v-col>
-          <div v-if="attachments.length > 0">
-            <p>Attachments</p>
-            <v-checkbox
-              v-for="attachment in attachments"
-              :key="attachment.id"
-              :label="attachment.label"
-            />
-          </div>
         </v-col>
       </v-row>
       <v-row>
@@ -587,14 +368,14 @@ permissions and limitations under the Licence.
       </v-row>
       <v-row>
         <v-col>
-          <div v-if="attachments.length > 0">
-            <p>Attachments</p>
-            <v-checkbox
-              v-for="attachment in attachments"
-              :key="attachment.id"
-              :label="attachment.label"
-            />
-          </div>
+          <v-select
+            v-if="attachments.length > 0"
+            multiple
+            clearable
+            label="Attachments"
+            :items="attachments"
+            :item-text="(x) => x.label"
+          />
         </v-col>
       </v-row>
       <v-row>
@@ -641,8 +422,6 @@ import { dateToString, stringToDate } from '@/utils/dateHelper'
 
 const ID_DEVICE_CALIBRATION = 1
 const ID_SOFTWARE_UPDATE = 2
-const ID_MOUNT_DEVICE = 3
-const ID_UNMOUNT_DEVICE = 4
 const ID_OTHER = 5
 
 interface IDeviceActionType {
@@ -663,8 +442,6 @@ export default class ActionAddPage extends Vue {
   private kindOfActionChoices = [
     { id: ID_DEVICE_CALIBRATION, label: 'Device calibration' },
     { id: ID_SOFTWARE_UPDATE, label: 'Software update' },
-    { id: ID_MOUNT_DEVICE, label: 'Mount' },
-    { id: ID_UNMOUNT_DEVICE, label: 'Unmount' },
     { id: ID_OTHER, label: 'Other...' }
   ]
 
@@ -766,14 +543,6 @@ export default class ActionAddPage extends Vue {
 
   get softwareUpdateChosen () {
     return this.chosenKindOfAction === ID_SOFTWARE_UPDATE
-  }
-
-  get mountChosen () {
-    return this.chosenKindOfAction === ID_MOUNT_DEVICE
-  }
-
-  get unmountChosen () {
-    return this.chosenKindOfAction === ID_UNMOUNT_DEVICE
   }
 
   get otherChosen () {
