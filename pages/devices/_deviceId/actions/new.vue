@@ -63,7 +63,7 @@ permissions and limitations under the Licence.
               <template v-slot:activator="{ on, attrs }">
                 <v-text-field
                   :value="getStartDate()"
-                  :rules="[rules.startDate]"
+                  :rules="[rules.startDate, rules.currentCalibrationDateNotNull]"
                   v-bind="attrs"
                   label="Current calibration date"
                   clearable
@@ -140,16 +140,30 @@ permissions and limitations under the Licence.
           />
         </v-col>
       </v-row>
-      <v-row>
-        <v-col md="5">
-          <v-autocomplete v-model="selectedContact" :items="contacts" label="Contact" clearable :item-text="(x) => x.toString()" />
-        </v-col>
-        <v-col md="1">
-          <v-btn v-if="isLoggedIn" small @click="selectCurrentUserAsContact">
-            {{ labelForSelectMeButton }}
-          </v-btn>
-        </v-col>
-      </v-row>
+      <v-form
+        ref="contactForm"
+        v-model="contactIsValid"
+        @submit.prevent
+      >
+        <v-row>
+          <v-col md="5">
+            <v-autocomplete
+              v-model="selectedContact"
+              :items="contacts"
+              label="Contact"
+              clearable
+              required
+              :item-text="(x) => x.toString()"
+              :rules="[rules.contactNotNull]"
+            />
+          </v-col>
+          <v-col md="1">
+            <v-btn v-if="isLoggedIn" small @click="selectCurrentUserAsContact">
+              {{ labelForSelectMeButton }}
+            </v-btn>
+          </v-col>
+        </v-row>
+      </v-form>
       <v-row>
         <v-col>
           <v-select
@@ -178,6 +192,7 @@ permissions and limitations under the Licence.
             v-if="isLoggedIn"
             color="green"
             small
+            @click="addDeviceCalibrationAction"
           >
             Add
           </v-btn>
@@ -203,7 +218,7 @@ permissions and limitations under the Licence.
               <template v-slot:activator="{ on, attrs }">
                 <v-text-field
                   :value="getStartDate()"
-                  :rules="[rules.startDate]"
+                  :rules="[rules.startDate, rules.updateDateNotNull]"
                   v-bind="attrs"
                   label="Date"
                   clearable
@@ -223,11 +238,17 @@ permissions and limitations under the Licence.
           </v-col>
         </v-row>
       </v-form>
-      <v-row>
-        <v-col md="6">
-          <v-select :items="softwareTypes" :item-text="(x) => x.name" label="Software type" />
-        </v-col>
-      </v-row>
+      <v-form
+        ref="softwareTypeForm"
+        v-model="softwareTypeIsValid"
+        @submit.prevent
+      >
+        <v-row>
+          <v-col md="6">
+            <v-select :items="softwareTypes" clearable :item-text="(x) => x.name" label="Software type" :rules="[rules.softwareTypeNotNull]" />
+          </v-col>
+        </v-row>
+      </v-form>
       <v-row>
         <v-col md="3">
           <v-text-field label="Version" placeholder="1.2.3" />
@@ -244,16 +265,30 @@ permissions and limitations under the Licence.
           />
         </v-col>
       </v-row>
-      <v-row>
-        <v-col md="5">
-          <v-autocomplete v-model="selectedContact" :items="contacts" label="Contact" clearable :item-text="(x) => x.toString()" />
-        </v-col>
-        <v-col md="1">
-          <v-btn v-if="isLoggedIn" small @click="selectCurrentUserAsContact">
-            {{ labelForSelectMeButton }}
-          </v-btn>
-        </v-col>
-      </v-row>
+      <v-form
+        ref="contactForm"
+        v-model="contactIsValid"
+        @submit.prevent
+      >
+        <v-row>
+          <v-col md="5">
+            <v-autocomplete
+              v-model="selectedContact"
+              :items="contacts"
+              label="Contact"
+              clearable
+              required
+              :item-text="(x) => x.toString()"
+              :rules="[rules.contactNotNull]"
+            />
+          </v-col>
+          <v-col md="1">
+            <v-btn v-if="isLoggedIn" small @click="selectCurrentUserAsContact">
+              {{ labelForSelectMeButton }}
+            </v-btn>
+          </v-col>
+        </v-row>
+      </v-form>
       <v-row>
         <v-col>
           <v-select
@@ -282,6 +317,7 @@ permissions and limitations under the Licence.
             v-if="isLoggedIn"
             color="green"
             small
+            @click="addDeviceSoftwareUpdateAction"
           >
             Add
           </v-btn>
@@ -307,7 +343,7 @@ permissions and limitations under the Licence.
               <template v-slot:activator="{ on, attrs }">
                 <v-text-field
                   :value="getStartDate()"
-                  :rules="[rules.startDate]"
+                  :rules="[rules.startDate, rules.startDateNotNull]"
                   v-bind="attrs"
                   label="Start date"
                   clearable
@@ -365,16 +401,30 @@ permissions and limitations under the Licence.
           />
         </v-col>
       </v-row>
-      <v-row>
-        <v-col md="5">
-          <v-autocomplete v-model="selectedContact" :items="contacts" label="Contact" clearable :item-text="(x) => x.toString()" />
-        </v-col>
-        <v-col md="1">
-          <v-btn v-if="isLoggedIn" small @click="selectCurrentUserAsContact">
-            {{ labelForSelectMeButton }}
-          </v-btn>
-        </v-col>
-      </v-row>
+      <v-form
+        ref="contactForm"
+        v-model="contactIsValid"
+        @submit.prevent
+      >
+        <v-row>
+          <v-col md="5">
+            <v-autocomplete
+              v-model="selectedContact"
+              :items="contacts"
+              label="Contact"
+              clearable
+              required
+              :item-text="(x) => x.toString()"
+              :rules="[rules.contactNotNull]"
+            />
+          </v-col>
+          <v-col md="1">
+            <v-btn v-if="isLoggedIn" small @click="selectCurrentUserAsContact">
+              {{ labelForSelectMeButton }}
+            </v-btn>
+          </v-col>
+        </v-row>
+      </v-form>
       <v-row>
         <v-col>
           <v-select
@@ -403,6 +453,7 @@ permissions and limitations under the Licence.
             v-if="isLoggedIn"
             color="green"
             small
+            @click="addGenericDeviceAction"
           >
             Add
           </v-btn>
@@ -445,10 +496,17 @@ interface IOptionsForActionType {
 export default class ActionAddPage extends Vue {
   private rules: Object = {
     startDate: this.validateInputForStartDate,
-    endDate: this.validateInputForEndDate
+    endDate: this.validateInputForEndDate,
+    contactNotNull: this.mustBeProvided('Contact'),
+    currentCalibrationDateNotNull: this.mustBeProvided('Current calibration date'),
+    updateDateNotNull: this.mustBeProvided('Update date'),
+    startDateNotNull: this.mustBeProvided('Start date'),
+    softwareTypeNotNull: this.mustBeProvided('Software type')
   }
 
   private datesAreValid = true
+  private contactIsValid = true
+  private softwareTypeIsValid = true
 
   private optionsForActionType: IOptionsForActionType[] = [
     { id: 'device-calibration', kind: 'device_calibration', name: 'Device calibration' },
@@ -603,6 +661,16 @@ export default class ActionAddPage extends Vue {
     return 'End date must not be before start date'
   }
 
+  mustBeProvided (fieldname: string): (v: any) => boolean | string {
+    const innerFunc: (v: any) => boolean | string = function (v: any) {
+      if (v == null || v === '') {
+        return fieldname + ' must be provided'
+      }
+      return true
+    }
+    return innerFunc
+  }
+
   get isLoggedIn (): boolean {
     return this.$store.getters['oidc/isAuthenticated']
   }
@@ -610,5 +678,40 @@ export default class ActionAddPage extends Vue {
   get deviceId (): string {
     return this.$route.params.deviceId
   }
+
+  addDeviceCalibrationAction () {
+    if (!(this.$refs.datesForm as Vue & { validate: () => boolean }).validate()) {
+      return
+    }
+    if (!(this.$refs.contactForm as Vue & { validate: () => boolean}).validate()) {
+      return
+    }
+
+    this.$store.commit('snackbar/setError', 'Not implemented yet')
+  }
+
+  addDeviceSoftwareUpdateAction () {
+    if (!(this.$refs.datesForm as Vue & { validate: () => boolean }).validate()) {
+      return
+    }
+    if (!(this.$refs.softwareTypeForm as Vue & { validate: () => boolean }).validate()) {
+      return
+    }
+    if (!(this.$refs.contactForm as Vue & { validate: () => boolean}).validate()) {
+      return
+    }
+    this.$store.commit('snackbar/setError', 'Not implemented yet')
+  }
+
+  addGenericDeviceAction () {
+    if (!(this.$refs.datesForm as Vue & { validate: () => boolean }).validate()) {
+      return
+    }
+    if (!(this.$refs.contactForm as Vue & { validate: () => boolean}).validate()) {
+      return
+    }
+    this.$store.commit('snackbar/setError', 'Not implemented yet')
+  }
 }
+
 </script>
