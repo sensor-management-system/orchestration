@@ -39,7 +39,7 @@ permissions and limitations under the Licence.
             :item-text="(x) => x.name"
             :item-value="(x) => x"
             clearable
-            label="Kind of action"
+            label="Action Type"
           />
         </v-col>
       </v-row>
@@ -134,8 +134,13 @@ permissions and limitations under the Licence.
       </v-row>
 
       <v-row>
-        <v-col md="6">
-          <v-select :items="contacts" label="Contact" />
+        <v-col md="5">
+          <v-select v-model="selectedContact" :items="contacts" label="Contact" />
+        </v-col>
+        <v-col md="1">
+          <v-btn v-if="isLoggedIn" @click="selectCurrentUserAsContact">
+            {{ labelForSelectMeButton }}
+          </v-btn>
         </v-col>
       </v-row>
       <v-row>
@@ -195,8 +200,13 @@ permissions and limitations under the Licence.
         </v-col>
       </v-row>
       <v-row>
-        <v-col md="6">
-          <v-select :items="contacts" label="Contact" />
+        <v-col md="5">
+          <v-select v-model="selectedContact" :items="contacts" label="Contact" />
+        </v-col>
+        <v-col md="1">
+          <v-btn v-if="isLoggedIn" @click="selectCurrentUserAsContact">
+            {{ labelForSelectMeButton }}
+          </v-btn>
         </v-col>
       </v-row>
       <v-form
@@ -281,8 +291,13 @@ permissions and limitations under the Licence.
     </v-card>
     <v-card v-else-if="otherChosen" class="pa-2">
       <v-row>
-        <v-col md="6">
-          <v-select :items="contacts" label="Contact" />
+        <v-col md="5">
+          <v-select v-model="selectedContact" :items="contacts" label="Contact" />
+        </v-col>
+        <v-col md="1">
+          <v-btn v-if="isLoggedIn" @click="selectCurrentUserAsContact">
+            {{ labelForSelectMeButton }}
+          </v-btn>
         </v-col>
       </v-row>
       <v-form
@@ -397,7 +412,7 @@ permissions and limitations under the Licence.
     </v-card>
     <v-card v-else class="pa-2" flat>
       <v-card-text style="text--grey text--center">
-        <i><small>Please choose the kind of action.</small></i>
+        <i><small>Please choose the action type.</small></i>
       </v-card-text>
     </v-card>
   </div>
@@ -445,11 +460,9 @@ export default class ActionAddPage extends Vue {
     { id: 'generic-action-2', kind: 'generic_device_action', /* uri: 'actionTypes/device_maintainance', */ name: 'Device maintainance' }
   ]
 
-  private contacts = [
-    Contact.createWithIdEMailAndNames('1', 'max.mustermann@mail.com', 'Max', 'Mustermann', ''),
-    Contact.createWithIdEMailAndNames('1', 'mix.mustermann@mail.com', 'Mix', 'Mustermann', ''),
-    Contact.createWithIdEMailAndNames('1', 'mox.mustermann@mail.com', 'Mox', 'Mustermann', '')
-  ]
+  private contacts: Contact[] = []
+  private selectedContact: Contact | null = null
+  private readonly labelForSelectMeButton = 'Select me'
 
   private attachments = [
     Attachment.createFromObject({
@@ -511,6 +524,26 @@ export default class ActionAddPage extends Vue {
   private startDate: DateTime | null = null
   private endDate: DateTime | null = null
 
+  mounted () {
+    this.$api.contacts.findAll().then((foundContacts) => {
+      this.contacts = foundContacts
+    }).catch((_error) => {
+      this.$store.commit('snackbar/setError', 'Failed to fetch contacts')
+    })
+  }
+
+  selectCurrentUserAsContact () {
+    const currentUserMail = this.$store.getters['oidc/userEmail']
+    if (currentUserMail) {
+      const userIndex = this.contacts.findIndex(c => c.email === currentUserMail)
+      if (userIndex > -1) {
+        this.selectedContact = this.contacts[userIndex]
+        return
+      }
+    }
+    this.$store.commit('snackbar/setError', 'No contact found with your data')
+  }
+
   get chosenKindOfAction () {
     return this.$data._chosenKindOfAction
   }
@@ -529,9 +562,8 @@ export default class ActionAddPage extends Vue {
     this.endDate = null
     this.startDateMenu = false
     this.endDateMenu = false
+    this.selectedContact = null
     // TODO: Once their value is tracked in a slot of this component
-    // actionType
-    // contact
   }
 
   get deviceCalibrationChosen () {
