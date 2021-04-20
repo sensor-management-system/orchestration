@@ -30,439 +30,335 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <v-card class="pa-2 mb-3">
-      <v-row>
-        <v-col>
-          <v-select
-            v-model="chosenKindOfAction"
-            :items="optionsForActionType"
-            :item-text="(x) => x.name"
-            :item-value="(x) => x"
-            clearable
-            label="Action Type"
-          />
-        </v-col>
-      </v-row>
-    </v-card>
-    <v-card v-if="deviceCalibrationChosen" class="pa-2">
-      <v-form
-        ref="datesForm"
-        v-model="datesAreValid"
-        @submit.prevent
+    <v-card
+      flat
+    >
+      <v-card-text>
+        <v-select
+          v-model="chosenKindOfAction"
+          :items="optionsForActionType"
+          :item-text="(x) => x.name"
+          :item-value="(x) => x"
+          clearable
+          label="Action Type"
+          :hint="!chosenKindOfAction ? 'Please select an action type' : ''"
+          persistent-hint
+        />
+      </v-card-text>
+      <!-- deviceCalibration -->
+      <v-card-text
+        v-if="deviceCalibrationChosen"
       >
-        <v-row>
-          <v-col cols="12" md="3">
-            <v-menu
-              v-model="startDateMenu"
-              :close-on-content-click="false"
-              :nudge-right="40"
-              transition="scale-transition"
-              offset-y
-              min-width="290px"
-            >
-              <template v-slot:activator="{ on, attrs }">
-                <v-text-field
+        <v-form
+          ref="datesForm"
+          v-model="datesAreValid"
+          @submit.prevent
+        >
+          <v-row>
+            <v-col cols="12" md="6">
+              <v-menu
+                v-model="startDateMenu"
+                :close-on-content-click="false"
+                :nudge-right="40"
+                transition="scale-transition"
+                offset-y
+                min-width="290px"
+              >
+                <template v-slot:activator="{ on, attrs }">
+                  <v-text-field
+                    :value="getStartDate()"
+                    :rules="[rules.startDate, rules.currentCalibrationDateNotNull]"
+                    v-bind="attrs"
+                    label="Current calibration date"
+                    clearable
+                    prepend-icon="mdi-calendar-range"
+                    readonly
+                    v-on="on"
+                    @click:clear="setStartDateAndValidate(null)"
+                  />
+                </template>
+                <v-date-picker
                   :value="getStartDate()"
-                  :rules="[rules.startDate, rules.currentCalibrationDateNotNull]"
-                  v-bind="attrs"
-                  label="Current calibration date"
-                  clearable
-                  prepend-icon="mdi-calendar-range"
-                  readonly
-                  v-on="on"
-                  @click:clear="setStartDateAndValidate(null)"
+                  first-day-of-week="1"
+                  :show-week="true"
+                  @input="setStartDateAndValidate"
                 />
-              </template>
-              <v-date-picker
-                :value="getStartDate()"
-                first-day-of-week="1"
-                :show-week="true"
-                @input="setStartDateAndValidate"
-              />
-            </v-menu>
-          </v-col>
-          <v-col cols="12" md="3">
-            <v-menu
-              v-model="endDateMenu"
-              :close-on-content-click="false"
-              :nudge-right="40"
-              transition="scale-transition"
-              offset-y
-              min-width="290px"
-            >
-              <template v-slot:activator="{ on, attrs }">
-                <v-text-field
+              </v-menu>
+            </v-col>
+            <v-col cols="12" md="6">
+              <v-menu
+                v-model="endDateMenu"
+                :close-on-content-click="false"
+                :nudge-right="40"
+                transition="scale-transition"
+                offset-y
+                min-width="290px"
+              >
+                <template v-slot:activator="{ on, attrs }">
+                  <v-text-field
+                    :value="getEndDate()"
+                    :rules="[rules.endDate]"
+                    v-bind="attrs"
+                    label="Next calibration date"
+                    clearable
+                    prepend-icon="mdi-calendar-range"
+                    readonly
+                    v-on="on"
+                    @click:clear="setEndDateAndValidate(null)"
+                  />
+                </template>
+                <v-date-picker
                   :value="getEndDate()"
-                  :rules="[rules.endDate]"
-                  v-bind="attrs"
-                  label="Next calibration date"
-                  clearable
-                  prepend-icon="mdi-calendar-range"
-                  readonly
-                  v-on="on"
-                  @click:clear="setEndDateAndValidate(null)"
+                  first-day-of-week="1"
+                  :show-week="true"
+                  @input="setEndDateAndValidate"
                 />
-              </template>
-              <v-date-picker
-                :value="getEndDate()"
-                first-day-of-week="1"
-                :show-week="true"
-                @input="setEndDateAndValidate"
+              </v-menu>
+            </v-col>
+          </v-row>
+          <v-row>
+            <v-col md="6">
+              <v-text-field label="Formula" />
+            </v-col>
+            <v-col>
+              <v-text-field label="Value" />
+            </v-col>
+          </v-row>
+          <v-row>
+            <v-col>
+              <v-select
+                multiple
+                clearable
+                label="Affected measured quantities"
+                :items="measuredQuantities"
+                :item-text="(x) => x.label"
               />
-            </v-menu>
-          </v-col>
-        </v-row>
-      </v-form>
-      <v-row>
-        <v-col md="6">
-          <v-text-field label="formula" />
-        </v-col>
-        <v-col>
-          <v-text-field label="value" />
-        </v-col>
-      </v-row>
-      <v-row>
-        <v-col>
-          <v-select
-            multiple
-            clearable
-            label="Affected measured quantities"
-            :items="measuredQuantities"
-            :item-text="(x) => x.label"
-          />
-        </v-col>
-      </v-row>
-      <v-row>
-        <v-col cols="12" md="9">
-          <v-textarea
-            label="Description"
-            rows="3"
-          />
-        </v-col>
-      </v-row>
-      <v-form
-        ref="contactForm"
-        v-model="contactIsValid"
-        @submit.prevent
+            </v-col>
+          </v-row>
+        </v-form>
+      </v-card-text>
+      <!-- softwareUpdate -->
+      <v-card-text
+        v-if="softwareUpdateChosen"
       >
-        <v-row>
-          <v-col md="5">
-            <v-autocomplete
-              v-model="selectedContact"
-              :items="contacts"
-              label="Contact"
-              clearable
-              required
-              :item-text="(x) => x.toString()"
-              :rules="[rules.contactNotNull]"
-            />
-          </v-col>
-          <v-col md="1">
-            <v-btn v-if="isLoggedIn" small @click="selectCurrentUserAsContact">
-              {{ labelForSelectMeButton }}
-            </v-btn>
-          </v-col>
-        </v-row>
-      </v-form>
-      <v-row>
-        <v-col>
-          <v-select
-            v-if="attachments.length > 0"
-            multiple
-            clearable
-            label="Attachments"
-            :items="attachments"
-            :item-text="(x) => x.label"
-          />
-        </v-col>
-      </v-row>
-      <v-row>
-        <v-col cols="12">
-          <v-spacer />
-          <v-btn
-            v-if="isLoggedIn"
-            ref="cancelButton"
-            text
-            small
-            :to="'/devices/' + deviceId + '/actions'"
-          >
-            Cancel
-          </v-btn>
-          <v-btn
-            v-if="isLoggedIn"
-            color="green"
-            small
-            @click="addDeviceCalibrationAction"
-          >
-            Add
-          </v-btn>
-        </v-col>
-      </v-row>
-    </v-card>
-    <v-card v-else-if="softwareUpdateChosen" class="pa-2">
-      <v-form
-        ref="datesForm"
-        v-model="datesAreValid"
-        @submit.prevent
-      >
-        <v-row>
-          <v-col cols="12" md="3">
-            <v-menu
-              v-model="startDateMenu"
-              :close-on-content-click="false"
-              :nudge-right="40"
-              transition="scale-transition"
-              offset-y
-              min-width="290px"
-            >
-              <template v-slot:activator="{ on, attrs }">
-                <v-text-field
+        <v-form
+          ref="datesForm"
+          v-model="datesAreValid"
+          @submit.prevent
+        >
+          <v-row>
+            <v-col cols="12" md="6">
+              <v-menu
+                v-model="startDateMenu"
+                :close-on-content-click="false"
+                :nudge-right="40"
+                transition="scale-transition"
+                offset-y
+                min-width="290px"
+              >
+                <template v-slot:activator="{ on, attrs }">
+                  <v-text-field
+                    :value="getStartDate()"
+                    :rules="[rules.startDate, rules.updateDateNotNull]"
+                    v-bind="attrs"
+                    label="Date"
+                    clearable
+                    prepend-icon="mdi-calendar-range"
+                    readonly
+                    v-on="on"
+                    @click:clear="setStartDateAndValidate(null)"
+                  />
+                </template>
+                <v-date-picker
                   :value="getStartDate()"
-                  :rules="[rules.startDate, rules.updateDateNotNull]"
-                  v-bind="attrs"
-                  label="Date"
-                  clearable
-                  prepend-icon="mdi-calendar-range"
-                  readonly
-                  v-on="on"
-                  @click:clear="setStartDateAndValidate(null)"
+                  first-day-of-week="1"
+                  :show-week="true"
+                  @input="setStartDateAndValidate"
                 />
-              </template>
-              <v-date-picker
-                :value="getStartDate()"
-                first-day-of-week="1"
-                :show-week="true"
-                @input="setStartDateAndValidate"
-              />
-            </v-menu>
-          </v-col>
-        </v-row>
-      </v-form>
-      <v-form
-        ref="softwareTypeForm"
-        v-model="softwareTypeIsValid"
-        @submit.prevent
-      >
-        <v-row>
-          <v-col md="6">
-            <v-select :items="softwareTypes" clearable :item-text="(x) => x.name" label="Software type" :rules="[rules.softwareTypeNotNull]" />
-          </v-col>
-        </v-row>
-      </v-form>
-      <v-row>
-        <v-col md="3">
-          <v-text-field label="Version" placeholder="1.2.3" />
-        </v-col>
-        <v-col md="9">
-          <v-text-field label="Repository URL" placeholder="https://github.com/" />
-        </v-col>
-      </v-row>
-      <v-row>
-        <v-col cols="12" md="9">
-          <v-textarea
-            label="Description"
-            rows="3"
-          />
-        </v-col>
-      </v-row>
-      <v-form
-        ref="contactForm"
-        v-model="contactIsValid"
-        @submit.prevent
-      >
-        <v-row>
-          <v-col md="5">
-            <v-autocomplete
-              v-model="selectedContact"
-              :items="contacts"
-              label="Contact"
-              clearable
-              required
-              :item-text="(x) => x.toString()"
-              :rules="[rules.contactNotNull]"
-            />
-          </v-col>
-          <v-col md="1">
-            <v-btn v-if="isLoggedIn" small @click="selectCurrentUserAsContact">
-              {{ labelForSelectMeButton }}
-            </v-btn>
-          </v-col>
-        </v-row>
-      </v-form>
-      <v-row>
-        <v-col>
-          <v-select
-            v-if="attachments.length > 0"
-            multiple
-            clearable
-            label="Attachments"
-            :items="attachments"
-            :item-text="(x) => x.label"
-          />
-        </v-col>
-      </v-row>
-      <v-row>
-        <v-col cols="12">
-          <v-spacer />
-          <v-btn
-            v-if="isLoggedIn"
-            ref="cancelButton"
-            text
-            small
-            :to="'/devices/' + deviceId + '/actions'"
-          >
-            Cancel
-          </v-btn>
-          <v-btn
-            v-if="isLoggedIn"
-            color="green"
-            small
-            @click="addDeviceSoftwareUpdateAction"
-          >
-            Add
-          </v-btn>
-        </v-col>
-      </v-row>
-    </v-card>
-    <v-card v-else-if="otherChosen" class="pa-2">
-      <v-form
-        ref="datesForm"
-        v-model="datesAreValid"
-        @submit.prevent
-      >
+              </v-menu>
+            </v-col>
+          </v-row>
+        </v-form>
+        <v-form
+          ref="softwareTypeForm"
+          v-model="softwareTypeIsValid"
+          @submit.prevent
+        >
+          <v-row>
+            <v-col cols="12" md="6">
+              <v-select :items="softwareTypes" clearable :item-text="(x) => x.name" label="Software type" :rules="[rules.softwareTypeNotNull]" />
+            </v-col>
+          </v-row>
+        </v-form>
         <v-row>
           <v-col cols="12" md="3">
-            <v-menu
-              v-model="startDateMenu"
-              :close-on-content-click="false"
-              :nudge-right="40"
-              transition="scale-transition"
-              offset-y
-              min-width="290px"
-            >
-              <template v-slot:activator="{ on, attrs }">
-                <v-text-field
+            <v-text-field label="Version" placeholder="1.2.3" />
+          </v-col>
+          <v-col cols="12" md="9">
+            <v-text-field label="Repository URL" placeholder="https://github.com/" />
+          </v-col>
+        </v-row>
+      </v-card-text>
+      <v-card-text
+        v-if="otherChosen"
+      >
+        <v-form
+          ref="datesForm"
+          v-model="datesAreValid"
+          @submit.prevent
+        >
+          <v-row>
+            <v-col cols="12" md="6">
+              <v-menu
+                v-model="startDateMenu"
+                :close-on-content-click="false"
+                :nudge-right="40"
+                transition="scale-transition"
+                offset-y
+                min-width="290px"
+              >
+                <template v-slot:activator="{ on, attrs }">
+                  <v-text-field
+                    :value="getStartDate()"
+                    :rules="[rules.startDate, rules.startDateNotNull]"
+                    v-bind="attrs"
+                    label="Start date"
+                    clearable
+                    prepend-icon="mdi-calendar-range"
+                    readonly
+                    v-on="on"
+                    @click:clear="setStartDateAndValidate(null)"
+                  />
+                </template>
+                <v-date-picker
                   :value="getStartDate()"
-                  :rules="[rules.startDate, rules.startDateNotNull]"
-                  v-bind="attrs"
-                  label="Start date"
-                  clearable
-                  prepend-icon="mdi-calendar-range"
-                  readonly
-                  v-on="on"
-                  @click:clear="setStartDateAndValidate(null)"
+                  first-day-of-week="1"
+                  :show-week="true"
+                  @input="setStartDateAndValidate"
                 />
-              </template>
-              <v-date-picker
-                :value="getStartDate()"
-                first-day-of-week="1"
-                :show-week="true"
-                @input="setStartDateAndValidate"
-              />
-            </v-menu>
-          </v-col>
-          <v-col cols="12" md="3">
-            <v-menu
-              v-model="endDateMenu"
-              :close-on-content-click="false"
-              :nudge-right="40"
-              transition="scale-transition"
-              offset-y
-              min-width="290px"
-            >
-              <template v-slot:activator="{ on, attrs }">
-                <v-text-field
+              </v-menu>
+            </v-col>
+            <v-col cols="12" md="6">
+              <v-menu
+                v-model="endDateMenu"
+                :close-on-content-click="false"
+                :nudge-right="40"
+                transition="scale-transition"
+                offset-y
+                min-width="290px"
+              >
+                <template v-slot:activator="{ on, attrs }">
+                  <v-text-field
+                    :value="getEndDate()"
+                    :rules="[rules.endDate]"
+                    v-bind="attrs"
+                    label="End date"
+                    clearable
+                    prepend-icon="mdi-calendar-range"
+                    readonly
+                    v-on="on"
+                    @click:clear="setEndDateAndValidate(null)"
+                  />
+                </template>
+                <v-date-picker
                   :value="getEndDate()"
-                  :rules="[rules.endDate]"
-                  v-bind="attrs"
-                  label="End date"
-                  clearable
-                  prepend-icon="mdi-calendar-range"
-                  readonly
-                  v-on="on"
-                  @click:clear="setEndDateAndValidate(null)"
+                  first-day-of-week="1"
+                  :show-week="true"
+                  @input="setEndDateAndValidate"
                 />
-              </template>
-              <v-date-picker
-                :value="getEndDate()"
-                first-day-of-week="1"
-                :show-week="true"
-                @input="setEndDateAndValidate"
-              />
-            </v-menu>
-          </v-col>
-        </v-row>
-      </v-form>
-      <v-row>
-        <v-col cols="12" md="9">
-          <v-textarea
-            label="Description"
-            rows="3"
-          />
-        </v-col>
-      </v-row>
-      <v-form
-        ref="contactForm"
-        v-model="contactIsValid"
-        @submit.prevent
+              </v-menu>
+            </v-col>
+          </v-row>
+        </v-form>
+      </v-card-text>
+      <!-- action type independent -->
+      <v-card-text
+        v-if="chosenKindOfAction"
       >
         <v-row>
-          <v-col md="5">
-            <v-autocomplete
-              v-model="selectedContact"
-              :items="contacts"
-              label="Contact"
-              clearable
-              required
-              :item-text="(x) => x.toString()"
-              :rules="[rules.contactNotNull]"
+          <v-col cols="12" md="12">
+            <v-textarea
+              label="Description"
+              rows="3"
             />
           </v-col>
-          <v-col md="1">
+        </v-row>
+        <v-row>
+          <v-col cols="12" md="6">
+            <v-form
+              ref="contactForm"
+              v-model="contactIsValid"
+              @submit.prevent
+            >
+              <v-autocomplete
+                v-model="selectedContact"
+                :items="contacts"
+                label="Contact"
+                clearable
+                required
+                :item-text="(x) => x.toString()"
+                :rules="[rules.contactNotNull]"
+              />
+            </v-form>
+          </v-col>
+          <v-col cols="12" md="1">
             <v-btn v-if="isLoggedIn" small @click="selectCurrentUserAsContact">
               {{ labelForSelectMeButton }}
             </v-btn>
           </v-col>
         </v-row>
-      </v-form>
-      <v-row>
-        <v-col>
-          <v-select
-            v-if="attachments.length > 0"
-            multiple
-            clearable
-            label="Attachments"
-            :items="attachments"
-            :item-text="(x) => x.label"
-          />
-        </v-col>
-      </v-row>
-      <v-row>
-        <v-col cols="12">
-          <v-spacer />
-          <v-btn
-            v-if="isLoggedIn"
-            ref="cancelButton"
-            text
-            small
-            :to="'/devices/' + deviceId + '/actions'"
-          >
-            Cancel
-          </v-btn>
-          <v-btn
-            v-if="isLoggedIn"
-            color="green"
-            small
-            @click="addGenericDeviceAction"
-          >
-            Add
-          </v-btn>
-        </v-col>
-      </v-row>
-    </v-card>
-    <v-card v-else class="pa-2" flat>
-      <v-card-text style="text--grey text--center">
-        <i><small>Please choose the action type.</small></i>
+        <v-row>
+          <v-col>
+            <v-select
+              v-if="attachments.length > 0"
+              multiple
+              clearable
+              label="Attachments"
+              :items="attachments"
+              :item-text="(x) => x.label"
+            />
+          </v-col>
+        </v-row>
+        <!-- button-tray -->
+        <v-row
+          v-if="isLoggedIn"
+        >
+          <v-col cols="12">
+            <v-spacer />
+            <v-btn
+              ref="cancelButton"
+              text
+              small
+              :to="'/devices/' + deviceId + '/actions'"
+            >
+              Cancel
+            </v-btn>
+            <v-btn
+              v-if="deviceCalibrationChosen"
+              color="green"
+              small
+              @click="addDeviceCalibrationAction"
+            >
+              Add
+            </v-btn>
+            <v-btn
+              v-else-if="softwareUpdateChosen"
+              color="green"
+              small
+              @click="addDeviceSoftwareUpdateAction"
+            >
+              Add
+            </v-btn>
+            <v-btn
+              v-else-if="otherChosen"
+              color="green"
+              small
+              @click="addGenericDeviceAction"
+            >
+              Add
+            </v-btn>
+          </v-col>
+        </v-row>
       </v-card-text>
     </v-card>
   </div>
@@ -517,7 +413,7 @@ export default class ActionAddPage extends Vue {
 
   private contacts: Contact[] = []
   private selectedContact: Contact | null = null
-  private readonly labelForSelectMeButton = 'Select me'
+  private readonly labelForSelectMeButton = 'Add current user'
 
   private attachments: Attachment[] = []
 
