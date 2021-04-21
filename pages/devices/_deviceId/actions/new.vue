@@ -462,6 +462,8 @@ export default class ActionAddPage extends Vue {
   }
 
   validateInputForStartDate (v: string): boolean | string {
+    // NOTE: as the internals of the DatePicker component work with strings,
+    // the validation functions should expect strings, too
     if (v === null || v === '') {
       return true
     }
@@ -475,6 +477,8 @@ export default class ActionAddPage extends Vue {
   }
 
   validateInputForEndDate (v: string): boolean | string {
+    // NOTE: as the internals of the DatePicker component work with strings,
+    // the validation functions should expect strings, too
     if (v === null || v === '') {
       return true
     }
