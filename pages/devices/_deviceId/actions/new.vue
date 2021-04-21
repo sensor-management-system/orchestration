@@ -95,16 +95,18 @@ permissions and limitations under the Licence.
           <v-row>
             <v-col cols="12" md="6">
               <DatePicker
-                v-model="startDate"
+                :value="startDate"
                 label="Current calibration date"
                 :rules="[rules.startDate, rules.currentCalibrationDateNotNull]"
+                @input="setStartDateAndValidate"
               />
             </v-col>
             <v-col cols="12" md="6">
               <DatePicker
-                v-model="endDate"
+                :value="endDate"
                 label="Next calibration date"
                 :rules="[rules.endDate]"
+                @input="setEndDateAndValidate"
               />
             </v-col>
           </v-row>
@@ -141,9 +143,10 @@ permissions and limitations under the Licence.
           <v-row>
             <v-col cols="12" md="6">
               <DatePicker
-                v-model="startDate"
+                :value="startDate"
                 label="Date"
                 :rules="[rules.startDate, rules.updateDateNotNull]"
+                @input="setStartDateAndValidate"
               />
             </v-col>
           </v-row>
@@ -179,16 +182,18 @@ permissions and limitations under the Licence.
           <v-row>
             <v-col cols="12" md="6">
               <DatePicker
-                v-model="startDate"
+                :value="startDate"
                 label="Start date"
                 :rules="[rules.startDate, rules.startDateNotNull]"
+                @input="setStartDateAndValidate"
               />
             </v-col>
             <v-col cols="12" md="6">
               <DatePicker
-                v-model="endDate"
+                :value="endDate"
                 label="End date"
                 :rules="[rules.endDate]"
+                @input="setEndDateAndValidate"
               />
             </v-col>
           </v-row>
@@ -438,17 +443,15 @@ export default class ActionAddPage extends Vue {
     this.endDate = aDate !== null ? stringToDate(aDate) : null
   }
 
-  setStartDateAndValidate (aDate: string) {
-    this.setStartDate(aDate)
-    this.startDateMenu = false
+  setStartDateAndValidate (aDate: DateTime | null) {
+    this.startDate = aDate
     if (this.endDate !== null) {
       this.checkValidationOfDates()
     }
   }
 
-  setEndDateAndValidate (aDate: string | null) {
-    this.setEndDate(aDate)
-    this.endDateMenu = false
+  setEndDateAndValidate (aDate: DateTime | null) {
+    this.endDate = aDate
     if (this.startDate !== null) {
       this.checkValidationOfDates()
     }
