@@ -197,6 +197,8 @@ import { DeviceType } from '@/models/DeviceType'
 import { Status } from '@/models/Status'
 import { Manufacturer } from '@/models/Manufacturer'
 
+import { createDeviceUrn } from '@/models/urnBuilders'
+
 @Component
 export default class DeviceBasicDataForm extends mixins(Rules) {
   private states: Status[] = []
@@ -347,32 +349,7 @@ export default class DeviceBasicDataForm extends mixins(Rules) {
   }
 
   get deviceURN () {
-    let partManufacturer = '[manufacturer]'
-    let partModel = '[model]'
-    let partSerialNumber = '[serial_number]'
-
-    if (this.value.manufacturerUri !== '') {
-      const manIndex = this.manufacturers.findIndex(m => m.uri === this.value.manufacturerUri)
-      if (manIndex > -1) {
-        partManufacturer = this.manufacturers[manIndex].name
-      } else if (this.value.manufacturerName !== '') {
-        partManufacturer = this.value.manufacturerName
-      }
-    } else if (this.value.manufacturerName !== '') {
-      partManufacturer = this.value.manufacturerName
-    }
-
-    if (this.value.model !== '') {
-      partModel = this.value.model
-    }
-
-    if (this.value.serialNumber !== '') {
-      partSerialNumber = this.value.serialNumber
-    }
-
-    return [partManufacturer, partModel, partSerialNumber].join('_').replace(
-      ' ', '_'
-    )
+    return createDeviceUrn(this.value, this.manufacturers)
   }
 
   /**

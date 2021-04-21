@@ -123,6 +123,8 @@ import { PlatformType } from '@/models/PlatformType'
 import { Status } from '@/models/Status'
 import { Manufacturer } from '@/models/Manufacturer'
 
+import { createPlatformUrn } from '@/models/urnBuilders'
+
 @Component
 export default class PlatformBasicData extends Vue {
   private states: Status[] = []
@@ -191,27 +193,7 @@ export default class PlatformBasicData extends Vue {
   }
 
   get platformURN () {
-    let partType = '[platformtype]'
-    let partShortName = '[short_name]'
-
-    if (this.value.platformTypeUri !== '') {
-      const typeIndex = this.platformTypes.findIndex(m => m.uri === this.value.platformTypeUri)
-      if (typeIndex > -1) {
-        partType = this.platformTypes[typeIndex].name
-      } else if (this.value.platformTypeName !== '') {
-        partType = this.value.platformTypeName
-      }
-    } else if (this.value.platformTypeName !== '') {
-      partType = this.value.platformTypeName
-    }
-
-    if (this.value.shortName !== '') {
-      partShortName = this.value.shortName
-    }
-
-    return [partType, partShortName].join('_').replace(
-      ' ', '_'
-    )
+    return createPlatformUrn(this.value, this.platformTypes)
   }
 }
 </script>
