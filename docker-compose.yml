@@ -59,11 +59,9 @@ services:
     networks:
       - db
   minio:
-    image: minio/minio:RELEASE.2020-12-16T05-05-17Z
+    image: minio/minio:latest
     volumes:
       - data1:/data1
-    expose:
-      - "9000"
     ports:
       - "127.0.0.1:9000:9000"
     networks:
@@ -78,6 +76,24 @@ services:
       interval: 30s
       timeout: 20s
       retries: 3
+
+  createbuckets:
+    image: minio/mc
+    depends_on:
+      - minio
+    # Make a Bucket using minio client mc
+    # https://docs.min.io/docs/minio-client-complete-guid
+    entrypoint: >
+      /bin/sh -c "
+      /usr/bin/mc config host rm local;
+      /usr/bin/mc config host add --quiet  local http://minio:9000 minio minio123;
+      /usr/bin/mc mb --quiet local/sms-attachments;
+      /usr/bin/mc policy download local/sms-attachments;
+      exit 0;
+      "
+    networks:
+      - minio
+
 volumes:
   esdata01:
     driver: local
