@@ -245,7 +245,7 @@ permissions and limitations under the Licence.
       </v-card-text>
       <!-- button-tray -->
       <v-card-actions
-        v-if="isLoggedIn"
+        v-if="isLoggedIn && chosenKindOfAction"
       >
         <v-spacer />
         <v-btn
