@@ -229,7 +229,7 @@ permissions and limitations under the Licence.
               />
             </v-form>
           </v-col>
-          <v-col cols="12" md="1">
+          <v-col cols="12" md="1" align-self="center">
             <v-btn small @click="selectCurrentUserAsContact">
               {{ labelForSelectMeButton }}
             </v-btn>
