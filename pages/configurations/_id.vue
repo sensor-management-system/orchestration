@@ -314,7 +314,7 @@ import { DeviceConfigurationAttributes } from '@/models/DeviceConfigurationAttri
 import { PlatformConfigurationAttributes } from '@/models/PlatformConfigurationAttributes'
 
 import { DateTime } from 'luxon'
-import { dateToString, stringToDate } from '@/utils/dateHelper'
+import { stringToDate } from '@/utils/dateHelper'
 import { getParentByClass } from '@/utils/domHelper'
 
 @Component({
