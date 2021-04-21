@@ -7,7 +7,8 @@ from .token_checker import token_required
 from ..api import minio
 from ..config import env
 
-upload_routes = Blueprint('upload', __name__, url_prefix=env("URL_PREFIX", "/rdm/svm-api/v1"))
+upload_routes = Blueprint('upload', __name__,
+                          url_prefix=env("URL_PREFIX", env("URL_PREFIX", "/rdm/svm-api/v1")))
 
 
 @upload_routes.route('/upload', methods=['POST'])
