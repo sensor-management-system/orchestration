@@ -72,7 +72,7 @@ permissions and limitations under the Licence.
 
 <script lang="ts">
 /**
- * @file provides a component to select dates
+ * @file provides a component to pick dates from an calendar
  * @author <marc.hanisch@gfz-potsdam.de>
  * @author <nils.brinckmann@gfz-potsdam.de>
  */
@@ -82,7 +82,8 @@ import { DateTime } from 'luxon'
 import { dateToString, stringToDate } from '@/utils/dateHelper'
 
 /**
- * A class component that wraps a v-date-picker
+ * A class component to pick dates from an calendar
+ * wraps a v-date-picker
  * @extends Vue
  */
 @Component
@@ -130,16 +131,27 @@ export default class DatePicker extends Vue {
   // @ts-ignore
   readonly readonly: boolean
 
+  /**
+   * returns the date as a string representation
+   *
+   * @return {string} a date as an ISO string
+   */
   getDate (): string {
     return dateToString(this.value)
   }
 
+  /**
+   * triggers an input event when a date was selected or cleared
+   *
+   * @param {string | null} aDate - the selected date from the v-date-picker component
+   * @fires DatePicker#input
+   */
   setDate (aDate: string | null) {
     this.dateMenu = false
     /**
      * fires an input event
      * @event DatePicker#input
-     * @type {Date}
+     * @type {DateTime}
      */
     this.$emit('input', aDate !== null ? stringToDate(aDate) : null)
   }
