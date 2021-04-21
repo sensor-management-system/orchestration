@@ -35,8 +35,17 @@ import { Manufacturer } from '@/models/Manufacturer'
 import { Platform } from '@/models/Platform'
 import { PlatformType } from '@/models/PlatformType'
 
+export const PLATFORM_URN_SEPERATOR = '_'
+export const PLATFORM_URN_TYPE_PLACEHOLDER = '[platformtype]'
+export const PLATFORM_URN_SHORT_NAME_PLACEHOLDER = '[short_name]'
+
+export const DEVICE_URN_SEPERATOR = '_'
+export const DEVICE_URN_MANUFACTURER_PLACEHOLDER = '[manufacturer]'
+export const DEVICE_URN_MODEL_PLACEHOLDER = '[model]'
+export const DEVICE_URN_SERIAL_NUMBER_PLACEHOLDER = '[serial_number]'
+
 export function createPlatformUrn (platform: Platform, platformTypes: PlatformType[]): string {
-  let partType: string = '[platformtype]'
+  let partType: string = PLATFORM_URN_TYPE_PLACEHOLDER
   if (platform.platformTypeUri !== '') {
     const typeIndex: number = platformTypes.findIndex(t => t.uri === platform.platformTypeUri)
     if (typeIndex > -1) {
@@ -48,15 +57,15 @@ export function createPlatformUrn (platform: Platform, platformTypes: PlatformTy
     partType = platform.platformTypeName
   }
 
-  const partShortName: string = platform.shortName || '[short_name]'
+  const partShortName: string = platform.shortName || PLATFORM_URN_SHORT_NAME_PLACEHOLDER
 
   return [partType, partShortName]
-    .join('_')
+    .join(PLATFORM_URN_SEPERATOR)
     .replace(/\s/g, '_')
 }
 
 export function createDeviceUrn (device: Device, manufacturers: Manufacturer[]): string {
-  let partManufacturer: string = '[manufacturer]'
+  let partManufacturer: string = DEVICE_URN_MANUFACTURER_PLACEHOLDER
   if (device.manufacturerUri !== '') {
     const manIndex: number = manufacturers.findIndex(m => m.uri === device.manufacturerUri)
     if (manIndex > -1) {
@@ -68,10 +77,10 @@ export function createDeviceUrn (device: Device, manufacturers: Manufacturer[]):
     partManufacturer = device.manufacturerName
   }
 
-  const partModel: string = device.model || '[model]'
-  const partSerialNumber: string = device.serialNumber || '[serial_number]'
+  const partModel: string = device.model || DEVICE_URN_MODEL_PLACEHOLDER
+  const partSerialNumber: string = device.serialNumber || DEVICE_URN_SERIAL_NUMBER_PLACEHOLDER
 
   return [partManufacturer, partModel, partSerialNumber]
-    .join('_')
+    .join(DEVICE_URN_SEPERATOR)
     .replace(/\s/g, '_')
 }
