@@ -29,14 +29,14 @@ implied. See the Licence for the specific language governing
 permissions and limitations under the Licence.
 -->
 <template>
-  <div>
+  <div
+    v-if="isLoggedIn"
+  >
     <v-card
       flat
     >
       <!-- button-tray -->
-      <v-card-actions
-        v-if="isLoggedIn"
-      >
+      <v-card-actions>
         <v-spacer />
         <v-btn
           ref="cancelButton"
@@ -230,7 +230,7 @@ permissions and limitations under the Licence.
             </v-form>
           </v-col>
           <v-col cols="12" md="1">
-            <v-btn v-if="isLoggedIn" small @click="selectCurrentUserAsContact">
+            <v-btn small @click="selectCurrentUserAsContact">
               {{ labelForSelectMeButton }}
             </v-btn>
           </v-col>
@@ -250,7 +250,7 @@ permissions and limitations under the Licence.
       </v-card-text>
       <!-- button-tray -->
       <v-card-actions
-        v-if="isLoggedIn && chosenKindOfAction"
+        v-if="chosenKindOfAction"
       >
         <v-spacer />
         <v-btn
