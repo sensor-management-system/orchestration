@@ -59,7 +59,7 @@ permissions and limitations under the Licence.
           v-model="attachment.url"
           label="URL"
           type="url"
-          placeholder="http://"
+          placeholder="https://"
           required
           class="required"
           :rules="[rules.required, rules.validUrl]"
