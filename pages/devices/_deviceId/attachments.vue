@@ -34,10 +34,11 @@ permissions and limitations under the Licence.
       v-model="isInProgress"
       :dark="isSaving"
     />
-    <v-card-actions>
+    <v-card-actions
+      v-if="isLoggedIn && !(isAddAttachmentPage)"
+    >
       <v-spacer />
       <v-btn
-        v-if="isLoggedIn && !(isAddAttachmentPage)"
         color="primary"
         small
         :disabled="isEditAttachmentPage"
@@ -47,9 +48,7 @@ permissions and limitations under the Licence.
       </v-btn>
     </v-card-actions>
     <template v-if="isAddAttachmentPage">
-      <v-card class="mb-2">
-        <NuxtChild @showsave="showsave" @input="addAttachmentToList" />
-      </v-card>
+      <NuxtChild @showsave="showsave" @input="addAttachmentToList" />
     </template>
     <template
       v-for="(attachment, index) in attachments"
