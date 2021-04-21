@@ -125,7 +125,7 @@ export default class PlatformAddContactPage extends Vue {
         this.$router.push('/platforms/' + this.platformId + '/contacts')
       }).catch(() => {
         this.isSaving = false
-        this.$store.commit('snackbar/setError', 'Failed to save contacts')
+        this.$store.commit('snackbar/setError', 'Failed to add a contact')
       })
     }
   }

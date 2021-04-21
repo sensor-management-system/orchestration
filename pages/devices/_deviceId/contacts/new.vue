@@ -122,7 +122,7 @@ export default class DeviceAddContactPage extends Vue {
         this.$router.push('/devices/' + this.deviceId + '/contacts')
       }).catch(() => {
         this.isSaving = false
-        this.$store.commit('snackbar/setError', 'Failed to save contacts')
+        this.$store.commit('snackbar/setError', 'Failed to add a contact')
       })
     }
   }
