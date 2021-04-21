@@ -56,64 +56,18 @@ permissions and limitations under the Licence.
         >
           <v-row>
             <v-col cols="12" md="6">
-              <v-menu
-                v-model="startDateMenu"
-                :close-on-content-click="false"
-                :nudge-right="40"
-                transition="scale-transition"
-                offset-y
-                min-width="290px"
-              >
-                <template v-slot:activator="{ on, attrs }">
-                  <v-text-field
-                    :value="getStartDate()"
-                    :rules="[rules.startDate, rules.currentCalibrationDateNotNull]"
-                    v-bind="attrs"
-                    label="Current calibration date"
-                    clearable
-                    prepend-icon="mdi-calendar-range"
-                    readonly
-                    v-on="on"
-                    @click:clear="setStartDateAndValidate(null)"
-                  />
-                </template>
-                <v-date-picker
-                  :value="getStartDate()"
-                  first-day-of-week="1"
-                  :show-week="true"
-                  @input="setStartDateAndValidate"
-                />
-              </v-menu>
+              <DatePicker
+                v-model="startDate"
+                label="Current calibration date"
+                :rules="[rules.startDate, rules.currentCalibrationDateNotNull]"
+              />
             </v-col>
             <v-col cols="12" md="6">
-              <v-menu
-                v-model="endDateMenu"
-                :close-on-content-click="false"
-                :nudge-right="40"
-                transition="scale-transition"
-                offset-y
-                min-width="290px"
-              >
-                <template v-slot:activator="{ on, attrs }">
-                  <v-text-field
-                    :value="getEndDate()"
-                    :rules="[rules.endDate]"
-                    v-bind="attrs"
-                    label="Next calibration date"
-                    clearable
-                    prepend-icon="mdi-calendar-range"
-                    readonly
-                    v-on="on"
-                    @click:clear="setEndDateAndValidate(null)"
-                  />
-                </template>
-                <v-date-picker
-                  :value="getEndDate()"
-                  first-day-of-week="1"
-                  :show-week="true"
-                  @input="setEndDateAndValidate"
-                />
-              </v-menu>
+              <DatePicker
+                v-model="endDate"
+                label="Next calibration date"
+                :rules="[rules.endDate]"
+              />
             </v-col>
           </v-row>
           <v-row>
@@ -148,34 +102,11 @@ permissions and limitations under the Licence.
         >
           <v-row>
             <v-col cols="12" md="6">
-              <v-menu
-                v-model="startDateMenu"
-                :close-on-content-click="false"
-                :nudge-right="40"
-                transition="scale-transition"
-                offset-y
-                min-width="290px"
-              >
-                <template v-slot:activator="{ on, attrs }">
-                  <v-text-field
-                    :value="getStartDate()"
-                    :rules="[rules.startDate, rules.updateDateNotNull]"
-                    v-bind="attrs"
-                    label="Date"
-                    clearable
-                    prepend-icon="mdi-calendar-range"
-                    readonly
-                    v-on="on"
-                    @click:clear="setStartDateAndValidate(null)"
-                  />
-                </template>
-                <v-date-picker
-                  :value="getStartDate()"
-                  first-day-of-week="1"
-                  :show-week="true"
-                  @input="setStartDateAndValidate"
-                />
-              </v-menu>
+              <DatePicker
+                v-model="startDate"
+                label="Date"
+                :rules="[rules.startDate, rules.updateDateNotNull]"
+              />
             </v-col>
           </v-row>
         </v-form>
@@ -209,64 +140,18 @@ permissions and limitations under the Licence.
         >
           <v-row>
             <v-col cols="12" md="6">
-              <v-menu
-                v-model="startDateMenu"
-                :close-on-content-click="false"
-                :nudge-right="40"
-                transition="scale-transition"
-                offset-y
-                min-width="290px"
-              >
-                <template v-slot:activator="{ on, attrs }">
-                  <v-text-field
-                    :value="getStartDate()"
-                    :rules="[rules.startDate, rules.startDateNotNull]"
-                    v-bind="attrs"
-                    label="Start date"
-                    clearable
-                    prepend-icon="mdi-calendar-range"
-                    readonly
-                    v-on="on"
-                    @click:clear="setStartDateAndValidate(null)"
-                  />
-                </template>
-                <v-date-picker
-                  :value="getStartDate()"
-                  first-day-of-week="1"
-                  :show-week="true"
-                  @input="setStartDateAndValidate"
-                />
-              </v-menu>
+              <DatePicker
+                v-model="startDate"
+                label="Start date"
+                :rules="[rules.startDate, rules.startDateNotNull]"
+              />
             </v-col>
             <v-col cols="12" md="6">
-              <v-menu
-                v-model="endDateMenu"
-                :close-on-content-click="false"
-                :nudge-right="40"
-                transition="scale-transition"
-                offset-y
-                min-width="290px"
-              >
-                <template v-slot:activator="{ on, attrs }">
-                  <v-text-field
-                    :value="getEndDate()"
-                    :rules="[rules.endDate]"
-                    v-bind="attrs"
-                    label="End date"
-                    clearable
-                    prepend-icon="mdi-calendar-range"
-                    readonly
-                    v-on="on"
-                    @click:clear="setEndDateAndValidate(null)"
-                  />
-                </template>
-                <v-date-picker
-                  :value="getEndDate()"
-                  first-day-of-week="1"
-                  :show-week="true"
-                  @input="setEndDateAndValidate"
-                />
-              </v-menu>
+              <DatePicker
+                v-model="endDate"
+                label="End date"
+                :rules="[rules.endDate]"
+              />
             </v-col>
           </v-row>
         </v-form>
@@ -374,6 +259,8 @@ import { DeviceProperty } from '@/models/DeviceProperty'
 
 import { dateToString, stringToDate } from '@/utils/dateHelper'
 
+import DatePicker from '@/components/DatePicker.vue'
+
 type KindOfActionType = 'device_calibration' | 'software_update' | 'generic_device_action'
 
 interface IGenericActionType {
@@ -388,7 +275,11 @@ interface IOptionsForActionType {
   name: string
 }
 
-@Component
+@Component({
+  components: {
+    DatePicker
+  }
+})
 export default class ActionAddPage extends Vue {
   private rules: Object = {
     startDate: this.validateInputForStartDate,
