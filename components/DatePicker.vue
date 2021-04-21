@@ -135,7 +135,7 @@ export default class DatePicker extends Vue {
   }
 
   setDate (aDate: string | null) {
-    // TODO: validation with the help of the rules property
+    this.dateMenu = false
     /**
      * fires an input event
      * @event DatePicker#input
