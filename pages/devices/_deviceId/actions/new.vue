@@ -33,6 +33,44 @@ permissions and limitations under the Licence.
     <v-card
       flat
     >
+      <!-- button-tray -->
+      <v-card-actions
+        v-if="isLoggedIn"
+      >
+        <v-spacer />
+        <v-btn
+          ref="cancelButton"
+          text
+          small
+          :to="'/devices/' + deviceId + '/actions'"
+        >
+          Cancel
+        </v-btn>
+        <v-btn
+          v-if="deviceCalibrationChosen"
+          color="green"
+          small
+          @click="addDeviceCalibrationAction"
+        >
+          Add
+        </v-btn>
+        <v-btn
+          v-else-if="softwareUpdateChosen"
+          color="green"
+          small
+          @click="addDeviceSoftwareUpdateAction"
+        >
+          Add
+        </v-btn>
+        <v-btn
+          v-else-if="otherChosen"
+          color="green"
+          small
+          @click="addGenericDeviceAction"
+        >
+          Add
+        </v-btn>
+      </v-card-actions>
       <v-card-text>
         <v-select
           v-model="chosenKindOfAction"
@@ -204,47 +242,45 @@ permissions and limitations under the Licence.
             />
           </v-col>
         </v-row>
-        <!-- button-tray -->
-        <v-row
-          v-if="isLoggedIn"
-        >
-          <v-col cols="12">
-            <v-spacer />
-            <v-btn
-              ref="cancelButton"
-              text
-              small
-              :to="'/devices/' + deviceId + '/actions'"
-            >
-              Cancel
-            </v-btn>
-            <v-btn
-              v-if="deviceCalibrationChosen"
-              color="green"
-              small
-              @click="addDeviceCalibrationAction"
-            >
-              Add
-            </v-btn>
-            <v-btn
-              v-else-if="softwareUpdateChosen"
-              color="green"
-              small
-              @click="addDeviceSoftwareUpdateAction"
-            >
-              Add
-            </v-btn>
-            <v-btn
-              v-else-if="otherChosen"
-              color="green"
-              small
-              @click="addGenericDeviceAction"
-            >
-              Add
-            </v-btn>
-          </v-col>
-        </v-row>
       </v-card-text>
+      <!-- button-tray -->
+      <v-card-actions
+        v-if="isLoggedIn"
+      >
+        <v-spacer />
+        <v-btn
+          ref="cancelButton"
+          text
+          small
+          :to="'/devices/' + deviceId + '/actions'"
+        >
+          Cancel
+        </v-btn>
+        <v-btn
+          v-if="deviceCalibrationChosen"
+          color="green"
+          small
+          @click="addDeviceCalibrationAction"
+        >
+          Add
+        </v-btn>
+        <v-btn
+          v-else-if="softwareUpdateChosen"
+          color="green"
+          small
+          @click="addDeviceSoftwareUpdateAction"
+        >
+          Add
+        </v-btn>
+        <v-btn
+          v-else-if="otherChosen"
+          color="green"
+          small
+          @click="addGenericDeviceAction"
+        >
+          Add
+        </v-btn>
+      </v-card-actions>
     </v-card>
   </div>
 </template>
