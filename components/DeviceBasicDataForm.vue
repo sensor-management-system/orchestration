@@ -197,7 +197,7 @@ import { DeviceType } from '@/models/DeviceType'
 import { Status } from '@/models/Status'
 import { Manufacturer } from '@/models/Manufacturer'
 
-import { createDeviceUrn } from '@/models/urnBuilders'
+import { createDeviceUrn } from '@/modelUtils/urnBuilders'
 
 @Component
 export default class DeviceBasicDataForm extends mixins(Rules) {

@@ -186,7 +186,7 @@ import { PlatformType } from '@/models/PlatformType'
 import { Status } from '@/models/Status'
 import { Manufacturer } from '@/models/Manufacturer'
 
-import { createPlatformUrn } from '@/models/urnBuilders'
+import { createPlatformUrn } from '@/modelUtils/urnBuilders'
 
 @Component
 export default class PlatformBasicDataForm extends mixins(Rules) {

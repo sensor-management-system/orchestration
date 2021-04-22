@@ -44,7 +44,7 @@ import {
   PLATFORM_URN_SEPERATOR,
   PLATFORM_URN_TYPE_PLACEHOLDER,
   PLATFORM_URN_SHORT_NAME_PLACEHOLDER
-} from '@/models/urnBuilders'
+} from '@/modelUtils/urnBuilders'
 
 describe('createDeviceUrn', () => {
   it('should return placeholders when no infos are available', () => {
