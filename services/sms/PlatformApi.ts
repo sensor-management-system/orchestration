@@ -42,7 +42,7 @@ import { ContactSerializer } from '@/serializers/jsonapi/ContactSerializer'
 
 import {
   PlatformSerializer,
-  platformWithMetaToPlatformByThrowingErrorOnMissing,
+  platformWithMetaToDeviceThrowingNoErrorOnMissing,
   platformWithMetaToPlatformByAddingDummyObjects
 } from '@/serializers/jsonapi/PlatformSerializer'
 import { PlatformAttachmentSerializer } from '@/serializers/jsonapi/PlatformAttachmentSerializer'
@@ -53,6 +53,11 @@ import {
   IPaginationLoader, FilteredPaginationedLoader
 } from '@/utils/PaginatedLoader'
 
+interface IncludedRelationships {
+  includeContacts?: boolean
+  includePlatformAttachments?: boolean
+}
+
 export class PlatformApi {
   private axiosApi: AxiosInstance
   private serializer: PlatformSerializer
@@ -62,16 +67,25 @@ export class PlatformApi {
     this.serializer = new PlatformSerializer()
   }
 
-  findById (id: string): Promise<Platform> {
+  findById (id: string, includes: IncludedRelationships): Promise<Platform> {
+    const listIncludedRelationships: string[] = []
+    if (includes.includeContacts) {
+      listIncludedRelationships.push('contacts')
+    }
+    if (includes.includePlatformAttachments) {
+      listIncludedRelationships.push('platform_attachments')
+    }
+    const include = listIncludedRelationships.join(',')
+
     return this.axiosApi.get(id, {
       params: {
-        include: 'contacts,platform_attachments'
+        include
       }
     }).then((rawResponse) => {
       const rawData = rawResponse.data
       // As we ask the api to include all the contacts, we want to have them here
       // if they are missing => throw an error
-      return platformWithMetaToPlatformByThrowingErrorOnMissing(this.serializer.convertJsonApiObjectToModel(rawData))
+      return platformWithMetaToDeviceThrowingNoErrorOnMissing(this.serializer.convertJsonApiObjectToModel(rawData))
     })
   }
 
@@ -100,7 +114,7 @@ export class PlatformApi {
         data
       }
     }).then((serverAnswer) => {
-      return this.findById(serverAnswer.data.data.id)
+      return this.findById(serverAnswer.data.data.id, {})
     })
   }
 

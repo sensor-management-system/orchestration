@@ -207,3 +207,7 @@ export const platformWithMetaToPlatformByAddingDummyObjects = (platformWithMeta:
 
   return platform
 }
+export const platformWithMetaToDeviceThrowingNoErrorOnMissing = (platformWithMeta: { missing: { contacts: { ids: any[] } }; platform: Platform }): Platform => {
+  const platform = platformWithMeta.platform
+  return platform
+}

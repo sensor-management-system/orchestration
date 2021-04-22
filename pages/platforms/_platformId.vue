@@ -64,7 +64,10 @@ export default class PlatformPage extends Vue {
   mounted () {
     this.initializeAppBar()
 
-    this.$api.platforms.findById(this.platformId).then((platform) => {
+    this.$api.platforms.findById(this.platformId,{
+      includeContacts: false,
+      includePlatformAttachments: false
+    }).then((platform) => {
       this.platform = platform
       this.isLoading = false
     }).catch((_error) => {
