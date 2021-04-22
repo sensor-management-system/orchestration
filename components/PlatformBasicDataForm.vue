@@ -2,9 +2,12 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020
+Copyright (C) 2020-2021
+- Kotyba Alhaj Taha (UFZ, kotyba.alhaj-taha@ufz.de)
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
+- Helmholtz Centre for Environmental Research GmbH - UFZ
+  (UFZ, https://www.ufz.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
   Geosciences (GFZ, https://www.gfz-potsdam.de)
 
@@ -36,7 +39,7 @@ permissions and limitations under the Licence.
     <v-row>
       <v-col cols="12" md="6">
         <v-text-field
-          :value="deviceURN"
+          :value="platformURN"
           label="URN"
           readonly
           disabled
@@ -78,7 +81,7 @@ permissions and limitations under the Licence.
     <v-row>
       <v-col cols="12" md="3">
         <v-combobox
-          :value="deviceStatusName"
+          :value="platformStatusName"
           :items="statusNames"
           :readonly="readonly"
           :disabled="readonly"
@@ -88,17 +91,17 @@ permissions and limitations under the Licence.
       </v-col>
       <v-col cols="12" md="3">
         <v-combobox
-          :value="deviceTypeName"
-          :items="deviceTypeNames"
+          :value="platformTypeName"
+          :items="platformTypeNames"
           :readonly="readonly"
           :disabled="readonly"
-          label="Device type"
-          @input="update('deviceTypeName', $event)"
+          label="Platform type"
+          @input="update('platformTypeName', $event)"
         />
       </v-col>
       <v-col cols="12" md="3">
         <v-combobox
-          :value="deviceManufacturerName"
+          :value="platformManufacturerName"
           :items="manufacturerNames"
           :readonly="readonly"
           :disabled="readonly"
@@ -171,20 +174,6 @@ permissions and limitations under the Licence.
         />
       </v-col>
     </v-row>
-    <v-row>
-      <v-col cols="12" md="3">
-        <v-checkbox
-          :input-value="value.dualUse"
-          :readonly="readonly"
-          :disabled="readonly"
-          label="Dual use"
-          hint="can be used for military aims"
-          :persistent-hint="true"
-          color="red darken-3"
-          @change="update('dualUse', $event)"
-        />
-      </v-col>
-    </v-row>
   </v-form>
 </template>
 <script lang="ts">
@@ -192,24 +181,24 @@ import { Component, Prop, mixins } from 'nuxt-property-decorator'
 
 import { Rules } from '@/mixins/Rules'
 
-import { Device } from '@/models/Device'
-import { DeviceType } from '@/models/DeviceType'
+import { Platform } from '@/models/Platform'
+import { PlatformType } from '@/models/PlatformType'
 import { Status } from '@/models/Status'
 import { Manufacturer } from '@/models/Manufacturer'
 
-import { createDeviceUrn } from '@/modelUtils/urnBuilders'
+import { createPlatformUrn } from '@/modelUtils/urnBuilders'
 
 @Component
-export default class DeviceBasicDataForm extends mixins(Rules) {
+export default class PlatformBasicDataForm extends mixins(Rules) {
   private states: Status[] = []
   private manufacturers: Manufacturer[] = []
-  private deviceTypes: DeviceType[] = []
+  private platformTypes: PlatformType[] = []
 
   @Prop({
     required: true,
-    type: Device
+    type: Platform
   })
-  readonly value!: Device
+  readonly value!: Platform
 
   @Prop({
     default: () => false,
@@ -228,15 +217,15 @@ export default class DeviceBasicDataForm extends mixins(Rules) {
     }).catch(() => {
       this.$store.commit('snackbar/setError', 'Loading of manufactures failed')
     })
-    this.$api.deviceTypes.findAllPaginated().then((foundDeviceTypes) => {
-      this.deviceTypes = foundDeviceTypes
+    this.$api.platformTypes.findAllPaginated().then((foundPlatformTypes) => {
+      this.platformTypes = foundPlatformTypes
     }).catch(() => {
-      this.$store.commit('snackbar/setError', 'Loading of device types failed')
+      this.$store.commit('snackbar/setError', 'Loading of platform types failed')
     })
   }
 
   update (key: string, value: string) {
-    const newObj = Device.createFromObject(this.value)
+    const newObj = Platform.createFromObject(this.value)
 
     switch (key) {
       case 'persistentIdentifier':
@@ -250,7 +239,7 @@ export default class DeviceBasicDataForm extends mixins(Rules) {
         break
       case 'statusName':
         newObj.statusName = value
-        { // for lexical scope
+        {
           const statusIndex = this.states.findIndex(s => s.name === value)
           if (statusIndex > -1) {
             newObj.statusUri = this.states[statusIndex].uri
@@ -259,14 +248,14 @@ export default class DeviceBasicDataForm extends mixins(Rules) {
           }
         }
         break
-      case 'deviceTypeName':
-        newObj.deviceTypeName = value
+      case 'platformTypeName':
+        newObj.platformTypeName = value
         {
-          const deviceTypeIndex = this.deviceTypes.findIndex(t => t.name === value)
-          if (deviceTypeIndex > -1) {
-            newObj.deviceTypeUri = this.deviceTypes[deviceTypeIndex].uri
+          const platformTypeIndex = this.platformTypes.findIndex(t => t.name === value)
+          if (platformTypeIndex > -1) {
+            newObj.platformTypeUri = this.platformTypes[platformTypeIndex].uri
           } else {
-            newObj.deviceTypeUri = ''
+            newObj.platformTypeUri = ''
           }
         }
         break
@@ -296,15 +285,6 @@ export default class DeviceBasicDataForm extends mixins(Rules) {
       case 'inventoryNumber':
         newObj.inventoryNumber = value
         break
-      case 'dualUse':
-        // Boolean(true) => true
-        // Boolean(false) => false
-        // but Boolean('false') => true
-        // due to the change handler, this is already a boolean
-        // only typescript doesn't know about this
-        // so we can be sure to go with it here
-        newObj.dualUse = Boolean(value)
-        break
       default:
         throw new TypeError('key ' + key + ' is not valid')
     }
@@ -320,11 +300,11 @@ export default class DeviceBasicDataForm extends mixins(Rules) {
     return this.states.map(s => s.name)
   }
 
-  get deviceTypeNames (): string[] {
-    return this.deviceTypes.map(t => t.name)
+  get platformTypeNames (): string[] {
+    return this.platformTypes.map(t => t.name)
   }
 
-  get deviceManufacturerName (): string {
+  get platformManufacturerName (): string {
     const manufacturerIndex = this.manufacturers.findIndex(m => m.uri === this.value.manufacturerUri)
     if (manufacturerIndex > -1) {
       return this.manufacturers[manufacturerIndex].name
@@ -332,7 +312,7 @@ export default class DeviceBasicDataForm extends mixins(Rules) {
     return this.value.manufacturerName
   }
 
-  get deviceStatusName () {
+  get platformStatusName () {
     const statusIndex = this.states.findIndex(s => s.uri === this.value.statusUri)
     if (statusIndex > -1) {
       return this.states[statusIndex].name
@@ -340,25 +320,18 @@ export default class DeviceBasicDataForm extends mixins(Rules) {
     return this.value.statusName
   }
 
-  get deviceTypeName () {
-    const deviceTypeIndex = this.deviceTypes.findIndex(t => t.uri === this.value.deviceTypeUri)
-    if (deviceTypeIndex > -1) {
-      return this.deviceTypes[deviceTypeIndex].name
+  get platformTypeName () {
+    const platformTypeIndex = this.platformTypes.findIndex(t => t.uri === this.value.platformTypeUri)
+    if (platformTypeIndex > -1) {
+      return this.platformTypes[platformTypeIndex].name
     }
-    return this.value.deviceTypeName
+    return this.value.platformTypeName
   }
 
-  get deviceURN () {
-    return createDeviceUrn(this.value, this.manufacturers)
+  get platformURN () {
+    return createPlatformUrn(this.value, this.platformTypes)
   }
 
-  /**
-   * validates the user input
-   *
-   * Note: we can't use 'validate' as a method name, so I used 'validateForm'
-   *
-   * @return {boolean} true when input is valid, otherwise false
-   */
   public validateForm (): boolean {
     return (this.$refs.basicForm as Vue & { validate: () => boolean }).validate()
   }

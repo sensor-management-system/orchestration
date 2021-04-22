@@ -2,9 +2,12 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020, 2021
+Copyright (C) 2020-2021
+- Kotyba Alhaj Taha (UFZ, kotyba.alhaj-taha@ufz.de)
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
+- Helmholtz Centre for Environmental Research GmbH - UFZ
+  (UFZ, https://www.ufz.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
   Geosciences (GFZ, https://www.gfz-potsdam.de)
 
@@ -38,7 +41,7 @@ permissions and limitations under the Licence.
         text
         small
         nuxt
-        :to="'/devices/' + deviceId + '/attachments'"
+        :to="'/platforms/' + platformId + '/attachments'"
       >
         Cancel
       </v-btn>
@@ -106,7 +109,7 @@ permissions and limitations under the Licence.
         text
         small
         nuxt
-        :to="'/devices/' + deviceId + '/attachments'"
+        :to="'/platforms/' + platformId + '/attachments'"
       >
         Cancel
       </v-btn>
@@ -162,18 +165,18 @@ export default class AttachmentAddPage extends mixins(Rules) {
     (this.$refs.attachmentsForm as Vue & { resetValidation: () => boolean }).resetValidation()
 
     this.$emit('showsave', true)
-    this.$api.deviceAttachments.add(this.deviceId, this.attachment).then((newAttachment: Attachment) => {
+    this.$api.platformAttachments.add(this.platformId, this.attachment).then((newAttachment: Attachment) => {
       this.$emit('showsave', false)
       this.$emit('input', newAttachment)
-      this.$router.push('/devices/' + this.deviceId + '/attachments')
+      this.$router.push('/platforms/' + this.platformId + '/attachments')
     }).catch(() => {
       this.$emit('showsave', false)
-      this.$store.commit('snackbar/setError', 'Failed to save an attachment')
+      this.$store.commit('snackbar/setError', 'Failed to save an attachment.')
     })
   }
 
-  get deviceId (): string {
-    return this.$route.params.deviceId
+  get platformId (): string {
+    return this.$route.params.platformId
   }
 
   get isLoggedIn (): boolean {

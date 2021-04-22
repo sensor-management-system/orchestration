@@ -35,7 +35,7 @@ permissions and limitations under the Licence.
     />
     <v-card flat>
       <NuxtChild
-        v-model="device"
+        v-model="platform"
       />
     </v-card>
   </div>
@@ -43,9 +43,7 @@ permissions and limitations under the Licence.
 
 <script lang="ts">
 import { Component, Vue, Watch } from 'nuxt-property-decorator'
-
-import { Device } from '@/models/Device'
-
+import { Platform } from '@/models/Platform'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
 @Component({
@@ -53,29 +51,27 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
     ProgressIndicator
   }
 })
-export default class DevicePage extends Vue {
-  private device: Device = new Device()
+export default class PlatformPage extends Vue {
+  private platform: Platform = new Platform()
   private isLoading: boolean = true
 
   created () {
     if (this.isBasePath()) {
-      this.$router.push('/devices/' + this.deviceId + '/basic')
+      this.$router.push('/platforms/' + this.platformId + '/basic')
     }
   }
 
   mounted () {
     this.initializeAppBar()
 
-    this.$api.devices.findById(this.deviceId, {
+    this.$api.platforms.findById(this.platformId,{
       includeContacts: false,
-      includeCustomFields: false,
-      includeDeviceProperties: false,
-      includeDeviceAttachments: false
-    }).then((device) => {
-      this.device = device
+      includePlatformAttachments: false
+    }).then((platform) => {
+      this.platform = platform
       this.isLoading = false
     }).catch((_error) => {
-      this.$store.commit('snackbar/setError', 'Loading device failed')
+      this.$store.commit('snackbar/setError', 'Loading platform failed')
       this.isLoading = false
     })
   }
@@ -88,43 +84,35 @@ export default class DevicePage extends Vue {
     this.$store.dispatch('appbar/init', {
       tabs: [
         {
-          to: '/devices/' + this.deviceId + '/basic',
+          to: '/platforms/' + this.platformId + '/basic',
           name: 'Basic Data'
         },
         {
-          to: '/devices/' + this.deviceId + '/contacts',
+          to: '/platforms/' + this.platformId + '/contacts',
           name: 'Contacts'
         },
         {
-          to: '/devices/' + this.deviceId + '/measuredquantities',
-          name: 'Measured Quantities'
-        },
-        {
-          to: '/devices/' + this.deviceId + '/customfields',
-          name: 'Custom Fields'
-        },
-        {
-          to: '/devices/' + this.deviceId + '/attachments',
+          to: '/platforms/' + this.platformId + '/attachments',
           name: 'Attachments'
         }
       ],
-      title: 'Devices'
+      title: 'Platforms'
     })
   }
 
   isBasePath () {
-    return this.$route.path === '/devices/' + this.deviceId || this.$route.path === '/devices/' + this.deviceId + '/'
+    return this.$route.path === '/platforms/' + this.platformId || this.$route.path === '/platforms/' + this.platformId + '/'
   }
 
-  get deviceId () {
-    return this.$route.params.deviceId
+  get platformId () {
+    return this.$route.params.platformId
   }
 
-  @Watch('device', { immediate: true, deep: true })
+  @Watch('platform', { immediate: true, deep: true })
   // @ts-ignore
-  onDeviceChanged (val: Device) {
+  onPlatformChanged (val: Platform) {
     if (val.id) {
-      this.$store.commit('appbar/setTitle', val?.shortName || 'Add Device')
+      this.$store.commit('appbar/setTitle', val?.shortName || 'Add Platform')
     }
   }
 }

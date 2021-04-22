@@ -1,10 +1,13 @@
-/*
-Web client of the Sensor Management System software developed within
-the Helmholtz DataHub Initiative by GFZ and UFZ.
+<!--
+Web client of the Sensor Management System software developed within the
+Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020
+Copyright (C) 2020-2021
+- Kotyba Alhaj Taha (UFZ, kotyba.alhaj-taha@ufz.de)
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
+- Helmholtz Centre for Environmental Research GmbH - UFZ
+  (UFZ, https://www.ufz.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
   Geosciences (GFZ, https://www.gfz-potsdam.de)
 
@@ -27,33 +30,32 @@ distributed under the Licence is distributed on an "AS IS" basis,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
 implied. See the Licence for the specific language governing
 permissions and limitations under the Licence.
-*/
-module.exports = {
-  moduleNameMapper: {
-    '^@/(.*)$': '<rootDir>/$1',
-    '^~/(.*)$': '<rootDir>/$1',
-    '^vue$': 'vue/dist/vue.common.js'
-  },
-  moduleFileExtensions: [
-    'ts',
-    'js',
-    'vue',
-    'json'
-  ],
-  transform: {
-    '^.+\\.ts$': 'ts-jest',
-    '^.+\\.js$': 'babel-jest',
-    '.*\\.(vue)$': 'vue-jest'
-  },
-  collectCoverage: true,
-  collectCoverageFrom: [
-    '<rootDir>/components/**/*.vue',
-    '<rootDir>/pages/**/*.vue',
-    '<rootDir>/models/**/*.ts',
-    '<rootDir>/modelUtils/**/*.ts',
-    '<rootDir>/serializers/**/*.ts',
-    '<rootDir>/utils/**/*.ts',
-    '<rootDir>/devtools/**/*.ts'
-  ],
-  verbose: true
+-->
+<template>
+  <NuxtChild
+    v-model="platform"
+  />
+</template>
+
+<script lang="ts">
+import { Component, Vue, Prop } from 'nuxt-property-decorator'
+
+import { Platform } from '@/models/Platform'
+
+@Component
+export default class PlatformBasicPage extends Vue {
+  @Prop({
+    required: true,
+    type: Object
+  })
+  readonly value!: Platform
+
+  get platform (): Platform {
+    return this.value
+  }
+
+  set platform (value: Platform) {
+    this.$emit('input', value)
+  }
 }
+</script>

@@ -2,9 +2,12 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020
+Copyright (C) 2020-2021
+- Kotyba Alhaj Taha (UFZ, kotyba.alhaj-taha@ufz.de)
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
+- Helmholtz Centre for Environmental Research GmbH - UFZ
+  (UFZ, https://www.ufz.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
   Geosciences (GFZ, https://www.gfz-potsdam.de)
 
@@ -63,7 +66,7 @@ permissions and limitations under the Licence.
               ref="cancelButton"
               text
               small
-              :to="'/devices/' + deviceId + '/attachments'"
+              :to="'/platforms/' + platformId + '/attachments'"
             >
               Cancel
             </v-btn>
@@ -117,8 +120,8 @@ export default class AttachmentEditPage extends Vue {
     cancelButton.$el.classList.remove('v-btn--active')
   }
 
-  get deviceId (): string {
-    return this.$route.params.deviceId
+  get platformId (): string {
+    return this.$route.params.platformId
   }
 
   /**
@@ -152,10 +155,10 @@ export default class AttachmentEditPage extends Vue {
 
   save () {
     this.$emit('showsave', true)
-    this.$api.deviceAttachments.update(this.deviceId, this.valueCopy).then((savedAttachment: Attachment) => {
+    this.$api.platformAttachments.update(this.platformId, this.valueCopy).then((savedAttachment: Attachment) => {
       this.$emit('showsave', false)
       this.$emit('input', savedAttachment)
-      this.$router.push('/devices/' + this.deviceId + '/attachments')
+      this.$router.push('/platforms/' + this.platformId + '/attachments')
     }).catch(() => {
       this.$emit('showsave', false)
       this.$store.commit('snackbar/setError', 'Failed to save attachments')

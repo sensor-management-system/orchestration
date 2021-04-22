@@ -2,9 +2,12 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020
+Copyright (C) 2020-2021
+- Kotyba Alhaj Taha (UFZ, kotyba.alhaj-taha@ufz.de)
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
+- Helmholtz Centre for Environmental Research GmbH - UFZ
+  (UFZ, https://www.ufz.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
   Geosciences (GFZ, https://www.gfz-potsdam.de)
 
@@ -28,12 +31,13 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
 implied. See the Licence for the specific language governing
 permissions and limitations under the Licence.
 -->
+
 <template>
   <div>
     <v-row>
       <v-col cols="12" md="6">
         <label>URN</label>
-        {{ deviceURN }}
+        {{ platformURN }}
       </v-col>
       <v-col cols="12" md="6">
         <label>Persistent identifier (PID)</label>
@@ -53,15 +57,15 @@ permissions and limitations under the Licence.
     <v-row>
       <v-col cols="12" md="3">
         <label>Status</label>
-        {{ deviceStatusName | orDefault }}
+        {{ platformStatusName | orDefault }}
       </v-col>
       <v-col cols="12" md="3">
-        <label>Device type</label>
-        {{ deviceTypeName | orDefault }}
+        <label>Platform type</label>
+        {{ platformTypeName | orDefault }}
       </v-col>
       <v-col cols="12" md="3">
         <label>Manufacturer</label>
-        {{ deviceManufacturerName | orDefault }}
+        {{ platformManufacturerName | orDefault }}
       </v-col>
       <v-col cols="12" md="3">
         <label>Model</label>
@@ -92,12 +96,6 @@ permissions and limitations under the Licence.
         {{ value.inventoryNumber | orDefault }}
       </v-col>
     </v-row>
-    <v-row>
-      <v-col cols="12" md="3">
-        <label>Dual use</label>
-        {{ value.dualUse ? 'yes' : 'no' }}
-      </v-col>
-    </v-row>
   </div>
 </template>
 
@@ -118,27 +116,27 @@ label {
 </style>
 
 <script lang="ts">
-import { Component, Vue, Prop } from 'nuxt-property-decorator'
+import { Component, Prop, Vue } from 'nuxt-property-decorator'
 
-import { Device } from '@/models/Device'
-import { DeviceType } from '@/models/DeviceType'
+import { Platform } from '@/models/Platform'
+import { PlatformType } from '@/models/PlatformType'
 import { Status } from '@/models/Status'
 import { Manufacturer } from '@/models/Manufacturer'
 
-import { createDeviceUrn } from '@/modelUtils/urnBuilders'
+import { createPlatformUrn } from '@/modelUtils/urnBuilders'
 
 @Component
-export default class DeviceBasicData extends Vue {
+export default class PlatformBasicData extends Vue {
   private states: Status[] = []
   private manufacturers: Manufacturer[] = []
-  private deviceTypes: DeviceType[] = []
+  private platformTypes: PlatformType[] = []
 
   @Prop({
-    default: () => new Device(),
+    default: () => new Platform(),
     required: true,
-    type: Device
+    type: Platform
   })
-  readonly value!: Device
+  readonly value!: Platform
 
   mounted () {
     this.$api.states.findAllPaginated().then((foundStates) => {
@@ -151,10 +149,10 @@ export default class DeviceBasicData extends Vue {
     }).catch(() => {
       this.$store.commit('snackbar/setError', 'Loading of manufactures failed')
     })
-    this.$api.deviceTypes.findAllPaginated().then((foundDeviceTypes) => {
-      this.deviceTypes = foundDeviceTypes
+    this.$api.platformTypes.findAllPaginated().then((foundPlatformTypes) => {
+      this.platformTypes = foundPlatformTypes
     }).catch(() => {
-      this.$store.commit('snackbar/setError', 'Loading of device types failed')
+      this.$store.commit('snackbar/setError', 'Loading of platform types failed')
     })
   }
 
@@ -166,11 +164,11 @@ export default class DeviceBasicData extends Vue {
     return this.states.map(s => s.name)
   }
 
-  get deviceTypeNames (): string[] {
-    return this.deviceTypes.map(t => t.name)
+  get platformTypeNames (): string[] {
+    return this.platformTypes.map(t => t.name)
   }
 
-  get deviceManufacturerName (): string {
+  get platformManufacturerName (): string {
     const manufacturerIndex = this.manufacturers.findIndex(m => m.uri === this.value.manufacturerUri)
     if (manufacturerIndex > -1) {
       return this.manufacturers[manufacturerIndex].name
@@ -178,7 +176,7 @@ export default class DeviceBasicData extends Vue {
     return this.value.manufacturerName
   }
 
-  get deviceStatusName () {
+  get platformStatusName () {
     const statusIndex = this.states.findIndex(s => s.uri === this.value.statusUri)
     if (statusIndex > -1) {
       return this.states[statusIndex].name
@@ -186,16 +184,16 @@ export default class DeviceBasicData extends Vue {
     return this.value.statusName
   }
 
-  get deviceTypeName () {
-    const deviceTypeIndex = this.deviceTypes.findIndex(t => t.uri === this.value.deviceTypeUri)
-    if (deviceTypeIndex > -1) {
-      return this.deviceTypes[deviceTypeIndex].name
+  get platformTypeName () {
+    const platformTypeIndex = this.platformTypes.findIndex(t => t.uri === this.value.platformTypeUri)
+    if (platformTypeIndex > -1) {
+      return this.platformTypes[platformTypeIndex].name
     }
-    return this.value.deviceTypeName
+    return this.value.platformTypeName
   }
 
-  get deviceURN () {
-    return createDeviceUrn(this.value, this.manufacturers)
+  get platformURN () {
+    return createPlatformUrn(this.value, this.platformTypes)
   }
 }
 </script>

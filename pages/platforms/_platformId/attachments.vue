@@ -2,9 +2,12 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020, 2021
+Copyright (C) 2020-2021
+- Kotyba Alhaj Taha (UFZ, kotyba.alhaj-taha@ufz.de)
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
+- Helmholtz Centre for Environmental Research GmbH - UFZ
+  (UFZ, https://www.ufz.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
   Geosciences (GFZ, https://www.gfz-potsdam.de)
 
@@ -42,7 +45,7 @@ permissions and limitations under the Licence.
         color="primary"
         small
         :disabled="isEditAttachmentPage"
-        :to="'/devices/' + deviceId + '/attachments/new'"
+        :to="'/platforms/' + platformId + '/attachments/new'"
       >
         Add Attachment
       </v-btn>
@@ -83,7 +86,7 @@ permissions and limitations under the Licence.
                     text
                     small
                     nuxt
-                    :to="'/devices/' + deviceId + '/attachments/' + attachment.id + '/edit'"
+                    :to="'/platforms/' + platformId + '/attachments/' + attachment.id + '/edit'"
                   >
                     Edit
                   </v-btn>
@@ -200,7 +203,7 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
     ProgressIndicator
   }
 })
-export default class DeviceAttachmentsPage extends mixins(AttachmentsMixin) {
+export default class PlatformAttachmentsPage extends mixins(AttachmentsMixin) {
   private attachments: Attachment[] = []
   private showDeleteDialog: {[idx: string]: boolean} = {}
   private isLoading = false
@@ -209,7 +212,7 @@ export default class DeviceAttachmentsPage extends mixins(AttachmentsMixin) {
   async fetch () {
     this.isLoading = true
     try {
-      this.attachments = await this.$api.devices.findRelatedDeviceAttachments(this.deviceId)
+      this.attachments = await this.$api.platforms.findRelatedPlatformAttachments(this.platformId)
       this.isLoading = false
     } catch (e) {
       this.$store.commit('snackbar/setError', 'failed to fetch attachments')
@@ -221,8 +224,8 @@ export default class DeviceAttachmentsPage extends mixins(AttachmentsMixin) {
     return this.isLoading || this.isSaving
   }
 
-  get deviceId (): string {
-    return this.$route.params.deviceId
+  get platformId (): string {
+    return this.$route.params.platformId
   }
 
   get isLoggedIn (): boolean {
@@ -231,13 +234,13 @@ export default class DeviceAttachmentsPage extends mixins(AttachmentsMixin) {
 
   get isEditAttachmentPage (): boolean {
     // eslint-disable-next-line no-useless-escape
-    const editUrl = '^\/devices\/' + this.deviceId + '\/attachments\/([0-9]+)\/edit$'
+    const editUrl = '^\/platforms\/' + this.platformId + '\/attachments\/([0-9]+)\/edit$'
     return !!this.$route.path.match(editUrl)
   }
 
   get isAddAttachmentPage (): boolean {
     // eslint-disable-next-line no-useless-escape
-    const addUrl = '^\/devices\/' + this.deviceId + '\/attachments\/new$'
+    const addUrl = '^\/platforms\/' + this.platformId + '\/attachments\/new$'
     return !!this.$route.path.match(addUrl)
   }
 
@@ -254,7 +257,7 @@ export default class DeviceAttachmentsPage extends mixins(AttachmentsMixin) {
       this.isSaving = true
       this.showDeleteDialog = {}
 
-      this.$api.deviceAttachments.deleteById(id).then(() => {
+      this.$api.platformAttachments.deleteById(id).then(() => {
         const searchIndex = this.attachments.findIndex(a => a.id === id)
         if (searchIndex > -1) {
           this.attachments.splice(searchIndex, 1)
@@ -276,7 +279,7 @@ export default class DeviceAttachmentsPage extends mixins(AttachmentsMixin) {
   }
 
   isEditModeForAttachment (attachment: Attachment): boolean {
-    return this.$route.path === '/devices/' + this.deviceId + '/attachments/' + attachment.id + '/edit'
+    return this.$route.path === '/platforms/' + this.platformId + '/attachments/' + attachment.id + '/edit'
   }
 }
 </script>

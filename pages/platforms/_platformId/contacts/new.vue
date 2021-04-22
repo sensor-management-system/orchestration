@@ -2,9 +2,12 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020, 2021
+Copyright (C) 2020-2021
+- Kotyba Alhaj Taha (UFZ, kotyba.alhaj-taha@ufz.de)
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
+- Helmholtz Centre for Environmental Research GmbH - UFZ
+  (UFZ, https://www.ufz.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
   Geosciences (GFZ, https://www.gfz-potsdam.de)
 
@@ -58,7 +61,7 @@ permissions and limitations under the Licence.
           small
           text
           nuxt
-          :to="'/devices/' + deviceId + '/contacts'"
+          :to="'/platforms/' + platformId + '/contacts'"
         >
           Cancel
         </v-btn>
@@ -79,7 +82,7 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
     ProgressIndicator
   }
 })
-export default class DeviceAddContactPage extends Vue {
+export default class PlatformAddContactPage extends Vue {
   private alreadyUsedContacts: Contact[] = []
   private allContacts: Contact[] = []
   private selectedContact: Contact | null = null
@@ -115,11 +118,11 @@ export default class DeviceAddContactPage extends Vue {
   addContact (): void {
     if (this.selectedContact && this.selectedContact.id && this.isLoggedIn) {
       this.isSaving = true
-      this.$api.devices.addContact(this.deviceId, this.selectedContact.id).then(() => {
+      this.$api.platforms.addContact(this.platformId, this.selectedContact.id).then(() => {
         this.isSaving = false
         this.alreadyUsedContacts.push(this.selectedContact as Contact)
         this.$emit('input', this.alreadyUsedContacts)
-        this.$router.push('/devices/' + this.deviceId + '/contacts')
+        this.$router.push('/platforms/' + this.platformId + '/contacts')
       }).catch(() => {
         this.isSaving = false
         this.$store.commit('snackbar/setError', 'Failed to add a contact')
@@ -140,8 +143,8 @@ export default class DeviceAddContactPage extends Vue {
     return this.allContacts.filter(c => !this.alreadyUsedContacts.find(rc => rc.id === c.id))
   }
 
-  get deviceId (): string {
-    return this.$route.params.deviceId
+  get platformId (): string {
+    return this.$route.params.platformId
   }
 
   get isLoggedIn (): boolean {
