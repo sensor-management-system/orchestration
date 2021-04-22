@@ -31,11 +31,11 @@ permissions and limitations under the Licence.
 <template>
   <div>
     <v-row>
-      <v-col cols="12" md="3">
+      <v-col cols="12" md="6">
         <label>URN</label>
         {{ deviceURN }}
       </v-col>
-      <v-col cols="12" md="3">
+      <v-col cols="12" md="6">
         <label>Persistent identifier (PID)</label>
         {{ value.persistentIdentifier | orDefault }}
       </v-col>
