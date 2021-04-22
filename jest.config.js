@@ -50,8 +50,10 @@ module.exports = {
     '<rootDir>/components/**/*.vue',
     '<rootDir>/pages/**/*.vue',
     '<rootDir>/models/**/*.ts',
+    '<rootDir>/modelUtils/**/*.ts',
     '<rootDir>/serializers/**/*.ts',
-    '<rootDir>/utils/**/*.ts'
+    '<rootDir>/utils/**/*.ts',
+    '<rootDir>/devtools/**/*.ts'
   ],
   verbose: true
 }
