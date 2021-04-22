@@ -298,7 +298,7 @@ permissions and limitations under the Licence.
       fab
       fixed
       right
-      to="/contacts"
+      to="/contacts/new"
     >
       <v-icon>
         mdi-plus
