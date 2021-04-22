@@ -99,7 +99,7 @@ permissions and limitations under the Licence.
           label="Website"
           placeholder="https://"
           type="url"
-          @input="update('email', $event)"
+          @input="update('website', $event)"
         />
       </v-col>
     </v-row>

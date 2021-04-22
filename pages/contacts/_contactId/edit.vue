@@ -117,7 +117,7 @@ export default class ContactEditPage extends Vue {
     this.save().then((contact) => {
       this.isLoading = false
       this.$emit('input', contact)
-      this.$router.push('/contact/' + this.contactId)
+      this.$router.push('/contacts/' + this.contactId)
     }).catch((_error) => {
       this.isLoading = false
       this.$store.commit('snackbar/setError', 'Save failed')
