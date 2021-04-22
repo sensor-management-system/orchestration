@@ -37,7 +37,7 @@ permissions and limitations under the Licence.
     @submit.prevent
   >
     <v-row>
-      <v-col cols="12" md="3">
+      <v-col cols="12" md="6">
         <v-text-field
           :value="platformURN"
           label="URN"
@@ -45,7 +45,7 @@ permissions and limitations under the Licence.
           disabled
         />
       </v-col>
-      <v-col cols="12" md="3">
+      <v-col cols="12" md="6">
         <v-text-field
           :value="value.persistentIdentifier"
           :readonly="readonly"
