@@ -114,7 +114,9 @@ export class PlatformApi {
         data
       }
     }).then((serverAnswer) => {
-      return this.findById(serverAnswer.data.data.id, {})
+      const answerData = serverAnswer.data
+      return platformWithMetaToDeviceThrowingNoErrorOnMissing(
+        this.serializer.convertJsonApiObjectToModel(answerData))
     })
   }
 

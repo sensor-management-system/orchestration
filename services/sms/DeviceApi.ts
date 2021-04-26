@@ -121,7 +121,9 @@ export class DeviceApi {
         data
       }
     }).then((serverAnswer) => {
-      return serverAnswer.data.data.id
+      const answerData = serverAnswer.data
+      return deviceWithMetaToDeviceThrowingNoErrorOnMissing(
+        this.serializer.convertJsonApiObjectToModel(answerData))
     })
   }
 
