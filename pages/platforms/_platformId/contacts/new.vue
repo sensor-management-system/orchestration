@@ -50,6 +50,7 @@ permissions and limitations under the Licence.
         align-self="center"
       >
         <v-btn
+          v-if="isLoggedIn"
           small
           color="primary"
           :disabled="selectedContact == null"
