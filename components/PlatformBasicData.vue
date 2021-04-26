@@ -100,19 +100,7 @@ permissions and limitations under the Licence.
 </template>
 
 <style lang="scss">
-@import '~vuetify/src/styles/settings/variables';
-@import '~vuetify/src/styles/settings/colors';
-
-label {
-  /* TODO: move to its own file */
-  display: block;
-  font-size: map-deep-get($headings, 'caption', 'size');
-  font-weight: map-deep-get($headings, 'caption', 'weight');
-  letter-spacing: map-deep-get($headings, 'caption', 'letter-spacing');
-  line-height: map-deep-get($headings, 'caption', 'line-height');
-  font-family: map-deep-get($headings, 'caption', 'font-family');
-  color: map-get($grey, 'darken-1');
-}
+@import "@/assets/styles/_readonly_views.scss";
 </style>
 
 <script lang="ts">
