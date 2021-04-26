@@ -1,6 +1,8 @@
 import json
+import os
 import time
 
+from faker import Faker
 from flask_jwt_extended.tokens import _encode_jwt
 from flask_testing import TestCase
 
@@ -8,6 +10,9 @@ from project import create_app
 from project.api.models.base_model import db
 
 app = create_app()
+fake = Faker()
+
+test_file_path = os.path.abspath(os.path.dirname(__file__))
 
 
 def query_result_to_list(query_result):
@@ -86,11 +91,8 @@ def generate_token_data():
     """
     # get current time in seconds
     now = int(time.time())
-    from faker import Faker
-
-    f = Faker()
     # generate a random name will bw like "test test"
-    name = f.unique.name()
+    name = fake.unique.name()
     # separate the name to a list
     name_l = name.lower().split(" ")
     family_name = name_l[1]
@@ -103,7 +105,7 @@ def generate_token_data():
         "name": name,
         "family_name": family_name,
         "given_name": given_name,
-        "email": f"{given_name}.{family_name}@unittest.test",
+        "email": fake.unique.email(),
         "iat": now,  # Issued At: Date/time when the token was issued
         "exp": now + 60,  # Expiration: expire after one minute.
         "aud": "SMS",  # recipient of this token
@@ -172,3 +174,32 @@ class BaseTestCase(TestCase):
         data = json.loads(response.data.decode())
         self.assertEqual(response.status_code, 422)
         self.assertIn("Not a valid string.", data["errors"][0]["detail"])
+
+    def update_object(self, url, data_object, object_type):
+        """Ensure a old object can be updated."""
+        access_headers = create_token()
+        with self.client:
+            response = self.client.patch(
+                url,
+                data=json.dumps(data_object),
+                content_type="application/vnd.api+json",
+                headers=access_headers,
+            )
+        data = json.loads(response.data.decode())
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(object_type, data["data"]["type"])
+        return data
+
+    def delete_object(self, url):
+        """Ensure delete an object."""
+        access_headers = create_token()
+        with self.client:
+            response = self.client.delete(
+                url,
+                content_type="application/vnd.api+json",
+                headers=access_headers,
+            )
+        data = json.loads(response.data.decode())
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("Object successfully deleted", data["meta"]["message"])
+        return data

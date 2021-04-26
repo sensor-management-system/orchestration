@@ -1,10 +1,10 @@
 """Module for the platform attachment detail resource."""
 from flask_rest_jsonapi import ResourceDetail
 
-from project.api.models.base_model import db
-from project.api.models.platform_attachment import PlatformAttachment
-from project.api.schemas.platform_attachment_schema import PlatformAttachmentSchema
-from project.api.token_checker import token_required
+from ..models.base_model import db
+from ..models.platform_attachment import PlatformAttachment
+from ..schemas.platform_attachment_schema import PlatformAttachmentSchema
+from ..token_checker import token_required
 
 
 class PlatformAttachmentDetail(ResourceDetail):

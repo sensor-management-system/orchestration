@@ -44,9 +44,11 @@ class CustomFieldSchema(Schema):
     value = fields.Str(allow_none=True)
 
     device = Relationship(
+        self_view="api.customfield_device",
         self_view_kwargs={"id": "<id>"},
         related_view="api.device_detail",
         related_view_kwargs={"id": "<device_id>"},
+        include_resource_linkage=True,
         type_="device",
         schema="DeviceSchema",
         id_field="id",

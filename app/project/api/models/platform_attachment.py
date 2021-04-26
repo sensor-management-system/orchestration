@@ -1,4 +1,4 @@
-from project.api.models.base_model import db
+from .base_model import db
 
 
 class PlatformAttachment(db.Model):

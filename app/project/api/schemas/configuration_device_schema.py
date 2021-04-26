@@ -1,11 +1,17 @@
 from marshmallow_jsonapi import fields
 from marshmallow_jsonapi.flask import Relationship, Schema
 
-from project.api.schemas.device_schema import DeviceSchema
-from project.api.schemas.platform_schema import PlatformSchema
+from ..schemas.device_schema import DeviceSchema
+from ..schemas.platform_schema import PlatformSchema
 
 
 class ConfigurationDeviceSchema(Schema):
+    """
+    Class to create a schema for a configuration device.
+    It uses the  marshmallow-jsonapi library that fit
+    the JSONAPI 1.0 specification and provides Flask integration.
+    """
+
     class Meta:
         type_ = "configuration_device"
         self_view = "api.configuration_device_detail"
@@ -20,25 +26,31 @@ class ConfigurationDeviceSchema(Schema):
     firmware_version = fields.Str()
 
     configuration = Relationship(
+        self_view="api.configuration_device_configuration",
         self_view_kwargs={"id": "<id>"},
         related_view="api.configuration_detail",
         related_view_kwargs={"id": "<configuration_id>"},
+        include_resource_linkage=True,
         type_="configuration",
         schema="ConfigurationSchema",
     )
 
     device = Relationship(
+        self_view="api.configuration_device_device",
         self_view_kwargs={"id": "<id>"},
         related_view="api.device_detail",
         related_view_kwargs={"id": "<device_id>"},
+        include_resource_linkage=True,
         type_="device",
         schema="DeviceSchema",
     )
 
     parent_platform = Relationship(
+        self_view="api.configuration_device_parent_platform",
         self_view_kwargs={"id": "<id>"},
         related_view="api.platform_detail",
         related_view_kwargs={"id": "<parent_platform_id>"},
+        include_resource_linkage=True,
         type_="platform",
         schema="PlatformSchema",
     )
