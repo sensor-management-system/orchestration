@@ -198,16 +198,20 @@ permissions and limitations under the Licence.
         <v-snackbar v-model="hasSuccess" top color="green">
           {{ success }}
           <template v-slot:action="{ attrs }">
-            <v-btn fab small v-bind="attrs" @click="closeSuccessSnackbar">
-              <v-icon>mdi-close</v-icon>
+            <v-btn icon small color="white" v-bind="attrs" @click="closeSuccessSnackbar">
+              <v-icon small>
+                mdi-close
+              </v-icon>
             </v-btn>
           </template>
         </v-snackbar>
         <v-snackbar v-model="hasError" top color="error">
           {{ error }}
           <template v-slot:action="{ attrs }">
-            <v-btn fab small v-bind="attrs" @click="closeErrorSnackbar">
-              <v-icon>mdi-close</v-icon>
+            <v-btn icon small color="white" v-bind="attrs" @click="closeErrorSnackbar">
+              <v-icon small>
+                mdi-close
+              </v-icon>
             </v-btn>
           </template>
         </v-snackbar>

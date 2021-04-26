@@ -90,7 +90,8 @@ export default {
   */
   plugins: [
     '~/plugins/fullContext.ts',
-    '~/plugins/api.ts'
+    '~/plugins/api.ts',
+    '~/plugins/filters.ts'
   ],
   /*
   ** Nuxt.js dev-modules

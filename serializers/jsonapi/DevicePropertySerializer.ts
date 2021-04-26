@@ -4,8 +4,11 @@
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
  * Copyright (C) 2020
+ * - Kotyba Alhaj Taha (UFZ, kotyba.alhaj-taha@ufz.de)
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
+ * - Helmholtz Centre for Environmental Research GmbH - UFZ
+ * (UFZ, https://www.ufz.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
  *   Geosciences (GFZ, https://www.gfz-potsdam.de)
  *
@@ -29,11 +32,25 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
-import { DeviceProperty } from '@/models/DeviceProperty'
+import { DeviceProperty, IDeviceProperty } from '@/models/DeviceProperty'
 import { MeasuringRange } from '@/models/MeasuringRange'
 
-import { IJsonApiNestedElement } from '@/serializers/jsonapi/JsonApiTypes'
+import {
+  IJsonApiNestedElement,
+  IJsonApiObject,
+  IJsonApiObjectList,
+  IJsonApiTypeIdAttributes,
+  IJsonApiDataWithOptionalId,
+  IJsonApiTypeIdDataListDict, IJsonApiTypeId, IJsonApiTypeIdDataList
+} from '@/serializers/jsonapi/JsonApiTypes'
+export interface IMissingDevicePropertyData {
+  ids: string[]
+}
 
+export interface IDevicePropertiesAndMissing {
+  properties: DeviceProperty[]
+  missing: IMissingDevicePropertyData
+}
 export class DevicePropertySerializer {
   convertJsonApiElementToModel (property: IJsonApiNestedElement): DeviceProperty {
     const result = new DeviceProperty()
@@ -97,5 +114,140 @@ export class DevicePropertySerializer {
     }
 
     return result
+  }
+
+  convertJsonApiObjectToModel (jsonApiObject: IJsonApiObject): DeviceProperty {
+    const data = jsonApiObject.data
+    return this.convertJsonApiDataToModel(data)
+  }
+
+  convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiObjectList): DeviceProperty[] {
+    return jsonApiObjectList.data.map(this.convertJsonApiDataToModel)
+  }
+
+  convertModelListToJsonApiRelationshipObject (properties: DeviceProperty[]): IJsonApiTypeIdDataListDict {
+    return {
+      device_properties: {
+        data: this.convertModelListToTupleListWithIdAndType(properties)
+      }
+    }
+  }
+
+  convertJsonApiDataToModel (jsonApiData: IJsonApiTypeIdAttributes): DeviceProperty {
+    const newEntry = new DeviceProperty()
+    newEntry.id = jsonApiData.id.toString()
+    newEntry.measuringRange = new MeasuringRange(
+      jsonApiData.attributes.measuring_range_min || null,
+      jsonApiData.attributes.measuring_range_max || null
+    )
+    newEntry.failureValue = jsonApiData.attributes.failure_value || null
+    newEntry.accuracy = jsonApiData.attributes.accuracy || null
+    newEntry.resolution = jsonApiData.attributes.resolution || null
+    newEntry.label = jsonApiData.attributes.label || ''
+    newEntry.unitUri = jsonApiData.attributes.unit_uri || ''
+    newEntry.unitName = jsonApiData.attributes.unit_name || ''
+    newEntry.compartmentUri = jsonApiData.attributes.compartment_uri || ''
+    newEntry.compartmentName = jsonApiData.attributes.compartment_name || ''
+    newEntry.propertyUri = jsonApiData.attributes.property_uri || ''
+    newEntry.propertyName = jsonApiData.attributes.property_name || ''
+    newEntry.samplingMediaUri = jsonApiData.attributes.sampling_media_uri || ''
+    newEntry.samplingMediaName = jsonApiData.attributes.sampling_media_name || ''
+    newEntry.resolutionUnitUri = jsonApiData.attributes.resolution_unit_uri || ''
+    newEntry.resolutionUnitName = jsonApiData.attributes.resolution_unit_name || ''
+
+    return newEntry
+  }
+
+  convertModelListToTupleListWithIdAndType (properties: IDeviceProperty[]): IJsonApiTypeId[] {
+    const result: IJsonApiTypeId[] = []
+    for (const property of properties) {
+      if (property.id !== null) {
+        result.push({
+          id: property.id,
+          type: 'device_property'
+        })
+      }
+    }
+    return result
+  }
+
+  convertJsonApiRelationshipsModelList (relationships: IJsonApiTypeIdDataListDict, included: IJsonApiTypeIdAttributes[]): IDevicePropertiesAndMissing {
+    const devicePropertyIds = []
+    if (relationships.device_properties) {
+      const devicePropertyObject = relationships.device_properties as IJsonApiTypeIdDataList
+      if (devicePropertyObject.data && devicePropertyObject.data.length > 0) {
+        for (const relationShipDevicePropertyData of devicePropertyObject.data) {
+          const devicePropertyId = relationShipDevicePropertyData.id
+          devicePropertyIds.push(devicePropertyId)
+        }
+      }
+    }
+
+    const possibleProperties: {[key: string]: DeviceProperty} = {}
+    if (included && included.length > 0) {
+      for (const includedEntry of included) {
+        if (includedEntry.type === 'device_property') {
+          const devicePropertyId = includedEntry.id
+          if (devicePropertyIds.includes(devicePropertyId)) {
+            const deviceProperty = this.convertJsonApiDataToModel(includedEntry)
+            possibleProperties[devicePropertyId] = deviceProperty
+          }
+        }
+      }
+    }
+
+    const properties = []
+    const missingDataForDevicePropertyIds = []
+
+    for (const devicePropertyId of devicePropertyIds) {
+      if (possibleProperties[devicePropertyId]) {
+        properties.push(possibleProperties[devicePropertyId])
+      } else {
+        missingDataForDevicePropertyIds.push(devicePropertyId)
+      }
+    }
+
+    return {
+      properties,
+      missing: {
+        ids: missingDataForDevicePropertyIds
+      }
+    }
+  }
+
+  convertModelToJsonApiData (deviceProperty: DeviceProperty, deviceId: string): IJsonApiDataWithOptionalId {
+    const data: any = {
+      type: 'device_property',
+      attributes: {
+        measuring_range_min: deviceProperty.measuringRange.min,
+        measuring_range_max: deviceProperty.measuringRange.max,
+        failure_value: deviceProperty.failureValue,
+        accuracy: deviceProperty.accuracy,
+        resolution: deviceProperty.resolution,
+        label: deviceProperty.label,
+        unit_uri: deviceProperty.unitUri,
+        unit_name: deviceProperty.unitName,
+        compartment_uri: deviceProperty.compartmentUri,
+        compartment_name: deviceProperty.compartmentName,
+        property_uri: deviceProperty.propertyUri,
+        property_name: deviceProperty.propertyName,
+        sampling_media_uri: deviceProperty.samplingMediaUri,
+        sampling_media_name: deviceProperty.samplingMediaName,
+        resolution_unit_uri: deviceProperty.resolutionUnitUri,
+        resolution_unit_name: deviceProperty.resolutionUnitName
+      },
+      relationships: {
+        device: {
+          data: {
+            type: 'device',
+            id: deviceId
+          }
+        }
+      }
+    }
+    if (deviceProperty.id) {
+      data.id = deviceProperty.id
+    }
+    return data
   }
 }

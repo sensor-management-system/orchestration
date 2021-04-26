@@ -33,6 +33,7 @@ permissions and limitations under the Licence.
     <v-row>
       <v-col cols="12" md="3">
         <v-text-field
+          ref="label"
           label="Label"
           :value="value.label"
           :readonly="readonly"
@@ -978,6 +979,10 @@ export default class DevicePropertyForm extends Vue {
    */
   itemHasDefinition (item: { definition?: string }): boolean {
     return item && !!item.definition
+  }
+
+  focus (): void {
+    (this.$refs.label as Vue & { focus: () => void }).focus()
   }
 }
 </script>

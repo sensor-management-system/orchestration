@@ -4,8 +4,11 @@
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
  * Copyright (C) 2020
+ * - Kotyba Alhaj Taha (UFZ, kotyba.alhaj-taha@ufz.de)
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
+ * - Helmholtz Centre for Environmental Research GmbH - UFZ
+ * (UFZ, https://www.ufz.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
  *   Geosciences (GFZ, https://www.gfz-potsdam.de)
  *
@@ -33,7 +36,12 @@
 import { DateTime } from 'luxon'
 import { Contact } from '@/models/Contact'
 import { Device } from '@/models/Device'
-import { DeviceSerializer, IDeviceWithMeta, deviceWithMetaToDeviceByThrowingErrorOnMissing, deviceWithMetaToDeviceByAddingDummyObjects } from '@/serializers/jsonapi/DeviceSerializer'
+import {
+  DeviceSerializer,
+  deviceWithMetaToDeviceByAddingDummyObjects,
+  deviceWithMetaToDeviceByThrowingErrorOnMissing,
+  IDeviceWithMeta
+} from '@/serializers/jsonapi/DeviceSerializer'
 import { Attachment } from '@/models/Attachment'
 import { DeviceProperty } from '@/models/DeviceProperty'
 import { MeasuringRange } from '@/models/MeasuringRange'
@@ -67,7 +75,7 @@ const createTestDevice = () => {
       value: 'First custom value'
     }),
     CustomTextField.createFromObject({
-      id: null,
+      id: '2',
       key: 'Second custom field',
       value: ''
     })
@@ -80,7 +88,7 @@ const createTestDevice = () => {
       url: 'http://www.gfz-potsdam.de'
     }),
     Attachment.createFromObject({
-      id: null,
+      id: '1',
       label: 'UFZ',
       url: 'http://www.ufz.de'
     })
@@ -109,7 +117,7 @@ const createTestDevice = () => {
       resolutionUnitName: 'mm'
     }),
     DeviceProperty.createFromObject({
-      id: null,
+      id: '4',
       label: 'Prop 2',
       compartmentUri: '',
       compartmentName: '',
@@ -158,11 +166,9 @@ describe('DeviceSerializer', () => {
           type: 'device',
           attributes: {
             serial_number: '',
-            properties: [],
             device_type_name: 'Logger',
             model: 'CR 1000',
             description: '',
-            attachments: [],
             status_uri: null,
             website: '',
             updated_at: '2020-08-29T13:49:48.015620+00:00',
@@ -171,7 +177,6 @@ describe('DeviceSerializer', () => {
             inventory_number: '',
             manufacturer_name: 'Campbell Scientific',
             device_type_uri: 'Logger',
-            customfields: [],
             short_name: 'Campbell CR1000 logger unit',
             status_name: null,
             dual_use: false,
@@ -181,7 +186,7 @@ describe('DeviceSerializer', () => {
           relationships: {
             updated_by: {
               links: {
-                self: '/rdm/svm-api/v1/devices/46/relationships/updatedUser'
+                self: '/rdm/svm-api/v1/devices/46/relationships/updated-user'
               }
             },
             contacts: {
@@ -198,8 +203,26 @@ describe('DeviceSerializer', () => {
             },
             created_by: {
               links: {
-                self: '/rdm/svm-api/v1/devices/46/relationships/createdUser'
+                self: '/rdm/svm-api/v1/devices/46/relationships/created-user'
               }
+            },
+            customfields: {
+              links: {
+                related: '/rdm/svm-api/v1/devices/1/relationships/customfields'
+              },
+              data: []
+            },
+            device_properties: {
+              links: {
+                related: '/rdm/svm-api/v1/devices/1/relationships/device-properties'
+              },
+              data: []
+            },
+            device_attachments: {
+              links: {
+                related: '/rdm/svm-api/v1/devices/1/relationships/device-attachments'
+              },
+              data: []
             }
           },
           id: '46',
@@ -210,11 +233,9 @@ describe('DeviceSerializer', () => {
           type: 'device',
           attributes: {
             serial_number: '',
-            properties: [],
             device_type_name: 'Logger',
             model: 'CR 200X',
             description: '',
-            attachments: [],
             status_uri: null,
             website: 'https://www.campbellsci.de/cr200x',
             updated_at: null,
@@ -223,7 +244,6 @@ describe('DeviceSerializer', () => {
             inventory_number: '',
             manufacturer_name: 'Campbell Scientific',
             device_type_uri: 'Logger',
-            customfields: [],
             short_name: 'Campbell CR200X logger unit',
             status_name: null,
             dual_use: false,
@@ -272,8 +292,8 @@ describe('DeviceSerializer', () => {
           version: '1.0'
         }
       }
-
       const expectedDevice1 = new Device()
+
       expectedDevice1.id = '46'
       expectedDevice1.serialNumber = ''
       expectedDevice1.properties = []
@@ -349,15 +369,9 @@ describe('DeviceSerializer', () => {
           type: 'device',
           attributes: {
             serial_number: '0000001',
-            properties: [],
             device_type_name: null,
             model: 'test model',
             description: 'My first test device',
-            attachments: [{
-              label: 'test label',
-              url: 'http://test.test',
-              id: '1'
-            }],
             status_uri: null,
             website: null,
             updated_at: '2020-08-28T13:00:46.295058+00:00',
@@ -366,7 +380,6 @@ describe('DeviceSerializer', () => {
             inventory_number: '0000001',
             manufacturer_name: null,
             device_type_uri: null,
-            customfields: [],
             short_name: 'Device short name',
             status_name: null,
             dual_use: false,
@@ -410,7 +423,6 @@ describe('DeviceSerializer', () => {
           version: '1.0'
         }
       }
-
       const expectedDevice = new Device()
       expectedDevice.id = '1'
       expectedDevice.serialNumber = '0000001'
@@ -418,11 +430,7 @@ describe('DeviceSerializer', () => {
       expectedDevice.deviceTypeName = ''
       expectedDevice.model = 'test model'
       expectedDevice.description = 'My first test device'
-      expectedDevice.attachments = [Attachment.createFromObject({
-        label: 'test label',
-        url: 'http://test.test',
-        id: '1'
-      })]
+      expectedDevice.attachments = []
       expectedDevice.statusUri = ''
       expectedDevice.website = ''
       expectedDevice.updatedAt = DateTime.utc(2020, 8, 28, 13, 0, 46, 295)
@@ -452,51 +460,9 @@ describe('DeviceSerializer', () => {
           type: 'device',
           attributes: {
             serial_number: '0000001',
-            properties: [{
-              compartment_name: 'Climate',
-              unit_uri: '',
-              sampling_media_name: 'Other',
-              compartment_uri: 'variabletype/Climate',
-              property_name: 'Water vapor concentration',
-              accuracy: null,
-              measuring_range_min: null,
-              measuring_range_max: null,
-              label: 'water vapor',
-              property_uri: 'variablename/Water%20vapor%20concentration',
-              id: '39',
-              unit_name: '',
-              failure_value: null,
-              sampling_media_uri: 'medium/Other',
-              resolution: 0.001,
-              resolution_unit_uri: 'http://foo/unit/1',
-              resolution_unit_name: 'mm'
-            }, {
-              compartment_name: 'a',
-              unit_uri: 'b',
-              sampling_media_name: 'c',
-              compartment_uri: 'd',
-              property_name: 'e',
-              accuracy: 1,
-              measuring_range_min: 2,
-              measuring_range_max: 3,
-              label: 'f',
-              property_uri: 'g',
-              id: '40',
-              unit_name: 'j',
-              failure_value: 4,
-              sampling_media_uri: 'k',
-              resolution: 0.001,
-              resolution_unit_uri: 'http://foo/unit/1',
-              resolution_unit_name: 'mm'
-            }],
             device_type_name: null,
             model: 'test model',
             description: 'My first test device',
-            attachments: [{
-              label: 'test label',
-              url: 'http://test.test',
-              id: '1'
-            }],
             status_uri: null,
             website: null,
             updated_at: '2020-08-28T13:00:46.295058+00:00',
@@ -505,11 +471,6 @@ describe('DeviceSerializer', () => {
             inventory_number: '0000001',
             manufacturer_name: null,
             device_type_uri: null,
-            customfields: [{
-              id: '44',
-              key: 'a',
-              value: 'b'
-            }],
             short_name: 'Device short name',
             status_name: null,
             dual_use: true,
@@ -532,6 +493,41 @@ describe('DeviceSerializer', () => {
                 id: '1'
               }]
             },
+            device_attachments: {
+              links: {
+                self: '/rdm/svm-api/v1/devices/1/relationships/device-attachments',
+                related: '/rdm/svm-api/v1/devices/1/device-attachments'
+              },
+              data: [{
+                type: 'device_attachments',
+                id: '1'
+              }]
+            },
+            customfields: {
+              links: {
+                self: '/rdm/svm-api/v1/devices/1/relationships/customfields',
+                related: '/rdm/svm-api/v1/devices/1/customfields'
+              },
+              data: [{
+                type: 'customfield',
+                id: '44'
+              }]
+            },
+            device_properties: {
+              links: {
+                self: '/rdm/svm-api/v1/devices/1/relationships/device-properties',
+                related: '/rdm/svm-api/v1/devices/1/device-properties'
+              },
+              data: [
+                {
+                  type: 'device_property',
+                  id: '39'
+                },
+                {
+                  type: 'device_property',
+                  id: '40'
+                }]
+            },
             events: {
               links: {
                 self: '/rdm/svm-api/v1/devices/1/relationships/events',
@@ -553,49 +549,171 @@ describe('DeviceSerializer', () => {
         links: {
           self: '/rdm/svm-api/v1/devices/1'
         },
-        included: [{
-          type: 'contact',
-          relationships: {
-            configurations: {
-              links: {
-                self: '/rdm/svm-api/v1/contacts/1/relationships/configurations',
-                related: '/rdm/svm-api/v1/configurations?contact_id=1'
-              }
-            },
-            user: {
-              links: {
-                self: '/rdm/svm-api/v1/contacts/1/relationships/user',
-                related: '/rdm/svm-api/v1/contacts/1/users'
+        included: [
+          {
+            type: 'contact',
+            relationships: {
+              configurations: {
+                links: {
+                  self: '/rdm/svm-api/v1/contacts/1/relationships/configurations',
+                  related: '/rdm/svm-api/v1/configurations?contact_id=1'
+                }
               },
-              data: {
-                type: 'user',
-                id: '[<User 1>]'
+              user: {
+                links: {
+                  self: '/rdm/svm-api/v1/contacts/1/relationships/user',
+                  related: '/rdm/svm-api/v1/contacts/1/users'
+                },
+                data: {
+                  type: 'user',
+                  id: '[<User 1>]'
+                }
+              },
+              devices: {
+                links: {
+                  self: '/rdm/svm-api/v1/contacts/1/relationships/devices',
+                  related: '/rdm/svm-api/v1/devices?contact_id=1'
+                }
+              },
+              platforms: {
+                links: {
+                  self: '/rdm/svm-api/v1/contacts/1/relationships/platforms',
+                  related: '/rdm/svm-api/v1/contacts/1/platforms'
+                }
               }
             },
-            devices: {
-              links: {
-                self: '/rdm/svm-api/v1/contacts/1/relationships/devices',
-                related: '/rdm/svm-api/v1/devices?contact_id=1'
-              }
+            attributes: {
+              given_name: 'Max',
+              email: 'test@test.test',
+              website: null,
+              family_name: 'Mustermann'
             },
-            platforms: {
-              links: {
-                self: '/rdm/svm-api/v1/contacts/1/relationships/platforms',
-                related: '/rdm/svm-api/v1/contacts/1/platforms'
-              }
+            id: '1',
+            links: {
+              self: '/rdm/svm-api/v1/contacts/1'
             }
           },
-          attributes: {
-            given_name: 'Max',
-            email: 'test@test.test',
-            website: null,
-            family_name: 'Mustermann'
+          {
+            type: 'customfield',
+            relationships: {
+              device: {
+                links: {
+                  self: '/rdm/svm-api/v1/customfields/1/relationships/device',
+                  related: '/rdm/svm-api/v1/devices/1'
+                },
+                data: {
+                  type: 'device',
+                  id: '1'
+                }
+              }
+            },
+            id: '44',
+            attributes: {
+              key: 'a',
+              value: 'b'
+            },
+            links: {
+              self: '/rdm/svm-api/v1/customfields/44'
+            }
           },
-          id: '1',
-          links: {
-            self: '/rdm/svm-api/v1/contacts/1'
+          {
+            type: 'device_attachment',
+            attributes: {
+              url: 'http://test.test',
+              label: 'test label'
+            },
+            relationships: {
+              device: {
+                links: {
+                  self: '/rdm/svm-api/v1/device-attachments/1/relationships/device',
+                  related: '/rdm/svm-api/v1/devices/3'
+                },
+                data: {
+                  type: 'device',
+                  id: '1'
+                }
+              }
+            },
+            id: '1',
+            links: {
+              self: '/rdm/svm-api/v1/device-attachments/1'
+            }
+          },
+          {
+            type: 'device_property',
+            attributes: {
+              measuring_range_min: null,
+              label: 'water vapor',
+              sampling_media_name: 'Other',
+              resolution: 0.001,
+              property_uri: 'variablename/Water%20vapor%20concentration',
+              measuring_range_max: null,
+              unit_name: '',
+              compartment_uri: 'variabletype/Climate',
+              property_name: 'Water vapor concentration',
+              resolution_unit_uri: 'http://foo/unit/1',
+              sampling_media_uri: 'medium/Other',
+              compartment_name: 'Climate',
+              accuracy: null,
+              resolution_unit_name: 'mm',
+              unit_uri: '',
+              failure_value: null
+            },
+            id: '39',
+            relationships: {
+              device: {
+                links: {
+                  self: '/rdm/svm-api/v1/device-properties/2/relationships/device',
+                  related: '/rdm/svm-api/v1/devices/4'
+                },
+                data: {
+                  type: 'device',
+                  id: '1'
+                }
+              }
+            },
+            links: {
+              self: '/rdm/svm-api/v1/device-properties/2'
+            }
+          },
+          {
+            type: 'device_property',
+            attributes: {
+              measuring_range_min: 2,
+              label: 'f',
+              sampling_media_name: 'c',
+              resolution: 0.001,
+              property_uri: 'g',
+              measuring_range_max: 3,
+              unit_name: 'j',
+              compartment_uri: 'd',
+              property_name: 'e',
+              resolution_unit_uri: 'http://foo/unit/1',
+              sampling_media_uri: 'k',
+              compartment_name: 'a',
+              accuracy: 1,
+              resolution_unit_name: 'mm',
+              unit_uri: 'b',
+              failure_value: 4
+            },
+            id: '40',
+            relationships: {
+              device: {
+                links: {
+                  self: '/rdm/svm-api/v1/device-properties/2/relationships/device',
+                  related: '/rdm/svm-api/v1/devices/4'
+                },
+                data: {
+                  type: 'device',
+                  id: '1'
+                }
+              }
+            },
+            links: {
+              self: '/rdm/svm-api/v1/device-properties/2'
+            }
           }
-        }],
+        ],
         jsonapi: {
           version: '1.0'
         }
@@ -689,9 +807,11 @@ describe('DeviceSerializer', () => {
       const serializer = new DeviceSerializer()
       const deviceWithMeta = serializer.convertJsonApiObjectToModel(jsonApiObject)
       const device = deviceWithMeta.device
-
       expect(device).toEqual(expectedDevice)
       expect(deviceWithMeta.missing.contacts.ids).toEqual([])
+      expect(deviceWithMeta.missing.deviceAttachments.ids).toEqual([])
+      expect(deviceWithMeta.missing.customfields.ids).toEqual([])
+      expect(deviceWithMeta.missing.properties.ids).toEqual([])
     })
   })
   describe('#convertJsonApiDataToModel', () => {
@@ -700,15 +820,9 @@ describe('DeviceSerializer', () => {
         type: 'device',
         attributes: {
           serial_number: '0000001',
-          properties: [],
           device_type_name: null,
           model: 'test model',
           description: 'My first test device',
-          attachments: [{
-            label: 'test label',
-            url: 'http://test.test',
-            id: '1'
-          }],
           status_uri: null,
           website: null,
           updated_at: '2020-08-28T13:00:46.295058+00:00',
@@ -717,7 +831,6 @@ describe('DeviceSerializer', () => {
           inventory_number: '0000001',
           manufacturer_name: null,
           device_type_uri: null,
-          customfields: [],
           short_name: 'Device short name',
           status_name: null,
           dual_use: false,
@@ -762,11 +875,7 @@ describe('DeviceSerializer', () => {
       expectedDevice.deviceTypeName = ''
       expectedDevice.model = 'test model'
       expectedDevice.description = 'My first test device'
-      expectedDevice.attachments = [Attachment.createFromObject({
-        label: 'test label',
-        url: 'http://test.test',
-        id: '1'
-      })]
+      expectedDevice.attachments = []
       expectedDevice.statusUri = ''
       expectedDevice.website = ''
       expectedDevice.updatedAt = DateTime.utc(2020, 8, 28, 13, 0, 46, 295)
@@ -808,9 +917,9 @@ describe('DeviceSerializer', () => {
           }],
           status_uri: null,
           website: null,
-          updated_at: '2020-08-28T13:00:46.295058+00:00',
+          updated_at: '2020-08-29T13:49:48.015',
           long_name: 'Device long name',
-          created_at: '2020-08-28T13:00:46.295058+00:00',
+          created_at: '2020-08-28T13:49:48.015',
           inventory_number: '0000001',
           manufacturer_name: null,
           device_type_uri: 'type uri',
@@ -859,16 +968,12 @@ describe('DeviceSerializer', () => {
       expectedDevice.deviceTypeName = 'type name'
       expectedDevice.model = 'test model'
       expectedDevice.description = 'My first test device'
-      expectedDevice.attachments = [Attachment.createFromObject({
-        label: 'test label',
-        url: 'http://test.test',
-        id: '1'
-      })]
+      expectedDevice.attachments = []
+      expectedDevice.updatedAt = DateTime.utc(2020, 8, 29, 13, 49, 48, 15)
+      expectedDevice.createdAt = DateTime.utc(2020, 8, 28, 13, 49, 48, 15)
       expectedDevice.statusUri = ''
       expectedDevice.website = ''
-      expectedDevice.updatedAt = DateTime.utc(2020, 8, 28, 13, 0, 46, 295)
       expectedDevice.longName = 'Device long name'
-      expectedDevice.createdAt = DateTime.utc(2020, 8, 28, 13, 0, 46, 295)
       expectedDevice.inventoryNumber = '0000001'
       expectedDevice.manufacturerName = ''
       expectedDevice.deviceTypeUri = 'type uri'
@@ -939,82 +1044,57 @@ describe('DeviceSerializer', () => {
       expect(attributes.website).toEqual('http://gfz-potsdam.de')
       expect(attributes).toHaveProperty('dual_use')
       expect(attributes.dual_use).toEqual(true)
-      expect(attributes).toHaveProperty('created_at')
+      // expect(attributes).toHaveProperty('created_at')
       // expect(attributes.created_at).toEqual('2020-08-28T13:49:48.015620+00:00')
       // I wasn't able to find the exact date time format, so we use ISO date times
-      expect(attributes.created_at).toEqual('2020-08-28T13:49:48.015Z')
-      expect(attributes).toHaveProperty('updated_at')
+      // expect(attributes.created_at).toEqual('2020-08-28T13:49:48.015Z')
+      // expect(attributes).toHaveProperty('updated_at')
       // expect(attributes.updated_at).toEqual('2020-08-30T13:49:48.015620+00:00')
       // again, iso date times
-      expect(attributes.updated_at).toEqual('2020-08-30T13:49:48.015Z')
+      // expect(attributes.updated_at).toEqual('2020-08-30T13:49:48.015Z')
 
-      expect(attributes).toHaveProperty('customfields')
-      const customfields = attributes.customfields
-      expect(Array.isArray(customfields)).toBeTruthy()
-      expect(customfields.length).toEqual(2)
-      expect(customfields[0]).toEqual({
+      expect(jsonApiData.relationships).toHaveProperty('customfields')
+      const customFields = jsonApiData.relationships.customfields as IJsonApiTypeIdDataList
+      expect(customFields).toHaveProperty('data')
+      const customFieldsData = customFields.data
+      expect(Array.isArray(customFieldsData)).toBeTruthy()
+      expect(customFieldsData.length).toEqual(2)
+      expect(customFieldsData[0]).toEqual({
         id: '1',
-        key: 'First custom field',
-        value: 'First custom value'
+        type: 'customfield'
       })
-      expect(customfields[1]).toEqual({
-        key: 'Second custom field',
-        value: ''
-      })
-
-      expect(attributes).toHaveProperty('attachments')
-      const attachments = attributes.attachments
-      expect(Array.isArray(attachments)).toBeTruthy()
-      expect(attachments.length).toEqual(2)
-      expect(attachments[0]).toEqual({
+      expect(customFieldsData[1]).toEqual({
         id: '2',
-        label: 'GFZ',
-        url: 'http://www.gfz-potsdam.de'
-      })
-      expect(attachments[1]).toEqual({
-        label: 'UFZ',
-        url: 'http://www.ufz.de'
+        type: 'customfield'
       })
 
-      expect(attributes).toHaveProperty('properties')
-      const properties = attributes.properties
-      expect(Array.isArray(properties)).toBeTruthy()
-      expect(properties[0]).toEqual({
-        id: '3',
-        label: 'Prop 1',
-        compartment_uri: 'compartment/Comp1',
-        compartment_name: 'Comp 1',
-        unit_uri: 'unit/Unit1',
-        unit_name: 'Unit 1',
-        sampling_media_uri: 'medium/Medium1',
-        sampling_media_name: 'Medium 1',
-        property_uri: 'property/Prop1',
-        property_name: 'Property 1',
-        measuring_range_min: -7,
-        measuring_range_max: 7,
-        accuracy: 0.5,
-        failure_value: -999,
-        resolution: 0.001,
-        resolution_unit_uri: 'http://foo/unit/1',
-        resolution_unit_name: 'mm'
+      expect(jsonApiData.relationships).toHaveProperty('device_attachments')
+      const attachments = jsonApiData.relationships.device_attachments as IJsonApiTypeIdDataList
+      expect(Array.isArray(attachments.data)).toBeTruthy()
+
+      expect(attachments.data.length).toEqual(2)
+      expect(attachments.data[0]).toEqual({
+        id: '2',
+        type: 'device_attachment'
+
       })
-      expect(properties[1]).toEqual({
-        label: 'Prop 2',
-        compartment_uri: '',
-        compartment_name: '',
-        unit_uri: '',
-        unit_name: '',
-        sampling_media_uri: '',
-        sampling_media_name: '',
-        property_uri: '',
-        property_name: '',
-        measuring_range_min: null,
-        measuring_range_max: null,
-        accuracy: null,
-        failure_value: null,
-        resolution: 0.001,
-        resolution_unit_uri: 'http://foo/unit/1',
-        resolution_unit_name: 'mm'
+      expect(attachments.data[1]).toEqual({
+        id: '1',
+        type: 'device_attachment'
+      })
+
+      expect(jsonApiData.relationships).toHaveProperty('device_properties')
+      const propertyObject = jsonApiData.relationships.device_properties as IJsonApiTypeIdDataList
+      expect(propertyObject).toHaveProperty('data')
+      const propertyData = propertyObject.data
+      expect(propertyData.length).toEqual(2)
+      expect(propertyData[0]).toEqual({
+        id: '3',
+        type: 'device_property'
+      })
+      expect(propertyData[1]).toEqual({
+        id: '4',
+        type: 'device_property'
       })
 
       expect(jsonApiData).toHaveProperty('relationships')
@@ -1065,24 +1145,6 @@ describe('DeviceSerializer', () => {
       expect(typeof jsonApiData).toEqual('object')
       expect(jsonApiData).toHaveProperty('id')
       expect(jsonApiData.id).toEqual('abc')
-    })
-    it('should stay with a null createdAt/updatedAt date', () => {
-      const device = createTestDevice()
-      device.createdAt = null
-      device.updatedAt = null
-
-      const serializer = new DeviceSerializer()
-
-      const jsonApiData = serializer.convertModelToJsonApiData(device)
-
-      expect(typeof jsonApiData).toEqual('object')
-      expect(jsonApiData).toHaveProperty('attributes')
-      const attributes = jsonApiData.attributes
-      expect(typeof attributes).toEqual('object')
-      expect(attributes).toHaveProperty('created_at')
-      expect(attributes.created_at).toBeNull()
-      expect(attributes).toHaveProperty('updated_at')
-      expect(attributes.updated_at).toBeNull()
     })
   })
 })

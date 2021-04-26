@@ -33,6 +33,10 @@ import { CustomTextField } from '@/models/CustomTextField'
 
 import { CustomTextFieldSerializer } from '@/serializers/jsonapi/CustomTextFieldSerializer'
 
+import {
+  IJsonApiObjectList
+} from '@/serializers/jsonapi/JsonApiTypes'
+
 describe('CustomTextFieldSerializer', () => {
   describe('#convertNestedJsonApiToModelList', () => {
     it('should convert a list of entries to models', () => {
@@ -116,6 +120,160 @@ describe('CustomTextFieldSerializer', () => {
         key: 'Second custom field',
         value: ''
       })
+    })
+  })
+  describe('#convertModelToJsonApiData', () => {
+    it('should convert a simple model to a json:api payload', () => {
+      const customfield = CustomTextField.createFromObject({
+        id: '123',
+        key: 'some key',
+        value: 'test test test'
+      })
+      const serializer = new CustomTextFieldSerializer()
+      const deviceId = '456'
+
+      const jsonApiPayload = serializer.convertModelToJsonApiData(customfield, deviceId)
+
+      expect(jsonApiPayload).toHaveProperty('id')
+      expect(jsonApiPayload.id).toEqual('123')
+      expect(jsonApiPayload).toHaveProperty('type')
+      expect(jsonApiPayload.type).toEqual('customfield')
+      expect(jsonApiPayload).toHaveProperty('attributes')
+      expect(jsonApiPayload.attributes).toHaveProperty('key')
+      expect(jsonApiPayload.attributes.key).toEqual('some key')
+      expect(jsonApiPayload.attributes).toHaveProperty('value')
+      expect(jsonApiPayload.attributes.value).toEqual('test test test')
+      expect(jsonApiPayload).toHaveProperty('relationships')
+      expect(jsonApiPayload.relationships).toHaveProperty('device')
+      expect(jsonApiPayload.relationships.device).toHaveProperty('data')
+      const deviceData: any = jsonApiPayload.relationships.device.data
+      expect(deviceData).toHaveProperty('id')
+      expect(deviceData.id).toEqual('456')
+      expect(deviceData).toHaveProperty('type')
+      expect(deviceData.type).toEqual('device')
+    })
+    it('should also be possible if there is no id yet', () => {
+      const customfield = CustomTextField.createFromObject({
+        id: null,
+        key: 'some key',
+        value: 'test test test'
+      })
+      const serializer = new CustomTextFieldSerializer()
+      const deviceId = '456'
+
+      const jsonApiPayload = serializer.convertModelToJsonApiData(customfield, deviceId)
+
+      expect(jsonApiPayload).not.toHaveProperty('id')
+      expect(jsonApiPayload).toHaveProperty('type')
+      expect(jsonApiPayload.type).toEqual('customfield')
+      expect(jsonApiPayload).toHaveProperty('attributes')
+      expect(jsonApiPayload.attributes).toHaveProperty('key')
+      expect(jsonApiPayload.attributes.key).toEqual('some key')
+      expect(jsonApiPayload.attributes).toHaveProperty('value')
+      expect(jsonApiPayload.attributes.value).toEqual('test test test')
+      expect(jsonApiPayload).toHaveProperty('relationships')
+      expect(jsonApiPayload.relationships).toHaveProperty('device')
+      expect(jsonApiPayload.relationships.device).toHaveProperty('data')
+      const deviceData: any = jsonApiPayload.relationships.device.data
+      expect(deviceData).toHaveProperty('id')
+      expect(deviceData.id).toEqual('456')
+      expect(deviceData).toHaveProperty('type')
+      expect(deviceData.type).toEqual('device')
+    })
+  })
+  describe('#convertJsonApiDataToModel', () => {
+    it('should convert an example payload to a model', () => {
+      const data = {
+        id: '123',
+        type: 'customfield',
+        attributes: {
+          key: 'institute',
+          value: 'GFZ'
+        }
+      }
+
+      const serializer = new CustomTextFieldSerializer()
+      const model = serializer.convertJsonApiDataToModel(data)
+
+      expect(model.id).toEqual('123')
+      expect(model.key).toEqual('institute')
+      expect(model.value).toEqual('GFZ')
+    })
+    it('should also convert missing values to empty strings', () => {
+      const data = {
+        id: '123',
+        type: 'customfield',
+        attributes: {
+        }
+      }
+
+      const serializer = new CustomTextFieldSerializer()
+      const model = serializer.convertJsonApiDataToModel(data)
+
+      expect(model.id).toEqual('123')
+      expect(model.key).toEqual('')
+      expect(model.value).toEqual('')
+    })
+  })
+  describe('#convertJsonApiObjectListToModelList', () => {
+    it('should convert two paylods to customTextField models', () => {
+      const data: IJsonApiObjectList = {
+        data: [
+          {
+            id: '123',
+            type: 'customfield',
+            attributes: {
+              key: 'Website GFZ',
+              value: 'www.gfz-potsdam.de'
+            },
+            relationships: {}
+          }, {
+            id: '124',
+            type: 'customfield',
+            attributes: {
+              key: 'Website UFZ',
+              value: 'www.ufz.de'
+            },
+            relationships: {}
+          }
+        ],
+        included: []
+      }
+
+      const serializer = new CustomTextFieldSerializer()
+      const models = serializer.convertJsonApiObjectListToModelList(data)
+
+      expect(models.length).toEqual(2)
+      expect(models[0].id).toEqual('123')
+      expect(models[0].key).toEqual('Website GFZ')
+      expect(models[0].value).toEqual('www.gfz-potsdam.de')
+
+      expect(models[1].id).toEqual('124')
+      expect(models[1].key).toEqual('Website UFZ')
+      expect(models[1].value).toEqual('www.ufz.de')
+    })
+  })
+  describe('#convertJsonApiObjectToModel', () => {
+    it('should convert an example payload to a model', () => {
+      const data = {
+        data: {
+          id: '123',
+          type: 'customfield',
+          attributes: {
+            key: 'institute',
+            value: 'GFZ'
+          },
+          relationships: {}
+        },
+        included: []
+      }
+
+      const serializer = new CustomTextFieldSerializer()
+      const model = serializer.convertJsonApiObjectToModel(data)
+
+      expect(model.id).toEqual('123')
+      expect(model.key).toEqual('institute')
+      expect(model.value).toEqual('GFZ')
     })
   })
 })

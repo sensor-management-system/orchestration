@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020
+ * Copyright (C) 2020, 2021
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -31,21 +31,35 @@
  */
 import { AxiosInstance, Method } from 'axios'
 
+import { Attachment } from '@/models/Attachment'
+import { Contact } from '@/models/Contact'
+import { CustomTextField } from '@/models/CustomTextField'
 import { Device } from '@/models/Device'
+import { DeviceProperty } from '@/models/DeviceProperty'
 import { DeviceType } from '@/models/DeviceType'
 import { Manufacturer } from '@/models/Manufacturer'
 import { Status } from '@/models/Status'
 
+import { ContactSerializer } from '@/serializers/jsonapi/ContactSerializer'
+import { CustomTextFieldSerializer } from '@/serializers/jsonapi/CustomTextFieldSerializer'
+import { DeviceAttachmentSerializer } from '@/serializers/jsonapi/DeviceAttachmentSerializer'
+import { DevicePropertySerializer } from '@/serializers/jsonapi/DevicePropertySerializer'
+
 import { IFlaskJSONAPIFilter } from '@/utils/JSONApiInterfaces'
 
-import {
-  IPaginationLoader, FilteredPaginationedLoader
-} from '@/utils/PaginatedLoader'
+import { FilteredPaginationedLoader, IPaginationLoader } from '@/utils/PaginatedLoader'
 import {
   DeviceSerializer,
-  deviceWithMetaToDeviceByThrowingErrorOnMissing,
-  deviceWithMetaToDeviceByAddingDummyObjects
+  deviceWithMetaToDeviceByAddingDummyObjects,
+  deviceWithMetaToDeviceThrowingNoErrorOnMissing
 } from '@/serializers/jsonapi/DeviceSerializer'
+
+interface IncludedRelationships {
+  includeContacts?: boolean
+  includeCustomFields?: boolean
+  includeDeviceProperties?: boolean
+  includeDeviceAttachments?: boolean
+}
 
 export class DeviceApi {
   private axiosApi: AxiosInstance
@@ -56,20 +70,34 @@ export class DeviceApi {
     this.serializer = new DeviceSerializer()
   }
 
-  findById (id: string): Promise<Device> {
+  findById (id: string, includes: IncludedRelationships): Promise<Device> {
+    const listIncludedRelationships: string[] = []
+    if (includes.includeContacts) {
+      listIncludedRelationships.push('contacts')
+    }
+    if (includes.includeDeviceProperties) {
+      listIncludedRelationships.push('device_properties')
+    }
+    if (includes.includeCustomFields) {
+      listIncludedRelationships.push('customfields')
+    }
+    if (includes.includeDeviceAttachments) {
+      listIncludedRelationships.push('device_attachments')
+    }
+    const include = listIncludedRelationships.join(',')
+
     return this.axiosApi.get(id, {
       params: {
-        include: 'contacts'
+        include
       }
     }).then((rawResponse) => {
       const rawData = rawResponse.data
-      // as we load the contacts, we want them to be included
-      // otherwise we throw an Error
-      return deviceWithMetaToDeviceByThrowingErrorOnMissing(this.serializer.convertJsonApiObjectToModel(rawData))
+      return deviceWithMetaToDeviceThrowingNoErrorOnMissing(
+        this.serializer.convertJsonApiObjectToModel(rawData))
     })
   }
 
-  deleteById (id: string) : Promise<void> {
+  deleteById (id: string): Promise<void> {
     return this.axiosApi.delete<string, void>(id)
   }
 
@@ -93,14 +121,72 @@ export class DeviceApi {
         data
       }
     }).then((serverAnswer) => {
-      // the server answer doesn't include the contacts
-      // so we will reload from the database
-      return this.findById(serverAnswer.data.data.id)
+      return serverAnswer.data.data.id
     })
   }
 
   newSearchBuilder (): DeviceSearchBuilder {
     return new DeviceSearchBuilder(this.axiosApi, this.serializer)
+  }
+
+  findRelatedContacts (deviceId: string): Promise<Contact[]> {
+    const url = deviceId + '/contacts'
+    const params = {
+      'page[size]': 10000
+    }
+    return this.axiosApi.get(url, { params }).then((rawServerResponse) => {
+      return new ContactSerializer().convertJsonApiObjectListToModelList(rawServerResponse.data)
+    })
+  }
+
+  removeContact (deviceId: string, contactId: string): Promise<void> {
+    const url = deviceId + '/relationships/contacts'
+    const params = {
+      data: [{
+        type: 'contact',
+        id: contactId
+      }]
+    }
+    return this.axiosApi.delete(url, { data: params })
+  }
+
+  addContact (deviceId: string, contactId: string): Promise<void> {
+    const url = deviceId + '/relationships/contacts'
+    const data = [{
+      type: 'contact',
+      id: contactId
+    }]
+    return this.axiosApi.post(url, { data })
+  }
+
+  findRelatedCustomFields (deviceId: string): Promise<CustomTextField[]> {
+    const url = deviceId + '/customfields'
+    const params = {
+      'page[size]': 10000
+    }
+    return this.axiosApi.get(url, { params }).then((rawServerResponse) => {
+      return new CustomTextFieldSerializer().convertJsonApiObjectListToModelList(rawServerResponse.data)
+    })
+  }
+
+  findRelatedDeviceAttachments (deviceId: string): Promise<Attachment[]> {
+    const url = deviceId + '/device-attachments'
+    const params = {
+      'page[size]': 10000
+    }
+    return this.axiosApi.get(url, { params }).then((rawServerResponse) => {
+      return new DeviceAttachmentSerializer().convertJsonApiObjectListToModelList(rawServerResponse.data)
+    })
+  }
+
+  findRelatedDeviceProperties (deviceId: string): Promise<DeviceProperty[]> {
+    const url = deviceId + '/device-properties'
+    const params = {
+      'page[size]': 10000
+    }
+    return this.axiosApi.get(url, { params }).then((rawServerResponse) => {
+      return new DevicePropertySerializer().convertJsonApiObjectListToModelList(rawServerResponse.data)
+    })
   }
 }
 

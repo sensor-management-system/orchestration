@@ -4,8 +4,11 @@
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
  * Copyright (C) 2020
+ * - Kotyba Alhaj Taha (UFZ, kotyba.alhaj-taha@ufz.de)
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
+ * - Helmholtz Centre for Environmental Research GmbH - UFZ
+ * (UFZ, https://www.ufz.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
  *   Geosciences (GFZ, https://www.gfz-potsdam.de)
  *
@@ -29,39 +32,54 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
-import {
-  Attachment
-} from '@/models/Attachment'
+import { Attachment, IAttachment } from '@/models/Attachment'
 
-import { IJsonApiNestedElement } from '@/serializers/jsonapi/JsonApiTypes'
+import
+{
+  IJsonApiObjectList, IJsonApiObject, IJsonApiTypeIdAttributes, IJsonApiDataWithOptionalIdWithoutRelationships
+}
+  from
+  '@/serializers/jsonapi/JsonApiTypes'
 
-export class AttachmentSerializer {
-  convertJsonApiElementToModel (attachment: IJsonApiNestedElement): Attachment {
-    const result = new Attachment()
-    result.id = attachment.id.toString()
-    result.label = attachment.label || ''
-    result.url = attachment.url || ''
+export interface IMissingAttachmentData {
+  ids: string[]
+}
 
-    return result
+export interface IAttachmentsAndMissing {
+  attachments: Attachment[]
+  missing: IMissingAttachmentData
+} export class AttachmentSerializer {
+  convertJsonApiObjectToModel (jsonApiObject: IJsonApiObject): Attachment {
+    const data = jsonApiObject.data
+    return this.convertJsonApiDataToModel(data)
   }
 
-  convertNestedJsonApiToModelList (attachments: IJsonApiNestedElement[]): Attachment[] {
-    return attachments.map(this.convertJsonApiElementToModel)
+  convertJsonApiDataToModel (jsonApiData: IJsonApiTypeIdAttributes): Attachment {
+    const attributes = jsonApiData.attributes
+    const newEntry = Attachment.createEmpty()
+
+    newEntry.id = attributes.id.toString()
+    newEntry.label = attributes.label || ''
+    newEntry.url = attributes.url || ''
+
+    return newEntry
   }
 
-  convertModelListToNestedJsonApiArray (attachments: Attachment[]): IJsonApiNestedElement[] {
-    const result = []
-    for (const attachment of attachments) {
-      const attachmentToSave: any = {}
-      if (attachment.id != null) {
-        attachmentToSave.id = attachment.id
+  convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiObjectList): Attachment[] {
+    return jsonApiObjectList.data.map(this.convertJsonApiDataToModel)
+  }
+
+  convertModelToJsonApiData (attachment : IAttachment): IJsonApiDataWithOptionalIdWithoutRelationships {
+    const data: any = {
+      type: 'attachment',
+      attributes: {
+        label: attachment.label,
+        url: attachment.url
       }
-      attachmentToSave.label = attachment.label
-      attachmentToSave.url = attachment.url
-
-      result.push(attachmentToSave)
     }
-
-    return result
+    if (attachment.id) {
+      data.id = attachment.id
+    }
+    return data
   }
 }

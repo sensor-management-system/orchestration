@@ -51,6 +51,9 @@ export class Attachment implements IAttachment {
   private _url: string = ''
   private _label: string = ''
   // @TODO: add an _uploadedAt field
+  static createEmpty (): Attachment {
+    return new Attachment()
+  }
 
   /**
    * creates an instance from another object

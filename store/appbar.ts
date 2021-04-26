@@ -29,13 +29,15 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
+import { TabItemConfiguration } from '@/models/TabItemConfiguration'
+
 export interface IAppbarStore {
   activeTab: null | number,
   cancelBtnDisabled: boolean,
   cancelBtnHidden: boolean,
   saveBtnDisabled: boolean,
   saveBtnHidden: boolean,
-  tabs: string[],
+  tabs: TabItemConfiguration[],
   title: string
 }
 
@@ -51,7 +53,7 @@ export const state = (): IAppbarStore => {
     cancelBtnHidden: true,
     saveBtnDisabled: false,
     saveBtnHidden: true,
-    tabs: [],
+    tabs: [] as TabItemConfiguration[],
     title: ''
   }
 }
@@ -75,7 +77,7 @@ export const mutations = {
    * @param {IAppbarStore} state - the current state
    * @param {string[]} tabs - the tabs to set
    */
-  setTabs (state: IAppbarStore, tabs: string[]): void {
+  setTabs (state: IAppbarStore, tabs: TabItemConfiguration[]): void {
     state.tabs = tabs
     state.activeTab = tabs.length > 0 ? 0 : null
   },

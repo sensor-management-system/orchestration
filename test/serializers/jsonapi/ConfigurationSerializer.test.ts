@@ -172,7 +172,6 @@ describe('ConfigurationSerializer', () => {
             short_name: 'boeken_BF1',
             created_at: '2020-08-28T13:48:35.740944+00:00',
             manufacturer_name: '',
-            attachments: [],
             description: 'Boeken BF1',
             updated_at: '2020-08-29T13:48:35.740944+00:00',
             long_name: 'Boeken BF1',
@@ -198,7 +197,6 @@ describe('ConfigurationSerializer', () => {
             short_name: 'boeken_BF12',
             created_at: '2020-09-28T13:48:35.740944+00:00',
             manufacturer_name: '',
-            attachments: [],
             description: 'Boeken BF2',
             updated_at: '2020-09-29T13:48:35.740944+00:00',
             long_name: 'Boeken BF2',
@@ -224,7 +222,6 @@ describe('ConfigurationSerializer', () => {
             short_name: 'boeken_BF123',
             created_at: '2020-09-29T13:48:35.740944+00:00',
             manufacturer_name: '',
-            attachments: [],
             description: 'Boeken BF3',
             updated_at: '2020-09-30T13:48:35.740944+00:00',
             long_name: 'Boeken BF3',
@@ -241,50 +238,11 @@ describe('ConfigurationSerializer', () => {
           type: 'device',
           id: '39',
           attributes: {
-            properties: [{
-              id: '100',
-              sampling_media_name: 'Air',
-              sampling_media_uri: 'medium/air',
-              compartment_name: 'C1',
-              compartment_uri: 'compartment/c1',
-              property_name: 'Temperature',
-              property_uri: 'property/temperature',
-              unit_name: 'degree',
-              unit_uri: 'unit/degree',
-              failure_value: -999,
-              measuring_range_min: -273,
-              measuring_range_max: 100,
-              label: 'air_temperature',
-              accuracy: 0.1,
-              resolution: 0.05,
-              resolution_unit_name: 'TemperatureRes',
-              resolution_unit_uri: 'property/res/temperature'
-            }, {
-              id: '101',
-              sampling_media_name: 'Water',
-              sampling_media_uri: 'medium/water',
-              compartment_name: 'C1',
-              compartment_uri: 'compartment/c1',
-              property_name: 'Temperature',
-              property_uri: 'property/temperature',
-              unit_name: 'degree',
-              unit_uri: 'unit/degree',
-              failure_value: -999,
-              measuring_range_min: -10,
-              measuring_range_max: 100,
-              label: 'water_temperature',
-              accuracy: 0.1,
-              resolution: 0.05,
-              resolution_unit_name: 'TemperatureRes',
-              resolution_unit_uri: 'property/res/temperature'
-            }],
             inventory_number: '',
             short_name: 'Adcon wind vane',
-            customfields: [],
             device_type_uri: '',
             created_at: '2020-08-28T13:49:48.799090+00:00',
             manufacturer_name: 'OTT Hydromet GmbH',
-            attachments: [],
             dual_use: false,
             description: '',
             device_type_name: '',
@@ -305,32 +263,11 @@ describe('ConfigurationSerializer', () => {
           type: 'device',
           id: '40',
           attributes: {
-            properties: [{
-              id: '102',
-              sampling_media_name: 'Snow',
-              sampling_media_uri: 'medium/snow',
-              compartment_name: 'C1',
-              compartment_uri: 'compartment/c1',
-              property_name: 'Temperature',
-              property_uri: 'property/temperature',
-              unit_name: 'degree',
-              unit_uri: 'unit/degree',
-              failure_value: -999,
-              measuring_range_min: -273,
-              measuring_range_max: 5,
-              label: 'snow_temperature',
-              accuracy: 0.1,
-              resolution: 0.05,
-              resolution_unit_name: 'TemperatureRes',
-              resolution_unit_uri: 'property/res/temperature'
-            }],
             inventory_number: '',
             short_name: 'Adcon leafwetness',
-            customfields: [],
             device_type_uri: '',
             created_at: '2020-08-29T13:49:48.799090+00:00',
             manufacturer_name: 'OTT Hydromet GmbH',
-            attachments: [],
             dual_use: false,
             description: '',
             device_type_name: '',
@@ -429,73 +366,9 @@ describe('ConfigurationSerializer', () => {
         updatedByUserId: null
       })
 
-      const expectedDeviceProperty1 = DeviceProperty.createFromObject({
-        id: '100',
-        samplingMediaName: 'Air',
-        samplingMediaUri: 'medium/air',
-        compartmentName: 'C1',
-        compartmentUri: 'compartment/c1',
-        propertyName: 'Temperature',
-        propertyUri: 'property/temperature',
-        unitName: 'degree',
-        unitUri: 'unit/degree',
-        failureValue: -999,
-        measuringRange: MeasuringRange.createFromObject({
-          min: -273,
-          max: 100
-        }),
-        label: 'air_temperature',
-        accuracy: 0.1,
-        resolution: 0.05,
-        resolutionUnitName: 'TemperatureRes',
-        resolutionUnitUri: 'property/res/temperature'
-      })
-      const expectedDeviceProperty2 = DeviceProperty.createFromObject({
-        id: '101',
-        samplingMediaName: 'Water',
-        samplingMediaUri: 'medium/water',
-        compartmentName: 'C1',
-        compartmentUri: 'compartment/c1',
-        propertyName: 'Temperature',
-        propertyUri: 'property/temperature',
-        unitName: 'degree',
-        unitUri: 'unit/degree',
-        failureValue: -999,
-        measuringRange: MeasuringRange.createFromObject({
-          min: -10,
-          max: 100
-        }),
-        label: 'water_temperature',
-        accuracy: 0.1,
-        resolution: 0.05,
-        resolutionUnitName: 'TemperatureRes',
-        resolutionUnitUri: 'property/res/temperature'
-      })
-      const expectedDeviceProperty3 = DeviceProperty.createFromObject({
-        id: '102',
-        samplingMediaName: 'Snow',
-        samplingMediaUri: 'medium/snow',
-        compartmentName: 'C1',
-        compartmentUri: 'compartment/c1',
-        propertyName: 'Temperature',
-        propertyUri: 'property/temperature',
-        unitName: 'degree',
-        unitUri: 'unit/degree',
-        failureValue: -999,
-        measuringRange: MeasuringRange.createFromObject({
-          min: -273,
-          max: 5
-        }),
-        label: 'snow_temperature',
-        accuracy: 0.1,
-        resolution: 0.05,
-        resolutionUnitName: 'TemperatureRes',
-        resolutionUnitUri: 'property/res/temperature'
-      })
-
       const expectedDevice1 = Device.createFromObject({
         id: '39',
-        properties: [expectedDeviceProperty1, expectedDeviceProperty2],
+        properties: [],
         inventoryNumber: '',
         shortName: 'Adcon wind vane',
         customFields: [],
@@ -521,7 +394,7 @@ describe('ConfigurationSerializer', () => {
       })
       const expectedDevice2 = Device.createFromObject({
         id: '40',
-        properties: [expectedDeviceProperty3],
+        properties: [],
         inventoryNumber: '',
         shortName: 'Adcon leafwetness',
         customFields: [],
@@ -549,8 +422,8 @@ describe('ConfigurationSerializer', () => {
       const expectedConfiguration1 = new Configuration()
       expectedConfiguration1.id = '1'
       expectedConfiguration1.location = DynamicLocation.createFromObject({
-        longitude: expectedDeviceProperty1,
-        latitude: expectedDeviceProperty2,
+        longitude: null,
+        latitude: null,
         elevation: null
       })
       expectedConfiguration1.startDate = DateTime.utc(2020, 8, 28, 13, 49, 48, 15)
