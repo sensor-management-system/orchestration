@@ -42,7 +42,7 @@ import { ContactSerializer } from '@/serializers/jsonapi/ContactSerializer'
 
 import {
   PlatformSerializer,
-  platformWithMetaToDeviceThrowingNoErrorOnMissing,
+  platformWithMetaToPlatformThrowingNoErrorOnMissing,
   platformWithMetaToPlatformByAddingDummyObjects
 } from '@/serializers/jsonapi/PlatformSerializer'
 import { PlatformAttachmentSerializer } from '@/serializers/jsonapi/PlatformAttachmentSerializer'
@@ -85,7 +85,7 @@ export class PlatformApi {
       const rawData = rawResponse.data
       // As we ask the api to include all the contacts, we want to have them here
       // if they are missing => throw an error
-      return platformWithMetaToDeviceThrowingNoErrorOnMissing(this.serializer.convertJsonApiObjectToModel(rawData))
+      return platformWithMetaToPlatformThrowingNoErrorOnMissing(this.serializer.convertJsonApiObjectToModel(rawData))
     })
   }
 
@@ -115,7 +115,7 @@ export class PlatformApi {
       }
     }).then((serverAnswer) => {
       const answerData = serverAnswer.data
-      return platformWithMetaToDeviceThrowingNoErrorOnMissing(
+      return platformWithMetaToPlatformThrowingNoErrorOnMissing(
         this.serializer.convertJsonApiObjectToModel(answerData))
     })
   }
