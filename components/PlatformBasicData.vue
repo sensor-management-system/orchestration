@@ -99,10 +99,6 @@ permissions and limitations under the Licence.
   </div>
 </template>
 
-<style lang="scss">
-@import "@/assets/styles/_readonly_views.scss";
-</style>
-
 <script lang="ts">
 import { Component, Prop, Vue } from 'nuxt-property-decorator'
 
@@ -185,3 +181,7 @@ export default class PlatformBasicData extends Vue {
   }
 }
 </script>
+
+<style lang="scss">
+@import "@/assets/styles/_readonly_views.scss";
+</style>

@@ -63,7 +63,7 @@ permissions and limitations under the Licence.
                 right
                 offset-y
               >
-                <template v-slot:activator="{ on }">
+                <template #activator="{ on }">
                   <v-btn
                     data-role="property-menu"
                     icon

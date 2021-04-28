@@ -39,7 +39,7 @@ cache:
 
 check-lint:
   stage: check
-  image: node:10.16.3-stretch
+  image: node:16.0.0-buster
   before_script:
     - node -v
     - npm install

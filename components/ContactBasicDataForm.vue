@@ -106,7 +106,7 @@ permissions and limitations under the Licence.
   </v-form>
 </template>
 <script lang="ts">
-import { Component, Prop, mixins } from 'nuxt-property-decorator'
+import { Component, Prop, Vue, mixins } from 'nuxt-property-decorator'
 
 import { Rules } from '@/mixins/Rules'
 
