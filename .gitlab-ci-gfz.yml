@@ -42,7 +42,7 @@ check-lint:
   image: node:16.0.0-buster
   before_script:
     - node -v
-    - npm install
+    - npm ci
   script:
     - npm run lint
   tags:
@@ -60,7 +60,7 @@ test-frontend-unit-tests:
   image: node:16.0.0-buster
   before_script:
     - node -v
-    - npm install
+    - npm ci
   script:
     - npm test
   tags:
