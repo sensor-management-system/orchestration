@@ -51,7 +51,7 @@ permissions and limitations under the Licence.
             v-model="value[index]"
             :readonly="readonly"
           >
-            <template v-slot:actions>
+            <template #actions>
               <v-btn
                 v-if="!readonly"
                 icon

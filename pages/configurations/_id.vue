@@ -86,7 +86,7 @@ permissions and limitations under the Licence.
                       offset-y
                       min-width="290px"
                     >
-                      <template v-slot:activator="{ on, attrs }">
+                      <template #activator="{ on, attrs }">
                         <v-text-field
                           :value="getStartDate()"
                           :rules="[rules.startDate]"
@@ -125,7 +125,7 @@ permissions and limitations under the Licence.
                       offset-y
                       min-width="290px"
                     >
-                      <template v-slot:activator="{ on, attrs }">
+                      <template #activator="{ on, attrs }">
                         <v-text-field
                           :value="getEndDate()"
                           :rules="[rules.endDate]"
@@ -341,10 +341,6 @@ permissions and limitations under the Licence.
     </v-card>
   </div>
 </template>
-
-<style lang="scss">
-@import "@/assets/styles/_forms.scss";
-</style>
 
 <script lang="ts">
 import { Vue, Component, Watch } from 'nuxt-property-decorator'
@@ -963,3 +959,7 @@ export default class ConfigurationsIdPage extends Vue {
   }
 }
 </script>
+
+<style lang="scss">
+@import "@/assets/styles/_forms.scss";
+</style>

@@ -135,7 +135,7 @@ permissions and limitations under the Licence.
             left
             z-index="999"
           >
-            <template v-slot:activator="{ on }">
+            <template #activator="{ on }">
               <v-btn
                 icon
                 v-on="on"
@@ -169,7 +169,7 @@ permissions and limitations under the Licence.
       </v-subheader>
       <v-hover
         v-for="result in searchResults"
-        v-slot:default="{ hover }"
+        v-slot="{ hover }"
         :key="result.id"
       >
         <v-card
@@ -203,7 +203,7 @@ permissions and limitations under the Licence.
                   left
                   z-index="999"
                 >
-                  <template v-slot:activator="{ on }">
+                  <template #activator="{ on }">
                     <v-btn
                       data-role="property-menu"
                       icon
@@ -472,10 +472,6 @@ permissions and limitations under the Licence.
     </v-btn>
   </div>
 </template>
-
-<style lang="scss">
-@import "@/assets/styles/_search.scss";
-</style>
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
@@ -767,3 +763,7 @@ export default class SearchDevicesPage extends Vue {
 }
 
 </script>
+
+<style lang="scss">
+@import "@/assets/styles/_search.scss";
+</style>

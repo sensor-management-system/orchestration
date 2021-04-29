@@ -88,12 +88,8 @@ permissions and limitations under the Licence.
   </div>
 </template>
 
-<style lang="scss">
-@import "@/assets/styles/_forms.scss";
-</style>
-
 <script lang="ts">
-import { Component, mixins } from 'nuxt-property-decorator'
+import { Component, Vue, mixins } from 'nuxt-property-decorator'
 
 import { Rules } from '@/mixins/Rules'
 
@@ -168,3 +164,7 @@ export default class PlatformNewPage extends mixins(Rules) {
   }
 }
 </script>
+
+<style lang="scss">
+@import "@/assets/styles/_forms.scss";
+</style>

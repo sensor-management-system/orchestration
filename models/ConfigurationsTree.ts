@@ -50,6 +50,8 @@ import { PlatformNode } from '@/models/PlatformNode'
  * }
  */
 export class ConfigurationsTreeIterator implements Iterator<ConfigurationsTreeNode> {
+  // We know that we define this class one step later
+  // eslint-disable-next-line no-use-before-define
   private tree: ConfigurationsTree
   private index: number = 0
 

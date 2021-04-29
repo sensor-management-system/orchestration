@@ -37,7 +37,7 @@ permissions and limitations under the Licence.
       rounded
       open-all
     >
-      <template v-slot:prepend="{ item }">
+      <template #prepend="{ item }">
         <v-icon v-if="item.isPlatform()">
           mdi-rocket-outline
         </v-icon>

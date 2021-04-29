@@ -78,7 +78,7 @@ permissions and limitations under the Licence.
                 left
                 z-index="999"
               >
-                <template v-slot:activator="{ on }">
+                <template #activator="{ on }">
                   <v-btn
                     data-role="property-menu"
                     icon
@@ -119,7 +119,7 @@ permissions and limitations under the Licence.
           </v-row>
         </v-expansion-panel-header>
         <v-expansion-panel-content>
-          <template>
+          <template #default>
             <div>
               <v-row
                 dense

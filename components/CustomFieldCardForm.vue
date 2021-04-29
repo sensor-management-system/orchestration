@@ -78,7 +78,7 @@ permissions and limitations under the Licence.
  * @file provides a component for a custom field which consists of an key and a value
  * @author <marc.hanisch@gfz-potsdam.de>
  */
-import { Component, Prop, mixins } from 'nuxt-property-decorator'
+import { Component, Prop, Vue, mixins } from 'nuxt-property-decorator'
 
 import { Rules } from '@/mixins/Rules'
 

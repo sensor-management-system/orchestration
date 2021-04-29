@@ -37,7 +37,7 @@ cache:
 
 check-lint-ufz:
   stage: check
-  image: node:10.16.3-stretch
+  image: node:16.0.0-buster
   before_script:
     - node -v
     - npm install
@@ -51,7 +51,7 @@ check-lint-ufz:
 
 test-frontend-unit-tests-ufz:
   stage: test
-  image: node:10.16.3-stretch
+  image: node:16.0.0-buster
   before_script:
     - node -v
     - npm install
@@ -80,7 +80,7 @@ build_app:
     NUXT_ENV_AUTOMATIC_SILENT_RENEW: 'false'
     NUXT_ENV_SILENT_RENEW_INTERVAL:  6900000 # 115 minutes in milliseconds
     NUXT_ENV_LOAD_USER_INFO: 'true'
-  image: node:latest
+  image: node:16.0.0-buster
   script:
     - npm install
     - npm run build

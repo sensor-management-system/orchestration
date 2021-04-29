@@ -42,16 +42,6 @@ permissions and limitations under the Licence.
   </div>
 </template>
 
-<style>
-  .center-absolute {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    margin-top: -16px;
-    margin-left: -16px;
-  }
-</style>
-
 <script lang="ts">
 import { Component, Vue, Prop } from 'nuxt-property-decorator'
 
@@ -78,3 +68,13 @@ export default class ProgressIndicator extends Vue {
   }
 }
 </script>
+
+<style>
+  .center-absolute {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    margin-top: -16px;
+    margin-left: -16px;
+  }
+</style>

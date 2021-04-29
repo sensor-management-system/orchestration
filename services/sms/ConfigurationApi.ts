@@ -54,11 +54,6 @@ import {
 
 import { ContactSerializer } from '@/serializers/jsonapi/ContactSerializer'
 
-interface IRelationshipData {
-  id: string
-  type: string
-}
-
 export class ConfigurationApi {
   private axiosApi: AxiosInstance
   private serializer: ConfigurationSerializer

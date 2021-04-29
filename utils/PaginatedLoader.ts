@@ -29,6 +29,9 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
+
+// We really want to do a recursive function definition here
+// eslint-disable-next-line no-use-before-define
 export type PaginationLoaderFunction<E> = () => Promise<IPaginationLoader<E>>
 
 export interface IPaginationLoader<E> {

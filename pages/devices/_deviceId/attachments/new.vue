@@ -124,7 +124,7 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, mixins } from 'nuxt-property-decorator'
+import { Component, Vue, mixins } from 'nuxt-property-decorator'
 import { Rules } from '@/mixins/Rules'
 
 import { Attachment } from '@/models/Attachment'
