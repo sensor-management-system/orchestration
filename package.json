@@ -5,16 +5,15 @@
   "author": "Marc Hanisch",
   "private": true,
   "scripts": {
-    "dev": "nuxt-ts",
-    "build": "nuxt-ts build",
-    "generate": "nuxt-ts generate",
-    "start": "nuxt-ts start",
+    "dev": "nuxt",
+    "build": "nuxt build",
+    "generate": "nuxt generate",
+    "start": "nuxt start",
     "lint": "eslint --ext .js,.vue,.ts --ignore-path .gitignore .",
     "format": "eslint --ext .js,.vue,.ts --ignore-path .gitignore --fix",
     "test": "jest"
   },
   "dependencies": {
-    "@nuxt/typescript-runtime": "^2.1.0",
     "@nuxtjs/axios": "^5.13.1",
     "@nuxtjs/dotenv": "^1.4.1",
     "@nuxtjs/pwa": "^3.3.5",
