@@ -40,7 +40,7 @@ check-lint-ufz:
   image: node:16.0.0-buster
   before_script:
     - node -v
-    - npm install
+    - npm ci
   script:
     - npm run lint
   allow_failure: true
@@ -54,7 +54,7 @@ test-frontend-unit-tests-ufz:
   image: node:16.0.0-buster
   before_script:
     - node -v
-    - npm install
+    - npm ci
   script:
     - npm test
   cache:
@@ -82,7 +82,7 @@ build_app:
     NUXT_ENV_LOAD_USER_INFO: 'true'
   image: node:16.0.0-buster
   script:
-    - npm install
+    - npm ci
     - npm run build
 
 
