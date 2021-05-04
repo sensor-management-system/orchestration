@@ -160,17 +160,17 @@ export default class CommonActionForm extends Vue {
     this.$emit('descriptionChange', value)
   }
 
-  get contactValue (): Contact {
+  get contactValue (): Contact | null {
     return this.contact
   }
 
   /**
    * sets the new contact
    *
-   * @param {Contact} value - the contact to set
+   * @param {Contact | null} value - the contact to set
    * @fires CommonActionForm#contactChange
    */
-  set contactValue (value: Contact) {
+  set contactValue (value: Contact | null) {
     /**
      * contactChange event
      * @event CommonActionForm#contactChange
