@@ -38,6 +38,7 @@ export interface IGenericDeviceAction extends IAction {
   actionTypeUrl: string
   beginDate: DateTime | null
   endDate: DateTime | null
+  isGenericDeviceAction: boolean
 }
 
 export class GenericDeviceAction implements IGenericDeviceAction {
@@ -134,5 +135,9 @@ export class GenericDeviceAction implements IGenericDeviceAction {
 
   set contact (contact: Contact | null) {
     this._contact = contact
+  }
+
+  get isGenericDeviceAction (): boolean {
+    return true
   }
 }
