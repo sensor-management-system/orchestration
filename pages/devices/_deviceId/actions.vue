@@ -53,8 +53,8 @@ permissions and limitations under the Licence.
       <v-timeline dense>
         <v-timeline-item
           v-for="action in actions"
-          :key="action.getId()"
-          :color="action.getColor()"
+          :key="action.id"
+          :color="getActionColor(action)"
           class="mb-4"
           small
         >
@@ -78,16 +78,16 @@ permissions and limitations under the Licence.
                   >
                     <v-btn
                       icon
-                      @click.stop.prevent="showActionItem(action.getId())"
+                      @click.stop.prevent="showActionItem(action.id)"
                     >
-                      <v-icon>{{ isActionItemShown(action.getId()) ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
+                      <v-icon>{{ isActionItemShown(action.id) ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
                     </v-btn>
                   </v-col>
                 </v-row>
               </v-card-title>
               <v-expand-transition>
                 <div
-                  v-show="isActionItemShown(action.getId())"
+                  v-show="isActionItemShown(action.id)"
                 >
                   <v-card-subtitle
                     class="pt-0"
@@ -127,16 +127,16 @@ permissions and limitations under the Licence.
                   >
                     <v-btn
                       icon
-                      @click.stop.prevent="showActionItem(action.getId())"
+                      @click.stop.prevent="showActionItem(action.id)"
                     >
-                      <v-icon>{{ isActionItemShown(action.getId()) ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
+                      <v-icon>{{ isActionItemShown(action.id) ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
                     </v-btn>
                   </v-col>
                 </v-row>
               </v-card-subtitle>
               <v-expand-transition>
                 <v-card-text
-                  v-show="isActionItemShown(action.getId())"
+                  v-show="isActionItemShown(action.id)"
                   class="text--primary"
                 >
                   <v-row dense>
@@ -186,16 +186,16 @@ permissions and limitations under the Licence.
                   >
                     <v-btn
                       icon
-                      @click.stop.prevent="showActionItem(action.getId())"
+                      @click.stop.prevent="showActionItem(action.id)"
                     >
-                      <v-icon>{{ isActionItemShown(action.getId()) ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
+                      <v-icon>{{ isActionItemShown(action.id) ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
                     </v-btn>
                   </v-col>
                 </v-row>
               </v-card-subtitle>
               <v-expand-transition>
                 <v-card-text
-                  v-show="isActionItemShown(action.getId())"
+                  v-show="isActionItemShown(action.id)"
                   class="text--primary"
                 >
                   <v-row dense>
@@ -247,16 +247,16 @@ permissions and limitations under the Licence.
                   >
                     <v-btn
                       icon
-                      @click.stop.prevent="showActionItem(action.getId())"
+                      @click.stop.prevent="showActionItem(action.id)"
                     >
-                      <v-icon>{{ isActionItemShown(action.getId()) ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
+                      <v-icon>{{ isActionItemShown(action.id) ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
                     </v-btn>
                   </v-col>
                 </v-row>
               </v-card-subtitle>
               <v-expand-transition>
                 <v-card-text
-                  v-show="isActionItemShown(action.getId())"
+                  v-show="isActionItemShown(action.id)"
                   class="text--primary"
                 >
                   <label>Parent platform</label>{{ action.parentPlatformName }}
@@ -298,16 +298,16 @@ permissions and limitations under the Licence.
                   >
                     <v-btn
                       icon
-                      @click.stop.prevent="showActionItem(action.getId())"
+                      @click.stop.prevent="showActionItem(action.id)"
                     >
-                      <v-icon>{{ isActionItemShown(action.getId()) ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
+                      <v-icon>{{ isActionItemShown(action.id) ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
                     </v-btn>
                   </v-col>
                 </v-row>
               </v-card-subtitle>
               <v-expand-transition>
                 <v-card-text
-                  v-show="isActionItemShown(action.getId())"
+                  v-show="isActionItemShown(action.id)"
                   class="text--primary"
                 />
               </v-expand-transition>
@@ -318,9 +318,6 @@ permissions and limitations under the Licence.
     </template>
   </div>
 </template>
-<style lang="scss">
-@import "@/assets/styles/_forms.scss";
-</style>
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
@@ -329,54 +326,11 @@ import { DateTime } from 'luxon'
 
 import { Contact } from '@/models/Contact'
 import { DeviceProperty } from '@/models/DeviceProperty'
+import { IAction } from '@/models/Action'
+import { GenericDeviceAction } from '@/models/GenericDeviceAction'
 
 const toUtcDate = (dt: DateTime) => {
   return dt.toUTC().toFormat('yyyy-MM-dd TT')
-}
-
-interface IAction {
-  getId (): string
-  getColor (): string
-}
-
-class GenericDeviceAction implements IAction {
-  private id: string
-  private description: string
-  private beginDate: DateTime
-  private endDate: DateTime
-  private actionTypeName: string
-  private actionTypeUri: string
-  private contact: Contact
-
-  constructor (
-    id: string,
-    description: string,
-    beginDate: DateTime,
-    endDate: DateTime,
-    actionTypeName: string,
-    actionTypeUri: string,
-    contact: Contact
-  ) {
-    this.id = id
-    this.description = description
-    this.beginDate = beginDate
-    this.endDate = endDate
-    this.actionTypeName = actionTypeName
-    this.actionTypeUri = actionTypeUri
-    this.contact = contact
-  }
-
-  getId (): string {
-    return 'generic-' + this.id
-  }
-
-  getColor (): string {
-    return 'blue'
-  }
-
-  get isGenericDeviceAction (): boolean {
-    return true
-  }
 }
 
 class DeviceSoftwareUpdateAction implements IAction {
@@ -410,10 +364,6 @@ class DeviceSoftwareUpdateAction implements IAction {
 
   getId (): string {
     return 'software-' + this.id
-  }
-
-  getColor (): string {
-    return 'yellow'
   }
 
   get isUpdateAction (): boolean {
@@ -454,10 +404,6 @@ class DeviceCalibrationAction implements IAction {
     return 'calibration-' + this.id
   }
 
-  getColor (): string {
-    return 'brown'
-  }
-
   get isDeviceCalibrationAction (): boolean {
     return true
   }
@@ -496,10 +442,6 @@ class DeviceMountAction {
     return 'mount-' + this.id
   }
 
-  getColor (): string {
-    return 'green'
-  }
-
   get isDeviceMountAction (): boolean {
     return true
   }
@@ -526,10 +468,6 @@ class DeviceUnmountAction implements IAction {
     return 'unmount-' + this.id
   }
 
-  getColor (): string {
-    return 'red'
-  }
-
   get isDeviceUnmountAction (): boolean {
     return true
   }
@@ -550,7 +488,7 @@ export default class DeviceActionsPage extends Vue {
   private actions: IAction[] = []
   private searchResultItemsShown: { [id: string]: boolean } = {}
 
-  /* async */ fetch () {
+  async fetch () {
     const contact1 = Contact.createFromObject({
       id: '1',
       givenName: 'Tech',
@@ -565,15 +503,6 @@ export default class DeviceActionsPage extends Vue {
       email: 'cam.paign@gfz-potsdam.de',
       website: ''
     })
-    const genericDeviceAction1 = new GenericDeviceAction(
-      '1',
-      'Grass cut on the site',
-      DateTime.fromISO('2021-03-29T08:00:00.000Z'),
-      DateTime.fromISO('2021-03-29T08:30:00Z'),
-      'Device visit',
-      'actionTypes/device_visit',
-      contact1
-    )
     const deviceSoftwareUpdateAction = new DeviceSoftwareUpdateAction(
       '2',
       'Firmware',
@@ -615,12 +544,17 @@ export default class DeviceActionsPage extends Vue {
       contact1
     )
     this.actions = [
-      genericDeviceAction1,
       deviceSoftwareUpdateAction,
       deviceCalibrationAction1,
       deviceMountAction1,
       deviceUnmountAction1
     ]
+    await Promise.all([this.fetchGenericDeviceActions()])
+  }
+
+  async fetchGenericDeviceActions (): Promise<void> {
+    const actions: GenericDeviceAction[] = await this.$api.devices.findRelatedGenericDeviceActions(this.deviceId)
+    actions.forEach((action: GenericDeviceAction) => this.actions.push(action))
   }
 
   get isInProgress (): boolean {
@@ -659,5 +593,24 @@ export default class DeviceActionsPage extends Vue {
   get deviceId (): string {
     return this.$route.params.deviceId
   }
+
+  getActionColor (action: IAction) {
+    switch (true) {
+      case action instanceof GenericDeviceAction:
+        return 'blue'
+      case action instanceof DeviceSoftwareUpdateAction:
+        return 'yellow'
+      case action instanceof DeviceCalibrationAction:
+        return 'brown'
+      case action instanceof DeviceMountAction:
+        return 'green'
+      case action instanceof DeviceUnmountAction:
+        return 'red'
+    }
+  }
 }
 </script>
+
+<style lang="scss">
+@import "@/assets/styles/_forms.scss";
+</style>
