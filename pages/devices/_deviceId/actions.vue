@@ -104,7 +104,7 @@ permissions and limitations under the Licence.
               </v-expand-transition>
             </v-card>
           </template>
-          <template v-if="action.isUpdateAction">
+          <template v-if="action.isDeviceSoftwareUpdateAction">
             <v-card>
               <v-card-subtitle class="pb-0">
                 {{ action.updateDate | toUtcDate }}
@@ -366,7 +366,7 @@ class DeviceSoftwareUpdateAction implements IAction {
     return 'software-' + this.id
   }
 
-  get isUpdateAction (): boolean {
+  get isDeviceSoftwareUpdateAction (): boolean {
     return true
   }
 }
@@ -557,6 +557,7 @@ export default class DeviceActionsPage extends Vue {
       deviceMountAction1,
       deviceUnmountAction1
     ]
+    // Todo: sort all actions by date descending
     await Promise.all([this.fetchGenericDeviceActions()])
   }
 
@@ -602,17 +603,17 @@ export default class DeviceActionsPage extends Vue {
     return this.$route.params.deviceId
   }
 
-  getActionColor (action: IAction) {
+  getActionColor (action: GenericDeviceAction | DeviceSoftwareUpdateAction | DeviceCalibrationAction | DeviceMountAction | DeviceUnmountAction) {
     switch (true) {
-      case action instanceof GenericDeviceAction:
+      case (action as GenericDeviceAction).isGenericDeviceAction:
         return 'blue'
-      case action instanceof DeviceSoftwareUpdateAction:
+      case (action as DeviceSoftwareUpdateAction).isDeviceSoftwareUpdateAction:
         return 'yellow'
-      case action instanceof DeviceCalibrationAction:
+      case (action as DeviceCalibrationAction).isDeviceCalibrationAction:
         return 'brown'
-      case action instanceof DeviceMountAction:
+      case (action as DeviceMountAction).isDeviceMountAction:
         return 'green'
-      case action instanceof DeviceUnmountAction:
+      case (action as DeviceUnmountAction).isDeviceUnmountAction:
         return 'red'
     }
   }
