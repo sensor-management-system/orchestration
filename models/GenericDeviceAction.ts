@@ -72,8 +72,10 @@ export class GenericDeviceAction implements IGenericDeviceAction {
     action.description = someObject.description
     action.actionTypeName = someObject.actionTypeName
     action.actionTypeUrl = someObject.actionTypeUrl
-    action.beginDate = someObject.beginDate !== null ? DateTime.fromObject(someObject.beginDate) : null
-    action.endDate = someObject.endDate !== null ? DateTime.fromObject(someObject.endDate) : null
+    // TODO: find the proper way to create new DateTime instances from other DateTime-ish instances
+    action.beginDate = someObject.beginDate !== null ? someObject.beginDate : null
+    // TODO: find the proper way to create new DateTime instances from other DateTime-ish instances
+    action.endDate = someObject.endDate !== null ? someObject.endDate : null
     action.contact = someObject.contact !== null ? Contact.createFromObject(someObject.contact) : null
     return action
   }
@@ -115,7 +117,7 @@ export class GenericDeviceAction implements IGenericDeviceAction {
   }
 
   set beginDate (date: DateTime | null) {
-    this._beginDate = date === null ? null : DateTime.fromObject(date)
+    this._beginDate = date
   }
 
   get endDate (): DateTime | null {
