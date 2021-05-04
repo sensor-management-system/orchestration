@@ -334,14 +334,14 @@ const toUtcDate = (dt: DateTime) => {
 }
 
 class DeviceSoftwareUpdateAction implements IAction {
-  private id: string
-  private softwareTypeName: string
-  private softwareTypeUri: string
-  private updateDate: DateTime
-  private version: string
-  private repositoryUrl: string
-  private description: string
-  private contact: Contact
+  public id: string
+  public softwareTypeName: string
+  public softwareTypeUri: string
+  public updateDate: DateTime
+  public version: string
+  public repositoryUrl: string
+  public description: string
+  public contact: Contact
   constructor (
     id: string,
     softwareTypeName: string,
@@ -372,14 +372,14 @@ class DeviceSoftwareUpdateAction implements IAction {
 }
 
 class DeviceCalibrationAction implements IAction {
-  private id: string
-  private description: string
-  private currentCalibrationDate: DateTime
-  private nextCalibrationDate: DateTime
-  private formula: string
-  private value: string
-  private deviceProperties: DeviceProperty[]
-  private contact: Contact
+  public id: string
+  public description: string
+  public currentCalibrationDate: DateTime
+  public nextCalibrationDate: DateTime
+  public formula: string
+  public value: string
+  public deviceProperties: DeviceProperty[]
+  public contact: Contact
   constructor (
     id: string,
     description: string,
@@ -410,14 +410,15 @@ class DeviceCalibrationAction implements IAction {
 }
 
 class DeviceMountAction {
-  private id: string
-  private configurationName: string
-  private parentPlatformName: string
-  private offsetX: number
-  private offsetY: number
-  private offsetZ: number
-  private beginDate: DateTime
-  private contact: Contact
+  public id: string
+  public configurationName: string
+  public parentPlatformName: string
+  public offsetX: number
+  public offsetY: number
+  public offsetZ: number
+  public beginDate: DateTime
+  public description: string
+  public contact: Contact
   constructor (
     id: string,
     configurationName: string,
@@ -426,6 +427,7 @@ class DeviceMountAction {
     offsetY: number,
     offsetZ: number,
     beginDate: DateTime,
+    description: string,
     contact: Contact
   ) {
     this.id = id
@@ -435,6 +437,7 @@ class DeviceMountAction {
     this.offsetY = offsetY
     this.offsetZ = offsetZ
     this.beginDate = beginDate
+    this.description = description
     this.contact = contact
   }
 
@@ -448,19 +451,22 @@ class DeviceMountAction {
 }
 
 class DeviceUnmountAction implements IAction {
-  private id: string
-  private configurationName: string
-  private endDate: DateTime
-  private contact: Contact
+  public id: string
+  public configurationName: string
+  public endDate: DateTime
+  public description: string
+  public contact: Contact
   constructor (
     id: string,
     configurationName: string,
     endDate: DateTime,
+    description: string,
     contact: Contact
   ) {
     this.id = id
     this.configurationName = configurationName
     this.endDate = endDate
+    this.description = description
     this.contact = contact
   }
 
@@ -535,12 +541,14 @@ export default class DeviceActionsPage extends Vue {
       0,
       2,
       DateTime.fromISO('2021-03-30T12:00:00Z'),
+      'Mounted Measurement ABC',
       contact1
     )
     const deviceUnmountAction1 = new DeviceUnmountAction(
       '5',
       'Measurement ABC',
       DateTime.fromISO('2022-03-30T12:00:00Z'),
+      'Unmounted Measurement ABC',
       contact1
     )
     this.actions = [
