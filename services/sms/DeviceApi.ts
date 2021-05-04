@@ -39,11 +39,13 @@ import { DeviceProperty } from '@/models/DeviceProperty'
 import { DeviceType } from '@/models/DeviceType'
 import { Manufacturer } from '@/models/Manufacturer'
 import { Status } from '@/models/Status'
+import { GenericDeviceAction } from '@/models/GenericDeviceAction'
 
 import { ContactSerializer } from '@/serializers/jsonapi/ContactSerializer'
 import { CustomTextFieldSerializer } from '@/serializers/jsonapi/CustomTextFieldSerializer'
 import { DeviceAttachmentSerializer } from '@/serializers/jsonapi/DeviceAttachmentSerializer'
 import { DevicePropertySerializer } from '@/serializers/jsonapi/DevicePropertySerializer'
+import { GenericDeviceActionSerializer } from '@/serializers/jsonapi/GenericDeviceActionSerializer'
 
 import { IFlaskJSONAPIFilter } from '@/utils/JSONApiInterfaces'
 
@@ -169,6 +171,16 @@ export class DeviceApi {
     }
     return this.axiosApi.get(url, { params }).then((rawServerResponse) => {
       return new DevicePropertySerializer().convertJsonApiObjectListToModelList(rawServerResponse.data)
+    })
+  }
+
+  findRelatedGenericDeviceActions (deviceId: string): Promise<GenericDeviceAction[]> {
+    const url = deviceId + '/generic-device-actions'
+    const params = {
+      'page[size]': 10000
+    }
+    return this.axiosApi.get(url, { params }).then((rawServerResponse) => {
+      return new GenericDeviceActionSerializer().convertJsonApiObjectListToModelList(rawServerResponse.data)
     })
   }
 }
