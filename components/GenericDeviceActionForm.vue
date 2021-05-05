@@ -55,6 +55,7 @@ permissions and limitations under the Licence.
       </v-row>
     </v-form>
     <CommonActionForm
+      ref="commonForm"
       :description="actionCopy.description"
       :contact="actionCopy.contact"
       :rules="[rules.contactNotNull]"
@@ -143,7 +144,7 @@ export default class GenericDeviceActionForm extends Vue {
   }
 
   checkValidationOfDates () {
-    (this.$refs.datesForm as Vue & { validate: () => boolean }).validate()
+    return (this.$refs.datesForm as Vue & { validate: () => boolean }).validate()
   }
 
   validateInputForStartDate (v: string): boolean | string {
@@ -184,6 +185,10 @@ export default class GenericDeviceActionForm extends Vue {
       return true
     }
     return innerFunc
+  }
+
+  isValid (): boolean {
+    return this.checkValidationOfDates() && (this.$refs.commonForm as Vue & { isValid: () => boolean }).isValid()
   }
 
   @Watch('value', { immediate: true, deep: true })

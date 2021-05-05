@@ -190,5 +190,9 @@ export default class CommonActionForm extends Vue {
     }
     this.$store.commit('snackbar/setError', 'No contact found with your data')
   }
+
+  isValid (): boolean {
+    return (this.$refs.contactForm as Vue & { validate: () => boolean }).validate()
+  }
 }
 </script>
