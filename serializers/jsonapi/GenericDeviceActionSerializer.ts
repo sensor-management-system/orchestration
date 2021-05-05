@@ -86,6 +86,14 @@ export class GenericDeviceActionSerializer {
     if (action.id) {
       data.id = action.id
     }
+    if (action.contact && action.contact.id) {
+      data.relationships.contact = {
+        data: {
+          type: 'contact',
+          id: action.contact.id
+        }
+      }
+    }
     return data
   }
 }
