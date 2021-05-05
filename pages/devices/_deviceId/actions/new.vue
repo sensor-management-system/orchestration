@@ -174,34 +174,13 @@ permissions and limitations under the Licence.
       <v-card-text
         v-if="otherChosen"
       >
-        <v-form
-          ref="datesForm"
-          v-model="datesAreValid"
-          @submit.prevent
-        >
-          <v-row>
-            <v-col cols="12" md="6">
-              <DatePicker
-                :value="startDate"
-                label="Start date"
-                :rules="[rules.startDate, rules.startDateNotNull]"
-                @input="setStartDateAndValidate"
-              />
-            </v-col>
-            <v-col cols="12" md="6">
-              <DatePicker
-                :value="endDate"
-                label="End date"
-                :rules="[rules.endDate]"
-                @input="setEndDateAndValidate"
-              />
-            </v-col>
-          </v-row>
-        </v-form>
+        <GenericDeviceActionForm
+          v-model="genericDeviceAction"
+        />
       </v-card-text>
       <!-- action type independent -->
       <v-card-text
-        v-if="chosenKindOfAction"
+        v-if="chosenKindOfAction && !otherChosen"
       >
         <v-row>
           <v-col cols="12" md="12">
@@ -297,27 +276,26 @@ import { DateTime } from 'luxon'
 import { Contact } from '@/models/Contact'
 import { Attachment } from '@/models/Attachment'
 import { DeviceProperty } from '@/models/DeviceProperty'
+import { IAction } from '@/models/Action'
+import { GenericDeviceAction } from '@/models/GenericDeviceAction'
 
 import { dateToString, stringToDate } from '@/utils/dateHelper'
 
+import GenericDeviceActionForm from '@/components/GenericDeviceActionForm.vue'
 import DatePicker from '@/components/DatePicker.vue'
 
 type KindOfActionType = 'device_calibration' | 'software_update' | 'generic_device_action'
-
-interface IGenericActionType {
-  id: string
-  uri: string
-  name: string
-}
 
 interface IOptionsForActionType {
   id: string
   kind: KindOfActionType
   name: string
+  uri?: string
 }
 
 @Component({
   components: {
+    GenericDeviceActionForm,
     DatePicker
   }
 })
@@ -363,6 +341,8 @@ export default class ActionAddPage extends Vue {
   private startDate: DateTime | null = null
   private endDate: DateTime | null = null
 
+  private genericDeviceAction: GenericDeviceAction | null = new GenericDeviceAction()
+
   mounted () {
     this.$api.contacts.findAll().then((foundContacts) => {
       this.contacts = foundContacts
@@ -402,6 +382,11 @@ export default class ActionAddPage extends Vue {
       this.$data._chosenKindOfAction = newValue
       if (this.$data._chosenKindOfAction?.kind !== newValue?.kind) {
         this.resetAllActionSpecificInputs()
+      }
+      if (this.otherChosen) {
+        this.genericDeviceAction = new GenericDeviceAction()
+        this.genericDeviceAction.actionTypeName = newValue?.name || ''
+        this.genericDeviceAction.actionTypeUrl = newValue?.uri || ''
       }
     }
   }
