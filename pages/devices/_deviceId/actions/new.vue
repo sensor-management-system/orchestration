@@ -175,6 +175,7 @@ permissions and limitations under the Licence.
         v-if="otherChosen"
       >
         <GenericDeviceActionForm
+          ref="genericDeviceActionForm"
           v-model="genericDeviceAction"
         />
       </v-card-text>
@@ -385,6 +386,7 @@ export default class ActionAddPage extends Vue {
       }
       if (this.otherChosen) {
         this.genericDeviceAction = new GenericDeviceAction()
+        // TODO: we still need those values from the controlled vocabulary
         this.genericDeviceAction.actionTypeName = newValue?.name || ''
         this.genericDeviceAction.actionTypeUrl = newValue?.uri || ''
       }
@@ -519,13 +521,17 @@ export default class ActionAddPage extends Vue {
   }
 
   addGenericDeviceAction () {
-    if (!(this.$refs.datesForm as Vue & { validate: () => boolean }).validate()) {
+    if (!this.isLoggedIn) {
       return
     }
-    if (!(this.$refs.contactForm as Vue & { validate: () => boolean}).validate()) {
+    if (!(this.$refs.genericDeviceActionForm as Vue & { isValid: () => boolean }).isValid()) {
       return
     }
-    this.$store.commit('snackbar/setError', 'Not implemented yet')
+    this.$api.genericDeviceActions.add(this.deviceId, this.genericDeviceAction).then((newAction: GenericDeviceAction) => {
+      this.$router.push('/devices/' + this.deviceId + '/actions')
+    }).catch(() => {
+      this.$store.commit('snackbar/setError', 'Failed to save the action')
+    })
   }
 }
 
