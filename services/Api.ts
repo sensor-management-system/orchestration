@@ -40,6 +40,7 @@ import { ConfigurationStatusApi } from '@/services/sms/ConfigurationStatusApi'
 import { CustomfieldsApi } from '@/services/sms/CustomfieldsApi'
 import { DeviceAttachmentApi } from '@/services/sms/DeviceAttachmentApi'
 import { PlatformAttachmentApi } from '@/services/sms/PlatformAttachmentApi'
+import { GenericDeviceActionApi } from '@/services/sms/GenericDeviceActionApi'
 
 import { CompartmentApi } from '@/services/cv/CompartmentApi'
 import { DeviceTypeApi } from '@/services/cv/DeviceTypeApi'
@@ -66,6 +67,7 @@ export class Api {
   private readonly _deviceAttachmentApi: DeviceAttachmentApi
   private readonly _platformAttachmentApi: PlatformAttachmentApi
   private readonly _devicePropertyApi: DevicePropertyApi
+  private readonly _genericDeviceActionApi: GenericDeviceActionApi
 
   private readonly _manufacturerApi: ManufacturerApi
   private readonly _platformTypeApi: PlatformTypeApi
@@ -121,6 +123,10 @@ export class Api {
 
     this._devicePropertyApi = new DevicePropertyApi(
       this.createAxios(smsBaseUrl, '/device-properties', smsConfig, getIdToken)
+    )
+
+    this._genericDeviceActionApi = new GenericDeviceActionApi(
+      this.createAxios(smsBaseUrl, '/generic-device-actions', smsConfig, getIdToken)
     )
 
     // and here we can set settings for all the cv api calls
@@ -217,6 +223,10 @@ export class Api {
 
   get deviceProperties (): DevicePropertyApi {
     return this._devicePropertyApi
+  }
+
+  get genericDeviceActions (): GenericDeviceActionApi {
+    return this._genericDeviceActionApi
   }
 
   get contacts (): ContactApi {
