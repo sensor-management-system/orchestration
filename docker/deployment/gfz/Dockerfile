@@ -65,7 +65,7 @@ ENV NUXT_ENV_LOAD_USER_INFO false
 RUN mkdir /ssmfrontend
 COPY . /ssmfrontend
 WORKDIR /ssmfrontend
-RUN npm install
+RUN npm ci
 RUN npm run build
 
 FROM nginx:alpine as webserver
