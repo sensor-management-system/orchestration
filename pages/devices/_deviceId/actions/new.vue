@@ -277,7 +277,6 @@ import { DateTime } from 'luxon'
 import { Contact } from '@/models/Contact'
 import { Attachment } from '@/models/Attachment'
 import { DeviceProperty } from '@/models/DeviceProperty'
-import { IAction } from '@/models/Action'
 import { GenericDeviceAction } from '@/models/GenericDeviceAction'
 
 import { dateToString, stringToDate } from '@/utils/dateHelper'
@@ -527,7 +526,7 @@ export default class ActionAddPage extends Vue {
     if (!(this.$refs.genericDeviceActionForm as Vue & { isValid: () => boolean }).isValid()) {
       return
     }
-    this.$api.genericDeviceActions.add(this.deviceId, this.genericDeviceAction).then((newAction: GenericDeviceAction) => {
+    this.$api.genericDeviceActions.add(this.deviceId, this.genericDeviceAction).then(() => {
       this.$router.push('/devices/' + this.deviceId + '/actions')
     }).catch(() => {
       this.$store.commit('snackbar/setError', 'Failed to save the action')
