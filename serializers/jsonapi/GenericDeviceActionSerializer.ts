@@ -121,4 +121,57 @@ export class GenericDeviceActionSerializer {
     }
     return data
   }
+
+  /**
+   * convert GenericDeviceActions that come as a relationship
+   *
+   * do we still need this one?
+   *
+   * @param {IJsonApiTypeIdDataListDict} relationships - a JSONAPI relationships object
+   * @param {IJsonApiTypeIdAttributes[]} included - a JSONAPI object with included GenericDeviceActions
+   * @return {IGenericDeviceActionsAndMissing} serialized GenericDeviceActions and an array of ids, that could not be resolved
+   */
+  convertJsonApiRelationshipsModelList (relationships: IJsonApiTypeIdDataListDict, included: IJsonApiTypeIdAttributes[]): IGenericDeviceActionsAndMissing {
+    const actionIds = []
+    if (relationships.generic_device_actions) {
+      const actionObject = relationships.generic_device_actions as IJsonApiTypeIdDataList
+      if (actionObject.data && actionObject.data.length > 0) {
+        for (const relationShipActionData of actionObject.data) {
+          const actionId = relationShipActionData.id
+          actionIds.push(actionId)
+        }
+      }
+    }
+
+    const possibleActions: { [key: string]: GenericDeviceAction } = {}
+    if (included && included.length > 0) {
+      for (const includedEntry of included) {
+        if (includedEntry.type === 'generic_device_action') {
+          const actionId = includedEntry.id
+          if (actionIds.includes(actionId)) {
+            const action = this.convertJsonApiDataToModel(includedEntry, [])
+            possibleActions[actionId] = action
+          }
+        }
+      }
+    }
+
+    const actions = []
+    const missingDataForActionIds = []
+
+    for (const actionId of actionIds) {
+      if (possibleActions[actionId]) {
+        actions.push(possibleActions[actionId])
+      } else {
+        missingDataForActionIds.push(actionId)
+      }
+    }
+
+    return {
+      genericDeviceActions: actions,
+      missing: {
+        ids: missingDataForActionIds
+      }
+    }
+  }
 }
