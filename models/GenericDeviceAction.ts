@@ -30,6 +30,7 @@
  * permissions and limitations under the Licence.
  */
 import { DateTime } from 'luxon'
+import { Attachment } from '@/models/Attachment'
 import { Contact } from '@/models/Contact'
 import { IAction } from '@/models/Action'
 
@@ -39,6 +40,7 @@ export interface IGenericDeviceAction extends IAction {
   beginDate: DateTime | null
   endDate: DateTime | null
   contact: Contact | null
+  attachments: Attachment[]
   isGenericDeviceAction: boolean
 }
 
@@ -50,6 +52,7 @@ export class GenericDeviceAction implements IGenericDeviceAction {
   private _beginDate: DateTime | null = null
   private _endDate: DateTime | null = null
   private _contact: Contact | null = null
+  private _attachments: Attachment[] = []
 
   /**
    * returns an empty instance
@@ -79,6 +82,7 @@ export class GenericDeviceAction implements IGenericDeviceAction {
     // TODO: find the proper way to create new DateTime instances from other DateTime-ish instances
     action.endDate = someObject.endDate ? someObject.endDate : null
     action.contact = someObject.contact ? Contact.createFromObject(someObject.contact) : null
+    action.attachments = [...someObject.attachments]
     return action
   }
 
@@ -136,6 +140,14 @@ export class GenericDeviceAction implements IGenericDeviceAction {
 
   set contact (contact: Contact | null) {
     this._contact = contact
+  }
+
+  get attachments (): Attachment[] {
+    return this._attachments
+  }
+
+  set attachments (attachments: Attachment[]) {
+    this._attachments = attachments
   }
 
   get isGenericDeviceAction (): boolean {
