@@ -45,7 +45,9 @@ export interface IMissingAttachmentData {
 export interface IAttachmentsAndMissing {
   attachments: Attachment[]
   missing: IMissingAttachmentData
-} export class AttachmentSerializer {
+}
+
+export class AttachmentSerializer {
   convertJsonApiObjectToModel (jsonApiObject: IJsonApiObject): Attachment {
     const data = jsonApiObject.data
     return this.convertJsonApiDataToModel(data)
