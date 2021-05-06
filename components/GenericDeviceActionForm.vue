@@ -57,6 +57,7 @@ permissions and limitations under the Licence.
     <CommonActionForm
       ref="commonForm"
       v-model="action"
+      :attachments="attachments"
       :rules="[rules.contactNotNull]"
     />
   </v-container>
@@ -72,7 +73,7 @@ import { Component, Prop, Vue, Watch } from 'nuxt-property-decorator'
 import { DateTime } from 'luxon'
 import { stringToDate } from '@/utils/dateHelper'
 
-import { Contact } from '@/models/Contact'
+import { Attachment } from '@/models/Attachment'
 import { GenericDeviceAction } from '@/models/GenericDeviceAction'
 
 import CommonActionForm from '@/components/CommonActionForm.vue'
@@ -109,6 +110,17 @@ export default class GenericDeviceActionForm extends Vue {
   })
   // @ts-ignore
   readonly value!: GenericDeviceAction
+
+  /**
+   * a list of available attachments
+   */
+  @Prop({
+    default: () => [],
+    required: false,
+    type: Array
+  })
+  // @ts-ignore
+  readonly attachments!: Attachment[]
 
   created () {
     this.actionCopy = GenericDeviceAction.createFromObject(this.value)

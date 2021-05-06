@@ -64,20 +64,24 @@ permissions and limitations under the Licence.
         </v-btn>
       </v-col>
     </v-row>
-    <!--
     <v-row>
       <v-col>
         <v-select
-          v-if="attachments.length > 0"
+          v-model="actionAttachments"
           multiple
+          chips
           clearable
+          deletable-chips
           label="Attachments"
+          prepend-icon="mdi-paperclip"
+          no-data-text="There are no attachments for this device"
           :items="attachments"
           :item-text="(x) => x.label"
+          :item-value="(x) => x"
+          :disabled="!attachments.length"
         />
       </v-col>
     </v-row>
-    -->
   </v-container>
 </template>
 
@@ -88,6 +92,7 @@ permissions and limitations under the Licence.
  */
 import { Component, Prop, Vue } from 'nuxt-property-decorator'
 
+import { Attachment } from '@/models/Attachment'
 import { Contact } from '@/models/Contact'
 import { GenericDeviceAction } from '@/models/GenericDeviceAction'
 
@@ -112,6 +117,17 @@ export default class CommonActionForm extends Vue {
   })
   // @ts-ignore
   readonly value!: GenericDeviceAction
+
+  /**
+   * a list of available attachments
+   */
+  @Prop({
+    default: () => [],
+    required: false,
+    type: Array
+  })
+  // @ts-ignore
+  readonly attachments!: Attachment[]
 
   /**
    * rules
@@ -170,6 +186,27 @@ export default class CommonActionForm extends Vue {
      * contactChange event
      * @event CommonActionForm#input
      * @type {Contact}
+     */
+    this.$emit('input', actionCopy)
+  }
+
+  get actionAttachments (): Attachment[] {
+    return this.value.attachments
+  }
+
+  /**
+   * sets the new list of attachments
+   *
+   * @param {Attachment[]} value - the list of attachments to set
+   * @fires CommonActionForm#input
+   */
+  set actionAttachments (value: Attachment[]) {
+    const actionCopy = GenericDeviceAction.createFromObject(this.value)
+    actionCopy.attachments = value
+    /**
+     * attachments event
+     * @event CommonActionForm#input
+     * @type {Attachment[]}
      */
     this.$emit('input', actionCopy)
   }

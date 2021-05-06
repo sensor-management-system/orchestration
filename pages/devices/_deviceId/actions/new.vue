@@ -177,6 +177,7 @@ permissions and limitations under the Licence.
         <GenericDeviceActionForm
           ref="genericDeviceActionForm"
           v-model="genericDeviceAction"
+          :attachments="attachments"
         />
       </v-card-text>
       <!-- action type independent -->
