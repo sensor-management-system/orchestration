@@ -31,15 +31,24 @@
  */
 import { Contact, IContact } from '@/models/Contact'
 
-import { IJsonApiObjectList, IJsonApiObject, IJsonApiTypeIdDataListDict, IJsonApiTypeIdAttributes, IJsonApiTypeIdDataList, IJsonApiDataWithOptionalIdWithoutRelationships, IJsonApiTypeId } from '@/serializers/jsonapi/JsonApiTypes'
+import { IJsonApiObjectList, IJsonApiObject, IJsonApiTypeIdData, IJsonApiTypeIdDataListDict, IJsonApiTypeIdAttributes, IJsonApiTypeIdDataList, IJsonApiDataWithOptionalIdWithoutRelationships, IJsonApiTypeId } from '@/serializers/jsonapi/JsonApiTypes'
 
 export interface IMissingContactData {
   ids: string[]
 }
 
+export interface IMissingSingleContactData {
+  id: string
+}
+
 export interface IContactsAndMissing {
   contacts: Contact[]
   missing: IMissingContactData
+}
+
+export interface IContactAndMissing {
+  contact: Contact | null
+  missing: IMissingSingleContactData
 }
 
 export class ContactSerializer {
@@ -143,6 +152,36 @@ export class ContactSerializer {
       contacts,
       missing: {
         ids: missingDataForContactIds
+      }
+    }
+  }
+
+  convertJsonApiRelationshipsSingleModel (relationships: IJsonApiTypeIdDataListDict, included: IJsonApiTypeIdAttributes[]): IContactAndMissing {
+    let relationContactId: string = ''
+    if (relationships.contact) {
+      const contactObject = relationships.contact as IJsonApiTypeIdData
+      if (contactObject.data && contactObject.data.id) {
+        relationContactId = contactObject.data.id
+      }
+    }
+
+    let serializedContact: Contact | null = null
+    if (included && included.length > 0) {
+      for (const includedEntry of included) {
+        if (includedEntry.type !== 'contact') {
+          continue
+        }
+        const contactId = includedEntry.id
+        if (relationContactId === contactId) {
+          serializedContact = this.convertJsonApiDataToModel(includedEntry)
+        }
+      }
+    }
+
+    return {
+      contact: serializedContact,
+      missing: {
+        id: serializedContact ? '' : relationContactId
       }
     }
   }
