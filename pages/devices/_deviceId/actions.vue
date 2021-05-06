@@ -494,21 +494,21 @@ export default class DeviceActionsPage extends Vue {
 
   async fetch () {
     const contact1 = Contact.createFromObject({
-      id: '1',
+      id: 'X1',
       givenName: 'Tech',
       familyName: 'Niker',
       email: 'tech.niker@gfz-potsdam.de',
       website: ''
     })
     const contact2 = Contact.createFromObject({
-      id: '2',
+      id: 'X2',
       givenName: 'Cam',
       familyName: 'Paign',
       email: 'cam.paign@gfz-potsdam.de',
       website: ''
     })
     const deviceSoftwareUpdateAction = new DeviceSoftwareUpdateAction(
-      '2',
+      'X2',
       'Firmware',
       'softwaretypes/firmware',
       DateTime.fromISO('2021-03-30T08:10:00Z'),
@@ -522,7 +522,7 @@ export default class DeviceActionsPage extends Vue {
     const devProp2 = new DeviceProperty()
     devProp2.label = 'Wind speed'
     const deviceCalibrationAction1 = new DeviceCalibrationAction(
-      '3',
+      'X3',
       'Calibration of the device for usage on the campaign',
       DateTime.fromISO('2021-03-30T08:12:00Z'),
       DateTime.fromISO('2021-04-30T12:00:00Z'),
@@ -532,7 +532,7 @@ export default class DeviceActionsPage extends Vue {
       contact2
     )
     const deviceMountAction1 = new DeviceMountAction(
-      '4',
+      'X4',
       'Measurement ABC',
       'Station ABC',
       0,
@@ -543,7 +543,7 @@ export default class DeviceActionsPage extends Vue {
       contact1
     )
     const deviceUnmountAction1 = new DeviceUnmountAction(
-      '5',
+      'X5',
       'Measurement ABC',
       DateTime.fromISO('2022-03-30T12:00:00Z'),
       'Unmounted Measurement ABC',
