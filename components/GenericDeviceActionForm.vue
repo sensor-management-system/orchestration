@@ -56,11 +56,8 @@ permissions and limitations under the Licence.
     </v-form>
     <CommonActionForm
       ref="commonForm"
-      :description="actionCopy.description"
-      :contact="actionCopy.contact"
+      v-model="action"
       :rules="[rules.contactNotNull]"
-      @descriptionChange="setDescription"
-      @contactChange="setContact"
     />
   </v-container>
 </template>
@@ -117,14 +114,12 @@ export default class GenericDeviceActionForm extends Vue {
     this.actionCopy = GenericDeviceAction.createFromObject(this.value)
   }
 
-  setDescription (value: string) {
-    this.actionCopy.description = value
-    this.$emit('input', this.actionCopy)
+  get action (): GenericDeviceAction {
+    return this.actionCopy
   }
 
-  setContact (value: Contact | null) {
-    this.actionCopy.contact = value
-    this.$emit('input', this.actionCopy)
+  set action (value: GenericDeviceAction) {
+    this.$emit('input', value)
   }
 
   setStartDateAndValidate (aDate: DateTime | null) {

@@ -33,7 +33,7 @@ permissions and limitations under the Licence.
     <v-row>
       <v-col cols="12" md="12">
         <v-textarea
-          v-model="descriptionValue"
+          v-model="description"
           label="Description"
           rows="3"
         />
@@ -47,12 +47,13 @@ permissions and limitations under the Licence.
           @submit.prevent
         >
           <v-autocomplete
-            v-model="contactValue"
+            v-model="contact"
             :items="contacts"
             label="Contact"
             clearable
             required
             :item-text="(x) => x.toString()"
+            :item-value="(x) => x"
             :rules="rules"
           />
         </v-form>
@@ -88,6 +89,7 @@ permissions and limitations under the Licence.
 import { Component, Prop, Vue } from 'nuxt-property-decorator'
 
 import { Contact } from '@/models/Contact'
+import { GenericDeviceAction } from '@/models/GenericDeviceAction'
 
 /**
  * A class component for a custom field
@@ -101,26 +103,15 @@ export default class CommonActionForm extends Vue {
   private contactIsValid = true
 
   /**
-   * a description
+   * a GenericDeviceAction
    */
   @Prop({
-    default: '',
-    required: false,
-    type: String
-  })
-  // @ts-ignore
-  readonly description!: string
-
-  /**
-   * an contact
-   */
-  @Prop({
-    default: null,
-    required: false,
+    default: new GenericDeviceAction(),
+    required: true,
     type: Object
   })
   // @ts-ignore
-  readonly contact!: Contact | null
+  readonly value!: GenericDeviceAction
 
   /**
    * rules
@@ -141,42 +132,47 @@ export default class CommonActionForm extends Vue {
     }
   }
 
-  get descriptionValue (): string {
-    return this.description
+  get description (): string {
+    return this.value.description
   }
 
   /**
    * sets the new description
    *
    * @param {string} value - the description to set
-   * @fires CommonActionForm#descriptionChange
+   * @fires CommonActionForm#input
    */
-  set descriptionValue (value: string) {
+  set description (value: string) {
+    const actionCopy = GenericDeviceAction.createFromObject(this.value)
+    actionCopy.description = value
     /**
      * descriptionChange event
-     * @event CommonActionForm#descriptionChange
+     * @event CommonActionForm#input
      * @type {string}
      */
-    this.$emit('descriptionChange', value)
+    this.$emit('input', actionCopy)
   }
 
-  get contactValue (): Contact | null {
-    return this.contact
+  get contact (): Contact | null {
+    return this.value.contact
   }
 
   /**
    * sets the new contact
    *
    * @param {Contact | null} value - the contact to set
-   * @fires CommonActionForm#contactChange
+   * @fires CommonActionForm#input
    */
-  set contactValue (value: Contact | null) {
+  set contact (value: Contact | null) {
+    console.log('the contact is', value)
+    const actionCopy = GenericDeviceAction.createFromObject(this.value)
+    actionCopy.contact = value || null
     /**
      * contactChange event
-     * @event CommonActionForm#contactChange
+     * @event CommonActionForm#input
      * @type {Contact}
      */
-    this.$emit('contactChange', value)
+    this.$emit('input', actionCopy)
   }
 
   selectCurrentUserAsContact () {
@@ -184,7 +180,7 @@ export default class CommonActionForm extends Vue {
     if (currentUserMail) {
       const userIndex = this.contacts.findIndex(c => c.email === currentUserMail)
       if (userIndex > -1) {
-        this.contactValue = this.contacts[userIndex]
+        this.contact = this.contacts[userIndex]
         return
       }
     }
