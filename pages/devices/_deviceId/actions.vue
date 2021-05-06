@@ -559,6 +559,28 @@ export default class DeviceActionsPage extends Vue {
     ]
     // Todo: sort all actions by date descending
     await Promise.all([this.fetchGenericDeviceActions()])
+    // sort the actions descending
+    this.actions.sort((i: IAction, j: IAction): number => {
+      if (!('beginDate' in i) && !('beginDate' in j)) {
+        return 0
+      }
+      if (('beginDate' in i) && ('beginDate' in j)) {
+        if ((i as IAction & { beginDate: DateTime }).beginDate < (j as IAction & { beginDate: DateTime }).beginDate) {
+          return 1
+        }
+        if ((i as IAction & { beginDate: DateTime }).beginDate > (j as IAction & { beginDate: DateTime }).beginDate) {
+          return -1
+        }
+        return 0
+      }
+      if (!('beginDate' in i) && ('beginDate' in j)) {
+        return -1
+      }
+      if (('beginDate' in i) && !('beginDate' in j)) {
+        return 1
+      }
+      return 0
+    })
   }
 
   async fetchGenericDeviceActions (): Promise<void> {
