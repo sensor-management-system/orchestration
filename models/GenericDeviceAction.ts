@@ -74,10 +74,10 @@ export class GenericDeviceAction implements IGenericDeviceAction {
     action.actionTypeName = someObject.actionTypeName
     action.actionTypeUrl = someObject.actionTypeUrl
     // TODO: find the proper way to create new DateTime instances from other DateTime-ish instances
-    action.beginDate = someObject.beginDate !== null ? someObject.beginDate : null
+    action.beginDate = someObject.beginDate ? someObject.beginDate : null
     // TODO: find the proper way to create new DateTime instances from other DateTime-ish instances
-    action.endDate = someObject.endDate !== null ? someObject.endDate : null
-    action.contact = someObject.contact !== null ? Contact.createFromObject(someObject.contact) : null
+    action.endDate = someObject.endDate ? someObject.endDate : null
+    action.contact = someObject.contact ? Contact.createFromObject(someObject.contact) : null
     return action
   }
 
