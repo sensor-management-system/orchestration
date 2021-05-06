@@ -30,21 +30,38 @@
  * permissions and limitations under the Licence.
  */
 import { DateTime } from 'luxon'
-import { GenericDeviceAction, IGenericDeviceAction } from '@/models/GenericDeviceAction'
+import { GenericDeviceAction } from '@/models/GenericDeviceAction'
 import {
   IJsonApiDataWithOptionalId,
   IJsonApiObject,
   IJsonApiObjectList,
-  IJsonApiTypeIdAttributes
+  IJsonApiTypeIdAttributes,
+  IJsonApiTypeIdDataList,
+  IJsonApiTypeIdDataListDict,
+  IJsonApiTypeIdAttributesWithOptionalRelationships,
+  IJsonApiDataWithId
 } from '@/serializers/jsonapi/JsonApiTypes'
 
+import { ContactSerializer, IContactAndMissing } from '@/serializers/jsonapi/ContactSerializer'
+
+export interface IMissingGenericDeviceActionData {
+  ids: string[]
+}
+
+export interface IGenericDeviceActionsAndMissing {
+  genericDeviceActions: GenericDeviceAction[]
+  missing: IMissingGenericDeviceActionData
+}
+
 export class GenericDeviceActionSerializer {
+  private contactSerializer: ContactSerializer = new ContactSerializer()
   convertJsonApiObjectToModel (jsonApiObject: IJsonApiObject): GenericDeviceAction {
     const data = jsonApiObject.data
-    return this.convertJsonApiDataToModel(data)
+    const included = jsonApiObject.included || []
+    return this.convertJsonApiDataToModel(data, included)
   }
 
-  convertJsonApiDataToModel (jsonApiData: IJsonApiTypeIdAttributes): GenericDeviceAction {
+  convertJsonApiDataToModel (jsonApiData: IJsonApiTypeIdAttributesWithOptionalRelationships, included: IJsonApiTypeIdAttributes[]): GenericDeviceAction {
     const attributes = jsonApiData.attributes
     const newEntry = GenericDeviceAction.createEmpty()
 
@@ -54,13 +71,22 @@ export class GenericDeviceActionSerializer {
     newEntry.actionTypeUrl = attributes.action_type_uri || ''
     newEntry.beginDate = attributes.begin_date ? DateTime.fromISO(attributes.begin_date, { zone: 'UTC' }) : null
     newEntry.endDate = attributes.end_date ? DateTime.fromISO(attributes.end_date, { zone: 'UTC' }) : null
-    // TODO: how to resolve the contact?
+
+    const relationships = jsonApiData.relationships || {}
+
+    const contactWithMissing: IContactAndMissing = this.contactSerializer.convertJsonApiRelationshipsSingleModel(relationships, included)
+    if (contactWithMissing.contact) {
+      newEntry.contact = contactWithMissing.contact
+    }
 
     return newEntry
   }
 
   convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiObjectList): GenericDeviceAction[] {
-    return jsonApiObjectList.data.map(this.convertJsonApiDataToModel)
+    const included = jsonApiObjectList.included || []
+    return jsonApiObjectList.data.map((model: IJsonApiDataWithId) => {
+      return this.convertJsonApiDataToModel(model, included)
+    })
   }
 
   convertModelToJsonApiData (action: GenericDeviceAction, deviceId: string): IJsonApiDataWithOptionalId {
@@ -72,7 +98,6 @@ export class GenericDeviceActionSerializer {
         action_type_uri: action.actionTypeUrl,
         begin_date: action.beginDate != null ? action.beginDate.setZone('UTC').toISO() : null,
         end_date: action.endDate != null ? action.endDate.setZone('UTC').toISO() : null
-        // TODO: how to handle the contact?
       },
       relationships: {
         device: {
