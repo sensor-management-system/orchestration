@@ -38,6 +38,7 @@ export interface IGenericDeviceAction extends IAction {
   actionTypeUrl: string
   beginDate: DateTime | null
   endDate: DateTime | null
+  contact: Contact | null
   isGenericDeviceAction: boolean
 }
 
