@@ -164,7 +164,6 @@ export default class CommonActionForm extends Vue {
    * @fires CommonActionForm#input
    */
   set contact (value: Contact | null) {
-    console.log('the contact is', value)
     const actionCopy = GenericDeviceAction.createFromObject(this.value)
     actionCopy.contact = value || null
     /**
