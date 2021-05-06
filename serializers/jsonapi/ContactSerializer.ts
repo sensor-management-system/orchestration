@@ -83,6 +83,14 @@ export class ContactSerializer {
     }
   }
 
+  convertModelToJsonApiRelationshipObject (contact: IContact): IJsonApiTypeIdDataListDict {
+    return {
+      contact: {
+        data: this.convertModelToTupleWithIdAndType(contact)
+      }
+    }
+  }
+
   convertModelToJsonApiData (contact: IContact): IJsonApiDataWithOptionalIdWithoutRelationships {
     const data: any = {
       type: 'contact',
@@ -110,6 +118,13 @@ export class ContactSerializer {
       }
     }
     return result
+  }
+
+  convertModelToTupleWithIdAndType (contact: IContact): IJsonApiTypeId {
+    return {
+      id: contact.id || '',
+      type: 'contact'
+    }
   }
 
   convertJsonApiRelationshipsModelList (relationships: IJsonApiTypeIdDataListDict, included: IJsonApiTypeIdAttributes[]): IContactsAndMissing {
