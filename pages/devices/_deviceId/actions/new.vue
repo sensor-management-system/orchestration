@@ -523,6 +523,9 @@ export default class ActionAddPage extends Vue {
     if (!this.isLoggedIn) {
       return
     }
+    if (!this.genericDeviceAction) {
+      return
+    }
     if (!(this.$refs.genericDeviceActionForm as Vue & { isValid: () => boolean }).isValid()) {
       return
     }
