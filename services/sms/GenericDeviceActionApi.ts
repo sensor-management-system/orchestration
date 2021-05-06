@@ -44,7 +44,11 @@ export class GenericDeviceActionApi {
   }
 
   async findById (id: string): Promise<GenericDeviceAction> {
-    const response = await this.axiosApi.get(id)
+    const response = await this.axiosApi.get(id, {
+      params: {
+        include: 'contact'
+      }
+    })
     const data = response.data
     return this.serializer.convertJsonApiObjectToModel(data)
   }
