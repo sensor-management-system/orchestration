@@ -50,3 +50,10 @@ export const timeStampToUTCDateTime = (value: number) : string => {
   const date = DateTime.fromSeconds(value).setZone('UTC')
   return date.toFormat('yyyy-MM-dd HH:mm:ss') + ' UTC'
 }
+
+export const dateToDateTimeString = (aDate: DateTime | null): string => {
+  if (!aDate) {
+    return ''
+  }
+  return aDate.setZone('UTC').toFormat('yyyy-MM-dd HH:mm:ss')
+}
