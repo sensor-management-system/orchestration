@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020
+Copyright (C) 2020, 2021
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -87,7 +87,7 @@ permissions and limitations under the Licence.
 
 <script lang="ts">
 /**
- * @file provides a component for a custom field which consists of an key and a value
+ * @file provides a component for a set of common form fields for actions
  * @author <marc.hanisch@gfz-potsdam.de>
  */
 import { Component, Prop, Vue } from 'nuxt-property-decorator'
@@ -97,7 +97,7 @@ import { Contact } from '@/models/Contact'
 import { GenericDeviceAction } from '@/models/GenericDeviceAction'
 
 /**
- * A class component for a custom field
+ * A class component for a set of common form fields for actions
  * @extends Vue
  */
 @Component
@@ -211,6 +211,11 @@ export default class CommonActionForm extends Vue {
     this.$emit('input', actionCopy)
   }
 
+  /**
+   * selects the current (loggined) user from the list of users and adds the
+   * user to the action
+   *
+   */
   selectCurrentUserAsContact () {
     const currentUserMail = this.$store.getters['oidc/userEmail']
     if (currentUserMail) {
@@ -223,6 +228,11 @@ export default class CommonActionForm extends Vue {
     this.$store.commit('snackbar/setError', 'No contact found with your data')
   }
 
+  /**
+   * returns whether the form is valid based on the defined rules
+   *
+   * @return {boolean} whether the form is valid or not
+   */
   isValid (): boolean {
     return (this.$refs.contactForm as Vue & { validate: () => boolean }).validate()
   }
