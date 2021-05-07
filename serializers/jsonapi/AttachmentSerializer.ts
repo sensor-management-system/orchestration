@@ -31,9 +31,11 @@
  */
 import { Attachment, IAttachment } from '@/models/Attachment'
 
-import
-{
-  IJsonApiObjectList, IJsonApiObject, IJsonApiTypeIdAttributes, IJsonApiDataWithOptionalIdWithoutRelationships
+import {
+  IJsonApiObjectList,
+  IJsonApiObject,
+  IJsonApiTypeIdAttributes,
+  IJsonApiDataWithOptionalIdWithoutRelationships
 }
   from
   '@/serializers/jsonapi/JsonApiTypes'
