@@ -457,7 +457,6 @@ export default class DeviceActionsPage extends Vue {
   private searchResultItemsShown: { [id: string]: boolean } = {}
 
   async fetch () {
-    console.log('calling fetch')
     const contact1 = Contact.createFromObject({
       id: 'X1',
       givenName: 'Tech',
