@@ -75,7 +75,7 @@ permissions and limitations under the Licence.
 
 <script lang="ts">
 /**
- * @file provides a component for a Generic Device Actions form
+ * @file provides a component for a Generic Device Actions card
  * @author <marc.hanisch@gfz-potsdam.de>
  */
 import { Component, Prop, Vue } from 'nuxt-property-decorator'
@@ -112,10 +112,19 @@ export default class GenericDeviceActionCard extends Vue {
   // @ts-ignore
   readonly value!: GenericDeviceAction
 
+  /**
+   * whether the card expansion is shown or not
+   *
+   * @return {boolean} whether the card expansion is shown or not
+   */
   isShown (): boolean {
     return this.showDetails
   }
 
+  /**
+   * toggles the shown state of the card expansion
+   *
+   */
   show (): void {
     this.showDetails = !this.showDetails
   }
