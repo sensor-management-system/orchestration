@@ -46,6 +46,6 @@ export class GenericDeviceActionAttachmentApi {
   async add (actionId: string, attachment: Attachment): Promise<any> {
     const url = ''
     const data = this.serializer.convertModelToJsonApiData(attachment, actionId)
-    const response = await this.axiosApi.post(url, { data })
+    await this.axiosApi.post(url, { data })
   }
 }
