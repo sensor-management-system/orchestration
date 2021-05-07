@@ -47,7 +47,9 @@ permissions and limitations under the Licence.
       </v-btn>
     </v-card-actions>
     <template v-if="isAddActionPage">
-      <NuxtChild />
+      <NuxtChild
+        @input="$fetch"
+      />
     </template>
     <template v-else>
       <v-timeline dense>
@@ -493,6 +495,7 @@ export default class DeviceActionsPage extends Vue {
   private searchResultItemsShown: { [id: string]: boolean } = {}
 
   async fetch () {
+    console.log('calling fetch')
     const contact1 = Contact.createFromObject({
       id: 'X1',
       givenName: 'Tech',

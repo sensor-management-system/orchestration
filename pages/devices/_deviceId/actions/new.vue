@@ -530,8 +530,8 @@ export default class ActionAddPage extends Vue {
     if (!(this.$refs.genericDeviceActionForm as Vue & { isValid: () => boolean }).isValid()) {
       return
     }
-    this.$api.genericDeviceActions.add(this.deviceId, this.genericDeviceAction).then(() => {
-      this.$router.push('/devices/' + this.deviceId + '/actions')
+    this.$api.genericDeviceActions.add(this.deviceId, this.genericDeviceAction).then((action: GenericDeviceAction) => {
+      this.$router.push('/devices/' + this.deviceId + '/actions', () => this.$emit('input', action))
     }).catch(() => {
       this.$store.commit('snackbar/setError', 'Failed to save the action')
     })
