@@ -54,56 +54,16 @@ permissions and limitations under the Licence.
     <template v-else>
       <v-timeline dense>
         <v-timeline-item
-          v-for="action in actions"
+          v-for="(action, index) in actions"
           :key="action.id"
           :color="getActionColor(action)"
           class="mb-4"
           small
         >
-          <template v-if="action.isGenericDeviceAction">
-            <v-card>
-              <v-card-subtitle class="pb-0">
-                {{ action.beginDate | toUtcDate }} - {{ action.endDate | toUtcDate }}
-              </v-card-subtitle>
-              <v-card-title class="pt-0">
-                {{ action.actionTypeName }}
-              </v-card-title>
-              <v-card-subtitle class="pb-1">
-                <v-row
-                  no-gutters
-                >
-                  <v-col
-                    cols="11"
-                  >
-                    {{ action.contact.toString() }}
-                  </v-col>
-                  <v-col
-                    align-self="end"
-                    class="text-right"
-                  >
-                    <v-btn
-                      icon
-                      @click.stop.prevent="showActionItem(action.id)"
-                    >
-                      <v-icon>{{ isActionItemShown(action.id) ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
-                    </v-btn>
-                  </v-col>
-                </v-row>
-              </v-card-subtitle>
-              <v-expand-transition>
-                <div
-                  v-show="isActionItemShown(action.id)"
-                >
-                  <v-card-text
-                    class="grey lighten-5 text--primary pt-2"
-                  >
-                    <label>Description</label>
-                    {{ action.description }}
-                  </v-card-text>
-                </div>
-              </v-expand-transition>
-            </v-card>
-          </template>
+          <GenericDeviceActionCard
+            v-if="action.isGenericDeviceAction"
+            v-model="actions[index]"
+          />
           <template v-if="action.isDeviceSoftwareUpdateAction">
             <v-card>
               <v-card-subtitle class="pb-0">
@@ -321,6 +281,7 @@ permissions and limitations under the Licence.
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import GenericDeviceActionCard from '@/components/GenericDeviceActionCard.vue'
 
 import { DateTime } from 'luxon'
 
@@ -481,7 +442,8 @@ class DeviceUnmountAction implements IAction {
 
 @Component({
   components: {
-    ProgressIndicator
+    ProgressIndicator,
+    GenericDeviceActionCard
   },
   filters: {
     toUtcDate
