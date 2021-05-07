@@ -30,11 +30,12 @@
  * permissions and limitations under the Licence.
  */
 import { DateTime } from 'luxon'
-import { GenericDeviceAction } from '@/models/GenericDeviceAction'
+import { GenericDeviceAction, IGenericDeviceAction } from '@/models/GenericDeviceAction'
 import {
   IJsonApiDataWithOptionalId,
   IJsonApiObject,
   IJsonApiObjectList,
+  IJsonApiTypeId,
   IJsonApiTypeIdAttributes,
   IJsonApiTypeIdDataList,
   IJsonApiTypeIdDataListDict,
@@ -43,6 +44,7 @@ import {
 } from '@/serializers/jsonapi/JsonApiTypes'
 
 import { ContactSerializer, IContactAndMissing } from '@/serializers/jsonapi/ContactSerializer'
+import { AttachmentSerializer } from '@/serializers/jsonapi/AttachmentSerializer'
 
 export interface IMissingGenericDeviceActionData {
   ids: string[]
@@ -54,6 +56,7 @@ export interface IGenericDeviceActionsAndMissing {
 }
 
 export class GenericDeviceActionSerializer {
+  private attachmentSerializer: AttachmentSerializer = new AttachmentSerializer()
   private contactSerializer: ContactSerializer = new ContactSerializer()
   convertJsonApiObjectToModel (jsonApiObject: IJsonApiObject): GenericDeviceAction {
     const data = jsonApiObject.data
@@ -112,14 +115,30 @@ export class GenericDeviceActionSerializer {
       data.id = action.id
     }
     if (action.contact && action.contact.id) {
-      data.relationships.contact = {
-        data: {
-          type: 'contact',
-          id: action.contact.id
-        }
+      const contactRelationship = this.contactSerializer.convertModelToJsonApiRelationshipObject(action.contact)
+      data.relationships = {
+        ...data.relationships,
+        ...contactRelationship
       }
     }
+    // Note: Attachments are not included and must be send to the backend with
+    // a relation to the action after this action was saved
     return data
+  }
+
+  convertModelToJsonApiRelationshipObject (action: IGenericDeviceAction): IJsonApiTypeIdDataListDict {
+    return {
+      generic_device_action: {
+        data: this.convertModelToTupleWithIdAndType(action)
+      }
+    }
+  }
+
+  convertModelToTupleWithIdAndType (action: IGenericDeviceAction): IJsonApiTypeId {
+    return {
+      id: action.id || '',
+      type: 'generic_device_action'
+    }
   }
 
   /**

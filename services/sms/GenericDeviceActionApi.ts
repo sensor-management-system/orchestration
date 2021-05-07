@@ -31,16 +31,20 @@
  */
 import { AxiosInstance } from 'axios'
 
+import { Attachment } from '@/models/Attachment'
 import { GenericDeviceAction } from '@/models/GenericDeviceAction'
+import { GenericDeviceActionAttachmentApi } from '@/services/sms/GenericDeviceActionAttachmentApi'
 import { GenericDeviceActionSerializer } from '@/serializers/jsonapi/GenericDeviceActionSerializer'
 
 export class GenericDeviceActionApi {
   private axiosApi: AxiosInstance
   private serializer: GenericDeviceActionSerializer
+  private attachmentApi: GenericDeviceActionAttachmentApi
 
-  constructor (axiosInstance: AxiosInstance) {
+  constructor (axiosInstance: AxiosInstance, attachmentApi: GenericDeviceActionAttachmentApi) {
     this.axiosApi = axiosInstance
     this.serializer = new GenericDeviceActionSerializer()
+    this.attachmentApi = attachmentApi
   }
 
   async findById (id: string): Promise<GenericDeviceAction> {
@@ -61,7 +65,13 @@ export class GenericDeviceActionApi {
     const url = ''
     const data = this.serializer.convertModelToJsonApiData(action, deviceId)
     const response = await this.axiosApi.post(url, { data })
-    return this.serializer.convertJsonApiObjectToModel(response.data)
+    const savedAction = this.serializer.convertJsonApiObjectToModel(response.data)
+    // save every attachment as an GenericDeviceActionAttachment
+    if (savedAction.id) {
+      const promises = action.attachments.map((attachment: Attachment) => this.attachmentApi.add(savedAction.id as string, attachment))
+      await Promise.all(promises)
+    }
+    return savedAction
   }
 
   async update (deviceId: string, action: GenericDeviceAction): Promise<GenericDeviceAction> {
