@@ -63,7 +63,18 @@ permissions and limitations under the Licence.
           <GenericDeviceActionCard
             v-if="action.isGenericDeviceAction"
             v-model="actions[index]"
-          />
+          >
+            <template #actions>
+              <v-btn
+                :to="'/devices/' + deviceId + '/actions/' + action.id + '/edit'"
+                color="primary"
+                text
+                @click.stop.prevent
+              >
+                Edit
+              </v-btn>
+            </template>
+          </GenericDeviceActionCard>
           <template v-if="action.isDeviceSoftwareUpdateAction">
             <v-card>
               <v-card-subtitle class="pb-0">
