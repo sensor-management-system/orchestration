@@ -37,17 +37,26 @@ permissions and limitations under the Licence.
     <v-card-actions>
       <v-spacer />
       <v-btn
-        v-if="isLoggedIn && !(isAddActionPage)"
+        v-if="isLoggedIn && !(isAddActionPage || isEditActionPage)"
         color="primary"
         small
-        :disabled="isEditActionPage"
         :to="'/devices/' + deviceId + '/actions/new'"
       >
         Add Action
       </v-btn>
     </v-card-actions>
-    <template v-if="isAddActionPage">
+    <template
+      v-if="isAddActionPage"
+    >
       <NuxtChild
+        @input="$fetch"
+      />
+    </template>
+    <template
+      v-else-if="isEditActionPage"
+    >
+      <NuxtChild
+        :value="editedAction"
         @input="$fetch"
       />
     </template>
@@ -598,6 +607,10 @@ export default class DeviceActionsPage extends Vue {
     return this.$route.params.deviceId
   }
 
+  get actionId (): string | undefined {
+    return this.$route.params.actionId
+  }
+
   getActionColor (action: GenericDeviceAction | DeviceSoftwareUpdateAction | DeviceCalibrationAction | DeviceMountAction | DeviceUnmountAction) {
     switch (true) {
       case (action as GenericDeviceAction).isGenericDeviceAction:
@@ -611,6 +624,13 @@ export default class DeviceActionsPage extends Vue {
       case (action as DeviceUnmountAction).isDeviceUnmountAction:
         return 'red'
     }
+  }
+
+  get editedAction (): IAction | undefined {
+    if (!this.actionId) {
+      return
+    }
+    return this.actions.find(action => action.id === this.actionId)
   }
 }
 </script>
