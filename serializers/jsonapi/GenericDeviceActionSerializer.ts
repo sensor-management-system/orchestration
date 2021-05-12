@@ -31,6 +31,7 @@
  */
 import { DateTime } from 'luxon'
 import { GenericDeviceAction, IGenericDeviceAction } from '@/models/GenericDeviceAction'
+import { Attachment } from '@/models/Attachment'
 import {
   IJsonApiDataWithOptionalId,
   IJsonApiObject,
@@ -44,7 +45,7 @@ import {
 } from '@/serializers/jsonapi/JsonApiTypes'
 
 import { ContactSerializer, IContactAndMissing } from '@/serializers/jsonapi/ContactSerializer'
-import { AttachmentSerializer } from '@/serializers/jsonapi/AttachmentSerializer'
+import { GenericDeviceActionAttachmentSerializer } from '@/serializers/jsonapi/GenericDeviceActionAttachmentSerializer'
 
 export interface IMissingGenericDeviceActionData {
   ids: string[]
@@ -56,8 +57,9 @@ export interface IGenericDeviceActionsAndMissing {
 }
 
 export class GenericDeviceActionSerializer {
-  private attachmentSerializer: AttachmentSerializer = new AttachmentSerializer()
+  private attachmentSerializer: GenericDeviceActionAttachmentSerializer = new GenericDeviceActionAttachmentSerializer()
   private contactSerializer: ContactSerializer = new ContactSerializer()
+
   convertJsonApiObjectToModel (jsonApiObject: IJsonApiObject): GenericDeviceAction {
     const data = jsonApiObject.data
     const included = jsonApiObject.included || []
@@ -80,6 +82,13 @@ export class GenericDeviceActionSerializer {
     const contactWithMissing: IContactAndMissing = this.contactSerializer.convertJsonApiRelationshipsSingleModel(relationships, included)
     if (contactWithMissing.contact) {
       newEntry.contact = contactWithMissing.contact
+    }
+
+    // @TODO: check the types
+    const attachments: Attachment[] = this.attachmentSerializer.convertJsonApiRelationshipsModelList(relationships, included)
+    if (attachments.length) {
+      newEntry.attachments = attachments
+      console.log(newEntry.attachments)
     }
 
     return newEntry

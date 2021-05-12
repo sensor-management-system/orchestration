@@ -178,7 +178,10 @@ export class DeviceApi {
     const url = deviceId + '/generic-device-actions'
     const params = {
       'page[size]': 10000,
-      include: 'contact'
+      include: [
+        'contact',
+        'generic_device_action_attachments.attachment'
+      ].join(',')
     }
     return this.axiosApi.get(url, { params }).then((rawServerResponse) => {
       return new GenericDeviceActionSerializer().convertJsonApiObjectListToModelList(rawServerResponse.data)

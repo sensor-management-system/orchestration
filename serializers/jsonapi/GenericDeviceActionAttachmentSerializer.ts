@@ -30,9 +30,19 @@
  * permissions and limitations under the Licence.
  */
 import { Attachment } from '@/models/Attachment'
-import { IJsonApiDataWithOptionalId } from '@/serializers/jsonapi/JsonApiTypes'
+import {
+  IJsonApiDataWithId,
+  IJsonApiDataWithOptionalId,
+  IJsonApiTypeIdDataList,
+  IJsonApiTypeIdDataListDict
+
+} from '@/serializers/jsonapi/JsonApiTypes'
+import { IAttachmentsAndMissing } from '@/serializers/jsonapi/AttachmentSerializer'
+import { DeviceAttachmentSerializer } from '@/serializers/jsonapi/DeviceAttachmentSerializer'
 
 export class GenericDeviceActionAttachmentSerializer {
+  private attachmentSerializer: DeviceAttachmentSerializer = new DeviceAttachmentSerializer()
+
   convertModelToJsonApiData (attachment: Attachment, actionId: string): IJsonApiDataWithOptionalId {
     /**
      * 2021-05-07 mha:
@@ -62,5 +72,48 @@ export class GenericDeviceActionAttachmentSerializer {
       }
     }
     return data
+  }
+
+  convertJsonApiRelationshipsModelList (relationships: IJsonApiTypeIdDataListDict, included: IJsonApiDataWithId[]): Attachment[] {
+
+    const actionAttachmentIds = []
+    if (relationships.generic_device_action_attachments) {
+      const attachmentObject = relationships.generic_device_action_attachments as IJsonApiTypeIdDataList
+      if (attachmentObject.data && attachmentObject.data.length > 0) {
+        for (const relationShipAttachmentData of attachmentObject.data) {
+          const actionAttachmentId = relationShipAttachmentData.id
+          actionAttachmentIds.push(actionAttachmentId)
+        }
+      }
+    }
+
+    const attachmentIds = []
+    if (included && included.length > 0) {
+      for (const includedEntry of included) {
+        if (includedEntry.type === 'generic_device_action_attachment') {
+          const actionAttachmentId = includedEntry.id
+          if (actionAttachmentIds.includes(actionAttachmentId)) {
+            if (includedEntry.relationships.attachment && includedEntry.relationships.attachment.data && 'id' in includedEntry.relationships.attachment.data) {
+              attachmentIds.push(includedEntry.relationships.attachment.data.id)
+            }
+          }
+        }
+      }
+    }
+
+    const attachments: Attachment[] = []
+    if (included && included.length > 0) {
+      for (const includedEntry of included) {
+        if (includedEntry.type === 'device_attachment') {
+          const attachmentId = includedEntry.id
+          if (attachmentIds.includes(attachmentId)) {
+            const attachment = this.attachmentSerializer.convertJsonApiDataToModel(includedEntry)
+            attachments.push(attachment)
+          }
+        }
+      }
+    }
+
+    return attachments
   }
 }

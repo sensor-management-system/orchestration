@@ -50,7 +50,10 @@ export class GenericDeviceActionApi {
   async findById (id: string): Promise<GenericDeviceAction> {
     const response = await this.axiosApi.get(id, {
       params: {
-        include: 'contact'
+        include: [
+          'contact',
+          'generic_device_action_attachments.device_attachment'
+        ].join(',')
       }
     })
     const data = response.data
@@ -78,8 +81,23 @@ export class GenericDeviceActionApi {
     if (!action.id) {
       throw new Error('no id for the GenericDeviceAction')
     }
+    // load the stored action to get a list of the attachments before the update
+    await this.findRelatedGenericDeviceActionAttachments(action.id)
+
     const data = this.serializer.convertModelToJsonApiData(action, deviceId)
     const response = await this.axiosApi.patch(action.id, { data })
     return this.serializer.convertJsonApiObjectToModel(response.data)
+  }
+
+  findRelatedGenericDeviceActionAttachments (actionId: string): Promise<GenericDeviceAction[]> {
+    const url = actionId + '/generic-device-action-attachments'
+    const params = {
+      'page[size]': 10000,
+      include: 'attachment'
+    }
+    return this.axiosApi.get(url, { params }).then((rawServerResponse) => {
+      console.log(rawServerResponse)
+      //return new GenericDeviceActionSerializer().convertJsonApiObjectListToModelList(rawServerResponse.data)
+    })
   }
 }

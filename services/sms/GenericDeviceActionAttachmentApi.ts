@@ -48,4 +48,8 @@ export class GenericDeviceActionAttachmentApi {
     const data = this.serializer.convertModelToJsonApiData(attachment, actionId)
     await this.axiosApi.post(url, { data })
   }
+
+  async delete (actionId: string): Promise<void> {
+    return await this.axiosApi.delete<string, void>(actionId)
+  }
 }
