@@ -40,15 +40,14 @@ permissions and limitations under the Licence.
       <v-row
         no-gutters
       >
-        <v-col
-          cols="11"
-        >
+        <v-col>
           {{ value.contact.toString() }}
         </v-col>
         <v-col
           align-self="end"
           class="text-right"
         >
+          <slot name="actions" />
           <v-btn
             icon
             @click.stop.prevent="show()"
