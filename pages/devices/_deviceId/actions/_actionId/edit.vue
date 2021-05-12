@@ -122,7 +122,11 @@ export default class DeviceActionEditPage extends Vue {
   }
 
   save (): void {
-    this.$router.push('/devices/' + this.deviceId + '/actions', () => this.$emit('input', this.valueCopy))
+    this.$api.genericDeviceActions.update(this.deviceId, this.valueCopy).then((action: GenericDeviceAction) => {
+      this.$router.push('/devices/' + this.deviceId + '/actions', () => this.$emit('input', action))
+    }).catch(() => {
+      this.$store.commit('snackbar/setError', 'Failed to save the action')
+    })
   }
 
   @Watch('value', { immediate: true, deep: true })
