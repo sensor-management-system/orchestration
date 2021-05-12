@@ -61,6 +61,7 @@ permissions and limitations under the Licence.
     <GenericDeviceActionForm
       ref="genericDeviceActionForm"
       v-model="valueCopy"
+      :attachments="attachments"
     />
     <v-card-actions>
       <v-spacer />
@@ -88,6 +89,7 @@ permissions and limitations under the Licence.
 <script lang="ts">
 import { Component, Vue, Prop, Watch } from 'nuxt-property-decorator'
 
+import { Attachment } from '@/models/Attachment'
 import { GenericDeviceAction } from '@/models/GenericDeviceAction'
 
 import GenericDeviceActionForm from '@/components/GenericDeviceActionForm.vue'
@@ -99,6 +101,7 @@ import GenericDeviceActionForm from '@/components/GenericDeviceActionForm.vue'
 })
 export default class DeviceActionEditPage extends Vue {
   private valueCopy: GenericDeviceAction = new GenericDeviceAction()
+  private attachments: Attachment[] = []
 
   @Prop({
     default: () => new GenericDeviceAction(),
@@ -110,6 +113,14 @@ export default class DeviceActionEditPage extends Vue {
   created () {
     if (this.value) {
       this.valueCopy = GenericDeviceAction.createFromObject(this.value)
+    }
+  }
+
+  async fetch (): Promise<any> {
+    try {
+      this.attachments = await this.$api.devices.findRelatedDeviceAttachments(this.deviceId)
+    } catch (_) {
+      this.$store.commit('snackbar/setError', 'Failed to fetch attachments')
     }
   }
 
