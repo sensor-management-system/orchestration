@@ -124,7 +124,7 @@ export default class GenericDeviceActionForm extends Vue {
 
   created () {
     // create a copy of the original value on which all operations will be applied
-    this.actionCopy = GenericDeviceAction.createFromObject(this.value)
+    this.createActionCopy(this.value)
   }
 
   get action (): GenericDeviceAction {
@@ -235,10 +235,14 @@ export default class GenericDeviceActionForm extends Vue {
     return this.checkValidationOfDates() && (this.$refs.commonForm as Vue & { isValid: () => boolean }).isValid()
   }
 
+  createActionCopy (action: GenericDeviceAction): void {
+    this.actionCopy = GenericDeviceAction.createFromObject(action)
+  }
+
   @Watch('value', { immediate: true, deep: true })
   // @ts-ignore
   onValueChanged (val: GenericDeviceAction) {
-    this.actionCopy = GenericDeviceAction.createFromObject(val)
+    this.createActionCopy(val)
   }
 }
 </script>
