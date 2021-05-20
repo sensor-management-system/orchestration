@@ -40,7 +40,6 @@ import {
   IJsonApiTypeIdAttributes,
   IJsonApiTypeIdDataList,
   IJsonApiTypeIdDataListDict,
-  IJsonApiTypeIdAttributesWithOptionalRelationships,
   IJsonApiDataWithId
 } from '@/serializers/jsonapi/JsonApiTypes'
 
@@ -71,7 +70,7 @@ export class GenericDeviceActionSerializer {
     return this.convertJsonApiDataToModel(data, included)
   }
 
-  convertJsonApiDataToModel (jsonApiData: IJsonApiTypeIdAttributesWithOptionalRelationships, included: IJsonApiDataWithId[]): GenericDeviceAction {
+  convertJsonApiDataToModel (jsonApiData: IJsonApiTypeIdAttributes, included: IJsonApiDataWithId[]): GenericDeviceAction {
     const attributes = jsonApiData.attributes
     const newEntry = GenericDeviceAction.createEmpty()
 

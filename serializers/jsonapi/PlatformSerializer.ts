@@ -37,8 +37,7 @@ import {
   IJsonApiDataWithOptionalId,
   IJsonApiObject,
   IJsonApiObjectList,
-  IJsonApiTypeIdAttributes,
-  IJsonApiTypeIdAttributesWithOptionalRelationships
+  IJsonApiTypeIdAttributes
 } from '@/serializers/jsonapi/JsonApiTypes'
 
 import { IMissingAttachmentData } from '@/serializers/jsonapi/AttachmentSerializer'
@@ -65,7 +64,7 @@ export class PlatformSerializer {
     return this.convertJsonApiDataToModel(jsonApiObject.data, included)
   }
 
-  convertJsonApiDataToModel (jsonApiData: IJsonApiDataWithId | IJsonApiTypeIdAttributesWithOptionalRelationships, included: IJsonApiTypeIdAttributes[]): IPlatformWithMeta {
+  convertJsonApiDataToModel (jsonApiData: IJsonApiDataWithId | IJsonApiTypeIdAttributes, included: IJsonApiTypeIdAttributes[]): IPlatformWithMeta {
     const result: Platform = Platform.createEmpty()
 
     const attributes = jsonApiData.attributes

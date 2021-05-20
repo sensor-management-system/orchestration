@@ -38,8 +38,7 @@ import {
   IJsonApiDataWithOptionalId,
   IJsonApiObject,
   IJsonApiObjectList,
-  IJsonApiTypeIdAttributes,
-  IJsonApiTypeIdAttributesWithOptionalRelationships
+  IJsonApiTypeIdAttributes
 } from '@/serializers/jsonapi/JsonApiTypes'
 
 import { IMissingAttachmentData } from '@/serializers/jsonapi/AttachmentSerializer'
@@ -78,7 +77,7 @@ export class DeviceSerializer {
     return this.convertJsonApiDataToModel(jsonApiObject.data, included)
   }
 
-  convertJsonApiDataToModel (jsonApiData: IJsonApiDataWithId | IJsonApiTypeIdAttributesWithOptionalRelationships, included: IJsonApiTypeIdAttributes[]): IDeviceWithMeta {
+  convertJsonApiDataToModel (jsonApiData: IJsonApiDataWithId | IJsonApiTypeIdAttributes, included: IJsonApiTypeIdAttributes[]): IDeviceWithMeta {
     const result: Device = new Device()
 
     const attributes = jsonApiData.attributes
