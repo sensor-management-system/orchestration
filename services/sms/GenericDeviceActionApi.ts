@@ -35,7 +35,6 @@ import { Attachment } from '@/models/Attachment'
 import { GenericDeviceAction } from '@/models/GenericDeviceAction'
 import { GenericDeviceActionAttachmentApi } from '@/services/sms/GenericDeviceActionAttachmentApi'
 import { GenericDeviceActionSerializer } from '@/serializers/jsonapi/GenericDeviceActionSerializer'
-import { IJsonApiTypeIdData } from '@/serializers/jsonapi/JsonApiTypes'
 
 export class GenericDeviceActionApi {
   private axiosApi: AxiosInstance
