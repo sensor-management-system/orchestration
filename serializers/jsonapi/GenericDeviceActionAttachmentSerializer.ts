@@ -37,7 +37,6 @@ import {
   IJsonApiTypeIdDataListDict
 
 } from '@/serializers/jsonapi/JsonApiTypes'
-import { IAttachmentsAndMissing } from '@/serializers/jsonapi/AttachmentSerializer'
 import { DeviceAttachmentSerializer } from '@/serializers/jsonapi/DeviceAttachmentSerializer'
 
 export class GenericDeviceActionAttachmentSerializer {

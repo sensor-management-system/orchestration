@@ -41,8 +41,7 @@ import {
   IJsonApiTypeIdDataList,
   IJsonApiTypeIdDataListDict,
   IJsonApiTypeIdAttributesWithOptionalRelationships,
-  IJsonApiDataWithId,
-  IJsonApiDataIdWithOptionalRelationships
+  IJsonApiDataWithId
 } from '@/serializers/jsonapi/JsonApiTypes'
 
 import { ContactSerializer, IContactAndMissing } from '@/serializers/jsonapi/ContactSerializer'
