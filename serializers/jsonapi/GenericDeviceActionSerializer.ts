@@ -41,7 +41,8 @@ import {
   IJsonApiTypeIdDataList,
   IJsonApiTypeIdDataListDict,
   IJsonApiTypeIdAttributesWithOptionalRelationships,
-  IJsonApiDataWithId
+  IJsonApiDataWithId,
+  IJsonApiDataIdWithOptionalRelationships
 } from '@/serializers/jsonapi/JsonApiTypes'
 
 import { ContactSerializer, IContactAndMissing } from '@/serializers/jsonapi/ContactSerializer'
@@ -66,7 +67,7 @@ export class GenericDeviceActionSerializer {
     return this.convertJsonApiDataToModel(data, included)
   }
 
-  convertJsonApiDataToModel (jsonApiData: IJsonApiTypeIdAttributesWithOptionalRelationships, included: IJsonApiTypeIdAttributes[]): GenericDeviceAction {
+  convertJsonApiDataToModel (jsonApiData: IJsonApiTypeIdAttributesWithOptionalRelationships, included: IJsonApiDataWithId[]): GenericDeviceAction {
     const attributes = jsonApiData.attributes
     const newEntry = GenericDeviceAction.createEmpty()
 
@@ -84,11 +85,9 @@ export class GenericDeviceActionSerializer {
       newEntry.contact = contactWithMissing.contact
     }
 
-    // @TODO: check the types
     const attachments: Attachment[] = this.attachmentSerializer.convertJsonApiRelationshipsModelList(relationships, included)
     if (attachments.length) {
       newEntry.attachments = attachments
-      console.log(newEntry.attachments)
     }
 
     return newEntry
