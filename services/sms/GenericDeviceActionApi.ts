@@ -101,7 +101,6 @@ export class GenericDeviceActionApi {
           return
         }
         if (!i.relationships.attachment || !i.relationships.attachment.data || !i.relationships.attachment.data.id) {
-          console.log('return')
           return
         }
         const attachmentId: string = i.relationships.attachment.data.id
