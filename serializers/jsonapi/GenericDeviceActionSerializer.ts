@@ -56,6 +56,11 @@ export interface IGenericDeviceActionsAndMissing {
   missing: IMissingGenericDeviceActionData
 }
 
+export interface IGenericDeviceActionAttachmentRelation {
+  genericDeviceActionAttachmentId: string
+  attachmentId: string
+}
+
 export class GenericDeviceActionSerializer {
   private attachmentSerializer: GenericDeviceActionAttachmentSerializer = new GenericDeviceActionAttachmentSerializer()
   private contactSerializer: ContactSerializer = new ContactSerializer()
@@ -199,5 +204,26 @@ export class GenericDeviceActionSerializer {
         ids: missingDataForActionIds
       }
     }
+  }
+
+  convertJsonApiIncludedGenericDeviceActionAttachmentsToIdList (included: IJsonApiDataWithOptionalId[]): IGenericDeviceActionAttachmentRelation[] {
+    const linkedAttachments: IGenericDeviceActionAttachmentRelation[] = []
+    included.forEach((i) => {
+      if (!i.id) {
+        return
+      }
+      if (i.type !== 'generic_device_action_attachment') {
+        return
+      }
+      if (!i.relationships.attachment || !i.relationships.attachment.data || !(i.relationships.attachment.data as IJsonApiTypeId & { id: string }).id) {
+        return
+      }
+      const attachmentId: string = (i.relationships.attachment.data as IJsonApiTypeId & { id: string }).id
+      linkedAttachments.push({
+        genericDeviceActionAttachmentId: i.id,
+        attachmentId
+      })
+    })
+    return linkedAttachments
   }
 }

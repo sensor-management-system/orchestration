@@ -93,19 +93,13 @@ export class GenericDeviceActionApi {
     const attResponseData = attRawResponse.data
     const included = attResponseData.included
 
-    // TODO: move this to the serializer?
+    // get the relations between attachments and generic device action attachments
     const linkedAttachments: { [attachmentId: string]: string } = {}
     if (included) {
-      included.forEach((i: { id: string, type: string, relationships: { attachment?: IJsonApiTypeIdData} }) => {
-        if (i.type !== 'generic_device_action_attachment') {
-          return
-        }
-        if (!i.relationships.attachment || !i.relationships.attachment.data || !i.relationships.attachment.data.id) {
-          return
-        }
-        const attachmentId: string = i.relationships.attachment.data.id
-        const genericDeviceActionAttachmentId: string = i.id
-        linkedAttachments[attachmentId] = genericDeviceActionAttachmentId
+      const relations = this.serializer.convertJsonApiIncludedGenericDeviceActionAttachmentsToIdList(included)
+      // convert to object to gain faster access to its members
+      relations.forEach((rel) => {
+        linkedAttachments[rel.attachmentId] = rel.genericDeviceActionAttachmentId
       })
     }
 
