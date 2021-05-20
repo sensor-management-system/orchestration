@@ -49,7 +49,7 @@ export class GenericDeviceActionAttachmentApi {
     await this.axiosApi.post(url, { data })
   }
 
-  async delete (actionId: string): Promise<void> {
-    return await this.axiosApi.delete<string, void>(actionId)
+  async delete (id: string): Promise<void> {
+    return await this.axiosApi.delete<string, void>(id)
   }
 }
