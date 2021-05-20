@@ -233,6 +233,13 @@ export interface IJsonApiDataWithId extends IJsonApiData {
     id: string
 }
 
+export interface IJsonApiDataIdWithOptionalRelationships {
+    id: string
+    attributes: IJsonApiAttributes
+    type: string
+    relationships?: IJsonApiTypeIdDataListDict
+}
+
 export interface IJsonApiDataWithIdAndLinks extends IJsonApiDataWithId {
     links: IJsonApiLinkDict
 }
