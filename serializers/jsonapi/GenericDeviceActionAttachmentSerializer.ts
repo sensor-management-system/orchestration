@@ -31,7 +31,7 @@
  */
 import { Attachment } from '@/models/Attachment'
 import {
-  IJsonApiDataWithId,
+  IJsonApiTypeIdAttributes,
   IJsonApiDataWithOptionalId,
   IJsonApiTypeIdDataList,
   IJsonApiTypeIdDataListDict
@@ -73,7 +73,7 @@ export class GenericDeviceActionAttachmentSerializer {
     return data
   }
 
-  convertJsonApiRelationshipsModelList (relationships: IJsonApiTypeIdDataListDict, included: IJsonApiDataWithId[]): Attachment[] {
+  convertJsonApiRelationshipsModelList (relationships: IJsonApiTypeIdDataListDict, included: IJsonApiTypeIdAttributes[]): Attachment[] {
     const actionAttachmentIds = []
     if (relationships.generic_device_action_attachments) {
       const attachmentObject = relationships.generic_device_action_attachments as IJsonApiTypeIdDataList
@@ -91,7 +91,7 @@ export class GenericDeviceActionAttachmentSerializer {
         if (includedEntry.type === 'generic_device_action_attachment') {
           const actionAttachmentId = includedEntry.id
           if (actionAttachmentIds.includes(actionAttachmentId)) {
-            if (includedEntry.relationships.attachment && includedEntry.relationships.attachment.data && 'id' in includedEntry.relationships.attachment.data) {
+            if (includedEntry.relationships && includedEntry.relationships.attachment && includedEntry.relationships.attachment.data && 'id' in includedEntry.relationships.attachment.data) {
               attachmentIds.push(includedEntry.relationships.attachment.data.id)
             }
           }

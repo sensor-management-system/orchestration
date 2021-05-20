@@ -70,7 +70,7 @@ export class GenericDeviceActionSerializer {
     return this.convertJsonApiDataToModel(data, included)
   }
 
-  convertJsonApiDataToModel (jsonApiData: IJsonApiTypeIdAttributes, included: IJsonApiDataWithId[]): GenericDeviceAction {
+  convertJsonApiDataToModel (jsonApiData: IJsonApiTypeIdAttributes, included: IJsonApiTypeIdAttributes[]): GenericDeviceAction {
     const attributes = jsonApiData.attributes
     const newEntry = GenericDeviceAction.createEmpty()
 
