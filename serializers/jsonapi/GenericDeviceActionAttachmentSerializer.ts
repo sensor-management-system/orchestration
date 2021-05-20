@@ -75,7 +75,6 @@ export class GenericDeviceActionAttachmentSerializer {
   }
 
   convertJsonApiRelationshipsModelList (relationships: IJsonApiTypeIdDataListDict, included: IJsonApiDataWithId[]): Attachment[] {
-
     const actionAttachmentIds = []
     if (relationships.generic_device_action_attachments) {
       const attachmentObject = relationships.generic_device_action_attachments as IJsonApiTypeIdDataList
