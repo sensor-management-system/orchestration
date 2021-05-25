@@ -262,6 +262,8 @@ export interface IJsonApiObjectListWithLinks {
     data: IJsonApiDataWithIdAndLinks[]
 }
 
+// --- 8< -------- *snipp* --------- 8< -----
+
 /**
  * 2021-05-25 mha:
  * new approach to give the JSONApi types less confusing names
@@ -301,8 +303,6 @@ export interface IJsonApiEntity {
   links?: IJsonApiLinkDict
   relationships?: IJsonApiRelationships
 }
-
-// --- 8< -------- *snipp* --------- 8< -----
 
 /**
  * a variation of the entity type without id
