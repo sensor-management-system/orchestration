@@ -284,6 +284,9 @@ describe('ContactSerializer', () => {
     it('should construct a list of contacts - and store missing ids', () => {
       const relationships = {
         contacts: {
+          links: {
+            related: '/foo'
+          },
           data: [{
             id: '1',
             type: 'contact'

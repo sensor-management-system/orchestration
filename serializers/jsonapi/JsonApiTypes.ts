@@ -193,14 +193,15 @@
 export type IJsonApiAttributes = {[idx: string]: any }
 
 export interface IJsonApiLinkDict {
-    self: string
+  self?: string
+  related?: string
 }
 
 export type IJsonApiNestedElement = {[idx: string]: any}
 
 export interface IJsonApiTypeId {
-    type: string
-    id: string
+  type: string
+  id: string
 }
 
 export interface IJsonApiTypeIdData {
@@ -245,16 +246,106 @@ export interface IJsonApiTypeIdAttributesWithOptionalRelationships extends IJson
     relationships?: IJsonApiTypeIdDataListDict
 }
 
+// mha
 export interface IJsonApiObject {
-    data: IJsonApiDataWithId
-    included: IJsonApiTypeIdAttributes[]
+  data: IJsonApiDataWithId
+  included: IJsonApiEntity[]
 }
 
+// mha
 export interface IJsonApiObjectList {
-    data: IJsonApiDataWithId[],
-    included: IJsonApiTypeIdAttributes[]
+  data: IJsonApiDataWithId[]
+  included: IJsonApiEntity[]
 }
 
 export interface IJsonApiObjectListWithLinks {
     data: IJsonApiDataWithIdAndLinks[]
+}
+
+/**
+ * 2021-05-25 mha:
+ * new approach to give the JSONApi types less confusing names
+ */
+export interface IJsonApiMeta {
+  version?: string
+}
+
+export interface IJsonApiPaginationLinks {
+  first: string
+  last: string
+  next: string
+  prev: string
+}
+
+export interface IJsonApiEntityEnvelope {
+  data: IJsonApiEntity
+  included: IJsonApiEntity[]
+  links?: IJsonApiLinkDict,
+  jsonapi?: IJsonApiMeta
+}
+
+export interface IJsonApiEntityListEnvelope {
+  data: IJsonApiEntity[]
+  included: IJsonApiEntity[]
+  links?: IJsonApiPaginationLinks,
+  jsonapi?: IJsonApiMeta
+}
+
+/**
+ * this is the main type, the actual object the user is interested in
+ */
+export interface IJsonApiEntity {
+  id: string
+  type: string
+  attributes: IJsonApiAttributes
+  links?: IJsonApiLinkDict
+  relationships?: IJsonApiRelationships
+}
+
+// --- 8< -------- *snipp* --------- 8< -----
+
+/**
+ * a variation of the entity type without id
+ */
+export type IJsonApiEntityWithoutId = Omit<IJsonApiEntity, 'id'>
+/**
+ * a variation of the entity type with optional id
+ */
+export type IJsonApiEntityWithOptionalId = Omit<IJsonApiEntity, 'id'> & { id?: string }
+/**
+ * a variation of the entity type stripped down to just id and type
+ */
+export type IJsonApiEntityWithoutDetails = Pick<IJsonApiEntity, 'id' | 'type'>
+
+/**
+ * a stripped down entity encapsulated in a data property
+ */
+export interface IJsonApiEntityWithoutDetailsDataDict {
+  data: IJsonApiEntityWithoutDetails
+}
+/**
+ * a stripped down entity encapsulated in a data property and wrapped in an
+ * user defined entity (usually the type names are used)
+ */
+export type IJsonApiTypedEntityWithoutDetailsDataDict = {[idx: string]: IJsonApiEntityWithoutDetailsDataDict}
+
+/**
+ * a stripped down list of entities encapsulated in a data property
+ */
+export interface IJsonApiEntityWithoutDetailsDataDictList {
+  data: IJsonApiEntityWithoutDetails[]
+}
+/**
+ * a stripped down list of entities encapsulated in a data property and wrapped in an
+ * user defined entity (usually the type names are used)
+ */
+export type IJsonApiTypedEntityWithoutDetailsDataDictList = {[idx: string]: IJsonApiEntityWithoutDetailsDataDictList}
+
+export interface IJsonApiRelationshipsData {
+  links: IJsonApiLinkDict
+  data: IJsonApiEntityWithoutDetails | IJsonApiEntityWithoutDetails[]
+}
+
+export interface IJsonApiRelationships {
+  [idx: string]: IJsonApiRelationshipsData
 }
