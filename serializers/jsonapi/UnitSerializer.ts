@@ -31,17 +31,20 @@
  */
 import { Unit } from '@/models/Unit'
 
-import { IJsonApiObjectListWithLinks, IJsonApiDataWithIdAndLinks } from '@/serializers/jsonapi/JsonApiTypes'
+import {
+  IJsonApiEntityListEnvelope,
+  IJsonApiEntity
+} from '@/serializers/jsonapi/JsonApiTypes'
 
 export class UnitSerializer {
-  convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiObjectListWithLinks): Unit[] {
+  convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiEntityListEnvelope): Unit[] {
     return jsonApiObjectList.data.map(this.convertJsonApiDataToModel.bind(this))
   }
 
-  convertJsonApiDataToModel (jsonApiData: IJsonApiDataWithIdAndLinks): Unit {
+  convertJsonApiDataToModel (jsonApiData: IJsonApiEntity): Unit {
     const id = jsonApiData.id.toString()
     const name = jsonApiData.attributes.term
-    const url = jsonApiData.links.self
+    const url = jsonApiData.links?.self || ''
     const definition = jsonApiData.attributes.definition
 
     return Unit.createWithData(id, name, url, definition)
