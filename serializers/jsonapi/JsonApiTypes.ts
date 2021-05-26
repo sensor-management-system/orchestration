@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020
+ * Copyright (C) 2020, 2021
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -188,90 +188,21 @@
   we currenlty work with.
 
   There may also be schemas out there for a json api as well.
+
+  More info is available at https://jsonapi.org/format/
 */
 
-export type IJsonApiAttributes = {[idx: string]: any }
-
-export interface IJsonApiLinkDict {
-  self?: string
-  related?: string
-}
-
-export type IJsonApiNestedElement = {[idx: string]: any}
-
-export interface IJsonApiTypeId {
-  type: string
-  id: string
-}
-
-export interface IJsonApiTypeIdData {
-  data: IJsonApiTypeId
-}
-
-export interface IJsonApiTypeIdDataList {
-    data: IJsonApiTypeId[]
-}
-
-export type IJsonApiTypeIdDataListDict = {[idx: string]: IJsonApiTypeIdDataList | IJsonApiTypeIdData}
-
-export interface IJsonApiData {
-    attributes: IJsonApiAttributes
-    type: string
-    relationships: IJsonApiTypeIdDataListDict
-}
-
-export interface IJsonApiDataWithOptionalId extends IJsonApiData {
-    id?: string
-}
-
-export interface IJsonApiDataWithOptionalIdWithoutRelationships {
-    id?: string
-    attributes: IJsonApiAttributes
-    type: string
-}
-
-export interface IJsonApiDataWithId extends IJsonApiData {
-    id: string
-}
-
-export interface IJsonApiDataWithIdAndLinks extends IJsonApiDataWithId {
-    links: IJsonApiLinkDict
-}
-
-export interface IJsonApiTypeIdAttributes extends IJsonApiTypeId {
-    attributes: IJsonApiAttributes
-}
-
-export interface IJsonApiTypeIdAttributesWithOptionalRelationships extends IJsonApiTypeIdAttributes {
-    relationships?: IJsonApiTypeIdDataListDict
-}
-
-// mha
-export interface IJsonApiObject {
-  data: IJsonApiDataWithId
-  included: IJsonApiEntity[]
-}
-
-// mha
-export interface IJsonApiObjectList {
-  data: IJsonApiDataWithId[]
-  included: IJsonApiEntity[]
-}
-
-export interface IJsonApiObjectListWithLinks {
-    data: IJsonApiDataWithIdAndLinks[]
-}
-
-// --- 8< -------- *snipp* --------- 8< -----
-
 /**
- * 2021-05-25 mha:
- * new approach to give the JSONApi types less confusing names
+ * some metadata object of the JSON API response
  */
 export interface IJsonApiMeta {
   version?: string
 }
 
+/**
+ * when pagination is used in entity lists, those links are delivered for the
+ * first, last, next and previous resultset
+ */
 export interface IJsonApiPaginationLinks {
   first: string
   last: string
@@ -279,19 +210,18 @@ export interface IJsonApiPaginationLinks {
   prev: string
 }
 
-export interface IJsonApiEntityEnvelope {
-  data: IJsonApiEntity
-  included: IJsonApiEntity[]
-  links?: IJsonApiLinkDict,
-  jsonapi?: IJsonApiMeta
+/**
+ * an object holding links to the entity itself and|or related entities
+ */
+export interface IJsonApiLinkDict {
+  self?: string
+  related?: string
 }
 
-export interface IJsonApiEntityListEnvelope {
-  data: IJsonApiEntity[]
-  included: IJsonApiEntity[]
-  links?: IJsonApiPaginationLinks,
-  jsonapi?: IJsonApiMeta
-}
+/**
+ * a dictionary of the entities attributes
+ */
+export type IJsonApiAttributes = {[idx: string]: any }
 
 /**
  * this is the main type, the actual object the user is interested in
@@ -301,6 +231,7 @@ export interface IJsonApiEntity {
   type: string
   attributes: IJsonApiAttributes
   links?: IJsonApiLinkDict
+  // eslint-disable-next-line no-use-before-define
   relationships?: IJsonApiRelationships
 }
 
@@ -308,14 +239,38 @@ export interface IJsonApiEntity {
  * a variation of the entity type without id
  */
 export type IJsonApiEntityWithoutId = Omit<IJsonApiEntity, 'id'>
+
 /**
  * a variation of the entity type with optional id
  */
 export type IJsonApiEntityWithOptionalId = Omit<IJsonApiEntity, 'id'> & { id?: string }
+
 /**
  * a variation of the entity type stripped down to just id and type
  */
 export type IJsonApiEntityWithoutDetails = Pick<IJsonApiEntity, 'id' | 'type'>
+
+/**
+ * the object in which the entity is wrapped in, usually used by the JSON API
+ * response, enriched with additional meta data
+ */
+export interface IJsonApiEntityEnvelope {
+  data: IJsonApiEntity
+  included: IJsonApiEntity[]
+  links?: IJsonApiLinkDict,
+  jsonapi?: IJsonApiMeta
+}
+
+/**
+ * the list of object in which the entity is wrapped in, usually used by the
+ * JSON API response, enriched with additional meta data
+ */
+export interface IJsonApiEntityListEnvelope {
+  data: IJsonApiEntity[]
+  included: IJsonApiEntity[]
+  links?: IJsonApiPaginationLinks,
+  jsonapi?: IJsonApiMeta
+}
 
 /**
  * a stripped down entity encapsulated in a data property
@@ -323,6 +278,7 @@ export type IJsonApiEntityWithoutDetails = Pick<IJsonApiEntity, 'id' | 'type'>
 export interface IJsonApiEntityWithoutDetailsDataDict {
   data: IJsonApiEntityWithoutDetails
 }
+
 /**
  * a stripped down entity encapsulated in a data property and wrapped in an
  * user defined entity (usually the type names are used)
@@ -335,17 +291,25 @@ export type IJsonApiTypedEntityWithoutDetailsDataDict = {[idx: string]: IJsonApi
 export interface IJsonApiEntityWithoutDetailsDataDictList {
   data: IJsonApiEntityWithoutDetails[]
 }
+
 /**
  * a stripped down list of entities encapsulated in a data property and wrapped in an
  * user defined entity (usually the type names are used)
  */
 export type IJsonApiTypedEntityWithoutDetailsDataDictList = {[idx: string]: IJsonApiEntityWithoutDetailsDataDictList}
 
+/**
+ * relationships of an entity are put into this object
+ */
 export interface IJsonApiRelationshipsData {
   links?: IJsonApiLinkDict
   data: IJsonApiEntityWithoutDetails | IJsonApiEntityWithoutDetails[]
 }
 
+/**
+ * a dict which holds the actual relationships of an entity per type, which is
+ * used as an index here
+ */
 export interface IJsonApiRelationships {
   [idx: string]: IJsonApiRelationshipsData
 }
