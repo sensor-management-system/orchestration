@@ -34,17 +34,17 @@ import { Attachment } from '@/models/Attachment'
 import { Contact } from '@/models/Contact'
 import { IAction } from '@/models/Action'
 
-export interface IGenericDeviceAction extends IAction {
+export interface IGenericAction extends IAction {
   actionTypeName: string
   actionTypeUrl: string
   beginDate: DateTime | null
   endDate: DateTime | null
   contact: Contact | null
   attachments: Attachment[]
-  isGenericDeviceAction: boolean
+  isGenericAction: boolean
 }
 
-export class GenericDeviceAction implements IGenericDeviceAction {
+export class GenericAction implements IGenericAction {
   private _id: string | null = null
   private _description: string = ''
   private _actionTypeName: string = ''
@@ -58,21 +58,21 @@ export class GenericDeviceAction implements IGenericDeviceAction {
    * returns an empty instance
    *
    * @static
-   * @return {GenericDeviceAction} an empty instance
+   * @return {GenericAction} an empty instance
    */
-  static createEmpty (): GenericDeviceAction {
-    return new GenericDeviceAction()
+  static createEmpty (): GenericAction {
+    return new GenericAction()
   }
 
   /**
-   * creates an instance from an existing IGenericDeviceAction-like object
+   * creates an instance from an existing IGenericAction-like object
    *
    * @static
-   * @param {IGenericDeviceAction} someObject - an IGenericDeviceAction like object
-   * @return {GenericDeviceAction} a cloned instance of the original object
+   * @param {IGenericAction} someObject - an IGenericAction like object
+   * @return {GenericAction} a cloned instance of the original object
    */
-  static createFromObject (someObject: IGenericDeviceAction) : GenericDeviceAction {
-    const action = new GenericDeviceAction()
+  static createFromObject (someObject: IGenericAction) : GenericAction {
+    const action = new GenericAction()
     action.id = someObject.id
     action.description = someObject.description
     action.actionTypeName = someObject.actionTypeName
@@ -150,7 +150,7 @@ export class GenericDeviceAction implements IGenericDeviceAction {
     this._attachments = attachments
   }
 
-  get isGenericDeviceAction (): boolean {
+  get isGenericAction (): boolean {
     return true
   }
 }

@@ -32,15 +32,15 @@
 import { AxiosInstance } from 'axios'
 
 import { Attachment } from '@/models/Attachment'
-import { GenericDeviceActionAttachmentSerializer } from '@/serializers/jsonapi/GenericDeviceActionAttachmentSerializer'
+import { GenericActionAttachmentSerializer } from '@/serializers/jsonapi/GenericActionAttachmentSerializer'
 
 export class GenericDeviceActionAttachmentApi {
   private axiosApi: AxiosInstance
-  private serializer: GenericDeviceActionAttachmentSerializer
+  private serializer: GenericActionAttachmentSerializer
 
   constructor (axiosInstance: AxiosInstance) {
     this.axiosApi = axiosInstance
-    this.serializer = new GenericDeviceActionAttachmentSerializer()
+    this.serializer = new GenericActionAttachmentSerializer()
   }
 
   async add (actionId: string, attachment: Attachment): Promise<any> {

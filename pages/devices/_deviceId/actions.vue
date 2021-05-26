@@ -69,8 +69,8 @@ permissions and limitations under the Licence.
           class="mb-4"
           small
         >
-          <GenericDeviceActionCard
-            v-if="action.isGenericDeviceAction"
+          <GenericActionCard
+            v-if="action.isGenericAction"
             v-model="actions[index]"
           >
             <template #actions>
@@ -83,7 +83,7 @@ permissions and limitations under the Licence.
                 Edit
               </v-btn>
             </template>
-          </GenericDeviceActionCard>
+          </GenericActionCard>
           <template v-if="action.isDeviceSoftwareUpdateAction">
             <v-card>
               <v-card-subtitle class="pb-0">
@@ -301,14 +301,14 @@ permissions and limitations under the Licence.
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
-import GenericDeviceActionCard from '@/components/GenericDeviceActionCard.vue'
+import GenericActionCard from '@/components/GenericActionCard.vue'
 
 import { DateTime } from 'luxon'
 
 import { Contact } from '@/models/Contact'
 import { DeviceProperty } from '@/models/DeviceProperty'
 import { IAction } from '@/models/Action'
-import { GenericDeviceAction } from '@/models/GenericDeviceAction'
+import { GenericAction } from '@/models/GenericAction'
 
 const toUtcDate = (dt: DateTime) => {
   return dt.toUTC().toFormat('yyyy-MM-dd TT')
@@ -463,7 +463,7 @@ class DeviceUnmountAction implements IAction {
 @Component({
   components: {
     ProgressIndicator,
-    GenericDeviceActionCard
+    GenericActionCard
   },
   filters: {
     toUtcDate
@@ -540,7 +540,7 @@ export default class DeviceActionsPage extends Vue {
       deviceUnmountAction1
     ]
     // Todo: sort all actions by date descending
-    await Promise.all([this.fetchGenericDeviceActions()])
+    await Promise.all([this.fetchGenericActions()])
     // sort the actions descending
     this.actions.sort((i: IAction, j: IAction): number => {
       if (!('beginDate' in i) && !('beginDate' in j)) {
@@ -565,9 +565,9 @@ export default class DeviceActionsPage extends Vue {
     })
   }
 
-  async fetchGenericDeviceActions (): Promise<void> {
-    const actions: GenericDeviceAction[] = await this.$api.devices.findRelatedGenericDeviceActions(this.deviceId)
-    actions.forEach((action: GenericDeviceAction) => this.actions.push(action))
+  async fetchGenericActions (): Promise<void> {
+    const actions: GenericAction[] = await this.$api.devices.findRelatedGenericActions(this.deviceId)
+    actions.forEach((action: GenericAction) => this.actions.push(action))
   }
 
   get isInProgress (): boolean {
@@ -611,9 +611,9 @@ export default class DeviceActionsPage extends Vue {
     return this.$route.params.actionId
   }
 
-  getActionColor (action: GenericDeviceAction | DeviceSoftwareUpdateAction | DeviceCalibrationAction | DeviceMountAction | DeviceUnmountAction) {
+  getActionColor (action: GenericAction | DeviceSoftwareUpdateAction | DeviceCalibrationAction | DeviceMountAction | DeviceUnmountAction) {
     switch (true) {
-      case (action as GenericDeviceAction).isGenericDeviceAction:
+      case (action as GenericAction).isGenericAction:
         return 'blue'
       case (action as DeviceSoftwareUpdateAction).isDeviceSoftwareUpdateAction:
         return 'yellow'

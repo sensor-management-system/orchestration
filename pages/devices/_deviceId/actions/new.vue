@@ -66,7 +66,7 @@ permissions and limitations under the Licence.
           v-else-if="otherChosen"
           color="green"
           small
-          @click="addGenericDeviceAction"
+          @click="addGenericAction"
         >
           Add
         </v-btn>
@@ -174,7 +174,7 @@ permissions and limitations under the Licence.
       <v-card-text
         v-if="otherChosen"
       >
-        <GenericDeviceActionForm
+        <GenericActionForm
           ref="genericDeviceActionForm"
           v-model="genericDeviceAction"
           :attachments="attachments"
@@ -262,7 +262,7 @@ permissions and limitations under the Licence.
           v-else-if="otherChosen"
           color="green"
           small
-          @click="addGenericDeviceAction"
+          @click="addGenericAction"
         >
           Add
         </v-btn>
@@ -278,11 +278,11 @@ import { DateTime } from 'luxon'
 import { Contact } from '@/models/Contact'
 import { Attachment } from '@/models/Attachment'
 import { DeviceProperty } from '@/models/DeviceProperty'
-import { GenericDeviceAction } from '@/models/GenericDeviceAction'
+import { GenericAction } from '@/models/GenericAction'
 
 import { dateToString, stringToDate } from '@/utils/dateHelper'
 
-import GenericDeviceActionForm from '@/components/GenericDeviceActionForm.vue'
+import GenericActionForm from '@/components/GenericActionForm.vue'
 import DatePicker from '@/components/DatePicker.vue'
 
 type KindOfActionType = 'device_calibration' | 'software_update' | 'generic_device_action'
@@ -296,7 +296,7 @@ interface IOptionsForActionType {
 
 @Component({
   components: {
-    GenericDeviceActionForm,
+    GenericActionForm,
     DatePicker
   }
 })
@@ -342,7 +342,7 @@ export default class ActionAddPage extends Vue {
   private startDate: DateTime | null = null
   private endDate: DateTime | null = null
 
-  private genericDeviceAction: GenericDeviceAction | null = new GenericDeviceAction()
+  private genericDeviceAction: GenericAction | null = new GenericAction()
 
   mounted () {
     this.$api.contacts.findAll().then((foundContacts) => {
@@ -385,7 +385,7 @@ export default class ActionAddPage extends Vue {
         this.resetAllActionSpecificInputs()
       }
       if (this.otherChosen) {
-        this.genericDeviceAction = new GenericDeviceAction()
+        this.genericDeviceAction = new GenericAction()
         // TODO: we still need those values from the controlled vocabulary
         this.genericDeviceAction.actionTypeName = newValue?.name || ''
         this.genericDeviceAction.actionTypeUrl = newValue?.uri || ''
@@ -520,7 +520,7 @@ export default class ActionAddPage extends Vue {
     this.$store.commit('snackbar/setError', 'Not implemented yet')
   }
 
-  addGenericDeviceAction () {
+  addGenericAction () {
     if (!this.isLoggedIn) {
       return
     }
@@ -530,7 +530,7 @@ export default class ActionAddPage extends Vue {
     if (!(this.$refs.genericDeviceActionForm as Vue & { isValid: () => boolean }).isValid()) {
       return
     }
-    this.$api.genericDeviceActions.add(this.deviceId, this.genericDeviceAction).then((action: GenericDeviceAction) => {
+    this.$api.genericDeviceActions.add(this.deviceId, this.genericDeviceAction).then((action: GenericAction) => {
       this.$router.push('/devices/' + this.deviceId + '/actions', () => this.$emit('input', action))
     }).catch(() => {
       this.$store.commit('snackbar/setError', 'Failed to save the action')

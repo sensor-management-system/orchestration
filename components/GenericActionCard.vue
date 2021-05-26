@@ -81,7 +81,7 @@ import { Component, Prop, Vue } from 'nuxt-property-decorator'
 
 import { DateTime } from 'luxon'
 import { dateToDateTimeString } from '@/utils/dateHelper'
-import { GenericDeviceAction } from '@/models/GenericDeviceAction'
+import { GenericAction } from '@/models/GenericAction'
 
 const toUtcDate = (date: DateTime): string => {
   return dateToDateTimeString(date)
@@ -97,19 +97,19 @@ const toUtcDate = (date: DateTime): string => {
   }
 })
 // @ts-ignore
-export default class GenericDeviceActionCard extends Vue {
+export default class GenericActionCard extends Vue {
   private showDetails: boolean = false
 
   /**
-   * a GenericDeviceAction
+   * a GenericAction
    */
   @Prop({
-    default: () => new GenericDeviceAction(),
+    default: () => new GenericAction(),
     required: true,
     type: Object
   })
   // @ts-ignore
-  readonly value!: GenericDeviceAction
+  readonly value!: GenericAction
 
   /**
    * whether the card expansion is shown or not

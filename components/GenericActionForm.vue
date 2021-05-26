@@ -74,7 +74,7 @@ import { DateTime } from 'luxon'
 import { stringToDate } from '@/utils/dateHelper'
 
 import { Attachment } from '@/models/Attachment'
-import { GenericDeviceAction } from '@/models/GenericDeviceAction'
+import { GenericAction } from '@/models/GenericAction'
 
 import CommonActionForm from '@/components/CommonActionForm.vue'
 import DatePicker from '@/components/DatePicker.vue'
@@ -90,8 +90,8 @@ import DatePicker from '@/components/DatePicker.vue'
   }
 })
 // @ts-ignore
-export default class GenericDeviceActionForm extends Vue {
-  private actionCopy: GenericDeviceAction = new GenericDeviceAction()
+export default class GenericActionForm extends Vue {
+  private actionCopy: GenericAction = new GenericAction()
   private datesAreValid: boolean = true
   private rules: Object = {
     startDate: this.validateInputForStartDate,
@@ -101,15 +101,15 @@ export default class GenericDeviceActionForm extends Vue {
   }
 
   /**
-   * a GenericDeviceAction
+   * a GenericAction
    */
   @Prop({
-    default: () => new GenericDeviceAction(),
+    default: () => new GenericAction(),
     required: true,
     type: Object
   })
   // @ts-ignore
-  readonly value!: GenericDeviceAction
+  readonly value!: GenericAction
 
   /**
    * a list of available attachments
@@ -127,11 +127,11 @@ export default class GenericDeviceActionForm extends Vue {
     this.createActionCopy(this.value)
   }
 
-  get action (): GenericDeviceAction {
+  get action (): GenericAction {
     return this.actionCopy
   }
 
-  set action (value: GenericDeviceAction) {
+  set action (value: GenericAction) {
     this.$emit('input', value)
   }
 
@@ -235,13 +235,13 @@ export default class GenericDeviceActionForm extends Vue {
     return this.checkValidationOfDates() && (this.$refs.commonForm as Vue & { isValid: () => boolean }).isValid()
   }
 
-  createActionCopy (action: GenericDeviceAction): void {
-    this.actionCopy = GenericDeviceAction.createFromObject(action)
+  createActionCopy (action: GenericAction): void {
+    this.actionCopy = GenericAction.createFromObject(action)
   }
 
   @Watch('value', { immediate: true, deep: true })
   // @ts-ignore
-  onValueChanged (val: GenericDeviceAction) {
+  onValueChanged (val: GenericAction) {
     this.createActionCopy(val)
   }
 }

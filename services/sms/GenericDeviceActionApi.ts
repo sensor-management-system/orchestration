@@ -32,22 +32,22 @@
 import { AxiosInstance } from 'axios'
 
 import { Attachment } from '@/models/Attachment'
-import { GenericDeviceAction } from '@/models/GenericDeviceAction'
+import { GenericAction } from '@/models/GenericAction'
 import { GenericDeviceActionAttachmentApi } from '@/services/sms/GenericDeviceActionAttachmentApi'
-import { GenericDeviceActionSerializer } from '@/serializers/jsonapi/GenericDeviceActionSerializer'
+import { GenericActionSerializer } from '@/serializers/jsonapi/GenericActionSerializer'
 
 export class GenericDeviceActionApi {
   private axiosApi: AxiosInstance
-  private serializer: GenericDeviceActionSerializer
+  private serializer: GenericActionSerializer
   private attachmentApi: GenericDeviceActionAttachmentApi
 
   constructor (axiosInstance: AxiosInstance, attachmentApi: GenericDeviceActionAttachmentApi) {
     this.axiosApi = axiosInstance
-    this.serializer = new GenericDeviceActionSerializer()
+    this.serializer = new GenericActionSerializer()
     this.attachmentApi = attachmentApi
   }
 
-  async findById (id: string): Promise<GenericDeviceAction> {
+  async findById (id: string): Promise<GenericAction> {
     const response = await this.axiosApi.get(id, {
       params: {
         include: [
@@ -64,12 +64,12 @@ export class GenericDeviceActionApi {
     return this.axiosApi.delete<string, void>(id)
   }
 
-  async add (deviceId: string, action: GenericDeviceAction): Promise<GenericDeviceAction> {
+  async add (deviceId: string, action: GenericAction): Promise<GenericAction> {
     const url = ''
     const data = this.serializer.convertModelToJsonApiData(action, deviceId)
     const response = await this.axiosApi.post(url, { data })
     const savedAction = this.serializer.convertJsonApiObjectToModel(response.data)
-    // save every attachment as an GenericDeviceActionAttachment
+    // save every attachment as an GenericActionAttachment
     if (savedAction.id) {
       const promises = action.attachments.map((attachment: Attachment) => this.attachmentApi.add(savedAction.id as string, attachment))
       await Promise.all(promises)
@@ -77,9 +77,9 @@ export class GenericDeviceActionApi {
     return savedAction
   }
 
-  async update (deviceId: string, action: GenericDeviceAction): Promise<GenericDeviceAction> {
+  async update (deviceId: string, action: GenericAction): Promise<GenericAction> {
     if (!action.id) {
-      throw new Error('no id for the GenericDeviceAction')
+      throw new Error('no id for the GenericAction')
     }
     // load the stored action to get a list of the generic device action attachments before the update
     const attRawResponse = await this.axiosApi.get(action.id, {
@@ -95,7 +95,7 @@ export class GenericDeviceActionApi {
     // get the relations between attachments and generic device action attachments
     const linkedAttachments: { [attachmentId: string]: string } = {}
     if (included) {
-      const relations = this.serializer.convertJsonApiIncludedGenericDeviceActionAttachmentsToIdList(included)
+      const relations = this.serializer.convertJsonApiIncludedGenericActionAttachmentsToIdList(included)
       // convert to object to gain faster access to its members
       relations.forEach((rel) => {
         linkedAttachments[rel.attachmentId] = rel.genericDeviceActionAttachmentId
@@ -133,14 +133,14 @@ export class GenericDeviceActionApi {
     return this.serializer.convertJsonApiObjectToModel(actionResponse.data)
   }
 
-  findRelatedGenericDeviceActionAttachments (actionId: string): Promise<GenericDeviceAction[]> {
+  findRelatedGenericActionAttachments (actionId: string): Promise<GenericAction[]> {
     const url = actionId + '/generic-device-action-attachments'
     const params = {
       'page[size]': 10000,
       include: 'attachment'
     }
     return this.axiosApi.get(url, { params }).then((rawServerResponse) => {
-      return new GenericDeviceActionSerializer().convertJsonApiObjectListToModelList(rawServerResponse.data)
+      return new GenericActionSerializer().convertJsonApiObjectListToModelList(rawServerResponse.data)
     })
   }
 }

@@ -41,14 +41,14 @@ import {
 
 import { DeviceAttachmentSerializer } from '@/serializers/jsonapi/DeviceAttachmentSerializer'
 
-export class GenericDeviceActionAttachmentSerializer {
+export class GenericActionAttachmentSerializer {
   private attachmentSerializer: DeviceAttachmentSerializer = new DeviceAttachmentSerializer()
 
   convertModelToJsonApiData (attachment: Attachment, actionId: string): IJsonApiEntityWithOptionalId {
     /**
      * 2021-05-07 mha:
      * We build the relation to the action by hand instead of using the
-     * GenericDeviceActionSerializer, to avoid circular references.  We also
+     * GenericActionSerializer, to avoid circular references.  We also
      * build the relation to the attachment by hand instead of using the
      * DeviceAttachmentSerializer, which uses 'device_attachment' as its
      * property whereas we need 'attachment' as the property and

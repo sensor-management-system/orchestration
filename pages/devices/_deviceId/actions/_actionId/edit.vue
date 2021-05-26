@@ -58,7 +58,7 @@ permissions and limitations under the Licence.
       disabled
       label="Action Type"
     />
-    <GenericDeviceActionForm
+    <GenericActionForm
       ref="genericDeviceActionForm"
       v-model="valueCopy"
       :attachments="attachments"
@@ -90,29 +90,29 @@ permissions and limitations under the Licence.
 import { Component, Vue, Prop, Watch } from 'nuxt-property-decorator'
 
 import { Attachment } from '@/models/Attachment'
-import { GenericDeviceAction } from '@/models/GenericDeviceAction'
+import { GenericAction } from '@/models/GenericAction'
 
-import GenericDeviceActionForm from '@/components/GenericDeviceActionForm.vue'
+import GenericActionForm from '@/components/GenericActionForm.vue'
 
 @Component({
   components: {
-    GenericDeviceActionForm
+    GenericActionForm
   }
 })
 export default class DeviceActionEditPage extends Vue {
-  private valueCopy: GenericDeviceAction = new GenericDeviceAction()
+  private valueCopy: GenericAction = new GenericAction()
   private attachments: Attachment[] = []
 
   @Prop({
-    default: () => new GenericDeviceAction(),
+    default: () => new GenericAction(),
     required: true,
     type: Object
   })
-  readonly value!: GenericDeviceAction
+  readonly value!: GenericAction
 
   created () {
     if (this.value) {
-      this.valueCopy = GenericDeviceAction.createFromObject(this.value)
+      this.valueCopy = GenericAction.createFromObject(this.value)
     }
   }
 
@@ -133,7 +133,7 @@ export default class DeviceActionEditPage extends Vue {
   }
 
   save (): void {
-    this.$api.genericDeviceActions.update(this.deviceId, this.valueCopy).then((action: GenericDeviceAction) => {
+    this.$api.genericDeviceActions.update(this.deviceId, this.valueCopy).then((action: GenericAction) => {
       this.$router.push('/devices/' + this.deviceId + '/actions', () => this.$emit('input', action))
     }).catch(() => {
       this.$store.commit('snackbar/setError', 'Failed to save the action')
@@ -142,8 +142,8 @@ export default class DeviceActionEditPage extends Vue {
 
   @Watch('value', { immediate: true, deep: true })
   // @ts-ignore
-  onValueChanged (val: GenericDeviceAction) {
-    this.valueCopy = GenericDeviceAction.createFromObject(val)
+  onValueChanged (val: GenericAction) {
+    this.valueCopy = GenericAction.createFromObject(val)
   }
 }
 </script>
