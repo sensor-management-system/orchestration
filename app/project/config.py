@@ -1,5 +1,4 @@
 import json
-import os
 
 import requests
 from environs import Env
@@ -71,7 +70,7 @@ class DevelopmentConfig(BaseConfig):
     JWT_DECODE_AUDIENCE = ["rdmsvm-implicit-flow", "oidcdebugger-implicit-flow"]
     # name of token entry that will become distinct flask identity username
     # example in our case it is {'sub':'username@ufz.de'}
-    JWT_IDENTITY_CLAIM = os.environ.get("OIDC_USERNAME_CLAIM")
+    JWT_IDENTITY_CLAIM = env("OIDC_USERNAME_CLAIM", "sub")
 
 
 class TestingConfig(BaseConfig):
