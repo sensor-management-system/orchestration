@@ -56,7 +56,7 @@ export interface IGenericActionsAndMissing {
 }
 
 export interface IGenericActionAttachmentRelation {
-  genericDeviceActionAttachmentId: string
+  genericActionAttachmentId: string
   attachmentId: string
 }
 
@@ -219,7 +219,7 @@ export class GenericActionSerializer {
       }
       const attachmentId: string = (i.relationships.attachment.data as IJsonApiEntityWithoutDetails).id
       linkedAttachments.push({
-        genericDeviceActionAttachmentId: i.id,
+        genericActionAttachmentId: i.id,
         attachmentId
       })
     })

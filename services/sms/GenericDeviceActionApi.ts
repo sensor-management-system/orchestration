@@ -98,7 +98,7 @@ export class GenericDeviceActionApi {
       const relations = this.serializer.convertJsonApiIncludedGenericActionAttachmentsToIdList(included)
       // convert to object to gain faster access to its members
       relations.forEach((rel) => {
-        linkedAttachments[rel.attachmentId] = rel.genericDeviceActionAttachmentId
+        linkedAttachments[rel.attachmentId] = rel.genericActionAttachmentId
       })
     }
 
