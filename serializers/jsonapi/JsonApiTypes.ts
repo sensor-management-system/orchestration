@@ -342,7 +342,7 @@ export interface IJsonApiEntityWithoutDetailsDataDictList {
 export type IJsonApiTypedEntityWithoutDetailsDataDictList = {[idx: string]: IJsonApiEntityWithoutDetailsDataDictList}
 
 export interface IJsonApiRelationshipsData {
-  links: IJsonApiLinkDict
+  links?: IJsonApiLinkDict
   data: IJsonApiEntityWithoutDetails | IJsonApiEntityWithoutDetails[]
 }
 
