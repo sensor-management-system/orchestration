@@ -39,7 +39,7 @@ import { Platform } from '@/models/Platform'
 import { Attachment } from '@/models/Attachment'
 
 import { PlatformSerializer, IPlatformWithMeta, platformWithMetaToPlatformByThrowingErrorOnMissing, platformWithMetaToPlatformByAddingDummyObjects } from '@/serializers/jsonapi/PlatformSerializer'
-import { IJsonApiTypeIdDataList, IJsonApiEntity } from '@/serializers/jsonapi/JsonApiTypes'
+import { IJsonApiEntityWithoutDetailsDataDictList, IJsonApiEntity } from '@/serializers/jsonapi/JsonApiTypes'
 
 const createTestPlatform = () => {
   const platform = new Platform()
@@ -768,7 +768,7 @@ describe('PlatformSerializer', () => {
       // expect(attributes.updated_at).toEqual('2020-08-30T13:49:48.015Z')
 
       expect(jsonApiData.relationships).toHaveProperty('platform_attachments')
-      const attachments = jsonApiData.relationships?.platform_attachments as IJsonApiTypeIdDataList
+      const attachments = jsonApiData.relationships?.platform_attachments as IJsonApiEntityWithoutDetailsDataDictList
       expect(attachments).toHaveProperty('data')
       const attachmentData = attachments.data
       expect(Array.isArray(attachmentData)).toBeTruthy()
@@ -786,7 +786,7 @@ describe('PlatformSerializer', () => {
       // this cast is just to tell typescript that
       // we have an array of data, so that it doesn't show
       // typeerrors here
-      const contactObject = jsonApiData.relationships?.contacts as IJsonApiTypeIdDataList
+      const contactObject = jsonApiData.relationships?.contacts as IJsonApiEntityWithoutDetailsDataDictList
       expect(contactObject).toHaveProperty('data')
       const contactData = contactObject.data
       expect(Array.isArray(contactData)).toBeTruthy()

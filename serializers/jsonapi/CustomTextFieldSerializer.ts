@@ -42,7 +42,7 @@ import {
   IJsonApiRelationships,
   IJsonApiTypedEntityWithoutDetailsDataDictList,
   IJsonApiEntityWithoutDetailsDataDictList,
-  IJsonApiNestedElement
+  IJsonApiAttributes
 } from '@/serializers/jsonapi/JsonApiTypes'
 
 export interface IMissingCustomTextFieldData {
@@ -55,7 +55,7 @@ export interface ICustomTextFieldsAndMissing {
 }
 
 export class CustomTextFieldSerializer {
-  convertJsonApiElementToModel (customfield: IJsonApiNestedElement): CustomTextField {
+  convertJsonApiElementToModel (customfield: IJsonApiAttributes): CustomTextField {
     const result = new CustomTextField()
     result.id = customfield.id.toString()
     result.key = customfield.key || ''
@@ -64,14 +64,14 @@ export class CustomTextFieldSerializer {
     return result
   }
 
-  convertNestedJsonApiToModelList (customfields: IJsonApiNestedElement[]): CustomTextField[] {
+  convertNestedJsonApiToModelList (customfields: IJsonApiAttributes[]): CustomTextField[] {
     return customfields.map(this.convertJsonApiElementToModel)
   }
 
-  convertModelListToNestedJsonApiArray (customfields: CustomTextField[]): IJsonApiNestedElement[] {
+  convertModelListToNestedJsonApiArray (customfields: CustomTextField[]): IJsonApiAttributes[] {
     const result = []
     for (const customField of customfields) {
-      const customFieldToSave: IJsonApiNestedElement = {}
+      const customFieldToSave: IJsonApiAttributes = {}
 
       if (customField.id != null) {
         customFieldToSave.id = customField.id

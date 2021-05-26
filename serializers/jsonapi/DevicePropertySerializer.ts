@@ -36,7 +36,7 @@ import { DeviceProperty, IDeviceProperty } from '@/models/DeviceProperty'
 import { MeasuringRange } from '@/models/MeasuringRange'
 
 import {
-  IJsonApiNestedElement,
+  IJsonApiAttributes,
   IJsonApiEntityEnvelope,
   IJsonApiEntityListEnvelope,
   IJsonApiTypedEntityWithoutDetailsDataDictList,
@@ -56,7 +56,7 @@ export interface IDevicePropertiesAndMissing {
 }
 
 export class DevicePropertySerializer {
-  convertJsonApiElementToModel (property: IJsonApiNestedElement): DeviceProperty {
+  convertJsonApiElementToModel (property: IJsonApiAttributes): DeviceProperty {
     const result = new DeviceProperty()
     result.id = property.id.toString()
     result.measuringRange = new MeasuringRange(
@@ -81,15 +81,15 @@ export class DevicePropertySerializer {
     return result
   }
 
-  convertNestedJsonApiToModelList (properties: IJsonApiNestedElement[]): DeviceProperty[] {
+  convertNestedJsonApiToModelList (properties: IJsonApiAttributes[]): DeviceProperty[] {
     return properties.map(this.convertJsonApiElementToModel)
   }
 
-  convertModelListToNestedJsonApiArray (properties: DeviceProperty[]): IJsonApiNestedElement[] {
+  convertModelListToNestedJsonApiArray (properties: DeviceProperty[]): IJsonApiAttributes[] {
     const result = []
 
     for (const property of properties) {
-      const propertyToSave: IJsonApiNestedElement = {}
+      const propertyToSave: IJsonApiAttributes = {}
       if (property.id != null) {
         // currently it seems that the id is always set to a higher value
         // I can set it to 8, but it will be saved with a new id (9)
