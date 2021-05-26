@@ -33,14 +33,14 @@ import { DateTime } from 'luxon'
 import { GenericDeviceAction, IGenericDeviceAction } from '@/models/GenericDeviceAction'
 import { Attachment } from '@/models/Attachment'
 import {
-  IJsonApiDataWithOptionalId,
-  IJsonApiObject,
-  IJsonApiObjectList,
-  IJsonApiTypeId,
-  IJsonApiTypeIdAttributes,
-  IJsonApiTypeIdDataList,
-  IJsonApiTypeIdDataListDict,
-  IJsonApiDataWithId
+  IJsonApiEntityEnvelope,
+  IJsonApiEntityListEnvelope,
+  IJsonApiEntity,
+  IJsonApiEntityWithOptionalId,
+  IJsonApiEntityWithoutDetails,
+  IJsonApiTypedEntityWithoutDetailsDataDict,
+  IJsonApiEntityWithoutDetailsDataDictList,
+  IJsonApiRelationships
 } from '@/serializers/jsonapi/JsonApiTypes'
 
 import { ContactSerializer, IContactAndMissing } from '@/serializers/jsonapi/ContactSerializer'
@@ -64,13 +64,13 @@ export class GenericDeviceActionSerializer {
   private attachmentSerializer: GenericDeviceActionAttachmentSerializer = new GenericDeviceActionAttachmentSerializer()
   private contactSerializer: ContactSerializer = new ContactSerializer()
 
-  convertJsonApiObjectToModel (jsonApiObject: IJsonApiObject): GenericDeviceAction {
+  convertJsonApiObjectToModel (jsonApiObject: IJsonApiEntityEnvelope): GenericDeviceAction {
     const data = jsonApiObject.data
     const included = jsonApiObject.included || []
     return this.convertJsonApiDataToModel(data, included)
   }
 
-  convertJsonApiDataToModel (jsonApiData: IJsonApiTypeIdAttributes, included: IJsonApiTypeIdAttributes[]): GenericDeviceAction {
+  convertJsonApiDataToModel (jsonApiData: IJsonApiEntity, included: IJsonApiEntity[]): GenericDeviceAction {
     const attributes = jsonApiData.attributes
     const newEntry = GenericDeviceAction.createEmpty()
 
@@ -96,15 +96,15 @@ export class GenericDeviceActionSerializer {
     return newEntry
   }
 
-  convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiObjectList): GenericDeviceAction[] {
+  convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiEntityListEnvelope): GenericDeviceAction[] {
     const included = jsonApiObjectList.included || []
-    return jsonApiObjectList.data.map((model: IJsonApiDataWithId) => {
+    return jsonApiObjectList.data.map((model: IJsonApiEntity) => {
       return this.convertJsonApiDataToModel(model, included)
     })
   }
 
-  convertModelToJsonApiData (action: GenericDeviceAction, deviceId: string): IJsonApiDataWithOptionalId {
-    const data: any = {
+  convertModelToJsonApiData (action: GenericDeviceAction, deviceId: string): IJsonApiEntityWithOptionalId {
+    const data: IJsonApiEntityWithOptionalId = {
       type: 'generic_device_action',
       attributes: {
         description: action.description,
@@ -137,7 +137,7 @@ export class GenericDeviceActionSerializer {
     return data
   }
 
-  convertModelToJsonApiRelationshipObject (action: IGenericDeviceAction): IJsonApiTypeIdDataListDict {
+  convertModelToJsonApiRelationshipObject (action: IGenericDeviceAction): IJsonApiTypedEntityWithoutDetailsDataDict {
     return {
       generic_device_action: {
         data: this.convertModelToTupleWithIdAndType(action)
@@ -145,7 +145,7 @@ export class GenericDeviceActionSerializer {
     }
   }
 
-  convertModelToTupleWithIdAndType (action: IGenericDeviceAction): IJsonApiTypeId {
+  convertModelToTupleWithIdAndType (action: IGenericDeviceAction): IJsonApiEntityWithoutDetails {
     return {
       id: action.id || '',
       type: 'generic_device_action'
@@ -161,11 +161,11 @@ export class GenericDeviceActionSerializer {
    * @param {IJsonApiTypeIdAttributes[]} included - a JSONAPI object with included GenericDeviceActions
    * @return {IGenericDeviceActionsAndMissing} serialized GenericDeviceActions and an array of ids, that could not be resolved
    */
-  convertJsonApiRelationshipsModelList (relationships: IJsonApiTypeIdDataListDict, included: IJsonApiTypeIdAttributes[]): IGenericDeviceActionsAndMissing {
+  convertJsonApiRelationshipsModelList (relationships: IJsonApiRelationships, included: IJsonApiEntity[]): IGenericDeviceActionsAndMissing {
     const actionIds = []
     if (relationships.generic_device_actions) {
-      const actionObject = relationships.generic_device_actions as IJsonApiTypeIdDataList
-      if (actionObject.data && actionObject.data.length > 0) {
+      const actionObject = relationships.generic_device_actions as IJsonApiEntityWithoutDetailsDataDictList
+      if (actionObject.data && (actionObject.data as IJsonApiEntityWithoutDetails[]).length > 0) {
         for (const relationShipActionData of actionObject.data) {
           const actionId = relationShipActionData.id
           actionIds.push(actionId)
@@ -205,7 +205,7 @@ export class GenericDeviceActionSerializer {
     }
   }
 
-  convertJsonApiIncludedGenericDeviceActionAttachmentsToIdList (included: IJsonApiDataWithOptionalId[]): IGenericDeviceActionAttachmentRelation[] {
+  convertJsonApiIncludedGenericDeviceActionAttachmentsToIdList (included: IJsonApiEntity[]): IGenericDeviceActionAttachmentRelation[] {
     const linkedAttachments: IGenericDeviceActionAttachmentRelation[] = []
     included.forEach((i) => {
       if (!i.id) {
@@ -214,10 +214,10 @@ export class GenericDeviceActionSerializer {
       if (i.type !== 'generic_device_action_attachment') {
         return
       }
-      if (!i.relationships.attachment || !i.relationships.attachment.data || !(i.relationships.attachment.data as IJsonApiTypeId & { id: string }).id) {
+      if (!i.relationships?.attachment || !i.relationships?.attachment.data || !(i.relationships?.attachment.data as IJsonApiEntityWithoutDetails).id) {
         return
       }
-      const attachmentId: string = (i.relationships.attachment.data as IJsonApiTypeId & { id: string }).id
+      const attachmentId: string = (i.relationships.attachment.data as IJsonApiEntityWithoutDetails).id
       linkedAttachments.push({
         genericDeviceActionAttachmentId: i.id,
         attachmentId

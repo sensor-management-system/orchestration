@@ -30,19 +30,21 @@
  * permissions and limitations under the Licence.
  */
 import { Attachment } from '@/models/Attachment'
-import {
-  IJsonApiTypeIdAttributes,
-  IJsonApiDataWithOptionalId,
-  IJsonApiTypeIdDataList,
-  IJsonApiTypeIdDataListDict
 
+import {
+  IJsonApiEntityWithOptionalId,
+  IJsonApiEntity,
+  IJsonApiRelationships,
+  IJsonApiEntityWithoutDetails,
+  IJsonApiEntityWithoutDetailsDataDictList
 } from '@/serializers/jsonapi/JsonApiTypes'
+
 import { DeviceAttachmentSerializer } from '@/serializers/jsonapi/DeviceAttachmentSerializer'
 
 export class GenericDeviceActionAttachmentSerializer {
   private attachmentSerializer: DeviceAttachmentSerializer = new DeviceAttachmentSerializer()
 
-  convertModelToJsonApiData (attachment: Attachment, actionId: string): IJsonApiDataWithOptionalId {
+  convertModelToJsonApiData (attachment: Attachment, actionId: string): IJsonApiEntityWithOptionalId {
     /**
      * 2021-05-07 mha:
      * We build the relation to the action by hand instead of using the
@@ -52,7 +54,7 @@ export class GenericDeviceActionAttachmentSerializer {
      * property whereas we need 'attachment' as the property and
      * 'device_attachment' as the type.
      */
-    const data: any = {
+    const data: IJsonApiEntityWithOptionalId = {
       type: 'generic_device_action_attachment',
       attributes: {},
       relationships: {
@@ -65,7 +67,7 @@ export class GenericDeviceActionAttachmentSerializer {
         attachment: {
           data: {
             type: 'device_attachment',
-            id: attachment.id
+            id: attachment.id || ''
           }
         }
       }
@@ -73,12 +75,12 @@ export class GenericDeviceActionAttachmentSerializer {
     return data
   }
 
-  convertJsonApiRelationshipsModelList (relationships: IJsonApiTypeIdDataListDict, included: IJsonApiTypeIdAttributes[]): Attachment[] {
+  convertJsonApiRelationshipsModelList (relationships: IJsonApiRelationships, included: IJsonApiEntity[]): Attachment[] {
     const actionAttachmentIds = []
     if (relationships.generic_device_action_attachments) {
-      const attachmentObject = relationships.generic_device_action_attachments as IJsonApiTypeIdDataList
-      if (attachmentObject.data && attachmentObject.data.length > 0) {
-        for (const relationShipAttachmentData of attachmentObject.data) {
+      const attachmentObject = relationships.generic_device_action_attachments as IJsonApiEntityWithoutDetailsDataDictList
+      if (attachmentObject.data && (attachmentObject.data as IJsonApiEntityWithoutDetails[]).length > 0) {
+        for (const relationShipAttachmentData of attachmentObject.data as IJsonApiEntityWithoutDetails[]) {
           const actionAttachmentId = relationShipAttachmentData.id
           actionAttachmentIds.push(actionAttachmentId)
         }
