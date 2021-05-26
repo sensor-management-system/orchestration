@@ -94,7 +94,7 @@ import { Component, Prop, Vue } from 'nuxt-property-decorator'
 
 import { Attachment } from '@/models/Attachment'
 import { Contact } from '@/models/Contact'
-import { GenericDeviceAction } from '@/models/GenericDeviceAction'
+import { GenericAction } from '@/models/GenericAction'
 
 /**
  * A class component for a set of common form fields for actions
@@ -108,15 +108,15 @@ export default class CommonActionForm extends Vue {
   private contactIsValid = true
 
   /**
-   * a GenericDeviceAction
+   * a GenericAction
    */
   @Prop({
-    default: new GenericDeviceAction(),
+    default: new GenericAction(),
     required: true,
     type: Object
   })
   // @ts-ignore
-  readonly value!: GenericDeviceAction
+  readonly value!: GenericAction
 
   /**
    * a list of available attachments
@@ -159,7 +159,7 @@ export default class CommonActionForm extends Vue {
    * @fires CommonActionForm#input
    */
   set description (value: string) {
-    const actionCopy = GenericDeviceAction.createFromObject(this.value)
+    const actionCopy = GenericAction.createFromObject(this.value)
     actionCopy.description = value
     /**
      * descriptionChange event
@@ -180,7 +180,7 @@ export default class CommonActionForm extends Vue {
    * @fires CommonActionForm#input
    */
   set contact (value: Contact | null) {
-    const actionCopy = GenericDeviceAction.createFromObject(this.value)
+    const actionCopy = GenericAction.createFromObject(this.value)
     actionCopy.contact = value || null
     /**
      * contactChange event
@@ -201,7 +201,7 @@ export default class CommonActionForm extends Vue {
    * @fires CommonActionForm#input
    */
   set actionAttachments (value: Attachment[]) {
-    const actionCopy = GenericDeviceAction.createFromObject(this.value)
+    const actionCopy = GenericAction.createFromObject(this.value)
     actionCopy.attachments = value
     /**
      * attachments event
