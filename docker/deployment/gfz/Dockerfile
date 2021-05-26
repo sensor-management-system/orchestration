@@ -27,7 +27,7 @@
 # implied. See the Licence for the specific language governing 
 # permissions and limitations under the Licence.
 
-FROM node:10.16.3-stretch as js-builder
+FROM node:16.0.0-buster as js-builder
 
 # First the urls for sms backend and cv backend
 ARG SMS_BACKEND_URL_ARG
@@ -65,7 +65,7 @@ ENV NUXT_ENV_LOAD_USER_INFO false
 RUN mkdir /ssmfrontend
 COPY . /ssmfrontend
 WORKDIR /ssmfrontend
-RUN npm install
+RUN npm ci
 RUN npm run build
 
 FROM nginx:alpine as webserver

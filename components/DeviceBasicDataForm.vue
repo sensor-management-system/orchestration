@@ -34,7 +34,7 @@ permissions and limitations under the Licence.
     @submit.prevent
   >
     <v-row>
-      <v-col cols="12" md="3">
+      <v-col cols="12" md="6">
         <v-text-field
           :value="deviceURN"
           label="URN"
@@ -42,7 +42,7 @@ permissions and limitations under the Licence.
           disabled
         />
       </v-col>
-      <v-col cols="12" md="3">
+      <v-col cols="12" md="6">
         <v-text-field
           :value="value.persistentIdentifier"
           :readonly="readonly"
@@ -188,7 +188,7 @@ permissions and limitations under the Licence.
   </v-form>
 </template>
 <script lang="ts">
-import { Component, Prop, mixins } from 'nuxt-property-decorator'
+import { Component, Prop, Vue, mixins } from 'nuxt-property-decorator'
 
 import { Rules } from '@/mixins/Rules'
 
@@ -196,6 +196,8 @@ import { Device } from '@/models/Device'
 import { DeviceType } from '@/models/DeviceType'
 import { Status } from '@/models/Status'
 import { Manufacturer } from '@/models/Manufacturer'
+
+import { createDeviceUrn } from '@/modelUtils/urnBuilders'
 
 @Component
 export default class DeviceBasicDataForm extends mixins(Rules) {
@@ -347,32 +349,7 @@ export default class DeviceBasicDataForm extends mixins(Rules) {
   }
 
   get deviceURN () {
-    let partManufacturer = '[manufacturer]'
-    let partModel = '[model]'
-    let partSerialNumber = '[serial_number]'
-
-    if (this.value.manufacturerUri !== '') {
-      const manIndex = this.manufacturers.findIndex(m => m.uri === this.value.manufacturerUri)
-      if (manIndex > -1) {
-        partManufacturer = this.manufacturers[manIndex].name
-      } else if (this.value.manufacturerName !== '') {
-        partManufacturer = this.value.manufacturerName
-      }
-    } else if (this.value.manufacturerName !== '') {
-      partManufacturer = this.value.manufacturerName
-    }
-
-    if (this.value.model !== '') {
-      partModel = this.value.model
-    }
-
-    if (this.value.serialNumber !== '') {
-      partSerialNumber = this.value.serialNumber
-    }
-
-    return [partManufacturer, partModel, partSerialNumber].join('_').replace(
-      ' ', '_'
-    )
+    return createDeviceUrn(this.value, this.manufacturers)
   }
 
   /**

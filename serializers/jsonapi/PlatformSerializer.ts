@@ -4,8 +4,11 @@
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
  * Copyright (C) 2020
+ * - Kotyba Alhaj Taha (UFZ, kotyba.alhaj-taha@ufz.de)
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
+ * - Helmholtz Centre for Environmental Research GmbH - UFZ
+ * (UFZ, https://www.ufz.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
  *   Geosciences (GFZ, https://www.gfz-potsdam.de)
  *
@@ -33,11 +36,10 @@ import { Contact } from '@/models/Contact'
 import { Platform } from '@/models/Platform'
 
 import {
-  IJsonApiDataWithId,
-  IJsonApiDataWithOptionalId,
-  IJsonApiObject,
-  IJsonApiObjectList,
-  IJsonApiTypeIdAttributes
+  IJsonApiEntityEnvelope,
+  IJsonApiEntityListEnvelope,
+  IJsonApiEntity,
+  IJsonApiEntityWithOptionalId
 } from '@/serializers/jsonapi/JsonApiTypes'
 
 import { IMissingAttachmentData } from '@/serializers/jsonapi/AttachmentSerializer'
@@ -59,12 +61,12 @@ export class PlatformSerializer {
   private attachmentSerializer: PlatformAttachmentSerializer = new PlatformAttachmentSerializer()
   private contactSerializer: ContactSerializer = new ContactSerializer()
 
-  convertJsonApiObjectToModel (jsonApiObject: IJsonApiObject): IPlatformWithMeta {
+  convertJsonApiObjectToModel (jsonApiObject: IJsonApiEntityEnvelope): IPlatformWithMeta {
     const included = jsonApiObject.included || []
     return this.convertJsonApiDataToModel(jsonApiObject.data, included)
   }
 
-  convertJsonApiDataToModel (jsonApiData: IJsonApiDataWithId | IJsonApiTypeIdAttributes, included: IJsonApiTypeIdAttributes[]): IPlatformWithMeta {
+  convertJsonApiDataToModel (jsonApiData: IJsonApiEntity, included: IJsonApiEntity[]): IPlatformWithMeta {
     const result: Platform = Platform.createEmpty()
 
     const attributes = jsonApiData.attributes
@@ -118,14 +120,14 @@ export class PlatformSerializer {
     }
   }
 
-  convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiObjectList): IPlatformWithMeta[] {
+  convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiEntityListEnvelope): IPlatformWithMeta[] {
     const included = jsonApiObjectList.included || []
-    return jsonApiObjectList.data.map((model: IJsonApiDataWithId) => {
+    return jsonApiObjectList.data.map((model: IJsonApiEntity) => {
       return this.convertJsonApiDataToModel(model, included)
     })
   }
 
-  convertJsonApiRelationshipsModelList (included: IJsonApiTypeIdAttributes[]): Platform[] {
+  convertJsonApiRelationshipsModelList (included: IJsonApiEntity[]): Platform[] {
     // it takes all the platforms, as those are the only ones included in the query per configuration.
     // if you want to use it in a broader scope, you may have to change several things
     const result = []
@@ -140,11 +142,11 @@ export class PlatformSerializer {
     return result
   }
 
-  convertModelToJsonApiData (platform: Platform): IJsonApiDataWithOptionalId {
+  convertModelToJsonApiData (platform: Platform): IJsonApiEntityWithOptionalId {
     const attachments = this.attachmentSerializer.convertModelListToJsonApiRelationshipObject(platform.attachments)
     const contacts = this.contactSerializer.convertModelListToJsonApiRelationshipObject(platform.contacts)
 
-    const data: IJsonApiDataWithOptionalId = {
+    const data: IJsonApiEntityWithOptionalId = {
       type: 'platform',
       attributes: {
         description: platform.description,
@@ -201,5 +203,9 @@ export const platformWithMetaToPlatformByAddingDummyObjects = (platformWithMeta:
     platform.contacts.push(contact)
   }
 
+  return platform
+}
+export const platformWithMetaToPlatformThrowingNoErrorOnMissing = (platformWithMeta: { missing: { contacts: { ids: any[] } }; platform: Platform }): Platform => {
+  const platform = platformWithMeta.platform
   return platform
 }

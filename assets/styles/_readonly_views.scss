@@ -1,8 +1,8 @@
 /*
-Web client of the Sensor Management System software developed within
-the Helmholtz DataHub Initiative by GFZ and UFZ.
+Web client of the Sensor Management System software developed within the
+Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020
+Copyright (C) 2020,2021
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -28,32 +28,15 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
 implied. See the Licence for the specific language governing
 permissions and limitations under the Licence.
 */
-module.exports = {
-  moduleNameMapper: {
-    '^@/(.*)$': '<rootDir>/$1',
-    '^~/(.*)$': '<rootDir>/$1',
-    '^vue$': 'vue/dist/vue.common.js'
-  },
-  moduleFileExtensions: [
-    'ts',
-    'js',
-    'vue',
-    'json'
-  ],
-  transform: {
-    '^.+\\.ts$': 'ts-jest',
-    '^.+\\.js$': 'babel-jest',
-    '.*\\.(vue)$': 'vue-jest'
-  },
-  collectCoverage: true,
-  collectCoverageFrom: [
-    '<rootDir>/components/**/*.vue',
-    '<rootDir>/pages/**/*.vue',
-    '<rootDir>/models/**/*.ts',
-    '<rootDir>/modelUtils/**/*.ts',
-    '<rootDir>/serializers/**/*.ts',
-    '<rootDir>/utils/**/*.ts',
-    '<rootDir>/devtools/**/*.ts'
-  ],
-  verbose: true
+@import '~vuetify/src/styles/settings/variables';
+@import '~vuetify/src/styles/settings/colors';
+
+label {
+  display: block;
+  font-size: map-deep-get($headings, 'caption', 'size');
+  font-weight: map-deep-get($headings, 'caption', 'weight');
+  letter-spacing: map-deep-get($headings, 'caption', 'letter-spacing');
+  line-height: map-deep-get($headings, 'caption', 'line-height');
+  font-family: map-deep-get($headings, 'caption', 'font-family');
+  color: map-get($grey, 'darken-1');
 }

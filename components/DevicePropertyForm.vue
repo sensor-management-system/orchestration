@@ -54,12 +54,12 @@ permissions and limitations under the Licence.
           :disabled="readonly"
           @input="updateCompartment"
         >
-          <template v-slot:append-outer>
+          <template #append-outer>
             <v-tooltip
               v-if="itemHasDefinition(valueCompartmentItem)"
               right
             >
-              <template v-slot:activator="{ on, attrs }">
+              <template #activator="{ on, attrs }">
                 <v-icon
                   color="primary"
                   small
@@ -72,7 +72,7 @@ permissions and limitations under the Licence.
               <span>{{ valueCompartmentItem.definition }}</span>
             </v-tooltip>
           </template>
-          <template v-slot:item="data">
+          <template #item="data">
             <template v-if="typeof data.item !== 'object'">
               <v-list-item-content>{{ data.item }}</v-list-item-content>
             </template>
@@ -84,7 +84,7 @@ permissions and limitations under the Licence.
                     v-if="data.item.definition"
                     bottom
                   >
-                    <template v-slot:activator="{ on, attrs }">
+                    <template #activator="{ on, attrs }">
                       <v-icon
                         color="primary"
                         small
@@ -113,12 +113,12 @@ permissions and limitations under the Licence.
           :disabled="readonly"
           @input="updateSamplingMedia"
         >
-          <template v-slot:append-outer>
+          <template #append-outer>
             <v-tooltip
               v-if="itemHasDefinition(valueSamplingMediaItem)"
               right
             >
-              <template v-slot:activator="{ on, attrs }">
+              <template #activator="{ on, attrs }">
                 <v-icon
                   color="primary"
                   small
@@ -131,7 +131,7 @@ permissions and limitations under the Licence.
               <span>{{ valueSamplingMediaItem.definition }}</span>
             </v-tooltip>
           </template>
-          <template v-slot:item="data">
+          <template #item="data">
             <template v-if="typeof data.item !== 'object'">
               <v-list-item-content>{{ data.item }}</v-list-item-content>
             </template>
@@ -143,7 +143,7 @@ permissions and limitations under the Licence.
                     v-if="data.item.definition"
                     bottom
                   >
-                    <template v-slot:activator="{ on, attrs }">
+                    <template #activator="{ on, attrs }">
                       <v-icon
                         color="primary"
                         small
@@ -172,12 +172,12 @@ permissions and limitations under the Licence.
           :disabled="readonly"
           @input="updateProperty"
         >
-          <template v-slot:append-outer>
+          <template #append-outer>
             <v-tooltip
               v-if="itemHasDefinition(valuePropertyItem)"
               right
             >
-              <template v-slot:activator="{ on, attrs }">
+              <template #activator="{ on, attrs }">
                 <v-icon
                   color="primary"
                   small
@@ -190,7 +190,7 @@ permissions and limitations under the Licence.
               <span>{{ valuePropertyItem.definition }}</span>
             </v-tooltip>
           </template>
-          <template v-slot:item="data">
+          <template #item="data">
             <template v-if="typeof data.item !== 'object'">
               <v-list-item-content>{{ data.item }}</v-list-item-content>
             </template>
@@ -202,7 +202,7 @@ permissions and limitations under the Licence.
                     v-if="data.item.definition"
                     bottom
                   >
-                    <template v-slot:activator="{ on, attrs }">
+                    <template #activator="{ on, attrs }">
                       <v-icon
                         color="primary"
                         small
@@ -233,12 +233,12 @@ permissions and limitations under the Licence.
           :disabled="readonly"
           @input="updateUnit"
         >
-          <template v-slot:append-outer>
+          <template #append-outer>
             <v-tooltip
               v-if="itemHasDefinition(valueUnitItem)"
               right
             >
-              <template v-slot:activator="{ on, attrs }">
+              <template #activator="{ on, attrs }">
                 <v-icon
                   color="primary"
                   small
@@ -251,7 +251,7 @@ permissions and limitations under the Licence.
               <span>{{ valueUnitItem.definition }}</span>
             </v-tooltip>
           </template>
-          <template v-slot:item="data">
+          <template #item="data">
             <template v-if="typeof data.item !== 'object'">
               <v-list-item-content>{{ data.item }}</v-list-item-content>
             </template>
@@ -263,7 +263,7 @@ permissions and limitations under the Licence.
                     v-if="data.item.definition"
                     bottom
                   >
-                    <template v-slot:activator="{ on, attrs }">
+                    <template #activator="{ on, attrs }">
                       <v-icon
                         color="primary"
                         small
@@ -350,12 +350,12 @@ permissions and limitations under the Licence.
           :disabled="readonly"
           @input="updateResolutionUnit"
         >
-          <template v-slot:append-outer>
+          <template #append-outer>
             <v-tooltip
               v-if="itemHasDefinition(valueResolutionUnitItem)"
               right
             >
-              <template v-slot:activator="{ on, attrs }">
+              <template #activator="{ on, attrs }">
                 <v-icon
                   color="primary"
                   small
@@ -368,7 +368,7 @@ permissions and limitations under the Licence.
               <span>{{ valueResolutionUnitItem.definition }}</span>
             </v-tooltip>
           </template>
-          <template v-slot:item="data">
+          <template #item="data">
             <template v-if="typeof data.item !== 'object'">
               <v-list-item-content>{{ data.item }}</v-list-item-content>
             </template>
@@ -380,7 +380,7 @@ permissions and limitations under the Licence.
                     v-if="data.item.definition"
                     bottom
                   >
-                    <template v-slot:activator="{ on, attrs }">
+                    <template #activator="{ on, attrs }">
                       <v-icon
                         color="primary"
                         small

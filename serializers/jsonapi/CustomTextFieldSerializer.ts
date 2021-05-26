@@ -4,8 +4,11 @@
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
  * Copyright (C) 2020, 2021
+ * - Kotyba Alhaj Taha (UFZ, kotyba.alhaj-taha@ufz.de)
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
+ * - Helmholtz Centre for Environmental Research GmbH - UFZ
+ * (UFZ, https://www.ufz.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
  *   Geosciences (GFZ, https://www.gfz-potsdam.de)
  *
@@ -31,14 +34,15 @@
  */
 import { CustomTextField, ICustomTextField } from '@/models/CustomTextField'
 import {
-  IJsonApiDataWithOptionalId,
-  IJsonApiNestedElement,
-  IJsonApiObject,
-  IJsonApiObjectList,
-  IJsonApiTypeId,
-  IJsonApiTypeIdAttributes,
-  IJsonApiTypeIdDataList,
-  IJsonApiTypeIdDataListDict
+  IJsonApiEntityWithoutDetails,
+  IJsonApiEntityWithOptionalId,
+  IJsonApiEntityListEnvelope,
+  IJsonApiEntityEnvelope,
+  IJsonApiEntity,
+  IJsonApiRelationships,
+  IJsonApiTypedEntityWithoutDetailsDataDictList,
+  IJsonApiEntityWithoutDetailsDataDictList,
+  IJsonApiAttributes
 } from '@/serializers/jsonapi/JsonApiTypes'
 
 export interface IMissingCustomTextFieldData {
@@ -51,7 +55,7 @@ export interface ICustomTextFieldsAndMissing {
 }
 
 export class CustomTextFieldSerializer {
-  convertJsonApiElementToModel (customfield: IJsonApiNestedElement): CustomTextField {
+  convertJsonApiElementToModel (customfield: IJsonApiAttributes): CustomTextField {
     const result = new CustomTextField()
     result.id = customfield.id.toString()
     result.key = customfield.key || ''
@@ -60,14 +64,14 @@ export class CustomTextFieldSerializer {
     return result
   }
 
-  convertNestedJsonApiToModelList (customfields: IJsonApiNestedElement[]): CustomTextField[] {
+  convertNestedJsonApiToModelList (customfields: IJsonApiAttributes[]): CustomTextField[] {
     return customfields.map(this.convertJsonApiElementToModel)
   }
 
-  convertModelListToNestedJsonApiArray (customfields: CustomTextField[]): IJsonApiNestedElement[] {
+  convertModelListToNestedJsonApiArray (customfields: CustomTextField[]): IJsonApiAttributes[] {
     const result = []
     for (const customField of customfields) {
-      const customFieldToSave: IJsonApiNestedElement = {}
+      const customFieldToSave: IJsonApiAttributes = {}
 
       if (customField.id != null) {
         customFieldToSave.id = customField.id
@@ -81,12 +85,12 @@ export class CustomTextFieldSerializer {
     return result
   }
 
-  convertJsonApiObjectToModel (jsonApiObject: IJsonApiObject): CustomTextField {
+  convertJsonApiObjectToModel (jsonApiObject: IJsonApiEntityEnvelope): CustomTextField {
     const data = jsonApiObject.data
     return this.convertJsonApiDataToModel(data)
   }
 
-  convertJsonApiDataToModel (jsonApiData: IJsonApiTypeIdAttributes): CustomTextField {
+  convertJsonApiDataToModel (jsonApiData: IJsonApiEntity): CustomTextField {
     const attributes = jsonApiData.attributes
 
     const newEntry = new CustomTextField()
@@ -98,14 +102,14 @@ export class CustomTextFieldSerializer {
     return newEntry
   }
 
-  convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiObjectList): CustomTextField[] {
+  convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiEntityListEnvelope): CustomTextField[] {
     return jsonApiObjectList.data.map(this.convertJsonApiDataToModel)
   }
 
-  convertJsonApiRelationshipsModelList (relationships: IJsonApiTypeIdDataListDict, included: IJsonApiTypeIdAttributes[]): ICustomTextFieldsAndMissing {
+  convertJsonApiRelationshipsModelList (relationships: IJsonApiRelationships, included: IJsonApiEntity[]): ICustomTextFieldsAndMissing {
     const customFieldsIds = []
     if (relationships.customfields) {
-      const customFieldObject = relationships.customfields as IJsonApiTypeIdDataList
+      const customFieldObject = relationships.customfields as IJsonApiEntityWithoutDetailsDataDictList
       if (customFieldObject.data && customFieldObject.data.length > 0) {
         for (const relationShipCustomFieldData of customFieldObject.data) {
           const customFieldsId = relationShipCustomFieldData.id
@@ -146,7 +150,7 @@ export class CustomTextFieldSerializer {
     }
   }
 
-  convertModelListToJsonApiRelationshipObject (customFields: CustomTextField[]): IJsonApiTypeIdDataListDict {
+  convertModelListToJsonApiRelationshipObject (customFields: CustomTextField[]): IJsonApiTypedEntityWithoutDetailsDataDictList {
     return {
       customfields: {
         data: this.convertModelListToTupleListWithIdAndType(customFields)
@@ -154,8 +158,8 @@ export class CustomTextFieldSerializer {
     }
   }
 
-  convertModelListToTupleListWithIdAndType (customfields: CustomTextField[]): IJsonApiTypeId[] {
-    const result: IJsonApiTypeId[] = []
+  convertModelListToTupleListWithIdAndType (customfields: CustomTextField[]): IJsonApiEntityWithoutDetails[] {
+    const result: IJsonApiEntityWithoutDetails[] = []
     for (const customfield of customfields) {
       if (customfield.id !== null) {
         result.push({
@@ -167,7 +171,7 @@ export class CustomTextFieldSerializer {
     return result
   }
 
-  convertModelToJsonApiData (customField: ICustomTextField, deviceId: string): IJsonApiDataWithOptionalId {
+  convertModelToJsonApiData (customField: ICustomTextField, deviceId: string): IJsonApiEntityWithOptionalId {
     const data: any = {
       type: 'customfield',
       attributes: {

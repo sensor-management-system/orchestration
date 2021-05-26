@@ -132,8 +132,8 @@ describe('DeviceAttachmetnSerializer', () => {
       expect(jsonApiPayload.attributes.label).toEqual('UFZ Homepage')
       expect(jsonApiPayload).toHaveProperty('relationships')
       expect(jsonApiPayload.relationships).toHaveProperty('device')
-      expect(jsonApiPayload.relationships.device).toHaveProperty('data')
-      const deviceData: any = jsonApiPayload.relationships.device.data
+      expect(jsonApiPayload.relationships?.device).toHaveProperty('data')
+      const deviceData: any = jsonApiPayload.relationships?.device.data
       expect(deviceData).toHaveProperty('id')
       expect(deviceData.id).toEqual('456')
       expect(deviceData).toHaveProperty('type')
@@ -160,8 +160,8 @@ describe('DeviceAttachmetnSerializer', () => {
       expect(jsonApiPayload.attributes.label).toEqual('UFZ Homepage')
       expect(jsonApiPayload).toHaveProperty('relationships')
       expect(jsonApiPayload.relationships).toHaveProperty('device')
-      expect(jsonApiPayload.relationships.device).toHaveProperty('data')
-      const deviceData: any = jsonApiPayload.relationships.device.data
+      expect(jsonApiPayload.relationships?.device).toHaveProperty('data')
+      const deviceData: any = jsonApiPayload.relationships?.device.data
       expect(deviceData).toHaveProperty('id')
       expect(deviceData.id).toEqual('456')
       expect(deviceData).toHaveProperty('type')

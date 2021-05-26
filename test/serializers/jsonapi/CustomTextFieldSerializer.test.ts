@@ -34,7 +34,7 @@ import { CustomTextField } from '@/models/CustomTextField'
 import { CustomTextFieldSerializer } from '@/serializers/jsonapi/CustomTextFieldSerializer'
 
 import {
-  IJsonApiObjectList
+  IJsonApiEntityListEnvelope
 } from '@/serializers/jsonapi/JsonApiTypes'
 
 describe('CustomTextFieldSerializer', () => {
@@ -145,8 +145,8 @@ describe('CustomTextFieldSerializer', () => {
       expect(jsonApiPayload.attributes.value).toEqual('test test test')
       expect(jsonApiPayload).toHaveProperty('relationships')
       expect(jsonApiPayload.relationships).toHaveProperty('device')
-      expect(jsonApiPayload.relationships.device).toHaveProperty('data')
-      const deviceData: any = jsonApiPayload.relationships.device.data
+      expect(jsonApiPayload.relationships!.device).toHaveProperty('data')
+      const deviceData: any = jsonApiPayload.relationships!.device.data
       expect(deviceData).toHaveProperty('id')
       expect(deviceData.id).toEqual('456')
       expect(deviceData).toHaveProperty('type')
@@ -173,8 +173,8 @@ describe('CustomTextFieldSerializer', () => {
       expect(jsonApiPayload.attributes.value).toEqual('test test test')
       expect(jsonApiPayload).toHaveProperty('relationships')
       expect(jsonApiPayload.relationships).toHaveProperty('device')
-      expect(jsonApiPayload.relationships.device).toHaveProperty('data')
-      const deviceData: any = jsonApiPayload.relationships.device.data
+      expect(jsonApiPayload.relationships!.device).toHaveProperty('data')
+      const deviceData: any = jsonApiPayload.relationships!.device.data
       expect(deviceData).toHaveProperty('id')
       expect(deviceData.id).toEqual('456')
       expect(deviceData).toHaveProperty('type')
@@ -217,7 +217,7 @@ describe('CustomTextFieldSerializer', () => {
   })
   describe('#convertJsonApiObjectListToModelList', () => {
     it('should convert two paylods to customTextField models', () => {
-      const data: IJsonApiObjectList = {
+      const data: IJsonApiEntityListEnvelope = {
         data: [
           {
             id: '123',

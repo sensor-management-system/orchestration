@@ -3,11 +3,8 @@ Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
 Copyright (C) 2020-2021
-- Kotyba Alhaj Taha (UFZ, kotyba.alhaj-taha@ufz.de)
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
-- Helmholtz Centre for Environmental Research GmbH - UFZ
-  (UFZ, https://www.ufz.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
   Geosciences (GFZ, https://www.gfz-potsdam.de)
 
@@ -47,7 +44,7 @@ permissions and limitations under the Licence.
           small
           text
           nuxt
-          to="/search/platforms"
+          to="/search/contacts"
         >
           cancel
         </v-btn>
@@ -60,9 +57,9 @@ permissions and limitations under the Licence.
           create
         </v-btn>
       </v-card-actions>
-      <PlatformBasicDataForm
+      <ContactBasicDataForm
         ref="basicForm"
-        v-model="platform"
+        v-model="contact"
       />
       <v-card-actions>
         <v-spacer />
@@ -71,7 +68,7 @@ permissions and limitations under the Licence.
           small
           text
           nuxt
-          to="/search/platforms"
+          to="/search/contacts"
         >
           cancel
         </v-btn>
@@ -93,22 +90,21 @@ import { Component, Vue, mixins } from 'nuxt-property-decorator'
 
 import { Rules } from '@/mixins/Rules'
 
-import { Platform } from '@/models/Platform'
+import { Contact } from '@/models/Contact'
 
+import ContactBasicDataForm from '@/components/ContactBasicDataForm.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
-import PlatformBasicDataForm from '@/components/PlatformBasicDataForm.vue'
 
 @Component({
   components: {
-    PlatformBasicDataForm,
+    ContactBasicDataForm,
     ProgressIndicator
   }
 })
-// @ts-ignore
-export default class PlatformNewPage extends mixins(Rules) {
+export default class ContactNewPage extends mixins(Rules) {
   private numberOfTabs: number = 1
 
-  private platform: Platform = new Platform()
+  private contact: Contact = new Contact()
   private isLoading: boolean = false
 
   mounted () {
@@ -125,14 +121,14 @@ export default class PlatformNewPage extends mixins(Rules) {
       return
     }
     if (!this.isLoggedIn) {
-      this.$store.commit('snackbar/setError', 'You need to be logged in to save the platform')
+      this.$store.commit('snackbar/setError', 'You need to be logged in to save the contact')
       return
     }
     this.isLoading = true
-    this.$api.platforms.save(this.platform).then((savedPlatform) => {
+    this.$api.contacts.save(this.contact).then((savedContact) => {
       this.isLoading = false
-      this.$store.commit('snackbar/setSuccess', 'Platform created')
-      this.$router.push('/platforms/' + savedPlatform.id + '')
+      this.$store.commit('snackbar/setSuccess', 'Contact created')
+      this.$router.push('/contacts/' + savedContact.id + '')
     }).catch((_error) => {
       this.isLoading = false
       this.$store.commit('snackbar/setError', 'Save failed')
@@ -141,21 +137,7 @@ export default class PlatformNewPage extends mixins(Rules) {
 
   initializeAppBar () {
     this.$store.dispatch('appbar/init', {
-      tabs: [
-        {
-          to: '/platforms/new',
-          name: 'Basic Data'
-        },
-        {
-          name: 'Contacts',
-          disabled: true
-        },
-        {
-          name: 'Attachments',
-          disabled: true
-        }
-      ],
-      title: 'Add Platform'
+      title: 'Add Contact'
     })
   }
 

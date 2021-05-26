@@ -1,11 +1,45 @@
+<!--
+Web client of the Sensor Management System software developed within the
+Helmholtz DataHub Initiative by GFZ and UFZ.
+
+Copyright (C) 2020-2021
+- Kotyba Alhaj Taha (UFZ, kotyba.alhaj-taha@ufz.de)
+- Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
+- Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
+- Helmholtz Centre for Environmental Research GmbH - UFZ
+  (UFZ, https://www.ufz.de)
+- Helmholtz Centre Potsdam - GFZ German Research Centre for
+  Geosciences (GFZ, https://www.gfz-potsdam.de)
+
+Parts of this program were developed within the context of the
+following publicly funded projects or measures:
+- Helmholtz Earth and Environment DataHub
+  (https://www.helmholtz.de/en/research/earth_and_environment/initiatives/#h51095)
+
+Licensed under the HEESIL, Version 1.0 or - as soon they will be
+approved by the "Community" - subsequent versions of the HEESIL
+(the "Licence").
+
+You may not use this work except in compliance with the Licence.
+
+You may obtain a copy of the Licence at:
+https://gitext.gfz-potsdam.de/software/heesil
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the Licence is distributed on an "AS IS" basis,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+implied. See the Licence for the specific language governing
+permissions and limitations under the Licence.
+-->
+
 <template>
   <div>
     <v-row>
-      <v-col cols="12" md="3">
+      <v-col cols="12" md="6">
         <label>URN</label>
         {{ platformURN }}
       </v-col>
-      <v-col cols="12" md="3">
+      <v-col cols="12" md="6">
         <label>Persistent identifier (PID)</label>
         {{ value.persistentIdentifier | orDefault }}
       </v-col>
@@ -65,22 +99,6 @@
   </div>
 </template>
 
-<style lang="scss">
-@import '~vuetify/src/styles/settings/variables';
-@import '~vuetify/src/styles/settings/colors';
-
-label {
-  /* TODO: move to its own file */
-  display: block;
-  font-size: map-deep-get($headings, 'caption', 'size');
-  font-weight: map-deep-get($headings, 'caption', 'weight');
-  letter-spacing: map-deep-get($headings, 'caption', 'letter-spacing');
-  line-height: map-deep-get($headings, 'caption', 'line-height');
-  font-family: map-deep-get($headings, 'caption', 'font-family');
-  color: map-get($grey, 'darken-1');
-}
-</style>
-
 <script lang="ts">
 import { Component, Prop, Vue } from 'nuxt-property-decorator'
 
@@ -88,6 +106,8 @@ import { Platform } from '@/models/Platform'
 import { PlatformType } from '@/models/PlatformType'
 import { Status } from '@/models/Status'
 import { Manufacturer } from '@/models/Manufacturer'
+
+import { createPlatformUrn } from '@/modelUtils/urnBuilders'
 
 @Component
 export default class PlatformBasicData extends Vue {
@@ -157,27 +177,11 @@ export default class PlatformBasicData extends Vue {
   }
 
   get platformURN () {
-    let partType = '[type]'
-    let partShortName = '[short_name]'
-
-    if (this.value.platformTypeUri !== '') {
-      const manIndex = this.platformTypes.findIndex(m => m.uri === this.value.platformTypeUri)
-      if (manIndex > -1) {
-        partType = this.platformTypes[manIndex].name
-      } else if (this.value.platformTypeName !== '') {
-        partType = this.value.platformTypeName
-      }
-    } else if (this.value.platformTypeName !== '') {
-      partType = this.value.platformTypeName
-    }
-
-    if (this.value.shortName !== '') {
-      partShortName = this.value.shortName
-    }
-
-    return [partType, partShortName].join('_').replace(
-      ' ', '_'
-    )
+    return createPlatformUrn(this.value, this.platformTypes)
   }
 }
 </script>
+
+<style lang="scss">
+@import "@/assets/styles/_readonly_views.scss";
+</style>

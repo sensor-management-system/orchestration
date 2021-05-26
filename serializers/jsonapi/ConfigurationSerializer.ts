@@ -35,7 +35,13 @@ import { DateTime } from 'luxon'
 import { Configuration } from '@/models/Configuration'
 import { Contact } from '@/models/Contact'
 
-import { IJsonApiObjectList, IJsonApiObject, IJsonApiDataWithId, IJsonApiDataWithOptionalId, IJsonApiTypeIdAttributes, IJsonApiTypeId } from '@/serializers/jsonapi/JsonApiTypes'
+import {
+  IJsonApiEntityListEnvelope,
+  IJsonApiEntityEnvelope,
+  IJsonApiEntity,
+  IJsonApiEntityWithOptionalId,
+  IJsonApiEntityWithoutDetails
+} from '@/serializers/jsonapi/JsonApiTypes'
 
 import { ContactSerializer, IMissingContactData } from '@/serializers/jsonapi/ContactSerializer'
 import { DeviceSerializer } from '@/serializers/jsonapi/DeviceSerializer'
@@ -65,19 +71,19 @@ export class ConfigurationSerializer {
   private deviceSerializer: DeviceSerializer = new DeviceSerializer()
   private platformSerializer: PlatformSerializer = new PlatformSerializer()
 
-  convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiObjectList): IConfigurationWithMeta[] {
+  convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiEntityListEnvelope): IConfigurationWithMeta[] {
     const included = jsonApiObjectList.included || []
-    return jsonApiObjectList.data.map((model: IJsonApiDataWithId) => {
+    return jsonApiObjectList.data.map((model: IJsonApiEntity) => {
       return this.convertJsonApiDataToModel(model, included)
     })
   }
 
-  convertJsonApiObjectToModel (jsonApiObject: IJsonApiObject): IConfigurationWithMeta {
+  convertJsonApiObjectToModel (jsonApiObject: IJsonApiEntityEnvelope): IConfigurationWithMeta {
     const included = jsonApiObject.included || []
     return this.convertJsonApiDataToModel(jsonApiObject.data, included)
   }
 
-  convertJsonApiDataToModel (jsonApiData: IJsonApiDataWithId, included: IJsonApiTypeIdAttributes[]): IConfigurationWithMeta {
+  convertJsonApiDataToModel (jsonApiData: IJsonApiEntity, included: IJsonApiEntity[]): IConfigurationWithMeta {
     const configuration = new Configuration()
 
     const attributes = jsonApiData.attributes
@@ -130,7 +136,7 @@ export class ConfigurationSerializer {
       ]
       for (const check of toCheck) {
         if (relationships && relationships[check.key] && relationships[check.key].data) {
-          const data = relationships[check.key].data as IJsonApiTypeId
+          const data = relationships[check.key].data as IJsonApiEntityWithoutDetails
           const id = data.id
           if (id != null && devicePropertyLookupById[id]) {
             check.setFunction(devicePropertyLookupById[id])
@@ -140,9 +146,12 @@ export class ConfigurationSerializer {
       configuration.location = location
     }
 
-    const contactsWithMissing = this.contactSerializer.convertJsonApiRelationshipsModelList(relationships, included)
-    configuration.contacts = contactsWithMissing.contacts
-    const missingDataForContactIds = contactsWithMissing.missing.ids
+    let missingDataForContactIds: string[] = []
+    if (relationships) {
+      const contactsWithMissing = this.contactSerializer.convertJsonApiRelationshipsModelList(relationships, included)
+      configuration.contacts = contactsWithMissing.contacts
+      missingDataForContactIds = contactsWithMissing.missing.ids
+    }
 
     // we get all the devices and platforms
     const platforms = this.platformSerializer.convertJsonApiRelationshipsModelList(included)
@@ -217,7 +226,7 @@ export class ConfigurationSerializer {
     }
   }
 
-  convertModelToJsonApiData (configuration: Configuration): IJsonApiDataWithOptionalId {
+  convertModelToJsonApiData (configuration: Configuration): IJsonApiEntityWithOptionalId {
     const contacts = this.contactSerializer.convertModelListToJsonApiRelationshipObject(configuration.contacts)
 
     let locationAttributes = {}
@@ -318,7 +327,7 @@ export class ConfigurationSerializer {
       addChildrenRecursivly(childNode, hierarchy)
     }
 
-    const result: IJsonApiDataWithOptionalId = {
+    const result: IJsonApiEntityWithOptionalId = {
       attributes: {
         label: configuration.label,
         project_uri: configuration.projectUri,

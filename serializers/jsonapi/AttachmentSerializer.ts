@@ -4,8 +4,11 @@
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
  * Copyright (C) 2020
+ * - Kotyba Alhaj Taha (UFZ, kotyba.alhaj-taha@ufz.de)
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
+ * - Helmholtz Centre for Environmental Research GmbH - UFZ
+ * (UFZ, https://www.ufz.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
  *   Geosciences (GFZ, https://www.gfz-potsdam.de)
  *
@@ -31,11 +34,12 @@
  */
 import { Attachment, IAttachment } from '@/models/Attachment'
 
-import {
-  IJsonApiObjectList,
-  IJsonApiObject,
-  IJsonApiTypeIdAttributes,
-  IJsonApiDataWithOptionalIdWithoutRelationships
+import
+{
+  IJsonApiEntityEnvelope,
+  IJsonApiEntityListEnvelope,
+  IJsonApiEntity,
+  IJsonApiEntityWithOptionalId
 }
   from
   '@/serializers/jsonapi/JsonApiTypes'
@@ -50,12 +54,12 @@ export interface IAttachmentsAndMissing {
 }
 
 export class AttachmentSerializer {
-  convertJsonApiObjectToModel (jsonApiObject: IJsonApiObject): Attachment {
+  convertJsonApiObjectToModel (jsonApiObject: IJsonApiEntityEnvelope): Attachment {
     const data = jsonApiObject.data
     return this.convertJsonApiDataToModel(data)
   }
 
-  convertJsonApiDataToModel (jsonApiData: IJsonApiTypeIdAttributes): Attachment {
+  convertJsonApiDataToModel (jsonApiData: IJsonApiEntity): Attachment {
     const attributes = jsonApiData.attributes
     const newEntry = Attachment.createEmpty()
 
@@ -66,11 +70,11 @@ export class AttachmentSerializer {
     return newEntry
   }
 
-  convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiObjectList): Attachment[] {
+  convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiEntityListEnvelope): Attachment[] {
     return jsonApiObjectList.data.map(this.convertJsonApiDataToModel)
   }
 
-  convertModelToJsonApiData (attachment : IAttachment): IJsonApiDataWithOptionalIdWithoutRelationships {
+  convertModelToJsonApiData (attachment : IAttachment): IJsonApiEntityWithOptionalId {
     const data: any = {
       type: 'attachment',
       attributes: {

@@ -31,19 +31,23 @@
  */
 import { SamplingMedia } from '@/models/SamplingMedia'
 
-import { IJsonApiObjectListWithLinks, IJsonApiDataWithIdAndLinks, IJsonApiTypeIdData } from '@/serializers/jsonapi/JsonApiTypes'
+import {
+  IJsonApiEntityListEnvelope,
+  IJsonApiEntity,
+  IJsonApiEntityWithoutDetailsDataDict
+} from '@/serializers/jsonapi/JsonApiTypes'
 
 export class SamplingMediaSerializer {
-  convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiObjectListWithLinks): SamplingMedia[] {
+  convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiEntityListEnvelope): SamplingMedia[] {
     return jsonApiObjectList.data.map(this.convertJsonApiDataToModel.bind(this))
   }
 
-  convertJsonApiDataToModel (jsonApiData: IJsonApiDataWithIdAndLinks): SamplingMedia {
+  convertJsonApiDataToModel (jsonApiData: IJsonApiEntity): SamplingMedia {
     const id = jsonApiData.id.toString()
     const name = jsonApiData.attributes.term
-    const url = jsonApiData.links.self
+    const url = jsonApiData.links?.self || ''
     const definition = jsonApiData.attributes.definition
-    const compartmentId = (jsonApiData.relationships.compartment as IJsonApiTypeIdData).data.id
+    const compartmentId = (jsonApiData.relationships && jsonApiData.relationships.compartment && (jsonApiData.relationships.compartment as IJsonApiEntityWithoutDetailsDataDict).data.id) || ''
 
     return SamplingMedia.createWithData(id, name, url, definition, compartmentId)
   }

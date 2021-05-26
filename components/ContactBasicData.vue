@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020
+Copyright (C) 2020-2021
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -30,51 +30,53 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <v-overlay
-      :value="isInProgress"
-      :opacity="dark ? 0.5 : 0.05"
-    >
-      <v-progress-circular
-        indeterminate
-        class="center-absolute"
-      />
-    </v-overlay>
+    <v-row>
+      <v-col cols="12" md="3">
+        <label>Given name</label>
+        {{ value.givenName | orDefault }}
+      </v-col>
+      <v-col cols="12" md="3">
+        <label>Family name</label>
+        {{ value.familyName | orDefault }}
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="12" md="9">
+        <label>E-mail</label>
+        {{ value.email | orDefault }}
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="12" md="9">
+        <label>Website</label>
+        {{ value.website | orDefault }}
+        <a v-if="value.website.length > 0" :href="value.website" target="_blank">
+          <v-icon>
+            mdi-open-in-new
+          </v-icon>
+        </a>
+      </v-col>
+    </v-row>
   </div>
 </template>
 
 <script lang="ts">
 import { Component, Vue, Prop } from 'nuxt-property-decorator'
 
+import { Contact } from '@/models/Contact'
+
 @Component
-export default class ProgressIndicator extends Vue {
+export default class ContactBasicData extends Vue {
   @Prop({
-    default: false,
-    required: false,
-    type: Boolean
+    default: () => new Contact(),
+    required: true,
+    type: Contact
   })
-  // @ts-ignore
-  readonly value!: boolean
-
-  @Prop({
-    default: false,
-    required: false,
-    type: Boolean
-  })
-  // @ts-ignore
-  readonly dark!: boolean
-
-  get isInProgress (): boolean {
-    return this.value
-  }
+  readonly value!: Contact
 }
+
 </script>
 
-<style>
-  .center-absolute {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    margin-top: -16px;
-    margin-left: -16px;
-  }
+<style lang="scss">
+@import "@/assets/styles/_readonly_views.scss";
 </style>

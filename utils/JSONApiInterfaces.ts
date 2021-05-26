@@ -62,6 +62,8 @@ export interface IFlaskJSONAPISimpleGroupFilter {
 }
 
 export interface IFlaskJSONAPIOrFilter {
+  // We really want to do a possible recursive type definition here
+  // eslint-disable-next-line no-use-before-define
   or: IFlaskJSONAPIFilter[]
 }
 

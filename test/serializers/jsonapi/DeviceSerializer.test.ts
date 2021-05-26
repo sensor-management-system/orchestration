@@ -4,8 +4,11 @@
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
  * Copyright (C) 2020
+ * - Kotyba Alhaj Taha (UFZ, kotyba.alhaj-taha@ufz.de)
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
+ * - Helmholtz Centre for Environmental Research GmbH - UFZ
+ * (UFZ, https://www.ufz.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
  *   Geosciences (GFZ, https://www.gfz-potsdam.de)
  *
@@ -43,7 +46,7 @@ import { Attachment } from '@/models/Attachment'
 import { DeviceProperty } from '@/models/DeviceProperty'
 import { MeasuringRange } from '@/models/MeasuringRange'
 import { CustomTextField } from '@/models/CustomTextField'
-import { IJsonApiTypeIdDataList } from '@/serializers/jsonapi/JsonApiTypes'
+import { IJsonApiEntityWithoutDetailsDataDictList } from '@/serializers/jsonapi/JsonApiTypes'
 
 const createTestDevice = () => {
   const device = new Device()
@@ -1051,7 +1054,7 @@ describe('DeviceSerializer', () => {
       // expect(attributes.updated_at).toEqual('2020-08-30T13:49:48.015Z')
 
       expect(jsonApiData.relationships).toHaveProperty('customfields')
-      const customFields = jsonApiData.relationships.customfields as IJsonApiTypeIdDataList
+      const customFields = jsonApiData.relationships?.customfields as IJsonApiEntityWithoutDetailsDataDictList
       expect(customFields).toHaveProperty('data')
       const customFieldsData = customFields.data
       expect(Array.isArray(customFieldsData)).toBeTruthy()
@@ -1066,7 +1069,7 @@ describe('DeviceSerializer', () => {
       })
 
       expect(jsonApiData.relationships).toHaveProperty('device_attachments')
-      const attachments = jsonApiData.relationships.device_attachments as IJsonApiTypeIdDataList
+      const attachments = jsonApiData.relationships?.device_attachments as IJsonApiEntityWithoutDetailsDataDictList
       expect(Array.isArray(attachments.data)).toBeTruthy()
 
       expect(attachments.data.length).toEqual(2)
@@ -1081,7 +1084,7 @@ describe('DeviceSerializer', () => {
       })
 
       expect(jsonApiData.relationships).toHaveProperty('device_properties')
-      const propertyObject = jsonApiData.relationships.device_properties as IJsonApiTypeIdDataList
+      const propertyObject = jsonApiData.relationships?.device_properties as IJsonApiEntityWithoutDetailsDataDictList
       expect(propertyObject).toHaveProperty('data')
       const propertyData = propertyObject.data
       expect(propertyData.length).toEqual(2)
@@ -1097,12 +1100,12 @@ describe('DeviceSerializer', () => {
       expect(jsonApiData).toHaveProperty('relationships')
       expect(typeof jsonApiData.relationships).toEqual('object')
       expect(jsonApiData.relationships).toHaveProperty('contacts')
-      expect(typeof jsonApiData.relationships.contacts).toBe('object')
+      expect(typeof jsonApiData.relationships?.contacts).toBe('object')
       // we test for the inner structure of the result anyway
       // this cast is just to tell typescript that
       // we have an array of data, so that it doesn't show
       // typeerrors here
-      const contactObject = jsonApiData.relationships.contacts as IJsonApiTypeIdDataList
+      const contactObject = jsonApiData.relationships?.contacts as IJsonApiEntityWithoutDetailsDataDictList
       expect(contactObject).toHaveProperty('data')
       const contactData = contactObject.data
       expect(Array.isArray(contactData)).toBeTruthy()

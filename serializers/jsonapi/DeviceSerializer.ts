@@ -4,8 +4,11 @@
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
  * Copyright (C) 2020
+ * - Kotyba Alhaj Taha (UFZ, kotyba.alhaj-taha@ufz.de)
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
+ * - Helmholtz Centre for Environmental Research GmbH - UFZ
+ * (UFZ, https://www.ufz.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
  *   Geosciences (GFZ, https://www.gfz-potsdam.de)
  *
@@ -34,11 +37,10 @@ import { Contact } from '@/models/Contact'
 import { Device } from '@/models/Device'
 
 import {
-  IJsonApiDataWithId,
-  IJsonApiDataWithOptionalId,
-  IJsonApiObject,
-  IJsonApiObjectList,
-  IJsonApiTypeIdAttributes
+  IJsonApiEntityEnvelope,
+  IJsonApiEntityListEnvelope,
+  IJsonApiEntity,
+  IJsonApiEntityWithOptionalId
 } from '@/serializers/jsonapi/JsonApiTypes'
 
 import { IMissingAttachmentData } from '@/serializers/jsonapi/AttachmentSerializer'
@@ -72,12 +74,12 @@ export class DeviceSerializer {
   private customTextFieldSerializer: CustomTextFieldSerializer = new CustomTextFieldSerializer()
   private devicePropertySerializer: DevicePropertySerializer = new DevicePropertySerializer()
 
-  convertJsonApiObjectToModel (jsonApiObject: IJsonApiObject): IDeviceWithMeta {
+  convertJsonApiObjectToModel (jsonApiObject: IJsonApiEntityEnvelope): IDeviceWithMeta {
     const included = jsonApiObject.included || []
     return this.convertJsonApiDataToModel(jsonApiObject.data, included)
   }
 
-  convertJsonApiDataToModel (jsonApiData: IJsonApiDataWithId | IJsonApiTypeIdAttributes, included: IJsonApiTypeIdAttributes[]): IDeviceWithMeta {
+  convertJsonApiDataToModel (jsonApiData: IJsonApiEntity, included: IJsonApiEntity[]): IDeviceWithMeta {
     const result: Device = new Device()
 
     const attributes = jsonApiData.attributes
@@ -142,14 +144,14 @@ export class DeviceSerializer {
     }
   }
 
-  convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiObjectList): IDeviceWithMeta[] {
+  convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiEntityListEnvelope): IDeviceWithMeta[] {
     const included = jsonApiObjectList.included || []
-    return jsonApiObjectList.data.map((model: IJsonApiDataWithId) => {
+    return jsonApiObjectList.data.map((model: IJsonApiEntity) => {
       return this.convertJsonApiDataToModel(model, included)
     })
   }
 
-  convertJsonApiRelationshipsModelList (included: IJsonApiTypeIdAttributes[]): Device[] {
+  convertJsonApiRelationshipsModelList (included: IJsonApiEntity[]): Device[] {
     // it takes all the devices, as those are the only ones included in the query per configuration.
     // if you want to use it in a broader scope, you may have to change several things
     const result = []
@@ -164,13 +166,13 @@ export class DeviceSerializer {
     return result
   }
 
-  convertModelToJsonApiData (device: Device): IJsonApiDataWithOptionalId {
+  convertModelToJsonApiData (device: Device): IJsonApiEntityWithOptionalId {
     const properties = this.devicePropertySerializer.convertModelListToJsonApiRelationshipObject(device.properties)
     const customfields = this.customTextFieldSerializer.convertModelListToJsonApiRelationshipObject(device.customFields)
     const attachments = this.attachmentSerializer.convertModelListToJsonApiRelationshipObject(device.attachments)
     const contacts = this.contactSerializer.convertModelListToJsonApiRelationshipObject(device.contacts)
 
-    const data: IJsonApiDataWithOptionalId = {
+    const data: IJsonApiEntityWithOptionalId = {
       type: 'device',
       attributes: {
         description: device.description,
@@ -229,5 +231,10 @@ export const deviceWithMetaToDeviceByAddingDummyObjects = (deviceWithMeta: { mis
     device.contacts.push(contact)
   }
 
+  return device
+}
+
+export const deviceWithMetaToDeviceThrowingNoErrorOnMissing = (deviceWithMeta: { missing: { contacts: { ids: any[] } }; device: Device }): Device => {
+  const device = deviceWithMeta.device
   return device
 }

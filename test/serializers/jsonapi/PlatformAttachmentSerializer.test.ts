@@ -132,8 +132,8 @@ describe('PlatformAttachmentSerializer', () => {
       expect(jsonApiPayload.attributes.label).toEqual('UFZ Homepage')
       expect(jsonApiPayload).toHaveProperty('relationships')
       expect(jsonApiPayload.relationships).toHaveProperty('platform')
-      expect(jsonApiPayload.relationships.platform).toHaveProperty('data')
-      const platformData: any = jsonApiPayload.relationships.platform.data
+      expect(jsonApiPayload.relationships?.platform).toHaveProperty('data')
+      const platformData: any = jsonApiPayload.relationships?.platform.data
       expect(platformData).toHaveProperty('id')
       expect(platformData.id).toEqual('456')
       expect(platformData).toHaveProperty('type')
@@ -160,8 +160,8 @@ describe('PlatformAttachmentSerializer', () => {
       expect(jsonApiPayload.attributes.label).toEqual('UFZ Homepage')
       expect(jsonApiPayload).toHaveProperty('relationships')
       expect(jsonApiPayload.relationships).toHaveProperty('platform')
-      expect(jsonApiPayload.relationships.platform).toHaveProperty('data')
-      const platformData: any = jsonApiPayload.relationships.platform.data
+      expect(jsonApiPayload.relationships?.platform).toHaveProperty('data')
+      const platformData: any = jsonApiPayload.relationships?.platform.data
       expect(platformData).toHaveProperty('id')
       expect(platformData.id).toEqual('456')
       expect(platformData).toHaveProperty('type')
