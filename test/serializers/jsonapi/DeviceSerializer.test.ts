@@ -1054,7 +1054,7 @@ describe('DeviceSerializer', () => {
       // expect(attributes.updated_at).toEqual('2020-08-30T13:49:48.015Z')
 
       expect(jsonApiData.relationships).toHaveProperty('customfields')
-      const customFields = jsonApiData.relationships.customfields as IJsonApiTypeIdDataList
+      const customFields = jsonApiData.relationships?.customfields as IJsonApiTypeIdDataList
       expect(customFields).toHaveProperty('data')
       const customFieldsData = customFields.data
       expect(Array.isArray(customFieldsData)).toBeTruthy()
@@ -1069,7 +1069,7 @@ describe('DeviceSerializer', () => {
       })
 
       expect(jsonApiData.relationships).toHaveProperty('device_attachments')
-      const attachments = jsonApiData.relationships.device_attachments as IJsonApiTypeIdDataList
+      const attachments = jsonApiData.relationships?.device_attachments as IJsonApiTypeIdDataList
       expect(Array.isArray(attachments.data)).toBeTruthy()
 
       expect(attachments.data.length).toEqual(2)
@@ -1084,7 +1084,7 @@ describe('DeviceSerializer', () => {
       })
 
       expect(jsonApiData.relationships).toHaveProperty('device_properties')
-      const propertyObject = jsonApiData.relationships.device_properties as IJsonApiTypeIdDataList
+      const propertyObject = jsonApiData.relationships?.device_properties as IJsonApiTypeIdDataList
       expect(propertyObject).toHaveProperty('data')
       const propertyData = propertyObject.data
       expect(propertyData.length).toEqual(2)
@@ -1100,12 +1100,12 @@ describe('DeviceSerializer', () => {
       expect(jsonApiData).toHaveProperty('relationships')
       expect(typeof jsonApiData.relationships).toEqual('object')
       expect(jsonApiData.relationships).toHaveProperty('contacts')
-      expect(typeof jsonApiData.relationships.contacts).toBe('object')
+      expect(typeof jsonApiData.relationships?.contacts).toBe('object')
       // we test for the inner structure of the result anyway
       // this cast is just to tell typescript that
       // we have an array of data, so that it doesn't show
       // typeerrors here
-      const contactObject = jsonApiData.relationships.contacts as IJsonApiTypeIdDataList
+      const contactObject = jsonApiData.relationships?.contacts as IJsonApiTypeIdDataList
       expect(contactObject).toHaveProperty('data')
       const contactData = contactObject.data
       expect(Array.isArray(contactData)).toBeTruthy()
