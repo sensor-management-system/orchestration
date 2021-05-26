@@ -60,9 +60,22 @@ export interface IGenericActionAttachmentRelation {
   attachmentId: string
 }
 
+export const GENERIC_ACTION_SERIALIZER_TYPE_DEVICE = 'device'
+export const GENERIC_ACTION_SERIALIZER_TYPE_PLATFORM = 'platform'
+export type GenericActionSerializerType = typeof GENERIC_ACTION_SERIALIZER_TYPE_DEVICE | typeof GENERIC_ACTION_SERIALIZER_TYPE_PLATFORM
+
 export class GenericActionSerializer {
-  private attachmentSerializer: GenericActionAttachmentSerializer = new GenericActionAttachmentSerializer()
+  private attachmentSerializer: GenericActionAttachmentSerializer
   private contactSerializer: ContactSerializer = new ContactSerializer()
+  private type: GenericActionSerializerType
+
+  constructor (type: GenericActionSerializerType) {
+    if (![GENERIC_ACTION_SERIALIZER_TYPE_DEVICE, GENERIC_ACTION_SERIALIZER_TYPE_PLATFORM].includes(type)) {
+      throw new TypeError('type ' + type + ' is unknown')
+    }
+    this.type = type
+    this.attachmentSerializer = new GenericActionAttachmentSerializer(this.type)
+  }
 
   convertJsonApiObjectToModel (jsonApiObject: IJsonApiEntityEnvelope): GenericAction {
     const data = jsonApiObject.data
@@ -103,9 +116,33 @@ export class GenericActionSerializer {
     })
   }
 
-  convertModelToJsonApiData (action: GenericAction, deviceId: string): IJsonApiEntityWithOptionalId {
+  convertModelToJsonApiData (action: GenericAction, deviceOrPlatformId: string): IJsonApiEntityWithOptionalId {
+    const type = this.getActionTypeName()
+    let relationships: IJsonApiRelationships
+    switch (this.type) {
+      case GENERIC_ACTION_SERIALIZER_TYPE_DEVICE:
+        relationships = {
+          device: {
+            data: {
+              type: 'device',
+              id: deviceOrPlatformId
+            }
+          }
+        }
+        break
+      case GENERIC_ACTION_SERIALIZER_TYPE_PLATFORM:
+        relationships = {
+          platform: {
+            data: {
+              type: 'platform',
+              id: deviceOrPlatformId
+            }
+          }
+        }
+        break
+    }
     const data: IJsonApiEntityWithOptionalId = {
-      type: 'generic_device_action',
+      type,
       attributes: {
         description: action.description,
         action_type_name: action.actionTypeName,
@@ -113,14 +150,7 @@ export class GenericActionSerializer {
         begin_date: action.beginDate != null ? action.beginDate.setZone('UTC').toISO() : null,
         end_date: action.endDate != null ? action.endDate.setZone('UTC').toISO() : null
       },
-      relationships: {
-        device: {
-          data: {
-            type: 'device',
-            id: deviceId
-          }
-        }
-      }
+      relationships
     }
     if (action.id) {
       data.id = action.id
@@ -139,7 +169,7 @@ export class GenericActionSerializer {
 
   convertModelToJsonApiRelationshipObject (action: IGenericAction): IJsonApiTypedEntityWithoutDetailsDataDict {
     return {
-      generic_device_action: {
+      [this.getActionTypeName()]: {
         data: this.convertModelToTupleWithIdAndType(action)
       }
     }
@@ -148,23 +178,16 @@ export class GenericActionSerializer {
   convertModelToTupleWithIdAndType (action: IGenericAction): IJsonApiEntityWithoutDetails {
     return {
       id: action.id || '',
-      type: 'generic_device_action'
+      type: this.getActionTypeName()
     }
   }
 
-  /**
-   * convert GenericActions that come as a relationship
-   *
-   * do we still need this one?
-   *
-   * @param {IJsonApiTypeIdDataListDict} relationships - a JSONAPI relationships object
-   * @param {IJsonApiTypeIdAttributes[]} included - a JSONAPI object with included GenericActions
-   * @return {IGenericActionsAndMissing} serialized GenericActions and an array of ids, that could not be resolved
-   */
   convertJsonApiRelationshipsModelList (relationships: IJsonApiRelationships, included: IJsonApiEntity[]): IGenericActionsAndMissing {
     const actionIds = []
-    if (relationships.generic_device_actions) {
-      const actionObject = relationships.generic_device_actions as IJsonApiEntityWithoutDetailsDataDictList
+    const type = this.getActionTypeName()
+    const typePlural = type + 's'
+    if (relationships[typePlural]) {
+      const actionObject = relationships[typePlural] as IJsonApiEntityWithoutDetailsDataDictList
       if (actionObject.data && (actionObject.data as IJsonApiEntityWithoutDetails[]).length > 0) {
         for (const relationShipActionData of actionObject.data) {
           const actionId = relationShipActionData.id
@@ -176,7 +199,7 @@ export class GenericActionSerializer {
     const possibleActions: { [key: string]: GenericAction } = {}
     if (included && included.length > 0) {
       for (const includedEntry of included) {
-        if (includedEntry.type === 'generic_device_action') {
+        if (includedEntry.type === type) {
           const actionId = includedEntry.id
           if (actionIds.includes(actionId)) {
             const action = this.convertJsonApiDataToModel(includedEntry, [])
@@ -207,11 +230,12 @@ export class GenericActionSerializer {
 
   convertJsonApiIncludedGenericActionAttachmentsToIdList (included: IJsonApiEntity[]): IGenericActionAttachmentRelation[] {
     const linkedAttachments: IGenericActionAttachmentRelation[] = []
+    const type = this.getActionAttachmentTypeName()
     included.forEach((i) => {
       if (!i.id) {
         return
       }
-      if (i.type !== 'generic_device_action_attachment') {
+      if (i.type !== type) {
         return
       }
       if (!i.relationships?.attachment || !i.relationships?.attachment.data || !(i.relationships?.attachment.data as IJsonApiEntityWithoutDetails).id) {
@@ -224,5 +248,27 @@ export class GenericActionSerializer {
       })
     })
     return linkedAttachments
+  }
+
+  getActionTypeName (): string {
+    switch (this.type) {
+      case GENERIC_ACTION_SERIALIZER_TYPE_DEVICE:
+        return 'generic_device_action'
+      case GENERIC_ACTION_SERIALIZER_TYPE_PLATFORM:
+        return 'generic_platform_action'
+      default:
+        throw new TypeError('action type name not defined')
+    }
+  }
+
+  getActionAttachmentTypeName (): string {
+    switch (this.type) {
+      case GENERIC_ACTION_SERIALIZER_TYPE_DEVICE:
+        return 'generic_device_action_attachment'
+      case GENERIC_ACTION_SERIALIZER_TYPE_PLATFORM:
+        return 'generic_platform_action_attachment'
+      default:
+        throw new TypeError('action attachment type name not defined')
+    }
   }
 }

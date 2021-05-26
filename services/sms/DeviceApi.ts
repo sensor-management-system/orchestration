@@ -203,7 +203,7 @@ export class DeviceApi {
       ].join(',')
     }
     return this.axiosApi.get(url, { params }).then((rawServerResponse) => {
-      return new GenericActionSerializer().convertJsonApiObjectListToModelList(rawServerResponse.data)
+      return new GenericActionSerializer('device').convertJsonApiObjectListToModelList(rawServerResponse.data)
     })
   }
 }

@@ -40,7 +40,7 @@ export class GenericDeviceActionAttachmentApi {
 
   constructor (axiosInstance: AxiosInstance) {
     this.axiosApi = axiosInstance
-    this.serializer = new GenericActionAttachmentSerializer()
+    this.serializer = new GenericActionAttachmentSerializer('device')
   }
 
   async add (actionId: string, attachment: Attachment): Promise<any> {

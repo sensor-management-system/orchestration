@@ -43,7 +43,7 @@ export class GenericDeviceActionApi {
 
   constructor (axiosInstance: AxiosInstance, attachmentApi: GenericDeviceActionAttachmentApi) {
     this.axiosApi = axiosInstance
-    this.serializer = new GenericActionSerializer()
+    this.serializer = new GenericActionSerializer('device')
     this.attachmentApi = attachmentApi
   }
 
@@ -140,7 +140,7 @@ export class GenericDeviceActionApi {
       include: 'attachment'
     }
     return this.axiosApi.get(url, { params }).then((rawServerResponse) => {
-      return new GenericActionSerializer().convertJsonApiObjectListToModelList(rawServerResponse.data)
+      return new GenericActionSerializer('device').convertJsonApiObjectListToModelList(rawServerResponse.data)
     })
   }
 }
