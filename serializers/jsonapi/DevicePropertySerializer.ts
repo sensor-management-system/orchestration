@@ -37,12 +37,15 @@ import { MeasuringRange } from '@/models/MeasuringRange'
 
 import {
   IJsonApiNestedElement,
-  IJsonApiObject,
-  IJsonApiObjectList,
-  IJsonApiTypeIdAttributes,
-  IJsonApiDataWithOptionalId,
-  IJsonApiTypeIdDataListDict, IJsonApiTypeId, IJsonApiTypeIdDataList
+  IJsonApiEntityEnvelope,
+  IJsonApiEntityListEnvelope,
+  IJsonApiTypedEntityWithoutDetailsDataDictList,
+  IJsonApiEntity,
+  IJsonApiEntityWithoutDetails,
+  IJsonApiRelationships,
+  IJsonApiEntityWithOptionalId
 } from '@/serializers/jsonapi/JsonApiTypes'
+
 export interface IMissingDevicePropertyData {
   ids: string[]
 }
@@ -51,6 +54,7 @@ export interface IDevicePropertiesAndMissing {
   properties: DeviceProperty[]
   missing: IMissingDevicePropertyData
 }
+
 export class DevicePropertySerializer {
   convertJsonApiElementToModel (property: IJsonApiNestedElement): DeviceProperty {
     const result = new DeviceProperty()
@@ -116,16 +120,16 @@ export class DevicePropertySerializer {
     return result
   }
 
-  convertJsonApiObjectToModel (jsonApiObject: IJsonApiObject): DeviceProperty {
+  convertJsonApiObjectToModel (jsonApiObject: IJsonApiEntityEnvelope): DeviceProperty {
     const data = jsonApiObject.data
     return this.convertJsonApiDataToModel(data)
   }
 
-  convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiObjectList): DeviceProperty[] {
+  convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiEntityListEnvelope): DeviceProperty[] {
     return jsonApiObjectList.data.map(this.convertJsonApiDataToModel)
   }
 
-  convertModelListToJsonApiRelationshipObject (properties: DeviceProperty[]): IJsonApiTypeIdDataListDict {
+  convertModelListToJsonApiRelationshipObject (properties: DeviceProperty[]): IJsonApiTypedEntityWithoutDetailsDataDictList {
     return {
       device_properties: {
         data: this.convertModelListToTupleListWithIdAndType(properties)
@@ -133,7 +137,7 @@ export class DevicePropertySerializer {
     }
   }
 
-  convertJsonApiDataToModel (jsonApiData: IJsonApiTypeIdAttributes): DeviceProperty {
+  convertJsonApiDataToModel (jsonApiData: IJsonApiEntity): DeviceProperty {
     const newEntry = new DeviceProperty()
     newEntry.id = jsonApiData.id.toString()
     newEntry.measuringRange = new MeasuringRange(
@@ -158,8 +162,8 @@ export class DevicePropertySerializer {
     return newEntry
   }
 
-  convertModelListToTupleListWithIdAndType (properties: IDeviceProperty[]): IJsonApiTypeId[] {
-    const result: IJsonApiTypeId[] = []
+  convertModelListToTupleListWithIdAndType (properties: IDeviceProperty[]): IJsonApiEntityWithoutDetails[] {
+    const result: IJsonApiEntityWithoutDetails[] = []
     for (const property of properties) {
       if (property.id !== null) {
         result.push({
@@ -171,12 +175,12 @@ export class DevicePropertySerializer {
     return result
   }
 
-  convertJsonApiRelationshipsModelList (relationships: IJsonApiTypeIdDataListDict, included: IJsonApiTypeIdAttributes[]): IDevicePropertiesAndMissing {
+  convertJsonApiRelationshipsModelList (relationships: IJsonApiRelationships, included: IJsonApiEntity[]): IDevicePropertiesAndMissing {
     const devicePropertyIds = []
     if (relationships.device_properties) {
-      const devicePropertyObject = relationships.device_properties as IJsonApiTypeIdDataList
-      if (devicePropertyObject.data && devicePropertyObject.data.length > 0) {
-        for (const relationShipDevicePropertyData of devicePropertyObject.data) {
+      const devicePropertyObject = relationships.device_properties
+      if (devicePropertyObject.data && (devicePropertyObject.data as IJsonApiEntityWithoutDetails[]).length > 0) {
+        for (const relationShipDevicePropertyData of (devicePropertyObject.data as IJsonApiEntityWithoutDetails[])) {
           const devicePropertyId = relationShipDevicePropertyData.id
           devicePropertyIds.push(devicePropertyId)
         }
@@ -215,7 +219,7 @@ export class DevicePropertySerializer {
     }
   }
 
-  convertModelToJsonApiData (deviceProperty: DeviceProperty, deviceId: string): IJsonApiDataWithOptionalId {
+  convertModelToJsonApiData (deviceProperty: DeviceProperty, deviceId: string): IJsonApiEntityWithOptionalId {
     const data: any = {
       type: 'device_property',
       attributes: {
