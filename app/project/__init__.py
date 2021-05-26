@@ -1,18 +1,17 @@
-import os
-
 from elasticsearch import Elasticsearch
 from flask import Blueprint, Flask
 from flask_cors import CORS
 from flask_migrate import Migrate
 
+from .api import minio
 from .api.models.base_model import db
 from .api.token_checker import jwt
 from .api.upload_files import upload_routes
+from .config import env
 from .urls import api
-from .api import minio
 
 migrate = Migrate()
-base_url = os.getenv("URL_PREFIX", "/rdm/svm-api/v1")
+base_url = env("URL_PREFIX", "/rdm/svm-api/v1")
 
 
 def create_app():
@@ -24,7 +23,7 @@ def create_app():
 
     # enable CORS
     # get space separated list from environment var
-    origins_raw = os.getenv("HTTP_ORIGINS", None)
+    origins_raw = env("HTTP_ORIGINS", None)
     if origins_raw:
         # create a list of origins
         origins = origins_raw.split()
@@ -32,7 +31,7 @@ def create_app():
         CORS(app, origins=origins)
 
     # set config
-    app_settings = os.getenv("APP_SETTINGS")
+    app_settings = env("APP_SETTINGS")
     app.config.from_object(app_settings)
 
     # instantiate the db

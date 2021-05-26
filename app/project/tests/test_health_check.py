@@ -12,5 +12,5 @@ class HealthCheck(BaseTestCase):
         response = self.client.get(base_url + "/ping")
         data = json.loads(response.data.decode())
         self.assertEqual(response.status_code, 200)
-        self.assertIn("Hello Sensor!", data["message"])
+        self.assertIn("Pong", data["message"])
         self.assertIn("success", data["status"])
