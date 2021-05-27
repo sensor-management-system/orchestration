@@ -36,7 +36,8 @@ class BaseConfig:
     SQLALCHEMY_POOL_TIMEOUT = env.int("POOL_TIMEOUT", DEFAULT_POOL_TIMEOUT)
     JWT_IDENTITY_CLAIM = env("OIDC_USERNAME_CLAIM")
     # Hostname of a S3 service.
-    MINIO_ENDPOINT = env("MINIO_ENDPOINT", "172.16.238.10:9000")
+    MINIO_ENDPOINT = env("MINIO_ENDPOINT", "minio:9000")
+    MINIO_ENDPOINT_DOWNLOAD = env("MINIO_ENDPOINT", "localhost:9000")
     # Access key (aka user ID) of your account in S3 service.
     MINIO_ACCESS_KEY = env("MINIO_ACCESS_KEY", "minio")
     # Secret Key (aka password) of your account in S3 service.

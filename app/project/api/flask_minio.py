@@ -178,7 +178,7 @@ class FlaskMinio:
         size = os.fstat(uploaded_file.fileno()).st_size
         act_year_month = time.strftime("%Y-%m")
         minio_bucket_name = current_app.config["MINIO_BUCKET_NAME"]
-        minio_endpoint = current_app.config["MINIO_ENDPOINT"]
+        minio_endpoint = current_app.config["MINIO_ENDPOINT_DOWNLOAD"]
         try:
             found = self.connection.bucket_exists(minio_bucket_name)
             if not found:

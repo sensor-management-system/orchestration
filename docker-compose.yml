@@ -17,7 +17,8 @@ services:
     ports:
       - 9200:9200
     networks:
-      - elastic
+      - sms
+
   app:
     image: python:3.9-slim-buster
     working_dir: /usr/src/app
@@ -30,9 +31,7 @@ services:
     depends_on:
       - db
     networks:
-      - elastic
-      - db
-      - minio
+      - sms
     command: >
       sh -c "
       apt-get update && apt-get install -y  --no-install-recommends \
@@ -57,7 +56,8 @@ services:
     volumes:
       - ./app/project/db/create.sql:/docker-entrypoint-initdb.d/create.sql
     networks:
-      - db
+      - sms
+
   minio:
     image: minio/minio:latest
     volumes:
@@ -65,8 +65,7 @@ services:
     ports:
       - "127.0.0.1:9000:9000"
     networks:
-      minio:
-        ipv4_address: 172.16.238.10
+      - sms
     environment:
       MINIO_ACCESS_KEY: minio
       MINIO_SECRET_KEY: minio123
@@ -92,7 +91,7 @@ services:
       exit 0;
       "
     networks:
-      - minio
+      - sms
 
 volumes:
   esdata01:
@@ -100,12 +99,4 @@ volumes:
   data1:
 
 networks:
-  elastic:
-    driver: bridge
-  db:
-  minio:
-    driver: bridge
-    ipam:
-      driver: default
-      config:
-        - subnet: 172.16.238.0/24
+  sms:
