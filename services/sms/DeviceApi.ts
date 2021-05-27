@@ -45,7 +45,7 @@ import { ContactSerializer } from '@/serializers/jsonapi/ContactSerializer'
 import { CustomTextFieldSerializer } from '@/serializers/jsonapi/CustomTextFieldSerializer'
 import { DeviceAttachmentSerializer } from '@/serializers/jsonapi/DeviceAttachmentSerializer'
 import { DevicePropertySerializer } from '@/serializers/jsonapi/DevicePropertySerializer'
-import { GenericActionSerializer } from '@/serializers/jsonapi/GenericActionSerializer'
+import { GenericDeviceActionSerializer } from '@/serializers/jsonapi/GenericActionSerializer'
 
 import { IFlaskJSONAPIFilter } from '@/utils/JSONApiInterfaces'
 
@@ -203,7 +203,7 @@ export class DeviceApi {
       ].join(',')
     }
     return this.axiosApi.get(url, { params }).then((rawServerResponse) => {
-      return new GenericActionSerializer('device').convertJsonApiObjectListToModelList(rawServerResponse.data)
+      return new GenericDeviceActionSerializer().convertJsonApiObjectListToModelList(rawServerResponse.data)
     })
   }
 }

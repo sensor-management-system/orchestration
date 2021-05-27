@@ -41,20 +41,10 @@ import {
 
 import { DeviceAttachmentSerializer } from '@/serializers/jsonapi/DeviceAttachmentSerializer'
 
-export const GENERIC_ACTION_ATTACHMENT_SERIALIZER_TYPE_DEVICE = 'device'
-export const GENERIC_ACTION_ATTACHMENT_SERIALIZER_TYPE_PLATFORM = 'platform'
-export type GenericActionAttachmentSerializerType = typeof GENERIC_ACTION_ATTACHMENT_SERIALIZER_TYPE_DEVICE | typeof GENERIC_ACTION_ATTACHMENT_SERIALIZER_TYPE_PLATFORM
-
-export class GenericActionAttachmentSerializer {
+export abstract class GenericActionAttachmentSerializer {
   private attachmentSerializer: DeviceAttachmentSerializer = new DeviceAttachmentSerializer()
-  private type: GenericActionAttachmentSerializerType
 
-  constructor (type: GenericActionAttachmentSerializerType) {
-    if (![GENERIC_ACTION_ATTACHMENT_SERIALIZER_TYPE_DEVICE, GENERIC_ACTION_ATTACHMENT_SERIALIZER_TYPE_PLATFORM].includes(type)) {
-      throw new TypeError('type ' + type + ' is unknown')
-    }
-    this.type = type
-  }
+  abstract get type (): string
 
   convertModelToJsonApiData (attachment: Attachment, actionId: string): IJsonApiEntityWithOptionalId {
     /**
@@ -93,7 +83,7 @@ export class GenericActionAttachmentSerializer {
   convertJsonApiRelationshipsModelList (relationships: IJsonApiRelationships, included: IJsonApiEntity[]): Attachment[] {
     const actionAttachmentIds = []
     const type = this.getActionAttachmentTypeName()
-    const typePlural = type + 's'
+    const typePlural = this.getActionAttachmentTypeNamePlural()
     if (relationships[typePlural]) {
       const attachmentObject = relationships[typePlural] as IJsonApiEntityWithoutDetailsDataDictList
       if (attachmentObject.data && (attachmentObject.data as IJsonApiEntityWithoutDetails[]).length > 0) {
@@ -136,35 +126,30 @@ export class GenericActionAttachmentSerializer {
   }
 
   getActionTypeName (): string {
-    switch (this.type) {
-      case GENERIC_ACTION_ATTACHMENT_SERIALIZER_TYPE_DEVICE:
-        return 'generic_device_action'
-      case GENERIC_ACTION_ATTACHMENT_SERIALIZER_TYPE_PLATFORM:
-        return 'generic_platform_action'
-      default:
-        throw new TypeError('action type name not defined')
-    }
+    return 'generic_' + this.type + '_action'
   }
 
   getActionAttachmentTypeName (): string {
-    switch (this.type) {
-      case GENERIC_ACTION_ATTACHMENT_SERIALIZER_TYPE_DEVICE:
-        return 'generic_device_action_attachment'
-      case GENERIC_ACTION_ATTACHMENT_SERIALIZER_TYPE_PLATFORM:
-        return 'generic_platform_action_attachment'
-      default:
-        throw new TypeError('action attachment type name not defined')
-    }
+    return 'generic_' + this.type + '_action_attachment'
+  }
+
+  getActionAttachmentTypeNamePlural (): string {
+    return this.getActionAttachmentTypeName() + 's'
   }
 
   getAttachmentTypeName (): string {
-    switch (this.type) {
-      case GENERIC_ACTION_ATTACHMENT_SERIALIZER_TYPE_DEVICE:
-        return 'device_attachment'
-      case GENERIC_ACTION_ATTACHMENT_SERIALIZER_TYPE_PLATFORM:
-        return 'platform_attachment'
-      default:
-        throw new TypeError('attachment type name not defined')
-    }
+    return this.type + '_attachment'
+  }
+}
+
+export class GenericDeviceActionAttachmentSerializer extends GenericActionAttachmentSerializer {
+  get type (): string {
+    return 'device'
+  }
+}
+
+export class GenericPlatformActionAttachmentSerializer extends GenericActionAttachmentSerializer {
+  get type (): string {
+    return 'platform'
   }
 }
