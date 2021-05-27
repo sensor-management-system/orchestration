@@ -41,7 +41,6 @@ export interface IGenericAction extends IAction {
   endDate: DateTime | null
   contact: Contact | null
   attachments: Attachment[]
-  isGenericAction: boolean
 }
 
 export class GenericAction implements IGenericAction {
