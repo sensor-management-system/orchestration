@@ -303,7 +303,7 @@ export type IJsonApiTypedEntityWithoutDetailsDataDictList = {[idx: string]: IJso
  */
 export interface IJsonApiRelationshipsData {
   links?: IJsonApiLinkDict
-  data: IJsonApiEntityWithoutDetails | IJsonApiEntityWithoutDetails[]
+  data?: IJsonApiEntityWithoutDetails | IJsonApiEntityWithoutDetails[]
 }
 
 /**
