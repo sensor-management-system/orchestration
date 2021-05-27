@@ -268,7 +268,7 @@ export interface IJsonApiEntityEnvelope {
 export interface IJsonApiEntityListEnvelope {
   data: IJsonApiEntity[]
   included: IJsonApiEntity[]
-  links?: IJsonApiPaginationLinks,
+  links?: IJsonApiPaginationLinks | IJsonApiLinkDict,
   jsonapi?: IJsonApiMeta
 }
 
