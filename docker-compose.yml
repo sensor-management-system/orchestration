@@ -21,6 +21,7 @@ services:
 
   app:
     image: python:3.9-slim-buster
+    container_name: backend
     working_dir: /usr/src/app
     volumes:
       - './app:/usr/src/app'
@@ -49,6 +50,7 @@ services:
 
   db:
     image: postgres:12-alpine
+    container_name: db
     ports:
       - "127.0.0.1:5432:5432"
     env_file:
@@ -57,9 +59,9 @@ services:
       - ./app/project/db/create.sql:/docker-entrypoint-initdb.d/create.sql
     networks:
       - sms
-
   minio:
     image: minio/minio:latest
+    container_name: minio
     volumes:
       - data1:/data1
     ports:
@@ -78,6 +80,8 @@ services:
 
   createbuckets:
     image: minio/mc
+    networks:
+      - sms
     depends_on:
       - minio
     # Make a Bucket using minio client mc
@@ -87,11 +91,19 @@ services:
       /usr/bin/mc config host rm local;
       /usr/bin/mc config host add --quiet  local http://minio:9000 minio minio123;
       /usr/bin/mc mb --quiet local/sms-attachments;
-      /usr/bin/mc policy download local/sms-attachments;
+      /usr/bin/mc policy set download local/sms-attachments;
       exit 0;
       "
-    networks:
-      - sms
+
+
+  nginx:
+    image: nginx:1.20-alpine
+    container_name: nginx
+    network_mode: "host"
+    volumes:
+      - ./ngnix/index.html:/usr/share/nginx/html/index.html
+      - ./certs:/etc/nginx/ssl
+      - ./ngnix/default.conf:/etc/nginx/conf.d/rdm-test.intranet.ufz.de.conf
 
 volumes:
   esdata01:

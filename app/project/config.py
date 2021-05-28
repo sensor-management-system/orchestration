@@ -36,8 +36,10 @@ class BaseConfig:
     SQLALCHEMY_POOL_TIMEOUT = env.int("POOL_TIMEOUT", DEFAULT_POOL_TIMEOUT)
     JWT_IDENTITY_CLAIM = env("OIDC_USERNAME_CLAIM")
     # Hostname of a S3 service.
-    MINIO_ENDPOINT = env("MINIO_ENDPOINT", "minio:9000")
-    MINIO_ENDPOINT_DOWNLOAD = env("MINIO_ENDPOINT", "localhost:9000")
+    # Minio's context root is '/' and this cannot be configured.
+    # So we use two endpoints.
+    MINIO_ENDPOINT = env("MINIO_ENDPOINT", "minio:9000")  # refer to docker container name
+    DOWNLOAD_ENDPOINT = env("DOWNLOAD_ENDPOINT", "localhost:9000")
     # Access key (aka user ID) of your account in S3 service.
     MINIO_ACCESS_KEY = env("MINIO_ACCESS_KEY", "minio")
     # Secret Key (aka password) of your account in S3 service.
@@ -50,7 +52,7 @@ class BaseConfig:
     # (Optional) Customized HTTP client.
     # learn more https://docs.min.io/docs/python-client-api-reference.html
     MINIO_HTTP_CLIENT = env("MINIO_HTTP_CLIENT", None)
-    MINIO_BUCKET_NAME = env("MINIO_BUCKET_NAME", "sms")
+    MINIO_BUCKET_NAME = env("MINIO_BUCKET_NAME", "sms-attachments")
     # ALLOWED_EXTENSIONS = env.str("ALLOWED_EXTENSIONS")
 
 
@@ -68,7 +70,7 @@ class DevelopmentConfig(BaseConfig):
     JWT_PUBLIC_KEY = RSAAlgorithm.from_jwk(json.dumps(oidc_jwks_uri["keys"][0]))
     # audience is oidc client id (can be array starting
     # https://github.com/vimalloc/flask-jwt-extended/issues/219)
-    JWT_DECODE_AUDIENCE = ["rdmsvm-implicit-flow", "oidcdebugger-implicit-flow"]
+    JWT_DECODE_AUDIENCE = ["rdmsvm-implicit-flow"]
     # name of token entry that will become distinct flask identity username
     # example in our case it is {'sub':'username@ufz.de'}
     JWT_IDENTITY_CLAIM = env("OIDC_USERNAME_CLAIM", "sub")

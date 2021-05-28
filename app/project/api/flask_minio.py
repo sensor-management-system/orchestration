@@ -178,7 +178,7 @@ class FlaskMinio:
         size = os.fstat(uploaded_file.fileno()).st_size
         act_year_month = time.strftime("%Y-%m")
         minio_bucket_name = current_app.config["MINIO_BUCKET_NAME"]
-        minio_endpoint = current_app.config["MINIO_ENDPOINT_DOWNLOAD"]
+        download_endpoint = current_app.config["DOWNLOAD_ENDPOINT"]
         try:
             found = self.connection.bucket_exists(minio_bucket_name)
             if not found:
@@ -200,8 +200,8 @@ class FlaskMinio:
                 )
                 data = {
                     "message": "object stored in {}".format(minio_bucket_name),
-                    "url": "http://{}/{}/{}".format(
-                        minio_endpoint, minio_bucket_name, ordered_filed
+                    "url": "{}/{}/{}".format(
+                        download_endpoint, minio_bucket_name, ordered_filed
                     ),
                 }
                 response = make_response(data, 201)
