@@ -39,7 +39,6 @@ import {
   IJsonApiEntityWithOptionalId,
   IJsonApiEntityWithOptionalAttributes,
   IJsonApiEntityWithoutDetails,
-  IJsonApiTypedEntityWithoutDetailsDataDict,
   IJsonApiEntityWithoutDetailsDataDictList,
   IJsonApiRelationships
 } from '@/serializers/jsonapi/JsonApiTypes'
@@ -150,7 +149,7 @@ export abstract class GenericActionSerializer {
     return data
   }
 
-  convertModelToJsonApiRelationshipObject (action: IGenericAction): IJsonApiTypedEntityWithoutDetailsDataDict {
+  convertModelToJsonApiRelationshipObject (action: IGenericAction): IJsonApiRelationships {
     return {
       [this.getActionTypeName()]: {
         data: this.convertModelToTupleWithIdAndType(action)
