@@ -45,10 +45,12 @@ import {
   IJsonApiEntityEnvelope,
   IJsonApiEntityListEnvelope,
   IJsonApiEntityWithOptionalId,
+  IJsonApiEntityWithOptionalAttributes,
   IJsonApiRelationships
 } from '@/serializers/jsonapi/JsonApiTypes'
 
 describe('GenericActionSerializer', () => {
+
   function getExampleObjectResponse (): IJsonApiEntityEnvelope {
     return {
       data: {
@@ -161,6 +163,7 @@ describe('GenericActionSerializer', () => {
       }
     }
   }
+
   function getExampleObjectListResponse (): IJsonApiEntityListEnvelope {
     return {
       data: [
@@ -425,6 +428,7 @@ describe('GenericActionSerializer', () => {
       }
     }
   }
+
   function getExampleDeviceResponse (): IJsonApiEntityEnvelope {
     return {
       data: {
@@ -579,6 +583,117 @@ describe('GenericActionSerializer', () => {
       }
     }
   }
+
+  function getExampleObjectResponseWithIncludedActionAttachments (): IJsonApiEntityEnvelope {
+    return {
+      data: {
+        type: 'generic_device_action',
+        relationships: {
+          generic_device_action_attachments: {
+            links: {
+              related: '/rdm/svm-api/v1/generic-device-actions/7/relationships/generic-device-action-attachments'
+            },
+            data: [
+              {
+                type: 'generic_device_action_attachment',
+                id: '21'
+              }
+            ]
+          },
+          device: {
+            links: {
+              self: '/rdm/svm-api/v1/generic-device-actions/7/relationships/device',
+              related: '/rdm/svm-api/v1/devices/204'
+            },
+            data: {
+              type: 'device',
+              id: '204'
+            }
+          },
+          contact: {
+            links: {
+              self: '/rdm/svm-api/v1/generic-device-actions/7/relationships/contact',
+              related: '/rdm/svm-api/v1/contacts/14'
+            },
+            data: {
+              type: 'contact',
+              id: '14'
+            }
+          }
+        },
+        attributes: {
+          updated_at: '2021-05-28T11:12:54.938479',
+          created_at: '2021-05-07T09:57:38.203251',
+          action_type_name: 'Device maintainance',
+          begin_date: '2021-05-23T00:00:00',
+          end_date: '2021-06-01T00:00:00',
+          action_type_uri: '',
+          description: 'Bla'
+        },
+        id: '7',
+        links: {
+          self: '/rdm/svm-api/v1/generic-device-actions/7'
+        }
+      },
+      links: {
+        self: '/rdm/svm-api/v1/generic-device-actions/7'
+      },
+      included: [
+        {
+          type: 'generic_device_action_attachment',
+          relationships: {
+            attachment: {
+              links: {
+                self: '/rdm/svm-api/v1/generic-device-action-attachments/21/relationships/attachment',
+                related: '/rdm/svm-api/v1/device-attachments/51'
+              },
+              data: {
+                type: 'device_attachment',
+                id: '51'
+              }
+            },
+            action: {
+              links: {
+                self: '/rdm/svm-api/v1/generic-device-action-attachments/21/relationships/action',
+                related: '/rdm/svm-api/v1/generic-device-actions/7'
+              }
+            }
+          },
+          id: '21',
+          links: {
+            self: '/rdm/svm-api/v1/generic-device-action-attachments/21'
+          }
+        },
+        {
+          type: 'device_attachment',
+          relationships: {
+            device: {
+              links: {
+                self: '/rdm/svm-api/v1/device-attachments/51/relationships/device',
+                related: '/rdm/svm-api/v1/devices/204'
+              },
+              data: {
+                type: 'device',
+                id: '204'
+              }
+            }
+          },
+          attributes: {
+            url: 'https://foo.de',
+            label: 'Foo.de'
+          },
+          id: '51',
+          links: {
+            self: '/rdm/svm-api/v1/device-attachments/51'
+          }
+        }
+      ],
+      jsonapi: {
+        version: '1.0'
+      }
+    }
+  }
+
   describe('GenericDeviceActionSerializer', () => {
     describe('constructing and types', () => {
       it('should return \'device\' as its type', () => {
@@ -798,6 +913,21 @@ describe('GenericActionSerializer', () => {
         const apiRelationship = serializer.convertModelToJsonApiRelationshipObject(action)
 
         expect(apiRelationship).toEqual(expectedRelationship)
+      })
+    })
+    describe('#convertJsonApiIncludedGenericActionAttachmentsToIdList', () => {
+      it('should return a list of generic_device_action_attachment ids / attachment ids mappings', () => {
+        const expectedMappings = [
+          {
+            genericActionAttachmentId: '21',
+            attachmentId: '51'
+          }
+        ]
+        const serializer = new GenericDeviceActionSerializer()
+        const data = getExampleObjectResponseWithIncludedActionAttachments()
+        const mappings = serializer.convertJsonApiIncludedGenericActionAttachmentsToIdList(data.included as IJsonApiEntityWithOptionalAttributes[])
+
+        expect(mappings).toEqual(expectedMappings)
       })
     })
   })
