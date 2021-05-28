@@ -39,7 +39,8 @@ import {
   IJsonApiEntityEnvelope,
   IJsonApiEntityListEnvelope,
   IJsonApiEntity,
-  IJsonApiEntityWithOptionalId
+  IJsonApiEntityWithOptionalId,
+  IJsonApiEntityWithOptionalAttributes
 } from '@/serializers/jsonapi/JsonApiTypes'
 
 import { IMissingAttachmentData } from '@/serializers/jsonapi/AttachmentSerializer'
@@ -66,7 +67,7 @@ export class PlatformSerializer {
     return this.convertJsonApiDataToModel(jsonApiObject.data, included)
   }
 
-  convertJsonApiDataToModel (jsonApiData: IJsonApiEntity, included: IJsonApiEntity[]): IPlatformWithMeta {
+  convertJsonApiDataToModel (jsonApiData: IJsonApiEntityWithOptionalAttributes, included: IJsonApiEntityWithOptionalAttributes[]): IPlatformWithMeta {
     const result: Platform = Platform.createEmpty()
 
     const attributes = jsonApiData.attributes
@@ -74,30 +75,32 @@ export class PlatformSerializer {
 
     result.id = jsonApiData.id.toString()
 
-    result.description = attributes.description || ''
-    result.shortName = attributes.short_name || ''
-    result.longName = attributes.long_name || ''
-    result.manufacturerUri = attributes.manufacturer_uri || ''
-    result.manufacturerName = attributes.manufacturer_name || ''
-    result.model = attributes.model || ''
-    result.platformTypeUri = attributes.platform_type_uri || ''
-    result.platformTypeName = attributes.platform_type_name || ''
-    result.statusUri = attributes.status_uri || ''
-    result.statusName = attributes.status_name || ''
-    result.website = attributes.website || ''
-    result.createdAt = attributes.created_at != null ? DateTime.fromISO(attributes.created_at, { zone: 'UTC' }) : null
-    result.updatedAt = attributes.updated_at != null ? DateTime.fromISO(attributes.updated_at, { zone: 'UTC' }) : null
+    if (attributes) {
+      result.description = attributes.description || ''
+      result.shortName = attributes.short_name || ''
+      result.longName = attributes.long_name || ''
+      result.manufacturerUri = attributes.manufacturer_uri || ''
+      result.manufacturerName = attributes.manufacturer_name || ''
+      result.model = attributes.model || ''
+      result.platformTypeUri = attributes.platform_type_uri || ''
+      result.platformTypeName = attributes.platform_type_name || ''
+      result.statusUri = attributes.status_uri || ''
+      result.statusName = attributes.status_name || ''
+      result.website = attributes.website || ''
+      result.createdAt = attributes.created_at != null ? DateTime.fromISO(attributes.created_at, { zone: 'UTC' }) : null
+      result.updatedAt = attributes.updated_at != null ? DateTime.fromISO(attributes.updated_at, { zone: 'UTC' }) : null
 
-    // TODO
-    // result.createdBy = attributes.created_by
-    // result.updatedBy = attributes.updated_by
+      // TODO
+      // result.createdBy = attributes.created_by
+      // result.updatedBy = attributes.updated_by
 
-    result.inventoryNumber = attributes.inventory_number || ''
-    result.serialNumber = attributes.serial_number || ''
-    result.persistentIdentifier = attributes.persistent_identifier || ''
+      result.inventoryNumber = attributes.inventory_number || ''
+      result.serialNumber = attributes.serial_number || ''
+      result.persistentIdentifier = attributes.persistent_identifier || ''
 
-    // TODO
-    // result.events = []
+      // TODO
+      // result.events = []
+    }
 
     const attachmentsWithMissing = this.attachmentSerializer.convertJsonApiRelationshipsModelList(relationships, included)
     result.attachments = attachmentsWithMissing.attachments
@@ -127,7 +130,7 @@ export class PlatformSerializer {
     })
   }
 
-  convertJsonApiRelationshipsModelList (included: IJsonApiEntity[]): Platform[] {
+  convertJsonApiRelationshipsModelList (included: IJsonApiEntityWithOptionalAttributes[]): Platform[] {
     // it takes all the platforms, as those are the only ones included in the query per configuration.
     // if you want to use it in a broader scope, you may have to change several things
     const result = []

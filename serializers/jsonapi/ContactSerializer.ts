@@ -34,8 +34,8 @@ import { Contact, IContact } from '@/models/Contact'
 import {
   IJsonApiEntityListEnvelope,
   IJsonApiEntityEnvelope,
-  IJsonApiEntity,
   IJsonApiEntityWithOptionalId,
+  IJsonApiEntityWithOptionalAttributes,
   IJsonApiEntityWithoutDetails,
   IJsonApiRelationships,
   IJsonApiEntityWithoutDetailsDataDict,
@@ -68,16 +68,19 @@ export class ContactSerializer {
     return this.convertJsonApiDataToModel(data)
   }
 
-  convertJsonApiDataToModel (jsonApiData: IJsonApiEntity): Contact {
+  convertJsonApiDataToModel (jsonApiData: IJsonApiEntityWithOptionalAttributes): Contact {
     const attributes = jsonApiData.attributes
 
     const newEntry = Contact.createEmpty()
 
     newEntry.id = jsonApiData.id.toString()
-    newEntry.givenName = attributes.given_name || ''
-    newEntry.familyName = attributes.family_name || ''
-    newEntry.website = attributes.website || ''
-    newEntry.email = attributes.email
+
+    if (attributes) {
+      newEntry.givenName = attributes.given_name || ''
+      newEntry.familyName = attributes.family_name || ''
+      newEntry.website = attributes.website || ''
+      newEntry.email = attributes.email
+    }
 
     return newEntry
   }
@@ -138,7 +141,7 @@ export class ContactSerializer {
     }
   }
 
-  convertJsonApiRelationshipsModelList (relationships: IJsonApiRelationships, included: IJsonApiEntity[]): IContactsAndMissing {
+  convertJsonApiRelationshipsModelList (relationships: IJsonApiRelationships, included: IJsonApiEntityWithOptionalAttributes[]): IContactsAndMissing {
     const contactIds = []
     if (relationships.contacts) {
       const contactObject = relationships.contacts as IJsonApiEntityWithoutDetailsDataDictList
@@ -182,7 +185,7 @@ export class ContactSerializer {
     }
   }
 
-  convertJsonApiRelationshipsSingleModel (relationships: IJsonApiTypedEntityWithoutDetailsDataDict, included: IJsonApiEntity[]): IContactAndMissing {
+  convertJsonApiRelationshipsSingleModel (relationships: IJsonApiTypedEntityWithoutDetailsDataDict, included: IJsonApiEntityWithOptionalAttributes[]): IContactAndMissing {
     let relationContactId: string = ''
     if (relationships.contact) {
       const contactObject = relationships.contact as IJsonApiEntityWithoutDetailsDataDict

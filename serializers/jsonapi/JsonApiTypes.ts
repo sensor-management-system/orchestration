@@ -251,12 +251,17 @@ export type IJsonApiEntityWithOptionalId = Omit<IJsonApiEntity, 'id'> & { id?: s
 export type IJsonApiEntityWithoutDetails = Pick<IJsonApiEntity, 'id' | 'type'>
 
 /**
+ * a variation of the entity type with optional attributes
+ */
+export type IJsonApiEntityWithOptionalAttributes = Omit<IJsonApiEntity, 'attributes'> & { attributes?: IJsonApiAttributes }
+
+/**
  * the object in which the entity is wrapped in, usually used by the JSON API
  * response, enriched with additional meta data
  */
 export interface IJsonApiEntityEnvelope {
   data: IJsonApiEntity
-  included: IJsonApiEntity[]
+  included: IJsonApiEntityWithOptionalAttributes[]
   links?: IJsonApiLinkDict,
   jsonapi?: IJsonApiMeta
 }
@@ -267,9 +272,10 @@ export interface IJsonApiEntityEnvelope {
  */
 export interface IJsonApiEntityListEnvelope {
   data: IJsonApiEntity[]
-  included: IJsonApiEntity[]
-  links?: IJsonApiPaginationLinks,
+  included: IJsonApiEntityWithOptionalAttributes[]
+  links?: IJsonApiPaginationLinks | IJsonApiLinkDict,
   jsonapi?: IJsonApiMeta
+  meta?: {}
 }
 
 /**
@@ -303,7 +309,7 @@ export type IJsonApiTypedEntityWithoutDetailsDataDictList = {[idx: string]: IJso
  */
 export interface IJsonApiRelationshipsData {
   links?: IJsonApiLinkDict
-  data: IJsonApiEntityWithoutDetails | IJsonApiEntityWithoutDetails[]
+  data?: IJsonApiEntityWithoutDetails | IJsonApiEntityWithoutDetails[]
 }
 
 /**

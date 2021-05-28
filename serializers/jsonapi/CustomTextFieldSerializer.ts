@@ -38,11 +38,11 @@ import {
   IJsonApiEntityWithOptionalId,
   IJsonApiEntityListEnvelope,
   IJsonApiEntityEnvelope,
-  IJsonApiEntity,
   IJsonApiRelationships,
   IJsonApiTypedEntityWithoutDetailsDataDictList,
   IJsonApiEntityWithoutDetailsDataDictList,
-  IJsonApiAttributes
+  IJsonApiAttributes,
+  IJsonApiEntityWithOptionalAttributes
 } from '@/serializers/jsonapi/JsonApiTypes'
 
 export interface IMissingCustomTextFieldData {
@@ -90,14 +90,17 @@ export class CustomTextFieldSerializer {
     return this.convertJsonApiDataToModel(data)
   }
 
-  convertJsonApiDataToModel (jsonApiData: IJsonApiEntity): CustomTextField {
+  convertJsonApiDataToModel (jsonApiData: IJsonApiEntityWithOptionalAttributes): CustomTextField {
     const attributes = jsonApiData.attributes
 
     const newEntry = new CustomTextField()
 
     newEntry.id = jsonApiData.id.toString()
-    newEntry.key = attributes.key || ''
-    newEntry.value = attributes.value || ''
+
+    if (attributes) {
+      newEntry.key = attributes.key || ''
+      newEntry.value = attributes.value || ''
+    }
 
     return newEntry
   }
@@ -106,7 +109,7 @@ export class CustomTextFieldSerializer {
     return jsonApiObjectList.data.map(this.convertJsonApiDataToModel)
   }
 
-  convertJsonApiRelationshipsModelList (relationships: IJsonApiRelationships, included: IJsonApiEntity[]): ICustomTextFieldsAndMissing {
+  convertJsonApiRelationshipsModelList (relationships: IJsonApiRelationships, included: IJsonApiEntityWithOptionalAttributes[]): ICustomTextFieldsAndMissing {
     const customFieldsIds = []
     if (relationships.customfields) {
       const customFieldObject = relationships.customfields as IJsonApiEntityWithoutDetailsDataDictList

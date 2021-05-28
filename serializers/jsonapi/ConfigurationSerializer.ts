@@ -38,9 +38,9 @@ import { Contact } from '@/models/Contact'
 import {
   IJsonApiEntityListEnvelope,
   IJsonApiEntityEnvelope,
-  IJsonApiEntity,
   IJsonApiEntityWithOptionalId,
-  IJsonApiEntityWithoutDetails
+  IJsonApiEntityWithoutDetails,
+  IJsonApiEntityWithOptionalAttributes
 } from '@/serializers/jsonapi/JsonApiTypes'
 
 import { ContactSerializer, IMissingContactData } from '@/serializers/jsonapi/ContactSerializer'
@@ -73,7 +73,7 @@ export class ConfigurationSerializer {
 
   convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiEntityListEnvelope): IConfigurationWithMeta[] {
     const included = jsonApiObjectList.included || []
-    return jsonApiObjectList.data.map((model: IJsonApiEntity) => {
+    return jsonApiObjectList.data.map((model) => {
       return this.convertJsonApiDataToModel(model, included)
     })
   }
@@ -83,20 +83,22 @@ export class ConfigurationSerializer {
     return this.convertJsonApiDataToModel(jsonApiObject.data, included)
   }
 
-  convertJsonApiDataToModel (jsonApiData: IJsonApiEntity, included: IJsonApiEntity[]): IConfigurationWithMeta {
+  convertJsonApiDataToModel (jsonApiData: IJsonApiEntityWithOptionalAttributes, included: IJsonApiEntityWithOptionalAttributes[]): IConfigurationWithMeta {
     const configuration = new Configuration()
 
     const attributes = jsonApiData.attributes
     const relationships = jsonApiData.relationships
 
     configuration.id = jsonApiData.id.toString()
-    configuration.label = attributes.label || ''
-    configuration.projectUri = attributes.project_uri || ''
-    configuration.projectName = attributes.project_name || ''
-    configuration.status = attributes.status || ''
+    if (attributes) {
+      configuration.label = attributes.label || ''
+      configuration.projectUri = attributes.project_uri || ''
+      configuration.projectName = attributes.project_name || ''
+      configuration.status = attributes.status || ''
 
-    configuration.startDate = attributes.start_date ? DateTime.fromISO(attributes.start_date, { zone: 'UTC' }) : null
-    configuration.endDate = attributes.end_date ? DateTime.fromISO(attributes.end_date, { zone: 'UTC' }) : null
+      configuration.startDate = attributes.start_date ? DateTime.fromISO(attributes.start_date, { zone: 'UTC' }) : null
+      configuration.endDate = attributes.end_date ? DateTime.fromISO(attributes.end_date, { zone: 'UTC' }) : null
+    }
 
     const devices = this.deviceSerializer.convertJsonApiRelationshipsModelList(included)
     const deviceLookupById: {[idx: string]: Device} = {}
@@ -115,7 +117,7 @@ export class ConfigurationSerializer {
       }
     }
 
-    if (attributes.location_type === LocationType.Stationary) {
+    if (attributes && attributes.location_type === LocationType.Stationary) {
       const location = new StationaryLocation()
       if (attributes.longitude != null) { // allow 0 as real values as well
         location.longitude = attributes.longitude
@@ -127,7 +129,7 @@ export class ConfigurationSerializer {
         location.elevation = attributes.elevation
       }
       configuration.location = location
-    } else if (attributes.location_type === LocationType.Dynamic) {
+    } else if (attributes && attributes.location_type === LocationType.Dynamic) {
       const location = new DynamicLocation()
       const toCheck = [
         { key: 'src_latitude', setFunction (value: DeviceProperty) { location.latitude = value } },
@@ -208,8 +210,10 @@ export class ConfigurationSerializer {
     const listOfPlatformAttributes: PlatformConfigurationAttributes[] = []
     const listOfDeviceAttributes: DeviceConfigurationAttributes[] = []
     const hierarchy: ConfigurationsTreeNode[] = []
-    for (const childNode of jsonApiData.attributes.hierarchy || []) {
-      addChildrenRecursivly(childNode, hierarchy, listOfPlatformAttributes, listOfDeviceAttributes)
+    if (jsonApiData.attributes) {
+      for (const childNode of jsonApiData.attributes.hierarchy || []) {
+        addChildrenRecursivly(childNode, hierarchy, listOfPlatformAttributes, listOfDeviceAttributes)
+      }
     }
 
     configuration.children = hierarchy
