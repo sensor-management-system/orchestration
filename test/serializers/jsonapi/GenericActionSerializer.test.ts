@@ -36,7 +36,6 @@ import { GenericAction } from '@/models/GenericAction'
 import { Contact } from '@/models/Contact'
 
 import {
-  GenericActionSerializer,
   GenericDeviceActionSerializer,
   GenericPlatformActionSerializer
 } from '@/serializers/jsonapi/GenericActionSerializer'
@@ -50,7 +49,6 @@ import {
 } from '@/serializers/jsonapi/JsonApiTypes'
 
 describe('GenericActionSerializer', () => {
-
   function getExampleObjectResponse (): IJsonApiEntityEnvelope {
     return {
       data: {
@@ -758,7 +756,7 @@ describe('GenericActionSerializer', () => {
         const serializer = new GenericDeviceActionSerializer()
         const data = getExampleObjectResponse().data
         const included = getExampleObjectResponse().included
-        const action = serializer.convertJsonApiDataToModel(data, included)
+        const action = serializer.convertJsonApiDataToModel(data, included as IJsonApiEntityWithOptionalAttributes[])
 
         expect(action).toEqual(expectedAction)
       })
@@ -787,7 +785,7 @@ describe('GenericActionSerializer', () => {
         expectedAction2.beginDate = DateTime.fromISO('2021-05-03T00:00:00', { zone: 'UTC' })
         expectedAction2.endDate = DateTime.fromISO('2021-05-04T00:00:00', { zone: 'UTC' })
 
-        const actionList = serializer.convertJsonApiRelationshipsModelList(relationships as IJsonApiRelationships, included)
+        const actionList = serializer.convertJsonApiRelationshipsModelList(relationships as IJsonApiRelationships, included as IJsonApiEntityWithOptionalAttributes[])
 
         expect(actionList).toHaveProperty('genericDeviceActions')
         expect(actionList.genericDeviceActions).toContainEqual(expectedAction1)
