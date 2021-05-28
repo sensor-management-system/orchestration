@@ -31,6 +31,7 @@
  */
 import { DateTime } from 'luxon'
 
+import { Attachment } from '@/models/Attachment'
 import { GenericAction } from '@/models/GenericAction'
 import { Contact } from '@/models/Contact'
 
@@ -552,6 +553,16 @@ describe('GenericActionSerializer', () => {
           email: 'marc.hanisch@gfz-potsdam.de',
           website: ''
         })
+        const attachment1 = Attachment.createFromObject({
+          id: '51',
+          label: 'Foo.de',
+          url: 'https://foo.de'
+        })
+        const attachment2 = Attachment.createFromObject({
+          id: '52',
+          label: 'Bar.baz',
+          url: 'https://bar.baz'
+        })
         const expectedAction1 = new GenericAction()
         expectedAction1.id = '4'
         expectedAction1.description = 'yet another maintainance'
@@ -560,6 +571,10 @@ describe('GenericActionSerializer', () => {
         expectedAction1.beginDate = DateTime.fromISO('2021-05-03T00:00:00', { zone: 'UTC' })
         expectedAction1.endDate = DateTime.fromISO('2021-05-04T00:00:00', { zone: 'UTC' })
         expectedAction1.contact = contact
+        expectedAction1.attachments = [
+          attachment1,
+          attachment2
+        ]
 
         const expectedAction2 = new GenericAction()
         expectedAction2.id = '5'
@@ -569,12 +584,15 @@ describe('GenericActionSerializer', () => {
         expectedAction2.beginDate = DateTime.fromISO('2021-05-09T00:00:00', { zone: 'UTC' })
         expectedAction2.endDate = DateTime.fromISO('2021-05-12T00:00:00', { zone: 'UTC' })
         expectedAction2.contact = contact
+        expectedAction2.attachments = [
+          attachment2
+        ]
 
         const serializer = new GenericDeviceActionSerializer()
         const actionList = serializer.convertJsonApiObjectListToModelList(getExampleObjectListResponse())
 
-        expect(actionList).toContain(expectedAction1)
-        expect(actionList).toContain(expectedAction2)
+        expect(actionList).toContainEqual(expectedAction1)
+        expect(actionList).toContainEqual(expectedAction2)
       })
     })
   })
