@@ -951,5 +951,3 @@ describe('GenericActionSerializer', () => {
     })
   })
 })
-describe('GenericDeviceActionSerializer', () => {
-})
