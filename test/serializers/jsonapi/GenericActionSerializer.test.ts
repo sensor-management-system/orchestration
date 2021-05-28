@@ -44,7 +44,8 @@ import {
 import {
   IJsonApiEntityEnvelope,
   IJsonApiEntityListEnvelope,
-  IJsonApiEntityWithOptionalId
+  IJsonApiEntityWithOptionalId,
+  IJsonApiRelationships
 } from '@/serializers/jsonapi/JsonApiTypes'
 
 describe('GenericActionSerializer', () => {
@@ -424,6 +425,160 @@ describe('GenericActionSerializer', () => {
       }
     }
   }
+  function getExampleDeviceResponse (): IJsonApiEntityEnvelope {
+    return {
+      data: {
+        type: 'device',
+        attributes: {
+          persistent_identifier: null,
+          model: 'SM1',
+          website: 'http://www.adcon.com',
+          short_name: 'Adcon SM1 soil moisture / temperature sensor FTDR Zeitlow 1',
+          serial_number: '',
+          updated_at: '2021-04-26T09:03:01.944689',
+          long_name: 'Adcon SM 1 soil moisture / temperature sensor',
+          device_type_uri: '',
+          status_name: 'In Use',
+          dual_use: false,
+          device_type_name: 'Frequency/Time Domain Reflectometer (FTDR)(Soil moisture and temperature)',
+          description: '',
+          inventory_number: '',
+          manufacturer_name: 'OTT Hydromet GmbH',
+          created_at: '2021-01-18T07:07:24.360000',
+          manufacturer_uri: 'OTT Hydromet GmbH',
+          status_uri: 'http://rz-vm64.gfz-potsdam.de:8000/api/v1/equipmentstatus/2/'
+        },
+        relationships: {
+          generic_device_actions: {
+            links: {
+              related: '/rdm/svm-api/v1/devices/204/relationships/generic-device-actions'
+            },
+            data: [
+              {
+                type: 'generic_device_action',
+                id: '3'
+              },
+              {
+                type: 'generic_device_action',
+                id: '4'
+              }
+            ]
+          }
+        },
+        id: '204',
+        links: {
+          self: '/rdm/svm-api/v1/devices/204'
+        }
+      },
+      links: {
+        self: '/rdm/svm-api/v1/devices/204'
+      },
+      included: [
+        {
+          type: 'generic_device_action',
+          relationships: {
+            generic_device_action_attachments: {
+              links: {
+                related: '/rdm/svm-api/v1/generic-device-actions/3/relationships/generic-device-action-attachments'
+              },
+              data: [
+
+              ]
+            },
+            device: {
+              links: {
+                self: '/rdm/svm-api/v1/generic-device-actions/3/relationships/device',
+                related: '/rdm/svm-api/v1/devices/204'
+              },
+              data: {
+                type: 'device',
+                id: '204'
+              }
+            },
+            contact: {
+              links: {
+                self: '/rdm/svm-api/v1/generic-device-actions/3/relationships/contact',
+                related: '/rdm/svm-api/v1/contacts/14'
+              },
+              data: {
+                type: 'contact',
+                id: '14'
+              }
+            }
+          },
+          attributes: {
+            updated_at: null,
+            created_at: '2021-05-06T12:54:18.899177',
+            action_type_name: 'Device maintainance',
+            begin_date: '2021-05-01T00:00:00',
+            end_date: '2021-05-03T00:00:00',
+            action_type_uri: '',
+            description: 'Rasenmähen'
+          },
+          id: '3',
+          links: {
+            self: '/rdm/svm-api/v1/generic-device-actions/3'
+          }
+        },
+        {
+          type: 'generic_device_action',
+          relationships: {
+            generic_device_action_attachments: {
+              links: {
+                related: '/rdm/svm-api/v1/generic-device-actions/4/relationships/generic-device-action-attachments'
+              },
+              data: [
+                {
+                  type: 'generic_device_action_attachment',
+                  id: '1'
+                },
+                {
+                  type: 'generic_device_action_attachment',
+                  id: '2'
+                }
+              ]
+            },
+            device: {
+              links: {
+                self: '/rdm/svm-api/v1/generic-device-actions/4/relationships/device',
+                related: '/rdm/svm-api/v1/devices/204'
+              },
+              data: {
+                type: 'device',
+                id: '204'
+              }
+            },
+            contact: {
+              links: {
+                self: '/rdm/svm-api/v1/generic-device-actions/4/relationships/contact',
+                related: '/rdm/svm-api/v1/contacts/14'
+              },
+              data: {
+                type: 'contact',
+                id: '14'
+              }
+            }
+          },
+          attributes: {
+            updated_at: null,
+            created_at: '2021-05-07T09:11:59.289773',
+            action_type_name: 'Device maintainance',
+            begin_date: '2021-05-03T00:00:00',
+            end_date: '2021-05-04T00:00:00',
+            action_type_uri: '',
+            description: 'yet another maintainance'
+          },
+          id: '4',
+          links: {
+            self: '/rdm/svm-api/v1/generic-device-actions/4'
+          }
+        }
+      ],
+      jsonapi: {
+        version: '1.0'
+      }
+    }
+  }
   describe('GenericDeviceActionSerializer', () => {
     describe('constructing and types', () => {
       it('should return \'device\' as its type', () => {
@@ -493,55 +648,35 @@ describe('GenericActionSerializer', () => {
         expect(action).toEqual(expectedAction)
       })
     })
-    describe('#convertModelToJsonApiData', () => {
-      it('should return a JSON API representation from a generic action model', () => {
-        const contact = Contact.createFromObject({
-          id: '14',
-          givenName: 'Marc',
-          familyName: 'Hanisch',
-          email: 'marc.hanisch@gfz-potsdam.de',
-          website: ''
-        })
-
-        const action = new GenericAction()
-        action.id = '7'
-        action.description = 'Bla'
-        action.actionTypeName = 'Device maintainance'
-        action.actionTypeUrl = ''
-        action.beginDate = DateTime.fromISO('2021-05-23T00:00:00', { zone: 'UTC' })
-        action.endDate = DateTime.fromISO('2021-06-01T00:00:00', { zone: 'UTC' })
-        action.contact = contact
-
-        const expectedApiModel: IJsonApiEntityWithOptionalId = {
-          type: 'generic_device_action',
-          id: '7',
-          attributes: {
-            description: 'Bla',
-            action_type_name: 'Device maintainance',
-            action_type_uri: '',
-            begin_date: '2021-05-23T00:00:00.000Z',
-            end_date: '2021-06-01T00:00:00.000Z'
-          },
-          relationships: {
-            device: {
-              data: {
-                type: 'device',
-                id: '204'
-              }
-            },
-            contact: {
-              data: {
-                type: 'contact',
-                id: '14'
-              }
-            }
-          }
-        }
-
+    describe('#convertJsonApiRelationshipsModelList', () => {
+      it('should return a serialized list of generic actions from an list of included API entities', () => {
         const serializer = new GenericDeviceActionSerializer()
-        const apiModel = serializer.convertModelToJsonApiData(action, '204')
+        const response = getExampleDeviceResponse()
 
-        expect(apiModel).toEqual(expectedApiModel)
+        const relationships = response.data.relationships
+        const included = response.included
+
+        const expectedAction1 = new GenericAction()
+        expectedAction1.id = '3'
+        expectedAction1.description = 'Rasenmähen'
+        expectedAction1.actionTypeName = 'Device maintainance'
+        expectedAction1.actionTypeUrl = ''
+        expectedAction1.beginDate = DateTime.fromISO('2021-05-01T00:00:00', { zone: 'UTC' })
+        expectedAction1.endDate = DateTime.fromISO('2021-05-03T00:00:00', { zone: 'UTC' })
+
+        const expectedAction2 = new GenericAction()
+        expectedAction2.id = '4'
+        expectedAction2.description = 'yet another maintainance'
+        expectedAction2.actionTypeName = 'Device maintainance'
+        expectedAction2.actionTypeUrl = ''
+        expectedAction2.beginDate = DateTime.fromISO('2021-05-03T00:00:00', { zone: 'UTC' })
+        expectedAction2.endDate = DateTime.fromISO('2021-05-04T00:00:00', { zone: 'UTC' })
+
+        const actionList = serializer.convertJsonApiRelationshipsModelList(relationships as IJsonApiRelationships, included)
+
+        expect(actionList).toHaveProperty('genericDeviceActions')
+        expect(actionList.genericDeviceActions).toContainEqual(expectedAction1)
+        expect(actionList.genericDeviceActions).toContainEqual(expectedAction2)
       })
     })
     describe('#convertJsonApiObjectListToModelList', () => {
@@ -595,7 +730,78 @@ describe('GenericActionSerializer', () => {
         expect(actionList).toContainEqual(expectedAction2)
       })
     })
+    describe('#convertModelToJsonApiData', () => {
+      it('should return a JSON API representation from a generic action model', () => {
+        const contact = Contact.createFromObject({
+          id: '14',
+          givenName: 'Marc',
+          familyName: 'Hanisch',
+          email: 'marc.hanisch@gfz-potsdam.de',
+          website: ''
+        })
+
+        const action = new GenericAction()
+        action.id = '7'
+        action.description = 'Bla'
+        action.actionTypeName = 'Device maintainance'
+        action.actionTypeUrl = ''
+        action.beginDate = DateTime.fromISO('2021-05-23T00:00:00', { zone: 'UTC' })
+        action.endDate = DateTime.fromISO('2021-06-01T00:00:00', { zone: 'UTC' })
+        action.contact = contact
+
+        const expectedApiModel: IJsonApiEntityWithOptionalId = {
+          type: 'generic_device_action',
+          id: '7',
+          attributes: {
+            description: 'Bla',
+            action_type_name: 'Device maintainance',
+            action_type_uri: '',
+            begin_date: '2021-05-23T00:00:00.000Z',
+            end_date: '2021-06-01T00:00:00.000Z'
+          },
+          relationships: {
+            device: {
+              data: {
+                type: 'device',
+                id: '204'
+              }
+            },
+            contact: {
+              data: {
+                type: 'contact',
+                id: '14'
+              }
+            }
+          }
+        }
+
+        const serializer = new GenericDeviceActionSerializer()
+        const apiModel = serializer.convertModelToJsonApiData(action, '204')
+
+        expect(apiModel).toEqual(expectedApiModel)
+      })
+    })
+    describe('#convertModelToJsonApiRelationshipObject', () => {
+      it('should return a JSON API relationships object from a generic action model', () => {
+        const action = new GenericAction()
+        action.id = '7'
+
+        const expectedRelationship: IJsonApiRelationships = {
+          generic_device_action: {
+            data: {
+              id: '7',
+              type: 'generic_device_action'
+            }
+          }
+        }
+        const serializer = new GenericDeviceActionSerializer()
+        const apiRelationship = serializer.convertModelToJsonApiRelationshipObject(action)
+
+        expect(apiRelationship).toEqual(expectedRelationship)
+      })
+    })
   })
+
   describe('GenericPlatformActionSerializer', () => {
     describe('constructing and types', () => {
       it('should return \'platform\' as its type', () => {
