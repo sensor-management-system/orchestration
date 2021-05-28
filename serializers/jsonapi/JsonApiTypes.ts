@@ -261,7 +261,7 @@ export type IJsonApiEntityWithOptionalAttributes = Omit<IJsonApiEntity, 'attribu
  */
 export interface IJsonApiEntityEnvelope {
   data: IJsonApiEntity
-  included: IJsonApiEntityWithOptionalAttributes[]
+  included?: IJsonApiEntityWithOptionalAttributes[]
   links?: IJsonApiLinkDict,
   jsonapi?: IJsonApiMeta
 }
@@ -272,7 +272,7 @@ export interface IJsonApiEntityEnvelope {
  */
 export interface IJsonApiEntityListEnvelope {
   data: IJsonApiEntity[]
-  included: IJsonApiEntityWithOptionalAttributes[]
+  included?: IJsonApiEntityWithOptionalAttributes[]
   links?: IJsonApiPaginationLinks | IJsonApiLinkDict,
   jsonapi?: IJsonApiMeta
   meta?: {}
