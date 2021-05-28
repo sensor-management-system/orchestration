@@ -35,7 +35,6 @@ import { Attachment } from '@/models/Attachment'
 import {
   IJsonApiEntityEnvelope,
   IJsonApiEntityListEnvelope,
-  IJsonApiEntity,
   IJsonApiEntityWithOptionalId,
   IJsonApiEntityWithOptionalAttributes,
   IJsonApiEntityWithoutDetails,
@@ -210,7 +209,7 @@ export abstract class GenericActionSerializer {
     }
   }
 
-  convertJsonApiIncludedGenericActionAttachmentsToIdList (included: IJsonApiEntity[]): IGenericActionAttachmentRelation[] {
+  convertJsonApiIncludedGenericActionAttachmentsToIdList (included: IJsonApiEntityWithOptionalAttributes[]): IGenericActionAttachmentRelation[] {
     const linkedAttachments: IGenericActionAttachmentRelation[] = []
     const type = this.getActionAttachmentTypeName()
     included.forEach((i) => {
