@@ -516,10 +516,10 @@ describe('GenericActionSerializer', () => {
           id: '7',
           attributes: {
             description: 'Bla',
-            actionTypeName: 'Device maintainance',
-            actionTypeUrl: '',
-            beginDate: '2021-05-23T00:00:00',
-            endDate: '2021-06-01T00:00:00'
+            action_type_name: 'Device maintainance',
+            action_type_uri: '',
+            begin_date: '2021-05-23T00:00:00.000Z',
+            end_date: '2021-06-01T00:00:00.000Z'
           },
           relationships: {
             device: {
