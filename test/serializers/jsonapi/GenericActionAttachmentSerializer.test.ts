@@ -29,10 +29,7 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
-import { DateTime } from 'luxon'
-
 import { Attachment } from '@/models/Attachment'
-import { GenericAction } from '@/models/GenericAction'
 
 import {
   GenericDeviceActionAttachmentSerializer,
@@ -41,7 +38,6 @@ import {
 
 import {
   IJsonApiEntityEnvelope,
-  IJsonApiEntityListEnvelope,
   IJsonApiEntityWithOptionalId,
   IJsonApiEntityWithOptionalAttributes,
   IJsonApiRelationships
