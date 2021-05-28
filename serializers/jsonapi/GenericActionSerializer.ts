@@ -37,6 +37,7 @@ import {
   IJsonApiEntityListEnvelope,
   IJsonApiEntity,
   IJsonApiEntityWithOptionalId,
+  IJsonApiEntityWithOptionalAttributes,
   IJsonApiEntityWithoutDetails,
   IJsonApiTypedEntityWithoutDetailsDataDict,
   IJsonApiEntityWithoutDetailsDataDictList,
@@ -80,16 +81,18 @@ export abstract class GenericActionSerializer {
     return this.convertJsonApiDataToModel(data, included)
   }
 
-  convertJsonApiDataToModel (jsonApiData: IJsonApiEntity, included: IJsonApiEntity[]): GenericAction {
+  convertJsonApiDataToModel (jsonApiData: IJsonApiEntityWithOptionalAttributes, included: IJsonApiEntityWithOptionalAttributes[]): GenericAction {
     const attributes = jsonApiData.attributes
     const newEntry = GenericAction.createEmpty()
 
     newEntry.id = jsonApiData.id.toString()
-    newEntry.description = attributes.description || ''
-    newEntry.actionTypeName = attributes.action_type_name || ''
-    newEntry.actionTypeUrl = attributes.action_type_uri || ''
-    newEntry.beginDate = attributes.begin_date ? DateTime.fromISO(attributes.begin_date, { zone: 'UTC' }) : null
-    newEntry.endDate = attributes.end_date ? DateTime.fromISO(attributes.end_date, { zone: 'UTC' }) : null
+    if (attributes) {
+      newEntry.description = attributes.description || ''
+      newEntry.actionTypeName = attributes.action_type_name || ''
+      newEntry.actionTypeUrl = attributes.action_type_uri || ''
+      newEntry.beginDate = attributes.begin_date ? DateTime.fromISO(attributes.begin_date, { zone: 'UTC' }) : null
+      newEntry.endDate = attributes.end_date ? DateTime.fromISO(attributes.end_date, { zone: 'UTC' }) : null
+    }
 
     const relationships = jsonApiData.relationships || {}
 
@@ -108,7 +111,7 @@ export abstract class GenericActionSerializer {
 
   convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiEntityListEnvelope): GenericAction[] {
     const included = jsonApiObjectList.included || []
-    return jsonApiObjectList.data.map((model: IJsonApiEntity) => {
+    return jsonApiObjectList.data.map((model) => {
       return this.convertJsonApiDataToModel(model, included)
     })
   }
@@ -162,7 +165,7 @@ export abstract class GenericActionSerializer {
     }
   }
 
-  convertJsonApiRelationshipsModelList (relationships: IJsonApiRelationships, included: IJsonApiEntity[]): IGenericActionsAndMissing {
+  convertJsonApiRelationshipsModelList (relationships: IJsonApiRelationships, included: IJsonApiEntityWithOptionalAttributes[]): IGenericActionsAndMissing {
     const actionIds = []
     const type = this.getActionTypeName()
     const typePlural = this.getActionTypeNamePlural()

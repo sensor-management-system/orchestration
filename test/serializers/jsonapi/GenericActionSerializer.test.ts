@@ -73,26 +73,6 @@ describe('GenericActionSerializer', () => {
               id: '204'
             }
           },
-          updated_by: {
-            links: {
-              self: '/rdm/svm-api/v1/generic-device-actions/7/relationships/updated-user',
-              related: '/rdm/svm-api/v1/users/8'
-            },
-            data: {
-              type: 'user',
-              id: '8'
-            }
-          },
-          created_by: {
-            links: {
-              self: '/rdm/svm-api/v1/generic-device-actions/7/relationships/created-user',
-              related: '/rdm/svm-api/v1/users/8'
-            },
-            data: {
-              type: 'user',
-              id: '8'
-            }
-          },
           contact: {
             links: {
               self: '/rdm/svm-api/v1/generic-device-actions/7/relationships/contact',
@@ -591,7 +571,7 @@ describe('GenericActionSerializer', () => {
         expectedAction2.contact = contact
 
         const serializer = new GenericDeviceActionSerializer()
-        const actionList = serializer.convertJsonApiObjectToModel(getExampleObjectListResponse())
+        const actionList = serializer.convertJsonApiObjectListToModelList(getExampleObjectListResponse())
 
         expect(actionList).toContain(expectedAction1)
         expect(actionList).toContain(expectedAction2)
