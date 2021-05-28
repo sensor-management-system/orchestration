@@ -40,10 +40,10 @@ import {
   IJsonApiEntityEnvelope,
   IJsonApiEntityListEnvelope,
   IJsonApiTypedEntityWithoutDetailsDataDictList,
-  IJsonApiEntity,
   IJsonApiEntityWithoutDetails,
   IJsonApiRelationships,
-  IJsonApiEntityWithOptionalId
+  IJsonApiEntityWithOptionalId,
+  IJsonApiEntityWithOptionalAttributes
 } from '@/serializers/jsonapi/JsonApiTypes'
 
 export interface IMissingDevicePropertyData {
@@ -137,27 +137,30 @@ export class DevicePropertySerializer {
     }
   }
 
-  convertJsonApiDataToModel (jsonApiData: IJsonApiEntity): DeviceProperty {
+  convertJsonApiDataToModel (jsonApiData: IJsonApiEntityWithOptionalAttributes): DeviceProperty {
     const newEntry = new DeviceProperty()
     newEntry.id = jsonApiData.id.toString()
-    newEntry.measuringRange = new MeasuringRange(
-      jsonApiData.attributes.measuring_range_min || null,
-      jsonApiData.attributes.measuring_range_max || null
-    )
-    newEntry.failureValue = jsonApiData.attributes.failure_value || null
-    newEntry.accuracy = jsonApiData.attributes.accuracy || null
-    newEntry.resolution = jsonApiData.attributes.resolution || null
-    newEntry.label = jsonApiData.attributes.label || ''
-    newEntry.unitUri = jsonApiData.attributes.unit_uri || ''
-    newEntry.unitName = jsonApiData.attributes.unit_name || ''
-    newEntry.compartmentUri = jsonApiData.attributes.compartment_uri || ''
-    newEntry.compartmentName = jsonApiData.attributes.compartment_name || ''
-    newEntry.propertyUri = jsonApiData.attributes.property_uri || ''
-    newEntry.propertyName = jsonApiData.attributes.property_name || ''
-    newEntry.samplingMediaUri = jsonApiData.attributes.sampling_media_uri || ''
-    newEntry.samplingMediaName = jsonApiData.attributes.sampling_media_name || ''
-    newEntry.resolutionUnitUri = jsonApiData.attributes.resolution_unit_uri || ''
-    newEntry.resolutionUnitName = jsonApiData.attributes.resolution_unit_name || ''
+
+    if (jsonApiData.attributes) {
+      newEntry.measuringRange = new MeasuringRange(
+        jsonApiData.attributes.measuring_range_min || null,
+        jsonApiData.attributes.measuring_range_max || null
+      )
+      newEntry.failureValue = jsonApiData.attributes.failure_value || null
+      newEntry.accuracy = jsonApiData.attributes.accuracy || null
+      newEntry.resolution = jsonApiData.attributes.resolution || null
+      newEntry.label = jsonApiData.attributes.label || ''
+      newEntry.unitUri = jsonApiData.attributes.unit_uri || ''
+      newEntry.unitName = jsonApiData.attributes.unit_name || ''
+      newEntry.compartmentUri = jsonApiData.attributes.compartment_uri || ''
+      newEntry.compartmentName = jsonApiData.attributes.compartment_name || ''
+      newEntry.propertyUri = jsonApiData.attributes.property_uri || ''
+      newEntry.propertyName = jsonApiData.attributes.property_name || ''
+      newEntry.samplingMediaUri = jsonApiData.attributes.sampling_media_uri || ''
+      newEntry.samplingMediaName = jsonApiData.attributes.sampling_media_name || ''
+      newEntry.resolutionUnitUri = jsonApiData.attributes.resolution_unit_uri || ''
+      newEntry.resolutionUnitName = jsonApiData.attributes.resolution_unit_name || ''
+    }
 
     return newEntry
   }
@@ -175,7 +178,7 @@ export class DevicePropertySerializer {
     return result
   }
 
-  convertJsonApiRelationshipsModelList (relationships: IJsonApiRelationships, included: IJsonApiEntity[]): IDevicePropertiesAndMissing {
+  convertJsonApiRelationshipsModelList (relationships: IJsonApiRelationships, included: IJsonApiEntityWithOptionalAttributes[]): IDevicePropertiesAndMissing {
     const devicePropertyIds = []
     if (relationships.device_properties) {
       const devicePropertyObject = relationships.device_properties

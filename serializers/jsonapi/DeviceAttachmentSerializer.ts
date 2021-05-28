@@ -36,11 +36,11 @@ import { Attachment, IAttachment } from '@/models/Attachment'
 import {
   IJsonApiEntityEnvelope,
   IJsonApiEntityListEnvelope,
-  IJsonApiEntity,
   IJsonApiRelationships,
   IJsonApiTypedEntityWithoutDetailsDataDictList,
   IJsonApiEntityWithoutDetails,
-  IJsonApiEntityWithOptionalId
+  IJsonApiEntityWithOptionalId,
+  IJsonApiEntityWithOptionalAttributes
 } from '@/serializers/jsonapi/JsonApiTypes'
 
 import { IAttachmentsAndMissing } from '@/serializers/jsonapi/AttachmentSerializer'
@@ -51,14 +51,16 @@ export class DeviceAttachmentSerializer {
     return this.convertJsonApiDataToModel(data)
   }
 
-  convertJsonApiDataToModel (jsonApiData: IJsonApiEntity): Attachment {
-    const attribues = jsonApiData.attributes
+  convertJsonApiDataToModel (jsonApiData: IJsonApiEntityWithOptionalAttributes): Attachment {
+    const attributes = jsonApiData.attributes
 
     const newEntry = Attachment.createEmpty()
 
     newEntry.id = jsonApiData.id.toString()
-    newEntry.url = attribues.url || ''
-    newEntry.label = attribues.label || ''
+    if (attributes) {
+      newEntry.url = attributes.url || ''
+      newEntry.label = attributes.label || ''
+    }
 
     return newEntry
   }
@@ -67,7 +69,7 @@ export class DeviceAttachmentSerializer {
     return jsonApiObjectList.data.map(this.convertJsonApiDataToModel)
   }
 
-  convertJsonApiRelationshipsModelList (relationships: IJsonApiRelationships, included: IJsonApiEntity[]): IAttachmentsAndMissing {
+  convertJsonApiRelationshipsModelList (relationships: IJsonApiRelationships, included: IJsonApiEntityWithOptionalAttributes[]): IAttachmentsAndMissing {
     const attachmentIds = []
     if (relationships.device_attachments) {
       const attachmentObject = relationships.device_attachments

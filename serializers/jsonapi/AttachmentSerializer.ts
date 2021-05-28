@@ -38,8 +38,8 @@ import
 {
   IJsonApiEntityEnvelope,
   IJsonApiEntityListEnvelope,
-  IJsonApiEntity,
-  IJsonApiEntityWithOptionalId
+  IJsonApiEntityWithOptionalId,
+  IJsonApiEntityWithOptionalAttributes
 }
   from
   '@/serializers/jsonapi/JsonApiTypes'
@@ -59,13 +59,15 @@ export class AttachmentSerializer {
     return this.convertJsonApiDataToModel(data)
   }
 
-  convertJsonApiDataToModel (jsonApiData: IJsonApiEntity): Attachment {
+  convertJsonApiDataToModel (jsonApiData: IJsonApiEntityWithOptionalAttributes): Attachment {
     const attributes = jsonApiData.attributes
     const newEntry = Attachment.createEmpty()
 
-    newEntry.id = attributes.id.toString()
-    newEntry.label = attributes.label || ''
-    newEntry.url = attributes.url || ''
+    if (attributes) {
+      newEntry.id = attributes.id.toString()
+      newEntry.label = attributes.label || ''
+      newEntry.url = attributes.url || ''
+    }
 
     return newEntry
   }
