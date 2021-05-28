@@ -33,7 +33,7 @@ import { Attachment } from '@/models/Attachment'
 
 import {
   IJsonApiEntityWithOptionalId,
-  IJsonApiEntity,
+  IJsonApiEntityWithOptionalAttributes,
   IJsonApiRelationships,
   IJsonApiEntityWithoutDetails,
   IJsonApiEntityWithoutDetailsDataDictList
@@ -80,7 +80,7 @@ export abstract class GenericActionAttachmentSerializer {
     return data
   }
 
-  convertJsonApiRelationshipsModelList (relationships: IJsonApiRelationships, included: IJsonApiEntity[]): Attachment[] {
+  convertJsonApiRelationshipsModelList (relationships: IJsonApiRelationships, included: IJsonApiEntityWithOptionalAttributes[]): Attachment[] {
     const actionAttachmentIds = []
     const type = this.getActionAttachmentTypeName()
     const typePlural = this.getActionAttachmentTypeNamePlural()
