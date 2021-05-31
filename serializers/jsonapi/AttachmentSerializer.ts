@@ -36,7 +36,10 @@ import { Attachment, IAttachment } from '@/models/Attachment'
 
 import
 {
-  IJsonApiObjectList, IJsonApiObject, IJsonApiTypeIdAttributes, IJsonApiDataWithOptionalIdWithoutRelationships
+  IJsonApiEntityEnvelope,
+  IJsonApiEntityListEnvelope,
+  IJsonApiEntityWithOptionalId,
+  IJsonApiEntityWithOptionalAttributes
 }
   from
   '@/serializers/jsonapi/JsonApiTypes'
@@ -48,28 +51,32 @@ export interface IMissingAttachmentData {
 export interface IAttachmentsAndMissing {
   attachments: Attachment[]
   missing: IMissingAttachmentData
-} export class AttachmentSerializer {
-  convertJsonApiObjectToModel (jsonApiObject: IJsonApiObject): Attachment {
+}
+
+export class AttachmentSerializer {
+  convertJsonApiObjectToModel (jsonApiObject: IJsonApiEntityEnvelope): Attachment {
     const data = jsonApiObject.data
     return this.convertJsonApiDataToModel(data)
   }
 
-  convertJsonApiDataToModel (jsonApiData: IJsonApiTypeIdAttributes): Attachment {
+  convertJsonApiDataToModel (jsonApiData: IJsonApiEntityWithOptionalAttributes): Attachment {
     const attributes = jsonApiData.attributes
     const newEntry = Attachment.createEmpty()
 
-    newEntry.id = attributes.id.toString()
-    newEntry.label = attributes.label || ''
-    newEntry.url = attributes.url || ''
+    if (attributes) {
+      newEntry.id = attributes.id.toString()
+      newEntry.label = attributes.label || ''
+      newEntry.url = attributes.url || ''
+    }
 
     return newEntry
   }
 
-  convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiObjectList): Attachment[] {
+  convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiEntityListEnvelope): Attachment[] {
     return jsonApiObjectList.data.map(this.convertJsonApiDataToModel)
   }
 
-  convertModelToJsonApiData (attachment : IAttachment): IJsonApiDataWithOptionalIdWithoutRelationships {
+  convertModelToJsonApiData (attachment : IAttachment): IJsonApiEntityWithOptionalId {
     const data: any = {
       type: 'attachment',
       attributes: {

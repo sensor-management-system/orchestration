@@ -39,7 +39,7 @@ import { Platform } from '@/models/Platform'
 import { Attachment } from '@/models/Attachment'
 
 import { PlatformSerializer, IPlatformWithMeta, platformWithMetaToPlatformByThrowingErrorOnMissing, platformWithMetaToPlatformByAddingDummyObjects } from '@/serializers/jsonapi/PlatformSerializer'
-import { IJsonApiTypeIdDataList } from '@/serializers/jsonapi/JsonApiTypes'
+import { IJsonApiEntityWithoutDetailsDataDictList, IJsonApiEntity } from '@/serializers/jsonapi/JsonApiTypes'
 
 const createTestPlatform = () => {
   const platform = new Platform()
@@ -596,7 +596,7 @@ describe('PlatformSerializer', () => {
           self: '/rdm/svm-api/v1/platforms/37'
         }
       }
-      const included = [
+      const included: IJsonApiEntity[] = [
         {
           type: 'contact',
           relationships: {
@@ -604,7 +604,8 @@ describe('PlatformSerializer', () => {
               links: {
                 self: '/rdm/svm-api/v1/contacts/1/relationships/configurations',
                 related: '/rdm/svm-api/v1/configurations?contact_id=1'
-              }
+              },
+              data: []
             },
             user: {
               links: {
@@ -620,13 +621,15 @@ describe('PlatformSerializer', () => {
               links: {
                 self: '/rdm/svm-api/v1/contacts/1/relationships/devices',
                 related: '/rdm/svm-api/v1/devices?contact_id=1'
-              }
+              },
+              data: []
             },
             platforms: {
               links: {
                 self: '/rdm/svm-api/v1/contacts/1/relationships/platforms',
                 related: '/rdm/svm-api/v1/contacts/1/platforms'
-              }
+              },
+              data: []
             }
           },
           attributes: {
@@ -642,21 +645,21 @@ describe('PlatformSerializer', () => {
         },
         {
           type: 'platform_attachment',
-          attributes: {
-            url: 'http://www.gfz-potsdam.de',
-            label: 'GFZ'
-          },
           relationships: {
-            platform: {
+            platforms: {
               links: {
                 self: '/rdm/svm-api/v1/platform-attachments/1/relationships/platform',
                 related: '/rdm/svm-api/v1/platforms/37'
               },
               data: {
-                type: 'platform',
-                id: '37'
+                id: '37',
+                type: 'platform'
               }
             }
+          },
+          attributes: {
+            url: 'http://www.gfz-potsdam.de',
+            label: 'GFZ'
           },
           id: '12',
           links: {
@@ -765,7 +768,7 @@ describe('PlatformSerializer', () => {
       // expect(attributes.updated_at).toEqual('2020-08-30T13:49:48.015Z')
 
       expect(jsonApiData.relationships).toHaveProperty('platform_attachments')
-      const attachments = jsonApiData.relationships.platform_attachments as IJsonApiTypeIdDataList
+      const attachments = jsonApiData.relationships?.platform_attachments as IJsonApiEntityWithoutDetailsDataDictList
       expect(attachments).toHaveProperty('data')
       const attachmentData = attachments.data
       expect(Array.isArray(attachmentData)).toBeTruthy()
@@ -778,12 +781,12 @@ describe('PlatformSerializer', () => {
       expect(jsonApiData).toHaveProperty('relationships')
       expect(typeof jsonApiData.relationships).toEqual('object')
       expect(jsonApiData.relationships).toHaveProperty('contacts')
-      expect(typeof jsonApiData.relationships.contacts).toBe('object')
+      expect(typeof jsonApiData.relationships?.contacts).toBe('object')
       // we test for the inner structure of the result anyway
       // this cast is just to tell typescript that
       // we have an array of data, so that it doesn't show
       // typeerrors here
-      const contactObject = jsonApiData.relationships.contacts as IJsonApiTypeIdDataList
+      const contactObject = jsonApiData.relationships?.contacts as IJsonApiEntityWithoutDetailsDataDictList
       expect(contactObject).toHaveProperty('data')
       const contactData = contactObject.data
       expect(Array.isArray(contactData)).toBeTruthy()

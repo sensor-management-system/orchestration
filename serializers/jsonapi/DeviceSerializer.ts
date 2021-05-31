@@ -37,12 +37,11 @@ import { Contact } from '@/models/Contact'
 import { Device } from '@/models/Device'
 
 import {
-  IJsonApiDataWithId,
-  IJsonApiDataWithOptionalId,
-  IJsonApiObject,
-  IJsonApiObjectList,
-  IJsonApiTypeIdAttributes,
-  IJsonApiTypeIdAttributesWithOptionalRelationships
+  IJsonApiEntityEnvelope,
+  IJsonApiEntityListEnvelope,
+  IJsonApiEntity,
+  IJsonApiEntityWithOptionalId,
+  IJsonApiEntityWithOptionalAttributes
 } from '@/serializers/jsonapi/JsonApiTypes'
 
 import { IMissingAttachmentData } from '@/serializers/jsonapi/AttachmentSerializer'
@@ -76,12 +75,12 @@ export class DeviceSerializer {
   private customTextFieldSerializer: CustomTextFieldSerializer = new CustomTextFieldSerializer()
   private devicePropertySerializer: DevicePropertySerializer = new DevicePropertySerializer()
 
-  convertJsonApiObjectToModel (jsonApiObject: IJsonApiObject): IDeviceWithMeta {
+  convertJsonApiObjectToModel (jsonApiObject: IJsonApiEntityEnvelope): IDeviceWithMeta {
     const included = jsonApiObject.included || []
     return this.convertJsonApiDataToModel(jsonApiObject.data, included)
   }
 
-  convertJsonApiDataToModel (jsonApiData: IJsonApiDataWithId | IJsonApiTypeIdAttributesWithOptionalRelationships, included: IJsonApiTypeIdAttributes[]): IDeviceWithMeta {
+  convertJsonApiDataToModel (jsonApiData: IJsonApiEntityWithOptionalAttributes, included: IJsonApiEntityWithOptionalAttributes[]): IDeviceWithMeta {
     const result: Device = new Device()
 
     const attributes = jsonApiData.attributes
@@ -89,27 +88,29 @@ export class DeviceSerializer {
 
     result.id = jsonApiData.id.toString()
 
-    result.description = attributes.description || ''
-    result.shortName = attributes.short_name || ''
-    result.longName = attributes.long_name || ''
-    result.serialNumber = attributes.serial_number || ''
-    result.manufacturerUri = attributes.manufacturer_uri || ''
-    result.manufacturerName = attributes.manufacturer_name || ''
-    result.deviceTypeUri = attributes.device_type_uri || ''
-    result.deviceTypeName = attributes.device_type_name || ''
-    result.statusUri = attributes.status_uri || ''
-    result.statusName = attributes.status_name || ''
-    result.model = attributes.model || ''
-    result.dualUse = attributes.dual_use || false
-    result.inventoryNumber = attributes.inventory_number || ''
-    result.persistentIdentifier = attributes.persistent_identifier || ''
-    result.website = attributes.website || ''
-    result.createdAt = attributes.created_at != null ? DateTime.fromISO(attributes.created_at, { zone: 'UTC' }) : null
-    result.updatedAt = attributes.updated_at != null ? DateTime.fromISO(attributes.updated_at, { zone: 'UTC' }) : null
-    // TODO
-    // result.createdBy = attributes.created_by
-    // result.updatedBy = attributes.updated_by
-    // result.events = []
+    if (attributes) {
+      result.description = attributes.description || ''
+      result.shortName = attributes.short_name || ''
+      result.longName = attributes.long_name || ''
+      result.serialNumber = attributes.serial_number || ''
+      result.manufacturerUri = attributes.manufacturer_uri || ''
+      result.manufacturerName = attributes.manufacturer_name || ''
+      result.deviceTypeUri = attributes.device_type_uri || ''
+      result.deviceTypeName = attributes.device_type_name || ''
+      result.statusUri = attributes.status_uri || ''
+      result.statusName = attributes.status_name || ''
+      result.model = attributes.model || ''
+      result.dualUse = attributes.dual_use || false
+      result.inventoryNumber = attributes.inventory_number || ''
+      result.persistentIdentifier = attributes.persistent_identifier || ''
+      result.website = attributes.website || ''
+      result.createdAt = attributes.created_at != null ? DateTime.fromISO(attributes.created_at, { zone: 'UTC' }) : null
+      result.updatedAt = attributes.updated_at != null ? DateTime.fromISO(attributes.updated_at, { zone: 'UTC' }) : null
+      // TODO
+      // result.createdBy = attributes.created_by
+      // result.updatedBy = attributes.updated_by
+      // result.events = []
+    }
 
     const attachmentsWithMissing = this.attachmentSerializer.convertJsonApiRelationshipsModelList(relationships, included)
     result.attachments = attachmentsWithMissing.attachments
@@ -146,14 +147,14 @@ export class DeviceSerializer {
     }
   }
 
-  convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiObjectList): IDeviceWithMeta[] {
+  convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiEntityListEnvelope): IDeviceWithMeta[] {
     const included = jsonApiObjectList.included || []
-    return jsonApiObjectList.data.map((model: IJsonApiDataWithId) => {
+    return jsonApiObjectList.data.map((model: IJsonApiEntity) => {
       return this.convertJsonApiDataToModel(model, included)
     })
   }
 
-  convertJsonApiRelationshipsModelList (included: IJsonApiTypeIdAttributes[]): Device[] {
+  convertJsonApiRelationshipsModelList (included: IJsonApiEntityWithOptionalAttributes[]): Device[] {
     // it takes all the devices, as those are the only ones included in the query per configuration.
     // if you want to use it in a broader scope, you may have to change several things
     const result = []
@@ -168,13 +169,13 @@ export class DeviceSerializer {
     return result
   }
 
-  convertModelToJsonApiData (device: Device): IJsonApiDataWithOptionalId {
+  convertModelToJsonApiData (device: Device): IJsonApiEntityWithOptionalId {
     const properties = this.devicePropertySerializer.convertModelListToJsonApiRelationshipObject(device.properties)
     const customfields = this.customTextFieldSerializer.convertModelListToJsonApiRelationshipObject(device.customFields)
     const attachments = this.attachmentSerializer.convertModelListToJsonApiRelationshipObject(device.attachments)
     const contacts = this.contactSerializer.convertModelListToJsonApiRelationshipObject(device.contacts)
 
-    const data: IJsonApiDataWithOptionalId = {
+    const data: IJsonApiEntityWithOptionalId = {
       type: 'device',
       attributes: {
         description: device.description,

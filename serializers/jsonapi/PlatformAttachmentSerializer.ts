@@ -35,44 +35,46 @@
 
 import { Attachment, IAttachment } from '@/models/Attachment'
 import {
-  IJsonApiDataWithOptionalId,
-  IJsonApiObject,
-  IJsonApiObjectList,
-  IJsonApiTypeId,
-  IJsonApiTypeIdAttributes,
-  IJsonApiTypeIdDataList,
-  IJsonApiTypeIdDataListDict
+  IJsonApiEntityEnvelope,
+  IJsonApiEntityListEnvelope,
+  IJsonApiEntityWithoutDetails,
+  IJsonApiEntityWithOptionalId,
+  IJsonApiEntityWithOptionalAttributes,
+  IJsonApiTypedEntityWithoutDetailsDataDictList,
+  IJsonApiRelationships
 } from '@/serializers/jsonapi/JsonApiTypes'
 import { IAttachmentsAndMissing } from '@/serializers/jsonapi/AttachmentSerializer'
 
 export class PlatformAttachmentSerializer {
-  convertJsonApiObjectToModel (jsonApiObject: IJsonApiObject): Attachment {
+  convertJsonApiObjectToModel (jsonApiObject: IJsonApiEntityEnvelope): Attachment {
     const data = jsonApiObject.data
     return this.convertJsonApiDataToModel(data)
   }
 
-  convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiObjectList): Attachment[] {
+  convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiEntityListEnvelope): Attachment[] {
     return jsonApiObjectList.data.map(this.convertJsonApiDataToModel)
   }
 
-  convertJsonApiDataToModel (jsonApiData: IJsonApiTypeIdAttributes): Attachment {
-    const attribues = jsonApiData.attributes
+  convertJsonApiDataToModel (jsonApiData: IJsonApiEntityWithOptionalAttributes): Attachment {
+    const attributes = jsonApiData.attributes
 
     const newEntry = new Attachment()
 
     newEntry.id = jsonApiData.id.toString()
-    newEntry.url = attribues.url || ''
-    newEntry.label = attribues.label || ''
+    if (attributes) {
+      newEntry.url = attributes.url || ''
+      newEntry.label = attributes.label || ''
+    }
 
     return newEntry
   }
 
-  convertJsonApiRelationshipsModelList (relationships: IJsonApiTypeIdDataListDict, included: IJsonApiTypeIdAttributes[]): IAttachmentsAndMissing {
+  convertJsonApiRelationshipsModelList (relationships: IJsonApiRelationships, included: IJsonApiEntityWithOptionalAttributes[]): IAttachmentsAndMissing {
     const attachmentIds = []
     if (relationships.platform_attachments) {
-      const attachmentObject = relationships.platform_attachments as IJsonApiTypeIdDataList
-      if (attachmentObject.data && attachmentObject.data.length > 0) {
-        for (const relationShipAttachmentData of attachmentObject.data) {
+      const attachmentObject = relationships.platform_attachments
+      if (attachmentObject.data && (attachmentObject.data as IJsonApiEntityWithoutDetails[]).length > 0) {
+        for (const relationShipAttachmentData of (attachmentObject.data as IJsonApiEntityWithoutDetails[])) {
           const attachmentId = relationShipAttachmentData.id
           attachmentIds.push(attachmentId)
         }
@@ -84,7 +86,7 @@ export class PlatformAttachmentSerializer {
       for (const includedEntry of included) {
         if (includedEntry.type === 'platform_attachment') {
           const attachmentId = includedEntry.id
-          if (attachmentIds.includes(attachmentId)) {
+          if (attachmentId && attachmentIds.includes(attachmentId)) {
             const attachment = this.convertJsonApiDataToModel(includedEntry)
             possibleAttachments[attachmentId] = attachment
           }
@@ -111,7 +113,7 @@ export class PlatformAttachmentSerializer {
     }
   }
 
-  convertModelListToJsonApiRelationshipObject (attachments: IAttachment[]): IJsonApiTypeIdDataListDict {
+  convertModelListToJsonApiRelationshipObject (attachments: IAttachment[]): IJsonApiTypedEntityWithoutDetailsDataDictList {
     return {
       platform_attachments: {
         data: this.convertModelListToTupleListWithIdAndType(attachments)
@@ -119,8 +121,8 @@ export class PlatformAttachmentSerializer {
     }
   }
 
-  convertModelListToTupleListWithIdAndType (attachments: IAttachment[]): IJsonApiTypeId[] {
-    const result: IJsonApiTypeId[] = []
+  convertModelListToTupleListWithIdAndType (attachments: IAttachment[]): IJsonApiEntityWithoutDetails[] {
+    const result: IJsonApiEntityWithoutDetails[] = []
     for (const attachment of attachments) {
       if (attachment.id !== null) {
         result.push({
@@ -132,7 +134,7 @@ export class PlatformAttachmentSerializer {
     return result
   }
 
-  convertModelToJsonApiData (attachment: Attachment, platformId: string): IJsonApiDataWithOptionalId {
+  convertModelToJsonApiData (attachment: Attachment, platformId: string): IJsonApiEntityWithOptionalId {
     const data: any = {
       type: 'platform_attachment',
       attributes: {

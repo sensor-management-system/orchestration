@@ -36,13 +36,16 @@ import { DeviceProperty, IDeviceProperty } from '@/models/DeviceProperty'
 import { MeasuringRange } from '@/models/MeasuringRange'
 
 import {
-  IJsonApiNestedElement,
-  IJsonApiObject,
-  IJsonApiObjectList,
-  IJsonApiTypeIdAttributes,
-  IJsonApiDataWithOptionalId,
-  IJsonApiTypeIdDataListDict, IJsonApiTypeId, IJsonApiTypeIdDataList
+  IJsonApiAttributes,
+  IJsonApiEntityEnvelope,
+  IJsonApiEntityListEnvelope,
+  IJsonApiTypedEntityWithoutDetailsDataDictList,
+  IJsonApiEntityWithoutDetails,
+  IJsonApiRelationships,
+  IJsonApiEntityWithOptionalId,
+  IJsonApiEntityWithOptionalAttributes
 } from '@/serializers/jsonapi/JsonApiTypes'
+
 export interface IMissingDevicePropertyData {
   ids: string[]
 }
@@ -51,8 +54,9 @@ export interface IDevicePropertiesAndMissing {
   properties: DeviceProperty[]
   missing: IMissingDevicePropertyData
 }
+
 export class DevicePropertySerializer {
-  convertJsonApiElementToModel (property: IJsonApiNestedElement): DeviceProperty {
+  convertJsonApiElementToModel (property: IJsonApiAttributes): DeviceProperty {
     const result = new DeviceProperty()
     result.id = property.id.toString()
     result.measuringRange = new MeasuringRange(
@@ -77,15 +81,15 @@ export class DevicePropertySerializer {
     return result
   }
 
-  convertNestedJsonApiToModelList (properties: IJsonApiNestedElement[]): DeviceProperty[] {
+  convertNestedJsonApiToModelList (properties: IJsonApiAttributes[]): DeviceProperty[] {
     return properties.map(this.convertJsonApiElementToModel)
   }
 
-  convertModelListToNestedJsonApiArray (properties: DeviceProperty[]): IJsonApiNestedElement[] {
+  convertModelListToNestedJsonApiArray (properties: DeviceProperty[]): IJsonApiAttributes[] {
     const result = []
 
     for (const property of properties) {
-      const propertyToSave: IJsonApiNestedElement = {}
+      const propertyToSave: IJsonApiAttributes = {}
       if (property.id != null) {
         // currently it seems that the id is always set to a higher value
         // I can set it to 8, but it will be saved with a new id (9)
@@ -116,16 +120,16 @@ export class DevicePropertySerializer {
     return result
   }
 
-  convertJsonApiObjectToModel (jsonApiObject: IJsonApiObject): DeviceProperty {
+  convertJsonApiObjectToModel (jsonApiObject: IJsonApiEntityEnvelope): DeviceProperty {
     const data = jsonApiObject.data
     return this.convertJsonApiDataToModel(data)
   }
 
-  convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiObjectList): DeviceProperty[] {
+  convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiEntityListEnvelope): DeviceProperty[] {
     return jsonApiObjectList.data.map(this.convertJsonApiDataToModel)
   }
 
-  convertModelListToJsonApiRelationshipObject (properties: DeviceProperty[]): IJsonApiTypeIdDataListDict {
+  convertModelListToJsonApiRelationshipObject (properties: DeviceProperty[]): IJsonApiTypedEntityWithoutDetailsDataDictList {
     return {
       device_properties: {
         data: this.convertModelListToTupleListWithIdAndType(properties)
@@ -133,33 +137,36 @@ export class DevicePropertySerializer {
     }
   }
 
-  convertJsonApiDataToModel (jsonApiData: IJsonApiTypeIdAttributes): DeviceProperty {
+  convertJsonApiDataToModel (jsonApiData: IJsonApiEntityWithOptionalAttributes): DeviceProperty {
     const newEntry = new DeviceProperty()
     newEntry.id = jsonApiData.id.toString()
-    newEntry.measuringRange = new MeasuringRange(
-      jsonApiData.attributes.measuring_range_min || null,
-      jsonApiData.attributes.measuring_range_max || null
-    )
-    newEntry.failureValue = jsonApiData.attributes.failure_value || null
-    newEntry.accuracy = jsonApiData.attributes.accuracy || null
-    newEntry.resolution = jsonApiData.attributes.resolution || null
-    newEntry.label = jsonApiData.attributes.label || ''
-    newEntry.unitUri = jsonApiData.attributes.unit_uri || ''
-    newEntry.unitName = jsonApiData.attributes.unit_name || ''
-    newEntry.compartmentUri = jsonApiData.attributes.compartment_uri || ''
-    newEntry.compartmentName = jsonApiData.attributes.compartment_name || ''
-    newEntry.propertyUri = jsonApiData.attributes.property_uri || ''
-    newEntry.propertyName = jsonApiData.attributes.property_name || ''
-    newEntry.samplingMediaUri = jsonApiData.attributes.sampling_media_uri || ''
-    newEntry.samplingMediaName = jsonApiData.attributes.sampling_media_name || ''
-    newEntry.resolutionUnitUri = jsonApiData.attributes.resolution_unit_uri || ''
-    newEntry.resolutionUnitName = jsonApiData.attributes.resolution_unit_name || ''
+
+    if (jsonApiData.attributes) {
+      newEntry.measuringRange = new MeasuringRange(
+        jsonApiData.attributes.measuring_range_min || null,
+        jsonApiData.attributes.measuring_range_max || null
+      )
+      newEntry.failureValue = jsonApiData.attributes.failure_value || null
+      newEntry.accuracy = jsonApiData.attributes.accuracy || null
+      newEntry.resolution = jsonApiData.attributes.resolution || null
+      newEntry.label = jsonApiData.attributes.label || ''
+      newEntry.unitUri = jsonApiData.attributes.unit_uri || ''
+      newEntry.unitName = jsonApiData.attributes.unit_name || ''
+      newEntry.compartmentUri = jsonApiData.attributes.compartment_uri || ''
+      newEntry.compartmentName = jsonApiData.attributes.compartment_name || ''
+      newEntry.propertyUri = jsonApiData.attributes.property_uri || ''
+      newEntry.propertyName = jsonApiData.attributes.property_name || ''
+      newEntry.samplingMediaUri = jsonApiData.attributes.sampling_media_uri || ''
+      newEntry.samplingMediaName = jsonApiData.attributes.sampling_media_name || ''
+      newEntry.resolutionUnitUri = jsonApiData.attributes.resolution_unit_uri || ''
+      newEntry.resolutionUnitName = jsonApiData.attributes.resolution_unit_name || ''
+    }
 
     return newEntry
   }
 
-  convertModelListToTupleListWithIdAndType (properties: IDeviceProperty[]): IJsonApiTypeId[] {
-    const result: IJsonApiTypeId[] = []
+  convertModelListToTupleListWithIdAndType (properties: IDeviceProperty[]): IJsonApiEntityWithoutDetails[] {
+    const result: IJsonApiEntityWithoutDetails[] = []
     for (const property of properties) {
       if (property.id !== null) {
         result.push({
@@ -171,12 +178,12 @@ export class DevicePropertySerializer {
     return result
   }
 
-  convertJsonApiRelationshipsModelList (relationships: IJsonApiTypeIdDataListDict, included: IJsonApiTypeIdAttributes[]): IDevicePropertiesAndMissing {
+  convertJsonApiRelationshipsModelList (relationships: IJsonApiRelationships, included: IJsonApiEntityWithOptionalAttributes[]): IDevicePropertiesAndMissing {
     const devicePropertyIds = []
     if (relationships.device_properties) {
-      const devicePropertyObject = relationships.device_properties as IJsonApiTypeIdDataList
-      if (devicePropertyObject.data && devicePropertyObject.data.length > 0) {
-        for (const relationShipDevicePropertyData of devicePropertyObject.data) {
+      const devicePropertyObject = relationships.device_properties
+      if (devicePropertyObject.data && (devicePropertyObject.data as IJsonApiEntityWithoutDetails[]).length > 0) {
+        for (const relationShipDevicePropertyData of (devicePropertyObject.data as IJsonApiEntityWithoutDetails[])) {
           const devicePropertyId = relationShipDevicePropertyData.id
           devicePropertyIds.push(devicePropertyId)
         }
@@ -215,7 +222,7 @@ export class DevicePropertySerializer {
     }
   }
 
-  convertModelToJsonApiData (deviceProperty: DeviceProperty, deviceId: string): IJsonApiDataWithOptionalId {
+  convertModelToJsonApiData (deviceProperty: DeviceProperty, deviceId: string): IJsonApiEntityWithOptionalId {
     const data: any = {
       type: 'device_property',
       attributes: {

@@ -31,7 +31,7 @@
  */
 import { Contact } from '@/models/Contact'
 import { ContactSerializer } from '@/serializers/jsonapi/ContactSerializer'
-import { IJsonApiTypeIdDataList } from '@/serializers/jsonapi/JsonApiTypes'
+import { IJsonApiEntityWithoutDetailsDataDictList } from '@/serializers/jsonapi/JsonApiTypes'
 
 describe('ContactSerializer', () => {
   describe('#convertJsonApiObjectListToModelList', () => {
@@ -265,7 +265,7 @@ describe('ContactSerializer', () => {
       // this cast is just to tell typescript that
       // we have an array of data, so that it doesn't show
       // typeerrors here
-      const contactObject = relationships.contacts as IJsonApiTypeIdDataList
+      const contactObject = relationships.contacts as IJsonApiEntityWithoutDetailsDataDictList
       expect(contactObject).toHaveProperty('data')
       const contactData = contactObject.data
       expect(Array.isArray(contactData)).toBeTruthy()
@@ -284,6 +284,9 @@ describe('ContactSerializer', () => {
     it('should construct a list of contacts - and store missing ids', () => {
       const relationships = {
         contacts: {
+          links: {
+            related: '/foo'
+          },
           data: [{
             id: '1',
             type: 'contact'
