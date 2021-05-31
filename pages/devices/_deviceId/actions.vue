@@ -75,6 +75,54 @@ permissions and limitations under the Licence.
             v-if="action.isGenericAction"
             v-model="actions[index]"
           >
+            <template #menu>
+              <v-menu
+                close-on-click
+                close-on-content-click
+                offset-x
+                left
+                z-index="999"
+              >
+                <template #activator="{ on }">
+                  <v-btn
+                    data-role="property-menu"
+                    icon
+                    small
+                    v-on="on"
+                  >
+                    <v-icon
+                      dense
+                      small
+                    >
+                      mdi-dots-vertical
+                    </v-icon>
+                  </v-btn>
+                </template>
+
+                <v-list>
+                  <v-list-item
+                    :disabled="!isLoggedIn"
+                    dense
+                    @click="showDeleteDialog(action.id)"
+                  >
+                    <v-list-item-content>
+                      <v-list-item-title
+                        :class="isLoggedIn ? 'red--text' : 'grey--text'"
+                      >
+                        <v-icon
+                          left
+                          small
+                          :color="isLoggedIn ? 'red' : 'grey'"
+                        >
+                          mdi-delete
+                        </v-icon>
+                        Delete
+                      </v-list-item-title>
+                    </v-list-item-content>
+                  </v-list-item>
+                </v-list>
+              </v-menu>
+            </template>
             <template #actions>
               <v-btn
                 :to="'/devices/' + deviceId + '/actions/' + action.id + '/edit'"
@@ -86,6 +134,7 @@ permissions and limitations under the Licence.
               </v-btn>
             </template>
           </GenericActionCard>
+
           <template v-if="action.isDeviceSoftwareUpdateAction">
             <v-card>
               <v-card-subtitle class="pb-0">
@@ -297,6 +346,35 @@ permissions and limitations under the Licence.
           </template>
         </v-timeline-item>
       </v-timeline>
+      <v-dialog v-model="actionIdToDelete" max-width="290">
+        <v-card>
+          <v-card-title class="headline">
+            Delete action
+          </v-card-title>
+          <v-card-text>
+            Do you really want to delete the action?
+          </v-card-text>
+          <v-card-actions>
+            <v-btn
+              text
+              @click="hideDeleteDialog()"
+            >
+              No
+            </v-btn>
+            <v-spacer />
+            <v-btn
+              color="error"
+              text
+              @click="deleteActionAndCloseDialog(actionIdToDelete)"
+            >
+              <v-icon left>
+                mdi-delete
+              </v-icon>
+              Delete
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
     </template>
   </div>
 </template>
@@ -375,91 +453,91 @@ class DeviceCalibrationAction implements IAction {
   ) {
     this.id = id
     this.description = description
-    this.currentCalibrationDate = currentCalibrationDate
-    this.nextCalibrationDate = nextCalibrationDate
-    this.formula = formula
-    this.value = value
-    this.deviceProperties = deviceProperties
-    this.contact = contact
-  }
+  this.currentCalibrationDate = currentCalibrationDate
+  this.nextCalibrationDate = nextCalibrationDate
+  this.formula = formula
+  this.value = value
+  this.deviceProperties = deviceProperties
+  this.contact = contact
+}
 
-  getId (): string {
-    return 'calibration-' + this.id
-  }
+getId (): string {
+  return 'calibration-' + this.id
+}
 
-  get isDeviceCalibrationAction (): boolean {
-    return true
-  }
+get isDeviceCalibrationAction (): boolean {
+  return true
+}
 }
 
 class DeviceMountAction {
-  public id: string
-  public configurationName: string
-  public parentPlatformName: string
-  public offsetX: number
-  public offsetY: number
-  public offsetZ: number
-  public beginDate: DateTime
-  public description: string
-  public contact: Contact
-  constructor (
-    id: string,
-    configurationName: string,
-    parentPlatformName: string,
-    offsetX: number,
-    offsetY: number,
-    offsetZ: number,
-    beginDate: DateTime,
-    description: string,
-    contact: Contact
-  ) {
-    this.id = id
-    this.configurationName = configurationName
-    this.parentPlatformName = parentPlatformName
-    this.offsetX = offsetX
-    this.offsetY = offsetY
-    this.offsetZ = offsetZ
-    this.beginDate = beginDate
-    this.description = description
-    this.contact = contact
-  }
+public id: string
+public configurationName: string
+public parentPlatformName: string
+public offsetX: number
+public offsetY: number
+public offsetZ: number
+public beginDate: DateTime
+public description: string
+public contact: Contact
+constructor (
+  id: string,
+  configurationName: string,
+  parentPlatformName: string,
+  offsetX: number,
+  offsetY: number,
+  offsetZ: number,
+  beginDate: DateTime,
+  description: string,
+  contact: Contact
+) {
+  this.id = id
+  this.configurationName = configurationName
+  this.parentPlatformName = parentPlatformName
+  this.offsetX = offsetX
+  this.offsetY = offsetY
+  this.offsetZ = offsetZ
+  this.beginDate = beginDate
+  this.description = description
+  this.contact = contact
+}
 
-  getId (): string {
-    return 'mount-' + this.id
-  }
+getId (): string {
+  return 'mount-' + this.id
+}
 
-  get isDeviceMountAction (): boolean {
-    return true
-  }
+get isDeviceMountAction (): boolean {
+  return true
+}
 }
 
 class DeviceUnmountAction implements IAction {
-  public id: string
-  public configurationName: string
-  public endDate: DateTime
-  public description: string
-  public contact: Contact
-  constructor (
-    id: string,
-    configurationName: string,
-    endDate: DateTime,
-    description: string,
-    contact: Contact
-  ) {
-    this.id = id
-    this.configurationName = configurationName
-    this.endDate = endDate
-    this.description = description
-    this.contact = contact
-  }
+public id: string
+public configurationName: string
+public endDate: DateTime
+public description: string
+public contact: Contact
+constructor (
+  id: string,
+  configurationName: string,
+  endDate: DateTime,
+  description: string,
+  contact: Contact
+) {
+  this.id = id
+  this.configurationName = configurationName
+  this.endDate = endDate
+  this.description = description
+  this.contact = contact
+}
 
-  getId (): string {
-    return 'unmount-' + this.id
-  }
+getId (): string {
+  return 'unmount-' + this.id
+}
 
-  get isDeviceUnmountAction (): boolean {
-    return true
-  }
+get isDeviceUnmountAction (): boolean {
+  return true
+}
 }
 
 @Component({
@@ -477,6 +555,8 @@ export default class DeviceActionsPage extends Vue {
 
   private actions: IAction[] = []
   private searchResultItemsShown: { [id: string]: boolean } = {}
+
+  private actionIdToDelete: string = ''
 
   async fetch () {
     const contact1 = Contact.createFromObject({
@@ -637,6 +717,27 @@ export default class DeviceActionsPage extends Vue {
 
   showsave (isSaving: boolean) {
     this.isSaving = isSaving
+  }
+
+  showDeleteDialog (id: string) {
+    this.actionIdToDelete = id
+  }
+
+  hideDeleteDialog (): void {
+    this.actionIdToDelete = ''
+  }
+
+  deleteActionAndCloseDialog (id: string) {
+    this.isSaving = true
+    this.$api.genericDeviceActions.deleteById(id).then(() => {
+      this.$fetch()
+      this.$store.commit('snackbar/setSuccess', 'Action deleted')
+    }).catch((_error) => {
+      this.$store.commit('snackbar/setError', 'Action could not be deleted')
+    }).finally(() => {
+      this.hideDeleteDialog()
+      this.isSaving = false
+    })
   }
 }
 </script>

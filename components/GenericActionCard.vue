@@ -31,7 +31,17 @@ permissions and limitations under the Licence.
 <template>
   <v-card>
     <v-card-subtitle class="pb-0">
-      {{ value.beginDate | toUtcDate }} - {{ value.endDate | toUtcDate }}
+      <v-row no-gutters>
+        <v-col>
+          {{ value.beginDate | toUtcDate }} - {{ value.endDate | toUtcDate }}
+        </v-col>
+        <v-col
+          align-self="end"
+          class="text-right"
+        >
+          <slot name="menu" />
+        </v-col>
+      </v-row>
     </v-card-subtitle>
     <v-card-title class="pt-0">
       {{ value.actionTypeName }}
