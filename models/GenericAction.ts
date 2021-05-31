@@ -76,9 +76,7 @@ export class GenericAction implements IGenericAction {
     action.description = someObject.description
     action.actionTypeName = someObject.actionTypeName
     action.actionTypeUrl = someObject.actionTypeUrl
-    // TODO: find the proper way to create new DateTime instances from other DateTime-ish instances
     action.beginDate = someObject.beginDate ? someObject.beginDate : null
-    // TODO: find the proper way to create new DateTime instances from other DateTime-ish instances
     action.endDate = someObject.endDate ? someObject.endDate : null
     action.contact = someObject.contact ? Contact.createFromObject(someObject.contact) : null
     action.attachments = [...someObject.attachments]
