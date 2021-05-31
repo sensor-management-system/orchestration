@@ -145,12 +145,11 @@ export default class DeviceActionEditPage extends Vue {
   }
 
   save (): void {
-    this.isSaving = true
     if (!(this.$refs.genericDeviceActionForm as Vue & { isValid: () => boolean }).isValid()) {
-      this.isSaving = false
       this.$store.commit('snackbar/setError', 'Please correct the errors')
       return
     }
+    this.isSaving = true
     this.$api.genericDeviceActions.update(this.deviceId, this.valueCopy).then((action: GenericAction) => {
       this.$router.push('/devices/' + this.deviceId + '/actions', () => this.$emit('input', action))
     }).catch(() => {
