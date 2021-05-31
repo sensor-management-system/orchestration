@@ -453,91 +453,91 @@ class DeviceCalibrationAction implements IAction {
   ) {
     this.id = id
     this.description = description
-  this.currentCalibrationDate = currentCalibrationDate
-  this.nextCalibrationDate = nextCalibrationDate
-  this.formula = formula
-  this.value = value
-  this.deviceProperties = deviceProperties
-  this.contact = contact
-}
+    this.currentCalibrationDate = currentCalibrationDate
+    this.nextCalibrationDate = nextCalibrationDate
+    this.formula = formula
+    this.value = value
+    this.deviceProperties = deviceProperties
+    this.contact = contact
+  }
 
-getId (): string {
-  return 'calibration-' + this.id
-}
+  getId (): string {
+    return 'calibration-' + this.id
+  }
 
-get isDeviceCalibrationAction (): boolean {
-  return true
-}
+  get isDeviceCalibrationAction (): boolean {
+    return true
+  }
 }
 
 class DeviceMountAction {
-public id: string
-public configurationName: string
-public parentPlatformName: string
-public offsetX: number
-public offsetY: number
-public offsetZ: number
-public beginDate: DateTime
-public description: string
-public contact: Contact
-constructor (
-  id: string,
-  configurationName: string,
-  parentPlatformName: string,
-  offsetX: number,
-  offsetY: number,
-  offsetZ: number,
-  beginDate: DateTime,
-  description: string,
-  contact: Contact
-) {
-  this.id = id
-  this.configurationName = configurationName
-  this.parentPlatformName = parentPlatformName
-  this.offsetX = offsetX
-  this.offsetY = offsetY
-  this.offsetZ = offsetZ
-  this.beginDate = beginDate
-  this.description = description
-  this.contact = contact
-}
+  public id: string
+  public configurationName: string
+  public parentPlatformName: string
+  public offsetX: number
+  public offsetY: number
+  public offsetZ: number
+  public beginDate: DateTime
+  public description: string
+  public contact: Contact
+  constructor (
+    id: string,
+    configurationName: string,
+    parentPlatformName: string,
+    offsetX: number,
+    offsetY: number,
+    offsetZ: number,
+    beginDate: DateTime,
+    description: string,
+    contact: Contact
+  ) {
+    this.id = id
+    this.configurationName = configurationName
+    this.parentPlatformName = parentPlatformName
+    this.offsetX = offsetX
+    this.offsetY = offsetY
+    this.offsetZ = offsetZ
+    this.beginDate = beginDate
+    this.description = description
+    this.contact = contact
+  }
 
-getId (): string {
-  return 'mount-' + this.id
-}
+  getId (): string {
+    return 'mount-' + this.id
+  }
 
-get isDeviceMountAction (): boolean {
-  return true
-}
+  get isDeviceMountAction (): boolean {
+    return true
+  }
 }
 
 class DeviceUnmountAction implements IAction {
-public id: string
-public configurationName: string
-public endDate: DateTime
-public description: string
-public contact: Contact
-constructor (
-  id: string,
-  configurationName: string,
-  endDate: DateTime,
-  description: string,
-  contact: Contact
-) {
-  this.id = id
-  this.configurationName = configurationName
-  this.endDate = endDate
-  this.description = description
-  this.contact = contact
-}
+  public id: string
+  public configurationName: string
+  public endDate: DateTime
+  public description: string
+  public contact: Contact
+  constructor (
+    id: string,
+    configurationName: string,
+    endDate: DateTime,
+    description: string,
+    contact: Contact
+  ) {
+    this.id = id
+    this.configurationName = configurationName
+    this.endDate = endDate
+    this.description = description
+    this.contact = contact
+  }
 
-getId (): string {
-  return 'unmount-' + this.id
-}
+  getId (): string {
+    return 'unmount-' + this.id
+  }
 
-get isDeviceUnmountAction (): boolean {
-  return true
-}
+  get isDeviceUnmountAction (): boolean {
+    return true
+  }
 }
 
 @Component({
