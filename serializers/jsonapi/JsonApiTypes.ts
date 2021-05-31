@@ -206,8 +206,8 @@ export interface IJsonApiMeta {
 export interface IJsonApiPaginationLinks {
   first: string
   last: string
-  next: string
-  prev: string
+  next?: string
+  prev?: string
 }
 
 /**
