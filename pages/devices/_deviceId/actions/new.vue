@@ -321,7 +321,7 @@ export default class ActionAddPage extends Vue {
     { id: 'device-calibration', kind: 'device_calibration', name: 'Device calibration' },
     { id: 'software-update', kind: 'software_update', name: 'Software update' },
     { id: 'generic-action-1', kind: 'generic_device_action', /* uri: 'actionTypes/device_visit', */ name: 'Device visit' },
-    { id: 'generic-action-2', kind: 'generic_device_action', /* uri: 'actionTypes/device_maintainance', */ name: 'Device maintainance' }
+    { id: 'generic-action-2', kind: 'generic_device_action', /* uri: 'actionTypes/device_maintenance', */ name: 'Device maintenance' }
   ]
 
   private contacts: Contact[] = []
