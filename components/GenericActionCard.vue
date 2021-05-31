@@ -60,7 +60,7 @@ permissions and limitations under the Licence.
           <slot name="actions" />
           <v-btn
             icon
-            @click.stop.prevent="show()"
+            @click.stop.prevent="toggleShow()"
           >
             <v-icon>{{ isShown() ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
           </v-btn>
@@ -134,7 +134,7 @@ export default class GenericActionCard extends Vue {
    * toggles the shown state of the card expansion
    *
    */
-  show (): void {
+  toggleShow (): void {
     this.showDetails = !this.showDetails
   }
 }
