@@ -62,14 +62,14 @@ permissions and limitations under the Licence.
             icon
             @click.stop.prevent="toggleVisibility()"
           >
-            <v-icon>{{ isShown() ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
+            <v-icon>{{ isVisible() ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
           </v-btn>
         </v-col>
       </v-row>
     </v-card-subtitle>
     <v-expand-transition>
       <div
-        v-show="isShown(value.id)"
+        v-show="isVisible(value.id)"
       >
         <v-card-text
           class="grey lighten-5 text--primary pt-2"
@@ -126,7 +126,7 @@ export default class GenericActionCard extends Vue {
    *
    * @return {boolean} whether the card expansion is shown or not
    */
-  isShown (): boolean {
+  isVisible (): boolean {
     return this.showDetails
   }
 
