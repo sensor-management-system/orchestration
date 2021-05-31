@@ -344,7 +344,7 @@ export default class ActionAddPage extends Vue {
   private startDate: DateTime | null = null
   private endDate: DateTime | null = null
 
-  private genericDeviceAction: GenericAction | null = new GenericAction()
+  private genericDeviceAction: GenericAction = new GenericAction()
 
   private _isSaving: boolean = false
 
