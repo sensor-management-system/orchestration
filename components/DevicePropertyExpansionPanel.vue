@@ -58,6 +58,7 @@ permissions and limitations under the Licence.
  * @author <marc.hanisch@gfz-potsdam.de>
  */
 import { Vue, Component, Prop } from 'nuxt-property-decorator'
+import { DeviceProperty } from '@/models/DeviceProperty'
 
 /**
  * A class component that lists DevicePropertyForms as ExpansionPanels

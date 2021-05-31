@@ -31,11 +31,11 @@ permissions and limitations under the Licence.
 <template>
   <div>
     <v-row>
-      <v-col cols="12" md="3">
+      <v-col cols="12" md="6">
         <label>URN</label>
         {{ deviceURN }}
       </v-col>
-      <v-col cols="12" md="3">
+      <v-col cols="12" md="6">
         <label>Persistent identifier (PID)</label>
         {{ value.persistentIdentifier | orDefault }}
       </v-col>
@@ -101,22 +101,6 @@ permissions and limitations under the Licence.
   </div>
 </template>
 
-<style lang="scss">
-@import '~vuetify/src/styles/settings/variables';
-@import '~vuetify/src/styles/settings/colors';
-
-label {
-  /* TODO: move to its own file */
-  display: block;
-  font-size: map-deep-get($headings, 'caption', 'size');
-  font-weight: map-deep-get($headings, 'caption', 'weight');
-  letter-spacing: map-deep-get($headings, 'caption', 'letter-spacing');
-  line-height: map-deep-get($headings, 'caption', 'line-height');
-  font-family: map-deep-get($headings, 'caption', 'font-family');
-  color: map-get($grey, 'darken-1');
-}
-</style>
-
 <script lang="ts">
 import { Component, Vue, Prop } from 'nuxt-property-decorator'
 
@@ -124,6 +108,8 @@ import { Device } from '@/models/Device'
 import { DeviceType } from '@/models/DeviceType'
 import { Status } from '@/models/Status'
 import { Manufacturer } from '@/models/Manufacturer'
+
+import { createDeviceUrn } from '@/modelUtils/urnBuilders'
 
 @Component
 export default class DeviceBasicData extends Vue {
@@ -193,32 +179,11 @@ export default class DeviceBasicData extends Vue {
   }
 
   get deviceURN () {
-    let partManufacturer = '[manufacturer]'
-    let partModel = '[model]'
-    let partSerialNumber = '[serial_number]'
-
-    if (this.value.manufacturerUri !== '') {
-      const manIndex = this.manufacturers.findIndex(m => m.uri === this.value.manufacturerUri)
-      if (manIndex > -1) {
-        partManufacturer = this.manufacturers[manIndex].name
-      } else if (this.value.manufacturerName !== '') {
-        partManufacturer = this.value.manufacturerName
-      }
-    } else if (this.value.manufacturerName !== '') {
-      partManufacturer = this.value.manufacturerName
-    }
-
-    if (this.value.model !== '') {
-      partModel = this.value.model
-    }
-
-    if (this.value.serialNumber !== '') {
-      partSerialNumber = this.value.serialNumber
-    }
-
-    return [partManufacturer, partModel, partSerialNumber].join('_').replace(
-      ' ', '_'
-    )
+    return createDeviceUrn(this.value, this.manufacturers)
   }
 }
 </script>
+
+<style lang="scss">
+@import "@/assets/styles/_readonly_views.scss";
+</style>

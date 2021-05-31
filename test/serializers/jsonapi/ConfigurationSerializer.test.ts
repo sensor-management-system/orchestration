@@ -40,13 +40,18 @@ import { PlatformNode } from '@/models/PlatformNode'
 import { Platform } from '@/models/Platform'
 import { StationaryLocation, DynamicLocation, LocationType } from '@/models/Location'
 
-import { IJsonApiTypeIdDataList, IJsonApiTypeIdData } from '@/serializers/jsonapi/JsonApiTypes'
+import {
+  IJsonApiEntityWithoutDetailsDataDict,
+  IJsonApiEntityWithoutDetailsDataDictList
+} from '@/serializers/jsonapi/JsonApiTypes'
+
 import {
   ConfigurationSerializer,
   IConfigurationWithMeta,
   configurationWithMetaToConfigurationByThrowingErrorOnMissing,
   configurationWithMetaToConfigurationByAddingDummyObjects
 } from '@/serializers/jsonapi/ConfigurationSerializer'
+
 import { PlatformConfigurationAttributes } from '@/models/PlatformConfigurationAttributes'
 import { DeviceConfigurationAttributes } from '@/models/DeviceConfigurationAttributes'
 import { DeviceProperty } from '@/models/DeviceProperty'
@@ -832,14 +837,14 @@ describe('ConfigurationSerializer', () => {
       expect(jsonApiData).toHaveProperty('relationships')
       expect(typeof jsonApiData.relationships).toEqual('object')
       expect(jsonApiData.relationships).toHaveProperty('contacts')
-      expect(typeof jsonApiData.relationships.contacts).toEqual('object')
-      expect(jsonApiData.relationships.contacts).toHaveProperty('data')
+      expect(typeof jsonApiData.relationships?.contacts).toEqual('object')
+      expect(jsonApiData.relationships?.contacts).toHaveProperty('data')
 
       // we test for the inner structure of the result anyway
       // this cast is just to tell typescript that
       // we have an array of data, so that it doesn't show
       // typeerrors here
-      const contactObject = jsonApiData.relationships.contacts as IJsonApiTypeIdDataList
+      const contactObject = jsonApiData.relationships?.contacts as IJsonApiEntityWithoutDetailsDataDictList
 
       const contactData = contactObject.data
       expect(Array.isArray(contactData)).toBeTruthy()
@@ -931,14 +936,14 @@ describe('ConfigurationSerializer', () => {
       expect(jsonApiData).toHaveProperty('relationships')
       const relationships = jsonApiData.relationships
       expect(relationships).toHaveProperty('src_longitude')
-      const lonSrcProperty = relationships.src_longitude as IJsonApiTypeIdData
+      const lonSrcProperty = relationships?.src_longitude as IJsonApiEntityWithoutDetailsDataDict
       expect(lonSrcProperty).toHaveProperty('data')
       expect(lonSrcProperty.data).toHaveProperty('id')
       expect(lonSrcProperty.data.id).toEqual('101')
       expect(lonSrcProperty.data).toHaveProperty('type')
       expect(lonSrcProperty.data.type).toEqual('device_property')
       expect(relationships).toHaveProperty('src_latitude')
-      const latSrcProperty = relationships.src_latitude as IJsonApiTypeIdData
+      const latSrcProperty = relationships?.src_latitude as IJsonApiEntityWithoutDetailsDataDict
       expect(latSrcProperty).toHaveProperty('data')
       expect(latSrcProperty.data).toHaveProperty('id')
       expect(latSrcProperty.data.id).toEqual('100')

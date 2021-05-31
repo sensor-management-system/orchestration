@@ -102,7 +102,7 @@ export class Device implements IDevice {
   private _contacts: Contact[] = []
   private _properties: DeviceProperty[] = []
   private _customFields: CustomTextField[] = []
-  private _deviceAttachments: Attachment[] = []
+  private _attachments: Attachment[] = []
 
   // TODO: Events
 
@@ -291,11 +291,11 @@ export class Device implements IDevice {
   }
 
   get attachments (): Attachment[] {
-    return this._deviceAttachments
+    return this._attachments
   }
 
   set attachments (attachments: Attachment[]) {
-    this._deviceAttachments = attachments
+    this._attachments = attachments
   }
 
   static createFromObject (someObject: IDevice): Device {

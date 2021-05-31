@@ -35,7 +35,13 @@ import { DateTime } from 'luxon'
 import { Configuration } from '@/models/Configuration'
 import { Contact } from '@/models/Contact'
 
-import { IJsonApiObjectList, IJsonApiObject, IJsonApiDataWithId, IJsonApiDataWithOptionalId, IJsonApiTypeIdAttributes, IJsonApiTypeId } from '@/serializers/jsonapi/JsonApiTypes'
+import {
+  IJsonApiEntityListEnvelope,
+  IJsonApiEntityEnvelope,
+  IJsonApiEntityWithOptionalId,
+  IJsonApiEntityWithoutDetails,
+  IJsonApiEntityWithOptionalAttributes
+} from '@/serializers/jsonapi/JsonApiTypes'
 
 import { ContactSerializer, IMissingContactData } from '@/serializers/jsonapi/ContactSerializer'
 import { DeviceSerializer } from '@/serializers/jsonapi/DeviceSerializer'
@@ -65,32 +71,34 @@ export class ConfigurationSerializer {
   private deviceSerializer: DeviceSerializer = new DeviceSerializer()
   private platformSerializer: PlatformSerializer = new PlatformSerializer()
 
-  convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiObjectList): IConfigurationWithMeta[] {
+  convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiEntityListEnvelope): IConfigurationWithMeta[] {
     const included = jsonApiObjectList.included || []
-    return jsonApiObjectList.data.map((model: IJsonApiDataWithId) => {
+    return jsonApiObjectList.data.map((model) => {
       return this.convertJsonApiDataToModel(model, included)
     })
   }
 
-  convertJsonApiObjectToModel (jsonApiObject: IJsonApiObject): IConfigurationWithMeta {
+  convertJsonApiObjectToModel (jsonApiObject: IJsonApiEntityEnvelope): IConfigurationWithMeta {
     const included = jsonApiObject.included || []
     return this.convertJsonApiDataToModel(jsonApiObject.data, included)
   }
 
-  convertJsonApiDataToModel (jsonApiData: IJsonApiDataWithId, included: IJsonApiTypeIdAttributes[]): IConfigurationWithMeta {
+  convertJsonApiDataToModel (jsonApiData: IJsonApiEntityWithOptionalAttributes, included: IJsonApiEntityWithOptionalAttributes[]): IConfigurationWithMeta {
     const configuration = new Configuration()
 
     const attributes = jsonApiData.attributes
     const relationships = jsonApiData.relationships
 
     configuration.id = jsonApiData.id.toString()
-    configuration.label = attributes.label || ''
-    configuration.projectUri = attributes.project_uri || ''
-    configuration.projectName = attributes.project_name || ''
-    configuration.status = attributes.status || ''
+    if (attributes) {
+      configuration.label = attributes.label || ''
+      configuration.projectUri = attributes.project_uri || ''
+      configuration.projectName = attributes.project_name || ''
+      configuration.status = attributes.status || ''
 
-    configuration.startDate = attributes.start_date ? DateTime.fromISO(attributes.start_date, { zone: 'UTC' }) : null
-    configuration.endDate = attributes.end_date ? DateTime.fromISO(attributes.end_date, { zone: 'UTC' }) : null
+      configuration.startDate = attributes.start_date ? DateTime.fromISO(attributes.start_date, { zone: 'UTC' }) : null
+      configuration.endDate = attributes.end_date ? DateTime.fromISO(attributes.end_date, { zone: 'UTC' }) : null
+    }
 
     const devices = this.deviceSerializer.convertJsonApiRelationshipsModelList(included)
     const deviceLookupById: {[idx: string]: Device} = {}
@@ -109,7 +117,7 @@ export class ConfigurationSerializer {
       }
     }
 
-    if (attributes.location_type === LocationType.Stationary) {
+    if (attributes && attributes.location_type === LocationType.Stationary) {
       const location = new StationaryLocation()
       if (attributes.longitude != null) { // allow 0 as real values as well
         location.longitude = attributes.longitude
@@ -121,7 +129,7 @@ export class ConfigurationSerializer {
         location.elevation = attributes.elevation
       }
       configuration.location = location
-    } else if (attributes.location_type === LocationType.Dynamic) {
+    } else if (attributes && attributes.location_type === LocationType.Dynamic) {
       const location = new DynamicLocation()
       const toCheck = [
         { key: 'src_latitude', setFunction (value: DeviceProperty) { location.latitude = value } },
@@ -130,7 +138,7 @@ export class ConfigurationSerializer {
       ]
       for (const check of toCheck) {
         if (relationships && relationships[check.key] && relationships[check.key].data) {
-          const data = relationships[check.key].data as IJsonApiTypeId
+          const data = relationships[check.key].data as IJsonApiEntityWithoutDetails
           const id = data.id
           if (id != null && devicePropertyLookupById[id]) {
             check.setFunction(devicePropertyLookupById[id])
@@ -140,9 +148,12 @@ export class ConfigurationSerializer {
       configuration.location = location
     }
 
-    const contactsWithMissing = this.contactSerializer.convertJsonApiRelationshipsModelList(relationships, included)
-    configuration.contacts = contactsWithMissing.contacts
-    const missingDataForContactIds = contactsWithMissing.missing.ids
+    let missingDataForContactIds: string[] = []
+    if (relationships) {
+      const contactsWithMissing = this.contactSerializer.convertJsonApiRelationshipsModelList(relationships, included)
+      configuration.contacts = contactsWithMissing.contacts
+      missingDataForContactIds = contactsWithMissing.missing.ids
+    }
 
     // we get all the devices and platforms
     const platforms = this.platformSerializer.convertJsonApiRelationshipsModelList(included)
@@ -199,8 +210,10 @@ export class ConfigurationSerializer {
     const listOfPlatformAttributes: PlatformConfigurationAttributes[] = []
     const listOfDeviceAttributes: DeviceConfigurationAttributes[] = []
     const hierarchy: ConfigurationsTreeNode[] = []
-    for (const childNode of jsonApiData.attributes.hierarchy || []) {
-      addChildrenRecursivly(childNode, hierarchy, listOfPlatformAttributes, listOfDeviceAttributes)
+    if (jsonApiData.attributes) {
+      for (const childNode of jsonApiData.attributes.hierarchy || []) {
+        addChildrenRecursivly(childNode, hierarchy, listOfPlatformAttributes, listOfDeviceAttributes)
+      }
     }
 
     configuration.children = hierarchy
@@ -217,7 +230,7 @@ export class ConfigurationSerializer {
     }
   }
 
-  convertModelToJsonApiData (configuration: Configuration): IJsonApiDataWithOptionalId {
+  convertModelToJsonApiData (configuration: Configuration): IJsonApiEntityWithOptionalId {
     const contacts = this.contactSerializer.convertModelListToJsonApiRelationshipObject(configuration.contacts)
 
     let locationAttributes = {}
@@ -318,7 +331,7 @@ export class ConfigurationSerializer {
       addChildrenRecursivly(childNode, hierarchy)
     }
 
-    const result: IJsonApiDataWithOptionalId = {
+    const result: IJsonApiEntityWithOptionalId = {
       attributes: {
         label: configuration.label,
         project_uri: configuration.projectUri,

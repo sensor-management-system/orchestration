@@ -40,7 +40,7 @@ services:
     environment:
       BASE_URL: "/"
       SMS_BACKEND_HOST_URL: "http://localhost:5000/rdm/svm-api/v1"
-      # TODO: CV_BACKEND_URL
+      CV_BACKEND_URL: "http://localhost:8000/api/v1"
       NUXT_ENV_REDIRECT_URI: "https://localhost.localdomain:3000/login-callback"
       NUXT_ENV_CLIENT_ID: "rdmsvm-implicit-flow"
       NUXT_ENV_AUTHORITY: "https://webapp.ufz.de/idp/oidc/v1"

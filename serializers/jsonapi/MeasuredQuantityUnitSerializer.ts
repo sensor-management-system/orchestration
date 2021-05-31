@@ -31,30 +31,34 @@
  */
 import { MeasuredQuantityUnit } from '@/models/MeasuredQuantityUnit'
 
-import { IJsonApiObjectListWithLinks, IJsonApiDataWithIdAndLinks, IJsonApiTypeIdData, IJsonApiTypeIdAttributes } from '@/serializers/jsonapi/JsonApiTypes'
+import {
+  IJsonApiEntityListEnvelope,
+  IJsonApiEntity,
+  IJsonApiEntityWithoutDetailsDataDict
+} from '@/serializers/jsonapi/JsonApiTypes'
 
 export class MeasuredQuantityUnitSerializer {
-  private _included: IJsonApiTypeIdAttributes[] = []
+  private _included: IJsonApiEntity[] = []
 
-  get included (): IJsonApiTypeIdAttributes[] {
+  get included (): IJsonApiEntity[] {
     return this._included
   }
 
-  set included (includedList: IJsonApiTypeIdAttributes[]) {
+  set included (includedList: IJsonApiEntity[]) {
     this._included = includedList.filter(i => i.type === 'Unit')
   }
 
-  convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiObjectListWithLinks): MeasuredQuantityUnit[] {
+  convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiEntityListEnvelope): MeasuredQuantityUnit[] {
     return jsonApiObjectList.data.map(this.convertJsonApiDataToModel.bind(this))
   }
 
-  convertJsonApiDataToModel (jsonApiData: IJsonApiDataWithIdAndLinks): MeasuredQuantityUnit {
+  convertJsonApiDataToModel (jsonApiData: IJsonApiEntity): MeasuredQuantityUnit {
     const id = jsonApiData.id.toString()
-    const url = jsonApiData.links.self
+    const url = jsonApiData.links?.self || ''
     const defaultLimitMin = jsonApiData.attributes.default_limit_min
     const defaultLimitMax = jsonApiData.attributes.default_limit_max
-    const unitId = (jsonApiData.relationships.unit as IJsonApiTypeIdData).data.id
-    const measuredQuantityId = (jsonApiData.relationships.measured_quantity as IJsonApiTypeIdData).data.id
+    const unitId = (jsonApiData.relationships && jsonApiData.relationships.unit && jsonApiData.relationships.unit.data && (jsonApiData.relationships.unit as IJsonApiEntityWithoutDetailsDataDict).data.id) || ''
+    const measuredQuantityId = (jsonApiData.relationships && jsonApiData.relationships.measured_quantity && jsonApiData.relationships.measured_quantity.data && (jsonApiData.relationships.measured_quantity as IJsonApiEntityWithoutDetailsDataDict).data.id) || ''
 
     // find the corresponding Unit and take the name and the definition from there
     let name = ''

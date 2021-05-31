@@ -2,12 +2,9 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020-2021
-- Kotyba Alhaj Taha (UFZ, kotyba.alhaj-taha@ufz.de)
+Copyright (C) 2020
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
-- Helmholtz Centre for Environmental Research GmbH - UFZ
-  (UFZ, https://www.ufz.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
   Geosciences (GFZ, https://www.gfz-potsdam.de)
 
@@ -35,19 +32,15 @@ permissions and limitations under the Licence.
   <div>
     <ProgressIndicator
       v-model="isLoading"
-      dark
     />
-    <v-card
-      flat
-    >
+    <v-card flat>
       <v-card-actions>
         <v-spacer />
         <v-btn
           v-if="isLoggedIn"
           small
-          text
           nuxt
-          to="/search/platforms"
+          :to="'/contacts/' + contactId"
         >
           cancel
         </v-btn>
@@ -57,21 +50,21 @@ permissions and limitations under the Licence.
           small
           @click="onSaveButtonClicked"
         >
-          create
+          apply
         </v-btn>
       </v-card-actions>
-      <PlatformBasicDataForm
+      <ContactBasicDataForm
         ref="basicForm"
-        v-model="platform"
+        v-model="contactCopy"
+        :readonly="false"
       />
       <v-card-actions>
         <v-spacer />
         <v-btn
           v-if="isLoggedIn"
           small
-          text
           nuxt
-          to="/search/platforms"
+          :to="'/contacts/' + contactId"
         >
           cancel
         </v-btn>
@@ -81,82 +74,77 @@ permissions and limitations under the Licence.
           small
           @click="onSaveButtonClicked"
         >
-          create
+          apply
         </v-btn>
       </v-card-actions>
     </v-card>
   </div>
 </template>
-
 <script lang="ts">
-import { Component, Vue, mixins } from 'nuxt-property-decorator'
+import { Component, Prop, Vue, Watch } from 'nuxt-property-decorator'
 
-import { Rules } from '@/mixins/Rules'
+import { Contact } from '@/models/Contact'
 
-import { Platform } from '@/models/Platform'
-
+import ContactBasicDataForm from '@/components/ContactBasicDataForm.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
-import PlatformBasicDataForm from '@/components/PlatformBasicDataForm.vue'
 
 @Component({
   components: {
-    PlatformBasicDataForm,
+    ContactBasicDataForm,
     ProgressIndicator
   }
 })
-// @ts-ignore
-export default class PlatformNewPage extends mixins(Rules) {
-  private numberOfTabs: number = 1
-
-  private platform: Platform = new Platform()
+export default class ContactEditPage extends Vue {
+  private contactCopy: Contact = new Contact()
   private isLoading: boolean = false
 
+  @Prop({
+    required: true,
+    type: Contact
+  })
+  readonly value!: Contact
+
   mounted () {
-    this.initializeAppBar()
+    this.contactCopy = Contact.createFromObject(this.value)
   }
 
-  beforeDestroy () {
-    this.$store.dispatch('appbar/setDefaults')
-  }
-
-  onSaveButtonClicked (): void {
+  onSaveButtonClicked () {
     if (!(this.$refs.basicForm as Vue & { validateForm: () => boolean }).validateForm()) {
       this.$store.commit('snackbar/setError', 'Please correct your input')
       return
     }
-    if (!this.isLoggedIn) {
-      this.$store.commit('snackbar/setError', 'You need to be logged in to save the platform')
-      return
-    }
     this.isLoading = true
-    this.$api.platforms.save(this.platform).then((savedPlatform) => {
+    this.save().then((contact) => {
       this.isLoading = false
-      this.$store.commit('snackbar/setSuccess', 'Platform created')
-      this.$router.push('/platforms/' + savedPlatform.id + '')
+      this.$emit('input', contact)
+      this.$router.push('/contacts/' + this.contactId)
     }).catch((_error) => {
       this.isLoading = false
       this.$store.commit('snackbar/setError', 'Save failed')
     })
   }
 
-  initializeAppBar () {
-    this.$store.dispatch('appbar/init', {
-      tabs: [
-        {
-          to: '/platforms/new',
-          name: 'Basic Data'
-        },
-        {
-          name: 'Contacts',
-          disabled: true
-        },
-        {
-          name: 'Attachments',
-          disabled: true
-        }
-      ],
-      title: 'Add Platform'
+  save (): Promise<Contact> {
+    return new Promise((resolve, reject) => {
+      this.$api.contacts.save(this.contactCopy).then((savedContact) => {
+        resolve(savedContact)
+      }).catch((_error) => {
+        reject(_error)
+      })
     })
+  }
+
+  get contactId () {
+    return this.$route.params.contactId
+  }
+
+  @Watch('value', { immediate: true, deep: true })
+  // @ts-ignore
+  onContactChanged (val: Contact) {
+    if (val.id) {
+      this.$store.commit('appbar/setTitle', val?.toString() || 'Edit contact')
+    }
+    this.contactCopy = Contact.createFromObject(val)
   }
 
   get isLoggedIn () {
@@ -164,7 +152,3 @@ export default class PlatformNewPage extends mixins(Rules) {
   }
 }
 </script>
-
-<style lang="scss">
-@import "@/assets/styles/_forms.scss";
-</style>

@@ -31,17 +31,20 @@
  */
 import { Status } from '@/models/Status'
 
-import { IJsonApiObjectListWithLinks, IJsonApiDataWithIdAndLinks } from '@/serializers/jsonapi/JsonApiTypes'
+import {
+  IJsonApiEntityListEnvelope,
+  IJsonApiEntity
+} from '@/serializers/jsonapi/JsonApiTypes'
 
 export class StatusSerializer {
-  convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiObjectListWithLinks): Status[] {
+  convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiEntityListEnvelope): Status[] {
     return jsonApiObjectList.data.map(this.convertJsonApiDataToModel.bind(this))
   }
 
-  convertJsonApiDataToModel (jsonApiData: IJsonApiDataWithIdAndLinks): Status {
+  convertJsonApiDataToModel (jsonApiData: IJsonApiEntity): Status {
     const id = jsonApiData.id.toString()
     const name = jsonApiData.attributes.term
-    const url = jsonApiData.links.self
+    const url = jsonApiData.links?.self || ''
 
     return Status.createWithData(id, name, url)
   }

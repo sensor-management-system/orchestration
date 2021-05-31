@@ -282,10 +282,6 @@ permissions and limitations under the Licence.
   </div>
 </template>
 
-<style lang="scss">
-@import "@/assets/styles/_forms.scss";
-</style>
-
 <script lang="ts">
 import { Vue, Component, Watch } from 'nuxt-property-decorator'
 
@@ -888,3 +884,7 @@ export default class ConfigurationsIdPage extends Vue {
   }
 }
 </script>
+
+<style lang="scss">
+@import "@/assets/styles/_forms.scss";
+</style>

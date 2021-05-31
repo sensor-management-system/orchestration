@@ -158,7 +158,7 @@ export default class AttachmentEditPage extends Vue {
       this.$router.push('/devices/' + this.deviceId + '/attachments')
     }).catch(() => {
       this.$emit('showsave', false)
-      this.$store.commit('snackbar/setError', 'Failed to save measured quantity')
+      this.$store.commit('snackbar/setError', 'Failed to save attachments')
     })
   }
 }

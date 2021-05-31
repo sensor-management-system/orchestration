@@ -31,17 +31,20 @@
  */
 import { PlatformType } from '@/models/PlatformType'
 
-import { IJsonApiObjectListWithLinks, IJsonApiDataWithIdAndLinks } from '@/serializers/jsonapi/JsonApiTypes'
+import {
+  IJsonApiEntityListEnvelope,
+  IJsonApiEntity
+} from '@/serializers/jsonapi/JsonApiTypes'
 
 export class PlatformTypeSerializer {
-  convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiObjectListWithLinks): PlatformType[] {
+  convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiEntityListEnvelope): PlatformType[] {
     return jsonApiObjectList.data.map(this.convertJsonApiDataToModel.bind(this))
   }
 
-  convertJsonApiDataToModel (jsonApiData: IJsonApiDataWithIdAndLinks): PlatformType {
+  convertJsonApiDataToModel (jsonApiData: IJsonApiEntity): PlatformType {
     const id = jsonApiData.id.toString()
     const name = jsonApiData.attributes.term
-    const url = jsonApiData.links.self
+    const url = jsonApiData.links?.self || ''
 
     return PlatformType.createWithData(id, name, url)
   }

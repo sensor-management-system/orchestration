@@ -105,7 +105,7 @@ permissions and limitations under the Licence.
           >
             <template
               v-if="!readonly"
-              v-slot:action
+              #action
             >
               <v-btn
                 icon

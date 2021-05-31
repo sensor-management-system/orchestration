@@ -34,44 +34,71 @@ permissions and limitations under the Licence.
       v-model="isLoading"
     />
     <v-card flat>
-      <NuxtChild
-        v-model="platform"
-      />
+      <div v-if="isEditPage">
+        <NuxtChild
+          v-model="contact"
+        />
+      </div>
+      <div v-else>
+        <v-card-actions>
+          <v-spacer />
+          <v-btn
+            v-if="isLoggedIn"
+            color="primary"
+            small
+            nuxt
+            :to="'/contacts/' + contactId + '/edit'"
+          >
+            Edit
+          </v-btn>
+        </v-card-actions>
+        <ContactBasicData
+          v-model="contact"
+        />
+        <v-card-actions>
+          <v-spacer />
+          <v-btn
+            v-if="isLoggedIn"
+            color="primary"
+            small
+            nuxt
+            :to="'/contacts/' + contactId + '/edit'"
+          >
+            Edit
+          </v-btn>
+        </v-card-actions>
+      </div>
     </v-card>
   </div>
 </template>
-
 <script lang="ts">
 import { Component, Vue, Watch } from 'nuxt-property-decorator'
-import { Platform } from '@/models/Platform'
+
+import { Contact } from '@/models/Contact'
+
+import ContactBasicData from '@/components/ContactBasicData.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
 @Component({
   components: {
+    ContactBasicData,
     ProgressIndicator
   }
 })
-export default class PlatformPage extends Vue {
-  private platform: Platform = new Platform()
+export default class ContactShowPage extends Vue {
+  private contact: Contact = new Contact()
   private isLoading: boolean = true
 
   created () {
-    if (this.isBasePath()) {
-      this.$router.push('/platforms/' + this.platformId + '/basic')
-    }
+    this.initializeAppBar()
   }
 
   mounted () {
-    this.initializeAppBar()
-
-    this.$api.platforms.findById(this.platformId, {
-      includeContacts: false,
-      includePlatformAttachments: false
-    }).then((platform) => {
-      this.platform = platform
+    this.$api.contacts.findById(this.contactId).then((contact) => {
+      this.contact = contact
       this.isLoading = false
     }).catch((_error) => {
-      this.$store.commit('snackbar/setError', 'Loading platform failed')
+      this.$store.commit('snackbar/setError', 'Loading contact failed')
       this.isLoading = false
     })
   }
@@ -82,38 +109,29 @@ export default class PlatformPage extends Vue {
 
   initializeAppBar () {
     this.$store.dispatch('appbar/init', {
-      tabs: [
-        {
-          to: '/platforms/' + this.platformId + '/basic',
-          name: 'Basic Data'
-        },
-        {
-          to: '/platforms/' + this.platformId + '/contacts',
-          name: 'Contacts'
-        },
-        {
-          to: '/platforms/' + this.platformId + '/attachments',
-          name: 'Attachments'
-        }
-      ],
-      title: 'Platforms'
+      title: 'Show Contact'
     })
   }
 
-  isBasePath () {
-    return this.$route.path === '/platforms/' + this.platformId || this.$route.path === '/platforms/' + this.platformId + '/'
+  get contactId () {
+    return this.$route.params.contactId
   }
 
-  get platformId () {
-    return this.$route.params.platformId
-  }
-
-  @Watch('platform', { immediate: true, deep: true })
+  @Watch('contact', { immediate: true, deep: true })
   // @ts-ignore
-  onPlatformChanged (val: Platform) {
+  onContactChanged (val: Contact) {
+    const fallbackText = this.isEditPage ? 'Edit contact' : 'Show contact'
     if (val.id) {
-      this.$store.commit('appbar/setTitle', val?.shortName || 'Add Platform')
+      this.$store.commit('appbar/setTitle', val?.toString() || fallbackText)
     }
+  }
+
+  get isEditPage () {
+    return this.$route.path === '/contacts/' + this.contactId + '/edit' || this.$route.path === '/contact/' + this.contactId + '/edit/'
+  }
+
+  get isLoggedIn () {
+    return this.$store.getters['oidc/isAuthenticated']
   }
 }
 </script>

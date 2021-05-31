@@ -31,19 +31,23 @@
  */
 import { Property } from '@/models/Property'
 
-import { IJsonApiObjectListWithLinks, IJsonApiDataWithIdAndLinks, IJsonApiTypeIdData } from '@/serializers/jsonapi/JsonApiTypes'
+import {
+  IJsonApiEntityListEnvelope,
+  IJsonApiEntity,
+  IJsonApiEntityWithoutDetailsDataDict
+} from '@/serializers/jsonapi/JsonApiTypes'
 
 export class PropertySerializer {
-  convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiObjectListWithLinks): Property[] {
+  convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiEntityListEnvelope): Property[] {
     return jsonApiObjectList.data.map(this.convertJsonApiDataToModel.bind(this))
   }
 
-  convertJsonApiDataToModel (jsonApiData: IJsonApiDataWithIdAndLinks): Property {
+  convertJsonApiDataToModel (jsonApiData: IJsonApiEntity): Property {
     const id = jsonApiData.id.toString()
     const name = jsonApiData.attributes.term
-    const url = jsonApiData.links.self
+    const url = jsonApiData.links?.self || ''
     const definition = jsonApiData.attributes.definition
-    const samplingMediaId = (jsonApiData.relationships.sampling_media as IJsonApiTypeIdData).data.id
+    const samplingMediaId = (jsonApiData.relationships && jsonApiData.relationships.sampling_media && (jsonApiData.relationships.sampling_media as IJsonApiEntityWithoutDetailsDataDict).data.id) || ''
 
     return Property.createWithData(id, name, url, definition, samplingMediaId)
   }

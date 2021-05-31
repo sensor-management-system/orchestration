@@ -85,7 +85,7 @@ permissions and limitations under the Licence.
           offset-y
           min-width="290px"
         >
-          <template v-slot:activator="{ on, attrs }">
+          <template #activator="{ on, attrs }">
             <v-text-field
               :value="calibrationDateStringHelper"
               label="Calibration date"

@@ -128,7 +128,7 @@ permissions and limitations under the Licence.
         :save-btn-disabled="saveBtnDisabled"
         :cancel-btn-disabled="cancelBtnDisabled"
       />
-      <template v-if="tabs.length" v-slot:extension>
+      <template v-if="tabs.length" #extension>
         <AppBarTabsExtension
           :value="activeTab"
           :tabs="tabs"
@@ -136,7 +136,7 @@ permissions and limitations under the Licence.
         />
       </template>
       <v-menu close-on-click close-on-content-click offset-x>
-        <template v-slot:activator="{ on }">
+        <template #activator="{ on }">
           <v-btn
             data-role="property-menu"
             icon
@@ -197,7 +197,7 @@ permissions and limitations under the Licence.
       <v-container>
         <v-snackbar v-model="hasSuccess" top color="green">
           {{ success }}
-          <template v-slot:action="{ attrs }">
+          <template #action="{ attrs }">
             <v-btn icon small color="white" v-bind="attrs" @click="closeSuccessSnackbar">
               <v-icon small>
                 mdi-close
@@ -207,7 +207,7 @@ permissions and limitations under the Licence.
         </v-snackbar>
         <v-snackbar v-model="hasError" top color="error">
           {{ error }}
-          <template v-slot:action="{ attrs }">
+          <template #action="{ attrs }">
             <v-btn icon small color="white" v-bind="attrs" @click="closeErrorSnackbar">
               <v-icon small>
                 mdi-close
@@ -248,6 +248,11 @@ export default {
       title: 'Sensor Management System',
       appBarContent: null,
       appBarExtension: null
+    }
+  },
+  head () {
+    return {
+      title: this.browserTitle
     }
   },
   computed: {
@@ -363,11 +368,6 @@ export default {
           }
         })
       })
-    }
-  },
-  head () {
-    return {
-      title: this.browserTitle
     }
   }
 }

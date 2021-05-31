@@ -31,17 +31,20 @@
  */
 import { Compartment } from '@/models/Compartment'
 
-import { IJsonApiObjectListWithLinks, IJsonApiDataWithIdAndLinks } from '@/serializers/jsonapi/JsonApiTypes'
+import {
+  IJsonApiEntityListEnvelope,
+  IJsonApiEntity
+} from '@/serializers/jsonapi/JsonApiTypes'
 
 export class CompartmentSerializer {
-  convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiObjectListWithLinks): Compartment[] {
+  convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiEntityListEnvelope): Compartment[] {
     return jsonApiObjectList.data.map(this.convertJsonApiDataToModel.bind(this))
   }
 
-  convertJsonApiDataToModel (jsonApiData: IJsonApiDataWithIdAndLinks): Compartment {
+  convertJsonApiDataToModel (jsonApiData: IJsonApiEntity): Compartment {
     const id = jsonApiData.id.toString()
     const name = jsonApiData.attributes.term
-    const url = jsonApiData.links.self
+    const url = jsonApiData.links?.self || ''
     const definition = jsonApiData.attributes.definition
 
     return Compartment.createWithData(id, name, url, definition)

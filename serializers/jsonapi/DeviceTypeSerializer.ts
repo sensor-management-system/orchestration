@@ -31,17 +31,20 @@
  */
 import { DeviceType } from '@/models/DeviceType'
 
-import { IJsonApiObjectListWithLinks, IJsonApiDataWithIdAndLinks } from '@/serializers/jsonapi/JsonApiTypes'
+import {
+  IJsonApiEntityListEnvelope,
+  IJsonApiEntity
+} from '@/serializers/jsonapi/JsonApiTypes'
 
 export class DeviceTypeSerializer {
-  convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiObjectListWithLinks): DeviceType[] {
+  convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiEntityListEnvelope): DeviceType[] {
     return jsonApiObjectList.data.map(this.convertJsonApiDataToModel.bind(this))
   }
 
-  convertJsonApiDataToModel (jsonApiData: IJsonApiDataWithIdAndLinks): DeviceType {
+  convertJsonApiDataToModel (jsonApiData: IJsonApiEntity): DeviceType {
     const id = jsonApiData.id.toString()
     const name = jsonApiData.attributes.term
-    const url = jsonApiData.links.self
+    const url = jsonApiData.links?.self || ''
 
     return DeviceType.createWithData(id, name, url)
   }

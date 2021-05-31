@@ -47,6 +47,7 @@ permissions and limitations under the Licence.
         align-self="center"
       >
         <v-btn
+          v-if="isLoggedIn"
           small
           color="primary"
           :disabled="selectedContact == null"
@@ -122,7 +123,7 @@ export default class DeviceAddContactPage extends Vue {
         this.$router.push('/devices/' + this.deviceId + '/contacts')
       }).catch(() => {
         this.isSaving = false
-        this.$store.commit('snackbar/setError', 'Failed to save contacts')
+        this.$store.commit('snackbar/setError', 'Failed to add a contact')
       })
     }
   }
