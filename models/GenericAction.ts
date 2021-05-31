@@ -79,7 +79,7 @@ export class GenericAction implements IGenericAction {
     action.beginDate = someObject.beginDate ? someObject.beginDate : null
     action.endDate = someObject.endDate ? someObject.endDate : null
     action.contact = someObject.contact ? Contact.createFromObject(someObject.contact) : null
-    action.attachments = [...someObject.attachments]
+    action.attachments = someObject.attachments.map(i => Attachment.createFromObject(i))
     return action
   }
 
