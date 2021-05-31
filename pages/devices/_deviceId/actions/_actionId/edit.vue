@@ -45,6 +45,7 @@ permissions and limitations under the Licence.
         v-if="isLoggedIn"
         color="green"
         small
+        :disabled="isSaving"
         @click="save"
       >
         apply
@@ -78,6 +79,7 @@ permissions and limitations under the Licence.
         v-if="isLoggedIn"
         color="green"
         small
+        :disabled="isSaving"
         @click="save"
       >
         apply
@@ -102,6 +104,7 @@ import GenericActionForm from '@/components/GenericActionForm.vue'
 export default class DeviceActionEditPage extends Vue {
   private valueCopy: GenericAction = new GenericAction()
   private attachments: Attachment[] = []
+  private _isSaving: boolean = false
 
   @Prop({
     default: () => new GenericAction(),
@@ -132,8 +135,19 @@ export default class DeviceActionEditPage extends Vue {
     return this.$store.getters['oidc/isAuthenticated']
   }
 
+  get isSaving (): boolean {
+    return this.$data._isSaving
+  }
+
+  set isSaving (value: boolean) {
+    this.$data._isSaving = value
+    this.$emit('showsave', value)
+  }
+
   save (): void {
+    this.isSaving = true
     if (!(this.$refs.genericDeviceActionForm as Vue & { isValid: () => boolean }).isValid()) {
+      this.isSaving = false
       this.$store.commit('snackbar/setError', 'Please correct the errors')
       return
     }
@@ -141,6 +155,8 @@ export default class DeviceActionEditPage extends Vue {
       this.$router.push('/devices/' + this.deviceId + '/actions', () => this.$emit('input', action))
     }).catch(() => {
       this.$store.commit('snackbar/setError', 'Failed to save the action')
+    }).finally(() => {
+      this.isSaving = false
     })
   }
 

@@ -66,6 +66,7 @@ permissions and limitations under the Licence.
           v-else-if="otherChosen"
           color="green"
           small
+          :disabled="isSaving"
           @click="addGenericAction"
         >
           Add
@@ -262,6 +263,7 @@ permissions and limitations under the Licence.
           v-else-if="otherChosen"
           color="green"
           small
+          :disabled="isSaving"
           @click="addGenericAction"
         >
           Add
@@ -343,6 +345,8 @@ export default class ActionAddPage extends Vue {
   private endDate: DateTime | null = null
 
   private genericDeviceAction: GenericAction | null = new GenericAction()
+
+  private _isSaving: boolean = false
 
   mounted () {
     this.$api.contacts.findAll().then((foundContacts) => {
@@ -496,6 +500,15 @@ export default class ActionAddPage extends Vue {
     return this.$route.params.deviceId
   }
 
+  get isSaving (): boolean {
+    return this.$data._isSaving
+  }
+
+  set isSaving (value: boolean) {
+    this.$data._isSaving = value
+    this.$emit('showsave', value)
+  }
+
   addDeviceCalibrationAction () {
     if (!(this.$refs.datesForm as Vue & { validate: () => boolean }).validate()) {
       return
@@ -528,12 +541,17 @@ export default class ActionAddPage extends Vue {
       return
     }
     if (!(this.$refs.genericDeviceActionForm as Vue & { isValid: () => boolean }).isValid()) {
+      this.isSaving = false
+      this.$store.commit('snackbar/setError', 'Please correct the errors')
       return
     }
+    this.isSaving = true
     this.$api.genericDeviceActions.add(this.deviceId, this.genericDeviceAction).then((action: GenericAction) => {
       this.$router.push('/devices/' + this.deviceId + '/actions', () => this.$emit('input', action))
     }).catch(() => {
       this.$store.commit('snackbar/setError', 'Failed to save the action')
+    }).finally(() => {
+      this.isSaving = false
     })
   }
 }

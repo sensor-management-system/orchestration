@@ -50,6 +50,7 @@ permissions and limitations under the Licence.
     >
       <NuxtChild
         @input="$fetch"
+        @showsave="showsave"
       />
     </template>
     <template
@@ -58,6 +59,7 @@ permissions and limitations under the Licence.
       <NuxtChild
         :value="editedAction"
         @input="$fetch"
+        @showsave="showsave"
       />
     </template>
     <template v-else>
@@ -631,6 +633,10 @@ export default class DeviceActionsPage extends Vue {
       return
     }
     return this.actions.find(action => action.id === this.actionId)
+  }
+
+  showsave (isSaving: boolean) {
+    this.isSaving = isSaving
   }
 }
 </script>
