@@ -58,39 +58,58 @@ export class ActionTypeApi extends CVApi<ActionType> {
   }
 }
 
+export const ACTION_TYPE_API_FILTER_DEVICE = 'Device'
+export const ACTION_TYPE_API_FILTER_PLATFORM = 'Platform'
+export const ACTION_TYPE_API_FILTER_CONFIGURATION = 'Configuration'
+export type ActionTypeApiFilterType = typeof ACTION_TYPE_API_FILTER_DEVICE | typeof ACTION_TYPE_API_FILTER_PLATFORM | typeof ACTION_TYPE_API_FILTER_CONFIGURATION
+
 export class ActionTypeSearchBuilder {
   private axiosApi: AxiosInstance
   private serializer: ActionTypeSerializer
+  private actionTypeFilter: ActionTypeApiFilterType | undefined
 
   constructor (axiosApi: AxiosInstance, serializer: ActionTypeSerializer) {
     this.axiosApi = axiosApi
     this.serializer = serializer
   }
 
+  onlyType (actionType: ActionTypeApiFilterType): ActionTypeSearchBuilder {
+    this.actionTypeFilter = actionType
+    return this
+  }
+
   build (): ActionTypeSearcher {
-    return new ActionTypeSearcher(this.axiosApi, this.serializer)
+    return new ActionTypeSearcher(this.axiosApi, this.serializer, this.actionTypeFilter)
   }
 }
 
 export class ActionTypeSearcher {
   private axiosApi: AxiosInstance
   private serializer: ActionTypeSerializer
+  private actionTypeFilter: ActionTypeApiFilterType | undefined
 
-  constructor (axiosApi: AxiosInstance, serializer: ActionTypeSerializer) {
+  constructor (axiosApi: AxiosInstance, serializer: ActionTypeSerializer, actionType?: ActionTypeApiFilterType) {
     this.axiosApi = axiosApi
     this.serializer = serializer
+    if (actionType) {
+      this.actionTypeFilter = actionType
+    }
   }
 
   private findAllOnPage (page: number, pageSize: number): Promise<IPaginationLoader<ActionType>> {
+    const params: { [idx: string]: any } = {
+      'page[size]': pageSize,
+      'page[number]': page,
+      'filter[status.iexact]': 'ACCEPTED',
+      sort: 'term'
+    }
+    if (this.actionTypeFilter) {
+      params['filter[action_category__term]'] = this.actionTypeFilter
+    }
     return this.axiosApi.get(
       '',
       {
-        params: {
-          'page[size]': pageSize,
-          'page[number]': page,
-          'filter[status.iexact]': 'ACCEPTED',
-          sort: 'term'
-        }
+        params
       }
     ).then((rawResponse) => {
       const response = rawResponse.data
@@ -111,14 +130,18 @@ export class ActionTypeSearcher {
   }
 
   findMatchingAsList (): Promise<ActionType[]> {
+    const params: { [idx: string]: any } = {
+      'page[size]': 10000,
+      'filter[status.iexact]': 'ACCEPTED',
+      sort: 'term'
+    }
+    if (this.actionTypeFilter) {
+      params['filter[action_category__term]'] = this.actionTypeFilter
+    }
     return this.axiosApi.get(
       '',
       {
-        params: {
-          'page[size]': 10000,
-          'filter[status.iexact]': 'ACCEPTED',
-          sort: 'term'
-        }
+        params
       }
     ).then((rawResponse) => {
       const response = rawResponse.data
