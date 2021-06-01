@@ -63,7 +63,7 @@ permissions and limitations under the Licence.
           Add
         </v-btn>
         <v-btn
-          v-else-if="otherChosen"
+          v-else-if="genericActionChosen"
           color="green"
           small
           :disabled="isSaving"
@@ -75,7 +75,7 @@ permissions and limitations under the Licence.
       <v-card-text>
         <v-select
           v-model="chosenKindOfAction"
-          :items="optionsForActionType"
+          :items="getActionTypeItems()"
           :item-text="(x) => x.name"
           :item-value="(x) => x"
           clearable
@@ -173,7 +173,7 @@ permissions and limitations under the Licence.
         </v-row>
       </v-card-text>
       <v-card-text
-        v-if="otherChosen"
+        v-if="genericActionChosen"
       >
         <GenericActionForm
           ref="genericDeviceActionForm"
@@ -183,7 +183,7 @@ permissions and limitations under the Licence.
       </v-card-text>
       <!-- action type independent -->
       <v-card-text
-        v-if="chosenKindOfAction && !otherChosen"
+        v-if="chosenKindOfAction && !genericActionChosen"
       >
         <v-row>
           <v-col cols="12" md="12">
@@ -260,7 +260,7 @@ permissions and limitations under the Licence.
           Add
         </v-btn>
         <v-btn
-          v-else-if="otherChosen"
+          v-else-if="genericActionChosen"
           color="green"
           small
           :disabled="isSaving"
@@ -281,13 +281,18 @@ import { Contact } from '@/models/Contact'
 import { Attachment } from '@/models/Attachment'
 import { DeviceProperty } from '@/models/DeviceProperty'
 import { GenericAction } from '@/models/GenericAction'
+import { IActionType, ActionType } from '@/models/ActionType'
 
 import { dateToString, stringToDate } from '@/utils/dateHelper'
 
 import GenericActionForm from '@/components/GenericActionForm.vue'
 import DatePicker from '@/components/DatePicker.vue'
 
-type KindOfActionType = 'device_calibration' | 'software_update' | 'generic_device_action'
+const KIND_OF_ACTION_TYPE_DEVICE_CALIBRATION = 'device_calibration'
+const KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE = 'software_update'
+const KIND_OF_ACTION_TYPE_GENERIC_DEVICE_ACTION = 'generic_device_action'
+const KIND_OF_ACTION_TYPE_UNKNOWN = 'unknown'
+type KindOfActionType = typeof KIND_OF_ACTION_TYPE_DEVICE_CALIBRATION | typeof KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE | typeof KIND_OF_ACTION_TYPE_GENERIC_DEVICE_ACTION | typeof KIND_OF_ACTION_TYPE_UNKNOWN
 
 interface IOptionsForActionType {
   id: string
@@ -317,12 +322,7 @@ export default class ActionAddPage extends Vue {
   private contactIsValid = true
   private softwareTypeIsValid = true
 
-  private optionsForActionType: IOptionsForActionType[] = [
-    { id: 'device-calibration', kind: 'device_calibration', name: 'Device calibration' },
-    { id: 'software-update', kind: 'software_update', name: 'Software update' },
-    { id: 'generic-action-1', kind: 'generic_device_action', /* uri: 'actionTypes/device_visit', */ name: 'Device visit' },
-    { id: 'generic-action-2', kind: 'generic_device_action', /* uri: 'actionTypes/device_maintenance', */ name: 'Device maintenance' }
-  ]
+  private actionTypes: ActionType[] = []
 
   private contacts: Contact[] = []
   private selectedContact: Contact | null = null
@@ -347,6 +347,16 @@ export default class ActionAddPage extends Vue {
   private genericDeviceAction: GenericAction = new GenericAction()
 
   private _isSaving: boolean = false
+
+  async fetch () {
+    await Promise.all([
+      this.fetchActionTypes()
+    ])
+  }
+
+  async fetchActionTypes (): Promise<any> {
+    this.actionTypes = await this.$api.actionTypes.findAllPaginated()
+  }
 
   mounted () {
     this.$api.contacts.findAll().then((foundContacts) => {
@@ -388,9 +398,8 @@ export default class ActionAddPage extends Vue {
       if (this.$data._chosenKindOfAction?.kind !== newValue?.kind) {
         this.resetAllActionSpecificInputs()
       }
-      if (this.otherChosen) {
+      if (this.genericActionChosen) {
         this.genericDeviceAction = new GenericAction()
-        // TODO: we still need those values from the controlled vocabulary
         this.genericDeviceAction.actionTypeName = newValue?.name || ''
         this.genericDeviceAction.actionTypeUrl = newValue?.uri || ''
       }
@@ -407,15 +416,15 @@ export default class ActionAddPage extends Vue {
   }
 
   get deviceCalibrationChosen () {
-    return this.$data._chosenKindOfAction?.kind === 'device_calibration'
+    return this.$data._chosenKindOfAction?.kind === KIND_OF_ACTION_TYPE_DEVICE_CALIBRATION
   }
 
   get softwareUpdateChosen () {
-    return this.$data._chosenKindOfAction?.kind === 'software_update'
+    return this.$data._chosenKindOfAction?.kind === KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE
   }
 
-  get otherChosen () {
-    return this.$data._chosenKindOfAction?.kind === 'generic_device_action'
+  get genericActionChosen () {
+    return this.$data._chosenKindOfAction?.kind === KIND_OF_ACTION_TYPE_GENERIC_DEVICE_ACTION
   }
 
   getStartDate (): string {
@@ -553,6 +562,29 @@ export default class ActionAddPage extends Vue {
     }).finally(() => {
       this.isSaving = false
     })
+  }
+
+  getActionTypeItems (): IOptionsForActionType[] {
+    const result: IOptionsForActionType[] = this.actionTypes.filter(i => i.name.match(/device/i)).map((i) => {
+      let kind: KindOfActionType = KIND_OF_ACTION_TYPE_UNKNOWN
+      // TODO: is there another way to get the kind of action than parsing the name?
+      if (i.name.match(/maintenance/i)) {
+        kind = KIND_OF_ACTION_TYPE_GENERIC_DEVICE_ACTION
+      } else if (i.name.match(/observation/i)) {
+        kind = KIND_OF_ACTION_TYPE_GENERIC_DEVICE_ACTION
+      } else if (i.name.match(/update/i)) {
+        kind = KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE
+      } else if (i.name.match(/calibration/i)) {
+        kind = KIND_OF_ACTION_TYPE_DEVICE_CALIBRATION
+      }
+      return {
+        id: i.id,
+        name: i.name,
+        uri: i.uri,
+        kind
+      } as IOptionsForActionType
+    })
+    return result
   }
 }
 
