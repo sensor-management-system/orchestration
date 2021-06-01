@@ -67,7 +67,7 @@ permissions and limitations under the Licence.
         <v-timeline-item
           v-for="(action, index) in actions"
           :key="action.id"
-          :color="getActionColor(action)"
+          :color="action.getColor()"
           class="mb-4"
           small
         >
@@ -395,7 +395,11 @@ const toUtcDate = (dt: DateTime) => {
   return dt.toUTC().toFormat('yyyy-MM-dd TT')
 }
 
-class DeviceSoftwareUpdateAction implements IAction {
+interface IColoredAction {
+  getColor (): string
+}
+
+class DeviceSoftwareUpdateAction implements IAction, IColoredAction {
   public id: string
   public softwareTypeName: string
   public softwareTypeUri: string
@@ -431,9 +435,13 @@ class DeviceSoftwareUpdateAction implements IAction {
   get isDeviceSoftwareUpdateAction (): boolean {
     return true
   }
+
+  getColor (): string {
+    return 'yellow'
+  }
 }
 
-class DeviceCalibrationAction implements IAction {
+class DeviceCalibrationAction implements IAction, IColoredAction {
   public id: string
   public description: string
   public currentCalibrationDate: DateTime
@@ -468,6 +476,10 @@ class DeviceCalibrationAction implements IAction {
 
   get isDeviceCalibrationAction (): boolean {
     return true
+  }
+
+  getColor (): string {
+    return 'brown'
   }
 }
 
@@ -510,9 +522,13 @@ class DeviceMountAction {
   get isDeviceMountAction (): boolean {
     return true
   }
+
+  getColor (): string {
+    return 'green'
+  }
 }
 
-class DeviceUnmountAction implements IAction {
+class DeviceUnmountAction implements IAction, IColoredAction {
   public id: string
   public configurationName: string
   public endDate: DateTime
@@ -539,7 +555,20 @@ class DeviceUnmountAction implements IAction {
   get isDeviceUnmountAction (): boolean {
     return true
   }
+
+  getColor (): string {
+    return 'red'
+  }
 }
+
+/**
+ * extend the original interface by adding the getColor() method
+ */
+declare module '@/models/GenericAction' {
+  export interface GenericAction extends IColoredAction {
+  }
+}
+GenericAction.prototype.getColor = (): string => 'blue'
 
 @Component({
   components: {
@@ -685,21 +714,6 @@ export default class DeviceActionsPage extends Vue {
 
   get actionId (): string | undefined {
     return this.$route.params.actionId
-  }
-
-  getActionColor (action: GenericAction | DeviceSoftwareUpdateAction | DeviceCalibrationAction | DeviceMountAction | DeviceUnmountAction) {
-    switch (true) {
-      case (action as GenericAction).isGenericAction:
-        return 'blue'
-      case (action as DeviceSoftwareUpdateAction).isDeviceSoftwareUpdateAction:
-        return 'yellow'
-      case (action as DeviceCalibrationAction).isDeviceCalibrationAction:
-        return 'brown'
-      case (action as DeviceMountAction).isDeviceMountAction:
-        return 'green'
-      case (action as DeviceUnmountAction).isDeviceUnmountAction:
-        return 'red'
-    }
   }
 
   get editedAction (): IAction | undefined {
