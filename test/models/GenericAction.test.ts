@@ -68,7 +68,7 @@ describe('GenericAction', () => {
     expect(action.beginDate).toBe(date1)
     expect(action.endDate).toBe(date2)
     expect(action.contact).toStrictEqual(contact)
-    expect(action.attachments).toContain(attachment)
+    expect(action.attachments).toContainEqual(attachment)
     expect(action.isGenericAction).toBeTruthy()
   })
 })
