@@ -33,6 +33,7 @@ import { DateTime } from 'luxon'
 import { Attachment } from '@/models/Attachment'
 import { Contact } from '@/models/Contact'
 import { IAction } from '@/models/Action'
+import { IDateCompareable } from '@/modelUtils/Compareables'
 
 export interface IGenericAction extends IAction {
   actionTypeName: string
@@ -43,7 +44,7 @@ export interface IGenericAction extends IAction {
   attachments: Attachment[]
 }
 
-export class GenericAction implements IGenericAction {
+export class GenericAction implements IGenericAction, IDateCompareable {
   private _id: string | null = null
   private _description: string = ''
   private _actionTypeName: string = ''
@@ -149,5 +150,9 @@ export class GenericAction implements IGenericAction {
 
   get isGenericAction (): boolean {
     return true
+  }
+
+  get date (): DateTime | null {
+    return this.beginDate
   }
 }
