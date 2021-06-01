@@ -8,7 +8,7 @@ export interface IDateCompareable {
   date: DateTime | null
 }
 
-export function isDateCompareable (i: Partial<IDateCompareable>): i is IDateCompareable {
+export function isDateCompareable (i: any): i is IDateCompareable {
   if (i && typeof i === 'object' && Object.prototype.hasOwnProperty.call(i, 'date') && DateTime.isDateTime(i.date)) {
     return true
   }
