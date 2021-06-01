@@ -389,6 +389,7 @@ import { Contact } from '@/models/Contact'
 import { DeviceProperty } from '@/models/DeviceProperty'
 import { IAction } from '@/models/Action'
 import { GenericAction } from '@/models/GenericAction'
+import { DateComparator, isDateCompareable } from '@/modelUtils/Compareables'
 
 const toUtcDate = (dt: DateTime) => {
   return dt.toUTC().toFormat('yyyy-MM-dd TT')
@@ -621,27 +622,20 @@ export default class DeviceActionsPage extends Vue {
       deviceMountAction1,
       deviceUnmountAction1
     ]
-    // Todo: sort all actions by date descending
     await Promise.all([this.fetchGenericActions()])
-    // sort the actions descending
+
+    // sort the actions
+    const comparator = new DateComparator()
     this.actions.sort((i: IAction, j: IAction): number => {
-      if (!('beginDate' in i) && !('beginDate' in j)) {
-        return 0
+      if (isDateCompareable(i) && isDateCompareable(j)) {
+        // multiply result with -1 to get descending order
+        return comparator.compare(i, j) * -1
       }
-      if (('beginDate' in i) && ('beginDate' in j)) {
-        if ((i as IAction & { beginDate: DateTime }).beginDate < (j as IAction & { beginDate: DateTime }).beginDate) {
-          return 1
-        }
-        if ((i as IAction & { beginDate: DateTime }).beginDate > (j as IAction & { beginDate: DateTime }).beginDate) {
-          return -1
-        }
-        return 0
-      }
-      if (!('beginDate' in i) && ('beginDate' in j)) {
-        return -1
-      }
-      if (('beginDate' in i) && !('beginDate' in j)) {
+      if (isDateCompareable(i)) {
         return 1
+      }
+      if (isDateCompareable(j)) {
+        return -1
       }
       return 0
     })
