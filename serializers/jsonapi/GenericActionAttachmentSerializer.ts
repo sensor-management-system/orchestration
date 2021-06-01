@@ -100,8 +100,8 @@ export abstract class GenericActionAttachmentSerializer {
         if (includedEntry.type === type) {
           const actionAttachmentId = includedEntry.id
           if (actionAttachmentIds.includes(actionAttachmentId)) {
-            if (includedEntry.relationships && includedEntry.relationships.attachment && includedEntry.relationships.attachment.data && 'id' in includedEntry.relationships.attachment.data) {
-              attachmentIds.push(includedEntry.relationships.attachment.data.id)
+            if ((includedEntry.relationships?.attachment?.data as IJsonApiEntityWithoutDetails | undefined)?.id) {
+              attachmentIds.push((includedEntry.relationships?.attachment?.data as IJsonApiEntityWithoutDetails).id)
             }
           }
         }
