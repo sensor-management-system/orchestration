@@ -283,6 +283,8 @@ import { DeviceProperty } from '@/models/DeviceProperty'
 import { GenericAction } from '@/models/GenericAction'
 import { IActionType, ActionType } from '@/models/ActionType'
 
+import { ACTION_TYPE_API_FILTER_DEVICE } from '@/services/cv/ActionTypeApi'
+
 import { dateToString, stringToDate } from '@/utils/dateHelper'
 
 import GenericActionForm from '@/components/GenericActionForm.vue'
@@ -294,11 +296,8 @@ const KIND_OF_ACTION_TYPE_GENERIC_DEVICE_ACTION = 'generic_device_action'
 const KIND_OF_ACTION_TYPE_UNKNOWN = 'unknown'
 type KindOfActionType = typeof KIND_OF_ACTION_TYPE_DEVICE_CALIBRATION | typeof KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE | typeof KIND_OF_ACTION_TYPE_GENERIC_DEVICE_ACTION | typeof KIND_OF_ACTION_TYPE_UNKNOWN
 
-interface IOptionsForActionType {
-  id: string
+type IOptionsForActionType = Pick<IActionType, 'id' | 'name' | 'uri'> & {
   kind: KindOfActionType
-  name: string
-  uri?: string
 }
 
 @Component({
@@ -322,7 +321,22 @@ export default class ActionAddPage extends Vue {
   private contactIsValid = true
   private softwareTypeIsValid = true
 
-  private actionTypes: ActionType[] = []
+  private specialActionTypes: IOptionsForActionType[] = [
+    {
+      id: 'device_calibration',
+      name: 'Device Calibration',
+      uri: '',
+      kind: KIND_OF_ACTION_TYPE_DEVICE_CALIBRATION
+    },
+    {
+      id: 'software_update',
+      name: 'Software Update',
+      uri: '',
+      kind: KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE
+    }
+  ]
+
+  private genericActionTypes: ActionType[] = []
 
   private contacts: Contact[] = []
   private selectedContact: Contact | null = null
@@ -350,12 +364,12 @@ export default class ActionAddPage extends Vue {
 
   async fetch () {
     await Promise.all([
-      this.fetchActionTypes()
+      this.fetchGenericActionTypes()
     ])
   }
 
-  async fetchActionTypes (): Promise<any> {
-    this.actionTypes = await this.$api.actionTypes.findAllPaginated()
+  async fetchGenericActionTypes (): Promise<any> {
+    this.genericActionTypes = await this.$api.actionTypes.newSearchBuilder().onlyType(ACTION_TYPE_API_FILTER_DEVICE).build().findMatchingAsList()
   }
 
   mounted () {
@@ -565,26 +579,17 @@ export default class ActionAddPage extends Vue {
   }
 
   getActionTypeItems (): IOptionsForActionType[] {
-    const result: IOptionsForActionType[] = this.actionTypes.filter(i => i.name.match(/device/i)).map((i) => {
-      let kind: KindOfActionType = KIND_OF_ACTION_TYPE_UNKNOWN
-      // TODO: is there another way to get the kind of action than parsing the name?
-      if (i.name.match(/maintenance/i)) {
-        kind = KIND_OF_ACTION_TYPE_GENERIC_DEVICE_ACTION
-      } else if (i.name.match(/observation/i)) {
-        kind = KIND_OF_ACTION_TYPE_GENERIC_DEVICE_ACTION
-      } else if (i.name.match(/update/i)) {
-        kind = KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE
-      } else if (i.name.match(/calibration/i)) {
-        kind = KIND_OF_ACTION_TYPE_DEVICE_CALIBRATION
-      }
-      return {
-        id: i.id,
-        name: i.name,
-        uri: i.uri,
-        kind
-      } as IOptionsForActionType
-    })
-    return result
+    return [
+      ...this.specialActionTypes,
+      ...this.genericActionTypes.map((i) => {
+        return {
+          id: i.id,
+          name: i.name,
+          uri: i.uri,
+          kind: KIND_OF_ACTION_TYPE_GENERIC_DEVICE_ACTION
+        }
+      })
+    ] as IOptionsForActionType[]
   }
 }
 
