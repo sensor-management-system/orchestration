@@ -44,7 +44,7 @@ describe('ActionTypeSerializer', () => {
             provenance_uri: null,
             category: null,
             note: null,
-            status: 'ACCEPTED',
+            status: 'ACCEPTED'
           },
           id: '8',
           links: {
@@ -60,7 +60,7 @@ describe('ActionTypeSerializer', () => {
             provenance_uri: null,
             category: null,
             note: null,
-            status: 'ACCEPTED',
+            status: 'ACCEPTED'
           },
           id: '9',
           links: {
