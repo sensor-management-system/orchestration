@@ -346,7 +346,7 @@ permissions and limitations under the Licence.
           </template>
         </v-timeline-item>
       </v-timeline>
-      <v-dialog v-model="actionIdToDelete" max-width="290">
+      <v-dialog v-model="hasActionIdToDelete" max-width="290">
         <v-card>
           <v-card-title class="headline">
             Delete action
@@ -721,6 +721,10 @@ export default class DeviceActionsPage extends Vue {
       return
     }
     return this.actions.find(action => action.id === this.actionId)
+  }
+
+  get hasActionIdToDelete (): boolean {
+    return !!this.actionIdToDelete
   }
 
   showsave (isSaving: boolean) {
