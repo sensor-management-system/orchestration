@@ -66,7 +66,7 @@ permissions and limitations under the Licence.
       <v-timeline dense>
         <v-timeline-item
           v-for="(action, index) in actions"
-          :key="action.id"
+          :key="getActionTypeIterationKey(action)"
           :color="action.getColor()"
           class="mb-4"
           small
@@ -750,6 +750,23 @@ export default class DeviceActionsPage extends Vue {
       this.hideDeleteDialog()
       this.isSaving = false
     })
+  }
+
+  getActionType (action: IAction): string {
+    switch (true) {
+      case 'isGenericAction' in action:
+        return 'generic-action'
+      case 'isDeviceSoftwareUpdateAction' in action:
+        return 'software-update-action'
+      case 'isDeviceCalibrationAction' in action:
+        return 'device-calibration-action'
+      default:
+        return 'unknown-action'
+    }
+  }
+
+  getActionTypeIterationKey (action: IAction): string {
+    return this.getActionType(action) + '-' + action.id
   }
 }
 </script>
