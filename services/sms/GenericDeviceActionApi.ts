@@ -34,11 +34,11 @@ import { AxiosInstance } from 'axios'
 import { Attachment } from '@/models/Attachment'
 import { GenericAction } from '@/models/GenericAction'
 import { GenericDeviceActionAttachmentApi } from '@/services/sms/GenericDeviceActionAttachmentApi'
-import { GenericActionSerializer, GenericDeviceActionSerializer } from '@/serializers/jsonapi/GenericActionSerializer'
+import { IGenericActionSerializer, GenericDeviceActionSerializer } from '@/serializers/jsonapi/GenericActionSerializer'
 
 export class GenericDeviceActionApi {
   private axiosApi: AxiosInstance
-  private serializer: GenericActionSerializer
+  private serializer: IGenericActionSerializer
   private attachmentApi: GenericDeviceActionAttachmentApi
 
   constructor (axiosInstance: AxiosInstance, attachmentApi: GenericDeviceActionAttachmentApi) {

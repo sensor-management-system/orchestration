@@ -210,7 +210,7 @@ describe('GenericActionAttachmentSerializer', () => {
     describe('constructing and types', () => {
       it('should return \'device\' as its type', () => {
         const serializer = new GenericDeviceActionAttachmentSerializer()
-        expect(serializer.type).toEqual('device')
+        expect(serializer.targetType).toEqual('device')
       })
       it('should return a correct action type name', () => {
         const serializer = new GenericDeviceActionAttachmentSerializer()
@@ -291,7 +291,7 @@ describe('GenericActionAttachmentSerializer', () => {
     describe('constructing and types', () => {
       it('should return \'platform\' as its type', () => {
         const serializer = new GenericPlatformActionAttachmentSerializer()
-        expect(serializer.type).toEqual('platform')
+        expect(serializer.targetType).toEqual('platform')
       })
       it('should return a correct action type name', () => {
         const serializer = new GenericPlatformActionAttachmentSerializer()

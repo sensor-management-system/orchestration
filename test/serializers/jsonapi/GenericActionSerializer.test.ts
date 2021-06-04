@@ -696,7 +696,7 @@ describe('GenericActionSerializer', () => {
     describe('constructing and types', () => {
       it('should return \'device\' as its type', () => {
         const serializer = new GenericDeviceActionSerializer()
-        expect(serializer.type).toEqual('device')
+        expect(serializer.targetType).toEqual('device')
       })
       it('should return a correct action type name', () => {
         const serializer = new GenericDeviceActionSerializer()
@@ -934,7 +934,7 @@ describe('GenericActionSerializer', () => {
     describe('constructing and types', () => {
       it('should return \'platform\' as its type', () => {
         const serializer = new GenericPlatformActionSerializer()
-        expect(serializer.type).toEqual('platform')
+        expect(serializer.targetType).toEqual('platform')
       })
       it('should return a correct action type name', () => {
         const serializer = new GenericPlatformActionSerializer()

@@ -41,10 +41,20 @@ import {
 
 import { DeviceAttachmentSerializer } from '@/serializers/jsonapi/DeviceAttachmentSerializer'
 
-export abstract class GenericActionAttachmentSerializer {
+export interface IGenericActionAttachmentSerializer {
+  targetType: string
+  convertModelToJsonApiData (attachment: Attachment, actionId: string): IJsonApiEntityWithOptionalId
+  convertJsonApiRelationshipsModelList (relationships: IJsonApiRelationships, included: IJsonApiEntityWithOptionalAttributes[]): Attachment[]
+  getActionTypeName (): string
+  getActionAttachmentTypeName (): string
+  getActionAttachmentTypeNamePlural (): string
+  getAttachmentTypeName (): string
+}
+
+export abstract class AbstractGenericActionAttachmentSerializer implements IGenericActionAttachmentSerializer {
   private attachmentSerializer: DeviceAttachmentSerializer = new DeviceAttachmentSerializer()
 
-  abstract get type (): string
+  abstract get targetType (): string
 
   convertModelToJsonApiData (attachment: Attachment, actionId: string): IJsonApiEntityWithOptionalId {
     /**
@@ -56,11 +66,11 @@ export abstract class GenericActionAttachmentSerializer {
      * property whereas we need 'attachment' as the property and
      * 'device_attachment' as the type.
      */
-    const type = this.getActionAttachmentTypeName()
+    const entityType = this.getActionAttachmentTypeName()
     const actionType = this.getActionTypeName()
     const attachmentType = this.getAttachmentTypeName()
     const data: IJsonApiEntityWithOptionalId = {
-      type,
+      type: entityType,
       attributes: {},
       relationships: {
         action: {
@@ -82,7 +92,7 @@ export abstract class GenericActionAttachmentSerializer {
 
   convertJsonApiRelationshipsModelList (relationships: IJsonApiRelationships, included: IJsonApiEntityWithOptionalAttributes[]): Attachment[] {
     const actionAttachmentIds = []
-    const type = this.getActionAttachmentTypeName()
+    const entityType = this.getActionAttachmentTypeName()
     const typePlural = this.getActionAttachmentTypeNamePlural()
     if (relationships[typePlural]) {
       const attachmentObject = relationships[typePlural] as IJsonApiEntityWithoutDetailsDataDictList
@@ -97,7 +107,7 @@ export abstract class GenericActionAttachmentSerializer {
     const attachmentIds = []
     if (included && included.length > 0) {
       for (const includedEntry of included) {
-        if (includedEntry.type === type) {
+        if (includedEntry.type === entityType) {
           const actionAttachmentId = includedEntry.id
           if (actionAttachmentIds.includes(actionAttachmentId)) {
             if ((includedEntry.relationships?.attachment?.data as IJsonApiEntityWithoutDetails | undefined)?.id) {
@@ -126,11 +136,11 @@ export abstract class GenericActionAttachmentSerializer {
   }
 
   getActionTypeName (): string {
-    return 'generic_' + this.type + '_action'
+    return 'generic_' + this.targetType + '_action'
   }
 
   getActionAttachmentTypeName (): string {
-    return 'generic_' + this.type + '_action_attachment'
+    return 'generic_' + this.targetType + '_action_attachment'
   }
 
   getActionAttachmentTypeNamePlural (): string {
@@ -138,18 +148,18 @@ export abstract class GenericActionAttachmentSerializer {
   }
 
   getAttachmentTypeName (): string {
-    return this.type + '_attachment'
+    return this.targetType + '_attachment'
   }
 }
 
-export class GenericDeviceActionAttachmentSerializer extends GenericActionAttachmentSerializer {
-  get type (): string {
+export class GenericDeviceActionAttachmentSerializer extends AbstractGenericActionAttachmentSerializer {
+  get targetType (): string {
     return 'device'
   }
 }
 
-export class GenericPlatformActionAttachmentSerializer extends GenericActionAttachmentSerializer {
-  get type (): string {
+export class GenericPlatformActionAttachmentSerializer extends AbstractGenericActionAttachmentSerializer {
+  get targetType (): string {
     return 'platform'
   }
 }

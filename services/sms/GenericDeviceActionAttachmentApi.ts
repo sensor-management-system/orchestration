@@ -32,11 +32,11 @@
 import { AxiosInstance } from 'axios'
 
 import { Attachment } from '@/models/Attachment'
-import { GenericActionAttachmentSerializer, GenericDeviceActionAttachmentSerializer } from '@/serializers/jsonapi/GenericActionAttachmentSerializer'
+import { IGenericActionAttachmentSerializer, GenericDeviceActionAttachmentSerializer } from '@/serializers/jsonapi/GenericActionAttachmentSerializer'
 
 export class GenericDeviceActionAttachmentApi {
   private axiosApi: AxiosInstance
-  private serializer: GenericActionAttachmentSerializer
+  private serializer: IGenericActionAttachmentSerializer
 
   constructor (axiosInstance: AxiosInstance) {
     this.axiosApi = axiosInstance
