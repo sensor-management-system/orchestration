@@ -89,13 +89,8 @@ permissions and limitations under the Licence.
  */
 import { Component, Prop, Vue } from 'nuxt-property-decorator'
 
-import { DateTime } from 'luxon'
 import { dateToDateTimeString } from '@/utils/dateHelper'
 import { GenericAction } from '@/models/GenericAction'
-
-const toUtcDate = (date: DateTime): string => {
-  return dateToDateTimeString(date)
-}
 
 /**
  * A class component for Generic Device Action card
@@ -103,7 +98,7 @@ const toUtcDate = (date: DateTime): string => {
  */
 @Component({
   filters: {
-    toUtcDate
+    toUtcDate: dateToDateTimeString
   }
 })
 // @ts-ignore
