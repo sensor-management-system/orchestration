@@ -75,7 +75,7 @@ permissions and limitations under the Licence.
       <v-card-text>
         <v-select
           v-model="chosenKindOfAction"
-          :items="getActionTypeItems()"
+          :items="actionTypeItems"
           :item-text="(x) => x.name"
           :item-value="(x) => x"
           clearable
@@ -578,7 +578,7 @@ export default class ActionAddPage extends Vue {
     })
   }
 
-  getActionTypeItems (): IOptionsForActionType[] {
+  get actionTypeItems (): IOptionsForActionType[] {
     return [
       ...this.specialActionTypes,
       ...this.genericActionTypes.map((i) => {
