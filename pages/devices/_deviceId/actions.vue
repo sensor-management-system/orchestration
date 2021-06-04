@@ -56,6 +56,8 @@ permissions and limitations under the Licence.
     <template
       v-else-if="isEditActionPage"
     >
+      <!-- the currently edited action is passed as a property to the
+           `edit.vue` page to avoid reloading of the action -->
       <NuxtChild
         :value="editedAction"
         @input="$fetch"
@@ -716,6 +718,19 @@ export default class DeviceActionsPage extends Vue {
     return this.$route.params.actionId
   }
 
+  /**
+   * Returns the action object from the list of actions that is currently edited
+   *
+   * When the `/edit` route for an action is called, the `edit.vue` page is
+   * included via a `NuxtChild` component. To avoid of loading the action again
+   * in this page, we return it from this method to pass it as a property to
+   * the `NuxtChild` component
+   *
+   * Calls {@link DeviceActionsPage.actionId} to get the currently edited
+   * action from the route.
+   *
+   * @return {IAction | undefined} the found action, otherwise undefined
+   */
   get editedAction (): IAction | undefined {
     if (!this.actionId) {
       return
