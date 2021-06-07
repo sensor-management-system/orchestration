@@ -37,7 +37,7 @@ permissions and limitations under the Licence.
     @input="updateByTextfield"
   >
     <template #append-outer>
-      <v-btn icon @click="initPicker">
+      <v-btn icon @click.stop="initPicker">
         <v-icon>mdi-calendar-range</v-icon>
       </v-btn>
       <v-dialog
