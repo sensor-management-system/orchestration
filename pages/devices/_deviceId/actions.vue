@@ -37,74 +37,107 @@ permissions and limitations under the Licence.
     <v-card-actions>
       <v-spacer />
       <v-btn
-        v-if="isLoggedIn && !(isAddActionPage)"
+        v-if="isLoggedIn && !(isAddActionPage || isEditActionPage)"
         color="primary"
         small
-        :disabled="isEditActionPage"
         :to="'/devices/' + deviceId + '/actions/new'"
       >
         Add Action
       </v-btn>
     </v-card-actions>
-    <template v-if="isAddActionPage">
-      <NuxtChild />
+    <template
+      v-if="isAddActionPage"
+    >
+      <NuxtChild
+        @input="$fetch"
+        @showsave="showsave"
+      />
+    </template>
+    <template
+      v-else-if="isEditActionPage"
+    >
+      <!-- the currently edited action is passed as a property to the
+           `edit.vue` page to avoid reloading of the action -->
+      <NuxtChild
+        :value="editedAction"
+        @input="$fetch"
+        @showsave="showsave"
+      />
     </template>
     <template v-else>
       <v-timeline dense>
         <v-timeline-item
-          v-for="action in actions"
-          :key="action.getId()"
+          v-for="(action, index) in actions"
+          :key="getActionTypeIterationKey(action)"
           :color="action.getColor()"
           class="mb-4"
           small
         >
-          <template v-if="action.isGenericDeviceAction">
-            <v-card>
-              <v-card-subtitle class="pb-0">
-                {{ action.beginDate | toUtcDate }} - {{ action.endDate | toUtcDate }}
-              </v-card-subtitle>
-              <v-card-title class="py-0">
-                <v-row
-                  no-gutters
-                >
-                  <v-col
-                    cols="11"
+          <GenericActionCard
+            v-if="action.isGenericAction"
+            v-model="actions[index]"
+          >
+            <template #menu>
+              <v-menu
+                close-on-click
+                close-on-content-click
+                offset-x
+                left
+                z-index="999"
+              >
+                <template #activator="{ on }">
+                  <v-btn
+                    data-role="property-menu"
+                    icon
+                    small
+                    v-on="on"
                   >
-                    {{ action.actionTypeName }}
-                  </v-col>
-                  <v-col
-                    align-self="end"
-                    class="text-right"
-                  >
-                    <v-btn
-                      icon
-                      @click.stop.prevent="showActionItem(action.getId())"
+                    <v-icon
+                      dense
+                      small
                     >
-                      <v-icon>{{ isActionItemShown(action.getId()) ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
-                    </v-btn>
-                  </v-col>
-                </v-row>
-              </v-card-title>
-              <v-expand-transition>
-                <div
-                  v-show="isActionItemShown(action.getId())"
-                >
-                  <v-card-subtitle
-                    class="pt-0"
+                      mdi-dots-vertical
+                    </v-icon>
+                  </v-btn>
+                </template>
+
+                <v-list>
+                  <v-list-item
+                    :disabled="!isLoggedIn"
+                    dense
+                    @click="showDeleteDialog(action.id)"
                   >
-                    {{ action.contact.toString() }}
-                  </v-card-subtitle>
-                  <v-card-text
-                    class="grey lighten-5 text--primary pt-2"
-                  >
-                    <label>Description</label>
-                    {{ action.description }}
-                  </v-card-text>
-                </div>
-              </v-expand-transition>
-            </v-card>
-          </template>
-          <template v-if="action.isUpdateAction">
+                    <v-list-item-content>
+                      <v-list-item-title
+                        :class="isLoggedIn ? 'red--text' : 'grey--text'"
+                      >
+                        <v-icon
+                          left
+                          small
+                          :color="isLoggedIn ? 'red' : 'grey'"
+                        >
+                          mdi-delete
+                        </v-icon>
+                        Delete
+                      </v-list-item-title>
+                    </v-list-item-content>
+                  </v-list-item>
+                </v-list>
+              </v-menu>
+            </template>
+            <template #actions>
+              <v-btn
+                :to="'/devices/' + deviceId + '/actions/' + action.id + '/edit'"
+                color="primary"
+                text
+                @click.stop.prevent
+              >
+                Edit
+              </v-btn>
+            </template>
+          </GenericActionCard>
+
+          <template v-if="action.isDeviceSoftwareUpdateAction">
             <v-card>
               <v-card-subtitle class="pb-0">
                 {{ action.updateDate | toUtcDate }}
@@ -127,16 +160,16 @@ permissions and limitations under the Licence.
                   >
                     <v-btn
                       icon
-                      @click.stop.prevent="showActionItem(action.getId())"
+                      @click.stop.prevent="showActionItem(action.id)"
                     >
-                      <v-icon>{{ isActionItemShown(action.getId()) ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
+                      <v-icon>{{ isActionItemShown(action.id) ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
                     </v-btn>
                   </v-col>
                 </v-row>
               </v-card-subtitle>
               <v-expand-transition>
                 <v-card-text
-                  v-show="isActionItemShown(action.getId())"
+                  v-show="isActionItemShown(action.id)"
                   class="text--primary"
                 >
                   <v-row dense>
@@ -186,16 +219,16 @@ permissions and limitations under the Licence.
                   >
                     <v-btn
                       icon
-                      @click.stop.prevent="showActionItem(action.getId())"
+                      @click.stop.prevent="showActionItem(action.id)"
                     >
-                      <v-icon>{{ isActionItemShown(action.getId()) ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
+                      <v-icon>{{ isActionItemShown(action.id) ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
                     </v-btn>
                   </v-col>
                 </v-row>
               </v-card-subtitle>
               <v-expand-transition>
                 <v-card-text
-                  v-show="isActionItemShown(action.getId())"
+                  v-show="isActionItemShown(action.id)"
                   class="text--primary"
                 >
                   <v-row dense>
@@ -247,16 +280,16 @@ permissions and limitations under the Licence.
                   >
                     <v-btn
                       icon
-                      @click.stop.prevent="showActionItem(action.getId())"
+                      @click.stop.prevent="showActionItem(action.id)"
                     >
-                      <v-icon>{{ isActionItemShown(action.getId()) ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
+                      <v-icon>{{ isActionItemShown(action.id) ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
                     </v-btn>
                   </v-col>
                 </v-row>
               </v-card-subtitle>
               <v-expand-transition>
                 <v-card-text
-                  v-show="isActionItemShown(action.getId())"
+                  v-show="isActionItemShown(action.id)"
                   class="text--primary"
                 >
                   <label>Parent platform</label>{{ action.parentPlatformName }}
@@ -298,16 +331,16 @@ permissions and limitations under the Licence.
                   >
                     <v-btn
                       icon
-                      @click.stop.prevent="showActionItem(action.getId())"
+                      @click.stop.prevent="showActionItem(action.id)"
                     >
-                      <v-icon>{{ isActionItemShown(action.getId()) ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
+                      <v-icon>{{ isActionItemShown(action.id) ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
                     </v-btn>
                   </v-col>
                 </v-row>
               </v-card-subtitle>
               <v-expand-transition>
                 <v-card-text
-                  v-show="isActionItemShown(action.getId())"
+                  v-show="isActionItemShown(action.id)"
                   class="text--primary"
                 />
               </v-expand-transition>
@@ -315,79 +348,68 @@ permissions and limitations under the Licence.
           </template>
         </v-timeline-item>
       </v-timeline>
+      <v-dialog v-model="hasActionIdToDelete" max-width="290">
+        <v-card>
+          <v-card-title class="headline">
+            Delete action
+          </v-card-title>
+          <v-card-text>
+            Do you really want to delete the action?
+          </v-card-text>
+          <v-card-actions>
+            <v-btn
+              text
+              @click="hideDeleteDialog()"
+            >
+              No
+            </v-btn>
+            <v-spacer />
+            <v-btn
+              color="error"
+              text
+              @click="deleteActionAndCloseDialog(actionIdToDelete)"
+            >
+              <v-icon left>
+                mdi-delete
+              </v-icon>
+              Delete
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
     </template>
   </div>
 </template>
-<style lang="scss">
-@import "@/assets/styles/_forms.scss";
-</style>
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import GenericActionCard from '@/components/GenericActionCard.vue'
 
 import { DateTime } from 'luxon'
 
 import { Contact } from '@/models/Contact'
 import { DeviceProperty } from '@/models/DeviceProperty'
+import { IAction } from '@/models/Action'
+import { GenericAction } from '@/models/GenericAction'
+import { DateComparator, isDateCompareable } from '@/modelUtils/Compareables'
 
 const toUtcDate = (dt: DateTime) => {
   return dt.toUTC().toFormat('yyyy-MM-dd TT')
 }
 
-interface IAction {
-  getId (): string
+interface IColoredAction {
   getColor (): string
 }
 
-class GenericDeviceAction implements IAction {
-  private id: string
-  private description: string
-  private beginDate: DateTime
-  private endDate: DateTime
-  private actionTypeName: string
-  private actionTypeUri: string
-  private contact: Contact
-
-  constructor (
-    id: string,
-    description: string,
-    beginDate: DateTime,
-    endDate: DateTime,
-    actionTypeName: string,
-    actionTypeUri: string,
-    contact: Contact
-  ) {
-    this.id = id
-    this.description = description
-    this.beginDate = beginDate
-    this.endDate = endDate
-    this.actionTypeName = actionTypeName
-    this.actionTypeUri = actionTypeUri
-    this.contact = contact
-  }
-
-  getId (): string {
-    return 'generic-' + this.id
-  }
-
-  getColor (): string {
-    return 'blue'
-  }
-
-  get isGenericDeviceAction (): boolean {
-    return true
-  }
-}
-
-class DeviceSoftwareUpdateAction implements IAction {
-  private id: string
-  private softwareTypeName: string
-  private softwareTypeUri: string
-  private updateDate: DateTime
-  private version: string
-  private repositoryUrl: string
-  private description: string
-  private contact: Contact
+class DeviceSoftwareUpdateAction implements IAction, IColoredAction {
+  public id: string
+  public softwareTypeName: string
+  public softwareTypeUri: string
+  public updateDate: DateTime
+  public version: string
+  public repositoryUrl: string
+  public description: string
+  public contact: Contact
   constructor (
     id: string,
     softwareTypeName: string,
@@ -412,24 +434,24 @@ class DeviceSoftwareUpdateAction implements IAction {
     return 'software-' + this.id
   }
 
+  get isDeviceSoftwareUpdateAction (): boolean {
+    return true
+  }
+
   getColor (): string {
     return 'yellow'
   }
-
-  get isUpdateAction (): boolean {
-    return true
-  }
 }
 
-class DeviceCalibrationAction implements IAction {
-  private id: string
-  private description: string
-  private currentCalibrationDate: DateTime
-  private nextCalibrationDate: DateTime
-  private formula: string
-  private value: string
-  private deviceProperties: DeviceProperty[]
-  private contact: Contact
+class DeviceCalibrationAction implements IAction, IColoredAction {
+  public id: string
+  public description: string
+  public currentCalibrationDate: DateTime
+  public nextCalibrationDate: DateTime
+  public formula: string
+  public value: string
+  public deviceProperties: DeviceProperty[]
+  public contact: Contact
   constructor (
     id: string,
     description: string,
@@ -454,24 +476,25 @@ class DeviceCalibrationAction implements IAction {
     return 'calibration-' + this.id
   }
 
-  getColor (): string {
-    return 'brown'
-  }
-
   get isDeviceCalibrationAction (): boolean {
     return true
+  }
+
+  getColor (): string {
+    return 'brown'
   }
 }
 
 class DeviceMountAction {
-  private id: string
-  private configurationName: string
-  private parentPlatformName: string
-  private offsetX: number
-  private offsetY: number
-  private offsetZ: number
-  private beginDate: DateTime
-  private contact: Contact
+  public id: string
+  public configurationName: string
+  public parentPlatformName: string
+  public offsetX: number
+  public offsetY: number
+  public offsetZ: number
+  public beginDate: DateTime
+  public description: string
+  public contact: Contact
   constructor (
     id: string,
     configurationName: string,
@@ -480,6 +503,7 @@ class DeviceMountAction {
     offsetY: number,
     offsetZ: number,
     beginDate: DateTime,
+    description: string,
     contact: Contact
   ) {
     this.id = id
@@ -489,6 +513,7 @@ class DeviceMountAction {
     this.offsetY = offsetY
     this.offsetZ = offsetZ
     this.beginDate = beginDate
+    this.description = description
     this.contact = contact
   }
 
@@ -496,29 +521,32 @@ class DeviceMountAction {
     return 'mount-' + this.id
   }
 
-  getColor (): string {
-    return 'green'
-  }
-
   get isDeviceMountAction (): boolean {
     return true
   }
+
+  getColor (): string {
+    return 'green'
+  }
 }
 
-class DeviceUnmountAction implements IAction {
-  private id: string
-  private configurationName: string
-  private endDate: DateTime
-  private contact: Contact
+class DeviceUnmountAction implements IAction, IColoredAction {
+  public id: string
+  public configurationName: string
+  public endDate: DateTime
+  public description: string
+  public contact: Contact
   constructor (
     id: string,
     configurationName: string,
     endDate: DateTime,
+    description: string,
     contact: Contact
   ) {
     this.id = id
     this.configurationName = configurationName
     this.endDate = endDate
+    this.description = description
     this.contact = contact
   }
 
@@ -526,18 +554,28 @@ class DeviceUnmountAction implements IAction {
     return 'unmount-' + this.id
   }
 
-  getColor (): string {
-    return 'red'
-  }
-
   get isDeviceUnmountAction (): boolean {
     return true
   }
+
+  getColor (): string {
+    return 'red'
+  }
 }
+
+/**
+ * extend the original interface by adding the getColor() method
+ */
+declare module '@/models/GenericAction' {
+  export interface GenericAction extends IColoredAction {
+  }
+}
+GenericAction.prototype.getColor = (): string => 'blue'
 
 @Component({
   components: {
-    ProgressIndicator
+    ProgressIndicator,
+    GenericActionCard
   },
   filters: {
     toUtcDate
@@ -550,32 +588,25 @@ export default class DeviceActionsPage extends Vue {
   private actions: IAction[] = []
   private searchResultItemsShown: { [id: string]: boolean } = {}
 
-  /* async */ fetch () {
+  private actionIdToDelete: string = ''
+
+  async fetch () {
     const contact1 = Contact.createFromObject({
-      id: '1',
+      id: 'X1',
       givenName: 'Tech',
       familyName: 'Niker',
       email: 'tech.niker@gfz-potsdam.de',
       website: ''
     })
     const contact2 = Contact.createFromObject({
-      id: '2',
+      id: 'X2',
       givenName: 'Cam',
       familyName: 'Paign',
       email: 'cam.paign@gfz-potsdam.de',
       website: ''
     })
-    const genericDeviceAction1 = new GenericDeviceAction(
-      '1',
-      'Grass cut on the site',
-      DateTime.fromISO('2021-03-29T08:00:00.000Z'),
-      DateTime.fromISO('2021-03-29T08:30:00Z'),
-      'Device visit',
-      'actionTypes/device_visit',
-      contact1
-    )
     const deviceSoftwareUpdateAction = new DeviceSoftwareUpdateAction(
-      '2',
+      'X2',
       'Firmware',
       'softwaretypes/firmware',
       DateTime.fromISO('2021-03-30T08:10:00Z'),
@@ -589,7 +620,7 @@ export default class DeviceActionsPage extends Vue {
     const devProp2 = new DeviceProperty()
     devProp2.label = 'Wind speed'
     const deviceCalibrationAction1 = new DeviceCalibrationAction(
-      '3',
+      'X3',
       'Calibration of the device for usage on the campaign',
       DateTime.fromISO('2021-03-30T08:12:00Z'),
       DateTime.fromISO('2021-04-30T12:00:00Z'),
@@ -599,28 +630,51 @@ export default class DeviceActionsPage extends Vue {
       contact2
     )
     const deviceMountAction1 = new DeviceMountAction(
-      '4',
+      'X4',
       'Measurement ABC',
       'Station ABC',
       0,
       0,
       2,
       DateTime.fromISO('2021-03-30T12:00:00Z'),
+      'Mounted Measurement ABC',
       contact1
     )
     const deviceUnmountAction1 = new DeviceUnmountAction(
-      '5',
+      'X5',
       'Measurement ABC',
       DateTime.fromISO('2022-03-30T12:00:00Z'),
+      'Unmounted Measurement ABC',
       contact1
     )
     this.actions = [
-      genericDeviceAction1,
       deviceSoftwareUpdateAction,
       deviceCalibrationAction1,
       deviceMountAction1,
       deviceUnmountAction1
     ]
+    await Promise.all([this.fetchGenericActions()])
+
+    // sort the actions
+    const comparator = new DateComparator()
+    this.actions.sort((i: IAction, j: IAction): number => {
+      if (isDateCompareable(i) && isDateCompareable(j)) {
+        // multiply result with -1 to get descending order
+        return comparator.compare(i, j) * -1
+      }
+      if (isDateCompareable(i)) {
+        return 1
+      }
+      if (isDateCompareable(j)) {
+        return -1
+      }
+      return 0
+    })
+  }
+
+  async fetchGenericActions (): Promise<void> {
+    const actions: GenericAction[] = await this.$api.devices.findRelatedGenericActions(this.deviceId)
+    actions.forEach((action: GenericAction) => this.actions.push(action))
   }
 
   get isInProgress (): boolean {
@@ -659,5 +713,79 @@ export default class DeviceActionsPage extends Vue {
   get deviceId (): string {
     return this.$route.params.deviceId
   }
+
+  get actionId (): string | undefined {
+    return this.$route.params.actionId
+  }
+
+  /**
+   * Returns the action object from the list of actions that is currently edited
+   *
+   * When the `/edit` route for an action is called, the `edit.vue` page is
+   * included via a `NuxtChild` component. To avoid of loading the action again
+   * in this page, we return it from this method to pass it as a property to
+   * the `NuxtChild` component
+   *
+   * Calls {@link DeviceActionsPage.actionId} to get the currently edited
+   * action from the route.
+   *
+   * @return {IAction | undefined} the found action, otherwise undefined
+   */
+  get editedAction (): IAction | undefined {
+    if (!this.actionId) {
+      return
+    }
+    return this.actions.find(action => action.id === this.actionId)
+  }
+
+  get hasActionIdToDelete (): boolean {
+    return !!this.actionIdToDelete
+  }
+
+  showsave (isSaving: boolean) {
+    this.isSaving = isSaving
+  }
+
+  showDeleteDialog (id: string) {
+    this.actionIdToDelete = id
+  }
+
+  hideDeleteDialog (): void {
+    this.actionIdToDelete = ''
+  }
+
+  deleteActionAndCloseDialog (id: string) {
+    this.isSaving = true
+    this.$api.genericDeviceActions.deleteById(id).then(() => {
+      this.$fetch()
+      this.$store.commit('snackbar/setSuccess', 'Action deleted')
+    }).catch((_error) => {
+      this.$store.commit('snackbar/setError', 'Action could not be deleted')
+    }).finally(() => {
+      this.hideDeleteDialog()
+      this.isSaving = false
+    })
+  }
+
+  getActionType (action: IAction): string {
+    switch (true) {
+      case 'isGenericAction' in action:
+        return 'generic-action'
+      case 'isDeviceSoftwareUpdateAction' in action:
+        return 'software-update-action'
+      case 'isDeviceCalibrationAction' in action:
+        return 'device-calibration-action'
+      default:
+        return 'unknown-action'
+    }
+  }
+
+  getActionTypeIterationKey (action: IAction): string {
+    return this.getActionType(action) + '-' + action.id
+  }
 }
 </script>
+
+<style lang="scss">
+@import "@/assets/styles/_forms.scss";
+</style>

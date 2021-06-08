@@ -63,10 +63,11 @@ permissions and limitations under the Licence.
           Add
         </v-btn>
         <v-btn
-          v-else-if="otherChosen"
+          v-else-if="genericActionChosen"
           color="green"
           small
-          @click="addGenericDeviceAction"
+          :disabled="isSaving"
+          @click="addGenericAction"
         >
           Add
         </v-btn>
@@ -74,7 +75,7 @@ permissions and limitations under the Licence.
       <v-card-text>
         <v-select
           v-model="chosenKindOfAction"
-          :items="optionsForActionType"
+          :items="actionTypeItems"
           :item-text="(x) => x.name"
           :item-value="(x) => x"
           clearable
@@ -172,36 +173,17 @@ permissions and limitations under the Licence.
         </v-row>
       </v-card-text>
       <v-card-text
-        v-if="otherChosen"
+        v-if="genericActionChosen"
       >
-        <v-form
-          ref="datesForm"
-          v-model="datesAreValid"
-          @submit.prevent
-        >
-          <v-row>
-            <v-col cols="12" md="6">
-              <DatePicker
-                :value="startDate"
-                label="Start date"
-                :rules="[rules.startDate, rules.startDateNotNull]"
-                @input="setStartDateAndValidate"
-              />
-            </v-col>
-            <v-col cols="12" md="6">
-              <DatePicker
-                :value="endDate"
-                label="End date"
-                :rules="[rules.endDate]"
-                @input="setEndDateAndValidate"
-              />
-            </v-col>
-          </v-row>
-        </v-form>
+        <GenericActionForm
+          ref="genericDeviceActionForm"
+          v-model="genericDeviceAction"
+          :attachments="attachments"
+        />
       </v-card-text>
       <!-- action type independent -->
       <v-card-text
-        v-if="chosenKindOfAction"
+        v-if="chosenKindOfAction && !genericActionChosen"
       >
         <v-row>
           <v-col cols="12" md="12">
@@ -278,10 +260,11 @@ permissions and limitations under the Licence.
           Add
         </v-btn>
         <v-btn
-          v-else-if="otherChosen"
+          v-else-if="genericActionChosen"
           color="green"
           small
-          @click="addGenericDeviceAction"
+          :disabled="isSaving"
+          @click="addGenericAction"
         >
           Add
         </v-btn>
@@ -297,27 +280,29 @@ import { DateTime } from 'luxon'
 import { Contact } from '@/models/Contact'
 import { Attachment } from '@/models/Attachment'
 import { DeviceProperty } from '@/models/DeviceProperty'
+import { GenericAction } from '@/models/GenericAction'
+import { IActionType, ActionType } from '@/models/ActionType'
+
+import { ACTION_TYPE_API_FILTER_DEVICE } from '@/services/cv/ActionTypeApi'
 
 import { dateToString, stringToDate } from '@/utils/dateHelper'
 
+import GenericActionForm from '@/components/GenericActionForm.vue'
 import DatePicker from '@/components/DatePicker.vue'
 
-type KindOfActionType = 'device_calibration' | 'software_update' | 'generic_device_action'
+const KIND_OF_ACTION_TYPE_DEVICE_CALIBRATION = 'device_calibration'
+const KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE = 'software_update'
+const KIND_OF_ACTION_TYPE_GENERIC_DEVICE_ACTION = 'generic_device_action'
+const KIND_OF_ACTION_TYPE_UNKNOWN = 'unknown'
+type KindOfActionType = typeof KIND_OF_ACTION_TYPE_DEVICE_CALIBRATION | typeof KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE | typeof KIND_OF_ACTION_TYPE_GENERIC_DEVICE_ACTION | typeof KIND_OF_ACTION_TYPE_UNKNOWN
 
-interface IGenericActionType {
-  id: string
-  uri: string
-  name: string
-}
-
-interface IOptionsForActionType {
-  id: string
+type IOptionsForActionType = Pick<IActionType, 'id' | 'name' | 'uri'> & {
   kind: KindOfActionType
-  name: string
 }
 
 @Component({
   components: {
+    GenericActionForm,
     DatePicker
   }
 })
@@ -336,12 +321,22 @@ export default class ActionAddPage extends Vue {
   private contactIsValid = true
   private softwareTypeIsValid = true
 
-  private optionsForActionType: IOptionsForActionType[] = [
-    { id: 'device-calibration', kind: 'device_calibration', name: 'Device calibration' },
-    { id: 'software-update', kind: 'software_update', name: 'Software update' },
-    { id: 'generic-action-1', kind: 'generic_device_action', /* uri: 'actionTypes/device_visit', */ name: 'Device visit' },
-    { id: 'generic-action-2', kind: 'generic_device_action', /* uri: 'actionTypes/device_maintainance', */ name: 'Device maintainance' }
+  private specialActionTypes: IOptionsForActionType[] = [
+    {
+      id: 'device_calibration',
+      name: 'Device Calibration',
+      uri: '',
+      kind: KIND_OF_ACTION_TYPE_DEVICE_CALIBRATION
+    },
+    {
+      id: 'software_update',
+      name: 'Software Update',
+      uri: '',
+      kind: KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE
+    }
   ]
+
+  private genericActionTypes: ActionType[] = []
 
   private contacts: Contact[] = []
   private selectedContact: Contact | null = null
@@ -362,6 +357,20 @@ export default class ActionAddPage extends Vue {
 
   private startDate: DateTime | null = null
   private endDate: DateTime | null = null
+
+  private genericDeviceAction: GenericAction = new GenericAction()
+
+  private _isSaving: boolean = false
+
+  async fetch () {
+    await Promise.all([
+      this.fetchGenericActionTypes()
+    ])
+  }
+
+  async fetchGenericActionTypes (): Promise<any> {
+    this.genericActionTypes = await this.$api.actionTypes.newSearchBuilder().onlyType(ACTION_TYPE_API_FILTER_DEVICE).build().findMatchingAsList()
+  }
 
   mounted () {
     this.$api.contacts.findAll().then((foundContacts) => {
@@ -403,6 +412,11 @@ export default class ActionAddPage extends Vue {
       if (this.$data._chosenKindOfAction?.kind !== newValue?.kind) {
         this.resetAllActionSpecificInputs()
       }
+      if (this.genericActionChosen) {
+        this.genericDeviceAction = new GenericAction()
+        this.genericDeviceAction.actionTypeName = newValue?.name || ''
+        this.genericDeviceAction.actionTypeUrl = newValue?.uri || ''
+      }
     }
   }
 
@@ -416,15 +430,15 @@ export default class ActionAddPage extends Vue {
   }
 
   get deviceCalibrationChosen () {
-    return this.$data._chosenKindOfAction?.kind === 'device_calibration'
+    return this.$data._chosenKindOfAction?.kind === KIND_OF_ACTION_TYPE_DEVICE_CALIBRATION
   }
 
   get softwareUpdateChosen () {
-    return this.$data._chosenKindOfAction?.kind === 'software_update'
+    return this.$data._chosenKindOfAction?.kind === KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE
   }
 
-  get otherChosen () {
-    return this.$data._chosenKindOfAction?.kind === 'generic_device_action'
+  get genericActionChosen () {
+    return this.$data._chosenKindOfAction?.kind === KIND_OF_ACTION_TYPE_GENERIC_DEVICE_ACTION
   }
 
   getStartDate (): string {
@@ -509,6 +523,15 @@ export default class ActionAddPage extends Vue {
     return this.$route.params.deviceId
   }
 
+  get isSaving (): boolean {
+    return this.$data._isSaving
+  }
+
+  set isSaving (value: boolean) {
+    this.$data._isSaving = value
+    this.$emit('showsave', value)
+  }
+
   addDeviceCalibrationAction () {
     if (!(this.$refs.datesForm as Vue & { validate: () => boolean }).validate()) {
       return
@@ -533,14 +556,40 @@ export default class ActionAddPage extends Vue {
     this.$store.commit('snackbar/setError', 'Not implemented yet')
   }
 
-  addGenericDeviceAction () {
-    if (!(this.$refs.datesForm as Vue & { validate: () => boolean }).validate()) {
+  addGenericAction () {
+    if (!this.isLoggedIn) {
       return
     }
-    if (!(this.$refs.contactForm as Vue & { validate: () => boolean}).validate()) {
+    if (!this.genericDeviceAction) {
       return
     }
-    this.$store.commit('snackbar/setError', 'Not implemented yet')
+    if (!(this.$refs.genericDeviceActionForm as Vue & { isValid: () => boolean }).isValid()) {
+      this.isSaving = false
+      this.$store.commit('snackbar/setError', 'Please correct the errors')
+      return
+    }
+    this.isSaving = true
+    this.$api.genericDeviceActions.add(this.deviceId, this.genericDeviceAction).then((action: GenericAction) => {
+      this.$router.push('/devices/' + this.deviceId + '/actions', () => this.$emit('input', action))
+    }).catch(() => {
+      this.$store.commit('snackbar/setError', 'Failed to save the action')
+    }).finally(() => {
+      this.isSaving = false
+    })
+  }
+
+  get actionTypeItems (): IOptionsForActionType[] {
+    return [
+      ...this.specialActionTypes,
+      ...this.genericActionTypes.map((i) => {
+        return {
+          id: i.id,
+          name: i.name,
+          uri: i.uri,
+          kind: KIND_OF_ACTION_TYPE_GENERIC_DEVICE_ACTION
+        }
+      })
+    ] as IOptionsForActionType[]
   }
 }
 
