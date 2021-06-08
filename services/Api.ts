@@ -40,6 +40,8 @@ import { ConfigurationStatusApi } from '@/services/sms/ConfigurationStatusApi'
 import { CustomfieldsApi } from '@/services/sms/CustomfieldsApi'
 import { DeviceAttachmentApi } from '@/services/sms/DeviceAttachmentApi'
 import { PlatformAttachmentApi } from '@/services/sms/PlatformAttachmentApi'
+import { GenericDeviceActionApi } from '@/services/sms/GenericDeviceActionApi'
+import { GenericDeviceActionAttachmentApi } from '@/services/sms/GenericDeviceActionAttachmentApi'
 
 import { CompartmentApi } from '@/services/cv/CompartmentApi'
 import { DeviceTypeApi } from '@/services/cv/DeviceTypeApi'
@@ -50,6 +52,7 @@ import { SamplingMediaApi } from '@/services/cv/SamplingMediaApi'
 import { StatusApi } from '@/services/cv/StatusApi'
 import { UnitApi } from '@/services/cv/UnitApi'
 import { MeasuredQuantityUnitApi } from '@/services/cv/MeasuredQuantityUnitApi'
+import { ActionTypeApi } from '@/services/cv/ActionTypeApi'
 
 import { ProjectApi } from '@/services/project/ProjectApi'
 
@@ -66,6 +69,8 @@ export class Api {
   private readonly _deviceAttachmentApi: DeviceAttachmentApi
   private readonly _platformAttachmentApi: PlatformAttachmentApi
   private readonly _devicePropertyApi: DevicePropertyApi
+  private readonly _genericDeviceActionApi: GenericDeviceActionApi
+  private readonly _genericDeviceActionAttachmentApi: GenericDeviceActionAttachmentApi
 
   private readonly _manufacturerApi: ManufacturerApi
   private readonly _platformTypeApi: PlatformTypeApi
@@ -76,6 +81,7 @@ export class Api {
   private readonly _propertyApi: PropertyApi
   private readonly _unitApi: UnitApi
   private readonly _measuredQuantityUnitApi: MeasuredQuantityUnitApi
+  private readonly _actionTypeApi: ActionTypeApi
 
   private readonly _projectApi: ProjectApi
 
@@ -123,6 +129,15 @@ export class Api {
       this.createAxios(smsBaseUrl, '/device-properties', smsConfig, getIdToken)
     )
 
+    this._genericDeviceActionAttachmentApi = new GenericDeviceActionAttachmentApi(
+      this.createAxios(smsBaseUrl, '/generic-device-action-attachments', smsConfig, getIdToken)
+    )
+
+    this._genericDeviceActionApi = new GenericDeviceActionApi(
+      this.createAxios(smsBaseUrl, '/generic-device-actions', smsConfig, getIdToken),
+      this._genericDeviceActionAttachmentApi
+    )
+
     // and here we can set settings for all the cv api calls
     const cvConfig: AxiosRequestConfig = {
       headers: {
@@ -158,6 +173,9 @@ export class Api {
     )
     this._measuredQuantityUnitApi = new MeasuredQuantityUnitApi(
       this.createAxios(cvBaseUrl, '/measuredquantityunits/', cvConfig)
+    )
+    this._actionTypeApi = new ActionTypeApi(
+      this.createAxios(cvBaseUrl, '/actiontypes/', cvConfig)
     )
 
     this._projectApi = new ProjectApi()
@@ -219,6 +237,14 @@ export class Api {
     return this._devicePropertyApi
   }
 
+  get genericDeviceActions (): GenericDeviceActionApi {
+    return this._genericDeviceActionApi
+  }
+
+  get genericDeviceActionAttachments (): GenericDeviceActionAttachmentApi {
+    return this._genericDeviceActionAttachmentApi
+  }
+
   get contacts (): ContactApi {
     return this._contactApi
   }
@@ -257,6 +283,10 @@ export class Api {
 
   get measuredQuantityUnits (): MeasuredQuantityUnitApi {
     return this._measuredQuantityUnitApi
+  }
+
+  get actionTypes (): ActionTypeApi {
+    return this._actionTypeApi
   }
 
   get projects (): ProjectApi {

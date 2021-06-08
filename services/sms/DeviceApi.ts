@@ -39,11 +39,13 @@ import { DeviceProperty } from '@/models/DeviceProperty'
 import { DeviceType } from '@/models/DeviceType'
 import { Manufacturer } from '@/models/Manufacturer'
 import { Status } from '@/models/Status'
+import { GenericAction } from '@/models/GenericAction'
 
 import { ContactSerializer } from '@/serializers/jsonapi/ContactSerializer'
 import { CustomTextFieldSerializer } from '@/serializers/jsonapi/CustomTextFieldSerializer'
 import { DeviceAttachmentSerializer } from '@/serializers/jsonapi/DeviceAttachmentSerializer'
 import { DevicePropertySerializer } from '@/serializers/jsonapi/DevicePropertySerializer'
+import { GenericDeviceActionSerializer } from '@/serializers/jsonapi/GenericActionSerializer'
 
 import { IFlaskJSONAPIFilter } from '@/utils/JSONApiInterfaces'
 
@@ -188,6 +190,20 @@ export class DeviceApi {
     }
     return this.axiosApi.get(url, { params }).then((rawServerResponse) => {
       return new DevicePropertySerializer().convertJsonApiObjectListToModelList(rawServerResponse.data)
+    })
+  }
+
+  findRelatedGenericActions (deviceId: string): Promise<GenericAction[]> {
+    const url = deviceId + '/generic-device-actions'
+    const params = {
+      'page[size]': 10000,
+      include: [
+        'contact',
+        'generic_device_action_attachments.attachment'
+      ].join(',')
+    }
+    return this.axiosApi.get(url, { params }).then((rawServerResponse) => {
+      return new GenericDeviceActionSerializer().convertJsonApiObjectListToModelList(rawServerResponse.data)
     })
   }
 }

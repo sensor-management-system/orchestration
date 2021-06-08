@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020
+ * Copyright (C) 2020, 2021
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -29,31 +29,24 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
+import { ActionType } from '@/models/ActionType'
 
-import { DateTime } from 'luxon'
+import {
+  IJsonApiEntityListEnvelope,
+  IJsonApiEntity
+} from '@/serializers/jsonapi/JsonApiTypes'
 
-export const dateToString = (aDate: DateTime | null): string => {
-  if (!aDate) {
-    return ''
+export class ActionTypeSerializer {
+  convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiEntityListEnvelope): ActionType[] {
+    return jsonApiObjectList.data.map(this.convertJsonApiDataToModel.bind(this))
   }
-  return aDate.setZone('UTC').toFormat('yyyy-MM-dd')
-}
 
-export const stringToDate = (aDate: string): DateTime => {
-  return DateTime.fromISO(aDate, { zone: 'UTC' })
-}
+  convertJsonApiDataToModel (jsonApiData: IJsonApiEntity): ActionType {
+    const id = jsonApiData.id.toString()
+    const name = jsonApiData.attributes.term
+    const url = jsonApiData.links?.self || ''
+    const definition = jsonApiData.attributes.definition
 
-export const timeStampToUTCDateTime = (value: number) : string => {
-  if (!value) {
-    return ''
+    return ActionType.createWithData(id, name, url, definition)
   }
-  const date = DateTime.fromSeconds(value).setZone('UTC')
-  return date.toFormat('yyyy-MM-dd HH:mm:ss') + ' UTC'
-}
-
-export const dateToDateTimeString = (aDate: DateTime | null): string => {
-  if (!aDate) {
-    return ''
-  }
-  return aDate.setZone('UTC').toFormat('yyyy-MM-dd HH:mm:ss')
 }

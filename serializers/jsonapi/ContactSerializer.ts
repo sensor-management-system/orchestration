@@ -185,7 +185,7 @@ export class ContactSerializer {
     }
   }
 
-  convertJsonApiRelationshipsSingleModel (relationships: IJsonApiTypedEntityWithoutDetailsDataDict, included: IJsonApiEntityWithOptionalAttributes[]): IContactAndMissing {
+  convertJsonApiRelationshipsSingleModel (relationships: IJsonApiRelationships, included: IJsonApiEntityWithOptionalAttributes[]): IContactAndMissing {
     let relationContactId: string = ''
     if (relationships.contact) {
       const contactObject = relationships.contact as IJsonApiEntityWithoutDetailsDataDict

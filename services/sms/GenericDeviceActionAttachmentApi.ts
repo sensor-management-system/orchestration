@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020
+ * Copyright (C) 2021
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -29,31 +29,27 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
+import { AxiosInstance } from 'axios'
 
-import { DateTime } from 'luxon'
+import { Attachment } from '@/models/Attachment'
+import { IGenericActionAttachmentSerializer, GenericDeviceActionAttachmentSerializer } from '@/serializers/jsonapi/GenericActionAttachmentSerializer'
 
-export const dateToString = (aDate: DateTime | null): string => {
-  if (!aDate) {
-    return ''
+export class GenericDeviceActionAttachmentApi {
+  private axiosApi: AxiosInstance
+  private serializer: IGenericActionAttachmentSerializer
+
+  constructor (axiosInstance: AxiosInstance) {
+    this.axiosApi = axiosInstance
+    this.serializer = new GenericDeviceActionAttachmentSerializer()
   }
-  return aDate.setZone('UTC').toFormat('yyyy-MM-dd')
-}
 
-export const stringToDate = (aDate: string): DateTime => {
-  return DateTime.fromISO(aDate, { zone: 'UTC' })
-}
-
-export const timeStampToUTCDateTime = (value: number) : string => {
-  if (!value) {
-    return ''
+  async add (actionId: string, attachment: Attachment): Promise<any> {
+    const url = ''
+    const data = this.serializer.convertModelToJsonApiData(attachment, actionId)
+    await this.axiosApi.post(url, { data })
   }
-  const date = DateTime.fromSeconds(value).setZone('UTC')
-  return date.toFormat('yyyy-MM-dd HH:mm:ss') + ' UTC'
-}
 
-export const dateToDateTimeString = (aDate: DateTime | null): string => {
-  if (!aDate) {
-    return ''
+  async delete (id: string): Promise<void> {
+    return await this.axiosApi.delete<string, void>(id)
   }
-  return aDate.setZone('UTC').toFormat('yyyy-MM-dd HH:mm:ss')
 }

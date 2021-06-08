@@ -77,81 +77,21 @@ permissions and limitations under the Licence.
               >
                 <v-row>
                   <v-col cols="12" md="3">
-                    <v-menu
-                      v-if="!readonly"
-                      v-model="startDateMenu"
-                      :close-on-content-click="false"
-                      :nudge-right="40"
-                      transition="scale-transition"
-                      offset-y
-                      min-width="290px"
-                    >
-                      <template #activator="{ on, attrs }">
-                        <v-text-field
-                          :value="getStartDate()"
-                          :rules="[rules.startDate]"
-                          v-bind="attrs"
-                          label="Start date"
-                          clearable
-                          prepend-icon="mdi-calendar-range"
-                          readonly
-                          v-on="on"
-                          @click:clear="setStartDateAndValidate(null)"
-                        />
-                      </template>
-                      <v-date-picker
-                        :value="getStartDate()"
-                        first-day-of-week="1"
-                        :show-week="true"
-                        @input="setStartDateAndValidate"
-                      />
-                    </v-menu>
-                    <v-text-field
-                      v-else
-                      :value="getStartDate()"
+                    <DatePicker
+                      :value="configuration.startDate"
                       label="Start date"
-                      prepend-icon="mdi-calendar-range"
-                      readonly
-                      disabled
+                      :rules="[rules.startDate]"
+                      :readonly="readonly"
+                      @input="setStartDateAndValidate"
                     />
                   </v-col>
                   <v-col cols="12" md="3">
-                    <v-menu
-                      v-if="!readonly"
-                      v-model="endDateMenu"
-                      :close-on-content-click="false"
-                      :nudge-right="40"
-                      transition="scale-transition"
-                      offset-y
-                      min-width="290px"
-                    >
-                      <template #activator="{ on, attrs }">
-                        <v-text-field
-                          :value="getEndDate()"
-                          :rules="[rules.endDate]"
-                          v-bind="attrs"
-                          label="End date"
-                          clearable
-                          prepend-icon="mdi-calendar-range"
-                          readonly
-                          v-on="on"
-                          @click:clear="setEndDateAndValidate(null)"
-                        />
-                      </template>
-                      <v-date-picker
-                        :value="getEndDate()"
-                        first-day-of-week="1"
-                        :show-week="true"
-                        @input="setEndDateAndValidate"
-                      />
-                    </v-menu>
-                    <v-text-field
-                      v-else
-                      :value="getEndDate()"
+                    <DatePicker
+                      :value="configuration.endDate"
                       label="End date"
-                      prepend-icon="mdi-calendar-range"
-                      readonly
-                      disabled
+                      :rules="[rules.endDate]"
+                      :readonly="readonly"
+                      @input="setEndDateAndValidate"
                     />
                   </v-col>
                 </v-row>
@@ -354,6 +294,7 @@ import ConfigurationsTreeView from '@/components/ConfigurationsTreeView.vue'
 import ConfigurationsDemoTreeView from '@/components/ConfigurationsDemoTreeView.vue'
 import ConfigurationsSelectedItem from '@/components/ConfigurationsSelectedItem.vue'
 import InfoBox from '@/components/InfoBox.vue'
+import DatePicker from '@/components/DatePicker.vue'
 
 import { Device } from '@/models/Device'
 import { Platform } from '@/models/Platform'
@@ -368,7 +309,8 @@ import { PlatformNode } from '@/models/PlatformNode'
 import { DeviceConfigurationAttributes } from '@/models/DeviceConfigurationAttributes'
 import { PlatformConfigurationAttributes } from '@/models/PlatformConfigurationAttributes'
 
-import { dateToString, stringToDate } from '@/utils/dateHelper'
+import { DateTime } from 'luxon'
+import { stringToDate } from '@/utils/dateHelper'
 import { getParentByClass } from '@/utils/domHelper'
 
 @Component({
@@ -381,7 +323,8 @@ import { getParentByClass } from '@/utils/domHelper'
     ConfigurationsTreeView,
     ConfigurationsDemoTreeView,
     ConfigurationsSelectedItem,
-    InfoBox
+    InfoBox,
+    DatePicker
   }
 })
 // @ts-ignore
@@ -858,33 +801,15 @@ export default class ConfigurationsIdPage extends Vue {
     this.selectedNode = node
   }
 
-  getStartDate (): string {
-    return dateToString(this.configuration.startDate)
-  }
-
-  getEndDate (): string {
-    return dateToString(this.configuration.endDate)
-  }
-
-  setStartDate (aDate: string | null) {
-    this.configuration.startDate = aDate !== null ? stringToDate(aDate) : null
-  }
-
-  setEndDate (aDate: string | null) {
-    this.configuration.endDate = aDate !== null ? stringToDate(aDate) : null
-  }
-
-  setStartDateAndValidate (aDate: string) {
-    this.setStartDate(aDate)
-    this.startDateMenu = false
+  setStartDateAndValidate (aDate: DateTime | null) {
+    this.configuration.startDate = aDate
     if (this.configuration.endDate !== null) {
       this.checkValidationOfDates()
     }
   }
 
-  setEndDateAndValidate (aDate: string | null) {
-    this.setEndDate(aDate)
-    this.endDateMenu = false
+  setEndDateAndValidate (aDate: DateTime | null) {
+    this.configuration.endDate = aDate
     if (this.configuration.startDate !== null) {
       this.checkValidationOfDates()
     }
