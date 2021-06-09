@@ -75,11 +75,11 @@ def create_app():
                 app.config["JWT_PUBLIC_KEY"] = oidc_jwt_service.get_jwt_public_key()
                 app.config["JWT_ALGORITHM"] = oidc_jwt_service.get_jwt_algorithm()
 
-        update_oidc_settings_thread = threading.Thread(
-            target=update_oidc_settings_thread,
+        update_jwt_settings_thread = threading.Thread(
+            target=update_jwt_settings,
             args=(),
         )
-        update_oidc_settings_thread.start()
+        update_jwt_settings_thread.start()
 
     # test to ensure the proper config was loaded
     # import sys
