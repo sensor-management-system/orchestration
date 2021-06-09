@@ -140,6 +140,22 @@ class Device(db.Model, AuditMixin, SearchableMixin):
                 "type": "nested",
                 "properties": Contact.get_search_index_properties(),
             },
+            "customfields": {
+                "type": "nested",
+                "properties": {
+                    # The key should use keyword behaviour by default
+                    # but should also searchable as text.
+                    "key": {
+                        "type": "keyword",
+                        "fields": {"text": {"type": "text"}},
+                    },
+                    # The same for the value.
+                    "value": {
+                        "type": "keyword",
+                        "fields": {"text": {"type": "text"}},
+                    },
+                },
+            },
             "properties": {
                 "type": "nested",
                 "properties": {
