@@ -152,7 +152,7 @@ class SearchableMixin:
                 for parent_obj in obj.get_parent_search_entities():
                     if isinstance(parent_obj, SearchableMixin):
                         ids_to_add[obj.__tablename__].add(obj.id)
-            elif isinstance(obj, SearchableMixin):
+            if isinstance(obj, SearchableMixin):
                 ids_to_add[obj.__tablename__].add(obj.id)
         # For those indirect ones we also want to check the deleted ones
         # So that we know that the parents must be updated as well.
