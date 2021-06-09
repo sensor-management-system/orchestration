@@ -1,4 +1,6 @@
 import os
+import threading
+import time
 
 from elasticsearch import Elasticsearch
 from flask import Blueprint, Flask
@@ -49,6 +51,35 @@ def create_app():
         if app.config["ELASTICSEARCH_URL"]
         else None
     )
+
+    # If we have the config to update our jwt config, then we want to do that
+    # from time to time - in order to prevent problems on changes of the IDP config
+    # (which will make the validation fail).
+    # With this code here we start a thread that checks the config every 5 minutes
+    # So we will be sure that 5 minutes after a IDP change, we can validate our tokens
+    # again.
+    # Using a thread here is important as we need to update the app.config dict.
+    # Also it is important that we wait from time to time to allow the webserver
+    # to run (no real multi-threading in python).
+    # (Running web requests to the IDP should allow context switches as well, so we
+    # should not expect a huge impact on the performance here).
+    # Also this here should not effect our test codes as there is no OIDC_JWT_SERVICE
+    # in the test config.
+    if app.config.get("OIDC_JWT_SERVICE", None) is not None:
+
+        def update_oidc_settings():
+            """Update the JWT settings from the IDP."""
+            while True:
+                time.sleep(60 * 5)
+                oidc_jwt_service = app.config["OIDC_JWT_SERVICE"]
+                app.config["JWT_PUBLIC_KEY"] = oidc_jwt_service.get_jwt_public_key()
+                app.config["JWT_ALGORITHM"] = oidc_jwt_service.get_jwt_algorithm()
+
+        update_oidc_settings_thread = threading.Thread(
+            target=update_oidc_settings_thread,
+            args=(),
+        )
+        update_oidc_settings_thread.start()
 
     # test to ensure the proper config was loaded
     # import sys
