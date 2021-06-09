@@ -145,6 +145,9 @@ class Configuration(db.Model, AuditMixin, SearchableMixin):
             "devices": [d.to_search_entry() for d in devices],
             "contacts": [c.to_search_entry() for c in self.contacts],
             "firmware_versions": firmware_versions,
+            "attachments": [
+                a.to_search_entry() for a in self.configuration_attachments
+            ],
             "generic_actions": [
                 g.to_search_entry() for g in self.generic_configuration_actions
             ],
@@ -196,6 +199,18 @@ class Configuration(db.Model, AuditMixin, SearchableMixin):
                     "firmware_versions": {
                         "type": "keyword",
                         "fields": {"text": {"type": "text"}},
+                    },
+                    "attachments": {
+                        "type": "nested",
+                        "properties": {
+                            # Allow search via text & keyword
+                            "label": {
+                                "type": "keyword",
+                                "fields": {"text": {"type": "text"}},
+                            },
+                            # But don't allow search for the very same url (unlikely to be needed).
+                            "url": {"type": "text"},
+                        },
                     },
                     "generic_actions": {
                         "type": "nested",
