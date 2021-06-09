@@ -1,7 +1,8 @@
 """Model for contacts & reference tables."""
 
+import itertools
 
-from ..models.mixin import SearchableMixin
+from ..models.mixin import SearchableMixin, IndirectSearchableMixin
 from .base_model import db
 
 platform_contacts = db.Table(
@@ -30,7 +31,7 @@ configuration_contacts = db.Table(
 )
 
 
-class Contact(db.Model, SearchableMixin):
+class Contact(db.Model, SearchableMixin, IndirectSearchableMixin):
     """Contact class."""
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -100,3 +101,7 @@ class Contact(db.Model, SearchableMixin):
             "mappings": {"properties": cls.get_search_index_properties()},
             "settings": {"index": {"number_of_shards": "1"}},
         }
+
+    def get_parent_search_entities(self):
+        """Return a list with all the devices, platforms & configurations."""
+        return list(itertools(self.devices, self.platforms, self.configurations))
