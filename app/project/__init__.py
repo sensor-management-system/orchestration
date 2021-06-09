@@ -67,7 +67,7 @@ def create_app():
     # in the test config.
     if app.config.get("OIDC_JWT_SERVICE", None) is not None:
 
-        def update_oidc_settings():
+        def update_jwt_settings():
             """Update the JWT settings from the IDP."""
             while True:
                 time.sleep(60 * 5)
