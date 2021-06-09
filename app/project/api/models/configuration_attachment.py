@@ -1,5 +1,5 @@
 from .base_model import db
-from .mixins import IndirectSearchableMixin
+from .mixin import IndirectSearchableMixin
 
 
 class ConfigurationAttachment(db.Model, IndirectSearchableMixin):
