@@ -200,10 +200,10 @@ class Configuration(db.Model, AuditMixin, SearchableMixin):
                     "generic_actions": {
                         "type": "nested",
                         "properties": {
-                            "action_type_name": {
+                            "action_type_uri": {
                                 "type": "keyword",
                             },
-                            "action_type_uri": {
+                            "action_type_name": {
                                 "type": "keyword",
                                 "fields": {"text": {"type": "text"}},
                             },

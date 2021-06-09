@@ -47,6 +47,9 @@ class Platform(db.Model, AuditMixin, SearchableMixin):
             "generic_actions": [
                 g.to_search_entry() for g in self.generic_configuration_actions
             ],
+            "software_update_actions": [
+                s.to_search_entry() for s in self.platform_software_update_actions
+            ],
         }
 
     @staticmethod
@@ -108,15 +111,40 @@ class Platform(db.Model, AuditMixin, SearchableMixin):
             "generic_actions": {
                 "type": "nested",
                 "properties": {
-                    "action_type_name": {
+                    "action_type_uri": {
                         "type": "keyword",
                     },
-                    "action_type_uri": {
+                    "action_type_name": {
                         "type": "keyword",
                         "fields": {"text": {"type": "text"}},
                     },
                     "description": {
                         "type": "text",
+                    },
+                },
+            },
+            "software_update_actions": {
+                "type": "nested",
+                "properties": {
+                    "software_type_name": {
+                        "type": "keyword",
+                        "fields": {"text": {"type": "text"}},
+                    },
+                    "software_type_uri": {
+                        "type": "keyword",
+                    },
+                    "description": {
+                        "type": "text",
+                    },
+                    "version": {
+                        "type": "keyword",
+                        "fields": {"text": {"type": "text"}},
+                    },
+                    "repository_url": {
+                        "type": "keyword",
+                        "fields": {
+                            "text": {"type": "text"},
+                        },
                     },
                 },
             },
