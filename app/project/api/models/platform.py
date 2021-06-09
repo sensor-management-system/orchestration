@@ -44,6 +44,9 @@ class Platform(db.Model, AuditMixin, SearchableMixin):
             "persistent_identifier": self.persistent_identifier,
             "attachments": [a.to_search_entry() for a in self.platform_attachments],
             "contacts": [c.to_search_entry() for c in self.contacts],
+            "generic_actions": [
+                g.to_search_entry() for g in self.generic_configuration_actions
+            ],
         }
 
     @staticmethod
@@ -100,6 +103,21 @@ class Platform(db.Model, AuditMixin, SearchableMixin):
                     },
                     # But don't allow search for the very same url (unlikely to be needed).
                     "url": {"type": "text"},
+                },
+            },
+            "generic_actions": {
+                "type": "nested",
+                "properties": {
+                    "action_type_name": {
+                        "type": "keyword",
+                    },
+                    "action_type_uri": {
+                        "type": "keyword",
+                        "fields": {"text": {"type": "text"}},
+                    },
+                    "description": {
+                        "type": "text",
+                    },
                 },
             },
             "contacts": {

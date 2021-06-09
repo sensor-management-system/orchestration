@@ -60,6 +60,9 @@ class Device(db.Model, AuditMixin, SearchableMixin):
             "contacts": [c.to_search_entry() for c in self.contacts],
             "properties": [p.to_search_entry() for p in self.device_properties],
             "customfields": [c.to_search_entry() for c in self.customfields],
+            "generic_actions": [
+                g.to_search_entry() for g in self.generic_configuration_actions
+            ],
         }
 
     @staticmethod
@@ -190,6 +193,21 @@ class Device(db.Model, AuditMixin, SearchableMixin):
                         "fields": {"text": {"type": "text"}},
                     },
                     "resolution_unit_uri": {"type": "keyword"},
+                },
+            },
+            "generic_actions": {
+                "type": "nested",
+                "properties": {
+                    "action_type_name": {
+                        "type": "keyword",
+                    },
+                    "action_type_uri": {
+                        "type": "keyword",
+                        "fields": {"text": {"type": "text"}},
+                    },
+                    "description": {
+                        "type": "text",
+                    },
                 },
             },
         }

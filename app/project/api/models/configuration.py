@@ -130,6 +130,11 @@ class Configuration(db.Model, AuditMixin, SearchableMixin):
             if configuration_device.firmware_version is not None:
                 firmware_versions.append(configuration_device.firmware_version)
 
+        # TODO: With the change for the mount & unmount Actions
+        # this here must be improved.
+        # Also we need to update the configurations in case that
+        # we have a change in the platform or device
+
         return {
             "label": self.label,
             "status": self.status,
@@ -140,6 +145,9 @@ class Configuration(db.Model, AuditMixin, SearchableMixin):
             "devices": [d.to_search_entry() for d in devices],
             "contacts": [c.to_search_entry() for c in self.contacts],
             "firmware_versions": firmware_versions,
+            "generic_actions": [
+                g.to_search_entry() for g in self.generic_configuration_actions
+            ],
             # start & end dates?
             # location type & data?
         }
@@ -188,6 +196,21 @@ class Configuration(db.Model, AuditMixin, SearchableMixin):
                     "firmware_versions": {
                         "type": "keyword",
                         "fields": {"text": {"type": "text"}},
+                    },
+                    "generic_actions": {
+                        "type": "nested",
+                        "properties": {
+                            "action_type_name": {
+                                "type": "keyword",
+                            },
+                            "action_type_uri": {
+                                "type": "keyword",
+                                "fields": {"text": {"type": "text"}},
+                            },
+                            "description": {
+                                "type": "text",
+                            },
+                        },
                     },
                 }
             },
