@@ -55,6 +55,7 @@ class AuditMixin:
             remote_side="User.id",
         )
 
+
 class IndirectSearchableMixin:
     """
     Mixin for chose elements that should only be indirect searchable.
@@ -84,6 +85,7 @@ class IndirectSearchableMixin:
         configurations & contacts).
         """
         return []
+
 
 class SearchableMixin:
     """Mixin to make a model searchable via full text search."""
@@ -125,7 +127,9 @@ class SearchableMixin:
         session._search_add = []
 
         for obj in itertools.chain(session._changes["add"], session._changes["update"]):
-            if isinstance(obj, SearchableMixin) or isinstance(obj, IndirectSearchableMixin):
+            if isinstance(obj, SearchableMixin) or isinstance(
+                obj, IndirectSearchableMixin
+            ):
                 session._search_add.append(
                     SearchModelWithEntry(model=obj, entry=obj.to_search_entry())
                 )
