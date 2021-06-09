@@ -1,8 +1,10 @@
 from .base_model import db
-from .mixin import AuditMixin
+from .mixin import AuditMixin, IndirectSearchableMixin
 
 
-class ConfigurationStaticLocationBeginAction(db.Model, AuditMixin):
+class ConfigurationStaticLocationBeginAction(
+    db.Model, AuditMixin, IndirectSearchableMixin
+):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     configuration_id = db.Column(
         db.Integer, db.ForeignKey("configuration.id"), nullable=False
@@ -29,8 +31,20 @@ class ConfigurationStaticLocationBeginAction(db.Model, AuditMixin):
     elevation_datum_name = db.Column(db.String(256), default="MSL")  # mean sea level
     elevation_datum_uri = db.Column(db.String(256), nullable=True)
 
+    def get_parent_search_entities(self):
+        """Return the configuration as parent search entity."""
+        return [self.configuration]
 
-class ConfigurationStaticLocationEndAction(db.Model, AuditMixin):
+    def to_search_entry(self):
+        """Return a dict with search information."""
+        return {
+            "description": self.description,
+        }
+
+
+class ConfigurationStaticLocationEndAction(
+    db.Model, AuditMixin, IndirectSearchableMixin
+):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     configuration_id = db.Column(
         db.Integer, db.ForeignKey("configuration.id"), nullable=False
@@ -51,8 +65,20 @@ class ConfigurationStaticLocationEndAction(db.Model, AuditMixin):
         backref=db.backref("configuration_static_location_end_actions"),
     )
 
+    def get_parent_search_entities(self):
+        """Return the configuration as parent search entity."""
+        return [self.configuration]
 
-class ConfigurationDynamicLocationBeginAction(db.Model, AuditMixin):
+    def to_search_entry(self):
+        """Return a dict with search information."""
+        return {
+            "description": self.description,
+        }
+
+
+class ConfigurationDynamicLocationBeginAction(
+    db.Model, AuditMixin, IndirectSearchableMixin
+):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     configuration_id = db.Column(
         db.Integer, db.ForeignKey("configuration.id"), nullable=False
@@ -103,8 +129,21 @@ class ConfigurationDynamicLocationBeginAction(db.Model, AuditMixin):
     elevation_datum_name = db.Column(db.String(256), default="MSL")  # mean sea level
     elevation_datum_uri = db.Column(db.String(256), nullable=True)
 
+    def to_search_entry(self):
+        """Return a dict with search information."""
+        return {
+            # We don't include the epsg code or the elevation_datum yet
+            "description": self.description,
+        }
 
-class ConfigurationDynamicLocationEndAction(db.Model, AuditMixin):
+    def get_parent_search_entities(self):
+        """Return the configuration as parent search entity."""
+        return [self.configuration]
+
+
+class ConfigurationDynamicLocationEndAction(
+    db.Model, AuditMixin, IndirectSearchableMixin
+):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     configuration_id = db.Column(
         db.Integer, db.ForeignKey("configuration.id"), nullable=False
@@ -124,3 +163,13 @@ class ConfigurationDynamicLocationEndAction(db.Model, AuditMixin):
         foreign_keys=[contact_id],
         backref=db.backref("configuration_dynamic_location_end_actions"),
     )
+
+    def to_search_entry(self):
+        """Return a dict with search information."""
+        return {
+            "description": self.description,
+        }
+
+    def get_parent_search_entities(self):
+        """Return the configuration as parent search entity."""
+        return [self.configuration]

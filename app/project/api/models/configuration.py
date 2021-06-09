@@ -151,8 +151,23 @@ class Configuration(db.Model, AuditMixin, SearchableMixin):
             "generic_actions": [
                 g.to_search_entry() for g in self.generic_configuration_actions
             ],
+            "static_location_begin_actions": [
+                s.to_search_entry()
+                for s in self.configuration_static_location_begin_actions
+            ],
+            "static_location_end_actions": [
+                s.to_search_entry()
+                for s in self.configuration_static_location_end_actions
+            ],
+            "dynamic_location_begin_actions": [
+                d.to_search_entry()
+                for d in self.configuration_dynamic_location_begin_actions
+            ],
+            "dynamic_location_end_actions": [
+                d.to_search_entry()
+                for d in self.configuration_dynamic_location_end_actions
+            ],
             # start & end dates?
-            # location type & data?
         }
 
     @staticmethod
@@ -225,6 +240,38 @@ class Configuration(db.Model, AuditMixin, SearchableMixin):
                             "description": {
                                 "type": "text",
                             },
+                        },
+                    },
+                    "static_location_begin_actions": {
+                        "type": "nested",
+                        "properties": {
+                            "description": {
+                                "type": "text",
+                            }
+                        },
+                    },
+                    "static_location_end_actions": {
+                        "type": "nested",
+                        "properties": {
+                            "description": {
+                                "type": "text",
+                            }
+                        },
+                    },
+                    "dynamic_location_begin_actions": {
+                        "type": "nested",
+                        "properties": {
+                            "description": {
+                                "type": "text",
+                            }
+                        },
+                    },
+                    "dynamic_location_end_actions": {
+                        "type": "nested",
+                        "properties": {
+                            "description": {
+                                "type": "text",
+                            }
                         },
                     },
                 }
