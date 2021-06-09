@@ -2,6 +2,7 @@ import json
 import os
 
 import requests
+from cachetools import cached, TTLCache
 from jwt.algorithms import RSAAlgorithm
 
 
@@ -31,6 +32,8 @@ class OidcJwtService:
         jwks_config = resp.json()
         return jwks_config
 
+    # Cache the content for 10 minutes
+    @cached(cache=TTLCache(maxsize=1, ttl=600))
     def get_jwt_public_key(self):
         """Return the JWT public key, so that we can se it to JWT_PUBLIC_KEY."""
         jwks_config = self._get_jwks_config()
