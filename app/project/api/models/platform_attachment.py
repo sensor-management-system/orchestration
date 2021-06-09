@@ -1,4 +1,5 @@
 from .base_model import db
+from .mixin import IndirectSearchableMixin
 
 
 class PlatformAttachment(db.Model):
@@ -15,3 +16,7 @@ class PlatformAttachment(db.Model):
     def to_search_entry(self):
         # to be included in the platform
         return {"label": self.label, "url": self.url}
+
+    def get_parent_search_entities(self):
+        """Return the platform as parent."""
+        return [self.platform]
