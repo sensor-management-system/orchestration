@@ -242,6 +242,11 @@ class SearchableMixin:
     @classmethod
     def yield_searchables(cls, obj):
         """Yield all searchables (direct & indirect over multiple levels)."""
+        # Please note: Currently the SearchableMixin and IndirectSearchableMixin
+        # classes doesn't give us an endless recursion here (we dont't have
+        # circular dependencies). However this setting is fragile, so
+        # be careful and add a set to check ids of already yielded entities
+        # if ncessary.
         if isinstance(obj, SearchableMixin):
             yield obj
         if isinstance(obj, IndirectSearchableMixin):
