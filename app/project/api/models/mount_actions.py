@@ -52,6 +52,7 @@ class PlatformMountAction(db.Model, AuditMixin):
         """Return a dict of search slots."""
         return {
             "description": self.description,
+            "platform": self.platform.to_search_entry(),
         }
 
 
@@ -105,4 +106,5 @@ class DeviceMountAction(db.Model, AuditMixin, IndirectSearchableMixin):
         """Return a dict of search slots."""
         return {
             "description": self.description,
+            "device": self.device.to_search_entry(),
         }

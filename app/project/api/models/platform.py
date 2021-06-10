@@ -1,7 +1,7 @@
 """Model for platforms."""
 
 
-from ..models.mixin import AuditMixin, SearchableMixin
+from ..models.mixin import AuditMixin, SearchableMixin, IndirectSearchableMixin
 from .base_model import db
 
 
@@ -51,6 +51,18 @@ class Platform(db.Model, AuditMixin, SearchableMixin):
                 s.to_search_entry() for s in self.platform_software_update_actions
             ],
         }
+
+    def get_parent_search_entities(self):
+        """Get the parents where this here is included in the search index."""
+        # This here should only affect configurations - as their search
+        # index entry includes the platform.
+        result = []
+        # We only need to check the platform mount actions for associated
+        # configurations - as there should be no unmount before an earlier
+        # mount action.
+        for action in self.platform_mount_actions:
+            result.append(action.configuration)
+        return result
 
     @staticmethod
     def get_search_index_properties():

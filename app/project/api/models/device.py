@@ -1,11 +1,11 @@
 """Model for the devices."""
 
 
-from ..models.mixin import AuditMixin, SearchableMixin
+from ..models.mixin import AuditMixin, SearchableMixin, IndirectSearchableMixin
 from .base_model import db
 
 
-class Device(db.Model, AuditMixin, SearchableMixin):
+class Device(db.Model, AuditMixin, SearchableMixin, IndirectSearchableMixin):
     """Device class."""
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -67,6 +67,18 @@ class Device(db.Model, AuditMixin, SearchableMixin):
                 s.to_search_entry() for s in self.device_software_update_actions
             ],
         }
+
+    def get_parent_search_entities(self):
+        """Get the parents where this here is included in the search index."""
+        # This here should only affect configurations - as their search
+        # index entry includes the device.
+        result = []
+        # We only need to check the device mount actions for associated
+        # configurations - as there should be no unmount before an earlier
+        # mount action.
+        for action in self.device_mount_actions:
+            result.append(action.configuration)
+        return result
 
     @staticmethod
     def get_search_index_properties():

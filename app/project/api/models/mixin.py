@@ -169,8 +169,11 @@ class SearchableMixin:
     - We have associated attachments, generic actions and location actions.
     - The situation for mount & unmount actions is a bit more interesting.
       Basically we not only want to have the description of those actions
-      included but also the associated platforms & devices. (But it doesn't make
-      that much sense to include all of the data of the devices again).
+      included but also the associated platforms & devices. (And we want
+      those texts in the search index to be update once a device or a
+      platform is changed. As we only have the configurations then that
+      are effected it is do-able, but it really starts to be complex...
+      Sorry for that!).
     - However, with a change of the devices & platforms we must update
       the configuration again.
 
@@ -218,7 +221,9 @@ class SearchableMixin:
         for obj in itertools.chain(session._changes["add"], session._changes["update"]):
             for searchable in cls.yield_searchables(obj):
                 session._search_add.append(
-                    SearchModelWithEntry(model=searchable, entry=searchable.to_search_entry())
+                    SearchModelWithEntry(
+                        model=searchable, entry=searchable.to_search_entry()
+                    )
                 )
         for obj in session._changes["delete"]:
             # We really don't want the direct searchables that are deleted
@@ -233,6 +238,7 @@ class SearchableMixin:
                                 model=searchable, entry=searchable.to_search_entry()
                             )
                         )
+
     @classmethod
     def yield_searchables(cls, obj):
         """Yield all searchables (direct & indirect over multiple levels)."""

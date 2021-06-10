@@ -291,11 +291,23 @@ class Configuration(db.Model, AuditMixin, SearchableMixin):
                     },
                     "platform_mount_actions": {
                         "type": "nested",
-                        "properties": {"description": {"type": "text"}},
+                        "properties": {
+                            "description": {"type": "text"},
+                            "platform": {
+                                "type": "nested",
+                                "properties": Platform.get_search_index_properties(),
+                            },
+                        },
                     },
                     "device_mount_actions": {
                         "type": "nested",
-                        "properties": {"description": {"type": "text"}},
+                        "properties": {
+                            "description": {"type": "text"},
+                            "device": {
+                                "type": "nested",
+                                "properties": Device.get_search_index_properties(),
+                            },
+                        },
                     },
                     "platform_unmount_actions": {
                         "type": "nested",
