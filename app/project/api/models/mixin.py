@@ -180,7 +180,7 @@ class SearchableMixin:
         for search_model_with_entry in session._search_add:
             model = search_model_with_entry.model
             if model.id in ids_to_add[model.__tablename__]:
-                if not model.id in ids_processed[model.__tablename__]:
+                if model.id not in ids_processed[model.__tablename__]:
                     add_to_index(
                         model.__tablename__, model, search_model_with_entry.entry
                     )
