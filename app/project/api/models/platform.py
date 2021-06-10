@@ -45,7 +45,7 @@ class Platform(db.Model, AuditMixin, SearchableMixin):
             "attachments": [a.to_search_entry() for a in self.platform_attachments],
             "contacts": [c.to_search_entry() for c in self.contacts],
             "generic_actions": [
-                g.to_search_entry() for g in self.generic_configuration_actions
+                g.to_search_entry() for g in self.generic_platform_actions
             ],
             "software_update_actions": [
                 s.to_search_entry() for s in self.platform_software_update_actions
