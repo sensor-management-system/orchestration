@@ -104,4 +104,4 @@ class Contact(db.Model, SearchableMixin, IndirectSearchableMixin):
 
     def get_parent_search_entities(self):
         """Return a list with all the devices, platforms & configurations."""
-        return list(itertools(self.devices, self.platforms, self.configurations))
+        return list(itertools.chain(self.devices, self.platforms, self.configurations))
