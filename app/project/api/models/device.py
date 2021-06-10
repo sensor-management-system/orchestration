@@ -61,7 +61,7 @@ class Device(db.Model, AuditMixin, SearchableMixin):
             "properties": [p.to_search_entry() for p in self.device_properties],
             "customfields": [c.to_search_entry() for c in self.customfields],
             "generic_actions": [
-                g.to_search_entry() for g in self.generic_configuration_actions
+                g.to_search_entry() for g in self.generic_device_actions
             ],
             "software_update_actions": [
                 s.to_search_entry() for s in self.device_software_update_actions
