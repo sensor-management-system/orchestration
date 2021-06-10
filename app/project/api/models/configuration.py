@@ -170,6 +170,18 @@ class Configuration(db.Model, AuditMixin, SearchableMixin):
                 d.to_search_entry()
                 for d in self.configuration_dynamic_location_end_actions
             ],
+            "platform_mount_actions": [
+                p.to_search_entry() for p in self.platform_mount_actions
+            ],
+            "device_mount_actions": [
+                d.to_search_entry() for d in self.device_mount_actions
+            ],
+            "platform_unmount_actions": [
+                p.to_search_entry() for p in self.platform_unmount_actions
+            ],
+            "device_unmount_actions": [
+                d.to_search_entry() for d in self.device_unmount_actions
+            ],
             # start & end dates?
         }
 
@@ -276,6 +288,22 @@ class Configuration(db.Model, AuditMixin, SearchableMixin):
                                 "type": "text",
                             }
                         },
+                    },
+                    "platform_mount_actions": {
+                        "type": "nested",
+                        "properties": {"description": {"type": "text"}},
+                    },
+                    "device_mount_actions": {
+                        "type": "nested",
+                        "properties": {"description": {"type": "text"}},
+                    },
+                    "platform_unmount_actions": {
+                        "type": "nested",
+                        "properties": {"description": {"type": "text"}},
+                    },
+                    "device_unmount_actions": {
+                        "type": "nested",
+                        "properties": {"description": {"type": "text"}},
                     },
                 }
             },

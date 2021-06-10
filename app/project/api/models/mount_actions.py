@@ -1,4 +1,4 @@
-from ..models.mixin import AuditMixin
+from ..models.mixin import AuditMixin, IndirectSearchableMixin
 from .base_model import db
 
 
@@ -42,8 +42,20 @@ class PlatformMountAction(db.Model, AuditMixin):
     offset_y = db.Column(db.Float, default=0)
     offset_z = db.Column(db.Float, default=0)
 
+    def get_parent_search_entities(self):
+        """Return the configuration as parent for the search."""
+        # We only want to include the mount for the search in the
+        # Configuration.
+        return [self.configuration]
 
-class DeviceMountAction(db.Model, AuditMixin):
+    def to_search_entry(self):
+        """Return a dict of search slots."""
+        return {
+            "description": self.description,
+        }
+
+
+class DeviceMountAction(db.Model, AuditMixin, IndirectSearchableMixin):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     configuration_id = db.Column(
         db.Integer, db.ForeignKey("configuration.id"), nullable=False
@@ -82,3 +94,15 @@ class DeviceMountAction(db.Model, AuditMixin):
     offset_x = db.Column(db.Float, default=0)
     offset_y = db.Column(db.Float, default=0)
     offset_z = db.Column(db.Float, default=0)
+
+    def get_parent_search_entities(self):
+        """Return the configuration as parent for the search."""
+        # We only want to include the mount for the search in the
+        # Configuration.
+        return [self.configuration]
+
+    def to_search_entry(self):
+        """Return a dict of search slots."""
+        return {
+            "description": self.description,
+        }
