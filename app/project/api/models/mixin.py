@@ -127,12 +127,27 @@ class SearchableMixin:
         session._search_add = []
 
         for obj in itertools.chain(session._changes["add"], session._changes["update"]):
-            if isinstance(obj, SearchableMixin) or isinstance(
-                obj, IndirectSearchableMixin
-            ):
+            if isinstance(obj, SearchableMixin):
                 session._search_add.append(
                     SearchModelWithEntry(model=obj, entry=obj.to_search_entry())
                 )
+            if isinstance(obj, IndirectSearchableMixin):
+                for parent_obj in obj.get_parent_search_entities():
+                    if isinstance(parent_obj, SearchableMixin):
+                        session._search_add.append(
+                            SearchModelWithEntry(
+                                model=parent_obj, entry=parent_obj.to_search_entry()
+                            )
+                        )
+        for obj in session._changes["delete"]:
+            if isinstance(obj, IndirectSearchableMixin):
+                for parent_obj in obj.get_parent_search_entities():
+                    if isinstance(parent_obj, SearchableMixin):
+                        session._search_add.append(
+                            SearchModelWithEntry(
+                                model=parent_obj, entry=parent_obj.to_search_entry()
+                            )
+                        )
 
     @classmethod
     def after_commit(cls, session):
@@ -147,38 +162,36 @@ class SearchableMixin:
         # When we go through all of the changes to add & to update
         # then we can take all the direct searchable entities, as well
         # as all parents of the indirect ones.
-        for obj in itertools.chain(session._changes["add"], session._changes["update"]):
-            if isinstance(obj, IndirectSearchableMixin):
-                for parent_obj in obj.get_parent_search_entities():
-                    if isinstance(parent_obj, SearchableMixin):
-                        ids_to_add[obj.__tablename__].add(obj.id)
-            if isinstance(obj, SearchableMixin):
-                ids_to_add[obj.__tablename__].add(obj.id)
+        for search_model_with_entry in session._search_add:
+            obj = search_model_with_entry.model
+            ids_to_add[obj.__tablename__].add(obj.id)
         # For those indirect ones we also want to check the deleted ones
         # So that we know that the parents must be updated as well.
-        for obj in session._changes["delete"]:
-            if isinstance(obj, IndirectSearchableMixin):
-                for parent_obj in obj.get_parent_search_entities():
-                    if isinstance(parent_obj, SearchableMixin):
-                        ids_to_add[parent_obj.__tablename__].add(obj.id)
         # However, if the ones that we want to update get deleted themselves
         # it really doesn't make any more sense to update them in the search
         # index. We can ignore them right away.
         for obj in session._changes["delete"]:
             if isinstance(obj, SearchableMixin):
-                ids_to_add[obj.__tablename__].remove(obj.id)
+                ids_to_add[obj.__tablename__].discard(obj.id)
 
+        ids_processed = collections.defaultdict(set)
         # So, now we have all of those that we want to update,
         # we can start adding them to the search index.
         for search_model_with_entry in session._search_add:
             model = search_model_with_entry.model
             if model.id in ids_to_add[model.__tablename__]:
-                add_to_index(model.__tablename__, model, search_model_with_entry.entry)
+                if not model.id in ids_processed[model.__tablename__]:
+                    add_to_index(
+                        model.__tablename__, model, search_model_with_entry.entry
+                    )
+                    ids_processed[model.__tablename__].add(model.id)
 
         # And then, we can delete old entries if necessary.
         for obj in session._changes["delete"]:
             if isinstance(obj, SearchableMixin):
-                remove_from_index(obj.__tablename__, obj)
+                if obj.id not in ids_processed[obj.__tablename__]:
+                    remove_from_index(obj.__tablename__, obj)
+                    ids_processed[obj.__tablename__].add(obj.id)
 
         session._changes = None
         session._search_add = None
