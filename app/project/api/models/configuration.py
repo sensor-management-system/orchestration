@@ -47,6 +47,9 @@ class Configuration(db.Model, AuditMixin, SearchableMixin):
     src_elevation = db.relationship(
         "DeviceProperty", uselist=False, foreign_keys=[elevation_src_device_property_id]
     )
+    configuration_attachments = db.relationship(
+        "ConfigurationAttachment", cascade="save-update, merge, delete, delete-orphan"
+    )
 
     @hybrid_property
     def hierarchy(self):
