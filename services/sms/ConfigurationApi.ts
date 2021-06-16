@@ -70,6 +70,7 @@ export class ConfigurationApi {
           'contacts',
           'configuration_platforms.platform',
           'configuration_devices.device',
+          'configuration_devices.device.device_properties',
           'src_longitude',
           'src_latitude',
           'src_elevation'
