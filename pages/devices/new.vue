@@ -148,7 +148,7 @@ export default class DeviceNewPage extends mixins(Rules) {
           disabled: true
         },
         {
-          name: 'Properties',
+          name: 'Measured Quantities',
           disabled: true
         },
         {
@@ -160,7 +160,7 @@ export default class DeviceNewPage extends mixins(Rules) {
           disabled: true
         },
         {
-          name: 'Events',
+          name: 'Actions',
           disabled: true
         }
       ],
