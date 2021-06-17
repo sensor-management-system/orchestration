@@ -41,6 +41,7 @@ import {
   IJsonApiEntityListEnvelope,
   IJsonApiEntity,
   IJsonApiEntityWithOptionalId,
+  IJsonApiEntityWithoutDetails,
   IJsonApiEntityWithOptionalAttributes
 } from '@/serializers/jsonapi/JsonApiTypes'
 
@@ -163,6 +164,15 @@ export class DeviceSerializer {
         if (includedEntry.type === 'device') {
           const device = this.convertJsonApiDataToModel(includedEntry, []).device
           result.push(device)
+
+          // take all device_properties in the included array for this device
+          // and add them to the device
+          included.filter((includedEntry) => {
+            return includedEntry.type === 'device_property' && (includedEntry.relationships?.device?.data as IJsonApiEntityWithoutDetails)?.id === device.id
+          }).forEach((includedEntry) => {
+            const deviceProperty = this.devicePropertySerializer.convertJsonApiDataToModel(includedEntry)
+            device.properties.push(deviceProperty)
+          })
         }
       }
     }
