@@ -895,7 +895,19 @@ export default class DevicePropertyForm extends Vue {
     let properties = this.properties
     // if a samplingMedia is choosen, restrict the list of properties
     if (this.value.samplingMediaUri !== '') {
-      properties = properties.filter(s => s.samplingMediaId === '' || this.checkUriEndsWithId(this.value.samplingMediaUri, s.samplingMediaId))
+      properties = properties.filter(p => p.samplingMediaId === '' || this.checkUriEndsWithId(this.value.samplingMediaUri, p.samplingMediaId))
+    } else if (this.value.compartmentUri !== '') {
+      // in case we have only a compartment, then we also just want
+      // to select those properties that are hierachically
+      // within the compartment
+      // In case that we have the compartment, then the
+      // getter for the samlingMediaItems is already pre-filtered
+      const samplingMediaItems = this.samplingMediaItems
+      const samplingMediaIds = new Set<string>()
+      for (const sm of samplingMediaItems) {
+        samplingMediaIds.add(sm.id)
+      }
+      properties = properties.filter(p => p.samplingMediaId === '' || samplingMediaIds.has(p.samplingMediaId))
     }
     return properties
   }
