@@ -615,6 +615,20 @@ export default class DevicePropertyForm extends Vue {
       newObj.samplingMediaUri = ''
     }
     if (this.value.samplingMediaUri !== newObj.samplingMediaUri) {
+      // ok, we also want to update the compartment here
+      const samplineMediaIndex = this.samplingMedias.findIndex(s => s.uri === newObj.samplingMediaUri)
+      if (samplineMediaIndex > -1) {
+        const samplingMediaItem = this.samplingMedias[samplineMediaIndex]
+        const compartmentId = samplingMediaItem.compartmentId
+        const compartmentIndex = this.compartmentItems.findIndex(c => c.id === compartmentId)
+        if (compartmentIndex > -1) {
+          const compartmentItem = this.compartmentItems[compartmentIndex]
+          if (compartmentItem.uri !== newObj.compartmentUri || compartmentItem.name !== newObj.compartmentName) {
+            newObj.compartmentUri = compartmentItem.uri
+            newObj.compartmentName = compartmentItem.name
+          }
+        }
+      }
       newObj.propertyName = ''
       newObj.propertyUri = ''
       newObj.unitName = ''
@@ -650,6 +664,29 @@ export default class DevicePropertyForm extends Vue {
       newObj.propertyUri = ''
     }
     if (this.value.propertyUri !== newObj.propertyUri) {
+      // and here we want to check both the sampling media & the compartment
+      const propertyIndex = this.properties.findIndex(p => p.uri === newObj.propertyUri)
+      if (propertyIndex > -1) {
+        const propertyItem = this.properties[propertyIndex]
+        const samplineMediaId = propertyItem.samplingMediaId
+        const samplineMediaIndex = this.samplingMedias.findIndex(s => s.id === samplineMediaId)
+        if (samplineMediaIndex > -1) {
+          const samplingMediaItem = this.samplingMedias[samplineMediaIndex]
+          if (samplingMediaItem.uri !== newObj.samplingMediaUri || samplingMediaItem.name !== newObj.samplingMediaName) {
+            newObj.samplingMediaUri = samplingMediaItem.uri
+            newObj.samplingMediaName = samplingMediaItem.name
+            const compartmentId = samplingMediaItem.compartmentId
+            const compartmentIndex = this.compartmentItems.findIndex(c => c.id === compartmentId)
+            if (compartmentIndex > -1) {
+              const compartmentItem = this.compartmentItems[compartmentIndex]
+              if (compartmentItem.uri !== newObj.compartmentUri || compartmentItem.name !== newObj.compartmentName) {
+                newObj.compartmentUri = compartmentItem.uri
+                newObj.compartmentName = compartmentItem.name
+              }
+            }
+          }
+        }
+      }
       newObj.unitName = ''
       newObj.unitUri = ''
     }
