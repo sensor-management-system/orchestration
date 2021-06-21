@@ -823,7 +823,7 @@ describe('PlatformSerializer', () => {
 
       const serializer = new PlatformSerializer()
 
-      const includeRelationships = true
+      const includeRelationships = false
       const jsonApiData = serializer.convertModelToJsonApiData(platform, includeRelationships)
 
       expect(typeof jsonApiData).toEqual('object')

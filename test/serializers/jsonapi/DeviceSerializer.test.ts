@@ -1139,7 +1139,7 @@ describe('DeviceSerializer', () => {
       device.id = 'abc'
 
       const serializer = new DeviceSerializer()
-      const includeRelationships = true
+      const includeRelationships = false
 
       const jsonApiData = serializer.convertModelToJsonApiData(device, includeRelationships)
 
