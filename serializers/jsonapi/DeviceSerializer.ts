@@ -179,7 +179,7 @@ export class DeviceSerializer {
     return result
   }
 
-  convertModelToJsonApiData (device: Device, includeRelationships: boolean): IJsonApiEntityWithOptionalId {
+  convertModelToJsonApiData (device: Device, includeRelationships: boolean = false): IJsonApiEntityWithOptionalId {
     const data: IJsonApiEntityWithOptionalId = {
       type: 'device',
       attributes: {

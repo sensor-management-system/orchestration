@@ -145,7 +145,7 @@ export class PlatformSerializer {
     return result
   }
 
-  convertModelToJsonApiData (platform: Platform, includeRelationships: boolean): IJsonApiEntityWithOptionalId {
+  convertModelToJsonApiData (platform: Platform, includeRelationships: boolean = false): IJsonApiEntityWithOptionalId {
     const data: IJsonApiEntityWithOptionalId = {
       type: 'platform',
       attributes: {
