@@ -615,6 +615,20 @@ export default class DevicePropertyForm extends Vue {
       newObj.samplingMediaUri = ''
     }
     if (this.value.samplingMediaUri !== newObj.samplingMediaUri) {
+      // ok, we also want to update the compartment here
+      const samplineMediaIndex = this.samplingMedias.findIndex(s => s.uri === newObj.samplingMediaUri)
+      if (samplineMediaIndex > -1) {
+        const samplingMediaItem = this.samplingMedias[samplineMediaIndex]
+        const compartmentId = samplingMediaItem.compartmentId
+        const compartmentIndex = this.compartmentItems.findIndex(c => c.id === compartmentId)
+        if (compartmentIndex > -1) {
+          const compartmentItem = this.compartmentItems[compartmentIndex]
+          if (compartmentItem.uri !== newObj.compartmentUri || compartmentItem.name !== newObj.compartmentName) {
+            newObj.compartmentUri = compartmentItem.uri
+            newObj.compartmentName = compartmentItem.name
+          }
+        }
+      }
       newObj.propertyName = ''
       newObj.propertyUri = ''
       newObj.unitName = ''
@@ -650,6 +664,29 @@ export default class DevicePropertyForm extends Vue {
       newObj.propertyUri = ''
     }
     if (this.value.propertyUri !== newObj.propertyUri) {
+      // and here we want to check both the sampling media & the compartment
+      const propertyIndex = this.properties.findIndex(p => p.uri === newObj.propertyUri)
+      if (propertyIndex > -1) {
+        const propertyItem = this.properties[propertyIndex]
+        const samplineMediaId = propertyItem.samplingMediaId
+        const samplineMediaIndex = this.samplingMedias.findIndex(s => s.id === samplineMediaId)
+        if (samplineMediaIndex > -1) {
+          const samplingMediaItem = this.samplingMedias[samplineMediaIndex]
+          if (samplingMediaItem.uri !== newObj.samplingMediaUri || samplingMediaItem.name !== newObj.samplingMediaName) {
+            newObj.samplingMediaUri = samplingMediaItem.uri
+            newObj.samplingMediaName = samplingMediaItem.name
+            const compartmentId = samplingMediaItem.compartmentId
+            const compartmentIndex = this.compartmentItems.findIndex(c => c.id === compartmentId)
+            if (compartmentIndex > -1) {
+              const compartmentItem = this.compartmentItems[compartmentIndex]
+              if (compartmentItem.uri !== newObj.compartmentUri || compartmentItem.name !== newObj.compartmentName) {
+                newObj.compartmentUri = compartmentItem.uri
+                newObj.compartmentName = compartmentItem.name
+              }
+            }
+          }
+        }
+      }
       newObj.unitName = ''
       newObj.unitUri = ''
     }
@@ -858,7 +895,19 @@ export default class DevicePropertyForm extends Vue {
     let properties = this.properties
     // if a samplingMedia is choosen, restrict the list of properties
     if (this.value.samplingMediaUri !== '') {
-      properties = properties.filter(s => s.samplingMediaId === '' || this.checkUriEndsWithId(this.value.samplingMediaUri, s.samplingMediaId))
+      properties = properties.filter(p => p.samplingMediaId === '' || this.checkUriEndsWithId(this.value.samplingMediaUri, p.samplingMediaId))
+    } else if (this.value.compartmentUri !== '') {
+      // in case we have only a compartment, then we also just want
+      // to select those properties that are hierachically
+      // within the compartment
+      // In case that we have the compartment, then the
+      // getter for the samlingMediaItems is already pre-filtered
+      const samplingMediaItems = this.samplingMediaItems
+      const samplingMediaIds = new Set<string>()
+      for (const sm of samplingMediaItems) {
+        samplingMediaIds.add(sm.id)
+      }
+      properties = properties.filter(p => p.samplingMediaId === '' || samplingMediaIds.has(p.samplingMediaId))
     }
     return properties
   }
