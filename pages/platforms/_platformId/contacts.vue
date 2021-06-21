@@ -148,6 +148,11 @@ permissions and limitations under the Licence.
                 >
                   <label>E-Mail:</label>
                   {{ contact.email | orDefault }}
+                  <a v-if="contact.email.length > 0" :href="'mailto:' + contact.email">
+                    <v-icon>
+                      mdi-email
+                    </v-icon>
+                  </a>
                 </v-col>
                 <v-col
                   cols="12"
@@ -155,6 +160,11 @@ permissions and limitations under the Licence.
                 >
                   <label>Website:</label>
                   {{ contact.website | orDefault }}
+                  <a v-if="contact.website.length > 0" :href="contact.website" target="_blank">
+                    <v-icon>
+                      mdi-open-in-new
+                    </v-icon>
+                  </a>
                 </v-col>
               </v-row>
             </div>
