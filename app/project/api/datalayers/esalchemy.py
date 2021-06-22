@@ -175,10 +175,13 @@ class FilterParser:
         parts_for_wraper_to_care = parts[:-1]
         # Now, we need the full qualified parts
         # so abc, abc.def
-        full_qualified_parts_for_wrapper = [
-            ".".join(parts_for_wraper_to_care[0 : i + 1])
-            for i in range(len(parts_for_wraper_to_care))
-        ]
+        full_qualified_parts_for_wrapper = []
+        for i in range(len(parts_for_wraper_to_care)):
+            start_index = 0
+            end_index = i + 1
+            parts_list = parts_for_wraper_to_care[start_index:end_index]
+            parts_joined = ".".join(parts_list)
+            full_qualified_parts_for_wrapper.append(parts_joined)
 
         # Now that we have those, but we have to wrap them
         # in a reversed way.
