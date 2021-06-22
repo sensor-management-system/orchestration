@@ -45,7 +45,9 @@ permissions and limitations under the Licence.
         <label>E-mail</label>
         {{ value.email | orDefault }}
         <a v-if="value.email.length > 0" :href="'mailto:' + value.email">
-          <v-icon>
+          <v-icon
+            small
+          >
             mdi-email
           </v-icon>
         </a>
@@ -56,7 +58,9 @@ permissions and limitations under the Licence.
         <label>Website</label>
         {{ value.website | orDefault }}
         <a v-if="value.website.length > 0" :href="value.website" target="_blank">
-          <v-icon>
+          <v-icon
+            small
+          >
             mdi-open-in-new
           </v-icon>
         </a>
