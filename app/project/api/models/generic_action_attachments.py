@@ -1,5 +1,5 @@
-from ..models.configuration_attachment import ConfigurationAttachment
 from .base_model import db
+from ..models.configuration_attachment import ConfigurationAttachment
 
 
 class GenericPlatformActionAttachment(db.Model):
@@ -11,7 +11,8 @@ class GenericPlatformActionAttachment(db.Model):
         "GenericPlatformAction",
         uselist=False,
         foreign_keys=[action_id],
-        backref=db.backref("generic_platform_action_attachments"),
+        backref=db.backref("generic_platform_action_attachments",
+                           cascade="save-update, merge, delete, delete-orphan"),
     )
     attachment_id = db.Column(
         db.Integer, db.ForeignKey("platform_attachment.id"), nullable=False
@@ -20,7 +21,8 @@ class GenericPlatformActionAttachment(db.Model):
         "PlatformAttachment",
         uselist=False,
         foreign_keys=[attachment_id],
-        backref=db.backref("generic_platform_action_attachments"),
+        backref=db.backref("generic_platform_action_attachments",
+                           cascade="save-update, merge, delete, delete-orphan"),
     )
 
 
@@ -33,7 +35,8 @@ class GenericDeviceActionAttachment(db.Model):
         "GenericDeviceAction",
         uselist=False,
         foreign_keys=[action_id],
-        backref=db.backref("generic_device_action_attachments"),
+        backref=db.backref("generic_device_action_attachments",
+                           cascade="save-update, merge, delete, delete-orphan"),
     )
     attachment_id = db.Column(
         db.Integer, db.ForeignKey("device_attachment.id"), nullable=False
@@ -42,7 +45,8 @@ class GenericDeviceActionAttachment(db.Model):
         "DeviceAttachment",
         uselist=False,
         foreign_keys=[attachment_id],
-        backref=db.backref("generic_device_action_attachments"),
+        backref=db.backref("generic_device_action_attachments",
+                           cascade="save-update, merge, delete, delete-orphan"),
     )
 
 
@@ -55,7 +59,8 @@ class GenericConfigurationActionAttachment(db.Model):
         "GenericConfigurationAction",
         uselist=False,
         foreign_keys=[action_id],
-        backref=db.backref("generic_configuration_action_attachments"),
+        backref=db.backref("generic_configuration_action_attachments",
+                           cascade="save-update, merge, delete, delete-orphan"),
     )
     attachment_id = db.Column(
         db.Integer, db.ForeignKey("configuration_attachment.id"), nullable=False
@@ -64,5 +69,6 @@ class GenericConfigurationActionAttachment(db.Model):
         ConfigurationAttachment,
         uselist=False,
         foreign_keys=[attachment_id],
-        backref=db.backref("generic_configuration_action_attachments"),
+        backref=db.backref("generic_configuration_action_attachments",
+                           cascade="save-update, merge, delete, delete-orphan"),
     )

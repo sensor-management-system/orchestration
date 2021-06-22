@@ -108,8 +108,8 @@ class PlatformSchema(Schema):
         related_view_kwargs={"id": "<id>"},
         include_resource_linkage=True,
         many=True,
-        schema="PlatformSoftwareUpdateActionAttachmentSchema",
-        type_="platform_software_update_action_attachment",
+        schema="PlatformSoftwareUpdateActionSchema",
+        type_="platform_software_update_action",
         id_field="id",
     )
     configuration_platform = Relationship(
