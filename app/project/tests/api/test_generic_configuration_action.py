@@ -8,6 +8,8 @@ from project.api.models import Configuration, Contact, GenericConfigurationActio
 from project.api.models.base_model import db
 from project.tests.base import BaseTestCase, fake, generate_token_data, test_file_path
 from project.tests.models.test_configurations_model import generate_configuration_model
+from project.tests.models.test_generic_action_attachment_model import \
+    add_generic_configuration_action_attachment_model
 from project.tests.models.test_generic_actions_models import (
     generate_configuration_action_model,
 )
@@ -157,8 +159,8 @@ class TestGenericConfigurationAction(BaseTestCase):
         # then test only for the first configuration
         with self.client:
             url_get_for_configuration1 = (
-                base_url
-                + f"/configurations/{configuration1.id}/generic-configuration-actions"
+                    base_url
+                    + f"/configurations/{configuration1.id}/generic-configuration-actions"
             )
             response = self.client.get(
                 url_get_for_configuration1, content_type="application/vnd.api+json"
@@ -172,8 +174,8 @@ class TestGenericConfigurationAction(BaseTestCase):
         # and test the second configuration
         with self.client:
             url_get_for_configuration2 = (
-                base_url
-                + f"/configurations/{configuration2.id}/generic-configuration-actions"
+                    base_url
+                    + f"/configurations/{configuration2.id}/generic-configuration-actions"
             )
             response = self.client.get(
                 url_get_for_configuration2, content_type="application/vnd.api+json"
@@ -187,11 +189,18 @@ class TestGenericConfigurationAction(BaseTestCase):
         # and for a non existing
         with self.client:
             url_get_for_non_existing_configuration = (
-                base_url
-                + f"/configurations/{configuration2.id + 9999}/generic-configuration-actions"
+                    base_url
+                    + f"/configurations/{configuration2.id + 9999}/generic-configuration-actions"
             )
             response = self.client.get(
                 url_get_for_non_existing_configuration,
                 content_type="application/vnd.api+json",
             )
         self.assertEqual(response.status_code, 404)
+
+    def test_delete_generic_configuration_action_with_attachment_link(self):
+        """Delete GenericConfigurationAction with an attachment link."""
+        configuration_action = add_generic_configuration_action_attachment_model()
+        _ = super().delete_object(
+            url=f"{self.url}/{configuration_action.id}",
+        )

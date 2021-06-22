@@ -1,7 +1,9 @@
 from functools import wraps
 
-from flask import request
+from jwt.exceptions import PyJWTError
+from flask import request, current_app
 from flask_jwt_extended import JWTManager, get_raw_jwt, verify_jwt_in_request
+from flask_jwt_extended.exceptions import NoAuthorizationError
 
 from .models import Contact, User
 from .models.base_model import db
@@ -13,6 +15,23 @@ def token_required(fn):
     @wraps(fn)
     def wrapper(*args, **kwargs):
         if request.method != "GET":
+            try:
+                verify_jwt_in_request()
+            except (PyJWTError, NoAuthorizationError):
+                # In case that our verification fails, it may be due to
+                # an old jwt public key (idp may have changes in the meantime)
+                # So we want to reload our config and test if again
+                if current_app.config["OIDC_JWT_SERVICE"] is not None:
+                    oidc_jwt_service = current_app.config["OIDC_JWT_SERVICE"]
+                    # The service is cached by itself, so we don't run queries all the time
+                    current_app.config[
+                        "JWT_PUBLIC_KEY"
+                    ] = oidc_jwt_service.get_jwt_public_key()
+                    current_app.config[
+                        "JWT_ALGORITHM"
+                    ] = oidc_jwt_service.get_jwt_algorithm()
+
+            # if it fails again, then we don't want to allow the user to use the endpoint
             verify_jwt_in_request()
         return fn(*args, **kwargs)
 
