@@ -7,6 +7,7 @@ from project.api.datalayers.esalchemy import (
     EsQueryBuilder,
     FilterParser,
     MultiFieldMatchFilter,
+    NestedElementFilterWrapper,
     OrFilter,
     TermEqualsExactStringFilter,
     TermExactInListFilter,
@@ -79,6 +80,52 @@ class TestEsQueryBuilder(unittest.TestCase):
 
         used_filter = builder.to_filter()
         expected_filter = TermEqualsExactStringFilter(term="short_name", value="boeken")
+
+        self.assertEqual(used_filter, expected_filter)
+
+    def test_with_nested_filter(self):
+        """
+        Test with a json api filter for a nested element.
+
+        No query string, but some nested element,
+        so we need a wrapper arount TermEqualsExactStringFilter.
+        """
+        json_api_filter = {"contacts.email": "max@mustermann.org"}
+        builder = EsQueryBuilder()
+        builder.filters.append(json_api_filter)
+
+        is_set = builder.is_set()
+        self.assertTrue(is_set)
+
+        used_filter = builder.to_filter()
+        expected_filter = NestedElementFilterWrapper(
+            "contacts",
+            TermEqualsExactStringFilter(
+                term="contacts.email", value="max@mustermann.org"
+            ),
+        )
+
+        self.assertEqual(used_filter, expected_filter)
+
+    def test_with_double_nested_filter(self):
+        """Test with a json api fitler with double nesting."""
+        json_api_filter = {"devices.contacts.email": "max@mustermann.org"}
+        builder = EsQueryBuilder()
+        builder.filters.append(json_api_filter)
+
+        is_set = builder.is_set()
+        self.assertTrue(is_set)
+
+        used_filter = builder.to_filter()
+        expected_filter = NestedElementFilterWrapper(
+            "devices",
+            NestedElementFilterWrapper(
+                "devices.contacts",
+                TermEqualsExactStringFilter(
+                    term="devices.contacts.email", value="max@mustermann.org"
+                ),
+            ),
+        )
 
         self.assertEqual(used_filter, expected_filter)
 
@@ -211,6 +258,57 @@ class TestTermExactInListFilter(unittest.TestCase):
         self.assertNotEqual(filter1, None)
 
 
+class TestNestedElementFilterWrapper(unittest.TestCase):
+    """
+    This are the tests for the NestedElementFilterWrapper.
+
+    This wrapper is used to query nested elements with a subfilter.
+    """
+
+    def test_to_query(self):
+        """Test the to_query_method."""
+        sub_filter = TermEqualsExactStringFilter(
+            term="contacts.email", value="max@mustermann.org"
+        )
+        wrapper = NestedElementFilterWrapper("contacts", sub_filter)
+        es_query = wrapper.to_query()
+
+        expected = {
+            "nested": {
+                "path": "contacts",
+                "query": {
+                    "term": {
+                        "contacts.email": {
+                            "value": "max@mustermann.org",
+                        }
+                    }
+                },
+            }
+        }
+
+        self.assertEqual(es_query, expected)
+
+    def test_eq(self):
+        """Test the __eq__ method."""
+        filter1 = NestedElementFilterWrapper(
+            "contacts", TermExactInListFilter("contacts.email", "max@mustermann.org")
+        )
+        filter2 = NestedElementFilterWrapper(
+            "contacts", TermExactInListFilter("contacts.email", "max@mustermann.org")
+        )
+        filter3 = NestedElementFilterWrapper(
+            "contacts", TermExactInListFilter("contacts.email", "max@mustermann.de")
+        )
+        filter4 = NestedElementFilterWrapper(
+            "contact", TermExactInListFilter("contacts.email", "max@mustermann.org")
+        )
+
+        self.assertEqual(filter1, filter2)
+        self.assertNotEqual(filter1, filter3)
+        self.assertNotEqual(filter1, filter4)
+        self.assertNotEqual(filter1, None)
+
+
 class TestOrFilter(unittest.TestCase):
     """
     This are the tests for the OrFilter.
@@ -323,6 +421,21 @@ class TestFilterParser(unittest.TestCase):
         )
         self.assertEqual(output_filter, expected)
 
+    def test_parse_nested_eq(self):
+        """Test the parsing of an eq clause in a nested element."""
+        filter_raw = [
+            {"name": "contacts.email", "op": "eq", "val": "max@mustermann.org"}
+        ]
+        output_filter = FilterParser.parse(filter_raw)
+
+        expected = NestedElementFilterWrapper(
+            "contacts",
+            TermEqualsExactStringFilter(
+                term="contacts.email", value="max@mustermann.org"
+            ),
+        )
+        self.assertEqual(output_filter, expected)
+
     def test_parse_in(self):
         """Test parsing of an in_ filter."""
         filter_raw = [{"name": "manufacturer_name", "op": "in_", "val": ["Campbell"]}]
@@ -414,4 +527,18 @@ class TestFilterParser(unittest.TestCase):
         expected = TermEqualsExactStringFilter(
             term="manufacturer_name", value="Campbell"
         )
+        self.assertEqual(output_filter, expected)
+
+    def test_parse_nested_simple_filed(self):
+        """Test for a nested filter field."""
+        filter_raw = [{"contacts.email": "max@mustermann.org"}]
+        output_filter = FilterParser.parse(filter_raw)
+
+        expected = NestedElementFilterWrapper(
+            "contacts",
+            TermEqualsExactStringFilter(
+                term="contacts.email", value="max@mustermann.org"
+            ),
+        )
+
         self.assertEqual(output_filter, expected)

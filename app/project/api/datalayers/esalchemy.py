@@ -49,6 +49,34 @@ class TermEqualsExactStringFilter:
         return True
 
 
+class NestedElementFilterWrapper:
+    """
+    Wrapper to allow other filtering access to nested fields.
+
+    Example is to access the email field of a contact that is
+    associated with a device.
+    """
+
+    def __init__(self, path, inner_filter):
+        """Init the object."""
+        self.path = path
+        self.inner_filter = inner_filter
+
+    def to_query(self):
+        """Return the es query representation of the filter."""
+        return {"nested": {"path": self.path, "query": self.inner_filter.to_query()}}
+
+    def __eq__(self, other):
+        """Test equality."""
+        if not isinstance(other, NestedElementFilterWrapper):
+            return False
+        if not self.path == other.path:
+            return False
+        if not self.inner_filter == other.inner_filter:
+            return False
+        return True
+
+
 class TermExactInListFilter:
     """Class to search for an exact string match in the field with multiple values."""
 
@@ -127,10 +155,44 @@ class AndFilter:
 class FilterParser:
     """Class to parse the filter settings."""
 
-    SUPPORTED_OPS = {
-        "eq": lambda name, val: TermEqualsExactStringFilter(term=name, value=val),
-        "in_": lambda name, val: TermExactInListFilter(term=name, values=val),
-    }
+    @classmethod
+    def wrap_for_nested_elements(cls, name, inner_filter):
+        """
+        Wrap the main filter in a NestedElementFilterWrapper if necessary.
+
+        In case that we want to filter for a nested field, like
+        the email of a contact associated with a device, we need
+        to tell the elasticsearch (es) the path to that field.
+        This method adds those wrappers as necessary.
+        """
+        # Say the name is 'abc.def.xyz' or just 'name'.
+        # In case of name we don't need any wrapper.
+        # But for the other one we do.
+        parts = name.split(".")
+        # parts would be now ['abc', 'def', 'xyz'] or ['name']
+        # We don't care about the last part - for that we don't need
+        # to give a path - the es knows that just easliy.
+        parts_for_wraper_to_care = parts[:-1]
+        # Now, we need the full qualified parts
+        # so abc, abc.def
+        full_qualified_parts_for_wrapper = [
+            ".".join(parts_for_wraper_to_care[0 : i + 1])
+            for i in range(len(parts_for_wraper_to_care))
+        ]
+
+        # Now that we have those, but we have to wrap them
+        # in a reversed way.
+        # so that the result is: {
+        # "abc": {
+        #    "abc.def": {
+        #        main_filter
+        # ...
+        result = inner_filter
+
+        for path in reversed(full_qualified_parts_for_wrapper):
+            result = NestedElementFilterWrapper(path, result)
+
+        return result
 
     @classmethod
     def parse(cls, filter_list):
@@ -148,6 +210,14 @@ class FilterParser:
     @classmethod
     def parse_single_filter(cls, filter_dict):
         """Parse a single filter."""
+        SUPPORTED_OPS = {
+            "eq": lambda name, val: cls.wrap_for_nested_elements(
+                name, TermEqualsExactStringFilter(term=name, value=val)
+            ),
+            "in_": lambda name, val: cls.wrap_for_nested_elements(
+                name, TermExactInListFilter(term=name, values=val)
+            ),
+        }
         # First check if we have a more complex filter
         if "or" in filter_dict.keys():
             sub_filters = [cls.parse_single_filter(f) for f in filter_dict["or"]]
@@ -157,13 +227,15 @@ class FilterParser:
             return AndFilter(sub_filters)
         # Then check if the op syntax is used (name=x, op=eq, val=value)
         op = filter_dict.get("op")
-        if op in cls.SUPPORTED_OPS.keys():
-            return cls.SUPPORTED_OPS[op](filter_dict["name"], filter_dict["val"])
+        if op in SUPPORTED_OPS.keys():
+            return SUPPORTED_OPS[op](filter_dict["name"], filter_dict["val"])
         # And last, check if we have a simple x:y filter
         if len(filter_dict.keys()) == 1:
             term = [x for x in filter_dict.keys()][0]
             value = filter_dict[term]
-            return TermEqualsExactStringFilter(term=term, value=value)
+            return cls.wrap_for_nested_elements(
+                term, TermEqualsExactStringFilter(term=term, value=value)
+            )
         return None
 
 
