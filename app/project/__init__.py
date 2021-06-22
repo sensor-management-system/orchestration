@@ -51,7 +51,7 @@ def create_app():
     )
 
     # test to ensure the proper config was loaded
-    # import sys
-    # print(app.config, file=sys.stderr)
+    import sys
+    print(app.config, file=sys.stderr)
 
     return app
