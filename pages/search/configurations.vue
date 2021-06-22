@@ -88,6 +88,11 @@ permissions and limitations under the Licence.
             />
           </v-col>
         </v-row>
+        <v-row v-if="isLoggedIn">
+          <v-col cols="12" md="3">
+            <v-checkbox v-model="onlyOwnConfigurations" label="Only own configurations" />
+          </v-col>
+        </v-row>
         <v-row>
           <v-col cols="12" md="3">
             <v-btn
@@ -486,6 +491,7 @@ export default class SearchConfigurationsPage extends Vue {
   private selectedConfigurationStates: string[] = []
   private selectedLocationTypes: string[] = []
   private selectedProjects: Project[] = []
+  private onlyOwnConfigurations: boolean = false
 
   private configurationStates: string[] = []
   private locationTypes: string[] = []
@@ -563,7 +569,7 @@ export default class SearchConfigurationsPage extends Vue {
   }
 
   basicSearch () {
-    this.runSearch(this.searchText, [], [], [])
+    this.runSearch(this.searchText, [], [], [], false)
   }
 
   clearBasicSearch () {
@@ -575,7 +581,8 @@ export default class SearchConfigurationsPage extends Vue {
       this.searchText,
       this.selectedConfigurationStates,
       this.selectedLocationTypes,
-      this.selectedProjects
+      this.selectedProjects,
+      this.onlyOwnConfigurations && this.isLoggedIn
     )
   }
 
@@ -584,25 +591,37 @@ export default class SearchConfigurationsPage extends Vue {
     this.selectedConfigurationStates = []
     this.selectedLocationTypes = []
     this.selectedProjects = []
+    this.onlyOwnConfigurations = false
   }
 
   runSearch (
     searchText: string | null,
     configurationStates: string[],
     locationTypes: string[],
-    projects: Project[]
+    projects: Project[],
+    onlyOwnConfigurations: boolean
   ) {
     this.loading = true
     this.searchResults = []
     this.unsetResultItemsShown()
     this.showDeleteDialog = {}
-    this.lastActiveSearcher = this.$api.configurations
+    this.loader = null
+
+    const searchBuilder = this.$api.configurations
       .newSearchBuilder()
       .withText(searchText)
       .withOneStatusOf(configurationStates)
       .withOneLocationTypeOf(locationTypes)
       .withOneMatchingProjectOf(projects)
-      .build()
+
+    if (onlyOwnConfigurations) {
+      const email = this.currentUserEmail
+      if (email) {
+        searchBuilder.withContactEmail(email)
+      }
+    }
+
+    this.lastActiveSearcher = searchBuilder.build()
     this.lastActiveSearcher
       .findMatchingAsPaginationLoader(this.pageSize)
       .then(this.loadUntilWeHaveSomeEntries).catch((_error) => {
@@ -708,6 +727,10 @@ export default class SearchConfigurationsPage extends Vue {
 
   get isLoggedIn () {
     return this.$store.getters['oidc/isAuthenticated']
+  }
+
+  get currentUserEmail () {
+    return this.$store.getters['oidc/userEmail']
   }
 }
 

@@ -267,6 +267,15 @@ export class ConfigurationSearchBuilder {
     return this
   }
 
+  withContactEmail (email: string) {
+    this.serverSideFilterSettings.push({
+      name: 'contacts.email',
+      op: 'eq',
+      val: email
+    })
+    return this
+  }
+
   build (): ConfigurationSearcher {
     return new ConfigurationSearcher(
       this.axiosApi,

@@ -75,6 +75,11 @@ permissions and limitations under the Licence.
             <DeviceTypeSelect v-model="selectedSearchDeviceTypes" label="Select a device type" />
           </v-col>
         </v-row>
+        <v-row v-if="isLoggedIn">
+          <v-col cols="12" md="3">
+            <v-checkbox v-model="onlyOwnDevices" label="Only own devices" />
+          </v-col>
+        </v-row>
         <v-row>
           <v-col cols="12" md="3">
             <v-btn
@@ -511,6 +516,7 @@ export default class SearchDevicesPage extends Vue {
   private selectedSearchManufacturers: Manufacturer[] = []
   private selectedSearchStates: Status[] = []
   private selectedSearchDeviceTypes: DeviceType[] = []
+  private onlyOwnDevices: boolean = false
 
   private deviceTypeLookup: Map<string, DeviceType> = new Map<string, DeviceType>()
   private statusLookup: Map<string, Status> = new Map<string, Status>()
@@ -601,7 +607,7 @@ export default class SearchDevicesPage extends Vue {
 
   basicSearch () {
     // only uses the text and the type (sensor or platform)
-    this.runSearch(this.searchText, [], [], [])
+    this.runSearch(this.searchText, [], [], [], false)
   }
 
   clearBasicSearch () {
@@ -613,7 +619,8 @@ export default class SearchDevicesPage extends Vue {
       this.searchText,
       this.selectedSearchManufacturers,
       this.selectedSearchStates,
-      this.selectedSearchDeviceTypes
+      this.selectedSearchDeviceTypes,
+      this.onlyOwnDevices && this.isLoggedIn
     )
   }
 
@@ -623,25 +630,37 @@ export default class SearchDevicesPage extends Vue {
     this.selectedSearchManufacturers = []
     this.selectedSearchStates = []
     this.selectedSearchDeviceTypes = []
+    this.onlyOwnDevices = false
   }
 
   runSearch (
     searchText: string | null,
     manufacturer: Manufacturer[],
     states: Status[],
-    types: DeviceType[]
+    types: DeviceType[],
+    onlyOwnDevices: boolean
   ) {
     this.loading = true
     this.searchResults = []
     this.unsetResultItemsShown()
     this.showDeleteDialog = {}
-    this.lastActiveSearcher = this.$api.devices
+    this.loader = null
+
+    const searchBuilder = this.$api.devices
       .newSearchBuilder()
       .withText(searchText)
       .withOneMachtingManufacturerOf(manufacturer)
       .withOneMatchingStatusOf(states)
       .withOneMatchingDeviceTypeOf(types)
-      .build()
+
+    if (onlyOwnDevices) {
+      const email = this.currentUserEmail
+      if (email) {
+        searchBuilder.withContactEmail(email)
+      }
+    }
+
+    this.lastActiveSearcher = searchBuilder.build()
     this.lastActiveSearcher
       .findMatchingAsPaginationLoader(this.pageSize)
       .then(this.loadUntilWeHaveSomeEntries).catch((_error) => {
@@ -759,6 +778,10 @@ export default class SearchDevicesPage extends Vue {
 
   get isLoggedIn () {
     return this.$store.getters['oidc/isAuthenticated']
+  }
+
+  get currentUserEmail () {
+    return this.$store.getters['oidc/userEmail']
   }
 }
 
