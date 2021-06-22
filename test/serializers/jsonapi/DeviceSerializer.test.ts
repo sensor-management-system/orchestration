@@ -1000,8 +1000,8 @@ describe('DeviceSerializer', () => {
       const device = createTestDevice()
 
       const serializer = new DeviceSerializer()
-
-      const jsonApiData = serializer.convertModelToJsonApiData(device)
+      const includeRelationships = true
+      const jsonApiData = serializer.convertModelToJsonApiData(device, includeRelationships)
 
       expect(typeof jsonApiData).toEqual('object')
 
@@ -1124,8 +1124,8 @@ describe('DeviceSerializer', () => {
       device.persistentIdentifier = ''
 
       const serializer = new DeviceSerializer()
-
-      const jsonApiData = serializer.convertModelToJsonApiData(device)
+      const includeRelationships = true
+      const jsonApiData = serializer.convertModelToJsonApiData(device, includeRelationships)
 
       expect(typeof jsonApiData).toEqual('object')
       expect(jsonApiData).toHaveProperty('attributes')
@@ -1139,12 +1139,58 @@ describe('DeviceSerializer', () => {
       device.id = 'abc'
 
       const serializer = new DeviceSerializer()
+      const includeRelationships = false
 
-      const jsonApiData = serializer.convertModelToJsonApiData(device)
+      const jsonApiData = serializer.convertModelToJsonApiData(device, includeRelationships)
 
       expect(typeof jsonApiData).toEqual('object')
       expect(jsonApiData).toHaveProperty('id')
       expect(jsonApiData.id).toEqual('abc')
+    })
+    it('should not include any relationship if we ask it not to do so', () => {
+      const device = createTestDevice()
+      device.id = 'abc'
+
+      const customTextField = CustomTextField.createFromObject({
+        id: '1',
+        key: 'foo',
+        value: 'bla'
+      })
+      device.customFields = [customTextField]
+
+      const serializer = new DeviceSerializer()
+      const includeRelationships = false
+
+      const jsonApiData = serializer.convertModelToJsonApiData(device, includeRelationships)
+
+      expect(typeof jsonApiData).toEqual('object')
+      expect(jsonApiData).toHaveProperty('id')
+      expect(jsonApiData.id).toEqual('abc')
+
+      expect(jsonApiData).not.toHaveProperty('relationships')
+    })
+    it('should include relationship if we want it', () => {
+      const device = createTestDevice()
+      device.id = 'abc'
+
+      const customTextField = CustomTextField.createFromObject({
+        id: '1',
+        key: 'foo',
+        value: 'bla'
+      })
+      device.customFields = [customTextField]
+
+      const serializer = new DeviceSerializer()
+      const includeRelationships = true
+
+      const jsonApiData = serializer.convertModelToJsonApiData(device, includeRelationships)
+
+      expect(typeof jsonApiData).toEqual('object')
+      expect(jsonApiData).toHaveProperty('id')
+      expect(jsonApiData.id).toEqual('abc')
+
+      expect(jsonApiData).toHaveProperty('relationships')
+      expect(jsonApiData.relationships).toHaveProperty('customfields')
     })
   })
 })

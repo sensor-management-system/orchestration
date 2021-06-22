@@ -104,7 +104,12 @@ export class DeviceApi {
   }
 
   save (device: Device) {
-    const data: any = this.serializer.convertModelToJsonApiData(device)
+    // The relationships themselves will be added, updated & deleted in their
+    // own tabs and in their own services.
+    // If we would include them here (without fetching them before), we would
+    // delete them. So we will skip them in order to keep them in the backend.
+    const includeRelationships = false
+    const data: any = this.serializer.convertModelToJsonApiData(device, includeRelationships)
     let method: Method = 'patch'
     let url = ''
 

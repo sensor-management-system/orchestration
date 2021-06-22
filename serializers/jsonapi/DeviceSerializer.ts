@@ -179,12 +179,7 @@ export class DeviceSerializer {
     return result
   }
 
-  convertModelToJsonApiData (device: Device): IJsonApiEntityWithOptionalId {
-    const properties = this.devicePropertySerializer.convertModelListToJsonApiRelationshipObject(device.properties)
-    const customfields = this.customTextFieldSerializer.convertModelListToJsonApiRelationshipObject(device.customFields)
-    const attachments = this.attachmentSerializer.convertModelListToJsonApiRelationshipObject(device.attachments)
-    const contacts = this.contactSerializer.convertModelListToJsonApiRelationshipObject(device.contacts)
-
+  convertModelToJsonApiData (device: Device, includeRelationships: boolean = false): IJsonApiEntityWithOptionalId {
     const data: IJsonApiEntityWithOptionalId = {
       type: 'device',
       attributes: {
@@ -207,13 +202,29 @@ export class DeviceSerializer {
         // TODO
         // created_by: device.createdBy,
         // updated_by: device.updatedBy,
-      },
-      relationships: {
+      }
+    }
+
+    /*
+      There are two use cases for this. One is that all the data is included in the model
+      and that we send them togehter with the payload, so that the relationships are saved.
+      This would be ok, if we also query & integrate them.
+      When we don't include them & have no element for their existing relationship, adding the
+      data here will mean to delete those elements.
+
+      So in case we just want to save the basic entries of a device - and save, update & delete
+      all the related elements seperatly, then we don't want to include tje relationships here.
+    */
+    if (includeRelationships) {
+      const properties = this.devicePropertySerializer.convertModelListToJsonApiRelationshipObject(device.properties)
+      const customfields = this.customTextFieldSerializer.convertModelListToJsonApiRelationshipObject(device.customFields)
+      const attachments = this.attachmentSerializer.convertModelListToJsonApiRelationshipObject(device.attachments)
+      const contacts = this.contactSerializer.convertModelListToJsonApiRelationshipObject(device.contacts)
+      data.relationships = {
         ...contacts,
         ...properties,
         ...attachments,
         ...customfields
-        // TODO: events
       }
     }
 
