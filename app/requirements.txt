@@ -5,7 +5,7 @@ chardet==3.0.4
 cherrypicker==0.3.1
 click==8.0.1
 coverage==5.1
-cryptography==2.1.4
+cryptography==3.4.7
 elasticsearch==7.13.1
 entrypoints==0.3
 environs==9.3.0
@@ -33,7 +33,7 @@ pycodestyle==2.5.0
 pycparser==2.20
 pycryptodomex==3.9.8
 pyjwkest==1.4.2
-PyJWT==1.6.4
+PyJWT==2.1.0
 python-dateutil==2.8.1
 python-editor==1.0.4
 requests==2.24.0
