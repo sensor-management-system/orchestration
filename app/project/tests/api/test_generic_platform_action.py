@@ -8,6 +8,9 @@ from project.api.models import Contact, GenericPlatformAction, Platform
 from project.tests.base import BaseTestCase, fake, generate_token_data, test_file_path
 from project.tests.read_from_json import extract_data_from_json_file
 
+from project.tests.models.test_generic_action_attachment_model import \
+    add_generic_platform_action_attachment_model
+
 
 class TestGenericPlatformAction(BaseTestCase):
     """Tests for the GenericPlatformAction endpoints."""
@@ -216,3 +219,12 @@ class TestGenericPlatformAction(BaseTestCase):
                 content_type="application/vnd.api+json",
             )
         self.assertEqual(response.status_code, 404)
+
+    def test_delete_generic_platform_action_with_attachment_link(self):
+        """Ensure a generic_platform_action with attachment link can be deleted."""
+        generic_platform_action_attachment = (
+            add_generic_platform_action_attachment_model()
+        )
+        _ = super().delete_object(
+            url=f"{self.url}/{generic_platform_action_attachment.id}",
+        )
