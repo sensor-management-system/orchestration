@@ -8,8 +8,8 @@ coverage==5.1
 cryptography==3.4.7
 elasticsearch==7.13.1
 entrypoints==0.3
-environs==9.3.0
-Faker== 8.8.0
+environs==9.3.2
+Faker==8.8.0
 Flask-Cors==3.0.9
 Flask-Migrate==3.0.1
 Flask-REST-JSONAPI==0.31.2
