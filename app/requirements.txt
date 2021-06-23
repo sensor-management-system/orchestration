@@ -29,7 +29,7 @@ marshmallow==3.12.1
 mccabe==0.6.1
 pandas==1.2.2
 psycopg2-binary==2.8.6
-pycodestyle==2.5.0
+pycodestyle==2.7.0
 pycparser==2.20
 pycryptodomex==3.9.8
 pyjwkest==1.4.2
