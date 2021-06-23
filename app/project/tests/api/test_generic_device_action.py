@@ -6,6 +6,8 @@ from datetime import datetime
 from project import base_url, db
 from project.api.models import Contact, Device, GenericDeviceAction
 from project.tests.base import BaseTestCase, fake, generate_token_data, test_file_path
+from project.tests.models.test_generic_action_attachment_model import \
+    add_generic_device_action_attachment_model
 from project.tests.read_from_json import extract_data_from_json_file
 
 
@@ -187,7 +189,7 @@ class TestGenericDeviceAction(BaseTestCase):
         # then test only for the first device
         with self.client:
             url_get_for_device1 = (
-                base_url + f"/devices/{device1.id}/generic-device-actions"
+                    base_url + f"/devices/{device1.id}/generic-device-actions"
             )
             response = self.client.get(
                 url_get_for_device1, content_type="application/vnd.api+json"
@@ -201,7 +203,7 @@ class TestGenericDeviceAction(BaseTestCase):
         # and test the second device
         with self.client:
             url_get_for_device2 = (
-                base_url + f"/devices/{device2.id}/generic-device-actions"
+                    base_url + f"/devices/{device2.id}/generic-device-actions"
             )
             response = self.client.get(
                 url_get_for_device2, content_type="application/vnd.api+json"
@@ -215,9 +217,16 @@ class TestGenericDeviceAction(BaseTestCase):
         # and for a non existing
         with self.client:
             url_get_for_non_existing_device = (
-                base_url + f"/devices/{device2.id + 9999}/generic-device-actions"
+                    base_url + f"/devices/{device2.id + 9999}/generic-device-actions"
             )
             response = self.client.get(
                 url_get_for_non_existing_device, content_type="application/vnd.api+json"
             )
         self.assertEqual(response.status_code, 404)
+
+    def test_delete_generic_device_action_with_link_to_an_attachment(self):
+        """Ensure the generic_device_action and the link to the attachment can be deleted."""
+        generic_device_action_attachment = add_generic_device_action_attachment_model()
+        _ = super().delete_object(
+            url=f"{self.url}/{generic_device_action_attachment.id}",
+        )

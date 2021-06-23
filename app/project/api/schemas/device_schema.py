@@ -154,8 +154,8 @@ class DeviceSchema(Schema):
         related_view_kwargs={"id": "<id>"},
         include_resource_linkage=True,
         many=True,
-        schema="DeviceSoftwareUpdateActionAttachmentSchema",
-        type_="device_software_update_action_attachment",
+        schema="DeviceSoftwareUpdateActionSchema",
+        type_="device_software_update_action",
         id_field="id",
     )
     configuration_device = Relationship(
