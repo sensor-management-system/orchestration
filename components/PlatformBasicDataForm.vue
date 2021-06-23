@@ -145,7 +145,9 @@ permissions and limitations under the Licence.
         >
           <template slot="append">
             <a v-if="value.website.length > 0" :href="value.website" target="_blank">
-              <v-icon>
+              <v-icon
+                small
+              >
                 mdi-open-in-new
               </v-icon>
             </a>

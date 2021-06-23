@@ -71,7 +71,17 @@ permissions and limitations under the Licence.
           class="required"
           :rules="[rules.required]"
           @input="update('email', $event)"
-        />
+        >
+          <template slot="append">
+            <a v-if="value.email.length > 0" :href="'mailto:' + value.email">
+              <v-icon
+                small
+              >
+                mdi-email
+              </v-icon>
+            </a>
+          </template>
+        </v-text-field>
       </v-col>
     </v-row>
     <v-row>
@@ -87,7 +97,9 @@ permissions and limitations under the Licence.
         >
           <template slot="append">
             <a v-if="value.website.length > 0" :href="value.website" target="_blank">
-              <v-icon>
+              <v-icon
+                small
+              >
                 mdi-open-in-new
               </v-icon>
             </a>
@@ -100,7 +112,17 @@ permissions and limitations under the Licence.
           placeholder="https://"
           type="url"
           @input="update('website', $event)"
-        />
+        >
+          <template slot="append">
+            <a v-if="value.website.length > 0" :href="value.website" target="_blank">
+              <v-icon
+                small
+              >
+                mdi-open-in-new
+              </v-icon>
+            </a>
+          </template>
+        </v-text-field>
       </v-col>
     </v-row>
   </v-form>
