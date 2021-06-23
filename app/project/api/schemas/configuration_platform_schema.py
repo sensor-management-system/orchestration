@@ -1,10 +1,16 @@
 from marshmallow_jsonapi import fields
 from marshmallow_jsonapi.flask import Relationship, Schema
 
-from project.api.schemas.platform_schema import PlatformSchema
+from ..schemas.platform_schema import PlatformSchema
 
 
 class ConfigurationPlatformSchema(Schema):
+    """
+    This class create a schema for a configuration platform.
+    It uses the  marshmallow-jsonapi library that fit
+    the JSONAPI 1.0 specification and provides Flask integration.
+    """
+
     class Meta:
         type_ = "configuration_platform"
         self_view = "api.configuration_platform_detail"
@@ -18,23 +24,29 @@ class ConfigurationPlatformSchema(Schema):
     platform_id = fields.Integer()
 
     configuration = Relationship(
+        self_view="api.configuration_platform_configuration",
         self_view_kwargs={"id": "<id>"},
         related_view="api.configuration_detail",
         related_view_kwargs={"id": "<configuration_id>"},
+        include_resource_linkage=True,
         type_="configuration",
         schema="ConfigurationSchema",
     )
     parent_platform = Relationship(
+        self_view="api.configuration_platform_parent_platform",
         self_view_kwargs={"id": "<id>"},
         related_view="api.platform_detail",
         related_view_kwargs={"id": "<parent_platform_id>"},
+        include_resource_linkage=True,
         type_="platform",
         schema="PlatformSchema",
     )
     platform = Relationship(
+        self_view="api.configuration_platform_platform",
         self_view_kwargs={"id": "<id>"},
         related_view="api.platform_detail",
         related_view_kwargs={"id": "<platform_id>"},
+        include_resource_linkage=True,
         type_="platform",
         schema="PlatformSchema",
     )

@@ -4,21 +4,21 @@ from datetime import datetime
 
 import sqlalchemy
 from sqlalchemy.ext.declarative import declared_attr
-from sqlalchemy.sql import func
 
-from project.api.models.base_model import db
-from project.api.search import (
+from ..search import (
     add_to_index,
     create_index,
     query_index,
     remove_from_index,
     remove_index,
 )
+from .base_model import db
 
 
 class AuditMixin:
-    created_at = db.Column(db.DateTime, default=func.now())
-    updated_at = db.Column(db.DateTime, default=None, onupdate=datetime.now)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    # define 'updated at' to be populated with datetime.utcnow()
+    updated_at = db.Column(db.DateTime, default=None, onupdate=datetime.utcnow)
 
     @declared_attr
     def created_by_id(self):
@@ -45,7 +45,6 @@ class AuditMixin:
             db.ForeignKey(
                 "user.id", name="fk_%s_updated_by_id" % self.__name__, use_alter=True
             ),
-            # nullable=False,
         )
 
     @declared_attr

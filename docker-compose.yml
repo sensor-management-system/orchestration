@@ -43,7 +43,8 @@ services:
       && apt-get clean
       && pip install --no-cache-dir --upgrade pip
       && pip install --no-cache-dir -r requirements.txt
-      && gunicorn -b 0.0.0.0:5000 manage:app
+      && python manage.py db upgrade
+      && gunicorn -b 0.0.0.0:5000 manage:app --reload
       "
 
   db:

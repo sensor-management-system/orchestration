@@ -1,9 +1,9 @@
 from flask_rest_jsonapi import ResourceRelationship
 
-from project.api.models.base_model import db
-from project.api.models.device import Device
-from project.api.schemas.device_schema import DeviceSchema
-from project.api.token_checker import token_required
+from ..models.base_model import db
+from ..models.device import Device
+from ..schemas.device_schema import DeviceSchema
+from ..token_checker import token_required
 
 
 class DeviceRelationship(ResourceRelationship):

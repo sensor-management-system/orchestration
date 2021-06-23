@@ -33,9 +33,9 @@
 
 from marshmallow_jsonapi import fields
 
-from project.api.models.configuration import ConfigurationsTuple
-from project.api.models.configuration_device import ConfigurationDevice
-from project.api.models.configuration_platform import ConfigurationPlatform
+from ..models.configuration import ConfigurationsTuple
+from ..models.configuration_device import ConfigurationDevice
+from ..models.configuration_platform import ConfigurationPlatform
 
 
 def int_or_none(x):
