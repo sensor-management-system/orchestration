@@ -1,11 +1,11 @@
-from project.api.models.contact import Contact
-from project.api.models.customfield import CustomField
-from project.api.models.device import Device
-from project.api.models.device_attachment import DeviceAttachment
-from project.api.models.event import Event
-from project.api.models.platform import Platform
-from project.api.models.platform_attachment import PlatformAttachment
-from project.api.models.device_property import DeviceProperty
+from ..models.contact import Contact
+from ..models.customfield import CustomField
+from ..models.device import Device
+from ..models.device_attachment import DeviceAttachment
+from ..models.device_property import DeviceProperty
+from ..models.event import Event
+from ..models.platform import Platform
+from ..models.platform_attachment import PlatformAttachment
 
 
 def add_device():

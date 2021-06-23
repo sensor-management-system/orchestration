@@ -17,3 +17,9 @@ class AttachmentSchema(MarshmallowSchema):
     id = fields.Integer(as_string=True)
     label = fields.Str(allow_none=True)
     url = fields.Str(required=True)
+
+    @staticmethod
+    def dict_serializer(obj):
+        """Convert the object to an dict."""
+        if obj is not None:
+            return {"label": obj.label, "url": obj.url}

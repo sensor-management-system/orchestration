@@ -1,15 +1,15 @@
-from flask_rest_jsonapi import ResourceList
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.orm.exc import NoResultFound
 
-from project.api.models.base_model import db
-from project.api.models.configuration import Configuration
-from project.api.models.contact import Contact
-from project.api.models.device import Device
-from project.api.models.platform import Platform
-from project.api.schemas.contact_schema import ContactSchema
-from project.api.datalayers.esalchemy import EsSqlalchemyDataLayer
-from project.api.token_checker import token_required
+from ...frj_csv_export.resource import ResourceList
+from ..datalayers.esalchemy import EsSqlalchemyDataLayer
+from ..models.base_model import db
+from ..models.configuration import Configuration
+from ..models.contact import Contact
+from ..models.device import Device
+from ..models.platform import Platform
+from ..schemas.contact_schema import ContactSchema
+from ..token_checker import token_required
 
 
 class ContactList(ResourceList):
@@ -63,11 +63,11 @@ class ContactList(ResourceList):
         return query_
 
     schema = ContactSchema
-    # decorators = (token_required,)
+    decorators = (token_required,)
     data_layer = {
-        "class": EsSqlalchemyDataLayer,
         "session": db.session,
         "model": Contact,
+        "class": EsSqlalchemyDataLayer,
         "methods": {
             "query": query,
         },

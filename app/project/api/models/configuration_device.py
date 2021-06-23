@@ -1,8 +1,7 @@
 from sqlalchemy import UniqueConstraint
-from project.api.models.base_model import db
-from project.api.models.device import Device
-from project.api.models.mixin import AuditMixin
-from project.api.models.platform import Platform
+
+from .base_model import db
+from .mixin import AuditMixin
 
 
 class ConfigurationDevice(db.Model, AuditMixin):

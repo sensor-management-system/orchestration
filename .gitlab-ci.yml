@@ -6,45 +6,54 @@ stages:
 variables:
   CONTAINER_TEST_IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
   CONTAINER_RELEASE_IMAGE: $CI_REGISTRY_IMAGE:latest
+  DATABASE_TEST_URL: postgresql://$POSTGRES_USER:@$POSTGRES_PASSWORD:5432/$POSTGRES_DB
+  WELL_KNOWN_URL: https://webapp-stage.intranet.ufz.de/idp/oidc/v1/.well-known/openid-configuration
+  HTTP_ORIGINS: "https://git.ufz.de http://rdm-test.intranet.ufz.de:5002"
+  OIDC_USERNAME_CLAIM: "sub"
+
 
 build-image:
   stage: build
   image:
     name: gcr.io/kaniko-project/executor:debug
-    entrypoint: [""]
+    entrypoint: [ "" ]
   script:
+    - echo "ENV WELL_KNOWN_URL" $WELL_KNOWN_URL >> $CI_PROJECT_DIR/Dockerfile.ci
+    - echo "ENV HTTP_ORIGINS" $HTTP_ORIGINS >> $CI_PROJECT_DIR/Dockerfile.ci
+    - echo "ENV OIDC_USERNAME_CLAIM" $OIDC_USERNAME_CLAIM >> $CI_PROJECT_DIR/Dockerfile.ci
     - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
     - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --destination $CONTAINER_TEST_IMAGE
 
 unittest-lint:
   stage: test
-  image: $CI_REGISTRY_IMAGE
+  image: $CONTAINER_TEST_IMAGE
   before_script:
-    - apk add --no-cache --update python3-dev  gcc build-base curl
-    - pip install --upgrade setuptools
-    - pip install --upgrade flake8
-    - pip install setuptools pylint pylint-exit pylint_flask pylint_flask_sqlalchemy
+    - apt-get update
+    - apt-get install -y  --no-install-recommends gcc libssl-dev libffi-dev musl-dev cargo
   script:
-    - flake8 --max-line-length=100 --ignore F401,W504 $CI_PROJECT_DIR/app/project
-    - pylint $CI_PROJECT_DIR/app/project --rcfile=$CI_PROJECT_DIR/app/.pylintrc| tee pylint.txt || pylint-exit $?
-    - score=$(sed -n 's/^Your code has been rated at \([-0-9.]*\)\/.*/\1/p' pylint.txt)
-    - curl https://img.shields.io/badge/lint%20score-$score/10-blue.svg  > $CI_PROJECT_DIR/docs/pylint.svg
-    - echo "Pylint score was $score"
-
-  artifacts:
-    paths:
-        - pylint.txt
+    - cd $CI_PROJECT_DIR/app/ && tox
 
 test-image:
+  services:
+    - postgres:12.2-alpine
+  variables:
+    POSTGRES_DB: db_test
+    POSTGRES_USER: postgres
+    POSTGRES_PASSWORD: postgres
+    POSTGRES_HOST_AUTH_METHOD: trust
   stage: test
+  image: $CONTAINER_TEST_IMAGE
+  before_script:
+    - export DATABASE_TEST_URL=$DATABASE_TEST_URL
+    - export APP_SETTINGS=project.config.TestingConfig
   script:
-    - echo "This is just dummy test - waitting for the databse connection."
+    - cd $CI_PROJECT_DIR/app/ && python manage.py test
 
 release-image:
   stage: release
   image:
     name: gcr.io/kaniko-project/executor:debug
-    entrypoint: [""]
+    entrypoint: [ "" ]
   script:
     - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
     - echo "FROM  ${CONTAINER_TEST_IMAGE}" | /kaniko/executor --context $CI_PROJECT_DIR --dockerfile /dev/stdin --destination ${CONTAINER_RELEASE_IMAGE}

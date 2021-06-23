@@ -1,5 +1,5 @@
-from marshmallow_jsonapi.flask import Schema, Relationship
 from marshmallow_jsonapi import fields
+from marshmallow_jsonapi.flask import Relationship, Schema
 
 
 class EventSchema(Schema):
@@ -12,20 +12,21 @@ class EventSchema(Schema):
     """
 
     class Meta:
-        type_ = 'event'
-        self_view = 'event_detail'
-        self_view_kwargs = {'id': '<id>'}
-        self_view_many = 'event_list'
+        type_ = "event"
+        self_view = "api.event_detail"
+        self_view_kwargs = {"id": "<id>"}
+        self_view_many = "api.event_list"
 
-    id = fields.Integer(as_string=True, dump_only=True)
+    id = fields.Integer(as_string=True)
     description = fields.Str(required=True)
     timestamp = fields.DateTime(required=True)
-    user = Relationship(self_view='event_user',
-                        self_view_kwargs={'id': '<id>'},
-                        related_view='event_list',
-                        related_view_kwargs={'id': '<id>'},
-                        include_resource_linkage=True,
-                        schema='UserSchema',
-                        type_='user',
-                        id_field='id'
-                        )
+    user = Relationship(
+        self_view="api.event_user",
+        self_view_kwargs={"id": "<id>"},
+        related_view="api.event_list",
+        related_view_kwargs={"id": "<id>"},
+        include_resource_linkage=True,
+        schema="UserSchema",
+        type_="user",
+        id_field="id",
+    )

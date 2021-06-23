@@ -1,5 +1,5 @@
 from marshmallow_jsonapi import fields
-from marshmallow_jsonapi.flask import Schema, Relationship
+from marshmallow_jsonapi.flask import Relationship, Schema
 
 
 class ContactSchema(Schema):
@@ -13,10 +13,10 @@ class ContactSchema(Schema):
 
     class Meta:
         type_ = "contact"
-        self_view = "contact_detail"
+        self_view = "api.contact_detail"
         self_view_kwargs = {"id": "<id>"}
 
-    id = fields.Integer(as_string=True, dump_only=True)
+    id = fields.Integer(as_string=True)
     given_name = fields.Str(required=True)
     family_name = fields.Str(required=True)
     website = fields.Str(allow_none=True)
@@ -24,10 +24,9 @@ class ContactSchema(Schema):
 
     platforms = Relationship(
         attribute="platforms",
-        self_view="contact_platforms",
-        self_view_kwargs={"id": "<id>"},
-        related_view="platform_list",
-        related_view_kwargs={"contact_id": "<id>"},
+        related_view="api.contact_platforms",
+        related_view_kwargs={"id": "<id>"},
+        include_resource_linkage=True,
         many=True,
         schema="PlatformSchema",
         type_="platform",
@@ -35,34 +34,44 @@ class ContactSchema(Schema):
     )
     configurations = Relationship(
         attribute="configurations",
-        self_view="contact_configurations",
-        self_view_kwargs={"id": "<id>"},
-        related_view="configuration_list",
-        related_view_kwargs={"contact_id": "<id>"},
+        related_view="api.contact_configurations",
+        related_view_kwargs={"id": "<id>"},
         many=True,
+        include_resource_linkage=True,
         schema="ConfigurationSchema",
         type_="configuration",
         id_field="id",
     )
     devices = Relationship(
         attribute="devices",
-        self_view="contact_devices",
-        self_view_kwargs={"id": "<id>"},
-        related_view="device_list",
-        related_view_kwargs={"contact_id": "<id>"},
+        related_view="api.contact_devices",
+        related_view_kwargs={"id": "<id>"},
         many=True,
+        include_resource_linkage=True,
         schema="DeviceSchema",
         type_="device",
         id_field="id",
     )
+    # This relationship should be optional as we want to
+    # allow to add extern contacts without user accounts.
     user = Relationship(
-        attribute="user",
-        self_view="contact_user",
+        required=False,
+        allow_none=True,
+        self_view="api.contact_user",
         self_view_kwargs={"id": "<id>"},
-        related_view="user_list",
-        related_view_kwargs={"id": "<id>"},
         include_resource_linkage=True,
         schema="UserSchema",
         type_="user",
         id_field="id",
     )
+
+    @staticmethod
+    def dict_serializer(obj):
+        """Convert the object to a dict."""
+        if obj is not None:
+            return {
+                "given_name": obj.given_name,
+                "family_name": obj.family_name,
+                "website": obj.website,
+                "email": obj.email,
+            }

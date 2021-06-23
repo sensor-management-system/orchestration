@@ -1,6 +1,5 @@
-from project.api.models.base_model import db
-from project.api.models.mixin import AuditMixin
-from project.api.models.platform import Platform
+from .base_model import db
+from .mixin import AuditMixin
 
 
 class ConfigurationPlatform(db.Model, AuditMixin):
