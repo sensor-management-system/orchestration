@@ -1,9 +1,10 @@
 from flask_rest_jsonapi import ResourceDetail
-from project.api.models.base_model import db
-from project.api.models.platform import Platform
-from project.api.resourceManager.base_resource import add_updated_by_id
-from project.api.schemas.platform_schema import PlatformSchema
-from project.api.token_checker import token_required
+
+from ..models.base_model import db
+from ..models.platform import Platform
+from ..resourceManager.base_resource import add_updated_by_id
+from ..schemas.platform_schema import PlatformSchema
+from ..token_checker import token_required
 
 
 class PlatformDetail(ResourceDetail):

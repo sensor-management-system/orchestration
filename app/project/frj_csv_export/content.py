@@ -53,3 +53,15 @@ def render_json(response):
         json_reponse = json.dumps(data, cls=JSONEncoder)
 
     return make_response(json_reponse, status_code, headers)
+
+
+def render_csv(response):
+    """
+    Default content renderer for CSV
+    """
+
+    return Response(
+        response.to_csv(),
+        mimetype="text/csv",
+        headers={"Content-disposition": "attachment; filename=export.csv"},
+    )

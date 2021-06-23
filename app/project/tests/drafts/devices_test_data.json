@@ -9,40 +9,7 @@
       "model": "device_model_test1",
       "inventory_number": "device_inventory_number_test1",
       "persistent_identifier": "device_persistent_identifier1",
-      "website": "http://device.website1.de",
-      "customfields": [
-        {
-          "key": "customfields_test1_key",
-          "value": "customfields_test1_value"
-        }
-      ],
-      "attachments": [
-        {
-          "label": "device_attachments_label_test1",
-          "url": "http://test1.test"
-        },
-        {
-          "label": "device_attachments_label_test2",
-          "url": "http://test2.test"
-        }
-      ],
-      "properties": [
-        {
-          "measuring_range_min": 1.2,
-          "measuring_range_max": 2.1,
-          "failure_value": 999.9,
-          "accuracy": 0.9,
-          "label": "device_property_test1",
-          "unit_uri": "device_unit_uri_test1",
-          "unit_name": "device_unit_name_test1",
-          "compartment_uri": "device_compartment_uri_test1",
-          "compartment_name": "device_compartment_name_test1",
-          "property_uri": "device_property_uri_test1",
-          "property_name": "device_property_name_test1",
-          "sampling_media_uri": "device_sampling_media_uri_test1",
-          "sampling_media_name": "device_sampling_media_name_test1"
-        }
-      ]
+      "website": "http://device.website1.de"
     },
     {
       "description": "device_test2_description",
@@ -53,44 +20,7 @@
       "model": "device_model_test2",
       "inventory_number": "device_inventory_number_test2",
       "persistent_identifier": "device_persistent_identifier2",
-      "website": "http://device.website2.de",
-      "customfields": [
-        {
-          "id": 1,
-          "key": "customfields_test2_key",
-          "value": "customfields_test2_value"
-        }
-      ],
-      "attachments": [
-        {
-          "id": 1,
-          "label": "device_attachments_label_test2",
-          "url": "http://test2.test"
-        },
-        {
-          "id": 2,
-          "label": "device_attachments_label2_test2",
-          "url": "http://test22.test"
-        }
-      ],
-      "properties": [
-        {
-          "id": 1,
-          "measuring_range_min": 8.7,
-          "measuring_range_max": 9.9,
-          "failure_value": 999.9,
-          "accuracy": 0.5,
-          "label": "device_property_test2",
-          "unit_uri": "device_unit_uri_test2",
-          "unit_name": "device_unit_name_test2",
-          "compartment_uri": "device_compartment_uri_test2",
-          "compartment_name": "device_compartment_name_test2",
-          "property_uri": "device_property_uri_test2",
-          "property_name": "device_property_name_test2",
-          "sampling_media_uri": "device_sampling_media_uri_test2",
-          "sampling_media_name": "device_sampling_media_name_test2"
-        }
-      ]
+      "website": "http://device.website2.de"
     },
     {
       "description": "device_test1_changed",
@@ -101,40 +31,7 @@
       "model": "device_model_test1",
       "inventory_number": "device_inventory_number_test1",
       "persistent_identifier": "device_persistent_identifier1",
-      "website": "http://device.website1.de",
-      "customfields": [
-        {
-          "key": "customfields_test1_key",
-          "value": "customfields_test1_value"
-        }
-      ],
-      "attachments": [
-        {
-          "label": "device_attachments_label_test1",
-          "url": "http://test1.test"
-        },
-        {
-          "label": "device_attachments_label_test2",
-          "url": "http://test2.test"
-        }
-      ],
-      "properties": [
-        {
-          "measuring_range_min": 1.2,
-          "measuring_range_max": 2.1,
-          "failure_value": 999.9,
-          "accuracy": 0.9,
-          "label": "device_property_test1",
-          "unit_uri": "device_unit_uri_test1",
-          "unit_name": "device_unit_name_test1",
-          "compartment_uri": "device_compartment_uri_test1",
-          "compartment_name": "device_compartment_name_test1",
-          "property_uri": "device_property_uri_test1",
-          "property_name": "device_property_name_test1",
-          "sampling_media_uri": "device_sampling_media_uri_test1",
-          "sampling_media_name": "device_sampling_media_name_test1"
-        }
-      ]
+      "website": "http://device.website1.de"
     }
   ],
   "relationships": []

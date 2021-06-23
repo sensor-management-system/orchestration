@@ -1,8 +1,9 @@
 from flask_rest_jsonapi import ResourceRelationship
-from project.api.models.base_model import db
-from project.api.models.configuration import Configuration
-from project.api.schemas.configuration_schema import ConfigurationSchema
-from project.api.token_checker import token_required
+
+from ..models.base_model import db
+from ..models.configuration import Configuration
+from ..schemas.configuration_schema import ConfigurationSchema
+from ..token_checker import token_required
 
 
 class ConfigurationRelationship(ResourceRelationship):

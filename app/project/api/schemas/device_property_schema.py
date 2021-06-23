@@ -32,6 +32,28 @@ class InnerDevicePropertySchema(MarshmallowSchema):
     resolution_unit_uri = fields.String(allow_none=True)
     resolution_unit_name = fields.String(allow_none=True)
 
+    @staticmethod
+    def dict_serializer(obj):
+        """Convert the object to a dict."""
+        if obj is not None:
+            return {
+                "label": obj.label,
+                "unit_name": obj.unit_name,
+                "unit_uri": obj.unit_uri,
+                "compartment_name": obj.compartment_name,
+                "compartment_uri": obj.compartment_uri,
+                "property_name": obj.property_name,
+                "property_uri": obj.property_uri,
+                "sample_medium_name": obj.sampling_media_name,
+                "sample_medium_uri": obj.sampling_media_uri,
+                "measuring_range_min": obj.measuring_range_min,
+                "measuring_range_max": obj.measuring_range_max,
+                "failure_value": obj.failure_value,
+                "resolution": obj.resolution,
+                "resolution_unit_uri": obj.resolution_unit_uri,
+                "resolution_unit_name": obj.resolution_unit_name,
+            }
+
 
 class DevicePropertySchema(Schema):
     """
@@ -61,10 +83,17 @@ class DevicePropertySchema(Schema):
     property_name = fields.Str(allow_none=True)
     sampling_media_uri = fields.Str(allow_none=True)
     sampling_media_name = fields.Str(allow_none=True)
+    resolution = fields.Float(allow_none=True)
+    resolution_unit_uri = fields.String(allow_none=True)
+    resolution_unit_name = fields.String(allow_none=True)
 
     device = Relationship(
+        self_view="api.device_property_device",
         self_view_kwargs={"id": "<id>"},
         related_view="api.device_detail",
         related_view_kwargs={"id": "<device_id>"},
+        include_resource_linkage=True,
         type_="device",
+        schema="DeviceSchema",
+        id_field="id",
     )

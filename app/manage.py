@@ -1,11 +1,12 @@
+import sys
 import unittest
 
+import click
 import coverage
 from flask.cli import FlaskGroup
+
 from project import create_app
-from project.api.insert_initial_values import *
 from project.api.models.base_model import db
-from project.tests.base import BaseTestCase
 
 app = create_app()
 cli = FlaskGroup(create_app=create_app)
@@ -30,52 +31,50 @@ def recreate_db():
 
 
 @cli.command()
-def test():
+@click.argument('test_names', nargs=-1)
+def test(test_names):
     """ Runs the tests without code coverage """
-    tests = unittest.TestLoader().discover(
-        "project/tests",
-        # Only execute the files starting with test_
-        # as we have some helper files here as well.
-        pattern="test_*.py",
-    )
+    # To run an oly test just pass th test-model-name
+    # an example:
+    # "python manage.py test project.tests.api.test_platform_software_update_action_attachment"
+    if test_names:
+        tests = unittest.TestLoader().loadTestsFromNames(test_names)
+    else:
+        tests = unittest.TestLoader().discover(
+            "project/tests",
+            # Only execute the files starting with test_
+            # as we have some helper files here as well.
+            pattern="test_*.py",
+        )
     result = unittest.TextTestRunner(verbosity=2).run(tests)
     if result.wasSuccessful():
-        return 0
-    return 1
+        return sys.exit(0)
+    return sys.exit(1)
 
 
 @cli.command()
-def cov():
+@click.argument('test_names', nargs=-1)
+def cov(test_names):
     """Runs the unit tests with coverage."""
-    tests = unittest.TestLoader().discover("project/tests")
+    if test_names:
+        tests = unittest.TestLoader().loadTestsFromNames(test_names)
+    else:
+        tests = unittest.TestLoader().discover(
+            "project/tests",
+            # Only execute the files starting with test_
+            # as we have some helper files here as well.
+            pattern="test_*.py",
+        )
     result = unittest.TextTestRunner(verbosity=2).run(tests)
     if result.wasSuccessful():
         COV.stop()
-    COV.save()
-    print("Coverage Summary:")
-    COV.report()
-    COV.html_report()
-    COV.erase()
-    return 0
-    return 1
-
-
-@cli.command("db_init")
-def db_init():
-    with app.app_context():
-        device = add_device()
-        event = add_event(device)
-        contact = add_contact()
-        platform = add_platform()
-        attachment = add_device_attachment(device)
-        pl_attachment = add_platform_attachment(platform)
-        db.session.add(device)
-        db.session.add(platform)
-        db.session.add(event)
-        db.session.add(contact)
-        db.session.add(attachment)
-        db.session.add(pl_attachment)
-        db.session.commit()
+        COV.save()
+        print("Coverage Summary:")
+        COV.report()
+        COV.html_report()
+        COV.erase()
+        return sys.exit(0)
+    return sys.exit(1)
 
 
 @cli.group()
@@ -87,10 +86,7 @@ def es():
 @es.command("reindex")
 def es_reindex():
     """Reindex all of the models that should be used in the es."""
-    from project.api.models.configuration import Configuration
-    from project.api.models.device import Device
-    from project.api.models.platform import Platform
-    from project.api.models.contact import Contact
+    from project.api.models import (Configuration, Device, Platform, Contact)
 
     for model_type in [Platform, Device, Configuration, Contact]:
         model_type.reindex()

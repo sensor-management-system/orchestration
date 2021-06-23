@@ -1,13 +1,15 @@
-from project.frj_csv_export.resource import ResourceList
 from flask_rest_jsonapi.exceptions import ObjectNotFound
-from project.api.models.base_model import db
-from project.api.models.configuration import Configuration
-from project.api.models.contact import Contact
-from project.api.models.device import Device
-from project.api.models.platform import Platform
-from project.api.schemas.contact_schema import ContactSchema
-from project.api.token_checker import token_required
 from sqlalchemy.orm.exc import NoResultFound
+
+from ...frj_csv_export.resource import ResourceList
+from ..datalayers.esalchemy import EsSqlalchemyDataLayer
+from ..models.base_model import db
+from ..models.configuration import Configuration
+from ..models.contact import Contact
+from ..models.device import Device
+from ..models.platform import Platform
+from ..schemas.contact_schema import ContactSchema
+from ..token_checker import token_required
 
 
 class ContactList(ResourceList):
@@ -28,8 +30,8 @@ class ContactList(ResourceList):
                 self.session.query(Configuration).filter_by(id=configuration_id).one()
             except NoResultFound:
                 raise ObjectNotFound(
-                    {'parameter': 'id'},
-                    "Configuration: {} not found".format(configuration_id)
+                    {"parameter": "id"},
+                    "Configuration: {} not found".format(configuration_id),
                 )
             else:
                 query_ = query_.join(Contact.configurations).filter(
@@ -41,8 +43,7 @@ class ContactList(ResourceList):
                 self.session.query(Platform).filter_by(id=platform_id).one()
             except NoResultFound:
                 raise ObjectNotFound(
-                    {'parameter': 'id'},
-                    "Platform: {} not found".format(platform_id)
+                    {"parameter": "id"}, "Platform: {} not found".format(platform_id)
                 )
             else:
                 query_ = query_.join(Contact.platforms).filter(
@@ -54,8 +55,7 @@ class ContactList(ResourceList):
                 self.session.query(Device).filter_by(id=device_id).one()
             except NoResultFound:
                 raise ObjectNotFound(
-                    {'parameter': 'id'},
-                    "Device: {} not found".format(platform_id)
+                    {"parameter": "id"}, "Device: {} not found".format(platform_id)
                 )
             else:
                 query_ = query_.join(Contact.devices).filter(Device.id == device_id)
@@ -67,6 +67,7 @@ class ContactList(ResourceList):
     data_layer = {
         "session": db.session,
         "model": Contact,
+        "class": EsSqlalchemyDataLayer,
         "methods": {
             "query": query,
         },

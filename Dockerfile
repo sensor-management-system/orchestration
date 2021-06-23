@@ -1,4 +1,4 @@
-FROM python:3-alpine as base
+FROM python:3.9-slim-buster as base
 
 ARG BUILD_DATE
 ARG VCS_REF
@@ -15,8 +15,6 @@ LABEL maintainer="Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>" \
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
 
-RUN apk --no-cache add libpq
-
 FROM base as builder
 
 RUN mkdir /install
@@ -25,14 +23,15 @@ WORKDIR /install
 # add requirements
 COPY app/requirements.txt /tmp/requirements.txt
 
-RUN apk add --no-cache --virtual .build-deps \
-    gcc \
-    python3-dev \
-    musl-dev \
-    postgresql-dev \
+RUN apt-get update && apt-get install -y  --no-install-recommends \
+        gcc \
+        libssl-dev \
+        libffi-dev \
+        musl-dev \
+        cargo \
+    && apt-get clean\
     && pip install --upgrade pip \
-    && pip install --prefix /install --no-cache-dir -r /tmp/requirements.txt \
-    && apk del --no-cache .build-deps
+    && pip install --prefix /install --no-cache-dir -r /tmp/requirements.txt
 
 FROM base
 
