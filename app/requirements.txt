@@ -13,7 +13,7 @@ Faker==8.8.0
 Flask-Cors==3.0.9
 Flask-Migrate==3.0.1
 Flask-REST-JSONAPI==0.31.2
-Flask-SQLAlchemy==2.4.4
+Flask-SQLAlchemy==2.5.1
 Flask-Testing==0.8.0
 Flask==1.1.2
 flask_jwt_extended==4.2.1
