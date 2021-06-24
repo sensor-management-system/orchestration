@@ -1,7 +1,8 @@
 from .base_model import db
+from .mixin import IndirectSearchableMixin
 
 
-class CustomField(db.Model):
+class CustomField(db.Model, IndirectSearchableMixin):
     """
     Custom Field class
     """
@@ -17,3 +18,7 @@ class CustomField(db.Model):
             "key": self.key,
             "value": self.value,
         }
+
+    def get_parent_search_entities(self):
+        """Return the device as parent entity."""
+        return [self.device]

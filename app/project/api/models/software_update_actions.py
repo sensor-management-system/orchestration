@@ -1,8 +1,8 @@
-from ..models.mixin import AuditMixin
+from ..models.mixin import AuditMixin, IndirectSearchableMixin
 from .base_model import db
 
 
-class DeviceSoftwareUpdateAction(db.Model, AuditMixin):
+class DeviceSoftwareUpdateAction(db.Model, AuditMixin, IndirectSearchableMixin):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     device_id = db.Column(db.Integer, db.ForeignKey("device.id"), nullable=False)
     device = db.relationship(
@@ -25,8 +25,22 @@ class DeviceSoftwareUpdateAction(db.Model, AuditMixin):
         backref=db.backref("device_software_update_actions"),
     )
 
+    def get_parent_search_entities(self):
+        """Return the device as parent."""
+        return [self.device]
 
-class PlatformSoftwareUpdateAction(db.Model, AuditMixin):
+    def to_search_entry(self):
+        """Return a dict with search information."""
+        return {
+            "software_type_name": self.software_type_name,
+            "software_type_uri": self.software_type_uri,
+            "version": self.version,
+            "repository_url": self.repository_url,
+            "description": self.description,
+        }
+
+
+class PlatformSoftwareUpdateAction(db.Model, AuditMixin, IndirectSearchableMixin):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     platform_id = db.Column(db.Integer, db.ForeignKey("platform.id"), nullable=False)
     platform = db.relationship(
@@ -48,3 +62,17 @@ class PlatformSoftwareUpdateAction(db.Model, AuditMixin):
         foreign_keys=[contact_id],
         backref=db.backref("platform_software_update_actions"),
     )
+
+    def get_parent_search_entities(self):
+        """Return the platform as parent."""
+        return [self.platform]
+
+    def to_search_entry(self):
+        """Return a dict with search information."""
+        return {
+            "software_type_name": self.software_type_name,
+            "software_type_uri": self.software_type_uri,
+            "version": self.version,
+            "repository_url": self.repository_url,
+            "description": self.description,
+        }

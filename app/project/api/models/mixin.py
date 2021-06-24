@@ -56,8 +56,131 @@ class AuditMixin:
         )
 
 
+class IndirectSearchableMixin:
+    """
+    Mixin for chose elements that should only be indirect searchable.
+
+    An example: The device properties that are part of the devices.
+    We will only search directly for devices - but the full text
+    index should contain up to date information about the device
+    properties as well.
+
+    This is what this IndirectSearchableMixin should be used for.
+    """
+
+    def get_parent_search_entities(self):
+        """
+        Return the list of "parent" search entities.
+
+        As an example for a device property I want to
+        have the device - as the device property will be
+        included in the full text search index entry for the
+        device.
+        However for contacts, we want to have them included in
+        multiple entries (devices, platforms, configurations), so
+        we need to handle a list of those entries.
+
+        Please also note: We only have a very small set of
+        full searchable entities for the moment (devices, platforms,
+        configurations & contacts).
+        """
+        return []
+
+
 class SearchableMixin:
-    """Mixin to make a model searchable via full text search."""
+    """
+    Mixin to make a model searchable via full text search.
+
+    The whole lgoic here may be a little complex, so lets explain.
+
+    We want to create entries in a full text search index (elasticsearch)
+    to be ahle to search for eny of the texts associated with our
+    data set.
+
+    We currently search explicitly for only some of our entities.
+    This are - at the time of wriging - contacts, configurations,
+    platforms and devices.
+
+    For the contacts it is relativly easy:
+    - We only want the name (given & family name), as well as
+      the email address.
+    - We don't want to search contacts by filtering for which devices
+      they are resposible. So we don't need more included data.
+
+    For the devices it is way more complex:
+    - We want all of the attributes of a device itself to be searchable
+      (short name, long name, serial numbers, descriptions, manufacturer, ...).
+    - We also want to search for customfields (key-value pairs) as we
+      may want to add another kind of identifier there.
+    - For this additional fields we want to include them in the search index
+      entry for the device. However as they are seperate entities that
+      are also added, updated or removed seperatly from the device itself,
+      we need to update our device entry for every change on the customfields.
+    - We tag those customfields with IndirectSearchableMixin to know, that
+      we have assoicated (parent) entities that must be updated on a change.
+    - This effects also the device properties, device attachments and the
+      device specific actions.
+    - One thing we are not itnerested here are the device mount & unmount
+      actiosn. Those are specific for the configuration and should only be
+      included there.
+    - But one other thing that we want to incluide are the contacts of a device.
+      This way we would be able to search for a persons name and find the
+      the associated devices (in case we don't remember the exact name of the
+      device, but we know who is resposible).
+      This will make us to update the device entry as well if we update a
+      contact (contact is both direct & indirect searchable).
+    - We don't need to include attachments a second time for the actions, they
+      are already included in the attachments themselves (and adding them
+      a second time will change the word statistics in the search index without
+      giving more information.)
+    - So all in all we will end with a data dict similar to this:
+      {
+        short_name: "abc",
+        long_name": "Aaa Bbb Ccc",
+        description: "Useful device",
+        contacts: [
+          {
+            given_name: "max",
+            family_name: "mustermann",
+            // ...
+          },
+          // ...
+        ],
+        "properties": [
+          {
+            label: "property 1",
+            // ...
+          },
+          // ...
+        ],
+        // attachments, generic_device_actions, device_software_update_actions, ..
+      }
+    - So we included all the information about the device in one dict/object.
+      And with this view the term "parent" makes most sense. The parent
+      of the customfield entry is the overall device data dict ifself.
+    - Contacts can have more then one parent. They should be included
+      in the devices, in the platforms and in the configurations.
+
+    For the platforms this is very similar to the devices. THe omly difference
+    is that there are fewer fields (no properties for example.)
+
+    The basic sitation for the configruations is similar as well:
+    - We have the main attributes (label, project).
+    - We have associated attachments, generic actions and location actions.
+    - The situation for mount & unmount actions is a bit more interesting.
+      Basically we not only want to have the description of those actions
+      included but also the associated platforms & devices. (And we want
+      those texts in the search index to be update once a device or a
+      platform is changed. As we only have the configurations then that
+      are effected it is do-able, but it really starts to be complex...
+      Sorry for that!).
+    - However, with a change of the devices & platforms we must update
+      the configuration again.
+
+    So the SearchableMixin and IndirectSearchableMixin are a way to
+    represent the information about all of this relationships - and
+    to run the necessary synchronization work.
+    """
 
     @classmethod
     def search(cls, query, page, per_page):
@@ -96,26 +219,79 @@ class SearchableMixin:
         session._search_add = []
 
         for obj in itertools.chain(session._changes["add"], session._changes["update"]):
-            if isinstance(obj, SearchableMixin):
+            for searchable in cls.yield_searchables(obj):
                 session._search_add.append(
-                    SearchModelWithEntry(model=obj, entry=obj.to_search_entry())
+                    SearchModelWithEntry(
+                        model=searchable, entry=searchable.to_search_entry()
+                    )
                 )
+        for obj in session._changes["delete"]:
+            # We really don't want the direct searchables that are deleted
+            # but we want every associated one
+            # We really want to skip this level here and start with the
+            # IndirectSearchables
+            if isinstance(obj, IndirectSearchableMixin):
+                for parent_obj in obj.get_parent_search_entities():
+                    for searchable in cls.yield_searchables(parent_obj):
+                        session._search_add.append(
+                            SearchModelWithEntry(
+                                model=searchable, entry=searchable.to_search_entry()
+                            )
+                        )
+
+    @classmethod
+    def yield_searchables(cls, obj):
+        """Yield all searchables (direct & indirect over multiple levels)."""
+        # Please note: Currently the SearchableMixin and IndirectSearchableMixin
+        # classes doesn't give us an endless recursion here (we dont't have
+        # circular dependencies). However this setting is fragile, so
+        # be careful and add a set to check ids of already yielded entities
+        # if ncessary.
+        if isinstance(obj, SearchableMixin):
+            yield obj
+        if isinstance(obj, IndirectSearchableMixin):
+            for parent in obj.get_parent_search_entities():
+                yield from cls.yield_searchables(parent)
 
     @classmethod
     def after_commit(cls, session):
         """Update the search after the sqlalchemy commit."""
         ids_to_add = collections.defaultdict(set)
-        for obj in itertools.chain(session._changes["add"], session._changes["update"]):
+
+        # We are going to collect all the ids for which we need to add or update
+        # the search index.
+        # Adding & Updating is here the very same command, so we can handle
+        # all of them in one run.
+        for search_model_with_entry in session._search_add:
+            obj = search_model_with_entry.model
+            ids_to_add[obj.__tablename__].add(obj.id)
+        # Because of the indirect searchable we can have the job
+        # to update their parent entries, it can still be the case that
+        # we want to delete the parent object. If so, it doesn't make any
+        # sense to try to update the search index for those - we will just
+        # delete them and are fine.
+        for obj in session._changes["delete"]:
             if isinstance(obj, SearchableMixin):
-                ids_to_add[obj.__tablename__].add(obj.id)
+                ids_to_add[obj.__tablename__].discard(obj.id)
+
+        ids_processed = collections.defaultdict(set)
+        # So, now we have all of those that we want to update,
+        # we can start adding them to the search index.
         for search_model_with_entry in session._search_add:
             model = search_model_with_entry.model
             if model.id in ids_to_add[model.__tablename__]:
-                add_to_index(model.__tablename__, model, search_model_with_entry.entry)
+                if model.id not in ids_processed[model.__tablename__]:
+                    add_to_index(
+                        model.__tablename__, model, search_model_with_entry.entry
+                    )
+                    ids_processed[model.__tablename__].add(model.id)
 
+        # And then, we can delete old entries if necessary.
         for obj in session._changes["delete"]:
             if isinstance(obj, SearchableMixin):
-                remove_from_index(obj.__tablename__, obj)
+                if obj.id not in ids_processed[obj.__tablename__]:
+                    remove_from_index(obj.__tablename__, obj)
+                    ids_processed[obj.__tablename__].add(obj.id)
 
         session._changes = None
         session._search_add = None
