@@ -1,8 +1,8 @@
-from ..models.mixin import AuditMixin
+from ..models.mixin import AuditMixin, IndirectSearchableMixin
 from .base_model import db
 
 
-class GenericPlatformAction(db.Model, AuditMixin):
+class GenericPlatformAction(db.Model, AuditMixin, IndirectSearchableMixin):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     platform_id = db.Column(db.Integer, db.ForeignKey("platform.id"), nullable=False)
     platform = db.relationship(
@@ -24,8 +24,21 @@ class GenericPlatformAction(db.Model, AuditMixin):
         backref=db.backref("generic_platform_actions"),
     )
 
+    def get_parent_search_entities(self):
+        """Return the platform as parent."""
+        # We won't search for the contact of this action, so we skip it here.
+        return [self.platform]
 
-class GenericDeviceAction(db.Model, AuditMixin):
+    def to_search_entry(self):
+        """Return a dict with the search fields."""
+        return {
+            "action_type_name": self.action_type_name,
+            "action_type_uri": self.action_type_uri,
+            "description": self.description,
+        }
+
+
+class GenericDeviceAction(db.Model, AuditMixin, IndirectSearchableMixin):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     device_id = db.Column(db.Integer, db.ForeignKey("device.id"), nullable=False)
     device = db.relationship(
@@ -47,8 +60,21 @@ class GenericDeviceAction(db.Model, AuditMixin):
         backref=db.backref("generic_device_actions"),
     )
 
+    def get_parent_search_entities(self):
+        """Return the device as parent."""
+        # We won't search for the contact of this action, so we skip it here.
+        return [self.device]
 
-class GenericConfigurationAction(db.Model, AuditMixin):
+    def to_search_entry(self):
+        """Return a dict with the search fields."""
+        return {
+            "action_type_name": self.action_type_name,
+            "action_type_uri": self.action_type_uri,
+            "description": self.description,
+        }
+
+
+class GenericConfigurationAction(db.Model, AuditMixin, IndirectSearchableMixin):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     configuration_id = db.Column(
         db.Integer, db.ForeignKey("configuration.id"), nullable=False
@@ -71,3 +97,16 @@ class GenericConfigurationAction(db.Model, AuditMixin):
         foreign_keys=[contact_id],
         backref=db.backref("generic_configuration_actions"),
     )
+
+    def get_parent_search_entities(self):
+        """Return the configuration as parent."""
+        # We won't search for the contact of this action, so we skip it here.
+        return [self.configuration]
+
+    def to_search_entry(self):
+        """Return a dict with the search fields."""
+        return {
+            "action_type_name": self.action_type_name,
+            "action_type_uri": self.action_type_uri,
+            "description": self.description,
+        }
