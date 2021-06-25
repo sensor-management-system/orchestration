@@ -3,9 +3,10 @@
 
 from ..models.device import Device
 from .base_model import db
+from .mixin import IndirectSearchableMixin
 
 
-class DeviceProperty(db.Model):
+class DeviceProperty(db.Model, IndirectSearchableMixin):
     """DeviceProperty class."""
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -45,3 +46,7 @@ class DeviceProperty(db.Model):
             "resolution_unit_name": self.resolution_unit_name,
             "resolution_unit_uri": self.resolution_unit_uri,
         }
+
+    def get_parent_search_entities(self):
+        """Return the device as parent search entity."""
+        return [self.device]

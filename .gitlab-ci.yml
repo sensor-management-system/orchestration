@@ -4,7 +4,7 @@ stages:
   - release
 
 variables:
-  CONTAINER_TEST_IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
+  CONTAINER_TEST_IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
   CONTAINER_RELEASE_IMAGE: $CI_REGISTRY_IMAGE:latest
   DATABASE_TEST_URL: postgres://$POSTGRES_USER:@$POSTGRES_PASSWORD:5432/$POSTGRES_DB
   WELL_KNOWN_URL: https://webapp-stage.intranet.ufz.de/idp/oidc/v1/.well-known/openid-configuration

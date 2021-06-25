@@ -3,6 +3,8 @@
 from project import base_url, db
 from project.api.models import Contact, Platform, PlatformSoftwareUpdateAction
 from project.tests.base import BaseTestCase, fake, generate_token_data
+from project.tests.models.test_software_update_actions_attachment_model import \
+    add_platform_software_update_action_attachment_model
 from project.tests.models.test_software_update_actions_model import (
     add_platform_software_update_action_model,
 )
@@ -136,7 +138,7 @@ class TestPlatformSoftwareUpdateAction(BaseTestCase):
         # test only for the first platform
         with self.client:
             url_get_for_platform1 = (
-                base_url + f"/platforms/{platform1.id}/platform-software-update-actions"
+                    base_url + f"/platforms/{platform1.id}/platform-software-update-actions"
             )
             response = self.client.get(
                 url_get_for_platform1, content_type="application/vnd.api+json"
@@ -150,7 +152,7 @@ class TestPlatformSoftwareUpdateAction(BaseTestCase):
         # and test the second platform
         with self.client:
             url_get_for_platform2 = (
-                base_url + f"/platforms/{platform2.id}/platform-software-update-actions"
+                    base_url + f"/platforms/{platform2.id}/platform-software-update-actions"
             )
             response = self.client.get(
                 url_get_for_platform2, content_type="application/vnd.api+json"
@@ -164,11 +166,18 @@ class TestPlatformSoftwareUpdateAction(BaseTestCase):
         # and for a non existing
         with self.client:
             url_get_for_non_existing_platform = (
-                base_url
-                + f"/platforms/{platform2.id + 9999}/platform-software-update-actions"
+                    base_url
+                    + f"/platforms/{platform2.id + 9999}/platform-software-update-actions"
             )
             response = self.client.get(
                 url_get_for_non_existing_platform,
                 content_type="application/vnd.api+json",
             )
         self.assertEqual(response.status_code, 404)
+
+    def test_delete_platform_software_update_action_with_attachment_link(self):
+        """Delete PlatformSoftwareUpdateAction with an attachment link."""
+        platform_software_update_action = add_platform_software_update_action_attachment_model()
+        _ = super().delete_object(
+            url=f"{self.url}/{platform_software_update_action.id}",
+        )

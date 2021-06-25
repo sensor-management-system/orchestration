@@ -9,6 +9,8 @@ from project.tests.base import BaseTestCase, fake, generate_token_data
 from project.tests.models.test_device_calibration_action_model import (
     add_device_calibration_action,
 )
+from project.tests.models.test_device_calibration_attachment_model import \
+    add_device_calibration_attachment
 
 
 class TestDeviceCalibrationAction(BaseTestCase):
@@ -135,7 +137,7 @@ class TestDeviceCalibrationAction(BaseTestCase):
         # then test only for the first device
         with self.client:
             url_get_for_device1 = (
-                base_url + f"/devices/{device1.id}/device-calibration-actions"
+                    base_url + f"/devices/{device1.id}/device-calibration-actions"
             )
             response = self.client.get(
                 url_get_for_device1, content_type="application/vnd.api+json"
@@ -149,7 +151,7 @@ class TestDeviceCalibrationAction(BaseTestCase):
         # and test the second device
         with self.client:
             url_get_for_device2 = (
-                base_url + f"/devices/{device2.id}/device-calibration-actions"
+                    base_url + f"/devices/{device2.id}/device-calibration-actions"
             )
             response = self.client.get(
                 url_get_for_device2, content_type="application/vnd.api+json"
@@ -163,9 +165,18 @@ class TestDeviceCalibrationAction(BaseTestCase):
         # and for a non existing
         with self.client:
             url_get_for_non_existing_device = (
-                base_url + f"/devices/{device2.id + 9999}/device-calibration-actions"
+                    base_url + f"/devices/{device2.id + 9999}/device-calibration-actions"
             )
             response = self.client.get(
                 url_get_for_non_existing_device, content_type="application/vnd.api+json"
             )
         self.assertEqual(response.status_code, 404)
+
+    def test_delete_device_calibration_action_with_an_attachment_link(self):
+        """Make sure the deletion of a DeviceCalibrationAction can be done even
+        if it linked to an attachment."""
+
+        device_calibration_action = add_device_calibration_attachment()
+        _ = super().delete_object(
+            url=f"{self.url}/{device_calibration_action.id}",
+        )

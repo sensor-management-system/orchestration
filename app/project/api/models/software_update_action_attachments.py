@@ -10,7 +10,8 @@ class DeviceSoftwareUpdateActionAttachment(db.Model):
         "DeviceSoftwareUpdateAction",
         uselist=False,
         foreign_keys=[action_id],
-        backref=db.backref("device_software_update_action_attachments"),
+        backref=db.backref("device_software_update_action_attachments",
+                           cascade="save-update, merge, delete, delete-orphan"),
     )
     attachment_id = db.Column(
         db.Integer, db.ForeignKey("device_attachment.id"), nullable=False
@@ -19,7 +20,8 @@ class DeviceSoftwareUpdateActionAttachment(db.Model):
         "DeviceAttachment",
         uselist=False,
         foreign_keys=[attachment_id],
-        backref=db.backref("device_software_update_action_attachments"),
+        backref=db.backref("device_software_update_action_attachments",
+                           cascade="save-update, merge, delete, delete-orphan"),
     )
 
 
@@ -32,7 +34,8 @@ class PlatformSoftwareUpdateActionAttachment(db.Model):
         "PlatformSoftwareUpdateAction",
         uselist=False,
         foreign_keys=[action_id],
-        backref=db.backref("platform_software_update_action_attachments"),
+        backref=db.backref("platform_software_update_action_attachments",
+                           cascade="save-update, merge, delete, delete-orphan"),
     )
     attachment_id = db.Column(
         db.Integer, db.ForeignKey("platform_attachment.id"), nullable=False
@@ -41,5 +44,6 @@ class PlatformSoftwareUpdateActionAttachment(db.Model):
         "PlatformAttachment",
         uselist=False,
         foreign_keys=[attachment_id],
-        backref=db.backref("platform_software_update_action_attachments"),
+        backref=db.backref("platform_software_update_action_attachments",
+                           cascade="save-update, merge, delete, delete-orphan"),
     )

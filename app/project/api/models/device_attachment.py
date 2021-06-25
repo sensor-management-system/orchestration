@@ -1,7 +1,8 @@
 from .base_model import db
+from .mixin import IndirectSearchableMixin
 
 
-class DeviceAttachment(db.Model):
+class DeviceAttachment(db.Model, IndirectSearchableMixin):
     """
     Attachment class
     """
@@ -15,3 +16,7 @@ class DeviceAttachment(db.Model):
     def to_search_entry(self):
         # to be included in the devices
         return {"label": self.label, "url": self.url}
+
+    def get_parent_search_entities(self):
+        """Return the device as parent search entity."""
+        return [self.device]

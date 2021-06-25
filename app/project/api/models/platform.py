@@ -1,7 +1,7 @@
 """Model for platforms."""
 
 
-from ..models.mixin import AuditMixin, SearchableMixin
+from ..models.mixin import AuditMixin, SearchableMixin, IndirectSearchableMixin
 from .base_model import db
 
 
@@ -44,7 +44,25 @@ class Platform(db.Model, AuditMixin, SearchableMixin):
             "persistent_identifier": self.persistent_identifier,
             "attachments": [a.to_search_entry() for a in self.platform_attachments],
             "contacts": [c.to_search_entry() for c in self.contacts],
+            "generic_actions": [
+                g.to_search_entry() for g in self.generic_platform_actions
+            ],
+            "software_update_actions": [
+                s.to_search_entry() for s in self.platform_software_update_actions
+            ],
         }
+
+    def get_parent_search_entities(self):
+        """Get the parents where this here is included in the search index."""
+        # This here should only affect configurations - as their search
+        # index entry includes the platform.
+        result = []
+        # We only need to check the platform mount actions for associated
+        # configurations - as there should be no unmount before an earlier
+        # mount action.
+        for action in self.platform_mount_actions:
+            result.append(action.configuration)
+        return result
 
     @staticmethod
     def get_search_index_properties():
@@ -100,6 +118,46 @@ class Platform(db.Model, AuditMixin, SearchableMixin):
                     },
                     # But don't allow search for the very same url (unlikely to be needed).
                     "url": {"type": "text"},
+                },
+            },
+            "generic_actions": {
+                "type": "nested",
+                "properties": {
+                    "action_type_uri": {
+                        "type": "keyword",
+                    },
+                    "action_type_name": {
+                        "type": "keyword",
+                        "fields": {"text": {"type": "text"}},
+                    },
+                    "description": {
+                        "type": "text",
+                    },
+                },
+            },
+            "software_update_actions": {
+                "type": "nested",
+                "properties": {
+                    "software_type_name": {
+                        "type": "keyword",
+                        "fields": {"text": {"type": "text"}},
+                    },
+                    "software_type_uri": {
+                        "type": "keyword",
+                    },
+                    "description": {
+                        "type": "text",
+                    },
+                    "version": {
+                        "type": "keyword",
+                        "fields": {"text": {"type": "text"}},
+                    },
+                    "repository_url": {
+                        "type": "keyword",
+                        "fields": {
+                            "text": {"type": "text"},
+                        },
+                    },
                 },
             },
             "contacts": {

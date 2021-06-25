@@ -55,3 +55,8 @@ Code coverage is the process of finding areas of the code not exercised by tests
 $ docker-compose exec app python manage.py cov
 
 ```
+### Run only one test file
+
+```
+$ docker-compose exec app python manage.py test project.tests.test_esquerybuilder
+```
