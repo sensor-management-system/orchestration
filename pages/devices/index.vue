@@ -36,7 +36,7 @@ permissions and limitations under the Licence.
       <v-tab-item :eager="true">
         <v-row>
           <v-col cols="12" md="5">
-            <v-text-field v-model="searchText" label="Label" placeholder="Label of configuration" @keydown.enter="basicSearch" />
+            <v-text-field v-model="searchText" label="Name" placeholder="Name of device" @keydown.enter="basicSearch" />
           </v-col>
           <v-col cols="12" md="2">
             <v-btn
@@ -57,35 +57,22 @@ permissions and limitations under the Licence.
       <v-tab-item :eager="true">
         <v-row>
           <v-col cols="12" md="6">
-            <v-text-field v-model="searchText" label="Label" placeholder="Label of configuration" @keydown.enter="extendedSearch" />
+            <v-text-field v-model="searchText" label="Name" placeholder="Name of device" @keydown.enter="extendedSearch" />
           </v-col>
         </v-row>
         <v-row>
           <v-col cols="12" md="3">
-            <StringSelect
-              v-model="selectedConfigurationStates"
-              label="Select a status"
-              :items="configurationStates"
-              color="green"
-            />
+            <ManufacturerSelect v-model="selectedSearchManufacturers" label="Select a manufacturer" />
           </v-col>
         </v-row>
         <v-row>
           <v-col cols="12" md="3">
-            <StringSelect
-              v-model="selectedLocationTypes"
-              label="Select a location type"
-              :items="locationTypes"
-              color="blue"
-            />
+            <StatusSelect v-model="selectedSearchStates" label="Select a status" />
           </v-col>
         </v-row>
         <v-row>
           <v-col cols="12" md="3">
-            <ProjectSelect
-              v-model="selectedProjects"
-              label="Select a project"
-            />
+            <DeviceTypeSelect v-model="selectedSearchDeviceTypes" label="Select a device type" />
           </v-col>
         </v-row>
         <v-row>
@@ -116,7 +103,7 @@ permissions and limitations under the Licence.
       <v-card>
         <v-card-text>
           <p class="text-center">
-            There are no configurations that match our your search criteria
+            There are no devices that match your search criteria.
           </p>
         </v-card-text>
       </v-card>
@@ -124,10 +111,10 @@ permissions and limitations under the Licence.
     <div v-if="searchResults.length && !loading">
       <v-subheader>
         <template v-if="totalCount == 1">
-          1 configuration found
+          1 device found
         </template>
         <template v-else>
-          {{ totalCount }} configurations found
+          {{ totalCount }} devices found
         </template>
         <v-spacer />
 
@@ -198,10 +185,10 @@ permissions and limitations under the Licence.
             >
               <v-col>
                 <StatusBadge
-                  :value="result.status"
+                  :value="getStatus(result)"
                 >
-                  <div class="text-caption">
-                    {{ getLocationType(result) }}
+                  <div :class="'text-caption' + (getType(result) === NO_TYPE ? ' text--disabled' : '')">
+                    {{ getType(result) }}
                   </div>
                 </StatusBadge>
               </v-col>
@@ -231,6 +218,7 @@ permissions and limitations under the Licence.
                       </v-icon>
                     </v-btn>
                   </template>
+
                   <v-list>
                     <v-list-item
                       :disabled="!isLoggedIn"
@@ -279,14 +267,14 @@ permissions and limitations under the Licence.
               no-gutters
             >
               <v-col class="text-subtitle-1">
-                {{ getTextOrDefault(result.label, 'Configuration') }}
+                {{ result.shortName }}
               </v-col>
               <v-col
                 align-self="end"
                 class="text-right"
               >
                 <v-btn
-                  :to="'/configurations/' + result.id"
+                  :to="'/devices/' + result.id"
                   color="primary"
                   text
                   @click.stop.prevent
@@ -322,7 +310,7 @@ permissions and limitations under the Licence.
                     xl="1"
                     class="font-weight-medium"
                   >
-                    Start:
+                    Manufacturer:
                   </v-col>
                   <v-col
                     cols="8"
@@ -333,7 +321,7 @@ permissions and limitations under the Licence.
                     xl="5"
                     class="nowrap-truncate"
                   >
-                    {{ result.startDate | formatDate }}
+                    {{ getTextOrDefault(result.manufacturerName) }}
                   </v-col>
                   <v-col
                     cols="4"
@@ -344,7 +332,7 @@ permissions and limitations under the Licence.
                     xl="1"
                     class="font-weight-medium"
                   >
-                    End:
+                    Model:
                   </v-col>
                   <v-col
                     cols="8"
@@ -355,7 +343,7 @@ permissions and limitations under the Licence.
                     xl="5"
                     class="nowrap-truncate"
                   >
-                    {{ result.endDate | formatDate }}
+                    {{ getTextOrDefault(result.model) }}
                   </v-col>
                 </v-row>
                 <v-row
@@ -370,7 +358,7 @@ permissions and limitations under the Licence.
                     xl="1"
                     class="font-weight-medium"
                   >
-                    Project:
+                    Serial number:
                   </v-col>
                   <v-col
                     cols="8"
@@ -381,7 +369,55 @@ permissions and limitations under the Licence.
                     xl="5"
                     class="nowrap-truncate"
                   >
-                    {{ getTextOrDefault(result.projectName, '-') }}
+                    {{ getTextOrDefault(result.serialNumber) }}
+                  </v-col>
+                  <v-col
+                    cols="4"
+                    xs="4"
+                    sm="3"
+                    md="2"
+                    lg="2"
+                    xl="1"
+                    class="font-weight-medium"
+                  >
+                    Inventory number:
+                  </v-col>
+                  <v-col
+                    cols="8"
+                    xs="8"
+                    sm="9"
+                    md="4"
+                    lg="4"
+                    xl="5"
+                    class="nowrap-truncate"
+                  >
+                    {{ getTextOrDefault(result.inventoryNumber) }}
+                  </v-col>
+                </v-row>
+                <v-row
+                  dense
+                >
+                  <v-col
+                    cols="4"
+                    xs="4"
+                    sm="3"
+                    md="2"
+                    lg="2"
+                    xl="1"
+                    class="font-weight-medium"
+                  >
+                    Description:
+                  </v-col>
+                  <v-col
+                    cols="8"
+                    xs="8"
+                    sm="9"
+                    md="10"
+                    lg="10"
+                    xl="11"
+                    class="nowrap-truncate"
+                  >
+                    {{ getTextOrDefault(result.description) }}
                   </v-col>
                 </v-row>
               </v-card-text>
@@ -390,10 +426,10 @@ permissions and limitations under the Licence.
           <v-dialog v-model="showDeleteDialog[result.id]" max-width="290">
             <v-card>
               <v-card-title class="headline">
-                Delete configuration
+                Delete device
               </v-card-title>
               <v-card-text>
-                Do you really want to delete the configuration <em>{{ result.label }}</em>
+                Do you really want to delete the device <em>{{ result.shortName }}</em>?
               </v-card-text>
               <v-card-actions>
                 <v-btn
@@ -428,7 +464,8 @@ permissions and limitations under the Licence.
       fab
       fixed
       right
-      to="/configurations"
+      nuxt
+      to="/devices/new"
     >
       <v-icon>
         mdi-plus
@@ -441,85 +478,86 @@ permissions and limitations under the Licence.
 import { Component, Vue } from 'nuxt-property-decorator'
 
 import { saveAs } from 'file-saver'
-import { DateTime } from 'luxon'
 
-import ProjectSelect from '@/components/ProjectSelect.vue'
+import DeviceTypeSelect from '@/components/DeviceTypeSelect.vue'
+import ManufacturerSelect from '@/components/ManufacturerSelect.vue'
+import StatusSelect from '@/components/StatusSelect.vue'
 import StatusBadge from '@/components/StatusBadge.vue'
-import StringSelect from '@/components/StringSelect.vue'
 
 import { IPaginationLoader } from '@/utils/PaginatedLoader'
 
-import { Configuration } from '@/models/Configuration'
-import { StationaryLocation, DynamicLocation, LocationType } from '@/models/Location'
-import { Project } from '@/models/Project'
-
-import { ConfigurationSearcher } from '@/services/sms/ConfigurationApi'
-
-import { dateToString } from '@/utils/dateHelper'
+import { Device } from '@/models/Device'
+import { DeviceType } from '@/models/DeviceType'
+import { Manufacturer } from '@/models/Manufacturer'
+import { Status } from '@/models/Status'
+import { DeviceSearcher } from '@/services/sms/DeviceApi'
 
 @Component({
-  filters: {
-    formatDate: (possibleDate: DateTime | null) => {
-      if (possibleDate != null) {
-        // TODO: handle also the time
-        return dateToString(possibleDate)
-      }
-      return '-'
-    }
-  },
   components: {
-    ProjectSelect,
+    DeviceTypeSelect,
+    ManufacturerSelect,
     StatusBadge,
-    StringSelect
+    StatusSelect
   }
 })
-// @ts-ignore
-export default class SearchConfigurationsPage extends Vue {
+export default class SearchDevicesPage extends Vue {
   private pageSize: number = 20
   private loading: boolean = true
   private processing: boolean = false
 
   private totalCount: number = 0
-  private loader: null | IPaginationLoader<Configuration> = null
-  private lastActiveSearcher: ConfigurationSearcher | null = null
+  private loader: null | IPaginationLoader<Device> = null
+  private lastActiveSearcher: DeviceSearcher | null = null
 
-  private selectedConfigurationStates: string[] = []
-  private selectedLocationTypes: string[] = []
-  private selectedProjects: Project[] = []
+  private selectedSearchManufacturers: Manufacturer[] = []
+  private selectedSearchStates: Status[] = []
+  private selectedSearchDeviceTypes: DeviceType[] = []
 
-  private configurationStates: string[] = []
-  private locationTypes: string[] = []
-  private projects: Project[] = []
+  private deviceTypeLookup: Map<string, DeviceType> = new Map<string, DeviceType>()
+  private statusLookup: Map<string, Status> = new Map<string, Status>()
 
-  private searchResults: Configuration[] = []
+  private searchResults: Device[] = []
   private searchText: string | null = null
 
   private showDeleteDialog: { [id: string]: boolean} = {}
 
-  private searchResultItemsShown: { [id: string]: boolean} = {}
+  private searchResultItemsShown: { [id: string]: boolean } = {}
+
+  public readonly NO_TYPE: string = 'Unknown type'
 
   created () {
     this.initializeAppBar()
   }
 
   mounted () {
-    this.$api.configurationStates.findAll().then((foundStates) => {
-      this.configurationStates = foundStates
-    }).catch((_error) => {
-      this.$store.commit('snackbar/setError', 'Loading configuration states failed')
+    const promiseDeviceTypes = this.$api.deviceTypes.findAll()
+    const promiseStates = this.$api.states.findAll()
+
+    promiseDeviceTypes.then((deviceTypes) => {
+      promiseStates.then((states) => {
+        const deviceTypeTypeLookup = new Map<string, DeviceType>()
+        const statusLookup = new Map<string, Status>()
+
+        for (const deviceType of deviceTypes) {
+          deviceTypeTypeLookup.set(deviceType.uri, deviceType)
+        }
+        for (const status of states) {
+          statusLookup.set(status.uri, status)
+        }
+
+        this.deviceTypeLookup = deviceTypeTypeLookup
+        this.statusLookup = statusLookup
+
+        this.runSelectedSearch()
+      }).catch((_error) => {
+        this.$store.commit('snackbar/setError', 'Loading of states failed')
+      }).catch((_error) => {
+        this.$store.commit('snackbar/setError', 'Loading of device types failed')
+      })
     })
-    this.locationTypes = [
-      LocationType.Stationary,
-      LocationType.Dynamic
-    ]
-    this.$api.projects.findAll().then((foundProjects) => {
-      this.projects = foundProjects
-    }).catch((_error) => {
-      this.$store.commit('snackbar/setError', 'Loading of projects failed')
-    })
-    this.runSelectedSearch()
 
     window.onscroll = () => {
+      // from https://www.digitalocean.com/community/tutorials/vuejs-implementing-infinite-scroll
       const isOnBottom = document.documentElement.scrollTop + window.innerHeight === document.documentElement.offsetHeight
 
       if (isOnBottom && this.canLoadNext()) {
@@ -540,7 +578,7 @@ export default class SearchConfigurationsPage extends Vue {
         'Search',
         'Extended Search'
       ],
-      title: 'Configurations',
+      title: 'Devices',
       saveBtnHidden: true,
       cancelBtnHidden: true
     })
@@ -563,6 +601,7 @@ export default class SearchConfigurationsPage extends Vue {
   }
 
   basicSearch () {
+    // only uses the text and the type (sensor or platform)
     this.runSearch(this.searchText, [], [], [])
   }
 
@@ -573,44 +612,45 @@ export default class SearchConfigurationsPage extends Vue {
   extendedSearch () {
     this.runSearch(
       this.searchText,
-      this.selectedConfigurationStates,
-      this.selectedLocationTypes,
-      this.selectedProjects
+      this.selectedSearchManufacturers,
+      this.selectedSearchStates,
+      this.selectedSearchDeviceTypes
     )
   }
 
   clearExtendedSearch () {
     this.clearBasicSearch()
-    this.selectedConfigurationStates = []
-    this.selectedLocationTypes = []
-    this.selectedProjects = []
+
+    this.selectedSearchManufacturers = []
+    this.selectedSearchStates = []
+    this.selectedSearchDeviceTypes = []
   }
 
   runSearch (
     searchText: string | null,
-    configurationStates: string[],
-    locationTypes: string[],
-    projects: Project[]
+    manufacturer: Manufacturer[],
+    states: Status[],
+    types: DeviceType[]
   ) {
     this.loading = true
     this.searchResults = []
     this.unsetResultItemsShown()
     this.showDeleteDialog = {}
-    this.lastActiveSearcher = this.$api.configurations
+    this.lastActiveSearcher = this.$api.devices
       .newSearchBuilder()
       .withText(searchText)
-      .withOneStatusOf(configurationStates)
-      .withOneLocationTypeOf(locationTypes)
-      .withOneMatchingProjectOf(projects)
+      .withOneMachtingManufacturerOf(manufacturer)
+      .withOneMatchingStatusOf(states)
+      .withOneMatchingDeviceTypeOf(types)
       .build()
     this.lastActiveSearcher
       .findMatchingAsPaginationLoader(this.pageSize)
       .then(this.loadUntilWeHaveSomeEntries).catch((_error) => {
-        this.$store.commit('snackbar/setError', 'Loading of configurations failed')
+        this.$store.commit('snackbar/setError', 'Loading of devices failed')
       })
   }
 
-  loadUntilWeHaveSomeEntries (loader: IPaginationLoader<Configuration>) {
+  loadUntilWeHaveSomeEntries (loader: IPaginationLoader<Device>) {
     this.loader = loader
     this.loading = false
     this.searchResults = [...this.searchResults, ...loader.elements]
@@ -622,7 +662,7 @@ export default class SearchConfigurationsPage extends Vue {
       loader.funToLoadNext().then((nextLoader) => {
         this.loadUntilWeHaveSomeEntries(nextLoader)
       }).catch((_error) => {
-        this.$store.commit('snackbar/setError', 'Loading of additional configurations failed')
+        this.$store.commit('snackbar/setError', 'Loading of additional devices failed')
       })
     }
   }
@@ -634,7 +674,7 @@ export default class SearchConfigurationsPage extends Vue {
         this.searchResults = [...this.searchResults, ...nextLoader.elements]
         this.totalCount = nextLoader.totalCount
       }).catch((_error) => {
-        this.$store.commit('snackbar/setError', 'Loading of additional configurations failed')
+        this.$store.commit('snackbar/setError', 'Loading of additional devices failed')
       })
     }
   }
@@ -648,7 +688,7 @@ export default class SearchConfigurationsPage extends Vue {
       this.processing = true
       this.lastActiveSearcher.findMatchingAsCsvBlob().then((blob) => {
         this.processing = false
-        saveAs(blob, 'configurations.csv')
+        saveAs(blob, 'devices.csv')
       }).catch((_err) => {
         this.processing = false
         this.$store.commit('snackbar/setError', 'CSV export failed')
@@ -657,7 +697,7 @@ export default class SearchConfigurationsPage extends Vue {
   }
 
   deleteAndCloseDialog (id: string) {
-    this.$api.configurations.deleteById(id).then(() => {
+    this.$api.devices.deleteById(id).then(() => {
       this.showDeleteDialog = {}
 
       const searchIndex = this.searchResults.findIndex(r => r.id === id)
@@ -666,11 +706,33 @@ export default class SearchConfigurationsPage extends Vue {
         this.totalCount -= 1
       }
 
-      this.$store.commit('snackbar/setSuccess', 'Configuration deleted')
+      this.$store.commit('snackbar/setSuccess', 'Device deleted')
     }).catch((_error) => {
       this.showDeleteDialog = {}
-      this.$store.commit('snackbar/setError', 'Configuration could not be deleted')
+      this.$store.commit('snackbar/setError', 'Device could not be deleted')
     })
+  }
+
+  getType (device: Device) {
+    if (this.deviceTypeLookup.has(device.deviceTypeUri)) {
+      const deviceType: DeviceType = this.deviceTypeLookup.get(device.deviceTypeUri) as DeviceType
+      return deviceType.name
+    }
+    if (device.deviceTypeName) {
+      return device.deviceTypeName
+    }
+    return this.NO_TYPE
+  }
+
+  getStatus (device: Device): string {
+    if (this.statusLookup.has(device.statusUri)) {
+      const deviceStatus: Status = this.statusLookup.get(device.statusUri) as Status
+      return deviceStatus.name
+    }
+    if (device.statusName) {
+      return device.statusName
+    }
+    return ''
   }
 
   showDeleteDialogFor (id: string) {
@@ -694,17 +756,7 @@ export default class SearchConfigurationsPage extends Vue {
     this.searchResultItemsShown = {}
   }
 
-  getTextOrDefault = (text: string, defaultValue: string): string => text || defaultValue
-
-  getLocationType (configuration: Configuration): string {
-    if (configuration.location instanceof StationaryLocation) {
-      return LocationType.Stationary
-    }
-    if (configuration.location instanceof DynamicLocation) {
-      return LocationType.Dynamic
-    }
-    return ''
-  }
+  getTextOrDefault = (text: string): string => text || '-'
 
   get isLoggedIn () {
     return this.$store.getters['oidc/isAuthenticated']

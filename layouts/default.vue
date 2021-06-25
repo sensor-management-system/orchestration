@@ -53,7 +53,7 @@ permissions and limitations under the Licence.
         </v-list-item>
 
         <!-- Devices -->
-        <v-list-item to="/search/devices" exact nuxt>
+        <v-list-item to="/devices" nuxt>
           <v-list-item-action>
             <v-icon>mdi-network</v-icon>
           </v-list-item-action>
@@ -63,7 +63,7 @@ permissions and limitations under the Licence.
         </v-list-item>
 
         <!-- Platforms -->
-        <v-list-item to="/search/platforms" exact nuxt>
+        <v-list-item to="/platforms" nuxt>
           <v-list-item-action>
             <v-icon>mdi-rocket</v-icon>
           </v-list-item-action>
@@ -73,7 +73,7 @@ permissions and limitations under the Licence.
         </v-list-item>
 
         <!-- Configurations -->
-        <v-list-item to="/search/configurations" exact nuxt>
+        <v-list-item to="/configurations" nuxt>
           <v-list-item-action>
             <v-icon>mdi-file-cog</v-icon>
           </v-list-item-action>
@@ -82,18 +82,8 @@ permissions and limitations under the Licence.
           </v-list-item-content>
         </v-list-item>
 
-        <!-- Projects -->
-        <v-list-item to="/projects" exact nuxt>
-          <v-list-item-action>
-            <v-icon>mdi-nature-people</v-icon>
-          </v-list-item-action>
-          <v-list-item-content>
-            <v-list-item-title>Projects</v-list-item-title>
-          </v-list-item-content>
-        </v-list-item>
-
         <!-- Contacts -->
-        <v-list-item to="/search/contacts" exact nuxt>
+        <v-list-item to="/contacts" nuxt>
           <v-list-item-action>
             <v-icon>mdi-account-multiple</v-icon>
           </v-list-item-action>
@@ -105,7 +95,7 @@ permissions and limitations under the Licence.
         <v-divider />
 
         <!-- Help -->
-        <v-list-item to="/help" nuxt exact>
+        <v-list-item to="/help" nuxt>
           <v-list-item-action>
             <v-icon>mdi-help-circle-outline</v-icon>
           </v-list-item-action>
