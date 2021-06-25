@@ -44,7 +44,7 @@ permissions and limitations under the Licence.
           small
           text
           nuxt
-          to="/search/contacts"
+          to="/contacts"
         >
           cancel
         </v-btn>
@@ -68,7 +68,7 @@ permissions and limitations under the Licence.
           small
           text
           nuxt
-          to="/search/contacts"
+          to="/contacts"
         >
           cancel
         </v-btn>

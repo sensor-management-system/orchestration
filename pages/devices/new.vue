@@ -44,7 +44,7 @@ permissions and limitations under the Licence.
           small
           text
           nuxt
-          to="/search/devices"
+          to="/devices"
         >
           cancel
         </v-btn>
@@ -68,7 +68,7 @@ permissions and limitations under the Licence.
           small
           text
           nuxt
-          to="/search/devices"
+          to="/devices"
         >
           cancel
         </v-btn>

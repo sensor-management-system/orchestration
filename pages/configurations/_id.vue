@@ -429,7 +429,7 @@ export default class ConfigurationsIdPage extends Vue {
   loadConfiguration (): Promise<Configuration|null> {
     return new Promise((resolve, reject) => {
       const configurationId = this.$route.params.id
-      if (!configurationId) {
+      if (!configurationId || configurationId === 'new') {
         this.createBackup()
         this.editMode = true && this.isLoggedIn
         resolve(null)
@@ -458,6 +458,10 @@ export default class ConfigurationsIdPage extends Vue {
         return
       }
       this.save().then(() => {
+        // when a new configuration was saved, change the URL accordingly
+        if (this.configuration.id && this.$route.params.id !== this.configuration.id) {
+          this.$router.push('/configurations/' + this.configuration.id)
+        }
         this.$store.commit('snackbar/setSuccess', 'Save successful')
       }).catch(() => {
         this.$store.commit('snackbar/setError', 'Save failed')
@@ -513,7 +517,7 @@ export default class ConfigurationsIdPage extends Vue {
     if (this.configuration.id) {
       this.editMode = false
     } else {
-      this.$router.push('/search/configurations')
+      this.$router.push('/configurations')
     }
   }
 
