@@ -34,10 +34,15 @@ permissions and limitations under the Licence.
     :value="valueAsDateTimeString"
     :label="label"
     :rules="textInputRules"
+    v-bind="$attrs"
     @input="updateByTextfield"
   >
     <template #append-outer>
-      <v-btn icon @click.stop="initPicker">
+      <v-btn
+        v-if="!readonly"
+        icon
+        @click.stop="initPicker"
+      >
         <v-icon>mdi-calendar-range</v-icon>
       </v-btn>
       <v-dialog
@@ -119,6 +124,8 @@ export default class DateTimePicker extends Vue {
   @Prop({ type: Boolean, default: false }) useTime!: boolean;
 
   @Prop({ default: () => [], type: Array }) readonly rules!: [];
+
+  @Prop({ default: false, type: Boolean }) readonly readonly!: boolean
 
   private isDatetimeUsed: boolean = true;
   private usesDate: boolean = false;
@@ -276,14 +283,15 @@ export default class DateTimePicker extends Vue {
 
   get textInputRules () {
     let rulesList: ((value: string) => string | boolean)[] = []
+
+    const textInputRule = (v: string) => {
+      return !v || this.isValueValidByCurrentFormat(v) || `Please use the format: ${this.currentFormat}`
+    }
+    rulesList.push(textInputRule)
+
     if (this.rules.length > 0) {
       rulesList = rulesList.concat(this.rules)
     }
-
-    const textInputRule = (v: string) => {
-      return this.isValueValidByCurrentFormat(v) || `Please use the format: ${this.currentFormat}`
-    }
-    rulesList.push(textInputRule)
     return rulesList
   }
 }
