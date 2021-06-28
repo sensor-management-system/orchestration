@@ -6,6 +6,7 @@
  * Copyright (C) 2020
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
+ * - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
  *   Geosciences (GFZ, https://www.gfz-potsdam.de)
  *
@@ -41,6 +42,10 @@ export const dateToString = (aDate: DateTime | null): string => {
 
 export const stringToDate = (aDate: string): DateTime => {
   return DateTime.fromISO(aDate, { zone: 'UTC' })
+}
+
+export const stringToDateTimeFormat = (aDate: string): DateTime => {
+  return DateTime.fromFormat(aDate, 'yyyy-MM-dd HH:mm', { zone: 'UTC' })
 }
 
 export const timeStampToUTCDateTime = (value: number) : string => {

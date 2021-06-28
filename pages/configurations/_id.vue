@@ -5,6 +5,7 @@ Helmholtz DataHub Initiative by GFZ and UFZ.
 Copyright (C) 2020
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
+- Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
   Geosciences (GFZ, https://www.gfz-potsdam.de)
 
@@ -77,20 +78,24 @@ permissions and limitations under the Licence.
               >
                 <v-row>
                   <v-col cols="12" md="3">
-                    <DatePicker
+                    <date-time-picker
                       :value="configuration.startDate"
                       label="Start date"
+                      placeholder="e.g. 2000-01-31 12:00"
                       :rules="[rules.startDate]"
                       :readonly="readonly"
+                      :disabled="readonly"
                       @input="setStartDateAndValidate"
                     />
                   </v-col>
                   <v-col cols="12" md="3">
-                    <DatePicker
+                    <date-time-picker
                       :value="configuration.endDate"
                       label="End date"
+                      placeholder="e.g. 2001-01-31 12:00"
                       :rules="[rules.endDate]"
                       :readonly="readonly"
+                      :disabled="readonly"
                       @input="setEndDateAndValidate"
                     />
                   </v-col>
@@ -294,7 +299,6 @@ import ConfigurationsTreeView from '@/components/ConfigurationsTreeView.vue'
 import ConfigurationsDemoTreeView from '@/components/ConfigurationsDemoTreeView.vue'
 import ConfigurationsSelectedItem from '@/components/ConfigurationsSelectedItem.vue'
 import InfoBox from '@/components/InfoBox.vue'
-import DatePicker from '@/components/DatePicker.vue'
 
 import { Device } from '@/models/Device'
 import { Platform } from '@/models/Platform'
@@ -310,11 +314,12 @@ import { DeviceConfigurationAttributes } from '@/models/DeviceConfigurationAttri
 import { PlatformConfigurationAttributes } from '@/models/PlatformConfigurationAttributes'
 
 import { DateTime } from 'luxon'
-import { stringToDate } from '@/utils/dateHelper'
 import { getParentByClass } from '@/utils/domHelper'
+import DateTimePicker from '@/components/DateTimePicker.vue'
 
 @Component({
   components: {
+    DateTimePicker,
     ContactSelect,
     DevicePropertyHierarchySelect,
     DeviceConfigurationAttributesExpansionPanels,
@@ -323,8 +328,7 @@ import { getParentByClass } from '@/utils/domHelper'
     ConfigurationsTreeView,
     ConfigurationsDemoTreeView,
     ConfigurationsSelectedItem,
-    InfoBox,
-    DatePicker
+    InfoBox
   }
 })
 // @ts-ignore
@@ -355,7 +359,7 @@ export default class ConfigurationsIdPage extends Vue {
     if (!this.configuration.endDate) {
       return true
     }
-    if (stringToDate(v) <= this.configuration.endDate) {
+    if (this.configuration.startDate <= this.configuration.endDate) {
       return true
     }
     return 'Start date must not be after end date'
@@ -368,7 +372,7 @@ export default class ConfigurationsIdPage extends Vue {
     if (!this.configuration.startDate) {
       return true
     }
-    if (stringToDate(v) >= this.configuration.startDate) {
+    if (this.configuration.endDate >= this.configuration.startDate) {
       return true
     }
     return 'End date must not be before start date'
