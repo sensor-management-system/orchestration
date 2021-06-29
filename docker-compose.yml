@@ -104,6 +104,7 @@ services:
       - ./ngnix/index.html:/usr/share/nginx/html/index.html
       - ./certs:/etc/nginx/ssl
       - ./ngnix/default.conf:/etc/nginx/conf.d/rdm-test.intranet.ufz.de.conf
+      - ./ngnix/nginx.conf:/etc/nginx/nginx.conf
 
 volumes:
   esdata01:
