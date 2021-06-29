@@ -212,10 +212,10 @@ permissions and limitations under the Licence.
             <v-card-text>
               <v-row>
                 <v-col cols="12" md="3">
-                  <DatePicker
+                  <DateTimePicker
                     :value="selectedDate"
+                    placeholder="e.g. 2000-01-31 12:00"
                     label="Configuration at date"
-                    :clearable="false"
                     @input="setSelectedDate"
                   />
                 </v-col>
@@ -400,7 +400,6 @@ import ConfigurationsPlatformDeviceSearch from '@/components/ConfigurationsPlatf
 import ConfigurationsTreeView from '@/components/ConfigurationsTreeView.vue'
 import ConfigurationsDemoTreeView from '@/components/ConfigurationsDemoTreeView.vue'
 import ConfigurationsSelectedItem from '@/components/ConfigurationsSelectedItem.vue'
-import DatePicker from '@/components/DatePicker.vue'
 import DateTimePicker from '@/components/DateTimePicker.vue'
 import InfoBox from '@/components/InfoBox.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
@@ -624,7 +623,6 @@ class DeviceUnmountTimelineAction implements ITimelineAction {
 
 @Component({
   components: {
-    DatePicker,
     DateTimePicker,
     ContactSelect,
     DevicePropertyHierarchySelect,
@@ -1165,8 +1163,6 @@ export default class ConfigurationsIdPage extends Vue {
   setSelectedDate (date: DateTime | null) {
     if (date) {
       this.selectedDate = date.setZone('utc')
-    } else {
-      this.selectedDate = this.today
     }
   }
 
