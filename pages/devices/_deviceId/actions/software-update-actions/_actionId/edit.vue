@@ -51,19 +51,13 @@ permissions and limitations under the Licence.
         apply
       </v-btn>
     </v-card-actions>
-    <!-- just to be consistent with the new mask, we show the selected action type as an disabled v-select here -->
-    <v-select
-      :value="valueCopy.actionTypeName"
-      :items="[valueCopy.actionTypeName]"
-      :item-text="(x) => x"
-      disabled
-      label="Action Type"
-    />
-    <GenericActionForm
-      ref="genericDeviceActionForm"
-      v-model="valueCopy"
+
+    <SoftwareUpdateActionForm
+      ref="softwareUpdateActionForm"
+      v-model="action"
       :attachments="attachments"
     />
+
     <v-card-actions>
       <v-spacer />
       <v-btn
@@ -89,37 +83,43 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop, Watch } from 'nuxt-property-decorator'
+import { Component, Vue } from 'nuxt-property-decorator'
 
 import { Attachment } from '@/models/Attachment'
-import { GenericAction } from '@/models/GenericAction'
+import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
 
-import GenericActionForm from '@/components/GenericActionForm.vue'
+import SoftwareUpdateActionForm from '@/components/SoftwareUpdateActionForm.vue'
 
 @Component({
   components: {
-    GenericActionForm
-  }
+    SoftwareUpdateActionForm
+  },
+  scrollToTop: true
 })
-export default class DeviceActionEditPage extends Vue {
-  private valueCopy: GenericAction = new GenericAction()
+export default class DeviceSoftwareUpdateActionEditPage extends Vue {
+  private action: SoftwareUpdateAction = new SoftwareUpdateAction()
   private attachments: Attachment[] = []
+  private _isLoading: boolean = false
   private _isSaving: boolean = false
 
-  @Prop({
-    default: () => new GenericAction(),
-    required: true,
-    type: Object
-  })
-  readonly value!: GenericAction
+  async fetch (): Promise<any> {
+    this.isLoading = true
+    await Promise.all([
+      this.fetchAttachments(),
+      this.fetchAction()
+    ])
+    this.isLoading = false
+  }
 
-  created () {
-    if (this.value) {
-      this.valueCopy = GenericAction.createFromObject(this.value)
+  async fetchAction (): Promise<any> {
+    try {
+      this.action = await this.$api.deviceSoftwareUpdateActions.findById(this.actionId)
+    } catch (_) {
+      this.$store.commit('snackbar/setError', 'Failed to fetch action')
     }
   }
 
-  async fetch (): Promise<any> {
+  async fetchAttachments (): Promise<any> {
     try {
       this.attachments = await this.$api.devices.findRelatedDeviceAttachments(this.deviceId)
     } catch (_) {
@@ -131,8 +131,21 @@ export default class DeviceActionEditPage extends Vue {
     return this.$route.params.deviceId
   }
 
+  get actionId (): string {
+    return this.$route.params.actionId
+  }
+
   get isLoggedIn (): boolean {
     return this.$store.getters['oidc/isAuthenticated']
+  }
+
+  get isLoading (): boolean {
+    return this.$data._isLoading
+  }
+
+  set isLoading (value: boolean) {
+    this.$data._isLoading = value
+    this.$emit('showload', value)
   }
 
   get isSaving (): boolean {
@@ -145,24 +158,18 @@ export default class DeviceActionEditPage extends Vue {
   }
 
   save (): void {
-    if (!(this.$refs.genericDeviceActionForm as Vue & { isValid: () => boolean }).isValid()) {
+    if (!(this.$refs.softwareUpdateActionForm as Vue & { isValid: () => boolean }).isValid()) {
       this.$store.commit('snackbar/setError', 'Please correct the errors')
       return
     }
     this.isSaving = true
-    this.$api.genericDeviceActions.update(this.deviceId, this.valueCopy).then((action: GenericAction) => {
+    this.$api.deviceSoftwareUpdateActions.update(this.deviceId, this.action).then((action: SoftwareUpdateAction) => {
       this.$router.push('/devices/' + this.deviceId + '/actions', () => this.$emit('input', action))
     }).catch(() => {
       this.$store.commit('snackbar/setError', 'Failed to save the action')
     }).finally(() => {
       this.isSaving = false
     })
-  }
-
-  @Watch('value', { immediate: true, deep: true })
-  // @ts-ignore
-  onValueChanged (val: GenericAction) {
-    this.valueCopy = GenericAction.createFromObject(val)
   }
 }
 </script>

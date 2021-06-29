@@ -32,12 +32,11 @@
 import { DateTime } from 'luxon'
 import { Attachment } from '@/models/Attachment'
 import { Contact } from '@/models/Contact'
-import { GenericAction } from '@/models/GenericAction'
+import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
 
-describe('GenericAction', () => {
-  test('create a GenericAction from an object', () => {
+describe('SoftwareUpdateAction', () => {
+  test('create a SoftwareUpdateAction from an object', () => {
     const date1 = DateTime.fromISO('2021-05-27')
-    const date2 = DateTime.fromISO('2021-05-28')
 
     const attachment = new Attachment()
     attachment.id = '1'
@@ -49,27 +48,29 @@ describe('GenericAction', () => {
     contact.familyName = 'Simpson'
     contact.email = 'homer.simpson@springfield.com'
 
-    const action = GenericAction.createFromObject({
+    const action = SoftwareUpdateAction.createFromObject({
       id: '1',
-      description: 'This is a generic action description',
-      actionTypeName: 'Generic Device Action',
-      actionTypeUrl: 'https://foo/bar',
-      beginDate: date1,
-      endDate: date2,
+      description: 'This is a software update action description',
+      softwareTypeName: 'Software Update',
+      softwareTypeUrl: 'https://foo/bar',
+      updateDate: date1,
+      version: '1.03',
+      repositoryUrl: 'https://git.gfz-potsdam.de/sensor-system-management/frontend',
       contact,
       attachments: [attachment]
     })
 
     expect(typeof action).toBe('object')
     expect(action).toHaveProperty('id', '1')
-    expect(action).toHaveProperty('description', 'This is a generic action description')
-    expect(action).toHaveProperty('actionTypeName', 'Generic Device Action')
-    expect(action).toHaveProperty('actionTypeUrl', 'https://foo/bar')
-    expect(action.beginDate).toBe(date1)
-    expect(action.endDate).toBe(date2)
+    expect(action).toHaveProperty('description', 'This is a software update action description')
+    expect(action).toHaveProperty('softwareTypeName', 'Software Update')
+    expect(action).toHaveProperty('softwareTypeUrl', 'https://foo/bar')
+    expect(action).toHaveProperty('version', '1.03')
+    expect(action).toHaveProperty('repositoryUrl', 'https://git.gfz-potsdam.de/sensor-system-management/frontend')
+    expect(action.updateDate).toBe(date1)
     expect(action.date).toBe(date1)
     expect(action.contact).toStrictEqual(contact)
     expect(action.attachments).toContainEqual(attachment)
-    expect(action.isGenericAction).toBeTruthy()
+    expect(action.isSoftwareUpdateAction).toBeTruthy()
   })
 })

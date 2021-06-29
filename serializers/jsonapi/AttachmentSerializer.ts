@@ -53,7 +53,13 @@ export interface IAttachmentsAndMissing {
   missing: IMissingAttachmentData
 }
 
-export class AttachmentSerializer {
+export interface IAttachmentSerializer {
+  convertJsonApiObjectToModel (jsonApiObject: IJsonApiEntityEnvelope): Attachment
+  convertJsonApiDataToModel (jsonApiData: IJsonApiEntityWithOptionalAttributes): Attachment
+  convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiEntityListEnvelope): Attachment[]
+}
+
+export class AttachmentSerializer implements IAttachmentSerializer {
   convertJsonApiObjectToModel (jsonApiObject: IJsonApiEntityEnvelope): Attachment {
     const data = jsonApiObject.data
     return this.convertJsonApiDataToModel(data)

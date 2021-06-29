@@ -68,3 +68,21 @@ export function toRouterPath (callbackUri: string, routeBase = '/') {
   }
   return null
 }
+
+/**
+ * checks whether the url contains the given protocols
+ *
+ * to be honest, it just checks whether the string starts with http(s):// or similar
+ *
+ * @param {string[]} allowedProtocols - the protocols to check
+ * @param {string} url - the url to check
+ * @returns {boolean | string} true when protocols are in the url, otherwise false
+ */
+export function protocolsInUrl (allowedProtocols: string[], url: string) {
+  const protocols = allowedProtocols.join('|')
+  const urlRegExp = new RegExp('^(' + protocols + ')://.+$', 'i')
+  if (url && !url.match(urlRegExp)) {
+    return false
+  }
+  return true
+}

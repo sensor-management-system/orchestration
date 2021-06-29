@@ -32,9 +32,9 @@
 import { Attachment } from '@/models/Attachment'
 
 import {
-  GenericDeviceActionAttachmentSerializer,
-  GenericPlatformActionAttachmentSerializer
-} from '@/serializers/jsonapi/GenericActionAttachmentSerializer'
+  DeviceSoftwareUpdateActionAttachmentSerializer,
+  PlatformSoftwareUpdateActionAttachmentSerializer
+} from '@/serializers/jsonapi/SoftwareUpdateActionAttachmentSerializer'
 
 import {
   IJsonApiEntityEnvelope,
@@ -43,31 +43,31 @@ import {
   IJsonApiRelationships
 } from '@/serializers/jsonapi/JsonApiTypes'
 
-describe('GenericActionAttachmentSerializer', () => {
-  describe('GenericDeviceActionAttachmentSerializer', () => {
+describe('SoftwareUpdateActionAttachmentSerializer', () => {
+  describe('DeviceSoftwareUpdateActionAttachmentSerializer', () => {
     function getExampleObjectResponse (): IJsonApiEntityEnvelope {
       return {
         data: {
-          type: 'generic_device_action',
+          type: 'device_software_update_action',
           relationships: {
-            generic_device_action_attachments: {
+            device_software_update_action_attachments: {
               links: {
-                related: '/rdm/svm-api/v1/generic-device-actions/9/relationships/generic-device-action-attachments'
+                related: '/rdm/svm-api/v1/device-software-update-actions/9/relationships/device-software-update-action-attachments'
               },
               data: [
                 {
-                  type: 'generic_device_action_attachment',
+                  type: 'device_software_update_action_attachment',
                   id: '6'
                 },
                 {
-                  type: 'generic_device_action_attachment',
+                  type: 'device_software_update_action_attachment',
                   id: '7'
                 }
               ]
             },
             device: {
               links: {
-                self: '/rdm/svm-api/v1/generic-device-actions/9/relationships/device',
+                self: '/rdm/svm-api/v1/device-software-update-actions/9/relationships/device',
                 related: '/rdm/svm-api/v1/devices/204'
               },
               data: {
@@ -77,7 +77,7 @@ describe('GenericActionAttachmentSerializer', () => {
             },
             contact: {
               links: {
-                self: '/rdm/svm-api/v1/generic-device-actions/9/relationships/contact',
+                self: '/rdm/svm-api/v1/device-software-update-actions/9/relationships/contact',
                 related: '/rdm/svm-api/v1/contacts/14'
               },
               data: {
@@ -87,29 +87,28 @@ describe('GenericActionAttachmentSerializer', () => {
             }
           },
           attributes: {
-            updated_at: null,
-            created_at: '2021-05-12T08:19:56.781661',
-            action_type_name: 'Device visit',
-            begin_date: '2021-05-21T00:00:00',
-            end_date: '2021-05-30T00:00:00',
-            action_type_uri: '',
-            description: 'dfdfdf'
+            software_type_uri: 'https://cv/firmware',
+            software_type_name: 'Firmware',
+            update_date: '2021-05-21T00:00:00',
+            description: 'dfdfdf',
+            version: '1.42',
+            repository_url: 'https://myrepo.de'
           },
           id: '9',
           links: {
-            self: '/rdm/svm-api/v1/generic-device-actions/9'
+            self: '/rdm/svm-api/v1/device-software-update-actions/9'
           }
         },
         links: {
-          self: '/rdm/svm-api/v1/generic-device-actions/9'
+          self: '/rdm/svm-api/v1/device-software-update-actions/9'
         },
         included: [
           {
-            type: 'generic_device_action_attachment',
+            type: 'device_software_update_action_attachment',
             relationships: {
               attachment: {
                 links: {
-                  self: '/rdm/svm-api/v1/generic-device-action-attachments/6/relationships/attachment',
+                  self: '/rdm/svm-api/v1/device-software-update-action-attachments/6/relationships/attachment',
                   related: '/rdm/svm-api/v1/device-attachments/51'
                 },
                 data: {
@@ -119,14 +118,14 @@ describe('GenericActionAttachmentSerializer', () => {
               },
               action: {
                 links: {
-                  self: '/rdm/svm-api/v1/generic-device-action-attachments/6/relationships/action',
-                  related: '/rdm/svm-api/v1/generic-device-actions/9'
+                  self: '/rdm/svm-api/v1/device-software-update-action-attachments/6/relationships/action',
+                  related: '/rdm/svm-api/v1/device-software-update-actions/9'
                 }
               }
             },
             id: '6',
             links: {
-              self: '/rdm/svm-api/v1/generic-device-action-attachments/6'
+              self: '/rdm/svm-api/v1/device-software-update-action-attachments/6'
             }
           },
           {
@@ -153,11 +152,11 @@ describe('GenericActionAttachmentSerializer', () => {
             }
           },
           {
-            type: 'generic_device_action_attachment',
+            type: 'device_software_update_action_attachment',
             relationships: {
               attachment: {
                 links: {
-                  self: '/rdm/svm-api/v1/generic-device-action-attachments/7/relationships/attachment',
+                  self: '/rdm/svm-api/v1/device-software-update-action-attachments/7/relationships/attachment',
                   related: '/rdm/svm-api/v1/device-attachments/52'
                 },
                 data: {
@@ -167,14 +166,14 @@ describe('GenericActionAttachmentSerializer', () => {
               },
               action: {
                 links: {
-                  self: '/rdm/svm-api/v1/generic-device-action-attachments/7/relationships/action',
-                  related: '/rdm/svm-api/v1/generic-device-actions/9'
+                  self: '/rdm/svm-api/v1/device-software-update-action-attachments/7/relationships/action',
+                  related: '/rdm/svm-api/v1/device-software-update-actions/9'
                 }
               }
             },
             id: '7',
             links: {
-              self: '/rdm/svm-api/v1/generic-device-action-attachments/7'
+              self: '/rdm/svm-api/v1/device-software-update-action-attachments/7'
             }
           },
           {
@@ -209,23 +208,23 @@ describe('GenericActionAttachmentSerializer', () => {
 
     describe('constructing and types', () => {
       it('should return a correct action type name', () => {
-        const serializer = new GenericDeviceActionAttachmentSerializer()
-        expect(serializer.getActionTypeName()).toEqual('generic_device_action')
+        const serializer = new DeviceSoftwareUpdateActionAttachmentSerializer()
+        expect(serializer.getActionTypeName()).toEqual('device_software_update_action')
       })
       it('should return a correct action attachment type name', () => {
-        const serializer = new GenericDeviceActionAttachmentSerializer()
-        expect(serializer.getActionAttachmentTypeName()).toEqual('generic_device_action_attachment')
+        const serializer = new DeviceSoftwareUpdateActionAttachmentSerializer()
+        expect(serializer.getActionAttachmentTypeName()).toEqual('device_software_update_action_attachment')
       })
       it('should return a the plural form of the action attachment type name', () => {
-        const serializer = new GenericDeviceActionAttachmentSerializer()
-        expect(serializer.getActionAttachmentTypeNamePlural()).toEqual('generic_device_action_attachments')
+        const serializer = new DeviceSoftwareUpdateActionAttachmentSerializer()
+        expect(serializer.getActionAttachmentTypeNamePlural()).toEqual('device_software_update_action_attachments')
       })
       it('should return a correct attachment type name', () => {
-        const serializer = new GenericDeviceActionAttachmentSerializer()
+        const serializer = new DeviceSoftwareUpdateActionAttachmentSerializer()
         expect(serializer.getAttachmentTypeName()).toEqual('device_attachment')
       })
       it('should return an attachment serializer', () => {
-        const serializer = new GenericDeviceActionAttachmentSerializer()
+        const serializer = new DeviceSoftwareUpdateActionAttachmentSerializer()
         expect(typeof serializer.attachmentSerializer).toBe('object')
       })
     })
@@ -239,12 +238,12 @@ describe('GenericActionAttachmentSerializer', () => {
         const actionId = '2'
 
         const expectedApiModel: IJsonApiEntityWithOptionalId = {
-          type: 'generic_device_action_attachment',
+          type: 'device_software_update_action_attachment',
           attributes: {},
           relationships: {
             action: {
               data: {
-                type: 'generic_device_action',
+                type: 'device_software_update_action',
                 id: '2'
               }
             },
@@ -257,7 +256,7 @@ describe('GenericActionAttachmentSerializer', () => {
           }
         }
 
-        const serializer = new GenericDeviceActionAttachmentSerializer()
+        const serializer = new DeviceSoftwareUpdateActionAttachmentSerializer()
         const apiModel = serializer.convertModelToJsonApiData(attachment, actionId)
 
         expect(apiModel).toEqual(expectedApiModel)
@@ -277,7 +276,7 @@ describe('GenericActionAttachmentSerializer', () => {
         })
 
         const response = getExampleObjectResponse()
-        const serializer = new GenericDeviceActionAttachmentSerializer()
+        const serializer = new DeviceSoftwareUpdateActionAttachmentSerializer()
 
         const attachmentList = serializer.convertJsonApiRelationshipsModelList(response.data.relationships as IJsonApiRelationships, response.included as IJsonApiEntityWithOptionalAttributes[])
 
@@ -287,26 +286,26 @@ describe('GenericActionAttachmentSerializer', () => {
       })
     })
   })
-  describe('GenericPlatformActionAttachmentSerializer', () => {
+  describe('PlatformSoftwareUpdateActionAttachmentSerializer', () => {
     describe('constructing and types', () => {
       it('should return a correct action type name', () => {
-        const serializer = new GenericPlatformActionAttachmentSerializer()
-        expect(serializer.getActionTypeName()).toEqual('generic_platform_action')
+        const serializer = new PlatformSoftwareUpdateActionAttachmentSerializer()
+        expect(serializer.getActionTypeName()).toEqual('platform_software_update_action')
       })
       it('should return a correct action attachment type name', () => {
-        const serializer = new GenericPlatformActionAttachmentSerializer()
-        expect(serializer.getActionAttachmentTypeName()).toEqual('generic_platform_action_attachment')
+        const serializer = new PlatformSoftwareUpdateActionAttachmentSerializer()
+        expect(serializer.getActionAttachmentTypeName()).toEqual('platform_software_update_action_attachment')
       })
       it('should return a the plural form of the action attachment type name', () => {
-        const serializer = new GenericPlatformActionAttachmentSerializer()
-        expect(serializer.getActionAttachmentTypeNamePlural()).toEqual('generic_platform_action_attachments')
+        const serializer = new PlatformSoftwareUpdateActionAttachmentSerializer()
+        expect(serializer.getActionAttachmentTypeNamePlural()).toEqual('platform_software_update_action_attachments')
       })
       it('should return a correct attachment type name', () => {
-        const serializer = new GenericPlatformActionAttachmentSerializer()
+        const serializer = new PlatformSoftwareUpdateActionAttachmentSerializer()
         expect(serializer.getAttachmentTypeName()).toEqual('platform_attachment')
       })
       it('should return an attachment serializer', () => {
-        const serializer = new GenericPlatformActionAttachmentSerializer()
+        const serializer = new PlatformSoftwareUpdateActionAttachmentSerializer()
         expect(typeof serializer.attachmentSerializer).toBe('object')
       })
     })

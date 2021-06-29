@@ -58,7 +58,7 @@ permissions and limitations under the Licence.
           v-else-if="softwareUpdateChosen"
           color="green"
           small
-          @click="addDeviceSoftwareUpdateAction"
+          @click="addSoftwareUpdateAction"
         >
           Add
         </v-btn>
@@ -132,46 +132,19 @@ permissions and limitations under the Licence.
           </v-row>
         </v-form>
       </v-card-text>
+
       <!-- softwareUpdate -->
       <v-card-text
         v-if="softwareUpdateChosen"
       >
-        <v-form
-          ref="datesForm"
-          v-model="datesAreValid"
-          @submit.prevent
-        >
-          <v-row>
-            <v-col cols="12" md="6">
-              <DatePicker
-                :value="startDate"
-                label="Date"
-                :rules="[rules.startDate, rules.updateDateNotNull]"
-                @input="setStartDateAndValidate"
-              />
-            </v-col>
-          </v-row>
-        </v-form>
-        <v-form
-          ref="softwareTypeForm"
-          v-model="softwareTypeIsValid"
-          @submit.prevent
-        >
-          <v-row>
-            <v-col cols="12" md="6">
-              <v-select :items="softwareTypes" clearable :item-text="(x) => x.name" label="Software type" :rules="[rules.softwareTypeNotNull]" />
-            </v-col>
-          </v-row>
-        </v-form>
-        <v-row>
-          <v-col cols="12" md="3">
-            <v-text-field label="Version" placeholder="1.2.3" />
-          </v-col>
-          <v-col cols="12" md="9">
-            <v-text-field label="Repository URL" placeholder="https://github.com/" />
-          </v-col>
-        </v-row>
+        <SoftwareUpdateActionForm
+          ref="softwareUpdateActionForm"
+          v-model="softwareUpdateAction"
+          :attachments="attachments"
+        />
       </v-card-text>
+
+      <!-- genericAction -->
       <v-card-text
         v-if="genericActionChosen"
       >
@@ -181,9 +154,13 @@ permissions and limitations under the Licence.
           :attachments="attachments"
         />
       </v-card-text>
-      <!-- action type independent -->
+
+      <!-- Action type independent
+           TODO: can be removed once all Action classes are implemented and
+           derive from ActionCommonDetails. Then the CommonActionForm component can
+           be used for all Action types. -->
       <v-card-text
-        v-if="chosenKindOfAction && !genericActionChosen"
+        v-if="chosenKindOfAction && !genericActionChosen && !softwareUpdateChosen"
       >
         <v-row>
           <v-col cols="12" md="12">
@@ -255,7 +232,7 @@ permissions and limitations under the Licence.
           v-else-if="softwareUpdateChosen"
           color="green"
           small
-          @click="addDeviceSoftwareUpdateAction"
+          @click="addSoftwareUpdateAction"
         >
           Add
         </v-btn>
@@ -281,6 +258,7 @@ import { Contact } from '@/models/Contact'
 import { Attachment } from '@/models/Attachment'
 import { DeviceProperty } from '@/models/DeviceProperty'
 import { GenericAction } from '@/models/GenericAction'
+import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
 import { IActionType, ActionType } from '@/models/ActionType'
 
 import { ACTION_TYPE_API_FILTER_DEVICE } from '@/services/cv/ActionTypeApi'
@@ -288,6 +266,7 @@ import { ACTION_TYPE_API_FILTER_DEVICE } from '@/services/cv/ActionTypeApi'
 import { dateToString, stringToDate } from '@/utils/dateHelper'
 
 import GenericActionForm from '@/components/GenericActionForm.vue'
+import SoftwareUpdateActionForm from '@/components/SoftwareUpdateActionForm.vue'
 import DatePicker from '@/components/DatePicker.vue'
 
 const KIND_OF_ACTION_TYPE_DEVICE_CALIBRATION = 'device_calibration'
@@ -303,6 +282,7 @@ type IOptionsForActionType = Pick<IActionType, 'id' | 'name' | 'uri'> & {
 @Component({
   components: {
     GenericActionForm,
+    SoftwareUpdateActionForm,
     DatePicker
   }
 })
@@ -359,6 +339,7 @@ export default class ActionAddPage extends Vue {
   private endDate: DateTime | null = null
 
   private genericDeviceAction: GenericAction = new GenericAction()
+  private softwareUpdateAction: SoftwareUpdateAction = new SoftwareUpdateAction()
 
   private _isSaving: boolean = false
 
@@ -416,6 +397,9 @@ export default class ActionAddPage extends Vue {
         this.genericDeviceAction = new GenericAction()
         this.genericDeviceAction.actionTypeName = newValue?.name || ''
         this.genericDeviceAction.actionTypeUrl = newValue?.uri || ''
+      }
+      if (this.softwareUpdateChosen) {
+        this.softwareUpdateAction = new SoftwareUpdateAction()
       }
     }
   }
@@ -543,17 +527,26 @@ export default class ActionAddPage extends Vue {
     this.$store.commit('snackbar/setError', 'Not implemented yet')
   }
 
-  addDeviceSoftwareUpdateAction () {
-    if (!(this.$refs.datesForm as Vue & { validate: () => boolean }).validate()) {
+  addSoftwareUpdateAction () {
+    if (!this.isLoggedIn) {
       return
     }
-    if (!(this.$refs.softwareTypeForm as Vue & { validate: () => boolean }).validate()) {
+    if (!this.softwareUpdateAction) {
       return
     }
-    if (!(this.$refs.contactForm as Vue & { validate: () => boolean}).validate()) {
+    if (!(this.$refs.softwareUpdateActionForm as Vue & { isValid: () => boolean }).isValid()) {
+      this.isSaving = false
+      this.$store.commit('snackbar/setError', 'Please correct the errors')
       return
     }
-    this.$store.commit('snackbar/setError', 'Not implemented yet')
+    this.isSaving = true
+    this.$api.deviceSoftwareUpdateActions.add(this.deviceId, this.softwareUpdateAction).then((action: SoftwareUpdateAction) => {
+      this.$router.push('/devices/' + this.deviceId + '/actions', () => this.$emit('input', action))
+    }).catch(() => {
+      this.$store.commit('snackbar/setError', 'Failed to save the action')
+    }).finally(() => {
+      this.isSaving = false
+    })
   }
 
   addGenericAction () {

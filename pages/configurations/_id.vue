@@ -353,7 +353,7 @@ export default class ConfigurationsIdPage extends Vue {
   }
 
   validateInputForStartDate (v: string): boolean | string {
-    if (v === null || v === '') {
+    if (v === null || v === '' || this.configuration.startDate === null) {
       return true
     }
     if (!this.configuration.endDate) {
@@ -366,7 +366,7 @@ export default class ConfigurationsIdPage extends Vue {
   }
 
   validateInputForEndDate (v: string): boolean | string {
-    if (v === null || v === '') {
+    if (v === null || v === '' || this.configuration.endDate === null) {
       return true
     }
     if (!this.configuration.startDate) {

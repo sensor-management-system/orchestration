@@ -30,7 +30,7 @@
  * permissions and limitations under the Licence.
  */
 import { DateTime } from 'luxon'
-import { GenericAction, IGenericAction } from '@/models/GenericAction'
+import { SoftwareUpdateAction, ISoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
 import { Attachment } from '@/models/Attachment'
 import {
   IJsonApiEntityEnvelope,
@@ -50,63 +50,64 @@ import {
 import { IActionAttachmentSerializer } from '@/serializers/jsonapi/ActionAttachmentSerializer'
 
 import {
-  GenericDeviceActionAttachmentSerializer,
-  GenericPlatformActionAttachmentSerializer
-} from '@/serializers/jsonapi/GenericActionAttachmentSerializer'
+  DeviceSoftwareUpdateActionAttachmentSerializer,
+  PlatformSoftwareUpdateActionAttachmentSerializer
+} from '@/serializers/jsonapi/SoftwareUpdateActionAttachmentSerializer'
 
-export interface IMissingGenericActionData {
+export interface IMissingSoftwareUpdateActionData {
   ids: string[]
 }
 
-export interface IGenericActionsAndMissing {
-  genericActions: GenericAction[]
-  missing: IMissingGenericActionData
+export interface ISoftwareUpdateActionsAndMissing {
+  softwareUpdateActions: SoftwareUpdateAction[]
+  missing: IMissingSoftwareUpdateActionData
 }
 
-export interface IGenericActionAttachmentRelation {
-  genericActionAttachmentId: string
+export interface ISoftwareUpdateActionAttachmentRelation {
+  softwareUpdateActionAttachmentId: string
   attachmentId: string
 }
 
-export interface IGenericActionSerializer {
+export interface ISoftwareUpdateActionSerializer {
   targetType: string
   attachmentSerializer: IActionAttachmentSerializer
-  convertJsonApiObjectToModel (jsonApiObject: IJsonApiEntityEnvelope): GenericAction
-  convertJsonApiDataToModel (jsonApiData: IJsonApiEntityWithOptionalAttributes, included: IJsonApiEntityWithOptionalAttributes[]): GenericAction
-  convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiEntityListEnvelope): GenericAction[]
-  convertModelToJsonApiData (action: GenericAction, deviceOrPlatformId: string): IJsonApiEntityWithOptionalId
-  convertModelToJsonApiRelationshipObject (action: IGenericAction): IJsonApiRelationships
-  convertModelToTupleWithIdAndType (action: IGenericAction): IJsonApiEntityWithoutDetails
-  convertJsonApiRelationshipsModelList (relationships: IJsonApiRelationships, included: IJsonApiEntityWithOptionalAttributes[]): IGenericActionsAndMissing
-  convertJsonApiIncludedActionAttachmentsToIdList (included: IJsonApiEntityWithOptionalAttributes[]): IGenericActionAttachmentRelation[]
+  convertJsonApiObjectToModel (jsonApiObject: IJsonApiEntityEnvelope): SoftwareUpdateAction
+  convertJsonApiDataToModel (jsonApiData: IJsonApiEntityWithOptionalAttributes, included: IJsonApiEntityWithOptionalAttributes[]): SoftwareUpdateAction
+  convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiEntityListEnvelope): SoftwareUpdateAction[]
+  convertModelToJsonApiData (action: SoftwareUpdateAction, deviceOrPlatformId: string): IJsonApiEntityWithOptionalId
+  convertModelToJsonApiRelationshipObject (action: ISoftwareUpdateAction): IJsonApiRelationships
+  convertModelToTupleWithIdAndType (action: ISoftwareUpdateAction): IJsonApiEntityWithoutDetails
+  convertJsonApiRelationshipsModelList (relationships: IJsonApiRelationships, included: IJsonApiEntityWithOptionalAttributes[]): ISoftwareUpdateActionsAndMissing
+  convertJsonApiIncludedActionAttachmentsToIdList (included: IJsonApiEntityWithOptionalAttributes[]): ISoftwareUpdateActionAttachmentRelation[]
   getActionTypeName (): string
   getActionTypeNamePlural (): string
   getActionAttachmentTypeName (): string
 }
 
-export abstract class AbstractGenericActionSerializer implements IGenericActionSerializer {
+export abstract class AbstractSoftwareUpdateActionSerializer implements ISoftwareUpdateActionSerializer {
   private contactSerializer: ContactSerializer = new ContactSerializer()
 
   abstract get targetType (): string
   abstract get attachmentSerializer (): IActionAttachmentSerializer
 
-  convertJsonApiObjectToModel (jsonApiObject: IJsonApiEntityEnvelope): GenericAction {
+  convertJsonApiObjectToModel (jsonApiObject: IJsonApiEntityEnvelope): SoftwareUpdateAction {
     const data = jsonApiObject.data
     const included = jsonApiObject.included || []
     return this.convertJsonApiDataToModel(data, included)
   }
 
-  convertJsonApiDataToModel (jsonApiData: IJsonApiEntityWithOptionalAttributes, included: IJsonApiEntityWithOptionalAttributes[]): GenericAction {
+  convertJsonApiDataToModel (jsonApiData: IJsonApiEntityWithOptionalAttributes, included: IJsonApiEntityWithOptionalAttributes[]): SoftwareUpdateAction {
     const attributes = jsonApiData.attributes
-    const newEntry = GenericAction.createEmpty()
+    const newEntry = SoftwareUpdateAction.createEmpty()
 
     newEntry.id = jsonApiData.id.toString()
     if (attributes) {
       newEntry.description = attributes.description || ''
-      newEntry.actionTypeName = attributes.action_type_name || ''
-      newEntry.actionTypeUrl = attributes.action_type_uri || ''
-      newEntry.beginDate = attributes.begin_date ? DateTime.fromISO(attributes.begin_date, { zone: 'UTC' }) : null
-      newEntry.endDate = attributes.end_date ? DateTime.fromISO(attributes.end_date, { zone: 'UTC' }) : null
+      newEntry.softwareTypeName = attributes.software_type_name || ''
+      newEntry.softwareTypeUrl = attributes.software_type_uri || ''
+      newEntry.updateDate = attributes.update_date ? DateTime.fromISO(attributes.update_date, { zone: 'UTC' }) : null
+      newEntry.version = attributes.version || ''
+      newEntry.repositoryUrl = attributes.repository_url || ''
     }
 
     const relationships = jsonApiData.relationships || {}
@@ -124,22 +125,23 @@ export abstract class AbstractGenericActionSerializer implements IGenericActionS
     return newEntry
   }
 
-  convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiEntityListEnvelope): GenericAction[] {
+  convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiEntityListEnvelope): SoftwareUpdateAction[] {
     const included = jsonApiObjectList.included || []
     return jsonApiObjectList.data.map((model) => {
       return this.convertJsonApiDataToModel(model, included)
     })
   }
 
-  convertModelToJsonApiData (action: GenericAction, deviceOrPlatformId: string): IJsonApiEntityWithOptionalId {
+  convertModelToJsonApiData (action: SoftwareUpdateAction, deviceOrPlatformId: string): IJsonApiEntityWithOptionalId {
     const data: IJsonApiEntityWithOptionalId = {
       type: this.getActionTypeName(),
       attributes: {
         description: action.description,
-        action_type_name: action.actionTypeName,
-        action_type_uri: action.actionTypeUrl,
-        begin_date: action.beginDate != null ? action.beginDate.setZone('UTC').toISO() : null,
-        end_date: action.endDate != null ? action.endDate.setZone('UTC').toISO() : null
+        software_type_name: action.softwareTypeName,
+        software_type_uri: action.softwareTypeUrl,
+        update_date: action.updateDate != null ? action.updateDate.setZone('UTC').toISO() : null,
+        version: action.version,
+        repository_url: action.repositoryUrl
       },
       relationships: {
         [this.targetType]: {
@@ -165,7 +167,7 @@ export abstract class AbstractGenericActionSerializer implements IGenericActionS
     return data
   }
 
-  convertModelToJsonApiRelationshipObject (action: IGenericAction): IJsonApiRelationships {
+  convertModelToJsonApiRelationshipObject (action: ISoftwareUpdateAction): IJsonApiRelationships {
     return {
       [this.getActionTypeName()]: {
         data: this.convertModelToTupleWithIdAndType(action)
@@ -173,14 +175,14 @@ export abstract class AbstractGenericActionSerializer implements IGenericActionS
     }
   }
 
-  convertModelToTupleWithIdAndType (action: IGenericAction): IJsonApiEntityWithoutDetails {
+  convertModelToTupleWithIdAndType (action: ISoftwareUpdateAction): IJsonApiEntityWithoutDetails {
     return {
       id: action.id || '',
       type: this.getActionTypeName()
     }
   }
 
-  convertJsonApiRelationshipsModelList (relationships: IJsonApiRelationships, included: IJsonApiEntityWithOptionalAttributes[]): IGenericActionsAndMissing {
+  convertJsonApiRelationshipsModelList (relationships: IJsonApiRelationships, included: IJsonApiEntityWithOptionalAttributes[]): ISoftwareUpdateActionsAndMissing {
     const actionIds = []
     const type = this.getActionTypeName()
     const typePlural = this.getActionTypeNamePlural()
@@ -194,7 +196,7 @@ export abstract class AbstractGenericActionSerializer implements IGenericActionS
       }
     }
 
-    const possibleActions: { [key: string]: GenericAction } = {}
+    const possibleActions: { [key: string]: SoftwareUpdateAction } = {}
     if (included && included.length > 0) {
       for (const includedEntry of included) {
         if (includedEntry.type === type) {
@@ -219,15 +221,15 @@ export abstract class AbstractGenericActionSerializer implements IGenericActionS
     }
 
     return {
-      genericActions: actions,
+      softwareUpdateActions: actions,
       missing: {
         ids: missingDataForActionIds
       }
     }
   }
 
-  convertJsonApiIncludedActionAttachmentsToIdList (included: IJsonApiEntityWithOptionalAttributes[]): IGenericActionAttachmentRelation[] {
-    const linkedAttachments: IGenericActionAttachmentRelation[] = []
+  convertJsonApiIncludedActionAttachmentsToIdList (included: IJsonApiEntityWithOptionalAttributes[]): ISoftwareUpdateActionAttachmentRelation[] {
+    const linkedAttachments: ISoftwareUpdateActionAttachmentRelation[] = []
     const type = this.getActionAttachmentTypeName()
     included.forEach((i) => {
       if (!i.id) {
@@ -241,7 +243,7 @@ export abstract class AbstractGenericActionSerializer implements IGenericActionS
       }
       const attachmentId: string = (i.relationships.attachment.data as IJsonApiEntityWithoutDetails).id
       linkedAttachments.push({
-        genericActionAttachmentId: i.id,
+        softwareUpdateActionAttachmentId: i.id,
         attachmentId
       })
     })
@@ -249,7 +251,7 @@ export abstract class AbstractGenericActionSerializer implements IGenericActionS
   }
 
   getActionTypeName (): string {
-    return 'generic_' + this.targetType + '_action'
+    return this.targetType + '_software_update_action'
   }
 
   getActionTypeNamePlural (): string {
@@ -257,16 +259,16 @@ export abstract class AbstractGenericActionSerializer implements IGenericActionS
   }
 
   getActionAttachmentTypeName (): string {
-    return 'generic_' + this.targetType + '_action_attachment'
+    return this.targetType + '_software_update_action_attachment'
   }
 }
 
-export class GenericDeviceActionSerializer extends AbstractGenericActionSerializer {
+export class DeviceSoftwareUpdateActionSerializer extends AbstractSoftwareUpdateActionSerializer {
   private _attachmentSerializer: IActionAttachmentSerializer
 
   constructor () {
     super()
-    this._attachmentSerializer = new GenericDeviceActionAttachmentSerializer()
+    this._attachmentSerializer = new DeviceSoftwareUpdateActionAttachmentSerializer()
   }
 
   get targetType (): string {
@@ -278,12 +280,12 @@ export class GenericDeviceActionSerializer extends AbstractGenericActionSerializ
   }
 }
 
-export class GenericPlatformActionSerializer extends AbstractGenericActionSerializer {
+export class PlatformSoftwareUpdateActionSerializer extends AbstractSoftwareUpdateActionSerializer {
   private _attachmentSerializer: IActionAttachmentSerializer
 
   constructor () {
     super()
-    this._attachmentSerializer = new GenericPlatformActionAttachmentSerializer()
+    this._attachmentSerializer = new PlatformSoftwareUpdateActionAttachmentSerializer()
   }
 
   get targetType (): string {

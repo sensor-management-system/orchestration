@@ -32,27 +32,27 @@
 import { AxiosInstance } from 'axios'
 
 import { Attachment } from '@/models/Attachment'
-import { GenericAction } from '@/models/GenericAction'
-import { GenericDeviceActionAttachmentApi } from '@/services/sms/GenericActionAttachmentApi'
-import { IGenericActionSerializer, GenericDeviceActionSerializer } from '@/serializers/jsonapi/GenericActionSerializer'
+import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
+import { PlatformSoftwareUpdateActionAttachmentApi } from '@/services/sms/SoftwareUpdateActionAttachmentApi'
+import { ISoftwareUpdateActionSerializer, PlatformSoftwareUpdateActionSerializer } from '@/serializers/jsonapi/SoftwareUpdateActionSerializer'
 
-export class GenericDeviceActionApi {
+export class PlatformSoftwareUpdateActionApi {
   private axiosApi: AxiosInstance
-  private serializer: IGenericActionSerializer
-  private attachmentApi: GenericDeviceActionAttachmentApi
+  private serializer: ISoftwareUpdateActionSerializer
+  private attachmentApi: PlatformSoftwareUpdateActionAttachmentApi
 
-  constructor (axiosInstance: AxiosInstance, attachmentApi: GenericDeviceActionAttachmentApi) {
+  constructor (axiosInstance: AxiosInstance, attachmentApi: PlatformSoftwareUpdateActionAttachmentApi) {
     this.axiosApi = axiosInstance
-    this.serializer = new GenericDeviceActionSerializer()
+    this.serializer = new PlatformSoftwareUpdateActionSerializer()
     this.attachmentApi = attachmentApi
   }
 
-  async findById (id: string): Promise<GenericAction> {
+  async findById (id: string): Promise<SoftwareUpdateAction> {
     const response = await this.axiosApi.get(id, {
       params: {
         include: [
           'contact',
-          'generic_device_action_attachments.attachment'
+          'platform_software_update_action_attachments.attachment'
         ].join(',')
       }
     })
@@ -64,12 +64,12 @@ export class GenericDeviceActionApi {
     return this.axiosApi.delete<string, void>(id)
   }
 
-  async add (deviceId: string, action: GenericAction): Promise<GenericAction> {
+  async add (platformId: string, action: SoftwareUpdateAction): Promise<SoftwareUpdateAction> {
     const url = ''
-    const data = this.serializer.convertModelToJsonApiData(action, deviceId)
+    const data = this.serializer.convertModelToJsonApiData(action, platformId)
     const response = await this.axiosApi.post(url, { data })
     const savedAction = this.serializer.convertJsonApiObjectToModel(response.data)
-    // save every attachment as an GenericActionAttachment
+    // save every attachment as an ActionAttachment
     if (savedAction.id) {
       const promises = action.attachments.map((attachment: Attachment) => this.attachmentApi.add(savedAction.id as string, attachment))
       await Promise.all(promises)
@@ -77,33 +77,33 @@ export class GenericDeviceActionApi {
     return savedAction
   }
 
-  async update (deviceId: string, action: GenericAction): Promise<GenericAction> {
+  async update (platformId: string, action: SoftwareUpdateAction): Promise<SoftwareUpdateAction> {
     if (!action.id) {
-      throw new Error('no id for the GenericAction')
+      throw new Error('no id for the SoftwareUpdateAction')
     }
-    // load the stored action to get a list of the generic device action attachments before the update
+    // load the stored action to get a list of the platform action attachments before the update
     const attRawResponse = await this.axiosApi.get(action.id, {
       params: {
         include: [
-          'generic_device_action_attachments.attachment'
+          'platform_software_update_action_attachments.attachment'
         ].join(',')
       }
     })
     const attResponseData = attRawResponse.data
     const included = attResponseData.included
 
-    // get the relations between attachments and generic device action attachments
+    // get the relations between attachments and platform action attachments
     const linkedAttachments: { [attachmentId: string]: string } = {}
     if (included) {
       const relations = this.serializer.convertJsonApiIncludedActionAttachmentsToIdList(included)
       // convert to object to gain faster access to its members
       relations.forEach((rel) => {
-        linkedAttachments[rel.attachmentId] = rel.genericActionAttachmentId
+        linkedAttachments[rel.attachmentId] = rel.softwareUpdateActionAttachmentId
       })
     }
 
     // update the action
-    const data = this.serializer.convertModelToJsonApiData(action, deviceId)
+    const data = this.serializer.convertModelToJsonApiData(action, platformId)
     const actionResponse = await this.axiosApi.patch(action.id, { data })
 
     // find new attachments
@@ -116,25 +116,25 @@ export class GenericDeviceActionApi {
     })
 
     // find deleted attachments
-    const genericDeviceActionAttachmentsToDelete: string[] = []
+    const platformActionAttachmentsToDelete: string[] = []
     for (const attachmentId in linkedAttachments) {
       if (action.attachments.find((i: Attachment) => i.id === attachmentId)) {
         continue
       }
-      genericDeviceActionAttachmentsToDelete.push(linkedAttachments[attachmentId])
+      platformActionAttachmentsToDelete.push(linkedAttachments[attachmentId])
     }
 
     // when there are no new attachments, newPromises is empty, which is okay
     const newPromises = newAttachments.map((attachment: Attachment) => this.attachmentApi.add(action.id as string, attachment))
     // when there are no deleted attachments, deletedPromises is empty, which is okay
-    const deletedPromises = genericDeviceActionAttachmentsToDelete.map((id: string) => this.attachmentApi.delete(id))
+    const deletedPromises = platformActionAttachmentsToDelete.map((id: string) => this.attachmentApi.delete(id))
     await Promise.all([...deletedPromises, ...newPromises])
 
     return this.serializer.convertJsonApiObjectToModel(actionResponse.data)
   }
 
-  findRelatedGenericActionAttachments (actionId: string): Promise<GenericAction[]> {
-    const url = actionId + '/generic-device-action-attachments'
+  findRelatedActionAttachments (actionId: string): Promise<SoftwareUpdateAction[]> {
+    const url = actionId + '/platform-software-update-action-attachments'
     const params = {
       'page[size]': 10000,
       include: 'attachment'

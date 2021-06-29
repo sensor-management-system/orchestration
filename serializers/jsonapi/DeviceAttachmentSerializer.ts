@@ -43,9 +43,9 @@ import {
   IJsonApiEntityWithOptionalAttributes
 } from '@/serializers/jsonapi/JsonApiTypes'
 
-import { IAttachmentsAndMissing } from '@/serializers/jsonapi/AttachmentSerializer'
+import { IAttachmentsAndMissing, IAttachmentSerializer } from '@/serializers/jsonapi/AttachmentSerializer'
 
-export class DeviceAttachmentSerializer {
+export class DeviceAttachmentSerializer implements IAttachmentSerializer {
   convertJsonApiObjectToModel (jsonApiObject: IJsonApiEntityEnvelope): Attachment {
     const data = jsonApiObject.data
     return this.convertJsonApiDataToModel(data)

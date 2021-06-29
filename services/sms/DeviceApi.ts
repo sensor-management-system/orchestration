@@ -40,12 +40,14 @@ import { DeviceType } from '@/models/DeviceType'
 import { Manufacturer } from '@/models/Manufacturer'
 import { Status } from '@/models/Status'
 import { GenericAction } from '@/models/GenericAction'
+import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
 
 import { ContactSerializer } from '@/serializers/jsonapi/ContactSerializer'
 import { CustomTextFieldSerializer } from '@/serializers/jsonapi/CustomTextFieldSerializer'
 import { DeviceAttachmentSerializer } from '@/serializers/jsonapi/DeviceAttachmentSerializer'
 import { DevicePropertySerializer } from '@/serializers/jsonapi/DevicePropertySerializer'
 import { GenericDeviceActionSerializer } from '@/serializers/jsonapi/GenericActionSerializer'
+import { DeviceSoftwareUpdateActionSerializer } from '@/serializers/jsonapi/SoftwareUpdateActionSerializer'
 
 import { IFlaskJSONAPIFilter } from '@/utils/JSONApiInterfaces'
 
@@ -209,6 +211,20 @@ export class DeviceApi {
     }
     return this.axiosApi.get(url, { params }).then((rawServerResponse) => {
       return new GenericDeviceActionSerializer().convertJsonApiObjectListToModelList(rawServerResponse.data)
+    })
+  }
+
+  findRelatedSoftwareUpdateActions (deviceId: string): Promise<SoftwareUpdateAction[]> {
+    const url = deviceId + '/device-software-update-actions'
+    const params = {
+      'page[size]': 10000,
+      include: [
+        'contact',
+        'device_software_update_action_attachments.attachment'
+      ].join(',')
+    }
+    return this.axiosApi.get(url, { params }).then((rawServerResponse) => {
+      return new DeviceSoftwareUpdateActionSerializer().convertJsonApiObjectListToModelList(rawServerResponse.data)
     })
   }
 }
