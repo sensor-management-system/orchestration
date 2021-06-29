@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2021
+ * Copyright (C) 2020, 2021
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -29,27 +29,24 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
-import { AxiosInstance } from 'axios'
+import { SoftwareType } from '@/models/SoftwareType'
 
-import { Attachment } from '@/models/Attachment'
-import { IGenericActionAttachmentSerializer, GenericDeviceActionAttachmentSerializer } from '@/serializers/jsonapi/GenericActionAttachmentSerializer'
+import {
+  IJsonApiEntityListEnvelope,
+  IJsonApiEntity
+} from '@/serializers/jsonapi/JsonApiTypes'
 
-export class GenericDeviceActionAttachmentApi {
-  private axiosApi: AxiosInstance
-  private serializer: IGenericActionAttachmentSerializer
-
-  constructor (axiosInstance: AxiosInstance) {
-    this.axiosApi = axiosInstance
-    this.serializer = new GenericDeviceActionAttachmentSerializer()
+export class SoftwareTypeSerializer {
+  convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiEntityListEnvelope): SoftwareType[] {
+    return jsonApiObjectList.data.map(this.convertJsonApiDataToModel.bind(this))
   }
 
-  async add (actionId: string, attachment: Attachment): Promise<any> {
-    const url = ''
-    const data = this.serializer.convertModelToJsonApiData(attachment, actionId)
-    await this.axiosApi.post(url, { data })
-  }
+  convertJsonApiDataToModel (jsonApiData: IJsonApiEntity): SoftwareType {
+    const id = jsonApiData.id.toString()
+    const name = jsonApiData.attributes.term
+    const url = jsonApiData.links?.self || ''
+    const definition = jsonApiData.attributes.definition
 
-  async delete (id: string): Promise<void> {
-    return await this.axiosApi.delete<string, void>(id)
+    return SoftwareType.createWithData(id, name, url, definition)
   }
 }

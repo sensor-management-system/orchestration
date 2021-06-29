@@ -9,7 +9,7 @@ export interface IDateCompareable {
 }
 
 export function isDateCompareable (i: any): i is IDateCompareable {
-  if (i && typeof i === 'object' && Object.prototype.hasOwnProperty.call(i, 'date') && DateTime.isDateTime(i.date)) {
+  if (i && typeof i === 'object' && 'date' in i && DateTime.isDateTime(i.date)) {
     return true
   }
   return false

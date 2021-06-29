@@ -56,11 +56,9 @@ permissions and limitations under the Licence.
     <template
       v-else-if="isEditActionPage"
     >
-      <!-- the currently edited action is passed as a property to the
-           `edit.vue` page to avoid reloading of the action -->
       <NuxtChild
-        :value="editedAction"
         @input="$fetch"
+        @showload="showload"
         @showsave="showsave"
       />
     </template>
@@ -77,7 +75,10 @@ permissions and limitations under the Licence.
             v-if="action.isGenericAction"
             v-model="actions[index]"
           >
-            <template #menu>
+            <template
+              v-if="isLoggedIn"
+              #menu
+            >
               <v-menu
                 close-on-click
                 close-on-content-click
@@ -105,7 +106,7 @@ permissions and limitations under the Licence.
                   <v-list-item
                     :disabled="!isLoggedIn"
                     dense
-                    @click="showDeleteDialog(action.id)"
+                    @click="showDeleteDialog(action)"
                   >
                     <v-list-item-content>
                       <v-list-item-title
@@ -127,7 +128,8 @@ permissions and limitations under the Licence.
             </template>
             <template #actions>
               <v-btn
-                :to="'/devices/' + deviceId + '/actions/' + action.id + '/edit'"
+                v-if="isLoggedIn"
+                :to="'/devices/' + deviceId + '/actions/generic-device-actions/' + action.id + '/edit'"
                 color="primary"
                 text
                 @click.stop.prevent
@@ -137,65 +139,74 @@ permissions and limitations under the Licence.
             </template>
           </GenericActionCard>
 
-          <template v-if="action.isDeviceSoftwareUpdateAction">
-            <v-card>
-              <v-card-subtitle class="pb-0">
-                {{ action.updateDate | toUtcDate }}
-              </v-card-subtitle>
-              <v-card-title class="pt-0">
-                {{ action.softwareTypeName }} update
-              </v-card-title>
-              <v-card-subtitle>
-                <v-row
-                  no-gutters
-                >
-                  <v-col
-                    cols="11"
+          <SoftwareUpdateActionCard
+            v-if="action.isSoftwareUpdateAction"
+            v-model="actions[index]"
+          >
+            <template
+              v-if="isLoggedIn"
+              #menu
+            >
+              <v-menu
+                close-on-click
+                close-on-content-click
+                offset-x
+                left
+                z-index="999"
+              >
+                <template #activator="{ on }">
+                  <v-btn
+                    data-role="property-menu"
+                    icon
+                    small
+                    v-on="on"
                   >
-                    {{ action.contact.toString() }}
-                  </v-col>
-                  <v-col
-                    align-self="end"
-                    class="text-right"
-                  >
-                    <v-btn
-                      icon
-                      @click.stop.prevent="showActionItem(action.id)"
+                    <v-icon
+                      dense
+                      small
                     >
-                      <v-icon>{{ isActionItemShown(action.id) ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
-                    </v-btn>
-                  </v-col>
-                </v-row>
-              </v-card-subtitle>
-              <v-expand-transition>
-                <v-card-text
-                  v-show="isActionItemShown(action.id)"
-                  class="text--primary"
-                >
-                  <v-row dense>
-                    <v-col cols="12" md="4">
-                      <label>
-                        Version
-                      </label>
-                      {{ action.version }}
-                    </v-col>
-                    <v-col cols="12" md="4">
-                      <label>
-                        Repository
-                      </label>
-                      {{ action.repositoryUrl }}
-                    </v-col>
-                  </v-row>
-                  <v-row dense>
-                    <v-col>
-                      <label>Description</label>
-                      {{ action.description }}
-                    </v-col>
-                  </v-row>
-                </v-card-text>
-              </v-expand-transition>
-            </v-card>
-          </template>
+                      mdi-dots-vertical
+                    </v-icon>
+                  </v-btn>
+                </template>
+
+                <v-list>
+                  <v-list-item
+                    :disabled="!isLoggedIn"
+                    dense
+                    @click="showDeleteDialog(action)"
+                  >
+                    <v-list-item-content>
+                      <v-list-item-title
+                        :class="isLoggedIn ? 'red--text' : 'grey--text'"
+                      >
+                        <v-icon
+                          left
+                          small
+                          :color="isLoggedIn ? 'red' : 'grey'"
+                        >
+                          mdi-delete
+                        </v-icon>
+                        Delete
+                      </v-list-item-title>
+                    </v-list-item-content>
+                  </v-list-item>
+                </v-list>
+              </v-menu>
+            </template>
+            <template #actions>
+              <v-btn
+                v-if="isLoggedIn"
+                :to="'/devices/' + deviceId + '/actions/software-update-actions/' + action.id + '/edit'"
+                color="primary"
+                text
+                @click.stop.prevent
+              >
+                Edit
+              </v-btn>
+            </template>
+          </SoftwareUpdateActionCard>
+
           <template v-if="action.isDeviceCalibrationAction">
             <v-card>
               <v-card-subtitle class="pb-0">
@@ -348,7 +359,11 @@ permissions and limitations under the Licence.
           </template>
         </v-timeline-item>
       </v-timeline>
-      <v-dialog v-model="hasActionIdToDelete" max-width="290">
+      <v-dialog
+        v-model="hasActionToDelete"
+        max-width="290"
+        @click:outside="hideDeleteDialog"
+      >
         <v-card>
           <v-card-title class="headline">
             Delete action
@@ -367,7 +382,7 @@ permissions and limitations under the Licence.
             <v-btn
               color="error"
               text
-              @click="deleteActionAndCloseDialog(actionIdToDelete)"
+              @click="deleteAction()"
             >
               <v-icon left>
                 mdi-delete
@@ -384,13 +399,16 @@ permissions and limitations under the Licence.
 import { Component, Vue } from 'nuxt-property-decorator'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import GenericActionCard from '@/components/GenericActionCard.vue'
+import SoftwareUpdateActionCard from '@/components/SoftwareUpdateActionCard.vue'
 
 import { DateTime } from 'luxon'
 
+import { Attachment } from '@/models/Attachment'
 import { Contact } from '@/models/Contact'
 import { DeviceProperty } from '@/models/DeviceProperty'
-import { IAction } from '@/models/Action'
+import { IActionCommonDetails } from '@/models/ActionCommonDetails'
 import { GenericAction } from '@/models/GenericAction'
+import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
 import { DateComparator, isDateCompareable } from '@/modelUtils/Compareables'
 
 const toUtcDate = (dt: DateTime) => {
@@ -401,49 +419,7 @@ interface IColoredAction {
   getColor (): string
 }
 
-class DeviceSoftwareUpdateAction implements IAction, IColoredAction {
-  public id: string
-  public softwareTypeName: string
-  public softwareTypeUri: string
-  public updateDate: DateTime
-  public version: string
-  public repositoryUrl: string
-  public description: string
-  public contact: Contact
-  constructor (
-    id: string,
-    softwareTypeName: string,
-    softwareTypeUri: string,
-    updateDate: DateTime,
-    version: string,
-    repositoryUrl: string,
-    description: string,
-    contact: Contact
-  ) {
-    this.id = id
-    this.softwareTypeName = softwareTypeName
-    this.softwareTypeUri = softwareTypeUri
-    this.updateDate = updateDate
-    this.version = version
-    this.repositoryUrl = repositoryUrl
-    this.description = description
-    this.contact = contact
-  }
-
-  getId (): string {
-    return 'software-' + this.id
-  }
-
-  get isDeviceSoftwareUpdateAction (): boolean {
-    return true
-  }
-
-  getColor (): string {
-    return 'yellow'
-  }
-}
-
-class DeviceCalibrationAction implements IAction, IColoredAction {
+class DeviceCalibrationAction implements IActionCommonDetails, IColoredAction {
   public id: string
   public description: string
   public currentCalibrationDate: DateTime
@@ -452,6 +428,7 @@ class DeviceCalibrationAction implements IAction, IColoredAction {
   public value: string
   public deviceProperties: DeviceProperty[]
   public contact: Contact
+  public attachments: Attachment[]
   constructor (
     id: string,
     description: string,
@@ -460,7 +437,8 @@ class DeviceCalibrationAction implements IAction, IColoredAction {
     formula: string,
     value: string,
     deviceProperties: DeviceProperty[],
-    contact: Contact
+    contact: Contact,
+    attachments: Attachment[]
   ) {
     this.id = id
     this.description = description
@@ -470,6 +448,7 @@ class DeviceCalibrationAction implements IAction, IColoredAction {
     this.value = value
     this.deviceProperties = deviceProperties
     this.contact = contact
+    this.attachments = attachments
   }
 
   getId (): string {
@@ -495,6 +474,7 @@ class DeviceMountAction {
   public beginDate: DateTime
   public description: string
   public contact: Contact
+  public attachments: Attachment[]
   constructor (
     id: string,
     configurationName: string,
@@ -504,7 +484,8 @@ class DeviceMountAction {
     offsetZ: number,
     beginDate: DateTime,
     description: string,
-    contact: Contact
+    contact: Contact,
+    attachments: Attachment[]
   ) {
     this.id = id
     this.configurationName = configurationName
@@ -515,6 +496,7 @@ class DeviceMountAction {
     this.beginDate = beginDate
     this.description = description
     this.contact = contact
+    this.attachments = attachments
   }
 
   getId (): string {
@@ -530,24 +512,27 @@ class DeviceMountAction {
   }
 }
 
-class DeviceUnmountAction implements IAction, IColoredAction {
+class DeviceUnmountAction implements IActionCommonDetails, IColoredAction {
   public id: string
   public configurationName: string
   public endDate: DateTime
   public description: string
   public contact: Contact
+  public attachments: Attachment[]
   constructor (
     id: string,
     configurationName: string,
     endDate: DateTime,
     description: string,
-    contact: Contact
+    contact: Contact,
+    attachments: Attachment[]
   ) {
     this.id = id
     this.configurationName = configurationName
     this.endDate = endDate
     this.description = description
     this.contact = contact
+    this.attachments = attachments
   }
 
   getId (): string {
@@ -564,18 +549,27 @@ class DeviceUnmountAction implements IAction, IColoredAction {
 }
 
 /**
- * extend the original interface by adding the getColor() method
+ * extend the original interfaces by adding the getColor() method
  */
 declare module '@/models/GenericAction' {
-  export interface GenericAction extends IColoredAction {
+  interface GenericAction extends IColoredAction {
   }
 }
 GenericAction.prototype.getColor = (): string => 'blue'
 
+declare module '@/models/SoftwareUpdateAction' {
+  interface SoftwareUpdateAction extends IColoredAction {
+  }
+}
+SoftwareUpdateAction.prototype.getColor = (): string => 'yellow'
+
+type ActionDeleteMethod = (id: string) => Promise<void>
+
 @Component({
   components: {
     ProgressIndicator,
-    GenericActionCard
+    GenericActionCard,
+    SoftwareUpdateActionCard
   },
   filters: {
     toUtcDate
@@ -585,10 +579,10 @@ export default class DeviceActionsPage extends Vue {
   private isLoading: boolean = false
   private isSaving: boolean = false
 
-  private actions: IAction[] = []
+  private actions: IActionCommonDetails[] = []
   private searchResultItemsShown: { [id: string]: boolean } = {}
 
-  private actionIdToDelete: string = ''
+  private actionToDelete: IActionCommonDetails | null = null
 
   async fetch () {
     const contact1 = Contact.createFromObject({
@@ -605,16 +599,6 @@ export default class DeviceActionsPage extends Vue {
       email: 'cam.paign@gfz-potsdam.de',
       website: ''
     })
-    const deviceSoftwareUpdateAction = new DeviceSoftwareUpdateAction(
-      'X2',
-      'Firmware',
-      'softwaretypes/firmware',
-      DateTime.fromISO('2021-03-30T08:10:00Z'),
-      '1.0.34',
-      'git.gfz-potsdam.de/sensor-management-system/firmware',
-      'The 1.0.34 firmware version for the device',
-      contact1
-    )
     const devProp1 = new DeviceProperty()
     devProp1.label = 'Wind direction'
     const devProp2 = new DeviceProperty()
@@ -627,7 +611,8 @@ export default class DeviceActionsPage extends Vue {
       'f(x) = x',
       '100',
       [devProp1, devProp2],
-      contact2
+      contact2,
+      []
     )
     const deviceMountAction1 = new DeviceMountAction(
       'X4',
@@ -638,35 +623,39 @@ export default class DeviceActionsPage extends Vue {
       2,
       DateTime.fromISO('2021-03-30T12:00:00Z'),
       'Mounted Measurement ABC',
-      contact1
+      contact1,
+      []
     )
     const deviceUnmountAction1 = new DeviceUnmountAction(
       'X5',
       'Measurement ABC',
       DateTime.fromISO('2022-03-30T12:00:00Z'),
       'Unmounted Measurement ABC',
-      contact1
+      contact1,
+      []
     )
     this.actions = [
-      deviceSoftwareUpdateAction,
       deviceCalibrationAction1,
       deviceMountAction1,
       deviceUnmountAction1
     ]
-    await Promise.all([this.fetchGenericActions()])
+    await Promise.all([
+      this.fetchGenericActions(),
+      this.fetchSoftwareUpdateActions()
+    ])
 
     // sort the actions
     const comparator = new DateComparator()
-    this.actions.sort((i: IAction, j: IAction): number => {
+    this.actions.sort((i: IActionCommonDetails, j: IActionCommonDetails): number => {
       if (isDateCompareable(i) && isDateCompareable(j)) {
         // multiply result with -1 to get descending order
         return comparator.compare(i, j) * -1
       }
       if (isDateCompareable(i)) {
-        return 1
+        return -1
       }
       if (isDateCompareable(j)) {
-        return -1
+        return 1
       }
       return 0
     })
@@ -675,6 +664,11 @@ export default class DeviceActionsPage extends Vue {
   async fetchGenericActions (): Promise<void> {
     const actions: GenericAction[] = await this.$api.devices.findRelatedGenericActions(this.deviceId)
     actions.forEach((action: GenericAction) => this.actions.push(action))
+  }
+
+  async fetchSoftwareUpdateActions (): Promise<void> {
+    const actions: SoftwareUpdateAction[] = await this.$api.devices.findRelatedSoftwareUpdateActions(this.deviceId)
+    actions.forEach((action: SoftwareUpdateAction) => this.actions.push(action))
   }
 
   get isInProgress (): boolean {
@@ -700,7 +694,7 @@ export default class DeviceActionsPage extends Vue {
 
   get isEditActionPage (): boolean {
     // eslint-disable-next-line no-useless-escape
-    const editUrl = '^\/devices\/' + this.deviceId + '\/actions\/([0-9]+)\/edit$'
+    const editUrl = '^\/devices\/' + this.deviceId + '\/actions\/[a-zA-Z-]+\/[0-9]+\/edit$'
     return !!this.$route.path.match(editUrl)
   }
 
@@ -718,45 +712,61 @@ export default class DeviceActionsPage extends Vue {
     return this.$route.params.actionId
   }
 
-  /**
-   * Returns the action object from the list of actions that is currently edited
-   *
-   * When the `/edit` route for an action is called, the `edit.vue` page is
-   * included via a `NuxtChild` component. To avoid of loading the action again
-   * in this page, we return it from this method to pass it as a property to
-   * the `NuxtChild` component
-   *
-   * Calls {@link DeviceActionsPage.actionId} to get the currently edited
-   * action from the route.
-   *
-   * @return {IAction | undefined} the found action, otherwise undefined
-   */
-  get editedAction (): IAction | undefined {
-    if (!this.actionId) {
-      return
-    }
-    return this.actions.find(action => action.id === this.actionId)
-  }
-
-  get hasActionIdToDelete (): boolean {
-    return !!this.actionIdToDelete
+  get hasActionToDelete (): boolean {
+    return this.actionToDelete !== null
   }
 
   showsave (isSaving: boolean) {
     this.isSaving = isSaving
   }
 
-  showDeleteDialog (id: string) {
-    this.actionIdToDelete = id
+  showload (isLoading: boolean) {
+    this.isLoading = isLoading
+  }
+
+  showDeleteDialog (action: IActionCommonDetails) {
+    this.actionToDelete = action
   }
 
   hideDeleteDialog (): void {
-    this.actionIdToDelete = ''
+    this.actionToDelete = null
   }
 
-  deleteActionAndCloseDialog (id: string) {
+  /**
+   * deletes the action and closes the delete dialog
+   *
+   * calls {@link DeviceActionsPage#deleteActionAndCloseDialog} with the appropriate API method
+   *
+   * @throws {TypeError} - throws an Error if the type of action is not supported
+   */
+  deleteAction (): void {
+    if (!this.actionToDelete) {
+      return
+    }
+    if (!this.actionToDelete.id) {
+      return
+    }
+    switch (true) {
+      case 'isGenericAction' in this.actionToDelete:
+        this.deleteActionAndCloseDialog(this.actionToDelete.id, this.$api.genericDeviceActions.deleteById.bind(this.$api.genericDeviceActions))
+        break
+      case 'isSoftwareUpdateAction' in this.actionToDelete:
+        this.deleteActionAndCloseDialog(this.actionToDelete.id, this.$api.deviceSoftwareUpdateActions.deleteById.bind(this.$api.deviceSoftwareUpdateActions))
+        break
+      default:
+        throw new TypeError('deleting the action type is not supported.')
+    }
+  }
+
+  /**
+   * deletes the action and closes the delete dialog
+   *
+   * @param {string} id - the id of the action to delete
+   * @param {ActionDeleteMethod} actionDeleteMethod - an API method to delete an action
+   */
+  deleteActionAndCloseDialog (id: string, actionDeleteMethod: ActionDeleteMethod): void {
     this.isSaving = true
-    this.$api.genericDeviceActions.deleteById(id).then(() => {
+    actionDeleteMethod(id).then(() => {
       this.$fetch()
       this.$store.commit('snackbar/setSuccess', 'Action deleted')
     }).catch((_error) => {
@@ -767,11 +777,11 @@ export default class DeviceActionsPage extends Vue {
     })
   }
 
-  getActionType (action: IAction): string {
+  getActionType (action: IActionCommonDetails): string {
     switch (true) {
       case 'isGenericAction' in action:
         return 'generic-action'
-      case 'isDeviceSoftwareUpdateAction' in action:
+      case 'isSoftwareUpdateAction' in action:
         return 'software-update-action'
       case 'isDeviceCalibrationAction' in action:
         return 'device-calibration-action'
@@ -780,7 +790,7 @@ export default class DeviceActionsPage extends Vue {
     }
   }
 
-  getActionTypeIterationKey (action: IAction): string {
+  getActionTypeIterationKey (action: IActionCommonDetails): string {
     return this.getActionType(action) + '-' + action.id
   }
 }

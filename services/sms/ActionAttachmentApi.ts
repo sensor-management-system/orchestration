@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020, 2021
+ * Copyright (C) 2021
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -29,10 +29,33 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
-import { Contact } from '@/models/Contact'
+import { AxiosInstance } from 'axios'
 
-export interface IAction {
-  id: string | null
-  description: string
-  contact: Contact | null
+import { Attachment } from '@/models/Attachment'
+import { IActionAttachmentSerializer } from '@/serializers/jsonapi/ActionAttachmentSerializer'
+
+export interface IActionAttachmentApi {
+  serializer: IActionAttachmentSerializer
+  add (actionId: string, attachment: Attachment): Promise<any>
+  delete (id: string): Promise<void>
+}
+
+export abstract class AbstractActionAttachmentApi implements IActionAttachmentApi {
+  private axiosApi: AxiosInstance
+
+  abstract get serializer (): IActionAttachmentSerializer
+
+  constructor (axiosInstance: AxiosInstance) {
+    this.axiosApi = axiosInstance
+  }
+
+  async add (actionId: string, attachment: Attachment): Promise<any> {
+    const url = ''
+    const data = this.serializer.convertModelToJsonApiData(attachment, actionId)
+    await this.axiosApi.post(url, { data })
+  }
+
+  async delete (id: string): Promise<void> {
+    return await this.axiosApi.delete<string, void>(id)
+  }
 }

@@ -41,7 +41,10 @@ import { CustomfieldsApi } from '@/services/sms/CustomfieldsApi'
 import { DeviceAttachmentApi } from '@/services/sms/DeviceAttachmentApi'
 import { PlatformAttachmentApi } from '@/services/sms/PlatformAttachmentApi'
 import { GenericDeviceActionApi } from '@/services/sms/GenericDeviceActionApi'
-import { GenericDeviceActionAttachmentApi } from '@/services/sms/GenericDeviceActionAttachmentApi'
+import { GenericDeviceActionAttachmentApi, GenericPlatformActionAttachmentApi } from '@/services/sms/GenericActionAttachmentApi'
+import { DeviceSoftwareUpdateActionApi } from '@/services/sms/DeviceSoftwareUpdateActionApi'
+import { PlatformSoftwareUpdateActionApi } from '@/services/sms/PlatformSoftwareUpdateActionApi'
+import { DeviceSoftwareUpdateActionAttachmentApi, PlatformSoftwareUpdateActionAttachmentApi } from '@/services/sms/SoftwareUpdateActionAttachmentApi'
 
 import { CompartmentApi } from '@/services/cv/CompartmentApi'
 import { DeviceTypeApi } from '@/services/cv/DeviceTypeApi'
@@ -53,6 +56,7 @@ import { StatusApi } from '@/services/cv/StatusApi'
 import { UnitApi } from '@/services/cv/UnitApi'
 import { MeasuredQuantityUnitApi } from '@/services/cv/MeasuredQuantityUnitApi'
 import { ActionTypeApi } from '@/services/cv/ActionTypeApi'
+import { SoftwareTypeApi } from '@/services/cv/SoftwareTypeApi'
 
 import { ProjectApi } from '@/services/project/ProjectApi'
 
@@ -71,6 +75,11 @@ export class Api {
   private readonly _devicePropertyApi: DevicePropertyApi
   private readonly _genericDeviceActionApi: GenericDeviceActionApi
   private readonly _genericDeviceActionAttachmentApi: GenericDeviceActionAttachmentApi
+  private readonly _genericPlatformActionAttachmentApi: GenericPlatformActionAttachmentApi
+  private readonly _deviceSoftwareUpdateActionApi: DeviceSoftwareUpdateActionApi
+  private readonly _deviceSoftwareUpdateActionAttachmentApi: DeviceSoftwareUpdateActionAttachmentApi
+  private readonly _platformSoftwareUpdateActionApi: PlatformSoftwareUpdateActionApi
+  private readonly _platformSoftwareUpdateActionAttachmentApi: PlatformSoftwareUpdateActionAttachmentApi
 
   private readonly _manufacturerApi: ManufacturerApi
   private readonly _platformTypeApi: PlatformTypeApi
@@ -82,6 +91,7 @@ export class Api {
   private readonly _unitApi: UnitApi
   private readonly _measuredQuantityUnitApi: MeasuredQuantityUnitApi
   private readonly _actionTypeApi: ActionTypeApi
+  private readonly _softwareTypeApi: SoftwareTypeApi
 
   private readonly _projectApi: ProjectApi
 
@@ -138,6 +148,28 @@ export class Api {
       this._genericDeviceActionAttachmentApi
     )
 
+    this._genericPlatformActionAttachmentApi = new GenericPlatformActionAttachmentApi(
+      this.createAxios(smsBaseUrl, '/generic-platform-action-attachments', smsConfig, getIdToken)
+    )
+
+    this._deviceSoftwareUpdateActionAttachmentApi = new DeviceSoftwareUpdateActionAttachmentApi(
+      this.createAxios(smsBaseUrl, '/device-software-update-action-attachments', smsConfig, getIdToken)
+    )
+
+    this._deviceSoftwareUpdateActionApi = new DeviceSoftwareUpdateActionApi(
+      this.createAxios(smsBaseUrl, '/device-software-update-actions', smsConfig, getIdToken),
+      this._deviceSoftwareUpdateActionAttachmentApi
+    )
+
+    this._platformSoftwareUpdateActionAttachmentApi = new PlatformSoftwareUpdateActionAttachmentApi(
+      this.createAxios(smsBaseUrl, '/platform-software-update-action-attachments', smsConfig, getIdToken)
+    )
+
+    this._platformSoftwareUpdateActionApi = new PlatformSoftwareUpdateActionApi(
+      this.createAxios(smsBaseUrl, '/platform-software-update-actions', smsConfig, getIdToken),
+      this._platformSoftwareUpdateActionAttachmentApi
+    )
+
     // and here we can set settings for all the cv api calls
     const cvConfig: AxiosRequestConfig = {
       headers: {
@@ -176,6 +208,9 @@ export class Api {
     )
     this._actionTypeApi = new ActionTypeApi(
       this.createAxios(cvBaseUrl, '/actiontypes/', cvConfig)
+    )
+    this._softwareTypeApi = new SoftwareTypeApi(
+      this.createAxios(cvBaseUrl, '/softwaretypes/', cvConfig)
     )
 
     this._projectApi = new ProjectApi()
@@ -245,6 +280,22 @@ export class Api {
     return this._genericDeviceActionAttachmentApi
   }
 
+  get deviceSoftwareUpdateActions (): DeviceSoftwareUpdateActionApi {
+    return this._deviceSoftwareUpdateActionApi
+  }
+
+  get deviceSoftwareUpdateActionAttachments (): DeviceSoftwareUpdateActionAttachmentApi {
+    return this._deviceSoftwareUpdateActionAttachmentApi
+  }
+
+  get platformSoftwareUpdateActions (): PlatformSoftwareUpdateActionApi {
+    return this._platformSoftwareUpdateActionApi
+  }
+
+  get platformSoftwareUpdateActionAttachments (): PlatformSoftwareUpdateActionAttachmentApi {
+    return this._platformSoftwareUpdateActionAttachmentApi
+  }
+
   get contacts (): ContactApi {
     return this._contactApi
   }
@@ -287,6 +338,10 @@ export class Api {
 
   get actionTypes (): ActionTypeApi {
     return this._actionTypeApi
+  }
+
+  get softwareTypes (): SoftwareTypeApi {
+    return this._softwareTypeApi
   }
 
   get projects (): ProjectApi {

@@ -29,7 +29,7 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
-import { removeBaseUrl, removeFirstSlash, removeTrailingSlash, toRouterPath } from '@/utils/urlHelpers'
+import { protocolsInUrl, removeBaseUrl, removeFirstSlash, removeTrailingSlash, toRouterPath } from '@/utils/urlHelpers'
 
 describe('removeBaseUrl', () => {
   it('should return the url if the base url is undefined', () => {
@@ -107,5 +107,19 @@ describe('toRouterPath', () => {
     const callbackPath = 'https://localhost:8080/static/logout-callback'
     const result = toRouterPath(callbackPath, '/static')
     expect(result).toEqual('/logout-callback')
+  })
+})
+describe('protocolsInUrl', () => {
+  it('should return true with the correct protocols', () => {
+    const allowedProtocols = ['http', 'https']
+    const url = 'http://www.heise.de'
+    const urlSecure = 'https://www.heise.de'
+    expect(protocolsInUrl(allowedProtocols, url)).toBeTruthy()
+    expect(protocolsInUrl(allowedProtocols, urlSecure)).toBeTruthy()
+  })
+  it('should return false with a protocol that is not supported', () => {
+    const allowedProtocols = ['http', 'https']
+    const url = 'ftp://www.heise.de'
+    expect(protocolsInUrl(allowedProtocols, url)).toBeFalsy()
   })
 })

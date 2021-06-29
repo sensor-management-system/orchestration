@@ -34,7 +34,7 @@ import { AbstractActionAttachmentSerializer } from '@/serializers/jsonapi/Action
 import { DeviceAttachmentSerializer } from '@/serializers/jsonapi/DeviceAttachmentSerializer'
 import { PlatformAttachmentSerializer } from '@/serializers/jsonapi/PlatformAttachmentSerializer'
 
-export class GenericDeviceActionAttachmentSerializer extends AbstractActionAttachmentSerializer {
+export class DeviceSoftwareUpdateActionAttachmentSerializer extends AbstractActionAttachmentSerializer {
   private _attachmentSerializer: IAttachmentSerializer
 
   constructor () {
@@ -43,11 +43,11 @@ export class GenericDeviceActionAttachmentSerializer extends AbstractActionAttac
   }
 
   getActionTypeName (): string {
-    return 'generic_device_action'
+    return 'device_software_update_action'
   }
 
   getActionAttachmentTypeName (): string {
-    return 'generic_device_action_attachment'
+    return 'device_software_update_action_attachment'
   }
 
   getActionAttachmentTypeNamePlural (): string {
@@ -63,7 +63,7 @@ export class GenericDeviceActionAttachmentSerializer extends AbstractActionAttac
   }
 }
 
-export class GenericPlatformActionAttachmentSerializer extends AbstractActionAttachmentSerializer {
+export class PlatformSoftwareUpdateActionAttachmentSerializer extends AbstractActionAttachmentSerializer {
   private _attachmentSerializer: IAttachmentSerializer
 
   constructor () {
@@ -72,11 +72,11 @@ export class GenericPlatformActionAttachmentSerializer extends AbstractActionAtt
   }
 
   getActionTypeName (): string {
-    return 'generic_platform_action'
+    return 'platform_software_update_action'
   }
 
   getActionAttachmentTypeName (): string {
-    return 'generic_platform_action_attachment'
+    return 'platform_software_update_action_attachment'
   }
 
   getActionAttachmentTypeNamePlural (): string {

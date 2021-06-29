@@ -30,7 +30,7 @@ implied. See the Licence for the specific language governing
 permissions and limitations under the Licence.
 -->
 <template>
-  <v-container>
+  <div>
     <v-form
       ref="datesForm"
       v-model="datesAreValid"
@@ -38,7 +38,7 @@ permissions and limitations under the Licence.
     >
       <v-row>
         <v-col cols="12" md="6">
-          <date-time-picker
+          <DateTimePicker
             :value="actionCopy.beginDate"
             label="Start date"
             placeholder="e.g. 2000-01-31 12:00"
@@ -47,7 +47,7 @@ permissions and limitations under the Licence.
           />
         </v-col>
         <v-col cols="12" md="6">
-          <date-time-picker
+          <DateTimePicker
             :value="actionCopy.endDate"
             label="End date"
             placeholder="e.g. 2001-01-31 12:00"
@@ -59,11 +59,12 @@ permissions and limitations under the Licence.
     </v-form>
     <CommonActionForm
       ref="commonForm"
-      v-model="action"
+      :value="actionCopy"
       :attachments="attachments"
       :rules="[rules.contactNotNull]"
+      @input="updateCommonFields"
     />
-  </v-container>
+  </div>
 </template>
 
 <script lang="ts">
@@ -77,6 +78,7 @@ import { DateTime } from 'luxon'
 
 import { Attachment } from '@/models/Attachment'
 import { GenericAction } from '@/models/GenericAction'
+import { ActionCommonDetails } from '@/models/ActionCommonDetails'
 
 import CommonActionForm from '@/components/CommonActionForm.vue'
 import DateTimePicker from '@/components/DateTimePicker.vue'
@@ -87,8 +89,8 @@ import DateTimePicker from '@/components/DateTimePicker.vue'
  */
 @Component({
   components: {
-    DateTimePicker,
-    CommonActionForm
+    CommonActionForm,
+    DateTimePicker
   }
 })
 // @ts-ignore
@@ -129,14 +131,6 @@ export default class GenericActionForm extends Vue {
     this.createActionCopy(this.value)
   }
 
-  get action (): GenericAction {
-    return this.actionCopy
-  }
-
-  set action (value: GenericAction) {
-    this.$emit('input', value)
-  }
-
   /**
    * sets the start date and validates start- and enddate
    *
@@ -163,6 +157,13 @@ export default class GenericActionForm extends Vue {
     this.$emit('input', this.actionCopy)
   }
 
+  updateCommonFields (action: ActionCommonDetails) {
+    this.actionCopy.description = action.description
+    this.actionCopy.contact = action.contact
+    this.actionCopy.attachments = action.attachments.map((a: Attachment) => Attachment.createFromObject(a))
+    this.$emit('input', this.actionCopy)
+  }
+
   /**
    * validates the form based on its rules
    *
@@ -174,13 +175,10 @@ export default class GenericActionForm extends Vue {
   /**
    * a rule to validate the start date
    *
-   * @param {string} v - a string representation of the date as supplied by the datepicker component
    * @return {boolean | string} whether the date is valid or an error message
    */
-  validateInputForStartDate (v: string): boolean | string {
-    // NOTE: as the internals of the DatePicker component work with strings,
-    // the validation functions should expect strings, too
-    if (v === null || v === '') {
+  validateInputForStartDate (): boolean | string {
+    if (!this.actionCopy.beginDate) {
       return true
     }
     if (!this.actionCopy.endDate) {
@@ -195,13 +193,10 @@ export default class GenericActionForm extends Vue {
   /**
    * a rule to validate the end date
    *
-   * @param {string} v - a string representation of the date as supplied by the datepicker component
    * @return {boolean | string} whether the date is valid or an error message
    */
-  validateInputForEndDate (v: string): boolean | string {
-    // NOTE: as the internals of the DatePicker component work with strings,
-    // the validation functions should expect strings, too
-    if (v === null || v === '') {
+  validateInputForEndDate (): boolean | string {
+    if (!this.actionCopy.endDate) {
       return true
     }
     if (!this.actionCopy.beginDate) {

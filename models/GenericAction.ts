@@ -32,27 +32,21 @@
 import { DateTime } from 'luxon'
 import { Attachment } from '@/models/Attachment'
 import { Contact } from '@/models/Contact'
-import { IAction } from '@/models/Action'
+import { IActionCommonDetails, ActionCommonDetails } from '@/models/ActionCommonDetails'
 import { IDateCompareable } from '@/modelUtils/Compareables'
 
-export interface IGenericAction extends IAction {
+export interface IGenericAction extends IActionCommonDetails {
   actionTypeName: string
   actionTypeUrl: string
   beginDate: DateTime | null
   endDate: DateTime | null
-  contact: Contact | null
-  attachments: Attachment[]
 }
 
-export class GenericAction implements IGenericAction, IDateCompareable {
-  private _id: string | null = null
-  private _description: string = ''
+export class GenericAction extends ActionCommonDetails implements IGenericAction, IDateCompareable {
   private _actionTypeName: string = ''
   private _actionTypeUrl: string = ''
   private _beginDate: DateTime | null = null
   private _endDate: DateTime | null = null
-  private _contact: Contact | null = null
-  private _attachments: Attachment[] = []
 
   /**
    * returns an empty instance
@@ -77,27 +71,11 @@ export class GenericAction implements IGenericAction, IDateCompareable {
     action.description = someObject.description
     action.actionTypeName = someObject.actionTypeName
     action.actionTypeUrl = someObject.actionTypeUrl
-    action.beginDate = someObject.beginDate ? someObject.beginDate : null
-    action.endDate = someObject.endDate ? someObject.endDate : null
+    action.beginDate = someObject.beginDate
+    action.endDate = someObject.endDate
     action.contact = someObject.contact ? Contact.createFromObject(someObject.contact) : null
     action.attachments = someObject.attachments.map(i => Attachment.createFromObject(i))
     return action
-  }
-
-  get id (): string | null {
-    return this._id
-  }
-
-  set id (id: string | null) {
-    this._id = id
-  }
-
-  get description (): string {
-    return this._description
-  }
-
-  set description (description: string) {
-    this._description = description
   }
 
   get actionTypeUrl (): string {
@@ -130,22 +108,6 @@ export class GenericAction implements IGenericAction, IDateCompareable {
 
   set endDate (date: DateTime | null) {
     this._endDate = date
-  }
-
-  get contact (): Contact | null {
-    return this._contact
-  }
-
-  set contact (contact: Contact | null) {
-    this._contact = contact
-  }
-
-  get attachments (): Attachment[] {
-    return this._attachments
-  }
-
-  set attachments (attachments: Attachment[]) {
-    this._attachments = attachments
   }
 
   get isGenericAction (): boolean {

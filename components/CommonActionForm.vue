@@ -29,7 +29,7 @@ implied. See the Licence for the specific language governing
 permissions and limitations under the Licence.
 -->
 <template>
-  <v-container>
+  <div>
     <v-row>
       <v-col cols="12" md="12">
         <v-textarea
@@ -82,7 +82,7 @@ permissions and limitations under the Licence.
         />
       </v-col>
     </v-row>
-  </v-container>
+  </div>
 </template>
 
 <script lang="ts">
@@ -94,7 +94,7 @@ import { Component, Prop, Vue } from 'nuxt-property-decorator'
 
 import { Attachment } from '@/models/Attachment'
 import { Contact } from '@/models/Contact'
-import { GenericAction } from '@/models/GenericAction'
+import { IActionCommonDetails, ActionCommonDetails } from '@/models/ActionCommonDetails'
 
 /**
  * A class component for a set of common form fields for actions
@@ -108,15 +108,14 @@ export default class CommonActionForm extends Vue {
   private contactIsValid = true
 
   /**
-   * a GenericAction
+   * an IActionCommonDetails like object
    */
   @Prop({
-    default: new GenericAction(),
     required: true,
     type: Object
   })
   // @ts-ignore
-  readonly value!: GenericAction
+  readonly value!: IActionCommonDetails
 
   /**
    * a list of available attachments
@@ -159,7 +158,7 @@ export default class CommonActionForm extends Vue {
    * @fires CommonActionForm#input
    */
   set description (value: string) {
-    const actionCopy = GenericAction.createFromObject(this.value)
+    const actionCopy = ActionCommonDetails.createFromObject(this.value)
     actionCopy.description = value
     /**
      * descriptionChange event
@@ -180,7 +179,7 @@ export default class CommonActionForm extends Vue {
    * @fires CommonActionForm#input
    */
   set contact (value: Contact | null) {
-    const actionCopy = GenericAction.createFromObject(this.value)
+    const actionCopy = ActionCommonDetails.createFromObject(this.value)
     actionCopy.contact = value || null
     /**
      * contactChange event
@@ -201,7 +200,7 @@ export default class CommonActionForm extends Vue {
    * @fires CommonActionForm#input
    */
   set actionAttachments (value: Attachment[]) {
-    const actionCopy = GenericAction.createFromObject(this.value)
+    const actionCopy = ActionCommonDetails.createFromObject(this.value)
     actionCopy.attachments = value
     /**
      * attachments event
