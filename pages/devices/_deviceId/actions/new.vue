@@ -265,8 +265,6 @@ import { IActionType, ActionType } from '@/models/ActionType'
 
 import { ACTION_TYPE_API_FILTER_DEVICE } from '@/services/cv/ActionTypeApi'
 
-import { dateToString, stringToDate } from '@/utils/dateHelper'
-
 import GenericActionForm from '@/components/GenericActionForm.vue'
 import SoftwareUpdateActionForm from '@/components/SoftwareUpdateActionForm.vue'
 import DatePicker from '@/components/DatePicker.vue'
