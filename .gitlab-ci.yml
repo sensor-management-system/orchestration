@@ -8,7 +8,7 @@ variables:
   CONTAINER_RELEASE_IMAGE: $CI_REGISTRY_IMAGE:latest
   DATABASE_TEST_URL: postgres://$POSTGRES_USER:@$POSTGRES_PASSWORD:5432/$POSTGRES_DB
   WELL_KNOWN_URL: https://webapp.ufz.de/idp/oidc/v1/.well-known/openid-configuration
-  HTTP_ORIGINS: "https://git.ufz.de http://rdm-test.intranet.ufz.de:5002"
+  HTTP_ORIGINS: "https://registry.hzdr.de http://rdm-test.intranet.ufz.de:5002"
   OIDC_USERNAME_CLAIM: "sub"
 
 .docker_login: &docker_login
