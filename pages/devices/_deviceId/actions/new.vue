@@ -95,17 +95,19 @@ permissions and limitations under the Licence.
         >
           <v-row>
             <v-col cols="12" md="6">
-              <DatePicker
+              <DateTimePicker
                 :value="startDate"
                 label="Current calibration date"
+                placeholder="e.g. 2000-01-31 12:00"
                 :rules="[rules.startDate, rules.currentCalibrationDateNotNull]"
                 @input="setStartDateAndValidate"
               />
             </v-col>
             <v-col cols="12" md="6">
-              <DatePicker
+              <DateTimePicker
                 :value="endDate"
                 label="Next calibration date"
+                placeholder="e.g. 2000-02-13 13:37"
                 :rules="[rules.endDate]"
                 @input="setEndDateAndValidate"
               />
@@ -268,6 +270,7 @@ import { dateToString, stringToDate } from '@/utils/dateHelper'
 import GenericActionForm from '@/components/GenericActionForm.vue'
 import SoftwareUpdateActionForm from '@/components/SoftwareUpdateActionForm.vue'
 import DatePicker from '@/components/DatePicker.vue'
+import DateTimePicker from '@/components/DateTimePicker.vue'
 
 const KIND_OF_ACTION_TYPE_DEVICE_CALIBRATION = 'device_calibration'
 const KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE = 'software_update'
@@ -281,6 +284,7 @@ type IOptionsForActionType = Pick<IActionType, 'id' | 'name' | 'uri'> & {
 
 @Component({
   components: {
+    DateTimePicker,
     GenericActionForm,
     SoftwareUpdateActionForm,
     DatePicker
@@ -425,22 +429,6 @@ export default class ActionAddPage extends Vue {
     return this.$data._chosenKindOfAction?.kind === KIND_OF_ACTION_TYPE_GENERIC_DEVICE_ACTION
   }
 
-  getStartDate (): string {
-    return dateToString(this.startDate)
-  }
-
-  setStartDate (aDate: string | null) {
-    this.startDate = aDate !== null ? stringToDate(aDate) : null
-  }
-
-  getEndDate (): string {
-    return dateToString(this.endDate)
-  }
-
-  setEndDate (aDate: string | null) {
-    this.endDate = aDate !== null ? stringToDate(aDate) : null
-  }
-
   setStartDateAndValidate (aDate: DateTime | null) {
     this.startDate = aDate
     if (this.endDate !== null) {
@@ -459,31 +447,27 @@ export default class ActionAddPage extends Vue {
     (this.$refs.datesForm as Vue & { validate: () => boolean }).validate()
   }
 
-  validateInputForStartDate (v: string): boolean | string {
-    // NOTE: as the internals of the DatePicker component work with strings,
-    // the validation functions should expect strings, too
-    if (v === null || v === '') {
+  validateInputForStartDate (): boolean | string {
+    if (!this.startDate) {
       return true
     }
     if (!this.endDate) {
       return true
     }
-    if (stringToDate(v) <= this.endDate) {
+    if (this.startDate <= this.endDate) {
       return true
     }
     return 'Start date must not be after end date'
   }
 
-  validateInputForEndDate (v: string): boolean | string {
-    // NOTE: as the internals of the DatePicker component work with strings,
-    // the validation functions should expect strings, too
-    if (v === null || v === '') {
+  validateInputForEndDate (): boolean | string {
+    if (!this.endDate) {
       return true
     }
     if (!this.startDate) {
       return true
     }
-    if (stringToDate(v) >= this.startDate) {
+    if (this.endDate >= this.startDate) {
       return true
     }
     return 'End date must not be before start date'
