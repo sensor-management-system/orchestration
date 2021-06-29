@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020
+ * Copyright (C) 2020-2021
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -30,7 +30,7 @@
  * permissions and limitations under the Licence.
  */
 import { DateTime } from 'luxon'
-import { dateToString, stringToDate, timeStampToUTCDateTime } from '@/utils/dateHelper'
+import { dateTimesEqual, dateToString, stringToDate, timeStampToUTCDateTime } from '@/utils/dateHelper'
 
 describe('dateToString', () => {
   it('should work with by birthday', () => {
@@ -86,5 +86,30 @@ describe('timeStampToUTCDateTime', () => {
     // in german summer time it is 15:12:25
     // in utc it is 13:12:25
     expect(formatted).toEqual('2020-10-21 13:12:25 UTC')
+  })
+})
+describe('dateTimesEqual', () => {
+  it('should return true for the very same objects', () => {
+    const date = DateTime.utc(2020, 1, 1, 0, 0, 0, 0)
+    expect(dateTimesEqual(date, date)).toBeTruthy()
+  })
+  it('should return true for eqivalent objects that are not equal themselves', () => {
+    const date1 = DateTime.utc(2020, 1, 1, 0, 0, 0, 0)
+    const date2 = DateTime.fromISO(date1.toISO())
+
+    // they are not really equal
+    // but they must be equivalent
+    expect(date1).not.toEqual(date2)
+    expect(dateTimesEqual(date1, date2)).toBeTruthy()
+  })
+  it('should return false for different objects', () => {
+    const date1 = DateTime.utc(2020, 1, 1, 0, 0, 0, 0)
+    const date2 = DateTime.utc(2020, 1, 2, 0, 0, 0, 0)
+    expect(dateTimesEqual(date1, date2)).not.toBeTruthy()
+  })
+  it('should return true if they have different time zones but represent the same point it time', () => {
+    const date1 = DateTime.local(2020, 1, 1, 0, 0, 0, 0)
+    const date2 = date1.toUTC()
+    expect(dateTimesEqual(date1, date2)).toBeTruthy()
   })
 })

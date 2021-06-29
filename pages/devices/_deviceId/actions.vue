@@ -395,6 +395,7 @@ permissions and limitations under the Licence.
     </template>
   </div>
 </template>
+
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
