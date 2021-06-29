@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020
+ * Copyright (C) 2020-2021
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -35,9 +35,9 @@
  * @author <marc.hanisch@gfz-potsdam.de>
  */
 
-import { ConfigurationsTreeNode } from '@/models/ConfigurationsTreeNode'
-import { DeviceNode } from '@/models/DeviceNode'
-import { PlatformNode } from '@/models/PlatformNode'
+import { ConfigurationsTreeNode } from '@/viewmodels/ConfigurationsTreeNode'
+import { DeviceNode } from '@/viewmodels/DeviceNode'
+import { PlatformNode } from '@/viewmodels/PlatformNode'
 
 /**
  * a class to iterate over the direct children of a ConfigurationsTree
@@ -216,7 +216,7 @@ export class ConfigurationsTree implements Iterable<ConfigurationsTreeNode> {
   getPathObjects (node: ConfigurationsTreeNode): ConfigurationsTreeNode[] {
     const getPathRecursive = (node: ConfigurationsTreeNode, nodes: ConfigurationsTree, path: ConfigurationsTreeNode[]): boolean => {
       for (const iteratedNode of nodes) {
-        if (iteratedNode === node) {
+        if (iteratedNode?.id === node?.id) {
           path.push(iteratedNode)
           return true
         }
@@ -271,7 +271,7 @@ export class ConfigurationsTree implements Iterable<ConfigurationsTreeNode> {
   getPlatformById (platformId: string): PlatformNode | null {
     const getByIdRecursive = (platformId: string, nodes: ConfigurationsTree): PlatformNode | null => {
       for (const iteratedNode of nodes) {
-        if (iteratedNode.isPlatform() && iteratedNode.unpack().id === platformId) {
+        if (iteratedNode.isPlatform() && iteratedNode.elementId === platformId) {
           return iteratedNode as PlatformNode
         }
         if (!iteratedNode.canHaveChildren()) {
@@ -297,7 +297,7 @@ export class ConfigurationsTree implements Iterable<ConfigurationsTreeNode> {
   getDeviceById (deviceId: string): DeviceNode | null {
     const getByIdRecursive = (deviceId: string, nodes: ConfigurationsTree): DeviceNode | null => {
       for (const iteratedNode of nodes) {
-        if (iteratedNode.isDevice() && iteratedNode.unpack().id === deviceId) {
+        if (iteratedNode.isDevice() && iteratedNode.elementId === deviceId) {
           return iteratedNode as DeviceNode
         }
         if (!iteratedNode.canHaveChildren()) {

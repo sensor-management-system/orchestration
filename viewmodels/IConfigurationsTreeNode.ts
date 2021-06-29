@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020
+ * Copyright (C) 2020-2021
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -31,63 +31,21 @@
  */
 
 /**
- * @file provides a wrapper class for a device in a tree
+ * @file provides an interface for node classes of a tree
  * @author <marc.hanisch@gfz-potsdam.de>
  */
 
-import { IConfigurationsTreeNode } from '@/models/IConfigurationsTreeNode'
-import { Device } from '@/models/Device'
-
 /**
- * a class that wraps a Device instance for the usage in a ConfigurationsTree
+ * an interface to implement wrapper classes for the usage in a ConfigurationsTreeNode
  */
-export class DeviceNode implements IConfigurationsTreeNode<Device> {
-  private node: Device
-  private _disabled: boolean = false
+export interface IConfigurationsTreeNode<T> {
+  id: string | null
+  name: string
+  nameWithoutOffsets: string
+  disabled: boolean
 
-  static readonly ID_PREFIX = 'DeviceNode-'
-
-  constructor (node: Device) {
-    this.node = node
-  }
-
-  get id (): string | null {
-    if (!this.node.id) {
-      return null
-    }
-    return DeviceNode.ID_PREFIX + this.node.id
-  }
-
-  get name (): string {
-    return this.node.shortName
-  }
-
-  get disabled (): boolean {
-    return this._disabled
-  }
-
-  set disabled (isDisabled: boolean) {
-    this._disabled = isDisabled
-  }
-
-  canHaveChildren (): boolean {
-    return false
-  }
-
-  isPlatform (): boolean {
-    return false
-  }
-
-  isDevice (): boolean {
-    return true
-  }
-
-  unpack (): Device {
-    return this.node
-  }
-
-  static createFromObject (someObject: DeviceNode): DeviceNode {
-    const newObject = new DeviceNode(someObject.unpack())
-    return newObject
-  }
+  canHaveChildren (): boolean
+  isPlatform (): boolean
+  isDevice (): boolean
+  unpack (): T
 }

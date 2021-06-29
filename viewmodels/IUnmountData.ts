@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020
+ * Copyright (C) 2020-2021
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -29,29 +29,10 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
-import { Platform } from '@/models/Platform'
-import { PlatformConfigurationAttributes } from '@/models/PlatformConfigurationAttributes'
 
-describe('PlatformConfigurationAttributes', () => {
-  it('should create a PlatformConfigurationAttributes object', () => {
-    const platform = new Platform()
-    platform.id = '1'
+import { Contact } from '@/models/Contact'
 
-    const attributes = new PlatformConfigurationAttributes(platform)
-    expect(attributes.platform).toBe(platform)
-    expect(attributes).toHaveProperty('id', '1')
-  })
-
-  it('should create a PlatformConfigurationAttributes from an object', () => {
-    const platform = new Platform()
-    platform.id = '1'
-
-    const attributes = PlatformConfigurationAttributes.createFromObject({ platform, offsetX: 1, offsetY: 1, offsetZ: 1 })
-    expect(typeof attributes).toBe('object')
-    expect(attributes.platform).toBe(platform)
-    expect(attributes).toHaveProperty('id', '1')
-    expect(attributes).toHaveProperty('offsetX', 1)
-    expect(attributes).toHaveProperty('offsetY', 1)
-    expect(attributes).toHaveProperty('offsetZ', 1)
-  })
-})
+export interface IUnmountData {
+  contact: Contact,
+  description: string
+}

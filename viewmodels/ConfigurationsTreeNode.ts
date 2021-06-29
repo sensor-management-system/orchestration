@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020
+ * Copyright (C) 2020-2021
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -29,34 +29,13 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
-import { Device } from '@/models/Device'
-import { DeviceNode } from '@/models/DeviceNode'
 
-describe('DeviceNode', () => {
-  it('should create a DeviceNode object', () => {
-    const device = new Device()
-    device.id = '1'
+/**
+ * @file provides an union type of Platform- and DeviceNodes
+ * @author <marc.hanisch@gfz-potsdam.de>
+ */
 
-    const node = new DeviceNode(device)
-    expect(Object.is(node.unpack(), device)).toBeTruthy()
-    expect(node).toHaveProperty('id', DeviceNode.ID_PREFIX + device.id)
-  })
+import { PlatformNode } from '@/viewmodels/PlatformNode'
+import { DeviceNode } from '@/viewmodels/DeviceNode'
 
-  it('should create a DeviceNode from another one', () => {
-    const firstDevice = new Device()
-    firstDevice.id = '1'
-
-    const firstNode = new DeviceNode(firstDevice)
-    const secondNode = DeviceNode.createFromObject(firstNode)
-
-    expect(Object.is(secondNode, firstNode)).toBeFalsy()
-    expect(Object.is(secondNode.unpack(), firstNode.unpack())).toBeTruthy()
-  })
-
-  it('should not be allowed to have children', () => {
-    const device = new Device()
-
-    const node = new DeviceNode(device)
-    expect(node.canHaveChildren()).toBeFalsy()
-  })
-})
+export type ConfigurationsTreeNode = PlatformNode | DeviceNode

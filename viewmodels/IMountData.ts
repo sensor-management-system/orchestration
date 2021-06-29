@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020
+ * Copyright (C) 2020-2021
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -30,21 +30,12 @@
  * permissions and limitations under the Licence.
  */
 
-/**
- * @file provides an interface for node classes of a tree
- * @author <marc.hanisch@gfz-potsdam.de>
- */
+import { Contact } from '@/models/Contact'
 
-/**
- * an interface to implement wrapper classes for the usage in a ConfigurationsTreeNode
- */
-export interface IConfigurationsTreeNode<T> {
-  id: string | null
-  name: string
-  disabled: boolean
-
-  canHaveChildren (): boolean
-  isPlatform (): boolean
-  isDevice (): boolean
-  unpack (): T
+export interface IMountData {
+  offsetX: number,
+  offsetY: number,
+  offsetZ: number,
+  contact: Contact,
+  description: string
 }

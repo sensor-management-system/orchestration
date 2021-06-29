@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020
+ * Copyright (C) 2020-2021
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -30,12 +30,14 @@
  * permissions and limitations under the Licence.
  */
 
-/**
- * @file provides an union type of Platform- and DeviceNodes
- * @author <marc.hanisch@gfz-potsdam.de>
- */
+import { DeviceMountAction } from '@/models/DeviceMountAction'
+import { DeviceUnmountAction } from '@/models/DeviceUnmountAction'
+import { PlatformMountAction } from '@/models/PlatformMountAction'
+import { PlatformUnmountAction } from '@/models/PlatformUnmountAction'
 
-import { PlatformNode } from '@/models/PlatformNode'
-import { DeviceNode } from '@/models/DeviceNode'
-
-export type ConfigurationsTreeNode = PlatformNode | DeviceNode
+export interface IMountActions {
+  platformMountActions: PlatformMountAction[]
+  platformUnmountActions: PlatformUnmountAction[]
+  deviceMountActions: DeviceMountAction[]
+  deviceUnmountActions: DeviceUnmountAction[]
+}

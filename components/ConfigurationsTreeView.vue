@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020
+Copyright (C) 2020-2021
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -57,8 +57,8 @@ permissions and limitations under the Licence.
  */
 import { Vue, Component, Prop } from 'nuxt-property-decorator'
 
-import { ConfigurationsTree } from '@/models/ConfigurationsTree'
-import { ConfigurationsTreeNode } from '@/models/ConfigurationsTreeNode'
+import { ConfigurationsTree } from '@/viewmodels/ConfigurationsTree'
+import { ConfigurationsTreeNode } from '@/viewmodels/ConfigurationsTreeNode'
 
 /**
  * A class component to display platforms and devices in a tree

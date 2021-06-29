@@ -59,6 +59,10 @@ import { ActionTypeApi } from '@/services/cv/ActionTypeApi'
 import { SoftwareTypeApi } from '@/services/cv/SoftwareTypeApi'
 
 import { ProjectApi } from '@/services/project/ProjectApi'
+import { DeviceMountActionApi } from '@/services/sms/DeviceMountActionApi'
+import { DeviceUnmountActionApi } from '@/services/sms/DeviceUnmountActionApi'
+import { PlatformMountActionApi } from '@/services/sms/PlatformMountActionApi'
+import { PlatformUnmountActionApi } from '@/services/sms/PlatformUnmountActionApi'
 
 const SMS_BASE_URL = process.env.smsBackendUrl
 const CV_BASE_URL = process.env.cvBackendUrl
@@ -118,8 +122,25 @@ export class Api {
     this._deviceApi = new DeviceApi(
       this.createAxios(smsBaseUrl, '/devices', smsConfig, getIdToken)
     )
+
+    const deviceMountActionApi = new DeviceMountActionApi(
+      this.createAxios(smsBaseUrl, '/device-mount-actions', smsConfig, getIdToken)
+    )
+    const deviceUnmountActionApi = new DeviceUnmountActionApi(
+      this.createAxios(smsBaseUrl, '/device-unmount-actions', smsConfig, getIdToken)
+    )
+    const platformMountActionApi = new PlatformMountActionApi(
+      this.createAxios(smsBaseUrl, '/platform-mount-actions', smsConfig, getIdToken)
+    )
+    const platformUnmountActionApi = new PlatformUnmountActionApi(
+      this.createAxios(smsBaseUrl, '/platform-unmount-actions', smsConfig, getIdToken)
+    )
     this._configurationApi = new ConfigurationApi(
-      this.createAxios(smsBaseUrl, '/configurations', smsConfig, getIdToken)
+      this.createAxios(smsBaseUrl, '/configurations', smsConfig, getIdToken),
+      deviceMountActionApi,
+      deviceUnmountActionApi,
+      platformMountActionApi,
+      platformUnmountActionApi
     )
     this._configurationStatesApi = new ConfigurationStatusApi()
 

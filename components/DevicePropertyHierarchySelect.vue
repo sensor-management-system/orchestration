@@ -31,7 +31,7 @@ permissions and limitations under the Licence.
 <template>
   <div>
     <v-select
-      :value="selectedDevice"
+      :value="device"
       :items="devices"
       :item-text="(device) => device.shortName"
       :item-value="(device) => device"
@@ -42,7 +42,7 @@ permissions and limitations under the Licence.
       @change="selectDevice"
     />
     <v-select
-      v-if="selectedDevice"
+      v-if="device"
       :value="value"
       :items="propertiesOfDevice"
       :item-text="(property) => property.propertyName"
@@ -125,6 +125,22 @@ export default class DevicePropertyHierarchySelect extends Vue {
 
   private selectedDevice: Device | null = null
 
+  get device (): Device | null {
+    if (this.selectedDevice) {
+      return this.selectedDevice
+    }
+    if (this.value && this.value.id) {
+      for (const device of this.devices) {
+        const devicePropertyIndex = device.properties.findIndex(p => p.id === this.value.id)
+        if (devicePropertyIndex > -1) {
+          this.selectedDevice = device
+          return this.selectedDevice
+        }
+      }
+    }
+    return null
+  }
+
   mounted () {
     // Lets check if we have already an property
     if (this.selectedDevice == null && this.value != null) {
@@ -171,6 +187,7 @@ export default class DevicePropertyHierarchySelect extends Vue {
     if (!this.selectedDevice) {
       return []
     }
+
     return this.selectedDevice.properties
   }
 

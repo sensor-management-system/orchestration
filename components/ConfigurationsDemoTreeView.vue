@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020
+Copyright (C) 2020-2021
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -60,13 +60,19 @@ permissions and limitations under the Licence.
  * @author <marc.hanisch@gfz-potsdam.de>
  */
 import { Vue, Component } from 'nuxt-property-decorator'
+import { DateTime } from 'luxon'
 
-import { ConfigurationsTree } from '@/models/ConfigurationsTree'
-import { ConfigurationsTreeNode } from '@/models/ConfigurationsTreeNode'
-import { PlatformNode } from '@/models/PlatformNode'
-import { DeviceNode } from '@/models/DeviceNode'
-import { Platform } from '@/models/Platform'
+import { Contact } from '@/models/Contact'
 import { Device } from '@/models/Device'
+import { DeviceMountAction } from '@/models/DeviceMountAction'
+import { DeviceUnmountAction } from '@/models/DeviceUnmountAction'
+import { Platform } from '@/models/Platform'
+import { PlatformMountAction } from '@/models/PlatformMountAction'
+import { PlatformUnmountAction } from '@/models/PlatformUnmountAction'
+
+import { ConfigurationsTreeNode } from '@/viewmodels/ConfigurationsTreeNode'
+
+import { buildConfigurationTree } from '@/modelUtils/mountHelpers'
 
 /**
  * A class component to select platforms and devices for a configuration
@@ -75,88 +81,129 @@ import { Device } from '@/models/Device'
 @Component
 // @ts-ignore
 export default class ConfigurationsDemoTreeView extends Vue {
+  createPlatform (id: string) {
+    const p = new Platform()
+    p.id = id
+    p.shortName = 'Platform ' + id
+    return p
+  }
+
+  createDevice (id: string) {
+    const d = new Device()
+    d.id = id
+    d.shortName = 'Device ' + id
+    return d
+  }
+
+  private platforms: Platform[] = [
+    this.createPlatform('1'),
+    this.createPlatform('2'),
+    this.createPlatform('3')
+  ]
+
+  private devices: Device[] = [
+    this.createDevice('1'),
+    this.createDevice('2'),
+    this.createDevice('3')
+  ]
+
   /**
    * returns a demo tree
    *
    * @return {ConfigurationsTreeNode[]} a demo tree
    */
   get items (): ConfigurationsTreeNode[] {
-    return ConfigurationsTree.fromArray(
-      [
-        ((): PlatformNode => {
-          const n = new PlatformNode(
-            ((): Platform => {
-              const o = new Platform()
-              o.id = '-1'
-              o.shortName = 'Platform 01'
-              return o
-            })()
-          )
-          n.disabled = true
-          n.setTree(
-            ConfigurationsTree.fromArray(
-              [
-                ((): PlatformNode => {
-                  const n = new PlatformNode(
-                    ((): Platform => {
-                      const o = new Platform()
-                      o.id = '-2'
-                      o.shortName = 'Platform 02'
-                      return o
-                    })()
-                  )
-                  n.disabled = true
-                  n.setTree(
-                    ConfigurationsTree.fromArray(
-                      [
-                        new DeviceNode(
-                          ((): Device => {
-                            const o = new Device()
-                            o.id = '-3'
-                            o.shortName = 'Device 01'
-                            return o
-                          })()
-                        ),
-                        new DeviceNode(
-                          ((): Device => {
-                            const o = new Device()
-                            o.id = '-4'
-                            o.shortName = 'Device 02'
-                            return o
-                          })()
-                        ),
-                        new DeviceNode(
-                          ((): Device => {
-                            const o = new Device()
-                            o.id = '-5'
-                            o.shortName = 'Device 03'
-                            return o
-                          })()
-                        )
-                      ]
-                    )
-                  )
-                  return n
-                })()
-              ]
-            )
-          )
-          return n
-        })(),
-        (() => {
-          const n = new PlatformNode(
-            ((): Platform => {
-              const o = new Platform()
-              o.id = '-6'
-              o.shortName = 'Platform 03'
-              return o
-            })()
-          )
-          n.disabled = true
-          return n
-        })()
-      ]
-    ).toArray()
+    const demoContact = new Contact()
+    demoContact.givenName = 'Max'
+    demoContact.familyName = 'Mustermann'
+    demoContact.email = 'max.mustermann@mail.org'
+
+    const platformMountActions = [
+      PlatformMountAction.createFromObject({
+        id: '',
+        platform: this.platforms[0],
+        parentPlatform: null,
+        date: DateTime.utc(2020, 10, 11),
+        offsetX: 0,
+        offsetY: 0,
+        offsetZ: 0,
+        contact: demoContact,
+        description: 'Mounted platform 1'
+      }),
+      PlatformMountAction.createFromObject({
+        id: '',
+        platform: this.platforms[1],
+        parentPlatform: this.platforms[0],
+        date: DateTime.utc(2020, 10, 13),
+        offsetX: 0,
+        offsetY: 0,
+        offsetZ: 0,
+        contact: demoContact,
+        description: 'Mounted platform 2 on platform 1'
+      })
+    ]
+    const platformUnmountActions = [
+      PlatformUnmountAction.createFromObject({
+        id: '',
+        platform: this.platforms[1],
+        date: DateTime.utc(2020, 10, 19),
+        contact: demoContact,
+        description: 'Unmounted platform 2'
+      })
+    ]
+    const deviceMountActions = [
+      DeviceMountAction.createFromObject({
+        id: '',
+        device: this.devices[0],
+        parentPlatform: this.platforms[0],
+        date: DateTime.utc(2020, 10, 12),
+        offsetX: 0,
+        offsetY: 0,
+        offsetZ: 0,
+        contact: demoContact,
+        description: 'Mounted device 1 on platform 1'
+      }),
+      DeviceMountAction.createFromObject({
+        id: '',
+        device: this.devices[1],
+        parentPlatform: this.platforms[1],
+        date: DateTime.utc(2020, 10, 15),
+        offsetX: 0,
+        offsetY: 0,
+        offsetZ: 0,
+        contact: demoContact,
+        description: 'Mounted device 2 on platform 2'
+      }),
+      DeviceMountAction.createFromObject({
+        id: '',
+        device: this.devices[2],
+        parentPlatform: null,
+        date: DateTime.utc(2020, 10, 17),
+        offsetX: 0,
+        offsetY: 0,
+        offsetZ: 0,
+        contact: demoContact,
+        description: 'Mounted device 3'
+      })
+    ]
+    const deviceUnmountActions = [
+      DeviceUnmountAction.createFromObject({
+        id: '',
+        device: this.devices[1],
+        date: DateTime.utc(2020, 10, 16),
+        contact: demoContact,
+        description: 'Unmounted device 2'
+      })
+    ]
+
+    const tree = buildConfigurationTree({
+      platformMountActions,
+      platformUnmountActions,
+      deviceMountActions,
+      deviceUnmountActions
+    }, DateTime.utc(2020, 10, 17))
+
+    return tree.toArray()
   }
 }
 </script>

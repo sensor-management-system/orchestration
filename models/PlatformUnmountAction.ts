@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020
+ * Copyright (C) 2020-2021
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -29,64 +29,75 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
+
+import { DateTime } from 'luxon'
+import { Contact } from '@/models/Contact'
 import { Platform } from '@/models/Platform'
 
-export interface IPlatformConfigurationAttributes {
+export interface IPlatformUnmountAction {
+  id: string
   platform: Platform
-  offsetX: number
-  offsetY: number
-  offsetZ: number
+  date: DateTime
+  contact: Contact
+  description: string
 }
 
-export class PlatformConfigurationAttributes implements IPlatformConfigurationAttributes {
+export class PlatformUnmountAction implements IPlatformUnmountAction {
+  private _id: string = ''
   private _platform: Platform
-  private _offsetX: number = 0
-  private _offsetY: number = 0
-  private _offsetZ: number = 0
+  private _date: DateTime
+  private _contact: Contact
+  private _description: string
 
-  constructor (platform: Platform) {
+  constructor (
+    id: string,
+    platform: Platform,
+    date: DateTime,
+    contact: Contact,
+    description: string
+  ) {
+    this._id = id
     this._platform = platform
+    this._date = date
+    this._contact = contact
+    this._description = description
   }
 
-  static createFromObject (someObject: IPlatformConfigurationAttributes): PlatformConfigurationAttributes {
-    const newObject = new PlatformConfigurationAttributes(someObject.platform)
-
-    newObject.offsetX = someObject.offsetX
-    newObject.offsetY = someObject.offsetY
-    newObject.offsetZ = someObject.offsetZ
-
-    return newObject
+  get id (): string {
+    return this._id
   }
 
-  get id (): string | null {
-    return this._platform.id
+  set id (newId: string) {
+    this._id = newId
   }
 
   get platform (): Platform {
     return this._platform
   }
 
-  get offsetX (): number {
-    return this._offsetX
+  get date (): DateTime {
+    return this._date
   }
 
-  set offsetX (offsetX: number) {
-    this._offsetX = offsetX
+  get contact (): Contact {
+    return this._contact
   }
 
-  get offsetY (): number {
-    return this._offsetY
+  get description (): string {
+    return this._description
   }
 
-  set offsetY (offsetY: number) {
-    this._offsetY = offsetY
+  get isMountAction (): boolean {
+    return false
   }
 
-  get offsetZ (): number {
-    return this._offsetZ
-  }
-
-  set offsetZ (offsetZ: number) {
-    this._offsetZ = offsetZ
+  static createFromObject (otherAction: IPlatformUnmountAction): PlatformUnmountAction {
+    return new PlatformUnmountAction(
+      otherAction.id,
+      Platform.createFromObject(otherAction.platform),
+      otherAction.date,
+      Contact.createFromObject(otherAction.contact),
+      otherAction.description
+    )
   }
 }

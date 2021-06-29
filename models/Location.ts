@@ -118,9 +118,9 @@ export class DynamicLocation implements IDynamicLocation {
   static createFromObject (someObject: IDynamicLocation): DynamicLocation {
     const newObject: DynamicLocation = new DynamicLocation()
 
-    newObject.latitude = someObject.latitude
-    newObject.longitude = someObject.longitude
-    newObject.elevation = someObject.elevation
+    newObject.latitude = someObject.latitude === null ? null : DeviceProperty.createFromObject(someObject.latitude)
+    newObject.longitude = someObject.longitude === null ? null : DeviceProperty.createFromObject(someObject.longitude)
+    newObject.elevation = someObject.elevation === null ? null : DeviceProperty.createFromObject(someObject.elevation)
 
     return newObject
   }

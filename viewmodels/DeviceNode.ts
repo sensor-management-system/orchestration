@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020
+ * Copyright (C) 2020-2021
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -31,38 +31,60 @@
  */
 
 /**
- * @file provides a wrapper class for a platform in a tree
+ * @file provides a wrapper class for a device in a tree
  * @author <marc.hanisch@gfz-potsdam.de>
  */
 
-import { IConfigurationsTreeNode } from '@/models/IConfigurationsTreeNode'
-import { ConfigurationsTree } from '@/models/ConfigurationsTree'
-import { ConfigurationsTreeNode } from '@/models/ConfigurationsTreeNode'
-import { Platform } from '@/models/Platform'
+import { IConfigurationsTreeNode } from '@/viewmodels/IConfigurationsTreeNode'
+import { DeviceMountAction } from '@/models/DeviceMountAction'
 
 /**
- * a class that wraps a Platform instance for the usage in a ConfigurationsTree
+ * a class that wraps a Device instance for the usage in a ConfigurationsTree
  */
-export class PlatformNode implements IConfigurationsTreeNode<Platform> {
-  private node: Platform
-  private tree: ConfigurationsTree = new ConfigurationsTree()
+export class DeviceNode implements IConfigurationsTreeNode<DeviceMountAction> {
+  private node: DeviceMountAction
   private _disabled: boolean = false
 
-  static readonly ID_PREFIX = 'PlatformNode-'
+  static readonly ID_PREFIX = 'DeviceNode-'
 
-  constructor (node: Platform) {
+  constructor (node: DeviceMountAction) {
     this.node = node
   }
 
   get id (): string | null {
-    if (!this.node.id) {
+    if (!this.node.device.id) {
       return null
     }
-    return PlatformNode.ID_PREFIX + this.node.id
+    return DeviceNode.ID_PREFIX + this.node.device.id
+  }
+
+  get elementId (): string | null {
+    if (!this.node.device.id) {
+      return null
+    }
+    return this.node.device.id
   }
 
   get name (): string {
-    return this.node.shortName
+    const partsOffsets = []
+    if (this.node.offsetX !== 0.0) {
+      partsOffsets.push('x=' + this.node.offsetX + 'm')
+    }
+    if (this.node.offsetY !== 0.0) {
+      partsOffsets.push('y=' + this.node.offsetY + 'm')
+    }
+    if (this.node.offsetZ !== 0.0) {
+      partsOffsets.push('z=' + this.node.offsetZ + 'm')
+    }
+    const offsetText = partsOffsets.join(', ')
+    if (offsetText) {
+      return this.nameWithoutOffsets + ' (' + offsetText + ')'
+    }
+    return this.nameWithoutOffsets
+  }
+
+  get nameWithoutOffsets (): string {
+    return this.node.device.shortName
   }
 
   get disabled (): boolean {
@@ -74,40 +96,23 @@ export class PlatformNode implements IConfigurationsTreeNode<Platform> {
   }
 
   canHaveChildren (): boolean {
-    return true
-  }
-
-  isPlatform (): boolean {
-    return true
-  }
-
-  isDevice (): boolean {
     return false
   }
 
-  unpack (): Platform {
+  isPlatform (): boolean {
+    return false
+  }
+
+  isDevice (): boolean {
+    return true
+  }
+
+  unpack (): DeviceMountAction {
     return this.node
   }
 
-  setTree (tree: ConfigurationsTree) {
-    this.tree = tree
-  }
-
-  getTree (): ConfigurationsTree {
-    return this.tree
-  }
-
-  set children (children: ConfigurationsTreeNode[]) {
-    this.tree = ConfigurationsTree.fromArray(children)
-  }
-
-  get children (): ConfigurationsTreeNode[] {
-    return this.tree.toArray()
-  }
-
-  static createFromObject (someObject: PlatformNode): PlatformNode {
-    const newObject = new PlatformNode(someObject.unpack())
-    newObject.setTree(ConfigurationsTree.createFromObject(someObject.getTree()))
+  static createFromObject (someObject: DeviceNode): DeviceNode {
+    const newObject = new DeviceNode(someObject.unpack())
     return newObject
   }
 }
