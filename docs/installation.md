@@ -61,7 +61,7 @@ but This is the power of Docker.
 1. Build image
 
     ```bash
-    docker build -t git.ufz.de:4567/rdm-software/svm/backend:`date +%Y-%m-%d`-1 \
+    docker build -t registry.hzdr.de/hub-terra/sms/backend:`date +%Y-%m-%d`-1 \
         --build-arg BUILD_DATE=$(date --utc +%FT%TZ) \
         --build-arg VCS_REF=$(git rev-parse HEAD) .
     ```
@@ -76,7 +76,7 @@ but This is the power of Docker.
     docker run --rm \
          -e DATABASE_URL="postgres://postgres:postgres@localhost:5432/db_dev" \
          -e APP_SETTINGS="project.config.DevelopmentConfig" \
-         git.ufz.de:4567/rdm-software/svm/backend:latest \
+         registry.hzdr.de/hub-terra/sms/backend:latest \
          python manage.py db upgrade
     ```
 
@@ -87,7 +87,7 @@ but This is the power of Docker.
          -e DATABASE_URL="postgres://postgres:postgres@localhost:5432/db_dev" \
          -e APP_SETTINGS="project.config.DevelopmentConfig" \
          -e FLASK_DEBUG=1 \
-         git.ufz.de:4567/rdm-software/svm/backend:latest
+         registry.hzdr.de/hub-terra/sms/backend:latest
     ```
 
 ##  Local
