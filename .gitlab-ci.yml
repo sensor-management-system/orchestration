@@ -1,0 +1,123 @@
+stages:
+  - build
+  - test
+  - release
+
+variables:
+  CONTAINER_TEST_IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
+  CONTAINER_RELEASE_IMAGE: $CI_REGISTRY_IMAGE:latest
+  DATABASE_TEST_URL: postgres://$POSTGRES_USER:@$POSTGRES_PASSWORD:5432/$POSTGRES_DB
+  WELL_KNOWN_URL: https://webapp.ufz.de/idp/oidc/v1/.well-known/openid-configuration
+  HTTP_ORIGINS: "https://registry.hzdr.de http://rdm-test.intranet.ufz.de:5002"
+  OIDC_USERNAME_CLAIM: "sub"
+
+.docker_login: &docker_login
+  - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+
+.docker-in-docker:
+  image: docker:20.10.7
+  services:
+    - docker:20.10.7-dind
+  before_script:
+    - *docker_login
+  tags:
+    - docker
+
+build-image:
+  stage: build
+  extends: .docker-in-docker
+  script:
+    - echo "ENV WELL_KNOWN_URL" $WELL_KNOWN_URL >> $CI_PROJECT_DIR/Dockerfile.ci
+    - echo "ENV HTTP_ORIGINS" $HTTP_ORIGINS >> $CI_PROJECT_DIR/Dockerfile.ci
+    - echo "ENV OIDC_USERNAME_CLAIM" $OIDC_USERNAME_CLAIM >> $CI_PROJECT_DIR/Dockerfile.ci
+    - docker build --tag $CONTAINER_TEST_IMAGE .
+    - docker push $CONTAINER_TEST_IMAGE
+
+build-gfz-image:
+  stage: build
+  extends: .docker-in-docker
+  environment:
+    name: gfzstaging
+    url: https://$GFZ_STAGING_HOST
+  script:
+    - >
+      if [ -z "$CI_COMMIT_TAG" ]; then
+        docker build --tag "$CI_REGISTRY_IMAGE:gfz-latest" -f Dockerfile .
+        docker push "$CI_REGISTRY_IMAGE:gfz-latest"
+      else
+        docker build --tag "$CI_REGISTRY_IMAGE:gfz-$CI_COMMIT_TAG" --tag "$CI_REGISTRY_IMAGE:gfz-latest" -f Dockerfile .
+        docker push "$CI_REGISTRY_IMAGE:gfz-latest"
+        docker push "$CI_REGISTRY_IMAGE:gfz-$CI_COMMIT_TAG"
+      fi
+  tags:
+    - docker
+  when: manual
+  allow_failure: true
+
+unittest-lint:
+  stage: test
+  image: $CONTAINER_TEST_IMAGE
+  before_script:
+    - apt-get update
+    - apt-get install -y  --no-install-recommends gcc libssl-dev libffi-dev musl-dev cargo
+  script:
+    - cd $CI_PROJECT_DIR/app/ && tox
+
+test-image:
+  services:
+    - postgres:12.2-alpine
+  variables:
+    POSTGRES_DB: db_test
+    POSTGRES_USER: postgres
+    POSTGRES_PASSWORD: postgres
+    POSTGRES_HOST_AUTH_METHOD: trust
+  stage: test
+  image: $CONTAINER_TEST_IMAGE
+  before_script:
+    - export DATABASE_TEST_URL=$DATABASE_TEST_URL
+    - export APP_SETTINGS=project.config.TestingConfig
+  script:
+    - cd $CI_PROJECT_DIR/app/ && python manage.py test
+
+release-image:
+  stage: release
+  extends: .docker-in-docker
+  script:
+    - docker pull $CONTAINER_TEST_IMAGE
+    - docker tag $CONTAINER_TEST_IMAGE $CONTAINER_RELEASE_IMAGE
+    - docker push $CONTAINER_RELEASE_IMAGE
+  rules:
+    - if: "$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH"
+
+deploy-gfz-image:
+  stage: release
+  environment:
+    name: gfzstaging
+    url: https://$GFZ_STAGING_HOST
+  tags:
+    - deploy
+    - staging
+    - gfz
+    - shell
+  variables:
+    COMPOSE_PROJECT_NAME: ssmbackend
+    HTTP_ORIGINS: ${GFZ_STAGING_HTTP_ORIGINS}
+    WELL_KNOWN_URL: ${GFZ_STAGING_OIDC_WELL_KNOWN_URL}
+    OIDC_CLIENT_IDS: ${GFZ_STAGING_OIDC_CLIENT_IDS}
+    OIDC_USERNAME_CLAIM: ${GFZ_STAGING_OIDC_USERNAME_CLAIM}
+  before_script:
+    - *docker_login
+  script:
+    - ./ensure_vm_max_map_count.sh
+    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml pull
+    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml up -d
+    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T db psql -U postgres -c 'CREATE DATABASE db_prod' || echo "prod database already exists"
+    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T db psql -U postgres -c 'CREATE DATABASE db_dev' || echo "dev database already exists"
+    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T db psql -U postgres -c 'CREATE DATABASE db_test;' || echo "test database already exists"
+    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T ssmbackend python3 manage.py db upgrade
+    - sleep 1m
+    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T ssmbackend python3 manage.py es reindex
+  when: manual
+  dependencies:
+    - build-gfz-image
+  allow_failure: true
