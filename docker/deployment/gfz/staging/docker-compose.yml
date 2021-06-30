@@ -30,7 +30,7 @@ version : '3'
 
 services:
   ssmfrontend:
-    image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_TAG:-latest}
+    image: ${CI_REGISTRY_IMAGE}:gfz-${CI_COMMIT_TAG:-latest}
     deploy:
       restart_policy:
         condition: unless-stopped
