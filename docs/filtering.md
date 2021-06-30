@@ -90,7 +90,7 @@ HTTP/1.0 201 CREATED
 Location: http://localhost:5000/sis/v1/platforms/1
 Content-Type: application/vnd.api+json
 Content-Length: 1745
-Access-Control-Allow-Origin: https://git.ufz.de
+Access-Control-Allow-Origin: https://registry.hzdr.de
 Access-Control-Allow-Headers: Content-Type
 Server: Werkzeug/1.0.1 Python/3.8.2
 Date: Fri, 08 May 2020 18:25:23 GMT

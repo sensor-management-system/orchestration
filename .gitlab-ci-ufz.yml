@@ -7,22 +7,31 @@ variables:
   CONTAINER_TEST_IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
   CONTAINER_RELEASE_IMAGE: $CI_REGISTRY_IMAGE:latest
   DATABASE_TEST_URL: postgres://$POSTGRES_USER:@$POSTGRES_PASSWORD:5432/$POSTGRES_DB
-  WELL_KNOWN_URL: https://webapp-stage.intranet.ufz.de/idp/oidc/v1/.well-known/openid-configuration
-  HTTP_ORIGINS: "https://git.ufz.de http://rdm-test.intranet.ufz.de:5002"
+  WELL_KNOWN_URL: https://webapp.ufz.de/idp/oidc/v1/.well-known/openid-configuration
+  HTTP_ORIGINS: "https://registry.hzdr.de http://rdm-test.intranet.ufz.de:5002"
   OIDC_USERNAME_CLAIM: "sub"
 
+.docker_login: &docker_login
+  - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+
+.docker-in-docker:
+  image: docker:20.10.7
+  services:
+    - docker:20.10.7-dind
+  before_script:
+    - *docker_login
+  tags:
+    - docker
 
 build-image:
   stage: build
-  image:
-    name: gcr.io/kaniko-project/executor:debug
-    entrypoint: [ "" ]
+  extends: .docker-in-docker
   script:
     - echo "ENV WELL_KNOWN_URL" $WELL_KNOWN_URL >> $CI_PROJECT_DIR/Dockerfile.ci
     - echo "ENV HTTP_ORIGINS" $HTTP_ORIGINS >> $CI_PROJECT_DIR/Dockerfile.ci
     - echo "ENV OIDC_USERNAME_CLAIM" $OIDC_USERNAME_CLAIM >> $CI_PROJECT_DIR/Dockerfile.ci
-    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
-    - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --destination $CONTAINER_TEST_IMAGE
+    - docker build --tag $CONTAINER_TEST_IMAGE .
+    - docker push $CONTAINER_TEST_IMAGE
 
 unittest-lint:
   stage: test
@@ -51,11 +60,10 @@ test-image:
 
 release-image:
   stage: release
-  image:
-    name: gcr.io/kaniko-project/executor:debug
-    entrypoint: [ "" ]
+  extends: .docker-in-docker
   script:
-    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
-    - echo "FROM  ${CONTAINER_TEST_IMAGE}" | /kaniko/executor --context $CI_PROJECT_DIR --dockerfile /dev/stdin --destination ${CONTAINER_RELEASE_IMAGE}
-  only:
-    - master
+    - docker pull $CONTAINER_TEST_IMAGE
+    - docker tag $CONTAINER_TEST_IMAGE $CONTAINER_RELEASE_IMAGE
+    - docker push $CONTAINER_RELEASE_IMAGE
+  rules:
+    - if: "$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH"
