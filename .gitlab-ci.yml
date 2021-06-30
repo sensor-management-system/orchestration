@@ -73,7 +73,9 @@ test-frontend-unit-tests:
 
 build-deploy-image-gfz:
   stage: build
-  image: docker:19.03.1
+  image: docker:20.10.7
+  services:
+    - docker:20.10.7-dind
   variables:
     SMS_BACKEND_URL: ${GFZ_STAGING_BACKEND_URL}/rdm/svm-api/v1
     CV_BACKEND_URL: ${GFZ_STAGING_SMS_CV_BACKEND_URL}/api/v1
@@ -112,14 +114,15 @@ build-deploy-image-gfz:
       - node_modules
   tags:
     - docker
-    - dind
   rules:
     - if: $CI_COMMIT_TAG
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
-build-deploy-image-manual:
+build-deploy-image-manual-gfz:
   stage: build
-  image: docker:19.03.1
+  image: docker:20.10.7
+  services:
+    - docker:20.10.7-dind
   variables:
     SMS_BACKEND_URL: ${GFZ_STAGING_BACKEND_URL}/rdm/svm-api/v1
     CV_BACKEND_URL: ${GFZ_STAGING_SMS_CV_BACKEND_URL}/api/v1
@@ -189,7 +192,7 @@ deploy-staging-manual-8080-gfz:
     - docker-compose -f docker/deployment/gfz/staging8080/docker-compose.yml pull
     - docker-compose -f docker/deployment/gfz/staging8080/docker-compose.yml up -d
   dependencies:
-    - build-deploy-image-manual
+    - build-deploy-image-manual-gfz
   when: manual
 
 test-availability-staging-gfz:
