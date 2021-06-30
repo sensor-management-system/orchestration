@@ -1,11 +1,11 @@
 """Model for the devices."""
 
 
-from ..models.mixin import AuditMixin, SearchableMixin
+from ..models.mixin import AuditMixin, SearchableMixin, IndirectSearchableMixin
 from .base_model import db
 
 
-class Device(db.Model, AuditMixin, SearchableMixin):
+class Device(db.Model, AuditMixin, SearchableMixin, IndirectSearchableMixin):
     """Device class."""
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -60,7 +60,25 @@ class Device(db.Model, AuditMixin, SearchableMixin):
             "contacts": [c.to_search_entry() for c in self.contacts],
             "properties": [p.to_search_entry() for p in self.device_properties],
             "customfields": [c.to_search_entry() for c in self.customfields],
+            "generic_actions": [
+                g.to_search_entry() for g in self.generic_device_actions
+            ],
+            "software_update_actions": [
+                s.to_search_entry() for s in self.device_software_update_actions
+            ],
         }
+
+    def get_parent_search_entities(self):
+        """Get the parents where this here is included in the search index."""
+        # This here should only affect configurations - as their search
+        # index entry includes the device.
+        result = []
+        # We only need to check the device mount actions for associated
+        # configurations - as there should be no unmount before an earlier
+        # mount action.
+        for action in self.device_mount_actions:
+            result.append(action.configuration)
+        return result
 
     @staticmethod
     def get_search_index_properties():
@@ -140,6 +158,22 @@ class Device(db.Model, AuditMixin, SearchableMixin):
                 "type": "nested",
                 "properties": Contact.get_search_index_properties(),
             },
+            "customfields": {
+                "type": "nested",
+                "properties": {
+                    # The key should use keyword behaviour by default
+                    # but should also searchable as text.
+                    "key": {
+                        "type": "keyword",
+                        "fields": {"text": {"type": "text"}},
+                    },
+                    # The same for the value.
+                    "value": {
+                        "type": "keyword",
+                        "fields": {"text": {"type": "text"}},
+                    },
+                },
+            },
             "properties": {
                 "type": "nested",
                 "properties": {
@@ -174,6 +208,46 @@ class Device(db.Model, AuditMixin, SearchableMixin):
                         "fields": {"text": {"type": "text"}},
                     },
                     "resolution_unit_uri": {"type": "keyword"},
+                },
+            },
+            "generic_actions": {
+                "type": "nested",
+                "properties": {
+                    "action_type_uri": {
+                        "type": "keyword",
+                    },
+                    "action_type_name": {
+                        "type": "keyword",
+                        "fields": {"text": {"type": "text"}},
+                    },
+                    "description": {
+                        "type": "text",
+                    },
+                },
+            },
+            "software_update_actions": {
+                "type": "nested",
+                "properties": {
+                    "software_type_name": {
+                        "type": "keyword",
+                        "fields": {"text": {"type": "text"}},
+                    },
+                    "software_type_uri": {
+                        "type": "keyword",
+                    },
+                    "description": {
+                        "type": "text",
+                    },
+                    "version": {
+                        "type": "keyword",
+                        "fields": {"text": {"type": "text"}},
+                    },
+                    "repository_url": {
+                        "type": "keyword",
+                        "fields": {
+                            "text": {"type": "text"},
+                        },
+                    },
                 },
             },
         }

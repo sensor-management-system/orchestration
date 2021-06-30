@@ -7,7 +7,7 @@ LABEL maintainer="Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>" \
     org.opencontainers.image.title="SVM Image" \
     org.opencontainers.image.licenses="MIT" \
     org.opencontainers.image.version="0.1.2" \
-    org.opencontainers.image.url="git.ufz.de:4567/rdm-software/svm/backend:$BUILD_DATE" \
+    org.opencontainers.image.url="registry.hzdr.de/hub-terra/sms/backend:$BUILD_DATE" \
     org.opencontainers.image.revision=$VCS_REF \
     org.opencontainers.image.created=$BUILD_DATE
 
@@ -44,4 +44,4 @@ COPY app /usr/src/app
 CMD ["sh", "-c","pip install --no-cache-dir -r requirements.txt && gunicorn --access-logfile - -b 0.0.0.0:5000 manage:app"]
 EXPOSE 5000
 
-# docker run --rm -p 127.0.0.1:5000:5000 -e DATABASE_URL="postgres://postgres:postgres@db:5432/db_dev" -e APP_SETTINGS="project.config.DevelopmentConfig" git.ufz.de:4567/rdm-software/svm/backend:latest
+# docker run --rm -p 127.0.0.1:5000:5000 -e DATABASE_URL="postgres://postgres:postgres@db:5432/db_dev" -e APP_SETTINGS="project.config.DevelopmentConfig" registry.hzdr.de/hub-terra/sms/backend:latest
