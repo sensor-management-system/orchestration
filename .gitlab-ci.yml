@@ -1,7 +1,7 @@
 # Web client of the Sensor Management System software developed within
 # the Helmholtz DataHub Initiative by GFZ and UFZ.
 # 
-# Copyright (C) 2020
+# Copyright (C) 2020-2021
 # - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 # - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -46,8 +46,6 @@ check-lint:
   script:
     - npm run lint
   tags:
-    - ssm
-    - id2
     - docker
   allow_failure: true
   cache:
@@ -64,8 +62,6 @@ test-frontend-unit-tests:
   script:
     - npm test
   tags:
-    - ssm
-    - id2
     - docker
   cache:
     key: ${CI_COMMIT_REF_SLUG}
@@ -75,15 +71,15 @@ test-frontend-unit-tests:
 .docker_login_gitlab_registry: &docker_login_gitlab_registry
   - echo "$CI_BUILD_TOKEN" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
 
-build-deploy-image:
+build-deploy-image-gfz:
   stage: build
   image: docker:19.03.1
   variables:
-    SMS_BACKEND_URL: ${STAGING_BACKEND_URL}/rdm/svm-api/v1
-    CV_BACKEND_URL: ${STAGING_SMS_CV_BACKEND_URL}/api/v1
-    HOST: ${STAGING_HOST}
-    CLIENT_ID: ${STAGING_CLIENT_ID}
-    AUTHORITY: ${STAGING_IDP_AUTORITY}
+    SMS_BACKEND_URL: ${GFZ_STAGING_BACKEND_URL}/rdm/svm-api/v1
+    CV_BACKEND_URL: ${GFZ_STAGING_SMS_CV_BACKEND_URL}/api/v1
+    HOST: ${GFZ_STAGING_HOST}
+    CLIENT_ID: ${GFZ_STAGING_CLIENT_ID}
+    AUTHORITY: ${GFZ_STAGING_IDP_AUTORITY}
   before_script:
     - *docker_login_gitlab_registry
     - echo $SMS_BACKEND_URL
@@ -115,24 +111,22 @@ build-deploy-image:
     paths:
       - node_modules
   tags:
-    - deploy
-    - staging
-    - id2
-  only:
-    refs:
-      - master
-      - tags
+    - docker
+    - dind
+  rules:
+    - if: $CI_COMMIT_TAG
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
 build-deploy-image-manual:
   stage: build
   image: docker:19.03.1
   variables:
-    SMS_BACKEND_URL: ${STAGING_BACKEND_URL}/rdm/svm-api/v1
-    CV_BACKEND_URL: ${STAGING_SMS_CV_BACKEND_URL}/api/v1
-    HOST: ${STAGING_HOST}:8080
+    SMS_BACKEND_URL: ${GFZ_STAGING_BACKEND_URL}/rdm/svm-api/v1
+    CV_BACKEND_URL: ${GFZ_STAGING_SMS_CV_BACKEND_URL}/api/v1
+    HOST: ${GFZ_STAGING_HOST}:8080
     # Not sure, if we need another client id for the staging on 8080
-    CLIENT_ID: ${STAGING_CLIENT_ID}
-    AUTHORITY: ${STAGING_IDP_AUTORITY}
+    CLIENT_ID: ${GFZ_STAGING_CLIENT_ID}
+    AUTHORITY: ${GFZ_STAGING_IDP_AUTORITY}
   before_script:
     - *docker_login_gitlab_registry
     - echo $SMS_BACKEND_URL
@@ -157,15 +151,16 @@ build-deploy-image-manual:
     - id2
   when: manual
 
-deploy-staging:
+deploy-staging-gfz:
   stage: deploy-staging
   environment:
     name: gfzstaging
-    url: http://$STAGING_HOST
+    url: http://$GFZ_STAGING_HOST
   tags:
     - deploy
     - staging
-    - id2
+    - gfz
+    - shell
   variables:
     COMPOSE_PROJECT_NAME: ssmfrontend
   before_script:
@@ -173,19 +168,19 @@ deploy-staging:
   script:
     - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml pull
     - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml up -d
-  only:
-    refs:
-      - master
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
-deploy-staging-manual-8080:
+deploy-staging-manual-8080-gfz:
   stage: deploy-staging
   environment:
     name: gfzstaging8080
-    url: http://${STAGING_HOST}:8080
+    url: http://${GFZ_STAGING_HOST}:8080
   tags:
     - deploy
     - staging
-    - id2
+    - gfz
+    - shell
   variables:
     COMPOSE_PROJECT_NAME: ssmfrontend
   before_script:
@@ -197,37 +192,36 @@ deploy-staging-manual-8080:
     - build-deploy-image-manual
   when: manual
 
-test-availability-staging:
+test-availability-staging-gfz:
   stage: after-deployment-tests
   image: python:3
   environment:
     name: gfzstaging
-    url: http://$STAGING_HOST
+    url: http://$GFZ_STAGING_HOST
   tags:
     - deploy
     - staging
-    - id2
+    - gfz
   script:
-    - curl http://$STAGING_HOST
+    - curl http://$GFZ_STAGING_HOST
   dependencies:
-    - deploy-staging
-  only:
-    refs:
-      - master
+    - deploy-staging-gfz
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
-test-availability-staging8080:
+test-availability-staging8080-gfz:
   stage: after-deployment-tests
   image: python:3
   environment:
     name: gfzstaging8080
-    url: http://${STAGING_HOST}:8080
+    url: http://${GFZ_STAGING_HOST}:8080
   tags:
     - deploy
     - staging
-    - id2
+    - gfz
   script:
-    - curl http://${STAGING_HOST}:8080
+    - curl http://${GFZ_STAGING_HOST}:8080
   dependencies:
-    - deploy-staging-manual-8080
+    - deploy-staging-manual-8080-gfz
   when: manual
 
