@@ -1,30 +1,30 @@
 # Web client of the Sensor Management System software developed within
 # the Helmholtz DataHub Initiative by GFZ and UFZ.
-# 
+#
 # Copyright (C) 2020-2021
 # - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 # - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for
 #   Geosciences (GFZ, https://www.gfz-potsdam.de)
-# 
+#
 # Parts of this program were developed within the context of the
 # following publicly funded projects or measures:
 # - Helmholtz Earth and Environment DataHub
 #   (https://www.helmholtz.de/en/research/earth_and_environment/initiatives/#h51095)
-# 
-# Licensed under the HEESIL, Version 1.0 or - as soon they will be 
-# approved by the "Community" - subsequent versions of the HEESIL 
+#
+# Licensed under the HEESIL, Version 1.0 or - as soon they will be
+# approved by the "Community" - subsequent versions of the HEESIL
 # (the "Licence").
-# 
+#
 # You may not use this work except in compliance with the Licence.
-# 
-# You may obtain a copy of the Licence at: 
+#
+# You may obtain a copy of the Licence at:
 # https://gitext.gfz-potsdam.de/software/heesil
-# 
-# Unless required by applicable law or agreed to in writing, software 
-# distributed under the Licence is distributed on an "AS IS" basis, 
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or 
-# implied. See the Licence for the specific language governing 
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the Licence is distributed on an "AS IS" basis,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+# implied. See the Licence for the specific language governing
 # permissions and limitations under the Licence.
 stages:
   - check
@@ -71,21 +71,26 @@ test-frontend-unit-tests:
 .docker_login_gitlab_registry: &docker_login_gitlab_registry
   - echo "$CI_BUILD_TOKEN" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
 
-build-deploy-image-gfz:
-  stage: build
+.docker_build:
   image: docker:20.10.7
   services:
     - docker:20.10.7-dind
+  before_script:
+    - *docker_login_gitlab_registry
+    - echo $SMS_BACKEND_URL
+    - echo $CV_BACKEND_URL
+  tags:
+    - docker
+
+build-deploy-image-gfz:
+  stage: build
+  extends: .docker_build
   variables:
     SMS_BACKEND_URL: ${GFZ_STAGING_BACKEND_URL}/rdm/svm-api/v1
     CV_BACKEND_URL: ${GFZ_STAGING_SMS_CV_BACKEND_URL}/api/v1
     HOST: ${GFZ_STAGING_HOST}
     CLIENT_ID: ${GFZ_STAGING_CLIENT_ID}
     AUTHORITY: ${GFZ_STAGING_IDP_AUTORITY}
-  before_script:
-    - *docker_login_gitlab_registry
-    - echo $SMS_BACKEND_URL
-    - echo $CV_BACKEND_URL
   script:
     - |
       if [ -z "$CI_COMMIT_TAG" ]; then
@@ -112,17 +117,13 @@ build-deploy-image-gfz:
     key: ${CI_COMMIT_REF_SLUG}
     paths:
       - node_modules
-  tags:
-    - docker
   rules:
     - if: $CI_COMMIT_TAG
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
 build-deploy-image-manual-gfz:
   stage: build
-  image: docker:20.10.7
-  services:
-    - docker:20.10.7-dind
+  extends: .docker_build
   variables:
     SMS_BACKEND_URL: ${GFZ_STAGING_BACKEND_URL}/rdm/svm-api/v1
     CV_BACKEND_URL: ${GFZ_STAGING_SMS_CV_BACKEND_URL}/api/v1
@@ -130,10 +131,6 @@ build-deploy-image-manual-gfz:
     # Not sure, if we need another client id for the staging on 8080
     CLIENT_ID: ${GFZ_STAGING_CLIENT_ID}
     AUTHORITY: ${GFZ_STAGING_IDP_AUTORITY}
-  before_script:
-    - *docker_login_gitlab_registry
-    - echo $SMS_BACKEND_URL
-    - echo $CV_BACKEND_URL
   script:
     - |
         docker build --tag "$CI_REGISTRY_IMAGE:gfz-$CI_COMMIT_SHORT_SHA" -f docker/deployment/gfz/Dockerfile \
@@ -148,8 +145,6 @@ build-deploy-image-manual-gfz:
     key: ${CI_COMMIT_REF_SLUG}
     paths:
       - node_modules
-  tags:
-    - docker
   when: manual
 
 deploy-staging-gfz:
