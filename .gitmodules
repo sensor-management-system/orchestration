@@ -4,3 +4,6 @@
 [submodule "frontend"]
 	path = frontend
 	url = git@gitlab.hzdr.de:hub-terra/sms/frontend.git
+[submodule "sms-cv"]
+	path = sms-cv
+	url = git@gitlab.hzdr.de:hub-terra/sms/sms-cv.git
