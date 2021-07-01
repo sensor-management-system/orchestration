@@ -60,7 +60,7 @@ services:
     networks:
       - sms
   minio:
-    image: minio/minio:latest
+    image: minio/minio:RELEASE.2021-06-17T00-10-46Z-28-gac7697426
     container_name: minio
     volumes:
       - data1:/data1
@@ -68,9 +68,8 @@ services:
       - "127.0.0.1:9000:9000"
     networks:
       - sms
-    environment:
-      MINIO_ACCESS_KEY: minio
-      MINIO_SECRET_KEY: minio123
+    env_file:
+      - ./minio/minio.env
     command: server /data1
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
@@ -102,7 +101,7 @@ services:
     network_mode: "host"
     volumes:
       - ./ngnix/index.html:/usr/share/nginx/html/index.html
-      - ./certs:/etc/nginx/ssl
+      - ./ngnix/certs:/etc/nginx/ssl
       - ./ngnix/default.conf:/etc/nginx/conf.d/rdm-test.intranet.ufz.de.conf
       - ./ngnix/nginx.conf:/etc/nginx/nginx.conf
 
