@@ -53,6 +53,8 @@ build-gfz-image:
     - docker
   when: manual
   allow_failure: true
+  rules:
+    - if: '$CI_COMMIT_REF_PROTECTED == "true"'
 
 unittest-lint:
   stage: test
@@ -121,3 +123,5 @@ deploy-gfz-image:
   dependencies:
     - build-gfz-image
   allow_failure: true
+  rules:
+    - if: '$CI_COMMIT_REF_PROTECTED == "true"'
