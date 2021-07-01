@@ -3,7 +3,6 @@ from project.api.resourceManager import *
 from .api.ping import Ping
 from .frj_csv_export.api import Api
 
-
 api = Api()
 
 api.route(Ping, "test_connection", "/ping")
