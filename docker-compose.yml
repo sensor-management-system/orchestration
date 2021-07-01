@@ -1,0 +1,132 @@
+version: '3.9'
+services:
+
+  elastic-search:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.10.0
+    container_name: smses01
+    environment:
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - cluster.routing.allocation.disk.threshold_enabled=false
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - esdata01:/usr/share/elasticsearch/data
+    ports:
+      - 9200:9200
+    networks:
+      - sms
+
+  backend:
+    image: python:3.9-slim-buster
+    container_name: backend
+    working_dir: /usr/src/app
+    volumes:
+      - './backend/app:/usr/src/app'
+    ports:
+      - "${HTTP_LOCAL_BINDING:-127.0.0.1:5000}:5000"
+    env_file:
+      - docker/backend.env
+    depends_on:
+      - db
+    command: >
+      sh -c "
+      apt-get update && apt-get install -y  --no-install-recommends \
+        gcc \
+        libssl-dev \
+        libffi-dev \
+        musl-dev \
+        cargo \
+      && apt-get clean
+      && pip install --no-cache-dir --upgrade pip
+      && pip install --no-cache-dir -r requirements.txt
+      && python manage.py db upgrade
+      && gunicorn -b 0.0.0.0:5000 manage:app --reload
+      "
+    networks:
+      - sms
+
+  db:
+    image: postgres:12-alpine
+    container_name: sms_db
+    ports:
+      - "127.0.0.1:5433:5433"
+    env_file:
+      - ./backend/app_env/db_secrets.env
+    volumes:
+      - ./backend/app/project/db/create.sql:/docker-entrypoint-initdb.d/create.sql
+    networks:
+      - sms
+    command: -p 5433
+
+  vocabulary:
+    image: python:3-alpine
+    container_name: vocabulary
+    working_dir: /usr/cv/app
+    volumes:
+      - './sms-cv/src:/usr/cv/app'
+    ports:
+      - 8000:8000
+    env_file:
+      - ./docker/cv.env
+    command: >
+      sh -c "
+      apk add --no-cache --virtual .build-deps \
+          gcc \
+          python3-dev \
+          musl-dev \
+          postgresql-dev \
+      && pip install --upgrade pip
+      && pip install -r requirements.txt
+      && python manage.py migrate
+      && python manage.py loaddata initial_data.json
+      && gunicorn cv.wsgi:application --bind 0:8000
+      "
+    networks:
+      - sms
+    depends_on:
+      - db
+
+  frontend:
+    container_name: frontend
+    build:
+      context: '.'
+      dockerfile: './frontend/docker/local-dev/Dockerfile-local-dev'
+    working_dir: /home/node/
+    user: "node"
+    networks:
+      - sms
+    ports:
+      - "127.0.0.1:3000:3000"
+    environment:
+      BASE_URL: "/"
+      SMS_BACKEND_HOST_URL: "http://localhost:5000/rdm/svm-api/v1"
+      CV_BACKEND_URL: "http://localhost:8000/api/v1"
+      NUXT_ENV_REDIRECT_URI: "https://localhost.localdomain:3000/login-callback"
+      NUXT_ENV_CLIENT_ID: "rdmsvm-implicit-flow"
+      NUXT_ENV_AUTHORITY: "https://localhost:8443/auth/realms/sms"
+      NUXT_ENV_RESPONSE_TYPE: "id_token"
+      NUXT_ENV_SCOPE: "openid profile email"
+      NUXT_ENV_POST_LOGOUT_REDIRECT_URI: "https://localhost.localdomain:3000/logout-callback"
+      NUXT_ENV_SILENT_REDIRECT_URI: "https://localhost.localdomain:3000/silent-callback"
+      NUXT_ENV_FILTER_PROTOCOL_CLAIMS: 'false'
+      NUXT_ENV_AUTOMATIC_SILENT_RENEW: 'false'
+      NUXT_ENV_SILENT_RENEW_INTERVAL: 6900000 # 115 minutes in milliseconds
+      NUXT_ENV_LOAD_USER_INFO: 'true'
+    volumes:
+      - ./frontend/:/home/node/
+    command: >
+      bash -c "npm install
+      && npm run dev"
+
+
+
+volumes:
+  esdata01:
+    driver: local
+
+networks:
+  sms:
