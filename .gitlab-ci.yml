@@ -51,10 +51,10 @@ build-gfz-image:
       fi
   tags:
     - docker
-  when: manual
-  allow_failure: true
   rules:
     - if: '$CI_COMMIT_REF_PROTECTED == "true"'
+      when: manual
+      allow_failure: true
 
 unittest-lint:
   stage: test
@@ -119,9 +119,10 @@ deploy-gfz-image:
     - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T ssmbackend python3 manage.py db upgrade
     - sleep 1m
     - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T ssmbackend python3 manage.py es reindex
-  when: manual
   dependencies:
     - build-gfz-image
-  allow_failure: true
   rules:
     - if: '$CI_COMMIT_REF_PROTECTED == "true"'
+      when: manual
+      allow_failure: true
+
