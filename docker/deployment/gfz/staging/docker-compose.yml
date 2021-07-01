@@ -1,0 +1,83 @@
+version: '3'
+
+services:
+  ssmbackend:
+    image: ${CI_REGISTRY_IMAGE}:gfz-${CI_COMMIT_TAG:-latest}
+    deploy:
+      restart_policy:
+        condition: unless-stopped
+        delay: 1s
+        max_attempts: 5
+        window: 30s
+    restart: unless-stopped
+    environment:
+      - FLASK_DEBUG=1
+      - APP_SETTINGS=project.config.DevelopmentConfig
+      - DATABASE_URL=postgres://postgres:postgres123456666666666666@db:5432/db_dev
+      - DATABASE_TEST_URL=postgres://postgres:postgres123456666666666666@db:5432/db_test
+      - HTTP_ORIGINS=$HTTP_ORIGINS
+      - ELASTICSEARCH_URL=http://smses01:9200
+      - WELL_KNOWN_URL=$WELL_KNOWN_URL
+      - OIDC_CLIENT_IDS=$OIDC_CLIENT_IDS
+      - OIDC_USERNAME_CLAIM=$OIDC_USERNAME_CLAIM
+    ports:
+      - 5000:5000
+    networks:
+      - elastic
+      - db
+
+  db:
+    image: postgres:12-alpine
+    deploy:
+      restart_policy:
+        condition: unless-stopped
+        delay: 3s
+        max_attempts: 5
+        window: 120s
+    # restart policy for container (ignored in swarm mode)
+    restart: unless-stopped
+    ports:
+      - 127.0.0.1:5432:5432
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres123456666666666666
+    volumes:
+      - "postgres-data-staging:/var/lib/postgresql/data"
+    shm_size: 128M
+    networks:
+      - db
+
+  smses01:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.10.0
+    deploy:
+      restart_policy:
+        condition: unless-stopped
+        delay: 1s
+        max_attempts: 5
+        window: 30s
+    restart: unless-stopped
+    container_name: smses01
+    environment:
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - cluster.routing.allocation.disk.threshold_enabled=false
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - esdata01:/usr/share/elasticsearch/data
+    ports:
+      - 9200:9200
+    networks:
+      - elastic
+
+volumes:
+  postgres-data-staging:
+  esdata01:
+    driver: local
+networks:
+  elastic:
+    driver: bridge
+  db:
