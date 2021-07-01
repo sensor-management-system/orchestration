@@ -1,0 +1,3 @@
+[submodule "backend"]
+	path = backend
+	url = git@gitlab.hzdr.de:hub-terra/sms/backend.git
