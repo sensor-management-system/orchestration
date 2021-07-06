@@ -30,12 +30,18 @@ stages:
   - check
   - test
   - build
+  - release
   - deploy-staging
   - after-deployment-tests
 
 cache:
   paths:
     - dist
+
+variables:
+  UFZ_TEST_IMAGE: $CI_REGISTRY_IMAGE:ufz-$CI_COMMIT_SHORT_SHA
+  UFZ_LATEST_RELEASE_IMAGE: $CI_REGISTRY_IMAGE:ufz-latest
+  UFZ_GIT_TAG_RELEASE_IMAGE: $CI_REGISTRY_IMAGE:ufz-$CI_COMMIT_REF_NAME
 
 check-lint:
   stage: check
@@ -146,6 +152,55 @@ build-deploy-image-manual-gfz:
     paths:
       - node_modules
   when: manual
+
+build-deploy-image-ufz:
+  stage: build
+  extends: .docker_build
+  variables:
+    SMS_BACKEND_URL: ${UFZ_STAGING_BACKEND_URL}/sms-backend/rdm/svm-api/v1
+    CV_BACKEND_URL: ${UFZ_STAGING_SMS_CV_BACKEND_URL}/sms-cv/api/v1
+    CLIENT_ID: ${UFZ_STAGING_CLIENT_ID}
+    AUTHORITY: ${UFZ_STAGING_IDP_AUTORITY}
+  script:
+    - |
+        docker build --tag "$UFZ_TEST_IMAGE" -f docker/deployment/ufz/Dockerfile \
+          --build-arg SMS_BACKEND_URL_ARG=$SMS_BACKEND_URL \
+          --build-arg CV_BACKEND_URL_ARG=$CV_BACKEND_URL \
+          --build-arg HOST_ARG=$HOST \
+          --build-arg CLIENT_ID_ARG=$CLIENT_ID \
+          --build-arg AUTHORITY_ARG=$AUTHORITY \
+          --build-arg BUILD_DATE=$(date --utc +%FT%TZ) \
+          --build-arg VCS_REF=$CI_COMMIT_SHA \
+          .
+    - docker push "$UFZ_TEST_IMAGE"
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - node_modules
+
+release-latest-deploy-image-ufz:
+  stage: release
+  extends: .docker_build
+  rules:
+    - if: "$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH"
+  variables:
+    GIT_STRATEGY: none
+  script:
+    - docker pull $UFZ_TEST_IMAGE
+    - docker tag $UFZ_TEST_IMAGE $UFZ_LATEST_RELEASE_IMAGE
+    - docker push $UFZ_LATEST_RELEASE_IMAGE
+
+release-tag-deploy-image-ufz:
+  stage: release
+  extends: .docker_build
+  rules:
+    - if: "$CI_COMMIT_TAG"
+  variables:
+    GIT_STRATEGY: none
+  script:
+    - docker pull $UFZ_TEST_IMAGE
+    - docker tag $UFZ_TEST_IMAGE $UFZ_GIT_TAG_RELEASE_IMAGE
+    - docker push $UFZ_GIT_TAG_RELEASE_IMAGE
 
 deploy-staging-gfz:
   stage: deploy-staging
