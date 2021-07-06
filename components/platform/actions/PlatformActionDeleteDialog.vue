@@ -18,7 +18,7 @@
         >
           No
         </v-btn>
-        <v-spacer/>
+        <v-spacer />
         <v-btn
           color="error"
           text
@@ -35,8 +35,17 @@
 </template>
 
 <script>
-export default {
-  name: "PlatformActionDeleteDialog"
+import { Vue, Component } from 'nuxt-property-decorator'
+
+@Component
+export default class PlatformActionDeleteDialog extends Vue {
+  get hasActionToDelete () {
+    return this.$store.state.smsActions.actionIdToDelete !== null
+  }
+
+  hideDeleteDialog () {
+    this.$store.commit('smsActions/removeActionId')
+  }
 }
 </script>
 

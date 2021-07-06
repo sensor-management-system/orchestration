@@ -21,16 +21,15 @@
 
     <v-list>
       <v-list-item
-        :disabled="!isLoggedIn"
         dense
-        @click="showDeleteDialog(action)"
+        @click="showDeleteDialog"
       >
         <v-list-item-content>
-          <v-list-item-title :class="isLoggedIn ? 'red--text' : 'grey--text'">
+          <v-list-item-title class="red--text">
             <v-icon
               left
               small
-              :color="isLoggedIn ? 'red' : 'grey'"
+              color="red"
             >
               mdi-delete
             </v-icon>
@@ -42,9 +41,17 @@
   </v-menu>
 </template>
 
-<script>
-export default {
-  name: "PlatformActionDeleteMenu"
+<script lang="ts">
+import { Vue, Component, Prop } from 'nuxt-property-decorator'
+import { IActionCommonDetails } from '@/models/ActionCommonDetails'
+
+@Component()
+export default class PlatformActionDeleteMenu extends Vue {
+  @Prop({ type: Object, required: true }) action!:IActionCommonDetails;
+
+  showDeleteDialog () {
+    this.$store.commit('smsActions/setActionIdToDelete', this.action.id)
+  }
 }
 </script>
 
