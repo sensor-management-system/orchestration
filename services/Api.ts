@@ -63,6 +63,7 @@ import { DeviceMountActionApi } from '@/services/sms/DeviceMountActionApi'
 import { DeviceUnmountActionApi } from '@/services/sms/DeviceUnmountActionApi'
 import { PlatformMountActionApi } from '@/services/sms/PlatformMountActionApi'
 import { PlatformUnmountActionApi } from '@/services/sms/PlatformUnmountActionApi'
+import {GenericPlatformActionApi} from "@/services/sms/GenericPlatformActionApi";
 
 const SMS_BASE_URL = process.env.smsBackendUrl
 const CV_BASE_URL = process.env.cvBackendUrl
@@ -78,6 +79,7 @@ export class Api {
   private readonly _platformAttachmentApi: PlatformAttachmentApi
   private readonly _devicePropertyApi: DevicePropertyApi
   private readonly _genericDeviceActionApi: GenericDeviceActionApi
+  private readonly _genericPlatformActionApi: GenericPlatformActionApi
   private readonly _genericDeviceActionAttachmentApi: GenericDeviceActionAttachmentApi
   private readonly _genericPlatformActionAttachmentApi: GenericPlatformActionAttachmentApi
   private readonly _deviceSoftwareUpdateActionApi: DeviceSoftwareUpdateActionApi
@@ -167,6 +169,10 @@ export class Api {
     this._genericDeviceActionApi = new GenericDeviceActionApi(
       this.createAxios(smsBaseUrl, '/generic-device-actions', smsConfig, getIdToken),
       this._genericDeviceActionAttachmentApi
+    )
+
+    this._genericPlatformActionApi = new GenericPlatformActionApi(
+      this.createAxios(smsBaseUrl, '/generic-platform-actions', smsConfig, getIdToken),
     )
 
     this._genericPlatformActionAttachmentApi = new GenericPlatformActionAttachmentApi(
@@ -295,6 +301,10 @@ export class Api {
 
   get genericDeviceActions (): GenericDeviceActionApi {
     return this._genericDeviceActionApi
+  }
+
+  get genericPlatformActions (): GenericPlatformActionApi {
+    return this._genericPlatformActionApi
   }
 
   get genericDeviceActionAttachments (): GenericDeviceActionAttachmentApi {

@@ -27,7 +27,7 @@
         :actions="actions"
         :platform-id="platformId"
       />
-      <platform-action-delete-dialog />
+      <platform-action-delete-dialog :platform-id="platformId" @update="fetchActions"/>
     </template>
   </div>
 </template>
@@ -87,8 +87,13 @@ export default class PlatformActionsPage extends Vue {
     actions.forEach((action: GenericAction) => this.actions.push(action))
   }
 
-  async fetch () {
+  async fetchActions (): Promise<void> {
+    this.actions = []
     await this.fetchGenericActions()
+  }
+
+  async fetch () {
+    await this.fetchActions()
   }
 }
 </script>

@@ -18,7 +18,7 @@
         >
           No
         </v-btn>
-        <v-spacer />
+        <v-spacer/>
         <v-btn
           color="error"
           text
@@ -34,17 +34,45 @@
   </v-dialog>
 </template>
 
-<script>
-import { Vue, Component } from 'nuxt-property-decorator'
+<script lang="ts">
+import {Vue, Component, Prop} from 'nuxt-property-decorator'
 
 @Component
 export default class PlatformActionDeleteDialog extends Vue {
-  get hasActionToDelete () {
-    return this.$store.state.smsActions.actionIdToDelete !== null
+
+  @Prop({ type: String, required: true }) platformId!:string;
+
+  get actionIdToDelete(): string | null {
+    return this.$store.state.smsActions.actionIdToDelete
   }
 
-  hideDeleteDialog () {
-    this.$store.commit('smsActions/removeActionId')
+  get hasActionToDelete() {
+    return this.actionIdToDelete !== null
+  }
+
+  get actionDeleteMethod() {
+    return this.$api.platforms.deleteRelatedGenericActionsById
+  }
+
+  hideDeleteDialog() {
+    this.$store.commit('smsActions/setActionIdToDelete', null)
+  }
+
+  async deleteAction(): void {
+    if (!this.hasActionToDelete) {
+      return
+    }
+
+    this.isSaving = true
+    this.$api.genericPlatformActions.deleteById(this.actionIdToDelete).then(() => {
+      this.$emit('update')
+      this.$store.commit('snackbar/setSuccess', 'Action deleted')
+    }).catch((_error) => {
+      this.$store.commit('snackbar/setError', 'Action could not be deleted')
+    }).finally(() => {
+      this.hideDeleteDialog()
+      this.isSaving = false
+    })
   }
 }
 </script>
