@@ -3,7 +3,7 @@
     <v-timeline-item
       v-for="(action, index) in actions"
       :key="index"
-      :color="action.getColor()"
+      :color="getColor(action)"
       class="mb-4"
       small
     >
@@ -50,6 +50,17 @@ export default class PlatformActionTimeline extends Vue {
 
   get isLoggedIn (): boolean {
     return this.$store.getters['oidc/isAuthenticated']
+  }
+
+  getColor(action): string{
+    switch (action._actionTypeName){
+      case "Platform Application": return 'yellow'
+      case "Platform Maintenance": return 'blue'
+      case "Platform Observation": return 'orange'
+      case "Platform Visit":       return 'green'
+      default: return 'gray'
+    }
+
   }
 }
 </script>
