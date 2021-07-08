@@ -34,6 +34,16 @@
           :attachments="attachments"
         />
       </v-card-text>
+      <v-card-actions>
+        <v-btn
+          color="green"
+          small
+          :disabled="isSaving"
+          @click="addGenericAction"
+        >
+          Add
+        </v-btn>
+      </v-card-actions>
     </v-card>
   </div>
 </template>
@@ -57,6 +67,7 @@ export default class NewPlatformAction extends Vue {
   private chosenKindOfAction: ActionType | null = null
   private genericPlatformAction: GenericAction = new GenericAction()
   private attachments: Attachment[] = []
+  private isSaving: boolean = false
 
   async fetch() {
     await Promise.all([
@@ -76,6 +87,10 @@ export default class NewPlatformAction extends Vue {
     return this.$route.params.platformId
   }
 
+  get isLoggedIn (): boolean {
+    return this.$store.getters['oidc/isAuthenticated']
+  }
+
   addGenericAction () {
     if (!this.isLoggedIn) {
       return
@@ -88,9 +103,14 @@ export default class NewPlatformAction extends Vue {
       this.$store.commit('snackbar/setError', 'Please correct the errors')
       return
     }
+
+    this.genericPlatformAction.actionTypeName = this.chosenKindOfAction?.name || ''
+    this.genericPlatformAction.actionTypeUrl = this.chosenKindOfAction?.uri || ''
+
     this.isSaving = true
-    this.$api.genericDeviceActions.add(this.deviceId, this.genericDeviceAction).then((action: GenericAction) => {
-      this.$router.push('/devices/' + this.deviceId + '/actions', () => this.$emit('input', action))
+    this.$api.genericPlatformActions.add(this.platformId, this.genericPlatformAction).then((action: GenericAction) => {
+      this.$router.push('/platforms/' + this.platformId + '/actions', () => this.$emit('input', action))
+      // this.$router.push('/platforms/' + this.platformId + '/actions') TODO: Automatisches neuladen der Daten in der action.vue
     }).catch(() => {
       this.$store.commit('snackbar/setError', 'Failed to save the action')
     }).finally(() => {

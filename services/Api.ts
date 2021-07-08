@@ -171,12 +171,13 @@ export class Api {
       this._genericDeviceActionAttachmentApi
     )
 
-    this._genericPlatformActionApi = new GenericPlatformActionApi(
-      this.createAxios(smsBaseUrl, '/generic-platform-actions', smsConfig, getIdToken),
-    )
-
     this._genericPlatformActionAttachmentApi = new GenericPlatformActionAttachmentApi(
       this.createAxios(smsBaseUrl, '/generic-platform-action-attachments', smsConfig, getIdToken)
+    )
+
+    this._genericPlatformActionApi = new GenericPlatformActionApi(
+      this.createAxios(smsBaseUrl, '/generic-platform-actions', smsConfig, getIdToken),
+      this._genericPlatformActionAttachmentApi
     )
 
     this._deviceSoftwareUpdateActionAttachmentApi = new DeviceSoftwareUpdateActionAttachmentApi(
