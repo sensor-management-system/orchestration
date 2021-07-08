@@ -70,7 +70,7 @@ export default class PlatformActionsPage extends Vue {
 
   get isEditActionPage (): boolean {
     // eslint-disable-next-line no-useless-escape
-    const editUrl = '^\/devices\/' + this.platformId + '\/actions\/[a-zA-Z-]+\/[0-9]+\/edit$'
+    const editUrl = '^\/platforms\/' + this.platformId + '\/actions\/[a-zA-Z-]+\/[0-9]+\/edit$'
     return !!this.$route.path.match(editUrl)
   }
 
