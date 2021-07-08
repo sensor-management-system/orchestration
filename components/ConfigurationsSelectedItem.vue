@@ -193,7 +193,7 @@ permissions and limitations under the Licence.
                 >
                   <v-list-item-content>
                     <v-list-item-title>
-                      Update for {{ value.unpack().date | dateToString }}
+                      Update for {{ value.unpack().date | dateToDateTimeStringHHMM }}
                     </v-list-item-title>
                   </v-list-item-content>
                 </v-list-item>
@@ -203,7 +203,7 @@ permissions and limitations under the Licence.
                 >
                   <v-list-item-content>
                     <v-list-item-title>
-                      Update for {{ selectedDate | dateToString }}
+                      Update for {{ selectedDate | dateToDateTimeStringHHMM }}
                     </v-list-item-title>
                   </v-list-item-content>
                 </v-list-item>
@@ -250,7 +250,7 @@ import { DeviceNode } from '@/viewmodels/DeviceNode'
 import { IUnmountData } from '@/viewmodels/IUnmountData'
 import { PlatformNode } from '@/viewmodels/PlatformNode'
 
-import { dateToString } from '@/utils/dateHelper'
+import { dateToDateTimeStringHHMM } from '@/utils/dateHelper'
 
 /**
 * A class component to display information about a selected tree node
@@ -261,7 +261,7 @@ import { dateToString } from '@/utils/dateHelper'
     ConfigurationsSelectedItemUnmountForm
   },
   filters: {
-    dateToString
+    dateToDateTimeStringHHMM
   }
 })
 // @ts-ignore
