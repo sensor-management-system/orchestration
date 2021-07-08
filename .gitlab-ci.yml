@@ -1,0 +1,278 @@
+# Web client of the Sensor Management System software developed within
+# the Helmholtz DataHub Initiative by GFZ and UFZ.
+#
+# Copyright (C) 2020-2021
+# - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
+# - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
+# - Helmholtz Centre Potsdam - GFZ German Research Centre for
+#   Geosciences (GFZ, https://www.gfz-potsdam.de)
+#
+# Parts of this program were developed within the context of the
+# following publicly funded projects or measures:
+# - Helmholtz Earth and Environment DataHub
+#   (https://www.helmholtz.de/en/research/earth_and_environment/initiatives/#h51095)
+#
+# Licensed under the HEESIL, Version 1.0 or - as soon they will be
+# approved by the "Community" - subsequent versions of the HEESIL
+# (the "Licence").
+#
+# You may not use this work except in compliance with the Licence.
+#
+# You may obtain a copy of the Licence at:
+# https://gitext.gfz-potsdam.de/software/heesil
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the Licence is distributed on an "AS IS" basis,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+# implied. See the Licence for the specific language governing
+# permissions and limitations under the Licence.
+stages:
+  - check
+  - test
+  - build
+  - release
+  - deploy-staging
+  - after-deployment-tests
+
+cache:
+  paths:
+    - dist
+
+variables:
+  UFZ_TEST_IMAGE: $CI_REGISTRY_IMAGE:ufz-$CI_COMMIT_SHORT_SHA
+  UFZ_LATEST_RELEASE_IMAGE: $CI_REGISTRY_IMAGE:ufz-latest
+  UFZ_GIT_TAG_RELEASE_IMAGE: $CI_REGISTRY_IMAGE:ufz-$CI_COMMIT_REF_NAME
+
+check-lint:
+  stage: check
+  image: node:16.0.0-buster
+  before_script:
+    - node -v
+    - npm ci
+  script:
+    - npm run lint
+  tags:
+    - docker
+  allow_failure: true
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - node_modules
+
+test-frontend-unit-tests:
+  stage: test
+  image: node:16.0.0-buster
+  before_script:
+    - node -v
+    - npm ci
+  script:
+    - npm test
+  tags:
+    - docker
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - node_modules
+
+.docker_login_gitlab_registry: &docker_login_gitlab_registry
+  - echo "$CI_BUILD_TOKEN" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
+
+.docker_build:
+  image: docker:20.10.7
+  services:
+    - docker:20.10.7-dind
+  before_script:
+    - *docker_login_gitlab_registry
+    - echo $SMS_BACKEND_URL
+    - echo $CV_BACKEND_URL
+  tags:
+    - docker
+
+build-deploy-image-gfz:
+  stage: build
+  extends: .docker_build
+  variables:
+    SMS_BACKEND_URL: ${GFZ_STAGING_BACKEND_URL}/rdm/svm-api/v1
+    CV_BACKEND_URL: ${GFZ_STAGING_SMS_CV_BACKEND_URL}/api/v1
+    HOST: ${GFZ_STAGING_HOST}
+    CLIENT_ID: ${GFZ_STAGING_CLIENT_ID}
+    AUTHORITY: ${GFZ_STAGING_IDP_AUTORITY}
+  script:
+    - |
+      if [ -z "$CI_COMMIT_TAG" ]; then
+        docker build --pull --tag "$CI_REGISTRY_IMAGE:gfz-latest" -f docker/deployment/gfz/Dockerfile \
+            --build-arg SMS_BACKEND_URL_ARG=$SMS_BACKEND_URL \
+            --build-arg CV_BACKEND_URL_ARG=$CV_BACKEND_URL \
+            --build-arg HOST_ARG=$HOST \
+            --build-arg CLIENT_ID_ARG=$CLIENT_ID \
+            --build-arg AUTHORITY_ARG=$AUTHORITY \
+            .
+        docker push "$CI_REGISTRY_IMAGE:gfz-latest"
+      else
+        docker build --pull --tag "$CI_REGISTRY_IMAGE:gfz-latest" --tag "$CI_REGISTRY_IMAGE:gfz-$CI_COMMIT_TAG" -f docker/deployment/gfz/Dockerfile \
+            --build-arg SMS_BACKEND_URL_ARG=$SMS_BACKEND_URL \
+            --build-arg CV_BACKEND_URL_ARG=$CV_BACKEND_URL \
+            --build-arg HOST_ARG=$HOST \
+            --build-arg CLIENT_ID_ARG=$CLIENT_ID \
+            --build-arg AUTHORITY_ARG=$AUTHORITY \
+            .
+        docker push "$CI_REGISTRY_IMAGE:gfz-latest"
+        docker push "$CI_REGISTRY_IMAGE:gfz-$CI_COMMIT_TAG"
+      fi
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - node_modules
+  rules:
+    - if: $CI_COMMIT_TAG
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+build-deploy-image-manual-gfz:
+  stage: build
+  extends: .docker_build
+  variables:
+    SMS_BACKEND_URL: ${GFZ_STAGING_BACKEND_URL}/rdm/svm-api/v1
+    CV_BACKEND_URL: ${GFZ_STAGING_SMS_CV_BACKEND_URL}/api/v1
+    HOST: ${GFZ_STAGING_HOST}:8080
+    # Not sure, if we need another client id for the staging on 8080
+    CLIENT_ID: ${GFZ_STAGING_CLIENT_ID}
+    AUTHORITY: ${GFZ_STAGING_IDP_AUTORITY}
+  script:
+    - |
+        docker build --tag "$CI_REGISTRY_IMAGE:gfz-$CI_COMMIT_SHORT_SHA" -f docker/deployment/gfz/Dockerfile \
+          --build-arg SMS_BACKEND_URL_ARG=$SMS_BACKEND_URL \
+          --build-arg CV_BACKEND_URL_ARG=$CV_BACKEND_URL \
+          --build-arg HOST_ARG=$HOST \
+          --build-arg CLIENT_ID_ARG=$CLIENT_ID \
+          --build-arg AUTHORITY_ARG=$AUTHORITY \
+          .
+    - docker push "$CI_REGISTRY_IMAGE:gfz-$CI_COMMIT_SHORT_SHA"
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - node_modules
+  when: manual
+
+build-deploy-image-ufz:
+  stage: build
+  extends: .docker_build
+  variables:
+    SMS_BACKEND_URL: ${UFZ_STAGING_BACKEND_URL}/sms-backend/rdm/svm-api/v1
+    CV_BACKEND_URL: ${UFZ_STAGING_SMS_CV_BACKEND_URL}/sms-cv/api/v1
+    CLIENT_ID: ${UFZ_STAGING_CLIENT_ID}
+    AUTHORITY: ${UFZ_STAGING_IDP_AUTORITY}
+  script:
+    - |
+        docker build --tag "$UFZ_TEST_IMAGE" -f docker/deployment/ufz/Dockerfile \
+          --build-arg SMS_BACKEND_URL_ARG=$SMS_BACKEND_URL \
+          --build-arg CV_BACKEND_URL_ARG=$CV_BACKEND_URL \
+          --build-arg HOST_ARG=$HOST \
+          --build-arg CLIENT_ID_ARG=$CLIENT_ID \
+          --build-arg AUTHORITY_ARG=$AUTHORITY \
+          --build-arg BUILD_DATE=$(date --utc +%FT%TZ) \
+          --build-arg VCS_REF=$CI_COMMIT_SHA \
+          .
+    - docker push "$UFZ_TEST_IMAGE"
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - node_modules
+
+release-latest-deploy-image-ufz:
+  stage: release
+  extends: .docker_build
+  rules:
+    - if: "$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH"
+  variables:
+    GIT_STRATEGY: none
+  script:
+    - docker pull $UFZ_TEST_IMAGE
+    - docker tag $UFZ_TEST_IMAGE $UFZ_LATEST_RELEASE_IMAGE
+    - docker push $UFZ_LATEST_RELEASE_IMAGE
+
+release-tag-deploy-image-ufz:
+  stage: release
+  extends: .docker_build
+  rules:
+    - if: "$CI_COMMIT_TAG"
+  variables:
+    GIT_STRATEGY: none
+  script:
+    - docker pull $UFZ_TEST_IMAGE
+    - docker tag $UFZ_TEST_IMAGE $UFZ_GIT_TAG_RELEASE_IMAGE
+    - docker push $UFZ_GIT_TAG_RELEASE_IMAGE
+
+deploy-staging-gfz:
+  stage: deploy-staging
+  environment:
+    name: gfzstaging
+    url: http://$GFZ_STAGING_HOST
+  tags:
+    - deploy
+    - staging
+    - gfz
+    - shell
+  variables:
+    COMPOSE_PROJECT_NAME: ssmfrontend
+  before_script:
+    - *docker_login_gitlab_registry
+  script:
+    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml pull
+    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml up -d
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+deploy-staging-manual-8080-gfz:
+  stage: deploy-staging
+  environment:
+    name: gfzstaging8080
+    url: http://${GFZ_STAGING_HOST}:8080
+  tags:
+    - deploy
+    - staging
+    - gfz
+    - shell
+  variables:
+    COMPOSE_PROJECT_NAME: ssmfrontend
+  before_script:
+    - *docker_login_gitlab_registry
+  script:
+    - docker-compose -f docker/deployment/gfz/staging8080/docker-compose.yml pull
+    - docker-compose -f docker/deployment/gfz/staging8080/docker-compose.yml up -d
+  dependencies:
+    - build-deploy-image-manual-gfz
+  when: manual
+
+test-availability-staging-gfz:
+  stage: after-deployment-tests
+  image: python:3
+  environment:
+    name: gfzstaging
+    url: http://$GFZ_STAGING_HOST
+  tags:
+    - deploy
+    - staging
+    - gfz
+  script:
+    - curl http://$GFZ_STAGING_HOST
+  dependencies:
+    - deploy-staging-gfz
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+test-availability-staging8080-gfz:
+  stage: after-deployment-tests
+  image: python:3
+  environment:
+    name: gfzstaging8080
+    url: http://${GFZ_STAGING_HOST}:8080
+  tags:
+    - deploy
+    - staging
+    - gfz
+  script:
+    - curl http://${GFZ_STAGING_HOST}:8080
+  dependencies:
+    - deploy-staging-manual-8080-gfz
+  when: manual
+

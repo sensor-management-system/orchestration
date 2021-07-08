@@ -119,7 +119,7 @@ import CommonActionForm from '@/components/CommonActionForm.vue'
 import DateTimePicker from '@/components/DateTimePicker.vue'
 
 /**
- * A class component for a form for Generic Device Actions
+ * A class component for a form for Software update actions
  * @extends Vue
  */
 @Component({

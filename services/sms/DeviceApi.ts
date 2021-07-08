@@ -35,6 +35,7 @@ import { Attachment } from '@/models/Attachment'
 import { Contact } from '@/models/Contact'
 import { CustomTextField } from '@/models/CustomTextField'
 import { Device } from '@/models/Device'
+import { DeviceCalibrationAction } from '@/models/DeviceCalibrationAction'
 import { DeviceProperty } from '@/models/DeviceProperty'
 import { DeviceType } from '@/models/DeviceType'
 import { Manufacturer } from '@/models/Manufacturer'
@@ -57,6 +58,7 @@ import {
   deviceWithMetaToDeviceByAddingDummyObjects,
   deviceWithMetaToDeviceThrowingNoErrorOnMissing
 } from '@/serializers/jsonapi/DeviceSerializer'
+import { DeviceCalibrationActionSerializer } from '@/serializers/jsonapi/DeviceCalibrationActionSerializer'
 
 interface IncludedRelationships {
   includeContacts?: boolean
@@ -225,6 +227,22 @@ export class DeviceApi {
     }
     return this.axiosApi.get(url, { params }).then((rawServerResponse) => {
       return new DeviceSoftwareUpdateActionSerializer().convertJsonApiObjectListToModelList(rawServerResponse.data)
+    })
+  }
+
+  findRelatedCalibrationActions (deviceId: string): Promise<DeviceCalibrationAction[]> {
+    const url = deviceId + '/device-calibration-actions'
+    const params = {
+      'page[size]': 10000,
+      include: [
+        'contact',
+        'device_calibration_attachments.attachment',
+        'device_property_calibrations',
+        'device_property_calibrations.device_property'
+      ].join(',')
+    }
+    return this.axiosApi.get(url, { params }).then((rawServerResponse) => {
+      return new DeviceCalibrationActionSerializer().convertJsonApiObjectListToModelList(rawServerResponse.data)
     })
   }
 }

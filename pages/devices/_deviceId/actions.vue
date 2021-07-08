@@ -207,67 +207,73 @@ permissions and limitations under the Licence.
             </template>
           </SoftwareUpdateActionCard>
 
-          <template v-if="action.isDeviceCalibrationAction">
-            <v-card>
-              <v-card-subtitle class="pb-0">
-                {{ action.currentCalibrationDate | toUtcDate }}
-              </v-card-subtitle>
-              <v-card-title class="pt-0">
-                Device calibration
-              </v-card-title>
-              <v-card-subtitle>
-                <v-row
-                  no-gutters
-                >
-                  <v-col
-                    cols="11"
+          <DeviceCalibrationActionCard
+            v-if="action.isDeviceCalibrationAction"
+            v-model="actions[index]"
+          >
+            <template
+              v-if="isLoggedIn"
+              #menu
+            >
+              <v-menu
+                close-on-click
+                close-on-content-click
+                offset-x
+                left
+                z-index="999"
+              >
+                <template #activator="{ on }">
+                  <v-btn
+                    data-role="property-menu"
+                    icon
+                    small
+                    v-on="on"
                   >
-                    {{ action.contact.toString() }}
-                  </v-col>
-                  <v-col
-                    align-self="end"
-                    class="text-right"
-                  >
-                    <v-btn
-                      icon
-                      @click.stop.prevent="showActionItem(action.id)"
+                    <v-icon
+                      dense
+                      small
                     >
-                      <v-icon>{{ isActionItemShown(action.id) ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
-                    </v-btn>
-                  </v-col>
-                </v-row>
-              </v-card-subtitle>
-              <v-expand-transition>
-                <v-card-text
-                  v-show="isActionItemShown(action.id)"
-                  class="text--primary"
-                >
-                  <v-row dense>
-                    <v-col cols="12" md="4">
-                      <label>Formula</label> {{ action.formula }}
-                    </v-col>
-                    <v-col cols="12" md="4">
-                      <label>value</label> {{ action.value }}
-                    </v-col>
-                    <v-col cols="12" md="4">
-                      <label>
-                        Next calibration date
-                      </label>
-                      {{ action.nextCalibrationDate | toUtcDate }}
-                    </v-col>
-                  </v-row>
-                  <label>Measured quantities</label>
-                  <ul>
-                    <li v-for="deviceProperty in action.deviceProperties" :key="deviceProperty.id">
-                      {{ deviceProperty.label }}
-                    </li>
-                  </ul>
-                  <label>Description</label>
-                  {{ action.description }}
-                </v-card-text>
-              </v-expand-transition>
-            </v-card>
-          </template>
+                      mdi-dots-vertical
+                    </v-icon>
+                  </v-btn>
+                </template>
+
+                <v-list>
+                  <v-list-item
+                    :disabled="!isLoggedIn"
+                    dense
+                    @click="showDeleteDialog(action)"
+                  >
+                    <v-list-item-content>
+                      <v-list-item-title
+                        :class="isLoggedIn ? 'red--text' : 'grey--text'"
+                      >
+                        <v-icon
+                          left
+                          small
+                          :color="isLoggedIn ? 'red' : 'grey'"
+                        >
+                          mdi-delete
+                        </v-icon>
+                        Delete
+                      </v-list-item-title>
+                    </v-list-item-content>
+                  </v-list-item>
+                </v-list>
+              </v-menu>
+            </template>
+            <template #actions>
+              <v-btn
+                v-if="isLoggedIn"
+                :to="'/devices/' + deviceId + '/actions/device-calibration-actions/' + action.id + '/edit'"
+                color="primary"
+                text
+                @click.stop.prevent
+              >
+                Edit
+              </v-btn>
+            </template>
+          </DeviceCalibrationActionCard>
           <template v-if="action.isDeviceMountAction">
             <v-card>
               <v-card-subtitle class="pb-0">
@@ -398,6 +404,7 @@ permissions and limitations under the Licence.
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
+import DeviceCalibrationActionCard from '@/components/DeviceCalibrationActionCard.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import GenericActionCard from '@/components/GenericActionCard.vue'
 import SoftwareUpdateActionCard from '@/components/SoftwareUpdateActionCard.vue'
@@ -406,6 +413,7 @@ import { DateTime } from 'luxon'
 
 import { Attachment } from '@/models/Attachment'
 import { Contact } from '@/models/Contact'
+import { DeviceCalibrationAction } from '@/models/DeviceCalibrationAction'
 import { DeviceProperty } from '@/models/DeviceProperty'
 import { IActionCommonDetails } from '@/models/ActionCommonDetails'
 import { GenericAction } from '@/models/GenericAction'
@@ -418,51 +426,6 @@ const toUtcDate = (dt: DateTime) => {
 
 interface IColoredAction {
   getColor (): string
-}
-
-class DeviceCalibrationAction implements IActionCommonDetails, IColoredAction {
-  public id: string
-  public description: string
-  public currentCalibrationDate: DateTime
-  public nextCalibrationDate: DateTime
-  public formula: string
-  public value: string
-  public deviceProperties: DeviceProperty[]
-  public contact: Contact
-  public attachments: Attachment[]
-  constructor (
-    id: string,
-    description: string,
-    currentCalibrationDate: DateTime,
-    nextCalibrationDate: DateTime,
-    formula: string,
-    value: string,
-    deviceProperties: DeviceProperty[],
-    contact: Contact,
-    attachments: Attachment[]
-  ) {
-    this.id = id
-    this.description = description
-    this.currentCalibrationDate = currentCalibrationDate
-    this.nextCalibrationDate = nextCalibrationDate
-    this.formula = formula
-    this.value = value
-    this.deviceProperties = deviceProperties
-    this.contact = contact
-    this.attachments = attachments
-  }
-
-  getId (): string {
-    return 'calibration-' + this.id
-  }
-
-  get isDeviceCalibrationAction (): boolean {
-    return true
-  }
-
-  getColor (): string {
-    return 'brown'
-  }
 }
 
 class DeviceMountAction {
@@ -564,10 +527,17 @@ declare module '@/models/SoftwareUpdateAction' {
 }
 SoftwareUpdateAction.prototype.getColor = (): string => 'yellow'
 
+declare module '@/models/DeviceCalibrationAction' {
+  interface DeviceCalibrationAction extends IColoredAction {
+  }
+}
+DeviceCalibrationAction.prototype.getColor = (): string => 'brown'
+
 type ActionDeleteMethod = (id: string) => Promise<void>
 
 @Component({
   components: {
+    DeviceCalibrationActionCard,
     ProgressIndicator,
     GenericActionCard,
     SoftwareUpdateActionCard
@@ -593,28 +563,10 @@ export default class DeviceActionsPage extends Vue {
       email: 'tech.niker@gfz-potsdam.de',
       website: ''
     })
-    const contact2 = Contact.createFromObject({
-      id: 'X2',
-      givenName: 'Cam',
-      familyName: 'Paign',
-      email: 'cam.paign@gfz-potsdam.de',
-      website: ''
-    })
     const devProp1 = new DeviceProperty()
     devProp1.label = 'Wind direction'
     const devProp2 = new DeviceProperty()
     devProp2.label = 'Wind speed'
-    const deviceCalibrationAction1 = new DeviceCalibrationAction(
-      'X3',
-      'Calibration of the device for usage on the campaign',
-      DateTime.fromISO('2021-03-30T08:12:00Z'),
-      DateTime.fromISO('2021-04-30T12:00:00Z'),
-      'f(x) = x',
-      '100',
-      [devProp1, devProp2],
-      contact2,
-      []
-    )
     const deviceMountAction1 = new DeviceMountAction(
       'X4',
       'Measurement ABC',
@@ -636,13 +588,13 @@ export default class DeviceActionsPage extends Vue {
       []
     )
     this.actions = [
-      deviceCalibrationAction1,
       deviceMountAction1,
       deviceUnmountAction1
     ]
     await Promise.all([
       this.fetchGenericActions(),
-      this.fetchSoftwareUpdateActions()
+      this.fetchSoftwareUpdateActions(),
+      this.fetchDeviceCalibrationActions()
     ])
 
     // sort the actions
@@ -670,6 +622,11 @@ export default class DeviceActionsPage extends Vue {
   async fetchSoftwareUpdateActions (): Promise<void> {
     const actions: SoftwareUpdateAction[] = await this.$api.devices.findRelatedSoftwareUpdateActions(this.deviceId)
     actions.forEach((action: SoftwareUpdateAction) => this.actions.push(action))
+  }
+
+  async fetchDeviceCalibrationActions (): Promise<void> {
+    const actions: DeviceCalibrationAction[] = await this.$api.devices.findRelatedCalibrationActions(this.deviceId)
+    actions.forEach((action: DeviceCalibrationAction) => this.actions.push(action))
   }
 
   get isInProgress (): boolean {
@@ -753,6 +710,9 @@ export default class DeviceActionsPage extends Vue {
         break
       case 'isSoftwareUpdateAction' in this.actionToDelete:
         this.deleteActionAndCloseDialog(this.actionToDelete.id, this.$api.deviceSoftwareUpdateActions.deleteById.bind(this.$api.deviceSoftwareUpdateActions))
+        break
+      case 'isDeviceCalibrationAction' in this.actionToDelete:
+        this.deleteActionAndCloseDialog(this.actionToDelete.id, this.$api.deviceCalibrationActions.deleteById.bind(this.$api.deviceCalibrationActions))
         break
       default:
         throw new TypeError('deleting the action type is not supported.')

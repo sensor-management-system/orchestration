@@ -132,15 +132,4 @@ export class PlatformSoftwareUpdateActionApi {
 
     return this.serializer.convertJsonApiObjectToModel(actionResponse.data)
   }
-
-  findRelatedActionAttachments (actionId: string): Promise<SoftwareUpdateAction[]> {
-    const url = actionId + '/platform-software-update-action-attachments'
-    const params = {
-      'page[size]': 10000,
-      include: 'attachment'
-    }
-    return this.axiosApi.get(url, { params }).then((rawServerResponse) => {
-      return this.serializer.convertJsonApiObjectListToModelList(rawServerResponse.data)
-    })
-  }
 }
