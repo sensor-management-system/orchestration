@@ -88,49 +88,12 @@ permissions and limitations under the Licence.
       <v-card-text
         v-if="deviceCalibrationChosen"
       >
-        <v-form
-          ref="datesForm"
-          v-model="datesAreValid"
-          @submit.prevent
-        >
-          <v-row>
-            <v-col cols="12" md="6">
-              <DatePicker
-                :value="startDate"
-                label="Current calibration date"
-                :rules="[rules.startDate, rules.currentCalibrationDateNotNull]"
-                @input="setStartDateAndValidate"
-              />
-            </v-col>
-            <v-col cols="12" md="6">
-              <DatePicker
-                :value="endDate"
-                label="Next calibration date"
-                :rules="[rules.endDate]"
-                @input="setEndDateAndValidate"
-              />
-            </v-col>
-          </v-row>
-          <v-row>
-            <v-col md="6">
-              <v-text-field label="Formula" />
-            </v-col>
-            <v-col>
-              <v-text-field label="Value" />
-            </v-col>
-          </v-row>
-          <v-row>
-            <v-col>
-              <v-select
-                multiple
-                clearable
-                label="Affected measured quantities"
-                :items="measuredQuantities"
-                :item-text="(x) => x.label"
-              />
-            </v-col>
-          </v-row>
-        </v-form>
+        <DeviceCalibrationActionForm
+          ref="deviceCalibrationActionForm"
+          v-model="deviceCalibrationAction"
+          :attachments="attachments"
+          :measured-quantities="measuredQuantities"
+        />
       </v-card-text>
 
       <!-- softwareUpdate -->
@@ -155,58 +118,6 @@ permissions and limitations under the Licence.
         />
       </v-card-text>
 
-      <!-- Action type independent
-           TODO: can be removed once all Action classes are implemented and
-           derive from ActionCommonDetails. Then the CommonActionForm component can
-           be used for all Action types. -->
-      <v-card-text
-        v-if="chosenKindOfAction && !genericActionChosen && !softwareUpdateChosen"
-      >
-        <v-row>
-          <v-col cols="12" md="12">
-            <v-textarea
-              label="Description"
-              rows="3"
-            />
-          </v-col>
-        </v-row>
-        <v-row>
-          <v-col cols="12" md="6">
-            <v-form
-              ref="contactForm"
-              v-model="contactIsValid"
-              @submit.prevent
-            >
-              <v-autocomplete
-                v-model="selectedContact"
-                :items="contacts"
-                label="Contact"
-                clearable
-                required
-                :item-text="(x) => x.toString()"
-                :rules="[rules.contactNotNull]"
-              />
-            </v-form>
-          </v-col>
-          <v-col cols="12" md="1" align-self="center">
-            <v-btn small @click="selectCurrentUserAsContact">
-              {{ labelForSelectMeButton }}
-            </v-btn>
-          </v-col>
-        </v-row>
-        <v-row>
-          <v-col>
-            <v-select
-              v-if="attachments.length > 0"
-              multiple
-              clearable
-              label="Attachments"
-              :items="attachments"
-              :item-text="(x) => x.label"
-            />
-          </v-col>
-        </v-row>
-      </v-card-text>
       <!-- button-tray -->
       <v-card-actions
         v-if="chosenKindOfAction"
@@ -252,10 +163,9 @@ permissions and limitations under the Licence.
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
-import { DateTime } from 'luxon'
 
-import { Contact } from '@/models/Contact'
 import { Attachment } from '@/models/Attachment'
+import { DeviceCalibrationAction } from '@/models/DeviceCalibrationAction'
 import { DeviceProperty } from '@/models/DeviceProperty'
 import { GenericAction } from '@/models/GenericAction'
 import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
@@ -263,8 +173,7 @@ import { IActionType, ActionType } from '@/models/ActionType'
 
 import { ACTION_TYPE_API_FILTER_DEVICE } from '@/services/cv/ActionTypeApi'
 
-import { dateToString, stringToDate } from '@/utils/dateHelper'
-
+import DeviceCalibrationActionForm from '@/components/DeviceCalibrationActionForm.vue'
 import GenericActionForm from '@/components/GenericActionForm.vue'
 import SoftwareUpdateActionForm from '@/components/SoftwareUpdateActionForm.vue'
 import DatePicker from '@/components/DatePicker.vue'
@@ -281,26 +190,13 @@ type IOptionsForActionType = Pick<IActionType, 'id' | 'name' | 'uri'> & {
 
 @Component({
   components: {
+    DeviceCalibrationActionForm,
     GenericActionForm,
     SoftwareUpdateActionForm,
     DatePicker
   }
 })
 export default class ActionAddPage extends Vue {
-  private rules: Object = {
-    startDate: this.validateInputForStartDate,
-    endDate: this.validateInputForEndDate,
-    contactNotNull: this.mustBeProvided('Contact'),
-    currentCalibrationDateNotNull: this.mustBeProvided('Current calibration date'),
-    updateDateNotNull: this.mustBeProvided('Update date'),
-    startDateNotNull: this.mustBeProvided('Start date'),
-    softwareTypeNotNull: this.mustBeProvided('Software type')
-  }
-
-  private datesAreValid = true
-  private contactIsValid = true
-  private softwareTypeIsValid = true
-
   private specialActionTypes: IOptionsForActionType[] = [
     {
       id: 'device_calibration',
@@ -317,27 +213,12 @@ export default class ActionAddPage extends Vue {
   ]
 
   private genericActionTypes: ActionType[] = []
-
-  private contacts: Contact[] = []
-  private selectedContact: Contact | null = null
-  private readonly labelForSelectMeButton = 'Add current user'
-
   private attachments: Attachment[] = []
-
   private measuredQuantities: DeviceProperty[] = []
 
-  private softwareTypes = [
-    { id: '1', uri: 'softwareTypes/firmware', name: 'Firmware' },
-    { id: '2', uri: 'softwareTypes/software', name: 'Software' }
-  ]
-
   private _chosenKindOfAction: IOptionsForActionType | null = null
-  private startDateMenu = false
-  private endDateMenu = false
 
-  private startDate: DateTime | null = null
-  private endDate: DateTime | null = null
-
+  private deviceCalibrationAction: DeviceCalibrationAction = new DeviceCalibrationAction()
   private genericDeviceAction: GenericAction = new GenericAction()
   private softwareUpdateAction: SoftwareUpdateAction = new SoftwareUpdateAction()
 
@@ -354,11 +235,6 @@ export default class ActionAddPage extends Vue {
   }
 
   mounted () {
-    this.$api.contacts.findAll().then((foundContacts) => {
-      this.contacts = foundContacts
-    }).catch((_error) => {
-      this.$store.commit('snackbar/setError', 'Failed to fetch contacts')
-    })
     this.$api.devices.findRelatedDeviceAttachments(this.deviceId).then((foundAttachments) => {
       this.attachments = foundAttachments
     }).catch((_error) => {
@@ -371,18 +247,6 @@ export default class ActionAddPage extends Vue {
     })
   }
 
-  selectCurrentUserAsContact () {
-    const currentUserMail = this.$store.getters['oidc/userEmail']
-    if (currentUserMail) {
-      const userIndex = this.contacts.findIndex(c => c.email === currentUserMail)
-      if (userIndex > -1) {
-        this.selectedContact = this.contacts[userIndex]
-        return
-      }
-    }
-    this.$store.commit('snackbar/setError', 'No contact found with your data')
-  }
-
   get chosenKindOfAction () {
     return this.$data._chosenKindOfAction
   }
@@ -390,9 +254,7 @@ export default class ActionAddPage extends Vue {
   set chosenKindOfAction (newValue: IOptionsForActionType | null) {
     if (this.$data._chosenKindOfAction !== newValue) {
       this.$data._chosenKindOfAction = newValue
-      if (this.$data._chosenKindOfAction?.kind !== newValue?.kind) {
-        this.resetAllActionSpecificInputs()
-      }
+
       if (this.genericActionChosen) {
         this.genericDeviceAction = new GenericAction()
         this.genericDeviceAction.actionTypeName = newValue?.name || ''
@@ -401,16 +263,10 @@ export default class ActionAddPage extends Vue {
       if (this.softwareUpdateChosen) {
         this.softwareUpdateAction = new SoftwareUpdateAction()
       }
+      if (this.deviceCalibrationChosen) {
+        this.deviceCalibrationAction = new DeviceCalibrationAction()
+      }
     }
-  }
-
-  resetAllActionSpecificInputs () {
-    this.startDate = null
-    this.endDate = null
-    this.startDateMenu = false
-    this.endDateMenu = false
-    this.selectedContact = null
-    // TODO: Once their value is tracked in a slot of this component
   }
 
   get deviceCalibrationChosen () {
@@ -423,80 +279,6 @@ export default class ActionAddPage extends Vue {
 
   get genericActionChosen () {
     return this.$data._chosenKindOfAction?.kind === KIND_OF_ACTION_TYPE_GENERIC_DEVICE_ACTION
-  }
-
-  getStartDate (): string {
-    return dateToString(this.startDate)
-  }
-
-  setStartDate (aDate: string | null) {
-    this.startDate = aDate !== null ? stringToDate(aDate) : null
-  }
-
-  getEndDate (): string {
-    return dateToString(this.endDate)
-  }
-
-  setEndDate (aDate: string | null) {
-    this.endDate = aDate !== null ? stringToDate(aDate) : null
-  }
-
-  setStartDateAndValidate (aDate: DateTime | null) {
-    this.startDate = aDate
-    if (this.endDate !== null) {
-      this.checkValidationOfDates()
-    }
-  }
-
-  setEndDateAndValidate (aDate: DateTime | null) {
-    this.endDate = aDate
-    if (this.startDate !== null) {
-      this.checkValidationOfDates()
-    }
-  }
-
-  checkValidationOfDates () {
-    (this.$refs.datesForm as Vue & { validate: () => boolean }).validate()
-  }
-
-  validateInputForStartDate (v: string): boolean | string {
-    // NOTE: as the internals of the DatePicker component work with strings,
-    // the validation functions should expect strings, too
-    if (v === null || v === '') {
-      return true
-    }
-    if (!this.endDate) {
-      return true
-    }
-    if (stringToDate(v) <= this.endDate) {
-      return true
-    }
-    return 'Start date must not be after end date'
-  }
-
-  validateInputForEndDate (v: string): boolean | string {
-    // NOTE: as the internals of the DatePicker component work with strings,
-    // the validation functions should expect strings, too
-    if (v === null || v === '') {
-      return true
-    }
-    if (!this.startDate) {
-      return true
-    }
-    if (stringToDate(v) >= this.startDate) {
-      return true
-    }
-    return 'End date must not be before start date'
-  }
-
-  mustBeProvided (fieldname: string): (v: any) => boolean | string {
-    const innerFunc: (v: any) => boolean | string = function (v: any) {
-      if (v == null || v === '') {
-        return fieldname + ' must be provided'
-      }
-      return true
-    }
-    return innerFunc
   }
 
   get isLoggedIn (): boolean {
@@ -517,14 +299,26 @@ export default class ActionAddPage extends Vue {
   }
 
   addDeviceCalibrationAction () {
-    if (!(this.$refs.datesForm as Vue & { validate: () => boolean }).validate()) {
+    if (!this.isLoggedIn) {
       return
     }
-    if (!(this.$refs.contactForm as Vue & { validate: () => boolean}).validate()) {
+    if (!this.deviceCalibrationAction) {
+      return
+    }
+    if (!(this.$refs.deviceCalibrationActionForm as Vue & { isValid: () => boolean }).isValid()) {
+      this.isSaving = false
+      this.$store.commit('snackbar/setError', 'Please correct the errors')
       return
     }
 
-    this.$store.commit('snackbar/setError', 'Not implemented yet')
+    this.isSaving = true
+    this.$api.deviceCalibrationActions.add(this.deviceId, this.deviceCalibrationAction).then((action: DeviceCalibrationAction) => {
+      this.$router.push('/devices/' + this.deviceId + '/actions', () => this.$emit('input', action))
+    }).catch(() => {
+      this.$store.commit('snackbar/setError', 'Failed to save the action')
+    }).finally(() => {
+      this.isSaving = false
+    })
   }
 
   addSoftwareUpdateAction () {
