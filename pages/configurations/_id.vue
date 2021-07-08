@@ -652,8 +652,7 @@ export default class ConfigurationsIdPage extends Vue {
   private contacts: Contact[] = []
 
   private selectedNode: ConfigurationsTreeNode | null = null
-  private now: DateTime = DateTime.utc()
-  private today: DateTime = DateTime.utc(this.now.year, this.now.month, this.now.day, 0, 0, 0, 0)
+  private today: DateTime = DateTime.utc()
   private selectedDate: DateTime = this.today
 
   private rules: Object = {
