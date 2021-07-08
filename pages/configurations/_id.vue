@@ -216,6 +216,7 @@ permissions and limitations under the Licence.
                     :value="selectedDate"
                     placeholder="e.g. 2000-01-31 12:00"
                     label="Configuration at date"
+                    :rules="[rules.dateNotNull]"
                     @input="setSelectedDate"
                   />
                 </v-col>
@@ -391,7 +392,7 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Vue, Component, Watch } from 'nuxt-property-decorator'
+import { Component, Vue, Watch } from 'nuxt-property-decorator'
 import { DateTime } from 'luxon'
 
 import ContactSelect from '@/components/ContactSelect.vue'
@@ -411,7 +412,7 @@ import { buildConfigurationTree, byDateOldestLast, mountDevice, mountPlatform, u
 import { Platform } from '@/models/Platform'
 import { Project } from '@/models/Project'
 
-import { StationaryLocation, DynamicLocation, LocationType } from '@/models/Location'
+import { DynamicLocation, LocationType, StationaryLocation } from '@/models/Location'
 import { Configuration } from '@/models/Configuration'
 import { DeviceMountAction } from '@/models/DeviceMountAction'
 import { DeviceUnmountAction } from '@/models/DeviceUnmountAction'
@@ -658,7 +659,8 @@ export default class ConfigurationsIdPage extends Vue {
   private rules: Object = {
     startDate: this.validateInputForStartDate,
     endDate: this.validateInputForEndDate,
-    locationType: this.validateInputForLocationType
+    locationType: this.validateInputForLocationType,
+    dateNotNull: this.mustBeProvided('Date')
   }
 
   private visibleTimelineActions: {[idx: string]: boolean} = {}
@@ -711,6 +713,21 @@ export default class ConfigurationsIdPage extends Vue {
 
   checkValidationOfLocationType () {
     (this.$refs.locationTypeForm as Vue & { validate: () => boolean }).validate()
+  }
+
+  /**
+   * a rule to check that an field is non-empty
+   *
+   * @param {string} fieldname - the (human readable) label of the field
+   * @return {(v: any) => boolean | string} a function that checks whether the field is valid or an error message
+   */
+  mustBeProvided (fieldname: string): (v: any) => boolean | string {
+    return function (v: any) {
+      if (v == null || v === '') {
+        return fieldname + ' must be provided'
+      }
+      return true
+    }
   }
 
   private datesAreValid: boolean = true
