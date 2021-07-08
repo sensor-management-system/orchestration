@@ -39,6 +39,7 @@ import { ConfigurationApi } from '@/services/sms/ConfigurationApi'
 import { ConfigurationStatusApi } from '@/services/sms/ConfigurationStatusApi'
 import { CustomfieldsApi } from '@/services/sms/CustomfieldsApi'
 import { DeviceAttachmentApi } from '@/services/sms/DeviceAttachmentApi'
+import { DeviceCalibrationActionApi } from '@/services/sms/DeviceCalibrationActionApi'
 import { PlatformAttachmentApi } from '@/services/sms/PlatformAttachmentApi'
 import { GenericDeviceActionApi } from '@/services/sms/GenericDeviceActionApi'
 import { GenericDeviceActionAttachmentApi, GenericPlatformActionAttachmentApi } from '@/services/sms/GenericActionAttachmentApi'
@@ -63,6 +64,8 @@ import { DeviceMountActionApi } from '@/services/sms/DeviceMountActionApi'
 import { DeviceUnmountActionApi } from '@/services/sms/DeviceUnmountActionApi'
 import { PlatformMountActionApi } from '@/services/sms/PlatformMountActionApi'
 import { PlatformUnmountActionApi } from '@/services/sms/PlatformUnmountActionApi'
+import { DeviceCalibrationActionAttachmentApi } from '@/services/sms/DeviceCalibrationActionAttachmentApi'
+import { DeviceCalibrationDevicePropertyApi } from '@/services/sms/DeviceCalibrationDevicePropertyApi'
 
 const SMS_BASE_URL = process.env.smsBackendUrl
 const CV_BASE_URL = process.env.cvBackendUrl
@@ -84,6 +87,9 @@ export class Api {
   private readonly _deviceSoftwareUpdateActionAttachmentApi: DeviceSoftwareUpdateActionAttachmentApi
   private readonly _platformSoftwareUpdateActionApi: PlatformSoftwareUpdateActionApi
   private readonly _platformSoftwareUpdateActionAttachmentApi: PlatformSoftwareUpdateActionAttachmentApi
+  private readonly _deviceCalibrationActionAttachmentApi: DeviceCalibrationActionAttachmentApi
+  private readonly _devicePropertyCalibrationApi: DeviceCalibrationDevicePropertyApi
+  private readonly _deviceCalibrationActionApi: DeviceCalibrationActionApi
 
   private readonly _manufacturerApi: ManufacturerApi
   private readonly _platformTypeApi: PlatformTypeApi
@@ -189,6 +195,20 @@ export class Api {
     this._platformSoftwareUpdateActionApi = new PlatformSoftwareUpdateActionApi(
       this.createAxios(smsBaseUrl, '/platform-software-update-actions', smsConfig, getIdToken),
       this._platformSoftwareUpdateActionAttachmentApi
+    )
+
+    this._deviceCalibrationActionAttachmentApi = new DeviceCalibrationActionAttachmentApi(
+      this.createAxios(smsBaseUrl, '/device-calibration-attachments', smsConfig, getIdToken)
+    )
+
+    this._devicePropertyCalibrationApi = new DeviceCalibrationDevicePropertyApi(
+      this.createAxios(smsBaseUrl, '/device-property-calibrations', smsConfig, getIdToken)
+    )
+
+    this._deviceCalibrationActionApi = new DeviceCalibrationActionApi(
+      this.createAxios(smsBaseUrl, '/device-calibration-actions', smsConfig, getIdToken),
+      this._deviceCalibrationActionAttachmentApi,
+      this._devicePropertyCalibrationApi
     )
 
     // and here we can set settings for all the cv api calls
@@ -315,6 +335,10 @@ export class Api {
 
   get platformSoftwareUpdateActionAttachments (): PlatformSoftwareUpdateActionAttachmentApi {
     return this._platformSoftwareUpdateActionAttachmentApi
+  }
+
+  get deviceCalibrationActions (): DeviceCalibrationActionApi {
+    return this._deviceCalibrationActionApi
   }
 
   get contacts (): ContactApi {
