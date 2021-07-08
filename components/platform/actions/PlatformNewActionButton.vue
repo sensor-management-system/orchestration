@@ -5,7 +5,7 @@
       v-if="isLoggedIn && !(isAddActionPage || isEditActionPage)"
       color="primary"
       small
-      :to="'/platform/' + platformId + '/actions/new'"
+      :to="'/platforms/' + platformId + '/actions/new'"
     >
       Add Action
     </v-btn>
@@ -13,13 +13,11 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
+import {Component, Prop, Vue} from 'nuxt-property-decorator'
 
 @Component
 export default class PlatformNewActionButton extends Vue {
-  get platformId (): string {
-    return this.$route.params.platformId
-  }
+  @Prop({ type: String, required: true }) platformId!:string;
 
   get isLoggedIn ():boolean {
     return this.$store.getters['oidc/isAuthenticated']
@@ -27,13 +25,13 @@ export default class PlatformNewActionButton extends Vue {
 
   get isEditActionPage (): boolean {
     // eslint-disable-next-line no-useless-escape
-    const editUrl = '^\/devices\/' + this.deviceId + '\/actions\/[a-zA-Z-]+\/[0-9]+\/edit$'
+    const editUrl = '^\/platforms\/' + this.platformId + '\/actions\/[a-zA-Z-]+\/[0-9]+\/edit$'
     return !!this.$route.path.match(editUrl)
   }
 
   get isAddActionPage ():boolean {
     // eslint-disable-next-line no-useless-escape
-    const addUrl = '^\/devices\/' + this.deviceId + '\/actions\/new$'
+    const addUrl = '^\/platforms\/' + this.platformId + '\/actions\/new$'
     return !!this.$route.path.match(addUrl)
   }
 }

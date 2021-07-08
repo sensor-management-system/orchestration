@@ -5,7 +5,7 @@
       :dark="isSaving"
     />
 
-    <platform-new-action-button />
+    <platform-new-action-button :platform-id="platformId"/>
 
     <template v-if="isAddActionPage">
       <NuxtChild
