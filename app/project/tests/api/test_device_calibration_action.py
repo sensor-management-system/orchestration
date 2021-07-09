@@ -11,6 +11,9 @@ from project.tests.models.test_device_calibration_action_model import (
 )
 from project.tests.models.test_device_calibration_attachment_model import \
     add_device_calibration_attachment
+from project.tests.models.test_device_calibration_action_model import (
+    add_device_property_calibration_model,
+)
 
 
 class TestDeviceCalibrationAction(BaseTestCase):
@@ -179,4 +182,15 @@ class TestDeviceCalibrationAction(BaseTestCase):
         device_calibration_action = add_device_calibration_attachment()
         _ = super().delete_object(
             url=f"{self.url}/{device_calibration_action.id}",
+        )
+
+    def test_delete_device_caliubration_action_with_device_property_link(self):
+        """
+        Make sure that the deletion of a DeviceCalibrationAction can be done
+        even it it links to an device property.
+        """
+        device_property_calibration = add_device_property_calibration_model()
+        device_calibration_action_id = device_property_calibration.calibration_action_id
+        _ = super().delete_object(
+            url=f"{self.url}/{device_calibration_action_id}",
         )

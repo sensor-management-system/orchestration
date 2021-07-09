@@ -34,7 +34,10 @@ class DevicePropertyCalibration(db.Model, AuditMixin):
         "DeviceCalibrationAction",
         uselist=False,
         foreign_keys=[calibration_action_id],
-        backref=db.backref("device_property_calibrations"),
+        backref=db.backref(
+            "device_property_calibrations",
+            cascade="save-update, merge, delete, delete-orphan",
+        ),
     )
     device_property_id = db.Column(
         db.Integer, db.ForeignKey("device_property.id"), nullable=False

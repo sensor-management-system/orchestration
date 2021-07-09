@@ -66,7 +66,14 @@ class DevelopmentConfig(BaseConfig):
     JWT_PUBLIC_KEY = OIDC_JWT_SERVICE.get_jwt_public_key()
     # audience is oidc client id (can be array starting
     # https://github.com/vimalloc/flask-jwt-extended/issues/219)
+    # GFZ: Currently for the idp-dev the aud field and the client id seems to
+    # be the very same values, so we want it to be part of the JWT_DECODE_AUDIENCE
+    # that we trust.
+    OIDC_CLIENT_IDS = os.environ.get("OIDC_CLIENT_IDS", "").split(" ")
     JWT_DECODE_AUDIENCE = ["rdmsvm-implicit-flow", "oidcdebugger-implicit-flow"]
+    if OIDC_CLIENT_IDS:
+        for client_id in OIDC_CLIENT_IDS:
+            JWT_DECODE_AUDIENCE.append(client_id)
     # name of token entry that will become distinct flask identity username
 
 
