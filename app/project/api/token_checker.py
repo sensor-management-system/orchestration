@@ -2,7 +2,7 @@ from functools import wraps
 
 from jwt.exceptions import PyJWTError
 from flask import request, current_app
-from flask_jwt_extended import JWTManager, get_raw_jwt, verify_jwt_in_request
+from flask_jwt_extended import JWTManager, get_jwt, verify_jwt_in_request
 from flask_jwt_extended.exceptions import NoAuthorizationError
 
 from .models import Contact, User
@@ -38,16 +38,16 @@ def token_required(fn):
     return wrapper
 
 
-@jwt.user_loader_callback_loader
-def add_user_to_database(current_user):
-    current_user_exists = db.session.query(User).filter_by(subject=current_user).first()
+@jwt.user_lookup_loader
+def add_user_to_database(_jwt_header, jwt_data):
+    identity = jwt_data["sub"]
+    current_user_exists = db.session.query(User).filter_by(subject=identity).one_or_none()
 
     if not current_user_exists:
-        raw_jwt_object = get_raw_jwt()
-        given_name = raw_jwt_object["given_name"]
-        family_name = raw_jwt_object["family_name"]
-        email = raw_jwt_object["email"]
-        subject = raw_jwt_object["sub"]
+        given_name = jwt_data["given_name"]
+        family_name = jwt_data["family_name"]
+        email = jwt_data["email"]
+        subject = jwt_data["sub"]
         current_contact_exists = (
             db.session.query(Contact).filter_by(email=email).first()
         )
