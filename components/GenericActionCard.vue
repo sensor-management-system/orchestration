@@ -33,7 +33,7 @@ permissions and limitations under the Licence.
     <v-card-subtitle class="pb-0">
       <v-row no-gutters>
         <v-col>
-          {{ value.beginDate | toUtcDate }} - {{ value.endDate | toUtcDate }}
+          {{ actionDate }}
         </v-col>
         <v-col
           align-self="end"
@@ -96,11 +96,7 @@ import { GenericAction } from '@/models/GenericAction'
  * A class component for Generic Device Action card
  * @extends Vue
  */
-@Component({
-  filters: {
-    toUtcDate: dateToDateTimeString
-  }
-})
+@Component
 // @ts-ignore
 export default class GenericActionCard extends Vue {
   private showDetails: boolean = false
@@ -115,6 +111,14 @@ export default class GenericActionCard extends Vue {
   })
   // @ts-ignore
   readonly value!: GenericAction
+
+  get actionDate():string {
+    let actionDate = dateToDateTimeString(this.value.beginDate)
+    if(this.value.endDate){
+      actionDate += ' - ' + dateToDateTimeString(this.value.endDate)
+    }
+    return actionDate;
+  }
 
   /**
    * whether the card expansion is shown or not
