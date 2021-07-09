@@ -1,7 +1,7 @@
 <template>
   <div>
     <v-card-actions>
-      <v-spacer/>
+      <v-spacer />
       <platform-action-cancel-add-buttons
         v-if="isLoggedIn"
         :cancel-url="'/platforms/' + platformId + '/actions'"
@@ -25,7 +25,7 @@
     />
 
     <v-card-actions>
-      <v-spacer/>
+      <v-spacer />
       <platform-action-cancel-add-buttons
         v-if="isLoggedIn"
         :cancel-url="'/platforms/' + platformId + '/actions'"
@@ -37,11 +37,11 @@
 </template>
 
 <script lang="ts">
-import {Component, Vue} from "nuxt-property-decorator";
-import GenericActionForm from "@/components/GenericActionForm.vue";
+import { Component, Vue } from 'nuxt-property-decorator'
+import GenericActionForm from '@/components/GenericActionForm.vue'
 import { GenericAction } from '@/models/GenericAction'
-import {Attachment} from "@/models/Attachment";
-import PlatformActionCancelAddButtons from "@/components/platform/actions/PlatformActionCancelAddButtons.vue";
+import { Attachment } from '@/models/Attachment'
+import PlatformActionCancelAddButtons from '@/components/platform/actions/PlatformActionCancelAddButtons.vue'
 
 @Component({
   components: {
@@ -52,8 +52,9 @@ import PlatformActionCancelAddButtons from "@/components/platform/actions/Platfo
 export default class EditPlatformAction extends Vue {
   private action: GenericAction = new GenericAction()
   private attachments: Attachment[] = []
+  private isSaving: boolean=false
 
-  async fetch(): Promise<any> {
+  async fetch (): Promise<any> {
     this.isLoading = true
     await Promise.all([
       this.fetchAttachments(),
@@ -62,7 +63,7 @@ export default class EditPlatformAction extends Vue {
     this.isLoading = false
   }
 
-  async fetchAction(): Promise<any> {
+  async fetchAction (): Promise<any> {
     try {
       this.action = await this.$api.genericPlatformActions.findById(this.actionId)
     } catch (error) {
@@ -71,7 +72,7 @@ export default class EditPlatformAction extends Vue {
     }
   }
 
-  async fetchAttachments(): Promise<any> {
+  async fetchAttachments (): Promise<any> {
     try {
       this.attachments = await this.$api.platforms.findRelatedPlatformAttachments(this.platformId)
     } catch (_) {
@@ -79,43 +80,35 @@ export default class EditPlatformAction extends Vue {
     }
   }
 
-  get platformId(): string {
+  get platformId (): string {
     return this.$route.params.platformId
   }
 
-  get actionId(): string {
+  get actionId (): string {
     return this.$route.params.actionId
   }
 
-  get isLoggedIn(): boolean {
+  get isLoggedIn (): boolean {
     return this.$store.getters['oidc/isAuthenticated']
   }
 
-  get isLoading(): boolean {
+  get isLoading (): boolean {
     return this.$data._isLoading
   }
 
-  set isLoading(value: boolean) {
+  set isLoading (value: boolean) {
     this.$data._isLoading = value
     this.$emit('showload', value)
   }
 
-  get isSaving(): boolean {
-    return this.$data._isSaving
-  }
-
-  set isSaving(value: boolean) {
-    this.$data._isSaving = value
-    this.$emit('showsave', value)
-  }
-
-  save(): void {
+  save (): void {
     if (!(this.$refs.genericPlatformActionForm as Vue & { isValid: () => boolean }).isValid()) {
       this.$store.commit('snackbar/setError', 'Please correct the errors')
       return
     }
     this.isSaving = true
     this.$api.genericPlatformActions.update(this.platformId, this.action).then((action: GenericAction) => {
+      this.$store.commit('snackbar/setSuccess', `Action: ${this.action.actionTypeName} updated`)
       this.$router.push('/platforms/' + this.platformId + '/actions', () => this.$emit('input', action))
     }).catch(() => {
       this.$store.commit('snackbar/setError', 'Failed to save the action')

@@ -52,7 +52,7 @@ import { ActionType } from '@/models/ActionType'
 import { ACTION_TYPE_API_FILTER_PLATFORM } from '@/services/cv/ActionTypeApi'
 import { GenericAction } from '@/models/GenericAction'
 import { Attachment } from '@/models/Attachment'
-import PlatformActionCancelAddButtons from "@/components/platform/actions/PlatformActionCancelAddButtons.vue";
+import PlatformActionCancelAddButtons from '@/components/platform/actions/PlatformActionCancelAddButtons.vue'
 
 @Component({
   components: {
@@ -107,6 +107,7 @@ export default class NewPlatformAction extends Vue {
 
     this.isSaving = true
     this.$api.genericPlatformActions.add(this.platformId, this.genericPlatformAction).then((action: GenericAction) => {
+      this.$store.commit('snackbar/setSuccess', `Action: ${this.genericPlatformAction.actionTypeName} created`)
       this.$router.push('/platforms/' + this.platformId + '/actions', () => this.$emit('input', action))
       // this.$router.push('/platforms/' + this.platformId + '/actions') TODO: Automatisches neuladen der Daten in der action.vue
     }).catch(() => {
