@@ -64,7 +64,7 @@ class BaseConfig:
     MINIO_SECRET_KEY = env("MINIO_SECRET_KEY", "minio123")
     # (Optional) Flag to indicate to use secure (TLS) connection to S3 service or not.
     # False for local testing
-    MINIO_SECURE = env("MINIO_SECURE", False)
+    MINIO_SECURE = env.bool("MINIO_SECURE", False)
     # (Optional) Region name of buckets in S3 service.
     MINIO_REGION = env("MINIO_REGION", None)
     # (Optional) Customized HTTP client.
