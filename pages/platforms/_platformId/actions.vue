@@ -5,7 +5,7 @@
       :dark="isSaving"
     />
 
-    <platform-new-action-button :platform-id="platformId"/>
+    <platform-new-action-button :platform-id="platformId" />
 
     <template v-if="isAddActionPage">
       <NuxtChild
@@ -23,11 +23,21 @@
     </template>
 
     <template v-else>
+      <div v-if="actions.length === 0">
+        <v-card flat>
+          <v-card-text>
+            <p class="text-center">
+              There are no actions for this platform.
+            </p>
+          </v-card-text>
+        </v-card>
+      </div>
       <platform-action-timeline
+        v-else
         :actions="actions"
         :platform-id="platformId"
       />
-      <platform-action-delete-dialog :platform-id="platformId" @update="fetchActions"/>
+      <platform-action-delete-dialog :platform-id="platformId" @update="fetchActions" />
     </template>
   </div>
 </template>
