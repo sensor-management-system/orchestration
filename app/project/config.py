@@ -70,7 +70,7 @@ class DevelopmentConfig(BaseConfig):
     # be the very same values, so we want it to be part of the JWT_DECODE_AUDIENCE
     # that we trust.
     OIDC_CLIENT_IDS = os.environ.get("OIDC_CLIENT_IDS", "").split(" ")
-    JWT_DECODE_AUDIENCE = ["rdmsvm-implicit-flow", "oidcdebugger-implicit-flow"]
+    JWT_DECODE_AUDIENCE = ["rdmsvm-implicit-flow"]
     if OIDC_CLIENT_IDS:
         for client_id in OIDC_CLIENT_IDS:
             JWT_DECODE_AUDIENCE.append(client_id)
