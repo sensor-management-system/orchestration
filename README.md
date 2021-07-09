@@ -1,8 +1,8 @@
 # API for Sensor Information System SIS 
 
-[![pipeline status](https://registry.hzdr.de/hub-terra/sms/backend/badges/master/pipeline.svg)](https://registry.hzdr.de/hub-terra/sms/backend/commits/master)
+[![pipeline status](https://gitlab.hzdr.de/hub-terra/sms/backend/badges/master/pipeline.svg)](https://gitlab.hzdr.de/hub-terra/sms/backend/-/commits/master)
 [![version](https://img.shields.io/badge/version-v1.0-lightgrey.svg)](./README.md) [![python](https://img.shields.io/badge/python-3.5|3.6|3.7-blue.svg?style=?style=plastic&logo=python)](#)
-[![pylint](https://img.shields.io/badge/lint%20score-9.97/10-yellowgreen.svg )](https://registry.hzdr.de/hub-terra/sms/backend/-/jobs?job=unittest-lint)
+[![pylint](https://img.shields.io/badge/lint%20score-9.97/10-yellowgreen.svg )](https://gitlab.hzdr.de/hub-terra/sms/backend/-/jobs?job=unittest-lint)
 [![r_licenses](https://img.shields.io/badge/requirements_licenses-check-redyellow.svg?style=plastic&logo=open-source-initiative)](./docs/requirements_licenses.md)
 [![openapi](https://img.shields.io/badge/OpenAPI-3.0-green.svg?style=?style=plastic&logo=openapi-initiative)](./app/openapi/openapi.yaml)
 [![licences](https://img.shields.io/badge/licenses-MIT-green.svg?style=?style=plastic&logo=)](#)

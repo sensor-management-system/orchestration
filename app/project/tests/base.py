@@ -3,9 +3,8 @@ import os
 import time
 
 from faker import Faker
-from flask_jwt_extended.tokens import _encode_jwt
+from flask_jwt_extended import create_access_token
 from flask_testing import TestCase
-
 from project import create_app
 from project.api.models.base_model import db
 
@@ -31,30 +30,20 @@ def query_result_to_list(query_result):
 
 
 def encode_token_date_with_hs256(
-    token_data,
-    headers=None,
+        token_data,
+        identity="test",
+
 ):
     """
-    Make use of the flask_jwt_extended methode (_encode_jwt) to
+    Make use of the flask_jwt_extended methode create_access_token to
     encode our payload.
     The test uses "HS256" as encode algorithm.
 
-    :param token_data:
     :param identity: Identifier for who this token is for (ex, sub).
-    :param fresh: this will indicate how long this
-                  token will remain fresh.
-    :param expires_delta: How far in the future this token should expire
-    :param headers:
-    :return:
+    :param token_data: the jwt payload data
+    :return: encoded jwt
     """
-    return _encode_jwt(
-        token_data,
-        expires_delta=None,
-        secret=app.config["JWT_SECRET_KEY"],
-        algorithm="HS256",
-        json_encoder=None,
-        headers=headers,
-    )
+    return create_access_token(identity=identity, additional_claims=token_data)
 
 
 def create_token():
