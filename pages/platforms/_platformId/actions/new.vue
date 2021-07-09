@@ -2,7 +2,7 @@
   <div>
     <v-card>
       <v-card-actions>
-        <v-spacer/>
+        <v-spacer />
         <v-btn
           ref="cancelButton"
           text
@@ -10,6 +10,15 @@
           :to="'/platforms/' + platformId + '/actions'"
         >
           Cancel
+        </v-btn>
+        <v-btn
+          v-if="genericActionChosen"
+          color="green"
+          small
+          :disabled="isSaving"
+          @click="addGenericAction"
+        >
+          Add
         </v-btn>
       </v-card-actions>
       <v-card-text>
@@ -35,7 +44,17 @@
         />
       </v-card-text>
       <v-card-actions>
+        <v-spacer />
         <v-btn
+          ref="cancelButton"
+          text
+          small
+          :to="'/platforms/' + platformId + '/actions'"
+        >
+          Cancel
+        </v-btn>
+        <v-btn
+          v-if="genericActionChosen"
           color="green"
           small
           :disabled="isSaving"
@@ -49,12 +68,12 @@
 </template>
 
 <script lang="ts">
-import {Component, Vue} from "nuxt-property-decorator";
-import GenericActionForm from "@/components/GenericActionForm.vue";
-import {ActionType} from "@/models/ActionType";
-import {ACTION_TYPE_API_FILTER_PLATFORM} from "@/services/cv/ActionTypeApi";
-import {GenericAction} from '@/models/GenericAction';
-import {Attachment} from "@/models/Attachment";
+import { Component, Vue } from 'nuxt-property-decorator'
+import GenericActionForm from '@/components/GenericActionForm.vue'
+import { ActionType } from '@/models/ActionType'
+import { ACTION_TYPE_API_FILTER_PLATFORM } from '@/services/cv/ActionTypeApi'
+import { GenericAction } from '@/models/GenericAction'
+import { Attachment } from '@/models/Attachment'
 
 @Component({
   components: {
@@ -62,25 +81,24 @@ import {Attachment} from "@/models/Attachment";
   }
 })
 export default class NewPlatformAction extends Vue {
-
   private genericActionTypes: ActionType[] = []
   private chosenKindOfAction: ActionType | null = null
   private genericPlatformAction: GenericAction = new GenericAction()
   private attachments: Attachment[] = []
   private isSaving: boolean = false
 
-  async fetch() {
+  async fetch () {
     await Promise.all([
       this.fetchGenericActionTypes()
     ])
   }
 
-  async fetchGenericActionTypes(): Promise<any> {
+  async fetchGenericActionTypes (): Promise<any> {
     this.genericActionTypes = await this.$api.actionTypes.newSearchBuilder().onlyType(ACTION_TYPE_API_FILTER_PLATFORM).build().findMatchingAsList()
   }
 
-  get genericActionChosen(): boolean {
-    return !!this.chosenKindOfAction;
+  get genericActionChosen (): boolean {
+    return !!this.chosenKindOfAction
   }
 
   get platformId (): string {
