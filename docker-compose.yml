@@ -60,7 +60,7 @@ services:
     networks:
       - sms
   minio:
-    image: minio/minio:RELEASE.2021-06-17T00-10-46Z-28-gac7697426
+    image: minio/minio:RELEASE.2021-06-14T01-29-23Z
     container_name: minio
     volumes:
       - data1:/data1
@@ -78,7 +78,7 @@ services:
       retries: 3
 
   createbuckets:
-    image: minio/mc
+    image: minio/mc:latest
     networks:
       - sms
     depends_on:
@@ -87,10 +87,9 @@ services:
     # https://docs.min.io/docs/minio-client-complete-guid
     entrypoint: >
       /bin/sh -c "
-      /usr/bin/mc config host rm local;
-      /usr/bin/mc config host add --quiet  local http://minio:9000 minio minio123;
-      /usr/bin/mc mb --quiet local/sms-attachments;
-      /usr/bin/mc policy set download local/sms-attachments;
+      /usr/bin/mc  alias set minio http://minio:9000 ${minio_user} ${minio_user_password} --api S3v4;
+      /usr/bin/mc mb --quiet minio/sms-attachments;
+      /usr/bin/mc policy set download minio/sms-attachments;
       exit 0;
       "
 
