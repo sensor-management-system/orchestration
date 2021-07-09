@@ -3,23 +3,12 @@
     <v-card>
       <v-card-actions>
         <v-spacer />
-        <v-btn
-          ref="cancelButton"
-          text
-          small
-          :to="'/platforms/' + platformId + '/actions'"
-        >
-          Cancel
-        </v-btn>
-        <v-btn
-          v-if="genericActionChosen"
-          color="green"
-          small
-          :disabled="isSaving"
-          @click="addGenericAction"
-        >
-          Add
-        </v-btn>
+        <platform-action-cancel-add-buttons
+          :cancel-url="'/platforms/' + platformId + '/actions'"
+          :is-saving="isSaving"
+          :show-apply="genericActionChosen"
+          @apply="addGenericAction"
+        />
       </v-card-actions>
       <v-card-text>
         <v-select
@@ -45,23 +34,12 @@
       </v-card-text>
       <v-card-actions>
         <v-spacer />
-        <v-btn
-          ref="cancelButton"
-          text
-          small
-          :to="'/platforms/' + platformId + '/actions'"
-        >
-          Cancel
-        </v-btn>
-        <v-btn
-          v-if="genericActionChosen"
-          color="green"
-          small
-          :disabled="isSaving"
-          @click="addGenericAction"
-        >
-          Add
-        </v-btn>
+        <platform-action-cancel-add-buttons
+          :cancel-url="'/platforms/' + platformId + '/actions'"
+          :is-saving="isSaving"
+          :show-apply="genericActionChosen"
+          @apply="addGenericAction"
+        />
       </v-card-actions>
     </v-card>
   </div>
@@ -74,9 +52,11 @@ import { ActionType } from '@/models/ActionType'
 import { ACTION_TYPE_API_FILTER_PLATFORM } from '@/services/cv/ActionTypeApi'
 import { GenericAction } from '@/models/GenericAction'
 import { Attachment } from '@/models/Attachment'
+import PlatformActionCancelAddButtons from "@/components/platform/actions/PlatformActionCancelAddButtons.vue";
 
 @Component({
   components: {
+    PlatformActionCancelAddButtons,
     GenericActionForm
   }
 })

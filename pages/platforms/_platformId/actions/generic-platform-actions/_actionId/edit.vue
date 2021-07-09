@@ -2,24 +2,12 @@
   <div>
     <v-card-actions>
       <v-spacer/>
-      <v-btn
+      <platform-action-cancel-add-buttons
         v-if="isLoggedIn"
-        small
-        text
-        nuxt
-        :to="'/platforms/' + platformId + '/actions'"
-      >
-        cancel
-      </v-btn>
-      <v-btn
-        v-if="isLoggedIn"
-        color="green"
-        small
-        :disabled="isSaving"
-        @click="save"
-      >
-        apply
-      </v-btn>
+        :cancel-url="'/platforms/' + platformId + '/actions'"
+        :is-saving="isSaving"
+        @apply="save"
+      />
     </v-card-actions>
 
     <!-- just to be consistent with the new mask, we show the selected action type as an disabled v-select here -->
@@ -38,24 +26,12 @@
 
     <v-card-actions>
       <v-spacer/>
-      <v-btn
+      <platform-action-cancel-add-buttons
         v-if="isLoggedIn"
-        small
-        text
-        nuxt
-        :to="'/platforms/' + platformId + '/actions'"
-      >
-        cancel
-      </v-btn>
-      <v-btn
-        v-if="isLoggedIn"
-        color="green"
-        small
-        :disabled="isSaving"
-        @click="save"
-      >
-        apply
-      </v-btn>
+        :cancel-url="'/platforms/' + platformId + '/actions'"
+        :is-saving="isSaving"
+        @apply="save"
+      />
     </v-card-actions>
   </div>
 </template>
@@ -65,9 +41,11 @@ import {Component, Vue} from "nuxt-property-decorator";
 import GenericActionForm from "@/components/GenericActionForm.vue";
 import { GenericAction } from '@/models/GenericAction'
 import {Attachment} from "@/models/Attachment";
+import PlatformActionCancelAddButtons from "@/components/platform/actions/PlatformActionCancelAddButtons.vue";
 
 @Component({
   components: {
+    PlatformActionCancelAddButtons,
     GenericActionForm
   }
 })
