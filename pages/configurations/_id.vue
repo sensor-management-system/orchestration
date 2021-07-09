@@ -212,10 +212,11 @@ permissions and limitations under the Licence.
             <v-card-text>
               <v-row>
                 <v-col cols="12" md="3">
-                  <DatePicker
+                  <DateTimePicker
                     :value="selectedDate"
+                    placeholder="e.g. 2000-01-31 12:00"
                     label="Configuration at date"
-                    :clearable="false"
+                    :rules="[rules.dateNotNull]"
                     @input="setSelectedDate"
                   />
                 </v-col>
@@ -391,7 +392,7 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Vue, Component, Watch } from 'nuxt-property-decorator'
+import { Component, Vue, Watch } from 'nuxt-property-decorator'
 import { DateTime } from 'luxon'
 
 import ContactSelect from '@/components/ContactSelect.vue'
@@ -400,7 +401,6 @@ import ConfigurationsPlatformDeviceSearch from '@/components/ConfigurationsPlatf
 import ConfigurationsTreeView from '@/components/ConfigurationsTreeView.vue'
 import ConfigurationsDemoTreeView from '@/components/ConfigurationsDemoTreeView.vue'
 import ConfigurationsSelectedItem from '@/components/ConfigurationsSelectedItem.vue'
-import DatePicker from '@/components/DatePicker.vue'
 import DateTimePicker from '@/components/DateTimePicker.vue'
 import InfoBox from '@/components/InfoBox.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
@@ -412,7 +412,7 @@ import { buildConfigurationTree, byDateOldestLast, mountDevice, mountPlatform, u
 import { Platform } from '@/models/Platform'
 import { Project } from '@/models/Project'
 
-import { StationaryLocation, DynamicLocation, LocationType } from '@/models/Location'
+import { DynamicLocation, LocationType, StationaryLocation } from '@/models/Location'
 import { Configuration } from '@/models/Configuration'
 import { DeviceMountAction } from '@/models/DeviceMountAction'
 import { DeviceUnmountAction } from '@/models/DeviceUnmountAction'
@@ -624,7 +624,6 @@ class DeviceUnmountTimelineAction implements ITimelineAction {
 
 @Component({
   components: {
-    DatePicker,
     DateTimePicker,
     ContactSelect,
     DevicePropertyHierarchySelect,
@@ -653,14 +652,14 @@ export default class ConfigurationsIdPage extends Vue {
   private contacts: Contact[] = []
 
   private selectedNode: ConfigurationsTreeNode | null = null
-  private now: DateTime = DateTime.utc()
-  private today: DateTime = DateTime.utc(this.now.year, this.now.month, this.now.day, 0, 0, 0, 0)
+  private today: DateTime = DateTime.utc()
   private selectedDate: DateTime = this.today
 
   private rules: Object = {
     startDate: this.validateInputForStartDate,
     endDate: this.validateInputForEndDate,
-    locationType: this.validateInputForLocationType
+    locationType: this.validateInputForLocationType,
+    dateNotNull: this.mustBeProvided('Date')
   }
 
   private visibleTimelineActions: {[idx: string]: boolean} = {}
@@ -713,6 +712,21 @@ export default class ConfigurationsIdPage extends Vue {
 
   checkValidationOfLocationType () {
     (this.$refs.locationTypeForm as Vue & { validate: () => boolean }).validate()
+  }
+
+  /**
+   * a rule to check that an field is non-empty
+   *
+   * @param {string} fieldname - the (human readable) label of the field
+   * @return {(v: any) => boolean | string} a function that checks whether the field is valid or an error message
+   */
+  mustBeProvided (fieldname: string): (v: any) => boolean | string {
+    return function (v: any) {
+      if (v == null || v === '') {
+        return fieldname + ' must be provided'
+      }
+      return true
+    }
   }
 
   private datesAreValid: boolean = true
@@ -1165,8 +1179,6 @@ export default class ConfigurationsIdPage extends Vue {
   setSelectedDate (date: DateTime | null) {
     if (date) {
       this.selectedDate = date.setZone('utc')
-    } else {
-      this.selectedDate = this.today
     }
   }
 

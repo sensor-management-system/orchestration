@@ -177,6 +177,7 @@ import DeviceCalibrationActionForm from '@/components/DeviceCalibrationActionFor
 import GenericActionForm from '@/components/GenericActionForm.vue'
 import SoftwareUpdateActionForm from '@/components/SoftwareUpdateActionForm.vue'
 import DatePicker from '@/components/DatePicker.vue'
+import DateTimePicker from '@/components/DateTimePicker.vue'
 
 const KIND_OF_ACTION_TYPE_DEVICE_CALIBRATION = 'device_calibration'
 const KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE = 'software_update'
