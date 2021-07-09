@@ -21,7 +21,6 @@ export class GenericPlatformActionApi {
   }
 
   async findById (id: string): Promise<GenericAction> {
-    console.log(id)
     const response = await this.axiosApi.get(id, {
       params: {
         include: [
