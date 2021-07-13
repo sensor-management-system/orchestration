@@ -1,4 +1,4 @@
-version: '3.3'
+version: '3.9'
 services:
   smses01:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.10.0
@@ -16,8 +16,6 @@ services:
       - esdata01:/usr/share/elasticsearch/data
     ports:
       - 9200:9200
-    networks:
-      - sms
 
   app:
     image: python:3.9-slim-buster
@@ -31,8 +29,6 @@ services:
       - ./app_env/compose.env
     depends_on:
       - db
-    networks:
-      - sms
     command: >
       sh -c "
       apt-get update && apt-get install -y  --no-install-recommends \
@@ -57,21 +53,19 @@ services:
       - ./app_env/db_secrets.env
     volumes:
       - ./app/project/db/create.sql:/docker-entrypoint-initdb.d/create.sql
-    networks:
-      - sms
   minio:
-    image: minio/minio:RELEASE.2021-07-08T19-43-25Z
+    image: minio/minio:RELEASE.2021-07-12T02-44-53Z
     container_name: minio
     volumes:
       - data1:/data1
     ports:
       - "127.0.0.1:9000:9000"
-      - "127.0.0.1:9090:9090"
-    networks:
-      - sms
-    env_file:
-      - ./minio/minio.env
-    command: server --console-address ":9090" /data1
+      - "127.0.0.1:9001:9001"
+    environment:
+      MINIO_ROOT_USER: ${minio_user}
+      MINIO_ROOT_PASSWORD: ${minio_user_password}
+#      MINIO_BROWSER: "off"
+    command: server /data1 --console-address ":9001"
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
       interval: 30s
@@ -80,8 +74,6 @@ services:
 
   createbuckets:
     image: minio/mc:latest
-    networks:
-      - sms
     depends_on:
       - minio
     # Make a Bucket using minio client mc
@@ -90,7 +82,7 @@ services:
       /bin/sh -c "
       /usr/bin/mc  alias set minio http://minio:9000 ${minio_user} ${minio_user_password} --api S3v4;
       /usr/bin/mc mb --quiet minio/sms-attachments;
-      /usr/bin/mc policy set public minio/sms-attachments;
+      /usr/bin/mc policy set download minio/sms-attachments;
       exit 0;
       "
 
@@ -102,13 +94,12 @@ services:
     volumes:
       - ./ngnix/index.html:/usr/share/nginx/html/index.html
       - ./ngnix/certs:/etc/nginx/ssl
-      - ./ngnix/default.conf:/etc/nginx/conf.d/rdm-test.intranet.ufz.de.conf
-      - ./ngnix/nginx.conf:/etc/nginx/nginx.conf
+      - ./ngnix/default.conf:/etc/nginx/conf.d/rdm-test.intranet.ufz.de.conf:ro
+      - ./ngnix/nginx.conf:/etc/nginx/nginx.conf:ro
 
 volumes:
   esdata01:
     driver: local
   data1:
 
-networks:
-  sms:
+
