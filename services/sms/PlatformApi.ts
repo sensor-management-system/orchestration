@@ -52,6 +52,10 @@ import { IFlaskJSONAPIFilter } from '@/utils/JSONApiInterfaces'
 import {
   IPaginationLoader, FilteredPaginationedLoader
 } from '@/utils/PaginatedLoader'
+import { GenericAction } from '@/models/GenericAction'
+import {
+  GenericPlatformActionSerializer
+} from '@/serializers/jsonapi/GenericActionSerializer'
 
 interface IncludedRelationships {
   includeContacts?: boolean
@@ -146,6 +150,20 @@ export class PlatformApi {
     }
     return this.axiosApi.get(url, { params }).then((rawServerResponse) => {
       return new PlatformAttachmentSerializer().convertJsonApiObjectListToModelList(rawServerResponse.data)
+    })
+  }
+
+  findRelatedGenericActions (platformId: string): Promise<GenericAction[]> {
+    const url = platformId + '/generic-platform-actions'
+    const params = {
+      'page[size]': 10000,
+      include: [
+        'contact',
+        'generic_platform_action_attachments.attachment'
+      ].join(',')
+    }
+    return this.axiosApi.get(url, { params }).then((rawServerResponse) => {
+      return new GenericPlatformActionSerializer().convertJsonApiObjectListToModelList(rawServerResponse.data)
     })
   }
 

@@ -94,6 +94,10 @@ export default class PlatformPage extends Vue {
         {
           to: '/platforms/' + this.platformId + '/attachments',
           name: 'Attachments'
+        },
+        {
+          to: '/platforms/' + this.platformId + '/actions',
+          name: 'Actions'
         }
       ],
       title: 'Platforms'
