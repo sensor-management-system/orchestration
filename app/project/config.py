@@ -19,7 +19,7 @@ class OidcJwtService:
         return "RS256"
 
     def _get_oidc_config(self):
-        resp = requests.get(self.oidc_issuer_url, verify=False)
+        resp = requests.get(self.oidc_issuer_url, verify=True)
         resp.raise_for_status()
         oidc_config = resp.json()
         return oidc_config
@@ -27,7 +27,7 @@ class OidcJwtService:
     def _get_jwks_config(self):
         oidc_config = self._get_oidc_config()
         jwks_uri = oidc_config["jwks_uri"]
-        resp = requests.get(jwks_uri, verify=False)
+        resp = requests.get(jwks_uri, verify=True)
         resp.raise_for_status()
         jwks_config = resp.json()
         return jwks_config
