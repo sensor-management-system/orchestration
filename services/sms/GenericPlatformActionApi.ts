@@ -1,13 +1,13 @@
-import {AxiosInstance} from "axios";
+import { AxiosInstance } from 'axios'
 import {
   GenericPlatformActionSerializer,
   IGenericActionSerializer
-} from "@/serializers/jsonapi/GenericActionSerializer";
-import {GenericAction} from '@/models/GenericAction';
-import {Attachment} from "@/models/Attachment";
+} from '@/serializers/jsonapi/GenericActionSerializer'
+import { GenericAction } from '@/models/GenericAction'
+import { Attachment } from '@/models/Attachment'
 import {
   GenericPlatformActionAttachmentApi
-} from "@/services/sms/GenericActionAttachmentApi";
+} from '@/services/sms/GenericActionAttachmentApi'
 
 export class GenericPlatformActionApi {
   private axiosApi: AxiosInstance

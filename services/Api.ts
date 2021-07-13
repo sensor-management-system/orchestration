@@ -63,7 +63,7 @@ import { DeviceMountActionApi } from '@/services/sms/DeviceMountActionApi'
 import { DeviceUnmountActionApi } from '@/services/sms/DeviceUnmountActionApi'
 import { PlatformMountActionApi } from '@/services/sms/PlatformMountActionApi'
 import { PlatformUnmountActionApi } from '@/services/sms/PlatformUnmountActionApi'
-import {GenericPlatformActionApi} from "@/services/sms/GenericPlatformActionApi";
+import { GenericPlatformActionApi } from '@/services/sms/GenericPlatformActionApi'
 
 const SMS_BASE_URL = process.env.smsBackendUrl
 const CV_BASE_URL = process.env.cvBackendUrl

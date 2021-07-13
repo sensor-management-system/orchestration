@@ -112,12 +112,12 @@ export default class GenericActionCard extends Vue {
   // @ts-ignore
   readonly value!: GenericAction
 
-  get actionDate():string {
+  get actionDate ():string {
     let actionDate = dateToDateTimeString(this.value.beginDate)
-    if(this.value.endDate){
+    if (this.value.endDate) {
       actionDate += ' - ' + dateToDateTimeString(this.value.endDate)
     }
-    return actionDate;
+    return actionDate
   }
 
   /**

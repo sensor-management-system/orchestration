@@ -54,7 +54,6 @@ import {
 } from '@/utils/PaginatedLoader'
 import { GenericAction } from '@/models/GenericAction'
 import {
-  GenericDeviceActionSerializer,
   GenericPlatformActionSerializer
 } from '@/serializers/jsonapi/GenericActionSerializer'
 

@@ -67,7 +67,6 @@ export default class EditPlatformAction extends Vue {
     try {
       this.action = await this.$api.genericPlatformActions.findById(this.actionId)
     } catch (error) {
-      console.log(error)
       this.$store.commit('snackbar/setError', 'Failed to fetch action')
     }
   }
