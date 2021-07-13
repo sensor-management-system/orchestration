@@ -49,20 +49,14 @@ export default class PlatformActionDeleteDialog extends Vue {
     return this.actionIdToDelete !== null
   }
 
-  get actionDeleteMethod () {
-    return this.$api.platforms.deleteRelatedGenericActionsById
-  }
-
   hideDeleteDialog () {
     this.$store.commit('smsActions/setActionIdToDelete', null)
   }
 
   deleteAction (): void {
-    if (!this.hasActionToDelete) {
+    if (!this.actionIdToDelete) {
       return
     }
-
-    this.isSaving = true
     this.$api.genericPlatformActions.deleteById(this.actionIdToDelete).then(() => {
       this.$emit('update')
       this.$store.commit('snackbar/setSuccess', 'Action deleted')
@@ -70,7 +64,6 @@ export default class PlatformActionDeleteDialog extends Vue {
       this.$store.commit('snackbar/setError', 'Action could not be deleted')
     }).finally(() => {
       this.hideDeleteDialog()
-      this.isSaving = false
     })
   }
 }

@@ -44,10 +44,10 @@
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
-import PlatformActionTimeline from '@/components/platform/actions/PlatformActionTimeline'
-import PlatformNewActionButton from '@/components/platform/actions/PlatformNewActionButton'
-import ProgressIndicator from '@/components/ProgressIndicator'
-import PlatformActionDeleteDialog from '@/components/platform/actions/PlatformActionDeleteDialog'
+import PlatformActionTimeline from '@/components/platform/actions/PlatformActionTimeline.vue'
+import PlatformNewActionButton from '@/components/platform/actions/PlatformNewActionButton.vue'
+import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import PlatformActionDeleteDialog from '@/components/platform/actions/PlatformActionDeleteDialog.vue'
 import { GenericAction } from '@/models/GenericAction'
 import { IActionCommonDetails } from '@/models/ActionCommonDetails'
 

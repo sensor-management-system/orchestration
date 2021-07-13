@@ -45,7 +45,7 @@
 import { Vue, Component, Prop } from 'nuxt-property-decorator'
 import { IActionCommonDetails } from '@/models/ActionCommonDetails'
 
-@Component()
+@Component
 export default class PlatformActionDeleteMenu extends Vue {
   @Prop({ type: Object, required: true }) action!:IActionCommonDetails;
 
