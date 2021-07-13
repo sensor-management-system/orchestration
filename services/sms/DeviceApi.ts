@@ -35,6 +35,7 @@ import { Attachment } from '@/models/Attachment'
 import { Contact } from '@/models/Contact'
 import { CustomTextField } from '@/models/CustomTextField'
 import { Device } from '@/models/Device'
+import { DeviceCalibrationAction } from '@/models/DeviceCalibrationAction'
 import { DeviceProperty } from '@/models/DeviceProperty'
 import { DeviceType } from '@/models/DeviceType'
 import { Manufacturer } from '@/models/Manufacturer'
@@ -42,12 +43,18 @@ import { Status } from '@/models/Status'
 import { GenericAction } from '@/models/GenericAction'
 import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
 
+import { DeviceMountAction } from '@/models/views/devices/actions/DeviceMountAction'
+import { DeviceUnmountAction } from '@/models/views/devices/actions/DeviceUnmountAction'
+
 import { ContactSerializer } from '@/serializers/jsonapi/ContactSerializer'
 import { CustomTextFieldSerializer } from '@/serializers/jsonapi/CustomTextFieldSerializer'
 import { DeviceAttachmentSerializer } from '@/serializers/jsonapi/DeviceAttachmentSerializer'
 import { DevicePropertySerializer } from '@/serializers/jsonapi/DevicePropertySerializer'
 import { GenericDeviceActionSerializer } from '@/serializers/jsonapi/GenericActionSerializer'
 import { DeviceSoftwareUpdateActionSerializer } from '@/serializers/jsonapi/SoftwareUpdateActionSerializer'
+
+import { DeviceMountActionSerializer } from '@/serializers/jsonapi/composed/devices/actions/DeviceMountActionSerializer'
+import { DeviceUnmountActionSerializer } from '@/serializers/jsonapi/composed/devices/actions/DeviceUnmountActionSerializer'
 
 import { IFlaskJSONAPIFilter } from '@/utils/JSONApiInterfaces'
 
@@ -57,6 +64,7 @@ import {
   deviceWithMetaToDeviceByAddingDummyObjects,
   deviceWithMetaToDeviceThrowingNoErrorOnMissing
 } from '@/serializers/jsonapi/DeviceSerializer'
+import { DeviceCalibrationActionSerializer } from '@/serializers/jsonapi/DeviceCalibrationActionSerializer'
 
 interface IncludedRelationships {
   includeContacts?: boolean
@@ -225,6 +233,51 @@ export class DeviceApi {
     }
     return this.axiosApi.get(url, { params }).then((rawServerResponse) => {
       return new DeviceSoftwareUpdateActionSerializer().convertJsonApiObjectListToModelList(rawServerResponse.data)
+    })
+  }
+
+  findRelatedCalibrationActions (deviceId: string): Promise<DeviceCalibrationAction[]> {
+    const url = deviceId + '/device-calibration-actions'
+    const params = {
+      'page[size]': 10000,
+      include: [
+        'contact',
+        'device_calibration_attachments.attachment',
+        'device_property_calibrations',
+        'device_property_calibrations.device_property'
+      ].join(',')
+    }
+    return this.axiosApi.get(url, { params }).then((rawServerResponse) => {
+      return new DeviceCalibrationActionSerializer().convertJsonApiObjectListToModelList(rawServerResponse.data)
+    })
+  }
+
+  findRelatedMountActions (deviceId: string): Promise<DeviceMountAction[]> {
+    const url = deviceId + '/device-mount-actions'
+    const params = {
+      'page[size]': 10000,
+      include: [
+        'contact',
+        'parent_platform',
+        'configuration'
+      ].join(',')
+    }
+    return this.axiosApi.get(url, { params }).then((rawServerResponse) => {
+      return new DeviceMountActionSerializer().convertJsonApiObjectListToModelList(rawServerResponse.data)
+    })
+  }
+
+  findRelatedUnmountActions (deviceId: string): Promise<DeviceUnmountAction[]> {
+    const url = deviceId + '/device-unmount-actions'
+    const params = {
+      'page[size]': 10000,
+      include: [
+        'contact',
+        'configuration'
+      ].join(',')
+    }
+    return this.axiosApi.get(url, { params }).then((rawServerResponse) => {
+      return new DeviceUnmountActionSerializer().convertJsonApiObjectListToModelList(rawServerResponse.data)
     })
   }
 }

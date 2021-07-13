@@ -6,7 +6,6 @@
  * Copyright (C) 2020
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
- * - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
  *   Geosciences (GFZ, https://www.gfz-potsdam.de)
  *
@@ -30,46 +29,37 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
+import { ContactBasicData } from '@/models/basic/ContactBasicData'
+import { ContactBasicDataSerializer } from '@/serializers/jsonapi/basic/ContactBasicDataSerializer'
 
-import { DateTime } from 'luxon'
+describe('ContactBasicDataSerializer', () => {
+  describe('#convertJsonApiDataToModel', () => {
+    it('should convert a single json api data object to a contact model', () => {
+      // it is basically the very same as the test for the whole json api object
+      // but this time we only give the content that is in the data sub-object
+      // of the convertJsonApiObjectToModel test.
+      const jsonApiData: any = {
+        type: 'contact',
+        attributes: {
+          given_name: 'Max',
+          email: 'test@test.test',
+          website: null,
+          family_name: 'Mustermann'
+        },
+        id: '1'
+      }
 
-export const dateToString = (aDate: DateTime | null): string => {
-  if (!aDate) {
-    return ''
-  }
-  return aDate.setZone('UTC').toFormat('yyyy-MM-dd')
-}
+      const expectedContact = new ContactBasicData()
+      expectedContact.id = '1'
+      expectedContact.givenName = 'Max'
+      expectedContact.familyName = 'Mustermann'
+      expectedContact.website = ''
+      expectedContact.email = 'test@test.test'
 
-export const dateToDateTimeStringHHMM = (aDate: DateTime | null): string => {
-  if (!aDate) {
-    return ''
-  }
-  return aDate.setZone('UTC').toFormat('yyyy-MM-dd HH:mm')
-}
+      const serializer = new ContactBasicDataSerializer()
+      const contact = serializer.convertJsonApiDataToModel(jsonApiData)
 
-export const stringToDate = (aDate: string): DateTime => {
-  return DateTime.fromISO(aDate, { zone: 'UTC' })
-}
-
-export const stringToDateTimeFormat = (aDate: string): DateTime => {
-  return DateTime.fromFormat(aDate, 'yyyy-MM-dd HH:mm', { zone: 'UTC' })
-}
-
-export const timeStampToUTCDateTime = (value: number) : string => {
-  if (!value) {
-    return ''
-  }
-  const date = DateTime.fromSeconds(value).setZone('UTC')
-  return date.toFormat('yyyy-MM-dd HH:mm:ss') + ' UTC'
-}
-
-export function dateTimesEqual (dateTime1: DateTime, dateTime2: DateTime) : boolean {
-  return dateTime1.toUTC().toISO() === dateTime2.toUTC().toISO()
-}
-
-export const dateToDateTimeString = (aDate: DateTime | null): string => {
-  if (!aDate) {
-    return ''
-  }
-  return aDate.setZone('UTC').toFormat('yyyy-MM-dd HH:mm:ss')
-}
+      expect(contact).toEqual(expectedContact)
+    })
+  })
+})

@@ -3,10 +3,9 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020
+ * Copyright (C) 2021
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
- * - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
  *   Geosciences (GFZ, https://www.gfz-potsdam.de)
  *
@@ -33,43 +32,34 @@
 
 import { DateTime } from 'luxon'
 
-export const dateToString = (aDate: DateTime | null): string => {
-  if (!aDate) {
-    return ''
-  }
-  return aDate.setZone('UTC').toFormat('yyyy-MM-dd')
-}
+import { DeviceUnmountActionBasicData } from '@/models/basic/DeviceUnmountActionBasicData'
 
-export const dateToDateTimeStringHHMM = (aDate: DateTime | null): string => {
-  if (!aDate) {
-    return ''
-  }
-  return aDate.setZone('UTC').toFormat('yyyy-MM-dd HH:mm')
-}
+import { DeviceUnmountActionBasicDataSerializer } from '@/serializers/jsonapi/basic/DeviceUnmountActionBasicDataSerializer'
 
-export const stringToDate = (aDate: string): DateTime => {
-  return DateTime.fromISO(aDate, { zone: 'UTC' })
-}
+const date = DateTime.utc(2020, 1, 1, 12, 0, 0)
 
-export const stringToDateTimeFormat = (aDate: string): DateTime => {
-  return DateTime.fromFormat(aDate, 'yyyy-MM-dd HH:mm', { zone: 'UTC' })
-}
+describe('DeviceUnmountActionBasicDataSerializer', () => {
+  describe('#convertJsonApiDataToModel', () => {
+    it('should covnert a single json api data object to a device mount action', () => {
+      const jsonApiData: any = {
+        type: 'device_unmount_action',
+        attributes: {
+          description: 'Device unmount',
+          end_date: '2020-01-01T12:00:00.000Z'
+        },
+        id: '1'
+      }
 
-export const timeStampToUTCDateTime = (value: number) : string => {
-  if (!value) {
-    return ''
-  }
-  const date = DateTime.fromSeconds(value).setZone('UTC')
-  return date.toFormat('yyyy-MM-dd HH:mm:ss') + ' UTC'
-}
+      const expecteDeviceUnmountAction = DeviceUnmountActionBasicData.createFromObject({
+        id: '1',
+        date,
+        description: 'Device unmount'
+      })
 
-export function dateTimesEqual (dateTime1: DateTime, dateTime2: DateTime) : boolean {
-  return dateTime1.toUTC().toISO() === dateTime2.toUTC().toISO()
-}
+      const serializer = new DeviceUnmountActionBasicDataSerializer()
+      const deviceUnmountAction = serializer.convertJsonApiDataToModel(jsonApiData)
 
-export const dateToDateTimeString = (aDate: DateTime | null): string => {
-  if (!aDate) {
-    return ''
-  }
-  return aDate.setZone('UTC').toFormat('yyyy-MM-dd HH:mm:ss')
-}
+      expect(deviceUnmountAction).toEqual(expecteDeviceUnmountAction)
+    })
+  })
+})

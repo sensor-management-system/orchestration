@@ -3,10 +3,9 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020
+ * Copyright (C) 2021
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
- * - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
  *   Geosciences (GFZ, https://www.gfz-potsdam.de)
  *
@@ -30,46 +29,21 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
+import { AxiosInstance } from 'axios'
 
-import { DateTime } from 'luxon'
+import { IActionAttachmentSerializer } from '@/serializers/jsonapi/ActionAttachmentSerializer'
+import { DeviceCalibrationActionAttachmentSerializer } from '@/serializers/jsonapi/DeviceCalibrationActionAttachmentSerializer'
+import { AbstractActionAttachmentApi } from '@/services/sms/ActionAttachmentApi'
 
-export const dateToString = (aDate: DateTime | null): string => {
-  if (!aDate) {
-    return ''
+export class DeviceCalibrationActionAttachmentApi extends AbstractActionAttachmentApi {
+  private _serializer: IActionAttachmentSerializer
+
+  constructor (axiosInstance: AxiosInstance) {
+    super(axiosInstance)
+    this._serializer = new DeviceCalibrationActionAttachmentSerializer()
   }
-  return aDate.setZone('UTC').toFormat('yyyy-MM-dd')
-}
 
-export const dateToDateTimeStringHHMM = (aDate: DateTime | null): string => {
-  if (!aDate) {
-    return ''
+  get serializer (): IActionAttachmentSerializer {
+    return this._serializer
   }
-  return aDate.setZone('UTC').toFormat('yyyy-MM-dd HH:mm')
-}
-
-export const stringToDate = (aDate: string): DateTime => {
-  return DateTime.fromISO(aDate, { zone: 'UTC' })
-}
-
-export const stringToDateTimeFormat = (aDate: string): DateTime => {
-  return DateTime.fromFormat(aDate, 'yyyy-MM-dd HH:mm', { zone: 'UTC' })
-}
-
-export const timeStampToUTCDateTime = (value: number) : string => {
-  if (!value) {
-    return ''
-  }
-  const date = DateTime.fromSeconds(value).setZone('UTC')
-  return date.toFormat('yyyy-MM-dd HH:mm:ss') + ' UTC'
-}
-
-export function dateTimesEqual (dateTime1: DateTime, dateTime2: DateTime) : boolean {
-  return dateTime1.toUTC().toISO() === dateTime2.toUTC().toISO()
-}
-
-export const dateToDateTimeString = (aDate: DateTime | null): string => {
-  if (!aDate) {
-    return ''
-  }
-  return aDate.setZone('UTC').toFormat('yyyy-MM-dd HH:mm:ss')
 }

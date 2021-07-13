@@ -132,15 +132,4 @@ export class GenericDeviceActionApi {
 
     return this.serializer.convertJsonApiObjectToModel(actionResponse.data)
   }
-
-  findRelatedGenericActionAttachments (actionId: string): Promise<GenericAction[]> {
-    const url = actionId + '/generic-device-action-attachments'
-    const params = {
-      'page[size]': 10000,
-      include: 'attachment'
-    }
-    return this.axiosApi.get(url, { params }).then((rawServerResponse) => {
-      return this.serializer.convertJsonApiObjectListToModelList(rawServerResponse.data)
-    })
-  }
 }

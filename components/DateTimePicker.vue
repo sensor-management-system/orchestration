@@ -184,14 +184,14 @@ export default class DateTimePicker extends Vue {
     if (this.isValueValidByCurrentFormat(this.textInput)) {
       return this.parseToCurrentFormat().toFormat(DEFAULT_DATE_FORMAT)
     }
-    return new Date().toISOString().substr(0, 10)
+    return DateTime.now().setZone('UTC').toFormat(DEFAULT_DATE_FORMAT)
   }
 
   get timePart (): string {
     if (this.isValueValidByCurrentFormat(this.textInput)) {
       return this.parseToCurrentFormat().toFormat(DEFAULT_TIME_FORMAT)
     }
-    return '00:00'
+    return DateTime.now().setZone('UTC').toFormat(DEFAULT_TIME_FORMAT)
   }
 
   setTextInputByValue (datetimeValue: DateTime | null) {

@@ -3,10 +3,9 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020
+ * Copyright (C) 2020-2021
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
- * - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
  *   Geosciences (GFZ, https://www.gfz-potsdam.de)
  *
@@ -33,43 +32,27 @@
 
 import { DateTime } from 'luxon'
 
-export const dateToString = (aDate: DateTime | null): string => {
-  if (!aDate) {
-    return ''
+import { ConfigurationBasicData } from '@/models/basic/ConfigurationBasicData'
+
+import { IJsonApiEntityWithOptionalAttributes } from '@/serializers/jsonapi/JsonApiTypes'
+
+export class ConfigurationBasicDataSerializer {
+  convertJsonApiDataToModel (jsonApiData: IJsonApiEntityWithOptionalAttributes): ConfigurationBasicData {
+    const configuration = new ConfigurationBasicData()
+
+    const attributes = jsonApiData.attributes
+
+    configuration.id = jsonApiData.id.toString()
+    if (attributes) {
+      configuration.label = attributes.label || ''
+      configuration.projectUri = attributes.project_uri || ''
+      configuration.projectName = attributes.project_name || ''
+      configuration.status = attributes.status || ''
+
+      configuration.startDate = attributes.start_date ? DateTime.fromISO(attributes.start_date, { zone: 'UTC' }) : null
+      configuration.endDate = attributes.end_date ? DateTime.fromISO(attributes.end_date, { zone: 'UTC' }) : null
+    }
+
+    return configuration
   }
-  return aDate.setZone('UTC').toFormat('yyyy-MM-dd')
-}
-
-export const dateToDateTimeStringHHMM = (aDate: DateTime | null): string => {
-  if (!aDate) {
-    return ''
-  }
-  return aDate.setZone('UTC').toFormat('yyyy-MM-dd HH:mm')
-}
-
-export const stringToDate = (aDate: string): DateTime => {
-  return DateTime.fromISO(aDate, { zone: 'UTC' })
-}
-
-export const stringToDateTimeFormat = (aDate: string): DateTime => {
-  return DateTime.fromFormat(aDate, 'yyyy-MM-dd HH:mm', { zone: 'UTC' })
-}
-
-export const timeStampToUTCDateTime = (value: number) : string => {
-  if (!value) {
-    return ''
-  }
-  const date = DateTime.fromSeconds(value).setZone('UTC')
-  return date.toFormat('yyyy-MM-dd HH:mm:ss') + ' UTC'
-}
-
-export function dateTimesEqual (dateTime1: DateTime, dateTime2: DateTime) : boolean {
-  return dateTime1.toUTC().toISO() === dateTime2.toUTC().toISO()
-}
-
-export const dateToDateTimeString = (aDate: DateTime | null): string => {
-  if (!aDate) {
-    return ''
-  }
-  return aDate.setZone('UTC').toFormat('yyyy-MM-dd HH:mm:ss')
 }
