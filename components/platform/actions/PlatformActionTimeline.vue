@@ -35,8 +35,8 @@
 <script lang="ts">
 import { Vue, Component, Prop } from 'nuxt-property-decorator'
 import GenericActionCard from '@/components/GenericActionCard.vue'
-import PlatformActionDeleteMenu from '@/components/platform/actions/PlatformActionDeleteMenu'
-
+import PlatformActionDeleteMenu from '@/components/platform/actions/PlatformActionDeleteMenu.vue'
+import { GenericAction } from '@/models/GenericAction'
 @Component({
   components: {
     PlatformActionDeleteMenu,
@@ -52,8 +52,8 @@ export default class PlatformActionTimeline extends Vue {
     return this.$store.getters['oidc/isAuthenticated']
   }
 
-  getColor (action): string {
-    switch (action._actionTypeName) {
+  getColor (action: GenericAction): string {
+    switch (action.actionTypeName) {
       case 'Platform Application': return 'yellow'
       case 'Platform Maintenance': return 'blue'
       case 'Platform Observation': return 'orange'
