@@ -95,6 +95,9 @@ release-image:
 deploy-to-rdm-test:
   stage: deploy
   resource_group: rdm-test
+  environment:
+    name: RDM-Test
+    url: https://rdm-test.intranet.ufz.de/sms-backend
   tags:
     - rdm-test
   rules:
