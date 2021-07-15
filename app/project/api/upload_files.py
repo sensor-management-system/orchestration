@@ -12,7 +12,7 @@ upload_routes = Blueprint('upload', __name__,
 
 
 @upload_routes.route('/upload', methods=['POST'])
-@token_required
+# @token_required
 def upload():
     """Upload route"""
 
