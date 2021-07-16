@@ -25,7 +25,7 @@ but This is the power of Docker.
 2. Start the containers and run them in background:
 
     ```bash
-    docker-compose --env-file  --env-file ./app_env/.env.dev  up -d
+    docker-compose --env-file ./app_env/.env.dev  up -d
     ```
 
     This will take a few minutes the first time. Subsequent builds will be much faster since Docker caches
