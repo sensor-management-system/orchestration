@@ -21,7 +21,7 @@ There are so many technologies used mentioned in the tech specs and yet the depe
 but This is the power of Docker.
 
 ## Compose
-**Note:** To generate self singed certificate you can use the script `ngnix/certs/ice-ca-certs.py`
+**Note:** To generate self singed certificate you can use the python script `ngnix/certs/ice-ca-certs.py`. The script requires the python library *zeroc-icecertutils*, which you can install with `pip install zeroc-icecertutils`. Make sure you execute the script inside the target folder `nginx/certs`.
 1. copy the file `env.template`. Fill the variables and rename it to .env.dev
 2. Start the containers and run them in background:
 
