@@ -21,7 +21,7 @@ There are so many technologies used mentioned in the tech specs and yet the depe
 but This is the power of Docker.
 
 ## Compose
-1. copy the file `env.example`. Fill the variables and rename it to .env.dev
+1. copy the file `env.template`. Fill the variables and rename it to .env.dev
 2. Start the containers and run them in background:
 
     ```bash
