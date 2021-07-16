@@ -21,11 +21,11 @@ There are so many technologies used mentioned in the tech specs and yet the depe
 but This is the power of Docker.
 
 ## Compose
-
-1. Start the containers and run them in background:
+1. copy the file `env.template`. Fill the variables and rename it to .env.dev
+2. Start the containers and run them in background:
 
     ```bash
-    docker-compose up -d
+    docker-compose --env-file  --env-file ./app_env/.env.dev  up -d
     ```
 
     This will take a few minutes the first time. Subsequent builds will be much faster since Docker caches
@@ -38,14 +38,7 @@ but This is the power of Docker.
     ```
 
 
-2. When running the first time or after changing the schema create or
-   upgrade the database schema before the first request
-
-    ```bash
-    docker-compose exec app python3 manage.py db upgrade
-    ```
-
-3. When ORM models change create alembic migration scripts
+**Note:** When ORM models change create alembic migration scripts
 
    1. create script
        ```bash

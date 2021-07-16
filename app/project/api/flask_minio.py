@@ -200,7 +200,7 @@ class FlaskMinio:
                 )
                 data = {
                     "message": "object stored in {}".format(minio_bucket_name),
-                    "url": "{}/{}/{}".format(
+                     "url": "{}/{}/{}".format(
                         download_endpoint, minio_bucket_name, ordered_filed
                     ),
                 }
