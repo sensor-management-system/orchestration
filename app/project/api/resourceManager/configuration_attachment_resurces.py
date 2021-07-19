@@ -3,6 +3,7 @@ from flask_rest_jsonapi import ResourceDetail, ResourceList, ResourceRelationshi
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.orm.exc import NoResultFound
 
+from .base_resource import delete_attachments_in_minio_by_id
 from ..models import Configuration, ConfigurationAttachment
 from ..models.base_model import db
 from ..schemas.configuration_attachment_schema import ConfigurationAttachmentSchema
@@ -52,6 +53,10 @@ class ConfigurationAttachmentDetail(ResourceDetail):
     """
     Resource for ConfigurationAttachments.
     """
+
+    def before_delete(self, args, kwargs):
+        """Hook to delete attachment from storage server before delete method"""
+        delete_attachments_in_minio_by_id(ConfigurationAttachment, kwargs["id"])
 
     schema = ConfigurationAttachmentSchema
     decorators = (token_required,)

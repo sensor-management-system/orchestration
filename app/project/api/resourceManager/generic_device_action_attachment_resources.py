@@ -1,12 +1,12 @@
 from flask_rest_jsonapi import ResourceDetail, ResourceRelationship
 
-from ...frj_csv_export.resource import ResourceList
 from ..models.base_model import db
 from ..models.generic_action_attachments import GenericDeviceActionAttachment
 from ..schemas.generic_action_attachment_schema import (
     GenericDeviceActionAttachmentSchema,
 )
 from ..token_checker import token_required
+from ...frj_csv_export.resource import ResourceList
 
 
 class GenericDeviceActionAttachmentList(ResourceList):

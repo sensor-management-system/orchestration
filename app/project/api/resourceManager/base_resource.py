@@ -2,6 +2,7 @@ from flask_jwt_extended import get_jwt_identity
 
 from ..models import Contact, User
 from ..models.base_model import db
+from ...api import minio
 
 
 def add_created_by_id(data):
@@ -43,8 +44,8 @@ def add_contact_to_object(entity_with_contact_list):
     """
     user_entry = (
         db.session.query(User)
-        .filter_by(id=entity_with_contact_list.created_by_id)
-        .first()
+            .filter_by(id=entity_with_contact_list.created_by_id)
+            .first()
     )
     contact_id = user_entry.contact_id
     contact_entry = db.session.query(Contact).filter_by(id=contact_id).first()
@@ -53,3 +54,39 @@ def add_contact_to_object(entity_with_contact_list):
         contacts.append(contact_entry)
         db.session.add(entity_with_contact_list)
         db.session.commit()
+
+
+def delete_attachments_in_minio_by_id(_class, object_id_intended_for_deletion):
+    """
+    Use the minio class to delete an attachment or a list of attachments.
+    :param object_id_intended_for_deletion: attachment id.
+    :param _class: Attachment class.
+    """
+    attachment = (
+        db.session.query(_class)
+            .filter_by(id=object_id_intended_for_deletion)
+            .first()
+    )
+    minio.remove_an_object(attachment.url)
+
+
+def delete_attachments_in_minio_by_related_object_id(related_object_class, attachment_class,
+                                                     object_id_intended_for_deletion):
+    """
+    Delete an Attachment related to an object by Using the minio class
+     to delete it or a list of attachments.
+    :param object_id_intended_for_deletion:  object id.
+    :param related_object_class: class od object the Attachment related to.
+    :param attachment_class: attachment class.
+    """
+    related_object = (
+        db.session.query(related_object_class)
+            .filter_by(id=object_id_intended_for_deletion)
+            .first()
+    )
+    attachment = (
+        db.session.query(attachment_class)
+            .filter_by(id=related_object.attachment_id)
+            .first()
+    )
+    minio.remove_an_object(attachment.url)

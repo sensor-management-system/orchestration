@@ -2,8 +2,12 @@ import json
 import os
 
 import requests
+from environs import Env
 from cachetools import cached, TTLCache
 from jwt.algorithms import RSAAlgorithm
+
+env = Env()
+env.read_env()
 
 
 class OidcJwtService:
@@ -46,23 +50,40 @@ class BaseConfig:
     TESTING = False
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SECRET_KEY = "top_secret"
-
     DEFAULT_POOL_TIMEOUT = 600
-    SQLALCHEMY_POOL_TIMEOUT = os.environ.get("POOL_TIMEOUT", DEFAULT_POOL_TIMEOUT)
-    # example in our case it is {'sub':'username@ufz.de'}
-    JWT_IDENTITY_CLAIM = os.environ.get("OIDC_USERNAME_CLAIM")
+    SQLALCHEMY_POOL_TIMEOUT = env.int("POOL_TIMEOUT", DEFAULT_POOL_TIMEOUT)
+    JWT_IDENTITY_CLAIM = env("OIDC_USERNAME_CLAIM")
+    # Hostname of a S3 service.
+    # Minio's context root is '/' and this cannot be configured.
+    # So we use two endpoints.
+    MINIO_ENDPOINT = env("MINIO_ENDPOINT", "minio:9000")  # refer to docker container name
+    DOWNLOAD_ENDPOINT = env("DOWNLOAD_ENDPOINT", "localhost:9000")
+    # Access key (aka user ID) of your account in S3 service.
+    MINIO_ACCESS_KEY = env("MINIO_ACCESS_KEY", "minio")
+    # Secret Key (aka password) of your account in S3 service.
+    MINIO_SECRET_KEY = env("MINIO_SECRET_KEY", "minio123")
+    # (Optional) Flag to indicate to use secure (TLS) connection to S3 service or not.
+    # False for local testing
+    MINIO_SECURE = env.bool("MINIO_SECURE", False)
+    # (Optional) Region name of buckets in S3 service.
+    MINIO_REGION = env("MINIO_REGION", None)
+    # (Optional) Customized HTTP client.
+    # learn more https://docs.min.io/docs/python-client-api-reference.html
+    MINIO_HTTP_CLIENT = env("MINIO_HTTP_CLIENT", None)
+    MINIO_BUCKET_NAME = env("MINIO_BUCKET_NAME", "sms-attachments")
+    # ALLOWED_EXTENSIONS = env.str("ALLOWED_EXTENSIONS")
 
 
 class DevelopmentConfig(BaseConfig):
     """Development configuration"""
 
-    SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL")
-    ELASTICSEARCH_URL = os.environ.get("ELASTICSEARCH_URL")
-
+    SQLALCHEMY_DATABASE_URI = env("DATABASE_URL", None)
+    ELASTICSEARCH_URL = env("ELASTICSEARCH_URL", None)
     # We can use the OIDC_JWT_SERVICE to query the latest information
     # from the IDP.
     OIDC_JWT_SERVICE = OidcJwtService(os.environ.get("WELL_KNOWN_URL"))
     JWT_ALGORITHM = OIDC_JWT_SERVICE.get_jwt_algorithm()
+    # retrieve first jwk entry from jwks_uri endpoint and use it to construct the RSA public key
     JWT_PUBLIC_KEY = OIDC_JWT_SERVICE.get_jwt_public_key()
     # audience is oidc client id (can be array starting
     # https://github.com/vimalloc/flask-jwt-extended/issues/219)
@@ -74,14 +95,17 @@ class DevelopmentConfig(BaseConfig):
     if OIDC_CLIENT_IDS:
         for client_id in OIDC_CLIENT_IDS:
             JWT_DECODE_AUDIENCE.append(client_id)
+    JWT_DECODE_AUDIENCE = ["rdmsvm-implicit-flow"]
     # name of token entry that will become distinct flask identity username
+    # example in our case it is {'sub':'username@ufz.de'}
+    JWT_IDENTITY_CLAIM = env("OIDC_USERNAME_CLAIM", "sub")
 
 
 class TestingConfig(BaseConfig):
     """Testing configuration"""
 
     TESTING = True
-    SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_TEST_URL")
+    SQLALCHEMY_DATABASE_URI = env("DATABASE_TEST_URL")
     ELASTICSEARCH_URL = None
     JWT_SECRET_KEY = "super-secret"
     JWT_ALGORITHM = "HS256"
@@ -91,5 +115,5 @@ class TestingConfig(BaseConfig):
 class ProductionConfig(BaseConfig):
     """Production configuration"""
 
-    SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL")
-    ELASTICSEARCH_URL = os.environ.get("ELASTICSEARCH_URL")
+    SQLALCHEMY_DATABASE_URI = env("DATABASE_URL", None)
+    ELASTICSEARCH_URL = env("ELASTICSEARCH_URL", None)
