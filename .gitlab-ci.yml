@@ -2,6 +2,7 @@ stages:
   - build
   - test
   - release
+  - deploy
 
 variables:
   CONTAINER_TEST_IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
@@ -91,8 +92,28 @@ release-image:
   rules:
     - if: "$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH"
 
+deploy-to-rdm-test:
+  stage: deploy
+  resource_group: rdm-test
+  tags:
+    - rdm-test
+  rules:
+    - if: "$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH"
+  image: alpine
+  script:
+    ## Install SSH agent
+    - 'command -v ssh-agent >/dev/null || ( apk add openssh-client )'
+    ## Run ssh-agent (inside the build environment)
+    - eval $(ssh-agent -s)
+    ## Add the SSH key stored in SERVER_CD_KEY variable to the agent store
+    - echo "$SERVER_CD_KEY" | base64 -d | ssh-add -
+    ## Add target hostkey to known hosts
+    - mkdir -p ~/.ssh && echo "$SERVER_CD_HOSTKEY" >> ~/.ssh/known_hosts
+    ## fire it up (deployment is triggered by "command" parameter in targets authorized_keys
+    - ssh root@rdm-test.intranet.ufz.de
+
 deploy-gfz-image:
-  stage: release
+  stage: deploy
   environment:
     name: gfzstaging
     url: https://$GFZ_STAGING_HOST
