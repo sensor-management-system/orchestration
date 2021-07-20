@@ -128,18 +128,26 @@ deploy-gfz-image:
     WELL_KNOWN_URL: ${GFZ_STAGING_OIDC_WELL_KNOWN_URL}
     OIDC_CLIENT_IDS: ${GFZ_STAGING_OIDC_CLIENT_IDS}
     OIDC_USERNAME_CLAIM: ${GFZ_STAGING_OIDC_USERNAME_CLAIM}
+    DOWNLOAD_ENDPOINT: ${GFZ_STAGING_DOWNLOAD_ENDPOINT}
+    MINIO_ACCESS_KEY: ${GFZ_STAGING_MINIO_ACCESS_KEY}
+    MINIO_SECRET_KEY: ${GFZ_STAGING_MINIO_SECRET_KEY}
+    MINIO_BUCKET_NAME: sms-attachments
+    MINIO_SECURE: "False"
   before_script:
     - *docker_login
   script:
     - ./ensure_vm_max_map_count.sh
+    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml down --remove-orphans
+    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml rm -f
     - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml pull
     - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml up -d
     - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T db psql -U postgres -c 'CREATE DATABASE db_prod' || echo "prod database already exists"
     - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T db psql -U postgres -c 'CREATE DATABASE db_dev' || echo "dev database already exists"
     - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T db psql -U postgres -c 'CREATE DATABASE db_test;' || echo "test database already exists"
-    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T ssmbackend python3 manage.py db upgrade
+    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T app python3 manage.py db upgrade
     - sleep 1m
-    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T ssmbackend python3 manage.py es reindex
+    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T app python3 manage.py es reindex
+    - docker rmi $(docker images -q -f dangling=true) || true
   dependencies:
     - build-gfz-image
   rules:

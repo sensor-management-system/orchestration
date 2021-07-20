@@ -1,23 +1,31 @@
-version: '3'
+version: '3.3'
 
 services:
-  ssmbackend:
+  app:
     image: ${CI_REGISTRY_IMAGE}:gfz-${CI_COMMIT_TAG:-latest}
     restart: unless-stopped
     environment:
       - FLASK_DEBUG=1
       - APP_SETTINGS=project.config.DevelopmentConfig
-      - DATABASE_URL=postgres://postgres:postgres123456666666666666@db:5432/db_dev
-      - DATABASE_TEST_URL=postgres://postgres:postgres123456666666666666@db:5432/db_test
+      - DATABASE_URL=postgresql://postgres:postgres123456666666666666@db:5432/db_dev
+      - DATABASE_TEST_URL=postgresql://postgres:postgres123456666666666666@db:5432/db_test
       - HTTP_ORIGINS=$HTTP_ORIGINS
       - ELASTICSEARCH_URL=http://smses01:9200
       - WELL_KNOWN_URL=$WELL_KNOWN_URL
       - OIDC_CLIENT_IDS=$OIDC_CLIENT_IDS
       - OIDC_USERNAME_CLAIM=$OIDC_USERNAME_CLAIM
-    ports:
-      - 5000:5000
+      - MINIO_ACCESS_KEY=$MINIO_ACCESS_KEY
+      - MINIO_SECRET_KEY=$MINIO_SECRET_KEY
+      - MINIO_SECURE=$MINIO_SECURE
+      - MINIO_BUCKET_NAME=$MINIO_BUCKET_NAME
+      - MINIO_ENDPOINT=minio:9000
+      - DOWNLOAD_ENDPOINT=$DOWNLOAD_ENDPOINT
     networks:
       - elastic
+      - db
+      - minio
+      - app
+    depends_on:
       - db
 
   db:
@@ -55,11 +63,63 @@ services:
     networks:
       - elastic
 
+  minio:
+    image: minio/minio:RELEASE.2021-07-12T02-44-53Z
+    volumes:
+      - minio-data-staging:/data/minio
+    ports:
+      - "9001:9001"
+    environment:
+      - MINIO_ROOT_USER=${MINIO_ACCESS_KEY}
+      - MINIO_ROOT_PASSWORD=${MINIO_SECRET_KEY}
+    networks:
+      - minio
+      - nginx
+    command: server /data/minio --console-address ":9001"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
+  createbuckets:
+    image: minio/mc:latest
+    depends_on:
+      - minio
+    # Make a Bucket using minio client mc
+    # https://docs.min.io/docs/minio-client-complete-guid
+    networks:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      until curl -f http://minio:9000/minio/health/live; do sleep 5; done;
+      /usr/bin/mc  alias set minio http://minio:9000 \"${MINIO_ACCESS_KEY}\" \"${MINIO_SECRET_KEY}\" --api S3v4;
+      /usr/bin/mc mb --quiet minio/${MINIO_BUCKET_NAME};
+      /usr/bin/mc policy set download minio/${MINIO_BUCKET_NAME};
+      exit 0;
+      "
+
+  nginx:
+    image: nginx:1.20-alpine
+    ports:
+      - "5000:5000"
+    networks:
+      - nginx
+      - app
+      - minio
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+
 volumes:
   postgres-data-staging:
+  minio-data-staging:
   esdata01:
     driver: local
 networks:
   elastic:
     driver: bridge
   db:
+  minio:
+  nginx:
+  app:

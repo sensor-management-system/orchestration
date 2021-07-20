@@ -95,7 +95,6 @@ class DevelopmentConfig(BaseConfig):
     if OIDC_CLIENT_IDS:
         for client_id in OIDC_CLIENT_IDS:
             JWT_DECODE_AUDIENCE.append(client_id)
-    JWT_DECODE_AUDIENCE = ["rdmsvm-implicit-flow"]
     # name of token entry that will become distinct flask identity username
     # example in our case it is {'sub':'username@ufz.de'}
     JWT_IDENTITY_CLAIM = env("OIDC_USERNAME_CLAIM", "sub")
