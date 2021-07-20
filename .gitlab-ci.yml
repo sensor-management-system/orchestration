@@ -142,7 +142,7 @@ deploy-gfz-image:
   script:
     - ./ensure_vm_max_map_count.sh
     - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml down --remove-orphans
-    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml down rm -f
+    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml rm -f
     - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml pull
     - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml up -d
     - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T db psql -U postgres -c 'CREATE DATABASE db_prod' || echo "prod database already exists"
