@@ -1,5 +1,4 @@
 /.idea/
-/docker/backend.env
-/docker/cv.env
-/docker/db_secrets.env
 /docker/env.dev
+/docker/backend.dev
+/docker/cv.dev
