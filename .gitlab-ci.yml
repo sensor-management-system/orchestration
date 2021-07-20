@@ -65,8 +65,6 @@ unittest-lint:
     - apt-get install -y  --no-install-recommends gcc libssl-dev libffi-dev musl-dev cargo
   script:
     - cd $CI_PROJECT_DIR/app/ && tox
-  rules:
-    - if: "$SKIP_TESTS != 'true'"
 
 test-image:
   services:
@@ -83,8 +81,6 @@ test-image:
     - export APP_SETTINGS=project.config.TestingConfig
   script:
     - cd $CI_PROJECT_DIR/app/ && python manage.py test
-  rules:
-    - if: "$SKIP_TESTS != 'true'"
 
 release-image:
   stage: release
