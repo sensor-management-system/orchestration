@@ -7,8 +7,8 @@ services:
     environment:
       - FLASK_DEBUG=1
       - APP_SETTINGS=project.config.DevelopmentConfig
-      - DATABASE_URL=postgres://postgres:postgres123456666666666666@db:5432/db_dev
-      - DATABASE_TEST_URL=postgres://postgres:postgres123456666666666666@db:5432/db_test
+      - DATABASE_URL=postgresql://postgres:postgres123456666666666666@db:5432/db_dev
+      - DATABASE_TEST_URL=postgresql://postgres:postgres123456666666666666@db:5432/db_test
       - HTTP_ORIGINS=$HTTP_ORIGINS
       - ELASTICSEARCH_URL=http://smses01:9200
       - WELL_KNOWN_URL=$WELL_KNOWN_URL
