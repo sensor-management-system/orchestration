@@ -29,7 +29,7 @@ services:
     ports:
       - "${HTTP_LOCAL_BINDING:-127.0.0.1:5000}:5000"
     env_file:
-      - docker/backend.env
+      - docker/backend.dev
     depends_on:
       - db
     command: >
@@ -72,7 +72,7 @@ services:
     ports:
       - 8000:8000
     env_file:
-      - ./docker/cv.env
+      - ./docker/cv.dev
     command: >
       sh -c "
       apk add --no-cache --virtual .build-deps \
