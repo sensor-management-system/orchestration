@@ -148,9 +148,9 @@ deploy-gfz-image:
     - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T db psql -U postgres -c 'CREATE DATABASE db_prod' || echo "prod database already exists"
     - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T db psql -U postgres -c 'CREATE DATABASE db_dev' || echo "dev database already exists"
     - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T db psql -U postgres -c 'CREATE DATABASE db_test;' || echo "test database already exists"
-    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T ssmbackend python3 manage.py db upgrade
+    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T app python3 manage.py db upgrade
     - sleep 1m
-    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T ssmbackend python3 manage.py es reindex
+    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T app python3 manage.py es reindex
     - docker rmi $(docker images -q -f dangling=true) || true
   dependencies:
     - build-gfz-image
