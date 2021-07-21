@@ -104,7 +104,7 @@ class TestingConfig(BaseConfig):
     """Testing configuration"""
 
     TESTING = True
-    SQLALCHEMY_DATABASE_URI = env("DATABASE_TEST_URL")
+    SQLALCHEMY_DATABASE_URI = env("DATABASE_TEST_URL", None)
     ELASTICSEARCH_URL = None
     JWT_SECRET_KEY = "super-secret"
     JWT_ALGORITHM = "HS256"
