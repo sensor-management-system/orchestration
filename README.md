@@ -37,9 +37,10 @@ system):
 
 Application urls:
 
-|    |      UFZ      |  GFZ      |
-|----------|:-------------:|-------------:|
-| __Backend:__  | `https://localhost.localdomain/sms-backend` | `https://{HOST}/backend` |
-| __Frontend:__ |    `https://localhost.localdomain/sms/`   |   `https://{HOST}/` |
-| __Controlled Vocabulary:__ | `https://localhost.localdomain/sms-cv` |    `https://{HOST}/cv` |
-| __Minio Console:__ | `https://localhost.localdomain:8443/` |   `https://{HOST}:8443/` |
+__Backend:__  `https://{HOST}/sms-backend` 
+
+__Frontend:__ `https://{HOST}/`
+
+__Controlled Vocabulary:__ `https://{HOST}/cv` 
+
+__Minio Console:__ `https://{HOST}:8443/` 
