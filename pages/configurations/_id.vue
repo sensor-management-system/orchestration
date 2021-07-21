@@ -942,7 +942,7 @@ export default class ConfigurationsIdPage extends Vue {
       // platforms and devices
       const subRoute = selectedNode.isPlatform() ? 'platforms' : 'devices'
       const id = selectedNode.elementId
-      const path = '/' + subRoute + '/' + id
+      const path = subRoute + '/' + id
 
       let partTarget = {}
       let partLink = {}
