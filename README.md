@@ -14,7 +14,7 @@ the target folder `nginx/certs`.
 2. Start the containers and run them in background:
 
 ```bash
-    docker-compose --env-file ./app_env/.env.dev  up -d
+    docker-compose --env-file ./docker/env.dev  up -d
 ```
 
 You can watch the output of the containers witch `docker-compose logs`:
@@ -37,10 +37,9 @@ system):
 
 Application urls:
 
-__Backend:__ `https://{HOST}/sms-backend`
-
-__Frontend:__ `https://{HOST}/sms/`
-
-__Controlled Vocabulary:__ `https://{HOST}/sms-cv`
-
-__Minio Console:__ `https://{HOST}:9002/`
+|    |      UFZ      |  GFZ      |
+|----------|:-------------:|-------------:|
+| __Backend:__  | `https://localhost.localdomain/sms-backend` | `https://{HOST}/backend` |
+| __Frontend:__ |    `https://localhost.localdomain/sms/`   |   `https://{HOST}/` |
+| __Controlled Vocabulary:__ | `https://localhost.localdomain/sms-cv` |    `https://{HOST}/cv` |
+| __Minio Console:__ | `https://localhost.localdomain:8443/` |   `https://{HOST}:8443/` |
