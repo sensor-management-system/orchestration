@@ -103,7 +103,7 @@ services:
     volumes:
       - ./ngnix/index.html:/usr/share/nginx/html/index.html
       - ./ngnix/certs:/etc/nginx/ssl
-      - ./ngnix/default.conf:/etc/nginx/conf.d/rdm-test.intranet.ufz.de.conf:ro
+      - ./ngnix/default.conf:/etc/nginx/conf.d/default.conf:ro
       - ./ngnix/nginx.conf:/etc/nginx/nginx.conf:ro
 
 volumes:
