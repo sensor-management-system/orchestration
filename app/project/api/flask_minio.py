@@ -165,9 +165,39 @@ class FlaskMinio:
         :param filename: a string
         :return: a Boolean
         """
-        return ("." in filename and os.path.splitext(filename)[-1].lower() in
-                self.allowed_extensions
-                )
+        return (
+            "." in filename and self.get_extension(filename) in self.allowed_extensions
+        )
+
+    def get_extension(self, filename):
+        """
+        Return the extension of a filename.
+
+        So for "foo.txt" return ".txt".
+        """
+        return os.path.splitext(filename)[-1].lower()
+
+    def content_type(self, filename):
+        """
+        Try to find a specific content type.
+
+        Use "application/octet-stream" in case we don't find a more specific one.
+        """
+        extension = self.get_extension(filename)
+        # For those that are currently supported, it makes sense to have a more specific
+        # content type, so that those files can be rendered in the browser later.
+        # For extending it, you can check out
+        # https://wiki.selfhtml.org/wiki/MIME-Type/%C3%9Cbersicht
+        # (german page)
+        content_type_by_extension = {
+            ".txt": "text/plain",
+            ".pdf": "application/pdf",
+            ".png": "image/png",
+            ".jpg": "image/jpeg",
+            ".jpeg": "image/jpeg",
+            ".gif": "image/gif",
+        }
+        return content_type_by_extension.get(extension, "application/octet-stream")
 
     def upload_object(self, uploaded_file):
         """
@@ -184,10 +214,16 @@ class FlaskMinio:
             if not found:
                 # self.connection.make_bucket(minio_bucket_name)
                 # self.set_bucket_policy(minio_bucket_name)
-                abort(make_response(
-                    jsonify(
-                        error="A Bucket with the name: {} is not Found.".format(minio_bucket_name)),
-                    400))
+                abort(
+                    make_response(
+                        jsonify(
+                            error="A Bucket with the name: {} is not Found.".format(
+                                minio_bucket_name
+                            )
+                        ),
+                        400,
+                    )
+                )
 
             if uploaded_file and self.allowed_file(filename=uploaded_file.filename):
                 filename = "{}{}".format(
@@ -195,12 +231,17 @@ class FlaskMinio:
                     os.path.splitext(uploaded_file.filename)[-1].lower(),
                 )
                 ordered_filed = f"{act_year_month}/{filename}"
+                content_type = self.content_type(filename=uploaded_file.filename)
                 self.connection.put_object(
-                    minio_bucket_name, ordered_filed, uploaded_file, size
+                    minio_bucket_name,
+                    ordered_filed,
+                    uploaded_file,
+                    size,
+                    content_type=content_type,
                 )
                 data = {
                     "message": "object stored in {}".format(minio_bucket_name),
-                     "url": "{}/{}/{}".format(
+                    "url": "{}/{}/{}".format(
                         download_endpoint, minio_bucket_name, ordered_filed
                     ),
                 }
@@ -209,8 +250,7 @@ class FlaskMinio:
                 return response
 
         except S3Error as s3err:
-            raise JsonApiException({"error": s3err.message},
-                                   title=s3err.code)
+            raise JsonApiException({"error": s3err.message}, title=s3err.code)
         except MaxRetryError as e:
             self._exception_on_creating_client = e
             raise MinioNotAvailableException(self._exception_on_creating_client)
@@ -232,7 +272,7 @@ class FlaskMinio:
                 self.connection.remove_object(_bucket_name, _object_name)
                 return make_response(f"{_object_name} has been successfully removed")
             except ResponseError as err:
-                raise JsonApiException({'parameter': err})
+                raise JsonApiException({"parameter": err})
 
     @staticmethod
     def extract_bucket_and_file_names_from_url(object_path):
