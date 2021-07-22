@@ -2,10 +2,12 @@
 
 ## How to run
 
-At first generate self singed certificate you can use the python
+At first generate self signed certificate you can use the python
 script `ngnix/certs/ice-ca-certs.py`. The script requires the python library *zeroc-icecertutils*,
 which you can install with `pip install zeroc-icecertutils`. Make sure you execute the script inside
 the target folder `nginx/certs`.
+
+In case you have an older pip version you may have to run `pip install --upgrade pip`, so that the build process with rust is supported.
 
 1. copy all files ending with
    ```backend.template, cv.template, env.template```. Fill the variables and rename it
@@ -31,7 +33,7 @@ Here's how you can do this on a Linux (Ubuntu) machine (feel free to search for 
 system):
 
 - Adjust `hosts` file:
-    - sudo nano /etc/hosts
+    - sudo edit /etc/hosts
     - add the following line: 127.0.0.1 localhost.localdomain
     - save
 
