@@ -44,26 +44,24 @@ ENV NUXT_ENV_AUTHORITY $AUTHORITY_ARG
 
 # The redirect uris (those must be different per host on that the frontend runs)
 ARG HOST_ARG
-ENV NUXT_ENV_REDIRECT_URI http://${HOST_ARG}/login-callback
-ENV NUXT_ENV_POST_LOGOUT_REDIRECT_URI http://${HOST_ARG}/logout-callback
-ENV NUXT_ENV_SILENT_REDIRECT_URI http://${HOST_ARG}/silent-callback
+ENV BASE_URL /sms
+ENV NUXT_ENV_REDIRECT_URI https://${HOST_ARG}${BASE_URL}/login-callback
+ENV NUXT_ENV_POST_LOGOUT_REDIRECT_URI https://${HOST_ARG}${BASE_URL}/logout-callback
+ENV NUXT_ENV_SILENT_REDIRECT_URI https://${HOST_ARG}${BASE_URL}/silent-callback
 
 # And those remaining settings
 ENV NUXT_ENV_RESPONSE_TYPE id_token
-# the following is the ufz setting
-#ENV NUXT_ENV_SCOPE openid profile email
-# and this is our setting
-ENV NUXT_ENV_SCOPE profile
+ENV NUXT_ENV_SCOPE openid profile email
 ENV NUXT_ENV_FILTER_PROTOCOL_CLAIMS false
 ENV NUXT_ENV_AUTOMATIC_SILENT_RENEW false
 # TODO; Check here if we still need this one
 ENV NUXT_ENV_SILENT_RENEW_INTERVAL 6900000
-ENV NUXT_ENV_LOAD_USER_INFO false
+ENV NUXT_ENV_LOAD_USER_INFO true
+ENV NUXT_ENV_PUBLIC_PATH=""
 
-
-RUN mkdir /ssmfrontend
-COPY . /ssmfrontend
-WORKDIR /ssmfrontend
+RUN mkdir /smsfrontend
+COPY . /smsfrontend
+WORKDIR /smsfrontend
 RUN npm ci
 RUN npm run build
 
@@ -81,4 +79,4 @@ LABEL maintainer="Martin Abbrent <martin.abbrent@ufz.de>" \
     org.opencontainers.image.revision=$VCS_REF \
     org.opencontainers.image.created=$BUILD_DATE
 
-COPY --from=js-builder /ssmfrontend/dist/ /usr/share/nginx/html/rdm/svm
+COPY --from=js-builder /smsfrontend/dist/ /usr/share/nginx/html/rdm/svm

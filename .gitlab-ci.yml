@@ -157,13 +157,15 @@ build-deploy-image-ufz:
   stage: build
   extends: .docker_build
   variables:
-    SMS_BACKEND_URL: ${UFZ_STAGING_BACKEND_URL}/sms-backend/rdm/svm-api/v1
-    CV_BACKEND_URL: ${UFZ_STAGING_SMS_CV_BACKEND_URL}/sms-cv/api/v1
+    SMS_BACKEND_URL: ${UFZ_STAGING_BACKEND_URL}
+    CV_BACKEND_URL: ${UFZ_STAGING_SMS_CV_BACKEND_URL}
+    HOST: ${UFZ_STAGING_HOST}
     CLIENT_ID: ${UFZ_STAGING_CLIENT_ID}
     AUTHORITY: ${UFZ_STAGING_IDP_AUTORITY}
   script:
     - |
         docker build --tag "$UFZ_TEST_IMAGE" -f docker/deployment/ufz/Dockerfile \
+          --build-arg BASE_URL="/sms" \
           --build-arg SMS_BACKEND_URL_ARG=$SMS_BACKEND_URL \
           --build-arg CV_BACKEND_URL_ARG=$CV_BACKEND_URL \
           --build-arg HOST_ARG=$HOST \
@@ -242,6 +244,29 @@ deploy-staging-manual-8080-gfz:
   dependencies:
     - build-deploy-image-manual-gfz
   when: manual
+
+deploy-staging-ufz:
+  stage: deploy-staging
+  resource_group: rdm-test
+  environment:
+    name: rdm-test
+    url: https://${UFZ_STAGING_HOST}/sms
+  tags:
+    - rdm-test
+  rules:
+    - if: "$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH"
+  image: alpine
+  script:
+    ## Install SSH agent
+    - 'command -v ssh-agent >/dev/null || ( apk add openssh-client )'
+    ## Run ssh-agent (inside the build environment)
+    - eval $(ssh-agent -s)
+    ## Add the SSH key stored in SERVER_CD_KEY variable to the agent store
+    - echo "$SERVER_CD_KEY" | base64 -d | ssh-add -
+    ## Add target hostkey to known hosts
+    - mkdir -p ~/.ssh && echo "$SERVER_CD_HOSTKEY" >> ~/.ssh/known_hosts
+    ## fire it up (deployment is triggered by "command" parameter in targets authorized_keys
+    - ssh root@rdm-test.intranet.ufz.de
 
 test-availability-staging-gfz:
   stage: after-deployment-tests
