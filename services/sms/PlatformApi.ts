@@ -38,6 +38,9 @@ import { PlatformType } from '@/models/PlatformType'
 import { Manufacturer } from '@/models/Manufacturer'
 import { Status } from '@/models/Status'
 
+import { PlatformMountAction } from '@/models/views/platforms/actions/PlatformMountAction'
+import { PlatformUnmountAction } from '@/models/views/platforms/actions/PlatformUnmountAction'
+
 import { ContactSerializer } from '@/serializers/jsonapi/ContactSerializer'
 
 import {
@@ -46,6 +49,9 @@ import {
   platformWithMetaToPlatformByAddingDummyObjects
 } from '@/serializers/jsonapi/PlatformSerializer'
 import { PlatformAttachmentSerializer } from '@/serializers/jsonapi/PlatformAttachmentSerializer'
+
+import { PlatformMountActionSerializer } from '@/serializers/jsonapi/composed/platforms/actions/PlatformMountActionSerializer'
+import { PlatformUnmountActionSerializer } from '@/serializers/jsonapi/composed/platforms/actions/PlatformUnmountActionSerializer'
 
 import { IFlaskJSONAPIFilter } from '@/utils/JSONApiInterfaces'
 
@@ -164,6 +170,35 @@ export class PlatformApi {
     }
     return this.axiosApi.get(url, { params }).then((rawServerResponse) => {
       return new GenericPlatformActionSerializer().convertJsonApiObjectListToModelList(rawServerResponse.data)
+    })
+  }
+
+  findRelatedMountActions (platformId: string): Promise<PlatformMountAction[]> {
+    const url = platformId + '/platform-mount-actions'
+    const params = {
+      'page[size]': 10000,
+      include: [
+        'contact',
+        'parent_platform',
+        'configuration'
+      ].join(',')
+    }
+    return this.axiosApi.get(url, { params }).then((rawServerResponse) => {
+      return new PlatformMountActionSerializer().convertJsonApiObjectListToModelList(rawServerResponse.data)
+    })
+  }
+
+  findRelatedUnmountActions (platformId: string): Promise<PlatformUnmountAction[]> {
+    const url = platformId + '/platform-unmount-actions'
+    const params = {
+      'page[size]': 10000,
+      include: [
+        'contact',
+        'configuration'
+      ].join(',')
+    }
+    return this.axiosApi.get(url, { params }).then((rawServerResponse) => {
+      return new PlatformUnmountActionSerializer().convertJsonApiObjectListToModelList(rawServerResponse.data)
     })
   }
 

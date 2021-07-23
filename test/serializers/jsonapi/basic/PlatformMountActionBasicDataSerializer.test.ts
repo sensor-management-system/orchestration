@@ -32,40 +32,40 @@
 
 import { DateTime } from 'luxon'
 
-import { DeviceMountActionBasicData } from '@/models/basic/DeviceMountActionBasicData'
+import { PlatformMountActionBasicData } from '@/models/basic/PlatformMountActionBasicData'
 
-import { DeviceMountActionBasicDataSerializer } from '@/serializers/jsonapi/basic/DeviceMountActionBasicDataSerializer'
+import { PlatformMountActionBasicDataSerializer } from '@/serializers/jsonapi/basic/PlatformMountActionBasicDataSerializer'
 
 const date = DateTime.utc(2020, 1, 1, 12, 0, 0)
 
-describe('DeviceMountActionBasicDataSerializer', () => {
+describe('PlatformMountActionBasicDataSerializer', () => {
   describe('#convertJsonApiDataToModel', () => {
-    it('should covnert a single json api data object to a device mount action', () => {
+    it('should covnert a single json api data object to a platform mount action', () => {
       const jsonApiData: any = {
-        type: 'device_mount_action',
+        type: 'platform_mount_action',
         attributes: {
           offset_x: 0,
           offset_y: 0,
           offset_z: 0,
-          description: 'Device mount',
+          description: 'Platform mount',
           begin_date: '2020-01-01T12:00:00.000Z'
         },
         id: '1'
       }
 
-      const expectedDeviceMountAction = DeviceMountActionBasicData.createFromObject({
+      const expectePlatformMountAction = PlatformMountActionBasicData.createFromObject({
         id: '1',
         offsetX: 0,
         offsetY: 0,
         offsetZ: 0,
         date,
-        description: 'Device mount'
+        description: 'Platform mount'
       })
 
-      const serializer = new DeviceMountActionBasicDataSerializer()
-      const deviceMountAction = serializer.convertJsonApiDataToModel(jsonApiData)
+      const serializer = new PlatformMountActionBasicDataSerializer()
+      const platformMountAction = serializer.convertJsonApiDataToModel(jsonApiData)
 
-      expect(deviceMountAction).toEqual(expectedDeviceMountAction)
+      expect(platformMountAction).toEqual(expectePlatformMountAction)
     })
   })
 })

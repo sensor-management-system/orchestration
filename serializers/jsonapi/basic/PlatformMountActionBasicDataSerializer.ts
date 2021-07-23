@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2021
+ * Copyright (C) 2020
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -31,41 +31,23 @@
  */
 
 import { DateTime } from 'luxon'
+import { PlatformMountActionBasicData } from '@/models/basic/PlatformMountActionBasicData'
 
-import { DeviceMountActionBasicData } from '@/models/basic/DeviceMountActionBasicData'
+import {
+  IJsonApiEntityWithOptionalAttributes
+} from '@/serializers/jsonapi/JsonApiTypes'
 
-import { DeviceMountActionBasicDataSerializer } from '@/serializers/jsonapi/basic/DeviceMountActionBasicDataSerializer'
+export class PlatformMountActionBasicDataSerializer {
+  convertJsonApiDataToModel (jsonApiData: IJsonApiEntityWithOptionalAttributes): PlatformMountActionBasicData {
+    const attributes = jsonApiData.attributes
 
-const date = DateTime.utc(2020, 1, 1, 12, 0, 0)
-
-describe('DeviceMountActionBasicDataSerializer', () => {
-  describe('#convertJsonApiDataToModel', () => {
-    it('should covnert a single json api data object to a device mount action', () => {
-      const jsonApiData: any = {
-        type: 'device_mount_action',
-        attributes: {
-          offset_x: 0,
-          offset_y: 0,
-          offset_z: 0,
-          description: 'Device mount',
-          begin_date: '2020-01-01T12:00:00.000Z'
-        },
-        id: '1'
-      }
-
-      const expectedDeviceMountAction = DeviceMountActionBasicData.createFromObject({
-        id: '1',
-        offsetX: 0,
-        offsetY: 0,
-        offsetZ: 0,
-        date,
-        description: 'Device mount'
-      })
-
-      const serializer = new DeviceMountActionBasicDataSerializer()
-      const deviceMountAction = serializer.convertJsonApiDataToModel(jsonApiData)
-
-      expect(deviceMountAction).toEqual(expectedDeviceMountAction)
+    return PlatformMountActionBasicData.createFromObject({
+      id: jsonApiData.id || '',
+      offsetX: attributes?.offset_x || 0,
+      offsetY: attributes?.offset_y || 0,
+      offsetZ: attributes?.offset_z || 0,
+      description: attributes?.description || '',
+      date: DateTime.fromISO(attributes?.begin_date, { zone: 'UTC' })
     })
-  })
-})
+  }
+}

@@ -40,7 +40,7 @@ const date = DateTime.utc(2020, 1, 1, 12, 0, 0)
 
 describe('DeviceUnmountActionBasicDataSerializer', () => {
   describe('#convertJsonApiDataToModel', () => {
-    it('should covnert a single json api data object to a device mount action', () => {
+    it('should covnert a single json api data object to a device unmount action', () => {
       const jsonApiData: any = {
         type: 'device_unmount_action',
         attributes: {
@@ -50,7 +50,7 @@ describe('DeviceUnmountActionBasicDataSerializer', () => {
         id: '1'
       }
 
-      const expecteDeviceUnmountAction = DeviceUnmountActionBasicData.createFromObject({
+      const expectedDeviceUnmountAction = DeviceUnmountActionBasicData.createFromObject({
         id: '1',
         date,
         description: 'Device unmount'
@@ -59,7 +59,7 @@ describe('DeviceUnmountActionBasicDataSerializer', () => {
       const serializer = new DeviceUnmountActionBasicDataSerializer()
       const deviceUnmountAction = serializer.convertJsonApiDataToModel(jsonApiData)
 
-      expect(deviceUnmountAction).toEqual(expecteDeviceUnmountAction)
+      expect(deviceUnmountAction).toEqual(expectedDeviceUnmountAction)
     })
   })
 })

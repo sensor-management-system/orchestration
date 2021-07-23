@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2021
+ * Copyright (C) 2020-2021
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -30,42 +30,35 @@
  * permissions and limitations under the Licence.
  */
 
-import { DateTime } from 'luxon'
+import { PlatformMountAction } from '@/models/views/platforms/actions/PlatformMountAction'
+import { Contact } from '@/models/Contact'
+import { Attachment } from '@/models/Attachment'
+import { IActionCommonDetails } from '@/models/ActionCommonDetails'
 
-import { DeviceMountActionBasicData } from '@/models/basic/DeviceMountActionBasicData'
+export class PlatformMountActionWrapper implements IActionCommonDetails {
+  inner: PlatformMountAction
 
-import { DeviceMountActionBasicDataSerializer } from '@/serializers/jsonapi/basic/DeviceMountActionBasicDataSerializer'
+  constructor (inner: PlatformMountAction) {
+    this.inner = inner
+  }
 
-const date = DateTime.utc(2020, 1, 1, 12, 0, 0)
+  get id (): string {
+    return this.inner.basicData.id
+  }
 
-describe('DeviceMountActionBasicDataSerializer', () => {
-  describe('#convertJsonApiDataToModel', () => {
-    it('should covnert a single json api data object to a device mount action', () => {
-      const jsonApiData: any = {
-        type: 'device_mount_action',
-        attributes: {
-          offset_x: 0,
-          offset_y: 0,
-          offset_z: 0,
-          description: 'Device mount',
-          begin_date: '2020-01-01T12:00:00.000Z'
-        },
-        id: '1'
-      }
+  get description (): string {
+    return this.inner.basicData.description
+  }
 
-      const expectedDeviceMountAction = DeviceMountActionBasicData.createFromObject({
-        id: '1',
-        offsetX: 0,
-        offsetY: 0,
-        offsetZ: 0,
-        date,
-        description: 'Device mount'
-      })
+  get contact (): Contact {
+    return Contact.createFromObject(this.inner.contact)
+  }
 
-      const serializer = new DeviceMountActionBasicDataSerializer()
-      const deviceMountAction = serializer.convertJsonApiDataToModel(jsonApiData)
+  get attachments (): Attachment[] {
+    return []
+  }
 
-      expect(deviceMountAction).toEqual(expectedDeviceMountAction)
-    })
-  })
-})
+  get isPlatformMountAction (): boolean {
+    return true
+  }
+}
