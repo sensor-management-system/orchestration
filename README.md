@@ -39,7 +39,7 @@ system):
 
 Application urls:
 
-__Backend:__  `https://{HOST}/sms-backend` 
+__Backend:__  `https://{HOST}/backend` 
 
 __Frontend:__ `https://{HOST}/`
 
