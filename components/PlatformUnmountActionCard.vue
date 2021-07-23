@@ -33,7 +33,7 @@ permissions and limitations under the Licence.
     <v-card-subtitle class="pb-0">
       <v-row no-gutters>
         <v-col>
-          {{ value.basicData.date | toUtcDate }}
+          {{ value.basicData.date | dateToDateTimeString }}
         </v-col>
         <v-col
           align-self="end"
@@ -44,7 +44,7 @@ permissions and limitations under the Licence.
       </v-row>
     </v-card-subtitle>
     <v-card-title class="pt-0">
-      Mounted on {{ value.configuration.label }}
+      Unmounted on {{ value.configuration.label }}
     </v-card-title>
     <v-card-subtitle class="pb-1">
       <v-row
@@ -74,20 +74,6 @@ permissions and limitations under the Licence.
         <v-card-text
           class="grey lighten-5 text--primary pt-2"
         >
-          <div v-if="value.parentPlatform !== null">
-            <label>Parent platform</label>{{ value.parentPlatform.shortName }}
-          </div>
-          <v-row dense>
-            <v-col cols="12" md="4">
-              <label>Offset x</label>{{ value.basicData.offsetX }} m
-            </v-col>
-            <v-col cols="12" md="4">
-              <label>Offset y</label>{{ value.basicData.offsetY }} m
-            </v-col>
-            <v-col cols="12" md="4">
-              <label>Offset z</label>{{ value.basicData.offsetZ }} m
-            </v-col>
-          </v-row>
           <label>Description</label>
           {{ value.basicData.description }}
         </v-card-text>
@@ -98,36 +84,36 @@ permissions and limitations under the Licence.
 
 <script lang="ts">
 /**
- * @file provides a component for a Device Mount Action card
+ * @file provides a component for a Platform Unmount Action card
  * @author <nils.brinckmann@gfz-potsdam.de>
  */
 import { Component, Prop, Vue } from 'nuxt-property-decorator'
 
 import { dateToDateTimeString } from '@/utils/dateHelper'
-import { DeviceMountAction } from '@/models/views/devices/actions/DeviceMountAction'
+import { PlatformUnmountAction } from '@/models/views/platforms/actions/PlatformUnmountAction'
 
 /**
- * A class component for Device Mount Action card
+ * A class component for Platform Unmount Action card
  * @extends Vue
  */
 @Component({
   filters: {
-    toUtcDate: dateToDateTimeString
+    dateToDateTimeString
   }
 })
 // @ts-ignore
-export default class DeviceMountActionCard extends Vue {
+export default class PlatformUnmountActionCard extends Vue {
   private showDetails: boolean = false
 
   /**
-   * a DeviceMountAction
+   * a PlatformUnmountAction
    */
   @Prop({
     required: true,
     type: Object
   })
   // @ts-ignore
-  readonly value!: DeviceMountAction
+  readonly value!: PlatformUnmountAction
 
   /**
    * whether the card expansion is shown or not

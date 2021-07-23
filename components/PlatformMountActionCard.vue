@@ -33,7 +33,7 @@ permissions and limitations under the Licence.
     <v-card-subtitle class="pb-0">
       <v-row no-gutters>
         <v-col>
-          {{ value.basicData.date | toUtcDate }}
+          {{ value.basicData.date | dateToDateTimeString }}
         </v-col>
         <v-col
           align-self="end"
@@ -98,36 +98,36 @@ permissions and limitations under the Licence.
 
 <script lang="ts">
 /**
- * @file provides a component for a Device Mount Action card
+ * @file provides a component for a Platform Mount Action Action card
  * @author <nils.brinckmann@gfz-potsdam.de>
  */
 import { Component, Prop, Vue } from 'nuxt-property-decorator'
 
 import { dateToDateTimeString } from '@/utils/dateHelper'
-import { DeviceMountAction } from '@/models/views/devices/actions/DeviceMountAction'
+import { PlatformMountAction } from '@/models/views/platforms/actions/PlatformMountAction'
 
 /**
- * A class component for Device Mount Action card
+ * A class component for Platform Mount Action card
  * @extends Vue
  */
 @Component({
   filters: {
-    toUtcDate: dateToDateTimeString
+    dateToDateTimeString
   }
 })
 // @ts-ignore
-export default class DeviceMountActionCard extends Vue {
+export default class PlatformMountActionCard extends Vue {
   private showDetails: boolean = false
 
   /**
-   * a DeviceMountAction
+   * a PlatformMountAction
    */
   @Prop({
     required: true,
     type: Object
   })
   // @ts-ignore
-  readonly value!: DeviceMountAction
+  readonly value!: PlatformMountAction
 
   /**
    * whether the card expansion is shown or not

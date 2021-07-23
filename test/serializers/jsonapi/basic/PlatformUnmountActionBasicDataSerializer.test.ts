@@ -32,40 +32,34 @@
 
 import { DateTime } from 'luxon'
 
-import { DeviceMountActionBasicData } from '@/models/basic/DeviceMountActionBasicData'
+import { PlatformUnmountActionBasicData } from '@/models/basic/PlatformUnmountActionBasicData'
 
-import { DeviceMountActionBasicDataSerializer } from '@/serializers/jsonapi/basic/DeviceMountActionBasicDataSerializer'
+import { PlatformUnmountActionBasicDataSerializer } from '@/serializers/jsonapi/basic/PlatformUnmountActionBasicDataSerializer'
 
 const date = DateTime.utc(2020, 1, 1, 12, 0, 0)
 
-describe('DeviceMountActionBasicDataSerializer', () => {
+describe('PlatformUnmountActionBasicDataSerializer', () => {
   describe('#convertJsonApiDataToModel', () => {
-    it('should covnert a single json api data object to a device mount action', () => {
+    it('should covnert a single json api data object to a platform unmount action', () => {
       const jsonApiData: any = {
-        type: 'device_mount_action',
+        type: 'platform_unmount_action',
         attributes: {
-          offset_x: 0,
-          offset_y: 0,
-          offset_z: 0,
-          description: 'Device mount',
-          begin_date: '2020-01-01T12:00:00.000Z'
+          description: 'Platform unmount',
+          end_date: '2020-01-01T12:00:00.000Z'
         },
         id: '1'
       }
 
-      const expectedDeviceMountAction = DeviceMountActionBasicData.createFromObject({
+      const expectedPlatformUnmountAction = PlatformUnmountActionBasicData.createFromObject({
         id: '1',
-        offsetX: 0,
-        offsetY: 0,
-        offsetZ: 0,
         date,
-        description: 'Device mount'
+        description: 'Platform unmount'
       })
 
-      const serializer = new DeviceMountActionBasicDataSerializer()
-      const deviceMountAction = serializer.convertJsonApiDataToModel(jsonApiData)
+      const serializer = new PlatformUnmountActionBasicDataSerializer()
+      const platformUnmountAction = serializer.convertJsonApiDataToModel(jsonApiData)
 
-      expect(deviceMountAction).toEqual(expectedDeviceMountAction)
+      expect(platformUnmountAction).toEqual(expectedPlatformUnmountAction)
     })
   })
 })

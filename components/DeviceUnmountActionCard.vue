@@ -84,7 +84,7 @@ permissions and limitations under the Licence.
 
 <script lang="ts">
 /**
- * @file provides a component for a Device Unmount Action Action card
+ * @file provides a component for a Device Unmount Action card
  * @author <nils.brinckmann@gfz-potsdam.de>
  */
 import { Component, Prop, Vue } from 'nuxt-property-decorator'
@@ -93,7 +93,7 @@ import { dateToDateTimeString } from '@/utils/dateHelper'
 import { DeviceUnmountAction } from '@/models/views/devices/actions/DeviceUnmountAction'
 
 /**
- * A class component for Software Update Action card
+ * A class component for Device Unmount Action card
  * @extends Vue
  */
 @Component({

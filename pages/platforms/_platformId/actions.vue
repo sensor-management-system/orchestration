@@ -51,6 +51,12 @@ import PlatformActionDeleteDialog from '@/components/platform/actions/PlatformAc
 import { GenericAction } from '@/models/GenericAction'
 import { IActionCommonDetails } from '@/models/ActionCommonDetails'
 
+import { PlatformMountActionWrapper } from '@/viewmodels/PlatformMountActionWrapper'
+import { PlatformUnmountActionWrapper } from '@/viewmodels/PlatformUnmountActionWrapper'
+
+import { PlatformMountAction } from '@/models/views/platforms/actions/PlatformMountAction'
+import { PlatformUnmountAction } from '@/models/views/platforms/actions/PlatformUnmountAction'
+
 @Component({
   components: {
     PlatformActionTimeline,
@@ -97,9 +103,23 @@ export default class PlatformActionsPage extends Vue {
     actions.forEach((action: GenericAction) => this.actions.push(action))
   }
 
+  async fetchMountActions (): Promise<void> {
+    const actions: PlatformMountAction[] = await this.$api.platforms.findRelatedMountActions(this.platformId)
+    actions.forEach((action: PlatformMountAction) => this.actions.push(new PlatformMountActionWrapper(action)))
+  }
+
+  async fetchUnmountActions (): Promise<void> {
+    const actions: PlatformUnmountAction[] = await this.$api.platforms.findRelatedUnmountActions(this.platformId)
+    actions.forEach((action: PlatformUnmountAction) => this.actions.push(new PlatformUnmountActionWrapper(action)))
+  }
+
   async fetchActions (): Promise<void> {
     this.actions = []
-    await this.fetchGenericActions()
+    await Promise.all([
+      this.fetchGenericActions(),
+      this.fetchMountActions(),
+      this.fetchUnmountActions()
+    ])
   }
 
   async fetch () {
