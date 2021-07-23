@@ -110,7 +110,7 @@ services:
     environment:
       BASE_URL: ${BASE_URL:-/}
       SMS_BACKEND_URL: ${SMS_BACKEND_URL:-https://localhost.localdomain/backend/rdm/svm-api/v1}
-      CV_BACKEND_URL: ${CV_BACKEND_URL:-https://localhost.localdomain/cv/api/v1}
+      CV_BACKEND_URL: ${CV_BACKEND_URL:-/cv/api/v1}
       NUXT_ENV_REDIRECT_URI: ${NUXT_ENV_REDIRECT_URI:-https://localhost.localdomain/login-callback}
       NUXT_ENV_CLIENT_ID: ${NUXT_ENV_CLIENT_ID:-rdmsvm-implicit-flow}
       NUXT_ENV_AUTHORITY: ${NUXT_ENV_AUTHORITY:-https://webapp.ufz.de/idp/oidc/v1/}
