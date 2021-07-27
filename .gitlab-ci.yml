@@ -30,7 +30,7 @@ build-deploy-image-nginx-gfz-staging:
     - |
         docker build --tag "$CI_REGISTRY_IMAGE-nginx:gfz-latest" -f docker/build/nginx/gfz/staging/Dockerfile \
           --build-arg CLIENT_ID_ARG=$CLIENT_ID \
-          frontend
+          .
     - docker push "$CI_REGISTRY_IMAGE-nginx:gfz-latest"
   cache:
     key: ${CI_COMMIT_REF_SLUG}
@@ -49,7 +49,7 @@ build-deploy-image-nginx-gfz-prod:
     - |
         docker build --tag "$CI_REGISTRY_IMAGE-nginx:gfz-${CI_COMMIT_TAG:-prod-test}" -f docker/build/nginx/gfz/prod/Dockerfile \
           --build-arg CLIENT_ID_ARG=$CLIENT_ID \
-          frontend
+          .
     - docker push "$CI_REGISTRY_IMAGE-nginx:gfz-${CI_COMMIT_TAG:-prod-test}"
   cache:
     key: ${CI_COMMIT_REF_SLUG}
