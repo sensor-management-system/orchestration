@@ -30,7 +30,7 @@ version : '3.3'
 
 services:
   nginx:
-    image: ${CI_REGISTRY_IMAGE}-nginx:gfz-latest
+    image: ${CI_REGISTRY_IMAGE}/nginx:gfz-latest
     restart: unless-stopped
     ports:
       - 443:443

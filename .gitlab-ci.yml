@@ -28,10 +28,10 @@ build-deploy-image-nginx-gfz-staging:
     CLIENT_ID: ${GFZ_STAGING_OIDC_CLIENT_ID}
   script:
     - |
-        docker build --tag "$CI_REGISTRY_IMAGE-nginx:gfz-latest" -f docker/build/nginx/gfz/staging/Dockerfile \
+        docker build --tag "$CI_REGISTRY_IMAGE/nginx:gfz-latest" -f docker/build/nginx/gfz/staging/Dockerfile \
           --build-arg CLIENT_ID_ARG=$CLIENT_ID \
           .
-    - docker push "$CI_REGISTRY_IMAGE-nginx:gfz-latest"
+    - docker push "$CI_REGISTRY_IMAGE/nginx:gfz-latest"
   cache:
     key: ${CI_COMMIT_REF_SLUG}
     paths:
@@ -47,10 +47,10 @@ build-deploy-image-nginx-gfz-prod:
     CLIENT_ID: ${GFZ_PROD_OIDC_CLIENT_ID}
   script:
     - |
-        docker build --tag "$CI_REGISTRY_IMAGE-nginx:gfz-${CI_COMMIT_TAG:-prod-test}" -f docker/build/nginx/gfz/prod/Dockerfile \
+        docker build --tag "$CI_REGISTRY_IMAGE/nginx:gfz-${CI_COMMIT_TAG:-prod-test}" -f docker/build/nginx/gfz/prod/Dockerfile \
           --build-arg CLIENT_ID_ARG=$CLIENT_ID \
           .
-    - docker push "$CI_REGISTRY_IMAGE-nginx:gfz-${CI_COMMIT_TAG:-prod-test}"
+    - docker push "$CI_REGISTRY_IMAGE/nginx:gfz-${CI_COMMIT_TAG:-prod-test}"
   cache:
     key: ${CI_COMMIT_REF_SLUG}
     paths:

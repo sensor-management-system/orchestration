@@ -66,6 +66,6 @@ RUN npm run build
 FROM nginx:alpine as webserver
 EXPOSE 443
 EXPOSE 8443
-COPY --from=js-builder /ssmfrontend/dist/ /usr/share/nginx/html
+COPY --from=js-builder /smsfrontend/dist/ /usr/share/nginx/html
 COPY ./docker/build/nginx/gfz/prod/default.conf /etc/nginx/default.conf
 COPY ./docker/build/nginx/gfz/prod/nginx.conf /etc/nginx/nginx.conf
