@@ -2,7 +2,6 @@ version: '3.9'
 services:
 
   elastic-search:
-    container_name: smses01
     image: docker.elastic.co/elasticsearch/elasticsearch:7.10.0
     environment:
       - discovery.type=single-node
@@ -27,9 +26,17 @@ services:
       - './backend/app:/usr/src/app'
     ports:
       - "5000:5000"
-    env_file:
-      - docker/backend.dev
     environment:
+      FLASK_DEBUG: ${FLASK_DEBUG:-1}
+      URL_PREFIX: ${URL_PREFIX:-/backend/rdm/svm-api/v1}
+      APP_SETTINGS: ${APP_SETTINGS:-project.config.DevelopmentConfig}
+      ELASTICSEARCH_URL: ${ELASTICSEARCH_URL:-http://elastic-search:9200}
+      DATABASE_URL: ${DATABASE_URL:-postgresql://postgres:postgres@db:5433/db_dev}
+      DATABASE_TEST_URL: ${DATABASE_TEST_URL:-postgresql://postgres:postgres@db:5433/db_test}
+      OIDC_USERNAME_CLAIM: ${OIDC_USERNAME_CLAIM:-sub}
+      HTTP_ORIGINS: ${HTTP_ORIGINS:-https://localhost.localdomain}
+      WELL_KNOWN_URL: ${WELL_KNOWN_URL:-https://webapp.ufz.de/idp/oidc/v1/.well-known/openid-configuration}
+      OIDC_CLIENT_IDS: ${OIDC_CLIENT_IDS:-rdmsvm-implicit-flow}
       MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-admin}
       MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-minio123}
       MINIO_SECURE: ${MINIO_SECURE:-False}
@@ -59,8 +66,9 @@ services:
     image: postgres:12-alpine
     ports:
       - "5433:5433"
-    env_file:
-      - ./backend/app_env/db_secrets.env
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
     volumes:
       - ./backend/app/project/db/create.sql:/docker-entrypoint-initdb.d/create.sql
     networks:
@@ -75,8 +83,17 @@ services:
       - static-files:/usr/cv/app/static
     ports:
       - 8000:8000
-    env_file:
-      - ./docker/cv.dev
+    environment:
+      CV_BASE_URL: ${CV_BASE_URL:-cv/}
+      DEBUG: ${DEBUG:-1}
+      SECRET_KEY: ${SECRET_KEY:-TopSecret}
+      SQL_ENGINE: ${SQL_ENGINE:-django.db.backends.postgresql_psycopg2}
+      SQL_DATABASE: ${SQL_DATABASE:-postgres}
+      SQL_USER: ${SQL_USER:-postgres}
+      SQL_PASSWORD: ${SQL_PASSWORD:-postgres}
+      SQL_HOST: ${SQL_HOST:-db}
+      SQL_PORT: ${SQL_PORT:-5433}
+      CORS_ORIGIN_WHITELIST: ${CORS_ORIGIN_WHITELIST:-https://localhost.localdomain}
     command: >
       sh -c "
       apk add --no-cache --virtual .build-deps \
