@@ -1,0 +1,105 @@
+stages:
+  - build
+  - deploy
+
+variables:
+  GIT_SUBMODULE_STRATEGY: recursive
+
+cache:
+  paths:
+    - frontend/dist
+
+.docker_login_gitlab_registry: &docker_login_gitlab_registry
+  - echo "$CI_BUILD_TOKEN" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
+
+.docker_build:
+  image: docker:20.10.7
+  services:
+    - docker:20.10.7-dind
+  before_script:
+    - *docker_login_gitlab_registry
+  tags:
+    - docker
+
+build-deploy-image-nginx-gfz-staging:
+  stage: build
+  extends: .docker_build
+  variables:
+    CLIENT_ID: ${GFZ_STAGING_OIDC_CLIENT_ID}
+  script:
+    - |
+        docker build --tag "$CI_REGISTRY_IMAGE-nginx:gfz-latest" -f docker/build/nginx/gfz/staging/Dockerfile \
+          --build-arg CLIENT_ID_ARG=$CLIENT_ID \
+          frontend
+    - docker push "$CI_REGISTRY_IMAGE-nginx:gfz-latest"
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - frontend/node_modules
+    # rules:
+    #   - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    
+
+build-deploy-image-nginx-gfz-prod:
+  stage: build
+  extends: .docker_build
+  variables:
+    CLIENT_ID: ${GFZ_PROD_OIDC_CLIENT_ID}
+  script:
+    - |
+        docker build --tag "$CI_REGISTRY_IMAGE-nginx:gfz-${CI_COMMIT_TAG:-prod-test}" -f docker/build/nginx/gfz/prod/Dockerfile \
+          --build-arg CLIENT_ID_ARG=$CLIENT_ID \
+          frontend
+    - docker push "$CI_REGISTRY_IMAGE-nginx:gfz-${CI_COMMIT_TAG:-prod-test}"
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - frontend/node_modules
+    # rules:
+    #   - if: $CI_COMMIT_TAG
+
+deploy-gfz-staging:
+  stage: deploy
+  environment:
+    name: gfz-staging
+    url: https://rz-vm64.gfz-potsdam.de
+  tags:
+    - deploy
+    - staging
+    - gfz
+    - shell
+  variables:
+    COMPOSE_PROJECT_NAME: sms-staging
+  before_script:
+    - *docker_login_gitlab_registry
+  script:
+    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml down --remove-orphans
+    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml rm -f
+    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml pull
+    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml up -d
+    - docker rmi $(docker images -q -f dangling=true) || true
+  # rules:
+  #   - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+deploy-gfz-prod:
+  stage: deploy
+  environment:
+    name: gfz-prod
+    url: https://sensors.gfz-potsdam.de
+  tags:
+    - deploy
+    - prod
+    - gfz
+    - shell
+  variables:
+    COMPOSE_PROJECT_NAME: sms-prod
+  before_script:
+    - *docker_login_gitlab_registry
+  script:
+    - docker-compose -f docker/deployment/gfz/prod/docker-compose.yml down --remove-orphans
+    - docker-compose -f docker/deployment/gfz/prod/docker-compose.yml rm -f
+    - docker-compose -f docker/deployment/gfz/prod/docker-compose.yml pull
+    - docker-compose -f docker/deployment/gfz/prod/docker-compose.yml up -d
+    - docker rmi $(docker images -q -f dangling=true) || true
+  #rules:
+  #  - if: $CI_COMMIT_TAG
