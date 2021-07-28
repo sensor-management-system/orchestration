@@ -103,11 +103,11 @@ deploy-gfz-staging:
     - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml rm -f
     - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml pull
     - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml up -d
-    - docker-compose -f docker/deployment/gfz/prod/docker-compose.yml exec -T vocabulary python3 manage.py migrate
-    - docker-compose -f docker/deployment/gfz/prod/docker-compose.yml exec -T vocabulary python3 manage.py loaddata initial_data.json
-    - docker-compose -f docker/deployment/gfz/prod/docker-compose.yml exec -T vocabulary python3 manage.py loaddata default_community_data.json
-    - docker-compose -f docker/deployment/gfz/prod/docker-compose.yml exec -T vocabulary python3 manage.py loaddata hydro_community_data.json
-    - docker-compose -f docker/deployment/gfz/prod/docker-compose.yml exec -T vocabulary python3 manage.py collectstatic --no-input
+    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T vocabulary python3 manage.py migrate
+    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T vocabulary python3 manage.py loaddata initial_data.json
+    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T vocabulary python3 manage.py loaddata default_community_data.json
+    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T vocabulary python3 manage.py loaddata hydro_community_data.json
+    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T vocabulary python3 manage.py collectstatic --no-input
     - docker rmi $(docker images -q -f dangling=true) || true
   # rules:
   #   - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
