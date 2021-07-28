@@ -30,7 +30,7 @@
 FROM node:16.0.0-buster as js-builder
 
 # First the urls for sms backend and cv backend
-ENV SMS_BACKEND_URL /backend/rdm/svm-api/v1
+ENV SMS_BACKEND_URL /backend/api/v1
 ENV CV_BACKEND_URL /cv/api/v1
 
 # Then the client id for open id connect and the authority to contact
