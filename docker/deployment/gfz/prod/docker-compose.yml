@@ -46,7 +46,7 @@ services:
       - nginx
 
   vocabulary:
-      image: ${CI_REGISTRY_IMAGE}/vocabulary:gfz-${CI_COMMIT_TAG:-prod-test}
+    image: ${CI_REGISTRY_IMAGE}/vocabulary:gfz-${CI_COMMIT_TAG:-prod-test}
     restart: unless-stopped
     environment:
       CV_BASE_URL: cv/
@@ -58,7 +58,7 @@ services:
       SQL_PASSWORD: $VOCABULARY_DB_PASSWORD
       SQL_HOST: vocabulary-db
       SQL_PORT: 5432
-      CORS_ORIGIN_WHITELIST: 'https://localhost,https://sensors.gfz-potsdam.de'
+      CORS_ORIGIN_WHITELIST: 'https://sensors.gfz-potsdam.de'
     volumes:
       - vocabulary-static-files:/usr/cv/app/static
     networks:

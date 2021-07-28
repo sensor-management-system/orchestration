@@ -57,7 +57,7 @@ services:
       SQL_PASSWORD: $VOCABULARY_DB_PASSWORD
       SQL_HOST: vocabulary-db
       SQL_PORT: 5432
-      CORS_ORIGIN_WHITELIST: 'https://localhost,http://localhost,https://rz-vm64.gfz-potsdam.de,http://rz-vm64.gfz-potsdam.de'
+      CORS_ORIGIN_WHITELIST: 'https://rz-vm64.gfz-potsdam.de'
     volumes:
       - vocabulary-static-files:/usr/cv/app/static
     networks:
