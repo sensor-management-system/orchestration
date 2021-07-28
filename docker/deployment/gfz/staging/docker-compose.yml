@@ -40,7 +40,7 @@ services:
       - /etc/ssl/private/gfz_hosts_default.key:/etc/ssl/private/default.key:ro
       - /etc/ssl/dhparam.pem:/etc/ssl/dhparam.pem:ro
       - /etc/ssl/dfn-ca-global-g2-chain.pem:/etc/ssl/chain.pem:ro
-      - vocabulary-static-files:/usr/share/nginx/html/static:ro
+      - vocabulary-static-files:/usr/share/nginx/html/static/cv:ro
     networks:
       - nginx
 
@@ -49,6 +49,7 @@ services:
     restart: unless-stopped
     environment:
       CV_BASE_URL: cv/
+      STATIC_URL: /static/cv/
       DEBUG: 0
       SECRET_KEY: $VOCABULARY_SECRET_KEY
       SQL_ENGINE: django.db.backends.postgresql_psycopg2
