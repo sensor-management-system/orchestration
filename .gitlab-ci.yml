@@ -36,8 +36,8 @@ build-deploy-image-nginx-gfz-staging:
     key: ${CI_COMMIT_REF_SLUG}
     paths:
       - frontend/node_modules
-  # rules:
-  #   - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
     
 
 build-deploy-image-nginx-gfz-prod:
@@ -55,8 +55,8 @@ build-deploy-image-nginx-gfz-prod:
     key: ${CI_COMMIT_REF_SLUG}
     paths:
       - frontend/node_modules
-  # rules:
-  #   - if: $CI_COMMIT_TAG
+  rules:
+    - if: $CI_COMMIT_TAG
 
 build-deploy-image-vocabulary-gfz-staging:
   stage: build
@@ -66,8 +66,8 @@ build-deploy-image-vocabulary-gfz-staging:
         docker build --tag "$CI_REGISTRY_IMAGE/vocabulary:gfz-latest" -f sms-cv/docker/gfz/deployment/Dockerfile \
           sms-cv
     - docker push "$CI_REGISTRY_IMAGE/vocabulary:gfz-latest"
-  # rules:
-  #   - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
     
 
 build-deploy-image-vocabulary-gfz-prod:
@@ -78,8 +78,8 @@ build-deploy-image-vocabulary-gfz-prod:
         docker build --tag "$CI_REGISTRY_IMAGE/vocabulary:gfz-${CI_COMMIT_TAG:-latest}" -f sms-cv/docker/gfz/deployment/Dockerfile \
           sms-cv
     - docker push "$CI_REGISTRY_IMAGE/vocabulary:gfz-${CI_COMMIT_TAG:-latest}"
-  # rules:
-  #   - if: $CI_COMMIT_TAG
+  rules:
+    - if: $CI_COMMIT_TAG
 
 build-deploy-image-backend-gfz-staging:
   stage: build
@@ -89,8 +89,8 @@ build-deploy-image-backend-gfz-staging:
         docker build --tag "$CI_REGISTRY_IMAGE/backend:gfz-latest" -f backend/Dockerfile \
           backend
     - docker push "$CI_REGISTRY_IMAGE/backend:gfz-latest"
-  # rules:
-  #   - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
     
 
 build-deploy-image-backend-gfz-prod:
@@ -101,8 +101,8 @@ build-deploy-image-backend-gfz-prod:
         docker build --tag "$CI_REGISTRY_IMAGE/backend:gfz-${CI_COMMIT_TAG:-latest}" -f backend/Dockerfile \
           backend
     - docker push "$CI_REGISTRY_IMAGE/backend:gfz-${CI_COMMIT_TAG:-latest}"
-  # rules:
-  #   - if: $CI_COMMIT_TAG
+  rules:
+    - if: $CI_COMMIT_TAG
 
 deploy-gfz-staging:
   stage: deploy
@@ -141,8 +141,8 @@ deploy-gfz-staging:
     - sleep 1m
     - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T backend python3 manage.py es reindex
     - docker rmi $(docker images -q -f dangling=true) || true
-  # rules:
-  #   - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
 deploy-gfz-prod:
   stage: deploy
@@ -181,5 +181,5 @@ deploy-gfz-prod:
     - sleep 1m
     - docker-compose -f docker/deployment/gfz/prod/docker-compose.yml exec -T backend python3 manage.py es reindex
     - docker rmi $(docker images -q -f dangling=true) || true
-  #rules:
-  #  - if: $CI_COMMIT_TAG
+  rules:
+    - if: $CI_COMMIT_TAG
