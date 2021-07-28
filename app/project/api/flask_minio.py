@@ -283,7 +283,7 @@ class FlaskMinio:
         :param object_path:
         :return:
         """
-        minio_endpoint = current_app.config["MINIO_ENDPOINT"]
+        minio_endpoint = current_app.config["DOWNLOAD_ENDPOINT"]
         _start, _minio_endpoint, rest = object_path.partition(minio_endpoint + "/")
         _bucket_name, _first_slash, _object_name = rest.partition("/")
         return _bucket_name, _object_name
