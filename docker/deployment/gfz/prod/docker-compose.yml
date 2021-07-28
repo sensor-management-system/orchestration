@@ -84,22 +84,3 @@ volumes:
 networks:
   vocabulary-db:
   nginx:
-  vocabulary-db:
-    image: postgres:12-alpine
-    restart: unless-stopped
-    environment:
-      POSTGRES_PASSWORD: $VOCABULARY_DB_PASSWORD
-      POSTGRES_USER: $VOCABULARY_DB_USER
-      POSTGRES_DB: vocabulary
-    volumes:
-      - "vocabulary-db-data:/var/lib/postgresql/data"
-    shm_size: 128M
-    networks:
-      - vocabulary-db
-
-volumes:
-  vocabulary-db-data:
-  vocabulary-static-files:
-networks:
-  vocabulary-db:
-  nginx:
