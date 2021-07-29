@@ -10,8 +10,8 @@ the target folder `nginx/certs`.
 In case you have an older pip version you may have to run `pip install --upgrade pip`, so that the build process with rust is supported.
 
 1. copy all files ending with
-   ```backend.template, cv.template, env.template```. Fill the variables and rename it
-   to ```backend.dev cv.dev env.dev```
+   ```env.template```. Fill the variables and rename it
+   to ```env.dev```
 
 2. Start the containers and run them in background:
 
