@@ -1,0 +1,4 @@
+/.idea/
+/docker/env.dev
+/docker/backend.dev
+/docker/cv.dev
