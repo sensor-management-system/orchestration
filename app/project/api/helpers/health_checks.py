@@ -38,7 +38,6 @@ def health_check_migrations():
     :return:
     """
     head = check_output(["python", "manage.py", "db", "current"]).decode("utf-8").split(" ")[0]
-    print(head)
 
     version_num = (db.session.execute('SELECT version_num from alembic_version').fetchone())[
         'version_num']
