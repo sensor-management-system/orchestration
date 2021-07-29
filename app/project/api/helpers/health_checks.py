@@ -12,7 +12,7 @@ def health_check_elastic_search():
     :return:
     """
     try:
-        _ = requests.get('http://smses01:9200').content
+        _ = requests.get(current_app.config["ELASTICSEARCH_URL"]).content
         return True, "elastic search ok"
 
     except requests.exceptions.HTTPError:
@@ -42,7 +42,6 @@ def health_check_migrations():
 
     version_num = (db.session.execute('SELECT version_num from alembic_version').fetchone())[
         'version_num']
-    print(version_num)
     if head == version_num:
         return True, 'database up to date with migrations'
     return False, 'database out of date with migrations'
