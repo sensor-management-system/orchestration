@@ -1,8 +1,7 @@
 version: '3.9'
 services:
-  smses01:
+  elastic-search:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.10.0
-    container_name: smses01
     environment:
       - discovery.type=single-node
       - bootstrap.memory_lock=true
@@ -19,7 +18,6 @@ services:
 
   backend:
     image: python:3.9-slim-buster
-    container_name: backend
     working_dir: /usr/src/app
     volumes:
       - './app:/usr/src/app'
@@ -52,7 +50,6 @@ services:
 
   db:
     image: postgres:12-alpine
-    container_name: db
     ports:
       - "127.0.0.1:5433:5433"
     environment:
@@ -100,7 +97,6 @@ services:
 
   nginx:
     image: nginx:1.20-alpine
-    container_name: nginx
     ports:
       - 443:443
       - 8443:8443
