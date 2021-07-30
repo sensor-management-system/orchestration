@@ -17,17 +17,26 @@ services:
     ports:
       - 9200:9200
 
-  app:
+  backend:
     image: python:3.9-slim-buster
     container_name: backend
     working_dir: /usr/src/app
     volumes:
       - './app:/usr/src/app'
+      - './scripts:/usr/src/app/scripts'
     ports:
-      - "${HTTP_LOCAL_BINDING:-127.0.0.1:5000}:5000"
-    env_file:
-      - ./app_env/compose.env
+      - "127.0.0.1:5000:5000"
     environment:
+      FLASK_DEBUG: ${FLASK_DEBUG:-1}
+      URL_PREFIX: ${URL_PREFIX:-/backend/rdm/svm-api/v1}
+      APP_SETTINGS: ${APP_SETTINGS:-project.config.DevelopmentConfig}
+      ELASTICSEARCH_URL: ${ELASTICSEARCH_URL:-http://elastic-search:9200}
+      DATABASE_URL: ${DATABASE_URL:-postgresql://postgres:postgres@db:5433/db_dev}
+      DATABASE_TEST_URL: ${DATABASE_TEST_URL:-postgresql://postgres:postgres@db:5433/db_test}
+      OIDC_USERNAME_CLAIM: ${OIDC_USERNAME_CLAIM:-sub}
+      HTTP_ORIGINS: ${HTTP_ORIGINS:-https://localhost.localdomain}
+      WELL_KNOWN_URL: ${WELL_KNOWN_URL:-https://webapp.ufz.de/idp/oidc/v1/.well-known/openid-configuration}
+      OIDC_CLIENT_IDS: ${OIDC_CLIENT_IDS:-rdmsvm-implicit-flow}
       MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-admin}
       MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-minio123}
       MINIO_SECURE: ${MINIO_SECURE:-False}
@@ -38,36 +47,29 @@ services:
       - db
     command: >
       sh -c "
-      apt-get update && apt-get install -y  --no-install-recommends \
-        gcc \
-        libssl-dev \
-        libffi-dev \
-        musl-dev \
-        cargo \
-      && apt-get clean
-      && pip install --no-cache-dir --upgrade pip
-      && pip install --no-cache-dir -r requirements.txt
-      && python manage.py db upgrade
-      && gunicorn -b 0.0.0.0:5000 manage:app --reload
-      "
+      scripts/install.sh
+      && scripts/run.sh ${DATABASE_URL:-postgresql://postgres:postgres@db:5433/db_dev} ${BACKEND_PORT:-5000}"
 
   db:
     image: postgres:12-alpine
     container_name: db
     ports:
-      - "${HTTP_LOCAL_BINDING:-127.0.0.1:5432}:5432"
-    env_file:
-      - ./app_env/db_secrets.env
+      - "127.0.0.1:5433:5433"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
     volumes:
       - ./app/project/db/create.sql:/docker-entrypoint-initdb.d/create.sql
+    command: -p 5433
+
   minio:
     image: minio/minio:RELEASE.2021-07-12T02-44-53Z
     container_name: minio
     volumes:
       - data:/data/minio
     ports:
-      - "${HTTP_LOCAL_BINDING:-127.0.0.1:9000}:9000"
-      - "${HTTP_LOCAL_BINDING:-127.0.0.1:9001}:9001"
+      - "127.0.0.1:9000:9000"
+      - "127.0.0.1:9001:9001"
     environment:
       MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:-admin}
       MINIO_ROOT_PASSWORD: ${minio_user_password:-minio123}
@@ -89,9 +91,9 @@ services:
     entrypoint: >
       /bin/sh -c "
       until curl -f http://minio:9000/minio/health/live; do sleep 5; done;
-      /usr/bin/mc  alias set minio http://minio:9000 ${MINIO_ACCESS_KEY:-admin1} ${MINIO_SECRET_KEY:-minio123} --api S3v4;
-      /usr/bin/mc mb --quiet minio/${MINIO_BUCKET_NAME};
-      /usr/bin/mc policy set download minio/${MINIO_BUCKET_NAME};
+      /usr/bin/mc  alias set minio http://minio:9000 ${MINIO_ACCESS_KEY:-admin} ${MINIO_SECRET_KEY:-minio123} --api S3v4;
+      /usr/bin/mc mb --quiet minio/${MINIO_BUCKET_NAME:-sms-attachments};
+      /usr/bin/mc policy set download minio/${MINIO_BUCKET_NAME:-sms-attachments};
       exit 0;
       "
 
@@ -99,7 +101,9 @@ services:
   nginx:
     image: nginx:1.20-alpine
     container_name: nginx
-    network_mode: "host"
+    ports:
+      - 443:443
+      - 8443:8443
     volumes:
       - ./ngnix/index.html:/usr/share/nginx/html/index.html
       - ./ngnix/certs:/etc/nginx/ssl

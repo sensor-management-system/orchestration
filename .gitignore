@@ -123,3 +123,4 @@ dmypy.json
 .pyre/
 *.swp
 /app_env/.env.dev
+/app_env/env.dev
