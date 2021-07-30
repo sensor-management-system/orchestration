@@ -41,6 +41,7 @@ services:
       MINIO_BUCKET_NAME: ${MINIO_BUCKET_NAME:-sms-attachments}
       MINIO_ENDPOINT: ${MINIO_ENDPOINT:-minio:9000}
       DOWNLOAD_ENDPOINT: ${DOWNLOAD_ENDPOINT:-https://localhost.localdomain}
+      PYTHONPATH: /usr/src/app
     depends_on:
       - db
     command: >

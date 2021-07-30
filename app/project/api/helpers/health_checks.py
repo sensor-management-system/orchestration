@@ -1,9 +1,8 @@
-from subprocess import check_output
-
 import requests
 from sqlalchemy.exc import SQLAlchemyError
 
 from ..models.base_model import db
+from ...config import env
 
 
 def health_check_elastic_search():
@@ -12,7 +11,7 @@ def health_check_elastic_search():
     :return:
     """
     try:
-        _ = requests.get(current_app.config["ELASTICSEARCH_URL"]).content
+        _ = requests.get(env("ELASTICSEARCH_URL")).content
         return True, "elastic search ok"
 
     except requests.exceptions.HTTPError:
@@ -37,11 +36,15 @@ def health_check_migrations():
     Checks whether database is up to date with migrations.
     :return:
     """
-    head = check_output(["python", "manage.py", "db", "current"]).decode("utf-8").split(" ")[0]
 
-    version_num = (db.session.execute('SELECT version_num from alembic_version').fetchone())[
-        'version_num']
-    if head == version_num:
+    from alembic.runtime import migration
+    import sqlalchemy
+
+    engine = sqlalchemy.create_engine(env("DATABASE_URL"))
+    with engine.begin() as conn:
+        context = migration.MigrationContext.configure(conn)
+        version_num = (db.session.execute('SELECT version_num from alembic_version').fetchone())[
+            'version_num']
+        if version_num != context.get_current_revision():
+            return False, 'database out of date with migrations'
         return True, 'database up to date with migrations'
-    return False, 'database out of date with migrations'
-
