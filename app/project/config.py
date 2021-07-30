@@ -114,5 +114,13 @@ class TestingConfig(BaseConfig):
 class ProductionConfig(BaseConfig):
     """Production configuration"""
 
+    SECRET_KEY = env("SECRET_KEY", "top_secret")
     SQLALCHEMY_DATABASE_URI = env("DATABASE_URL", None)
     ELASTICSEARCH_URL = env("ELASTICSEARCH_URL", None)
+    OIDC_JWT_SERVICE = OidcJwtService(env("WELL_KNOWN_URL"))
+    JWT_ALGORITHM = OIDC_JWT_SERVICE.get_jwt_algorithm()
+    # retrieve first jwk entry from jwks_uri endpoint and use it to construct the RSA public key
+    JWT_PUBLIC_KEY = OIDC_JWT_SERVICE.get_jwt_public_key()
+    # For production we only want to have one audience that should be allowed
+    JWT_DECODE_AUDIENCE = [env("OIDC_CLIENT_ID", None)]
+    JWT_IDENTITY_CLAIM = env("OIDC_USERNAME_CLAIM", "sub")
