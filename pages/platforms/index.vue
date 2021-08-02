@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020
+Copyright (C) 2020-2021
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -496,6 +496,42 @@ import { PlatformType } from '@/models/PlatformType'
 import { Status } from '@/models/Status'
 import { PlatformSearcher } from '@/services/sms/PlatformApi'
 
+interface IRunSearchParameters {
+  searchText: string | null
+  manufacturer: Manufacturer[]
+  states: Status[]
+  types: PlatformType[]
+  onlyOwnPlatforms: boolean
+}
+
+class BasicSearchParameters implements IRunSearchParameters {
+  private readonly _searchText: string | null
+
+  constructor (searchText: string | null) {
+    this._searchText = searchText
+  }
+
+  get searchText (): string | null {
+    return this._searchText
+  }
+
+  get manufacturer (): Manufacturer[] {
+    return []
+  }
+
+  get states (): Status[] {
+    return []
+  }
+
+  get types (): PlatformType[] {
+    return []
+  }
+
+  get onlyOwnPlatforms (): boolean {
+    return false
+  }
+}
+
 @Component({
   components: {
     ManufacturerSelect,
@@ -607,7 +643,7 @@ export default class SearchPlatformsPage extends Vue {
 
   basicSearch () {
     // only uses the text and the type (sensor or platform)
-    this.runSearch(this.searchText, [], [], [], false)
+    this.runSearch(new BasicSearchParameters(this.searchText))
   }
 
   clearBasicSearch () {
@@ -615,13 +651,13 @@ export default class SearchPlatformsPage extends Vue {
   }
 
   extendedSearch () {
-    this.runSearch(
-      this.searchText,
-      this.selectedSearchManufacturers,
-      this.selectedSearchStates,
-      this.selectedSearchPlatformTypes,
-      this.onlyOwnPlatforms && this.isLoggedIn
-    )
+    this.runSearch({
+      searchText: this.searchText,
+      manufacturer: this.selectedSearchManufacturers,
+      states: this.selectedSearchStates,
+      types: this.selectedSearchPlatformTypes,
+      onlyOwnPlatforms: this.onlyOwnPlatforms && this.isLoggedIn
+    })
   }
 
   clearExtendedSearch () {
@@ -633,11 +669,7 @@ export default class SearchPlatformsPage extends Vue {
   }
 
   runSearch (
-    searchText: string | null,
-    manufacturer: Manufacturer[],
-    states: Status[],
-    platformTypes: PlatformType[],
-    onlyOwnPlatforms: boolean
+    searchParameters: IRunSearchParameters
   ) {
     this.loading = true
     this.searchResults = []
@@ -647,12 +679,12 @@ export default class SearchPlatformsPage extends Vue {
 
     const searchBuilder = this.$api.platforms
       .newSearchBuilder()
-      .withText(searchText)
-      .withOneMatchingManufacturerOf(manufacturer)
-      .withOneMatchingStatusOf(states)
-      .withOneMatchingPlatformTypeOf(platformTypes)
+      .withText(searchParameters.searchText)
+      .withOneMatchingManufacturerOf(searchParameters.manufacturer)
+      .withOneMatchingStatusOf(searchParameters.states)
+      .withOneMatchingPlatformTypeOf(searchParameters.types)
 
-    if (onlyOwnPlatforms) {
+    if (searchParameters.onlyOwnPlatforms) {
       const email = this.currentUserEmail
       if (email) {
         searchBuilder.withContactEmail(email)

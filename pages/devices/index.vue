@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020
+Copyright (C) 2020,2021
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -497,6 +497,42 @@ import { Manufacturer } from '@/models/Manufacturer'
 import { Status } from '@/models/Status'
 import { DeviceSearcher } from '@/services/sms/DeviceApi'
 
+interface IRunSearchParameters {
+  searchText: string | null
+  manufacturer: Manufacturer[]
+  states: Status[]
+  types: DeviceType[]
+  onlyOwnDevices: boolean
+}
+
+class BasicSearchParameters implements IRunSearchParameters {
+  private readonly _searchText: string | null
+
+  constructor (searchText: string | null) {
+    this._searchText = searchText
+  }
+
+  get searchText (): string | null {
+    return this._searchText
+  }
+
+  get manufacturer (): Manufacturer[] {
+    return []
+  }
+
+  get states (): Status[] {
+    return []
+  }
+
+  get types (): DeviceType[] {
+    return []
+  }
+
+  get onlyOwnDevices (): boolean {
+    return false
+  }
+}
+
 @Component({
   components: {
     DeviceTypeSelect,
@@ -608,7 +644,7 @@ export default class SearchDevicesPage extends Vue {
 
   basicSearch () {
     // only uses the text and the type (sensor or platform)
-    this.runSearch(this.searchText, [], [], [], false)
+    this.runSearch(new BasicSearchParameters(this.searchText))
   }
 
   clearBasicSearch () {
@@ -616,13 +652,13 @@ export default class SearchDevicesPage extends Vue {
   }
 
   extendedSearch () {
-    this.runSearch(
-      this.searchText,
-      this.selectedSearchManufacturers,
-      this.selectedSearchStates,
-      this.selectedSearchDeviceTypes,
-      this.onlyOwnDevices && this.isLoggedIn
-    )
+    this.runSearch({
+      searchText: this.searchText,
+      manufacturer: this.selectedSearchManufacturers,
+      states: this.selectedSearchStates,
+      types: this.selectedSearchDeviceTypes,
+      onlyOwnDevices: this.onlyOwnDevices && this.isLoggedIn
+    })
   }
 
   clearExtendedSearch () {
@@ -635,11 +671,7 @@ export default class SearchDevicesPage extends Vue {
   }
 
   runSearch (
-    searchText: string | null,
-    manufacturer: Manufacturer[],
-    states: Status[],
-    types: DeviceType[],
-    onlyOwnDevices: boolean
+    searchParameters: IRunSearchParameters
   ) {
     this.loading = true
     this.searchResults = []
@@ -649,12 +681,12 @@ export default class SearchDevicesPage extends Vue {
 
     const searchBuilder = this.$api.devices
       .newSearchBuilder()
-      .withText(searchText)
-      .withOneMachtingManufacturerOf(manufacturer)
-      .withOneMatchingStatusOf(states)
-      .withOneMatchingDeviceTypeOf(types)
+      .withText(searchParameters.searchText)
+      .withOneMachtingManufacturerOf(searchParameters.manufacturer)
+      .withOneMatchingStatusOf(searchParameters.states)
+      .withOneMatchingDeviceTypeOf(searchParameters.types)
 
-    if (onlyOwnDevices) {
+    if (searchParameters.onlyOwnDevices) {
       const email = this.currentUserEmail
       if (email) {
         searchBuilder.withContactEmail(email)

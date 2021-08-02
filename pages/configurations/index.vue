@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020
+Copyright (C) 2020,2021
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -464,6 +464,42 @@ import { ConfigurationSearcher } from '@/services/sms/ConfigurationApi'
 
 import { dateToString } from '@/utils/dateHelper'
 
+interface IRunSearchParameters {
+  searchText: string | null
+  configurationStates: string[]
+  locationTypes: string[]
+  projects: Project[]
+  onlyOwnConfigurations: boolean
+}
+
+class BasicSearchParameters implements IRunSearchParameters {
+  private readonly _searchText: string | null
+
+  constructor (searchText: string | null) {
+    this._searchText = searchText
+  }
+
+  get searchText (): string | null {
+    return this._searchText
+  }
+
+  get configurationStates (): string[] {
+    return []
+  }
+
+  get locationTypes (): string[] {
+    return []
+  }
+
+  get projects (): Project[] {
+    return []
+  }
+
+  get onlyOwnConfigurations (): boolean {
+    return false
+  }
+}
+
 @Component({
   filters: {
     formatDate: (possibleDate: DateTime | null) => {
@@ -571,7 +607,7 @@ export default class SearchConfigurationsPage extends Vue {
   }
 
   basicSearch () {
-    this.runSearch(this.searchText, [], [], [], false)
+    this.runSearch(new BasicSearchParameters(this.searchText))
   }
 
   clearBasicSearch () {
@@ -579,13 +615,13 @@ export default class SearchConfigurationsPage extends Vue {
   }
 
   extendedSearch () {
-    this.runSearch(
-      this.searchText,
-      this.selectedConfigurationStates,
-      this.selectedLocationTypes,
-      this.selectedProjects,
-      this.onlyOwnConfigurations && this.isLoggedIn
-    )
+    this.runSearch({
+      searchText: this.searchText,
+      configurationStates: this.selectedConfigurationStates,
+      locationTypes: this.selectedLocationTypes,
+      projects: this.selectedProjects,
+      onlyOwnConfigurations: this.onlyOwnConfigurations && this.isLoggedIn
+    })
   }
 
   clearExtendedSearch () {
@@ -597,11 +633,7 @@ export default class SearchConfigurationsPage extends Vue {
   }
 
   runSearch (
-    searchText: string | null,
-    configurationStates: string[],
-    locationTypes: string[],
-    projects: Project[],
-    onlyOwnConfigurations: boolean
+    searchParameters: IRunSearchParameters
   ) {
     this.loading = true
     this.searchResults = []
@@ -611,12 +643,12 @@ export default class SearchConfigurationsPage extends Vue {
 
     const searchBuilder = this.$api.configurations
       .newSearchBuilder()
-      .withText(searchText)
-      .withOneStatusOf(configurationStates)
-      .withOneLocationTypeOf(locationTypes)
-      .withOneMatchingProjectOf(projects)
+      .withText(searchParameters.searchText)
+      .withOneStatusOf(searchParameters.configurationStates)
+      .withOneLocationTypeOf(searchParameters.locationTypes)
+      .withOneMatchingProjectOf(searchParameters.projects)
 
-    if (onlyOwnConfigurations) {
+    if (searchParameters.onlyOwnConfigurations) {
       const email = this.currentUserEmail
       if (email) {
         searchBuilder.withContactEmail(email)
