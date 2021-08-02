@@ -717,7 +717,8 @@ describe('PlatformSerializer', () => {
 
       const serializer = new PlatformSerializer()
 
-      const jsonApiData = serializer.convertModelToJsonApiData(platform)
+      const includeRelationships = true
+      const jsonApiData = serializer.convertModelToJsonApiData(platform, includeRelationships)
 
       expect(typeof jsonApiData).toEqual('object')
 
@@ -806,7 +807,8 @@ describe('PlatformSerializer', () => {
 
       const serializer = new PlatformSerializer()
 
-      const jsonApiData = serializer.convertModelToJsonApiData(platform)
+      const includeRelationships = true
+      const jsonApiData = serializer.convertModelToJsonApiData(platform, includeRelationships)
 
       expect(typeof jsonApiData).toEqual('object')
       expect(jsonApiData).toHaveProperty('attributes')
@@ -821,11 +823,59 @@ describe('PlatformSerializer', () => {
 
       const serializer = new PlatformSerializer()
 
-      const jsonApiData = serializer.convertModelToJsonApiData(platform)
+      const includeRelationships = false
+      const jsonApiData = serializer.convertModelToJsonApiData(platform, includeRelationships)
 
       expect(typeof jsonApiData).toEqual('object')
       expect(jsonApiData).toHaveProperty('id')
       expect(jsonApiData.id).toEqual('abc')
+    })
+    it('should not include any relationship if we ask it not to do so', () => {
+      const platform = createTestPlatform()
+      platform.id = 'abc'
+
+      const attachment = Attachment.createFromObject({
+        id: '1',
+        label: 'GFZ',
+        url: 'https://www.gfz-potsdam.de'
+      })
+
+      platform.attachments = [attachment]
+
+      const serializer = new PlatformSerializer()
+      const includeRelationships = false
+
+      const jsonApiData = serializer.convertModelToJsonApiData(platform, includeRelationships)
+
+      expect(typeof jsonApiData).toEqual('object')
+      expect(jsonApiData).toHaveProperty('id')
+      expect(jsonApiData.id).toEqual('abc')
+
+      expect(jsonApiData).not.toHaveProperty('relationships')
+    })
+    it('should include relationship if we want it', () => {
+      const platform = createTestPlatform()
+      platform.id = 'abc'
+
+      const attachment = Attachment.createFromObject({
+        id: '1',
+        label: 'GFZ',
+        url: 'https://www.gfz-potsdam.de'
+      })
+
+      platform.attachments = [attachment]
+
+      const serializer = new PlatformSerializer()
+      const includeRelationships = true
+
+      const jsonApiData = serializer.convertModelToJsonApiData(platform, includeRelationships)
+
+      expect(typeof jsonApiData).toEqual('object')
+      expect(jsonApiData).toHaveProperty('id')
+      expect(jsonApiData.id).toEqual('abc')
+
+      expect(jsonApiData).toHaveProperty('relationships')
+      expect(jsonApiData.relationships).toHaveProperty('platform_attachments')
     })
   })
 })

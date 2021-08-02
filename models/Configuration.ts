@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020
+ * Copyright (C) 2020-2021
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -32,13 +32,14 @@
 import { DateTime } from 'luxon'
 
 import { IContact, Contact } from '@/models/Contact'
-import { ConfigurationsTree } from '@/models/ConfigurationsTree'
-import { ConfigurationsTreeNode } from '@/models/ConfigurationsTreeNode'
-import { DeviceConfigurationAttributes } from '@/models/DeviceConfigurationAttributes'
+import { IMountActions } from '@/models/IMountActions'
+import { DeviceMountAction } from '@/models/DeviceMountAction'
+import { DeviceUnmountAction } from '@/models/DeviceUnmountAction'
+import { PlatformMountAction } from '@/models/PlatformMountAction'
+import { PlatformUnmountAction } from '@/models/PlatformUnmountAction'
 import { IStationaryLocation, IDynamicLocation, StationaryLocation, DynamicLocation } from '@/models/Location'
-import { PlatformConfigurationAttributes } from '@/models/PlatformConfigurationAttributes'
 
-export interface IConfiguration {
+export interface IConfiguration extends IMountActions {
   id: string
   startDate: DateTime | null
   endDate: DateTime | null
@@ -48,9 +49,6 @@ export interface IConfiguration {
   status: string
   location: IStationaryLocation | IDynamicLocation | null
   contacts: IContact[]
-  children: ConfigurationsTreeNode[]
-  platformAttributes: PlatformConfigurationAttributes[]
-  deviceAttributes: DeviceConfigurationAttributes[]
 }
 
 export class Configuration implements IConfiguration {
@@ -63,9 +61,10 @@ export class Configuration implements IConfiguration {
   private _status: string = ''
   private _location: IStationaryLocation | IDynamicLocation | null = null
   private _contacts: IContact[] = [] as IContact[]
-  private _tree: ConfigurationsTree = new ConfigurationsTree()
-  private _platformAttributes: PlatformConfigurationAttributes[] = [] as PlatformConfigurationAttributes[]
-  private _deviceAttributes: DeviceConfigurationAttributes[] = [] as DeviceConfigurationAttributes[]
+  private _deviceMountActions: DeviceMountAction[] = []
+  private _deviceUnmountActions: DeviceUnmountAction[] = []
+  private _platformMountActions: PlatformMountAction[] = []
+  private _platformUnmountActions: PlatformUnmountAction[] = []
 
   get id (): string {
     return this._id
@@ -139,36 +138,36 @@ export class Configuration implements IConfiguration {
     this._contacts = contacts
   }
 
-  get tree (): ConfigurationsTree {
-    return this._tree
+  get deviceMountActions (): DeviceMountAction[] {
+    return this._deviceMountActions
   }
 
-  set tree (tree: ConfigurationsTree) {
-    this._tree = tree
+  set deviceMountActions (newDeviceMountActions: DeviceMountAction[]) {
+    this._deviceMountActions = newDeviceMountActions
   }
 
-  get children (): ConfigurationsTreeNode[] {
-    return this._tree.toArray()
+  get deviceUnmountActions (): DeviceUnmountAction[] {
+    return this._deviceUnmountActions
   }
 
-  set children (children: ConfigurationsTreeNode[]) {
-    this._tree = ConfigurationsTree.fromArray(children)
+  set deviceUnmountActions (newDeviceUnmountActions: DeviceUnmountAction[]) {
+    this._deviceUnmountActions = newDeviceUnmountActions
   }
 
-  get platformAttributes (): PlatformConfigurationAttributes[] {
-    return this._platformAttributes
+  get platformMountActions (): PlatformMountAction[] {
+    return this._platformMountActions
   }
 
-  set platformAttributes (attributes: PlatformConfigurationAttributes[]) {
-    this._platformAttributes = attributes
+  set platformMountActions (newPlatformMountActions: PlatformMountAction[]) {
+    this._platformMountActions = newPlatformMountActions
   }
 
-  get deviceAttributes (): DeviceConfigurationAttributes[] {
-    return this._deviceAttributes
+  get platformUnmountActions (): PlatformUnmountAction[] {
+    return this._platformUnmountActions
   }
 
-  set deviceAttributes (attributes: DeviceConfigurationAttributes[]) {
-    this._deviceAttributes = attributes
+  set platformUnmountActions (newPlatformUnmountActions: PlatformUnmountAction[]) {
+    this._platformUnmountActions = newPlatformUnmountActions
   }
 
   static createFromObject (someObject: Configuration): Configuration {
@@ -194,9 +193,10 @@ export class Configuration implements IConfiguration {
         break
     }
     newObject.contacts = someObject.contacts.map(Contact.createFromObject)
-    newObject.tree = ConfigurationsTree.createFromObject(someObject.tree)
-    newObject.platformAttributes = someObject.platformAttributes.map(PlatformConfigurationAttributes.createFromObject)
-    newObject.deviceAttributes = someObject.deviceAttributes.map(DeviceConfigurationAttributes.createFromObject)
+    newObject.deviceMountActions = someObject.deviceMountActions.map(DeviceMountAction.createFromObject)
+    newObject.deviceUnmountActions = someObject.deviceUnmountActions.map(DeviceUnmountAction.createFromObject)
+    newObject.platformMountActions = someObject.platformMountActions.map(PlatformMountAction.createFromObject)
+    newObject.platformUnmountActions = someObject.platformUnmountActions.map(PlatformUnmountAction.createFromObject)
 
     return newObject
   }

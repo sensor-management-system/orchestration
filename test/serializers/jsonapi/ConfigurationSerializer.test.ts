@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020
+ * Copyright (C) 2020-2021
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -32,12 +32,13 @@
 import { DateTime } from 'luxon'
 
 import { Configuration } from '@/models/Configuration'
-import { ConfigurationsTree } from '@/models/ConfigurationsTree'
 import { Contact } from '@/models/Contact'
 import { Device } from '@/models/Device'
-import { DeviceNode } from '@/models/DeviceNode'
-import { PlatformNode } from '@/models/PlatformNode'
+import { DeviceMountAction } from '@/models/DeviceMountAction'
+import { DeviceUnmountAction } from '@/models/DeviceUnmountAction'
 import { Platform } from '@/models/Platform'
+import { PlatformMountAction } from '@/models/PlatformMountAction'
+import { PlatformUnmountAction } from '@/models/PlatformUnmountAction'
 import { StationaryLocation, DynamicLocation, LocationType } from '@/models/Location'
 
 import {
@@ -52,8 +53,6 @@ import {
   configurationWithMetaToConfigurationByAddingDummyObjects
 } from '@/serializers/jsonapi/ConfigurationSerializer'
 
-import { PlatformConfigurationAttributes } from '@/models/PlatformConfigurationAttributes'
-import { DeviceConfigurationAttributes } from '@/models/DeviceConfigurationAttributes'
 import { DeviceProperty } from '@/models/DeviceProperty'
 import { MeasuringRange } from '@/models/MeasuringRange'
 
@@ -76,46 +75,7 @@ describe('ConfigurationSerializer', () => {
             project_uri: 'projects/Tereno-NO',
             project_name: 'Tereno NO',
             label: 'Tereno NO Boeken',
-            status: 'draft',
-            hierarchy: [
-              {
-                type: 'platform',
-                id: '37',
-                offset_x: 1.0,
-                offset_y: 2.0,
-                offset_z: 3.0,
-                children: [{
-                  type: 'platform',
-                  id: '38',
-                  offset_x: 4.0,
-                  offset_y: 5.0,
-                  offset_z: 6.0,
-                  children: [{
-                    type: 'device',
-                    id: '39',
-                    offset_x: 7.0,
-                    offset_y: 8.0,
-                    offset_z: 9.0,
-                    calibration_date: '2020-01-01T13:49:48.015620+00:00',
-                    firmware_version: 'v1.0'
-                  }, {
-                    type: 'device',
-                    id: '40',
-                    offset_x: 10.0,
-                    offset_y: 11.0,
-                    offset_z: 12.0,
-                    calibration_date: null,
-                    firmware_version: null
-                  }]
-                }]
-              }, {
-                type: 'platform',
-                id: '41',
-                offset_x: 13.0,
-                offset_y: 14.0,
-                offset_z: 15.0
-              }
-            ]
+            status: 'draft'
           },
           relationships: {
             src_longitude: {
@@ -131,6 +91,50 @@ describe('ConfigurationSerializer', () => {
               }
             },
             src_elevation: {
+            },
+            platform_mount_actions: {
+              data: [
+                {
+                  type: 'platform_mount_action',
+                  id: '1'
+                },
+                {
+                  type: 'platform_mount_action',
+                  id: '2'
+                },
+                {
+                  type: 'platform_mount_action',
+                  id: '3'
+                }
+              ]
+            },
+            platform_unmount_actions: {
+              data: [
+                {
+                  type: 'platform_unmount_action',
+                  id: '1'
+                }
+              ]
+            },
+            device_mount_actions: {
+              data: [
+                {
+                  type: 'device_mount_action',
+                  id: '1'
+                },
+                {
+                  type: 'device_mount_action',
+                  id: '2'
+                }
+              ]
+            },
+            device_unmount_actions: {
+              data: [
+                {
+                  type: 'device_unmount_action',
+                  id: '1'
+                }
+              ]
             }
             // no contacts, as we expect an empty case here
           },
@@ -169,6 +173,245 @@ describe('ConfigurationSerializer', () => {
         // The point of which platforms and devices are used is mentiond in the hierarchy.
         // so there is no further need to add other relationships
         included: [{
+          type: 'platform_mount_action',
+          id: '1',
+          attributes: {
+            offset_x: 1.0,
+            offset_y: 2.0,
+            offset_z: 3.0,
+            description: '',
+            begin_date: '2020-01-01T13:49:48.000000+00:00'
+          },
+          relationships: {
+            platform: {
+              data: {
+                type: 'platform',
+                id: '37'
+              }
+            },
+            contact: {
+              data: {
+                type: 'contact',
+                id: '1'
+              }
+            },
+            configuration: {
+              data: {
+                type: 'configuration',
+                id: '1'
+              }
+            }
+          }
+        },
+        {
+          type: 'platform_mount_action',
+          id: '2',
+          attributes: {
+            offset_x: 4.0,
+            offset_y: 5.0,
+            offset_z: 6.0,
+            description: '',
+            begin_date: '2020-01-01T14:49:48.000000+00:00'
+          },
+          relationships: {
+            platform: {
+              data: {
+                type: 'platform',
+                id: '38'
+              }
+            },
+            parent_platform: {
+              data: {
+                type: 'platform',
+                id: '37'
+              }
+            },
+            contact: {
+              data: {
+                type: 'contact',
+                id: '1'
+              }
+            },
+            configuration: {
+              data: {
+                type: 'configuration',
+                id: '1'
+              }
+            }
+          }
+        },
+        {
+          type: 'platform_mount_action',
+          id: '3',
+          attributes: {
+            offset_x: 13.0,
+            offset_y: 14.0,
+            offset_z: 15.0,
+            description: 'mount',
+            begin_date: '2020-01-01T15:49:48.000000+00:00'
+          },
+          relationships: {
+            platform: {
+              data: {
+                type: 'platform',
+                id: '41'
+              }
+            },
+            contact: {
+              data: {
+                type: 'contact',
+                id: '1'
+              }
+            },
+            configuration: {
+              data: {
+                type: 'configuration',
+                id: '1'
+              }
+            }
+          }
+        },
+        {
+          type: 'platform_unmount_action',
+          id: '1',
+          attributes: {
+            end_date: '2021-01-01T15:49:48.000000+00:00',
+            description: 'unmount'
+          },
+          relationships: {
+            platform: {
+              data: {
+                type: 'platform',
+                id: '41'
+              }
+            },
+            contact: {
+              data: {
+                type: 'contact',
+                id: '1'
+              }
+            },
+            configuration: {
+              data: {
+                type: 'configuration',
+                id: '1'
+              }
+            }
+          }
+        },
+        {
+          type: 'device_mount_action',
+          id: '1',
+          attributes: {
+            offset_x: 7.0,
+            offset_y: 8.0,
+            offset_z: 9.0,
+            description: '',
+            begin_date: '2020-01-01T16:49:48.000000+00:00'
+          },
+          relationships: {
+            device: {
+              data: {
+                type: 'device',
+                id: '39'
+              }
+            },
+            parent_platform: {
+              data: {
+                type: 'platform',
+                id: '38'
+              }
+            },
+            contact: {
+              data: {
+                type: 'contact',
+                id: '1'
+              }
+            },
+            configuration: {
+              data: {
+                type: 'configuration',
+                id: '1'
+              }
+            }
+          }
+        },
+        {
+          type: 'device_mount_action',
+          id: '2',
+          attributes: {
+            offset_x: 10.0,
+            offset_y: 11.0,
+            offset_z: 12.0,
+            description: 'device mount',
+            begin_date: '2020-01-01T17:49:48.000000+00:00'
+          },
+          relationships: {
+            device: {
+              data: {
+                type: 'device',
+                id: '40'
+              }
+            },
+            parent_platform: {
+              data: {
+                type: 'platform',
+                id: '38'
+              }
+            },
+            contact: {
+              data: {
+                type: 'contact',
+                id: '1'
+              }
+            },
+            configuration: {
+              data: {
+                type: 'configuration',
+                id: '1'
+              }
+            }
+          }
+        },
+        {
+          type: 'device_unmount_action',
+          id: '1',
+          attributes: {
+            description: 'device unmount',
+            end_date: '2021-01-01T17:49:48.000000+00:00'
+          },
+          relationships: {
+            device: {
+              data: {
+                type: 'device',
+                id: '40'
+              }
+            },
+            contact: {
+              data: {
+                type: 'contact',
+                id: '1'
+              }
+            },
+            configuration: {
+              data: {
+                type: 'configuration',
+                id: '1'
+              }
+            }
+          }
+        },
+        {
+          type: 'contact',
+          id: '1',
+          attributes: {
+            given_name: 'Max',
+            family_name: 'Mustermann',
+            email: 'max@mustermann.xyz',
+            website: ''
+          }
+        },
+        {
           type: 'platform',
           id: '37',
           attributes: {
@@ -424,6 +667,89 @@ describe('ConfigurationSerializer', () => {
         updatedByUserId: null
       })
 
+      const expectedContact = new Contact()
+      expectedContact.id = '1'
+      expectedContact.givenName = 'Max'
+      expectedContact.familyName = 'Mustermann'
+      expectedContact.email = 'max@mustermann.xyz'
+      expectedContact.website = ''
+
+      const expectedPlatformMountAction1 = PlatformMountAction.createFromObject({
+        id: '1',
+        offsetX: 1.0,
+        offsetY: 2.0,
+        offsetZ: 3.0,
+        description: '',
+        platform: expectedPlatform1,
+        parentPlatform: null,
+        contact: expectedContact,
+        date: DateTime.utc(2020, 1, 1, 13, 49, 48)
+      })
+
+      const expectedPlatformMountAction2 = PlatformMountAction.createFromObject({
+        id: '2',
+        offsetX: 4.0,
+        offsetY: 5.0,
+        offsetZ: 6.0,
+        description: '',
+        platform: expectedPlatform2,
+        parentPlatform: expectedPlatform1,
+        contact: expectedContact,
+        date: DateTime.utc(2020, 1, 1, 14, 49, 48)
+      })
+
+      const expectedPlatformMountAction3 = PlatformMountAction.createFromObject({
+        id: '3',
+        offsetX: 13.0,
+        offsetY: 14.0,
+        offsetZ: 15.0,
+        description: 'mount',
+        platform: expectedPlatform3,
+        parentPlatform: null,
+        contact: expectedContact,
+        date: DateTime.utc(2020, 1, 1, 15, 49, 48)
+      })
+
+      const expectedPlatformUnmountAction1 = PlatformUnmountAction.createFromObject({
+        id: '1',
+        platform: expectedPlatform3,
+        contact: expectedContact,
+        description: 'unmount',
+        date: DateTime.utc(2021, 1, 1, 15, 49, 48)
+      })
+
+      const expectedDeviceMountAction1 = DeviceMountAction.createFromObject({
+        id: '1',
+        offsetX: 7.0,
+        offsetY: 8.0,
+        offsetZ: 9.0,
+        description: '',
+        device: expectedDevice1,
+        parentPlatform: expectedPlatform2,
+        contact: expectedContact,
+        date: DateTime.utc(2020, 1, 1, 16, 49, 48)
+      })
+
+      const expectedDeviceMountAction2 = DeviceMountAction.createFromObject({
+        id: '2',
+        offsetX: 10.0,
+        offsetY: 11.0,
+        offsetZ: 12.0,
+        description: 'device mount',
+        device: expectedDevice2,
+        parentPlatform: expectedPlatform2,
+        contact: expectedContact,
+        date: DateTime.utc(2020, 1, 1, 17, 49, 48)
+      })
+
+      const expectedDeviceUnmountAction1 = DeviceUnmountAction.createFromObject({
+        id: '1',
+        device: expectedDevice2,
+        date: DateTime.utc(2021, 1, 1, 17, 49, 48),
+        description: 'device unmount',
+        contact: expectedContact
+      })
+
       const expectedConfiguration1 = new Configuration()
       expectedConfiguration1.id = '1'
       expectedConfiguration1.location = DynamicLocation.createFromObject({
@@ -437,71 +763,17 @@ describe('ConfigurationSerializer', () => {
       expectedConfiguration1.projectName = 'Tereno NO'
       expectedConfiguration1.label = 'Tereno NO Boeken'
       expectedConfiguration1.status = 'draft'
-      expectedConfiguration1.children = ConfigurationsTree.fromArray(
-        [
-          ((): PlatformNode => {
-            const n = new PlatformNode(expectedPlatform1)
-            n.setTree(
-              ConfigurationsTree.fromArray(
-                [
-                  ((): PlatformNode => {
-                    const n = new PlatformNode(expectedPlatform2)
-                    n.setTree(
-                      ConfigurationsTree.fromArray(
-                        [
-                          new DeviceNode(expectedDevice1),
-                          new DeviceNode(expectedDevice2)
-                        ]
-                      )
-                    )
-                    return n
-                  })()
-                ]
-              )
-            )
-            return n
-          })(),
-          new PlatformNode(expectedPlatform3)
-        ]
-      ).toArray()
-      expectedConfiguration1.platformAttributes = [
-        PlatformConfigurationAttributes.createFromObject({
-          platform: expectedPlatform1,
-          offsetX: 1.0,
-          offsetY: 2.0,
-          offsetZ: 3.0
-        }),
-        PlatformConfigurationAttributes.createFromObject({
-          platform: expectedPlatform2,
-          offsetX: 4.0,
-          offsetY: 5.0,
-          offsetZ: 6.0
-        }),
-        PlatformConfigurationAttributes.createFromObject({
-          platform: expectedPlatform3,
-          offsetX: 13.0,
-          offsetY: 14.0,
-          offsetZ: 15.0
-        })
+      expectedConfiguration1.platformMountActions = [
+        expectedPlatformMountAction1,
+        expectedPlatformMountAction2,
+        expectedPlatformMountAction3
       ]
-      expectedConfiguration1.deviceAttributes = [
-        DeviceConfigurationAttributes.createFromObject({
-          device: expectedDevice1,
-          offsetX: 7.0,
-          offsetY: 8.0,
-          offsetZ: 9.0,
-          calibrationDate: DateTime.utc(2020, 1, 1, 13, 49, 48, 15),
-          firmwareVersion: 'v1.0'
-        }),
-        DeviceConfigurationAttributes.createFromObject({
-          device: expectedDevice2,
-          offsetX: 10.0,
-          offsetY: 11.0,
-          offsetZ: 12.0,
-          calibrationDate: null,
-          firmwareVersion: ''
-        })
+      expectedConfiguration1.platformUnmountActions = [expectedPlatformUnmountAction1]
+      expectedConfiguration1.deviceMountActions = [
+        expectedDeviceMountAction1,
+        expectedDeviceMountAction2
       ]
+      expectedConfiguration1.deviceUnmountActions = [expectedDeviceUnmountAction1]
 
       const expectedConfiguration2 = new Configuration()
       expectedConfiguration2.id = '2'
@@ -529,11 +801,15 @@ describe('ConfigurationSerializer', () => {
       expect(configurations.length).toEqual(4)
 
       expect(configurations[0]).toEqual(expectedConfiguration1)
-      expect(configurations[0].deviceAttributes.length).toEqual(2)
-      expect(configurations[0].platformAttributes.length).toEqual(3)
+      expect(configurations[0].deviceMountActions.length).toEqual(2)
+      expect(configurations[0].platformMountActions.length).toEqual(3)
+      expect(configurations[0].deviceUnmountActions.length).toEqual(1)
+      expect(configurations[0].platformUnmountActions.length).toEqual(1)
       expect(configurations[1]).toEqual(expectedConfiguration2)
-      expect(configurations[1].deviceAttributes.length).toEqual(0)
-      expect(configurations[1].platformAttributes.length).toEqual(0)
+      expect(configurations[1].deviceMountActions.length).toEqual(0)
+      expect(configurations[1].platformMountActions.length).toEqual(0)
+      expect(configurations[1].deviceUnmountActions.length).toEqual(0)
+      expect(configurations[1].platformUnmountActions.length).toEqual(0)
       expect(configurations[2]).toEqual(expectedConfiguration3)
       expect(configurations[3]).toEqual(expectedConfiguration4)
 
@@ -978,156 +1254,12 @@ describe('ConfigurationSerializer', () => {
       expect(attributes.elevation).toEqual(null)
     })
   })
-  it('should also serialize a platform & device hierarchy', () => {
-    const platform1 = ((): Platform => {
-      const o = new Platform()
-      o.id = '1'
-      o.shortName = 'Platform 01'
-      return o
-    })()
-    const platform2 = ((): Platform => {
-      const o = new Platform()
-      o.id = '2'
-      o.shortName = 'Platform 02'
-      return o
-    })()
-    const device3 = ((): Device => {
-      const o = new Device()
-      o.id = '3'
-      o.shortName = 'Device 01'
-      return o
-    })()
-    const device4 = ((): Device => {
-      const o = new Device()
-      o.id = '4'
-      o.shortName = 'Device 02'
-      return o
-    })()
-    const device5 = ((): Device => {
-      const o = new Device()
-      o.id = '5'
-      o.shortName = 'Device 03'
-      return o
-    })()
-    const platform6 = ((): Platform => {
-      const o = new Platform()
-      o.id = '6'
-      o.shortName = 'Platform 03'
-      return o
-    })()
-    const configuration = new Configuration()
-    configuration.children = ConfigurationsTree.fromArray(
-      [
-        ((): PlatformNode => {
-          const n = new PlatformNode(platform1)
-          n.setTree(
-            ConfigurationsTree.fromArray(
-              [
-                ((): PlatformNode => {
-                  const n = new PlatformNode(platform2)
-                  n.setTree(
-                    ConfigurationsTree.fromArray(
-                      [
-                        new DeviceNode(device3),
-                        new DeviceNode(device4),
-                        new DeviceNode(device5)
-                      ]
-                    )
-                  )
-                  return n
-                })()
-              ]
-            )
-          )
-          return n
-        })(),
-        (() => {
-          const n = new PlatformNode(platform6)
-          return n
-        })()
-      ]
-    ).toArray()
-    configuration.platformAttributes = [
-      PlatformConfigurationAttributes.createFromObject({
-        platform: platform1,
-        offsetX: 1.0,
-        offsetY: 2.0,
-        offsetZ: 3.0
-      }),
-      // none for platform2
-      PlatformConfigurationAttributes.createFromObject({
-        platform: platform6,
-        offsetX: 6.0,
-        offsetY: 7.0,
-        offsetZ: 8.0
-      })
-    ]
-    configuration.deviceAttributes = [
-      DeviceConfigurationAttributes.createFromObject({
-        device: device3,
-        offsetX: 11.0,
-        offsetY: 12.0,
-        offsetZ: 13.0,
-        calibrationDate: null,
-        firmwareVersion: ''
-      }),
-      // none for device4
-      DeviceConfigurationAttributes.createFromObject({
-        device: device5,
-        offsetX: 22.0,
-        offsetY: 23.0,
-        offsetZ: 24.0,
-        calibrationDate: DateTime.utc(2020, 11, 9, 0, 0, 0, 0),
-        firmwareVersion: 'v.2.0'
-      })
-
-    ]
-
-    const serializer = new ConfigurationSerializer()
-    const jsonApiData = serializer.convertModelToJsonApiData(configuration)
-
-    const attributes = jsonApiData.attributes
-    const hierarchy = attributes.hierarchy
-
-    const expectedHierarchy = [{
-      type: 'platform',
-      id: '1',
-      offset_x: 1.0,
-      offset_y: 2.0,
-      offset_z: 3.0,
-      children: [{
-        type: 'platform',
-        id: '2',
-        children: [{
-          type: 'device',
-          id: '3',
-          offset_x: 11.0,
-          offset_y: 12.0,
-          offset_z: 13.0,
-          firmware_version: ''
-        }, {
-          type: 'device',
-          id: '4'
-        }, {
-          type: 'device',
-          id: '5',
-          offset_x: 22.0,
-          offset_y: 23.0,
-          offset_z: 24.0,
-          calibration_date: '2020-11-09T00:00:00.000Z',
-          firmware_version: 'v.2.0'
-        }]
-      }]
-    }, {
-      type: 'platform',
-      id: '6',
-      offset_x: 6.0,
-      offset_y: 7.0,
-      offset_z: 8.0
-    }]
-
-    expect(hierarchy).toEqual(expectedHierarchy)
-  })
+  // in earlier versions, the test to serialize the configuration hierarchy
+  // was here. As we don't handle a single hierarchy anymore, but the
+  // the list of mpunt & unmount actions it is no longer representative.
+  // (And the actions themselves are handled as entities of the JSON:API
+  // on their own, so there is really no point in checking them for the
+  // serializer).
 })
 describe('configurationWithMetaToConfigurationByThrowingErrorOnMissing', () => {
   it('should work without missing data', () => {

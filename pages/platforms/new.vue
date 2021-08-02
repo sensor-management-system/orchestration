@@ -47,7 +47,7 @@ permissions and limitations under the Licence.
           small
           text
           nuxt
-          to="/search/platforms"
+          to="/platforms"
         >
           cancel
         </v-btn>
@@ -71,7 +71,7 @@ permissions and limitations under the Licence.
           small
           text
           nuxt
-          to="/search/platforms"
+          to="/platforms"
         >
           cancel
         </v-btn>

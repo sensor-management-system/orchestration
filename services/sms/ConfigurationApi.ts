@@ -53,13 +53,34 @@ import {
 } from '@/serializers/jsonapi/ConfigurationSerializer'
 
 import { ContactSerializer } from '@/serializers/jsonapi/ContactSerializer'
+import { DeviceMountActionApi } from './DeviceMountActionApi'
+import { DeviceUnmountActionApi } from './DeviceUnmountActionApi'
+import { PlatformMountActionApi } from './PlatformMountActionApi'
+import { PlatformUnmountActionApi } from './PlatformUnmountActionApi'
 
 export class ConfigurationApi {
   private axiosApi: AxiosInstance
+
+  private deviceMountActionApi: DeviceMountActionApi
+  private deviceUnmountActionApi: DeviceUnmountActionApi
+  private platformMountActionApi: PlatformMountActionApi
+  private platformUnmountActionApi: PlatformUnmountActionApi
+
   private serializer: ConfigurationSerializer
 
-  constructor (axiosInstance: AxiosInstance) {
+  constructor (
+    axiosInstance: AxiosInstance,
+    deviceMountActionApi: DeviceMountActionApi,
+    deviceUnmountActionApi: DeviceUnmountActionApi,
+    platformMountActionApi: PlatformMountActionApi,
+    platformUnmountActionApi: PlatformUnmountActionApi
+  ) {
     this.axiosApi = axiosInstance
+    this.deviceMountActionApi = deviceMountActionApi
+    this.deviceUnmountActionApi = deviceUnmountActionApi
+    this.platformMountActionApi = platformMountActionApi
+    this.platformUnmountActionApi = platformUnmountActionApi
+
     this.serializer = new ConfigurationSerializer()
   }
 
@@ -68,12 +89,20 @@ export class ConfigurationApi {
       params: {
         include: [
           'contacts',
-          'configuration_platforms.platform',
-          'configuration_devices.device',
-          'configuration_devices.device.device_properties',
           'src_longitude',
           'src_latitude',
-          'src_elevation'
+          'src_elevation',
+          'device_mount_actions',
+          'device_unmount_actions',
+          'platform_mount_actions',
+          'platform_unmount_actions',
+          'platform_mount_actions.platform',
+          'device_mount_actions.device',
+          'device_mount_actions.device.device_properties',
+          'device_mount_actions.contact',
+          'platform_mount_actions.contact',
+          'platform_unmount_actions.contact',
+          'device_unmount_actions.contact'
         ].join(',')
       }
     }).then((rawResponse) => {
@@ -87,50 +116,121 @@ export class ConfigurationApi {
     return this.axiosApi.delete<string, void>(id)
   }
 
-  save (configuration: Configuration): Promise<Configuration> {
+  async save (configuration: Configuration): Promise<Configuration> {
     const data: any = this.serializer.convertModelToJsonApiData(configuration)
     let method: Method = 'patch'
     let url = ''
     const relationshipsToDelete : string[] = []
+    let platformMountActionIdsToDelete: Set<string> = new Set()
+    let platformMountActionIdsToUpdate: Set<string> = new Set()
+    let platformUnmountActionIdsToDelete: Set<string> = new Set()
+    let platformUnmountActionIdsToUpdate: Set<string> = new Set()
+    let deviceMountActionIdsToDelete: Set<string> = new Set()
+    let deviceMountActionIdsToUpdate: Set<string> = new Set()
+    let deviceUnmountActionIdsToDelete: Set<string> = new Set()
+    let deviceUnmountActionIdsToUpdate: Set<string> = new Set()
+    // step 1
+    // load existing config to check current setting of the configuration
+
+    if (configuration.id) {
+      const existingConfig = await this.findById(configuration.id)
+      if (existingConfig.location instanceof DynamicLocation) {
+        if (configuration.location instanceof DynamicLocation) {
+          if (configuration.location.elevation == null && existingConfig.location.elevation !== null) {
+            relationshipsToDelete.push('src-elevation')
+          }
+          if (configuration.location.latitude == null && existingConfig.location.latitude !== null) {
+            relationshipsToDelete.push('src-latitude')
+          }
+          if (configuration.location.longitude == null && existingConfig.location.longitude !== null) {
+            relationshipsToDelete.push('src-longitude')
+          }
+        } else {
+          relationshipsToDelete.push('src-elevation')
+          relationshipsToDelete.push('src-latitude')
+          relationshipsToDelete.push('src-longitude')
+        }
+      }
+      const newPlatformMountActionIds = new Set(configuration.platformMountActions.map(x => x.id))
+      platformMountActionIdsToDelete = new Set(existingConfig.platformMountActions.map(x => x.id).filter(x => !newPlatformMountActionIds.has(x)))
+      platformMountActionIdsToUpdate = new Set(existingConfig.platformMountActions.map(x => x.id).filter(x => newPlatformMountActionIds.has(x)))
+      const newPlatformUnmountActionIds = new Set(configuration.platformUnmountActions.map(x => x.id))
+      platformUnmountActionIdsToDelete = new Set(existingConfig.platformUnmountActions.map(x => x.id).filter(x => !newPlatformUnmountActionIds.has(x)))
+      platformUnmountActionIdsToUpdate = new Set(existingConfig.platformUnmountActions.map(x => x.id).filter(x => newPlatformUnmountActionIds.has(x)))
+
+      const newDeviceMountActionIds = new Set(configuration.deviceMountActions.map(x => x.id))
+      deviceMountActionIdsToDelete = new Set(existingConfig.deviceMountActions.map(x => x.id).filter(x => !newDeviceMountActionIds.has(x)))
+      deviceMountActionIdsToUpdate = new Set(existingConfig.deviceMountActions.map(x => x.id).filter(x => newDeviceMountActionIds.has(x)))
+      const newDeviceUnmountActionIds = new Set(configuration.deviceUnmountActions.map(x => x.id))
+      deviceUnmountActionIdsToDelete = new Set(existingConfig.deviceUnmountActions.map(x => x.id).filter(x => !newDeviceUnmountActionIds.has(x)))
+      deviceUnmountActionIdsToUpdate = new Set(existingConfig.deviceUnmountActions.map(x => x.id).filter(x => newDeviceUnmountActionIds.has(x)))
+    }
 
     if (!configuration.id) {
       method = 'post'
     } else {
       url = configuration.id
-
-      if (configuration.location instanceof DynamicLocation) {
-        if (configuration.location.elevation == null) {
-          // it uses here the url views to send a delete request
-          relationshipsToDelete.push('src-elevation')
-        }
-        if (configuration.location.latitude == null) {
-          relationshipsToDelete.push('src-latitude')
-        }
-        if (configuration.location.longitude == null) {
-          relationshipsToDelete.push('src-longitude')
-        }
-      } else {
-        relationshipsToDelete.push('src-elevation')
-        relationshipsToDelete.push('src-latitude')
-        relationshipsToDelete.push('src-longitude')
-      }
     }
-    return this.axiosApi.request({
+    const serverAnswer = await this.axiosApi.request({
       url,
       method,
       data: {
         data
       }
-    }).then((serverAnswer) => {
-      return this.tryToDeleteRelationshipsAndFindById(relationshipsToDelete, serverAnswer.data.data.id)
     })
-  }
+    const configurationId = serverAnswer.data.data.id
+    const promisesDelete = []
+    for (const deviceMountActionId of deviceMountActionIdsToDelete) {
+      promisesDelete.push(this.deviceMountActionApi.deleteById(deviceMountActionId))
+    }
+    for (const deviceUnmontActionId of deviceUnmountActionIdsToDelete) {
+      promisesDelete.push(this.deviceUnmountActionApi.deleteById(deviceUnmontActionId))
+    }
+    for (const platformMountActionId of platformMountActionIdsToDelete) {
+      promisesDelete.push(this.platformMountActionApi.deleteById(platformMountActionId))
+    }
+    for (const platformUnmountAtionId of platformUnmountActionIdsToDelete) {
+      promisesDelete.push(this.platformUnmountActionApi.deleteById(platformUnmountAtionId))
+    }
+    for (const relationship in relationshipsToDelete) {
+      promisesDelete.push(this.tryToDeleteRelationship(relationship, configurationId))
+    }
 
-  private async tryToDeleteRelationshipsAndFindById (relationshipsToDelete: string[], id: string) : Promise<Configuration> {
-    await Promise.all(relationshipsToDelete.map(async (r: string) => {
-      await this.tryToDeleteRelationship(r, id)
-    }))
-    return this.findById(id)
+    await Promise.all(promisesDelete)
+
+    // now we need to add the new ones
+    const promisesSave = []
+    for (const platformMountAction of configuration.platformMountActions) {
+      if (!platformMountAction.id) {
+        promisesSave.push(this.platformMountActionApi.add(configurationId, platformMountAction))
+      } else if (platformMountActionIdsToUpdate.has(platformMountAction.id)) {
+        promisesSave.push(this.platformMountActionApi.update(configurationId, platformMountAction))
+      }
+    }
+    for (const platformUnmountAction of configuration.platformUnmountActions) {
+      if (!platformUnmountAction.id) {
+        promisesSave.push(this.platformUnmountActionApi.add(configurationId, platformUnmountAction))
+      } else if (platformUnmountActionIdsToUpdate.has(platformUnmountAction.id)) {
+        promisesSave.push(this.platformUnmountActionApi.update(configurationId, platformUnmountAction))
+      }
+    }
+    for (const deviceMountAction of configuration.deviceMountActions) {
+      if (!deviceMountAction.id) {
+        promisesSave.push(this.deviceMountActionApi.add(configurationId, deviceMountAction))
+      } else if (deviceMountActionIdsToUpdate.has(deviceMountAction.id)) {
+        promisesSave.push(this.deviceMountActionApi.update(configurationId, deviceMountAction))
+      }
+    }
+    for (const deviceUnmountAction of configuration.deviceUnmountActions) {
+      if (!deviceUnmountAction.id) {
+        promisesSave.push(this.deviceUnmountActionApi.add(configurationId, deviceUnmountAction))
+      } else if (deviceUnmountActionIdsToUpdate.has(deviceUnmountAction.id)) {
+        promisesSave.push(this.deviceUnmountActionApi.update(configurationId, deviceUnmountAction))
+      }
+    }
+    await Promise.all(promisesSave)
+
+    return this.findById(configurationId)
   }
 
   private async tryToDeleteRelationship (relationshipToDelete: string, id: string) {

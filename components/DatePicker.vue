@@ -45,7 +45,7 @@ permissions and limitations under the Licence.
           :rules="rules"
           v-bind="attrs"
           :label="label"
-          clearable
+          :clearable="clearable"
           prepend-icon="mdi-calendar-range"
           readonly
           v-on="on"
@@ -130,6 +130,13 @@ export default class DatePicker extends Vue {
   })
   // @ts-ignore
   readonly readonly: boolean
+
+  @Prop({
+    default: true,
+    type: Boolean
+  })
+  // @ts-ignore
+  readonly clearable: boolean
 
   /**
    * returns the date as a string representation

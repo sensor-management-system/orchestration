@@ -47,8 +47,9 @@ import {
   IContactAndMissing
 } from '@/serializers/jsonapi/ContactSerializer'
 
+import { IActionAttachmentSerializer } from '@/serializers/jsonapi/ActionAttachmentSerializer'
+
 import {
-  IGenericActionAttachmentSerializer,
   GenericDeviceActionAttachmentSerializer,
   GenericPlatformActionAttachmentSerializer
 } from '@/serializers/jsonapi/GenericActionAttachmentSerializer'
@@ -58,7 +59,7 @@ export interface IMissingGenericActionData {
 }
 
 export interface IGenericActionsAndMissing {
-  genericDeviceActions: GenericAction[]
+  genericActions: GenericAction[]
   missing: IMissingGenericActionData
 }
 
@@ -69,7 +70,7 @@ export interface IGenericActionAttachmentRelation {
 
 export interface IGenericActionSerializer {
   targetType: string
-  attachmentSerializer: IGenericActionAttachmentSerializer
+  attachmentSerializer: IActionAttachmentSerializer
   convertJsonApiObjectToModel (jsonApiObject: IJsonApiEntityEnvelope): GenericAction
   convertJsonApiDataToModel (jsonApiData: IJsonApiEntityWithOptionalAttributes, included: IJsonApiEntityWithOptionalAttributes[]): GenericAction
   convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiEntityListEnvelope): GenericAction[]
@@ -77,7 +78,7 @@ export interface IGenericActionSerializer {
   convertModelToJsonApiRelationshipObject (action: IGenericAction): IJsonApiRelationships
   convertModelToTupleWithIdAndType (action: IGenericAction): IJsonApiEntityWithoutDetails
   convertJsonApiRelationshipsModelList (relationships: IJsonApiRelationships, included: IJsonApiEntityWithOptionalAttributes[]): IGenericActionsAndMissing
-  convertJsonApiIncludedGenericActionAttachmentsToIdList (included: IJsonApiEntityWithOptionalAttributes[]): IGenericActionAttachmentRelation[]
+  convertJsonApiIncludedActionAttachmentsToIdList (included: IJsonApiEntityWithOptionalAttributes[]): IGenericActionAttachmentRelation[]
   getActionTypeName (): string
   getActionTypeNamePlural (): string
   getActionAttachmentTypeName (): string
@@ -87,7 +88,7 @@ export abstract class AbstractGenericActionSerializer implements IGenericActionS
   private contactSerializer: ContactSerializer = new ContactSerializer()
 
   abstract get targetType (): string
-  abstract get attachmentSerializer (): IGenericActionAttachmentSerializer
+  abstract get attachmentSerializer (): IActionAttachmentSerializer
 
   convertJsonApiObjectToModel (jsonApiObject: IJsonApiEntityEnvelope): GenericAction {
     const data = jsonApiObject.data
@@ -218,14 +219,14 @@ export abstract class AbstractGenericActionSerializer implements IGenericActionS
     }
 
     return {
-      genericDeviceActions: actions,
+      genericActions: actions,
       missing: {
         ids: missingDataForActionIds
       }
     }
   }
 
-  convertJsonApiIncludedGenericActionAttachmentsToIdList (included: IJsonApiEntityWithOptionalAttributes[]): IGenericActionAttachmentRelation[] {
+  convertJsonApiIncludedActionAttachmentsToIdList (included: IJsonApiEntityWithOptionalAttributes[]): IGenericActionAttachmentRelation[] {
     const linkedAttachments: IGenericActionAttachmentRelation[] = []
     const type = this.getActionAttachmentTypeName()
     included.forEach((i) => {
@@ -261,35 +262,35 @@ export abstract class AbstractGenericActionSerializer implements IGenericActionS
 }
 
 export class GenericDeviceActionSerializer extends AbstractGenericActionSerializer {
-  private _attachmentSerializer: IGenericActionAttachmentSerializer
-
-  get targetType (): string {
-    return 'device'
-  }
-
-  get attachmentSerializer (): IGenericActionAttachmentSerializer {
-    return this._attachmentSerializer
-  }
+  private _attachmentSerializer: IActionAttachmentSerializer
 
   constructor () {
     super()
     this._attachmentSerializer = new GenericDeviceActionAttachmentSerializer()
   }
+
+  get targetType (): string {
+    return 'device'
+  }
+
+  get attachmentSerializer (): IActionAttachmentSerializer {
+    return this._attachmentSerializer
+  }
 }
 
 export class GenericPlatformActionSerializer extends AbstractGenericActionSerializer {
-  private _attachmentSerializer: IGenericActionAttachmentSerializer
+  private _attachmentSerializer: IActionAttachmentSerializer
+
+  constructor () {
+    super()
+    this._attachmentSerializer = new GenericPlatformActionAttachmentSerializer()
+  }
 
   get targetType (): string {
     return 'platform'
   }
 
-  get attachmentSerializer (): IGenericActionAttachmentSerializer {
+  get attachmentSerializer (): IActionAttachmentSerializer {
     return this._attachmentSerializer
-  }
-
-  constructor () {
-    super()
-    this._attachmentSerializer = new GenericPlatformActionAttachmentSerializer()
   }
 }

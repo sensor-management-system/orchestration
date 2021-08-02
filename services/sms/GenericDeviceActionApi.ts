@@ -33,7 +33,7 @@ import { AxiosInstance } from 'axios'
 
 import { Attachment } from '@/models/Attachment'
 import { GenericAction } from '@/models/GenericAction'
-import { GenericDeviceActionAttachmentApi } from '@/services/sms/GenericDeviceActionAttachmentApi'
+import { GenericDeviceActionAttachmentApi } from '@/services/sms/GenericActionAttachmentApi'
 import { IGenericActionSerializer, GenericDeviceActionSerializer } from '@/serializers/jsonapi/GenericActionSerializer'
 
 export class GenericDeviceActionApi {
@@ -95,7 +95,7 @@ export class GenericDeviceActionApi {
     // get the relations between attachments and generic device action attachments
     const linkedAttachments: { [attachmentId: string]: string } = {}
     if (included) {
-      const relations = this.serializer.convertJsonApiIncludedGenericActionAttachmentsToIdList(included)
+      const relations = this.serializer.convertJsonApiIncludedActionAttachmentsToIdList(included)
       // convert to object to gain faster access to its members
       relations.forEach((rel) => {
         linkedAttachments[rel.attachmentId] = rel.genericActionAttachmentId
@@ -131,16 +131,5 @@ export class GenericDeviceActionApi {
     await Promise.all([...deletedPromises, ...newPromises])
 
     return this.serializer.convertJsonApiObjectToModel(actionResponse.data)
-  }
-
-  findRelatedGenericActionAttachments (actionId: string): Promise<GenericAction[]> {
-    const url = actionId + '/generic-device-action-attachments'
-    const params = {
-      'page[size]': 10000,
-      include: 'attachment'
-    }
-    return this.axiosApi.get(url, { params }).then((rawServerResponse) => {
-      return this.serializer.convertJsonApiObjectListToModelList(rawServerResponse.data)
-    })
   }
 }

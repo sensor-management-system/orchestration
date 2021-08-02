@@ -38,6 +38,9 @@ import { PlatformType } from '@/models/PlatformType'
 import { Manufacturer } from '@/models/Manufacturer'
 import { Status } from '@/models/Status'
 
+import { PlatformMountAction } from '@/models/views/platforms/actions/PlatformMountAction'
+import { PlatformUnmountAction } from '@/models/views/platforms/actions/PlatformUnmountAction'
+
 import { ContactSerializer } from '@/serializers/jsonapi/ContactSerializer'
 
 import {
@@ -47,11 +50,18 @@ import {
 } from '@/serializers/jsonapi/PlatformSerializer'
 import { PlatformAttachmentSerializer } from '@/serializers/jsonapi/PlatformAttachmentSerializer'
 
+import { PlatformMountActionSerializer } from '@/serializers/jsonapi/composed/platforms/actions/PlatformMountActionSerializer'
+import { PlatformUnmountActionSerializer } from '@/serializers/jsonapi/composed/platforms/actions/PlatformUnmountActionSerializer'
+
 import { IFlaskJSONAPIFilter } from '@/utils/JSONApiInterfaces'
 
 import {
   IPaginationLoader, FilteredPaginationedLoader
 } from '@/utils/PaginatedLoader'
+import { GenericAction } from '@/models/GenericAction'
+import {
+  GenericPlatformActionSerializer
+} from '@/serializers/jsonapi/GenericActionSerializer'
 
 interface IncludedRelationships {
   includeContacts?: boolean
@@ -94,7 +104,12 @@ export class PlatformApi {
   }
 
   save (platform: Platform): Promise<Platform> {
-    const data: any = this.serializer.convertModelToJsonApiData(platform)
+    // The relationships themselves will be added, updated & deleted in their
+    // own tabs and in their own services.
+    // If we would include them here (without fetching them before), we would
+    // delete them. So we will skip them in order to keep them in the backend.
+    const includeRelationships = false
+    const data: any = this.serializer.convertModelToJsonApiData(platform, includeRelationships)
     let method: Method = 'patch'
     let url = ''
 
@@ -141,6 +156,49 @@ export class PlatformApi {
     }
     return this.axiosApi.get(url, { params }).then((rawServerResponse) => {
       return new PlatformAttachmentSerializer().convertJsonApiObjectListToModelList(rawServerResponse.data)
+    })
+  }
+
+  findRelatedGenericActions (platformId: string): Promise<GenericAction[]> {
+    const url = platformId + '/generic-platform-actions'
+    const params = {
+      'page[size]': 10000,
+      include: [
+        'contact',
+        'generic_platform_action_attachments.attachment'
+      ].join(',')
+    }
+    return this.axiosApi.get(url, { params }).then((rawServerResponse) => {
+      return new GenericPlatformActionSerializer().convertJsonApiObjectListToModelList(rawServerResponse.data)
+    })
+  }
+
+  findRelatedMountActions (platformId: string): Promise<PlatformMountAction[]> {
+    const url = platformId + '/platform-mount-actions'
+    const params = {
+      'page[size]': 10000,
+      include: [
+        'contact',
+        'parent_platform',
+        'configuration'
+      ].join(',')
+    }
+    return this.axiosApi.get(url, { params }).then((rawServerResponse) => {
+      return new PlatformMountActionSerializer().convertJsonApiObjectListToModelList(rawServerResponse.data)
+    })
+  }
+
+  findRelatedUnmountActions (platformId: string): Promise<PlatformUnmountAction[]> {
+    const url = platformId + '/platform-unmount-actions'
+    const params = {
+      'page[size]': 10000,
+      include: [
+        'contact',
+        'configuration'
+      ].join(',')
+    }
+    return this.axiosApi.get(url, { params }).then((rawServerResponse) => {
+      return new PlatformUnmountActionSerializer().convertJsonApiObjectListToModelList(rawServerResponse.data)
     })
   }
 

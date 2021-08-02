@@ -208,10 +208,6 @@ describe('GenericActionAttachmentSerializer', () => {
     }
 
     describe('constructing and types', () => {
-      it('should return \'device\' as its type', () => {
-        const serializer = new GenericDeviceActionAttachmentSerializer()
-        expect(serializer.targetType).toEqual('device')
-      })
       it('should return a correct action type name', () => {
         const serializer = new GenericDeviceActionAttachmentSerializer()
         expect(serializer.getActionTypeName()).toEqual('generic_device_action')
@@ -227,6 +223,10 @@ describe('GenericActionAttachmentSerializer', () => {
       it('should return a correct attachment type name', () => {
         const serializer = new GenericDeviceActionAttachmentSerializer()
         expect(serializer.getAttachmentTypeName()).toEqual('device_attachment')
+      })
+      it('should return an attachment serializer', () => {
+        const serializer = new GenericDeviceActionAttachmentSerializer()
+        expect(typeof serializer.attachmentSerializer).toBe('object')
       })
     })
     describe('#convertModelToJsonApiData', () => {
@@ -289,10 +289,6 @@ describe('GenericActionAttachmentSerializer', () => {
   })
   describe('GenericPlatformActionAttachmentSerializer', () => {
     describe('constructing and types', () => {
-      it('should return \'platform\' as its type', () => {
-        const serializer = new GenericPlatformActionAttachmentSerializer()
-        expect(serializer.targetType).toEqual('platform')
-      })
       it('should return a correct action type name', () => {
         const serializer = new GenericPlatformActionAttachmentSerializer()
         expect(serializer.getActionTypeName()).toEqual('generic_platform_action')
@@ -308,6 +304,10 @@ describe('GenericActionAttachmentSerializer', () => {
       it('should return a correct attachment type name', () => {
         const serializer = new GenericPlatformActionAttachmentSerializer()
         expect(serializer.getAttachmentTypeName()).toEqual('platform_attachment')
+      })
+      it('should return an attachment serializer', () => {
+        const serializer = new GenericPlatformActionAttachmentSerializer()
+        expect(typeof serializer.attachmentSerializer).toBe('object')
       })
     })
   })

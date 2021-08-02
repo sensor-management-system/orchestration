@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020
+ * Copyright (C) 2020-2021
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -34,16 +34,26 @@ import Vuetify from 'vuetify'
 
 import { mount, createLocalVue } from '@vue/test-utils'
 
+import { DateTime } from 'luxon'
+
 // @ts-ignore
 import ConfigurationsTreeView from '@/components/ConfigurationsTreeView.vue'
+
+import { Contact } from '@/models/Contact'
 import { Device } from '@/models/Device'
+import { DeviceMountAction } from '@/models/DeviceMountAction'
 import { Platform } from '@/models/Platform'
-import { DeviceNode } from '@/models/DeviceNode'
-import { PlatformNode } from '@/models/PlatformNode'
-import { ConfigurationsTreeNode } from '@/models/ConfigurationsTreeNode'
-import { ConfigurationsTree } from '@/models/ConfigurationsTree'
+import { PlatformMountAction } from '@/models/PlatformMountAction'
+
+import { DeviceNode } from '@/viewmodels/DeviceNode'
+import { PlatformNode } from '@/viewmodels/PlatformNode'
+import { ConfigurationsTreeNode } from '@/viewmodels/ConfigurationsTreeNode'
+import { ConfigurationsTree } from '@/viewmodels/ConfigurationsTree'
 
 Vue.use(Vuetify)
+
+const contact = new Contact()
+const date = DateTime.utc(2020, 2, 3, 0, 0, 0, 0)
 
 describe('ConfigurationsTreeView', () => {
   const createWrapper = (value: ConfigurationsTree, selected: ConfigurationsTreeNode|null = null) => {
@@ -67,8 +77,28 @@ describe('ConfigurationsTreeView', () => {
     const device = new Device()
     device.id = '1'
     device.shortName = 'a sensor'
-    const node = new PlatformNode(platform)
-    node.getTree().push(new DeviceNode(device))
+    const node = new PlatformNode(PlatformMountAction.createFromObject({
+      id: '',
+      platform,
+      parentPlatform: null,
+      offsetX: 0,
+      offsetY: 0,
+      offsetZ: 0,
+      contact,
+      date,
+      description: 'Platform mount'
+    }))
+    node.getTree().push(new DeviceNode(DeviceMountAction.createFromObject({
+      id: '',
+      device,
+      parentPlatform: platform,
+      offsetX: 0,
+      offsetY: 0,
+      offsetZ: 0,
+      contact,
+      date,
+      description: 'Device mount'
+    })))
 
     const tree = ConfigurationsTree.fromArray([node])
 
@@ -76,7 +106,6 @@ describe('ConfigurationsTreeView', () => {
     // the used v-treeview requires an array of node ids
     expect(wrapper.vm.selectedNodeSingletonList).toHaveLength(0)
   })
-
   it('should return an array with one node id when a node is selected', () => {
     const platform = new Platform()
     platform.id = '1'
@@ -84,8 +113,28 @@ describe('ConfigurationsTreeView', () => {
     const device = new Device()
     device.id = '1'
     device.shortName = 'a sensor'
-    const node = new PlatformNode(platform)
-    node.getTree().push(new DeviceNode(device))
+    const node = new PlatformNode(PlatformMountAction.createFromObject({
+      id: '',
+      platform,
+      parentPlatform: null,
+      offsetX: 0,
+      offsetY: 0,
+      offsetZ: 0,
+      contact,
+      date,
+      description: 'Platform mount'
+    }))
+    node.getTree().push(new DeviceNode(DeviceMountAction.createFromObject({
+      id: '',
+      device,
+      parentPlatform: platform,
+      offsetX: 0,
+      offsetY: 0,
+      offsetZ: 0,
+      contact,
+      date,
+      description: 'Device mount'
+    })))
 
     const tree = ConfigurationsTree.fromArray([node])
 
@@ -102,8 +151,28 @@ describe('ConfigurationsTreeView', () => {
     const device = new Device()
     device.id = '1'
     device.shortName = 'a sensor'
-    const node = new PlatformNode(platform)
-    node.getTree().push(new DeviceNode(device))
+    const node = new PlatformNode(PlatformMountAction.createFromObject({
+      id: '',
+      platform,
+      parentPlatform: null,
+      offsetX: 0,
+      offsetY: 0,
+      offsetZ: 0,
+      contact,
+      date,
+      description: 'Platform mount'
+    }))
+    node.getTree().push(new DeviceNode(DeviceMountAction.createFromObject({
+      id: '',
+      device,
+      parentPlatform: platform,
+      offsetX: 0,
+      offsetY: 0,
+      offsetZ: 0,
+      contact,
+      date,
+      description: 'Device mount'
+    })))
 
     const tree = ConfigurationsTree.fromArray([node])
 

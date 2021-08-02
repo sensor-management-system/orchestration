@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020
+Copyright (C) 2020-2021
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -31,7 +31,7 @@ permissions and limitations under the Licence.
 <template>
   <div>
     Add platforms and devices:
-    <v-row>
+    <v-row v-if="searchOptions">
       <v-col cols="12" md="3">
         <v-select
           v-model="searchOptions.searchType"
@@ -55,109 +55,156 @@ permissions and limitations under the Licence.
         </v-btn>
       </v-col>
     </v-row>
-    <v-row v-if="platforms.length">
-      <v-col cols="12">
-        <v-list
-          two-line
-          max-height="50vh"
-          class="overflow-y-auto"
-        >
-          <v-list-item-group
-            v-model="platformItem"
-            color="primary"
+    <div v-if="loading">
+      <div class="text-center pt-2">
+        <v-progress-circular indeterminate />
+      </div>
+    </div>
+    <div v-else>
+      <v-row v-if="platforms && platforms.length">
+        <v-col cols="12">
+          <v-expansion-panels
+            v-model="selectedPlatform"
           >
-            <template
-              v-for="(item, index) in platforms"
+            <v-expansion-panel
+              v-for="item in platforms"
+              :key="'platform-' + item.id"
             >
-              <v-list-item
-                :key="'platform-' + item.id"
-                :disabled="isPlatformUsedFunc(item)"
-              >
-                <v-list-item-content>
-                  <v-list-item-title v-text="item.shortName" />
-                  <v-list-item-subtitle class="text--primary" v-text="item.longName" />
-                  <v-list-item-subtitle>URN (TODO)</v-list-item-subtitle>
-                </v-list-item-content>
-                <v-list-item-action>
-                  <v-btn :href="'/platforms/' + item.id" target="_blank" icon x-small :disabled="false">
-                    <v-icon>
-                      mdi-open-in-new
-                    </v-icon>
-                  </v-btn>
-                </v-list-item-action>
-                <v-list-item-action>
-                  <v-btn
-                    :key="'btn-add-platform-' + item.id"
-                    :disabled="isPlatformUsedFunc(item)"
-                    data-role="add-platform"
-                    @click="addPlatform(item)"
-                  >
-                    add
-                  </v-btn>
-                </v-list-item-action>
-              </v-list-item>
-              <v-divider
-                v-if="index + 1 < platforms.length"
-                :key="'platformDivider-' + index"
-              />
-            </template>
-          </v-list-item-group>
-        </v-list>
-      </v-col>
-    </v-row>
-    <v-row v-if="devices.length">
-      <v-col cols="12">
-        <v-list
-          two-line
-          max-height="50vh"
-          class="overflow-y-auto"
-        >
-          <v-list-item-group
-            v-model="deviceItem"
-            color="primary"
+              <v-expansion-panel-header>
+                {{ item.shortName }} {{ isPlatformUsedFunc(item) ? ' - already mounted': '' }}
+              </v-expansion-panel-header>
+              <v-expansion-panel-content>
+                <v-expansion-panels multiple>
+                  <v-expansion-panel>
+                    <v-expansion-panel-header>
+                      Platform overview
+                    </v-expansion-panel-header>
+                    <v-expansion-panel-content>
+                      <v-row>
+                        <v-col>
+                          <label>Long name</label>
+                        </v-col>
+                        <v-col>
+                          {{ item.longName }}
+                        </v-col>
+                      </v-row>
+                      <v-row>
+                        <v-col>
+                          <label>URN</label>
+                        </v-col>
+                        <v-col>
+                          (TODO)
+                        </v-col>
+                      </v-row>
+                      <v-row>
+                        <v-col>
+                          <v-btn :href="'/platforms/' + item.id" target="_blank" :disabled="false">
+                            <v-icon>
+                              mdi-open-in-new
+                            </v-icon>
+                            Open in new tab
+                          </v-btn>
+                        </v-col>
+                      </v-row>
+                    </v-expansion-panel-content>
+                  </v-expansion-panel>
+                  <v-expansion-panel :disabled="isPlatformUsedFunc(item)">
+                    <v-expansion-panel-header class="mount-expansion-panel">
+                      Mount
+                    </v-expansion-panel-header>
+                    <v-expansion-panel-content>
+                      <ConfigurationsPlatformDeviceMountForm
+                        ref="mountForm"
+                        data-role-btn="add-platform"
+                        :readonly="isPlatformUsedFunc(item)"
+                        :contacts="contacts"
+                        @add="addPlatform(item, $event)"
+                      />
+                    </v-expansion-panel-content>
+                  </v-expansion-panel>
+                </v-expansion-panels>
+              </v-expansion-panel-content>
+            </v-expansion-panel>
+          </v-expansion-panels>
+        </v-col>
+      </v-row>
+      <v-row v-else-if="devices && devices.length">
+        <v-col cols="12">
+          <v-expansion-panels
+            v-model="selectedDevice"
           >
-            <template
-              v-for="(item, index) in devices"
+            <v-expansion-panel
+              v-for="item in devices"
+              :key="'device-' + item.id"
             >
-              <v-list-item
-                :key="'device-' + item.id"
-                :disabled="isDeviceUsedFunc(item)"
-              >
-                <v-list-item-content>
-                  <v-list-item-title v-text="item.shortName" />
-                  <v-list-item-subtitle class="text--primary" v-text="item.longName" />
-                  <v-list-item-subtitle>URN (TODO)</v-list-item-subtitle>
-                </v-list-item-content>
-                <v-list-item-action>
-                  <v-btn :href="'/devices/' + item.id" target="_blank" icon x-small>
-                    <v-icon>
-                      mdi-open-in-new
-                    </v-icon>
-                  </v-btn>
-                </v-list-item-action>
-                <v-list-item-action>
-                  <div v-if="!canAddDevices">
-                    Devices can only be added to platforms.
-                  </div>
-                  <v-btn
-                    :key="'btn-add-device-' + item.id"
-                    :disabled="isDeviceUsedFunc(item) || (!canAddDevices)"
-                    data-role="add-device"
-                    @click="addDevice(item)"
-                  >
-                    add
-                  </v-btn>
-                </v-list-item-action>
-              </v-list-item>
-              <v-divider
-                v-show="index + 1 < devices.length"
-                :key="'deviceDivider-' + index"
-              />
-            </template>
-          </v-list-item-group>
-        </v-list>
-      </v-col>
-    </v-row>
+              <v-expansion-panel-header>
+                {{ item.shortName }} {{ isDeviceUsedFunc(item) ? ' - already mounted': '' }}
+              </v-expansion-panel-header>
+              <v-expansion-panel-content>
+                <v-expansion-panels multiple>
+                  <v-expansion-panel>
+                    <v-expansion-panel-header>
+                      Device overview
+                    </v-expansion-panel-header>
+                    <v-expansion-panel-content>
+                      <v-row>
+                        <v-col>
+                          <label>Long name</label>
+                        </v-col>
+                        <v-col>
+                          {{ item.longName }}
+                        </v-col>
+                      </v-row>
+                      <v-row>
+                        <v-col>
+                          <label>URN</label>
+                        </v-col>
+                        <v-col>
+                          (TODO)
+                        </v-col>
+                      </v-row>
+                      <v-row>
+                        <v-col>
+                          <v-btn :href="'/devices/' + item.id" target="_blank" :disabled="false">
+                            <v-icon>
+                              mdi-open-in-new
+                            </v-icon>
+                            Open in new tab
+                          </v-btn>
+                        </v-col>
+                      </v-row>
+                    </v-expansion-panel-content>
+                  </v-expansion-panel>
+                  <v-expansion-panel :disabled="isDeviceUsedFunc(item)">
+                    <v-expansion-panel-header class="mount-expansion-panel">
+                      Mount
+                    </v-expansion-panel-header>
+                    <v-expansion-panel-content>
+                      <ConfigurationsPlatformDeviceMountForm
+                        data-role-btn="add-device"
+                        :readonly="isDeviceUsedFunc(item)"
+                        :contacts="contacts"
+                        @add="addDevice(item, $event)"
+                      />
+                    </v-expansion-panel-content>
+                  </v-expansion-panel>
+                </v-expansion-panels>
+              </v-expansion-panel-content>
+            </v-expansion-panel>
+          </v-expansion-panels>
+        </v-col>
+      </v-row>
+      <v-row v-else-if="searchedForPlatforms">
+        <p class="text-center">
+          There are no platforms that match your search criteria.
+        </p>
+      </v-row>
+      <v-row v-else-if="searchedForDevices">
+        <p class="text-center">
+          There are no devices that match your search criteria.
+        </p>
+      </v-row>
+    </div>
   </div>
 </template>
 
@@ -167,9 +214,15 @@ permissions and limitations under the Licence.
  * @author <marc.hanisch@gfz-potsdam.de>
  */
 import { Vue, Component, Prop } from 'nuxt-property-decorator'
+import { DateTime } from 'luxon'
 
+import ConfigurationsPlatformDeviceMountForm from '@/components/ConfigurationsPlatformDeviceMountForm.vue'
+
+import { Contact } from '@/models/Contact'
 import { Platform } from '@/models/Platform'
 import { Device } from '@/models/Device'
+
+import { IMountData } from '@/viewmodels/IMountData'
 
 enum SearchType {
   Platform = 'Platform',
@@ -188,7 +241,11 @@ type IsDeviceUsedFunc = (d: Device) => boolean
  * A class component to search for platforms and devices
  * @extends Vue
  */
-@Component
+@Component({
+  components: {
+    ConfigurationsPlatformDeviceMountForm
+  }
+})
 // @ts-ignore
 export default class ConfigurationsPlatformDeviceSearch extends Vue {
   private searchOptions: ISearchOptions = {
@@ -199,8 +256,12 @@ export default class ConfigurationsPlatformDeviceSearch extends Vue {
   private platformsResult: Platform[] = [] as Platform[]
   private devicesResult: Device[] = [] as Device[]
 
-  private platformItem: string = ''
-  private deviceItem: string = ''
+  private selectedPlatform = -1
+  private selectedDevice = -1
+
+  private loading = false
+  private searchedForPlatforms = false
+  private searchedForDevices = false
 
   /**
    * a function that returns if a device is already present in a tree or not
@@ -223,19 +284,19 @@ export default class ConfigurationsPlatformDeviceSearch extends Vue {
   readonly isPlatformUsedFunc: IsPlatformUsedFunc
 
   @Prop({
-    default: () => false,
-    type: Boolean
+    default: DateTime.utc(),
+    type: DateTime
   })
-  readonly canAddDevices!: boolean
+  readonly selectedDate!: DateTime
+
+  @Prop({
+    default: () => [],
+    type: Array
+  })
+  readonly contacts!: Contact[]
 
   get searchTypes (): string[] {
-    const result = [SearchType.Platform]
-    // maybe it makes more sense to allow the search
-    // but show that devices need a platform to be added to
-    if (this.canAddDevices) {
-      result.push(SearchType.Device)
-    }
-    return result
+    return [SearchType.Platform, SearchType.Device]
   }
 
   /**
@@ -290,22 +351,28 @@ export default class ConfigurationsPlatformDeviceSearch extends Vue {
    * @async
    */
   async search () {
+    this.loading = true
+    this.searchedForPlatforms = false
+    this.searchedForDevices = false
     switch (this.searchOptions.searchType) {
       case SearchType.Platform:
         this.platforms = await this.$api.platforms.newSearchBuilder()
           .withText(this.searchOptions.text)
           .build()
           .findMatchingAsList()
+        this.searchedForPlatforms = true
         break
       case SearchType.Device:
         this.devices = await this.$api.devices.newSearchBuilder()
           .withText(this.searchOptions.text)
           .build()
           .findMatchingAsList()
+        this.searchedForDevices = true
         break
       default:
         throw new TypeError('search function not defined for unknown value')
     }
+    this.loading = false
   }
 
   /**
@@ -314,13 +381,21 @@ export default class ConfigurationsPlatformDeviceSearch extends Vue {
    * @param {Platform} platform - the platform to add
    * @fires ConfigurationsPlatformDeviceSearch#add-platform
    */
-  addPlatform (platform: Platform) {
+  addPlatform (platform: Platform, mountData: IMountData) {
     /**
      * fires an add-plaform event
      * @event ConfigurationsPlatformDeviceSearch#add-platform
      * @type {Platform}
      */
-    this.$emit('add-platform', platform)
+    this.$emit(
+      'add-platform',
+      platform,
+      mountData.offsetX,
+      mountData.offsetY,
+      mountData.offsetZ,
+      mountData.contact,
+      mountData.description
+    )
   }
 
   /**
@@ -329,15 +404,21 @@ export default class ConfigurationsPlatformDeviceSearch extends Vue {
    * @param {Device} device - the device to add
    * @fires ConfigurationsPlatformDeviceSearch#add-device
    */
-  addDevice (device: Device) {
+  addDevice (device: Device, mountData: IMountData) {
     /**
      * fires an add-device event
      * @event ConfigurationsPlatformDeviceSearch#add-device
      * @type {Device}
      */
-    if (this.canAddDevices) {
-      this.$emit('add-device', device)
-    }
+    this.$emit(
+      'add-device',
+      device,
+      mountData.offsetX,
+      mountData.offsetY,
+      mountData.offsetZ,
+      mountData.contact,
+      mountData.description
+    )
   }
 }
 </script>

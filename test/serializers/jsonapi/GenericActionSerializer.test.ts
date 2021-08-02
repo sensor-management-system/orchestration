@@ -787,9 +787,9 @@ describe('GenericActionSerializer', () => {
 
         const actionList = serializer.convertJsonApiRelationshipsModelList(relationships as IJsonApiRelationships, included as IJsonApiEntityWithOptionalAttributes[])
 
-        expect(actionList).toHaveProperty('genericDeviceActions')
-        expect(actionList.genericDeviceActions).toContainEqual(expectedAction1)
-        expect(actionList.genericDeviceActions).toContainEqual(expectedAction2)
+        expect(actionList).toHaveProperty('genericActions')
+        expect(actionList.genericActions).toContainEqual(expectedAction1)
+        expect(actionList.genericActions).toContainEqual(expectedAction2)
       })
     })
     describe('#convertJsonApiObjectListToModelList', () => {
@@ -913,7 +913,7 @@ describe('GenericActionSerializer', () => {
         expect(apiRelationship).toEqual(expectedRelationship)
       })
     })
-    describe('#convertJsonApiIncludedGenericActionAttachmentsToIdList', () => {
+    describe('#convertJsonApiIncludedActionAttachmentsToIdList', () => {
       it('should return a list of generic_device_action_attachment ids / attachment ids mappings', () => {
         const expectedMappings = [
           {
@@ -923,7 +923,7 @@ describe('GenericActionSerializer', () => {
         ]
         const serializer = new GenericDeviceActionSerializer()
         const data = getExampleObjectResponseWithIncludedActionAttachments()
-        const mappings = serializer.convertJsonApiIncludedGenericActionAttachmentsToIdList(data.included as IJsonApiEntityWithOptionalAttributes[])
+        const mappings = serializer.convertJsonApiIncludedActionAttachmentsToIdList(data.included as IJsonApiEntityWithOptionalAttributes[])
 
         expect(mappings).toEqual(expectedMappings)
       })

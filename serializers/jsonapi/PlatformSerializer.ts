@@ -145,10 +145,7 @@ export class PlatformSerializer {
     return result
   }
 
-  convertModelToJsonApiData (platform: Platform): IJsonApiEntityWithOptionalId {
-    const attachments = this.attachmentSerializer.convertModelListToJsonApiRelationshipObject(platform.attachments)
-    const contacts = this.contactSerializer.convertModelListToJsonApiRelationshipObject(platform.contacts)
-
+  convertModelToJsonApiData (platform: Platform, includeRelationships: boolean = false): IJsonApiEntityWithOptionalId {
     const data: IJsonApiEntityWithOptionalId = {
       type: 'platform',
       attributes: {
@@ -172,8 +169,13 @@ export class PlatformSerializer {
         // as the persistent_identifier must be unique, we sent null in case
         // that we don't have an identifier here
         persistent_identifier: platform.persistentIdentifier === '' ? null : platform.persistentIdentifier
-      },
-      relationships: {
+      }
+    }
+
+    if (includeRelationships) {
+      const attachments = this.attachmentSerializer.convertModelListToJsonApiRelationshipObject(platform.attachments)
+      const contacts = this.contactSerializer.convertModelListToJsonApiRelationshipObject(platform.contacts)
+      data.relationships = {
         ...contacts,
         ...attachments
       }

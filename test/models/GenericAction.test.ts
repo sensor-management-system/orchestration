@@ -67,6 +67,7 @@ describe('GenericAction', () => {
     expect(action).toHaveProperty('actionTypeUrl', 'https://foo/bar')
     expect(action.beginDate).toBe(date1)
     expect(action.endDate).toBe(date2)
+    expect(action.date).toBe(date1)
     expect(action.contact).toStrictEqual(contact)
     expect(action.attachments).toContainEqual(attachment)
     expect(action.isGenericAction).toBeTruthy()

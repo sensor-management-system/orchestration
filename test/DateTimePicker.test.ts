@@ -1,3 +1,36 @@
+/**
+ * @license
+ * Web client of the Sensor Management System software developed within
+ * the Helmholtz DataHub Initiative by GFZ and UFZ.
+ *
+ * Copyright (C) 2020
+ * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
+ * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
+ * - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
+ * - Helmholtz Centre Potsdam - GFZ German Research Centre for
+ *   Geosciences (GFZ, https://www.gfz-potsdam.de)
+ *
+ * Parts of this program were developed within the context of the
+ * following publicly funded projects or measures:
+ * - Helmholtz Earth and Environment DataHub
+ *   (https://www.helmholtz.de/en/research/earth_and_environment/initiatives/#h51095)
+ *
+ * Licensed under the HEESIL, Version 1.0 or - as soon they will be
+ * approved by the "Community" - subsequent versions of the HEESIL
+ * (the "Licence").
+ *
+ * You may not use this work except in compliance with the Licence.
+ *
+ * You may obtain a copy of the Licence at:
+ * https://gitext.gfz-potsdam.de/software/heesil
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the Licence is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+ * implied. See the Licence for the specific language governing
+ * permissions and limitations under the Licence.
+ */
+
 import Vue from 'vue'
 
 import { mount } from '@vue/test-utils'
@@ -95,26 +128,19 @@ describe('DatetimePicker.vue', () => {
     expect(wrapper.find('input[type="text"]').element.value).toBe('20:12')
   })
 
-  it('displays correct error message for datetime format, when textfield contains value with wrong format', async () => {
+  it('displays correct error message for datetime format, when textfield contains value with wrong format', () => {
     wrapper = factory({
       propsData: {
         label: 'Testlabel',
         value: null
       }
     })
+    const validationMessage = wrapper.vm.textInputRules[0]('2021-05-01')
 
-    const textFieldInput = wrapper.find('input[type="text"]')
-
-    await textFieldInput.setValue('2021-05-01')
-
-    expect(wrapper.find('input[type="text"]').element.value).toBe('2021-05-01')
-
-    const validationMessage = wrapper.find('div.v-messages__message')
-
-    expect(validationMessage.text()).toBe('Please use the format: yyyy-MM-dd HH:mm')
+    expect(validationMessage).toBe('Please use the format: yyyy-MM-dd HH:mm')
   })
 
-  it('displays correct error message for date format, when textfield contains value with wrong format', async () => {
+  it('displays correct error message for date format, when textfield contains value with wrong format', () => {
     wrapper = factory({
       propsData: {
         label: 'Testlabel',
@@ -123,18 +149,12 @@ describe('DatetimePicker.vue', () => {
       }
     })
 
-    const textFieldInput = wrapper.find('input[type="text"]')
+    const validationMessage = wrapper.vm.textInputRules[0]('2021-05-011')
 
-    await textFieldInput.setValue('2021-05-011')
-
-    expect(wrapper.find('input[type="text"]').element.value).toBe('2021-05-011')
-
-    const validationMessage = wrapper.find('div.v-messages__message')
-
-    expect(validationMessage.text()).toBe('Please use the format: yyyy-MM-dd')
+    expect(validationMessage).toBe('Please use the format: yyyy-MM-dd')
   })
 
-  it('displays correct error message for time format, when textfield contains value with wrong format', async () => {
+  it('displays correct error message for time format, when textfield contains value with wrong format', () => {
     wrapper = factory({
       propsData: {
         label: 'Testlabel',
@@ -142,16 +162,9 @@ describe('DatetimePicker.vue', () => {
         'use-time': true
       }
     })
+    const validationMessage = wrapper.vm.textInputRules[0]('2021-05-01')
 
-    const textFieldInput = wrapper.find('input[type="text"]')
-
-    await textFieldInput.setValue('2021-05-01')
-
-    expect(wrapper.find('input[type="text"]').element.value).toBe('2021-05-01')
-
-    const validationMessage = wrapper.find('div.v-messages__message')
-
-    expect(validationMessage.text()).toBe('Please use the format: HH:mm')
+    expect(validationMessage).toBe('Please use the format: HH:mm')
   })
 
   it('uses datetime when use-date and use-datime are both WRONGLY passed as props', () => {
@@ -186,7 +199,8 @@ describe('DatetimePicker.vue', () => {
   })
 
   it('emits correct dateTime object when updated by date picker when value was null', async () => {
-    const expectedDateTime = DateTime.fromFormat('2020-05-01 00:00', 'yyyy-MM-dd HH:mm', { zone: 'UTC' })
+    const expectedDate = '2020-05-01'
+    const expectedTime = DateTime.now().setZone('UTC').toFormat('HH:mm')
 
     wrapper = factory({
       propsData: {
@@ -201,7 +215,13 @@ describe('DatetimePicker.vue', () => {
     wrapper.vm.applyPickerValue()
     expect(wrapper.emitted('input')).toBeTruthy()
     await wrapper.vm.$nextTick()
-    expect(wrapper.emitted().input[0]).toEqual([expectedDateTime])
+
+    const emittedObject = wrapper.emitted().input[0][0]
+    const actualDate = emittedObject.toFormat('yyyy-MM-dd')
+    const actualTime = emittedObject.toFormat('HH:mm')
+
+    expect(actualDate).toEqual(expectedDate)
+    expect(actualTime).toEqual(expectedTime)
   })
 
   it('emits correct dateTime object when updated by date picker when value was passed', async () => {
@@ -360,7 +380,7 @@ describe('DatetimePicker.vue', () => {
     // --------------------------------------------------------
 
     const expectedDate = new Date().toISOString().substr(0, 10)
-    const expectedTime = '00:00'
+    const expectedTime = DateTime.now().setZone('UTC').toFormat('HH:mm')
     wrapper = factory({
       propsData: {
         label: 'Testlabel',
@@ -476,21 +496,5 @@ describe('DatetimePicker.vue', () => {
 
     const actual = wrapper.emitted().input[0][0]
     expect(actual.hour + ':' + actual.minute).toBe(expectedTime)
-  })
-
-  it('getPickerValue returns empty string when neither date, time nor datetime are true', () => {
-    wrapper = factory({
-      propsData: {
-        label: 'Testlabel',
-        value: null,
-        'use-time': true
-      }
-    })
-
-    wrapper.vm.isUseDatetime = false
-    wrapper.vm.isUseTime = false
-    wrapper.vm.isUseDateTime = false
-
-    expect(wrapper.vm.getPickerValue()).toBe('')
   })
 })

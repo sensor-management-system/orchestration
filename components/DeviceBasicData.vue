@@ -79,6 +79,13 @@ permissions and limitations under the Licence.
       <v-col cols="12" md="9">
         <label>Website</label>
         {{ value.website | orDefault }}
+        <a v-if="value.website.length > 0" :href="value.website" target="_blank">
+          <v-icon
+            small
+          >
+            mdi-open-in-new
+          </v-icon>
+        </a>
       </v-col>
     </v-row>
     <v-divider />
