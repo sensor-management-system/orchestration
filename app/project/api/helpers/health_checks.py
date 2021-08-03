@@ -1,8 +1,8 @@
 import requests
+from flask import current_app
 from sqlalchemy.exc import SQLAlchemyError
 
 from ..models.base_model import db
-from ...config import env
 
 
 def health_check_elastic_search():
@@ -11,7 +11,7 @@ def health_check_elastic_search():
     :return:
     """
     try:
-        _ = requests.get(env("ELASTICSEARCH_URL")).content
+        _ = requests.get(current_app.config["ELASTICSEARCH_URL"]).content
         return True, "elastic search ok"
 
     except requests.exceptions.HTTPError:
@@ -38,10 +38,8 @@ def health_check_migrations():
     """
 
     from alembic.runtime import migration
-    import sqlalchemy
 
-    engine = sqlalchemy.create_engine(env("DATABASE_URL"))
-    with engine.begin() as conn:
+    with db.engine.begin() as conn:
         context = migration.MigrationContext.configure(conn)
         version_num = (db.session.execute('SELECT version_num from alembic_version').fetchone())[
             'version_num']
