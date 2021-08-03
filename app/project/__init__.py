@@ -6,7 +6,7 @@ from healthcheck import HealthCheck
 
 from .api import minio
 from .api.helpers.health_checks import health_check_elastic_search, health_check_db, \
-    health_check_migrations
+    health_check_migrations, health_check_minio
 from .api.models.base_model import db
 from .api.token_checker import jwt
 from .api.upload_files import upload_routes
@@ -66,6 +66,7 @@ def create_app():
     health.add_check(health_check_elastic_search)
     health.add_check(health_check_db)
     health.add_check(health_check_migrations)
+    health.add_check(health_check_minio)
     app.add_url_rule(base_url + "/health", "health", view_func=lambda: health.run())
 
 

@@ -1,3 +1,5 @@
+import logging
+
 import requests
 from flask import current_app
 from sqlalchemy.exc import SQLAlchemyError
@@ -14,7 +16,8 @@ def health_check_elastic_search():
         _ = requests.get(current_app.config["ELASTICSEARCH_URL"]).content
         return True, "elastic search ok"
 
-    except requests.exceptions.HTTPError:
+    except requests.exceptions.HTTPError as e:
+        logging.error('Error' + str(e))
         return False, "Error connecting to elastic search server"
 
 
@@ -26,8 +29,8 @@ def health_check_db():
     try:
         db.session.execute('SELECT 1')
         return True, 'database ok'
-    except SQLAlchemyError:
-
+    except SQLAlchemyError as err:
+        logging.error('Error' + str(err))
         return False, 'Error connecting to database'
 
 
@@ -43,6 +46,25 @@ def health_check_migrations():
         context = migration.MigrationContext.configure(conn)
         version_num = (db.session.execute('SELECT version_num from alembic_version').fetchone())[
             'version_num']
-        if version_num != context.get_current_revision():
+        ctx_head = context.get_current_revision()
+        if version_num != ctx_head:
+            logging.error(
+                'Error:  Migration head in Database is: {1} But migration version is: {2}'.format(
+                    version_num,
+                    ctx_head))
             return False, 'database out of date with migrations'
         return True, 'database up to date with migrations'
+
+
+def health_check_minio():
+    """
+    Check health status of minio
+    :return:
+    """
+
+    try:
+        _ = requests.get("http://minio:9000/minio/health/live").content
+        return True, 'minio is up'
+    except requests.exceptions.RequestException as s3err:
+        logging.error('Error' + str(s3err))
+        return False, 'Error connecting to minio'
