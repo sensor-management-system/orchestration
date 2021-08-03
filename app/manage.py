@@ -6,6 +6,7 @@ import coverage
 from flask.cli import FlaskGroup
 
 from project import create_app
+from project.api.helpers.errors import ErrorResponse
 from project.api.models.base_model import db
 
 app = create_app()
@@ -95,6 +96,11 @@ def es_reindex():
 @app.after_request
 def add_header(response):
     return response
+
+
+@app.errorhandler(ErrorResponse)
+def handle_exception(error: ErrorResponse):
+    return error.respond()
 
 
 if __name__ == "__main__":

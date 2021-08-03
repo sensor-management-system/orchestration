@@ -20,6 +20,5 @@ class DeviceCalibrationAttachment(db.Model):
         "DeviceAttachment",
         uselist=False,
         foreign_keys=[attachment_id],
-        backref=db.backref("device_calibration_attachments",
-                           cascade="save-update, merge, delete, delete-orphan"),
+        backref=db.backref("device_calibration_attachments"),
     )
