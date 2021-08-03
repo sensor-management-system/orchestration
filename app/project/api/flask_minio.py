@@ -240,7 +240,7 @@ class FlaskMinio:
                     uploaded_file,
                     size,
                     content_type=content_type,
-                    metadata={"uploaded_by": current_user}
+                    metadata={"uploaded-by": current_user}
                 )
                 data = {
                     "message": "object stored in {}".format(minio_bucket_name),
