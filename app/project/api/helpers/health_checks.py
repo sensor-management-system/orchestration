@@ -49,7 +49,7 @@ def health_check_migrations():
         ctx_head = context.get_current_revision()
         if version_num != ctx_head:
             logging.error(
-                'Error:  Migration head in Database is: {1} But migration version is: {2}'.format(
+                'Error:  Migration head in Database is: {} But migration version is: {}'.format(
                     version_num,
                     ctx_head))
             return False, 'database out of date with migrations'
