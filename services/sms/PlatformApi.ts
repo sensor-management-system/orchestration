@@ -303,6 +303,15 @@ export class PlatformSearchBuilder {
     return this
   }
 
+  withContactEmail (email: string) {
+    this.serverSideFilterSettings.push({
+      name: 'contacts.email',
+      op: 'eq',
+      val: email
+    })
+    return this
+  }
+
   build (): PlatformSearcher {
     return new PlatformSearcher(
       this.axiosApi,

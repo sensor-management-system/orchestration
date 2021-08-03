@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020
+Copyright (C) 2020,2021
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -73,6 +73,11 @@ permissions and limitations under the Licence.
         <v-row>
           <v-col cols="12" md="3">
             <DeviceTypeSelect v-model="selectedSearchDeviceTypes" label="Select a device type" />
+          </v-col>
+        </v-row>
+        <v-row v-if="isLoggedIn">
+          <v-col cols="12" md="3">
+            <v-checkbox v-model="onlyOwnDevices" label="Only own devices" />
           </v-col>
         </v-row>
         <v-row>
@@ -492,6 +497,42 @@ import { Manufacturer } from '@/models/Manufacturer'
 import { Status } from '@/models/Status'
 import { DeviceSearcher } from '@/services/sms/DeviceApi'
 
+interface IRunSearchParameters {
+  searchText: string | null
+  manufacturer: Manufacturer[]
+  states: Status[]
+  types: DeviceType[]
+  onlyOwnDevices: boolean
+}
+
+class BasicSearchParameters implements IRunSearchParameters {
+  private readonly _searchText: string | null
+
+  constructor (searchText: string | null) {
+    this._searchText = searchText
+  }
+
+  get searchText (): string | null {
+    return this._searchText
+  }
+
+  get manufacturer (): Manufacturer[] {
+    return []
+  }
+
+  get states (): Status[] {
+    return []
+  }
+
+  get types (): DeviceType[] {
+    return []
+  }
+
+  get onlyOwnDevices (): boolean {
+    return false
+  }
+}
+
 @Component({
   components: {
     DeviceTypeSelect,
@@ -512,6 +553,7 @@ export default class SearchDevicesPage extends Vue {
   private selectedSearchManufacturers: Manufacturer[] = []
   private selectedSearchStates: Status[] = []
   private selectedSearchDeviceTypes: DeviceType[] = []
+  private onlyOwnDevices: boolean = false
 
   private deviceTypeLookup: Map<string, DeviceType> = new Map<string, DeviceType>()
   private statusLookup: Map<string, Status> = new Map<string, Status>()
@@ -602,7 +644,7 @@ export default class SearchDevicesPage extends Vue {
 
   basicSearch () {
     // only uses the text and the type (sensor or platform)
-    this.runSearch(this.searchText, [], [], [])
+    this.runSearch(new BasicSearchParameters(this.searchText))
   }
 
   clearBasicSearch () {
@@ -610,12 +652,13 @@ export default class SearchDevicesPage extends Vue {
   }
 
   extendedSearch () {
-    this.runSearch(
-      this.searchText,
-      this.selectedSearchManufacturers,
-      this.selectedSearchStates,
-      this.selectedSearchDeviceTypes
-    )
+    this.runSearch({
+      searchText: this.searchText,
+      manufacturer: this.selectedSearchManufacturers,
+      states: this.selectedSearchStates,
+      types: this.selectedSearchDeviceTypes,
+      onlyOwnDevices: this.onlyOwnDevices && this.isLoggedIn
+    })
   }
 
   clearExtendedSearch () {
@@ -624,25 +667,33 @@ export default class SearchDevicesPage extends Vue {
     this.selectedSearchManufacturers = []
     this.selectedSearchStates = []
     this.selectedSearchDeviceTypes = []
+    this.onlyOwnDevices = false
   }
 
   runSearch (
-    searchText: string | null,
-    manufacturer: Manufacturer[],
-    states: Status[],
-    types: DeviceType[]
+    searchParameters: IRunSearchParameters
   ) {
     this.loading = true
     this.searchResults = []
     this.unsetResultItemsShown()
     this.showDeleteDialog = {}
-    this.lastActiveSearcher = this.$api.devices
+    this.loader = null
+
+    const searchBuilder = this.$api.devices
       .newSearchBuilder()
-      .withText(searchText)
-      .withOneMachtingManufacturerOf(manufacturer)
-      .withOneMatchingStatusOf(states)
-      .withOneMatchingDeviceTypeOf(types)
-      .build()
+      .withText(searchParameters.searchText)
+      .withOneMachtingManufacturerOf(searchParameters.manufacturer)
+      .withOneMatchingStatusOf(searchParameters.states)
+      .withOneMatchingDeviceTypeOf(searchParameters.types)
+
+    if (searchParameters.onlyOwnDevices) {
+      const email = this.currentUserEmail
+      if (email) {
+        searchBuilder.withContactEmail(email)
+      }
+    }
+
+    this.lastActiveSearcher = searchBuilder.build()
     this.lastActiveSearcher
       .findMatchingAsPaginationLoader(this.pageSize)
       .then(this.loadUntilWeHaveSomeEntries).catch((_error) => {
@@ -760,6 +811,10 @@ export default class SearchDevicesPage extends Vue {
 
   get isLoggedIn () {
     return this.$store.getters['oidc/isAuthenticated']
+  }
+
+  get currentUserEmail () {
+    return this.$store.getters['oidc/userEmail']
   }
 }
 

@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020
+Copyright (C) 2020,2021
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -86,6 +86,11 @@ permissions and limitations under the Licence.
               v-model="selectedProjects"
               label="Select a project"
             />
+          </v-col>
+        </v-row>
+        <v-row v-if="isLoggedIn">
+          <v-col cols="12" md="3">
+            <v-checkbox v-model="onlyOwnConfigurations" label="Only own configurations" />
           </v-col>
         </v-row>
         <v-row>
@@ -459,6 +464,42 @@ import { ConfigurationSearcher } from '@/services/sms/ConfigurationApi'
 
 import { dateToString } from '@/utils/dateHelper'
 
+interface IRunSearchParameters {
+  searchText: string | null
+  configurationStates: string[]
+  locationTypes: string[]
+  projects: Project[]
+  onlyOwnConfigurations: boolean
+}
+
+class BasicSearchParameters implements IRunSearchParameters {
+  private readonly _searchText: string | null
+
+  constructor (searchText: string | null) {
+    this._searchText = searchText
+  }
+
+  get searchText (): string | null {
+    return this._searchText
+  }
+
+  get configurationStates (): string[] {
+    return []
+  }
+
+  get locationTypes (): string[] {
+    return []
+  }
+
+  get projects (): Project[] {
+    return []
+  }
+
+  get onlyOwnConfigurations (): boolean {
+    return false
+  }
+}
+
 @Component({
   filters: {
     formatDate: (possibleDate: DateTime | null) => {
@@ -488,6 +529,7 @@ export default class SearchConfigurationsPage extends Vue {
   private selectedConfigurationStates: string[] = []
   private selectedLocationTypes: string[] = []
   private selectedProjects: Project[] = []
+  private onlyOwnConfigurations: boolean = false
 
   private configurationStates: string[] = []
   private locationTypes: string[] = []
@@ -565,7 +607,7 @@ export default class SearchConfigurationsPage extends Vue {
   }
 
   basicSearch () {
-    this.runSearch(this.searchText, [], [], [])
+    this.runSearch(new BasicSearchParameters(this.searchText))
   }
 
   clearBasicSearch () {
@@ -573,12 +615,13 @@ export default class SearchConfigurationsPage extends Vue {
   }
 
   extendedSearch () {
-    this.runSearch(
-      this.searchText,
-      this.selectedConfigurationStates,
-      this.selectedLocationTypes,
-      this.selectedProjects
-    )
+    this.runSearch({
+      searchText: this.searchText,
+      configurationStates: this.selectedConfigurationStates,
+      locationTypes: this.selectedLocationTypes,
+      projects: this.selectedProjects,
+      onlyOwnConfigurations: this.onlyOwnConfigurations && this.isLoggedIn
+    })
   }
 
   clearExtendedSearch () {
@@ -586,25 +629,33 @@ export default class SearchConfigurationsPage extends Vue {
     this.selectedConfigurationStates = []
     this.selectedLocationTypes = []
     this.selectedProjects = []
+    this.onlyOwnConfigurations = false
   }
 
   runSearch (
-    searchText: string | null,
-    configurationStates: string[],
-    locationTypes: string[],
-    projects: Project[]
+    searchParameters: IRunSearchParameters
   ) {
     this.loading = true
     this.searchResults = []
     this.unsetResultItemsShown()
     this.showDeleteDialog = {}
-    this.lastActiveSearcher = this.$api.configurations
+    this.loader = null
+
+    const searchBuilder = this.$api.configurations
       .newSearchBuilder()
-      .withText(searchText)
-      .withOneStatusOf(configurationStates)
-      .withOneLocationTypeOf(locationTypes)
-      .withOneMatchingProjectOf(projects)
-      .build()
+      .withText(searchParameters.searchText)
+      .withOneStatusOf(searchParameters.configurationStates)
+      .withOneLocationTypeOf(searchParameters.locationTypes)
+      .withOneMatchingProjectOf(searchParameters.projects)
+
+    if (searchParameters.onlyOwnConfigurations) {
+      const email = this.currentUserEmail
+      if (email) {
+        searchBuilder.withContactEmail(email)
+      }
+    }
+
+    this.lastActiveSearcher = searchBuilder.build()
     this.lastActiveSearcher
       .findMatchingAsPaginationLoader(this.pageSize)
       .then(this.loadUntilWeHaveSomeEntries).catch((_error) => {
@@ -710,6 +761,10 @@ export default class SearchConfigurationsPage extends Vue {
 
   get isLoggedIn () {
     return this.$store.getters['oidc/isAuthenticated']
+  }
+
+  get currentUserEmail () {
+    return this.$store.getters['oidc/userEmail']
   }
 }
 

@@ -362,6 +362,15 @@ export class DeviceSearchBuilder {
     return this
   }
 
+  withContactEmail (email: string) {
+    this.serverSideFilterSettings.push({
+      name: 'contacts.email',
+      op: 'eq',
+      val: email
+    })
+    return this
+  }
+
   build (): DeviceSearcher {
     return new DeviceSearcher(
       this.axiosApi,

@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020
+Copyright (C) 2020-2021
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -73,6 +73,11 @@ permissions and limitations under the Licence.
         <v-row>
           <v-col cols="12" md="3">
             <PlatformTypeSelect v-model="selectedSearchPlatformTypes" label="Select a platform type" />
+          </v-col>
+        </v-row>
+        <v-row v-if="isLoggedIn">
+          <v-col cols="12" md="3">
+            <v-checkbox v-model="onlyOwnPlatforms" label="Only own platforms" />
           </v-col>
         </v-row>
         <v-row>
@@ -491,6 +496,42 @@ import { PlatformType } from '@/models/PlatformType'
 import { Status } from '@/models/Status'
 import { PlatformSearcher } from '@/services/sms/PlatformApi'
 
+interface IRunSearchParameters {
+  searchText: string | null
+  manufacturer: Manufacturer[]
+  states: Status[]
+  types: PlatformType[]
+  onlyOwnPlatforms: boolean
+}
+
+class BasicSearchParameters implements IRunSearchParameters {
+  private readonly _searchText: string | null
+
+  constructor (searchText: string | null) {
+    this._searchText = searchText
+  }
+
+  get searchText (): string | null {
+    return this._searchText
+  }
+
+  get manufacturer (): Manufacturer[] {
+    return []
+  }
+
+  get states (): Status[] {
+    return []
+  }
+
+  get types (): PlatformType[] {
+    return []
+  }
+
+  get onlyOwnPlatforms (): boolean {
+    return false
+  }
+}
+
 @Component({
   components: {
     ManufacturerSelect,
@@ -511,6 +552,7 @@ export default class SearchPlatformsPage extends Vue {
   private selectedSearchManufacturers: Manufacturer[] = []
   private selectedSearchStates: Status[] = []
   private selectedSearchPlatformTypes: PlatformType[] = []
+  private onlyOwnPlatforms: boolean = false
 
   private platformTypeLookup: Map<string, PlatformType> = new Map<string, PlatformType>()
   private statusLookup: Map<string, Status> = new Map<string, Status>()
@@ -601,7 +643,7 @@ export default class SearchPlatformsPage extends Vue {
 
   basicSearch () {
     // only uses the text and the type (sensor or platform)
-    this.runSearch(this.searchText, [], [], [])
+    this.runSearch(new BasicSearchParameters(this.searchText))
   }
 
   clearBasicSearch () {
@@ -609,12 +651,13 @@ export default class SearchPlatformsPage extends Vue {
   }
 
   extendedSearch () {
-    this.runSearch(
-      this.searchText,
-      this.selectedSearchManufacturers,
-      this.selectedSearchStates,
-      this.selectedSearchPlatformTypes
-    )
+    this.runSearch({
+      searchText: this.searchText,
+      manufacturer: this.selectedSearchManufacturers,
+      states: this.selectedSearchStates,
+      types: this.selectedSearchPlatformTypes,
+      onlyOwnPlatforms: this.onlyOwnPlatforms && this.isLoggedIn
+    })
   }
 
   clearExtendedSearch () {
@@ -622,25 +665,33 @@ export default class SearchPlatformsPage extends Vue {
     this.selectedSearchManufacturers = []
     this.selectedSearchStates = []
     this.selectedSearchPlatformTypes = []
+    this.onlyOwnPlatforms = false
   }
 
   runSearch (
-    searchText: string | null,
-    manufacturer: Manufacturer[],
-    states: Status[],
-    platformTypes: PlatformType[]
+    searchParameters: IRunSearchParameters
   ) {
     this.loading = true
     this.searchResults = []
     this.unsetResultItemsShown()
     this.showDeleteDialog = {}
-    this.lastActiveSearcher = this.$api.platforms
+    this.loader = null
+
+    const searchBuilder = this.$api.platforms
       .newSearchBuilder()
-      .withText(searchText)
-      .withOneMatchingManufacturerOf(manufacturer)
-      .withOneMatchingStatusOf(states)
-      .withOneMatchingPlatformTypeOf(platformTypes)
-      .build()
+      .withText(searchParameters.searchText)
+      .withOneMatchingManufacturerOf(searchParameters.manufacturer)
+      .withOneMatchingStatusOf(searchParameters.states)
+      .withOneMatchingPlatformTypeOf(searchParameters.types)
+
+    if (searchParameters.onlyOwnPlatforms) {
+      const email = this.currentUserEmail
+      if (email) {
+        searchBuilder.withContactEmail(email)
+      }
+    }
+
+    this.lastActiveSearcher = searchBuilder.build()
     this.lastActiveSearcher
       .findMatchingAsPaginationLoader(this.pageSize)
       .then(this.loadUntilWeHaveSomeEntries).catch((_error) => {
@@ -758,6 +809,10 @@ export default class SearchPlatformsPage extends Vue {
 
   get isLoggedIn () {
     return this.$store.getters['oidc/isAuthenticated']
+  }
+
+  get currentUserEmail () {
+    return this.$store.getters['oidc/userEmail']
   }
 }
 
