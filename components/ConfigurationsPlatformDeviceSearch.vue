@@ -98,7 +98,7 @@ permissions and limitations under the Licence.
                       </v-row>
                       <v-row>
                         <v-col>
-                          <v-btn :href="'/platforms/' + item.id" target="_blank" :disabled="false">
+                          <v-btn :href="'platforms/' + item.id" target="_blank" :disabled="false">
                             <v-icon>
                               mdi-open-in-new
                             </v-icon>
@@ -165,7 +165,7 @@ permissions and limitations under the Licence.
                       </v-row>
                       <v-row>
                         <v-col>
-                          <v-btn :href="'/devices/' + item.id" target="_blank" :disabled="false">
+                          <v-btn :href="'devices/' + item.id" target="_blank" :disabled="false">
                             <v-icon>
                               mdi-open-in-new
                             </v-icon>
