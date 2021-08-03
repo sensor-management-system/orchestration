@@ -4,6 +4,7 @@ import uuid
 
 import minio
 from flask import current_app, _app_ctx_stack, make_response, abort, jsonify
+from flask_jwt_extended import get_jwt_identity
 from flask_rest_jsonapi.exceptions import JsonApiException
 from minio.error import S3Error
 from urllib3.exceptions import ResponseError, MaxRetryError
@@ -166,7 +167,7 @@ class FlaskMinio:
         :return: a Boolean
         """
         return (
-            "." in filename and self.get_extension(filename) in self.allowed_extensions
+                "." in filename and self.get_extension(filename) in self.allowed_extensions
         )
 
     def get_extension(self, filename):
@@ -232,12 +233,14 @@ class FlaskMinio:
                 )
                 ordered_filed = f"{act_year_month}/{filename}"
                 content_type = self.content_type(filename=uploaded_file.filename)
+                current_user = get_jwt_identity()
                 self.connection.put_object(
                     minio_bucket_name,
                     ordered_filed,
                     uploaded_file,
                     size,
                     content_type=content_type,
+                    metadata={"uploaded-by": current_user}
                 )
                 data = {
                     "message": "object stored in {}".format(minio_bucket_name),
