@@ -21,8 +21,7 @@ class GenericPlatformActionAttachment(db.Model):
         "PlatformAttachment",
         uselist=False,
         foreign_keys=[attachment_id],
-        backref=db.backref("generic_platform_action_attachments",
-                           cascade="save-update, merge, delete, delete-orphan"),
+        backref=db.backref("generic_platform_action_attachments"),
     )
 
 
@@ -45,8 +44,7 @@ class GenericDeviceActionAttachment(db.Model):
         "DeviceAttachment",
         uselist=False,
         foreign_keys=[attachment_id],
-        backref=db.backref("generic_device_action_attachments",
-                           cascade="save-update, merge, delete, delete-orphan"),
+        backref=db.backref("generic_device_action_attachments"),
     )
 
 
@@ -69,6 +67,5 @@ class GenericConfigurationActionAttachment(db.Model):
         ConfigurationAttachment,
         uselist=False,
         foreign_keys=[attachment_id],
-        backref=db.backref("generic_configuration_action_attachments",
-                           cascade="save-update, merge, delete, delete-orphan"),
+        backref=db.backref("generic_configuration_action_attachments"),
     )

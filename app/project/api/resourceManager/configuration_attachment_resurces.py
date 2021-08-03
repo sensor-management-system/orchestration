@@ -1,9 +1,10 @@
-"""Module for the device attachment list resource."""
+"""Module for the configuration attachments list resource."""
 from flask_rest_jsonapi import ResourceDetail, ResourceList, ResourceRelationship
-from flask_rest_jsonapi.exceptions import ObjectNotFound
+from flask_rest_jsonapi.exceptions import ObjectNotFound, JsonApiException
 from sqlalchemy.orm.exc import NoResultFound
 
-from .base_resource import delete_attachments_in_minio_by_id
+from .base_resource import delete_attachments_in_minio_by_url
+from ..helpers.errors import ConflictError
 from ..models import Configuration, ConfigurationAttachment
 from ..models.base_model import db
 from ..schemas.configuration_attachment_schema import ConfigurationAttachmentSchema
@@ -54,9 +55,27 @@ class ConfigurationAttachmentDetail(ResourceDetail):
     Resource for ConfigurationAttachments.
     """
 
-    def before_delete(self, args, kwargs):
-        """Hook to delete attachment from storage server before delete method"""
-        delete_attachments_in_minio_by_id(ConfigurationAttachment, kwargs["id"])
+    def delete(self, *args, **kwargs):
+        """
+        Try to delete an object through sqlalchemy. If could not be done give a ConflictError.
+        :param args: args from the resource view
+        :param kwargs: kwargs from the resource view
+        :return:
+        """
+
+        attachment = (db.session.query(ConfigurationAttachment).filter_by(id=kwargs["id"]).first())
+        if attachment is None:
+            raise ObjectNotFound({'pointer': ''}, 'Object Not Found')
+        url = attachment.url
+        try:
+            super().delete(*args, **kwargs)
+        except JsonApiException as e:
+            raise ConflictError("Deletion failed as the attachment is still in use.", str(e))
+
+        delete_attachments_in_minio_by_url(url)
+        final_result = {'meta': {'message': 'Object successfully deleted'}}
+
+        return final_result
 
     schema = ConfigurationAttachmentSchema
     decorators = (token_required,)

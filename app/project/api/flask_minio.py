@@ -3,11 +3,12 @@ import time
 import uuid
 
 import minio
-from flask import current_app, _app_ctx_stack, make_response, abort, jsonify
+from flask import current_app, _app_ctx_stack, make_response
 from flask_jwt_extended import get_jwt_identity
-from flask_rest_jsonapi.exceptions import JsonApiException
 from minio.error import S3Error
 from urllib3.exceptions import ResponseError, MaxRetryError
+
+from .helpers.errors import NotFoundError, ConflictError, ServiceIsUnreachableError
 
 
 class MinioNotAvailableException(Exception):
@@ -215,16 +216,8 @@ class FlaskMinio:
             if not found:
                 # self.connection.make_bucket(minio_bucket_name)
                 # self.set_bucket_policy(minio_bucket_name)
-                abort(
-                    make_response(
-                        jsonify(
-                            error="A Bucket with the name: {} is not Found.".format(
-                                minio_bucket_name
-                            )
-                        ),
-                        400,
-                    )
-                )
+                raise NotFoundError("A Bucket with the name: {} is not Found.".format(
+                    minio_bucket_name))
 
             if uploaded_file and self.allowed_file(filename=uploaded_file.filename):
                 filename = "{}{}".format(
@@ -253,7 +246,7 @@ class FlaskMinio:
                 return response
 
         except S3Error as s3err:
-            raise JsonApiException({"error": s3err.message}, title=s3err.code)
+            raise ConflictError(s3err.message)
         except MaxRetryError as e:
             self._exception_on_creating_client = e
             raise MinioNotAvailableException(self._exception_on_creating_client)
@@ -275,7 +268,7 @@ class FlaskMinio:
                 self.connection.remove_object(_bucket_name, _object_name)
                 return make_response(f"{_object_name} has been successfully removed")
             except ResponseError as err:
-                raise JsonApiException({"parameter": err})
+                raise ServiceIsUnreachableError(err)
 
     @staticmethod
     def extract_bucket_and_file_names_from_url(object_path):

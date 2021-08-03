@@ -1,8 +1,7 @@
-from flask import request, Blueprint, jsonify, make_response
-from flask_rest_jsonapi.exceptions import JsonApiException
-from werkzeug.exceptions import abort
+from flask import request, Blueprint
 
 from .flask_minio import MinioNotAvailableException
+from .helpers.errors import UnsupportedMediaTypeError, BadRequestError, ServiceIsUnreachableError
 from .token_checker import token_required
 from ..api import minio
 from ..config import env
@@ -24,14 +23,10 @@ def upload():
                 return response, 201
 
             except MinioNotAvailableException as e:
-                raise JsonApiException(
-                    str(e), title="Connection to MinIO server could not be done"
-                )
+                raise ServiceIsUnreachableError(str(e))
         else:
-            raise JsonApiException(
-                {"error": "Sorry, This File Type Is Not Permitted"},
-                status=415,
-                title="Unsupported Media Type",
+            raise UnsupportedMediaTypeError(
+                "{} is Not Permitted".format(file.content_type)
             )
     else:
-        abort(make_response(jsonify(error="Bad Request"), 400))
+        raise BadRequestError("No File in request Body was Found")

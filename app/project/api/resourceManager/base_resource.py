@@ -56,18 +56,14 @@ def add_contact_to_object(entity_with_contact_list):
         db.session.commit()
 
 
-def delete_attachments_in_minio_by_id(_class, object_id_intended_for_deletion):
+def delete_attachments_in_minio_by_url(url):
     """
-    Use the minio class to delete an attachment or a list of attachments.
-    :param object_id_intended_for_deletion: attachment id.
-    :param _class: Attachment class.
+    Use the minio class to delete an attachment.
+
+    :param url: attachment url.
     """
-    attachment = (
-        db.session.query(_class)
-            .filter_by(id=object_id_intended_for_deletion)
-            .first()
-    )
-    minio.remove_an_object(attachment.url)
+
+    minio.remove_an_object(url)
 
 
 def delete_attachments_in_minio_by_related_object_id(related_object_class, attachment_class,
