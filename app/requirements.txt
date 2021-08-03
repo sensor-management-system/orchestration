@@ -30,6 +30,7 @@ mccabe==0.6.1
 minio==7.1.0
 pandas==1.2.5
 psycopg2-binary==2.9.1
+py-healthcheck==1.10.1
 pycodestyle==2.7.0
 pycparser==2.20
 pycryptodomex==3.10.1

@@ -2,8 +2,11 @@ from elasticsearch import Elasticsearch
 from flask import Blueprint, Flask
 from flask_cors import CORS
 from flask_migrate import Migrate
+from healthcheck import HealthCheck
 
 from .api import minio
+from .api.helpers.health_checks import health_check_elastic_search, health_check_db, \
+    health_check_migrations, health_check_minio
 from .api.models.base_model import db
 from .api.token_checker import jwt
 from .api.upload_files import upload_routes
@@ -12,6 +15,7 @@ from .urls import api
 
 migrate = Migrate()
 base_url = env("URL_PREFIX", "/rdm/svm-api/v1")
+health = HealthCheck()
 
 
 def create_app():
@@ -57,6 +61,14 @@ def create_app():
     # test to ensure the proper config was loaded
     # import sys
     # print(app.config, file=sys.stderr)
+
+    # Health Checks
+    health.add_check(health_check_elastic_search)
+    health.add_check(health_check_db)
+    health.add_check(health_check_migrations)
+    health.add_check(health_check_minio)
+    app.add_url_rule(base_url + "/health", "health", view_func=lambda: health.run())
+
 
     # upload_routes
     app.register_blueprint(upload_routes)
