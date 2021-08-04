@@ -9,6 +9,8 @@ from minio.error import S3Error
 from urllib3.exceptions import ResponseError, MaxRetryError
 
 from .helpers.errors import NotFoundError, ConflictError, ServiceIsUnreachableError
+from .models import User
+from .models.base_model import db
 
 
 class MinioNotAvailableException(Exception):
@@ -226,14 +228,15 @@ class FlaskMinio:
                 )
                 ordered_filed = f"{act_year_month}/{filename}"
                 content_type = self.content_type(filename=uploaded_file.filename)
-                current_user = get_jwt_identity()
+                current_user = db.session.query(User).filter_by(
+                    subject=get_jwt_identity()).one_or_none()
                 self.connection.put_object(
                     minio_bucket_name,
                     ordered_filed,
                     uploaded_file,
                     size,
                     content_type=content_type,
-                    metadata={"uploaded-by": current_user}
+                    metadata={"uploaded-by-id": current_user.id}
                 )
                 data = {
                     "message": "object stored in {}".format(minio_bucket_name),
