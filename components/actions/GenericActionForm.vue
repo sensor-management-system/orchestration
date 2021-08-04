@@ -80,7 +80,7 @@ import { Attachment } from '@/models/Attachment'
 import { GenericAction } from '@/models/GenericAction'
 import { ActionCommonDetails } from '@/models/ActionCommonDetails'
 
-import CommonActionForm from '@/components/CommonActionForm.vue'
+import CommonActionForm from '@/components/actions/CommonActionForm.vue'
 import DateTimePicker from '@/components/DateTimePicker.vue'
 
 /**

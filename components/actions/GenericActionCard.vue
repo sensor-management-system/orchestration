@@ -33,18 +33,22 @@ permissions and limitations under the Licence.
     <v-card-subtitle class="pb-0">
       <v-row no-gutters>
         <v-col>
-          {{ value.updateDate | toUtcDate }}
+          {{ actionDate }}
         </v-col>
         <v-col
           align-self="end"
           class="text-right"
         >
-          <slot name="menu" />
+          <ActionCardMenu
+            v-if="isLoggedIn"
+            :value="value"
+            @delete-menu-item-click="showDeleteDialog = true"
+          />
         </v-col>
       </v-row>
     </v-card-subtitle>
     <v-card-title class="pt-0">
-      {{ updateName }}
+      {{ value.actionTypeName }}
     </v-card-title>
     <v-card-subtitle class="pb-1">
       <v-row
@@ -74,63 +78,68 @@ permissions and limitations under the Licence.
         <v-card-text
           class="grey lighten-5 text--primary pt-2"
         >
-          <v-row dense>
-            <v-col cols="12" md="4">
-              <label>
-                Version
-              </label>
-              {{ value.version }}
-            </v-col>
-            <v-col cols="12" md="4">
-              <label>
-                Repository
-              </label>
-              <!-- eslint-disable-next-line vue/no-v-html -->
-              <span v-html="repositoryLink" />
-            </v-col>
-          </v-row>
           <label>Description</label>
           {{ value.description }}
         </v-card-text>
       </div>
     </v-expand-transition>
+    <ActionDeleteDialog
+      v-model="showDeleteDialog"
+      @delete-dialog-button-click="deleteActionAndCloseDialog"
+    />
   </v-card>
 </template>
 
 <script lang="ts">
 /**
- * @file provides a component for a Software Update Action card
+ * @file provides a component for a Generic Device Actions card
  * @author <marc.hanisch@gfz-potsdam.de>
  */
 import { Component, Prop, Vue } from 'nuxt-property-decorator'
 
 import { dateToDateTimeString } from '@/utils/dateHelper'
-import { protocolsInUrl } from '@/utils/urlHelpers'
-import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
+import { GenericAction } from '@/models/GenericAction'
+
+import ActionCardMenu from '@/components/actions/ActionCardMenu.vue'
+import ActionDeleteDialog from '@/components/actions/ActionDeleteDialog.vue'
 
 /**
- * A class component for Software Update Action card
+ * A class component for Generic Device Action card
  * @extends Vue
  */
 @Component({
-  filters: {
-    toUtcDate: dateToDateTimeString
+  components: {
+    ActionCardMenu,
+    ActionDeleteDialog
   }
 })
 // @ts-ignore
-export default class SoftwareUpdateActionCard extends Vue {
+export default class GenericActionCard extends Vue {
   private showDetails: boolean = false
+  private isShowDeleteDialog: boolean = false
+  private _isDeleting: boolean = false
 
   /**
-   * a SoftwareUpdateAction
+   * a GenericAction
    */
   @Prop({
-    default: () => new SoftwareUpdateAction(),
+    default: () => new GenericAction(),
     required: true,
     type: Object
   })
   // @ts-ignore
-  readonly value!: SoftwareUpdateAction
+  readonly value!: GenericAction
+
+  /**
+   * a function reference that deletes the action
+   */
+  @Prop({
+    default: () => null,
+    required: false,
+    type: Function
+  })
+  // @ts-ignore
+  readonly deleteCallback!: (id: string) => Promise<void>
 
   /**
    * whether the card expansion is shown or not
@@ -149,34 +158,63 @@ export default class SoftwareUpdateActionCard extends Vue {
     this.showDetails = !this.showDetails
   }
 
-  /**
-   * returns an URL as an link
-   *
-   * All characters except 0-9, a-z, :, / and . are removed from the link to
-   * prevent xss attacks. If the URL doesn't start with a known protocol, it
-   * won't be wrapped.
-   *
-   * @return {string} the url wrapped in an HTML link element
-   */
-  get repositoryLink (): string {
-    // eslint-disable-next-line no-useless-escape
-    const url = this.value.repositoryUrl.replace(/[^a-zA-Z0-9:\/.-]/g, '')
-    if (protocolsInUrl(['https', 'http', 'ftp', 'ftps', 'sftp', 'dav', 'davs'], url)) {
-      return '<a href="' + url + '" target="_blank">' + url + '</a>'
+  get actionDate ():string {
+    let actionDate = dateToDateTimeString(this.value.beginDate)
+    if (this.value.endDate) {
+      actionDate += ' - ' + dateToDateTimeString(this.value.endDate)
     }
-    return url
+    return actionDate
+  }
+
+  get isLoggedIn (): boolean {
+    return this.$store.getters['oidc/isAuthenticated']
+  }
+
+  get showDeleteDialog (): boolean {
+    return this.isShowDeleteDialog
+  }
+
+  set showDeleteDialog (value: boolean) {
+    this.isShowDeleteDialog = value
+  }
+
+  get isDeleting (): boolean {
+    return this.$data._isDeleting
+  }
+
+  set isDeleting (value: boolean) {
+    this.$data._isDeleting = value
+    this.$emit('showdelete', value)
   }
 
   /**
-   * returns the name of the update
+   * deletes the action and closes the delete dialog
    *
-   * @returns {string} the update name
+   * @fires GenericActionCard#delete-success
    */
-  get updateName (): string {
-    if (this.value.softwareTypeName.toLowerCase() === 'others') {
-      return 'Device Software Update'
+  deleteActionAndCloseDialog (): void {
+    if (!this.value.id) {
+      return
     }
-    return this.value.softwareTypeName + ' Update'
+    if (!this.deleteCallback) {
+      return
+    }
+    this.isDeleting = true
+    this.deleteCallback(this.value.id).then(() => {
+      this.isDeleting = false
+      /**
+       * fires an delete-success event
+       * @event GenericActionCard#delete-success
+       * @type {IActionCommonDetails}
+       */
+      this.$emit('delete-success', this.value)
+      this.$store.commit('snackbar/setSuccess', 'Action deleted')
+    }).catch((_error) => {
+      this.isDeleting = false
+      this.$store.commit('snackbar/setError', 'Action could not be deleted')
+    }).finally(() => {
+      this.showDeleteDialog = false
+    })
   }
 }
 </script>

@@ -34,24 +34,23 @@ permissions and limitations under the Licence.
       <v-spacer />
       <ActionButtonTray
         v-if="isLoggedIn"
-        :cancel-url="'/devices/' + deviceId + '/actions'"
+        :cancel-url="'/platforms/' + platformId + '/actions'"
         :is-saving="isSaving"
         @apply="save"
       />
     </v-card-actions>
 
-    <DeviceCalibrationActionForm
-      ref="deviceCalibrationActionForm"
+    <SoftwareUpdateActionForm
+      ref="softwareUpdateActionForm"
       v-model="action"
       :attachments="attachments"
-      :measured-quantities="measuredQuantities"
     />
 
     <v-card-actions>
       <v-spacer />
       <ActionButtonTray
         v-if="isLoggedIn"
-        :cancel-url="'/devices/' + deviceId + '/actions'"
+        :cancel-url="'/platforms/' + platformId + '/actions'"
         :is-saving="isSaving"
         @apply="save"
       />
@@ -63,23 +62,21 @@ permissions and limitations under the Licence.
 import { Component, Vue } from 'nuxt-property-decorator'
 
 import { Attachment } from '@/models/Attachment'
-import { DeviceCalibrationAction } from '@/models/DeviceCalibrationAction'
-import { DeviceProperty } from '@/models/DeviceProperty'
+import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
 
-import DeviceCalibrationActionForm from '@/components/actions/DeviceCalibrationActionForm.vue'
 import ActionButtonTray from '@/components/actions/ActionButtonTray.vue'
+import SoftwareUpdateActionForm from '@/components/actions/SoftwareUpdateActionForm.vue'
 
 @Component({
   components: {
-    DeviceCalibrationActionForm,
+    SoftwareUpdateActionForm,
     ActionButtonTray
   },
   scrollToTop: true
 })
-export default class DeviceCalibrationActionEditPage extends Vue {
-  private action: DeviceCalibrationAction = new DeviceCalibrationAction()
+export default class PlatformSoftwareUpdateActionEditPage extends Vue {
+  private action: SoftwareUpdateAction = new SoftwareUpdateAction()
   private attachments: Attachment[] = []
-  private measuredQuantities: DeviceProperty[] = []
   private _isLoading: boolean = false
   private _isSaving: boolean = false
 
@@ -87,15 +84,14 @@ export default class DeviceCalibrationActionEditPage extends Vue {
     this.isLoading = true
     await Promise.all([
       this.fetchAttachments(),
-      this.fetchAction(),
-      this.fetchMeasuredQuantities()
+      this.fetchAction()
     ])
     this.isLoading = false
   }
 
   async fetchAction (): Promise<any> {
     try {
-      this.action = await this.$api.deviceCalibrationActions.findById(this.actionId)
+      this.action = await this.$api.platformSoftwareUpdateActions.findById(this.actionId)
     } catch (_) {
       this.$store.commit('snackbar/setError', 'Failed to fetch action')
     }
@@ -103,22 +99,14 @@ export default class DeviceCalibrationActionEditPage extends Vue {
 
   async fetchAttachments (): Promise<any> {
     try {
-      this.attachments = await this.$api.devices.findRelatedDeviceAttachments(this.deviceId)
+      this.attachments = await this.$api.platforms.findRelatedPlatformAttachments(this.platformId)
     } catch (_) {
       this.$store.commit('snackbar/setError', 'Failed to fetch attachments')
     }
   }
 
-  async fetchMeasuredQuantities (): Promise<any> {
-    try {
-      this.measuredQuantities = await this.$api.devices.findRelatedDeviceProperties(this.deviceId)
-    } catch (_) {
-      this.$store.commit('snackbar/setError', 'Failed to fetch measured quantities')
-    }
-  }
-
-  get deviceId (): string {
-    return this.$route.params.deviceId
+  get platformId (): string {
+    return this.$route.params.platformId
   }
 
   get actionId (): string {
@@ -148,13 +136,13 @@ export default class DeviceCalibrationActionEditPage extends Vue {
   }
 
   save (): void {
-    if (!(this.$refs.deviceCalibrationActionForm as Vue & { isValid: () => boolean }).isValid()) {
+    if (!(this.$refs.softwareUpdateActionForm as Vue & { isValid: () => boolean }).isValid()) {
       this.$store.commit('snackbar/setError', 'Please correct the errors')
       return
     }
     this.isSaving = true
-    this.$api.deviceCalibrationActions.update(this.deviceId, this.action).then((action: DeviceCalibrationAction) => {
-      this.$router.push('/devices/' + this.deviceId + '/actions', () => this.$emit('input', action))
+    this.$api.platformSoftwareUpdateActions.update(this.platformId, this.action).then((action: SoftwareUpdateAction) => {
+      this.$router.push('/platforms/' + this.platformId + '/actions', () => this.$emit('input', action))
     }).catch(() => {
       this.$store.commit('snackbar/setError', 'Failed to save the action')
     }).finally(() => {

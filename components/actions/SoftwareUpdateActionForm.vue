@@ -115,7 +115,7 @@ import { ActionCommonDetails } from '@/models/ActionCommonDetails'
 
 import { protocolsInUrl } from '@/utils/urlHelpers'
 
-import CommonActionForm from '@/components/CommonActionForm.vue'
+import CommonActionForm from '@/components/actions/CommonActionForm.vue'
 import DateTimePicker from '@/components/DateTimePicker.vue'
 
 /**

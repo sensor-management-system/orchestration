@@ -32,24 +32,12 @@ permissions and limitations under the Licence.
   <div>
     <v-card-actions>
       <v-spacer />
-      <v-btn
+      <ActionButtonTray
         v-if="isLoggedIn"
-        small
-        text
-        nuxt
-        :to="'/devices/' + deviceId + '/actions'"
-      >
-        cancel
-      </v-btn>
-      <v-btn
-        v-if="isLoggedIn"
-        color="green"
-        small
-        :disabled="isSaving"
-        @click="save"
-      >
-        apply
-      </v-btn>
+        :cancel-url="'/devices/' + deviceId + '/actions'"
+        :is-saving="isSaving"
+        @apply="save"
+      />
     </v-card-actions>
 
     <SoftwareUpdateActionForm
@@ -60,24 +48,12 @@ permissions and limitations under the Licence.
 
     <v-card-actions>
       <v-spacer />
-      <v-btn
+      <ActionButtonTray
         v-if="isLoggedIn"
-        small
-        text
-        nuxt
-        :to="'/devices/' + deviceId + '/actions'"
-      >
-        cancel
-      </v-btn>
-      <v-btn
-        v-if="isLoggedIn"
-        color="green"
-        small
-        :disabled="isSaving"
-        @click="save"
-      >
-        apply
-      </v-btn>
+        :cancel-url="'/devices/' + deviceId + '/actions'"
+        :is-saving="isSaving"
+        @apply="save"
+      />
     </v-card-actions>
   </div>
 </template>
@@ -88,11 +64,13 @@ import { Component, Vue } from 'nuxt-property-decorator'
 import { Attachment } from '@/models/Attachment'
 import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
 
-import SoftwareUpdateActionForm from '@/components/SoftwareUpdateActionForm.vue'
+import SoftwareUpdateActionForm from '@/components/actions/SoftwareUpdateActionForm.vue'
+import ActionButtonTray from '@/components/actions/ActionButtonTray.vue'
 
 @Component({
   components: {
-    SoftwareUpdateActionForm
+    SoftwareUpdateActionForm,
+    ActionButtonTray
   },
   scrollToTop: true
 })

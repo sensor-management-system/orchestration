@@ -38,39 +38,12 @@ permissions and limitations under the Licence.
       <!-- button-tray -->
       <v-card-actions>
         <v-spacer />
-        <v-btn
-          ref="cancelButton"
-          text
-          small
-          :to="'/devices/' + deviceId + '/actions'"
-        >
-          Cancel
-        </v-btn>
-        <v-btn
-          v-if="deviceCalibrationChosen"
-          color="green"
-          small
-          @click="addDeviceCalibrationAction"
-        >
-          Add
-        </v-btn>
-        <v-btn
-          v-else-if="softwareUpdateChosen"
-          color="green"
-          small
-          @click="addSoftwareUpdateAction"
-        >
-          Add
-        </v-btn>
-        <v-btn
-          v-else-if="genericActionChosen"
-          color="green"
-          small
-          :disabled="isSaving"
-          @click="addGenericAction"
-        >
-          Add
-        </v-btn>
+        <ActionButtonTray
+          :cancel-url="'/devices/' + deviceId + '/actions'"
+          :is-saving="isSaving"
+          :show-apply="showApplyButton"
+          @apply="onApplyButtonClick"
+        />
       </v-card-actions>
       <v-card-text>
         <v-select
@@ -123,39 +96,12 @@ permissions and limitations under the Licence.
         v-if="chosenKindOfAction"
       >
         <v-spacer />
-        <v-btn
-          ref="cancelButton"
-          text
-          small
-          :to="'/devices/' + deviceId + '/actions'"
-        >
-          Cancel
-        </v-btn>
-        <v-btn
-          v-if="deviceCalibrationChosen"
-          color="green"
-          small
-          @click="addDeviceCalibrationAction"
-        >
-          Add
-        </v-btn>
-        <v-btn
-          v-else-if="softwareUpdateChosen"
-          color="green"
-          small
-          @click="addSoftwareUpdateAction"
-        >
-          Add
-        </v-btn>
-        <v-btn
-          v-else-if="genericActionChosen"
-          color="green"
-          small
-          :disabled="isSaving"
-          @click="addGenericAction"
-        >
-          Add
-        </v-btn>
+        <ActionButtonTray
+          :cancel-url="'/devices/' + deviceId + '/actions'"
+          :is-saving="isSaving"
+          :show-apply="showApplyButton"
+          @apply="onApplyButtonClick"
+        />
       </v-card-actions>
     </v-card>
   </div>
@@ -173,10 +119,10 @@ import { IActionType, ActionType } from '@/models/ActionType'
 
 import { ACTION_TYPE_API_FILTER_DEVICE } from '@/services/cv/ActionTypeApi'
 
-import DeviceCalibrationActionForm from '@/components/DeviceCalibrationActionForm.vue'
-import GenericActionForm from '@/components/GenericActionForm.vue'
-import SoftwareUpdateActionForm from '@/components/SoftwareUpdateActionForm.vue'
-import DatePicker from '@/components/DatePicker.vue'
+import DeviceCalibrationActionForm from '@/components/actions/DeviceCalibrationActionForm.vue'
+import GenericActionForm from '@/components/actions/GenericActionForm.vue'
+import SoftwareUpdateActionForm from '@/components/actions/SoftwareUpdateActionForm.vue'
+import ActionButtonTray from '@/components/actions/ActionButtonTray.vue'
 
 const KIND_OF_ACTION_TYPE_DEVICE_CALIBRATION = 'device_calibration'
 const KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE = 'software_update'
@@ -193,7 +139,7 @@ type IOptionsForActionType = Pick<IActionType, 'id' | 'name' | 'uri'> & {
     DeviceCalibrationActionForm,
     GenericActionForm,
     SoftwareUpdateActionForm,
-    DatePicker
+    ActionButtonTray
   }
 })
 export default class ActionAddPage extends Vue {
@@ -298,6 +244,19 @@ export default class ActionAddPage extends Vue {
     this.$emit('showsave', value)
   }
 
+  onApplyButtonClick () {
+    switch (true) {
+      case this.genericActionChosen:
+        this.addGenericAction()
+        return
+      case this.softwareUpdateChosen:
+        this.addSoftwareUpdateAction()
+        return
+      case this.deviceCalibrationChosen:
+        this.addDeviceCalibrationAction()
+    }
+  }
+
   addDeviceCalibrationAction () {
     if (!this.isLoggedIn) {
       return
@@ -365,6 +324,10 @@ export default class ActionAddPage extends Vue {
     })
   }
 
+  get showApplyButton (): boolean {
+    return this.chosenKindOfAction !== null
+  }
+
   get actionTypeItems (): IOptionsForActionType[] {
     return [
       ...this.specialActionTypes,
@@ -376,7 +339,7 @@ export default class ActionAddPage extends Vue {
           kind: KIND_OF_ACTION_TYPE_GENERIC_DEVICE_ACTION
         }
       })
-    ] as IOptionsForActionType[]
+    ].sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase())) as IOptionsForActionType[]
   }
 }
 

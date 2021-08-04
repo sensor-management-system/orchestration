@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020, 2021
+ * Copyright (C) 2020-2021
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -29,15 +29,42 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
-import Vue from 'vue'
 
-/**
- * returns a default string when value is empty
- *
- * @param {string} value - the string
- * @param {string} [defaultValue] - a default string, defaults to '-'
- * @returns {string} the string or the default, if the string is empty
- */
-Vue.filter('orDefault', (value: string, defaultValue: string = '—'): string => {
-  return value || defaultValue
-})
+import { DateTime } from 'luxon'
+import { DeviceUnmountAction } from '@/models/views/devices/actions/DeviceUnmountAction'
+import { Contact } from '@/models/Contact'
+import { Attachment } from '@/models/Attachment'
+import { IActionCommonDetails } from '@/models/ActionCommonDetails'
+import { IDateCompareable } from '@/modelUtils/Compareables'
+
+export class DeviceUnmountActionWrapper implements IActionCommonDetails, IDateCompareable {
+  inner: DeviceUnmountAction
+
+  constructor (inner: DeviceUnmountAction) {
+    this.inner = inner
+  }
+
+  get id (): string {
+    return this.inner.basicData.id
+  }
+
+  get description (): string {
+    return this.inner.basicData.description
+  }
+
+  get contact (): Contact {
+    return Contact.createFromObject(this.inner.contact)
+  }
+
+  get attachments (): Attachment[] {
+    return []
+  }
+
+  get isDeviceUnmountAction (): boolean {
+    return true
+  }
+
+  get date (): DateTime | null {
+    return this.inner.basicData.date
+  }
+}

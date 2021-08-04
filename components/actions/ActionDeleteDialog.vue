@@ -5,8 +5,12 @@ Helmholtz DataHub Initiative by GFZ and UFZ.
 Copyright (C) 2020, 2021
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
+- Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
+- Erik Pongratz (UFZ, erik.pongratz@ufz.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
   Geosciences (GFZ, https://www.gfz-potsdam.de)
+- Helmholtz Centre for Environmental Research GmbH - UFZ
+  (UFZ, https://www.ufz.de)
 
 Parts of this program were developed within the context of the
 following publicly funded projects or measures:
@@ -28,68 +32,61 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
 implied. See the Licence for the specific language governing
 permissions and limitations under the Licence.
 -->
+
 <template>
-  <v-card
-    class="mb-2"
+  <v-dialog
+    v-model="show"
+    max-width="290"
+    @click:outside="show = false"
   >
-    <v-card-text>
-      <v-row
-        no-gutters
-      >
-        <v-col
-          cols="12"
-          md="2"
+    <v-card>
+      <v-card-title class="headline">
+        Delete action
+      </v-card-title>
+      <v-card-text>
+        Do you really want to delete the action?
+      </v-card-text>
+      <v-card-actions>
+        <v-btn
+          text
+          @click="show = false"
         >
-          <label>Key:</label>
-          {{ value.key }}
-        </v-col>
-        <v-col
-          cols="12"
-          md="8"
+          No
+        </v-btn>
+        <v-spacer />
+        <v-btn
+          color="error"
+          text
+          @click="$emit('delete-dialog-button-click')"
         >
-          <label>Value:</label>
-          {{ value.value }}
-        </v-col>
-        <v-col
-          cols="12"
-          md="2"
-          class="text-right"
-          align-self="center"
-        >
-          <slot name="actions" />
-        </v-col>
-      </v-row>
-    </v-card-text>
-  </v-card>
+          <v-icon left>
+            mdi-delete
+          </v-icon>
+          Delete
+        </v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop } from 'nuxt-property-decorator'
-
-import { CustomTextField } from '@/models/CustomTextField'
+import { Vue, Component, Prop } from 'nuxt-property-decorator'
 
 @Component
-export default class CustomFieldCard extends Vue {
+export default class ActionDeleteDialog extends Vue {
   @Prop({
-    required: true,
-    type: Object
+    default: false,
+    type: Boolean,
+    required: true
   })
-  readonly value!: CustomTextField
+  readonly value!: boolean
 
-  get field (): CustomTextField {
+  get show (): boolean {
     return this.value
   }
 
-  set field (value: CustomTextField) {
+  set show (value: boolean) {
     this.$emit('input', value)
-  }
-
-  get deviceId (): string {
-    return this.$route.params.deviceId
-  }
-
-  get isLoggedIn (): boolean {
-    return this.$store.getters['oidc/isAuthenticated']
   }
 }
 </script>
