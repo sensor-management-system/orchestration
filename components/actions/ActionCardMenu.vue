@@ -5,8 +5,12 @@ Helmholtz DataHub Initiative by GFZ and UFZ.
 Copyright (C) 2020, 2021
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
+- Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
+- Erik Pongratz (UFZ, erik.pongratz@ufz.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
   Geosciences (GFZ, https://www.gfz-potsdam.de)
+- Helmholtz Centre for Environmental Research GmbH - UFZ
+  (UFZ, https://www.ufz.de)
 
 Parts of this program were developed within the context of the
 following publicly funded projects or measures:
@@ -29,67 +33,63 @@ implied. See the Licence for the specific language governing
 permissions and limitations under the Licence.
 -->
 <template>
-  <v-card
-    class="mb-2"
+  <v-menu
+    close-on-click
+    close-on-content-click
+    offset-x
+    left
+    z-index="999"
   >
-    <v-card-text>
-      <v-row
-        no-gutters
+    <template #activator="{ on }">
+      <v-btn
+        data-role="property-menu"
+        icon
+        small
+        v-on="on"
       >
-        <v-col
-          cols="12"
-          md="2"
-        >
-          <label>Key:</label>
-          {{ value.key }}
-        </v-col>
-        <v-col
-          cols="12"
-          md="8"
-        >
-          <label>Value:</label>
-          {{ value.value }}
-        </v-col>
-        <v-col
-          cols="12"
-          md="2"
-          class="text-right"
-          align-self="center"
-        >
-          <slot name="actions" />
-        </v-col>
-      </v-row>
-    </v-card-text>
-  </v-card>
+        <v-icon dense small>
+          mdi-dots-vertical
+        </v-icon>
+      </v-btn>
+    </template>
+
+    <v-list>
+      <v-list-item
+        dense
+        @click="onDeleteButtonClick"
+      >
+        <v-list-item-content>
+          <v-list-item-title class="red--text">
+            <v-icon
+              left
+              small
+              color="red"
+            >
+              mdi-delete
+            </v-icon>
+            Delete
+          </v-list-item-title>
+        </v-list-item-content>
+      </v-list-item>
+    </v-list>
+  </v-menu>
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop } from 'nuxt-property-decorator'
+import { Vue, Component, Prop } from 'nuxt-property-decorator'
 
-import { CustomTextField } from '@/models/CustomTextField'
+import { IActionCommonDetails } from '@/models/ActionCommonDetails'
 
 @Component
-export default class CustomFieldCard extends Vue {
+export default class ActionCardMenu extends Vue {
   @Prop({
-    required: true,
-    type: Object
+    type: Object,
+    required: true
   })
-  readonly value!: CustomTextField
+  readonly value!: IActionCommonDetails
 
-  get field (): CustomTextField {
-    return this.value
-  }
-
-  set field (value: CustomTextField) {
-    this.$emit('input', value)
-  }
-
-  get deviceId (): string {
-    return this.$route.params.deviceId
-  }
-
-  get isLoggedIn (): boolean {
-    return this.$store.getters['oidc/isAuthenticated']
+  onDeleteButtonClick (): void {
+    this.$emit('delete-menu-item-click', this.value)
   }
 }
 </script>

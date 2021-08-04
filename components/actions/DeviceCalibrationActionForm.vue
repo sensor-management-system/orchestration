@@ -125,10 +125,10 @@ import { DateTime } from 'luxon'
 import { Attachment } from '@/models/Attachment'
 import { DeviceCalibrationAction } from '@/models/DeviceCalibrationAction'
 import { ActionCommonDetails } from '@/models/ActionCommonDetails'
-
-import CommonActionForm from '@/components/CommonActionForm.vue'
-import DateTimePicker from '@/components/DateTimePicker.vue'
 import { DeviceProperty } from '@/models/DeviceProperty'
+
+import CommonActionForm from '@/components/actions/CommonActionForm.vue'
+import DateTimePicker from '@/components/DateTimePicker.vue'
 
 /**
  * A class component for a form for Device calibration actions

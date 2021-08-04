@@ -1,11 +1,54 @@
+<!--
+Web client of the Sensor Management System software developed within the
+Helmholtz DataHub Initiative by GFZ and UFZ.
+
+Copyright (C) 2020, 2021
+- Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
+- Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
+- Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
+- Erik Pongratz (UFZ, erik.pongratz@ufz.de)
+- Helmholtz Centre Potsdam - GFZ German Research Centre for
+  Geosciences (GFZ, https://www.gfz-potsdam.de)
+- Helmholtz Centre for Environmental Research GmbH - UFZ
+  (UFZ, https://www.ufz.de)
+
+Parts of this program were developed within the context of the
+following publicly funded projects or measures:
+- Helmholtz Earth and Environment DataHub
+  (https://www.helmholtz.de/en/research/earth_and_environment/initiatives/#h51095)
+
+Licensed under the HEESIL, Version 1.0 or - as soon they will be
+approved by the "Community" - subsequent versions of the HEESIL
+(the "Licence").
+
+You may not use this work except in compliance with the Licence.
+
+You may obtain a copy of the Licence at:
+https://gitext.gfz-potsdam.de/software/heesil
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the Licence is distributed on an "AS IS" basis,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+implied. See the Licence for the specific language governing
+permissions and limitations under the Licence.
+-->
 <template>
   <div>
     <ProgressIndicator
       v-model="isInProgress"
       :dark="isSaving"
     />
-
-    <platform-new-action-button :platform-id="platformId" />
+    <v-card-actions>
+      <v-spacer />
+      <v-btn
+        v-if="isLoggedIn && isActionsPage"
+        color="primary"
+        small
+        :to="'/platforms/' + platformId + '/actions/new'"
+      >
+        Add Action
+      </v-btn>
+    </v-card-actions>
 
     <template v-if="isAddActionPage">
       <NuxtChild
@@ -32,37 +75,39 @@
           </v-card-text>
         </v-card>
       </div>
-      <platform-action-timeline
+      <PlatformActionTimeline
         v-else
-        :actions="actions"
+        :value="actions"
         :platform-id="platformId"
+        :action-api-dispatcher="apiDispatcher"
+        @input="$fetch"
+        @showdelete="showsave"
       />
-      <platform-action-delete-dialog :platform-id="platformId" @update="fetchActions" />
     </template>
   </div>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
-import PlatformActionTimeline from '@/components/platform/actions/PlatformActionTimeline.vue'
-import PlatformNewActionButton from '@/components/platform/actions/PlatformNewActionButton.vue'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
-import PlatformActionDeleteDialog from '@/components/platform/actions/PlatformActionDeleteDialog.vue'
-import { GenericAction } from '@/models/GenericAction'
-import { IActionCommonDetails } from '@/models/ActionCommonDetails'
 
+import PlatformActionTimeline from '@/components/actions/PlatformActionTimeline.vue'
+import ProgressIndicator from '@/components/ProgressIndicator.vue'
+
+import { IActionCommonDetails } from '@/models/ActionCommonDetails'
+import { GenericAction } from '@/models/GenericAction'
+import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
+import { PlatformMountAction } from '@/models/views/platforms/actions/PlatformMountAction'
+import { PlatformUnmountAction } from '@/models/views/platforms/actions/PlatformUnmountAction'
 import { PlatformMountActionWrapper } from '@/viewmodels/PlatformMountActionWrapper'
 import { PlatformUnmountActionWrapper } from '@/viewmodels/PlatformUnmountActionWrapper'
 
-import { PlatformMountAction } from '@/models/views/platforms/actions/PlatformMountAction'
-import { PlatformUnmountAction } from '@/models/views/platforms/actions/PlatformUnmountAction'
+import { DateComparator, isDateCompareable } from '@/modelUtils/Compareables'
+import { PlatformActionApiDispatcher } from '@/modelUtils/actionHelpers'
 
 @Component({
   components: {
-    PlatformActionTimeline,
-    PlatformNewActionButton,
     ProgressIndicator,
-    PlatformActionDeleteDialog
+    PlatformActionTimeline
   }
 })
 export default class PlatformActionsPage extends Vue {
@@ -70,12 +115,71 @@ export default class PlatformActionsPage extends Vue {
   private isLoading: boolean = false
   private actions: IActionCommonDetails[] = []
 
+  async fetch () {
+    this.showload(true)
+    await this.fetchActions()
+    this.showload(false)
+  }
+
+  async fetchActions (): Promise<void> {
+    this.actions = []
+    await Promise.all([
+      this.fetchGenericActions(),
+      this.fetchSoftwareUpdateActions(),
+      this.fetchMountActions(),
+      this.fetchUnmountActions()
+    ])
+    // sort the actions
+    const comparator = new DateComparator()
+    this.actions.sort((i: IActionCommonDetails, j: IActionCommonDetails): number => {
+      if (isDateCompareable(i) && isDateCompareable(j)) {
+        // multiply result with -1 to get descending order
+        return comparator.compare(i, j) * -1
+      }
+      if (isDateCompareable(i)) {
+        return -1
+      }
+      if (isDateCompareable(j)) {
+        return 1
+      }
+      return 0
+    })
+  }
+
+  async fetchGenericActions (): Promise<void> {
+    const actions: GenericAction[] = await this.$api.platforms.findRelatedGenericActions(this.platformId)
+    actions.forEach((action: GenericAction) => this.actions.push(action))
+  }
+
+  async fetchSoftwareUpdateActions (): Promise<void> {
+    const actions: SoftwareUpdateAction[] = await this.$api.platforms.findRelatedSoftwareUpdateActions(this.platformId)
+    actions.forEach((action: SoftwareUpdateAction) => this.actions.push(action))
+  }
+
+  async fetchMountActions (): Promise<void> {
+    const actions: PlatformMountAction[] = await this.$api.platforms.findRelatedMountActions(this.platformId)
+    actions.forEach((action: PlatformMountAction) => this.actions.push(new PlatformMountActionWrapper(action)))
+  }
+
+  async fetchUnmountActions (): Promise<void> {
+    const actions: PlatformUnmountAction[] = await this.$api.platforms.findRelatedUnmountActions(this.platformId)
+    actions.forEach((action: PlatformUnmountAction) => this.actions.push(new PlatformUnmountActionWrapper(action)))
+  }
+
   get platformId (): string {
     return this.$route.params.platformId
   }
 
+  get isLoggedIn (): boolean {
+    return this.$store.getters['oidc/isAuthenticated']
+  }
+
   get isInProgress (): boolean {
     return this.isLoading || this.isSaving
+  }
+
+  get isActionsPage (): boolean {
+    return !this.isEditActionPage && !this.isAddActionPage
   }
 
   get isAddActionPage (): boolean {
@@ -98,36 +202,8 @@ export default class PlatformActionsPage extends Vue {
     this.isLoading = isLoading
   }
 
-  async fetchGenericActions (): Promise<void> {
-    const actions: GenericAction[] = await this.$api.platforms.findRelatedGenericActions(this.platformId)
-    actions.forEach((action: GenericAction) => this.actions.push(action))
-  }
-
-  async fetchMountActions (): Promise<void> {
-    const actions: PlatformMountAction[] = await this.$api.platforms.findRelatedMountActions(this.platformId)
-    actions.forEach((action: PlatformMountAction) => this.actions.push(new PlatformMountActionWrapper(action)))
-  }
-
-  async fetchUnmountActions (): Promise<void> {
-    const actions: PlatformUnmountAction[] = await this.$api.platforms.findRelatedUnmountActions(this.platformId)
-    actions.forEach((action: PlatformUnmountAction) => this.actions.push(new PlatformUnmountActionWrapper(action)))
-  }
-
-  async fetchActions (): Promise<void> {
-    this.actions = []
-    await Promise.all([
-      this.fetchGenericActions(),
-      this.fetchMountActions(),
-      this.fetchUnmountActions()
-    ])
-  }
-
-  async fetch () {
-    await this.fetchActions()
+  get apiDispatcher () {
+    return new PlatformActionApiDispatcher(this.$api)
   }
 }
 </script>
-
-<style scoped>
-
-</style>

@@ -30,12 +30,14 @@
  * permissions and limitations under the Licence.
  */
 
+import { DateTime } from 'luxon'
 import { PlatformUnmountAction } from '@/models/views/platforms/actions/PlatformUnmountAction'
 import { Contact } from '@/models/Contact'
 import { Attachment } from '@/models/Attachment'
 import { IActionCommonDetails } from '@/models/ActionCommonDetails'
+import { IDateCompareable } from '@/modelUtils/Compareables'
 
-export class PlatformUnmountActionWrapper implements IActionCommonDetails {
+export class PlatformUnmountActionWrapper implements IActionCommonDetails, IDateCompareable {
   inner: PlatformUnmountAction
 
   constructor (inner: PlatformUnmountAction) {
@@ -60,5 +62,9 @@ export class PlatformUnmountActionWrapper implements IActionCommonDetails {
 
   get isPlatformUnmountAction (): boolean {
     return true
+  }
+
+  get date (): DateTime | null {
+    return this.inner.basicData.date
   }
 }

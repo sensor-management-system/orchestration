@@ -32,24 +32,12 @@ permissions and limitations under the Licence.
   <div>
     <v-card-actions>
       <v-spacer />
-      <v-btn
+      <ActionButtonTray
         v-if="isLoggedIn"
-        small
-        text
-        nuxt
-        :to="'/devices/' + deviceId + '/actions'"
-      >
-        cancel
-      </v-btn>
-      <v-btn
-        v-if="isLoggedIn"
-        color="green"
-        small
-        :disabled="isSaving"
-        @click="save"
-      >
-        apply
-      </v-btn>
+        :cancel-url="'/devices/' + deviceId + '/actions'"
+        :is-saving="isSaving"
+        @apply="save"
+      />
     </v-card-actions>
 
     <!-- just to be consistent with the new mask, we show the selected action type as an disabled v-select here -->
@@ -68,24 +56,12 @@ permissions and limitations under the Licence.
 
     <v-card-actions>
       <v-spacer />
-      <v-btn
+      <ActionButtonTray
         v-if="isLoggedIn"
-        small
-        text
-        nuxt
-        :to="'/devices/' + deviceId + '/actions'"
-      >
-        cancel
-      </v-btn>
-      <v-btn
-        v-if="isLoggedIn"
-        color="green"
-        small
-        :disabled="isSaving"
-        @click="save"
-      >
-        apply
-      </v-btn>
+        :cancel-url="'/devices/' + deviceId + '/actions'"
+        :is-saving="isSaving"
+        @apply="save"
+      />
     </v-card-actions>
   </div>
 </template>
@@ -96,11 +72,13 @@ import { Component, Vue } from 'nuxt-property-decorator'
 import { Attachment } from '@/models/Attachment'
 import { GenericAction } from '@/models/GenericAction'
 
-import GenericActionForm from '@/components/GenericActionForm.vue'
+import GenericActionForm from '@/components/actions/GenericActionForm.vue'
+import ActionButtonTray from '@/components/actions/ActionButtonTray.vue'
 
 @Component({
   components: {
-    GenericActionForm
+    GenericActionForm,
+    ActionButtonTray
   },
   scrollToTop: true
 })

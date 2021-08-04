@@ -38,6 +38,8 @@ import { PlatformType } from '@/models/PlatformType'
 import { Manufacturer } from '@/models/Manufacturer'
 import { Status } from '@/models/Status'
 
+import { GenericAction } from '@/models/GenericAction'
+import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
 import { PlatformMountAction } from '@/models/views/platforms/actions/PlatformMountAction'
 import { PlatformUnmountAction } from '@/models/views/platforms/actions/PlatformUnmountAction'
 
@@ -48,20 +50,20 @@ import {
   platformWithMetaToPlatformThrowingNoErrorOnMissing,
   platformWithMetaToPlatformByAddingDummyObjects
 } from '@/serializers/jsonapi/PlatformSerializer'
+
 import { PlatformAttachmentSerializer } from '@/serializers/jsonapi/PlatformAttachmentSerializer'
 
+import { GenericPlatformActionSerializer } from '@/serializers/jsonapi/GenericActionSerializer'
+import { PlatformSoftwareUpdateActionSerializer } from '@/serializers/jsonapi/SoftwareUpdateActionSerializer'
 import { PlatformMountActionSerializer } from '@/serializers/jsonapi/composed/platforms/actions/PlatformMountActionSerializer'
 import { PlatformUnmountActionSerializer } from '@/serializers/jsonapi/composed/platforms/actions/PlatformUnmountActionSerializer'
 
 import { IFlaskJSONAPIFilter } from '@/utils/JSONApiInterfaces'
 
 import {
-  IPaginationLoader, FilteredPaginationedLoader
+  IPaginationLoader,
+  FilteredPaginationedLoader
 } from '@/utils/PaginatedLoader'
-import { GenericAction } from '@/models/GenericAction'
-import {
-  GenericPlatformActionSerializer
-} from '@/serializers/jsonapi/GenericActionSerializer'
 
 interface IncludedRelationships {
   includeContacts?: boolean
@@ -170,6 +172,20 @@ export class PlatformApi {
     }
     return this.axiosApi.get(url, { params }).then((rawServerResponse) => {
       return new GenericPlatformActionSerializer().convertJsonApiObjectListToModelList(rawServerResponse.data)
+    })
+  }
+
+  findRelatedSoftwareUpdateActions (platformId: string): Promise<SoftwareUpdateAction[]> {
+    const url = platformId + '/platform-software-update-actions'
+    const params = {
+      'page[size]': 10000,
+      include: [
+        'contact',
+        'platform_software_update_action_attachments.attachment'
+      ].join(',')
+    }
+    return this.axiosApi.get(url, { params }).then((rawServerResponse) => {
+      return new PlatformSoftwareUpdateActionSerializer().convertJsonApiObjectListToModelList(rawServerResponse.data)
     })
   }
 

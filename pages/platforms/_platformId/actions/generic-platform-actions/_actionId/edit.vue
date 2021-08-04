@@ -1,8 +1,42 @@
+<!--
+Web client of the Sensor Management System software developed within the
+Helmholtz DataHub Initiative by GFZ and UFZ.
+
+Copyright (C) 2020, 2021
+- Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
+- Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
+- Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
+- Erik Pongratz (UFZ, erik.pongratz@ufz.de)
+- Helmholtz Centre Potsdam - GFZ German Research Centre for
+  Geosciences (GFZ, https://www.gfz-potsdam.de)
+- Helmholtz Centre for Environmental Research GmbH - UFZ
+  (UFZ, https://www.ufz.de)
+
+Parts of this program were developed within the context of the
+following publicly funded projects or measures:
+- Helmholtz Earth and Environment DataHub
+  (https://www.helmholtz.de/en/research/earth_and_environment/initiatives/#h51095)
+
+Licensed under the HEESIL, Version 1.0 or - as soon they will be
+approved by the "Community" - subsequent versions of the HEESIL
+(the "Licence").
+
+You may not use this work except in compliance with the Licence.
+
+You may obtain a copy of the Licence at:
+https://gitext.gfz-potsdam.de/software/heesil
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the Licence is distributed on an "AS IS" basis,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+implied. See the Licence for the specific language governing
+permissions and limitations under the Licence.
+-->
 <template>
   <div>
     <v-card-actions>
       <v-spacer />
-      <platform-action-cancel-add-buttons
+      <ActionButtonTray
         v-if="isLoggedIn"
         :cancel-url="'/platforms/' + platformId + '/actions'"
         :is-saving="isSaving"
@@ -26,7 +60,7 @@
 
     <v-card-actions>
       <v-spacer />
-      <platform-action-cancel-add-buttons
+      <ActionButtonTray
         v-if="isLoggedIn"
         :cancel-url="'/platforms/' + platformId + '/actions'"
         :is-saving="isSaving"
@@ -38,21 +72,25 @@
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
-import GenericActionForm from '@/components/GenericActionForm.vue'
+
 import { GenericAction } from '@/models/GenericAction'
 import { Attachment } from '@/models/Attachment'
-import PlatformActionCancelAddButtons from '@/components/platform/actions/PlatformActionCancelAddButtons.vue'
+
+import GenericActionForm from '@/components/actions/GenericActionForm.vue'
+import ActionButtonTray from '@/components/actions/ActionButtonTray.vue'
 
 @Component({
   components: {
-    PlatformActionCancelAddButtons,
+    ActionButtonTray,
     GenericActionForm
-  }
+  },
+  scrollToTop: true
 })
 export default class EditPlatformAction extends Vue {
   private action: GenericAction = new GenericAction()
   private attachments: Attachment[] = []
-  private isSaving: boolean=false
+  private _isLoading: boolean = false
+  private _isSaving: boolean = false
 
   async fetch (): Promise<any> {
     this.isLoading = true
@@ -100,6 +138,15 @@ export default class EditPlatformAction extends Vue {
     this.$emit('showload', value)
   }
 
+  get isSaving (): boolean {
+    return this.$data._isSaving
+  }
+
+  set isSaving (value: boolean) {
+    this.$data._isSaving = value
+    this.$emit('showsave', value)
+  }
+
   save (): void {
     if (!(this.$refs.genericPlatformActionForm as Vue & { isValid: () => boolean }).isValid()) {
       this.$store.commit('snackbar/setError', 'Please correct the errors')
@@ -117,7 +164,3 @@ export default class EditPlatformAction extends Vue {
   }
 }
 </script>
-
-<style scoped>
-
-</style>

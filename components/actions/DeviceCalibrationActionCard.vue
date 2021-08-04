@@ -39,7 +39,11 @@ permissions and limitations under the Licence.
           align-self="end"
           class="text-right"
         >
-          <slot name="menu" />
+          <ActionCardMenu
+            v-if="isLoggedIn"
+            :value="value"
+            @delete-menu-item-click="showDeleteDialog = true"
+          />
         </v-col>
       </v-row>
     </v-card-subtitle>
@@ -107,6 +111,10 @@ permissions and limitations under the Licence.
         </v-card-text>
       </div>
     </v-expand-transition>
+    <ActionDeleteDialog
+      v-model="showDeleteDialog"
+      @delete-dialog-button-click="deleteActionAndCloseDialog"
+    />
   </v-card>
 </template>
 
@@ -120,13 +128,22 @@ import { Component, Prop, Vue } from 'nuxt-property-decorator'
 import { DeviceCalibrationAction } from '@/models/DeviceCalibrationAction'
 import { dateToDateTimeString } from '@/utils/dateHelper'
 
+import ActionCardMenu from '@/components/actions/ActionCardMenu.vue'
+import ActionDeleteDialog from '@/components/actions/ActionDeleteDialog.vue'
+
 @Component({
   filters: {
     toUtcDate: dateToDateTimeString
+  },
+  components: {
+    ActionCardMenu,
+    ActionDeleteDialog
   }
 })
 export default class DeviceCalibrationActionCard extends Vue {
   private showDetails: boolean = false
+  private isShowDeleteDialog: boolean = false
+  private _isDeleting: boolean = false
 
   @Prop({
     default: () => new DeviceCalibrationAction(),
@@ -135,12 +152,74 @@ export default class DeviceCalibrationActionCard extends Vue {
   })
   readonly value!: DeviceCalibrationAction
 
+  /**
+   * a function reference that deletes the action
+   */
+  @Prop({
+    default: () => null,
+    required: false,
+    type: Function
+  })
+  // @ts-ignore
+  readonly deleteCallback!: (id: string) => Promise<void>
+
   isVisible (): boolean {
     return this.showDetails
   }
 
   toggleVisibility (): void {
     this.showDetails = !this.showDetails
+  }
+
+  get isLoggedIn (): boolean {
+    return this.$store.getters['oidc/isAuthenticated']
+  }
+
+  get showDeleteDialog (): boolean {
+    return this.isShowDeleteDialog
+  }
+
+  set showDeleteDialog (value: boolean) {
+    this.isShowDeleteDialog = value
+  }
+
+  get isDeleting (): boolean {
+    return this.$data._isDeleting
+  }
+
+  set isDeleting (value: boolean) {
+    this.$data._isDeleting = value
+    this.$emit('showdelete', value)
+  }
+
+  /**
+   * deletes the action and closes the delete dialog
+   *
+   * @fires DeviceCalibrationActionCard#delete-success
+   */
+  deleteActionAndCloseDialog (): void {
+    if (!this.value.id) {
+      return
+    }
+    if (!this.deleteCallback) {
+      return
+    }
+    this.isDeleting = true
+    this.deleteCallback(this.value.id).then(() => {
+      this.isDeleting = false
+      /**
+       * fires an delete-success event
+       * @event DeviceCalibrationActionCard#delete-success
+       * @type {IActionCommonDetails}
+       */
+      this.$emit('delete-success', this.value)
+      this.$store.commit('snackbar/setSuccess', 'Action deleted')
+    }).catch((_error) => {
+      this.isDeleting = false
+      this.$store.commit('snackbar/setError', 'Action could not be deleted')
+    }).finally(() => {
+      this.showDeleteDialog = false
+    })
   }
 }
 </script>
