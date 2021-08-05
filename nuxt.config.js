@@ -117,6 +117,12 @@ export default {
   */
   axios: {
   },
+  // PWA module configuration: https://go.nuxtjs.dev/pwa
+  pwa: {
+    manifest: {
+      lang: 'en'
+    }
+  },
   /*
   ** vuetify module configuration
   ** https://github.com/nuxt-community/vuetify-module
@@ -131,11 +137,10 @@ export default {
   ** Build configuration
   */
   build: {
-    /*
-    ** You can extend webpack config here
-    */
-    // eslint-disable-next-line
-    extend (config, ctx) {
+    babel: {
+      // due to a bug with nuxtjs and babel we have to explictly set 'loose' to true
+      // see https://github.com/nuxt/nuxt.js/issues/9224#issuecomment-893289291
+      plugins: [['@babel/plugin-proposal-private-property-in-object', { loose: true }]]
     }
   },
   router: {

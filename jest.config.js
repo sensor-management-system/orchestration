@@ -56,5 +56,6 @@ module.exports = {
     '<rootDir>/devtools/**/*.ts',
     '<rootDir>/viewmodels/**/*.ts'
   ],
+  testEnvironment: 'jsdom',
   verbose: true
 }
