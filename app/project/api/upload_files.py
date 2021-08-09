@@ -1,4 +1,4 @@
-from flask import request, Blueprint
+from flask import request, Blueprint, current_app
 
 from .flask_minio import MinioNotAvailableException
 from .helpers.errors import UnsupportedMediaTypeError, BadRequestError, ServiceIsUnreachableError
@@ -14,10 +14,11 @@ upload_routes = Blueprint('upload', __name__,
 @token_required
 def upload():
     """Upload route"""
-
+    content_types = current_app.config["ALLOWED_MIME_TYPES"]
     if 'file' in request.files:
         file = request.files['file']
-        if file and minio.allowed_file(file.filename):
+        content_type = file.content_type
+        if file and content_type in content_types:
             try:
                 response = minio.upload_object(file)
                 return response, 201

@@ -71,7 +71,7 @@ class BaseConfig:
     # learn more https://docs.min.io/docs/python-client-api-reference.html
     MINIO_HTTP_CLIENT = env("MINIO_HTTP_CLIENT", None)
     MINIO_BUCKET_NAME = env("MINIO_BUCKET_NAME", "sms-attachments")
-    # ALLOWED_EXTENSIONS = env.str("ALLOWED_EXTENSIONS")
+    ALLOWED_MIME_TYPES = env.list("ALLOWED_MIME_TYPES", [])
 
 
 class DevelopmentConfig(BaseConfig):

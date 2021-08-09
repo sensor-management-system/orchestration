@@ -1,6 +1,7 @@
+import mimetypes
 import os
+import random
 import time
-import uuid
 
 import minio
 from flask import current_app, _app_ctx_stack, make_response
@@ -15,6 +16,43 @@ from .models.base_model import db
 
 class MinioNotAvailableException(Exception):
     pass
+
+
+def search_a_list_of_dictionaries(lod, default, **kw):
+    result = list(filter(lambda item: (item[key] == value for (key, value) in kw.items()), lod))
+    if len(result) != 0:
+        return result[0]
+    else:
+        return default
+
+
+def set_file_extension(filename, content_type):
+    """
+    If the file extension is not set then use the content-type to guess it.
+
+    :param filename: the uploaded name.
+    :param content_type: content type from uploaded file.
+    :return: string
+    """
+    if filename[-1] == "":
+        file_extension = mimetypes.guess_extension(content_type)
+    else:
+        file_extension = filename[-1].lower()
+
+    return file_extension
+
+
+def set_a_filename(uploaded_file):
+    act_year_month = time.strftime("%Y-%m")
+    filename_picked_by_user = os.path.splitext(uploaded_file.filename)
+    file_extension = set_file_extension(filename_picked_by_user, uploaded_file.content_type)
+    numbers = random.randint(0, 0x10000)
+    filename = "{}{}".format(
+        filename_picked_by_user[0].lower() + '_' + str(numbers),
+        file_extension,
+    )
+    ordered_filed = f"{act_year_month}/{filename}"
+    return ordered_filed
 
 
 class FlaskMinio:
@@ -44,10 +82,7 @@ class FlaskMinio:
         # should ONLY be turned off for local debugging
         app.config.setdefault("MINIO_SECURE", True)
         app.config.setdefault("MINIO_REGION", None)
-        allowed_extensions = [".txt", ".pdf", ".png", ".jpg", ".jpeg", ".gif"]
-        app.config.setdefault("ALLOWED_EXTENSIONS", allowed_extensions)
         self._exception_on_creating_client = None
-        self.allowed_extensions = app.config["ALLOWED_EXTENSIONS"]
         app.teardown_appcontext(self.teardown)
 
     def connect(self):
@@ -89,120 +124,6 @@ class FlaskMinio:
                 ctx.minio = self.connect()
             return ctx.minio
 
-    # def set_bucket_policy(self, bucket_name):
-    #     """
-    #     Set bucket policy to download only, so that we can
-    #     get a permanent url.
-    #
-    #     :param bucket_name: a string However, only characters that are
-    #     valid in URLs should be used
-    #
-    #         :Example:
-    #             Download bucket policy
-    #             {
-    #               "Version": "2012-10-17",
-    #               "Statement": [
-    #                 {
-    #                   "Effect": "Allow",
-    #                   "Principal": {
-    #                     "AWS": [
-    #                       "*"
-    #                     ]
-    #                   },
-    #                   "Action": [
-    #                     "s3:GetBucketLocation",
-    #                     "s3:ListBucket"
-    #                   ],
-    #                   "Resource": [
-    #                     "arn:aws:s3:::sms"
-    #                   ]
-    #                 },
-    #                 {
-    #                   "Effect": "Allow",
-    #                   "Principal": {
-    #                     "AWS": [
-    #                       "*"
-    #                     ]
-    #                   },
-    #                   "Action": [
-    #                     "s3:GetObject"
-    #                   ],
-    #                   "Resource": [
-    #                     "arn:aws:s3:::sms/*"
-    #                   ]
-    #                 }
-    #               ]
-    #             }
-    #
-    #     """
-    #     # download_only bucket policy.
-    #     policy = {
-    #         "Version": "2012-10-17",
-    #         "Statement": [
-    #             {
-    #                 "Effect": "Allow",
-    #                 "Principal": {"AWS": ["*"]},
-    #                 "Action": [
-    #                     "s3:GetBucketLocation",
-    #                     "s3:ListBucket"
-    #                 ],
-    #                 "Resource": [f"arn:aws:s3:::{bucket_name}"],
-    #             },
-    #             {
-    #                 "Effect": "Allow",
-    #                 "Principal": {"AWS": ["*"]},
-    #                 "Action": [
-    #                     "s3:GetObject",
-    #                 ],
-    #                 # allow to get all object under a bucket name
-    #                 "Resource": [f"arn:aws:s3:::{bucket_name}/*"],
-    #             },
-    #         ],
-    #     }
-    #
-    #     self.connection.set_bucket_policy(bucket_name, json.dumps(policy))
-
-    def allowed_file(self, filename):
-        """
-        Check if a file extension is allowed, which is part of the file name.
-
-        :param filename: a string
-        :return: a Boolean
-        """
-        return (
-                "." in filename and self.get_extension(filename) in self.allowed_extensions
-        )
-
-    def get_extension(self, filename):
-        """
-        Return the extension of a filename.
-
-        So for "foo.txt" return ".txt".
-        """
-        return os.path.splitext(filename)[-1].lower()
-
-    def content_type(self, filename):
-        """
-        Try to find a specific content type.
-
-        Use "application/octet-stream" in case we don't find a more specific one.
-        """
-        extension = self.get_extension(filename)
-        # For those that are currently supported, it makes sense to have a more specific
-        # content type, so that those files can be rendered in the browser later.
-        # For extending it, you can check out
-        # https://wiki.selfhtml.org/wiki/MIME-Type/%C3%9Cbersicht
-        # (german page)
-        content_type_by_extension = {
-            ".txt": "text/plain",
-            ".pdf": "application/pdf",
-            ".png": "image/png",
-            ".jpg": "image/jpeg",
-            ".jpeg": "image/jpeg",
-            ".gif": "image/gif",
-        }
-        return content_type_by_extension.get(extension, "application/octet-stream")
-
     def upload_object(self, uploaded_file):
         """
         Uploads a file as an object to the Minio Storage.
@@ -210,7 +131,7 @@ class FlaskMinio:
         :return: jons:api response with a permanent url to reach that object.
         """
         size = os.fstat(uploaded_file.fileno()).st_size
-        act_year_month = time.strftime("%Y-%m")
+
         minio_bucket_name = current_app.config["MINIO_BUCKET_NAME"]
         download_endpoint = current_app.config["DOWNLOAD_ENDPOINT"]
         try:
@@ -221,12 +142,8 @@ class FlaskMinio:
                 raise NotFoundError("A Bucket with the name: {} is not Found.".format(
                     minio_bucket_name))
 
-            if uploaded_file and self.allowed_file(filename=uploaded_file.filename):
-                filename = "{}{}".format(
-                    uuid.uuid4().hex,
-                    os.path.splitext(uploaded_file.filename)[-1].lower(),
-                )
-                ordered_filed = f"{act_year_month}/{filename}"
+            if uploaded_file:
+                ordered_filed = set_a_filename(uploaded_file)
                 content_type = self.content_type(filename=uploaded_file.filename)
                 current_user = db.session.query(User).filter_by(
                     subject=get_jwt_identity()).one_or_none()

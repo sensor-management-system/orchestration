@@ -11,6 +11,7 @@ variables:
   WELL_KNOWN_URL: https://webapp.ufz.de/idp/oidc/v1/.well-known/openid-configuration
   HTTP_ORIGINS: "https://registry.hzdr.de http://rdm-test.intranet.ufz.de:5002"
   OIDC_USERNAME_CLAIM: "sub"
+  ALLOWED_MIME_TYPES: "application/x-abiword,application/x-freearc,application/vnd.amazon.ebook,image/bmp,application/x-bzip,application/x-bzip2,text/csv,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/epub+zip,application/gzip,image/gif,text/html,image/vnd.microsoft.icon,text/calendar,image/jpeg,application/json,application/ld+json,application/vnd.oasis.opendocument.presentation,application/vnd.oasis.opendocument.spreadsheet,application/vnd.oasis.opendocument.text,image/png,application/pdf,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/vnd.rar,application/rtf,image/svg+xml,application/x-tar,image/tiff,image/tiff,text/plain,image/webp,application/xhtml+xml,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/xml,application/vnd.mozilla.xul+xml,application/zip,application/x-7z-compressed"
 
 .docker_login: &docker_login
   - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
@@ -136,6 +137,7 @@ deploy-gfz-image:
     MINIO_SECRET_KEY: ${GFZ_STAGING_MINIO_SECRET_KEY}
     MINIO_BUCKET_NAME: sms-attachments
     MINIO_SECURE: "False"
+    ALLOWED_MIME_TYPES: ${ALLOWED_MIME_TYPES}
   before_script:
     - *docker_login
   script:
