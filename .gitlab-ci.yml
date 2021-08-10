@@ -137,7 +137,6 @@ deploy-gfz-image:
     MINIO_SECRET_KEY: ${GFZ_STAGING_MINIO_SECRET_KEY}
     MINIO_BUCKET_NAME: sms-attachments
     MINIO_SECURE: "False"
-    ALLOWED_MIME_TYPES: ${ALLOWED_MIME_TYPES}
   before_script:
     - *docker_login
   script:
