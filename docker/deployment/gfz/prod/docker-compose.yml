@@ -161,6 +161,7 @@ services:
       MINIO_ENDPOINT: minio:9000
       DOWNLOAD_ENDPOINT: https://sensors.gfz-potsdam.de
       SECRET_KEY: ${BACKEND_SECRET_KEY}
+      ALLOWED_MIME_TYPES: ${ALLOWED_MIME_TYPES}
     depends_on:
       - backend-db
     networks:

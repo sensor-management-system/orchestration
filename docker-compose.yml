@@ -43,6 +43,7 @@ services:
       MINIO_BUCKET_NAME: ${MINIO_BUCKET_NAME:-sms-attachments}
       MINIO_ENDPOINT: ${MINIO_ENDPOINT:-minio:9000}
       DOWNLOAD_ENDPOINT: ${DOWNLOAD_ENDPOINT:-https://localhost.localdomain}
+      ALLOWED_MIME_TYPES: ${ALLOWED_MIME_TYPES:-image/png,application/pdf}
     depends_on:
       - db
     command: >
@@ -140,6 +141,7 @@ services:
       NUXT_ENV_SILENT_RENEW_INTERVAL: ${NUXT_ENV_SILENT_RENEW_INTERVAL:-6900000}
       NUXT_ENV_LOAD_USER_INFO: ${NUXT_ENV_LOAD_USER_INFO:-true}
       STAY_WITH_HTTP: ${STAY_WITH_HTTP:-true }
+      NUXT_ENV_ALLOWED_MIMETYPES: ${ALLOWED_MIME_TYPES:-image/png,application/pdf}
     volumes:
       - ./frontend/:/home/node/
       - ./frontend/dist:/home/node/dist/:rw
