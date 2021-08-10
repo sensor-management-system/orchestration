@@ -144,7 +144,7 @@ class FlaskMinio:
 
             if uploaded_file:
                 ordered_filed = set_a_filename(uploaded_file)
-                content_type = self.content_type(filename=uploaded_file.filename)
+                content_type = uploaded_file.content_type
                 current_user = db.session.query(User).filter_by(
                     subject=get_jwt_identity()).one_or_none()
                 self.connection.put_object(
