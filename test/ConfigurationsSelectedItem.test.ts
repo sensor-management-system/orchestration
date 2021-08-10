@@ -31,11 +31,10 @@
  */
 import Vue from 'vue'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
+import Vuex, { Store } from 'vuex'
+import { DateTime } from 'luxon'
 
 import { mount, createLocalVue } from '@vue/test-utils'
-
-import { DateTime } from 'luxon'
 
 // @ts-ignore
 import ConfigurationsSelectedItem from '@/components/ConfigurationsSelectedItem.vue'
@@ -63,7 +62,7 @@ describe('ConfigurationsSelectedItem', () => {
     localVue.use(Vuex)
     const vuetify = new Vuetify()
 
-    const store = new Vuex.Store({
+    const store = new Store({
       getters: {
         'oidc/userEMail': () => contact.email
       }

@@ -32,6 +32,8 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
+import { DateTime } from 'luxon'
+
 import { Contact } from '@/models/Contact'
 import { Platform } from '@/models/Platform'
 
@@ -46,7 +48,6 @@ import {
 import { IMissingAttachmentData } from '@/serializers/jsonapi/AttachmentSerializer'
 import { ContactSerializer, IMissingContactData } from '@/serializers/jsonapi/ContactSerializer'
 import { PlatformAttachmentSerializer } from '@/serializers/jsonapi/PlatformAttachmentSerializer'
-import { DateTime } from 'luxon'
 
 export interface IPlatformMissingData {
   contacts: IMissingContactData

@@ -51,11 +51,12 @@ import { DeviceMountActionSerializer } from '@/serializers/jsonapi/DeviceMountAc
 import { DeviceUnmountActionSerializer } from '@/serializers/jsonapi/DeviceUnmountActionSerializer'
 import { DeviceSerializer } from '@/serializers/jsonapi/DeviceSerializer'
 import { PlatformSerializer } from '@/serializers/jsonapi/PlatformSerializer'
+import { DevicePropertySerializer } from '@/serializers/jsonapi/DevicePropertySerializer'
+
 import { DynamicLocation, StationaryLocation, LocationType } from '@/models/Location'
 import { Platform } from '@/models/Platform'
 import { Device } from '@/models/Device'
 import { DeviceProperty } from '@/models/DeviceProperty'
-import { DevicePropertySerializer } from './DevicePropertySerializer'
 
 export interface IConfigurationMissingData {
   contacts: IMissingContactData

@@ -33,6 +33,8 @@
  * permissions and limitations under the Licence.
  */
 
+import { DateTime } from 'luxon'
+
 import { Contact } from '@/models/Contact'
 import { Device } from '@/models/Device'
 
@@ -56,7 +58,6 @@ import {
   IMissingDevicePropertyData
 } from '@/serializers/jsonapi/DevicePropertySerializer'
 import { DeviceAttachmentSerializer } from '@/serializers/jsonapi/DeviceAttachmentSerializer'
-import { DateTime } from 'luxon'
 
 export interface IDeviceMissingData {
   contacts: IMissingContactData

@@ -53,10 +53,10 @@ import {
 } from '@/serializers/jsonapi/ConfigurationSerializer'
 
 import { ContactSerializer } from '@/serializers/jsonapi/ContactSerializer'
-import { DeviceMountActionApi } from './DeviceMountActionApi'
-import { DeviceUnmountActionApi } from './DeviceUnmountActionApi'
-import { PlatformMountActionApi } from './PlatformMountActionApi'
-import { PlatformUnmountActionApi } from './PlatformUnmountActionApi'
+import { DeviceMountActionApi } from '@/services/sms/DeviceMountActionApi'
+import { DeviceUnmountActionApi } from '@/services/sms/DeviceUnmountActionApi'
+import { PlatformMountActionApi } from '@/services/sms/PlatformMountActionApi'
+import { PlatformUnmountActionApi } from '@/services/sms/PlatformUnmountActionApi'
 
 export class ConfigurationApi {
   private axiosApi: AxiosInstance

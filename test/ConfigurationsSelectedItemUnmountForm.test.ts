@@ -32,7 +32,7 @@
 
 import Vue from 'vue'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
+import Vuex, { Store } from 'vuex'
 
 import { mount, createLocalVue } from '@vue/test-utils'
 
@@ -52,7 +52,7 @@ describe('ConfigurationsSelectedItemUnmountForm', () => {
     localVue.use(Vuex)
     const vuetify = new Vuetify()
 
-    const store = new Vuex.Store({
+    const store = new Store({
       getters: {
         'oidc/userEMail': () => contact.email
       }
