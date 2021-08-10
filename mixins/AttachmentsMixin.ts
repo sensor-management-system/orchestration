@@ -41,6 +41,8 @@
 import { Vue, Component } from 'nuxt-property-decorator'
 import { Attachment } from '@/models/Attachment'
 
+import { removeTrailingSlash } from '@/utils/urlHelpers'
+
 /**
  * A mixin component with helper functions to handle attachments
  * @extends Vue
@@ -58,7 +60,8 @@ export class AttachmentsMixin extends Vue {
     if (attachment.url === '') {
       return UNKNOWN_FILENAME
     }
-    const paths = attachment.url.split('/')
+    const url = removeTrailingSlash(attachment.url)
+    const paths = url.split('/')
     if (!paths.length) {
       return UNKNOWN_FILENAME
     }

@@ -72,10 +72,15 @@ permissions and limitations under the Licence.
           </v-list-item-avatar>
           <v-list-item-content>
             <v-list-item-subtitle>
-              {{ filename(attachment) }}, uploaded at {{ uploadedDateTime(attachment) }}
+              {{ filename(attachment) }}
             </v-list-item-subtitle>
-            <v-list-item-title>
+            <v-list-item-title v-if="attachment.label">
               <a :href="attachment.url" target="_blank">{{ attachment.label }}</a>
+            </v-list-item-title>
+            <v-list-item-title v-else>
+              <a :href="attachment.url" target="_blank">
+                <v-icon color="primary">mdi-open-in-new</v-icon>
+              </a>
             </v-list-item-title>
             <v-list-item-action-text>
               <v-row>

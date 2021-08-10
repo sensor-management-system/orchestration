@@ -54,6 +54,7 @@ services:
       NUXT_ENV_AUTOMATIC_SILENT_RENEW: "false"
       NUXT_ENV_SILENT_RENEW_INTERVAL: 6900000
       NUXT_ENV_LOAD_USER_INFO: "false"
+      NUXT_ENV_ALLOWED_MIMETYPES: "application/x-abiword,application/x-freearc,application/vnd.amazon.ebook,image/bmp,application/x-bzip,application/x-bzip2,text/csv,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/epub+zip,application/gzip,image/gif,text/html,image/vnd.microsoft.icon,text/calendar,image/jpeg,application/json,application/ld+json,application/vnd.oasis.opendocument.presentation,application/vnd.oasis.opendocument.spreadsheet,application/vnd.oasis.opendocument.text,image/png,application/pdf,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/vnd.rar,application/rtf,image/svg+xml,application/x-tar,image/tiff,image/tiff,text/plain,image/webp,application/xhtml+xml,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/xml,application/vnd.mozilla.xul+xml,application/zip,application/x-7z-compressed" 
       #NUXT_ENV_CLIENT_ID: "${NUXT_ENV_CLIENT_ID}"
       # this comes from the gfz-staging-oidc.env
       # Ask nils@gfz-potsdam.de or mhanisch@gfz-potsdam.de

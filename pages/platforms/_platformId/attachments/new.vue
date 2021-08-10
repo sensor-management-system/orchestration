@@ -77,7 +77,7 @@ permissions and limitations under the Licence.
             label="File"
             required
             class="required"
-            :rules="[rules.required]"
+            :rules="[rules.required, uploadRules.maxSize, uploadRules.mimeTypeAllowed]"
             show-size
           />
           <v-text-field
@@ -128,14 +128,18 @@ permissions and limitations under the Licence.
 
 <script lang="ts">
 import { Component, Vue, mixins } from 'nuxt-property-decorator'
+
+import UploadConfig from '@/config/uploads'
+
 import { Rules } from '@/mixins/Rules'
+import { UploadRules } from '@/mixins/UploadRules'
 
 import { Attachment } from '@/models/Attachment'
 
 @Component({
   components: {}
 })
-export default class AttachmentAddPage extends mixins(Rules) {
+export default class AttachmentAddPage extends mixins(Rules, UploadRules) {
   private attachment: Attachment = new Attachment()
   private attachmentType: string = 'file'
   private file: File | null = null
@@ -154,10 +158,10 @@ export default class AttachmentAddPage extends mixins(Rules) {
    * @return {string} a list of MimeTypes
    */
   get mimeTypeList (): string {
-    return Object.keys(Attachment.mimeTypes).join(',')
+    return UploadConfig.allowedMimeTypes.join(',')
   }
 
-  add () {
+  async add () {
     if (!(this.$refs.attachmentsForm as Vue & { validate: () => boolean }).validate()) {
       return
     }
@@ -165,14 +169,32 @@ export default class AttachmentAddPage extends mixins(Rules) {
     (this.$refs.attachmentsForm as Vue & { resetValidation: () => boolean }).resetValidation()
 
     this.$emit('showsave', true)
-    this.$api.platformAttachments.add(this.platformId, this.attachment).then((newAttachment: Attachment) => {
-      this.$emit('showsave', false)
+    let theFailureCanBeFromUpload = true
+
+    try {
+      if (this.attachmentType !== 'url') {
+        // Due to the validation we can be sure that the file is not null
+        const uploadResult = await this.$api.upload.file(this.file as File)
+        this.attachment.url = uploadResult.url
+        theFailureCanBeFromUpload = false
+      }
+      const newAttachment = await this.$api.platformAttachments.add(this.platformId, this.attachment)
       this.$emit('input', newAttachment)
       this.$router.push('/platforms/' + this.platformId + '/attachments')
-    }).catch(() => {
+    } catch (error) {
+      let message = 'Failed to save an attachment'
+
+      if (theFailureCanBeFromUpload && error.response?.data?.errors?.length) {
+        const errorDetails = error.response.data.errors[0]
+        if (errorDetails.source && errorDetails.title) {
+          // In this case something ala 'Unsupported Media Type: application/exe is Not Permitted'
+          message = errorDetails.title + ': ' + errorDetails.source
+        }
+      }
+      this.$store.commit('snackbar/setError', message)
+    } finally {
       this.$emit('showsave', false)
-      this.$store.commit('snackbar/setError', 'Failed to save an attachment.')
-    })
+    }
   }
 
   get platformId (): string {

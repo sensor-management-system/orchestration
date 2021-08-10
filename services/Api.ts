@@ -46,6 +46,7 @@ import { GenericDeviceActionAttachmentApi, GenericPlatformActionAttachmentApi } 
 import { DeviceSoftwareUpdateActionApi } from '@/services/sms/DeviceSoftwareUpdateActionApi'
 import { PlatformSoftwareUpdateActionApi } from '@/services/sms/PlatformSoftwareUpdateActionApi'
 import { DeviceSoftwareUpdateActionAttachmentApi, PlatformSoftwareUpdateActionAttachmentApi } from '@/services/sms/SoftwareUpdateActionAttachmentApi'
+import { UploadApi } from '@/services/sms/UploadApi'
 
 import { CompartmentApi } from '@/services/cv/CompartmentApi'
 import { DeviceTypeApi } from '@/services/cv/DeviceTypeApi'
@@ -92,6 +93,7 @@ export class Api {
   private readonly _deviceCalibrationActionAttachmentApi: DeviceCalibrationActionAttachmentApi
   private readonly _devicePropertyCalibrationApi: DeviceCalibrationDevicePropertyApi
   private readonly _deviceCalibrationActionApi: DeviceCalibrationActionApi
+  private readonly _uploadApi: UploadApi
 
   private readonly _manufacturerApi: ManufacturerApi
   private readonly _platformTypeApi: PlatformTypeApi
@@ -216,6 +218,10 @@ export class Api {
       this.createAxios(smsBaseUrl, '/device-calibration-actions', smsConfig, getIdToken),
       this._deviceCalibrationActionAttachmentApi,
       this._devicePropertyCalibrationApi
+    )
+
+    this._uploadApi = new UploadApi(
+      this.createAxios(smsBaseUrl, '/upload', smsConfig, getIdToken)
     )
 
     // and here we can set settings for all the cv api calls
@@ -354,6 +360,10 @@ export class Api {
 
   get contacts (): ContactApi {
     return this._contactApi
+  }
+
+  get upload (): UploadApi {
+    return this._uploadApi
   }
 
   get manufacturer (): ManufacturerApi {
