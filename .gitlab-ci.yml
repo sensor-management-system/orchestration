@@ -28,7 +28,6 @@ build-deploy-image-nginx-gfz-staging:
   extends: .docker_build
   variables:
     CLIENT_ID: ${GFZ_STAGING_OIDC_CLIENT_ID}
-    ALLOWED_MIME_TYPES: ${ALLOWED_MIME_TYPES}
   script:
     - |
         docker build --tag "$CI_REGISTRY_IMAGE/nginx:gfz-latest" -f docker/build/nginx/gfz/staging/Dockerfile \
@@ -49,7 +48,6 @@ build-deploy-image-nginx-gfz-prod:
   extends: .docker_build
   variables:
     CLIENT_ID: ${GFZ_PROD_OIDC_CLIENT_ID}
-    ALLOWED_MIME_TYPES: ${ALLOWED_MIME_TYPES}
   script:
     - |
         docker build --tag "$CI_REGISTRY_IMAGE/nginx:gfz-${CI_COMMIT_TAG:-latest}" -f docker/build/nginx/gfz/prod/Dockerfile \
@@ -131,7 +129,6 @@ build-deploy-image-backend-gfz-prod:
 #    BACKEND_DB_PASSWORD: ${GFZ_STAGING_BACKEND_POSTGRES_PASSWORD}
 #    BACKEND_SECRET_KEY: ${GFZ_STAGING_BACKEND_SECRET}
 #    OIDC_CLIENT_ID: ${GFZ_STAGING_OIDC_CLIENT_ID}
-#    ALLOWED_MIME_TYPES: ${ALLOWED_MIME_TYPES}
 #  before_script:
 #    # clean up & remove files older than 180 days
 #    - find /srv/docker/service/backend-db/backups -type f -mtime +180 -exec rm {} \;
@@ -163,7 +160,6 @@ build-deploy-image-backend-gfz-prod:
 #    BACKEND_DB_PASSWORD: ${GFZ_PROD_BACKEND_POSTGRES_PASSWORD}
 #    BACKEND_SECRET_KEY: ${GFZ_PROD_BACKEND_SECRET}
 #    OIDC_CLIENT_ID: ${GFZ_PROD_OIDC_CLIENT_ID}
-#    ALLOWED_MIME_TYPES: ${ALLOWED_MIME_TYPES}
 #  before_script:
 #    # clean up & remove files older than 180 days
 #    - find /srv/docker/service/backend-db/backups -type f -mtime +180 -exec rm {} \;
@@ -196,7 +192,6 @@ deploy-gfz-staging:
     BACKEND_DB_PASSWORD: ${GFZ_STAGING_BACKEND_POSTGRES_PASSWORD}
     BACKEND_SECRET_KEY: ${GFZ_STAGING_BACKEND_SECRET}
     OIDC_CLIENT_ID: ${GFZ_STAGING_OIDC_CLIENT_ID}
-    ALLOWED_MIME_TYPES: ${ALLOWED_MIME_TYPES}
   before_script:
     - *docker_login_gitlab_registry
   script:
@@ -237,7 +232,6 @@ deploy-gfz-prod:
     BACKEND_DB_PASSWORD: ${GFZ_PROD_BACKEND_POSTGRES_PASSWORD}
     BACKEND_SECRET_KEY: ${GFZ_PROD_BACKEND_SECRET}
     OIDC_CLIENT_ID: ${GFZ_PROD_OIDC_CLIENT_ID}
-    ALLOWED_MIME_TYPES: ${ALLOWED_MIME_TYPES}
   before_script:
     - *docker_login_gitlab_registry
   script:
