@@ -42,6 +42,7 @@ variables:
   UFZ_TEST_IMAGE: $CI_REGISTRY_IMAGE:ufz-$CI_COMMIT_SHORT_SHA
   UFZ_LATEST_RELEASE_IMAGE: $CI_REGISTRY_IMAGE:ufz-latest
   UFZ_GIT_TAG_RELEASE_IMAGE: $CI_REGISTRY_IMAGE:ufz-$CI_COMMIT_REF_NAME
+  ALLOWED_MIME_TYPES: "application/x-abiword,application/x-freearc,application/vnd.amazon.ebook,image/bmp,application/x-bzip,application/x-bzip2,text/csv,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/epub+zip,application/gzip,image/gif,text/html,image/vnd.microsoft.icon,text/calendar,image/jpeg,application/json,application/ld+json,application/vnd.oasis.opendocument.presentation,application/vnd.oasis.opendocument.spreadsheet,application/vnd.oasis.opendocument.text,image/png,application/pdf,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/vnd.rar,application/rtf,image/svg+xml,application/x-tar,image/tiff,image/tiff,text/plain,image/webp,application/xhtml+xml,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/xml,application/vnd.mozilla.xul+xml,application/zip,application/x-7z-compressed"
 
 check-lint:
   stage: check
@@ -97,6 +98,7 @@ build-deploy-image-gfz:
     HOST: ${GFZ_STAGING_HOST}
     CLIENT_ID: ${GFZ_STAGING_CLIENT_ID}
     AUTHORITY: ${GFZ_STAGING_IDP_AUTORITY}
+    ALLOWED_MIME_TYPES: ${ALLOWED_MIME_TYPES}
   script:
     - |
       if [ -z "$CI_COMMIT_TAG" ]; then
@@ -106,6 +108,7 @@ build-deploy-image-gfz:
             --build-arg HOST_ARG=$HOST \
             --build-arg CLIENT_ID_ARG=$CLIENT_ID \
             --build-arg AUTHORITY_ARG=$AUTHORITY \
+            --build-arg ALLOWED_MIME_TYPES_ARG=$ALLOWED_MIME_TYPES \
             .
         docker push "$CI_REGISTRY_IMAGE:gfz-latest"
       else
@@ -115,6 +118,7 @@ build-deploy-image-gfz:
             --build-arg HOST_ARG=$HOST \
             --build-arg CLIENT_ID_ARG=$CLIENT_ID \
             --build-arg AUTHORITY_ARG=$AUTHORITY \
+            --build-arg ALLOWED_MIME_TYPES_ARG=$ALLOWED_MIME_TYPES \
             .
         docker push "$CI_REGISTRY_IMAGE:gfz-latest"
         docker push "$CI_REGISTRY_IMAGE:gfz-$CI_COMMIT_TAG"
@@ -145,6 +149,7 @@ build-deploy-image-manual-gfz:
           --build-arg HOST_ARG=$HOST \
           --build-arg CLIENT_ID_ARG=$CLIENT_ID \
           --build-arg AUTHORITY_ARG=$AUTHORITY \
+          --build-arg ALLOWED_MIME_TYPES_ARG=$ALLOWED_MIME_TYPES \
           .
     - docker push "$CI_REGISTRY_IMAGE:gfz-$CI_COMMIT_SHORT_SHA"
   cache:
@@ -171,6 +176,7 @@ build-deploy-image-ufz:
           --build-arg HOST_ARG=$HOST \
           --build-arg CLIENT_ID_ARG=$CLIENT_ID \
           --build-arg AUTHORITY_ARG=$AUTHORITY \
+          --build-arg ALLOWED_MIME_TYPES_ARG=$ALLOWED_MIME_TYPES \
           --build-arg BUILD_DATE=$(date --utc +%FT%TZ) \
           --build-arg VCS_REF=$CI_COMMIT_SHA \
           .
