@@ -32,13 +32,13 @@
  */
 
 import Vue from 'vue'
+import Vuetify from 'vuetify'
+import { DateTime } from 'luxon'
 
 import { mount } from '@vue/test-utils'
 
 // @ts-ignore
 import DateTimePicker from '@/components/DateTimePicker'
-import { DateTime } from 'luxon'
-import Vuetify from 'vuetify'
 
 Vue.use(Vuetify)
 

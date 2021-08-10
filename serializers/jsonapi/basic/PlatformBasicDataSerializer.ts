@@ -32,13 +32,13 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
+import { DateTime } from 'luxon'
+
 import { PlatformBasicData } from '@/models/basic/PlatformBasicData'
 
 import {
   IJsonApiEntityWithOptionalAttributes
 } from '@/serializers/jsonapi/JsonApiTypes'
-
-import { DateTime } from 'luxon'
 
 export class PlatformBasicDataSerializer {
   convertJsonApiDataToModel (jsonApiData: IJsonApiEntityWithOptionalAttributes): PlatformBasicData {

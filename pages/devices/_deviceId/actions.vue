@@ -87,9 +87,6 @@ permissions and limitations under the Licence.
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 
-import DeviceActionTimeline from '@/components/actions/DeviceActionTimeline.vue'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
-
 import { DateTime } from 'luxon'
 
 import { IActionCommonDetails } from '@/models/ActionCommonDetails'
@@ -103,6 +100,9 @@ import { DeviceUnmountActionWrapper } from '@/viewmodels/DeviceUnmountActionWrap
 
 import { DateComparator, isDateCompareable } from '@/modelUtils/Compareables'
 import { DeviceActionApiDispatcher } from '@/modelUtils/actionHelpers'
+
+import DeviceActionTimeline from '@/components/actions/DeviceActionTimeline.vue'
+import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
 const toUtcDate = (dt: DateTime) => {
   return dt.toUTC().toFormat('yyyy-MM-dd TT')
