@@ -22,7 +22,7 @@ class ConfigurationSchema(Schema):
     id = fields.Integer(as_string=True)
     start_date = fields.DateTime(allow_none=True)
     end_date = fields.DateTime(allow_none=True)
-    location_type = fields.String(required=True)
+    location_type = fields.String(allow_none=True)
     longitude = fields.Float(allow_none=True)
     latitude = fields.Float(allow_none=True)
     elevation = fields.Float(allow_none=True)

@@ -18,7 +18,7 @@ class Configuration(db.Model, AuditMixin, SearchableMixin):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     start_date = db.Column(db.DateTime, nullable=True)
     end_date = db.Column(db.DateTime, nullable=True)
-    location_type = db.Column(db.String(256), nullable=False)
+    location_type = db.Column(db.String(256), nullable=True)
     longitude = db.Column(db.Float(), nullable=True)
     latitude = db.Column(db.Float(), nullable=True)
     elevation = db.Column(db.Float(), nullable=True)
