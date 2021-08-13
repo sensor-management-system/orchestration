@@ -7,9 +7,10 @@ services:
     ports:
       - "${PORT:-5000}:5000"
     env_file:
-      - ./${ENVIRONMENT}/app.env
+      - ./${ENVIRONMENT:-rdm-test.intranet.ufz.de}/app.env
     networks:
       - sms
+      - minio
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.13.2
@@ -44,6 +45,7 @@ services:
       retries: 3
     networks:
       - sms
+      - minio
 
   createbuckets:
     image: minio/mc:latest
@@ -51,6 +53,7 @@ services:
       - minio1
     networks:
       - sms
+      - minio
     # Make a Bucket using minio client mc
     # https://docs.min.io/docs/minio-client-complete-guid
     entrypoint: >
@@ -70,3 +73,4 @@ networks:
   sms:
     external: true
     name: sms
+  minio:
