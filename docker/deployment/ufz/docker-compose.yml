@@ -11,10 +11,15 @@ services:
     networks:
       - sms
       - minio
+      - elastic
+      - app
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.13.2
     restart: unless-stopped
+    networks:
+      - elastic
+      - app
     environment:
       - discovery.type=single-node
       - bootstrap.memory_lock=true
@@ -46,6 +51,7 @@ services:
     networks:
       - sms
       - minio
+      - app
 
   createbuckets:
     image: minio/mc:latest
@@ -74,3 +80,6 @@ networks:
     external: true
     name: sms
   minio:
+  app:
+  elastic:
+    driver: bridge
