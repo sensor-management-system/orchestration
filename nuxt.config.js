@@ -60,7 +60,8 @@ export default {
   target: 'server',
   env: {
     smsBackendUrl: process.env.SMS_BACKEND_URL || 'http://localhost:5000/rdm/svm-api/v1',
-    cvBackendUrl: process.env.CV_BACKEND_URL || 'http://localhost:5001/api'
+    cvBackendUrl: process.env.CV_BACKEND_URL || 'http://localhost:5001/api',
+    institute: process.env.INSTITUTE || ''
   },
   /*
   ** Headers of the page
@@ -145,6 +146,6 @@ export default {
   },
   router: {
     base: process.env.BASE_URL || '/',
-    middleware: 'vuex-oidc-router'
+    middleware: ['vuex-oidc-router', 'institute-pages']
   }
 }

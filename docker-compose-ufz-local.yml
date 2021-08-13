@@ -39,6 +39,7 @@ services:
       - 3000:3000
     environment:
       BASE_URL: "/"
+      INSTITUTE: "ufz"
       SMS_BACKEND_HOST_URL: "http://localhost:5000/rdm/svm-api/v1"
       CV_BACKEND_URL: "http://localhost:8000/api/v1"
       NUXT_ENV_REDIRECT_URI: "https://localhost.localdomain:3000/login-callback"

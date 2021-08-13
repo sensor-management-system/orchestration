@@ -211,8 +211,36 @@ permissions and limitations under the Licence.
     <v-footer
       :fixed="fixed"
       app
+      padless
     >
-      <span>&copy; {{ new Date().getFullYear() }}</span>
+      <v-row
+        no-gutters
+      >
+        <v-col
+          cols="12"
+          class="text-center caption"
+        >
+          <v-btn
+            to="/info/legal-notice"
+            text
+            class="ma-2"
+            small
+            color="secondary"
+          >
+            Legal Notice
+          </v-btn>&nbsp;|&nbsp;
+          <v-btn
+            to="/info/privacy-policy"
+            text
+            class="ma-2"
+            small
+            color="secondary"
+          >
+            Privacy Policy
+          </v-btn>&nbsp;|&nbsp;
+          <span class="ma-2">&copy; {{ new Date().getFullYear() }}</span>
+        </v-col>
+      </v-row>
     </v-footer>
   </v-app>
 </template>
