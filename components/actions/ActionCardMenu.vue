@@ -81,7 +81,15 @@ import { Vue, Component, Prop } from 'nuxt-property-decorator'
 import { IActionCommonDetails } from '@/models/ActionCommonDetails'
 
 @Component
+/**
+ * A component that provides a simple menu for action related user-actions
+ *
+ * @augments Vue
+ */
 export default class ActionCardMenu extends Vue {
+  /**
+   * The action to which the menu relates
+   */
   @Prop({
     type: Object,
     required: true
@@ -89,6 +97,12 @@ export default class ActionCardMenu extends Vue {
   readonly value!: IActionCommonDetails
 
   onDeleteButtonClick (): void {
+    /**
+     * is triggered when the user clicks the delete menu item
+     *
+     * @event delete-menu-item-click
+     * @property {IActionCommonDetails} value
+     */
     this.$emit('delete-menu-item-click', this.value)
   }
 }

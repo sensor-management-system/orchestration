@@ -130,9 +130,7 @@ export default {
   */
   vuetify: {
     customVariables: ['~/assets/variables.scss'],
-    theme: {
-      dark: false
-    }
+    optionsPath: '~/config/vuetify/vuetify.options.js'
   },
   /*
   ** Build configuration
