@@ -57,7 +57,7 @@ permissions and limitations under the Licence.
         <v-btn
           color="error"
           text
-          @click="$emit('delete-dialog-button-click')"
+          @click="onDeleteButtonClick"
         >
           <v-icon left>
             mdi-delete
@@ -72,8 +72,16 @@ permissions and limitations under the Licence.
 <script lang="ts">
 import { Vue, Component, Prop } from 'nuxt-property-decorator'
 
+/**
+ * A dialog component to confirm the deletion of an action.
+ *
+ * @augments Vue
+ */
 @Component
 export default class ActionDeleteDialog extends Vue {
+  /**
+   * A boolean indication whether the dialog is shown or not
+   */
   @Prop({
     default: false,
     type: Boolean,
@@ -86,7 +94,22 @@ export default class ActionDeleteDialog extends Vue {
   }
 
   set show (value: boolean) {
+    /**
+     * is triggered when the dialog is closed
+     *
+     * @event input
+     * @property {boolean} value
+     */
     this.$emit('input', value)
+  }
+
+  onDeleteButtonClick () {
+    /**
+     * is triggered when the user clicks the delete button
+     *
+     * @event delete-dialog-button-click
+     */
+    this.$emit('delete-dialog-button-click')
   }
 }
 </script>

@@ -47,7 +47,7 @@ permissions and limitations under the Licence.
       color="green"
       small
       :disabled="isSaving"
-      @click="$emit('apply')"
+      @click="onApplyButtonClick"
     >
       apply
     </v-btn>
@@ -57,10 +57,52 @@ permissions and limitations under the Licence.
 <script lang="ts">
 import { Component, Prop, Vue } from 'nuxt-property-decorator'
 
+/**
+ * A simple button tray with an apply and a cancel button
+ *
+ * @augments Vue
+ */
 @Component
 export default class ActionButtonTray extends Vue {
-  @Prop({ type: String, required: true }) readonly cancelUrl!:string;
-  @Prop({ type: Boolean, required: true }) readonly isSaving!:boolean;
-  @Prop({ type: Boolean, default: true }) readonly showApply!:boolean;
+  /**
+   * a Nuxt router link for the cancel action
+   */
+  @Prop({
+    type: String,
+    required: true
+  })
+  readonly cancelUrl!: string
+
+  /**
+   * whether the apply button is disabled or not
+   */
+  @Prop({
+    type: Boolean,
+    default: false
+  })
+  readonly isSaving!: boolean
+
+  /**
+   * whether the apply button is hidden or not
+   */
+  @Prop({
+    type: Boolean,
+    default: true
+  })
+  readonly showApply!: boolean
+
+  /**
+   * triggers the apply event when the button is clicked
+   *
+   * @fires ActionButtonTray#apply
+   */
+  onApplyButtonClick (): void {
+    /**
+     * is triggered when the apply button was clicked
+     *
+     * @event apply
+     */
+    this.$emit('apply')
+  }
 }
 </script>
