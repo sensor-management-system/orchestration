@@ -85,6 +85,8 @@ export default {
   ** Global CSS
   */
   css: [
+    '@/assets/Roboto.css',
+    '@mdi/font/css/materialdesignicons.min.css'
   ],
   /*
   ** Plugins to load before mounting the App
@@ -130,7 +132,9 @@ export default {
   */
   vuetify: {
     customVariables: ['~/assets/variables.scss'],
-    optionsPath: '~/config/vuetify/vuetify.options.js'
+    optionsPath: '~/config/vuetify/vuetify.options.js',
+    // needed to include own fonts
+    defaultAssets: false
   },
   /*
   ** Build configuration
