@@ -192,9 +192,7 @@ export class ConfigurationApi {
     for (const platformUnmountAtionId of platformUnmountActionIdsToDelete) {
       promisesDelete.push(this.platformUnmountActionApi.deleteById(platformUnmountAtionId))
     }
-    for (const relationship in relationshipsToDelete) {
-      promisesDelete.push(this.tryToDeleteRelationship(relationship, configurationId))
-    }
+    relationshipsToDelete.forEach(relationship => promisesDelete.push(this.tryToDeleteRelationship(relationship, configurationId)))
 
     await Promise.all(promisesDelete)
 

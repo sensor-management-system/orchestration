@@ -69,7 +69,7 @@ permissions and limitations under the Licence.
               <v-row>
                 <v-col>
                   <label>Mounted:</label>
-                  {{ value.unpack().date }}
+                  {{ value.unpack().date | dateToDateTimeString }}
                 </v-col>
               </v-row>
               <v-row>
@@ -250,7 +250,7 @@ import { DeviceNode } from '@/viewmodels/DeviceNode'
 import { IUnmountData } from '@/viewmodels/IUnmountData'
 import { PlatformNode } from '@/viewmodels/PlatformNode'
 
-import { dateToDateTimeStringHHMM } from '@/utils/dateHelper'
+import { dateToDateTimeStringHHMM, dateToDateTimeString } from '@/utils/dateHelper'
 
 /**
 * A class component to display information about a selected tree node
@@ -261,7 +261,8 @@ import { dateToDateTimeStringHHMM } from '@/utils/dateHelper'
     ConfigurationsSelectedItemUnmountForm
   },
   filters: {
-    dateToDateTimeStringHHMM
+    dateToDateTimeStringHHMM,
+    dateToDateTimeString
   }
 })
 // @ts-ignore
