@@ -38,5 +38,10 @@
     "node_modules",
     ".nuxt",
     "dist"
-  ]
+  ],
+  "ts-node": {
+    "compilerOptions": {
+      "module": "CommonJS"
+    }
+  }
 }
