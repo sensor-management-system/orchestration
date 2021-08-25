@@ -60,6 +60,22 @@ check-lint:
     paths:
       - node_modules
 
+check-license:
+  stage: check
+  image: node:16.0.0-buster
+  before_script:
+    - node -v
+    - npm ci
+  script:
+    - npm run licenseCheck
+  tags:
+    - docker
+  allow_failure: true
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - node_modules
+
 test-frontend-unit-tests:
   stage: test
   image: node:16.0.0-buster
