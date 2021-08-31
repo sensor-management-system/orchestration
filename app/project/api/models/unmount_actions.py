@@ -1,5 +1,5 @@
-from ..models.mixin import AuditMixin, IndirectSearchableMixin
 from .base_model import db
+from ..models.mixin import AuditMixin, IndirectSearchableMixin
 
 
 class PlatformUnmountAction(db.Model, AuditMixin, IndirectSearchableMixin):
@@ -11,7 +11,8 @@ class PlatformUnmountAction(db.Model, AuditMixin, IndirectSearchableMixin):
         "Configuration",
         uselist=False,
         foreign_keys=[configuration_id],
-        backref=db.backref("platform_unmount_actions"),
+        backref=db.backref("platform_unmount_actions",
+                           cascade="save-update, merge, delete, delete-orphan"),
     )
     platform_id = db.Column(db.Integer, db.ForeignKey("platform.id"), nullable=False)
     platform = db.relationship(
@@ -52,7 +53,8 @@ class DeviceUnmountAction(db.Model, AuditMixin, IndirectSearchableMixin):
         "Configuration",
         uselist=False,
         foreign_keys=[configuration_id],
-        backref=db.backref("device_unmount_actions"),
+        backref=db.backref("device_unmount_actions",
+                           cascade="save-update, merge, delete, delete-orphan"),
     )
     device_id = db.Column(db.Integer, db.ForeignKey("device.id"), nullable=False)
     device = db.relationship(

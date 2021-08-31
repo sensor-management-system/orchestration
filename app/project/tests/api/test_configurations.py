@@ -3,6 +3,7 @@ import json
 import os
 
 from project import base_url
+from project.api.models import Contact
 from project.api.models.base_model import db
 from project.api.models.configuration import Configuration
 from project.api.models.configuration_device import ConfigurationDevice
@@ -10,6 +11,8 @@ from project.api.models.configuration_platform import ConfigurationPlatform
 from project.api.models.device import Device
 from project.api.models.platform import Platform
 from project.tests.base import BaseTestCase, create_token, test_file_path
+from project.tests.base import fake, generate_token_data
+from project.tests.models.test_configurations_model import generate_configuration_model
 from project.tests.read_from_json import extract_data_from_json_file
 
 
@@ -29,6 +32,8 @@ class TestConfigurationsService(BaseTestCase):
     platform_json_data_url = os.path.join(
         test_file_path, "drafts", "platforms_test_data.json"
     )
+    device_mount_url = base_url + "/device-mount-actions"
+    platform_mount_url = base_url + "/platform-mount-actions"
 
     def test_get_configurations(self):
         """Ensure the GET /configurations route behaves correctly."""
@@ -69,8 +74,8 @@ class TestConfigurationsService(BaseTestCase):
             },
         }
         for (
-            input_calibration_date,
-            expected_output_calibration_date,
+                input_calibration_date,
+                expected_output_calibration_date,
         ) in calibration_dates.items():
             # set up for each single run
             self.setUp()
@@ -121,8 +126,8 @@ class TestConfigurationsService(BaseTestCase):
 
             configuration_device = (
                 db.session.query(ConfigurationDevice)
-                .filter_by(device_id=1, configuration_id=1)
-                .first()
+                    .filter_by(device_id=1, configuration_id=1)
+                    .first()
             )
             self.assertEqual(
                 configuration_device.calibration_date,
@@ -176,8 +181,8 @@ class TestConfigurationsService(BaseTestCase):
 
         configuration_device = (
             db.session.query(ConfigurationDevice)
-            .filter_by(device_id=1, configuration_id=1)
-            .first()
+                .filter_by(device_id=1, configuration_id=1)
+                .first()
         )
         self.assertEqual(configuration_device.firmware_version, firmware_version)
 
@@ -395,3 +400,92 @@ class TestConfigurationsService(BaseTestCase):
                             entry["attributes"]["short_name"], platform.short_name
                         )
                 self.assertTrue(found)
+
+    def test_delete_configuration_which_still_contains_actions(self):
+        """
+        Ensure that we can delete a configuration and it's
+        included actions.
+
+        """
+        device = Device(
+            short_name=fake.linux_processor(),
+        )
+        device_parent_platform = Platform(
+            short_name="device parent platform",
+        )
+        platform = Platform(
+            short_name=fake.linux_processor(),
+        )
+        parent_platform = Platform(
+            short_name="platform parent-platform",
+        )
+        mock_jwt = generate_token_data()
+        contact = Contact(
+            given_name=mock_jwt["given_name"],
+            family_name=mock_jwt["family_name"],
+            email=mock_jwt["email"],
+        )
+        configuration = generate_configuration_model()
+        db.session.add_all(
+            [device, device_parent_platform, platform, parent_platform, contact, configuration])
+        db.session.commit()
+        # Mount a device
+        device_mount_data = {
+            "data": {
+                "type": "device_mount_action",
+                "attributes": {
+                    "description": "Test DeviceMountAction",
+                    "begin_date": fake.future_datetime().__str__(),
+                    "offset_x": str(fake.coordinate()),
+                    "offset_y": str(fake.coordinate()),
+                    "offset_z": str(fake.coordinate()),
+                },
+                "relationships": {
+                    "device": {"data": {"type": "device", "id": device.id}},
+                    "contact": {"data": {"type": "contact", "id": contact.id}},
+                    "parent_platform": {
+                        "data": {"type": "platform", "id": device_parent_platform.id}
+                    },
+                    "configuration": {
+                        "data": {"type": "configuration", "id": configuration.id}
+                    },
+                },
+            }
+        }
+        _ = super().add_object(
+            url=f"{self.device_mount_url}?include=device,contact,parent_platform,configuration",
+            data_object=device_mount_data,
+            object_type="device_mount_action",
+        )
+        # Mount a Platform
+        platform_mount_data = {
+            "data": {
+                "type": "platform_mount_action",
+                "attributes": {
+                    "description": "Test PlatformMountAction",
+                    "begin_date": fake.future_datetime().__str__(),
+                    "offset_x": str(fake.coordinate()),
+                    "offset_y": str(fake.coordinate()),
+                    "offset_z": str(fake.coordinate()),
+                },
+                "relationships": {
+                    "platform": {"data": {"type": "platform", "id": platform.id}},
+                    "contact": {"data": {"type": "contact", "id": contact.id}},
+                    "parent_platform": {
+                        "data": {"type": "platform", "id": parent_platform.id}
+                    },
+                    "configuration": {
+                        "data": {"type": "configuration", "id": configuration.id}
+                    },
+                },
+            }
+        }
+        _ = super().add_object(
+            url=f"{self.platform_mount_url}?include=platform,contact,parent_platform,configuration",
+            data_object=platform_mount_data,
+            object_type="platform_mount_action",
+        )
+
+        _ = super().delete_object(
+            url=f"{self.configurations_url}/{configuration.id}",
+        )
