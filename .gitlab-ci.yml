@@ -208,8 +208,8 @@ deploy-gfz-staging:
     - sleep 1m
     - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T backend python3 manage.py es reindex
     - docker rmi $(docker images -q -f dangling=true) || true
-  #rules:
-  #  - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_PIPELINE_SOURCE != "schedule"'
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_PIPELINE_SOURCE != "schedule"'
 
 deploy-gfz-prod:
   stage: deploy
