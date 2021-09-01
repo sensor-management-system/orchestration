@@ -50,7 +50,7 @@ permissions and limitations under the Licence.
         align-self="center"
       >
         <v-btn
-          v-if="isLoggedIn"
+          v-if="$auth.loggedIn"
           small
           color="primary"
           :disabled="selectedContact == null"
@@ -117,7 +117,7 @@ export default class PlatformAddContactPage extends Vue {
   }
 
   addContact (): void {
-    if (this.selectedContact && this.selectedContact.id && this.isLoggedIn) {
+    if (this.selectedContact && this.selectedContact.id && this.$auth.loggedIn) {
       this.isSaving = true
       this.$api.platforms.addContact(this.platformId, this.selectedContact.id).then(() => {
         this.isSaving = false
@@ -146,10 +146,6 @@ export default class PlatformAddContactPage extends Vue {
 
   get platformId (): string {
     return this.$route.params.platformId
-  }
-
-  get isLoggedIn (): boolean {
-    return this.$store.getters['oidc/isAuthenticated']
   }
 }
 </script>

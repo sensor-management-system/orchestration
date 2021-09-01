@@ -87,9 +87,5 @@ export default class CustomFieldCard extends Vue {
   get deviceId (): string {
     return this.$route.params.deviceId
   }
-
-  get isLoggedIn (): boolean {
-    return this.$store.getters['oidc/isAuthenticated']
-  }
 }
 </script>

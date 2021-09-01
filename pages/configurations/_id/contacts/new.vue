@@ -57,7 +57,7 @@ permissions and limitations under the Licence.
         align-self="center"
       >
         <v-btn
-          v-if="isLoggedIn"
+          v-if="$auth.loggedIn"
           small
           color="primary"
           :disabled="selectedContact == null"
@@ -127,10 +127,6 @@ export default class PlatformAddContactPage extends Vue {
     return this.allContacts.filter(c => !this.alreadyUsedContacts.find(rc => rc.id === c.id))
   }
 
-  get isLoggedIn (): boolean {
-    return this.$store.getters['oidc/isAuthenticated']
-  }
-
   select (newContactId: string): void {
     const idx = this.allContacts.findIndex((c: Contact) => c.id === newContactId)
     if (idx > -1) {
@@ -141,7 +137,7 @@ export default class PlatformAddContactPage extends Vue {
   }
 
   addContact () {
-    if (this.selectedContact && this.selectedContact.id && this.isLoggedIn) {
+    if (this.selectedContact && this.selectedContact.id && this.$auth.loggedIn) {
       this.isSaving = true
       this.$store.dispatch('contacts/addContactToConfiguration', {
         configurationId: this.configurationId,

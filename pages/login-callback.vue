@@ -33,22 +33,16 @@ implied. See the Licence for the specific language governing
 permissions and limitations under the Licence.
 -->
 <template>
-  <div />
+  <div
+    class="container d-flex align-items-center justify-content-center flex-column"
+  >
+    Logging in...
+  </div>
 </template>
 
 <script>
-import { mapActions } from 'vuex'
 
 export default {
-  name: 'LoginCallback',
-  created () {
-    this.handleSigninPopupCallback().catch((err) => {
-      // eslint-disable-next-line
-      console.error(err)
-    })
-  },
-  methods: {
-    ...mapActions('oidc', ['handleSigninPopupCallback'])
-  }
+  name: 'LoginCallback'
 }
 </script>

@@ -75,7 +75,7 @@ permissions and limitations under the Licence.
             <PlatformTypeSelect v-model="selectedSearchPlatformTypes" label="Select a platform type" />
           </v-col>
         </v-row>
-        <v-row v-if="isLoggedIn">
+        <v-row v-if="$auth.loggedIn">
           <v-col cols="12" md="3">
             <v-checkbox v-model="onlyOwnPlatforms" label="Only own platforms" />
           </v-col>
@@ -226,17 +226,17 @@ permissions and limitations under the Licence.
 
                   <v-list>
                     <v-list-item
-                      :disabled="!isLoggedIn"
+                      :disabled="!$auth.loggedIn"
                       dense
                     >
                       <v-list-item-content>
                         <v-list-item-title
-                          :class="isLoggedIn ? 'text' : 'grey-text'"
+                          :class="$auth.loggedIn ? 'text' : 'grey-text'"
                         >
                           <v-icon
                             left
                             small
-                            :color="isLoggedIn ? 'black' : 'grey'"
+                            :color="$auth.loggedIn ? 'black' : 'grey'"
                           >
                             mdi-content-copy
                           </v-icon>
@@ -245,18 +245,18 @@ permissions and limitations under the Licence.
                       </v-list-item-content>
                     </v-list-item>
                     <v-list-item
-                      :disabled="!isLoggedIn"
+                      :disabled="!$auth.loggedIn"
                       dense
                       @click="showDeleteDialogFor(result.id)"
                     >
                       <v-list-item-content>
                         <v-list-item-title
-                          :class="isLoggedIn ? 'red--text' : 'grey--text'"
+                          :class="$auth.loggedIn ? 'red--text' : 'grey--text'"
                         >
                           <v-icon
                             left
                             small
-                            :color="isLoggedIn ? 'red' : 'grey'"
+                            :color="$auth.loggedIn ? 'red' : 'grey'"
                           >
                             mdi-delete
                           </v-icon>
@@ -461,7 +461,7 @@ permissions and limitations under the Licence.
       </v-hover>
     </div>
     <v-btn
-      v-if="isLoggedIn"
+      v-if="$auth.loggedIn"
       bottom
       color="primary"
       dark
@@ -656,7 +656,7 @@ export default class SearchPlatformsPage extends Vue {
       manufacturer: this.selectedSearchManufacturers,
       states: this.selectedSearchStates,
       types: this.selectedSearchPlatformTypes,
-      onlyOwnPlatforms: this.onlyOwnPlatforms && this.isLoggedIn
+      onlyOwnPlatforms: this.onlyOwnPlatforms && this.$auth.loggedIn
     })
   }
 
@@ -685,7 +685,7 @@ export default class SearchPlatformsPage extends Vue {
       .withOneMatchingPlatformTypeOf(searchParameters.types)
 
     if (searchParameters.onlyOwnPlatforms) {
-      const email = this.currentUserEmail
+      const email = this.$auth.user!.email as string
       if (email) {
         searchBuilder.withContactEmail(email)
       }
@@ -806,14 +806,6 @@ export default class SearchPlatformsPage extends Vue {
   }
 
   getTextOrDefault = (text: string): string => text || '-'
-
-  get isLoggedIn () {
-    return this.$store.getters['oidc/isAuthenticated']
-  }
-
-  get currentUserEmail () {
-    return this.$store.getters['oidc/userEmail']
-  }
 }
 
 </script>

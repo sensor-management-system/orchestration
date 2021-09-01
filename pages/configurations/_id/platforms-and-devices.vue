@@ -66,7 +66,7 @@ permissions and limitations under the Licence.
           />
         </v-col>
         <v-col cols="12" md="6">
-          <InfoBox v-if="!selectedNode && isLoggedIn">
+          <InfoBox v-if="!selectedNode && $auth.loggedIn">
             Select a platform on the left side to add devices or platforms to it. To add a device or platform to the
             root of this configuration, deselect any previously selected device or platform.
           </InfoBox>
@@ -74,18 +74,20 @@ permissions and limitations under the Licence.
             :value="getSelectedNode"
             :breadcrumbs="hierarchyNodeNames"
             :selected-date="selectedDateOrFallback"
-            :readonly="!isLoggedIn"
+            :readonly="!$auth.loggedIn"
             :contacts="contacts"
+            :current-user-mail="$auth.user.email"
             @remove="removeSelectedNode"
             @overwriteExistingMountAction="overwriteExistingMountAction"
             @addNewMountAction="addNewMountAction"
           />
           <ConfigurationsPlatformDeviceSearch
-            v-if="isLoggedIn && (!selectedNode || selectedNode.isPlatform())"
+            v-if="$auth.loggedIn && (!selectedNode || selectedNode.isPlatform())"
             :is-platform-used-func="isPlatformInTree"
             :is-device-used-func="isDeviceInTree"
             :selected-date="selectedDate"
             :contacts="contacts"
+            :current-user-mail="$auth.user.email"
             @add-platform="addPlatformNode"
             @add-device="addDeviceNode"
           />
@@ -287,10 +289,6 @@ export default class ConfigurationPlatformsAndDevices extends Vue {
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Save failed')
     }
-  }
-
-  get isLoggedIn (): boolean {
-    return this.$store.getters['oidc/isAuthenticated']
   }
 
   @Watch('value', {

@@ -125,7 +125,7 @@ export default class ConfigurationPlatformDeviceMountForm extends mixins(Rules) 
   private offsetY: number = 0.0
   private offsetZ: number = 0.0
 
-  private contact: Contact | null = this.currentUserAsMountContact
+  private contact: Contact | null = null
   private description = ''
 
   @Prop({
@@ -148,10 +148,19 @@ export default class ConfigurationPlatformDeviceMountForm extends mixins(Rules) 
   })
   readonly contacts!: Contact[]
 
+  @Prop({
+    type: String
+  })
+  // @ts-ignore
+readonly currentUserMail:string|null
+
+  created () {
+    this.contact = this.currentUserAsMountContact
+  }
+
   get currentUserAsMountContact (): Contact | null {
-    const currentUserMail = this.$store.getters['oidc/userEmail']
-    if (currentUserMail) {
-      const userIndex = this.contacts.findIndex(c => c.email === currentUserMail)
+    if (this.currentUserMail) {
+      const userIndex = this.contacts.findIndex(c => c.email === this.currentUserMail)
       if (userIndex > -1) {
         return this.contacts[userIndex]
       }

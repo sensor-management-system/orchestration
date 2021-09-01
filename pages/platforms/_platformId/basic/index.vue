@@ -36,7 +36,7 @@ permissions and limitations under the Licence.
     <v-card-actions>
       <v-spacer />
       <v-btn
-        v-if="isLoggedIn"
+        v-if="$auth.loggedIn"
         color="primary"
         small
         nuxt
@@ -51,7 +51,7 @@ permissions and limitations under the Licence.
     <v-card-actions>
       <v-spacer />
       <v-btn
-        v-if="isLoggedIn"
+        v-if="$auth.loggedIn"
         color="primary"
         small
         nuxt
@@ -91,10 +91,6 @@ export default class PlatformShowBasicPage extends Vue {
 
   get platformId () {
     return this.$route.params.platformId
-  }
-
-  get isLoggedIn () {
-    return this.$store.getters['oidc/isAuthenticated']
   }
 }
 </script>

@@ -80,7 +80,7 @@ import { Contact } from '@/models/Contact'
 
 @Component
 export default class ConfigurationsSelectedItemUnmountForm extends mixins(Rules) {
-  private contact: Contact | null = this.currentUserAsMountContact
+  private contact: Contact | null = null
   private description = ''
 
   @Prop({
@@ -96,10 +96,19 @@ export default class ConfigurationsSelectedItemUnmountForm extends mixins(Rules)
   // @ts-ignore
   readonly readonly: boolean
 
+  @Prop({
+    type: String
+  })
+  // @ts-ignore
+readonly currentUserMail:string|null
+
+  created () {
+    this.contact = this.currentUserAsMountContact
+  }
+
   get currentUserAsMountContact (): Contact | null {
-    const currentUserMail = this.$store.getters['oidc/userEmail']
-    if (currentUserMail) {
-      const userIndex = this.contacts.findIndex(c => c.email === currentUserMail)
+    if (this.currentUserMail) {
+      const userIndex = this.contacts.findIndex(c => c.email === this.currentUserMail)
       if (userIndex > -1) {
         return this.contacts[userIndex]
       }

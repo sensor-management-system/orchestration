@@ -35,7 +35,7 @@ permissions and limitations under the Licence.
     >
       <template #actions>
         <v-btn
-          v-if="isLoggedIn"
+          v-if="$auth.loggedIn"
           color="primary"
           text
           small
@@ -45,7 +45,7 @@ permissions and limitations under the Licence.
           Edit
         </v-btn>
         <v-menu
-          v-if="isLoggedIn"
+          v-if="$auth.loggedIn"
           close-on-click
           close-on-content-click
           offset-x
@@ -122,10 +122,6 @@ export default class DeviceCustomFieldsShowPage extends Vue {
 
   get deviceId (): string {
     return this.$route.params.deviceId
-  }
-
-  get isLoggedIn (): boolean {
-    return this.$store.getters['oidc/isAuthenticated']
   }
 
   openDeleteDialog (): void {

@@ -33,7 +33,7 @@ permissions and limitations under the Licence.
     <v-card-actions>
       <v-spacer />
       <ActionButtonTray
-        v-if="isLoggedIn"
+        v-if="$auth.loggedIn"
         :cancel-url="'/devices/' + deviceId + '/actions'"
         :is-saving="isSaving"
         @apply="save"
@@ -45,12 +45,13 @@ permissions and limitations under the Licence.
       v-model="action"
       :attachments="attachments"
       :measured-quantities="measuredQuantities"
+      :current-user-mail="$auth.user.email"
     />
 
     <v-card-actions>
       <v-spacer />
       <ActionButtonTray
-        v-if="isLoggedIn"
+        v-if="$auth.loggedIn"
         :cancel-url="'/devices/' + deviceId + '/actions'"
         :is-saving="isSaving"
         @apply="save"
@@ -123,10 +124,6 @@ export default class DeviceCalibrationActionEditPage extends Vue {
 
   get actionId (): string {
     return this.$route.params.actionId
-  }
-
-  get isLoggedIn (): boolean {
-    return this.$store.getters['oidc/isAuthenticated']
   }
 
   get isLoading (): boolean {

@@ -33,7 +33,7 @@ permissions and limitations under the Licence.
     <v-card-actions>
       <v-spacer />
       <v-btn
-        v-if="isLoggedIn"
+        v-if="$auth.loggedIn"
         ref="cancelButton"
         text
         small
@@ -43,7 +43,7 @@ permissions and limitations under the Licence.
         Cancel
       </v-btn>
       <v-btn
-        v-if="isLoggedIn"
+        v-if="$auth.loggedIn"
         color="green"
         small
         data-role="add-attachment"
@@ -101,7 +101,7 @@ permissions and limitations under the Licence.
     <v-card-actions>
       <v-spacer />
       <v-btn
-        v-if="isLoggedIn"
+        v-if="$auth.loggedIn"
         ref="cancelButton"
         text
         small
@@ -111,7 +111,7 @@ permissions and limitations under the Licence.
         Cancel
       </v-btn>
       <v-btn
-        v-if="isLoggedIn"
+        v-if="$auth.loggedIn"
         color="green"
         small
         data-role="add-attachment"
@@ -197,10 +197,6 @@ export default class AttachmentAddPage extends mixins(Rules, UploadRules) {
 
   get deviceId (): string {
     return this.$route.params.deviceId
-  }
-
-  get isLoggedIn (): boolean {
-    return this.$store.getters['oidc/isAuthenticated']
   }
 }
 </script>

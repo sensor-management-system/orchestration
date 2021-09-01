@@ -37,7 +37,7 @@ permissions and limitations under the Licence.
     <v-card-actions>
       <v-spacer />
       <v-btn
-        v-if="isLoggedIn"
+        v-if="$auth.loggedIn"
         :disabled="isEditPropertiesPage"
         color="primary"
         small
@@ -64,7 +64,7 @@ permissions and limitations under the Licence.
               class="text-right"
             >
               <v-btn
-                v-if="isLoggedIn && (!isEditModeForSomeProperty())"
+                v-if="$auth.loggedIn && (!isEditModeForSomeProperty())"
                 color="primary"
                 text
                 small
@@ -73,7 +73,7 @@ permissions and limitations under the Licence.
                 Edit
               </v-btn>
               <template
-                v-if="isLoggedIn && (isEditModeForProperty(property))"
+                v-if="$auth.loggedIn && (isEditModeForProperty(property))"
               >
                 <v-btn
                   text
@@ -92,7 +92,7 @@ permissions and limitations under the Licence.
               </template>
 
               <v-menu
-                v-if="isLoggedIn && (!isEditModeForSomeProperty())"
+                v-if="$auth.loggedIn && (!isEditModeForSomeProperty())"
                 close-on-click
                 close-on-content-click
                 offset-x
@@ -207,7 +207,7 @@ permissions and limitations under the Licence.
     >
       <v-spacer />
       <v-btn
-        v-if="isLoggedIn"
+        v-if="$auth.loggedIn"
         :disabled="isEditPropertiesPage"
         color="primary"
         small
@@ -292,10 +292,6 @@ export default class DevicePropertiesPage extends Vue {
 
   get deviceId (): string {
     return this.$route.params.deviceId
-  }
-
-  get isLoggedIn (): boolean {
-    return this.$store.getters['oidc/isAuthenticated']
   }
 
   get isEditPropertiesPage (): boolean {

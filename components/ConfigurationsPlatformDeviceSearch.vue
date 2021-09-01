@@ -118,6 +118,7 @@ permissions and limitations under the Licence.
                         data-role-btn="add-platform"
                         :readonly="isPlatformUsedFunc(item)"
                         :contacts="contacts"
+                        :current-user-mail="currentUserMail"
                         @add="addPlatform(item, $event)"
                       />
                     </v-expansion-panel-content>
@@ -184,6 +185,7 @@ permissions and limitations under the Licence.
                         data-role-btn="add-device"
                         :readonly="isDeviceUsedFunc(item)"
                         :contacts="contacts"
+                        :current-user-mail="currentUserMail"
                         @add="addDevice(item, $event)"
                       />
                     </v-expansion-panel-content>
@@ -294,6 +296,12 @@ export default class ConfigurationsPlatformDeviceSearch extends Vue {
     type: Array
   })
   readonly contacts!: Contact[]
+
+  @Prop({
+    type: String
+  })
+  // @ts-ignore
+readonly currentUserMail:string|null
 
   get searchTypes (): string[] {
     return [SearchType.Platform, SearchType.Device]

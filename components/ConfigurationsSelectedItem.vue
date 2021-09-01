@@ -222,6 +222,7 @@ permissions and limitations under the Licence.
             :key="valueKey"
             :contacts="contacts"
             :readonly="readonly"
+            :current-user-mail="currentUserMail"
             @remove="remove"
           />
         </v-expansion-panel-content>
@@ -317,6 +318,12 @@ export default class ConfigurationsSelectedItem extends mixins(Rules) {
   // @ts-ignore
   readonly readonly: boolean
 
+  @Prop({
+    type: String
+  })
+  // @ts-ignore
+readonly currentUserMail:string|null
+
   /**
    * returns the description of a node
    *
@@ -400,9 +407,8 @@ export default class ConfigurationsSelectedItem extends mixins(Rules) {
   }
 
   selectCurrentUserAsMountContact () {
-    const currentUserMail = this.$store.getters['oidc/userEmail']
-    if (currentUserMail) {
-      const userIndex = this.contacts.findIndex(c => c.email === currentUserMail)
+    if (this.currentUserMail) {
+      const userIndex = this.contacts.findIndex(c => c.email === this.currentUserMail)
       if (userIndex > -1) {
         this.mountContact = this.contacts[userIndex]
         return

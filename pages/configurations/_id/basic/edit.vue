@@ -44,7 +44,7 @@ permissions and limitations under the Licence.
       <v-card-actions>
         <v-spacer />
         <save-and-cancel-buttons
-          v-if="isLoggedIn"
+          v-if="$auth.loggedIn"
           :to="`/configurations/${configurationId}/basic`"
           @save="save()"
         />
@@ -58,7 +58,7 @@ permissions and limitations under the Licence.
       <v-card-actions>
         <v-spacer />
         <save-and-cancel-buttons
-          v-if="isLoggedIn"
+          v-if="$auth.loggedIn"
           :to="`/configurations/${configurationId}/basic`"
           @save="save()"
         />
@@ -112,10 +112,6 @@ export default class ConfigurationEditBasicPage extends Vue {
     } finally {
       this.isLoading = false
     }
-  }
-
-  get isLoggedIn (): boolean {
-    return this.$store.getters['oidc/isAuthenticated']
   }
 
   @Watch('value', { immediate: true, deep: true })

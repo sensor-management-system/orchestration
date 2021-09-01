@@ -44,16 +44,8 @@ services:
       CV_BACKEND_URL: "http://localhost:8000/api/v1"
       NUXT_ENV_REDIRECT_URI: "https://localhost.localdomain:3000/login-callback"
       NUXT_ENV_CLIENT_ID: "rdmsvm-implicit-flow"
-      NUXT_ENV_AUTHORITY: "https://webapp.ufz.de/idp/oidc/v1"
-      NUXT_ENV_RESPONSE_TYPE: "id_token"
+      NUXT_ENV_AUTHORITY: "https://webapp.ufz.de/idp/oidc/v1/auth"
       NUXT_ENV_SCOPE: "openid profile email"
-      NUXT_ENV_POST_LOGOUT_REDIRECT_URI: "https://localhost.localdomain:3000/logout-callback"
-      NUXT_ENV_SILENT_REDIRECT_URI: "https://localhost.localdomain:3000/silent-callback"
-      NUXT_ENV_FILTER_PROTOCOL_CLAIMS: 'false'
-      NUXT_ENV_AUTOMATIC_SILENT_RENEW: 'false'
-      NUXT_ENV_SILENT_RENEW_INTERVAL: 6900000 # 115 minutes in milliseconds
-      NUXT_ENV_LOAD_USER_INFO: 'true'
-      NUXT_ENV_PUBLIC_PATH: ''
     volumes:
       - .:/home/node/
     command: >

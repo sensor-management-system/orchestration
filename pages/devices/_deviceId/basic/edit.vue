@@ -37,7 +37,7 @@ permissions and limitations under the Licence.
     <v-card-actions>
       <v-spacer />
       <v-btn
-        v-if="isLoggedIn"
+        v-if="$auth.loggedIn"
         small
         text
         nuxt
@@ -46,7 +46,7 @@ permissions and limitations under the Licence.
         cancel
       </v-btn>
       <v-btn
-        v-if="isLoggedIn"
+        v-if="$auth.loggedIn"
         color="green"
         small
         @click="onSaveButtonClicked"
@@ -61,7 +61,7 @@ permissions and limitations under the Licence.
     <v-card-actions>
       <v-spacer />
       <v-btn
-        v-if="isLoggedIn"
+        v-if="$auth.loggedIn"
         small
         text
         nuxt
@@ -70,7 +70,7 @@ permissions and limitations under the Licence.
         cancel
       </v-btn>
       <v-btn
-        v-if="isLoggedIn"
+        v-if="$auth.loggedIn"
         color="green"
         small
         @click="onSaveButtonClicked"
@@ -140,10 +140,6 @@ export default class DeviceEditBasicPage extends Vue {
 
   get deviceId () {
     return this.$route.params.deviceId
-  }
-
-  get isLoggedIn () {
-    return this.$store.getters['oidc/isAuthenticated']
   }
 
   @Watch('value', { immediate: true, deep: true })

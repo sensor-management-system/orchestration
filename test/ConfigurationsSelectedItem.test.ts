@@ -31,7 +31,6 @@
  */
 import Vue from 'vue'
 import Vuetify from 'vuetify'
-import Vuex, { Store } from 'vuex'
 import { DateTime } from 'luxon'
 
 import { mount, createLocalVue } from '@vue/test-utils'
@@ -59,25 +58,24 @@ Vue.use(Vuetify)
 describe('ConfigurationsSelectedItem', () => {
   const createWrapper = (node: ConfigurationsTreeNode) => {
     const localVue = createLocalVue()
-    localVue.use(Vuex)
     const vuetify = new Vuetify()
-
-    const store = new Store({
-      getters: {
-        'oidc/userEMail': () => contact.email
-      }
-    })
 
     return mount(ConfigurationsSelectedItem, {
       localVue,
       vuetify,
-      store,
       propsData: {
         value: node,
         selectedDate
       },
       data () {
         return {}
+      },
+      mocks: {
+        $auth: {
+          user: {
+            email: 'foo@bar.de'
+          }
+        }
       }
     })
   }

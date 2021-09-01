@@ -86,12 +86,12 @@ permissions and limitations under the Licence.
                   >
                     <v-list-item-content>
                       <v-list-item-title
-                        :class="isLoggedIn ? 'text' : 'grey-text'"
+                        :class="isUserAuthenticated ? 'text' : 'grey-text'"
                       >
                         <v-icon
                           left
                           small
-                          :color="isLoggedIn ? 'black' : 'grey'"
+                          :color="isUserAuthenticated ? 'black' : 'grey'"
                         >
                           mdi-content-copy
                         </v-icon>
@@ -100,18 +100,18 @@ permissions and limitations under the Licence.
                     </v-list-item-content>
                   </v-list-item>
                   <v-list-item
-                    :disabled="!isLoggedIn"
+                    :disabled="!isUserAuthenticated"
                     dense
                     @click="$emit('showDeleteDialog',configuration)"
                   >
                     <v-list-item-content>
                       <v-list-item-title
-                        :class="isLoggedIn ? 'red--text' : 'grey--text'"
+                        :class="isUserAuthenticated ? 'red--text' : 'grey--text'"
                       >
                         <v-icon
                           left
                           small
-                          :color="isLoggedIn ? 'red' : 'grey'"
+                          :color="isUserAuthenticated ? 'red' : 'grey'"
                         >
                           mdi-delete
                         </v-icon>
@@ -262,6 +262,12 @@ export default class ConfigurationsOverviewCard extends Vue {
   })
   readonly configuration!: Configuration
 
+  @Prop({
+    type: Boolean,
+    required: true
+  })
+  readonly isUserAuthenticated!: boolean
+
   private isExpanded:boolean=false;
 
   getLocationType (configuration: Configuration): string {
@@ -276,10 +282,6 @@ export default class ConfigurationsOverviewCard extends Vue {
 
   toggleExapansion () {
     this.isExpanded = !this.isExpanded
-  }
-
-  get isLoggedIn () { // TODO entfernen, wenn es ordentliche autorisierung gibt
-    return this.$store.getters['oidc/isAuthenticated']
   }
 
   getTextOrDefault = (text: string, defaultValue: string): string => text || defaultValue

@@ -40,7 +40,7 @@ permissions and limitations under the Licence.
           class="text-right"
         >
           <ActionCardMenu
-            v-if="isLoggedIn"
+            v-if="isUserAuthenticated"
             :value="value"
             @delete-menu-item-click="showDeleteDialog = true"
           />
@@ -163,16 +163,18 @@ export default class DeviceCalibrationActionCard extends Vue {
   // @ts-ignore
   readonly deleteCallback!: (id: string) => Promise<void>
 
+  @Prop({
+    type: Boolean,
+    required: true
+  })
+  readonly isUserAuthenticated!: boolean
+
   isVisible (): boolean {
     return this.showDetails
   }
 
   toggleVisibility (): void {
     this.showDetails = !this.showDetails
-  }
-
-  get isLoggedIn (): boolean {
-    return this.$store.getters['oidc/isAuthenticated']
   }
 
   get showDeleteDialog (): boolean {

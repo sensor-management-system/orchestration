@@ -32,7 +32,6 @@
 
 import Vue from 'vue'
 import Vuetify from 'vuetify'
-import Vuex, { Store } from 'vuex'
 
 import { mount, createLocalVue } from '@vue/test-utils'
 
@@ -49,23 +48,16 @@ Vue.use(Vuetify)
 describe('ConfigurationsPlatformDeviceMountForm', () => {
   const createWrapper = () => {
     const localVue = createLocalVue()
-    localVue.use(Vuex)
     const vuetify = new Vuetify()
-
-    const store = new Store({
-      getters: {
-        'oidc/userEMail': () => contact.email
-      }
-    })
 
     return mount(ConfigurationsPlatformDeviceMountForm, {
       localVue,
       vuetify,
-      store,
       propsData: {
         dataRoleBtn: 'add-device',
         readonly: false,
-        contacts: [contact]
+        contacts: [contact],
+        currentUserMail: 'aa@bb.cc'
       },
       data () {
         return {
@@ -74,6 +66,13 @@ describe('ConfigurationsPlatformDeviceMountForm', () => {
           offsetZ: 3,
           contact,
           description: 'mount description'
+        }
+      },
+      mocks: {
+        $auth: {
+          user: {
+            email: 'aa@bb.cc'
+          }
         }
       }
     })

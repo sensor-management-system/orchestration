@@ -46,7 +46,7 @@ permissions and limitations under the Licence.
     >
       <v-spacer />
       <v-btn
-        v-if="isLoggedIn"
+        v-if="$auth.loggedIn"
         color="primary"
         small
         nuxt
@@ -72,7 +72,7 @@ permissions and limitations under the Licence.
               class="text-right"
             >
               <v-menu
-                v-if="isLoggedIn"
+                v-if="$auth.loggedIn"
                 close-on-click
                 close-on-content-click
                 offset-x
@@ -182,7 +182,7 @@ permissions and limitations under the Licence.
     >
       <v-spacer />
       <v-btn
-        v-if="isLoggedIn"
+        v-if="$auth.loggedIn"
         color="primary"
         small
         nuxt
@@ -254,10 +254,6 @@ export default class ContactTab extends Vue {
     } finally {
       this.isLoading = false
     }
-  }
-
-  get isLoggedIn (): boolean {
-    return this.$store.getters['oidc/isAuthenticated']
   }
 
   get isAddContactPage (): boolean {

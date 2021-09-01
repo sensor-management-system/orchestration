@@ -32,7 +32,6 @@
 
 import Vue from 'vue'
 import Vuetify from 'vuetify'
-import Vuex, { Store } from 'vuex'
 
 import { mount, createLocalVue } from '@vue/test-utils'
 
@@ -49,27 +48,27 @@ Vue.use(Vuetify)
 describe('ConfigurationsSelectedItemUnmountForm', () => {
   const createWrapper = () => {
     const localVue = createLocalVue()
-    localVue.use(Vuex)
     const vuetify = new Vuetify()
-
-    const store = new Store({
-      getters: {
-        'oidc/userEMail': () => contact.email
-      }
-    })
 
     return mount(ConfigurationsSelectedItemUnmountForm, {
       localVue,
       vuetify,
-      store,
       propsData: {
         readonly: false,
-        contacts: [contact]
+        contacts: [contact],
+        currentUserMail: 'aa@bb.cc'
       },
       data () {
         return {
           contact,
           description: 'unmount description'
+        }
+      },
+      mocks: {
+        $auth: {
+          user: {
+            email: 'aa@bb.cc'
+          }
         }
       }
     })

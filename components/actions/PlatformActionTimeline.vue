@@ -45,12 +45,13 @@ permissions and limitations under the Licence.
         v-if="action.isGenericAction"
         :value="value[index]"
         :delete-callback="getActionApiDispatcherDeleteMethod(action)"
+        :is-user-authenticated="isUserAuthenticated"
         @delete-success="removeActionFromModel"
         @showdelete="$emit('showdelete', $event)"
       >
         <template #actions>
           <v-btn
-            v-if="isLoggedIn"
+            v-if="isUserAuthenticated"
             :to="'/platforms/' + platformId + '/actions/generic-platform-actions/' + action.id + '/edit'"
             color="primary"
             text
@@ -66,12 +67,13 @@ permissions and limitations under the Licence.
         :value="value[index]"
         target="Platform"
         :delete-callback="getActionApiDispatcherDeleteMethod(action)"
+        :is-user-authenticated="isUserAuthenticated"
         @delete-success="removeActionFromModel"
         @showdelete="$emit('showdelete', $event)"
       >
         <template #actions>
           <v-btn
-            v-if="isLoggedIn"
+            v-if="isUserAuthenticated"
             :to="'/platforms/' + platformId + '/actions/software-update-actions/' + action.id + '/edit'"
             color="primary"
             text
@@ -163,9 +165,11 @@ export default class PlatformActionTimeline extends Vue {
   // @ts-ignore
   readonly actionApiDispatcher!: IActionApiDispatcher | null
 
-  get isLoggedIn (): boolean {
-    return this.$store.getters['oidc/isAuthenticated']
-  }
+  @Prop({
+    type: Boolean,
+    required: true
+  })
+  readonly isUserAuthenticated!: boolean
 
   getActionTypeIterationKey (action: IActionCommonDetails): string {
     return this.getActionType(action) + '-' + action.id

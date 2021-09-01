@@ -134,7 +134,7 @@ permissions and limitations under the Licence.
             v-on="on"
           >
             <v-avatar>
-              <template v-if="isLoggedIn">
+              <template v-if="$auth.loggedIn">
                 {{ initials }}
               </template>
               <template v-else>
@@ -146,7 +146,7 @@ permissions and limitations under the Licence.
           </v-btn>
         </template>
         <v-list>
-          <template v-if="!isLoggedIn">
+          <template v-if="!$auth.loggedIn">
             <v-list-item dense @click="login">
               <v-list-item-content>
                 <v-list-item-title>
@@ -158,7 +158,7 @@ permissions and limitations under the Licence.
               </v-list-item-content>
             </v-list-item>
           </template>
-          <template v-if="isLoggedIn">
+          <template v-if="$auth.loggedIn">
             <v-list-item dense @click="logout">
               <v-list-item-content>
                 <v-list-item-title>
@@ -247,8 +247,6 @@ permissions and limitations under the Licence.
 
 <script>
 
-import { mapActions } from 'vuex'
-
 import AppBarTabsExtension from '@/components/AppBarTabsExtension'
 import AppBarEditModeContent from '@/components/AppBarEditModeContent'
 
@@ -330,11 +328,23 @@ export default {
     cancelBtnDisabled () {
       return this.$store.state.appbar.cancelBtnDisabled
     },
-    isLoggedIn () {
-      return this.$store.getters['oidc/isAuthenticated']
-    },
     initials () {
-      return this.$store.getters['oidc/initials']
+      if (this.$auth.loggedIn) {
+        const givenName = this.$auth.user.given_name
+        const familyName = this.$auth.user.family_name
+
+        if (
+          givenName != null && givenName.length > 0 &&
+          familyName != null && familyName.length > 0
+        ) {
+          return givenName[0] + familyName[0]
+        }
+
+        if (this.$auth.user.name.length > 2) {
+          return this.$auth.user.name[0] + this.$auth.user.name[1]
+        }
+      }
+      return null
     }
   },
   created () {
@@ -346,7 +356,6 @@ export default {
     })
   },
   methods: {
-    ...mapActions('oidc', ['removeOidcUser', 'logoutPopup', 'loginPopup']),
     closeErrorSnackbar () {
       this.$store.commit('snackbar/clearError')
     },
@@ -357,35 +366,12 @@ export default {
       this.$store.commit('appbar/setActiveTab', tab)
     },
     login () {
-      this.loginPopup().then((_redirectPath) => {
-        /*
-           The redirect path is normally just a path to '/'.
-           However - as we are now logged in we are fine that
-           the user still can access the current page.
-           So we will not do the redirect.
-
-           In case you want to re-introduce this redirect, you
-           can use the following snippet:
-
-           ```javascript
-           this.$router.push(redirectPath)
-           ```
-        */
-      }).catch((_err) => {
+      this.$auth.loginWith('customStrategy').catch(() => {
         this.$store.commit('snackbar/setError', 'Login failed')
       })
     },
     logout () {
-      this.removeOidcUser().then(() => {
-        // same logic as in the vuex-oidc-router.js middleware
-        // but don't display an error message
-        const accessPromise = this.$store.dispatch('oidc/oidcCheckAccess', this.$fullContext.route)
-        accessPromise.then((hasAccess) => {
-          if (!hasAccess) {
-            this.$router.push('/')
-          }
-        })
-      })
+      this.$auth.logout()
     }
   }
 }

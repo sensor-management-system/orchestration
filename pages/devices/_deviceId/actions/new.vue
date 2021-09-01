@@ -30,7 +30,7 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div
-    v-if="isLoggedIn"
+    v-if="$auth.loggedIn"
   >
     <v-card
       flat
@@ -66,6 +66,7 @@ permissions and limitations under the Licence.
           v-model="deviceCalibrationAction"
           :attachments="attachments"
           :measured-quantities="measuredQuantities"
+          :current-user-mail="$auth.user.email"
         />
       </v-card-text>
 
@@ -77,6 +78,7 @@ permissions and limitations under the Licence.
           ref="softwareUpdateActionForm"
           v-model="softwareUpdateAction"
           :attachments="attachments"
+          :current-user-mail="$auth.user.email"
         />
       </v-card-text>
 
@@ -88,6 +90,7 @@ permissions and limitations under the Licence.
           ref="genericDeviceActionForm"
           v-model="genericDeviceAction"
           :attachments="attachments"
+          :current-user-mail="$auth.user.email"
         />
       </v-card-text>
 
@@ -227,10 +230,6 @@ export default class ActionAddPage extends Vue {
     return this.$data._chosenKindOfAction?.kind === KIND_OF_ACTION_TYPE_GENERIC_DEVICE_ACTION
   }
 
-  get isLoggedIn (): boolean {
-    return this.$store.getters['oidc/isAuthenticated']
-  }
-
   get deviceId (): string {
     return this.$route.params.deviceId
   }
@@ -258,7 +257,7 @@ export default class ActionAddPage extends Vue {
   }
 
   addDeviceCalibrationAction () {
-    if (!this.isLoggedIn) {
+    if (!this.$auth.loggedIn) {
       return
     }
     if (!this.deviceCalibrationAction) {
@@ -281,7 +280,7 @@ export default class ActionAddPage extends Vue {
   }
 
   addSoftwareUpdateAction () {
-    if (!this.isLoggedIn) {
+    if (!this.$auth.loggedIn) {
       return
     }
     if (!this.softwareUpdateAction) {
@@ -303,7 +302,7 @@ export default class ActionAddPage extends Vue {
   }
 
   addGenericAction () {
-    if (!this.isLoggedIn) {
+    if (!this.$auth.loggedIn) {
       return
     }
     if (!this.genericDeviceAction) {
