@@ -139,6 +139,12 @@ export default class CommonActionForm extends Vue {
   // @ts-ignore
   readonly rules!: ((v: any) => boolean | string)[]
 
+  @Prop({
+    type: String
+  })
+  // @ts-ignore
+readonly currentUserMail:string|null
+
   async fetch () {
     try {
       this.contacts = await this.$api.contacts.findAll()
@@ -216,9 +222,8 @@ export default class CommonActionForm extends Vue {
    *
    */
   selectCurrentUserAsContact () {
-    const currentUserMail = this.$store.getters['oidc/userEmail']
-    if (currentUserMail) {
-      const userIndex = this.contacts.findIndex(c => c.email === currentUserMail)
+    if (this.currentUserMail) {
+      const userIndex = this.contacts.findIndex(c => c.email === this.currentUserMail)
       if (userIndex > -1) {
         this.contact = this.contacts[userIndex]
         return

@@ -113,7 +113,11 @@ build-deploy-image-gfz:
     CV_BACKEND_URL: ${GFZ_STAGING_SMS_CV_BACKEND_URL}/api/v1
     HOST: ${GFZ_STAGING_HOST}
     CLIENT_ID: ${GFZ_STAGING_CLIENT_ID}
-    AUTHORITY: ${GFZ_STAGING_IDP_AUTORITY}
+    # The authority is a url like this:
+    # https://idp.institute/cas/oidc
+    # In order to make it work with the nuxt-auth plugin
+    # we need to add a subpath
+    AUTHORITY: ${GFZ_STAGING_IDP_AUTORITY}/authorize
   script:
     - |
       if [ -z "$CI_COMMIT_TAG" ]; then
@@ -155,7 +159,11 @@ build-deploy-image-manual-gfz:
     HOST: ${GFZ_STAGING_HOST}:8080
     # Not sure, if we need another client id for the staging on 8080
     CLIENT_ID: ${GFZ_STAGING_CLIENT_ID}
-    AUTHORITY: ${GFZ_STAGING_IDP_AUTORITY}
+    # The authority is a url like this:
+    # https://idp.institute/cas/oidc
+    # In order to make it work with the nuxt-auth plugin
+    # we need to add a subpath
+    AUTHORITY: ${GFZ_STAGING_IDP_AUTORITY}/authorize
   script:
     - |
         docker build --tag "$CI_REGISTRY_IMAGE:gfz-$CI_COMMIT_SHORT_SHA" -f docker/deployment/gfz/Dockerfile \
@@ -181,7 +189,11 @@ build-deploy-image-ufz:
     CV_BACKEND_URL: ${UFZ_STAGING_SMS_CV_BACKEND_URL}
     HOST: ${UFZ_STAGING_HOST}
     CLIENT_ID: ${UFZ_STAGING_CLIENT_ID}
-    AUTHORITY: ${UFZ_STAGING_IDP_AUTORITY}
+    # The authority is a url like this:
+    # https://<domain>/idp/oidc/v1
+    # In order to make it work with the nuxt-auth plugin
+    # we need to add a subpath
+    AUTHORITY: ${UFZ_STAGING_IDP_AUTORITY}/auth
   script:
     - |
         docker build --tag "$UFZ_TEST_IMAGE" -f docker/deployment/ufz/Dockerfile \

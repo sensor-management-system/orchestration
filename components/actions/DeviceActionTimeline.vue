@@ -45,12 +45,13 @@ permissions and limitations under the Licence.
         v-if="action.isGenericAction"
         :value="value[index]"
         :delete-callback="getActionApiDispatcherDeleteMethod(action)"
+        :is-user-authenticated="isUserAuthenticated"
         @delete-sucess="removeActionFromModel"
         @showdelete="$emit('showdelete', $event)"
       >
         <template #actions>
           <v-btn
-            v-if="isLoggedIn"
+            v-if="isUserAuthenticated"
             :to="'/devices/' + deviceId + '/actions/generic-device-actions/' + action.id + '/edit'"
             color="primary"
             text
@@ -66,12 +67,13 @@ permissions and limitations under the Licence.
         target="Device"
         :value="value[index]"
         :delete-callback="getActionApiDispatcherDeleteMethod(action)"
+        :is-user-authenticated="isUserAuthenticated"
         @delete-success="removeActionFromModel"
         @showdelete="$emit('showdelete', $event)"
       >
         <template #actions>
           <v-btn
-            v-if="isLoggedIn"
+            v-if="isUserAuthenticated"
             :to="'/devices/' + deviceId + '/actions/software-update-actions/' + action.id + '/edit'"
             color="primary"
             text
@@ -86,12 +88,13 @@ permissions and limitations under the Licence.
         v-if="action.isDeviceCalibrationAction"
         :value="value[index]"
         :delete-callback="getActionApiDispatcherDeleteMethod(action)"
+        :is-user-authenticated="isUserAuthenticated"
         @delete-success="removeActionFromModel"
         @showdelete="$emit('showdelete', $event)"
       >
         <template #actions>
           <v-btn
-            v-if="isLoggedIn"
+            v-if="isUserAuthenticated"
             :to="'/devices/' + deviceId + '/actions/device-calibration-actions/' + action.id + '/edit'"
             color="primary"
             text
@@ -185,9 +188,11 @@ export default class DeviceActionTimeline extends Vue {
   // @ts-ignore
   readonly actionApiDispatcher!: IActionApiDispatcher | null
 
-  get isLoggedIn (): boolean {
-    return this.$store.getters['oidc/isAuthenticated']
-  }
+  @Prop({
+    type: Boolean,
+    required: true
+  })
+  readonly isUserAuthenticated!: boolean
 
   getActionTypeIterationKey (action: IActionCommonDetails): string {
     return this.getActionType(action) + '-' + action.id

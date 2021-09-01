@@ -122,18 +122,18 @@ permissions and limitations under the Licence.
                   </template>
                   <v-list>
                     <v-list-item
-                      :disabled="!isLoggedIn"
+                      :disabled="!$auth.loggedIn"
                       dense
                       @click="showDeleteDialogFor(result.id)"
                     >
                       <v-list-item-content>
                         <v-list-item-title
-                          :class="isLoggedIn ? 'red--text' : 'grey--text'"
+                          :class="$auth.loggedIn ? 'red--text' : 'grey--text'"
                         >
                           <v-icon
                             left
                             small
-                            :color="isLoggedIn ? 'red' : 'grey'"
+                            :color="$auth.loggedIn ? 'red' : 'grey'"
                           >
                             mdi-delete
                           </v-icon>
@@ -290,7 +290,7 @@ permissions and limitations under the Licence.
       </v-hover>
     </div>
     <v-btn
-      v-if="isLoggedIn"
+      v-if="$auth.loggedIn"
       bottom
       color="primary"
       dark
@@ -452,10 +452,6 @@ export default class SearchContactsPage extends Vue {
 
   getFullName (contact: Contact) : string {
     return contact.givenName + ' ' + contact.familyName
-  }
-
-  get isLoggedIn () {
-    return this.$store.getters['oidc/isAuthenticated']
   }
 }
 </script>

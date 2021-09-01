@@ -40,7 +40,7 @@ permissions and limitations under the Licence.
           class="text-right"
         >
           <ActionCardMenu
-            v-if="isLoggedIn"
+            v-if="isUserAuthenticated"
             :value="value"
             @delete-menu-item-click="showDeleteDialog = true"
           />
@@ -171,6 +171,12 @@ export default class SoftwareUpdateActionCard extends Vue {
   })
   readonly target!: string
 
+  @Prop({
+    type: Boolean,
+    required: true
+  })
+  readonly isUserAuthenticated!: boolean
+
   /**
    * whether the card expansion is shown or not
    *
@@ -221,10 +227,6 @@ export default class SoftwareUpdateActionCard extends Vue {
       return name
     }
     return this.value.softwareTypeName + ' Update'
-  }
-
-  get isLoggedIn (): boolean {
-    return this.$store.getters['oidc/isAuthenticated']
   }
 
   get showDeleteDialog (): boolean {

@@ -35,7 +35,7 @@ permissions and limitations under the Licence.
       :dark="isSaving"
     />
     <v-card-actions
-      v-if="isLoggedIn && !(isAddAttachmentPage)"
+      v-if="$auth.loggedIn && !(isAddAttachmentPage)"
     >
       <v-spacer />
       <v-btn
@@ -53,7 +53,7 @@ permissions and limitations under the Licence.
     <template
       v-for="(attachment, index) in attachments"
     >
-      <template v-if="isLoggedIn && isEditModeForAttachment(attachment)">
+      <template v-if="$auth.loggedIn && isEditModeForAttachment(attachment)">
         <NuxtChild
           :key="attachment.id"
           v-model="attachments[index]"
@@ -83,7 +83,7 @@ permissions and limitations under the Licence.
               <v-row>
                 <v-col align-self="end" class="text-right">
                   <v-btn
-                    v-if="isLoggedIn && !isEditAttachmentPage && !isAddAttachmentPage"
+                    v-if="$auth.loggedIn && !isEditAttachmentPage && !isAddAttachmentPage"
                     color="primary"
                     text
                     small
@@ -93,7 +93,7 @@ permissions and limitations under the Licence.
                     Edit
                   </v-btn>
                   <v-menu
-                    v-if="isLoggedIn"
+                    v-if="$auth.loggedIn"
                     close-on-click
                     close-on-content-click
                     offset-x
@@ -117,7 +117,7 @@ permissions and limitations under the Licence.
                     </template>
                     <v-list>
                       <v-list-item
-                        v-if="isLoggedIn && !isAddAttachmentPage && !isEditAttachmentPage"
+                        v-if="$auth.loggedIn && !isAddAttachmentPage && !isEditAttachmentPage"
                         dense
                         @click="showDeleteDialogFor(attachment.id)"
                       >
@@ -179,7 +179,7 @@ permissions and limitations under the Licence.
     >
       <v-spacer />
       <v-btn
-        v-if="isLoggedIn"
+        v-if="$auth.loggedIn"
         color="primary"
         small
         :disabled="isEditAttachmentPage || isAddAttachmentPage"
@@ -228,10 +228,6 @@ export default class DeviceAttachmentsPage extends mixins(AttachmentsMixin) {
 
   get deviceId (): string {
     return this.$route.params.deviceId
-  }
-
-  get isLoggedIn (): boolean {
-    return this.$store.getters['oidc/isAuthenticated']
   }
 
   get isEditAttachmentPage (): boolean {

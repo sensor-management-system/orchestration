@@ -37,7 +37,7 @@ permissions and limitations under the Licence.
       <v-card-actions>
         <v-spacer />
         <v-btn
-          v-if="isLoggedIn"
+          v-if="$auth.loggedIn"
           small
           nuxt
           :to="'/contacts/' + contactId"
@@ -45,7 +45,7 @@ permissions and limitations under the Licence.
           cancel
         </v-btn>
         <v-btn
-          v-if="isLoggedIn"
+          v-if="$auth.loggedIn"
           color="green"
           small
           @click="onSaveButtonClicked"
@@ -61,7 +61,7 @@ permissions and limitations under the Licence.
       <v-card-actions>
         <v-spacer />
         <v-btn
-          v-if="isLoggedIn"
+          v-if="$auth.loggedIn"
           small
           nuxt
           :to="'/contacts/' + contactId"
@@ -69,7 +69,7 @@ permissions and limitations under the Licence.
           cancel
         </v-btn>
         <v-btn
-          v-if="isLoggedIn"
+          v-if="$auth.loggedIn"
           color="green"
           small
           @click="onSaveButtonClicked"
@@ -145,10 +145,6 @@ export default class ContactEditPage extends Vue {
       this.$store.commit('appbar/setTitle', val?.toString() || 'Edit contact')
     }
     this.contactCopy = Contact.createFromObject(val)
-  }
-
-  get isLoggedIn () {
-    return this.$store.getters['oidc/isAuthenticated']
   }
 }
 </script>

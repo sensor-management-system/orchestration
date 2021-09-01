@@ -286,7 +286,7 @@ export class Api {
         // So in this case, we don't send the id token with the request.
         if (idToken) {
           // But once we have it, we want to send it with.
-          config.headers.Authorization = 'Bearer ' + idToken
+          config.headers.Authorization = idToken
         }
         return config
       })

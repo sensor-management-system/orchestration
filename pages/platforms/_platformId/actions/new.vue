@@ -34,7 +34,7 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div
-    v-if="isLoggedIn"
+    v-if="$auth.loggedIn"
   >
     <v-card
       flat
@@ -69,6 +69,7 @@ permissions and limitations under the Licence.
           ref="softwareUpdateActionForm"
           v-model="softwareUpdateAction"
           :attachments="attachments"
+          :current-user-mail="$auth.user.email"
         />
       </v-card-text>
 
@@ -80,6 +81,7 @@ permissions and limitations under the Licence.
           ref="genericPlatformActionForm"
           v-model="genericPlatformAction"
           :attachments="attachments"
+          :current-user-mail="$auth.user.email"
         />
       </v-card-text>
       <v-card-actions>
@@ -190,10 +192,6 @@ export default class NewPlatformAction extends Vue {
     return this.$data._chosenKindOfAction?.kind === KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE
   }
 
-  get isLoggedIn (): boolean {
-    return this.$store.getters['oidc/isAuthenticated']
-  }
-
   get platformId (): string {
     return this.$route.params.platformId
   }
@@ -218,7 +216,7 @@ export default class NewPlatformAction extends Vue {
   }
 
   addSoftwareUpdateAction () {
-    if (!this.isLoggedIn) {
+    if (!this.$auth.loggedIn) {
       return
     }
     if (!this.softwareUpdateChosen) {
@@ -243,7 +241,7 @@ export default class NewPlatformAction extends Vue {
   }
 
   addGenericAction () {
-    if (!this.isLoggedIn) {
+    if (!this.$auth.loggedIn) {
       return
     }
     if (!this.genericActionChosen) {

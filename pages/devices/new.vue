@@ -40,7 +40,7 @@ permissions and limitations under the Licence.
       <v-card-actions>
         <v-spacer />
         <v-btn
-          v-if="isLoggedIn"
+          v-if="$auth.loggedIn"
           small
           text
           nuxt
@@ -49,7 +49,7 @@ permissions and limitations under the Licence.
           cancel
         </v-btn>
         <v-btn
-          v-if="isLoggedIn"
+          v-if="$auth.loggedIn"
           color="green"
           small
           @click="onSaveButtonClicked"
@@ -64,7 +64,7 @@ permissions and limitations under the Licence.
       <v-card-actions>
         <v-spacer />
         <v-btn
-          v-if="isLoggedIn"
+          v-if="$auth.loggedIn"
           small
           text
           nuxt
@@ -73,7 +73,7 @@ permissions and limitations under the Licence.
           cancel
         </v-btn>
         <v-btn
-          v-if="isLoggedIn"
+          v-if="$auth.loggedIn"
           color="green"
           small
           @click="onSaveButtonClicked"
@@ -121,7 +121,7 @@ export default class DeviceNewPage extends mixins(Rules) {
       this.$store.commit('snackbar/setError', 'Please correct your input')
       return
     }
-    if (!this.isLoggedIn) {
+    if (!this.$auth.loggedIn) {
       this.$store.commit('snackbar/setError', 'You need to be logged in to save the device')
       return
     }
@@ -166,10 +166,6 @@ export default class DeviceNewPage extends mixins(Rules) {
       ],
       title: 'Add Device'
     })
-  }
-
-  get isLoggedIn () {
-    return this.$store.getters['oidc/isAuthenticated']
   }
 }
 </script>

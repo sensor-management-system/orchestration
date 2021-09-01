@@ -40,7 +40,7 @@ permissions and limitations under the Licence.
           class="text-right"
         >
           <ActionCardMenu
-            v-if="isLoggedIn"
+            v-if="isUserAuthenticated"
             :value="value"
             @delete-menu-item-click="showDeleteDialog = true"
           />
@@ -141,6 +141,12 @@ export default class GenericActionCard extends Vue {
   // @ts-ignore
   readonly deleteCallback!: (id: string) => Promise<void>
 
+  @Prop({
+    type: Boolean,
+    required: true
+  })
+  readonly isUserAuthenticated!: boolean
+
   /**
    * whether the card expansion is shown or not
    *
@@ -164,10 +170,6 @@ export default class GenericActionCard extends Vue {
       actionDate += ' - ' + dateToDateTimeString(this.value.endDate)
     }
     return actionDate
-  }
-
-  get isLoggedIn (): boolean {
-    return this.$store.getters['oidc/isAuthenticated']
   }
 
   get showDeleteDialog (): boolean {

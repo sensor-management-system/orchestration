@@ -58,7 +58,7 @@ permissions and limitations under the Licence.
                 Name
               </v-col>
               <v-col align-self="end" :cols="secondCol">
-                {{ claims.name }}
+                {{ $auth.user.name }}
               </v-col>
             </v-row>
             <v-row no-gutters>
@@ -66,7 +66,7 @@ permissions and limitations under the Licence.
                 User name
               </v-col>
               <v-col align-self="end" :cols="secondCol">
-                {{ claims.preferred_username }}
+                {{ $auth.user.preferred_username }}
               </v-col>
             </v-row>
             <v-row no-gutters>
@@ -74,7 +74,7 @@ permissions and limitations under the Licence.
                 Email address
               </v-col>
               <v-col align-self="end" :cols="secondCol">
-                {{ claims.email }}
+                {{ $auth.user.email }}
               </v-col>
             </v-row>
             <v-row no-gutters>
@@ -82,7 +82,7 @@ permissions and limitations under the Licence.
                 Given name
               </v-col>
               <v-col align-self="end" :cols="secondCol">
-                {{ claims.given_name }}
+                {{ $auth.user.given_name }}
               </v-col>
             </v-row>
             <v-row no-gutters>
@@ -90,7 +90,7 @@ permissions and limitations under the Licence.
                 Family name
               </v-col>
               <v-col align-self="end" :cols="secondCol">
-                {{ claims.family_name }}
+                {{ $auth.user.family_name }}
               </v-col>
             </v-row>
           </v-card-text>
@@ -150,7 +150,7 @@ permissions and limitations under the Licence.
                 Authentification
               </v-col>
               <v-col align-self="end" :cols="secondCol">
-                {{ claims.auth_time | timeStampToUTCDateTime }}
+                {{ $auth.user.iat | timeStampToUTCDateTime }}
               </v-col>
             </v-row>
             <v-row no-gutters>
@@ -158,7 +158,7 @@ permissions and limitations under the Licence.
                 Your token expires
               </v-col>
               <v-col align-self="end" :cols="secondCol">
-                {{ claims.exp | timeStampToUTCDateTime }}
+                {{ $auth.user.exp | timeStampToUTCDateTime }}
               </v-col>
             </v-row>
           </v-card-text>
@@ -179,15 +179,14 @@ import { timeStampToUTCDateTime } from '@/utils/dateHelper'
   filters: {
     timeStampToUTCDateTime
   },
-  meta: {
-    // Only accessible if we have a user that is logged in
-    loginRequired: true
-  }
+  middleware: ['auth']
 })
 export default class ProfilePage extends Vue {
   private isOpenIdConnectSectionVisible: boolean = false
   private isPersonalSectionVisible: boolean = true
   private isTokenSectionVisible: boolean = false
+  private firstCol = 3
+  private secondCol = 9
 
   created () {
     this.$nuxt.$emit('app-bar-content', AppBarEditModeContent)
@@ -203,16 +202,8 @@ export default class ProfilePage extends Vue {
     this.$nuxt.$emit('app-bar-content', null)
   }
 
-  get userName (): string {
-    return this.claims.name
-  }
-
-  get claims () {
-    return this.$store.getters['oidc/allUserClaims']
-  }
-
   get notExplicitPrintedClaims () {
-    return this.objectWithoutKeys(this.claims, [
+    return this.objectWithoutKeys(this.$auth.user as {[idx: string]: any}, [
       'name', 'email', 'given_name',
       'family_name', 'preferred_username', 'exp',
       'auth_time'
@@ -228,9 +219,6 @@ export default class ProfilePage extends Vue {
     }
     return result
   }
-
-  get firstCol () { return 3 }
-  get secondCol () { return 9 }
 
   toggleOpenIdConnectSection () {
     this.isOpenIdConnectSectionVisible = !this.isOpenIdConnectSectionVisible

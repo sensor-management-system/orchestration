@@ -48,20 +48,12 @@ ENV NUXT_ENV_AUTHORITY $AUTHORITY_ARG
 # The redirect uris (those must be different per host on that the frontend runs)
 ARG HOST_ARG
 ENV NUXT_ENV_REDIRECT_URI http://${HOST_ARG}/login-callback
-ENV NUXT_ENV_POST_LOGOUT_REDIRECT_URI http://${HOST_ARG}/logout-callback
-ENV NUXT_ENV_SILENT_REDIRECT_URI http://${HOST_ARG}/silent-callback
 
 # And those remaining settings
-ENV NUXT_ENV_RESPONSE_TYPE id_token
 # the following is the ufz setting
 #ENV NUXT_ENV_SCOPE openid profile email
 # and this is our setting
 ENV NUXT_ENV_SCOPE profile
-ENV NUXT_ENV_FILTER_PROTOCOL_CLAIMS false
-ENV NUXT_ENV_AUTOMATIC_SILENT_RENEW false
-# TODO; Check here if we still need this one
-ENV NUXT_ENV_SILENT_RENEW_INTERVAL 6900000
-ENV NUXT_ENV_LOAD_USER_INFO false
 
 # The allowed mime types
 ARG ALLOWED_MIME_TYPES_ARG

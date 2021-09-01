@@ -37,7 +37,7 @@ permissions and limitations under the Licence.
     <v-card-actions>
       <v-spacer />
       <v-btn
-        v-if="isLoggedIn"
+        v-if="$auth.loggedIn"
         :disabled="isEditCustomFieldsPage"
         color="primary"
         small
@@ -90,7 +90,7 @@ permissions and limitations under the Licence.
     >
       <v-spacer />
       <v-btn
-        v-if="isLoggedIn"
+        v-if="$auth.loggedIn"
         :disabled="isEditCustomFieldsPage"
         color="primary"
         small
@@ -137,10 +137,6 @@ export default class DeviceCustomFieldsPage extends Vue {
 
   get deviceId (): string {
     return this.$route.params.deviceId
-  }
-
-  get isLoggedIn (): boolean {
-    return this.$store.getters['oidc/isAuthenticated']
   }
 
   get isEditCustomFieldsPage (): boolean {

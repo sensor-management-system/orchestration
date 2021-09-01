@@ -108,6 +108,7 @@ permissions and limitations under the Licence.
       :value="actionCopy"
       :attachments="attachments"
       :rules="[rules.contactNotNull]"
+      :current-user-mail="currentUserMail"
       @input="updateCommonFields"
     />
   </div>
@@ -177,6 +178,12 @@ export default class DeviceCalibationActionForm extends Vue {
     type: Array
   })
   readonly measuredQuantities!: DeviceProperty[]
+
+  @Prop({
+    type: String
+  })
+  // @ts-ignore
+readonly currentUserMail:string|null
 
   created () {
     this.createActionCopy(this.value)

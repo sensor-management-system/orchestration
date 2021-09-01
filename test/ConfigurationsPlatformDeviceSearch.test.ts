@@ -31,7 +31,6 @@
  */
 import Vue from 'vue'
 import Vuetify from 'vuetify'
-import Vuex, { Store } from 'vuex'
 import { DateTime } from 'luxon'
 
 import { mount, createLocalVue } from '@vue/test-utils'
@@ -57,14 +56,7 @@ describe('ConfigurationsPlatformDeviceSearch', () => {
     devicesResult: Device[]
   ) => {
     const localVue = createLocalVue()
-    localVue.use(Vuex)
     const vuetify = new Vuetify()
-
-    const store = new Store({
-      getters: {
-        'oidc/userEMail': () => contact.email
-      }
-    })
 
     const searchType = devicesResult.length ? 'Device' : 'Platform'
     const searchOptions = {
@@ -79,7 +71,6 @@ describe('ConfigurationsPlatformDeviceSearch', () => {
     const wrapper = mount(ConfigurationsPlatformDeviceSearch, {
       localVue,
       vuetify,
-      store,
       propsData: {
         selectedDate: date,
         isPlatformUsedFunc (_p: Platform) { return false },

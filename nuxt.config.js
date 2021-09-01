@@ -107,6 +107,7 @@ export default {
   ** Nuxt.js modules
   */
   modules: [
+    '@nuxtjs/auth-next',
     // Doc: https://axios.nuxtjs.org/usage
     '@nuxtjs/axios',
     '@nuxtjs/pwa',
@@ -148,6 +149,43 @@ export default {
   },
   router: {
     base: process.env.BASE_URL || '/',
-    middleware: ['vuex-oidc-router', 'institute-pages']
+    middleware: ['institute-pages']
+  },
+  auth: {
+    redirect: {
+      callback: '/login-callback',
+      login: '/'
+    },
+    strategies: {
+      customStrategy: {
+        scheme: '~/config/auth/schemes/customScheme',
+        endpoints: {
+          authorization: process.env.NUXT_ENV_AUTHORITY,
+          token: undefined,
+          userInfo: undefined,
+          logout: undefined
+        },
+        token: {
+          property: 'id_token',
+          type: 'Bearer',
+          maxAge: 3600
+        },
+        refreshToken: {
+          property: false,
+          maxAge: 60 * 60 * 24 * 30
+        },
+        responseType: 'id_token',
+        grantType: 'implicit',
+        accessType: undefined,
+        redirectUri: process.env.NUXT_ENV_REDIRECT_URI,
+        logoutRedirectUri: undefined,
+        clientId: process.env.NUXT_ENV_CLIENT_ID,
+        scope: process.env.NUXT_ENV_SCOPE.split(' '),
+        state: 'UNIQUE_AND_NON_GUESSABLE',
+        codeChallengeMethod: '',
+        responseMode: '',
+        acrValues: ''
+      }
+    }
   }
 }

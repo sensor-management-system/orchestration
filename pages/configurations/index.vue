@@ -42,6 +42,7 @@ permissions and limitations under the Licence.
       v-for="result in searchResults"
       :key="result.id"
       :configuration="result"
+      :is-user-authenticated="$auth.loggedIn"
       @showDeleteDialog="initDeleteDialog"
     />
     <ConfigurationsDeleteDialog
@@ -51,7 +52,7 @@ permissions and limitations under the Licence.
       @submit-deletion="deleteAndCloseDialog"
     />
     <v-btn
-      v-if="isLoggedIn"
+      v-if="$auth.loggedIn"
       bottom
       color="primary"
       dark
@@ -148,14 +149,6 @@ export default class SearchConfigurationsPage extends Vue {
       .finally(() => {
         this.configurationToDelete = null
       })
-  }
-
-  get isLoggedIn () {
-    return this.$store.getters['oidc/isAuthenticated']
-  }
-
-  get currentUserEmail () {
-    return this.$store.getters['oidc/userEmail']
   }
 }
 

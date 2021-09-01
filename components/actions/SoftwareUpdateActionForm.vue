@@ -94,6 +94,7 @@ permissions and limitations under the Licence.
       :value="actionCopy"
       :attachments="attachments"
       :rules="[rules.contactNotNull]"
+      :current-user-mail="currentUserMail"
       @input="updateCommonFields"
     />
   </div>
@@ -162,6 +163,12 @@ export default class SoftwareUpdateActionForm extends Vue {
   })
   // @ts-ignore
   readonly attachments!: Attachment[]
+
+  @Prop({
+    type: String
+  })
+  // @ts-ignore
+readonly currentUserMail:string|null
 
   async fetch (): Promise<any> {
     await this.fetchSoftwareTypes()

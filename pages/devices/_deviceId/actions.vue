@@ -37,7 +37,7 @@ permissions and limitations under the Licence.
     <v-card-actions>
       <v-spacer />
       <v-btn
-        v-if="isLoggedIn && isActionsPage"
+        v-if="$auth.loggedIn && isActionsPage"
         color="primary"
         small
         :to="'/devices/' + deviceId + '/actions/new'"
@@ -77,6 +77,7 @@ permissions and limitations under the Licence.
         :value="actions"
         :device-id="deviceId"
         :action-api-dispatcher="apiDispatcher"
+        :is-user-authenticated="$auth.loggedIn"
         @input="$fetch"
         @showdelete="showsave"
       />
@@ -183,10 +184,6 @@ export default class DeviceActionsPage extends Vue {
 
   get deviceId (): string {
     return this.$route.params.deviceId
-  }
-
-  get isLoggedIn (): boolean {
-    return this.$store.getters['oidc/isAuthenticated']
   }
 
   get isInProgress (): boolean {

@@ -62,6 +62,7 @@ permissions and limitations under the Licence.
       :value="actionCopy"
       :attachments="attachments"
       :rules="[rules.contactNotNull]"
+      :current-user-mail="currentUserMail"
       @input="updateCommonFields"
     />
   </div>
@@ -125,6 +126,12 @@ export default class GenericActionForm extends Vue {
   })
   // @ts-ignore
   readonly attachments!: Attachment[]
+
+  @Prop({
+    type: String
+  })
+  // @ts-ignore
+readonly currentUserMail:string|null
 
   created () {
     // create a copy of the original value on which all operations will be applied
