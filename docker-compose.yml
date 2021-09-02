@@ -57,7 +57,7 @@ services:
       && pip install --no-cache-dir --upgrade pip
       && pip install --no-cache-dir -r requirements.txt
       && python manage.py db upgrade
-      && gunicorn -b 0.0.0.0:5000 manage:app --reload
+      && gunicorn -b 0.0.0.0:5000 manage:app --reload --log-level debug --timeout 50
       "
     networks:
       - sms
@@ -106,8 +106,9 @@ services:
       && python manage.py migrate
       && python manage.py loaddata initial_data.json
       && python manage.py loaddata default_community_data.json
+      && python manage.py loaddata hydro_community_data.json
       && python manage.py collectstatic --noinput
-      && gunicorn cv.wsgi:application --bind 0:8000 --reload
+      && gunicorn cv.wsgi:application --bind 0:8000 --reload --log-level debug --timeout 50
             "
     networks:
       - sms
@@ -148,7 +149,7 @@ services:
       && npm run dev"
 
   minio:
-    image: minio/minio:RELEASE.2021-07-12T02-44-53Z
+    image: minio/minio:RELEASE.2021-08-05T22-01-19Z
     volumes:
       - minio-data:/data/minio
     ports:
@@ -198,6 +199,7 @@ services:
       - ./ngnix/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./frontend/dist:/etc/nginx/html
       - static-files:/usr/share/nginx/html/static:ro
+      - ./backend/app/project/static:/usr/share/nginx/html/backend/static
 
 
 volumes:
