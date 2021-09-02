@@ -36,10 +36,10 @@ import { Middleware, Context } from '@nuxt/types'
 
 const institutePagesMiddleware: Middleware = function (context: Context) {
   const institute = context.env.institute
-  if (context.route.path === '/info/legal-notice') {
+  if (context.route.path.match('^/info/legal-notice/?$')) {
     context.redirect({ name: `info-legal-notice-${institute}` })
   }
-  if (context.route.path === '/info/privacy-policy') {
+  if (context.route.path.match('^/info/privacy-policy/?$')) {
     context.redirect({ name: `info-privacy-policy-${institute}` })
   }
 }
