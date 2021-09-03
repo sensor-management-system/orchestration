@@ -44,6 +44,9 @@ ENV NUXT_ENV_CLIENT_ID $CLIENT_ID_ARG
 ARG AUTHORITY_ARG
 ENV NUXT_ENV_AUTHORITY $AUTHORITY_ARG
 
+# VERY IMPORTANT: That is the root path of the application and all additional files on the server
+ENV BASE_URL /sms
+
 # And those remaining settings
 ENV NUXT_ENV_SCOPE openid profile email
 
