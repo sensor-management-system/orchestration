@@ -43,6 +43,7 @@ services:
       MINIO_BUCKET_NAME: ${MINIO_BUCKET_NAME:-sms-attachments}
       MINIO_ENDPOINT: ${MINIO_ENDPOINT:-minio:9000}
       DOWNLOAD_ENDPOINT: ${DOWNLOAD_ENDPOINT:-https://localhost.localdomain}
+      ALLOWED_MIME_TYPES: ${ALLOWED_MIME_TYPES}
     depends_on:
       - db
     command: >
@@ -131,16 +132,10 @@ services:
       CV_BACKEND_URL: ${CV_BACKEND_URL:-/cv/api/v1}
       NUXT_ENV_REDIRECT_URI: ${NUXT_ENV_REDIRECT_URI:-https://localhost.localdomain/login-callback}
       NUXT_ENV_CLIENT_ID: ${NUXT_ENV_CLIENT_ID:-rdmsvm-implicit-flow}
-      NUXT_ENV_AUTHORITY: ${NUXT_ENV_AUTHORITY:-https://webapp.ufz.de/idp/oidc/v1/}
-      NUXT_ENV_RESPONSE_TYPE: ${NUXT_ENV_RESPONSE_TYPE:-id_token}
-      NUXT_ENV_SCOPE: ${NUXT_ENV_SCOPE:-openid profile email}
-      NUXT_ENV_POST_LOGOUT_REDIRECT_URI: ${NUXT_ENV_POST_LOGOUT_REDIRECT_URI:-https://localhost.localdomain/logout-callback}
-      NUXT_ENV_SILENT_REDIRECT_URI: ${NUXT_ENV_SILENT_REDIRECT_URI:-https://localhost.localdomain/silent-callback}
-      NUXT_ENV_FILTER_PROTOCOL_CLAIMS: ${NUXT_ENV_FILTER_PROTOCOL_CLAIMS:-false}
-      NUXT_ENV_AUTOMATIC_SILENT_RENEW: ${NUXT_ENV_AUTOMATIC_SILENT_RENEW:-false}
-      NUXT_ENV_SILENT_RENEW_INTERVAL: ${NUXT_ENV_SILENT_RENEW_INTERVAL:-6900000}
-      NUXT_ENV_LOAD_USER_INFO: ${NUXT_ENV_LOAD_USER_INFO:-true}
+      NUXT_ENV_AUTHORITY: ${NUXT_ENV_AUTHORITY:-https://webapp.ufz.de/idp/oidc/v1/auth}
       STAY_WITH_HTTP: ${STAY_WITH_HTTP:-true }
+      NUXT_ENV_SCOPE: ${NUXT_ENV_SCOPE:-openid profile email}
+      NUXT_ENV_ALLOWED_MIMETYPES: ${ALLOWED_MIME_TYPES:?}
     volumes:
       - ./frontend/:/home/node/
       - ./frontend/dist:/home/node/dist/:rw
