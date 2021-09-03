@@ -153,8 +153,9 @@ export default {
   },
   auth: {
     redirect: {
-      callback: '/login-callback',
-      login: '/'
+      login: '/',
+      home: '/login-success',
+      callback: '/login-callback'
     },
     strategies: {
       customStrategy: {
@@ -177,7 +178,6 @@ export default {
         responseType: 'id_token',
         grantType: 'implicit',
         accessType: undefined,
-        redirectUri: process.env.NUXT_ENV_REDIRECT_URI,
         logoutRedirectUri: undefined,
         clientId: process.env.NUXT_ENV_CLIENT_ID,
         scope: process.env.NUXT_ENV_SCOPE.split(' '),

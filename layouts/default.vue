@@ -249,6 +249,7 @@ permissions and limitations under the Licence.
 
 import AppBarTabsExtension from '@/components/AppBarTabsExtension'
 import AppBarEditModeContent from '@/components/AppBarEditModeContent'
+import { saveCurrentRoute } from '@/utils/loginHelpers'
 
 export default {
   components: {
@@ -366,6 +367,7 @@ export default {
       this.$store.commit('appbar/setActiveTab', tab)
     },
     login () {
+      saveCurrentRoute(this.$fullContext)
       this.$auth.loginWith('customStrategy').catch(() => {
         this.$store.commit('snackbar/setError', 'Login failed')
       })
