@@ -39,10 +39,22 @@ permissions and limitations under the Licence.
     <v-alert
       border="left"
       colored-border
-      type="info"
+      type="success"
       elevation="2"
     >
-      Please wait, you'll be logged in...
+      Please wait, you'll be redirected...
     </v-alert>
   </div>
 </template>
+
+<script>
+import { removeSavedRoute } from '@/utils/loginHelpers'
+
+export default {
+  name: 'LoginSuccess',
+  mounted () {
+    const route = removeSavedRoute() || '/'
+    this.$router.replace(route)
+  }
+}
+</script>

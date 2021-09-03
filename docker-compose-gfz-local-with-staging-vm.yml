@@ -45,7 +45,6 @@ services:
       CV_BACKEND_URL: "http://rz-vm64.gfz-potsdam.de:8000/api/v1"
       STAY_WITH_HTTP: "true"
       INSTITUTE: "gfz"
-      NUXT_ENV_REDIRECT_URI: "http://localhost:3000/login-callback"
       NUXT_ENV_AUTHORITY: "https://idp-dev.gfz-potsdam.de/cas/oidc/authorize"
       NUXT_ENV_SCOPE: "profile"
       NUXT_ENV_ALLOWED_MIMETYPES: "application/x-abiword,application/x-freearc,application/vnd.amazon.ebook,image/bmp,application/x-bzip,application/x-bzip2,text/csv,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/epub+zip,application/gzip,image/gif,text/html,image/vnd.microsoft.icon,text/calendar,image/jpeg,application/json,application/ld+json,application/vnd.oasis.opendocument.presentation,application/vnd.oasis.opendocument.spreadsheet,application/vnd.oasis.opendocument.text,image/png,application/pdf,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/vnd.rar,application/rtf,image/svg+xml,application/x-tar,image/tiff,image/tiff,text/plain,image/webp,application/xhtml+xml,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/xml,application/vnd.mozilla.xul+xml,application/zip,application/x-7z-compressed"

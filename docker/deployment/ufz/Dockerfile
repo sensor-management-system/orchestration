@@ -44,11 +44,6 @@ ENV NUXT_ENV_CLIENT_ID $CLIENT_ID_ARG
 ARG AUTHORITY_ARG
 ENV NUXT_ENV_AUTHORITY $AUTHORITY_ARG
 
-# The redirect uris (those must be different per host on that the frontend runs)
-ARG HOST_ARG
-ENV BASE_URL /sms
-ENV NUXT_ENV_REDIRECT_URI https://${HOST_ARG}${BASE_URL}/login-callback
-
 # And those remaining settings
 ENV NUXT_ENV_SCOPE openid profile email
 
