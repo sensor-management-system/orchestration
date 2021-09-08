@@ -220,6 +220,12 @@ export default class PlatformContactsPage extends Vue {
     })
   }
 
+  head () {
+    return {
+      titleTemplate: 'Contacts - %s'
+    }
+  }
+
   get isInProgress (): boolean {
     return this.isLoading || this.isSaving
   }

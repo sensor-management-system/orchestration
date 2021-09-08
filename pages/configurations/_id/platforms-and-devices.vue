@@ -151,6 +151,12 @@ export default class ConfigurationPlatformsAndDevices extends Vue {
     }
   }
 
+  head () {
+    return {
+      titleTemplate: 'Platforms and Devices - %s'
+    }
+  }
+
   get configuration () {
     return this.valueCopy
   }

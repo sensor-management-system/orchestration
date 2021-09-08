@@ -47,6 +47,12 @@ export default class DeviceBasicPage extends Vue {
   })
   readonly value!: Device
 
+  head () {
+    return {
+      titleTemplate: 'Basic Data - %s'
+    }
+  }
+
   get device (): Device {
     return this.value
   }

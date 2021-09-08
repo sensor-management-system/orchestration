@@ -167,6 +167,12 @@ export default class PlatformActionsPage extends Vue {
     actions.forEach((action: PlatformUnmountAction) => this.actions.push(new PlatformUnmountActionWrapper(action)))
   }
 
+  head () {
+    return {
+      titleTemplate: 'Actions - %s'
+    }
+  }
+
   get platformId (): string {
     return this.$route.params.platformId
   }

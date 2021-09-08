@@ -280,7 +280,7 @@ export default {
       if (!this.appBarTitle) {
         return this.title
       }
-      return this.title + ' - ' + this.appBarTitle
+      return this.appBarTitle + ' - ' + this.title
     },
     error () {
       return this.$store.state.snackbar.error

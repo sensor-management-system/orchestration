@@ -225,6 +225,12 @@ export default class PlatformAttachmentsPage extends mixins(AttachmentsMixin) {
     }
   }
 
+  head () {
+    return {
+      titleTemplate: 'Attachments - %s'
+    }
+  }
+
   get isInProgress (): boolean {
     return this.isLoading || this.isSaving
   }

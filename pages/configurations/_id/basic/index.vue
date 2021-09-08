@@ -82,6 +82,12 @@ export default class ConfigurationShowBasicPage extends Vue {
   })
   readonly value!: Configuration
 
+  head () {
+    return {
+      titleTemplate: 'Basic Data - %s'
+    }
+  }
+
   get configuration (): Configuration {
     return this.value
   }

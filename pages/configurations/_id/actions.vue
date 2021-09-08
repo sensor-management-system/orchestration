@@ -90,6 +90,12 @@ export default class ConfigurationActions extends Vue {
   })
   readonly value!: Configuration
 
+  head () {
+    return {
+      titleTemplate: 'Actions - %s'
+    }
+  }
+
   get configuration () {
     return this.value
   }
