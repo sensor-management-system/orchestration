@@ -274,6 +274,12 @@ export default class DevicePropertiesPage extends Vue {
     }
   }
 
+  head () {
+    return {
+      titleTemplate: 'Measured Quantities - %s'
+    }
+  }
+
   openPanelIfStartedInEditMode () {
     if (this.isEditPropertiesPage) {
       const propertyId = this.getPropertyIdFromUrl()

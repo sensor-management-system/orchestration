@@ -217,6 +217,12 @@ export default class DeviceContactsPage extends Vue {
     })
   }
 
+  head () {
+    return {
+      titleTemplate: 'Contacts - %s'
+    }
+  }
+
   get isInProgress (): boolean {
     return this.isLoading || this.isSaving
   }

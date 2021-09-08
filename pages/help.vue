@@ -33,4 +33,16 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
+import { Component, Vue } from 'nuxt-property-decorator'
+
+@Component
+export default class HelpPage extends Vue {
+  created () {
+    this.$store.commit('appbar/setTitle', 'Help')
+  }
+
+  beforeDestroy () {
+    this.$store.dispatch('appbar/setDefaults')
+  }
+}
 </script>

@@ -37,10 +37,12 @@ import { Component, Vue } from 'nuxt-property-decorator'
 
 @Component
 export default class UfzImprintPage extends Vue {
-  head () {
-    return {
-      titleTemplate: 'Legal Notice - %s'
-    }
+  created () {
+    this.$store.commit('appbar/setTitle', 'Legal Notice')
+  }
+
+  beforeDestroy () {
+    this.$store.dispatch('appbar/setDefaults')
   }
 }
 </script>

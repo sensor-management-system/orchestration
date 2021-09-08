@@ -87,6 +87,12 @@ export default class ConfigurationEditBasicPage extends Vue {
   private isLoading: boolean =false
   private formIsValid: boolean = true
 
+  head () {
+    return {
+      titleTemplate: 'Basic Data - %s'
+    }
+  }
+
   get configurationId () {
     return this.$route.params.id
   }

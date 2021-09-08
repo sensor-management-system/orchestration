@@ -50,6 +50,12 @@ export default class PlatformBasicPage extends Vue {
   })
   readonly value!: Platform
 
+  head () {
+    return {
+      titleTemplate: 'Basic Data - %s'
+    }
+  }
+
   get platform (): Platform {
     return this.value
   }

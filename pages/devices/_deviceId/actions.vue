@@ -182,6 +182,12 @@ export default class DeviceActionsPage extends Vue {
     actions.forEach((action: DeviceCalibrationAction) => this.actions.push(action))
   }
 
+  head () {
+    return {
+      titleTemplate: 'Actions - %s'
+    }
+  }
+
   get deviceId (): string {
     return this.$route.params.deviceId
   }

@@ -131,6 +131,12 @@ export default class DeviceCustomFieldsPage extends Vue {
     })
   }
 
+  head () {
+    return {
+      titleTemplate: 'Custom Fields - %s'
+    }
+  }
+
   get isInProgress (): boolean {
     return this.isLoading || this.isSaving
   }

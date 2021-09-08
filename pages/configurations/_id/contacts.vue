@@ -214,6 +214,12 @@ export default class ContactTab extends Vue {
     this.loadConfigurationContacts()
   }
 
+  head () {
+    return {
+      titleTemplate: 'Contacts - %s'
+    }
+  }
+
   beforeRouteUpdate (to: any, _from:any, next:any) {
     if (to.name === 'configurations-id-contacts') {
       this.loadConfigurationContacts()
