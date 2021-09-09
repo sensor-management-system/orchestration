@@ -152,6 +152,7 @@ export default {
     middleware: ['institute-pages']
   },
   auth: {
+    cookie: false,
     redirect: {
       login: '/',
       home: '/login-success',
