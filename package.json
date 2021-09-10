@@ -29,6 +29,7 @@
     "nuxt": "^2.15.7",
     "nuxt-leaflet": "0.0.25",
     "nuxt-property-decorator": "^2.9.1",
+    "vue-cookie-law": "^1.13.3",
     "vuetify": "^2.5.5"
   },
   "devDependencies": {

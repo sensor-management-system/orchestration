@@ -208,6 +208,14 @@ permissions and limitations under the Licence.
         <nuxt />
       </v-container>
     </v-main>
+    <cookie-law
+      button-text="Okay"
+      button-class="v-btn v-btn--is-elevated v-btn--has-bg v-size--default primary"
+    >
+      <template #message>
+        This site uses cookies to ensure technical functionality. To read more about what we store in the cookies, have a look at our <nuxt-link to="info/privacy-policy">Privacy Policy</nuxt-link>.
+      </template>
+    </cookie-law>
     <v-footer
       :fixed="fixed"
       app
@@ -247,14 +255,17 @@ permissions and limitations under the Licence.
 
 <script>
 
+import CookieLaw from 'vue-cookie-law'
 import AppBarTabsExtension from '@/components/AppBarTabsExtension'
 import AppBarEditModeContent from '@/components/AppBarEditModeContent'
+
 import { saveCurrentRoute } from '@/utils/loginHelpers'
 
 export default {
   components: {
     AppBarTabsExtension,
-    AppBarEditModeContent
+    AppBarEditModeContent,
+    CookieLaw
   },
   data () {
     return {
