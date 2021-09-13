@@ -30,7 +30,7 @@ version : '3.3'
 
 services:
   nginx:
-    image: ${CI_REGISTRY_IMAGE}/nginx:gfz-${CI_COMMIT_TAG:-latest}
+    image: ${CI_REGISTRY_IMAGE}/nginx:gfz-${CI_COMMIT_TAG:-prod-latest}
     restart: unless-stopped
     ports:
       - 80:80
@@ -46,7 +46,7 @@ services:
       - nginx
 
   vocabulary:
-    image: ${CI_REGISTRY_IMAGE}/vocabulary:gfz-${CI_COMMIT_TAG:-latest}
+    image: ${CI_REGISTRY_IMAGE}/vocabulary:gfz-${CI_COMMIT_TAG:-prod-latest}
     restart: unless-stopped
     environment:
       CV_BASE_URL: cv/
@@ -146,7 +146,7 @@ services:
       - backend
 
   backend:
-    image: ${CI_REGISTRY_IMAGE}/backend:gfz-${CI_COMMIT_TAG:-latest}
+    image: ${CI_REGISTRY_IMAGE}/backend:gfz-${CI_COMMIT_TAG:-prod-latest}
     restart: unless-stopped
     environment:
       URL_PREFIX: /backend/api/v1
