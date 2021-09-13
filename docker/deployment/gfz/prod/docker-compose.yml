@@ -61,7 +61,7 @@ services:
       SQL_PORT: 5432
       CORS_ORIGIN_WHITELIST: 'https://sensors.gfz-potsdam.de'
     volumes:
-      - vocabulary-static-files:/usr/cv/app/static
+      - vocabulary-static-files:/static/cv
     networks:
       - nginx
       - vocabulary-db
