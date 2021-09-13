@@ -6,7 +6,7 @@ stages:
 variables:
   GIT_SUBMODULE_STRATEGY: recursive
   ALLOWED_MIME_TYPES: "application/x-abiword,application/x-freearc,application/vnd.amazon.ebook,image/bmp,application/x-bzip,application/x-bzip2,text/csv,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/epub+zip,application/gzip,image/gif,text/html,image/vnd.microsoft.icon,text/calendar,image/jpeg,application/json,application/ld+json,application/vnd.oasis.opendocument.presentation,application/vnd.oasis.opendocument.spreadsheet,application/vnd.oasis.opendocument.text,image/png,application/pdf,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/vnd.rar,application/rtf,image/svg+xml,application/x-tar,image/tiff,image/tiff,text/plain,image/webp,application/xhtml+xml,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/xml,application/vnd.mozilla.xul+xml,application/zip,application/x-7z-compressed"
-  FORCE_TEST_DEPLOYMENT: TRUE
+  FORCE_TEST_DEPLOYMENT: 'TRUE'
 
 cache:
   paths:
