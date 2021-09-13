@@ -40,7 +40,7 @@ ARG CLIENT_ID_ARG
 ENV NUXT_ENV_CLIENT_ID $CLIENT_ID_ARG
 
 # For the moment we stay with the dev idp
-ENV NUXT_ENV_AUTHORITY https://idp-dev.gfz-potsdam.de/cas/oidc
+ENV NUXT_ENV_AUTHORITY https://idp-dev.gfz-potsdam.de/cas/oidc/authorize
 
 # And those remaining settings
 # the following is the ufz setting
