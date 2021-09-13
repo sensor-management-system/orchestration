@@ -162,6 +162,7 @@ services:
       DOWNLOAD_ENDPOINT: https://sensors.gfz-potsdam.de
       SECRET_KEY: ${BACKEND_SECRET_KEY}
       ALLOWED_MIME_TYPES: ${ALLOWED_MIME_TYPES}
+      ELASTICSEARCH_URL: http://elastic-search:9200
     depends_on:
       - backend-db
     networks:
