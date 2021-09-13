@@ -1,3 +1,34 @@
+# Web client of the Sensor Management System software developed within
+# the Helmholtz DataHub Initiative by GFZ and UFZ.
+#
+# Copyright (C) 2020-2021
+# - Kotyba Alhaj Taha (UFZ, kotyba.alhaj-taha@ufz.de)
+# - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
+# - Helmholtz Centre for Environmental Research GmbH - UFZ
+#   (UFZ, https://www.ufz.de)
+# - Helmholtz Centre Potsdam - GFZ German Research Centre for
+#   Geosciences (GFZ, https://www.gfz-potsdam.de)
+#
+# Parts of this program were developed within the context of the
+# following publicly funded projects or measures:
+# - Helmholtz Earth and Environment DataHub
+#   (https://www.helmholtz.de/en/research/earth_and_environment/initiatives/#h51095)
+#
+# Licensed under the HEESIL, Version 1.0 or - as soon they will be
+# approved by the "Community" - subsequent versions of the HEESIL
+# (the "Licence").
+#
+# You may not use this work except in compliance with the Licence.
+#
+# You may obtain a copy of the Licence at:
+# https://gitext.gfz-potsdam.de/software/heesil
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the Licence is distributed on an "AS IS" basis,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+# implied. See the Licence for the specific language governing
+# permissions and limitations under the Licence.
+
 version: '3.9'
 services:
 
@@ -43,7 +74,7 @@ services:
       MINIO_BUCKET_NAME: ${MINIO_BUCKET_NAME:-sms-attachments}
       MINIO_ENDPOINT: ${MINIO_ENDPOINT:-minio:9000}
       DOWNLOAD_ENDPOINT: ${DOWNLOAD_ENDPOINT:-https://localhost.localdomain}
-      ALLOWED_MIME_TYPES: ${ALLOWED_MIME_TYPES}
+      ALLOWED_MIME_TYPES: ${ALLOWED_MIME_TYPES:-image/png,application/pdf}
     depends_on:
       - db
     command: >
@@ -81,11 +112,12 @@ services:
     working_dir: /usr/cv/app
     volumes:
       - './sms-cv/src:/usr/cv/app'
-      - static-files:/usr/cv/app/static
+      - static-files:/static
     ports:
       - 8000:8000
     environment:
       CV_BASE_URL: ${CV_BASE_URL:-cv/}
+      STATIC_URL: '/static/cv/'
       DEBUG: ${DEBUG:-1}
       SECRET_KEY: ${SECRET_KEY:-TopSecret}
       SQL_ENGINE: ${SQL_ENGINE:-django.db.backends.postgresql_psycopg2}
@@ -134,8 +166,8 @@ services:
       NUXT_ENV_CLIENT_ID: ${NUXT_ENV_CLIENT_ID:-rdmsvm-implicit-flow}
       NUXT_ENV_AUTHORITY: ${NUXT_ENV_AUTHORITY:-https://webapp.ufz.de/idp/oidc/v1/auth}
       STAY_WITH_HTTP: ${STAY_WITH_HTTP:-true }
+      NUXT_ENV_ALLOWED_MIMETYPES: ${ALLOWED_MIME_TYPES:-image/png,application/pdf}
       NUXT_ENV_SCOPE: ${NUXT_ENV_SCOPE:-openid profile email}
-      NUXT_ENV_ALLOWED_MIMETYPES: ${ALLOWED_MIME_TYPES:?}
     volumes:
       - ./frontend/:/home/node/
       - ./frontend/dist:/home/node/dist/:rw
