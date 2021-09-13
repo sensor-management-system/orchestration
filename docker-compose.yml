@@ -112,11 +112,12 @@ services:
     working_dir: /usr/cv/app
     volumes:
       - './sms-cv/src:/usr/cv/app'
-      - static-files:/usr/cv/app/static
+      - static-files:/static
     ports:
       - 8000:8000
     environment:
       CV_BASE_URL: ${CV_BASE_URL:-cv/}
+      STATIC_URL: '/static/cv/'
       DEBUG: ${DEBUG:-1}
       SECRET_KEY: ${SECRET_KEY:-TopSecret}
       SQL_ENGINE: ${SQL_ENGINE:-django.db.backends.postgresql_psycopg2}
