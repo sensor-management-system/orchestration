@@ -76,7 +76,7 @@ permissions and limitations under the Licence.
             :selected-date="selectedDateOrFallback"
             :readonly="!$auth.loggedIn"
             :contacts="contacts"
-            :current-user-mail="$auth.user.email"
+            :current-user-mail="currentUserMail"
             @remove="removeSelectedNode"
             @overwriteExistingMountAction="overwriteExistingMountAction"
             @addNewMountAction="addNewMountAction"
@@ -87,7 +87,7 @@ permissions and limitations under the Licence.
             :is-device-used-func="isDeviceInTree"
             :selected-date="selectedDate"
             :contacts="contacts"
-            :current-user-mail="$auth.user.email"
+            :current-user-mail="currentUserMail"
             @add-platform="addPlatformNode"
             @add-device="addDeviceNode"
           />
@@ -295,6 +295,13 @@ export default class ConfigurationPlatformsAndDevices extends Vue {
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Save failed')
     }
+  }
+
+  get currentUserMail (): string | null {
+    if (this.$auth.user && this.$auth.user.email) {
+      return this.$auth.user.email as string
+    }
+    return null
   }
 
   @Watch('value', {
