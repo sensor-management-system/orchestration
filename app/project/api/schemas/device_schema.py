@@ -46,6 +46,7 @@ class DeviceSchema(Schema):
     website = fields.Str(allow_none=True)
     created_at = fields.DateTime(dump_only=True)
     updated_at = fields.DateTime(dump_only=True)
+    groups_ids = fields.Field(many=True, allow_none=True)
     created_by = Relationship(
         attribute="created_by",
         self_view="api.device_created_user",
