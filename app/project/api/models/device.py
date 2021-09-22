@@ -1,8 +1,8 @@
 """Model for the devices."""
+from sqlalchemy.ext.mutable import MutableList
 
-
-from ..models.mixin import AuditMixin, SearchableMixin, IndirectSearchableMixin
 from .base_model import db
+from ..models.mixin import AuditMixin, SearchableMixin, IndirectSearchableMixin
 
 
 class Device(db.Model, AuditMixin, SearchableMixin, IndirectSearchableMixin):
@@ -37,6 +37,8 @@ class Device(db.Model, AuditMixin, SearchableMixin, IndirectSearchableMixin):
     device_attachments = db.relationship(
         "DeviceAttachment", cascade="save-update, merge, delete, delete-orphan"
     )
+    groups_ids = db.Column(MutableList.as_mutable(db.ARRAY(db.Integer)), nullable=True)
+    is_private = db.Column(db.Boolean, default=False)
 
     def to_search_entry(self):
         """Convert the model to an dict to store in the full text search."""

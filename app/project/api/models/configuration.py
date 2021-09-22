@@ -3,6 +3,7 @@
 import collections
 
 from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy.ext.mutable import MutableList
 
 from .base_model import db
 from .mixin import AuditMixin, SearchableMixin
@@ -50,6 +51,8 @@ class Configuration(db.Model, AuditMixin, SearchableMixin):
     configuration_attachments = db.relationship(
         "ConfigurationAttachment", cascade="save-update, merge, delete, delete-orphan"
     )
+    groups_ids = db.Column(MutableList.as_mutable(db.ARRAY(db.Integer)), nullable=True)
+    is_private = db.Column(db.Boolean, default=False)
 
     @hybrid_property
     def hierarchy(self):
