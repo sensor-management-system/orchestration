@@ -7,6 +7,7 @@ class User(db.Model):
     contact_id = db.Column(db.Integer, db.ForeignKey("contact.id"), nullable=False)
     # uselist: To convert one-to-many into one-to-one
     contact = db.relationship("Contact", backref=db.backref("user", uselist=False))
+    is_superuser = db.Column(db.Boolean, default=False)
 
     def __str__(self):
         return "User(username='%s')" % self.subject.split("@")[0]
