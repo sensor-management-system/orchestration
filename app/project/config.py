@@ -2,8 +2,8 @@ import json
 import os
 
 import requests
-from environs import Env
 from cachetools import cached, TTLCache
+from environs import Env
 from jwt.algorithms import RSAAlgorithm
 
 env = Env()
@@ -72,6 +72,8 @@ class BaseConfig:
     MINIO_HTTP_CLIENT = env("MINIO_HTTP_CLIENT", None)
     MINIO_BUCKET_NAME = env("MINIO_BUCKET_NAME", "sms-attachments")
     ALLOWED_MIME_TYPES = env.list("ALLOWED_MIME_TYPES", [])
+    SMS_IDL_TOKEN = env("SMS_IDL_TOKEN", None)
+    IDL_URL = env("IDL_URL", "http://172.21.0.11:80/dataprojects/api/user_accounts")
 
 
 class DevelopmentConfig(BaseConfig):
