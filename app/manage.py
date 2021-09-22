@@ -7,6 +7,7 @@ from flask.cli import FlaskGroup
 
 from project import create_app
 from project.api.helpers.errors import ErrorResponse
+from project.api.models import User
 from project.api.models.base_model import db
 
 app = create_app()
@@ -101,6 +102,28 @@ def add_header(response):
 @app.errorhandler(ErrorResponse)
 def handle_exception(error: ErrorResponse):
     return error.respond()
+
+
+@cli.group()
+def users():
+    """Group for user command so that the sub commands are grouped there."""
+    pass
+
+
+@users.command("makesuperuser")
+@click.argument('user_subject')
+def make_super_user(user_subject):
+    """
+    Create/Update a superuser.
+
+    How To use: python manage.py users makesuperuser
+
+    :param user_subject:
+    :return:
+    """
+    user = db.session.query(User).filter_by(subject=user_subject).first()
+    user.admin = True
+    db.session.commit()
 
 
 if __name__ == "__main__":
