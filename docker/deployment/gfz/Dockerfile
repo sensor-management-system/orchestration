@@ -2,6 +2,7 @@
 # the Helmholtz DataHub Initiative by GFZ and UFZ.
 #
 # Copyright (C) 2020
+# - Wilhelm Becker (GFZ, wilhelm.becker@gfz-potsdam.de)
 # - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 # - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -38,12 +39,30 @@ ENV CV_BACKEND_URL $CV_BACKEND_URL_ARG
 
 ENV INSTITUTE gfz
 
-# Then the client id for open id connect and the authority to contact
+# Then the parameter and endpoints for open id connect
 ARG CLIENT_ID_ARG
 ENV NUXT_ENV_CLIENT_ID $CLIENT_ID_ARG
 
 ARG AUTHORITY_ARG
 ENV NUXT_ENV_AUTHORITY $AUTHORITY_ARG
+
+ARG OIDC_TOKEN_ARG
+ENV NUXT_ENV_OIDC_TOKEN $OIDC_TOKEN_ARG
+
+ARG OIDC_REFRESH_TOKEN_ARG
+ENV NUXT_ENV_OIDC_REFRESH_TOKEN $OIDC_REFRESH_TOKEN_ARG
+
+ARG OIDC_REFRESH_EXPIRE_ARG
+ENV NUXT_ENV_OIDC_REFRESH_EXPIRE $OIDC_REFRESH_EXPIRE_ARG
+
+ARG OIDC_RESPONSE_TYPE_ARG
+ENV NUXT_ENV_OIDC_RESPONSE_TYPE $OIDC_RESPONSE_TYPE_ARG
+
+ARG OIDC_GRANT_TYPE_ARG
+ENV NUXT_ENV_OIDC_GRANT_TYPE $OIDC_GRANT_TYPE_ARG
+
+ARG OIDC_CHALLANGE_ARG
+ENV NUXT_ENV_OIDC_CHALLANGE $OIDC_CHALLANGE_ARG
 
 # And those remaining settings
 # the following is the ufz setting

@@ -113,11 +113,17 @@ build-deploy-image-gfz:
     CV_BACKEND_URL: ${GFZ_STAGING_SMS_CV_BACKEND_URL}/api/v1
     HOST: ${GFZ_STAGING_HOST}
     CLIENT_ID: ${GFZ_STAGING_CLIENT_ID}
+    OIDC_REFRESH_TOKEN: "refresh_token"
+    OIDC_REFRESH_EXPIRE: 28800
+    OIDC_RESPONSE_TYPE: "code"
+    OIDC_GRANT_TYPE: "authorization_code"
+    OIDC_CHALLANGE: "S256"
     # The authority is a url like this:
     # https://idp.institute/cas/oidc
     # In order to make it work with the nuxt-auth plugin
-    # we need to add a subpath
+    # we need to add a subpath for multiple endpoints
     AUTHORITY: ${GFZ_STAGING_IDP_AUTORITY}/authorize
+    OIDC_TOKEN: ${GFZ_STAGING_IDP_AUTORITY}/accessToken
   script:
     - |
       if [ -z "$CI_COMMIT_TAG" ]; then
@@ -126,7 +132,13 @@ build-deploy-image-gfz:
             --build-arg CV_BACKEND_URL_ARG=$CV_BACKEND_URL \
             --build-arg HOST_ARG=$HOST \
             --build-arg CLIENT_ID_ARG=$CLIENT_ID \
+            --build-arg OIDC_REFRESH_TOKEN_ARG=$OIDC_REFRESH_TOKEN \
+            --build-arg OIDC_REFRESH_EXPIRE_ARG=$OIDC_REFRESH_EXPIRE \
+            --build-arg OIDC_RESPONSE_TYPE_ARG=$OIDC_RESPONSE_TYPE \
+            --build-arg OIDC_GRANT_TYPE_ARG=$OIDC_GRANT_TYPE \
+            --build-arg OIDC_CHALLANGE_ARG=$OIDC_CHALLANGE \
             --build-arg AUTHORITY_ARG=$AUTHORITY \
+            --build-arg OIDC_TOKEN_ARG=$OIDC_TOKEN \
             --build-arg ALLOWED_MIME_TYPES_ARG=$ALLOWED_MIME_TYPES \
             .
         docker push "$CI_REGISTRY_IMAGE:gfz-latest"
@@ -136,7 +148,13 @@ build-deploy-image-gfz:
             --build-arg CV_BACKEND_URL_ARG=$CV_BACKEND_URL \
             --build-arg HOST_ARG=$HOST \
             --build-arg CLIENT_ID_ARG=$CLIENT_ID \
+            --build-arg OIDC_REFRESH_TOKEN_ARG=$OIDC_REFRESH_TOKEN \
+            --build-arg OIDC_REFRESH_EXPIRE_ARG=$OIDC_REFRESH_EXPIRE \
+            --build-arg OIDC_RESPONSE_TYPE_ARG=$OIDC_RESPONSE_TYPE \
+            --build-arg OIDC_GRANT_TYPE_ARG=$OIDC_GRANT_TYPE \
+            --build-arg OIDC_CHALLANGE_ARG=$OIDC_CHALLANGE \
             --build-arg AUTHORITY_ARG=$AUTHORITY \
+            --build-arg OIDC_TOKEN_ARG=$OIDC_TOKEN \
             --build-arg ALLOWED_MIME_TYPES_ARG=$ALLOWED_MIME_TYPES \
             .
         docker push "$CI_REGISTRY_IMAGE:gfz-latest"
@@ -159,11 +177,17 @@ build-deploy-image-manual-gfz:
     HOST: ${GFZ_STAGING_HOST}:8080
     # Not sure, if we need another client id for the staging on 8080
     CLIENT_ID: ${GFZ_STAGING_CLIENT_ID}
+    OIDC_REFRESH_TOKEN: "refresh_token"
+    OIDC_REFRESH_EXPIRE: 28800
+    OIDC_RESPONSE_TYPE: "code"
+    OIDC_GRANT_TYPE: "authorization_code"
+    OIDC_CHALLANGE: "S256"
     # The authority is a url like this:
     # https://idp.institute/cas/oidc
     # In order to make it work with the nuxt-auth plugin
-    # we need to add a subpath
+    # we need to add a subpath for multiple endpoints
     AUTHORITY: ${GFZ_STAGING_IDP_AUTORITY}/authorize
+    OIDC_TOKEN: ${GFZ_STAGING_IDP_AUTORITY}/accessToken
   script:
     - |
         docker build --tag "$CI_REGISTRY_IMAGE:gfz-$CI_COMMIT_SHORT_SHA" -f docker/deployment/gfz/Dockerfile \
@@ -171,7 +195,13 @@ build-deploy-image-manual-gfz:
           --build-arg CV_BACKEND_URL_ARG=$CV_BACKEND_URL \
           --build-arg HOST_ARG=$HOST \
           --build-arg CLIENT_ID_ARG=$CLIENT_ID \
+          --build-arg OIDC_REFRESH_TOKEN_ARG=$OIDC_REFRESH_TOKEN \
+          --build-arg OIDC_REFRESH_EXPIRE_ARG=$OIDC_REFRESH_EXPIRE \
+          --build-arg OIDC_RESPONSE_TYPE_ARG=$OIDC_RESPONSE_TYPE \
+          --build-arg OIDC_GRANT_TYPE_ARG=$OIDC_GRANT_TYPE \
+          --build-arg OIDC_CHALLANGE_ARG=$OIDC_CHALLANGE \
           --build-arg AUTHORITY_ARG=$AUTHORITY \
+          --build-arg OIDC_TOKEN_ARG=$OIDC_TOKEN \
           --build-arg ALLOWED_MIME_TYPES_ARG=$ALLOWED_MIME_TYPES \
           .
     - docker push "$CI_REGISTRY_IMAGE:gfz-$CI_COMMIT_SHORT_SHA"

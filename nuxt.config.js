@@ -4,6 +4,7 @@ the Helmholtz DataHub Initiative by GFZ and UFZ.
 
 Copyright (C) 2020
 - Kotyba Alhaj Taha (UFZ, kotyba.alhaj-taha@ufz.de)
+- Wilhelm Becker (GFZ, wilhelm.becker@gfz-potsdam.de)
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
@@ -43,7 +44,7 @@ const server = {
   host: '0.0.0.0'
 }
 
-if (!process.env.STAY_WITH_HTTP) {
+if (!process.env.STAY_WITH_HTTP || process.env.STAY_WITH_HTTP !== 'true') {
   server.https = {
     key: fs.readFileSync(path.resolve(__dirname, 'server.key')),
     cert: fs.readFileSync(path.resolve(__dirname, 'server.crt'))
@@ -163,7 +164,7 @@ export default {
         scheme: '~/config/auth/schemes/customScheme',
         endpoints: {
           authorization: process.env.NUXT_ENV_AUTHORITY,
-          token: undefined,
+          token: process.env.NUXT_ENV_OIDC_TOKEN,
           userInfo: undefined,
           logout: undefined
         },
@@ -173,17 +174,19 @@ export default {
           maxAge: 3600
         },
         refreshToken: {
-          property: false,
-          maxAge: 60 * 60 * 24 * 30
+          property: process.env.NUXT_ENV_OIDC_REFRESH_TOKEN || false,
+          // GFZ Refresh token refresh time is not fetched from the server response.
+          // This leads us into setting this time via env variable
+          maxAge: process.env.NUXT_ENV_OIDC_REFRESH_EXPIRE || 60 * 60 * 24 * 30
         },
-        responseType: 'id_token',
-        grantType: 'implicit',
+        responseType: process.env.NUXT_ENV_OIDC_RESPONSE_TYPE || 'id_token',
+        grantType: process.env.NUXT_ENV_OIDC_GRANT_TYPE || 'implicit',
         accessType: undefined,
         logoutRedirectUri: undefined,
         clientId: process.env.NUXT_ENV_CLIENT_ID,
         scope: process.env.NUXT_ENV_SCOPE.split(' '),
         state: 'UNIQUE_AND_NON_GUESSABLE',
-        codeChallengeMethod: '',
+        codeChallengeMethod: process.env.NUXT_ENV_OIDC_CHALLANGE || '',
         responseMode: '',
         acrValues: ''
       }

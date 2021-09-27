@@ -48,7 +48,12 @@ services:
       NUXT_ENV_AUTHORITY: "https://idp-dev.gfz-potsdam.de/cas/oidc/authorize"
       NUXT_ENV_SCOPE: "profile"
       NUXT_ENV_ALLOWED_MIMETYPES: "application/x-abiword,application/x-freearc,application/vnd.amazon.ebook,image/bmp,application/x-bzip,application/x-bzip2,text/csv,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/epub+zip,application/gzip,image/gif,text/html,image/vnd.microsoft.icon,text/calendar,image/jpeg,application/json,application/ld+json,application/vnd.oasis.opendocument.presentation,application/vnd.oasis.opendocument.spreadsheet,application/vnd.oasis.opendocument.text,image/png,application/pdf,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/vnd.rar,application/rtf,image/svg+xml,application/x-tar,image/tiff,image/tiff,text/plain,image/webp,application/xhtml+xml,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/xml,application/vnd.mozilla.xul+xml,application/zip,application/x-7z-compressed"
-      #NUXT_ENV_CLIENT_ID: "${NUXT_ENV_CLIENT_ID}"
+      NUXT_ENV_OIDC_REFRESH_TOKEN: "refresh_token"
+      NUXT_ENV_OIDC_REFRESH_EXPIRE: 28800 # 60 * 60 * 8
+      NUXT_ENV_OIDC_TOKEN: "https://idp-dev.gfz-potsdam.de/cas/oidc/accessToken"
+      NUXT_ENV_OIDC_RESPONSE_TYPE: "code"
+      NUXT_ENV_OIDC_GRANT_TYPE: "authorization_code"
+      NUXT_ENV_OIDC_CHALLANGE: "S256"
       # this comes from the gfz-staging-oidc.env
       # Ask nils@gfz-potsdam.de or mhanisch@gfz-potsdam.de
       # to get it
