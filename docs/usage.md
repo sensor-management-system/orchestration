@@ -1,96 +1,189 @@
-### Create object
+# CRUD operations
 
-Request:
-```http request
-POST http://localhost:5001/devices HTTP/1.1
+To take a deeper look into the api-operations please visit the 
+[Swagger 2.0](../app/project/static/swager.json)
+sites.
+
+## List objects
+
+__Request:__
+
+```http
+GET /devices HTTP/1.1
+Accept: application/vnd.api+json
+```
+__Response:__
+
+```json
+{
+  "data": [
+    {
+      "attributes": {
+        "created_at": "0001-00-00T00:00:00.000000",
+        "updated_at": "0001-00-00T00:00:00.000000",
+        "description": "",
+        "short_name": "",
+        "long_name": "",
+        "serial_number": "",
+        "manufacturer_uri": "",
+        "manufacturer_name": "",
+        "dual_use": false,
+        "model": "",
+        "inventory_number": "",
+        "persistent_identifier": null,
+        "website": "",
+        "device_type_uri": "",
+        "device_type_name": "",
+        "status_uri": "",
+        "status_name": ""
+      },
+      "type": "device",
+      "id": "0",
+      "relationships": {
+        "customfields": {
+          "data": [],
+          "links": {
+            "self": null
+          }
+        },
+        "device_properties": {
+          "data": [],
+          "links": {
+            "self": null
+          }
+        },
+        "events": {
+          "data": [],
+          "links": {
+            "self": null
+          }
+        },
+        "device_attachments": {
+          "data": [],
+          "links": {
+            "self": null
+          }
+        },
+        "device_calibration_actions": {
+          "data": [],
+          "links": {
+            "self": null
+          }
+        },
+        "configuration_device": {
+          "data": [],
+          "links": {
+            "self": null
+          }
+        },
+        "contacts": {
+          "data": [],
+          "links": {
+            "self": null
+          }
+        },
+        "generic_device_actions": {
+          "data": [],
+          "links": {
+            "self": null
+          }
+        },
+        "device_mount_actions": {
+          "data": [],
+          "links": {
+            "self": null
+          }
+        },
+        "device_software_update_actions": {
+          "data": [],
+          "links": {
+            "self": null
+          }
+        },
+        "device_unmount_actions": {
+          "data": [],
+          "links": {
+            "self": null
+          }
+        }
+      }
+    }
+  ]
+}
+```
+## Create object
+
+__Request:__
+```http
+POST /devices HTTP/1.1
 Content-Type: application/vnd.api+json
 Accept: application/vnd.api+json
 
 {
   "data": {
-    "type": "device",
     "attributes": {
-        "description": "test_test_test",
-        "shortName": "short",
-        "longName": "",
-        "serialNumber": "0125436987",
-        "manufacture": "manufacture",
-        "model": "model",
-        "inventoryNumber": "0001122",
-        "persistentIdentifier": "54564654",
-        "website": "###",
-        "label": "LABEL",
-        "type": "TYPE"
-    }
+      "description": "",
+      "short_name": "TEST",
+      "long_name": "",
+      "serial_number": "",
+      "manufacturer_uri": "",
+      "manufacturer_name": "",
+      "dual_use": false,
+      "model": "",
+      "inventory_number": "",
+      "persistent_identifier": null,
+      "website": "",
+      "device_type_uri": "",
+      "device_type_name": "",
+      "status_uri": "",
+      "status_name": ""
+    },
+    "relationships": {},
+    "id": "0",
+    "type": "device"
   }
 }
 ```
-Response:
+__Response:__
 
-```
+```json
 
 HTTP/1.1 201 Created
 Content-Type: application/vnd.api+json
 {
   "data": {
-    "type": "device",
     "attributes": {
-      "shortName": "short",
-      "serialNumber": "125436987",
-      "urn": "[MANUFACTURE]_[MODEL]_[TYPE]_[125436987]",
-      "manufacture": "manufacture",
-      "website": "###",
-      "dualUse": "False",
-      "configurationDate": null,
-      "persistentIdentifier": 54564654,
-      "inventoryNumber": 1122,
-      "model": "model",
-      "longName": "",
-      "label": "LABEL",
-      "description": "test_test_test",
-      "type": "TYPE"
+      "description": "",
+      "short_name": "TEST",
+      "long_name": "",
+      "serial_number": "",
+      "manufacturer_uri": "",
+      "manufacturer_name": "",
+      "dual_use": false,
+      "model": "",
+      "inventory_number": "",
+      "persistent_identifier": null,
+      "website": "",
+      "device_type_uri": "",
+      "device_type_name": "",
+      "status_uri": "",
+      "status_name": ""
     },
-    "relationships": {
-      "platform": {
-        "links": {
-          "self": "/devices/4/relationships/platform",
-          "related": "/devices/4/platform"
-        }
-      },
-      "events": {
-        "links": {
-          "self": "/devices/4/relationships/events",
-          "related": "/events?device_id=4"
-        }
-      },
-      "contacts": {
-        "links": {
-          "self": "/devices/4/relationships/contacts",
-          "related": "/contacts?device_id=4"
-        }
-      }
-    },
-    "id": "4",
-    "links": {
-      "self": "/devices/4"
-    }
-  },
-  "links": {
-    "self": "/devices/4"
-  },
-  "jsonapi": {
-    "version": "1.0"
+    "relationships": {},
+    "id": "1",
+    "type": "device"
   }
 }
 
+
 ```
 
-### Update object and his relationships
+## Update object
 
-Request:
+__Request:__
 
-```http request
-PATCH http://localhost:5001/devices/1 HTTP/1.1
+```http
+PATCH /devices/1 HTTP/1.1
 Content-Type: application/vnd.api+json
 Accept: application/vnd.api+json
 
@@ -106,70 +199,42 @@ Accept: application/vnd.api+json
 
 ```
 
-Response:
+__Response:__
 
-```
+```json
 HTTP/1.1 200 OK
 Content-Type: application/vnd.api+json
 {
   "data": {
-    "type": "device",
     "attributes": {
-      "shortName": "updated",
-      "serialNumber": "125436987",
-      "urn": "[MANUFACTURE]_[MODEL]_[TYPE]_[125436987]",
-      "manufacture": "manufacture",
-      "website": "###",
-      "dualUse": "False",
-      "configurationDate": null,
-      "persistentIdentifier": 54564654,
-      "inventoryNumber": 1122,
-      "model": "model",
-      "longName": "",
-      "label": "LABEL",
-      "description": "test_test_test",
-      "type": "TYPE"
+      "description": "",
+      "short_name": "updated",
+      "long_name": "",
+      "serial_number": "",
+      "manufacturer_uri": "",
+      "manufacturer_name": "",
+      "dual_use": false,
+      "model": "",
+      "inventory_number": "",
+      "persistent_identifier": null,
+      "website": "",
+      "device_type_uri": "",
+      "device_type_name": "",
+      "status_uri": "",
+      "status_name": ""
     },
-    "relationships": {
-      "platform": {
-        "links": {
-          "self": "/devices/1/relationships/platform",
-          "related": "/devices/1/platform"
-        }
-      },
-      "events": {
-        "links": {
-          "self": "/devices/1/relationships/events",
-          "related": "/events?device_id=1"
-        }
-      },
-      "contacts": {
-        "links": {
-          "self": "/devices/1/relationships/contacts",
-          "related": "/contacts?device_id=1"
-        }
-      }
-    },
+    "relationships": {},
     "id": "1",
-    "links": {
-      "self": "/devices/1"
-    }
-  },
-  "links": {
-    "self": "/devices/1"
-  },
-  "jsonapi": {
-    "version": "1.0"
+    "type": "device"
   }
 }
 
 ```
-### Create relationship
+## Delete object
 
-Request:
-```http request
-POST http://localhost:5001/platforms/1/relationships/devices HTTP/1.1
-Content-Type: application/vnd.api+json
+__Request:__
+```http
+DELETE /devices/1 HTTP/1.1
 Accept: application/vnd.api+json
 
 {
@@ -181,9 +246,196 @@ Accept: application/vnd.api+json
   ]
 }
 ```
-Response:
+
+__Response:__
+
+```json
+HTTP/1.1 200 OK
+Content-Type: application/vnd.api+json
+
+{
+  "meta": {
+    "message": "Object successfully deleted"
+  },
+  "jsonapi": {
+    "version": "1.0"
+  }
+}
 
 ```
+## Relationships
+
+### Create relationship
+
+There are two ways to create a relationship in a JSON:API. The first one directly as we create the 
+object, which we want to make the relation with. Or using the endpoint associated to this relationship.  
+#### The First Methode 
+We just add the querystring parameter `include` to the url and extend the payload as follows:
+
+__Request:__
+
+```http
+POST /devices?include=contacts HTTP/1.1
+Content-Type: application/vnd.api+json
+Accept: application/vnd.api+json
+
+{
+  "data": {
+    "type": "device",
+    "attributes": {
+      "short_name": "test device",
+    },
+    "relationships": {
+      "contacts": {
+        "data": [
+          {
+            "type": "contact",
+            "id": "1"
+          }
+        ]
+      }
+    }
+  }
+}
+```
+
+__Response:__
+
+```json
+HTTP/1.1 201 Created
+Content-Type: application/vnd.api+json
+{
+  "data": {
+    "type": "device",
+    "attributes": {
+     "description": "",
+      "short_name": "test device",
+      "long_name": "",
+      "serial_number": "",
+      "manufacturer_uri": "",
+      "manufacturer_name": "",
+      "dual_use": false,
+      "model": "",
+      "inventory_number": "",
+      "persistent_identifier": null,
+      "website": "",
+      "device_type_uri": "",
+      "device_type_name": "",
+      "status_uri": "",
+      "status_name": ""
+    },
+    "relationships": {
+      "platform": {
+        "links": {
+          "self": "/devices/4/relationships/platform",
+          "related": "/devices/4/platform"
+        }
+      },
+      "contacts": {
+        "links": {
+          "self": "/devices/3/relationships/contacts",
+          "related": "/contacts?device_id=3"
+        }
+      }
+    }
+    included": [
+   {
+      "type": "contact",
+      "id": "1",
+      "relationships": {
+        "devices": {
+          "links": {
+            "related": "/rdm/svm-api/v1/contacts/1/relationships/devices"
+          },
+          "data": [
+            {
+              "type": "device",
+              "id": "1"
+            },
+            {
+              "type": "device",
+              "id": "2"
+            }
+          ]
+        },
+        "user": {
+          "links": {
+            "self": "/rdm/svm-api/v1/contacts/1/relationships/user"
+          },
+          "data": {
+            "type": "user",
+            "id": "1"
+          }
+        },
+        "platforms": {
+          "links": {
+            "related": "/rdm/svm-api/v1/contacts/1/relationships/platforms"
+          },
+          "data": [
+            {
+              "type": "platform",
+              "id": "1"
+            }
+          ]
+        },
+        "configurations": {
+          "links": {
+            "related": "/rdm/svm-api/v1/contacts/1/relationships/configurations"
+          },
+          "data": [
+            {
+              "type": "configuration",
+              "id": "1"
+            }
+          ]
+        }
+      },
+      "attributes": {
+        "family_name": "user",
+        "website": null,
+        "email": "user@ufz.de",
+        "given_name": "user"
+      },
+      "links": {
+        "self": "/rdm/svm-api/v1/contacts/1"
+      }
+    }
+    ],
+    "id": "3",
+    "links": {
+      "self": "/devices/3"
+    }
+  },
+  "links": {
+    "self": "/devices/3"
+  },
+  "jsonapi": {
+    "version": "1.0"
+  }
+}
+
+```
+#### The second Methode
+
+__Request:__
+
+```http
+POST /device/1/relationships/contacts HTTP/1.1
+Content-Type: application/vnd.api+json
+Accept: application/vnd.api+json
+
+{
+  "data": [
+    {
+      "type": "contact",
+      "id": "2"
+    }
+  ]
+}
+```
+__Response:__
+
+```json
 HTTP/1.0 200 OK
 Content-Type: application/vnd.api+json
 
@@ -198,21 +450,21 @@ Content-Type: application/vnd.api+json
 ```
 ### Delete relationship
 
-```http request
-DELETE http://localhost:5001/platforms/1/relationships/devices HTTP/1.1
+```http
+DELETE /devices/1/relationships/contacts HTTP/1.1
 Content-Type: application/vnd.api+json
 Accept: application/vnd.api+json
 
 {
   "data": [
     {
-      "type": "device",
-      "id": "1"
+      "type": "contact",
+      "id": "2"
     }
   ]
 }
 ```
-Response:
+__Response:__
 
 ```
 HTTP/1.0 200 OK
@@ -229,93 +481,6 @@ Content-Type: application/vnd.api+json
 
 ```
 
-### related and 
+## References:
 
-You add the querystring parameter “include” to the url to add or Update relationships 
-
-```http request
-POST http://localhost:5001/platforms?include= HTTP/1.1
-Content-Type: application/vnd.api+json
-Accept: application/vnd.api+json
-
-{
-  "data": {
-    "type": "platform",
-    "attributes": {
-        "description": "blah blah ",
-        "shortName": "short",
-        "longName": "long name",
-        "manufacturer": "manufacturer",
-        "inventoryNumber": "0001122",
-        "persistentIdentifier": "54564654",
-        "website": "###",
-        "platformType": "testType",
-        "type": "test"
-
-    },
-    "relationships": {
-      "devices": {
-        "data": [
-          {
-            "type": "device",
-            "id": "1"
-          }
-        ]
-      }
-    }
-  }
-}
-```
-
-### Multiple related resources
-
-Multiple related resources can be requested in a comma-separated list
-
-#### GET 
-
-```http request
-GET http://localhost:5001/devices/1?include=platform,events,contacts HTTP/1.1
-Accept: application/vnd.api+json
-``` 
-
-#### POST
-
-```http request
-POST http://localhost:5001/devices?include=events,contacts HTTP/1.1
-Content-Type: application/vnd.api+json
-Accept: application/vnd.api+json
-
-{
-  "data": {
-    "type": "device",
-    "attributes": {
-        "serialNumber": "0125436987",
-         "manufacture": "manufacture",
-         "model": "model",
-         "inventoryNumber": "0001122",
-         "persistentIdentifier": "54564654",
-         "type": "TYPE"
-
-    },
-    "relationships": {
-
-      "contact": {
-        "data": [
-          {
-            "type": "contact",
-            "id": "1"
-          }
-        ]
-      },
-      "event": {
-        "data": [
-          {
-            "type": "event",
-            "id": "1"
-          }
-        ]
-      }
-    }
-  }
-}
-```
+- [flask-rest-jsonapi](https://flask-rest-jsonapi.readthedocs.io/en/latest/quickstart.html)

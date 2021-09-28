@@ -3,11 +3,11 @@
 There are multiple ways to install the application. This document describes a [Compose](#compose),  
 a [Docker](#docker) and a [Local](#local) installation. The preferred and easiest way to quickly get  
 it running is [Compose](#compose). Once you finished the installation navigate to  
-[http://localhost:5000/sis/v1/ping](http://localhost:5000/sis/v1/ping) in your browser. You should see:
+[http://localhost:5000/rdm/svm-api/v1/ping](http://localhost:5000/rdm/svm-api/v1/ping) in your browser. You should see:
 
 ```json
 {
-"message": "Hallo Sensor ;)",
+"message": "Pong",
 "status": "success"
 }
 
@@ -15,10 +15,10 @@ it running is [Compose](#compose). Once you finished the installation navigate t
 
 ## Dependencies
 
-- Docker
 
-There are so many technologies used mentioned in the tech specs and yet the dependencies just one, 
-but This is the power of Docker.
+- Get docker. See the [official site](https://docs.docker.com/engine/install/) for installation info for your platform.
+- Install docker-compose. Windows and Mac users should have docker-compose 
+ by default as it is part of Docker toolbox. For Linux users, see the [official guide](https://docs.docker.com/compose/install/). 
 
 ## Compose
 **Note:** To generate self singed certificate you can use the python script `ngnix/certs/ice-ca-certs.py`. The script requires the python library *zeroc-icecertutils*, which you can install with `pip install zeroc-icecertutils`. Make sure you execute the script inside the target folder `nginx/certs`.
@@ -86,14 +86,36 @@ but This is the power of Docker.
 
 ##  Local
 
+### Dependencies required to run the Server
+
+- Python >= 3.6
+- PostgreSQL
+- Elasticsearch
+- Minio
+
 To run the server local without docker, please execute the following from the app directory:
 
 1. Install the dependencies:
     ```bash
     pip install -r requirements.txt
     ```
+2. Create the database. For that we first open the psql shell.
+```bash
+sudo -u postgres psql
+ ```
+Then:
+```sql
+CREATE DATABASE db_dev
+```
+Once database created, exit the psql shell with `\q` followed by ENTER.
 
-2. Start development server:
+After that, Create the tables.
+```bash
+python3 manage.py db upgrade
+```
+
+3. Start development server:
+
 
     ```bash
     export FLASK_APP=project/__init__.py
