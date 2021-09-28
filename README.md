@@ -77,7 +77,43 @@ After having installed the dependencies, then just run the following commands to
 
 [How to user filters](docs/filtering.md)
 
+## CLI commands for admins
 
+<details>
+<summary>CLI commands</summary>
+
+
+**user deactivation/reactivation**
+
+When attend to deactivate/activate a user. Use users cli.
+
+```
+# Deactivate a user
+python manage.py users deactivate srcuserubject@ufz.de
+
+# Deactivated and provide a substituted user
+python manage.py users deactivate srcuserubject@ufz.de --dest-user-subject=destusersubject@ufz.de
+
+# Activate a user
+python manage.py users reactivate srcuserubject@ufz.de
+```
+
+**Model updates & migrations**
+
+When writing changes to the models. Use migrations.
+
+```
+# To generate a migration after doing a model update
+python manage.py db migrate
+
+# To sync Database
+python manage.py db upgrade
+
+# To rollback
+python manage.py db downgrade
+```
+
+</details>
 
 ### Authors
 
