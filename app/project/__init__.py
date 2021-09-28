@@ -5,6 +5,7 @@ from flask_migrate import Migrate
 from healthcheck import HealthCheck
 
 from .api import minio
+from .api.helpers.docs import docs_routes
 from .api.helpers.health_checks import health_check_elastic_search, health_check_db, \
     health_check_migrations, health_check_minio
 from .api.models.base_model import db
@@ -15,6 +16,7 @@ from .urls import api
 
 migrate = Migrate()
 base_url = env("URL_PREFIX", "/rdm/svm-api/v1")
+static_url_path = env("STATIC_URL", "/static/backend")
 health = HealthCheck()
 
 
@@ -23,7 +25,8 @@ def create_app():
     set up the application in a function
     """
     # init the app
-    app = Flask(__name__)
+    app = Flask(__name__, template_folder='../templates', static_folder='static',
+                static_url_path=static_url_path)
 
     # enable CORS
     # get space separated list from environment var
@@ -69,7 +72,8 @@ def create_app():
     health.add_check(health_check_minio)
     app.add_url_rule(base_url + "/health", "health", view_func=lambda: health.run())
 
-
     # upload_routes
     app.register_blueprint(upload_routes)
+    # docs_routes
+    app.register_blueprint(docs_routes)
     return app
