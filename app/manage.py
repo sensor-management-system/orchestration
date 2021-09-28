@@ -7,7 +7,9 @@ from flask.cli import FlaskGroup
 
 from project import create_app
 from project.api.helpers.errors import ErrorResponse
+from project.api.models import User, Contact
 from project.api.models.base_model import db
+from project.api.services.userservice import user_deactivation
 
 app = create_app()
 cli = FlaskGroup(create_app=create_app)
@@ -101,6 +103,74 @@ def add_header(response):
 @app.errorhandler(ErrorResponse)
 def handle_exception(error: ErrorResponse):
     return error.respond()
+
+
+@cli.group()
+def users():
+    """Group for user command so that the sub commands are grouped there."""
+    pass
+
+
+@users.command("deactivate")
+@click.argument('src_user_subject')
+@click.option('--dest-user-subject', default=None, help='A substituted user subject')
+def deactivate_a_user(src_user_subject, dest_user_subject):
+    """
+    Deactivate a user in this steps:
+     - Set the active attribute to False
+     - Replace contact entities with a deactivation message.
+     - If a there is substituted user then add it to all objects where
+       the deactivated user is listed.
+
+    # How to use:
+    python manage.py users deactivate srcuserubject@ufz.de --dest-user-subject=destusersubject@ufz.de
+
+    :param src_user_subject: Subject attribute for the user Intended to be deactivated.
+    :param dest_user_subject: Subject attribute for the substituted user.
+    """
+    src_user = db.session.query(User).filter_by(subject=src_user_subject).first()
+    src_contact = db.session.query(Contact).filter_by(id=src_user.contact_id).first()
+
+    dest_contact = None
+    if dest_user_subject is not None:
+        dest_user = db.session.query(User).filter_by(subject=dest_user_subject).first()
+        dest_contact = db.session.query(Contact).filter_by(id=dest_user.contact_id).first()
+
+    user_deactivation(src_user, src_contact, dest_contact)
+
+
+@users.command("reactivate")
+@click.argument('subject_user')
+@click.option('--given_name', prompt='Contact given_name please')
+@click.option('--family_name', prompt='Contact family_name please')
+@click.option('--email', prompt='Contact email please')
+def reactivate_a_user(subject_user, given_name, family_name, email):
+    """
+    Reactivate a user.
+    The user active attribute will be set to True and then the contact 
+    Info will be asked by Prompting.
+
+    # How to use:
+     python manage.py users deactivate srcuserubject@ufz.de
+     
+
+    :param subject_user: Subject attribute for the user.
+    :param given_name: Contact given name.
+    :param family_name: Contact family name.
+    :param email: Contact email.
+    """
+    user = db.session.query(User).filter_by(subject=subject_user).first()
+    contact = db.session.query(Contact).filter_by(id=user.contact_id).first()
+
+    contact.active = True
+    contact.given_name = given_name
+    contact.family_name = family_name
+    contact.email = email
+    contact.website = None
+
+    user.active = True
+
+    db.session.commit()
 
 
 if __name__ == "__main__":

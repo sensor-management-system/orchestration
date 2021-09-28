@@ -2,8 +2,8 @@
 
 import itertools
 
-from ..models.mixin import SearchableMixin, IndirectSearchableMixin
 from .base_model import db
+from ..models.mixin import SearchableMixin, IndirectSearchableMixin
 
 platform_contacts = db.Table(
     "platform_contacts",
@@ -39,6 +39,7 @@ class Contact(db.Model, SearchableMixin, IndirectSearchableMixin):
     family_name = db.Column(db.String(256), nullable=False)
     website = db.Column(db.String(1024), nullable=True)
     email = db.Column(db.String(256), nullable=False, unique=True)
+    active = db.Column(db.Boolean, default=True)
     devices = db.relationship(
         "Device",
         secondary=device_contacts,

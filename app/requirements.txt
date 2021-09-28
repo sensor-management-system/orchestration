@@ -40,8 +40,9 @@ python-dateutil==2.8.2
 python-editor==1.0.4
 requests==2.26.0
 six==1.16.0
+SQLAlchemy-Utils==0.37.8
 SQLAlchemy==1.4.23
+stringcase==1.2.0
 tox-pip-extensions~=1.6.0
 urllib3==1.26.6
 Werkzeug==2.0.1
-stringcase==1.2.0

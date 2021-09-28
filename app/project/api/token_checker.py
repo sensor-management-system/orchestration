@@ -5,6 +5,7 @@ from flask import request, current_app
 from flask_jwt_extended import JWTManager, get_jwt, verify_jwt_in_request
 from flask_jwt_extended.exceptions import NoAuthorizationError
 
+from .helpers.errors import ForbiddenError
 from .models import Contact, User
 from .models.base_model import db
 
@@ -58,6 +59,8 @@ def add_user_to_database(_jwt_header, jwt_data):
         db.session.add(user)
         db.session.commit()
         return user
+    elif not current_user_exists.active:
+        raise ForbiddenError("This user is deactivated. Please contact your admin in order to reactivate the user.")
     return current_user_exists
 
 
