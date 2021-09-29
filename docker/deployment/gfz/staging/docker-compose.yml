@@ -21,6 +21,9 @@ services:
       - MINIO_ENDPOINT=minio:9000
       - DOWNLOAD_ENDPOINT=$DOWNLOAD_ENDPOINT
       - ALLOWED_MIME_TYPES=$ALLOWED_MIME_TYPES
+      - STATIC_URL=/static/backend
+    volumes:
+      - backend-static-files:/usr/src/app/project/static
     networks:
       - elastic
       - db
@@ -113,10 +116,12 @@ services:
     volumes:
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - backend-static-files:/usr/share/nginx/html/static/backend:ro
 
 volumes:
   postgres-data-staging:
   minio-data-staging:
+  backend-static-files:
   esdata01:
     driver: local
 networks:
