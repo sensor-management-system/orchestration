@@ -1,5 +1,9 @@
+import click
 from flask_jwt_extended import get_jwt_identity
 
+from ..helpers.errors import ForbiddenError
+from ..helpers.permission import is_user_super_admin, is_user_owner_of_this_object, is_user_in_a_group, \
+    is_user_admin_in_a_group
 from ..models import (
     ConfigurationAttachment,
     Contact,
@@ -50,8 +54,8 @@ def add_contact_to_object(entity_with_contact_list):
     """
     user_entry = (
         db.session.query(User)
-        .filter_by(id=entity_with_contact_list.created_by_id)
-        .first()
+            .filter_by(id=entity_with_contact_list.created_by_id)
+            .first()
     )
     contact_id = user_entry.contact_id
     contact_entry = db.session.query(Contact).filter_by(id=contact_id).first()
@@ -80,7 +84,7 @@ def delete_attachments_in_minio_by_url(url):
 
 
 def delete_attachments_in_minio_by_related_object_id(
-    related_object_class, attachment_class, object_id_intended_for_deletion
+        related_object_class, attachment_class, object_id_intended_for_deletion
 ):
     """
     Delete an Attachment related to an object by Using the minio class
@@ -91,12 +95,45 @@ def delete_attachments_in_minio_by_related_object_id(
     """
     related_object = (
         db.session.query(related_object_class)
-        .filter_by(id=object_id_intended_for_deletion)
-        .first()
+            .filter_by(id=object_id_intended_for_deletion)
+            .first()
     )
     attachment = (
         db.session.query(attachment_class)
-        .filter_by(id=related_object.attachment_id)
-        .first()
+            .filter_by(id=related_object.attachment_id)
+            .first()
     )
     minio.remove_an_object(attachment.url)
+
+
+def check_patch_permission(data, object_to_patch):
+    """
+
+    :param data:
+    :param object_to_patch:
+    :return:
+    """
+    if not is_user_super_admin():
+        object_ = db.session.query(object_to_patch).filter_by(id=data['id']).one_or_none()
+        if object_.is_private:
+            click.secho(object_.is_private, fg="green")
+            is_user_owner_of_this_object(object_)
+        else:
+            groups_ids = object_.groups_ids
+            if is_user_in_a_group(groups_ids):
+                add_updated_by_id(data)
+            else:
+                raise ForbiddenError(f"User should be in this groups: {groups_ids}")
+
+
+def check_deletion_permission(kwargs, object_to_patch):
+    """
+
+    :param kwargs:
+    :param object_to_patch:
+    :return:
+    """
+    if not is_user_super_admin():
+        groups_ids = db.session.query(object_to_patch).filter_by(id=kwargs['id']).one_or_none().groups_ids
+        if not is_user_admin_in_a_group(groups_ids):
+            raise ForbiddenError(f"User should be admin in one of this groups: {groups_ids}")

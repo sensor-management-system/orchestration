@@ -1,16 +1,16 @@
 """Add {groups_ids, is_private, is_superuser} attributes
 
-Revision ID: 523e1f0740ed
-Revises: 3abc641a1fdb
-Create Date: 2021-09-22 07:19:02.889043
+Revision ID: 12e34f225a6c
+Revises: c1d164f8d5d8
+Create Date: 2021-09-29 07:29:59.046318
 
 """
 import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = '523e1f0740ed'
-down_revision = '3abc641a1fdb'
+revision = '12e34f225a6c'
+down_revision = 'c1d164f8d5d8'
 branch_labels = None
 depends_on = None
 

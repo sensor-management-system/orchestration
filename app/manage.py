@@ -4,12 +4,12 @@ import unittest
 import click
 import coverage
 from flask.cli import FlaskGroup
-from project.api.services.userservice import user_deactivation
 
 from project import create_app
 from project.api.helpers.errors import ErrorResponse
 from project.api.models import User, Contact
 from project.api.models.base_model import db
+from project.api.services.userservice import user_deactivation
 
 app = create_app()
 cli = FlaskGroup(create_app=create_app)
@@ -185,8 +185,12 @@ def make_super_user(user_subject):
     :return:
     """
     user = db.session.query(User).filter_by(subject=user_subject).first()
-    user.admin = True
+    user.is_superuser = True
     db.session.commit()
+    click.secho(f"{user.contact.given_name} is now a super user!", fg="green")
+    click.secho("As super user you will be able to modify or delete any entity \n"
+                "in SMS without the need to belong to a group or a project.\n"
+                "Please use it wisely", fg="blue")
 
 
 if __name__ == "__main__":

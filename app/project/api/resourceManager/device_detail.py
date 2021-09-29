@@ -1,13 +1,10 @@
 from flask_rest_jsonapi import ResourceDetail, JsonApiException
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 
-from .base_resource import delete_attachments_in_minio_by_url
+from .base_resource import delete_attachments_in_minio_by_url, check_patch_permission, check_deletion_permission
 from ..helpers.errors import ConflictError
-from ..helpers.errors import ForbiddenError
-from ..helpers.permission import is_user_in_a_group, is_user_Admin_in_a_group
 from ..models.base_model import db
 from ..models.device import Device
-from ..resourceManager.base_resource import add_updated_by_id
 from ..schemas.device_schema import DeviceSchema
 from ..token_checker import token_required
 
@@ -19,17 +16,12 @@ class DeviceDetail(ResourceDetail):
     """
 
     def before_patch(self, args, kwargs, data):
-        """Add Created by user id to the data"""
-        groups_ids = db.session.query(Device).filter_by(id=data['id']).first().groups_ids
-        if is_user_in_a_group(groups_ids):
-            add_updated_by_id(data)
-        else:
-            raise ForbiddenError(f"User should be in this groups:{groups_ids}")
+        """Checks for permission & Add Created by user id to the data"""
+        check_patch_permission(data, Device)
 
     def before_delete(self, args, kwargs):
-        groups_ids = db.session.query(Device).filter_by(id=kwargs['id']).first().groups_ids
-        if not is_user_Admin_in_a_group(groups_ids):
-            raise ForbiddenError(f"User should be admin in one of this groups:{groups_ids}")
+        """Checks for permission"""
+        check_deletion_permission(kwargs, Device)
 
     def delete(self, *args, **kwargs):
         """
