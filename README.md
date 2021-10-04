@@ -19,6 +19,19 @@ In case you have an older pip version you may have to run `pip install --upgrade
     docker-compose --env-file ./docker/env.dev  up -d
 ```
 
+3. In order to make sure that the search filter work, you have to create
+   the search index on the elastic search:
+
+```bash
+docker-compose --env-file ./docker/env.dev exec backend python3 manage.py es reindex
+```
+
+This ensures that the search index can be used for full text search
+**AND** for keyword search (without it search for specific
+device types for example will not work).
+
+
+
 You can watch the output of the containers witch `docker-compose logs`:
 
 ```bash
