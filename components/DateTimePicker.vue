@@ -176,6 +176,8 @@ export default class DateTimePicker extends Vue {
   get valueAsDateTimeString (): string {
     if (this.value) {
       this.setTextInputByValue(this.value)
+    } else if (this.isValueValidByCurrentFormat(this.textInput)) {
+      this.emitDateTimeObject()
     }
     return this.textInput
   }
