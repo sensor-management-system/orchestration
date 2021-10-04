@@ -2,7 +2,7 @@ FROM minio/mc:latest
 
 RUN \
     microdnf update --nodocs && \
-    microdnf install tar && \
+    microdnf install tar gzip && \
     microdnf clean all
 
 COPY ./minio_backup.sh /backup.sh
