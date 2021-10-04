@@ -228,6 +228,7 @@ permissions and limitations under the Licence.
                     <v-list-item
                       :disabled="!$auth.loggedIn"
                       dense
+                      :to="'/devices/copy/' + result.id"
                     >
                       <v-list-item-content>
                         <v-list-item-title
