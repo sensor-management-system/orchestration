@@ -158,6 +158,34 @@ build-deploy-image-backend-gfz-prod:
     - if: '$CI_COMMIT_REF_PROTECTED && $CI_COMMIT_TAG'
       when: always
 
+build-deploy-image-mc-gfz-staging:
+  stage: build
+  extends: .docker_build
+  script:
+    - |
+        docker build --tag "$CI_REGISTRY_IMAGE/mc:gfz-latest" -f docker/build/mc/gfz/Dockerfile \
+          docker/build/mc/gfz
+    - docker push "$CI_REGISTRY_IMAGE/mc:gfz-latest"
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: never
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+      when: always
+
+build-deploy-image-mc-gfz-prod:
+  stage: build
+  extends: .docker_build
+  script:
+    - |
+        docker build --tag "$CI_REGISTRY_IMAGE/mc:gfz-${CI_COMMIT_TAG:-prod-latest}" -f docker/build/mc/gfz/Dockerfile \
+          docker/build/mc/gfz
+    - docker push "$CI_REGISTRY_IMAGE/mc:gfz-${CI_COMMIT_TAG:-prod-latest}"
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: never
+    - if: '$CI_COMMIT_REF_PROTECTED && $CI_COMMIT_TAG'
+      when: always
+
 backup-gfz-staging:
   stage: backup
   environment:
@@ -183,9 +211,29 @@ backup-gfz-staging:
     # clean up & remove files older than 180 days
     - find /srv/docker/service/backend-db/backups -type f -mtime +180 -exec rm {} \;
     - find /srv/docker/service/vocabulary-db/backups -type f -mtime +180 -exec rm {} \;
+    - find /srv/docker/service/minio/backups -type f -mtime +180 -exec rm {} \;
   script:
     - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T vocabulary-db pg_dump -U $VOCABULARY_DB_USER -d vocabulary -Fc > /srv/docker/service/vocabulary-db/backups/vocabulary_$(date +%Y%m%d-%H%M)_${CI_COMMIT_SHORT_SHA}.dump
     - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T backend-db pg_dump -U $BACKEND_DB_USER -d backend -Fc > /srv/docker/service/backend-db/backups/backend_$(date +%Y%m%d-%H%M)_${CI_COMMIT_SHORT_SHA}.dump
+    # Most of the minio stuff is handled in the backup.sh script.
+    # However, there are some things to mention:
+    # First the mc image was already used to create the bucket. It is very likely that it is
+    # already stopped, so we use docker-compose run here.
+    # Next: We will mount our backup folder into the container in order to write the backup right
+    # into there. We will give the current user & group ids, so that we can edit and delete
+    # the backups content right away.
+    - if (docker-compose -f docker/deployment/gfz/staging/docker-compose.yml run -T --entrypoint '/bin/sh -c' --rm mc echo 'start minio backup'); \
+      then; \
+        docker-compose -f docker/deployment/gfz/staging/docker-compose.yml \
+          run -T --entrypoint '/backup.sh' \
+          --rm \
+          -e USER_ID=$(id -u) \
+          -e GROUP_ID=$(id -g) \
+          -v /srv/docker/service/minio/backups/$(date +%Y%m%d-%H%M)_${CI_COMMIT_SHORT_SHA}:/backups \
+          mc; \
+      else; \
+        echo 'no mc service - skip minio backup'; \
+      fi
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
       when: never
@@ -217,9 +265,22 @@ backup-gfz-prod:
     # clean up & remove files older than 180 days
     - find /srv/docker/service/backend-db/backups -type f -mtime +180 -exec rm {} \;
     - find /srv/docker/service/vocabulary-db/backups -type f -mtime +180 -exec rm {} \;
+    - find /srv/docker/service/minio/backups -type f -mtime +180 -exec rm {} \;
   script:
     - docker-compose -f docker/deployment/gfz/prod/docker-compose.yml exec -T vocabulary-db pg_dump -U $VOCABULARY_DB_USER -d vocabulary -Fc > /srv/docker/service/vocabulary-db/backups/vocabulary_$(date +%Y%m%d-%H%M)_${CI_COMMIT_SHORT_SHA}.dump
     - docker-compose -f docker/deployment/gfz/prod/docker-compose.yml exec -T backend-db pg_dump -U $BACKEND_DB_USER -d backend -Fc > /srv/docker/service/backend-db/backups/backend_$(date +%Y%m%d-%H%M)_${CI_COMMIT_SHORT_SHA}.dump
+    - if (docker-compose -f docker/deployment/gfz/prod/docker-compose.yml run -T --entrypoint '/bin/sh -c' --rm mc echo 'start minio backup'); \
+      then; \
+        docker-compose -f docker/deployment/gfz/prod/docker-compose.yml \
+          run -T --entrypoint '/backup.sh' \
+          --rm \
+          -e USER_ID=$(id -u) \
+          -e GROUP_ID=$(id -g) \
+          -v /srv/docker/service/minio/backups/$(date +%Y%m%d-%H%M)_${CI_COMMIT_SHORT_SHA}:/backups \
+          mc; \
+      else; \
+        echo 'no mc service - skip minio backup'; \
+      fi
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
       when: always
