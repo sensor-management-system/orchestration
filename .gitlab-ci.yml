@@ -230,9 +230,9 @@ backup-gfz-staging:
           -e USER_ID=$(id -u) \
           -e GROUP_ID=$(id -g) \
           -v /srv/docker/service/minio/backups/$(date +%Y%m%d-%H%M)_${CI_COMMIT_SHORT_SHA}:/backups \
-          mc
+          mc;
       else
-        echo 'no mc service - skip minio backup'
+        echo 'no mc service - skip minio backup';
       fi
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
@@ -277,9 +277,9 @@ backup-gfz-prod:
           -e USER_ID=$(id -u) \
           -e GROUP_ID=$(id -g) \
           -v /srv/docker/service/minio/backups/$(date +%Y%m%d-%H%M)_${CI_COMMIT_SHORT_SHA}:/backups \
-          mc
+          mc;
       else
-        echo 'no mc service - skip minio backup'
+        echo 'no mc service - skip minio backup';
       fi
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
