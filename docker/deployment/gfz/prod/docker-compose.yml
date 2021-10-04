@@ -116,22 +116,14 @@ services:
       timeout: 20s
       retries: 3
 
-  createbuckets:
-    image: minio/mc:latest
+  mc:
+    image: ${CI_REGISTRY_IMAGE}/mc:gfz-${CI_COMMIT_TAG:-prod-latest}
     depends_on:
       - minio
     networks:
       - backend
-    # Make a Bucket using minio client mc
-    # https://docs.min.io/docs/minio-client-complete-guid
-    entrypoint: >
-      /bin/sh -c "
-      until curl -f http://minio:9000/minio/health/live; do sleep 5; done;
-      /usr/bin/mc  alias set minio http://minio:9000 ${MINIO_ROOT_USER} ${MINIO_ROOT_PASSWORD} --api S3v4;
-      /usr/bin/mc mb --quiet minio/sms-attachments;
-      /usr/bin/mc policy set download minio/sms-attachments;
-      exit 0;
-      "
+    entrypoint: '/create_bucket.sh'
+
   backend-db:
     image: postgres:12-alpine
     restart: unless-stopped
