@@ -48,6 +48,7 @@ permissions and limitations under the Licence.
           :readonly="readonly"
           :disabled="readonly"
           label="Persistent identifier (PID)"
+          :placeholder="persistentIdentifierPlaceholder"
           @input="update('persistentIdentifier', $event)"
         />
       </v-col>
@@ -160,6 +161,7 @@ permissions and limitations under the Licence.
           :readonly="readonly"
           :disabled="readonly"
           label="Serial number"
+          :placeholder="serialNumberPlaceholder"
           @input="update('serialNumber', $event)"
         />
       </v-col>
@@ -169,6 +171,7 @@ permissions and limitations under the Licence.
           :readonly="readonly"
           :disabled="readonly"
           label="Inventory number"
+          :placeholder="inventoryNumberPlaceholder"
           @input="update('inventoryNumber', $event)"
         />
       </v-col>
@@ -218,6 +221,24 @@ export default class DeviceBasicDataForm extends mixins(Rules) {
     type: Boolean
   })
   readonly readonly!: boolean
+
+  @Prop({
+    default: () => null,
+    type: String
+  })
+  readonly inventoryNumberPlaceholder!: string | null
+
+  @Prop({
+    default: () => null,
+    type: String
+  })
+  readonly serialNumberPlaceholder!: string | null
+
+  @Prop({
+    default: () => null,
+    type: String
+  })
+  readonly persistentIdentifierPlaceholder!: string | null
 
   mounted () {
     this.$api.states.findAllPaginated().then((foundStates) => {
