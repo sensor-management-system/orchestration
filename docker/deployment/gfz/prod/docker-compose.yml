@@ -118,6 +118,9 @@ services:
 
   mc:
     image: ${CI_REGISTRY_IMAGE}/mc:gfz-${CI_COMMIT_TAG:-prod-latest}
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
     depends_on:
       - minio
     networks:
