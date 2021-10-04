@@ -223,7 +223,7 @@ backup-gfz-staging:
     # into there. We will give the current user & group ids, so that we can edit and delete
     # the backups content right away.
     - if (docker-compose -f docker/deployment/gfz/staging/docker-compose.yml run -T --entrypoint '/bin/sh -c' --rm mc echo 'start minio backup'); \
-      then; \
+      then \
         docker-compose -f docker/deployment/gfz/staging/docker-compose.yml \
           run -T --entrypoint '/backup.sh' \
           --rm \
@@ -231,7 +231,7 @@ backup-gfz-staging:
           -e GROUP_ID=$(id -g) \
           -v /srv/docker/service/minio/backups/$(date +%Y%m%d-%H%M)_${CI_COMMIT_SHORT_SHA}:/backups \
           mc; \
-      else; \
+      else \
         echo 'no mc service - skip minio backup'; \
       fi
   rules:
@@ -270,7 +270,7 @@ backup-gfz-prod:
     - docker-compose -f docker/deployment/gfz/prod/docker-compose.yml exec -T vocabulary-db pg_dump -U $VOCABULARY_DB_USER -d vocabulary -Fc > /srv/docker/service/vocabulary-db/backups/vocabulary_$(date +%Y%m%d-%H%M)_${CI_COMMIT_SHORT_SHA}.dump
     - docker-compose -f docker/deployment/gfz/prod/docker-compose.yml exec -T backend-db pg_dump -U $BACKEND_DB_USER -d backend -Fc > /srv/docker/service/backend-db/backups/backend_$(date +%Y%m%d-%H%M)_${CI_COMMIT_SHORT_SHA}.dump
     - if (docker-compose -f docker/deployment/gfz/prod/docker-compose.yml run -T --entrypoint '/bin/sh -c' --rm mc echo 'start minio backup'); \
-      then; \
+      then \
         docker-compose -f docker/deployment/gfz/prod/docker-compose.yml \
           run -T --entrypoint '/backup.sh' \
           --rm \
@@ -278,7 +278,7 @@ backup-gfz-prod:
           -e GROUP_ID=$(id -g) \
           -v /srv/docker/service/minio/backups/$(date +%Y%m%d-%H%M)_${CI_COMMIT_SHORT_SHA}:/backups \
           mc; \
-      else; \
+      else \
         echo 'no mc service - skip minio backup'; \
       fi
   rules:
