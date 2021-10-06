@@ -1,4 +1,4 @@
-"""Set active attribute to True.
+"""Set active attribute to True for contacts and users.
 
 Revision ID: 0139893c4e15
 Revises: c1d164f8d5d8
