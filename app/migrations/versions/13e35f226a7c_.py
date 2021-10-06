@@ -1,7 +1,8 @@
 """Set default values:
- - is_internal -> True
- -  is_private -> False
- - is_superuser -> False
+ - {configuration, device, platform} is_internal -> True
+ - {configuration, device, platform} is_public -> False
+ - {device, platform} is_private -> False
+ - {user} is_superuser -> False
 
 Revision ID: 13e35f226a7c
 Revises: 12e34f225a6c
