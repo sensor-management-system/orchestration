@@ -4,7 +4,11 @@ from datetime import datetime
 
 import sqlalchemy
 from sqlalchemy.ext.declarative import declared_attr
+from sqlalchemy.ext.mutable import MutableList
+from sqlalchemy.orm import validates
 
+from .base_model import db
+from ..helpers.errors import ConflictError
 from ..search import (
     add_to_index,
     create_index,
@@ -12,7 +16,6 @@ from ..search import (
     remove_from_index,
     remove_index,
 )
-from .base_model import db
 
 
 class AuditMixin:
@@ -314,3 +317,29 @@ db.event.listen(db.session, "after_commit", SearchableMixin.after_commit)
 SearchModelWithEntry = collections.namedtuple(
     "SearchModelWithEntry", ["model", "entry"]
 )
+
+
+class PermissionMixin:
+    __abstract__ = True
+    groups_ids = db.Column(MutableList.as_mutable(db.ARRAY(db.Integer)), nullable=True)
+    is_private = db.Column(db.Boolean, default=False)
+    is_internal = db.Column(db.Boolean, default=True)
+    is_public = db.Column(db.Boolean, default=False)
+
+    @validates('is_private')
+    def validate_private(self, key, is_private):
+        if (is_private and self.is_public) | (is_private and self.is_internal):
+            raise ConflictError("failed permission validation")
+        return is_private
+
+    @validates('is_internal')
+    def validate_internal(self, key, is_internal):
+        if (is_internal and self.is_public) | (is_internal and self.is_private):
+            raise ConflictError("failed permission validation")
+        return is_internal
+
+    @validates('is_public')
+    def validate_public(self, key, is_public):
+        if (is_public and self.is_private) | (is_public and self.is_internal):
+            raise ConflictError("failed permission validation")
+        return is_public
