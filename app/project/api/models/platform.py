@@ -28,6 +28,7 @@ class Platform(db.Model, AuditMixin, SearchableMixin):
     )
     groups_ids = db.Column(MutableList.as_mutable(db.ARRAY(db.Integer)), nullable=True)
     is_private = db.Column(db.Boolean, default=False)
+    is_internal = db.Column(db.Boolean, default=True)
 
     def to_search_entry(self):
         """Convert the model to a dict to store it in a full text search."""

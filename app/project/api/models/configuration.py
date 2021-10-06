@@ -52,7 +52,7 @@ class Configuration(db.Model, AuditMixin, SearchableMixin):
         "ConfigurationAttachment", cascade="save-update, merge, delete, delete-orphan"
     )
     groups_ids = db.Column(MutableList.as_mutable(db.ARRAY(db.Integer)), nullable=True)
-    is_private = db.Column(db.Boolean, default=False)
+    is_internal = db.Column(db.Boolean, default=True)
 
     @hybrid_property
     def hierarchy(self):

@@ -39,6 +39,7 @@ class Device(db.Model, AuditMixin, SearchableMixin, IndirectSearchableMixin):
     )
     groups_ids = db.Column(MutableList.as_mutable(db.ARRAY(db.Integer)), nullable=True)
     is_private = db.Column(db.Boolean, default=False)
+    is_internal = db.Column(db.Boolean, default=True)
 
     def to_search_entry(self):
         """Convert the model to an dict to store in the full text search."""
