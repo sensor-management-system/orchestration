@@ -30,6 +30,10 @@ This ensures that the search index can be used for full text search
 **AND** for keyword search (without it search for specific
 device types for example will not work).
 
+Please note: You don't have to run the `reindex` on every startup.
+It is important to run it initially and after each change in the structure of the
+search index as well (new fields to index for example).
+
 
 
 You can watch the output of the containers witch `docker-compose logs`:
