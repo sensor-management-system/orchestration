@@ -222,9 +222,9 @@ services:
     networks:
       - sms
     volumes:
-      - ./ngnix/certs:/etc/nginx/ssl
-      - ./ngnix/default.conf:/etc/nginx/conf.d/default.conf:ro
-      - ./ngnix/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/certs:/etc/nginx/ssl
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./frontend/dist:/etc/nginx/html
       - static-files:/usr/share/nginx/html/static/cv:ro
       - ./backend/app/project/static:/usr/share/nginx/html/static/backend:ro

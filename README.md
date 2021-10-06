@@ -3,7 +3,7 @@
 ## How to run
 
 At first generate self signed certificate you can use the python
-script `ngnix/certs/ice-ca-certs.py`. The script requires the python library *zeroc-icecertutils*,
+script `nginx/certs/ice-ca-certs.py`. The script requires the python library *zeroc-icecertutils*,
 which you can install with `pip install zeroc-icecertutils`. Make sure you execute the script inside
 the target folder `nginx/certs`.
 
