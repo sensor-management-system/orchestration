@@ -65,6 +65,10 @@ class Device(db.Model, AuditMixin, SearchableMixin, IndirectSearchableMixin, Per
             "software_update_actions": [
                 s.to_search_entry() for s in self.device_software_update_actions
             ],
+            "is_internal": self.is_internal,
+            "is_public": self.is_public,
+            "is_private": self.is_private,
+            "created_by_id": self.created_by_id,
         }
 
     def get_parent_search_entities(self):

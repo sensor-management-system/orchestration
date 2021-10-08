@@ -1,5 +1,6 @@
 import click
-from flask_jwt_extended import get_jwt_identity
+from flask_jwt_extended import get_jwt_identity, jwt_required, current_user
+from sqlalchemy import and_, or_
 
 from ..helpers.errors import ForbiddenError
 from ..helpers.permission import is_user_super_admin, is_user_owner_of_this_object, is_user_in_a_group, \
@@ -19,8 +20,6 @@ def add_created_by_id(data):
     """
     Use jwt to add user id to dataset.
     :param data:
-    :param args:
-    :param kwargs:
     :return:
 
     .. note:: every HTTP-Methode should come with a json web token, which automatically
@@ -36,8 +35,6 @@ def add_updated_by_id(data):
     """
     Use jwt to add user id to dataset after updating the data.
     :param data:
-    :param args:
-    :param kwargs:
     :return:
 
     """
@@ -137,3 +134,39 @@ def check_deletion_permission(kwargs, object_to_patch):
         groups_ids = db.session.query(object_to_patch).filter_by(id=kwargs['id']).one_or_none().groups_ids
         if not is_user_admin_in_a_group(groups_ids):
             raise ForbiddenError(f"User should be admin in one of this groups: {groups_ids}")
+
+
+@jwt_required(optional=True)
+def set_object_query(object_):
+    """
+    This methode do the choices:
+    - if user is anonymous then show only public objects.
+    - if the user is superuser the show all.
+    - if user logged in then show public, internal and owned private objects.
+
+    :param object_:
+    :return:
+    """
+    query_ = object_.query
+
+    if get_jwt_identity() is None:
+        query_ = query_.filter_by(is_public=True)
+    else:
+        if not current_user.is_superuser:
+            user_id = current_user.id
+            query0 = object_.query
+            query0 = query0.filter(
+                and_(
+                    object_.is_private == True,
+                    object_.created_by_id == user_id
+                )
+            )
+            query_ = query_.filter(
+                or_(
+                    object_.is_public == True,
+                    object_.is_internal == True
+                )
+            )
+
+            query_ = query_.union(query0)
+    return query_

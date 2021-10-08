@@ -1,10 +1,10 @@
-from ...frj_csv_export.resource import ResourceList
 from ..datalayers.esalchemy import EsSqlalchemyDataLayer
 from ..models.base_model import db
 from ..models.platform import Platform
-from ..resourceManager.base_resource import add_contact_to_object, add_created_by_id
+from ..resourceManager.base_resource import add_contact_to_object, add_created_by_id, set_object_query
 from ..schemas.platform_schema import PlatformSchema
 from ..token_checker import token_required
+from ...frj_csv_export.resource import ResourceList
 
 
 class PlatformList(ResourceList):
@@ -12,6 +12,16 @@ class PlatformList(ResourceList):
     PlatformList class for creating a platformSchema
     only POST and GET method allowed
     """
+
+    def query(self, view_kwargs):
+        """
+        query method To show only allowed objects.
+
+        :param view_kwargs:
+        :return:
+        """
+        query_ = set_object_query(Platform)
+        return query_
 
     def before_create_object(self, data, *args, **kwargs):
         """
@@ -44,5 +54,6 @@ class PlatformList(ResourceList):
         "class": EsSqlalchemyDataLayer,
         "methods": {
             "before_create_object": before_create_object,
+            'query': query
         },
     }

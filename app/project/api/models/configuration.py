@@ -182,6 +182,10 @@ class Configuration(db.Model, AuditMixin, SearchableMixin, PermissionMixin):
             "device_unmount_actions": [
                 d.to_search_entry() for d in self.device_unmount_actions
             ],
+            "is_internal": self.is_internal,
+            "is_public": self.is_public,
+            "is_private": self.is_private,
+            "created_by_id": self.created_by_id,
             # start & end dates?
         }
 
