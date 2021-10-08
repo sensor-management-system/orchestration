@@ -1,4 +1,3 @@
-import requests_cache
 from elasticsearch import Elasticsearch
 from flask import Blueprint, Flask
 from flask_cors import CORS
@@ -78,7 +77,5 @@ def create_app():
     app.register_blueprint(upload_routes)
     # docs_routes
     app.register_blueprint(docs_routes)
-
-    requests_cache.install_cache(cache_name='groups_cache', backend='sqlite', expire_after=180)
 
     return app
