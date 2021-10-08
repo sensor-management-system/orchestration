@@ -73,7 +73,7 @@ permissions and limitations under the Licence.
           <ConfigurationsSelectedItem
             :value="getSelectedNode"
             :breadcrumbs="hierarchyNodeNames"
-            :selected-date="selectedDateOrFallback"
+            :selected-date="selectedDate"
             :readonly="!$auth.loggedIn"
             :contacts="contacts"
             :current-user-mail="currentUserMail"
@@ -132,7 +132,6 @@ import ConfigurationsPlatformDeviceSearch from '@/components/ConfigurationsPlatf
 export default class ConfigurationPlatformsAndDevices extends Vue {
   private selectedNode: ConfigurationsTreeNode | null = null
   private today: DateTime = DateTime.utc()
-  private selectedDate: DateTime = this.today
   private valueCopy: Configuration = new Configuration()
   @Prop({
     required: true,
@@ -169,12 +168,16 @@ export default class ConfigurationPlatformsAndDevices extends Vue {
     dateNotNull: Validator.mustBeProvided('Date')
   }
 
-  get selectedDateOrFallback () {
-    return this.selectedDate || this.today
+  get selectedDate () {
+    return this.$store.getters['configurations/configurationEditDate']
+  }
+
+  set selectedDate (newDate: DateTime) {
+    this.$store.commit('configurations/setConfigurationEditDate', newDate)
   }
 
   get actionDates (): IActionDateWithText[] {
-    return ConfigurationHelper.getActionDatesWithTextsByConfiguration(this.configuration, this.selectedDateOrFallback)
+    return ConfigurationHelper.getActionDatesWithTextsByConfiguration(this.configuration, this.selectedDate, { useMounts: true, useLoctions: false })
   }
 
   setSelectedNode (node: ConfigurationsTreeNode) {
@@ -183,7 +186,7 @@ export default class ConfigurationPlatformsAndDevices extends Vue {
 
   get tree () {
     const selectedNodeId = this.selectedNode?.id
-    const tree = buildConfigurationTree(this.configuration, this.selectedDateOrFallback)
+    const tree = buildConfigurationTree(this.configuration, this.selectedDate)
     if (selectedNodeId) {
       const node = tree.getById(selectedNodeId)
       if (node) {
@@ -212,7 +215,7 @@ export default class ConfigurationPlatformsAndDevices extends Vue {
     if (parentNode) {
       parentNodeId = parentNode.id
     }
-    const mountActions = unmount(this.configuration, node, this.selectedDateOrFallback, contact, description)
+    const mountActions = unmount(this.configuration, node, this.selectedDate, contact, description)
     this.setMountActionsIntoConfiguration(mountActions)
 
     if (parentNodeId) {
@@ -261,7 +264,7 @@ export default class ConfigurationPlatformsAndDevices extends Vue {
   ): void {
     const node: ConfigurationsTreeNode | null = this.selectedNode
 
-    const mountActions = mountPlatform(this.configuration, platform, offsetX, offsetY, offsetZ, contact, description, node, this.selectedDateOrFallback)
+    const mountActions = mountPlatform(this.configuration, platform, offsetX, offsetY, offsetZ, contact, description, node, this.selectedDate)
     this.setMountActionsIntoConfiguration(mountActions)
   }
 
@@ -274,7 +277,7 @@ export default class ConfigurationPlatformsAndDevices extends Vue {
     description: string
   ): void {
     const node: ConfigurationsTreeNode | null = this.selectedNode
-    const mountActions = mountDevice(this.configuration, device, offsetX, offsetY, offsetZ, contact, description, node, this.selectedDateOrFallback)
+    const mountActions = mountDevice(this.configuration, device, offsetX, offsetY, offsetZ, contact, description, node, this.selectedDate)
     this.setMountActionsIntoConfiguration(mountActions)
   }
 

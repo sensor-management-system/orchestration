@@ -88,38 +88,6 @@ permissions and limitations under the Licence.
         />
       </v-col>
     </v-row>
-    <v-row>
-      <v-col cols="12" md="3">
-        <v-select
-          v-model="locationType"
-          label="Location type"
-          :items="[LOCATION_TYPE_STATIONARY, LOCATION_TYPE_DYNAMIC]"
-          :readonly="readonly"
-          clearable
-        />
-      </v-col>
-    </v-row>
-    <div v-if="locationType === LOCATION_TYPE_STATIONARY">
-      <stationary-location-row
-        :configuration="value"
-        :readonly="readonly"
-      />
-      <v-row>
-        <v-col cols="12" md="6">
-          <location-map
-            v-model="value.location"
-            :readonly="readonly"
-          />
-        </v-col>
-      </v-row>
-    </div>
-    <div v-if="locationType === LOCATION_TYPE_DYNAMIC">
-      <dynamic-location-row
-        :configuration="value"
-        :readonly="readonly"
-        @input="$emit('input', $event)"
-      />
-    </div>
   </v-form>
 </template>
 
@@ -127,20 +95,13 @@ permissions and limitations under the Licence.
 import { Vue, Component, Prop } from 'nuxt-property-decorator'
 
 import { Configuration } from '@/models/Configuration'
-import { DynamicLocation, LocationType, StationaryLocation } from '@/models/Location'
 
 import Validator from '@/utils/validator'
 
 import DateTimePicker from '@/components/DateTimePicker.vue'
-import StationaryLocationRow from '@/components/configurations/StationaryLocationRow.vue'
-import LocationMap from '@/components/configurations/LocationMap.vue'
-import DynamicLocationRow from '@/components/configurations/DynamicLocationRow.vue'
 
 @Component({
   components: {
-    DynamicLocationRow,
-    LocationMap,
-    StationaryLocationRow,
     DateTimePicker
   }
 })
@@ -181,34 +142,6 @@ export default class ConfigurationsBasicDataForm extends Vue {
       startDate: Validator.validateInputForStartDate(this.value),
       endDate: Validator.validateInputForEndDate(this.value),
       labelProvided: Validator.mustBeProvided('label')
-    }
-  }
-
-  get locationType (): string | null {
-    switch (true) {
-      case (this.value.location instanceof StationaryLocation):
-        return LocationType.Stationary
-      case (this.value.location instanceof DynamicLocation):
-        return LocationType.Dynamic
-      default:
-        return null
-    }
-  }
-
-  set locationType (locationType: string | null) {
-    switch (locationType) {
-      case LocationType.Stationary:
-        if (!(this.value.location instanceof StationaryLocation)) {
-          this.value.location = new StationaryLocation()
-        }
-        break
-      case LocationType.Dynamic:
-        if (!(this.value.location instanceof DynamicLocation)) {
-          this.value.location = new DynamicLocation()
-        }
-        break
-      default:
-        this.value.location = null
     }
   }
 

@@ -213,6 +213,7 @@ permissions and limitations under the Licence.
       button-class="v-btn v-btn--is-elevated v-btn--has-bg v-size--default primary"
     >
       <template #message>
+        <!-- eslint-disable-next-line -->
         This site uses cookies to ensure technical functionality. To read more about what we store in the cookies, have a look at our <nuxt-link to="info/privacy-policy">Privacy Policy</nuxt-link>.
       </template>
     </cookie-law>

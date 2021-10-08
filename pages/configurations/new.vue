@@ -108,6 +108,10 @@ export default class ConfigurationNewPage extends Vue {
           disabled: true
         },
         {
+          name: 'Locations',
+          disabled: true
+        },
+        {
           name: 'Actions',
           disabled: true
         }

@@ -35,7 +35,7 @@
  */
 import { DateTime } from 'luxon'
 import { Configuration } from '@/models/Configuration'
-import { IActionDateWithText } from '@/utils/configurationInterfaces'
+import { IActionDateWithTextItem } from '@/utils/configurationInterfaces'
 import { ConfigurationsTreeNode } from '@/viewmodels/ConfigurationsTreeNode'
 import { PlatformNode } from '@/viewmodels/PlatformNode'
 import { DeviceNode } from '@/viewmodels/DeviceNode'
@@ -43,57 +43,114 @@ import { PlatformMountAction } from '@/models/PlatformMountAction'
 import { DeviceMountAction } from '@/models/DeviceMountAction'
 import { ConfigurationsTree } from '@/viewmodels/ConfigurationsTree'
 import { dateToDateTimeStringHHMM } from '@/utils/dateHelper'
+
+interface IActionDatesWithTextSetting {
+  useMounts: boolean | undefined
+  useLoctions: boolean | undefined
+}
 export default {
-  getActionDatesWithTextsByConfiguration (configuration: Configuration, selectedDate: DateTime): IActionDateWithText[] {
-    const datesWithTexts = []
-    for (const platformMountAction of configuration.platformMountActions) {
-      datesWithTexts.push({
-        date: platformMountAction.date,
-        text: 'Mount ' + platformMountAction.platform.shortName
-      })
+  getActionDatesWithTextsByConfiguration (configuration: Configuration, selectedDate: DateTime, setting: IActionDatesWithTextSetting): IActionDateWithTextItem[] {
+    const datesWithTexts: IActionDateWithTextItem[] = []
+    if (setting.useMounts) {
+      for (const platformMountAction of configuration.platformMountActions) {
+        datesWithTexts.push({
+          date: platformMountAction.date,
+          text: 'Mount ' + platformMountAction.platform.shortName
+        })
+      }
+      for (const platformUnmountAction of configuration.platformUnmountActions) {
+        datesWithTexts.push({
+          date: platformUnmountAction.date,
+          text: 'Unmount ' + platformUnmountAction.platform.shortName
+        })
+      }
+      for (const deviceMountAction of configuration.deviceMountActions) {
+        datesWithTexts.push({
+          date: deviceMountAction.date,
+          text: 'Mount ' + deviceMountAction.device.shortName
+        })
+      }
+      for (const deviceUnmountAction of configuration.deviceUnmountActions) {
+        datesWithTexts.push({
+          date: deviceUnmountAction.date,
+          text: 'Unmount ' + deviceUnmountAction.device.shortName
+        })
+      }
     }
-    for (const platformUnmountAction of configuration.platformUnmountActions) {
-      datesWithTexts.push({
-        date: platformUnmountAction.date,
-        text: 'Unmount ' + platformUnmountAction.platform.shortName
-      })
-    }
-    for (const deviceMountAction of configuration.deviceMountActions) {
-      datesWithTexts.push({
-        date: deviceMountAction.date,
-        text: 'Mount ' + deviceMountAction.device.shortName
-      })
-    }
-    for (const deviceUnmountAction of configuration.deviceUnmountActions) {
-      datesWithTexts.push({
-        date: deviceUnmountAction.date,
-        text: 'Unmount ' + deviceUnmountAction.device.shortName
-      })
+    if (setting.useLoctions) {
+      for (const staticLocationBeginAction of configuration.staticLocationBeginActions) {
+        if (staticLocationBeginAction.beginDate) {
+          datesWithTexts.push({
+            date: staticLocationBeginAction.beginDate,
+            text: 'Static location begin'
+          })
+        }
+      }
+      for (const staticLocationEndAction of configuration.staticLocationEndActions) {
+        if (staticLocationEndAction.endDate) {
+          datesWithTexts.push({
+            date: staticLocationEndAction.endDate,
+            text: 'Static location end'
+          })
+        }
+      }
+      for (const dynamicLocationBeginAction of configuration.dynamicLocationBeginActions) {
+        if (dynamicLocationBeginAction.beginDate) {
+          datesWithTexts.push({
+            date: dynamicLocationBeginAction.beginDate,
+            text: 'Dynamic location begin'
+          })
+        }
+      }
+      for (const dynamicLocationEndAction of configuration.dynamicLocationEndActions) {
+        if (dynamicLocationEndAction.endDate) {
+          datesWithTexts.push({
+            date: dynamicLocationEndAction.endDate,
+            text: 'Dynamic location end'
+          })
+        }
+      }
     }
     datesWithTexts.push({
+      text: '',
       date: selectedDate,
       isSelected: true
     })
     datesWithTexts.push({
+      text: '',
       date: DateTime.utc(),
       isNow: true
     })
 
-    const byDates: { [idx: number]: any[] } = {}
+    // sort by date
+    // we can use native comparision on luxon objects
+    datesWithTexts.sort((a, b) => {
+      if (a.date < b.date) {
+        return -1
+      }
+      if (a.date > b.date) {
+        return 1
+      }
+      return 0
+    })
+
+    // group by date
+    const dateIndex: { [idx: number]: number } = {}
+    const itemsGroupedByDate: IActionDateWithTextItem[][] = []
     for (const dateObject of datesWithTexts) {
       const key: number = dateObject.date.toMillis()
-      if (!byDates[key]) {
-        byDates[key] = [dateObject]
+      if (!dateIndex[key]) {
+        dateIndex[key] = itemsGroupedByDate.length
+        itemsGroupedByDate.push([dateObject])
       } else {
-        byDates[key].push(dateObject)
+        const index = dateIndex[key]
+        itemsGroupedByDate[index].push(dateObject)
       }
     }
-    const allDates: number[] = [...Object.keys(byDates)].map(x => parseFloat(x))
-    allDates.sort()
 
-    const result = []
-    for (const key of allDates) {
-      const value: any[] = byDates[key]
+    const result: IActionDateWithTextItem[] = []
+
+    itemsGroupedByDate.forEach((value) => {
       const texts = value.filter(e => e.text).map(e => e.text)
       const isNow = value.filter(e => e.isNow).length > 0
       const isSelected = value.filter(e => e.isSelected).length > 0
@@ -104,7 +161,7 @@ export default {
         text += 'Now'
 
         if (texts.length > 0) {
-          text += ' + ' + texts.length + ' more mount/unmount'
+          text += ' + ' + texts.length + ' more'
           if (texts.length > 1) {
             text += ' actions'
           } else {
@@ -115,7 +172,7 @@ export default {
         text += texts[0]
 
         if (texts.length > 1) {
-          text += ' + ' + (texts.length - 1) + ' more mount/unmount'
+          text += ' + ' + (texts.length - 1) + ' more'
           if (texts.length > 2) {
             text += ' actions'
           } else {
@@ -130,7 +187,7 @@ export default {
         date: value[0].date,
         text
       })
-    }
+    })
     return result
   },
 

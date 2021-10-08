@@ -142,19 +142,17 @@ export default class ConfigurationsSearch extends Vue {
   }
 
   basicSearch (searchText: string) {
-    this.runSearch(searchText, [], [], [])
+    this.runSearch(searchText, [], [])
   }
 
   extendedSearch ({
     searchText,
     selectedConfigurationStates,
-    selectedLocationTypes,
     selectedProjects
   }: IConfigurationSearchOption) {
     this.runSearch(
       searchText,
       selectedConfigurationStates,
-      selectedLocationTypes,
       selectedProjects
     )
   }
@@ -162,7 +160,6 @@ export default class ConfigurationsSearch extends Vue {
   runSearch (
     searchText: string | null,
     configurationStates: string[],
-    locationTypes: string[],
     projects: Project[]
   ) {
     this.loading = true
@@ -171,7 +168,6 @@ export default class ConfigurationsSearch extends Vue {
       .newSearchBuilder()
       .withText(searchText)
       .withOneStatusOf(configurationStates)
-      .withOneLocationTypeOf(locationTypes)
       .withOneMatchingProjectOf(projects)
       .build()
     this.lastActiveSearcher

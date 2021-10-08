@@ -51,16 +51,6 @@ permissions and limitations under the Licence.
     </v-row>
     <v-row>
       <v-col cols="12" md="3">
-        <StringSelect
-          v-model="selectedLocationTypes"
-          label="Select a location type"
-          :items="locationTypes"
-          color="blue"
-        />
-      </v-col>
-    </v-row>
-    <v-row>
-      <v-col cols="12" md="3">
         <ProjectSelect
           v-model="selectedProjects"
           label="Select a project"
@@ -89,7 +79,6 @@ permissions and limitations under the Licence.
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 
-import { LocationType } from '@/models/Location'
 import { Project } from '@/models/Project'
 
 import ProjectSelect from '@/components/ProjectSelect.vue'
@@ -107,9 +96,6 @@ export default class ConfigurationsExtendedSearch extends Vue {
   private selectedConfigurationStates: string[] = []
   private configurationStates: string[] = []
 
-  private selectedLocationTypes: string[] = []
-  private locationTypes: string[] = []
-
   private selectedProjects: Project[] = []
 
   mounted () {
@@ -118,18 +104,12 @@ export default class ConfigurationsExtendedSearch extends Vue {
     }).catch((_error) => {
       this.$store.commit('snackbar/setError', 'Loading configuration states failed')
     })
-
-    this.locationTypes = [
-      LocationType.Stationary,
-      LocationType.Dynamic
-    ]
   }
 
   emitSearch () {
     this.$emit('search', {
       searchText: this.searchText,
       selectedConfigurationStates: this.selectedConfigurationStates,
-      selectedLocationTypes: this.selectedLocationTypes,
       selectedProjects: this.selectedProjects
     })
   }
@@ -137,7 +117,6 @@ export default class ConfigurationsExtendedSearch extends Vue {
   clearSearch () {
     this.searchText = null
     this.selectedConfigurationStates = []
-    this.selectedLocationTypes = []
     this.selectedProjects = []
   }
 }

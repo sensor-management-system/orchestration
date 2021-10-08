@@ -30,29 +30,43 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <v-select
-      :value="device"
-      :items="devices"
-      :item-text="(device) => device.shortName"
-      :item-value="(device) => device"
-      :label="deviceSelectLabel"
-      clearable
-      :readonly="readonly"
-      :disabled="readonly"
-      @change="selectDevice"
-    />
-    <v-select
-      v-if="device"
-      :value="value"
-      :items="propertiesOfDevice"
-      :item-text="(property) => property.propertyName"
-      :item-value="(property) => property"
-      :label="propertySelectLabel"
-      clearable
-      :readonly="readonly"
-      :disabled="readonly"
-      @change="selectProperty"
-    />
+    <template v-if="!readonly">
+      <v-select
+        :value="device"
+        :items="devices"
+        :item-text="(device) => device.shortName"
+        :item-value="(device) => device"
+        :label="deviceSelectLabel"
+        clearable
+        :disabled="disabled"
+        @change="selectDevice"
+      />
+      <v-select
+        v-if="device"
+        :value="value"
+        :items="propertiesOfDevice"
+        :item-text="(property) => property.propertyName"
+        :item-value="(property) => property"
+        :label="propertySelectLabel"
+        clearable
+        :disabled="disabled"
+        @change="selectProperty"
+      />
+    </template>
+    <template v-else>
+      <v-row>
+        <v-col>
+          <label>{{ deviceSelectLabel }}</label>
+          {{ deviceName }}
+        </v-col>
+      </v-row>
+      <v-row>
+        <v-col>
+          <label>{{ propertySelectLabel }}</label>
+          {{ propertyName }}
+        </v-col>
+      </v-row>
+    </template>
   </div>
 </template>
 
@@ -122,6 +136,16 @@ export default class DevicePropertyHierarchySelect extends Vue {
   })
   // @ts-ignore
   readonly readonly: boolean
+
+  /**
+   * whether the component is disabled or not
+   */
+  @Prop({
+    default: false,
+    type: Boolean
+  })
+  // @ts-ignore
+  readonly disabled: boolean
 
   private selectedDevice: Device | null = null
 
@@ -204,6 +228,19 @@ export default class DevicePropertyHierarchySelect extends Vue {
      * @type {DeviceProperty|null}
      */
     this.$emit('input', property)
+  }
+
+  get deviceName (): string {
+    let deviceName: string = ''
+    // only show the device name when a property was selected
+    if (this.value && this.device) {
+      deviceName = this.device.shortName
+    }
+    return this.$options.filters?.orDefault(deviceName)
+  }
+
+  get propertyName (): string {
+    return this.$options.filters?.orDefault(this.value?.propertyName)
   }
 }
 </script>

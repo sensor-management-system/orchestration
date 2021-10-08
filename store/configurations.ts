@@ -34,6 +34,8 @@
  * permissions and limitations under the Licence.
  */
 import { ActionContext } from 'vuex/types'
+import { DateTime } from 'luxon'
+
 import { Configuration } from '@/models/Configuration'
 import { Project } from '@/models/Project'
 
@@ -41,13 +43,15 @@ export interface ConfigurationsStoreState {
   configuration: Configuration,
   projects: Project[],
   configurationStates: string[]
+  configurationEditDate: DateTime
 }
 
 export const state = (): ConfigurationsStoreState => {
   return {
     configuration: new Configuration(),
     projects: [],
-    configurationStates: []
+    configurationStates: [],
+    configurationEditDate: DateTime.utc()
   }
 }
 
@@ -60,6 +64,9 @@ export const mutations = {
   },
   setConfigurationsStates (state: ConfigurationsStoreState, configurationStates: string[]) {
     state.configurationStates = configurationStates
+  },
+  setConfigurationEditDate (state: ConfigurationsStoreState, configurationEditDate: DateTime) {
+    state.configurationEditDate = configurationEditDate
   }
 }
 
@@ -75,9 +82,21 @@ export const actions = {
     context.commit('setConfigurationsStates', configurationStates)
   },
   async loadConfigurationById (context: ActionContext<ConfigurationsStoreState, ConfigurationsStoreState>, id:string) {
+    const oldConfigurationId = context.state.configuration?.id
     // @ts-ignore
     const configuration = await this.$api.configurations.findById(id)
     context.commit('setConfiguration', configuration)
+
+    // for the edit date:
+    // the moment we open the very same configuration, we want to stay with the
+    // current edit date (say we switch from the platform & devices tab to the one
+    // for the locations).
+    // However, in case we load a different configuration there is no point in
+    // reusing the old date (it is very likely that it doesn't make sense for
+    // the now selected configuration).
+    if (oldConfigurationId && oldConfigurationId !== id) {
+      context.commit('setConfigurationEditDate', DateTime.utc())
+    }
   },
   async saveConfiguration (context: ActionContext<ConfigurationsStoreState, ConfigurationsStoreState>) {
     // @ts-ignore
@@ -89,5 +108,8 @@ export const actions = {
 export const getters = {
   projectNames: (state: ConfigurationsStoreState) => {
     return state.projects.map((p:Project) => p.name)
+  },
+  configurationEditDate (state: ConfigurationsStoreState): DateTime {
+    return state.configurationEditDate || DateTime.utc()
   }
 }

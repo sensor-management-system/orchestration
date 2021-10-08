@@ -57,6 +57,10 @@ import { DeviceMountActionApi } from '@/services/sms/DeviceMountActionApi'
 import { DeviceUnmountActionApi } from '@/services/sms/DeviceUnmountActionApi'
 import { PlatformMountActionApi } from '@/services/sms/PlatformMountActionApi'
 import { PlatformUnmountActionApi } from '@/services/sms/PlatformUnmountActionApi'
+import { StaticLocationBeginActionApi } from '@/services/sms/StaticLocationBeginActionApi'
+import { StaticLocationEndActionApi } from '@/services/sms/StaticLocationEndActionApi'
+import { DynamicLocationBeginActionApi } from '@/services/sms/DynamicLocationBeginActionApi'
+import { DynamicLocationEndActionApi } from '@/services/sms/DynamicLocationEndActionApi'
 
 export class ConfigurationApi {
   private axiosApi: AxiosInstance
@@ -66,6 +70,11 @@ export class ConfigurationApi {
   private platformMountActionApi: PlatformMountActionApi
   private platformUnmountActionApi: PlatformUnmountActionApi
 
+  private staticLocationBeginActionApi: StaticLocationBeginActionApi
+  private staticLocationEndActionApi: StaticLocationEndActionApi
+  private dynamicLocationBeginActionApi: DynamicLocationBeginActionApi
+  private dynamicLocationEndActionApi: DynamicLocationEndActionApi
+
   private serializer: ConfigurationSerializer
 
   constructor (
@@ -73,13 +82,24 @@ export class ConfigurationApi {
     deviceMountActionApi: DeviceMountActionApi,
     deviceUnmountActionApi: DeviceUnmountActionApi,
     platformMountActionApi: PlatformMountActionApi,
-    platformUnmountActionApi: PlatformUnmountActionApi
+    platformUnmountActionApi: PlatformUnmountActionApi,
+
+    staticLocationBeginActionApi: StaticLocationBeginActionApi,
+    staticLocationEndActionApi: StaticLocationEndActionApi,
+    dynamicLocationBeginActionApi: DynamicLocationBeginActionApi,
+    dynamicLocationEndActionApi: DynamicLocationEndActionApi
   ) {
     this.axiosApi = axiosInstance
+
     this.deviceMountActionApi = deviceMountActionApi
     this.deviceUnmountActionApi = deviceUnmountActionApi
     this.platformMountActionApi = platformMountActionApi
     this.platformUnmountActionApi = platformUnmountActionApi
+
+    this.staticLocationBeginActionApi = staticLocationBeginActionApi
+    this.staticLocationEndActionApi = staticLocationEndActionApi
+    this.dynamicLocationBeginActionApi = dynamicLocationBeginActionApi
+    this.dynamicLocationEndActionApi = dynamicLocationEndActionApi
 
     this.serializer = new ConfigurationSerializer()
   }
@@ -96,13 +116,26 @@ export class ConfigurationApi {
           'device_unmount_actions',
           'platform_mount_actions',
           'platform_unmount_actions',
+          'configuration_static_location_begin_actions',
+          'configuration_static_location_end_actions',
+          'configuration_dynamic_location_begin_actions',
+          'configuration_dynamic_location_end_actions',
           'platform_mount_actions.platform',
           'device_mount_actions.device',
           'device_mount_actions.device.device_properties',
           'device_mount_actions.contact',
           'platform_mount_actions.contact',
           'platform_unmount_actions.contact',
-          'device_unmount_actions.contact'
+          'device_unmount_actions.contact',
+          'configuration_static_location_begin_actions.contact',
+          'configuration_static_location_end_actions.contact',
+          'configuration_dynamic_location_begin_actions.contact',
+          'configuration_dynamic_location_end_actions.contact',
+          'configuration_dynamic_location_begin_actions.x_property',
+          'configuration_dynamic_location_begin_actions.y_property',
+          'configuration_dynamic_location_begin_actions.z_property'
+          // devices of the dynamic location properties must be
+          // part of mounted devices
         ].join(',')
       }
     }).then((rawResponse) => {
@@ -129,6 +162,15 @@ export class ConfigurationApi {
     let deviceMountActionIdsToUpdate: Set<string> = new Set()
     let deviceUnmountActionIdsToDelete: Set<string> = new Set()
     let deviceUnmountActionIdsToUpdate: Set<string> = new Set()
+    let staticLocationBeginActionIdsToDelete: Set<string> = new Set()
+    let staticLocationBeginActionIdsToUpdate: Set<string> = new Set()
+    let staticLocationEndActionIdsToDelete: Set<string> = new Set()
+    let staticLocationEndActionIdsToUpdate: Set<string> = new Set()
+    let dynamicLocationBeginActionIdsToDelete: Set<string> = new Set()
+    let dynamicLocationBeginActionIdsToUpdate: Set<string> = new Set()
+    let dynamicLocationEndActionIdsToDelete: Set<string> = new Set()
+    let dynamicLocationEndActionIdsToUpdate: Set<string> = new Set()
+
     // step 1
     // load existing config to check current setting of the configuration
 
@@ -164,6 +206,22 @@ export class ConfigurationApi {
       const newDeviceUnmountActionIds = new Set(configuration.deviceUnmountActions.map(x => x.id))
       deviceUnmountActionIdsToDelete = new Set(existingConfig.deviceUnmountActions.map(x => x.id).filter(x => !newDeviceUnmountActionIds.has(x)))
       deviceUnmountActionIdsToUpdate = new Set(existingConfig.deviceUnmountActions.map(x => x.id).filter(x => newDeviceUnmountActionIds.has(x)))
+
+      const newStaticLocationBeginActionIds = new Set(configuration.staticLocationBeginActions.map(x => x.id))
+      staticLocationBeginActionIdsToDelete = new Set(existingConfig.staticLocationBeginActions.map(x => x.id).filter(x => !newStaticLocationBeginActionIds.has(x)))
+      staticLocationBeginActionIdsToUpdate = new Set(existingConfig.staticLocationBeginActions.map(x => x.id).filter(x => newStaticLocationBeginActionIds.has(x)))
+
+      const newStaticLocationEndActionIds = new Set(configuration.staticLocationEndActions.map(x => x.id))
+      staticLocationEndActionIdsToDelete = new Set(existingConfig.staticLocationEndActions.map(x => x.id).filter(x => !newStaticLocationEndActionIds.has(x)))
+      staticLocationEndActionIdsToUpdate = new Set(existingConfig.staticLocationEndActions.map(x => x.id).filter(x => newStaticLocationEndActionIds.has(x)))
+
+      const newDynamicLocationBeginActionIds = new Set(configuration.dynamicLocationBeginActions.map(x => x.id))
+      dynamicLocationBeginActionIdsToDelete = new Set(existingConfig.dynamicLocationBeginActions.map(x => x.id).filter(x => !newDynamicLocationBeginActionIds.has(x)))
+      dynamicLocationBeginActionIdsToUpdate = new Set(existingConfig.dynamicLocationBeginActions.map(x => x.id).filter(x => newDynamicLocationBeginActionIds.has(x)))
+
+      const newDynamicLocationEndActionIds = new Set(configuration.dynamicLocationEndActions.map(x => x.id))
+      dynamicLocationEndActionIdsToDelete = new Set(existingConfig.dynamicLocationEndActions.map(x => x.id).filter(x => !newDynamicLocationEndActionIds.has(x)))
+      dynamicLocationEndActionIdsToUpdate = new Set(existingConfig.dynamicLocationEndActions.map(x => x.id).filter(x => newDynamicLocationEndActionIds.has(x)))
     }
 
     if (!configuration.id) {
@@ -189,8 +247,20 @@ export class ConfigurationApi {
     for (const platformMountActionId of platformMountActionIdsToDelete) {
       promisesDelete.push(this.platformMountActionApi.deleteById(platformMountActionId))
     }
-    for (const platformUnmountAtionId of platformUnmountActionIdsToDelete) {
-      promisesDelete.push(this.platformUnmountActionApi.deleteById(platformUnmountAtionId))
+    for (const platformUnmountActionId of platformUnmountActionIdsToDelete) {
+      promisesDelete.push(this.platformUnmountActionApi.deleteById(platformUnmountActionId))
+    }
+    for (const staticLocationBeginActionId of staticLocationBeginActionIdsToDelete) {
+      promisesDelete.push(this.staticLocationBeginActionApi.deleteById(staticLocationBeginActionId))
+    }
+    for (const staticLocationEndActionId of staticLocationEndActionIdsToDelete) {
+      promisesDelete.push(this.staticLocationEndActionApi.deleteById(staticLocationEndActionId))
+    }
+    for (const dynamicLocationBeginActionId of dynamicLocationBeginActionIdsToDelete) {
+      promisesDelete.push(this.dynamicLocationBeginActionApi.deleteById(dynamicLocationBeginActionId))
+    }
+    for (const dynamicLocationEndActionId of dynamicLocationEndActionIdsToDelete) {
+      promisesDelete.push(this.dynamicLocationEndActionApi.deleteById(dynamicLocationEndActionId))
     }
     relationshipsToDelete.forEach(relationship => promisesDelete.push(this.tryToDeleteRelationship(relationship, configurationId)))
 
@@ -224,6 +294,34 @@ export class ConfigurationApi {
         promisesSave.push(this.deviceUnmountActionApi.add(configurationId, deviceUnmountAction))
       } else if (deviceUnmountActionIdsToUpdate.has(deviceUnmountAction.id)) {
         promisesSave.push(this.deviceUnmountActionApi.update(configurationId, deviceUnmountAction))
+      }
+    }
+    for (const staticLocationBeginAction of configuration.staticLocationBeginActions) {
+      if (!staticLocationBeginAction.id) {
+        promisesSave.push(this.staticLocationBeginActionApi.add(configurationId, staticLocationBeginAction))
+      } else if (staticLocationBeginActionIdsToUpdate.has(staticLocationBeginAction.id)) {
+        promisesSave.push(this.staticLocationBeginActionApi.update(configurationId, staticLocationBeginAction))
+      }
+    }
+    for (const staticLocationEndAction of configuration.staticLocationEndActions) {
+      if (!staticLocationEndAction.id) {
+        promisesSave.push(this.staticLocationEndActionApi.add(configurationId, staticLocationEndAction))
+      } else if (staticLocationEndActionIdsToUpdate.has(staticLocationEndAction.id)) {
+        promisesSave.push(this.staticLocationEndActionApi.update(configurationId, staticLocationEndAction))
+      }
+    }
+    for (const dynamicLocationBeginAction of configuration.dynamicLocationBeginActions) {
+      if (!dynamicLocationBeginAction.id) {
+        promisesSave.push(this.dynamicLocationBeginActionApi.add(configurationId, dynamicLocationBeginAction))
+      } else if (dynamicLocationBeginActionIdsToUpdate.has(dynamicLocationBeginAction.id)) {
+        promisesSave.push(this.dynamicLocationBeginActionApi.update(configurationId, dynamicLocationBeginAction))
+      }
+    }
+    for (const dynamicLocationEndAction of configuration.dynamicLocationEndActions) {
+      if (!dynamicLocationEndAction.id) {
+        promisesSave.push(this.dynamicLocationEndActionApi.add(configurationId, dynamicLocationEndAction))
+      } else if (dynamicLocationEndActionIdsToUpdate.has(dynamicLocationEndAction.id)) {
+        promisesSave.push(this.dynamicLocationEndActionApi.update(configurationId, dynamicLocationEndAction))
       }
     }
     await Promise.all(promisesSave)

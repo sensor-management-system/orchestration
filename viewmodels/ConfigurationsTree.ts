@@ -315,6 +315,29 @@ export class ConfigurationsTree implements Iterable<ConfigurationsTreeNode> {
   }
 
   /**
+   * returns a list with all the device nodes in the tree.
+   * @returns {DeviceNode[]} the flat list of all the device nodes in the hierarchy
+   */
+  getAllDeviceNodesAsList (): DeviceNode[] {
+    const result: DeviceNode[] = []
+    const visitAndAddToResult = (node: ConfigurationsTreeNode) => {
+      if (node.isDevice()) {
+        const deviceNode = node as DeviceNode
+        result.push(deviceNode)
+      } else if (node.isPlatform()) {
+        const platformNode = node as PlatformNode
+        for (const innerNode of platformNode.children) {
+          visitAndAddToResult(innerNode)
+        }
+      }
+    }
+    for (const node of this) {
+      visitAndAddToResult(node)
+    }
+    return result
+  }
+
+  /**
    * returns the parent of a node in the tree
    *
    * @param {ConfigurationsTreeNode} node - the node to get the parent of

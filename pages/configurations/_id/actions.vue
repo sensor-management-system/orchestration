@@ -69,7 +69,11 @@ import {
   DeviceUnmountTimelineAction,
   ITimelineAction,
   PlatformMountTimelineAction,
-  PlatformUnmountTimelineAction
+  PlatformUnmountTimelineAction,
+  StaticLocationBeginTimelineAction,
+  StaticLocationEndTimelineAction,
+  DynamicLocationBeginTimelineAction,
+  DynamicLocationEndTimelineAction
 } from '@/utils/configurationInterfaces'
 
 import { byDateOldestLast } from '@/modelUtils/mountHelpers'
@@ -101,7 +105,8 @@ export default class ConfigurationActions extends Vue {
   }
 
   get timelineActions (): ITimelineAction[] {
-    const result = []
+    const devices = this.configuration.deviceMountActions.map(a => a.device)
+    const result: ITimelineAction[] = []
     for (const platformMountAction of this.configuration.platformMountActions) {
       result.push(new PlatformMountTimelineAction(platformMountAction))
     }
@@ -113,6 +118,18 @@ export default class ConfigurationActions extends Vue {
     }
     for (const deviceUnmountAction of this.configuration.deviceUnmountActions) {
       result.push(new DeviceUnmountTimelineAction(deviceUnmountAction))
+    }
+    for (const action of this.configuration.staticLocationBeginActions) {
+      result.push(new StaticLocationBeginTimelineAction(action))
+    }
+    for (const action of this.configuration.staticLocationEndActions) {
+      result.push(new StaticLocationEndTimelineAction(action))
+    }
+    for (const action of this.configuration.dynamicLocationBeginActions) {
+      result.push(new DynamicLocationBeginTimelineAction(action, devices))
+    }
+    for (const action of this.configuration.dynamicLocationEndActions) {
+      result.push(new DynamicLocationEndTimelineAction(action))
     }
 
     result.sort(byDateOldestLast)
