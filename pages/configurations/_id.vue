@@ -76,9 +76,7 @@ export default class ConfigurationsIdPage extends Vue {
     this.isLoading = true
     try {
       // load the configuration
-      const configuration: Configuration = await this.$api.configurations.findById(this.configurationId)
-      // and put it into the store
-      this.$store.commit('configurations/setConfiguration', configuration)
+      await this.$store.dispatch('configurations/loadConfigurationById', this.configurationId)
     } catch (_e) {
       this.$store.commit('snackbar/setError', 'Loading configuration failed')
     } finally {
@@ -109,6 +107,10 @@ export default class ConfigurationsIdPage extends Vue {
         {
           to: '/configurations/' + this.$route.params.id + '/platforms-and-devices',
           name: 'Platforms and Devices'
+        },
+        {
+          to: '/configurations/' + this.$route.params.id + '/locations',
+          name: 'Locations'
         },
         {
           to: '/configurations/' + this.$route.params.id + '/actions',

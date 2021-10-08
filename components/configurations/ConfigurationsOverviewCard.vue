@@ -50,7 +50,7 @@ permissions and limitations under the Licence.
                 :value="configuration.status"
               >
                 <div class="text-caption">
-                  {{ getLocationType(configuration) }}
+                  {{ configuration.projectName || 'no project' }}
                 </div>
               </StatusBadge>
             </v-col>
@@ -205,32 +205,6 @@ permissions and limitations under the Licence.
                   class="nowrap-truncate"
                 >
                   {{ configuration.endDate | dateToDateTimeString }}
-                </v-col>
-              </v-row>
-              <v-row
-                dense
-              >
-                <v-col
-                  cols="4"
-                  xs="4"
-                  sm="3"
-                  md="2"
-                  lg="2"
-                  xl="1"
-                  class="font-weight-medium"
-                >
-                  Project:
-                </v-col>
-                <v-col
-                  cols="8"
-                  xs="8"
-                  sm="9"
-                  md="4"
-                  lg="4"
-                  xl="5"
-                  class="nowrap-truncate"
-                >
-                  {{ getTextOrDefault(configuration.projectName, '-') }}
                 </v-col>
               </v-row>
             </v-card-text>

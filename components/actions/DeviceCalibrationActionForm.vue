@@ -39,7 +39,7 @@ permissions and limitations under the Licence.
           <DateTimePicker
             :value="actionCopy.currentCalibrationDate"
             label="Current calibration date"
-            placeholder="e.g 2000-0131 12:00"
+            placeholder="e.g 2000-01-31 12:00"
             :rules="[rules.currentCalibrationDate,rules.currentCalibrationDateNotNull]"
             @input="setCurrentCalibrationDateAndValidate"
           />

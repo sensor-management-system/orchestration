@@ -52,6 +52,10 @@ import { DeviceUnmountActionSerializer } from '@/serializers/jsonapi/DeviceUnmou
 import { DeviceSerializer } from '@/serializers/jsonapi/DeviceSerializer'
 import { PlatformSerializer } from '@/serializers/jsonapi/PlatformSerializer'
 import { DevicePropertySerializer } from '@/serializers/jsonapi/DevicePropertySerializer'
+import { StaticLocationBeginActionSerializer } from '@/serializers/jsonapi/StaticLocationBeginActionSerializer'
+import { StaticLocationEndActionSerializer } from '@/serializers/jsonapi/StaticLocationEndActionSerializer'
+import { DynamicLocationBeginActionSerializer } from '@/serializers/jsonapi/DynamicLocationBeginActionSerializer'
+import { DynamicLocationEndActionSerializer } from '@/serializers/jsonapi/DynamicLocationEndActionSerializer'
 
 import { DynamicLocation, StationaryLocation, LocationType } from '@/models/Location'
 import { Platform } from '@/models/Platform'
@@ -76,6 +80,10 @@ export class ConfigurationSerializer {
   private platformUnmountActionSerializer: PlatformUnmountActionSerializer = new PlatformUnmountActionSerializer()
   private deviceMountActionSerializer: DeviceMountActionSerializer = new DeviceMountActionSerializer()
   private deviceUnmountActionSerializer: DeviceUnmountActionSerializer = new DeviceUnmountActionSerializer()
+  private staticLocationBeginActionSerializer: StaticLocationBeginActionSerializer = new StaticLocationBeginActionSerializer()
+  private staticLocationEndActionSerializer: StaticLocationEndActionSerializer = new StaticLocationEndActionSerializer()
+  private dynamicLocationBeginActionSerializer: DynamicLocationBeginActionSerializer = new DynamicLocationBeginActionSerializer()
+  private dynamicLocationEndActionSerializer: DynamicLocationEndActionSerializer = new DynamicLocationEndActionSerializer()
 
   convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiEntityListEnvelope): IConfigurationWithMeta[] {
     const included = jsonApiObjectList.included || []
@@ -227,6 +235,18 @@ export class ConfigurationSerializer {
       )
       configuration.deviceUnmountActions = this.deviceUnmountActionSerializer.convertJsonApiRelationshipsModelList(
         rs, included, allPossibleContacts, allPossibleDevices
+      )
+      configuration.staticLocationBeginActions = this.staticLocationBeginActionSerializer.convertJsonApiRelationshipsModelList(
+        rs, included, allPossibleContacts
+      )
+      configuration.staticLocationEndActions = this.staticLocationEndActionSerializer.convertJsonApiRelationshipsModelList(
+        rs, included, allPossibleContacts
+      )
+      configuration.dynamicLocationBeginActions = this.dynamicLocationBeginActionSerializer.convertJsonApiRelationshipsModelList(
+        rs, included, allPossibleContacts, devicePropertyLookupById
+      )
+      configuration.dynamicLocationEndActions = this.dynamicLocationEndActionSerializer.convertJsonApiRelationshipsModelList(
+        rs, included, allPossibleContacts
       )
     }
 

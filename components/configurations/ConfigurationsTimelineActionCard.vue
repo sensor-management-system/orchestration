@@ -64,36 +64,114 @@ permissions and limitations under the Licence.
         <v-card-text
           class="text--primary"
         >
-          <v-row
-            v-if="action.mountInfo && action.mountInfo.parentPlatform"
-            dense
-          >
-            <v-col cols="12" md="4">
-              <label>Mounted on</label>
-              {{ action.mountInfo.parentPlatform.shortName }}
-            </v-col>
-          </v-row>
-          <v-row
-            v-if="action.mountInfo"
-            dense
-          >
-            <v-col cols="12" md="3">
-              <label>Offset x</label>
-              {{ action.mountInfo.offsetX }}
-            </v-col>
-            <v-col cols="12" md="3">
-              <label>Offset y</label>
-              {{ action.mountInfo.offsetY }}
-            </v-col>
-            <v-col cols="12" md="3">
-              <label>Offset z</label>
-              {{ action.mountInfo.offsetZ }}
-            </v-col>
-          </v-row>
+          <div v-if="action.mountInfo">
+            <v-row
+              v-if="action.mountInfo.parentPlatform"
+              dense
+            >
+              <v-col cols="12" md="4">
+                <label>Mounted on</label>
+                {{ action.mountInfo.parentPlatform.shortName }}
+              </v-col>
+            </v-row>
+            <v-row
+              dense
+            >
+              <v-col cols="12" md="3">
+                <label>Offset x</label>
+                {{ action.mountInfo.offsetX }}
+              </v-col>
+              <v-col cols="12" md="3">
+                <label>Offset y</label>
+                {{ action.mountInfo.offsetY }}
+              </v-col>
+              <v-col cols="12" md="3">
+                <label>Offset z</label>
+                {{ action.mountInfo.offsetZ }}
+              </v-col>
+            </v-row>
+          </div>
+          <div v-else-if="action.staticLocationInfo">
+            <v-row
+              dense
+            >
+              <v-col cols="12" md="3">
+                <label>x</label>
+                {{ action.staticLocationInfo.x | orDefault }}
+              </v-col>
+              <v-col cols="12" md="3">
+                <label>y</label>
+                {{ action.staticLocationInfo.y | orDefault }}
+              </v-col>
+              <v-col cols="12" md="3">
+                <label>EPSG Code</label>
+                {{ action.staticLocationInfo.epsgCode | orDefault }}
+              </v-col>
+            </v-row>
+            <v-row
+              dense
+            >
+              <v-col cols="12" md="3" />
+              <v-col cols="12" md="3">
+                <label>z</label>
+                {{ action.staticLocationInfo.z }}
+              </v-col>
+              <v-col cols="12" md="3">
+                <label>Elevation Datum</label>
+                {{ action.staticLocationInfo.elevationDatumName | orDefault }}
+              </v-col>
+            </v-row>
+          </div>
+          <div v-else-if="action.dynamicLocationInfo">
+            <v-row
+              dense
+            >
+              <v-col cols="12" md="3">
+                <label>Device that measures x</label>
+                {{ action.dynamicLocationInfo.deviceX | orDefault }}
+              </v-col>
+              <v-col cols="12" md="3">
+                <label>Device that measures y</label>
+                {{ action.dynamicLocationInfo.deviceY | orDefault }}
+              </v-col>
+              <v-col cols="12" md="3">
+                <label>Device that measures z</label>
+                {{ action.dynamicLocationInfo.deviceZ | orDefault }}
+              </v-col>
+            </v-row>
+            <v-row
+              dense
+            >
+              <v-col cols="12" md="3">
+                <label>Measured Quantity for x</label>
+                {{ action.dynamicLocationInfo.x | orDefault }}
+              </v-col>
+              <v-col cols="12" md="3">
+                <label>Measured Quantity for y</label>
+                {{ action.dynamicLocationInfo.y | orDefault }}
+              </v-col>
+              <v-col cols="12" md="3">
+                <label>Measured Quantity for z</label>
+                {{ action.dynamicLocationInfo.z | orDefault }}
+              </v-col>
+            </v-row>
+            <v-row
+              dense
+            >
+              <v-col cols="12" md="3">
+                <label>EPSG Code</label>
+                {{ action.dynamicLocationInfo.epsgCode | orDefault }}
+              </v-col>
+              <v-col cols="12" md="3">
+                <label>Elevation Datum</label>
+                {{ action.dynamicLocationInfo.elevationDatumName | orDefault }}
+              </v-col>
+            </v-row>
+          </div>
           <v-row dense>
             <v-col>
               <label>Description</label>
-              {{ action.description }}
+              {{ action.description | orDefault }}
             </v-col>
           </v-row>
         </v-card-text>

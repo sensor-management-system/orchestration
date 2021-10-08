@@ -46,6 +46,10 @@ import { GenericDeviceActionAttachmentApi, GenericPlatformActionAttachmentApi } 
 import { DeviceSoftwareUpdateActionApi } from '@/services/sms/DeviceSoftwareUpdateActionApi'
 import { PlatformSoftwareUpdateActionApi } from '@/services/sms/PlatformSoftwareUpdateActionApi'
 import { DeviceSoftwareUpdateActionAttachmentApi, PlatformSoftwareUpdateActionAttachmentApi } from '@/services/sms/SoftwareUpdateActionAttachmentApi'
+import { StaticLocationBeginActionApi } from '@/services/sms/StaticLocationBeginActionApi'
+import { StaticLocationEndActionApi } from '@/services/sms/StaticLocationEndActionApi'
+import { DynamicLocationBeginActionApi } from '@/services/sms/DynamicLocationBeginActionApi'
+import { DynamicLocationEndActionApi } from '@/services/sms/DynamicLocationEndActionApi'
 import { UploadApi } from '@/services/sms/UploadApi'
 
 import { CompartmentApi } from '@/services/cv/CompartmentApi'
@@ -61,6 +65,7 @@ import { ActionTypeApi } from '@/services/cv/ActionTypeApi'
 import { SoftwareTypeApi } from '@/services/cv/SoftwareTypeApi'
 
 import { ProjectApi } from '@/services/project/ProjectApi'
+
 import { DeviceMountActionApi } from '@/services/sms/DeviceMountActionApi'
 import { DeviceUnmountActionApi } from '@/services/sms/DeviceUnmountActionApi'
 import { PlatformMountActionApi } from '@/services/sms/PlatformMountActionApi'
@@ -68,6 +73,9 @@ import { PlatformUnmountActionApi } from '@/services/sms/PlatformUnmountActionAp
 import { GenericPlatformActionApi } from '@/services/sms/GenericPlatformActionApi'
 import { DeviceCalibrationActionAttachmentApi } from '@/services/sms/DeviceCalibrationActionAttachmentApi'
 import { DeviceCalibrationDevicePropertyApi } from '@/services/sms/DeviceCalibrationDevicePropertyApi'
+
+import { ElevationDatumApi } from '@/services/cv/ElevationDatumApi'
+import { EpsgCodeApi } from '@/services/cv/EpsgCodeApi'
 
 const SMS_BASE_URL = process.env.smsBackendUrl
 const CV_BASE_URL = process.env.cvBackendUrl
@@ -93,6 +101,10 @@ export class Api {
   private readonly _deviceCalibrationActionAttachmentApi: DeviceCalibrationActionAttachmentApi
   private readonly _devicePropertyCalibrationApi: DeviceCalibrationDevicePropertyApi
   private readonly _deviceCalibrationActionApi: DeviceCalibrationActionApi
+  private readonly _staticLocationBeginActionApi: StaticLocationBeginActionApi
+  private readonly _staticLocationEndActionApi: StaticLocationEndActionApi
+  private readonly _dynamicLocationBeginActionApi: DynamicLocationBeginActionApi
+  private readonly _dynamicLocationEndActionApi: DynamicLocationEndActionApi
   private readonly _uploadApi: UploadApi
 
   private readonly _manufacturerApi: ManufacturerApi
@@ -108,6 +120,8 @@ export class Api {
   private readonly _softwareTypeApi: SoftwareTypeApi
 
   private readonly _projectApi: ProjectApi
+  private readonly _elevationDatumApi: ElevationDatumApi
+  private readonly _epsgCodeApi: EpsgCodeApi
 
   constructor (
     getIdToken: () => string | null,
@@ -145,12 +159,28 @@ export class Api {
     const platformUnmountActionApi = new PlatformUnmountActionApi(
       this.createAxios(smsBaseUrl, '/platform-unmount-actions', smsConfig, getIdToken)
     )
+    this._staticLocationBeginActionApi = new StaticLocationBeginActionApi(
+      this.createAxios(smsBaseUrl, '/static-location-begin-actions', smsConfig, getIdToken)
+    )
+    this._staticLocationEndActionApi = new StaticLocationEndActionApi(
+      this.createAxios(smsBaseUrl, '/static-location-end-actions', smsConfig, getIdToken)
+    )
+    this._dynamicLocationBeginActionApi = new DynamicLocationBeginActionApi(
+      this.createAxios(smsBaseUrl, '/dynamic-location-begin-actions', smsConfig, getIdToken)
+    )
+    this._dynamicLocationEndActionApi = new DynamicLocationEndActionApi(
+      this.createAxios(smsBaseUrl, '/dynamic-location-end-actions', smsConfig, getIdToken)
+    )
     this._configurationApi = new ConfigurationApi(
       this.createAxios(smsBaseUrl, '/configurations', smsConfig, getIdToken),
       deviceMountActionApi,
       deviceUnmountActionApi,
       platformMountActionApi,
-      platformUnmountActionApi
+      platformUnmountActionApi,
+      this._staticLocationBeginActionApi,
+      this._staticLocationEndActionApi,
+      this._dynamicLocationBeginActionApi,
+      this._dynamicLocationEndActionApi
     )
     this._configurationStatesApi = new ConfigurationStatusApi()
 
@@ -268,6 +298,8 @@ export class Api {
     )
 
     this._projectApi = new ProjectApi()
+    this._elevationDatumApi = new ElevationDatumApi()
+    this._epsgCodeApi = new EpsgCodeApi()
   }
 
   private createAxios (baseUrl: string | undefined, path: string, baseConfig: AxiosRequestConfig, getIdToken?: () => (string | null)): AxiosInstance {
@@ -412,5 +444,13 @@ export class Api {
 
   get projects (): ProjectApi {
     return this._projectApi
+  }
+
+  get elevationData (): ElevationDatumApi {
+    return this._elevationDatumApi
+  }
+
+  get epsgCodes (): EpsgCodeApi {
+    return this._epsgCodeApi
   }
 }

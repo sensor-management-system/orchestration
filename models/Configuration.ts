@@ -38,6 +38,10 @@ import { DeviceUnmountAction } from '@/models/DeviceUnmountAction'
 import { PlatformMountAction } from '@/models/PlatformMountAction'
 import { PlatformUnmountAction } from '@/models/PlatformUnmountAction'
 import { IStationaryLocation, IDynamicLocation, StationaryLocation, DynamicLocation } from '@/models/Location'
+import { StaticLocationBeginAction } from '@/models/StaticLocationBeginAction'
+import { StaticLocationEndAction } from '@/models/StaticLocationEndAction'
+import { DynamicLocationBeginAction } from '@/models/DynamicLocationBeginAction'
+import { DynamicLocationEndAction } from '@/models/DynamicLocationEndAction'
 
 export interface IConfiguration extends IMountActions {
   id: string
@@ -49,6 +53,10 @@ export interface IConfiguration extends IMountActions {
   status: string
   location: IStationaryLocation | IDynamicLocation | null
   contacts: IContact[]
+  staticLocationBeginActions: StaticLocationBeginAction[]
+  staticLocationEndActions: StaticLocationEndAction[]
+  dynamicLocationBeginActions: DynamicLocationBeginAction[]
+  dynamicLocationEndActions: DynamicLocationEndAction[]
 }
 
 export class Configuration implements IConfiguration {
@@ -65,6 +73,10 @@ export class Configuration implements IConfiguration {
   private _deviceUnmountActions: DeviceUnmountAction[] = []
   private _platformMountActions: PlatformMountAction[] = []
   private _platformUnmountActions: PlatformUnmountAction[] = []
+  private _staticLocationBeginActions: StaticLocationBeginAction[] = []
+  private _staticLocationEndActions: StaticLocationEndAction[] = []
+  private _dynamicLocationBeginActions: DynamicLocationBeginAction[] = []
+  private _dynamicLocationEndActions: DynamicLocationEndAction[] = []
 
   get id (): string {
     return this._id
@@ -170,6 +182,38 @@ export class Configuration implements IConfiguration {
     this._platformUnmountActions = newPlatformUnmountActions
   }
 
+  get staticLocationBeginActions (): StaticLocationBeginAction[] {
+    return this._staticLocationBeginActions
+  }
+
+  set staticLocationBeginActions (newActions: StaticLocationBeginAction[]) {
+    this._staticLocationBeginActions = newActions
+  }
+
+  get staticLocationEndActions (): StaticLocationEndAction[] {
+    return this._staticLocationEndActions
+  }
+
+  set staticLocationEndActions (newActions: StaticLocationEndAction[]) {
+    this._staticLocationEndActions = newActions
+  }
+
+  get dynamicLocationBeginActions (): DynamicLocationBeginAction[] {
+    return this._dynamicLocationBeginActions
+  }
+
+  set dynamicLocationBeginActions (newActions: DynamicLocationBeginAction[]) {
+    this._dynamicLocationBeginActions = newActions
+  }
+
+  get dynamicLocationEndActions (): DynamicLocationEndAction[] {
+    return this._dynamicLocationEndActions
+  }
+
+  set dynamicLocationEndActions (newActions: DynamicLocationEndAction[]) {
+    this._dynamicLocationEndActions = newActions
+  }
+
   static createFromObject (someObject: Configuration): Configuration {
     const newObject = new Configuration()
 
@@ -197,6 +241,10 @@ export class Configuration implements IConfiguration {
     newObject.deviceUnmountActions = someObject.deviceUnmountActions.map(DeviceUnmountAction.createFromObject)
     newObject.platformMountActions = someObject.platformMountActions.map(PlatformMountAction.createFromObject)
     newObject.platformUnmountActions = someObject.platformUnmountActions.map(PlatformUnmountAction.createFromObject)
+    newObject.staticLocationBeginActions = someObject.staticLocationBeginActions.map(StaticLocationBeginAction.createFromObject)
+    newObject.staticLocationEndActions = someObject.staticLocationEndActions.map(StaticLocationEndAction.createFromObject)
+    newObject.dynamicLocationBeginActions = someObject.dynamicLocationBeginActions.map(DynamicLocationBeginAction.createFromObject)
+    newObject.dynamicLocationEndActions = someObject.dynamicLocationEndActions.map(DynamicLocationEndAction.createFromObject)
 
     return newObject
   }

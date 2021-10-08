@@ -456,4 +456,101 @@ describe('ConfigurationsTree', () => {
     expect(Object.is(tree.getParent(deviceNode), platformNode)).toBeTruthy()
     expect(tree.getParent(platformNode)).toBeNull()
   })
+  describe('#getAllDeviceNodesAsList', () => {
+    it('should return an empty array for an empty tree', () => {
+      const tree = ConfigurationsTree.fromArray([])
+      const deviceNodes = tree.getAllDeviceNodesAsList()
+
+      expect(deviceNodes).toEqual([])
+    })
+    it('should stay empty if there is just a platform node', () => {
+      const platform = new Platform()
+
+      const platformNode = new PlatformNode(PlatformMountAction.createFromObject({
+        id: '',
+        platform,
+        parentPlatform: null,
+        offsetX: 0,
+        offsetY: 0,
+        offsetZ: 0,
+        contact,
+        date,
+        description: 'Platform mount'
+      }))
+
+      const tree = ConfigurationsTree.fromArray([platformNode])
+
+      const deviceNodes = tree.getAllDeviceNodesAsList()
+
+      expect(deviceNodes).toEqual([])
+    })
+    it('should return a device node if it contains one', () => {
+      const platform = new Platform()
+      const device = new Device()
+
+      const platformNode = new PlatformNode(PlatformMountAction.createFromObject({
+        id: '',
+        platform,
+        parentPlatform: null,
+        offsetX: 0,
+        offsetY: 0,
+        offsetZ: 0,
+        contact,
+        date,
+        description: 'Platform mount'
+      }))
+      const deviceNode = new DeviceNode(DeviceMountAction.createFromObject({
+        id: '',
+        device,
+        parentPlatform: null,
+        offsetX: 0,
+        offsetY: 0,
+        offsetZ: 0,
+        contact,
+        date,
+        description: 'Device mount'
+      }))
+
+      const tree = ConfigurationsTree.fromArray([platformNode, deviceNode])
+
+      const deviceNodes = tree.getAllDeviceNodesAsList()
+
+      expect(deviceNodes).toEqual([deviceNode])
+    })
+    it('should also consider device nodes if they are mounted on platform nodes', () => {
+      const platform = new Platform()
+      const device = new Device()
+
+      const platformNode = new PlatformNode(PlatformMountAction.createFromObject({
+        id: '',
+        platform,
+        parentPlatform: null,
+        offsetX: 0,
+        offsetY: 0,
+        offsetZ: 0,
+        contact,
+        date,
+        description: 'Platform mount'
+      }))
+      const deviceNode = new DeviceNode(DeviceMountAction.createFromObject({
+        id: '',
+        device,
+        parentPlatform: null,
+        offsetX: 0,
+        offsetY: 0,
+        offsetZ: 0,
+        contact,
+        date,
+        description: 'Device mount'
+      }))
+
+      platformNode.getTree().push(deviceNode)
+
+      const tree = ConfigurationsTree.fromArray([platformNode])
+
+      const deviceNodes = tree.getAllDeviceNodesAsList()
+
+      expect(deviceNodes).toEqual([deviceNode])
+    })
+  })
 })
