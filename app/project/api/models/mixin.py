@@ -326,20 +326,38 @@ class PermissionMixin:
     is_internal = db.Column(db.Boolean, default=True)
     is_public = db.Column(db.Boolean, default=False)
 
-    @validates('is_private')
+    @validates("is_private")
     def validate_private(self, key, is_private):
         if (is_private and self.is_public) | (is_private and self.is_internal):
-            raise ConflictError("failed permission validation")
+            raise ConflictError(
+                "Please make sure that this object neither public nor internal at first."
+            )
+        elif self.groups_ids is not None and self.groups_ids != 0:
+            raise ConflictError(
+                "This Object is in a group. You can't set it to private"
+            )
         return is_private
 
-    @validates('is_internal')
+    @validates("is_internal")
     def validate_internal(self, key, is_internal):
-        if (is_internal and self.is_public) | (is_internal and self.is_private):
-            raise ConflictError("failed permission validation")
+        if (is_internal and self.is_private) | (is_internal and self.is_public):
+            raise ConflictError(
+                "Please make sure that this object neither public nor private at first."
+            )
         return is_internal
 
-    @validates('is_public')
+    @validates("is_public")
     def validate_public(self, key, is_public):
         if (is_public and self.is_private) | (is_public and self.is_internal):
-            raise ConflictError("failed permission validation")
+            raise ConflictError(
+                "Please make sure that this object neither private nor internal at first."
+            )
         return is_public
+
+    @validates("groups_ids")
+    def validate_groups_ids(self, key, groups_ids):
+        if self.is_private:
+            raise ConflictError(
+                "This Object is Private. If you want to add it to a Group you should make it internal or public."
+            )
+        return groups_ids

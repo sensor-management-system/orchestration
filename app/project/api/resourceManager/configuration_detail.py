@@ -1,4 +1,4 @@
-from flask_rest_jsonapi import ResourceDetail, JsonApiException
+from flask_rest_jsonapi import JsonApiException, ResourceDetail
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 
 from .base_resource import delete_attachments_in_minio_by_url

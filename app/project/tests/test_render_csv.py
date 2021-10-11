@@ -44,6 +44,13 @@ class Test(BaseTestCase):
             persistent_identifier="persistent_identifier_test2",
         )
         db.session.add(sensor2)
+
+        # Make the object public.
+        sensor1.is_internal = False
+        sensor2.is_internal = False
+        sensor1.is_public = True
+        sensor2.is_public = True
+
         db.session.commit()
         response = self.client.get(
             self.device_url,

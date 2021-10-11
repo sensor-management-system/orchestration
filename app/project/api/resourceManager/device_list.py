@@ -1,7 +1,11 @@
 from ..datalayers.esalchemy import EsSqlalchemyDataLayer
 from ..models.base_model import db
 from ..models.device import Device
-from ..resourceManager.base_resource import add_contact_to_object, add_created_by_id, set_object_query
+from ..resourceManager.base_resource import (
+    add_contact_to_object,
+    add_created_by_id,
+    set_object_query,
+)
 from ..schemas.device_schema import DeviceSchema
 from ..token_checker import token_required
 from ...frj_csv_export.resource import ResourceList
@@ -55,6 +59,6 @@ class DeviceList(ResourceList):
         "class": EsSqlalchemyDataLayer,
         "methods": {
             "before_create_object": before_create_object,
-            'query': query,
+            "query": query,
         },
     }
