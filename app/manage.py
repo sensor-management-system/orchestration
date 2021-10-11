@@ -179,7 +179,7 @@ def make_super_user(user_subject):
     """
     Upgrade a user to superuser a superuser.
 
-    How To use: python manage.py users upgradetosuperuser testuser@udz.de
+    How To use: python manage.py users upgradetosuperuser testuser@ufz.de
 
     :param user_subject: the subject attribute identical to jwt.sub
     """
