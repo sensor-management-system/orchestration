@@ -157,14 +157,14 @@ def set_object_query(object_):
             query0 = object_.query
             query0 = query0.filter(
                 and_(
-                    object_.is_private == True,
+                    object_.is_private,
                     object_.created_by_id == user_id
                 )
             )
             query_ = query_.filter(
                 or_(
-                    object_.is_public == True,
-                    object_.is_internal == True
+                    object_.is_public,
+                    object_.is_internal
                 )
             )
 
