@@ -46,14 +46,15 @@ def encode_token_date_with_hs256(
     return create_access_token(identity=identity, additional_claims=token_data)
 
 
-def create_token():
+def create_token(token_data=None):
     """
     Mock a 'HS256' jwt same to the one, that come from idp
      and prepare the access header.
 
     :return: an access token dict for the request headers
     """
-    token_data = generate_token_data()
+    if token_data is None:
+        token_data = generate_token_data()
     hs256_token = encode_token_date_with_hs256(token_data)
     access_headers = {"Authorization": "Bearer {}".format(hs256_token)}
     return access_headers
