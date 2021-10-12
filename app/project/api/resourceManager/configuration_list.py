@@ -1,7 +1,8 @@
 from ..datalayers.esalchemy import EsSqlalchemyDataLayer
 from ..models.base_model import db
 from ..models.configuration import Configuration
-from ..resourceManager.base_resource import add_contact_to_object, add_created_by_id, set_object_query
+from ..resourceManager.base_resource import add_contact_to_object, add_created_by_id, set_object_query, \
+    validate_object_state
 from ..schemas.configuration_schema import ConfigurationSchema
 from ..token_checker import token_required
 from ...frj_csv_export.resource import ResourceList
@@ -32,6 +33,7 @@ class ConfigurationList(ResourceList):
         :return:
         """
         add_created_by_id(data)
+        validate_object_state(data)
 
     def after_post(self, result):
         """
