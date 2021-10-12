@@ -2,7 +2,7 @@ import click
 from flask_jwt_extended import get_jwt_identity, jwt_required, current_user
 from sqlalchemy import and_, or_
 
-from ..helpers.errors import ForbiddenError
+from ..helpers.errors import ForbiddenError, ConflictError
 from ..helpers.permission import is_user_super_admin, is_user_owner_of_this_object, is_user_in_a_group, \
     is_user_admin_in_a_group
 from ..models import (
@@ -170,3 +170,25 @@ def set_object_query(object_):
 
             query_ = query_.union(query0)
     return query_
+
+
+def validate_object_state(data):
+    """
+    Methode to validate the state of an object before a post request
+    It will throw an ConflictError if multiple states are True
+    or set the state to internal if all are False.
+
+    :param data: json date sent wit the request.
+    """
+    if (data["is_private"] is False) and (data["is_public"] is False) and (
+            data["is_internal"] is False):
+        data["is_internal"] = True
+        data["is_public"] = False
+        data["is_private"] = False
+
+    elif (data["is_private"] and data["is_public"]) | (data["is_private"] and data["is_internal"]) | (
+            data["is_public"] and data["is_internal"]):
+        raise ConflictError(
+            "An Object should only have one state of view. Only one of These values is allowed to be true: "
+            "{is_public, is_private, is_internal}"
+        )
