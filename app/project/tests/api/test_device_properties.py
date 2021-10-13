@@ -270,7 +270,11 @@ class TestDevicePropertyServices(BaseTestCase):
 
     def test_delete_device_property_api(self):
         """Ensure that we can delete a device property."""
-        device1 = Device(short_name="Just a device")
+        device1 = Device(short_name="Just a device",
+                         is_public=False,
+                         is_private=False,
+                         is_internal=True,
+                         )
         db.session.add(device1)
         db.session.commit()
         device_property1 = DeviceProperty(

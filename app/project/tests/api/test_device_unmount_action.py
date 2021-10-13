@@ -109,7 +109,10 @@ class TestDeviceUnmountAction(BaseTestCase):
         )
         db.session.add(configuration1)
         configuration2 = Configuration(
-            label="sample configuration II", location_type="static"
+            label="sample configuration II", location_type="static",
+            is_public=False,
+            is_private=False,
+            is_internal=True,
         )
         db.session.add(configuration2)
 
@@ -163,7 +166,7 @@ class TestDeviceUnmountAction(BaseTestCase):
         # then test only for the first configuration
         with self.client:
             url_get_for_configuration1 = (
-                base_url + f"/configurations/{configuration1.id}/device-unmount-actions"
+                    base_url + f"/configurations/{configuration1.id}/device-unmount-actions"
             )
             response = self.client.get(
                 url_get_for_configuration1, content_type="application/vnd.api+json"
@@ -177,7 +180,7 @@ class TestDeviceUnmountAction(BaseTestCase):
         # and test the second configuration
         with self.client:
             url_get_for_configuration2 = (
-                base_url + f"/configurations/{configuration2.id}/device-unmount-actions"
+                    base_url + f"/configurations/{configuration2.id}/device-unmount-actions"
             )
             response = self.client.get(
                 url_get_for_configuration2, content_type="application/vnd.api+json"
@@ -191,8 +194,8 @@ class TestDeviceUnmountAction(BaseTestCase):
         # and for a non existing
         with self.client:
             url_get_for_non_existing_configuration = (
-                base_url
-                + f"/configurations/{configuration2.id + 9999}/device-unmount-actions"
+                    base_url
+                    + f"/configurations/{configuration2.id + 9999}/device-unmount-actions"
             )
             response = self.client.get(
                 url_get_for_non_existing_configuration,
@@ -259,7 +262,7 @@ class TestDeviceUnmountAction(BaseTestCase):
         # test only for the first device
         with self.client:
             url_get_for_device1 = (
-                base_url + f"/devices/{device1.id}/device-unmount-actions"
+                    base_url + f"/devices/{device1.id}/device-unmount-actions"
             )
             response = self.client.get(
                 url_get_for_device1, content_type="application/vnd.api+json"
@@ -273,7 +276,7 @@ class TestDeviceUnmountAction(BaseTestCase):
         # and test the second device
         with self.client:
             url_get_for_device2 = (
-                base_url + f"/devices/{device2.id}/device-unmount-actions"
+                    base_url + f"/devices/{device2.id}/device-unmount-actions"
             )
             response = self.client.get(
                 url_get_for_device2, content_type="application/vnd.api+json"
@@ -287,7 +290,7 @@ class TestDeviceUnmountAction(BaseTestCase):
         # and for a non existing
         with self.client:
             url_get_for_non_existing_device = (
-                base_url + f"/devices/{device2.id + 9999}/device-unmount-actions"
+                    base_url + f"/devices/{device2.id + 9999}/device-unmount-actions"
             )
             response = self.client.get(
                 url_get_for_non_existing_device,
