@@ -40,7 +40,11 @@ class TestConfigurationDynamicLocationEndActionServices(BaseTestCase):
         Ensure POST a new configuration static location end action
         can be added to the database.
         """
-        device = Device(short_name="Device 666")
+        device = Device(short_name="Device 666",
+                        is_public=False,
+                        is_private=False,
+                        is_internal=True,
+                        )
 
         config = generate_configuration_model()
         mock_jwt = generate_token_data()

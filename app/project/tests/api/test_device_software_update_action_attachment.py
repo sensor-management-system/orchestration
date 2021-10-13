@@ -41,7 +41,11 @@ class TestDeviceSoftwareUpdateActionAttachment(BaseTestCase):
 
     def test_post_device_software_update_action_attachment(self):
         """TEST Create DeviceSoftwareUpdateActionAttachment"""
-        device = Device(short_name="Device 277")
+        device = Device(short_name="Device 277",
+                        is_public=False,
+                        is_private=False,
+                        is_internal=True,
+                        )
         mock_jwt = generate_token_data()
         contact = Contact(
             given_name=mock_jwt["given_name"],
@@ -93,7 +97,11 @@ class TestDeviceSoftwareUpdateActionAttachment(BaseTestCase):
         device_software_update_action_attachment = (
             add_device_software_update_action_attachment()
         )
-        device = Device(short_name="Device new 277")
+        device = Device(short_name="Device new 277",
+                        is_public=False,
+                        is_private=False,
+                        is_internal=True,
+                        )
         db.session.add(device)
         db.session.commit()
         attachment = DeviceAttachment(

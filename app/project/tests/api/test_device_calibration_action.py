@@ -9,11 +9,11 @@ from project.tests.base import BaseTestCase, fake, generate_token_data
 from project.tests.models.test_device_calibration_action_model import (
     add_device_calibration_action,
 )
-from project.tests.models.test_device_calibration_attachment_model import \
-    add_device_calibration_attachment
 from project.tests.models.test_device_calibration_action_model import (
     add_device_property_calibration_model,
 )
+from project.tests.models.test_device_calibration_attachment_model import \
+    add_device_calibration_attachment
 
 
 class TestDeviceCalibrationAction(BaseTestCase):
@@ -43,7 +43,11 @@ class TestDeviceCalibrationAction(BaseTestCase):
 
     def test_post_device_calibration_action(self):
         """Create DeviceCalibrationAction."""
-        device = Device(short_name="Device 12")
+        device = Device(short_name="Device 12",
+                        is_public=False,
+                        is_private=False,
+                        is_internal=True,
+                        )
         mock_jwt = generate_token_data()
         contact = Contact(
             given_name=mock_jwt["given_name"],
@@ -101,9 +105,17 @@ class TestDeviceCalibrationAction(BaseTestCase):
 
     def test_filtered_by_device(self):
         """Ensure that I can prefilter by a specific device."""
-        device1 = Device(short_name="sample device")
+        device1 = Device(short_name="sample device",
+                         is_public=False,
+                         is_private=False,
+                         is_internal=True,
+                         )
         db.session.add(device1)
-        device2 = Device(short_name="sample device II")
+        device2 = Device(short_name="sample device II",
+                         is_public=False,
+                         is_private=False,
+                         is_internal=True,
+                         )
         db.session.add(device2)
 
         contact = Contact(

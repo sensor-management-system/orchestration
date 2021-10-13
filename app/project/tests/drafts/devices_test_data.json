@@ -9,7 +9,10 @@
       "model": "device_model_test1",
       "inventory_number": "device_inventory_number_test1",
       "persistent_identifier": "device_persistent_identifier1",
-      "website": "http://device.website1.de"
+      "website": "http://device.website1.de",
+      "is_public": false,
+      "is_internal": true,
+      "is_private": false
     },
     {
       "description": "device_test2_description",
@@ -20,7 +23,10 @@
       "model": "device_model_test2",
       "inventory_number": "device_inventory_number_test2",
       "persistent_identifier": "device_persistent_identifier2",
-      "website": "http://device.website2.de"
+      "website": "http://device.website2.de",
+      "is_public": false,
+      "is_internal": true,
+      "is_private": false
     },
     {
       "description": "device_test1_changed",
@@ -31,7 +37,10 @@
       "model": "device_model_test1",
       "inventory_number": "device_inventory_number_test1",
       "persistent_identifier": "device_persistent_identifier1",
-      "website": "http://device.website1.de"
+      "website": "http://device.website1.de",
+      "is_public": false,
+      "is_internal": true,
+      "is_private": false
     }
   ],
   "relationships": []

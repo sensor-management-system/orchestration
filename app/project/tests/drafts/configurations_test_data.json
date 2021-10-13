@@ -4,6 +4,9 @@
       "longitude": 56.1,
       "elevation": 42.23,
       "location_type": "test",
+      "is_public": false,
+      "is_internal": true,
+      "is_private": false,
       "hierarchy": [
         {
           "children": [
@@ -23,6 +26,9 @@
     {
       "longitude": 56.1,
       "location_type": "test2",
+      "is_public": false,
+      "is_internal": true,
+      "is_private": false,
       "hierarchy": [
         {
           "children": [
@@ -42,6 +48,9 @@
     {
       "longitude": 56.1,
       "location_type": "test3",
+      "is_public": false,
+      "is_internal": true,
+      "is_private": false,
       "hierarchy": [
         {
           "children": [

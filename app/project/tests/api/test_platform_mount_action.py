@@ -20,11 +20,17 @@ class TestPlatformMountAction(BaseTestCase):
     def test_filtered_by_configuration(self):
         """Ensure that I can prefilter by a specific configuration."""
         configuration1 = Configuration(
-            label="sample configuration", location_type="static"
+            label="sample configuration", location_type="static",
+            is_public=False,
+            is_private=False,
+            is_internal=True,
         )
         db.session.add(configuration1)
         configuration2 = Configuration(
-            label="sample configuration II", location_type="static"
+            label="sample configuration II", location_type="static",
+            is_public=False,
+            is_private=False,
+            is_internal=True,
         )
         db.session.add(configuration2)
 
@@ -33,10 +39,18 @@ class TestPlatformMountAction(BaseTestCase):
         )
         db.session.add(contact)
 
-        platform1 = Platform(short_name="platform1")
+        platform1 = Platform(short_name="platform1",
+                             is_public=False,
+                             is_private=False,
+                             is_internal=True,
+                             )
         db.session.add(platform1)
 
-        platform2 = Platform(short_name="Platform2")
+        platform2 = Platform(short_name="Platform2",
+                             is_public=False,
+                             is_private=False,
+                             is_internal=True,
+                             )
         db.session.add(platform2)
 
         action1 = PlatformMountAction(
@@ -72,7 +86,7 @@ class TestPlatformMountAction(BaseTestCase):
         # then test only for the first configuration
         with self.client:
             url_get_for_configuration1 = (
-                base_url + f"/configurations/{configuration1.id}/platform-mount-actions"
+                    base_url + f"/configurations/{configuration1.id}/platform-mount-actions"
             )
             response = self.client.get(
                 url_get_for_configuration1, content_type="application/vnd.api+json"
@@ -86,7 +100,7 @@ class TestPlatformMountAction(BaseTestCase):
         # and test the second configuration
         with self.client:
             url_get_for_configuration2 = (
-                base_url + f"/configurations/{configuration2.id}/platform-mount-actions"
+                    base_url + f"/configurations/{configuration2.id}/platform-mount-actions"
             )
             response = self.client.get(
                 url_get_for_configuration2, content_type="application/vnd.api+json"
@@ -100,8 +114,8 @@ class TestPlatformMountAction(BaseTestCase):
         # and for a non existing
         with self.client:
             url_get_for_non_existing_configuration = (
-                base_url
-                + f"/configurations/{configuration2.id + 9999}/platform-mount-actions"
+                    base_url
+                    + f"/configurations/{configuration2.id + 9999}/platform-mount-actions"
             )
             response = self.client.get(
                 url_get_for_non_existing_configuration,
@@ -112,11 +126,17 @@ class TestPlatformMountAction(BaseTestCase):
     def test_filtered_by_platform(self):
         """Ensure that I can prefilter by a specific platform."""
         configuration1 = Configuration(
-            label="sample configuration", location_type="static"
+            label="sample configuration", location_type="static",
+            is_public=False,
+            is_private=False,
+            is_internal=True,
         )
         db.session.add(configuration1)
         configuration2 = Configuration(
-            label="sample configuration II", location_type="static"
+            label="sample configuration II", location_type="static",
+            is_public=False,
+            is_private=False,
+            is_internal=True,
         )
         db.session.add(configuration2)
 
@@ -125,10 +145,18 @@ class TestPlatformMountAction(BaseTestCase):
         )
         db.session.add(contact)
 
-        platform1 = Platform(short_name="platform1")
+        platform1 = Platform(short_name="platform1",
+                             is_public=False,
+                             is_private=False,
+                             is_internal=True,
+                             )
         db.session.add(platform1)
 
-        platform2 = Platform(short_name="Platform2")
+        platform2 = Platform(short_name="Platform2",
+                             is_public=False,
+                             is_private=False,
+                             is_internal=True,
+                             )
         db.session.add(platform2)
 
         action1 = PlatformMountAction(
@@ -155,7 +183,7 @@ class TestPlatformMountAction(BaseTestCase):
         # test only for the first platform
         with self.client:
             url_get_for_platform1 = (
-                base_url + f"/platforms/{platform1.id}/platform-mount-actions"
+                    base_url + f"/platforms/{platform1.id}/platform-mount-actions"
             )
             response = self.client.get(
                 url_get_for_platform1, content_type="application/vnd.api+json"
@@ -169,7 +197,7 @@ class TestPlatformMountAction(BaseTestCase):
         # and test the second platform
         with self.client:
             url_get_for_platform2 = (
-                base_url + f"/platforms/{platform2.id}/platform-mount-actions"
+                    base_url + f"/platforms/{platform2.id}/platform-mount-actions"
             )
             response = self.client.get(
                 url_get_for_platform2, content_type="application/vnd.api+json"
@@ -183,7 +211,7 @@ class TestPlatformMountAction(BaseTestCase):
         # and for a non existing
         with self.client:
             url_get_for_non_existing = (
-                base_url + f"/platforms/{platform2.id + 9999}/platform-mount-actions"
+                    base_url + f"/platforms/{platform2.id + 9999}/platform-mount-actions"
             )
             response = self.client.get(
                 url_get_for_non_existing,
@@ -194,24 +222,46 @@ class TestPlatformMountAction(BaseTestCase):
     def test_filtered_by_parent_platform(self):
         """Ensure filter by a specific parent platform works well."""
         configuration1 = Configuration(
-            label="sample configuration", location_type="static"
+            label="sample configuration", location_type="static",
+            is_public=False,
+            is_private=False,
+            is_internal=True,
         )
 
         configuration2 = Configuration(
-            label="sample configuration II", location_type="static"
+            label="sample configuration II", location_type="static",
+            is_public=False,
+            is_private=False,
+            is_internal=True,
         )
 
         contact = Contact(
             given_name="Nils", family_name="Brinckmann", email="nils@gfz-potsdam.de"
         )
 
-        platform1 = Platform(short_name="platform1")
+        platform1 = Platform(short_name="platform1",
+                             is_public=False,
+                             is_private=False,
+                             is_internal=True,
+                             )
 
-        platform2 = Platform(short_name="Platform2")
+        platform2 = Platform(short_name="Platform2",
+                             is_public=False,
+                             is_private=False,
+                             is_internal=True,
+                             )
 
-        platform3 = Platform(short_name="platform3")
+        platform3 = Platform(short_name="platform3",
+                             is_public=False,
+                             is_private=False,
+                             is_internal=True,
+                             )
 
-        platform4 = Platform(short_name="Platform4")
+        platform4 = Platform(short_name="Platform4",
+                             is_public=False,
+                             is_private=False,
+                             is_internal=True,
+                             )
 
         action1 = PlatformMountAction(
             configuration=configuration1,
@@ -248,7 +298,7 @@ class TestPlatformMountAction(BaseTestCase):
         # test only for the first platform
         with self.client:
             url_get_for_platform1 = (
-                base_url + f"/platforms/{platform3.id}/parent-platform-mount-actions"
+                    base_url + f"/platforms/{platform3.id}/parent-platform-mount-actions"
             )
             response = self.client.get(
                 url_get_for_platform1, content_type="application/vnd.api+json"
@@ -262,7 +312,7 @@ class TestPlatformMountAction(BaseTestCase):
         # and test the second platform
         with self.client:
             url_get_for_platform2 = (
-                base_url + f"/platforms/{platform4.id}/parent-platform-mount-actions"
+                    base_url + f"/platforms/{platform4.id}/parent-platform-mount-actions"
             )
             response = self.client.get(
                 url_get_for_platform2, content_type="application/vnd.api+json"
@@ -276,8 +326,8 @@ class TestPlatformMountAction(BaseTestCase):
         # and for a non existing
         with self.client:
             url_get_for_non_existing = (
-                base_url
-                + f"/platforms/{platform2.id + 9999}/parent-platform-mount-actions"
+                    base_url
+                    + f"/platforms/{platform2.id + 9999}/parent-platform-mount-actions"
             )
             response = self.client.get(
                 url_get_for_non_existing,
@@ -308,9 +358,15 @@ class TestPlatformMountAction(BaseTestCase):
         """Create PlatformMountAction."""
         platform = Platform(
             short_name=fake.linux_processor(),
+            is_public=False,
+            is_private=False,
+            is_internal=True,
         )
         parent_platform = Platform(
             short_name="platform parent-platform",
+            is_public=False,
+            is_private=False,
+            is_internal=True,
         )
         mock_jwt = generate_token_data()
         contact = Contact(

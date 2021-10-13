@@ -36,7 +36,11 @@ class TestPlatformSoftwareUpdateAction(BaseTestCase):
 
     def test_post_platform_software_update_action(self):
         """Create PlatformSoftwareUpdateAction."""
-        platform = Platform(short_name="Platform 111")
+        platform = Platform(short_name="Platform 111",
+                            is_public=False,
+                            is_private=False,
+                            is_internal=True,
+                            )
         mock_jwt = generate_token_data()
         contact = Contact(
             given_name=mock_jwt["given_name"],
@@ -100,10 +104,18 @@ class TestPlatformSoftwareUpdateAction(BaseTestCase):
         )
         db.session.add(contact)
 
-        platform1 = Platform(short_name="platform1")
+        platform1 = Platform(short_name="platform1",
+                             is_public=False,
+                             is_private=False,
+                             is_internal=True,
+                             )
         db.session.add(platform1)
 
-        platform2 = Platform(short_name="platform2")
+        platform2 = Platform(short_name="platform2",
+                             is_public=False,
+                             is_private=False,
+                             is_internal=True,
+                             )
         db.session.add(platform2)
 
         action1 = PlatformSoftwareUpdateAction(

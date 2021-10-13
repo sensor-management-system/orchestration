@@ -40,7 +40,11 @@ class TestConfigurationDynamicLocationBeginActionServices(BaseTestCase):
         Ensure POST a new configuration static location begin action
         can be added to the database.
         """
-        device = Device(short_name="Device 555")
+        device = Device(short_name="Device 555",
+                        is_public=False,
+                        is_private=False,
+                        is_internal=True,
+                        )
         x_property = DeviceProperty(
             device=device,
             measuring_range_min=fake.pyfloat(),
@@ -131,7 +135,11 @@ class TestConfigurationDynamicLocationBeginActionServices(BaseTestCase):
         )
 
     def prepare_request_data_with_config(self, description):
-        device = Device(short_name="Device 555")
+        device = Device(short_name="Device 555",
+                        is_public=False,
+                        is_private=False,
+                        is_internal=True,
+                        )
 
         config = generate_configuration_model()
         mock_jwt = generate_token_data()
@@ -250,7 +258,11 @@ class TestConfigurationDynamicLocationBeginActionServices(BaseTestCase):
         )
 
     def prepare_request_data_with_x_property(self, description):
-        device = Device(short_name="Device 575")
+        device = Device(short_name="Device 575",
+                        is_public=False,
+                        is_private=False,
+                        is_internal=True,
+                        )
         x_property = DeviceProperty(
             device=device,
             measuring_range_min=fake.pyfloat(),

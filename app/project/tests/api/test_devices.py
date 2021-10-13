@@ -80,7 +80,11 @@ class TestDeviceService(BaseTestCase):
         # and want to make sure that we can query the attachments
         # together with the device itself.
 
-        device = Device(short_name="device")
+        device = Device(short_name="device",
+                        is_public=False,
+                        is_private=False,
+                        is_internal=True,
+                        )
         db.session.add(device)
 
         attachment1 = DeviceAttachment(
@@ -136,7 +140,11 @@ class TestDeviceService(BaseTestCase):
 
     def test_add_device_device_attachment_relationship(self):
         """Ensure that we can work with the attachment relationship."""
-        device = Device(short_name="device")
+        device = Device(short_name="device",
+                        is_public=False,
+                        is_private=False,
+                        is_internal=True,
+                        )
         db.session.add(device)
 
         attachment1 = DeviceAttachment(
@@ -174,7 +182,11 @@ class TestDeviceService(BaseTestCase):
         # and want to make sure that we can query the properties
         # together with the device itself.
 
-        device = Device(short_name="device")
+        device = Device(short_name="device",
+                        is_public=False,
+                        is_private=False,
+                        is_internal=True,
+                        )
         db.session.add(device)
 
         property1 = DeviceProperty(label="property1", device=device)
@@ -222,7 +234,11 @@ class TestDeviceService(BaseTestCase):
 
     def test_add_device_device_property_relationship(self):
         """Ensure that we can work with the property relationship."""
-        device = Device(short_name="device")
+        device = Device(short_name="device",
+                        is_public=False,
+                        is_private=False,
+                        is_internal=True,
+                        )
         db.session.add(device)
 
         property1 = DeviceProperty(label="property1", device=device)
@@ -254,7 +270,11 @@ class TestDeviceService(BaseTestCase):
 
     def test_add_device_customfield_included(self):
         """Ensure that we can include customfields on getting a device."""
-        device = Device(short_name="device")
+        device = Device(short_name="device",
+                        is_public=False,
+                        is_private=False,
+                        is_internal=True,
+                        )
         db.session.add(device)
 
         customfield1 = CustomField(value="www.gfz-potsdam.de", key="GFZ", device=device)
@@ -306,7 +326,11 @@ class TestDeviceService(BaseTestCase):
 
     def test_add_device_customfield_relationship(self):
         """Ensure that we can work with the customfield relationship."""
-        device = Device(short_name="device")
+        device = Device(short_name="device",
+                        is_public=False,
+                        is_private=False,
+                        is_internal=True,
+                        )
         db.session.add(device)
 
         customfield1 = CustomField(value="www.gfz-potsdam.de", key="GFZ", device=device)

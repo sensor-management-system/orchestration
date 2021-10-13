@@ -17,6 +17,9 @@ class TestCustomFieldServices(BaseTestCase):
         # First we need to make sure that we have a device
         device = Device(
             short_name="Very new device",
+            is_public=False,
+            is_private=False,
+            is_internal=True,
         )
         db.session.add(device)
         db.session.commit()
@@ -79,6 +82,9 @@ class TestCustomFieldServices(BaseTestCase):
         """Ensure that we don't add a customfield with missing key."""
         device = Device(
             short_name="Very new device",
+            is_public=False,
+            is_private=False,
+            is_internal=True,
         )
         db.session.add(device)
         db.session.commit()
@@ -144,8 +150,16 @@ class TestCustomFieldServices(BaseTestCase):
 
     def test_get_customfields_api(self):
         """Ensure that we can get a list of customfields."""
-        device1 = Device(short_name="Just a device")
-        device2 = Device(short_name="Another device")
+        device1 = Device(short_name="Just a device",
+                         is_public=False,
+                         is_private=False,
+                         is_internal=True,
+                         )
+        device2 = Device(short_name="Another device",
+                         is_public=False,
+                         is_private=False,
+                         is_internal=True,
+                         )
 
         db.session.add(device1)
         db.session.add(device2)
@@ -249,8 +263,16 @@ class TestCustomFieldServices(BaseTestCase):
 
     def test_patch_customfield_api(self):
         """Ensure that we can update a customfield."""
-        device1 = Device(short_name="Just a device")
-        device2 = Device(short_name="Another device")
+        device1 = Device(short_name="Just a device",
+                         is_public=False,
+                         is_private=False,
+                         is_internal=True,
+                         )
+        device2 = Device(short_name="Another device",
+                         is_public=False,
+                         is_private=False,
+                         is_internal=True,
+                         )
 
         db.session.add(device1)
         db.session.add(device2)
@@ -297,7 +319,11 @@ class TestCustomFieldServices(BaseTestCase):
 
     def test_delete_customfield_api(self):
         """Ensure that we can delete a customfield."""
-        device1 = Device(short_name="Just a device")
+        device1 = Device(short_name="Just a device",
+                         is_public=False,
+                         is_private=False,
+                         is_internal=True,
+                         )
         db.session.add(device1)
         db.session.commit()
         customfield1 = CustomField(

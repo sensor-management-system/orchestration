@@ -35,7 +35,11 @@ class TestDeviceSoftwareUpdateAction(BaseTestCase):
 
     def test_post_device_software_update_action(self):
         """Create DeviceSoftwareUpdateAction."""
-        device = Device(short_name="Device 1")
+        device = Device(short_name="Device 1",
+                        is_public=False,
+                        is_private=False,
+                        is_internal=True,
+                        )
         mock_jwt = generate_token_data()
         contact = Contact(
             given_name=mock_jwt["given_name"],
@@ -99,10 +103,18 @@ class TestDeviceSoftwareUpdateAction(BaseTestCase):
         )
         db.session.add(contact)
 
-        device1 = Device(short_name="device1")
+        device1 = Device(short_name="device1",
+                         is_public=False,
+                         is_private=False,
+                         is_internal=True,
+                         )
         db.session.add(device1)
 
-        device2 = Device(short_name="device2")
+        device2 = Device(short_name="device2",
+                         is_public=False,
+                         is_private=False,
+                         is_internal=True,
+                         )
         db.session.add(device2)
 
         action1 = DeviceSoftwareUpdateAction(

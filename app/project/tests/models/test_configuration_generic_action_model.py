@@ -14,8 +14,16 @@ class TestConfigurationObjectsModel(BaseTestCase):
 
     def test_add_configuration_device_model(self):
         """""Ensure Add configuration device model """
-        parent_platform = Platform(short_name="Platform 33")
-        device = Device(short_name="Device 44")
+        parent_platform = Platform(short_name="Platform 33",
+                                   is_public=False,
+                                   is_private=False,
+                                   is_internal=True,
+                                   )
+        device = Device(short_name="Device 44",
+                        is_public=False,
+                        is_private=False,
+                        is_internal=True,
+                        )
         conf = generate_configuration_model()
         cd = ConfigurationDevice(
             parent_platform=parent_platform,
@@ -32,8 +40,16 @@ class TestConfigurationObjectsModel(BaseTestCase):
 
     def test_add_configuration_platform_model(self):
         """""Ensure Add configuration platform model """
-        parent_platform = Platform(short_name="Platform 133")
-        platform = Platform(short_name="Platform 233")
+        parent_platform = Platform(short_name="Platform 133",
+                                   is_public=False,
+                                   is_private=False,
+                                   is_internal=True,
+                                   )
+        platform = Platform(short_name="Platform 233",
+                            is_public=False,
+                            is_private=False,
+                            is_internal=True,
+                            )
         conf = generate_configuration_model()
         cp = ConfigurationPlatform(
             parent_platform=parent_platform,

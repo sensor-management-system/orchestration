@@ -6,10 +6,9 @@ from datetime import datetime
 from project import base_url, db
 from project.api.models import Contact, GenericPlatformAction, Platform
 from project.tests.base import BaseTestCase, fake, generate_token_data, test_file_path
-from project.tests.read_from_json import extract_data_from_json_file
-
 from project.tests.models.test_generic_action_attachment_model import \
     add_generic_platform_action_attachment_model
+from project.tests.read_from_json import extract_data_from_json_file
 
 
 class TestGenericPlatformAction(BaseTestCase):
@@ -143,9 +142,13 @@ class TestGenericPlatformAction(BaseTestCase):
 
     def test_filtered_by_platform(self):
         """Ensure that I can prefilter by a specific platform."""
-        platform1 = Platform(short_name="sample platform")
+        platform1 = Platform(short_name="sample platform", is_public=False,
+                             is_private=False,
+                             is_internal=True, )
         db.session.add(platform1)
-        platform2 = Platform(short_name="sample platform II")
+        platform2 = Platform(short_name="sample platform II", is_public=False,
+                             is_private=False,
+                             is_internal=True, )
         db.session.add(platform2)
 
         contact = Contact(
@@ -184,7 +187,7 @@ class TestGenericPlatformAction(BaseTestCase):
         # then test only for the first platform
         with self.client:
             url_get_for_platform1 = (
-                base_url + f"/platforms/{platform1.id}/generic-platform-actions"
+                    base_url + f"/platforms/{platform1.id}/generic-platform-actions"
             )
             response = self.client.get(
                 url_get_for_platform1, content_type="application/vnd.api+json"
@@ -198,7 +201,7 @@ class TestGenericPlatformAction(BaseTestCase):
         # and test the second platform
         with self.client:
             url_get_for_platform2 = (
-                base_url + f"/platforms/{platform2.id}/generic-platform-actions"
+                    base_url + f"/platforms/{platform2.id}/generic-platform-actions"
             )
             response = self.client.get(
                 url_get_for_platform2, content_type="application/vnd.api+json"
@@ -212,7 +215,7 @@ class TestGenericPlatformAction(BaseTestCase):
         # and for a non existing
         with self.client:
             url_get_for_non_existing_platform = (
-                base_url + f"/platforms/{platform2.id + 9999}/generic-platform-actions"
+                    base_url + f"/platforms/{platform2.id + 9999}/generic-platform-actions"
             )
             response = self.client.get(
                 url_get_for_non_existing_platform,

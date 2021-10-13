@@ -38,6 +38,9 @@ class TestPlatformUnmountAction(BaseTestCase):
         """Create PlatformUnmountAction."""
         platform = Platform(
             short_name="Test platform",
+            is_public=False,
+            is_private=False,
+            is_internal=True,
         )
         mock_jwt = generate_token_data()
         contact = Contact(
@@ -98,11 +101,17 @@ class TestPlatformUnmountAction(BaseTestCase):
     def test_filtered_by_configuration(self):
         """Ensure that I can prefilter by a specific configuration."""
         configuration1 = Configuration(
-            label="sample configuration", location_type="static"
+            label="sample configuration", location_type="static",
+            is_public=False,
+            is_private=False,
+            is_internal=True,
         )
         db.session.add(configuration1)
         configuration2 = Configuration(
-            label="sample configuration II", location_type="static"
+            label="sample configuration II", location_type="static",
+            is_public=False,
+            is_private=False,
+            is_internal=True,
         )
         db.session.add(configuration2)
 
@@ -111,10 +120,18 @@ class TestPlatformUnmountAction(BaseTestCase):
         )
         db.session.add(contact)
 
-        platform1 = Platform(short_name="platform1")
+        platform1 = Platform(short_name="platform1",
+                             is_public=False,
+                             is_private=False,
+                             is_internal=True,
+                             )
         db.session.add(platform1)
 
-        platform2 = Platform(short_name="platform2")
+        platform2 = Platform(short_name="platform2",
+                             is_public=False,
+                             is_private=False,
+                             is_internal=True,
+                             )
         db.session.add(platform2)
 
         action1 = PlatformUnmountAction(
@@ -148,8 +165,8 @@ class TestPlatformUnmountAction(BaseTestCase):
         # then test only for the first configuration
         with self.client:
             url_get_for_configuration1 = (
-                base_url
-                + f"/configurations/{configuration1.id}/platform-unmount-actions"
+                    base_url
+                    + f"/configurations/{configuration1.id}/platform-unmount-actions"
             )
             response = self.client.get(
                 url_get_for_configuration1, content_type="application/vnd.api+json"
@@ -163,8 +180,8 @@ class TestPlatformUnmountAction(BaseTestCase):
         # and test the second configuration
         with self.client:
             url_get_for_configuration2 = (
-                base_url
-                + f"/configurations/{configuration2.id}/platform-unmount-actions"
+                    base_url
+                    + f"/configurations/{configuration2.id}/platform-unmount-actions"
             )
             response = self.client.get(
                 url_get_for_configuration2, content_type="application/vnd.api+json"
@@ -178,8 +195,8 @@ class TestPlatformUnmountAction(BaseTestCase):
         # and for a non existing
         with self.client:
             url_get_for_non_existing_configuration = (
-                base_url
-                + f"/configurations/{configuration2.id + 9999}/platform-unmount-actions"
+                    base_url
+                    + f"/configurations/{configuration2.id + 9999}/platform-unmount-actions"
             )
             response = self.client.get(
                 url_get_for_non_existing_configuration,
@@ -190,11 +207,17 @@ class TestPlatformUnmountAction(BaseTestCase):
     def test_filtered_by_platform(self):
         """Ensure that I can prefilter by a specific platforms."""
         configuration1 = Configuration(
-            label="sample configuration", location_type="static"
+            label="sample configuration", location_type="static",
+            is_public=False,
+            is_private=False,
+            is_internal=True,
         )
         db.session.add(configuration1)
         configuration2 = Configuration(
-            label="sample configuration II", location_type="static"
+            label="sample configuration II", location_type="static",
+            is_public=False,
+            is_private=False,
+            is_internal=True,
         )
         db.session.add(configuration2)
 
@@ -203,10 +226,18 @@ class TestPlatformUnmountAction(BaseTestCase):
         )
         db.session.add(contact)
 
-        platform1 = Platform(short_name="platform1")
+        platform1 = Platform(short_name="platform1",
+                             is_public=False,
+                             is_private=False,
+                             is_internal=True,
+                             )
         db.session.add(platform1)
 
-        platform2 = Platform(short_name="platform2")
+        platform2 = Platform(short_name="platform2",
+                             is_public=False,
+                             is_private=False,
+                             is_internal=True,
+                             )
         db.session.add(platform2)
 
         action1 = PlatformUnmountAction(
@@ -232,7 +263,7 @@ class TestPlatformUnmountAction(BaseTestCase):
         # test only for the first platform
         with self.client:
             url_get_for_platform1 = (
-                base_url + f"/platforms/{platform1.id}/platform-unmount-actions"
+                    base_url + f"/platforms/{platform1.id}/platform-unmount-actions"
             )
             response = self.client.get(
                 url_get_for_platform1, content_type="application/vnd.api+json"
@@ -246,7 +277,7 @@ class TestPlatformUnmountAction(BaseTestCase):
         # and test the second platform
         with self.client:
             url_get_for_platform2 = (
-                base_url + f"/platforms/{platform2.id}/platform-unmount-actions"
+                    base_url + f"/platforms/{platform2.id}/platform-unmount-actions"
             )
             response = self.client.get(
                 url_get_for_platform2, content_type="application/vnd.api+json"
@@ -260,7 +291,7 @@ class TestPlatformUnmountAction(BaseTestCase):
         # and for a non existing
         with self.client:
             url_get_for_non_existing_platform = (
-                base_url + f"/platforms/{platform2.id + 9999}/platform-unmount-actions"
+                    base_url + f"/platforms/{platform2.id + 9999}/platform-unmount-actions"
             )
             response = self.client.get(
                 url_get_for_non_existing_platform,

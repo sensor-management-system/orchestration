@@ -10,7 +10,11 @@ from project.tests.base import BaseTestCase, fake, generate_token_data
 
 
 def add_device_calibration_action():
-    device = Device(short_name="Device 12")
+    device = Device(short_name="Device 12",
+                    is_public=False,
+                    is_private=False,
+                    is_internal=True,
+                    )
     mock_jwt = generate_token_data()
     contact = Contact(
         given_name=mock_jwt["given_name"],
@@ -32,7 +36,11 @@ def add_device_calibration_action():
 
 
 def add_device_property_calibration_model():
-    device = Device(short_name="Device 20")
+    device = Device(short_name="Device 20",
+                    is_public=False,
+                    is_private=False,
+                    is_internal=True,
+                    )
     device_property = DeviceProperty(
         device=device,
         measuring_range_min=fake.pyfloat(),

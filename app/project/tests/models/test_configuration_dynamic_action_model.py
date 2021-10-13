@@ -12,7 +12,11 @@ from .test_configurations_model import generate_configuration_model
 
 
 def add_dynamic_location_begin_action_model():
-    device = Device(short_name="Device 555")
+    device = Device(short_name="Device 555",
+                    is_public=False,
+                    is_private=False,
+                    is_internal=True,
+                    )
     x_property = DeviceProperty(
         device=device,
         measuring_range_min=fake.pyfloat(),

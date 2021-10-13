@@ -17,6 +17,9 @@ class TestDevicePropertyServices(BaseTestCase):
         # First we need to make sure that we have a device
         device = Device(
             short_name="Very new device",
+            is_public=False,
+            is_private=False,
+            is_internal=True,
         )
         db.session.add(device)
         db.session.commit()
@@ -106,8 +109,16 @@ class TestDevicePropertyServices(BaseTestCase):
 
     def test_get_device_property_api(self):
         """Ensure that we can get a list of device properties."""
-        device1 = Device(short_name="Just a device")
-        device2 = Device(short_name="Another device")
+        device1 = Device(short_name="Just a device",
+                         is_public=False,
+                         is_private=False,
+                         is_internal=True,
+                         )
+        device2 = Device(short_name="Another device",
+                         is_public=False,
+                         is_private=False,
+                         is_internal=True,
+                         )
 
         db.session.add(device1)
         db.session.add(device2)
@@ -206,8 +217,16 @@ class TestDevicePropertyServices(BaseTestCase):
 
     def test_patch_device_property_api(self):
         """Ensure that we can update a device property."""
-        device1 = Device(short_name="Just a device")
-        device2 = Device(short_name="Another device")
+        device1 = Device(short_name="Just a device",
+                         is_public=False,
+                         is_private=False,
+                         is_internal=True,
+                         )
+        device2 = Device(short_name="Another device",
+                         is_public=False,
+                         is_private=False,
+                         is_internal=True,
+                         )
 
         db.session.add(device1)
         db.session.add(device2)

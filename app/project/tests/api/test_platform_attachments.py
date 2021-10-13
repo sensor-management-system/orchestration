@@ -17,6 +17,9 @@ class TestPlatformAttachmentServices(BaseTestCase):
         # First we need to make sure that we have a platform
         platform = Platform(
             short_name="Very new platform",
+            is_public=False,
+            is_private=False,
+            is_internal=True,
         )
         db.session.add(platform)
         db.session.commit()
@@ -26,10 +29,10 @@ class TestPlatformAttachmentServices(BaseTestCase):
 
         count_platform_attachments = (
             db.session.query(PlatformAttachment)
-            .filter_by(
+                .filter_by(
                 platform_id=platform.id,
             )
-            .count()
+                .count()
         )
         # However, this new platform for sure has no attachments
         self.assertEqual(count_platform_attachments, 0)
@@ -81,6 +84,9 @@ class TestPlatformAttachmentServices(BaseTestCase):
         """Ensure that we don't add a platform attachment with missing url."""
         platform = Platform(
             short_name="Very new platform",
+            is_public=False,
+            is_private=False,
+            is_internal=True,
         )
         db.session.add(platform)
         db.session.commit()
@@ -111,10 +117,10 @@ class TestPlatformAttachmentServices(BaseTestCase):
         self.assertEqual(response.status_code, 422)
         count_attachments = (
             db.session.query(PlatformAttachment)
-            .filter_by(
+                .filter_by(
                 platform_id=platform.id,
             )
-            .count()
+                .count()
         )
         self.assertEqual(count_attachments, 0)
 
@@ -150,8 +156,12 @@ class TestPlatformAttachmentServices(BaseTestCase):
 
     def test_get_platform_attachment_api(self):
         """Ensure that we can get a list of platform attachments."""
-        platform1 = Platform(short_name="Just a platform")
-        platform2 = Platform(short_name="Another platform")
+        platform1 = Platform(short_name="Just a platform", is_public=False,
+                             is_private=False,
+                             is_internal=True, )
+        platform2 = Platform(short_name="Another platform", is_public=False,
+                             is_private=False,
+                             is_internal=True, )
 
         db.session.add(platform1)
         db.session.add(platform2)
@@ -259,8 +269,14 @@ class TestPlatformAttachmentServices(BaseTestCase):
 
     def test_patch_platform_attachment_api(self):
         """Ensure that we can update a platform attachment."""
-        platform1 = Platform(short_name="Just a platform")
-        platform2 = Platform(short_name="Another platform")
+        platform1 = Platform(short_name="Just a platform", is_public=False,
+                             is_private=False,
+                             is_internal=True, )
+        platform2 = Platform(short_name="Another platform",
+                             is_public=False,
+                             is_private=False,
+                             is_internal=True,
+                             )
 
         db.session.add(platform1)
         db.session.add(platform2)
@@ -289,7 +305,7 @@ class TestPlatformAttachmentServices(BaseTestCase):
         }
         with self.client:
             url_patch = (
-                base_url + "/platform-attachments/" + str(platform_attachment1.id)
+                    base_url + "/platform-attachments/" + str(platform_attachment1.id)
             )
             response = self.client.patch(
                 url_patch,
@@ -302,8 +318,8 @@ class TestPlatformAttachmentServices(BaseTestCase):
 
         platform_attachment_reloaded = (
             db.session.query(PlatformAttachment)
-            .filter_by(id=platform_attachment1.id)
-            .one()
+                .filter_by(id=platform_attachment1.id)
+                .one()
         )
         self.assertEqual(platform_attachment_reloaded.url, "https://www.ufz.de")
         self.assertEqual(platform_attachment_reloaded.label, "UFZ")
@@ -311,7 +327,11 @@ class TestPlatformAttachmentServices(BaseTestCase):
 
     def test_delete_platform_attachment_api(self):
         """Ensure that we can delete a platform attachment."""
-        platform1 = Platform(short_name="Just a platform")
+        platform1 = Platform(short_name="Just a platform",
+                             is_public=False,
+                             is_private=False,
+                             is_internal=True,
+                             )
         db.session.add(platform1)
         db.session.commit()
         platform_attachment1 = PlatformAttachment(
@@ -347,9 +367,9 @@ class TestPlatformAttachmentServices(BaseTestCase):
 
         count_platform_attachments = (
             db.session.query(PlatformAttachment)
-            .filter_by(
+                .filter_by(
                 platform_id=platform1.id,
             )
-            .count()
+                .count()
         )
         self.assertEqual(count_platform_attachments, 0)

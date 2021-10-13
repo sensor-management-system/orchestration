@@ -17,6 +17,9 @@ class TestDeviceAttachmentServices(BaseTestCase):
         # First we need to make sure that we have a device
         device = Device(
             short_name="Very new device",
+            is_public=False,
+            is_private=False,
+            is_internal=True,
         )
         db.session.add(device)
         db.session.commit()
@@ -81,6 +84,9 @@ class TestDeviceAttachmentServices(BaseTestCase):
         """Ensure that we don't add a device attachment with missing url."""
         device = Device(
             short_name="Very new device",
+            is_public=False,
+            is_private=False,
+            is_internal=True,
         )
         db.session.add(device)
         db.session.commit()
@@ -148,8 +154,16 @@ class TestDeviceAttachmentServices(BaseTestCase):
 
     def test_get_device_attachment_api(self):
         """Ensure that we can get a list of device attachments."""
-        device1 = Device(short_name="Just a device")
-        device2 = Device(short_name="Another device")
+        device1 = Device(short_name="Just a device",
+                         is_public=False,
+                         is_private=False,
+                         is_internal=True,
+                         )
+        device2 = Device(short_name="Another device",
+                         is_public=False,
+                         is_private=False,
+                         is_internal=True,
+                         )
 
         db.session.add(device1)
         db.session.add(device2)
@@ -257,8 +271,16 @@ class TestDeviceAttachmentServices(BaseTestCase):
 
     def test_patch_device_attachment_api(self):
         """Ensure that we can update a device attachment."""
-        device1 = Device(short_name="Just a device")
-        device2 = Device(short_name="Another device")
+        device1 = Device(short_name="Just a device",
+                         is_public=False,
+                         is_private=False,
+                         is_internal=True,
+                         )
+        device2 = Device(short_name="Another device",
+                         is_public=False,
+                         is_private=False,
+                         is_internal=True,
+                         )
 
         db.session.add(device1)
         db.session.add(device2)
@@ -305,7 +327,11 @@ class TestDeviceAttachmentServices(BaseTestCase):
 
     def test_delete_device_attachment_api(self):
         """Ensure that we can delete a device attachment."""
-        device1 = Device(short_name="Just a device")
+        device1 = Device(short_name="Just a device",
+                         is_public=False,
+                         is_private=False,
+                         is_internal=True,
+                         )
         db.session.add(device1)
         db.session.commit()
         device_attachment1 = DeviceAttachment(

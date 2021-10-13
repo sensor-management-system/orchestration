@@ -42,7 +42,11 @@ class TestPlatformSoftwareUpdateActionAttachment(BaseTestCase):
 
     def test_post_platform_software_update_action_attachment(self):
         """Create PlatformSoftwareUpdateActionAttachment"""
-        platform = Platform(short_name="Platform 144")
+        platform = Platform(short_name="Platform 144",
+                            is_public=False,
+                            is_private=False,
+                            is_internal=True,
+                            )
         mock_jwt = generate_token_data()
         contact = Contact(
             given_name=mock_jwt["given_name"],
@@ -96,7 +100,11 @@ class TestPlatformSoftwareUpdateActionAttachment(BaseTestCase):
         platform_software_update_action_attachment = (
             add_platform_software_update_action_attachment_model()
         )
-        platform = Platform(short_name="Platform new 144")
+        platform = Platform(short_name="Platform new 144",
+                            is_public=False,
+                            is_private=False,
+                            is_internal=True,
+                            )
         db.session.add(platform)
         db.session.commit()
         attachment = PlatformAttachment(

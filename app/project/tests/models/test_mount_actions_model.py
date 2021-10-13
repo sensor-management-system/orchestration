@@ -11,9 +11,15 @@ from project.tests.models.test_configurations_model import generate_configuratio
 def add_mount_device_action_model():
     d = Device(
         short_name=fake.linux_processor(),
+        is_public=False,
+        is_private=False,
+        is_internal=True,
     )
     p_p = Platform(
         short_name="device parent platform",
+        is_public=False,
+        is_private=False,
+        is_internal=True,
     )
     mock_jwt = generate_token_data()
     c1 = Contact(
@@ -43,9 +49,15 @@ def add_mount_device_action_model():
 def add_mount_platform_action_model():
     p = Platform(
         short_name="short_name test",
+        is_public=False,
+        is_private=False,
+        is_internal=True,
     )
     p_p = Platform(
         short_name="parent platform",
+        is_public=False,
+        is_private=False,
+        is_internal=True,
     )
     mock_jwt = generate_token_data()
     c1 = Contact(

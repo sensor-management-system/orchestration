@@ -78,7 +78,11 @@ class TestPlatformServices(BaseTestCase):
         # and want to make sure that we can query the attachments
         # together with the platform itself.
 
-        platform = Platform(short_name="platform")
+        platform = Platform(short_name="platform",
+                            is_public=False,
+                            is_private=False,
+                            is_internal=True,
+                            )
         db.session.add(platform)
 
         attachment1 = PlatformAttachment(
@@ -139,7 +143,11 @@ class TestPlatformServices(BaseTestCase):
 
     def test_add_platform_platform_attachment_relationship(self):
         """Ensure that we can work with the attachment relationship."""
-        platform = Platform(short_name="platform")
+        platform = Platform(short_name="platform",
+                            is_public=False,
+                            is_private=False,
+                            is_internal=True,
+                            )
         db.session.add(platform)
 
         attachment1 = PlatformAttachment(

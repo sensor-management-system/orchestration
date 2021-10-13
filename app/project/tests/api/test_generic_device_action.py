@@ -148,9 +148,17 @@ class TestGenericDeviceAction(BaseTestCase):
 
     def test_filtered_by_device(self):
         """Ensure that I can prefilter by a specific device."""
-        device1 = Device(short_name="sample device")
+        device1 = Device(short_name="sample device",
+                         is_public=False,
+                         is_private=False,
+                         is_internal=True,
+                         )
         db.session.add(device1)
-        device2 = Device(short_name="sample device II")
+        device2 = Device(short_name="sample device II",
+                         is_public=False,
+                         is_private=False,
+                         is_internal=True,
+                         )
         db.session.add(device2)
 
         contact = Contact(
