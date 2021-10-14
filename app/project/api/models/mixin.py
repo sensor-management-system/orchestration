@@ -328,7 +328,7 @@ class PermissionMixin:
 
     @validates("is_private")
     def validate_private(self, key, is_private):
-        if (is_private and isinstance(self.is_public, bool)) | (is_private and isinstance(self.is_internal, bool)):
+        if (is_private and exist(self.is_public)) | (is_private and exist(self.is_internal)):
             raise ConflictError(
                 "Please make sure that this object neither public nor internal at first."
             )
@@ -336,7 +336,7 @@ class PermissionMixin:
 
     @validates("is_internal")
     def validate_internal(self, key, is_internal):
-        if (is_internal and isinstance(self.is_private, bool)) | (is_internal and isinstance(self.is_public, bool)):
+        if (is_internal and exist(self.is_private)) | (is_internal and exist(self.is_public)):
             raise ConflictError(
                 "Please make sure that this object neither public nor private at first."
             )
@@ -344,7 +344,8 @@ class PermissionMixin:
 
     @validates("is_public")
     def validate_public(self, key, is_public):
-        if (is_public and isinstance(self.is_private, bool)) | (is_public and isinstance(self.is_internal, bool)):
+
+        if (is_public and exist(self.is_private)) | (is_public and exist(self.is_internal)):
             raise ConflictError(
                 "Please make sure that this object neither private nor internal at first."
             )
@@ -357,3 +358,10 @@ class PermissionMixin:
                 "This Object is Private. If you want to add it to a Group you should make it internal or public."
             )
         return groups_ids
+
+
+def exist(o) -> bool:
+    if o is None:
+        return False
+    else:
+        return o
