@@ -38,9 +38,9 @@ class PlatformSchema(Schema):
     updated_at = fields.DateTime(dump_only=True)
     created_by_id = fields.Str(dump_only=True)
     groups_ids = fields.Field(many=True, allow_none=True)
-    is_private = fields.Boolean(required=True)
-    is_internal = fields.Boolean(required=True)
-    is_public = fields.Boolean(required=True)
+    is_private = fields.Boolean(allow_none=True)
+    is_internal = fields.Boolean(allow_none=True)
+    is_public = fields.Boolean(allow_none=True)
     created_by = Relationship(
         self_view="api.platform_created_user",
         self_view_kwargs={"id": "<id>"},
