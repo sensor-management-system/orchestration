@@ -184,11 +184,3 @@ def validate_object_state(data):
         data["is_internal"] = True
         data["is_public"] = False
         data["is_private"] = False
-
-    # else:
-    #     if (data["is_private"] and data["is_public"]) | (data["is_private"] and data["is_internal"]) | (
-    #             data["is_public"] and data["is_internal"]):
-    #         raise ConflictError(
-    #             "An Object should only have one state of view. Only one of These values is allowed to be true: "
-    #             "{is_public, is_private, is_internal}"
-    #         )
