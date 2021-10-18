@@ -13,7 +13,8 @@ class ConfigurationStaticLocationBeginAction(
         "Configuration",
         uselist=False,
         foreign_keys=[configuration_id],
-        backref=db.backref("configuration_static_location_begin_actions"),
+        backref=db.backref("configuration_static_location_begin_actions",
+                           cascade="save-update, merge, delete, delete-orphan"),
     )
     begin_date = db.Column(db.DateTime, nullable=False)
     description = db.Column(db.Text, nullable=True)
@@ -22,7 +23,8 @@ class ConfigurationStaticLocationBeginAction(
         "Contact",
         uselist=False,
         foreign_keys=[contact_id],
-        backref=db.backref("configuration_static_location_begin_actions"),
+        backref=db.backref("configuration_static_location_begin_actions",
+                           cascade="save-update, merge, delete, delete-orphan"),
     )
     x = db.Column(db.Float, nullable=True)
     y = db.Column(db.Float, nullable=True)
@@ -53,7 +55,8 @@ class ConfigurationStaticLocationEndAction(
         "Configuration",
         uselist=False,
         foreign_keys=[configuration_id],
-        backref=db.backref("configuration_static_location_end_actions"),
+        backref=db.backref("configuration_static_location_end_actions",
+                           cascade="save-update, merge, delete, delete-orphan"),
     )
     end_date = db.Column(db.DateTime, nullable=False)
     description = db.Column(db.Text, nullable=True)
@@ -62,7 +65,8 @@ class ConfigurationStaticLocationEndAction(
         "Contact",
         uselist=False,
         foreign_keys=[contact_id],
-        backref=db.backref("configuration_static_location_end_actions"),
+        backref=db.backref("configuration_static_location_end_actions",
+                           cascade="save-update, merge, delete, delete-orphan"),
     )
 
     def get_parent_search_entities(self):
@@ -87,7 +91,8 @@ class ConfigurationDynamicLocationBeginAction(
         "Configuration",
         uselist=False,
         foreign_keys=[configuration_id],
-        backref=db.backref("configuration_dynamic_location_begin_actions"),
+        backref=db.backref("configuration_dynamic_location_begin_actions",
+                           cascade="save-update, merge, delete, delete-orphan"),
     )
     begin_date = db.Column(db.DateTime, nullable=False)
     description = db.Column(db.Text, nullable=True)
@@ -96,7 +101,8 @@ class ConfigurationDynamicLocationBeginAction(
         "Contact",
         uselist=False,
         foreign_keys=[contact_id],
-        backref=db.backref("configuration_dynamic_location_begin_actions"),
+        backref=db.backref("configuration_dynamic_location_begin_actions",
+                           cascade="save-update, merge, delete, delete-orphan"),
     )
     x_property_id = db.Column(
         db.Integer, db.ForeignKey("device_property.id"), nullable=True
@@ -105,7 +111,8 @@ class ConfigurationDynamicLocationBeginAction(
         "DeviceProperty",
         uselist=False,
         foreign_keys=[x_property_id],
-        backref=db.backref("x_property_configuration_dynamic_location_begin_actions"),
+        backref=db.backref("x_property_configuration_dynamic_location_begin_actions",
+                           cascade="save-update, merge, delete, delete-orphan"),
     )
     y_property_id = db.Column(
         db.Integer, db.ForeignKey("device_property.id"), nullable=True
@@ -114,7 +121,8 @@ class ConfigurationDynamicLocationBeginAction(
         "DeviceProperty",
         uselist=False,
         foreign_keys=[y_property_id],
-        backref=db.backref("y_property_configuration_dynamic_location_begin_actions"),
+        backref=db.backref("y_property_configuration_dynamic_location_begin_actions",
+                           cascade="save-update, merge, delete, delete-orphan"),
     )
     z_property_id = db.Column(
         db.Integer, db.ForeignKey("device_property.id"), nullable=True
@@ -123,7 +131,8 @@ class ConfigurationDynamicLocationBeginAction(
         "DeviceProperty",
         uselist=False,
         foreign_keys=[z_property_id],
-        backref=db.backref("z_property_configuration_dynamic_location_begin_actions"),
+        backref=db.backref("z_property_configuration_dynamic_location_begin_actions",
+                           cascade="save-update, merge, delete, delete-orphan"),
     )
     epsg_code = db.Column(db.String(256), default="4326")
     elevation_datum_name = db.Column(db.String(256), default="MSL")  # mean sea level
@@ -152,7 +161,8 @@ class ConfigurationDynamicLocationEndAction(
         "Configuration",
         uselist=False,
         foreign_keys=[configuration_id],
-        backref=db.backref("configuration_dynamic_location_end_actions"),
+        backref=db.backref("configuration_dynamic_location_end_actions",
+                           cascade="save-update, merge, delete, delete-orphan"),
     )
     end_date = db.Column(db.DateTime, nullable=False)
     description = db.Column(db.Text, nullable=True)
@@ -161,7 +171,8 @@ class ConfigurationDynamicLocationEndAction(
         "Contact",
         uselist=False,
         foreign_keys=[contact_id],
-        backref=db.backref("configuration_dynamic_location_end_actions"),
+        backref=db.backref("configuration_dynamic_location_end_actions",
+                           cascade="save-update, merge, delete, delete-orphan"),
     )
 
     def to_search_entry(self):
