@@ -5,14 +5,14 @@ import collections
 from sqlalchemy.ext.hybrid import hybrid_property
 
 from .base_model import db
-from .mixin import AuditMixin, SearchableMixin, PermissionMixin
+from .mixin import AuditMixin, SearchableMixin, PermissionMixinForConfiguration
 
 ConfigurationsTuple = collections.namedtuple(
     "ConfigurationsTuple", ["configuration_devices", "configuration_platforms"]
 )
 
 
-class Configuration(db.Model, AuditMixin, SearchableMixin, PermissionMixin):
+class Configuration(db.Model, AuditMixin, SearchableMixin, PermissionMixinForConfiguration):
     """Data model for the configurations."""
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)

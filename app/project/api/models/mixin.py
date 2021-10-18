@@ -365,3 +365,27 @@ def exist(o) -> bool:
         return False
     else:
         return o
+
+
+class PermissionMixinForConfiguration:
+    __abstract__ = True
+    groups_ids = db.Column(MutableList.as_mutable(db.ARRAY(db.Integer)), nullable=True)
+    is_internal = db.Column(db.Boolean, default=False)
+    is_public = db.Column(db.Boolean, default=False)
+
+    @validates("is_internal")
+    def validate_internal(self, key, is_internal):
+        if is_internal and exist(self.is_public):
+            raise ConflictError(
+                "Please make sure that this object is not public at first."
+            )
+        return is_internal
+
+    @validates("is_public")
+    def validate_public(self, key, is_public):
+
+        if is_public and exist(self.is_internal):
+            raise ConflictError(
+                "Please make sure that this object is not internal at first."
+            )
+        return is_public

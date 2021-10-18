@@ -20,7 +20,6 @@ def upgrade():
     op.add_column('configuration', sa.Column('groups_ids', sa.ARRAY(sa.Integer()), nullable=True))
     op.add_column('configuration', sa.Column('is_internal', sa.Boolean(), nullable=True))
     op.add_column('configuration', sa.Column('is_public', sa.Boolean(), nullable=True))
-    op.add_column('configuration', sa.Column('is_private', sa.Boolean(), nullable=True))
 
     op.add_column('device', sa.Column('groups_ids', sa.ARRAY(sa.Integer()), nullable=True))
     op.add_column('device', sa.Column('is_private', sa.Boolean(), nullable=True))

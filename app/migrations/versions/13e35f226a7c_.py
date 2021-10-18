@@ -25,9 +25,12 @@ def upgrade():
     op.execute('UPDATE "device" SET is_internal = true WHERE is_internal IS NULL')
     op.execute('UPDATE "platform" SET is_internal = true WHERE is_internal IS NULL')
 
-    op.execute('UPDATE "configuration" SET is_private = false WHERE is_private IS NULL')
-    op.execute('UPDATE "device" SET is_private = false WHERE is_private IS NULL')
-    op.execute('UPDATE "platform" SET is_private = false WHERE is_private IS NULL')
+    op.execute('UPDATE "device" SET is_private = false WHERE is_public IS NULL')
+    op.execute('UPDATE "platform" SET is_private = false WHERE is_public IS NULL')
+
+    op.execute('UPDATE "configuration" SET is_public = false WHERE is_public IS NULL')
+    op.execute('UPDATE "device" SET is_public = false WHERE is_public IS NULL')
+    op.execute('UPDATE "platform" SET is_public = false WHERE is_public IS NULL')
 
 
 def downgrade():
