@@ -6,7 +6,6 @@
       "location_type": "test",
       "is_public": false,
       "is_internal": true,
-      "is_private": false,
       "hierarchy": [
         {
           "children": [
@@ -28,7 +27,6 @@
       "location_type": "test2",
       "is_public": false,
       "is_internal": true,
-      "is_private": false,
       "hierarchy": [
         {
           "children": [
@@ -50,7 +48,6 @@
       "location_type": "test3",
       "is_public": false,
       "is_internal": true,
-      "is_private": false,
       "hierarchy": [
         {
           "children": [
