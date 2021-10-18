@@ -3,7 +3,7 @@ from flask_jwt_extended import get_jwt_identity, jwt_required, current_user
 from sqlalchemy import and_, or_
 
 from ..helpers.errors import ForbiddenError
-from ..helpers.permission import is_user_super_admin, is_user_owner_of_this_object, is_user_in_a_group, \
+from ..helpers.permission import is_user_super_admin, assert_current_user_is_owner_of_object, is_user_in_a_group, \
     is_user_admin_in_a_group
 from ..models import (
     ConfigurationAttachment,
@@ -114,26 +114,26 @@ def check_patch_permission(data, object_to_patch):
         object_ = db.session.query(object_to_patch).filter_by(id=data['id']).one_or_none()
         if object_.is_private:
             click.secho(object_.is_private, fg="green")
-            is_user_owner_of_this_object(object_)
+            assert_current_user_is_owner_of_object(object_)
         else:
             groups_ids = object_.groups_ids
             if is_user_in_a_group(groups_ids):
                 add_updated_by_id(data)
             else:
-                raise ForbiddenError(f"User should be in this groups: {groups_ids}")
+                raise ForbiddenError("User is not part of any group to edit this object.")
 
 
-def check_deletion_permission(kwargs, object_to_patch):
+def check_deletion_permission(kwargs, object_to_delete):
     """
 
     :param kwargs:
-    :param object_to_patch:
+    :param object_to_delete:
     :return:
     """
     if not is_user_super_admin():
-        groups_ids = db.session.query(object_to_patch).filter_by(id=kwargs['id']).one_or_none().groups_ids
+        groups_ids = db.session.query(object_to_delete).filter_by(id=kwargs['id']).one_or_none().groups_ids
         if not is_user_admin_in_a_group(groups_ids):
-            raise ForbiddenError(f"User should be admin in one of this groups: {groups_ids}")
+            raise ForbiddenError("User is not part of any group to edit this object.")
 
 
 @jwt_required(optional=True)

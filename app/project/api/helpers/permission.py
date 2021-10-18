@@ -1,4 +1,3 @@
-import click
 import requests
 from flask import current_app
 from flask_jwt_extended import get_current_user
@@ -6,22 +5,22 @@ from flask_jwt_extended import get_current_user
 from .errors import ForbiddenError, ServiceIsUnreachableError
 
 
-def is_user_in_a_group(object_groups):
+def is_user_in_a_group(groups_to_check):
     """
     Check if the current user is in the same group
     as the object regardless if it is admin or member.
 
-    :param object_groups:
+    :param groups_to_check:
     :return:
     """
-    if not object_groups:
+    if not groups_to_check:
         return True
     current_user = get_current_user()
-    idl_groups = get_all_permission_group(current_user.subject)
+    idl_groups = get_all_permission_groups(current_user.subject)
     # idl_groups = test_groups_list
     groups = idl_groups[0]["administratedDataprojects"] + idl_groups[0]["memberedDataprojects"]
     user_groups = extract_groups_ids_as_list(groups)
-    return any(map(lambda each: each in user_groups, object_groups))
+    return any(group in user_groups for group in groups_to_check)
 
 
 def extract_groups_ids_as_list(groups):
@@ -29,7 +28,9 @@ def extract_groups_ids_as_list(groups):
     Extract the groups ids from the groups list.
 
     Example:
-    groups=['/dataprojects/api/dataprojects/2', '/dataprojects/api/dataprojects/1', '/dataprojects/api/dataprojects/3']
+    groups=['/permissiongroups/api/permissiongroups/2', '/permissiongroups/api/permissiongroups/1',
+    '/permissiongroups/api/permissiongroups/3']
+
     extract_groups_ids_as_list(groups)
     >> [2, 1, 3]
 
@@ -42,22 +43,22 @@ def extract_groups_ids_as_list(groups):
     return user_groups
 
 
-def is_user_admin_in_a_group(object_groups):
+def is_user_admin_in_a_group(groups_to_check):
     """
     check if the current user is an admin in the same group
      as the object.
 
-    :param object_groups: a list of ids
+    :param groups_to_check: a list of ids
     :return:
     """
-    if not object_groups:
+    if not groups_to_check:
         return True
     current_user = get_current_user()
-    idl_groups = get_all_permission_group(current_user.subject)
+    idl_groups = get_all_permission_groups(current_user.subject)
     # idl_groups = test_groups_list
     groups = idl_groups[0]["administratedDataprojects"]
     user_groups = extract_groups_ids_as_list(groups)
-    return any(map(lambda each: each in user_groups, object_groups))
+    return any(group in user_groups for group in groups_to_check)
 
 
 def is_user_super_admin():
@@ -69,10 +70,10 @@ def is_user_super_admin():
 
     current_user = get_current_user()
 
-    return True if current_user.is_superuser else False
+    return current_user.is_superuser
 
 
-def get_all_permission_group(user_subject):
+def get_all_permission_groups(user_subject):
     """
     Returns a list of groups or Projects for a user-subject that are fetched from the IDL service.
 
@@ -96,7 +97,7 @@ def get_all_permission_group(user_subject):
         raise ServiceIsUnreachableError("IDL connection error. Please try again later")
 
 
-def is_user_owner_of_this_object(object_):
+def assert_current_user_is_owner_of_object(object_):
     """
     Checks if the current user is the owner of the given object.
 
@@ -104,8 +105,6 @@ def is_user_owner_of_this_object(object_):
     :return:
     """
     current_user_id = get_current_user().id
-    click.secho(current_user_id)
-    click.secho(object_.created_by_id)
     if current_user_id != object_.created_by_id:
         raise ForbiddenError(
             "This is a private object. You should be the owner to modify!"
@@ -117,10 +116,10 @@ def is_user_owner_of_this_object(object_):
 #         "username": "testuser@ufz.de",
 #         "displayName": "Test User (WKDV)",
 #         "referencedIri": "/infra/api/v1/accounts/testuser",
-#         "administratedDataprojects": ["/dataprojects/api/dataprojects/2"],
+#         "administratedDataprojects": ["/permissiongroups/api/permissiongroups/2"],
 #         "memberedDataprojects": [
-#             "/dataprojects/api/dataprojects/1",
-#             "/dataprojects/api/dataprojects/3",
+#             "/permissiongroups/api/permissiongroups/1",
+#             "/permissiongroups/api/permissiongroups/3",
 #         ],
 #     }
 # ]
