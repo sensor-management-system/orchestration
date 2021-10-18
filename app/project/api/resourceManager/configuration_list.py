@@ -1,8 +1,10 @@
+from flask_jwt_extended import jwt_required, get_jwt_identity, current_user
+from sqlalchemy import or_
+
 from ..datalayers.esalchemy import EsSqlalchemyDataLayer
 from ..models.base_model import db
 from ..models.configuration import Configuration
-from ..resourceManager.base_resource import add_contact_to_object, add_created_by_id, set_object_query, \
-    validate_object_state
+from ..resourceManager.base_resource import add_contact_to_object, add_created_by_id
 from ..schemas.configuration_schema import ConfigurationSchema
 from ..token_checker import token_required
 from ...frj_csv_export.resource import ResourceList
@@ -14,6 +16,7 @@ class ConfigurationList(ResourceList):
     a collection of Devices or create one.
     """
 
+    @jwt_required(optional=True)
     def query(self, view_kwargs):
         """
         query method To show only allowed objects.
@@ -21,7 +24,18 @@ class ConfigurationList(ResourceList):
         :param view_kwargs:
         :return:
         """
-        query_ = set_object_query(Configuration)
+        query_ = Configuration.query
+
+        if get_jwt_identity() is None:
+            query_ = query_.filter_by(is_public=True)
+        else:
+            if not current_user.is_superuser:
+                query_ = query_.filter(
+                    or_(
+                        Configuration.is_public,
+                        Configuration.is_internal
+                    )
+                )
         return query_
 
     def before_create_object(self, data, *args, **kwargs):
@@ -33,7 +47,9 @@ class ConfigurationList(ResourceList):
         :return:
         """
         add_created_by_id(data)
-        validate_object_state(data)
+        if ('is_public' not in data) and ('is_internal' not in data):
+            data["is_internal"] = True
+            data["is_public"] = False
 
     def after_post(self, result):
         """

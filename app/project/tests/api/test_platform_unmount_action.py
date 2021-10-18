@@ -103,14 +103,12 @@ class TestPlatformUnmountAction(BaseTestCase):
         configuration1 = Configuration(
             label="sample configuration", location_type="static",
             is_public=False,
-            is_private=False,
             is_internal=True,
         )
         db.session.add(configuration1)
         configuration2 = Configuration(
             label="sample configuration II", location_type="static",
             is_public=False,
-            is_private=False,
             is_internal=True,
         )
         db.session.add(configuration2)
@@ -209,14 +207,12 @@ class TestPlatformUnmountAction(BaseTestCase):
         configuration1 = Configuration(
             label="sample configuration", location_type="static",
             is_public=False,
-            is_private=False,
             is_internal=True,
         )
         db.session.add(configuration1)
         configuration2 = Configuration(
             label="sample configuration II", location_type="static",
             is_public=False,
-            is_private=False,
             is_internal=True,
         )
         db.session.add(configuration2)

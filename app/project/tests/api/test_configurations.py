@@ -304,7 +304,6 @@ class TestConfigurationsService(BaseTestCase):
 
         config1 = Configuration(label="Config1", location_type="static",
                                 is_public=False,
-                                is_private=False,
                                 is_internal=True,
                                 )
         db.session.add(config1)

@@ -3,16 +3,19 @@
 import collections
 
 from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy.ext.mutable import MutableList
+from sqlalchemy.orm import validates
 
 from .base_model import db
-from .mixin import AuditMixin, SearchableMixin, PermissionMixinForConfiguration
+from .mixin import AuditMixin, SearchableMixin, exist
+from ..helpers.errors import ConflictError
 
 ConfigurationsTuple = collections.namedtuple(
     "ConfigurationsTuple", ["configuration_devices", "configuration_platforms"]
 )
 
 
-class Configuration(db.Model, AuditMixin, SearchableMixin, PermissionMixinForConfiguration):
+class Configuration(db.Model, AuditMixin, SearchableMixin):
     """Data model for the configurations."""
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -50,6 +53,26 @@ class Configuration(db.Model, AuditMixin, SearchableMixin, PermissionMixinForCon
     configuration_attachments = db.relationship(
         "ConfigurationAttachment", cascade="save-update, merge, delete, delete-orphan"
     )
+    groups_ids = db.Column(MutableList.as_mutable(db.ARRAY(db.Integer)), nullable=True)
+    is_internal = db.Column(db.Boolean, default=False)
+    is_public = db.Column(db.Boolean, default=False)
+
+    @validates("is_internal")
+    def validate_internal(self, key, is_internal):
+        if is_internal and exist(self.is_public):
+            raise ConflictError(
+                "Please make sure that this object is not public at first."
+            )
+        return is_internal
+
+    @validates("is_public")
+    def validate_public(self, key, is_public):
+
+        if is_public and exist(self.is_internal):
+            raise ConflictError(
+                "Please make sure that this object is not internal at first."
+            )
+        return is_public
 
     @hybrid_property
     def hierarchy(self):
@@ -184,7 +207,6 @@ class Configuration(db.Model, AuditMixin, SearchableMixin, PermissionMixinForCon
             ],
             "is_internal": self.is_internal,
             "is_public": self.is_public,
-            "is_private": self.is_private,
             "created_by_id": self.created_by_id,
             # start & end dates?
         }

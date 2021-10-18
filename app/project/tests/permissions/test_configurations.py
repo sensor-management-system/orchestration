@@ -20,7 +20,6 @@ class TestConfigurationPermissions(BaseTestCase):
             id=15,
             label="public configuration",
             is_public=True,
-            is_private=False,
             is_internal=False,
         )
         db.session.add(public_config)
@@ -29,24 +28,6 @@ class TestConfigurationPermissions(BaseTestCase):
         configuration = db.session.query(Configuration).filter_by(id=public_config.id).one()
         self.assertEqual(configuration.is_public, True)
         self.assertEqual(configuration.is_internal, False)
-        self.assertEqual(configuration.is_private, False)
-
-    def test_add_private_configuration(self):
-        """Ensure a new configuration can be private."""
-        private_config = Configuration(
-            id=1,
-            label="private configuration",
-            is_public=False,
-            is_private=True,
-            is_internal=False,
-        )
-        db.session.add(private_config)
-        db.session.commit()
-
-        configuration = db.session.query(Configuration).filter_by(id=private_config.id).one()
-        self.assertEqual(configuration.is_public, False)
-        self.assertEqual(configuration.is_internal, False)
-        self.assertEqual(configuration.is_private, True)
 
     def test_add_configuration_model(self):
         """Ensure a new configuration model can be internal."""
@@ -55,7 +36,6 @@ class TestConfigurationPermissions(BaseTestCase):
             label="internal configuration",
             is_internal=True,
             is_public=False,
-            is_private=False,
         )
         db.session.add(internal_config)
         db.session.commit()
@@ -63,21 +43,19 @@ class TestConfigurationPermissions(BaseTestCase):
         configuration = db.session.query(Configuration).filter_by(id=internal_config.id).one()
         self.assertEqual(configuration.is_internal, True)
         self.assertEqual(configuration.is_public, False)
-        self.assertEqual(configuration.is_private, False)
 
     def test_add_configuration(self):
         """Ensure a new configuration can be added to api and is internal."""
-        device_data = {"data": {"type": "configuration", "attributes": {
+        configuration_data = {"data": {"type": "configuration", "attributes": {
             "label": "Test configuration",
             "is_public": False,
-            "is_internal": True,
-            "is_private": False
+            "is_internal": True
         }}}
         access_headers = create_token()
         with self.client:
             response = self.client.post(
                 self.device_url,
-                data=json.dumps(device_data),
+                data=json.dumps(configuration_data),
                 content_type="application/vnd.api+json",
                 headers=access_headers,
             )
@@ -85,14 +63,12 @@ class TestConfigurationPermissions(BaseTestCase):
         self.assertEqual(response.status_code, 201)
         self.assertEqual(data["data"]["attributes"]["is_internal"], True)
         self.assertEqual(data["data"]["attributes"]["is_public"], False)
-        self.assertEqual(data["data"]["attributes"]["is_private"], False)
 
     def test_get_as_anonymous_user(self):
         """Ensure anonymous user can only see public objects."""
         public_config = Configuration(
             id=15,
             label="device_label test2",
-            is_private=False,
             is_internal=False,
             is_public=True
         )
@@ -101,15 +77,13 @@ class TestConfigurationPermissions(BaseTestCase):
             id=33,
             label="device_label test2",
             is_public=False,
-            is_private=False,
             is_internal=True
         )
         private_config = Configuration(
             id=1,
             label="private configuration",
             is_public=False,
-            is_internal=False,
-            is_private=True
+            is_internal=False
 
         )
         db.session.add_all([public_config, internal_config, private_config])
@@ -127,7 +101,6 @@ class TestConfigurationPermissions(BaseTestCase):
             id=15,
             label="device_label test2",
             is_public=True,
-            is_private=False,
             is_internal=False,
         )
 
@@ -135,22 +108,7 @@ class TestConfigurationPermissions(BaseTestCase):
             id=33,
             label="device_label test2",
             is_public=False,
-            is_private=False,
             is_internal=True,
-        )
-        private_config = Configuration(
-            id=1,
-            label="private configuration",
-            is_public=False,
-            is_internal=False,
-            is_private=True
-        )
-        private_config_1 = Configuration(
-            id=3,
-            label="private configuration",
-            is_public=False,
-            is_private=True,
-            is_internal=False,
         )
         mock_jwt = generate_token_data()
         contact = Contact(
@@ -169,11 +127,8 @@ class TestConfigurationPermissions(BaseTestCase):
         user = User(subject="test_user@test.test", contact=contact)
         user_1 = User(subject="test_user1@test.test", contact=contact_1)
         db.session.add_all(
-            [public_config, internal_config, private_config, private_config_1, contact, user, contact_1, user_1])
+            [public_config, internal_config, contact, user, contact_1, user_1])
         db.session.commit()
-
-        private_config.created_by_id = user.id
-        private_config_1.created_by_id = user_1.id
 
         token_data = {"sub": user.subject,
                       "iss": "SMS unittest",
@@ -186,53 +141,20 @@ class TestConfigurationPermissions(BaseTestCase):
         response = self.client.get(self.device_url, headers=access_headers)
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.data.decode())
-        self.assertEqual(data["meta"]["count"], 3)
+        self.assertEqual(data["meta"]["count"], 2)
 
     def test_add_configuration_with_multipel_true_status(self):
         """Make Sure that is a an object can't have tow True status at the same time"""
-        device_data = {"data": {"type": "configuration", "attributes": {
+        configuration_data = {"data": {"type": "configuration", "attributes": {
             "label": "Test configuration",
             "is_public": True,
-            "is_internal": True,
-            "is_private": False
+            "is_internal": True
         }}}
         access_headers = create_token()
         with self.client:
             response = self.client.post(
                 self.device_url,
-                data=json.dumps(device_data),
-                content_type="application/vnd.api+json",
-                headers=access_headers,
-            )
-        self.assertEqual(response.status_code, 409)
-
-        device_data_1 = {"data": {"type": "configuration", "attributes": {
-            "label": "Test configuration",
-            "is_public": False,
-            "is_internal": True,
-            "is_private": True
-        }}}
-        access_headers = create_token()
-        with self.client:
-            response = self.client.post(
-                self.device_url,
-                data=json.dumps(device_data_1),
-                content_type="application/vnd.api+json",
-                headers=access_headers,
-            )
-        self.assertEqual(response.status_code, 409)
-
-        device_data_2 = {"data": {"type": "configuration", "attributes": {
-            "label": "Test configuration",
-            "is_public": True,
-            "is_internal": True,
-            "is_private": True
-        }}}
-        access_headers = create_token()
-        with self.client:
-            response = self.client.post(
-                self.device_url,
-                data=json.dumps(device_data_2),
+                data=json.dumps(configuration_data),
                 content_type="application/vnd.api+json",
                 headers=access_headers,
             )
@@ -244,7 +166,6 @@ class TestConfigurationPermissions(BaseTestCase):
             "label": "Test configuration associated to a group",
             "is_public": False,
             "is_internal": True,
-            "is_private": False,
             "groups_ids": [12]
         }}}
         access_headers = create_token()
