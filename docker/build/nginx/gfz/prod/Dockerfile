@@ -41,6 +41,7 @@ ENV NUXT_ENV_CLIENT_ID $CLIENT_ID_ARG
 
 # For the moment we stay with the dev idp
 ENV NUXT_ENV_AUTHORITY https://idp-dev.gfz-potsdam.de/cas/oidc/authorize
+ENV NUXT_ENV_OIDC_TOKEN https://idp-dev.gfz-potsdam.de/cas/oidc/accessToken
 
 # And those remaining settings
 # the following is the ufz setting
@@ -51,6 +52,12 @@ ENV NUXT_ENV_SCOPE profile
 # The allowed mime types
 ARG ALLOWED_MIME_TYPES_ARG
 ENV NUXT_ENV_ALLOWED_MIMETYPES $ALLOWED_MIME_TYPES_ARG
+
+ENV NUXT_ENV_OIDC_REFRESH_TOKEN refresh_token
+ENV NUXT_ENV_OIDC_REFRESH_EXPIRE 28800
+ENV NUXT_ENV_OIDC_RESPONSE_TYPE code
+ENV NUXT_ENV_OIDC_GRANT_TYPE authorization_code
+ENV NUXT_ENV_OIDC_CHALLANGE S256
 
 
 RUN mkdir /smsfrontend
@@ -64,6 +71,7 @@ EXPOSE 80
 EXPOSE 443
 EXPOSE 8443
 COPY --from=js-builder /smsfrontend/dist/ /usr/share/nginx/html
+COPY ./docker/build/nginx/gfz/prod/nginx.conf /etc/nginx/nginx.conf
 COPY ./docker/build/nginx/gfz/prod/default.conf /etc/nginx/conf.d/default.conf
 
 

@@ -42,6 +42,7 @@ services:
       - /etc/ssl/dhparam.pem:/etc/ssl/dhparam.pem:ro
       - /etc/ssl/dfn-ca-global-g2-chain.pem:/etc/ssl/chain.pem:ro
       - vocabulary-static-files:/usr/share/nginx/html/static/cv:ro
+      - backend-static-files:/usr/share/nginx/html/static/backend:ro
     networks:
       - nginx
 
@@ -160,6 +161,8 @@ services:
       ELASTICSEARCH_URL: http://elastic-search:9200
     depends_on:
       - backend-db
+    volumes:
+      - backend-static-files:/usr/src/app/project/static
     networks:
       - backend
       - nginx
@@ -170,6 +173,7 @@ volumes:
   elasticsearch-data:
   minio-data:
   backend-db-data:
+  backend-static-files:
 networks:
   vocabulary-db:
   nginx:
