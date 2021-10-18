@@ -4,8 +4,8 @@ from ..models.device import Device
 from ..resourceManager.base_resource import (
     add_contact_to_object,
     add_created_by_id,
-    set_object_query,
-    validate_object_state,
+    set_permission_filter_to_query,
+    set_default_permission_view_to_internal,
 )
 from ..schemas.device_schema import DeviceSchema
 from ..token_checker import token_required
@@ -26,7 +26,7 @@ class DeviceList(ResourceList):
         :return:
         """
 
-        query_ = set_object_query(Device)
+        query_ = set_permission_filter_to_query(Device)
         return query_
 
     def before_create_object(self, data, *args, **kwargs):
@@ -38,7 +38,7 @@ class DeviceList(ResourceList):
         :return:
         """
         add_created_by_id(data)
-        validate_object_state(data)
+        set_default_permission_view_to_internal(data)
 
     def after_post(self, result):
         """

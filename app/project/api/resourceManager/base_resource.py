@@ -137,46 +137,42 @@ def check_deletion_permission(kwargs, object_to_delete):
 
 
 @jwt_required(optional=True)
-def set_object_query(object_):
+def set_permission_filter_to_query(model_class):
     """
     This methode do the choices:
     - if user is anonymous then show only public objects.
     - if the user is superuser the show all.
     - if user logged in then show public, internal and owned private objects.
 
-    :param object_:
+    :param model_class:
     :return:
     """
-    query_ = object_.query
+    query_ = model_class.query
 
     if get_jwt_identity() is None:
         query_ = query_.filter_by(is_public=True)
     else:
         if not current_user.is_superuser:
             user_id = current_user.id
-            query0 = object_.query
-            query0 = query0.filter(
-                and_(
-                    object_.is_private,
-                    object_.created_by_id == user_id
-                )
-            )
             query_ = query_.filter(
                 or_(
-                    object_.is_public,
-                    object_.is_internal
+                    and_(
+                        model_class.is_private,
+                        model_class.created_by_id == user_id
+                    ),
+                    or_(
+                        model_class.is_public,
+                        model_class.is_internal
+                    )
                 )
             )
-
-            query_ = query_.union(query0)
     return query_
 
 
-def validate_object_state(data):
+def set_default_permission_view_to_internal(data):
     """
-    Methode to validate the state of an object before a post request
-    It will throw an ConflictError if multiple states are True
-    or set the state to internal if all are False.
+    Methode to check if the request doesn't include the permission view and if not
+    the set it to internal by default.
 
     :param data: json date sent wit the request.
     """

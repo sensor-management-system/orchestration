@@ -4,7 +4,7 @@ from ..models.platform import Platform
 from ..resourceManager.base_resource import (
     add_contact_to_object,
     add_created_by_id,
-    set_object_query, validate_object_state,
+    set_permission_filter_to_query, set_default_permission_view_to_internal,
 )
 from ..schemas.platform_schema import PlatformSchema
 from ..token_checker import token_required
@@ -24,7 +24,7 @@ class PlatformList(ResourceList):
         :param view_kwargs:
         :return:
         """
-        query_ = set_object_query(Platform)
+        query_ = set_permission_filter_to_query(Platform)
         return query_
 
     def before_create_object(self, data, *args, **kwargs):
@@ -36,7 +36,7 @@ class PlatformList(ResourceList):
         :return:
         """
         add_created_by_id(data)
-        validate_object_state(data)
+        set_default_permission_view_to_internal(data)
 
     def after_post(self, result):
         """
