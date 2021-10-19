@@ -1,8 +1,11 @@
+import json
+
 import requests
 from flask import current_app
 from flask_jwt_extended import get_current_user
 
 from .errors import ForbiddenError, ServiceIsUnreachableError
+from ..models.idl_user import idl_from_dict
 
 
 def is_user_in_a_group(groups_to_check):
@@ -17,30 +20,8 @@ def is_user_in_a_group(groups_to_check):
         return True
     current_user = get_current_user()
     idl_groups = get_all_permission_groups(current_user.subject)
-    # idl_groups = test_groups_list
-    groups = idl_groups[0]["administratedDataprojects"] + idl_groups[0]["memberedDataprojects"]
-    user_groups = extract_groups_ids_as_list(groups)
+    user_groups = idl_groups.administratedDataprojects + idl_groups.memberedDataprojects
     return any(group in user_groups for group in groups_to_check)
-
-
-def extract_groups_ids_as_list(groups):
-    """
-    Extract the groups ids from the groups list.
-
-    Example:
-    groups=['/permissiongroups/api/permissiongroups/2', '/permissiongroups/api/permissiongroups/1',
-    '/permissiongroups/api/permissiongroups/3']
-
-    extract_groups_ids_as_list(groups)
-    >> [2, 1, 3]
-
-    :param groups: list of strings, where the last character is the group id
-    :return: list of integers
-    """
-    user_groups = []
-    for group in groups:
-        user_groups.append(int(group.split("/")[-1]))
-    return user_groups
 
 
 def is_user_admin_in_a_group(groups_to_check):
@@ -55,9 +36,7 @@ def is_user_admin_in_a_group(groups_to_check):
         return True
     current_user = get_current_user()
     idl_groups = get_all_permission_groups(current_user.subject)
-    # idl_groups = test_groups_list
-    groups = idl_groups[0]["administratedDataprojects"]
-    user_groups = extract_groups_ids_as_list(groups)
+    user_groups = idl_groups.administratedDataprojects
     return any(group in user_groups for group in groups_to_check)
 
 
@@ -91,8 +70,9 @@ def get_all_permission_groups(user_subject):
         response = requests.get(url, headers=access_headers)
         json_obj = response.json()
         if not json_obj:
-            raise ForbiddenError("User is not assigned to any group")
-        return json_obj
+            json_obj = '[]'
+        result = idl_from_dict(json.loads(json_obj))
+        return result[0]
     except (requests.exceptions.ConnectionError, requests.Timeout):
         raise ServiceIsUnreachableError("IDL connection error. Please try again later")
 
@@ -109,17 +89,3 @@ def assert_current_user_is_owner_of_object(object_):
         raise ForbiddenError(
             "This is a private object. You should be the owner to modify!"
         )
-
-# test_groups_list = [
-#     {
-#         "id": 3,
-#         "username": "testuser@ufz.de",
-#         "displayName": "Test User (WKDV)",
-#         "referencedIri": "/infra/api/v1/accounts/testuser",
-#         "administratedDataprojects": ["/permissiongroups/api/permissiongroups/2"],
-#         "memberedDataprojects": [
-#             "/permissiongroups/api/permissiongroups/1",
-#             "/permissiongroups/api/permissiongroups/3",
-#         ],
-#     }
-# ]
