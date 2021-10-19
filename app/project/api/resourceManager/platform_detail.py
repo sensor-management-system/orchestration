@@ -1,7 +1,7 @@
 from flask_rest_jsonapi import ResourceDetail, JsonApiException
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 
-from .base_resource import delete_attachments_in_minio_by_url
+from .base_resource import delete_attachments_in_minio_by_url, prevent_normal_user_from_viewing_not_owned_private_object
 from ..helpers.errors import ConflictError
 from ..models.base_model import db
 from ..models.platform import Platform
@@ -15,6 +15,10 @@ class PlatformDetail(ResourceDetail):
     provides get, patch and delete methods to retrieve details
     of an object, update an object and delete an Event
     """
+
+    def before_get(self, args, kwargs):
+        """Check user permission to view a Platform."""
+        prevent_normal_user_from_viewing_not_owned_private_object(Platform, kwargs)
 
     def before_patch(self, args, kwargs, data):
         """Add Created by user id to the data"""

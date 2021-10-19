@@ -180,3 +180,20 @@ def set_default_permission_view_to_internal(data):
         data["is_internal"] = True
         data["is_public"] = False
         data["is_private"] = False
+
+
+@jwt_required()
+def prevent_normal_user_from_viewing_not_owned_private_object(model_class, kwargs):
+    """
+    checks if user is not the owner of a private object and if so return a ForbiddenError.
+
+    :param kwargs:
+    :param model_class: class model
+    :return:
+    """
+    object_ = db.session.query(model_class).filter_by(id=kwargs["id"]).first()
+    user_id = current_user.id
+    if object_.is_private:
+        if not current_user.is_superuser:
+            if object_.created_by_id != user_id:
+                raise ForbiddenError("User is not allowed to view object.")
