@@ -81,9 +81,9 @@ class TestDeviceService(BaseTestCase):
         # together with the device itself.
 
         device = Device(short_name="device",
-                        is_public=False,
+                        is_public=True,
                         is_private=False,
-                        is_internal=True,
+                        is_internal=False,
                         )
         db.session.add(device)
 
@@ -183,9 +183,9 @@ class TestDeviceService(BaseTestCase):
         # together with the device itself.
 
         device = Device(short_name="device",
-                        is_public=False,
+                        is_public=True,
                         is_private=False,
-                        is_internal=True,
+                        is_internal=False,
                         )
         db.session.add(device)
 
@@ -271,9 +271,9 @@ class TestDeviceService(BaseTestCase):
     def test_add_device_customfield_included(self):
         """Ensure that we can include customfields on getting a device."""
         device = Device(short_name="device",
-                        is_public=False,
+                        is_public=True,
                         is_private=False,
-                        is_internal=True,
+                        is_internal=False,
                         )
         db.session.add(device)
 

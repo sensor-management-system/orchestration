@@ -156,12 +156,12 @@ class TestPlatformAttachmentServices(BaseTestCase):
 
     def test_get_platform_attachment_api(self):
         """Ensure that we can get a list of platform attachments."""
-        platform1 = Platform(short_name="Just a platform", is_public=False,
+        platform1 = Platform(short_name="Just a platform", is_public=True,
                              is_private=False,
-                             is_internal=True, )
-        platform2 = Platform(short_name="Another platform", is_public=False,
+                             is_internal=False, )
+        platform2 = Platform(short_name="Another platform", is_public=True,
                              is_private=False,
-                             is_internal=True, )
+                             is_internal=False, )
 
         db.session.add(platform1)
         db.session.add(platform2)

@@ -1,5 +1,5 @@
 import click
-from flask_jwt_extended import get_jwt_identity, jwt_required, current_user
+from flask_jwt_extended import get_jwt_identity, jwt_required, current_user, verify_jwt_in_request
 from sqlalchemy import and_, or_
 
 from ..helpers.errors import ForbiddenError
@@ -182,7 +182,6 @@ def set_default_permission_view_to_internal(data):
         data["is_private"] = False
 
 
-@jwt_required()
 def prevent_normal_user_from_viewing_not_owned_private_object(model_class, kwargs):
     """
     checks if user is not the owner of a private object and if so return a ForbiddenError.
@@ -192,8 +191,11 @@ def prevent_normal_user_from_viewing_not_owned_private_object(model_class, kwarg
     :return:
     """
     object_ = db.session.query(model_class).filter_by(id=kwargs["id"]).first()
-    user_id = current_user.id
     if object_.is_private:
+        verify_jwt_in_request()
+        user_id = current_user.id
         if not current_user.is_superuser:
             if object_.created_by_id != user_id:
                 raise ForbiddenError("User is not allowed to view object.")
+    elif object_.is_internal:
+        verify_jwt_in_request()

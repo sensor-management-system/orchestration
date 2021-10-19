@@ -79,9 +79,9 @@ class TestPlatformServices(BaseTestCase):
         # together with the platform itself.
 
         platform = Platform(short_name="platform",
-                            is_public=False,
+                            is_public=True,
                             is_private=False,
-                            is_internal=True,
+                            is_internal=False,
                             )
         db.session.add(platform)
 

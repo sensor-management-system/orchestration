@@ -151,14 +151,14 @@ class TestCustomFieldServices(BaseTestCase):
     def test_get_customfields_api(self):
         """Ensure that we can get a list of customfields."""
         device1 = Device(short_name="Just a device",
-                         is_public=False,
+                         is_public=True,
                          is_private=False,
-                         is_internal=True,
+                         is_internal=False,
                          )
         device2 = Device(short_name="Another device",
-                         is_public=False,
+                         is_public=True,
                          is_private=False,
-                         is_internal=True,
+                         is_internal=False,
                          )
 
         db.session.add(device1)
