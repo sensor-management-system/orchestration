@@ -56,7 +56,7 @@ permissions and limitations under the Licence.
         <label>z</label>
         {{ value.z | orDefault }}
       </v-col>
-      <v-col cols="12">
+      <v-col cols="12" md="3">
         <label>Elevation Datum</label>
         {{ elevationDatum | orDefault }}
       </v-col>
