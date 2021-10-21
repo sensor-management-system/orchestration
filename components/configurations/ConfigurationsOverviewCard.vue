@@ -82,24 +82,6 @@ permissions and limitations under the Licence.
                 </template>
                 <v-list>
                   <v-list-item
-                    dense
-                  >
-                    <v-list-item-content>
-                      <v-list-item-title
-                        :class="isUserAuthenticated ? 'text' : 'grey-text'"
-                      >
-                        <v-icon
-                          left
-                          small
-                          :color="isUserAuthenticated ? 'black' : 'grey'"
-                        >
-                          mdi-content-copy
-                        </v-icon>
-                        Copy
-                      </v-list-item-title>
-                    </v-list-item-content>
-                  </v-list-item>
-                  <v-list-item
                     :disabled="!isUserAuthenticated"
                     dense
                     @click="$emit('showDeleteDialog',configuration)"
