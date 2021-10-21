@@ -29,11 +29,11 @@
 FROM node:16.0.0-buster as js-builder
 
 # First the urls for sms backend and cv backend
-ARG SMS_BACKEND_URL_ARG
-ENV SMS_BACKEND_URL $SMS_BACKEND_URL_ARG
+#ARG SMS_BACKEND_URL_ARG
+ENV SMS_BACKEND_URL /backend/api/v1
 
-ARG CV_BACKEND_URL_ARG
-ENV CV_BACKEND_URL $CV_BACKEND_URL_ARG
+#ARG CV_BACKEND_URL_ARG
+ENV CV_BACKEND_URL /cv/api/v1
 
 ENV INSTITUTE ufz
 
@@ -44,8 +44,8 @@ ENV NUXT_ENV_CLIENT_ID $CLIENT_ID_ARG
 ARG AUTHORITY_ARG
 ENV NUXT_ENV_AUTHORITY $AUTHORITY_ARG
 
-# VERY IMPORTANT: That is the root path of the application and all additional files on the server
-ENV BASE_URL /sms
+## VERY IMPORTANT: That is the root path of the application and all additional files on the server
+#ENV BASE_URL /sms
 
 # And those remaining settings
 ENV NUXT_ENV_SCOPE openid profile email
