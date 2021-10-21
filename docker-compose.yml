@@ -119,6 +119,7 @@ services:
     environment:
       CV_BASE_URL: ${CV_BASE_URL:-cv/}
       STATIC_URL: '/static/cv/'
+      STATIC_ROOT: '/static/cv/'
       DEBUG: ${DEBUG:-1}
       SECRET_KEY: ${SECRET_KEY:-TopSecret}
       SQL_ENGINE: ${SQL_ENGINE:-django.db.backends.postgresql_psycopg2}

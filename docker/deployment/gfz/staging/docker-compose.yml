@@ -51,6 +51,7 @@ services:
     environment:
       CV_BASE_URL: cv/
       STATIC_URL: /static/cv/
+      STATIC_ROOT: /static/cv/
       DEBUG: 0
       SECRET_KEY: $VOCABULARY_SECRET_KEY
       SQL_ENGINE: django.db.backends.postgresql_psycopg2
