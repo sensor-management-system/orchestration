@@ -10,5 +10,4 @@ class User(db.Model):
     active = db.Column(db.Boolean, default=True)
     is_superuser = db.Column(db.Boolean, default=False)
 
-    def __str__(self):
-        return f"User(subject={repr(self.subject)})"
+    def __str__(self): return f"User(subject={repr(self.subject)})"
