@@ -11,4 +11,4 @@ class User(db.Model):
     is_superuser = db.Column(db.Boolean, default=False)
 
     def __str__(self):
-        return "User(username='%s')" % self.subject.split("@")[0]
+        return f"User(subject={repr(self.subject)})"
