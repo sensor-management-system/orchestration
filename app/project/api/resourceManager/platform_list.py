@@ -4,7 +4,7 @@ from ..models.platform import Platform
 from ..resourceManager.base_resource import (
     add_contact_to_object,
     add_created_by_id,
-    set_permission_filter_to_query, set_default_permission_view_to_internal,
+    set_permission_filter_to_query, set_default_permission_view_to_internal_if_not_exists_or_all_false,
 )
 from ..schemas.platform_schema import PlatformSchema
 from ..token_checker import token_required
@@ -36,7 +36,7 @@ class PlatformList(ResourceList):
         :return:
         """
         add_created_by_id(data)
-        set_default_permission_view_to_internal(data)
+        set_default_permission_view_to_internal_if_not_exists_or_all_false(data)
 
     def after_post(self, result):
         """
