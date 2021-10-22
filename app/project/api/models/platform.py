@@ -98,6 +98,19 @@ class Platform(db.Model, AuditMixin, SearchableMixin, PermissionMixin):
             "status_uri": {"type": "keyword"},
             # Website just via text, as we won't search exactly the same website.
             "website": {"type": "text"},
+            "is_internal": {
+                "type": "boolean",
+            },
+            "is_public": {
+                "type": "boolean",
+            },
+            "is_private": {
+                "type": "boolean",
+            },
+            "created_by_id": {
+                "type": "integer",
+            },
+
             # Inventory, serrial number & pid, allow search via both text and keyword.
             "inventory_number": {
                 "type": "keyword",

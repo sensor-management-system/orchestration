@@ -230,6 +230,15 @@ class Configuration(db.Model, AuditMixin, SearchableMixin):
                     # Label & project name should be filterable (keyword) & searchable (text).
                     "label": {"type": "keyword", "fields": {"text": {"type": "text"}}},
                     "status": {"type": "keyword", "fields": {"text": {"type": "text"}}},
+                    "is_internal": {
+                        "type": "boolean",
+                    },
+                    "is_public": {
+                        "type": "boolean",
+                    },
+                    "created_by_id": {
+                        "type": "integer",
+                    },
                     "location_type": {
                         "type": "keyword",
                         "fields": {"text": {"type": "text"}},
