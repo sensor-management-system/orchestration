@@ -116,6 +116,18 @@ class Device(db.Model, AuditMixin, SearchableMixin, IndirectSearchableMixin, Per
             "manufacturer_uri": {"type": "keyword"},
             # dual use is a boolean
             "dual_use": {"type": "boolean"},
+            "is_internal": {
+                "type": "boolean",
+            },
+            "is_public": {
+                "type": "boolean",
+            },
+            "is_private": {
+                "type": "boolean",
+            },
+            "created_by_id": {
+                "type": "integer",
+            },
             # Model should be both keyword & text.
             "model": {"type": "keyword", "fields": {"text": {"type": "text"}}},
             # Inventory number is the same as serial number.
