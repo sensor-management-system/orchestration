@@ -169,14 +169,14 @@ def set_permission_filter_to_query(model_class):
     return query_
 
 
-def set_default_permission_view_to_internal(data):
+def set_default_permission_view_to_internal_if_not_exists_or_all_false(data):
     """
-    Methode to check if the request doesn't include the permission view and if not
-    the set it to internal by default.
+    Methode to check if the request doesn't include the permission view or all are False
+    and if not the set it to internal by default.
 
     :param data: json date sent wit the request.
     """
-    if ("is_private" not in data) and ('is_public' not in data) and ('is_internal' not in data):
+    if not any([bool(data.get("is_private")), bool(data.get("is_public")), bool(data.get("is_internal"))]):
         data["is_internal"] = True
         data["is_public"] = False
         data["is_private"] = False
