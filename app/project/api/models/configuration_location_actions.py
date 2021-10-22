@@ -23,8 +23,7 @@ class ConfigurationStaticLocationBeginAction(
         "Contact",
         uselist=False,
         foreign_keys=[contact_id],
-        backref=db.backref("configuration_static_location_begin_actions",
-                           cascade="save-update, merge, delete, delete-orphan"),
+        backref=db.backref("configuration_static_location_begin_actions"),
     )
     x = db.Column(db.Float, nullable=True)
     y = db.Column(db.Float, nullable=True)
@@ -65,8 +64,7 @@ class ConfigurationStaticLocationEndAction(
         "Contact",
         uselist=False,
         foreign_keys=[contact_id],
-        backref=db.backref("configuration_static_location_end_actions",
-                           cascade="save-update, merge, delete, delete-orphan"),
+        backref=db.backref("configuration_static_location_end_actions"),
     )
 
     def get_parent_search_entities(self):
@@ -101,8 +99,7 @@ class ConfigurationDynamicLocationBeginAction(
         "Contact",
         uselist=False,
         foreign_keys=[contact_id],
-        backref=db.backref("configuration_dynamic_location_begin_actions",
-                           cascade="save-update, merge, delete, delete-orphan"),
+        backref=db.backref("configuration_dynamic_location_begin_actions"),
     )
     x_property_id = db.Column(
         db.Integer, db.ForeignKey("device_property.id"), nullable=True
@@ -171,8 +168,7 @@ class ConfigurationDynamicLocationEndAction(
         "Contact",
         uselist=False,
         foreign_keys=[contact_id],
-        backref=db.backref("configuration_dynamic_location_end_actions",
-                           cascade="save-update, merge, delete, delete-orphan"),
+        backref=db.backref("configuration_dynamic_location_end_actions"),
     )
 
     def to_search_entry(self):
