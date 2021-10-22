@@ -20,14 +20,14 @@ def is_user_in_a_group(groups_to_check):
         return True
     current_user = get_current_user()
     idl_groups = get_all_permission_groups(current_user.subject)
-    user_groups = idl_groups.administratedDataprojects + idl_groups.memberedDataprojects
+    user_groups = idl_groups.administrated_permissions_groups + idl_groups.membered_permissions_groups
     return any(group in user_groups for group in groups_to_check)
 
 
 def is_user_admin_in_a_group(groups_to_check):
     """
     check if the current user is an admin in the same group
-     as the object.
+    as the object.
 
     :param groups_to_check: a list of ids
     :return:
@@ -36,7 +36,7 @@ def is_user_admin_in_a_group(groups_to_check):
         return True
     current_user = get_current_user()
     idl_groups = get_all_permission_groups(current_user.subject)
-    user_groups = idl_groups.administratedDataprojects
+    user_groups = idl_groups.administrated_permissions_groups
     return any(group in user_groups for group in groups_to_check)
 
 
