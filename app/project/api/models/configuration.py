@@ -7,7 +7,7 @@ from sqlalchemy.ext.mutable import MutableList
 from sqlalchemy.orm import validates
 
 from .base_model import db
-from .mixin import AuditMixin, SearchableMixin, exist
+from .mixin import AuditMixin, SearchableMixin
 from ..helpers.errors import ConflictError
 
 ConfigurationsTuple = collections.namedtuple(
@@ -59,7 +59,7 @@ class Configuration(db.Model, AuditMixin, SearchableMixin):
 
     @validates("is_internal")
     def validate_internal(self, key, is_internal):
-        if is_internal and exist(self.is_public):
+        if is_internal and bool(self.is_public):
             raise ConflictError(
                 "Please make sure that this object is not public at first."
             )
@@ -68,7 +68,7 @@ class Configuration(db.Model, AuditMixin, SearchableMixin):
     @validates("is_public")
     def validate_public(self, key, is_public):
 
-        if is_public and exist(self.is_internal):
+        if is_public and bool(self.is_internal):
             raise ConflictError(
                 "Please make sure that this object is not internal at first."
             )
