@@ -45,18 +45,6 @@ class IdlUser:
         return IdlUser(id, username, display_name, referenced_iri, administrated_permissions_groups,
                        membered_permissions_groups)
 
-    def to_dict(self) -> dict:
-        result: dict = {}
-        result["id"] = from_int(self.id)
-        result["username"] = from_str(self.username)
-        result["displayName"] = from_str(self.display_name)
-        result["referencedIri"] = from_str(self.referenced_iri)
-        result["administratedPermissionsGroups"] = from_list(lambda x: from_str((lambda x: str(x))(x)),
-                                                             self.administrated_permissions_groups)
-        result["memberedPermissionsGroups"] = from_list(lambda x: from_str((lambda x: str(x))(x)),
-                                                        self.membered_permissions_groups)
-        return result
-
 
 def idl_from_dict(s: Any) -> List[IdlUser]:
     return from_list(IdlUser.from_dict, s)
