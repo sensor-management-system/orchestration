@@ -45,7 +45,7 @@ class TestEsQueryBuilder(unittest.TestCase):
             self.assertTrue(is_set)
 
             used_filter = builder.to_filter()
-            expected_filter = MultiFieldMatchFilter(query=q)
+            expected_filter = MultiFieldMatchFilter(query=q, type_="phrase")
 
             self.assertEqual(used_filter, expected_filter)
 
@@ -157,7 +157,7 @@ class TestEsQueryBuilder(unittest.TestCase):
         es_filter = builder.to_filter()
         expected = AndFilter(
             [
-                MultiFieldMatchFilter(query="Boeken"),
+                MultiFieldMatchFilter(query="Boeken", type_="phrase"),
                 TermEqualsExactStringFilter(term="short_name", value="boeken"),
             ]
         )
@@ -177,7 +177,15 @@ class TestMultiMatchStringFilter(unittest.TestCase):
         for q in ["search1", "search2", "something different"]:
             multi_match_filter = MultiFieldMatchFilter(query=q)
             es_query = multi_match_filter.to_query()
-            expected = {"multi_match": {"query": q, "fields": ["*"]}}
+            expected = {
+                "multi_match": {"query": q, "type": "best_fields", "fields": ["*"]}
+            }
+            self.assertEqual(es_query, expected)
+
+        for q in ["search1", "search2", "something different"]:
+            multi_match_filter = MultiFieldMatchFilter(query=q, type_="phrase")
+            es_query = multi_match_filter.to_query()
+            expected = {"multi_match": {"query": q, "type": "phrase", "fields": ["*"]}}
             self.assertEqual(es_query, expected)
 
     def test_eq(self):
@@ -185,10 +193,15 @@ class TestMultiMatchStringFilter(unittest.TestCase):
         filter1 = MultiFieldMatchFilter(query="a")
         filter2 = MultiFieldMatchFilter(query="a")
         filter3 = MultiFieldMatchFilter(query="b")
+        filter4 = MultiFieldMatchFilter(query="b", type_="phrase")
+        filter5 = MultiFieldMatchFilter(query="a", type_="best_fields")
 
         self.assertEqual(filter1, filter2)
         self.assertNotEqual(filter1, filter3)
         self.assertNotEqual(filter1, None)
+
+        self.assertEqual(filter1, filter5)
+        self.assertNotEqual(filter4, filter5)
 
 
 class TestTermEqualsExactStringFilter(unittest.TestCase):
