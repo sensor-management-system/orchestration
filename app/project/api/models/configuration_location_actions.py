@@ -13,7 +13,8 @@ class ConfigurationStaticLocationBeginAction(
         "Configuration",
         uselist=False,
         foreign_keys=[configuration_id],
-        backref=db.backref("configuration_static_location_begin_actions"),
+        backref=db.backref("configuration_static_location_begin_actions",
+                           cascade="save-update, merge, delete, delete-orphan"),
     )
     begin_date = db.Column(db.DateTime, nullable=False)
     description = db.Column(db.Text, nullable=True)
@@ -53,7 +54,8 @@ class ConfigurationStaticLocationEndAction(
         "Configuration",
         uselist=False,
         foreign_keys=[configuration_id],
-        backref=db.backref("configuration_static_location_end_actions"),
+        backref=db.backref("configuration_static_location_end_actions",
+                           cascade="save-update, merge, delete, delete-orphan"),
     )
     end_date = db.Column(db.DateTime, nullable=False)
     description = db.Column(db.Text, nullable=True)
@@ -87,7 +89,8 @@ class ConfigurationDynamicLocationBeginAction(
         "Configuration",
         uselist=False,
         foreign_keys=[configuration_id],
-        backref=db.backref("configuration_dynamic_location_begin_actions"),
+        backref=db.backref("configuration_dynamic_location_begin_actions",
+                           cascade="save-update, merge, delete, delete-orphan"),
     )
     begin_date = db.Column(db.DateTime, nullable=False)
     description = db.Column(db.Text, nullable=True)
@@ -152,7 +155,8 @@ class ConfigurationDynamicLocationEndAction(
         "Configuration",
         uselist=False,
         foreign_keys=[configuration_id],
-        backref=db.backref("configuration_dynamic_location_end_actions"),
+        backref=db.backref("configuration_dynamic_location_end_actions",
+                           cascade="save-update, merge, delete, delete-orphan"),
     )
     end_date = db.Column(db.DateTime, nullable=False)
     description = db.Column(db.Text, nullable=True)
