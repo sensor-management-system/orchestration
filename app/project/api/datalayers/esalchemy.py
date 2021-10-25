@@ -1,29 +1,28 @@
 """Classes to help searching in the elasticsearch."""
 
+from dataclasses import dataclass
+
 from flask import current_app, request
 from flask_rest_jsonapi.data_layers.alchemy import SqlalchemyDataLayer
 
 
+@dataclass
 class MultiFieldMatchFilter:
     """Class to search for a match in all the fields."""
 
-    def __init__(self, query):
-        """Init the object."""
-        self.query = query
+    query: str
+    type_: str = "best_fields"
+    # The type_ of best_fields is the default value that
+    # the elasticsearch uses if no explicit value is given.
+    # Ok to search full words, but for substring matches
+    # something like 'phrase' should be considered.
 
     def to_query(self):
         """Convert the filter to a query."""
-        return {
-            "multi_match": {"query": self.query, "fields": ["*"]},
+        result = {
+            "multi_match": {"query": self.query, "type": self.type_, "fields": ["*"]},
         }
-
-    def __eq__(self, other):
-        """Test equality."""
-        if not isinstance(other, MultiFieldMatchFilter):
-            return False
-        if not self.query == other.query:
-            return False
-        return True
+        return result
 
 
 class TermEqualsExactStringFilter:
@@ -274,7 +273,12 @@ class EsQueryBuilder:
         """Return the filter out of the settings."""
         sub_filters = []
         if self.q:
-            sub_filters.append(MultiFieldMatchFilter(query=self.q))
+            sub_filters.append(
+                MultiFieldMatchFilter(
+                    query=self.q,
+                    type_="phrase",
+                )
+            )
         if self.filters:
             sub_filters.append(FilterParser.parse(filter_list=self.filters))
         return AndFilter(sub_filters).simplify()
