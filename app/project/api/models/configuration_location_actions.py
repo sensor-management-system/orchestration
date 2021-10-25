@@ -117,7 +117,6 @@ class ConfigurationDynamicLocationBeginAction(
         "DeviceProperty",
         uselist=False,
         foreign_keys=[y_property_id],
-        backref=db.backref("y_property_configuration_dynamic_location_begin_actions",
         backref=db.backref("y_property_configuration_dynamic_location_begin_actions"),
     )
     z_property_id = db.Column(
@@ -127,7 +126,6 @@ class ConfigurationDynamicLocationBeginAction(
         "DeviceProperty",
         uselist=False,
         foreign_keys=[z_property_id],
-        backref=db.backref("z_property_configuration_dynamic_location_begin_actions",
         backref=db.backref("z_property_configuration_dynamic_location_begin_actions"),
     )
     epsg_code = db.Column(db.String(256), default="4326")
