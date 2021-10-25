@@ -108,8 +108,7 @@ class ConfigurationDynamicLocationBeginAction(
         "DeviceProperty",
         uselist=False,
         foreign_keys=[x_property_id],
-        backref=db.backref("x_property_configuration_dynamic_location_begin_actions",
-                           cascade="save-update, merge, delete, delete-orphan"),
+        backref=db.backref("x_property_configuration_dynamic_location_begin_actions"),
     )
     y_property_id = db.Column(
         db.Integer, db.ForeignKey("device_property.id"), nullable=True
@@ -119,7 +118,7 @@ class ConfigurationDynamicLocationBeginAction(
         uselist=False,
         foreign_keys=[y_property_id],
         backref=db.backref("y_property_configuration_dynamic_location_begin_actions",
-                           cascade="save-update, merge, delete, delete-orphan"),
+        backref=db.backref("y_property_configuration_dynamic_location_begin_actions"),
     )
     z_property_id = db.Column(
         db.Integer, db.ForeignKey("device_property.id"), nullable=True
@@ -129,7 +128,7 @@ class ConfigurationDynamicLocationBeginAction(
         uselist=False,
         foreign_keys=[z_property_id],
         backref=db.backref("z_property_configuration_dynamic_location_begin_actions",
-                           cascade="save-update, merge, delete, delete-orphan"),
+        backref=db.backref("z_property_configuration_dynamic_location_begin_actions"),
     )
     epsg_code = db.Column(db.String(256), default="4326")
     elevation_datum_name = db.Column(db.String(256), default="MSL")  # mean sea level
