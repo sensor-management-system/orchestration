@@ -74,8 +74,8 @@ class TestConfigurationsService(BaseTestCase):
             },
         }
         for (
-                input_calibration_date,
-                expected_output_calibration_date,
+            input_calibration_date,
+            expected_output_calibration_date,
         ) in calibration_dates.items():
             # set up for each single run
             self.setUp()
@@ -126,8 +126,8 @@ class TestConfigurationsService(BaseTestCase):
 
             configuration_device = (
                 db.session.query(ConfigurationDevice)
-                    .filter_by(device_id=1, configuration_id=1)
-                    .first()
+                .filter_by(device_id=1, configuration_id=1)
+                .first()
             )
             self.assertEqual(
                 configuration_device.calibration_date,
@@ -181,8 +181,8 @@ class TestConfigurationsService(BaseTestCase):
 
         configuration_device = (
             db.session.query(ConfigurationDevice)
-                .filter_by(device_id=1, configuration_id=1)
-                .first()
+            .filter_by(device_id=1, configuration_id=1)
+            .first()
         )
         self.assertEqual(configuration_device.firmware_version, firmware_version)
 
@@ -268,44 +268,46 @@ class TestConfigurationsService(BaseTestCase):
         """
         # add a configuration, the same way as
         # in test_add_configuration_model
-        platform1 = Platform(short_name="Platform 1", is_public=False,
-                             is_private=False,
-                             is_internal=True, )
-        platform2 = Platform(short_name="Platform 2", is_public=False,
-                             is_private=False,
-                             is_internal=True, )
-        platform3 = Platform(short_name="Platform 3", is_public=False,
-                             is_private=False,
-                             is_internal=True, )
+        platform1 = Platform(
+            short_name="Platform 1",
+            is_public=False,
+            is_private=False,
+            is_internal=True,
+        )
+        platform2 = Platform(
+            short_name="Platform 2",
+            is_public=False,
+            is_private=False,
+            is_internal=True,
+        )
+        platform3 = Platform(
+            short_name="Platform 3",
+            is_public=False,
+            is_private=False,
+            is_internal=True,
+        )
 
         db.session.add(platform1)
         db.session.add(platform2)
         db.session.add(platform3)
 
-        device1 = Device(short_name="Device 1",
-                         is_public=False,
-                         is_private=False,
-                         is_internal=True,
-                         )
-        device2 = Device(short_name="Device 2",
-                         is_public=False,
-                         is_private=False,
-                         is_internal=True,
-                         )
-        device3 = Device(short_name="Device 3",
-                         is_public=False,
-                         is_private=False,
-                         is_internal=True,
-                         )
+        device1 = Device(
+            short_name="Device 1", is_public=False, is_private=False, is_internal=True,
+        )
+        device2 = Device(
+            short_name="Device 2", is_public=False, is_private=False, is_internal=True,
+        )
+        device3 = Device(
+            short_name="Device 3", is_public=False, is_private=False, is_internal=True,
+        )
 
         db.session.add(device1)
         db.session.add(device2)
         db.session.add(device3)
 
-        config1 = Configuration(label="Config1", location_type="static",
-                                is_public=False,
-                                is_internal=True,
-                                )
+        config1 = Configuration(
+            label="Config1", location_type="static", is_public=False, is_internal=True,
+        )
         db.session.add(config1)
         db.session.commit()
 
@@ -460,7 +462,15 @@ class TestConfigurationsService(BaseTestCase):
         )
         configuration = generate_configuration_model()
         db.session.add_all(
-            [device, device_parent_platform, platform, parent_platform, contact, configuration])
+            [
+                device,
+                device_parent_platform,
+                platform,
+                parent_platform,
+                contact,
+                configuration,
+            ]
+        )
         db.session.commit()
         # Mount a device
         device_mount_data = {
@@ -519,99 +529,128 @@ class TestConfigurationsService(BaseTestCase):
             object_type="platform_mount_action",
         )
 
-        _ = super().delete_object(
-            url=f"{self.configurations_url}/{configuration.id}",
-        )
+        _ = super().delete_object(url=f"{self.configurations_url}/{configuration.id}",)
 
     def test_delete_configuration_with_static_begin_location_action(self):
         """Ensure a configuration with a static_begin_location_action can be deleted"""
         contact = self.add_a_contact()
         config_id = self.add_a_configuration()
 
-        action_data = {"data": {
-            "type": "configuration_static_location_begin_action",
-            "attributes": {"x": 12.424163818359377,
-                           "y": 51.40391771800119,
-                           "z": None,
-                           "description": "",
-                           "begin_date": "2021-10-22T09:28:40.275Z",
-                           "epsg_code": "4326", "elevation_datum_uri": "",
-                           "elevation_datum_name": "MSL"},
-            "relationships": {"contact": {"data": {"type": "contact",
-                                                   "id": contact.id}},
-                              "configuration": {"data": {"type": "configuration",
-                                                         "id": config_id}}}}}
+        action_data = {
+            "data": {
+                "type": "configuration_static_location_begin_action",
+                "attributes": {
+                    "x": 12.424163818359377,
+                    "y": 51.40391771800119,
+                    "z": None,
+                    "description": "",
+                    "begin_date": "2021-10-22T09:28:40.275Z",
+                    "epsg_code": "4326",
+                    "elevation_datum_uri": "",
+                    "elevation_datum_name": "MSL",
+                },
+                "relationships": {
+                    "contact": {"data": {"type": "contact", "id": contact.id}},
+                    "configuration": {
+                        "data": {"type": "configuration", "id": config_id}
+                    },
+                },
+            }
+        }
         url = base_url + "/static-location-begin-actions"
         _ = super().add_object(
             url=url,
             data_object=action_data,
             object_type="configuration_static_location_begin_action",
         )
-        _ = super().delete_object(
-            url=f"{self.configurations_url}/{config_id}",
-        )
+        _ = super().delete_object(url=f"{self.configurations_url}/{config_id}",)
 
     def test_delete_configuration_with_static_end_location_action(self):
         """Ensure a configuration with a static_end_location_action can be deleted"""
         contact = self.add_a_contact()
         config_id = self.add_a_configuration()
 
-        action_data = {"data": {"type": "configuration_static_location_end_action",
-                                "attributes": {"description": "stopped", "end_date": "2021-10-31T09:28:00.000Z"},
-                                "relationships": {"contact": {"data": {"type": "contact", "id": contact.id}},
-                                                  "configuration": {
-                                                      "data": {"type": "configuration", "id": config_id}}}}}
+        action_data = {
+            "data": {
+                "type": "configuration_static_location_end_action",
+                "attributes": {
+                    "description": "stopped",
+                    "end_date": "2021-10-31T09:28:00.000Z",
+                },
+                "relationships": {
+                    "contact": {"data": {"type": "contact", "id": contact.id}},
+                    "configuration": {
+                        "data": {"type": "configuration", "id": config_id}
+                    },
+                },
+            }
+        }
         url = base_url + "/static-location-end-actions"
         _ = super().add_object(
             url=url,
             data_object=action_data,
             object_type="configuration_static_location_end_action",
         )
-        _ = super().delete_object(
-            url=f"{self.configurations_url}/{config_id}",
-        )
+        _ = super().delete_object(url=f"{self.configurations_url}/{config_id}",)
 
     def test_delete_configuration_with_dynamic_begin_location_action(self):
         """Ensure a configuration with a dynamic_begin_location_action can be deleted"""
         contact = self.add_a_contact()
         config_id = self.add_a_configuration()
 
-        action_data = {"data": {"type": "configuration_dynamic_location_begin_action",
-                                "attributes": {"description": "dynamic", "begin_date": "2021-10-22T10:00:50.542Z",
-                                               "epsg_code": "4326", "elevation_datum_uri": "",
-                                               "elevation_datum_name": "MSL"},
-                                "relationships": {"contact": {"data": {"type": "contact", "id": contact.id}},
-                                                  "configuration": {
-                                                      "data": {"type": "configuration", "id": config_id}}}}}
+        action_data = {
+            "data": {
+                "type": "configuration_dynamic_location_begin_action",
+                "attributes": {
+                    "description": "dynamic",
+                    "begin_date": "2021-10-22T10:00:50.542Z",
+                    "epsg_code": "4326",
+                    "elevation_datum_uri": "",
+                    "elevation_datum_name": "MSL",
+                },
+                "relationships": {
+                    "contact": {"data": {"type": "contact", "id": contact.id}},
+                    "configuration": {
+                        "data": {"type": "configuration", "id": config_id}
+                    },
+                },
+            }
+        }
         url = base_url + "/dynamic-location-begin-actions"
         _ = super().add_object(
             url=url,
             data_object=action_data,
             object_type="configuration_dynamic_location_begin_action",
         )
-        _ = super().delete_object(
-            url=f"{self.configurations_url}/{config_id}",
-        )
+        _ = super().delete_object(url=f"{self.configurations_url}/{config_id}",)
 
     def test_delete_configuration_with_dynamic_end_location_action(self):
         """Ensure a configuration with a dynamic_end_location_action can be deleted"""
         contact = self.add_a_contact()
         config_id = self.add_a_configuration()
 
-        action_data = {"data": {"type": "configuration_dynamic_location_end_action",
-                                "attributes": {"description": "Stopped", "end_date": "2021-10-23T10:00:00.000Z"},
-                                "relationships": {"contact": {"data": {"type": "contact", "id": contact.id}},
-                                                  "configuration": {
-                                                      "data": {"type": "configuration", "id": config_id}}}}}
+        action_data = {
+            "data": {
+                "type": "configuration_dynamic_location_end_action",
+                "attributes": {
+                    "description": "Stopped",
+                    "end_date": "2021-10-23T10:00:00.000Z",
+                },
+                "relationships": {
+                    "contact": {"data": {"type": "contact", "id": contact.id}},
+                    "configuration": {
+                        "data": {"type": "configuration", "id": config_id}
+                    },
+                },
+            }
+        }
         url = base_url + "/dynamic-location-end-actions"
         _ = super().add_object(
             url=url,
             data_object=action_data,
             object_type="configuration_dynamic_location_end_action",
         )
-        _ = super().delete_object(
-            url=f"{self.configurations_url}/{config_id}",
-        )
+        _ = super().delete_object(url=f"{self.configurations_url}/{config_id}",)
 
     @staticmethod
     def add_a_contact():
@@ -628,13 +667,18 @@ class TestConfigurationsService(BaseTestCase):
     def add_a_configuration(self):
         config_data = {
             "data": {
-                "attributes": {"label": "Test configuration",
-                               "project_uri": "", "project_name": "MOSES",
-                               "status": "draft",
-                               "start_date": "2021-10-22T09:31:00.000Z",
-                               "end_date": "2021-10-31T09:32:00.000Z",
-                               "hierarchy": []},
-                "type": "configuration"}}
+                "attributes": {
+                    "label": "Test configuration",
+                    "project_uri": "",
+                    "project_name": "MOSES",
+                    "status": "draft",
+                    "start_date": "2021-10-22T09:31:00.000Z",
+                    "end_date": "2021-10-31T09:32:00.000Z",
+                    "hierarchy": [],
+                },
+                "type": "configuration",
+            }
+        }
         config = super().add_object(
             url=self.configurations_url,
             data_object=config_data,

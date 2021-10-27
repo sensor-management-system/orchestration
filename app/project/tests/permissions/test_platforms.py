@@ -1,24 +1,25 @@
-"""Tests for the devices."""
+"""Tests for the Platform-Permissions."""
 import json
 
 from project import base_url
 from project.api.models import Contact, User, Platform
 from project.api.models.base_model import db
 from project.tests.base import BaseTestCase
+from project.tests.base import fake
 from project.tests.base import generate_token_data, create_token
 
 
 class TestPlatformPermissions(BaseTestCase):
     """Tests for the platform Permissions."""
 
-    device_url = base_url + "/platforms"
+    platform_url = base_url + "/platforms"
     object_type = "platform"
 
     def test_add_public_platform(self):
         """Ensure a new platform can be public."""
         public_platform = Platform(
             id=15,
-            short_name="public platform",
+            short_name=fake.pystr(),
             is_public=True,
             is_private=False,
             is_internal=False,
@@ -35,7 +36,7 @@ class TestPlatformPermissions(BaseTestCase):
         """Ensure a new platform can be private."""
         private_platform = Platform(
             id=1,
-            short_name="private platform",
+            short_name=fake.pystr(),
             is_public=False,
             is_private=True,
             is_internal=False,
@@ -48,11 +49,11 @@ class TestPlatformPermissions(BaseTestCase):
         self.assertEqual(platform.is_internal, False)
         self.assertEqual(platform.is_private, True)
 
-    def test_add_platform_model(self):
+    def test_add_internal_platform_model(self):
         """Ensure a new platform model can be internal."""
         internal_platform = Platform(
             id=33,
-            short_name="internal platform",
+            short_name=fake.pystr(),
             is_internal=True,
             is_public=False,
             is_private=False,
@@ -65,19 +66,24 @@ class TestPlatformPermissions(BaseTestCase):
         self.assertEqual(platform.is_public, False)
         self.assertEqual(platform.is_private, False)
 
-    def test_add_platform(self):
+    def test_add_internal_platform(self):
         """Ensure a new platform can be added to api and is internal."""
-        device_data = {"data": {"type": "platform", "attributes": {
-            "short_name": "Test platform",
-            "is_public": False,
-            "is_internal": True,
-            "is_private": False
-        }}}
+        platform_data = {
+            "data": {
+                "type": "platform",
+                "attributes": {
+                    "short_name": fake.pystr(),
+                    "is_public": False,
+                    "is_internal": True,
+                    "is_private": False,
+                },
+            }
+        }
         access_headers = create_token()
         with self.client:
             response = self.client.post(
-                self.device_url,
-                data=json.dumps(device_data),
+                self.platform_url,
+                data=json.dumps(platform_data),
                 content_type="application/vnd.api+json",
                 headers=access_headers,
             )
@@ -91,31 +97,30 @@ class TestPlatformPermissions(BaseTestCase):
         """Ensure anonymous user can only see public objects."""
         public_platform = Platform(
             id=15,
-            short_name="device_short_name test2",
+            short_name=fake.pystr(),
             is_private=False,
             is_internal=False,
-            is_public=True
+            is_public=True,
         )
 
         internal_platform = Platform(
             id=33,
-            short_name="device_short_name test2",
+            short_name=fake.pystr(),
             is_public=False,
             is_private=False,
-            is_internal=True
+            is_internal=True,
         )
         private_platform = Platform(
             id=1,
-            short_name="private platform",
+            short_name=fake.pystr(),
             is_public=False,
             is_internal=False,
-            is_private=True
-
+            is_private=True,
         )
         db.session.add_all([public_platform, internal_platform, private_platform])
         db.session.commit()
 
-        response = self.client.get(self.device_url)
+        response = self.client.get(self.platform_url)
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.data.decode())
         self.assertEqual(data["meta"]["count"], 1)
@@ -125,7 +130,7 @@ class TestPlatformPermissions(BaseTestCase):
         """Ensure that a registered user can see public, internal, and only his own private objects"""
         public_platform = Platform(
             id=15,
-            short_name="device_short_name test2",
+            short_name=fake.pystr(),
             is_public=True,
             is_private=False,
             is_internal=False,
@@ -133,21 +138,21 @@ class TestPlatformPermissions(BaseTestCase):
 
         internal_platform = Platform(
             id=33,
-            short_name="device_short_name test2",
+            short_name=fake.pystr(),
             is_public=False,
             is_private=False,
             is_internal=True,
         )
         private_platform = Platform(
             id=1,
-            short_name="private platform",
+            short_name=fake.pystr(),
             is_public=False,
             is_internal=False,
-            is_private=True
+            is_private=True,
         )
         private_platform_1 = Platform(
             id=3,
-            short_name="private platform",
+            short_name=fake.pystr(),
             is_public=False,
             is_private=True,
             is_internal=False,
@@ -169,70 +174,95 @@ class TestPlatformPermissions(BaseTestCase):
         user = User(subject="test_user@test.test", contact=contact)
         user_1 = User(subject="test_user1@test.test", contact=contact_1)
         db.session.add_all(
-            [public_platform, internal_platform, private_platform, private_platform_1, contact, user, contact_1,
-             user_1])
+            [
+                public_platform,
+                internal_platform,
+                private_platform,
+                private_platform_1,
+                contact,
+                user,
+                contact_1,
+                user_1,
+            ]
+        )
         db.session.commit()
 
         private_platform.created_by_id = user.id
         private_platform_1.created_by_id = user_1.id
 
-        token_data = {"sub": user.subject,
-                      "iss": "SMS unittest",
-                      "family_name": contact.family_name,
-                      "given_name": contact.given_name,
-                      "email": contact.email,
-                      "aud": "SMS"
-                      }
+        token_data = {
+            "sub": user.subject,
+            "iss": "SMS unittest",
+            "family_name": contact.family_name,
+            "given_name": contact.given_name,
+            "email": contact.email,
+            "aud": "SMS",
+        }
         access_headers = create_token(token_data)
-        response = self.client.get(self.device_url, headers=access_headers)
+        response = self.client.get(self.platform_url, headers=access_headers)
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.data.decode())
         self.assertEqual(data["meta"]["count"], 3)
 
     def test_add_platform_with_multipel_true_status(self):
         """Make Sure that is a an object can't have tow True status at the same time"""
-        device_data = {"data": {"type": "platform", "attributes": {
-            "short_name": "Test platform",
-            "is_public": True,
-            "is_internal": True,
-            "is_private": False
-        }}}
+        platform_data = {
+            "data": {
+                "type": "platform",
+                "attributes": {
+                    "short_name": fake.pystr(),
+                    "is_public": True,
+                    "is_internal": True,
+                    "is_private": False,
+                },
+            }
+        }
         access_headers = create_token()
         with self.client:
             response = self.client.post(
-                self.device_url,
-                data=json.dumps(device_data),
+                self.platform_url,
+                data=json.dumps(platform_data),
                 content_type="application/vnd.api+json",
                 headers=access_headers,
             )
         self.assertEqual(response.status_code, 409)
 
-        device_data_1 = {"data": {"type": "platform", "attributes": {
-            "short_name": "Test platform",
-            "is_public": False,
-            "is_internal": True,
-            "is_private": True
-        }}}
+        device_data_1 = {
+            "data": {
+                "type": "platform",
+                "attributes": {
+                    "short_name": fake.pystr(),
+                    "is_public": False,
+                    "is_internal": True,
+                    "is_private": True,
+                },
+            }
+        }
         access_headers = create_token()
         with self.client:
             response = self.client.post(
-                self.device_url,
+                self.platform_url,
                 data=json.dumps(device_data_1),
                 content_type="application/vnd.api+json",
                 headers=access_headers,
             )
         self.assertEqual(response.status_code, 409)
 
-        device_data_2 = {"data": {"type": "platform", "attributes": {
-            "short_name": "Test platform",
-            "is_public": True,
-            "is_internal": True,
-            "is_private": True
-        }}}
+        device_data_2 = {
+            "data": {
+                "type": "platform",
+                "attributes": {
+                    "short_name": fake.pystr(),
+                    "is_public": True,
+                    "is_internal": True,
+                    "is_private": True,
+                },
+            }
+        }
         access_headers = create_token()
         with self.client:
             response = self.client.post(
-                self.device_url,
+                self.platform_url,
                 data=json.dumps(device_data_2),
                 content_type="application/vnd.api+json",
                 headers=access_headers,
@@ -241,18 +271,23 @@ class TestPlatformPermissions(BaseTestCase):
 
     def test_add_groups_ids(self):
         """Make sure that a platform with groups-ids can be created"""
-        device_data = {"data": {"type": "platform", "attributes": {
-            "short_name": "Test platform associated to a group",
-            "is_public": False,
-            "is_internal": True,
-            "is_private": False,
-            "group_ids": [12]
-        }}}
+        platform_data = {
+            "data": {
+                "type": "platform",
+                "attributes": {
+                    "short_name": fake.pystr(),
+                    "is_public": False,
+                    "is_internal": True,
+                    "is_private": False,
+                    "group_ids": [12],
+                },
+            }
+        }
         access_headers = create_token()
         with self.client:
             response = self.client.post(
-                self.device_url,
-                data=json.dumps(device_data),
+                self.platform_url,
+                data=json.dumps(platform_data),
                 content_type="application/vnd.api+json",
                 headers=access_headers,
             )

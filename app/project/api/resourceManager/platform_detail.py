@@ -1,8 +1,12 @@
 from flask_rest_jsonapi import ResourceDetail, JsonApiException
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 
-from .base_resource import delete_attachments_in_minio_by_url, \
-    prevent_normal_user_from_viewing_not_owned_private_object, check_patch_permission, check_deletion_permission
+from .base_resource import (
+    delete_attachments_in_minio_by_url,
+    check_for_permissions,
+    check_patch_permission,
+    check_deletion_permission,
+)
 from ..helpers.errors import ConflictError
 from ..models.base_model import db
 from ..models.platform import Platform
@@ -19,7 +23,7 @@ class PlatformDetail(ResourceDetail):
 
     def before_get(self, args, kwargs):
         """Check user permission to view a Platform."""
-        prevent_normal_user_from_viewing_not_owned_private_object(Platform, kwargs)
+        check_for_permissions(Platform, kwargs)
 
     def before_patch(self, args, kwargs, data):
         """Add Created by user id to the data"""

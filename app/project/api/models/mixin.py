@@ -350,11 +350,3 @@ class PermissionMixin:
                 "Please make sure that this object neither private nor internal at first."
             )
         return is_public
-    # To prevent private Objects from being in a group
-    # @validates("group_ids")
-    # def validate_groups_ids(self, key, group_ids):
-    #     if self.is_private:
-    #         raise ConflictError(
-    #             "This Object is Private. If you want to add it to a Group you should make it internal or public."
-    #         )
-    #     return group_ids
