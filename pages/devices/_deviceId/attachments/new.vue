@@ -179,7 +179,7 @@ export default class AttachmentAddPage extends mixins(Rules, UploadRules) {
       this.$emit('input', newAttachment)
 
       this.$router.push('/devices/' + this.deviceId + '/attachments')
-    } catch (error) {
+    } catch (error: any) {
       let message = 'Failed to save an attachment'
 
       if (theFailureCanBeFromUpload && error.response?.data?.errors?.length) {

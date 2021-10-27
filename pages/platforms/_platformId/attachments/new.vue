@@ -181,7 +181,7 @@ export default class AttachmentAddPage extends mixins(Rules, UploadRules) {
       const newAttachment = await this.$api.platformAttachments.add(this.platformId, this.attachment)
       this.$emit('input', newAttachment)
       this.$router.push('/platforms/' + this.platformId + '/attachments')
-    } catch (error) {
+    } catch (error: any) {
       let message = 'Failed to save an attachment'
 
       if (theFailureCanBeFromUpload && error.response?.data?.errors?.length) {
