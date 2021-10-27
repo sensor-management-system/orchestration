@@ -1,10 +1,12 @@
 """Model for platforms."""
 
 from .base_model import db
-from ..models.mixin import AuditMixin, SearchableMixin, PermissionMixin
+from ..models.mixin import AuditMixin, SearchableMixin, PermissionMixin, IndirectSearchableMixin
+
+from ..es_utils import settings_with_ngrams, ElasticSearchIndexTypes
 
 
-class Platform(db.Model, AuditMixin, SearchableMixin, PermissionMixin):
+class Platform(db.Model, AuditMixin, SearchableMixin, IndirectSearchableMixin,PermissionMixin):
     """Platform class."""
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -72,31 +74,38 @@ class Platform(db.Model, AuditMixin, SearchableMixin, PermissionMixin):
         """Get the properties for the index configuration."""
         from ..models.contact import Contact
 
+        type_keyword = ElasticSearchIndexTypes.keyword()
+        type_text_full_searchable = ElasticSearchIndexTypes.text_full_searchable(
+            analyzer="ngram_analyzer"
+        )
+        type_keyword_and_full_searchable = (
+            ElasticSearchIndexTypes.keyword_and_full_searchable(
+                analyzer="ngram_analyzer"
+            )
+        )
         return {
             # Search the description just via text (and not via keyword).
-            "description": {"type": "text"},
+            # We want this to be full searchable, but we don't need to
+            # provide any suggestions for.
+            "description": type_text_full_searchable,
             # Long & Short name via both text & keyword.
-            "long_name": {"type": "keyword", "fields": {"text": {"type": "text"}}},
-            "short_name": {"type": "keyword", "fields": {"text": {"type": "text"}}},
+            "long_name": type_keyword_and_full_searchable,
+            "short_name": type_keyword_and_full_searchable,
             # Names for Manufacturer, Status & Type searchable via both.
-            "manufacturer_name": {
-                "type": "keyword",
-                "fields": {"text": {"type": "text"}},
-            },
+            "manufacturer_name": type_keyword_and_full_searchable,
             # Uris just via keyword (for filtering).
-            "manufacturer_uri": {"type": "keyword"},
-            "model": {"type": "keyword", "fields": {"text": {"type": "text"}}},
-            "platform_type_name": {
-                "type": "keyword",
-                "fields": {"text": {"type": "text"}},
-            },
-            "platform_type_uri": {"type": "keyword"},
-            "status_name": {
-                "type": "keyword",
-                "fields": {"text": {"type": "text"}},
-            },
-            "status_uri": {"type": "keyword"},
+            "manufacturer_uri": type_keyword,
+            "model": type_keyword_and_full_searchable,
+            "platform_type_name": type_keyword_and_full_searchable,
+            "platform_type_uri": type_keyword,
+            "status_name": type_keyword_and_full_searchable,
+            "status_uri": type_keyword,
             # Website just via text, as we won't search exactly the same website.
+            "website": type_text_full_searchable,
+            # Inventory, serial number & pid, allow search via both text and keyword.
+            "inventory_number": type_keyword_and_full_searchable,
+            "serial_number": type_keyword_and_full_searchable,
+            "persistent_identifier": type_keyword_and_full_searchable,
             "website": {"type": "text"},
             "is_internal": {
                 "type": "boolean",
@@ -128,52 +137,27 @@ class Platform(db.Model, AuditMixin, SearchableMixin, PermissionMixin):
                 "type": "nested",
                 "properties": {
                     # Allow search via text & keyword
-                    "label": {
-                        "type": "keyword",
-                        "fields": {"text": {"type": "text"}},
-                    },
+                    "label": type_keyword_and_full_searchable,
                     # But don't allow search for the very same url (unlikely to be needed).
-                    "url": {"type": "text"},
+                    "url": type_text_full_searchable,
                 },
             },
             "generic_actions": {
                 "type": "nested",
                 "properties": {
-                    "action_type_uri": {
-                        "type": "keyword",
-                    },
-                    "action_type_name": {
-                        "type": "keyword",
-                        "fields": {"text": {"type": "text"}},
-                    },
-                    "description": {
-                        "type": "text",
-                    },
+                    "action_type_uri": type_keyword,
+                    "action_type_name": type_keyword_and_full_searchable,
+                    "description": type_text_full_searchable,
                 },
             },
             "software_update_actions": {
                 "type": "nested",
                 "properties": {
-                    "software_type_name": {
-                        "type": "keyword",
-                        "fields": {"text": {"type": "text"}},
-                    },
-                    "software_type_uri": {
-                        "type": "keyword",
-                    },
-                    "description": {
-                        "type": "text",
-                    },
-                    "version": {
-                        "type": "keyword",
-                        "fields": {"text": {"type": "text"}},
-                    },
-                    "repository_url": {
-                        "type": "keyword",
-                        "fields": {
-                            "text": {"type": "text"},
-                        },
-                    },
+                    "software_type_name": type_keyword_and_full_searchable,
+                    "software_type_uri": type_keyword,
+                    "description": type_text_full_searchable,
+                    "version": type_keyword_and_full_searchable,
+                    "repository_url": type_text_full_searchable,
                 },
             },
             "contacts": {
@@ -193,5 +177,11 @@ class Platform(db.Model, AuditMixin, SearchableMixin, PermissionMixin):
         return {
             "aliases": {},
             "mappings": {"properties": cls.get_search_index_properties()},
-            "settings": {"index": {"number_of_shards": "1"}},
+            "settings": settings_with_ngrams(
+                analyzer_name="ngram_analyzer",
+                filter_name="ngram_filter",
+                min_ngram=3,
+                max_ngram=10,
+                max_ngram_diff=10,
+            ),
         }

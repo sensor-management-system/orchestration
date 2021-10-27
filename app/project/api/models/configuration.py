@@ -10,6 +10,8 @@ from .base_model import db
 from .mixin import AuditMixin, SearchableMixin
 from ..helpers.errors import ConflictError
 
+from ..es_utils import settings_with_ngrams, ElasticSearchIndexTypes
+
 ConfigurationsTuple = collections.namedtuple(
     "ConfigurationsTuple", ["configuration_devices", "configuration_platforms"]
 )
@@ -223,6 +225,16 @@ class Configuration(db.Model, AuditMixin, SearchableMixin):
         from ..models.device import Device
         from ..models.platform import Platform
 
+        type_keyword = ElasticSearchIndexTypes.keyword()
+        type_text_full_searchable = ElasticSearchIndexTypes.text_full_searchable(
+            analyzer="ngram_analyzer"
+        )
+        type_keyword_and_full_searchable = (
+            ElasticSearchIndexTypes.keyword_and_full_searchable(
+                analyzer="ngram_analyzer"
+            )
+        )
+
         return {
             "aliases": {},
             "mappings": {
@@ -247,8 +259,12 @@ class Configuration(db.Model, AuditMixin, SearchableMixin):
                         "type": "keyword",
                         "fields": {"text": {"type": "text"}},
                     },
+                    "label": type_keyword_and_full_searchable,
+                    "status": type_keyword_and_full_searchable,
+                    "location_type": type_keyword_and_full_searchable,
+                    "project_name": type_keyword_and_full_searchable,
                     # The uri just for an keyword filter.
-                    "project_uri": {"type": "keyword"},
+                    "project_uri": type_keyword,
                     "platforms": {
                         "type": "nested",
                         "properties": Platform.get_search_index_properties(),
@@ -261,73 +277,52 @@ class Configuration(db.Model, AuditMixin, SearchableMixin):
                         "type": "nested",
                         "properties": Contact.get_search_index_properties(),
                     },
-                    "firmware_versions": {
-                        "type": "keyword",
-                        "fields": {"text": {"type": "text"}},
-                    },
+                    "firmware_versions": type_keyword_and_full_searchable,
                     "attachments": {
                         "type": "nested",
                         "properties": {
                             # Allow search via text & keyword
-                            "label": {
-                                "type": "keyword",
-                                "fields": {"text": {"type": "text"}},
-                            },
+                            "label": type_keyword_and_full_searchable,
                             # But don't allow search for the very same url (unlikely to be needed).
-                            "url": {"type": "text"},
+                            "url": type_text_full_searchable,
                         },
                     },
                     "generic_actions": {
                         "type": "nested",
                         "properties": {
-                            "action_type_uri": {
-                                "type": "keyword",
-                            },
-                            "action_type_name": {
-                                "type": "keyword",
-                                "fields": {"text": {"type": "text"}},
-                            },
-                            "description": {
-                                "type": "text",
-                            },
+                            "action_type_uri": type_keyword,
+                            "action_type_name": type_keyword_and_full_searchable,
+                            "description": type_text_full_searchable,
                         },
                     },
                     "static_location_begin_actions": {
                         "type": "nested",
                         "properties": {
-                            "description": {
-                                "type": "text",
-                            }
+                            "description": type_text_full_searchable,
                         },
                     },
                     "static_location_end_actions": {
                         "type": "nested",
                         "properties": {
-                            "description": {
-                                "type": "text",
-                            }
+                            "description": type_text_full_searchable,
                         },
                     },
                     "dynamic_location_begin_actions": {
                         "type": "nested",
                         "properties": {
-                            "description": {
-                                "type": "text",
-                            }
+                            "description": type_text_full_searchable,
                         },
                     },
                     "dynamic_location_end_actions": {
                         "type": "nested",
                         "properties": {
-                            "description": {
-                                "type": "text",
-                            }
+                            "description": type_text_full_searchable,
                         },
                     },
                     "platform_mount_actions": {
                         "type": "nested",
                         "properties": {
-                            "description": {"type": "text"},
+                            "description": type_text_full_searchable,
                             "platform": {
                                 "type": "nested",
                                 "properties": Platform.get_search_index_properties(),
@@ -337,7 +332,7 @@ class Configuration(db.Model, AuditMixin, SearchableMixin):
                     "device_mount_actions": {
                         "type": "nested",
                         "properties": {
-                            "description": {"type": "text"},
+                            "description": type_text_full_searchable,
                             "device": {
                                 "type": "nested",
                                 "properties": Device.get_search_index_properties(),
@@ -346,13 +341,19 @@ class Configuration(db.Model, AuditMixin, SearchableMixin):
                     },
                     "platform_unmount_actions": {
                         "type": "nested",
-                        "properties": {"description": {"type": "text"}},
+                        "properties": {"description": type_text_full_searchable},
                     },
                     "device_unmount_actions": {
                         "type": "nested",
-                        "properties": {"description": {"type": "text"}},
+                        "properties": {"description": type_text_full_searchable},
                     },
                 }
             },
-            "settings": {"index": {"number_of_shards": "1"}},
+            "settings": settings_with_ngrams(
+                analyzer_name="ngram_analyzer",
+                filter_name="ngram_filter",
+                min_ngram=3,
+                max_ngram=10,
+                max_ngram_diff=10,
+            ),
         }

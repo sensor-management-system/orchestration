@@ -522,3 +522,123 @@ class TestConfigurationsService(BaseTestCase):
         _ = super().delete_object(
             url=f"{self.configurations_url}/{configuration.id}",
         )
+
+    def test_delete_configuration_with_static_begin_location_action(self):
+        """Ensure a configuration with a static_begin_location_action can be deleted"""
+        contact = self.add_a_contact()
+        config_id = self.add_a_configuration()
+
+        action_data = {"data": {
+            "type": "configuration_static_location_begin_action",
+            "attributes": {"x": 12.424163818359377,
+                           "y": 51.40391771800119,
+                           "z": None,
+                           "description": "",
+                           "begin_date": "2021-10-22T09:28:40.275Z",
+                           "epsg_code": "4326", "elevation_datum_uri": "",
+                           "elevation_datum_name": "MSL"},
+            "relationships": {"contact": {"data": {"type": "contact",
+                                                   "id": contact.id}},
+                              "configuration": {"data": {"type": "configuration",
+                                                         "id": config_id}}}}}
+        url = base_url + "/static-location-begin-actions"
+        _ = super().add_object(
+            url=url,
+            data_object=action_data,
+            object_type="configuration_static_location_begin_action",
+        )
+        _ = super().delete_object(
+            url=f"{self.configurations_url}/{config_id}",
+        )
+
+    def test_delete_configuration_with_static_end_location_action(self):
+        """Ensure a configuration with a static_end_location_action can be deleted"""
+        contact = self.add_a_contact()
+        config_id = self.add_a_configuration()
+
+        action_data = {"data": {"type": "configuration_static_location_end_action",
+                                "attributes": {"description": "stopped", "end_date": "2021-10-31T09:28:00.000Z"},
+                                "relationships": {"contact": {"data": {"type": "contact", "id": contact.id}},
+                                                  "configuration": {
+                                                      "data": {"type": "configuration", "id": config_id}}}}}
+        url = base_url + "/static-location-end-actions"
+        _ = super().add_object(
+            url=url,
+            data_object=action_data,
+            object_type="configuration_static_location_end_action",
+        )
+        _ = super().delete_object(
+            url=f"{self.configurations_url}/{config_id}",
+        )
+
+    def test_delete_configuration_with_dynamic_begin_location_action(self):
+        """Ensure a configuration with a dynamic_begin_location_action can be deleted"""
+        contact = self.add_a_contact()
+        config_id = self.add_a_configuration()
+
+        action_data = {"data": {"type": "configuration_dynamic_location_begin_action",
+                                "attributes": {"description": "dynamic", "begin_date": "2021-10-22T10:00:50.542Z",
+                                               "epsg_code": "4326", "elevation_datum_uri": "",
+                                               "elevation_datum_name": "MSL"},
+                                "relationships": {"contact": {"data": {"type": "contact", "id": contact.id}},
+                                                  "configuration": {
+                                                      "data": {"type": "configuration", "id": config_id}}}}}
+        url = base_url + "/dynamic-location-begin-actions"
+        _ = super().add_object(
+            url=url,
+            data_object=action_data,
+            object_type="configuration_dynamic_location_begin_action",
+        )
+        _ = super().delete_object(
+            url=f"{self.configurations_url}/{config_id}",
+        )
+
+    def test_delete_configuration_with_dynamic_end_location_action(self):
+        """Ensure a configuration with a dynamic_end_location_action can be deleted"""
+        contact = self.add_a_contact()
+        config_id = self.add_a_configuration()
+
+        action_data = {"data": {"type": "configuration_dynamic_location_end_action",
+                                "attributes": {"description": "Stopped", "end_date": "2021-10-23T10:00:00.000Z"},
+                                "relationships": {"contact": {"data": {"type": "contact", "id": contact.id}},
+                                                  "configuration": {
+                                                      "data": {"type": "configuration", "id": config_id}}}}}
+        url = base_url + "/dynamic-location-end-actions"
+        _ = super().add_object(
+            url=url,
+            data_object=action_data,
+            object_type="configuration_dynamic_location_end_action",
+        )
+        _ = super().delete_object(
+            url=f"{self.configurations_url}/{config_id}",
+        )
+
+    @staticmethod
+    def add_a_contact():
+        mock_jwt = generate_token_data()
+        contact = Contact(
+            given_name=mock_jwt["given_name"],
+            family_name=mock_jwt["family_name"],
+            email=mock_jwt["email"],
+        )
+        db.session.add(contact)
+        db.session.commit()
+        return contact
+
+    def add_a_configuration(self):
+        config_data = {
+            "data": {
+                "attributes": {"label": "Test configuration",
+                               "project_uri": "", "project_name": "MOSES",
+                               "status": "draft",
+                               "start_date": "2021-10-22T09:31:00.000Z",
+                               "end_date": "2021-10-31T09:32:00.000Z",
+                               "hierarchy": []},
+                "type": "configuration"}}
+        config = super().add_object(
+            url=self.configurations_url,
+            data_object=config_data,
+            object_type=self.object_type,
+        )
+        config_id = config["data"]["id"]
+        return config_id

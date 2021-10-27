@@ -5,6 +5,8 @@ import itertools
 from .base_model import db
 from ..models.mixin import SearchableMixin, IndirectSearchableMixin
 
+from ..es_utils import settings_with_ngrams, ElasticSearchIndexTypes
+
 platform_contacts = db.Table(
     "platform_contacts",
     db.Column(
@@ -72,21 +74,20 @@ class Contact(db.Model, SearchableMixin, IndirectSearchableMixin):
     @staticmethod
     def get_search_index_properties():
         """Get the properties for the index configuration."""
+        type_text_full_searchable = ElasticSearchIndexTypes.text_full_searchable(
+            analyzer="ngram_analyzer"
+        )
+        type_keyword_and_full_searchable = (
+            ElasticSearchIndexTypes.keyword_and_full_searchable(
+                analyzer="ngram_analyzer"
+            )
+        )
         return {
-            "given_name": {
-                "type": "keyword",
-                "fields": {"text": {"type": "text"}},
-            },
-            "family_name": {
-                "type": "keyword",
-                "fields": {"text": {"type": "text"}},
-            },
+            "given_name": type_keyword_and_full_searchable,
+            "family_name": type_keyword_and_full_searchable,
             # Not necessary to allow exact search for the personal website.
-            "website": {"type": "text"},
-            "email": {
-                "type": "keyword",
-                "fields": {"text": {"type": "text"}},
-            },
+            "website": type_text_full_searchable,
+            "email": type_keyword_and_full_searchable,
         }
 
     @classmethod
@@ -100,7 +101,13 @@ class Contact(db.Model, SearchableMixin, IndirectSearchableMixin):
         return {
             "aliases": {},
             "mappings": {"properties": cls.get_search_index_properties()},
-            "settings": {"index": {"number_of_shards": "1"}},
+            "settings": settings_with_ngrams(
+                analyzer_name="ngram_analyzer",
+                filter_name="ngram_filter",
+                min_ngram=3,
+                max_ngram=10,
+                max_ngram_diff=10,
+            ),
         }
 
     def get_parent_search_entities(self):

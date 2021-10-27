@@ -3,6 +3,8 @@
 from .base_model import db
 from ..models.mixin import AuditMixin, SearchableMixin, IndirectSearchableMixin, PermissionMixin
 
+from ..es_utils import settings_with_ngrams, ElasticSearchIndexTypes
+
 
 class Device(db.Model, AuditMixin, SearchableMixin, IndirectSearchableMixin, PermissionMixin):
     """Device class."""
@@ -88,32 +90,30 @@ class Device(db.Model, AuditMixin, SearchableMixin, IndirectSearchableMixin, Per
         """Get the properties for the index configuration."""
         from ..models.contact import Contact
 
+        type_keyword = ElasticSearchIndexTypes.keyword()
+        type_text_full_searchable = ElasticSearchIndexTypes.text_full_searchable(
+            analyzer="ngram_analyzer"
+        )
+        type_keyword_and_full_searchable = (
+            ElasticSearchIndexTypes.keyword_and_full_searchable(
+                analyzer="ngram_analyzer"
+            )
+        )
+
         return {
             # We won't check the very equal description, so using text right away is fine.
-            "description": {"type": "text"},
+            "description": type_text_full_searchable,
             # We may filter by long_name (keyword), but we also want to search all of its parts.
-            "long_name": {
-                "type": "keyword",
-                "fields": {"text": {"type": "text"}},
-            },
+            "long_name": type_keyword_and_full_searchable,
             # Same for short_name.
-            "short_name": {
-                "type": "keyword",
-                "fields": {"text": {"type": "text"}},
-            },
+            "short_name": type_keyword_and_full_searchable,
             # Serial number is more likely to be searched as keyword, but text search may be
             # fine here as well.
-            "serial_number": {
-                "type": "keyword",
-                "fields": {"text": {"type": "text"}},
-            },
+            "serial_number": type_keyword_and_full_searchable,
             # We may need keyword search, but mostly we will search via text.
-            "manufacturer_name": {
-                "type": "keyword",
-                "fields": {"text": {"type": "text"}},
-            },
+            "manufacturer_name": type_keyword_and_full_searchable,
             # Manufacturer uri (as all uris), should be keyword only.
-            "manufacturer_uri": {"type": "keyword"},
+            "manufacturer_uri": type_keyword,
             # dual use is a boolean
             "dual_use": {"type": "boolean"},
             "is_internal": {
@@ -129,44 +129,29 @@ class Device(db.Model, AuditMixin, SearchableMixin, IndirectSearchableMixin, Per
                 "type": "integer",
             },
             # Model should be both keyword & text.
-            "model": {"type": "keyword", "fields": {"text": {"type": "text"}}},
+            "model": type_keyword_and_full_searchable,
             # Inventory number is the same as serial number.
-            "inventory_number": {
-                "type": "keyword",
-                "fields": {"text": {"type": "text"}},
-            },
+            "inventory_number": type_keyword_and_full_searchable,
             # As we may search for parts of it, we need text,
             # otherwise keyword would be the way to go
-            "persistent_identifier": {
-                "type": "keyword",
-                "fields": {"text": {"type": "text"}},
-            },
+            "persistent_identifier": type_keyword_and_full_searchable,
             # We won't search for the very same website.
-            "website": {"type": "text"},
+            "website": type_text_full_searchable,
             # Both search types for the device type name.
-            "device_type_name": {
-                "type": "keyword",
-                "fields": {"text": {"type": "text"}},
-            },
+            "device_type_name": type_keyword_and_full_searchable,
             # Just keyword search for the device type uri.
-            "device_type_uri": {"type": "keyword"},
+            "device_type_uri": type_keyword,
             # Both for the status name.
-            "status_name": {
-                "type": "keyword",
-                "fields": {"text": {"type": "text"}},
-            },
+            "status_name": type_keyword_and_full_searchable,
             # Just keyword for status uri.
-            "status_uri": {"type": "keyword"},
+            "status_uri": type_keyword,
             "attachments": {
                 "type": "nested",
                 "properties": {
                     # The label should be searchable via text & via keyword
-                    "label": {
-                        "type": "keyword",
-                        "fields": {"text": {"type": "text"}},
-                    },
+                    "label": type_keyword_and_full_searchable,
                     # But for the url we will not search by keyword.
-                    "url": {"type": "text"},
+                    "url": type_text_full_searchable,
                 },
             },
             "contacts": {
@@ -178,91 +163,45 @@ class Device(db.Model, AuditMixin, SearchableMixin, IndirectSearchableMixin, Per
                 "properties": {
                     # The key should use keyword behaviour by default
                     # but should also searchable as text.
-                    "key": {
-                        "type": "keyword",
-                        "fields": {"text": {"type": "text"}},
-                    },
+                    "key": type_keyword_and_full_searchable,
                     # The same for the value.
-                    "value": {
-                        "type": "keyword",
-                        "fields": {"text": {"type": "text"}},
-                    },
+                    "value": type_keyword_and_full_searchable,
                 },
             },
             "properties": {
                 "type": "nested",
                 "properties": {
                     # All the "normal" text fields searchable via text & keyword.
-                    "label": {
-                        "type": "keyword",
-                        "fields": {"text": {"type": "text"}},
-                    },
-                    "unit_name": {
-                        "type": "keyword",
-                        "fields": {"text": {"type": "text"}},
-                    },
+                    "label": type_keyword_and_full_searchable,
+                    "unit_name": type_keyword_and_full_searchable,
                     # And all the uris only via keyword.
-                    "unit_uri": {"type": "keyword"},
-                    "compartment_name": {
-                        "type": "keyword",
-                        "fields": {"text": {"type": "text"}},
-                    },
-                    "compartment_uri": {"type": "keyword"},
-                    "property_name": {
-                        "type": "keyword",
-                        "fields": {"text": {"type": "text"}},
-                    },
-                    "property_uri": {"type": "keyword"},
-                    "sample_medium_name": {
-                        "type": "keyword",
-                        "fields": {"text": {"type": "text"}},
-                    },
-                    "sample_medium_uri": {"type": "keyword"},
-                    "resolution_unit_name": {
-                        "type": "keyword",
-                        "fields": {"text": {"type": "text"}},
-                    },
-                    "resolution_unit_uri": {"type": "keyword"},
+                    "unit_uri": type_keyword,
+                    "compartment_name": type_keyword_and_full_searchable,
+                    "compartment_uri": type_keyword,
+                    "property_name": type_keyword_and_full_searchable,
+                    "property_uri": type_keyword,
+                    "sample_medium_name": type_keyword_and_full_searchable,
+                    "sample_medium_uri": type_keyword,
+                    "resolution_unit_name": type_keyword_and_full_searchable,
+                    "resolution_unit_uri": type_keyword,
                 },
             },
             "generic_actions": {
                 "type": "nested",
                 "properties": {
-                    "action_type_uri": {
-                        "type": "keyword",
-                    },
-                    "action_type_name": {
-                        "type": "keyword",
-                        "fields": {"text": {"type": "text"}},
-                    },
-                    "description": {
-                        "type": "text",
-                    },
+                    "action_type_uri": type_keyword,
+                    "action_type_name": type_keyword_and_full_searchable,
+                    "description": type_text_full_searchable,
                 },
             },
             "software_update_actions": {
                 "type": "nested",
                 "properties": {
-                    "software_type_name": {
-                        "type": "keyword",
-                        "fields": {"text": {"type": "text"}},
-                    },
-                    "software_type_uri": {
-                        "type": "keyword",
-                    },
-                    "description": {
-                        "type": "text",
-                    },
-                    "version": {
-                        "type": "keyword",
-                        "fields": {"text": {"type": "text"}},
-                    },
-                    "repository_url": {
-                        "type": "keyword",
-                        "fields": {
-                            "text": {"type": "text"},
-                        },
-                    },
+                    "software_type_name": type_keyword_and_full_searchable,
+                    "software_type_uri": type_keyword,
+                    "description": type_text_full_searchable,
+                    "version": type_keyword_and_full_searchable,
+                    "repository_url": type_text_full_searchable,
                 },
             },
         }
@@ -278,5 +217,11 @@ class Device(db.Model, AuditMixin, SearchableMixin, IndirectSearchableMixin, Per
         return {
             "aliases": {},
             "mappings": {"properties": cls.get_search_index_properties()},
-            "settings": {"index": {"number_of_shards": "1"}},
+            "settings": settings_with_ngrams(
+                analyzer_name='ngram_analyzer',
+                filter_name='ngram_filter',
+                min_ngram=3,
+                max_ngram=10,
+                max_ngram_diff=10,
+            ),
         }
