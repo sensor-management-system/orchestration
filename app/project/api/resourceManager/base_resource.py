@@ -133,7 +133,7 @@ def check_deletion_permission(kwargs, object_to_delete):
     if not is_superuser():
         group_ids = db.session.query(object_to_delete).filter_by(id=kwargs['id']).one_or_none().group_ids
         if not is_user_admin_in_a_group(group_ids):
-            raise ForbiddenError("User is not part of any group to edit this object.")
+            raise ForbiddenError("User is not part of any group to delete this object.")
 
 
 @jwt_required(optional=True)
@@ -141,7 +141,7 @@ def set_permission_filter_to_query(model_class):
     """
     This methode do the choices:
     - if user is anonymous then show only public objects.
-    - if the user is superuser the show all.
+    - if the user is superuser then show all.
     - if user logged in then show public, internal and owned private objects.
 
     :param model_class:
