@@ -166,7 +166,7 @@ class TestConfigurationPermissions(BaseTestCase):
             "label": "Test configuration associated to a group",
             "is_public": False,
             "is_internal": True,
-            "groups_ids": [12]
+            "group_ids": [12]
         }}}
         access_headers = create_token()
         with self.client:
@@ -181,4 +181,4 @@ class TestConfigurationPermissions(BaseTestCase):
 
         self.assertEqual(response.status_code, 201)
 
-        self.assertEqual(data["data"]["attributes"]["groups_ids"], [12])
+        self.assertEqual(data["data"]["attributes"]["group_ids"], [12])

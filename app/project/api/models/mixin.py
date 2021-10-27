@@ -321,7 +321,7 @@ SearchModelWithEntry = collections.namedtuple(
 
 class PermissionMixin:
     __abstract__ = True
-    groups_ids = db.Column(MutableList.as_mutable(db.ARRAY(db.Integer)), nullable=True)
+    group_ids = db.Column(MutableList.as_mutable(db.ARRAY(db.Integer)), nullable=True)
     is_private = db.Column(db.Boolean, default=False)
     is_internal = db.Column(db.Boolean, default=False)
     is_public = db.Column(db.Boolean, default=False)
@@ -351,10 +351,10 @@ class PermissionMixin:
             )
         return is_public
     # To prevent private Objects from being in a group
-    # @validates("groups_ids")
-    # def validate_groups_ids(self, key, groups_ids):
+    # @validates("group_ids")
+    # def validate_groups_ids(self, key, group_ids):
     #     if self.is_private:
     #         raise ConflictError(
     #             "This Object is Private. If you want to add it to a Group you should make it internal or public."
     #         )
-    #     return groups_ids
+    #     return group_ids

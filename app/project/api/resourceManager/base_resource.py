@@ -116,8 +116,8 @@ def check_patch_permission(data, object_to_patch):
             click.secho(object_.is_private, fg="green")
             assert_current_user_is_owner_of_object(object_)
         else:
-            groups_ids = object_.groups_ids
-            if is_user_in_a_group(groups_ids):
+            group_ids = object_.group_ids
+            if is_user_in_a_group(group_ids):
                 add_updated_by_id(data)
             else:
                 raise ForbiddenError("User is not part of any group to edit this object.")
@@ -131,8 +131,8 @@ def check_deletion_permission(kwargs, object_to_delete):
     :return:
     """
     if not is_user_super_admin():
-        groups_ids = db.session.query(object_to_delete).filter_by(id=kwargs['id']).one_or_none().groups_ids
-        if not is_user_admin_in_a_group(groups_ids):
+        group_ids = db.session.query(object_to_delete).filter_by(id=kwargs['id']).one_or_none().group_ids
+        if not is_user_admin_in_a_group(group_ids):
             raise ForbiddenError("User is not part of any group to edit this object.")
 
 

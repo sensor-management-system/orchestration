@@ -245,7 +245,7 @@ class TestDevicePermissions(BaseTestCase):
             "is_public": False,
             "is_internal": True,
             "is_private": False,
-            "groups_ids": [12]
+            "group_ids": [12]
         }}}
         access_headers = create_token()
         with self.client:
@@ -260,4 +260,4 @@ class TestDevicePermissions(BaseTestCase):
 
         self.assertEqual(response.status_code, 201)
 
-        self.assertEqual(data["data"]["attributes"]["groups_ids"], [12])
+        self.assertEqual(data["data"]["attributes"]["group_ids"], [12])

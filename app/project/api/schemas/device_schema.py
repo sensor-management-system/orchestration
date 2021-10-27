@@ -47,7 +47,7 @@ class DeviceSchema(Schema):
     created_at = fields.DateTime(dump_only=True)
     updated_at = fields.DateTime(dump_only=True)
     created_by_id = fields.Str(dump_only=True)
-    groups_ids = fields.Field(many=True, allow_none=True)
+    group_ids = fields.Field(many=True, allow_none=True)
     is_private = fields.Boolean(allow_none=True)
     is_internal = fields.Boolean(allow_none=True)
     is_public = fields.Boolean(allow_none=True)
