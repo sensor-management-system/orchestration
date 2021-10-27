@@ -40,7 +40,7 @@ def is_user_admin_in_a_group(groups_to_check):
     return any(group in user_groups for group in groups_to_check)
 
 
-def is_user_super_admin():
+def is_superuser():
     """
     Check if current user is a super admin.
 
