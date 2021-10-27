@@ -1619,7 +1619,7 @@ describe('configurationWithMetaToConfigurationByThrowingErrorOnMissing', () => {
         missing
       })
       fail('There must be an error')
-    } catch (error) {
+    } catch (error: any) {
       expect(error.toString()).toMatch(/Contacts are missing/)
     }
   })
