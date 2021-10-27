@@ -1,5 +1,6 @@
+import collections
 from dataclasses import dataclass
-from typing import List, Any, Callable, TypeVar, Type, cast
+from typing import List, Any, Callable, TypeVar, Type, cast, Iterable
 
 T = TypeVar("T")
 
@@ -46,5 +47,5 @@ class IdlUser:
                        membered_permissions_groups)
 
 
-def idl_from_dict(s: Any) -> List[IdlUser]:
+def idl_from_dict(s: Iterable[dict]) -> List[IdlUser]:
     return from_list(IdlUser.from_dict, s)
