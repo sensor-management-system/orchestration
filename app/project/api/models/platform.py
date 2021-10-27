@@ -106,7 +106,6 @@ class Platform(db.Model, AuditMixin, SearchableMixin, IndirectSearchableMixin,Pe
             "inventory_number": type_keyword_and_full_searchable,
             "serial_number": type_keyword_and_full_searchable,
             "persistent_identifier": type_keyword_and_full_searchable,
-            "website": {"type": "text"},
             "is_internal": {
                 "type": "boolean",
             },
@@ -120,19 +119,6 @@ class Platform(db.Model, AuditMixin, SearchableMixin, IndirectSearchableMixin,Pe
                 "type": "integer",
             },
 
-            # Inventory, serrial number & pid, allow search via both text and keyword.
-            "inventory_number": {
-                "type": "keyword",
-                "fields": {"text": {"type": "text"}},
-            },
-            "serial_number": {
-                "type": "keyword",
-                "fields": {"text": {"type": "text"}},
-            },
-            "persistent_identifier": {
-                "type": "keyword",
-                "fields": {"text": {"type": "text"}},
-            },
             "attachments": {
                 "type": "nested",
                 "properties": {

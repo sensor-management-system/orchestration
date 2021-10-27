@@ -239,9 +239,6 @@ class Configuration(db.Model, AuditMixin, SearchableMixin):
             "aliases": {},
             "mappings": {
                 "properties": {
-                    # Label & project name should be filterable (keyword) & searchable (text).
-                    "label": {"type": "keyword", "fields": {"text": {"type": "text"}}},
-                    "status": {"type": "keyword", "fields": {"text": {"type": "text"}}},
                     "is_internal": {
                         "type": "boolean",
                     },
@@ -250,14 +247,6 @@ class Configuration(db.Model, AuditMixin, SearchableMixin):
                     },
                     "created_by_id": {
                         "type": "integer",
-                    },
-                    "location_type": {
-                        "type": "keyword",
-                        "fields": {"text": {"type": "text"}},
-                    },
-                    "project_name": {
-                        "type": "keyword",
-                        "fields": {"text": {"type": "text"}},
                     },
                     "label": type_keyword_and_full_searchable,
                     "status": type_keyword_and_full_searchable,
