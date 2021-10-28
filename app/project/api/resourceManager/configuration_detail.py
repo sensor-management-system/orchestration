@@ -25,8 +25,9 @@ class ConfigurationDetail(ResourceDetail):
     def before_get(self, args, kwargs):
         """Prevent not registered users form viewing internal configs."""
         config = db.session.query(Configuration).filter_by(id=kwargs["id"]).first()
-        if config.is_internal:
-            verify_jwt_in_request()
+        if config:
+            if config.is_internal:
+                verify_jwt_in_request()
 
     def before_patch(self, args, kwargs, data):
         """Add Created by user id to the data"""

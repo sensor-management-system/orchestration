@@ -218,7 +218,8 @@ def check_for_permissions(model_class, kwargs):
     :return:
     """
     object_ = db.session.query(model_class).filter_by(id=kwargs["id"]).first()
-    if object_.is_private:
-        prevent_normal_user_from_viewing_not_owned_private_object(object_)
-    elif object_.is_internal:
-        verify_jwt_in_request()
+    if object_:
+        if object_.is_private:
+            prevent_normal_user_from_viewing_not_owned_private_object(object_)
+        elif object_.is_internal:
+            verify_jwt_in_request()
