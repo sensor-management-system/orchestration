@@ -97,9 +97,7 @@ class TestConfigurationPermissions(BaseTestCase):
         db.session.commit()
         url = f"{self.configuration_url}/{internal_config.id}"
         response = self.client.get(url)
-        data = json.loads(response.data.decode())
-        print(data)
-        self.assertEqual(response.status_code, 401)
+        self.assertNotEqual(response.status_code, 200)
 
     def test_get_as_registered_user(self):
         """Ensure that a registered user can see public, internal, and only his own private objects"""
