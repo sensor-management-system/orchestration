@@ -227,7 +227,7 @@ class TestPlatformPermissions(BaseTestCase):
             )
         self.assertEqual(response.status_code, 409)
 
-        device_data_1 = {
+        platform_data_1 = {
             "data": {
                 "type": "platform",
                 "attributes": {
@@ -242,7 +242,7 @@ class TestPlatformPermissions(BaseTestCase):
         with self.client:
             response = self.client.post(
                 self.platform_url,
-                data=json.dumps(device_data_1),
+                data=json.dumps(platform_data_1),
                 content_type="application/vnd.api+json",
                 headers=access_headers,
             )

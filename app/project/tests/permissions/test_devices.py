@@ -97,7 +97,7 @@ class TestDevicePermissions(BaseTestCase):
         """Ensure anonymous user can only see public objects."""
         public_sensor = Device(
             id=15,
-            short_name="device_short_name test2",
+            short_name=fake.pystr(),
             is_private=False,
             is_internal=False,
             is_public=True,
@@ -105,7 +105,7 @@ class TestDevicePermissions(BaseTestCase):
 
         internal_sensor = Device(
             id=33,
-            short_name="device_short_name test2",
+            short_name=fake.pystr(),
             is_public=False,
             is_private=False,
             is_internal=True,
@@ -130,7 +130,7 @@ class TestDevicePermissions(BaseTestCase):
         """Ensure that a registered user can see public, internal, and only his own private objects"""
         public_sensor = Device(
             id=15,
-            short_name="device_short_name test2",
+            short_name=fake.pystr(),
             is_public=True,
             is_private=False,
             is_internal=False,
@@ -138,7 +138,7 @@ class TestDevicePermissions(BaseTestCase):
 
         internal_sensor = Device(
             id=33,
-            short_name="device_short_name test2",
+            short_name=fake.pystr(),
             is_public=False,
             is_private=False,
             is_internal=True,
