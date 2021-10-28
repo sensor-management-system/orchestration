@@ -173,13 +173,13 @@ def reactivate_a_user(subject_user, given_name, family_name, email):
     db.session.commit()
 
 
-@users.command("upgradetosuperuser")
+@users.command("upgrade-to-superuser")
 @click.argument('user_subject')
 def make_super_user(user_subject):
     """
     Upgrade a user to superuser a superuser.
 
-    How To use: python manage.py users upgradetosuperuser testuser@ufz.de
+    How To use: python manage.py users upgrade-to-superuser testuser@ufz.de
 
     :param user_subject: the subject attribute identical to jwt.sub
     """
@@ -187,18 +187,18 @@ def make_super_user(user_subject):
     user.is_superuser = True
     db.session.commit()
     click.secho(f"{user.contact.given_name} is now upgraded to super user!", fg="green")
-    click.secho("As super user you will be able to modify or delete any entity \n"
+    click.secho("As super-user you will be able to modify or delete any entity \n"
                 "in SMS without the need to belong to a group or a project.\n"
-                "Please use it wisely", fg="blue")
+                "Please use it wisely", fg="yellow")
 
 
-@users.command("downgradetoruser")
+@users.command("downgrade-to-user")
 @click.argument('user_subject')
 def downgrade_to_user(user_subject):
     """
     Downgrade a superuser to a normal user.
 
-    How To use: python manage.py users downgradetoruser testsuperuser@ufz.de
+    How To use: python manage.py users downgrade-to-user testsuperuser@ufz.de
 
     :param user_subject: the subject attribute identical to jwt.sub
     """
