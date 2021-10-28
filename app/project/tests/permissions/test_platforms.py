@@ -204,8 +204,8 @@ class TestPlatformPermissions(BaseTestCase):
         data = json.loads(response.data.decode())
         self.assertEqual(data["meta"]["count"], 3)
 
-    def test_add_platform_with_multipel_true_status(self):
-        """Make Sure that is a an object can't have tow True status at the same time"""
+    def test_add_platform_with_multiple_permission_values(self):
+        """Make sure that is a a platform can't have multiple True permission values at the same time"""
         platform_data = {
             "data": {
                 "type": "platform",

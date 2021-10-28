@@ -183,7 +183,7 @@ def set_permission_filter_to_query(model_class):
 
 def set_default_permission_view_to_internal_if_not_exists_or_all_false(data):
     """
-    Methode to check if the request doesn't include the permission view or all are False
+    Check if the request doesn't include permission data (is_public, is_internal, is_private) or all are False
     and if not the set it to internal by default.
 
     :param data: json date sent wit the request.
@@ -198,7 +198,7 @@ def set_default_permission_view_to_internal_if_not_exists_or_all_false(data):
 
 def prevent_normal_user_from_viewing_not_owned_private_object(object_):
     """
-    checks if user is not the owner of a private object and if so return a ForbiddenError.
+    Check if user is not the owner of a private object and if so return a ForbiddenError.
 
     :param object_:
     """
