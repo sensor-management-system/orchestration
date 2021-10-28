@@ -74,8 +74,8 @@ class TestConfigurationsService(BaseTestCase):
             },
         }
         for (
-            input_calibration_date,
-            expected_output_calibration_date,
+                input_calibration_date,
+                expected_output_calibration_date,
         ) in calibration_dates.items():
             # set up for each single run
             self.setUp()
@@ -126,8 +126,8 @@ class TestConfigurationsService(BaseTestCase):
 
             configuration_device = (
                 db.session.query(ConfigurationDevice)
-                .filter_by(device_id=1, configuration_id=1)
-                .first()
+                    .filter_by(device_id=1, configuration_id=1)
+                    .first()
             )
             self.assertEqual(
                 configuration_device.calibration_date,
@@ -181,8 +181,8 @@ class TestConfigurationsService(BaseTestCase):
 
         configuration_device = (
             db.session.query(ConfigurationDevice)
-            .filter_by(device_id=1, configuration_id=1)
-            .first()
+                .filter_by(device_id=1, configuration_id=1)
+                .first()
         )
         self.assertEqual(configuration_device.firmware_version, firmware_version)
 
@@ -391,7 +391,8 @@ class TestConfigurationsService(BaseTestCase):
                     ),
                 ]
             )
-            response = self.client.get(url)
+            access_headers = create_token()
+            response = self.client.get(url, headers=access_headers)
             self.assertEqual(response.status_code, 200)
             for key in ["data", "included"]:
                 self.assertIn(key, response.json.keys())
@@ -529,7 +530,7 @@ class TestConfigurationsService(BaseTestCase):
             object_type="platform_mount_action",
         )
 
-        _ = super().delete_object(url=f"{self.configurations_url}/{configuration.id}",)
+        _ = super().delete_object(url=f"{self.configurations_url}/{configuration.id}", )
 
     def test_delete_configuration_with_static_begin_location_action(self):
         """Ensure a configuration with a static_begin_location_action can be deleted"""
@@ -563,7 +564,7 @@ class TestConfigurationsService(BaseTestCase):
             data_object=action_data,
             object_type="configuration_static_location_begin_action",
         )
-        _ = super().delete_object(url=f"{self.configurations_url}/{config_id}",)
+        _ = super().delete_object(url=f"{self.configurations_url}/{config_id}", )
 
     def test_delete_configuration_with_static_end_location_action(self):
         """Ensure a configuration with a static_end_location_action can be deleted"""
@@ -591,7 +592,7 @@ class TestConfigurationsService(BaseTestCase):
             data_object=action_data,
             object_type="configuration_static_location_end_action",
         )
-        _ = super().delete_object(url=f"{self.configurations_url}/{config_id}",)
+        _ = super().delete_object(url=f"{self.configurations_url}/{config_id}", )
 
     def test_delete_configuration_with_dynamic_begin_location_action(self):
         """Ensure a configuration with a dynamic_begin_location_action can be deleted"""
@@ -622,7 +623,7 @@ class TestConfigurationsService(BaseTestCase):
             data_object=action_data,
             object_type="configuration_dynamic_location_begin_action",
         )
-        _ = super().delete_object(url=f"{self.configurations_url}/{config_id}",)
+        _ = super().delete_object(url=f"{self.configurations_url}/{config_id}", )
 
     def test_delete_configuration_with_dynamic_end_location_action(self):
         """Ensure a configuration with a dynamic_end_location_action can be deleted"""
@@ -650,7 +651,7 @@ class TestConfigurationsService(BaseTestCase):
             data_object=action_data,
             object_type="configuration_dynamic_location_end_action",
         )
-        _ = super().delete_object(url=f"{self.configurations_url}/{config_id}",)
+        _ = super().delete_object(url=f"{self.configurations_url}/{config_id}", )
 
     @staticmethod
     def add_a_contact():

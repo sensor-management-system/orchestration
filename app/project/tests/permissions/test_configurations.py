@@ -87,7 +87,7 @@ class TestConfigurationPermissions(BaseTestCase):
         self.assertEqual(data["meta"]["count"], 1)
         self.assertEqual(data["data"][0]["id"], str(public_config.id))
 
-    def test_get_an_internal_config__as_anonymous_user(self):
+    def test_get_an_internal_config_as_anonymous_user(self):
         """Ensure anonymous user can't access an internal configuration."""
         internal_config = Configuration(
             label=fake.pystr(), is_public=False, is_internal=True
@@ -97,6 +97,8 @@ class TestConfigurationPermissions(BaseTestCase):
         db.session.commit()
         url = f"{self.configuration_url}/{internal_config.id}"
         response = self.client.get(url)
+        data = json.loads(response.data.decode())
+        print(data)
         self.assertEqual(response.status_code, 401)
 
     def test_get_as_registered_user(self):
