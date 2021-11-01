@@ -58,15 +58,20 @@ permissions and limitations under the Licence.
       </v-col>
     </v-row>
     <v-row>
-      <v-col cols="12" md="3">
+      <v-col
+        cols="12"
+        align-self="center"
+      >
         <v-btn
           color="primary"
+          small
           @click="emitSearch"
         >
           Search
         </v-btn>
         <v-btn
           text
+          small
           @click="clearSearch"
         >
           Clear
