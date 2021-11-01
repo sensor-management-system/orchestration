@@ -57,7 +57,7 @@ export default class PlatformPage extends Vue {
 
   created () {
     if (this.isBasePath()) {
-      this.$router.push('/platforms/' + this.platformId + '/basic')
+      this.$router.replace('/platforms/' + this.platformId + '/basic')
     }
   }
 

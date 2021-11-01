@@ -64,7 +64,7 @@ export default class ConfigurationsIdPage extends Vue {
 
   created () {
     if (this.isBasePath()) {
-      this.$router.push('/configurations/' + this.configurationId + '/basic')
+      this.$router.replace('/configurations/' + this.configurationId + '/basic')
     }
   }
 
