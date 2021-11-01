@@ -2,16 +2,14 @@ from flask_jwt_extended import verify_jwt_in_request
 from flask_rest_jsonapi import JsonApiException, ResourceDetail
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 
-from .base_resource import (
-    delete_attachments_in_minio_by_url,
+from .base_resource import delete_attachments_in_minio_by_url
+from ..helpers.errors import ConflictError
+from ..helpers.permission_helpers import (
     check_patch_permission,
     check_deletion_permission,
-    prevent_normal_user_from_viewing_not_owned_private_object,
 )
-from ..helpers.errors import ConflictError
 from ..models.base_model import db
 from ..models.configuration import Configuration
-from ..resourceManager.base_resource import add_updated_by_id
 from ..schemas.configuration_schema import ConfigurationSchema
 from ..token_checker import token_required
 
@@ -31,7 +29,6 @@ class ConfigurationDetail(ResourceDetail):
 
     def before_patch(self, args, kwargs, data):
         """Add Created by user id to the data"""
-        add_updated_by_id(data)
         check_patch_permission(data, Configuration)
 
     def before_delete(self, args, kwargs):

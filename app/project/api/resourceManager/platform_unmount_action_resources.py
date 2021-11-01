@@ -8,17 +8,12 @@ from ..models.base_model import db
 from ..models.configuration import Configuration
 from ..models.platform import Platform
 from ..models.unmount_actions import PlatformUnmountAction
-from ..resourceManager.base_resource import add_created_by_id, add_updated_by_id
 from ..schemas.unmount_actions_schema import PlatformUnmountActionSchema
 from ..token_checker import token_required
 
 
 class PlatformUnmountActionList(ResourceList):
     """List resource for platform unmount actions (get, post)."""
-
-    def before_create_object(self, data, *args, **kwargs):
-        """Use jwt to add user id to dataset."""
-        add_created_by_id(data)
 
     def query(self, view_kwargs):
         """
@@ -34,9 +29,7 @@ class PlatformUnmountActionList(ResourceList):
                 self.session.query(Configuration).filter_by(id=configuration_id).one()
             except NoResultFound:
                 raise ObjectNotFound(
-                    {
-                        "parameter": "id",
-                    },
+                    {"parameter": "id",},
                     "Configuration: {} not found".format(configuration_id),
                 )
             else:
@@ -48,10 +41,7 @@ class PlatformUnmountActionList(ResourceList):
                 self.session.query(Platform).filter_by(id=platform_id).one()
             except NoResultFound:
                 raise ObjectNotFound(
-                    {
-                        "parameter": "id",
-                    },
-                    "Platform: {} not found".format(platform_id),
+                    {"parameter": "id",}, "Platform: {} not found".format(platform_id),
                 )
             else:
                 query_ = query_.filter(PlatformUnmountAction.platform_id == platform_id)
@@ -62,19 +52,12 @@ class PlatformUnmountActionList(ResourceList):
     data_layer = {
         "session": db.session,
         "model": PlatformUnmountAction,
-        "methods": {
-            "before_create_object": before_create_object,
-            "query": query,
-        },
+        "methods": {"query": query,},
     }
 
 
 class PlatformUnmountActionDetail(ResourceDetail):
     """Detail resource for platform unmount actions (get, delete, patch)."""
-
-    def before_patch(self, args, kwargs, data):
-        """Add Created by user id to the data."""
-        add_updated_by_id(data)
 
     schema = PlatformUnmountActionSchema
     decorators = (token_required,)

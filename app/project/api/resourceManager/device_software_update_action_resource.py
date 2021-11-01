@@ -8,17 +8,12 @@ from ...frj_csv_export.resource import ResourceList
 from ..models.base_model import db
 from ..models.device import Device
 from ..models.software_update_actions import DeviceSoftwareUpdateAction
-from ..resourceManager.base_resource import add_created_by_id, add_updated_by_id
 from ..schemas.software_update_action_schema import DeviceSoftwareUpdateActionSchema
 from ..token_checker import token_required
 
 
 class DeviceSoftwareUpdateActionList(ResourceList):
     """List resource for device software update actions (get, post)."""
-
-    def before_create_object(self, data, *args, **kwargs):
-        """Use jwt to add user id to dataset."""
-        add_created_by_id(data)
 
     def query(self, view_kwargs):
         """
@@ -33,10 +28,7 @@ class DeviceSoftwareUpdateActionList(ResourceList):
                 self.session.query(Device).filter_by(id=device_id).one()
             except NoResultFound:
                 raise ObjectNotFound(
-                    {
-                        "parameter": "id",
-                    },
-                    "Device: {} not found".format(device_id),
+                    {"parameter": "id",}, "Device: {} not found".format(device_id),
                 )
             else:
                 query_ = query_.filter(
@@ -49,19 +41,12 @@ class DeviceSoftwareUpdateActionList(ResourceList):
     data_layer = {
         "session": db.session,
         "model": DeviceSoftwareUpdateAction,
-        "methods": {
-            "before_create_object": before_create_object,
-            "query": query,
-        },
+        "methods": {"query": query,},
     }
 
 
 class DeviceSoftwareUpdateActionDetail(ResourceDetail):
     """Detail resource for device software update actions (get, delete, patch)."""
-
-    def before_patch(self, args, kwargs, data):
-        """Add Created by user id to the data."""
-        add_updated_by_id(data)
 
     schema = DeviceSoftwareUpdateActionSchema
     decorators = (token_required,)

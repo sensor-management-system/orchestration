@@ -1,14 +1,13 @@
 from flask_rest_jsonapi import ResourceDetail, JsonApiException
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 
-from .base_resource import (
-    delete_attachments_in_minio_by_url,
+from .base_resource import delete_attachments_in_minio_by_url
+from ..helpers.errors import ConflictError
+from ..helpers.permission_helpers import (
+    check_for_permissions,
     check_patch_permission,
     check_deletion_permission,
-    add_updated_by_id,
-    check_for_permissions,
 )
-from ..helpers.errors import ConflictError
 from ..models.base_model import db
 from ..models.device import Device
 from ..schemas.device_schema import DeviceSchema
@@ -26,8 +25,7 @@ class DeviceDetail(ResourceDetail):
         check_for_permissions(Device, kwargs)
 
     def before_patch(self, args, kwargs, data):
-        """Checks for permission & Add Created by user id to the data"""
-        add_updated_by_id(data)
+        """Checks for permission"""
         check_patch_permission(data, Device)
 
     def before_delete(self, args, kwargs):

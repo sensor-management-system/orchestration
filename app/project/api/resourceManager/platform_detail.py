@@ -1,16 +1,15 @@
 from flask_rest_jsonapi import ResourceDetail, JsonApiException
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 
-from .base_resource import (
-    delete_attachments_in_minio_by_url,
+from .base_resource import delete_attachments_in_minio_by_url
+from ..helpers.errors import ConflictError
+from ..helpers.permission_helpers import (
     check_for_permissions,
     check_patch_permission,
     check_deletion_permission,
 )
-from ..helpers.errors import ConflictError
 from ..models.base_model import db
 from ..models.platform import Platform
-from ..resourceManager.base_resource import add_updated_by_id
 from ..schemas.platform_schema import PlatformSchema
 from ..token_checker import token_required
 
@@ -27,7 +26,6 @@ class PlatformDetail(ResourceDetail):
 
     def before_patch(self, args, kwargs, data):
         """Add Created by user id to the data"""
-        add_updated_by_id(data)
         check_patch_permission(data, Platform)
 
     def before_delete(self, args, kwargs):

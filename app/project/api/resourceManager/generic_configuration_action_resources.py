@@ -8,17 +8,12 @@ from ...frj_csv_export.resource import ResourceList
 from ..models.base_model import db
 from ..models.configuration import Configuration
 from ..models.generic_actions import GenericConfigurationAction
-from ..resourceManager.base_resource import add_created_by_id, add_updated_by_id
 from ..schemas.generic_actions_schema import GenericConfigurationActionSchema
 from ..token_checker import token_required
 
 
 class GenericConfigurationActionList(ResourceList):
     """List resource for the generic configuration actions (get & post)."""
-
-    def before_create_object(self, data, *args, **kwargs):
-        """Use jwt to add user id to dataset."""
-        add_created_by_id(data)
 
     def query(self, view_kwargs):
         """
@@ -34,9 +29,7 @@ class GenericConfigurationActionList(ResourceList):
                 self.session.query(Configuration).filter_by(id=configuration_id).one()
             except NoResultFound:
                 raise ObjectNotFound(
-                    {
-                        "parameter": "id",
-                    },
+                    {"parameter": "id",},
                     "Configuration: {} not found".format(configuration_id),
                 )
             else:
@@ -50,16 +43,12 @@ class GenericConfigurationActionList(ResourceList):
     data_layer = {
         "session": db.session,
         "model": GenericConfigurationAction,
-        "methods": {"before_create_object": before_create_object, "query": query},
+        "methods": {"query": query},
     }
 
 
 class GenericConfigurationActionDetail(ResourceDetail):
     """Detail resources for generic configuration actions (get, delete, patch)."""
-
-    def before_patch(self, args, kwargs, data):
-        """Add Created by user id to the data."""
-        add_updated_by_id(data)
 
     schema = GenericConfigurationActionSchema
     decorators = (token_required,)

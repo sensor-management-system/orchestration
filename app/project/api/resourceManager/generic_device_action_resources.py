@@ -8,17 +8,12 @@ from ...frj_csv_export.resource import ResourceList
 from ..models.base_model import db
 from ..models.device import Device
 from ..models.generic_actions import GenericDeviceAction
-from ..resourceManager.base_resource import add_created_by_id, add_updated_by_id
 from ..schemas.generic_actions_schema import GenericDeviceActionSchema
 from ..token_checker import token_required
 
 
 class GenericDeviceActionList(ResourceList):
     """List resource for generic device actions (get & post)."""
-
-    def before_create_object(self, data, *args, **kwargs):
-        """Use jwt to add user id to dataset."""
-        add_created_by_id(data)
 
     def query(self, view_kwargs):
         """
@@ -34,10 +29,7 @@ class GenericDeviceActionList(ResourceList):
                 self.session.query(Device).filter_by(id=device_id).one()
             except NoResultFound:
                 raise ObjectNotFound(
-                    {
-                        "parameter": "id",
-                    },
-                    "Device: {} not found".format(device_id),
+                    {"parameter": "id",}, "Device: {} not found".format(device_id),
                 )
             else:
                 query_ = query_.filter(GenericDeviceAction.device_id == device_id)
@@ -48,19 +40,12 @@ class GenericDeviceActionList(ResourceList):
     data_layer = {
         "session": db.session,
         "model": GenericDeviceAction,
-        "methods": {
-            "before_create_object": before_create_object,
-            "query": query,
-        },
+        "methods": {"query": query,},
     }
 
 
 class GenericDeviceActionDetail(ResourceDetail):
     """Detail resource for generic device actions (get, delete, patch)."""
-
-    def before_patch(self, args, kwargs, data):
-        """Add Created by user id to the data."""
-        add_updated_by_id(data)
 
     schema = GenericDeviceActionSchema
     decorators = (token_required,)

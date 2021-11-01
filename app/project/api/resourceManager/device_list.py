@@ -1,12 +1,11 @@
 from ..datalayers.esalchemy import EsSqlalchemyDataLayer
-from ..models.base_model import db
-from ..models.device import Device
-from ..resourceManager.base_resource import (
-    add_contact_to_object,
-    add_created_by_id,
-    set_permission_filter_to_query,
+from ..helpers.permission_helpers import (
+    get_collection_with_permissions,
     set_default_permission_view_to_internal_if_not_exists_or_all_false,
 )
+from ..models.base_model import db
+from ..models.device import Device
+from ..resourceManager.base_resource import add_contact_to_object
 from ..schemas.device_schema import DeviceSchema
 from ..token_checker import token_required
 from ...frj_csv_export.resource import ResourceList
@@ -18,16 +17,16 @@ class DeviceList(ResourceList):
     a collection of Devices or create one.
     """
 
-    def query(self, view_kwargs):
-        """
-        query method To show only allowed objects.
+    def get_collection(self, qs, view_kwargs, filters=None):
+        """Retrieve a collection of objects through sqlalchemy
 
-        :param view_kwargs:
-        :return:
+        :param QueryStringManager qs: a querystring manager to retrieve information from url
+        :param dict view_kwargs: kwargs from the resource view
+        :param dict filters: A dictionary of key/value filters to apply to the eventual query
+        :return tuple: the number of object and the list of objects
         """
 
-        query_ = set_permission_filter_to_query(Device)
-        return query_
+        return get_collection_with_permissions(self, filters, qs, view_kwargs)
 
     def before_create_object(self, data, *args, **kwargs):
         """
@@ -37,7 +36,6 @@ class DeviceList(ResourceList):
         :param kwargs:
         :return:
         """
-        add_created_by_id(data)
         set_default_permission_view_to_internal_if_not_exists_or_all_false(data)
 
     def after_post(self, result):
@@ -59,8 +57,5 @@ class DeviceList(ResourceList):
         "session": db.session,
         "model": Device,
         "class": EsSqlalchemyDataLayer,
-        "methods": {
-            "before_create_object": before_create_object,
-            "query": query,
-        },
+        "methods": {"before_create_object": before_create_object,},
     }

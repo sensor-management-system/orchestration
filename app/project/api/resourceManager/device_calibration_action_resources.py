@@ -8,17 +8,12 @@ from ...frj_csv_export.resource import ResourceList
 from ..models.base_model import db
 from ..models.calibration_actions import DeviceCalibrationAction
 from ..models.device import Device
-from ..resourceManager.base_resource import add_created_by_id, add_updated_by_id
 from ..schemas.calibration_actions_schema import DeviceCalibrationActionSchema
 from ..token_checker import token_required
 
 
 class DeviceCalibrationActionList(ResourceList):
     """List resource for device calibration actions (get, post)."""
-
-    def before_create_object(self, data, *args, **kwargs):
-        """Use jwt to add user id to dataset."""
-        add_created_by_id(data)
 
     def query(self, view_kwargs):
         """
@@ -34,10 +29,7 @@ class DeviceCalibrationActionList(ResourceList):
                 self.session.query(Device).filter_by(id=device_id).one()
             except NoResultFound:
                 raise ObjectNotFound(
-                    {
-                        "parameter": "id",
-                    },
-                    "Device: {} not found".format(device_id),
+                    {"parameter": "id",}, "Device: {} not found".format(device_id),
                 )
             else:
                 query_ = query_.filter(DeviceCalibrationAction.device_id == device_id)
@@ -48,19 +40,12 @@ class DeviceCalibrationActionList(ResourceList):
     data_layer = {
         "session": db.session,
         "model": DeviceCalibrationAction,
-        "methods": {
-            "before_create_object": before_create_object,
-            "query": query,
-        },
+        "methods": {"query": query,},
     }
 
 
 class DeviceCalibrationActionDetail(ResourceDetail):
     """Detail resource for device calibration action (get, delete, patch)."""
-
-    def before_patch(self, args, kwargs, data):
-        """Add Created by user id to the data."""
-        add_updated_by_id(data)
 
     schema = DeviceCalibrationActionSchema
     decorators = (token_required,)

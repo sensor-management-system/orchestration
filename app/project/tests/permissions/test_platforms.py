@@ -297,3 +297,49 @@ class TestPlatformPermissions(BaseTestCase):
         self.assertEqual(response.status_code, 201)
 
         self.assertEqual(data["data"]["attributes"]["group_ids"], [12])
+
+    def test_get_an_internal_platforms_as_an_unregistered_user(self):
+        """An unregistered user should not be able to
+        retrieve an internal Platform."""
+
+        internal_platform = Platform(
+            short_name=fake.pystr(),
+            is_public=False,
+            is_private=False,
+            is_internal=True,
+        )
+        db.session.add(internal_platform)
+        db.session.commit()
+        url = f"{self.platform_url}/{internal_platform.id}"
+        response = self.client.get(url)
+        self.assertNotEqual(response.status_code, 200)
+
+    def test_get_an_private_platform_as_not_owner_user(self):
+        """Make sure that a normal user is not allowed a retrieve a not owned 
+        private platform."""
+
+        mock_jwt = generate_token_data()
+        c = Contact(
+            given_name=mock_jwt["given_name"],
+            family_name=mock_jwt["family_name"],
+            email=mock_jwt["email"],
+        )
+        user = User(subject="test_user1@test.test", contact=c)
+
+        db.session.add_all([c, user])
+        db.session.commit()
+
+        private_platform = Platform(
+            short_name=fake.pystr(),
+            is_public=False,
+            is_private=True,
+            is_internal=False,
+            created_by_id=user.id,
+        )
+        db.session.add(private_platform)
+        db.session.commit()
+
+        access_headers = create_token()
+        url = f"{self.platform_url}/{private_platform.id}"
+        response = self.client.get(url, headers=access_headers)
+        self.assertNotEqual(response.status_code, 200)
