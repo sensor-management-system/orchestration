@@ -135,20 +135,24 @@ export default class SearchConfigurationsPage extends Vue {
     this.configurationToDelete = null
   }
 
-  deleteAndCloseDialog () { // TODO reload current search after deletion
+  deleteAndCloseDialog () {
     this.showDeleteDialog = false
     if (this.configurationToDelete === null) {
       return
     }
 
     this.$api.configurations.deleteById(this.configurationToDelete.id).then(() => {
+      // remove configuration from search results
+      const indexToDelete = this.searchResults.findIndex(configuration => configuration.id === this.configurationToDelete?.id)
+      if (indexToDelete > -1) {
+        this.searchResults.splice(indexToDelete, 1)
+      }
       this.$store.commit('snackbar/setSuccess', 'Configuration deleted')
     }).catch((_error) => {
       this.$store.commit('snackbar/setError', 'Configuration could not be deleted')
+    }).finally(() => {
+      this.configurationToDelete = null
     })
-      .finally(() => {
-        this.configurationToDelete = null
-      })
   }
 }
 
