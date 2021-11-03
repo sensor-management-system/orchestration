@@ -37,13 +37,13 @@ permissions and limitations under the Licence.
     <section>
       <h2>Provider</h2>
       <p>
-        The provider of the internet presence <a href="https://sensors.gfz-potsdam.de">sensors.gfz-potsdam.de</a> is the <a href="https://www.gfz-potsdam.de/en/home/" target="_blank">Helmholtz Centre Potsdam German Research Centre for Geosciences</a>. This internet presence was developed within the DataHub initiative of the Helmholtz Association of German Research Centres.
+        The provider of the internet presence <a href="https://sensors.gfz-potsdam.de">sensors.gfz-potsdam.de</a> is the <a href="https://www.gfz-potsdam.de/en/home/" target="_blank">Helmholtz Centre Potsdam German Research Centre for Geosciences GFZ</a>. This internet presence was developed within the DataHub initiative of the Helmholtz Association of German Research Centres.
       </p>
     </section>
     <section>
       <h2>Address</h2>
       <p>
-        Helmholtz Centre Potsdam German Research Centre for Geosciences - GFZ<br>
+        Helmholtz Centre Potsdam German Research Centre for Geosciences GFZ<br>
         Telegrafenberg<br>
         14473 Potsdam, Germany<br>
         Tel.: +49 331 288 0<br>
@@ -52,7 +52,7 @@ permissions and limitations under the Licence.
     </section>
     <section>
       <h2>Legal form</h2>
-      <p>The Helmholtz Centre Potsdam German Research Centre for Geosciences - GFZ is a Public Law Foundation. The GFZ is member of the <a href="https://www.helmholtz.de" target="_blank">Helmholtz-Gemeinschaft Deutscher Forschungszentren e.V. (Helmholtz Association of German Research Centres)</a>.</p>
+      <p>The Helmholtz Centre Potsdam German Research Centre for Geosciences GFZ is a Public Law Foundation. The GFZ is member of the <a href="https://www.helmholtz.de" target="_blank">Helmholtz-Gemeinschaft Deutscher Forschungszentren e.V. (Helmholtz Association of German Research Centres)</a>.</p>
     </section>
     <section>
       <h2>Authorized representatives</h2>
