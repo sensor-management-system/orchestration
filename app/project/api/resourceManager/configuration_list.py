@@ -34,8 +34,8 @@ class ConfigurationList(ResourceList):
             if not current_user.is_superuser:
                 query = query.filter(
                     or_(
-                        self._data_layer.model.is_public,
-                        self._data_layer.model.is_internal,
+                        self.model.is_public,
+                        self.model.is_internal,
                     )
                 )
 
