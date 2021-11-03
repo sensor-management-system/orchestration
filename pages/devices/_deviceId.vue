@@ -59,7 +59,7 @@ export default class DevicePage extends Vue {
 
   created () {
     if (this.isBasePath()) {
-      this.$router.push('/devices/' + this.deviceId + '/basic')
+      this.$router.replace('/devices/' + this.deviceId + '/basic')
     }
   }
 
