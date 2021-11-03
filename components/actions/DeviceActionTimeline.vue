@@ -46,7 +46,7 @@ permissions and limitations under the Licence.
         :value="value[index]"
         :delete-callback="getActionApiDispatcherDeleteMethod(action)"
         :is-user-authenticated="isUserAuthenticated"
-        @delete-sucess="removeActionFromModel"
+        @delete-success="removeActionFromModel"
         @showdelete="$emit('showdelete', $event)"
       >
         <template #actions>
