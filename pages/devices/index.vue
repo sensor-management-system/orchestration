@@ -38,15 +38,21 @@ permissions and limitations under the Licence.
           <v-col cols="12" md="5">
             <v-text-field v-model="searchText" label="Name" placeholder="Name of device" @keydown.enter="basicSearch" />
           </v-col>
-          <v-col cols="12" md="2">
+          <v-col
+            cols="12"
+            md="7"
+            align-self="center"
+          >
             <v-btn
               color="primary"
+              small
               @click="basicSearch"
             >
               Search
             </v-btn>
             <v-btn
               text
+              small
               @click="clearBasicSearch"
             >
               Clear
@@ -81,15 +87,20 @@ permissions and limitations under the Licence.
           </v-col>
         </v-row>
         <v-row>
-          <v-col cols="12" md="3">
+          <v-col
+            cols="12"
+            align-self="center"
+          >
             <v-btn
               color="primary"
+              small
               @click="extendedSearch"
             >
               Search
             </v-btn>
             <v-btn
               text
+              small
               @click="clearExtendedSearch"
             >
               Clear

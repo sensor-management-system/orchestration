@@ -34,15 +34,21 @@ permissions and limitations under the Licence.
       <v-col cols="12" md="5">
         <v-text-field v-model="searchText" label="Name" placeholder="Name of contact" @keydown.enter="search" />
       </v-col>
-      <v-col cols="12" md="2">
+      <v-col
+        cols="12"
+        md="7"
+        align-self="center"
+      >
         <v-btn
           color="primary"
+          small
           @click="search"
         >
           Search
         </v-btn>
         <v-btn
           text
+          small
           @click="clearSearch"
         >
           Clear
