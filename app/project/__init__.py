@@ -8,7 +8,9 @@ from .api import minio
 from .api.helpers.docs import docs_routes
 from .api.helpers.health_checks import health_check_elastic_search, health_check_db, \
     health_check_migrations, health_check_minio
+
 from .api.models.base_model import db
+from .api.auth.permission_manager import permission_manager
 from .api.token_checker import jwt
 from .api.upload_files import upload_routes
 from .config import env
@@ -46,6 +48,7 @@ def create_app():
     api.init_app(app, Blueprint("api", __name__, url_prefix=base_url))
     migrate.init_app(app, db)
     jwt.init_app(app)
+    api.permission_manager(permission_manager)
 
     # instantiate minio client
     minio.init_app(app)

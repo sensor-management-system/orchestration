@@ -123,7 +123,7 @@ class TestDevicePermissions(BaseTestCase):
         response = self.client.get(self.device_url)
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.data.decode())
-        self.assertEqual(data["meta"]["count"], 1)
+        self.assertEqual(len(data["data"]), 1)
         self.assertEqual(data["data"][0]["id"], str(public_sensor.id))
 
     def test_get_as_registered_user(self):
@@ -202,7 +202,7 @@ class TestDevicePermissions(BaseTestCase):
         response = self.client.get(self.device_url, headers=access_headers)
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.data.decode())
-        self.assertEqual(data["meta"]["count"], 3)
+        self.assertEqual(len(data["data"]), 3)
 
     def test_add_device_with_multipel_true_status(self):
         """Make Sure that is an object can't have tow True status at the same time"""

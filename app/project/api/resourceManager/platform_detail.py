@@ -3,11 +3,6 @@ from flask_rest_jsonapi.exceptions import ObjectNotFound
 
 from .base_resource import delete_attachments_in_minio_by_url
 from ..helpers.errors import ConflictError
-from ..helpers.permission_helpers import (
-    check_for_permissions,
-    check_patch_permission,
-    check_deletion_permission,
-)
 from ..models.base_model import db
 from ..models.platform import Platform
 from ..schemas.platform_schema import PlatformSchema
@@ -19,18 +14,6 @@ class PlatformDetail(ResourceDetail):
     provides get, patch and delete methods to retrieve details
     of an object, update an object and delete an Event
     """
-
-    def before_get(self, args, kwargs):
-        """Check user permission to view a Platform."""
-        check_for_permissions(Platform, kwargs)
-
-    def before_patch(self, args, kwargs, data):
-        """Add Created by user id to the data"""
-        check_patch_permission(data, Platform)
-
-    def before_delete(self, args, kwargs):
-        """Checks for permission"""
-        check_deletion_permission(kwargs, Platform)
 
     def delete(self, *args, **kwargs):
         """

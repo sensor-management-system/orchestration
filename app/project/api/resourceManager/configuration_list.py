@@ -17,13 +17,14 @@ class ConfigurationList(ResourceList):
     """
 
     @jwt_required(optional=True)
-    def get_collection(self, qs, view_kwargs, filters=None):
-        """Retrieve a collection of objects through sqlalchemy with permissions
+    def after_get_collection(self, collection, qs, view_kwargs):
+        """Take the intersection between requested collection and
+        what the user allowed querying.
 
-        :param QueryStringManager qs: a querystring manager to retrieve information from url
-        :param dict view_kwargs: kwargs from the resource view
-        :param dict filters: A dictionary of key/value filters to apply to the eventual query
-        :return tuple: the number of object and the list of objects
+        :param collection:
+        :param qs:
+        :param view_kwargs:
+        :return:
         """
 
         self._data_layer.before_get_collection(qs, view_kwargs)
@@ -38,21 +39,10 @@ class ConfigurationList(ResourceList):
                         self._data_layer.model.is_internal,
                     )
                 )
-        if filters:
-            query = query.filter_by(**filters)
-        if qs.filters:
-            query = self._data_layer.filter_query(
-                query, qs.filters, self._data_layer.model
-            )
-        if qs.sorting:
-            query = self._data_layer.sort_query(query, qs.sorting)
-        object_count = query.count()
-        if getattr(self, "eagerload_includes", True):
-            query = self._data_layer.eagerload_includes(query, qs)
-        query = self._data_layer.paginate_query(query, qs.pagination)
-        collection = query.all()
-        collection = self._data_layer.after_get_collection(collection, qs, view_kwargs)
-        return object_count, collection
+
+        allowed_collection = query.all()
+
+        return set(collection).intersection(allowed_collection)
 
     def before_create_object(self, data, *args, **kwargs):
         """

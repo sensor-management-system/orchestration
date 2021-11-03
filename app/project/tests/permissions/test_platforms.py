@@ -123,7 +123,7 @@ class TestPlatformPermissions(BaseTestCase):
         response = self.client.get(self.platform_url)
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.data.decode())
-        self.assertEqual(data["meta"]["count"], 1)
+        self.assertEqual(len(data["data"]), 1)
         self.assertEqual(data["data"][0]["id"], str(public_platform.id))
 
     def test_get_as_registered_user(self):
@@ -202,7 +202,7 @@ class TestPlatformPermissions(BaseTestCase):
         response = self.client.get(self.platform_url, headers=access_headers)
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.data.decode())
-        self.assertEqual(data["meta"]["count"], 3)
+        self.assertEqual(len(data["data"]), 3)
 
     def test_add_platform_with_multiple_permission_values(self):
         """Make sure that is a a platform can't have multiple True permission values at the same time"""
