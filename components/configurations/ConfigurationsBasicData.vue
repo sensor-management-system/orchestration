@@ -53,12 +53,14 @@ permissions and limitations under the Licence.
         <label>Start date</label>
         <span v-if="value.startDate">
           {{ value.startDate | dateToDateTimeString }}
+          <span class="text-caption text--secondary">(UTC)</span>
         </span>
       </v-col>
       <v-col cols="12" md="3">
         <label>End date</label>
         <span v-if="value.endDate">
           {{ value.endDate | dateToDateTimeString }}
+          <span class="text-caption text--secondary">(UTC)</span>
         </span>
       </v-col>
     </v-row>

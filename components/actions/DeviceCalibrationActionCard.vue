@@ -34,6 +34,7 @@ permissions and limitations under the Licence.
       <v-row no-gutters>
         <v-col>
           {{ value.currentCalibrationDate | toUtcDate }}
+          <span class="text-caption text--secondary">(UTC)</span>
         </v-col>
         <v-col
           align-self="end"
@@ -94,6 +95,7 @@ permissions and limitations under the Licence.
                 Next calibration date
               </label>
               {{ value.nextCalibrationDate | toUtcDate }}
+              <span class="text-caption text--secondary">(UTC)</span>
             </v-col>
           </v-row>
           <div v-if="value.measuredQuantities && value.measuredQuantities.length > 0">

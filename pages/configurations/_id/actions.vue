@@ -77,15 +77,11 @@ import {
 } from '@/utils/configurationInterfaces'
 
 import { byDateOldestLast } from '@/modelUtils/mountHelpers'
-import { dateToDateTimeString } from '@/utils/dateHelper'
 
 import ConfigurationsTimelineActionCard from '@/components/configurations/ConfigurationsTimelineActionCard.vue'
 
 @Component({
-  components: { ConfigurationsTimelineActionCard },
-  filters: {
-    dateToDateTimeString
-  }
+  components: { ConfigurationsTimelineActionCard }
 })
 export default class ConfigurationActions extends Vue {
   @Prop({

@@ -41,6 +41,7 @@ permissions and limitations under the Licence.
             <v-col cols="12">
               <v-card-subtitle class="pb-0">
                 {{ action.date | dateToDateTimeString }}
+                <span class="text-caption text--secondary">(UTC)</span>
               </v-card-subtitle>
             </v-col>
           </v-row>

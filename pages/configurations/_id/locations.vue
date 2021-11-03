@@ -61,6 +61,8 @@ permissions and limitations under the Licence.
             label="Dates defined by actions"
             :readonly="isInEditMode"
             :disabled="isInEditMode"
+            hint="The referenced time zone is UTC."
+            persistent-hint
           />
         </v-col>
       </v-row>

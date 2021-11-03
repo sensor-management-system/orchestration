@@ -34,6 +34,7 @@ permissions and limitations under the Licence.
       <v-row no-gutters>
         <v-col>
           {{ value.basicData.date | dateToDateTimeString }}
+          <span class="text-caption text--secondary">(UTC)</span>
         </v-col>
         <v-col
           align-self="end"
