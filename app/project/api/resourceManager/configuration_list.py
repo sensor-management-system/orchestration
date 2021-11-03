@@ -27,8 +27,7 @@ class ConfigurationList(ResourceList):
         :return:
         """
 
-        self._data_layer.before_get_collection(qs, view_kwargs)
-        query = self._data_layer.query(view_kwargs)
+        query = db.session.query(self.model)
         if get_jwt_identity() is None:
             query = query.filter_by(is_public=True)
         else:
@@ -75,5 +74,8 @@ class ConfigurationList(ResourceList):
         "session": db.session,
         "model": Configuration,
         "class": EsSqlalchemyDataLayer,
-        "methods": {"before_create_object": before_create_object,},
+        "methods": {
+            "before_create_object": before_create_object,
+            "after_get_collection": after_get_collection,
+        },
     }
