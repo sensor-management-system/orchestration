@@ -70,6 +70,7 @@ permissions and limitations under the Licence.
                 <v-col>
                   <label>Mounted:</label>
                   {{ value.unpack().date | dateToDateTimeString }}
+                  <span class="text-caption text--secondary">(UTC)</span>
                 </v-col>
               </v-row>
               <v-row>
@@ -194,6 +195,7 @@ permissions and limitations under the Licence.
                   <v-list-item-content>
                     <v-list-item-title>
                       Update for {{ value.unpack().date | dateToDateTimeStringHHMM }}
+                      <span class="text-caption text--secondary">(UTC)</span>
                     </v-list-item-title>
                   </v-list-item-content>
                 </v-list-item>
@@ -204,6 +206,7 @@ permissions and limitations under the Licence.
                   <v-list-item-content>
                     <v-list-item-title>
                       Update for {{ selectedDate | dateToDateTimeStringHHMM }}
+                      <span class="text-caption text--secondary">(UTC)</span>
                     </v-list-item-title>
                   </v-list-item-content>
                 </v-list-item>

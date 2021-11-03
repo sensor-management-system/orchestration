@@ -34,6 +34,8 @@ permissions and limitations under the Licence.
     :value="valueAsDateTimeString"
     :label="label"
     :rules="textInputRules"
+    hint="The referenced time zone is UTC."
+    persistent-hint
     v-bind="$attrs"
     @input="updateByTextfield"
   >
@@ -77,6 +79,9 @@ permissions and limitations under the Licence.
                   class="height-adjustment"
                   @input="setTimePickerValue"
                 />
+                <p class="text-caption">
+                  The referenced time zone is UTC.
+                </p>
               </v-tab-item>
             </v-tabs>
           </v-card-text>

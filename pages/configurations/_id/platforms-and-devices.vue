@@ -53,6 +53,8 @@ permissions and limitations under the Licence.
             :item-text="(x) => x.text"
             :items="actionDates"
             label="Dates defined by actions"
+            hint="The referenced time zone is UTC."
+            persistent-hint
           />
         </v-col>
       </v-row>

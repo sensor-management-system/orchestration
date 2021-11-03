@@ -35,6 +35,7 @@ permissions and limitations under the Licence.
       <v-col>
         <label>Begin date</label>
         {{ value.beginDate | dateToDateTimeStringHHMM }}
+        <span class="text-caption text--secondary">(UTC)</span>
       </v-col>
     </v-row>
     <v-row>

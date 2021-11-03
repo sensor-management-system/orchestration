@@ -165,6 +165,12 @@ permissions and limitations under the Licence.
                   class="nowrap-truncate"
                 >
                   {{ configuration.startDate | dateToDateTimeString }}
+                  <span
+                    v-if="configuration.startDate"
+                    class="text-caption text--secondary"
+                  >
+                    (UTC)
+                  </span>
                 </v-col>
                 <v-col
                   cols="4"
@@ -187,6 +193,12 @@ permissions and limitations under the Licence.
                   class="nowrap-truncate"
                 >
                   {{ configuration.endDate | dateToDateTimeString }}
+                  <span
+                    v-if="configuration.endDate"
+                    class="text-caption text--secondary"
+                  >
+                    (UTC)
+                  </span>
                 </v-col>
               </v-row>
             </v-card-text>
