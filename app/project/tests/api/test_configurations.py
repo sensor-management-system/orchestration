@@ -15,6 +15,8 @@ from project.tests.base import fake, generate_token_data
 from project.tests.models.test_configurations_model import generate_configuration_model
 from project.tests.read_from_json import extract_data_from_json_file
 
+from project.api.models import User
+
 
 class TestConfigurationsService(BaseTestCase):
     """Tests for the Configurations Service."""
@@ -74,8 +76,8 @@ class TestConfigurationsService(BaseTestCase):
             },
         }
         for (
-                input_calibration_date,
-                expected_output_calibration_date,
+            input_calibration_date,
+            expected_output_calibration_date,
         ) in calibration_dates.items():
             # set up for each single run
             self.setUp()
@@ -126,8 +128,8 @@ class TestConfigurationsService(BaseTestCase):
 
             configuration_device = (
                 db.session.query(ConfigurationDevice)
-                    .filter_by(device_id=1, configuration_id=1)
-                    .first()
+                .filter_by(device_id=1, configuration_id=1)
+                .first()
             )
             self.assertEqual(
                 configuration_device.calibration_date,
@@ -181,8 +183,8 @@ class TestConfigurationsService(BaseTestCase):
 
         configuration_device = (
             db.session.query(ConfigurationDevice)
-                .filter_by(device_id=1, configuration_id=1)
-                .first()
+            .filter_by(device_id=1, configuration_id=1)
+            .first()
         )
         self.assertEqual(configuration_device.firmware_version, firmware_version)
 
@@ -461,7 +463,13 @@ class TestConfigurationsService(BaseTestCase):
             family_name=mock_jwt["family_name"],
             email=mock_jwt["email"],
         )
-        configuration = generate_configuration_model()
+        user = User(subject="test_user@test.test", contact=contact)
+        configuration = Configuration(
+            label=fake.linux_processor(),
+            is_public=False,
+            is_internal=True,
+            created_by=user,
+        )
         db.session.add_all(
             [
                 device,
@@ -470,6 +478,7 @@ class TestConfigurationsService(BaseTestCase):
                 parent_platform,
                 contact,
                 configuration,
+                user,
             ]
         )
         db.session.commit()
@@ -529,13 +538,28 @@ class TestConfigurationsService(BaseTestCase):
             data_object=platform_mount_data,
             object_type="platform_mount_action",
         )
+        url = f"{self.configurations_url}/{configuration.id}"
+        self.delete_as_owner(contact, user, url)
 
-        _ = super().delete_object(url=f"{self.configurations_url}/{configuration.id}", )
+    def delete_as_owner(self, contact, user, url):
+        token_data = {
+            "sub": user.subject,
+            "iss": "SMS unittest",
+            "family_name": contact.family_name,
+            "given_name": contact.given_name,
+            "email": contact.email,
+            "aud": "SMS",
+        }
+        access_headers = create_token(token_data)
+        with self.client:
+            response = self.client.delete(
+                url, content_type="application/vnd.api+json", headers=access_headers,
+            )
+        self.assertEqual(response.status_code, 200)
 
     def test_delete_configuration_with_static_begin_location_action(self):
         """Ensure a configuration with a static_begin_location_action can be deleted"""
-        contact = self.add_a_contact()
-        config_id = self.add_a_configuration()
+        configuration, contact, user = add_a_configuration()
 
         action_data = {
             "data": {
@@ -553,7 +577,7 @@ class TestConfigurationsService(BaseTestCase):
                 "relationships": {
                     "contact": {"data": {"type": "contact", "id": contact.id}},
                     "configuration": {
-                        "data": {"type": "configuration", "id": config_id}
+                        "data": {"type": "configuration", "id": configuration.id}
                     },
                 },
             }
@@ -564,12 +588,12 @@ class TestConfigurationsService(BaseTestCase):
             data_object=action_data,
             object_type="configuration_static_location_begin_action",
         )
-        _ = super().delete_object(url=f"{self.configurations_url}/{config_id}", )
+        url_ = f"{self.configurations_url}/{configuration.id}"
+        _ = self.delete_as_owner(contact, user, url_)
 
     def test_delete_configuration_with_static_end_location_action(self):
         """Ensure a configuration with a static_end_location_action can be deleted"""
-        contact = self.add_a_contact()
-        config_id = self.add_a_configuration()
+        configuration, contact, user = add_a_configuration()
 
         action_data = {
             "data": {
@@ -581,7 +605,7 @@ class TestConfigurationsService(BaseTestCase):
                 "relationships": {
                     "contact": {"data": {"type": "contact", "id": contact.id}},
                     "configuration": {
-                        "data": {"type": "configuration", "id": config_id}
+                        "data": {"type": "configuration", "id": configuration.id}
                     },
                 },
             }
@@ -592,12 +616,12 @@ class TestConfigurationsService(BaseTestCase):
             data_object=action_data,
             object_type="configuration_static_location_end_action",
         )
-        _ = super().delete_object(url=f"{self.configurations_url}/{config_id}", )
+        url = f"{self.configurations_url}/{configuration.id}"
+        _ = self.delete_as_owner(contact, user, url)
 
     def test_delete_configuration_with_dynamic_begin_location_action(self):
         """Ensure a configuration with a dynamic_begin_location_action can be deleted"""
-        contact = self.add_a_contact()
-        config_id = self.add_a_configuration()
+        configuration, contact, user = add_a_configuration()
 
         action_data = {
             "data": {
@@ -612,7 +636,7 @@ class TestConfigurationsService(BaseTestCase):
                 "relationships": {
                     "contact": {"data": {"type": "contact", "id": contact.id}},
                     "configuration": {
-                        "data": {"type": "configuration", "id": config_id}
+                        "data": {"type": "configuration", "id": configuration.id}
                     },
                 },
             }
@@ -623,12 +647,12 @@ class TestConfigurationsService(BaseTestCase):
             data_object=action_data,
             object_type="configuration_dynamic_location_begin_action",
         )
-        _ = super().delete_object(url=f"{self.configurations_url}/{config_id}", )
+        url = f"{self.configurations_url}/{configuration.id}"
+        _ = self.delete_as_owner(contact, user, url)
 
     def test_delete_configuration_with_dynamic_end_location_action(self):
         """Ensure a configuration with a dynamic_end_location_action can be deleted"""
-        contact = self.add_a_contact()
-        config_id = self.add_a_configuration()
+        configuration, contact, user = add_a_configuration()
 
         action_data = {
             "data": {
@@ -640,7 +664,7 @@ class TestConfigurationsService(BaseTestCase):
                 "relationships": {
                     "contact": {"data": {"type": "contact", "id": contact.id}},
                     "configuration": {
-                        "data": {"type": "configuration", "id": config_id}
+                        "data": {"type": "configuration", "id": configuration.id}
                     },
                 },
             }
@@ -651,39 +675,25 @@ class TestConfigurationsService(BaseTestCase):
             data_object=action_data,
             object_type="configuration_dynamic_location_end_action",
         )
-        _ = super().delete_object(url=f"{self.configurations_url}/{config_id}", )
+        url = f"{self.configurations_url}/{configuration.id}"
+        _ = self.delete_as_owner(contact, user, url)
 
-    @staticmethod
-    def add_a_contact():
-        mock_jwt = generate_token_data()
-        contact = Contact(
-            given_name=mock_jwt["given_name"],
-            family_name=mock_jwt["family_name"],
-            email=mock_jwt["email"],
-        )
-        db.session.add(contact)
-        db.session.commit()
-        return contact
 
-    def add_a_configuration(self):
-        config_data = {
-            "data": {
-                "attributes": {
-                    "label": "Test configuration",
-                    "project_uri": "",
-                    "project_name": "MOSES",
-                    "status": "draft",
-                    "start_date": "2021-10-22T09:31:00.000Z",
-                    "end_date": "2021-10-31T09:32:00.000Z",
-                    "hierarchy": [],
-                },
-                "type": "configuration",
-            }
-        }
-        config = super().add_object(
-            url=self.configurations_url,
-            data_object=config_data,
-            object_type=self.object_type,
-        )
-        config_id = config["data"]["id"]
-        return config_id
+def add_a_configuration():
+    mock_jwt = generate_token_data()
+    contact = Contact(
+        given_name=mock_jwt["given_name"],
+        family_name=mock_jwt["family_name"],
+        email=mock_jwt["email"],
+    )
+
+    user = User(subject=fake.email(), contact=contact)
+    configuration = Configuration(
+        label=fake.linux_processor(),
+        is_public=False,
+        is_internal=True,
+        created_by=user,
+    )
+    db.session.add_all([contact, user, configuration])
+    db.session.commit()
+    return configuration, contact, user
