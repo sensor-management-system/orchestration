@@ -77,6 +77,14 @@ Those are stored under
 - /srv/docker/service/vocabulary-db/backups
 - /srv/docker/service/minio/backups
 
+We also save those backups for the productive machine on a project share
+that is mounted on:
+
+- /mnt/sms-backup
+
+The backups on the vms themselves are stored for 30 days,
+the ones on the project share for 180.
+
 The `*-db` backups are `pg_dump` flies in the compressed postgres binary format. Both can be restored with the `pg_restore`.
 
 It should be possible with a command like this (not tested yet):

@@ -207,12 +207,13 @@ backup-gfz-staging:
     BACKEND_DB_PASSWORD: ${GFZ_STAGING_BACKEND_POSTGRES_PASSWORD}
     BACKEND_SECRET_KEY: ${GFZ_STAGING_BACKEND_SECRET}
     OIDC_CLIENT_ID: ${GFZ_STAGING_OIDC_CLIENT_ID}
+    DAYS_TO_CLEANUP: 30
   before_script:
     - *docker_login_gitlab_registry
-    # clean up & remove files older than 30 days
-    - find /srv/docker/service/backend-db/backups -type f -mtime +30 -exec rm {} \;
-    - find /srv/docker/service/vocabulary-db/backups -type f -mtime +30 -exec rm {} \;
-    - find /srv/docker/service/minio/backups -type f -mtime +30 -exec rm {} \;
+    # clean up & remove files older than x days
+    - find /srv/docker/service/backend-db/backups -type f -mtime +${DAYS_TO_CLEANUP:-30} -exec rm {} \;
+    - find /srv/docker/service/vocabulary-db/backups -type f -mtime +${DAYS_TO_CLEANUP:-30} -exec rm {} \;
+    - find /srv/docker/service/minio/backups -type f -mtime +${DAYS_TO_CLEANUP:-30} -exec rm {} \;
   script:
     - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml pull mc
     - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T vocabulary-db pg_dump -U $VOCABULARY_DB_USER -d vocabulary -Fc > /srv/docker/service/vocabulary-db/backups/vocabulary_$(date +%Y%m%d-%H%M)_${CI_COMMIT_SHORT_SHA}.dump
@@ -259,15 +260,17 @@ backup-gfz-prod:
     BACKEND_DB_PASSWORD: ${GFZ_PROD_BACKEND_POSTGRES_PASSWORD}
     BACKEND_SECRET_KEY: ${GFZ_PROD_BACKEND_SECRET}
     OIDC_CLIENT_ID: ${GFZ_PROD_OIDC_CLIENT_ID}
+    DAYS_TO_CLEANUP: 30
+    DAYS_TO_CLEANUP_PROJECTSHARE: 180
   before_script:
     - *docker_login_gitlab_registry
     # clean up & remove files older than 30 days
-    # Note: We store the files of the latest 30 days on the machine
+    # Note: We store the files of the latest x days on the machine
     # itself. But we also store the files on the projectshare, where
-    # we keep them for 180 days
-    - find /srv/docker/service/backend-db/backups -type f -mtime +30 -exec rm {} \;
-    - find /srv/docker/service/vocabulary-db/backups -type f -mtime +30 -exec rm {} \;
-    - find /srv/docker/service/minio/backups -type f -mtime +30 -exec rm {} \;
+    # we keep them for longer.
+    - find /srv/docker/service/backend-db/backups -type f -mtime +${DAYS_TO_CLEANUP:-30} -exec rm {} \;
+    - find /srv/docker/service/vocabulary-db/backups -type f -mtime +${DAYS_TO_CLEANUP:-30} -exec rm {} \;
+    - find /srv/docker/service/minio/backups -type f -mtime +${DAYS_TO_CLEANUP:-30} -exec rm {} \;
   script:
     - docker-compose -f docker/deployment/gfz/prod/docker-compose.yml pull mc
     - docker-compose -f docker/deployment/gfz/prod/docker-compose.yml exec -T vocabulary-db pg_dump -U $VOCABULARY_DB_USER -d vocabulary -Fc > /srv/docker/service/vocabulary-db/backups/vocabulary_$(date +%Y%m%d-%H%M)_${CI_COMMIT_SHORT_SHA}.dump
@@ -284,7 +287,7 @@ backup-gfz-prod:
       docker-compose -f docker/deployment/gfz/prod/docker-compose.yml
         run -T --entrypoint '/projectshare.sh'
         --rm
-        -e CLEANUP=180
+        -e CLEANUP=${DAYS_TO_CLEANUP_PROJECTSHARE:-180}
         -u "$(id -u smsbckp):$(id -g sms-backup-rw)"
         -v /srv/docker/service:/srv/docker/service:ro
         -v /mnt/sms-backup:/mnt/sms-backup
