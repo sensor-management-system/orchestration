@@ -73,14 +73,17 @@ test the minio restore (in the GFZ deployments this service is called `mc`).
 For staging and prod we create backups on a regular basis (before every deployment for both, and on a daily basis for prod as well).
 Those are stored under 
 
-- /srv/docker/service/backend-db/backups
-- /srv/docker/service/vocabulary-db/backups
-- /srv/docker/service/minio/backups
+- `/srv/docker/service/backend-db/backups`
+- `/srv/docker/service/vocabulary-db/backups`
+- `/srv/docker/service/minio/backups`
 
 We also save those backups for the productive machine on a project share
 that is mounted on:
 
-- /mnt/sms-backup
+- `/mnt/sms-backup`
+
+which can be found here as well:
+- `rzv124n.gfz-potsdam.de:/PROJECT_124n_1/sms-backup`
 
 The backups on the vms themselves are stored for 30 days,
 the ones on the project share for 180.
