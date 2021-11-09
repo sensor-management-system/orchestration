@@ -14,17 +14,6 @@ from project.api.services.userservice import user_deactivation
 app = create_app()
 cli = FlaskGroup(create_app=create_app)
 
-COV = coverage.coverage(
-    branch=True,
-    include="project/*",
-    # skip the tests itself for the coverage
-    omit=[
-        "project/tests/*",
-        "project/config.py",
-    ],
-)
-COV.start()
-
 
 @cli.command("recreate_db")
 def recreate_db():
@@ -34,7 +23,7 @@ def recreate_db():
 
 
 @cli.command()
-@click.argument('test_names', nargs=-1)
+@click.argument("test_names", nargs=-1)
 def test(test_names):
     """ Runs the tests without code coverage """
     # To run an oly test just pass th test-model-name
@@ -56,9 +45,18 @@ def test(test_names):
 
 
 @cli.command()
-@click.argument('test_names', nargs=-1)
+@click.argument("test_names", nargs=-1)
 def cov(test_names):
     """Runs the unit tests with coverage."""
+    coverage_ = coverage.coverage(
+        branch=True,
+        include="project/*",
+        # skip the tests itself for the coverage
+        omit=["project/tests/*", "project/config.py",],
+    )
+    coverage_.erase()
+    coverage_.start()
+
     if test_names:
         tests = unittest.TestLoader().loadTestsFromNames(test_names)
     else:
@@ -70,12 +68,11 @@ def cov(test_names):
         )
     result = unittest.TextTestRunner(verbosity=2).run(tests)
     if result.wasSuccessful():
-        COV.stop()
-        COV.save()
-        print("Coverage Summary:")
-        COV.report()
-        COV.html_report()
-        COV.erase()
+        coverage_.stop()
+        coverage_.save()
+        click.secho("Coverage Summary:", fg="green")
+        # coverage_.html_report(directory="coveragereport", skip_empty=True)
+        coverage_.report(show_missing=True, skip_empty=True, skip_covered=True, )
         return sys.exit(0)
     return sys.exit(1)
 
@@ -88,8 +85,8 @@ def es():
 
 @es.command("reindex")
 def es_reindex():
-    """Reindex all of the models that should be used in the es."""
-    from project.api.models import (Configuration, Device, Platform, Contact)
+    """Reindex all the models that should be used in the es."""
+    from project.api.models import Configuration, Device, Platform, Contact
 
     for model_type in [Platform, Device, Configuration, Contact]:
         model_type.reindex()
@@ -112,11 +109,11 @@ def users():
 
 
 @users.command("deactivate")
-@click.argument('src_user_subject')
-@click.option('--dest-user-subject', default=None, help='A substituted user subject')
+@click.argument("src_user_subject")
+@click.option("--dest-user-subject", default=None, help="A substituted user subject")
 def deactivate_a_user(src_user_subject, dest_user_subject):
     """
-    Deactivate a user in this steps:
+    Deactivate a user in these steps:
      - Set the active attribute to False
      - Replace contact entities with a deactivation message.
      - If a there is substituted user then add it to all objects where
@@ -134,16 +131,18 @@ def deactivate_a_user(src_user_subject, dest_user_subject):
     dest_contact = None
     if dest_user_subject is not None:
         dest_user = db.session.query(User).filter_by(subject=dest_user_subject).first()
-        dest_contact = db.session.query(Contact).filter_by(id=dest_user.contact_id).first()
+        dest_contact = (
+            db.session.query(Contact).filter_by(id=dest_user.contact_id).first()
+        )
 
     user_deactivation(src_user, src_contact, dest_contact)
 
 
 @users.command("reactivate")
-@click.argument('subject_user')
-@click.option('--given_name', prompt='Contact given_name please')
-@click.option('--family_name', prompt='Contact family_name please')
-@click.option('--email', prompt='Contact email please')
+@click.argument("subject_user")
+@click.option("--given_name", prompt="Contact given_name please")
+@click.option("--family_name", prompt="Contact family_name please")
+@click.option("--email", prompt="Contact email please")
 def reactivate_a_user(subject_user, given_name, family_name, email):
     """
     Reactivate a user.
