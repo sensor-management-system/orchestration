@@ -6,7 +6,7 @@ from project.api.models import (
 from project.api.models.base_model import db
 from project.tests.base import BaseTestCase, fake, generate_token_data
 
-from .test_configurations_model import generate_configuration_model
+from project.tests.models.test_configurations_model import generate_configuration_model
 
 
 def add_static_location_begin_action_model():

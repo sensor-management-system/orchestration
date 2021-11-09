@@ -81,7 +81,7 @@ test-image:
     - export DATABASE_TEST_URL=$DATABASE_TEST_URL
     - export APP_SETTINGS=project.config.TestingConfig
   script:
-    - cd $CI_PROJECT_DIR/app/ && python manage.py test
+    - cd $CI_PROJECT_DIR/app/ && python manage.py cov
 
 release-image:
   stage: release
