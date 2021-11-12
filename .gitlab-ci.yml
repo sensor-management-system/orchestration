@@ -226,12 +226,12 @@ backup-gfz-staging:
     # into there. We will give the current user & group ids, so that we can edit and delete
     # the backups content right away.
     - >
-      docker-compose -f docker/deployment/gfz/staging/docker-compose.yml
-        run -T --entrypoint '/backup.sh'
-        --rm
-        -e USER_ID=$(id -u)
-        -e GROUP_ID=$(id -g)
-        -v /srv/docker/service/minio/backups/$(date +%Y%m%d-%H%M)_${CI_COMMIT_SHORT_SHA}:/backups
+      docker-compose -f docker/deployment/gfz/staging/docker-compose.yml \
+        run -T --entrypoint '/backup.sh' \
+        --rm \
+        -e USER_ID=$(id -u) \
+        -e GROUP_ID=$(id -g) \
+        -v /srv/docker/service/minio/backups/$(date +%Y%m%d-%H%M)_${CI_COMMIT_SHORT_SHA}:/backups \
         mc
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
@@ -276,21 +276,21 @@ backup-gfz-prod:
     - docker-compose -f docker/deployment/gfz/prod/docker-compose.yml exec -T vocabulary-db pg_dump -U $VOCABULARY_DB_USER -d vocabulary -Fc > /srv/docker/service/vocabulary-db/backups/vocabulary_$(date +%Y%m%d-%H%M)_${CI_COMMIT_SHORT_SHA}.dump
     - docker-compose -f docker/deployment/gfz/prod/docker-compose.yml exec -T backend-db pg_dump -U $BACKEND_DB_USER -d backend -Fc > /srv/docker/service/backend-db/backups/backend_$(date +%Y%m%d-%H%M)_${CI_COMMIT_SHORT_SHA}.dump
     - >
-      docker-compose -f docker/deployment/gfz/prod/docker-compose.yml
-        run -T --entrypoint '/backup.sh'
-        --rm
-        -e USER_ID=$(id -u)
-        -e GROUP_ID=$(id -g)
-        -v /srv/docker/service/minio/backups/$(date +%Y%m%d-%H%M)_${CI_COMMIT_SHORT_SHA}:/backups
+      docker-compose -f docker/deployment/gfz/prod/docker-compose.yml \
+        run -T --entrypoint '/backup.sh' \
+        --rm \
+        -e USER_ID=$(id -u) \
+        -e GROUP_ID=$(id -g) \
+        -v /srv/docker/service/minio/backups/$(date +%Y%m%d-%H%M)_${CI_COMMIT_SHORT_SHA}:/backups \
         mc
     - >
-      docker-compose -f docker/deployment/gfz/prod/docker-compose.yml
-        run -T --entrypoint '/projectshare.sh'
-        --rm
-        -e CLEANUP=${DAYS_TO_CLEANUP_PROJECTSHARE:-180}
-        -u "$(id -u smsbckp):$(id -g sms-backup-rw)"
-        -v /srv/docker/service:/srv/docker/service:ro
-        -v /mnt/sms-backup:/mnt/sms-backup
+      docker-compose -f docker/deployment/gfz/prod/docker-compose.yml \
+        run -T --entrypoint '/projectshare.sh' \
+        --rm \
+        -e CLEANUP=${DAYS_TO_CLEANUP_PROJECTSHARE:-180} \
+        -u "$(id -u smsbckp):$(id -g sms-backup-rw)" \
+        -v /srv/docker/service:/srv/docker/service:ro \
+        -v /mnt/sms-backup:/mnt/sms-backup \
         mc
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
