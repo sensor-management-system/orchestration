@@ -25,12 +25,21 @@ tar zcvf /backups/minio_backup.tar.gz /backup-creation
 # be able to edit / remove the files afterwards.
 # In the mc docker image we only have the root user. So we can easily add a new
 # one with the GROUP_ID and USER_ID variables
-# We can easliy add a new one
+# We can easliy add a new one (but we also need to check existing ones)
 
-groupadd -g ${GROUP_ID:-1000} backupgroup
-useradd -u ${USER_ID:-1000} backupuser
+# the getent will return a colon seperated one line list of entries
+# the name is the first one (or it returns nothing at all)
+GROUPNAME=$(getent group ${GROUP_ID:-1000} | awk -F ':' '{print $1}')
+if [ -z $GROUPNAME ]
+then
+    GROUPNAME=backupgroup
+    groupadd -g ${GROUP_ID:-1000} ${GROUPNAME}
+fi
+USERNAME=$(getent passwd ${USER_ID:-1000} | awk -F ':' '{print $1}')
+if [ -z $USERNAME ]
+then
+    USERNAME=backupuser
+    useradd -u ${USER_ID:-1000} ${USERNAME}
+fi
 
-chown --recursive backupuser:backupgroup /backups
-
-# Now we are done - and another process can care about the bundling and compressing
-# the files (no tar in the mc image).
+chown --recursive ${USERNAME}:${GROUPNAME} /backups
