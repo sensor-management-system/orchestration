@@ -209,7 +209,8 @@ backup-gfz-staging:
     OIDC_CLIENT_ID: ${GFZ_STAGING_OIDC_CLIENT_ID}
     DAYS_TO_CLEANUP: 30
     # We want to make sure that we still have 1 GB left to do the backup
-    MINIMUM_STORAGE_LEFT: 1000000000
+    # comparision value is in kb
+    MINIMUM_STORAGE_LEFT: 1000000
   before_script:
     - *docker_login_gitlab_registry
   script:
@@ -271,7 +272,8 @@ backup-gfz-prod:
     DAYS_TO_CLEANUP: 30
     DAYS_TO_CLEANUP_PROJECTSHARE: 180
     # We want to make sure that we still have 1 GB left to do the backup
-    MINIMUM_STORAGE_LEFT: 1000000000
+    # comparision value is in kb
+    MINIMUM_STORAGE_LEFT: 1000000
   before_script:
     - *docker_login_gitlab_registry
   script:
