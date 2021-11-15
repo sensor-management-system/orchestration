@@ -177,9 +177,13 @@ build-deploy-image-mc-gfz-prod:
   extends: .docker_build
   script:
     - |
-        docker build --tag "$CI_REGISTRY_IMAGE/mc:gfz-${CI_COMMIT_TAG:-prod-latest}" -f docker/build/mc/gfz/Dockerfile \
+        docker build \
+          --tag "$CI_REGISTRY_IMAGE/mc:gfz-${CI_COMMIT_TAG}" \
+          --tag "$CI_REGISTRY_IMAGE/mc:gfz-prod-latest" \
+          -f docker/build/mc/gfz/Dockerfile \
           docker/build/mc/gfz
-    - docker push "$CI_REGISTRY_IMAGE/mc:gfz-${CI_COMMIT_TAG:-prod-latest}"
+    - docker push "$CI_REGISTRY_IMAGE/mc:gfz-${CI_COMMIT_TAG}"
+    - docker push "$CI_REGISTRY_IMAGE/mc:gfz-prod-latest"
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
       when: never
