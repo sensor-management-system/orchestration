@@ -93,7 +93,7 @@ services:
       DJANGO_DB_ENGINE: django.db.backends.postgresql
       DJANGO_DB_NAME: idl
       DJANGO_DB_USER: $IDL_DB_USER
-      DJANGO_DB_PASSOWRD: $IDL_DB_PASSWORD
+      DJANGO_DB_PASSWORD: $IDL_DB_PASSWORD
       DJANGO_DB_HOST: idl-db
       DJANGO_DB_PORT: 5432
       LDAP_URL: ldaps://ldap.gfz-potsdam.de
