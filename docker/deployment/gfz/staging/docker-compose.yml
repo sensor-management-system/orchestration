@@ -101,7 +101,7 @@ services:
       - idl-static-files:/static/idl
     networks:
       - nginx
-      - vocabulary-db
+      - idl-db
 
   idl-db:
     image: postgres:12-alpine
