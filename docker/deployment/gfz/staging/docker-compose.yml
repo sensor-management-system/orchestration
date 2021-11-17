@@ -86,7 +86,7 @@ services:
     restart: unless-stopped
     environment:
       DJANGO_DEBUG: 'false'
-      DJANGO_ALLOWED_HOSTS: https://rz-vm64.gfz-potsdam.de
+      DJANGO_ALLOWED_HOSTS: 'https://rz-vm64.gfz-potsdam.de idl'
       DJANGO_BASE_PATH: idl/
       DJANGO_STATIC_URL: /static/idl/
       DJANGO_STATIC_ROOT: /static/idl/
