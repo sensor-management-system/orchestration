@@ -33,13 +33,21 @@
 // We really want to do a recursive function definition here
 // eslint-disable-next-line no-use-before-define
 export type PaginationLoaderFunction<E> = () => Promise<IPaginationLoader<E>>
+// eslint-disable-next-line no-use-before-define
+export type PaginationPageLoaderFunction<E> = (page: number) => Promise<IPaginationLoader<E>>
 
 export interface IPaginationLoader<E> {
   elements: E[]
   totalCount: number,
-  funToLoadNext: null | PaginationLoaderFunction<E>
+  page: number,
+  funToLoadNext: null | PaginationLoaderFunction<E>,
+  funToLoadPage: null | PaginationPageLoaderFunction<E>
 }
 
+/*
+ * TODO: we don't use client side filtering anymore, so this class can be removed
+ *
+ */
 export class FilteredPaginationedLoader<E> implements IPaginationLoader<E> {
   private innerLoader: IPaginationLoader<E>
   private filterFunc: (x: E) => boolean
@@ -58,6 +66,10 @@ export class FilteredPaginationedLoader<E> implements IPaginationLoader<E> {
     return this.innerLoader.totalCount - countThatDoesNotFulfillFilterFunc
   }
 
+  get page (): number {
+    return this.innerLoader.page
+  }
+
   get funToLoadNext () : null | PaginationLoaderFunction<E> {
     const innerPromise: null | PaginationLoaderFunction<E> = this.innerLoader.funToLoadNext
     if (innerPromise === null) {
@@ -66,6 +78,19 @@ export class FilteredPaginationedLoader<E> implements IPaginationLoader<E> {
 
     return () => {
       return innerPromise().then((nextLoader: IPaginationLoader<E>) => {
+        return new FilteredPaginationedLoader(nextLoader, this.filterFunc)
+      })
+    }
+  }
+
+  get funToLoadPage () : null | PaginationPageLoaderFunction<E> {
+    const innerPromise: null | PaginationPageLoaderFunction<E> = this.innerLoader.funToLoadPage
+    if (innerPromise === null) {
+      return null
+    }
+
+    return (pageNr: number) => {
+      return innerPromise(pageNr).then((nextLoader: IPaginationLoader<E>) => {
         return new FilteredPaginationedLoader(nextLoader, this.filterFunc)
       })
     }
