@@ -110,21 +110,19 @@ permissions and limitations under the Licence.
       </v-tab-item>
     </v-tabs-items>
 
-    <div v-if="loading">
-      <div class="text-center pt-2">
-        <v-progress-circular indeterminate />
-      </div>
+    <v-progress-circular
+      v-if="loading"
+      class="progress-spinner"
+      color="primary"
+      indeterminate
+    />
+    <div v-if="!totalCount && !loading">
+      <p class="text-center">
+        There are no devices that match your search criteria.
+      </p>
     </div>
-    <div v-if="searchResults.length == 0 && !loading">
-      <v-card>
-        <v-card-text>
-          <p class="text-center">
-            There are no devices that match your search criteria.
-          </p>
-        </v-card-text>
-      </v-card>
-    </div>
-    <div v-if="searchResults.length && !loading">
+
+    <div v-if="totalCount">
       <v-subheader>
         <template v-if="totalCount == 1">
           1 device found
@@ -183,8 +181,16 @@ permissions and limitations under the Licence.
           </v-menu>
         </template>
       </v-subheader>
+
+      <v-pagination
+        :value="page"
+        :disabled="loading"
+        :length="numberOfPages"
+        :total-visible="7"
+        @input="setPage"
+      />
       <v-hover
-        v-for="result in searchResults"
+        v-for="result in getSearchResultForPage(page)"
         v-slot="{ hover }"
         :key="result.id"
       >
@@ -471,7 +477,15 @@ permissions and limitations under the Licence.
           </v-dialog>
         </v-card>
       </v-hover>
+      <v-pagination
+        :value="page"
+        :disabled="loading"
+        :length="numberOfPages"
+        :total-visible="7"
+        @input="setPage"
+      />
     </div>
+
     <v-btn
       v-if="$auth.loggedIn"
       bottom
@@ -545,6 +559,10 @@ class BasicSearchParameters implements IRunSearchParameters {
   }
 }
 
+type PaginatedResult = {
+  [page: number]: Device[]
+}
+
 @Component({
   components: {
     DeviceTypeSelect,
@@ -555,6 +573,7 @@ class BasicSearchParameters implements IRunSearchParameters {
 })
 export default class SearchDevicesPage extends Vue {
   private pageSize: number = 20
+  private page: number = 0
   private loading: boolean = true
   private processing: boolean = false
 
@@ -570,7 +589,7 @@ export default class SearchDevicesPage extends Vue {
   private deviceTypeLookup: Map<string, DeviceType> = new Map<string, DeviceType>()
   private statusLookup: Map<string, Status> = new Map<string, Status>()
 
-  private searchResults: Device[] = []
+  private searchResults: PaginatedResult = {}
   private searchText: string | null = null
 
   private showDeleteDialog: { [id: string]: boolean} = {}
@@ -609,15 +628,6 @@ export default class SearchDevicesPage extends Vue {
         this.$store.commit('snackbar/setError', 'Loading of device types failed')
       })
     })
-
-    window.onscroll = () => {
-      // from https://www.digitalocean.com/community/tutorials/vuejs-implementing-infinite-scroll
-      const isOnBottom = document.documentElement.scrollTop + window.innerHeight === document.documentElement.offsetHeight
-
-      if (isOnBottom && this.canLoadNext()) {
-        this.loadNext()
-      }
-    }
   }
 
   beforeDestroy () {
@@ -682,14 +692,16 @@ export default class SearchDevicesPage extends Vue {
     this.onlyOwnDevices = false
   }
 
-  runSearch (
+  async runSearch (
     searchParameters: IRunSearchParameters
   ) {
+    this.totalCount = 0
     this.loading = true
-    this.searchResults = []
+    this.searchResults = {}
     this.unsetResultItemsShown()
     this.showDeleteDialog = {}
     this.loader = null
+    this.page = 0
 
     const searchBuilder = this.$api.devices
       .newSearchBuilder()
@@ -706,40 +718,62 @@ export default class SearchDevicesPage extends Vue {
     }
 
     this.lastActiveSearcher = searchBuilder.build()
-    this.lastActiveSearcher
-      .findMatchingAsPaginationLoader(this.pageSize)
-      .then(this.loadUntilWeHaveSomeEntries).catch((_error) => {
-        this.$store.commit('snackbar/setError', 'Loading of devices failed')
-      })
-  }
-
-  loadUntilWeHaveSomeEntries (loader: IPaginationLoader<Device>) {
-    this.loader = loader
-    this.loading = false
-    this.searchResults = [...this.searchResults, ...loader.elements]
-    this.totalCount = loader.totalCount
-
-    if (this.searchResults.length >= this.pageSize || !this.canLoadNext()) {
+    try {
+      const loader = await this.lastActiveSearcher.findMatchingAsPaginationLoader(this.pageSize)
+      this.loader = loader
+      this.searchResults[1] = loader.elements
+      this.totalCount = loader.totalCount
+      this.page = 1
+    } catch (_error) {
+      this.$store.commit('snackbar/setError', 'Loading of devices failed')
+    } finally {
       this.loading = false
-    } else if (this.canLoadNext() && loader.funToLoadNext != null) {
-      loader.funToLoadNext().then((nextLoader) => {
-        this.loadUntilWeHaveSomeEntries(nextLoader)
-      }).catch((_error) => {
-        this.$store.commit('snackbar/setError', 'Loading of additional devices failed')
-      })
     }
   }
 
-  loadNext () {
-    if (this.loader != null && this.loader.funToLoadNext != null) {
-      this.loader.funToLoadNext().then((nextLoader) => {
-        this.loader = nextLoader
-        this.searchResults = [...this.searchResults, ...nextLoader.elements]
-        this.totalCount = nextLoader.totalCount
-      }).catch((_error) => {
-        this.$store.commit('snackbar/setError', 'Loading of additional devices failed')
-      })
+  async loadPage (pageNr: number, useCache: boolean = true) {
+    // use the results that were already loaded if available
+    if (useCache && this.searchResults[pageNr]) {
+      return
     }
+    if (this.loader != null && this.loader.funToLoadPage != null) {
+      try {
+        this.loading = true
+        const loader = await this.loader.funToLoadPage(pageNr)
+        this.loader = loader
+        this.searchResults[pageNr] = loader.elements
+        this.totalCount = loader.totalCount
+      } catch (_error) {
+        this.$store.commit('snackbar/setError', 'Loading of additional devices failed')
+      } finally {
+        this.loading = false
+      }
+    }
+  }
+
+  get numberOfPages (): number {
+    return Math.ceil(this.totalCount / this.pageSize)
+  }
+
+  async setPage (page: number) {
+    await this.loadPage(page)
+    this.page = page
+  }
+
+  getSearchResultForPage (pageNr: number): Device[] | undefined {
+    return this.searchResults[pageNr]
+  }
+
+  getAllResults (): Device[] {
+    /* it could be as short as
+     * return ([] as Device[]).concat.apply([] as Device[], Object.entries(this.searchResults).map(i => i[1]))
+     * but the version below is much more readable:
+     */
+    let result: Device[] = []
+    Object.entries(this.searchResults).map(i => i[1]).forEach((i: Device[]) => {
+      result = [...result, ...i]
+    })
+    return result
   }
 
   canLoadNext () {
@@ -762,14 +796,8 @@ export default class SearchDevicesPage extends Vue {
   deleteAndCloseDialog (id: string) {
     this.$api.devices.deleteById(id).then(() => {
       this.showDeleteDialog = {}
-
-      const searchIndex = this.searchResults.findIndex(r => r.id === id)
-      if (searchIndex > -1) {
-        this.searchResults.splice(searchIndex, 1)
-        this.totalCount -= 1
-      }
-
       this.$store.commit('snackbar/setSuccess', 'Device deleted')
+      this.loadPage(this.page, false)
     }).catch((_error) => {
       this.showDeleteDialog = {}
       this.$store.commit('snackbar/setError', 'Device could not be deleted')
@@ -826,4 +854,14 @@ export default class SearchDevicesPage extends Vue {
 
 <style lang="scss">
 @import "@/assets/styles/_search.scss";
+.progress-spinner {
+  position: absolute;
+  top: 40vh;
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
+  width: 32px;
+  z-index: 99;
+}
 </style>
