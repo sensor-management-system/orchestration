@@ -4,14 +4,18 @@ from flask_rest_jsonapi import ResourceDetail, ResourceRelationship
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.orm.exc import NoResultFound
 
-from ...frj_csv_export.resource import ResourceList
 from ..models.base_model import db
 from ..models.configuration import Configuration
 from ..models.device import Device
 from ..models.unmount_actions import DeviceUnmountAction
-from ..resourceManager.base_resource import add_created_by_id, add_updated_by_id
+from ..resourceManager.base_resource import (
+    add_created_by_id,
+    add_updated_by_id,
+    check_if_object_not_found,
+)
 from ..schemas.unmount_actions_schema import DeviceUnmountActionSchema
 from ..token_checker import token_required
+from ...frj_csv_export.resource import ResourceList
 
 
 class DeviceUnmountActionList(ResourceList):
@@ -35,9 +39,7 @@ class DeviceUnmountActionList(ResourceList):
                 self.session.query(Configuration).filter_by(id=configuration_id).one()
             except NoResultFound:
                 raise ObjectNotFound(
-                    {
-                        "parameter": "id",
-                    },
+                    {"parameter": "id",},
                     "Configuration: {} not found".format(configuration_id),
                 )
             else:
@@ -49,10 +51,7 @@ class DeviceUnmountActionList(ResourceList):
                 self.session.query(Device).filter_by(id=device_id).one()
             except NoResultFound:
                 raise ObjectNotFound(
-                    {
-                        "parameter": "id",
-                    },
-                    "Device: {} not found".format(device_id),
+                    {"parameter": "id",}, "Device: {} not found".format(device_id),
                 )
             else:
                 query_ = query_.filter(DeviceUnmountAction.device_id == device_id)
@@ -63,15 +62,16 @@ class DeviceUnmountActionList(ResourceList):
     data_layer = {
         "session": db.session,
         "model": DeviceUnmountAction,
-        "methods": {
-            "before_create_object": before_create_object,
-            "query": query,
-        },
+        "methods": {"before_create_object": before_create_object, "query": query,},
     }
 
 
 class DeviceUnmountActionDetail(ResourceDetail):
     """Detail resource for device unmount actions (get, delete, patch)."""
+
+    def before_get(self, args, kwargs):
+        """Return 404 Responses if DeviceUnmountAction not found"""
+        check_if_object_not_found(self._data_layer.model, kwargs)
 
     def before_patch(self, args, kwargs, data):
         """Add Created by user id to the data."""

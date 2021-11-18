@@ -43,12 +43,8 @@ class TestDeviceMountAction(BaseTestCase):
 
     def test_post_device_mount_action(self):
         """Create DeviceMountAction."""
-        device = Device(
-            short_name=fake.linux_processor(),
-        )
-        parent_platform = Platform(
-            short_name="device parent platform",
-        )
+        device = Device(short_name=fake.linux_processor(),)
+        parent_platform = Platform(short_name="device parent platform",)
         mock_jwt = generate_token_data()
         contact = Contact(
             given_name=mock_jwt["given_name"],
@@ -93,9 +89,7 @@ class TestDeviceMountAction(BaseTestCase):
             "data": {
                 "type": self.object_type,
                 "id": mount_device_action.id,
-                "attributes": {
-                    "description": "updated",
-                },
+                "attributes": {"description": "updated",},
             }
         }
         _ = super().update_object(
@@ -107,9 +101,7 @@ class TestDeviceMountAction(BaseTestCase):
     def test_delete_device_mount_action(self):
         """Delete DeviceMountAction."""
         mount_device_action = add_mount_device_action_model()
-        _ = super().delete_object(
-            url=f"{self.url}/{mount_device_action.id}",
-        )
+        _ = super().delete_object(url=f"{self.url}/{mount_device_action.id}",)
 
     def test_filtered_by_configuration(self):
         """Ensure that I can prefilter by a specific configuration."""
@@ -368,7 +360,11 @@ class TestDeviceMountAction(BaseTestCase):
                 base_url + f"/platforms/{platform2.id + 9999}/device-mount-actions"
             )
             response = self.client.get(
-                url_get_for_non_existing,
-                content_type="application/vnd.api+json",
+                url_get_for_non_existing, content_type="application/vnd.api+json",
             )
         self.assertEqual(response.status_code, 404)
+
+    def test_http_response_not_found(self):
+        """Make sure that the backend responds with 404 HTTP-Code if a resource was not found."""
+        url = f"{self.url}/{fake.random_int()}"
+        _ = super().http_code_404_when_resource_not_found(url)

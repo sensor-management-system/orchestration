@@ -6,8 +6,9 @@ from datetime import datetime
 from project import base_url, db
 from project.api.models import Contact, Device, GenericDeviceAction
 from project.tests.base import BaseTestCase, fake, generate_token_data, test_file_path
-from project.tests.models.test_generic_action_attachment_model import \
-    add_generic_device_action_attachment_model
+from project.tests.models.test_generic_action_attachment_model import (
+    add_generic_device_action_attachment_model,
+)
 from project.tests.read_from_json import extract_data_from_json_file
 
 
@@ -142,9 +143,7 @@ class TestGenericDeviceAction(BaseTestCase):
             data_object=data,
             object_type=self.object_type,
         )
-        _ = super().delete_object(
-            url=f"{self.url}/{obj['data']['id']}",
-        )
+        _ = super().delete_object(url=f"{self.url}/{obj['data']['id']}",)
 
     def test_filtered_by_device(self):
         """Ensure that I can prefilter by a specific device."""
@@ -189,7 +188,7 @@ class TestGenericDeviceAction(BaseTestCase):
         # then test only for the first device
         with self.client:
             url_get_for_device1 = (
-                    base_url + f"/devices/{device1.id}/generic-device-actions"
+                base_url + f"/devices/{device1.id}/generic-device-actions"
             )
             response = self.client.get(
                 url_get_for_device1, content_type="application/vnd.api+json"
@@ -203,7 +202,7 @@ class TestGenericDeviceAction(BaseTestCase):
         # and test the second device
         with self.client:
             url_get_for_device2 = (
-                    base_url + f"/devices/{device2.id}/generic-device-actions"
+                base_url + f"/devices/{device2.id}/generic-device-actions"
             )
             response = self.client.get(
                 url_get_for_device2, content_type="application/vnd.api+json"
@@ -217,7 +216,7 @@ class TestGenericDeviceAction(BaseTestCase):
         # and for a non existing
         with self.client:
             url_get_for_non_existing_device = (
-                    base_url + f"/devices/{device2.id + 9999}/generic-device-actions"
+                base_url + f"/devices/{device2.id + 9999}/generic-device-actions"
             )
             response = self.client.get(
                 url_get_for_non_existing_device, content_type="application/vnd.api+json"
@@ -230,3 +229,8 @@ class TestGenericDeviceAction(BaseTestCase):
         _ = super().delete_object(
             url=f"{self.url}/{generic_device_action_attachment.id}",
         )
+
+    def test_http_response_not_found(self):
+        """Make sure that the backend responds with 404 HTTP-Code if a resource was not found."""
+        url = f"{self.url}/{fake.random_int()}"
+        _ = super().http_code_404_when_resource_not_found(url)

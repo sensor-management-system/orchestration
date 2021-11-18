@@ -4,7 +4,7 @@ import os
 from project import base_url
 from project.api.models import Contact
 from project.api.models.base_model import db
-from project.tests.base import BaseTestCase, generate_token_data, test_file_path
+from project.tests.base import BaseTestCase, generate_token_data, test_file_path, fake
 
 
 def add_a_contact():
@@ -63,9 +63,7 @@ class TestContactServices(BaseTestCase):
             "data": {
                 "type": "contact",
                 "id": contact.id,
-                "attributes": {
-                    "given_name": "updated",
-                },
+                "attributes": {"given_name": "updated",},
             }
         }
         _ = super().update_object(
@@ -78,6 +76,9 @@ class TestContactServices(BaseTestCase):
         """Ensure remove contact behaves correctly."""
 
         contact = add_a_contact()
-        _ = super().delete_object(
-            url=f"{self.url}/{contact.id}",
-        )
+        _ = super().delete_object(url=f"{self.url}/{contact.id}",)
+
+    def test_http_response_not_found(self):
+        """Make sure that the backend responds with 404 HTTP-Code if a resource was not found."""
+        url = f"{self.url}/{fake.random_int()}"
+        _ = super().http_code_404_when_resource_not_found(url)

@@ -7,17 +7,18 @@ from project.api.models.base_model import db
 from project.api.models.platform import Platform
 from project.api.models.platform_attachment import PlatformAttachment
 from project.tests.base import BaseTestCase, create_token, query_result_to_list
+from project.tests.base import fake
 
 
 class TestPlatformAttachmentServices(BaseTestCase):
     """Test platform attachments."""
 
+    url = base_url + "/platform-attachments"
+
     def test_post_platform_attachment_api(self):
         """Ensure that we can add a platform attachment."""
         # First we need to make sure that we have a platform
-        platform = Platform(
-            short_name="Very new platform",
-        )
+        platform = Platform(short_name="Very new platform",)
         db.session.add(platform)
         db.session.commit()
 
@@ -26,9 +27,7 @@ class TestPlatformAttachmentServices(BaseTestCase):
 
         count_platform_attachments = (
             db.session.query(PlatformAttachment)
-            .filter_by(
-                platform_id=platform.id,
-            )
+            .filter_by(platform_id=platform.id,)
             .count()
         )
         # However, this new platform for sure has no attachments
@@ -61,9 +60,7 @@ class TestPlatformAttachmentServices(BaseTestCase):
         self.assertEqual(response.status_code, 201)
         # And we want to inspect our attachment list
         platform_attachments = query_result_to_list(
-            db.session.query(PlatformAttachment).filter_by(
-                platform_id=platform.id,
-            )
+            db.session.query(PlatformAttachment).filter_by(platform_id=platform.id,)
         )
         # We now have one attachment
         self.assertEqual(len(platform_attachments), 1)
@@ -79,9 +76,7 @@ class TestPlatformAttachmentServices(BaseTestCase):
 
     def test_post_platform_attachment_api_missing_url(self):
         """Ensure that we don't add a platform attachment with missing url."""
-        platform = Platform(
-            short_name="Very new platform",
-        )
+        platform = Platform(short_name="Very new platform",)
         db.session.add(platform)
         db.session.commit()
 
@@ -89,10 +84,7 @@ class TestPlatformAttachmentServices(BaseTestCase):
         payload = {
             "data": {
                 "type": "platform_attachment",
-                "attributes": {
-                    "url": None,
-                    "label": "GFZ Homepage",
-                },
+                "attributes": {"url": None, "label": "GFZ Homepage",},
                 "relationships": {
                     "platform": {"data": {"type": "platform", "id": str(platform.id)}}
                 },
@@ -111,9 +103,7 @@ class TestPlatformAttachmentServices(BaseTestCase):
         self.assertEqual(response.status_code, 422)
         count_attachments = (
             db.session.query(PlatformAttachment)
-            .filter_by(
-                platform_id=platform.id,
-            )
+            .filter_by(platform_id=platform.id,)
             .count()
         )
         self.assertEqual(count_attachments, 0)
@@ -124,10 +114,7 @@ class TestPlatformAttachmentServices(BaseTestCase):
         payload = {
             "data": {
                 "type": "platform_attachment",
-                "attributes": {
-                    "url": "GFZ",
-                    "label": "GFZ Homepage",
-                },
+                "attributes": {"url": "GFZ", "label": "GFZ Homepage",},
                 "relationships": {
                     "platform": {"data": {"type": "platform", "id": None}}
                 },
@@ -158,19 +145,13 @@ class TestPlatformAttachmentServices(BaseTestCase):
         db.session.commit()
 
         platform_attachment1 = PlatformAttachment(
-            label="GFZ",
-            url="https://www.gfz-potsdam.de",
-            platform=platform1,
+            label="GFZ", url="https://www.gfz-potsdam.de", platform=platform1,
         )
         platform_attachment2 = PlatformAttachment(
-            label="UFZ",
-            url="https://www.ufz.de",
-            platform=platform1,
+            label="UFZ", url="https://www.ufz.de", platform=platform1,
         )
         platform_attachment3 = PlatformAttachment(
-            label="PIK",
-            url="https://www.pik-potsdam.de",
-            platform=platform2,
+            label="PIK", url="https://www.pik-potsdam.de", platform=platform2,
         )
 
         db.session.add(platform_attachment1)
@@ -217,8 +198,7 @@ class TestPlatformAttachmentServices(BaseTestCase):
                         "related"
                     ]
                     resp_platform = self.client.get(
-                        platform_link,
-                        content_type="application/vnd.api+json",
+                        platform_link, content_type="application/vnd.api+json",
                     )
                     self.assertEqual(resp_platform.status_code, 200)
                     self.assertEqual(
@@ -267,9 +247,7 @@ class TestPlatformAttachmentServices(BaseTestCase):
         db.session.commit()
 
         platform_attachment1 = PlatformAttachment(
-            label="GFZ",
-            url="https://www.gfz-potsdam.de",
-            platform=platform1,
+            label="GFZ", url="https://www.gfz-potsdam.de", platform=platform1,
         )
         db.session.add(platform_attachment1)
         db.session.commit()
@@ -278,10 +256,7 @@ class TestPlatformAttachmentServices(BaseTestCase):
             "data": {
                 "type": "platform_attachment",
                 "id": str(platform_attachment1.id),
-                "attributes": {
-                    "label": "UFZ",
-                    "url": "https://www.ufz.de",
-                },
+                "attributes": {"label": "UFZ", "url": "https://www.ufz.de",},
                 "relationships": {
                     "platform": {"data": {"type": "platform", "id": str(platform2.id)}}
                 },
@@ -315,9 +290,7 @@ class TestPlatformAttachmentServices(BaseTestCase):
         db.session.add(platform1)
         db.session.commit()
         platform_attachment1 = PlatformAttachment(
-            label="GFZ",
-            url="https://www.gfz-potsdam.de",
-            platform=platform1,
+            label="GFZ", url="https://www.gfz-potsdam.de", platform=platform1,
         )
         db.session.add(platform_attachment1)
         db.session.commit()
@@ -347,9 +320,12 @@ class TestPlatformAttachmentServices(BaseTestCase):
 
         count_platform_attachments = (
             db.session.query(PlatformAttachment)
-            .filter_by(
-                platform_id=platform1.id,
-            )
+            .filter_by(platform_id=platform1.id,)
             .count()
         )
         self.assertEqual(count_platform_attachments, 0)
+
+    def test_http_response_not_found(self):
+        """Make sure that the backend responds with 404 HTTP-Code if a resource was not found."""
+        url = f"{self.url}/{fake.random_int()}"
+        _ = super().http_code_404_when_resource_not_found(url)

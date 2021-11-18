@@ -7,17 +7,18 @@ from project.api.models.base_model import db
 from project.api.models.device import Device
 from project.api.models.device_property import DeviceProperty
 from project.tests.base import BaseTestCase, create_token, query_result_to_list
+from project.tests.base import fake
 
 
 class TestDevicePropertyServices(BaseTestCase):
     """Test device properties."""
 
+    url = base_url + "/device-properties"
+
     def test_post_device_property_api(self):
         """Ensure that we can add a device property."""
         # First we need to make sure that we have a device
-        device = Device(
-            short_name="Very new device",
-        )
+        device = Device(short_name="Very new device",)
         db.session.add(device)
         db.session.commit()
 
@@ -25,11 +26,7 @@ class TestDevicePropertyServices(BaseTestCase):
         self.assertTrue(device.id is not None)
 
         count_device_properties = (
-            db.session.query(DeviceProperty)
-            .filter_by(
-                device_id=device.id,
-            )
-            .count()
+            db.session.query(DeviceProperty).filter_by(device_id=device.id,).count()
         )
         # However, this new device for sure has no properties
         self.assertEqual(count_device_properties, 0)
@@ -62,9 +59,7 @@ class TestDevicePropertyServices(BaseTestCase):
         self.assertEqual(response.status_code, 201)
         # And we want to inspect our property list
         device_properties = query_result_to_list(
-            db.session.query(DeviceProperty).filter_by(
-                device_id=device.id,
-            )
+            db.session.query(DeviceProperty).filter_by(device_id=device.id,)
         )
         # We now have one property
         self.assertEqual(len(device_properties), 1)
@@ -85,9 +80,7 @@ class TestDevicePropertyServices(BaseTestCase):
         payload = {
             "data": {
                 "type": "device_property",
-                "attributes": {
-                    "label": "device property1",
-                },
+                "attributes": {"label": "device property1",},
                 "relationships": {"device": {"data": {"type": "device", "id": None}}},
             }
         }
@@ -113,18 +106,9 @@ class TestDevicePropertyServices(BaseTestCase):
         db.session.add(device2)
         db.session.commit()
 
-        device_property1 = DeviceProperty(
-            label="device property1",
-            device=device1,
-        )
-        device_property2 = DeviceProperty(
-            label="device property2",
-            device=device1,
-        )
-        device_property3 = DeviceProperty(
-            label="device property3",
-            device=device2,
-        )
+        device_property1 = DeviceProperty(label="device property1", device=device1,)
+        device_property2 = DeviceProperty(label="device property2", device=device1,)
+        device_property3 = DeviceProperty(label="device property3", device=device2,)
 
         db.session.add(device_property1)
         db.session.add(device_property2)
@@ -164,8 +148,7 @@ class TestDevicePropertyServices(BaseTestCase):
                         "related"
                     ]
                     resp_device = self.client.get(
-                        device_link,
-                        content_type="application/vnd.api+json",
+                        device_link, content_type="application/vnd.api+json",
                     )
                     self.assertEqual(resp_device.status_code, 200)
                     self.assertEqual(
@@ -213,10 +196,7 @@ class TestDevicePropertyServices(BaseTestCase):
         db.session.add(device2)
         db.session.commit()
 
-        device_property1 = DeviceProperty(
-            label="property 1",
-            device=device1,
-        )
+        device_property1 = DeviceProperty(label="property 1", device=device1,)
         db.session.add(device_property1)
         db.session.commit()
 
@@ -224,9 +204,7 @@ class TestDevicePropertyServices(BaseTestCase):
             "data": {
                 "type": "device_property",
                 "id": str(device_property1.id),
-                "attributes": {
-                    "label": "property 2",
-                },
+                "attributes": {"label": "property 2",},
                 "relationships": {
                     "device": {"data": {"type": "device", "id": str(device2.id)}}
                 },
@@ -254,10 +232,7 @@ class TestDevicePropertyServices(BaseTestCase):
         device1 = Device(short_name="Just a device")
         db.session.add(device1)
         db.session.commit()
-        device_property1 = DeviceProperty(
-            label="property 1",
-            device=device1,
-        )
+        device_property1 = DeviceProperty(label="property 1", device=device1,)
         db.session.add(device_property1)
         db.session.commit()
 
@@ -285,10 +260,11 @@ class TestDevicePropertyServices(BaseTestCase):
             self.assertEqual(len(response.get_json()["data"]), 0)
 
         count_device_properties = (
-            db.session.query(DeviceProperty)
-            .filter_by(
-                device_id=device1.id,
-            )
-            .count()
+            db.session.query(DeviceProperty).filter_by(device_id=device1.id,).count()
         )
         self.assertEqual(count_device_properties, 0)
+
+    def test_http_response_not_found(self):
+        """Make sure that the backend responds with 404 HTTP-Code if a resource was not found."""
+        url = f"{self.url}/{fake.random_int()}"
+        _ = super().http_code_404_when_resource_not_found(url)

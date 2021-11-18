@@ -145,9 +145,7 @@ class TestDevicePropertyCalibration(BaseTestCase):
     def test_delete_device_property_calibration(self):
         """Delete DevicePropertyCalibration."""
         device_property_calibration = add_device_property_calibration_model()
-        _ = super().delete_object(
-            url=f"{self.url}/{device_property_calibration.id}",
-        )
+        _ = super().delete_object(url=f"{self.url}/{device_property_calibration.id}",)
 
     def _create_some_device_property_calibrations(self):
         """Create some devices, properties, & device property calibrations."""
@@ -156,16 +154,10 @@ class TestDevicePropertyCalibration(BaseTestCase):
         device2 = Device(short_name="sample device II")
         db.session.add(device2)
 
-        device_property1 = DeviceProperty(
-            device=device1,
-            label="prop1",
-        )
+        device_property1 = DeviceProperty(device=device1, label="prop1",)
         db.session.add(device_property1)
 
-        device_property2 = DeviceProperty(
-            device=device1,
-            label="prop2",
-        )
+        device_property2 = DeviceProperty(device=device1, label="prop2",)
         db.session.add(device_property2)
 
         device_property3 = DeviceProperty(device=device2, label="prop3")
@@ -198,25 +190,21 @@ class TestDevicePropertyCalibration(BaseTestCase):
         db.session.add(action2)
 
         device_property_calibration1 = DevicePropertyCalibration(
-            device_property=device_property1,
-            calibration_action=action1,
+            device_property=device_property1, calibration_action=action1,
         )
         db.session.add(device_property1)
 
         device_property_calibration2 = DevicePropertyCalibration(
-            device_property=device_property2,
-            calibration_action=action1,
+            device_property=device_property2, calibration_action=action1,
         )
         db.session.add(device_property2)
 
         device_property_calibration3 = DevicePropertyCalibration(
-            device_property=device_property3,
-            calibration_action=action2,
+            device_property=device_property3, calibration_action=action2,
         )
         db.session.add(device_property3)
         device_property_calibration4 = DevicePropertyCalibration(
-            device_property=device_property4,
-            calibration_action=action2,
+            device_property=device_property4, calibration_action=action2,
         )
         db.session.add(device_property2)
 
@@ -408,3 +396,8 @@ class TestDevicePropertyCalibration(BaseTestCase):
                 url_get_for_non_existing_device, content_type="application/vnd.api+json"
             )
         self.assertEqual(response.status_code, 404)
+
+    def test_http_response_not_found(self):
+        """Make sure that the backend responds with 404 HTTP-Code if a resource was not found."""
+        url = f"{self.url}/{fake.random_int()}"
+        _ = super().http_code_404_when_resource_not_found(url)

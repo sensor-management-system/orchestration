@@ -37,9 +37,7 @@ class TestDeviceUnmountAction(BaseTestCase):
 
     def test_post_device_unmount_action(self):
         """Create DeviceUnmountAction."""
-        device = Device(
-            short_name=fake.linux_processor(),
-        )
+        device = Device(short_name=fake.linux_processor(),)
         mock_jwt = generate_token_data()
         contact = Contact(
             given_name=mock_jwt["given_name"],
@@ -78,9 +76,7 @@ class TestDeviceUnmountAction(BaseTestCase):
             "data": {
                 "type": self.object_type,
                 "id": unmount_device_action.id,
-                "attributes": {
-                    "description": "updated",
-                },
+                "attributes": {"description": "updated",},
             }
         }
         _ = super().update_object(
@@ -92,9 +88,7 @@ class TestDeviceUnmountAction(BaseTestCase):
     def test_delete_device_unmount_action(self):
         """Delete DeviceUnmountAction."""
         unmount_device_action = add_unmount_device_action()
-        _ = super().delete_object(
-            url=f"{self.url}/{unmount_device_action.id}",
-        )
+        _ = super().delete_object(url=f"{self.url}/{unmount_device_action.id}",)
 
     def test_filtered_by_configuration(self):
         """Ensure that I can prefilter by a specific configuration."""
@@ -266,3 +260,8 @@ class TestDeviceUnmountAction(BaseTestCase):
                 content_type="application/vnd.api+json",
             )
         self.assertEqual(response.status_code, 404)
+
+    def test_http_response_not_found(self):
+        """Make sure that the backend responds with 404 HTTP-Code if a resource was not found."""
+        url = f"{self.url}/{fake.random_int()}"
+        _ = super().http_code_404_when_resource_not_found(url)

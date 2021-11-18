@@ -74,9 +74,7 @@ class TestDeviceSoftwareUpdateAction(BaseTestCase):
             "data": {
                 "type": self.object_type,
                 "id": device_software_update_action.id,
-                "attributes": {
-                    "description": "updated",
-                },
+                "attributes": {"description": "updated",},
             }
         }
         _ = super().update_object(
@@ -88,9 +86,7 @@ class TestDeviceSoftwareUpdateAction(BaseTestCase):
     def test_delete_device_software_update_action(self):
         """Delete DeviceSoftwareUpdateAction."""
         device_software_update_action = add_device_software_update_action_model()
-        _ = super().delete_object(
-            url=f"{self.url}/{device_software_update_action.id}",
-        )
+        _ = super().delete_object(url=f"{self.url}/{device_software_update_action.id}",)
 
     def test_filtered_by_device(self):
         """Ensure that I can prefilter by a specific devices."""
@@ -173,3 +169,8 @@ class TestDeviceSoftwareUpdateAction(BaseTestCase):
                 content_type="application/vnd.api+json",
             )
         self.assertEqual(response.status_code, 404)
+
+    def test_http_response_not_found(self):
+        """Make sure that the backend responds with 404 HTTP-Code if a resource was not found."""
+        url = f"{self.url}/{fake.random_int()}"
+        _ = super().http_code_404_when_resource_not_found(url)
