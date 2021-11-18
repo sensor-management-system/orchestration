@@ -181,9 +181,7 @@ class TestConfigurationDynamicLocationBeginActionServices(BaseTestCase):
             "data": {
                 "type": self.object_type,
                 "id": static_location_begin_action.id,
-                "attributes": {
-                    "description": "changed",
-                },
+                "attributes": {"description": "changed",},
                 "relationships": {
                     "contact": {
                         "data": {"type": "contact", "id": contact["data"]["id"]}
@@ -203,9 +201,7 @@ class TestConfigurationDynamicLocationBeginActionServices(BaseTestCase):
 
         static_location_begin_action = add_dynamic_location_begin_action_model()
 
-        _ = super().delete_object(
-            url=f"{self.url}/{static_location_begin_action.id}",
-        )
+        _ = super().delete_object(url=f"{self.url}/{static_location_begin_action.id}",)
 
     def test_filtered_by_configuration(self):
         """Ensure that filter by a specific configuration works."""
@@ -338,3 +334,8 @@ class TestConfigurationDynamicLocationBeginActionServices(BaseTestCase):
             response.json["data"][0]["attributes"]["description"],
             "test dynamic_location_begin_action1",
         )
+
+    def test_http_response_not_found(self):
+        """Make sure that the backend responds with 404 HTTP-Code if a resource was not found."""
+        url = f"{self.url}/{fake.random_int()}"
+        _ = super().http_code_404_when_resource_not_found(url)

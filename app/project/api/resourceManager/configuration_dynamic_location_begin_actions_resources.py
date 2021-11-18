@@ -4,7 +4,7 @@ from flask_rest_jsonapi import ResourceDetail, ResourceRelationship
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.orm.exc import NoResultFound
 
-from ...frj_csv_export.resource import ResourceList
+from .base_resource import check_if_object_not_found
 from ..models import (
     Configuration,
     ConfigurationDynamicLocationBeginAction,
@@ -15,6 +15,7 @@ from ..schemas.configuration_dynamic_location_actions_schema import (
     ConfigurationDynamicLocationBeginActionSchema,
 )
 from ..token_checker import token_required
+from ...frj_csv_export.resource import ResourceList
 
 
 class ConfigurationDynamicLocationBeginActionList(ResourceList):
@@ -37,9 +38,7 @@ class ConfigurationDynamicLocationBeginActionList(ResourceList):
                 self.session.query(Configuration).filter_by(id=configuration_id).one()
             except NoResultFound:
                 raise ObjectNotFound(
-                    {
-                        "parameter": "id",
-                    },
+                    {"parameter": "id",},
                     "Configuration: {} not found".format(configuration_id),
                 )
             else:
@@ -52,9 +51,7 @@ class ConfigurationDynamicLocationBeginActionList(ResourceList):
                 self.session.query(DeviceProperty).filter_by(id=x_property_id).one()
             except NoResultFound:
                 raise ObjectNotFound(
-                    {
-                        "parameter": "id",
-                    },
+                    {"parameter": "id",},
                     "Device property: {} not found".format(x_property_id),
                 )
             else:
@@ -67,9 +64,7 @@ class ConfigurationDynamicLocationBeginActionList(ResourceList):
                 self.session.query(DeviceProperty).filter_by(id=y_property_id).one()
             except NoResultFound:
                 raise ObjectNotFound(
-                    {
-                        "parameter": "id",
-                    },
+                    {"parameter": "id",},
                     "Device property: {} not found".format(y_property_id),
                 )
             else:
@@ -82,9 +77,7 @@ class ConfigurationDynamicLocationBeginActionList(ResourceList):
                 self.session.query(DeviceProperty).filter_by(id=z_property_id).one()
             except NoResultFound:
                 raise ObjectNotFound(
-                    {
-                        "parameter": "id",
-                    },
+                    {"parameter": "id",},
                     "Device property: {} not found".format(z_property_id),
                 )
             else:
@@ -99,14 +92,16 @@ class ConfigurationDynamicLocationBeginActionList(ResourceList):
     data_layer = {
         "session": db.session,
         "model": ConfigurationDynamicLocationBeginAction,
-        "methods": {
-            "query": query,
-        },
+        "methods": {"query": query,},
     }
 
 
 class ConfigurationDynamicLocationBeginActionDetail(ResourceDetail):
     """Detail resource for Configuration dynamic location begin actions (get, delete, patch)."""
+
+    def before_get(self, args, kwargs):
+        """Return 404 Responses if ConfigurationDynamicLocationBeginAction not found"""
+        check_if_object_not_found(self._data_layer.model, kwargs)
 
     schema = ConfigurationDynamicLocationBeginActionSchema
     decorators = (token_required,)

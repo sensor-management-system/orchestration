@@ -33,7 +33,6 @@ class TestPlatformUnmountAction(BaseTestCase):
             unmount_platform_action.end_date.strftime("%Y-%m-%dT%H:%M:%S"),
             data["data"][0]["attributes"]["end_date"],
         )
-
     def test_post_platform_unmount_action(self):
         """Create PlatformUnmountAction."""
         platform = Platform(
@@ -267,3 +266,8 @@ class TestPlatformUnmountAction(BaseTestCase):
                 content_type="application/vnd.api+json",
             )
         self.assertEqual(response.status_code, 404)
+
+    def test_http_response_not_found(self):
+        """Make sure that the backend responds with 404 HTTP-Code if a resource was not found."""
+        url = f"{self.url}/{fake.random_int()}"
+        _ = super().http_code_404_when_resource_not_found(url)

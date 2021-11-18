@@ -1,4 +1,5 @@
 from flask_jwt_extended import get_jwt_identity
+from flask_rest_jsonapi.exceptions import ObjectNotFound
 
 from ..models import (
     ConfigurationAttachment,
@@ -100,3 +101,20 @@ def delete_attachments_in_minio_by_related_object_id(
         .first()
     )
     minio.remove_an_object(attachment.url)
+
+
+def check_if_object_not_found(model_class, kwargs):
+    """
+    Check if an object is none and raise a 404.
+
+    :param model_class:
+    :param kwargs:
+    :return:
+    """
+    object_to_be_checked = (
+        db.session.query(model_class).filter_by(id=kwargs["id"]).first()
+    )
+    if object_to_be_checked is None:
+        raise ObjectNotFound({"pointer": ""}, "Object Not Found")
+    else:
+        return object_to_be_checked

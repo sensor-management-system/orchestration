@@ -6,10 +6,10 @@ from datetime import datetime
 from project import base_url, db
 from project.api.models import Contact, GenericPlatformAction, Platform
 from project.tests.base import BaseTestCase, fake, generate_token_data, test_file_path
+from project.tests.models.test_generic_action_attachment_model import (
+    add_generic_platform_action_attachment_model,
+)
 from project.tests.read_from_json import extract_data_from_json_file
-
-from project.tests.models.test_generic_action_attachment_model import \
-    add_generic_platform_action_attachment_model
 
 
 class TestGenericPlatformAction(BaseTestCase):
@@ -137,9 +137,7 @@ class TestGenericPlatformAction(BaseTestCase):
             data_object=generic_platform_action_data,
             object_type=self.object_type,
         )
-        _ = super().delete_object(
-            url=f"{self.url}/{obj['data']['id']}",
-        )
+        _ = super().delete_object(url=f"{self.url}/{obj['data']['id']}",)
 
     def test_filtered_by_platform(self):
         """Ensure that I can prefilter by a specific platform."""
@@ -225,6 +223,10 @@ class TestGenericPlatformAction(BaseTestCase):
         generic_platform_action_attachment = (
             add_generic_platform_action_attachment_model()
         )
-        _ = super().delete_object(
-            url=f"{self.url}/{generic_platform_action_attachment.id}",
-        )
+        url = f"{self.url}/{generic_platform_action_attachment.id}"
+        _ = super().delete_object(url)
+
+    def test_http_response_not_found(self):
+        """Make sure that the backend responds with 404 HTTP-Code if a resource was not found."""
+        url = f"{self.url}/{fake.random_int()}"
+        _ = super().http_code_404_when_resource_not_found(url)
