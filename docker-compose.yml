@@ -176,6 +176,7 @@ services:
       NUXT_ENV_OIDC_RESPONSE_TYPE: ${NUXT_ENV_OIDC_RESPONSE_TYPE}
       NUXT_ENV_OIDC_GRANT_TYPE: ${NUXT_ENV_OIDC_GRANT_TYPE}
       NUXT_ENV_OIDC_CHALLANGE: ${NUXT_ENV_OIDC_CHALLANGE}
+      INSTITUTE: ${INSTITUTE:-ufz}
     volumes:
       - ./frontend/:/home/node/
       - ./frontend/dist:/home/node/dist/:rw
