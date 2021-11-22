@@ -219,6 +219,7 @@ permissions and limitations under the Licence.
                 class="text-right"
               >
                 <v-menu
+                  v-if="$auth.loggedIn"
                   close-on-click
                   close-on-content-click
                   offset-x
@@ -243,18 +244,17 @@ permissions and limitations under the Licence.
 
                   <v-list>
                     <v-list-item
-                      :disabled="!$auth.loggedIn"
                       dense
                       :to="'/devices/copy/' + result.id"
                     >
                       <v-list-item-content>
                         <v-list-item-title
-                          :class="$auth.loggedIn ? 'text' : 'grey-text'"
+                          class="text"
                         >
                           <v-icon
                             left
                             small
-                            :color="$auth.loggedIn ? 'black' : 'grey'"
+                            color="black"
                           >
                             mdi-content-copy
                           </v-icon>
@@ -263,18 +263,17 @@ permissions and limitations under the Licence.
                       </v-list-item-content>
                     </v-list-item>
                     <v-list-item
-                      :disabled="!$auth.loggedIn"
                       dense
                       @click="showDeleteDialogFor(result.id)"
                     >
                       <v-list-item-content>
                         <v-list-item-title
-                          :class="$auth.loggedIn ? 'red--text' : 'grey--text'"
+                          class="red--text"
                         >
                           <v-icon
                             left
                             small
-                            :color="$auth.loggedIn ? 'red' : 'grey'"
+                            color="red"
                           >
                             mdi-delete
                           </v-icon>
