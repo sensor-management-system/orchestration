@@ -110,21 +110,19 @@ permissions and limitations under the Licence.
       </v-tab-item>
     </v-tabs-items>
 
-    <div v-if="loading">
-      <div class="text-center pt-2">
-        <v-progress-circular indeterminate />
-      </div>
+    <v-progress-circular
+      v-if="loading"
+      class="progress-spinner"
+      color="primary"
+      indeterminate
+    />
+    <div v-if="!totalCount && !loading">
+      <p class="text-center">
+        There are no platforms that match your search criteria.
+      </p>
     </div>
-    <div v-if="searchResults.length == 0 && !loading">
-      <v-card>
-        <v-card-text>
-          <p class="text-center">
-            There are no platforms that match your search criteria.
-          </p>
-        </v-card-text>
-      </v-card>
-    </div>
-    <div v-if="searchResults.length && !loading">
+
+    <div v-if="totalCount">
       <v-subheader>
         <template v-if="totalCount == 1">
           1 platform found
@@ -183,8 +181,16 @@ permissions and limitations under the Licence.
           </v-menu>
         </template>
       </v-subheader>
+
+      <v-pagination
+        :value="page"
+        :disabled="loading"
+        :length="numberOfPages"
+        :total-visible="7"
+        @input="setPage"
+      />
       <v-hover
-        v-for="result in searchResults"
+        v-for="result in getSearchResultForPage(page)"
         v-slot="{ hover }"
         :key="result.id"
       >
@@ -213,6 +219,7 @@ permissions and limitations under the Licence.
                 class="text-right"
               >
                 <v-menu
+                  v-if="$auth.loggedIn"
                   close-on-click
                   close-on-content-click
                   offset-x
@@ -237,18 +244,17 @@ permissions and limitations under the Licence.
 
                   <v-list>
                     <v-list-item
-                      :disabled="!$auth.loggedIn"
                       dense
                       :to="'/platforms/copy/' + result.id"
                     >
                       <v-list-item-content>
                         <v-list-item-title
-                          :class="$auth.loggedIn ? 'text' : 'grey-text'"
+                          class="text"
                         >
                           <v-icon
                             left
                             small
-                            :color="$auth.loggedIn ? 'black' : 'grey'"
+                            color="black"
                           >
                             mdi-content-copy
                           </v-icon>
@@ -257,18 +263,17 @@ permissions and limitations under the Licence.
                       </v-list-item-content>
                     </v-list-item>
                     <v-list-item
-                      :disabled="!$auth.loggedIn"
                       dense
                       @click="showDeleteDialogFor(result.id)"
                     >
                       <v-list-item-content>
                         <v-list-item-title
-                          :class="$auth.loggedIn ? 'red--text' : 'grey--text'"
+                          class="red--text"
                         >
                           <v-icon
                             left
                             small
-                            :color="$auth.loggedIn ? 'red' : 'grey'"
+                            color="red"
                           >
                             mdi-delete
                           </v-icon>
@@ -471,7 +476,15 @@ permissions and limitations under the Licence.
           </v-dialog>
         </v-card>
       </v-hover>
+      <v-pagination
+        :value="page"
+        :disabled="loading"
+        :length="numberOfPages"
+        :total-visible="7"
+        @input="setPage"
+      />
     </div>
+
     <v-btn
       v-if="$auth.loggedIn"
       bottom
@@ -544,6 +557,10 @@ class BasicSearchParameters implements IRunSearchParameters {
   }
 }
 
+type PaginatedResult = {
+  [page: number]: Platform[]
+}
+
 @Component({
   components: {
     ManufacturerSelect,
@@ -554,6 +571,7 @@ class BasicSearchParameters implements IRunSearchParameters {
 })
 export default class SearchPlatformsPage extends Vue {
   private pageSize: number = 20
+  private page: number = 0
   private loading: boolean = true
   private processing: boolean = false
 
@@ -569,7 +587,7 @@ export default class SearchPlatformsPage extends Vue {
   private platformTypeLookup: Map<string, PlatformType> = new Map<string, PlatformType>()
   private statusLookup: Map<string, Status> = new Map<string, Status>()
 
-  private searchResults: Platform[] = []
+  private searchResults: PaginatedResult = {}
   private searchText: string | null = null
 
   private showDeleteDialog: {[index: string]: boolean } = {}
@@ -608,15 +626,6 @@ export default class SearchPlatformsPage extends Vue {
     }).catch((_error) => {
       this.$store.commit('snackbar/setError', 'Loading of platform types failed')
     })
-
-    window.onscroll = () => {
-      // from https://www.digitalocean.com/community/tutorials/vuejs-implementing-infinite-scroll
-      const isOnBottom = document.documentElement.scrollTop + window.innerHeight === document.documentElement.offsetHeight
-
-      if (isOnBottom && this.canLoadNext()) {
-        this.loadNext()
-      }
-    }
   }
 
   beforeDestroy () {
@@ -680,14 +689,16 @@ export default class SearchPlatformsPage extends Vue {
     this.onlyOwnPlatforms = false
   }
 
-  runSearch (
+  async runSearch (
     searchParameters: IRunSearchParameters
   ) {
+    this.totalCount = 0
     this.loading = true
-    this.searchResults = []
+    this.searchResults = {}
     this.unsetResultItemsShown()
     this.showDeleteDialog = {}
     this.loader = null
+    this.page = 0
 
     const searchBuilder = this.$api.platforms
       .newSearchBuilder()
@@ -704,44 +715,58 @@ export default class SearchPlatformsPage extends Vue {
     }
 
     this.lastActiveSearcher = searchBuilder.build()
-    this.lastActiveSearcher
-      .findMatchingAsPaginationLoader(this.pageSize)
-      .then(this.loadUntilWeHaveSomeEntries).catch((_error) => {
-        this.$store.commit('snackbar/setError', 'Loading of platforms failed')
-      })
-  }
-
-  loadUntilWeHaveSomeEntries (loader:IPaginationLoader<Platform>) {
-    this.loader = loader
-    this.loading = false
-    this.searchResults = [...this.searchResults, ...loader.elements]
-    this.totalCount = loader.totalCount
-
-    if (this.searchResults.length >= this.pageSize || !this.canLoadNext()) {
+    try {
+      const loader = await this.lastActiveSearcher.findMatchingAsPaginationLoader(this.pageSize)
+      this.loader = loader
+      this.searchResults[1] = loader.elements
+      this.totalCount = loader.totalCount
+      this.page = 1
+    } catch (_error) {
+      this.$store.commit('snackbar/setError', 'Loading of platforms failed')
+    } finally {
       this.loading = false
-    } else if (this.canLoadNext() && loader.funToLoadNext != null) {
-      loader.funToLoadNext().then((nextLoader) => {
-        this.loadUntilWeHaveSomeEntries(nextLoader)
-      }).catch((_error) => {
-        this.$store.commit('snackbar/setError', 'Loading of additional platforms failed')
-      })
     }
   }
 
-  loadNext () {
-    if (this.loader != null && this.loader.funToLoadNext != null) {
-      this.loader.funToLoadNext().then((nextLoader) => {
-        this.loader = nextLoader
-        this.searchResults = [...this.searchResults, ...nextLoader.elements]
-        this.totalCount = nextLoader.totalCount
-      }).catch((_error) => {
-        this.$store.commit('snackbar/setError', 'Loading of additional platforms failed')
-      })
+  async loadPage (pageNr: number, useCache: boolean = true) {
+    // use the results that were already loaded if available
+    if (useCache && this.searchResults[pageNr]) {
+      return
+    }
+    if (this.loader != null && this.loader.funToLoadPage != null) {
+      try {
+        this.loading = true
+        const loader = await this.loader.funToLoadPage(pageNr)
+        this.loader = loader
+        this.searchResults[pageNr] = loader.elements
+        this.totalCount = loader.totalCount
+      } catch (_error) {
+        this.$store.commit('snackbar/setError', 'Loading of platforms failed')
+      } finally {
+        this.loading = false
+      }
     }
   }
 
-  canLoadNext () {
-    return this.loader != null && this.loader.funToLoadNext != null
+  get numberOfPages (): number {
+    return Math.ceil(this.totalCount / this.pageSize)
+  }
+
+  async setPage (page: number) {
+    await this.loadPage(page)
+    this.page = page
+  }
+
+  getSearchResultForPage (pageNr: number): Platform[] | undefined {
+    return this.searchResults[pageNr]
+  }
+
+  getAllResults (): Platform[] {
+    let result: Platform[] = []
+    Object.entries(this.searchResults).map(i => i[1]).forEach((i: Platform[]) => {
+      result = [...result, ...i]
+    })
+    return result
   }
 
   exportCsv () {
@@ -759,14 +784,13 @@ export default class SearchPlatformsPage extends Vue {
 
   deleteAndCloseDialog (id: string) {
     this.$api.platforms.deleteById(id).then(() => {
-      this.showDeleteDialog = {}
-
-      const searchIndex = this.searchResults.findIndex(r => r.id === id)
-      if (searchIndex > -1) {
-        this.searchResults.splice(searchIndex, 1)
-        this.totalCount -= 1
+      // if we know that the deleted platform was the last of the page, we
+      // decrement the page by one
+      if (this.getSearchResultForPage(this.page)?.length === 1) {
+        this.page = this.page > 1 ? this.page - 1 : 1
       }
-
+      this.loadPage(this.page, false)
+      this.showDeleteDialog = {}
       this.$store.commit('snackbar/setSuccess', 'Platform deleted')
     }).catch((_error) => {
       this.showDeleteDialog = {}
@@ -824,4 +848,14 @@ export default class SearchPlatformsPage extends Vue {
 
 <style lang="scss">
 @import "@/assets/styles/_search.scss";
+.progress-spinner {
+  position: absolute;
+  top: 40vh;
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
+  width: 32px;
+  z-index: 99;
+}
 </style>
