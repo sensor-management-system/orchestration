@@ -121,10 +121,17 @@ export class ActionTypeSearcher {
         funToLoadNext = () => this.findAllOnPage(page + 1, pageSize)
       }
 
+      let funToLoadPage = null
+      if (elements.length > 0) {
+        funToLoadPage = (pageNr: number) => this.findAllOnPage(pageNr, pageSize)
+      }
+
       return {
         elements,
         totalCount,
-        funToLoadNext
+        page,
+        funToLoadNext,
+        funToLoadPage
       }
     })
   }

@@ -61,8 +61,7 @@ import { PlatformUnmountActionSerializer } from '@/serializers/jsonapi/composed/
 import { IFlaskJSONAPIFilter } from '@/utils/JSONApiInterfaces'
 
 import {
-  IPaginationLoader,
-  FilteredPaginationedLoader
+  IPaginationLoader
 } from '@/utils/PaginatedLoader'
 
 interface IncludedRelationships {
@@ -409,10 +408,7 @@ export class PlatformSearcher {
   }
 
   findMatchingAsPaginationLoader (pageSize: number): Promise<IPaginationLoader<Platform>> {
-    const loaderPromise: Promise<IPaginationLoader<Platform>> = this.findAllOnPage(1, pageSize)
-    return loaderPromise.then((loader) => {
-      return new FilteredPaginationedLoader<Platform>(loader, this.clientSideFilterFunc)
-    })
+    return this.findAllOnPage(1, pageSize)
   }
 
   private findAllOnPage (page: number, pageSize: number): Promise<IPaginationLoader<Platform>> {
@@ -427,16 +423,11 @@ export class PlatformSearcher {
       }
     ).then((rawResponse) => {
       const rawData = rawResponse.data
-      // client side filtering will not be done here
-      // (but in the FilteredPaginationedLoader)
-      // so that we know if we still have elements here
-      // there may be others to load as well
-
       // And - again - as we don't ask the api to include the contacts, we just handle
       // the missing contact data by adding dummy objects for those.
-      const elements: Platform[] = this.serializer
-        .convertJsonApiObjectListToModelList(rawData)
-        .map(platformWithMetaToPlatformByAddingDummyObjects)
+      const elements: Platform[] = this.serializer.convertJsonApiObjectListToModelList(
+        rawData
+      ).map(platformWithMetaToPlatformByAddingDummyObjects)
 
       // This is given by the json api. Regardless of the pagination it
       // represents the total amount of entries found.
@@ -447,10 +438,17 @@ export class PlatformSearcher {
         funToLoadNext = () => this.findAllOnPage(page + 1, pageSize)
       }
 
+      let funToLoadPage = null
+      if (elements.length > 0) {
+        funToLoadPage = (pageNr: number) => this.findAllOnPage(pageNr, pageSize)
+      }
+
       return {
         elements,
         totalCount,
-        funToLoadNext
+        page,
+        funToLoadNext,
+        funToLoadPage
       }
     })
   }
