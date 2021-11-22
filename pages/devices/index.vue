@@ -743,7 +743,7 @@ export default class SearchDevicesPage extends Vue {
         this.searchResults[pageNr] = loader.elements
         this.totalCount = loader.totalCount
       } catch (_error) {
-        this.$store.commit('snackbar/setError', 'Loading of additional devices failed')
+        this.$store.commit('snackbar/setError', 'Loading of devices failed')
       } finally {
         this.loading = false
       }
@@ -773,10 +773,6 @@ export default class SearchDevicesPage extends Vue {
       result = [...result, ...i]
     })
     return result
-  }
-
-  canLoadNext () {
-    return this.loader != null && this.loader.funToLoadNext != null
   }
 
   exportCsv () {
