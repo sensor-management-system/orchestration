@@ -795,9 +795,14 @@ export default class SearchDevicesPage extends Vue {
 
   deleteAndCloseDialog (id: string) {
     this.$api.devices.deleteById(id).then(() => {
+      // if we know that the deleted device was the last of the page, we
+      // decrement the page by one
+      if (this.getSearchResultForPage(this.page)?.length === 1) {
+        this.page = this.page > 1 ? this.page - 1 : 1
+      }
+      this.loadPage(this.page, false)
       this.showDeleteDialog = {}
       this.$store.commit('snackbar/setSuccess', 'Device deleted')
-      this.loadPage(this.page, false)
     }).catch((_error) => {
       this.showDeleteDialog = {}
       this.$store.commit('snackbar/setError', 'Device could not be deleted')
