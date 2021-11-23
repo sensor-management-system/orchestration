@@ -59,6 +59,7 @@ permissions and limitations under the Licence.
               class="text-right"
             >
               <v-menu
+                v-if="isUserAuthenticated"
                 close-on-click
                 close-on-content-click
                 offset-x
@@ -82,18 +83,17 @@ permissions and limitations under the Licence.
                 </template>
                 <v-list>
                   <v-list-item
-                    :disabled="!isUserAuthenticated"
                     dense
                     @click="$emit('showDeleteDialog',configuration)"
                   >
                     <v-list-item-content>
                       <v-list-item-title
-                        :class="isUserAuthenticated ? 'red--text' : 'grey--text'"
+                        class="red--text"
                       >
                         <v-icon
                           left
                           small
-                          :color="isUserAuthenticated ? 'red' : 'grey'"
+                          color="red"
                         >
                           mdi-delete
                         </v-icon>
