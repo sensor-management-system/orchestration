@@ -31,9 +31,8 @@ permissions and limitations under the Licence.
 <template>
   <div>
     <ConfigurationsSearch
-      ref="configurationsSearch"
       :active-tab="activeTab"
-      :load-initial-data="true"
+      load-initial-data
       :delete-callback="deleteConfiguration"
     />
     <v-btn
@@ -78,7 +77,6 @@ import ConfigurationsSearch from '@/components/configurations/ConfigurationsSear
 })
 // @ts-ignore
 export default class SearchConfigurationsPage extends Vue {
-
   created () {
     this.initializeAppBar()
   }
