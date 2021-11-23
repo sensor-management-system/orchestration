@@ -33,33 +33,31 @@ implied. See the Licence for the specific language governing
 permissions and limitations under the Licence.
 -->
 <template>
-  <v-tab-item :eager="true">
-    <v-row>
-      <v-col cols="12" md="5">
-        <v-text-field v-model="searchText" label="Label" placeholder="Label of configuration" @keydown.enter="emitSearch" />
-      </v-col>
-      <v-col
-        cols="12"
-        md="7"
-        align-self="center"
+  <v-row>
+    <v-col cols="12" md="5">
+      <v-text-field v-model="searchText" label="Label" placeholder="Label of configuration" @keydown.enter="emitSearch" />
+    </v-col>
+    <v-col
+      cols="12"
+      md="7"
+      align-self="center"
+    >
+      <v-btn
+        color="primary"
+        small
+        @click="emitSearch"
       >
-        <v-btn
-          color="primary"
-          small
-          @click="emitSearch"
-        >
-          Search
-        </v-btn>
-        <v-btn
-          text
-          small
-          @click="clearSearch"
-        >
-          Clear
-        </v-btn>
-      </v-col>
-    </v-row>
-  </v-tab-item>
+        Search
+      </v-btn>
+      <v-btn
+        text
+        small
+        @click="clearSearch"
+      >
+        Clear
+      </v-btn>
+    </v-col>
+  </v-row>
 </template>
 
 <script lang="ts">
