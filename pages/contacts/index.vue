@@ -55,21 +55,20 @@ permissions and limitations under the Licence.
         </v-btn>
       </v-col>
     </v-row>
-    <div v-if="loading">
-      <div class="text-center pt-2">
-        <v-progress-circular indeterminate />
-      </div>
+
+    <v-progress-circular
+      v-if="loading"
+      class="progress-spinner"
+      color="primary"
+      indeterminate
+    />
+    <div v-if="!totalCount && !loading">
+      <p class="text-center">
+        There are no contacts that match your search criteria.
+      </p>
     </div>
-    <div v-if="searchResults.length == 0 && !loading">
-      <v-card>
-        <v-card-text>
-          <p class="text-center">
-            There are no contacts that match your search criteria.
-          </p>
-        </v-card-text>
-      </v-card>
-    </div>
-    <div v-if="searchResults.length && !loading">
+
+    <div v-if="totalCount">
       <v-subheader>
         <template v-if="totalCount == 1">
           1 contact found
@@ -79,8 +78,16 @@ permissions and limitations under the Licence.
         </template>
         <!-- No export to pdf due to data privacy reasons -->
       </v-subheader>
+
+      <v-pagination
+        :value="page"
+        :disabled="loading"
+        :length="numberOfPages"
+        :total-visible="7"
+        @input="setPage"
+      />
       <v-hover
-        v-for="result in searchResults"
+        v-for="result in getSearchResultForPage(page)"
         v-slot="{ hover }"
         :key="result.id"
       >
@@ -105,6 +112,7 @@ permissions and limitations under the Licence.
                 class="text-right"
               >
                 <v-menu
+                  v-if="$auth.loggedIn"
                   close-on-click
                   close-on-content-click
                   offset-x
@@ -128,18 +136,17 @@ permissions and limitations under the Licence.
                   </template>
                   <v-list>
                     <v-list-item
-                      :disabled="!$auth.loggedIn"
                       dense
                       @click="showDeleteDialogFor(result.id)"
                     >
                       <v-list-item-content>
                         <v-list-item-title
-                          :class="$auth.loggedIn ? 'red--text' : 'grey--text'"
+                          class="'red--text"
                         >
                           <v-icon
                             left
                             small
-                            :color="$auth.loggedIn ? 'red' : 'grey'"
+                            color="red"
                           >
                             mdi-delete
                           </v-icon>
@@ -294,7 +301,15 @@ permissions and limitations under the Licence.
           </v-dialog>
         </v-card>
       </v-hover>
+      <v-pagination
+        :value="page"
+        :disabled="loading"
+        :length="numberOfPages"
+        :total-visible="7"
+        @input="setPage"
+      />
     </div>
+
     <v-btn
       v-if="$auth.loggedIn"
       bottom
@@ -319,16 +334,21 @@ import { IPaginationLoader } from '@/utils/PaginatedLoader'
 
 import { Contact } from '@/models/Contact'
 
+type PaginatedResult = {
+  [page: number]: Contact[]
+}
+
 @Component({
 })
 export default class SearchContactsPage extends Vue {
   private readonly pageSize: number = 20
+  private page: number = 0
   private loading: boolean = true
 
   private totalCount: number = 0
   private loader: null | IPaginationLoader<Contact> = null
 
-  private searchResults: Contact[] = []
+  private searchResults: PaginatedResult = {}
   private searchText: string = ''
 
   private showDeleteDialog: { [id: string]: boolean} = {}
@@ -340,14 +360,6 @@ export default class SearchContactsPage extends Vue {
 
   mounted () {
     this.search()
-    window.onscroll = () => {
-      // from https://www.digitalocean.com/community/tutorials/vuejs-implementing-infinite-scroll
-      const isOnBottom = document.documentElement.scrollTop + window.innerHeight === document.documentElement.offsetHeight
-
-      if (isOnBottom && this.canLoadNext()) {
-        this.loadNext()
-      }
-    }
   }
 
   beforeDestroy () {
@@ -369,65 +381,83 @@ export default class SearchContactsPage extends Vue {
     this.searchText = ''
   }
 
-  search () {
+  async search () {
+    this.totalCount = 0
     this.loading = true
-    this.searchResults = []
+    this.searchResults = {}
     this.unsetResultItemsShown()
     this.showDeleteDialog = {}
+    this.loader = null
+    this.page = 0
+
     const lastActiveSearcher = this.$api.contacts
       .newSearchBuilder()
       .withText(this.searchText)
       .build()
-    lastActiveSearcher
-      .findMatchingAsPaginationLoader(this.pageSize)
-      .then(this.loadUntilWeHaveSomeEntries).catch((_error) => {
-        this.$store.commit('snackbar/setError', 'Loading of contacts failed')
-      })
-  }
 
-  loadUntilWeHaveSomeEntries (loader: IPaginationLoader<Contact>) {
-    this.loader = loader
-    this.loading = false
-    this.searchResults = [...this.searchResults, ...loader.elements]
-    this.totalCount = loader.totalCount
-
-    if (this.searchResults.length >= this.pageSize || !this.canLoadNext()) {
+    try {
+      const loader = await lastActiveSearcher.findMatchingAsPaginationLoader(this.pageSize)
+      this.loader = loader
+      this.searchResults[1] = loader.elements
+      this.totalCount = loader.totalCount
+      this.page = 1
+    } catch (_error) {
+      this.$store.commit('snackbar/setError', 'Loading of contacts failed')
+    } finally {
       this.loading = false
-    } else if (this.canLoadNext() && loader.funToLoadNext != null) {
-      loader.funToLoadNext().then((nextLoader) => {
-        this.loadUntilWeHaveSomeEntries(nextLoader)
-      }).catch((_error) => {
+    }
+  }
+
+  async loadPage (pageNr: number, useCache: boolean = true) {
+    // use the results that were already loaded if available
+    if (useCache && this.searchResults[pageNr]) {
+      return
+    }
+    if (this.loader != null && this.loader.funToLoadPage != null) {
+      try {
+        this.loading = true
+        const loader = await this.loader.funToLoadPage(pageNr)
+        this.loader = loader
+        this.searchResults[pageNr] = loader.elements
+        this.totalCount = loader.totalCount
+      } catch (_error) {
         this.$store.commit('snackbar/setError', 'Loading of contacts failed')
-      })
+      } finally {
+        this.loading = false
+      }
     }
   }
 
-  loadNext () {
-    if (this.loader != null && this.loader.funToLoadNext != null) {
-      this.loader.funToLoadNext().then((nextLoader) => {
-        this.loader = nextLoader
-        this.searchResults = [...this.searchResults, ...nextLoader.elements]
-        this.totalCount = nextLoader.totalCount
-      }).catch((_error) => {
-        this.$store.commit('snackbar/setError', 'Loading of additional contacts failed')
-      })
-    }
+  get numberOfPages (): number {
+    return Math.ceil(this.totalCount / this.pageSize)
   }
 
-  canLoadNext () {
-    return this.loader != null && this.loader.funToLoadNext != null
+  async setPage (page: number) {
+    await this.loadPage(page)
+    this.page = page
+  }
+
+  getSearchResultForPage (pageNr: number): Contact[] | undefined {
+    return this.searchResults[pageNr]
+  }
+
+  getAllResults (): Contact[] {
+    let result: Contact[] = []
+    Object.entries(this.searchResults).map(i => i[1]).forEach((i: Contact[]) => {
+      result = [...result, ...i]
+    })
+    return result
   }
 
   deleteAndCloseDialog (id: string) {
     this.$api.contacts.deleteById(id).then(() => {
-      this.showDeleteDialog = {}
-
-      const searchIndex = this.searchResults.findIndex(r => r.id === id)
-      if (searchIndex > -1) {
-        this.searchResults.splice(searchIndex, 1)
-        this.totalCount -= 1
+      // if we know that the deleted device was the last of the page, we
+      // decrement the page by one
+      if (this.getSearchResultForPage(this.page)?.length === 1) {
+        this.page = this.page > 1 ? this.page - 1 : 1
       }
-
+      this.loadPage(this.page, false)
+      this.showDeleteDialog = {}
       this.$store.commit('snackbar/setSuccess', 'Contact deleted')
     }).catch((_error) => {
       this.showDeleteDialog = {}
@@ -464,4 +494,14 @@ export default class SearchContactsPage extends Vue {
 
 <style lang="scss">
 @import "@/assets/styles/_search.scss";
+.progress-spinner {
+  position: absolute;
+  top: 40vh;
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
+  width: 32px;
+  z-index: 99;
+}
 </style>
