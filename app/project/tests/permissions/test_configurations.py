@@ -1,12 +1,17 @@
 """Tests for the Configuration-Permissions."""
 import json
+from unittest.mock import patch
 
 from project import base_url
 from project.api.models import Contact, User, Configuration
 from project.api.models.base_model import db
+from project.api.services.idl_services import Idl
 from project.tests.base import BaseTestCase
+from project.tests.base import app
 from project.tests.base import fake
 from project.tests.base import generate_token_data, create_token
+from project.tests.permissions import create_superuser_token
+from project.tests.permissions.test_platforms import IDL_USER_ACCOUNT
 
 
 class TestConfigurationPermissions(BaseTestCase):
@@ -97,7 +102,7 @@ class TestConfigurationPermissions(BaseTestCase):
         db.session.commit()
         url = f"{self.configuration_url}/{internal_config.id}"
         response = self.client.get(url)
-        self.assertNotEqual(response.status_code, 200)
+        self.assertNotEqual(response.status, 200)
 
     def test_get_as_registered_user(self):
         """Ensure that a registered user can see public, internal, and only his own private objects"""
@@ -167,7 +172,7 @@ class TestConfigurationPermissions(BaseTestCase):
 
     def test_add_groups_ids(self):
         """Make sure that a configuration with groups-ids can be created"""
-        device_data = {
+        config_data = {
             "data": {
                 "type": "configuration",
                 "attributes": {
@@ -182,7 +187,7 @@ class TestConfigurationPermissions(BaseTestCase):
         with self.client:
             response = self.client.post(
                 self.configuration_url,
-                data=json.dumps(device_data),
+                data=json.dumps(config_data),
                 content_type="application/vnd.api+json",
                 headers=access_headers,
             )
@@ -192,3 +197,220 @@ class TestConfigurationPermissions(BaseTestCase):
         self.assertEqual(response.status_code, 201)
 
         self.assertEqual(data["data"]["attributes"]["group_ids"], [12])
+
+    def test_patch_configuration_as_a_member_in_a_permission_group(self):
+        """Make sure that a member in a group (admin/member) can change
+         the configuration data per patch request"""
+        group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permissions_groups
+        configs = preparation_of_public_and_internal_configuration_data(
+            group_id_test_user_is_member_in_2
+        )
+        access_headers = create_token()
+        for configuration_data in configs:
+            with self.client:
+                response = self.client.post(
+                    self.configuration_url,
+                    data=json.dumps(configuration_data),
+                    content_type="application/vnd.api+json",
+                    headers=access_headers,
+                )
+
+            data = json.loads(response.data.decode())
+
+            self.assertEqual(response.status_code, 201)
+
+            self.assertIn(
+                group_id_test_user_is_member_in_2[0],
+                data["data"]["attributes"]["group_ids"],
+            )
+            with patch.object(
+                Idl, "get_all_permission_groups"
+            ) as test_get_all_permission_groups:
+                test_get_all_permission_groups.return_value = IDL_USER_ACCOUNT
+                configuration_data_changed = {
+                    "data": {
+                        "type": "configuration",
+                        "id": data["data"]["id"],
+                        "attributes": {"label": "Changed configuration name"},
+                    }
+                }
+                url = f"{self.configuration_url}/{data['data']['id']}"
+                res = super().update_object(
+                    url, configuration_data_changed, self.object_type
+                )
+                self.assertEqual(
+                    res["data"]["attributes"]["label"],
+                    configuration_data_changed["data"]["attributes"]["label"],
+                )
+
+    def test_patch_configuration_user_not_in_any_permission_group(self):
+        """Make sure that a user can only do changes in configurations, where he/she is involved."""
+        group_id_test_user_is_not_included = [13]
+        configs = preparation_of_public_and_internal_configuration_data(
+            group_id_test_user_is_not_included
+        )
+        access_headers = create_token()
+        for configuration_data in configs:
+            with self.client:
+                response = self.client.post(
+                    self.configuration_url,
+                    data=json.dumps(configuration_data),
+                    content_type="application/vnd.api+json",
+                    headers=access_headers,
+                )
+
+            data = json.loads(response.data.decode())
+
+            self.assertEqual(response.status_code, 201)
+
+            self.assertEqual(data["data"]["attributes"]["group_ids"], group_id_test_user_is_not_included)
+            with patch.object(
+                Idl, "get_all_permission_groups"
+            ) as test_get_all_permission_groups:
+                test_get_all_permission_groups.return_value = IDL_USER_ACCOUNT
+                configuration_data_changed = {
+                    "data": {
+                        "type": "configuration",
+                        "id": data["data"]["id"],
+                        "attributes": {"label": "Forbidden"},
+                    }
+                }
+                url = f"{self.configuration_url}/{data['data']['id']}"
+                access_headers = create_token()
+                with self.client:
+                    response = self.client.patch(
+                        url,
+                        data=json.dumps(configuration_data_changed),
+                        content_type="application/vnd.api+json",
+                        headers=access_headers,
+                    )
+                self.assertEqual(response.status, "403 FORBIDDEN")
+
+    def test_delete_configuration_as_not_an_admin_in_a_permission_group(self):
+        """Make sure that only admin can delete a configuration in the same permission group."""
+        group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permissions_groups
+        configs = preparation_of_public_and_internal_configuration_data(
+            group_id_test_user_is_member_in_2
+        )
+        access_headers = create_token()
+        for configuration_data in configs:
+            with self.client:
+                response = self.client.post(
+                    self.configuration_url,
+                    data=json.dumps(configuration_data),
+                    content_type="application/vnd.api+json",
+                    headers=access_headers,
+                )
+
+            data = json.loads(response.data.decode())
+
+            self.assertEqual(response.status_code, 201)
+
+            self.assertIn(
+                group_id_test_user_is_member_in_2[0],
+                data["data"]["attributes"]["group_ids"],
+            )
+            with patch.object(
+                Idl, "get_all_permission_groups"
+            ) as test_get_all_permission_groups:
+                test_get_all_permission_groups.return_value = IDL_USER_ACCOUNT
+                url = f"{self.configuration_url}/{data['data']['id']}"
+                delete_response = self.client.delete(url, headers=access_headers)
+                delete_data = json.loads(delete_response.data.decode())
+                self.assertEqual(delete_data["errors"][0]["status"], 409)
+
+    def test_delete_configuration_as_an_admin_in_a_permission_group(self):
+        """Make sure that permission group admins are allowed to delete a configuration"""
+        group_id_test_user_is_admin_in_1 = (
+            IDL_USER_ACCOUNT.administrated_permissions_groups
+        )
+        configs = preparation_of_public_and_internal_configuration_data(
+            group_id_test_user_is_admin_in_1
+        )
+        access_headers = create_token()
+        for configuration_data in configs:
+            with self.client:
+                response = self.client.post(
+                    self.configuration_url,
+                    data=json.dumps(configuration_data),
+                    content_type="application/vnd.api+json",
+                    headers=access_headers,
+                )
+
+            data = json.loads(response.data.decode())
+
+            self.assertEqual(response.status_code, 201)
+
+            self.assertEqual(data["data"]["attributes"]["group_ids"], [1])
+
+            with patch.object(
+                Idl, "get_all_permission_groups"
+            ) as test_get_all_permission_groups:
+                test_get_all_permission_groups.return_value = IDL_USER_ACCOUNT
+                url = f"{self.configuration_url}/{data['data']['id']}"
+                delete_response = self.client.delete(url, headers=access_headers)
+                self.assertEqual(delete_response.status_code, 200)
+
+    def test_delete_configuration_as_super_user(self):
+        """Make sure that a superuser can delete a configuration even if he/she is not admin in
+        the corresponding permission group."""
+        group_id_test_user_is_not_included = [20]
+        configs = preparation_of_public_and_internal_configuration_data(
+            group_id_test_user_is_not_included
+        )
+        access_headers = create_superuser_token()
+        for configuration_data in configs:
+            with self.client:
+                response = self.client.post(
+                    self.configuration_url,
+                    data=json.dumps(configuration_data),
+                    content_type="application/vnd.api+json",
+                    headers=access_headers,
+                )
+
+            data = json.loads(response.data.decode())
+
+            self.assertEqual(response.status_code, 201)
+
+            self.assertEqual(data["data"]["attributes"]["group_ids"], group_id_test_user_is_not_included)
+
+            with patch.object(
+                Idl, "get_all_permission_groups"
+            ) as test_get_all_permission_groups:
+                test_get_all_permission_groups.return_value = IDL_USER_ACCOUNT
+                url = f"{self.configuration_url}/{data['data']['id']}"
+                delete_response = self.client.delete(url, headers=access_headers)
+                self.assertEqual(delete_response.status_code, 200)
+
+
+def preparation_of_public_and_internal_configuration_data(group_ids):
+    """
+    Data to add an internal and a public configuration.
+
+    :param group_ids: list of permission groups
+    :return: list of data for two configs [public, internal]
+    """
+    public_configuration_data = {
+        "data": {
+            "type": "configuration",
+            "attributes": {
+                "label": fake.pystr(),
+                "is_public": True,
+                "is_internal": False,
+                "group_ids": group_ids,
+            },
+        }
+    }
+    internal_configuration_data = {
+        "data": {
+            "type": "configuration",
+            "attributes": {
+                "label": fake.pystr(),
+                "is_public": False,
+                "is_internal": True,
+                "group_ids": group_ids,
+            },
+        }
+    }
+    configs = [public_configuration_data, internal_configuration_data]
+    return configs

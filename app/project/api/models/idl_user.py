@@ -1,6 +1,5 @@
-import collections
 from dataclasses import dataclass
-from typing import List, Any, Callable, TypeVar, Type, cast, Iterable
+from typing import List, Any, Callable, TypeVar, Type, cast
 
 T = TypeVar("T")
 
@@ -29,23 +28,24 @@ def to_class(c: Type[T], x: Any) -> dict:
 class IdlUser:
     id: int
     username: str
-    display_name: str
-    referenced_iri: str
     administrated_permissions_groups: List[int]
     membered_permissions_groups: List[int]
 
     @staticmethod
-    def from_dict(obj: Any) -> 'IdlUser':
+    def from_dict(obj: Any) -> "IdlUser":
         assert isinstance(obj, dict)
         id = from_int(obj.get("id"))
         username = from_str(obj.get("username"))
-        display_name = from_str(obj.get("displayName"))
-        referenced_iri = from_str(obj.get("referencedIri"))
-        administrated_permissions_groups = from_list(from_int, obj.get("administratedPermissionsGroups"))
-        membered_permissions_groups = from_list(from_int, obj.get("memberedPermissionsGroups"))
-        return IdlUser(id, username, display_name, referenced_iri, administrated_permissions_groups,
-                       membered_permissions_groups)
+        administrated_permissions_groups = from_list(
+            from_int, obj.get("administratedPermissionsGroups")
+        )
+        membered_permissions_groups = from_list(
+            from_int, obj.get("memberedPermissionsGroups")
+        )
+        return IdlUser(
+            id, username, administrated_permissions_groups, membered_permissions_groups
+        )
 
 
-def idl_from_dict(s: Iterable[dict]) -> List[IdlUser]:
-    return from_list(IdlUser.from_dict, s)
+def idl_from_dict(s: dict) -> IdlUser:
+    return IdlUser.from_dict(s)
