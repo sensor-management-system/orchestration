@@ -530,8 +530,35 @@ interface IRunSearchParameters {
   onlyOwnDevices: boolean
 }
 
+type NuxtRouteQueryParams = {
+  [param: string]: string | (string | null)[]
+}
+
+class SearchParamsSerializer {
+  serialize (params: IRunSearchParameters): NuxtRouteQueryParams {
+    const result: NuxtRouteQueryParams = {}
+    if (params.searchText) {
+      result.searchText = params.searchText
+    }
+    if (params.onlyOwnDevices) {
+      result.onlyOwnDevices = String(params.onlyOwnDevices)
+    }
+    return result
+  }
+
+  unserialize (params: NuxtRouteQueryParams): IRunSearchParameters {
+    return {
+      searchText: typeof params.searchText === 'string' ? params.searchText : '',
+      manufacturer: [],
+      states: [],
+      types: [],
+      onlyOwnDevices: typeof params.onlyOwnDevices !== 'undefined' && params.onlyOwnDevices === 'true'
+    }
+  }
+}
+
 class BasicSearchParameters implements IRunSearchParameters {
-  private readonly _searchText: string | null
+  private _searchText: string | null
 
   constructor (searchText: string | null) {
     this._searchText = searchText
@@ -599,6 +626,7 @@ export default class SearchDevicesPage extends Vue {
 
   created () {
     this.initializeAppBar()
+    this.initSearchParamsFromQuery(this.$route.query)
   }
 
   mounted () {
@@ -694,6 +722,8 @@ export default class SearchDevicesPage extends Vue {
   async runSearch (
     searchParameters: IRunSearchParameters
   ) {
+    this.initQueryParamsFromSearch(searchParameters)
+
     this.totalCount = 0
     this.loading = true
     this.searchResults = {}
@@ -848,6 +878,24 @@ export default class SearchDevicesPage extends Vue {
   }
 
   getTextOrDefault = (text: string): string => text || '-'
+
+  initSearchParamsFromQuery (params: NuxtRouteQueryParams): void {
+    const serializer = new SearchParamsSerializer()
+    const searchParamsObject = serializer.unserialize(params)
+    if (searchParamsObject.searchText) {
+      this.searchText = searchParamsObject.searchText
+    }
+    if (searchParamsObject.onlyOwnDevices) {
+      this.onlyOwnDevices = searchParamsObject.onlyOwnDevices
+    }
+  }
+
+  initQueryParamsFromSearch (params: IRunSearchParameters): void {
+    const serializer = new SearchParamsSerializer()
+    this.$router.push({
+      query: serializer.serialize(params)
+    })
+  }
 }
 
 </script>
