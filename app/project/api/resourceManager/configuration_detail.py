@@ -4,9 +4,11 @@ from flask_rest_jsonapi.exceptions import ObjectNotFound
 
 from .base_resource import delete_attachments_in_minio_by_url
 from ..auth.permission_utils import (
-    check_patch_permission, check_deletion_permission,
+    check_deletion_permission,
+    is_superuser,
+    is_user_in_a_group,
 )
-from ..helpers.errors import ConflictError
+from ..helpers.errors import ConflictError, ForbiddenError
 from ..models.base_model import db
 from ..models.configuration import Configuration
 from ..schemas.configuration_schema import ConfigurationSchema
@@ -27,8 +29,16 @@ class ConfigurationDetail(ResourceDetail):
                 verify_jwt_in_request()
 
     def before_patch(self, args, kwargs, data):
-        """Add Created by user id to the data"""
-        check_patch_permission(data, Configuration)
+        """check if a user has the permission to change this configuration"""
+        if not is_superuser():
+            configuration = (
+                db.session.query(Configuration).filter_by(id=data["id"]).one_or_none()
+            )
+            group_ids = configuration.group_ids
+            if not is_user_in_a_group(group_ids):
+                raise ForbiddenError(
+                    "User is not part of any group to edit this object."
+                )
 
     def before_delete(self, args, kwargs):
         """Checks for permission"""

@@ -56,7 +56,9 @@ class BaseConfig:
     # Hostname of a S3 service.
     # Minio's context root is '/' and this cannot be configured.
     # So we use two endpoints.
-    MINIO_ENDPOINT = env("MINIO_ENDPOINT", "minio:9000")  # refer to docker container name
+    MINIO_ENDPOINT = env(
+        "MINIO_ENDPOINT", "minio:9000"
+    )  # refer to docker container name
     DOWNLOAD_ENDPOINT = env("DOWNLOAD_ENDPOINT", "localhost:9000")
     # Access key (aka user ID) of your account in S3 service.
     MINIO_ACCESS_KEY = env("MINIO_ACCESS_KEY", "minio")
@@ -112,6 +114,8 @@ class TestingConfig(BaseConfig):
     JWT_SECRET_KEY = "super-secret"
     JWT_ALGORITHM = "HS256"
     JWT_DECODE_AUDIENCE = "SMS"
+    # https://github.com/jarus/flask-testing/issues/21
+    PRESERVE_CONTEXT_ON_EXCEPTION = False
 
 
 class ProductionConfig(BaseConfig):

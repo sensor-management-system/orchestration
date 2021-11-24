@@ -1,12 +1,19 @@
 """Model for platforms."""
 
 from .base_model import db
-from ..models.mixin import AuditMixin, SearchableMixin, PermissionMixin, IndirectSearchableMixin
+from ..models.mixin import (
+    AuditMixin,
+    SearchableMixin,
+    PermissionMixin,
+    IndirectSearchableMixin,
+)
 
 from ..es_utils import settings_with_ngrams, ElasticSearchIndexTypes
 
 
-class Platform(db.Model, AuditMixin, SearchableMixin, IndirectSearchableMixin,PermissionMixin):
+class Platform(
+    db.Model, AuditMixin, SearchableMixin, IndirectSearchableMixin, PermissionMixin
+):
     """Platform class."""
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -78,10 +85,8 @@ class Platform(db.Model, AuditMixin, SearchableMixin, IndirectSearchableMixin,Pe
         type_text_full_searchable = ElasticSearchIndexTypes.text_full_searchable(
             analyzer="ngram_analyzer"
         )
-        type_keyword_and_full_searchable = (
-            ElasticSearchIndexTypes.keyword_and_full_searchable(
-                analyzer="ngram_analyzer"
-            )
+        type_keyword_and_full_searchable = ElasticSearchIndexTypes.keyword_and_full_searchable(
+            analyzer="ngram_analyzer"
         )
         return {
             # Search the description just via text (and not via keyword).
@@ -106,19 +111,10 @@ class Platform(db.Model, AuditMixin, SearchableMixin, IndirectSearchableMixin,Pe
             "inventory_number": type_keyword_and_full_searchable,
             "serial_number": type_keyword_and_full_searchable,
             "persistent_identifier": type_keyword_and_full_searchable,
-            "is_internal": {
-                "type": "boolean",
-            },
-            "is_public": {
-                "type": "boolean",
-            },
-            "is_private": {
-                "type": "boolean",
-            },
-            "created_by_id": {
-                "type": "integer",
-            },
-
+            "is_internal": {"type": "boolean",},
+            "is_public": {"type": "boolean",},
+            "is_private": {"type": "boolean",},
+            "created_by_id": {"type": "integer",},
             "attachments": {
                 "type": "nested",
                 "properties": {

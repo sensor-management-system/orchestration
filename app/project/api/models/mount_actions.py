@@ -11,8 +11,10 @@ class PlatformMountAction(db.Model, AuditMixin):
         "Configuration",
         uselist=False,
         foreign_keys=[configuration_id],
-        backref=db.backref("platform_mount_actions",
-                           cascade="save-update, merge, delete, delete-orphan"),
+        backref=db.backref(
+            "platform_mount_actions",
+            cascade="save-update, merge, delete, delete-orphan",
+        ),
     )
     platform_id = db.Column(db.Integer, db.ForeignKey("platform.id"), nullable=False)
     platform = db.relationship(
@@ -66,9 +68,9 @@ class DeviceMountAction(db.Model, AuditMixin, IndirectSearchableMixin):
         "Configuration",
         uselist=False,
         foreign_keys=[configuration_id],
-        backref=db.backref("device_mount_actions",
-                           cascade="save-update, merge, delete, delete-orphan"),
-
+        backref=db.backref(
+            "device_mount_actions", cascade="save-update, merge, delete, delete-orphan"
+        ),
     )
     device_id = db.Column(db.Integer, db.ForeignKey("device.id"), nullable=False)
     device = db.relationship(
@@ -84,8 +86,10 @@ class DeviceMountAction(db.Model, AuditMixin, IndirectSearchableMixin):
         "Platform",
         uselist=False,
         foreign_keys=[parent_platform_id],
-        backref=db.backref("outer_device_mount_actions",
-                           cascade="save-update, merge, delete, delete-orphan"),
+        backref=db.backref(
+            "outer_device_mount_actions",
+            cascade="save-update, merge, delete, delete-orphan",
+        ),
     )
     begin_date = db.Column(db.DateTime, nullable=False)
     description = db.Column(db.Text, nullable=True)
