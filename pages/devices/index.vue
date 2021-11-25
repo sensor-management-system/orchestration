@@ -522,21 +522,45 @@ import { Manufacturer } from '@/models/Manufacturer'
 import { Status } from '@/models/Status'
 import { DeviceSearcher } from '@/services/sms/DeviceApi'
 
-interface IRunSearchParameters {
+interface IBasicSearchParameters {
   searchText: string | null
+}
+
+interface ISearchParameters extends IBasicSearchParameters {
   manufacturer: Manufacturer[]
   states: Status[]
   types: DeviceType[]
   onlyOwnDevices: boolean
 }
 
-type NuxtRouteQueryParams = {
+/**
+ * the Vue route query params are defined (but not exported) in
+ * vue-router/types as:
+ *
+ *   Dictionary<string | (string | null)[]>
+ *
+ * where Dictionary is defined as:
+ *
+ *   type Dictionary<T> = { [key: string]: T }
+ *
+ */
+type QueryParams = {
   [param: string]: string | (string | null)[]
 }
 
+/**
+ * defines methods to convert from ISearchParameters to QueryParams and vice
+ * versa
+ */
 class SearchParamsSerializer {
-  serialize (params: IRunSearchParameters): NuxtRouteQueryParams {
-    const result: NuxtRouteQueryParams = {}
+  /**
+   * converts search parameters to Vue route query params
+   *
+   * @param {ISearchParameters} params - the params used in the search
+   * @returns {QueryParams} Vue route query params
+   */
+  toQueryParams (params: ISearchParameters): QueryParams {
+    const result: QueryParams = {}
     if (params.searchText) {
       result.searchText = params.searchText
     }
@@ -546,7 +570,13 @@ class SearchParamsSerializer {
     return result
   }
 
-  unserialize (params: NuxtRouteQueryParams): IRunSearchParameters {
+  /**
+   * converts Vue route query params to search parameters
+   *
+   * @param {QueryParams} params - the Vue route query params
+   * @returns {ISearchParameters} the params used in the search
+   */
+  toSearchParams (params: QueryParams): ISearchParameters {
     return {
       searchText: typeof params.searchText === 'string' ? params.searchText : '',
       manufacturer: [],
@@ -554,34 +584,6 @@ class SearchParamsSerializer {
       types: [],
       onlyOwnDevices: typeof params.onlyOwnDevices !== 'undefined' && params.onlyOwnDevices === 'true'
     }
-  }
-}
-
-class BasicSearchParameters implements IRunSearchParameters {
-  private _searchText: string | null
-
-  constructor (searchText: string | null) {
-    this._searchText = searchText
-  }
-
-  get searchText (): string | null {
-    return this._searchText
-  }
-
-  get manufacturer (): Manufacturer[] {
-    return []
-  }
-
-  get states (): Status[] {
-    return []
-  }
-
-  get types (): DeviceType[] {
-    return []
-  }
-
-  get onlyOwnDevices (): boolean {
-    return false
   }
 }
 
@@ -626,7 +628,7 @@ export default class SearchDevicesPage extends Vue {
 
   created () {
     this.initializeAppBar()
-    this.initSearchParamsFromQuery(this.$route.query)
+    this.initSearchQueryParams(this.$route.query)
   }
 
   mounted () {
@@ -648,7 +650,7 @@ export default class SearchDevicesPage extends Vue {
         this.deviceTypeLookup = deviceTypeTypeLookup
         this.statusLookup = statusLookup
 
-        this.runSelectedSearch()
+        this.runInitialSearch()
       }).catch((_error) => {
         this.$store.commit('snackbar/setError', 'Loading of states failed')
       }).catch((_error) => {
@@ -683,17 +685,33 @@ export default class SearchDevicesPage extends Vue {
     this.$store.commit('appbar/setActiveTab', tab)
   }
 
-  runSelectedSearch () {
-    if (this.activeTab === 0) {
-      this.basicSearch()
-    } else {
-      this.extendedSearch()
+  isExtendedSearch (): boolean {
+    return this.onlyOwnDevices === true ||
+      !!this.selectedSearchStates.length ||
+      !!this.selectedSearchDeviceTypes.length ||
+      !!this.selectedSearchManufacturers.length
+  }
+
+  runInitialSearch () {
+    switch (this.isExtendedSearch()) {
+      case true:
+        this.activeTab = 1
+        this.extendedSearch()
+        break
+      default:
+        this.activeTab = 0
+        this.basicSearch()
     }
   }
 
   basicSearch () {
-    // only uses the text and the type (sensor or platform)
-    this.runSearch(new BasicSearchParameters(this.searchText))
+    this.runSearch({
+      searchText: this.searchText,
+      manufacturer: [],
+      states: [],
+      types: [],
+      onlyOwnDevices: false
+    })
   }
 
   clearBasicSearch () {
@@ -720,9 +738,9 @@ export default class SearchDevicesPage extends Vue {
   }
 
   async runSearch (
-    searchParameters: IRunSearchParameters
+    searchParameters: ISearchParameters
   ) {
-    this.initQueryParamsFromSearch(searchParameters)
+    this.initUrlQueryParams(searchParameters)
 
     this.totalCount = 0
     this.loading = true
@@ -879,9 +897,8 @@ export default class SearchDevicesPage extends Vue {
 
   getTextOrDefault = (text: string): string => text || '-'
 
-  initSearchParamsFromQuery (params: NuxtRouteQueryParams): void {
-    const serializer = new SearchParamsSerializer()
-    const searchParamsObject = serializer.unserialize(params)
+  initSearchQueryParams (params: QueryParams): void {
+    const searchParamsObject = (new SearchParamsSerializer()).toSearchParams(params)
     if (searchParamsObject.searchText) {
       this.searchText = searchParamsObject.searchText
     }
@@ -890,10 +907,9 @@ export default class SearchDevicesPage extends Vue {
     }
   }
 
-  initQueryParamsFromSearch (params: IRunSearchParameters): void {
-    const serializer = new SearchParamsSerializer()
+  initUrlQueryParams (params: ISearchParameters): void {
     this.$router.push({
-      query: serializer.serialize(params)
+      query: (new SearchParamsSerializer()).toQueryParams(params)
     })
   }
 }
