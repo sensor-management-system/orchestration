@@ -191,12 +191,14 @@ permissions and limitations under the Licence.
       />
       <v-hover
         v-for="result in getSearchResultForPage(page)"
+        :id="'item-' + result.id"
         v-slot="{ hover }"
         :key="result.id"
       >
         <v-card
           :disabled="loading"
-          :elevation="hover ? 6 : 2"
+          :elevation="hover || isItemSelected(result.id) ? 6 : 2"
+          :outlined="isItemSelected(result.id)"
           class="ma-2"
         >
           <v-card-text
@@ -206,6 +208,13 @@ permissions and limitations under the Licence.
               no-gutters
             >
               <v-col>
+                <nuxt-link
+                  :to="{ query: $route.query, hash: '#item-' + result.id }"
+                  class="text-caption font-weight-light"
+                  style="text-decoration: none"
+                >
+                  #
+                </nuxt-link>
                 <StatusBadge
                   :value="getStatus(result)"
                 >
@@ -692,20 +701,27 @@ export default class SearchDevicesPage extends Vue {
       !!this.selectedSearchManufacturers.length
   }
 
-  runInitialSearch () {
-    switch (this.isExtendedSearch()) {
-      case true:
-        this.activeTab = 1
-        this.extendedSearch()
-        break
-      default:
-        this.activeTab = 0
-        this.basicSearch()
-    }
+  async runInitialSearch (): Promise<void> {
+    this.activeTab = this.isExtendedSearch() ? 1 : 0
+
+    const page: number | undefined = this.getPageFromUrl()
+
+    await this.runSearch(
+      {
+        searchText: this.searchText,
+        manufacturer: this.selectedSearchManufacturers,
+        states: this.selectedSearchStates,
+        types: this.selectedSearchDeviceTypes,
+        onlyOwnDevices: this.onlyOwnDevices && this.$auth.loggedIn
+      },
+      page
+    )
+    // when the search result was loaded, expand the selected item
+    this.initShowResultItem()
   }
 
-  basicSearch () {
-    this.runSearch({
+  basicSearch (): Promise<void> {
+    return this.runSearch({
       searchText: this.searchText,
       manufacturer: [],
       states: [],
@@ -718,8 +734,8 @@ export default class SearchDevicesPage extends Vue {
     this.searchText = null
   }
 
-  extendedSearch () {
-    this.runSearch({
+  extendedSearch (): Promise<void> {
+    return this.runSearch({
       searchText: this.searchText,
       manufacturer: this.selectedSearchManufacturers,
       states: this.selectedSearchStates,
@@ -738,8 +754,9 @@ export default class SearchDevicesPage extends Vue {
   }
 
   async runSearch (
-    searchParameters: ISearchParameters
-  ) {
+    searchParameters: ISearchParameters,
+    page: number = 1
+  ): Promise<void> {
     this.initUrlQueryParams(searchParameters)
 
     this.totalCount = 0
@@ -766,11 +783,12 @@ export default class SearchDevicesPage extends Vue {
 
     this.lastActiveSearcher = searchBuilder.build()
     try {
-      const loader = await this.lastActiveSearcher.findMatchingAsPaginationLoader(this.pageSize)
+      const loader = await this.lastActiveSearcher.findMatchingAsPaginationLoaderOnPage(page, this.pageSize)
       this.loader = loader
-      this.searchResults[1] = loader.elements
+      this.searchResults[page] = loader.elements
       this.totalCount = loader.totalCount
-      this.page = 1
+      this.page = page
+      this.setPageInUrl(page)
     } catch (_error) {
       this.$store.commit('snackbar/setError', 'Loading of devices failed')
     } finally {
@@ -805,6 +823,7 @@ export default class SearchDevicesPage extends Vue {
   async setPage (page: number) {
     await this.loadPage(page)
     this.page = page
+    this.setPageInUrl(page)
   }
 
   getSearchResultForPage (pageNr: number): Device[] | undefined {
@@ -909,8 +928,64 @@ export default class SearchDevicesPage extends Vue {
 
   initUrlQueryParams (params: ISearchParameters): void {
     this.$router.push({
-      query: (new SearchParamsSerializer()).toQueryParams(params)
+      query: (new SearchParamsSerializer()).toQueryParams(params),
+      hash: this.$route.hash
     })
+  }
+
+  getPageFromUrl (): number | undefined {
+    if ('page' in this.$route.query && typeof this.$route.query.page === 'string') {
+      return parseInt(this.$route.query.page) || 0
+    }
+  }
+
+  setPageInUrl (page: number): void {
+    let query: QueryParams = {}
+    if (page) {
+      // add page to the current url params
+      query = {
+        ...this.$route.query,
+        page: String(page)
+      }
+    } else {
+      // remove page from the current url params
+      const {
+        // eslint-disable-next-line
+        page,
+        ...params
+      } = this.$route.query
+      query = params
+    }
+    this.$router.push({
+      query,
+      hash: this.$route.hash
+    })
+  }
+
+  getItemHashFromUrl (): undefined | string {
+    if (!this.$route.hash) {
+      return
+    }
+    const hash: string = this.$route.hash.replace('#item-', '')
+    if (isNaN(parseInt(hash))) {
+      return
+    }
+    return hash
+  }
+
+  isItemSelected (id: string): boolean {
+    return this.getItemHashFromUrl() === id
+  }
+
+  initShowResultItem () {
+    const itemId = this.getItemHashFromUrl()
+    if (itemId) {
+      this.showResultItem(itemId)
+      // wait until the list is rendered
+      Vue.nextTick(() => {
+        this.$vuetify.goTo('#item-' + itemId)
+      })
+    }
   }
 }
 
