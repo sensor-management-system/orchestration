@@ -823,7 +823,7 @@ export default class SearchDevicesPage extends Vue {
   async setPage (page: number) {
     await this.loadPage(page)
     this.page = page
-    this.setPageInUrl(page)
+    this.setPageInUrl(page, false)
   }
 
   getSearchResultForPage (pageNr: number): Device[] | undefined {
@@ -939,7 +939,7 @@ export default class SearchDevicesPage extends Vue {
     }
   }
 
-  setPageInUrl (page: number): void {
+  setPageInUrl (page: number, preserveHash: boolean = true): void {
     let query: QueryParams = {}
     if (page) {
       // add page to the current url params
@@ -958,7 +958,7 @@ export default class SearchDevicesPage extends Vue {
     }
     this.$router.push({
       query,
-      hash: this.$route.hash
+      hash: preserveHash ? this.$route.hash : ''
     })
   }
 
