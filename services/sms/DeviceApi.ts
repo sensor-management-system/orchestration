@@ -455,6 +455,10 @@ export class DeviceSearcher {
     return this.findAllOnPage(1, pageSize)
   }
 
+  findMatchingAsPaginationLoaderOnPage (page: number, pageSize: number): Promise<IPaginationLoader<Device>> {
+    return this.findAllOnPage(page, pageSize)
+  }
+
   private findAllOnPage (page: number, pageSize: number): Promise<IPaginationLoader<Device>> {
     return this.axiosApi.get(
       '',
@@ -475,6 +479,11 @@ export class DeviceSearcher {
 
       const totalCount = rawData.meta.count
 
+      // check if the provided page param is valid
+      if (totalCount > 0 && elements.length === 0) {
+        throw new RangeError('page is out of bounds')
+      }
+
       let funToLoadNext = null
       if (elements.length > 0) {
         funToLoadNext = () => this.findAllOnPage(page + 1, pageSize)
@@ -488,7 +497,7 @@ export class DeviceSearcher {
       return {
         elements,
         totalCount,
-        page,
+        page: elements.length ? page : 0,
         funToLoadNext,
         funToLoadPage
       }
