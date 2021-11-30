@@ -1,7 +1,8 @@
 # Web client of the Sensor Management System software developed within
 # the Helmholtz DataHub Initiative by GFZ and UFZ.
 #
-# Copyright (C) 2020
+# Copyright (C) 2020-2021
+# - Wilhelm Becker (GFZ, wilhelm.becker@gfz-potsdam.de)
 # - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 # - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -41,8 +42,8 @@ services:
       - ./gfz-staging-oidc.env
     environment:
       BASE_URL: "/"
-      SMS_BACKEND_URL: "http://rz-vm64.gfz-potsdam.de:5000/rdm/svm-api/v1"
-      CV_BACKEND_URL: "http://rz-vm64.gfz-potsdam.de:8000/api/v1"
+      SMS_BACKEND_URL: "http://rz-vm64.gfz-potsdam.de:3001/backend/api/v1"
+      CV_BACKEND_URL: "http://rz-vm64.gfz-potsdam.de:3001/cv/api/v1"
       STAY_WITH_HTTP: "true"
       INSTITUTE: "gfz"
       NUXT_ENV_AUTHORITY: "https://idp-dev.gfz-potsdam.de/cas/oidc/authorize"
