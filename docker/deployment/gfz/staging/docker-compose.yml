@@ -2,6 +2,7 @@
 # the Helmholtz DataHub Initiative by GFZ and UFZ.
 # 
 # Copyright (C) 2020-2021
+# - Wilhelm Becker (GFZ, wilhelm.becker@gfz-potsdam.de)
 # - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 # - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -30,11 +31,11 @@ version : '3.3'
 
 services:
   nginx:
-    image: ${CI_REGISTRY_IMAGE}/nginx:gfz-latest
+    image: ${CI_REGISTRY_IMAGE}/nginx:${NGINX_IMAGE_TAG:-gfz-latest}
     restart: unless-stopped
     ports:
-      - 443:443
-      - 8443:8443
+      - ${APPLICATION_PORTS:-443}:${APPLICATION_PORTS:-443}
+      - ${MINIO_PORT:-8443}:${MINIO_PORT:-8443}
     volumes:
       - /etc/ssl/gfz_hosts_default.chained.crt:/etc/ssl/default.crt:ro
       - /etc/ssl/private/gfz_hosts_default.key:/etc/ssl/private/default.key:ro
@@ -47,7 +48,7 @@ services:
       - nginx
 
   vocabulary:
-    image: ${CI_REGISTRY_IMAGE}/vocabulary:gfz-latest
+    image: $VOCABULARY_IMAGE
     restart: unless-stopped
     environment:
       CV_BASE_URL: cv/
@@ -61,7 +62,7 @@ services:
       SQL_PASSWORD: $VOCABULARY_DB_PASSWORD
       SQL_HOST: vocabulary-db
       SQL_PORT: 5432
-      CORS_ORIGIN_WHITELIST: 'https://rz-vm64.gfz-potsdam.de'
+      CORS_ORIGIN_WHITELIST: ${HTTP_ORIGINS_VOCABULARY:-'https://rz-vm64.gfz-potsdam.de'}
     volumes:
       - vocabulary-static-files:/static/cv
     networks:
@@ -178,7 +179,7 @@ services:
       - backend
 
   backend:
-    image: ${CI_REGISTRY_IMAGE}/backend:gfz-latest
+    image: $BACKEND_IMAGE
     restart: unless-stopped
     environment:
       URL_PREFIX: /backend/api/v1
@@ -196,6 +197,7 @@ services:
       SECRET_KEY: ${BACKEND_SECRET_KEY}
       ALLOWED_MIME_TYPES: ${ALLOWED_MIME_TYPES}
       ELASTICSEARCH_URL: http://elastic-search:9200
+      HTTP_ORIGINS: ${HTTP_ORIGINS}
     depends_on:
       - backend-db
     volumes:

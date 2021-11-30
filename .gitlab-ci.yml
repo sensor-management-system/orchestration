@@ -3,6 +3,7 @@
 #
 # Copyright (C) 2020-2021
 # - Kotyba Alhaj Taha (UFZ, kotyba.alhaj-taha@ufz.de)
+# - Wilhelm Becker (GFZ, wilhelm.becker@gfz-potsdam.de)
 # - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 # - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 # - Helmholtz Centre for Environmental Research GmbH - UFZ
@@ -74,9 +75,48 @@ build-deploy-image-nginx-gfz-staging:
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
       when: never
+    - if: '$CI_PIPELINE_SOURCE == "pipeline"'
+      when: never
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
       when: always
     
+
+build-deploy-image-nginx-gfz-staging-develop:
+  stage: build
+  extends: .docker_build
+  variables:
+    NGINX_IMAGE_TAG: "gfz-latest-develop"
+  before_script:
+    - *docker_login_gitlab_registry
+    - apk add --update wget && rm -rf /var/cache/apk/*
+  script:
+    # Frontend project is passed via CICD var and should be configured with the gitlab repository setup
+    - 'wget --header="JOB-TOKEN: $CI_JOB_TOKEN" ${CI_API_V4_URL}/projects/${PROJECT_ID_FRONTEND}/packages/generic/gfz-statics/manual/signed-dist.tar'
+    # Use dist folder for multiple distributions
+    - mkdir -p dist/manual/
+    - tar -xvf signed-dist.tar
+    - sha256sum -c dist-sha256sum.txt
+    - tar -zxvf dist.tar.gz -C dist/manual --strip-components=1
+    # Remove dist tar files of manual version
+    - rm signed-dist.tar dist.tar.gz
+    # Frontend project is passed via CICD var and should be configured with the gitlab repository setup
+    - 'wget --header="JOB-TOKEN: $CI_JOB_TOKEN" ${CI_API_V4_URL}/projects/${PROJECT_ID_FRONTEND}/packages/generic/gfz-statics/latest/signed-dist.tar'
+    # Use dist folder for multiple distributions
+    - mkdir -p dist/latest/
+    - tar -xvf signed-dist.tar
+    - sha256sum -c dist-sha256sum.txt
+    - tar -zxvf dist.tar.gz -C dist/latest --strip-components=1
+    - docker build --tag "$CI_REGISTRY_IMAGE/nginx:gfz-latest-develop" -f docker/build/nginx/gfz/staging-dev/Dockerfile .
+    - docker push "$CI_REGISTRY_IMAGE/nginx:$NGINX_IMAGE_TAG"
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: never
+    # Exclude pipeline source, to prohibit triggering from different repo default branch
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_PIPELINE_SOURCE != "pipeline"'
+      when: always
+    - if: '$CI_PIPELINE_SOURCE == "pipeline" && $UPSTREAM_DEPLOYMENT_ONLY != "true"'
+      when: always
+
 
 build-deploy-image-nginx-gfz-prod:
   stage: build
@@ -97,6 +137,8 @@ build-deploy-image-nginx-gfz-prod:
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
       when: never
+    - if: '$CI_PIPELINE_SOURCE == "pipeline"'
+      when: never
     - if: '$CI_COMMIT_REF_PROTECTED && $CI_COMMIT_TAG'
       when: always
 
@@ -110,6 +152,8 @@ build-deploy-image-vocabulary-gfz-staging:
     - docker push "$CI_REGISTRY_IMAGE/vocabulary:gfz-latest"
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: never
+    - if: '$CI_PIPELINE_SOURCE == "pipeline"'
       when: never
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
       when: always
@@ -126,6 +170,8 @@ build-deploy-image-vocabulary-gfz-prod:
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
       when: never
+    - if: '$CI_PIPELINE_SOURCE == "pipeline"'
+      when: never
     - if: '$CI_COMMIT_REF_PROTECTED && $CI_COMMIT_TAG'
       when: always
 
@@ -139,6 +185,8 @@ build-deploy-image-backend-gfz-staging:
     - docker push "$CI_REGISTRY_IMAGE/backend:gfz-latest"
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: never
+    - if: '$CI_PIPELINE_SOURCE == "pipeline"'
       when: never
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
       when: always
@@ -155,6 +203,8 @@ build-deploy-image-backend-gfz-prod:
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
       when: never
+    - if: '$CI_PIPELINE_SOURCE == "pipeline"'
+      when: never
     - if: '$CI_COMMIT_REF_PROTECTED && $CI_COMMIT_TAG'
       when: always
 
@@ -168,6 +218,8 @@ build-deploy-image-mc-gfz-staging:
     - docker push "$CI_REGISTRY_IMAGE/mc:gfz-latest"
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: never
+    - if: '$CI_PIPELINE_SOURCE == "pipeline"'
       when: never
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
       when: always
@@ -202,6 +254,7 @@ backup-gfz-staging:
     - shell
   variables:
     COMPOSE_PROJECT_NAME: sms-staging
+    VOCABULARY_IMAGE: ${CI_REGISTRY_IMAGE}/vocabulary:gfz-latest
     VOCABULARY_SECRET_KEY: ${GFZ_STAGING_VOCABULARY_SECRET}
     VOCABULARY_DB_USER: ${GFZ_STAGING_VOCABULARY_POSTGRES_USER}
     VOCABULARY_DB_PASSWORD: ${GFZ_STAGING_VOCABULARY_POSTGRES_PASSWORD}
@@ -209,6 +262,7 @@ backup-gfz-staging:
     IDL_DB_PASSWORD: ${GFZ_STAGING_IDL_POSTGRES_PASSWORD}
     MINIO_ROOT_USER: ${GFZ_STAGING_MINIO_ROOT_USER}
     MINIO_ROOT_PASSWORD: ${GFZ_STAGING_MINIO_ROOT_PASSWORD}
+    BACKEND_IMAGE: ${CI_REGISTRY_IMAGE}/backend:gfz-latest
     BACKEND_DB_USER: ${GFZ_STAGING_BACKEND_POSTGRES_USER}
     BACKEND_DB_PASSWORD: ${GFZ_STAGING_BACKEND_POSTGRES_PASSWORD}
     BACKEND_SECRET_KEY: ${GFZ_STAGING_BACKEND_SECRET}
@@ -252,6 +306,8 @@ backup-gfz-staging:
         mc
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: never
+    - if: '$CI_PIPELINE_SOURCE == "pipeline"'
       when: never
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
       when: always
@@ -321,6 +377,8 @@ backup-gfz-prod:
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
       when: always
+    - if: '$CI_PIPELINE_SOURCE == "pipeline"'
+      when: never
     - if: '$CI_COMMIT_REF_PROTECTED && $CI_COMMIT_TAG'
       when: always
 
@@ -336,6 +394,7 @@ deploy-gfz-staging:
     - shell
   variables:
     COMPOSE_PROJECT_NAME: sms-staging
+    VOCABULARY_IMAGE: ${CI_REGISTRY_IMAGE}/vocabulary:gfz-latest
     VOCABULARY_SECRET_KEY: ${GFZ_STAGING_VOCABULARY_SECRET}
     VOCABULARY_DB_USER: ${GFZ_STAGING_VOCABULARY_POSTGRES_USER}
     VOCABULARY_DB_PASSWORD: ${GFZ_STAGING_VOCABULARY_POSTGRES_PASSWORD}
@@ -343,6 +402,7 @@ deploy-gfz-staging:
     IDL_DB_PASSWORD: ${GFZ_STAGING_IDL_POSTGRES_PASSWORD}
     MINIO_ROOT_USER: ${GFZ_STAGING_MINIO_ROOT_USER}
     MINIO_ROOT_PASSWORD: ${GFZ_STAGING_MINIO_ROOT_PASSWORD}
+    BACKEND_IMAGE: ${CI_REGISTRY_IMAGE}/backend:gfz-latest
     BACKEND_DB_USER: ${GFZ_STAGING_BACKEND_POSTGRES_USER}
     BACKEND_DB_PASSWORD: ${GFZ_STAGING_BACKEND_POSTGRES_PASSWORD}
     BACKEND_SECRET_KEY: ${GFZ_STAGING_BACKEND_SECRET}
@@ -366,8 +426,63 @@ deploy-gfz-staging:
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
       when: never
+    - if: '$CI_PIPELINE_SOURCE == "pipeline"'
+      when: never
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
       when: always
+
+deploy-gfz-staging-develop:
+  stage: deploy
+  environment:
+    name: gfz-staging
+    url: https://rz-vm64.gfz-potsdam.de
+  tags:
+    - deploy
+    - staging
+    - gfz
+    - shell
+  variables:
+    COMPOSE_PROJECT_NAME: sms-staging
+    VOCABULARY_IMAGE: $CI_REGISTRY/hub-terra/sms/sms-cv:gfz-latest
+    VOCABULARY_SECRET_KEY: ${GFZ_STAGING_VOCABULARY_SECRET}
+    VOCABULARY_DB_USER: ${GFZ_STAGING_VOCABULARY_POSTGRES_USER}
+    VOCABULARY_DB_PASSWORD: ${GFZ_STAGING_VOCABULARY_POSTGRES_PASSWORD}
+    CORS_ORIGIN_WHITELIST: "https://rz-vm64.gfz-potsdam.de localhost"
+    MINIO_ROOT_USER: ${GFZ_STAGING_MINIO_ROOT_USER}
+    MINIO_ROOT_PASSWORD: ${GFZ_STAGING_MINIO_ROOT_PASSWORD}
+    BACKEND_IMAGE: $CI_REGISTRY/hub-terra/sms/backend:gfz-latest
+    BACKEND_DB_USER: ${GFZ_STAGING_BACKEND_POSTGRES_USER}
+    BACKEND_DB_PASSWORD: ${GFZ_STAGING_BACKEND_POSTGRES_PASSWORD}
+    BACKEND_SECRET_KEY: ${GFZ_STAGING_BACKEND_SECRET}
+    HTTP_ORIGINS: ${GFZ_STAGING_HTTP_ORIGINS}
+    HTTP_ORIGINS_VOCABULARY: ${GFZ_STAGING_HTTP_ORIGINS_VOCABULARY}
+    OIDC_CLIENT_ID: ${GFZ_STAGING_OIDC_CLIENT_ID}
+    NGINX_IMAGE_TAG: gfz-latest-develop
+    APPLICATION_PORTS: 3000-3001
+    MINIO_PORT: 3002
+  before_script:
+    - *docker_login_gitlab_registry
+  script:
+    - ./scripts/ensure_vm_max_map_count.sh
+    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml -p sms-staging-develop down --remove-orphans
+    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml -p sms-staging-develop rm -f
+    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml pull
+    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml -p sms-staging-develop up -d
+    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml -p sms-staging-develop exec -T vocabulary python3 manage.py migrate
+    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml -p sms-staging-develop exec -T vocabulary python3 manage.py loaddata initial_data.json
+    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml -p sms-staging-develop exec -T vocabulary python3 manage.py loaddata default_community_data.json
+    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml -p sms-staging-develop exec -T vocabulary python3 manage.py loaddata hydro_community_data.json
+    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml -p sms-staging-develop exec -T vocabulary python3 manage.py collectstatic --no-input
+    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml -p sms-staging-develop exec -T backend python3 manage.py db upgrade
+    - sleep 1m
+    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml -p sms-staging-develop exec -T backend python3 manage.py es reindex
+    - docker rmi $(docker images -q -f dangling=true) || true
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: never
+    # Exclude pipeline source, to prohibit triggering the job twice
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_PIPELINE_SOURCE != "pipeline"'
+    - if: '$CI_PIPELINE_SOURCE == "pipeline"'
 
 deploy-gfz-prod:
   stage: deploy
@@ -408,6 +523,8 @@ deploy-gfz-prod:
     - docker rmi $(docker images -q -f dangling=true) || true
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: never
+    - if: '$CI_PIPELINE_SOURCE == "pipeline"'
       when: never
     - if: '$CI_COMMIT_REF_PROTECTED && $CI_COMMIT_TAG'
       when: always
