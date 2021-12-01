@@ -442,7 +442,7 @@ deploy-gfz-staging-develop:
     - gfz
     - shell
   variables:
-    COMPOSE_PROJECT_NAME: sms-staging
+    COMPOSE_PROJECT_NAME: sms-staging-develop
     VOCABULARY_IMAGE: $CI_REGISTRY/hub-terra/sms/sms-cv:gfz-latest
     VOCABULARY_SECRET_KEY: ${GFZ_STAGING_VOCABULARY_SECRET}
     VOCABULARY_DB_USER: ${GFZ_STAGING_VOCABULARY_POSTGRES_USER}
@@ -466,18 +466,18 @@ deploy-gfz-staging-develop:
     - *docker_login_gitlab_registry
   script:
     - ./scripts/ensure_vm_max_map_count.sh
-    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml -p sms-staging-develop down --remove-orphans
-    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml -p sms-staging-develop rm -f
+    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml down --remove-orphans
+    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml rm -f
     - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml pull
-    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml -p sms-staging-develop up -d
-    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml -p sms-staging-develop exec -T vocabulary python3 manage.py migrate
-    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml -p sms-staging-develop exec -T vocabulary python3 manage.py loaddata initial_data.json
-    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml -p sms-staging-develop exec -T vocabulary python3 manage.py loaddata default_community_data.json
-    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml -p sms-staging-develop exec -T vocabulary python3 manage.py loaddata hydro_community_data.json
-    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml -p sms-staging-develop exec -T vocabulary python3 manage.py collectstatic --no-input
-    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml -p sms-staging-develop exec -T backend python3 manage.py db upgrade
+    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml up -d
+    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T vocabulary python3 manage.py migrate
+    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T vocabulary python3 manage.py loaddata initial_data.json
+    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T vocabulary python3 manage.py loaddata default_community_data.json
+    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T vocabulary python3 manage.py loaddata hydro_community_data.json
+    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T vocabulary python3 manage.py collectstatic --no-input
+    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T backend python3 manage.py db upgrade
     - sleep 1m
-    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml -p sms-staging-develop exec -T backend python3 manage.py es reindex
+    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T backend python3 manage.py es reindex
     - docker rmi $(docker images -q -f dangling=true) || true
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
