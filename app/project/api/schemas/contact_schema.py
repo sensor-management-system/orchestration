@@ -27,9 +27,9 @@ class ContactSchema(Schema):
         attribute="platforms",
         related_view="api.contact_platforms",
         related_view_kwargs={"id": "<id>"},
-        include_resource_linkage=True,
+        include_resource_linkage=False,
         many=True,
-        schema="PlatformSchema",
+        schema="PlatformPublicSchema",
         type_="platform",
         id_field="id",
     )
@@ -38,8 +38,8 @@ class ContactSchema(Schema):
         related_view="api.contact_configurations",
         related_view_kwargs={"id": "<id>"},
         many=True,
-        include_resource_linkage=True,
-        schema="ConfigurationSchema",
+        include_resource_linkage=False,
+        schema="ConfigurationPublicSchema",
         type_="configuration",
         id_field="id",
     )
@@ -48,20 +48,20 @@ class ContactSchema(Schema):
         related_view="api.contact_devices",
         related_view_kwargs={"id": "<id>"},
         many=True,
-        include_resource_linkage=True,
-        schema="DeviceSchema",
+        include_resource_linkage=False,
+        schema="DevicePublicSchema",
         type_="device",
         id_field="id",
     )
     # This relationship should be optional as we want to
-    # allow to add extern contacts without user accounts.
+    # allow adding extern contacts without user accounts.
     user = Relationship(
-        required=False,
-        allow_none=True,
         self_view="api.contact_user",
         self_view_kwargs={"id": "<id>"},
-        include_resource_linkage=True,
-        schema="UserSchema",
+        related_view="api.user_detail",
+        related_view_kwargs={"id": "<user.id>"},
+        include_resource_linkage=False,
+        schema="UserPublicSchema",
         type_="user",
         id_field="id",
     )

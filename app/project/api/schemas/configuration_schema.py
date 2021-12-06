@@ -201,13 +201,13 @@ class ConfigurationToNestedDictSerializer:
             configuration_platforms = []
             configuration_devices = []
             for cd in configuration.configuration_devices:
-                configuration_device = (
-                    ConfigurationDeviceSchema().nested_dict_serializer(cd)
+                configuration_device = ConfigurationDeviceSchema().nested_dict_serializer(
+                    cd
                 )
                 configuration_devices.append(configuration_device)
             for cp in configuration.configuration_platforms:
-                configuration_platform = (
-                    ConfigurationPlatformSchema().nested_dict_serializer(cp)
+                configuration_platform = ConfigurationPlatformSchema().nested_dict_serializer(
+                    cp
                 )
                 configuration_platforms.append(configuration_platform)
             return {
@@ -236,3 +236,12 @@ class ConfigurationToNestedDictSerializer:
                     configuration.src_elevation
                 ),
             }
+
+
+class ConfigurationPublicSchema(Schema):
+    class Meta:
+        type_ = "configuration"
+        self_view = "api.configuration_detail"
+        self_view_kwargs = {"id": "<id>"}
+
+    id = fields.Integer(as_string=True)

@@ -207,3 +207,14 @@ class PlatformToNestedDictSerializer:
                     ContactSchema().dict_serializer(c) for c in platform.contacts
                 ],
             }
+
+
+class PlatformPublicSchema(Schema):
+    class Meta:
+
+        type_ = "platform"
+        self_view = "api.platform_detail"
+        self_view_kwargs = {"id": "<id>"}
+        self_view_many = "api.platform_list"
+
+    id = fields.Integer(as_string=True)

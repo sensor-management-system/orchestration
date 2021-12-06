@@ -27,6 +27,7 @@ class DeviceSchema(Schema):
         type_ = "device"
         self_view = "api.device_detail"
         self_view_kwargs = {"id": "<id>"}
+        self_view_many = "api.device_list"
 
     id = fields.Integer(as_string=True)
     description = fields.Str(allow_none=True)
@@ -235,3 +236,12 @@ class DeviceToNestedDictSerializer:
                     for c in device.customfields
                 ],
             }
+
+
+class DevicePublicSchema(Schema):
+    class Meta:
+        type_ = "device"
+        self_view = "api.device_detail"
+        self_view_kwargs = {"id": "<id>"}
+
+    id = fields.Integer(as_string=True)
