@@ -3,10 +3,12 @@
 """This module contains the logic of resource management
 Modifications: Adopted form Custom content negotiation #171 ( miLibris /
 flask-rest-jsonapi ) """
-
+import json
+from flask.wrappers import Response as FlaskResponse
+from werkzeug.wrappers import Response
 import pandas as pd
 from cherrypicker import CherryPicker
-from flask import request, url_for
+from flask import request, url_for, make_response
 from flask_rest_jsonapi.decorators import (
     check_method_requirements,
     jsonapi_exception_formatter,
@@ -16,6 +18,7 @@ from flask_rest_jsonapi.querystring import QueryStringManager as QSManager
 from flask_rest_jsonapi.resource import Resource as ResourceBase
 from flask_rest_jsonapi.resource import ResourceMeta as ResourceMetaBase
 from flask_rest_jsonapi.schema import compute_schema
+from flask_rest_jsonapi.utils import JSONEncoder
 from marshmallow import ValidationError
 from marshmallow_jsonapi.exceptions import IncorrectTypeError
 from marshmallow_jsonapi.fields import BaseRelationship
@@ -116,7 +119,8 @@ class ResourceList(with_metaclass(ResourceMetaBase, Resource)):
         qs = QSManager(request.args, self.schema)
 
         parent_filter = self._get_parent_filter(request.url, kwargs)
-        objects_count, objects = self.get_collection(qs, kwargs, filters=parent_filter)
+        _, objects = self.get_collection(qs, kwargs, filters=parent_filter)
+        objects_count = len(objects)
         if "HTTP_ACCEPT" in request.headers.environ:
             http_accept = request.headers.environ["HTTP_ACCEPT"]
             if http_accept == "text/csv":
@@ -156,7 +160,7 @@ class ResourceList(with_metaclass(ResourceMetaBase, Resource)):
         )
 
         try:
-            data = schema.load(json_data)
+            data = schema.load(json_data, partial=True)
         except IncorrectTypeError as e:
             errors = e.messages
             for error in errors["errors"]:
