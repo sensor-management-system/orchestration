@@ -58,8 +58,6 @@ class ContactSchema(Schema):
     user = Relationship(
         self_view="api.contact_user",
         self_view_kwargs={"id": "<id>"},
-        related_view="api.user_detail",
-        related_view_kwargs={"id": "<user.id>"},
         include_resource_linkage=False,
         schema="UserPublicSchema",
         type_="user",
