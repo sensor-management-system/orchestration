@@ -211,10 +211,13 @@ permissions and limitations under the Licence.
     <cookie-law
       button-text="Okay"
       button-class="v-btn v-btn--is-elevated v-btn--has-bg v-size--default primary"
+      storage-name="cookie-and-terms-of-use-1:accepted"
     >
       <template #message>
-        <!-- eslint-disable-next-line -->
-        This site uses cookies to ensure technical functionality. To read more about what we store in the cookies, have a look at our <nuxt-link to="info/privacy-policy">Privacy Policy</nuxt-link>.
+        <!-- eslint-disable -->
+        This site uses cookies to ensure technical functionality. To read more about what we store in the cookies, have a look at our <nuxt-link to="/info/privacy-policy">Privacy Policy</nuxt-link>.
+        By using this service, I also accept the <nuxt-link to="/info/terms-of-use">Terms of Use</nuxt-link>.
+        <!-- eslint-enable -->
       </template>
     </cookie-law>
     <v-footer
@@ -246,6 +249,15 @@ permissions and limitations under the Licence.
             color="secondary"
           >
             Privacy Policy
+          </v-btn>&nbsp;|&nbsp;
+          <v-btn
+            to="/info/terms-of-use"
+            text
+            class="ma-2"
+            small
+            color="secondary"
+          >
+            Terms of Use
           </v-btn>&nbsp;|&nbsp;
           <span class="ma-2">&copy; {{ new Date().getFullYear() }}</span>
         </v-col>
