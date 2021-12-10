@@ -103,6 +103,8 @@ deploy-to-rdm-test:
     - rdm-test
   rules:
     - if: "$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH"
+      when: manual
+      allow_failure: true
   image: alpine
   script:
     ## Install SSH agent
