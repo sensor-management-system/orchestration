@@ -44,6 +44,18 @@ permissions and limitations under the Licence.
       >
         Edit
       </v-btn>
+      <DotMenu
+        v-if="$auth.loggedIn"
+      >
+        <template #actions>
+          <DotMenuActionCopy
+            :path="'/platforms/copy/' + platformId"
+          />
+          <DotMenuActionDelete
+            @click="initDeleteDialog"
+          />
+        </template>
+      </DotMenu>
     </v-card-actions>
     <PlatformBasicData
       v-model="platform"
@@ -59,7 +71,25 @@ permissions and limitations under the Licence.
       >
         Edit
       </v-btn>
+      <DotMenu
+        v-if="$auth.loggedIn"
+      >
+        <template #actions>
+          <DotMenuActionCopy
+            :path="'/platforms/copy/' + platformId"
+          />
+          <DotMenuActionDelete
+            @click="initDeleteDialog"
+          />
+        </template>
+      </DotMenu>
     </v-card-actions>
+    <PlatformDeleteDialog
+      v-model="showDeleteDialog"
+      :platform-to-delete="platform"
+      @cancel-deletion="closeDialog"
+      @submit-deletion="deleteAndCloseDialog"
+    />
   </div>
 </template>
 
@@ -68,9 +98,17 @@ import { Component, Prop, Vue } from 'nuxt-property-decorator'
 
 import { Platform } from '@/models/Platform'
 import PlatformBasicData from '@/components/PlatformBasicData.vue'
+import DotMenu from '@/components/DotMenu.vue'
+import DotMenuActionCopy from '@/components/DotMenuActionCopy.vue'
+import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
+import PlatformDeleteDialog from '@/components/plarform/PlatformDeleteDialog.vue'
 
 @Component({
   components: {
+    PlatformDeleteDialog,
+    DotMenuActionDelete,
+    DotMenuActionCopy,
+    DotMenu,
     PlatformBasicData
   }
 })
@@ -80,6 +118,8 @@ export default class PlatformShowBasicPage extends Vue {
     type: Object
   })
   readonly value!: Platform
+
+  private showDeleteDialog:boolean=false;
 
   get platform (): Platform {
     return this.value
@@ -91,6 +131,28 @@ export default class PlatformShowBasicPage extends Vue {
 
   get platformId () {
     return this.$route.params.platformId
+  }
+
+  initDeleteDialog () {
+    this.showDeleteDialog = true
+  }
+
+  closeDialog () {
+    this.showDeleteDialog = false
+  }
+
+  deleteAndCloseDialog () {
+    this.showDeleteDialog = false
+    if (this.platform === null) {
+      return
+    }
+
+    this.$api.platforms.deleteById(this.platform.id!).then(() => {
+      this.$router.push('/platforms')
+      this.$store.commit('snackbar/setSuccess', 'Platform deleted')
+    }).catch((_error) => {
+      this.$store.commit('snackbar/setError', 'Platform could not be deleted')
+    })
   }
 }
 </script>

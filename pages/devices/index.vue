@@ -212,72 +212,18 @@ permissions and limitations under the Licence.
                 align-self="end"
                 class="text-right"
               >
-                <v-menu
-                  close-on-click
-                  close-on-content-click
-                  offset-x
-                  left
-                  z-index="999"
-                >
-                  <template #activator="{ on }">
-                    <v-btn
-                      data-role="property-menu"
-                      icon
-                      small
-                      v-on="on"
-                    >
-                      <v-icon
-                        dense
-                        small
-                      >
-                        mdi-dots-vertical
-                      </v-icon>
-                    </v-btn>
+                <DotMenu>
+                  <template #actions>
+                    <DotMenuActionCopy
+                      :readonly="!$auth.loggedIn"
+                      :path="'/devices/copy/' + result.id"
+                    />
+                    <DotMenuActionDelete
+                      :readonly="!$auth.loggedIn"
+                      @click="initDeleteDialog(result)"
+                    />
                   </template>
-
-                  <v-list>
-                    <v-list-item
-                      :disabled="!$auth.loggedIn"
-                      dense
-                      :to="'/devices/copy/' + result.id"
-                    >
-                      <v-list-item-content>
-                        <v-list-item-title
-                          :class="$auth.loggedIn ? 'text' : 'grey-text'"
-                        >
-                          <v-icon
-                            left
-                            small
-                            :color="$auth.loggedIn ? 'black' : 'grey'"
-                          >
-                            mdi-content-copy
-                          </v-icon>
-                          Copy
-                        </v-list-item-title>
-                      </v-list-item-content>
-                    </v-list-item>
-                    <v-list-item
-                      :disabled="!$auth.loggedIn"
-                      dense
-                      @click="showDeleteDialogFor(result.id)"
-                    >
-                      <v-list-item-content>
-                        <v-list-item-title
-                          :class="$auth.loggedIn ? 'red--text' : 'grey--text'"
-                        >
-                          <v-icon
-                            left
-                            small
-                            :color="$auth.loggedIn ? 'red' : 'grey'"
-                          >
-                            mdi-delete
-                          </v-icon>
-                          Delete
-                        </v-list-item-title>
-                      </v-list-item-content>
-                    </v-list-item>
-                  </v-list>
-                </v-menu>
+                </DotMenu>
               </v-col>
             </v-row>
             <v-row
@@ -440,38 +386,15 @@ permissions and limitations under the Licence.
               </v-card-text>
             </v-card>
           </v-expand-transition>
-          <v-dialog v-model="showDeleteDialog[result.id]" max-width="290">
-            <v-card>
-              <v-card-title class="headline">
-                Delete device
-              </v-card-title>
-              <v-card-text>
-                Do you really want to delete the device <em>{{ result.shortName }}</em>?
-              </v-card-text>
-              <v-card-actions>
-                <v-btn
-                  text
-                  @click="hideDeleteDialogFor(result.id)"
-                >
-                  No
-                </v-btn>
-                <v-spacer />
-                <v-btn
-                  color="error"
-                  text
-                  @click="deleteAndCloseDialog(result.id)"
-                >
-                  <v-icon left>
-                    mdi-delete
-                  </v-icon>
-                  Delete
-                </v-btn>
-              </v-card-actions>
-            </v-card>
-          </v-dialog>
         </v-card>
       </v-hover>
     </div>
+    <DeviceDeleteDialog
+      v-model="showDeleteDialog"
+      :device-to-delete="deviceToDelete"
+      @cancel-deletion="closeDialog"
+      @submit-deletion="deleteAndCloseDialog"
+    />
     <v-btn
       v-if="$auth.loggedIn"
       bottom
@@ -508,6 +431,10 @@ import { DeviceType } from '@/models/DeviceType'
 import { Manufacturer } from '@/models/Manufacturer'
 import { Status } from '@/models/Status'
 import { DeviceSearcher } from '@/services/sms/DeviceApi'
+import DeviceDeleteDialog from '@/components/device/DeviceDeleteDialog.vue'
+import DotMenu from '@/components/DotMenu.vue'
+import DotMenuActionCopy from '@/components/DotMenuActionCopy.vue'
+import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 
 interface IRunSearchParameters {
   searchText: string | null
@@ -547,6 +474,10 @@ class BasicSearchParameters implements IRunSearchParameters {
 
 @Component({
   components: {
+    DotMenuActionDelete,
+    DotMenuActionCopy,
+    DotMenu,
+    DeviceDeleteDialog,
     DeviceTypeSelect,
     ManufacturerSelect,
     StatusBadge,
@@ -573,11 +504,13 @@ export default class SearchDevicesPage extends Vue {
   private searchResults: Device[] = []
   private searchText: string | null = null
 
-  private showDeleteDialog: { [id: string]: boolean} = {}
+  private showDeleteDialog:boolean=false;
 
   private searchResultItemsShown: { [id: string]: boolean } = {}
 
   public readonly NO_TYPE: string = 'Unknown type'
+
+  private deviceToDelete:Device|null=null
 
   created () {
     this.initializeAppBar()
@@ -622,7 +555,6 @@ export default class SearchDevicesPage extends Vue {
 
   beforeDestroy () {
     this.unsetResultItemsShown()
-    this.showDeleteDialog = {}
     this.$store.dispatch('appbar/setDefaults')
   }
 
@@ -688,7 +620,6 @@ export default class SearchDevicesPage extends Vue {
     this.loading = true
     this.searchResults = []
     this.unsetResultItemsShown()
-    this.showDeleteDialog = {}
     this.loader = null
 
     const searchBuilder = this.$api.devices
@@ -759,23 +690,6 @@ export default class SearchDevicesPage extends Vue {
     }
   }
 
-  deleteAndCloseDialog (id: string) {
-    this.$api.devices.deleteById(id).then(() => {
-      this.showDeleteDialog = {}
-
-      const searchIndex = this.searchResults.findIndex(r => r.id === id)
-      if (searchIndex > -1) {
-        this.searchResults.splice(searchIndex, 1)
-        this.totalCount -= 1
-      }
-
-      this.$store.commit('snackbar/setSuccess', 'Device deleted')
-    }).catch((_error) => {
-      this.showDeleteDialog = {}
-      this.$store.commit('snackbar/setError', 'Device could not be deleted')
-    })
-  }
-
   getType (device: Device) {
     if (this.deviceTypeLookup.has(device.deviceTypeUri)) {
       const deviceType: DeviceType = this.deviceTypeLookup.get(device.deviceTypeUri) as DeviceType
@@ -798,12 +712,34 @@ export default class SearchDevicesPage extends Vue {
     return ''
   }
 
-  showDeleteDialogFor (id: string) {
-    Vue.set(this.showDeleteDialog, id, true)
+  initDeleteDialog (device:Device) {
+    this.showDeleteDialog = true
+    this.deviceToDelete = device
   }
 
-  hideDeleteDialogFor (id: string) {
-    Vue.set(this.showDeleteDialog, id, false)
+  closeDialog () {
+    this.showDeleteDialog = false
+    this.deviceToDelete = null
+  }
+
+  deleteAndCloseDialog () {
+    this.showDeleteDialog = false
+    if (this.deviceToDelete === null) {
+      return
+    }
+
+    this.$api.devices.deleteById(this.deviceToDelete.id!).then(() => {
+      const searchIndex = this.searchResults.findIndex(device => device.id === this.deviceToDelete?.id)
+      if (searchIndex > -1) {
+        this.searchResults.splice(searchIndex, 1)
+        this.totalCount -= 1
+      }
+      this.$store.commit('snackbar/setSuccess', 'Device deleted')
+    }).catch((_error) => {
+      this.$store.commit('snackbar/setError', 'Device could not be deleted')
+    }).finally(() => {
+      this.deviceToDelete = null
+    })
   }
 
   showResultItem (id: string) {

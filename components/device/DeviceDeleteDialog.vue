@@ -38,12 +38,12 @@ permissions and limitations under the Licence.
     max-width="290"
     @click:outside="$emit('cancel-deletion')"
   >
-    <v-card v-if="hasConfigurationToDelete">
+    <v-card v-if="hasDeviceToDelete">
       <v-card-title class="headline">
-        Delete configuration
+        Delete device
       </v-card-title>
       <v-card-text>
-        Do you really want to delete the configuration <em>{{ configurationToDelete.label }}</em>?
+        Do you really want to delete the device <em>{{ deviceToDelete.shortName }}</em>?
       </v-card-text>
       <v-card-actions>
         <v-btn
@@ -70,11 +70,10 @@ permissions and limitations under the Licence.
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'nuxt-property-decorator'
-
-import { Configuration } from '@/models/Configuration'
+import { Device } from '@/models/Device'
 
 @Component
-export default class ConfigurationsDeleteDialog extends Vue {
+export default class DeviceDeleteDialog extends Vue {
   @Prop({
     required: true,
     type: Boolean
@@ -84,7 +83,7 @@ export default class ConfigurationsDeleteDialog extends Vue {
   @Prop({
     type: Object
   })
-  configurationToDelete!: Configuration
+  deviceToDelete!: Device
 
   get showDialog (): boolean {
     return this.value
@@ -94,8 +93,8 @@ export default class ConfigurationsDeleteDialog extends Vue {
     this.$emit('input', value)
   }
 
-  get hasConfigurationToDelete () {
-    return this.configurationToDelete !== null
+  get hasDeviceToDelete () {
+    return this.deviceToDelete !== null
   }
 }
 </script>

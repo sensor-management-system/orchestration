@@ -33,73 +33,43 @@ implied. See the Licence for the specific language governing
 permissions and limitations under the Licence.
 -->
 <template>
-  <v-dialog
-    v-model="showDialog"
-    max-width="290"
-    @click:outside="$emit('cancel-deletion')"
+  <v-list-item
+    :disabled="readonly"
+    dense
+    nuxt
+    :to="path"
   >
-    <v-card v-if="hasConfigurationToDelete">
-      <v-card-title class="headline">
-        Delete configuration
-      </v-card-title>
-      <v-card-text>
-        Do you really want to delete the configuration <em>{{ configurationToDelete.label }}</em>?
-      </v-card-text>
-      <v-card-actions>
-        <v-btn
-          text
-          @click="$emit('cancel-deletion')"
+    <v-list-item-content>
+      <v-list-item-title
+        :class="readonly? 'grey-text':'text'"
+      >
+        <v-icon
+          left
+          small
+          :color="readonly ? 'grey':'black'"
         >
-          No
-        </v-btn>
-        <v-spacer />
-        <v-btn
-          color="error"
-          text
-          @click="$emit('submit-deletion')"
-        >
-          <v-icon left>
-            mdi-delete
-          </v-icon>
-          Delete
-        </v-btn>
-      </v-card-actions>
-    </v-card>
-  </v-dialog>
+          mdi-content-copy
+        </v-icon>
+        Copy
+      </v-list-item-title>
+    </v-list-item-content>
+  </v-list-item>
 </template>
-
 <script lang="ts">
-import { Component, Prop, Vue } from 'nuxt-property-decorator'
-
-import { Configuration } from '@/models/Configuration'
-
+import { Component, Vue, Prop } from 'nuxt-property-decorator'
 @Component
-export default class ConfigurationsDeleteDialog extends Vue {
+export default class DotMenuActionCopy extends Vue {
   @Prop({
     required: true,
-    type: Boolean
+    type: String
   })
-  readonly value!: boolean
+  readonly path!:string
 
   @Prop({
-    type: Object
+    default: false,
+    type: Boolean
   })
-  configurationToDelete!: Configuration
-
-  get showDialog (): boolean {
-    return this.value
-  }
-
-  set showDialog (value: boolean) {
-    this.$emit('input', value)
-  }
-
-  get hasConfigurationToDelete () {
-    return this.configurationToDelete !== null
-  }
+  // @ts-ignore
+  readonly readonly: boolean
 }
 </script>
-
-<style scoped>
-
-</style>
