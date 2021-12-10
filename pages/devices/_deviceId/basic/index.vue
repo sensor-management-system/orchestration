@@ -41,6 +41,18 @@ permissions and limitations under the Licence.
       >
         Edit
       </v-btn>
+      <DotMenu
+        v-if="$auth.loggedIn"
+      >
+        <template #actions>
+          <DotMenuActionCopy
+            :path="'/devices/copy/' + deviceId"
+          />
+          <DotMenuActionDelete
+            @click="initDeleteDialog"
+          />
+        </template>
+      </DotMenu>
     </v-card-actions>
     <DeviceBasicData
       v-model="device"
@@ -56,7 +68,25 @@ permissions and limitations under the Licence.
       >
         Edit
       </v-btn>
+      <DotMenu
+        v-if="$auth.loggedIn"
+      >
+        <template #actions>
+          <DotMenuActionCopy
+            :path="'/devices/copy/' + deviceId"
+          />
+          <DotMenuActionDelete
+            @click="initDeleteDialog"
+          />
+        </template>
+      </DotMenu>
     </v-card-actions>
+    <DeviceDeleteDialog
+      v-model="showDeleteDialog"
+      :device-to-delete="device"
+      @cancel-deletion="closeDialog"
+      @submit-deletion="deleteAndCloseDialog"
+    />
   </div>
 </template>
 
@@ -66,9 +96,17 @@ import { Component, Vue, Prop } from 'nuxt-property-decorator'
 import DeviceBasicData from '@/components/DeviceBasicData.vue'
 
 import { Device } from '@/models/Device'
+import DeviceDeleteDialog from '@/components/device/DeviceDeleteDialog.vue'
+import DotMenu from '@/components/DotMenu.vue'
+import DotMenuActionCopy from '@/components/DotMenuActionCopy.vue'
+import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 
 @Component({
   components: {
+    DotMenuActionDelete,
+    DotMenuActionCopy,
+    DotMenu,
+    DeviceDeleteDialog,
     DeviceBasicData
   }
 })
@@ -78,6 +116,8 @@ export default class DeviceShowBasicPage extends Vue {
     type: Object
   })
   readonly value!: Device
+
+  private showDeleteDialog:boolean=false;
 
   get device (): Device {
     return this.value
@@ -89,6 +129,28 @@ export default class DeviceShowBasicPage extends Vue {
 
   get deviceId () {
     return this.$route.params.deviceId
+  }
+
+  initDeleteDialog () {
+    this.showDeleteDialog = true
+  }
+
+  closeDialog () {
+    this.showDeleteDialog = false
+  }
+
+  deleteAndCloseDialog () {
+    this.showDeleteDialog = false
+    if (this.device === null) {
+      return
+    }
+
+    this.$api.devices.deleteById(this.device.id!).then(() => {
+      this.$router.push('/devices')
+      this.$store.commit('snackbar/setSuccess', 'Device deleted')
+    }).catch((_error) => {
+      this.$store.commit('snackbar/setError', 'Device could not be deleted')
+    })
   }
 }
 </script>

@@ -51,6 +51,15 @@ permissions and limitations under the Licence.
           >
             Edit
           </v-btn>
+          <DotMenu
+            v-if="$auth.loggedIn"
+          >
+            <template #actions>
+              <DotMenuActionDelete
+                @click="initDeleteDialog"
+              />
+            </template>
+          </DotMenu>
         </v-card-actions>
         <ContactBasicData
           v-model="contact"
@@ -66,8 +75,23 @@ permissions and limitations under the Licence.
           >
             Edit
           </v-btn>
+          <DotMenu
+            v-if="$auth.loggedIn"
+          >
+            <template #actions>
+              <DotMenuActionDelete
+                @click="initDeleteDialog"
+              />
+            </template>
+          </DotMenu>
         </v-card-actions>
       </div>
+      <ContacsDeleteDialog
+        v-model="showDeleteDialog"
+        :contact-to-delete="contact"
+        @cancel-deletion="closeDialog"
+        @submit-deletion="deleteAndCloseDialog"
+      />
     </v-card>
   </div>
 </template>
@@ -78,9 +102,15 @@ import { Contact } from '@/models/Contact'
 
 import ContactBasicData from '@/components/ContactBasicData.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import DotMenu from '@/components/DotMenu.vue'
+import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
+import ContacsDeleteDialog from '@/components/contacts/ContacsDeleteDialog.vue'
 
 @Component({
   components: {
+    ContacsDeleteDialog,
+    DotMenuActionDelete,
+    DotMenu,
     ContactBasicData,
     ProgressIndicator
   }
@@ -88,6 +118,8 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
 export default class ContactShowPage extends Vue {
   private contact: Contact = new Contact()
   private isLoading: boolean = true
+
+  private showDeleteDialog:boolean=false;
 
   created () {
     this.initializeAppBar()
@@ -115,6 +147,28 @@ export default class ContactShowPage extends Vue {
 
   get contactId () {
     return this.$route.params.contactId
+  }
+
+  initDeleteDialog () {
+    this.showDeleteDialog = true
+  }
+
+  closeDialog () {
+    this.showDeleteDialog = false
+  }
+
+  deleteAndCloseDialog () {
+    this.showDeleteDialog = false
+    if (this.contact === null) {
+      return
+    }
+
+    this.$api.contacts.deleteById(this.contact.id!).then(() => {
+      this.$router.push('/contacts')
+      this.$store.commit('snackbar/setSuccess', 'Contact deleted')
+    }).catch((_error) => {
+      this.$store.commit('snackbar/setError', 'Contact could not be deleted')
+    })
   }
 
   @Watch('contact', { immediate: true, deep: true })

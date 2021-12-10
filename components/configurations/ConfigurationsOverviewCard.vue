@@ -58,51 +58,14 @@ permissions and limitations under the Licence.
               align-self="end"
               class="text-right"
             >
-              <v-menu
-                close-on-click
-                close-on-content-click
-                offset-x
-                left
-                z-index="999"
-              >
-                <template #activator="{ on }">
-                  <v-btn
-                    data-role="property-menu"
-                    icon
-                    small
-                    v-on="on"
-                  >
-                    <v-icon
-                      dense
-                      small
-                    >
-                      mdi-dots-vertical
-                    </v-icon>
-                  </v-btn>
-                </template>
-                <v-list>
-                  <v-list-item
-                    :disabled="!isUserAuthenticated"
-                    dense
+              <DotMenu>
+                <template #actions>
+                  <DotMenuActionDelete
+                    :readonly="!isUserAuthenticated"
                     @click="$emit('showDeleteDialog',configuration)"
-                  >
-                    <v-list-item-content>
-                      <v-list-item-title
-                        :class="isUserAuthenticated ? 'red--text' : 'grey--text'"
-                      >
-                        <v-icon
-                          left
-                          small
-                          :color="isUserAuthenticated ? 'red' : 'grey'"
-                        >
-                          mdi-delete
-                        </v-icon>
-                        Delete
-                      </v-list-item-title>
-                    </v-list-item-content>
-                  </v-list-item>
-                </v-list>
-              </v-menu>
+                  />
+                </template>
+              </DotMenu>
             </v-col>
           </v-row>
           <v-row
@@ -218,10 +181,12 @@ import { DynamicLocation, LocationType, StationaryLocation } from '@/models/Loca
 import { dateToDateTimeString } from '@/utils/dateHelper'
 
 import StatusBadge from '@/components/StatusBadge.vue'
+import DotMenu from '@/components/DotMenu.vue'
+import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 
 @Component({
   filters: { dateToDateTimeString },
-  components: { StatusBadge }
+  components: { DotMenuActionDelete, DotMenu, StatusBadge }
 })
 export default class ConfigurationsOverviewCard extends Vue {
   @Prop({

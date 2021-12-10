@@ -212,72 +212,18 @@ permissions and limitations under the Licence.
                 align-self="end"
                 class="text-right"
               >
-                <v-menu
-                  close-on-click
-                  close-on-content-click
-                  offset-x
-                  left
-                  z-index="999"
-                >
-                  <template #activator="{ on }">
-                    <v-btn
-                      data-role="property-menu"
-                      icon
-                      small
-                      v-on="on"
-                    >
-                      <v-icon
-                        dense
-                        small
-                      >
-                        mdi-dots-vertical
-                      </v-icon>
-                    </v-btn>
+                <DotMenu>
+                  <template #actions>
+                    <DotMenuActionCopy
+                      :readonly="!$auth.loggedIn"
+                      :path="'/platforms/copy/' + result.id"
+                    />
+                    <DotMenuActionDelete
+                      :readonly="!$auth.loggedIn"
+                      @click="initDeleteDialog(result)"
+                    />
                   </template>
-
-                  <v-list>
-                    <v-list-item
-                      :disabled="!$auth.loggedIn"
-                      dense
-                      :to="'/platforms/copy/' + result.id"
-                    >
-                      <v-list-item-content>
-                        <v-list-item-title
-                          :class="$auth.loggedIn ? 'text' : 'grey-text'"
-                        >
-                          <v-icon
-                            left
-                            small
-                            :color="$auth.loggedIn ? 'black' : 'grey'"
-                          >
-                            mdi-content-copy
-                          </v-icon>
-                          Copy
-                        </v-list-item-title>
-                      </v-list-item-content>
-                    </v-list-item>
-                    <v-list-item
-                      :disabled="!$auth.loggedIn"
-                      dense
-                      @click="showDeleteDialogFor(result.id)"
-                    >
-                      <v-list-item-content>
-                        <v-list-item-title
-                          :class="$auth.loggedIn ? 'red--text' : 'grey--text'"
-                        >
-                          <v-icon
-                            left
-                            small
-                            :color="$auth.loggedIn ? 'red' : 'grey'"
-                          >
-                            mdi-delete
-                          </v-icon>
-                          Delete
-                        </v-list-item-title>
-                      </v-list-item-content>
-                    </v-list-item>
-                  </v-list>
-                </v-menu>
+                </DotMenu>
               </v-col>
             </v-row>
             <v-row
@@ -440,38 +386,15 @@ permissions and limitations under the Licence.
               </v-card-text>
             </v-card>
           </v-expand-transition>
-          <v-dialog v-model="showDeleteDialog[result.id]" max-width="290">
-            <v-card>
-              <v-card-title class="headline">
-                Delete platform
-              </v-card-title>
-              <v-card-text>
-                Do you really want to delete the platform <em>{{ result.shortName }}</em>?
-              </v-card-text>
-              <v-card-actions>
-                <v-btn
-                  text
-                  @click="hideDeleteDialogFor(result.id)"
-                >
-                  No
-                </v-btn>
-                <v-spacer />
-                <v-btn
-                  color="error"
-                  text
-                  @click="deleteAndCloseDialog(result.id)"
-                >
-                  <v-icon left>
-                    mdi-delete
-                  </v-icon>
-                  Delete
-                </v-btn>
-              </v-card-actions>
-            </v-card>
-          </v-dialog>
         </v-card>
       </v-hover>
     </div>
+    <PlatformDeleteDialog
+      v-model="showDeleteDialog"
+      :platform-to-delete="platformToDelete"
+      @cancel-deletion="closeDialog"
+      @submit-deletion="deleteAndCloseDialog"
+    />
     <v-btn
       v-if="$auth.loggedIn"
       bottom
@@ -507,6 +430,10 @@ import { Platform } from '@/models/Platform'
 import { PlatformType } from '@/models/PlatformType'
 import { Status } from '@/models/Status'
 import { PlatformSearcher } from '@/services/sms/PlatformApi'
+import PlatformDeleteDialog from '@/components/plarform/PlatformDeleteDialog.vue'
+import DotMenu from '@/components/DotMenu.vue'
+import DotMenuActionCopy from '@/components/DotMenuActionCopy.vue'
+import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 
 interface IRunSearchParameters {
   searchText: string | null
@@ -546,6 +473,10 @@ class BasicSearchParameters implements IRunSearchParameters {
 
 @Component({
   components: {
+    DotMenuActionDelete,
+    DotMenuActionCopy,
+    DotMenu,
+    PlatformDeleteDialog,
     ManufacturerSelect,
     PlatformTypeSelect,
     StatusBadge,
@@ -572,11 +503,13 @@ export default class SearchPlatformsPage extends Vue {
   private searchResults: Platform[] = []
   private searchText: string | null = null
 
-  private showDeleteDialog: {[index: string]: boolean } = {}
+  private showDeleteDialog: boolean = false;
 
   private searchResultItemsShown: { [id: string]: boolean } = {}
 
   public readonly NO_TYPE: string = 'Unknown type'
+
+  private platformToDelete: Platform | null = null
 
   created () {
     this.initializeAppBar()
@@ -621,7 +554,6 @@ export default class SearchPlatformsPage extends Vue {
 
   beforeDestroy () {
     this.unsetResultItemsShown()
-    this.showDeleteDialog = {}
     this.$store.dispatch('appbar/setDefaults')
   }
 
@@ -686,7 +618,6 @@ export default class SearchPlatformsPage extends Vue {
     this.loading = true
     this.searchResults = []
     this.unsetResultItemsShown()
-    this.showDeleteDialog = {}
     this.loader = null
 
     const searchBuilder = this.$api.platforms
@@ -757,11 +688,24 @@ export default class SearchPlatformsPage extends Vue {
     }
   }
 
-  deleteAndCloseDialog (id: string) {
-    this.$api.platforms.deleteById(id).then(() => {
-      this.showDeleteDialog = {}
+  initDeleteDialog (platform: Platform) {
+    this.showDeleteDialog = true
+    this.platformToDelete = platform
+  }
 
-      const searchIndex = this.searchResults.findIndex(r => r.id === id)
+  closeDialog () {
+    this.showDeleteDialog = false
+    this.platformToDelete = null
+  }
+
+  deleteAndCloseDialog () {
+    this.showDeleteDialog = false
+    if (this.platformToDelete === null) {
+      return
+    }
+
+    this.$api.platforms.deleteById(this.platformToDelete.id!).then(() => {
+      const searchIndex = this.searchResults.findIndex(r => r.id === this.platformToDelete?.id)
       if (searchIndex > -1) {
         this.searchResults.splice(searchIndex, 1)
         this.totalCount -= 1
@@ -769,8 +713,9 @@ export default class SearchPlatformsPage extends Vue {
 
       this.$store.commit('snackbar/setSuccess', 'Platform deleted')
     }).catch((_error) => {
-      this.showDeleteDialog = {}
       this.$store.commit('snackbar/setError', 'Platform could not be deleted')
+    }).finally(() => {
+      this.platformToDelete = null
     })
   }
 
@@ -794,14 +739,6 @@ export default class SearchPlatformsPage extends Vue {
       return platform.statusName
     }
     return ''
-  }
-
-  showDeleteDialogFor (id: string) {
-    Vue.set(this.showDeleteDialog, id, true)
-  }
-
-  hideDeleteDialogFor (id: string) {
-    Vue.set(this.showDeleteDialog, id, false)
   }
 
   showResultItem (id: string) {

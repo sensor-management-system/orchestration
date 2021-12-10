@@ -104,58 +104,21 @@ permissions and limitations under the Licence.
                 align-self="end"
                 class="text-right"
               >
-                <v-menu
-                  close-on-click
-                  close-on-content-click
-                  offset-x
-                  left
-                  z-index="999"
-                >
-                  <template #activator="{ on }">
-                    <v-btn
-                      data-role="property-menu"
-                      icon
-                      small
-                      v-on="on"
-                    >
-                      <v-icon
-                        dense
-                        small
-                      >
-                        mdi-dots-vertical
-                      </v-icon>
-                    </v-btn>
+                <DotMenu>
+                  <template #actions>
+                    <DotMenuActionDelete
+                      :readonly="!$auth.loggedIn"
+                      @click="initDeleteDialog(result)"
+                    />
                   </template>
-                  <v-list>
-                    <v-list-item
-                      :disabled="!$auth.loggedIn"
-                      dense
-                      @click="showDeleteDialogFor(result.id)"
-                    >
-                      <v-list-item-content>
-                        <v-list-item-title
-                          :class="$auth.loggedIn ? 'red--text' : 'grey--text'"
-                        >
-                          <v-icon
-                            left
-                            small
-                            :color="$auth.loggedIn ? 'red' : 'grey'"
-                          >
-                            mdi-delete
-                          </v-icon>
-                          Delete
-                        </v-list-item-title>
-                      </v-list-item-content>
-                    </v-list-item>
-                  </v-list>
-                </v-menu>
+                </DotMenu>
               </v-col>
             </v-row>
             <v-row
               no-gutters
             >
               <v-col class="text-subtitle-1">
-                {{ getFullName(result) }}
+                {{ result.fullName }}
               </v-col>
               <v-col
                 align-self="end"
@@ -263,38 +226,15 @@ permissions and limitations under the Licence.
               </v-card-text>
             </v-card>
           </v-expand-transition>
-          <v-dialog v-model="showDeleteDialog[result.id]" max-width="290">
-            <v-card>
-              <v-card-title class="headline">
-                Delete contact
-              </v-card-title>
-              <v-card-text>
-                Do you really want to delete the contact <em>{{ getFullName(result) }}</em>?
-              </v-card-text>
-              <v-card-actions>
-                <v-btn
-                  text
-                  @click="hideDeleteDialogFor(result.id)"
-                >
-                  No
-                </v-btn>
-                <v-spacer />
-                <v-btn
-                  color="error"
-                  text
-                  @click="deleteAndCloseDialog(result.id)"
-                >
-                  <v-icon left>
-                    mdi-delete
-                  </v-icon>
-                  Delete
-                </v-btn>
-              </v-card-actions>
-            </v-card>
-          </v-dialog>
         </v-card>
       </v-hover>
     </div>
+    <ContacsDeleteDialog
+      v-model="showDeleteDialog"
+      :contact-to-delete="contactToDelete"
+      @cancel-deletion="closeDialog"
+      @submit-deletion="deleteAndCloseDialog"
+    />
     <v-btn
       v-if="$auth.loggedIn"
       bottom
@@ -318,8 +258,12 @@ import { Component, Vue } from 'nuxt-property-decorator'
 import { IPaginationLoader } from '@/utils/PaginatedLoader'
 
 import { Contact } from '@/models/Contact'
+import DotMenu from '@/components/DotMenu.vue'
+import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
+import ContacsDeleteDialog from '@/components/contacts/ContacsDeleteDialog.vue'
 
 @Component({
+  components: { ContacsDeleteDialog, DotMenuActionDelete, DotMenu }
 })
 export default class SearchContactsPage extends Vue {
   private readonly pageSize: number = 20
@@ -331,7 +275,8 @@ export default class SearchContactsPage extends Vue {
   private searchResults: Contact[] = []
   private searchText: string = ''
 
-  private showDeleteDialog: { [id: string]: boolean} = {}
+  private showDeleteDialog:boolean=false
+  private contactToDelete:Contact|null=null
   private searchResultItemsShown: { [id: string]: boolean } = {}
 
   created () {
@@ -352,7 +297,6 @@ export default class SearchContactsPage extends Vue {
 
   beforeDestroy () {
     this.unsetResultItemsShown()
-    this.showDeleteDialog = {}
     this.$store.dispatch('appbar/setDefaults')
   }
 
@@ -373,7 +317,6 @@ export default class SearchContactsPage extends Vue {
     this.loading = true
     this.searchResults = []
     this.unsetResultItemsShown()
-    this.showDeleteDialog = {}
     const lastActiveSearcher = this.$api.contacts
       .newSearchBuilder()
       .withText(this.searchText)
@@ -418,29 +361,34 @@ export default class SearchContactsPage extends Vue {
     return this.loader != null && this.loader.funToLoadNext != null
   }
 
-  deleteAndCloseDialog (id: string) {
-    this.$api.contacts.deleteById(id).then(() => {
-      this.showDeleteDialog = {}
+  initDeleteDialog (contact: Contact) {
+    this.showDeleteDialog = true
+    this.contactToDelete = contact
+  }
 
-      const searchIndex = this.searchResults.findIndex(r => r.id === id)
+  closeDialog () {
+    this.showDeleteDialog = false
+    this.contactToDelete = null
+  }
+
+  deleteAndCloseDialog () {
+    this.showDeleteDialog = false
+    if (this.contactToDelete === null) {
+      return
+    }
+
+    this.$api.contacts.deleteById(this.contactToDelete.id!).then(() => {
+      const searchIndex = this.searchResults.findIndex(contact => contact.id === this.contactToDelete?.id)
       if (searchIndex > -1) {
         this.searchResults.splice(searchIndex, 1)
         this.totalCount -= 1
       }
-
       this.$store.commit('snackbar/setSuccess', 'Contact deleted')
     }).catch((_error) => {
-      this.showDeleteDialog = {}
       this.$store.commit('snackbar/setError', 'Contact could not be deleted')
+    }).finally(() => {
+      this.contactToDelete = null
     })
-  }
-
-  showDeleteDialogFor (id: string) {
-    Vue.set(this.showDeleteDialog, id, true)
-  }
-
-  hideDeleteDialogFor (id: string) {
-    Vue.set(this.showDeleteDialog, id, false)
   }
 
   showResultItem (id: string) {
@@ -454,10 +402,6 @@ export default class SearchContactsPage extends Vue {
 
   unsetResultItemsShown (): void {
     this.searchResultItemsShown = {}
-  }
-
-  getFullName (contact: Contact) : string {
-    return contact.givenName + ' ' + contact.familyName
   }
 }
 </script>
