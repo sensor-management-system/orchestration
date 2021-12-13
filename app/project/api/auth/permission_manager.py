@@ -1,5 +1,3 @@
-import json
-
 from flask import request
 
 from .permission_utils import (
@@ -7,12 +5,7 @@ from .permission_utils import (
     check_patch_permission,
     check_deletion_permission,
     check_permissions_for_related_objects,
-    check_patch_permission_for_related_objects,
-    check_deletion_permission_for_related_objects, check_for_permissions_mount,
 )
-from ..helpers.errors import ConflictError
-from ..models import Device, DeviceMountAction
-from ... import db
 
 protected_views = [
     "api.device_detail",
