@@ -3,6 +3,7 @@ from flask_rest_jsonapi import ResourceList
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.orm.exc import NoResultFound
 
+from ..auth.permission_utils import get_collection_with_permissions_for_related_objects
 from ..models.base_model import db
 from ..models.customfield import CustomField
 from ..models.device import Device
@@ -17,6 +18,20 @@ class CustomFieldList(ResourceList):
     Provides get and post methods to retrieve
     a list of custom fields or to create a new one.
     """
+
+    def after_get_collection(self, collection, qs, view_kwargs):
+        """Take the intersection between requested collection and
+        what the user allowed querying.
+
+        :param collection:
+        :param qs:
+        :param view_kwargs:
+        :return:
+        """
+
+        return get_collection_with_permissions_for_related_objects(
+            self.model, collection
+        )
 
     def query(self, view_kwargs):
         """
@@ -35,10 +50,7 @@ class CustomFieldList(ResourceList):
                 self.session.query(Device).filter_by(id=device_id).one()
             except NoResultFound:
                 raise ObjectNotFound(
-                    {
-                        "parameter": "id",
-                    },
-                    "Device: {} not found".format(device_id),
+                    {"parameter": "id",}, "Device: {} not found".format(device_id),
                 )
             else:
                 query_ = query_.filter(CustomField.device_id == device_id)
@@ -49,7 +61,5 @@ class CustomFieldList(ResourceList):
     data_layer = {
         "session": db.session,
         "model": CustomField,
-        "methods": {
-            "query": query,
-        },
+        "methods": {"query": query, "after_get_collection": after_get_collection,},
     }

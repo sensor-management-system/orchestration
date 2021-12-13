@@ -1,3 +1,5 @@
+from sqlalchemy import UniqueConstraint
+
 from .base_model import db
 from ..models.mixin import AuditMixin, IndirectSearchableMixin
 
@@ -16,7 +18,9 @@ class PlatformMountAction(db.Model, AuditMixin):
             cascade="save-update, merge, delete, delete-orphan",
         ),
     )
-    platform_id = db.Column(db.Integer, db.ForeignKey("platform.id"), nullable=False)
+    platform_id = db.Column(
+        db.Integer, db.ForeignKey("platform.id"), nullable=False, unique=True
+    )
     platform = db.relationship(
         "Platform",
         uselist=False,
@@ -72,7 +76,9 @@ class DeviceMountAction(db.Model, AuditMixin, IndirectSearchableMixin):
             "device_mount_actions", cascade="save-update, merge, delete, delete-orphan"
         ),
     )
-    device_id = db.Column(db.Integer, db.ForeignKey("device.id"), nullable=False)
+    device_id = db.Column(
+        db.Integer, db.ForeignKey("device.id"), nullable=False, unique=True
+    )
     device = db.relationship(
         "Device",
         uselist=False,
@@ -80,7 +86,7 @@ class DeviceMountAction(db.Model, AuditMixin, IndirectSearchableMixin):
         backref=db.backref("device_mount_actions"),
     )
     parent_platform_id = db.Column(
-        db.Integer, db.ForeignKey("platform.id"), nullable=True
+        db.Integer, db.ForeignKey("platform.id"), nullable=True, unique=True
     )
     parent_platform = db.relationship(
         "Platform",

@@ -1,10 +1,18 @@
 """Resource classes for device mount actions."""
+import json
 
+from flask import request
 from flask_rest_jsonapi import ResourceDetail, ResourceRelationship
-from flask_rest_jsonapi.exceptions import ObjectNotFound
+from flask_rest_jsonapi.exceptions import ObjectNotFound, JsonApiException
 from sqlalchemy.orm.exc import NoResultFound
 
-from ...frj_csv_export.resource import ResourceList
+from ..auth.permission_utils import (
+    check_permissions_for_related_objects,
+    check_for_permissions_mount,
+    get_collection_with_permissions,
+    get_collection_with_permissions_for_related_objects,
+)
+from ..helpers.errors import ConflictError
 from ..models.base_model import db
 from ..models.configuration import Configuration
 from ..models.device import Device
@@ -12,10 +20,45 @@ from ..models.mount_actions import DeviceMountAction
 from ..models.platform import Platform
 from ..schemas.mount_actions_schema import DeviceMountActionSchema
 from ..token_checker import token_required
+from ...frj_csv_export.resource import ResourceList
 
 
 class DeviceMountActionList(ResourceList):
     """List resource for device mount actions (get, post)."""
+
+    def after_get_collection(self, collection, qs, view_kwargs):
+        """Take the intersection between requested collection and
+        what the user allowed querying.
+
+        :param collection:
+        :param qs:
+        :param view_kwargs:
+        :return:
+        """
+
+        return get_collection_with_permissions_for_related_objects(
+            self.model, collection
+        )
+
+    def post(self, *args, **kwargs):
+        data = json.loads(request.data.decode())["data"]
+        device_id = data["relationships"]["device"]["data"]["id"]
+        device = db.session.query(Device).filter_by(id=device_id).one_or_none()
+        action = (
+            db.session.query(DeviceMountAction)
+            .filter_by(device_id=device_id)
+            .one_or_none()
+        )
+        if device.is_private:
+            raise ConflictError("Private device can't be used.")
+        if action:
+            raise ConflictError(
+                f"Device mounted on  Configuration with the id :{action.configuration_id}"
+            )
+        try:
+            super().post(*args, **kwargs)
+        except JsonApiException as e:
+            raise ConflictError("Mount failed.", str(e))
 
     def query(self, view_kwargs):
         """
@@ -69,7 +112,7 @@ class DeviceMountActionList(ResourceList):
     data_layer = {
         "session": db.session,
         "model": DeviceMountAction,
-        "methods": {"query": query,},
+        "methods": {"query": query, "after_get_collection": after_get_collection,},
     }
 
 

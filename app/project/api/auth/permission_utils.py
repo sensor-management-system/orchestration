@@ -8,7 +8,8 @@ from flask_jwt_extended import (
 )
 from sqlalchemy import or_, and_
 
-from ..helpers.errors import ForbiddenError
+from ..helpers.errors import ForbiddenError, ConflictError
+from ..models import Device
 from ..models.base_model import db
 from ..services.idl_services import Idl
 
@@ -187,3 +188,119 @@ def check_for_permissions(model_class, kwargs):
             prevent_normal_user_from_viewing_not_owned_private_object(object_)
         elif object_.is_internal:
             verify_jwt_in_request()
+
+
+def check_permissions_for_related_objects(model_class, id_):
+    """
+    check if a user has the permission to view a related object by checking
+    the object permission.
+
+    :param id_:
+    :param model_class: class model
+    """
+    object_ = db.session.query(model_class).filter_by(id=id_).first()
+    if hasattr(object_, "device"):
+        if not object_.device.is_public:
+            verify_jwt_in_request()
+    elif hasattr(object_, "platform"):
+        if not object_.platform.is_public:
+            verify_jwt_in_request()
+
+
+# def check_patch_permission_for_related_objects(data, object_to_patch):
+#     """
+#     check if a user has the permission to patch an object.
+#
+#     :param data:
+#     :param object_to_patch:
+#     """
+#     if not is_superuser():
+#         object_ = (
+#             db.session.query(object_to_patch).filter_by(id=data["id"]).one_or_none()
+#         )
+#         if (
+#             object_.configuration.id
+#             != data["relationships"]["configuration"]["data"]["id"]
+#         ):
+#             raise ConflictError("This device is already Mounted!")
+#         if object_.device.is_private:
+#             click.secho(object_.is_private, fg="green")
+#             assert_current_user_is_owner_of_object(object_)
+#         else:
+#             group_ids = object_.group_ids
+#             if not is_user_in_a_group(group_ids):
+#                 raise ForbiddenError(
+#                     "User is not part of any group to edit this object."
+#                 )
+#
+#
+# def check_deletion_permission_for_related_objects(kwargs, object_to_delete):
+#     """
+#     check if a user has the permission to delete an object.
+#
+#     :param kwargs:
+#     :param object_to_delete:
+#     """
+#     if not is_superuser():
+#         object_ = (
+#             db.session.query(object_to_delete).filter_by(id=kwargs["id"]).one_or_none()
+#         )
+#         group_ids = (
+#             db.session.query(object_to_delete)
+#             .filter_by(id=kwargs["id"])
+#             .one_or_none()
+#             .group_ids
+#         )
+#         if group_ids is None:
+#             assert_current_user_is_owner_of_object(object_)
+#         if not is_user_admin_in_a_group(group_ids):
+#             raise ForbiddenError("User is not part of any group to delete this object.")
+
+
+def check_for_permissions_mount(model_class, kwargs):
+    """
+    check if a user has the permission to view an object.
+
+    :param model_class: class model
+    :param kwargs:
+    """
+    object_ = db.session.query(model_class).filter_by(id=kwargs).first()
+    if object_.device:
+        if object_.device.is_internal:
+            verify_jwt_in_request()
+
+
+@jwt_required(optional=True)
+def get_collection_with_permissions_for_related_objects(model, collection):
+    """Retrieve a collection of related objects through sqlalchemy by checking
+    the object permission.
+
+    :param model:
+    :param collection:
+    :return set: list of objects
+    """
+    query = db.session.query(model)
+    if get_jwt_identity() is None:
+        if hasattr(model, "device"):
+            query = query.filter(model.device.has(is_public=True))
+        else:
+            query = query.filter(model.platform.has(is_public=True))
+    else:
+        if not current_user.is_superuser:
+            if hasattr(model, "device"):
+                query = query.filter(
+                    or_(
+                        model.device.has(is_public=True),
+                        model.device.has(is_internal=True),
+                    )
+                )
+            else:
+                query = query.filter(
+                    or_(
+                        model.platform.has(is_public=True),
+                        model.platform.has(is_internal=True),
+                    )
+                )
+    allowed_collection = query.all()
+
+    return set(collection).intersection(allowed_collection)
