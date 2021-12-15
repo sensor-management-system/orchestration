@@ -96,7 +96,7 @@ import { Component, Vue, Prop } from 'nuxt-property-decorator'
 import DeviceBasicData from '@/components/DeviceBasicData.vue'
 
 import { Device } from '@/models/Device'
-import DeviceDeleteDialog from '@/components/device/DeviceDeleteDialog.vue'
+import DeviceDeleteDialog from '@/components/devices/DeviceDeleteDialog.vue'
 import DotMenu from '@/components/DotMenu.vue'
 import DotMenuActionCopy from '@/components/DotMenuActionCopy.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
