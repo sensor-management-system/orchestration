@@ -43,7 +43,14 @@ import { StaticLocationBeginAction } from '@/models/StaticLocationBeginAction'
 import { StaticLocationEndAction } from '@/models/StaticLocationEndAction'
 
 import { IActionDateWithTextItem } from '@/utils/configurationInterfaces'
-import ConfigurationHelper from '@/utils/configurationHelper'
+import { Platform } from '@/models/Platform'
+import { PlatformMountAction } from '@/models/PlatformMountAction'
+import { Contact } from '@/models/Contact'
+import { DeviceMountAction } from '@/models/DeviceMountAction'
+import { Device } from '@/models/Device'
+import { buildConfigurationTree } from '@/modelUtils/mountHelpers'
+import configurationHelper from '@/utils/configurationHelper'
+import { PlatformNode } from '@/viewmodels/PlatformNode'
 
 describe('#getActionDatesWithTextByConfiguration', () => {
   it('should return a sorted list of action dates', () => {
@@ -79,7 +86,7 @@ describe('#getActionDatesWithTextByConfiguration', () => {
       dynamicLocationEndAction1
     ]
     const selectedDate = DateTime.utc(2021, 10, 6, 12, 0, 0)
-    const actionDates: IActionDateWithTextItem[] = ConfigurationHelper.getActionDatesWithTextsByConfiguration(configuration, selectedDate, { useMounts: false, useLoctions: true })
+    const actionDates: IActionDateWithTextItem[] = configurationHelper.getActionDatesWithTextsByConfiguration(configuration, selectedDate, { useMounts: false, useLoctions: true })
 
     expect(actionDates.length).toEqual(8)
     expect(actionDates[0]).toHaveProperty('date', DateTime.utc(1999, 8, 1, 10, 0, 0))
@@ -97,5 +104,124 @@ describe('#getActionDatesWithTextByConfiguration', () => {
     expect(actionDates[6]).toHaveProperty('date', DateTime.utc(2021, 10, 6, 12, 0, 0))
     expect(actionDates[6]).toHaveProperty('text', '2021-10-06 12:00 - Selected')
     // the 7th item is now - which we can't text because of the time
+  })
+})
+describe('#addNewMountAction', () => {
+  it('should add a new platformMountAction to our configuration', () => {
+    const platform1 = Platform.createFromObject({
+      shortName: 'platform 1',
+      id: '111',
+      longName: '',
+      platformTypeName: '',
+      platformTypeUri: '',
+      persistentIdentifier: '',
+      serialNumber: '',
+      inventoryNumber: '',
+      website: '',
+      manufacturerName: '',
+      manufacturerUri: '',
+      statusName: '',
+      statusUri: '',
+      attachments: [],
+      contacts: [],
+      model: '',
+      createdAt: DateTime.utc(2021, 12, 15, 8, 54, 13),
+      updatedAt: DateTime.utc(2021, 12, 15, 8, 54, 13),
+      createdByUserId: 1,
+      updatedByUserId: 1,
+      description: ''
+    })
+    const device1 = Device.createFromObject({
+      shortName: 'device 1',
+      id: '222',
+      longName: '',
+      deviceTypeName: '',
+      deviceTypeUri: '',
+      persistentIdentifier: '',
+      serialNumber: '',
+      inventoryNumber: '',
+      website: '',
+      manufacturerName: '',
+      manufacturerUri: '',
+      statusName: '',
+      statusUri: '',
+      attachments: [],
+      contacts: [],
+      model: '',
+      createdAt: DateTime.utc(2021, 12, 15, 8, 54, 13),
+      updatedAt: DateTime.utc(2021, 12, 15, 8, 54, 13),
+      createdByUserId: 1,
+      updatedByUserId: 1,
+      description: '',
+      dualUse: false,
+      properties: [],
+      customFields: []
+    })
+    const contact1 = Contact.createFromObject({
+      id: '111111',
+      givenName: 'Homer',
+      familyName: 'S',
+      email: 'homer.j@s',
+      website: ''
+    })
+    const platformMountAction1 = PlatformMountAction.createFromObject({
+      id: '1111',
+      platform: platform1,
+      offsetX: 1,
+      offsetY: 2,
+      offsetZ: 3,
+      description: 'This is the very first mount',
+      contact: contact1,
+      date: DateTime.utc(2021, 12, 15, 9, 0, 0),
+      parentPlatform: null
+    })
+    const deviceMountAction1 = DeviceMountAction.createFromObject({
+      id: '1112',
+      device: device1,
+      offsetX: -1,
+      offsetY: -2,
+      offsetZ: -3,
+      description: 'Mount of the device on the platform',
+      contact: contact1,
+      parentPlatform: platform1,
+      date: DateTime.utc(2021, 12, 15, 9, 0, 0)
+    })
+    const configuration = Configuration.createFromObject({
+      id: '123',
+      label: 'test config',
+      startDate: null,
+      endDate: null,
+      projectName: '',
+      projectUri: '',
+      staticLocationBeginActions: [],
+      staticLocationEndActions: [],
+      dynamicLocationBeginActions: [],
+      dynamicLocationEndActions: [],
+      platformMountActions: [platformMountAction1],
+      platformUnmountActions: [],
+      deviceMountActions: [deviceMountAction1],
+      deviceUnmountActions: [],
+      contacts: [],
+      status: '',
+      location: null
+    })
+
+    const selectedDate = DateTime.utc(2021, 12, 15, 9, 15, 0)
+    const tree = buildConfigurationTree(configuration, selectedDate)
+    const platformTreeNode: PlatformNode = tree.getPlatformById(platform1.id!)! // id of the platform & not the mount of the platform
+
+    expect(platformTreeNode).not.toBeNull()
+
+    configurationHelper.addNewMountAction(platformTreeNode, {
+      offsetX: 29,
+      offsetY: 30,
+      offsetZ: 17,
+      description: 'Changed offsets for platform',
+      contact: contact1
+    }, configuration, selectedDate, platformTreeNode)
+
+    expect(configuration.platformMountActions.length).toEqual(2)
+    expect(configuration.platformMountActions[0].offsetX).toEqual(1)
+    expect(configuration.platformMountActions[1].offsetX).toEqual(29)
   })
 })

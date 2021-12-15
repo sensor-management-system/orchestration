@@ -101,7 +101,7 @@ import PlatformBasicData from '@/components/PlatformBasicData.vue'
 import DotMenu from '@/components/DotMenu.vue'
 import DotMenuActionCopy from '@/components/DotMenuActionCopy.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
-import PlatformDeleteDialog from '@/components/plarform/PlatformDeleteDialog.vue'
+import PlatformDeleteDialog from '@/components/platforms/PlatformDeleteDialog.vue'
 
 @Component({
   components: {

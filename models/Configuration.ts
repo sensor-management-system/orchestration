@@ -214,7 +214,7 @@ export class Configuration implements IConfiguration {
     this._dynamicLocationEndActions = newActions
   }
 
-  static createFromObject (someObject: Configuration): Configuration {
+  static createFromObject (someObject: IConfiguration): Configuration {
     const newObject = new Configuration()
 
     newObject.id = someObject.id

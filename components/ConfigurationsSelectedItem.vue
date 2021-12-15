@@ -158,60 +158,9 @@ permissions and limitations under the Licence.
           <div
             v-if="value && !readonly"
           >
-            <v-btn v-if="isMountedOnSelectedDate" @click="overwriteExistingMountAction">
-              Update
+            <v-btn @click="overwriteExistingMountAction">
+              Update existing mount
             </v-btn>
-            <v-btn v-else @click="addNewMountAction">
-              Update
-            </v-btn>
-            <v-menu
-              v-if="!isMountedOnSelectedDate"
-              close-on-click
-              close-on-content-click
-              offset-x
-              right
-              z-indx="999"
-            >
-              <template #activator="{ on }">
-                <v-btn
-                  data-role="property menu"
-                  icon
-                  small
-                  v-on="on"
-                >
-                  <v-icon
-                    dense
-                    small
-                  >
-                    mdi-dots-vertical
-                  </v-icon>
-                </v-btn>
-              </template>
-              <v-list>
-                <v-list-item
-                  dense
-                  @click="overwriteExistingMountAction"
-                >
-                  <v-list-item-content>
-                    <v-list-item-title>
-                      Update for {{ value.unpack().date | dateToDateTimeStringHHMM }}
-                      <span class="text-caption text--secondary">(UTC)</span>
-                    </v-list-item-title>
-                  </v-list-item-content>
-                </v-list-item>
-                <v-list-item
-                  dense
-                  @click="addNewMountAction"
-                >
-                  <v-list-item-content>
-                    <v-list-item-title>
-                      Update for {{ selectedDate | dateToDateTimeStringHHMM }}
-                      <span class="text-caption text--secondary">(UTC)</span>
-                    </v-list-item-title>
-                  </v-list-item-content>
-                </v-list-item>
-              </v-list>
-            </v-menu>
           </div>
         </v-expansion-panel-content>
       </v-expansion-panel>
@@ -377,24 +326,6 @@ readonly currentUserMail:string|null
     if (this.validateMountUpdateForm()) {
       this.$emit(
         'overwriteExistingMountAction',
-        this.value,
-        {
-          offsetX: this.offsetX,
-          offsetY: this.offsetY,
-          offsetZ: this.offsetZ,
-          contact: this.mountContact,
-          description: this.mountDescription
-        }
-      )
-    } else {
-      this.$store.commit('snackbar/setError', 'Please correct the errors')
-    }
-  }
-
-  addNewMountAction () {
-    if (this.validateMountUpdateForm()) {
-      this.$emit(
-        'addNewMountAction',
         this.value,
         {
           offsetX: this.offsetX,
