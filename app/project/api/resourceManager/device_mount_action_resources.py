@@ -8,7 +8,6 @@ from sqlalchemy.orm.exc import NoResultFound
 
 from ..auth.permission_utils import (
     check_permissions_for_related_objects,
-    check_for_permissions_mount,
     get_collection_with_permissions,
     get_collection_with_permissions_for_related_objects,
 )
@@ -40,25 +39,28 @@ class DeviceMountActionList(ResourceList):
             self.model, collection
         )
 
-    def post(self, *args, **kwargs):
-        data = json.loads(request.data.decode())["data"]
-        device_id = data["relationships"]["device"]["data"]["id"]
-        device = db.session.query(Device).filter_by(id=device_id).one_or_none()
-        action = (
-            db.session.query(DeviceMountAction)
-            .filter_by(device_id=device_id)
-            .one_or_none()
-        )
-        if device.is_private:
-            raise ConflictError("Private device can't be used.")
-        if action:
-            raise ConflictError(
-                f"Device mounted on  Configuration with the id :{action.configuration_id}"
-            )
-        try:
-            super().post(*args, **kwargs)
-        except JsonApiException as e:
-            raise ConflictError("Mount failed.", str(e))
+    # def post(self, *args, **kwargs):
+    #     data = json.loads(request.data.decode())["data"]
+    #     device_id = data["relationships"]["device"]["data"]["id"]
+    #     device = db.session.query(Device).filter_by(id=device_id).one_or_none()
+    #     action = (
+    #         db.session.query(DeviceMountAction)
+    #         .filter_by(device_id=device_id)
+    #         .one_or_none()
+    #     )
+    #     if device.is_private:
+    #         raise ConflictError("Private device can't be used.")
+    #     raise ConflictError(
+    #         f"Device mounted on  Configuration with the id :{str(device.device_unmount_actions[-1].end_date)}"
+    #     )
+    #     if device.device_unmount_actions.end_date:
+    #         raise ConflictError(
+    #             f"Device mounted on  Configuration with the id :{str(device.device_unmount_actions[0])}"
+    #         )
+    #     try:
+    #         super().post(*args, **kwargs)
+    #     except JsonApiException as e:
+    #         raise ConflictError("Mount failed.", str(e))
 
     def query(self, view_kwargs):
         """

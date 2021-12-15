@@ -8,8 +8,7 @@ from flask_jwt_extended import (
 )
 from sqlalchemy import or_, and_
 
-from ..helpers.errors import ForbiddenError, ConflictError
-from ..models import Device
+from ..helpers.errors import ForbiddenError
 from ..models.base_model import db
 from ..services.idl_services import Idl
 
@@ -207,67 +206,62 @@ def check_permissions_for_related_objects(model_class, id_):
             verify_jwt_in_request()
 
 
-# def check_patch_permission_for_related_objects(data, object_to_patch):
+def check_patch_permission_for_related_objects(data, object_to_patch):
+    """
+    check if a user has the permission to patch a related object.
+
+    :param data:
+    :param object_to_patch:
+    """
+    if not is_superuser():
+        object_ = (
+            db.session.query(object_to_patch).filter_by(id=data["id"]).one_or_none()
+        )
+        if hasattr(object_, "device"):
+            related_object = object_.device
+        else:
+            related_object = object_.platform
+        if related_object.is_private:
+            assert_current_user_is_owner_of_object(object_)
+        else:
+            group_ids = related_object.group_ids
+            if not is_user_in_a_group(group_ids):
+                raise ForbiddenError(
+                    "User is not part of any group to edit this object."
+                )
+
+
+def check_deletion_permission_for_related_objects(kwargs, object_to_delete):
+    """
+    check if a user has the permission to delete a related object.
+
+    :param kwargs:
+    :param object_to_delete:
+    """
+    if not is_superuser():
+        object_ = (
+            db.session.query(object_to_delete).filter_by(id=kwargs["id"]).one_or_none()
+        )
+        if hasattr(object_, "device"):
+            group_ids = object_.device.group_ids
+        else:
+            group_ids = object_.platform.group_ids
+        if group_ids is None:
+            assert_current_user_is_owner_of_object(object_)
+        if not is_user_admin_in_a_group(group_ids):
+            raise ForbiddenError("User is not part of any group to delete this object.")
+
+
+# def check_for_permissions_mount(model_class, kwargs):
 #     """
-#     check if a user has the permission to patch an object.
-#
-#     :param data:
-#     :param object_to_patch:
-#     """
-#     if not is_superuser():
-#         object_ = (
-#             db.session.query(object_to_patch).filter_by(id=data["id"]).one_or_none()
-#         )
-#         if (
-#             object_.configuration.id
-#             != data["relationships"]["configuration"]["data"]["id"]
-#         ):
-#             raise ConflictError("This device is already Mounted!")
-#         if object_.device.is_private:
-#             click.secho(object_.is_private, fg="green")
-#             assert_current_user_is_owner_of_object(object_)
-#         else:
-#             group_ids = object_.group_ids
-#             if not is_user_in_a_group(group_ids):
-#                 raise ForbiddenError(
-#                     "User is not part of any group to edit this object."
-#                 )
-#
-#
-# def check_deletion_permission_for_related_objects(kwargs, object_to_delete):
-#     """
-#     check if a user has the permission to delete an object.
+#     check if a user has the permission to view an object.
 #
 #     :param kwargs:
-#     :param object_to_delete:
 #     """
-#     if not is_superuser():
-#         object_ = (
-#             db.session.query(object_to_delete).filter_by(id=kwargs["id"]).one_or_none()
-#         )
-#         group_ids = (
-#             db.session.query(object_to_delete)
-#             .filter_by(id=kwargs["id"])
-#             .one_or_none()
-#             .group_ids
-#         )
-#         if group_ids is None:
-#             assert_current_user_is_owner_of_object(object_)
-#         if not is_user_admin_in_a_group(group_ids):
-#             raise ForbiddenError("User is not part of any group to delete this object.")
-
-
-def check_for_permissions_mount(model_class, kwargs):
-    """
-    check if a user has the permission to view an object.
-
-    :param model_class: class model
-    :param kwargs:
-    """
-    object_ = db.session.query(model_class).filter_by(id=kwargs).first()
-    if object_.device:
-        if object_.device.is_internal:
-            verify_jwt_in_request()
+#     object_ = db.session.query(model_class).filter_by(id=kwargs).first()
+#     if object_.device:
+#         if object_.device.is_internal:
+#             verify_jwt_in_request()
 
 
 @jwt_required(optional=True)
