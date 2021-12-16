@@ -35,11 +35,9 @@ class TestDeviceSoftwareUpdateAction(BaseTestCase):
 
     def test_post_device_software_update_action(self):
         """Create DeviceSoftwareUpdateAction."""
-        device = Device(short_name="Device 1",
-                        is_public=False,
-                        is_private=False,
-                        is_internal=True,
-                        )
+        device = Device(
+            short_name="Device 1", is_public=True, is_private=False, is_internal=False,
+        )
         mock_jwt = generate_token_data()
         contact = Contact(
             given_name=mock_jwt["given_name"],
@@ -78,9 +76,7 @@ class TestDeviceSoftwareUpdateAction(BaseTestCase):
             "data": {
                 "type": self.object_type,
                 "id": device_software_update_action.id,
-                "attributes": {
-                    "description": "updated",
-                },
+                "attributes": {"description": "updated",},
             }
         }
         _ = super().update_object(
@@ -92,9 +88,7 @@ class TestDeviceSoftwareUpdateAction(BaseTestCase):
     def test_delete_device_software_update_action(self):
         """Delete DeviceSoftwareUpdateAction."""
         device_software_update_action = add_device_software_update_action_model()
-        _ = super().delete_object(
-            url=f"{self.url}/{device_software_update_action.id}",
-        )
+        _ = super().delete_object(url=f"{self.url}/{device_software_update_action.id}",)
 
     def test_filtered_by_device(self):
         """Ensure that I can prefilter by a specific devices."""
@@ -103,18 +97,14 @@ class TestDeviceSoftwareUpdateAction(BaseTestCase):
         )
         db.session.add(contact)
 
-        device1 = Device(short_name="device1",
-                         is_public=False,
-                         is_private=False,
-                         is_internal=True,
-                         )
+        device1 = Device(
+            short_name="device1", is_public=True, is_private=False, is_internal=False,
+        )
         db.session.add(device1)
 
-        device2 = Device(short_name="device2",
-                         is_public=False,
-                         is_private=False,
-                         is_internal=True,
-                         )
+        device2 = Device(
+            short_name="device2", is_public=True, is_private=False, is_internal=False,
+        )
         db.session.add(device2)
 
         action1 = DeviceSoftwareUpdateAction(

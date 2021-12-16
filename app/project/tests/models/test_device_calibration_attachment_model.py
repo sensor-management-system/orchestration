@@ -10,11 +10,9 @@ from project.tests.base import BaseTestCase, fake, generate_token_data
 
 
 def add_device_calibration_attachment():
-    device = Device(short_name="Device 1",
-                    is_public=False,
-                    is_private=False,
-                    is_internal=True,
-                    )
+    device = Device(
+        short_name="Device 1", is_public=True, is_private=False, is_internal=False,
+    )
     mock_jwt = generate_token_data()
     contact = Contact(
         given_name=mock_jwt["given_name"],

@@ -12,6 +12,7 @@ from project.api.models import (
 )
 from project.api.models.base_model import db
 from project.tests.base import BaseTestCase, fake, generate_token_data
+from project.tests.base import create_token
 from project.tests.models.test_configurations_model import generate_configuration_model
 from project.tests.models.test_mount_actions_model import add_mount_device_action_model
 
@@ -45,15 +46,15 @@ class TestDeviceMountAction(BaseTestCase):
         """Create DeviceMountAction."""
         device = Device(
             short_name=fake.linux_processor(),
-            is_public=False,
+            is_public=True,
             is_private=False,
-            is_internal=True,
+            is_internal=False,
         )
         parent_platform = Platform(
             short_name="device parent platform",
-            is_public=False,
+            is_public=True,
             is_private=False,
-            is_internal=True,
+            is_internal=False,
         )
         mock_jwt = generate_token_data()
         contact = Contact(
@@ -99,9 +100,7 @@ class TestDeviceMountAction(BaseTestCase):
             "data": {
                 "type": self.object_type,
                 "id": mount_device_action.id,
-                "attributes": {
-                    "description": "updated",
-                },
+                "attributes": {"description": "updated",},
             }
         }
         _ = super().update_object(
@@ -110,25 +109,32 @@ class TestDeviceMountAction(BaseTestCase):
             object_type=self.object_type,
         )
 
-    def test_delete_device_mount_action(self):
-        """Delete DeviceMountAction."""
+    def test_fail_to_delete_device_mount_action_without_permission(self):
+        """Delete DeviceMountAction should fail without permission."""
         mount_device_action = add_mount_device_action_model()
-        _ = super().delete_object(
-            url=f"{self.url}/{mount_device_action.id}",
-        )
+        access_headers = create_token()
+        with self.client:
+            response = self.client.delete(
+                f"{self.url}/{mount_device_action.id}",
+                content_type="application/vnd.api+json",
+                headers=access_headers,
+            )
+        self.assertNotEqual(response.status_code, 200)
 
     def test_filtered_by_configuration(self):
         """Ensure that I can prefilter by a specific configuration."""
         configuration1 = Configuration(
-            label="sample configuration", location_type="static",
-            is_public=False,
-            is_internal=True,
+            label="sample configuration",
+            location_type="static",
+            is_public=True,
+            is_internal=False,
         )
         db.session.add(configuration1)
         configuration2 = Configuration(
-            label="sample configuration II", location_type="static",
-            is_public=False,
-            is_internal=True,
+            label="sample configuration II",
+            location_type="static",
+            is_public=True,
+            is_internal=False,
         )
         db.session.add(configuration2)
 
@@ -137,18 +143,14 @@ class TestDeviceMountAction(BaseTestCase):
         )
         db.session.add(contact)
 
-        device1 = Device(short_name="device1",
-                         is_public=False,
-                         is_private=False,
-                         is_internal=True,
-                         )
+        device1 = Device(
+            short_name="device1", is_public=True, is_private=False, is_internal=False,
+        )
         db.session.add(device1)
 
-        device2 = Device(short_name="device2",
-                         is_public=False,
-                         is_private=False,
-                         is_internal=True,
-                         )
+        device2 = Device(
+            short_name="device2", is_public=True, is_private=False, is_internal=False,
+        )
         db.session.add(device2)
 
         action1 = DeviceMountAction(
@@ -223,15 +225,17 @@ class TestDeviceMountAction(BaseTestCase):
     def test_filtered_by_device(self):
         """Ensure that I can prefilter by a specific devices."""
         configuration1 = Configuration(
-            label="sample configuration", location_type="static",
-            is_public=False,
-            is_internal=True,
+            label="sample configuration",
+            location_type="static",
+            is_public=True,
+            is_internal=False,
         )
         db.session.add(configuration1)
         configuration2 = Configuration(
-            label="sample configuration II", location_type="static",
-            is_public=False,
-            is_internal=True,
+            label="sample configuration II",
+            location_type="static",
+            is_public=True,
+            is_internal=False,
         )
         db.session.add(configuration2)
 
@@ -240,18 +244,14 @@ class TestDeviceMountAction(BaseTestCase):
         )
         db.session.add(contact)
 
-        device1 = Device(short_name="device1",
-                         is_public=False,
-                         is_private=False,
-                         is_internal=True,
-                         )
+        device1 = Device(
+            short_name="device1", is_public=True, is_private=False, is_internal=False,
+        )
         db.session.add(device1)
 
-        device2 = Device(short_name="device2",
-                         is_public=False,
-                         is_private=False,
-                         is_internal=True,
-                         )
+        device2 = Device(
+            short_name="device2", is_public=True, is_private=False, is_internal=False,
+        )
         db.session.add(device2)
 
         action1 = DeviceMountAction(
@@ -317,15 +317,17 @@ class TestDeviceMountAction(BaseTestCase):
     def test_filtered_by_platform(self):
         """Ensure that I can prefilter by a specific (parent) platform."""
         configuration1 = Configuration(
-            label="sample configuration", location_type="static",
-            is_public=False,
-            is_internal=True,
+            label="sample configuration",
+            location_type="static",
+            is_public=True,
+            is_internal=False,
         )
         db.session.add(configuration1)
         configuration2 = Configuration(
-            label="sample configuration II", location_type="static",
-            is_public=False,
-            is_internal=True,
+            label="sample configuration II",
+            location_type="static",
+            is_public=True,
+            is_internal=False,
         )
         db.session.add(configuration2)
 
@@ -334,32 +336,24 @@ class TestDeviceMountAction(BaseTestCase):
         )
         db.session.add(contact)
 
-        platform1 = Platform(short_name="platform1",
-                             is_public=False,
-                             is_private=False,
-                             is_internal=True,
-                             )
+        platform1 = Platform(
+            short_name="platform1", is_public=True, is_private=False, is_internal=False,
+        )
         db.session.add(platform1)
 
-        platform2 = Platform(short_name="platform2",
-                             is_public=False,
-                             is_private=False,
-                             is_internal=True,
-                             )
+        platform2 = Platform(
+            short_name="platform2", is_public=True, is_private=False, is_internal=False,
+        )
         db.session.add(platform2)
 
-        device1 = Device(short_name="device1",
-                         is_public=False,
-                         is_private=False,
-                         is_internal=True,
-                         )
+        device1 = Device(
+            short_name="device1", is_public=True, is_private=False, is_internal=False,
+        )
         db.session.add(device1)
 
-        device2 = Device(short_name="device2",
-                         is_public=False,
-                         is_private=False,
-                         is_internal=True,
-                         )
+        device2 = Device(
+            short_name="device2", is_public=True, is_private=False, is_internal=False,
+        )
         db.session.add(device2)
 
         action1 = DeviceMountAction(
@@ -418,7 +412,6 @@ class TestDeviceMountAction(BaseTestCase):
                 base_url + f"/platforms/{platform2.id + 9999}/device-mount-actions"
             )
             response = self.client.get(
-                url_get_for_non_existing,
-                content_type="application/vnd.api+json",
+                url_get_for_non_existing, content_type="application/vnd.api+json",
             )
         self.assertEqual(response.status_code, 404)

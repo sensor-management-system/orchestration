@@ -10,11 +10,9 @@ from project.tests.base import BaseTestCase, fake, generate_token_data
 
 
 def add_device_software_update_action_model():
-    d = Device(short_name="Device 1",
-               is_public=False,
-               is_private=False,
-               is_internal=True,
-               )
+    d = Device(
+        short_name="Device 1", is_public=True, is_private=False, is_internal=False,
+    )
     mock_jwt = generate_token_data()
     c = Contact(
         given_name=mock_jwt["given_name"],
@@ -37,11 +35,9 @@ def add_device_software_update_action_model():
 
 
 def add_platform_software_update_action_model():
-    p = Platform(short_name="Platform 1",
-                 is_public=False,
-                 is_private=False,
-                 is_internal=True,
-                 )
+    p = Platform(
+        short_name="Platform 1", is_public=True, is_private=False, is_internal=False,
+    )
     mock_jwt = generate_token_data()
     c = Contact(
         given_name=mock_jwt["given_name"],

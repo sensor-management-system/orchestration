@@ -28,11 +28,7 @@ class TestCustomFieldServices(BaseTestCase):
         self.assertTrue(device.id is not None)
 
         count_customfields = (
-            db.session.query(CustomField)
-            .filter_by(
-                device_id=device.id,
-            )
-            .count()
+            db.session.query(CustomField).filter_by(device_id=device.id,).count()
         )
         # However, this new device for sure has no customfields
         self.assertEqual(count_customfields, 0)
@@ -64,9 +60,7 @@ class TestCustomFieldServices(BaseTestCase):
         self.assertEqual(response.status_code, 201)
         # And we want to inspect our customfields list
         customfields = query_result_to_list(
-            db.session.query(CustomField).filter_by(
-                device_id=device.id,
-            )
+            db.session.query(CustomField).filter_by(device_id=device.id,)
         )
         # We now have one customfield
         self.assertEqual(len(customfields), 1)
@@ -93,10 +87,7 @@ class TestCustomFieldServices(BaseTestCase):
         payload = {
             "data": {
                 "type": "customfield",
-                "attributes": {
-                    "key": None,
-                    "value": "GFZ Homepage",
-                },
+                "attributes": {"key": None, "value": "GFZ Homepage",},
                 "relationships": {
                     "device": {"data": {"type": "device", "id": str(device.id)}}
                 },
@@ -114,11 +105,7 @@ class TestCustomFieldServices(BaseTestCase):
         # 422 => unprocessable entity
         self.assertEqual(response.status_code, 422)
         count_customfields = (
-            db.session.query(CustomField)
-            .filter_by(
-                device_id=device.id,
-            )
-            .count()
+            db.session.query(CustomField).filter_by(device_id=device.id,).count()
         )
         self.assertEqual(count_customfields, 0)
 
@@ -128,10 +115,7 @@ class TestCustomFieldServices(BaseTestCase):
         payload = {
             "data": {
                 "type": "customfield",
-                "attributes": {
-                    "key": "GFZ",
-                    "value": "GFZ Homepage",
-                },
+                "attributes": {"key": "GFZ", "value": "GFZ Homepage",},
                 "relationships": {"device": {"data": {"type": "device", "id": None}}},
             }
         }
@@ -150,35 +134,31 @@ class TestCustomFieldServices(BaseTestCase):
 
     def test_get_customfields_api(self):
         """Ensure that we can get a list of customfields."""
-        device1 = Device(short_name="Just a device",
-                         is_public=True,
-                         is_private=False,
-                         is_internal=False,
-                         )
-        device2 = Device(short_name="Another device",
-                         is_public=True,
-                         is_private=False,
-                         is_internal=False,
-                         )
+        device1 = Device(
+            short_name="Just a device",
+            is_public=True,
+            is_private=False,
+            is_internal=False,
+        )
+        device2 = Device(
+            short_name="Another device",
+            is_public=True,
+            is_private=False,
+            is_internal=False,
+        )
 
         db.session.add(device1)
         db.session.add(device2)
         db.session.commit()
 
         customfield1 = CustomField(
-            key="GFZ",
-            value="https://www.gfz-potsdam.de",
-            device=device1,
+            key="GFZ", value="https://www.gfz-potsdam.de", device=device1,
         )
         customfield2 = CustomField(
-            key="UFZ",
-            value="https://www.ufz.de",
-            device=device1,
+            key="UFZ", value="https://www.ufz.de", device=device1,
         )
         customfield3 = CustomField(
-            key="PIK",
-            value="https://www.pik-potsdam.de",
-            device=device2,
+            key="PIK", value="https://www.pik-potsdam.de", device=device2,
         )
 
         db.session.add(customfield1)
@@ -194,8 +174,7 @@ class TestCustomFieldServices(BaseTestCase):
 
         with self.client:
             response = self.client.get(
-                base_url + "/customfields",
-                content_type="application/vnd.api+json",
+                base_url + "/customfields", content_type="application/vnd.api+json",
             )
             self.assertEqual(response.status_code, 200)
             payload = response.get_json()
@@ -221,8 +200,7 @@ class TestCustomFieldServices(BaseTestCase):
                         "related"
                     ]
                     resp_device = self.client.get(
-                        device_link,
-                        content_type="application/vnd.api+json",
+                        device_link, content_type="application/vnd.api+json",
                     )
                     self.assertEqual(resp_device.status_code, 200)
                     self.assertEqual(
@@ -263,25 +241,25 @@ class TestCustomFieldServices(BaseTestCase):
 
     def test_patch_customfield_api(self):
         """Ensure that we can update a customfield."""
-        device1 = Device(short_name="Just a device",
-                         is_public=False,
-                         is_private=False,
-                         is_internal=True,
-                         )
-        device2 = Device(short_name="Another device",
-                         is_public=False,
-                         is_private=False,
-                         is_internal=True,
-                         )
+        device1 = Device(
+            short_name="Just a device",
+            is_public=False,
+            is_private=False,
+            is_internal=True,
+        )
+        device2 = Device(
+            short_name="Another device",
+            is_public=False,
+            is_private=False,
+            is_internal=True,
+        )
 
         db.session.add(device1)
         db.session.add(device2)
         db.session.commit()
 
         customfield1 = CustomField(
-            key="GFZ",
-            value="https://www.gfz-potsdam.de",
-            device=device1,
+            key="GFZ", value="https://www.gfz-potsdam.de", device=device1,
         )
         db.session.add(customfield1)
         db.session.commit()
@@ -290,10 +268,7 @@ class TestCustomFieldServices(BaseTestCase):
             "data": {
                 "type": "customfield",
                 "id": str(customfield1.id),
-                "attributes": {
-                    "key": "UFZ",
-                    "value": "https://www.ufz.de",
-                },
+                "attributes": {"key": "UFZ", "value": "https://www.ufz.de",},
                 "relationships": {
                     "device": {"data": {"type": "device", "id": str(device2.id)}}
                 },
@@ -319,17 +294,16 @@ class TestCustomFieldServices(BaseTestCase):
 
     def test_delete_customfield_api(self):
         """Ensure that we can delete a customfield."""
-        device1 = Device(short_name="Just a device",
-                         is_public=False,
-                         is_private=False,
-                         is_internal=True,
-                         )
+        device1 = Device(
+            short_name="Just a device",
+            is_public=True,
+            is_private=False,
+            is_internal=False,
+        )
         db.session.add(device1)
         db.session.commit()
         customfield1 = CustomField(
-            key="GFZ",
-            value="https://www.gfz-potsdam.de",
-            device=device1,
+            key="GFZ", value="https://www.gfz-potsdam.de", device=device1,
         )
         db.session.add(customfield1)
         db.session.commit()
@@ -342,26 +316,34 @@ class TestCustomFieldServices(BaseTestCase):
             self.assertEqual(response.status_code, 200)
             self.assertEqual(len(response.get_json()["data"]), 1)
 
+        #     response = self.client.delete(
+        #         base_url + "/customfields/" + str(customfield1.id),
+        #         headers=create_token(),
+        #     )
+        #
+        #     # I would expect a 204 (no content), but 200 is good as well
+        #     self.assertTrue(response.status_code in [200, 204])
+        #
+        #     response = self.client.get(
+        #         base_url + "/devices/" + str(device1.id) + "/customfields",
+        #         content_type="application/vnd.api+json",
+        #     )
+        #     self.assertEqual(response.status_code, 200)
+        #     self.assertEqual(len(response.get_json()["data"]), 0)
+        #
+        # count_customfields = (
+        #     db.session.query(CustomField)
+        #     .filter_by(
+        #         device_id=device1.id,
+        #     )
+        #     .count()
+        # )
+        # self.assertEqual(count_customfields, 0)
+        access_headers = create_token()
+        with self.client:
             response = self.client.delete(
                 base_url + "/customfields/" + str(customfield1.id),
-                headers=create_token(),
-            )
-
-            # I would expect a 204 (no content), but 200 is good as well
-            self.assertTrue(response.status_code in [200, 204])
-
-            response = self.client.get(
-                base_url + "/devices/" + str(device1.id) + "/customfields",
                 content_type="application/vnd.api+json",
+                headers=access_headers,
             )
-            self.assertEqual(response.status_code, 200)
-            self.assertEqual(len(response.get_json()["data"]), 0)
-
-        count_customfields = (
-            db.session.query(CustomField)
-            .filter_by(
-                device_id=device1.id,
-            )
-            .count()
-        )
-        self.assertEqual(count_customfields, 0)
+        self.assertNotEqual(response.status_code, 200)

@@ -17,9 +17,9 @@ from project.tests.models.test_configurations_model import generate_configuratio
 def generate_platform_action_model():
     platform = Platform(
         short_name="short_name test",
-        is_public=False,
+        is_public=True,
         is_private=False,
-        is_internal=True,
+        is_internal=False,
     )
     mock_jwt = generate_token_data()
     contact = Contact(
@@ -45,10 +45,7 @@ def generate_platform_action_model():
 
 def generate_device_action_model():
     d = Device(
-        short_name="test device",
-        is_public=False,
-        is_private=False,
-        is_internal=True,
+        short_name="test device", is_public=True, is_private=False, is_internal=False,
     )
 
     mock_jwt = generate_token_data()

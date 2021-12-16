@@ -4,7 +4,8 @@ from .permission_utils import (
     check_for_permissions,
     check_patch_permission,
     check_deletion_permission,
-    check_permissions_for_related_objects, check_deletion_permission_for_related_objects,
+    check_permissions_for_related_objects,
+    check_deletion_permission_for_related_objects,
     check_patch_permission_for_related_objects,
 )
 
@@ -15,10 +16,26 @@ protected_views = [
     "api.platform_list",
 ]
 related_objects_protected_views = [
+    "api.customfield_list",
+    "api.customfield_detail",
     "api.device_mount_action_list",
     "api.device_mount_action_detail",
+    "api.device_unmount_action_list",
+    "api.device_unmount_action_detail",
+    "api.device_calibration_action_list",
+    "api.device_calibration_action_detail",
+    "api.generic_device_action_list",
+    "api.generic_device_action_detail",
+    "api.device_property_list",
+    "api.device_property_detail",
     "api.platform_mount_action_list",
     "api.platform_mount_action_detail",
+    "api.platform_unmount_action_list",
+    "api.platform_unmount_action_detail",
+    "api.platform_software_update_action_list",
+    "api.platform_software_update_action_detail",
+    "api.generic_platform_action_list",
+    "api.generic_platform_action_detail",
 ]
 
 
