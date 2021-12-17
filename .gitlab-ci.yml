@@ -147,7 +147,7 @@ build-deploy-static-files-gfz:
           --env NUXT_ENV_OIDC_CHALLANGE=$OIDC_CHALLANGE \
           --env NUXT_ENV_ALLOWED_MIMETYPES=$ALLOWED_MIME_TYPES \
           --env NUXT_ENV_SCOPE="profile" \
-          ${CI_REGISTRY_IMAGE}-static:gfz-${TARGET_PACKAGE_VERSION} 
+          ${CI_REGISTRY_IMAGE}-static:gfz-${TARGET_PACKAGE_VERSION}
     # Use cp to avoid user missmatch with docker volumes
     - docker cp "static-gfz-${TARGET_PACKAGE_VERSION}-container-$CI_JOB_ID":/smsfrontend/dist .
     # Sign the tar and tar the tar with the signing txt file to enable checksum test for orch repository
@@ -175,7 +175,7 @@ build-deploy-static-files-gfz:
     # We want to be able to trigger the manual deployment from every branch
     - if: $CI_PIPELINE_SOURCE == "push"
       when: manual
-  
+
 trigger-build-on-orchestration-gfz:
   stage: deploy-staging
   needs: ["build-deploy-static-files-gfz"]
@@ -253,6 +253,8 @@ deploy-staging-ufz:
     - rdm-test
   rules:
     - if: "$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH"
+      when: manual
+      allow_failure: true
   image: alpine
   script:
     ## Install SSH agent
