@@ -474,6 +474,22 @@ type QueryParams = {
  * versa
  */
 class SearchParamsSerializer {
+  public states: Status[] = []
+  public deviceTypes: DeviceType[] = []
+  public manufacturer: Manufacturer[] = []
+
+  constructor ({ states, deviceTypes, manufacturer }: {states?: Status[], deviceTypes?: DeviceType[], manufacturer?: Manufacturer[]} = {}) {
+    if (states) {
+      this.states = states
+    }
+    if (deviceTypes) {
+      this.deviceTypes = deviceTypes
+    }
+    if (manufacturer) {
+      this.manufacturer = manufacturer
+    }
+  }
+
   /**
    * converts search parameters to Vue route query params
    *
@@ -488,6 +504,15 @@ class SearchParamsSerializer {
     if (params.onlyOwnDevices) {
       result.onlyOwnDevices = String(params.onlyOwnDevices)
     }
+    if (params.manufacturer) {
+      result.manufacturer = params.manufacturer.map(m => m.id)
+    }
+    if (params.types) {
+      result.types = params.types.map(t => t.id)
+    }
+    if (params.states) {
+      result.states = params.states.map(s => s.id)
+    }
     return result
   }
 
@@ -498,11 +523,35 @@ class SearchParamsSerializer {
    * @returns {ISearchParameters} the params used in the search
    */
   toSearchParams (params: QueryParams): ISearchParameters {
+    let manufacturer: Manufacturer[] = []
+    if (params.manufacturer) {
+      if (!Array.isArray(params.manufacturer)) {
+        params.manufacturer = [params.manufacturer]
+      }
+      manufacturer = params.manufacturer.map(paramId => this.manufacturer.find(manufacturer => manufacturer.id === paramId)).filter(manufacturer => typeof manufacturer !== 'undefined') as Manufacturer[]
+    }
+
+    let types: DeviceType[] = []
+    if (params.types) {
+      if (!Array.isArray(params.types)) {
+        params.types = [params.types]
+      }
+      types = params.types.map(paramId => this.deviceTypes.find(deviceType => deviceType.id === paramId)).filter(deviceType => typeof deviceType !== 'undefined') as DeviceType[]
+    }
+
+    let states: Status[] = []
+    if (params.states) {
+      if (!Array.isArray(params.states)) {
+        params.states = [params.states]
+      }
+      states = params.states.map(paramId => this.states.find(state => state.id === paramId)).filter(state => typeof state !== 'undefined') as Status[]
+    }
+
     return {
       searchText: typeof params.searchText === 'string' ? params.searchText : '',
-      manufacturer: [],
-      states: [],
-      types: [],
+      manufacturer,
+      states,
+      types,
       onlyOwnDevices: typeof params.onlyOwnDevices !== 'undefined' && params.onlyOwnDevices === 'true'
     }
   }
@@ -539,13 +588,17 @@ export default class SearchDevicesPage extends Vue {
   private selectedSearchDeviceTypes: DeviceType[] = []
   private onlyOwnDevices: boolean = false
 
+  private manufacturer: Manufacturer[] = []
+  private states: Status[] = []
+  private deviceTypes: DeviceType[] = []
+
   private deviceTypeLookup: Map<string, DeviceType> = new Map<string, DeviceType>()
   private statusLookup: Map<string, Status> = new Map<string, Status>()
 
   private searchResults: PaginatedResult = {}
   private searchText: string | null = null
 
-  private showDeleteDialog:boolean = false
+  private showDeleteDialog: boolean = false
 
   private searchResultItemsShown: { [id: string]: boolean } = {}
 
@@ -555,35 +608,40 @@ export default class SearchDevicesPage extends Vue {
 
   created () {
     this.initializeAppBar()
-    this.initSearchQueryParams(this.$route.query)
   }
 
-  mounted () {
-    const promiseDeviceTypes = this.$api.deviceTypes.findAll()
-    const promiseStates = this.$api.states.findAll()
+  async mounted () {
+    await this.fetchEntities()
+    this.initSearchQueryParams(this.$route.query)
+    this.runInitialSearch()
+  }
 
-    promiseDeviceTypes.then((deviceTypes) => {
-      promiseStates.then((states) => {
-        const deviceTypeTypeLookup = new Map<string, DeviceType>()
-        const statusLookup = new Map<string, Status>()
+  async fetchEntities (): Promise<void> {
+    const deviceTypeTypeLookup = new Map<string, DeviceType>()
+    const statusLookup = new Map<string, Status>()
 
-        for (const deviceType of deviceTypes) {
-          deviceTypeTypeLookup.set(deviceType.uri, deviceType)
-        }
-        for (const status of states) {
-          statusLookup.set(status.uri, status)
-        }
+    try {
+      const [deviceTypes, states, manufacturer] = await Promise.all([
+        this.$api.deviceTypes.findAll(),
+        this.$api.states.findAll(),
+        this.$api.manufacturer.findAll()
+      ])
 
-        this.deviceTypeLookup = deviceTypeTypeLookup
-        this.statusLookup = statusLookup
+      this.deviceTypes = deviceTypes
+      this.states = states
+      this.manufacturer = manufacturer
 
-        this.runInitialSearch()
-      }).catch((_error) => {
-        this.$store.commit('snackbar/setError', 'Loading of states failed')
-      }).catch((_error) => {
-        this.$store.commit('snackbar/setError', 'Loading of device types failed')
-      })
-    })
+      for (const deviceType of deviceTypes) {
+        deviceTypeTypeLookup.set(deviceType.uri, deviceType)
+      }
+      for (const status of states) {
+        statusLookup.set(status.uri, status)
+      }
+      this.deviceTypeLookup = deviceTypeTypeLookup
+      this.statusLookup = statusLookup
+    } catch (_error) {
+      this.$store.commit('snackbar/setError', 'Loading of entities failed')
+    }
   }
 
   beforeDestroy () {
@@ -837,12 +895,27 @@ export default class SearchDevicesPage extends Vue {
   getTextOrDefault = (text: string): string => text || '-'
 
   initSearchQueryParams (params: QueryParams): void {
-    const searchParamsObject = (new SearchParamsSerializer()).toSearchParams(params)
+    const searchParamsObject = (new SearchParamsSerializer({
+      states: this.states,
+      deviceTypes: this.deviceTypes,
+      manufacturer: this.manufacturer
+    })).toSearchParams(params)
+
+    // prefill the form by the serialized search params from the URL
     if (searchParamsObject.searchText) {
       this.searchText = searchParamsObject.searchText
     }
     if (searchParamsObject.onlyOwnDevices) {
       this.onlyOwnDevices = searchParamsObject.onlyOwnDevices
+    }
+    if (searchParamsObject.manufacturer) {
+      this.selectedSearchManufacturers = searchParamsObject.manufacturer
+    }
+    if (searchParamsObject.types) {
+      this.selectedSearchDeviceTypes = searchParamsObject.types
+    }
+    if (searchParamsObject.states) {
+      this.selectedSearchStates = searchParamsObject.states
     }
   }
 
