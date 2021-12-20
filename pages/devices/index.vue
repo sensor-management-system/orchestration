@@ -441,121 +441,11 @@ import { Device } from '@/models/Device'
 import { DeviceType } from '@/models/DeviceType'
 import { Manufacturer } from '@/models/Manufacturer'
 import { Status } from '@/models/Status'
+
 import { DeviceSearcher } from '@/services/sms/DeviceApi'
 
-interface IBasicSearchParameters {
-  searchText: string | null
-}
-
-interface ISearchParameters extends IBasicSearchParameters {
-  manufacturer: Manufacturer[]
-  states: Status[]
-  types: DeviceType[]
-  onlyOwnDevices: boolean
-}
-
-/**
- * the Vue route query params are defined (but not exported) in
- * vue-router/types as:
- *
- *   Dictionary<string | (string | null)[]>
- *
- * where Dictionary is defined as:
- *
- *   type Dictionary<T> = { [key: string]: T }
- *
- */
-type QueryParams = {
-  [param: string]: string | (string | null)[]
-}
-
-/**
- * defines methods to convert from ISearchParameters to QueryParams and vice
- * versa
- */
-class SearchParamsSerializer {
-  public states: Status[] = []
-  public deviceTypes: DeviceType[] = []
-  public manufacturer: Manufacturer[] = []
-
-  constructor ({ states, deviceTypes, manufacturer }: {states?: Status[], deviceTypes?: DeviceType[], manufacturer?: Manufacturer[]} = {}) {
-    if (states) {
-      this.states = states
-    }
-    if (deviceTypes) {
-      this.deviceTypes = deviceTypes
-    }
-    if (manufacturer) {
-      this.manufacturer = manufacturer
-    }
-  }
-
-  /**
-   * converts search parameters to Vue route query params
-   *
-   * @param {ISearchParameters} params - the params used in the search
-   * @returns {QueryParams} Vue route query params
-   */
-  toQueryParams (params: ISearchParameters): QueryParams {
-    const result: QueryParams = {}
-    if (params.searchText) {
-      result.searchText = params.searchText
-    }
-    if (params.onlyOwnDevices) {
-      result.onlyOwnDevices = String(params.onlyOwnDevices)
-    }
-    if (params.manufacturer) {
-      result.manufacturer = params.manufacturer.map(m => m.id)
-    }
-    if (params.types) {
-      result.types = params.types.map(t => t.id)
-    }
-    if (params.states) {
-      result.states = params.states.map(s => s.id)
-    }
-    return result
-  }
-
-  /**
-   * converts Vue route query params to search parameters
-   *
-   * @param {QueryParams} params - the Vue route query params
-   * @returns {ISearchParameters} the params used in the search
-   */
-  toSearchParams (params: QueryParams): ISearchParameters {
-    let manufacturer: Manufacturer[] = []
-    if (params.manufacturer) {
-      if (!Array.isArray(params.manufacturer)) {
-        params.manufacturer = [params.manufacturer]
-      }
-      manufacturer = params.manufacturer.map(paramId => this.manufacturer.find(manufacturer => manufacturer.id === paramId)).filter(manufacturer => typeof manufacturer !== 'undefined') as Manufacturer[]
-    }
-
-    let types: DeviceType[] = []
-    if (params.types) {
-      if (!Array.isArray(params.types)) {
-        params.types = [params.types]
-      }
-      types = params.types.map(paramId => this.deviceTypes.find(deviceType => deviceType.id === paramId)).filter(deviceType => typeof deviceType !== 'undefined') as DeviceType[]
-    }
-
-    let states: Status[] = []
-    if (params.states) {
-      if (!Array.isArray(params.states)) {
-        params.states = [params.states]
-      }
-      states = params.states.map(paramId => this.states.find(state => state.id === paramId)).filter(state => typeof state !== 'undefined') as Status[]
-    }
-
-    return {
-      searchText: typeof params.searchText === 'string' ? params.searchText : '',
-      manufacturer,
-      states,
-      types,
-      onlyOwnDevices: typeof params.onlyOwnDevices !== 'undefined' && params.onlyOwnDevices === 'true'
-    }
-  }
-}
+import { QueryParams } from '@/modelUtils/QueryParams'
+import { IDeviceSearchParams, DeviceSearchParamsSerializer } from '@/modelUtils/DeviceSearchParams'
 
 type PaginatedResult = {
   [page: number]: Device[]
@@ -727,7 +617,7 @@ export default class SearchDevicesPage extends Vue {
   }
 
   async runSearch (
-    searchParameters: ISearchParameters,
+    searchParameters: IDeviceSearchParams,
     page: number = 1
   ): Promise<void> {
     this.initUrlQueryParams(searchParameters)
@@ -895,7 +785,7 @@ export default class SearchDevicesPage extends Vue {
   getTextOrDefault = (text: string): string => text || '-'
 
   initSearchQueryParams (params: QueryParams): void {
-    const searchParamsObject = (new SearchParamsSerializer({
+    const searchParamsObject = (new DeviceSearchParamsSerializer({
       states: this.states,
       deviceTypes: this.deviceTypes,
       manufacturer: this.manufacturer
@@ -919,9 +809,9 @@ export default class SearchDevicesPage extends Vue {
     }
   }
 
-  initUrlQueryParams (params: ISearchParameters): void {
+  initUrlQueryParams (params: IDeviceSearchParams): void {
     this.$router.push({
-      query: (new SearchParamsSerializer()).toQueryParams(params),
+      query: (new DeviceSearchParamsSerializer()).toQueryParams(params),
       hash: this.$route.hash
     })
   }
