@@ -486,6 +486,10 @@ class BasicSearchParameters implements IRunSearchParameters {
   }
 }
 
+type PaginatedResult = {
+    [page: number]: Platform[]
+}
+
 @Component({
   components: {
     DotMenuActionDelete,
@@ -506,6 +510,7 @@ export default class SearchPlatformsPage extends Vue {
   private totalCount: number = 0
   private loader: null | IPaginationLoader<Platform> = null
   private lastActiveSearcher: PlatformSearcher | null = null
+  private page: number = 0
 
   private selectedSearchManufacturers: Manufacturer[] = []
   private selectedSearchStates: Status[] = []
@@ -625,7 +630,6 @@ export default class SearchPlatformsPage extends Vue {
     this.loading = true
     this.searchResults = {}
     this.unsetResultItemsShown()
-    this.showDeleteDialog = {}
     this.loader = null
     this.page = 0
 
@@ -711,7 +715,7 @@ export default class SearchPlatformsPage extends Vue {
     }
   }
 
- initDeleteDialog (platform: Platform) {
+  initDeleteDialog (platform: Platform) {
     this.showDeleteDialog = true
     this.platformToDelete = platform
   }
@@ -734,15 +738,6 @@ export default class SearchPlatformsPage extends Vue {
         this.page = this.page > 1 ? this.page - 1 : 1
       }
       this.loadPage(this.page, false)
-      this.showDeleteDialog = {}
-
-      const searchIndex = this.searchResults.findIndex(r => r.id === id)
-      if (searchIndex > -1) {
-        this.searchResults.splice(searchIndex, 1)
-        this.totalCount -= 1
-      }
-      this.loadPage(this.page, false)
-
       this.$store.commit('snackbar/setSuccess', 'Platform deleted')
     }).catch((_error) => {
       this.$store.commit('snackbar/setError', 'Platform could not be deleted')

@@ -285,7 +285,7 @@ type PaginatedResult = {
   components: {
     ContacsDeleteDialog,
     DotMenuActionDelete,
-    DotMenu 
+    DotMenu
   }
 })
 export default class SearchContactsPage extends Vue {
@@ -341,12 +341,6 @@ export default class SearchContactsPage extends Vue {
       .newSearchBuilder()
       .withText(this.searchText)
       .build()
-    lastActiveSearcher
-      .findMatchingAsPaginationLoader(this.pageSize)
-      .then(this.loadUntilWeHaveSomeEntries).catch((_error) => {
-        this.$store.commit('snackbar/setError', 'Loading of contacts failed')
-      })
-  }
 
     try {
       const loader = await lastActiveSearcher.findMatchingAsPaginationLoader(this.pageSize)
@@ -358,12 +352,6 @@ export default class SearchContactsPage extends Vue {
       this.$store.commit('snackbar/setError', 'Loading of contacts failed')
     } finally {
       this.loading = false
-    } else if (this.canLoadNext() && loader.funToLoadNext != null) {
-      loader.funToLoadNext().then((nextLoader) => {
-        this.loadUntilWeHaveSomeEntries(nextLoader)
-      }).catch((_error) => {
-        this.$store.commit('snackbar/setError', 'Loading of contacts failed')
-      })
     }
   }
 
