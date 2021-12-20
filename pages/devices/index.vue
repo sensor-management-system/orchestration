@@ -197,8 +197,7 @@ permissions and limitations under the Licence.
       >
         <v-card
           :disabled="loading"
-          :elevation="hover || isItemSelected(result.id) ? 6 : 2"
-          :outlined="isItemSelected(result.id)"
+          :elevation="hover ? 6 : 2"
           class="ma-2"
         >
           <v-card-text
@@ -208,13 +207,6 @@ permissions and limitations under the Licence.
               no-gutters
             >
               <v-col>
-                <nuxt-link
-                  :to="{ query: $route.query, hash: '#item-' + result.id }"
-                  class="text-caption font-weight-light"
-                  style="text-decoration: none"
-                >
-                  #
-                </nuxt-link>
                 <StatusBadge
                   :value="getStatus(result)"
                 >
@@ -641,8 +633,6 @@ export default class SearchDevicesPage extends Vue {
       },
       page
     )
-    // when the search result was loaded, expand the selected item
-    this.initShowResultItem()
   }
 
   basicSearch (): Promise<void> {
@@ -890,32 +880,6 @@ export default class SearchDevicesPage extends Vue {
       query,
       hash: preserveHash ? this.$route.hash : ''
     })
-  }
-
-  getItemHashFromUrl (): undefined | string {
-    if (!this.$route.hash) {
-      return
-    }
-    const hash: string = this.$route.hash.replace('#item-', '')
-    if (isNaN(parseInt(hash))) {
-      return
-    }
-    return hash
-  }
-
-  isItemSelected (id: string): boolean {
-    return this.getItemHashFromUrl() === id
-  }
-
-  initShowResultItem () {
-    const itemId = this.getItemHashFromUrl()
-    if (itemId) {
-      this.showResultItem(itemId)
-      // wait until the list is rendered
-      Vue.nextTick(() => {
-        this.$vuetify.goTo('#item-' + itemId)
-      })
-    }
   }
 }
 
