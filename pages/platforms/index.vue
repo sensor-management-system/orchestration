@@ -440,7 +440,6 @@ import DotMenu from '@/components/DotMenu.vue'
 import DotMenuActionCopy from '@/components/DotMenuActionCopy.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 
-
 import { IPaginationLoader } from '@/utils/PaginatedLoader'
 
 import { Manufacturer } from '@/models/Manufacturer'

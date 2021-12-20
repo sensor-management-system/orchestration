@@ -186,7 +186,7 @@ import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 
 @Component({
   filters: { dateToDateTimeString },
-  components: { 
+  components: {
     DotMenuActionDelete,
     DotMenu,
     StatusBadge
