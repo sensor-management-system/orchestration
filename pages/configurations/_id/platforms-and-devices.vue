@@ -81,7 +81,6 @@ permissions and limitations under the Licence.
             :current-user-mail="currentUserMail"
             @remove="removeSelectedNode"
             @overwriteExistingMountAction="overwriteExistingMountAction"
-            @addNewMountAction="addNewMountAction"
           />
           <ConfigurationsPlatformDeviceSearch
             v-if="$auth.loggedIn && (!selectedNode || selectedNode.isPlatform())"
@@ -234,10 +233,12 @@ export default class ConfigurationPlatformsAndDevices extends Vue {
 
   overwriteExistingMountAction (node: ConfigurationsTreeNode, newSettings: any) {
     ConfigurationHelper.overwriteExistingMountAction(node, newSettings)
-  }
-
-  addNewMountAction (node: ConfigurationsTreeNode, newSettings: any) {
-    ConfigurationHelper.addNewMountAction(node, newSettings, this.configuration, this.selectedDate, this.selectedNode)
+    // The overwriteExistingMountAction helper overwrites the mount action
+    // directly in the tree & the configuration.
+    // We don't need to set those updated mount action additionally
+    // in the configuration.
+    // All what is left is to save our change.
+    this.save()
   }
 
   isPlatformInTree (platform: Platform): boolean {

@@ -111,51 +111,14 @@ permissions and limitations under the Licence.
                 align-self="end"
                 class="text-right"
               >
-                <v-menu
-                  v-if="$auth.loggedIn"
-                  close-on-click
-                  close-on-content-click
-                  offset-x
-                  left
-                  z-index="999"
-                >
-                  <template #activator="{ on }">
-                    <v-btn
-                      data-role="property-menu"
-                      icon
-                      small
-                      v-on="on"
-                    >
-                      <v-icon
-                        dense
-                        small
-                      >
-                        mdi-dots-vertical
-                      </v-icon>
-                    </v-btn>
+                <DotMenu>
+                  <template #actions>
+                    <DotMenuActionDelete
+                      :readonly="!$auth.loggedIn"
+                      @click="initDeleteDialog(result)"
+                    />
                   </template>
-                  <v-list>
-                    <v-list-item
-                      dense
-                      @click="showDeleteDialogFor(result.id)"
-                    >
-                      <v-list-item-content>
-                        <v-list-item-title
-                          class="'red--text"
-                        >
-                          <v-icon
-                            left
-                            small
-                            color="red"
-                          >
-                            mdi-delete
-                          </v-icon>
-                          Delete
-                        </v-list-item-title>
-                      </v-list-item-content>
-                    </v-list-item>
-                  </v-list>
-                </v-menu>
+                </DotMenu>
               </v-col>
             </v-row>
             <v-row
@@ -270,35 +233,6 @@ permissions and limitations under the Licence.
               </v-card-text>
             </v-card>
           </v-expand-transition>
-          <v-dialog v-model="showDeleteDialog[result.id]" max-width="290">
-            <v-card>
-              <v-card-title class="headline">
-                Delete contact
-              </v-card-title>
-              <v-card-text>
-                Do you really want to delete the contact <em>{{ getFullName(result) }}</em>?
-              </v-card-text>
-              <v-card-actions>
-                <v-btn
-                  text
-                  @click="hideDeleteDialogFor(result.id)"
-                >
-                  No
-                </v-btn>
-                <v-spacer />
-                <v-btn
-                  color="error"
-                  text
-                  @click="deleteAndCloseDialog(result.id)"
-                >
-                  <v-icon left>
-                    mdi-delete
-                  </v-icon>
-                  Delete
-                </v-btn>
-              </v-card-actions>
-            </v-card>
-          </v-dialog>
         </v-card>
       </v-hover>
       <v-pagination
@@ -309,7 +243,12 @@ permissions and limitations under the Licence.
         @input="setPage"
       />
     </div>
-
+    <ContacsDeleteDialog
+      v-model="showDeleteDialog"
+      :contact-to-delete="contactToDelete"
+      @cancel-deletion="closeDialog"
+      @submit-deletion="deleteAndCloseDialog"
+    />
     <v-btn
       v-if="$auth.loggedIn"
       bottom
@@ -334,11 +273,20 @@ import { IPaginationLoader } from '@/utils/PaginatedLoader'
 
 import { Contact } from '@/models/Contact'
 
+import DotMenu from '@/components/DotMenu.vue'
+import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
+import ContacsDeleteDialog from '@/components/contacts/ContacsDeleteDialog.vue'
+
 type PaginatedResult = {
   [page: number]: Contact[]
 }
 
 @Component({
+  components: {
+    ContacsDeleteDialog,
+    DotMenuActionDelete,
+    DotMenu 
+  }
 })
 export default class SearchContactsPage extends Vue {
   private readonly pageSize: number = 20
@@ -351,7 +299,8 @@ export default class SearchContactsPage extends Vue {
   private searchResults: PaginatedResult = {}
   private searchText: string = ''
 
-  private showDeleteDialog: { [id: string]: boolean} = {}
+  private showDeleteDialog: boolean = false
+  private contactToDelete: Contact|null = null
   private searchResultItemsShown: { [id: string]: boolean } = {}
 
   created () {
@@ -364,7 +313,6 @@ export default class SearchContactsPage extends Vue {
 
   beforeDestroy () {
     this.unsetResultItemsShown()
-    this.showDeleteDialog = {}
     this.$store.dispatch('appbar/setDefaults')
   }
 
@@ -384,9 +332,8 @@ export default class SearchContactsPage extends Vue {
   async search () {
     this.totalCount = 0
     this.loading = true
-    this.searchResults = {}
+    this.searchResults = []
     this.unsetResultItemsShown()
-    this.showDeleteDialog = {}
     this.loader = null
     this.page = 0
 
@@ -394,6 +341,12 @@ export default class SearchContactsPage extends Vue {
       .newSearchBuilder()
       .withText(this.searchText)
       .build()
+    lastActiveSearcher
+      .findMatchingAsPaginationLoader(this.pageSize)
+      .then(this.loadUntilWeHaveSomeEntries).catch((_error) => {
+        this.$store.commit('snackbar/setError', 'Loading of contacts failed')
+      })
+  }
 
     try {
       const loader = await lastActiveSearcher.findMatchingAsPaginationLoader(this.pageSize)
@@ -405,6 +358,12 @@ export default class SearchContactsPage extends Vue {
       this.$store.commit('snackbar/setError', 'Loading of contacts failed')
     } finally {
       this.loading = false
+    } else if (this.canLoadNext() && loader.funToLoadNext != null) {
+      loader.funToLoadNext().then((nextLoader) => {
+        this.loadUntilWeHaveSomeEntries(nextLoader)
+      }).catch((_error) => {
+        this.$store.commit('snackbar/setError', 'Loading of contacts failed')
+      })
     }
   }
 
@@ -449,7 +408,22 @@ export default class SearchContactsPage extends Vue {
     return result
   }
 
+  initDeleteDialog (contact: Contact) {
+    this.showDeleteDialog = true
+    this.contactToDelete = contact
+  }
+
+  closeDialog () {
+    this.showDeleteDialog = false
+    this.contactToDelete = null
+  }
+
   deleteAndCloseDialog (id: string) {
+    this.showDeleteDialog = false
+    if (this.contactToDelete === null) {
+      return
+    }
+
     this.$api.contacts.deleteById(id).then(() => {
       // if we know that the deleted device was the last of the page, we
       // decrement the page by one
@@ -457,20 +431,12 @@ export default class SearchContactsPage extends Vue {
         this.page = this.page > 1 ? this.page - 1 : 1
       }
       this.loadPage(this.page, false)
-      this.showDeleteDialog = {}
       this.$store.commit('snackbar/setSuccess', 'Contact deleted')
     }).catch((_error) => {
-      this.showDeleteDialog = {}
       this.$store.commit('snackbar/setError', 'Contact could not be deleted')
+    }).finally(() => {
+      this.contactToDelete = null
     })
-  }
-
-  showDeleteDialogFor (id: string) {
-    Vue.set(this.showDeleteDialog, id, true)
-  }
-
-  hideDeleteDialogFor (id: string) {
-    Vue.set(this.showDeleteDialog, id, false)
   }
 
   showResultItem (id: string) {

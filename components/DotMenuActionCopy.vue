@@ -1,15 +1,16 @@
-/*
-Web client of the Sensor Management System software developed within
-the Helmholtz DataHub Initiative by GFZ and UFZ.
+<!--
+Web client of the Sensor Management System software developed within the
+Helmholtz DataHub Initiative by GFZ and UFZ.
 
 Copyright (C) 2020, 2021
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
-- Helmholtz Centre for Environmental Research GmbH - UFZ
-  (UFZ, https://www.ufz.de)
+- Erik Pongratz (UFZ, erik.pongratz@ufz.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
   Geosciences (GFZ, https://www.gfz-potsdam.de)
+- Helmholtz Centre for Environmental Research GmbH - UFZ
+  (UFZ, https://www.ufz.de)
 
 Parts of this program were developed within the context of the
 following publicly funded projects or measures:
@@ -30,20 +31,45 @@ distributed under the Licence is distributed on an "AS IS" basis,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
 implied. See the Licence for the specific language governing
 permissions and limitations under the Licence.
-*/
+-->
+<template>
+  <v-list-item
+    :disabled="readonly"
+    dense
+    nuxt
+    :to="path"
+  >
+    <v-list-item-content>
+      <v-list-item-title
+        :class="readonly? 'grey-text':'text'"
+      >
+        <v-icon
+          left
+          small
+          :color="readonly ? 'grey':'black'"
+        >
+          mdi-content-copy
+        </v-icon>
+        Copy
+      </v-list-item-title>
+    </v-list-item-content>
+  </v-list-item>
+</template>
+<script lang="ts">
+import { Component, Vue, Prop } from 'nuxt-property-decorator'
+@Component
+export default class DotMenuActionCopy extends Vue {
+  @Prop({
+    required: true,
+    type: String
+  })
+  readonly path!:string
 
-import { Middleware, Context } from '@nuxt/types'
-
-const institutePagesMiddleware: Middleware = function (context: Context) {
-  const institute = context.env.institute
-  if (context.route.path.match('^/info/legal-notice/?$')) {
-    context.redirect({ name: `info-legal-notice-${institute}` })
-  }
-  if (context.route.path.match('^/info/privacy-policy/?$')) {
-    context.redirect({ name: `info-privacy-policy-${institute}` })
-  }
-  if (context.route.path.match('^/info/terms-of-use/?$')) {
-    context.redirect({ name: `info-terms-of-use-${institute}` })
-  }
+  @Prop({
+    default: false,
+    type: Boolean
+  })
+  // @ts-ignore
+  readonly readonly: boolean
 }
-export default institutePagesMiddleware
+</script>

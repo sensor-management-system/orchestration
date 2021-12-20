@@ -227,71 +227,18 @@ permissions and limitations under the Licence.
                 align-self="end"
                 class="text-right"
               >
-                <v-menu
-                  v-if="$auth.loggedIn"
-                  close-on-click
-                  close-on-content-click
-                  offset-x
-                  left
-                  z-index="999"
-                >
-                  <template #activator="{ on }">
-                    <v-btn
-                      data-role="property-menu"
-                      icon
-                      small
-                      v-on="on"
-                    >
-                      <v-icon
-                        dense
-                        small
-                      >
-                        mdi-dots-vertical
-                      </v-icon>
-                    </v-btn>
+                <DotMenu>
+                  <template #actions>
+                    <DotMenuActionCopy
+                      :readonly="!$auth.loggedIn"
+                      :path="'/devices/copy/' + result.id"
+                    />
+                    <DotMenuActionDelete
+                      :readonly="!$auth.loggedIn"
+                      @click="initDeleteDialog(result)"
+                    />
                   </template>
-
-                  <v-list>
-                    <v-list-item
-                      dense
-                      :to="'/devices/copy/' + result.id"
-                    >
-                      <v-list-item-content>
-                        <v-list-item-title
-                          class="text"
-                        >
-                          <v-icon
-                            left
-                            small
-                            color="black"
-                          >
-                            mdi-content-copy
-                          </v-icon>
-                          Copy
-                        </v-list-item-title>
-                      </v-list-item-content>
-                    </v-list-item>
-                    <v-list-item
-                      dense
-                      @click="showDeleteDialogFor(result.id)"
-                    >
-                      <v-list-item-content>
-                        <v-list-item-title
-                          class="red--text"
-                        >
-                          <v-icon
-                            left
-                            small
-                            color="red"
-                          >
-                            mdi-delete
-                          </v-icon>
-                          Delete
-                        </v-list-item-title>
-                      </v-list-item-content>
-                    </v-list-item>
-                  </v-list>
-                </v-menu>
+                </DotMenu>
               </v-col>
             </v-row>
             <v-row
@@ -454,46 +401,15 @@ permissions and limitations under the Licence.
               </v-card-text>
             </v-card>
           </v-expand-transition>
-          <v-dialog v-model="showDeleteDialog[result.id]" max-width="290">
-            <v-card>
-              <v-card-title class="headline">
-                Delete device
-              </v-card-title>
-              <v-card-text>
-                Do you really want to delete the device <em>{{ result.shortName }}</em>?
-              </v-card-text>
-              <v-card-actions>
-                <v-btn
-                  text
-                  @click="hideDeleteDialogFor(result.id)"
-                >
-                  No
-                </v-btn>
-                <v-spacer />
-                <v-btn
-                  color="error"
-                  text
-                  @click="deleteAndCloseDialog(result.id)"
-                >
-                  <v-icon left>
-                    mdi-delete
-                  </v-icon>
-                  Delete
-                </v-btn>
-              </v-card-actions>
-            </v-card>
-          </v-dialog>
         </v-card>
       </v-hover>
-      <v-pagination
-        :value="page"
-        :disabled="loading"
-        :length="numberOfPages"
-        :total-visible="7"
-        @input="setPage"
-      />
     </div>
-
+    <DeviceDeleteDialog
+      v-model="showDeleteDialog"
+      :device-to-delete="deviceToDelete"
+      @cancel-deletion="closeDialog"
+      @submit-deletion="deleteAndCloseDialog"
+    />
     <v-btn
       v-if="$auth.loggedIn"
       bottom
@@ -522,6 +438,10 @@ import DeviceTypeSelect from '@/components/DeviceTypeSelect.vue'
 import ManufacturerSelect from '@/components/ManufacturerSelect.vue'
 import StatusSelect from '@/components/StatusSelect.vue'
 import StatusBadge from '@/components/StatusBadge.vue'
+import DeviceDeleteDialog from '@/components/devices/DeviceDeleteDialog.vue'
+import DotMenu from '@/components/DotMenu.vue'
+import DotMenuActionCopy from '@/components/DotMenuActionCopy.vue'
+import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 
 import { IPaginationLoader } from '@/utils/PaginatedLoader'
 
@@ -602,6 +522,10 @@ type PaginatedResult = {
 
 @Component({
   components: {
+    DotMenuActionDelete,
+    DotMenuActionCopy,
+    DotMenu,
+    DeviceDeleteDialog,
     DeviceTypeSelect,
     ManufacturerSelect,
     StatusBadge,
@@ -629,11 +553,13 @@ export default class SearchDevicesPage extends Vue {
   private searchResults: PaginatedResult = {}
   private searchText: string | null = null
 
-  private showDeleteDialog: { [id: string]: boolean} = {}
+  private showDeleteDialog:boolean = false
 
   private searchResultItemsShown: { [id: string]: boolean } = {}
 
   public readonly NO_TYPE: string = 'Unknown type'
+
+  private deviceToDelete:Device|null=null
 
   created () {
     this.initializeAppBar()
@@ -670,7 +596,6 @@ export default class SearchDevicesPage extends Vue {
 
   beforeDestroy () {
     this.unsetResultItemsShown()
-    this.showDeleteDialog = {}
     this.$store.dispatch('appbar/setDefaults')
   }
 
@@ -763,7 +688,6 @@ export default class SearchDevicesPage extends Vue {
     this.loading = true
     this.searchResults = {}
     this.unsetResultItemsShown()
-    this.showDeleteDialog = {}
     this.loader = null
     this.page = 0
 
@@ -856,6 +780,10 @@ export default class SearchDevicesPage extends Vue {
   }
 
   deleteAndCloseDialog (id: string) {
+    this.showDeleteDialog = false
+    if (this.deviceToDelete === null) {
+      return
+    }
     this.$api.devices.deleteById(id).then(() => {
       // if we know that the deleted device was the last of the page, we
       // decrement the page by one
@@ -863,11 +791,11 @@ export default class SearchDevicesPage extends Vue {
         this.page = this.page > 1 ? this.page - 1 : 1
       }
       this.loadPage(this.page, false)
-      this.showDeleteDialog = {}
       this.$store.commit('snackbar/setSuccess', 'Device deleted')
     }).catch((_error) => {
-      this.showDeleteDialog = {}
       this.$store.commit('snackbar/setError', 'Device could not be deleted')
+    }).finally(() => {
+      this.deviceToDelete = null
     })
   }
 
@@ -893,12 +821,14 @@ export default class SearchDevicesPage extends Vue {
     return ''
   }
 
-  showDeleteDialogFor (id: string) {
-    Vue.set(this.showDeleteDialog, id, true)
+  initDeleteDialog (device:Device) {
+    this.showDeleteDialog = true
+    this.deviceToDelete = device
   }
 
-  hideDeleteDialogFor (id: string) {
-    Vue.set(this.showDeleteDialog, id, false)
+  closeDialog () {
+    this.showDeleteDialog = false
+    this.deviceToDelete = null
   }
 
   showResultItem (id: string) {

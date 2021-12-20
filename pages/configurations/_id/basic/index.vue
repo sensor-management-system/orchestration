@@ -45,6 +45,15 @@ permissions and limitations under the Licence.
       >
         Edit
       </v-btn>
+      <DotMenu
+        v-if="$auth.loggedIn"
+      >
+        <template #actions>
+          <DotMenuActionDelete
+            @click="initDeleteDialog"
+          />
+        </template>
+      </DotMenu>
     </v-card-actions>
 
     <ConfigurationsBasicData
@@ -63,7 +72,22 @@ permissions and limitations under the Licence.
       >
         Edit
       </v-btn>
+      <DotMenu
+        v-if="$auth.loggedIn"
+      >
+        <template #actions>
+          <DotMenuActionDelete
+            @click="initDeleteDialog"
+          />
+        </template>
+      </DotMenu>
     </v-card-actions>
+    <ConfigurationsDeleteDialog
+      v-model="showDeleteDialog"
+      :configuration-to-delete="configuration"
+      @cancel-deletion="closeDialog"
+      @submit-deletion="deleteAndCloseDialog"
+    />
   </v-card>
 </template>
 
@@ -72,8 +96,11 @@ import { Component, Prop, Vue } from 'nuxt-property-decorator'
 import { Configuration } from '@/models/Configuration'
 import ConfigurationsBasicDataForm from '@/components/configurations/ConfigurationsBasicDataForm.vue'
 import ConfigurationsBasicData from '@/components/configurations/ConfigurationsBasicData.vue'
+import DotMenu from '@/components/DotMenu.vue'
+import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
+import ConfigurationsDeleteDialog from '@/components/configurations/ConfigurationsDeleteDialog.vue'
 @Component({
-  components: { ConfigurationsBasicData, ConfigurationsBasicDataForm }
+  components: { ConfigurationsDeleteDialog, DotMenuActionDelete, DotMenu, ConfigurationsBasicData, ConfigurationsBasicDataForm }
 })
 export default class ConfigurationShowBasicPage extends Vue {
   @Prop({
@@ -81,6 +108,8 @@ export default class ConfigurationShowBasicPage extends Vue {
     type: Object
   })
   readonly value!: Configuration
+
+  private showDeleteDialog:boolean=false;
 
   head () {
     return {
@@ -98,6 +127,28 @@ export default class ConfigurationShowBasicPage extends Vue {
 
   get configurationId () {
     return this.$route.params.id
+  }
+
+  initDeleteDialog () {
+    this.showDeleteDialog = true
+  }
+
+  closeDialog () {
+    this.showDeleteDialog = false
+  }
+
+  deleteAndCloseDialog () {
+    this.showDeleteDialog = false
+    if (this.configuration === null) {
+      return
+    }
+
+    this.$api.configurations.deleteById(this.configuration.id).then(() => {
+      this.$router.push('/configurations')
+      this.$store.commit('snackbar/setSuccess', 'Configuration deleted')
+    }).catch((_error) => {
+      this.$store.commit('snackbar/setError', 'Configuration could not be deleted')
+    })
   }
 }
 </script>

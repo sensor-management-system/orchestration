@@ -30,55 +30,9 @@
 
 FROM node:16.0.0-buster as js-builder
 
-# First the urls for sms backend and cv backend
-ARG SMS_BACKEND_URL_ARG
-ENV SMS_BACKEND_URL $SMS_BACKEND_URL_ARG
-
-ARG CV_BACKEND_URL_ARG
-ENV CV_BACKEND_URL $CV_BACKEND_URL_ARG
-
-ENV INSTITUTE gfz
-
-# Then the parameter and endpoints for open id connect
-ARG CLIENT_ID_ARG
-ENV NUXT_ENV_CLIENT_ID $CLIENT_ID_ARG
-
-ARG AUTHORITY_ARG
-ENV NUXT_ENV_AUTHORITY $AUTHORITY_ARG
-
-ARG OIDC_TOKEN_ARG
-ENV NUXT_ENV_OIDC_TOKEN $OIDC_TOKEN_ARG
-
-ARG OIDC_REFRESH_TOKEN_ARG
-ENV NUXT_ENV_OIDC_REFRESH_TOKEN $OIDC_REFRESH_TOKEN_ARG
-
-ARG OIDC_REFRESH_EXPIRE_ARG
-ENV NUXT_ENV_OIDC_REFRESH_EXPIRE $OIDC_REFRESH_EXPIRE_ARG
-
-ARG OIDC_RESPONSE_TYPE_ARG
-ENV NUXT_ENV_OIDC_RESPONSE_TYPE $OIDC_RESPONSE_TYPE_ARG
-
-ARG OIDC_GRANT_TYPE_ARG
-ENV NUXT_ENV_OIDC_GRANT_TYPE $OIDC_GRANT_TYPE_ARG
-
-ARG OIDC_CHALLANGE_ARG
-ENV NUXT_ENV_OIDC_CHALLANGE $OIDC_CHALLANGE_ARG
-
-# And those remaining settings
-# the following is the ufz setting
-#ENV NUXT_ENV_SCOPE openid profile email
-# and this is our setting
-ENV NUXT_ENV_SCOPE profile
-
-# The allowed mime types
-ARG ALLOWED_MIME_TYPES_ARG
-ENV NUXT_ENV_ALLOWED_MIMETYPES $ALLOWED_MIME_TYPES_ARG
-
-RUN mkdir /ssmfrontend
-COPY . /ssmfrontend
-WORKDIR /ssmfrontend
+RUN mkdir /smsfrontend
+COPY . /smsfrontend
+WORKDIR /smsfrontend
 RUN npm ci
-RUN npm run build
 
-FROM nginx:alpine as webserver
-COPY --from=js-builder /ssmfrontend/dist/ /usr/share/nginx/html
+ENTRYPOINT [ "npm", "run", "build" ]
