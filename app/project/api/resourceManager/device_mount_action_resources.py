@@ -7,11 +7,10 @@ from flask_rest_jsonapi.exceptions import ObjectNotFound, JsonApiException
 from sqlalchemy.orm.exc import NoResultFound
 
 from ..auth.permission_utils import (
-    check_permissions_for_related_objects,
-    get_collection_with_permissions,
     get_collection_with_permissions_for_related_objects,
 )
 from ..helpers.errors import ConflictError
+from ..helpers.mounting_checks import before_mount_action
 from ..models.base_model import db
 from ..models.configuration import Configuration
 from ..models.device import Device
@@ -39,28 +38,14 @@ class DeviceMountActionList(ResourceList):
             self.model, collection
         )
 
-    # def post(self, *args, **kwargs):
-    #     data = json.loads(request.data.decode())["data"]
-    #     device_id = data["relationships"]["device"]["data"]["id"]
-    #     device = db.session.query(Device).filter_by(id=device_id).one_or_none()
-    #     action = (
-    #         db.session.query(DeviceMountAction)
-    #         .filter_by(device_id=device_id)
-    #         .one_or_none()
-    #     )
-    #     if device.is_private:
-    #         raise ConflictError("Private device can't be used.")
-    #     raise ConflictError(
-    #         f"Device mounted on  Configuration with the id :{str(device.device_unmount_actions[-1].end_date)}"
-    #     )
-    #     if device.device_unmount_actions.end_date:
-    #         raise ConflictError(
-    #             f"Device mounted on  Configuration with the id :{str(device.device_unmount_actions[0])}"
-    #         )
-    #     try:
-    #         super().post(*args, **kwargs)
-    #     except JsonApiException as e:
-    #         raise ConflictError("Mount failed.", str(e))
+    def post(self, *args, **kwargs):
+        data = json.loads(request.data.decode())["data"]
+        before_mount_action(data)
+        try:
+            response = super().post(*args, **kwargs)
+            return response
+        except JsonApiException as e:
+            raise ConflictError("Mount failed.", str(e))
 
     def query(self, view_kwargs):
         """
@@ -78,7 +63,7 @@ class DeviceMountActionList(ResourceList):
                 self.session.query(Configuration).filter_by(id=configuration_id).one()
             except NoResultFound:
                 raise ObjectNotFound(
-                    {"parameter": "id",},
+                    {"parameter": "id", },
                     "Configuration: {} not found".format(configuration_id),
                 )
             else:
@@ -90,7 +75,7 @@ class DeviceMountActionList(ResourceList):
                 self.session.query(Device).filter_by(id=device_id).one()
             except NoResultFound:
                 raise ObjectNotFound(
-                    {"parameter": "id",}, "Device: {} not found".format(device_id),
+                    {"parameter": "id", }, "Device: {} not found".format(device_id),
                 )
             else:
                 query_ = query_.filter(DeviceMountAction.device_id == device_id)
@@ -99,7 +84,7 @@ class DeviceMountActionList(ResourceList):
                 self.session.query(Platform).filter_by(id=parent_platform_id).one()
             except NoResultFound:
                 raise ObjectNotFound(
-                    {"parameter": "id",},
+                    {"parameter": "id", },
                     "Platform: {} not found".format(parent_platform_id),
                 )
             else:
@@ -114,7 +99,7 @@ class DeviceMountActionList(ResourceList):
     data_layer = {
         "session": db.session,
         "model": DeviceMountAction,
-        "methods": {"query": query, "after_get_collection": after_get_collection,},
+        "methods": {"query": query, "after_get_collection": after_get_collection, },
     }
 
 

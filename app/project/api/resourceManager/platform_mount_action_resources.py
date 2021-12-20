@@ -7,6 +7,7 @@ from flask_rest_jsonapi.exceptions import ObjectNotFound, JsonApiException
 from sqlalchemy.orm.exc import NoResultFound
 
 from ..auth.permission_utils import get_collection_with_permissions_for_related_objects
+from ..helpers.mounting_checks import before_mount_action
 from ..helpers.errors import ConflictError
 from ...frj_csv_export.resource import ResourceList
 from ..models.base_model import db
@@ -34,25 +35,14 @@ class PlatformMountActionList(ResourceList):
             self.model, collection
         )
 
-    # def post(self, *args, **kwargs):
-    #     data = json.loads(request.data.decode())["data"]
-    #     platform_id = data["relationships"]["platform"]["data"]["id"]
-    #     platform = db.session.query(Platform).filter_by(id=platform_id).one_or_none()
-    #     action = (
-    #         db.session.query(PlatformMountAction)
-    #         .filter_by(platform_id=platform_id)
-    #         .one_or_none()
-    #     )
-    #     if platform.is_private:
-    #         raise ConflictError("Private Platform can't be used.")
-    #     if action:
-    #         raise ConflictError(
-    #             f"Platform mounted on Configuration with the id :{action.configuration_id}"
-    #         )
-    #     try:
-    #         super().post(*args, **kwargs)
-    #     except JsonApiException as e:
-    #         raise ConflictError("Mount failed.", str(e))
+    def post(self, *args, **kwargs):
+        data = json.loads(request.data.decode())["data"]
+        before_mount_action(data)
+        try:
+            response = super().post(*args, **kwargs)
+            return response
+        except JsonApiException as e:
+            raise ConflictError("Mount failed.", str(e))
 
     def query(self, view_kwargs):
         """
