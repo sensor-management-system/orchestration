@@ -558,6 +558,10 @@ export class ConfigurationSearcher {
     return this.findAllOnPage(1, pageSize)
   }
 
+  findMatchingAsPaginationLoaderOnPage (page: number, pageSize: number): Promise<IPaginationLoader<Configuration>> {
+    return this.findAllOnPage(page, pageSize)
+  }
+
   private findAllOnPage (page: number, pageSize: number): Promise<IPaginationLoader<Configuration>> {
     return this.axiosApi.get(
       '',
