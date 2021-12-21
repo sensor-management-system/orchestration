@@ -449,41 +449,8 @@ import { Status } from '@/models/Status'
 
 import { PlatformSearcher } from '@/services/sms/PlatformApi'
 
-interface IRunSearchParameters {
-  searchText: string | null
-  manufacturer: Manufacturer[]
-  states: Status[]
-  types: PlatformType[]
-  onlyOwnPlatforms: boolean
-}
-
-class BasicSearchParameters implements IRunSearchParameters {
-  private readonly _searchText: string | null
-
-  constructor (searchText: string | null) {
-    this._searchText = searchText
-  }
-
-  get searchText (): string | null {
-    return this._searchText
-  }
-
-  get manufacturer (): Manufacturer[] {
-    return []
-  }
-
-  get states (): Status[] {
-    return []
-  }
-
-  get types (): PlatformType[] {
-    return []
-  }
-
-  get onlyOwnPlatforms (): boolean {
-    return false
-  }
-}
+import { QueryParams } from '@/modelUtils/QueryParams'
+import { IPlatformSearchParams, PlatformSearchParamsSerializer } from '@/modelUtils/PlatformSearchParams'
 
 type PaginatedResult = {
     [page: number]: Platform[]
@@ -516,6 +483,10 @@ export default class SearchPlatformsPage extends Vue {
   private selectedSearchPlatformTypes: PlatformType[] = []
   private onlyOwnPlatforms: boolean = false
 
+  private manufacturer: Manufacturer[] = []
+  private states: Status[] = []
+  private platformTypes: PlatformType[] = []
+
   private platformTypeLookup: Map<string, PlatformType> = new Map<string, PlatformType>()
   private statusLookup: Map<string, Status> = new Map<string, Status>()
 
@@ -534,32 +505,39 @@ export default class SearchPlatformsPage extends Vue {
     this.initializeAppBar()
   }
 
-  mounted () {
-    const promisePlatformTypes = this.$api.platformTypes.findAll()
-    const promiseStates = this.$api.states.findAll()
+  async mounted () {
+    await this.fetchEntities()
+    this.initSearchQueryParams(this.$route.query)
+    this.runInitialSearch()
+  }
 
-    promisePlatformTypes.then((platformTypes) => {
-      promiseStates.then((states) => {
-        const platformTypeLookup = new Map<string, PlatformType>()
-        const statusLookup = new Map<string, Status>()
+  async fetchEntities (): Promise<void> {
+    const platformTypeLookup = new Map<string, PlatformType>()
+    const statusLookup = new Map<string, Status>()
 
-        for (const platformType of platformTypes) {
-          platformTypeLookup.set(platformType.uri, platformType)
-        }
-        for (const status of states) {
-          statusLookup.set(status.uri, status)
-        }
+    try {
+      const [platformTypes, states, manufacturer] = await Promise.all([
+        this.$api.platformTypes.findAll(),
+        this.$api.states.findAll(),
+        this.$api.manufacturer.findAll()
+      ])
 
-        this.platformTypeLookup = platformTypeLookup
-        this.statusLookup = statusLookup
+      this.platformTypes = platformTypes
+      this.states = states
+      this.manufacturer = manufacturer
 
-        this.runSelectedSearch()
-      }).catch((_error) => {
-        this.$store.commit('snackbar/setError', 'Loading of states failed')
-      })
-    }).catch((_error) => {
-      this.$store.commit('snackbar/setError', 'Loading of platform types failed')
-    })
+      for (const platformType of platformTypes) {
+        platformTypeLookup.set(platformType.uri, platformType)
+      }
+      for (const status of states) {
+        statusLookup.set(status.uri, status)
+      }
+
+      this.platformTypeLookup = platformTypeLookup
+      this.statusLookup = statusLookup
+    } catch (_error) {
+      this.$store.commit('snackbar/setError', 'Loading of entities failed')
+    }
   }
 
   beforeDestroy () {
@@ -587,25 +565,46 @@ export default class SearchPlatformsPage extends Vue {
     this.$store.commit('appbar/setActiveTab', tab)
   }
 
-  runSelectedSearch () {
-    if (this.activeTab === 0) {
-      this.basicSearch()
-    } else {
-      this.extendedSearch()
-    }
+  isExtendedSearch (): boolean {
+    return this.onlyOwnPlatforms === true ||
+      !!this.selectedSearchStates.length ||
+      !!this.selectedSearchPlatformTypes.length ||
+      !!this.selectedSearchManufacturers.length
   }
 
-  basicSearch () {
-    // only uses the text and the type (sensor or platform)
-    this.runSearch(new BasicSearchParameters(this.searchText))
+  async runInitialSearch (): Promise<void> {
+    this.activeTab = this.isExtendedSearch() ? 1 : 0
+
+    const page: number | undefined = this.getPageFromUrl()
+
+    await this.runSearch(
+      {
+        searchText: this.searchText,
+        manufacturer: this.selectedSearchManufacturers,
+        states: this.selectedSearchStates,
+        types: this.selectedSearchPlatformTypes,
+        onlyOwnPlatforms: this.onlyOwnPlatforms && this.$auth.loggedIn
+      },
+      page
+    )
+  }
+
+  basicSearch (): Promise<void> {
+    return this.runSearch({
+      searchText: this.searchText,
+      manufacturer: [],
+      states: [],
+      types: [],
+      onlyOwnPlatforms: false
+    })
   }
 
   clearBasicSearch () {
     this.searchText = null
   }
 
-  extendedSearch () {
-    this.runSearch({
+  extendedSearch (): Promise<void> {
+    return this.runSearch({
       searchText: this.searchText,
       manufacturer: this.selectedSearchManufacturers,
       states: this.selectedSearchStates,
@@ -616,6 +615,7 @@ export default class SearchPlatformsPage extends Vue {
 
   clearExtendedSearch () {
     this.clearBasicSearch()
+
     this.selectedSearchManufacturers = []
     this.selectedSearchStates = []
     this.selectedSearchPlatformTypes = []
@@ -623,8 +623,11 @@ export default class SearchPlatformsPage extends Vue {
   }
 
   async runSearch (
-    searchParameters: IRunSearchParameters
-  ) {
+    searchParameters: IPlatformSearchParams,
+    page: number = 1
+  ): Promise<void> {
+    this.initUrlQueryParams(searchParameters)
+
     this.totalCount = 0
     this.loading = true
     this.searchResults = {}
@@ -648,11 +651,12 @@ export default class SearchPlatformsPage extends Vue {
 
     this.lastActiveSearcher = searchBuilder.build()
     try {
-      const loader = await this.lastActiveSearcher.findMatchingAsPaginationLoader(this.pageSize)
+      const loader = await this.lastActiveSearcher.findMatchingAsPaginationLoaderOnPage(page, this.pageSize)
       this.loader = loader
-      this.searchResults[1] = loader.elements
+      this.searchResults[page] = loader.elements
       this.totalCount = loader.totalCount
-      this.page = 1
+      this.page = page
+      this.setPageInUrl(page)
     } catch (_error) {
       this.$store.commit('snackbar/setError', 'Loading of platforms failed')
     } finally {
@@ -781,6 +785,67 @@ export default class SearchPlatformsPage extends Vue {
   }
 
   getTextOrDefault = (text: string): string => text || '-'
+
+  initSearchQueryParams (params: QueryParams): void {
+    const searchParamsObject = (new PlatformSearchParamsSerializer({
+      states: this.states,
+      platformTypes: this.platformTypes,
+      manufacturer: this.manufacturer
+    })).toSearchParams(params)
+
+    // prefill the form by the serialized search params from the URL
+    if (searchParamsObject.searchText) {
+      this.searchText = searchParamsObject.searchText
+    }
+    if (searchParamsObject.onlyOwnPlatforms) {
+      this.onlyOwnPlatforms = searchParamsObject.onlyOwnPlatforms
+    }
+    if (searchParamsObject.manufacturer) {
+      this.selectedSearchManufacturers = searchParamsObject.manufacturer
+    }
+    if (searchParamsObject.types) {
+      this.selectedSearchPlatformTypes = searchParamsObject.types
+    }
+    if (searchParamsObject.states) {
+      this.selectedSearchStates = searchParamsObject.states
+    }
+  }
+
+  initUrlQueryParams (params: IPlatformSearchParams): void {
+    this.$router.push({
+      query: (new PlatformSearchParamsSerializer()).toQueryParams(params),
+      hash: this.$route.hash
+    })
+  }
+
+  getPageFromUrl (): number | undefined {
+    if ('page' in this.$route.query && typeof this.$route.query.page === 'string') {
+      return parseInt(this.$route.query.page) || 0
+    }
+  }
+
+  setPageInUrl (page: number, preserveHash: boolean = true): void {
+    let query: QueryParams = {}
+    if (page) {
+      // add page to the current url params
+      query = {
+        ...this.$route.query,
+        page: String(page)
+      }
+    } else {
+      // remove page from the current url params
+      const {
+        // eslint-disable-next-line
+        page,
+        ...params
+      } = this.$route.query
+      query = params
+    }
+    this.$router.push({
+      query,
+      hash: preserveHash ? this.$route.hash : ''
+    })
+  }
 }
 
 </script>
