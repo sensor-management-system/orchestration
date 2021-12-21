@@ -494,7 +494,7 @@ export default class SearchDevicesPage extends Vue {
 
   public readonly NO_TYPE: string = 'Unknown type'
 
-  private deviceToDelete:Device|null=null
+  private deviceToDelete: Device | null = null
 
   created () {
     this.initializeAppBar()
