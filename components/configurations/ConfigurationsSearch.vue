@@ -39,11 +39,15 @@ permissions and limitations under the Licence.
     >
       <v-tab-item :eager="true">
         <ConfigurationsBasicSearch
+          :search-text="searchText"
           @search="basicSearch"
         />
       </v-tab-item>
       <v-tab-item :eager="true">
         <ConfigurationsExtendedSearch
+          :search-text="searchText"
+          :selected-projects="selectedProjects"
+          :selected-configuration-states="selectedConfigurationStates"
           @search="extendedSearch"
         />
       </v-tab-item>
@@ -111,11 +115,17 @@ import { Component, Prop, Vue } from 'nuxt-property-decorator'
 
 import { Project } from '@/models/Project'
 import { Configuration } from '@/models/Configuration'
-import { IConfigurationSearchOption } from '@/models/SearchTypes'
 
 import { IPaginationLoader } from '@/utils/PaginatedLoader'
 
 import { ConfigurationSearcher } from '@/services/sms/ConfigurationApi'
+
+import { QueryParams } from '@/modelUtils/QueryParams'
+import {
+  IConfigurationSearchParams,
+  ConfigurationSearchParamsSerializer,
+  IConfigurationBasicSearchParams
+} from '@/modelUtils/ConfigurationSearchParams'
 
 import ConfigurationsBasicSearch from '@/components/configurations/ConfigurationsBasicSearch.vue'
 import ConfigurationsDeleteDialog from '@/components/configurations/ConfigurationsDeleteDialog.vue'
@@ -150,6 +160,13 @@ export default class ConfigurationsSearch extends Vue {
   private showDeleteDialog: boolean = false
   private configurationToDelete: Configuration | null = null
 
+  private searchText: string = ''
+  private selectedProjects: Project[] = []
+  private selectedConfigurationStates: string[] = []
+
+  private projects: Project[] = []
+  private configurationStates: string[] = []
+
   @Prop({
     default: 0,
     required: false,
@@ -170,9 +187,24 @@ export default class ConfigurationsSearch extends Vue {
   })
   readonly deleteCallback!: undefined | ConfigurationCallbackFunc
 
-  created () {
+  async mounted () {
+    await this.fetchEntities()
+    this.initSearchQueryParams(this.$route.query)
     if (this.loadInitialData) {
-      this.basicSearch('')
+      this.runInitialSearch()
+    }
+  }
+
+  async fetchEntities (): Promise<void> {
+    try {
+      const [configurationStates, projects] = await Promise.all([
+        this.$api.configurationStates.findAll(),
+        this.$api.projects.findAll()
+      ])
+      this.configurationStates = configurationStates
+      this.projects = projects
+    } catch (_error) {
+      this.$store.commit('snackbar/setError', 'Loading of entities failed')
     }
   }
 
@@ -187,27 +219,43 @@ export default class ConfigurationsSearch extends Vue {
     return message
   }
 
-  basicSearch (searchText: string = '') {
-    this.runSearch(searchText, [], [])
+  isExtendedSearch (): boolean {
+    return !!this.selectedConfigurationStates.length || !!this.selectedProjects.length
   }
 
-  extendedSearch ({
-    searchText,
-    selectedConfigurationStates,
-    selectedProjects
-  }: IConfigurationSearchOption) {
-    this.runSearch(
-      searchText,
-      selectedConfigurationStates,
-      selectedProjects
+  async runInitialSearch (): Promise<void> {
+    this.$emit('change-active-tab', this.isExtendedSearch() ? 1 : 0)
+
+    const page: number | undefined = this.getPageFromUrl()
+
+    await this.runSearch(
+      {
+        searchText: this.searchText,
+        states: this.selectedConfigurationStates,
+        projects: this.selectedProjects
+      },
+      page
     )
   }
 
+  basicSearch (searchParams: IConfigurationBasicSearchParams): Promise<void> {
+    return this.runSearch({
+      ...searchParams,
+      states: [],
+      projects: []
+    })
+  }
+
+  extendedSearch (searchParams: IConfigurationSearchParams): Promise<void> {
+    return this.runSearch(searchParams)
+  }
+
   async runSearch (
-    searchText: string | null,
-    configurationStates: string[],
-    projects: Project[]
+    searchParams: IConfigurationSearchParams,
+    page: number = 1
   ) {
+    this.initUrlQueryParams(searchParams)
+
     this.totalCount = 0
     this.loading = true
     this.searchResults = {}
@@ -215,16 +263,16 @@ export default class ConfigurationsSearch extends Vue {
 
     this.lastActiveSearcher = this.$api.configurations
       .newSearchBuilder()
-      .withText(searchText)
-      .withOneStatusOf(configurationStates)
-      .withOneMatchingProjectOf(projects)
+      .withText(searchParams.searchText)
+      .withOneStatusOf(searchParams.states)
+      .withOneMatchingProjectOf(searchParams.projects)
       .build()
 
     try {
-      this.loader = await this.lastActiveSearcher.findMatchingAsPaginationLoader(this.pageSize)
-      this.searchResults[1] = this.loader.elements
+      this.loader = await this.lastActiveSearcher.findMatchingAsPaginationLoaderOnPage(page, this.pageSize)
+      this.searchResults[page] = this.loader.elements
       this.totalCount = this.loader.totalCount
-      this.page = 1
+      this.page = page
     } catch (_error) {
       this.$store.commit('snackbar/setError', 'Loading of configurations failed')
     } finally {
@@ -306,6 +354,60 @@ export default class ConfigurationsSearch extends Vue {
     } finally {
       this.loading = false
     }
+  }
+
+  initSearchQueryParams (params: QueryParams): void {
+    const searchParamsObject = (new ConfigurationSearchParamsSerializer({
+      states: this.configurationStates,
+      projects: this.projects
+    })).toSearchParams(params)
+
+    // prefill the form by the serialized search params from the URL
+    if (searchParamsObject.searchText) {
+      this.searchText = searchParamsObject.searchText
+    }
+    if (searchParamsObject.projects) {
+      this.selectedProjects = searchParamsObject.projects
+    }
+    if (searchParamsObject.states) {
+      this.selectedConfigurationStates = searchParamsObject.states
+    }
+  }
+
+  initUrlQueryParams (params: IConfigurationSearchParams): void {
+    this.$router.push({
+      query: (new ConfigurationSearchParamsSerializer()).toQueryParams(params),
+      hash: this.$route.hash
+    })
+  }
+
+  getPageFromUrl (): number | undefined {
+    if ('page' in this.$route.query && typeof this.$route.query.page === 'string') {
+      return parseInt(this.$route.query.page) || 0
+    }
+  }
+
+  setPageInUrl (page: number, preserveHash: boolean = true): void {
+    let query: QueryParams = {}
+    if (page) {
+      // add page to the current url params
+      query = {
+        ...this.$route.query,
+        page: String(page)
+      }
+    } else {
+      // remove page from the current url params
+      const {
+        // eslint-disable-next-line
+        page,
+        ...params
+      } = this.$route.query
+      query = params
+    }
+    this.$router.push({
+      query,
+      hash: preserveHash ? this.$route.hash : ''
+    })
   }
 }
 </script>

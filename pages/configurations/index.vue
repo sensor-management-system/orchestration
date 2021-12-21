@@ -34,6 +34,7 @@ permissions and limitations under the Licence.
       :active-tab="activeTab"
       load-initial-data
       :delete-callback="deleteConfiguration"
+      @change-active-tab="activeTab = $event"
     />
     <v-btn
       v-if="$auth.loggedIn"

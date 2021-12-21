@@ -35,7 +35,7 @@ permissions and limitations under the Licence.
 <template>
   <v-row>
     <v-col cols="12" md="5">
-      <v-text-field v-model="searchText" label="Label" placeholder="Label of configuration" @keydown.enter="emitSearch" />
+      <v-text-field v-model="searchTextModel" label="Label" placeholder="Label of configuration" @keydown.enter="emitSearch" />
     </v-col>
     <v-col
       cols="12"
@@ -61,18 +61,37 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
+import { Component, Vue, Prop } from 'nuxt-property-decorator'
+
+import { IConfigurationBasicSearchParams } from '@/modelUtils/ConfigurationSearchParams'
 
 @Component
 export default class ConfigurationsBasicSearch extends Vue {
-  private searchText:string|null=null
+  @Prop({
+    default: '',
+    required: false,
+    type: String
+  })
+  private readonly searchText!: string
+
+  private internalSearchText: string | null = null
+
+  get searchTextModel (): string | null {
+    return this.internalSearchText || this.searchText
+  }
+
+  set searchTextModel (value: string | null) {
+    this.internalSearchText = value
+  }
 
   emitSearch () {
-    this.$emit('search', this.searchText)
+    this.$emit('search', {
+      searchText: this.searchTextModel
+    } as IConfigurationBasicSearchParams)
   }
 
   clearSearch () {
-    this.searchText = null
+    this.searchTextModel = null
   }
 }
 </script>

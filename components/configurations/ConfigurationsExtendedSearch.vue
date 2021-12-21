@@ -36,13 +36,13 @@ permissions and limitations under the Licence.
   <div>
     <v-row>
       <v-col cols="12" md="6">
-        <v-text-field v-model="searchText" label="Label" placeholder="Label of configuration" @keydown.enter="emitSearch" />
+        <v-text-field v-model="searchTextModel" label="Label" placeholder="Label of configuration" @keydown.enter="emitSearch" />
       </v-col>
     </v-row>
     <v-row>
       <v-col cols="12" md="3">
         <StringSelect
-          v-model="selectedConfigurationStates"
+          v-model="selectedConfigurationStatesModel"
           label="Select a status"
           :items="configurationStates"
           color="green"
@@ -52,7 +52,7 @@ permissions and limitations under the Licence.
     <v-row>
       <v-col cols="12" md="3">
         <ProjectSelect
-          v-model="selectedProjects"
+          v-model="selectedProjectsModel"
           label="Select a project"
         />
       </v-col>
@@ -82,9 +82,11 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
+import { Component, Vue, Prop } from 'nuxt-property-decorator'
 
 import { Project } from '@/models/Project'
+
+import { IConfigurationSearchParams } from '@/modelUtils/ConfigurationSearchParams'
 
 import ProjectSelect from '@/components/ProjectSelect.vue'
 import StringSelect from '@/components/StringSelect.vue'
@@ -96,12 +98,32 @@ import StringSelect from '@/components/StringSelect.vue'
   }
 })
 export default class ConfigurationsExtendedSearch extends Vue {
-  private searchText:string|null=null
+  @Prop({
+    default: '',
+    required: false,
+    type: String
+  })
+  private readonly searchText!: string
 
-  private selectedConfigurationStates: string[] = []
+  @Prop({
+    default: () => [],
+    required: false,
+    type: Array
+  })
+  private readonly selectedConfigurationStates!: string[]
+
+  @Prop({
+    default: () => [],
+    required: false,
+    type: Array
+  })
+  private readonly selectedProjects!: Project[]
+
+  private internalSearchText: string | null = null
+  private internalSelectedConfigurationStates: string[] = []
+  private internalSelectedProjects: Project[] = []
+
   private configurationStates: string[] = []
-
-  private selectedProjects: Project[] = []
 
   mounted () {
     this.$api.configurationStates.findAll().then((foundStates) => {
@@ -111,18 +133,42 @@ export default class ConfigurationsExtendedSearch extends Vue {
     })
   }
 
+  get searchTextModel (): string | null {
+    return this.internalSearchText || this.searchText
+  }
+
+  set searchTextModel (value: string | null) {
+    this.internalSearchText = value
+  }
+
+  get selectedConfigurationStatesModel (): string[] {
+    return this.internalSelectedConfigurationStates.length ? this.internalSelectedConfigurationStates : this.selectedConfigurationStates
+  }
+
+  set selectedConfigurationStatesModel (value: string[]) {
+    this.internalSelectedConfigurationStates = value
+  }
+
+  get selectedProjectsModel (): Project[] {
+    return this.internalSelectedProjects.length ? this.internalSelectedProjects : this.selectedProjects
+  }
+
+  set selectedProjectsModel (value: Project[]) {
+    this.internalSelectedProjects = value
+  }
+
   emitSearch () {
     this.$emit('search', {
-      searchText: this.searchText,
-      selectedConfigurationStates: this.selectedConfigurationStates,
-      selectedProjects: this.selectedProjects
-    })
+      searchText: this.searchTextModel,
+      states: this.selectedConfigurationStatesModel,
+      projects: this.selectedProjectsModel
+    } as IConfigurationSearchParams)
   }
 
   clearSearch () {
-    this.searchText = null
-    this.selectedConfigurationStates = []
-    this.selectedProjects = []
+    this.searchTextModel = null
+    this.selectedConfigurationStatesModel = []
+    this.selectedProjectsModel = []
   }
 }
 </script>
