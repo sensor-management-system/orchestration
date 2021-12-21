@@ -101,12 +101,14 @@ export class DeviceSearchParamsSerializer {
    * @returns {IDeviceSearchParams} the params used in the search
    */
   toSearchParams (params: QueryParams): IDeviceSearchParams {
+    const isNotUndefined = (value: any) => typeof value !== 'undefined'
+
     let manufacturer: Manufacturer[] = []
     if (params.manufacturer) {
       if (!Array.isArray(params.manufacturer)) {
         params.manufacturer = [params.manufacturer]
       }
-      manufacturer = params.manufacturer.map(paramId => this.manufacturer.find(manufacturer => manufacturer.id === paramId)).filter(manufacturer => typeof manufacturer !== 'undefined') as Manufacturer[]
+      manufacturer = params.manufacturer.map(paramId => this.manufacturer.find(manufacturer => manufacturer.id === paramId)).filter(isNotUndefined) as Manufacturer[]
     }
 
     let types: DeviceType[] = []
@@ -114,7 +116,7 @@ export class DeviceSearchParamsSerializer {
       if (!Array.isArray(params.types)) {
         params.types = [params.types]
       }
-      types = params.types.map(paramId => this.deviceTypes.find(deviceType => deviceType.id === paramId)).filter(deviceType => typeof deviceType !== 'undefined') as DeviceType[]
+      types = params.types.map(paramId => this.deviceTypes.find(deviceType => deviceType.id === paramId)).filter(isNotUndefined) as DeviceType[]
     }
 
     let states: Status[] = []
@@ -122,7 +124,7 @@ export class DeviceSearchParamsSerializer {
       if (!Array.isArray(params.states)) {
         params.states = [params.states]
       }
-      states = params.states.map(paramId => this.states.find(state => state.id === paramId)).filter(state => typeof state !== 'undefined') as Status[]
+      states = params.states.map(paramId => this.states.find(state => state.id === paramId)).filter(isNotUndefined) as Status[]
     }
 
     return {
