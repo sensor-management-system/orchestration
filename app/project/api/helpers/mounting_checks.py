@@ -1,4 +1,5 @@
-import datetime
+import dateutil.parser
+
 
 from sqlalchemy import desc
 
@@ -55,9 +56,7 @@ def before_mount_action(data):
         raise ConflictError("Private device can't be used in a configuration.")
 
     beginn_date_as_string = data["attributes"]["begin_date"]
-    beginn_date = datetime.datetime.strptime(
-        beginn_date_as_string, "%Y-%m-%dT%H:%M:%S.%fZ"
-    )
+    beginn_date = dateutil.parser.parse(beginn_date_as_string).isoformat()
 
     if last_mount_action and not last_unmount_action:
         raise ConflictError(
@@ -71,7 +70,7 @@ def before_mount_action(data):
                 f"Device still Mounted on {last_mount_action.configuration.label}"
             )
 
-        if beginn_date < last_unmount_action.end_date:
+        if beginn_date < last_unmount_action.end_date.isoformat():
             raise ConflictError(
                 f"Device still Mounted on {last_mount_action.configuration.label} till: \
                         {last_unmount_action.end_date}"
