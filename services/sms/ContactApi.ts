@@ -168,6 +168,10 @@ export class ContactSearcher {
     return this.findAllOnPage(1, pageSize)
   }
 
+  findMatchingAsPaginationLoaderOnPage (page: number, pageSize: number): Promise<IPaginationLoader<Contact>> {
+    return this.findAllOnPage(page, pageSize)
+  }
+
   private findAllOnPage (page: number, pageSize: number): Promise<IPaginationLoader<Contact>> {
     return this.axiosApi.get(
       '',
@@ -183,6 +187,11 @@ export class ContactSearcher {
       const elements: Contact[] = this.serializer.convertJsonApiObjectListToModelList(rawData)
 
       const totalCount = rawData.meta.count
+
+      // check if the provided page param is valid
+      if (totalCount > 0 && elements.length === 0) {
+        throw new RangeError('page is out of bounds')
+      }
 
       let funToLoadNext = null
       if (elements.length > 0) {

@@ -582,6 +582,11 @@ export class ConfigurationSearcher {
 
       const totalCount = rawData.meta.count
 
+      // check if the provided page param is valid
+      if (totalCount > 0 && elements.length === 0) {
+        throw new RangeError('page is out of bounds')
+      }
+
       let funToLoadNext = null
       if (elements.length > 0) {
         funToLoadNext = () => this.findAllOnPage(page + 1, pageSize)
