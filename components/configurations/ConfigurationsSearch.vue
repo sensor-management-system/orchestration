@@ -308,6 +308,7 @@ export default class ConfigurationsSearch extends Vue {
   async loadAndSetPage (page: number, useCache: boolean = true) {
     await this.loadPage(page, useCache)
     this.page = page
+    this.setPageInUrl(page, false)
   }
 
   getSearchResultForPage (pageNr: number): Configuration[] | undefined {

@@ -409,6 +409,7 @@ export default class SearchContactsPage extends Vue {
   async setPage (page: number) {
     await this.loadPage(page)
     this.page = page
+    this.setPageInUrl(page, false)
   }
 
   getSearchResultForPage (pageNr: number): Contact[] | undefined {

@@ -691,6 +691,7 @@ export default class SearchPlatformsPage extends Vue {
   async setPage (page: number) {
     await this.loadPage(page)
     this.page = page
+    this.setPageInUrl(page, false)
   }
 
   getSearchResultForPage (pageNr: number): Platform[] | undefined {
