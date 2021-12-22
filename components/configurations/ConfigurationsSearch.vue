@@ -273,6 +273,7 @@ export default class ConfigurationsSearch extends Vue {
       this.searchResults[page] = this.loader.elements
       this.totalCount = this.loader.totalCount
       this.page = page
+      this.setPageInUrl(page)
     } catch (_error) {
       this.$store.commit('snackbar/setError', 'Loading of configurations failed')
     } finally {

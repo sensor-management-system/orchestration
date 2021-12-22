@@ -32,7 +32,7 @@ permissions and limitations under the Licence.
   <div>
     <v-row>
       <v-col cols="12" md="5">
-        <v-text-field v-model="searchText" label="Name" placeholder="Name of contact" @keydown.enter="search" />
+        <v-text-field v-model="searchText" label="Name" placeholder="Name of contact" @keydown.enter="runSearch" />
       </v-col>
       <v-col
         cols="12"
@@ -42,7 +42,7 @@ permissions and limitations under the Licence.
         <v-btn
           color="primary"
           small
-          @click="search"
+          @click="runSearch"
         >
           Search
         </v-btn>
@@ -277,6 +277,9 @@ import DotMenu from '@/components/DotMenu.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 import ContacsDeleteDialog from '@/components/contacts/ContacsDeleteDialog.vue'
 
+import { QueryParams } from '@/modelUtils/QueryParams'
+import { IContactSearchParams, ContactSearchParamsSerializer } from '@/modelUtils/ContactSearchParams'
+
 type PaginatedResult = {
   [page: number]: Contact[]
 }
@@ -308,7 +311,8 @@ export default class SearchContactsPage extends Vue {
   }
 
   mounted () {
-    this.search()
+    this.initSearchQueryParams(this.$route.query)
+    this.runInitialSearch()
   }
 
   beforeDestroy () {
@@ -329,7 +333,29 @@ export default class SearchContactsPage extends Vue {
     this.searchText = ''
   }
 
-  async search () {
+  async runInitialSearch (): Promise<void> {
+    const page: number | undefined = this.getPageFromUrl()
+
+    await this.search(
+      {
+        searchText: this.searchText
+      },
+      page
+    )
+  }
+
+  runSearch () {
+    this.search({
+      searchText: this.searchText
+    })
+  }
+
+  async search (
+    searchParameters: IContactSearchParams,
+    page: number = 1
+  ): Promise<void> {
+    this.initUrlQueryParams(searchParameters)
+
     this.totalCount = 0
     this.loading = true
     this.searchResults = []
@@ -343,11 +369,12 @@ export default class SearchContactsPage extends Vue {
       .build()
 
     try {
-      const loader = await lastActiveSearcher.findMatchingAsPaginationLoader(this.pageSize)
+      const loader = await lastActiveSearcher.findMatchingAsPaginationLoaderOnPage(page, this.pageSize)
       this.loader = loader
-      this.searchResults[1] = loader.elements
+      this.searchResults[page] = loader.elements
       this.totalCount = loader.totalCount
-      this.page = 1
+      this.page = page
+      this.setPageInUrl(page)
     } catch (_error) {
       this.$store.commit('snackbar/setError', 'Loading of contacts failed')
     } finally {
@@ -442,6 +469,51 @@ export default class SearchContactsPage extends Vue {
 
   getFullName (contact: Contact) : string {
     return contact.givenName + ' ' + contact.familyName
+  }
+
+  initSearchQueryParams (params: QueryParams): void {
+    const searchParamsObject = new ContactSearchParamsSerializer().toSearchParams(params)
+
+    // prefill the form by the serialized search params from the URL
+    if (searchParamsObject.searchText) {
+      this.searchText = searchParamsObject.searchText
+    }
+  }
+
+  initUrlQueryParams (params: IContactSearchParams): void {
+    this.$router.push({
+      query: (new ContactSearchParamsSerializer()).toQueryParams(params),
+      hash: this.$route.hash
+    })
+  }
+
+  getPageFromUrl (): number | undefined {
+    if ('page' in this.$route.query && typeof this.$route.query.page === 'string') {
+      return parseInt(this.$route.query.page) || 0
+    }
+  }
+
+  setPageInUrl (page: number, preserveHash: boolean = true): void {
+    let query: QueryParams = {}
+    if (page) {
+      // add page to the current url params
+      query = {
+        ...this.$route.query,
+        page: String(page)
+      }
+    } else {
+      // remove page from the current url params
+      const {
+        // eslint-disable-next-line
+        page,
+        ...params
+      } = this.$route.query
+      query = params
+    }
+    this.$router.push({
+      query,
+      hash: preserveHash ? this.$route.hash : ''
+    })
   }
 }
 </script>
