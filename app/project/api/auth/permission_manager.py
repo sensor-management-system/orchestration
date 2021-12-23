@@ -6,7 +6,7 @@ from .permission_utils import (
     check_deletion_permission,
     check_permissions_for_related_objects,
     check_deletion_permission_for_related_objects,
-    check_patch_permission_for_related_objects,
+    check_patch_permission_for_related_objects, check_post_permission_for_related_objects,
 )
 
 protected_views = [
@@ -69,6 +69,10 @@ def permission_manager(view, view_args, view_kwargs, *args, **kwargs):
                 check_permissions_for_related_objects(
                     view_args[0].data_layer["model"], kwargs["id"]
                 )
+        elif method == "POST":
+            check_post_permission_for_related_objects(
+                view_args[0].data_layer["model"]
+            )
         elif method == "PATCH":
             check_patch_permission_for_related_objects(
                 view_kwargs, view_args[0].data_layer["model"]

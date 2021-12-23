@@ -1,4 +1,7 @@
+import json
+
 import click
+from flask import request
 from flask_jwt_extended import get_current_user
 from flask_jwt_extended import (
     jwt_required,
@@ -9,6 +12,7 @@ from flask_jwt_extended import (
 from sqlalchemy import or_, and_
 
 from ..helpers.errors import ForbiddenError
+from ..models import Device, Platform
 from ..models.base_model import db
 from ..services.idl_services import Idl
 
@@ -206,6 +210,32 @@ def check_permissions_for_related_objects(model_class, id_):
             verify_jwt_in_request()
 
 
+def check_post_permission_for_related_objects(object_):
+    """
+    check if a user has the permission to patch a related object.
+
+    :param object_:
+    """
+    data = json.loads(request.data.decode())["data"]
+    if not is_superuser():
+        if "device" in data["relationships"]:
+            object_id = data["relationships"]["device"]["data"]["id"]
+            object_ = db.session.query(Device).filter_by(id=object_id).one_or_none()
+
+        if "platform" in data["relationships"]:
+            object_id = data["relationships"]["platform"]["data"]["id"]
+            object_ = db.session.query(Platform).filter_by(id=object_id).one_or_none()
+
+        if object_.is_private:
+            assert_current_user_is_owner_of_object(object_)
+        else:
+            group_ids = object_.group_ids
+            if not is_user_in_a_group(group_ids):
+                raise ForbiddenError(
+                    "User is not part of any group to edit this object."
+                )
+
+
 def check_patch_permission_for_related_objects(data, object_to_patch):
     """
     check if a user has the permission to patch a related object.
@@ -243,25 +273,14 @@ def check_deletion_permission_for_related_objects(kwargs, object_to_delete):
             db.session.query(object_to_delete).filter_by(id=kwargs["id"]).one_or_none()
         )
         if hasattr(object_, "device"):
-            group_ids = object_.device.group_ids
+            related_object = object_.device
         else:
-            group_ids = object_.platform.group_ids
+            related_object = object_.platform
+        group_ids = related_object.group_ids
         if group_ids is None:
             assert_current_user_is_owner_of_object(object_)
         if not is_user_admin_in_a_group(group_ids):
             raise ForbiddenError("User is not part of any group to delete this object.")
-
-
-# def check_for_permissions_mount(model_class, kwargs):
-#     """
-#     check if a user has the permission to view an object.
-#
-#     :param kwargs:
-#     """
-#     object_ = db.session.query(model_class).filter_by(id=kwargs).first()
-#     if object_.device:
-#         if object_.device.is_internal:
-#             verify_jwt_in_request()
 
 
 @jwt_required(optional=True)
