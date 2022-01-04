@@ -1,0 +1,222 @@
+# Web client of the Sensor Management System software developed within
+# the Helmholtz DataHub Initiative by GFZ and UFZ.
+# 
+# Copyright (C) 2020-2021
+# - Wilhelm Becker (GFZ, wilhelm.becker@gfz-potsdam.de)
+# - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
+# - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
+# - Helmholtz Centre Potsdam - GFZ German Research Centre for
+#   Geosciences (GFZ, https://www.gfz-potsdam.de)
+# 
+# Parts of this program were developed within the context of the
+# following publicly funded projects or measures:
+# - Helmholtz Earth and Environment DataHub
+#   (https://www.helmholtz.de/en/research/earth_and_environment/initiatives/#h51095)
+# 
+# Licensed under the HEESIL, Version 1.0 or - as soon they will be 
+# approved by the "Community" - subsequent versions of the HEESIL 
+# (the "Licence").
+# 
+# You may not use this work except in compliance with the Licence.
+# 
+# You may obtain a copy of the Licence at: 
+# https://gitext.gfz-potsdam.de/software/heesil
+# 
+# Unless required by applicable law or agreed to in writing, software 
+# distributed under the Licence is distributed on an "AS IS" basis, 
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or 
+# implied. See the Licence for the specific language governing 
+# permissions and limitations under the Licence.
+version : '3.3'
+
+services:
+  nginx:
+    image: ${CI_REGISTRY_IMAGE}/nginx:${NGINX_IMAGE_TAG:-gfz-latest}
+    restart: unless-stopped
+    ports:
+      - ${APPLICATION_PORTS:-443}:${APPLICATION_PORTS:-443}
+      - ${MINIO_PORT:-8443}:${MINIO_PORT:-8443}
+    volumes:
+      - /etc/ssl/gfz_hosts_default.chained.crt:/etc/ssl/default.crt:ro
+      - /etc/ssl/private/gfz_hosts_default.key:/etc/ssl/private/default.key:ro
+      - /etc/ssl/dhparam.pem:/etc/ssl/dhparam.pem:ro
+      - /etc/ssl/dfn-ca-global-g2-chain.pem:/etc/ssl/chain.pem:ro
+      - vocabulary-static-files:/usr/share/nginx/html/static/cv:ro
+      - backend-static-files:/usr/share/nginx/html/static/backend:ro
+      - idl-static-files:/usr/share/nginx/html/static/idl:ro
+    networks:
+      - nginx
+
+  vocabulary:
+    image: $VOCABULARY_IMAGE
+    restart: unless-stopped
+    environment:
+      CV_BASE_URL: cv/
+      STATIC_URL: /static/cv/
+      STATIC_ROOT: /static/cv/
+      DEBUG: 0
+      SECRET_KEY: $VOCABULARY_SECRET_KEY
+      SQL_ENGINE: django.db.backends.postgresql_psycopg2
+      SQL_DATABASE: vocabulary
+      SQL_USER: $VOCABULARY_DB_USER
+      SQL_PASSWORD: $VOCABULARY_DB_PASSWORD
+      SQL_HOST: vocabulary-db
+      SQL_PORT: 5432
+      CORS_ORIGIN_WHITELIST: ${HTTP_ORIGINS_VOCABULARY:-'https://rz-vm64.gfz-potsdam.de'}
+    volumes:
+      - vocabulary-static-files:/static/cv
+    networks:
+      - nginx
+      - vocabulary-db
+
+  vocabulary-db:
+    image: postgres:12-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD: $VOCABULARY_DB_PASSWORD
+      POSTGRES_USER: $VOCABULARY_DB_USER
+      POSTGRES_DB: vocabulary
+    volumes:
+      - "vocabulary-db-data:/var/lib/postgresql/data"
+    shm_size: 128M
+    networks:
+      - vocabulary-db
+
+  idl:
+    image: registry.hzdr.de/hub-terra/sms/gfz-idl/backend:latest
+    restart: unless-stopped
+    environment:
+      DJANGO_DEBUG: 'false'
+      DJANGO_ALLOWED_HOSTS: 'https://rz-vm64.gfz-potsdam.de idl'
+      DJANGO_BASE_PATH: idl/
+      DJANGO_STATIC_URL: /static/idl/
+      DJANGO_STATIC_ROOT: /static/idl/
+      DJANGO_DB_ENGINE: django.db.backends.postgresql
+      DJANGO_DB_NAME: idl
+      DJANGO_DB_USER: $IDL_DB_USER
+      DJANGO_DB_PASSWORD: $IDL_DB_PASSWORD
+      DJANGO_DB_HOST: idl-db
+      DJANGO_DB_PORT: 5432
+      LDAP_URL: ldaps://ldap.gfz-potsdam.de
+    volumes:
+      - idl-static-files:/static/idl
+    networks:
+      - nginx
+      - idl-db
+
+  idl-db:
+    image: postgres:12-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD: $IDL_DB_PASSWORD
+      POSTGRES_USER: $IDL_DB_USER
+      POSTGRES_DB: idl
+    volumes:
+      - "idl-db-data:/var/lib/postgresql/data"
+    shm_size: 128M
+    networks:
+      - idl-db
+
+  elastic-search:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.16.1
+    restart: unless-stopped
+    environment:
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m -Dlog4j2.formatMsgNoLookups=true"
+      - cluster.routing.allocation.disk.threshold_enabled=false
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+    networks:
+      - backend
+  
+  minio:
+    image: minio/minio:RELEASE.2021-07-12T02-44-53Z
+    restart: unless-stopped
+    volumes:
+      - minio-data:/data/minio
+    networks:
+      - nginx
+      - backend
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    #      To deactivate the console
+    #      MINIO_BROWSER: "off"
+    command: server /data/minio --console-address ":9001"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://minio:9000/minio/health/live" ]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
+  mc:
+    image: ${CI_REGISTRY_IMAGE}/mc:gfz-latest
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    depends_on:
+      - minio
+    networks:
+      - backend
+    entrypoint: ['/create_bucket.sh']
+
+  backend-db:
+    image: postgres:12-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD: $BACKEND_DB_PASSWORD
+      POSTGRES_USER: $BACKEND_DB_USER
+      POSTGRES_DB: backend
+    volumes:
+      - "backend-db-data:/var/lib/postgresql/data"
+    shm_size: 128M
+    networks:
+      - backend
+
+  backend:
+    image: $BACKEND_IMAGE
+    restart: unless-stopped
+    environment:
+      URL_PREFIX: /backend/api/v1
+      STATIC_URL: /static/backend
+      APP_SETTINGS: project.config.ProductionConfig
+      DATABASE_URL: postgresql://${BACKEND_DB_USER}:${BACKEND_DB_PASSWORD}@backend-db:5432/backend
+      OIDC_USERNAME_CLAIM: sub
+      WELL_KNOWN_URL: https://idp-dev.gfz-potsdam.de/cas/oidc/.well-known/openid-configuration
+      OIDC_CLIENT_IDS: ${OIDC_CLIENT_IDS}
+      MINIO_ACCESS_KEY: ${MINIO_ROOT_USER}
+      MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
+      MINIO_BUCKET_NAME: sms-attachments
+      MINIO_ENDPOINT: minio:9000
+      DOWNLOAD_ENDPOINT: https://rz-vm64.gfz-potsdam.de
+      SECRET_KEY: ${BACKEND_SECRET_KEY}
+      ALLOWED_MIME_TYPES: ${ALLOWED_MIME_TYPES}
+      ELASTICSEARCH_URL: http://elastic-search:9200
+      HTTP_ORIGINS: ${HTTP_ORIGINS}
+    depends_on:
+      - backend-db
+    volumes:
+      - backend-static-files:/usr/src/app/project/static
+    networks:
+      - backend
+      - nginx
+
+volumes:
+  vocabulary-db-data:
+  vocabulary-static-files:
+  idl-db-data:
+  idl-static-files:
+  elasticsearch-data:
+  minio-data:
+  backend-db-data:
+  backend-static-files:
+networks:
+  vocabulary-db:
+  nginx:
+  backend:
+  idl-db:
