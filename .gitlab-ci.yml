@@ -487,6 +487,7 @@ deploy-gfz-staging-develop:
       when: never
     # Exclude pipeline source, to prohibit triggering the job twice
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_PIPELINE_SOURCE != "pipeline"'
+    - if: '$CI_COMMIT_BRANCH == "fix-gfz-development-multiple-client-ids"'
     - if: '$CI_PIPELINE_SOURCE == "pipeline"'
 
 deploy-gfz-prod:
