@@ -461,7 +461,6 @@ deploy-gfz-staging-develop:
     # App-settings need to be development to enable multiple client IDs
     APP_SETTINGS: "project.config.DevelopmentConfig"
     OIDC_CLIENT_IDS: ${GFZ_STAGING_DEVELOP_OIDC_CLIENT_IDS}
-    OIDC_USERNAME_CLAIM: "sub"
     NGINX_IMAGE_TAG: gfz-latest-develop
     APPLICATION_PORTS: 3000-3001
     MINIO_PORT: 3002
