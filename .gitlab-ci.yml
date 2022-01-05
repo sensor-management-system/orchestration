@@ -458,7 +458,7 @@ deploy-gfz-staging-develop:
     BACKEND_SECRET_KEY: ${GFZ_STAGING_BACKEND_SECRET}
     HTTP_ORIGINS: ${GFZ_STAGING_HTTP_ORIGINS}
     HTTP_ORIGINS_VOCABULARY: ${GFZ_STAGING_HTTP_ORIGINS_VOCABULARY}
-    OIDC_CLIENT_ID: ${GFZ_STAGING_OIDC_CLIENT_ID}
+    OIDC_CLIENT_IDS: ${GFZ_STAGING_DEVELOP_OIDC_CLIENT_IDS}
     NGINX_IMAGE_TAG: gfz-latest-develop
     APPLICATION_PORTS: 3000-3001
     MINIO_PORT: 3002
@@ -466,18 +466,18 @@ deploy-gfz-staging-develop:
     - *docker_login_gitlab_registry
   script:
     - ./scripts/ensure_vm_max_map_count.sh
-    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml down --remove-orphans
-    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml rm -f
-    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml pull
-    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml up -d
-    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T vocabulary python3 manage.py migrate
-    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T vocabulary python3 manage.py loaddata initial_data.json
-    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T vocabulary python3 manage.py loaddata default_community_data.json
-    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T vocabulary python3 manage.py loaddata hydro_community_data.json
-    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T vocabulary python3 manage.py collectstatic --no-input
-    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T backend python3 manage.py db upgrade
+    - docker-compose -f docker/deployment/gfz/staging-dev/docker-compose.yml down --remove-orphans
+    - docker-compose -f docker/deployment/gfz/staging-dev/docker-compose.yml rm -f
+    - docker-compose -f docker/deployment/gfz/staging-dev/docker-compose.yml pull
+    - docker-compose -f docker/deployment/gfz/staging-dev/docker-compose.yml up -d
+    - docker-compose -f docker/deployment/gfz/staging-dev/docker-compose.yml exec -T vocabulary python3 manage.py migrate
+    - docker-compose -f docker/deployment/gfz/staging-dev/docker-compose.yml exec -T vocabulary python3 manage.py loaddata initial_data.json
+    - docker-compose -f docker/deployment/gfz/staging-dev/docker-compose.yml exec -T vocabulary python3 manage.py loaddata default_community_data.json
+    - docker-compose -f docker/deployment/gfz/staging-dev/docker-compose.yml exec -T vocabulary python3 manage.py loaddata hydro_community_data.json
+    - docker-compose -f docker/deployment/gfz/staging-dev/docker-compose.yml exec -T vocabulary python3 manage.py collectstatic --no-input
+    - docker-compose -f docker/deployment/gfz/staging-dev/docker-compose.yml exec -T backend python3 manage.py db upgrade
     - sleep 1m
-    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T backend python3 manage.py es reindex
+    - docker-compose -f docker/deployment/gfz/staging-dev/docker-compose.yml exec -T backend python3 manage.py es reindex
     - docker rmi $(docker images -q -f dangling=true) || true
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
