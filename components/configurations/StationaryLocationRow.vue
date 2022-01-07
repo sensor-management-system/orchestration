@@ -40,6 +40,7 @@ permissions and limitations under the Licence.
           v-model.number.lazy="configuration.location.latitude"
           label="Latitude (WGS84)"
           type="number"
+          step="any"
           :readonly="readonly"
           @wheel.prevent
         />
@@ -49,6 +50,7 @@ permissions and limitations under the Licence.
           v-model.number.lazy="configuration.location.longitude"
           label="Longitude (WGS84)"
           type="number"
+          step="any"
           :readonly="readonly"
           @wheel.prevent
         />
@@ -58,6 +60,7 @@ permissions and limitations under the Licence.
           v-model.number="configuration.location.elevation"
           label="Elevation (m asl)"
           type="number"
+          step="any"
           :readonly="readonly"
           @wheel.prevent
         />
