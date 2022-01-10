@@ -184,7 +184,7 @@ services:
     environment:
       URL_PREFIX: /backend/api/v1
       STATIC_URL: /static/backend
-      APP_SETTINGS: project.config.ProductionConfig
+      APP_SETTINGS: ${APP_SETTINGS}
       DATABASE_URL: postgresql://${BACKEND_DB_USER}:${BACKEND_DB_PASSWORD}@backend-db:5432/backend
       OIDC_USERNAME_CLAIM: sub
       WELL_KNOWN_URL: https://idp-dev.gfz-potsdam.de/cas/oidc/.well-known/openid-configuration
