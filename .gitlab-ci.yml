@@ -458,6 +458,8 @@ deploy-gfz-staging-develop:
     BACKEND_SECRET_KEY: ${GFZ_STAGING_BACKEND_SECRET}
     HTTP_ORIGINS: ${GFZ_STAGING_HTTP_ORIGINS}
     HTTP_ORIGINS_VOCABULARY: ${GFZ_STAGING_HTTP_ORIGINS_VOCABULARY}
+    # App-settings need to be development to enable multiple client IDs
+    APP_SETTINGS: "project.config.DevelopmentConfig"
     OIDC_CLIENT_IDS: ${GFZ_STAGING_DEVELOP_OIDC_CLIENT_IDS}
     NGINX_IMAGE_TAG: gfz-latest-develop
     APPLICATION_PORTS: 3000-3001
