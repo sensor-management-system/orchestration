@@ -50,6 +50,7 @@ permissions and limitations under the Licence.
           :value="value.x"
           label="x"
           type="number"
+          step="any"
           :rules="[rules.required]"
           @wheel.prevent
           @change="update('x', $event)"
@@ -60,6 +61,7 @@ permissions and limitations under the Licence.
           :value="value.y"
           label="y"
           type="number"
+          step="any"
           :rules="[rules.required]"
           @wheel.prevent
           @change="update('y', $event)"
@@ -83,6 +85,7 @@ permissions and limitations under the Licence.
           :value="value.z"
           label="z"
           type="number"
+          step="any"
           @wheel.prevent
           @change="update('z', $event)"
         />

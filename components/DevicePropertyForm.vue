@@ -288,6 +288,7 @@ permissions and limitations under the Licence.
           :readonly="readonly"
           :disabled="readonly"
           type="number"
+          step="any"
           @input="update('measuringRange.min', $event)"
           @wheel.prevent
         />
@@ -299,6 +300,7 @@ permissions and limitations under the Licence.
           :readonly="readonly"
           :disabled="readonly"
           type="number"
+          step="any"
           @input="update('measuringRange.max', $event)"
           @wheel.prevent
         />
@@ -312,6 +314,7 @@ permissions and limitations under the Licence.
           :readonly="readonly"
           :disabled="readonly"
           type="number"
+          step="any"
           @input="update('accuracy', $event)"
           @wheel.prevent
         />
@@ -323,6 +326,7 @@ permissions and limitations under the Licence.
           :readonly="readonly"
           :disabled="readonly"
           type="number"
+          step="any"
           @input="update('failureValue', $event)"
           @wheel.prevent
         />
@@ -336,6 +340,7 @@ permissions and limitations under the Licence.
           :readonly="readonly"
           :disabled="readonly"
           type="number"
+          step="any"
           @input="update('resolution', $event)"
           @wheel.prevent
         />

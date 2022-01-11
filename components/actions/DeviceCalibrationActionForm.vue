@@ -69,6 +69,7 @@ permissions and limitations under the Licence.
           :value="actionCopy.value"
           label="Value"
           type="number"
+          step="any"
           @wheel.prevent
           @input="setValue"
         />
