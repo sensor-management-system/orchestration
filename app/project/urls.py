@@ -3,22 +3,16 @@ from project.api.resourceManager import *
 from .api.ping import Ping
 from .frj_csv_export.api import Api
 
-
 api = Api()
 
 api.route(Ping, "test_connection", "/ping")
 
 # Platform
 api.route(
-    PlatformList,
-    "platform_list",
-    "/platforms",
-    "/contacts/<int:contact_id>/platforms",
+    PlatformList, "platform_list", "/platforms", "/contacts/<int:contact_id>/platforms",
 )
 api.route(
-    PlatformDetail,
-    "platform_detail",
-    "/platforms/<int:id>",
+    PlatformDetail, "platform_detail", "/platforms/<int:id>",
 )
 api.route(
     PlatformRelationship,
@@ -123,37 +117,24 @@ api.route(
 # Events
 api.route(EventList, "event_list", "/events")
 api.route(
-    EventDetail,
-    "event_detail",
-    "/events/<int:id>",
+    EventDetail, "event_detail", "/events/<int:id>",
 )
 api.route(
-    EventRelationship,
-    "event_user",
-    "/events/<int:id>/relationships/user",
+    EventRelationship, "event_user", "/events/<int:id>/relationships/user",
 )
 
 # Device
 api.route(
-    DeviceList,
-    "device_list",
-    "/devices",
-    "/contacts/<int:id>/devices",
+    DeviceList, "device_list", "/devices", "/contacts/<int:id>/devices",
 )
 api.route(
-    DeviceDetail,
-    "device_detail",
-    "/devices/<int:id>",
+    DeviceDetail, "device_detail", "/devices/<int:id>",
 )
 api.route(
-    DeviceRelationship,
-    "device_contacts",
-    "/devices/<int:id>/relationships/contacts",
+    DeviceRelationship, "device_contacts", "/devices/<int:id>/relationships/contacts",
 )
 api.route(
-    DeviceRelationship,
-    "device_events",
-    "/devices/<int:id>/relationships/events",
+    DeviceRelationship, "device_events", "/devices/<int:id>/relationships/events",
 )
 api.route(
     DeviceRelationship,
@@ -214,9 +195,7 @@ api.route(
 
 # Device Property
 api.route(
-    DevicePropertyDetail,
-    "device_property_detail",
-    "/device-properties/<int:id>",
+    DevicePropertyDetail, "device_property_detail", "/device-properties/<int:id>",
 )
 
 api.route(
@@ -240,9 +219,7 @@ api.route(
     "/devices/<int:device_id>/device-attachments",
 )
 api.route(
-    DeviceAttachmentDetail,
-    "device_attachment_detail",
-    "/device-attachments/<int:id>",
+    DeviceAttachmentDetail, "device_attachment_detail", "/device-attachments/<int:id>",
 )
 api.route(
     DeviceAttachmentRelationship,
@@ -258,9 +235,7 @@ api.route(
     "/devices/<int:device_id>/customfields",
 )
 api.route(
-    CustomFieldDetail,
-    "customfield_detail",
-    "/customfields/<int:id>",
+    CustomFieldDetail, "customfield_detail", "/customfields/<int:id>",
 )
 api.route(
     CustomFieldRelationship,
@@ -279,9 +254,7 @@ api.route(
 )
 api.route(ContactDetail, "contact_detail", "/contacts/<int:id>")
 api.route(
-    ContactRelationship,
-    "contact_devices",
-    "/contacts/<int:id>/relationships/devices",
+    ContactRelationship, "contact_devices", "/contacts/<int:id>/relationships/devices",
 )
 api.route(
     ContactRelationship,
@@ -294,39 +267,29 @@ api.route(
     "/contacts/<int:id>/relationships/configurations",
 )
 api.route(
-    ContactRelationship,
-    "contact_user",
-    "/contacts/<int:id>/relationships/user",
+    ContactRelationship, "contact_user", "/contacts/<int:id>/relationships/user",
+)
+api.route(
+    ContactRelationship, "contact_roles", "/contacts/<int:id>/relationships/roles",
 )
 # Users
 api.route(
-    UserList,
-    "user_list",
-    "/users",
-    "/contacts/<int:id>/users",
+    UserList, "user_list", "/users", "/contacts/<int:id>/users",
 )
 api.route(UserDetail, "user_detail", "/users/<int:id>")
 api.route(
-    UserRelationship,
-    "user_contact",
-    "/users/<int:id>/relationships/contact",
+    UserRelationship, "user_contact", "/users/<int:id>/relationships/contact",
 )
 api.route(
-    UserRelationship,
-    "user_events",
-    "/users/<int:id>/relationships/events",
+    UserRelationship, "user_events", "/users/<int:id>/relationships/events",
 )
 
 # Configuration
 api.route(
-    ConfigurationList,
-    "configuration_list",
-    "/configurations",
+    ConfigurationList, "configuration_list", "/configurations",
 )
 api.route(
-    ConfigurationDetail,
-    "configuration_detail",
-    "/configurations/<int:id>",
+    ConfigurationDetail, "configuration_detail", "/configurations/<int:id>",
 )
 api.route(
     ConfigurationRelationship,
@@ -441,9 +404,7 @@ api.route(
 )
 # ConfigurationDevice
 api.route(
-    ConfigurationDeviceList,
-    "configuration_device_list",
-    "/configuration-devices",
+    ConfigurationDeviceList, "configuration_device_list", "/configuration-devices",
 )
 api.route(
     ConfigurationDeviceDetail,
@@ -1141,4 +1102,12 @@ api.route(
     ConfigurationDynamicLocationEndActionRelationship,
     "configuration_dynamic_location_end_action_configuration",
     "/dynamic-location-end-actions/<int:id>/relationships/configuration",
+)
+# Roles
+api.route(
+    RoleList, "roles_list", "/roles", "/contacts/<int:role_id>/roles",
+)
+api.route(RoleDetail, "roles_detail", "/roles/<int:id>")
+api.route(
+    RoleRelationship, "roles_contacts", "/roles/<int:id>/relationships/contacts",
 )

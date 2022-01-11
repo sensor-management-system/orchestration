@@ -147,6 +147,7 @@ from .platform_unmount_action_resources import (  # noqa: F401
     PlatformUnmountActionList,
     PlatformUnmountActionRelationship,
 )
+from .role_resources import RoleList, RoleDetail, RoleRelationship  # noqa: F401
 from .user_detail import UserDetail  # noqa: F401
 from .user_list import UserList  # noqa: F401
 from .user_relationship import UserRelationship  # noqa: F401

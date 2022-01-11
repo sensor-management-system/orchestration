@@ -53,6 +53,16 @@ class ContactSchema(Schema):
         type_="device",
         id_field="id",
     )
+    roles = Relationship(
+        attribute="roles",
+        related_view="api.contact_roles",
+        related_view_kwargs={"id": "<id>"},
+        many=True,
+        include_resource_linkage=True,
+        schema="RoleSchema",
+        type_="role",
+        id_field="id",
+    )
     # This relationship should be optional as we want to
     # allow to add extern contacts without user accounts.
     user = Relationship(
