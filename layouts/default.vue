@@ -230,7 +230,10 @@ permissions and limitations under the Licence.
       >
         <v-col
           cols="12"
-          class="text-center caption"
+          md="8"
+          offset-md="2"
+          align-self="center"
+          class="text-center caption text--secondary"
         >
           <v-btn
             to="/info/legal-notice"
@@ -259,7 +262,38 @@ permissions and limitations under the Licence.
           >
             Terms of Use
           </v-btn>&nbsp;|&nbsp;
-          <span class="ma-2">&copy; {{ new Date().getFullYear() }}</span>
+          <span class="ma-2 pl-3">&copy; {{ new Date().getFullYear() }}</span>
+        </v-col>
+        <v-col
+          cols="12"
+          md="2"
+          align-self="center"
+          :class="iconLinksClass"
+        >
+          <v-btn
+            href="https://gitlab.hzdr.de/hub-terra/sms/"
+            target="_blank"
+            title="Sensor Management System Repository"
+            icon
+          >
+            <v-icon>mdi-gitlab</v-icon>
+          </v-btn>
+          <v-btn
+            v-if="apiLink"
+            :href="apiLink"
+            target="_blank"
+            title="Sensor Management System API"
+            icon
+          >
+            <v-icon>mdi-api</v-icon>
+          </v-btn>
+          <v-btn
+            href="mailto:gitlab-incoming+hub-terra-sms-service-desk-4415-issue-@hzdr.de"
+            title="Request Support"
+            icon
+          >
+            <v-icon>mdi-message-question-outline</v-icon>
+          </v-btn>
         </v-col>
       </v-row>
     </v-footer>
@@ -370,6 +404,28 @@ export default {
         }
       }
       return null
+    },
+    apiLink () {
+      let link = ''
+      if (this.$fullContext.env.smsBackendUrl) {
+        link = this.$fullContext.env.smsBackendUrl + '/swagger'
+      }
+      return link
+    },
+    iconLinksClass () {
+      let align = ''
+      switch (this.$vuetify.breakpoint.name) {
+        case 'xs':
+        case 'sm':
+          align = 'text-center'
+          break
+        case 'md':
+        case 'lg':
+        case 'xl':
+          align = 'text-right'
+          break
+      }
+      return align + ' pr-2'
     }
   },
   created () {
