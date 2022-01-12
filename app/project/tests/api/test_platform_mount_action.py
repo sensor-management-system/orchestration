@@ -325,7 +325,7 @@ class TestPlatformMountAction(BaseTestCase):
         # no data yet
         self.assertEqual(response.json["data"], [])
 
-    def test_get_platfrom_mount_action_collection(self):
+    def test_get_platform_mount_action_collection(self):
         """Test retrieve a collection of PlatformMountAction objects."""
         mount_platform_action = add_mount_platform_action_model()
         with self.client:
