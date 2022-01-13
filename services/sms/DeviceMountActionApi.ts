@@ -43,11 +43,11 @@ export class DeviceMountActionApi {
     this.serializer = new DeviceMountActionSerializer()
   }
 
-  deleteById (id: string) : Promise<void> {
+  deleteById (id: string): Promise<void> {
     return this.axiosApi.delete<string, void>(id)
   }
 
-  async add (configurationId: string, deviceMountAction: DeviceMountAction) : Promise<string> {
+  async add (configurationId: string, deviceMountAction: DeviceMountAction): Promise<string> {
     const url = ''
     const data = this.serializer.convertModelToJsonApiData(configurationId, deviceMountAction)
     const response = await this.axiosApi.post(url, { data })
@@ -57,7 +57,7 @@ export class DeviceMountActionApi {
     return response.data.id
   }
 
-  async update (configurationId: string, deviceMountAction: DeviceMountAction) : Promise<string> {
+  async update (configurationId: string, deviceMountAction: DeviceMountAction): Promise<string> {
     if (!deviceMountAction.id) {
       throw new Error('no id for the DeviceMountAction')
     }

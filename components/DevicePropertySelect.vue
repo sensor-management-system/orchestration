@@ -112,7 +112,7 @@ export default class DevicePropertySelect extends Vue {
    *
    * @return {DevicePropertysLoaderFunction} a function that returns the list of DeviceProperties
    */
-  get getAvailableDeviceProperties () : DevicePropertysLoaderFunction {
+  get getAvailableDeviceProperties (): DevicePropertysLoaderFunction {
     return () => new Promise((resolve) => {
       resolve(
         this.properties

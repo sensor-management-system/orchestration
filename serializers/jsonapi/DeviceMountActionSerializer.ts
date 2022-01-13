@@ -95,7 +95,7 @@ export class DeviceMountActionSerializer {
     return result
   }
 
-  convertModelToJsonApiData (configurationId: string, deviceMountAction: DeviceMountAction) : IJsonApiEntityWithOptionalId {
+  convertModelToJsonApiData (configurationId: string, deviceMountAction: DeviceMountAction): IJsonApiEntityWithOptionalId {
     const data: any = {
       type: 'device_mount_action',
       attributes: {

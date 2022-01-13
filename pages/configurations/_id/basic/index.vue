@@ -109,7 +109,7 @@ export default class ConfigurationShowBasicPage extends Vue {
   })
   readonly value!: Configuration
 
-  private showDeleteDialog:boolean=false;
+  private showDeleteDialog: boolean=false;
 
   head () {
     return {

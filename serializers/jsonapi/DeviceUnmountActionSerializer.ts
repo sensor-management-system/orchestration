@@ -43,7 +43,7 @@ export class DeviceUnmountActionSerializer {
     included: IJsonApiEntityWithOptionalAttributes[],
     possibleContacts: {[key: string]: Contact},
     possibleDevices: {[key: string]: Device}
-  ) : DeviceUnmountAction[] {
+  ): DeviceUnmountAction[] {
     const deviceUnmountActionIds = []
     if (relationships.device_unmount_actions) {
       const deviceUnmountActionObject = relationships.device_unmount_actions as IJsonApiEntityWithoutDetailsDataDictList
@@ -81,7 +81,7 @@ export class DeviceUnmountActionSerializer {
     return result
   }
 
-  convertModelToJsonApiData (configurationId: string, deviceUnmountAction: DeviceUnmountAction) : IJsonApiEntityWithOptionalId {
+  convertModelToJsonApiData (configurationId: string, deviceUnmountAction: DeviceUnmountAction): IJsonApiEntityWithOptionalId {
     const data: any = {
       type: 'device_unmount_action',
       attributes: {

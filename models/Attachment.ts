@@ -62,7 +62,7 @@ export class Attachment implements IAttachment {
    * @param {IAttachment} someObject - the object from which the new instance is to be created
    * @return {Attachment} the newly created instance
    */
-  static createFromObject (someObject: IAttachment) : Attachment {
+  static createFromObject (someObject: IAttachment): Attachment {
     const attachment = new Attachment()
     attachment.id = someObject.id || null
     attachment.url = someObject.url || ''

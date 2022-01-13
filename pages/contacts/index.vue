@@ -275,8 +275,8 @@ export default class SearchContactsPage extends Vue {
   private searchResults: Contact[] = []
   private searchText: string = ''
 
-  private showDeleteDialog:boolean=false
-  private contactToDelete:Contact|null=null
+  private showDeleteDialog: boolean=false
+  private contactToDelete: Contact|null=null
   private searchResultItemsShown: { [id: string]: boolean } = {}
 
   created () {

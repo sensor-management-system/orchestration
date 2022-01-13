@@ -43,11 +43,11 @@ export class PlatformMountActionApi {
     this.serializer = new PlatformMountActionSerializer()
   }
 
-  deleteById (id: string) : Promise<void> {
+  deleteById (id: string): Promise<void> {
     return this.axiosApi.delete<string, void>(id)
   }
 
-  async add (configurationId: string, platformMountAction: PlatformMountAction) : Promise<string> {
+  async add (configurationId: string, platformMountAction: PlatformMountAction): Promise<string> {
     const url = ''
     const data = this.serializer.convertModelToJsonApiData(configurationId, platformMountAction)
     const response = await this.axiosApi.post(url, { data })
@@ -57,7 +57,7 @@ export class PlatformMountActionApi {
     return response.data.id
   }
 
-  async update (configurationId: string, platformMountAction: PlatformMountAction) : Promise<string> {
+  async update (configurationId: string, platformMountAction: PlatformMountAction): Promise<string> {
     if (!platformMountAction.id) {
       throw new Error('no id for the PlatformMountAction')
     }

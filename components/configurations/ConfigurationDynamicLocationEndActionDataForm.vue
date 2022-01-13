@@ -146,7 +146,7 @@ export default class ConfigurationDynamicLocationEndActionDataForm extends mixin
   })
   readonly latestDateExclusive!: DateTime | null
 
-  update (key: string, value: any) : void {
+  update (key: string, value: any): void {
     const copy = DynamicLocationEndAction.createFromObject(this.value)
 
     switch (key) {
@@ -223,7 +223,7 @@ export default class ConfigurationDynamicLocationEndActionDataForm extends mixin
     ]
   }
 
-  combine (a: any[], b: any[]) : any[] {
+  combine (a: any[], b: any[]): any[] {
     const result: any[] = []
     a.forEach(x => result.push(x))
     b.forEach(x => result.push(x))

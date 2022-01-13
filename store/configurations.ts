@@ -81,7 +81,7 @@ export const actions = {
     const configurationStates = await this.$api.configurationStates.findAll()
     context.commit('setConfigurationsStates', configurationStates)
   },
-  async loadConfigurationById (context: ActionContext<ConfigurationsStoreState, ConfigurationsStoreState>, id:string) {
+  async loadConfigurationById (context: ActionContext<ConfigurationsStoreState, ConfigurationsStoreState>, id: string) {
     const oldConfigurationId = context.state.configuration?.id
     // @ts-ignore
     const configuration = await this.$api.configurations.findById(id)
@@ -107,7 +107,7 @@ export const actions = {
 
 export const getters = {
   projectNames: (state: ConfigurationsStoreState) => {
-    return state.projects.map((p:Project) => p.name)
+    return state.projects.map((p: Project) => p.name)
   },
   configurationEditDate (state: ConfigurationsStoreState): DateTime {
     return state.configurationEditDate || DateTime.utc()

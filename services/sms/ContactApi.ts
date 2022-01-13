@@ -166,7 +166,7 @@ export class ContactSearcher {
 
   findMatchingAsPaginationLoader (pageSize: number): Promise<IPaginationLoader<Contact>> {
     const acceptAllContacts = (_contact: Contact) => { return true }
-    const loaderPromise : Promise<IPaginationLoader<Contact>> = this.findAllOnePage(1, pageSize)
+    const loaderPromise: Promise<IPaginationLoader<Contact>> = this.findAllOnePage(1, pageSize)
     return loaderPromise.then((loader) => {
       return new FilteredPaginationedLoader<Contact>(loader, acceptAllContacts)
     })

@@ -67,7 +67,7 @@ import { Component, Vue } from 'nuxt-property-decorator'
 
 @Component
 export default class ConfigurationsBasicSearch extends Vue {
-  private searchText:string|null=null
+  private searchText: string|null=null
 
   emitSearch () {
     this.$emit('search', this.searchText)

@@ -96,7 +96,7 @@ import StringSelect from '@/components/StringSelect.vue'
   }
 })
 export default class ConfigurationsExtendedSearch extends Vue {
-  private searchText:string|null=null
+  private searchText: string|null=null
 
   private selectedConfigurationStates: string[] = []
   private configurationStates: string[] = []

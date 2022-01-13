@@ -252,7 +252,7 @@ export class PlatformSearchBuilder {
     this.clientSideFilterFunc = (_p: Platform) => true
   }
 
-  withText (text: string | null) : PlatformSearchBuilder {
+  withText (text: string | null): PlatformSearchBuilder {
     if (text) {
       this.esTextFilter = text
     }

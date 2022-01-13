@@ -164,7 +164,7 @@ export default class StaticLocationEndActionNew extends mixins(Rules) {
     }
   }
 
-  get currentlyActiveLocationAction () : StaticLocationBeginAction | DynamicLocationBeginAction | null {
+  get currentlyActiveLocationAction (): StaticLocationBeginAction | DynamicLocationBeginAction | null {
     if (!this.selectedDate) {
       return null
     }

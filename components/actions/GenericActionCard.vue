@@ -165,7 +165,7 @@ export default class GenericActionCard extends Vue {
     this.showDetails = !this.showDetails
   }
 
-  get actionDate ():string {
+  get actionDate (): string {
     let actionDate = dateToDateTimeString(this.value.beginDate)
     if (this.value.endDate) {
       actionDate += ' - ' + dateToDateTimeString(this.value.endDate)

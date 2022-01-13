@@ -76,7 +76,7 @@ export class Contact implements IContact {
     this._familyName = newFamilyName
   }
 
-  get fullName ():string {
+  get fullName (): string {
     return this.givenName + ' ' + this.familyName
   }
 

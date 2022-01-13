@@ -101,11 +101,11 @@ export default class ConfigurationsSearch extends Vue {
     required: false,
     type: Boolean
   })
-  private loadInitialData!:boolean;
+  private loadInitialData!: boolean;
 
   private lastActiveSearcher: ConfigurationSearcher | null = null
   private loader: null | IPaginationLoader<Configuration> = null
-  private loading:boolean=true
+  private loading: boolean=true
   private pageSize: number = 20
 
   created () {

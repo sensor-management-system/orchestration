@@ -99,7 +99,7 @@ export default class ContactSelect extends Vue {
    *
    * @return {ContactsLoaderFunction} a function that returns a promise which returns a list of contacts
    */
-  get findAllContacts () : ContactsLoaderFunction {
+  get findAllContacts (): ContactsLoaderFunction {
     return () => { return this.$api.contacts.findAll() }
   }
 

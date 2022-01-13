@@ -63,7 +63,7 @@ export default class DotMenuActionCopy extends Vue {
     required: true,
     type: String
   })
-  readonly path!:string
+  readonly path!: string
 
   @Prop({
     default: false,

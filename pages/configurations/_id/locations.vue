@@ -232,7 +232,7 @@ export default class ConfigurationLocations extends mixins(Rules) {
     return ConfigurationHelper.getActionDatesWithTextsByConfiguration(this.configuration, this.selectedDate, { useMounts: false, useLoctions: true })
   }
 
-  get currentlyActiveLocationAction () : StaticLocationBeginAction | DynamicLocationBeginAction | null {
+  get currentlyActiveLocationAction (): StaticLocationBeginAction | DynamicLocationBeginAction | null {
     return getCurrentlyActiveLocationAction(this.configuration, this.selectedDate)
   }
 

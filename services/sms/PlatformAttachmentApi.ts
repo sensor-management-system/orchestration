@@ -54,7 +54,7 @@ export class PlatformAttachmentApi {
     return this.axiosApi.delete<string, void>(id)
   }
 
-  add (platformId: string, attachment: Attachment) : Promise<Attachment> {
+  add (platformId: string, attachment: Attachment): Promise<Attachment> {
     const url = ''
     const data = this.serializer.convertModelToJsonApiData(attachment, platformId)
     return this.axiosApi.post(url, { data }).then((serverResponse) => {
@@ -62,7 +62,7 @@ export class PlatformAttachmentApi {
     })
   }
 
-  update (platformId: string, attachment: Attachment) : Promise<Attachment> {
+  update (platformId: string, attachment: Attachment): Promise<Attachment> {
     return new Promise<string>((resolve, reject) => {
       if (attachment.id) {
         resolve(attachment.id)

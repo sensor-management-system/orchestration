@@ -76,7 +76,7 @@ export class StaticLocationEndActionSerializer {
     return result
   }
 
-  convertModelToJsonApiData (configurationId: string, action: StaticLocationEndAction) : IJsonApiEntityWithOptionalId {
+  convertModelToJsonApiData (configurationId: string, action: StaticLocationEndAction): IJsonApiEntityWithOptionalId {
     const data: any = {
       type: 'configuration_static_location_end_action',
       attributes: {

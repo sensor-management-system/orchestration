@@ -817,7 +817,7 @@ export default class DevicePropertyForm extends Vue {
    *
    * @returns {Compartment[]} list of compartments
    */
-  get compartmentItems () : Compartment[] {
+  get compartmentItems (): Compartment[] {
     return this.compartments
   }
 

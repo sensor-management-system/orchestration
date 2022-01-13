@@ -37,7 +37,7 @@ import { LocationType } from '@/models/Location'
 import { Configuration } from '@/models/Configuration'
 
 export default {
-  validateInputForStartDate (configuration: Configuration): (v:string) => (boolean | string) {
+  validateInputForStartDate (configuration: Configuration): (v: string) => (boolean | string) {
     return (v) => {
       if (v === null || v === '' || configuration.startDate === null) {
         return true
@@ -52,7 +52,7 @@ export default {
     }
   },
 
-  validateInputForEndDate (configuration: Configuration): (v:string) => (boolean | string) {
+  validateInputForEndDate (configuration: Configuration): (v: string) => (boolean | string) {
     return (v) => {
       if (v === null || v === '' || configuration.endDate === null) {
         return true

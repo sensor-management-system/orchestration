@@ -37,7 +37,7 @@ interface ITokenObject {
   exp?: number
 }
 
-function parseJwt (token: string) : ITokenObject {
+function parseJwt (token: string): ITokenObject {
   try {
     const base64Url = token.split('.')[1]
     const base64 = base64Url.replace('-', '+').replace('_', '/')
@@ -55,7 +55,7 @@ function tokenExp (token: string): number | null {
   return null
 }
 
-export function tokenIsExpired (token: string) : boolean {
+export function tokenIsExpired (token: string): boolean {
   const tokenExpiryTime = tokenExp(token)
   if (tokenExpiryTime) {
     return tokenExpiryTime < new Date().getTime()

@@ -642,7 +642,7 @@ export default class SearchPlatformsPage extends Vue {
       })
   }
 
-  loadUntilWeHaveSomeEntries (loader:IPaginationLoader<Platform>) {
+  loadUntilWeHaveSomeEntries (loader: IPaginationLoader<Platform>) {
     this.loader = loader
     this.loading = false
     this.searchResults = [...this.searchResults, ...loader.elements]
