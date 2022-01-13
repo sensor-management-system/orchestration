@@ -211,7 +211,7 @@ export default class ProfilePage extends Vue {
   }
 
   objectWithoutKeys (object: {[idx: string]: any}, keys: string[]) {
-    const result: {[idx:string]: any} = {}
+    const result: {[idx: string]: any} = {}
     for (const key in object) {
       if (!keys.includes(key)) {
         result[key] = object[key]

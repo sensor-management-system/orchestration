@@ -142,7 +142,7 @@ export default class StaticLocationBeginActionNew extends mixins(Rules) {
     return DateTime.utc()
   }
 
-  get currentlyActiveLocationAction () : StaticLocationBeginAction | DynamicLocationBeginAction | null {
+  get currentlyActiveLocationAction (): StaticLocationBeginAction | DynamicLocationBeginAction | null {
     return getCurrentlyActiveLocationAction(this.configuration, this.selectedDate)
   }
 

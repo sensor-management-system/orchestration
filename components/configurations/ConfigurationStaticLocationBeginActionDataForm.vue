@@ -253,7 +253,7 @@ export default class ConfigurationStaticLocationBeginActionDataForm extends mixi
     return extractStationaryLocationFromStaticLocationBeginAction(this.value)
   }
 
-  update (key: string, value: any) : void {
+  update (key: string, value: any): void {
     const copy = StaticLocationBeginAction.createFromObject(this.value)
 
     switch (key) {
@@ -357,7 +357,7 @@ export default class ConfigurationStaticLocationBeginActionDataForm extends mixi
     ]
   }
 
-  combine (a: any[], b: any[]) : any[] {
+  combine (a: any[], b: any[]): any[] {
     const result: any[] = []
     a.forEach(x => result.push(x))
     b.forEach(x => result.push(x))

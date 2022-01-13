@@ -47,7 +47,7 @@ export class CustomTextField implements ICustomTextField {
    * @param {ICustomTextField} someObject - the object from which the new instance is to be created
    * @return {CustomTextField} the newly created instance
    */
-  static createFromObject (someObject: ICustomTextField) : CustomTextField {
+  static createFromObject (someObject: ICustomTextField): CustomTextField {
     const newObject = new CustomTextField()
 
     newObject.id = someObject.id

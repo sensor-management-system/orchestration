@@ -31,7 +31,7 @@
  */
 
 export class ConfigurationStatusApi {
-  newSearchBuilder () : ConfigurationStatusSearchBuilder {
+  newSearchBuilder (): ConfigurationStatusSearchBuilder {
     return new ConfigurationStatusSearchBuilder()
   }
 

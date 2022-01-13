@@ -49,7 +49,7 @@ export class FilteredPaginationedLoader<E> implements IPaginationLoader<E> {
     this.filterFunc = filterFunc
   }
 
-  get elements () : E[] {
+  get elements (): E[] {
     return this.innerLoader.elements.filter(this.filterFunc)
   }
 
@@ -58,7 +58,7 @@ export class FilteredPaginationedLoader<E> implements IPaginationLoader<E> {
     return this.innerLoader.totalCount - countThatDoesNotFulfillFilterFunc
   }
 
-  get funToLoadNext () : null | PaginationLoaderFunction<E> {
+  get funToLoadNext (): null | PaginationLoaderFunction<E> {
     const innerPromise: null | PaginationLoaderFunction<E> = this.innerLoader.funToLoadNext
     if (innerPromise === null) {
       return null

@@ -242,7 +242,7 @@ export default class DateTimePicker extends Vue {
     this.activeTab = 0
   }
 
-  getPickerValue ():string {
+  getPickerValue (): string {
     if (this.isDatetimeUsed) {
       return this.datePickerValue + ' ' + this.timePickerValue
     }

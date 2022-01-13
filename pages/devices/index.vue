@@ -504,13 +504,13 @@ export default class SearchDevicesPage extends Vue {
   private searchResults: Device[] = []
   private searchText: string | null = null
 
-  private showDeleteDialog:boolean=false;
+  private showDeleteDialog: boolean=false;
 
   private searchResultItemsShown: { [id: string]: boolean } = {}
 
   public readonly NO_TYPE: string = 'Unknown type'
 
-  private deviceToDelete:Device|null=null
+  private deviceToDelete: Device|null=null
 
   created () {
     this.initializeAppBar()
@@ -712,7 +712,7 @@ export default class SearchDevicesPage extends Vue {
     return ''
   }
 
-  initDeleteDialog (device:Device) {
+  initDeleteDialog (device: Device) {
     this.showDeleteDialog = true
     this.deviceToDelete = device
   }

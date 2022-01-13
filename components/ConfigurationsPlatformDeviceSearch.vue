@@ -301,7 +301,7 @@ export default class ConfigurationsPlatformDeviceSearch extends Vue {
     type: String
   })
   // @ts-ignore
-readonly currentUserMail:string|null
+readonly currentUserMail: string|null
 
   get searchTypes (): string[] {
     return [SearchType.Platform, SearchType.Device]

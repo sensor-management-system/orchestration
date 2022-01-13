@@ -95,9 +95,9 @@ import ConfigurationsSearch from '@/components/configurations/ConfigurationsSear
 export default class SearchConfigurationsPage extends Vue {
   private searchResults: Configuration[] = []
 
-  private configurationToDelete:Configuration|null=null
+  private configurationToDelete: Configuration|null=null
 
-  private showDeleteDialog:boolean=false;
+  private showDeleteDialog: boolean=false;
 
   created () {
     this.initializeAppBar()
@@ -125,7 +125,7 @@ export default class SearchConfigurationsPage extends Vue {
     this.$store.commit('appbar/setActiveTab', tab)
   }
 
-  initDeleteDialog (configuration:Configuration) {
+  initDeleteDialog (configuration: Configuration) {
     this.showDeleteDialog = true
     this.configurationToDelete = configuration
   }

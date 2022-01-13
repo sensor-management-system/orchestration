@@ -355,7 +355,7 @@ describe('DatetimePicker.vue', () => {
   })
 
   it('includes the provided rules', () => {
-    const testRuleNameRequired = (v:any) => !!v || 'Name is required'
+    const testRuleNameRequired = (v: any) => !!v || 'Name is required'
 
     wrapper = factory({
       propsData: {

@@ -153,7 +153,7 @@ export class ConfigurationApi {
     const data: any = this.serializer.convertModelToJsonApiData(configuration)
     let method: Method = 'patch'
     let url = ''
-    const relationshipsToDelete : string[] = []
+    const relationshipsToDelete: string[] = []
     let platformMountActionIdsToDelete: Set<string> = new Set()
     let platformMountActionIdsToUpdate: Set<string> = new Set()
     let platformUnmountActionIdsToDelete: Set<string> = new Set()

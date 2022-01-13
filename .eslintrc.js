@@ -41,5 +41,20 @@ module.exports = {
   ],
   // add your custom rules here
   rules: {
+    // type annotations should look like this:
+    // const foo: SomeType
+    '@typescript-eslint/type-annotation-spacing': [
+      'warn',
+      {
+        before: false,
+        after: true,
+        overrides: {
+          arrow: {
+            before: true,
+            after: true
+          }
+        }
+      }
+    ]
   }
 }

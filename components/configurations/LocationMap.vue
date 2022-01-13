@@ -60,7 +60,7 @@ import { StationaryLocation } from '@/models/Location'
 @Component
 export default class LocationMap extends Vue {
   @Prop({ required: true, type: Object })
-  readonly value!:StationaryLocation
+  readonly value!: StationaryLocation
 
   @Prop({ default: false, type: Boolean }) readonly readonly!: boolean
 
@@ -85,14 +85,14 @@ export default class LocationMap extends Vue {
     this.$emit('input', newValue)
   }
 
-  get location ():LatLng|null {
+  get location (): LatLng|null {
     if (!!this.value.latitude && !!this.value.longitude) {
       return new LatLng(this.value.latitude, this.value.longitude)
     }
     return null
   }
 
-  onReady (mapObject:Map) {
+  onReady (mapObject: Map) {
     // Only locate when no coordinates were set
     if (!this.location) {
       mapObject.locate()

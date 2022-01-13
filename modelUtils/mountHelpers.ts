@@ -307,7 +307,7 @@ export function unmount (
   date: DateTime,
   contact: Contact,
   description: string
-) : IMountActions {
+): IMountActions {
   let platformIdsToRemoveActions = new Set<string>()
   let deviceIdsToRemoveActions = new Set<string>()
 

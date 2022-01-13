@@ -47,7 +47,7 @@ export interface IPlatformMountAction {
 }
 
 export class PlatformMountAction {
-  private _id : string = ''
+  private _id: string = ''
   private _platform: Platform
   private _parentPlatform: Platform | null
   private _date: DateTime

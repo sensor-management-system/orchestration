@@ -201,7 +201,7 @@ export default class ConfigurationsOverviewCard extends Vue {
   })
   readonly isUserAuthenticated!: boolean
 
-  private isExpanded:boolean=false;
+  private isExpanded: boolean=false;
 
   getLocationType (configuration: Configuration): string {
     if (configuration.location instanceof StationaryLocation) {

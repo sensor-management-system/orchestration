@@ -143,7 +143,7 @@ export default class CommonActionForm extends Vue {
     type: String
   })
   // @ts-ignore
-readonly currentUserMail:string|null
+readonly currentUserMail: string|null
 
   async fetch () {
     try {

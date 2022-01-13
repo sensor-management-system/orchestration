@@ -44,11 +44,11 @@ export class DynamicLocationBeginActionApi {
     this.serializer = new DynamicLocationBeginActionSerializer()
   }
 
-  deleteById (id: string) : Promise<void> {
+  deleteById (id: string): Promise<void> {
     return this.axiosApi.delete<string, void>(id)
   }
 
-  async add (configurationId: string, action: DynamicLocationBeginAction) : Promise<string> {
+  async add (configurationId: string, action: DynamicLocationBeginAction): Promise<string> {
     const url = ''
     const data = this.serializer.convertModelToJsonApiData(configurationId, action)
     const response = await this.axiosApi.post(url, { data })
@@ -58,7 +58,7 @@ export class DynamicLocationBeginActionApi {
     return response.data.id
   }
 
-  async update (configurationId: string, action: DynamicLocationBeginAction) : Promise<string> {
+  async update (configurationId: string, action: DynamicLocationBeginAction): Promise<string> {
     if (!action.id) {
       throw new Error('no id for the DynamicLocationBeginAction')
     }

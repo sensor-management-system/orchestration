@@ -351,7 +351,7 @@ export default class ConfigurationLocationsAtTimestamp extends mixins(Rules) {
     return this.dateFromUrlParam(this.$route) || DateTime.utc()
   }
 
-  get currentlyActiveLocationAction () : StaticLocationBeginAction | DynamicLocationBeginAction | null {
+  get currentlyActiveLocationAction (): StaticLocationBeginAction | DynamicLocationBeginAction | null {
     return getCurrentlyActiveLocationAction(this.value, this.selectedDate)
   }
 

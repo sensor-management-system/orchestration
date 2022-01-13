@@ -155,7 +155,7 @@ export default class ConfigurationPlatformDeviceMountForm extends mixins(Rules) 
     type: String
   })
   // @ts-ignore
-readonly currentUserMail:string|null
+readonly currentUserMail: string|null
 
   created () {
     this.contact = this.currentUserAsMountContact

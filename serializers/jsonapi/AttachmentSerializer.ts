@@ -82,7 +82,7 @@ export class AttachmentSerializer implements IAttachmentSerializer {
     return jsonApiObjectList.data.map(this.convertJsonApiDataToModel)
   }
 
-  convertModelToJsonApiData (attachment : IAttachment): IJsonApiEntityWithOptionalId {
+  convertModelToJsonApiData (attachment: IAttachment): IJsonApiEntityWithOptionalId {
     const data: any = {
       type: 'attachment',
       attributes: {

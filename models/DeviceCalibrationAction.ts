@@ -55,7 +55,7 @@ export class DeviceCalibrationAction extends ActionCommonDetails implements IDev
     return new DeviceCalibrationAction()
   }
 
-  static createFromObject (someObject: IDeviceCalibrationAction) : DeviceCalibrationAction {
+  static createFromObject (someObject: IDeviceCalibrationAction): DeviceCalibrationAction {
     const action = new DeviceCalibrationAction()
     action.id = someObject.id
     action.currentCalibrationDate = someObject.currentCalibrationDate
@@ -69,7 +69,7 @@ export class DeviceCalibrationAction extends ActionCommonDetails implements IDev
     return action
   }
 
-  get currentCalibrationDate () : DateTime | null {
+  get currentCalibrationDate (): DateTime | null {
     return this._currentCalibrationDate
   }
 
@@ -77,7 +77,7 @@ export class DeviceCalibrationAction extends ActionCommonDetails implements IDev
     this._currentCalibrationDate = newDate
   }
 
-  get nextCalibrationDate () : DateTime | null {
+  get nextCalibrationDate (): DateTime | null {
     return this._nextCalibrationDate
   }
 
@@ -93,7 +93,7 @@ export class DeviceCalibrationAction extends ActionCommonDetails implements IDev
     this._formula = newFormula
   }
 
-  get value () : number | null {
+  get value (): number | null {
     return this._value
   }
 

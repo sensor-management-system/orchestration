@@ -67,7 +67,7 @@ export class SoftwareUpdateAction extends ActionCommonDetails implements ISoftwa
    * @param {ISoftwareUpdateAction} someObject - an ISoftwareUpdateAction like object
    * @return {SoftwareUpdateAction} a cloned instance of the original object
    */
-  static createFromObject (someObject: ISoftwareUpdateAction) : SoftwareUpdateAction {
+  static createFromObject (someObject: ISoftwareUpdateAction): SoftwareUpdateAction {
     const action = new SoftwareUpdateAction()
     action.id = someObject.id
     action.softwareTypeName = someObject.softwareTypeName

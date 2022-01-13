@@ -65,7 +65,7 @@ export class GenericAction extends ActionCommonDetails implements IGenericAction
    * @param {IGenericAction} someObject - an IGenericAction like object
    * @return {GenericAction} a cloned instance of the original object
    */
-  static createFromObject (someObject: IGenericAction) : GenericAction {
+  static createFromObject (someObject: IGenericAction): GenericAction {
     const action = new GenericAction()
     action.id = someObject.id
     action.description = someObject.description

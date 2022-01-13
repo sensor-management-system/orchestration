@@ -76,7 +76,7 @@ export class DynamicLocationEndActionSerializer {
     return result
   }
 
-  convertModelToJsonApiData (configurationId: string, action: DynamicLocationEndAction) : IJsonApiEntityWithOptionalId {
+  convertModelToJsonApiData (configurationId: string, action: DynamicLocationEndAction): IJsonApiEntityWithOptionalId {
     const data: any = {
       type: 'configuration_dynamic_location_end_action',
       attributes: {

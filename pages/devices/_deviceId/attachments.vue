@@ -286,7 +286,7 @@ export default class DeviceAttachmentsPage extends mixins(AttachmentsMixin) {
     return this.$route.path === '/devices/' + this.deviceId + '/attachments/' + attachment.id + '/edit'
   }
 
-  attachmentLabel (attachment: Attachment) : string {
+  attachmentLabel (attachment: Attachment): string {
     return attachment.label || 'Attachment'
   }
 }
