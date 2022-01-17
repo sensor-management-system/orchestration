@@ -107,7 +107,7 @@ export class DynamicLocationBeginActionSerializer {
     return result
   }
 
-  convertModelToJsonApiData (configurationId: string, action: DynamicLocationBeginAction) : IJsonApiEntityWithOptionalId {
+  convertModelToJsonApiData (configurationId: string, action: DynamicLocationBeginAction): IJsonApiEntityWithOptionalId {
     const data: any = {
       type: 'configuration_dynamic_location_begin_action',
       attributes: {

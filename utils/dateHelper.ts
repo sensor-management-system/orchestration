@@ -55,7 +55,7 @@ export const stringToDateTimeFormat = (aDate: string): DateTime => {
   return DateTime.fromFormat(aDate, 'yyyy-MM-dd HH:mm', { zone: 'UTC' })
 }
 
-export const timeStampToUTCDateTime = (value: number) : string => {
+export const timeStampToUTCDateTime = (value: number): string => {
   if (!value) {
     return ''
   }
@@ -63,7 +63,7 @@ export const timeStampToUTCDateTime = (value: number) : string => {
   return date.toFormat('yyyy-MM-dd HH:mm:ss') + ' UTC'
 }
 
-export function dateTimesEqual (dateTime1: DateTime, dateTime2: DateTime) : boolean {
+export function dateTimesEqual (dateTime1: DateTime, dateTime2: DateTime): boolean {
   return dateTime1.toUTC().toISO() === dateTime2.toUTC().toISO()
 }
 

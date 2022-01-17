@@ -62,7 +62,7 @@ export class DevicePropertyApi {
     })
   }
 
-  update (deviceId: string, deviceProperty: DeviceProperty) : Promise<DeviceProperty> {
+  update (deviceId: string, deviceProperty: DeviceProperty): Promise<DeviceProperty> {
     return new Promise<string>((resolve, reject) => {
       if (deviceProperty.id) {
         resolve(deviceProperty.id)

@@ -184,7 +184,7 @@ export default {
         accessType: undefined,
         logoutRedirectUri: undefined,
         clientId: process.env.NUXT_ENV_CLIENT_ID,
-        scope: process.env.NUXT_ENV_SCOPE.split(' '),
+        scope: process.env.NUXT_ENV_SCOPE ? process.env.NUXT_ENV_SCOPE.split(' ') : [],
         state: 'UNIQUE_AND_NON_GUESSABLE',
         codeChallengeMethod: process.env.NUXT_ENV_OIDC_CHALLANGE || '',
         responseMode: '',

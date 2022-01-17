@@ -243,7 +243,7 @@ export default class ConfigurationDynamicLocationActionDataForm extends mixins(R
     return this.value.elevationDatumName
   }
 
-  update (key: string, value: any) : void {
+  update (key: string, value: any): void {
     const copy = DynamicLocationBeginAction.createFromObject(this.value)
 
     switch (key) {
@@ -397,7 +397,7 @@ export default class ConfigurationDynamicLocationActionDataForm extends mixins(R
     ]
   }
 
-  combine (a: any[], b: any[]) : any[] {
+  combine (a: any[], b: any[]): any[] {
     const result: any[] = []
     a.forEach(x => result.push(x))
     b.forEach(x => result.push(x))

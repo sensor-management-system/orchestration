@@ -119,7 +119,7 @@ export default class ContactShowPage extends Vue {
   private contact: Contact = new Contact()
   private isLoading: boolean = true
 
-  private showDeleteDialog:boolean=false;
+  private showDeleteDialog: boolean=false;
 
   created () {
     this.initializeAppBar()

@@ -249,13 +249,13 @@ export default {
     return selectedNode
   },
 
-  getHierarchyNodeNamesByTreeAndSelectedNode (tree:ConfigurationsTree, selectedNode: ConfigurationsTreeNode|null): Object[] {
+  getHierarchyNodeNamesByTreeAndSelectedNode (tree: ConfigurationsTree, selectedNode: ConfigurationsTreeNode|null): Object[] {
     if (!selectedNode) {
       return []
     }
 
     const openInNewTab = true
-    return tree.getPathObjects(selectedNode).map((selectedNode:ConfigurationsTreeNode) => {
+    return tree.getPathObjects(selectedNode).map((selectedNode: ConfigurationsTreeNode) => {
       // we not only handle the names here, but we also allow to have links to our
       // platforms and devices
       const subRoute = selectedNode.isPlatform() ? 'platforms' : 'devices'

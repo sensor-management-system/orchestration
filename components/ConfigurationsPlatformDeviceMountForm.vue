@@ -39,9 +39,10 @@ permissions and limitations under the Licence.
         md="3"
       >
         <v-text-field
-          v-model="offsetX"
+          v-model.number="offsetX"
           label="Offset (x)"
           type="number"
+          step="any"
           :disabled="readonly"
           required
           :rules="[rules.numericRequired]"
@@ -54,9 +55,10 @@ permissions and limitations under the Licence.
         md="3"
       >
         <v-text-field
-          v-model="offsetY"
+          v-model.number="offsetY"
           label="Offset (y)"
           type="number"
+          step="any"
           :disabled="readonly"
           required
           :rules="[rules.numericRequired]"
@@ -69,9 +71,10 @@ permissions and limitations under the Licence.
         md="3"
       >
         <v-text-field
-          v-model="offsetZ"
+          v-model.number="offsetZ"
           label="Offset (z)"
           type="number"
+          step="any"
           :disabled="readonly"
           required
           :rules="[rules.numericRequired]"
@@ -152,7 +155,7 @@ export default class ConfigurationPlatformDeviceMountForm extends mixins(Rules) 
     type: String
   })
   // @ts-ignore
-readonly currentUserMail:string|null
+readonly currentUserMail: string|null
 
   created () {
     this.contact = this.currentUserAsMountContact

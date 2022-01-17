@@ -81,7 +81,7 @@ export class PlatformUnmountActionSerializer {
     return result
   }
 
-  convertModelToJsonApiData (configurationId: string, platformUnmountAction: PlatformUnmountAction) : IJsonApiEntityWithOptionalId {
+  convertModelToJsonApiData (configurationId: string, platformUnmountAction: PlatformUnmountAction): IJsonApiEntityWithOptionalId {
     const data: any = {
       type: 'platform_unmount_action',
       attributes: {

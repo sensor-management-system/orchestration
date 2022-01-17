@@ -44,11 +44,11 @@ export class StaticLocationEndActionApi {
     this.serializer = new StaticLocationEndActionSerializer()
   }
 
-  deleteById (id: string) : Promise<void> {
+  deleteById (id: string): Promise<void> {
     return this.axiosApi.delete<string, void>(id)
   }
 
-  async add (configurationId: string, action: StaticLocationEndAction) : Promise<string> {
+  async add (configurationId: string, action: StaticLocationEndAction): Promise<string> {
     const url = ''
     const data = this.serializer.convertModelToJsonApiData(configurationId, action)
     const response = await this.axiosApi.post(url, { data })
@@ -58,7 +58,7 @@ export class StaticLocationEndActionApi {
     return response.data.id
   }
 
-  async update (configurationId: string, action: StaticLocationEndAction) : Promise<string> {
+  async update (configurationId: string, action: StaticLocationEndAction): Promise<string> {
     if (!action.id) {
       throw new Error('no id for the StaticLocationEndAction')
     }

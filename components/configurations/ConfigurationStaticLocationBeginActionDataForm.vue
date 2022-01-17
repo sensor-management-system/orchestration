@@ -50,6 +50,7 @@ permissions and limitations under the Licence.
           :value="value.x"
           label="x"
           type="number"
+          step="any"
           :rules="[rules.required]"
           @wheel.prevent
           @change="update('x', $event)"
@@ -60,6 +61,7 @@ permissions and limitations under the Licence.
           :value="value.y"
           label="y"
           type="number"
+          step="any"
           :rules="[rules.required]"
           @wheel.prevent
           @change="update('y', $event)"
@@ -83,6 +85,7 @@ permissions and limitations under the Licence.
           :value="value.z"
           label="z"
           type="number"
+          step="any"
           @wheel.prevent
           @change="update('z', $event)"
         />
@@ -250,7 +253,7 @@ export default class ConfigurationStaticLocationBeginActionDataForm extends mixi
     return extractStationaryLocationFromStaticLocationBeginAction(this.value)
   }
 
-  update (key: string, value: any) : void {
+  update (key: string, value: any): void {
     const copy = StaticLocationBeginAction.createFromObject(this.value)
 
     switch (key) {
@@ -354,7 +357,7 @@ export default class ConfigurationStaticLocationBeginActionDataForm extends mixi
     ]
   }
 
-  combine (a: any[], b: any[]) : any[] {
+  combine (a: any[], b: any[]): any[] {
     const result: any[] = []
     a.forEach(x => result.push(x))
     b.forEach(x => result.push(x))

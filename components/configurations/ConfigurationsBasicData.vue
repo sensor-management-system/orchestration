@@ -91,7 +91,7 @@ export default class ConfigurationsBasicDataForm extends Vue {
     required: true,
     type: Configuration
   })
-  readonly value!:Configuration
+  readonly value!: Configuration
 
   readonly LOCATION_TYPE_STATIONARY = 'Stationary'
   readonly LOCATION_TYPE_DYNAMIC = 'Dynamic'
@@ -106,7 +106,7 @@ export default class ConfigurationsBasicDataForm extends Vue {
   get configurationStates () { return this.$store.state.configurations.configurationStates }
   get projectNames () { return this.$store.getters['configurations/projectNames'] }
   // @ts-ignore
-  update (key:string, value:any) {
+  update (key: string, value: any) {
     // @ts-ignore
     if (typeof this.value[key] !== 'undefined') {
       const newObj = Configuration.createFromObject(this.value)

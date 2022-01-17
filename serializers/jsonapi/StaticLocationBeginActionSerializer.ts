@@ -82,7 +82,7 @@ export class StaticLocationBeginActionSerializer {
     return result
   }
 
-  convertModelToJsonApiData (configurationId: string, action: StaticLocationBeginAction) : IJsonApiEntityWithOptionalId {
+  convertModelToJsonApiData (configurationId: string, action: StaticLocationBeginAction): IJsonApiEntityWithOptionalId {
     const data: any = {
       type: 'configuration_static_location_begin_action',
       attributes: {

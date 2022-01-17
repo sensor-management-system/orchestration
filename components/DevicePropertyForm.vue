@@ -288,6 +288,7 @@ permissions and limitations under the Licence.
           :readonly="readonly"
           :disabled="readonly"
           type="number"
+          step="any"
           @input="update('measuringRange.min', $event)"
           @wheel.prevent
         />
@@ -299,6 +300,7 @@ permissions and limitations under the Licence.
           :readonly="readonly"
           :disabled="readonly"
           type="number"
+          step="any"
           @input="update('measuringRange.max', $event)"
           @wheel.prevent
         />
@@ -312,6 +314,7 @@ permissions and limitations under the Licence.
           :readonly="readonly"
           :disabled="readonly"
           type="number"
+          step="any"
           @input="update('accuracy', $event)"
           @wheel.prevent
         />
@@ -323,6 +326,7 @@ permissions and limitations under the Licence.
           :readonly="readonly"
           :disabled="readonly"
           type="number"
+          step="any"
           @input="update('failureValue', $event)"
           @wheel.prevent
         />
@@ -336,6 +340,7 @@ permissions and limitations under the Licence.
           :readonly="readonly"
           :disabled="readonly"
           type="number"
+          step="any"
           @input="update('resolution', $event)"
           @wheel.prevent
         />
@@ -718,16 +723,22 @@ export default class DevicePropertyForm extends Vue {
         newObj.unitName = value.name
         newObj.unitUri = this.getUriByValue('unitName', value.name)
         // if the unit has numerical default values, apply them to measuringRange min and max
-        if (value.defaultLimitMin) {
+        if (value.defaultLimitMin !== null) {
           newObj.measuringRange.min = parseFloatOrNull(value.defaultLimitMin)
+        } else {
+          newObj.measuringRange.min = null
         }
-        if (value.defaultLimitMax) {
+        if (value.defaultLimitMax !== null) {
           newObj.measuringRange.max = parseFloatOrNull(value.defaultLimitMax)
+        } else {
+          newObj.measuringRange.max = null
         }
       }
     } else {
       newObj.unitName = ''
       newObj.unitUri = ''
+      newObj.measuringRange.min = null
+      newObj.measuringRange.max = null
     }
     /**
      * input event
@@ -812,7 +823,7 @@ export default class DevicePropertyForm extends Vue {
    *
    * @returns {Compartment[]} list of compartments
    */
-  get compartmentItems () : Compartment[] {
+  get compartmentItems (): Compartment[] {
     return this.compartments
   }
 

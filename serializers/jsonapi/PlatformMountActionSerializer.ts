@@ -93,7 +93,7 @@ export class PlatformMountActionSerializer {
     return result
   }
 
-  convertModelToJsonApiData (configurationId: string, platformMountAction: PlatformMountAction) : IJsonApiEntityWithOptionalId {
+  convertModelToJsonApiData (configurationId: string, platformMountAction: PlatformMountAction): IJsonApiEntityWithOptionalId {
     const data: any = {
       type: 'platform_mount_action',
       attributes: {

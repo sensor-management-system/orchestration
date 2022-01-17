@@ -178,7 +178,7 @@ export default class DynamicLocationEndActionNew extends mixins(Rules) {
     return tree.getAllDeviceNodesAsList().map(node => node.unpack().device)
   }
 
-  get currentlyActiveLocationAction () : StaticLocationBeginAction | DynamicLocationBeginAction | null {
+  get currentlyActiveLocationAction (): StaticLocationBeginAction | DynamicLocationBeginAction | null {
     if (!this.selectedDate) {
       return null
     }

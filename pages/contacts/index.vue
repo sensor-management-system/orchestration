@@ -303,7 +303,7 @@ export default class SearchContactsPage extends Vue {
   private searchText: string = ''
 
   private showDeleteDialog: boolean = false
-  private contactToDelete: Contact|null = null
+  private contactToDelete: Contact | null = null
   private searchResultItemsShown: { [id: string]: boolean } = {}
 
   created () {

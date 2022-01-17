@@ -61,6 +61,22 @@ check-lint:
     paths:
       - node_modules
 
+check-build:
+  stage: check
+  image: node:16.0.0-buster
+  before_script:
+    - node -v
+    - npm ci
+  script:
+    - npm run build
+  tags:
+    - docker
+  allow_failure: false
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - node_modules
+
 check-license:
   stage: check
   image: node:16.0.0-buster
@@ -125,8 +141,7 @@ build-deploy-static-files-gfz:
     AUTHORITY: ${GFZ_STAGING_IDP_AUTORITY}/authorize
     OIDC_TOKEN: ${GFZ_STAGING_IDP_AUTORITY}/accessToken
   before_script:
-    - apk add --update curl python3 py3-pip && rm -rf /var/cache/apk/*
-    - pip install requests
+    - apk add --update curl jq && rm -rf /var/cache/apk/*
   script:
     - TARGET_PACKAGE_VERSION=$(if [ -z "${CI_JOB_MANUAL}" ]; then echo "latest"; else echo "manual"; fi)
     - echo "Build gfz statics ${TARGET_PACKAGE_VERSION}"
@@ -155,14 +170,13 @@ build-deploy-static-files-gfz:
     - sha256sum dist.tar.gz > dist-sha256sum.txt
     - cat dist-sha256sum.txt
     - tar -cvf signed-dist.tar dist.tar.gz dist-sha256sum.txt
-    - 'curl --header "JOB-TOKEN: $CI_JOB_TOKEN" --upload-file signed-dist.tar "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/gfz-statics/${TARGET_PACKAGE_VERSION}/signed-dist.tar"'
-    # Check sha256 sum
-    # Download the uploaded file until HZDR gitlab is updated to 14.3.5, which supports the the select attribute for generic packages
-    - sha256sum signed-dist.tar > signed-dist-sha256sum.txt
-    - cat signed-dist-sha256sum.txt
-    - rm signed-dist.tar
-    - 'wget --header="JOB-TOKEN: $CI_JOB_TOKEN" ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/gfz-statics/${TARGET_PACKAGE_VERSION}/signed-dist.tar'
-    - sha256sum signed-dist.tar
+    # Upload static package and save response package-data
+    - 'curl --header "JOB-TOKEN: $CI_JOB_TOKEN" --upload-file signed-dist.tar "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/gfz-statics/${TARGET_PACKAGE_VERSION}/signed-dist.tar?select=package_file"  -o package_data.json'
+    # Filter the sha256sum and store it in a file
+    - cat package_data.json | jq -r '.file_sha256' -j > signed-dist-sha256sum.txt
+    # Add source-file-name to match sha256sum checksum file format
+    - echo "  signed-dist.tar" >> signed-dist-sha256sum.txt
+    # Compare checksum
     - sha256sum -c signed-dist-sha256sum.txt
   after_script:
     - docker rm "static-gfz-${TARGET_PACKAGE_VERSION}-container-$CI_JOB_ID"

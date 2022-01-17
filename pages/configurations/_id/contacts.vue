@@ -220,7 +220,7 @@ export default class ContactTab extends Vue {
     }
   }
 
-  beforeRouteUpdate (to: any, _from:any, next:any) {
+  beforeRouteUpdate (to: any, _from: any, next: any) {
     if (to.name === 'configurations-id-contacts') {
       this.loadConfigurationContacts()
     }

@@ -52,7 +52,7 @@ export class CustomfieldsApi {
     })
   }
 
-  deleteById (id: string) : Promise<void> {
+  deleteById (id: string): Promise<void> {
     return this.axiosApi.delete<string, void>(id)
   }
 

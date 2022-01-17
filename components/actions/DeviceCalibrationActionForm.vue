@@ -69,6 +69,7 @@ permissions and limitations under the Licence.
           :value="actionCopy.value"
           label="Value"
           type="number"
+          step="any"
           @wheel.prevent
           @input="setValue"
         />
@@ -183,7 +184,7 @@ export default class DeviceCalibationActionForm extends Vue {
     type: String
   })
   // @ts-ignore
-readonly currentUserMail:string|null
+readonly currentUserMail: string|null
 
   created () {
     this.createActionCopy(this.value)
@@ -273,7 +274,7 @@ readonly currentUserMail:string|null
     return innerFunc
   }
 
-  measuredQuantitiesNotEmpty (selectedMeasuredQuantities: DeviceProperty[]) : boolean | string {
+  measuredQuantitiesNotEmpty (selectedMeasuredQuantities: DeviceProperty[]): boolean | string {
     // in case that there are no measured quantities at all to use, we don't want
     // to complain about that
     if (this.measuredQuantities.length === 0) {

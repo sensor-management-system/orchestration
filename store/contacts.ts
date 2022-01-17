@@ -46,8 +46,8 @@ export const state = {
   configurationContacts: []
 }
 export const getters = {
-  searchContacts: (state:contactsState) => {
-    return state.allContacts.filter((c:Contact) => !state.configurationContacts.find((rc:Contact) => rc.id === c.id))
+  searchContacts: (state: contactsState) => {
+    return state.allContacts.filter((c: Contact) => !state.configurationContacts.find((rc: Contact) => rc.id === c.id))
   }
 }
 export const actions = {
@@ -56,27 +56,27 @@ export const actions = {
     const contacts = await this.$api.contacts.findAll()
     commit('setAllContacts', contacts)
   },
-  async loadConfigurationContacts ({ commit }: { commit: Commit }, id:string) {
+  async loadConfigurationContacts ({ commit }: { commit: Commit }, id: string) {
     // @ts-ignore
     const contacts = await this.$api.configurations.findRelatedContacts(id)
     commit('setConfigurationContacts', contacts)
   },
-  async addContactToConfiguration (_context:ActionContext<contactsState, contactsState>,
-    { configurationId, contactId }:{configurationId:string, contactId:string}) {
+  async addContactToConfiguration (_context: ActionContext<contactsState, contactsState>,
+    { configurationId, contactId }: {configurationId: string, contactId: string}) {
     // @ts-ignore
     await this.$api.configurations.addContact(configurationId, contactId)
   },
-  async removeContactFromConfiguration (_context:ActionContext<contactsState, contactsState>,
-    { configurationId, contactId }:{configurationId:string, contactId:string}) {
+  async removeContactFromConfiguration (_context: ActionContext<contactsState, contactsState>,
+    { configurationId, contactId }: {configurationId: string, contactId: string}) {
     // @ts-ignore
     await this.$api.configurations.removeContact(configurationId, contactId)
   }
 }
 export const mutations = {
-  setAllContacts (state:contactsState, contacts:Contact[]) {
+  setAllContacts (state: contactsState, contacts: Contact[]) {
     state.allContacts = contacts
   },
-  setConfigurationContacts (state:contactsState, contacts:Contact[]) {
+  setConfigurationContacts (state: contactsState, contacts: Contact[]) {
     state.configurationContacts = contacts
   }
 }

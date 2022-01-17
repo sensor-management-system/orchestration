@@ -50,7 +50,7 @@ export class MeasuringRange implements IMeasuringRange {
    * @param {IMeasuringRange} someObject - the object from which the new instance is to be created
    * @return {MeasuringRange} the newly created instance
    */
-  static createFromObject (someObject: IMeasuringRange) : MeasuringRange {
+  static createFromObject (someObject: IMeasuringRange): MeasuringRange {
     return new MeasuringRange(someObject.min, someObject.max)
   }
 

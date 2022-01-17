@@ -759,7 +759,7 @@ export default class SearchDevicesPage extends Vue {
     return ''
   }
 
-  initDeleteDialog (device:Device) {
+  initDeleteDialog (device: Device) {
     this.showDeleteDialog = true
     this.deviceToDelete = device
   }

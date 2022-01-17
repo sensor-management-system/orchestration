@@ -107,7 +107,6 @@ import { Contact } from '@/models/Contact'
 import { Platform } from '@/models/Platform'
 import { Device } from '@/models/Device'
 import { Configuration } from '@/models/Configuration'
-import { IMountActions } from '@/models/IMountActions'
 
 import { ConfigurationsTreeNode } from '@/viewmodels/ConfigurationsTreeNode'
 import { buildConfigurationTree, mountDevice, mountPlatform, unmount } from '@/modelUtils/mountHelpers'
@@ -132,7 +131,6 @@ import ConfigurationsPlatformDeviceSearch from '@/components/ConfigurationsPlatf
 })
 export default class ConfigurationPlatformsAndDevices extends Vue {
   private selectedNode: ConfigurationsTreeNode | null = null
-  private today: DateTime = DateTime.utc()
   private valueCopy: Configuration = new Configuration()
   @Prop({
     required: true,
@@ -205,7 +203,10 @@ export default class ConfigurationPlatformsAndDevices extends Vue {
     return ConfigurationHelper.getHierarchyNodeNamesByTreeAndSelectedNode(this.tree, this.selectedNode)
   }
 
-  removeSelectedNode (_node: ConfigurationsTreeNode, contact: Contact, description: string) {
+  async removeSelectedNode (_node: ConfigurationsTreeNode, contact: Contact, description: string): Promise<void> {
+    // we make a copy of the current configuration in case that something fails
+    const configurationCopy: Configuration = Configuration.createFromObject(this.configuration)
+
     const node: ConfigurationsTreeNode | null = this.selectedNode
     if (!node) {
       return
@@ -216,18 +217,24 @@ export default class ConfigurationPlatformsAndDevices extends Vue {
     if (parentNode) {
       parentNodeId = parentNode.id
     }
-    const mountActions = unmount(this.configuration, node, this.selectedDate, contact, description)
-    this.setMountActionsIntoConfiguration(mountActions)
 
-    if (parentNodeId) {
-      const nodeWithTheSameId = this.tree.toArray().find(treeNode => treeNode.id === parentNodeId)
-      if (nodeWithTheSameId) {
-        this.selectedNode = nodeWithTheSameId
+    unmount(this.configuration, node, this.selectedDate, contact, description)
+
+    try {
+      await this.save()
+
+      if (parentNodeId) {
+        const nodeWithTheSameId = this.tree.toArray().find(treeNode => treeNode.id === parentNodeId)
+        if (nodeWithTheSameId) {
+          this.selectedNode = nodeWithTheSameId
+        } else {
+          this.selectedNode = null
+        }
       } else {
         this.selectedNode = null
       }
-    } else {
-      this.selectedNode = null
+    } catch (_error) {
+      this.$store.commit('configurations/setConfiguration', configurationCopy)
     }
   }
 
@@ -257,40 +264,46 @@ export default class ConfigurationPlatformsAndDevices extends Vue {
     return !!this.tree.getDeviceById(deviceId)
   }
 
-  addPlatformNode (
+  async addPlatformNode (
     platform: Platform,
     offsetX: number,
     offsetY: number,
     offsetZ: number,
     contact: Contact,
     description: string
-  ): void {
+  ): Promise<void> {
     const node: ConfigurationsTreeNode | null = this.selectedNode
+    // we make a copy of the current configuration in case that something fails
+    const configurationCopy: Configuration = Configuration.createFromObject(this.configuration)
 
-    const mountActions = mountPlatform(this.configuration, platform, offsetX, offsetY, offsetZ, contact, description, node, this.selectedDate)
-    this.setMountActionsIntoConfiguration(mountActions)
+    mountPlatform(this.configuration, platform, offsetX, offsetY, offsetZ, contact, description, node, this.selectedDate)
+
+    try {
+      await this.save()
+    } catch (_error) {
+      this.$store.commit('configurations/setConfiguration', configurationCopy)
+    }
   }
 
-  addDeviceNode (
+  async addDeviceNode (
     device: Device,
     offsetX: number,
     offsetY: number,
     offsetZ: number,
     contact: Contact,
     description: string
-  ): void {
+  ): Promise<void> {
     const node: ConfigurationsTreeNode | null = this.selectedNode
-    const mountActions = mountDevice(this.configuration, device, offsetX, offsetY, offsetZ, contact, description, node, this.selectedDate)
-    this.setMountActionsIntoConfiguration(mountActions)
-  }
+    // we make a copy of the current configuration in case that something fails
+    const configurationCopy: Configuration = Configuration.createFromObject(this.configuration)
 
-  setMountActionsIntoConfiguration (mountActions: IMountActions) {
-    this.configuration.platformMountActions = mountActions.platformMountActions
-    this.configuration.platformUnmountActions = mountActions.platformUnmountActions
-    this.configuration.deviceMountActions = mountActions.deviceMountActions
-    this.configuration.deviceUnmountActions = mountActions.deviceUnmountActions
+    mountDevice(this.configuration, device, offsetX, offsetY, offsetZ, contact, description, node, this.selectedDate)
 
-    this.save()
+    try {
+      await this.save()
+    } catch (_error) {
+      this.$store.commit('configurations/setConfiguration', configurationCopy)
+    }
   }
 
   async save () {
@@ -300,6 +313,7 @@ export default class ConfigurationPlatformsAndDevices extends Vue {
       this.$store.commit('snackbar/setSuccess', 'Save successful')
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Save failed')
+      throw e
     }
   }
 

@@ -75,7 +75,7 @@ export class DeviceProperty implements IDeviceProperty {
    * @param {IDeviceProperty} someObject - the object from which the new instance is to be created
    * @return {DeviceProperty} the newly created instance
    */
-  static createFromObject (someObject: IDeviceProperty) : DeviceProperty {
+  static createFromObject (someObject: IDeviceProperty): DeviceProperty {
     const newObject = new DeviceProperty()
 
     newObject.id = someObject.id

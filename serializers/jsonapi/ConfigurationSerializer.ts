@@ -124,7 +124,7 @@ export class ConfigurationSerializer {
       }
     }
 
-    const devicePropertyLookupById : {[idx: string]: DeviceProperty} = {}
+    const devicePropertyLookupById: {[idx: string]: DeviceProperty} = {}
 
     for (const includedEntry of included) {
       if (includedEntry.type === 'device_property') {
@@ -260,7 +260,7 @@ export class ConfigurationSerializer {
     }
   }
 
-  convertModelToJsonApiData (configuration: Configuration) : IJsonApiEntityWithOptionalId {
+  convertModelToJsonApiData (configuration: Configuration): IJsonApiEntityWithOptionalId {
     const contacts = this.contactSerializer.convertModelListToJsonApiRelationshipObject(configuration.contacts)
 
     let locationAttributes = {}
@@ -321,7 +321,7 @@ export class ConfigurationSerializer {
   }
 }
 
-export const configurationWithMetaToConfigurationByThrowingErrorOnMissing = (configurationWithMeta: IConfigurationWithMeta) : Configuration => {
+export const configurationWithMetaToConfigurationByThrowingErrorOnMissing = (configurationWithMeta: IConfigurationWithMeta): Configuration => {
   const configuration = configurationWithMeta.configuration
   if (configurationWithMeta.missing.contacts.ids.length > 0) {
     throw new Error('Contacts are missing')
@@ -329,7 +329,7 @@ export const configurationWithMetaToConfigurationByThrowingErrorOnMissing = (con
   return configuration
 }
 
-export const configurationWithMetaToConfigurationByAddingDummyObjects = (configurationWithMeta: IConfigurationWithMeta) : Configuration => {
+export const configurationWithMetaToConfigurationByAddingDummyObjects = (configurationWithMeta: IConfigurationWithMeta): Configuration => {
   const configuration = configurationWithMeta.configuration
 
   for (const missingContactId of configurationWithMeta.missing.contacts.ids) {
