@@ -83,7 +83,7 @@ export class FilteredPaginationedLoader<E> implements IPaginationLoader<E> {
     }
   }
 
-  get funToLoadPage () : null | PaginationPageLoaderFunction<E> {
+  get funToLoadPage (): null | PaginationPageLoaderFunction<E> {
     const innerPromise: null | PaginationPageLoaderFunction<E> = this.innerLoader.funToLoadPage
     if (innerPromise === null) {
       return null

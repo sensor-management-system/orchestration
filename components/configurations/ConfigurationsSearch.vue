@@ -323,7 +323,7 @@ export default class ConfigurationsSearch extends Vue {
     return result
   }
 
-  initDeleteDialog (configuration:Configuration) {
+  initDeleteDialog (configuration: Configuration) {
     this.showDeleteDialog = true
     this.configurationToDelete = configuration
   }

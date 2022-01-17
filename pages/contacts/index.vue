@@ -468,7 +468,7 @@ export default class SearchContactsPage extends Vue {
     this.searchResultItemsShown = {}
   }
 
-  getFullName (contact: Contact) : string {
+  getFullName (contact: Contact): string {
     return contact.givenName + ' ' + contact.familyName
   }
 
