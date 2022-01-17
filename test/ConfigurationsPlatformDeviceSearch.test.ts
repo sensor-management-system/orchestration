@@ -79,8 +79,10 @@ describe('ConfigurationsPlatformDeviceSearch', () => {
       },
       data () {
         return {
-          platforms: platformsResult,
-          devices: devicesResult,
+          platformsResult,
+          searchedForPlatforms: !devicesResult.length,
+          devicesResult,
+          searchedForDevices: !!devicesResult.length,
           searchOptions,
           selectedPlatform,
           selectedDevice
