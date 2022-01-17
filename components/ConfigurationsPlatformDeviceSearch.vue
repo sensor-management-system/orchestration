@@ -61,7 +61,7 @@ permissions and limitations under the Licence.
       </div>
     </div>
     <div v-else>
-      <v-row v-if="platforms && platforms.length">
+      <v-row v-if="searchedForPlatforms && platforms.length">
         <v-col cols="12">
           <v-expansion-panels
             v-model="selectedPlatform"
@@ -129,7 +129,12 @@ permissions and limitations under the Licence.
           </v-expansion-panels>
         </v-col>
       </v-row>
-      <v-row v-else-if="devices && devices.length">
+      <v-row v-else-if="searchedForPlatforms && !platforms.length">
+        <p class="text-center">
+          There are no platforms that match your search criteria.
+        </p>
+      </v-row>
+      <v-row v-if="searchedForDevices && devices.length">
         <v-col cols="12">
           <v-expansion-panels
             v-model="selectedDevice"
@@ -196,12 +201,7 @@ permissions and limitations under the Licence.
           </v-expansion-panels>
         </v-col>
       </v-row>
-      <v-row v-else-if="searchedForPlatforms">
-        <p class="text-center">
-          There are no platforms that match your search criteria.
-        </p>
-      </v-row>
-      <v-row v-else-if="searchedForDevices">
+      <v-row v-else-if="searchedForDevices && !devices.length">
         <p class="text-center">
           There are no devices that match your search criteria.
         </p>
