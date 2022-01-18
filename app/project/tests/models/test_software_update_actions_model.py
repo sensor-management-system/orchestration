@@ -9,9 +9,12 @@ from project.api.models.base_model import db
 from project.tests.base import BaseTestCase, fake, generate_token_data
 
 
-def add_device_software_update_action_model():
+def add_device_software_update_action_model(public=True, private=False, internal=False):
     d = Device(
-        short_name="Device 1", is_public=True, is_private=False, is_internal=False,
+        short_name="Device 1",
+        is_public=public,
+        is_private=private,
+        is_internal=internal,
     )
     mock_jwt = generate_token_data()
     c = Contact(
@@ -34,9 +37,14 @@ def add_device_software_update_action_model():
     return device_software_update_action
 
 
-def add_platform_software_update_action_model():
+def add_platform_software_update_action_model(
+    public=True, private=False, internal=False
+):
     p = Platform(
-        short_name="Platform 1", is_public=True, is_private=False, is_internal=False,
+        short_name="Platform 1",
+        is_public=public,
+        is_private=private,
+        is_internal=internal,
     )
     mock_jwt = generate_token_data()
     c = Contact(

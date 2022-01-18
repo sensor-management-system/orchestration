@@ -9,9 +9,9 @@ from project.api.models.base_model import db
 from project.tests.base import BaseTestCase, fake, generate_token_data
 
 
-def add_device_calibration_action():
+def add_device_calibration_action(public=True, private=False, internal=False):
     device = Device(
-        short_name="Device 12", is_public=True, is_private=False, is_internal=False,
+        short_name="Device 12", is_public=public, is_private=private, is_internal=internal,
     )
     mock_jwt = generate_token_data()
     contact = Contact(
