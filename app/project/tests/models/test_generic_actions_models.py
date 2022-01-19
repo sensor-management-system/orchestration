@@ -14,12 +14,12 @@ from project.tests.base import BaseTestCase, generate_token_data
 from project.tests.models.test_configurations_model import generate_configuration_model
 
 
-def generate_platform_action_model():
+def generate_platform_action_model(public=True, private=False, internal=False):
     platform = Platform(
         short_name="short_name test",
-        is_public=True,
-        is_private=False,
-        is_internal=False,
+        is_public=public,
+        is_private=private,
+        is_internal=internal,
     )
     mock_jwt = generate_token_data()
     contact = Contact(
@@ -43,9 +43,9 @@ def generate_platform_action_model():
     return generic_platform_action
 
 
-def generate_device_action_model():
+def generate_device_action_model(public=True, private=False, internal=False):
     d = Device(
-        short_name="test device", is_public=True, is_private=False, is_internal=False,
+        short_name="test device", is_public=public, is_private=private, is_internal=internal,
     )
 
     mock_jwt = generate_token_data()
