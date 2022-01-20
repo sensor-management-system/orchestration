@@ -244,6 +244,11 @@ services:
       - ./frontend/dist:/etc/nginx/html
       - static-files:/usr/share/nginx/html/static/cv:ro
       - ./backend/app/project/static:/usr/share/nginx/html/static/backend:ro
+    depends_on:
+      - frontend
+      - minio
+      - vocabulary
+      - backend
 
 
 volumes:
