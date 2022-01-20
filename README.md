@@ -9,6 +9,13 @@ the target folder `nginx/certs`.
 
 In case you have an older pip version you may have to run `pip install --upgrade pip`, so that the build process with rust is supported.
 
+__Note:__
+
+To generate self-signed certificates (only needs to be run the first time):
+```
+docker-compose -f docker-compose.icessl.yml up -d
+```
+
 1. copy all files ending with
    ```env.template```. Fill the variables and rename it
    to ```env.dev```

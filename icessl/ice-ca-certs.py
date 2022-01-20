@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env/bin python3
 # Create self-signed certificates for testing.
 # Requires https://pypi.org/project/zeroc-icecertutils/
 # Optional arg: CommonName for certificate

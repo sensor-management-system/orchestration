@@ -1,0 +1,11 @@
+
+version: "3"
+
+services:
+
+  # A helper container to generate self-signed SSL certificates
+  icessl:
+    build: ./icessl
+    volumes:
+      - "./nginx/certs:/icessl:rw${VOLOPTS-}"
+    command: python3 ice-ca-certs.py
