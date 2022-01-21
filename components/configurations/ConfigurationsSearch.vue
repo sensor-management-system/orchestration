@@ -315,14 +315,6 @@ export default class ConfigurationsSearch extends Vue {
     return this.searchResults[pageNr]
   }
 
-  getAllResults (): Configuration[] {
-    let result: Configuration[] = []
-    Object.entries(this.searchResults).map(i => i[1]).forEach((i: Configuration[]) => {
-      result = [...result, ...i]
-    })
-    return result
-  }
-
   initDeleteDialog (configuration: Configuration) {
     this.showDeleteDialog = true
     this.configurationToDelete = configuration

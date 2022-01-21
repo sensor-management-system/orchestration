@@ -699,18 +699,6 @@ export default class SearchDevicesPage extends Vue {
     return this.searchResults[pageNr]
   }
 
-  getAllResults (): Device[] {
-    /* it could be as short as
-     * return ([] as Device[]).concat.apply([] as Device[], Object.entries(this.searchResults).map(i => i[1]))
-     * but the version below is much more readable:
-     */
-    let result: Device[] = []
-    Object.entries(this.searchResults).map(i => i[1]).forEach((i: Device[]) => {
-      result = [...result, ...i]
-    })
-    return result
-  }
-
   exportCsv () {
     if (this.lastActiveSearcher != null) {
       this.processing = true

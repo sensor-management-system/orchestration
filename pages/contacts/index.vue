@@ -416,14 +416,6 @@ export default class SearchContactsPage extends Vue {
     return this.searchResults[pageNr]
   }
 
-  getAllResults (): Contact[] {
-    let result: Contact[] = []
-    Object.entries(this.searchResults).map(i => i[1]).forEach((i: Contact[]) => {
-      result = [...result, ...i]
-    })
-    return result
-  }
-
   initDeleteDialog (contact: Contact) {
     this.showDeleteDialog = true
     this.contactToDelete = contact

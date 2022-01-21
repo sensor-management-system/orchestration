@@ -698,14 +698,6 @@ export default class SearchPlatformsPage extends Vue {
     return this.searchResults[pageNr]
   }
 
-  getAllResults (): Platform[] {
-    let result: Platform[] = []
-    Object.entries(this.searchResults).map(i => i[1]).forEach((i: Platform[]) => {
-      result = [...result, ...i]
-    })
-    return result
-  }
-
   exportCsv () {
     if (this.lastActiveSearcher != null) {
       this.processing = true
