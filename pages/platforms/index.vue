@@ -721,13 +721,13 @@ export default class SearchPlatformsPage extends Vue {
     this.platformToDelete = null
   }
 
-  deleteAndCloseDialog (id: string) {
-    this.showDeleteDialog = false
+  async deleteAndCloseDialog (id: string) {
     if (this.platformToDelete === null) {
       return
     }
-
-    this.$api.platforms.deleteById(id).then(() => {
+    this.loading = true
+    try {
+      await this.$api.platforms.deleteById(id)
       // if we know that the deleted platform was the last of the page, we
       // decrement the page by one
       if (this.getSearchResultForPage(this.page)?.length === 1) {
@@ -735,11 +735,12 @@ export default class SearchPlatformsPage extends Vue {
       }
       this.loadPage(this.page, false)
       this.$store.commit('snackbar/setSuccess', 'Platform deleted')
-    }).catch((_error) => {
+    } catch (_error) {
       this.$store.commit('snackbar/setError', 'Platform could not be deleted')
-    }).finally(() => {
-      this.platformToDelete = null
-    })
+    } finally {
+      this.loading = false
+      this.closeDialog()
+    }
   }
 
   getType (platform: Platform) {

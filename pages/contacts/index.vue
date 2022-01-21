@@ -426,13 +426,14 @@ export default class SearchContactsPage extends Vue {
     this.contactToDelete = null
   }
 
-  deleteAndCloseDialog (id: string) {
-    this.showDeleteDialog = false
+  async deleteAndCloseDialog (id: string) {
     if (this.contactToDelete === null) {
       return
     }
 
-    this.$api.contacts.deleteById(id).then(() => {
+    this.loading = true
+    try {
+      await this.$api.contacts.deleteById(id)
       // if we know that the deleted device was the last of the page, we
       // decrement the page by one
       if (this.getSearchResultForPage(this.page)?.length === 1) {
@@ -440,11 +441,12 @@ export default class SearchContactsPage extends Vue {
       }
       this.loadPage(this.page, false)
       this.$store.commit('snackbar/setSuccess', 'Contact deleted')
-    }).catch((_error) => {
+    } catch (_error) {
       this.$store.commit('snackbar/setError', 'Contact could not be deleted')
-    }).finally(() => {
-      this.contactToDelete = null
-    })
+    } finally {
+      this.loading = false
+      this.closeDialog()
+    }
   }
 
   showResultItem (id: string) {

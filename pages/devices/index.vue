@@ -712,12 +712,13 @@ export default class SearchDevicesPage extends Vue {
     }
   }
 
-  deleteAndCloseDialog (id: string) {
-    this.showDeleteDialog = false
+  async deleteAndCloseDialog (id: string) {
     if (this.deviceToDelete === null) {
       return
     }
-    this.$api.devices.deleteById(id).then(() => {
+    this.loading = true
+    try {
+      await this.$api.devices.deleteById(id)
       // if we know that the deleted device was the last of the page, we
       // decrement the page by one
       if (this.getSearchResultForPage(this.page)?.length === 1) {
@@ -725,11 +726,12 @@ export default class SearchDevicesPage extends Vue {
       }
       this.loadPage(this.page, false)
       this.$store.commit('snackbar/setSuccess', 'Device deleted')
-    }).catch((_error) => {
+    } catch (_error) {
       this.$store.commit('snackbar/setError', 'Device could not be deleted')
-    }).finally(() => {
-      this.deviceToDelete = null
-    })
+    } finally {
+      this.loading = false
+      this.closeDialog()
+    }
   }
 
   getType (device: Device) {
