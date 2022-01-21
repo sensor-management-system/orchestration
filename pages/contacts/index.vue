@@ -125,7 +125,7 @@ permissions and limitations under the Licence.
               no-gutters
             >
               <v-col class="text-subtitle-1">
-                {{ getFullName(result) }}
+                {{ result.fullName }}
               </v-col>
               <v-col
                 align-self="end"
@@ -466,10 +466,6 @@ export default class SearchContactsPage extends Vue {
 
   unsetResultItemsShown (): void {
     this.searchResultItemsShown = {}
-  }
-
-  getFullName (contact: Contact): string {
-    return contact.givenName + ' ' + contact.familyName
   }
 
   initSearchQueryParams (params: QueryParams): void {
