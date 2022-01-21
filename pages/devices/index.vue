@@ -395,6 +395,13 @@ permissions and limitations under the Licence.
           </v-expand-transition>
         </v-card>
       </v-hover>
+      <v-pagination
+        :value="page"
+        :disabled="loading"
+        :length="numberOfPages"
+        :total-visible="7"
+        @input="setPage"
+      />
     </div>
     <DeviceDeleteDialog
       v-model="showDeleteDialog"
