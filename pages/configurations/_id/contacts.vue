@@ -55,6 +55,9 @@ permissions and limitations under the Licence.
         Add contact
       </v-btn>
     </v-card-actions>
+    <hint-card v-if="contacts.length === 0 && !isAddContactPage">
+      There are no contacts for this configuration.
+    </hint-card>
     <v-expansion-panels>
       <v-expansion-panel
         v-for="contact in contacts"
@@ -200,10 +203,15 @@ import { Component, Vue } from 'nuxt-property-decorator'
 import { Contact } from '@/models/Contact'
 
 import ContactBasicData from '@/components/ContactBasicData.vue'
+import HintCard from '@/components/HintCard.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
 @Component({
-  components: { ProgressIndicator, ContactBasicData }
+  components: {
+    ContactBasicData,
+    HintCard,
+    ProgressIndicator
+  }
 })
 export default class ContactTab extends Vue {
   private contacts: Contact[] = []

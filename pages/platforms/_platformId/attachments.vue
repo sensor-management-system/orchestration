@@ -53,6 +53,9 @@ permissions and limitations under the Licence.
     <template v-if="isAddAttachmentPage">
       <NuxtChild @showsave="showsave" @input="addAttachmentToList" />
     </template>
+    <hint-card v-if="attachments.length === 0 && !isAddAttachmentPage">
+      There are no attachments for this platform.
+    </hint-card>
     <template
       v-for="(attachment, index) in attachments"
     >
@@ -200,11 +203,13 @@ import { Attachment } from '@/models/Attachment'
 import { AttachmentsMixin } from '@/mixins/AttachmentsMixin'
 
 import AttachmentListItem from '@/components/AttachmentListItem.vue'
+import HintCard from '@/components/HintCard.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
 @Component({
   components: {
     AttachmentListItem,
+    HintCard,
     ProgressIndicator
   }
 })

@@ -46,6 +46,9 @@ permissions and limitations under the Licence.
         Add Measured Quantity
       </v-btn>
     </v-card-actions>
+    <hint-card v-if="deviceProperties.length === 0">
+      There are no measured quantities for this device.
+    </hint-card>
     <v-expansion-panels
       v-model="openedPanels"
       multiple
@@ -223,6 +226,7 @@ permissions and limitations under the Licence.
 import { Component, Vue } from 'nuxt-property-decorator'
 
 import DevicePropertyInfo from '@/components/DevicePropertyInfo.vue'
+import HintCard from '@/components/HintCard.vue'
 
 import { DeviceProperty } from '@/models/DeviceProperty'
 import { Compartment } from '@/models/Compartment'
@@ -235,8 +239,9 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
 @Component({
   components: {
-    ProgressIndicator,
-    DevicePropertyInfo
+    HintCard,
+    DevicePropertyInfo,
+    ProgressIndicator
   }
 })
 export default class DevicePropertiesPage extends Vue {
