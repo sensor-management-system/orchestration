@@ -63,15 +63,9 @@ permissions and limitations under the Licence.
       />
     </template>
     <template v-else>
-      <div v-if="actions.length == 0">
-        <v-card flat>
-          <v-card-text>
-            <p class="text-center">
-              There are no actions for this device.
-            </p>
-          </v-card-text>
-        </v-card>
-      </div>
+      <hint-card v-if="actions.length === 0">
+        There are no actions for this device.
+      </hint-card>
       <DeviceActionTimeline
         v-else
         :value="actions"
@@ -103,6 +97,7 @@ import { DateComparator, isDateCompareable } from '@/modelUtils/Compareables'
 import { DeviceActionApiDispatcher } from '@/modelUtils/actionHelpers'
 
 import DeviceActionTimeline from '@/components/actions/DeviceActionTimeline.vue'
+import HintCard from '@/components/HintCard.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
 const toUtcDate = (dt: DateTime) => {
@@ -111,8 +106,9 @@ const toUtcDate = (dt: DateTime) => {
 
 @Component({
   components: {
-    ProgressIndicator,
-    DeviceActionTimeline
+    DeviceActionTimeline,
+    HintCard,
+    ProgressIndicator
   },
   filters: {
     toUtcDate

@@ -36,13 +36,11 @@ permissions and limitations under the Licence.
   <v-card
     flat
   >
-    <v-card-text>
-      <div v-if="timelineActions.length === 0">
-        <p class="text-center">
-          There are no actions for this configuration yet.
-        </p>
-      </div>
-      <v-timeline v-else dense>
+    <hint-card v-if="timelineActions.length === 0">
+      There are no actions for this configuration.
+    </hint-card>
+    <v-card-text v-else>
+      <v-timeline dense>
         <v-timeline-item
           v-for="action in timelineActions"
           :key="action.key"
@@ -79,9 +77,13 @@ import {
 import { byDateOldestLast } from '@/modelUtils/mountHelpers'
 
 import ConfigurationsTimelineActionCard from '@/components/configurations/ConfigurationsTimelineActionCard.vue'
+import HintCard from '@/components/HintCard.vue'
 
 @Component({
-  components: { ConfigurationsTimelineActionCard }
+  components: {
+    ConfigurationsTimelineActionCard,
+    HintCard
+  }
 })
 export default class ConfigurationActions extends Vue {
   @Prop({

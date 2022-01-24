@@ -46,6 +46,9 @@ permissions and limitations under the Licence.
         Add Custom Field
       </v-btn>
     </v-card-actions>
+    <hint-card v-if="customFields.length === 0">
+      There are no custom fields for this device.
+    </hint-card>
     <template
       v-for="(field, index) in customFields"
     >
@@ -106,10 +109,12 @@ permissions and limitations under the Licence.
 import { Component, Vue } from 'nuxt-property-decorator'
 import { CustomTextField } from '@/models/CustomTextField'
 
+import HintCard from '@/components/HintCard.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
 @Component({
   components: {
+    HintCard,
     ProgressIndicator
   }
 })

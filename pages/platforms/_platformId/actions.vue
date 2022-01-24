@@ -66,15 +66,9 @@ permissions and limitations under the Licence.
     </template>
 
     <template v-else>
-      <div v-if="actions.length === 0">
-        <v-card flat>
-          <v-card-text>
-            <p class="text-center">
-              There are no actions for this platform.
-            </p>
-          </v-card-text>
-        </v-card>
-      </div>
+      <hint-card v-if="actions.length === 0">
+        There are no actions for this platform.
+      </hint-card>
       <PlatformActionTimeline
         v-else
         :value="actions"
@@ -92,6 +86,7 @@ permissions and limitations under the Licence.
 import { Component, Vue } from 'nuxt-property-decorator'
 
 import PlatformActionTimeline from '@/components/actions/PlatformActionTimeline.vue'
+import HintCard from '@/components/HintCard.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
 import { IActionCommonDetails } from '@/models/ActionCommonDetails'
@@ -107,8 +102,9 @@ import { PlatformActionApiDispatcher } from '@/modelUtils/actionHelpers'
 
 @Component({
   components: {
-    ProgressIndicator,
-    PlatformActionTimeline
+    HintCard,
+    PlatformActionTimeline,
+    ProgressIndicator
   }
 })
 export default class PlatformActionsPage extends Vue {
