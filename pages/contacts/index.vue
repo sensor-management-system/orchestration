@@ -32,7 +32,13 @@ permissions and limitations under the Licence.
   <div>
     <v-row>
       <v-col cols="12" md="5">
-        <v-text-field v-model="searchText" label="Name" placeholder="Name of contact" @keydown.enter="runSearch" />
+        <v-text-field
+          v-model="searchText"
+          label="Name"
+          placeholder="Name of contact"
+          hint="Please enter at least 3 characters"
+          @keydown.enter="runSearch"
+        />
       </v-col>
       <v-col
         cols="12"

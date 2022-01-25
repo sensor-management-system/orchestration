@@ -35,7 +35,13 @@ permissions and limitations under the Licence.
 <template>
   <v-row>
     <v-col cols="12" md="5">
-      <v-text-field v-model="searchTextModel" label="Label" placeholder="Label of configuration" @keydown.enter="emitSearch" />
+      <v-text-field
+        v-model="searchTextModel"
+        label="Label"
+        placeholder="Label of configuration"
+        hint="Please enter at least 3 characters"
+        @keydown.enter="emitSearch"
+      />
     </v-col>
     <v-col
       cols="12"

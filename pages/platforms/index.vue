@@ -36,7 +36,13 @@ permissions and limitations under the Licence.
       <v-tab-item :eager="true">
         <v-row>
           <v-col cols="12" md="5">
-            <v-text-field v-model="searchText" label="Name" placeholder="Name of platform" @keydown.enter="basicSearch" />
+            <v-text-field
+              v-model="searchText"
+              label="Name"
+              placeholder="Name of platform"
+              hint="Please enter at least 3 characters"
+              @keydown.enter="basicSearch"
+            />
           </v-col>
           <v-col
             cols="12"
@@ -63,7 +69,13 @@ permissions and limitations under the Licence.
       <v-tab-item :eager="true">
         <v-row>
           <v-col cols="12" md="6">
-            <v-text-field v-model="searchText" label="Name" placeholder="Name of platform" @keydown.enter="extendedSearch" />
+            <v-text-field
+              v-model="searchText"
+              label="Name"
+              placeholder="Name of platform"
+              hint="Please enter at least 3 characters"
+              @keydown.enter="extendedSearch"
+            />
           </v-col>
         </v-row>
         <v-row>
