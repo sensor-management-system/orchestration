@@ -36,11 +36,8 @@ import { Manufacturer } from '@/models/Manufacturer'
 import { DeviceType } from '@/models/DeviceType'
 import { Status } from '@/models/Status'
 
-export interface IDeviceBasicSearchParams {
+export interface IDeviceSearchParams {
   searchText: string | null
-}
-
-export interface IDeviceSearchParams extends IDeviceBasicSearchParams {
   manufacturer: Manufacturer[]
   states: Status[]
   types: DeviceType[]

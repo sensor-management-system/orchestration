@@ -36,11 +36,8 @@ import { Manufacturer } from '@/models/Manufacturer'
 import { PlatformType } from '@/models/PlatformType'
 import { Status } from '@/models/Status'
 
-export interface IPlatformBasicSearchParams {
+export interface IPlatformSearchParams {
   searchText: string | null
-}
-
-export interface IPlatformSearchParams extends IPlatformBasicSearchParams {
   manufacturer: Manufacturer[]
   states: Status[]
   types: PlatformType[]
