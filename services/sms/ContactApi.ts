@@ -164,10 +164,6 @@ export class ContactSearcher {
     })
   }
 
-  findMatchingAsPaginationLoader (pageSize: number): Promise<IPaginationLoader<Contact>> {
-    return this.findAllOnPage(1, pageSize)
-  }
-
   findMatchingAsPaginationLoaderOnPage (page: number, pageSize: number): Promise<IPaginationLoader<Contact>> {
     return this.findAllOnPage(page, pageSize)
   }

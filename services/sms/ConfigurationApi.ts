@@ -554,10 +554,6 @@ export class ConfigurationSearcher {
     })
   }
 
-  findMatchingAsPaginationLoader (pageSize: number): Promise<IPaginationLoader<Configuration>> {
-    return this.findAllOnPage(1, pageSize)
-  }
-
   findMatchingAsPaginationLoaderOnPage (page: number, pageSize: number): Promise<IPaginationLoader<Configuration>> {
     return this.findAllOnPage(page, pageSize)
   }

@@ -407,10 +407,6 @@ export class PlatformSearcher {
     })
   }
 
-  findMatchingAsPaginationLoader (pageSize: number): Promise<IPaginationLoader<Platform>> {
-    return this.findAllOnPage(1, pageSize)
-  }
-
   findMatchingAsPaginationLoaderOnPage (page: number, pageSize: number): Promise<IPaginationLoader<Platform>> {
     return this.findAllOnPage(page, pageSize)
   }
