@@ -733,13 +733,13 @@ export default class SearchPlatformsPage extends Vue {
     this.platformToDelete = null
   }
 
-  async deleteAndCloseDialog (id: string) {
-    if (this.platformToDelete === null) {
+  async deleteAndCloseDialog () {
+    if (this.platformToDelete === null || this.platformToDelete.id === null) {
       return
     }
     this.loading = true
     try {
-      await this.$api.platforms.deleteById(id)
+      await this.$api.platforms.deleteById(this.platformToDelete.id)
       // if we know that the deleted platform was the last of the page, we
       // decrement the page by one
       if (this.getSearchResultForPage(this.page)?.length === 1) {

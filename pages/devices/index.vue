@@ -724,13 +724,13 @@ export default class SearchDevicesPage extends Vue {
     }
   }
 
-  async deleteAndCloseDialog (id: string) {
-    if (this.deviceToDelete === null) {
+  async deleteAndCloseDialog () {
+    if (this.deviceToDelete === null || this.deviceToDelete.id === null) {
       return
     }
     this.loading = true
     try {
-      await this.$api.devices.deleteById(id)
+      await this.$api.devices.deleteById(this.deviceToDelete.id)
       // if we know that the deleted device was the last of the page, we
       // decrement the page by one
       if (this.getSearchResultForPage(this.page)?.length === 1) {

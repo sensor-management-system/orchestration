@@ -432,14 +432,14 @@ export default class SearchContactsPage extends Vue {
     this.contactToDelete = null
   }
 
-  async deleteAndCloseDialog (id: string) {
-    if (this.contactToDelete === null) {
+  async deleteAndCloseDialog () {
+    if (this.contactToDelete === null || this.contactToDelete.id === null) {
       return
     }
 
     this.loading = true
     try {
-      await this.$api.contacts.deleteById(id)
+      await this.$api.contacts.deleteById(this.contactToDelete.id)
       // if we know that the deleted device was the last of the page, we
       // decrement the page by one
       if (this.getSearchResultForPage(this.page)?.length === 1) {
