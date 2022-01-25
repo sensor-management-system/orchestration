@@ -7,5 +7,5 @@ services:
   icessl:
     build: ./icessl
     volumes:
-      - "./nginx/certs:/icessl:rw${VOLOPTS-}"
+      - "./icessl:/icessl:rw${VOLOPTS-}"
     command: python3 ice-ca-certs.py
