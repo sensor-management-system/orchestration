@@ -142,6 +142,21 @@ build-deploy-image-nginx-gfz-prod:
     - if: '$CI_COMMIT_REF_PROTECTED && $CI_COMMIT_TAG'
       when: always
 
+build-deploy-image-nginx-ufz-staging:
+  stage: build
+  extends: .docker_build
+  script:
+    - docker build --tag "$CI_REGISTRY_IMAGE/nginx:ufz-latest" -f docker/build/nginx/ufz/staging/Dockerfile ./docker/build/nginx/ufz/staging/
+    - docker push "$CI_REGISTRY_IMAGE/nginx:ufz-latest"
+  allow_failure: true
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: never
+    - if: '$CI_PIPELINE_SOURCE == "pipeline"'
+      when: never
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+      when: always
+
 build-deploy-image-vocabulary-gfz-staging:
   stage: build
   extends: .docker_build
