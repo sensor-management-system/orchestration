@@ -332,7 +332,7 @@ SearchModelWithEntry = collections.namedtuple(
 
 class PermissionMixin:
     __abstract__ = True
-    group_ids = db.Column(MutableList.as_mutable(db.ARRAY(db.Integer)), nullable=True)
+    group_ids = db.Column(MutableList.as_mutable(db.ARRAY(db.String)), nullable=True)
     is_private = db.Column(db.Boolean, default=False)
     is_internal = db.Column(db.Boolean, default=False)
     is_public = db.Column(db.Boolean, default=False)

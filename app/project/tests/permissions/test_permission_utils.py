@@ -1,18 +1,17 @@
 from unittest.mock import Mock, patch
 
+from project.api.helpers.errors import ConflictError
 from project.api.helpers.errors import ServiceIsUnreachableError
 from project.api.services.idl_services import Idl
 from project.tests.base import BaseTestCase
 from requests.exceptions import Timeout, HTTPError
 
-from project.api.helpers.errors import ConflictError
-
 IDL_MOCKED_USER_ACCOUNT = [
     {
-        "id": 1000,
+        "id": "1000",
         "username": "testuser@ufz.de",
-        "administratedPermissionsGroups": [1],
-        "memberedPermissionsGroups": [2, 3],
+        "administratedPermissionsGroups": ["1"],
+        "memberedPermissionsGroups": ["2", "3"],
     }
 ]
 
@@ -45,7 +44,7 @@ class TestInstituteDecouplingLayerApi(BaseTestCase):
                 IDL_MOCKED_USER_ACCOUNT[0]["username"]
             )
 
-            self.assertEqual(response.id, 1000)
+            self.assertEqual(response.id, "1000")
             self.assertEqual(response.username, IDL_MOCKED_USER_ACCOUNT[0]["username"])
             self.assertEqual(
                 IDL_MOCKED_USER_ACCOUNT[0]["administratedPermissionsGroups"],
