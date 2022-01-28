@@ -13,10 +13,10 @@ from project.tests.base import generate_token_data, create_token
 from project.tests.permissions import create_superuser_token
 
 IDL_USER_ACCOUNT = IdlUser(
-    id=1000,
+    id="1000",
     username="testuser@ufz.de",
-    administrated_permissions_groups=[1],
-    membered_permissions_groups=[2, 3],
+    administrated_permissions_groups=["1"],
+    membered_permissions_groups=["2", "3"],
 )
 
 
@@ -290,7 +290,7 @@ class TestPlatformPermissions(BaseTestCase):
                     "is_public": False,
                     "is_internal": True,
                     "is_private": False,
-                    "group_ids": [12],
+                    "group_ids": ["12"],
                 },
             }
         }
@@ -307,7 +307,7 @@ class TestPlatformPermissions(BaseTestCase):
 
         self.assertEqual(response.status_code, 201)
 
-        self.assertEqual(data["data"]["attributes"]["group_ids"], [12])
+        self.assertEqual(data["data"]["attributes"]["group_ids"], ["12"])
 
     def test_get_an_internal_platforms_as_an_unregistered_user(self):
         """An unregistered user should not be able to
@@ -400,7 +400,7 @@ class TestPlatformPermissions(BaseTestCase):
 
     def test_patch_platform_user_not_in_any_permission_group(self):
         """Make sure that a user can only do changes in platforms, where he/she is involved."""
-        group_id_test_user_is_not_included = [13]
+        group_id_test_user_is_not_included = ["13"]
         platforms = preparation_of_public_and_internal_platform_data(
             group_id_test_user_is_not_included
         )
@@ -545,7 +545,7 @@ class TestPlatformPermissions(BaseTestCase):
     def test_delete_platform_as_superuser_not_involved_in_permission_group(self):
         """Make sure that a superuser can delete a platform even if he/she is not admin in
         the corresponding permission group."""
-        group_id_test_user_is_not_included = [40]
+        group_id_test_user_is_not_included = ["40"]
         platforms = preparation_of_public_and_internal_platform_data(
             group_id_test_user_is_not_included
         )

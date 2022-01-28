@@ -179,7 +179,7 @@ class TestConfigurationPermissions(BaseTestCase):
                     "label": fake.pystr(),
                     "is_public": False,
                     "is_internal": True,
-                    "group_ids": [12],
+                    "group_ids": ["12"],
                 },
             }
         }
@@ -196,7 +196,7 @@ class TestConfigurationPermissions(BaseTestCase):
 
         self.assertEqual(response.status_code, 201)
 
-        self.assertEqual(data["data"]["attributes"]["group_ids"], [12])
+        self.assertEqual(data["data"]["attributes"]["group_ids"], ["12"])
 
     def test_patch_configuration_as_a_member_in_a_permission_group(self):
         """Make sure that a member in a group (admin/member) can change
@@ -245,7 +245,7 @@ class TestConfigurationPermissions(BaseTestCase):
 
     def test_patch_configuration_user_not_in_any_permission_group(self):
         """Make sure that a user can only do changes in configurations, where he/she is involved."""
-        group_id_test_user_is_not_included = [13]
+        group_id_test_user_is_not_included = ["13"]
         configs = preparation_of_public_and_internal_configuration_data(
             group_id_test_user_is_not_included
         )
@@ -341,7 +341,7 @@ class TestConfigurationPermissions(BaseTestCase):
 
             self.assertEqual(response.status_code, 201)
 
-            self.assertEqual(data["data"]["attributes"]["group_ids"], [1])
+            self.assertEqual(data["data"]["attributes"]["group_ids"], ["1"])
 
             with patch.object(
                 Idl, "get_all_permission_groups"
@@ -354,7 +354,7 @@ class TestConfigurationPermissions(BaseTestCase):
     def test_delete_configuration_as_super_user(self):
         """Make sure that a superuser can delete a configuration even if he/she is not admin in
         the corresponding permission group."""
-        group_id_test_user_is_not_included = [20]
+        group_id_test_user_is_not_included = ["20"]
         configs = preparation_of_public_and_internal_configuration_data(
             group_id_test_user_is_not_included
         )

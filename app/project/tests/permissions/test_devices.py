@@ -283,7 +283,7 @@ class TestDevicePermissions(BaseTestCase):
                     "is_public": False,
                     "is_internal": True,
                     "is_private": False,
-                    "group_ids": [12],
+                    "group_ids": ["12"],
                 },
             }
         }
@@ -300,7 +300,7 @@ class TestDevicePermissions(BaseTestCase):
 
         self.assertEqual(response.status_code, 201)
 
-        self.assertEqual(data["data"]["attributes"]["group_ids"], [12])
+        self.assertEqual(data["data"]["attributes"]["group_ids"], ["12"])
 
     def test_get_an_internal_device_as_an_unregistered_user(self):
         """An unregistered user should not be able to
@@ -393,7 +393,7 @@ class TestDevicePermissions(BaseTestCase):
 
     def test_patch_device_user_not_in_any_permission_group(self):
         """Make sure that a user can only do changes in devices, where he/she is involved."""
-        group_id_test_user_is_not_included = [13]
+        group_id_test_user_is_not_included = ["13"]
         devices = preparation_of_public_and_internal_device_data(
             group_id_test_user_is_not_included
         )
@@ -411,7 +411,7 @@ class TestDevicePermissions(BaseTestCase):
 
             self.assertEqual(response.status_code, 201)
 
-            self.assertEqual(data["data"]["attributes"]["group_ids"], [13])
+            self.assertEqual(data["data"]["attributes"]["group_ids"], ["13"])
             with patch.object(
                 Idl, "get_all_permission_groups"
             ) as test_get_all_permission_groups:
@@ -489,7 +489,7 @@ class TestDevicePermissions(BaseTestCase):
 
             self.assertEqual(response.status_code, 201)
 
-            self.assertEqual(data["data"]["attributes"]["group_ids"], [1])
+            self.assertEqual(data["data"]["attributes"]["group_ids"], ["1"])
 
         with patch.object(
             Idl, "get_all_permission_groups"
@@ -536,7 +536,7 @@ class TestDevicePermissions(BaseTestCase):
     def test_delete_device_as_superuser_not_involved_in_permission_group(self):
         """Make sure that a superuser can delete a device even if he/she is not admin in
         the corresponding permission group."""
-        group_id_test_user_is_not_included = [40]
+        group_id_test_user_is_not_included = ["40"]
         device_data = {
             "data": {
                 "type": "device",
@@ -562,7 +562,7 @@ class TestDevicePermissions(BaseTestCase):
 
         self.assertEqual(response.status_code, 201)
 
-        self.assertEqual(data["data"]["attributes"]["group_ids"], [40])
+        self.assertEqual(data["data"]["attributes"]["group_ids"], ["40"])
 
         with patch.object(
             Idl, "get_all_permission_groups"
