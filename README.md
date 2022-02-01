@@ -1,22 +1,39 @@
 # Orchestration
 
-## How to run
+## Usage
 
-At first generate self signed certificate you can use the python
-script `nginx/certs/ice-ca-certs.py`. The script requires the python library *zeroc-icecertutils*,
-which you can install with `pip install zeroc-icecertutils`. Make sure you execute the script inside
-the target folder `nginx/certs`.
+### Self-signed certificate creation
+At first, generate a self-signed certificate. You can use the python
+script `icessl/ice-ca-certs.py`, which requires the python library *zeroc-icecertutils*
+Make sure you execute the script inside the target folder `nginx/certs`.
+The self-signed certificate can be generated in the following ways:
 
-In case you have an older pip version you may have to run `pip install --upgrade pip`, so that the build process with rust is supported.
+- Using `pip`:
+  ```shell
+  # In case you have an older pip version, upgrade pip beforehand,
+  # so that the build process with rust is supported.
+  pip install --upgrade pip`
+  pip install zeroc-icecertutils
+  
+  cd nginx/certs/
+  ../../icessl/ice-ca-certs.py
+  ```
 
-__Note:__
+- Using `poetry`:
+  ```shell
+  poetry install
+  cd nginx/certs/
+  poetry run ../../icessl/ice-ca-certs.py
+  ```
 
-To generate self-signed certificates (only needs to be run the first time):
-```
-docker-compose -f docker-compose.icessl.yml up -d
-```
+- Using `docker`:
+  ```
+  docker-compose -f docker-compose.icessl.yml up -d
+  mv icessl/server.* nginx/certs/
+  ```
 
-1. copy all files ending with
+### Run the application
+1. Copy all files ending with
    ```env.template```. Fill the variables and rename it
    to ```env.dev```
 
