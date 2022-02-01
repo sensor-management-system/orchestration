@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "orchestration"
+version = "0.1.9"
+description = "Sensor Management System orchestration repository"
+authors = [
+    "Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)",
+    "Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)"
+]
+license = "\"Helmholtz Earth and Environment\" Software-Infrastruktur-Lizenz (HEESIL) v.1.0"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+zeroc-icecertutils = "^1.0.4"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
