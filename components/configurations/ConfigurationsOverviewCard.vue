@@ -186,7 +186,11 @@ import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 
 @Component({
   filters: { dateToDateTimeString },
-  components: { DotMenuActionDelete, DotMenu, StatusBadge }
+  components: {
+    DotMenuActionDelete,
+    DotMenu,
+    StatusBadge
+  }
 })
 export default class ConfigurationsOverviewCard extends Vue {
   @Prop({

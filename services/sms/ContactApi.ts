@@ -33,7 +33,7 @@ import { AxiosInstance, Method } from 'axios'
 
 import { Contact } from '@/models/Contact'
 import { ContactSerializer } from '@/serializers/jsonapi/ContactSerializer'
-import { IPaginationLoader, FilteredPaginationedLoader } from '@/utils/PaginatedLoader'
+import { IPaginationLoader } from '@/utils/PaginatedLoader'
 
 export class ContactApi {
   private axiosApi: AxiosInstance
@@ -164,15 +164,11 @@ export class ContactSearcher {
     })
   }
 
-  findMatchingAsPaginationLoader (pageSize: number): Promise<IPaginationLoader<Contact>> {
-    const acceptAllContacts = (_contact: Contact) => { return true }
-    const loaderPromise: Promise<IPaginationLoader<Contact>> = this.findAllOnePage(1, pageSize)
-    return loaderPromise.then((loader) => {
-      return new FilteredPaginationedLoader<Contact>(loader, acceptAllContacts)
-    })
+  findMatchingAsPaginationLoaderOnPage (page: number, pageSize: number): Promise<IPaginationLoader<Contact>> {
+    return this.findAllOnPage(page, pageSize)
   }
 
-  private findAllOnePage (page: number, pageSize: number): Promise<IPaginationLoader<Contact>> {
+  private findAllOnPage (page: number, pageSize: number): Promise<IPaginationLoader<Contact>> {
     return this.axiosApi.get(
       '',
       {
@@ -188,15 +184,27 @@ export class ContactSearcher {
 
       const totalCount = rawData.meta.count
 
+      // check if the provided page param is valid
+      if (totalCount > 0 && elements.length === 0) {
+        throw new RangeError('page is out of bounds')
+      }
+
       let funToLoadNext = null
       if (elements.length > 0) {
-        funToLoadNext = () => this.findAllOnePage(page + 1, pageSize)
+        funToLoadNext = () => this.findAllOnPage(page + 1, pageSize)
+      }
+
+      let funToLoadPage = null
+      if (elements.length > 0) {
+        funToLoadPage = (pageNr: number) => this.findAllOnPage(pageNr, pageSize)
       }
 
       return {
         elements,
         totalCount,
-        funToLoadNext
+        page,
+        funToLoadNext,
+        funToLoadPage
       }
     })
   }

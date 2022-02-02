@@ -58,7 +58,7 @@ import { DeviceUnmountActionSerializer } from '@/serializers/jsonapi/composed/de
 
 import { IFlaskJSONAPIFilter } from '@/utils/JSONApiInterfaces'
 
-import { FilteredPaginationedLoader, IPaginationLoader } from '@/utils/PaginatedLoader'
+import { IPaginationLoader } from '@/utils/PaginatedLoader'
 import {
   DeviceSerializer,
   deviceWithMetaToDeviceByAddingDummyObjects,
@@ -451,11 +451,8 @@ export class DeviceSearcher {
     })
   }
 
-  findMatchingAsPaginationLoader (pageSize: number): Promise<IPaginationLoader<Device>> {
-    const loaderPromise: Promise<IPaginationLoader<Device>> = this.findAllOnPage(1, pageSize)
-    return loaderPromise.then((loader) => {
-      return new FilteredPaginationedLoader<Device>(loader, this.clientSideFilterFunc)
-    })
+  findMatchingAsPaginationLoaderOnPage (page: number, pageSize: number): Promise<IPaginationLoader<Device>> {
+    return this.findAllOnPage(page, pageSize)
   }
 
   private findAllOnPage (page: number, pageSize: number): Promise<IPaginationLoader<Device>> {
@@ -470,11 +467,6 @@ export class DeviceSearcher {
       }
     ).then((rawResponse) => {
       const rawData = rawResponse.data
-      // client side filtering will not be done here
-      // (but in the FilteredPaginationedLoader)
-      // so that we know if we still have elements here
-      // there may be others to load as well
-
       // And - again - we don't ask the api here to load the contact data as well
       // so we will add the dummy objects to stay with the relationships
       const elements: Device[] = this.serializer.convertJsonApiObjectListToModelList(
@@ -483,15 +475,27 @@ export class DeviceSearcher {
 
       const totalCount = rawData.meta.count
 
+      // check if the provided page param is valid
+      if (totalCount > 0 && elements.length === 0) {
+        throw new RangeError('page is out of bounds')
+      }
+
       let funToLoadNext = null
       if (elements.length > 0) {
         funToLoadNext = () => this.findAllOnPage(page + 1, pageSize)
       }
 
+      let funToLoadPage = null
+      if (elements.length > 0) {
+        funToLoadPage = (pageNr: number) => this.findAllOnPage(pageNr, pageSize)
+      }
+
       return {
         elements,
         totalCount,
-        funToLoadNext
+        page: elements.length ? page : 0,
+        funToLoadNext,
+        funToLoadPage
       }
     })
   }

@@ -36,7 +36,13 @@ permissions and limitations under the Licence.
       <v-tab-item :eager="true">
         <v-row>
           <v-col cols="12" md="5">
-            <v-text-field v-model="searchText" label="Name" placeholder="Name of device" @keydown.enter="basicSearch" />
+            <v-text-field
+              v-model="searchText"
+              label="Name"
+              placeholder="Name of device"
+              hint="Please enter at least 3 characters"
+              @keydown.enter="basicSearch"
+            />
           </v-col>
           <v-col
             cols="12"
@@ -63,7 +69,13 @@ permissions and limitations under the Licence.
       <v-tab-item :eager="true">
         <v-row>
           <v-col cols="12" md="6">
-            <v-text-field v-model="searchText" label="Name" placeholder="Name of device" @keydown.enter="extendedSearch" />
+            <v-text-field
+              v-model="searchText"
+              label="Name"
+              placeholder="Name of device"
+              hint="Please enter at least 3 characters"
+              @keydown.enter="extendedSearch"
+            />
           </v-col>
         </v-row>
         <v-row>
@@ -110,21 +122,19 @@ permissions and limitations under the Licence.
       </v-tab-item>
     </v-tabs-items>
 
-    <div v-if="loading">
-      <div class="text-center pt-2">
-        <v-progress-circular indeterminate />
-      </div>
+    <v-progress-circular
+      v-if="loading"
+      class="progress-spinner"
+      color="primary"
+      indeterminate
+    />
+    <div v-if="!totalCount && !loading">
+      <p class="text-center">
+        There are no devices that match your search criteria.
+      </p>
     </div>
-    <div v-if="searchResults.length == 0 && !loading">
-      <v-card>
-        <v-card-text>
-          <p class="text-center">
-            There are no devices that match your search criteria.
-          </p>
-        </v-card-text>
-      </v-card>
-    </div>
-    <div v-if="searchResults.length && !loading">
+
+    <div v-if="totalCount">
       <v-subheader>
         <template v-if="totalCount == 1">
           1 device found
@@ -183,8 +193,17 @@ permissions and limitations under the Licence.
           </v-menu>
         </template>
       </v-subheader>
+
+      <v-pagination
+        :value="page"
+        :disabled="loading"
+        :length="numberOfPages"
+        :total-visible="7"
+        @input="setPage"
+      />
       <v-hover
-        v-for="result in searchResults"
+        v-for="result in getSearchResultForPage(page)"
+        :id="'item-' + result.id"
         v-slot="{ hover }"
         :key="result.id"
       >
@@ -388,6 +407,13 @@ permissions and limitations under the Licence.
           </v-expand-transition>
         </v-card>
       </v-hover>
+      <v-pagination
+        :value="page"
+        :disabled="loading"
+        :length="numberOfPages"
+        :total-visible="7"
+        @input="setPage"
+      />
     </div>
     <DeviceDeleteDialog
       v-model="showDeleteDialog"
@@ -423,6 +449,10 @@ import DeviceTypeSelect from '@/components/DeviceTypeSelect.vue'
 import ManufacturerSelect from '@/components/ManufacturerSelect.vue'
 import StatusSelect from '@/components/StatusSelect.vue'
 import StatusBadge from '@/components/StatusBadge.vue'
+import DeviceDeleteDialog from '@/components/devices/DeviceDeleteDialog.vue'
+import DotMenu from '@/components/DotMenu.vue'
+import DotMenuActionCopy from '@/components/DotMenuActionCopy.vue'
+import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 
 import { IPaginationLoader } from '@/utils/PaginatedLoader'
 
@@ -430,46 +460,14 @@ import { Device } from '@/models/Device'
 import { DeviceType } from '@/models/DeviceType'
 import { Manufacturer } from '@/models/Manufacturer'
 import { Status } from '@/models/Status'
+
 import { DeviceSearcher } from '@/services/sms/DeviceApi'
-import DeviceDeleteDialog from '@/components/devices/DeviceDeleteDialog.vue'
-import DotMenu from '@/components/DotMenu.vue'
-import DotMenuActionCopy from '@/components/DotMenuActionCopy.vue'
-import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 
-interface IRunSearchParameters {
-  searchText: string | null
-  manufacturer: Manufacturer[]
-  states: Status[]
-  types: DeviceType[]
-  onlyOwnDevices: boolean
-}
+import { QueryParams } from '@/modelUtils/QueryParams'
+import { IDeviceSearchParams, DeviceSearchParamsSerializer } from '@/modelUtils/DeviceSearchParams'
 
-class BasicSearchParameters implements IRunSearchParameters {
-  private readonly _searchText: string | null
-
-  constructor (searchText: string | null) {
-    this._searchText = searchText
-  }
-
-  get searchText (): string | null {
-    return this._searchText
-  }
-
-  get manufacturer (): Manufacturer[] {
-    return []
-  }
-
-  get states (): Status[] {
-    return []
-  }
-
-  get types (): DeviceType[] {
-    return []
-  }
-
-  get onlyOwnDevices (): boolean {
-    return false
-  }
+type PaginatedResult = {
+  [page: number]: Device[]
 }
 
 @Component({
@@ -486,6 +484,7 @@ class BasicSearchParameters implements IRunSearchParameters {
 })
 export default class SearchDevicesPage extends Vue {
   private pageSize: number = 20
+  private page: number = 0
   private loading: boolean = true
   private processing: boolean = false
 
@@ -498,58 +497,59 @@ export default class SearchDevicesPage extends Vue {
   private selectedSearchDeviceTypes: DeviceType[] = []
   private onlyOwnDevices: boolean = false
 
+  private manufacturer: Manufacturer[] = []
+  private states: Status[] = []
+  private deviceTypes: DeviceType[] = []
+
   private deviceTypeLookup: Map<string, DeviceType> = new Map<string, DeviceType>()
   private statusLookup: Map<string, Status> = new Map<string, Status>()
 
-  private searchResults: Device[] = []
+  private searchResults: PaginatedResult = {}
   private searchText: string | null = null
 
-  private showDeleteDialog: boolean=false;
+  private showDeleteDialog: boolean = false
 
   private searchResultItemsShown: { [id: string]: boolean } = {}
 
   public readonly NO_TYPE: string = 'Unknown type'
 
-  private deviceToDelete: Device|null=null
+  private deviceToDelete: Device | null = null
 
   created () {
     this.initializeAppBar()
   }
 
-  mounted () {
-    const promiseDeviceTypes = this.$api.deviceTypes.findAll()
-    const promiseStates = this.$api.states.findAll()
+  async mounted () {
+    await this.fetchEntities()
+    this.initSearchQueryParams(this.$route.query)
+    this.runInitialSearch()
+  }
 
-    promiseDeviceTypes.then((deviceTypes) => {
-      promiseStates.then((states) => {
-        const deviceTypeTypeLookup = new Map<string, DeviceType>()
-        const statusLookup = new Map<string, Status>()
+  async fetchEntities (): Promise<void> {
+    const deviceTypeTypeLookup = new Map<string, DeviceType>()
+    const statusLookup = new Map<string, Status>()
 
-        for (const deviceType of deviceTypes) {
-          deviceTypeTypeLookup.set(deviceType.uri, deviceType)
-        }
-        for (const status of states) {
-          statusLookup.set(status.uri, status)
-        }
+    try {
+      const [deviceTypes, states, manufacturer] = await Promise.all([
+        this.$api.deviceTypes.findAll(),
+        this.$api.states.findAll(),
+        this.$api.manufacturer.findAll()
+      ])
 
-        this.deviceTypeLookup = deviceTypeTypeLookup
-        this.statusLookup = statusLookup
+      this.deviceTypes = deviceTypes
+      this.states = states
+      this.manufacturer = manufacturer
 
-        this.runSelectedSearch()
-      }).catch((_error) => {
-        this.$store.commit('snackbar/setError', 'Loading of states failed')
-      }).catch((_error) => {
-        this.$store.commit('snackbar/setError', 'Loading of device types failed')
-      })
-    })
-
-    window.onscroll = () => {
-      // from https://www.digitalocean.com/community/tutorials/vuejs-implementing-infinite-scroll
-      const isOnBottom = document.documentElement.scrollTop + window.innerHeight === document.documentElement.offsetHeight
-
-      if (isOnBottom && this.canLoadNext()) {
-        this.loadNext()
+      for (const deviceType of deviceTypes) {
+        deviceTypeTypeLookup.set(deviceType.uri, deviceType)
       }
+      for (const status of states) {
+        statusLookup.set(status.uri, status)
+      }
+      this.deviceTypeLookup = deviceTypeTypeLookup
+      this.statusLookup = statusLookup
+    } catch (_error) {
+      this.$store.commit('snackbar/setError', 'Loading of entities failed')
     }
   }
 
@@ -578,25 +578,46 @@ export default class SearchDevicesPage extends Vue {
     this.$store.commit('appbar/setActiveTab', tab)
   }
 
-  runSelectedSearch () {
-    if (this.activeTab === 0) {
-      this.basicSearch()
-    } else {
-      this.extendedSearch()
-    }
+  isExtendedSearch (): boolean {
+    return this.onlyOwnDevices === true ||
+      !!this.selectedSearchStates.length ||
+      !!this.selectedSearchDeviceTypes.length ||
+      !!this.selectedSearchManufacturers.length
   }
 
-  basicSearch () {
-    // only uses the text and the type (sensor or platform)
-    this.runSearch(new BasicSearchParameters(this.searchText))
+  async runInitialSearch (): Promise<void> {
+    this.activeTab = this.isExtendedSearch() ? 1 : 0
+
+    const page: number | undefined = this.getPageFromUrl()
+
+    await this.runSearch(
+      {
+        searchText: this.searchText,
+        manufacturer: this.selectedSearchManufacturers,
+        states: this.selectedSearchStates,
+        types: this.selectedSearchDeviceTypes,
+        onlyOwnDevices: this.onlyOwnDevices && this.$auth.loggedIn
+      },
+      page
+    )
+  }
+
+  basicSearch (): Promise<void> {
+    return this.runSearch({
+      searchText: this.searchText,
+      manufacturer: [],
+      states: [],
+      types: [],
+      onlyOwnDevices: false
+    })
   }
 
   clearBasicSearch () {
     this.searchText = null
   }
 
-  extendedSearch () {
-    this.runSearch({
+  extendedSearch (): Promise<void> {
+    return this.runSearch({
       searchText: this.searchText,
       manufacturer: this.selectedSearchManufacturers,
       states: this.selectedSearchStates,
@@ -614,13 +635,18 @@ export default class SearchDevicesPage extends Vue {
     this.onlyOwnDevices = false
   }
 
-  runSearch (
-    searchParameters: IRunSearchParameters
-  ) {
+  async runSearch (
+    searchParameters: IDeviceSearchParams,
+    page: number = 1
+  ): Promise<void> {
+    this.initUrlQueryParams(searchParameters)
+
+    this.totalCount = 0
     this.loading = true
-    this.searchResults = []
+    this.searchResults = {}
     this.unsetResultItemsShown()
     this.loader = null
+    this.page = 0
 
     const searchBuilder = this.$api.devices
       .newSearchBuilder()
@@ -637,44 +663,52 @@ export default class SearchDevicesPage extends Vue {
     }
 
     this.lastActiveSearcher = searchBuilder.build()
-    this.lastActiveSearcher
-      .findMatchingAsPaginationLoader(this.pageSize)
-      .then(this.loadUntilWeHaveSomeEntries).catch((_error) => {
-        this.$store.commit('snackbar/setError', 'Loading of devices failed')
-      })
-  }
-
-  loadUntilWeHaveSomeEntries (loader: IPaginationLoader<Device>) {
-    this.loader = loader
-    this.loading = false
-    this.searchResults = [...this.searchResults, ...loader.elements]
-    this.totalCount = loader.totalCount
-
-    if (this.searchResults.length >= this.pageSize || !this.canLoadNext()) {
+    try {
+      const loader = await this.lastActiveSearcher.findMatchingAsPaginationLoaderOnPage(page, this.pageSize)
+      this.loader = loader
+      this.searchResults[page] = loader.elements
+      this.totalCount = loader.totalCount
+      this.page = page
+      this.setPageInUrl(page)
+    } catch (_error) {
+      this.$store.commit('snackbar/setError', 'Loading of devices failed')
+    } finally {
       this.loading = false
-    } else if (this.canLoadNext() && loader.funToLoadNext != null) {
-      loader.funToLoadNext().then((nextLoader) => {
-        this.loadUntilWeHaveSomeEntries(nextLoader)
-      }).catch((_error) => {
-        this.$store.commit('snackbar/setError', 'Loading of additional devices failed')
-      })
     }
   }
 
-  loadNext () {
-    if (this.loader != null && this.loader.funToLoadNext != null) {
-      this.loader.funToLoadNext().then((nextLoader) => {
-        this.loader = nextLoader
-        this.searchResults = [...this.searchResults, ...nextLoader.elements]
-        this.totalCount = nextLoader.totalCount
-      }).catch((_error) => {
-        this.$store.commit('snackbar/setError', 'Loading of additional devices failed')
-      })
+  async loadPage (pageNr: number, useCache: boolean = true) {
+    // use the results that were already loaded if available
+    if (useCache && this.searchResults[pageNr]) {
+      return
+    }
+    if (this.loader != null && this.loader.funToLoadPage != null) {
+      try {
+        this.loading = true
+        const loader = await this.loader.funToLoadPage(pageNr)
+        this.loader = loader
+        this.searchResults[pageNr] = loader.elements
+        this.totalCount = loader.totalCount
+      } catch (_error) {
+        this.$store.commit('snackbar/setError', 'Loading of devices failed')
+      } finally {
+        this.loading = false
+      }
     }
   }
 
-  canLoadNext () {
-    return this.loader != null && this.loader.funToLoadNext != null
+  get numberOfPages (): number {
+    return Math.ceil(this.totalCount / this.pageSize)
+  }
+
+  async setPage (page: number) {
+    await this.loadPage(page)
+    this.page = page
+    this.setPageInUrl(page, false)
+  }
+
+  getSearchResultForPage (pageNr: number): Device[] | undefined {
+    return this.searchResults[pageNr]
   }
 
   exportCsv () {
@@ -687,6 +721,28 @@ export default class SearchDevicesPage extends Vue {
         this.processing = false
         this.$store.commit('snackbar/setError', 'CSV export failed')
       })
+    }
+  }
+
+  async deleteAndCloseDialog () {
+    if (this.deviceToDelete === null || this.deviceToDelete.id === null) {
+      return
+    }
+    this.loading = true
+    try {
+      await this.$api.devices.deleteById(this.deviceToDelete.id)
+      // if we know that the deleted device was the last of the page, we
+      // decrement the page by one
+      if (this.getSearchResultForPage(this.page)?.length === 1) {
+        this.page = this.page > 1 ? this.page - 1 : 1
+      }
+      this.loadPage(this.page, false)
+      this.$store.commit('snackbar/setSuccess', 'Device deleted')
+    } catch (_error) {
+      this.$store.commit('snackbar/setError', 'Device could not be deleted')
+    } finally {
+      this.loading = false
+      this.closeDialog()
     }
   }
 
@@ -722,26 +778,6 @@ export default class SearchDevicesPage extends Vue {
     this.deviceToDelete = null
   }
 
-  deleteAndCloseDialog () {
-    this.showDeleteDialog = false
-    if (this.deviceToDelete === null) {
-      return
-    }
-
-    this.$api.devices.deleteById(this.deviceToDelete.id!).then(() => {
-      const searchIndex = this.searchResults.findIndex(device => device.id === this.deviceToDelete?.id)
-      if (searchIndex > -1) {
-        this.searchResults.splice(searchIndex, 1)
-        this.totalCount -= 1
-      }
-      this.$store.commit('snackbar/setSuccess', 'Device deleted')
-    }).catch((_error) => {
-      this.$store.commit('snackbar/setError', 'Device could not be deleted')
-    }).finally(() => {
-      this.deviceToDelete = null
-    })
-  }
-
   showResultItem (id: string) {
     const show = !!this.searchResultItemsShown[id]
     Vue.set(this.searchResultItemsShown, id, !show)
@@ -756,10 +792,81 @@ export default class SearchDevicesPage extends Vue {
   }
 
   getTextOrDefault = (text: string): string => text || '-'
+
+  initSearchQueryParams (params: QueryParams): void {
+    const searchParamsObject = (new DeviceSearchParamsSerializer({
+      states: this.states,
+      deviceTypes: this.deviceTypes,
+      manufacturer: this.manufacturer
+    })).toSearchParams(params)
+
+    // prefill the form by the serialized search params from the URL
+    if (searchParamsObject.searchText) {
+      this.searchText = searchParamsObject.searchText
+    }
+    if (searchParamsObject.onlyOwnDevices) {
+      this.onlyOwnDevices = searchParamsObject.onlyOwnDevices
+    }
+    if (searchParamsObject.manufacturer) {
+      this.selectedSearchManufacturers = searchParamsObject.manufacturer
+    }
+    if (searchParamsObject.types) {
+      this.selectedSearchDeviceTypes = searchParamsObject.types
+    }
+    if (searchParamsObject.states) {
+      this.selectedSearchStates = searchParamsObject.states
+    }
+  }
+
+  initUrlQueryParams (params: IDeviceSearchParams): void {
+    this.$router.push({
+      query: (new DeviceSearchParamsSerializer()).toQueryParams(params),
+      hash: this.$route.hash
+    })
+  }
+
+  getPageFromUrl (): number | undefined {
+    if ('page' in this.$route.query && typeof this.$route.query.page === 'string') {
+      return parseInt(this.$route.query.page) || 0
+    }
+  }
+
+  setPageInUrl (page: number, preserveHash: boolean = true): void {
+    let query: QueryParams = {}
+    if (page) {
+      // add page to the current url params
+      query = {
+        ...this.$route.query,
+        page: String(page)
+      }
+    } else {
+      // remove page from the current url params
+      const {
+        // eslint-disable-next-line
+        page,
+        ...params
+      } = this.$route.query
+      query = params
+    }
+    this.$router.push({
+      query,
+      hash: preserveHash ? this.$route.hash : ''
+    })
+  }
 }
 
 </script>
 
 <style lang="scss">
 @import "@/assets/styles/_search.scss";
+.progress-spinner {
+  position: absolute;
+  top: 40vh;
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
+  width: 32px;
+  z-index: 99;
+}
 </style>

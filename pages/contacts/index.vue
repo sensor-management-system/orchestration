@@ -32,7 +32,13 @@ permissions and limitations under the Licence.
   <div>
     <v-row>
       <v-col cols="12" md="5">
-        <v-text-field v-model="searchText" label="Name" placeholder="Name of contact" @keydown.enter="search" />
+        <v-text-field
+          v-model="searchText"
+          label="Name"
+          placeholder="Name of contact"
+          hint="Please enter at least 3 characters"
+          @keydown.enter="runSearch"
+        />
       </v-col>
       <v-col
         cols="12"
@@ -42,7 +48,7 @@ permissions and limitations under the Licence.
         <v-btn
           color="primary"
           small
-          @click="search"
+          @click="runSearch"
         >
           Search
         </v-btn>
@@ -55,21 +61,20 @@ permissions and limitations under the Licence.
         </v-btn>
       </v-col>
     </v-row>
-    <div v-if="loading">
-      <div class="text-center pt-2">
-        <v-progress-circular indeterminate />
-      </div>
+
+    <v-progress-circular
+      v-if="loading"
+      class="progress-spinner"
+      color="primary"
+      indeterminate
+    />
+    <div v-if="!totalCount && !loading">
+      <p class="text-center">
+        There are no contacts that match your search criteria.
+      </p>
     </div>
-    <div v-if="searchResults.length == 0 && !loading">
-      <v-card>
-        <v-card-text>
-          <p class="text-center">
-            There are no contacts that match your search criteria.
-          </p>
-        </v-card-text>
-      </v-card>
-    </div>
-    <div v-if="searchResults.length && !loading">
+
+    <div v-if="totalCount">
       <v-subheader>
         <template v-if="totalCount == 1">
           1 contact found
@@ -79,8 +84,16 @@ permissions and limitations under the Licence.
         </template>
         <!-- No export to pdf due to data privacy reasons -->
       </v-subheader>
+
+      <v-pagination
+        :value="page"
+        :disabled="loading"
+        :length="numberOfPages"
+        :total-visible="7"
+        @input="setPage"
+      />
       <v-hover
-        v-for="result in searchResults"
+        v-for="result in getSearchResultForPage(page)"
         v-slot="{ hover }"
         :key="result.id"
       >
@@ -228,6 +241,13 @@ permissions and limitations under the Licence.
           </v-expand-transition>
         </v-card>
       </v-hover>
+      <v-pagination
+        :value="page"
+        :disabled="loading"
+        :length="numberOfPages"
+        :total-visible="7"
+        @input="setPage"
+      />
     </div>
     <ContacsDeleteDialog
       v-model="showDeleteDialog"
@@ -258,25 +278,38 @@ import { Component, Vue } from 'nuxt-property-decorator'
 import { IPaginationLoader } from '@/utils/PaginatedLoader'
 
 import { Contact } from '@/models/Contact'
+
 import DotMenu from '@/components/DotMenu.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 import ContacsDeleteDialog from '@/components/contacts/ContacsDeleteDialog.vue'
 
+import { QueryParams } from '@/modelUtils/QueryParams'
+import { IContactSearchParams, ContactSearchParamsSerializer } from '@/modelUtils/ContactSearchParams'
+
+type PaginatedResult = {
+  [page: number]: Contact[]
+}
+
 @Component({
-  components: { ContacsDeleteDialog, DotMenuActionDelete, DotMenu }
+  components: {
+    ContacsDeleteDialog,
+    DotMenuActionDelete,
+    DotMenu
+  }
 })
 export default class SearchContactsPage extends Vue {
   private readonly pageSize: number = 20
+  private page: number = 0
   private loading: boolean = true
 
   private totalCount: number = 0
   private loader: null | IPaginationLoader<Contact> = null
 
-  private searchResults: Contact[] = []
+  private searchResults: PaginatedResult = {}
   private searchText: string = ''
 
-  private showDeleteDialog: boolean=false
-  private contactToDelete: Contact|null=null
+  private showDeleteDialog: boolean = false
+  private contactToDelete: Contact | null = null
   private searchResultItemsShown: { [id: string]: boolean } = {}
 
   created () {
@@ -284,15 +317,8 @@ export default class SearchContactsPage extends Vue {
   }
 
   mounted () {
-    this.search()
-    window.onscroll = () => {
-      // from https://www.digitalocean.com/community/tutorials/vuejs-implementing-infinite-scroll
-      const isOnBottom = document.documentElement.scrollTop + window.innerHeight === document.documentElement.offsetHeight
-
-      if (isOnBottom && this.canLoadNext()) {
-        this.loadNext()
-      }
-    }
+    this.initSearchQueryParams(this.$route.query)
+    this.runInitialSearch()
   }
 
   beforeDestroy () {
@@ -313,52 +339,87 @@ export default class SearchContactsPage extends Vue {
     this.searchText = ''
   }
 
-  search () {
+  async runInitialSearch (): Promise<void> {
+    const page: number | undefined = this.getPageFromUrl()
+
+    await this.search(
+      {
+        searchText: this.searchText
+      },
+      page
+    )
+  }
+
+  runSearch () {
+    this.search({
+      searchText: this.searchText
+    })
+  }
+
+  async search (
+    searchParameters: IContactSearchParams,
+    page: number = 1
+  ): Promise<void> {
+    this.initUrlQueryParams(searchParameters)
+
+    this.totalCount = 0
     this.loading = true
     this.searchResults = []
     this.unsetResultItemsShown()
+    this.loader = null
+    this.page = 0
+
     const lastActiveSearcher = this.$api.contacts
       .newSearchBuilder()
       .withText(this.searchText)
       .build()
-    lastActiveSearcher
-      .findMatchingAsPaginationLoader(this.pageSize)
-      .then(this.loadUntilWeHaveSomeEntries).catch((_error) => {
-        this.$store.commit('snackbar/setError', 'Loading of contacts failed')
-      })
-  }
 
-  loadUntilWeHaveSomeEntries (loader: IPaginationLoader<Contact>) {
-    this.loader = loader
-    this.loading = false
-    this.searchResults = [...this.searchResults, ...loader.elements]
-    this.totalCount = loader.totalCount
-
-    if (this.searchResults.length >= this.pageSize || !this.canLoadNext()) {
+    try {
+      const loader = await lastActiveSearcher.findMatchingAsPaginationLoaderOnPage(page, this.pageSize)
+      this.loader = loader
+      this.searchResults[page] = loader.elements
+      this.totalCount = loader.totalCount
+      this.page = page
+      this.setPageInUrl(page)
+    } catch (_error) {
+      this.$store.commit('snackbar/setError', 'Loading of contacts failed')
+    } finally {
       this.loading = false
-    } else if (this.canLoadNext() && loader.funToLoadNext != null) {
-      loader.funToLoadNext().then((nextLoader) => {
-        this.loadUntilWeHaveSomeEntries(nextLoader)
-      }).catch((_error) => {
+    }
+  }
+
+  async loadPage (pageNr: number, useCache: boolean = true) {
+    // use the results that were already loaded if available
+    if (useCache && this.searchResults[pageNr]) {
+      return
+    }
+    if (this.loader != null && this.loader.funToLoadPage != null) {
+      try {
+        this.loading = true
+        const loader = await this.loader.funToLoadPage(pageNr)
+        this.loader = loader
+        this.searchResults[pageNr] = loader.elements
+        this.totalCount = loader.totalCount
+      } catch (_error) {
         this.$store.commit('snackbar/setError', 'Loading of contacts failed')
-      })
+      } finally {
+        this.loading = false
+      }
     }
   }
 
-  loadNext () {
-    if (this.loader != null && this.loader.funToLoadNext != null) {
-      this.loader.funToLoadNext().then((nextLoader) => {
-        this.loader = nextLoader
-        this.searchResults = [...this.searchResults, ...nextLoader.elements]
-        this.totalCount = nextLoader.totalCount
-      }).catch((_error) => {
-        this.$store.commit('snackbar/setError', 'Loading of additional contacts failed')
-      })
-    }
+  get numberOfPages (): number {
+    return Math.ceil(this.totalCount / this.pageSize)
   }
 
-  canLoadNext () {
-    return this.loader != null && this.loader.funToLoadNext != null
+  async setPage (page: number) {
+    await this.loadPage(page)
+    this.page = page
+    this.setPageInUrl(page, false)
+  }
+
+  getSearchResultForPage (pageNr: number): Contact[] | undefined {
+    return this.searchResults[pageNr]
   }
 
   initDeleteDialog (contact: Contact) {
@@ -371,24 +432,27 @@ export default class SearchContactsPage extends Vue {
     this.contactToDelete = null
   }
 
-  deleteAndCloseDialog () {
-    this.showDeleteDialog = false
-    if (this.contactToDelete === null) {
+  async deleteAndCloseDialog () {
+    if (this.contactToDelete === null || this.contactToDelete.id === null) {
       return
     }
 
-    this.$api.contacts.deleteById(this.contactToDelete.id!).then(() => {
-      const searchIndex = this.searchResults.findIndex(contact => contact.id === this.contactToDelete?.id)
-      if (searchIndex > -1) {
-        this.searchResults.splice(searchIndex, 1)
-        this.totalCount -= 1
+    this.loading = true
+    try {
+      await this.$api.contacts.deleteById(this.contactToDelete.id)
+      // if we know that the deleted device was the last of the page, we
+      // decrement the page by one
+      if (this.getSearchResultForPage(this.page)?.length === 1) {
+        this.page = this.page > 1 ? this.page - 1 : 1
       }
+      this.loadPage(this.page, false)
       this.$store.commit('snackbar/setSuccess', 'Contact deleted')
-    }).catch((_error) => {
+    } catch (_error) {
       this.$store.commit('snackbar/setError', 'Contact could not be deleted')
-    }).finally(() => {
-      this.contactToDelete = null
-    })
+    } finally {
+      this.loading = false
+      this.closeDialog()
+    }
   }
 
   showResultItem (id: string) {
@@ -403,9 +467,64 @@ export default class SearchContactsPage extends Vue {
   unsetResultItemsShown (): void {
     this.searchResultItemsShown = {}
   }
+
+  initSearchQueryParams (params: QueryParams): void {
+    const searchParamsObject = new ContactSearchParamsSerializer().toSearchParams(params)
+
+    // prefill the form by the serialized search params from the URL
+    if (searchParamsObject.searchText) {
+      this.searchText = searchParamsObject.searchText
+    }
+  }
+
+  initUrlQueryParams (params: IContactSearchParams): void {
+    this.$router.push({
+      query: (new ContactSearchParamsSerializer()).toQueryParams(params),
+      hash: this.$route.hash
+    })
+  }
+
+  getPageFromUrl (): number | undefined {
+    if ('page' in this.$route.query && typeof this.$route.query.page === 'string') {
+      return parseInt(this.$route.query.page) || 0
+    }
+  }
+
+  setPageInUrl (page: number, preserveHash: boolean = true): void {
+    let query: QueryParams = {}
+    if (page) {
+      // add page to the current url params
+      query = {
+        ...this.$route.query,
+        page: String(page)
+      }
+    } else {
+      // remove page from the current url params
+      const {
+        // eslint-disable-next-line
+        page,
+        ...params
+      } = this.$route.query
+      query = params
+    }
+    this.$router.push({
+      query,
+      hash: preserveHash ? this.$route.hash : ''
+    })
+  }
 }
 </script>
 
 <style lang="scss">
 @import "@/assets/styles/_search.scss";
+.progress-spinner {
+  position: absolute;
+  top: 40vh;
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
+  width: 32px;
+  z-index: 99;
+}
 </style>

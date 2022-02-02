@@ -34,27 +34,41 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ConfigurationsBasicSearch
-      @search="basicSearch"
+    <v-tabs-items
+      v-model="activeTab"
+    >
+      <v-tab-item :eager="true">
+        <ConfigurationsBasicSearch
+          :search-text="searchText"
+          @search="basicSearch"
+        />
+      </v-tab-item>
+      <v-tab-item :eager="true">
+        <ConfigurationsExtendedSearch
+          :search-text="searchText"
+          :selected-projects="selectedProjects"
+          :selected-configuration-states="selectedConfigurationStates"
+          @search="extendedSearch"
+        />
+      </v-tab-item>
+    </v-tabs-items>
+
+    <v-progress-circular
+      v-if="loading"
+      class="progress-spinner"
+      color="primary"
+      indeterminate
     />
-    <ConfigurationsExtendedSearch
-      @search="extendedSearch"
-    />
-    <div v-if="loading">
-      <div class="text-center pt-2">
-        <v-progress-circular indeterminate />
-      </div>
+
+    <div v-if="!totalCount && !loading">
+      <p class="text-center">
+        There are no configurations that match your search criteria.
+      </p>
     </div>
-    <div v-if="searchResults.length === 0 && !loading">
-      <v-card>
-        <v-card-text>
-          <p class="text-center">
-            There are no configurations that match our your search criteria
-          </p>
-        </v-card-text>
-      </v-card>
-    </div>
-    <div v-if="searchResults.length && !loading">
+
+    <div
+      v-if="totalCount"
+    >
       <v-subheader>
         {{ numbersFoundMessage }}
         <v-spacer />
@@ -64,7 +78,35 @@ permissions and limitations under the Licence.
           :last-active-searcher="lastActiveSearcher"
         />
       </v-subheader>
+
+      <v-pagination
+        :value="page"
+        :disabled="loading"
+        :length="numberOfPages"
+        :total-visible="7"
+        @input="loadAndSetPage"
+      />
+      <ConfigurationsOverviewCard
+        v-for="result in getSearchResultForPage(page)"
+        :key="result.id"
+        :configuration="result"
+        :is-user-authenticated="$auth.loggedIn"
+        @showDeleteDialog="initDeleteDialog"
+      />
+      <v-pagination
+        :value="page"
+        :disabled="loading"
+        :length="numberOfPages"
+        :total-visible="7"
+        @input="loadAndSetPage"
+      />
     </div>
+    <ConfigurationsDeleteDialog
+      v-model="showDeleteDialog"
+      :configuration-to-delete="configurationToDelete"
+      @cancel-deletion="closeDialog"
+      @submit-deletion="deleteAndCloseDialog"
+    />
   </div>
 </template>
 
@@ -73,143 +115,307 @@ import { Component, Prop, Vue } from 'nuxt-property-decorator'
 
 import { Project } from '@/models/Project'
 import { Configuration } from '@/models/Configuration'
-import { IConfigurationSearchOption } from '@/models/SearchTypes'
 
 import { IPaginationLoader } from '@/utils/PaginatedLoader'
 
 import { ConfigurationSearcher } from '@/services/sms/ConfigurationApi'
 
-import ConfigurationsDownloader from '@/components/configurations/ConfigurationsDownloader.vue'
+import { QueryParams } from '@/modelUtils/QueryParams'
+import {
+  IConfigurationSearchParams,
+  ConfigurationSearchParamsSerializer,
+  IConfigurationBasicSearchParams
+} from '@/modelUtils/ConfigurationSearchParams'
+
 import ConfigurationsBasicSearch from '@/components/configurations/ConfigurationsBasicSearch.vue'
+import ConfigurationsDeleteDialog from '@/components/configurations/ConfigurationsDeleteDialog.vue'
+import ConfigurationsDownloader from '@/components/configurations/ConfigurationsDownloader.vue'
 import ConfigurationsExtendedSearch from '@/components/configurations/ConfigurationsExtendedSearch.vue'
+import ConfigurationsOverviewCard from '@/components/configurations/ConfigurationsOverviewCard.vue'
+
+export type PaginatedResult = {
+  [page: number]: Configuration[]
+}
+
+export type ConfigurationCallbackFunc = (value: Configuration) => Promise<void>
 
 @Component({
   components: {
+    ConfigurationsBasicSearch,
+    ConfigurationsDeleteDialog,
     ConfigurationsDownloader,
     ConfigurationsExtendedSearch,
-    ConfigurationsBasicSearch
+    ConfigurationsOverviewCard
   }
 })
 export default class ConfigurationsSearch extends Vue {
-  @Prop({
-    required: true,
-    type: Array
-  })
-  readonly value!: Configuration[]
+  private totalCount: number = 0
+  private lastActiveSearcher: ConfigurationSearcher | null = null
+  private loader: null | IPaginationLoader<Configuration> = null
+  private loading: boolean = true
+  private page: number = 0
+  private pageSize: number = 20
+  private searchResults: PaginatedResult = {}
+
+  private showDeleteDialog: boolean = false
+  private configurationToDelete: Configuration | null = null
+
+  private searchText: string = ''
+  private selectedProjects: Project[] = []
+  private selectedConfigurationStates: string[] = []
+
+  private projects: Project[] = []
+  private configurationStates: string[] = []
 
   @Prop({
+    default: 0,
+    required: false,
+    type: Number
+  })
+  readonly activeTab!: number
+
+  @Prop({
+    default: true,
     required: false,
     type: Boolean
   })
-  private loadInitialData!: boolean;
+  private loadInitialData!: boolean
 
-  private lastActiveSearcher: ConfigurationSearcher | null = null
-  private loader: null | IPaginationLoader<Configuration> = null
-  private loading: boolean=true
-  private pageSize: number = 20
+  @Prop({
+    required: false,
+    type: Function
+  })
+  readonly deleteCallback!: undefined | ConfigurationCallbackFunc
 
-  created () {
+  async mounted () {
+    await this.fetchEntities()
+    this.initSearchQueryParams(this.$route.query)
     if (this.loadInitialData) {
-      this.basicSearch('')
-    }
-
-    window.onscroll = () => { // TODO falls infinite scroll wirklich genutzt werden soll (wovon ich bei wissenschaftlichen Anwendungen abrate), dann sollte man doch gleich den von vuetify nutzen)
-      const isOnBottom = document.documentElement.scrollTop + window.innerHeight === document.documentElement.offsetHeight
-
-      if (isOnBottom && this.canLoadNext()) {
-        this.loadNext()
-      }
+      this.runInitialSearch()
     }
   }
 
-  get searchResults () {
-    return this.value
-  }
-
-  set searchResults (value: Configuration[]) {
-    this.$emit('input', value)
+  async fetchEntities (): Promise<void> {
+    try {
+      const [configurationStates, projects] = await Promise.all([
+        this.$api.configurationStates.findAll(),
+        this.$api.projects.findAll()
+      ])
+      this.configurationStates = configurationStates
+      this.projects = projects
+    } catch (_error) {
+      this.$store.commit('snackbar/setError', 'Loading of entities failed')
+    }
   }
 
   get numbersFoundMessage () {
     let message = ''
-    if (this.searchResults.length === 1) {
+    if (this.totalCount === 1) {
       message = '1 configuration found'
     }
-    if (this.searchResults.length > 1) {
-      message = `${this.searchResults.length} configurations found`
+    if (this.totalCount > 1) {
+      message = `${this.totalCount} configurations found`
     }
     return message
   }
 
-  basicSearch (searchText: string) {
-    this.runSearch(searchText, [], [])
+  isExtendedSearch (): boolean {
+    return !!this.selectedConfigurationStates.length || !!this.selectedProjects.length
   }
 
-  extendedSearch ({
-    searchText,
-    selectedConfigurationStates,
-    selectedProjects
-  }: IConfigurationSearchOption) {
-    this.runSearch(
-      searchText,
-      selectedConfigurationStates,
-      selectedProjects
+  async runInitialSearch (): Promise<void> {
+    this.$emit('change-active-tab', this.isExtendedSearch() ? 1 : 0)
+
+    const page: number | undefined = this.getPageFromUrl()
+
+    await this.runSearch(
+      {
+        searchText: this.searchText,
+        states: this.selectedConfigurationStates,
+        projects: this.selectedProjects
+      },
+      page
     )
   }
 
-  runSearch (
-    searchText: string | null,
-    configurationStates: string[],
-    projects: Project[]
+  basicSearch (searchParams: IConfigurationBasicSearchParams): Promise<void> {
+    return this.runSearch({
+      ...searchParams,
+      states: [],
+      projects: []
+    })
+  }
+
+  extendedSearch (searchParams: IConfigurationSearchParams): Promise<void> {
+    return this.runSearch(searchParams)
+  }
+
+  async runSearch (
+    searchParams: IConfigurationSearchParams,
+    page: number = 1
   ) {
+    this.initUrlQueryParams(searchParams)
+
+    this.totalCount = 0
     this.loading = true
-    this.searchResults = []
+    this.searchResults = {}
+    this.loader = null
+
     this.lastActiveSearcher = this.$api.configurations
       .newSearchBuilder()
-      .withText(searchText)
-      .withOneStatusOf(configurationStates)
-      .withOneMatchingProjectOf(projects)
+      .withText(searchParams.searchText)
+      .withOneStatusOf(searchParams.states)
+      .withOneMatchingProjectOf(searchParams.projects)
       .build()
-    this.lastActiveSearcher
-      .findMatchingAsPaginationLoader(this.pageSize)
-      .then(this.loadUntilWeHaveSomeEntries).catch((_error) => {
-        this.$store.commit('snackbar/setError', 'Loading of configurations failed')
-      })
-  }
 
-  loadUntilWeHaveSomeEntries (loader: IPaginationLoader<Configuration>) {
-    this.loader = loader
-    this.loading = false
-    this.searchResults = [...this.searchResults, ...loader.elements]
-
-    if (this.searchResults.length >= this.pageSize || !this.canLoadNext()) {
+    try {
+      this.loader = await this.lastActiveSearcher.findMatchingAsPaginationLoaderOnPage(page, this.pageSize)
+      this.searchResults[page] = this.loader.elements
+      this.totalCount = this.loader.totalCount
+      this.page = page
+      this.setPageInUrl(page)
+    } catch (_error) {
+      this.$store.commit('snackbar/setError', 'Loading of configurations failed')
+    } finally {
       this.loading = false
-    } else if (this.canLoadNext() && loader.funToLoadNext != null) {
-      loader.funToLoadNext().then((nextLoader) => {
-        this.loadUntilWeHaveSomeEntries(nextLoader) // TODO die Rekursion versteh ich hier nicht so ganz bzw. allgmein das komplexe laden der Daten --> da brauch ich mal ne Erläuterung
-      }).catch((_error) => {
-        this.$store.commit('snackbar/setError', 'Loading of additional configurations failed')
-      })
     }
   }
 
-  canLoadNext () {
-    return this.loader != null && this.loader.funToLoadNext != null
+  async loadPage (pageNr: number, useCache: boolean = true) {
+    // use the results that were already loaded if available
+    if (useCache && this.searchResults[pageNr]) {
+      return
+    }
+    if (this.loader != null && this.loader.funToLoadPage != null) {
+      try {
+        this.loading = true
+        const loader = await this.loader.funToLoadPage(pageNr)
+        this.loader = loader
+        this.searchResults[pageNr] = loader.elements
+        this.totalCount = loader.totalCount
+      } catch (_error) {
+        this.$store.commit('snackbar/setError', 'Loading of configurations failed')
+      } finally {
+        this.loading = false
+      }
+    }
   }
 
-  loadNext () {
-    if (this.loader != null && this.loader.funToLoadNext != null) {
-      this.loader.funToLoadNext().then((nextLoader) => {
-        this.loader = nextLoader
-        this.searchResults = [...this.searchResults, ...nextLoader.elements]
-      }).catch((_error) => {
-        this.$store.commit('snackbar/setError', 'Loading of additional configurations failed')
-      })
+  get numberOfPages (): number {
+    return Math.ceil(this.totalCount / this.pageSize)
+  }
+
+  async loadAndSetPage (page: number, useCache: boolean = true) {
+    await this.loadPage(page, useCache)
+    this.page = page
+    this.setPageInUrl(page, false)
+  }
+
+  getSearchResultForPage (pageNr: number): Configuration[] | undefined {
+    return this.searchResults[pageNr]
+  }
+
+  initDeleteDialog (configuration: Configuration) {
+    this.showDeleteDialog = true
+    this.configurationToDelete = configuration
+  }
+
+  closeDialog () {
+    this.showDeleteDialog = false
+    this.configurationToDelete = null
+  }
+
+  async deleteAndCloseDialog () {
+    if (this.configurationToDelete === null) {
+      this.closeDialog()
+      return
     }
+    if (!this.deleteCallback || typeof this.deleteCallback !== 'function') {
+      this.closeDialog()
+      return
+    }
+    this.loading = true
+    try {
+      await this.deleteCallback(this.configurationToDelete)
+      this.closeDialog()
+      // if we know that the deleted device was the last of the page, we
+      // decrement the page by one
+      let page = this.page
+      if (this.getSearchResultForPage(page)?.length === 1) {
+        page = page > 1 ? page - 1 : 1
+      }
+      this.loadAndSetPage(page, false)
+    } finally {
+      this.loading = false
+    }
+  }
+
+  initSearchQueryParams (params: QueryParams): void {
+    const searchParamsObject = (new ConfigurationSearchParamsSerializer({
+      states: this.configurationStates,
+      projects: this.projects
+    })).toSearchParams(params)
+
+    // prefill the form by the serialized search params from the URL
+    if (searchParamsObject.searchText) {
+      this.searchText = searchParamsObject.searchText
+    }
+    if (searchParamsObject.projects) {
+      this.selectedProjects = searchParamsObject.projects
+    }
+    if (searchParamsObject.states) {
+      this.selectedConfigurationStates = searchParamsObject.states
+    }
+  }
+
+  initUrlQueryParams (params: IConfigurationSearchParams): void {
+    this.$router.push({
+      query: (new ConfigurationSearchParamsSerializer()).toQueryParams(params),
+      hash: this.$route.hash
+    })
+  }
+
+  getPageFromUrl (): number | undefined {
+    if ('page' in this.$route.query && typeof this.$route.query.page === 'string') {
+      return parseInt(this.$route.query.page) || 0
+    }
+  }
+
+  setPageInUrl (page: number, preserveHash: boolean = true): void {
+    let query: QueryParams = {}
+    if (page) {
+      // add page to the current url params
+      query = {
+        ...this.$route.query,
+        page: String(page)
+      }
+    } else {
+      // remove page from the current url params
+      const {
+        // eslint-disable-next-line
+        page,
+        ...params
+      } = this.$route.query
+      query = params
+    }
+    this.$router.push({
+      query,
+      hash: preserveHash ? this.$route.hash : ''
+    })
   }
 }
 </script>
 
-<style scoped>
-
+<style lang="scss">
+@import "@/assets/styles/_search.scss";
+.progress-spinner {
+  position: absolute;
+  top: 40vh;
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
+  width: 32px;
+  z-index: 99;
+}
 </style>

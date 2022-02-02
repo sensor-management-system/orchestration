@@ -33,48 +33,71 @@ implied. See the Licence for the specific language governing
 permissions and limitations under the Licence.
 -->
 <template>
-  <v-tab-item :eager="true">
-    <v-row>
-      <v-col cols="12" md="5">
-        <v-text-field v-model="searchText" label="Label" placeholder="Label of configuration" @keydown.enter="emitSearch" />
-      </v-col>
-      <v-col
-        cols="12"
-        md="7"
-        align-self="center"
+  <v-row>
+    <v-col cols="12" md="5">
+      <v-text-field
+        v-model="searchTextModel"
+        label="Label"
+        placeholder="Label of configuration"
+        hint="Please enter at least 3 characters"
+        @keydown.enter="emitSearch"
+      />
+    </v-col>
+    <v-col
+      cols="12"
+      md="7"
+      align-self="center"
+    >
+      <v-btn
+        color="primary"
+        small
+        @click="emitSearch"
       >
-        <v-btn
-          color="primary"
-          small
-          @click="emitSearch"
-        >
-          Search
-        </v-btn>
-        <v-btn
-          text
-          small
-          @click="clearSearch"
-        >
-          Clear
-        </v-btn>
-      </v-col>
-    </v-row>
-  </v-tab-item>
+        Search
+      </v-btn>
+      <v-btn
+        text
+        small
+        @click="clearSearch"
+      >
+        Clear
+      </v-btn>
+    </v-col>
+  </v-row>
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
+import { Component, Vue, Prop } from 'nuxt-property-decorator'
+
+import { IConfigurationBasicSearchParams } from '@/modelUtils/ConfigurationSearchParams'
 
 @Component
 export default class ConfigurationsBasicSearch extends Vue {
-  private searchText: string|null=null
+  @Prop({
+    default: '',
+    required: false,
+    type: String
+  })
+  private readonly searchText!: string
+
+  private internalSearchText: string | null = null
+
+  get searchTextModel (): string | null {
+    return this.internalSearchText || this.searchText
+  }
+
+  set searchTextModel (value: string | null) {
+    this.internalSearchText = value
+  }
 
   emitSearch () {
-    this.$emit('search', this.searchText)
+    this.$emit('search', {
+      searchText: this.searchTextModel
+    } as IConfigurationBasicSearchParams)
   }
 
   clearSearch () {
-    this.searchText = null
+    this.searchTextModel = null
   }
 }
 </script>

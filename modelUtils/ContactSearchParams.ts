@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020
+ * Copyright (C) 2020-2022
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -30,16 +30,40 @@
  * permissions and limitations under the Licence.
  */
 
-// We really want to do a recursive function definition here
-// eslint-disable-next-line no-use-before-define
-export type PaginationLoaderFunction<E> = () => Promise<IPaginationLoader<E>>
-// eslint-disable-next-line no-use-before-define
-export type PaginationPageLoaderFunction<E> = (page: number) => Promise<IPaginationLoader<E>>
+import { QueryParams } from '@/modelUtils/QueryParams'
 
-export interface IPaginationLoader<E> {
-  elements: E[]
-  totalCount: number,
-  page: number,
-  funToLoadNext: null | PaginationLoaderFunction<E>,
-  funToLoadPage: null | PaginationPageLoaderFunction<E>
+export interface IContactSearchParams {
+  searchText: string | null
+}
+
+/**
+ * defines methods to convert from ISearchParameters to QueryParams and vice
+ * versa
+ */
+export class ContactSearchParamsSerializer {
+  /**
+   * converts search parameters to Vue route query params
+   *
+   * @param {IContactSearchParams} params - the params used in the search
+   * @returns {QueryParams} Vue route query params
+   */
+  toQueryParams (params: IContactSearchParams): QueryParams {
+    const result: QueryParams = {}
+    if (params.searchText) {
+      result.searchText = params.searchText
+    }
+    return result
+  }
+
+  /**
+   * converts Vue route query params to search parameters
+   *
+   * @param {QueryParams} params - the Vue route query params
+   * @returns {IContactSearchParams} the params used in the search
+   */
+  toSearchParams (params: QueryParams): IContactSearchParams {
+    return {
+      searchText: typeof params.searchText === 'string' ? params.searchText : ''
+    }
+  }
 }

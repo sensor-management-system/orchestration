@@ -30,26 +30,11 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <v-tabs-items
-      v-model="activeTab"
-    >
-      <ConfigurationsSearch
-        v-model="searchResults"
-        :load-initial-data="true"
-      />
-    </v-tabs-items>
-    <ConfigurationsOverviewCard
-      v-for="result in searchResults"
-      :key="result.id"
-      :configuration="result"
-      :is-user-authenticated="$auth.loggedIn"
-      @showDeleteDialog="initDeleteDialog"
-    />
-    <ConfigurationsDeleteDialog
-      v-model="showDeleteDialog"
-      :configuration-to-delete="configurationToDelete"
-      @cancel-deletion="closeDialog"
-      @submit-deletion="deleteAndCloseDialog"
+    <ConfigurationsSearch
+      :active-tab="activeTab"
+      load-initial-data
+      :delete-callback="deleteConfiguration"
+      @change-active-tab="activeTab = $event"
     />
     <v-btn
       v-if="$auth.loggedIn"
@@ -93,12 +78,6 @@ import ConfigurationsSearch from '@/components/configurations/ConfigurationsSear
 })
 // @ts-ignore
 export default class SearchConfigurationsPage extends Vue {
-  private searchResults: Configuration[] = []
-
-  private configurationToDelete: Configuration|null=null
-
-  private showDeleteDialog: boolean=false;
-
   created () {
     this.initializeAppBar()
   }
@@ -125,34 +104,15 @@ export default class SearchConfigurationsPage extends Vue {
     this.$store.commit('appbar/setActiveTab', tab)
   }
 
-  initDeleteDialog (configuration: Configuration) {
-    this.showDeleteDialog = true
-    this.configurationToDelete = configuration
-  }
-
-  closeDialog () {
-    this.showDeleteDialog = false
-    this.configurationToDelete = null
-  }
-
-  deleteAndCloseDialog () {
-    this.showDeleteDialog = false
-    if (this.configurationToDelete === null) {
-      return
-    }
-
-    this.$api.configurations.deleteById(this.configurationToDelete.id).then(() => {
-      // remove configuration from search results
-      const indexToDelete = this.searchResults.findIndex(configuration => configuration.id === this.configurationToDelete?.id)
-      if (indexToDelete > -1) {
-        this.searchResults.splice(indexToDelete, 1)
-      }
+  async deleteConfiguration (configuration: Configuration) {
+    try {
+      await this.$api.configurations.deleteById(configuration.id)
       this.$store.commit('snackbar/setSuccess', 'Configuration deleted')
-    }).catch((_error) => {
+    } catch (_error) {
       this.$store.commit('snackbar/setError', 'Configuration could not be deleted')
-    }).finally(() => {
-      this.configurationToDelete = null
-    })
+      // throw the error again so that the caller knows that something went wrong
+      throw _error
+    }
   }
 }
 
