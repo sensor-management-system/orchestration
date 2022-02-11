@@ -5,7 +5,7 @@ stages:
   - deploy
 
 variables:
-  CONTAINER_TEST_IMAGE: $CI_REGISTRY_IMAGE:dev-$CI_COMMIT_REF_SLUG
+  CONTAINER_TEST_IMAGE: $CI_REGISTRY_IMAGE:test-$CI_COMMIT_REF_SLUG
   CONTAINER_RELEASE_IMAGE: $CI_REGISTRY_IMAGE:latest
   DATABASE_TEST_URL: postgresql://$POSTGRES_USER:@$POSTGRES_PASSWORD:5432/$POSTGRES_DB
   WELL_KNOWN_URL: https://webapp.ufz.de/idp/oidc/v1/.well-known/openid-configuration
