@@ -223,7 +223,7 @@ build-deploy-image-ufz:
           --build-arg ALLOWED_MIME_TYPES_ARG=$ALLOWED_MIME_TYPES \
           --build-arg BUILD_DATE=$(date --utc +%FT%TZ) \
           --build-arg VCS_REF=$CI_COMMIT_SHA \
-          ./docker/deployment/ufz/
+          .
     - docker push "$UFZ_TEST_IMAGE"
   cache:
     key: ${CI_COMMIT_REF_SLUG}
