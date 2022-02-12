@@ -75,4 +75,5 @@ LABEL maintainer="Martin Abbrent <martin.abbrent@ufz.de>" \
     org.opencontainers.image.revision=$VCS_REF \
     org.opencontainers.image.created=$BUILD_DATE
 
+COPY default.conf /etc/nginx/conf.d/default.conf
 COPY --from=js-builder /smsfrontend/dist/ /usr/share/nginx/html/rdm/svm
