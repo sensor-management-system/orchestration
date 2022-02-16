@@ -204,7 +204,7 @@ build-deploy-image-ufz:
   variables:
     SMS_BACKEND_URL: ${UFZ_STAGING_BACKEND_URL}
     CV_BACKEND_URL: ${UFZ_STAGING_SMS_CV_BACKEND_URL}
-    HOST: ${UFZ_STAGING_HOST}
+#    HOST: ${UFZ_STAGING_HOST}
     CLIENT_ID: ${UFZ_STAGING_CLIENT_ID}
     # The authority is a url like this:
     # https://<domain>/idp/oidc/v1
@@ -214,10 +214,9 @@ build-deploy-image-ufz:
   script:
     - |
         docker build --tag "$UFZ_TEST_IMAGE" -f docker/deployment/ufz/Dockerfile \
-          --build-arg BASE_URL="/sms" \
+          --build-arg BASE_URL_ARG="/sms/frontend/" \
           --build-arg SMS_BACKEND_URL_ARG=$SMS_BACKEND_URL \
           --build-arg CV_BACKEND_URL_ARG=$CV_BACKEND_URL \
-          --build-arg HOST_ARG=$HOST \
           --build-arg CLIENT_ID_ARG=$CLIENT_ID \
           --build-arg AUTHORITY_ARG=$AUTHORITY \
           --build-arg ALLOWED_MIME_TYPES_ARG=$ALLOWED_MIME_TYPES \

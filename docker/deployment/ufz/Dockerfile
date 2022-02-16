@@ -45,8 +45,8 @@ ARG AUTHORITY_ARG
 ENV NUXT_ENV_AUTHORITY $AUTHORITY_ARG
 
 # The redirect uris (those must be different per host on that the frontend runs)
-ARG HOST_ARG
-ENV BASE_URL /sms
+ARG BASE_URL_ARG=/sms
+ENV BASE_URL $BASE_URL_ARG
 
 # And those remaining settings
 ENV NUXT_ENV_SCOPE openid profile email
@@ -75,5 +75,5 @@ LABEL maintainer="Martin Abbrent <martin.abbrent@ufz.de>" \
     org.opencontainers.image.revision=$VCS_REF \
     org.opencontainers.image.created=$BUILD_DATE
 
-COPY ./docker/deployment/ufz/default.conf /etc/nginx/conf.d/default.conf
 COPY --from=js-builder /smsfrontend/dist/ /usr/share/nginx/html/rdm/svm
+COPY ./docker/deployment/ufz/default.conf /etc/nginx/conf.d/default.conf
