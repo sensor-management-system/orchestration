@@ -23,22 +23,22 @@ def to_class(c: Type[T], x: Any) -> dict:
 class IdlUser:
     id: str
     username: str
-    administrated_permissions_groups: List[str]
-    membered_permissions_groups: List[str]
+    administrated_permission_groups: List[str]
+    membered_permission_groups: List[str]
 
     @staticmethod
     def from_dict(obj: Any) -> "IdlUser":
         assert isinstance(obj, dict)
         id = from_str(obj.get("id"))
-        username = from_str(obj.get("username"))
-        administrated_permissions_groups = from_list(
-            from_str, obj.get("administratedPermissionsGroups")
+        username = from_str(obj.get("userName"))
+        administrated_permission_groups = from_list(
+            from_str, obj.get("administratedPermissionGroups")
         )
-        membered_permissions_groups = from_list(
-            from_str, obj.get("memberedPermissionsGroups")
+        membered_permission_groups = from_list(
+            from_str, obj.get("memberedPermissionGroups")
         )
         return IdlUser(
-            id, username, administrated_permissions_groups, membered_permissions_groups
+            id, username, administrated_permission_groups, membered_permission_groups
         )
 
 

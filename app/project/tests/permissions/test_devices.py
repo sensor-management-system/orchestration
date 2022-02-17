@@ -351,7 +351,7 @@ class TestDevicePermissions(BaseTestCase):
     def test_patch_device_as_a_member_in_a_permission_group(self):
         """Make sure that a member in a group (admin/member) can change
          the device data per patch request"""
-        group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permissions_groups
+        group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permission_groups
         devices = preparation_of_public_and_internal_device_data(
             group_id_test_user_is_member_in_2
         )
@@ -374,7 +374,7 @@ class TestDevicePermissions(BaseTestCase):
                 data["data"]["attributes"]["group_ids"],
             )
             with patch.object(
-                Idl, "get_all_permission_groups"
+                Idl, "get_all_permission_groups_for_a_user"
             ) as test_get_all_permission_groups:
                 test_get_all_permission_groups.return_value = IDL_USER_ACCOUNT
                 device_data_changed = {
@@ -413,7 +413,7 @@ class TestDevicePermissions(BaseTestCase):
 
             self.assertEqual(data["data"]["attributes"]["group_ids"], ["13"])
             with patch.object(
-                Idl, "get_all_permission_groups"
+                Idl, "get_all_permission_groups_for_a_user"
             ) as test_get_all_permission_groups:
                 test_get_all_permission_groups.return_value = IDL_USER_ACCOUNT
                 device_data_changed = {
@@ -436,7 +436,7 @@ class TestDevicePermissions(BaseTestCase):
 
     def test_delete_device_as_an_admin_in_a_permission_group(self):
         """Make sure that an admin can delete a device in the same permission group."""
-        group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permissions_groups
+        group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permission_groups
         devices = preparation_of_public_and_internal_device_data(
             group_id_test_user_is_member_in_2
         )
@@ -459,7 +459,7 @@ class TestDevicePermissions(BaseTestCase):
                 data["data"]["attributes"]["group_ids"],
             )
             with patch.object(
-                Idl, "get_all_permission_groups"
+                Idl, "get_all_permission_groups_for_a_user"
             ) as test_get_all_permission_groups:
                 test_get_all_permission_groups.return_value = IDL_USER_ACCOUNT
                 url = f"{self.device_url}/{data['data']['id']}"
@@ -470,7 +470,7 @@ class TestDevicePermissions(BaseTestCase):
     def test_delete_public_device_as_an_admin_in_a_permission_group(self):
         """Make sure that a public device can be deleted as an admin in the permission group."""
         group_id_test_user_is_admin_in_1 = (
-            IDL_USER_ACCOUNT.administrated_permissions_groups
+            IDL_USER_ACCOUNT.administrated_permission_groups
         )
         devices = preparation_of_public_and_internal_device_data(
             group_id_test_user_is_admin_in_1
@@ -492,7 +492,7 @@ class TestDevicePermissions(BaseTestCase):
             self.assertEqual(data["data"]["attributes"]["group_ids"], ["1"])
 
         with patch.object(
-            Idl, "get_all_permission_groups"
+            Idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups:
             test_get_all_permission_groups.return_value = IDL_USER_ACCOUNT
             url = f"{self.device_url}/{data['data']['id']}"
@@ -526,7 +526,7 @@ class TestDevicePermissions(BaseTestCase):
         self.assertEqual(response.status_code, 201)
 
         with patch.object(
-            Idl, "get_all_permission_groups"
+            Idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups:
             test_get_all_permission_groups.return_value = IDL_USER_ACCOUNT
             url = f"{self.device_url}/{data['data']['id']}"
@@ -565,7 +565,7 @@ class TestDevicePermissions(BaseTestCase):
         self.assertEqual(data["data"]["attributes"]["group_ids"], ["40"])
 
         with patch.object(
-            Idl, "get_all_permission_groups"
+            Idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups:
             test_get_all_permission_groups.return_value = IDL_USER_ACCOUNT
             url = f"{self.device_url}/{data['data']['id']}"

@@ -57,6 +57,7 @@ class TestConfigurationPermissions(BaseTestCase):
                     "label": fake.pystr(),
                     "is_public": False,
                     "is_internal": True,
+                    "cfg_permission_group": "1",
                 },
             }
         }
@@ -157,6 +158,9 @@ class TestConfigurationPermissions(BaseTestCase):
                     "label": fake.pystr(),
                     "is_public": True,
                     "is_internal": True,
+                    "cfg_permission_group": IDL_USER_ACCOUNT.membered_permission_groups[
+                        0
+                    ],
                 },
             }
         }
@@ -179,7 +183,7 @@ class TestConfigurationPermissions(BaseTestCase):
                     "label": fake.pystr(),
                     "is_public": False,
                     "is_internal": True,
-                    "group_ids": ["12"],
+                    "cfg_permission_group": "12",
                 },
             }
         }
@@ -196,12 +200,14 @@ class TestConfigurationPermissions(BaseTestCase):
 
         self.assertEqual(response.status_code, 201)
 
-        self.assertEqual(data["data"]["attributes"]["group_ids"], ["12"])
+        self.assertEqual(data["data"]["attributes"]["cfg_permission_group"], "12")
 
     def test_patch_configuration_as_a_member_in_a_permission_group(self):
         """Make sure that a member in a group (admin/member) can change
          the configuration data per patch request"""
-        group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permissions_groups
+        group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permission_groups[
+            0
+        ]
         configs = preparation_of_public_and_internal_configuration_data(
             group_id_test_user_is_member_in_2
         )
@@ -221,10 +227,10 @@ class TestConfigurationPermissions(BaseTestCase):
 
             self.assertIn(
                 group_id_test_user_is_member_in_2[0],
-                data["data"]["attributes"]["group_ids"],
+                data["data"]["attributes"]["cfg_permission_group"],
             )
             with patch.object(
-                Idl, "get_all_permission_groups"
+                Idl, "get_all_permission_groups_for_a_user"
             ) as test_get_all_permission_groups:
                 test_get_all_permission_groups.return_value = IDL_USER_ACCOUNT
                 configuration_data_changed = {
@@ -245,7 +251,7 @@ class TestConfigurationPermissions(BaseTestCase):
 
     def test_patch_configuration_user_not_in_any_permission_group(self):
         """Make sure that a user can only do changes in configurations, where he/she is involved."""
-        group_id_test_user_is_not_included = ["13"]
+        group_id_test_user_is_not_included = "13"
         configs = preparation_of_public_and_internal_configuration_data(
             group_id_test_user_is_not_included
         )
@@ -263,12 +269,15 @@ class TestConfigurationPermissions(BaseTestCase):
 
             self.assertEqual(response.status_code, 201)
 
-            self.assertEqual(data["data"]["attributes"]["group_ids"], group_id_test_user_is_not_included)
+            self.assertEqual(
+                data["data"]["attributes"]["cfg_permission_group"],
+                group_id_test_user_is_not_included,
+            )
             with patch.object(
-                Idl, "get_all_permission_groups"
+                Idl, "get_all_permission_groups_for_a_user"
             ) as test_get_all_permission_groups:
                 test_get_all_permission_groups.return_value = IDL_USER_ACCOUNT
-                configuration_data_changed = {
+                configuration_data_changed_forbidden = {
                     "data": {
                         "type": "configuration",
                         "id": data["data"]["id"],
@@ -280,7 +289,7 @@ class TestConfigurationPermissions(BaseTestCase):
                 with self.client:
                     response = self.client.patch(
                         url,
-                        data=json.dumps(configuration_data_changed),
+                        data=json.dumps(configuration_data_changed_forbidden),
                         content_type="application/vnd.api+json",
                         headers=access_headers,
                     )
@@ -288,7 +297,9 @@ class TestConfigurationPermissions(BaseTestCase):
 
     def test_delete_configuration_as_not_an_admin_in_a_permission_group(self):
         """Make sure that only admin can delete a configuration in the same permission group."""
-        group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permissions_groups
+        group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permission_groups[
+            0
+        ]
         configs = preparation_of_public_and_internal_configuration_data(
             group_id_test_user_is_member_in_2
         )
@@ -308,10 +319,10 @@ class TestConfigurationPermissions(BaseTestCase):
 
             self.assertIn(
                 group_id_test_user_is_member_in_2[0],
-                data["data"]["attributes"]["group_ids"],
+                data["data"]["attributes"]["cfg_permission_group"],
             )
             with patch.object(
-                Idl, "get_all_permission_groups"
+                Idl, "get_all_permission_groups_for_a_user"
             ) as test_get_all_permission_groups:
                 test_get_all_permission_groups.return_value = IDL_USER_ACCOUNT
                 url = f"{self.configuration_url}/{data['data']['id']}"
@@ -321,9 +332,9 @@ class TestConfigurationPermissions(BaseTestCase):
 
     def test_delete_configuration_as_an_admin_in_a_permission_group(self):
         """Make sure that permission group admins are allowed to delete a configuration"""
-        group_id_test_user_is_admin_in_1 = (
-            IDL_USER_ACCOUNT.administrated_permissions_groups
-        )
+        group_id_test_user_is_admin_in_1 = IDL_USER_ACCOUNT.administrated_permission_groups[
+            0
+        ]
         configs = preparation_of_public_and_internal_configuration_data(
             group_id_test_user_is_admin_in_1
         )
@@ -341,10 +352,13 @@ class TestConfigurationPermissions(BaseTestCase):
 
             self.assertEqual(response.status_code, 201)
 
-            self.assertEqual(data["data"]["attributes"]["group_ids"], ["1"])
+            self.assertEqual(
+                data["data"]["attributes"]["cfg_permission_group"],
+                IDL_USER_ACCOUNT.administrated_permission_groups[0],
+            )
 
             with patch.object(
-                Idl, "get_all_permission_groups"
+                Idl, "get_all_permission_groups_for_a_user"
             ) as test_get_all_permission_groups:
                 test_get_all_permission_groups.return_value = IDL_USER_ACCOUNT
                 url = f"{self.configuration_url}/{data['data']['id']}"
@@ -354,7 +368,7 @@ class TestConfigurationPermissions(BaseTestCase):
     def test_delete_configuration_as_super_user(self):
         """Make sure that a superuser can delete a configuration even if he/she is not admin in
         the corresponding permission group."""
-        group_id_test_user_is_not_included = ["20"]
+        group_id_test_user_is_not_included = "20"
         configs = preparation_of_public_and_internal_configuration_data(
             group_id_test_user_is_not_included
         )
@@ -372,10 +386,13 @@ class TestConfigurationPermissions(BaseTestCase):
 
             self.assertEqual(response.status_code, 201)
 
-            self.assertEqual(data["data"]["attributes"]["group_ids"], group_id_test_user_is_not_included)
+            self.assertEqual(
+                data["data"]["attributes"]["cfg_permission_group"],
+                group_id_test_user_is_not_included,
+            )
 
             with patch.object(
-                Idl, "get_all_permission_groups"
+                Idl, "get_all_permission_groups_for_a_user"
             ) as test_get_all_permission_groups:
                 test_get_all_permission_groups.return_value = IDL_USER_ACCOUNT
                 url = f"{self.configuration_url}/{data['data']['id']}"
@@ -383,11 +400,11 @@ class TestConfigurationPermissions(BaseTestCase):
                 self.assertEqual(delete_response.status_code, 200)
 
 
-def preparation_of_public_and_internal_configuration_data(group_ids):
+def preparation_of_public_and_internal_configuration_data(group_id):
     """
     Data to add an internal and a public configuration.
 
-    :param group_ids: list of permission groups
+    :param group_id: one permission group
     :return: list of data for two configs [public, internal]
     """
     public_configuration_data = {
@@ -397,7 +414,7 @@ def preparation_of_public_and_internal_configuration_data(group_ids):
                 "label": fake.pystr(),
                 "is_public": True,
                 "is_internal": False,
-                "group_ids": group_ids,
+                "cfg_permission_group": group_id,
             },
         }
     }
@@ -408,7 +425,7 @@ def preparation_of_public_and_internal_configuration_data(group_ids):
                 "label": fake.pystr(),
                 "is_public": False,
                 "is_internal": True,
-                "group_ids": group_ids,
+                "cfg_permission_group": group_id,
             },
         }
     }

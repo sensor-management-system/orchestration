@@ -105,7 +105,7 @@ class TestGenericConfigurationActionServices(BaseTestCase):
         return data
 
     def test_update_generic_configuration_action(self):
-        """Ensure a generic_configuration_action can be updateded."""
+        """Ensure a generic_configuration_action can be updated."""
         old_generic_configuration_action_data = (
             self.make_generic_configuration_action_data()
         )
