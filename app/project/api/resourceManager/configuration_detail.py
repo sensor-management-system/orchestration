@@ -34,8 +34,8 @@ class ConfigurationDetail(ResourceDetail):
             configuration = (
                 db.session.query(Configuration).filter_by(id=data["id"]).one_or_none()
             )
-            group_ids = configuration.group_ids
-            if not is_user_in_a_group(group_ids):
+            group_id = configuration.cfg_permission_group
+            if not is_user_in_a_group([group_id]):
                 raise ForbiddenError(
                     "User is not part of any group to edit this object."
                 )

@@ -15,8 +15,8 @@ from project.tests.permissions import create_superuser_token
 IDL_USER_ACCOUNT = IdlUser(
     id="1000",
     username="testuser@ufz.de",
-    administrated_permissions_groups=["1"],
-    membered_permissions_groups=["2", "3"],
+    administrated_permission_groups=["1"],
+    membered_permission_groups=["2", "3"],
 )
 
 
@@ -358,7 +358,7 @@ class TestPlatformPermissions(BaseTestCase):
     def test_patch_platform_as_a_member_in_a_permission_group(self):
         """Make sure that a member in a group (admin/member) can change
          the platform data per patch request"""
-        group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permissions_groups
+        group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permission_groups
         platforms = preparation_of_public_and_internal_platform_data(
             group_id_test_user_is_member_in_2
         )
@@ -381,7 +381,7 @@ class TestPlatformPermissions(BaseTestCase):
                 data["data"]["attributes"]["group_ids"],
             )
             with patch.object(
-                Idl, "get_all_permission_groups"
+                Idl, "get_all_permission_groups_for_a_user"
             ) as test_get_all_permission_groups:
                 test_get_all_permission_groups.return_value = IDL_USER_ACCOUNT
                 platform_data_changed = {
@@ -420,7 +420,7 @@ class TestPlatformPermissions(BaseTestCase):
 
             self.assertEqual(data["data"]["attributes"]["group_ids"], group_id_test_user_is_not_included)
             with patch.object(
-                Idl, "get_all_permission_groups"
+                Idl, "get_all_permission_groups_for_a_user"
             ) as test_get_all_permission_groups:
 
                 test_get_all_permission_groups.return_value = IDL_USER_ACCOUNT
@@ -444,7 +444,7 @@ class TestPlatformPermissions(BaseTestCase):
 
     def test_delete_platform_access_forbidden(self):
         """Make sure that only admins can delete a platform in the same permission group."""
-        group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permissions_groups
+        group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permission_groups
         platforms = preparation_of_public_and_internal_platform_data(
             group_id_test_user_is_member_in_2
         )
@@ -467,7 +467,7 @@ class TestPlatformPermissions(BaseTestCase):
                 data["data"]["attributes"]["group_ids"],
             )
             with patch.object(
-                Idl, "get_all_permission_groups"
+                Idl, "get_all_permission_groups_for_a_user"
             ) as test_get_all_permission_groups:
 
                 test_get_all_permission_groups.return_value = IDL_USER_ACCOUNT
@@ -478,7 +478,7 @@ class TestPlatformPermissions(BaseTestCase):
 
     def test_delete_platform_as_an_admin_in_a_permission_group(self):
         """Make sure that a permission group admins are allowed to delete a platform."""
-        group_id_test_user_is_member_in_1 = IDL_USER_ACCOUNT.administrated_permissions_groups
+        group_id_test_user_is_member_in_1 = IDL_USER_ACCOUNT.administrated_permission_groups
         platforms = preparation_of_public_and_internal_platform_data(
             group_id_test_user_is_member_in_1
         )
@@ -499,7 +499,7 @@ class TestPlatformPermissions(BaseTestCase):
             self.assertEqual(data["data"]["attributes"]["group_ids"], group_id_test_user_is_member_in_1)
 
             with patch.object(
-                Idl, "get_all_permission_groups"
+                Idl, "get_all_permission_groups_for_a_user"
             ) as test_get_all_permission_groups:
 
                 test_get_all_permission_groups.return_value = IDL_USER_ACCOUNT
@@ -534,7 +534,7 @@ class TestPlatformPermissions(BaseTestCase):
         self.assertEqual(response.status_code, 201)
 
         with patch.object(
-            Idl, "get_all_permission_groups"
+            Idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups:
             test_get_all_permission_groups.return_value = IDL_USER_ACCOUNT
 
@@ -566,7 +566,7 @@ class TestPlatformPermissions(BaseTestCase):
             self.assertEqual(data["data"]["attributes"]["group_ids"], group_id_test_user_is_not_included)
 
             with patch.object(
-                Idl, "get_all_permission_groups"
+                Idl, "get_all_permission_groups_for_a_user"
             ) as test_get_all_permission_groups:
 
                 test_get_all_permission_groups.return_value = IDL_USER_ACCOUNT

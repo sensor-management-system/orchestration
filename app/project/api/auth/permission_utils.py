@@ -1,4 +1,4 @@
-import click
+from flask import request
 from flask_jwt_extended import get_current_user
 from flask_jwt_extended import (
     jwt_required,
@@ -6,9 +6,11 @@ from flask_jwt_extended import (
     current_user,
     verify_jwt_in_request,
 )
+from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy import or_, and_
 
 from ..helpers.errors import ForbiddenError
+from ..models import Configuration
 from ..models.base_model import db
 from ..services.idl_services import Idl
 
@@ -24,10 +26,12 @@ def is_user_in_a_group(groups_to_check):
     if not groups_to_check:
         return True
     current_user = get_current_user()
-    idl_groups = Idl().get_all_permission_groups(current_user.subject)
+    idl_groups = Idl().get_all_permission_groups_for_a_user(current_user.subject)
+    if not idl_groups:
+        return []
     user_groups = (
-        idl_groups.administrated_permissions_groups
-        + idl_groups.membered_permissions_groups
+        idl_groups.administrated_permission_groups
+        + idl_groups.membered_permission_groups
     )
     return any(group in user_groups for group in groups_to_check)
 
@@ -43,8 +47,10 @@ def is_user_admin_in_a_group(groups_to_check):
     if not groups_to_check:
         return True
     current_user = get_current_user()
-    idl_groups = Idl().get_all_permission_groups(current_user.subject)
-    user_groups = idl_groups.administrated_permissions_groups
+    idl_groups = Idl().get_all_permission_groups_for_a_user(current_user.subject)
+    if not idl_groups:
+        return []
+    user_groups = idl_groups.administrated_permission_groups
     return any(group in user_groups for group in groups_to_check)
 
 
@@ -112,15 +118,20 @@ def check_patch_permission(data, object_to_patch):
         object_ = (
             db.session.query(object_to_patch).filter_by(id=data["id"]).one_or_none()
         )
-        if object_.is_private:
-            click.secho(object_.is_private, fg="green")
-            assert_current_user_is_owner_of_object(object_)
-        else:
-            group_ids = object_.group_ids
-            if not is_user_in_a_group(group_ids):
-                raise ForbiddenError(
-                    "User is not part of any group to edit this object."
+        if object_:
+            if object_.is_private:
+                assert_current_user_is_owner_of_object(object_)
+            else:
+                group_ids = object_.group_ids
+                if not is_user_in_a_group(group_ids):
+                    raise ForbiddenError(
+                        "User is not part of any group to edit this object."
+                    )
+                allow_only_admin_in_a_permission_group_to_remove_it_from_an_object(
+                    group_ids
                 )
+        else:
+            raise ObjectNotFound(f"Object with id: {data['id']} not found!")
 
 
 def check_deletion_permission(kwargs, object_to_delete):
@@ -134,12 +145,21 @@ def check_deletion_permission(kwargs, object_to_delete):
         object_ = (
             db.session.query(object_to_delete).filter_by(id=kwargs["id"]).one_or_none()
         )
-        group_ids = (
-            db.session.query(object_to_delete)
-            .filter_by(id=kwargs["id"])
-            .one_or_none()
-            .group_ids
-        )
+        if object_to_delete == Configuration:
+            group_id = (
+                db.session.query(object_to_delete)
+                .filter_by(id=kwargs["id"])
+                .one_or_none()
+                .cfg_permission_group
+            )
+            group_ids = [group_id] if group_id else []
+        else:
+            group_ids = (
+                db.session.query(object_to_delete)
+                .filter_by(id=kwargs["id"])
+                .one_or_none()
+                .group_ids
+            )
         if group_ids is None:
             assert_current_user_is_owner_of_object(object_)
         if not is_user_admin_in_a_group(group_ids):
@@ -187,3 +207,38 @@ def check_for_permissions(model_class, kwargs):
             prevent_normal_user_from_viewing_not_owned_private_object(object_)
         elif object_.is_internal:
             verify_jwt_in_request()
+
+
+def allow_only_admin_in_a_permission_group_to_remove_it_from_an_object(group_ids):
+    """
+    Only admin in a permission groups is allowed to perform a remove action fron the permission group list.
+    This Methode will be applied before a patch request for (device, platform)
+
+    :param group_ids: list of the permission groups_ids from database.
+    """
+    # An example how the json_data:
+    # {
+    #   "data": {
+    #     "type": "device",
+    #     "id": 2,
+    #     "attributes": {
+    #       "short_name": "internal Device with a group 6",
+    #       "is_public": false,
+    #       "is_private": false,
+    #       "is_internal": true,
+    #       "group_ids": [
+    #         6
+    #       ]
+    #     }
+    #   }
+    # }
+    json_data = request.get_json() or {}
+    if "group_ids" in json_data["data"]["attributes"]:
+        changed_group = json_data["data"]["attributes"]["group_ids"]
+        if group_ids != changed_group:
+            # Get permission groups_ids deleted from the original permission groups
+            deleted_elements = list(set(group_ids) - set(changed_group))
+            if deleted_elements:
+                for element in deleted_elements:
+                    if not is_user_admin_in_a_group([element]):
+                        raise ForbiddenError("Not allowed to perform this action.")

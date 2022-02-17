@@ -9,9 +9,9 @@ from requests.exceptions import Timeout, HTTPError
 IDL_MOCKED_USER_ACCOUNT = [
     {
         "id": "1000",
-        "username": "testuser@ufz.de",
-        "administratedPermissionsGroups": ["1"],
-        "memberedPermissionsGroups": ["2", "3"],
+        "userName": "testuser@ufz.de",
+        "administratedPermissionGroups": ["1"],
+        "memberedPermissionGroups": ["2", "3"],
     }
 ]
 
@@ -24,7 +24,7 @@ class TestInstituteDecouplingLayerApi(BaseTestCase):
             mock_get.return_value = Mock(ok=True)
             mock_get.return_value.json.return_value = idl_empty_response
 
-            response = Idl().get_all_permission_groups("noUser@ufz.de")
+            response = Idl().get_all_permission_groups_for_a_user("noUser@ufz.de")
             self.assertEqual(response, [])
 
     @patch("requests.get")
@@ -32,7 +32,7 @@ class TestInstituteDecouplingLayerApi(BaseTestCase):
         """Make sure that error raise (ServiceIsUnreachableError) if IDL not responding."""
         mock_get.side_effect = Timeout
         with self.assertRaises(ServiceIsUnreachableError):
-            _ = Idl().get_all_permission_groups("noUser@ufz.de")
+            _ = Idl().get_all_permission_groups_for_a_user("noUser@ufz.de")
 
     def test_get_all_permission_groups(self):
         """Test data in User account"""
@@ -40,19 +40,19 @@ class TestInstituteDecouplingLayerApi(BaseTestCase):
             mock_get.return_value = Mock(ok=True)
             mock_get.return_value.json.return_value = IDL_MOCKED_USER_ACCOUNT
 
-            response = Idl().get_all_permission_groups(
-                IDL_MOCKED_USER_ACCOUNT[0]["username"]
+            response = Idl().get_all_permission_groups_for_a_user(
+                IDL_MOCKED_USER_ACCOUNT[0]["userName"]
             )
 
             self.assertEqual(response.id, "1000")
-            self.assertEqual(response.username, IDL_MOCKED_USER_ACCOUNT[0]["username"])
+            self.assertEqual(response.username, IDL_MOCKED_USER_ACCOUNT[0]["userName"])
             self.assertEqual(
-                IDL_MOCKED_USER_ACCOUNT[0]["administratedPermissionsGroups"],
-                response.administrated_permissions_groups,
+                IDL_MOCKED_USER_ACCOUNT[0]["administratedPermissionGroups"],
+                response.administrated_permission_groups,
             )
             self.assertEqual(
-                IDL_MOCKED_USER_ACCOUNT[0]["memberedPermissionsGroups"],
-                response.membered_permissions_groups,
+                IDL_MOCKED_USER_ACCOUNT[0]["memberedPermissionGroups"],
+                response.membered_permission_groups,
             )
 
     def test_get_permission_with_HTTPError_from_idl(self):
@@ -60,4 +60,4 @@ class TestInstituteDecouplingLayerApi(BaseTestCase):
         with patch("requests.get") as mock_get:
             mock_get.side_effect = HTTPError
             with self.assertRaises(ConflictError):
-                _ = Idl().get_all_permission_groups("noUser@ufz.de")
+                _ = Idl().get_all_permission_groups_for_a_user("noUser@ufz.de")

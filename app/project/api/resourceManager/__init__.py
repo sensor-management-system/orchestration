@@ -148,5 +148,6 @@ from .platform_unmount_action_resources import (  # noqa: F401
     PlatformUnmountActionRelationship,
 )
 from .user_detail import UserDetail  # noqa: F401
+from .user_info import UserInfo  # noqa: F401
 from .user_list import UserList  # noqa: F401
 from .user_relationship import UserRelationship  # noqa: F401
