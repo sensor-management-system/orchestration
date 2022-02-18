@@ -58,6 +58,16 @@ build-gfz-image:
       when: manual
       allow_failure: true
 
+build-deploy-image-nginx-ufz-staging:
+  stage: build
+  extends: .docker-in-docker
+  allow_failure: true
+  script:
+    - docker build --tag "$CI_REGISTRY_IMAGE/nginx:ufz-latest" -f docker/build/nginx/ufz/staging/Dockerfile .
+    - docker push "$CI_REGISTRY_IMAGE/nginx:ufz-latest"
+  rules:
+    - if: "$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH"
+
 unittest-lint:
   stage: test
   image: $CONTAINER_TEST_IMAGE
