@@ -50,7 +50,7 @@ class DeviceSoftwareUpdateActionDetail(ResourceDetail):
     """Detail resource for device software update actions (get, delete, patch)."""
 
     def before_get(self, args, kwargs):
-        """Return 404 Responses if DeviceMountAction not found"""
+        """Return 404 Responses if DeviceSoftwareUpdateAction not found"""
         check_if_object_not_found(self._data_layer.model, kwargs)
 
     schema = DeviceSoftwareUpdateActionSchema

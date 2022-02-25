@@ -89,7 +89,7 @@ class DevicePropertyCalibrationDetail(ResourceDetail):
     """Detail resource for the device property calibrations (get, delete, patch)."""
 
     def before_get(self, args, kwargs):
-        """Return 404 Responses if DeviceMountAction not found"""
+        """Return 404 Responses if DevicePropertyCalibration not found"""
         check_if_object_not_found(self._data_layer.model, kwargs)
 
     schema = DevicePropertyCalibrationSchema
