@@ -13,6 +13,7 @@ from ..resourceManager.base_resource import (
 )
 from ..schemas.mount_actions_schema import PlatformMountActionSchema
 from ..token_checker import token_required
+from ...frj_csv_export.resource import ResourceList
 
 
 class PlatformMountActionList(ResourceList):
@@ -33,7 +34,7 @@ class PlatformMountActionList(ResourceList):
                 self.session.query(Configuration).filter_by(id=configuration_id).one()
             except NoResultFound:
                 raise ObjectNotFound(
-                    {"parameter": "id",},
+                    {"parameter": "id", },
                     "Configuration: {} not found".format(configuration_id),
                 )
             else:
@@ -45,7 +46,7 @@ class PlatformMountActionList(ResourceList):
                 self.session.query(Platform).filter_by(id=platform_id).one()
             except NoResultFound:
                 raise ObjectNotFound(
-                    {"parameter": "id",}, "Platform: {} not found".format(platform_id),
+                    {"parameter": "id", }, "Platform: {} not found".format(platform_id),
                 )
             else:
                 query_ = query_.filter(PlatformMountAction.platform_id == platform_id)
@@ -54,7 +55,7 @@ class PlatformMountActionList(ResourceList):
                 self.session.query(Platform).filter_by(id=parent_platform_id).one()
             except NoResultFound:
                 raise ObjectNotFound(
-                    {"parameter": "id",},
+                    {"parameter": "id", },
                     "Parent platform: {} not found".format(parent_platform_id),
                 )
             else:
@@ -68,7 +69,7 @@ class PlatformMountActionList(ResourceList):
     data_layer = {
         "session": db.session,
         "model": PlatformMountAction,
-        "methods": {"query": query,},
+        "methods": {"query": query, },
     }
 
 

@@ -12,6 +12,7 @@ from sqlalchemy import or_, and_
 from ..helpers.errors import ForbiddenError
 from ..models import Configuration
 from ..models.base_model import db
+from ..resourceManager.base_resource import check_if_object_not_found
 from ..services.idl_services import Idl
 
 
@@ -201,6 +202,7 @@ def check_for_permissions(model_class, kwargs):
     :param model_class: class model
     :param kwargs:
     """
+    check_if_object_not_found(model_class, kwargs)
     object_ = db.session.query(model_class).filter_by(id=kwargs["id"]).first()
     if object_:
         if object_.is_private:

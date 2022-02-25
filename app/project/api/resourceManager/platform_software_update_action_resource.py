@@ -4,15 +4,13 @@ from flask_rest_jsonapi import ResourceDetail, ResourceRelationship
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.orm.exc import NoResultFound
 
-from ...frj_csv_export.resource import ResourceList
 from ..models.base_model import db
 from ..models.platform import Platform
 from ..models.software_update_actions import PlatformSoftwareUpdateAction
-from ..resourceManager.base_resource import (
-    check_if_object_not_found,
-)
+from ..resourceManager.base_resource import check_if_object_not_found
 from ..schemas.software_update_action_schema import PlatformSoftwareUpdateActionSchema
 from ..token_checker import token_required
+from ...frj_csv_export.resource import ResourceList
 
 
 class PlatformSoftwareUpdateActionList(ResourceList):

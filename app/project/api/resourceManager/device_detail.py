@@ -1,5 +1,4 @@
 from flask_rest_jsonapi import ResourceDetail, JsonApiException
-from flask_rest_jsonapi.exceptions import ObjectNotFound
 
 from .base_resource import delete_attachments_in_minio_by_url, check_if_object_not_found
 from ..helpers.errors import ConflictError

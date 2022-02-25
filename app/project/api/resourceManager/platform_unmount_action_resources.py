@@ -3,18 +3,16 @@ from flask_rest_jsonapi import ResourceDetail, ResourceRelationship
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.orm.exc import NoResultFound
 
-from ...frj_csv_export.resource import ResourceList
 from ..models.base_model import db
 from ..models.configuration import Configuration
 from ..models.platform import Platform
 from ..models.unmount_actions import PlatformUnmountAction
 from ..resourceManager.base_resource import (
-    add_created_by_id,
-    add_updated_by_id,
     check_if_object_not_found,
 )
 from ..schemas.unmount_actions_schema import PlatformUnmountActionSchema
 from ..token_checker import token_required
+from ...frj_csv_export.resource import ResourceList
 
 
 class PlatformUnmountActionList(ResourceList):

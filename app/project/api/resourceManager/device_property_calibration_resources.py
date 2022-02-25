@@ -4,7 +4,6 @@ from flask_rest_jsonapi import ResourceDetail, ResourceRelationship
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.orm.exc import NoResultFound
 
-from ...frj_csv_export.resource import ResourceList
 from ..models.base_model import db
 from ..models.calibration_actions import (
     DeviceCalibrationAction,
@@ -12,11 +11,10 @@ from ..models.calibration_actions import (
 )
 from ..models.device import Device
 from ..models.device_property import DeviceProperty
-from ..resourceManager.base_resource import (
-    check_if_object_not_found,
-)
+from ..resourceManager.base_resource import check_if_object_not_found
 from ..schemas.calibration_actions_schema import DevicePropertyCalibrationSchema
 from ..token_checker import token_required
+from ...frj_csv_export.resource import ResourceList
 
 
 class DevicePropertyCalibrationList(ResourceList):
@@ -89,6 +87,10 @@ class DevicePropertyCalibrationList(ResourceList):
 
 class DevicePropertyCalibrationDetail(ResourceDetail):
     """Detail resource for the device property calibrations (get, delete, patch)."""
+
+    def before_get(self, args, kwargs):
+        """Return 404 Responses if DeviceMountAction not found"""
+        check_if_object_not_found(self._data_layer.model, kwargs)
 
     schema = DevicePropertyCalibrationSchema
     decorators = (token_required,)

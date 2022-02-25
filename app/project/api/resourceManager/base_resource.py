@@ -1,4 +1,5 @@
 from flask_jwt_extended import current_user
+from flask_rest_jsonapi.exceptions import ObjectNotFound
 
 from ..models import (
     ConfigurationAttachment,

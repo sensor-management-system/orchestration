@@ -4,12 +4,13 @@ from flask_rest_jsonapi import ResourceDetail, ResourceRelationship
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.orm.exc import NoResultFound
 
-from ...frj_csv_export.resource import ResourceList
+from .base_resource import check_if_object_not_found
 from ..models.base_model import db
 from ..models.generic_actions import GenericPlatformAction
 from ..models.platform import Platform
 from ..schemas.generic_actions_schema import GenericPlatformActionSchema
 from ..token_checker import token_required
+from ...frj_csv_export.resource import ResourceList
 
 
 class GenericPlatformActionList(ResourceList):

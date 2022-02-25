@@ -8,9 +8,7 @@ from ...frj_csv_export.resource import ResourceList
 from ..models.base_model import db
 from ..models.device import Device
 from ..models.software_update_actions import DeviceSoftwareUpdateAction
-from ..resourceManager.base_resource import (
-    check_if_object_not_found,
-)
+from ..resourceManager.base_resource import check_if_object_not_found
 from ..schemas.software_update_action_schema import DeviceSoftwareUpdateActionSchema
 from ..token_checker import token_required
 
@@ -31,7 +29,7 @@ class DeviceSoftwareUpdateActionList(ResourceList):
                 self.session.query(Device).filter_by(id=device_id).one()
             except NoResultFound:
                 raise ObjectNotFound(
-                    {"parameter": "id",}, "Device: {} not found".format(device_id),
+                    {"parameter": "id", }, "Device: {} not found".format(device_id),
                 )
             else:
                 query_ = query_.filter(
@@ -44,12 +42,16 @@ class DeviceSoftwareUpdateActionList(ResourceList):
     data_layer = {
         "session": db.session,
         "model": DeviceSoftwareUpdateAction,
-        "methods": {"query": query,}
+        "methods": {"query": query, },
     }
 
 
 class DeviceSoftwareUpdateActionDetail(ResourceDetail):
     """Detail resource for device software update actions (get, delete, patch)."""
+
+    def before_get(self, args, kwargs):
+        """Return 404 Responses if DeviceMountAction not found"""
+        check_if_object_not_found(self._data_layer.model, kwargs)
 
     schema = DeviceSoftwareUpdateActionSchema
     decorators = (token_required,)
