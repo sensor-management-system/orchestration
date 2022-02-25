@@ -9,8 +9,10 @@ from ...frj_csv_export.resource import ResourceList
 from ..models.base_model import db
 from ..models.platform import Platform
 from ..models.software_update_actions import PlatformSoftwareUpdateAction
+from ..resourceManager.base_resource import check_if_object_not_found
 from ..schemas.software_update_action_schema import PlatformSoftwareUpdateActionSchema
 from ..token_checker import token_required
+from ...frj_csv_export.resource import ResourceList
 
 
 class PlatformSoftwareUpdateActionList(ResourceList):
@@ -62,6 +64,10 @@ class PlatformSoftwareUpdateActionList(ResourceList):
 
 class PlatformSoftwareUpdateActionDetail(ResourceDetail):
     """Detail relationship for platform software update actions (get, delete, patch)."""
+
+    def before_get(self, args, kwargs):
+        """Return 404 Responses if PlatformSoftwareUpdateAction not found"""
+        check_if_object_not_found(self._data_layer.model, kwargs)
 
     schema = PlatformSoftwareUpdateActionSchema
     decorators = (token_required,)

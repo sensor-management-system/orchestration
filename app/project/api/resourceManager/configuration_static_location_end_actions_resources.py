@@ -4,13 +4,14 @@ from flask_rest_jsonapi import ResourceDetail, ResourceRelationship
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.orm.exc import NoResultFound
 
-from ...frj_csv_export.resource import ResourceList
+from .base_resource import check_if_object_not_found
 from ..models import Configuration, ConfigurationStaticLocationEndAction
 from ..models.base_model import db
 from ..schemas.configuration_static_location_actions_schema import (
     ConfigurationStaticLocationEndActionSchema,
 )
 from ..token_checker import token_required
+from ...frj_csv_export.resource import ResourceList
 
 
 class ConfigurationStaticLocationEndActionList(ResourceList):
@@ -30,9 +31,7 @@ class ConfigurationStaticLocationEndActionList(ResourceList):
                 self.session.query(Configuration).filter_by(id=configuration_id).one()
             except NoResultFound:
                 raise ObjectNotFound(
-                    {
-                        "parameter": "id",
-                    },
+                    {"parameter": "id",},
                     "Configuration: {} not found".format(configuration_id),
                 )
             else:
@@ -47,14 +46,16 @@ class ConfigurationStaticLocationEndActionList(ResourceList):
     data_layer = {
         "session": db.session,
         "model": ConfigurationStaticLocationEndAction,
-        "methods": {
-            "query": query,
-        },
+        "methods": {"query": query,},
     }
 
 
 class ConfigurationStaticLocationEndActionDetail(ResourceDetail):
     """Detail resource for Configuration static location end actions (get, delete, patch)."""
+
+    def before_get(self, args, kwargs):
+        """Return 404 Responses if ConfigurationStaticLocationEndAction not found"""
+        check_if_object_not_found(self._data_layer.model, kwargs)
 
     schema = ConfigurationStaticLocationEndActionSchema
     decorators = (token_required,)

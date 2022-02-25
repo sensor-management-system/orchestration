@@ -5,6 +5,7 @@ from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.orm.exc import NoResultFound
 
 from ..auth.permission_utils import get_collection_with_permissions_for_related_objects
+from .base_resource import check_if_object_not_found
 from ...frj_csv_export.resource import ResourceList
 from ..models.base_model import db
 from ..models.calibration_actions import DeviceCalibrationAction
@@ -61,6 +62,10 @@ class DeviceCalibrationActionList(ResourceList):
 
 class DeviceCalibrationActionDetail(ResourceDetail):
     """Detail resource for device calibration action (get, delete, patch)."""
+
+    def before_get(self, args, kwargs):
+        """Return 404 Responses if device calibration action not found"""
+        check_if_object_not_found(self._data_layer.model, kwargs)
 
     schema = DeviceCalibrationActionSchema
     decorators = (token_required,)

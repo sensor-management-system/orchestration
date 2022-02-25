@@ -32,7 +32,7 @@ class ConfigurationSchema(Schema):
     status = fields.String(default="draft", allow_none=True)
     hierarchy = ConfigurationHierarchyField(allow_none=True)
     created_by_id = fields.Str(dump_only=True)
-    group_ids = fields.Field(many=True, allow_none=True)
+    cfg_permission_group = fields.String(required=True)
     is_private = fields.Boolean(allow_none=True)
     is_internal = fields.Boolean(allow_none=True)
     is_public = fields.Boolean(allow_none=True)

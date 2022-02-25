@@ -10,6 +10,9 @@ from project.tests.base import create_token
 from project.tests.models.test_generic_action_attachment_model import (
     add_generic_device_action_attachment_model,
 )
+from project.tests.models.test_generic_action_attachment_model import (
+    add_generic_device_action_attachment_model,
+)
 from project.tests.read_from_json import extract_data_from_json_file
 
 
@@ -252,3 +255,8 @@ class TestGenericDeviceAction(BaseTestCase):
                 headers=access_headers,
             )
         self.assertNotEqual(response.status_code, 200)
+
+    def test_http_response_not_found(self):
+        """Make sure that the backend responds with 404 HTTP-Code if a resource was not found."""
+        url = f"{self.url}/{fake.random_int()}"
+        _ = super().http_code_404_when_resource_not_found(url)

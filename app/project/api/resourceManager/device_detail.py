@@ -1,7 +1,6 @@
 from flask_rest_jsonapi import ResourceDetail, JsonApiException
-from flask_rest_jsonapi.exceptions import ObjectNotFound
 
-from .base_resource import delete_attachments_in_minio_by_url
+from .base_resource import delete_attachments_in_minio_by_url, check_if_object_not_found
 from ..helpers.errors import ConflictError
 from ..models.base_model import db
 from ..models.device import Device
@@ -22,9 +21,7 @@ class DeviceDetail(ResourceDetail):
         :param kwargs: kwargs from the resource view
         :return:
         """
-        device = db.session.query(Device).filter_by(id=kwargs["id"]).first()
-        if device is None:
-            raise ObjectNotFound({"pointer": ""}, "Object Not Found")
+        device = check_if_object_not_found(Device, kwargs)
         urls = [a.url for a in device.device_attachments]
         try:
             super().delete(*args, **kwargs)

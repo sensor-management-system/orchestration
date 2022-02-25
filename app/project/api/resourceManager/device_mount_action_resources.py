@@ -16,6 +16,7 @@ from ..models.configuration import Configuration
 from ..models.device import Device
 from ..models.mount_actions import DeviceMountAction
 from ..models.platform import Platform
+from ..resourceManager.base_resource import check_if_object_not_found
 from ..schemas.mount_actions_schema import DeviceMountActionSchema
 from ..token_checker import token_required
 from ...frj_csv_export.resource import ResourceList
@@ -105,6 +106,10 @@ class DeviceMountActionList(ResourceList):
 
 class DeviceMountActionDetail(ResourceDetail):
     """Detail resource for device mount actions (get, delete, patch)."""
+
+    def before_get(self, args, kwargs):
+        """Return 404 Responses if DeviceMountAction not found"""
+        check_if_object_not_found(self._data_layer.model, kwargs)
 
     schema = DeviceMountActionSchema
     decorators = (token_required,)

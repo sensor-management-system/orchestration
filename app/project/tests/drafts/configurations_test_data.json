@@ -6,6 +6,7 @@
       "location_type": "test",
       "is_public": false,
       "is_internal": true,
+      "cfg_permission_group": "12",
       "hierarchy": [
         {
           "children": [
@@ -27,6 +28,7 @@
       "location_type": "test2",
       "is_public": false,
       "is_internal": true,
+      "cfg_permission_group": "2",
       "hierarchy": [
         {
           "children": [
@@ -48,6 +50,7 @@
       "location_type": "test3",
       "is_public": false,
       "is_internal": true,
+      "cfg_permission_group": "1",
       "hierarchy": [
         {
           "children": [

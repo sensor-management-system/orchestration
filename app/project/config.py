@@ -75,7 +75,7 @@ class BaseConfig:
     MINIO_BUCKET_NAME = env("MINIO_BUCKET_NAME", "sms-attachments")
     ALLOWED_MIME_TYPES = env.list("ALLOWED_MIME_TYPES", [])
     SMS_IDL_TOKEN = env("SMS_IDL_TOKEN", None)
-    IDL_URL = env("IDL_URL", "http://172.21.0.11:80/dataprojects/api/user_accounts")
+    IDL_URL = env("IDL_URL", None)
     CATCH_EXCEPTIONS = True
 
 

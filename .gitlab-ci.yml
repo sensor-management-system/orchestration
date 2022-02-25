@@ -5,7 +5,7 @@ stages:
   - deploy
 
 variables:
-  CONTAINER_TEST_IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
+  CONTAINER_TEST_IMAGE: $CI_REGISTRY_IMAGE:test-$CI_COMMIT_REF_SLUG
   CONTAINER_RELEASE_IMAGE: $CI_REGISTRY_IMAGE:latest
   DATABASE_TEST_URL: postgresql://$POSTGRES_USER:@$POSTGRES_PASSWORD:5432/$POSTGRES_DB
   WELL_KNOWN_URL: https://webapp.ufz.de/idp/oidc/v1/.well-known/openid-configuration
@@ -58,6 +58,16 @@ build-gfz-image:
       when: manual
       allow_failure: true
 
+build-deploy-image-nginx-ufz-staging:
+  stage: build
+  extends: .docker-in-docker
+  allow_failure: true
+  script:
+    - docker build --tag "$CI_REGISTRY_IMAGE/nginx:ufz-latest" -f docker/build/nginx/ufz/staging/Dockerfile .
+    - docker push "$CI_REGISTRY_IMAGE/nginx:ufz-latest"
+  rules:
+    - if: "$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH"
+
 unittest-lint:
   stage: test
   image: $CONTAINER_TEST_IMAGE
@@ -81,7 +91,7 @@ test-image:
     - export DATABASE_TEST_URL=$DATABASE_TEST_URL
     - export APP_SETTINGS=project.config.TestingConfig
   script:
-    - cd $CI_PROJECT_DIR/app/ && python manage.py test
+    - cd $CI_PROJECT_DIR/app/ && python manage.py cov
 
 release-image:
   stage: release
@@ -103,6 +113,8 @@ deploy-to-rdm-test:
     - rdm-test
   rules:
     - if: "$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH"
+      when: manual
+      allow_failure: true
   image: alpine
   script:
     ## Install SSH agent
@@ -116,46 +128,14 @@ deploy-to-rdm-test:
     ## fire it up (deployment is triggered by "command" parameter in targets authorized_keys
     - ssh root@rdm-test.intranet.ufz.de
 
-deploy-gfz-image:
+trigger-deploy-on-orchestration-gfz-image-develop:
   stage: deploy
-  environment:
-    name: gfzstaging
-    url: https://$GFZ_STAGING_HOST
-  tags:
-    - deploy
-    - staging
-    - gfz
-    - shell
   variables:
-    COMPOSE_PROJECT_NAME: ssmbackend
-    HTTP_ORIGINS: ${GFZ_STAGING_HTTP_ORIGINS}
-    WELL_KNOWN_URL: ${GFZ_STAGING_OIDC_WELL_KNOWN_URL}
-    OIDC_CLIENT_IDS: ${GFZ_STAGING_OIDC_CLIENT_IDS}
-    OIDC_USERNAME_CLAIM: ${GFZ_STAGING_OIDC_USERNAME_CLAIM}
-    DOWNLOAD_ENDPOINT: ${GFZ_STAGING_DOWNLOAD_ENDPOINT}
-    MINIO_ACCESS_KEY: ${GFZ_STAGING_MINIO_ACCESS_KEY}
-    MINIO_SECRET_KEY: ${GFZ_STAGING_MINIO_SECRET_KEY}
-    MINIO_BUCKET_NAME: sms-attachments
-    MINIO_SECURE: "False"
-  before_script:
-    - *docker_login
-  script:
-    - ./ensure_vm_max_map_count.sh
-    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml down --remove-orphans
-    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml rm -f
-    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml pull
-    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml up -d
-    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T db psql -U postgres -c 'CREATE DATABASE db_prod' || echo "prod database already exists"
-    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T db psql -U postgres -c 'CREATE DATABASE db_dev' || echo "dev database already exists"
-    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T db psql -U postgres -c 'CREATE DATABASE db_test;' || echo "test database already exists"
-    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T app python3 manage.py db upgrade
-    - sleep 1m
-    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T app python3 manage.py es reindex
-    - docker rmi $(docker images -q -f dangling=true) || true
-  dependencies:
-    - build-gfz-image
+    UPSTREAM_DEPLOYMENT_ONLY: "true"
+  trigger:
+    project: hub-terra/sms/orchestration
+    branch: main
+    strategy: depend
+  needs: ["build-gfz-image"]
   rules:
     - if: '$CI_COMMIT_REF_PROTECTED == "true"'
-      when: manual
-      allow_failure: true
-

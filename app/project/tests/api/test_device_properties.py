@@ -7,10 +7,13 @@ from project.api.models.base_model import db
 from project.api.models.device import Device
 from project.api.models.device_property import DeviceProperty
 from project.tests.base import BaseTestCase, create_token, query_result_to_list
+from project.tests.base import fake
 
 
 class TestDevicePropertyServices(BaseTestCase):
     """Test device properties."""
+
+    url = base_url + "/device-properties"
 
     def test_post_device_property_api(self):
         """Ensure that we can add a device property."""
@@ -303,3 +306,8 @@ class TestDevicePropertyServices(BaseTestCase):
                 headers=access_headers,
             )
         self.assertNotEqual(response.status_code, 200)
+
+    def test_http_response_not_found(self):
+        """Make sure that the backend responds with 404 HTTP-Code if a resource was not found."""
+        url = f"{self.url}/{fake.random_int()}"
+        _ = super().http_code_404_when_resource_not_found(url)

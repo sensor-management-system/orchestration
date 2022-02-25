@@ -99,9 +99,7 @@ class TestConfigurationDynamicLocationEndActionServices(BaseTestCase):
             "data": {
                 "type": self.object_type,
                 "id": static_location_end_action.id,
-                "attributes": {
-                    "description": "changed",
-                },
+                "attributes": {"description": "changed",},
                 "relationships": {
                     "contact": {
                         "data": {"type": "contact", "id": contact["data"]["id"]}
@@ -121,6 +119,9 @@ class TestConfigurationDynamicLocationEndActionServices(BaseTestCase):
 
         static_location_end_action = add_dynamic_location_end_action_model()
 
-        _ = super().delete_object(
-            url=f"{self.url}/{static_location_end_action.id}",
-        )
+        _ = super().delete_object(url=f"{self.url}/{static_location_end_action.id}",)
+
+    def test_http_response_not_found(self):
+        """Make sure that the backend responds with 404 HTTP-Code if a resource was not found."""
+        url = f"{self.url}/{fake.random_int()}"
+        _ = super().http_code_404_when_resource_not_found(url)

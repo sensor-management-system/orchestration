@@ -9,8 +9,12 @@ from ..models.base_model import db
 from ..models.configuration import Configuration
 from ..models.platform import Platform
 from ..models.unmount_actions import PlatformUnmountAction
+from ..resourceManager.base_resource import (
+    check_if_object_not_found,
+)
 from ..schemas.unmount_actions_schema import PlatformUnmountActionSchema
 from ..token_checker import token_required
+from ...frj_csv_export.resource import ResourceList
 
 
 class PlatformUnmountActionList(ResourceList):
@@ -73,6 +77,10 @@ class PlatformUnmountActionList(ResourceList):
 
 class PlatformUnmountActionDetail(ResourceDetail):
     """Detail resource for platform unmount actions (get, delete, patch)."""
+
+    def before_get(self, args, kwargs):
+        """Return 404 Responses if PlatformUnmountAction not found"""
+        check_if_object_not_found(self._data_layer.model, kwargs)
 
     schema = PlatformUnmountActionSchema
     decorators = (token_required,)

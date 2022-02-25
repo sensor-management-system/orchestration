@@ -6,11 +6,13 @@ from sqlalchemy.orm.exc import NoResultFound
 
 from ..auth.permission_utils import get_collection_with_permissions_for_related_objects
 from ...frj_csv_export.resource import ResourceList
+from .base_resource import check_if_object_not_found
 from ..models.base_model import db
 from ..models.generic_actions import GenericPlatformAction
 from ..models.platform import Platform
 from ..schemas.generic_actions_schema import GenericPlatformActionSchema
 from ..token_checker import token_required
+from ...frj_csv_export.resource import ResourceList
 
 
 class GenericPlatformActionList(ResourceList):
@@ -61,6 +63,10 @@ class GenericPlatformActionList(ResourceList):
 
 class GenericPlatformActionDetail(ResourceDetail):
     """Detail resource for generic platform actions (get, delete, patch)."""
+
+    def before_get(self, args, kwargs):
+        """Return 404 Responses if GenericPlatformAction not found"""
+        check_if_object_not_found(self._data_layer.model, kwargs)
 
     schema = GenericPlatformActionSchema
     decorators = (token_required,)
