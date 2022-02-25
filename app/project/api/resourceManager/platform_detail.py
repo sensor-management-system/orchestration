@@ -15,6 +15,10 @@ class PlatformDetail(ResourceDetail):
     of an object, update an object and delete an Event
     """
 
+    def before_get(self, args, kwargs):
+        """Return 404 Responses if platform not found"""
+        check_if_object_not_found(self._data_layer.model, kwargs)
+
     def delete(self, *args, **kwargs):
         """
         Try to delete an object through sqlalchemy. If could not be done give a ConflictError.

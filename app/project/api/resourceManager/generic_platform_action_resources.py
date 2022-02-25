@@ -47,6 +47,10 @@ class GenericPlatformActionList(ResourceList):
 class GenericPlatformActionDetail(ResourceDetail):
     """Detail resource for generic platform actions (get, delete, patch)."""
 
+    def before_get(self, args, kwargs):
+        """Return 404 Responses if GenericPlatformAction not found"""
+        check_if_object_not_found(self._data_layer.model, kwargs)
+
     schema = GenericPlatformActionSchema
     decorators = (token_required,)
     data_layer = {

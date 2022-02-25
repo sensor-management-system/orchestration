@@ -8,8 +8,9 @@ from project.api.models import Configuration, Contact, GenericConfigurationActio
 from project.api.models.base_model import db
 from project.tests.base import BaseTestCase, fake, generate_token_data, test_file_path
 from project.tests.models.test_configurations_model import generate_configuration_model
-from project.tests.models.test_generic_action_attachment_model import \
-    add_generic_configuration_action_attachment_model
+from project.tests.models.test_generic_action_attachment_model import (
+    add_generic_configuration_action_attachment_model,
+)
 from project.tests.models.test_generic_actions_models import (
     generate_configuration_action_model,
 )
@@ -94,9 +95,7 @@ class TestGenericConfigurationAction(BaseTestCase):
             "data": {
                 "type": self.object_type,
                 "id": configuration_action.id,
-                "attributes": {
-                    "description": "updated",
-                },
+                "attributes": {"description": "updated", },
             }
         }
         _ = super().update_object(
@@ -108,9 +107,7 @@ class TestGenericConfigurationAction(BaseTestCase):
     def test_delete_generic_configuration_action(self):
         """Delete GenericConfigurationAction."""
         configuration_action = generate_configuration_action_model()
-        _ = super().delete_object(
-            url=f"{self.url}/{configuration_action.id}",
-        )
+        _ = super().delete_object(url=f"{self.url}/{configuration_action.id}", )
 
     def test_filtered_by_configuration(self):
         """Ensure that I can prefilter by a specific configuration."""
@@ -205,6 +202,9 @@ class TestGenericConfigurationAction(BaseTestCase):
     def test_delete_generic_configuration_action_with_attachment_link(self):
         """Delete GenericConfigurationAction with an attachment link."""
         configuration_action = add_generic_configuration_action_attachment_model()
-        _ = super().delete_object(
-            url=f"{self.url}/{configuration_action.id}",
-        )
+        _ = super().delete_object(url=f"{self.url}/{configuration_action.id}", )
+
+    def test_http_response_not_found(self):
+        """Make sure that the backend responds with 404 HTTP-Code if a resource was not found."""
+        url = f"{self.url}/{fake.random_int()}"
+        _ = super().http_code_404_when_resource_not_found(url)

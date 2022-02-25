@@ -8,6 +8,9 @@ from ...frj_csv_export.resource import ResourceList
 from ..models.base_model import db
 from ..models.device import Device
 from ..models.software_update_actions import DeviceSoftwareUpdateAction
+from ..resourceManager.base_resource import (
+    check_if_object_not_found,
+)
 from ..schemas.software_update_action_schema import DeviceSoftwareUpdateActionSchema
 from ..token_checker import token_required
 
@@ -41,7 +44,7 @@ class DeviceSoftwareUpdateActionList(ResourceList):
     data_layer = {
         "session": db.session,
         "model": DeviceSoftwareUpdateAction,
-        "methods": {"query": query,},
+        "methods": {"query": query,}
     }
 
 

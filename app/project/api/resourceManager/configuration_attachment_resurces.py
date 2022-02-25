@@ -3,7 +3,7 @@ from flask_rest_jsonapi import ResourceDetail, ResourceList, ResourceRelationshi
 from flask_rest_jsonapi.exceptions import ObjectNotFound, JsonApiException
 from sqlalchemy.orm.exc import NoResultFound
 
-from .base_resource import delete_attachments_in_minio_by_url
+from .base_resource import delete_attachments_in_minio_by_url, check_if_object_not_found
 from ..helpers.errors import ConflictError
 from ..models import Configuration, ConfigurationAttachment
 from ..models.base_model import db
@@ -28,9 +28,7 @@ class ConfigurationAttachmentList(ResourceList):
                 self.session.query(Configuration).filter_by(id=configuration_id).one()
             except NoResultFound:
                 raise ObjectNotFound(
-                    {
-                        "parameter": "id",
-                    },
+                    {"parameter": "id",},
                     "Configuration: {} not found".format(configuration_id),
                 )
             else:
@@ -44,9 +42,7 @@ class ConfigurationAttachmentList(ResourceList):
     data_layer = {
         "session": db.session,
         "model": ConfigurationAttachment,
-        "methods": {
-            "query": query,
-        },
+        "methods": {"query": query,},
     }
 
 
@@ -54,6 +50,10 @@ class ConfigurationAttachmentDetail(ResourceDetail):
     """
     Resource for ConfigurationAttachments.
     """
+
+    def before_get(self, args, kwargs):
+        """Return 404 Responses if ConfigurationAttachment not found"""
+        check_if_object_not_found(self._data_layer.model, kwargs)
 
     def delete(self, *args, **kwargs):
         """
@@ -63,17 +63,21 @@ class ConfigurationAttachmentDetail(ResourceDetail):
         :return:
         """
 
-        attachment = (db.session.query(ConfigurationAttachment).filter_by(id=kwargs["id"]).first())
+        attachment = (
+            db.session.query(ConfigurationAttachment).filter_by(id=kwargs["id"]).first()
+        )
         if attachment is None:
-            raise ObjectNotFound({'pointer': ''}, 'Object Not Found')
+            raise ObjectNotFound({"pointer": ""}, "Object Not Found")
         url = attachment.url
         try:
             super().delete(*args, **kwargs)
         except JsonApiException as e:
-            raise ConflictError("Deletion failed as the attachment is still in use.", str(e))
+            raise ConflictError(
+                "Deletion failed as the attachment is still in use.", str(e)
+            )
 
         delete_attachments_in_minio_by_url(url)
-        final_result = {'meta': {'message': 'Object successfully deleted'}}
+        final_result = {"meta": {"message": "Object successfully deleted"}}
 
         return final_result
 

@@ -180,3 +180,8 @@ class TestPlatformServices(BaseTestCase):
 
         for attachment in [attachment1, attachment2]:
             self.assertIn(str(attachment.id), attachment_ids)
+
+    def test_http_response_not_found(self):
+        """Make sure that the backend responds with 404 HTTP-Code if a resource was not found."""
+        url = f"{self.platform_url}/{fake.random_int()}"
+        _ = super().http_code_404_when_resource_not_found(url)

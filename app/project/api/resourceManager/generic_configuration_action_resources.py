@@ -8,6 +8,9 @@ from ...frj_csv_export.resource import ResourceList
 from ..models.base_model import db
 from ..models.configuration import Configuration
 from ..models.generic_actions import GenericConfigurationAction
+from ..resourceManager.base_resource import (
+    check_if_object_not_found,
+)
 from ..schemas.generic_actions_schema import GenericConfigurationActionSchema
 from ..token_checker import token_required
 
@@ -49,6 +52,11 @@ class GenericConfigurationActionList(ResourceList):
 
 class GenericConfigurationActionDetail(ResourceDetail):
     """Detail resources for generic configuration actions (get, delete, patch)."""
+
+    def before_get(self, args, kwargs):
+        """Return 404 Responses if GenericConfigurationAction not found"""
+        check_if_object_not_found(self._data_layer.model, kwargs)
+
 
     schema = GenericConfigurationActionSchema
     decorators = (token_required,)

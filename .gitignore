@@ -1,5 +1,6 @@
 .idea/
 
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -124,3 +125,6 @@ dmypy.json
 *.swp
 /app_env/.env.dev
 /app_env/env.dev
+
+!docker
+!docker/*

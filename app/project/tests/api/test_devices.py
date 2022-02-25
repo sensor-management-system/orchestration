@@ -356,3 +356,8 @@ class TestDeviceService(BaseTestCase):
 
         for customfield in [customfield1, customfield2]:
             self.assertIn(str(customfield.id), customfield_ids)
+
+    def test_http_response_not_found(self):
+        """Make sure that the backend responds with 404 HTTP-Code if a resource was not found."""
+        url = f"{self.device_url}/{fake.random_int()}"
+        _ = super().http_code_404_when_resource_not_found(url)

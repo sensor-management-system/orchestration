@@ -12,6 +12,8 @@ from project.tests.base import BaseTestCase, create_token, query_result_to_list
 class TestCustomFieldServices(BaseTestCase):
     """Test customfields."""
 
+    url = base_url + "/customfields"
+
     def test_post_customfield_api(self):
         """Ensure that we can add a custom field."""
         # First we need to make sure that we have a device
@@ -365,3 +367,8 @@ class TestCustomFieldServices(BaseTestCase):
             .count()
         )
         self.assertEqual(count_customfields, 0)
+
+    def test_http_response_not_found(self):
+        """Make sure that the backend responds with 404 HTTP-Code if a resource was not found."""
+        url = f"{self.url}/{fake.random_int()}"
+        _ = super().http_code_404_when_resource_not_found(url)

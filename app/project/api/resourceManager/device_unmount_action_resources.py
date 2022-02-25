@@ -60,6 +60,10 @@ class DeviceUnmountActionList(ResourceList):
 class DeviceUnmountActionDetail(ResourceDetail):
     """Detail resource for device unmount actions (get, delete, patch)."""
 
+    def before_get(self, args, kwargs):
+        """Return 404 Responses if DeviceUnmountAction not found"""
+        check_if_object_not_found(self._data_layer.model, kwargs)
+
     schema = DeviceUnmountActionSchema
     decorators = (token_required,)
     data_layer = {

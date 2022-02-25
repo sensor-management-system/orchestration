@@ -315,3 +315,8 @@ class TestDevicePropertyServices(BaseTestCase):
             .count()
         )
         self.assertEqual(count_device_properties, 0)
+
+    def test_http_response_not_found(self):
+        """Make sure that the backend responds with 404 HTTP-Code if a resource was not found."""
+        url = f"{self.url}/{fake.random_int()}"
+        _ = super().http_code_404_when_resource_not_found(url)

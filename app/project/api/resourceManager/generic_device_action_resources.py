@@ -8,6 +8,11 @@ from ...frj_csv_export.resource import ResourceList
 from ..models.base_model import db
 from ..models.device import Device
 from ..models.generic_actions import GenericDeviceAction
+from ..resourceManager.base_resource import (
+    add_created_by_id,
+    add_updated_by_id,
+    check_if_object_not_found,
+)
 from ..schemas.generic_actions_schema import GenericDeviceActionSchema
 from ..token_checker import token_required
 
@@ -46,6 +51,10 @@ class GenericDeviceActionList(ResourceList):
 
 class GenericDeviceActionDetail(ResourceDetail):
     """Detail resource for generic device actions (get, delete, patch)."""
+
+    def before_get(self, args, kwargs):
+        """Return 404 Responses if GenericDeviceAction not found"""
+        check_if_object_not_found(self._data_layer.model, kwargs)
 
     schema = GenericDeviceActionSchema
     decorators = (token_required,)

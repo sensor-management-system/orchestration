@@ -51,11 +51,7 @@ class ConfigurationDetail(ResourceDetail):
         :param kwargs: kwargs from the resource view
         :return:
         """
-        configuration = (
-            db.session.query(Configuration).filter_by(id=kwargs["id"]).first()
-        )
-        if configuration is None:
-            raise ObjectNotFound({"pointer": ""}, "Object Not Found")
+        configuration = check_if_object_not_found(Configuration, kwargs)
         urls = [a.url for a in configuration.configuration_attachments]
         try:
             super().delete(*args, **kwargs)

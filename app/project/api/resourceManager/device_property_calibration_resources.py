@@ -12,6 +12,9 @@ from ..models.calibration_actions import (
 )
 from ..models.device import Device
 from ..models.device_property import DeviceProperty
+from ..resourceManager.base_resource import (
+    check_if_object_not_found,
+)
 from ..schemas.calibration_actions_schema import DevicePropertyCalibrationSchema
 from ..token_checker import token_required
 

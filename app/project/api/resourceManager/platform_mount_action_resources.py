@@ -4,11 +4,13 @@ from flask_rest_jsonapi import ResourceDetail, ResourceRelationship
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.orm.exc import NoResultFound
 
-from ...frj_csv_export.resource import ResourceList
 from ..models.base_model import db
 from ..models.configuration import Configuration
 from ..models.mount_actions import PlatformMountAction
 from ..models.platform import Platform
+from ..resourceManager.base_resource import (
+    check_if_object_not_found,
+)
 from ..schemas.mount_actions_schema import PlatformMountActionSchema
 from ..token_checker import token_required
 
@@ -72,6 +74,10 @@ class PlatformMountActionList(ResourceList):
 
 class PlatformMountActionDetail(ResourceDetail):
     """Detail resource for platform mount actions (get, delete, patch)."""
+
+    def before_get(self, args, kwargs):
+        """Return 404 Responses if PlatformMountAction not found"""
+        check_if_object_not_found(self._data_layer.model, kwargs)
 
     schema = PlatformMountActionSchema
     decorators = (token_required,)

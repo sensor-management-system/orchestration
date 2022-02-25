@@ -193,3 +193,10 @@ class BaseTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn("Object successfully deleted", data["meta"]["message"])
         return data
+
+    def http_code_404_when_resource_not_found(self, url):
+        """
+        Backend should respond with 404 HTTP-Code if resource not found.
+        """
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 404)
