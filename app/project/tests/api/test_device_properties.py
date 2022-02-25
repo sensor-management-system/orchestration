@@ -13,6 +13,8 @@ from project.tests.base import fake
 class TestDevicePropertyServices(BaseTestCase):
     """Test device properties."""
 
+    url = base_url + "/device-properties"
+
     def test_post_device_property_api(self):
         """Ensure that we can add a device property."""
         # First we need to make sure that we have a device

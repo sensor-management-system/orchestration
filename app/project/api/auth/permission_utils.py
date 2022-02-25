@@ -207,6 +207,8 @@ def check_for_permissions(model_class, kwargs):
             prevent_normal_user_from_viewing_not_owned_private_object(object_)
         elif object_.is_internal:
             verify_jwt_in_request()
+    else:
+        raise ObjectNotFound({"pointer": ""}, "Object Not Found")
 
 
 def allow_only_admin_in_a_permission_group_to_remove_it_from_an_object(group_ids):

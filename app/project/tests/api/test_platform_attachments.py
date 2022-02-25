@@ -13,6 +13,8 @@ from project.tests.base import fake
 class TestPlatformAttachmentServices(BaseTestCase):
     """Test platform attachments."""
 
+    url = base_url + "/platform-attachments"
+
     def test_post_platform_attachment_api(self):
         """Ensure that we can add a platform attachment."""
         # First we need to make sure that we have a platform

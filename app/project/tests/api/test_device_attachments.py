@@ -13,6 +13,8 @@ from project.tests.base import fake
 class TestDeviceAttachmentServices(BaseTestCase):
     """Test device attachments."""
 
+    url = base_url + "/device-attachments"
+
     def test_post_device_attachment_api(self):
         """Ensure that we can add a device attachment."""
         # First we need to make sure that we have a device
