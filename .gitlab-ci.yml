@@ -128,18 +128,15 @@ build-deploy-static-files-gfz:
   variables:
     SMS_BACKEND_URL: ${GFZ_STAGING_DEVELOP_BACKEND_URL}
     CV_BACKEND_URL: ${GFZ_STAGING_DEVELOP_SMS_CV_URL}
-    CLIENT_ID: ${GFZ_STAGING_CLIENT_ID}
+    CLIENT_ID: ${GFZ_STAGING_HIFIS_DEV_CLIENT_ID}
     OIDC_REFRESH_TOKEN: "refresh_token"
     OIDC_REFRESH_EXPIRE: 28800
     OIDC_RESPONSE_TYPE: "code"
     OIDC_GRANT_TYPE: "authorization_code"
     OIDC_CHALLANGE: "S256"
-    # The authority is a url like this:
-    # https://idp.institute/cas/oidc
-    # In order to make it work with the nuxt-auth plugin
-    # we need to add a subpath for multiple endpoints
-    AUTHORITY: ${GFZ_STAGING_IDP_AUTORITY}/authorize
-    OIDC_TOKEN: ${GFZ_STAGING_IDP_AUTORITY}/accessToken
+    OIDC_SCHEME: "true"
+    OIDC_WELL_KNOWN: "https://login-dev.helmholtz.de/oauth2/.well-known/openid-configuration"
+    OIDC_SCOPES: "profile openid email eduperson_principal_name"
   before_script:
     - apk add --update curl jq && rm -rf /var/cache/apk/*
   script:
@@ -153,15 +150,15 @@ build-deploy-static-files-gfz:
           --env CV_BACKEND_URL \
           --env INSTITUTE="gfz" \
           --env NUXT_ENV_CLIENT_ID=$CLIENT_ID \
-          --env NUXT_ENV_AUTHORITY=$AUTHORITY \
-          --env NUXT_ENV_OIDC_TOKEN=$OIDC_TOKEN \
+          --env NUXT_ENV_OIDC_SCHEME=$OIDC_SCHEME \
+          --env NUXT_ENV_OIDC_WELL_KNOWN=$OIDC_WELL_KNOWN \
           --env NUXT_ENV_OIDC_REFRESH_TOKEN=$OIDC_REFRESH_TOKEN \
           --env NUXT_ENV_OIDC_REFRESH_EXPIRE=$OIDC_REFRESH_EXPIRE \
           --env NUXT_ENV_OIDC_RESPONSE_TYPE=$OIDC_RESPONSE_TYPE \
           --env NUXT_ENV_OIDC_GRANT_TYPE=$OIDC_GRANT_TYPE \
           --env NUXT_ENV_OIDC_CHALLANGE=$OIDC_CHALLANGE \
           --env NUXT_ENV_ALLOWED_MIMETYPES=$ALLOWED_MIME_TYPES \
-          --env NUXT_ENV_SCOPE="profile" \
+          --env NUXT_ENV_SCOPE="$OIDC_SCOPES" \
           ${CI_REGISTRY_IMAGE}-static:gfz-${TARGET_PACKAGE_VERSION}
     # Use cp to avoid user missmatch with docker volumes
     - docker cp "static-gfz-${TARGET_PACKAGE_VERSION}-container-$CI_JOB_ID":/smsfrontend/dist .
@@ -204,13 +201,16 @@ build-deploy-image-ufz:
   variables:
     SMS_BACKEND_URL: ${UFZ_STAGING_BACKEND_URL}
     CV_BACKEND_URL: ${UFZ_STAGING_SMS_CV_BACKEND_URL}
-#    HOST: ${UFZ_STAGING_HOST}
-    CLIENT_ID: ${UFZ_STAGING_CLIENT_ID}
-    # The authority is a url like this:
-    # https://<domain>/idp/oidc/v1
-    # In order to make it work with the nuxt-auth plugin
-    # we need to add a subpath
-    AUTHORITY: ${UFZ_STAGING_IDP_AUTORITY}/auth
+    # HOST: ${UFZ_STAGING_HOST}
+    CLIENT_ID: ${UFZ_STAGING_PKCE_CLIENT_ID}
+    OIDC_SCHEME: "true"
+    OIDC_WELL_KNOWN: $UFZ_STAGING_OIDC_WELL_KNOWN
+    OIDC_SCOPES: "profile openid email offline_access"
+    OIDC_REFRESH_TOKEN: "refresh_token"
+    OIDC_REFRESH_EXPIRE: 28800
+    OIDC_RESPONSE_TYPE: "code"
+    OIDC_GRANT_TYPE: "authorization_code"
+    OIDC_CHALLANGE: "S256"
   script:
     - |
         docker build --tag "$UFZ_TEST_IMAGE" -f docker/deployment/ufz/Dockerfile \
@@ -218,7 +218,13 @@ build-deploy-image-ufz:
           --build-arg SMS_BACKEND_URL_ARG=$SMS_BACKEND_URL \
           --build-arg CV_BACKEND_URL_ARG=$CV_BACKEND_URL \
           --build-arg CLIENT_ID_ARG=$CLIENT_ID \
-          --build-arg AUTHORITY_ARG=$AUTHORITY \
+          --build-arg NUXT_ENV_OIDC_WELL_KNOWN=$UFZ_STAGING_OIDC_WELL_KNOWN \
+          --build-arg NUXT_ENV_OIDC_SCHEME=$OIDC_SCHEME \
+          --build-arg NUXT_ENV_OIDC_REFRESH_TOKEN=$OIDC_REFRESH_TOKEN \
+          --build-arg NUXT_ENV_OIDC_REFRESH_EXPIRE=$OIDC_REFRESH_EXPIRE \
+          --build-arg NUXT_ENV_OIDC_RESPONSE_TYPE=$OIDC_RESPONSE_TYPE \
+          --build-arg NUXT_ENV_OIDC_GRANT_TYPE=$OIDC_GRANT_TYPE \
+          --build-arg NUXT_ENV_OIDC_CHALLANGE=$OIDC_CHALLANGE \
           --build-arg ALLOWED_MIME_TYPES_ARG=$ALLOWED_MIME_TYPES \
           --build-arg BUILD_DATE=$(date --utc +%FT%TZ) \
           --build-arg VCS_REF=$CI_COMMIT_SHA \
