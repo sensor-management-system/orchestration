@@ -44,6 +44,18 @@ const server = {
   host: '0.0.0.0'
 }
 
+const oidcEndpoints = {
+  configuration: process.env.NUXT_ENV_OIDC_WELL_KNOWN,
+  logout: false
+}
+
+const oAuthEndpoints = {
+  authorization: process.env.NUXT_ENV_AUTHORITY,
+  token: process.env.NUXT_ENV_OIDC_TOKEN,
+  userInfo: process.env.NUXT_ENV_OIDC_USER_INFO,
+  logout: undefined
+}
+
 if (!process.env.STAY_WITH_HTTP || process.env.STAY_WITH_HTTP !== 'true') {
   server.https = {
     key: fs.readFileSync(path.resolve(__dirname, 'server.key')),
@@ -161,15 +173,13 @@ export default {
     },
     strategies: {
       customStrategy: {
-        scheme: '~/config/auth/schemes/customScheme',
-        endpoints: {
-          authorization: process.env.NUXT_ENV_AUTHORITY,
-          token: process.env.NUXT_ENV_OIDC_TOKEN,
-          userInfo: undefined,
-          logout: undefined
-        },
+        // ToDo: Set customOIDCScheme as default, when every deployment uses the customOIDCScheme
+        scheme: process.env.NUXT_ENV_OIDC_SCHEME ? '~/config/auth/schemes/customOIDCScheme' : '~/config/auth/schemes/customScheme',
+        // ToDo: Remove the oAuth endpoint configuration, when every deployment uses the customOIDCScheme
+        endpoints: process.env.NUXT_ENV_OIDC_SCHEME ? oidcEndpoints : oAuthEndpoints,
         token: {
-          property: 'id_token',
+          // ToDo: Set Access token as default, when every deployment uses the customOIDCScheme
+          property: process.env.NUXT_ENV_OIDC_SCHEME ? 'access_token' : 'id_token',
           type: 'Bearer',
           maxAge: 3600
         },
