@@ -97,7 +97,8 @@ services:
       DJANGO_DB_PASSWORD: $IDL_DB_PASSWORD
       DJANGO_DB_HOST: idl-db
       DJANGO_DB_PORT: 5432
-      LDAP_URL: ldaps://ldap.gfz-potsdam.de
+      IDL_TOKEN: $IDL_TOKEN
+      OIDC_WELL_KNOWN_URL: https://login-dev.helmholtz.de/oauth2/.well-known/openid-configuration
     volumes:
       - idl-static-files:/static/idl
     networks:
