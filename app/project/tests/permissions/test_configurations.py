@@ -7,7 +7,6 @@ from project.api.models import Contact, User, Configuration
 from project.api.models.base_model import db
 from project.api.services.idl_services import Idl
 from project.tests.base import BaseTestCase
-from project.tests.base import app
 from project.tests.base import fake
 from project.tests.base import generate_token_data, create_token
 from project.tests.permissions import create_superuser_token
@@ -114,7 +113,7 @@ class TestConfigurationPermissions(BaseTestCase):
         internal_config = Configuration(
             id=33, label=fake.pystr(), is_public=False, is_internal=True,
         )
-        mock_jwt = generate_token_data()
+
         contact = Contact(
             given_name=mock_jwt["given_name"],
             family_name=mock_jwt["family_name"],

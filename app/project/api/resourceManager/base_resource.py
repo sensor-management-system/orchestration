@@ -5,7 +5,7 @@ from ..models import (
     ConfigurationAttachment,
     Contact,
     DeviceAttachment,
-    PlatformAttachment,
+    PlatformAttachment, User,
 )
 from ..models.base_model import db
 from ...api import minio

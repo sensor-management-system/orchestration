@@ -12,8 +12,9 @@ from project.tests.models.test_device_calibration_action_model import (
 from project.tests.models.test_device_calibration_action_model import (
     add_device_property_calibration_model,
 )
-from project.tests.models.test_device_calibration_attachment_model import \
-    add_device_calibration_attachment
+from project.tests.models.test_device_calibration_attachment_model import (
+    add_device_calibration_attachment,
+)
 
 
 class TestDeviceCalibrationAction(BaseTestCase):
@@ -44,12 +45,10 @@ class TestDeviceCalibrationAction(BaseTestCase):
     def test_post_device_calibration_action(self):
         """Create DeviceCalibrationAction."""
         userinfo = generate_userinfo_data()
-        device = Device(short_name="Device 12",
-                        is_public=False,
-                        is_private=False,
-                        is_internal=True,
-                        )
-        mock_jwt = generate_token_data()
+        device = Device(
+            short_name="Device 12", is_public=False, is_private=False, is_internal=True,
+        )
+
         contact = Contact(
             given_name=userinfo["given_name"],
             family_name=userinfo["family_name"],
@@ -86,9 +85,7 @@ class TestDeviceCalibrationAction(BaseTestCase):
             "data": {
                 "type": self.object_type,
                 "id": device_calibration_action.id,
-                "attributes": {
-                    "description": "updated",
-                },
+                "attributes": {"description": "updated",},
             }
         }
         _ = super().update_object(
@@ -100,23 +97,23 @@ class TestDeviceCalibrationAction(BaseTestCase):
     def test_delete_device_calibration_action(self):
         """Delete DeviceCalibrationAction."""
         device_calibration_action = add_device_calibration_action()
-        _ = super().delete_object(
-            url=f"{self.url}/{device_calibration_action.id}",
-        )
+        _ = super().delete_object(url=f"{self.url}/{device_calibration_action.id}",)
 
     def test_filtered_by_device(self):
         """Ensure that I can prefilter by a specific device."""
-        device1 = Device(short_name="sample device",
-                         is_public=False,
-                         is_private=False,
-                         is_internal=True,
-                         )
+        device1 = Device(
+            short_name="sample device",
+            is_public=False,
+            is_private=False,
+            is_internal=True,
+        )
         db.session.add(device1)
-        device2 = Device(short_name="sample device II",
-                         is_public=False,
-                         is_private=False,
-                         is_internal=True,
-                         )
+        device2 = Device(
+            short_name="sample device II",
+            is_public=False,
+            is_private=False,
+            is_internal=True,
+        )
         db.session.add(device2)
 
         contact = Contact(
@@ -153,7 +150,7 @@ class TestDeviceCalibrationAction(BaseTestCase):
         # then test only for the first device
         with self.client:
             url_get_for_device1 = (
-                    base_url + f"/devices/{device1.id}/device-calibration-actions"
+                base_url + f"/devices/{device1.id}/device-calibration-actions"
             )
             response = self.client.get(
                 url_get_for_device1, content_type="application/vnd.api+json"
@@ -167,7 +164,7 @@ class TestDeviceCalibrationAction(BaseTestCase):
         # and test the second device
         with self.client:
             url_get_for_device2 = (
-                    base_url + f"/devices/{device2.id}/device-calibration-actions"
+                base_url + f"/devices/{device2.id}/device-calibration-actions"
             )
             response = self.client.get(
                 url_get_for_device2, content_type="application/vnd.api+json"
@@ -181,7 +178,7 @@ class TestDeviceCalibrationAction(BaseTestCase):
         # and for a non existing
         with self.client:
             url_get_for_non_existing_device = (
-                    base_url + f"/devices/{device2.id + 9999}/device-calibration-actions"
+                base_url + f"/devices/{device2.id + 9999}/device-calibration-actions"
             )
             response = self.client.get(
                 url_get_for_non_existing_device, content_type="application/vnd.api+json"
@@ -193,9 +190,7 @@ class TestDeviceCalibrationAction(BaseTestCase):
         if it linked to an attachment."""
 
         device_calibration_action = add_device_calibration_attachment()
-        _ = super().delete_object(
-            url=f"{self.url}/{device_calibration_action.id}",
-        )
+        _ = super().delete_object(url=f"{self.url}/{device_calibration_action.id}",)
 
     def test_delete_device_caliubration_action_with_device_property_link(self):
         """

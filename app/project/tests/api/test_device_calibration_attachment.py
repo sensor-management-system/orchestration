@@ -39,12 +39,10 @@ class TestDeviceCalibrationAttachment(BaseTestCase):
     def test_post_generic_device_action_attachment(self):
         """Create DeviceCalibrationAttachment"""
         userinfo = generate_userinfo_data()
-        device = Device(short_name="Device 1",
-                        is_public=False,
-                        is_private=False,
-                        is_internal=True,
-                        )
-        mock_jwt = generate_token_data()
+        device = Device(
+            short_name="Device 1", is_public=False, is_private=False, is_internal=True,
+        )
+
         contact = Contact(
             given_name=userinfo["given_name"],
             family_name=userinfo["family_name"],
@@ -90,11 +88,12 @@ class TestDeviceCalibrationAttachment(BaseTestCase):
     def test_update_generic_device_action_attachment(self):
         """Update DeviceCalibrationAttachment"""
         device_calibration_attachment = add_device_calibration_attachment()
-        device = Device(short_name="Device new",
-                        is_public=False,
-                        is_private=False,
-                        is_internal=True,
-                        )
+        device = Device(
+            short_name="Device new",
+            is_public=False,
+            is_private=False,
+            is_internal=True,
+        )
         db.session.add(device)
         db.session.commit()
         attachment = DeviceAttachment(

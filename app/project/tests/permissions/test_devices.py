@@ -161,7 +161,7 @@ class TestDevicePermissions(BaseTestCase):
             is_private=True,
             is_internal=False,
         )
-        mock_jwt = generate_token_data()
+
         contact = Contact(
             given_name=mock_jwt["given_name"],
             family_name=mock_jwt["family_name"],
@@ -322,7 +322,6 @@ class TestDevicePermissions(BaseTestCase):
         """Make sure that a normal user is not allowed a retrieve a not owned
         private device."""
 
-        mock_jwt = generate_token_data()
         c = Contact(
             given_name=mock_jwt["given_name"],
             family_name=mock_jwt["family_name"],

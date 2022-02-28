@@ -3,9 +3,9 @@ import os
 import time
 
 from faker import Faker
-from flask_jwt_extended import create_access_token
 from flask_testing import TestCase
 from project import create_app
+from project.api.auth.flask_openidconnect import open_id_connect
 from project.api.models.base_model import db
 
 app = create_app()
@@ -169,10 +169,7 @@ class BaseTestCase(TestCase):
     def delete_object(self, url):
         """Ensure delete an object."""
         with self.client:
-            response = self.client.delete(
-                url,
-                content_type="application/vnd.api+json",
-            )
+            response = self.client.delete(url, content_type="application/vnd.api+json",)
         data = json.loads(response.data.decode())
         self.assertEqual(response.status_code, 200)
         self.assertIn("Object successfully deleted", data["meta"]["message"])

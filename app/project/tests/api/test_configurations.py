@@ -12,7 +12,6 @@ from project.api.models.device import Device
 from project.api.models.platform import Platform
 from project.tests.base import BaseTestCase, test_file_path
 from project.tests.base import fake, generate_userinfo_data
-from project.tests.models.test_configurations_model import generate_configuration_model
 from project.tests.read_from_json import extract_data_from_json_file
 
 
@@ -711,8 +710,8 @@ class TestConfigurationsService(BaseTestCase):
         url = f"{self.configurations_url}/{fake.random_int()}"
         _ = super().http_code_404_when_resource_not_found(url)
 
+
 def add_a_configuration():
-    mock_jwt = generate_token_data()
     contact = Contact(
         given_name=mock_jwt["given_name"],
         family_name=mock_jwt["family_name"],
