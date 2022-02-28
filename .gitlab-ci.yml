@@ -60,7 +60,7 @@ build-deploy-image-nginx-gfz-staging:
   stage: build
   extends: .docker_build
   variables:
-    CLIENT_ID: ${GFZ_STAGING_OIDC_CLIENT_ID}
+    CLIENT_ID: ${GFZ_STAGING_HIFIS_OIDC_CLIENT_ID}
   script:
     - |
         docker build --tag "$CI_REGISTRY_IMAGE/nginx:gfz-latest" -f docker/build/nginx/gfz/staging/Dockerfile \
@@ -122,7 +122,7 @@ build-deploy-image-nginx-gfz-prod:
   stage: build
   extends: .docker_build
   variables:
-    CLIENT_ID: ${GFZ_PROD_OIDC_CLIENT_ID}
+    CLIENT_ID: ${GFZ_PROD_HIFIS_OIDC_CLIENT_ID}
   script:
     - |
         docker build --tag "$CI_REGISTRY_IMAGE/nginx:gfz-${CI_COMMIT_TAG:-prod-latest}" -f docker/build/nginx/gfz/prod/Dockerfile \
@@ -282,7 +282,6 @@ backup-gfz-staging:
     BACKEND_DB_USER: ${GFZ_STAGING_BACKEND_POSTGRES_USER}
     BACKEND_DB_PASSWORD: ${GFZ_STAGING_BACKEND_POSTGRES_PASSWORD}
     BACKEND_SECRET_KEY: ${GFZ_STAGING_BACKEND_SECRET}
-    OIDC_CLIENT_ID: ${GFZ_STAGING_OIDC_CLIENT_ID}
     DAYS_TO_CLEANUP: 30
     # We want to make sure that we still have 1 GB left to do the backup
     # comparision value is in kb
@@ -348,7 +347,6 @@ backup-gfz-prod:
     BACKEND_DB_USER: ${GFZ_PROD_BACKEND_POSTGRES_USER}
     BACKEND_DB_PASSWORD: ${GFZ_PROD_BACKEND_POSTGRES_PASSWORD}
     BACKEND_SECRET_KEY: ${GFZ_PROD_BACKEND_SECRET}
-    OIDC_CLIENT_ID: ${GFZ_PROD_OIDC_CLIENT_ID}
     DAYS_TO_CLEANUP: 30
     DAYS_TO_CLEANUP_PROJECTSHARE: 180
     # We want to make sure that we still have 1 GB left to do the backup
@@ -423,7 +421,6 @@ deploy-gfz-staging:
     BACKEND_DB_USER: ${GFZ_STAGING_BACKEND_POSTGRES_USER}
     BACKEND_DB_PASSWORD: ${GFZ_STAGING_BACKEND_POSTGRES_PASSWORD}
     BACKEND_SECRET_KEY: ${GFZ_STAGING_BACKEND_SECRET}
-    OIDC_CLIENT_ID: ${GFZ_STAGING_OIDC_CLIENT_ID}
   before_script:
     - *docker_login_gitlab_registry
   script:
@@ -478,7 +475,6 @@ deploy-gfz-staging-develop:
     HTTP_ORIGINS_VOCABULARY: ${GFZ_STAGING_HTTP_ORIGINS_VOCABULARY}
     # App-settings need to be development to enable multiple client IDs
     APP_SETTINGS: "project.config.DevelopmentConfig"
-    OIDC_CLIENT_IDS: ${GFZ_STAGING_DEVELOP_OIDC_CLIENT_IDS}
     NGINX_IMAGE_TAG: gfz-latest-develop
     APPLICATION_PORTS: 3000-3001
     MINIO_PORT: 3002
@@ -526,7 +522,6 @@ deploy-gfz-prod:
     BACKEND_DB_USER: ${GFZ_PROD_BACKEND_POSTGRES_USER}
     BACKEND_DB_PASSWORD: ${GFZ_PROD_BACKEND_POSTGRES_PASSWORD}
     BACKEND_SECRET_KEY: ${GFZ_PROD_BACKEND_SECRET}
-    OIDC_CLIENT_ID: ${GFZ_PROD_OIDC_CLIENT_ID}
   before_script:
     - *docker_login_gitlab_registry
   script:

@@ -39,15 +39,10 @@ ENV INSTITUTE gfz
 ARG CLIENT_ID_ARG
 ENV NUXT_ENV_CLIENT_ID $CLIENT_ID_ARG
 
-# For the moment we stay with the dev idp
-ENV NUXT_ENV_AUTHORITY https://idp-dev.gfz-potsdam.de/cas/oidc/authorize
-ENV NUXT_ENV_OIDC_TOKEN https://idp-dev.gfz-potsdam.de/cas/oidc/accessToken
+ENV NUXT_ENV_OIDC_WELL_KNOWN https://login.helmholtz.de/oauth2/.well-known/openid-configuration
+ENV NUXT_ENV_OIDC_SCHEME true
 
-# And those remaining settings
-# the following is the ufz setting
-#ENV NUXT_ENV_SCOPE openid profile email
-# and this is our setting
-ENV NUXT_ENV_SCOPE profile
+ENV NUXT_ENV_SCOPE profile openid email eduperson_principal_name
 
 # The allowed mime types
 ARG ALLOWED_MIME_TYPES_ARG
