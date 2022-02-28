@@ -70,7 +70,6 @@ services:
       OIDC_USERNAME_CLAIM: ${OIDC_USERNAME_CLAIM:-sub}
       HTTP_ORIGINS: ${HTTP_ORIGINS:-https://localhost.localdomain}
       WELL_KNOWN_URL: ${WELL_KNOWN_URL:-https://webapp.ufz.de/idp/oidc/v1/.well-known/openid-configuration}
-      OIDC_CLIENT_IDS: ${OIDC_CLIENT_IDS:-rdmsvm-implicit-flow}
       MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-admin}
       MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-minio123}
       MINIO_SECURE: ${MINIO_SECURE:-False}
@@ -171,13 +170,14 @@ services:
       CV_BACKEND_URL: ${CV_BACKEND_URL:-/cv/api/v1}
       NUXT_ENV_REDIRECT_URI: ${NUXT_ENV_REDIRECT_URI:-https://localhost.localdomain/login-callback}
       NUXT_ENV_CLIENT_ID: ${NUXT_ENV_CLIENT_ID:-rdmsvm-implicit-flow}
-      NUXT_ENV_AUTHORITY: ${NUXT_ENV_AUTHORITY:-https://webapp.ufz.de/idp/oidc/v1/auth}
+      # We reuse here the variable defined for the backend
+      NUXT_ENV_OIDC_WELL_KNOWN: ${WELL_KNOWN_URL:-https://webapp.ufz.de/idp/oidc/v1/.well-known/openid-configuration}
       STAY_WITH_HTTP: ${STAY_WITH_HTTP:-true }
       NUXT_ENV_ALLOWED_MIMETYPES: ${ALLOWED_MIME_TYPES:-image/png,application/pdf}
       NUXT_ENV_SCOPE: ${NUXT_ENV_SCOPE:-openid profile email}
+      NUXT_ENV_OIDC_SCHEME: ${NUXT_ENV_OIDC_SCHEME}
       NUXT_ENV_OIDC_REFRESH_TOKEN: ${NUXT_ENV_OIDC_REFRESH_TOKEN}
       NUXT_ENV_OIDC_REFRESH_EXPIRE: ${NUXT_ENV_OIDC_REFRESH_EXPIRE}
-      NUXT_ENV_OIDC_TOKEN: ${NUXT_ENV_OIDC_TOKEN}
       NUXT_ENV_OIDC_RESPONSE_TYPE: ${NUXT_ENV_OIDC_RESPONSE_TYPE}
       NUXT_ENV_OIDC_GRANT_TYPE: ${NUXT_ENV_OIDC_GRANT_TYPE}
       NUXT_ENV_OIDC_CHALLANGE: ${NUXT_ENV_OIDC_CHALLANGE}

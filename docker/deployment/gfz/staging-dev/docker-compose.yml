@@ -187,14 +187,13 @@ services:
       STATIC_URL: /static/backend
       APP_SETTINGS: ${APP_SETTINGS}
       DATABASE_URL: postgresql://${BACKEND_DB_USER}:${BACKEND_DB_PASSWORD}@backend-db:5432/backend
-      OIDC_USERNAME_CLAIM: sub
-      WELL_KNOWN_URL: https://idp-dev.gfz-potsdam.de/cas/oidc/.well-known/openid-configuration
-      OIDC_CLIENT_IDS: ${OIDC_CLIENT_IDS}
+      OIDC_USERNAME_CLAIM: eduperson_principal_name
+      WELL_KNOWN_URL: https://login-dev.helmholtz.de/oauth2/.well-known/openid-configuration
       MINIO_ACCESS_KEY: ${MINIO_ROOT_USER}
       MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
       MINIO_BUCKET_NAME: sms-attachments
       MINIO_ENDPOINT: minio:9000
-      DOWNLOAD_ENDPOINT: https://rz-vm64.gfz-potsdam.de
+      DOWNLOAD_ENDPOINT: https://rz-vm64.gfz-potsdam.de:3000
       SECRET_KEY: ${BACKEND_SECRET_KEY}
       ALLOWED_MIME_TYPES: ${ALLOWED_MIME_TYPES}
       ELASTICSEARCH_URL: http://elastic-search:9200
