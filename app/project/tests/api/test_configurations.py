@@ -544,14 +544,12 @@ class TestConfigurationsService(BaseTestCase):
             "aud": "SMS",
         }
         with self.client:
-            response = self.client.delete(
-                url, content_type="application/vnd.api+json", headers=access_headers,
-            )
+            response = self.client.delete(url, content_type="application/vnd.api+json",)
         self.assertEqual(response.status_code, 200)
 
     def test_delete_configuration_with_static_begin_location_action(self):
         """Ensure a configuration with a static_begin_location_action can be deleted"""
-        configuration, contact, user = add_a_configuration()
+        configuration, contact, user = self.add_a_configuration_model()
 
         action_data = {
             "data": {
@@ -585,7 +583,7 @@ class TestConfigurationsService(BaseTestCase):
 
     def test_delete_configuration_with_static_end_location_action(self):
         """Ensure a configuration with a static_end_location_action can be deleted"""
-        configuration, contact, user = add_a_configuration()
+        configuration, contact, user = self.add_a_configuration_model()
 
         action_data = {
             "data": {
@@ -613,7 +611,7 @@ class TestConfigurationsService(BaseTestCase):
 
     def test_delete_configuration_with_dynamic_begin_location_action(self):
         """Ensure a configuration with a dynamic_begin_location_action can be deleted"""
-        configuration, contact, user = add_a_configuration()
+        configuration, contact, user = self.add_a_configuration_model()
 
         action_data = {
             "data": {
@@ -644,7 +642,7 @@ class TestConfigurationsService(BaseTestCase):
 
     def test_delete_configuration_with_dynamic_end_location_action(self):
         """Ensure a configuration with a dynamic_end_location_action can be deleted"""
-        configuration, contact, user = add_a_configuration()
+        configuration, contact, user = self.add_a_configuration_model()
 
         action_data = {
             "data": {
@@ -710,7 +708,7 @@ class TestConfigurationsService(BaseTestCase):
         url = f"{self.configurations_url}/{fake.random_int()}"
         _ = super().http_code_404_when_resource_not_found(url)
 
-    def add_a_configuration(self):
+    def add_a_configuration_model(self):
         contact = self.add_a_contact()
 
         user = User(subject=fake.email(), contact=contact)
