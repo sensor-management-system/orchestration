@@ -4,6 +4,7 @@ import os
 
 from project import base_url
 from project.api.models import Contact
+from project.api.models import User
 from project.api.models.base_model import db
 from project.api.models.configuration import Configuration
 from project.api.models.configuration_device import ConfigurationDevice
@@ -542,7 +543,6 @@ class TestConfigurationsService(BaseTestCase):
             "email": contact.email,
             "aud": "SMS",
         }
-        access_headers = create_token(token_data)
         with self.client:
             response = self.client.delete(
                 url, content_type="application/vnd.api+json", headers=access_headers,
@@ -710,21 +710,16 @@ class TestConfigurationsService(BaseTestCase):
         url = f"{self.configurations_url}/{fake.random_int()}"
         _ = super().http_code_404_when_resource_not_found(url)
 
+    def add_a_configuration(self):
+        contact = self.add_a_contact()
 
-def add_a_configuration():
-    contact = Contact(
-        given_name=mock_jwt["given_name"],
-        family_name=mock_jwt["family_name"],
-        email=mock_jwt["email"],
-    )
-
-    user = User(subject=fake.email(), contact=contact)
-    configuration = Configuration(
-        label=fake.linux_processor(),
-        is_public=False,
-        is_internal=True,
-        created_by=user,
-    )
-    db.session.add_all([contact, user, configuration])
-    db.session.commit()
-    return configuration, contact, user
+        user = User(subject=fake.email(), contact=contact)
+        configuration = Configuration(
+            label=fake.linux_processor(),
+            is_public=False,
+            is_internal=True,
+            created_by=user,
+        )
+        db.session.add_all([contact, user, configuration])
+        db.session.commit()
+        return configuration, contact, user

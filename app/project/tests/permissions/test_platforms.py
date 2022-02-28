@@ -10,6 +10,7 @@ from project.api.services.idl_services import Idl
 from project.tests.base import BaseTestCase
 from project.tests.base import fake
 from project.tests.base import generate_token_data, create_token
+from project.tests.permissions import add_a_contact
 from project.tests.permissions import create_superuser_token
 
 IDL_USER_ACCOUNT = IdlUser(
@@ -169,11 +170,7 @@ class TestPlatformPermissions(BaseTestCase):
             is_internal=False,
         )
 
-        contact = Contact(
-            given_name=mock_jwt["given_name"],
-            family_name=mock_jwt["family_name"],
-            email=mock_jwt["email"],
-        )
+        contact = add_a_contact()
 
         mock_jwt_1 = generate_token_data()
         contact_1 = Contact(
@@ -329,11 +326,7 @@ class TestPlatformPermissions(BaseTestCase):
         """Make sure that a normal user is not allowed a retrieve a not owned 
         private platform."""
 
-        c = Contact(
-            given_name=mock_jwt["given_name"],
-            family_name=mock_jwt["family_name"],
-            email=mock_jwt["email"],
-        )
+        c = add_a_contact()
         user = User(subject="test_user1@test.test", contact=c)
 
         db.session.add_all([c, user])
