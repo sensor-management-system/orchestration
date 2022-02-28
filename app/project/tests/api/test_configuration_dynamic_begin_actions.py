@@ -2,7 +2,7 @@ import json
 
 from project import base_url, db
 from project.api.models import Contact, Device, DeviceProperty
-from project.tests.base import BaseTestCase, fake, generate_token_data
+from project.tests.base import BaseTestCase, fake, generate_userinfo_data
 from project.tests.models.test_configuration_dynamic_action_model import (
     add_dynamic_location_begin_action_model,
 )
@@ -90,11 +90,11 @@ class TestConfigurationDynamicLocationBeginActionServices(BaseTestCase):
             sampling_media_name=fake.pystr(),
         )
         config = generate_configuration_model()
-        mock_jwt = generate_token_data()
+        userinfo = generate_userinfo_data()
         contact = Contact(
-            given_name=mock_jwt["given_name"],
-            family_name=mock_jwt["family_name"],
-            email=mock_jwt["email"],
+            given_name=userinfo["given_name"],
+            family_name=userinfo["family_name"],
+            email=userinfo["email"],
         )
         db.session.add_all(
             [device, x_property, y_property, z_property, contact, config]
@@ -134,11 +134,11 @@ class TestConfigurationDynamicLocationBeginActionServices(BaseTestCase):
         device = Device(short_name="Device 555")
 
         config = generate_configuration_model()
-        mock_jwt = generate_token_data()
+        userinfo = generate_userinfo_data()
         contact = Contact(
-            given_name=mock_jwt["given_name"],
-            family_name=mock_jwt["family_name"],
-            email=mock_jwt["email"],
+            given_name=userinfo["given_name"],
+            family_name=userinfo["family_name"],
+            email=userinfo["email"],
         )
         db.session.add_all([device, contact, config])
         db.session.commit()
@@ -162,14 +162,14 @@ class TestConfigurationDynamicLocationBeginActionServices(BaseTestCase):
     def test_update_configuration_dynamic_begin_location_action(self):
         """Ensure a configuration_dynamic_begin_location_action can be updated."""
         static_location_begin_action = add_dynamic_location_begin_action_model()
-        mock_jwt = generate_token_data()
+        userinfo = generate_userinfo_data()
         contact_data = {
             "data": {
                 "type": "contact",
                 "attributes": {
-                    "given_name": mock_jwt["given_name"],
-                    "family_name": mock_jwt["family_name"],
-                    "email": mock_jwt["email"],
+                    "given_name": userinfo["given_name"],
+                    "family_name": userinfo["family_name"],
+                    "email": userinfo["email"],
                     "website": fake.url(),
                 },
             }
@@ -264,11 +264,11 @@ class TestConfigurationDynamicLocationBeginActionServices(BaseTestCase):
             sampling_media_name=fake.pystr(),
         )
         config = generate_configuration_model()
-        mock_jwt = generate_token_data()
+        userinfo = generate_userinfo_data()
         contact = Contact(
-            given_name=mock_jwt["given_name"],
-            family_name=mock_jwt["family_name"],
-            email=mock_jwt["email"],
+            given_name=userinfo["given_name"],
+            family_name=userinfo["family_name"],
+            email=userinfo["email"],
         )
         db.session.add_all([device, contact, config, x_property])
         db.session.commit()

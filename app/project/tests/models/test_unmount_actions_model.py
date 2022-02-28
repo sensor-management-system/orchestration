@@ -7,7 +7,7 @@ from project.api.models import (
     User,
 )
 from project.api.models.base_model import db
-from project.tests.base import BaseTestCase, fake, generate_token_data
+from project.tests.base import BaseTestCase, fake, generate_userinfo_data
 from project.tests.models.test_configurations_model import generate_configuration_model
 
 
@@ -15,13 +15,13 @@ def add_unmount_device_action():
     d = Device(
         short_name=fake.linux_processor(),
     )
-    mock_jwt = generate_token_data()
+    userinfo = generate_userinfo_data()
     c1 = Contact(
-        given_name=mock_jwt["given_name"],
-        family_name=mock_jwt["family_name"],
-        email=mock_jwt["email"],
+        given_name=userinfo["given_name"],
+        family_name=userinfo["family_name"],
+        email=userinfo["email"],
     )
-    u1 = User(subject=mock_jwt["sub"], contact=c1)
+    u1 = User(subject=userinfo["sub"], contact=c1)
     config = generate_configuration_model()
     unmount_device_action = DeviceUnmountAction(
         end_date=fake.date(),
@@ -40,13 +40,13 @@ def add_unmount_platform_action():
     p = Platform(
         short_name="Platform 55",
     )
-    mock_jwt = generate_token_data()
+    userinfo = generate_userinfo_data()
     c1 = Contact(
-        given_name=mock_jwt["given_name"],
-        family_name=mock_jwt["family_name"],
-        email=mock_jwt["email"],
+        given_name=userinfo["given_name"],
+        family_name=userinfo["family_name"],
+        email=userinfo["email"],
     )
-    u1 = User(subject=mock_jwt["sub"], contact=c1)
+    u1 = User(subject=userinfo["sub"], contact=c1)
     config = generate_configuration_model()
     unmount_platform_action = PlatformUnmountAction(
         end_date=fake.date(),

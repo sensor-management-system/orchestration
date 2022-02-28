@@ -4,18 +4,18 @@ from project.api.models import (
     Contact,
 )
 from project.api.models.base_model import db
-from project.tests.base import BaseTestCase, fake, generate_token_data
+from project.tests.base import BaseTestCase, fake, generate_userinfo_data
 
 from project.tests.models.test_configurations_model import generate_configuration_model
 
 
 def add_static_location_begin_action_model():
     config = generate_configuration_model()
-    mock_jwt = generate_token_data()
+    userinfo = generate_userinfo_data()
     contact = Contact(
-        given_name=mock_jwt["given_name"],
-        family_name=mock_jwt["family_name"],
-        email=mock_jwt["email"],
+        given_name=userinfo["given_name"],
+        family_name=userinfo["family_name"],
+        email=userinfo["email"],
     )
     configuration_static_location_begin_action = ConfigurationStaticLocationBeginAction(
         begin_date=fake.date(),
@@ -36,11 +36,11 @@ def add_static_location_begin_action_model():
 
 def add_static_location_end_action_model():
     config = generate_configuration_model()
-    mock_jwt = generate_token_data()
+    userinfo = generate_userinfo_data()
     contact = Contact(
-        given_name=mock_jwt["given_name"],
-        family_name=mock_jwt["family_name"],
-        email=mock_jwt["email"],
+        given_name=userinfo["given_name"],
+        family_name=userinfo["family_name"],
+        email=userinfo["email"],
     )
     configuration_static_location_end_action = ConfigurationStaticLocationEndAction(
         end_date=fake.date(),

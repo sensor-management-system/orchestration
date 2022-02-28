@@ -2,7 +2,7 @@
 
 from project import base_url, db
 from project.api.models import Contact, Platform, PlatformSoftwareUpdateAction
-from project.tests.base import BaseTestCase, fake, generate_token_data
+from project.tests.base import BaseTestCase, fake, generate_userinfo_data
 from project.tests.models.test_software_update_actions_attachment_model import \
     add_platform_software_update_action_attachment_model
 from project.tests.models.test_software_update_actions_model import (
@@ -37,11 +37,11 @@ class TestPlatformSoftwareUpdateAction(BaseTestCase):
     def test_post_platform_software_update_action(self):
         """Create PlatformSoftwareUpdateAction."""
         platform = Platform(short_name="Platform 111")
-        mock_jwt = generate_token_data()
+        userinfo = generate_userinfo_data()
         contact = Contact(
-            given_name=mock_jwt["given_name"],
-            family_name=mock_jwt["family_name"],
-            email=mock_jwt["email"],
+            given_name=userinfo["given_name"],
+            family_name=userinfo["family_name"],
+            email=userinfo["email"],
         )
         db.session.add_all([platform, contact])
         db.session.commit()

@@ -6,7 +6,7 @@ import os
 from project import base_url
 from project.api.models import Configuration, Contact, GenericConfigurationAction
 from project.api.models.base_model import db
-from project.tests.base import BaseTestCase, fake, generate_token_data, test_file_path
+from project.tests.base import BaseTestCase, fake, generate_userinfo_data, test_file_path
 from project.tests.models.test_configurations_model import generate_configuration_model
 from project.tests.models.test_generic_action_attachment_model import (
     add_generic_configuration_action_attachment_model,
@@ -56,11 +56,11 @@ class TestGenericConfigurationAction(BaseTestCase):
     def test_post_generic_configuration_action(self):
         """Create GenericConfigurationAction."""
         configuration = generate_configuration_model()
-        mock_jwt = generate_token_data()
+        userinfo = generate_userinfo_data()
         contact = Contact(
-            given_name=mock_jwt["given_name"],
-            family_name=mock_jwt["family_name"],
-            email=mock_jwt["email"],
+            given_name=userinfo["given_name"],
+            family_name=userinfo["family_name"],
+            email=userinfo["email"],
         )
         db.session.add_all([configuration, contact])
         db.session.commit()
