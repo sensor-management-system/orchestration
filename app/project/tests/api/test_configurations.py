@@ -535,14 +535,6 @@ class TestConfigurationsService(BaseTestCase):
         self.delete_as_owner(contact, user, url)
 
     def delete_as_owner(self, contact, user, url):
-        token_data = {
-            "sub": user.subject,
-            "iss": "SMS unittest",
-            "family_name": contact.family_name,
-            "given_name": contact.given_name,
-            "email": contact.email,
-            "aud": "SMS",
-        }
         with self.client:
             response = self.client.delete(url, content_type="application/vnd.api+json",)
         self.assertEqual(response.status_code, 200)
@@ -550,7 +542,6 @@ class TestConfigurationsService(BaseTestCase):
     def test_delete_configuration_with_static_begin_location_action(self):
         """Ensure a configuration with a static_begin_location_action can be deleted"""
         configuration, contact, user = self.add_a_configuration_model()
-
         action_data = {
             "data": {
                 "type": "configuration_static_location_begin_action",
