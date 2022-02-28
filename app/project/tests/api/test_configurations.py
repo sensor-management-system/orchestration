@@ -10,12 +10,10 @@ from project.api.models.configuration_device import ConfigurationDevice
 from project.api.models.configuration_platform import ConfigurationPlatform
 from project.api.models.device import Device
 from project.api.models.platform import Platform
-from project.tests.base import BaseTestCase, create_token, test_file_path
-from project.tests.base import fake, generate_token_data
+from project.tests.base import BaseTestCase, test_file_path
+from project.tests.base import fake, generate_userinfo_data
 from project.tests.models.test_configurations_model import generate_configuration_model
 from project.tests.read_from_json import extract_data_from_json_file
-
-from project.api.models import User
 
 
 class TestConfigurationsService(BaseTestCase):
@@ -213,13 +211,11 @@ class TestConfigurationsService(BaseTestCase):
         config_json = extract_data_from_json_file(self.json_data_url, "configuration")
 
         config_data = {"data": {"type": "configuration", "attributes": config_json[1]}}
-        access_headers = create_token()
         with self.client:
             response = self.client.post(
                 self.configurations_url,
                 data=json.dumps(config_data),
                 content_type="application/vnd.api+json",
-                headers=access_headers,
             )
         json.loads(response.data.decode())
         self.assertEqual(response.status_code, 500)
@@ -249,13 +245,11 @@ class TestConfigurationsService(BaseTestCase):
         config_json = extract_data_from_json_file(self.json_data_url, "configuration")
 
         config_data = {"data": {"type": "configuration", "attributes": config_json[2]}}
-        access_headers = create_token()
         with self.client:
             response = self.client.post(
                 self.configurations_url,
                 data=json.dumps(config_data),
                 content_type="application/vnd.api+json",
-                headers=access_headers,
             )
         json.loads(response.data.decode())
         self.assertEqual(response.status_code, 500)
@@ -393,8 +387,7 @@ class TestConfigurationsService(BaseTestCase):
                     ),
                 ]
             )
-            access_headers = create_token()
-            response = self.client.get(url, headers=access_headers)
+            response = self.client.get(url)
             self.assertEqual(response.status_code, 200)
             for key in ["data", "included"]:
                 self.assertIn(key, response.json.keys())
@@ -433,6 +426,7 @@ class TestConfigurationsService(BaseTestCase):
         included actions.
 
         """
+        userinfo = generate_userinfo_data()
         device = Device(
             short_name=fake.linux_processor(),
             is_public=False,
@@ -457,11 +451,10 @@ class TestConfigurationsService(BaseTestCase):
             is_private=False,
             is_internal=True,
         )
-        mock_jwt = generate_token_data()
         contact = Contact(
-            given_name=mock_jwt["given_name"],
-            family_name=mock_jwt["family_name"],
-            email=mock_jwt["email"],
+            given_name=userinfo["given_name"],
+            family_name=userinfo["family_name"],
+            email=userinfo["email"],
         )
         user = User(subject="test_user@test.test", contact=contact)
         configuration = Configuration(
@@ -678,6 +671,45 @@ class TestConfigurationsService(BaseTestCase):
         url = f"{self.configurations_url}/{configuration.id}"
         _ = self.delete_as_owner(contact, user, url)
 
+    @staticmethod
+    def add_a_contact():
+        userinfo = generate_userinfo_data()
+        contact = Contact(
+            given_name=userinfo["given_name"],
+            family_name=userinfo["family_name"],
+            email=userinfo["email"],
+        )
+        db.session.add(contact)
+        db.session.commit()
+        return contact
+
+    def add_a_configuration(self):
+        config_data = {
+            "data": {
+                "attributes": {
+                    "label": "Test configuration",
+                    "project_uri": "",
+                    "project_name": "MOSES",
+                    "status": "draft",
+                    "start_date": "2021-10-22T09:31:00.000Z",
+                    "end_date": "2021-10-31T09:32:00.000Z",
+                    "hierarchy": [],
+                },
+                "type": "configuration",
+            }
+        }
+        config = super().add_object(
+            url=self.configurations_url,
+            data_object=config_data,
+            object_type=self.object_type,
+        )
+        config_id = config["data"]["id"]
+        return config_id
+
+    def test_http_response_not_found(self):
+        """Make sure that the backend responds with 404 HTTP-Code if a resource was not found."""
+        url = f"{self.configurations_url}/{fake.random_int()}"
+        _ = super().http_code_404_when_resource_not_found(url)
 
 def add_a_configuration():
     mock_jwt = generate_token_data()

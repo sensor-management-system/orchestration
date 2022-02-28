@@ -4,15 +4,15 @@ import os
 from project import base_url
 from project.api.models import Contact
 from project.api.models.base_model import db
-from project.tests.base import BaseTestCase, generate_token_data, test_file_path, fake
+from project.tests.base import BaseTestCase, generate_userinfo_data, test_file_path, fake
 
 
 def add_a_contact():
-    mock_jwt = generate_token_data()
+    userinfo = generate_userinfo_data()
     contact = Contact(
-        given_name=mock_jwt["given_name"],
-        family_name=mock_jwt["family_name"],
-        email=mock_jwt["email"],
+        given_name=userinfo["given_name"],
+        family_name=userinfo["family_name"],
+        email=userinfo["email"],
     )
     db.session.add(contact)
     db.session.commit()
@@ -46,11 +46,11 @@ class TestContactServices(BaseTestCase):
 
     def test_post_a_contact(self):
         """Ensure post a contact behaves correctly."""
-        mock_jwt = generate_token_data()
+        userinfo = generate_userinfo_data()
         contact = {
-            "given_name": mock_jwt["given_name"],
-            "family_name": mock_jwt["family_name"],
-            "email": mock_jwt["email"],
+            "given_name": userinfo["given_name"],
+            "family_name": userinfo["family_name"],
+            "email": userinfo["email"],
         }
 
         data = {"data": {"type": "contact", "attributes": contact}}

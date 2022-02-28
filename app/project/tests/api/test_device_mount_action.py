@@ -11,7 +11,7 @@ from project.api.models import (
     Platform,
 )
 from project.api.models.base_model import db
-from project.tests.base import BaseTestCase, fake, generate_token_data
+from project.tests.base import BaseTestCase, fake, generate_userinfo_data
 from project.tests.models.test_configurations_model import generate_configuration_model
 from project.tests.models.test_mount_actions_model import add_mount_device_action_model
 
@@ -43,6 +43,7 @@ class TestDeviceMountAction(BaseTestCase):
 
     def test_post_device_mount_action(self):
         """Create DeviceMountAction."""
+        userinfo = generate_userinfo_data()
         device = Device(
             short_name=fake.linux_processor(),
             is_public=False,
@@ -57,9 +58,9 @@ class TestDeviceMountAction(BaseTestCase):
         )
         mock_jwt = generate_token_data()
         contact = Contact(
-            given_name=mock_jwt["given_name"],
-            family_name=mock_jwt["family_name"],
-            email=mock_jwt["email"],
+            given_name=userinfo["given_name"],
+            family_name=userinfo["family_name"],
+            email=userinfo["email"],
         )
         configuration = generate_configuration_model()
         db.session.add_all([device, parent_platform, contact, configuration])

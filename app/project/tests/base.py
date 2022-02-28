@@ -29,38 +29,7 @@ def query_result_to_list(query_result):
     return [r for r in query_result]
 
 
-def encode_token_date_with_hs256(
-        token_data,
-        identity="test",
-
-):
-    """
-    Make use of the flask_jwt_extended methode create_access_token to
-    encode our payload.
-    The test uses "HS256" as encode algorithm.
-
-    :param identity: Identifier for who this token is for (ex, sub).
-    :param token_data: the jwt payload data
-    :return: encoded jwt
-    """
-    return create_access_token(identity=identity, additional_claims=token_data)
-
-
-def create_token(token_data=None):
-    """
-    Mock a 'HS256' jwt same to the one, that come from idp
-     and prepare the access header.
-
-    :return: an access token dict for the request headers
-    """
-    if token_data is None:
-        token_data = generate_token_data()
-    hs256_token = encode_token_date_with_hs256(token_data)
-    access_headers = {"Authorization": "Bearer {}".format(hs256_token)}
-    return access_headers
-
-
-def generate_token_data():
+def generate_userinfo_data():
     """
     Generate jwt payload data.
 
@@ -104,14 +73,13 @@ def generate_token_data():
 
 
 class BaseTestCase(TestCase):
-    """
-    Base Test Case
-    """
+    """Base test case for all testing the code of our app."""
 
     def create_app(self):
         """
+        Create the flask app - with test settings.
 
-        :return:
+        :return: flask app object
         """
         app.config.from_object("project.config.TestingConfig")
         app.elasticsearch = None
@@ -119,30 +87,54 @@ class BaseTestCase(TestCase):
 
     def setUp(self):
         """
+        Set up for all the tests.
 
-        :return:
+        Clear the database & mock the authentification for all of our tests.
+        :return: None
         """
         db.drop_all()
         db.create_all()
         db.session.commit()
 
+        self.original_verify_valid_access_token_in_request = (
+            open_id_connect.__class__._verify_valid_access_token_in_request
+        )
+
+        def verify_valid_access_token_for_tests(self):
+            """Fake the verification for our tests."""
+            # We don't ask the user info endpoint, we just use data
+            # decoded from the token.
+            # Sub will be the identity.
+            attributes = generate_userinfo_data()
+            identity = attributes["sub"]
+            return identity, attributes
+
+        open_id_connect.__class__._verify_valid_access_token_in_request = (
+            verify_valid_access_token_for_tests
+        )
+
     def tearDown(self):
         """
+        Cleanup after the tests.
 
+        Drop all the content of the database & restore our
+        authentification mechanism.
         :return:
         """
         db.session.remove()
         db.drop_all()
 
+        open_id_connect.__class__._verify_valid_access_token_in_request = (
+            self.original_verify_valid_access_token_in_request
+        )
+
     def add_object(self, url, data_object, object_type):
         """Ensure a new object can be added to the database."""
-        access_headers = create_token()
         with self.client:
             response = self.client.post(
                 url,
                 data=json.dumps(data_object),
                 content_type="application/vnd.api+json",
-                headers=access_headers,
             )
         data = json.loads(response.data.decode())
         self.assertEqual(response.status_code, 201)
@@ -150,16 +142,12 @@ class BaseTestCase(TestCase):
         return data
 
     def add_object_invalid_data_key(self, url, data_object):
-        """Ensure error is thrown if the JSON object
-        has invalid data key."""
-
-        access_headers = create_token()
+        """Ensure error is thrown if the JSON object has invalid data key."""
         with self.client:
             response = self.client.post(
                 url=url,
                 data=json.dumps(data_object),
                 content_type="application/vnd.api+json",
-                headers=access_headers,
             )
         data = json.loads(response.data.decode())
         self.assertEqual(response.status_code, 422)
@@ -167,13 +155,11 @@ class BaseTestCase(TestCase):
 
     def update_object(self, url, data_object, object_type):
         """Ensure a old object can be updated."""
-        access_headers = create_token()
         with self.client:
             response = self.client.patch(
                 url,
                 data=json.dumps(data_object),
                 content_type="application/vnd.api+json",
-                headers=access_headers,
             )
         data = json.loads(response.data.decode())
         self.assertEqual(response.status_code, 200)
@@ -182,12 +168,10 @@ class BaseTestCase(TestCase):
 
     def delete_object(self, url):
         """Ensure delete an object."""
-        access_headers = create_token()
         with self.client:
             response = self.client.delete(
                 url,
                 content_type="application/vnd.api+json",
-                headers=access_headers,
             )
         data = json.loads(response.data.decode())
         self.assertEqual(response.status_code, 200)
@@ -195,8 +179,6 @@ class BaseTestCase(TestCase):
         return data
 
     def http_code_404_when_resource_not_found(self, url):
-        """
-        Backend should respond with 404 HTTP-Code if resource not found.
-        """
+        """Ensure that the backend respond with 404 if resource not found."""
         response = self.client.get(url)
         self.assertEqual(response.status_code, 404)

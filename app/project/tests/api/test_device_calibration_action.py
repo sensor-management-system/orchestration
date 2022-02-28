@@ -5,7 +5,7 @@ import json
 from project import base_url
 from project.api.models import Contact, Device, DeviceCalibrationAction
 from project.api.models.base_model import db
-from project.tests.base import BaseTestCase, fake, generate_token_data
+from project.tests.base import BaseTestCase, fake, generate_userinfo_data
 from project.tests.models.test_device_calibration_action_model import (
     add_device_calibration_action,
 )
@@ -43,6 +43,7 @@ class TestDeviceCalibrationAction(BaseTestCase):
 
     def test_post_device_calibration_action(self):
         """Create DeviceCalibrationAction."""
+        userinfo = generate_userinfo_data()
         device = Device(short_name="Device 12",
                         is_public=False,
                         is_private=False,
@@ -50,9 +51,9 @@ class TestDeviceCalibrationAction(BaseTestCase):
                         )
         mock_jwt = generate_token_data()
         contact = Contact(
-            given_name=mock_jwt["given_name"],
-            family_name=mock_jwt["family_name"],
-            email=mock_jwt["email"],
+            given_name=userinfo["given_name"],
+            family_name=userinfo["family_name"],
+            email=userinfo["email"],
         )
         db.session.add_all([device, contact])
         db.session.commit()

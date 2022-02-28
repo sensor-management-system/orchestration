@@ -6,10 +6,11 @@ from project.api.models import (
     PlatformSoftwareUpdateAction,
 )
 from project.api.models.base_model import db
-from project.tests.base import BaseTestCase, fake, generate_token_data
+from project.tests.base import BaseTestCase, fake, generate_userinfo_data
 
 
 def add_device_software_update_action_model():
+    userinfo = generate_userinfo_data()
     d = Device(short_name="Device 1",
                is_public=False,
                is_private=False,
@@ -17,9 +18,9 @@ def add_device_software_update_action_model():
                )
     mock_jwt = generate_token_data()
     c = Contact(
-        given_name=mock_jwt["given_name"],
-        family_name=mock_jwt["family_name"],
-        email=mock_jwt["email"],
+        given_name=userinfo["given_name"],
+        family_name=userinfo["family_name"],
+        email=userinfo["email"],
     )
     device_software_update_action = DeviceSoftwareUpdateAction(
         device=d,
@@ -37,6 +38,7 @@ def add_device_software_update_action_model():
 
 
 def add_platform_software_update_action_model():
+    userinfo = generate_userinfo_data()
     p = Platform(short_name="Platform 1",
                  is_public=False,
                  is_private=False,
@@ -44,9 +46,9 @@ def add_platform_software_update_action_model():
                  )
     mock_jwt = generate_token_data()
     c = Contact(
-        given_name=mock_jwt["given_name"],
-        family_name=mock_jwt["family_name"],
-        email=mock_jwt["email"],
+        given_name=userinfo["given_name"],
+        family_name=userinfo["family_name"],
+        email=userinfo["email"],
     )
     platform_software_update_action = PlatformSoftwareUpdateAction(
         platform=p,

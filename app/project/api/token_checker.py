@@ -1,54 +1,44 @@
+"""Module that defines a token_required decorator."""
+
 from functools import wraps
 
-from jwt.exceptions import PyJWTError
-from flask import request, current_app
-from flask_jwt_extended import JWTManager, get_jwt, verify_jwt_in_request
-from flask_jwt_extended.exceptions import NoAuthorizationError
+from flask import request
 
+from .auth.flask_openidconnect import open_id_connect
 from .helpers.errors import ForbiddenError
 from .models import Contact, User
 from .models.base_model import db
 
-jwt = JWTManager()
-
 
 def token_required(fn):
+    """Make sure that we have a valid token before executing a views code."""
+
     @wraps(fn)
     def wrapper(*args, **kwargs):
-        if request.method != "GET":
-            try:
-                verify_jwt_in_request()
-            except (PyJWTError, NoAuthorizationError):
-                # In case that our verification fails, it may be due to
-                # an old jwt public key (idp may have changes in the meantime)
-                # So we want to reload our config and test if again
-                if current_app.config["OIDC_JWT_SERVICE"] is not None:
-                    oidc_jwt_service = current_app.config["OIDC_JWT_SERVICE"]
-                    # The service is cached by itself, so we don't run queries all the time
-                    current_app.config[
-                        "JWT_PUBLIC_KEY"
-                    ] = oidc_jwt_service.get_jwt_public_key()
-                    current_app.config[
-                        "JWT_ALGORITHM"
-                    ] = oidc_jwt_service.get_jwt_algorithm()
-
-            # if it fails again, then we don't want to allow the user to use the endpoint
-            verify_jwt_in_request()
+        """Wrap the function & check for the token before."""
+        if request.method not in ["GET", "HEAD", "OPTION"]:
+            open_id_connect.verify_valid_access_token_in_request_and_set_user()
         return fn(*args, **kwargs)
 
     return wrapper
 
 
-@jwt.user_lookup_loader
-def add_user_to_database(_jwt_header, jwt_data):
-    identity = jwt_data["sub"]
-    current_user_exists = db.session.query(User).filter_by(subject=identity).one_or_none()
+@open_id_connect.user_lookup_loader
+def add_user_to_database(identity, user_info_data):
+    """
+    Load the user from the database.
+
+    Also create the user if necessary.
+    """
+    current_user_exists = (
+        db.session.query(User).filter_by(subject=identity).one_or_none()
+    )
 
     if not current_user_exists:
-        given_name = jwt_data["given_name"]
-        family_name = jwt_data["family_name"]
-        email = jwt_data["email"]
-        subject = jwt_data["sub"]
+        given_name = user_info_data["given_name"]
+        family_name = user_info_data["family_name"]
+        email = user_info_data["email"]
+        subject = identity
         current_contact_exists = (
             db.session.query(Contact).filter_by(email=email).first()
         )
@@ -60,11 +50,14 @@ def add_user_to_database(_jwt_header, jwt_data):
         db.session.commit()
         return user
     elif not current_user_exists.active:
-        raise ForbiddenError("This user is deactivated. Please contact your admin in order to reactivate the user.")
+        raise ForbiddenError(
+            "This user is deactivated. Please contact your admin in order to reactivate the user."
+        )
     return current_user_exists
 
 
 def add_contact_if_not_exists(current_contact_exists, email, family_name, given_name):
+    """Create the contact if it is not in the database so far."""
     if not current_contact_exists:
         contact = Contact(given_name=given_name, family_name=family_name, email=email)
         db.session.add(contact)

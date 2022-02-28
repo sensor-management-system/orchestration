@@ -1,13 +1,22 @@
 """Tests for the devices."""
+import json
 import os
+from unittest.mock import patch
 
 from project import base_url
+from project.api.auth.flask_openidconnect import open_id_connect
+from project.api.helpers.errors import UnauthorizedError
 from project.api.models.base_model import db
 from project.api.models.customfield import CustomField
 from project.api.models.device import Device
 from project.api.models.device_attachment import DeviceAttachment
 from project.api.models.device_property import DeviceProperty
-from project.tests.base import BaseTestCase, fake, generate_token_data, test_file_path
+from project.tests.base import (
+    BaseTestCase,
+    fake,
+    generate_userinfo_data,
+    test_file_path,
+)
 from project.tests.read_from_json import extract_data_from_json_file
 
 
@@ -33,16 +42,33 @@ class TestDeviceService(BaseTestCase):
             url=self.device_url, data_object=device_data, object_type=self.object_type
         )
 
+    def test_add_device_non_valid_token(self):
+        """Test the post request for adding a device, but without a valid token."""
+        devices_json = extract_data_from_json_file(self.json_data_url, "devices")
+        device_data = {"data": {"type": "device", "attributes": devices_json[0]}}
+        with patch.object(
+            open_id_connect.__class__, "_verify_valid_access_token_in_request"
+        ) as mock:
+            mock.side_effect = UnauthorizedError("No valid access token.")
+            with self.client:
+                response = self.client.post(
+                    self.device_url,
+                    data=json.dumps(device_data),
+                    content_type="application/vnd.api+json",
+                    headers={"Authorization": "Bearer abcdefghij"},
+                )
+        self.assertEqual(response.status_code, 401)
+
     def test_add_device_contacts_relationship(self):
         """Ensure a new relationship between a device & contact can be created."""
-        mock_jwt = generate_token_data()
+        userinfo = generate_userinfo_data()
         contact_data = {
             "data": {
                 "type": "contact",
                 "attributes": {
-                    "given_name": mock_jwt["given_name"],
-                    "family_name": mock_jwt["family_name"],
-                    "email": mock_jwt["email"],
+                    "given_name": userinfo["given_name"],
+                    "family_name": userinfo["family_name"],
+                    "email": userinfo["email"],
                     "website": fake.url(),
                 },
             }

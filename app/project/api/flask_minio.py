@@ -5,7 +5,7 @@ import time
 
 import minio
 from flask import current_app, _app_ctx_stack, make_response
-from flask_jwt_extended import get_jwt_identity
+from .auth.flask_openidconnect import open_id_connect
 from minio.error import S3Error
 from urllib3.exceptions import ResponseError, MaxRetryError
 
@@ -145,8 +145,7 @@ class FlaskMinio:
             if uploaded_file:
                 ordered_filed = set_a_filename(uploaded_file)
                 content_type = uploaded_file.content_type
-                current_user = db.session.query(User).filter_by(
-                    subject=get_jwt_identity()).one_or_none()
+                current_user = open_id_connect.get_current_user()
                 self.connection.put_object(
                     minio_bucket_name,
                     ordered_filed,
