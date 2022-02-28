@@ -20,6 +20,7 @@ class TestMountDevicePermissions(BaseTestCase):
     """Tests for the Mount Device Permissions."""
 
     url = base_url + "/device-mount-actions"
+    unmount_url = base_url + "/device-unmount-actions"
     object_type = "device_mount_action"
 
     def test_mount_a_public_device(self):
@@ -64,8 +65,8 @@ class TestMountDevicePermissions(BaseTestCase):
         db.session.commit()
         action = (
             db.session.query(DeviceMountAction)
-            .filter_by(id=device_mount_action.id)
-            .one()
+                .filter_by(id=device_mount_action.id)
+                .one()
         )
         self.assertEqual(action.description, device_mount_action.description)
         response = self.client.get(self.url)
@@ -114,8 +115,8 @@ class TestMountDevicePermissions(BaseTestCase):
         db.session.commit()
         action = (
             db.session.query(DeviceMountAction)
-            .filter_by(id=device_mount_action.id)
-            .one()
+                .filter_by(id=device_mount_action.id)
+                .one()
         )
         self.assertEqual(action.description, device_mount_action.description)
 
@@ -314,9 +315,9 @@ class TestMountDevicePermissions(BaseTestCase):
         }
         access_headers = create_token()
         with patch.object(
-            Idl, "get_all_permission_groups"
-        ) as test_get_all_permission_groups:
-            test_get_all_permission_groups.return_value = IDL_USER_ACCOUNT
+                Idl, "get_all_permission_groups_for_a_user"
+        ) as test_get_all_permission_groups_for_a_user:
+            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             with self.client:
                 response = self.client.post(
                     f"{self.url}?include=device,contact,parent_platform,configuration",
@@ -329,7 +330,7 @@ class TestMountDevicePermissions(BaseTestCase):
     def test_post_action_as_a_group_member(self):
         """Ensure mounting a device in a group success
         if it mounted from a group member."""
-        group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permissions_groups
+        group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permission_groups
         device = Device(
             short_name=fake.linux_processor(),
             is_public=True,
@@ -376,9 +377,9 @@ class TestMountDevicePermissions(BaseTestCase):
         }
         access_headers = create_token()
         with patch.object(
-            Idl, "get_all_permission_groups"
-        ) as test_get_all_permission_groups:
-            test_get_all_permission_groups.return_value = IDL_USER_ACCOUNT
+                Idl, "get_all_permission_groups_for_a_user"
+        ) as test_get_all_permission_groups_for_a_user:
+            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             with self.client:
                 response = self.client.post(
                     f"{self.url}?include=device,contact,parent_platform,configuration",
@@ -390,7 +391,7 @@ class TestMountDevicePermissions(BaseTestCase):
 
     def test_delete_action_as_a_group_member(self):
         """Ensure that only admin for mounted device groups can delete an action."""
-        group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permissions_groups
+        group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permission_groups
         device = Device(
             short_name=fake.linux_processor(),
             is_public=True,
@@ -437,9 +438,9 @@ class TestMountDevicePermissions(BaseTestCase):
         }
         access_headers = create_token()
         with patch.object(
-            Idl, "get_all_permission_groups"
-        ) as test_get_all_permission_groups:
-            test_get_all_permission_groups.return_value = IDL_USER_ACCOUNT
+                Idl, "get_all_permission_groups_for_a_user"
+        ) as test_get_all_permission_groups_for_a_user:
+            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             with self.client:
                 response = self.client.post(
                     f"{self.url}?include=device,contact,parent_platform,configuration",
@@ -457,20 +458,232 @@ class TestMountDevicePermissions(BaseTestCase):
         # User not involved in the group
         device.group_ids = [40]
         with patch.object(
-            Idl, "get_all_permission_groups"
-        ) as test_get_all_permission_groups:
-            test_get_all_permission_groups.return_value = IDL_USER_ACCOUNT
+                Idl, "get_all_permission_groups_for_a_user"
+        ) as test_get_all_permission_groups_for_a_user:
+            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             delete_response_user_not_involved = self.client.delete(
                 url, headers=access_headers
             )
             self.assertEqual(delete_response_user_not_involved.status_code, 403)
         # As an admin in the group
-        device.group_ids = IDL_USER_ACCOUNT.administrated_permissions_groups
+        device.group_ids = IDL_USER_ACCOUNT.administrated_permission_groups
         with patch.object(
-            Idl, "get_all_permission_groups"
-        ) as test_get_all_permission_groups:
-            test_get_all_permission_groups.return_value = IDL_USER_ACCOUNT
+                Idl, "get_all_permission_groups_for_a_user"
+        ) as test_get_all_permission_groups_for_a_user:
+            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             delete_response_user_is_admin = self.client.delete(
                 url, headers=access_headers
             )
             self.assertEqual(delete_response_user_is_admin.status_code, 200)
+
+    def test_mount_a_device_in_two_configuration_at_same_time(self):
+        """Ensure mounting a device in more than one configuration at the same time won't success."""
+        group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permission_groups
+        device = Device(
+            short_name=fake.linux_processor(),
+            is_public=True,
+            is_private=False,
+            is_internal=False,
+            group_ids=group_id_test_user_is_member_in_2,
+        )
+        parent_platform = Platform(
+            short_name=fake.linux_processor(),
+            is_public=True,
+            is_private=False,
+            is_internal=False,
+        )
+        mock_jwt = generate_token_data()
+        contact = Contact(
+            given_name=mock_jwt["given_name"],
+            family_name=mock_jwt["family_name"],
+            email=mock_jwt["email"],
+        )
+        first_configuration = generate_configuration_model()
+        second_configuration = generate_configuration_model()
+        db.session.add_all([device, parent_platform, contact, first_configuration, second_configuration])
+        db.session.commit()
+        data = {
+            "data": {
+                "type": self.object_type,
+                "attributes": {
+                    "description": "Test as a group member.",
+                    "begin_date": fake.future_datetime().__str__(),
+                    "offset_x": str(fake.coordinate()),
+                    "offset_y": str(fake.coordinate()),
+                    "offset_z": str(fake.coordinate()),
+                },
+                "relationships": {
+                    "device": {"data": {"type": "device", "id": device.id}},
+                    "contact": {"data": {"type": "contact", "id": contact.id}},
+                    "parent_platform": {
+                        "data": {"type": "platform", "id": parent_platform.id}
+                    },
+                    "configuration": {
+                        "data": {"type": "configuration", "id": first_configuration.id}
+                    },
+                },
+            }
+        }
+        access_headers = create_token()
+        with patch.object(
+                Idl, "get_all_permission_groups_for_a_user"
+        ) as test_get_all_permission_groups_for_a_user:
+            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
+            with self.client:
+                response = self.client.post(
+                    f"{self.url}?include=device,contact,parent_platform,configuration",
+                    data=json.dumps(data),
+                    content_type="application/vnd.api+json",
+                    headers=access_headers,
+                )
+            self.assertEqual(response.status_code, 201)
+        data_2 = {
+            "data": {
+                "type": self.object_type,
+                "attributes": {
+                    "description": "Test as a group member.",
+                    "begin_date": data["data"]["attributes"]["begin_date"],
+                    "offset_x": str(fake.coordinate()),
+                    "offset_y": str(fake.coordinate()),
+                    "offset_z": str(fake.coordinate()),
+                },
+                "relationships": {
+                    "device": {"data": {"type": "device", "id": device.id}},
+                    "contact": {"data": {"type": "contact", "id": contact.id}},
+                    "parent_platform": {
+                        "data": {"type": "platform", "id": parent_platform.id}
+                    },
+                    "configuration": {
+                        "data": {"type": "configuration", "id": second_configuration.id}
+                    },
+                },
+            }
+        }
+        access_headers = create_token()
+        with patch.object(
+                Idl, "get_all_permission_groups_for_a_user"
+        ) as test_get_all_permission_groups_for_a_user:
+            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
+            with self.client:
+                response_2 = self.client.post(
+                    f"{self.url}?include=device,contact,parent_platform,configuration",
+                    data=json.dumps(data_2),
+                    content_type="application/vnd.api+json",
+                    headers=access_headers,
+                )
+        self.assertEqual(response_2.status_code, 409)
+
+    def test_mount_a_device_in_two_configuration_at_different_time(self):
+        """Ensure mounting a device in more than one configuration at the different time will success."""
+        group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permission_groups
+        device = Device(
+            short_name=fake.linux_processor(),
+            is_public=True,
+            is_private=False,
+            is_internal=False,
+            group_ids=group_id_test_user_is_member_in_2,
+        )
+        parent_platform = Platform(
+            short_name=fake.linux_processor(),
+            is_public=True,
+            is_private=False,
+            is_internal=False,
+        )
+        mock_jwt = generate_token_data()
+        contact = Contact(
+            given_name=mock_jwt["given_name"],
+            family_name=mock_jwt["family_name"],
+            email=mock_jwt["email"],
+        )
+        first_configuration = generate_configuration_model()
+        second_configuration = generate_configuration_model()
+        db.session.add_all([device, parent_platform, contact, first_configuration, second_configuration])
+        db.session.commit()
+        mount_data = {
+            "data": {
+                "type": self.object_type,
+                "attributes": {
+                    "description": "Test as a group member.",
+                    "begin_date": "2022-02-18 20:44:42",
+                    "offset_x": str(fake.coordinate()),
+                    "offset_y": str(fake.coordinate()),
+                    "offset_z": str(fake.coordinate()),
+                },
+                "relationships": {
+                    "device": {"data": {"type": "device", "id": device.id}},
+                    "contact": {"data": {"type": "contact", "id": contact.id}},
+                    "parent_platform": {
+                        "data": {"type": "platform", "id": parent_platform.id}
+                    },
+                    "configuration": {
+                        "data": {"type": "configuration", "id": first_configuration.id}
+                    },
+                },
+            }
+        }
+        unmount_data = {
+            "data": {
+                "type": "device_unmount_action",
+                "attributes": {
+                    "description": "test unmount device action",
+                    "end_date": "2022-02-28 20:44:42",
+                },
+                "relationships": {
+                    "device": {"data": {"type": "device", "id": device.id}},
+                    "contact": {"data": {"type": "contact", "id": contact.id}},
+                    "configuration": {
+                        "data": {"type": "configuration", "id": first_configuration.id}
+                    },
+                },
+            }
+        }
+        mount_data_2 = {
+            "data": {
+                "type": self.object_type,
+                "attributes": {
+                    "description": "test mount device action 2",
+                    "begin_date": "2022-03-18 20:44:42",
+                    "offset_x": str(fake.coordinate()),
+                    "offset_y": str(fake.coordinate()),
+                    "offset_z": str(fake.coordinate()),
+                },
+                "relationships": {
+                    "device": {"data": {"type": "device", "id": device.id}},
+                    "contact": {"data": {"type": "contact", "id": contact.id}},
+                    "parent_platform": {
+                        "data": {"type": "platform", "id": parent_platform.id}
+                    },
+                    "configuration": {
+                        "data": {"type": "configuration", "id": second_configuration.id}
+                    },
+                },
+            }
+        }
+        access_headers = create_token()
+        with patch.object(
+                Idl, "get_all_permission_groups_for_a_user"
+        ) as test_get_all_permission_groups_for_a_user:
+            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
+            with self.client:
+                mount_response = self.client.post(
+                    f"{self.url}?include=device,contact,parent_platform,configuration",
+                    data=json.dumps(mount_data),
+                    content_type="application/vnd.api+json",
+                    headers=access_headers,
+                )
+                self.assertEqual(mount_response.status_code, 201)
+
+                unmount_response = self.client.post(
+                    f"{self.unmount_url}?include=device,contact,configuration",
+                    data=json.dumps(unmount_data),
+                    content_type="application/vnd.api+json",
+                    headers=access_headers,
+                )
+                self.assertEqual(unmount_response.status_code, 201)
+                mount_response_2 = self.client.post(
+                    f"{self.url}?include=device,contact,parent_platform,configuration",
+                    data=json.dumps(mount_data_2),
+                    content_type="application/vnd.api+json",
+                    headers=access_headers,
+                )
+                self.assertEqual(mount_response_2.status_code, 201)

@@ -1,7 +1,5 @@
 import json
 
-import click
-from flask import request
 from flask import request
 from flask_jwt_extended import get_current_user
 from flask_jwt_extended import (
@@ -14,7 +12,7 @@ from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy import or_, and_
 
 from ..helpers.errors import ForbiddenError
-from ..models import Configuration,Device, Platform
+from ..models import Configuration, Device, Platform
 from ..models.base_model import db
 from ..services.idl_services import Idl
 

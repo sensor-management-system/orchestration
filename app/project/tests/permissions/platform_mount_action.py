@@ -297,9 +297,9 @@ class TestMountPlatformPermissions(BaseTestCase):
         }
         access_headers = create_token()
         with patch.object(
-            Idl, "get_all_permission_groups"
-        ) as test_get_all_permission_groups:
-            test_get_all_permission_groups.return_value = IDL_USER_ACCOUNT
+            Idl, "get_all_permission_groups_for_a_user"
+        ) as test_get_all_permission_groups_for_a_user:
+            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             with self.client:
                 response = self.client.post(
                     f"{self.url}?include=platform,contact,parent_platform,configuration",
@@ -312,7 +312,7 @@ class TestMountPlatformPermissions(BaseTestCase):
     def test_post_action_as_a_group_member(self):
         """Ensure mounting a platform in a group success
         if it mounted from a group member."""
-        group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permissions_groups
+        group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permission_groups
         platform = Platform(
             short_name=fake.linux_processor(),
             is_public=True,
@@ -359,9 +359,9 @@ class TestMountPlatformPermissions(BaseTestCase):
         }
         access_headers = create_token()
         with patch.object(
-            Idl, "get_all_permission_groups"
-        ) as test_get_all_permission_groups:
-            test_get_all_permission_groups.return_value = IDL_USER_ACCOUNT
+            Idl, "get_all_permission_groups_for_a_user"
+        ) as test_get_all_permission_groups_for_a_user:
+            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             with self.client:
                 response = self.client.post(
                     f"{self.url}?include=platform,contact,parent_platform,configuration",
@@ -373,7 +373,7 @@ class TestMountPlatformPermissions(BaseTestCase):
 
     def test_delete_action_as_a_group_member(self):
         """Ensure that only admin for mounted device groups can delete an action."""
-        group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permissions_groups
+        group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permission_groups
         platform = Platform(
             short_name=fake.linux_processor(),
             is_public=True,
@@ -420,9 +420,9 @@ class TestMountPlatformPermissions(BaseTestCase):
         }
         access_headers = create_token()
         with patch.object(
-            Idl, "get_all_permission_groups"
-        ) as test_get_all_permission_groups:
-            test_get_all_permission_groups.return_value = IDL_USER_ACCOUNT
+            Idl, "get_all_permission_groups_for_a_user"
+        ) as test_get_all_permission_groups_for_a_user:
+            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             with self.client:
                 response = self.client.post(
                     f"{self.url}?include=platform,contact,parent_platform,configuration",
@@ -438,19 +438,20 @@ class TestMountPlatformPermissions(BaseTestCase):
         # User not involved in the group
         platform.group_ids = [40]
         with patch.object(
-            Idl, "get_all_permission_groups"
-        ) as test_get_all_permission_groups:
-            test_get_all_permission_groups.return_value = IDL_USER_ACCOUNT
+            Idl, "get_all_permission_groups_for_a_user"
+        ) as test_get_all_permission_groups_for_a_user:
+            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             delete_response_user_not_involved = self.client.delete(url, headers=access_headers)
             self.assertEqual(delete_response_user_not_involved.status_code, 403)
         # As an admin in the group
         platform.group_ids = (
-            IDL_USER_ACCOUNT.administrated_permissions_groups
+            IDL_USER_ACCOUNT.administrated_permission_groups
         )
         with patch.object(
-            Idl, "get_all_permission_groups"
-        ) as test_get_all_permission_groups:
-            test_get_all_permission_groups.return_value = IDL_USER_ACCOUNT
+            Idl, "get_all_permission_groups_for_a_user"
+        ) as test_get_all_permission_groups_for_a_user:
+            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             delete_response_user_is_admin = self.client.delete(url, headers=access_headers)
             self.assertEqual(delete_response_user_is_admin.status_code, 200)
+
 
