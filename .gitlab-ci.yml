@@ -220,6 +220,7 @@ build-deploy-image-ufz:
           --build-arg CLIENT_ID_ARG=$CLIENT_ID \
           --build-arg NUXT_ENV_OIDC_WELL_KNOWN=$UFZ_STAGING_OIDC_WELL_KNOWN \
           --build-arg NUXT_ENV_OIDC_SCHEME=$OIDC_SCHEME \
+          --build-arg NUXT_ENV_SCOPE=$OIDC_SCOPES \
           --build-arg NUXT_ENV_OIDC_REFRESH_TOKEN=$OIDC_REFRESH_TOKEN \
           --build-arg NUXT_ENV_OIDC_REFRESH_EXPIRE=$OIDC_REFRESH_EXPIRE \
           --build-arg NUXT_ENV_OIDC_RESPONSE_TYPE=$OIDC_RESPONSE_TYPE \
