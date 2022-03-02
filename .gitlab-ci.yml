@@ -40,9 +40,8 @@ cache:
     - dist
 
 variables:
-  UFZ_TEST_IMAGE: $CI_REGISTRY_IMAGE:ufz-$CI_COMMIT_SHORT_SHA
-  UFZ_LATEST_RELEASE_IMAGE: $CI_REGISTRY_IMAGE:ufz-latest
-  UFZ_GIT_TAG_RELEASE_IMAGE: $CI_REGISTRY_IMAGE:ufz-$CI_COMMIT_REF_NAME
+  UFZ_LATEST_IMAGE: $CI_REGISTRY_IMAGE:ufz-latest
+  UFZ_RELEASE_TAG_IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
   ALLOWED_MIME_TYPES: "application/x-abiword,application/x-freearc,application/vnd.amazon.ebook,image/bmp,application/x-bzip,application/x-bzip2,text/csv,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/epub+zip,application/gzip,image/gif,text/html,image/vnd.microsoft.icon,text/calendar,image/jpeg,application/json,application/ld+json,application/vnd.oasis.opendocument.presentation,application/vnd.oasis.opendocument.spreadsheet,application/vnd.oasis.opendocument.text,image/png,application/pdf,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/vnd.rar,application/rtf,image/svg+xml,application/x-tar,image/tiff,image/tiff,text/plain,image/webp,application/xhtml+xml,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/xml,application/vnd.mozilla.xul+xml,application/zip,application/x-7z-compressed"
 
 check-lint:
@@ -213,7 +212,7 @@ build-deploy-image-ufz:
     OIDC_CHALLANGE: "S256"
   script:
     - |
-        docker build --tag "$UFZ_TEST_IMAGE" -f docker/deployment/ufz/Dockerfile \
+        docker build --tag "$UFZ_LATEST_IMAGE" -f docker/deployment/ufz/Dockerfile \
           --build-arg BASE_URL_ARG="/sms/frontend/" \
           --build-arg SMS_BACKEND_URL_ARG=$SMS_BACKEND_URL \
           --build-arg CV_BACKEND_URL_ARG=$CV_BACKEND_URL \
@@ -229,7 +228,7 @@ build-deploy-image-ufz:
           --build-arg BUILD_DATE=$(date --utc +%FT%TZ) \
           --build-arg VCS_REF=$CI_COMMIT_SHA \
           .
-    - docker push "$UFZ_TEST_IMAGE"
+    - docker push "$UFZ_LATEST_IMAGE"
   cache:
     key: ${CI_COMMIT_REF_SLUG}
     paths:
@@ -238,51 +237,27 @@ build-deploy-image-ufz:
     - if: $CI_COMMIT_TAG
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
-release-latest-deploy-image-ufz:
+release-ufz-tag-image:
   stage: release
   extends: .docker_build
-  rules:
-    - if: "$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH"
-  variables:
-    GIT_STRATEGY: none
   script:
-    - docker pull $UFZ_TEST_IMAGE
-    - docker tag $UFZ_TEST_IMAGE $UFZ_LATEST_RELEASE_IMAGE
-    - docker push $UFZ_LATEST_RELEASE_IMAGE
-
-release-tag-deploy-image-ufz:
-  stage: release
-  extends: .docker_build
+    - docker pull $UFZ_LATEST_IMAGE
+    - docker tag $UFZ_LATEST_IMAGE $UFZ_RELEASE_TAG_IMAGE
+    - docker push $UFZ_RELEASE_TAG_IMAGE
+  needs: ["build-deploy-image-ufz"]
   rules:
-    - if: "$CI_COMMIT_TAG"
-  variables:
-    GIT_STRATEGY: none
-  script:
-    - docker pull $UFZ_TEST_IMAGE
-    - docker tag $UFZ_TEST_IMAGE $UFZ_GIT_TAG_RELEASE_IMAGE
-    - docker push $UFZ_GIT_TAG_RELEASE_IMAGE
+    - if: '$CI_COMMIT_REF_PROTECTED && $CI_COMMIT_TAG =~ /^ufz-rc-.*/'
 
-deploy-staging-ufz:
+trigger-deploy-on-orchestration-ufz-stage:
   stage: deploy-staging
-  resource_group: rdm-test
-  environment:
-    name: rdm-test
-    url: https://${UFZ_STAGING_HOST}/sms
-  tags:
-    - rdm-test
+  variables:
+    UPSTREAM_DEPLOYMENT_TARGET: "ufz"
+    SMS_COMPONENT_NAME: "frontend"
+    SMS_COMPONENT_TAG: "$CI_COMMIT_REF_SLUG"
+  trigger:
+    project: hub-terra/sms/orchestration
+    branch: adapt-ufz-deployment
+    strategy: depend
+  needs: ["release-ufz-tag-image"]
   rules:
-    - if: "$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH"
-      when: manual
-      allow_failure: true
-  image: alpine
-  script:
-    ## Install SSH agent
-    - 'command -v ssh-agent >/dev/null || ( apk add openssh-client )'
-    ## Run ssh-agent (inside the build environment)
-    - eval $(ssh-agent -s)
-    ## Add the SSH key stored in SERVER_CD_KEY variable to the agent store
-    - echo "$SERVER_CD_KEY" | base64 -d | ssh-add -
-    ## Add target hostkey to known hosts
-    - mkdir -p ~/.ssh && echo "$SERVER_CD_HOSTKEY" >> ~/.ssh/known_hosts
-    ## fire it up (deployment is triggered by "command" parameter in targets authorized_keys
-    - ssh root@rdm-test.intranet.ufz.de
+    - if: '$CI_COMMIT_REF_PROTECTED && $CI_COMMIT_TAG =~ /^ufz-rc-.*/'
