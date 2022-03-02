@@ -204,7 +204,7 @@ build-deploy-image-ufz:
     # HOST: ${UFZ_STAGING_HOST}
     CLIENT_ID: ${UFZ_STAGING_PKCE_CLIENT_ID}
     OIDC_SCHEME: "true"
-    OIDC_WELL_KNOWN: $UFZ_STAGING_OIDC_WELL_KNOWN
+    OIDC_WELL_KNOWN: ${UFZ_STAGING_OIDC_WELL_KNOWN}
     OIDC_SCOPES: "profile openid email offline_access"
     OIDC_REFRESH_TOKEN: "refresh_token"
     OIDC_REFRESH_EXPIRE: 28800
@@ -218,9 +218,8 @@ build-deploy-image-ufz:
           --build-arg SMS_BACKEND_URL_ARG=$SMS_BACKEND_URL \
           --build-arg CV_BACKEND_URL_ARG=$CV_BACKEND_URL \
           --build-arg CLIENT_ID_ARG=$CLIENT_ID \
-          --build-arg NUXT_ENV_OIDC_WELL_KNOWN=$UFZ_STAGING_OIDC_WELL_KNOWN \
+          --build-arg NUXT_ENV_OIDC_WELL_KNOWN=$OIDC_WELL_KNOWN \
           --build-arg NUXT_ENV_OIDC_SCHEME=$OIDC_SCHEME \
-          --build-arg NUXT_ENV_SCOPE=$OIDC_SCOPES \
           --build-arg NUXT_ENV_OIDC_REFRESH_TOKEN=$OIDC_REFRESH_TOKEN \
           --build-arg NUXT_ENV_OIDC_REFRESH_EXPIRE=$OIDC_REFRESH_EXPIRE \
           --build-arg NUXT_ENV_OIDC_RESPONSE_TYPE=$OIDC_RESPONSE_TYPE \
