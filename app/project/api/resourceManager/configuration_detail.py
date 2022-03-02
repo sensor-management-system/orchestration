@@ -1,4 +1,3 @@
-from flask_jwt_extended import verify_jwt_in_request
 from flask_rest_jsonapi import JsonApiException, ResourceDetail
 
 from .base_resource import delete_attachments_in_minio_by_url, check_if_object_not_found
@@ -11,7 +10,8 @@ from ..helpers.errors import ConflictError, ForbiddenError
 from ..models.base_model import db
 from ..models.configuration import Configuration
 from ..schemas.configuration_schema import ConfigurationSchema
-from ..token_checker import token_required
+from ..token_checker import token_required, current_user_or_none
+from ..auth.flask_openidconnect import open_id_connect
 
 
 class ConfigurationDetail(ResourceDetail):
@@ -25,7 +25,7 @@ class ConfigurationDetail(ResourceDetail):
         config = db.session.query(Configuration).filter_by(id=kwargs["id"]).first()
         if config:
             if config.is_internal:
-                verify_jwt_in_request()
+                current_user_or_none()
 
     def before_patch(self, args, kwargs, data):
         """check if a user has the permission to change this configuration"""

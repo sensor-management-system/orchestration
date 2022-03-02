@@ -1,11 +1,5 @@
 from flask import request
-from flask_jwt_extended import get_current_user
-from flask_jwt_extended import (
-    jwt_required,
-    get_jwt_identity,
-    current_user,
-    verify_jwt_in_request,
-)
+
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy import or_, and_
 
@@ -13,6 +7,8 @@ from ..helpers.errors import ForbiddenError
 from ..models import Configuration
 from ..models.base_model import db
 from ..services.idl_services import Idl
+from ..auth.flask_openidconnect import open_id_connect
+from ..token_checker import token_required, current_user_or_none
 
 
 def is_user_in_a_group(groups_to_check):
@@ -25,7 +21,7 @@ def is_user_in_a_group(groups_to_check):
     """
     if not groups_to_check:
         return True
-    current_user = get_current_user()
+    current_user = open_id_connect.get_current_user()
     idl_groups = Idl().get_all_permission_groups_for_a_user(current_user.subject)
     if not idl_groups:
         return []
@@ -46,7 +42,7 @@ def is_user_admin_in_a_group(groups_to_check):
     """
     if not groups_to_check:
         return True
-    current_user = get_current_user()
+    current_user = open_id_connect.get_current_user()
     idl_groups = Idl().get_all_permission_groups_for_a_user(current_user.subject)
     if not idl_groups:
         return []
@@ -61,7 +57,7 @@ def is_superuser():
     :return: boolean
     """
 
-    current_user = get_current_user()
+    current_user = open_id_connect.get_current_user()
 
     return current_user.is_superuser
 
@@ -73,14 +69,13 @@ def assert_current_user_is_owner_of_object(object_):
     :param object_:
     :return:
     """
-    current_user_id = get_current_user().id
+    current_user_id = open_id_connect.get_current_user().id
     if current_user_id != object_.created_by_id:
         raise ForbiddenError(
             "This is a private object. You should be the owner to modify!"
         )
 
 
-@jwt_required(optional=True)
 def get_collection_with_permissions(model, collection, qs, view_kwargs):
     """Retrieve a collection of objects through sqlalchemy with permissions
     and take the intersection between them and requested collection.
@@ -91,7 +86,8 @@ def get_collection_with_permissions(model, collection, qs, view_kwargs):
     :return set: list of objects
     """
     query = db.session.query(model)
-    if get_jwt_identity() is None:
+    current_user = current_user_or_none(optional=True)
+    if current_user is None:
         query = query.filter_by(is_public=True)
     else:
         if not current_user.is_superuser:
@@ -187,7 +183,7 @@ def prevent_normal_user_from_viewing_not_owned_private_object(object_):
 
     :param object_:
     """
-    verify_jwt_in_request()
+    current_user = current_user_or_none()
     user_id = current_user.id
     if not current_user.is_superuser:
         if object_.created_by_id != user_id:
@@ -206,7 +202,7 @@ def check_for_permissions(model_class, kwargs):
         if object_.is_private:
             prevent_normal_user_from_viewing_not_owned_private_object(object_)
         elif object_.is_internal:
-            verify_jwt_in_request()
+            current_user_or_none()
     else:
         raise ObjectNotFound({"pointer": ""}, "Object Not Found")
 

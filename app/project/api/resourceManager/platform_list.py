@@ -1,6 +1,8 @@
 from ..datalayers.esalchemy import EsSqlalchemyDataLayer
-from ...api.auth.permission_utils import get_collection_with_permissions, \
-    set_default_permission_view_to_internal_if_not_exists_or_all_false
+from ...api.auth.permission_utils import (
+    get_collection_with_permissions,
+    set_default_permission_view_to_internal_if_not_exists_or_all_false,
+)
 from ..models.base_model import db
 from ..models.platform import Platform
 from ..resourceManager.base_resource import add_contact_to_object
@@ -26,6 +28,10 @@ class PlatformList(ResourceList):
         """
 
         return get_collection_with_permissions(self.model, collection, qs, view_kwargs)
+
+    def after_get(self, result):
+        result.update({"meta": {"count": len(result["data"])}})
+        return result
 
     def before_create_object(self, data, *args, **kwargs):
         """
@@ -56,6 +62,8 @@ class PlatformList(ResourceList):
         "session": db.session,
         "model": Platform,
         "class": EsSqlalchemyDataLayer,
-        "methods": {"before_create_object": before_create_object,
-            "after_get_collection": after_get_collection,},
+        "methods": {
+            "before_create_object": before_create_object,
+            "after_get_collection": after_get_collection,
+        },
     }

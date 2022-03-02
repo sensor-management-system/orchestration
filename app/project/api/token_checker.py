@@ -5,7 +5,7 @@ from functools import wraps
 from flask import request
 
 from .auth.flask_openidconnect import open_id_connect
-from .helpers.errors import ForbiddenError
+from .helpers.errors import ForbiddenError, UnauthorizedError
 from .models import Contact, User
 from .models.base_model import db
 
@@ -64,3 +64,15 @@ def add_contact_if_not_exists(current_contact_exists, email, family_name, given_
         db.session.commit()
         return contact
     return current_contact_exists
+
+
+def current_user_or_none(optional=False):
+    """Verify access token and get current user if token is given
+    or return None."""
+    try:
+        open_id_connect.verify_valid_access_token_in_request_and_set_user()
+    except UnauthorizedError:
+        if optional:
+            return None
+    current_user = open_id_connect.get_current_user()
+    return current_user
