@@ -46,8 +46,7 @@ ARG BASE_URL_ARG=/sms
 ENV BASE_URL $BASE_URL_ARG
 
 # And those remaining settings
-ARG NUXT_ENV_SCOPE
-ENV NUXT_ENV_SCOPE $NUXT_ENV_SCOPE
+ENV NUXT_ENV_SCOPE openid profile email
 
 # The allowed mime types
 ARG ALLOWED_MIME_TYPES_ARG
