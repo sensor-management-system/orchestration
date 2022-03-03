@@ -51,7 +51,9 @@ build-gfz-image:
 trigger-deploy-on-orchestration-gfz-image-develop:
   stage: deploy
   variables:
-    UPSTREAM_DEPLOYMENT_ONLY: "true"
+    # We set it to false in order to build also the
+    # nginx (with then includes the idl).
+    UPSTREAM_DEPLOYMENT_ONLY: "false"
   trigger:
     project: hub-terra/sms/orchestration
     branch: right-management-prototype
