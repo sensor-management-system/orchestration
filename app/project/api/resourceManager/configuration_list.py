@@ -1,4 +1,3 @@
-from ..auth.flask_openidconnect import open_id_connect
 from sqlalchemy import or_
 
 from .base_resource import add_contact_to_object
@@ -28,7 +27,7 @@ class ConfigurationList(ResourceList):
         """
 
         query = db.session.query(self.model)
-        current_user = current_user_or_none(True)
+        current_user = current_user_or_none(optional=True)
         if current_user is None:
             query = query.filter_by(is_public=True)
         else:
@@ -55,6 +54,7 @@ class ConfigurationList(ResourceList):
             data["is_internal"] = True
             data["is_public"] = False
         add_created_by_id(data)
+
     def after_post(self, result):
         """
         Automatically add the created user to object contacts
