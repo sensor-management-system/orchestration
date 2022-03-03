@@ -1,6 +1,5 @@
 stages:
   - build
-  - test
   - release
   - deploy
 
@@ -25,16 +24,6 @@ variables:
   tags:
     - docker
 
-build-image:
-  stage: build
-  extends: .docker-in-docker
-  script:
-    - echo "ENV WELL_KNOWN_URL" $WELL_KNOWN_URL >> $CI_PROJECT_DIR/Dockerfile.ci
-    - echo "ENV HTTP_ORIGINS" $HTTP_ORIGINS >> $CI_PROJECT_DIR/Dockerfile.ci
-    - echo "ENV OIDC_USERNAME_CLAIM" $OIDC_USERNAME_CLAIM >> $CI_PROJECT_DIR/Dockerfile.ci
-    - docker build --tag $CONTAINER_TEST_IMAGE .
-    - docker push $CONTAINER_TEST_IMAGE
-
 build-gfz-image:
   stage: build
   extends: .docker-in-docker
@@ -58,75 +47,6 @@ build-gfz-image:
       when: manual
       allow_failure: true
 
-build-deploy-image-nginx-ufz-staging:
-  stage: build
-  extends: .docker-in-docker
-  allow_failure: true
-  script:
-    - docker build --tag "$CI_REGISTRY_IMAGE/nginx:ufz-latest" -f docker/build/nginx/ufz/staging/Dockerfile .
-    - docker push "$CI_REGISTRY_IMAGE/nginx:ufz-latest"
-  rules:
-    - if: "$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH"
-
-unittest-lint:
-  stage: test
-  image: $CONTAINER_TEST_IMAGE
-  before_script:
-    - apt-get update
-    - apt-get install -y  --no-install-recommends gcc libssl-dev libffi-dev musl-dev cargo
-  script:
-    - cd $CI_PROJECT_DIR/app/ && tox
-
-test-image:
-  services:
-    - postgres:12.2-alpine
-  variables:
-    POSTGRES_DB: db_test
-    POSTGRES_USER: postgres
-    POSTGRES_PASSWORD: postgres
-    POSTGRES_HOST_AUTH_METHOD: trust
-  stage: test
-  image: $CONTAINER_TEST_IMAGE
-  before_script:
-    - export DATABASE_TEST_URL=$DATABASE_TEST_URL
-    - export APP_SETTINGS=project.config.TestingConfig
-  script:
-    - cd $CI_PROJECT_DIR/app/ && python manage.py cov
-
-release-image:
-  stage: release
-  extends: .docker-in-docker
-  script:
-    - docker pull $CONTAINER_TEST_IMAGE
-    - docker tag $CONTAINER_TEST_IMAGE $CONTAINER_RELEASE_IMAGE
-    - docker push $CONTAINER_RELEASE_IMAGE
-  rules:
-    - if: "$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH"
-
-deploy-to-rdm-test:
-  stage: deploy
-  resource_group: rdm-test
-  environment:
-    name: RDM-Test
-    url: https://rdm-test.intranet.ufz.de/sms-backend
-  tags:
-    - rdm-test
-  rules:
-    - if: "$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH"
-      when: manual
-      allow_failure: true
-  image: alpine
-  script:
-    ## Install SSH agent
-    - 'command -v ssh-agent >/dev/null || ( apk add openssh-client )'
-    ## Run ssh-agent (inside the build environment)
-    - eval $(ssh-agent -s)
-    ## Add the SSH key stored in SERVER_CD_KEY variable to the agent store
-    - echo "$SERVER_CD_KEY" | base64 -d | ssh-add -
-    ## Add target hostkey to known hosts
-    - mkdir -p ~/.ssh && echo "$SERVER_CD_HOSTKEY" >> ~/.ssh/known_hosts
-    ## fire it up (deployment is triggered by "command" parameter in targets authorized_keys
-    - ssh root@rdm-test.intranet.ufz.de
 
 trigger-deploy-on-orchestration-gfz-image-develop:
   stage: deploy
@@ -134,7 +54,7 @@ trigger-deploy-on-orchestration-gfz-image-develop:
     UPSTREAM_DEPLOYMENT_ONLY: "true"
   trigger:
     project: hub-terra/sms/orchestration
-    branch: main
+    branch: right-management-prototype
     strategy: depend
   needs: ["build-gfz-image"]
   rules:
