@@ -3,6 +3,7 @@ from sqlalchemy import or_
 
 from .base_resource import add_contact_to_object
 from ..datalayers.esalchemy import EsSqlalchemyDataLayer
+from ..helpers.resource_mixin import add_created_by_id
 from ..models.base_model import db
 from ..models.configuration import Configuration
 from ..schemas.configuration_schema import ConfigurationSchema
@@ -53,7 +54,7 @@ class ConfigurationList(ResourceList):
         if not any([data.get("is_public"), data.get("is_internal")]):
             data["is_internal"] = True
             data["is_public"] = False
-
+        add_created_by_id(data)
     def after_post(self, result):
         """
         Automatically add the created user to object contacts

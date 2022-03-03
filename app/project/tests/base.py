@@ -155,7 +155,7 @@ class BaseTestCase(TestCase):
         Cleanup after the tests.
 
         Drop all the content of the database & restore our
-        authentification mechanism.
+        authentication mechanism.
         :return:
         """
         db.session.remove()
