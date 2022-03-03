@@ -71,8 +71,10 @@ def current_user_or_none(optional=False):
     or return None."""
     try:
         open_id_connect.verify_valid_access_token_in_request_and_set_user()
-    except UnauthorizedError:
+        current_user = open_id_connect.get_current_user()
+        return current_user
+    except (UnauthorizedError, AttributeError):
         if optional:
             return None
-    current_user = open_id_connect.get_current_user()
-    return current_user
+        else:
+            raise UnauthorizedError("No valid access token.")

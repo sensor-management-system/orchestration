@@ -1,14 +1,14 @@
 from flask import request
-
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy import or_, and_
 
+from ..auth.flask_openidconnect import open_id_connect
 from ..helpers.errors import ForbiddenError
+from ..helpers.resource_mixin import add_created_by_id, add_updated_by_id
 from ..models import Configuration
 from ..models.base_model import db
 from ..services.idl_services import Idl
-from ..auth.flask_openidconnect import open_id_connect
-from ..token_checker import token_required, current_user_or_none
+from ..token_checker import current_user_or_none
 
 
 def is_user_in_a_group(groups_to_check):
@@ -129,6 +129,9 @@ def check_patch_permission(data, object_to_patch):
         else:
             raise ObjectNotFound(f"Object with id: {data['id']} not found!")
 
+    # Add update by id to data
+    add_updated_by_id(data)
+
 
 def check_deletion_permission(kwargs, object_to_delete):
     """
@@ -175,6 +178,9 @@ def set_default_permission_view_to_internal_if_not_exists_or_all_false(data):
         data["is_internal"] = True
         data["is_public"] = False
         data["is_private"] = False
+
+    # Add created by id to data
+    add_created_by_id(data)
 
 
 def prevent_normal_user_from_viewing_not_owned_private_object(object_):
