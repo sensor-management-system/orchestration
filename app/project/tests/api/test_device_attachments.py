@@ -58,6 +58,7 @@ class TestDeviceAttachmentServices(BaseTestCase):
                 url_post,
                 data=json.dumps(payload),
                 content_type="application/vnd.api+json",
+                headers=create_token(),
             )
         # We expect that it worked and that we have a new entry
         self.assertEqual(response.status_code, 201)
@@ -104,6 +105,7 @@ class TestDeviceAttachmentServices(BaseTestCase):
                 url_post,
                 data=json.dumps(payload),
                 content_type="application/vnd.api+json",
+                headers=create_token(),
             )
         # it will not work, as we miss an important part (the url)
         # 422 => unprocessable entity
@@ -129,6 +131,7 @@ class TestDeviceAttachmentServices(BaseTestCase):
                 url_post,
                 data=json.dumps(payload),
                 content_type="application/vnd.api+json",
+                headers=create_token(),
             )
         # it will not work, as we miss an important part (the device)
         self.assertEqual(response.status_code, 422)
@@ -290,6 +293,7 @@ class TestDeviceAttachmentServices(BaseTestCase):
                 url_patch,
                 data=json.dumps(payload),
                 content_type="application/vnd.api+json",
+                headers=create_token(),
             )
 
         self.assertEqual(response.status_code, 200)
@@ -326,9 +330,8 @@ class TestDeviceAttachmentServices(BaseTestCase):
             self.assertEqual(len(response.get_json()["data"]), 1)
 
             response = self.client.delete(
-                base_url + "/device-attachments/" + str(device_attachment1.id),
+                base_url + "/device-attachments/" + str(device_attachment1.id), headers=create_token(),
             )
-
             # I would expect a 204 (no content), but 200 is good as well
             self.assertTrue(response.status_code in [200, 204])
 

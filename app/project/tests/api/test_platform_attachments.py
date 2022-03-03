@@ -7,6 +7,7 @@ from project.api.models.base_model import db
 from project.api.models.platform import Platform
 from project.api.models.platform_attachment import PlatformAttachment
 from project.tests.base import BaseTestCase, query_result_to_list
+from project.tests.base import create_token
 from project.tests.base import fake
 
 
@@ -59,6 +60,7 @@ class TestPlatformAttachmentServices(BaseTestCase):
                 url_post,
                 data=json.dumps(payload),
                 content_type="application/vnd.api+json",
+                headers=create_token(),
             )
         # We expect that it worked and that we have a new entry
         self.assertEqual(response.status_code, 201)
@@ -105,6 +107,7 @@ class TestPlatformAttachmentServices(BaseTestCase):
                 url_post,
                 data=json.dumps(payload),
                 content_type="application/vnd.api+json",
+                headers=create_token(),
             )
         # it will not work, as we miss an important part (the url)
         # 422 => unprocessable entity
@@ -134,6 +137,7 @@ class TestPlatformAttachmentServices(BaseTestCase):
                 url_post,
                 data=json.dumps(payload),
                 content_type="application/vnd.api+json",
+                headers=create_token(),
             )
         # it will not work, as we miss an important part (the platform)
         self.assertEqual(response.status_code, 422)
@@ -297,6 +301,7 @@ class TestPlatformAttachmentServices(BaseTestCase):
                 url_patch,
                 data=json.dumps(payload),
                 content_type="application/vnd.api+json",
+                headers=create_token(),
             )
 
         self.assertEqual(response.status_code, 200)
@@ -336,6 +341,7 @@ class TestPlatformAttachmentServices(BaseTestCase):
 
             response = self.client.delete(
                 base_url + "/platform-attachments/" + str(platform_attachment1.id),
+                headers=create_token(),
             )
 
             # I would expect a 204 (no content), but 200 is good as well
