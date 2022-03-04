@@ -268,26 +268,24 @@ def check_permissions_for_related_objects(model_class, id_):
             current_user_or_none()
 
 
-def check_post_permission_for_related_objects(object_):
+def check_post_permission_for_related_objects():
     """
     check if a user has the permission to patch a related object.
-
-    :param object_:
     """
     data = json.loads(request.data.decode())["data"]
     if not is_superuser():
         if "device" in data["relationships"]:
             object_id = data["relationships"]["device"]["data"]["id"]
-            object_ = db.session.query(Device).filter_by(id=object_id).one_or_none()
+            related_object = db.session.query(Device).filter_by(id=object_id).one_or_none()
 
         if "platform" in data["relationships"]:
             object_id = data["relationships"]["platform"]["data"]["id"]
-            object_ = db.session.query(Platform).filter_by(id=object_id).one_or_none()
+            related_object = db.session.query(Platform).filter_by(id=object_id).one_or_none()
 
-        if object_.is_private:
-            assert_current_user_is_owner_of_object(object_)
+        if related_object.is_private:
+            assert_current_user_is_owner_of_object(related_object)
         else:
-            group_ids = object_.group_ids
+            group_ids = related_object.group_ids
             if not is_user_in_a_group(group_ids):
                 raise ForbiddenError(
                     "User is not part of any group to edit this object."
@@ -310,7 +308,7 @@ def check_patch_permission_for_related_objects(data, object_to_patch):
         else:
             related_object = object_.platform
         if related_object.is_private:
-            assert_current_user_is_owner_of_object(object_)
+            assert_current_user_is_owner_of_object(related_object)
         else:
             group_ids = related_object.group_ids
             if not is_user_in_a_group(group_ids):
@@ -336,7 +334,7 @@ def check_deletion_permission_for_related_objects(kwargs, object_to_delete):
             related_object = object_.platform
         group_ids = related_object.group_ids
         if group_ids is None:
-            assert_current_user_is_owner_of_object(object_)
+            assert_current_user_is_owner_of_object(related_object)
         if not is_user_admin_in_a_group(group_ids):
             raise ForbiddenError("User is not part of any group to delete this object.")
 

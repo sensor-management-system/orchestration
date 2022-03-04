@@ -70,9 +70,7 @@ def permission_manager(view, view_args, view_kwargs, *args, **kwargs):
                     view_args[0].data_layer["model"], kwargs["id"]
                 )
         elif method == "POST":
-            check_post_permission_for_related_objects(
-                view_args[0].data_layer["model"]
-            )
+            check_post_permission_for_related_objects()
         elif method == "PATCH":
             check_patch_permission_for_related_objects(
                 view_kwargs, view_args[0].data_layer["model"]
