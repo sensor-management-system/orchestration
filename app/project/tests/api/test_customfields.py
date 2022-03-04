@@ -311,7 +311,7 @@ class TestCustomFieldServices(BaseTestCase):
         )
         db.session.add(customfield1)
         db.session.commit()
-        access_headers = create_token()
+        # access_headers = create_token()
         with self.client:
             response = self.client.get(
                 base_url + "/devices/" + str(device1.id) + "/customfields",
