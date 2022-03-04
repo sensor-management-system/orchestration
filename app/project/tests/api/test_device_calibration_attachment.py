@@ -5,7 +5,7 @@ from project.api.models import (
     DeviceAttachment,
     DeviceCalibrationAction,
 )
-from project.tests.base import BaseTestCase, fake, generate_token_data
+from project.tests.base import BaseTestCase, fake, generate_userinfo_data
 from project.tests.models.test_device_calibration_attachment_model import (
     add_device_calibration_attachment,
 )
@@ -38,16 +38,15 @@ class TestDeviceCalibrationAttachment(BaseTestCase):
 
     def test_post_generic_device_action_attachment(self):
         """Create DeviceCalibrationAttachment"""
-        device = Device(short_name="Device 1",
-                        is_public=False,
-                        is_private=False,
-                        is_internal=True,
-                        )
-        mock_jwt = generate_token_data()
+        userinfo = generate_userinfo_data()
+        device = Device(
+            short_name="Device 1", is_public=False, is_private=False, is_internal=True,
+        )
+
         contact = Contact(
-            given_name=mock_jwt["given_name"],
-            family_name=mock_jwt["family_name"],
-            email=mock_jwt["email"],
+            given_name=userinfo["given_name"],
+            family_name=userinfo["family_name"],
+            email=userinfo["email"],
         )
         db.session.add(device)
         db.session.commit()
@@ -89,11 +88,12 @@ class TestDeviceCalibrationAttachment(BaseTestCase):
     def test_update_generic_device_action_attachment(self):
         """Update DeviceCalibrationAttachment"""
         device_calibration_attachment = add_device_calibration_attachment()
-        device = Device(short_name="Device new",
-                        is_public=False,
-                        is_private=False,
-                        is_internal=True,
-                        )
+        device = Device(
+            short_name="Device new",
+            is_public=False,
+            is_private=False,
+            is_internal=True,
+        )
         db.session.add(device)
         db.session.commit()
         attachment = DeviceAttachment(

@@ -6,18 +6,21 @@ from project.api.models import (
     DevicePropertyCalibration,
 )
 from project.api.models.base_model import db
-from project.tests.base import BaseTestCase, fake, generate_token_data
+from project.tests.base import BaseTestCase, fake, generate_userinfo_data
 
 
-def add_device_calibration_action(public=True, private=False, internal=False):
-    device = Device(
-        short_name="Device 12", is_public=public, is_private=private, is_internal=internal,
-    )
-    mock_jwt = generate_token_data()
+def add_device_calibration_action():
+    device = Device(short_name="Device 12",
+                    is_public=False,
+                    is_private=False,
+                    is_internal=True,
+                    )
+    device = Device(short_name="Device 12")
+    userinfo = generate_userinfo_data()
     contact = Contact(
-        given_name=mock_jwt["given_name"],
-        family_name=mock_jwt["family_name"],
-        email=mock_jwt["email"],
+        given_name=userinfo["given_name"],
+        family_name=userinfo["family_name"],
+        email=userinfo["email"],
     )
     device_calibration_action = DeviceCalibrationAction(
         description="Test DeviceCalibrationAction",
@@ -34,9 +37,11 @@ def add_device_calibration_action(public=True, private=False, internal=False):
 
 
 def add_device_property_calibration_model():
-    device = Device(
-        short_name="Device 20", is_public=True, is_private=False, is_internal=False,
-    )
+    device = Device(short_name="Device 20",
+                    is_public=False,
+                    is_private=False,
+                    is_internal=True,
+                    )
     device_property = DeviceProperty(
         device=device,
         measuring_range_min=fake.pyfloat(),
@@ -53,11 +58,11 @@ def add_device_property_calibration_model():
         sampling_media_uri=fake.uri(),
         sampling_media_name=fake.pystr(),
     )
-    mock_jwt = generate_token_data()
+    userinfo = generate_userinfo_data()
     contact = Contact(
-        given_name=mock_jwt["given_name"],
-        family_name=mock_jwt["family_name"],
-        email=mock_jwt["email"],
+        given_name=userinfo["given_name"],
+        family_name=userinfo["family_name"],
+        email=userinfo["email"],
     )
     device_calibration_action = DeviceCalibrationAction(
         description="Test DeviceCalibrationAction",

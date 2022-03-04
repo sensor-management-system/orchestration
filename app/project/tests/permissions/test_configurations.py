@@ -3,13 +3,13 @@ import json
 from unittest.mock import patch
 
 from project import base_url
-from project.api.models import Contact, User, Configuration
+from project.api.models import User, Configuration
 from project.api.models.base_model import db
 from project.api.services.idl_services import Idl
 from project.tests.base import BaseTestCase
-from project.tests.base import app
+from project.tests.base import create_token
 from project.tests.base import fake
-from project.tests.base import generate_token_data, create_token
+from project.tests.permissions import add_a_contact
 from project.tests.permissions import create_superuser_token
 from project.tests.permissions.test_platforms import IDL_USER_ACCOUNT
 
@@ -114,19 +114,9 @@ class TestConfigurationPermissions(BaseTestCase):
         internal_config = Configuration(
             id=33, label=fake.pystr(), is_public=False, is_internal=True,
         )
-        mock_jwt = generate_token_data()
-        contact = Contact(
-            given_name=mock_jwt["given_name"],
-            family_name=mock_jwt["family_name"],
-            email=mock_jwt["email"],
-        )
 
-        mock_jwt_1 = generate_token_data()
-        contact_1 = Contact(
-            given_name=mock_jwt_1["given_name"],
-            family_name=mock_jwt_1["family_name"],
-            email=mock_jwt_1["email"],
-        )
+        contact = add_a_contact()
+        contact_1 = add_a_contact()
 
         user = User(subject="test_user@test.test", contact=contact)
         user_1 = User(subject="test_user1@test.test", contact=contact_1)

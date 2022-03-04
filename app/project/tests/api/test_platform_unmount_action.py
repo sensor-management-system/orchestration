@@ -5,7 +5,7 @@ import json
 from project import base_url
 from project.api.models import Configuration, Contact, Platform, PlatformUnmountAction
 from project.api.models.base_model import db
-from project.tests.base import BaseTestCase, fake, generate_token_data
+from project.tests.base import BaseTestCase, fake, generate_userinfo_data
 from project.tests.base import create_token
 from project.tests.models.test_configurations_model import generate_configuration_model
 from project.tests.models.test_unmount_actions_model import add_unmount_platform_action
@@ -34,6 +34,7 @@ class TestPlatformUnmountAction(BaseTestCase):
             unmount_platform_action.end_date.strftime("%Y-%m-%dT%H:%M:%S"),
             data["data"][0]["attributes"]["end_date"],
         )
+
     def test_post_platform_unmount_action(self):
         """Create PlatformUnmountAction."""
         platform = Platform(
@@ -42,11 +43,11 @@ class TestPlatformUnmountAction(BaseTestCase):
             is_private=False,
             is_internal=False,
         )
-        mock_jwt = generate_token_data()
+        userinfo = generate_userinfo_data()
         contact = Contact(
-            given_name=mock_jwt["given_name"],
-            family_name=mock_jwt["family_name"],
-            email=mock_jwt["email"],
+            given_name=userinfo["given_name"],
+            family_name=userinfo["family_name"],
+            email=userinfo["email"],
         )
         config = generate_configuration_model()
         db.session.add_all([platform, contact, config])
@@ -80,7 +81,7 @@ class TestPlatformUnmountAction(BaseTestCase):
             "data": {
                 "type": self.object_type,
                 "id": unmount_platform_action.id,
-                "attributes": {"description": "updated",},
+                "attributes": {"description": "updated", },
             }
         }
         _ = super().update_object(
@@ -165,8 +166,8 @@ class TestPlatformUnmountAction(BaseTestCase):
         # then test only for the first configuration
         with self.client:
             url_get_for_configuration1 = (
-                base_url
-                + f"/configurations/{configuration1.id}/platform-unmount-actions"
+                    base_url
+                    + f"/configurations/{configuration1.id}/platform-unmount-actions"
             )
             response = self.client.get(
                 url_get_for_configuration1, content_type="application/vnd.api+json"
@@ -180,8 +181,8 @@ class TestPlatformUnmountAction(BaseTestCase):
         # and test the second configuration
         with self.client:
             url_get_for_configuration2 = (
-                base_url
-                + f"/configurations/{configuration2.id}/platform-unmount-actions"
+                    base_url
+                    + f"/configurations/{configuration2.id}/platform-unmount-actions"
             )
             response = self.client.get(
                 url_get_for_configuration2, content_type="application/vnd.api+json"
@@ -195,8 +196,8 @@ class TestPlatformUnmountAction(BaseTestCase):
         # and for a non existing
         with self.client:
             url_get_for_non_existing_configuration = (
-                base_url
-                + f"/configurations/{configuration2.id + 9999}/platform-unmount-actions"
+                    base_url
+                    + f"/configurations/{configuration2.id + 9999}/platform-unmount-actions"
             )
             response = self.client.get(
                 url_get_for_non_existing_configuration,
@@ -259,7 +260,7 @@ class TestPlatformUnmountAction(BaseTestCase):
         # test only for the first platform
         with self.client:
             url_get_for_platform1 = (
-                base_url + f"/platforms/{platform1.id}/platform-unmount-actions"
+                    base_url + f"/platforms/{platform1.id}/platform-unmount-actions"
             )
             response = self.client.get(
                 url_get_for_platform1, content_type="application/vnd.api+json"
@@ -273,7 +274,7 @@ class TestPlatformUnmountAction(BaseTestCase):
         # and test the second platform
         with self.client:
             url_get_for_platform2 = (
-                base_url + f"/platforms/{platform2.id}/platform-unmount-actions"
+                    base_url + f"/platforms/{platform2.id}/platform-unmount-actions"
             )
             response = self.client.get(
                 url_get_for_platform2, content_type="application/vnd.api+json"
@@ -287,7 +288,7 @@ class TestPlatformUnmountAction(BaseTestCase):
         # and for a non existing
         with self.client:
             url_get_for_non_existing_platform = (
-                base_url + f"/platforms/{platform2.id + 9999}/platform-unmount-actions"
+                    base_url + f"/platforms/{platform2.id + 9999}/platform-unmount-actions"
             )
             response = self.client.get(
                 url_get_for_non_existing_platform,

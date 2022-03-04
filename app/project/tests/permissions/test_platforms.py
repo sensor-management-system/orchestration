@@ -3,13 +3,14 @@ import json
 from unittest.mock import patch
 
 from project import base_url
-from project.api.models import Contact, User, Platform
+from project.api.models import User, Platform
 from project.api.models.base_model import db
 from project.api.models.idl_user import IdlUser
 from project.api.services.idl_services import Idl
 from project.tests.base import BaseTestCase
+from project.tests.base import create_token
 from project.tests.base import fake
-from project.tests.base import generate_token_data, create_token
+from project.tests.permissions import add_a_contact
 from project.tests.permissions import create_superuser_token
 
 IDL_USER_ACCOUNT = IdlUser(
@@ -168,19 +169,9 @@ class TestPlatformPermissions(BaseTestCase):
             is_private=True,
             is_internal=False,
         )
-        mock_jwt = generate_token_data()
-        contact = Contact(
-            given_name=mock_jwt["given_name"],
-            family_name=mock_jwt["family_name"],
-            email=mock_jwt["email"],
-        )
 
-        mock_jwt_1 = generate_token_data()
-        contact_1 = Contact(
-            given_name=mock_jwt_1["given_name"],
-            family_name=mock_jwt_1["family_name"],
-            email=mock_jwt_1["email"],
-        )
+        contact = add_a_contact()
+        contact_1 = add_a_contact()
 
         user = User(subject="test_user@test.test", contact=contact)
         user_1 = User(subject="test_user1@test.test", contact=contact_1)
@@ -329,12 +320,7 @@ class TestPlatformPermissions(BaseTestCase):
         """Make sure that a normal user is not allowed a retrieve a not owned 
         private platform."""
 
-        mock_jwt = generate_token_data()
-        c = Contact(
-            given_name=mock_jwt["given_name"],
-            family_name=mock_jwt["family_name"],
-            email=mock_jwt["email"],
-        )
+        c = add_a_contact()
         user = User(subject="test_user1@test.test", contact=c)
 
         db.session.add_all([c, user])
@@ -392,7 +378,9 @@ class TestPlatformPermissions(BaseTestCase):
                     }
                 }
                 url = f"{self.platform_url}/{data['data']['id']}"
-                res = super().update_object(url, platform_data_changed, self.object_type)
+                res = super().update_object(
+                    url, platform_data_changed, self.object_type
+                )
                 self.assertEqual(
                     res["data"]["attributes"]["short_name"],
                     platform_data_changed["data"]["attributes"]["short_name"],
@@ -418,7 +406,10 @@ class TestPlatformPermissions(BaseTestCase):
 
             self.assertEqual(response.status_code, 201)
 
-            self.assertEqual(data["data"]["attributes"]["group_ids"], group_id_test_user_is_not_included)
+            self.assertEqual(
+                data["data"]["attributes"]["group_ids"],
+                group_id_test_user_is_not_included,
+            )
             with patch.object(
                 Idl, "get_all_permission_groups_for_a_user"
             ) as test_get_all_permission_groups:
@@ -478,7 +469,9 @@ class TestPlatformPermissions(BaseTestCase):
 
     def test_delete_platform_as_an_admin_in_a_permission_group(self):
         """Make sure that a permission group admins are allowed to delete a platform."""
-        group_id_test_user_is_member_in_1 = IDL_USER_ACCOUNT.administrated_permission_groups
+        group_id_test_user_is_member_in_1 = (
+            IDL_USER_ACCOUNT.administrated_permission_groups
+        )
         platforms = preparation_of_public_and_internal_platform_data(
             group_id_test_user_is_member_in_1
         )
@@ -496,7 +489,10 @@ class TestPlatformPermissions(BaseTestCase):
 
             self.assertEqual(response.status_code, 201)
 
-            self.assertEqual(data["data"]["attributes"]["group_ids"], group_id_test_user_is_member_in_1)
+            self.assertEqual(
+                data["data"]["attributes"]["group_ids"],
+                group_id_test_user_is_member_in_1,
+            )
 
             with patch.object(
                 Idl, "get_all_permission_groups_for_a_user"
@@ -563,7 +559,10 @@ class TestPlatformPermissions(BaseTestCase):
 
             self.assertEqual(response.status_code, 201)
 
-            self.assertEqual(data["data"]["attributes"]["group_ids"], group_id_test_user_is_not_included)
+            self.assertEqual(
+                data["data"]["attributes"]["group_ids"],
+                group_id_test_user_is_not_included,
+            )
 
             with patch.object(
                 Idl, "get_all_permission_groups_for_a_user"

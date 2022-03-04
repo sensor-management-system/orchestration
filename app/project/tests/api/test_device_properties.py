@@ -6,7 +6,8 @@ from project import base_url
 from project.api.models.base_model import db
 from project.api.models.device import Device
 from project.api.models.device_property import DeviceProperty
-from project.tests.base import BaseTestCase, create_token, query_result_to_list
+from project.tests.base import BaseTestCase, query_result_to_list
+from project.tests.base import create_token
 from project.tests.base import fake
 
 

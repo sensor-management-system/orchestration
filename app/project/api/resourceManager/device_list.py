@@ -1,6 +1,8 @@
 from ..datalayers.esalchemy import EsSqlalchemyDataLayer
+from ..helpers.errors import BadRequestError
 from ...api.auth.permission_utils import (
-    get_collection_with_permissions, set_default_permission_view_to_internal_if_not_exists_or_all_false,
+    get_collection_with_permissions,
+    set_default_permission_view_to_internal_if_not_exists_or_all_false,
 )
 from ..models.base_model import db
 from ..models.device import Device
@@ -28,6 +30,10 @@ class DeviceList(ResourceList):
         """
 
         return get_collection_with_permissions(self.model, collection, qs, view_kwargs)
+
+    def after_get(self, result):
+        result.update({"meta": {"count": len(result["data"])}})
+        return result
 
     def before_create_object(self, data, *args, **kwargs):
         """

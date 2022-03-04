@@ -11,7 +11,7 @@ from .api.helpers.health_checks import health_check_elastic_search, health_check
 
 from .api.models.base_model import db
 from .api.auth.permission_manager import permission_manager
-from .api.token_checker import jwt
+from .api.auth.flask_openidconnect import open_id_connect
 from .api.upload_files import upload_routes
 from .config import env
 from .urls import api
@@ -47,7 +47,7 @@ def create_app():
     db.init_app(app)
     api.init_app(app, Blueprint("api", __name__, url_prefix=base_url))
     migrate.init_app(app, db)
-    jwt.init_app(app)
+    open_id_connect.init_app(app)
     api.permission_manager(permission_manager)
 
     # instantiate minio client

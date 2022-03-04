@@ -1,5 +1,4 @@
-from flask_jwt_extended import jwt_required, get_current_user
-
+from ..auth.flask_openidconnect import open_id_connect
 from ..helpers.errors import MethodNotAllowed
 from ..services.idl_services import Idl
 from ...frj_csv_export.resource import ResourceList
@@ -12,15 +11,15 @@ class UserInfo(ResourceList):
     It gathers from the local database and the institute decoupling layer.
     User data will be found using the JWT token & the get_current_user function."""
 
-    @jwt_required()
     def get(self):
         """GET method to retrieve information gathered from database and
         Institute decoupling layer (IDL) from user subject.
 
         :return: Dict with user infos from database + IDL-groups.
         """
-        current_user = get_current_user()
-        idl_groups = Idl().get_all_permission_groups(current_user.subject)
+        open_id_connect.verify_valid_access_token_in_request_and_set_user()
+        current_user = open_id_connect.get_current_user()
+        idl_groups = Idl().get_all_permission_groups_for_a_user(current_user.subject)
         data = {
             "data": {
                 "type": "user",

@@ -1,12 +1,12 @@
-from flask_jwt_extended import jwt_required, get_jwt_identity, current_user
 from sqlalchemy import or_
 
 from .base_resource import add_contact_to_object
 from ..datalayers.esalchemy import EsSqlalchemyDataLayer
+from ..helpers.resource_mixin import add_created_by_id
 from ..models.base_model import db
 from ..models.configuration import Configuration
 from ..schemas.configuration_schema import ConfigurationSchema
-from ..token_checker import token_required
+from ..token_checker import token_required, current_user_or_none
 from ...frj_csv_export.resource import ResourceList
 
 
@@ -16,7 +16,6 @@ class ConfigurationList(ResourceList):
     a collection of Devices or create one.
     """
 
-    @jwt_required(optional=True)
     def after_get_collection(self, collection, qs, view_kwargs):
         """Take the intersection between requested collection and
         what the user allowed querying.
@@ -28,20 +27,20 @@ class ConfigurationList(ResourceList):
         """
 
         query = db.session.query(self.model)
-        if get_jwt_identity() is None:
+        current_user = current_user_or_none(optional=True)
+        if current_user is None:
             query = query.filter_by(is_public=True)
         else:
             if not current_user.is_superuser:
-                query = query.filter(
-                    or_(
-                        self.model.is_public,
-                        self.model.is_internal,
-                    )
-                )
+                query = query.filter(or_(self.model.is_public, self.model.is_internal,))
 
         allowed_collection = query.all()
 
         return set(collection).intersection(allowed_collection)
+
+    def after_get(self, result):
+        result.update({"meta": {"count": len(result["data"])}})
+        return result
 
     def before_create_object(self, data, *args, **kwargs):
         """
@@ -54,6 +53,7 @@ class ConfigurationList(ResourceList):
         if not any([data.get("is_public"), data.get("is_internal")]):
             data["is_internal"] = True
             data["is_public"] = False
+        add_created_by_id(data)
 
     def after_post(self, result):
         """

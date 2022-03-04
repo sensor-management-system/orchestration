@@ -3,12 +3,13 @@ import json
 from unittest.mock import patch
 
 from project import base_url
-from project.api.models import Contact, User, Device
+from project.api.models import User, Device
 from project.api.models.base_model import db
 from project.api.services.idl_services import Idl
 from project.tests.base import BaseTestCase
+from project.tests.base import create_token
 from project.tests.base import fake
-from project.tests.base import generate_token_data, create_token
+from project.tests.permissions import add_a_contact
 from project.tests.permissions import create_superuser_token
 from project.tests.permissions.test_platforms import IDL_USER_ACCOUNT
 
@@ -161,19 +162,9 @@ class TestDevicePermissions(BaseTestCase):
             is_private=True,
             is_internal=False,
         )
-        mock_jwt = generate_token_data()
-        contact = Contact(
-            given_name=mock_jwt["given_name"],
-            family_name=mock_jwt["family_name"],
-            email=mock_jwt["email"],
-        )
 
-        mock_jwt_1 = generate_token_data()
-        contact_1 = Contact(
-            given_name=mock_jwt_1["given_name"],
-            family_name=mock_jwt_1["family_name"],
-            email=mock_jwt_1["email"],
-        )
+        contact = add_a_contact()
+        contact_1 = add_a_contact()
 
         user = User(subject="test_user@test.test", contact=contact)
         user_1 = User(subject="test_user1@test.test", contact=contact_1)
@@ -221,16 +212,6 @@ class TestDevicePermissions(BaseTestCase):
                 },
             }
         }
-        access_headers = create_token()
-        with self.client:
-            response = self.client.post(
-                self.device_url,
-                data=json.dumps(device_data),
-                content_type="application/vnd.api+json",
-                headers=access_headers,
-            )
-        self.assertEqual(response.status_code, 409)
-
         device_data_1 = {
             "data": {
                 "type": "device",
@@ -242,16 +223,6 @@ class TestDevicePermissions(BaseTestCase):
                 },
             }
         }
-        access_headers = create_token()
-        with self.client:
-            response = self.client.post(
-                self.device_url,
-                data=json.dumps(device_data_1),
-                content_type="application/vnd.api+json",
-                headers=access_headers,
-            )
-        self.assertEqual(response.status_code, 409)
-
         device_data_2 = {
             "data": {
                 "type": "device",
@@ -267,11 +238,27 @@ class TestDevicePermissions(BaseTestCase):
         with self.client:
             response = self.client.post(
                 self.device_url,
+                data=json.dumps(device_data),
+                content_type="application/vnd.api+json",
+                headers=access_headers,
+            )
+            self.assertEqual(response.status_code, 409)
+
+            response_1 = self.client.post(
+                self.device_url,
+                data=json.dumps(device_data_1),
+                content_type="application/vnd.api+json",
+                headers=access_headers,
+            )
+            self.assertEqual(response_1.status_code, 409)
+
+            response_2 = self.client.post(
+                self.device_url,
                 data=json.dumps(device_data_2),
                 content_type="application/vnd.api+json",
                 headers=access_headers,
             )
-        self.assertEqual(response.status_code, 409)
+            self.assertEqual(response_2.status_code, 409)
 
     def test_add_groups_ids(self):
         """Make sure that a device with groups-ids can be created"""
@@ -322,12 +309,7 @@ class TestDevicePermissions(BaseTestCase):
         """Make sure that a normal user is not allowed a retrieve a not owned
         private device."""
 
-        mock_jwt = generate_token_data()
-        c = Contact(
-            given_name=mock_jwt["given_name"],
-            family_name=mock_jwt["family_name"],
-            email=mock_jwt["email"],
-        )
+        c = add_a_contact()
         user = User(subject="test_user1@test.test", contact=c)
 
         db.session.add_all([c, user])

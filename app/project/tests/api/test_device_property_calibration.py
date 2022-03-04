@@ -8,7 +8,7 @@ from project.api.models import (
     DevicePropertyCalibration,
 )
 from project.api.models.base_model import db
-from project.tests.base import BaseTestCase, fake, generate_token_data
+from project.tests.base import BaseTestCase, fake, generate_userinfo_data
 from project.tests.models.test_device_calibration_action_model import (
     add_device_property_calibration_model,
 )
@@ -40,11 +40,12 @@ class TestDevicePropertyCalibration(BaseTestCase):
 
     def test_post_device_property_calibration(self):
         """Create DevicePropertyCalibration."""
-        device = Device(short_name="Device 200",
-                        is_public=False,
-                        is_private=False,
-                        is_internal=True,
-                        )
+        device = Device(
+            short_name="Device 200",
+            is_public=False,
+            is_private=False,
+            is_internal=True,
+        )
         device_property = DeviceProperty(
             device=device,
             measuring_range_min=fake.pyfloat(),
@@ -61,11 +62,11 @@ class TestDevicePropertyCalibration(BaseTestCase):
             sampling_media_uri=fake.uri(),
             sampling_media_name=fake.pystr(),
         )
-        mock_jwt = generate_token_data()
+        userinfo = generate_userinfo_data()
         contact = Contact(
-            given_name=mock_jwt["given_name"],
-            family_name=mock_jwt["family_name"],
-            email=mock_jwt["email"],
+            given_name=userinfo["given_name"],
+            family_name=userinfo["family_name"],
+            email=userinfo["email"],
         )
         device_calibration_action = DeviceCalibrationAction(
             description="Test DeviceCalibrationAction",
@@ -105,16 +106,18 @@ class TestDevicePropertyCalibration(BaseTestCase):
 
     def test_update_device_property_calibration(self):
         """Update DevicePropertyCalibration."""
-        device = Device(short_name="Device 300",
-                        is_public=False,
-                        is_private=False,
-                        is_internal=True,
-                        )
-        mock_jwt = generate_token_data()
+        userinfo = generate_userinfo_data()
+        device = Device(
+            short_name="Device 300",
+            is_public=False,
+            is_private=False,
+            is_internal=True,
+        )
+
         contact = Contact(
-            given_name=mock_jwt["given_name"],
-            family_name=mock_jwt["family_name"],
-            email=mock_jwt["email"],
+            given_name=userinfo["given_name"],
+            family_name=userinfo["family_name"],
+            email=userinfo["email"],
         )
 
         device_calibration_action = DeviceCalibrationAction(
@@ -157,17 +160,19 @@ class TestDevicePropertyCalibration(BaseTestCase):
 
     def _create_some_device_property_calibrations(self):
         """Create some devices, properties, & device property calibrations."""
-        device1 = Device(short_name="sample device",
-                         is_public=False,
-                         is_private=False,
-                         is_internal=True,
-                         )
+        device1 = Device(
+            short_name="sample device",
+            is_public=False,
+            is_private=False,
+            is_internal=True,
+        )
         db.session.add(device1)
-        device2 = Device(short_name="sample device II",
-                         is_public=False,
-                         is_private=False,
-                         is_internal=True,
-                         )
+        device2 = Device(
+            short_name="sample device II",
+            is_public=False,
+            is_private=False,
+            is_internal=True,
+        )
         db.session.add(device2)
 
         device_property1 = DeviceProperty(device=device1, label="prop1",)

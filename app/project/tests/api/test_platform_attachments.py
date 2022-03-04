@@ -6,7 +6,8 @@ from project import base_url
 from project.api.models.base_model import db
 from project.api.models.platform import Platform
 from project.api.models.platform_attachment import PlatformAttachment
-from project.tests.base import BaseTestCase, create_token, query_result_to_list
+from project.tests.base import BaseTestCase, query_result_to_list
+from project.tests.base import create_token
 from project.tests.base import fake
 
 

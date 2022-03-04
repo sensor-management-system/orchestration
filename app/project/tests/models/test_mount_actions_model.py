@@ -4,7 +4,7 @@ from project.api.models.device import Device
 from project.api.models.mount_actions import DeviceMountAction, PlatformMountAction
 from project.api.models.platform import Platform
 from project.api.models.user import User
-from project.tests.base import BaseTestCase, fake, generate_token_data
+from project.tests.base import BaseTestCase, fake, generate_userinfo_data
 from project.tests.models.test_configurations_model import generate_configuration_model
 
 
@@ -21,13 +21,13 @@ def add_mount_device_action_model():
         is_private=False,
         is_internal=False,
     )
-    mock_jwt = generate_token_data()
+    userinfo = generate_userinfo_data()
     c1 = Contact(
-        given_name=mock_jwt["given_name"],
-        family_name=mock_jwt["family_name"],
-        email=mock_jwt["email"],
+        given_name=userinfo["given_name"],
+        family_name=userinfo["family_name"],
+        email=userinfo["email"],
     )
-    u1 = User(subject=mock_jwt["sub"], contact=c1)
+    u1 = User(subject=userinfo["sub"], contact=c1)
     config = generate_configuration_model()
     device_mount_action = DeviceMountAction(
         begin_date=fake.date(),
@@ -59,13 +59,13 @@ def add_mount_platform_action_model():
         is_private=False,
         is_internal=False,
     )
-    mock_jwt = generate_token_data()
+    userinfo = generate_userinfo_data()
     c1 = Contact(
-        given_name=mock_jwt["given_name"],
-        family_name=mock_jwt["family_name"],
-        email=mock_jwt["email"],
+        given_name=userinfo["given_name"],
+        family_name=userinfo["family_name"],
+        email=userinfo["email"],
     )
-    u1 = User(subject=mock_jwt["sub"], contact=c1)
+    u1 = User(subject=userinfo["sub"], contact=c1)
     config = generate_configuration_model()
     platform_mount_action = PlatformMountAction(
         begin_date=fake.date(),

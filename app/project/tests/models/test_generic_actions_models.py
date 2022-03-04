@@ -10,7 +10,7 @@ from project.api.models.generic_actions import (
 )
 from project.api.models.platform import Platform
 from project.api.models.user import User
-from project.tests.base import BaseTestCase, generate_token_data
+from project.tests.base import BaseTestCase, generate_userinfo_data
 from project.tests.models.test_configurations_model import generate_configuration_model
 
 
@@ -21,13 +21,13 @@ def generate_platform_action_model(public=True, private=False, internal=False):
         is_private=private,
         is_internal=internal,
     )
-    mock_jwt = generate_token_data()
+    userinfo = generate_userinfo_data()
     contact = Contact(
-        given_name=mock_jwt["given_name"],
-        family_name=mock_jwt["family_name"],
-        email=mock_jwt["email"],
+        given_name=userinfo["given_name"],
+        family_name=userinfo["family_name"],
+        email=userinfo["email"],
     )
-    u = User(subject=mock_jwt["sub"], contact=contact)
+    u = User(subject=userinfo["sub"], contact=contact)
     generic_platform_action = GenericPlatformAction(
         description="test GenericPlatformAction",
         action_type_name="testing",
@@ -48,14 +48,14 @@ def generate_device_action_model(public=True, private=False, internal=False):
         short_name="test device", is_public=public, is_private=private, is_internal=internal,
     )
 
-    mock_jwt = generate_token_data()
+    userinfo = generate_userinfo_data()
     c1 = Contact(
-        given_name=mock_jwt["given_name"],
-        family_name=mock_jwt["family_name"],
-        email=mock_jwt["email"],
+        given_name=userinfo["given_name"],
+        family_name=userinfo["family_name"],
+        email=userinfo["email"],
     )
 
-    u1 = User(subject=mock_jwt["sub"], contact=c1)
+    u1 = User(subject=userinfo["sub"], contact=c1)
 
     generic_device_action = GenericDeviceAction(
         description="test GenericDeviceAction",
@@ -74,13 +74,13 @@ def generate_device_action_model(public=True, private=False, internal=False):
 
 def generate_configuration_action_model():
     config = generate_configuration_model()
-    mock_jwt = generate_token_data()
+    userinfo = generate_userinfo_data()
     c1 = Contact(
-        given_name=mock_jwt["given_name"],
-        family_name=mock_jwt["family_name"],
-        email=mock_jwt["email"],
+        given_name=userinfo["given_name"],
+        family_name=userinfo["family_name"],
+        email=userinfo["email"],
     )
-    u1 = User(subject=mock_jwt["sub"], contact=c1)
+    u1 = User(subject=userinfo["sub"], contact=c1)
 
     generic_configuration_action = GenericConfigurationAction(
         description="test GenericConfigurationAction",

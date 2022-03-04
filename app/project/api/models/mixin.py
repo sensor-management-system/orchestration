@@ -3,7 +3,6 @@ import itertools
 from datetime import datetime
 
 import sqlalchemy
-from flask_jwt_extended import current_user, verify_jwt_in_request
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.ext.mutable import MutableList
 from sqlalchemy.orm import validates
@@ -19,14 +18,6 @@ from ..search import (
 )
 
 
-def _current_user_id_or_none():
-    verify_jwt_in_request(optional=True)
-    try:
-        return current_user.id
-    except AttributeError:
-        return None
-
-
 class AuditMixin:
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     # define 'updated at' to be populated with datetime.utcnow()
@@ -39,8 +30,6 @@ class AuditMixin:
             db.ForeignKey(
                 "user.id", name="fk_%s_created_by_id" % self.__name__, use_alter=True
             ),
-            # nullable=False,
-            default=_current_user_id_or_none,
         )
 
     @declared_attr
@@ -58,7 +47,6 @@ class AuditMixin:
             db.ForeignKey(
                 "user.id", name="fk_%s_updated_by_id" % self.__name__, use_alter=True
             ),
-            onupdate=_current_user_id_or_none,
         )
 
     @declared_attr

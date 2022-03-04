@@ -4,18 +4,17 @@ import os
 
 from project import base_url
 from project.api.models import Contact
+from project.api.models import User
 from project.api.models.base_model import db
 from project.api.models.configuration import Configuration
 from project.api.models.configuration_device import ConfigurationDevice
 from project.api.models.configuration_platform import ConfigurationPlatform
 from project.api.models.device import Device
 from project.api.models.platform import Platform
-from project.tests.base import BaseTestCase, create_token, test_file_path
-from project.tests.base import fake, generate_token_data
-from project.tests.models.test_configurations_model import generate_configuration_model
+from project.tests.base import BaseTestCase, test_file_path
+from project.tests.base import create_token
+from project.tests.base import fake, generate_userinfo_data
 from project.tests.read_from_json import extract_data_from_json_file
-
-from project.api.models import User
 
 
 class TestConfigurationsService(BaseTestCase):
@@ -76,8 +75,8 @@ class TestConfigurationsService(BaseTestCase):
             },
         }
         for (
-            input_calibration_date,
-            expected_output_calibration_date,
+                input_calibration_date,
+                expected_output_calibration_date,
         ) in calibration_dates.items():
             # set up for each single run
             self.setUp()
@@ -128,8 +127,8 @@ class TestConfigurationsService(BaseTestCase):
 
             configuration_device = (
                 db.session.query(ConfigurationDevice)
-                .filter_by(device_id=1, configuration_id=1)
-                .first()
+                    .filter_by(device_id=1, configuration_id=1)
+                    .first()
             )
             self.assertEqual(
                 configuration_device.calibration_date,
@@ -183,8 +182,8 @@ class TestConfigurationsService(BaseTestCase):
 
         configuration_device = (
             db.session.query(ConfigurationDevice)
-            .filter_by(device_id=1, configuration_id=1)
-            .first()
+                .filter_by(device_id=1, configuration_id=1)
+                .first()
         )
         self.assertEqual(configuration_device.firmware_version, firmware_version)
 
@@ -433,6 +432,7 @@ class TestConfigurationsService(BaseTestCase):
         included actions.
 
         """
+        userinfo = generate_userinfo_data()
         device = Device(
             short_name=fake.linux_processor(),
             is_public=False,
@@ -457,11 +457,10 @@ class TestConfigurationsService(BaseTestCase):
             is_private=False,
             is_internal=True,
         )
-        mock_jwt = generate_token_data()
         contact = Contact(
-            given_name=mock_jwt["given_name"],
-            family_name=mock_jwt["family_name"],
-            email=mock_jwt["email"],
+            given_name=userinfo["given_name"],
+            family_name=userinfo["family_name"],
+            email=userinfo["email"],
         )
         user = User(subject="test_user@test.test", contact=contact)
         configuration = Configuration(
@@ -553,14 +552,13 @@ class TestConfigurationsService(BaseTestCase):
         access_headers = create_token(token_data)
         with self.client:
             response = self.client.delete(
-                url, content_type="application/vnd.api+json", headers=access_headers,
+                url, content_type="application/vnd.api+json", headers=access_headers
             )
         self.assertEqual(response.status_code, 200)
 
     def test_delete_configuration_with_static_begin_location_action(self):
         """Ensure a configuration with a static_begin_location_action can be deleted"""
-        configuration, contact, user = add_a_configuration()
-
+        configuration, contact, user = self.add_a_configuration_model()
         action_data = {
             "data": {
                 "type": "configuration_static_location_begin_action",
@@ -593,7 +591,7 @@ class TestConfigurationsService(BaseTestCase):
 
     def test_delete_configuration_with_static_end_location_action(self):
         """Ensure a configuration with a static_end_location_action can be deleted"""
-        configuration, contact, user = add_a_configuration()
+        configuration, contact, user = self.add_a_configuration_model()
 
         action_data = {
             "data": {
@@ -621,7 +619,7 @@ class TestConfigurationsService(BaseTestCase):
 
     def test_delete_configuration_with_dynamic_begin_location_action(self):
         """Ensure a configuration with a dynamic_begin_location_action can be deleted"""
-        configuration, contact, user = add_a_configuration()
+        configuration, contact, user = self.add_a_configuration_model()
 
         action_data = {
             "data": {
@@ -652,7 +650,7 @@ class TestConfigurationsService(BaseTestCase):
 
     def test_delete_configuration_with_dynamic_end_location_action(self):
         """Ensure a configuration with a dynamic_end_location_action can be deleted"""
-        configuration, contact, user = add_a_configuration()
+        configuration, contact, user = self.add_a_configuration_model()
 
         action_data = {
             "data": {
@@ -678,22 +676,56 @@ class TestConfigurationsService(BaseTestCase):
         url = f"{self.configurations_url}/{configuration.id}"
         _ = self.delete_as_owner(contact, user, url)
 
+    @staticmethod
+    def add_a_contact():
+        userinfo = generate_userinfo_data()
+        contact = Contact(
+            given_name=userinfo["given_name"],
+            family_name=userinfo["family_name"],
+            email=userinfo["email"],
+        )
+        db.session.add(contact)
+        db.session.commit()
+        return contact
 
-def add_a_configuration():
-    mock_jwt = generate_token_data()
-    contact = Contact(
-        given_name=mock_jwt["given_name"],
-        family_name=mock_jwt["family_name"],
-        email=mock_jwt["email"],
-    )
+    def add_a_configuration(self):
+        config_data = {
+            "data": {
+                "attributes": {
+                    "label": "Test configuration",
+                    "project_uri": "",
+                    "project_name": "MOSES",
+                    "status": "draft",
+                    "start_date": "2021-10-22T09:31:00.000Z",
+                    "end_date": "2021-10-31T09:32:00.000Z",
+                    "hierarchy": [],
+                },
+                "type": "configuration",
+            }
+        }
+        config = super().add_object(
+            url=self.configurations_url,
+            data_object=config_data,
+            object_type=self.object_type,
+        )
+        config_id = config["data"]["id"]
+        return config_id
 
-    user = User(subject=fake.email(), contact=contact)
-    configuration = Configuration(
-        label=fake.linux_processor(),
-        is_public=False,
-        is_internal=True,
-        created_by=user,
-    )
-    db.session.add_all([contact, user, configuration])
-    db.session.commit()
-    return configuration, contact, user
+    def test_http_response_not_found(self):
+        """Make sure that the backend responds with 404 HTTP-Code if a resource was not found."""
+        url = f"{self.configurations_url}/{fake.random_int()}"
+        _ = super().http_code_404_when_resource_not_found(url)
+
+    def add_a_configuration_model(self):
+        contact = self.add_a_contact()
+
+        user = User(subject=fake.email(), contact=contact)
+        configuration = Configuration(
+            label=fake.linux_processor(),
+            is_public=False,
+            is_internal=True,
+            created_by=user,
+        )
+        db.session.add_all([contact, user, configuration])
+        db.session.commit()
+        return configuration, contact, user

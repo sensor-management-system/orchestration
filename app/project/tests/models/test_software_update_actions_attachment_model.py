@@ -10,20 +10,19 @@ from project.api.models import (
     PlatformSoftwareUpdateActionAttachment,
 )
 from project.api.models.base_model import db
-from project.tests.base import BaseTestCase, fake, generate_token_data
+from project.tests.base import BaseTestCase, fake, generate_userinfo_data
 
 
 def add_device_software_update_action_attachment():
-    d = Device(short_name="Device 133",
-               is_public=False,
-               is_private=False,
-               is_internal=True,
-               )
-    mock_jwt = generate_token_data()
+    userinfo = generate_userinfo_data()
+    d = Device(
+        short_name="Device 133", is_public=False, is_private=False, is_internal=True,
+    )
+
     c = Contact(
-        given_name=mock_jwt["given_name"],
-        family_name=mock_jwt["family_name"],
-        email=mock_jwt["email"],
+        given_name=userinfo["given_name"],
+        family_name=userinfo["family_name"],
+        email=userinfo["email"],
     )
     db.session.add(d)
     db.session.commit()
@@ -47,16 +46,15 @@ def add_device_software_update_action_attachment():
 
 
 def add_platform_software_update_action_attachment_model():
-    p = Platform(short_name="Platform 144",
-                 is_public=False,
-                 is_private=False,
-                 is_internal=True,
-                 )
-    mock_jwt = generate_token_data()
+    userinfo = generate_userinfo_data()
+    p = Platform(
+        short_name="Platform 144", is_public=False, is_private=False, is_internal=True,
+    )
+
     c = Contact(
-        given_name=mock_jwt["given_name"],
-        family_name=mock_jwt["family_name"],
-        email=mock_jwt["email"],
+        given_name=userinfo["given_name"],
+        family_name=userinfo["family_name"],
+        email=userinfo["email"],
     )
     db.session.add(p)
     db.session.commit()

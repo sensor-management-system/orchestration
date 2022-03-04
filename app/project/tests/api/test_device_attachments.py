@@ -6,6 +6,7 @@ from project import base_url
 from project.api.models.base_model import db
 from project.api.models.device import Device
 from project.api.models.device_attachment import DeviceAttachment
+from project.tests.base import BaseTestCase, query_result_to_list, fake
 from project.tests.base import BaseTestCase, create_token, query_result_to_list
 from project.tests.base import fake
 
@@ -329,10 +330,8 @@ class TestDeviceAttachmentServices(BaseTestCase):
             self.assertEqual(len(response.get_json()["data"]), 1)
 
             response = self.client.delete(
-                base_url + "/device-attachments/" + str(device_attachment1.id),
-                headers=create_token(),
+                base_url + "/device-attachments/" + str(device_attachment1.id), headers=create_token(),
             )
-
             # I would expect a 204 (no content), but 200 is good as well
             self.assertTrue(response.status_code in [200, 204])
 

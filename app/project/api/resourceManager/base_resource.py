@@ -1,4 +1,3 @@
-from flask_jwt_extended import current_user
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 
 from ..models import (
@@ -6,6 +5,7 @@ from ..models import (
     Contact,
     DeviceAttachment,
     PlatformAttachment,
+    User,
 )
 from ..models.base_model import db
 from ...api import minio
@@ -18,7 +18,12 @@ def add_contact_to_object(entity_with_contact_list):
     :return:
     """
 
-    contact_id = current_user.contact_id
+    user_entry = (
+        db.session.query(User)
+        .filter_by(id=entity_with_contact_list.created_by_id)
+        .first()
+    )
+    contact_id = user_entry.contact_id
     contact_entry = db.session.query(Contact).filter_by(id=contact_id).first()
     contacts = entity_with_contact_list.contacts
     if contact_entry not in contacts:

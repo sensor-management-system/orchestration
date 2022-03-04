@@ -1,3 +1,5 @@
+"""Common error classes to work with in the app."""
+
 import json
 from typing import Union
 
@@ -9,19 +11,20 @@ from flask_rest_jsonapi.errors import jsonapi_errors
 class ErrorResponse(JsonApiException):
     """
     A class for handling json-api errors.
-    Inspired by the JsonApiException class of `flask-rest-jsonapi` itself.
 
+    Inspired by the JsonApiException class of `flask-rest-jsonapi` itself.
     # https://blog.fossasia.org/modifying-flask-rest-jsonapi-exception-handling-in-open-event-server-to-enable-support-for-sentry/
     """
 
-    headers = {'Content-Type': 'application/vnd.api+json'}
+    headers = {"Content-Type": "application/vnd.api+json"}
 
     def __init__(self, source: Union[dict, str], detail=None, title=None, status=None):
-        """Initialize a jsonapi ErrorResponse Object
+        """
+        Initialize a jsonapi ErrorResponse object.
+
         :param dict source: the source of the error
         :param str detail: the detail of the error
         """
-
         if isinstance(source, str) and detail is None:
             # We have been passed a single argument, and hence source is unknown
             # so we'll represent source as detail
@@ -31,6 +34,8 @@ class ErrorResponse(JsonApiException):
 
     def respond(self):
         """
+        Create a response (json:api style).
+
         :return: a jsonapi compliant response object
         """
         dict_ = self.to_dict()
@@ -39,46 +44,43 @@ class ErrorResponse(JsonApiException):
         )
 
 
-class ForbiddenError(ErrorResponse):
-    """
-    Default class for 403 Error
-    """
+class UnauthorizedError(ErrorResponse):
+    """Default class for 401 Error."""
 
-    title = 'Access Forbidden'
+    title = "Unauthorized"
+    status = 401
+
+
+class ForbiddenError(ErrorResponse):
+    """Default class for 403 Error."""
+
+    title = "Access Forbidden"
     status = 403
 
 
 class NotFoundError(ErrorResponse):
-    """
-    Default class for 404 Error
-    """
+    """Default class for 404 Error."""
 
-    title = 'Not Found'
+    title = "Not Found"
     status = 404
 
 
 class BadRequestError(ErrorResponse):
-    """
-    Default class for 400 Error
-    """
+    """Default class for 400 Error."""
 
     status = 400
-    title = 'Bad Request'
+    title = "Bad Request"
 
 
 class ConflictError(ErrorResponse):
-    """
-    Default class for 409 Error
-    """
+    """Default class for 409 Error."""
 
     title = "Conflict"
     status = 409
 
 
 class MethodNotAllowed(ErrorResponse):
-    """
-    Default Class to throw HTTP 405 Exception
-    """
+    """Default Class to throw HTTP 405 Exception."""
 
     title = "Method Not Allowed"
     status = 405
@@ -86,26 +88,25 @@ class MethodNotAllowed(ErrorResponse):
 
 class DeletionError(ErrorResponse):
     """
-    Error class to indicate that an object can't be deleted as it is still in use.
+    Error class to indicate that an object can't be deleted.
+
+    Especially when foreign keys still point to the object that
+    should be deleted.
     """
 
     status = 409
-    title = 'Deletion failed as the object is still in use.'
+    title = "Deletion failed as the object is still in use."
 
 
 class UnsupportedMediaTypeError(ErrorResponse):
-    """
-    Default Class to throw HTTP 405 Exception extinction
-    """
+    """Default Class to throw HTTP 405 Exception extinction."""
 
     title = "Unsupported Media Type"
     status = 415
 
 
 class ServiceIsUnreachableError(ErrorResponse):
-    """
-    Default Class to throw HTTP 523 Exception extinction
-    """
+    """Default Class to throw HTTP 523 Exception extinction."""
 
     title = "Service Is Unreachable"
     status = 523

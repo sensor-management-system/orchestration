@@ -5,11 +5,14 @@ from datetime import datetime
 
 from project import base_url, db
 from project.api.models import Contact, GenericPlatformAction, Platform
-from project.tests.base import BaseTestCase, fake, generate_token_data, test_file_path
-from project.tests.base import create_token
+from project.tests.base import BaseTestCase, fake, generate_userinfo_data, test_file_path
 from project.tests.models.test_generic_action_attachment_model import (
     add_generic_platform_action_attachment_model,
 )
+from project.tests.base import create_token
+from project.tests.base import BaseTestCase, fake, test_file_path
+from project.tests.models.test_generic_action_attachment_model import \
+    add_generic_platform_action_attachment_model
 from project.tests.read_from_json import extract_data_from_json_file
 
 
@@ -51,14 +54,14 @@ class TestGenericPlatformAction(BaseTestCase):
         platform = super().add_object(
             url=self.platform_url, data_object=platform_data, object_type="platform"
         )
-        mock_jwt = generate_token_data()
+        userinfo = generate_userinfo_data()
         contact_data = {
             "data": {
                 "type": "contact",
                 "attributes": {
-                    "given_name": mock_jwt["given_name"],
-                    "family_name": mock_jwt["family_name"],
-                    "email": mock_jwt["email"],
+                    "given_name": userinfo["given_name"],
+                    "family_name": userinfo["family_name"],
+                    "email": userinfo["email"],
                     "website": fake.url(),
                 },
             }
@@ -97,11 +100,11 @@ class TestGenericPlatformAction(BaseTestCase):
             data_object=generic_platform_action_data,
             object_type=self.object_type,
         )
-        mock_jwt = generate_token_data()
+        userinfo = generate_userinfo_data()
         contact = Contact(
-            given_name=mock_jwt["given_name"],
-            family_name=mock_jwt["family_name"],
-            email=mock_jwt["email"],
+            given_name=userinfo["given_name"],
+            family_name=userinfo["family_name"],
+            email=userinfo["email"],
         )
         db.session.add(contact)
         db.session.commit()
