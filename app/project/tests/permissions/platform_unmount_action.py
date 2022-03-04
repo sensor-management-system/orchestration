@@ -7,7 +7,7 @@ from project.api.models import PlatformUnmountAction
 from project.api.models.base_model import db
 from project.tests.base import BaseTestCase
 from project.tests.base import fake
-from project.tests.base import generate_token_data, create_token
+from project.tests.base import generate_userinfo_data, create_token
 
 
 def platform_unmount_action_model(public=True, private=False, internal=False):
@@ -17,7 +17,7 @@ def platform_unmount_action_model(public=True, private=False, internal=False):
         is_private=private,
         is_internal=internal,
     )
-    mock_jwt = generate_token_data()
+    mock_jwt = generate_userinfo_data()
     contact = Contact(
         given_name=mock_jwt["given_name"],
         family_name=mock_jwt["family_name"],
@@ -59,8 +59,8 @@ def platform_unmount_action_model(public=True, private=False, internal=False):
     db.session.commit()
     action = (
         db.session.query(PlatformUnmountAction)
-        .filter_by(id=platform_unmount_action.id)
-        .one()
+            .filter_by(id=platform_unmount_action.id)
+            .one()
     )
     return action, platform_unmount_action
 

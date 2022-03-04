@@ -10,7 +10,7 @@ from project.api.models.base_model import db
 from project.api.services.idl_services import Idl
 from project.tests.base import BaseTestCase
 from project.tests.base import fake
-from project.tests.base import generate_token_data, create_token
+from project.tests.base import generate_userinfo_data, create_token
 from project.tests.models.test_configurations_model import generate_configuration_model
 from project.tests.permissions.test_platforms import IDL_USER_ACCOUNT
 
@@ -29,7 +29,7 @@ class TestMountPlatformPermissions(BaseTestCase):
             is_private=False,
             is_internal=False,
         )
-        mock_jwt = generate_token_data()
+        mock_jwt = generate_userinfo_data()
         contact = Contact(
             given_name=mock_jwt["given_name"],
             family_name=mock_jwt["family_name"],
@@ -72,7 +72,7 @@ class TestMountPlatformPermissions(BaseTestCase):
             is_private=False,
             is_internal=True,
         )
-        mock_jwt = generate_token_data()
+        mock_jwt = generate_userinfo_data()
         contact = Contact(
             given_name=mock_jwt["given_name"],
             family_name=mock_jwt["family_name"],
@@ -129,7 +129,7 @@ class TestMountPlatformPermissions(BaseTestCase):
             is_private=False,
             is_internal=False,
         )
-        mock_jwt = generate_token_data()
+        mock_jwt = generate_userinfo_data()
         contact = Contact(
             given_name=mock_jwt["given_name"],
             family_name=mock_jwt["family_name"],
@@ -181,7 +181,7 @@ class TestMountPlatformPermissions(BaseTestCase):
             is_private=False,
             is_internal=True,
         )
-        mock_jwt = generate_token_data()
+        mock_jwt = generate_userinfo_data()
         contact = Contact(
             given_name=mock_jwt["given_name"],
             family_name=mock_jwt["family_name"],
@@ -264,7 +264,7 @@ class TestMountPlatformPermissions(BaseTestCase):
             is_private=False,
             is_internal=False,
         )
-        mock_jwt = generate_token_data()
+        mock_jwt = generate_userinfo_data()
         contact = Contact(
             given_name=mock_jwt["given_name"],
             family_name=mock_jwt["family_name"],
@@ -326,7 +326,7 @@ class TestMountPlatformPermissions(BaseTestCase):
             is_private=False,
             is_internal=False,
         )
-        mock_jwt = generate_token_data()
+        mock_jwt = generate_userinfo_data()
         contact = Contact(
             given_name=mock_jwt["given_name"],
             family_name=mock_jwt["family_name"],
@@ -387,7 +387,7 @@ class TestMountPlatformPermissions(BaseTestCase):
             is_private=False,
             is_internal=False,
         )
-        mock_jwt = generate_token_data()
+        mock_jwt = generate_userinfo_data()
         contact = Contact(
             given_name=mock_jwt["given_name"],
             family_name=mock_jwt["family_name"],

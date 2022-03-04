@@ -112,12 +112,12 @@ class TestPlatformSoftwareUpdateAction(BaseTestCase):
         db.session.add(contact)
 
         platform1 = Platform(
-            short_name="platform1", is_public=False, is_private=False, is_internal=True,
+            short_name="platform1", is_public=True, is_private=False, is_internal=False,
         )
         db.session.add(platform1)
 
         platform2 = Platform(
-            short_name="platform2", is_public=False, is_private=False, is_internal=True,
+            short_name="platform2", is_public=True, is_private=False, is_internal=False,
         )
         db.session.add(platform2)
 
@@ -145,7 +145,7 @@ class TestPlatformSoftwareUpdateAction(BaseTestCase):
         with self.client:
             url_get_all = base_url + "/platform-software-update-actions"
             response = self.client.get(
-                url_get_all, content_type="application/vnd.api+json"
+                url_get_all, content_type="application/vnd.api+json",
             )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.json["data"]), 2)

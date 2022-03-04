@@ -3,9 +3,8 @@
 import json
 
 from project import base_url
-from project.api.models import Contact, Device, DeviceSoftwareUpdateAction
 from project.api.models.base_model import db
-from project.tests.base import BaseTestCase, fake, generate_token_data
+from project.tests.base import BaseTestCase
 from project.tests.models.test_software_update_actions_model import (
     add_device_software_update_action_model,
 )
@@ -31,7 +30,9 @@ class TestDeviceSoftwareUpdateAction(BaseTestCase):
 
     def test_get_internal_device_software_update_action_collection(self):
         """Test retrieve a collection of internal DeviceSoftwareUpdateAction objects."""
-        _ = add_device_software_update_action_model(public=False, private=False, internal=True)
+        _ = add_device_software_update_action_model(
+            public=False, private=False, internal=True
+        )
         with self.client:
             response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)

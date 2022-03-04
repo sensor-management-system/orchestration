@@ -2,7 +2,7 @@
 import json
 
 from project import base_url, db
-from project.tests.base import BaseTestCase, fake, generate_token_data
+from project.tests.base import BaseTestCase, fake, generate_userinfo_data
 from project.tests.base import create_token
 from project.tests.models.test_software_update_actions_model import (
     add_platform_software_update_action_model,

@@ -1,21 +1,15 @@
 """Tests for the devices."""
-import json
-from unittest.mock import patch
 
 from project import base_url
 from project.api.models import Configuration
 from project.api.models import Contact, User, Device
 from project.api.models import DeviceMountAction
+from project.api.models import DeviceUnmountAction
 from project.api.models import Platform
 from project.api.models.base_model import db
-from project.api.services.idl_services import Idl
 from project.tests.base import BaseTestCase
 from project.tests.base import fake
-from project.tests.base import generate_token_data, create_token
-from project.tests.models.test_configurations_model import generate_configuration_model
-from project.tests.permissions.test_platforms import IDL_USER_ACCOUNT
-
-from project.api.models import DeviceUnmountAction
+from project.tests.base import generate_userinfo_data, create_token
 
 
 def device_unmount_action_model(public=True, private=False, internal=False):
@@ -31,7 +25,7 @@ def device_unmount_action_model(public=True, private=False, internal=False):
         is_private=private,
         is_internal=internal,
     )
-    mock_jwt = generate_token_data()
+    mock_jwt = generate_userinfo_data()
     contact = Contact(
         given_name=mock_jwt["given_name"],
         family_name=mock_jwt["family_name"],
