@@ -461,6 +461,7 @@ deploy-gfz-staging-develop:
     IDL_DB_PASSWORD: ${GFZ_STAGING_IDL_POSTGRES_PASSWORD}
     IDL_TOKEN: ${GFZ_STAGING_IDL_TOKEN}
     CORS_ORIGIN_WHITELIST: "https://rz-vm64.gfz-potsdam.de localhost"
+    HTTP_ORIGINS: "http://localhost:3000 https://localhost:3000 https://rz-vm64.gfz-potsdam.de https://rz-vm64.gfz-potsdam.de:3000 http://rz-vm64.gfz-potsdam.de:3001"
     MINIO_ROOT_USER: ${GFZ_STAGING_MINIO_ROOT_USER}
     MINIO_ROOT_PASSWORD: ${GFZ_STAGING_MINIO_ROOT_PASSWORD}
     BACKEND_IMAGE: $CI_REGISTRY/hub-terra/sms/backend:gfz-latest
