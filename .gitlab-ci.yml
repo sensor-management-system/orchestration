@@ -467,7 +467,11 @@ deploy-gfz-staging-develop:
     BACKEND_DB_USER: ${GFZ_STAGING_BACKEND_POSTGRES_USER}
     BACKEND_DB_PASSWORD: ${GFZ_STAGING_BACKEND_POSTGRES_PASSWORD}
     BACKEND_SECRET_KEY: ${GFZ_STAGING_BACKEND_SECRET}
-    HTTP_ORIGINS: ${GFZ_STAGING_HTTP_ORIGINS}
+    # We can't reuse the HTTP_ORIGINS name, as it was
+    # defined in the backend repo.
+    # See https://docs.gitlab.com/ee/ci/variables/#cicd-variable-precedence
+    # So we use a different name.
+    STAGING_DEV_HTTP_ORIGINS: ${GFZ_STAGING_HTTP_ORIGINS}
     HTTP_ORIGINS_VOCABULARY: ${GFZ_STAGING_HTTP_ORIGINS_VOCABULARY}
     # App-settings need to be development to enable multiple client IDs
     APP_SETTINGS: "project.config.DevelopmentConfig"
@@ -477,7 +481,6 @@ deploy-gfz-staging-develop:
   before_script:
     - *docker_login_gitlab_registry
   script:
-    - echo $HTTP_ORIGINS
     - ./scripts/ensure_vm_max_map_count.sh
     - docker-compose -f docker/deployment/gfz/staging-dev/docker-compose.yml down --remove-orphans
     - docker-compose -f docker/deployment/gfz/staging-dev/docker-compose.yml rm -f
