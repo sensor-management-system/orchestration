@@ -22,6 +22,8 @@ related_objects_protected_views = [
     "api.device_mount_action_detail",
     "api.device_unmount_action_list",
     "api.device_unmount_action_detail",
+    "api.device_software_update_action_list",
+    "api.device_software_update_action_detail",
     "api.device_calibration_action_list",
     "api.device_calibration_action_detail",
     "api.generic_device_action_list",

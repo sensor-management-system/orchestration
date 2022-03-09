@@ -9,13 +9,14 @@ from project.api.models.base_model import db
 from project.tests.base import BaseTestCase, fake, generate_userinfo_data
 
 
-def add_device_software_update_action_model(public=True, private=False, internal=False):
+def add_device_software_update_action_model(public=True, private=False, internal=False, group_ids=[],):
     userinfo = generate_userinfo_data()
     d = Device(
         short_name="Device 1",
         is_public=public,
         is_private=private,
         is_internal=internal,
+        group_ids=group_ids,
     )
 
     c = Contact(

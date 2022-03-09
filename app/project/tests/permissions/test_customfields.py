@@ -10,20 +10,8 @@ from project.api.models.device import Device
 from project.api.services.idl_services import Idl
 from project.tests.base import BaseTestCase, create_token, query_result_to_list
 from project.tests.base import fake
+from project.tests.permissions import create_a_test_device
 from project.tests.permissions.test_platforms import IDL_USER_ACCOUNT
-
-
-def create_a_test_device(group_ids):
-    device = Device(
-        short_name=fake.pystr(),
-        is_public=False,
-        is_private=False,
-        is_internal=True,
-        group_ids=group_ids,
-    )
-    db.session.add(device)
-    db.session.commit()
-    return device
 
 
 def prepare_custom_field_payload(device):
@@ -139,7 +127,7 @@ class TestCustomFieldServices(BaseTestCase):
         count_customfields = (
             db.session.query(CustomField).filter_by(device_id=device.id,).count()
         )
-        
+
         self.assertEqual(count_customfields, 0)
         payload = prepare_custom_field_payload(device)
         with patch.object(
@@ -168,14 +156,14 @@ class TestCustomFieldServices(BaseTestCase):
         self.assertEqual(customfield.device_id, device.id)
         self.assertEqual(str(customfield.device_id), response.get_json()["data"]["id"])
 
-    def test_post_to_a_device_with_an_other__permission_group(self):
+    def test_post_to_a_device_with_an_other_permission_group(self):
         """Post to a device with a different permission Group from the user."""
         device = create_a_test_device([66])
         self.assertTrue(device.id is not None)
         count_customfields = (
             db.session.query(CustomField).filter_by(device_id=device.id,).count()
         )
-        
+
         self.assertEqual(count_customfields, 0)
         payload = prepare_custom_field_payload(device)
         with patch.object(
@@ -201,7 +189,7 @@ class TestCustomFieldServices(BaseTestCase):
         count_customfields = (
             db.session.query(CustomField).filter_by(device_id=device.id,).count()
         )
-        
+
         self.assertEqual(count_customfields, 0)
         customfield = CustomField(
             key="GFZ", value="https://www.gfz-potsdam.de", device=device,
@@ -246,7 +234,7 @@ class TestCustomFieldServices(BaseTestCase):
         count_customfields = (
             db.session.query(CustomField).filter_by(device_id=device.id,).count()
         )
-        
+
         self.assertEqual(count_customfields, 0)
         customfield = CustomField(
             key="GFZ", value="https://www.gfz-potsdam.de", device=device,
@@ -275,7 +263,7 @@ class TestCustomFieldServices(BaseTestCase):
         count_customfields = (
             db.session.query(CustomField).filter_by(device_id=device.id,).count()
         )
-        
+
         self.assertEqual(count_customfields, 0)
         customfield = CustomField(
             key="GFZ", value="https://www.gfz-potsdam.de", device=device,

@@ -1,6 +1,7 @@
-from project.api.models import Contact, User
+from project.api.models import Contact, User, Device
 from project.api.models.base_model import db
 from project.tests.base import create_token
+from project.tests.base import fake
 from project.tests.base import generate_userinfo_data
 
 
@@ -33,3 +34,16 @@ def add_a_contact():
     db.session.add(contact)
     db.session.commit()
     return contact
+
+
+def create_a_test_device(group_ids):
+    device = Device(
+        short_name=fake.pystr(),
+        is_public=False,
+        is_private=False,
+        is_internal=True,
+        group_ids=group_ids,
+    )
+    db.session.add(device)
+    db.session.commit()
+    return device
