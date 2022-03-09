@@ -4,6 +4,8 @@ from project.tests.base import create_token
 from project.tests.base import fake
 from project.tests.base import generate_userinfo_data
 
+from project.api.models import Platform
+
 
 def create_superuser_token():
     contact = Contact(
@@ -47,3 +49,16 @@ def create_a_test_device(group_ids):
     db.session.add(device)
     db.session.commit()
     return device
+
+
+def create_a_test_platform(group_ids):
+    platform = Platform(
+        short_name=fake.pystr(),
+        is_public=False,
+        is_private=False,
+        is_internal=True,
+        group_ids=group_ids,
+    )
+    db.session.add(platform)
+    db.session.commit()
+    return platform

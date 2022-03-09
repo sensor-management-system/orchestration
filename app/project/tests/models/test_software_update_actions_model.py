@@ -40,7 +40,7 @@ def add_device_software_update_action_model(public=True, private=False, internal
 
 
 def add_platform_software_update_action_model(
-        public=True, private=False, internal=False
+        public=True, private=False, internal=False, group_ids=[]
 ):
     userinfo = generate_userinfo_data()
     p = Platform(
@@ -48,6 +48,7 @@ def add_platform_software_update_action_model(
         is_public=public,
         is_private=private,
         is_internal=internal,
+        group_ids=group_ids
     )
     c = Contact(
         given_name=userinfo["given_name"],
