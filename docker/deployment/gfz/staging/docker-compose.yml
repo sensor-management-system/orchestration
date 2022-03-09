@@ -99,6 +99,8 @@ services:
       DJANGO_DB_PORT: 5432
       IDL_TOKEN: $IDL_TOKEN
       OIDC_WELL_KNOWN_URL: https://login-dev.helmholtz.de/oauth2/.well-known/openid-configuration
+      VO_ADMIN_CONVENTIONS: '*:gfz.sms.admin'
+      VO_MEMBER_CONVENTIONS: '*:datahub.default.member'
     volumes:
       - idl-static-files:/static/idl
     networks:
