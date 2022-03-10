@@ -13,7 +13,7 @@ from project.tests.base import fake
 from project.tests.models.test_generic_actions_models import (
     generate_device_action_model,
 )
-from project.tests.permissions import create_a_test_device, add_a_contact
+from project.tests.permissions import create_a_test_device, create_a_test_device
 from project.tests.permissions.test_platforms import IDL_USER_ACCOUNT
 
 
@@ -24,7 +24,7 @@ def make_generic_device_action_data(object_type, group_ids=[]):
     This also creates some associated objects in the database.
     """
     device = create_a_test_device(group_ids)
-    contact = add_a_contact()
+    contact = create_a_test_device()
 
     data = {
         "data": {

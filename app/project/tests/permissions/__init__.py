@@ -26,8 +26,9 @@ def create_superuser_token():
     return access_headers
 
 
-def add_a_contact():
-    userinfo = generate_userinfo_data()
+def create_a_test_contact(userinfo=None):
+    if not userinfo:
+        userinfo = generate_userinfo_data()
     contact = Contact(
         given_name=userinfo["given_name"],
         family_name=userinfo["family_name"],
@@ -38,12 +39,12 @@ def add_a_contact():
     return contact
 
 
-def create_a_test_device(group_ids):
+def create_a_test_device(public=False, private=False, internal=True, group_ids=[]):
     device = Device(
         short_name=fake.pystr(),
-        is_public=False,
-        is_private=False,
-        is_internal=True,
+        is_public=public,
+        is_private=private,
+        is_internal=internal,
         group_ids=group_ids,
     )
     db.session.add(device)
@@ -51,12 +52,12 @@ def create_a_test_device(group_ids):
     return device
 
 
-def create_a_test_platform(group_ids):
+def create_a_test_platform(public=False, private=False, internal=True, group_ids=[]):
     platform = Platform(
         short_name=fake.pystr(),
-        is_public=False,
-        is_private=False,
-        is_internal=True,
+        is_public=public,
+        is_private=private,
+        is_internal=internal,
         group_ids=group_ids,
     )
     db.session.add(platform)

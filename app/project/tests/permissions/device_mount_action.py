@@ -4,16 +4,55 @@ from unittest.mock import patch
 
 from project import base_url
 from project.api.models import Configuration
-from project.api.models import Contact, User, Device
+from project.api.models import Contact, User
 from project.api.models import DeviceMountAction
-from project.api.models import Platform
 from project.api.models.base_model import db
 from project.api.services.idl_services import Idl
 from project.tests.base import BaseTestCase
 from project.tests.base import fake
 from project.tests.base import generate_userinfo_data, create_token
 from project.tests.models.test_configurations_model import generate_configuration_model
+from project.tests.permissions import (
+    create_a_test_device,
+    create_a_test_platform,
+    create_a_test_contact,
+)
 from project.tests.permissions.test_platforms import IDL_USER_ACCOUNT
+
+from project.api.models import Device
+
+
+def payload_data(
+    object_type,
+    configuration,
+    contact,
+    device,
+    parent_platform,
+    begin_date=fake.future_datetime().__str__(),
+):
+    data = {
+        "data": {
+            "type": object_type,
+            "attributes": {
+                "description": "Test DeviceMountAction",
+                "begin_date": begin_date,
+                "offset_x": str(fake.coordinate()),
+                "offset_y": str(fake.coordinate()),
+                "offset_z": str(fake.coordinate()),
+            },
+            "relationships": {
+                "device": {"data": {"type": "device", "id": device.id}},
+                "contact": {"data": {"type": "contact", "id": contact.id}},
+                "parent_platform": {
+                    "data": {"type": "platform", "id": parent_platform.id}
+                },
+                "configuration": {
+                    "data": {"type": "configuration", "id": configuration.id}
+                },
+            },
+        }
+    }
+    return data
 
 
 class TestMountDevicePermissions(BaseTestCase):
@@ -25,24 +64,10 @@ class TestMountDevicePermissions(BaseTestCase):
 
     def test_mount_a_public_device(self):
         """Ensure mounting a public device works well."""
-        device = Device(
-            short_name=fake.pystr(),
-            is_public=True,
-            is_private=False,
-            is_internal=False,
-        )
-        parent_platform = Platform(
-            short_name="device parent platform",
-            is_public=True,
-            is_private=False,
-            is_internal=False,
-        )
+        device = create_a_test_device(public=True, internal=False)
+        parent_platform = create_a_test_platform()
         mock_jwt = generate_userinfo_data()
-        contact = Contact(
-            given_name=mock_jwt["given_name"],
-            family_name=mock_jwt["family_name"],
-            email=mock_jwt["email"],
-        )
+        contact = create_a_test_contact(mock_jwt)
         user = User(subject=mock_jwt["sub"], contact=contact)
         configuration = Configuration(
             label=fake.pystr(), is_public=True, is_internal=False,
@@ -65,8 +90,8 @@ class TestMountDevicePermissions(BaseTestCase):
         db.session.commit()
         action = (
             db.session.query(DeviceMountAction)
-                .filter_by(id=device_mount_action.id)
-                .one()
+            .filter_by(id=device_mount_action.id)
+            .one()
         )
         self.assertEqual(action.description, device_mount_action.description)
         response = self.client.get(self.url)
@@ -75,24 +100,10 @@ class TestMountDevicePermissions(BaseTestCase):
 
     def test_mount_an_internal_device_model(self):
         """Ensure mounting an internal device as model works well."""
-        device = Device(
-            short_name=fake.pystr(),
-            is_public=False,
-            is_private=False,
-            is_internal=True,
-        )
-        parent_platform = Platform(
-            short_name="device parent platform",
-            is_public=False,
-            is_private=False,
-            is_internal=True,
-        )
+        device = create_a_test_device()
+        parent_platform = create_a_test_platform()
         mock_jwt = generate_userinfo_data()
-        contact = Contact(
-            given_name=mock_jwt["given_name"],
-            family_name=mock_jwt["family_name"],
-            email=mock_jwt["email"],
-        )
+        contact = create_a_test_contact(mock_jwt)
         user = User(subject=mock_jwt["sub"], contact=contact)
         configuration = Configuration(
             label=fake.pystr(), is_public=True, is_internal=False,
@@ -115,8 +126,8 @@ class TestMountDevicePermissions(BaseTestCase):
         db.session.commit()
         action = (
             db.session.query(DeviceMountAction)
-                .filter_by(id=device_mount_action.id)
-                .one()
+            .filter_by(id=device_mount_action.id)
+            .one()
         )
         self.assertEqual(action.description, device_mount_action.description)
 
@@ -133,51 +144,18 @@ class TestMountDevicePermissions(BaseTestCase):
 
     def test_mount_an_internal_device(self):
         """Ensure mounting an internal device works well."""
-        device = Device(
-            short_name=fake.pystr(),
-            is_public=False,
-            is_private=False,
-            is_internal=True,
-        )
-        parent_platform = Platform(
-            short_name="device parent platform",
-            is_public=False,
-            is_private=False,
-            is_internal=True,
-        )
+        device = create_a_test_device()
+        parent_platform = create_a_test_platform()
         mock_jwt = generate_userinfo_data()
-        contact = Contact(
-            given_name=mock_jwt["given_name"],
-            family_name=mock_jwt["family_name"],
-            email=mock_jwt["email"],
-        )
+        contact = create_a_test_contact(mock_jwt)
         configuration = Configuration(
             label=fake.pystr(), is_public=True, is_internal=False,
         )
         db.session.add_all([device, parent_platform, contact, configuration])
         db.session.commit()
-        data = {
-            "data": {
-                "type": self.object_type,
-                "attributes": {
-                    "description": "Test DeviceMountAction",
-                    "begin_date": fake.future_datetime().__str__(),
-                    "offset_x": str(fake.coordinate()),
-                    "offset_y": str(fake.coordinate()),
-                    "offset_z": str(fake.coordinate()),
-                },
-                "relationships": {
-                    "device": {"data": {"type": "device", "id": device.id}},
-                    "contact": {"data": {"type": "contact", "id": contact.id}},
-                    "parent_platform": {
-                        "data": {"type": "platform", "id": parent_platform.id}
-                    },
-                    "configuration": {
-                        "data": {"type": "configuration", "id": configuration.id}
-                    },
-                },
-            }
-        }
+        data = payload_data(
+            self.object_type, configuration, contact, device, parent_platform
+        )
         _ = super().add_object(
             url=f"{self.url}?include=device,contact,parent_platform,configuration",
             data_object=data,
@@ -200,15 +178,12 @@ class TestMountDevicePermissions(BaseTestCase):
             is_internal=True,
         )
         mock_jwt = generate_userinfo_data()
-        contact = Contact(
-            given_name=mock_jwt["given_name"],
-            family_name=mock_jwt["family_name"],
-            email=mock_jwt["email"],
-        )
+        contact = create_a_test_contact(mock_jwt)
         user = User(subject=mock_jwt["sub"], contact=contact)
         configuration = Configuration(
             label=fake.pystr(), is_public=True, is_internal=False,
         )
+
         mount_public_device = DeviceMountAction(
             begin_date=fake.date(),
             description="test mount public device action model",
@@ -220,7 +195,6 @@ class TestMountDevicePermissions(BaseTestCase):
         )
         mount_public_device.configuration = configuration
         mount_public_device.contact = contact
-
         mount_internal_device = DeviceMountAction(
             begin_date=fake.date(),
             description="test mount internal device action model",
@@ -232,6 +206,7 @@ class TestMountDevicePermissions(BaseTestCase):
         )
         mount_internal_device.configuration = configuration
         mount_internal_device.contact = contact
+
         db.session.add_all(
             [
                 public_device,
@@ -269,53 +244,19 @@ class TestMountDevicePermissions(BaseTestCase):
     def test_post_action_as_not_a_group_member(self):
         """Ensure mounting a device in a group fails
         if it mounted as someone not member in the group."""
-        device = Device(
-            short_name=fake.linux_processor(),
-            is_public=True,
-            is_private=False,
-            is_internal=False,
-            group_ids=[222],
-        )
-        parent_platform = Platform(
-            short_name="device parent platform",
-            is_public=True,
-            is_private=False,
-            is_internal=False,
-        )
+        device = create_a_test_device(group_ids=[222],)
+        parent_platform = create_a_test_platform()
         mock_jwt = generate_userinfo_data()
-        contact = Contact(
-            given_name=mock_jwt["given_name"],
-            family_name=mock_jwt["family_name"],
-            email=mock_jwt["email"],
-        )
+        contact = create_a_test_contact(mock_jwt)
         configuration = generate_configuration_model()
         db.session.add_all([device, parent_platform, contact, configuration])
         db.session.commit()
-        data = {
-            "data": {
-                "type": self.object_type,
-                "attributes": {
-                    "description": "Test DeviceMountAction",
-                    "begin_date": fake.future_datetime().__str__(),
-                    "offset_x": str(fake.coordinate()),
-                    "offset_y": str(fake.coordinate()),
-                    "offset_z": str(fake.coordinate()),
-                },
-                "relationships": {
-                    "device": {"data": {"type": "device", "id": device.id}},
-                    "contact": {"data": {"type": "contact", "id": contact.id}},
-                    "parent_platform": {
-                        "data": {"type": "platform", "id": parent_platform.id}
-                    },
-                    "configuration": {
-                        "data": {"type": "configuration", "id": configuration.id}
-                    },
-                },
-            }
-        }
+        data = payload_data(
+            self.object_type, configuration, contact, device, parent_platform
+        )
         access_headers = create_token()
         with patch.object(
-                Idl, "get_all_permission_groups_for_a_user"
+            Idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             with self.client:
@@ -331,53 +272,19 @@ class TestMountDevicePermissions(BaseTestCase):
         """Ensure mounting a device in a group success
         if it mounted from a group member."""
         group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permission_groups
-        device = Device(
-            short_name=fake.linux_processor(),
-            is_public=True,
-            is_private=False,
-            is_internal=False,
-            group_ids=group_id_test_user_is_member_in_2,
-        )
-        parent_platform = Platform(
-            short_name="device parent platform",
-            is_public=True,
-            is_private=False,
-            is_internal=False,
-        )
+        device = create_a_test_device(group_ids=group_id_test_user_is_member_in_2,)
+        parent_platform = create_a_test_platform()
         mock_jwt = generate_userinfo_data()
-        contact = Contact(
-            given_name=mock_jwt["given_name"],
-            family_name=mock_jwt["family_name"],
-            email=mock_jwt["email"],
-        )
+        contact = create_a_test_contact(mock_jwt)
         configuration = generate_configuration_model()
         db.session.add_all([device, parent_platform, contact, configuration])
         db.session.commit()
-        data = {
-            "data": {
-                "type": self.object_type,
-                "attributes": {
-                    "description": "Test as a group member.",
-                    "begin_date": fake.future_datetime().__str__(),
-                    "offset_x": str(fake.coordinate()),
-                    "offset_y": str(fake.coordinate()),
-                    "offset_z": str(fake.coordinate()),
-                },
-                "relationships": {
-                    "device": {"data": {"type": "device", "id": device.id}},
-                    "contact": {"data": {"type": "contact", "id": contact.id}},
-                    "parent_platform": {
-                        "data": {"type": "platform", "id": parent_platform.id}
-                    },
-                    "configuration": {
-                        "data": {"type": "configuration", "id": configuration.id}
-                    },
-                },
-            }
-        }
+        data = payload_data(
+            self.object_type, configuration, contact, device, parent_platform
+        )
         access_headers = create_token()
         with patch.object(
-                Idl, "get_all_permission_groups_for_a_user"
+            Idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             with self.client:
@@ -392,53 +299,19 @@ class TestMountDevicePermissions(BaseTestCase):
     def test_delete_action_as_a_group_member(self):
         """Ensure that only admin for mounted device groups can delete an action."""
         group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permission_groups
-        device = Device(
-            short_name=fake.linux_processor(),
-            is_public=True,
-            is_private=False,
-            is_internal=False,
-            group_ids=group_id_test_user_is_member_in_2,
-        )
-        parent_platform = Platform(
-            short_name="device parent platform",
-            is_public=True,
-            is_private=False,
-            is_internal=False,
-        )
+        device = create_a_test_device(group_ids=group_id_test_user_is_member_in_2,)
+        parent_platform = create_a_test_platform()
         mock_jwt = generate_userinfo_data()
-        contact = Contact(
-            given_name=mock_jwt["given_name"],
-            family_name=mock_jwt["family_name"],
-            email=mock_jwt["email"],
-        )
+        contact = create_a_test_contact(mock_jwt)
         configuration = generate_configuration_model()
         db.session.add_all([device, parent_platform, contact, configuration])
         db.session.commit()
-        data = {
-            "data": {
-                "type": self.object_type,
-                "attributes": {
-                    "description": "Test as a group member.",
-                    "begin_date": fake.future_datetime().__str__(),
-                    "offset_x": str(fake.coordinate()),
-                    "offset_y": str(fake.coordinate()),
-                    "offset_z": str(fake.coordinate()),
-                },
-                "relationships": {
-                    "device": {"data": {"type": "device", "id": device.id}},
-                    "contact": {"data": {"type": "contact", "id": contact.id}},
-                    "parent_platform": {
-                        "data": {"type": "platform", "id": parent_platform.id}
-                    },
-                    "configuration": {
-                        "data": {"type": "configuration", "id": configuration.id}
-                    },
-                },
-            }
-        }
+        data = payload_data(
+            self.object_type, configuration, contact, device, parent_platform
+        )
         access_headers = create_token()
         with patch.object(
-                Idl, "get_all_permission_groups_for_a_user"
+            Idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             with self.client:
@@ -458,7 +331,7 @@ class TestMountDevicePermissions(BaseTestCase):
         # User not involved in the group
         device.group_ids = [40]
         with patch.object(
-                Idl, "get_all_permission_groups_for_a_user"
+            Idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             delete_response_user_not_involved = self.client.delete(
@@ -468,7 +341,7 @@ class TestMountDevicePermissions(BaseTestCase):
         # As an admin in the group
         device.group_ids = IDL_USER_ACCOUNT.administrated_permission_groups
         with patch.object(
-                Idl, "get_all_permission_groups_for_a_user"
+            Idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             delete_response_user_is_admin = self.client.delete(
@@ -479,19 +352,8 @@ class TestMountDevicePermissions(BaseTestCase):
     def test_mount_a_device_in_two_configuration_at_same_time(self):
         """Ensure mounting a device in more than one configuration at the same time won't success."""
         group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permission_groups
-        device = Device(
-            short_name=fake.linux_processor(),
-            is_public=True,
-            is_private=False,
-            is_internal=False,
-            group_ids=group_id_test_user_is_member_in_2,
-        )
-        parent_platform = Platform(
-            short_name=fake.linux_processor(),
-            is_public=True,
-            is_private=False,
-            is_internal=False,
-        )
+        device = create_a_test_device(group_ids=group_id_test_user_is_member_in_2,)
+        parent_platform = create_a_test_platform()
         mock_jwt = generate_userinfo_data()
         contact = Contact(
             given_name=mock_jwt["given_name"],
@@ -500,33 +362,22 @@ class TestMountDevicePermissions(BaseTestCase):
         )
         first_configuration = generate_configuration_model()
         second_configuration = generate_configuration_model()
-        db.session.add_all([device, parent_platform, contact, first_configuration, second_configuration])
+        db.session.add_all(
+            [
+                device,
+                parent_platform,
+                contact,
+                first_configuration,
+                second_configuration,
+            ]
+        )
         db.session.commit()
-        data = {
-            "data": {
-                "type": self.object_type,
-                "attributes": {
-                    "description": "Test as a group member.",
-                    "begin_date": fake.future_datetime().__str__(),
-                    "offset_x": str(fake.coordinate()),
-                    "offset_y": str(fake.coordinate()),
-                    "offset_z": str(fake.coordinate()),
-                },
-                "relationships": {
-                    "device": {"data": {"type": "device", "id": device.id}},
-                    "contact": {"data": {"type": "contact", "id": contact.id}},
-                    "parent_platform": {
-                        "data": {"type": "platform", "id": parent_platform.id}
-                    },
-                    "configuration": {
-                        "data": {"type": "configuration", "id": first_configuration.id}
-                    },
-                },
-            }
-        }
+        data = payload_data(
+            self.object_type, first_configuration, contact, device, parent_platform
+        )
         access_headers = create_token()
         with patch.object(
-                Idl, "get_all_permission_groups_for_a_user"
+            Idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             with self.client:
@@ -537,31 +388,12 @@ class TestMountDevicePermissions(BaseTestCase):
                     headers=access_headers,
                 )
             self.assertEqual(response.status_code, 201)
-        data_2 = {
-            "data": {
-                "type": self.object_type,
-                "attributes": {
-                    "description": "Test as a group member.",
-                    "begin_date": data["data"]["attributes"]["begin_date"],
-                    "offset_x": str(fake.coordinate()),
-                    "offset_y": str(fake.coordinate()),
-                    "offset_z": str(fake.coordinate()),
-                },
-                "relationships": {
-                    "device": {"data": {"type": "device", "id": device.id}},
-                    "contact": {"data": {"type": "contact", "id": contact.id}},
-                    "parent_platform": {
-                        "data": {"type": "platform", "id": parent_platform.id}
-                    },
-                    "configuration": {
-                        "data": {"type": "configuration", "id": second_configuration.id}
-                    },
-                },
-            }
-        }
+        data_2 = payload_data(
+            self.object_type, second_configuration, contact, device, parent_platform
+        )
         access_headers = create_token()
         with patch.object(
-                Idl, "get_all_permission_groups_for_a_user"
+            Idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             with self.client:
@@ -576,51 +408,30 @@ class TestMountDevicePermissions(BaseTestCase):
     def test_mount_a_device_in_two_configuration_at_different_time(self):
         """Ensure mounting a device in more than one configuration at the different time will success."""
         group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permission_groups
-        device = Device(
-            short_name=fake.linux_processor(),
-            is_public=True,
-            is_private=False,
-            is_internal=False,
-            group_ids=group_id_test_user_is_member_in_2,
-        )
-        parent_platform = Platform(
-            short_name=fake.linux_processor(),
-            is_public=True,
-            is_private=False,
-            is_internal=False,
-        )
+        device = create_a_test_device(group_ids=group_id_test_user_is_member_in_2,)
+        parent_platform = create_a_test_platform()
         mock_jwt = generate_userinfo_data()
-        contact = Contact(
-            given_name=mock_jwt["given_name"],
-            family_name=mock_jwt["family_name"],
-            email=mock_jwt["email"],
-        )
+        contact = create_a_test_contact(mock_jwt)
         first_configuration = generate_configuration_model()
         second_configuration = generate_configuration_model()
-        db.session.add_all([device, parent_platform, contact, first_configuration, second_configuration])
+        db.session.add_all(
+            [
+                device,
+                parent_platform,
+                contact,
+                first_configuration,
+                second_configuration,
+            ]
+        )
         db.session.commit()
-        mount_data = {
-            "data": {
-                "type": self.object_type,
-                "attributes": {
-                    "description": "Test as a group member.",
-                    "begin_date": "2022-02-18 20:44:42",
-                    "offset_x": str(fake.coordinate()),
-                    "offset_y": str(fake.coordinate()),
-                    "offset_z": str(fake.coordinate()),
-                },
-                "relationships": {
-                    "device": {"data": {"type": "device", "id": device.id}},
-                    "contact": {"data": {"type": "contact", "id": contact.id}},
-                    "parent_platform": {
-                        "data": {"type": "platform", "id": parent_platform.id}
-                    },
-                    "configuration": {
-                        "data": {"type": "configuration", "id": first_configuration.id}
-                    },
-                },
-            }
-        }
+        mount_data = payload_data(
+            self.object_type,
+            first_configuration,
+            contact,
+            device,
+            parent_platform,
+            begin_date="2022-02-18 20:44:42",
+        )
         unmount_data = {
             "data": {
                 "type": "device_unmount_action",
@@ -637,31 +448,18 @@ class TestMountDevicePermissions(BaseTestCase):
                 },
             }
         }
-        mount_data_2 = {
-            "data": {
-                "type": self.object_type,
-                "attributes": {
-                    "description": "test mount device action 2",
-                    "begin_date": "2022-03-18 20:44:42",
-                    "offset_x": str(fake.coordinate()),
-                    "offset_y": str(fake.coordinate()),
-                    "offset_z": str(fake.coordinate()),
-                },
-                "relationships": {
-                    "device": {"data": {"type": "device", "id": device.id}},
-                    "contact": {"data": {"type": "contact", "id": contact.id}},
-                    "parent_platform": {
-                        "data": {"type": "platform", "id": parent_platform.id}
-                    },
-                    "configuration": {
-                        "data": {"type": "configuration", "id": second_configuration.id}
-                    },
-                },
-            }
-        }
+        mount_data_2 = payload_data(
+            self.object_type,
+            first_configuration,
+            contact,
+            device,
+            parent_platform,
+            begin_date="2022-03-18 20:44:42",
+        )
+
         access_headers = create_token()
         with patch.object(
-                Idl, "get_all_permission_groups_for_a_user"
+            Idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             with self.client:
@@ -679,6 +477,7 @@ class TestMountDevicePermissions(BaseTestCase):
                     content_type="application/vnd.api+json",
                     headers=access_headers,
                 )
+
                 self.assertEqual(unmount_response.status_code, 201)
                 mount_response_2 = self.client.post(
                     f"{self.url}?include=device,contact,parent_platform,configuration",

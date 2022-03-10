@@ -12,7 +12,7 @@ from project.tests.base import fake
 from project.tests.models.test_generic_actions_models import (
     generate_platform_action_model,
 )
-from project.tests.permissions import create_a_test_platform, add_a_contact
+from project.tests.permissions import create_a_test_platform, create_a_test_device
 from project.tests.permissions.test_platforms import IDL_USER_ACCOUNT
 
 
@@ -23,7 +23,7 @@ def make_generic_platform_action_data(object_type, group_ids=[]):
     This also creates some associated objects in the database.
     """
     platform = create_a_test_platform(group_ids)
-    contact = add_a_contact()
+    contact = create_a_test_device()
 
     data = {
         "data": {

@@ -14,6 +14,7 @@ from project.api.models.platform import Platform
 from project.tests.base import BaseTestCase, test_file_path
 from project.tests.base import create_token
 from project.tests.base import fake, generate_userinfo_data
+from project.tests.permissions import create_a_test_device
 from project.tests.read_from_json import extract_data_from_json_file
 
 
@@ -75,8 +76,8 @@ class TestConfigurationsService(BaseTestCase):
             },
         }
         for (
-                input_calibration_date,
-                expected_output_calibration_date,
+            input_calibration_date,
+            expected_output_calibration_date,
         ) in calibration_dates.items():
             # set up for each single run
             self.setUp()
@@ -127,8 +128,8 @@ class TestConfigurationsService(BaseTestCase):
 
             configuration_device = (
                 db.session.query(ConfigurationDevice)
-                    .filter_by(device_id=1, configuration_id=1)
-                    .first()
+                .filter_by(device_id=1, configuration_id=1)
+                .first()
             )
             self.assertEqual(
                 configuration_device.calibration_date,
@@ -182,8 +183,8 @@ class TestConfigurationsService(BaseTestCase):
 
         configuration_device = (
             db.session.query(ConfigurationDevice)
-                .filter_by(device_id=1, configuration_id=1)
-                .first()
+            .filter_by(device_id=1, configuration_id=1)
+            .first()
         )
         self.assertEqual(configuration_device.firmware_version, firmware_version)
 
@@ -676,18 +677,6 @@ class TestConfigurationsService(BaseTestCase):
         url = f"{self.configurations_url}/{configuration.id}"
         _ = self.delete_as_owner(contact, user, url)
 
-    @staticmethod
-    def add_a_contact():
-        userinfo = generate_userinfo_data()
-        contact = Contact(
-            given_name=userinfo["given_name"],
-            family_name=userinfo["family_name"],
-            email=userinfo["email"],
-        )
-        db.session.add(contact)
-        db.session.commit()
-        return contact
-
     def add_a_configuration(self):
         config_data = {
             "data": {
@@ -717,7 +706,7 @@ class TestConfigurationsService(BaseTestCase):
         _ = super().http_code_404_when_resource_not_found(url)
 
     def add_a_configuration_model(self):
-        contact = self.add_a_contact()
+        contact = create_a_test_device()
 
         user = User(subject=fake.email(), contact=contact)
         configuration = Configuration(

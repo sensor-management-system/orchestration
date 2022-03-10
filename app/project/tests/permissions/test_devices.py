@@ -9,7 +9,7 @@ from project.api.services.idl_services import Idl
 from project.tests.base import BaseTestCase
 from project.tests.base import create_token
 from project.tests.base import fake
-from project.tests.permissions import add_a_contact
+from project.tests.permissions import create_a_test_device
 from project.tests.permissions import create_superuser_token
 from project.tests.permissions.test_platforms import IDL_USER_ACCOUNT
 
@@ -163,8 +163,8 @@ class TestDevicePermissions(BaseTestCase):
             is_internal=False,
         )
 
-        contact = add_a_contact()
-        contact_1 = add_a_contact()
+        contact = create_a_test_device()
+        contact_1 = create_a_test_device()
 
         user = User(subject="test_user@test.test", contact=contact)
         user_1 = User(subject="test_user1@test.test", contact=contact_1)
@@ -309,7 +309,7 @@ class TestDevicePermissions(BaseTestCase):
         """Make sure that a normal user is not allowed a retrieve a not owned
         private device."""
 
-        c = add_a_contact()
+        c = create_a_test_device()
         user = User(subject="test_user1@test.test", contact=c)
 
         db.session.add_all([c, user])
