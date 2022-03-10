@@ -9,7 +9,7 @@ from project.tests.base import create_token
 from project.tests.models.test_software_update_actions_model import (
     add_platform_software_update_action_model,
 )
-from project.tests.permissions import create_a_test_platform, create_a_test_device
+from project.tests.permissions import create_a_test_platform, create_a_test_contact
 from project.tests.permissions.test_platforms import IDL_USER_ACCOUNT
 
 
@@ -70,12 +70,12 @@ class TestPlatformSoftwareUpdateAction(BaseTestCase):
         """Post to device,with permission Group."""
         platform = create_a_test_platform(IDL_USER_ACCOUNT.membered_permission_groups)
         self.assertTrue(platform.id is not None)
-        contact = create_a_test_device()
+        contact = create_a_test_contact()
         payload = prepare_software_update_action_payload(
             self.object_type, platform, contact
         )
         with patch.object(
-                Idl, "get_all_permission_groups_for_a_user"
+            Idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             with self.client:
@@ -92,7 +92,7 @@ class TestPlatformSoftwareUpdateAction(BaseTestCase):
         """Post to device,with permission Group different from the user group."""
         platform = create_a_test_platform([403])
         self.assertTrue(platform.id is not None)
-        contact = create_a_test_device()
+        contact = create_a_test_contact()
         payload = prepare_software_update_action_payload(
             self.object_type, platform, contact
         )

@@ -115,7 +115,7 @@ class TestConfigurationPermissions(BaseTestCase):
             id=33, label=fake.pystr(), is_public=False, is_internal=True,
         )
 
-        contact = create_a_test_device()
+        contact = create_a_test_contact()
         contact_1 = create_a_test_device()
 
         user = User(subject="test_user@test.test", contact=contact)

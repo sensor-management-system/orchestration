@@ -8,7 +8,7 @@ from project.tests.base import (
     test_file_path,
     fake,
 )
-from project.tests.permissions import create_a_test_device
+from project.tests.permissions import create_a_test_contact
 
 
 class TestContactServices(BaseTestCase):
@@ -29,7 +29,7 @@ class TestContactServices(BaseTestCase):
 
     def test_get_collection_of_contacts(self):
         """Ensure contact get collection behaves correctly."""
-        contact = create_a_test_device()
+        contact = create_a_test_contact()
         with self.client:
             response = self.client.get(self.url)
         data = json.loads(response.data.decode())
@@ -50,7 +50,7 @@ class TestContactServices(BaseTestCase):
 
     def test_update_a_contact(self):
         """Ensure update contact behaves correctly."""
-        contact = create_a_test_device()
+        contact = create_a_test_contact()
         contact_updated = {
             "data": {
                 "type": "contact",
@@ -67,7 +67,7 @@ class TestContactServices(BaseTestCase):
     def test_delete_a_contacts(self):
         """Ensure remove contact behaves correctly."""
 
-        contact = create_a_test_device()
+        contact = create_a_test_contact()
         _ = super().delete_object(url=f"{self.url}/{contact.id}",)
 
     def test_http_response_not_found(self):

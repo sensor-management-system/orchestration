@@ -14,7 +14,7 @@ from project.api.models.platform import Platform
 from project.tests.base import BaseTestCase, test_file_path
 from project.tests.base import create_token
 from project.tests.base import fake, generate_userinfo_data
-from project.tests.permissions import create_a_test_device
+from project.tests.permissions import create_a_test_contact
 from project.tests.read_from_json import extract_data_from_json_file
 
 
@@ -706,7 +706,7 @@ class TestConfigurationsService(BaseTestCase):
         _ = super().http_code_404_when_resource_not_found(url)
 
     def add_a_configuration_model(self):
-        contact = create_a_test_device()
+        contact = create_a_test_contact()
 
         user = User(subject=fake.email(), contact=contact)
         configuration = Configuration(

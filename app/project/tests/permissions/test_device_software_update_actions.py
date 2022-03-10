@@ -11,7 +11,7 @@ from project.tests.base import fake
 from project.tests.models.test_software_update_actions_model import (
     add_device_software_update_action_model,
 )
-from project.tests.permissions import create_a_test_device
+from project.tests.permissions import create_a_test_contact
 from project.tests.permissions.test_customfields import create_a_test_device
 from project.tests.permissions.test_platforms import IDL_USER_ACCOUNT
 
@@ -73,7 +73,7 @@ class TestDeviceSoftwareUpdateAction(BaseTestCase):
         """Post to device,with permission Group."""
         device = create_a_test_device(IDL_USER_ACCOUNT.membered_permission_groups)
         self.assertTrue(device.id is not None)
-        contact = create_a_test_device()
+        contact = create_a_test_contact()
         payload = prepare_software_update_action_payload(
             self.object_type, device, contact
         )
@@ -96,7 +96,7 @@ class TestDeviceSoftwareUpdateAction(BaseTestCase):
         """Post to device,with permission Group different from the user group."""
         device = create_a_test_device([403])
         self.assertTrue(device.id is not None)
-        contact = create_a_test_device()
+        contact = create_a_test_contact()
         payload = prepare_software_update_action_payload(
             self.object_type, device, contact
         )

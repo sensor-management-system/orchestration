@@ -13,7 +13,7 @@ from project.tests.base import fake
 from project.tests.models.test_generic_actions_models import (
     generate_device_action_model,
 )
-from project.tests.permissions import create_a_test_device, create_a_test_device
+from project.tests.permissions import create_a_test_device, create_a_test_contact
 from project.tests.permissions.test_platforms import IDL_USER_ACCOUNT
 
 
@@ -24,7 +24,7 @@ def make_generic_device_action_data(object_type, group_ids=[]):
     This also creates some associated objects in the database.
     """
     device = create_a_test_device(group_ids)
-    contact = create_a_test_device()
+    contact = create_a_test_contact()
 
     data = {
         "data": {
@@ -147,7 +147,9 @@ class TestGenericDeviceActionPermissions(BaseTestCase):
                 )
         self.assertEqual(response.status_code, 200)
 
-    def test_patch_generic_device_action_data_user_is_not_part_from_permission_group(self):
+    def test_patch_generic_device_action_data_user_is_not_part_from_permission_group(
+        self,
+    ):
         """Post to device,with permission Group."""
         generic_device_action = generate_device_action_model(group_ids=[403])
         self.assertTrue(generic_device_action.id is not None)
