@@ -94,7 +94,7 @@ class TestPlatformSoftwareUpdateAction(BaseTestCase):
 
     def test_delete_platform_software_update_action(self):
         """Delete PlatformSoftwareUpdateAction."""
-        platform_software_update_action = add_platform_software_update_action_model()
+        platform_software_update_action = add_platform_software_update_action_model(group_ids=[403])
         access_headers = create_token()
         with self.client:
             response = self.client.delete(

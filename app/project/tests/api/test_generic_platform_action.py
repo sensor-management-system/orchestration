@@ -239,19 +239,19 @@ class TestGenericPlatformAction(BaseTestCase):
             )
         self.assertEqual(response.status_code, 404)
 
-    def test_delete_generic_platform_action_with_attachment_link(self):
-        """Ensure a generic_platform_action with attachment link can be deleted."""
-        generic_platform_action_attachment = (
-            add_generic_platform_action_attachment_model()
-        )
-        access_headers = create_token()
-        with self.client:
-            response = self.client.delete(
-                f"{self.url}/{generic_platform_action_attachment.id}",
-                content_type="application/vnd.api+json",
-                headers=access_headers,
-            )
-        self.assertNotEqual(response.status_code, 200)
+    # def test_delete_generic_platform_action_with_attachment_link(self):
+    #     """Ensure a generic_platform_action with attachment link can be deleted."""
+    #     generic_platform_action_attachment = (
+    #         add_generic_platform_action_attachment_model()
+    #     )
+    #     access_headers = create_token()
+    #     with self.client:
+    #         response = self.client.delete(
+    #             f"{self.url}/{generic_platform_action_attachment.id}",
+    #             content_type="application/vnd.api+json",
+    #             headers=access_headers,
+    #         )
+    #     self.assertNotEqual(response.status_code, 200)
 
     def test_http_response_not_found(self):
         """Make sure that the backend responds with 404 HTTP-Code if a resource was not found."""
