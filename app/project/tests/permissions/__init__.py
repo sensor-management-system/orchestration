@@ -39,7 +39,7 @@ def create_a_test_contact(userinfo=None):
     return contact
 
 
-def create_a_test_device(public=False, private=False, internal=True, group_ids=[]):
+def create_a_test_device(group_ids=[], public=False, private=False, internal=True):
     device = Device(
         short_name=fake.pystr(),
         is_public=public,
@@ -52,7 +52,7 @@ def create_a_test_device(public=False, private=False, internal=True, group_ids=[
     return device
 
 
-def create_a_test_platform(public=False, private=False, internal=True, group_ids=[]):
+def create_a_test_platform(group_ids=[], public=False, private=False, internal=True, ):
     platform = Platform(
         short_name=fake.pystr(),
         is_public=public,
