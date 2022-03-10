@@ -116,7 +116,7 @@ class TestConfigurationPermissions(BaseTestCase):
         )
 
         contact = create_a_test_contact()
-        contact_1 = create_a_test_device()
+        contact_1 = create_a_test_contact()
 
         user = User(subject="test_user@test.test", contact=contact)
         user_1 = User(subject="test_user1@test.test", contact=contact_1)
