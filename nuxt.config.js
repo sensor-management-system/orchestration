@@ -63,6 +63,25 @@ if (!process.env.STAY_WITH_HTTP || process.env.STAY_WITH_HTTP !== 'true') {
   }
 }
 
+const matomoModule = []
+if (process.env.NUXT_ENV_MATOMO_SITE_ID) {
+  const config = {
+    siteId: process.env.NUXT_ENV_MATOMO_SITE_ID
+  }
+  if (process.env.NUXT_ENV_MATOMO_URL) {
+    config.matomoUrl = process.env.NUXT_ENV_MATOMO_URL
+  }
+  if (process.env.NUXT_ENV_MATOMO_TRACKER_URL) {
+    config.trackerUrl = process.env.NUXT_ENV_MATOMO_TRACKER_URL
+  }
+  if (process.env.NUXT_ENV_MATOMO_SCRIPT_URL) {
+    config.scriptUrl = process.env.NUXT_ENV_MATOMO_SCRIPT_URL
+  }
+  matomoModule.push([
+    'nuxt-matomo', config
+  ])
+}
+
 export default {
   server,
   ssr: false,
@@ -126,7 +145,9 @@ export default {
     '@nuxtjs/pwa',
     // Doc: https://github.com/nuxt-community/dotenv-module
     '@nuxtjs/dotenv',
-    'nuxt-leaflet'
+    'nuxt-leaflet',
+    // Can be empty depending on the config
+    ...matomoModule
   ],
   /*
   ** Axios module configuration
