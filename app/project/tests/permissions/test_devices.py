@@ -22,12 +22,8 @@ class TestDevicePermissions(BaseTestCase):
 
     def test_add_public_device(self):
         """Ensure a new device can be public."""
-        public_sensor = Device(
-            id=15,
-            short_name=fake.pystr(),
-            is_public=True,
-            is_private=False,
-            is_internal=False,
+        public_sensor = create_a_test_device(
+            public=True, private=False, internal=False,
         )
         db.session.add(public_sensor)
         db.session.commit()
@@ -39,12 +35,8 @@ class TestDevicePermissions(BaseTestCase):
 
     def test_add_private_device(self):
         """Ensure a new device can be private."""
-        private_sensor = Device(
-            id=1,
-            short_name=fake.pystr(),
-            is_public=False,
-            is_private=True,
-            is_internal=False,
+        private_sensor = create_a_test_device(
+            public=False, private=True, internal=False,
         )
         db.session.add(private_sensor)
         db.session.commit()
@@ -56,12 +48,8 @@ class TestDevicePermissions(BaseTestCase):
 
     def test_add_device_model(self):
         """Ensure a new device model can be internal."""
-        internal_sensor = Device(
-            id=33,
-            short_name=fake.pystr(),
-            is_internal=True,
-            is_public=False,
-            is_private=False,
+        internal_sensor = create_a_test_device(
+            internal=True, public=False, private=False,
         )
         db.session.add(internal_sensor)
         db.session.commit()
@@ -100,27 +88,15 @@ class TestDevicePermissions(BaseTestCase):
 
     def test_get_as_anonymous_user(self):
         """Ensure anonymous user can only see public objects."""
-        public_sensor = Device(
-            id=15,
-            short_name=fake.pystr(),
-            is_private=False,
-            is_internal=False,
-            is_public=True,
+        public_sensor = create_a_test_device(
+            private=False, internal=False, public=True,
         )
 
-        internal_sensor = Device(
-            id=33,
-            short_name=fake.pystr(),
-            is_public=False,
-            is_private=False,
-            is_internal=True,
+        internal_sensor = create_a_test_device(
+            public=False, private=False, internal=True,
         )
-        private_sensor = Device(
-            id=1,
-            short_name="private device",
-            is_public=False,
-            is_internal=False,
-            is_private=True,
+        private_sensor = create_a_test_device(
+            public=False, internal=False, private=True,
         )
         db.session.add_all([public_sensor, internal_sensor, private_sensor])
         db.session.commit()
@@ -133,38 +109,22 @@ class TestDevicePermissions(BaseTestCase):
 
     def test_get_as_registered_user(self):
         """Ensure that a registered user can see public, internal, and only his own private objects"""
-        public_sensor = Device(
-            id=15,
-            short_name=fake.pystr(),
-            is_public=True,
-            is_private=False,
-            is_internal=False,
+        public_sensor = create_a_test_device(
+            public=True, private=False, internal=False,
         )
 
-        internal_sensor = Device(
-            id=33,
-            short_name=fake.pystr(),
-            is_public=False,
-            is_private=False,
-            is_internal=True,
+        internal_sensor = create_a_test_device(
+            public=False, private=False, internal=True,
         )
-        private_sensor = Device(
-            id=1,
-            short_name="private device",
-            is_public=False,
-            is_internal=False,
-            is_private=True,
+        private_sensor = create_a_test_device(
+            public=False, internal=False, private=True,
         )
-        private_sensor_1 = Device(
-            id=3,
-            short_name="private device",
-            is_public=False,
-            is_private=True,
-            is_internal=False,
+        private_sensor_1 = create_a_test_device(
+            public=False, private=True, internal=False,
         )
 
         contact = create_a_test_contact()
-        contact_1 = create_a_test_device()
+        contact_1 = create_a_test_contact()
 
         user = User(subject="test_user@test.test", contact=contact)
         user_1 = User(subject="test_user1@test.test", contact=contact_1)
@@ -309,7 +269,7 @@ class TestDevicePermissions(BaseTestCase):
         """Make sure that a normal user is not allowed a retrieve a not owned
         private device."""
 
-        c = create_a_test_device()
+        c = create_a_test_contact()
         user = User(subject="test_user1@test.test", contact=c)
 
         db.session.add_all([c, user])
