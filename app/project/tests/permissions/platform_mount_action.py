@@ -3,7 +3,6 @@ from unittest.mock import patch
 
 from project import base_url
 from project.api.models import Configuration
-from project.api.models import Platform
 from project.api.models import PlatformMountAction
 from project.api.models import User
 from project.api.models.base_model import db
@@ -24,7 +23,7 @@ class TestMountPlatformPermissions(BaseTestCase):
 
     def test_mount_a_public_platform(self):
         """Ensure mounting a public platform works well."""
-        platform = create_a_test_platform()
+        platform = create_a_test_platform(public=True, internal=False)
         mock_jwt = generate_userinfo_data()
         contact = create_a_test_contact(mock_jwt)
         user = User(subject=mock_jwt["sub"], contact=contact)
@@ -107,28 +106,9 @@ class TestMountPlatformPermissions(BaseTestCase):
         configuration = generate_configuration_model()
         db.session.add_all([platform, parent_platform, contact, configuration])
         db.session.commit()
-        data = {
-            "data": {
-                "type": self.object_type,
-                "attributes": {
-                    "description": "Test PlatformMountAction",
-                    "begin_date": fake.future_datetime().__str__(),
-                    "offset_x": str(fake.coordinate()),
-                    "offset_y": str(fake.coordinate()),
-                    "offset_z": str(fake.coordinate()),
-                },
-                "relationships": {
-                    "platform": {"data": {"type": "platform", "id": platform.id}},
-                    "contact": {"data": {"type": "contact", "id": contact.id}},
-                    "parent_platform": {
-                        "data": {"type": "platform", "id": parent_platform.id}
-                    },
-                    "configuration": {
-                        "data": {"type": "configuration", "id": configuration.id}
-                    },
-                },
-            }
-        }
+        data = mount_payload_data(
+            self.object_type, configuration, contact, parent_platform, platform
+        )
         _ = super().add_object(
             url=f"{self.url}?include=platform,contact,parent_platform,configuration",
             data_object=data,
@@ -138,17 +118,11 @@ class TestMountPlatformPermissions(BaseTestCase):
     def test_get_as_registered_user(self):
         """Ensure that a registered user can see public, internal."""
 
-        public_platform = Platform(
-            short_name=fake.pystr(),
-            is_public=True,
-            is_private=False,
-            is_internal=False,
+        public_platform = create_a_test_platform(
+            public=True, private=False, internal=False,
         )
-        internal_platform = Platform(
-            short_name=fake.pystr(),
-            is_public=False,
-            is_private=False,
-            is_internal=True,
+        internal_platform = create_a_test_platform(
+            public=False, private=False, internal=True,
         )
         mock_jwt = generate_userinfo_data()
         contact = create_a_test_contact(mock_jwt)
@@ -223,28 +197,9 @@ class TestMountPlatformPermissions(BaseTestCase):
         configuration = generate_configuration_model()
         db.session.add_all([platform, parent_platform, contact, configuration])
         db.session.commit()
-        data = {
-            "data": {
-                "type": self.object_type,
-                "attributes": {
-                    "description": "Test PlatformMountAction",
-                    "begin_date": fake.future_datetime().__str__(),
-                    "offset_x": str(fake.coordinate()),
-                    "offset_y": str(fake.coordinate()),
-                    "offset_z": str(fake.coordinate()),
-                },
-                "relationships": {
-                    "platform": {"data": {"type": "platform", "id": platform.id}},
-                    "contact": {"data": {"type": "contact", "id": contact.id}},
-                    "parent_platform": {
-                        "data": {"type": "platform", "id": parent_platform.id}
-                    },
-                    "configuration": {
-                        "data": {"type": "configuration", "id": configuration.id}
-                    },
-                },
-            }
-        }
+        data = mount_payload_data(
+            self.object_type, configuration, contact, parent_platform, platform
+        )
         access_headers = create_token()
         with patch.object(
             Idl, "get_all_permission_groups_for_a_user"
@@ -270,28 +225,9 @@ class TestMountPlatformPermissions(BaseTestCase):
         configuration = generate_configuration_model()
         db.session.add_all([platform, parent_platform, contact, configuration])
         db.session.commit()
-        data = {
-            "data": {
-                "type": self.object_type,
-                "attributes": {
-                    "description": "Test as a group member.",
-                    "begin_date": fake.future_datetime().__str__(),
-                    "offset_x": str(fake.coordinate()),
-                    "offset_y": str(fake.coordinate()),
-                    "offset_z": str(fake.coordinate()),
-                },
-                "relationships": {
-                    "platform": {"data": {"type": "platform", "id": platform.id}},
-                    "contact": {"data": {"type": "contact", "id": contact.id}},
-                    "parent_platform": {
-                        "data": {"type": "platform", "id": parent_platform.id}
-                    },
-                    "configuration": {
-                        "data": {"type": "configuration", "id": configuration.id}
-                    },
-                },
-            }
-        }
+        data = mount_payload_data(
+            self.object_type, configuration, contact, parent_platform, platform
+        )
         access_headers = create_token()
         with patch.object(
             Idl, "get_all_permission_groups_for_a_user"
@@ -316,28 +252,9 @@ class TestMountPlatformPermissions(BaseTestCase):
         configuration = generate_configuration_model()
         db.session.add_all([platform, parent_platform, contact, configuration])
         db.session.commit()
-        data = {
-            "data": {
-                "type": self.object_type,
-                "attributes": {
-                    "description": "Test as a group member.",
-                    "begin_date": fake.future_datetime().__str__(),
-                    "offset_x": str(fake.coordinate()),
-                    "offset_y": str(fake.coordinate()),
-                    "offset_z": str(fake.coordinate()),
-                },
-                "relationships": {
-                    "platform": {"data": {"type": "platform", "id": platform.id}},
-                    "contact": {"data": {"type": "contact", "id": contact.id}},
-                    "parent_platform": {
-                        "data": {"type": "platform", "id": parent_platform.id}
-                    },
-                    "configuration": {
-                        "data": {"type": "configuration", "id": configuration.id}
-                    },
-                },
-            }
-        }
+        data = mount_payload_data(
+            self.object_type, configuration, contact, parent_platform, platform
+        )
         access_headers = create_token()
         with patch.object(
             Idl, "get_all_permission_groups_for_a_user"
@@ -377,3 +294,36 @@ class TestMountPlatformPermissions(BaseTestCase):
                 url, headers=access_headers
             )
             self.assertEqual(delete_response_user_is_admin.status_code, 200)
+
+
+def mount_payload_data(
+    object_type,
+    configuration,
+    contact,
+    parent_platform,
+    platform,
+    begin_date=fake.future_datetime().__str__(),
+):
+    data = {
+        "data": {
+            "type": object_type,
+            "attributes": {
+                "description": "Test PlatformMountAction",
+                "begin_date": begin_date,
+                "offset_x": str(fake.coordinate()),
+                "offset_y": str(fake.coordinate()),
+                "offset_z": str(fake.coordinate()),
+            },
+            "relationships": {
+                "platform": {"data": {"type": "platform", "id": platform.id}},
+                "contact": {"data": {"type": "contact", "id": contact.id}},
+                "parent_platform": {
+                    "data": {"type": "platform", "id": parent_platform.id}
+                },
+                "configuration": {
+                    "data": {"type": "configuration", "id": configuration.id}
+                },
+            },
+        }
+    }
+    return data

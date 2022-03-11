@@ -117,34 +117,32 @@ class TestUnmountDevicePermissions(BaseTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.json["data"]), 1)
 
-    def test_mount_a_device_in_two_configuration_at_different_time(self):
-        """Ensure mounting a device in more than one configuration at the different time will success."""
+    def test_unmount_a_device_with_permission_group(self):
+        """Ensure unmounting with a permission group will success."""
         group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permission_groups
         device = create_a_test_device(group_ids=group_id_test_user_is_member_in_2,)
         parent_platform = create_a_test_platform()
         mock_jwt = generate_userinfo_data()
         contact = create_a_test_contact(mock_jwt)
-        first_configuration = generate_configuration_model()
-        second_configuration = generate_configuration_model()
+        configuration = generate_configuration_model()
         db.session.add_all(
             [
                 device,
                 parent_platform,
                 contact,
-                first_configuration,
-                second_configuration,
+                configuration,
             ]
         )
         db.session.commit()
         mount_data = payload_data(
             "device_mount_action",
-            first_configuration,
+            configuration,
             contact,
             device,
             parent_platform,
             begin_date="2022-02-18 20:44:42",
         )
-        unmount_data = payload_unmount_data(contact, device, first_configuration)
+        unmount_data = payload_unmount_data(contact, device, configuration)
 
         access_headers = create_token()
         with patch.object(
