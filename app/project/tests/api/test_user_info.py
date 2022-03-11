@@ -22,14 +22,14 @@ class TestUserinfo(BaseTestCase):
     def test_get_with_jwt_user_not_assigned_to_any_permission_group(self):
         """Ensure response with an empty list if user not assigned to any permission group"""
         access_headers = create_token()
-        if "IDL_URL" in current_app.config:
+        if current_app.config['IDL_URL'] is not None:
             response = self.client.get(self.url, headers=access_headers)
             self.assertEqual(response.status_code, 200)
             data = response.json["data"]
             self.assertEqual(data["attributes"]["admin"], [])
             self.assertEqual(data["attributes"]["member"], [])
         else:
-            self.assertTrue()
+            pass
 
     def test_get_with_jwt_user_is_assigned_to_permission_groups(self):
         """Ensure response with an empty list if user not assigned to any permission group"""
