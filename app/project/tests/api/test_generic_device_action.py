@@ -241,17 +241,17 @@ class TestGenericDeviceAction(BaseTestCase):
             )
         self.assertEqual(response.status_code, 404)
 
-    # def test_fail_delete_generic_device_action_with_link_to_an_attachment(self):
-    #     """Ensure the generic_device_action and the link to the attachment can be deleted."""
-    #     generic_device_action_attachment = add_generic_device_action_attachment_model()
-    #     access_headers = create_token()
-    #     with self.client:
-    #         response = self.client.delete(
-    #             f"{self.url}/{generic_device_action_attachment.id}",
-    #             content_type="application/vnd.api+json",
-    #             headers=access_headers,
-    #         )
-    #     self.assertNotEqual(response.status_code, 200)
+    def test_fail_delete_generic_device_action_with_link_to_an_attachment(self):
+        """Ensure the generic_device_action and the link to the attachment can be deleted."""
+        generic_device_action_attachment = add_generic_device_action_attachment_model(group_ids=[403])
+        access_headers = create_token()
+        with self.client:
+            response = self.client.delete(
+                f"{self.url}/{generic_device_action_attachment.id}",
+                content_type="application/vnd.api+json",
+                headers=access_headers,
+            )
+        self.assertNotEqual(response.status_code, 200)
 
     def test_http_response_not_found(self):
         """Make sure that the backend responds with 404 HTTP-Code if a resource was not found."""
