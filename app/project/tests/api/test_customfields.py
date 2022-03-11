@@ -112,29 +112,29 @@ class TestCustomFieldServices(BaseTestCase):
         )
         self.assertEqual(count_customfields, 0)
 
-    # def test_post_customfield_api_missing_device(self):
-    #     """Ensure that we don't add a customfield with missing device."""
-    #     count_customfields_before = db.session.query(CustomField).count()
-    #     payload = {
-    #         "data": {
-    #             "type": "customfield",
-    #             "attributes": {"key": "GFZ", "value": "GFZ Homepage", },
-    #             "relationships": {"device": {"data": {"type": "device", "id": None}}},
-    #         }
-    #     }
-    #     with self.client:
-    #         url_post = base_url + "/customfields"
-    #         response = self.client.post(
-    #             url_post,
-    #             data=json.dumps(payload),
-    #             content_type="application/vnd.api+json",
-    #             headers=create_token(),
-    #         )
-    #     # it will not work, as we miss an important part (the device)
-    #     self.assertNotEqual(response.status_code, 201)
-    #     self.assertNotEqual(response.status_code, 200)
-    #     count_customfields_after = db.session.query(CustomField).count()
-    #     self.assertEqual(count_customfields_before, count_customfields_after)
+    def test_post_customfield_api_missing_device(self):
+        """Ensure that we don't add a customfield with missing device."""
+        count_customfields_before = db.session.query(CustomField).count()
+        payload = {
+            "data": {
+                "type": "customfield",
+                "attributes": {"key": "GFZ", "value": "GFZ Homepage", },
+                "relationships": {"device": {"data": {"type": "device", "id": None}}},
+            }
+        }
+        with self.client:
+            url_post = base_url + "/customfields"
+            response = self.client.post(
+                url_post,
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+                headers=create_token(),
+            )
+        # it will not work, as we miss an important part (the device)
+        self.assertNotEqual(response.status_code, 201)
+        self.assertNotEqual(response.status_code, 200)
+        count_customfields_after = db.session.query(CustomField).count()
+        self.assertEqual(count_customfields_before, count_customfields_after)
 
     def test_get_customfields_api(self):
         """Ensure that we can get a list of customfields."""

@@ -277,19 +277,20 @@ def check_post_permission_for_related_objects():
         if "device" in data["relationships"]:
             object_id = data["relationships"]["device"]["data"]["id"]
             related_object = db.session.query(Device).filter_by(id=object_id).one_or_none()
-
         if "platform" in data["relationships"]:
             object_id = data["relationships"]["platform"]["data"]["id"]
             related_object = db.session.query(Platform).filter_by(id=object_id).one_or_none()
-
-        if related_object.is_private:
-            assert_current_user_is_owner_of_object(related_object)
+        if related_object is not None:
+            if related_object.is_private:
+                assert_current_user_is_owner_of_object(related_object)
+            else:
+                group_ids = related_object.group_ids
+                if not is_user_in_a_group(group_ids):
+                    raise ForbiddenError(
+                        "User is not part of any group to edit this object."
+                    )
         else:
-            group_ids = related_object.group_ids
-            if not is_user_in_a_group(group_ids):
-                raise ForbiddenError(
-                    "User is not part of any group to edit this object."
-                )
+            raise ObjectNotFound(f"Object with id: {object_id} not found!")
 
 
 def check_patch_permission_for_related_objects(data, object_to_patch):
