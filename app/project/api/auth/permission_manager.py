@@ -19,9 +19,6 @@ related_objects_protected_views = [
     "api.customfield_list",
     "api.customfield_detail",
 
-    "platform_attachment_list"
-    "platform_attachment_detail"
-    
     "device_attachment_list"
     "device_attachment_detail"
     
@@ -42,6 +39,9 @@ related_objects_protected_views = [
 
     "api.generic_device_action_list",
     "api.generic_device_action_detail",
+
+    "platform_attachment_list"
+    "platform_attachment_detail"
 
     "api.platform_mount_action_list",
     "api.platform_mount_action_detail",

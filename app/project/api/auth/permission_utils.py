@@ -273,6 +273,7 @@ def check_post_permission_for_related_objects():
     check if a user has the permission to patch a related object.
     """
     data = json.loads(request.data.decode())["data"]
+    related_object = None
     if not is_superuser():
         if "device" in data["relationships"]:
             object_id = data["relationships"]["device"]["data"]["id"]

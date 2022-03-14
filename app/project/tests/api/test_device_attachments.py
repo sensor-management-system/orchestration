@@ -325,6 +325,7 @@ class TestDeviceAttachmentServices(BaseTestCase):
             response = self.client.get(
                 base_url + "/devices/" + str(device1.id) + "/device-attachments",
                 content_type="application/vnd.api+json",
+                headers=create_token()
             )
             self.assertEqual(response.status_code, 200)
             self.assertEqual(len(response.get_json()["data"]), 1)

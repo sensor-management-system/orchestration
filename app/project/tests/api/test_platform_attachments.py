@@ -335,6 +335,7 @@ class TestPlatformAttachmentServices(BaseTestCase):
             response = self.client.get(
                 base_url + "/platforms/" + str(platform1.id) + "/platform-attachments",
                 content_type="application/vnd.api+json",
+                headers=create_token()
             )
             self.assertEqual(response.status_code, 200)
             self.assertEqual(len(response.get_json()["data"]), 1)
