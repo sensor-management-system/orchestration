@@ -8,6 +8,7 @@ from .permission_utils import (
     check_deletion_permission_for_related_objects,
     check_patch_permission_for_related_objects, check_post_permission_for_related_objects,
 )
+from ..helpers.errors import ForbiddenError
 
 protected_views = [
     "api.device_detail",
@@ -19,8 +20,8 @@ related_objects_protected_views = [
     "api.customfield_list",
     "api.customfield_detail",
 
-    "device_attachment_list"
-    "device_attachment_detail"
+    "api.device_attachment_list",
+    "api.device_attachment_detail",
     
     "api.device_property_list",
     "api.device_property_detail",
@@ -40,8 +41,8 @@ related_objects_protected_views = [
     "api.generic_device_action_list",
     "api.generic_device_action_detail",
 
-    "platform_attachment_list"
-    "platform_attachment_detail"
+    "api.platform_attachment_list",
+    "api.platform_attachment_detail",
 
     "api.platform_mount_action_list",
     "api.platform_mount_action_detail",
@@ -79,7 +80,6 @@ def permission_manager(view, view_args, view_kwargs, *args, **kwargs):
             check_deletion_permission(view_kwargs, view_args[0].data_layer["model"])
 
     elif view_args[0].view in related_objects_protected_views:
-
         method = request.method
         if method == "GET":
             if "id" in view_kwargs:
