@@ -5,7 +5,7 @@ import json
 from project import base_url
 from project.api.models import Configuration, Contact, Device, DeviceUnmountAction
 from project.api.models.base_model import db
-from project.tests.base import BaseTestCase, fake, generate_token_data
+from project.tests.base import BaseTestCase, fake, generate_userinfo_data
 from project.tests.models.test_configurations_model import generate_configuration_model
 from project.tests.models.test_unmount_actions_model import add_unmount_device_action
 
@@ -38,11 +38,11 @@ class TestDeviceUnmountAction(BaseTestCase):
     def test_post_device_unmount_action(self):
         """Create DeviceUnmountAction."""
         device = Device(short_name=fake.linux_processor(),)
-        mock_jwt = generate_token_data()
+        userinfo = generate_userinfo_data()
         contact = Contact(
-            given_name=mock_jwt["given_name"],
-            family_name=mock_jwt["family_name"],
-            email=mock_jwt["email"],
+            given_name=userinfo["given_name"],
+            family_name=userinfo["family_name"],
+            email=userinfo["email"],
         )
         configuration = generate_configuration_model()
         db.session.add_all([device, contact, configuration])

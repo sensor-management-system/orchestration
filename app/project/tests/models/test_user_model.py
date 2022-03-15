@@ -1,7 +1,7 @@
 from project.api.models import Contact
 from project.api.models.base_model import db
 from project.api.models.user import User
-from project.tests.base import BaseTestCase, generate_token_data
+from project.tests.base import BaseTestCase, generate_userinfo_data
 
 
 class TestUsersModel(BaseTestCase):
@@ -11,11 +11,11 @@ class TestUsersModel(BaseTestCase):
 
     def test_add_user_model(self):
         """""Ensure Add user model """
-        mock_jwt = generate_token_data()
+        userinfo = generate_userinfo_data()
         c = Contact(
-            given_name=mock_jwt["given_name"],
-            family_name=mock_jwt["family_name"],
-            email=mock_jwt["email"],
+            given_name=userinfo["given_name"],
+            family_name=userinfo["family_name"],
+            email=userinfo["email"],
         )
         user = User(id=445, subject="test_user@test.test", contact=c)
 

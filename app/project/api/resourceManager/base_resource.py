@@ -1,4 +1,4 @@
-from flask_jwt_extended import get_jwt_identity
+from ..auth.flask_openidconnect import open_id_connect
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 
 from ..models import (
@@ -24,8 +24,7 @@ def add_created_by_id(data):
     check if the user exists or add the user to the database
     so that a user can't be None. Due to that created_by_id can't be None also.
     """
-    current_user = get_jwt_identity()
-    user_entry = db.session.query(User).filter_by(subject=current_user).first()
+    user_entry = open_id_connect.get_current_user()
     data["created_by_id"] = user_entry.id
 
 
@@ -38,8 +37,7 @@ def add_updated_by_id(data):
     :return:
 
     """
-    current_user = get_jwt_identity()
-    user_entry = db.session.query(User).filter_by(subject=current_user).first()
+    user_entry = open_id_connect.get_current_user()
     data["updated_by_id"] = user_entry.id
 
 

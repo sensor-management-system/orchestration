@@ -10,8 +10,8 @@ from project.api.models.configuration_device import ConfigurationDevice
 from project.api.models.configuration_platform import ConfigurationPlatform
 from project.api.models.device import Device
 from project.api.models.platform import Platform
-from project.tests.base import BaseTestCase, create_token, test_file_path
-from project.tests.base import fake, generate_token_data
+from project.tests.base import BaseTestCase, test_file_path
+from project.tests.base import fake, generate_userinfo_data
 from project.tests.models.test_configurations_model import generate_configuration_model
 from project.tests.read_from_json import extract_data_from_json_file
 
@@ -211,13 +211,11 @@ class TestConfigurationsService(BaseTestCase):
         config_json = extract_data_from_json_file(self.json_data_url, "configuration")
 
         config_data = {"data": {"type": "configuration", "attributes": config_json[1]}}
-        access_headers = create_token()
         with self.client:
             response = self.client.post(
                 self.configurations_url,
                 data=json.dumps(config_data),
                 content_type="application/vnd.api+json",
-                headers=access_headers,
             )
         json.loads(response.data.decode())
         self.assertEqual(response.status_code, 500)
@@ -247,13 +245,11 @@ class TestConfigurationsService(BaseTestCase):
         config_json = extract_data_from_json_file(self.json_data_url, "configuration")
 
         config_data = {"data": {"type": "configuration", "attributes": config_json[2]}}
-        access_headers = create_token()
         with self.client:
             response = self.client.post(
                 self.configurations_url,
                 data=json.dumps(config_data),
                 content_type="application/vnd.api+json",
-                headers=access_headers,
             )
         json.loads(response.data.decode())
         self.assertEqual(response.status_code, 500)
@@ -411,11 +407,11 @@ class TestConfigurationsService(BaseTestCase):
         device_parent_platform = Platform(short_name="device parent platform",)
         platform = Platform(short_name=fake.linux_processor(),)
         parent_platform = Platform(short_name="platform parent-platform",)
-        mock_jwt = generate_token_data()
+        userinfo = generate_userinfo_data()
         contact = Contact(
-            given_name=mock_jwt["given_name"],
-            family_name=mock_jwt["family_name"],
-            email=mock_jwt["email"],
+            given_name=userinfo["given_name"],
+            family_name=userinfo["family_name"],
+            email=userinfo["email"],
         )
         configuration = generate_configuration_model()
         db.session.add_all(
@@ -611,11 +607,11 @@ class TestConfigurationsService(BaseTestCase):
 
     @staticmethod
     def add_a_contact():
-        mock_jwt = generate_token_data()
+        userinfo = generate_userinfo_data()
         contact = Contact(
-            given_name=mock_jwt["given_name"],
-            family_name=mock_jwt["family_name"],
-            email=mock_jwt["email"],
+            given_name=userinfo["given_name"],
+            family_name=userinfo["family_name"],
+            email=userinfo["email"],
         )
         db.session.add(contact)
         db.session.commit()

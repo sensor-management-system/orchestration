@@ -2,7 +2,7 @@ import json
 
 from project import base_url, db
 from project.api.models import ConfigurationAttachment
-from project.tests.base import BaseTestCase, create_token, fake
+from project.tests.base import BaseTestCase, fake
 from project.tests.models.test_generic_action_attachment_model import (
     add_generic_configuration_action_attachment_model,
 )
@@ -141,13 +141,11 @@ class TestGenericConfigurationActionAttachment(BaseTestCase):
                 },
             }
         }
-        access_headers = create_token()
         with self.client:
             response = self.client.post(
                 self.url,
                 data=json.dumps(data),
                 content_type="application/vnd.api+json",
-                headers=access_headers,
             )
 
         self.assertEqual(response.status_code, 422)

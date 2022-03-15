@@ -5,7 +5,7 @@ from project import base_url
 from project.api.models.base_model import db
 from project.api.models.platform import Platform
 from project.api.models.platform_attachment import PlatformAttachment
-from project.tests.base import BaseTestCase, fake, generate_token_data, test_file_path
+from project.tests.base import BaseTestCase, fake, generate_userinfo_data, test_file_path
 from project.tests.read_from_json import extract_data_from_json_file
 
 
@@ -32,14 +32,14 @@ class TestPlatformServices(BaseTestCase):
 
     def test_add_platform_contacts_relationship(self):
         """Ensure a new relationship between a platform & contact can be created."""
-        mock_jwt = generate_token_data()
+        userinfo = generate_userinfo_data()
         contact_data = {
             "data": {
                 "type": "contact",
                 "attributes": {
-                    "given_name": mock_jwt["given_name"],
-                    "family_name": mock_jwt["family_name"],
-                    "email": mock_jwt["email"],
+                    "given_name": userinfo["given_name"],
+                    "family_name": userinfo["family_name"],
+                    "email": userinfo["email"],
                     "website": fake.url(),
                 },
             }

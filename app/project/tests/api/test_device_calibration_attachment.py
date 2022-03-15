@@ -5,7 +5,7 @@ from project.api.models import (
     DeviceAttachment,
     DeviceCalibrationAction,
 )
-from project.tests.base import BaseTestCase, fake, generate_token_data
+from project.tests.base import BaseTestCase, fake, generate_userinfo_data
 from project.tests.models.test_device_calibration_attachment_model import (
     add_device_calibration_attachment,
 )
@@ -39,11 +39,11 @@ class TestDeviceCalibrationAttachment(BaseTestCase):
     def test_post_generic_device_action_attachment(self):
         """Create DeviceCalibrationAttachment"""
         device = Device(short_name="Device 1")
-        mock_jwt = generate_token_data()
+        userinfo = generate_userinfo_data()
         contact = Contact(
-            given_name=mock_jwt["given_name"],
-            family_name=mock_jwt["family_name"],
-            email=mock_jwt["email"],
+            given_name=userinfo["given_name"],
+            family_name=userinfo["family_name"],
+            email=userinfo["email"],
         )
         db.session.add(device)
         db.session.commit()

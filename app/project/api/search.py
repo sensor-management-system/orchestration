@@ -13,7 +13,7 @@ def add_to_index(index, model, payload):
     """Add an entry to the index in the full text search."""
     if not current_app.elasticsearch:
         return
-    current_app.elasticsearch.index(index=index, id=model.id, body=payload)
+    current_app.elasticsearch.index(index=index, id=model.id, document=payload)
 
 
 def remove_from_index(index, model):
@@ -27,14 +27,15 @@ def query_index(index, query, page, per_page):
     """Query the index with custom filters & pagination settings."""
     if not current_app.elasticsearch:
         return [], 0
+    body={
+        "query": query,
+        # the from value is the beginning & starts counting with 0
+        "from": (page - 1) * per_page,
+        "size": per_page,
+    }
     search = current_app.elasticsearch.search(
         index=index,
-        body={
-            "query": query,
-            # the from value is the beginning & starts counting with 0
-            "from": (page - 1) * per_page,
-            "size": per_page,
-        },
+            **body,
     )
     ids = [int(hit["_id"]) for hit in search["hits"]["hits"]]
     return ids, search["hits"]["total"]["value"]
@@ -45,11 +46,20 @@ def remove_index(index):
     if not current_app.elasticsearch:
         return
     # if we don't have an index, it is fine
-    current_app.elasticsearch.indices.delete(index, ignore=[404])
+    current_app.elasticsearch.indices.delete(index=index, ignore_unavailable=True)
 
 
 def create_index(index, payload):
     """Create an index for the full text search."""
     if not current_app.elasticsearch:
         return
-    current_app.elasticsearch.indices.create(index, payload)
+    aliases = payload.get("aliases", {})
+    mappings = payload.get("mappings", {})
+    settings = payload.get("settings", {})
+
+    current_app.elasticsearch.indices.create(
+        index=index,
+        aliases=aliases,
+        mappings=mappings,
+        settings=settings,
+    )
