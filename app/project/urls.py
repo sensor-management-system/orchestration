@@ -1103,11 +1103,67 @@ api.route(
     "configuration_dynamic_location_end_action_configuration",
     "/dynamic-location-end-actions/<int:id>/relationships/configuration",
 )
-# Roles
+# DeviceRoles
 api.route(
-    RoleList, "roles_list", "/roles", "/contacts/<int:role_id>/roles",
+    DeviceRoleList,
+    "device_roles_list",
+    "/device-contact-roles",
+    "/contacts/<int:role_id>/roles",
+    "/devices/<int:role_id>/roles",
 )
-api.route(RoleDetail, "roles_detail", "/roles/<int:id>")
+api.route(DeviceRoleDetail, "device_roles_detail", "/device-contact-roles/<int:id>")
 api.route(
-    RoleRelationship, "roles_contacts", "/roles/<int:id>/relationships/contacts",
+    DeviceRoleRelationship,
+    "roles_contact",
+    "/device-contact-roles/<int:id>/relationships/contact",
+)
+api.route(
+    DeviceRoleRelationship,
+    "device_contact_roles",
+    "/device-contact-roles/<int:id>/relationships/device",
+)
+
+# PlatformRoles
+api.route(
+    PlatformRoleList,
+    "platform_roles_list",
+    "/platform-contact-roles",
+    "/contacts/<int:role_id>/roles",
+    "/platform/<int:role_id>/roles",
+)
+api.route(
+    PlatformRoleDetail, "platform_roles_detail", "/platform-contact-roles/<int:id>"
+)
+api.route(
+    PlatformRoleRelationship,
+    "platform_roles_contact",
+    "/platform-contact-roles/<int:id>/relationships/contact",
+)
+api.route(
+    PlatformRoleRelationship,
+    "platform_contact_roles",
+    "/platform-contact-roles/<int:id>/relationships/platform",
+)
+# ConfigurationRoles
+api.route(
+    ConfigurationRoleList,
+    "configuration_roles_list",
+    "/configuration-contact-roles",
+    "/contacts/<int:role_id>/roles",
+    "/configuration/<int:role_id>/roles",
+)
+api.route(
+    ConfigurationRoleDetail,
+    "configuration_roles_detail",
+    "/configuration-contact-roles/<int:id>",
+)
+api.route(
+    ConfigurationRoleRelationship,
+    "configuration_roles_contact",
+    "/configuration-contact-roles/<int:id>/relationships/contact",
+)
+api.route(
+    ConfigurationRoleRelationship,
+    "configuration_contact_roles",
+    "/configuration-contact-roles/<int:id>/relationships/configuration",
 )
