@@ -1,3 +1,5 @@
+import json
+
 from flask import request
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy import and_, or_
