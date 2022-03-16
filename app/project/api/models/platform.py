@@ -28,11 +28,6 @@ class Platform(db.Model, AuditMixin, SearchableMixin, IndirectSearchableMixin):
     platform_attachments = db.relationship(
         "PlatformAttachment", cascade="save-update, merge, delete, delete-orphan"
     )
-    platform_contact_roles = db.relationship(
-        "PlatformContactRole",
-        cascade="save-update, merge, delete, delete-orphan",
-        backref=db.backref("platform", lazy=True)
-    )
 
     def to_search_entry(self):
         """Convert the model to a dict to store it in a full text search."""

@@ -39,11 +39,6 @@ class Device(db.Model, AuditMixin, SearchableMixin, IndirectSearchableMixin):
     device_attachments = db.relationship(
         "DeviceAttachment", cascade="save-update, merge, delete, delete-orphan"
     )
-    device_contact_roles = db.relationship(
-        "DeviceContactRole",
-        cascade="save-update, merge, delete, delete-orphan",
-        backref=db.backref("device", lazy=True)
-    )
 
     def to_search_entry(self):
         """Convert the model to an dict to store in the full text search."""

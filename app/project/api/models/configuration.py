@@ -52,11 +52,6 @@ class Configuration(db.Model, AuditMixin, SearchableMixin):
     configuration_attachments = db.relationship(
         "ConfigurationAttachment", cascade="save-update, merge, delete, delete-orphan"
     )
-    configuration_contact_roles = db.relationship(
-        "ConfigurationContactRole",
-        cascade="save-update, merge, delete, delete-orphan",
-        backref=db.backref("configuration", lazy=True)
-    )
 
     @hybrid_property
     def hierarchy(self):

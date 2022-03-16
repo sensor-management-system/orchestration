@@ -60,21 +60,6 @@ class Contact(db.Model, SearchableMixin, IndirectSearchableMixin):
         lazy="subquery",
         backref=db.backref("contacts", lazy=True),
     )
-    contact_device_roles = db.relationship(
-        "DeviceContactRole",
-        cascade="save-update, merge, delete, delete-orphan",
-        backref=db.backref("contacts", lazy=True)
-    )
-    contact_platform_roles = db.relationship(
-        "PlatformContactRole",
-        cascade="save-update, merge, delete, delete-orphan",
-        backref=db.backref("contacts", lazy=True)
-    )
-    contact_configuration_roles = db.relationship(
-        "ConfigurationContactRole",
-        cascade="save-update, merge, delete, delete-orphan",
-        backref=db.backref("contacts", lazy=True)
-    )
 
     def to_search_entry(self):
         """Transform the model to an entry to store in the full text search."""
