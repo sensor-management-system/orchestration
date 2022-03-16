@@ -28,6 +28,11 @@ class Platform(db.Model, AuditMixin, SearchableMixin, IndirectSearchableMixin):
     platform_attachments = db.relationship(
         "PlatformAttachment", cascade="save-update, merge, delete, delete-orphan"
     )
+    platform_contact_roles = db.relationship(
+        "PlatformContactRole",
+        cascade="save-update, merge, delete, delete-orphan",
+        backref=db.backref("platform", lazy=True)
+    )
 
     def to_search_entry(self):
         """Convert the model to a dict to store it in a full text search."""
@@ -75,10 +80,8 @@ class Platform(db.Model, AuditMixin, SearchableMixin, IndirectSearchableMixin):
         type_text_full_searchable = ElasticSearchIndexTypes.text_full_searchable(
             analyzer="ngram_analyzer"
         )
-        type_keyword_and_full_searchable = (
-            ElasticSearchIndexTypes.keyword_and_full_searchable(
-                analyzer="ngram_analyzer"
-            )
+        type_keyword_and_full_searchable = ElasticSearchIndexTypes.keyword_and_full_searchable(
+            analyzer="ngram_analyzer"
         )
         return {
             # Search the description just via text (and not via keyword).

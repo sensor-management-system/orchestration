@@ -39,6 +39,11 @@ class Device(db.Model, AuditMixin, SearchableMixin, IndirectSearchableMixin):
     device_attachments = db.relationship(
         "DeviceAttachment", cascade="save-update, merge, delete, delete-orphan"
     )
+    device_contact_roles = db.relationship(
+        "DeviceContactRole",
+        cascade="save-update, merge, delete, delete-orphan",
+        backref=db.backref("device", lazy=True)
+    )
 
     def to_search_entry(self):
         """Convert the model to an dict to store in the full text search."""
@@ -91,10 +96,8 @@ class Device(db.Model, AuditMixin, SearchableMixin, IndirectSearchableMixin):
         type_text_full_searchable = ElasticSearchIndexTypes.text_full_searchable(
             analyzer="ngram_analyzer"
         )
-        type_keyword_and_full_searchable = (
-            ElasticSearchIndexTypes.keyword_and_full_searchable(
-                analyzer="ngram_analyzer"
-            )
+        type_keyword_and_full_searchable = ElasticSearchIndexTypes.keyword_and_full_searchable(
+            analyzer="ngram_analyzer"
         )
 
         return {
@@ -203,8 +206,8 @@ class Device(db.Model, AuditMixin, SearchableMixin, IndirectSearchableMixin):
             "aliases": {},
             "mappings": {"properties": cls.get_search_index_properties()},
             "settings": settings_with_ngrams(
-                analyzer_name='ngram_analyzer',
-                filter_name='ngram_filter',
+                analyzer_name="ngram_analyzer",
+                filter_name="ngram_filter",
                 min_ngram=3,
                 max_ngram=10,
                 max_ngram_diff=10,
