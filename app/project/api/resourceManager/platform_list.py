@@ -1,55 +1,63 @@
-from ..datalayers.esalchemy import EsSqlalchemyDataLayer
+"""Platform list resource."""
+
 from ...api.auth.permission_utils import (
-    get_collection_with_permissions,
+    get_es_query_with_permissions,
+    get_query_with_permissions,
     set_default_permission_view_to_internal_if_not_exists_or_all_false,
 )
+from ...frj_csv_export.resource import ResourceList
+from ..datalayers.esalchemy import EsSqlalchemyDataLayer
 from ..models.base_model import db
 from ..models.platform import Platform
 from ..resourceManager.base_resource import add_contact_to_object
 from ..schemas.platform_schema import PlatformSchema
 from ..token_checker import token_required
-from ...frj_csv_export.resource import ResourceList
 
 
 class PlatformList(ResourceList):
     """
-    PlatformList class for creating a platformSchema
-    only POST and GET method allowed
+    Resource for the platform list endpoint.
+
+    Supports GET (list) & POST (create) methods.
     """
 
-    def after_get_collection(self, collection, qs, view_kwargs):
-        """Take the intersection between requested collection and
-        what the user allowed querying.
-
-        :param collection:
-        :param qs:
-        :param view_kwargs:
-        :return:
+    def query(self, view_kwargs):
         """
+        Filter for what the user is allowed to query.
 
-        return get_collection_with_permissions(self.model, collection, qs, view_kwargs)
+        :param view_kwargs:
+        :return: queryset
+        """
+        return get_query_with_permissions(self.model)
 
-    def after_get(self, result):
-        result.update({"meta": {"count": len(result["data"])}})
-        return result
+    def es_query(self, view_kwargs):
+        """
+        Return the elasticsearch filter for the query.
+
+        Should return the same set as query, but using
+        the elasticsearch fields.
+        """
+        return get_es_query_with_permissions()
 
     def before_create_object(self, data, *args, **kwargs):
         """
-        Use jwt to add user id to dataset
-        :param data:
+        Set the visibility of the object (internal of nothing else is given).
+
+        :param data: data of the request (as dict)
         :param args:
         :param kwargs:
-        :return:
+        :return: None
         """
+        # Will modify the data inplace.
         set_default_permission_view_to_internal_if_not_exists_or_all_false(data)
 
     def after_post(self, result):
         """
-        Automatically add the created user to object contacts
+        Automatically add the created user to object contacts.
+
         :param result:
         :return:
         """
-
         result_id = result[0]["data"]["id"]
         d = db.session.query(Platform).filter_by(id=result_id).first()
         add_contact_to_object(d)
@@ -64,6 +72,7 @@ class PlatformList(ResourceList):
         "class": EsSqlalchemyDataLayer,
         "methods": {
             "before_create_object": before_create_object,
-            "after_get_collection": after_get_collection,
+            "query": query,
+            "es_query": es_query,
         },
     }

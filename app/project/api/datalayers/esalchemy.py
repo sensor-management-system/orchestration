@@ -287,6 +287,8 @@ class EsQueryBuilder:
 class EsSqlalchemyDataLayer(SqlalchemyDataLayer):
     """Data layer for the elasticsearch (with sqlalchemy under the hood)."""
 
+    REWRITABLE_METHODS = SqlalchemyDataLayer.REWRITABLE_METHODS + ("es_query",)
+
     def get_pagination_parameter(self, paginate_info):
         """
         Return the parameter for pagination.
@@ -298,6 +300,21 @@ class EsSqlalchemyDataLayer(SqlalchemyDataLayer):
         number = int(paginate_info.get("number", 1))
 
         return {"size": size, "number": number}
+
+    def es_query(self, view_kwargs):
+        """
+        Return a filter for the view collection.
+
+        This is just a default implementation that doesn't
+        filter anything.
+
+        The views (aka list resources) themselves can overwrite
+        this method to get the queryset they need.
+
+        This works in combination with the model.search method
+        where we send the filters to the elasticsearch.
+        """
+        return None
 
     def get_collection(self, qs, view_kwargs, filters=None):
         """
@@ -329,7 +346,7 @@ class EsSqlalchemyDataLayer(SqlalchemyDataLayer):
         # now we have a search string, so we want to go with our search logic
         # As in the initial get_collection method we give a hook here.
         self.before_get_collection(qs, view_kwargs)
-
+        es_filter_query = self.es_query(view_kwargs)
         # but as elasticsearch itself cares about pagination, we need
         # to have the sizes & the page number available right now.
         pagination = self.get_pagination_parameter(qs.pagination)
@@ -338,7 +355,10 @@ class EsSqlalchemyDataLayer(SqlalchemyDataLayer):
 
         # Then we run our search.
         search_filter = query_builder.to_filter()
+        if es_filter_query:
+            search_filter = AndFilter([search_filter, es_filter_query])
         search_query = search_filter.to_query()
+
         query, object_count = self.model.search(search_query, page, per_page)
         # And as Elasticsearch handles pagination, we don't have to care here.
         # Normally same is true for sorting. Elasticsearch sorts by relevance.

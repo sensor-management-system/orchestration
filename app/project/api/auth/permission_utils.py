@@ -1,10 +1,9 @@
-import json
-
 from flask import request
 from flask_rest_jsonapi.exceptions import ObjectNotFound
-from sqlalchemy import or_, and_
+from sqlalchemy import and_, or_
 
 from ..auth.flask_openidconnect import open_id_connect
+from ..datalayers.esalchemy import AndFilter, OrFilter, TermEqualsExactStringFilter
 from ..helpers.errors import ForbiddenError
 from ..helpers.resource_mixin import add_created_by_id, add_updated_by_id
 from ..models import Configuration
@@ -16,11 +15,12 @@ from ..token_checker import current_user_or_none
 
 def is_user_in_a_group(groups_to_check):
     """
-    Check if the current user is in the same group
-    as the object regardless if it is admin or member.
+    Check if the current user is in the same group as the object.
+
+    Doesn't care if the user is an admin or a member.
 
     :param groups_to_check:
-    :return:
+    :return: boolean
     """
     if not groups_to_check:
         return True
@@ -37,11 +37,10 @@ def is_user_in_a_group(groups_to_check):
 
 def is_user_admin_in_a_group(groups_to_check):
     """
-    check if the current user is an admin in the same group
-    as the object.
+    Check if the current user is an admin in the same group as the object.
 
     :param groups_to_check: a list of ids
-    :return:
+    :return: boolean
     """
     if not groups_to_check:
         return True
@@ -59,7 +58,6 @@ def is_superuser():
 
     :return: boolean
     """
-
     current_user = open_id_connect.get_current_user()
 
     return current_user.is_superuser
@@ -67,10 +65,12 @@ def is_superuser():
 
 def assert_current_user_is_owner_of_object(object_):
     """
-    Checks if the current user is the owner of the given object.
+    Check if the current user is the owner of the given object.
+
+    Raises an ForbiddenError in case the user is not owner of the object.
 
     :param object_:
-    :return:
+    :return: None
     """
     current_user_id = open_id_connect.get_current_user().id
     if current_user_id != object_.created_by_id:
@@ -79,14 +79,12 @@ def assert_current_user_is_owner_of_object(object_):
         )
 
 
-def get_collection_with_permissions(model, collection, qs, view_kwargs):
-    """Retrieve a collection of objects through sqlalchemy with permissions
-    and take the intersection between them and requested collection.
+def get_query_with_permissions(model):
+    """
+    Filter a model query for those data that the user is allowed to see.
 
     :param model:
-    :param collection qs:
-    :param dict view_kwargs: kwargs from the resource view
-    :return set: list of objects
+    :return set: queryset for the model
     """
     query = db.session.query(model)
     current_user = current_user_or_none(optional=True)
@@ -97,18 +95,52 @@ def get_collection_with_permissions(model, collection, qs, view_kwargs):
             user_id = current_user.id
             query = query.filter(
                 or_(
-                    and_(model.is_private, model.created_by_id == user_id, ),
-                    or_(model.is_public, model.is_internal, ),
+                    and_(
+                        model.is_private,
+                        model.created_by_id == user_id,
+                    ),
+                    or_(
+                        model.is_public,
+                        model.is_internal,
+                    ),
                 )
             )
-    allowed_collection = query.all()
+    return query
 
-    return set(collection).intersection(allowed_collection)
+
+def get_es_query_with_permissions():
+    """
+    Filter a model query for those data that the user is allowed to see.
+
+    :return set: queryset for the model
+    """
+    current_user = current_user_or_none(optional=True)
+    if current_user is None:
+        return TermEqualsExactStringFilter("is_public", True)
+    if not current_user.is_superuser:
+        user_id = current_user.id
+        return OrFilter(
+            [
+                AndFilter(
+                    [
+                        TermEqualsExactStringFilter("is_private", True),
+                        TermEqualsExactStringFilter("created_by_id", user_id),
+                    ]
+                ),
+                OrFilter(
+                    [
+                        TermEqualsExactStringFilter("is_public", True),
+                        TermEqualsExactStringFilter("is_internal", True),
+                    ]
+                ),
+            ]
+        )
+    return None
 
 
 def check_patch_permission(data, object_to_patch):
     """
-    check if a user has the permission to patch an object.
+    Check if a user has the permission to patch an object.
 
     :param data:
     :param object_to_patch:
@@ -138,7 +170,7 @@ def check_patch_permission(data, object_to_patch):
 
 def check_deletion_permission(kwargs, object_to_delete):
     """
-    check if a user has the permission to delete an object.
+    Check if a user has the permission to delete an object.
 
     :param kwargs:
     :param object_to_delete:
@@ -170,7 +202,10 @@ def check_deletion_permission(kwargs, object_to_delete):
 
 def set_default_permission_view_to_internal_if_not_exists_or_all_false(data):
     """
-    Check if the request doesn't include permission data (is_public, is_internal, is_private) or all are False
+    Check if the request doesn't include permission data or all are False.
+
+    Checks are for is_public, is_internal or is_private.
+    If none of them are true, we set internal as default.
     and if not the set it to internal by default.
 
     :param data: json date sent wit the request.
@@ -201,7 +236,7 @@ def prevent_normal_user_from_viewing_not_owned_private_object(object_):
 
 def check_for_permissions(model_class, kwargs):
     """
-    check if a user has the permission to view an object.
+    Check if a user has the permission to view an object.
 
     :param model_class: class model
     :param kwargs:
@@ -218,8 +253,11 @@ def check_for_permissions(model_class, kwargs):
 
 def allow_only_admin_in_a_permission_group_to_remove_it_from_an_object(group_ids):
     """
-    Only admin in a permission groups is allowed to perform a remove action fron the permission group list.
-    This Methode will be applied before a patch request for (device, platform)
+    Ensure that a remove of a permission group can only be done by an admin.
+
+    Only admins in a permission groups are allowed to perform a remove action
+    fron the permission group list.
+    This methode will be applied before a patch request for (device, platform).
 
     :param group_ids: list of the permission groups_ids from database.
     """
