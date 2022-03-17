@@ -1,3 +1,5 @@
+"""Utility functions to handle permissions."""
+
 import json
 
 from flask import request
