@@ -405,6 +405,10 @@ def get_collection_with_permissions_for_related_objects(model, collection):
                     or_(
                         model.device.has(is_public=True),
                         model.device.has(is_internal=True),
+                        and_(
+                            model.device.has(is_private=True),
+                            model.device.has(created_by_id=current_user.id)
+                        )
                     )
                 )
             else:
@@ -412,6 +416,10 @@ def get_collection_with_permissions_for_related_objects(model, collection):
                     or_(
                         model.platform.has(is_public=True),
                         model.platform.has(is_internal=True),
+                        and_(
+                            model.platform.has(is_private=True),
+                            model.platform.has(created_by_id=current_user.id)
+                        )
                     )
                 )
     allowed_collection = query.all()
