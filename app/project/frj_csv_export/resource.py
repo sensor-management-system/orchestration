@@ -119,8 +119,7 @@ class ResourceList(with_metaclass(ResourceMetaBase, Resource)):
         qs = QSManager(request.args, self.schema)
 
         parent_filter = self._get_parent_filter(request.url, kwargs)
-        _, objects = self.get_collection(qs, kwargs, filters=parent_filter)
-        objects_count = len(objects)
+        objects_count, objects = self.get_collection(qs, kwargs, filters=parent_filter)
         if "HTTP_ACCEPT" in request.headers.environ:
             http_accept = request.headers.environ["HTTP_ACCEPT"]
             if http_accept == "text/csv":
