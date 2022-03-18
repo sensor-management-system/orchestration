@@ -67,8 +67,7 @@ def assert_object_is_free_to_be_mounted(data):
         raise ConflictError("Private object can't be used in a configuration.")
 
     begin_date_as_string = data["attributes"]["begin_date"]
-    beginn_date = dateutil.parser.parse(begin_date_as_string).isoformat()
-
+    beginn_date = dateutil.parser.parse(begin_date_as_string).replace(tzinfo=None)
     if last_mount_action and not last_unmount_action:
         raise ConflictError(
             f"Object is mounted on {last_mount_action.configuration.label} since \
@@ -81,7 +80,7 @@ def assert_object_is_free_to_be_mounted(data):
                 f"Object still Mounted on {last_mount_action.configuration.label}"
             )
 
-        if beginn_date < last_unmount_action.end_date.isoformat():
+        if beginn_date < last_unmount_action.end_date:
             raise ConflictError(
                 f"Object still Mounted on {last_mount_action.configuration.label} till: \
                         {last_unmount_action.end_date}"
