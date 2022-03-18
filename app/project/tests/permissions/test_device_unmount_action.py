@@ -19,7 +19,7 @@ from project.tests.permissions import (
     create_a_test_platform,
     create_a_test_device,
 )
-from project.tests.permissions.device_mount_action import payload_data
+from project.tests.permissions.test_device_mount_action import payload_data
 from project.tests.permissions.test_platforms import IDL_USER_ACCOUNT
 
 
@@ -126,12 +126,7 @@ class TestUnmountDevicePermissions(BaseTestCase):
         contact = create_a_test_contact(mock_jwt)
         configuration = generate_configuration_model()
         db.session.add_all(
-            [
-                device,
-                parent_platform,
-                contact,
-                configuration,
-            ]
+            [device, parent_platform, contact, configuration,]
         )
         db.session.commit()
         mount_data = payload_data(

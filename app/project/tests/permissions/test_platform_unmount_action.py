@@ -14,7 +14,7 @@ from project.tests.base import fake
 from project.tests.base import generate_userinfo_data, create_token
 from project.tests.models.test_configurations_model import generate_configuration_model
 from project.tests.permissions import create_a_test_platform, create_a_test_contact
-from project.tests.permissions.platform_mount_action import mount_payload_data
+from project.tests.permissions.test_platform_mount_action import mount_payload_data
 from project.tests.permissions.test_platforms import IDL_USER_ACCOUNT
 
 
@@ -115,12 +115,7 @@ class TestMountPlatformPermissions(BaseTestCase):
         contact = create_a_test_contact(mock_jwt)
         configuration = generate_configuration_model()
         db.session.add_all(
-            [
-                platform,
-                parent_platform,
-                contact,
-                configuration,
-            ]
+            [platform, parent_platform, contact, configuration,]
         )
         db.session.commit()
         mount_data = mount_payload_data(
