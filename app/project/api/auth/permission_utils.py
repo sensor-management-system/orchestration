@@ -296,6 +296,8 @@ def check_permissions_for_related_objects(model_class, id_):
     :param model_class: class model
     """
     object_ = db.session.query(model_class).filter_by(id=id_).first()
+    if object_ is None:
+        raise ObjectNotFound("Object not found!")
     related_object = object_.get_parent()
     if not related_object.is_public:
         current_user_or_none()
@@ -342,6 +344,8 @@ def check_patch_permission_for_related_objects(data, object_to_patch):
         object_ = (
             db.session.query(object_to_patch).filter_by(id=data["id"]).one_or_none()
         )
+        if object_ is None:
+            raise ObjectNotFound("Object not found!")
         related_object = object_.get_parent()
         if related_object.is_private:
             assert_current_user_is_owner_of_object(related_object)
@@ -364,6 +368,8 @@ def check_deletion_permission_for_related_objects(kwargs, object_to_delete):
         object_ = (
             db.session.query(object_to_delete).filter_by(id=kwargs["id"]).one_or_none()
         )
+        if object_ is None:
+            raise ObjectNotFound("Object not found!")
         related_object = object_.get_parent()
         group_ids = related_object.group_ids
         if group_ids is None:
