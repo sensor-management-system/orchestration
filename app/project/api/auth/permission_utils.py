@@ -33,8 +33,8 @@ def is_user_in_a_group(groups_to_check):
     if not idl_groups:
         return []
     user_groups = (
-            idl_groups.administrated_permission_groups
-            + idl_groups.membered_permission_groups
+        idl_groups.administrated_permission_groups
+        + idl_groups.membered_permission_groups
     )
     return any(group in user_groups for group in groups_to_check)
 
@@ -99,14 +99,8 @@ def get_query_with_permissions(model):
             user_id = current_user.id
             query = query.filter(
                 or_(
-                    and_(
-                        model.is_private,
-                        model.created_by_id == user_id,
-                    ),
-                    or_(
-                        model.is_public,
-                        model.is_internal,
-                    ),
+                    and_(model.is_private, model.created_by_id == user_id,),
+                    or_(model.is_public, model.is_internal,),
                 )
             )
     return query
@@ -186,17 +180,17 @@ def check_deletion_permission(kwargs, object_to_delete):
         if object_to_delete == Configuration:
             group_id = (
                 db.session.query(object_to_delete)
-                    .filter_by(id=kwargs["id"])
-                    .one_or_none()
-                    .cfg_permission_group
+                .filter_by(id=kwargs["id"])
+                .one_or_none()
+                .cfg_permission_group
             )
             group_ids = [group_id] if group_id else []
         else:
             group_ids = (
                 db.session.query(object_to_delete)
-                    .filter_by(id=kwargs["id"])
-                    .one_or_none()
-                    .group_ids
+                .filter_by(id=kwargs["id"])
+                .one_or_none()
+                .group_ids
             )
         if group_ids is None:
             assert_current_user_is_owner_of_object(object_)
@@ -215,7 +209,7 @@ def set_default_permission_view_to_internal_if_not_exists_or_all_false(data):
     :param data: json date sent wit the request.
     """
     if not any(
-            [data.get("is_private"), data.get("is_public"), data.get("is_internal")]
+        [data.get("is_private"), data.get("is_public"), data.get("is_internal")]
     ):
         data["is_internal"] = True
         data["is_public"] = False
@@ -302,12 +296,9 @@ def check_permissions_for_related_objects(model_class, id_):
     :param model_class: class model
     """
     object_ = db.session.query(model_class).filter_by(id=id_).first()
-    if hasattr(object_, "device"):
-        if not object_.device.is_public:
-            current_user_or_none()
-    elif hasattr(object_, "platform"):
-        if not object_.platform.is_public:
-            current_user_or_none()
+    related_object = object_.get_parent()
+    if not related_object.is_public:
+        current_user_or_none()
 
 
 def check_post_permission_for_related_objects():
@@ -319,10 +310,14 @@ def check_post_permission_for_related_objects():
     if not is_superuser():
         if "device" in data["relationships"]:
             object_id = data["relationships"]["device"]["data"]["id"]
-            related_object = db.session.query(Device).filter_by(id=object_id).one_or_none()
+            related_object = (
+                db.session.query(Device).filter_by(id=object_id).one_or_none()
+            )
         if "platform" in data["relationships"]:
             object_id = data["relationships"]["platform"]["data"]["id"]
-            related_object = db.session.query(Platform).filter_by(id=object_id).one_or_none()
+            related_object = (
+                db.session.query(Platform).filter_by(id=object_id).one_or_none()
+            )
         if related_object is not None:
             if related_object.is_private:
                 assert_current_user_is_owner_of_object(related_object)
@@ -347,10 +342,7 @@ def check_patch_permission_for_related_objects(data, object_to_patch):
         object_ = (
             db.session.query(object_to_patch).filter_by(id=data["id"]).one_or_none()
         )
-        if hasattr(object_, "device"):
-            related_object = object_.device
-        else:
-            related_object = object_.platform
+        related_object = object_.get_parent()
         if related_object.is_private:
             assert_current_user_is_owner_of_object(related_object)
         else:
@@ -372,10 +364,7 @@ def check_deletion_permission_for_related_objects(kwargs, object_to_delete):
         object_ = (
             db.session.query(object_to_delete).filter_by(id=kwargs["id"]).one_or_none()
         )
-        if hasattr(object_, "device"):
-            related_object = object_.device
-        else:
-            related_object = object_.platform
+        related_object = object_.get_parent()
         group_ids = related_object.group_ids
         if group_ids is None:
             assert_current_user_is_owner_of_object(related_object)
@@ -407,8 +396,8 @@ def get_collection_with_permissions_for_related_objects(model, collection):
                         model.device.has(is_internal=True),
                         and_(
                             model.device.has(is_private=True),
-                            model.device.has(created_by_id=current_user.id)
-                        )
+                            model.device.has(created_by_id=current_user.id),
+                        ),
                     )
                 )
             else:
@@ -418,8 +407,8 @@ def get_collection_with_permissions_for_related_objects(model, collection):
                         model.platform.has(is_internal=True),
                         and_(
                             model.platform.has(is_private=True),
-                            model.platform.has(created_by_id=current_user.id)
-                        )
+                            model.platform.has(created_by_id=current_user.id),
+                        ),
                     )
                 )
     allowed_collection = query.all()

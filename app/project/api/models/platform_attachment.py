@@ -20,3 +20,7 @@ class PlatformAttachment(db.Model):
     def get_parent_search_entities(self):
         """Return the platform as parent."""
         return [self.platform]
+
+    def get_parent(self):
+        """Return parent object."""
+        return self.platform

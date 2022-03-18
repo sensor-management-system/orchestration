@@ -18,3 +18,7 @@ class ConfigurationAttachment(db.Model, IndirectSearchableMixin):
     def get_parent_search_entities(self):
         """Return the configuration as parent search entity."""
         return [self.configuration]
+
+    def get_parent(self):
+        """Return parent object."""
+        return self.configuration

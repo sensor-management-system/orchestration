@@ -22,3 +22,7 @@ class CustomField(db.Model, IndirectSearchableMixin, AuditMixin):
     def get_parent_search_entities(self):
         """Return the device as parent entity."""
         return [self.device]
+
+    def get_parent(self):
+        """Return parent object."""
+        return self.device

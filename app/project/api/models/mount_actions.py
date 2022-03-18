@@ -58,6 +58,10 @@ class PlatformMountAction(db.Model, AuditMixin):
             "platform": self.platform.to_search_entry(),
         }
 
+    def get_parent(self):
+        """Return parent object."""
+        return self.platform
+
 
 class DeviceMountAction(db.Model, AuditMixin, IndirectSearchableMixin):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -116,3 +120,7 @@ class DeviceMountAction(db.Model, AuditMixin, IndirectSearchableMixin):
             "description": self.description,
             "device": self.device.to_search_entry(),
         }
+
+    def get_parent(self):
+        """Return parent object."""
+        return self.device
