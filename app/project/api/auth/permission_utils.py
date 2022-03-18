@@ -299,7 +299,9 @@ def check_permissions_for_related_objects(model_class, id_):
     if object_ is None:
         raise ObjectNotFound("Object not found!")
     related_object = object_.get_parent()
-    if not related_object.is_public:
+    if related_object.is_private:
+        assert_current_user_is_owner_of_object(related_object)
+    elif not related_object.is_public:
         current_user_or_none()
 
 
