@@ -6,6 +6,7 @@ from sqlalchemy.orm.exc import NoResultFound
 
 from ..auth.permission_utils import get_query_with_permissions_for_related_objects
 from ..helpers.mounting_checks import assert_object_is_free_to_be_mounted
+from ..helpers.resource_mixin import decode_json_request_data
 from ..models.base_model import db
 from ..models.configuration import Configuration
 from ..models.device import Device
@@ -13,7 +14,6 @@ from ..models.mount_actions import DeviceMountAction
 from ..models.platform import Platform
 from ..resourceManager.base_resource import (
     check_if_object_not_found,
-    decode_json_request_data,
 )
 from ..schemas.mount_actions_schema import DeviceMountActionSchema
 from ..token_checker import token_required
@@ -43,7 +43,7 @@ class DeviceMountActionList(ResourceList):
                 self.session.query(Configuration).filter_by(id=configuration_id).one()
             except NoResultFound:
                 raise ObjectNotFound(
-                    {"parameter": "id",},
+                    {"parameter": "id", },
                     "Configuration: {} not found".format(configuration_id),
                 )
             else:
@@ -55,7 +55,7 @@ class DeviceMountActionList(ResourceList):
                 self.session.query(Device).filter_by(id=device_id).one()
             except NoResultFound:
                 raise ObjectNotFound(
-                    {"parameter": "id",}, "Device: {} not found".format(device_id),
+                    {"parameter": "id", }, "Device: {} not found".format(device_id),
                 )
             else:
                 query_ = query_.filter(DeviceMountAction.device_id == device_id)
@@ -64,7 +64,7 @@ class DeviceMountActionList(ResourceList):
                 self.session.query(Platform).filter_by(id=parent_platform_id).one()
             except NoResultFound:
                 raise ObjectNotFound(
-                    {"parameter": "id",},
+                    {"parameter": "id", },
                     "Platform: {} not found".format(parent_platform_id),
                 )
             else:
@@ -79,7 +79,7 @@ class DeviceMountActionList(ResourceList):
     data_layer = {
         "session": db.session,
         "model": DeviceMountAction,
-        "methods": {"query": query,},
+        "methods": {"query": query, },
     }
 
 

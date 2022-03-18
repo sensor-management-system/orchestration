@@ -7,11 +7,10 @@ from sqlalchemy import and_, or_
 from ..auth.flask_openidconnect import open_id_connect
 from ..datalayers.esalchemy import AndFilter, OrFilter, TermEqualsExactStringFilter
 from ..helpers.errors import ForbiddenError
-from ..helpers.resource_mixin import add_created_by_id, add_updated_by_id
+from ..helpers.resource_mixin import add_created_by_id, add_updated_by_id, decode_json_request_data
 from ..models import Configuration
 from ..models import Device, Platform
 from ..models.base_model import db
-from ..resourceManager.base_resource import decode_json_request_data
 from ..services.idl_services import Idl
 from ..token_checker import current_user_or_none
 

@@ -6,14 +6,12 @@ from sqlalchemy.orm.exc import NoResultFound
 
 from ..auth.permission_utils import get_query_with_permissions_for_related_objects
 from ..helpers.mounting_checks import assert_object_is_free_to_be_mounted
+from ..helpers.resource_mixin import decode_json_request_data
 from ..models.base_model import db
 from ..models.configuration import Configuration
 from ..models.mount_actions import PlatformMountAction
 from ..models.platform import Platform
-from ..resourceManager.base_resource import (
-    check_if_object_not_found,
-    decode_json_request_data,
-)
+from ..resourceManager.base_resource import check_if_object_not_found
 from ..schemas.mount_actions_schema import PlatformMountActionSchema
 from ..token_checker import token_required
 from ...frj_csv_export.resource import ResourceList
