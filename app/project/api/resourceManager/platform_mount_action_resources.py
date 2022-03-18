@@ -9,7 +9,6 @@ from sqlalchemy.orm.exc import NoResultFound
 from ..auth.permission_utils import get_collection_with_permissions_for_related_objects
 from ..helpers.mounting_checks import assert_object_is_free_to_be_mounted
 from ..helpers.errors import ConflictError
-from ...frj_csv_export.resource import ResourceList
 from ..models.base_model import db
 from ..models.configuration import Configuration
 from ..models.mount_actions import PlatformMountAction
