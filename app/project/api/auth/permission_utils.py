@@ -336,7 +336,7 @@ def check_post_permission_for_related_objects():
                         "User is not part of any group to edit this object."
                     )
         else:
-            raise ObjectNotFound(f"Object not found!")
+            raise ObjectNotFound("Object not found!")
 
 
 def check_patch_permission_for_related_objects(data, object_to_patch):
