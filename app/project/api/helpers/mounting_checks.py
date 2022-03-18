@@ -15,8 +15,19 @@ from ..models import (
 from ... import db
 
 
-def before_mount_action(data):
+def assert_object_is_free_to_be_mounted(data):
     """
+    Methode to check if the object is not attached to any configuration before attempting to
+    mount it.
+
+    - Mounting between x1_1 and x1_2 will through an exception that this object is mounted till x1_2 datetime.
+    - Mounting ina date after x2_1 will als raise an exception that the object is mounted
+        on a configuration and has no unmount date.
+    - Also trying to Mount a Private Object through an exception.
+
+    ---------x1_1---------------x1_2------------x2_1------------------>
+
+    :TODO: Find a suitable solution for Mounting Overlap
 
     :param data: the incoming request data
     """
@@ -53,25 +64,25 @@ def before_mount_action(data):
             .first()
         )
     if object_.is_private:
-        raise ConflictError("Private device can't be used in a configuration.")
+        raise ConflictError("Private object can't be used in a configuration.")
 
     beginn_date_as_string = data["attributes"]["begin_date"]
     beginn_date = dateutil.parser.parse(beginn_date_as_string).isoformat()
 
     if last_mount_action and not last_unmount_action:
         raise ConflictError(
-            f"Device is mounted on {last_mount_action.configuration.label} since \
+            f"Object is mounted on {last_mount_action.configuration.label} since \
             {last_mount_action.begin_date} and has no unmount date."
         )
 
     elif last_mount_action and last_unmount_action:
         if last_mount_action.begin_date > last_unmount_action.end_date:
             raise ConflictError(
-                f"Device still Mounted on {last_mount_action.configuration.label}"
+                f"Object still Mounted on {last_mount_action.configuration.label}"
             )
 
         if beginn_date < last_unmount_action.end_date.isoformat():
             raise ConflictError(
-                f"Device still Mounted on {last_mount_action.configuration.label} till: \
+                f"Object still Mounted on {last_mount_action.configuration.label} till: \
                         {last_unmount_action.end_date}"
             )

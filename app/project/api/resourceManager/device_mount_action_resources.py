@@ -10,7 +10,7 @@ from ..auth.permission_utils import (
     get_collection_with_permissions_for_related_objects,
 )
 from ..helpers.errors import ConflictError
-from ..helpers.mounting_checks import before_mount_action
+from ..helpers.mounting_checks import assert_object_is_free_to_be_mounted
 from ..models.base_model import db
 from ..models.configuration import Configuration
 from ..models.device import Device
@@ -41,7 +41,7 @@ class DeviceMountActionList(ResourceList):
 
     def post(self, *args, **kwargs):
         data = json.loads(request.data.decode())["data"]
-        before_mount_action(data)
+        assert_object_is_free_to_be_mounted(data)
         try:
             response = super().post(*args, **kwargs)
             return response
