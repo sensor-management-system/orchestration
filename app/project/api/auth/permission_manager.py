@@ -43,6 +43,8 @@ related_objects_protected_views = [
     "api.platform_software_update_action_detail",
     "api.generic_platform_action_list",
     "api.generic_platform_action_detail",
+    "api.configuration_attachment_list"
+    "api.configuration_attachment_detail"
 ]
 
 
