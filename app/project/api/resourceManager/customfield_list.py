@@ -3,7 +3,7 @@ from flask_rest_jsonapi import ResourceList
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.orm.exc import NoResultFound
 
-from ..auth.permission_utils import get_collection_with_permissions_for_related_objects
+from ..auth.permission_utils import get_query_with_permissions_for_related_objects
 from ..models.base_model import db
 from ..models.customfield import CustomField
 from ..models.device import Device
@@ -19,30 +19,16 @@ class CustomFieldList(ResourceList):
     a list of custom fields or to create a new one.
     """
 
-    def after_get_collection(self, collection, qs, view_kwargs):
-        """Take the intersection between requested collection and
-        what the user allowed querying.
-
-        :param collection:
-        :param qs:
-        :param view_kwargs:
-        :return:
-        """
-
-        return get_collection_with_permissions_for_related_objects(
-            self.model, collection
-        )
-
     def query(self, view_kwargs):
         """
-        Query the data from the database.
+        Query the data from the database & Filter for what the user is allowed to query.
 
         Normally it should query all the customfields.
         However, if we give a device_id with a url like
         /devices/<device_id>/customfields
         we want to filter according to them.
         """
-        query_ = self.session.query(CustomField)
+        query_ = get_query_with_permissions_for_related_objects(self.model)
         device_id = view_kwargs.get("device_id")
 
         if device_id is not None:
@@ -61,5 +47,5 @@ class CustomFieldList(ResourceList):
     data_layer = {
         "session": db.session,
         "model": CustomField,
-        "methods": {"query": query, "after_get_collection": after_get_collection,},
+        "methods": {"query": query},
     }

@@ -4,32 +4,18 @@ from flask_rest_jsonapi import ResourceDetail, ResourceRelationship
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.orm.exc import NoResultFound
 
-from ..auth.permission_utils import get_collection_with_permissions_for_related_objects
 from .base_resource import check_if_object_not_found
-from ...frj_csv_export.resource import ResourceList
+from ..auth.permission_utils import get_query_with_permissions_for_related_objects
 from ..models.base_model import db
 from ..models.calibration_actions import DeviceCalibrationAction
 from ..models.device import Device
 from ..schemas.calibration_actions_schema import DeviceCalibrationActionSchema
 from ..token_checker import token_required
+from ...frj_csv_export.resource import ResourceList
 
 
 class DeviceCalibrationActionList(ResourceList):
     """List resource for device calibration actions (get, post)."""
-
-    def after_get_collection(self, collection, qs, view_kwargs):
-        """Take the intersection between requested collection and
-        what the user allowed querying.
-
-        :param collection:
-        :param qs:
-        :param view_kwargs:
-        :return:
-        """
-
-        return get_collection_with_permissions_for_related_objects(
-            self.model, collection
-        )
 
     def query(self, view_kwargs):
         """
@@ -37,7 +23,7 @@ class DeviceCalibrationActionList(ResourceList):
 
         Also handle optional pre-filters (for specific devices, for example).
         """
-        query_ = self.session.query(DeviceCalibrationAction)
+        query_ = get_query_with_permissions_for_related_objects(self.model)
         device_id = view_kwargs.get("device_id")
 
         if device_id is not None:
@@ -56,7 +42,7 @@ class DeviceCalibrationActionList(ResourceList):
     data_layer = {
         "session": db.session,
         "model": DeviceCalibrationAction,
-        "methods": {"query": query, "after_get_collection": after_get_collection},
+        "methods": {"query": query},
     }
 
 

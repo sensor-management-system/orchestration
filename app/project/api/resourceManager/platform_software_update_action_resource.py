@@ -4,8 +4,7 @@ from flask_rest_jsonapi import ResourceDetail, ResourceRelationship
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.orm.exc import NoResultFound
 
-from ..auth.permission_utils import get_collection_with_permissions_for_related_objects
-from ...frj_csv_export.resource import ResourceList
+from ..auth.permission_utils import get_query_with_permissions_for_related_objects
 from ..models.base_model import db
 from ..models.platform import Platform
 from ..models.software_update_actions import PlatformSoftwareUpdateAction
@@ -18,27 +17,13 @@ from ...frj_csv_export.resource import ResourceList
 class PlatformSoftwareUpdateActionList(ResourceList):
     """List resource for platform software update actions (get, post)."""
 
-    def after_get_collection(self, collection, qs, view_kwargs):
-        """Take the intersection between requested collection and
-        what the user allowed querying.
-
-        :param collection:
-        :param qs:
-        :param view_kwargs:
-        :return:
-        """
-
-        return get_collection_with_permissions_for_related_objects(
-            self.model, collection
-        )
-
     def query(self, view_kwargs):
         """
         Query the actions from the database.
 
         Also handle optional pre-filters (for specific platforms, for example).
         """
-        query_ = self.session.query(PlatformSoftwareUpdateAction)
+        query_ = get_query_with_permissions_for_related_objects(self.model)
         platform_id = view_kwargs.get("platform_id")
         if platform_id is not None:
             try:
@@ -58,7 +43,7 @@ class PlatformSoftwareUpdateActionList(ResourceList):
     data_layer = {
         "session": db.session,
         "model": PlatformSoftwareUpdateAction,
-        "methods": {"query": query, "after_get_collection": after_get_collection},
+        "methods": {"query": query},
     }
 
 

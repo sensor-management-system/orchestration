@@ -378,45 +378,32 @@ def check_deletion_permission_for_related_objects(kwargs, object_to_delete):
             raise ForbiddenError("User is not part of any group to delete this object.")
 
 
-def get_collection_with_permissions_for_related_objects(model, collection):
+def get_query_with_permissions_for_related_objects(model):
     """Retrieve a collection of related objects through sqlalchemy by checking
     the object permission.
 
     :param model:
-    :param collection:
     :return set: list of objects
     """
     query = db.session.query(model)
     current_user = current_user_or_none(optional=True)
+    if hasattr(model, "device"):
+        related_object = model.device
+    else:
+        related_object = model.platform
     if current_user is None:
-        if hasattr(model, "device"):
-            query = query.filter(model.device.has(is_public=True))
-        else:
-            query = query.filter(model.platform.has(is_public=True))
+        query = query.filter(related_object.has(is_public=True))
     else:
         if not current_user.is_superuser:
-            if hasattr(model, "device"):
-                query = query.filter(
-                    or_(
-                        model.device.has(is_public=True),
-                        model.device.has(is_internal=True),
-                        and_(
-                            model.device.has(is_private=True),
-                            model.device.has(created_by_id=current_user.id),
-                        ),
-                    )
+            query = query.filter(
+                or_(
+                    related_object.has(is_public=True),
+                    related_object.has(is_internal=True),
+                    and_(
+                        related_object.has(is_private=True),
+                        related_object.has(created_by_id=current_user.id),
+                    ),
                 )
-            else:
-                query = query.filter(
-                    or_(
-                        model.platform.has(is_public=True),
-                        model.platform.has(is_internal=True),
-                        and_(
-                            model.platform.has(is_private=True),
-                            model.platform.has(created_by_id=current_user.id),
-                        ),
-                    )
-                )
-    allowed_collection = query.all()
+            )
 
-    return set(collection).intersection(allowed_collection)
+    return query

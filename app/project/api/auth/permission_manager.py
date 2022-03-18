@@ -43,14 +43,6 @@ related_objects_protected_views = [
     "api.platform_software_update_action_detail",
     "api.generic_platform_action_list",
     "api.generic_platform_action_detail",
-    "api.configuration_static_location_begin_action_list"
-    "api.configuration_static_location_begin_action_detail"
-    "api.configuration_static_location_end_action_list"
-    "api.configuration_static_location_end_action_detail"
-    "api.configuration_dynamic_location_begin_action_list"
-    "api.configuration_dynamic_location_begin_action_detail"
-    "api.configuration_dynamic_location_end_action_list"
-    "api.configuration_dynamic_location_end_action_detail",
 ]
 
 

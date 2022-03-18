@@ -4,16 +4,8 @@ from flask_rest_jsonapi import ResourceDetail, ResourceRelationship
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.orm.exc import NoResultFound
 
-from ..auth.permission_utils import get_collection_with_permissions_for_related_objects
-from ...frj_csv_export.resource import ResourceList
 from .base_resource import check_if_object_not_found
-from ..models.base_model import db
-from ..models.configuration import Configuration
-from ..models.device import Device
-from ..models.unmount_actions import DeviceUnmountAction
-from ..schemas.unmount_actions_schema import DeviceUnmountActionSchema
-from ..token_checker import token_required
-from .base_resource import check_if_object_not_found
+from ..auth.permission_utils import get_query_with_permissions_for_related_objects
 from ..models.base_model import db
 from ..models.configuration import Configuration
 from ..models.device import Device
@@ -26,27 +18,13 @@ from ...frj_csv_export.resource import ResourceList
 class DeviceUnmountActionList(ResourceList):
     """List resource for the device unmount actions (get, post)."""
 
-    def after_get_collection(self, collection, qs, view_kwargs):
-        """Take the intersection between requested collection and
-        what the user allowed querying.
-
-        :param collection:
-        :param qs:
-        :param view_kwargs:
-        :return:
-        """
-
-        return get_collection_with_permissions_for_related_objects(
-            self.model, collection
-        )
-
     def query(self, view_kwargs):
         """
         Query the actions from the database.
 
         Also handle optional pre-filters (for specific configurations, for example).
         """
-        query_ = self.session.query(DeviceUnmountAction)
+        query_ = get_query_with_permissions_for_related_objects(self.model)
         configuration_id = view_kwargs.get("configuration_id")
         device_id = view_kwargs.get("device_id")
         if configuration_id is not None:
@@ -77,7 +55,7 @@ class DeviceUnmountActionList(ResourceList):
     data_layer = {
         "session": db.session,
         "model": DeviceUnmountAction,
-        "methods": {"query": query, "after_get_collection": after_get_collection},
+        "methods": {"query": query},
     }
 
 

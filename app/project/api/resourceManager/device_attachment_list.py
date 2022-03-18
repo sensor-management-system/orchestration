@@ -3,7 +3,7 @@ from flask_rest_jsonapi import ResourceList
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.orm.exc import NoResultFound
 
-from ..auth.permission_utils import get_collection_with_permissions_for_related_objects
+from ..auth.permission_utils import get_query_with_permissions_for_related_objects
 from ..models.base_model import db
 from ..models.device import Device
 from ..models.device_attachment import DeviceAttachment
@@ -19,20 +19,6 @@ class DeviceAttachmentList(ResourceList):
     collection of device attachments or to create new ones.
     """
 
-    def after_get_collection(self, collection, qs, view_kwargs):
-        """Take the intersection between requested collection and
-        what the user allowed querying.
-
-        :param collection:
-        :param qs:
-        :param view_kwargs:
-        :return:
-        """
-
-        return get_collection_with_permissions_for_related_objects(
-            self.model, collection
-        )
-
     def query(self, view_kwargs):
         """
         Query the entries from the database.
@@ -40,7 +26,7 @@ class DeviceAttachmentList(ResourceList):
         Handle also additional logic to query the device
         attachments for a specific device.
         """
-        query_ = self.session.query(DeviceAttachment)
+        query_ = get_query_with_permissions_for_related_objects(self.model)
         device_id = view_kwargs.get("device_id")
 
         if device_id is not None:
@@ -59,5 +45,5 @@ class DeviceAttachmentList(ResourceList):
     data_layer = {
         "session": db.session,
         "model": DeviceAttachment,
-        "methods": {"query": query,"after_get_collection": after_get_collection},
+        "methods": {"query": query},
     }
