@@ -1,5 +1,10 @@
+import json
+from json import JSONDecodeError
+
+from flask import request
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 
+from ..helpers.errors import BadRequestError
 from ..models import (
     ConfigurationAttachment,
     Contact,
@@ -87,3 +92,11 @@ def check_if_object_not_found(model_class, kwargs):
         raise ObjectNotFound({"pointer": ""}, "Object Not Found")
     else:
         return object_to_be_checked
+
+
+def decode_json_request_data():
+    try:
+        data = json.loads(request.data.decode())["data"]
+    except JSONDecodeError as e:
+        raise BadRequestError(repr(e))
+    return data

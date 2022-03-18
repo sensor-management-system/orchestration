@@ -1,20 +1,20 @@
 """Resource classes for device mount actions."""
-import json
 
-from flask import request
 from flask_rest_jsonapi import ResourceDetail, ResourceRelationship
-from flask_rest_jsonapi.exceptions import ObjectNotFound, JsonApiException
+from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.orm.exc import NoResultFound
 
 from ..auth.permission_utils import get_query_with_permissions_for_related_objects
-from ..helpers.errors import ConflictError
 from ..helpers.mounting_checks import assert_object_is_free_to_be_mounted
 from ..models.base_model import db
 from ..models.configuration import Configuration
 from ..models.device import Device
 from ..models.mount_actions import DeviceMountAction
 from ..models.platform import Platform
-from ..resourceManager.base_resource import check_if_object_not_found
+from ..resourceManager.base_resource import (
+    check_if_object_not_found,
+    decode_json_request_data,
+)
 from ..schemas.mount_actions_schema import DeviceMountActionSchema
 from ..token_checker import token_required
 from ...frj_csv_export.resource import ResourceList
@@ -23,14 +23,9 @@ from ...frj_csv_export.resource import ResourceList
 class DeviceMountActionList(ResourceList):
     """List resource for device mount actions (get, post)."""
 
-    def post(self, *args, **kwargs):
-        data = json.loads(request.data.decode())["data"]
-        assert_object_is_free_to_be_mounted(data)
-        try:
-            response = super().post(*args, **kwargs)
-            return response
-        except JsonApiException as e:
-            raise ConflictError("Mount failed.", str(e))
+    def before_post(self, args, kwargs, data=None):
+        data_with_relationships = decode_json_request_data()
+        assert_object_is_free_to_be_mounted(data_with_relationships)
 
     def query(self, view_kwargs):
         """
