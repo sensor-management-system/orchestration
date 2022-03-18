@@ -66,8 +66,8 @@ def assert_object_is_free_to_be_mounted(data):
     if object_.is_private:
         raise ConflictError("Private object can't be used in a configuration.")
 
-    beginn_date_as_string = data["attributes"]["begin_date"]
-    beginn_date = dateutil.parser.parse(beginn_date_as_string).isoformat()
+    begin_date_as_string = data["attributes"]["begin_date"]
+    beginn_date = dateutil.parser.parse(begin_date_as_string).isoformat()
 
     if last_mount_action and not last_unmount_action:
         raise ConflictError(
