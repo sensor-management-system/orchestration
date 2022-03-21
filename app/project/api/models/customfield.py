@@ -1,8 +1,8 @@
 from .base_model import db
-from .mixin import IndirectSearchableMixin, AuditMixin
+from .mixin import IndirectSearchableMixin
 
 
-class CustomField(db.Model, IndirectSearchableMixin, AuditMixin):
+class CustomField(db.Model, IndirectSearchableMixin):
     """
     Custom Field class
     """
