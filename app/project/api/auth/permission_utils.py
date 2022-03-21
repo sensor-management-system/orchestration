@@ -230,7 +230,7 @@ def prevent_normal_user_from_viewing_not_owned_private_object(object_):
             raise ForbiddenError("User is not allowed to view object.")
 
 
-def check_for_permissions(model_class, kwargs):
+def check_for_permission(model_class, kwargs):
     """
     Check if a user has the permission to view an object.
 

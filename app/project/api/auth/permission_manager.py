@@ -1,7 +1,7 @@
 from flask import request
 
 from .permission_utils import (
-    check_for_permissions,
+    check_for_permission,
     check_patch_permission,
     check_deletion_permission,
     check_permissions_for_related_objects,
@@ -63,7 +63,7 @@ def permission_manager(view, view_args, view_kwargs, *args, **kwargs):
         if method == "GET":
             if "id" in view_kwargs:
                 kwargs["id"] = view_kwargs["id"]
-                check_for_permissions(view_args[0].data_layer["model"], kwargs)
+                check_for_permission(view_args[0].data_layer["model"], kwargs)
         elif method == "PATCH":
             check_patch_permission(view_kwargs, view_args[0].data_layer["model"])
         elif method == "DELETE":
