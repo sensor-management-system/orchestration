@@ -209,7 +209,7 @@ class PlatformToNestedDictSerializer:
             }
 
 
-class PlatformPublicSchema(Schema):
+class PlatformSchemaForOnlyId(Schema):
     class Meta:
 
         type_ = "platform"

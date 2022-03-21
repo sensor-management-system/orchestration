@@ -238,10 +238,11 @@ class DeviceToNestedDictSerializer:
             }
 
 
-class DevicePublicSchema(Schema):
+class DeviceSchemaForOnlyId(Schema):
     class Meta:
         type_ = "device"
         self_view = "api.device_detail"
         self_view_kwargs = {"id": "<id>"}
+        self_view_many = "api.device_list"
 
     id = fields.Integer(as_string=True)
