@@ -12,7 +12,7 @@ from ..models import Configuration
 from ..models import Device, Platform
 from ..models.base_model import db
 from ..services.idl_services import Idl
-from ..token_checker import current_user_or_none
+from ..token_checker import get_current_user_or_none_by_optional
 
 
 def is_user_in_a_group(groups_to_check):
@@ -89,7 +89,7 @@ def get_query_with_permissions(model):
     :return set: queryset for the model
     """
     query = db.session.query(model)
-    current_user = current_user_or_none(optional=True)
+    current_user = get_current_user_or_none_by_optional(optional=True)
     if current_user is None:
         query = query.filter_by(is_public=True)
     else:
@@ -110,7 +110,7 @@ def get_es_query_with_permissions():
 
     :return set: queryset for the model
     """
-    current_user = current_user_or_none(optional=True)
+    current_user = get_current_user_or_none_by_optional(optional=True)
     if current_user is None:
         return TermEqualsExactStringFilter("is_public", True)
     if not current_user.is_superuser:
@@ -223,7 +223,7 @@ def prevent_normal_user_from_viewing_not_owned_private_object(object_):
 
     :param object_:
     """
-    current_user = current_user_or_none()
+    current_user = get_current_user_or_none_by_optional()
     user_id = current_user.id
     if not current_user.is_superuser:
         if object_.created_by_id != user_id:
@@ -242,7 +242,7 @@ def check_for_permissions(model_class, kwargs):
         if object_.is_private:
             prevent_normal_user_from_viewing_not_owned_private_object(object_)
         elif object_.is_internal:
-            current_user_or_none()
+            get_current_user_or_none_by_optional()
     else:
         raise ObjectNotFound({"pointer": ""}, "Object Not Found")
 
@@ -300,7 +300,7 @@ def check_permissions_for_related_objects(model_class, id_):
     if related_object.is_private:
         assert_current_user_is_owner_of_object(related_object)
     elif not related_object.is_public:
-        current_user_or_none()
+        get_current_user_or_none_by_optional()
 
 
 def check_post_permission_for_related_objects():
@@ -386,7 +386,7 @@ def get_query_with_permissions_for_related_objects(model):
     :return set: list of objects
     """
     query = db.session.query(model)
-    current_user = current_user_or_none(optional=True)
+    current_user = get_current_user_or_none_by_optional(optional=True)
     if hasattr(model, "device"):
         related_object = model.device
     else:
