@@ -23,48 +23,32 @@ class ContactSchema(Schema):
     email = fields.Email(required=True)
     active = fields.Boolean(dump_only=True)
 
-    platforms = Relationship(
-        attribute="platforms",
-        related_view="api.contact_platforms",
+    contact_platform_roles = Relationship(
+        attribute="contact_platform_roles",
+        related_view="api.platform_roles_detail",
         related_view_kwargs={"id": "<id>"},
-        include_resource_linkage=True,
         many=True,
-        schema="PlatformSchema",
-        type_="platform",
-        id_field="id",
+        schema="PlatformRoleSchema",
+        type_="platform_contact_role",
     )
-    configurations = Relationship(
-        attribute="configurations",
-        related_view="api.contact_configurations",
+    contact_configuration_roles = Relationship(
+        attribute="contact_configuration_roles",
+        related_view="api.configuration_roles_detail",
         related_view_kwargs={"id": "<id>"},
         many=True,
-        include_resource_linkage=True,
-        schema="ConfigurationSchema",
-        type_="configuration",
-        id_field="id",
+        schema="ConfigurationRoleSchema",
+        type_="configuration_contact_role",
     )
-    devices = Relationship(
-        attribute="devices",
-        related_view="api.contact_devices",
+    contact_device_roles = Relationship(
+        attribute="contact_device_roles",
+        related_view="api.device_roles_detail",
         related_view_kwargs={"id": "<id>"},
         many=True,
-        include_resource_linkage=True,
-        schema="DeviceSchema",
-        type_="device",
-        id_field="id",
-    )
-    roles = Relationship(
-        attribute="roles",
-        related_view="api.contact_roles",
-        related_view_kwargs={"id": "<id>"},
-        many=True,
-        include_resource_linkage=True,
-        schema="RoleSchema",
-        type_="role",
-        id_field="id",
+        schema="DeviceRoleSchema",
+        type_="device_contact_role",
     )
     # This relationship should be optional as we want to
-    # allow to add extern contacts without user accounts.
+    # allow adding extern contacts without user accounts.
     user = Relationship(
         required=False,
         allow_none=True,
