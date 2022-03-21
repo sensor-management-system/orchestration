@@ -2,8 +2,8 @@ from .base_model import db
 
 
 class Role:
-    role_name = db.Column(db.String, nullable=False, unique=True)
-    role_uri = db.Column(db.String(256), nullable=False)
+    role_name = db.Column(db.String, nullable=False)
+    role_uri = db.Column(db.String(256), nullable=True)
 
 
 class DeviceContactRole(db.Model, Role):

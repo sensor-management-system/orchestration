@@ -26,8 +26,7 @@ def upgrade():
     sa.Column('device_id', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['contact_id'], ['contact.id'], ),
     sa.ForeignKeyConstraint(['device_id'], ['device.id'], ),
-    sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('role_name')
+    sa.PrimaryKeyConstraint('id')
     )
     op.create_table('platform_contact_role',
     sa.Column('role_name', sa.String(), nullable=False),
@@ -37,8 +36,7 @@ def upgrade():
     sa.Column('platform_id', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['contact_id'], ['contact.id'], ),
     sa.ForeignKeyConstraint(['platform_id'], ['platform.id'], ),
-    sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('role_name')
+    sa.PrimaryKeyConstraint('id')
     )
     op.create_table('configuration_contact_role',
     sa.Column('role_name', sa.String(), nullable=False),
@@ -48,8 +46,7 @@ def upgrade():
     sa.Column('configuration_id', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['configuration_id'], ['configuration.id'], ),
     sa.ForeignKeyConstraint(['contact_id'], ['contact.id'], ),
-    sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('role_name')
+    sa.PrimaryKeyConstraint('id')
     )
     # ### end Alembic commands ###
 
