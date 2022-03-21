@@ -1,7 +1,10 @@
 from flask_rest_jsonapi import ResourceDetail
 from flask_rest_jsonapi import ResourceRelationship
+from flask_rest_jsonapi.exceptions import ObjectNotFound
+from sqlalchemy.exc import NoResultFound
 
 from .base_resource import check_if_object_not_found
+from ..models import Configuration
 from ..models.base_model import db
 from ..models.contact_role import ConfigurationContactRole
 from ..schemas.role import ConfigurationRoleSchema
@@ -15,11 +18,33 @@ class ConfigurationRoleList(ResourceList):
     a collection of Configuration Role or create one.
     """
 
+    def query(self, view_kwargs):
+        """
+        Query the entries from the database.
+        """
+        query_ = self.session.query(ConfigurationContactRole)
+        configuration_id = view_kwargs.get("configuration_id")
+
+        if configuration_id is not None:
+            try:
+                self.session.query(Configuration).filter_by(id=configuration_id).one()
+            except NoResultFound:
+                raise ObjectNotFound(
+                    {"parameter": "id"},
+                    "Configuration: {} not found".format(configuration_id),
+                )
+            else:
+                query_ = query_.filter(
+                    ConfigurationContactRole.configuration_id == configuration_id
+                )
+        return query_
+
     schema = ConfigurationRoleSchema
     decorators = (token_required,)
     data_layer = {
         "session": db.session,
         "model": ConfigurationContactRole,
+        "methods": {"query": query},
     }
 
 
