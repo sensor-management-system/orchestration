@@ -1106,12 +1106,12 @@ api.route(
 # DeviceRoles
 api.route(
     DeviceRoleList,
-    "device_roles_list",
+    "device_contact_role_list",
     "/device-contact-roles",
-    "/contacts/<int:role_id>/roles",
-    "/devices/<int:role_id>/roles",
+    "/contacts/<int:contact_id>/device-contact-roles",
+    "/devices/<int:device_id>/device-contact-roles",
 )
-api.route(DeviceRoleDetail, "device_roles_detail", "/device-contact-roles/<int:id>")
+api.route(DeviceRoleDetail, "device_contact_role_detail", "/device-contact-roles/<int:id>")
 api.route(
     DeviceRoleRelationship,
     "roles_contact",
@@ -1126,13 +1126,13 @@ api.route(
 # PlatformRoles
 api.route(
     PlatformRoleList,
-    "platform_roles_list",
+    "platform_contact_role_list",
     "/platform-contact-roles",
-    "/contacts/<int:role_id>/roles",
-    "/platform/<int:role_id>/roles",
+    "/contacts/<int:contact_id>/platform-contact-roles",
+    "/platform/<int:platform_id>/platform-contact-roles",
 )
 api.route(
-    PlatformRoleDetail, "platform_roles_detail", "/platform-contact-roles/<int:id>"
+    PlatformRoleDetail, "platform_contact_role_detail", "/platform-contact-roles/<int:id>"
 )
 api.route(
     PlatformRoleRelationship,
@@ -1147,14 +1147,14 @@ api.route(
 # ConfigurationRoles
 api.route(
     ConfigurationRoleList,
-    "configuration_roles_list",
+    "configuration_contact_role_list",
     "/configuration-contact-roles",
-    "/contacts/<int:role_id>/roles",
-    "/configuration/<int:role_id>/roles",
+    "/contacts/<int:contact_id>/configuration-contact-roles",
+    "/configuration/<int:configuration_id>/configuration-contact-roles",
 )
 api.route(
     ConfigurationRoleDetail,
-    "configuration_roles_detail",
+    "configuration_contact_role_detail",
     "/configuration-contact-roles/<int:id>",
 )
 api.route(

@@ -15,9 +15,9 @@ class DeviceRoleSchema(Schema, RoleSchema):
 
     class Meta:
         type_ = "device_contact_role"
-        self_view = "api.device_roles_detail"
+        self_view = "api.device_contact_role_detail"
         self_view_kwargs = {"id": "<id>"}
-        self_view_many = "api.device_roles_list"
+        self_view_many = "api.device_contact_role_list"
 
     device = Relationship(
         self_view="api.device_contact_roles",
@@ -44,9 +44,9 @@ class PlatformRoleSchema(Schema, RoleSchema):
 
     class Meta:
         type_ = "platform_contact_role"
-        self_view = "api.platform_roles_detail"
+        self_view = "api.platform_contact_role_detail"
         self_view_kwargs = {"id": "<id>"}
-        self_view_many = "api.platform_roles_list"
+        self_view_many = "api.platform_contact_role_list"
 
     platform = Relationship(
         self_view="api.platform_contact_roles",
@@ -73,9 +73,9 @@ class ConfigurationRoleSchema(Schema, RoleSchema):
 
     class Meta:
         type_ = "configuration_contact_role"
-        self_view = "api.configuration_roles_detail"
+        self_view = "api.configuration_contact_role_detail"
         self_view_kwargs = {"id": "<id>"}
-        self_view_many = "api.configuration_roles_list"
+        self_view_many = "api.configuration_contact_role_list"
 
     configuration = Relationship(
         self_view="api.configuration_contact_roles",
