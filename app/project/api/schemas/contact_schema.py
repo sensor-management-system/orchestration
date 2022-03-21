@@ -25,7 +25,7 @@ class ContactSchema(Schema):
 
     contact_platform_roles = Relationship(
         attribute="contact_platform_roles",
-        related_view="api.platform_roles_detail",
+        related_view="api.platform_contact_role_detail",
         related_view_kwargs={"id": "<id>"},
         many=True,
         schema="PlatformRoleSchema",
@@ -33,7 +33,7 @@ class ContactSchema(Schema):
     )
     contact_configuration_roles = Relationship(
         attribute="contact_configuration_roles",
-        related_view="api.configuration_roles_detail",
+        related_view="api.configuration_contact_role_detail",
         related_view_kwargs={"id": "<id>"},
         many=True,
         schema="ConfigurationRoleSchema",
@@ -41,7 +41,7 @@ class ContactSchema(Schema):
     )
     contact_device_roles = Relationship(
         attribute="contact_device_roles",
-        related_view="api.device_roles_detail",
+        related_view="api.device_contact_role_detail",
         related_view_kwargs={"id": "<id>"},
         many=True,
         schema="DeviceRoleSchema",
