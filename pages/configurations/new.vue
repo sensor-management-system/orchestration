@@ -78,7 +78,7 @@ import ConfigurationsBasicDataForm from '@/components/configurations/Configurati
 })
 export default class ConfigurationNewPage extends Vue {
   private configuration: Configuration = new Configuration()
-  private isLoading: boolean =false
+  private isLoading: boolean = false
 
   created () {
     this.$store.commit('configurations/setConfiguration', this.configuration)

@@ -38,8 +38,8 @@ import { AbstractActionAttachmentApi } from '@/services/sms/ActionAttachmentApi'
 export class GenericDeviceActionAttachmentApi extends AbstractActionAttachmentApi {
   private _serializer: IActionAttachmentSerializer
 
-  constructor (axiosInstance: AxiosInstance) {
-    super(axiosInstance)
+  constructor (axiosInstance: AxiosInstance, basePath: string) {
+    super(axiosInstance, basePath)
     this._serializer = new GenericDeviceActionAttachmentSerializer()
   }
 
@@ -51,8 +51,8 @@ export class GenericDeviceActionAttachmentApi extends AbstractActionAttachmentAp
 export class GenericPlatformActionAttachmentApi extends AbstractActionAttachmentApi {
   private _serializer: IActionAttachmentSerializer
 
-  constructor (axiosInstance: AxiosInstance) {
-    super(axiosInstance)
+  constructor (axiosInstance: AxiosInstance, basePath: string) {
+    super(axiosInstance, basePath)
     this._serializer = new GenericPlatformActionAttachmentSerializer()
   }
 

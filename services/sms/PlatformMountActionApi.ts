@@ -36,19 +36,21 @@ import { PlatformMountActionSerializer } from '@/serializers/jsonapi/PlatformMou
 
 export class PlatformMountActionApi {
   private axiosApi: AxiosInstance
+  readonly basePath: string
   private serializer: PlatformMountActionSerializer
 
-  constructor (axiosApi: AxiosInstance) {
+  constructor (axiosApi: AxiosInstance, basePath: string) {
     this.axiosApi = axiosApi
+    this.basePath = basePath
     this.serializer = new PlatformMountActionSerializer()
   }
 
   deleteById (id: string): Promise<void> {
-    return this.axiosApi.delete<string, void>(id)
+    return this.axiosApi.delete<string, void>(this.basePath + '/' + id)
   }
 
   async add (configurationId: string, platformMountAction: PlatformMountAction): Promise<string> {
-    const url = ''
+    const url = this.basePath
     const data = this.serializer.convertModelToJsonApiData(configurationId, platformMountAction)
     const response = await this.axiosApi.post(url, { data })
     // we can't return a full entity here, as we need to included data about the contacts & the device
@@ -61,7 +63,7 @@ export class PlatformMountActionApi {
     if (!platformMountAction.id) {
       throw new Error('no id for the PlatformMountAction')
     }
-    const url = platformMountAction.id
+    const url = this.basePath + '/' + platformMountAction.id
     const data = this.serializer.convertModelToJsonApiData(configurationId, platformMountAction)
     const response = await this.axiosApi.patch(url, { data })
     // we can't return a full entity here, as we need to included data about the contacts & the device

@@ -168,7 +168,7 @@ export default class SoftwareUpdateActionForm extends Vue {
     type: String
   })
   // @ts-ignore
-readonly currentUserMail: string|null
+  readonly currentUserMail: string | null
 
   async fetch (): Promise<any> {
     await this.fetchSoftwareTypes()

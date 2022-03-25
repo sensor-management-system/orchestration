@@ -39,14 +39,16 @@ import { IPaginationLoader } from '@/utils/PaginatedLoader'
 
 export class MeasuredQuantityUnitApi extends CVApi<MeasuredQuantityUnit> {
   private serializer: MeasuredQuantityUnitSerializer
+  readonly basePath: string
 
-  constructor (axiosInstance: AxiosInstance) {
+  constructor (axiosInstance: AxiosInstance, basePath: string) {
     super(axiosInstance)
+    this.basePath = basePath
     this.serializer = new MeasuredQuantityUnitSerializer()
   }
 
   newSearchBuilder (): MeasuredQuantityUnitSearchBuilder {
-    return new MeasuredQuantityUnitSearchBuilder(this.axiosApi, this.serializer)
+    return new MeasuredQuantityUnitSearchBuilder(this.axiosApi, this.basePath, this.serializer)
   }
 
   findAll (): Promise<MeasuredQuantityUnit[]> {
@@ -60,30 +62,34 @@ export class MeasuredQuantityUnitApi extends CVApi<MeasuredQuantityUnit> {
 
 export class MeasuredQuantityUnitSearchBuilder {
   private axiosApi: AxiosInstance
+  readonly basePath: string
   private serializer: MeasuredQuantityUnitSerializer
 
-  constructor (axiosApi: AxiosInstance, serializer: MeasuredQuantityUnitSerializer) {
+  constructor (axiosApi: AxiosInstance, basePath: string, serializer: MeasuredQuantityUnitSerializer) {
     this.axiosApi = axiosApi
+    this.basePath = basePath
     this.serializer = serializer
   }
 
   build (): MeasuredQuantityUnitSearcher {
-    return new MeasuredQuantityUnitSearcher(this.axiosApi, this.serializer)
+    return new MeasuredQuantityUnitSearcher(this.axiosApi, this.basePath, this.serializer)
   }
 }
 
 export class MeasuredQuantityUnitSearcher {
   private axiosApi: AxiosInstance
+  readonly basePath: string
   private serializer: MeasuredQuantityUnitSerializer
 
-  constructor (axiosApi: AxiosInstance, serializer: MeasuredQuantityUnitSerializer) {
+  constructor (axiosApi: AxiosInstance, basePath: string, serializer: MeasuredQuantityUnitSerializer) {
     this.axiosApi = axiosApi
+    this.basePath = basePath
     this.serializer = serializer
   }
 
   private findAllOnPage (page: number, pageSize: number): Promise<IPaginationLoader<MeasuredQuantityUnit>> {
     return this.axiosApi.get(
-      '',
+      this.basePath,
       {
         params: {
           'page[size]': pageSize,
@@ -119,7 +125,7 @@ export class MeasuredQuantityUnitSearcher {
 
   findMatchingAsList (): Promise<MeasuredQuantityUnit[]> {
     return this.axiosApi.get(
-      '',
+      this.basePath,
       {
         params: {
           'page[size]': 10000,

@@ -39,14 +39,16 @@ import { IPaginationLoader } from '@/utils/PaginatedLoader'
 
 export class UnitApi extends CVApi<Unit> {
   private serializer: UnitSerializer
+  readonly basePath: string
 
-  constructor (axiosInstance: AxiosInstance) {
+  constructor (axiosInstance: AxiosInstance, basePath: string) {
     super(axiosInstance)
+    this.basePath = basePath
     this.serializer = new UnitSerializer()
   }
 
   newSearchBuilder (): UnitSearchBuilder {
-    return new UnitSearchBuilder(this.axiosApi, this.serializer)
+    return new UnitSearchBuilder(this.axiosApi, this.basePath, this.serializer)
   }
 
   findAll (): Promise<Unit[]> {
@@ -60,30 +62,34 @@ export class UnitApi extends CVApi<Unit> {
 
 export class UnitSearchBuilder {
   private axiosApi: AxiosInstance
+  readonly basePath: string
   private serializer: UnitSerializer
 
-  constructor (axiosApi: AxiosInstance, serializer: UnitSerializer) {
+  constructor (axiosApi: AxiosInstance, basePath: string, serializer: UnitSerializer) {
     this.axiosApi = axiosApi
+    this.basePath = basePath
     this.serializer = serializer
   }
 
   build (): UnitSearcher {
-    return new UnitSearcher(this.axiosApi, this.serializer)
+    return new UnitSearcher(this.axiosApi, this.basePath, this.serializer)
   }
 }
 
 export class UnitSearcher {
   private axiosApi: AxiosInstance
+  readonly basePath: string
   private serializer: UnitSerializer
 
-  constructor (axiosApi: AxiosInstance, serializer: UnitSerializer) {
+  constructor (axiosApi: AxiosInstance, basePath: string, serializer: UnitSerializer) {
     this.axiosApi = axiosApi
+    this.basePath = basePath
     this.serializer = serializer
   }
 
   private findAllOnPage (page: number, pageSize: number): Promise<IPaginationLoader<Unit>> {
     return this.axiosApi.get(
-      '',
+      this.basePath,
       {
         params: {
           'page[size]': pageSize,
@@ -119,7 +125,7 @@ export class UnitSearcher {
 
   findMatchingAsList (): Promise<Unit[]> {
     return this.axiosApi.get(
-      '',
+      this.basePath,
       {
         params: {
           'page[size]': 10000,

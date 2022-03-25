@@ -39,14 +39,16 @@ import { IPaginationLoader } from '@/utils/PaginatedLoader'
 
 export class ActionTypeApi extends CVApi<ActionType> {
   private serializer: ActionTypeSerializer
+  readonly basePath: string
 
-  constructor (axiosInstance: AxiosInstance) {
+  constructor (axiosInstance: AxiosInstance, basePath: string) {
     super(axiosInstance)
+    this.basePath = basePath
     this.serializer = new ActionTypeSerializer()
   }
 
   newSearchBuilder (): ActionTypeSearchBuilder {
-    return new ActionTypeSearchBuilder(this.axiosApi, this.serializer)
+    return new ActionTypeSearchBuilder(this.axiosApi, this.basePath, this.serializer)
   }
 
   findAll (): Promise<ActionType[]> {
@@ -65,11 +67,13 @@ export type ActionTypeApiFilterType = typeof ACTION_TYPE_API_FILTER_DEVICE | typ
 
 export class ActionTypeSearchBuilder {
   private axiosApi: AxiosInstance
+  readonly basePath: string
   private serializer: ActionTypeSerializer
   private actionTypeFilter: ActionTypeApiFilterType | undefined
 
-  constructor (axiosApi: AxiosInstance, serializer: ActionTypeSerializer) {
+  constructor (axiosApi: AxiosInstance, basePath: string, serializer: ActionTypeSerializer) {
     this.axiosApi = axiosApi
+    this.basePath = basePath
     this.serializer = serializer
   }
 
@@ -79,17 +83,19 @@ export class ActionTypeSearchBuilder {
   }
 
   build (): ActionTypeSearcher {
-    return new ActionTypeSearcher(this.axiosApi, this.serializer, this.actionTypeFilter)
+    return new ActionTypeSearcher(this.axiosApi, this.basePath, this.serializer, this.actionTypeFilter)
   }
 }
 
 export class ActionTypeSearcher {
   private axiosApi: AxiosInstance
+  readonly basePath: string
   private serializer: ActionTypeSerializer
   private actionTypeFilter: ActionTypeApiFilterType | undefined
 
-  constructor (axiosApi: AxiosInstance, serializer: ActionTypeSerializer, actionType?: ActionTypeApiFilterType) {
+  constructor (axiosApi: AxiosInstance, basePath: string, serializer: ActionTypeSerializer, actionType?: ActionTypeApiFilterType) {
     this.axiosApi = axiosApi
+    this.basePath = basePath
     this.serializer = serializer
     if (actionType) {
       this.actionTypeFilter = actionType
@@ -107,7 +113,7 @@ export class ActionTypeSearcher {
       params['filter[action_category__term]'] = this.actionTypeFilter
     }
     return this.axiosApi.get(
-      '',
+      this.basePath,
       {
         params
       }
@@ -146,7 +152,7 @@ export class ActionTypeSearcher {
       params['filter[action_category__term]'] = this.actionTypeFilter
     }
     return this.axiosApi.get(
-      '',
+      this.basePath,
       {
         params
       }

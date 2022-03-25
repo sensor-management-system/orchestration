@@ -184,7 +184,7 @@ export default class DeviceCalibationActionForm extends Vue {
     type: String
   })
   // @ts-ignore
-readonly currentUserMail: string|null
+  readonly currentUserMail: string | null
 
   created () {
     this.createActionCopy(this.value)

@@ -39,14 +39,16 @@ import { IPaginationLoader } from '@/utils/PaginatedLoader'
 
 export class SamplingMediaApi extends CVApi<SamplingMedia> {
   private serializer: SamplingMediaSerializer
+  readonly basePath: string
 
-  constructor (axiosInstance: AxiosInstance) {
+  constructor (axiosInstance: AxiosInstance, basePath: string) {
     super(axiosInstance)
+    this.basePath = basePath
     this.serializer = new SamplingMediaSerializer()
   }
 
   newSearchBuilder (): SamplingMediaSearchBuilder {
-    return new SamplingMediaSearchBuilder(this.axiosApi, this.serializer)
+    return new SamplingMediaSearchBuilder(this.axiosApi, this.basePath, this.serializer)
   }
 
   findAll (): Promise<SamplingMedia[]> {
@@ -60,30 +62,34 @@ export class SamplingMediaApi extends CVApi<SamplingMedia> {
 
 export class SamplingMediaSearchBuilder {
   private axiosApi: AxiosInstance
+  readonly basePath: string
   private serializer: SamplingMediaSerializer
 
-  constructor (axiosApi: AxiosInstance, serializer: SamplingMediaSerializer) {
+  constructor (axiosApi: AxiosInstance, basePath: string, serializer: SamplingMediaSerializer) {
     this.axiosApi = axiosApi
+    this.basePath = basePath
     this.serializer = serializer
   }
 
   build (): SamplingMediaSearcher {
-    return new SamplingMediaSearcher(this.axiosApi, this.serializer)
+    return new SamplingMediaSearcher(this.axiosApi, this.basePath, this.serializer)
   }
 }
 
 export class SamplingMediaSearcher {
   private axiosApi: AxiosInstance
+  readonly basePath: string
   private serializer: SamplingMediaSerializer
 
-  constructor (axiosApi: AxiosInstance, serializer: SamplingMediaSerializer) {
+  constructor (axiosApi: AxiosInstance, basePath: string, serializer: SamplingMediaSerializer) {
     this.axiosApi = axiosApi
+    this.basePath = basePath
     this.serializer = serializer
   }
 
   private findAllOnPage (page: number, pageSize: number): Promise<IPaginationLoader<SamplingMedia>> {
     return this.axiosApi.get(
-      '',
+      this.basePath,
       {
         params: {
           'page[size]': pageSize,
@@ -119,7 +125,7 @@ export class SamplingMediaSearcher {
 
   findMatchingAsList (): Promise<SamplingMedia[]> {
     return this.axiosApi.get(
-      '',
+      this.basePath,
       {
         params: {
           'page[size]': 10000,

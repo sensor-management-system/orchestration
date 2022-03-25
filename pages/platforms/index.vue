@@ -505,7 +505,7 @@ export default class SearchPlatformsPage extends Vue {
   private searchResults: PaginatedResult = {}
   private searchText: string | null = null
 
-  private showDeleteDialog: boolean = false;
+  private showDeleteDialog: boolean = false
 
   private searchResultItemsShown: { [id: string]: boolean } = {}
 

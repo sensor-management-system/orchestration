@@ -75,10 +75,12 @@ interface IncludedRelationships {
 
 export class DeviceApi {
   private axiosApi: AxiosInstance
+  readonly basePath: string
   private serializer: DeviceSerializer
 
-  constructor (axiosInstance: AxiosInstance) {
+  constructor (axiosInstance: AxiosInstance, basePath: string) {
     this.axiosApi = axiosInstance
+    this.basePath = basePath
     this.serializer = new DeviceSerializer()
   }
 
@@ -98,7 +100,7 @@ export class DeviceApi {
     }
     const include = listIncludedRelationships.join(',')
 
-    return this.axiosApi.get(id, {
+    return this.axiosApi.get(this.basePath + '/' + id, {
       params: {
         include
       }
@@ -110,7 +112,7 @@ export class DeviceApi {
   }
 
   deleteById (id: string): Promise<void> {
-    return this.axiosApi.delete<string, void>(id)
+    return this.axiosApi.delete<string, void>(this.basePath + '/' + id)
   }
 
   save (device: Device) {
@@ -121,14 +123,14 @@ export class DeviceApi {
     const includeRelationships = false
     const data: any = this.serializer.convertModelToJsonApiData(device, includeRelationships)
     let method: Method = 'patch'
-    let url = ''
+    let url = this.basePath
 
     if (device.id === null) {
       // new -> post
       method = 'post'
     } else {
       // old -> patch
-      url = String(device.id)
+      url += '/' + String(device.id)
     }
 
     return this.axiosApi.request({
@@ -145,11 +147,11 @@ export class DeviceApi {
   }
 
   newSearchBuilder (): DeviceSearchBuilder {
-    return new DeviceSearchBuilder(this.axiosApi, this.serializer)
+    return new DeviceSearchBuilder(this.axiosApi, this.basePath, this.serializer)
   }
 
   findRelatedContacts (deviceId: string): Promise<Contact[]> {
-    const url = deviceId + '/contacts'
+    const url = this.basePath + '/' + deviceId + '/contacts'
     const params = {
       'page[size]': 10000
     }
@@ -159,7 +161,7 @@ export class DeviceApi {
   }
 
   removeContact (deviceId: string, contactId: string): Promise<void> {
-    const url = deviceId + '/relationships/contacts'
+    const url = this.basePath + '/' + deviceId + '/relationships/contacts'
     const params = {
       data: [{
         type: 'contact',
@@ -170,7 +172,7 @@ export class DeviceApi {
   }
 
   addContact (deviceId: string, contactId: string): Promise<void> {
-    const url = deviceId + '/relationships/contacts'
+    const url = this.basePath + '/' + deviceId + '/relationships/contacts'
     const data = [{
       type: 'contact',
       id: contactId
@@ -179,7 +181,7 @@ export class DeviceApi {
   }
 
   findRelatedCustomFields (deviceId: string): Promise<CustomTextField[]> {
-    const url = deviceId + '/customfields'
+    const url = this.basePath + '/' + deviceId + '/customfields'
     const params = {
       'page[size]': 10000
     }
@@ -189,7 +191,7 @@ export class DeviceApi {
   }
 
   findRelatedDeviceAttachments (deviceId: string): Promise<Attachment[]> {
-    const url = deviceId + '/device-attachments'
+    const url = this.basePath + '/' + deviceId + '/device-attachments'
     const params = {
       'page[size]': 10000
     }
@@ -199,7 +201,7 @@ export class DeviceApi {
   }
 
   findRelatedDeviceProperties (deviceId: string): Promise<DeviceProperty[]> {
-    const url = deviceId + '/device-properties'
+    const url = this.basePath + '/' + deviceId + '/device-properties'
     const params = {
       'page[size]': 10000
     }
@@ -209,7 +211,7 @@ export class DeviceApi {
   }
 
   findRelatedGenericActions (deviceId: string): Promise<GenericAction[]> {
-    const url = deviceId + '/generic-device-actions'
+    const url = this.basePath + '/' + deviceId + '/generic-device-actions'
     const params = {
       'page[size]': 10000,
       include: [
@@ -223,7 +225,7 @@ export class DeviceApi {
   }
 
   findRelatedSoftwareUpdateActions (deviceId: string): Promise<SoftwareUpdateAction[]> {
-    const url = deviceId + '/device-software-update-actions'
+    const url = this.basePath + '/' + deviceId + '/device-software-update-actions'
     const params = {
       'page[size]': 10000,
       include: [
@@ -237,7 +239,7 @@ export class DeviceApi {
   }
 
   findRelatedCalibrationActions (deviceId: string): Promise<DeviceCalibrationAction[]> {
-    const url = deviceId + '/device-calibration-actions'
+    const url = this.basePath + '/' + deviceId + '/device-calibration-actions'
     const params = {
       'page[size]': 10000,
       include: [
@@ -253,7 +255,7 @@ export class DeviceApi {
   }
 
   findRelatedMountActions (deviceId: string): Promise<DeviceMountAction[]> {
-    const url = deviceId + '/device-mount-actions'
+    const url = this.basePath + '/' + deviceId + '/device-mount-actions'
     const params = {
       'page[size]': 10000,
       include: [
@@ -268,7 +270,7 @@ export class DeviceApi {
   }
 
   findRelatedUnmountActions (deviceId: string): Promise<DeviceUnmountAction[]> {
-    const url = deviceId + '/device-unmount-actions'
+    const url = this.basePath + '/' + deviceId + '/device-unmount-actions'
     const params = {
       'page[size]': 10000,
       include: [
@@ -284,13 +286,15 @@ export class DeviceApi {
 
 export class DeviceSearchBuilder {
   private axiosApi: AxiosInstance
+  readonly basePath: string
   private clientSideFilterFunc: (device: Device) => boolean
   private serverSideFilterSettings: IFlaskJSONAPIFilter[] = []
   private esTextFilter: string | null = null
   private serializer: DeviceSerializer
 
-  constructor (axiosApi: AxiosInstance, serializer: DeviceSerializer) {
+  constructor (axiosApi: AxiosInstance, basePath: string, serializer: DeviceSerializer) {
     this.axiosApi = axiosApi
+    this.basePath = basePath
     this.clientSideFilterFunc = (_d: Device) => true
     this.serializer = serializer
   }
@@ -374,6 +378,7 @@ export class DeviceSearchBuilder {
   build (): DeviceSearcher {
     return new DeviceSearcher(
       this.axiosApi,
+      this.basePath,
       this.clientSideFilterFunc,
       this.serverSideFilterSettings,
       this.esTextFilter,
@@ -384,6 +389,7 @@ export class DeviceSearchBuilder {
 
 export class DeviceSearcher {
   private axiosApi: AxiosInstance
+  readonly basePath: string
   private clientSideFilterFunc: (device: Device) => boolean
   private serverSideFilterSettings: IFlaskJSONAPIFilter[]
   private esTextFilter: string | null
@@ -391,12 +397,14 @@ export class DeviceSearcher {
 
   constructor (
     axiosApi: AxiosInstance,
+    basePath: string,
     clientSideFilterFunc: (device: Device) => boolean,
     serverSideFilterSettings: IFlaskJSONAPIFilter[],
     esTextFilter: string | null,
     serializer: DeviceSerializer
   ) {
     this.axiosApi = axiosApi
+    this.basePath = basePath
     this.clientSideFilterFunc = clientSideFilterFunc
     this.serverSideFilterSettings = serverSideFilterSettings
     this.esTextFilter = esTextFilter
@@ -416,7 +424,7 @@ export class DeviceSearcher {
   }
 
   findMatchingAsCsvBlob (): Promise<Blob> {
-    const url = ''
+    const url = this.basePath
     return this.axiosApi.request({
       url,
       method: 'get',
@@ -434,7 +442,7 @@ export class DeviceSearcher {
 
   findMatchingAsList (): Promise<Device[]> {
     return this.axiosApi.get(
-      '',
+      this.basePath,
       {
         params: {
           'page[size]': 10000,
@@ -457,7 +465,7 @@ export class DeviceSearcher {
 
   private findAllOnPage (page: number, pageSize: number): Promise<IPaginationLoader<Device>> {
     return this.axiosApi.get(
-      '',
+      this.basePath,
       {
         params: {
           'page[size]': pageSize,

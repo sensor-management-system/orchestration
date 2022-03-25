@@ -191,7 +191,7 @@ export default class DevicePropertyExpansionPanels extends Vue {
     required: true,
     type: Array
   })
-  compartments!: Compartment[]
+  readonly compartments!: Compartment[]
 
   /**
    * a list of SamplingMedias
@@ -201,7 +201,7 @@ export default class DevicePropertyExpansionPanels extends Vue {
     required: true,
     type: Array
   })
-  samplingMedias!: SamplingMedia[]
+  readonly samplingMedias!: SamplingMedia[]
 
   /**
    * a list of Properties
@@ -211,7 +211,7 @@ export default class DevicePropertyExpansionPanels extends Vue {
     required: true,
     type: Array
   })
-  properties!: Property[]
+  readonly properties!: Property[]
 
   /**
    * a list of Units
@@ -221,7 +221,7 @@ export default class DevicePropertyExpansionPanels extends Vue {
     required: true,
     type: Array
   })
-  units!: Unit[]
+  readonly units!: Unit[]
 
   /**
    * a list of MeasuredQuantityUnits
@@ -231,7 +231,7 @@ export default class DevicePropertyExpansionPanels extends Vue {
     required: true,
     type: Array
   })
-  measuredQuantityUnits!: MeasuredQuantityUnit[]
+  readonly measuredQuantityUnits!: MeasuredQuantityUnit[]
 
   /**
    * adds a new DeviceProperty instance and triggers an input event

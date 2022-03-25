@@ -277,7 +277,7 @@ export default class ConfigurationsSelectedItem extends mixins(Rules) {
     type: String
   })
   // @ts-ignore
-readonly currentUserMail: string|null
+  readonly currentUserMail: string | null
 
   /**
    * returns the description of a node

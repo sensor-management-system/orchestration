@@ -119,7 +119,7 @@ export default class PlatformShowBasicPage extends Vue {
   })
   readonly value!: Platform
 
-  private showDeleteDialog: boolean=false;
+  private showDeleteDialog: boolean = false
 
   get platform (): Platform {
     return this.value

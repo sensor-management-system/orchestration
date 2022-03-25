@@ -37,19 +37,21 @@ import { StaticLocationBeginActionSerializer } from '@/serializers/jsonapi/Stati
 
 export class StaticLocationBeginActionApi {
   private axiosApi: AxiosInstance
+  readonly basePath: string
   private serializer: StaticLocationBeginActionSerializer
 
-  constructor (axiosApi: AxiosInstance) {
+  constructor (axiosApi: AxiosInstance, basePath: string) {
     this.axiosApi = axiosApi
+    this.basePath = basePath
     this.serializer = new StaticLocationBeginActionSerializer()
   }
 
   deleteById (id: string): Promise<void> {
-    return this.axiosApi.delete<string, void>(id)
+    return this.axiosApi.delete<string, void>(this.basePath + '/' + id)
   }
 
   async add (configurationId: string, action: StaticLocationBeginAction): Promise<string> {
-    const url = ''
+    const url = this.basePath
     const data = this.serializer.convertModelToJsonApiData(configurationId, action)
     const response = await this.axiosApi.post(url, { data })
     // we can't return a full entity here, as we need to included data about the contact
@@ -62,7 +64,7 @@ export class StaticLocationBeginActionApi {
     if (!action.id) {
       throw new Error('no id for the StaticLocationBeginAction')
     }
-    const url = action.id
+    const url = this.basePath + '/' + action.id
     const data = this.serializer.convertModelToJsonApiData(configurationId, action)
     const response = await this.axiosApi.patch(url, { data })
     // we can't return a full entity here, as we need to included data about the contacts & the device

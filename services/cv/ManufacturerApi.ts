@@ -39,14 +39,16 @@ import { IPaginationLoader } from '@/utils/PaginatedLoader'
 
 export class ManufacturerApi extends CVApi<Manufacturer> {
   private serializer: ManufacturerSerializer
+  readonly basePath: string
 
-  constructor (axiosInstance: AxiosInstance) {
+  constructor (axiosInstance: AxiosInstance, basePath: string) {
     super(axiosInstance)
+    this.basePath = basePath
     this.serializer = new ManufacturerSerializer()
   }
 
   newSearchBuilder (): ManufacturerSearchBuilder {
-    return new ManufacturerSearchBuilder(this.axiosApi, this.serializer)
+    return new ManufacturerSearchBuilder(this.axiosApi, this.basePath, this.serializer)
   }
 
   findAll (): Promise<Manufacturer[]> {
@@ -60,30 +62,34 @@ export class ManufacturerApi extends CVApi<Manufacturer> {
 
 export class ManufacturerSearchBuilder {
   private axiosApi: AxiosInstance
+  readonly basePath: string
   private serializer: ManufacturerSerializer
 
-  constructor (axiosApi: AxiosInstance, serializer: ManufacturerSerializer) {
+  constructor (axiosApi: AxiosInstance, basePath: string, serializer: ManufacturerSerializer) {
     this.axiosApi = axiosApi
+    this.basePath = basePath
     this.serializer = serializer
   }
 
   build (): ManufacturerSearcher {
-    return new ManufacturerSearcher(this.axiosApi, this.serializer)
+    return new ManufacturerSearcher(this.axiosApi, this.basePath, this.serializer)
   }
 }
 
 export class ManufacturerSearcher {
   private axiosApi: AxiosInstance
+  readonly basePath: string
   private serializer: ManufacturerSerializer
 
-  constructor (axiosApi: AxiosInstance, serializer: ManufacturerSerializer) {
+  constructor (axiosApi: AxiosInstance, basePath: string, serializer: ManufacturerSerializer) {
     this.axiosApi = axiosApi
+    this.basePath = basePath
     this.serializer = serializer
   }
 
   private findAllOnPage (page: number, pageSize: number): Promise<IPaginationLoader<Manufacturer>> {
     return this.axiosApi.get(
-      '',
+      this.basePath,
       {
         params: {
           'page[size]': pageSize,
@@ -119,7 +125,7 @@ export class ManufacturerSearcher {
 
   findMatchingAsList (): Promise<Manufacturer[]> {
     return this.axiosApi.get(
-      '',
+      this.basePath,
       {
         params: {
           'page[size]': 10000,

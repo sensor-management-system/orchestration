@@ -131,7 +131,7 @@ export default class GenericActionForm extends Vue {
     type: String
   })
   // @ts-ignore
-readonly currentUserMail: string|null
+  readonly currentUserMail: string | null
 
   created () {
     // create a copy of the original value on which all operations will be applied

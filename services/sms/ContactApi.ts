@@ -37,15 +37,17 @@ import { IPaginationLoader } from '@/utils/PaginatedLoader'
 
 export class ContactApi {
   private axiosApi: AxiosInstance
+  readonly basePath: string
   private serializer: ContactSerializer
 
-  constructor (axiosInstance: AxiosInstance) {
+  constructor (axiosInstance: AxiosInstance, basePath: string) {
     this.axiosApi = axiosInstance
+    this.basePath = basePath
     this.serializer = new ContactSerializer()
   }
 
   findById (id: string): Promise<Contact> {
-    return this.axiosApi.get(id, {
+    return this.axiosApi.get(this.basePath + '/' + id, {
       params: {
         // maybe add something later
       }
@@ -56,20 +58,20 @@ export class ContactApi {
   }
 
   deleteById (id: string): Promise<void> {
-    return this.axiosApi.delete<string, void>(id)
+    return this.axiosApi.delete<string, void>(this.basePath + '/' + id)
   }
 
   save (contact: Contact) {
     const data: any = this.serializer.convertModelToJsonApiData(contact)
     let method: Method = 'patch'
-    let url = ''
+    let url = this.basePath
 
     if (contact.id === null) {
       // new -> post
       method = 'post'
     } else {
       // old -> patch
-      url = String(contact.id)
+      url += '/' + String(contact.id)
     }
 
     return this.axiosApi.request({
@@ -84,7 +86,7 @@ export class ContactApi {
   }
 
   newSearchBuilder (): ContactSearchBuilder {
-    return new ContactSearchBuilder(this.axiosApi, this.serializer)
+    return new ContactSearchBuilder(this.axiosApi, this.basePath, this.serializer)
   }
 
   findAll (): Promise<Contact[]> {
@@ -109,11 +111,13 @@ export function serverResponseToEntity (entry: any): Contact {
 
 export class ContactSearchBuilder {
   private axiosApi: AxiosInstance
+  readonly basePath: string
   private serializer: ContactSerializer
   private esTextFilter: string | null = null
 
-  constructor (axiosApi: AxiosInstance, serializer: ContactSerializer) {
+  constructor (axiosApi: AxiosInstance, basePath: string, serializer: ContactSerializer) {
     this.axiosApi = axiosApi
+    this.basePath = basePath
     this.serializer = serializer
   }
 
@@ -125,17 +129,19 @@ export class ContactSearchBuilder {
   }
 
   build (): ContactSearcher {
-    return new ContactSearcher(this.axiosApi, this.serializer, this.esTextFilter)
+    return new ContactSearcher(this.axiosApi, this.basePath, this.serializer, this.esTextFilter)
   }
 }
 
 export class ContactSearcher {
   private axiosApi: AxiosInstance
+  readonly basePath: string
   private serializer: ContactSerializer
   private esTextFilter: string | null
 
-  constructor (axiosApi: AxiosInstance, serializer: ContactSerializer, esTextFilter: string | null) {
+  constructor (axiosApi: AxiosInstance, basePath: string, serializer: ContactSerializer, esTextFilter: string | null) {
     this.axiosApi = axiosApi
+    this.basePath = basePath
     this.serializer = serializer
     this.esTextFilter = esTextFilter
   }
@@ -153,7 +159,7 @@ export class ContactSearcher {
   findMatchingAsList (): Promise<Contact[]> {
     return this.axiosApi.get(
       // we use the base path
-      '',
+      this.basePath,
       {
         params: {
           'page[size]': 10000,
@@ -170,7 +176,7 @@ export class ContactSearcher {
 
   private findAllOnPage (page: number, pageSize: number): Promise<IPaginationLoader<Contact>> {
     return this.axiosApi.get(
-      '',
+      this.basePath,
       {
         params: {
           'page[size]': pageSize,

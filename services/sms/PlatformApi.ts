@@ -71,10 +71,12 @@ interface IncludedRelationships {
 
 export class PlatformApi {
   private axiosApi: AxiosInstance
+  readonly basePath: string
   private serializer: PlatformSerializer
 
-  constructor (axiosInstance: AxiosInstance) {
+  constructor (axiosInstance: AxiosInstance, basePath: string) {
     this.axiosApi = axiosInstance
+    this.basePath = basePath
     this.serializer = new PlatformSerializer()
   }
 
@@ -88,7 +90,7 @@ export class PlatformApi {
     }
     const include = listIncludedRelationships.join(',')
 
-    return this.axiosApi.get(id, {
+    return this.axiosApi.get(this.basePath + '/' + id, {
       params: {
         include
       }
@@ -101,7 +103,7 @@ export class PlatformApi {
   }
 
   deleteById (id: string): Promise<void> {
-    return this.axiosApi.delete<string, void>(id)
+    return this.axiosApi.delete<string, void>(this.basePath + '/' + id)
   }
 
   save (platform: Platform): Promise<Platform> {
@@ -112,14 +114,14 @@ export class PlatformApi {
     const includeRelationships = false
     const data: any = this.serializer.convertModelToJsonApiData(platform, includeRelationships)
     let method: Method = 'patch'
-    let url = ''
+    let url = this.basePath
 
     if (platform.id === null) {
       // new -> post
       method = 'post'
     } else {
       // old -> patch
-      url = String(platform.id)
+      url += '/' + String(platform.id)
     }
 
     // TODO: links for contacts
@@ -137,11 +139,11 @@ export class PlatformApi {
   }
 
   newSearchBuilder (): PlatformSearchBuilder {
-    return new PlatformSearchBuilder(this.axiosApi, this.serializer)
+    return new PlatformSearchBuilder(this.axiosApi, this.basePath, this.serializer)
   }
 
   findRelatedContacts (platformId: string): Promise<Contact[]> {
-    const url = platformId + '/contacts'
+    const url = this.basePath + '/' + platformId + '/contacts'
     const params = {
       'page[size]': 10000
     }
@@ -151,7 +153,7 @@ export class PlatformApi {
   }
 
   findRelatedPlatformAttachments (platformId: string): Promise<Attachment[]> {
-    const url = platformId + '/platform-attachments'
+    const url = this.basePath + '/' + platformId + '/platform-attachments'
     const params = {
       'page[size]': 10000
     }
@@ -161,7 +163,7 @@ export class PlatformApi {
   }
 
   findRelatedGenericActions (platformId: string): Promise<GenericAction[]> {
-    const url = platformId + '/generic-platform-actions'
+    const url = this.basePath + '/' + platformId + '/generic-platform-actions'
     const params = {
       'page[size]': 10000,
       include: [
@@ -175,7 +177,7 @@ export class PlatformApi {
   }
 
   findRelatedSoftwareUpdateActions (platformId: string): Promise<SoftwareUpdateAction[]> {
-    const url = platformId + '/platform-software-update-actions'
+    const url = this.basePath + '/' + platformId + '/platform-software-update-actions'
     const params = {
       'page[size]': 10000,
       include: [
@@ -189,7 +191,7 @@ export class PlatformApi {
   }
 
   findRelatedMountActions (platformId: string): Promise<PlatformMountAction[]> {
-    const url = platformId + '/platform-mount-actions'
+    const url = this.basePath + '/' + platformId + '/platform-mount-actions'
     const params = {
       'page[size]': 10000,
       include: [
@@ -204,7 +206,7 @@ export class PlatformApi {
   }
 
   findRelatedUnmountActions (platformId: string): Promise<PlatformUnmountAction[]> {
-    const url = platformId + '/platform-unmount-actions'
+    const url = this.basePath + '/' + platformId + '/platform-unmount-actions'
     const params = {
       'page[size]': 10000,
       include: [
@@ -218,7 +220,7 @@ export class PlatformApi {
   }
 
   removeContact (platformId: string, contactId: string): Promise<void> {
-    const url = platformId + '/relationships/contacts'
+    const url = this.basePath + '/' + platformId + '/relationships/contacts'
     const params = {
       data: [{
         type: 'contact',
@@ -229,7 +231,7 @@ export class PlatformApi {
   }
 
   addContact (platformId: string, contactId: string): Promise<void> {
-    const url = platformId + '/relationships/contacts'
+    const url = this.basePath + '/' + platformId + '/relationships/contacts'
     const data = [{
       type: 'contact',
       id: contactId
@@ -240,13 +242,15 @@ export class PlatformApi {
 
 export class PlatformSearchBuilder {
   private axiosApi: AxiosInstance
+  readonly basePath: string
   private clientSideFilterFunc: (platform: Platform) => boolean
   private serverSideFilterSettings: IFlaskJSONAPIFilter[] = []
   private esTextFilter: string | null = null
   private serializer: PlatformSerializer
 
-  constructor (axiosApi: AxiosInstance, serializer: PlatformSerializer) {
+  constructor (axiosApi: AxiosInstance, basePath: string, serializer: PlatformSerializer) {
     this.axiosApi = axiosApi
+    this.basePath = basePath
     this.serializer = serializer
     this.clientSideFilterFunc = (_p: Platform) => true
   }
@@ -330,6 +334,7 @@ export class PlatformSearchBuilder {
   build (): PlatformSearcher {
     return new PlatformSearcher(
       this.axiosApi,
+      this.basePath,
       this.clientSideFilterFunc,
       this.serverSideFilterSettings,
       this.esTextFilter,
@@ -340,6 +345,7 @@ export class PlatformSearchBuilder {
 
 export class PlatformSearcher {
   private axiosApi: AxiosInstance
+  readonly basePath: string
   private clientSideFilterFunc: (platform: Platform) => boolean
   private serverSideFilterSettings: IFlaskJSONAPIFilter[]
   private esTextFilter: string | null
@@ -347,12 +353,14 @@ export class PlatformSearcher {
 
   constructor (
     axiosApi: AxiosInstance,
+    basePath: string,
     clientSideFilterFunc: (platform: Platform) => boolean,
     serverSideFilterSetting: IFlaskJSONAPIFilter[],
     esTextFilter: string | null,
     serializer: PlatformSerializer
   ) {
     this.axiosApi = axiosApi
+    this.basePath = basePath
     this.clientSideFilterFunc = clientSideFilterFunc
     this.serverSideFilterSettings = serverSideFilterSetting
     this.esTextFilter = esTextFilter
@@ -372,7 +380,7 @@ export class PlatformSearcher {
   }
 
   findMatchingAsCsvBlob (): Promise<Blob> {
-    const url = ''
+    const url = this.basePath
     return this.axiosApi.request({
       url,
       method: 'get',
@@ -390,7 +398,7 @@ export class PlatformSearcher {
 
   findMatchingAsList (): Promise<Platform[]> {
     return this.axiosApi.get(
-      '',
+      this.basePath,
       {
         params: {
           'page[size]': 10000,
@@ -413,7 +421,7 @@ export class PlatformSearcher {
 
   private findAllOnPage (page: number, pageSize: number): Promise<IPaginationLoader<Platform>> {
     return this.axiosApi.get(
-      '',
+      this.basePath,
       {
         params: {
           'page[size]': pageSize,

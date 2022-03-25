@@ -83,7 +83,7 @@ export default class PlatformDeleteDialog extends Vue {
   @Prop({
     type: Object
   })
-  platformToDelete!: Platform
+  readonly platformToDelete!: Platform
 
   get showDialog (): boolean {
     return this.value

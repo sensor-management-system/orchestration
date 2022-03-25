@@ -39,14 +39,16 @@ import { IPaginationLoader } from '@/utils/PaginatedLoader'
 
 export class PlatformTypeApi extends CVApi<PlatformType> {
   private serializer: PlatformTypeSerializer
+  readonly basePath: string
 
-  constructor (axiosInstance: AxiosInstance) {
+  constructor (axiosInstance: AxiosInstance, basePath: string) {
     super(axiosInstance)
+    this.basePath = basePath
     this.serializer = new PlatformTypeSerializer()
   }
 
   newSearchBuilder (): PlatformTypeSearchBuilder {
-    return new PlatformTypeSearchBuilder(this.axiosApi, this.serializer)
+    return new PlatformTypeSearchBuilder(this.axiosApi, this.basePath, this.serializer)
   }
 
   findAll (): Promise<PlatformType[]> {
@@ -60,30 +62,34 @@ export class PlatformTypeApi extends CVApi<PlatformType> {
 
 export class PlatformTypeSearchBuilder {
   private axiosApi: AxiosInstance
+  readonly basePath: string
   private serializer: PlatformTypeSerializer
 
-  constructor (axiosApi: AxiosInstance, serializer: PlatformTypeSerializer) {
+  constructor (axiosApi: AxiosInstance, basePath: string, serializer: PlatformTypeSerializer) {
     this.axiosApi = axiosApi
+    this.basePath = basePath
     this.serializer = serializer
   }
 
   build (): PlatformTypeSearcher {
-    return new PlatformTypeSearcher(this.axiosApi, this.serializer)
+    return new PlatformTypeSearcher(this.axiosApi, this.basePath, this.serializer)
   }
 }
 
 export class PlatformTypeSearcher {
   private axiosApi: AxiosInstance
+  readonly basePath: string
   private serializer: PlatformTypeSerializer
 
-  constructor (axiosApi: AxiosInstance, serializer: PlatformTypeSerializer) {
+  constructor (axiosApi: AxiosInstance, basePath: string, serializer: PlatformTypeSerializer) {
     this.axiosApi = axiosApi
+    this.basePath = basePath
     this.serializer = serializer
   }
 
   private findAllOnPage (page: number, pageSize: number): Promise<IPaginationLoader<PlatformType>> {
     return this.axiosApi.get(
-      '',
+      this.basePath,
       {
         params: {
           'page[size]': pageSize,
@@ -119,7 +125,7 @@ export class PlatformTypeSearcher {
 
   findMatchingAsList (): Promise<PlatformType[]> {
     return this.axiosApi.get(
-      '',
+      this.basePath,
       {
         params: {
           'page[limit]': 10000,

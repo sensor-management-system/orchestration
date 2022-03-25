@@ -39,14 +39,16 @@ import { IPaginationLoader } from '@/utils/PaginatedLoader'
 
 export class CompartmentApi extends CVApi<Compartment> {
   private serializer: CompartmentSerializer
+  readonly basePath: string
 
-  constructor (axiosInstance: AxiosInstance) {
+  constructor (axiosInstance: AxiosInstance, basePath: string) {
     super(axiosInstance)
+    this.basePath = basePath
     this.serializer = new CompartmentSerializer()
   }
 
   newSearchBuilder (): CompartmentSearchBuilder {
-    return new CompartmentSearchBuilder(this.axiosApi, this.serializer)
+    return new CompartmentSearchBuilder(this.axiosApi, this.basePath, this.serializer)
   }
 
   findAll (): Promise<Compartment[]> {
@@ -60,30 +62,34 @@ export class CompartmentApi extends CVApi<Compartment> {
 
 export class CompartmentSearchBuilder {
   private axiosApi: AxiosInstance
+  readonly basePath: string
   private serializer: CompartmentSerializer
 
-  constructor (axiosApi: AxiosInstance, serializer: CompartmentSerializer) {
+  constructor (axiosApi: AxiosInstance, basePath: string, serializer: CompartmentSerializer) {
     this.axiosApi = axiosApi
+    this.basePath = basePath
     this.serializer = serializer
   }
 
   build (): CompartmentSearcher {
-    return new CompartmentSearcher(this.axiosApi, this.serializer)
+    return new CompartmentSearcher(this.axiosApi, this.basePath, this.serializer)
   }
 }
 
 export class CompartmentSearcher {
   private axiosApi: AxiosInstance
+  readonly basePath: string
   private serializer: CompartmentSerializer
 
-  constructor (axiosApi: AxiosInstance, serializer: CompartmentSerializer) {
+  constructor (axiosApi: AxiosInstance, basePath: string, serializer: CompartmentSerializer) {
     this.axiosApi = axiosApi
+    this.basePath = basePath
     this.serializer = serializer
   }
 
   private findAllOnPage (page: number, pageSize: number): Promise<IPaginationLoader<Compartment>> {
     return this.axiosApi.get(
-      '',
+      this.basePath,
       {
         params: {
           'page[size]': pageSize,
@@ -119,7 +125,7 @@ export class CompartmentSearcher {
 
   findMatchingAsList (): Promise<Compartment[]> {
     return this.axiosApi.get(
-      '',
+      this.basePath,
       {
         params: {
           'page[size]': 10000,
