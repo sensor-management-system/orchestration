@@ -120,33 +120,33 @@ const DEFAULT_TIME_FORMAT = 'HH:mm'
 @Component
 // @ts-ignore
 export default class DateTimePicker extends Vue {
-  @Prop({ type: Object, default: null }) value!: DateTime | null;
+  @Prop({ type: Object, default: null }) value!: DateTime | null
   @Prop({ type: String, required: true }) label!: string
 
-  @Prop({ type: Number, default: DEFAULT_DIALOG_WIDTH }) dialogWidth?: number;
+  @Prop({ type: Number, default: DEFAULT_DIALOG_WIDTH }) dialogWidth?: number
 
-  @Prop({ type: Boolean, default: false }) useDate!: boolean;
-  @Prop({ type: Boolean, default: false }) useTime!: boolean;
+  @Prop({ type: Boolean, default: false }) useDate!: boolean
+  @Prop({ type: Boolean, default: false }) useTime!: boolean
 
-  @Prop({ default: () => [], type: Array }) readonly rules!: [];
+  @Prop({ default: () => [], type: Array }) readonly rules!: []
 
   @Prop({ default: false, type: Boolean }) readonly readonly!: boolean
 
-  private isDatetimeUsed: boolean = true;
-  private usesDate: boolean = false;
-  private usesTime: boolean = false;
+  private isDatetimeUsed: boolean = true
+  private usesDate: boolean = false
+  private usesTime: boolean = false
 
-  private dialog: boolean = false;
-  private activeTab: number = 0;
+  private dialog: boolean = false
+  private activeTab: number = 0
 
-  private optsZone = { zone: 'UTC' };
+  private optsZone = { zone: 'UTC' }
 
-  private textInput: string = '';
+  private textInput: string = ''
 
-  private currentFormat: string = DEFAULT_DATETIME_FORMAT;
+  private currentFormat: string = DEFAULT_DATETIME_FORMAT
 
-  private datePickerValue: string = '';
-  private timePickerValue: string = '';
+  private datePickerValue: string = ''
+  private timePickerValue: string = ''
 
   created () {
     this.usesDate = this.useDate

@@ -117,7 +117,7 @@ export default class DeviceShowBasicPage extends Vue {
   })
   readonly value!: Device
 
-  private showDeleteDialog: boolean=false;
+  private showDeleteDialog: boolean = false
 
   get device (): Device {
     return this.value

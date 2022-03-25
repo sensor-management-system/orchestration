@@ -39,14 +39,16 @@ import { IPaginationLoader } from '@/utils/PaginatedLoader'
 
 export class SoftwareTypeApi extends CVApi<SoftwareType> {
   private serializer: SoftwareTypeSerializer
+  readonly basePath: string
 
-  constructor (axiosInstance: AxiosInstance) {
+  constructor (axiosInstance: AxiosInstance, basePath: string) {
     super(axiosInstance)
+    this.basePath = basePath
     this.serializer = new SoftwareTypeSerializer()
   }
 
   newSearchBuilder (): SoftwareTypeSearchBuilder {
-    return new SoftwareTypeSearchBuilder(this.axiosApi, this.serializer)
+    return new SoftwareTypeSearchBuilder(this.axiosApi, this.basePath, this.serializer)
   }
 
   findAll (): Promise<SoftwareType[]> {
@@ -81,24 +83,28 @@ export class SoftwareTypeApi extends CVApi<SoftwareType> {
 
 export class SoftwareTypeSearchBuilder {
   private axiosApi: AxiosInstance
+  readonly basePath: string
   private serializer: SoftwareTypeSerializer
 
-  constructor (axiosApi: AxiosInstance, serializer: SoftwareTypeSerializer) {
+  constructor (axiosApi: AxiosInstance, basePath: string, serializer: SoftwareTypeSerializer) {
     this.axiosApi = axiosApi
+    this.basePath = basePath
     this.serializer = serializer
   }
 
   build (): SoftwareTypeSearcher {
-    return new SoftwareTypeSearcher(this.axiosApi, this.serializer)
+    return new SoftwareTypeSearcher(this.axiosApi, this.basePath, this.serializer)
   }
 }
 
 export class SoftwareTypeSearcher {
   private axiosApi: AxiosInstance
+  readonly basePath: string
   private serializer: SoftwareTypeSerializer
 
-  constructor (axiosApi: AxiosInstance, serializer: SoftwareTypeSerializer) {
+  constructor (axiosApi: AxiosInstance, basePath: string, serializer: SoftwareTypeSerializer) {
     this.axiosApi = axiosApi
+    this.basePath = basePath
     this.serializer = serializer
   }
 
@@ -110,7 +116,7 @@ export class SoftwareTypeSearcher {
       sort: 'term'
     }
     return this.axiosApi.get(
-      '',
+      this.basePath,
       {
         params
       }
@@ -146,7 +152,7 @@ export class SoftwareTypeSearcher {
       sort: 'term'
     }
     return this.axiosApi.get(
-      '',
+      this.basePath,
       {
         params
       }

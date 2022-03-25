@@ -36,20 +36,22 @@ import { DeviceCalibrationDevicePropertySerializer } from '@/serializers/jsonapi
 
 export class DeviceCalibrationDevicePropertyApi {
   private axiosApi: AxiosInstance
+  readonly basePath: string
   private serializer: DeviceCalibrationDevicePropertySerializer
 
-  constructor (axiosInstance: AxiosInstance) {
+  constructor (axiosInstance: AxiosInstance, basePath: string) {
     this.axiosApi = axiosInstance
+    this.basePath = basePath
     this.serializer = new DeviceCalibrationDevicePropertySerializer()
   }
 
   async add (actionId: string, devicePropty: DeviceProperty): Promise<any> {
-    const url = ''
+    const url = this.basePath
     const data = this.serializer.convertModelToJsonApiData(devicePropty, actionId)
     await this.axiosApi.post(url, { data })
   }
 
   async delete (id: string): Promise<void> {
-    return await this.axiosApi.delete<string, void>(id)
+    return await this.axiosApi.delete<string, void>(this.basePath + '/' + id)
   }
 }

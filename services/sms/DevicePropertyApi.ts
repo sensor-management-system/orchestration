@@ -36,26 +36,28 @@ import { DevicePropertySerializer } from '@/serializers/jsonapi/DevicePropertySe
 
 export class DevicePropertyApi {
   private axiosApi: AxiosInstance
+  readonly basePath: string
   private serializer: DevicePropertySerializer
 
-  constructor (axiosInstance: AxiosInstance) {
+  constructor (axiosInstance: AxiosInstance, basePath: string) {
     this.axiosApi = axiosInstance
+    this.basePath = basePath
     this.serializer = new DevicePropertySerializer()
   }
 
   findById (id: string): Promise<DeviceProperty> {
-    return this.axiosApi.get(id).then((rawRespmse) => {
+    return this.axiosApi.get(this.basePath + '/' + id).then((rawRespmse) => {
       const rawData = rawRespmse.data
       return this.serializer.convertJsonApiObjectToModel(rawData)
     })
   }
 
   deleteById (id: string): Promise<void> {
-    return this.axiosApi.delete<string, void>(id)
+    return this.axiosApi.delete<string, void>(this.basePath + '/' + id)
   }
 
   add (deviceId: string, deviceProperty: DeviceProperty): Promise<DeviceProperty> {
-    const url = ''
+    const url = this.basePath
     const data = this.serializer.convertModelToJsonApiData(deviceProperty, deviceId)
     return this.axiosApi.post(url, { data }).then((serverResponse) => {
       return this.serializer.convertJsonApiObjectToModel(serverResponse.data)
@@ -71,7 +73,7 @@ export class DevicePropertyApi {
       }
     }).then((devicePropertyId) => {
       const data = this.serializer.convertModelToJsonApiData(deviceProperty, deviceId)
-      return this.axiosApi.patch(devicePropertyId, { data }).then((serverResponse) => {
+      return this.axiosApi.patch(this.basePath + '/' + devicePropertyId, { data }).then((serverResponse) => {
         return this.serializer.convertJsonApiObjectToModel(serverResponse.data)
       })
     })

@@ -83,7 +83,7 @@ export default class DeviceDeleteDialog extends Vue {
   @Prop({
     type: Object
   })
-  deviceToDelete!: Device
+  readonly deviceToDelete!: Device
 
   get showDialog (): boolean {
     return this.value

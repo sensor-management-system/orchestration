@@ -63,6 +63,7 @@ import { DynamicLocationEndActionApi } from '@/services/sms/DynamicLocationEndAc
 
 export class ConfigurationApi {
   private axiosApi: AxiosInstance
+  readonly basePath: string
 
   private deviceMountActionApi: DeviceMountActionApi
   private deviceUnmountActionApi: DeviceUnmountActionApi
@@ -78,6 +79,7 @@ export class ConfigurationApi {
 
   constructor (
     axiosInstance: AxiosInstance,
+    basePath: string,
     deviceMountActionApi: DeviceMountActionApi,
     deviceUnmountActionApi: DeviceUnmountActionApi,
     platformMountActionApi: PlatformMountActionApi,
@@ -89,6 +91,7 @@ export class ConfigurationApi {
     dynamicLocationEndActionApi: DynamicLocationEndActionApi
   ) {
     this.axiosApi = axiosInstance
+    this.basePath = basePath
 
     this.deviceMountActionApi = deviceMountActionApi
     this.deviceUnmountActionApi = deviceUnmountActionApi
@@ -104,7 +107,7 @@ export class ConfigurationApi {
   }
 
   findById (id: string): Promise<Configuration> {
-    return this.axiosApi.get(id, {
+    return this.axiosApi.get(this.basePath + '/' + id, {
       params: {
         include: [
           'contacts',
@@ -145,13 +148,13 @@ export class ConfigurationApi {
 
   // eslint-disable-next-line
   deleteById (id: string) : Promise<void> {
-    return this.axiosApi.delete<string, void>(id)
+    return this.axiosApi.delete<string, void>(this.basePath + '/' + id)
   }
 
   async save (configuration: Configuration): Promise<Configuration> {
     const data: any = this.serializer.convertModelToJsonApiData(configuration)
     let method: Method = 'patch'
-    let url = ''
+    let url = this.basePath
     const relationshipsToDelete: string[] = []
     let platformMountActionIdsToDelete: Set<string> = new Set()
     let platformMountActionIdsToUpdate: Set<string> = new Set()
@@ -226,7 +229,7 @@ export class ConfigurationApi {
     if (!configuration.id) {
       method = 'post'
     } else {
-      url = configuration.id
+      url += '/' + configuration.id
     }
     const serverAnswer = await this.axiosApi.request({
       url,
@@ -329,7 +332,7 @@ export class ConfigurationApi {
   }
 
   private async tryToDeleteRelationship (relationshipToDelete: string, id: string) {
-    const url = id + '/relationships/' + relationshipToDelete
+    const url = this.basePath + '/' + id + '/relationships/' + relationshipToDelete
 
     let relationshipTypeToDelete: string | null = null
     let relationshipIdToDelete: string | null = null
@@ -366,11 +369,11 @@ export class ConfigurationApi {
   }
 
   newSearchBuilder (): ConfigurationSearchBuilder {
-    return new ConfigurationSearchBuilder(this.axiosApi, this.serializer)
+    return new ConfigurationSearchBuilder(this.axiosApi, this.basePath, this.serializer)
   }
 
   findRelatedContacts (configurationId: string): Promise<Contact[]> {
-    const url = configurationId + '/contacts'
+    const url = this.basePath + '/' + configurationId + '/contacts'
     const params = {
       'page[size]': 10000
     }
@@ -380,7 +383,7 @@ export class ConfigurationApi {
   }
 
   removeContact (configurationId: string, contactId: string): Promise<void> {
-    const url = configurationId + '/relationships/contacts'
+    const url = this.basePath + '/' + configurationId + '/relationships/contacts'
     const params = {
       data: [{
         type: 'contact',
@@ -391,7 +394,7 @@ export class ConfigurationApi {
   }
 
   addContact (configurationId: string, contactId: string): Promise<void> {
-    const url = configurationId + '/relationships/contacts'
+    const url = this.basePath + '/' + configurationId + '/relationships/contacts'
     const data = [{
       type: 'contact',
       id: contactId
@@ -402,13 +405,16 @@ export class ConfigurationApi {
 
 export class ConfigurationSearchBuilder {
   private axiosApi: AxiosInstance
+  readonly basePath: string
+
   private clientSideFilterFunc: (configuration: Configuration) => boolean
   private serverSideFilterSettings: IFlaskJSONAPIFilter[] = []
   private esTextFilter: string | null = null
   private serializer: ConfigurationSerializer
 
-  constructor (axiosApi: AxiosInstance, serializer: ConfigurationSerializer) {
+  constructor (axiosApi: AxiosInstance, basePath: string, serializer: ConfigurationSerializer) {
     this.axiosApi = axiosApi
+    this.basePath = basePath
     this.clientSideFilterFunc = (_c: Configuration) => true
     this.serializer = serializer
   }
@@ -474,6 +480,7 @@ export class ConfigurationSearchBuilder {
   build (): ConfigurationSearcher {
     return new ConfigurationSearcher(
       this.axiosApi,
+      this.basePath,
       this.clientSideFilterFunc,
       this.serverSideFilterSettings,
       this.esTextFilter,
@@ -484,6 +491,7 @@ export class ConfigurationSearchBuilder {
 
 export class ConfigurationSearcher {
   private axiosApi: AxiosInstance
+  readonly basePath: string
   private clientSideFilterFunc: (configuration: Configuration) => boolean
   private serverSideFilterSettings: IFlaskJSONAPIFilter[]
   private esTextFilter: string | null
@@ -491,12 +499,14 @@ export class ConfigurationSearcher {
 
   constructor (
     axiosApi: AxiosInstance,
+    basePath: string,
     clientSideFilterFunc: (configuration: Configuration) => boolean,
     serverSideFilterSettings: IFlaskJSONAPIFilter[],
     esTextFilter: string | null,
     serializer: ConfigurationSerializer
   ) {
     this.axiosApi = axiosApi
+    this.basePath = basePath
     this.clientSideFilterFunc = clientSideFilterFunc
     this.serverSideFilterSettings = serverSideFilterSettings
     this.esTextFilter = esTextFilter
@@ -519,7 +529,7 @@ export class ConfigurationSearcher {
   }
 
   findMatchingAsCsvBlob (): Promise<Blob> {
-    const url = ''
+    const url = this.basePath
     return this.axiosApi.request({
       url,
       method: 'get',
@@ -537,7 +547,7 @@ export class ConfigurationSearcher {
 
   findMatchingAsList (): Promise<Configuration[]> {
     return this.axiosApi.get(
-      '',
+      this.basePath,
       {
         params: {
           'page[size]': 100000,
@@ -560,7 +570,7 @@ export class ConfigurationSearcher {
 
   private findAllOnPage (page: number, pageSize: number): Promise<IPaginationLoader<Configuration>> {
     return this.axiosApi.get(
-      '',
+      this.basePath,
       {
         params: {
           'page[size]': pageSize,

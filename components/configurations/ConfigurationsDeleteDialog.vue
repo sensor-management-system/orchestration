@@ -84,7 +84,7 @@ export default class ConfigurationsDeleteDialog extends Vue {
   @Prop({
     type: Object
   })
-  configurationToDelete!: Configuration
+    configurationToDelete!: Configuration
 
   get showDialog (): boolean {
     return this.value

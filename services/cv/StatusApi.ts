@@ -39,14 +39,16 @@ import { IPaginationLoader } from '@/utils/PaginatedLoader'
 
 export class StatusApi extends CVApi<Status> {
   private serializer: StatusSerializer
+  readonly basePath: string
 
-  constructor (axiosInstance: AxiosInstance) {
+  constructor (axiosInstance: AxiosInstance, basePath: string) {
     super(axiosInstance)
+    this.basePath = basePath
     this.serializer = new StatusSerializer()
   }
 
   newSearchBuilder (): StatusSearchBuilder {
-    return new StatusSearchBuilder(this.axiosApi, this.serializer)
+    return new StatusSearchBuilder(this.axiosApi, this.basePath, this.serializer)
   }
 
   findAll (): Promise<Status[]> {
@@ -60,30 +62,34 @@ export class StatusApi extends CVApi<Status> {
 
 export class StatusSearchBuilder {
   private axiosApi: AxiosInstance
+  readonly basePath: string
   private serializer: StatusSerializer
 
-  constructor (axiosApi: AxiosInstance, serializer: StatusSerializer) {
+  constructor (axiosApi: AxiosInstance, basePath: string, serializer: StatusSerializer) {
     this.axiosApi = axiosApi
+    this.basePath = basePath
     this.serializer = serializer
   }
 
   build (): StatusSearcher {
-    return new StatusSearcher(this.axiosApi, this.serializer)
+    return new StatusSearcher(this.axiosApi, this.basePath, this.serializer)
   }
 }
 
 export class StatusSearcher {
   private axiosApi: AxiosInstance
+  readonly basePath: string
   private serializer: StatusSerializer
 
-  constructor (axiosApi: AxiosInstance, serializer: StatusSerializer) {
+  constructor (axiosApi: AxiosInstance, basePath: string, serializer: StatusSerializer) {
     this.axiosApi = axiosApi
+    this.basePath = basePath
     this.serializer = serializer
   }
 
   private findAllOnPage (page: number, pageSize: number): Promise<IPaginationLoader<Status>> {
     return this.axiosApi.get(
-      '',
+      this.basePath,
       {
         params: {
           'page[size]': pageSize,
@@ -119,7 +125,7 @@ export class StatusSearcher {
 
   findMatchingAsList (): Promise<Status[]> {
     return this.axiosApi.get(
-      '',
+      this.basePath,
       {
         params: {
           'page[size]': 10000,

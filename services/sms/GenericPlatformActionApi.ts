@@ -46,17 +46,19 @@ import {
 
 export class GenericPlatformActionApi {
   private axiosApi: AxiosInstance
+  readonly basePath: string
   private serializer: IGenericActionSerializer
   private attachmentApi: GenericPlatformActionAttachmentApi
 
-  constructor (axiosInstance: AxiosInstance, attachmentApi: GenericPlatformActionAttachmentApi) {
+  constructor (axiosInstance: AxiosInstance, basePath: string, attachmentApi: GenericPlatformActionAttachmentApi) {
     this.axiosApi = axiosInstance
+    this.basePath = basePath
     this.serializer = new GenericPlatformActionSerializer()
     this.attachmentApi = attachmentApi
   }
 
   async findById (id: string): Promise<GenericAction> {
-    const response = await this.axiosApi.get(id, {
+    const response = await this.axiosApi.get(this.basePath + '/' + id, {
       params: {
         include: [
           'contact',
@@ -69,11 +71,11 @@ export class GenericPlatformActionApi {
   }
 
   deleteById (id: string): Promise<void> {
-    return this.axiosApi.delete<string, void>(id)
+    return this.axiosApi.delete<string, void>(this.basePath + '/' + id)
   }
 
   async add (platformId: string, action: GenericAction): Promise<GenericAction> {
-    const url = ''
+    const url = this.basePath
     const data = this.serializer.convertModelToJsonApiData(action, platformId)
     const response = await this.axiosApi.post(url, { data })
     const savedAction = this.serializer.convertJsonApiObjectToModel(response.data)
@@ -90,7 +92,7 @@ export class GenericPlatformActionApi {
       throw new Error('no id for the GenericAction')
     }
     // load the stored action to get a list of the generic platform action attachments before the update
-    const attRawResponse = await this.axiosApi.get(action.id, {
+    const attRawResponse = await this.axiosApi.get(this.basePath + '/' + action.id, {
       params: {
         include: [
           'generic_platform_action_attachments.attachment'
@@ -112,7 +114,7 @@ export class GenericPlatformActionApi {
 
     // update the action
     const data = this.serializer.convertModelToJsonApiData(action, platformId)
-    const actionResponse = await this.axiosApi.patch(action.id, { data })
+    const actionResponse = await this.axiosApi.patch(this.basePath + '/' + action.id, { data })
 
     // find new attachments
     const newAttachments: Attachment[] = []

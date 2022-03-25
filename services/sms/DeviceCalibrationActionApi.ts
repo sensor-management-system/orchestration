@@ -40,19 +40,21 @@ import { DeviceProperty } from '@/models/DeviceProperty'
 
 export class DeviceCalibrationActionApi {
   private axiosApi: AxiosInstance
+  readonly basePath: string
   private serializer: DeviceCalibrationActionSerializer
   private attachmentApi: DeviceCalibrationActionAttachmentApi
   private propertyApi: DeviceCalibrationDevicePropertyApi
 
-  constructor (axiosInstace: AxiosInstance, attachmentApi: DeviceCalibrationActionAttachmentApi, propertyApi: DeviceCalibrationDevicePropertyApi) {
+  constructor (axiosInstace: AxiosInstance, basePath: string, attachmentApi: DeviceCalibrationActionAttachmentApi, propertyApi: DeviceCalibrationDevicePropertyApi) {
     this.axiosApi = axiosInstace
+    this.basePath = basePath
     this.serializer = new DeviceCalibrationActionSerializer()
     this.attachmentApi = attachmentApi
     this.propertyApi = propertyApi
   }
 
   async findById (id: string): Promise<DeviceCalibrationAction> {
-    const response = await this.axiosApi.get(id, {
+    const response = await this.axiosApi.get(this.basePath + '/' + id, {
       params: {
         include: [
           'contact',
@@ -68,11 +70,11 @@ export class DeviceCalibrationActionApi {
   }
 
   deleteById (id: string): Promise<void> {
-    return this.axiosApi.delete<string, void>(id)
+    return this.axiosApi.delete<string, void>(this.basePath + '/' + id)
   }
 
   async add (deviceId: string, action: DeviceCalibrationAction): Promise<DeviceCalibrationAction> {
-    const url = ''
+    const url = this.basePath
     const data = this.serializer.convertModelToJsonApiData(action, deviceId)
     const response = await this.axiosApi.post(url, { data })
     const savedAction = this.serializer.convertJsonApiObjectToModel(response.data)
@@ -91,7 +93,7 @@ export class DeviceCalibrationActionApi {
       throw new Error('no id for the DeviceCalirbationAction')
     }
     // load the stored action to get a list of the current attachments before update
-    const attRawResponse = await this.axiosApi.get(action.id, {
+    const attRawResponse = await this.axiosApi.get(this.basePath + '/' + action.id, {
       params: {
         include: [
           'device_calibration_attachments.attachment',
@@ -121,7 +123,7 @@ export class DeviceCalibrationActionApi {
 
     // update the action
     const data = this.serializer.convertModelToJsonApiData(action, deviceId)
-    const actionResponse = await this.axiosApi.patch(action.id, { data })
+    const actionResponse = await this.axiosApi.patch(this.basePath + '/' + action.id, { data })
 
     // find new attachments
     const newAttachments: Attachment[] = []

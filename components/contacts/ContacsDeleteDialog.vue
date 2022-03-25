@@ -83,7 +83,7 @@ export default class ContacsDeleteDialog extends Vue {
   @Prop({
     type: Object
   })
-  contactToDelete!: Contact
+  readonly contactToDelete!: Contact
 
   get showDialog (): boolean {
     return this.value

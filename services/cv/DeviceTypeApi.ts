@@ -39,14 +39,16 @@ import { IPaginationLoader } from '@/utils/PaginatedLoader'
 
 export class DeviceTypeApi extends CVApi<DeviceType> {
   private serializer: DeviceTypeSerializer
+  readonly basePath: string
 
-  constructor (axiosInstance: AxiosInstance) {
+  constructor (axiosInstance: AxiosInstance, basePath: string) {
     super(axiosInstance)
+    this.basePath = basePath
     this.serializer = new DeviceTypeSerializer()
   }
 
   newSearchBuilder (): DeviceTypeSearchBuilder {
-    return new DeviceTypeSearchBuilder(this.axiosApi, this.serializer)
+    return new DeviceTypeSearchBuilder(this.axiosApi, this.basePath, this.serializer)
   }
 
   findAll (): Promise<DeviceType[]> {
@@ -60,30 +62,34 @@ export class DeviceTypeApi extends CVApi<DeviceType> {
 
 export class DeviceTypeSearchBuilder {
   private axiosApi: AxiosInstance
+  readonly basePath: string
   private serializer: DeviceTypeSerializer
 
-  constructor (axiosApi: AxiosInstance, serializer: DeviceTypeSerializer) {
+  constructor (axiosApi: AxiosInstance, basePath: string, serializer: DeviceTypeSerializer) {
     this.axiosApi = axiosApi
+    this.basePath = basePath
     this.serializer = serializer
   }
 
   build (): DeviceTypeSearcher {
-    return new DeviceTypeSearcher(this.axiosApi, this.serializer)
+    return new DeviceTypeSearcher(this.axiosApi, this.basePath, this.serializer)
   }
 }
 
 export class DeviceTypeSearcher {
   private axiosApi: AxiosInstance
+  readonly basePath: string
   private serializer: DeviceTypeSerializer
 
-  constructor (axiosApi: AxiosInstance, serializer: DeviceTypeSerializer) {
+  constructor (axiosApi: AxiosInstance, basePath: string, serializer: DeviceTypeSerializer) {
     this.axiosApi = axiosApi
+    this.basePath = basePath
     this.serializer = serializer
   }
 
   private findAllOnPage (page: number, pageSize: number): Promise<IPaginationLoader<DeviceType>> {
     return this.axiosApi.get(
-      '',
+      this.basePath,
       {
         params: {
           'page[size]': pageSize,
@@ -119,7 +125,7 @@ export class DeviceTypeSearcher {
 
   findMatchingAsList (): Promise<DeviceType[]> {
     return this.axiosApi.get(
-      '',
+      this.basePath,
       {
         params: {
           'page[size]': 10000,

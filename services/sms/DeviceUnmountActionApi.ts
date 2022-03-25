@@ -36,19 +36,21 @@ import { DeviceUnmountActionSerializer } from '@/serializers/jsonapi/DeviceUnmou
 
 export class DeviceUnmountActionApi {
   private axiosApi: AxiosInstance
+  readonly basePath: string
   private serializer: DeviceUnmountActionSerializer
 
-  constructor (axiosApi: AxiosInstance) {
+  constructor (axiosApi: AxiosInstance, basePath: string) {
     this.axiosApi = axiosApi
+    this.basePath = basePath
     this.serializer = new DeviceUnmountActionSerializer()
   }
 
   deleteById (id: string): Promise<void> {
-    return this.axiosApi.delete<string, void>(id)
+    return this.axiosApi.delete<string, void>(this.basePath + '/' + id)
   }
 
   async add (configurationId: string, deviceUnmountAction: DeviceUnmountAction): Promise<string> {
-    const url = ''
+    const url = this.basePath
     const data = this.serializer.convertModelToJsonApiData(configurationId, deviceUnmountAction)
     const response = await this.axiosApi.post(url, { data })
     // we can't return a full entity here, as we need to included data about the contacts & the device
@@ -61,7 +63,7 @@ export class DeviceUnmountActionApi {
     if (!deviceUnmountAction.id) {
       throw new Error('no id for the DeviceUnmountAction')
     }
-    const url = deviceUnmountAction.id
+    const url = this.basePath + '/' + deviceUnmountAction.id
     const data = this.serializer.convertModelToJsonApiData(configurationId, deviceUnmountAction)
     const response = await this.axiosApi.patch(url, { data })
     // we can't return a full entity here, as we need to included data about the contacts & the device

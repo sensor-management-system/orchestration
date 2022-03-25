@@ -36,15 +36,17 @@ import { CustomTextFieldSerializer } from '@/serializers/jsonapi/CustomTextField
 
 export class CustomfieldsApi {
   private axiosApi: AxiosInstance
+  readonly basePath: string
   private serializer: CustomTextFieldSerializer
 
-  constructor (axiosInstance: AxiosInstance) {
+  constructor (axiosInstance: AxiosInstance, basePath: string) {
     this.axiosApi = axiosInstance
+    this.basePath = basePath
     this.serializer = new CustomTextFieldSerializer()
   }
 
   findById (id: string): Promise<CustomTextField> {
-    return this.axiosApi.get(id, {
+    return this.axiosApi.get(this.basePath + '/' + id, {
       // params: {}
     }).then((rawResponse) => {
       const rawData = rawResponse.data
@@ -53,11 +55,11 @@ export class CustomfieldsApi {
   }
 
   deleteById (id: string): Promise<void> {
-    return this.axiosApi.delete<string, void>(id)
+    return this.axiosApi.delete<string, void>(this.basePath + '/' + id)
   }
 
   add (deviceId: string, field: CustomTextField): Promise<CustomTextField> {
-    const url = ''
+    const url = this.basePath
     const data: any = this.serializer.convertModelToJsonApiData(field, deviceId)
     return this.axiosApi.post(url, { data }).then((serverResponse) => {
       return this.serializer.convertJsonApiObjectToModel(serverResponse.data)
@@ -73,7 +75,7 @@ export class CustomfieldsApi {
       }
     }).then((fieldId) => {
       const data: any = this.serializer.convertModelToJsonApiData(field, deviceId)
-      return this.axiosApi.patch(fieldId, { data }).then((serverResponse) => {
+      return this.axiosApi.patch(this.basePath + '/' + fieldId, { data }).then((serverResponse) => {
         return this.serializer.convertJsonApiObjectToModel(serverResponse.data)
       })
     })

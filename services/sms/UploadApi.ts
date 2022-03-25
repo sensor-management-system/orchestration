@@ -40,13 +40,15 @@ export class UploadApi {
   public readonly UPLOAD_SIZE_LIMIT = 200 * 1024 * 1024
 
   private axiosApi: AxiosInstance
+  readonly basePath: string
 
-  constructor (axiosInstance: AxiosInstance) {
+  constructor (axiosInstance: AxiosInstance, basePath: string) {
     this.axiosApi = axiosInstance
+    this.basePath = basePath
   }
 
   async file (file: File): Promise<IUploadResult> {
-    const url = '' // url already specified in axios instance
+    const url = this.basePath
     const formData = new FormData()
     formData.append('file', file)
     const result = await this.axiosApi.post(url, formData, {

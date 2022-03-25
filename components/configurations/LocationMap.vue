@@ -64,7 +64,7 @@ export default class LocationMap extends Vue {
 
   @Prop({ default: false, type: Boolean }) readonly readonly!: boolean
 
-  private currentPosition: LatLng = new LatLng(52, 12);
+  private currentPosition: LatLng = new LatLng(52, 12)
 
   created () {
     if (this.location !== null) {

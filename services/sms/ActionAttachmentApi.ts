@@ -42,17 +42,18 @@ export interface IActionAttachmentApi {
 
 export abstract class AbstractActionAttachmentApi implements IActionAttachmentApi {
   private axiosApi: AxiosInstance
+  readonly basePath: string
 
   abstract get serializer (): IActionAttachmentSerializer
 
-  constructor (axiosInstance: AxiosInstance) {
+  constructor (axiosInstance: AxiosInstance, basePath: string) {
     this.axiosApi = axiosInstance
+    this.basePath = basePath
   }
 
   async add (actionId: string, attachment: Attachment): Promise<any> {
-    const url = ''
     const data = this.serializer.convertModelToJsonApiData(attachment, actionId)
-    await this.axiosApi.post(url, { data })
+    await this.axiosApi.post(this.basePath, { data })
   }
 
   async delete (id: string): Promise<void> {

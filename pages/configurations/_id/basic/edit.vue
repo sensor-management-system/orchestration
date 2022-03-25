@@ -84,7 +84,7 @@ export default class ConfigurationEditBasicPage extends Vue {
   readonly value!: Configuration
 
   private configurationCopy: Configuration = new Configuration()
-  private isLoading: boolean =false
+  private isLoading: boolean = false
   private formIsValid: boolean = true
 
   head () {

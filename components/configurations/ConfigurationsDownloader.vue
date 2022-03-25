@@ -85,7 +85,7 @@ export default class ConfigurationsDownloader extends Vue {
     required: true,
     type: Object
   })
-  readonly lastActiveSearcher!: ConfigurationSearcher;
+  readonly lastActiveSearcher!: ConfigurationSearcher
 
   exportCsv () { // TODO lastActiveSearcher ist nur noch in der ConfigurationsSearch
     this.lastActiveSearcher.findMatchingAsCsvBlob().then((blob) => {

@@ -39,14 +39,16 @@ import { IPaginationLoader } from '@/utils/PaginatedLoader'
 
 export class PropertyApi extends CVApi<Property> {
   private serializer: PropertySerializer
+  readonly basePath: string
 
-  constructor (axiosInstance: AxiosInstance) {
+  constructor (axiosInstance: AxiosInstance, basePath: string) {
     super(axiosInstance)
+    this.basePath = basePath
     this.serializer = new PropertySerializer()
   }
 
   newSearchBuilder (): PropertySearchBuilder {
-    return new PropertySearchBuilder(this.axiosApi, this.serializer)
+    return new PropertySearchBuilder(this.axiosApi, this.basePath, this.serializer)
   }
 
   findAll (): Promise<Property[]> {
@@ -60,30 +62,34 @@ export class PropertyApi extends CVApi<Property> {
 
 export class PropertySearchBuilder {
   private axiosApi: AxiosInstance
+  readonly basePath: string
   private serializer: PropertySerializer
 
-  constructor (axiosApi: AxiosInstance, serializer: PropertySerializer) {
+  constructor (axiosApi: AxiosInstance, basePath: string, serializer: PropertySerializer) {
     this.axiosApi = axiosApi
+    this.basePath = basePath
     this.serializer = serializer
   }
 
   build (): PropertySearcher {
-    return new PropertySearcher(this.axiosApi, this.serializer)
+    return new PropertySearcher(this.axiosApi, this.basePath, this.serializer)
   }
 }
 
 export class PropertySearcher {
   private axiosApi: AxiosInstance
+  readonly basePath: string
   private serializer: PropertySerializer
 
-  constructor (axiosApi: AxiosInstance, serializer: PropertySerializer) {
+  constructor (axiosApi: AxiosInstance, basePath: string, serializer: PropertySerializer) {
     this.axiosApi = axiosApi
+    this.basePath = basePath
     this.serializer = serializer
   }
 
   private findAllOnPage (page: number, pageSize: number): Promise<IPaginationLoader<Property>> {
     return this.axiosApi.get(
-      '',
+      this.basePath,
       {
         params: {
           'page[size]': pageSize,
@@ -119,7 +125,7 @@ export class PropertySearcher {
 
   findMatchingAsList (): Promise<Property[]> {
     return this.axiosApi.get(
-      '',
+      this.basePath,
       {
         params: {
           'page[size]': 10000,
