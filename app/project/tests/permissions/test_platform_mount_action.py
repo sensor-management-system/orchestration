@@ -243,7 +243,7 @@ class TestMountPlatformPermissions(BaseTestCase):
             self.assertEqual(response.status_code, 201)
 
     def test_delete_action_as_a_group_member(self):
-        """Ensure that only admin for mounted device groups can delete an action."""
+        """Ensure mounted device groups can be deleted."""
         group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permission_groups
         platform = create_a_test_platform(group_ids=group_id_test_user_is_member_in_2,)
         parent_platform = create_a_test_platform()
@@ -274,26 +274,6 @@ class TestMountPlatformPermissions(BaseTestCase):
                     url, headers=access_headers
                 )
                 self.assertEqual(delete_response_user_is_a_member.status_code, 200)
-        # User not involved in the group
-        platform.group_ids = [40]
-        with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            delete_response_user_not_involved = self.client.delete(
-                url, headers=access_headers
-            )
-            self.assertEqual(delete_response_user_not_involved.status_code, 200)
-        # As an admin in the group
-        platform.group_ids = IDL_USER_ACCOUNT.administrated_permission_groups
-        with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            delete_response_user_is_admin = self.client.delete(
-                url, headers=access_headers
-            )
-            self.assertEqual(delete_response_user_is_admin.status_code, 200)
 
 
 def mount_payload_data(
