@@ -210,4 +210,4 @@ class TestGenericPlatformActionPermissions(BaseTestCase):
                     content_type="application/vnd.api+json",
                     headers=create_token(),
                 )
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 200)

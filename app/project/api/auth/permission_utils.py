@@ -360,6 +360,8 @@ def check_patch_permission_for_related_objects(data, object_to_patch):
 def check_deletion_permission_for_related_objects(kwargs, object_to_delete):
     """
     check if a user has the permission to delete a related object.
+    Note: both Member and Admin in a group should have the right
+    to make the deletion.
 
     :param kwargs:
     :param object_to_delete:
@@ -374,7 +376,7 @@ def check_deletion_permission_for_related_objects(kwargs, object_to_delete):
         group_ids = related_object.group_ids
         if group_ids is None:
             assert_current_user_is_owner_of_object(related_object)
-        if not is_user_admin_in_a_group(group_ids):
+        if not is_user_in_a_group(group_ids):
             raise ForbiddenError("User is not part of any group to delete this object.")
 
 

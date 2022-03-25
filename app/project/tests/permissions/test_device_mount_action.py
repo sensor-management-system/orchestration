@@ -327,7 +327,7 @@ class TestMountDevicePermissions(BaseTestCase):
                 delete_response_user_is_a_member = self.client.delete(
                     url, headers=access_headers
                 )
-                self.assertEqual(delete_response_user_is_a_member.status_code, 403)
+                self.assertEqual(delete_response_user_is_a_member.status_code, 200)
         # User not involved in the group
         device.group_ids = [40]
         with patch.object(
@@ -337,7 +337,7 @@ class TestMountDevicePermissions(BaseTestCase):
             delete_response_user_not_involved = self.client.delete(
                 url, headers=access_headers
             )
-            self.assertEqual(delete_response_user_not_involved.status_code, 403)
+            self.assertEqual(delete_response_user_not_involved.status_code, 200)
         # As an admin in the group
         device.group_ids = IDL_USER_ACCOUNT.administrated_permission_groups
         with patch.object(

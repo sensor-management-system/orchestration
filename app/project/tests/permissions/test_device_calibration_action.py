@@ -208,4 +208,4 @@ class TestDeviceCalibrationAction(BaseTestCase):
                     content_type="application/vnd.api+json",
                     headers=access_headers,
                 )
-            self.assertEqual(response.status_code, 403)
+            self.assertEqual(response.status_code, 200)
