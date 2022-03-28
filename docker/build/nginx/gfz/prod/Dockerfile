@@ -54,6 +54,11 @@ ENV NUXT_ENV_OIDC_RESPONSE_TYPE code
 ENV NUXT_ENV_OIDC_GRANT_TYPE authorization_code
 ENV NUXT_ENV_OIDC_CHALLANGE S256
 
+ENV NUXT_ENV_MATOMO_URL https://webstats.gfz-potsdam.de/
+ENV NUXT_ENV_MATOMO_TRACKER_URL https://webstats.gfz-potsdam.de/matomo.php
+ENV NUXT_ENV_MATOMO_SCRIPT_URL https://webstats.gfz-potsdam.de/matomo.js
+ENV NUXT_ENV_MATOMO_SITE_ID 30
+
 
 RUN mkdir /smsfrontend
 COPY ./frontend /smsfrontend

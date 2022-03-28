@@ -1,5 +1,7 @@
 # Orchestration
 
+![SMS work flow](docs/images/sms.png)
+
 ## Usage
 
 ### Self-signed certificate creation

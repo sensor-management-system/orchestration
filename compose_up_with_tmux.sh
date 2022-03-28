@@ -15,20 +15,21 @@ if [ "$SESSION_NOT_FOUND" != "0" ] ; then
 fi
 
 DIR_SCRIPT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+ENV_FILE="${DIR_SCRIPT}/docker/env.dev"
 
-2>/dev/null 1>/dev/null docker-compose  -f "${DIR_SCRIPT}/docker-compose.yml" --env-file docker/env.dev exec nginx whoami
+2>/dev/null 1>/dev/null docker-compose  -f "${DIR_SCRIPT}/docker-compose.yml" --env-file "$ENV_FILE" exec nginx whoami
 DOCKER_COMPOSE_IS_NOT_RUNNING=$?
 
 if [ "$DOCKER_COMPOSE_IS_NOT_RUNNING" != "0" ] ; then
     echo "docker-compose services are not running!"
     echo "I'll start them for you ..."
 
-    docker-compose -f "${DIR_SCRIPT}/docker-compose.yml" --env-file docker/env.dev  up -d
+    docker-compose -f "${DIR_SCRIPT}/docker-compose.yml" --env-file "$ENV_FILE"  up -d
 
     while [ "$DOCKER_COMPOSE_IS_NOT_RUNNING" != "0" ] ; do
         sleep 2
         echo "..."
-        2>/dev/null 1>/dev/null docker-compose -f "${DIR_SCRIPT}/docker-compose.yml" --env-file docker/env.dev exec nginx whoami
+        2>/dev/null 1>/dev/null docker-compose -f "${DIR_SCRIPT}/docker-compose.yml" --env-file "$ENV_FILE" exec nginx whoami
         DOCKER_COMPOSE_IS_NOT_RUNNING=$?
     done
     sleep 1
@@ -49,7 +50,7 @@ tmux splitw -v
 tmux selectp -t 4
 tmux splitw -v
 
-#
+# Name the Panes
 
 tmux selectp -t 0  -T dev
 tmux selectp -t 1  -T sms_backend
