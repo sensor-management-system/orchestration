@@ -12,6 +12,7 @@ from project.api.models.configuration_platform import ConfigurationPlatform
 from project.api.models.device import Device
 from project.api.models.platform import Platform
 from project.tests.base import BaseTestCase, test_file_path
+from project.tests.base import create_token
 from project.tests.base import fake, generate_userinfo_data
 from project.tests.read_from_json import extract_data_from_json_file
 
@@ -74,8 +75,8 @@ class TestConfigurationsService(BaseTestCase):
             },
         }
         for (
-            input_calibration_date,
-            expected_output_calibration_date,
+                input_calibration_date,
+                expected_output_calibration_date,
         ) in calibration_dates.items():
             # set up for each single run
             self.setUp()
@@ -126,8 +127,8 @@ class TestConfigurationsService(BaseTestCase):
 
             configuration_device = (
                 db.session.query(ConfigurationDevice)
-                .filter_by(device_id=1, configuration_id=1)
-                .first()
+                    .filter_by(device_id=1, configuration_id=1)
+                    .first()
             )
             self.assertEqual(
                 configuration_device.calibration_date,
@@ -181,8 +182,8 @@ class TestConfigurationsService(BaseTestCase):
 
         configuration_device = (
             db.session.query(ConfigurationDevice)
-            .filter_by(device_id=1, configuration_id=1)
-            .first()
+                .filter_by(device_id=1, configuration_id=1)
+                .first()
         )
         self.assertEqual(configuration_device.firmware_version, firmware_version)
 
@@ -211,11 +212,13 @@ class TestConfigurationsService(BaseTestCase):
         config_json = extract_data_from_json_file(self.json_data_url, "configuration")
 
         config_data = {"data": {"type": "configuration", "attributes": config_json[1]}}
+        access_headers = create_token()
         with self.client:
             response = self.client.post(
                 self.configurations_url,
                 data=json.dumps(config_data),
                 content_type="application/vnd.api+json",
+                headers=access_headers,
             )
         json.loads(response.data.decode())
         self.assertEqual(response.status_code, 500)
@@ -245,11 +248,13 @@ class TestConfigurationsService(BaseTestCase):
         config_json = extract_data_from_json_file(self.json_data_url, "configuration")
 
         config_data = {"data": {"type": "configuration", "attributes": config_json[2]}}
+        access_headers = create_token()
         with self.client:
             response = self.client.post(
                 self.configurations_url,
                 data=json.dumps(config_data),
                 content_type="application/vnd.api+json",
+                headers=access_headers,
             )
         json.loads(response.data.decode())
         self.assertEqual(response.status_code, 500)
@@ -387,7 +392,8 @@ class TestConfigurationsService(BaseTestCase):
                     ),
                 ]
             )
-            response = self.client.get(url)
+            access_headers = create_token()
+            response = self.client.get(url, headers=access_headers)
             self.assertEqual(response.status_code, 200)
             for key in ["data", "included"]:
                 self.assertIn(key, response.json.keys())
@@ -535,8 +541,19 @@ class TestConfigurationsService(BaseTestCase):
         self.delete_as_owner(contact, user, url)
 
     def delete_as_owner(self, contact, user, url):
+        token_data = {
+            "sub": user.subject,
+            "iss": "SMS unittest",
+            "family_name": contact.family_name,
+            "given_name": contact.given_name,
+            "email": contact.email,
+            "aud": "SMS",
+        }
+        access_headers = create_token(token_data)
         with self.client:
-            response = self.client.delete(url, content_type="application/vnd.api+json",)
+            response = self.client.delete(
+                url, content_type="application/vnd.api+json", headers=access_headers
+            )
         self.assertEqual(response.status_code, 200)
 
     def test_delete_configuration_with_static_begin_location_action(self):

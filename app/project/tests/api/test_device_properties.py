@@ -7,6 +7,7 @@ from project.api.models.base_model import db
 from project.api.models.device import Device
 from project.api.models.device_property import DeviceProperty
 from project.tests.base import BaseTestCase, query_result_to_list
+from project.tests.base import create_token
 from project.tests.base import fake
 
 
@@ -58,6 +59,7 @@ class TestDevicePropertyServices(BaseTestCase):
                 url_post,
                 data=json.dumps(payload),
                 content_type="application/vnd.api+json",
+                headers=create_token(),
             )
         # We expect that it worked and that we have a new entry
         self.assertEqual(response.status_code, 201)
@@ -94,6 +96,7 @@ class TestDevicePropertyServices(BaseTestCase):
                 url_post,
                 data=json.dumps(payload),
                 content_type="application/vnd.api+json",
+                headers=create_token(),
             )
         # it will not work, as we miss an important part (the device)
         self.assertEqual(response.status_code, 422)
@@ -239,6 +242,7 @@ class TestDevicePropertyServices(BaseTestCase):
                 url_patch,
                 data=json.dumps(payload),
                 content_type="application/vnd.api+json",
+                headers=create_token(),
             )
 
         self.assertEqual(response.status_code, 200)
@@ -273,6 +277,7 @@ class TestDevicePropertyServices(BaseTestCase):
 
             response = self.client.delete(
                 base_url + "/device-properties/" + str(device_property1.id),
+                headers=create_token(),
             )
 
             # I would expect a 204 (no content), but 200 is good as well

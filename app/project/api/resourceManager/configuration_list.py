@@ -1,66 +1,90 @@
-from ..auth.flask_openidconnect import open_id_connect
+"""Configuration list resource."""
+
 from sqlalchemy import or_
 
-from .base_resource import add_contact_to_object
-from ..datalayers.esalchemy import EsSqlalchemyDataLayer
+from ...frj_csv_export.resource import ResourceList
+from ..datalayers.esalchemy import (
+    EsSqlalchemyDataLayer,
+    OrFilter,
+    TermEqualsExactStringFilter,
+)
+from ..helpers.resource_mixin import add_created_by_id
 from ..models.base_model import db
 from ..models.configuration import Configuration
 from ..schemas.configuration_schema import ConfigurationSchema
-from ..token_checker import token_required, current_user_or_none
-from ...frj_csv_export.resource import ResourceList
+from ..token_checker import current_user_or_none, token_required
+from .base_resource import add_contact_to_object
 
 
 class ConfigurationList(ResourceList):
     """
-    provides get and post methods to retrieve
-    a collection of Devices or create one.
+    Resource for the device list endpoint.
+
+    Supports GET (list) & POST (create) methods.
     """
 
-    def after_get_collection(self, collection, qs, view_kwargs):
-        """Take the intersection between requested collection and
-        what the user allowed querying.
-
-        :param collection:
-        :param qs:
-        :param view_kwargs:
-        :return:
+    def query(self, view_kwargs):
         """
+        Filter for what the user is allowed to query.
 
+        :param view_kwargs:
+        :return: queryset or es filter
+        """
         query = db.session.query(self.model)
-        current_user = current_user_or_none(True)
+        current_user = current_user_or_none(optional=True)
         if current_user is None:
             query = query.filter_by(is_public=True)
         else:
             if not current_user.is_superuser:
-                query = query.filter(or_(self.model.is_public, self.model.is_internal,))
+                query = query.filter(
+                    or_(
+                        self.model.is_public,
+                        self.model.is_internal,
+                    )
+                )
+        return query
 
-        allowed_collection = query.all()
+    def es_query(self, view_kwargs):
+        """
+        Return the elasticsearch filter for the query.
 
-        return set(collection).intersection(allowed_collection)
-
-    def after_get(self, result):
-        result.update({"meta": {"count": len(result["data"])}})
-        return result
+        Should return the same set as query, but using
+        the elasticsearch fields.
+        """
+        current_user = current_user_or_none(optional=True)
+        if current_user is None:
+            return TermEqualsExactStringFilter("is_public", True)
+        if not current_user.is_superuser:
+            return OrFilter(
+                [
+                    TermEqualsExactStringFilter("is_public", True),
+                    TermEqualsExactStringFilter("is_internal", True),
+                ]
+            )
+        return None
 
     def before_create_object(self, data, *args, **kwargs):
         """
-        Use jwt to add user id to dataset
-        :param data:
+        Set the visibility of the object (internal of nothing else is given).
+
+        :param data: data of the request (as dict)
         :param args:
         :param kwargs:
-        :return:
+        :return: None
         """
+        # Will modify the data inplace.
         if not any([data.get("is_public"), data.get("is_internal")]):
             data["is_internal"] = True
             data["is_public"] = False
+        add_created_by_id(data)
 
     def after_post(self, result):
         """
-        Automatically add the created user to object contacts
+        Automatically add the created user to object contacts.
+
         :param result:
         :return:
         """
-
         result_id = result[0]["data"]["id"]
         d = db.session.query(Configuration).filter_by(id=result_id).first()
         add_contact_to_object(d)
@@ -75,6 +99,7 @@ class ConfigurationList(ResourceList):
         "class": EsSqlalchemyDataLayer,
         "methods": {
             "before_create_object": before_create_object,
-            "after_get_collection": after_get_collection,
+            "query": query,
+            "es_query": es_query,
         },
     }

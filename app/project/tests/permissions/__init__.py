@@ -1,5 +1,5 @@
-from project.api.models.base_model import db
 from project.api.models import Contact, User
+from project.api.models.base_model import db
 from project.tests.base import create_token
 from project.tests.base import generate_userinfo_data
 
@@ -22,7 +22,7 @@ def create_superuser_token():
     access_headers = create_token(token_data)
     return access_headers
 
-@staticmethod
+
 def add_a_contact():
     userinfo = generate_userinfo_data()
     contact = Contact(

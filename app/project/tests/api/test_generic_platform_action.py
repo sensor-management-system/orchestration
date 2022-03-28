@@ -9,7 +9,7 @@ from project.tests.base import BaseTestCase, fake, generate_userinfo_data, test_
 from project.tests.models.test_generic_action_attachment_model import (
     add_generic_platform_action_attachment_model,
 )
-from project.tests.base import BaseTestCase, fake, generate_token_data, test_file_path
+from project.tests.base import BaseTestCase, fake, test_file_path
 from project.tests.models.test_generic_action_attachment_model import \
     add_generic_platform_action_attachment_model
 from project.tests.read_from_json import extract_data_from_json_file

@@ -1,7 +1,7 @@
 import collections
 import itertools
 from datetime import datetime
-from ..auth.flask_openidconnect import open_id_connect
+
 import sqlalchemy
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.ext.mutable import MutableList
@@ -18,11 +18,6 @@ from ..search import (
 )
 
 
-def current_user_id():
-    open_id_connect.verify_valid_access_token_in_request_and_set_user()
-    return open_id_connect.get_current_user().id
-
-
 class AuditMixin:
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     # define 'updated at' to be populated with datetime.utcnow()
@@ -35,7 +30,6 @@ class AuditMixin:
             db.ForeignKey(
                 "user.id", name="fk_%s_created_by_id" % self.__name__, use_alter=True
             ),
-            default=current_user_id
         )
 
     @declared_attr
@@ -53,7 +47,6 @@ class AuditMixin:
             db.ForeignKey(
                 "user.id", name="fk_%s_updated_by_id" % self.__name__, use_alter=True
             ),
-            onupdate=current_user_id,
         )
 
     @declared_attr

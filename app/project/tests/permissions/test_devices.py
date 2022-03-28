@@ -212,16 +212,6 @@ class TestDevicePermissions(BaseTestCase):
                 },
             }
         }
-        access_headers = create_token()
-        with self.client:
-            response = self.client.post(
-                self.device_url,
-                data=json.dumps(device_data),
-                content_type="application/vnd.api+json",
-                headers=access_headers,
-            )
-        self.assertEqual(response.status_code, 409)
-
         device_data_1 = {
             "data": {
                 "type": "device",
@@ -233,16 +223,6 @@ class TestDevicePermissions(BaseTestCase):
                 },
             }
         }
-        access_headers = create_token()
-        with self.client:
-            response = self.client.post(
-                self.device_url,
-                data=json.dumps(device_data_1),
-                content_type="application/vnd.api+json",
-                headers=access_headers,
-            )
-        self.assertEqual(response.status_code, 409)
-
         device_data_2 = {
             "data": {
                 "type": "device",
@@ -258,11 +238,27 @@ class TestDevicePermissions(BaseTestCase):
         with self.client:
             response = self.client.post(
                 self.device_url,
+                data=json.dumps(device_data),
+                content_type="application/vnd.api+json",
+                headers=access_headers,
+            )
+            self.assertEqual(response.status_code, 409)
+
+            response_1 = self.client.post(
+                self.device_url,
+                data=json.dumps(device_data_1),
+                content_type="application/vnd.api+json",
+                headers=access_headers,
+            )
+            self.assertEqual(response_1.status_code, 409)
+
+            response_2 = self.client.post(
+                self.device_url,
                 data=json.dumps(device_data_2),
                 content_type="application/vnd.api+json",
                 headers=access_headers,
             )
-        self.assertEqual(response.status_code, 409)
+            self.assertEqual(response_2.status_code, 409)
 
     def test_add_groups_ids(self):
         """Make sure that a device with groups-ids can be created"""

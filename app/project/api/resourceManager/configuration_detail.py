@@ -11,7 +11,6 @@ from ..models.base_model import db
 from ..models.configuration import Configuration
 from ..schemas.configuration_schema import ConfigurationSchema
 from ..token_checker import token_required, current_user_or_none
-from ..auth.flask_openidconnect import open_id_connect
 
 
 class ConfigurationDetail(ResourceDetail):
@@ -22,6 +21,7 @@ class ConfigurationDetail(ResourceDetail):
 
     def before_get(self, args, kwargs):
         """Prevent not registered users form viewing internal configs."""
+        check_if_object_not_found(self._data_layer.model, kwargs)
         config = db.session.query(Configuration).filter_by(id=kwargs["id"]).first()
         if config:
             if config.is_internal:
