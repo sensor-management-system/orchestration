@@ -55,6 +55,8 @@ cache:
     - *docker_login_gitlab_registry
   tags:
     - docker
+    - dind
+    - hifis
 
 build-deploy-image-nginx-gfz-staging:
   stage: build
