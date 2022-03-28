@@ -181,6 +181,7 @@ services:
       NUXT_ENV_OIDC_RESPONSE_TYPE: ${NUXT_ENV_OIDC_RESPONSE_TYPE}
       NUXT_ENV_OIDC_GRANT_TYPE: ${NUXT_ENV_OIDC_GRANT_TYPE}
       NUXT_ENV_OIDC_CHALLANGE: ${NUXT_ENV_OIDC_CHALLANGE}
+      NUXT_ENV_OIDC_REFRESH_INTERVAL_TIME: ${NUXT_ENV_OIDC_REFRESH_INTERVAL_TIME}
       INSTITUTE: ${INSTITUTE:-ufz}
     volumes:
       - ./frontend/:/home/node/
@@ -259,3 +260,4 @@ volumes:
 
 networks:
   sms:
+    name: sms-docker-network
