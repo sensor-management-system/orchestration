@@ -304,8 +304,6 @@ export class ConfigurationSerializer {
         status: configuration.status,
         start_date: configuration.startDate != null ? configuration.startDate.setZone('UTC').toISO() : null,
         end_date: configuration.endDate != null ? configuration.endDate.setZone('UTC').toISO() : null,
-        // TODO
-        hierarchy: [],
         ...locationAttributes
       },
       relationships: {

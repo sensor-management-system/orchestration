@@ -207,8 +207,6 @@ describe('ConfigurationSerializer', () => {
           relationships: {},
           id: '4'
         }],
-        // The point of which platforms and devices are used is mentiond in the hierarchy.
-        // so there is no further need to add other relationships
         included: [{
           type: 'platform_mount_action',
           id: '1',
