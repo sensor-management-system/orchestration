@@ -78,7 +78,8 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
 @Component({
   components: {
     ProgressIndicator
-  }
+  },
+  middleware: ['auth']
 })
 export default class DeviceAddContactPage extends Vue {
   private alreadyUsedContacts: Contact[] = []

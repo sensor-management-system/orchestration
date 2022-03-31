@@ -156,7 +156,8 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
   components: {
     PlatformBasicDataForm,
     ProgressIndicator
-  }
+  },
+  middleware: ['auth']
 })
 // @ts-ignore
 export default class PlatformCopyPage extends mixins(Rules) {

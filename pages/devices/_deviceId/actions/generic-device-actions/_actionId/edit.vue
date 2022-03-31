@@ -81,7 +81,8 @@ import ActionButtonTray from '@/components/actions/ActionButtonTray.vue'
     GenericActionForm,
     ActionButtonTray
   },
-  scrollToTop: true
+  scrollToTop: true,
+  middleware: ['auth']
 })
 export default class GenericDeviceActionEditPage extends Vue {
   private action: GenericAction = new GenericAction()

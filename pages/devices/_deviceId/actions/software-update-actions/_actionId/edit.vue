@@ -73,7 +73,8 @@ import ActionButtonTray from '@/components/actions/ActionButtonTray.vue'
     SoftwareUpdateActionForm,
     ActionButtonTray
   },
-  scrollToTop: true
+  scrollToTop: true,
+  middleware: ['auth']
 })
 export default class DeviceSoftwareUpdateActionEditPage extends Vue {
   private action: SoftwareUpdateAction = new SoftwareUpdateAction()

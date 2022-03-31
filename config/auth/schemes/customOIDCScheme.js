@@ -40,7 +40,10 @@ import { OpenIDConnectScheme } from '~auth/runtime'
 export default class CustomOIDCScheme extends OpenIDConnectScheme {
   // Fetch the userInfo from the user-info endpoint
   async fetchUser () {
-    if (!this.check().valid) {
+    const checkExpiration = this.check(true)
+
+    if (!checkExpiration.valid) {
+      this.$auth.logout()
       return
     }
     const { data } = await this.$auth.requestWith(this.name, {
@@ -53,5 +56,16 @@ export default class CustomOIDCScheme extends OpenIDConnectScheme {
       return
     }
     this.$auth.setUser(data)
+
+    // activate token refresh after a certain amount of time
+    if (!checkExpiration.refreshTokenExpired) {
+      const intervalId = setInterval(() => {
+        this.$auth.refreshTokens()
+          .catch(() => {
+            this.$auth.ctx.store.commit('snackbar/setError', 'Error while refreshing tokens!')
+            clearInterval(intervalId)
+          })
+      }, process.env.NUXT_ENV_OIDC_REFRESH_INTERVAL_TIME || 30 * 60 * 1000) // time in milliseconds when to start the token refresh
+    }
   }
 }

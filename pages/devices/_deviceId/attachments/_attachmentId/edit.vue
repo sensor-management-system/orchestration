@@ -90,7 +90,9 @@ import { Attachment } from '@/models/Attachment'
  * A class component that displays a single attached file
  * @extends Vue
  */
-@Component
+@Component({
+  middleware: ['auth']
+})
 // @ts-ignore
 export default class AttachmentEditPage extends Vue {
   private valueCopy: Attachment = new Attachment()

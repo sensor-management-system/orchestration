@@ -115,7 +115,8 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
     ConfigurationDynamicLocationEndActionDataForm,
     DateTimePicker,
     ProgressIndicator
-  }
+  },
+  middleware: ['auth']
 })
 export default class DynamicLocationEndActionEdit extends mixins(Rules) {
   private configuration: Configuration = new Configuration()

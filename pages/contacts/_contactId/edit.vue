@@ -92,7 +92,8 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
   components: {
     ContactBasicDataForm,
     ProgressIndicator
-  }
+  },
+  middleware: ['auth']
 })
 export default class ContactEditPage extends Vue {
   private contactCopy: Contact = new Contact()
