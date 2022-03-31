@@ -228,7 +228,7 @@ build-deploy-image-ufz:
           --build-arg NUXT_ENV_OIDC_RESPONSE_TYPE=$OIDC_RESPONSE_TYPE \
           --build-arg NUXT_ENV_OIDC_GRANT_TYPE=$OIDC_GRANT_TYPE \
           --build-arg NUXT_ENV_OIDC_CHALLANGE=$OIDC_CHALLANGE \
-          --build-arg NUXT_ENV_OIDC_LOGIN_PARAMS=$OIDC_LOGIN_PARAMS \
+          --build-arg NUXT_ENV_OIDC_LOGIN_PARAMS="$OIDC_LOGIN_PARAMS" \
           --build-arg NUXT_ENV_OIDC_REFRESH_INTERVAL_TIME=$OIDC_REFRESH_INTERVAL_TIME \
           --build-arg ALLOWED_MIME_TYPES_ARG=$ALLOWED_MIME_TYPES \
           --build-arg BUILD_DATE=$(date --utc +%FT%TZ) \
