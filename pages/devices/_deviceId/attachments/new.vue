@@ -134,7 +134,8 @@ import { UploadRules } from '@/mixins/UploadRules'
 import { Attachment } from '@/models/Attachment'
 
 @Component({
-  components: {}
+  components: {},
+  middleware: ['auth']
 })
 export default class AttachmentAddPage extends mixins(Rules, UploadRules) {
   private attachment: Attachment = new Attachment()

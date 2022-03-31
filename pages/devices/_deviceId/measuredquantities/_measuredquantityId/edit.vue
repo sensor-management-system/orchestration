@@ -56,7 +56,8 @@ import { Unit } from '@/models/Unit'
 import { MeasuredQuantityUnit } from '@/models/MeasuredQuantityUnit'
 
 @Component({
-  components: { DevicePropertyForm }
+  components: { DevicePropertyForm },
+  middleware: ['auth']
 })
 export default class DevicePropertyEditPage extends Vue {
   private valueCopy: DeviceProperty = new DeviceProperty()

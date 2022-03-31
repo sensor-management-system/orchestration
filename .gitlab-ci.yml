@@ -136,6 +136,7 @@ build-deploy-static-files-gfz:
     OIDC_SCHEME: "true"
     OIDC_WELL_KNOWN: "https://login-dev.helmholtz.de/oauth2/.well-known/openid-configuration"
     OIDC_SCOPES: "profile openid email eduperson_principal_name"
+    OIDC_REFRESH_INTERVAL_TIME: 1800000
   before_script:
     - apk add --update curl jq && rm -rf /var/cache/apk/*
   script:
@@ -156,6 +157,7 @@ build-deploy-static-files-gfz:
           --env NUXT_ENV_OIDC_RESPONSE_TYPE=$OIDC_RESPONSE_TYPE \
           --env NUXT_ENV_OIDC_GRANT_TYPE=$OIDC_GRANT_TYPE \
           --env NUXT_ENV_OIDC_CHALLANGE=$OIDC_CHALLANGE \
+          --env NUXT_ENV_OIDC_REFRESH_INTERVAL_TIME=$OIDC_REFRESH_INTERVAL_TIME \
           --env NUXT_ENV_ALLOWED_MIMETYPES=$ALLOWED_MIME_TYPES \
           --env NUXT_ENV_SCOPE="$OIDC_SCOPES" \
           ${CI_REGISTRY_IMAGE}-static:gfz-${TARGET_PACKAGE_VERSION}
@@ -210,6 +212,8 @@ build-deploy-image-ufz:
     OIDC_RESPONSE_TYPE: "code"
     OIDC_GRANT_TYPE: "authorization_code"
     OIDC_CHALLANGE: "S256"
+    OIDC_LOGIN_PARAMS: ${UFZ_STAGING_OIDC_LOGIN_PARAMS}
+    OIDC_REFRESH_INTERVAL_TIME: ${UFZ_STAGING_OIDC_REFRESH_INTERVAL_TIME}
   script:
     - |
         docker build --tag "$UFZ_LATEST_IMAGE" -f docker/deployment/ufz/Dockerfile \
@@ -224,6 +228,8 @@ build-deploy-image-ufz:
           --build-arg NUXT_ENV_OIDC_RESPONSE_TYPE=$OIDC_RESPONSE_TYPE \
           --build-arg NUXT_ENV_OIDC_GRANT_TYPE=$OIDC_GRANT_TYPE \
           --build-arg NUXT_ENV_OIDC_CHALLANGE=$OIDC_CHALLANGE \
+          --build-arg NUXT_ENV_OIDC_LOGIN_PARAMS=$OIDC_LOGIN_PARAMS \
+          --build-arg NUXT_ENV_OIDC_REFRESH_INTERVAL_TIME=$OIDC_REFRESH_INTERVAL_TIME \
           --build-arg ALLOWED_MIME_TYPES_ARG=$ALLOWED_MIME_TYPES \
           --build-arg BUILD_DATE=$(date --utc +%FT%TZ) \
           --build-arg VCS_REF=$CI_COMMIT_SHA \

@@ -74,7 +74,8 @@ import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButto
 import ConfigurationsBasicDataForm from '@/components/configurations/ConfigurationsBasicDataForm.vue'
 
 @Component({
-  components: { ConfigurationsBasicDataForm, SaveAndCancelButtons, ProgressIndicator }
+  components: { ConfigurationsBasicDataForm, SaveAndCancelButtons, ProgressIndicator },
+  middleware: ['auth']
 })
 export default class ConfigurationNewPage extends Vue {
   private configuration: Configuration = new Configuration()

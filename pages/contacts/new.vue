@@ -99,7 +99,8 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
   components: {
     ContactBasicDataForm,
     ProgressIndicator
-  }
+  },
+  middleware: ['auth']
 })
 export default class ContactNewPage extends mixins(Rules) {
   private numberOfTabs: number = 1

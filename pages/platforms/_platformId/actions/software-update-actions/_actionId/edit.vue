@@ -73,7 +73,8 @@ import SoftwareUpdateActionForm from '@/components/actions/SoftwareUpdateActionF
     SoftwareUpdateActionForm,
     ActionButtonTray
   },
-  scrollToTop: true
+  scrollToTop: true,
+  middleware: ['auth']
 })
 export default class PlatformSoftwareUpdateActionEditPage extends Vue {
   private action: SoftwareUpdateAction = new SoftwareUpdateAction()

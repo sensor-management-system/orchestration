@@ -74,7 +74,8 @@ import ConfigurationsBasicDataForm from '@/components/configurations/Configurati
 import { Configuration } from '@/models/Configuration'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 @Component({
-  components: { ProgressIndicator, ConfigurationsBasicDataForm, SaveAndCancelButtons }
+  components: { ProgressIndicator, ConfigurationsBasicDataForm, SaveAndCancelButtons },
+  middleware: ['auth']
 })
 export default class ConfigurationEditBasicPage extends Vue {
   @Prop({

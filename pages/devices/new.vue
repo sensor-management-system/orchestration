@@ -99,7 +99,8 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
   components: {
     DeviceBasicDataForm,
     ProgressIndicator
-  }
+  },
+  middleware: ['auth']
 })
 // @ts-ignore
 export default class DeviceNewPage extends mixins(Rules) {

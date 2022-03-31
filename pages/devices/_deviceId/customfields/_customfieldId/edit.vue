@@ -74,7 +74,8 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
   components: {
     CustomFieldCardForm,
     ProgressIndicator
-  }
+  },
+  middleware: ['auth']
 })
 export default class DeviceCustomFieldsShowPage extends Vue {
   private isSaving: boolean = false

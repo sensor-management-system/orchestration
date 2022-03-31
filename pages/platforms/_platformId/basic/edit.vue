@@ -96,7 +96,8 @@ import { Platform } from '@/models/Platform'
   components: {
     PlatformBasicDataForm,
     ProgressIndicator
-  }
+  },
+  middleware: ['auth']
 })
 export default class PlatformEditBasicPage extends Vue {
   // we need to initialize the instance variable with an empty Platform instance

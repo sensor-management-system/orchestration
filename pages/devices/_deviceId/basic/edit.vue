@@ -93,7 +93,8 @@ import { Device } from '@/models/Device'
   components: {
     DeviceBasicDataForm,
     ProgressIndicator
-  }
+  },
+  middleware: ['auth']
 })
 export default class DeviceEditBasicPage extends Vue {
   // we need to initialize the instance variable with an empty Device instance

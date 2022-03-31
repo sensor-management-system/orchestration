@@ -102,7 +102,8 @@ import PlatformBasicDataForm from '@/components/PlatformBasicDataForm.vue'
   components: {
     PlatformBasicDataForm,
     ProgressIndicator
-  }
+  },
+  middleware: ['auth']
 })
 // @ts-ignore
 export default class PlatformNewPage extends mixins(Rules) {

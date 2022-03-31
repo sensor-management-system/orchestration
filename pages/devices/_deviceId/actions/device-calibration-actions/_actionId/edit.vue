@@ -75,7 +75,8 @@ import ActionButtonTray from '@/components/actions/ActionButtonTray.vue'
     DeviceCalibrationActionForm,
     ActionButtonTray
   },
-  scrollToTop: true
+  scrollToTop: true,
+  middleware: ['auth']
 })
 export default class DeviceCalibrationActionEditPage extends Vue {
   private action: DeviceCalibrationAction = new DeviceCalibrationAction()

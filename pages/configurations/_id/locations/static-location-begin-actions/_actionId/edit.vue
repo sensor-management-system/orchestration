@@ -108,7 +108,8 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
     ConfigurationStaticLocationEndActionData,
     DateTimePicker,
     ProgressIndicator
-  }
+  },
+  middleware: ['auth']
 })
 export default class StaticLocationBeginActionEdit extends mixins(Rules) {
   private configuration: Configuration = new Configuration()

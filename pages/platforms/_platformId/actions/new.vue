@@ -125,7 +125,8 @@ type IOptionsForActionType = Pick<IActionType, 'id' | 'name' | 'uri'> & {
     ActionButtonTray,
     GenericActionForm,
     SoftwareUpdateActionForm
-  }
+  },
+  middleware: ['auth']
 })
 export default class NewPlatformAction extends Vue {
   private specialActionTypes: IOptionsForActionType[] = [

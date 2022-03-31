@@ -215,8 +215,13 @@ permissions and limitations under the Licence.
     >
       <template #message>
         <!-- eslint-disable -->
-        This site uses cookies to ensure technical functionality. To read more about what we store in the cookies, have a look at our <nuxt-link to="/info/privacy-policy">Privacy Policy</nuxt-link>.
-        By using this service, I also accept the <nuxt-link to="/info/terms-of-use">Terms of Use</nuxt-link>.
+        This site uses cookies to ensure technical functionality. To read more about what we store in the cookies, have
+        a look at our
+        <nuxt-link to="/info/privacy-policy">Privacy Policy</nuxt-link>
+        .
+        By using this service, I also accept the
+        <nuxt-link to="/info/terms-of-use">Terms of Use</nuxt-link>
+        .
         <!-- eslint-enable -->
       </template>
     </cookie-law>
@@ -448,9 +453,10 @@ export default {
     },
     login () {
       saveCurrentRoute(this.$fullContext)
-      this.$auth.loginWith('customStrategy').catch(() => {
-        this.$store.commit('snackbar/setError', 'Login failed')
-      })
+      this.$auth.loginWith('customStrategy', JSON.parse(process.env.NUXT_ENV_OIDC_LOGIN_PARAMS) || {})
+        .catch(() => {
+          this.$store.commit('snackbar/setError', 'Login failed')
+        })
     },
     logout () {
       this.$auth.logout()
