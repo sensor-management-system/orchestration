@@ -278,7 +278,10 @@ def allow_only_admin_in_a_permission_group_to_remove_it_from_an_object(group_ids
         changed_group = json_data["data"]["attributes"]["group_ids"]
         if group_ids != changed_group:
             # Get permission groups_ids deleted from the original permission groups
-            deleted_elements = list(set(group_ids) - set(changed_group))
+            set_group_ids = set(
+                group_ids or []
+            )  # Could be None, so we need the or case
+            deleted_elements = list(set_group_ids - set(changed_group))
             if deleted_elements:
                 for element in deleted_elements:
                     if not is_user_admin_in_a_group([element]):
