@@ -453,7 +453,13 @@ export default {
     },
     login () {
       saveCurrentRoute(this.$fullContext)
-      this.$auth.loginWith('customStrategy', JSON.parse(process.env.NUXT_ENV_OIDC_LOGIN_PARAMS) || {})
+      let params = {}
+      try {
+        params = JSON.parse(process.env.NUXT_ENV_OIDC_LOGIN_PARAMS)
+      } catch (error) {
+        // Error handling skipped, as params is set to {} by default
+      }
+      this.$auth.loginWith('customStrategy', params)
         .catch(() => {
           this.$store.commit('snackbar/setError', 'Login failed')
         })
