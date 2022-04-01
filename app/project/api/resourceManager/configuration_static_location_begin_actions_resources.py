@@ -5,6 +5,13 @@ from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.orm.exc import NoResultFound
 
 from .base_resource import check_if_object_not_found
+from ..auth.permission_utils import (
+    get_query_with_permissions_for_configuration_related_objects,
+    check_permissions_for_configuration_related_objects,
+    check_patch_permission_for_configuration_related_objects,
+    check_deletion_permission_for_configuration_related_objects,
+    check_post_permission_for_configuration_related_objects,
+)
 from ..models import Configuration, ConfigurationStaticLocationBeginAction
 from ..models.base_model import db
 from ..schemas.configuration_static_location_actions_schema import (
@@ -23,7 +30,9 @@ class ConfigurationStaticLocationBeginActionList(ResourceList):
 
         Also handle optional pre-filters (for specific configuration, for example).
         """
-        query_ = self.session.query(ConfigurationStaticLocationBeginAction)
+        query_ = get_query_with_permissions_for_configuration_related_objects(
+            self.model
+        )
         configuration_id = view_kwargs.get("configuration_id")
 
         if configuration_id is not None:
@@ -41,12 +50,15 @@ class ConfigurationStaticLocationBeginActionList(ResourceList):
                 )
         return query_
 
+    def before_post(self, args, kwargs, data=None):
+        check_post_permission_for_configuration_related_objects()
+
     schema = ConfigurationStaticLocationBeginActionSchema
     decorators = (token_required,)
     data_layer = {
         "session": db.session,
         "model": ConfigurationStaticLocationBeginAction,
-        "methods": {"query": query,},
+        "methods": {"query": query},
     }
 
 
@@ -56,6 +68,19 @@ class ConfigurationStaticLocationBeginActionDetail(ResourceDetail):
     def before_get(self, args, kwargs):
         """Return 404 Responses if ConfigurationStaticLocationBeginAction not found"""
         check_if_object_not_found(self._data_layer.model, kwargs)
+        check_permissions_for_configuration_related_objects(
+            self._data_layer.model, kwargs["id"]
+        )
+
+    def before_patch(self, args, kwargs, data=None):
+        check_patch_permission_for_configuration_related_objects(
+            kwargs, self._data_layer.model
+        )
+
+    def before_delete(self, args, kwargs):
+        check_deletion_permission_for_configuration_related_objects(
+            kwargs, self._data_layer.model
+        )
 
     schema = ConfigurationStaticLocationBeginActionSchema
     decorators = (token_required,)
