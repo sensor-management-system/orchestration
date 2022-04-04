@@ -41,9 +41,10 @@ def generate_configuration_model(
         email=userinfo["email"],
     )
     configuration = Configuration(
-        label=fake.linux_processor(),
+        label="Config1",
         is_public=is_public,
         is_internal=is_internal,
+        location_type="static"
     )
     db.session.add_all(
         [
