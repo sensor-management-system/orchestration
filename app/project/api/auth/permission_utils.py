@@ -493,7 +493,7 @@ def check_patch_permission_for_configuration_related_objects(data, object_to_pat
         )
         if object_ is None:
             raise ObjectNotFound("Object not found!")
-        configuration = object_.configuration
+        configuration = object_.get_parent()
         group_id = configuration.cfg_permission_group
         if group_id:
             if not is_user_in_a_group([group_id]):
@@ -519,7 +519,7 @@ def check_deletion_permission_for_configuration_related_objects(
         )
         if object_ is None:
             raise ObjectNotFound("Object not found!")
-        configuration = object_.configuration
+        configuration = object_.get_parent()
         group_id = configuration.cfg_permission_group
         if group_id:
             if not is_user_in_a_group([group_id]):

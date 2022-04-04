@@ -52,7 +52,6 @@ class TestConfigurationDynamicLocationEndActionServices(BaseTestCase):
         config = generate_configuration_model(
             is_public=False, is_private=False, is_internal=True
         )
-        print(config)
         userinfo = generate_userinfo_data()
         contact = Contact(
             given_name=userinfo["given_name"],
@@ -61,7 +60,6 @@ class TestConfigurationDynamicLocationEndActionServices(BaseTestCase):
         )
         db.session.add_all([device, contact, config])
         db.session.commit()
-        print(config)
         data = {
             "data": {
                 "type": self.object_type,

@@ -17,7 +17,6 @@ class TestPermissionGroup(BaseTestCase):
     def test_get_with_jwt(self):
         """Ensure it works with a valid jwt."""
         access_headers = create_token()
-        print(current_app.config['IDL_URL'])
         if current_app.config['IDL_URL'] is not None:
             response = self.client.get(self.url, headers=access_headers)
             self.assertEqual(response.status_code, 200)
