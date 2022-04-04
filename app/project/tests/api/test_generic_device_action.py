@@ -151,7 +151,7 @@ class TestGenericDeviceAction(BaseTestCase):
                 content_type="application/vnd.api+json",
                 headers=access_headers,
             )
-        self.assertNotEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
 
     def test_filtered_by_device(self):
         """Ensure that I can prefilter by a specific device."""

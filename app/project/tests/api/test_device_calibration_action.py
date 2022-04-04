@@ -104,7 +104,7 @@ class TestDeviceCalibrationAction(BaseTestCase):
                 content_type="application/vnd.api+json",
                 headers=access_headers,
             )
-        self.assertNotEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
 
     def test_filtered_by_device(self):
         """Ensure that I can prefilter by a specific device."""
@@ -204,7 +204,7 @@ class TestDeviceCalibrationAction(BaseTestCase):
                 content_type="application/vnd.api+json",
                 headers=access_headers,
             )
-        self.assertNotEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
 
     def test_delete_device_caliubration_action_with_device_property_link(self):
         """
@@ -220,7 +220,7 @@ class TestDeviceCalibrationAction(BaseTestCase):
                 content_type="application/vnd.api+json",
                 headers=access_headers,
             )
-        self.assertNotEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
 
     def test_http_response_not_found(self):
         """Make sure that the backend responds with 404 HTTP-Code if a resource was not found."""

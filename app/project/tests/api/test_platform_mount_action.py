@@ -407,12 +407,10 @@ class TestPlatformMountAction(BaseTestCase):
     def test_fail_delete_platform_mount_action(self):
         """Delete PlatformMountAction."""
         mount_platform_action = add_mount_platform_action_model()
-        access_headers = create_token()
         with self.client:
             response = self.client.delete(
                 f"{self.url}/{mount_platform_action.id}",
                 content_type="application/vnd.api+json",
-                headers=access_headers,
             )
         self.assertNotEqual(response.status_code, 200)
 

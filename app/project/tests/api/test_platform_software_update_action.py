@@ -202,7 +202,7 @@ class TestPlatformSoftwareUpdateAction(BaseTestCase):
                 content_type="application/vnd.api+json",
                 headers=access_headers,
             )
-        self.assertNotEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
 
     def test_http_response_not_found(self):
         """Make sure that the backend responds with 404 HTTP-Code if a resource was not found."""
