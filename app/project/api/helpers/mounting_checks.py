@@ -52,7 +52,7 @@ def assert_object_is_free_to_be_mounted(data):
 
     begin_date_as_string = data["attributes"]["begin_date"]
     beginn_date = dateutil.parser.parse(begin_date_as_string).replace(tzinfo=None)
-    # 2- Beginn date is after last mounted beginn date and there is no end date
+    # 1- Beginn date is after last mounted beginn date and there is no end date
     # ------mx----------m1--------------->
     # TODO: make it possible if user set unmount date before first mount begin
     if first_mount_action and (beginn_date <= first_mount_action.begin_date):
