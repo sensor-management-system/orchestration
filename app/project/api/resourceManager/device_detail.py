@@ -1,11 +1,12 @@
-from flask_rest_jsonapi import ResourceDetail, JsonApiException
+from flask_rest_jsonapi import JsonApiException, ResourceDetail
 
-from .base_resource import delete_attachments_in_minio_by_url, check_if_object_not_found
+from ..auth.flask_openidconnect import open_id_connect
 from ..helpers.errors import ConflictError
 from ..models.base_model import db
 from ..models.device import Device
 from ..schemas.device_schema import DeviceSchema
 from ..token_checker import token_required
+from .base_resource import check_if_object_not_found, delete_attachments_in_minio_by_url
 
 
 class DeviceDetail(ResourceDetail):
@@ -33,6 +34,11 @@ class DeviceDetail(ResourceDetail):
 
         final_result = {"meta": {"message": "Object successfully deleted"}}
         return final_result
+
+    def before_patch(self, args, kwargs, data):
+        super().before_patch(args, kwargs, data=data)
+        user = open_id_connect.get_current_user()
+        data["updated_by_id"] = user.id
 
     schema = DeviceSchema
     decorators = (token_required,)

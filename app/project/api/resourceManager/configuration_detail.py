@@ -11,7 +11,7 @@ from ..models.base_model import db
 from ..models.configuration import Configuration
 from ..schemas.configuration_schema import ConfigurationSchema
 from ..token_checker import token_required, current_user_or_none
-
+from ..auth.flask_openidconnect import open_id_connect
 
 class ConfigurationDetail(ResourceDetail):
     """
@@ -38,6 +38,9 @@ class ConfigurationDetail(ResourceDetail):
                 raise ForbiddenError(
                     "User is not part of any group to edit this object."
                 )
+        # And set the current user as updated_by_id
+        user = open_id_connect.get_current_user()
+        data["updated_by_id"] = user.id
 
     def before_delete(self, args, kwargs):
         """Checks for permission"""
