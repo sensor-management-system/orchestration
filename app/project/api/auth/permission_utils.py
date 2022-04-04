@@ -340,7 +340,7 @@ def check_post_permission_for_related_objects():
             raise ObjectNotFound("Object not found!")
 
 
-def check_patch_permission_for_related_objects(data, object_to_patch):
+def check_patch_and_delete_permission_for_related_objects(data, object_to_patch):
     """
     check if a user has the permission to patch a related object.
 
@@ -362,29 +362,6 @@ def check_patch_permission_for_related_objects(data, object_to_patch):
                 raise ForbiddenError(
                     "User is not part of any group to edit this object."
                 )
-
-
-def check_deletion_permission_for_related_objects(kwargs, object_to_delete):
-    """
-    check if a user has the permission to delete a related object.
-    Note: both Member and Admin in a group should have the right
-    to make the deletion.
-
-    :param kwargs:
-    :param object_to_delete:
-    """
-    if not is_superuser():
-        object_ = (
-            db.session.query(object_to_delete).filter_by(id=kwargs["id"]).one_or_none()
-        )
-        if object_ is None:
-            raise ObjectNotFound("Object not found!")
-        related_object = object_.get_parent()
-        group_ids = related_object.group_ids
-        if group_ids is None:
-            assert_current_user_is_owner_of_object(related_object)
-        if not is_user_in_a_group(group_ids):
-            raise ForbiddenError("User is not part of any group to delete this object.")
 
 
 def get_query_with_permissions_for_related_objects(model):
