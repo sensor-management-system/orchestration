@@ -353,7 +353,7 @@ class TestMountDevicePermissions(BaseTestCase):
         )
         db.session.commit()
         data = payload_data(
-            self.object_type, first_configuration, contact, device, parent_platform
+            self.object_type, first_configuration, contact, device, parent_platform, begin_date='2022-04-05 00:21:34'
         )
         access_headers = create_token()
         with patch.object(
@@ -369,7 +369,7 @@ class TestMountDevicePermissions(BaseTestCase):
                 )
             self.assertEqual(response.status_code, 201)
         data_2 = payload_data(
-            self.object_type, second_configuration, contact, device, parent_platform
+            self.object_type, second_configuration, contact, device, parent_platform, begin_date='2022-04-05 00:21:34'
         )
         access_headers = create_token()
         with patch.object(

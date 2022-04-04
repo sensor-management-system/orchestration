@@ -55,7 +55,7 @@ def assert_object_is_free_to_be_mounted(data):
     # 2- Beginn date is after last mounted beginn date and there is no end date
     # ------mx----------m1--------------->
     # TODO: make it possible if user set unmount date before first mount begin
-    if first_mount_action and (beginn_date < first_mount_action.begin_date):
+    if first_mount_action and (beginn_date <= first_mount_action.begin_date):
         raise ConflictError(
             f"Object will be mounted on {first_mount_action.configuration.label} on \
                     {first_mount_action.begin_date}"
@@ -63,7 +63,7 @@ def assert_object_is_free_to_be_mounted(data):
     # 2- Beginn date is after last mounted beginn date and there is no end date
     # --------m1----------------------->
     if (last_mount_action and not last_unmount_action) and (
-            beginn_date > last_mount_action.begin_date
+            beginn_date >= last_mount_action.begin_date
     ):
         raise ConflictError(
             f"Object is mounted on {last_mount_action.configuration.label} since \
@@ -72,7 +72,7 @@ def assert_object_is_free_to_be_mounted(data):
     # 3- Beginn date is between mount and unmount date.
     # --------m1-----mx------u1------------>
     elif last_mount_action and last_unmount_action:
-        if last_mount_action.begin_date < beginn_date < last_unmount_action.end_date:
+        if last_mount_action.begin_date <= beginn_date <= last_unmount_action.end_date:
             raise ConflictError(
                 f"Object still Mounted on {last_mount_action.configuration.label} till: \
                         {last_unmount_action.end_date}"
@@ -80,7 +80,7 @@ def assert_object_is_free_to_be_mounted(data):
         # 4- Beginn date is between unmount and mount date.
         # --------m1------u1----mx------m2------->
         # TODO: make it possible if the user accept to set unmount date before the last beginn date.
-        elif last_unmount_action.end_date < beginn_date < last_mount_action.begin_date:
+        elif last_unmount_action.end_date <= beginn_date <= last_mount_action.begin_date:
             raise ConflictError(
                 f"Object will be mounted on {last_mount_action.configuration.label} at: \
                         {last_mount_action.begin_date}"
