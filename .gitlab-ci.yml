@@ -6,6 +6,7 @@ stages:
 variables:
   CONTAINER_TEST_IMAGE: $CI_REGISTRY_IMAGE:test-$CI_COMMIT_REF_SLUG
   CONTAINER_RELEASE_IMAGE: $CI_REGISTRY_IMAGE:latest
+  CONTAINER_RELEASE_TAG_IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
   DATABASE_TEST_URL: postgresql://$POSTGRES_USER:@$POSTGRES_PASSWORD:5432/$POSTGRES_DB
   WELL_KNOWN_URL: https://webapp.ufz.de/idp/oidc/v1/.well-known/openid-configuration
   HTTP_ORIGINS: "https://registry.hzdr.de http://rdm-test.intranet.ufz.de:5002"
