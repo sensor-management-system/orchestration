@@ -327,57 +327,57 @@ api.route(
     "/configurations/<int:id>/relationships/src-elevation",
 )
 api.route(
-    PlatformRelationship,
+    ConfigurationRelationship,
     "configuration_created_user",
     "/configurations/<int:id>/relationships/created-user",
 )
 api.route(
-    PlatformRelationship,
+    ConfigurationRelationship,
     "configuration_updated_user",
     "/configurations/<int:id>/relationships/updated-user",
 )
 api.route(
-    PlatformRelationship,
+    ConfigurationRelationship,
     "configuration_generic_configuration_actions",
     "/configurations/<int:id>/relationships/generic-configuration-actions",
 )
 api.route(
-    PlatformRelationship,
+    ConfigurationRelationship,
     "configuration_device_mount_actions",
     "/configurations/<int:id>/relationships/device-mount-actions",
 )
 api.route(
-    PlatformRelationship,
+    ConfigurationRelationship,
     "configuration_device_unmount_actions",
     "/configurations/<int:id>/relationships/device-unmount-actions",
 )
 api.route(
-    PlatformRelationship,
+    ConfigurationRelationship,
     "configuration_platform_mount_actions",
     "/configurations/<int:id>/relationships/platform-mount-actions",
 )
 api.route(
-    PlatformRelationship,
+    ConfigurationRelationship,
     "configuration_platform_unmount_actions",
     "/configurations/<int:id>/relationships/platform-unmount-actions",
 )
 api.route(
-    PlatformRelationship,
+    ConfigurationRelationship,
     "configuration_configuration_static_location_begin_actions",
     "/configurations/<int:id>/relationships/configuration-static-location-begin-actions",
 )
 api.route(
-    PlatformRelationship,
+    ConfigurationRelationship,
     "configuration_configuration_static_location_end_actions",
     "/configurations/<int:id>/relationships/configuration-static-location-end-actions",
 )
 api.route(
-    PlatformRelationship,
+    ConfigurationRelationship,
     "configuration_configuration_dynamic_location_begin_actions",
     "/configurations/<int:id>/relationships/configuration-dynamic-location-begin-actions",
 )
 api.route(
-    PlatformRelationship,
+    ConfigurationRelationship,
     "configuration_configuration_dynamic_location_end_actions",
     "/configurations/<int:id>/relationships/configuration-dynamic-location-end-actions",
 )

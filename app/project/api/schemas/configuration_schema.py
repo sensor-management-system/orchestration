@@ -31,7 +31,6 @@ class ConfigurationSchema(Schema):
     label = fields.String(allow_none=True)
     status = fields.String(default="draft", allow_none=True)
     hierarchy = ConfigurationHierarchyField(allow_none=True)
-    created_by_id = fields.Str(dump_only=True)
     cfg_permission_group = fields.String(required=True)
     is_private = fields.Boolean(allow_none=True)
     is_internal = fields.Boolean(allow_none=True)
@@ -181,6 +180,26 @@ class ConfigurationSchema(Schema):
         schema="ConfigurationDynamicLocationEndActionSchema",
         type_="configuration_dynamic_location_end_action",
         id_field="id",
+    )
+    created_by = Relationship(
+        self_view="api.configuration_created_user",
+        self_view_kwargs={"id": "<id>"},
+        related_view="api.user_detail",
+        related_view_kwargs={"id": "<created_by_id>"},
+        include_resource_linkage=True,
+        schema="UserSchema",
+        type_="user",
+        dump_only=True,
+    )
+    updated_by = Relationship(
+        self_view="api.configuration_updated_user",
+        self_view_kwargs={"id": "<id>"},
+        related_view="api.user_detail",
+        related_view_kwargs={"id": "<updated_by_id>"},
+        include_resource_linkage=True,
+        schema="UserSchema",
+        type_="user",
+        dump_only=True,
     )
 
     @staticmethod

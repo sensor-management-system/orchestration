@@ -46,7 +46,6 @@ class DeviceSchema(Schema):
     website = fields.Str(allow_none=True)
     created_at = fields.DateTime(dump_only=True)
     updated_at = fields.DateTime(dump_only=True)
-    created_by_id = fields.Str(dump_only=True)
     group_ids = fields.Field(many=True, allow_none=True)
     is_private = fields.Boolean(allow_none=True)
     is_internal = fields.Boolean(allow_none=True)
@@ -60,6 +59,7 @@ class DeviceSchema(Schema):
         include_resource_linkage=True,
         schema="UserSchema",
         type_="user",
+        dump_only=True,
     )
     updated_by = Relationship(
         self_view="api.device_updated_user",
@@ -69,6 +69,7 @@ class DeviceSchema(Schema):
         include_resource_linkage=True,
         schema="UserSchema",
         type_="user",
+        dump_only=True,
     )
     customfields = Relationship(
         related_view="api.device_customfields",
