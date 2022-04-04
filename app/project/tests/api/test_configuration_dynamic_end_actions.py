@@ -25,7 +25,9 @@ class TestConfigurationDynamicLocationEndActionServices(BaseTestCase):
 
     def test_get_device_calibration_action_collection(self):
         """Test retrieve a collection of configuration_dynamic_location_end_action objects."""
-        static_location_end_action = add_dynamic_location_end_action_model()
+        static_location_end_action = add_dynamic_location_end_action_model(
+            is_public=True, is_private=False, is_internal=False
+        )
         with self.client:
             response = self.client.get(self.url)
         data = json.loads(response.data.decode())
@@ -40,13 +42,17 @@ class TestConfigurationDynamicLocationEndActionServices(BaseTestCase):
         Ensure POST a new configuration static location end action
         can be added to the database.
         """
-        device = Device(short_name="Device 666",
-                        is_public=False,
-                        is_private=False,
-                        is_internal=True,
-                        )
+        device = Device(
+            short_name="Device 666",
+            is_public=False,
+            is_private=False,
+            is_internal=True,
+        )
 
-        config = generate_configuration_model()
+        config = generate_configuration_model(
+            is_public=False, is_private=False, is_internal=True
+        )
+        print(config)
         userinfo = generate_userinfo_data()
         contact = Contact(
             given_name=userinfo["given_name"],
@@ -55,6 +61,7 @@ class TestConfigurationDynamicLocationEndActionServices(BaseTestCase):
         )
         db.session.add_all([device, contact, config])
         db.session.commit()
+        print(config)
         data = {
             "data": {
                 "type": self.object_type,

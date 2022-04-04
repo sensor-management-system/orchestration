@@ -471,10 +471,11 @@ def check_post_permission_for_configuration_related_objects():
         )
         if configuration is not None:
             group_id = configuration.cfg_permission_group
-            if not is_user_in_a_group([group_id]):
-                raise ForbiddenError(
-                    "User is not part of the configuration-group to edit this object."
-                )
+            if group_id:
+                if not is_user_in_a_group([group_id]):
+                    raise ForbiddenError(
+                        "User is not part of the configuration-group to edit this object."
+                    )
         else:
             raise ObjectNotFound("Object not found!")
 
@@ -494,10 +495,11 @@ def check_patch_permission_for_configuration_related_objects(data, object_to_pat
             raise ObjectNotFound("Object not found!")
         configuration = object_.configuration
         group_id = configuration.cfg_permission_group
-        if not is_user_in_a_group([group_id]):
-            raise ForbiddenError(
-                "User is not part of the configuration-group to edit this object."
-            )
+        if group_id:
+            if not is_user_in_a_group([group_id]):
+                raise ForbiddenError(
+                    "User is not part of the configuration-group to edit this object."
+                )
 
 
 def check_deletion_permission_for_configuration_related_objects(
@@ -519,7 +521,8 @@ def check_deletion_permission_for_configuration_related_objects(
             raise ObjectNotFound("Object not found!")
         configuration = object_.configuration
         group_id = configuration.cfg_permission_group
-        if not is_user_in_a_group([group_id]):
-            raise ForbiddenError(
-                "User is not part of the configuration-group to delete this object."
-            )
+        if group_id:
+            if not is_user_in_a_group([group_id]):
+                raise ForbiddenError(
+                    "User is not part of the configuration-group to delete this object."
+                )

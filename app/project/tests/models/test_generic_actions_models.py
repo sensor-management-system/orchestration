@@ -81,8 +81,8 @@ def generate_device_action_model(
     return generic_device_action
 
 
-def generate_configuration_action_model():
-    config = generate_configuration_model()
+def generate_configuration_action_model(is_public=False, is_private=False, is_internal=True):
+    config = generate_configuration_model(is_public=is_public, is_private=is_private, is_internal=is_internal)
     userinfo = generate_userinfo_data()
     c1 = Contact(
         given_name=userinfo["given_name"],
