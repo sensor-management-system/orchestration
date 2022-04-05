@@ -21,7 +21,7 @@ class DeviceRelationship(ResourceRelationship):
 
     def before_patch(self, args, kwargs, json_data=None):
         check_parent_group_before_change_a_relationship(
-            "device/", self._data_layer.model
+            "devices/", self._data_layer.model
         )
 
     def before_delete(self, args, kwargs, json_data=None):

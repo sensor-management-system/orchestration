@@ -515,7 +515,7 @@ def check_parent_group_before_change_a_relationship(string_to_split_after, paren
     parent_id = request.path.split(string_to_split_after)[1][0]
     parent = db.session.query(parent_model).filter_by(id=parent_id).one_or_none()
     if parent_model == Configuration:
-        group_ids = parent.cfg_permission_group
+        group_ids = [parent.cfg_permission_group]
     else:
         group_ids = parent.group_ids
     if not is_user_in_a_group(group_ids):
