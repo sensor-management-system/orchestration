@@ -204,6 +204,7 @@ export default class StaticLocationEndActionEdit extends mixins(Rules) {
       return
     }
     this.isSaving = true
+    const configurationBeforeSave = this.$store.state.configurations.configuration
     try {
       this.configuration.staticLocationEndActions = this.configuration.staticLocationEndActions.filter(x => x.id !== this.endAction.id)
       this.configuration.staticLocationEndActions.push(this.endAction)
@@ -213,6 +214,7 @@ export default class StaticLocationEndActionEdit extends mixins(Rules) {
       this.isSaving = false
       this.closeEditStaticLocationEndForm()
     } catch (e) {
+      this.$store.commit('configurations/setConfiguration', configurationBeforeSave)
       this.$store.commit('snackbar/setError', 'Save failed')
       this.isSaving = false
     }

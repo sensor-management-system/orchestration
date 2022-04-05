@@ -216,6 +216,7 @@ export default class DynamicLocationEndActionEdit extends mixins(Rules) {
       return
     }
     this.isSaving = true
+    const configurationBeforeSave = this.$store.state.configurations.configuration
     try {
       this.configuration.dynamicLocationEndActions = this.configuration.dynamicLocationEndActions.filter(x => x.id !== this.endAction.id)
       this.configuration.dynamicLocationEndActions.push(this.endAction)
@@ -225,6 +226,7 @@ export default class DynamicLocationEndActionEdit extends mixins(Rules) {
       this.isSaving = false
       this.closeEditDynamicLocationEndForm()
     } catch (e) {
+      this.$store.commit('configurations/setConfiguration', configurationBeforeSave)
       this.$store.commit('snackbar/setError', 'Save failed')
       this.isSaving = false
     }
