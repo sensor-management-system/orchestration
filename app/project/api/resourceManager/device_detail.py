@@ -36,7 +36,6 @@ class DeviceDetail(ResourceDetail):
         return final_result
 
     def before_patch(self, args, kwargs, data):
-        super().before_patch(args, kwargs, data=data)
         user = open_id_connect.get_current_user()
         data["updated_by_id"] = user.id
 
