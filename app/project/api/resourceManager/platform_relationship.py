@@ -13,14 +13,21 @@ class PlatformRelationship(ResourceRelationship):
     create relationships, update relationships and delete
     relationships between Platforms.
     """
+
     def before_post(self, args, kwargs, json_data=None):
-        check_parent_group_before_change_a_relationship(f"platforms/", self._data_layer.model)
+        check_parent_group_before_change_a_relationship(
+            "platforms/", self._data_layer.model
+        )
 
     def before_patch(self, args, kwargs, json_data=None):
-        check_parent_group_before_change_a_relationship("platforms/", self._data_layer.model)
+        check_parent_group_before_change_a_relationship(
+            "platforms/", self._data_layer.model
+        )
 
     def before_delete(self, args, kwargs, json_data=None):
-        check_parent_group_before_change_a_relationship(f"platforms/", self._data_layer.model)
+        check_parent_group_before_change_a_relationship(
+            "platforms/", self._data_layer.model
+        )
 
     schema = PlatformSchema
     decorators = (token_required,)

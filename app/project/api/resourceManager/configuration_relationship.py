@@ -15,13 +15,19 @@ class ConfigurationRelationship(ResourceRelationship):
     """
 
     def before_post(self, args, kwargs, json_data=None):
-        check_parent_group_before_change_a_relationship(f"configurations/", self._data_layer.model)
+        check_parent_group_before_change_a_relationship(
+            "configurations/", self._data_layer.model
+        )
 
     def before_patch(self, args, kwargs, json_data=None):
-        check_parent_group_before_change_a_relationship("configurations/", self._data_layer.model)
+        check_parent_group_before_change_a_relationship(
+            "configurations/", self._data_layer.model
+        )
 
     def before_delete(self, args, kwargs, json_data=None):
-        check_parent_group_before_change_a_relationship(f"configurations/", self._data_layer.model)
+        check_parent_group_before_change_a_relationship(
+            "configurations/", self._data_layer.model
+        )
 
     schema = ConfigurationSchema
     decorators = (token_required,)
