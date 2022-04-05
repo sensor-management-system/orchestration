@@ -1,8 +1,8 @@
 from flask_rest_jsonapi import JsonApiException, ResourceDetail
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 
-from ..auth.flask_openidconnect import open_id_connect
 from ..helpers.errors import ConflictError
+from ..helpers.resource_mixin import add_updated_by_id
 from ..models.base_model import db
 from ..models.platform import Platform
 from ..schemas.platform_schema import PlatformSchema
@@ -43,8 +43,7 @@ class PlatformDetail(ResourceDetail):
         return final_result
 
     def before_patch(self, args, kwargs, data):
-        user = open_id_connect.get_current_user()
-        data["updated_by_id"] = user.id
+        add_updated_by_id(data)
 
     schema = PlatformSchema
     decorators = (token_required,)
