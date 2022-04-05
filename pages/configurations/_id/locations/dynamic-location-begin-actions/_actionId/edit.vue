@@ -213,6 +213,7 @@ export default class DynamicLocationBeginActionEdit extends mixins(Rules) {
       return
     }
     this.isSaving = true
+    const configurationBeforeSave = this.$store.state.configurations.configuration
     try {
       // I have to save it the same way as the mount and unmount actions as it
       // is always possible that someone goes into the past and makes an earlier
@@ -225,6 +226,7 @@ export default class DynamicLocationBeginActionEdit extends mixins(Rules) {
       this.isSaving = false
       this.closeEditDynamicLocationForm()
     } catch (e) {
+      this.$store.commit('configurations/setConfiguration', configurationBeforeSave)
       this.$store.commit('snackbar/setError', 'Save failed')
       this.isSaving = false
     }

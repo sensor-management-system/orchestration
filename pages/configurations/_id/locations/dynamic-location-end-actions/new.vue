@@ -219,6 +219,8 @@ export default class DynamicLocationEndActionNew extends mixins(Rules) {
       return
     }
     this.isSaving = true
+    const configurationBeforeSave = this.$store.state.configurations.configuration
+
     // We close this form (otherwise we show the input form and the data component for the time we need to save)
     try {
       const currentlyActiveBeginDate = this.currentlyActiveLocationAction?.beginDate
@@ -237,6 +239,7 @@ export default class DynamicLocationEndActionNew extends mixins(Rules) {
       this.isSaving = false
       this.closeFormOnSave()
     } catch (e) {
+      this.$store.commit('configurations/setConfiguration', configurationBeforeSave)
       this.$store.commit('snackbar/setError', 'Save failed')
       this.isSaving = false
     }

@@ -205,6 +205,7 @@ export default class StaticLocationEndActionNew extends mixins(Rules) {
       return
     }
     this.isSaving = true
+    const configurationBeforeSave = this.$store.state.configurations.configuration
     try {
       const currentlyActiveBeginDate = this.currentlyActiveLocationAction?.beginDate
       if (currentlyActiveBeginDate && this.endAction.endDate && this.endAction.endDate.equals(currentlyActiveBeginDate)) {
@@ -222,6 +223,7 @@ export default class StaticLocationEndActionNew extends mixins(Rules) {
       this.isSaving = false
       this.closeFormOnSave()
     } catch (e) {
+      this.$store.commit('configurations/setConfiguration', configurationBeforeSave)
       this.$store.commit('snackbar/setError', 'Save failed')
       this.isSaving = false
     }
