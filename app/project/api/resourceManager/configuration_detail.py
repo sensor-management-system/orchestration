@@ -13,6 +13,7 @@ from ..models.configuration import Configuration
 from ..schemas.configuration_schema import ConfigurationSchema
 from ..token_checker import token_required, current_user_or_none
 
+
 class ConfigurationDetail(ResourceDetail):
     """
     provides get, patch and delete methods to retrieve details
