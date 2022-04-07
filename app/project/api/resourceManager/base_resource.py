@@ -59,7 +59,7 @@ def add_contact_to_object(entity_with_contact_list):
         contacts.append(contact_entry)
         db.session.add(entity_with_contact_list)
         db.session.commit()
-
+    return contact_entry
 
 def delete_attachments_in_minio_by_url(url):
     """
