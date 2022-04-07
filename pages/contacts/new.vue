@@ -132,7 +132,7 @@ export default class ContactNewPage extends mixins(Rules) {
       this.$router.push('/contacts/' + savedContact.id + '')
     }).catch((_error) => {
       this.isLoading = false
-      this.$store.commit('snackbar/setError', 'Save failed')
+      this.$store.commit('snackbar/setError', 'Creation of contact failed')
     })
   }
 

@@ -69,7 +69,7 @@ permissions and limitations under the Licence.
           :disabled="readonly"
           required
           class="required"
-          :rules="[rules.required]"
+          :rules="[rules.required, additionalRules.isValidEmailAddress]"
           @input="update('email', $event)"
         >
           <template slot="append">
@@ -134,6 +134,8 @@ import { Rules } from '@/mixins/Rules'
 
 import { Contact } from '@/models/Contact'
 
+import Validator from '@/utils/validator'
+
 @Component
 export default class ContactBasicDataForm extends mixins(Rules) {
   @Prop({
@@ -147,6 +149,10 @@ export default class ContactBasicDataForm extends mixins(Rules) {
     type: Boolean
   })
   readonly readonly!: boolean
+
+  private additionalRules = {
+    isValidEmailAddress: Validator.isValidEmailAddress
+  }
 
   update (key: string, value: string) {
     const newObj = Contact.createFromObject(this.value)
