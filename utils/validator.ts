@@ -84,5 +84,25 @@ export default {
       }
       return true
     }
+  },
+
+  /**
+   * checks whether the address is an valid email or not
+   *
+   * @param {string} address - the address to validate
+   * @returns {boolean|string} true when valid, otherwise an error message
+   */
+  isValidEmailAddress (address: string): boolean | string {
+    // note: the following false positives are possible:
+    // test@--a.de, test@-.a.de
+    if (!address.match(/^.+@[a-z0-9-][a-z0-9-.]*[a-z0-9]\.[a-z]{2,}$/i)) {
+      //                 ^  ^        ^          ^         ^ the TLD should at least have two characters
+      //                 ^  ^        ^          ^ make sure that the domain doesn't end with a '-' or a '.'
+      //                 ^  ^        ^ after the first character of the domain the characters 'a-z', '0-9', '-' and '.' are allowed
+      //                 ^  ^ the domain should start with either a single letter or digit or a '-'
+      //                 ^ before the @ every character is allowed
+      return 'The email address is not valid'
+    }
+    return true
   }
 }
