@@ -35,8 +35,7 @@ class DeviceRoleList(ResourceList):
                 raise ObjectNotFound(
                     {"parameter": "id"}, "Device: {} not found".format(device_id)
                 )
-            else:
-                query_ = query_.filter(DeviceContactRole.device_id == device_id)
+            query_ = query_.filter(DeviceContactRole.device_id == device_id)
         return query_
 
     schema = DeviceRoleSchema

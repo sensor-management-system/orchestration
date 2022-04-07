@@ -33,10 +33,9 @@ class ConfigurationRoleList(ResourceList):
                     {"parameter": "id"},
                     "Configuration: {} not found".format(configuration_id),
                 )
-            else:
-                query_ = query_.filter(
-                    ConfigurationContactRole.configuration_id == configuration_id
-                )
+            query_ = query_.filter(
+                ConfigurationContactRole.configuration_id == configuration_id
+            )
         return query_
 
     schema = ConfigurationRoleSchema

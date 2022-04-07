@@ -35,8 +35,7 @@ class PlatformRoleList(ResourceList):
                 raise ObjectNotFound(
                     {"parameter": "id"}, "Platform: {} not found".format(platform_id)
                 )
-            else:
-                query_ = query_.filter(PlatformContactRole.platform_id == platform_id)
+            query_ = query_.filter(PlatformContactRole.platform_id == platform_id)
         return query_
 
     schema = PlatformRoleSchema
