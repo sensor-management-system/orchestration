@@ -28,7 +28,7 @@ class DeviceRoleSchema(Schema, RoleSchema):
         type_="device",
     )
     contact = Relationship(
-        self_view="api.device_contact_roles",
+        self_view="api.contact_roles_device",
         self_view_kwargs={"id": "<id>"},
         related_view="api.contact_detail",
         related_view_kwargs={"id": "<contact_id>"},
@@ -57,7 +57,7 @@ class PlatformRoleSchema(Schema, RoleSchema):
         type_="platform",
     )
     contact = Relationship(
-        self_view="api.platform_roles_contact",
+        self_view="api.contact_roles_platform",
         self_view_kwargs={"id": "<id>"},
         related_view="api.contact_detail",
         related_view_kwargs={"id": "<contact_id>"},
@@ -86,7 +86,7 @@ class ConfigurationRoleSchema(Schema, RoleSchema):
         type_="configuration",
     )
     contact = Relationship(
-        self_view="api.configuration_roles_contact",
+        self_view="api.contact_roles_configuration",
         self_view_kwargs={"id": "<id>"},
         related_view="api.contact_detail",
         related_view_kwargs={"id": "<contact_id>"},

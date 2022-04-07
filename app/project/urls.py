@@ -270,7 +270,13 @@ api.route(
     ContactRelationship, "contact_user", "/contacts/<int:id>/relationships/user",
 )
 api.route(
-    ContactRelationship, "contact_roles", "/contacts/<int:id>/relationships/roles",
+    ContactRelationship, "contact_device_roles", "/contacts/<int:id>/relationships/contact-device-roles",
+)
+api.route(
+    ContactRelationship, "contact_platform_roles", "/contacts/<int:id>/relationships/contact-platform-roles",
+)
+api.route(
+    ContactRelationship, "contact_configuration_roles", "/contacts/<int:id>/relationships/contact-configuration-roles",
 )
 # Users
 api.route(
@@ -1114,7 +1120,7 @@ api.route(
 api.route(DeviceRoleDetail, "device_contact_role_detail", "/device-contact-roles/<int:id>")
 api.route(
     DeviceRoleRelationship,
-    "roles_contact",
+    "contact_roles_device",
     "/device-contact-roles/<int:id>/relationships/contact",
 )
 api.route(
