@@ -15,6 +15,7 @@ from project.api.models.base_model import db
 from sqlalchemy import MetaData, Table
 
 # revision identifiers, used by Alembic.
+
 revision = "7b504fcc359b"
 down_revision = "0139893c4e15"
 branch_labels = None
@@ -83,20 +84,23 @@ def add_device_contact_role(default_role, default_role_uri):
     :param string default_role: default role name.
     :param default_role_uri: URI of the default role.
     """
-    device_contacts = db.session.query(db.metadata.tables["device_contacts"]).all()
-    data_list = []
-    for device_contact in device_contacts:
-        data = {
-            "device_id": device_contact[0],
-            "contact_id": device_contact[1],
-            "role_name": default_role,
-            "role_uri": default_role_uri,
-        }
-        data_list.append(data)
-    meta = MetaData(bind=op.get_bind())
-    meta.reflect(only=("device_contact_role",))
-    device_contact_role = Table("device_contact_role", meta)
-    op.bulk_insert(device_contact_role, data_list)
+    try:
+        device_contacts = db.session.query(db.metadata.tables["device_contacts"]).all()
+        data_list = []
+        for device_contact in device_contacts:
+            data = {
+                "device_id": device_contact[0],
+                "contact_id": device_contact[1],
+                "role_name": default_role,
+                "role_uri": default_role_uri,
+            }
+            data_list.append(data)
+        meta = MetaData(bind=op.get_bind())
+        meta.reflect(only=("device_contact_role",))
+        device_contact_role = Table("device_contact_role", meta)
+        op.bulk_insert(device_contact_role, data_list)
+    except (sa.exc.ProgrammingError, sa.exc.InternalError):
+        pass
 
 
 def add_platform_contact_role(default_role, default_role_uri):
@@ -106,20 +110,25 @@ def add_platform_contact_role(default_role, default_role_uri):
     :param string default_role: default role name.
     :param default_role_uri: URI of the default role.
     """
-    platform_contacts = db.session.query(db.metadata.tables["platform_contacts"]).all()
-    data_list = []
-    for platform_contact in platform_contacts:
-        data = {
-            "platform_id": platform_contact[0],
-            "contact_id": platform_contact[1],
-            "role_name": default_role,
-            "role_uri": default_role_uri,
-        }
-        data_list.append(data)
-    meta = MetaData(bind=op.get_bind())
-    meta.reflect(only=("platform_contact_role",))
-    platform_contact_role = Table("platform_contact_role", meta)
-    op.bulk_insert(platform_contact_role, data_list)
+    try:
+        platform_contacts = db.session.query(
+            db.metadata.tables["platform_contacts"]
+        ).all()
+        data_list = []
+        for platform_contact in platform_contacts:
+            data = {
+                "platform_id": platform_contact[0],
+                "contact_id": platform_contact[1],
+                "role_name": default_role,
+                "role_uri": default_role_uri,
+            }
+            data_list.append(data)
+        meta = MetaData(bind=op.get_bind())
+        meta.reflect(only=("platform_contact_role",))
+        platform_contact_role = Table("platform_contact_role", meta)
+        op.bulk_insert(platform_contact_role, data_list)
+    except (sa.exc.ProgrammingError, sa.exc.InternalError):
+        pass
 
 
 def add_configuration_contact_role(default_role, default_role_uri):
@@ -129,19 +138,22 @@ def add_configuration_contact_role(default_role, default_role_uri):
     :param string default_role: default role name.
     :param default_role_uri: URI of the default role.
     """
-    configuration_contacts = db.session.query(
-        db.metadata.tables["configuration_contacts"]
-    ).all()
-    data_list = []
-    for configuration_contact in configuration_contacts:
-        data = {
-            "configuration_id": configuration_contact[0],
-            "contact_id": configuration_contact[1],
-            "role_name": default_role,
-            "role_uri": default_role_uri,
-        }
-        data_list.append(data)
-    meta = MetaData(bind=op.get_bind())
-    meta.reflect(only=("configuration_contact_role",))
-    configuration_contact_role = Table("configuration_contact_role", meta)
-    op.bulk_insert(configuration_contact_role, data_list)
+    try:
+        configuration_contacts = db.session.query(
+            db.metadata.tables["configuration_contacts"]
+        ).all()
+        data_list = []
+        for configuration_contact in configuration_contacts:
+            data = {
+                "configuration_id": configuration_contact[0],
+                "contact_id": configuration_contact[1],
+                "role_name": default_role,
+                "role_uri": default_role_uri,
+            }
+            data_list.append(data)
+        meta = MetaData(bind=op.get_bind())
+        meta.reflect(only=("configuration_contact_role",))
+        configuration_contact_role = Table("configuration_contact_role", meta)
+        op.bulk_insert(configuration_contact_role, data_list)
+    except (sa.exc.ProgrammingError, sa.exc.InternalError):
+        pass
