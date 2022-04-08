@@ -252,7 +252,8 @@ api.route(
     "/platforms/<int:platform_id>/contacts",
     "/configurations/<int:configuration_id>/contacts",
 )
-api.route(ContactDetail, "contact_detail", "/contacts/<int:id>")
+api.route(ContactDetail, "contact_detail", "/contacts/<int:id>",
+          "/device-contact-roles/<int:id>/contact")
 api.route(
     ContactRelationship, "contact_devices", "/contacts/<int:id>/relationships/devices",
 )
