@@ -1,12 +1,11 @@
 """Model for the devices."""
 
 from .base_model import db
-from ..models.mixin import AuditMixin, SearchableMixin, IndirectSearchableMixin, PermissionMixin
-
 from ..es_utils import settings_with_ngrams, ElasticSearchIndexTypes
+from ..models.mixin import AuditMixin, SearchableMixin, IndirectSearchableMixin
 
 
-class Device(db.Model, AuditMixin, SearchableMixin, IndirectSearchableMixin, PermissionMixin):
+class Device(db.Model, AuditMixin, SearchableMixin, IndirectSearchableMixin):
     """Device class."""
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -31,10 +30,6 @@ class Device(db.Model, AuditMixin, SearchableMixin, IndirectSearchableMixin, Per
     device_properties = db.relationship(
         "DeviceProperty", cascade="save-update, merge, delete, delete-orphan"
     )
-    events = db.relationship(
-        "Event", cascade="save-update, merge, delete, delete-orphan"
-    )
-
     device_attachments = db.relationship(
         "DeviceAttachment", cascade="save-update, merge, delete, delete-orphan"
     )
@@ -94,10 +89,8 @@ class Device(db.Model, AuditMixin, SearchableMixin, IndirectSearchableMixin, Per
         type_text_full_searchable = ElasticSearchIndexTypes.text_full_searchable(
             analyzer="ngram_analyzer"
         )
-        type_keyword_and_full_searchable = (
-            ElasticSearchIndexTypes.keyword_and_full_searchable(
-                analyzer="ngram_analyzer"
-            )
+        type_keyword_and_full_searchable = ElasticSearchIndexTypes.keyword_and_full_searchable(
+            analyzer="ngram_analyzer"
         )
 
         return {
@@ -218,8 +211,8 @@ class Device(db.Model, AuditMixin, SearchableMixin, IndirectSearchableMixin, Per
             "aliases": {},
             "mappings": {"properties": cls.get_search_index_properties()},
             "settings": settings_with_ngrams(
-                analyzer_name='ngram_analyzer',
-                filter_name='ngram_filter',
+                analyzer_name="ngram_analyzer",
+                filter_name="ngram_filter",
                 min_ngram=3,
                 max_ngram=10,
                 max_ngram_diff=10,
