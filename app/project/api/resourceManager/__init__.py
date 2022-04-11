@@ -4,11 +4,6 @@ from .configuration_attachment_resurces import (  # noqa: F401
     ConfigurationAttachmentRelationship,
 )
 from .configuration_detail import ConfigurationDetail  # noqa: F401
-from .configuration_device_detail import ConfigurationDeviceDetail  # noqa: F401
-from .configuration_device_list import ConfigurationDeviceList  # noqa: F401
-from .configuration_device_relationship import (  # noqa: F401
-    ConfigurationDeviceRelationship,
-)
 from .configuration_dynamic_location_begin_actions_resources import (  # noqa: F401
     ConfigurationDynamicLocationBeginActionDetail,
     ConfigurationDynamicLocationBeginActionList,
@@ -20,11 +15,6 @@ from .configuration_dynamic_location_end_actions_resources import (  # noqa: F40
     ConfigurationDynamicLocationEndActionRelationship,
 )
 from .configuration_list import ConfigurationList  # noqa: F401
-from .configuration_platform_detail import ConfigurationPlatformDetail  # noqa: F401
-from .configuration_platform_list import ConfigurationPlatformList  # noqa: F401
-from .configuration_platform_relationship import (  # noqa: F401
-    ConfigurationPlatformRelationship,
-)
 from .configuration_relationship import ConfigurationRelationship  # noqa: F401
 from .configuration_static_location_begin_actions_resources import (  # noqa: F401
     ConfigurationStaticLocationBeginActionDetail,
@@ -86,9 +76,6 @@ from .device_unmount_action_resources import (  # noqa: F401
     DeviceUnmountActionList,
     DeviceUnmountActionRelationship,
 )
-from .event_detail import EventDetail  # noqa: F401
-from .event_list import EventList  # noqa: F401
-from .event_relationship import EventRelationship  # noqa: F401
 from .generic_configuration_action_attachment_resources import (  # noqa: F401
     GenericConfigurationActionAttachmentDetail,
     GenericConfigurationActionAttachmentList,

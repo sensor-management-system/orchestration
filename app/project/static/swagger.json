@@ -6707,12 +6707,6 @@
                     "self": null
                   }
                 },
-                "configuration_devices": {
-                  "data": [],
-                  "links": {
-                    "self": null
-                  }
-                },
                 "configuration_static_location_begin_actions": {
                   "data": [],
                   "links": {
@@ -6732,12 +6726,6 @@
                   }
                 },
                 "configuration_dynamic_location_end_actions": {
-                  "data": [],
-                  "links": {
-                    "self": null
-                  }
-                },
-                "configuration_platforms": {
                   "data": [],
                   "links": {
                     "self": null
@@ -7253,12 +7241,6 @@
                     "self": null
                   }
                 },
-                "configuration_device": {
-                  "data": [],
-                  "links": {
-                    "self": null
-                  }
-                },
                 "contacts": {
                   "data": [],
                   "links": {
@@ -7613,24 +7595,6 @@
               "id": "0",
               "relationships": {
                 "platform_attachments": {
-                  "data": [],
-                  "links": {
-                    "self": null
-                  }
-                },
-                "inner_configuration_device": {
-                  "data": [],
-                  "links": {
-                    "self": null
-                  }
-                },
-                "configuration platform": {
-                  "data": [],
-                  "links": {
-                    "self": null
-                  }
-                },
-                "inner_configuration_platform": {
                   "data": [],
                   "links": {
                     "self": null

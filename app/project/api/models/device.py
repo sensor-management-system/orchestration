@@ -1,10 +1,8 @@
 """Model for the devices."""
 
-
-from ..models.mixin import AuditMixin, SearchableMixin, IndirectSearchableMixin
 from .base_model import db
-
 from ..es_utils import settings_with_ngrams, ElasticSearchIndexTypes
+from ..models.mixin import AuditMixin, SearchableMixin, IndirectSearchableMixin
 
 
 class Device(db.Model, AuditMixin, SearchableMixin, IndirectSearchableMixin):
@@ -32,10 +30,6 @@ class Device(db.Model, AuditMixin, SearchableMixin, IndirectSearchableMixin):
     device_properties = db.relationship(
         "DeviceProperty", cascade="save-update, merge, delete, delete-orphan"
     )
-    events = db.relationship(
-        "Event", cascade="save-update, merge, delete, delete-orphan"
-    )
-
     device_attachments = db.relationship(
         "DeviceAttachment", cascade="save-update, merge, delete, delete-orphan"
     )

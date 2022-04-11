@@ -75,15 +75,6 @@ class DeviceSchema(Schema):
         type_="customfield",
         id_field="id",
     )
-    events = Relationship(
-        related_view="api.device_events",
-        related_view_kwargs={"id": "<id>"},
-        include_resource_linkage=True,
-        many=True,
-        allow_none=True,
-        schema="EventSchema",
-        type_="event",
-    )
     device_properties = Relationship(
         related_view="api.device_device_properties",
         related_view_kwargs={"id": "<id>"},
@@ -156,14 +147,6 @@ class DeviceSchema(Schema):
         many=True,
         schema="DeviceSoftwareUpdateActionSchema",
         type_="device_software_update_action",
-        id_field="id",
-    )
-    configuration_device = Relationship(
-        self_view="api.device_configuration_device",
-        self_view_kwargs={"id": "<id>"},
-        include_resource_linkage=True,
-        schema="ConfigurationDeviceSchema",
-        type_="configuration_device",
         id_field="id",
     )
 
