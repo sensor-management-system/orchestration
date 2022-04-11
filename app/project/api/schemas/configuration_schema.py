@@ -1,11 +1,8 @@
 from marshmallow_jsonapi import fields
 from marshmallow_jsonapi.flask import Relationship, Schema
 
-from ..schemas.configuration_device_schema import ConfigurationDeviceSchema
-from ..schemas.configuration_platform_schema import ConfigurationPlatformSchema
 from ..schemas.contact_schema import ContactSchema
 from ..schemas.device_property_schema import InnerDevicePropertySchema
-from ..serializer.configuration_hierarchy_field import ConfigurationHierarchyField
 
 
 class ConfigurationSchema(Schema):
@@ -30,8 +27,6 @@ class ConfigurationSchema(Schema):
     project_name = fields.String(allow_none=True)
     label = fields.String(allow_none=True)
     status = fields.String(default="draft", allow_none=True)
-    hierarchy = ConfigurationHierarchyField(allow_none=True)
-
     src_longitude = Relationship(
         attribute="src_longitude",
         self_view="api.configuration_src_longitude",
@@ -73,27 +68,6 @@ class ConfigurationSchema(Schema):
         many=True,
         schema="ContactSchema",
         type_="contact",
-        id_field="id",
-    )
-    configuration_platforms = Relationship(
-        attribute="configuration_platforms",
-        related_view="api.configuration_platforms",
-        related_view_kwargs={"id": "<id>"},
-        include_resource_linkage=True,
-        many=True,
-        schema="ConfigurationPlatformSchema",
-        type_="configuration_platform",
-        id_field="id",
-    )
-
-    configuration_devices = Relationship(
-        attribute="configuration_devices",
-        related_view="api.configuration_devices",
-        related_view_kwargs={"id": "<id>"},
-        include_resource_linkage=True,
-        many=True,
-        schema="ConfigurationDeviceSchema",
-        type_="configuration_device",
         id_field="id",
     )
     generic_configuration_actions = Relationship(
@@ -193,18 +167,6 @@ class ConfigurationToNestedDictSerializer:
         :return:
         """
         if configuration is not None:
-            configuration_platforms = []
-            configuration_devices = []
-            for cd in configuration.configuration_devices:
-                configuration_device = (
-                    ConfigurationDeviceSchema().nested_dict_serializer(cd)
-                )
-                configuration_devices.append(configuration_device)
-            for cp in configuration.configuration_platforms:
-                configuration_platform = (
-                    ConfigurationPlatformSchema().nested_dict_serializer(cp)
-                )
-                configuration_platforms.append(configuration_platform)
             return {
                 "label": configuration.label,
                 "status": configuration.status,
@@ -216,8 +178,6 @@ class ConfigurationToNestedDictSerializer:
                 ],
                 "start_date": configuration.start_date,
                 "end_date": configuration.end_date,
-                "configuration_platforms": configuration_platforms,
-                "configuration_devices": configuration_devices,
                 "longitude": configuration.longitude,
                 "src_longitude": InnerDevicePropertySchema().dict_serializer(
                     configuration.src_longitude

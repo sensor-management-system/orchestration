@@ -112,30 +112,6 @@ class PlatformSchema(Schema):
         type_="platform_software_update_action",
         id_field="id",
     )
-    configuration_platform = Relationship(
-        self_view="api.platform_configuration_platform",
-        self_view_kwargs={"id": "<id>"},
-        include_resource_linkage=True,
-        schema="ConfigurationPlatformSchema",
-        type_="configuration_platform",
-        id_field="id",
-    )
-    inner_configuration_platform = Relationship(
-        self_view="api.platform_inner_configuration_platform",
-        self_view_kwargs={"id": "<id>"},
-        include_resource_linkage=True,
-        schema="ConfigurationPlatformSchema",
-        type_="configuration_platform",
-        id_field="id",
-    )
-    inner_configuration_device = Relationship(
-        self_view="api.platform_inner_configuration_device",
-        self_view_kwargs={"id": "<id>"},
-        include_resource_linkage=True,
-        schema="ConfigurationDeviceSchema",
-        type_="configuration_device",
-        id_field="id",
-    )
     outer_platform_mount_actions = Relationship(
         related_view="api.platform_outer_platform_mount_actions",
         related_view_kwargs={"id": "<id>"},

@@ -120,19 +120,6 @@ api.route(
     "configuration_attachment_configuration",
     "/configuration-attachments/<int:id>/relationships/configuration",
 )
-# Events
-api.route(EventList, "event_list", "/events")
-api.route(
-    EventDetail,
-    "event_detail",
-    "/events/<int:id>",
-)
-api.route(
-    EventRelationship,
-    "event_user",
-    "/events/<int:id>/relationships/user",
-)
-
 # Device
 api.route(
     DeviceList,
@@ -335,16 +322,6 @@ api.route(
 )
 api.route(
     ConfigurationRelationship,
-    "configuration_platforms",
-    "/configurations/<int:id>/relationships/configuration-platforms",
-)
-api.route(
-    ConfigurationRelationship,
-    "configuration_devices",
-    "/configurations/<int:id>/relationships/configuration-devices",
-)
-api.route(
-    ConfigurationRelationship,
     "configuration_src_longitude",
     "/configurations/<int:id>/relationships/src-longitude",
 )
@@ -412,58 +389,6 @@ api.route(
     PlatformRelationship,
     "configuration_configuration_dynamic_location_end_actions",
     "/configurations/<int:id>/relationships/configuration-dynamic-location-end-actions",
-)
-# ConfigurationPlatform
-api.route(
-    ConfigurationPlatformList,
-    "configuration_platform_list",
-    "/configuration-platforms",
-)
-api.route(
-    ConfigurationPlatformDetail,
-    "configuration_platform_detail",
-    "/configuration-platforms/<int:id>",
-)
-api.route(
-    ConfigurationPlatformRelationship,
-    "configuration_platform_platform",
-    "/configuration-platforms/<int:id>/relationships/platform",
-)
-api.route(
-    ConfigurationPlatformRelationship,
-    "configuration_platform_configuration",
-    "/configuration-platforms/<int:id>/relationships/configuration",
-)
-api.route(
-    ConfigurationPlatformRelationship,
-    "configuration_platform_parent_platform",
-    "/configuration-platforms/<int:id>/relationships/parent_platform",
-)
-# ConfigurationDevice
-api.route(
-    ConfigurationDeviceList,
-    "configuration_device_list",
-    "/configuration-devices",
-)
-api.route(
-    ConfigurationDeviceDetail,
-    "configuration_device_detail",
-    "/configuration-devices/<int:id>",
-)
-api.route(
-    ConfigurationDeviceRelationship,
-    "configuration_device_device",
-    "/configuration-devices/<int:id>/relationships/device",
-)
-api.route(
-    ConfigurationDeviceRelationship,
-    "configuration_device_configuration",
-    "/configuration-devices/<int:id>/relationships/configuration",
-)
-api.route(
-    ConfigurationDeviceRelationship,
-    "configuration_device_parent_platform",
-    "/configuration-devices/<int:id>/relationships/parent_platform",
 )
 # GenericDeviceAction
 api.route(
