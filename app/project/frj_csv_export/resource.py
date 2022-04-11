@@ -67,6 +67,7 @@ class Resource(ResourceBase):
         # Start with default renderers, but accept user provided ones
         self.response_renderers = {
             "application/vnd.api+json": render_json,
+            "application/signed-exchange;v=b3": render_json,
             "application/json": render_json,
             "text/html": render_json,
             "text/csv": render_csv,
@@ -86,7 +87,7 @@ class Resource(ResourceBase):
         assert method is not None, "Unimplemented method {}".format(request.method)
 
         # Choose a renderer based on the Accept header
-        if len(request.accept_mimetypes) < 1:
+        if len(request.accept_mimetypes) < 1  or request.accept_mimetypes == [('*/*', 1)]:
             # If the request doesn't specify a mimetype, assume JSON API
             accept_type = "application/vnd.api+json"
         elif request.accept_mimetypes.best not in self.response_renderers:

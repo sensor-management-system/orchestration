@@ -25,7 +25,7 @@ def add_device_calibration_attachment():
         label=fake.pystr(), url=fake.url(), device_id=device.id
     )
     device_calibration_action = DeviceCalibrationAction(
-        description="Test ConfigurationDevice",
+        description="Test DeviceCalibrationAction",
         current_calibration_date=fake.date(),
         next_calibration_date=fake.date(),
         device=device,
