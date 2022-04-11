@@ -2,10 +2,17 @@
 
 from .base_model import db
 from ..es_utils import settings_with_ngrams, ElasticSearchIndexTypes
-from ..models.mixin import AuditMixin, SearchableMixin, IndirectSearchableMixin
+from ..models.mixin import (
+    AuditMixin,
+    SearchableMixin,
+    IndirectSearchableMixin,
+    PermissionMixin,
+)
 
 
-class Device(db.Model, AuditMixin, SearchableMixin, IndirectSearchableMixin):
+class Device(
+    db.Model, AuditMixin, SearchableMixin, IndirectSearchableMixin, PermissionMixin
+):
     """Device class."""
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -109,18 +116,10 @@ class Device(db.Model, AuditMixin, SearchableMixin, IndirectSearchableMixin):
             "manufacturer_uri": type_keyword,
             # dual use is a boolean
             "dual_use": {"type": "boolean"},
-            "is_internal": {
-                "type": "boolean",
-            },
-            "is_public": {
-                "type": "boolean",
-            },
-            "is_private": {
-                "type": "boolean",
-            },
-            "created_by_id": {
-                "type": "integer",
-            },
+            "is_internal": {"type": "boolean",},
+            "is_public": {"type": "boolean",},
+            "is_private": {"type": "boolean",},
+            "created_by_id": {"type": "integer",},
             # Model should be both keyword & text.
             "model": type_keyword_and_full_searchable,
             # Inventory number is the same as serial number.
