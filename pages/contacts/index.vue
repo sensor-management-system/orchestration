@@ -143,32 +143,22 @@ permissions and limitations under the Licence.
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
-import { IPaginationLoader } from '@/utils/PaginatedLoader'
-
 import {mapState,mapActions} from 'vuex';
 
 import { Contact } from '@/models/Contact'
 
-import DotMenu from '@/components/DotMenu.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 import ContacsDeleteDialog from '@/components/contacts/ContacsDeleteDialog.vue'
 
-import { QueryParams } from '@/modelUtils/QueryParams'
-import { IContactSearchParams, ContactSearchParamsSerializer } from '@/modelUtils/ContactSearchParams'
 import BaseList from '@/components/shared/BaseList.vue'
 import ContactsListItem from '@/components/contacts/ContactsListItem.vue'
-
-type PaginatedResult = {
-  [page: number]: Contact[]
-}
 
 @Component({
   components: {
     ContactsListItem,
     BaseList,
     ContacsDeleteDialog,
-    DotMenuActionDelete,
-    DotMenu
+    DotMenuActionDelete
   },
   computed:mapState('contacts',['pageNumber','pageSize','totalPages','contacts']),
   methods:{
