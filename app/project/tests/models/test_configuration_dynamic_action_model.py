@@ -11,12 +11,12 @@ from project.tests.base import BaseTestCase, fake, generate_userinfo_data
 from project.tests.models.test_configurations_model import generate_configuration_model
 
 
-def add_dynamic_location_begin_action_model():
-    device = Device(short_name="Device 555",
-                    is_public=False,
-                    is_private=False,
-                    is_internal=True,
-                    )
+def add_dynamic_location_begin_action_model(
+    is_public=False, is_private=False, is_internal=True
+):
+    device = Device(
+        short_name="Device 555", is_public=is_public, is_private=is_private, is_internal=is_internal,
+    )
     x_property = DeviceProperty(
         device=device,
         measuring_range_min=fake.pyfloat(),
@@ -33,21 +33,19 @@ def add_dynamic_location_begin_action_model():
         sampling_media_uri=fake.uri(),
         sampling_media_name=fake.pystr(),
     )
-    config = generate_configuration_model()
+    config = generate_configuration_model(is_public=is_public, is_private=is_private, is_internal=is_internal)
     userinfo = generate_userinfo_data()
     contact = Contact(
         given_name=userinfo["given_name"],
         family_name=userinfo["family_name"],
         email=userinfo["email"],
     )
-    configuration_dynamic_location_begin_action = (
-        ConfigurationDynamicLocationBeginAction(
-            begin_date=fake.date(),
-            description="test configuration_dynamic_location_begin_action",
-            x_property=x_property,
-            configuration=config,
-            contact=contact,
-        )
+    configuration_dynamic_location_begin_action = ConfigurationDynamicLocationBeginAction(
+        begin_date=fake.date(),
+        description="test configuration_dynamic_location_begin_action",
+        x_property=x_property,
+        configuration=config,
+        contact=contact,
     )
     db.session.add_all(
         [
@@ -62,8 +60,8 @@ def add_dynamic_location_begin_action_model():
     return configuration_dynamic_location_begin_action
 
 
-def add_dynamic_location_end_action_model():
-    config = generate_configuration_model()
+def add_dynamic_location_end_action_model(is_public=False, is_private=False, is_internal=True):
+    config = generate_configuration_model(is_public=is_public, is_private=is_private, is_internal=is_internal)
     userinfo = generate_userinfo_data()
     contact = Contact(
         given_name=userinfo["given_name"],

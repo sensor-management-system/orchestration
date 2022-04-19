@@ -14,9 +14,9 @@ from project.tests.models.test_configurations_model import generate_configuratio
 def add_unmount_device_action():
     d = Device(
         short_name=fake.linux_processor(),
-        is_public=False,
+        is_public=True,
         is_private=False,
-        is_internal=True,
+        is_internal=False,
     )
     userinfo = generate_userinfo_data()
     c1 = Contact(
@@ -41,10 +41,7 @@ def add_unmount_device_action():
 
 def add_unmount_platform_action():
     p = Platform(
-        short_name="Platform 55",
-        is_public=False,
-        is_private=False,
-        is_internal=True,
+        short_name="Platform 55", is_public=True, is_private=False, is_internal=False,
     )
     userinfo = generate_userinfo_data()
     c1 = Contact(

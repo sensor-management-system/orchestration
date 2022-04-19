@@ -10,7 +10,7 @@ from ..helpers.errors import ConflictError, ForbiddenError
 from ..models.base_model import db
 from ..models.configuration import Configuration
 from ..schemas.configuration_schema import ConfigurationSchema
-from ..token_checker import token_required, current_user_or_none
+from ..token_checker import token_required, get_current_user_or_none_by_optional
 
 
 class ConfigurationDetail(ResourceDetail):
@@ -25,7 +25,7 @@ class ConfigurationDetail(ResourceDetail):
         config = db.session.query(Configuration).filter_by(id=kwargs["id"]).first()
         if config:
             if config.is_internal:
-                current_user_or_none()
+                get_current_user_or_none_by_optional()
 
     def before_patch(self, args, kwargs, data):
         """check if a user has the permission to change this configuration"""

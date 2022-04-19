@@ -2,8 +2,13 @@ import os
 from datetime import datetime
 
 from project import base_url
-from project.tests.base import BaseTestCase, fake, generate_userinfo_data, test_file_path
-from project.tests.read_from_json import extract_data_from_json_file
+from project.tests.base import (
+    BaseTestCase,
+    fake,
+    generate_userinfo_data,
+    test_file_path,
+)
+from project.tests.models.test_configurations_model import generate_configuration_model
 
 
 class TestGenericConfigurationActionServices(BaseTestCase):
@@ -47,24 +52,8 @@ class TestGenericConfigurationActionServices(BaseTestCase):
         )
 
     def make_generic_configuration_action_data(self):
-        devices_json = extract_data_from_json_file(self.device_json_data_url, "devices")
-        device_data = {"data": {"type": "device", "attributes": devices_json[0]}}
-        device = super().add_object(
-            url=self.device_url, data_object=device_data, object_type="device"
-        )
-        platforms_json = extract_data_from_json_file(
-            self.platform_json_data_url, "platforms"
-        )
-        platform_data = {"data": {"type": "platform", "attributes": platforms_json[0]}}
-        super().add_object(
-            url=self.platform_url, data_object=platform_data, object_type="platform"
-        )
-        config_json = extract_data_from_json_file(self.json_data_url, "configuration")
-        config_data = {"data": {"type": "configuration", "attributes": config_json[0]}}
-        super().add_object(
-            url=self.configurations_url,
-            data_object=config_data,
-            object_type="configuration",
+        config = generate_configuration_model(
+            is_public=True, is_private=False, is_internal=False
         )
         userinfo = generate_userinfo_data()
         contact_data = {
@@ -94,7 +83,7 @@ class TestGenericConfigurationActionServices(BaseTestCase):
                 },
                 "relationships": {
                     "configuration": {
-                        "data": {"type": "configuration", "id": device["data"]["id"]}
+                        "data": {"type": "configuration", "id": config.id}
                     },
                     "contact": {
                         "data": {"type": "contact", "id": contact["data"]["id"]}

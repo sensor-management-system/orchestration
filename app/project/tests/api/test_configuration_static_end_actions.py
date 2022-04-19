@@ -25,7 +25,7 @@ class TestConfigurationStaticLocationEndActionServices(BaseTestCase):
 
     def test_get_device_calibration_action_collection(self):
         """Test retrieve a collection of configuration_static_location_end_action objects."""
-        static_location_end_action = add_static_location_end_action_model()
+        static_location_end_action = add_static_location_end_action_model(is_public=True, is_private=False, is_internal=False)
         with self.client:
             response = self.client.get(self.url)
         data = json.loads(response.data.decode())

@@ -196,3 +196,13 @@ class ConfigurationToNestedDictSerializer:
                     configuration.src_elevation
                 ),
             }
+
+
+class ConfigurationSchemaForOnlyId(Schema):
+    class Meta:
+        type_ = "configuration"
+        self_view = "api.configuration_detail"
+        self_view_kwargs = {"id": "<id>"}
+        self_view_many = "api.configuration_list"
+
+    id = fields.Integer(as_string=True)

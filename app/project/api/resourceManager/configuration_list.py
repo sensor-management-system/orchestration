@@ -12,7 +12,7 @@ from ..helpers.resource_mixin import add_created_by_id
 from ..models.base_model import db
 from ..models.configuration import Configuration
 from ..schemas.configuration_schema import ConfigurationSchema
-from ..token_checker import current_user_or_none, token_required
+from ..token_checker import get_current_user_or_none_by_optional, token_required
 from .base_resource import add_contact_to_object
 
 
@@ -31,7 +31,7 @@ class ConfigurationList(ResourceList):
         :return: queryset or es filter
         """
         query = db.session.query(self.model)
-        current_user = current_user_or_none(optional=True)
+        current_user = get_current_user_or_none_by_optional(optional=True)
         if current_user is None:
             query = query.filter_by(is_public=True)
         else:
@@ -51,7 +51,7 @@ class ConfigurationList(ResourceList):
         Should return the same set as query, but using
         the elasticsearch fields.
         """
-        current_user = current_user_or_none(optional=True)
+        current_user = get_current_user_or_none_by_optional(optional=True)
         if current_user is None:
             return TermEqualsExactStringFilter("is_public", True)
         if not current_user.is_superuser:

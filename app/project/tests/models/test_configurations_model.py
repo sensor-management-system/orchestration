@@ -1,55 +1,63 @@
+from project.api.models import User, Contact
 from project.api.models.base_model import db
 from project.api.models.configuration import Configuration
 from project.api.models.device import Device
 from project.api.models.platform import Platform
 from project.tests.base import BaseTestCase
+from project.tests.base import fake, generate_userinfo_data
 
 
-def generate_configuration_model():
-    platform1 = Platform(short_name="Platform 1",
-                         is_public=False,
-                         is_private=False,
-                         is_internal=True,
-                         )
-    platform2 = Platform(short_name="Platform 2",
-                         is_public=False,
-                         is_private=False,
-                         is_internal=True,
-                         )
-    platform3 = Platform(short_name="Platform 3",
-                         is_public=False,
-                         is_private=False,
-                         is_internal=True,
-                         )
-    db.session.add(platform1)
-    db.session.add(platform2)
-    db.session.add(platform3)
-    device1 = Device(short_name="Device 1",
-                     is_public=False,
-                     is_private=False,
-                     is_internal=True,
-                     )
-    device2 = Device(short_name="Device 2",
-                     is_public=False,
-                     is_private=False,
-                     is_internal=True,
-                     )
-    device3 = Device(short_name="Device 3",
-                     is_public=False,
-                     is_private=False,
-                     is_internal=True,
-                     )
-    db.session.add(device1)
-    db.session.add(device2)
-    db.session.add(device3)
-    config1 = Configuration(label="Config1", location_type="static",
-                            is_public=False,
-                            is_internal=True,
-                            )
-    db.session.add(config1)
+def generate_configuration_model(
+    is_public=False, is_private=False, is_internal=True,
+):
+    userinfo = generate_userinfo_data()
+    device = Device(
+        short_name=fake.linux_processor(),
+        is_public=is_public,
+        is_private=is_private,
+        is_internal=is_internal,
+    )
+    device_parent_platform = Platform(
+        short_name="device parent platform",
+        is_public=is_public,
+        is_private=is_private,
+        is_internal=is_internal,
+    )
+    platform = Platform(
+        short_name=fake.linux_processor(),
+        is_public=is_public,
+        is_private=is_private,
+        is_internal=is_internal,
+    )
+    parent_platform = Platform(
+        short_name="platform parent-platform",
+        is_public=is_public,
+        is_private=is_private,
+        is_internal=is_internal,
+    )
+    contact = Contact(
+        given_name=userinfo["given_name"],
+        family_name=userinfo["family_name"],
+        email=userinfo["email"],
+    )
+    configuration = Configuration(
+        label="Config1",
+        is_public=is_public,
+        is_internal=is_internal,
+        location_type="static"
+    )
+    db.session.add_all(
+        [
+            device,
+            device_parent_platform,
+            platform,
+            parent_platform,
+            contact,
+            configuration,
+        ]
+    )
     db.session.commit()
-    db.session.commit()
-    return config1
+    return configuration
 
 
 class TestConfigurationsModel(BaseTestCase):

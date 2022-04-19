@@ -4,6 +4,8 @@ from flask_rest_jsonapi import ResourceDetail, ResourceRelationship
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.orm.exc import NoResultFound
 
+from ..auth.permission_utils import get_query_with_permissions_for_related_objects
+from ...frj_csv_export.resource import ResourceList
 from .base_resource import check_if_object_not_found
 from ..models.base_model import db
 from ..models.generic_actions import GenericPlatformAction
@@ -22,7 +24,7 @@ class GenericPlatformActionList(ResourceList):
 
         Also handle optional pre-filters (for specific platforms, for example).
         """
-        query_ = self.session.query(GenericPlatformAction)
+        query_ = get_query_with_permissions_for_related_objects(self.model)
         platform_id = view_kwargs.get("platform_id")
 
         if platform_id is not None:
@@ -41,7 +43,7 @@ class GenericPlatformActionList(ResourceList):
     data_layer = {
         "session": db.session,
         "model": GenericPlatformAction,
-        "methods": {"query": query,},
+        "methods": {"query": query},
     }
 
 

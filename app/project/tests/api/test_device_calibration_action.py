@@ -5,7 +5,7 @@ import json
 from project import base_url
 from project.api.models import Contact, Device, DeviceCalibrationAction
 from project.api.models.base_model import db
-from project.tests.base import BaseTestCase, fake, generate_userinfo_data
+from project.tests.base import BaseTestCase, fake, generate_userinfo_data, create_token
 from project.tests.models.test_device_calibration_action_model import (
     add_device_calibration_action,
 )
@@ -97,22 +97,29 @@ class TestDeviceCalibrationAction(BaseTestCase):
     def test_delete_device_calibration_action(self):
         """Delete DeviceCalibrationAction."""
         device_calibration_action = add_device_calibration_action()
-        _ = super().delete_object(url=f"{self.url}/{device_calibration_action.id}",)
+        access_headers = create_token()
+        with self.client:
+            response = self.client.delete(
+                f"{self.url}/{device_calibration_action.id}",
+                content_type="application/vnd.api+json",
+                headers=access_headers,
+            )
+        self.assertEqual(response.status_code, 200)
 
     def test_filtered_by_device(self):
         """Ensure that I can prefilter by a specific device."""
         device1 = Device(
             short_name="sample device",
-            is_public=False,
+            is_public=True,
             is_private=False,
-            is_internal=True,
+            is_internal=False,
         )
         db.session.add(device1)
         device2 = Device(
             short_name="sample device II",
-            is_public=False,
+            is_public=True,
             is_private=False,
-            is_internal=True,
+            is_internal=False,
         )
         db.session.add(device2)
 
@@ -190,7 +197,14 @@ class TestDeviceCalibrationAction(BaseTestCase):
         if it linked to an attachment."""
 
         device_calibration_action = add_device_calibration_attachment()
-        _ = super().delete_object(url=f"{self.url}/{device_calibration_action.id}",)
+        access_headers = create_token()
+        with self.client:
+            response = self.client.delete(
+                f"{self.url}/{device_calibration_action.id}",
+                content_type="application/vnd.api+json",
+                headers=access_headers,
+            )
+        self.assertEqual(response.status_code, 200)
 
     def test_delete_device_caliubration_action_with_device_property_link(self):
         """
@@ -199,7 +213,14 @@ class TestDeviceCalibrationAction(BaseTestCase):
         """
         device_property_calibration = add_device_property_calibration_model()
         device_calibration_action_id = device_property_calibration.calibration_action_id
-        _ = super().delete_object(url=f"{self.url}/{device_calibration_action_id}",)
+        access_headers = create_token()
+        with self.client:
+            response = self.client.delete(
+                f"{self.url}/{device_calibration_action_id}",
+                content_type="application/vnd.api+json",
+                headers=access_headers,
+            )
+        self.assertEqual(response.status_code, 200)
 
     def test_http_response_not_found(self):
         """Make sure that the backend responds with 404 HTTP-Code if a resource was not found."""
