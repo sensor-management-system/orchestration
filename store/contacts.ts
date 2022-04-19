@@ -38,6 +38,7 @@ import { Contact } from '@/models/Contact'
 
 interface contactsState {
   contacts: Contact[],
+  contact : Contact|null,
   configurationContacts: Contact[],
   pageNumber: number,
   pageSize: number,
@@ -46,6 +47,7 @@ interface contactsState {
 
 export const state = {
   contacts: [],
+  contact:null,
   configurationContacts: [],
   totalPages: 1,
   pageNumber: 1,
@@ -68,7 +70,11 @@ export const actions = {
     const totalPages = Math.ceil(totalCount / state.pageSize)
     commit('setTotalPages', totalPages)
   },
-
+  async loadContact({ commit }: { commit: Commit },id:number){
+    // @ts-ignore
+    const contact = await this.$api.contacts.findById(id);
+    commit('setContact',contact);
+  },
   async loadAllContacts ({ commit }: { commit: Commit }) {
     // @ts-ignore
     const contacts = await this.$api.contacts.findAll()
@@ -106,6 +112,9 @@ export const actions = {
 export const mutations = {
   setContacts (state: contactsState, contacts: Contact[]) {
     state.contacts = contacts
+  },
+  setContact(state: contactsState, contact: Contact){
+    state.contact = contact;
   },
   setConfigurationContacts (state: contactsState, contacts: Contact[]) {
     state.configurationContacts = contacts

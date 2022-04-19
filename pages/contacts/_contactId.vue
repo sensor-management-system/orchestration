@@ -29,110 +29,25 @@ implied. See the Licence for the specific language governing
 permissions and limitations under the Licence.
 -->
 <template>
-  <div>
-    <ProgressIndicator
-      v-model="isLoading"
-    />
-    <v-card flat>
-      <div v-if="isEditPage">
-        <NuxtChild
-          v-model="contact"
-        />
-      </div>
-      <div v-else>
-        <v-card-actions>
-          <v-spacer />
-          <v-btn
-            v-if="$auth.loggedIn"
-            color="primary"
-            small
-            nuxt
-            :to="'/contacts/' + contactId + '/edit'"
-          >
-            Edit
-          </v-btn>
-          <DotMenu
-            v-if="$auth.loggedIn"
-          >
-            <template #actions>
-              <DotMenuActionDelete
-                @click="initDeleteDialog"
-              />
-            </template>
-          </DotMenu>
-        </v-card-actions>
-        <ContactBasicData
-          v-model="contact"
-        />
-        <v-card-actions>
-          <v-spacer />
-          <v-btn
-            v-if="$auth.loggedIn"
-            color="primary"
-            small
-            nuxt
-            :to="'/contacts/' + contactId + '/edit'"
-          >
-            Edit
-          </v-btn>
-          <DotMenu
-            v-if="$auth.loggedIn"
-          >
-            <template #actions>
-              <DotMenuActionDelete
-                @click="initDeleteDialog"
-              />
-            </template>
-          </DotMenu>
-        </v-card-actions>
-      </div>
-      <ContacsDeleteDialog
-        v-model="showDeleteDialog"
-        :contact-to-delete="contact"
-        @cancel-deletion="closeDialog"
-        @submit-deletion="deleteAndCloseDialog"
-      />
-    </v-card>
-  </div>
+  <NuxtChild/>
 </template>
 <script lang="ts">
 import { Component, Vue, Watch } from 'nuxt-property-decorator'
 
-import { Contact } from '@/models/Contact'
-
-import ContactBasicData from '@/components/ContactBasicData.vue'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
-import DotMenu from '@/components/DotMenu.vue'
-import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
-import ContacsDeleteDialog from '@/components/contacts/ContacsDeleteDialog.vue'
+import {mapState,mapActions} from 'vuex'
 
 @Component({
-  components: {
-    ContacsDeleteDialog,
-    DotMenuActionDelete,
-    DotMenu,
-    ContactBasicData,
-    ProgressIndicator
-  }
+  methods:mapActions('contacts',['loadContact'])
 })
 export default class ContactShowPage extends Vue {
-  private contact: Contact = new Contact()
-  private isLoading: boolean = true
-
-  private showDeleteDialog: boolean = false
-
-  created () {
+  async created () {
     this.initializeAppBar()
-  }
-
-  mounted () {
-    this.$api.contacts.findById(this.contactId).then((contact) => {
-      this.contact = contact
-      this.isLoading = false
-    }).catch((_error) => {
+    try {
+      await this.loadContact(this.contactId)
+    }catch (_error){
       this.$store.commit('snackbar/setError', 'Loading contact failed')
-      this.isLoading = false
-    })
+    }finally {
+    }
   }
 
   beforeDestroy () {
@@ -147,41 +62,6 @@ export default class ContactShowPage extends Vue {
 
   get contactId () {
     return this.$route.params.contactId
-  }
-
-  initDeleteDialog () {
-    this.showDeleteDialog = true
-  }
-
-  closeDialog () {
-    this.showDeleteDialog = false
-  }
-
-  deleteAndCloseDialog () {
-    this.showDeleteDialog = false
-    if (this.contact === null) {
-      return
-    }
-
-    this.$api.contacts.deleteById(this.contact.id!).then(() => {
-      this.$router.push('/contacts')
-      this.$store.commit('snackbar/setSuccess', 'Contact deleted')
-    }).catch((_error) => {
-      this.$store.commit('snackbar/setError', 'Contact could not be deleted')
-    })
-  }
-
-  @Watch('contact', { immediate: true, deep: true })
-  // @ts-ignore
-  onContactChanged (val: Contact) {
-    const fallbackText = this.isEditPage ? 'Edit contact' : 'Show contact'
-    if (val.id) {
-      this.$store.commit('appbar/setTitle', val?.toString() || fallbackText)
-    }
-  }
-
-  get isEditPage () {
-    return this.$route.path === '/contacts/' + this.contactId + '/edit' || this.$route.path === '/contact/' + this.contactId + '/edit/'
   }
 }
 </script>
