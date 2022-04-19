@@ -37,7 +37,7 @@ permissions and limitations under the Licence.
           label="Name"
           placeholder="Name of contact"
           hint="Please enter at least 3 characters"
-          @keydown.enter="runSearch"
+          @keydown.enter="search"
         />
       </v-col>
       <v-col
@@ -48,7 +48,7 @@ permissions and limitations under the Licence.
         <v-btn
           color="primary"
           small
-          @click="runSearch"
+          @click="search"
         >
           Search
         </v-btn>
@@ -68,19 +68,19 @@ permissions and limitations under the Licence.
       color="primary"
       indeterminate
     />
-    <div v-if="!totalCount && !loading">
+    <div v-if="contacts.length<=0 && !loading">
       <p class="text-center">
         There are no contacts that match your search criteria.
       </p>
     </div>
 
-    <div v-if="totalCount">
+    <div v-if="contacts.length>0">
       <v-subheader>
-        <template v-if="totalCount == 1">
+        <template v-if="contacts.length == 1">
           1 contact found
         </template>
         <template v-else>
-          {{ totalCount }} contacts found
+          {{ contacts.length }} contacts found
         </template>
         <!-- No export to pdf due to data privacy reasons -->
       </v-subheader>
@@ -88,165 +88,37 @@ permissions and limitations under the Licence.
       <v-pagination
         :value="page"
         :disabled="loading"
-        :length="numberOfPages"
+        :length="totalPages"
         :total-visible="7"
-        @input="setPage"
+        @input="search"
       />
-      <v-hover
-        v-for="result in getSearchResultForPage(page)"
-        v-slot="{ hover }"
-        :key="result.id"
+      <BaseList
+        :list-items="contacts"
       >
-        <v-card
-          :disabled="loading"
-          :elevation="hover ? 6 : 2"
-          class="ma-2"
-        >
-          <v-card-text
-            @click.stop.prevent="showResultItem(result.id)"
+        <template v-slot:list-item="{item}">
+          <ContactsListItem
+            :key="item.id"
+            :contact="item"
           >
-            <v-row
-              no.gutters
-            >
-              <v-col>
-                <div class="'text-caption text-disabled">
-                  {{ result.email }}
-                </div>
-              </v-col>
-              <v-col
-                align-self="end"
-                class="text-right"
-              >
-                <DotMenu>
-                  <template #actions>
-                    <DotMenuActionDelete
-                      :readonly="!$auth.loggedIn"
-                      @click="initDeleteDialog(result)"
-                    />
-                  </template>
-                </DotMenu>
-              </v-col>
-            </v-row>
-            <v-row
-              no-gutters
-            >
-              <v-col class="text-subtitle-1">
-                {{ result.fullName }}
-              </v-col>
-              <v-col
-                align-self="end"
-                class="text-right"
-              >
-                <v-btn
-                  :to="'/contacts/' + result.id"
-                  color="primary"
-                  text
-                  @click.stop.prevent
-                >
-                  View
-                </v-btn>
-                <v-btn
-                  icon
-                  @click.stop.prevent="showResultItem(result.id)"
-                >
-                  <v-icon>{{ isResultItemShown(result.id) ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
-                </v-btn>
-              </v-col>
-            </v-row>
-          </v-card-text>
-          <v-expand-transition>
-            <v-card
-              v-show="isResultItemShown(result.id)"
-              flat
-              tile
-              color="grey lighten-5"
-            >
-              <v-card-text>
-                <v-row
-                  dense
-                >
-                  <v-col
-                    cols="4"
-                    xs="4"
-                    sm="3"
-                    md="2"
-                    lg="2"
-                    xl="1"
-                    class="font-weight-medium"
-                  >
-                    Given name:
-                  </v-col>
-                  <v-col
-                    cols="8"
-                    xs="8"
-                    sm="9"
-                    md="4"
-                    lg="4"
-                    xl="5"
-                    class="nowrap-truncate"
-                  >
-                    {{ result.givenName }}
-                  </v-col>
-                  <v-col
-                    cols="4"
-                    xs="4"
-                    sm="3"
-                    md="2"
-                    lg="2"
-                    xl="1"
-                    class="font-weight-medium"
-                  >
-                    Family name:
-                  </v-col>
-                  <v-col
-                    cols="8"
-                    xs="8"
-                    sm="9"
-                    md="4"
-                    lg="4"
-                    xl="5"
-                    class="nowrap-truncate"
-                  >
-                    {{ result.familyName }}
-                  </v-col>
-                </v-row>
-                <v-row
-                  dense
-                >
-                  <v-col
-                    cols="4"
-                    xs="4"
-                    sm="3"
-                    md="2"
-                    lg="2"
-                    xl="1"
-                    class="font-weight-medium"
-                  >
-                    Website:
-                  </v-col>
-                  <v-col
-                    cols="8"
-                    xs="8"
-                    sm="9"
-                    md="4"
-                    lg="4"
-                    xl="5"
-                    class="nowrap-truncate"
-                  >
-                    {{ result.website }}
-                  </v-col>
-                </v-row>
-              </v-card-text>
-            </v-card>
-          </v-expand-transition>
-        </v-card>
-      </v-hover>
+            <template #dot-menu>
+              <DotMenu>
+                <template #actions>
+                  <DotMenuActionDelete
+                    :readonly="!$auth.loggedIn"
+                    @click="initDeleteDialog(item)"
+                  />
+                </template>
+              </DotMenu>
+            </template>
+          </ContactsListItem>
+        </template>
+      </BaseList>
       <v-pagination
         :value="page"
         :disabled="loading"
-        :length="numberOfPages"
+        :length="totalPages"
         :total-visible="7"
-        @input="setPage"
+        @input="search"
       />
     </div>
     <ContacsDeleteDialog
@@ -277,6 +149,8 @@ permissions and limitations under the Licence.
 import { Component, Vue } from 'nuxt-property-decorator'
 import { IPaginationLoader } from '@/utils/PaginatedLoader'
 
+import {mapState,mapActions} from 'vuex';
+
 import { Contact } from '@/models/Contact'
 
 import DotMenu from '@/components/DotMenu.vue'
@@ -285,6 +159,8 @@ import ContacsDeleteDialog from '@/components/contacts/ContacsDeleteDialog.vue'
 
 import { QueryParams } from '@/modelUtils/QueryParams'
 import { IContactSearchParams, ContactSearchParamsSerializer } from '@/modelUtils/ContactSearchParams'
+import BaseList from '@/components/shared/BaseList.vue'
+import ContactsListItem from '@/components/contacts/ContactsListItem.vue'
 
 type PaginatedResult = {
   [page: number]: Contact[]
@@ -292,135 +168,144 @@ type PaginatedResult = {
 
 @Component({
   components: {
+    ContactsListItem,
+    BaseList,
     ContacsDeleteDialog,
     DotMenuActionDelete,
     DotMenu
+  },
+  computed:mapState('contacts',['pageNumber','pageSize','totalPages','contacts']),
+  methods:{
+    ...mapActions('contacts',['searchContactsPaginated','setPageNumber']),
+    ...mapActions('appbar',['init','setDefaults'])
   }
 })
 export default class SearchContactsPage extends Vue {
-  private readonly pageSize: number = 20
-  private page: number = 0
-  private loading: boolean = true
 
-  private totalCount: number = 0
-  private loader: null | IPaginationLoader<Contact> = null
-
-  private searchResults: PaginatedResult = {}
+  private loading: boolean = false
   private searchText: string = ''
 
   private showDeleteDialog: boolean = false
   private contactToDelete: Contact | null = null
-  private searchResultItemsShown: { [id: string]: boolean } = {}
 
-  created () {
-    this.initializeAppBar()
+  get page(){
+    return this.pageNumber;
   }
 
-  mounted () {
-    this.initSearchQueryParams(this.$route.query)
-    this.runInitialSearch()
+  set page(newVal){
+    this.setPageNumber(newVal);
   }
 
-  beforeDestroy () {
-    this.unsetResultItemsShown()
-    this.$store.dispatch('appbar/setDefaults')
-  }
-
-  initializeAppBar () {
-    this.$store.dispatch('appbar/init', {
+  async created () {
+    await this.init({
       tabs: [],
       title: 'Contacts',
       saveBtnHiden: true,
       cancelBtnHidden: true
-    })
+    });
+    this.search();
   }
 
+  beforeDestroy () {
+    this.setDefaults();
+  }
+
+  async search(){
+    try{
+      this.loading=true;
+      await this.searchContactsPaginated(this.searchText);
+    }catch (e){
+      this.$store.commit('snackbar/setError', 'Loading of contacts failed')
+    }finally {
+      this.loading=false;
+    }
+  }
   clearSearch () {
     this.searchText = ''
   }
 
-  async runInitialSearch (): Promise<void> {
-    const page: number | undefined = this.getPageFromUrl()
+  //
+  // async runInitialSearch (): Promise<void> {
+  //   const page: number | undefined = this.getPageFromUrl()
+  //
+  //   await this.search(
+  //     {
+  //       searchText: this.searchText
+  //     },
+  //     page
+  //   )
+  // }
 
-    await this.search(
-      {
-        searchText: this.searchText
-      },
-      page
-    )
-  }
+  // runSearch () {
+  //   this.search({
+  //     searchText: this.searchText
+  //   })
+  // }
+  //
+  // async search (
+  //   searchParameters: IContactSearchParams,
+  //   page: number = 1
+  // ): Promise<void> {
+  //   this.initUrlQueryParams(searchParameters)
+  //
+  //   this.totalCount = 0
+  //   this.loading = true
+  //   this.searchResults = []
+  //   this.loader = null
+  //   this.page = 0
+  //
+  //   const lastActiveSearcher = this.$api.contacts
+  //     .newSearchBuilder()
+  //     .withText(this.searchText)
+  //     .build()
+  //
+  //   try {
+  //     const loader = await lastActiveSearcher.findMatchingAsPaginationLoaderOnPage(page, this.pageSize)
+  //     this.loader = loader
+  //     this.searchResults[page] = loader.elements
+  //     this.totalCount = loader.totalCount
+  //     this.page = page
+  //     this.setPageInUrl(page)
+  //   } catch (_error) {
+  //     this.$store.commit('snackbar/setError', 'Loading of contacts failed')
+  //   } finally {
+  //     this.loading = false
+  //   }
+  // }
 
-  runSearch () {
-    this.search({
-      searchText: this.searchText
-    })
-  }
-
-  async search (
-    searchParameters: IContactSearchParams,
-    page: number = 1
-  ): Promise<void> {
-    this.initUrlQueryParams(searchParameters)
-
-    this.totalCount = 0
-    this.loading = true
-    this.searchResults = []
-    this.unsetResultItemsShown()
-    this.loader = null
-    this.page = 0
-
-    const lastActiveSearcher = this.$api.contacts
-      .newSearchBuilder()
-      .withText(this.searchText)
-      .build()
-
-    try {
-      const loader = await lastActiveSearcher.findMatchingAsPaginationLoaderOnPage(page, this.pageSize)
-      this.loader = loader
-      this.searchResults[page] = loader.elements
-      this.totalCount = loader.totalCount
-      this.page = page
-      this.setPageInUrl(page)
-    } catch (_error) {
-      this.$store.commit('snackbar/setError', 'Loading of contacts failed')
-    } finally {
-      this.loading = false
-    }
-  }
-
-  async loadPage (pageNr: number, useCache: boolean = true) {
-    // use the results that were already loaded if available
-    if (useCache && this.searchResults[pageNr]) {
-      return
-    }
-    if (this.loader != null && this.loader.funToLoadPage != null) {
-      try {
-        this.loading = true
-        const loader = await this.loader.funToLoadPage(pageNr)
-        this.loader = loader
-        this.searchResults[pageNr] = loader.elements
-        this.totalCount = loader.totalCount
-      } catch (_error) {
-        this.$store.commit('snackbar/setError', 'Loading of contacts failed')
-      } finally {
-        this.loading = false
-      }
-    }
-  }
-
-  get numberOfPages (): number {
-    return Math.ceil(this.totalCount / this.pageSize)
-  }
-
-  async setPage (page: number) {
-    await this.loadPage(page)
-    this.page = page
-    this.setPageInUrl(page, false)
-  }
-
-  getSearchResultForPage (pageNr: number): Contact[] | undefined {
-    return this.searchResults[pageNr]
-  }
+  // async loadPage (pageNr: number, useCache: boolean = true) {
+  //   // use the results that were already loaded if available
+  //   if (useCache && this.searchResults[pageNr]) {
+  //     return
+  //   }
+  //   if (this.loader != null && this.loader.funToLoadPage != null) {
+  //     try {
+  //       this.loading = true
+  //       const loader = await this.loader.funToLoadPage(pageNr)
+  //       this.loader = loader
+  //       this.searchResults[pageNr] = loader.elements
+  //       this.totalCount = loader.totalCount
+  //     } catch (_error) {
+  //       this.$store.commit('snackbar/setError', 'Loading of contacts failed')
+  //     } finally {
+  //       this.loading = false
+  //     }
+  //   }
+  // }
+  //
+  // get numberOfPages (): number {
+  //   return Math.ceil(this.totalCount / this.pageSize)
+  // }
+  //
+  // async setPage (page: number) {
+  //   await this.loadPage(page)
+  //   this.page = page
+  //   this.setPageInUrl(page, false)
+  // }
+  //
+  // getSearchResultForPage (pageNr: number): Contact[] | undefined {
+  //   return this.searchResults[pageNr]
+  // }
 
   initDeleteDialog (contact: Contact) {
     this.showDeleteDialog = true
@@ -454,64 +339,53 @@ export default class SearchContactsPage extends Vue {
       this.closeDialog()
     }
   }
+  //
+  // initSearchQueryParams (params: QueryParams): void {
+  //   const searchParamsObject = new ContactSearchParamsSerializer().toSearchParams(params)
+  //
+  //   // prefill the form by the serialized search params from the URL
+  //   if (searchParamsObject.searchText) {
+  //     this.searchText = searchParamsObject.searchText
+  //   }
+  // }
+  //
+  // initUrlQueryParams (params: IContactSearchParams): void {
+  //   this.$router.push({
+  //     query: (new ContactSearchParamsSerializer()).toQueryParams(params),
+  //     hash: this.$route.hash
+  //   })
+  // }
+  //
+  // getPageFromUrl (): number | undefined {
+  //   if ('page' in this.$route.query && typeof this.$route.query.page === 'string') {
+  //     return parseInt(this.$route.query.page) || 0
+  //   }
+  // }
+  //
+  // setPageInUrl (page: number, preserveHash: boolean = true): void {
+  //   let query: QueryParams = {}
+  //   if (page) {
+  //     // add page to the current url params
+  //     query = {
+  //       ...this.$route.query,
+  //       page: String(page)
+  //     }
+  //   } else {
+  //     // remove page from the current url params
+  //     const {
+  //       // eslint-disable-next-line
+  //       page,
+  //       ...params
+  //     } = this.$route.query
+  //     query = params
+  //   }
+  //   this.$router.push({
+  //     query,
+  //     hash: preserveHash ? this.$route.hash : ''
+  //   })
+  // }
 
-  showResultItem (id: string) {
-    const show = !!this.searchResultItemsShown[id]
-    Vue.set(this.searchResultItemsShown, id, !show)
-  }
 
-  isResultItemShown (id: string): boolean {
-    return this.searchResultItemsShown[id]
-  }
-
-  unsetResultItemsShown (): void {
-    this.searchResultItemsShown = {}
-  }
-
-  initSearchQueryParams (params: QueryParams): void {
-    const searchParamsObject = new ContactSearchParamsSerializer().toSearchParams(params)
-
-    // prefill the form by the serialized search params from the URL
-    if (searchParamsObject.searchText) {
-      this.searchText = searchParamsObject.searchText
-    }
-  }
-
-  initUrlQueryParams (params: IContactSearchParams): void {
-    this.$router.push({
-      query: (new ContactSearchParamsSerializer()).toQueryParams(params),
-      hash: this.$route.hash
-    })
-  }
-
-  getPageFromUrl (): number | undefined {
-    if ('page' in this.$route.query && typeof this.$route.query.page === 'string') {
-      return parseInt(this.$route.query.page) || 0
-    }
-  }
-
-  setPageInUrl (page: number, preserveHash: boolean = true): void {
-    let query: QueryParams = {}
-    if (page) {
-      // add page to the current url params
-      query = {
-        ...this.$route.query,
-        page: String(page)
-      }
-    } else {
-      // remove page from the current url params
-      const {
-        // eslint-disable-next-line
-        page,
-        ...params
-      } = this.$route.query
-      query = params
-    }
-    this.$router.push({
-      query,
-      hash: preserveHash ? this.$route.hash : ''
-    })
-  }
 }
 </script>
 

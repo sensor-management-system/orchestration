@@ -46,6 +46,35 @@ export class ContactApi {
     this.serializer = new ContactSerializer()
   }
 
+  searchPaginated (pageNumber: number, pageSize: number, search: string = '') {
+
+    let queryParams = {
+      params: {
+        'page[number]': pageNumber,
+        'page[size]': pageSize,
+        'sort': 'family_name'
+      }
+    }
+    if(search !== ''){
+      // @ts-ignore
+      queryParams.params['q']=search;
+    }
+
+    return this.axiosApi.get(
+      this.basePath,
+      queryParams
+    ).then((rawResponse) => {
+      const rawData = rawResponse.data
+      const elements: Contact[] = this.serializer.convertJsonApiObjectListToModelList(rawData)
+      const totalCount = rawData.meta.count
+
+      return {
+        elements,
+        totalCount
+      }
+    });
+  }
+
   findById (id: string): Promise<Contact> {
     return this.axiosApi.get(this.basePath + '/' + id, {
       params: {

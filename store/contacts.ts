@@ -36,25 +36,43 @@
 import { Commit, ActionContext } from 'vuex/types'
 import { Contact } from '@/models/Contact'
 
-interface contactsState{
-  allContacts: Contact[],
-  configurationContacts: Contact[]
+interface contactsState {
+  contacts: Contact[],
+  configurationContacts: Contact[],
+  pageNumber: number,
+  pageSize: number,
+  totalPages: number
 }
 
 export const state = {
-  allContacts: [],
-  configurationContacts: []
+  contacts: [],
+  configurationContacts: [],
+  totalPages: 1,
+  pageNumber: 1,
+  pageSize: 20
 }
 export const getters = {
   searchContacts: (state: contactsState) => {
-    return state.allContacts.filter((c: Contact) => !state.configurationContacts.find((rc: Contact) => rc.id === c.id))
+    return state.contacts.filter((c: Contact) => !state.configurationContacts.find((rc: Contact) => rc.id === c.id))
   }
 }
 export const actions = {
+  async searchContactsPaginated ({
+    commit,
+    state
+  }: { commit: Commit, state: contactsState }, searchtext: string = '') {
+    // @ts-ignore
+    const {elements,totalCount} = await this.$api.contacts.searchPaginated(state.pageNumber, state.pageSize, searchtext)
+    commit('setContacts', elements)
+
+    const totalPages = Math.ceil(totalCount / state.pageSize)
+    commit('setTotalPages', totalPages)
+  },
+
   async loadAllContacts ({ commit }: { commit: Commit }) {
     // @ts-ignore
     const contacts = await this.$api.contacts.findAll()
-    commit('setAllContacts', contacts)
+    commit('setContacts', contacts)
   },
   async loadConfigurationContacts ({ commit }: { commit: Commit }, id: string) {
     // @ts-ignore
@@ -62,21 +80,36 @@ export const actions = {
     commit('setConfigurationContacts', contacts)
   },
   async addContactToConfiguration (_context: ActionContext<contactsState, contactsState>,
-    { configurationId, contactId }: {configurationId: string, contactId: string}) {
+    {
+      configurationId,
+      contactId
+    }: { configurationId: string, contactId: string }) {
     // @ts-ignore
     await this.$api.configurations.addContact(configurationId, contactId)
   },
   async removeContactFromConfiguration (_context: ActionContext<contactsState, contactsState>,
-    { configurationId, contactId }: {configurationId: string, contactId: string}) {
+    {
+      configurationId,
+      contactId
+    }: { configurationId: string, contactId: string }) {
     // @ts-ignore
     await this.$api.configurations.removeContact(configurationId, contactId)
+  },
+  setPageNumber ({ commit }: { commit: Commit }, newPageNumber: number) {
+    commit('setPageNumber', newPageNumber)
   }
 }
 export const mutations = {
-  setAllContacts (state: contactsState, contacts: Contact[]) {
-    state.allContacts = contacts
+  setContacts (state: contactsState, contacts: Contact[]) {
+    state.contacts = contacts
   },
   setConfigurationContacts (state: contactsState, contacts: Contact[]) {
     state.configurationContacts = contacts
+  },
+  setPageNumber (state: contactsState, newPageNumber: number) {
+    state.pageNumber = newPageNumber
+  },
+  setTotalPages (state: contactsState, count: number) {
+    state.totalPages = count
   }
 }
