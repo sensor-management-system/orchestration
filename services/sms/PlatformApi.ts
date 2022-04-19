@@ -63,6 +63,7 @@ import { IFlaskJSONAPIFilter } from '@/utils/JSONApiInterfaces'
 import {
   IPaginationLoader
 } from '@/utils/PaginatedLoader'
+import { IPlatformSearchParams } from '@/modelUtils/PlatformSearchParams'
 
 interface IncludedRelationships {
   includeContacts?: boolean
@@ -74,13 +75,19 @@ export class PlatformApi {
   readonly basePath: string
   private serializer: PlatformSerializer
 
+  private searchParams={}
+  private searchSettings:any=[]
+
   constructor (axiosInstance: AxiosInstance, basePath: string) {
     this.axiosApi = axiosInstance
     this.basePath = basePath
     this.serializer = new PlatformSerializer()
   }
 
-  searchPaginated(pageNumber: number, pageSize: number, searchParams={}){
+  // searchPaginated(pageNumber: number, pageSize: number, searchParams={}){
+  searchPaginated(pageNumber: number, pageSize: number, searchParameters: IPlatformSearchParams){
+
+    this.processParameters(searchParameters);
 
     return this.axiosApi.get(
       this.basePath,
@@ -88,7 +95,7 @@ export class PlatformApi {
         params: {
           'page[size]': pageSize,
           'page[number]': pageNumber,
-          ...searchParams
+          ...this.searchParams
         }
       }
     ).then((rawResponse) => {
@@ -110,6 +117,31 @@ export class PlatformApi {
     })
 
   }
+
+  processParameters(searchParameters: IPlatformSearchParams) {
+    // todo implement
+    this.processManufacturers(searchParameters);
+
+    }
+
+  processManufacturers(searchParameters: IPlatformSearchParams) {
+    if (searchParameters.manufacturer.length > 0) {
+      this.searchSettings.push({
+        or: [
+          {
+            name: 'manufacturer_name',
+            op: 'in_',
+            val: searchParameters.manufacturer.map((m: Manufacturer) => m.name)
+          },
+          {
+            name: 'manufacturer_uri',
+            op: 'in_',
+            val: searchParameters.manufacturer.map((m: Manufacturer) => m.uri)
+          }
+        ]
+      })
+    }
+    }
 
   findById (id: string, includes: IncludedRelationships): Promise<Platform> {
     const listIncludedRelationships: string[] = []
