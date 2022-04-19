@@ -101,12 +101,19 @@ export const actions = {
     // @ts-ignore
     await this.$api.configurations.removeContact(configurationId, contactId)
   },
+  async updateContact({ commit }: { commit: Commit }, contact:Contact){
+    commit('setContact',contact)
+  },
   setPageNumber ({ commit }: { commit: Commit }, newPageNumber: number) {
     commit('setPageNumber', newPageNumber)
   },
   async deleteContact({ commit }: { commit: Commit }, id: number){
     // @ts-ignore
     await this.$api.contacts.deleteById(id);
+  },
+  async saveContact({ commit }: { commit: Commit }, contact:Contact):Promise<Contact>{
+    // @ts-ignore
+    return this.$api.contacts.save(contact);
   }
 }
 export const mutations = {

@@ -54,8 +54,9 @@ permissions and limitations under the Licence.
         </v-btn>
       </v-card-actions>
       <ContactBasicDataForm
+        v-if="formContact"
         ref="basicForm"
-        v-model="contactCopy"
+        v-model="formContact"
         :readonly="false"
       />
       <v-card-actions>
@@ -85,28 +86,32 @@ import { Component, Prop, Vue, Watch } from 'nuxt-property-decorator'
 
 import { Contact } from '@/models/Contact'
 
+
+
 import ContactBasicDataForm from '@/components/ContactBasicDataForm.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { mapActions, mapState } from 'vuex'
 
 @Component({
   components: {
     ContactBasicDataForm,
     ProgressIndicator
   },
-  middleware: ['auth']
+  middleware: ['auth'],
+  computed:mapState('contacts',['contact']),
+  methods:mapActions('contacts',['updateContact','saveContact'])
 })
 export default class ContactEditPage extends Vue {
-  private contactCopy: Contact = new Contact()
   private isLoading: boolean = false
 
-  @Prop({
-    required: true,
-    type: Contact
-  })
-  readonly value!: Contact
-
-  mounted () {
-    this.contactCopy = Contact.createFromObject(this.value)
+  get formContact(){
+    if(this.contact){
+      return this.contact;
+    }
+    return new Contact()
+  }
+  set formContact(val){
+    this.updateContact(val);
   }
 
   onSaveButtonClicked () {
@@ -127,7 +132,7 @@ export default class ContactEditPage extends Vue {
 
   save (): Promise<Contact> {
     return new Promise((resolve, reject) => {
-      this.$api.contacts.save(this.contactCopy).then((savedContact) => {
+      this.saveContact(this.formContact).then((savedContact) => {
         resolve(savedContact)
       }).catch((_error) => {
         reject(_error)
@@ -139,13 +144,13 @@ export default class ContactEditPage extends Vue {
     return this.$route.params.contactId
   }
 
-  @Watch('value', { immediate: true, deep: true })
-  // @ts-ignore
-  onContactChanged (val: Contact) {
-    if (val.id) {
-      this.$store.commit('appbar/setTitle', val?.toString() || 'Edit contact')
-    }
-    this.contactCopy = Contact.createFromObject(val)
-  }
+  // @Watch('value', { immediate: true, deep: true })
+  // // @ts-ignore
+  // onContactChanged (val: Contact) {
+  //   if (val.id) {
+  //     this.$store.commit('appbar/setTitle', val?.toString() || 'Edit contact')
+  //   }
+  //   this.contactCopy = Contact.createFromObject(val)
+  // }
 }
 </script>
