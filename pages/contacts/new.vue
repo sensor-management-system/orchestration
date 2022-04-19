@@ -94,13 +94,15 @@ import { Contact } from '@/models/Contact'
 
 import ContactBasicDataForm from '@/components/ContactBasicDataForm.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { mapActions } from 'vuex'
 
 @Component({
   components: {
     ContactBasicDataForm,
     ProgressIndicator
   },
-  middleware: ['auth']
+  middleware: ['auth'],
+  methods: mapActions('contacts',['saveContact'])
 })
 export default class ContactNewPage extends mixins(Rules) {
   private numberOfTabs: number = 1
@@ -126,7 +128,7 @@ export default class ContactNewPage extends mixins(Rules) {
       return
     }
     this.isLoading = true
-    this.$api.contacts.save(this.contact).then((savedContact) => {
+    this.saveContact(this.contact).then((savedContact) => {
       this.isLoading = false
       this.$store.commit('snackbar/setSuccess', 'Contact created')
       this.$router.push('/contacts/' + savedContact.id + '')
