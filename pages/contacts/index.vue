@@ -194,6 +194,7 @@ export default class SearchContactsPage extends Vue {
 
   set page(newVal){
     this.setPageNumber(newVal);
+    this.setPageInUrl(false);
   }
 
   async created () {
@@ -203,6 +204,7 @@ export default class SearchContactsPage extends Vue {
       saveBtnHiden: true,
       cancelBtnHidden: true
     });
+    this.setPageFromUrl();
     this.search();
   }
 
@@ -223,89 +225,39 @@ export default class SearchContactsPage extends Vue {
   clearSearch () {
     this.searchText = ''
   }
+  setPageFromUrl():void{
+    const urlPage = this.getPageFromUrl();
+    this.setPageNumber(urlPage);
+  }
+  getPageFromUrl (): number | undefined {
+    if ('page' in this.$route.query && typeof this.$route.query.page === 'string') {
+      return parseInt(this.$route.query.page) || 1
+    }
+    return 1;
+  }
+  setPageInUrl (preserveHash: boolean = true): void {
+    let query: QueryParams = {}
+    if (this.page) {
+      // add page to the current url params
+      query = {
+        ...this.$route.query,
+        page: String(this.page)
+      }
+    } else {
+      // remove page from the current url params
+      const {
+        // eslint-disable-next-line
+        page,
+        ...params
+      } = this.$route.query
+      query = params
+    }
+    this.$router.push({
+      query,
+      hash: preserveHash ? this.$route.hash : ''
+    })
+  }
 
-  //
-  // async runInitialSearch (): Promise<void> {
-  //   const page: number | undefined = this.getPageFromUrl()
-  //
-  //   await this.search(
-  //     {
-  //       searchText: this.searchText
-  //     },
-  //     page
-  //   )
-  // }
-
-  // runSearch () {
-  //   this.search({
-  //     searchText: this.searchText
-  //   })
-  // }
-  //
-  // async search (
-  //   searchParameters: IContactSearchParams,
-  //   page: number = 1
-  // ): Promise<void> {
-  //   this.initUrlQueryParams(searchParameters)
-  //
-  //   this.totalCount = 0
-  //   this.loading = true
-  //   this.searchResults = []
-  //   this.loader = null
-  //   this.page = 0
-  //
-  //   const lastActiveSearcher = this.$api.contacts
-  //     .newSearchBuilder()
-  //     .withText(this.searchText)
-  //     .build()
-  //
-  //   try {
-  //     const loader = await lastActiveSearcher.findMatchingAsPaginationLoaderOnPage(page, this.pageSize)
-  //     this.loader = loader
-  //     this.searchResults[page] = loader.elements
-  //     this.totalCount = loader.totalCount
-  //     this.page = page
-  //     this.setPageInUrl(page)
-  //   } catch (_error) {
-  //     this.$store.commit('snackbar/setError', 'Loading of contacts failed')
-  //   } finally {
-  //     this.loading = false
-  //   }
-  // }
-
-  // async loadPage (pageNr: number, useCache: boolean = true) {
-  //   // use the results that were already loaded if available
-  //   if (useCache && this.searchResults[pageNr]) {
-  //     return
-  //   }
-  //   if (this.loader != null && this.loader.funToLoadPage != null) {
-  //     try {
-  //       this.loading = true
-  //       const loader = await this.loader.funToLoadPage(pageNr)
-  //       this.loader = loader
-  //       this.searchResults[pageNr] = loader.elements
-  //       this.totalCount = loader.totalCount
-  //     } catch (_error) {
-  //       this.$store.commit('snackbar/setError', 'Loading of contacts failed')
-  //     } finally {
-  //       this.loading = false
-  //     }
-  //   }
-  // }
-  //
-  // get numberOfPages (): number {
-  //   return Math.ceil(this.totalCount / this.pageSize)
-  // }
-  //
-  // async setPage (page: number) {
-  //   await this.loadPage(page)
-  //   this.page = page
-  //   this.setPageInUrl(page, false)
-  // }
-  //
-  // getSearchResultForPage (pageNr: number): Contact[] | undefined {
-  //   return this.searchResults[pageNr]
-  // }
 
   initDeleteDialog (contact: Contact) {
     this.showDeleteDialog = true
@@ -334,52 +286,6 @@ export default class SearchContactsPage extends Vue {
       this.closeDialog()
     }
   }
-  //
-  // initSearchQueryParams (params: QueryParams): void {
-  //   const searchParamsObject = new ContactSearchParamsSerializer().toSearchParams(params)
-  //
-  //   // prefill the form by the serialized search params from the URL
-  //   if (searchParamsObject.searchText) {
-  //     this.searchText = searchParamsObject.searchText
-  //   }
-  // }
-  //
-  // initUrlQueryParams (params: IContactSearchParams): void {
-  //   this.$router.push({
-  //     query: (new ContactSearchParamsSerializer()).toQueryParams(params),
-  //     hash: this.$route.hash
-  //   })
-  // }
-  //
-  // getPageFromUrl (): number | undefined {
-  //   if ('page' in this.$route.query && typeof this.$route.query.page === 'string') {
-  //     return parseInt(this.$route.query.page) || 0
-  //   }
-  // }
-  //
-  // setPageInUrl (page: number, preserveHash: boolean = true): void {
-  //   let query: QueryParams = {}
-  //   if (page) {
-  //     // add page to the current url params
-  //     query = {
-  //       ...this.$route.query,
-  //       page: String(page)
-  //     }
-  //   } else {
-  //     // remove page from the current url params
-  //     const {
-  //       // eslint-disable-next-line
-  //       page,
-  //       ...params
-  //     } = this.$route.query
-  //     query = params
-  //   }
-  //   this.$router.push({
-  //     query,
-  //     hash: preserveHash ? this.$route.hash : ''
-  //   })
-  // }
-
 
 }
 </script>
