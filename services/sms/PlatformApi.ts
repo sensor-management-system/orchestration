@@ -80,6 +80,37 @@ export class PlatformApi {
     this.serializer = new PlatformSerializer()
   }
 
+  searchPaginated(pageNumber: number, pageSize: number, searchParams={}){
+
+    return this.axiosApi.get(
+      this.basePath,
+      {
+        params: {
+          'page[size]': pageSize,
+          'page[number]': pageNumber,
+          ...searchParams
+        }
+      }
+    ).then((rawResponse) => {
+      const rawData = rawResponse.data
+      // And - again - as we don't ask the api to include the contacts, we just handle
+      // the missing contact data by adding dummy objects for those.
+      const elements: Platform[] = this.serializer.convertJsonApiObjectListToModelList(
+        rawData
+      ).map(platformWithMetaToPlatformByAddingDummyObjects)
+
+      // This is given by the json api. Regardless of the pagination it
+      // represents the total amount of entries found.
+      const totalCount = rawData.meta.count
+
+      return {
+        elements,
+        totalCount
+      }
+    })
+
+  }
+
   findById (id: string, includes: IncludedRelationships): Promise<Platform> {
     const listIncludedRelationships: string[] = []
     if (includes.includeContacts) {

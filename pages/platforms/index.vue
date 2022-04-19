@@ -128,19 +128,19 @@ permissions and limitations under the Licence.
       color="primary"
       indeterminate
     />
-    <div v-if="!totalCount && !loading">
+    <div v-if="platforms.length <=0 && !loading">
       <p class="text-center">
         There are no platforms that match your search criteria.
       </p>
     </div>
 
-    <div v-if="totalCount">
+    <div v-if="platforms.length>0">
       <v-subheader>
-        <template v-if="totalCount == 1">
+        <template v-if="platforms.length == 1">
           1 platform found
         </template>
         <template v-else>
-          {{ totalCount }} platforms found
+          {{ platforms.length }} platforms found
         </template>
         <v-spacer />
 
@@ -202,7 +202,7 @@ permissions and limitations under the Licence.
         @input="setPage"
       />
       <BaseList
-        :list-items="getSearchResultForPage(page)"
+        :list-items="platforms"
       >
         <template v-slot:list-item="{item}">
           <PlatformsListItem
@@ -303,10 +303,12 @@ type PaginatedResult = {
     StatusSelect
   },
   computed:{
-    ...mapState('vocabulary',['platformtypes','manufacturers','equipmentstatus'])
+    ...mapState('vocabulary',['platformtypes','manufacturers','equipmentstatus']),
+    ...mapState('platforms',['platforms'])
   },
   methods:{
-    ...mapActions('vocabulary',['loadEquipmentstatus','loadPlatformtypes','loadManufacturers'])
+    ...mapActions('vocabulary',['loadEquipmentstatus','loadPlatformtypes','loadManufacturers']),
+    ...mapActions('platforms',['searchPlatformsPaginated'])
   }
 })
 export default class SearchPlatformsPage extends Vue {
@@ -347,6 +349,7 @@ export default class SearchPlatformsPage extends Vue {
     this.loadEquipmentstatus();
     this.loadPlatformtypes();
     this.loadManufacturers();
+
   }
 
   async mounted () {
@@ -486,21 +489,95 @@ export default class SearchPlatformsPage extends Vue {
       .withOneMatchingStatusOf(searchParameters.states)
       .withOneMatchingPlatformTypeOf(searchParameters.types)
 
+    // if (searchParameters.onlyOwnPlatforms) {
+    //   const email = this.$auth.user!.email as string
+    //   if (email) {
+    //     searchBuilder.withContactEmail(email)
+    //   }
+    // }
+
+    let filterSettings = [];
+    if (searchParameters.manufacturer.length > 0) {
+      filterSettings.push({
+        or: [
+          {
+            name: 'manufacturer_name',
+            op: 'in_',
+            val: searchParameters.manufacturer.map((m: Manufacturer) => m.name)
+          },
+          {
+            name: 'manufacturer_uri',
+            op: 'in_',
+            val: searchParameters.manufacturer.map((m: Manufacturer) => m.uri)
+          }
+        ]
+      })
+    }
+    if (searchParameters.states.length > 0) {
+      filterSettings.push({
+        or: [
+          {
+            name: 'status_name',
+            op: 'in_',
+            val: searchParameters.states.map((s: Status) => s.name)
+          },
+          {
+            name: 'status_uri',
+            op: 'in_',
+            val: searchParameters.states.map((s: Status) => s.uri)
+          }
+        ]
+      })
+    }
+    if (searchParameters.types.length > 0) {
+      filterSettings.push({
+        or: [
+          {
+            name: 'platform_type_name',
+            op: 'in_',
+            val: searchParameters.types.map((t: PlatformType) => t.name)
+          },
+          {
+            name: 'platform_type_uri',
+            op: 'in_',
+            val: searchParameters.types.map((t: PlatformType) => t.uri)
+          }
+        ]
+      })
+    }
     if (searchParameters.onlyOwnPlatforms) {
       const email = this.$auth.user!.email as string
       if (email) {
-        searchBuilder.withContactEmail(email)
+        filterSettings.push({
+          name: 'contacts.email',
+          op: 'eq',
+          val: email
+        })
       }
     }
+    //todo nicht vergessen:
+    //searchParameters.searchText
 
-    this.lastActiveSearcher = searchBuilder.build()
+    let queryParams = {};
+    queryParams={
+      filter:JSON.stringify(filterSettings)
+    }
+    if(searchParameters.searchText){
+      queryParams.q = searchParameters.searchText
+    }
+    queryParams.sort='short_name';
+
+    // this.lastActiveSearcher = searchBuilder.build()
+    console.log('searchParameters',searchParameters);
+    console.log('filterSettings',filterSettings);
     try {
-      const loader = await this.lastActiveSearcher.findMatchingAsPaginationLoaderOnPage(page, this.pageSize)
-      this.loader = loader
-      this.searchResults[page] = loader.elements
-      this.totalCount = loader.totalCount
-      this.page = page
-      this.setPageInUrl(page)
+      this.searchPlatformsPaginated(queryParams);
+      // const loader = await this.lastActiveSearcher.findMatchingAsPaginationLoaderOnPage(page, this.pageSize)
+      // this.loader = loader
+      // this.searchResults[page] = loader.elements
+      // this.totalCount = loader.totalCount
+      // this.page = page
+      // this.setPageInUrl(page)
     } catch (_error) {
       this.$store.commit('snackbar/setError', 'Loading of platforms failed')
     } finally {
@@ -508,25 +585,25 @@ export default class SearchPlatformsPage extends Vue {
     }
   }
 
-  async loadPage (pageNr: number, useCache: boolean = true) {
-    // use the results that were already loaded if available
-    if (useCache && this.searchResults[pageNr]) {
-      return
-    }
-    if (this.loader != null && this.loader.funToLoadPage != null) {
-      try {
-        this.loading = true
-        const loader = await this.loader.funToLoadPage(pageNr)
-        this.loader = loader
-        this.searchResults[pageNr] = loader.elements
-        this.totalCount = loader.totalCount
-      } catch (_error) {
-        this.$store.commit('snackbar/setError', 'Loading of platforms failed')
-      } finally {
-        this.loading = false
-      }
-    }
-  }
+  // async loadPage (pageNr: number, useCache: boolean = true) {
+  //   // use the results that were already loaded if available
+  //   if (useCache && this.searchResults[pageNr]) {
+  //     return
+  //   }
+  //   if (this.loader != null && this.loader.funToLoadPage != null) {
+  //     try {
+  //       this.loading = true
+  //       const loader = await this.loader.funToLoadPage(pageNr)
+  //       this.loader = loader
+  //       this.searchResults[pageNr] = loader.elements
+  //       this.totalCount = loader.totalCount
+  //     } catch (_error) {
+  //       this.$store.commit('snackbar/setError', 'Loading of platforms failed')
+  //     } finally {
+  //       this.loading = false
+  //     }
+  //   }
+  // }
 
   get numberOfPages (): number {
     return Math.ceil(this.totalCount / this.pageSize)

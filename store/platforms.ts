@@ -25,7 +25,7 @@ const actions = {
     state
   }: { commit: Commit, state: platformsState }, searchParams:{}){
     //TODO  this.$api.platforms.searchPaginated implementieren bzw. vorhandenes nachnutzen.
-    // searchtext,manufacturer,status,platformtype und wenn onlyOwnPlatforms, dann auch user.email --> kommt als parameter
+    // searchtext,manufacturer,status,platformtype !können listen sein! und wenn onlyOwnPlatforms, dann auch user.email --> kommt als parameter
 
     // @ts-ignore
     const {elements,totalCount} = await this.$api.platforms.searchPaginated(state.pageNumber,state.pageSize,searchParams)
