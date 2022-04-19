@@ -1,0 +1,64 @@
+import { Platform } from '@/models/Platform'
+import { Commit } from 'vuex'
+
+interface platformsState {
+  platforms: Platform[],
+  platform : Platform|null,
+  pageNumber: number,
+  pageSize: number,
+  totalPages: number
+}
+
+const state = {
+  platforms:[],
+  platform:null,
+  totalPages: 1,
+  pageNumber: 1,
+  pageSize: 20
+}
+
+const getters = {}
+
+const actions = {
+  async searchPlatformsPaginated({
+    commit,
+    state
+  }: { commit: Commit, state: platformsState }, searchParams:{}){
+    //TODO  this.$api.platforms.searchPaginated implementieren bzw. vorhandenes nachnutzen.
+    // searchtext,manufacturer,status,platformtype und wenn onlyOwnPlatforms, dann auch user.email --> kommt als parameter
+
+    // @ts-ignore
+    const {elements,totalCount} = await this.$api.platforms.searchPaginated(state.pageNumber,state.pageSize,searchParams)
+    commit('setPlatforms',elements)
+
+    const totalPages = Math.ceil(totalCount / state.pageSize)
+    commit('setTotalPages', totalPages)
+  },
+
+  setPageNumber ({ commit }: { commit: Commit }, newPageNumber: number) {
+    commit('setPageNumber', newPageNumber)
+  },
+}
+
+const mutations = {
+  setPlatforms(state:platformsState,platforms:Platform[]){
+    state.platforms=platforms;
+  },
+  setPlatform(state:platformsState,platform:Platform){
+    state.platform=platform
+  },
+  setPageNumber (state: platformsState, newPageNumber: number) {
+    state.pageNumber = newPageNumber
+  },
+  setTotalPages (state: platformsState, count: number) {
+    state.totalPages = count
+  }
+}
+
+export default {
+  namespaced: true,
+  state,
+  getters,
+  actions,
+  mutations
+}

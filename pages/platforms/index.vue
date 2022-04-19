@@ -201,211 +201,28 @@ permissions and limitations under the Licence.
         :total-visible="7"
         @input="setPage"
       />
-      <v-hover
-        v-for="result in getSearchResultForPage(page)"
-        v-slot="{ hover }"
-        :key="result.id"
+      <BaseList
+        :list-items="getSearchResultForPage(page)"
       >
-        <v-card
-          :disabled="loading"
-          :elevation="hover ? 6 : 2"
-          class="ma-2"
-        >
-          <v-card-text
-            @click.stop.prevent="showResultItem(result.id)"
+        <template v-slot:list-item="{item}">
+          <PlatformsListItem
+            :key="item.id"
+            :platform="item"
           >
-            <v-row
-              no-gutters
-            >
-              <v-col>
-                <StatusBadge
-                  :value="getStatus(result)"
-                >
-                  <div :class="'text-caption' + (getType(result) === NO_TYPE ? ' text--disabled' : '')">
-                    {{ getType(result) }}
-                  </div>
-                </StatusBadge>
-              </v-col>
-              <v-col
-                align-self="end"
-                class="text-right"
-              >
-                <DotMenu>
-                  <template #actions>
-                    <DotMenuActionCopy
-                      :readonly="!$auth.loggedIn"
-                      :path="'/platforms/copy/' + result.id"
-                    />
-                    <DotMenuActionDelete
-                      :readonly="!$auth.loggedIn"
-                      @click="initDeleteDialog(result)"
-                    />
-                  </template>
-                </DotMenu>
-              </v-col>
-            </v-row>
-            <v-row
-              no-gutters
-            >
-              <v-col class="text-subtitle-1">
-                {{ result.shortName }}
-              </v-col>
-              <v-col
-                align-self="end"
-                class="text-right"
-              >
-                <v-btn
-                  :to="'/platforms/' + result.id"
-                  color="primary"
-                  text
-                  @click.stop.prevent
-                >
-                  View
-                </v-btn>
-                <v-btn
-                  icon
-                  @click.stop.prevent="showResultItem(result.id)"
-                >
-                  <v-icon>{{ isResultItemShown(result.id) ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
-                </v-btn>
-              </v-col>
-            </v-row>
-          </v-card-text>
-          <v-expand-transition>
-            <v-card
-              v-show="isResultItemShown(result.id)"
-              flat
-              tile
-              color="grey lighten-5"
-            >
-              <v-card-text>
-                <v-row
-                  dense
-                >
-                  <v-col
-                    cols="4"
-                    xs="4"
-                    sm="3"
-                    md="2"
-                    lg="2"
-                    xl="1"
-                    class="font-weight-medium"
-                  >
-                    Manufacturer:
-                  </v-col>
-                  <v-col
-                    cols="8"
-                    xs="8"
-                    sm="9"
-                    md="4"
-                    lg="4"
-                    xl="5"
-                    class="nowrap-truncate"
-                  >
-                    {{ getTextOrDefault(result.manufacturerName) }}
-                  </v-col>
-                  <v-col
-                    cols="4"
-                    xs="4"
-                    sm="3"
-                    md="2"
-                    lg="2"
-                    xl="1"
-                    class="font-weight-medium"
-                  >
-                    Model:
-                  </v-col>
-                  <v-col
-                    cols="8"
-                    xs="8"
-                    sm="9"
-                    md="4"
-                    lg="4"
-                    xl="5"
-                    class="nowrap-truncate"
-                  >
-                    {{ getTextOrDefault(result.model) }}
-                  </v-col>
-                </v-row>
-                <v-row
-                  dense
-                >
-                  <v-col
-                    cols="4"
-                    xs="4"
-                    sm="3"
-                    md="2"
-                    lg="2"
-                    xl="1"
-                    class="font-weight-medium"
-                  >
-                    Serial number:
-                  </v-col>
-                  <v-col
-                    cols="8"
-                    xs="8"
-                    sm="9"
-                    md="4"
-                    lg="4"
-                    xl="5"
-                    class="nowrap-truncate"
-                  >
-                    {{ getTextOrDefault(result.serialNumber) }}
-                  </v-col>
-                  <v-col
-                    cols="4"
-                    xs="4"
-                    sm="3"
-                    md="2"
-                    lg="2"
-                    xl="1"
-                    class="font-weight-medium"
-                  >
-                    Inventory number:
-                  </v-col>
-                  <v-col
-                    cols="8"
-                    xs="8"
-                    sm="9"
-                    md="4"
-                    lg="4"
-                    xl="5"
-                    class="nowrap-truncate"
-                  >
-                    {{ getTextOrDefault(result.inventoryNumber) }}
-                  </v-col>
-                </v-row>
-                <v-row
-                  dense
-                >
-                  <v-col
-                    cols="4"
-                    xs="4"
-                    sm="3"
-                    md="2"
-                    lg="2"
-                    xl="1"
-                    class="font-weight-medium"
-                  >
-                    Description:
-                  </v-col>
-                  <v-col
-                    cols="8"
-                    xs="8"
-                    sm="9"
-                    md="10"
-                    lg="10"
-                    xl="11"
-                    class="nowrap-truncate"
-                  >
-                    {{ getTextOrDefault(result.description) }}
-                  </v-col>
-                </v-row>
-              </v-card-text>
-            </v-card>
-          </v-expand-transition>
-        </v-card>
-      </v-hover>
+            <template #dot-menu-items>
+              <DotMenuActionCopy
+                :readonly="!$auth.loggedIn"
+                :path="'/platforms/copy/' + item.id"
+              />
+              <DotMenuActionDelete
+                :readonly="!$auth.loggedIn"
+                @click="initDeleteDialog(item)"
+              />
+            </template>
+          </PlatformsListItem>
+        </template>
+
+      </BaseList>
       <v-pagination
         :value="page"
         :disabled="loading"
@@ -443,6 +260,8 @@ import { Component, Vue } from 'nuxt-property-decorator'
 
 import { saveAs } from 'file-saver'
 
+import {mapState,mapActions} from 'vuex'
+
 import ManufacturerSelect from '@/components/ManufacturerSelect.vue'
 import PlatformTypeSelect from '@/components/PlatformTypeSelect.vue'
 import StatusSelect from '@/components/StatusSelect.vue'
@@ -463,6 +282,8 @@ import { PlatformSearcher } from '@/services/sms/PlatformApi'
 
 import { QueryParams } from '@/modelUtils/QueryParams'
 import { IPlatformSearchParams, PlatformSearchParamsSerializer } from '@/modelUtils/PlatformSearchParams'
+import BaseList from '@/components/shared/BaseList.vue'
+import PlatformsListItem from '@/components/platforms/PlatformsListItem.vue'
 
 type PaginatedResult = {
     [page: number]: Platform[]
@@ -470,6 +291,8 @@ type PaginatedResult = {
 
 @Component({
   components: {
+    PlatformsListItem,
+    BaseList,
     DotMenuActionDelete,
     DotMenuActionCopy,
     DotMenu,
@@ -478,6 +301,12 @@ type PaginatedResult = {
     PlatformTypeSelect,
     StatusBadge,
     StatusSelect
+  },
+  computed:{
+    ...mapState('vocabulary',['platformtypes','manufacturers','equipmentstatus'])
+  },
+  methods:{
+    ...mapActions('vocabulary',['loadEquipmentstatus','loadPlatformtypes','loadManufacturers'])
   }
 })
 export default class SearchPlatformsPage extends Vue {
@@ -495,9 +324,9 @@ export default class SearchPlatformsPage extends Vue {
   private selectedSearchPlatformTypes: PlatformType[] = []
   private onlyOwnPlatforms: boolean = false
 
-  private manufacturer: Manufacturer[] = []
-  private states: Status[] = []
-  private platformTypes: PlatformType[] = []
+  // private manufacturer: Manufacturer[] = []
+  // private states: Status[] = []
+  // private platformTypes: PlatformType[] = []
 
   private platformTypeLookup: Map<string, PlatformType> = new Map<string, PlatformType>()
   private statusLookup: Map<string, Status> = new Map<string, Status>()
@@ -515,42 +344,45 @@ export default class SearchPlatformsPage extends Vue {
 
   created () {
     this.initializeAppBar()
+    this.loadEquipmentstatus();
+    this.loadPlatformtypes();
+    this.loadManufacturers();
   }
 
   async mounted () {
-    await this.fetchEntities()
+    // await this.fetchEntities()
     this.initSearchQueryParams(this.$route.query)
     this.runInitialSearch()
   }
 
-  async fetchEntities (): Promise<void> {
-    const platformTypeLookup = new Map<string, PlatformType>()
-    const statusLookup = new Map<string, Status>()
-
-    try {
-      const [platformTypes, states, manufacturer] = await Promise.all([
-        this.$api.platformTypes.findAll(),
-        this.$api.states.findAll(),
-        this.$api.manufacturer.findAll()
-      ])
-
-      this.platformTypes = platformTypes
-      this.states = states
-      this.manufacturer = manufacturer
-
-      for (const platformType of platformTypes) {
-        platformTypeLookup.set(platformType.uri, platformType)
-      }
-      for (const status of states) {
-        statusLookup.set(status.uri, status)
-      }
-
-      this.platformTypeLookup = platformTypeLookup
-      this.statusLookup = statusLookup
-    } catch (_error) {
-      this.$store.commit('snackbar/setError', 'Loading of entities failed')
-    }
-  }
+  // async fetchEntities (): Promise<void> {
+  //   const platformTypeLookup = new Map<string, PlatformType>()
+  //   const statusLookup = new Map<string, Status>()
+  //
+  //   try {
+  //     const [platformTypes, states, manufacturer] = await Promise.all([
+  //       this.$api.platformTypes.findAll(),
+  //       this.$api.states.findAll(),
+  //       this.$api.manufacturer.findAll()
+  //     ])
+  //
+  //     this.platformTypes = platformTypes
+  //     this.states = states
+  //     this.manufacturer = manufacturer
+  //
+  //     for (const platformType of platformTypes) {
+  //       platformTypeLookup.set(platformType.uri, platformType)
+  //     }
+  //     for (const status of states) {
+  //       statusLookup.set(status.uri, status)
+  //     }
+  //
+  //     this.platformTypeLookup = platformTypeLookup
+  //     this.statusLookup = statusLookup
+  //   } catch (_error) {
+  //     this.$store.commit('snackbar/setError', 'Loading of entities failed')
+  //   }
+  // }
 
   beforeDestroy () {
     this.unsetResultItemsShown()
