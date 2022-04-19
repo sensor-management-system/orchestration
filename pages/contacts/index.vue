@@ -176,7 +176,7 @@ type PaginatedResult = {
   },
   computed:mapState('contacts',['pageNumber','pageSize','totalPages','contacts']),
   methods:{
-    ...mapActions('contacts',['searchContactsPaginated','setPageNumber']),
+    ...mapActions('contacts',['searchContactsPaginated','setPageNumber','deleteContact']),
     ...mapActions('appbar',['init','setDefaults'])
   }
 })
@@ -324,13 +324,8 @@ export default class SearchContactsPage extends Vue {
 
     this.loading = true
     try {
-      await this.$api.contacts.deleteById(this.contactToDelete.id)
-      // if we know that the deleted device was the last of the page, we
-      // decrement the page by one
-      if (this.getSearchResultForPage(this.page)?.length === 1) {
-        this.page = this.page > 1 ? this.page - 1 : 1
-      }
-      this.loadPage(this.page, false)
+      await this.deleteContact(this.contactToDelete.id)
+      this.search();//to update the list
       this.$store.commit('snackbar/setSuccess', 'Contact deleted')
     } catch (_error) {
       this.$store.commit('snackbar/setError', 'Contact could not be deleted')

@@ -97,6 +97,10 @@ export const actions = {
   },
   setPageNumber ({ commit }: { commit: Commit }, newPageNumber: number) {
     commit('setPageNumber', newPageNumber)
+  },
+  async deleteContact({ commit }: { commit: Commit }, id: number){
+    // @ts-ignore
+    await this.$api.contacts.deleteById(id);
   }
 }
 export const mutations = {
