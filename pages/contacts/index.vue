@@ -100,15 +100,11 @@ permissions and limitations under the Licence.
             :key="item.id"
             :contact="item"
           >
-            <template #dot-menu>
-              <DotMenu>
-                <template #actions>
+            <template #dot-menu-items>
                   <DotMenuActionDelete
                     :readonly="!$auth.loggedIn"
                     @click="initDeleteDialog(item)"
                   />
-                </template>
-              </DotMenu>
             </template>
           </ContactsListItem>
         </template>

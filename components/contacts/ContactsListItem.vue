@@ -21,9 +21,13 @@
             align-self="end"
             class="text-right"
           >
-            <slot name="dot-menu">
 
-            </slot>
+              <DotMenu>
+                <template #actions>
+                  <slot name="dot-menu-items">
+                  </slot>
+                </template>
+              </DotMenu>
           </v-col>
         </v-row>
         <v-row
@@ -146,7 +150,9 @@
 import { Component, Vue } from 'vue-property-decorator'
 import { Prop } from 'nuxt-property-decorator'
 import { Contact } from '@/models/Contact'
+import DotMenu from '@/components/DotMenu.vue'
 @Component({
+  components: { DotMenu }
 })
 export default class ContactsListItem extends Vue {
   @Prop({
