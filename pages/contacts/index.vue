@@ -86,7 +86,7 @@ permissions and limitations under the Licence.
       </v-subheader>
 
       <v-pagination
-        :value="page"
+        v-model="page"
         :disabled="loading"
         :length="totalPages"
         :total-visible="7"
@@ -114,7 +114,7 @@ permissions and limitations under the Licence.
         </template>
       </BaseList>
       <v-pagination
-        :value="page"
+        v-model="page"
         :disabled="loading"
         :length="totalPages"
         :total-visible="7"
