@@ -265,13 +265,9 @@ import {mapState,mapActions} from 'vuex'
 import ManufacturerSelect from '@/components/ManufacturerSelect.vue'
 import PlatformTypeSelect from '@/components/PlatformTypeSelect.vue'
 import StatusSelect from '@/components/StatusSelect.vue'
-import StatusBadge from '@/components/StatusBadge.vue'
 import PlatformDeleteDialog from '@/components/platforms/PlatformDeleteDialog.vue'
-import DotMenu from '@/components/DotMenu.vue'
 import DotMenuActionCopy from '@/components/DotMenuActionCopy.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
-
-import { IPaginationLoader } from '@/utils/PaginatedLoader'
 
 import { Manufacturer } from '@/models/Manufacturer'
 import { Platform } from '@/models/Platform'
@@ -279,13 +275,9 @@ import { PlatformType } from '@/models/PlatformType'
 import { Status } from '@/models/Status'
 
 import { QueryParams } from '@/modelUtils/QueryParams'
-import { IPlatformSearchParams, PlatformSearchParamsSerializer } from '@/modelUtils/PlatformSearchParams'
+import { PlatformSearchParamsSerializer } from '@/modelUtils/PlatformSearchParams'
 import BaseList from '@/components/shared/BaseList.vue'
 import PlatformsListItem from '@/components/platforms/PlatformsListItem.vue'
-
-type PaginatedResult = {
-    [page: number]: Platform[]
-}
 
 @Component({
   components: {
@@ -293,11 +285,9 @@ type PaginatedResult = {
     BaseList,
     DotMenuActionDelete,
     DotMenuActionCopy,
-    DotMenu,
     PlatformDeleteDialog,
     ManufacturerSelect,
     PlatformTypeSelect,
-    StatusBadge,
     StatusSelect
   },
   computed:{
@@ -318,32 +308,20 @@ export default class SearchPlatformsPage extends Vue {
   private selectedSearchPlatformTypes: PlatformType[] = []
   private onlyOwnPlatforms: boolean = false
 
-  // private platformTypeLookup: Map<string, PlatformType> = new Map<string, PlatformType>() //Todo probably strore getter
-  // private statusLookup: Map<string, Status> = new Map<string, Status>() //Todo probably strore getter
-
-  private searchResults: PaginatedResult = {}
   private searchText: string | null = null
 
   private showDeleteDialog: boolean = false
 
-  private searchResultItemsShown: { [id: string]: boolean } = {}
-
-  public readonly NO_TYPE: string = 'Unknown type'
-
   private platformToDelete: Platform | null = null
 
-  created () {
-    this.initializeAppBar()
-    this.loadEquipmentstatus();
-    this.loadPlatformtypes();
-    this.loadManufacturers();
+  async created () {
+    await this.initializeAppBar()
+    await this.loadEquipmentstatus();
+    await this.loadPlatformtypes();
+    await this.loadManufacturers();
 
-  }
-
-  async mounted () {
-    // await this.fetchEntities()
-    this.initSearchQueryParams(this.$route.query)
-    this.runInitialSearch()
+    await this.initSearchQueryParams(this.$route.query)
+    await this.runInitialSearch()
   }
 
   beforeDestroy () {
@@ -429,7 +407,7 @@ export default class SearchPlatformsPage extends Vue {
   }
 
   async runSearch (): Promise<void> {
-    this.initUrlQueryParams(this.searchParams)
+    this.initUrlQueryParams()
     this.loading = true
     try {
       this.searchPlatformsPaginated(this.searchParams);
@@ -486,28 +464,6 @@ export default class SearchPlatformsPage extends Vue {
     }
   }
 
-  // getType (platform: Platform) {
-  //   if (this.platformTypeLookup.has(platform.platformTypeUri)) {
-  //     const platformType: PlatformType = this.platformTypeLookup.get(platform.platformTypeUri) as PlatformType
-  //     return platformType.name
-  //   }
-  //   if (platform.platformTypeName) {
-  //     return platform.platformTypeName
-  //   }
-  //   return this.NO_TYPE
-  // }
-  //
-  // getStatus (platform: Platform) {
-  //   if (this.statusLookup.has(platform.statusUri)) {
-  //     const platformStatus: Status = this.statusLookup.get(platform.statusUri) as Status
-  //     return platformStatus.name
-  //   }
-  //   if (platform.statusName) {
-  //     return platform.statusName
-  //   }
-  //   return ''
-  // }
-
   initSearchQueryParams (params: QueryParams): void {
     const searchParamsObject = (new PlatformSearchParamsSerializer({
       states: this.states,
@@ -533,9 +489,9 @@ export default class SearchPlatformsPage extends Vue {
     }
   }
 
-  initUrlQueryParams (params: IPlatformSearchParams): void {
+  initUrlQueryParams (): void { // todo scheint aktuell nicht zu funktionieren, noch keine Ahnung warum. Er pushed nicht zur route
     this.$router.push({
-      query: (new PlatformSearchParamsSerializer()).toQueryParams(params),
+      query: (new PlatformSearchParamsSerializer()).toQueryParams(this.searchParams),
       hash: this.$route.hash
     })
   }
