@@ -58,8 +58,9 @@ permissions and limitations under the Licence.
       </v-btn>
     </v-card-actions>
     <PlatformBasicDataForm
+      v-if="formPlatform"
       ref="basicForm"
-      v-model="platformCopy"
+      v-model="formPlatform"
     />
     <v-card-actions>
       <v-spacer />
@@ -91,31 +92,31 @@ import PlatformBasicDataForm from '@/components/PlatformBasicDataForm.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
 import { Platform } from '@/models/Platform'
+import { mapActions, mapState } from 'vuex'
+import { Contact } from '@/models/Contact'
 
 @Component({
   components: {
     PlatformBasicDataForm,
     ProgressIndicator
   },
-  middleware: ['auth']
+  middleware: ['auth'],
+  computed:mapState('platforms',['platform']),
+  methods:mapActions('platforms',['updatePlatform','savePlatform'])
 })
 export default class PlatformEditBasicPage extends Vue {
-  // we need to initialize the instance variable with an empty Platform instance
-  // here, otherwise the form is not reactive
-  private platformCopy: Platform = new Platform()
 
   private isLoading: boolean = false
 
-  @Prop({
-    required: true,
-    type: Object
-  })
-  readonly value!: Platform
-
-  created () {
-    this.platformCopy = Platform.createFromObject(this.value)
+  get formPlatform(){
+    if(this.platform){
+      return this.platform;
+    }
+    return new Platform()
   }
-
+  set formPlatform(val){
+    this.updatePlatform(val);
+  }
   onSaveButtonClicked () {
     if (!(this.$refs.basicForm as Vue & { validateForm: () => boolean }).validateForm()) {
       this.$store.commit('snackbar/setError', 'Please correct your input')
@@ -134,7 +135,7 @@ export default class PlatformEditBasicPage extends Vue {
 
   save (): Promise<Platform> {
     return new Promise((resolve, reject) => {
-      this.$api.platforms.save(this.platformCopy).then((savedPlatform) => {
+      this.savePlatform(this.platform).then((savedPlatform) => {
         resolve(savedPlatform)
       }).catch((_error) => {
         reject(_error)
@@ -144,12 +145,6 @@ export default class PlatformEditBasicPage extends Vue {
 
   get platformId () {
     return this.$route.params.platformId
-  }
-
-  @Watch('value', { immediate: true, deep: true })
-  // @ts-ignore
-  onPlatformChanged (val: Platform) {
-    this.platformCopy = Platform.createFromObject(val)
   }
 }
 </script>

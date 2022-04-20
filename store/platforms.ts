@@ -1,6 +1,7 @@
 import { Platform } from '@/models/Platform'
 import { Commit } from 'vuex'
 import { IPlatformSearchParams } from '@/modelUtils/PlatformSearchParams'
+import { Contact } from '@/models/Contact'
 
 interface platformsState {
   platforms: Platform[],
@@ -51,6 +52,12 @@ const actions = {
       includePlatformAttachments: false
     });
     commit('setPlatform',platform)
+  },
+  async updatePlatform({ commit }: { commit: Commit }, platform:Platform){
+    commit('setPlatform',platform)
+  },
+  async savePlatform({ commit }: { commit: Commit }, platform:Platform):Promise<Platform>{
+    return this.$api.platforms.save(platform);
   },
   async exportAsCsv({ commit}: { commit: Commit}, searchParams: IPlatformSearchParams):Promise<Blob> {
     let email = null;
