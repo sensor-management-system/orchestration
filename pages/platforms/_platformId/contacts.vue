@@ -51,14 +51,11 @@ import { mapActions } from 'vuex'
   methods: mapActions('platforms', ['loadPlatformContacts'])
 })
 export default class PlatformContactsPage extends Vue {
-  // private contacts: Contact[] = []
   private isLoading = false
-  // private isSaving = false
 
   get platformId (): string {
     return this.$route.params.platformId
   }
-
 
   async created () {
     try {

@@ -56,7 +56,14 @@ export const state = {
 export const getters = {
   searchContacts: (state: contactsState) => {
     return state.contacts.filter((c: Contact) => !state.configurationContacts.find((rc: Contact) => rc.id === c.id))
-  }
+  },
+  contactsByDifference:(state:contactsState)=>(contactsToSubtract:Contact[])=>{
+    return state.contacts.filter((contact)=>{
+      return !contactsToSubtract.find((contactToSubtract)=>{
+        return contactToSubtract.id === contact.id
+      })
+    })
+}
 }
 export const actions = {
   async searchContactsPaginated ({

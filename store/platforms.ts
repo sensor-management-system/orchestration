@@ -59,6 +59,9 @@ const actions = {
     const platformContacts = await this.$api.platforms.findRelatedContacts(id)
     commit('setPlatformContacts',platformContacts)
   },
+  async addPlatformContact({ commit }: { commit: Commit },{platformId,contactId}:{platformId:number,contactId:number}):Promise<void>{
+    return this.$api.platforms.addContact(platformId, contactId)
+  },
   async removePlatformContact({ commit }: { commit: Commit },{platformId,contactId}:{platformId:number,contactId:number}):Promise<void>{
     return this.$api.platforms.removeContact(platformId, contactId);
   },
