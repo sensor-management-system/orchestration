@@ -400,9 +400,7 @@ export class PlatformApi {
     })
   }
 
-  findRelatedUnmountActions (platformId: string
-  ):
-    Promise<PlatformUnmountAction[]> {
+  findRelatedUnmountActions (platformId: string): Promise<PlatformUnmountAction[]> {
     const url = this.basePath + '/' + platformId + '/platform-unmount-actions'
     const params = {
       'page[size]': 10000,
@@ -416,11 +414,7 @@ export class PlatformApi {
     })
   }
 
-  removeContact (platformId:
-    string, contactId:
-    string
-  ):
-    Promise<void> {
+  removeContact (platformId: string, contactId: string): Promise<void> {
     const url = this.basePath + '/' + platformId + '/relationships/contacts'
     const params = {
       data: [{
@@ -431,13 +425,7 @@ export class PlatformApi {
     return this.axiosApi.delete(url, { data: params })
   }
 
-  addContact (platformId
-    :
-    string, contactId
-    :
-    string
-  ):
-    Promise<void> {
+  addContact (platformId: string, contactId: string): Promise<void> {
     const url = this.basePath + '/' + platformId + '/relationships/contacts'
     const data = [{
       type: 'contact',
