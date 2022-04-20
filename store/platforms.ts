@@ -2,11 +2,13 @@ import { Platform } from '@/models/Platform'
 import { Commit } from 'vuex'
 import { IPlatformSearchParams } from '@/modelUtils/PlatformSearchParams'
 import { Contact } from '@/models/Contact'
+import { Attachment } from '@/models/Attachment'
 
 interface platformsState {
   platforms: Platform[],
   platform: Platform | null,
   platformContacts:Contact[],
+  platformAttachments:Attachment[],
   pageNumber: number,
   pageSize: number,
   totalPages: number
@@ -16,6 +18,7 @@ const state = {
   platforms: [],
   platform: null,
   platformContacts:[],
+  platformAttachments:[],
   totalPages: 1,
   pageNumber: 1,
   pageSize: 20
@@ -59,14 +62,21 @@ const actions = {
     const platformContacts = await this.$api.platforms.findRelatedContacts(id)
     commit('setPlatformContacts',platformContacts)
   },
+  async loadPlatformAttachments({ commit }: { commit: Commit },id:number){
+    const platformAttachments = await this.$api.platforms.findRelatedPlatformAttachments(id)
+    commit('setPlatformAttachments',platformAttachments)
+  },
   async addPlatformContact({ commit }: { commit: Commit },{platformId,contactId}:{platformId:number,contactId:number}):Promise<void>{
     return this.$api.platforms.addContact(platformId, contactId)
   },
   async removePlatformContact({ commit }: { commit: Commit },{platformId,contactId}:{platformId:number,contactId:number}):Promise<void>{
     return this.$api.platforms.removeContact(platformId, contactId);
   },
+  async deletePlatformAttachment({ commit }: { commit: Commit },attachmentId:number): Promise<void>{
+    return this.$api.platformAttachments.deleteById(attachmentId);
+  },
   async updatePlatform({ commit }: { commit: Commit }, platform:Platform){
-    commit('setPlatform',platform)
+    commit('setPlatform',platform);
   },
   async savePlatform({ commit }: { commit: Commit }, platform:Platform):Promise<Platform>{
     return this.$api.platforms.save(platform);
@@ -109,6 +119,9 @@ const mutations = {
   },
   setPlatformContacts(state:platformsState,platformContacts:Contact[]){
     state.platformContacts=platformContacts
+  },
+  setPlatformAttachments(state:platformsState,platformAttachments:Attachment[]){
+    state.platformAttachments=platformAttachments;
   }
 }
 
