@@ -25,9 +25,7 @@ const actions = {
     commit,
     state
   }: { commit: Commit, state: platformsState }, searchParams: IPlatformSearchParams) {
-    //TODO  this.$api.platforms.searchPaginated implementieren bzw. vorhandenes nachnutzen.
-    // searchtext,manufacturer,status,platformtype !können listen sein! und wenn onlyOwnPlatforms, dann auch user.email --> kommt als parameter
-    console.log('searchParams',searchParams);
+
     let email = null;
     if (searchParams.onlyOwnPlatforms) {
       // @ts-ignore
@@ -35,10 +33,7 @@ const actions = {
     }
 
     // @ts-ignore
-    const {
-      elements,
-      totalCount
-    } = await this.$api.platforms
+    const { elements, totalCount } = await this.$api.platforms
       .setSearchText(searchParams.searchText)
       .setSearchedManufacturers(searchParams.manufacturer)
       .setSearchedStates(searchParams.states)

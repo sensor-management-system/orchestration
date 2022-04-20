@@ -144,7 +144,7 @@ permissions and limitations under the Licence.
         </template>
         <v-spacer />
 
-        <template v-if="lastActiveSearcher != null">
+        <template v-if="platforms.length>0">
           <v-dialog v-model="processing" max-width="100">
             <v-card>
               <v-card-text>
@@ -195,11 +195,11 @@ permissions and limitations under the Licence.
       </v-subheader>
 
       <v-pagination
-        :value="page"
+        v-model="page"
         :disabled="loading"
-        :length="numberOfPages"
+        :length="totalPages"
         :total-visible="7"
-        @input="setPage"
+        @input="runSearch"
       />
       <BaseList
         :list-items="platforms"
@@ -224,11 +224,11 @@ permissions and limitations under the Licence.
 
       </BaseList>
       <v-pagination
-        :value="page"
+        v-model="page"
         :disabled="loading"
-        :length="numberOfPages"
+        :length="totalPages"
         :total-visible="7"
-        @input="setPage"
+        @input="runSearch"
       />
     </div>
     <PlatformDeleteDialog
@@ -278,8 +278,6 @@ import { Platform } from '@/models/Platform'
 import { PlatformType } from '@/models/PlatformType'
 import { Status } from '@/models/Status'
 
-import { PlatformSearcher } from '@/services/sms/PlatformApi'
-
 import { QueryParams } from '@/modelUtils/QueryParams'
 import { IPlatformSearchParams, PlatformSearchParamsSerializer } from '@/modelUtils/PlatformSearchParams'
 import BaseList from '@/components/shared/BaseList.vue'
@@ -304,22 +302,16 @@ type PaginatedResult = {
   },
   computed:{
     ...mapState('vocabulary',['platformtypes','manufacturers','equipmentstatus']),
-    ...mapState('platforms',['platforms'])
+    ...mapState('platforms',['platforms','pageNumber','pageSize','totalPages'])
   },
   methods:{
     ...mapActions('vocabulary',['loadEquipmentstatus','loadPlatformtypes','loadManufacturers']),
-    ...mapActions('platforms',['searchPlatformsPaginated'])
+    ...mapActions('platforms',['searchPlatformsPaginated','setPageNumber'])
   }
 })
 export default class SearchPlatformsPage extends Vue {
-  private pageSize: number = 20
   private loading: boolean = true
   private processing: boolean = false
-
-  private totalCount: number = 0
-  // private loader: null | IPaginationLoader<Platform> = null
-  // private lastActiveSearcher: PlatformSearcher | null = null
-  private page: number = 0
 
   private selectedSearchManufacturers: Manufacturer[] = []
   private selectedSearchStates: Status[] = []
@@ -355,7 +347,6 @@ export default class SearchPlatformsPage extends Vue {
   }
 
   beforeDestroy () {
-    this.unsetResultItemsShown()
     this.$store.dispatch('appbar/setDefaults')
   }
 
@@ -369,6 +360,15 @@ export default class SearchPlatformsPage extends Vue {
       saveBtnHidden: true,
       cancelBtnHidden: true
     })
+  }
+
+  get page(){
+    return this.pageNumber;
+  }
+
+  set page(newVal){
+    this.setPageNumber(newVal);
+    this.setPageInUrl(false);
   }
 
   get activeTab (): number | null {
@@ -389,28 +389,27 @@ export default class SearchPlatformsPage extends Vue {
   async runInitialSearch (): Promise<void> {
     this.activeTab = this.isExtendedSearch() ? 1 : 0
 
-    const page: number | undefined = this.getPageFromUrl()
+    this.page = this.getPageFromUrl()
 
-    await this.runSearch(
-      {
-        searchText: this.searchText,
-        manufacturer: this.selectedSearchManufacturers,
-        states: this.selectedSearchStates,
-        types: this.selectedSearchPlatformTypes,
-        onlyOwnPlatforms: this.onlyOwnPlatforms && this.$auth.loggedIn
-      },
-      page
-    )
+    await this.runSearch()
+  }
+
+  get searchParams(){
+    return {
+      searchText: this.searchText,
+      manufacturer: this.selectedSearchManufacturers,
+      states: this.selectedSearchStates,
+      types: this.selectedSearchPlatformTypes,
+      onlyOwnPlatforms: this.onlyOwnPlatforms && this.$auth.loggedIn
+    }
   }
 
   basicSearch (): Promise<void> {
-    return this.runSearch({
-      searchText: this.searchText,
-      manufacturer: [],
-      states: [],
-      types: [],
-      onlyOwnPlatforms: false
-    })
+    this.selectedSearchManufacturers=[]
+    this.selectedSearchStates=[]
+    this.selectedSearchPlatformTypes=[]
+    this.onlyOwnPlatforms=false
+    return this.runSearch()
   }
 
   clearBasicSearch () {
@@ -418,13 +417,7 @@ export default class SearchPlatformsPage extends Vue {
   }
 
   extendedSearch (): Promise<void> {
-    return this.runSearch({
-      searchText: this.searchText,
-      manufacturer: this.selectedSearchManufacturers,
-      states: this.selectedSearchStates,
-      types: this.selectedSearchPlatformTypes,
-      onlyOwnPlatforms: this.onlyOwnPlatforms && this.$auth.loggedIn
-    })
+    return this.runSearch()
   }
 
   clearExtendedSearch () {
@@ -436,53 +429,18 @@ export default class SearchPlatformsPage extends Vue {
     this.onlyOwnPlatforms = false
   }
 
-  async runSearch (
-    searchParameters: IPlatformSearchParams,
-    page: number = 1
-  ): Promise<void> {
-    this.initUrlQueryParams(searchParameters)
-
-    this.totalCount = 0
+  async runSearch (): Promise<void> {
+    this.initUrlQueryParams(this.searchParams)
     this.loading = true
-    this.searchResults = {}
-    this.unsetResultItemsShown()
-    this.loader = null
-    this.page = 0
     try {
-
-      this.searchPlatformsPaginated(searchParameters);
-      // const loader = await this.lastActiveSearcher.findMatchingAsPaginationLoaderOnPage(page, this.pageSize)
-      // this.loader = loader
-      // this.searchResults[page] = loader.elements
-      // this.totalCount = loader.totalCount
-      // this.page = page
-      // this.setPageInUrl(page)
+      this.searchPlatformsPaginated(this.searchParams);
+      this.setPageInUrl(this.page)
     } catch (_error) {
       this.$store.commit('snackbar/setError', 'Loading of platforms failed')
     } finally {
       this.loading = false
     }
   }
-
-  // async loadPage (pageNr: number, useCache: boolean = true) {
-  //   // use the results that were already loaded if available
-  //   if (useCache && this.searchResults[pageNr]) {
-  //     return
-  //   }
-  //   if (this.loader != null && this.loader.funToLoadPage != null) {
-  //     try {
-  //       this.loading = true
-  //       const loader = await this.loader.funToLoadPage(pageNr)
-  //       this.loader = loader
-  //       this.searchResults[pageNr] = loader.elements
-  //       this.totalCount = loader.totalCount
-  //     } catch (_error) {
-  //       this.$store.commit('snackbar/setError', 'Loading of platforms failed')
-  //     } finally {
-  //       this.loading = false
-  //     }
-  //   }
-  // }
 
   get numberOfPages (): number {
     return Math.ceil(this.totalCount / this.pageSize)
@@ -599,8 +557,9 @@ export default class SearchPlatformsPage extends Vue {
 
   getPageFromUrl (): number | undefined {
     if ('page' in this.$route.query && typeof this.$route.query.page === 'string') {
-      return parseInt(this.$route.query.page) || 0
+      return parseInt(this.$route.query.page)
     }
+    return 1
   }
 
   setPageInUrl (page: number, preserveHash: boolean = true): void {
