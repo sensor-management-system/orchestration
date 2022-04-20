@@ -60,6 +60,9 @@ const actions = {
       .setSearchedUserMail(email)
       .searchMatchingAsCsvBlob()
   },
+  async deletePlatform({ commit }: { commit: Commit }, id: number){
+    await this.$api.platforms.deleteById(id)
+  },
   setPageNumber ({ commit }: { commit: Commit }, newPageNumber: number) {
     commit('setPageNumber', newPageNumber)
   },

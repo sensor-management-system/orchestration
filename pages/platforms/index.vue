@@ -268,7 +268,7 @@ import PlatformsBasicSearchField from '@/components/platforms/PlatformsBasicSear
   },
   methods:{
     ...mapActions('vocabulary',['loadEquipmentstatus','loadPlatformtypes','loadManufacturers']),
-    ...mapActions('platforms',['searchPlatformsPaginated','setPageNumber','exportAsCsv'])
+    ...mapActions('platforms',['searchPlatformsPaginated','setPageNumber','exportAsCsv','deletePlatform'])
   }
 })
 export default class SearchPlatformsPage extends Vue {
@@ -390,8 +390,8 @@ export default class SearchPlatformsPage extends Vue {
       this.loading = false
     }
   }
-  exportCsv () {
 
+  exportCsv () {
     if(this.platforms.length>0){
       this.processing=true
       this.exportAsCsv(this.searchParams).then((blob) => {
@@ -420,13 +420,8 @@ export default class SearchPlatformsPage extends Vue {
     }
     this.loading = true
     try {
-      await this.$api.platforms.deleteById(this.platformToDelete.id)
-      // if we know that the deleted platform was the last of the page, we
-      // decrement the page by one
-      if (this.getSearchResultForPage(this.page)?.length === 1) {
-        this.page = this.page > 1 ? this.page - 1 : 1
-      }
-      this.loadPage(this.page, false)
+      await this.deletePlatform(this.platformToDelete.id)
+      this.runSearch()
       this.$store.commit('snackbar/setSuccess', 'Platform deleted')
     } catch (_error) {
       this.$store.commit('snackbar/setError', 'Platform could not be deleted')
