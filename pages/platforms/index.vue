@@ -33,48 +33,16 @@ permissions and limitations under the Licence.
     <v-tabs-items
       v-model="activeTab"
     >
-      <v-tab-item :eager="true">
-        <v-row>
-          <v-col cols="12" md="5">
-            <v-text-field
-              v-model="searchText"
-              label="Name"
-              placeholder="Name of platform"
-              hint="Please enter at least 3 characters"
-              @keydown.enter="basicSearch"
-            />
-          </v-col>
-          <v-col
-            cols="12"
-            md="7"
-            align-self="center"
-          >
-            <v-btn
-              color="primary"
-              small
-              @click="basicSearch"
-            >
-              Search
-            </v-btn>
-            <v-btn
-              text
-              small
-              @click="clearBasicSearch"
-            >
-              Clear
-            </v-btn>
-          </v-col>
-        </v-row>
-      </v-tab-item>
+      <PlatformsBasicSearch
+        v-model="searchText"
+        @search="basicSearch"
+      />
       <v-tab-item :eager="true">
         <v-row>
           <v-col cols="12" md="6">
-            <v-text-field
+            <PlatformsBasicSearchField
               v-model="searchText"
-              label="Name"
-              placeholder="Name of platform"
-              hint="Please enter at least 3 characters"
-              @keydown.enter="extendedSearch"
+              @start-search="extendedSearch"
             />
           </v-col>
         </v-row>
@@ -278,9 +246,13 @@ import { QueryParams } from '@/modelUtils/QueryParams'
 import { PlatformSearchParamsSerializer } from '@/modelUtils/PlatformSearchParams'
 import BaseList from '@/components/shared/BaseList.vue'
 import PlatformsListItem from '@/components/platforms/PlatformsListItem.vue'
+import PlatformsBasicSearch from '@/components/platforms/PlatformsBasicSearch.vue'
+import PlatformsBasicSearchField from '@/components/platforms/PlatformsBasicSearchField.vue'
 
 @Component({
   components: {
+    PlatformsBasicSearchField,
+    PlatformsBasicSearch,
     PlatformsListItem,
     BaseList,
     DotMenuActionDelete,
