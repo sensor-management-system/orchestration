@@ -1,17 +1,18 @@
 import { Platform } from '@/models/Platform'
 import { Commit } from 'vuex'
+import { IPlatformSearchParams } from '@/modelUtils/PlatformSearchParams'
 
 interface platformsState {
   platforms: Platform[],
-  platform : Platform|null,
+  platform: Platform | null,
   pageNumber: number,
   pageSize: number,
   totalPages: number
 }
 
 const state = {
-  platforms:[],
-  platform:null,
+  platforms: [],
+  platform: null,
   totalPages: 1,
   pageNumber: 1,
   pageSize: 20
@@ -20,16 +21,31 @@ const state = {
 const getters = {}
 
 const actions = {
-  async searchPlatformsPaginated({
+  async searchPlatformsPaginated ({
     commit,
     state
-  }: { commit: Commit, state: platformsState }, searchParams:{}){
+  }: { commit: Commit, state: platformsState }, searchParams: IPlatformSearchParams) {
     //TODO  this.$api.platforms.searchPaginated implementieren bzw. vorhandenes nachnutzen.
     // searchtext,manufacturer,status,platformtype !können listen sein! und wenn onlyOwnPlatforms, dann auch user.email --> kommt als parameter
+    console.log('searchParams',searchParams);
+    let email = null;
+    if (searchParams.onlyOwnPlatforms) {
+      // @ts-ignore
+      email = this.$auth.user!.email as string
+    }
 
     // @ts-ignore
-    const {elements,totalCount} = await this.$api.platforms.searchPaginated(state.pageNumber,state.pageSize,searchParams)
-    commit('setPlatforms',elements)
+    const {
+      elements,
+      totalCount
+    } = await this.$api.platforms
+      .setSearchText(searchParams.searchText)
+      .setSearchedManufacturers(searchParams.manufacturer)
+      .setSearchedStates(searchParams.states)
+      .setSearchedPlatformTypes(searchParams.types)
+      .setSearchedUserMail(email)
+      .searchPaginated(state.pageNumber, state.pageSize, searchParams)
+    commit('setPlatforms', elements)
 
     const totalPages = Math.ceil(totalCount / state.pageSize)
     commit('setTotalPages', totalPages)
@@ -41,11 +57,11 @@ const actions = {
 }
 
 const mutations = {
-  setPlatforms(state:platformsState,platforms:Platform[]){
-    state.platforms=platforms;
+  setPlatforms (state: platformsState, platforms: Platform[]) {
+    state.platforms = platforms
   },
-  setPlatform(state:platformsState,platform:Platform){
-    state.platform=platform
+  setPlatform (state: platformsState, platform: Platform) {
+    state.platform = platform
   },
   setPageNumber (state: platformsState, newPageNumber: number) {
     state.pageNumber = newPageNumber

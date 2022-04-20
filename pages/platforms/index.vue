@@ -481,13 +481,13 @@ export default class SearchPlatformsPage extends Vue {
     this.unsetResultItemsShown()
     this.loader = null
     this.page = 0
-
-    const searchBuilder = this.$api.platforms
-      .newSearchBuilder()
-      .withText(searchParameters.searchText)
-      .withOneMatchingManufacturerOf(searchParameters.manufacturer)
-      .withOneMatchingStatusOf(searchParameters.states)
-      .withOneMatchingPlatformTypeOf(searchParameters.types)
+    //
+    // const searchBuilder = this.$api.platforms
+    //   .newSearchBuilder()
+    //   .withText(searchParameters.searchText)
+    //   .withOneMatchingManufacturerOf(searchParameters.manufacturer)
+    //   .withOneMatchingStatusOf(searchParameters.states)
+    //   .withOneMatchingPlatformTypeOf(searchParameters.types)
 
     // if (searchParameters.onlyOwnPlatforms) {
     //   const email = this.$auth.user!.email as string
@@ -496,82 +496,90 @@ export default class SearchPlatformsPage extends Vue {
     //   }
     // }
 
-    let filterSettings = [];
-    if (searchParameters.manufacturer.length > 0) {
-      filterSettings.push({
-        or: [
-          {
-            name: 'manufacturer_name',
-            op: 'in_',
-            val: searchParameters.manufacturer.map((m: Manufacturer) => m.name)
-          },
-          {
-            name: 'manufacturer_uri',
-            op: 'in_',
-            val: searchParameters.manufacturer.map((m: Manufacturer) => m.uri)
-          }
-        ]
-      })
-    }
-    if (searchParameters.states.length > 0) {
-      filterSettings.push({
-        or: [
-          {
-            name: 'status_name',
-            op: 'in_',
-            val: searchParameters.states.map((s: Status) => s.name)
-          },
-          {
-            name: 'status_uri',
-            op: 'in_',
-            val: searchParameters.states.map((s: Status) => s.uri)
-          }
-        ]
-      })
-    }
-    if (searchParameters.types.length > 0) {
-      filterSettings.push({
-        or: [
-          {
-            name: 'platform_type_name',
-            op: 'in_',
-            val: searchParameters.types.map((t: PlatformType) => t.name)
-          },
-          {
-            name: 'platform_type_uri',
-            op: 'in_',
-            val: searchParameters.types.map((t: PlatformType) => t.uri)
-          }
-        ]
-      })
-    }
-    if (searchParameters.onlyOwnPlatforms) {
-      const email = this.$auth.user!.email as string
-      if (email) {
-        filterSettings.push({
-          name: 'contacts.email',
-          op: 'eq',
-          val: email
-        })
-      }
-    }
-    //todo nicht vergessen:
-    //searchParameters.searchText
-
-    let queryParams = {};
-    queryParams={
-      filter:JSON.stringify(filterSettings)
-    }
-    if(searchParameters.searchText){
-      queryParams.q = searchParameters.searchText
-    }
-    queryParams.sort='short_name';
-
-    // this.lastActiveSearcher = searchBuilder.build()
-    console.log('searchParameters',searchParameters);
-    console.log('filterSettings',filterSettings);
+    // let filterSettings = [];
+    // if (searchParameters.manufacturer.length > 0) {
+    //   filterSettings.push({
+    //     or: [
+    //       {
+    //         name: 'manufacturer_name',
+    //         op: 'in_',
+    //         val: searchParameters.manufacturer.map((m: Manufacturer) => m.name)
+    //       },
+    //       {
+    //         name: 'manufacturer_uri',
+    //         op: 'in_',
+    //         val: searchParameters.manufacturer.map((m: Manufacturer) => m.uri)
+    //       }
+    //     ]
+    //   })
+    // }
+    // if (searchParameters.states.length > 0) {
+    //   filterSettings.push({
+    //     or: [
+    //       {
+    //         name: 'status_name',
+    //         op: 'in_',
+    //         val: searchParameters.states.map((s: Status) => s.name)
+    //       },
+    //       {
+    //         name: 'status_uri',
+    //         op: 'in_',
+    //         val: searchParameters.states.map((s: Status) => s.uri)
+    //       }
+    //     ]
+    //   })
+    // }
+    // if (searchParameters.types.length > 0) {
+    //   filterSettings.push({
+    //     or: [
+    //       {
+    //         name: 'platform_type_name',
+    //         op: 'in_',
+    //         val: searchParameters.types.map((t: PlatformType) => t.name)
+    //       },
+    //       {
+    //         name: 'platform_type_uri',
+    //         op: 'in_',
+    //         val: searchParameters.types.map((t: PlatformType) => t.uri)
+    //       }
+    //     ]
+    //   })
+    // }
+    // if (searchParameters.onlyOwnPlatforms) {
+    //   const email = this.$auth.user!.email as string
+    //   if (email) {
+    //     filterSettings.push({
+    //       name: 'contacts.email',
+    //       op: 'eq',
+    //       val: email
+    //     })
+    //   }
+    // }
+    // //todo nicht vergessen:
+    // //searchParameters.searchText
+    //
+    // let queryParams = {};
+    // queryParams={
+    //   filter:JSON.stringify(filterSettings)
+    // }
+    // if(searchParameters.searchText){
+    //   queryParams.q = searchParameters.searchText
+    // }
+    // queryParams.sort='short_name';
+    //
+    // // this.lastActiveSearcher = searchBuilder.build()
+    // console.log('searchParameters',searchParameters);
+    // console.log('filterSettings',filterSettings);
     try {
-      this.searchPlatformsPaginated(queryParams);
+
+      // if (searchParameters.onlyOwnPlatforms) {
+      //   const email = this.$auth.user!.email as string
+      //   if (email) {
+      //     searchBuilder.withContactEmail(email)
+      //   }
+      // }
+
+      this.searchPlatformsPaginated(searchParameters);
       // const loader = await this.lastActiveSearcher.findMatchingAsPaginationLoaderOnPage(page, this.pageSize)
       // this.loader = loader
       // this.searchResults[page] = loader.elements
