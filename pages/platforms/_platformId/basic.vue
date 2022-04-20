@@ -32,9 +32,7 @@ implied. See the Licence for the specific language governing
 permissions and limitations under the Licence.
 -->
 <template>
-  <NuxtChild
-    v-model="platform"
-  />
+  <NuxtChild/>
 </template>
 
 <script lang="ts">
@@ -43,25 +41,12 @@ import { Component, Vue, Prop } from 'nuxt-property-decorator'
 import { Platform } from '@/models/Platform'
 
 @Component
-export default class PlatformBasicPage extends Vue {
-  @Prop({
-    required: true,
-    type: Object
-  })
-  readonly value!: Platform
-
+export default class PlatformBasicPage extends Vue { // Todo:prüfen ob man diese Art von Pages überhaupt noch brauchts
   head () {
     return {
       titleTemplate: 'Basic Data - %s'
     }
   }
 
-  get platform (): Platform {
-    return this.value
-  }
-
-  set platform (value: Platform) {
-    this.$emit('input', value)
-  }
 }
 </script>
