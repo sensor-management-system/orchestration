@@ -97,13 +97,15 @@ import { Platform } from '@/models/Platform'
 
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import PlatformBasicDataForm from '@/components/PlatformBasicDataForm.vue'
+import { mapActions } from 'vuex'
 
 @Component({
   components: {
     PlatformBasicDataForm,
     ProgressIndicator
   },
-  middleware: ['auth']
+  middleware: ['auth'],
+  methods:mapActions('platforms',['savePlatform'])
 })
 // @ts-ignore
 export default class PlatformNewPage extends mixins(Rules) {
@@ -130,7 +132,7 @@ export default class PlatformNewPage extends mixins(Rules) {
       return
     }
     this.isLoading = true
-    this.$api.platforms.save(this.platform).then((savedPlatform) => {
+    this.savePlatform(this.platform).then((savedPlatform) => {
       this.isLoading = false
       this.$store.commit('snackbar/setSuccess', 'Platform created')
       this.$router.push('/platforms/' + savedPlatform.id + '')
