@@ -6,6 +6,7 @@ import { Contact } from '@/models/Contact'
 interface platformsState {
   platforms: Platform[],
   platform: Platform | null,
+  platformContacts:Contact[],
   pageNumber: number,
   pageSize: number,
   totalPages: number
@@ -14,6 +15,7 @@ interface platformsState {
 const state = {
   platforms: [],
   platform: null,
+  platformContacts:[],
   totalPages: 1,
   pageNumber: 1,
   pageSize: 20
@@ -52,6 +54,13 @@ const actions = {
       includePlatformAttachments: false
     });
     commit('setPlatform',platform)
+  },
+  async loadPlatformContacts({ commit }: { commit: Commit },id:number){
+    const platformContacts = await this.$api.platforms.findRelatedContacts(id)
+    commit('setPlatformContacts',platformContacts)
+  },
+  async removePlatformContact({ commit }: { commit: Commit },{platformId,contactId}:{platformId:number,contactId:number}):Promise<void>{
+    return this.$api.platforms.removeContact(platformId, contactId);
   },
   async updatePlatform({ commit }: { commit: Commit }, platform:Platform){
     commit('setPlatform',platform)
@@ -94,6 +103,9 @@ const mutations = {
   },
   setTotalPages (state: platformsState, count: number) {
     state.totalPages = count
+  },
+  setPlatformContacts(state:platformsState,platformContacts:Contact[]){
+    state.platformContacts=platformContacts
   }
 }
 
