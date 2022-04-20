@@ -9,6 +9,7 @@ from project.tests.base import BaseTestCase, fake, generate_userinfo_data, test_
 from project.tests.models.test_generic_action_attachment_model import (
     add_generic_platform_action_attachment_model,
 )
+from project.tests.base import create_token
 from project.tests.base import BaseTestCase, fake, test_file_path
 from project.tests.models.test_generic_action_attachment_model import \
     add_generic_platform_action_attachment_model
@@ -140,19 +141,30 @@ class TestGenericPlatformAction(BaseTestCase):
             data_object=generic_platform_action_data,
             object_type=self.object_type,
         )
-        _ = super().delete_object(
-            url=f"{self.url}/{obj['data']['id']}",
-        )
+        access_headers = create_token()
+        with self.client:
+            response = self.client.delete(
+                f"{self.url}/{obj['data']['id']}",
+                content_type="application/vnd.api+json",
+                headers=access_headers,
+            )
+        self.assertEqual(response.status_code, 200)
 
     def test_filtered_by_platform(self):
         """Ensure that I can prefilter by a specific platform."""
-        platform1 = Platform(short_name="sample platform", is_public=False,
-                             is_private=False,
-                             is_internal=True, )
+        platform1 = Platform(
+            short_name="sample platform",
+            is_public=True,
+            is_private=False,
+            is_internal=False,
+        )
         db.session.add(platform1)
-        platform2 = Platform(short_name="sample platform II", is_public=False,
-                             is_private=False,
-                             is_internal=True, )
+        platform2 = Platform(
+            short_name="sample platform II",
+            is_public=True,
+            is_private=False,
+            is_internal=False,
+        )
         db.session.add(platform2)
 
         contact = Contact(
@@ -191,7 +203,7 @@ class TestGenericPlatformAction(BaseTestCase):
         # then test only for the first platform
         with self.client:
             url_get_for_platform1 = (
-                    base_url + f"/platforms/{platform1.id}/generic-platform-actions"
+                base_url + f"/platforms/{platform1.id}/generic-platform-actions"
             )
             response = self.client.get(
                 url_get_for_platform1, content_type="application/vnd.api+json"
@@ -205,7 +217,7 @@ class TestGenericPlatformAction(BaseTestCase):
         # and test the second platform
         with self.client:
             url_get_for_platform2 = (
-                    base_url + f"/platforms/{platform2.id}/generic-platform-actions"
+                base_url + f"/platforms/{platform2.id}/generic-platform-actions"
             )
             response = self.client.get(
                 url_get_for_platform2, content_type="application/vnd.api+json"
@@ -219,7 +231,7 @@ class TestGenericPlatformAction(BaseTestCase):
         # and for a non existing
         with self.client:
             url_get_for_non_existing_platform = (
-                    base_url + f"/platforms/{platform2.id + 9999}/generic-platform-actions"
+                base_url + f"/platforms/{platform2.id + 9999}/generic-platform-actions"
             )
             response = self.client.get(
                 url_get_for_non_existing_platform,
@@ -227,13 +239,19 @@ class TestGenericPlatformAction(BaseTestCase):
             )
         self.assertEqual(response.status_code, 404)
 
-    def test_delete_generic_platform_action_with_attachment_link(self):
-        """Ensure a generic_platform_action with attachment link can be deleted."""
-        generic_platform_action_attachment = (
-            add_generic_platform_action_attachment_model()
-        )
-        url = f"{self.url}/{generic_platform_action_attachment.id}"
-        _ = super().delete_object(url)
+    # def test_delete_generic_platform_action_with_attachment_link(self):
+    #     """Ensure a generic_platform_action with attachment link can be deleted."""
+    #     generic_platform_action_attachment = (
+    #         add_generic_platform_action_attachment_model()
+    #     )
+    #     access_headers = create_token()
+    #     with self.client:
+    #         response = self.client.delete(
+    #             f"{self.url}/{generic_platform_action_attachment.id}",
+    #             content_type="application/vnd.api+json",
+    #             headers=access_headers,
+    #         )
+    #     self.assertNotEqual(response.status_code, 200)
 
     def test_http_response_not_found(self):
         """Make sure that the backend responds with 404 HTTP-Code if a resource was not found."""

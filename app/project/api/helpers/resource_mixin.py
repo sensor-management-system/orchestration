@@ -1,4 +1,11 @@
+import json
+from json import JSONDecodeError
+
+from flask import request
+
 from ..auth.flask_openidconnect import open_id_connect
+from ..helpers.errors import BadRequestError
+
 
 def add_created_by_id(data):
     """
@@ -27,3 +34,11 @@ def add_updated_by_id(data):
     """
     user_entry = open_id_connect.get_current_user()
     data["updated_by_id"] = user_entry.id
+
+
+def decode_json_request_data():
+    try:
+        data = json.loads(request.data.decode())["data"]
+    except JSONDecodeError as e:
+        raise BadRequestError(repr(e))
+    return data

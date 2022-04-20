@@ -4,6 +4,7 @@ from flask_rest_jsonapi import ResourceDetail, ResourceRelationship
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.orm.exc import NoResultFound
 
+from ..auth.permission_utils import get_query_with_permissions_for_related_objects
 from ..models.base_model import db
 from ..models.platform import Platform
 from ..models.software_update_actions import PlatformSoftwareUpdateAction
@@ -22,7 +23,7 @@ class PlatformSoftwareUpdateActionList(ResourceList):
 
         Also handle optional pre-filters (for specific platforms, for example).
         """
-        query_ = self.session.query(PlatformSoftwareUpdateAction)
+        query_ = get_query_with_permissions_for_related_objects(self.model)
         platform_id = view_kwargs.get("platform_id")
         if platform_id is not None:
             try:
@@ -42,7 +43,7 @@ class PlatformSoftwareUpdateActionList(ResourceList):
     data_layer = {
         "session": db.session,
         "model": PlatformSoftwareUpdateAction,
-        "methods": {"query": query,},
+        "methods": {"query": query},
     }
 
 

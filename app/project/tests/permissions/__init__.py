@@ -1,7 +1,10 @@
-from project.api.models import Contact, User
+from project.api.models import Contact, User, Device
 from project.api.models.base_model import db
 from project.tests.base import create_token
+from project.tests.base import fake
 from project.tests.base import generate_userinfo_data
+
+from project.api.models import Platform
 
 
 def create_superuser_token():
@@ -23,8 +26,9 @@ def create_superuser_token():
     return access_headers
 
 
-def add_a_contact():
-    userinfo = generate_userinfo_data()
+def create_a_test_contact(userinfo=None):
+    if not userinfo:
+        userinfo = generate_userinfo_data()
     contact = Contact(
         given_name=userinfo["given_name"],
         family_name=userinfo["family_name"],
@@ -33,3 +37,29 @@ def add_a_contact():
     db.session.add(contact)
     db.session.commit()
     return contact
+
+
+def create_a_test_device(group_ids=[], public=False, private=False, internal=True):
+    device = Device(
+        short_name=fake.pystr(),
+        is_public=public,
+        is_private=private,
+        is_internal=internal,
+        group_ids=group_ids,
+    )
+    db.session.add(device)
+    db.session.commit()
+    return device
+
+
+def create_a_test_platform(group_ids=[], public=False, private=False, internal=True, ):
+    platform = Platform(
+        short_name=fake.pystr(),
+        is_public=public,
+        is_private=private,
+        is_internal=internal,
+        group_ids=group_ids,
+    )
+    db.session.add(platform)
+    db.session.commit()
+    return platform

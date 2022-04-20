@@ -50,3 +50,7 @@ class DeviceProperty(db.Model, IndirectSearchableMixin):
     def get_parent_search_entities(self):
         """Return the device as parent search entity."""
         return [self.device]
+
+    def get_parent(self):
+        """Return parent object."""
+        return self.device

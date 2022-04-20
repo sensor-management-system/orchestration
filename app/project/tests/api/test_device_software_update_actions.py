@@ -99,12 +99,12 @@ class TestDeviceSoftwareUpdateAction(BaseTestCase):
         db.session.add(contact)
 
         device1 = Device(
-            short_name="device1", is_public=False, is_private=False, is_internal=True,
+            short_name="device1", is_public=True, is_private=False, is_internal=False,
         )
         db.session.add(device1)
 
         device2 = Device(
-            short_name="device2", is_public=False, is_private=False, is_internal=True,
+            short_name="device2", is_public=True, is_private=False, is_internal=False,
         )
         db.session.add(device2)
 

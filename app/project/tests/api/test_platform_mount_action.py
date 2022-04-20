@@ -5,6 +5,7 @@ from project import base_url
 from project.api.models import Configuration, Contact, Platform, PlatformMountAction
 from project.api.models.base_model import db
 from project.tests.base import BaseTestCase, fake, generate_userinfo_data
+from project.tests.base import create_token
 from project.tests.models.test_configurations_model import generate_configuration_model
 from project.tests.models.test_mount_actions_model import (
     add_mount_platform_action_model,
@@ -20,15 +21,17 @@ class TestPlatformMountAction(BaseTestCase):
     def test_filtered_by_configuration(self):
         """Ensure that I can prefilter by a specific configuration."""
         configuration1 = Configuration(
-            label="sample configuration", location_type="static",
-            is_public=False,
-            is_internal=True,
+            label="sample configuration",
+            location_type="static",
+            is_public=True,
+            is_internal=False,
         )
         db.session.add(configuration1)
         configuration2 = Configuration(
-            label="sample configuration II", location_type="static",
-            is_public=False,
-            is_internal=True,
+            label="sample configuration II",
+            location_type="static",
+            is_public=True,
+            is_internal=False,
         )
         db.session.add(configuration2)
 
@@ -37,18 +40,14 @@ class TestPlatformMountAction(BaseTestCase):
         )
         db.session.add(contact)
 
-        platform1 = Platform(short_name="platform1",
-                             is_public=False,
-                             is_private=False,
-                             is_internal=True,
-                             )
+        platform1 = Platform(
+            short_name="platform1", is_public=True, is_private=False, is_internal=False,
+        )
         db.session.add(platform1)
 
-        platform2 = Platform(short_name="Platform2",
-                             is_public=False,
-                             is_private=False,
-                             is_internal=True,
-                             )
+        platform2 = Platform(
+            short_name="Platform2", is_public=True, is_private=False, is_internal=False,
+        )
         db.session.add(platform2)
 
         action1 = PlatformMountAction(
@@ -124,15 +123,17 @@ class TestPlatformMountAction(BaseTestCase):
     def test_filtered_by_platform(self):
         """Ensure that I can prefilter by a specific platform."""
         configuration1 = Configuration(
-            label="sample configuration", location_type="static",
-            is_public=False,
-            is_internal=True,
+            label="sample configuration",
+            location_type="static",
+            is_public=True,
+            is_internal=False,
         )
         db.session.add(configuration1)
         configuration2 = Configuration(
-            label="sample configuration II", location_type="static",
-            is_public=False,
-            is_internal=True,
+            label="sample configuration II",
+            location_type="static",
+            is_public=True,
+            is_internal=False,
         )
         db.session.add(configuration2)
 
@@ -141,18 +142,14 @@ class TestPlatformMountAction(BaseTestCase):
         )
         db.session.add(contact)
 
-        platform1 = Platform(short_name="platform1",
-                             is_public=False,
-                             is_private=False,
-                             is_internal=True,
-                             )
+        platform1 = Platform(
+            short_name="platform1", is_public=True, is_private=False, is_internal=False,
+        )
         db.session.add(platform1)
 
-        platform2 = Platform(short_name="Platform2",
-                             is_public=False,
-                             is_private=False,
-                             is_internal=True,
-                             )
+        platform2 = Platform(
+            short_name="Platform2", is_public=True, is_private=False, is_internal=False,
+        )
         db.session.add(platform2)
 
         action1 = PlatformMountAction(
@@ -210,52 +207,45 @@ class TestPlatformMountAction(BaseTestCase):
                     base_url + f"/platforms/{platform2.id + 9999}/platform-mount-actions"
             )
             response = self.client.get(
-                url_get_for_non_existing,
-                content_type="application/vnd.api+json",
+                url_get_for_non_existing, content_type="application/vnd.api+json",
             )
         self.assertEqual(response.status_code, 404)
 
     def test_filtered_by_parent_platform(self):
         """Ensure filter by a specific parent platform works well."""
         configuration1 = Configuration(
-            label="sample configuration", location_type="static",
-            is_public=False,
-            is_internal=True,
+            label="sample configuration",
+            location_type="static",
+            is_public=True,
+            is_internal=False,
         )
 
         configuration2 = Configuration(
-            label="sample configuration II", location_type="static",
-            is_public=False,
-            is_internal=True,
+            label="sample configuration II",
+            location_type="static",
+            is_public=True,
+            is_internal=False,
         )
 
         contact = Contact(
             given_name="Nils", family_name="Brinckmann", email="nils@gfz-potsdam.de"
         )
 
-        platform1 = Platform(short_name="platform1",
-                             is_public=False,
-                             is_private=False,
-                             is_internal=True,
-                             )
+        platform1 = Platform(
+            short_name="platform1", is_public=True, is_private=False, is_internal=False,
+        )
 
-        platform2 = Platform(short_name="Platform2",
-                             is_public=False,
-                             is_private=False,
-                             is_internal=True,
-                             )
+        platform2 = Platform(
+            short_name="Platform2", is_public=True, is_private=False, is_internal=False,
+        )
 
-        platform3 = Platform(short_name="platform3",
-                             is_public=False,
-                             is_private=False,
-                             is_internal=True,
-                             )
+        platform3 = Platform(
+            short_name="platform3", is_public=True, is_private=False, is_internal=False,
+        )
 
-        platform4 = Platform(short_name="Platform4",
-                             is_public=False,
-                             is_private=False,
-                             is_internal=True,
-                             )
+        platform4 = Platform(
+            short_name="Platform4", is_public=True, is_private=False, is_internal=False,
+        )
 
         action1 = PlatformMountAction(
             configuration=configuration1,
@@ -324,8 +314,7 @@ class TestPlatformMountAction(BaseTestCase):
                     + f"/platforms/{platform2.id + 9999}/parent-platform-mount-actions"
             )
             response = self.client.get(
-                url_get_for_non_existing,
-                content_type="application/vnd.api+json",
+                url_get_for_non_existing, content_type="application/vnd.api+json",
             )
         self.assertEqual(response.status_code, 404)
 
@@ -336,7 +325,7 @@ class TestPlatformMountAction(BaseTestCase):
         # no data yet
         self.assertEqual(response.json["data"], [])
 
-    def test_get_platfrom_mount_action_collection(self):
+    def test_get_platform_mount_action_collection(self):
         """Test retrieve a collection of PlatformMountAction objects."""
         mount_platform_action = add_mount_platform_action_model()
         with self.client:
@@ -352,15 +341,15 @@ class TestPlatformMountAction(BaseTestCase):
         """Create PlatformMountAction."""
         platform = Platform(
             short_name=fake.linux_processor(),
-            is_public=False,
+            is_public=True,
             is_private=False,
-            is_internal=True,
+            is_internal=False,
         )
         parent_platform = Platform(
             short_name="platform parent-platform",
-            is_public=False,
+            is_public=True,
             is_private=False,
-            is_internal=True,
+            is_internal=False,
         )
         userinfo = generate_userinfo_data()
         contact = Contact(
@@ -406,9 +395,7 @@ class TestPlatformMountAction(BaseTestCase):
             "data": {
                 "type": self.object_type,
                 "id": mount_platform_action.id,
-                "attributes": {
-                    "description": "updated",
-                },
+                "attributes": {"description": "updated", },
             }
         }
         _ = super().update_object(
@@ -417,12 +404,15 @@ class TestPlatformMountAction(BaseTestCase):
             object_type=self.object_type,
         )
 
-    def test_delete_device_mount_action(self):
+    def test_fail_delete_platform_mount_action(self):
         """Delete PlatformMountAction."""
         mount_platform_action = add_mount_platform_action_model()
-        _ = super().delete_object(
-            url=f"{self.url}/{mount_platform_action.id}",
-        )
+        with self.client:
+            response = self.client.delete(
+                f"{self.url}/{mount_platform_action.id}",
+                content_type="application/vnd.api+json",
+            )
+        self.assertNotEqual(response.status_code, 200)
 
     def test_http_response_not_found(self):
         """Make sure that the backend responds with 404 HTTP-Code if a resource was not found."""

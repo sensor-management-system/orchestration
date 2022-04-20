@@ -3,6 +3,7 @@
 from project import base_url, db
 from project.api.models import Contact, Platform, PlatformSoftwareUpdateAction
 from project.tests.base import BaseTestCase, fake, generate_userinfo_data
+from project.tests.base import create_token
 from project.tests.models.test_software_update_actions_attachment_model import (
     add_platform_software_update_action_attachment_model,
 )
@@ -40,9 +41,9 @@ class TestPlatformSoftwareUpdateAction(BaseTestCase):
         userinfo = generate_userinfo_data()
         platform = Platform(
             short_name="Platform 111",
-            is_public=False,
+            is_public=True,
             is_private=False,
-            is_internal=True,
+            is_internal=False,
         )
 
         contact = Contact(
@@ -82,7 +83,7 @@ class TestPlatformSoftwareUpdateAction(BaseTestCase):
             "data": {
                 "type": self.object_type,
                 "id": platform_software_update_action.id,
-                "attributes": {"description": "updated",},
+                "attributes": {"description": "updated", },
             }
         }
         _ = super().update_object(
@@ -93,10 +94,15 @@ class TestPlatformSoftwareUpdateAction(BaseTestCase):
 
     def test_delete_platform_software_update_action(self):
         """Delete PlatformSoftwareUpdateAction."""
-        platform_software_update_action = add_platform_software_update_action_model()
-        _ = super().delete_object(
-            url=f"{self.url}/{platform_software_update_action.id}",
-        )
+        platform_software_update_action = add_platform_software_update_action_model(group_ids=[403])
+        access_headers = create_token()
+        with self.client:
+            response = self.client.delete(
+                f"{self.url}/{platform_software_update_action.id}",
+                content_type="application/vnd.api+json",
+                headers=access_headers,
+            )
+        self.assertNotEqual(response.status_code, 200)
 
     def test_filtered_by_platform(self):
         """Ensure that I can prefilter by a specific platform."""
@@ -106,12 +112,12 @@ class TestPlatformSoftwareUpdateAction(BaseTestCase):
         db.session.add(contact)
 
         platform1 = Platform(
-            short_name="platform1", is_public=False, is_private=False, is_internal=True,
+            short_name="platform1", is_public=True, is_private=False, is_internal=False,
         )
         db.session.add(platform1)
 
         platform2 = Platform(
-            short_name="platform2", is_public=False, is_private=False, is_internal=True,
+            short_name="platform2", is_public=True, is_private=False, is_internal=False,
         )
         db.session.add(platform2)
 
@@ -139,7 +145,7 @@ class TestPlatformSoftwareUpdateAction(BaseTestCase):
         with self.client:
             url_get_all = base_url + "/platform-software-update-actions"
             response = self.client.get(
-                url_get_all, content_type="application/vnd.api+json"
+                url_get_all, content_type="application/vnd.api+json",
             )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.json["data"]), 2)
@@ -147,7 +153,7 @@ class TestPlatformSoftwareUpdateAction(BaseTestCase):
         # test only for the first platform
         with self.client:
             url_get_for_platform1 = (
-                base_url + f"/platforms/{platform1.id}/platform-software-update-actions"
+                    base_url + f"/platforms/{platform1.id}/platform-software-update-actions"
             )
             response = self.client.get(
                 url_get_for_platform1, content_type="application/vnd.api+json"
@@ -161,7 +167,7 @@ class TestPlatformSoftwareUpdateAction(BaseTestCase):
         # and test the second platform
         with self.client:
             url_get_for_platform2 = (
-                base_url + f"/platforms/{platform2.id}/platform-software-update-actions"
+                    base_url + f"/platforms/{platform2.id}/platform-software-update-actions"
             )
             response = self.client.get(
                 url_get_for_platform2, content_type="application/vnd.api+json"
@@ -175,8 +181,8 @@ class TestPlatformSoftwareUpdateAction(BaseTestCase):
         # and for a non existing
         with self.client:
             url_get_for_non_existing_platform = (
-                base_url
-                + f"/platforms/{platform2.id + 9999}/platform-software-update-actions"
+                    base_url
+                    + f"/platforms/{platform2.id + 9999}/platform-software-update-actions"
             )
             response = self.client.get(
                 url_get_for_non_existing_platform,
@@ -189,9 +195,14 @@ class TestPlatformSoftwareUpdateAction(BaseTestCase):
         platform_software_update_action = (
             add_platform_software_update_action_attachment_model()
         )
-        _ = super().delete_object(
-            url=f"{self.url}/{platform_software_update_action.id}",
-        )
+        access_headers = create_token()
+        with self.client:
+            response = self.client.delete(
+                f"{self.url}/{platform_software_update_action.id}",
+                content_type="application/vnd.api+json",
+                headers=access_headers,
+            )
+        self.assertEqual(response.status_code, 200)
 
     def test_http_response_not_found(self):
         """Make sure that the backend responds with 404 HTTP-Code if a resource was not found."""

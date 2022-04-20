@@ -3,13 +3,12 @@ from flask_rest_jsonapi import ResourceDetail, ResourceRelationship
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.orm.exc import NoResultFound
 
+from ..auth.permission_utils import get_query_with_permissions_for_related_objects
 from ..models.base_model import db
 from ..models.configuration import Configuration
 from ..models.platform import Platform
 from ..models.unmount_actions import PlatformUnmountAction
-from ..resourceManager.base_resource import (
-    check_if_object_not_found,
-)
+from ..resourceManager.base_resource import check_if_object_not_found
 from ..schemas.unmount_actions_schema import PlatformUnmountActionSchema
 from ..token_checker import token_required
 from ...frj_csv_export.resource import ResourceList
@@ -24,7 +23,7 @@ class PlatformUnmountActionList(ResourceList):
 
         Also handle optional pre-filters (for specific configurations, for example).
         """
-        query_ = self.session.query(PlatformUnmountAction)
+        query_ = get_query_with_permissions_for_related_objects(self.model)
         configuration_id = view_kwargs.get("configuration_id")
         platform_id = view_kwargs.get("platform_id")
         if configuration_id is not None:
@@ -55,7 +54,7 @@ class PlatformUnmountActionList(ResourceList):
     data_layer = {
         "session": db.session,
         "model": PlatformUnmountAction,
-        "methods": {"query": query,},
+        "methods": {"query": query},
     }
 
 

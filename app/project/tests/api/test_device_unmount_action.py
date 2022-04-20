@@ -6,6 +6,7 @@ from project import base_url
 from project.api.models import Configuration, Contact, Device, DeviceUnmountAction
 from project.api.models.base_model import db
 from project.tests.base import BaseTestCase, fake, generate_userinfo_data
+from project.tests.base import create_token
 from project.tests.models.test_configurations_model import generate_configuration_model
 from project.tests.models.test_unmount_actions_model import add_unmount_device_action
 
@@ -40,9 +41,9 @@ class TestDeviceUnmountAction(BaseTestCase):
         userinfo = generate_userinfo_data()
         device = Device(
             short_name=fake.linux_processor(),
-            is_public=False,
+            is_public=True,
             is_private=False,
-            is_internal=True,
+            is_internal=False,
         )
 
         contact = Contact(
@@ -94,22 +95,29 @@ class TestDeviceUnmountAction(BaseTestCase):
     def test_delete_device_unmount_action(self):
         """Delete DeviceUnmountAction."""
         unmount_device_action = add_unmount_device_action()
-        _ = super().delete_object(url=f"{self.url}/{unmount_device_action.id}",)
+        access_headers = create_token()
+        with self.client:
+            response = self.client.delete(
+                f"{self.url}/{unmount_device_action.id}",
+                content_type="application/vnd.api+json",
+                headers=access_headers,
+            )
+        self.assertEqual(response.status_code, 200)
 
     def test_filtered_by_configuration(self):
         """Ensure that I can prefilter by a specific configuration."""
         configuration1 = Configuration(
             label="sample configuration",
             location_type="static",
-            is_public=False,
-            is_internal=True,
+            is_public=True,
+            is_internal=False,
         )
         db.session.add(configuration1)
         configuration2 = Configuration(
             label="sample configuration II",
             location_type="static",
-            is_public=False,
-            is_internal=True,
+            is_public=True,
+            is_internal=False,
         )
         db.session.add(configuration2)
 
@@ -119,12 +127,12 @@ class TestDeviceUnmountAction(BaseTestCase):
         db.session.add(contact)
 
         device1 = Device(
-            short_name="device1", is_public=False, is_private=False, is_internal=True,
+            short_name="device1", is_public=True, is_private=False, is_internal=False,
         )
         db.session.add(device1)
 
         device2 = Device(
-            short_name="device2", is_public=False, is_private=False, is_internal=True,
+            short_name="device2", is_public=True, is_private=False, is_internal=False,
         )
         db.session.add(device2)
 
@@ -201,15 +209,15 @@ class TestDeviceUnmountAction(BaseTestCase):
         configuration1 = Configuration(
             label="sample configuration",
             location_type="static",
-            is_public=False,
-            is_internal=True,
+            is_public=True,
+            is_internal=False,
         )
         db.session.add(configuration1)
         configuration2 = Configuration(
             label="sample configuration II",
             location_type="static",
-            is_public=False,
-            is_internal=True,
+            is_public=True,
+            is_internal=False,
         )
         db.session.add(configuration2)
 
@@ -219,12 +227,12 @@ class TestDeviceUnmountAction(BaseTestCase):
         db.session.add(contact)
 
         device1 = Device(
-            short_name="device1", is_public=False, is_private=False, is_internal=True,
+            short_name="device1", is_public=True, is_private=False, is_internal=False,
         )
         db.session.add(device1)
 
         device2 = Device(
-            short_name="device2", is_public=False, is_private=False, is_internal=True,
+            short_name="device2", is_public=True, is_private=False, is_internal=False,
         )
         db.session.add(device2)
 

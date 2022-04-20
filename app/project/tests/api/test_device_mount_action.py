@@ -12,6 +12,7 @@ from project.api.models import (
 )
 from project.api.models.base_model import db
 from project.tests.base import BaseTestCase, fake, generate_userinfo_data
+from project.tests.base import create_token
 from project.tests.models.test_configurations_model import generate_configuration_model
 from project.tests.models.test_mount_actions_model import add_mount_device_action_model
 
@@ -46,15 +47,15 @@ class TestDeviceMountAction(BaseTestCase):
         userinfo = generate_userinfo_data()
         device = Device(
             short_name=fake.linux_processor(),
-            is_public=False,
+            is_public=True,
             is_private=False,
-            is_internal=True,
+            is_internal=False,
         )
         parent_platform = Platform(
             short_name="device parent platform",
-            is_public=False,
+            is_public=True,
             is_private=False,
-            is_internal=True,
+            is_internal=False,
         )
 
         contact = Contact(
@@ -109,25 +110,32 @@ class TestDeviceMountAction(BaseTestCase):
             object_type=self.object_type,
         )
 
-    def test_delete_device_mount_action(self):
-        """Delete DeviceMountAction."""
+    def test_fail_to_delete_device_mount_action_without_permission(self):
+        """Delete DeviceMountAction should fail without permission."""
         mount_device_action = add_mount_device_action_model()
-        _ = super().delete_object(url=f"{self.url}/{mount_device_action.id}",)
+        access_headers = create_token()
+        with self.client:
+            response = self.client.delete(
+                f"{self.url}/{mount_device_action.id}",
+                content_type="application/vnd.api+json",
+                headers=access_headers,
+            )
+        self.assertEqual(response.status_code, 200)
 
     def test_filtered_by_configuration(self):
         """Ensure that I can prefilter by a specific configuration."""
         configuration1 = Configuration(
             label="sample configuration",
             location_type="static",
-            is_public=False,
-            is_internal=True,
+            is_public=True,
+            is_internal=False,
         )
         db.session.add(configuration1)
         configuration2 = Configuration(
             label="sample configuration II",
             location_type="static",
-            is_public=False,
-            is_internal=True,
+            is_public=True,
+            is_internal=False,
         )
         db.session.add(configuration2)
 
@@ -137,12 +145,12 @@ class TestDeviceMountAction(BaseTestCase):
         db.session.add(contact)
 
         device1 = Device(
-            short_name="device1", is_public=False, is_private=False, is_internal=True,
+            short_name="device1", is_public=True, is_private=False, is_internal=False,
         )
         db.session.add(device1)
 
         device2 = Device(
-            short_name="device2", is_public=False, is_private=False, is_internal=True,
+            short_name="device2", is_public=True, is_private=False, is_internal=False,
         )
         db.session.add(device2)
 
@@ -220,15 +228,15 @@ class TestDeviceMountAction(BaseTestCase):
         configuration1 = Configuration(
             label="sample configuration",
             location_type="static",
-            is_public=False,
-            is_internal=True,
+            is_public=True,
+            is_internal=False,
         )
         db.session.add(configuration1)
         configuration2 = Configuration(
             label="sample configuration II",
             location_type="static",
-            is_public=False,
-            is_internal=True,
+            is_public=True,
+            is_internal=False,
         )
         db.session.add(configuration2)
 
@@ -238,12 +246,12 @@ class TestDeviceMountAction(BaseTestCase):
         db.session.add(contact)
 
         device1 = Device(
-            short_name="device1", is_public=False, is_private=False, is_internal=True,
+            short_name="device1", is_public=True, is_private=False, is_internal=False,
         )
         db.session.add(device1)
 
         device2 = Device(
-            short_name="device2", is_public=False, is_private=False, is_internal=True,
+            short_name="device2", is_public=True, is_private=False, is_internal=False,
         )
         db.session.add(device2)
 
@@ -312,15 +320,15 @@ class TestDeviceMountAction(BaseTestCase):
         configuration1 = Configuration(
             label="sample configuration",
             location_type="static",
-            is_public=False,
-            is_internal=True,
+            is_public=True,
+            is_internal=False,
         )
         db.session.add(configuration1)
         configuration2 = Configuration(
             label="sample configuration II",
             location_type="static",
-            is_public=False,
-            is_internal=True,
+            is_public=True,
+            is_internal=False,
         )
         db.session.add(configuration2)
 
@@ -330,22 +338,22 @@ class TestDeviceMountAction(BaseTestCase):
         db.session.add(contact)
 
         platform1 = Platform(
-            short_name="platform1", is_public=False, is_private=False, is_internal=True,
+            short_name="platform1", is_public=True, is_private=False, is_internal=False,
         )
         db.session.add(platform1)
 
         platform2 = Platform(
-            short_name="platform2", is_public=False, is_private=False, is_internal=True,
+            short_name="platform2", is_public=True, is_private=False, is_internal=False,
         )
         db.session.add(platform2)
 
         device1 = Device(
-            short_name="device1", is_public=False, is_private=False, is_internal=True,
+            short_name="device1", is_public=True, is_private=False, is_internal=False,
         )
         db.session.add(device1)
 
         device2 = Device(
-            short_name="device2", is_public=False, is_private=False, is_internal=True,
+            short_name="device2", is_public=True, is_private=False, is_internal=False,
         )
         db.session.add(device2)
 

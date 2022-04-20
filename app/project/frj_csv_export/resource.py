@@ -3,7 +3,6 @@
 """This module contains the logic of resource management
 Modifications: Adopted form Custom content negotiation #171 ( miLibris /
 flask-rest-jsonapi ) """
-
 import pandas as pd
 from cherrypicker import CherryPicker
 from flask import request, url_for
@@ -157,7 +156,7 @@ class ResourceList(with_metaclass(ResourceMetaBase, Resource)):
         )
 
         try:
-            data = schema.load(json_data)
+            data = schema.load(json_data, partial=True)
         except IncorrectTypeError as e:
             errors = e.messages
             for error in errors["errors"]:
