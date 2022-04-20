@@ -349,7 +349,7 @@ class BeforeCommitValidatableMixin:
             if isinstance(obj, BeforeCommitValidatableMixin):
                 validation_needed.append(obj)
         for obj in session.deleted:
-            if obj in session._validation_needed:
+            if obj in validation_needed:
                 validation_needed.remove(obj)
 
         for obj in validation_needed:
