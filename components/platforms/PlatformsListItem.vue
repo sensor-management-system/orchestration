@@ -209,7 +209,7 @@ import {mapGetters} from 'vuex'
 
 @Component({
   components: { StatusBadge, DotMenu },
-  computed: mapGetters('vocabulary',['getPlatformTypeNameByUri','getEquipmentstatusNameByUri'])
+  computed: mapGetters('vocabulary',['getPlatformTypeByUri','getEquipmentstatusByUri'])
 })
 export default class PlatformsListItem extends Vue {
 
@@ -228,8 +228,8 @@ export default class PlatformsListItem extends Vue {
       return this.platform.platformTypeName
     }
 
-    if(this.getPlatformTypeNameByUri(this.platform.platformTypeUri)){
-      const platformType:PlatformType = this.getPlatformTypeNameByUri(this.platform.platformTypeUri)
+    if(this.getPlatformTypeByUri(this.platform.platformTypeUri)){
+      const platformType:PlatformType = this.getPlatformTypeByUri(this.platform.platformTypeUri)
       return platformType.name
     }
      return this.NO_TYPE
@@ -239,8 +239,8 @@ export default class PlatformsListItem extends Vue {
     if (platform.statusName) {
       return platform.statusName
     }
-    if (this.getEquipmentstatusNameByUri(this.platform.statusUri)) {
-      const platformStatus:Status = this.getEquipmentstatusNameByUri(this.platform.statusUri)
+    if (this.getEquipmentstatusByUri(this.platform.statusUri)) {
+      const platformStatus:Status = this.getEquipmentstatusByUri(this.platform.statusUri)
       return platformStatus.name
     }
     return ''

@@ -23,14 +23,19 @@ const state = {
 //   return platformStatus.name
 // }
 const getters = {
-  getPlatformTypeNameByUri: (state:vocabularyState)=>(uri:string):PlatformType|undefined=>{
+  getPlatformTypeByUri: (state:vocabularyState)=>(uri:string):PlatformType|undefined=>{
     return state.platformtypes.find((platformType:PlatformType)=>{
       return platformType.uri===uri
     });
   },
-  getEquipmentstatusNameByUri: (state:vocabularyState)=>(uri:string):Status|undefined=>{
+  getEquipmentstatusByUri: (state:vocabularyState)=>(uri:string):Status|undefined=>{
     return state.equipmentstatus.find((equipmentstatus:Status)=>{
       return equipmentstatus.uri===uri
+    });
+  },
+  getManufacturerByUri: (state:vocabularyState)=>(uri:string):Manufacturer|undefined=>{
+    return state.manufacturers.find((manufacturer:Manufacturer)=>{
+      return manufacturer.uri===uri
     });
   }
 }

@@ -115,12 +115,18 @@ import { Status } from '@/models/Status'
 import { Manufacturer } from '@/models/Manufacturer'
 
 import { createPlatformUrn } from '@/modelUtils/urnBuilders'
+import { mapActions, mapGetters, mapState } from 'vuex'
 
-@Component
+@Component({
+  computed:{
+    ...mapState('vocabulary',['platformtypes','manufacturers','equipmentstatus']),
+    ...mapGetters('vocabulary',['getEquipmentstatusByUri','getPlatformTypeByUri','getManufacturerByUri'])
+  },
+  methods:mapActions('vocabulary',['loadManufacturers','loadPlatformtypes','loadEquipmentstatus','loadManufacturers'])
+})
 export default class PlatformBasicData extends Vue {
-  private states: Status[] = []
-  private manufacturers: Manufacturer[] = []
-  private platformTypes: PlatformType[] = []
+
+  public readonly NO_TYPE: string = 'Unknown type'
 
   @Prop({
     default: () => new Platform(),
@@ -129,58 +135,56 @@ export default class PlatformBasicData extends Vue {
   })
   readonly value!: Platform
 
-  mounted () {
-    this.$api.states.findAllPaginated().then((foundStates) => {
-      this.states = foundStates
-    }).catch(() => {
+  async mounted () {
+    try {
+      await this.loadEquipmentstatus()
+    } catch (e) {
       this.$store.commit('snackbar/setError', 'Loading of states failed')
-    })
-    this.$api.manufacturer.findAllPaginated().then((foundManufacturers) => {
-      this.manufacturers = foundManufacturers
-    }).catch(() => {
-      this.$store.commit('snackbar/setError', 'Loading of manufactures failed')
-    })
-    this.$api.platformTypes.findAllPaginated().then((foundPlatformTypes) => {
-      this.platformTypes = foundPlatformTypes
-    }).catch(() => {
+    }
+    try {
+      await this.loadPlatformtypes()
+    } catch (e) {
       this.$store.commit('snackbar/setError', 'Loading of platform types failed')
-    })
-  }
-
-  get manufacturerNames (): string[] {
-    return this.manufacturers.map(m => m.name)
-  }
-
-  get statusNames (): string[] {
-    return this.states.map(s => s.name)
-  }
-
-  get platformTypeNames (): string[] {
-    return this.platformTypes.map(t => t.name)
+    }
+    try {
+      await this.loadManufacturers()
+    } catch (e) {
+      this.$store.commit('snackbar/setError', 'Loading of manufactures failed')
+    }
   }
 
   get platformManufacturerName (): string {
-    const manufacturerIndex = this.manufacturers.findIndex(m => m.uri === this.value.manufacturerUri)
-    if (manufacturerIndex > -1) {
-      return this.manufacturers[manufacturerIndex].name
+    if (this.value.manufacturerName) {
+      return this.value.manufacturerName
     }
-    return this.value.manufacturerName
+    if (this.getManufacturerByUri(this.value.manufacturerUri)) {
+      const manufacturer:Manufacturer = this.getManufacturerByUri(this.value.manufacturerUri)
+      return manufacturer.name
+    }
+    return ''
   }
 
-  get platformStatusName () {
-    const statusIndex = this.states.findIndex(s => s.uri === this.value.statusUri)
-    if (statusIndex > -1) {
-      return this.states[statusIndex].name
+  get platformTypeName (): string {
+    if (this.value.platformTypeName) {
+      return this.value.platformTypeName
     }
-    return this.value.statusName
+
+    if(this.getPlatformTypeByUri(this.value.platformTypeUri)){
+      const platformType:PlatformType = this.getPlatformTypeByUri(this.value.platformTypeUri)
+      return platformType.name
+    }
+    return this.NO_TYPE
   }
 
-  get platformTypeName () {
-    const platformTypeIndex = this.platformTypes.findIndex(t => t.uri === this.value.platformTypeUri)
-    if (platformTypeIndex > -1) {
-      return this.platformTypes[platformTypeIndex].name
+  get platformStatusName (): string {
+    if (this.value.statusName) {
+      return this.value.statusName
     }
-    return this.value.platformTypeName
+    if (this.getEquipmentstatusByUri(this.value.statusUri)) {
+      const platformStatus:Status = this.getEquipmentstatusByUri(this.value.statusUri)
+      return platformStatus.name
+    }
+    return ''
   }
 
   get platformURN () {
