@@ -45,7 +45,21 @@ const actions = {
     const totalPages = Math.ceil(totalCount / state.pageSize)
     commit('setTotalPages', totalPages)
   },
-
+  async exportAsCsv({ commit}: { commit: Commit}, searchParams: IPlatformSearchParams):Promise<Blob> {
+    let email = null;
+    if (searchParams.onlyOwnPlatforms) {
+      // @ts-ignore
+      email = this.$auth.user!.email as string
+    }
+    // @ts-ignore
+    return await this.$api.platforms
+      .setSearchText(searchParams.searchText)
+      .setSearchedManufacturers(searchParams.manufacturer)
+      .setSearchedStates(searchParams.states)
+      .setSearchedPlatformTypes(searchParams.types)
+      .setSearchedUserMail(email)
+      .searchMatchingAsCsvBlob()
+  },
   setPageNumber ({ commit }: { commit: Commit }, newPageNumber: number) {
     commit('setPageNumber', newPageNumber)
   },

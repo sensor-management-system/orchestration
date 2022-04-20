@@ -306,7 +306,7 @@ type PaginatedResult = {
   },
   methods:{
     ...mapActions('vocabulary',['loadEquipmentstatus','loadPlatformtypes','loadManufacturers']),
-    ...mapActions('platforms',['searchPlatformsPaginated','setPageNumber'])
+    ...mapActions('platforms',['searchPlatformsPaginated','setPageNumber','exportAsCsv'])
   }
 })
 export default class SearchPlatformsPage extends Vue {
@@ -456,17 +456,18 @@ export default class SearchPlatformsPage extends Vue {
     return this.searchResults[pageNr]
   }
 
-  exportCsv () { //Todo update using store
-    // if (this.lastActiveSearcher != null) {
-    //   this.processing = true
-    //   this.lastActiveSearcher.findMatchingAsCsvBlob().then((blob) => {
-    //     this.processing = false
-    //     saveAs(blob, 'platforms.csv')
-    //   }).catch((_err) => {
-    //     this.processing = false
-    //     this.$store.commit('snackbar/setError', 'CSV export failed')
-    //   })
-    // }
+  exportCsv () {
+
+    if(this.platforms.length>0){
+      this.processing=true
+      this.exportAsCsv(this.searchParams).then((blob) => {
+        saveAs(blob, 'platforms.csv')
+      }).catch((_err) => {
+        this.$store.commit('snackbar/setError', 'CSV export failed')
+      }).finally(()=>{
+        this.processing = false
+      })
+    }
   }
 
   initDeleteDialog (platform: Platform) {
