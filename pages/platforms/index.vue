@@ -317,8 +317,8 @@ export default class SearchPlatformsPage extends Vue {
   private processing: boolean = false
 
   private totalCount: number = 0
-  private loader: null | IPaginationLoader<Platform> = null
-  private lastActiveSearcher: PlatformSearcher | null = null
+  // private loader: null | IPaginationLoader<Platform> = null
+  // private lastActiveSearcher: PlatformSearcher | null = null
   private page: number = 0
 
   private selectedSearchManufacturers: Manufacturer[] = []
@@ -326,12 +326,8 @@ export default class SearchPlatformsPage extends Vue {
   private selectedSearchPlatformTypes: PlatformType[] = []
   private onlyOwnPlatforms: boolean = false
 
-  // private manufacturer: Manufacturer[] = []
-  // private states: Status[] = []
-  // private platformTypes: PlatformType[] = []
-
-  private platformTypeLookup: Map<string, PlatformType> = new Map<string, PlatformType>()
-  private statusLookup: Map<string, Status> = new Map<string, Status>()
+  // private platformTypeLookup: Map<string, PlatformType> = new Map<string, PlatformType>() //Todo probably strore getter
+  // private statusLookup: Map<string, Status> = new Map<string, Status>() //Todo probably strore getter
 
   private searchResults: PaginatedResult = {}
   private searchText: string | null = null
@@ -357,35 +353,6 @@ export default class SearchPlatformsPage extends Vue {
     this.initSearchQueryParams(this.$route.query)
     this.runInitialSearch()
   }
-
-  // async fetchEntities (): Promise<void> {
-  //   const platformTypeLookup = new Map<string, PlatformType>()
-  //   const statusLookup = new Map<string, Status>()
-  //
-  //   try {
-  //     const [platformTypes, states, manufacturer] = await Promise.all([
-  //       this.$api.platformTypes.findAll(),
-  //       this.$api.states.findAll(),
-  //       this.$api.manufacturer.findAll()
-  //     ])
-  //
-  //     this.platformTypes = platformTypes
-  //     this.states = states
-  //     this.manufacturer = manufacturer
-  //
-  //     for (const platformType of platformTypes) {
-  //       platformTypeLookup.set(platformType.uri, platformType)
-  //     }
-  //     for (const status of states) {
-  //       statusLookup.set(status.uri, status)
-  //     }
-  //
-  //     this.platformTypeLookup = platformTypeLookup
-  //     this.statusLookup = statusLookup
-  //   } catch (_error) {
-  //     this.$store.commit('snackbar/setError', 'Loading of entities failed')
-  //   }
-  // }
 
   beforeDestroy () {
     this.unsetResultItemsShown()
@@ -481,103 +448,7 @@ export default class SearchPlatformsPage extends Vue {
     this.unsetResultItemsShown()
     this.loader = null
     this.page = 0
-    //
-    // const searchBuilder = this.$api.platforms
-    //   .newSearchBuilder()
-    //   .withText(searchParameters.searchText)
-    //   .withOneMatchingManufacturerOf(searchParameters.manufacturer)
-    //   .withOneMatchingStatusOf(searchParameters.states)
-    //   .withOneMatchingPlatformTypeOf(searchParameters.types)
-
-    // if (searchParameters.onlyOwnPlatforms) {
-    //   const email = this.$auth.user!.email as string
-    //   if (email) {
-    //     searchBuilder.withContactEmail(email)
-    //   }
-    // }
-
-    // let filterSettings = [];
-    // if (searchParameters.manufacturer.length > 0) {
-    //   filterSettings.push({
-    //     or: [
-    //       {
-    //         name: 'manufacturer_name',
-    //         op: 'in_',
-    //         val: searchParameters.manufacturer.map((m: Manufacturer) => m.name)
-    //       },
-    //       {
-    //         name: 'manufacturer_uri',
-    //         op: 'in_',
-    //         val: searchParameters.manufacturer.map((m: Manufacturer) => m.uri)
-    //       }
-    //     ]
-    //   })
-    // }
-    // if (searchParameters.states.length > 0) {
-    //   filterSettings.push({
-    //     or: [
-    //       {
-    //         name: 'status_name',
-    //         op: 'in_',
-    //         val: searchParameters.states.map((s: Status) => s.name)
-    //       },
-    //       {
-    //         name: 'status_uri',
-    //         op: 'in_',
-    //         val: searchParameters.states.map((s: Status) => s.uri)
-    //       }
-    //     ]
-    //   })
-    // }
-    // if (searchParameters.types.length > 0) {
-    //   filterSettings.push({
-    //     or: [
-    //       {
-    //         name: 'platform_type_name',
-    //         op: 'in_',
-    //         val: searchParameters.types.map((t: PlatformType) => t.name)
-    //       },
-    //       {
-    //         name: 'platform_type_uri',
-    //         op: 'in_',
-    //         val: searchParameters.types.map((t: PlatformType) => t.uri)
-    //       }
-    //     ]
-    //   })
-    // }
-    // if (searchParameters.onlyOwnPlatforms) {
-    //   const email = this.$auth.user!.email as string
-    //   if (email) {
-    //     filterSettings.push({
-    //       name: 'contacts.email',
-    //       op: 'eq',
-    //       val: email
-    //     })
-    //   }
-    // }
-    // //todo nicht vergessen:
-    // //searchParameters.searchText
-    //
-    // let queryParams = {};
-    // queryParams={
-    //   filter:JSON.stringify(filterSettings)
-    // }
-    // if(searchParameters.searchText){
-    //   queryParams.q = searchParameters.searchText
-    // }
-    // queryParams.sort='short_name';
-    //
-    // // this.lastActiveSearcher = searchBuilder.build()
-    // console.log('searchParameters',searchParameters);
-    // console.log('filterSettings',filterSettings);
     try {
-
-      // if (searchParameters.onlyOwnPlatforms) {
-      //   const email = this.$auth.user!.email as string
-      //   if (email) {
-      //     searchBuilder.withContactEmail(email)
-      //   }
-      // }
 
       this.searchPlatformsPaginated(searchParameters);
       // const loader = await this.lastActiveSearcher.findMatchingAsPaginationLoaderOnPage(page, this.pageSize)
@@ -627,17 +498,17 @@ export default class SearchPlatformsPage extends Vue {
     return this.searchResults[pageNr]
   }
 
-  exportCsv () {
-    if (this.lastActiveSearcher != null) {
-      this.processing = true
-      this.lastActiveSearcher.findMatchingAsCsvBlob().then((blob) => {
-        this.processing = false
-        saveAs(blob, 'platforms.csv')
-      }).catch((_err) => {
-        this.processing = false
-        this.$store.commit('snackbar/setError', 'CSV export failed')
-      })
-    }
+  exportCsv () { //Todo update using store
+    // if (this.lastActiveSearcher != null) {
+    //   this.processing = true
+    //   this.lastActiveSearcher.findMatchingAsCsvBlob().then((blob) => {
+    //     this.processing = false
+    //     saveAs(blob, 'platforms.csv')
+    //   }).catch((_err) => {
+    //     this.processing = false
+    //     this.$store.commit('snackbar/setError', 'CSV export failed')
+    //   })
+    // }
   }
 
   initDeleteDialog (platform: Platform) {
@@ -672,42 +543,27 @@ export default class SearchPlatformsPage extends Vue {
     }
   }
 
-  getType (platform: Platform) {
-    if (this.platformTypeLookup.has(platform.platformTypeUri)) {
-      const platformType: PlatformType = this.platformTypeLookup.get(platform.platformTypeUri) as PlatformType
-      return platformType.name
-    }
-    if (platform.platformTypeName) {
-      return platform.platformTypeName
-    }
-    return this.NO_TYPE
-  }
-
-  getStatus (platform: Platform) {
-    if (this.statusLookup.has(platform.statusUri)) {
-      const platformStatus: Status = this.statusLookup.get(platform.statusUri) as Status
-      return platformStatus.name
-    }
-    if (platform.statusName) {
-      return platform.statusName
-    }
-    return ''
-  }
-
-  showResultItem (id: string) {
-    const show = !!this.searchResultItemsShown[id]
-    Vue.set(this.searchResultItemsShown, id, !show)
-  }
-
-  isResultItemShown (id: string): boolean {
-    return this.searchResultItemsShown[id]
-  }
-
-  unsetResultItemsShown (): void {
-    this.searchResultItemsShown = {}
-  }
-
-  getTextOrDefault = (text: string): string => text || '-'
+  // getType (platform: Platform) {
+  //   if (this.platformTypeLookup.has(platform.platformTypeUri)) {
+  //     const platformType: PlatformType = this.platformTypeLookup.get(platform.platformTypeUri) as PlatformType
+  //     return platformType.name
+  //   }
+  //   if (platform.platformTypeName) {
+  //     return platform.platformTypeName
+  //   }
+  //   return this.NO_TYPE
+  // }
+  //
+  // getStatus (platform: Platform) {
+  //   if (this.statusLookup.has(platform.statusUri)) {
+  //     const platformStatus: Status = this.statusLookup.get(platform.statusUri) as Status
+  //     return platformStatus.name
+  //   }
+  //   if (platform.statusName) {
+  //     return platform.statusName
+  //   }
+  //   return ''
+  // }
 
   initSearchQueryParams (params: QueryParams): void {
     const searchParamsObject = (new PlatformSearchParamsSerializer({
