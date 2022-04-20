@@ -203,8 +203,13 @@ import { Platform } from '@/models/Platform'
 import { Prop } from 'nuxt-property-decorator'
 import DotMenu from '@/components/DotMenu.vue'
 import StatusBadge from '@/components/StatusBadge.vue'
+import { PlatformType } from '@/models/PlatformType'
+import { Status } from '@/models/Status'
+import {mapGetters} from 'vuex'
+
 @Component({
-  components: { StatusBadge, DotMenu }
+  components: { StatusBadge, DotMenu },
+  computed: mapGetters('vocabulary',['getPlatformTypeNameByUri','getEquipmentstatusNameByUri'])
 })
 export default class PlatformsListItem extends Vue {
 
@@ -218,12 +223,27 @@ export default class PlatformsListItem extends Vue {
 
   getTextOrDefault = (text: string): string => text || '-'
 
-  getType(foo){
-    return 'todo: getType';
+  getType () {
+    if (this.platform.platformTypeName) {
+      return this.platform.platformTypeName
+    }
+
+    if(this.getPlatformTypeNameByUri(this.platform.platformTypeUri)){
+      const platformType:PlatformType = this.getPlatformTypeNameByUri(this.platform.platformTypeUri)
+      return platformType.name
+    }
+     return this.NO_TYPE
   }
 
-  getStatus(bar){
-    return 'todo getStatus';
+  getStatus (platform: Platform) {
+    if (platform.statusName) {
+      return platform.statusName
+    }
+    if (this.getEquipmentstatusNameByUri(this.platform.statusUri)) {
+      const platformStatus:Status = this.getEquipmentstatusNameByUri(this.platform.statusUri)
+      return platformStatus.name
+    }
+    return ''
   }
 }
 </script>

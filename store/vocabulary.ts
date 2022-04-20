@@ -3,6 +3,7 @@ import { Manufacturer } from '@/models/Manufacturer'
 import { Status } from '@/models/Status'
 import { PlatformType } from '@/models/PlatformType'
 import { DeviceType } from '@/models/DeviceType'
+import { Platform } from '@/models/Platform'
 
 interface vocabularyState {
   manufacturers: Manufacturer[]
@@ -17,8 +18,22 @@ const state = {
   equipmenttypes: [],
   platformtypes: []
 }
-
-const getters = {}
+// if (this.statusLookup.has(platform.statusUri)) {
+//   const platformStatus: Status = this.statusLookup.get(platform.statusUri) as Status
+//   return platformStatus.name
+// }
+const getters = {
+  getPlatformTypeNameByUri: (state:vocabularyState)=>(uri:string):PlatformType|undefined=>{
+    return state.platformtypes.find((platformType:PlatformType)=>{
+      return platformType.uri===uri
+    });
+  },
+  getEquipmentstatusNameByUri: (state:vocabularyState)=>(uri:string):Status|undefined=>{
+    return state.equipmentstatus.find((equipmentstatus:Status)=>{
+      return equipmentstatus.uri===uri
+    });
+  }
+}
 
 const actions = {
   async loadManufacturers ({ commit }: { commit: Commit }) {

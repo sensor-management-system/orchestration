@@ -368,7 +368,6 @@ export default class SearchPlatformsPage extends Vue {
 
   set page(newVal){
     this.setPageNumber(newVal);
-    this.setPageInUrl(false);
   }
 
   get activeTab (): number | null {
@@ -441,21 +440,6 @@ export default class SearchPlatformsPage extends Vue {
       this.loading = false
     }
   }
-
-  get numberOfPages (): number {
-    return Math.ceil(this.totalCount / this.pageSize)
-  }
-
-  async setPage (page: number) {
-    await this.loadPage(page)
-    this.page = page
-    this.setPageInUrl(page, false)
-  }
-
-  getSearchResultForPage (pageNr: number): Platform[] | undefined {
-    return this.searchResults[pageNr]
-  }
-
   exportCsv () {
 
     if(this.platforms.length>0){
