@@ -45,6 +45,13 @@ const actions = {
     const totalPages = Math.ceil(totalCount / state.pageSize)
     commit('setTotalPages', totalPages)
   },
+  async loadPlatform({ commit }: { commit: Commit },id:number){
+    const platform = await this.$api.platforms.findById(id,{ //TODO Überprüfen, ob man diese Parameter wirklich braucht/ notfalls die payload als Object übergeben lassen
+      includeContacts: false,
+      includePlatformAttachments: false
+    });
+    commit('setPlatform',platform)
+  },
   async exportAsCsv({ commit}: { commit: Commit}, searchParams: IPlatformSearchParams):Promise<Blob> {
     let email = null;
     if (searchParams.onlyOwnPlatforms) {

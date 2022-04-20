@@ -34,9 +34,7 @@ permissions and limitations under the Licence.
       v-model="isLoading"
     />
     <v-card flat>
-      <NuxtChild
-        v-model="platform"
-      />
+      <NuxtChild/>
     </v-card>
   </div>
 </template>
@@ -45,36 +43,49 @@ permissions and limitations under the Licence.
 import { Component, Vue, Watch } from 'nuxt-property-decorator'
 import { Platform } from '@/models/Platform'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import {mapActions} from 'vuex'
 
 @Component({
   components: {
     ProgressIndicator
-  }
+  },
+  methods:mapActions('platforms',['loadPlatform'])
 })
 export default class PlatformPage extends Vue {
   private platform: Platform = new Platform()
-  private isLoading: boolean = true
+  private isLoading: boolean = false
 
-  created () {
-    if (this.isBasePath()) {
+  async created () {
+    if (this.isBasePath()) { // Todo hinterfragen, ob man das if wirklich braucht
       this.$router.replace('/platforms/' + this.platformId + '/basic')
+    }
+    this.initializeAppBar()
+    try {
+      this.isLoading = true
+      await this.loadPlatform(this.platformId)
+    } catch (e) {
+      this.$store.commit('snackbar/setError', 'Loading platform failed')
+    } finally {
+      this.isLoading = false
     }
   }
 
-  mounted () {
-    this.initializeAppBar()
-
-    this.$api.platforms.findById(this.platformId, {
-      includeContacts: false,
-      includePlatformAttachments: false
-    }).then((platform) => {
-      this.platform = platform
-      this.isLoading = false
-    }).catch((_error) => {
-      this.$store.commit('snackbar/setError', 'Loading platform failed')
-      this.isLoading = false
-    })
-  }
+  // mounted () {
+  //
+  //
+  //
+  //
+  //   this.$api.platforms.findById(this.platformId, {
+  //     includeContacts: false,
+  //     includePlatformAttachments: false
+  //   }).then((platform) => {
+  //     this.platform = platform
+  //     this.isLoading = false
+  //   }).catch((_error) => {
+  //     this.$store.commit('snackbar/setError', 'Loading platform failed')
+  //     this.isLoading = false
+  //   })
+  // }
 
   beforeDestroy () {
     this.$store.dispatch('appbar/setDefaults')
@@ -111,13 +122,13 @@ export default class PlatformPage extends Vue {
   get platformId () {
     return this.$route.params.platformId
   }
-
-  @Watch('platform', { immediate: true, deep: true })
-  // @ts-ignore
-  onPlatformChanged (val: Platform) {
-    if (val.id) {
-      this.$store.commit('appbar/setTitle', val?.shortName || 'Add Platform')
-    }
-  }
+  //
+  // @Watch('platform', { immediate: true, deep: true })
+  // // @ts-ignore
+  // onPlatformChanged (val: Platform) {
+  //   if (val.id) {
+  //     this.$store.commit('appbar/setTitle', val?.shortName || 'Add Platform')
+  //   }
+  // }
 }
 </script>

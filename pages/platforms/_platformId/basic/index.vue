@@ -58,6 +58,7 @@ permissions and limitations under the Licence.
       </DotMenu>
     </v-card-actions>
     <PlatformBasicData
+      v-if="platform"
       v-model="platform"
     />
     <v-card-actions>
@@ -85,6 +86,7 @@ permissions and limitations under the Licence.
       </DotMenu>
     </v-card-actions>
     <PlatformDeleteDialog
+      v-if="platform"
       v-model="showDeleteDialog"
       :platform-to-delete="platform"
       @cancel-deletion="closeDialog"
@@ -102,6 +104,7 @@ import DotMenu from '@/components/DotMenu.vue'
 import DotMenuActionCopy from '@/components/DotMenuActionCopy.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 import PlatformDeleteDialog from '@/components/platforms/PlatformDeleteDialog.vue'
+import { mapActions, mapState } from 'vuex'
 
 @Component({
   components: {
@@ -110,24 +113,12 @@ import PlatformDeleteDialog from '@/components/platforms/PlatformDeleteDialog.vu
     DotMenuActionCopy,
     DotMenu,
     PlatformBasicData
-  }
+  },
+  computed:mapState('platforms',['platform']),
+  methods:mapActions('platforms',['deletePlatform'])
 })
 export default class PlatformShowBasicPage extends Vue {
-  @Prop({
-    required: true,
-    type: Object
-  })
-  readonly value!: Platform
-
   private showDeleteDialog: boolean = false
-
-  get platform (): Platform {
-    return this.value
-  }
-
-  set platform (value: Platform) {
-    this.$emit('input', value)
-  }
 
   get platformId () {
     return this.$route.params.platformId
@@ -141,13 +132,12 @@ export default class PlatformShowBasicPage extends Vue {
     this.showDeleteDialog = false
   }
 
-  deleteAndCloseDialog () {
+  async deleteAndCloseDialog () {
     this.showDeleteDialog = false
     if (this.platform === null) {
       return
     }
-
-    this.$api.platforms.deleteById(this.platform.id!).then(() => {
+    await this.deletePlatform(this.platform.id!).then(() => {
       this.$router.push('/platforms')
       this.$store.commit('snackbar/setSuccess', 'Platform deleted')
     }).catch((_error) => {
