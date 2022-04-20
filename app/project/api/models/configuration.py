@@ -1,14 +1,14 @@
 """Class and helpers for the configurations."""
 
-from sqlalchemy.orm import validates
-
-from .base_model import db
-from .mixin import AuditMixin, SearchableMixin
-from ..es_utils import settings_with_ngrams, ElasticSearchIndexTypes
+from ..es_utils import ElasticSearchIndexTypes, settings_with_ngrams
 from ..helpers.errors import ConflictError
+from .base_model import db
+from .mixin import AuditMixin, BeforeCommitValidatableMixin, SearchableMixin
 
 
-class Configuration(db.Model, AuditMixin, SearchableMixin):
+class Configuration(
+    db.Model, AuditMixin, SearchableMixin, BeforeCommitValidatableMixin
+):
     """Data model for the configurations."""
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -50,22 +50,15 @@ class Configuration(db.Model, AuditMixin, SearchableMixin):
     is_internal = db.Column(db.Boolean, default=False)
     is_public = db.Column(db.Boolean, default=False)
 
-    @validates("is_internal")
-    def validate_internal(self, key, is_internal):
-        if is_internal and bool(self.is_public):
-            raise ConflictError(
-                "Please make sure that this object is not public at first."
-            )
-        return is_internal
+    def validate(self):
+        """
+        Validate the model.
 
-    @validates("is_public")
-    def validate_public(self, key, is_public):
-
-        if is_public and bool(self.is_internal):
-            raise ConflictError(
-                "Please make sure that this object is not internal at first."
-            )
-        return is_public
+        Check that we don't have multiple visibility values.
+        """
+        super().validate()
+        if self.is_internal and self.is_public:
+            raise ConflictError("The configuration can't be both internal and public")
 
     def to_search_entry(self):
         """
@@ -142,8 +135,10 @@ class Configuration(db.Model, AuditMixin, SearchableMixin):
         type_text_full_searchable = ElasticSearchIndexTypes.text_full_searchable(
             analyzer="ngram_analyzer"
         )
-        type_keyword_and_full_searchable = ElasticSearchIndexTypes.keyword_and_full_searchable(
-            analyzer="ngram_analyzer"
+        type_keyword_and_full_searchable = (
+            ElasticSearchIndexTypes.keyword_and_full_searchable(
+                analyzer="ngram_analyzer"
+            )
         )
 
         return {
@@ -197,19 +192,27 @@ class Configuration(db.Model, AuditMixin, SearchableMixin):
                     },
                     "static_location_begin_actions": {
                         "type": "nested",
-                        "properties": {"description": type_text_full_searchable, },
+                        "properties": {
+                            "description": type_text_full_searchable,
+                        },
                     },
                     "static_location_end_actions": {
                         "type": "nested",
-                        "properties": {"description": type_text_full_searchable, },
+                        "properties": {
+                            "description": type_text_full_searchable,
+                        },
                     },
                     "dynamic_location_begin_actions": {
                         "type": "nested",
-                        "properties": {"description": type_text_full_searchable, },
+                        "properties": {
+                            "description": type_text_full_searchable,
+                        },
                     },
                     "dynamic_location_end_actions": {
                         "type": "nested",
-                        "properties": {"description": type_text_full_searchable, },
+                        "properties": {
+                            "description": type_text_full_searchable,
+                        },
                     },
                     "platform_mount_actions": {
                         "type": "nested",
