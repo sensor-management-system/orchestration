@@ -170,7 +170,7 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
   computed: mapState('platforms', ['platformContacts']),
   methods:mapActions('platforms',['removePlatformContact','loadPlatformContacts'])
 })
-export default class PlatformIndexContactPage extends Vue {
+export default class PlatformShowContactPage extends Vue {
 
   private isSaving = false
 
