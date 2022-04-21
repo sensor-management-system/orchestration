@@ -17,6 +17,7 @@
   <PlatformActionTimeline
     :value="actions"
     :platform-id="platformId"
+    :action-api-dispatcher="apiDispatcher"
     :is-user-authenticated="$auth.loggedIn"
   />
 </div>
@@ -27,6 +28,9 @@ import { Component, Vue } from 'vue-property-decorator'
 import PlatformActionTimeline from '@/components/actions/PlatformActionTimeline.vue'
 import HintCard from '@/components/HintCard.vue'
 import { mapGetters } from 'vuex'
+
+import { PlatformActionApiDispatcher } from '@/modelUtils/actionHelpers'
+
 @Component({
   components: { HintCard, PlatformActionTimeline },
   computed:mapGetters('platforms',['actions'])
@@ -34,6 +38,9 @@ import { mapGetters } from 'vuex'
 export default class PlatformActionsShowPage extends Vue {
   get platformId (): string {
     return this.$route.params.platformId
+  }
+  get apiDispatcher () { // Todo überarbeiten, da z.B. beim Löschen mit dieser Methode die Actions nicht neu geladen werden
+    return new PlatformActionApiDispatcher(this.$api)
   }
 }
 </script>

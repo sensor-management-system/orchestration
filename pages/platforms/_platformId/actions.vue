@@ -86,10 +86,5 @@ export default class PlatformActionsPage extends Vue {
   get platformId (): string {
     return this.$route.params.platformId
   }
-
-
-  // get apiDispatcher () {
-  //   return new PlatformActionApiDispatcher(this.$api)
-  // }
 }
 </script>
