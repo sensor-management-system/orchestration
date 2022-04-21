@@ -235,9 +235,9 @@ export default class PlatformsListItem extends Vue {
      return this.NO_TYPE
   }
 
-  getStatus (platform: Platform) {
-    if (platform.statusName) {
-      return platform.statusName
+  getStatus () {
+    if (this.platform.statusName) {
+      return this.platform.statusName
     }
     if (this.getEquipmentstatusByUri(this.platform.statusUri)) {
       const platformStatus:Status = this.getEquipmentstatusByUri(this.platform.statusUri)
