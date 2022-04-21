@@ -1,8 +1,12 @@
 import { Platform } from '@/models/Platform'
-import { Commit } from 'vuex'
+import { Commit, Dispatch } from 'vuex'
 import { IPlatformSearchParams } from '@/modelUtils/PlatformSearchParams'
 import { Contact } from '@/models/Contact'
 import { Attachment } from '@/models/Attachment'
+import { GenericAction } from '@/models/GenericAction'
+import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
+import { PlatformUnmountAction } from '@/models/PlatformUnmountAction'
+import { PlatformMountAction } from '@/models/PlatformMountAction'
 
 interface platformsState {
   platforms: Platform[],
@@ -10,6 +14,10 @@ interface platformsState {
   platformContacts:Contact[],
   platformAttachments:Attachment[],
   platformAttachment:Attachment|null,
+  platformGenericActions:GenericAction[],
+  platformSoftwareUpdateActions:SoftwareUpdateAction[],
+  platformMountActions:PlatformMountAction[],
+  platformUnmountActions:PlatformUnmountAction[],
   pageNumber: number,
   pageSize: number,
   totalPages: number
@@ -21,12 +29,25 @@ const state = {
   platformContacts:[],
   platformAttachments:[],
   platformAttachment:null,
+  platformGenericActions:[],
+  platformSoftwareUpdateActions:[],
+  platformMountActions:[],
+  platformUnmountActions:[],
   totalPages: 1,
   pageNumber: 1,
   pageSize: 20
 }
 
-const getters = {}
+const getters = {
+  actions:(state:platformsState)=>{
+    return [
+      ...state.platformGenericActions,
+      ...state.platformSoftwareUpdateActions,
+      ...state.platformMountActions,
+      ...state.platformUnmountActions
+    ]
+  }
+}
 
 const actions = {
   async searchPlatformsPaginated ({
@@ -71,6 +92,28 @@ const actions = {
   async loadPlatformAttachment({ commit }: { commit: Commit },id:number){
     const platformAttachment = await this.$api.platformAttachments.findById(id)
     commit('setPlatformAttachment',platformAttachment)
+  },
+  async loadAllPlatformActions({dispatch}:{dispatch:Dispatch},id:number){
+    await dispatch('loadPlatformGenericActions',id)
+    await dispatch('loadPlatformSoftwareUpdateActions',id)
+    await dispatch('loadPlatformMountActions',id)
+    await dispatch('loadPlatformUnmountActions',id)
+  },
+  async loadPlatformGenericActions({ commit }: { commit: Commit },id:number){
+    const platformGenericActions = await this.$api.platforms.findRelatedGenericActions(id)
+    commit('setPlatformGenericActions',platformGenericActions)
+  },
+  async loadPlatformSoftwareUpdateActions({ commit }: { commit: Commit },id:number){
+    const platformSoftwareUpdateActions = await this.$api.platforms.findRelatedSoftwareUpdateActions(id)
+    commit('setPlatformSoftwareUpdateActions',platformSoftwareUpdateActions)
+  },
+  async loadPlatformMountActions({ commit }: { commit: Commit },id:number){
+    const platformMountActions = await this.$api.platforms.findRelatedMountActions(id)
+    commit('setPlatformMountActions',platformMountActions)
+  },
+  async loadPlatformUnmountActions({ commit }: { commit: Commit },id:number){
+    const platformUnmountActions = await this.$api.platforms.findRelatedUnmountActions(id)
+    commit('setPlatformUnmountActions',platformUnmountActions)
   },
   async addPlatformContact({ commit }: { commit: Commit },{platformId,contactId}:{platformId:number,contactId:number}):Promise<void>{
     return this.$api.platforms.addContact(platformId, contactId)
@@ -137,6 +180,18 @@ const mutations = {
   },
   setPlatformAttachment(state:platformsState,platformAttachment:Attachment){
     state.platformAttachment=platformAttachment
+  },
+  setPlatformGenericActions(state:platformsState,platformGenericActions:GenericAction[]){
+    state.platformGenericActions=platformGenericActions
+  },
+  setPlatformSoftwareUpdateActions(state:platformsState,platformSoftwareUpdateActions:SoftwareUpdateAction[]){
+    state.platformSoftwareUpdateActions=platformSoftwareUpdateActions
+  },
+  setPlatformMountActions(state:platformsState,platformMountActions:PlatformMountAction[]){
+    state.platformMountActions=platformMountActions
+  },
+  setPlatformUnmountActions(state:platformsState,platformUnmountActions:PlatformUnmountAction[]){
+    state.platformUnmountActions=platformUnmountActions
   }
 }
 
