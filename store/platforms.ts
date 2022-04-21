@@ -172,10 +172,34 @@ const actions = {
   async savePlatform({ commit }: { commit: Commit }, platform:Platform):Promise<Platform>{
     return this.$api.platforms.save(platform);
   },
-  async copyPlatform({commit}: { commit: Commit },{platform,copyContacts,copyAttachments}:{platform:Platform,copyContacts:boolean,copyAttachments:boolean}){
-    //Todo
+  async copyPlatform({commit,dispatch,state}: { commit: Commit, dispatch:Dispatch, state:platformsState },{platform,copyContacts,copyAttachments}:{platform:Platform,copyContacts:boolean,copyAttachments:boolean}){
+    //Todo, prüfen ob man eventuell etwas vereinfachen kann
+    const savedPlatform = await dispatch('savePlatform',platform);
+    const savedPlatformId = savedPlatform.id!
+    const related: Promise<any>[] = []
+    if(copyContacts){
+      // hier erstmal die Umsetztung, wie es vorher in pages/platforms/copy/_platformId.vue
+      const contacts = platform.contacts
+      await dispatch('loadPlatformContacts',savedPlatformId)
+      const contactsToSave = contacts.filter(c => state.platformContacts.findIndex((ec: Contact) => { return ec.id === c.id }) === -1)
 
-
+      for (const contact of contactsToSave) {
+        if (contact.id) {
+          // related.push(this.$api.platforms.addContact(savedPlatformId, contact.id))
+          related.push(dispatch('addPlatformContact',{platformId:savedPlatformId,contactId:contact.id}))
+        }
+      }
+    }
+    if(copyAttachments){
+      // hier erstmal die Umsetztung, wie es vorher in pages/platforms/copy/_platformId.vue
+      const attachments = platform.attachments.map(Attachment.createFromObject)
+      for (const attachment of attachments) {
+        attachment.id = null
+        related.push(dispatch('addPlatformAttachment',{platformId:savedPlatformId,attachment:attachment}))
+      }
+    }
+    await Promise.all(related)
+    return savedPlatformId
   },
   async exportAsCsv({ commit}: { commit: Commit}, searchParams: IPlatformSearchParams):Promise<Blob> {
     let email = null;
