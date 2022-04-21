@@ -25,7 +25,9 @@ interface platformsState {
   platformAttachments:Attachment[],
   platformAttachment:Attachment|null,
   platformGenericActions:GenericAction[],
+  platformGenericAction:GenericAction|null,
   platformSoftwareUpdateActions:SoftwareUpdateAction[],
+  platformSoftwareUpdateAction:SoftwareUpdateAction|null,
   platformMountActions:PlatformMountAction[],
   platformUnmountActions:PlatformUnmountAction[],
   chosenKindOfPlatformAction: IOptionsForActionType | null,
@@ -45,6 +47,8 @@ const state = {
   platformMountActions:[],
   platformUnmountActions:[],
   chosenKindOfPlatformAction:null,
+  platformGenericAction:null,
+  platformSoftwareUpdateAction:null,
   totalPages: 1,
   pageNumber: 1,
   pageSize: 20
@@ -127,6 +131,14 @@ const actions = {
     const platformUnmountActions = await this.$api.platforms.findRelatedUnmountActions(id)
     commit('setPlatformUnmountActions',platformUnmountActions)
   },
+  async loadPlatformGenericAction({ commit }: { commit: Commit },actionId:number){
+    const genericPlatformAction = await this.$api.genericPlatformActions.findById(actionId)
+    commit('setPlatformGenericAction',genericPlatformAction)
+  },
+  async loadPlatformSoftwareUpdateAction({ commit }: { commit: Commit },actionId:number){
+    const platformSoftwareUpdateAction = await this.$api.platformSoftwareUpdateActions.findById(actionId)
+    commit('setPlatformSoftwareUpdateAction',platformSoftwareUpdateAction);
+  },
   async addPlatformContact({ commit }: { commit: Commit },{platformId,contactId}:{platformId:number,contactId:number}):Promise<void>{
     return this.$api.platforms.addContact(platformId, contactId)
   },
@@ -144,6 +156,9 @@ const actions = {
   },
   async addPlatformGenericAction({ commit }: { commit: Commit },{platformId,genericPlatformAction}:{platformId:number,genericPlatformAction:GenericAction}): Promise<GenericAction>{
     return  this.$api.genericPlatformActions.add(platformId, genericPlatformAction)
+  },
+  async updatePlatformGenericAction({ commit }: { commit: Commit },{platformId,genericPlatformAction}:{platformId:number,genericPlatformAction:GenericAction}):Promise<GenericAction>{
+    return this.$api.genericPlatformActions.update(platformId, genericPlatformAction);
   },
   addPlatformSoftwareUpdateAction({ commit }: { commit: Commit },{platformId,softwareUpdateAction}:{platformId:number,softwareUpdateAction:SoftwareUpdateAction}):Promise<SoftwareUpdateAction>{
     return this.$api.platformSoftwareUpdateActions.add(platformId,softwareUpdateAction)
@@ -216,6 +231,12 @@ const mutations = {
   },
   setChosenKindOfPlatformAction(state:platformsState,newVal:IOptionsForActionType | null){
     state.chosenKindOfPlatformAction=newVal
+  },
+  setPlatformGenericAction(state:platformsState,action:GenericAction){
+    state.platformGenericAction=action
+  },
+  setPlatformSoftwareUpdateAction(state:platformsState,action:SoftwareUpdateAction){
+    state.platformSoftwareUpdateAction=action
   }
 }
 

@@ -34,6 +34,14 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
+    <!-- just to be consistent with the new mask, we show the selected action type as an disabled v-select here -->
+    <v-select
+      :value="action.actionTypeName"
+      :items="[action.actionTypeName]"
+      :item-text="(x) => x"
+      disabled
+      label="Action Type"
+    />
     <v-card-actions>
       <v-spacer />
       <ActionButtonTray
@@ -43,19 +51,10 @@ permissions and limitations under the Licence.
         @apply="save"
       />
     </v-card-actions>
-
-    <!-- just to be consistent with the new mask, we show the selected action type as an disabled v-select here -->
-    <v-select
-      :value="action.actionTypeName"
-      :items="[action.actionTypeName]"
-      :item-text="(x) => x"
-      disabled
-      label="Action Type"
-    />
     <GenericActionForm
       ref="genericPlatformActionForm"
       v-model="action"
-      :attachments="attachments"
+      :attachments="platformAttachments"
       :current-user-mail="$auth.user.email"
     />
 
@@ -79,6 +78,7 @@ import { Attachment } from '@/models/Attachment'
 
 import GenericActionForm from '@/components/actions/GenericActionForm.vue'
 import ActionButtonTray from '@/components/actions/ActionButtonTray.vue'
+import { mapActions, mapState } from 'vuex'
 
 @Component({
   components: {
@@ -86,35 +86,25 @@ import ActionButtonTray from '@/components/actions/ActionButtonTray.vue'
     GenericActionForm
   },
   scrollToTop: true,
-  middleware: ['auth']
+  middleware: ['auth'],
+  computed:mapState('platforms',['platformGenericAction','platformAttachments']),
+  methods:mapActions('platforms',['loadPlatformGenericAction','loadAllPlatformActions','loadPlatformAttachments','updatePlatformGenericAction'])
 })
 export default class EditPlatformAction extends Vue {
-  private action: GenericAction = new GenericAction()
-  private attachments: Attachment[] = []
-  private _isLoading: boolean = false
-  private _isSaving: boolean = false
+  private isSaving: boolean = false
 
-  async fetch (): Promise<any> {
-    this.isLoading = true
-    await Promise.all([
-      this.fetchAttachments(),
-      this.fetchAction()
-    ])
-    this.isLoading = false
-  }
+  private action:GenericAction=new GenericAction()
 
-  async fetchAction (): Promise<any> {
+  async created(){
     try {
-      this.action = await this.$api.genericPlatformActions.findById(this.actionId)
+      await this.loadPlatformGenericAction(this.actionId)
+      this.action = GenericAction.createFromObject(this.platformGenericAction)
     } catch (error) {
       this.$store.commit('snackbar/setError', 'Failed to fetch action')
     }
-  }
-
-  async fetchAttachments (): Promise<any> {
     try {
-      this.attachments = await this.$api.platforms.findRelatedPlatformAttachments(this.platformId)
-    } catch (_) {
+      await this.loadPlatformAttachments(this.platformId)
+    } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to fetch attachments')
     }
   }
@@ -127,38 +117,23 @@ export default class EditPlatformAction extends Vue {
     return this.$route.params.actionId
   }
 
-  get isLoading (): boolean {
-    return this.$data._isLoading
-  }
-
-  set isLoading (value: boolean) {
-    this.$data._isLoading = value
-    this.$emit('showload', value)
-  }
-
-  get isSaving (): boolean {
-    return this.$data._isSaving
-  }
-
-  set isSaving (value: boolean) {
-    this.$data._isSaving = value
-    this.$emit('showsave', value)
-  }
-
-  save (): void {
+  async save (): void {
     if (!(this.$refs.genericPlatformActionForm as Vue & { isValid: () => boolean }).isValid()) {
       this.$store.commit('snackbar/setError', 'Please correct the errors')
       return
     }
-    this.isSaving = true
-    this.$api.genericPlatformActions.update(this.platformId, this.action).then((action: GenericAction) => {
+
+    try {
+      this.isSaving = true
+      await this.updatePlatformGenericAction({platformId:this.platformId,genericPlatformAction: this.action})
+      this.loadAllPlatformActions(this.platformId)
       this.$store.commit('snackbar/setSuccess', `Action: ${this.action.actionTypeName} updated`)
-      this.$router.push('/platforms/' + this.platformId + '/actions', () => this.$emit('input', action))
-    }).catch(() => {
+      this.$router.push('/platforms/' + this.platformId + '/actions')
+    }catch (err){
       this.$store.commit('snackbar/setError', 'Failed to save the action')
-    }).finally(() => {
+    }finally {
       this.isSaving = false
-    })
+    }
   }
 }
 </script>
