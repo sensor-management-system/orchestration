@@ -36,12 +36,12 @@ permissions and limitations under the Licence.
     <v-list-item>
       <v-list-item-avatar>
         <v-icon large>
-          {{ filetypeIcon }}
+          {{ filetypeIcon(valueCopy) }}
         </v-icon>
       </v-list-item-avatar>
       <v-list-item-content>
         <v-list-item-subtitle>
-          {{ filename }}, uploaded at {{ uploadedDateTime }}
+          {{ filename(valueCopy) }}, uploaded at {{ uploadedDateTime(valueCopy) }}
         </v-list-item-subtitle>
         <v-list-item-title>
           <v-text-field
@@ -85,84 +85,47 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Vue, Component, Prop } from 'nuxt-property-decorator'
+import { Vue, Component, Prop, mixins } from 'nuxt-property-decorator'
 
 import { Attachment } from '@/models/Attachment'
-
+import { mapActions, mapState } from 'vuex'
+import { AttachmentsMixin } from '@/mixins/AttachmentsMixin'
 /**
  * A class component that displays a single attached file
  * @extends Vue
  */
-@Component
+@Component({
+  computed:mapState('platforms',['platformAttachment']),
+  methods:mapActions('platforms',['loadPlatformAttachment','loadPlatformAttachments','updatePlatformAttachment'])
+})
 // @ts-ignore
-export default class AttachmentEditPage extends Vue {
+export default class AttachmentEditPage extends mixins(AttachmentsMixin) {
   private valueCopy: Attachment = new Attachment()
 
-  /**
-   * an Attachment
-   */
-  @Prop({
-    required: true,
-    type: Attachment
-  })
-  // @ts-ignore
-  readonly value!: Attachment
-
-  created () {
-    this.valueCopy = Attachment.createFromObject(this.value)
-  }
-
-  mounted () {
-    const cancelButton = this.$refs.cancelButton as Vue
-    // due to the active route (and the button being a router link)
-    // this button has the active class
-    // however, we don't want this special behaviour for this button
-    cancelButton.$el.classList.remove('v-btn--active')
+  async created () {
+    await this.loadPlatformAttachment(this.attachmentId)
+    this.valueCopy = Attachment.createFromObject(this.platformAttachment)
   }
 
   get platformId (): string {
     return this.$route.params.platformId
   }
-
-  /**
-   * returns the timestamp of the upload date
-   *
-   * @TODO this must be implemented when the file API is ready
-   * @return {string} a readable timestamp
-   */
-  get uploadedDateTime (): string {
-    return '2020-06-17 16:35 (TODO)'
-  }
-
-  /**
-   * returns a filename from a full filepath
-   *
-   * @return {string} the filename
-   */
-  get filename (): string {
-    const UNKNOWN_FILENAME = 'unknown filename'
-
-    if (this.valueCopy.url === '') {
-      return UNKNOWN_FILENAME
-    }
-    const paths = this.valueCopy.url.split('/')
-    if (!paths.length) {
-      return UNKNOWN_FILENAME
-    }
-    // @ts-ignore
-    return paths.pop()
+  get attachmentId (): string {
+    return this.$route.params.attachmentId
   }
 
   save () {
-    this.$emit('showsave', true)
-    this.$api.platformAttachments.update(this.platformId, this.valueCopy).then((savedAttachment: Attachment) => {
-      this.$emit('showsave', false)
-      this.$emit('input', savedAttachment)
+    try {
+      this.updatePlatformAttachment({
+        platformId: this.platformId,
+        attachment: this.valueCopy
+      })
+      this.loadPlatformAttachments(this.platformId)
       this.$router.push('/platforms/' + this.platformId + '/attachments')
-    }).catch(() => {
-      this.$emit('showsave', false)
+    } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to save attachments')
-    })
+    }
+
   }
 }
 </script>

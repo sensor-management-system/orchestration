@@ -9,6 +9,7 @@ interface platformsState {
   platform: Platform | null,
   platformContacts:Contact[],
   platformAttachments:Attachment[],
+  platformAttachment:Attachment|null,
   pageNumber: number,
   pageSize: number,
   totalPages: number
@@ -19,6 +20,7 @@ const state = {
   platform: null,
   platformContacts:[],
   platformAttachments:[],
+  platformAttachment:null,
   totalPages: 1,
   pageNumber: 1,
   pageSize: 20
@@ -66,6 +68,10 @@ const actions = {
     const platformAttachments = await this.$api.platforms.findRelatedPlatformAttachments(id)
     commit('setPlatformAttachments',platformAttachments)
   },
+  async loadPlatformAttachment({ commit }: { commit: Commit },id:number){
+    const platformAttachment = await this.$api.platformAttachments.findById(id)
+    commit('setPlatformAttachment',platformAttachment)
+  },
   async addPlatformContact({ commit }: { commit: Commit },{platformId,contactId}:{platformId:number,contactId:number}):Promise<void>{
     return this.$api.platforms.addContact(platformId, contactId)
   },
@@ -74,6 +80,9 @@ const actions = {
   },
   async addPlatformAttachment({ commit }: { commit: Commit },{platformId,attachment}:{platformId:number,attachment:Attachment}):Promise<void>{
     return this.$api.platformAttachments.add(platformId, attachment);
+  },
+  async updatePlatformAttachment({ commit }: { commit: Commit },{platformId,attachment}:{platformId:number,attachment:Attachment}):Promise<void>{
+    return this.$api.platformAttachments.update(platformId, attachment);
   },
   async deletePlatformAttachment({ commit }: { commit: Commit },attachmentId:number): Promise<void>{
     return this.$api.platformAttachments.deleteById(attachmentId);
@@ -125,6 +134,9 @@ const mutations = {
   },
   setPlatformAttachments(state:platformsState,platformAttachments:Attachment[]){
     state.platformAttachments=platformAttachments;
+  },
+  setPlatformAttachment(state:platformsState,platformAttachment:Attachment){
+    state.platformAttachment=platformAttachment
   }
 }
 
