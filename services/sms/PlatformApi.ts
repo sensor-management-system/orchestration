@@ -80,7 +80,6 @@ export class PlatformApi {
   private _searchedPlatformTypes: PlatformType[] = []
   private _searchedUserMail: string | null = null
   private _searchText: string | null = null
-  //Todo email
   private filterSettings: any[] = []
 
   constructor (axiosInstance: AxiosInstance, basePath: string) {
@@ -131,7 +130,7 @@ export class PlatformApi {
 
   setSearchedUserMail (value: string | null) {
     this._searchedUserMail = value
-    return this;
+    return this
   }
 
   private get commonParams (): any {
@@ -205,7 +204,7 @@ export class PlatformApi {
     this.prepareMail()
   }
 
-  prepareMail() {
+  prepareMail () {
     if (this.searchedUserMail) {
       this.filterSettings.push({
         name: 'contacts.email',
@@ -213,7 +212,7 @@ export class PlatformApi {
         val: this.searchedUserMail
       })
     }
-    }
+  }
 
   resetFilterSetting () {
     this.filterSettings = []
