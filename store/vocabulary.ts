@@ -4,39 +4,43 @@ import { Status } from '@/models/Status'
 import { PlatformType } from '@/models/PlatformType'
 import { DeviceType } from '@/models/DeviceType'
 import { Platform } from '@/models/Platform'
+import { ActionType } from '@/models/ActionType'
+import { ACTION_TYPE_API_FILTER_PLATFORM } from '@/services/cv/ActionTypeApi'
 
 interface vocabularyState {
   manufacturers: Manufacturer[]
   equipmentstatus: Status[]
   equipmenttypes: DeviceType[]
-  platformtypes: PlatformType[]
+  platformtypes: PlatformType[],
+  platformGenericActionTypes: ActionType[]
 }
 
 const state = {
   manufacturers: [],
   equipmentstatus: [],
   equipmenttypes: [],
-  platformtypes: []
+  platformtypes: [],
+  platformGenericActionTypes: []
 }
 // if (this.statusLookup.has(platform.statusUri)) {
 //   const platformStatus: Status = this.statusLookup.get(platform.statusUri) as Status
 //   return platformStatus.name
 // }
 const getters = {
-  getPlatformTypeByUri: (state:vocabularyState)=>(uri:string):PlatformType|undefined=>{
-    return state.platformtypes.find((platformType:PlatformType)=>{
-      return platformType.uri===uri
-    });
+  getPlatformTypeByUri: (state: vocabularyState) => (uri: string): PlatformType | undefined => {
+    return state.platformtypes.find((platformType: PlatformType) => {
+      return platformType.uri === uri
+    })
   },
-  getEquipmentstatusByUri: (state:vocabularyState)=>(uri:string):Status|undefined=>{
-    return state.equipmentstatus.find((equipmentstatus:Status)=>{
-      return equipmentstatus.uri===uri
-    });
+  getEquipmentstatusByUri: (state: vocabularyState) => (uri: string): Status | undefined => {
+    return state.equipmentstatus.find((equipmentstatus: Status) => {
+      return equipmentstatus.uri === uri
+    })
   },
-  getManufacturerByUri: (state:vocabularyState)=>(uri:string):Manufacturer|undefined=>{
-    return state.manufacturers.find((manufacturer:Manufacturer)=>{
-      return manufacturer.uri===uri
-    });
+  getManufacturerByUri: (state: vocabularyState) => (uri: string): Manufacturer | undefined => {
+    return state.manufacturers.find((manufacturer: Manufacturer) => {
+      return manufacturer.uri === uri
+    })
   }
 }
 
@@ -57,6 +61,10 @@ const actions = {
     //@ts-ignore
     commit('setPlatformtypes', await this.$api.platformTypes.findAll())
   },
+  async loadPlatformGenericActionTypes ({ commit }: { commit: Commit }) { //TODO check api and maybe refactor
+    commit('setPlatformGenericActionTypes', await this.$api.actionTypes.newSearchBuilder().onlyType(ACTION_TYPE_API_FILTER_PLATFORM).build().findMatchingAsList()
+    )
+  }
 }
 
 const mutations = {
@@ -72,6 +80,9 @@ const mutations = {
   setPlatformtypes (state: vocabularyState, platformtypes: PlatformType[]) {
     state.platformtypes = platformtypes
   },
+  setPlatformGenericActionTypes (state: vocabularyState, platformGenericActionTypes: ActionType[]) {
+    state.platformGenericActionTypes = platformGenericActionTypes
+  }
 }
 
 export default {

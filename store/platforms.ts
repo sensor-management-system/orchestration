@@ -7,6 +7,16 @@ import { GenericAction } from '@/models/GenericAction'
 import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
 import { PlatformUnmountAction } from '@/models/PlatformUnmountAction'
 import { PlatformMountAction } from '@/models/PlatformMountAction'
+import { IActionType } from '@/models/ActionType'
+
+const KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE = 'software_update'
+const KIND_OF_ACTION_TYPE_GENERIC_PLATFORM_ACTION = 'generic_platform_action'
+const KIND_OF_ACTION_TYPE_UNKNOWN = 'unknown'
+type KindOfActionType = typeof KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE | typeof KIND_OF_ACTION_TYPE_GENERIC_PLATFORM_ACTION | typeof KIND_OF_ACTION_TYPE_UNKNOWN
+
+type IOptionsForActionType = Pick<IActionType, 'id' | 'name' | 'uri'> & {
+  kind: KindOfActionType
+}
 
 interface platformsState {
   platforms: Platform[],
@@ -18,6 +28,7 @@ interface platformsState {
   platformSoftwareUpdateActions:SoftwareUpdateAction[],
   platformMountActions:PlatformMountAction[],
   platformUnmountActions:PlatformUnmountAction[],
+  chosenKindOfPlatformAction: IOptionsForActionType | null,
   pageNumber: number,
   pageSize: number,
   totalPages: number
@@ -33,13 +44,14 @@ const state = {
   platformSoftwareUpdateActions:[],
   platformMountActions:[],
   platformUnmountActions:[],
+  chosenKindOfPlatformAction:null,
   totalPages: 1,
   pageNumber: 1,
   pageSize: 20
 }
 
 const getters = {
-  actions:(state:platformsState)=>{
+  actions:(state:platformsState)=>{ //Todo actions sortieren, wobei ehrlich gesagt, eine extra route im Backend mit allen Actions (sortiert) besser wäre
     return [
       ...state.platformGenericActions,
       ...state.platformSoftwareUpdateActions,
@@ -130,6 +142,12 @@ const actions = {
   async deletePlatformAttachment({ commit }: { commit: Commit },attachmentId:number): Promise<void>{
     return this.$api.platformAttachments.deleteById(attachmentId);
   },
+  async addPlatformGenericAction({ commit }: { commit: Commit },{platformId,genericPlatformAction}:{platformId:number,genericPlatformAction:GenericAction}): Promise<GenericAction>{
+    return  this.$api.genericPlatformActions.add(platformId, genericPlatformAction)
+  },
+  addPlatformSoftwareUpdateAction({ commit }: { commit: Commit },{platformId,softwareUpdateAction}:{platformId:number,softwareUpdateAction:SoftwareUpdateAction}):Promise<SoftwareUpdateAction>{
+    return this.$api.platformSoftwareUpdateActions.add(platformId,softwareUpdateAction)
+  },
   async updatePlatform({ commit }: { commit: Commit }, platform:Platform){
     commit('setPlatform',platform);
   },
@@ -157,6 +175,9 @@ const actions = {
   setPageNumber ({ commit }: { commit: Commit }, newPageNumber: number) {
     commit('setPageNumber', newPageNumber)
   },
+  setChosenKindOfPlatformAction({ commit }: { commit: Commit }, newval:IOptionsForActionType | null) {
+    commit('setChosenKindOfPlatformAction',newval)
+  }
 }
 
 const mutations = {
@@ -192,6 +213,9 @@ const mutations = {
   },
   setPlatformUnmountActions(state:platformsState,platformUnmountActions:PlatformUnmountAction[]){
     state.platformUnmountActions=platformUnmountActions
+  },
+  setChosenKindOfPlatformAction(state:platformsState,newVal:IOptionsForActionType | null){
+    state.chosenKindOfPlatformAction=newVal
   }
 }
 
