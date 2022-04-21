@@ -65,6 +65,7 @@ import {
   deviceWithMetaToDeviceThrowingNoErrorOnMissing
 } from '@/serializers/jsonapi/DeviceSerializer'
 import { DeviceCalibrationActionSerializer } from '@/serializers/jsonapi/DeviceCalibrationActionSerializer'
+import { PlatformType } from '@/models/PlatformType'
 
 interface IncludedRelationships {
   includeContacts?: boolean
@@ -78,10 +79,201 @@ export class DeviceApi {
   readonly basePath: string
   private serializer: DeviceSerializer
 
+  private _searchedManufacturers: Manufacturer[] = []
+  private _searchedStates: Status[] = []
+  private _searchedDeviceTypes: DeviceType[] = []
+  private _searchedUserMail: string | null = null
+  private _searchText: string | null = null
+  private filterSettings: any[] = []
+
   constructor (axiosInstance: AxiosInstance, basePath: string) {
     this.axiosApi = axiosInstance
     this.basePath = basePath
     this.serializer = new DeviceSerializer()
+  }
+
+  get searchedManufacturers (): Manufacturer[] {
+    return this._searchedManufacturers
+  }
+
+  setSearchedManufacturers (value: Manufacturer[]) {
+    this._searchedManufacturers = value
+    return this
+  }
+
+  get searchedStates (): Status[] {
+    return this._searchedStates
+  }
+
+  setSearchedStates (value: Status[]) {
+    this._searchedStates = value
+    return this
+  }
+
+  get searchedDeviceTypes (): DeviceType[] {
+    return this._searchedDeviceTypes
+  }
+
+  setSearchedDeviceTypes (value: DeviceType[]) {
+    this._searchedDeviceTypes = value
+    return this
+  }
+
+  get searchedUserMail (): string | null {
+    return this._searchedUserMail
+  }
+
+  setSearchedUserMail (value: string | null) {
+    this._searchedUserMail = value
+    return this
+  }
+
+  get searchText (): string | null {
+    return this._searchText
+  }
+
+  setSearchText (value: string | null) {
+    this._searchText = value
+    return this
+  }
+
+  private get commonParams (): any {
+    const result: any = {
+      filter: JSON.stringify(this.filterSettings)
+    }
+    if (this.searchText) {
+      result.q = this.searchText
+    }
+    result.sort = 'short_name'
+    return result
+  }
+
+  searchPaginated (pageNumber: number, pageSize: number) {
+
+    this.prepareSearch()
+
+    return this.axiosApi.get(
+      this.basePath,
+      {
+        params: {
+          'page[size]': pageSize,
+          'page[number]': pageNumber,
+          ...this.commonParams
+        }
+      }
+    ).then((rawResponse) => {
+      const rawData = rawResponse.data
+      // And - again - we don't ask the api here to load the contact data as well
+      // so we will add the dummy objects to stay with the relationships
+      const elements: Device[] = this.serializer.convertJsonApiObjectListToModelList(
+        rawData
+      ).map(deviceWithMetaToDeviceByAddingDummyObjects)
+
+      const totalCount = rawData.meta.count
+
+
+      return {
+        elements,
+        totalCount
+      }
+    })
+  }
+
+  searchMatchingAsCsvBlob (): Promise<Blob> {
+
+    this.prepareSearch()
+
+    const url = this.basePath
+    return this.axiosApi.request({
+      url,
+      method: 'get',
+      headers: {
+        accept: 'text/csv'
+      },
+      params: {
+        'page[size]': 10000,
+        ...this.commonParams
+      }
+    }).then((response) => {
+      return new Blob([response.data], { type: 'text/csv;charset=utf-8' })
+    })
+  }
+
+  prepareSearch() {
+    this.resetFilterSetting()
+    this.prepareManufacturers()
+    this.prepareStates()
+    this.prepareTypes()
+    this.prepareMail()
+    }
+  prepareMail () {
+    if (this.searchedUserMail) {
+      this.filterSettings.push({
+        name: 'contacts.email',
+        op: 'eq',
+        val: this.searchedUserMail
+      })
+    }
+  }
+  resetFilterSetting () {
+    this.filterSettings = []
+  }
+
+  prepareManufacturers () {
+    if (this.searchedManufacturers.length > 0) {
+      this.filterSettings.push({
+        or: [
+          {
+            name: 'manufacturer_name',
+            op: 'in_',
+            val: this.searchedManufacturers.map((m: Manufacturer) => m.name)
+          },
+          {
+            name: 'manufacturer_uri',
+            op: 'in_',
+            val: this.searchedManufacturers.map((m: Manufacturer) => m.uri)
+          }
+        ]
+      })
+    }
+  }
+
+  prepareStates () {
+    if (this.searchedStates.length > 0) {
+      this.filterSettings.push({
+        or: [
+          {
+            name: 'status_name',
+            op: 'in_',
+            val: this.searchedStates.map((s: Status) => s.name)
+          },
+          {
+            name: 'status_uri',
+            op: 'in_',
+            val: this.searchedStates.map((s: Status) => s.uri)
+          }
+        ]
+      })
+    }
+  }
+
+  prepareTypes () {
+    if (this.searchedDeviceTypes.length > 0) {
+      this.filterSettings.push({
+        or: [
+          {
+            name: 'device_type_name',
+            op: 'in_',
+            val: this.searchedDeviceTypes.map((t: DeviceType) => t.name)
+          },
+          {
+            name: 'device_type_uri',
+            op: 'in_',
+            val: this.searchedDeviceTypes.map((t: DeviceType) => t.uri)
+          }
+        ]
+      })
+    }
   }
 
   findById (id: string, includes: IncludedRelationships): Promise<Device> {
@@ -283,228 +475,228 @@ export class DeviceApi {
     })
   }
 }
-
-export class DeviceSearchBuilder {
-  private axiosApi: AxiosInstance
-  readonly basePath: string
-  private clientSideFilterFunc: (device: Device) => boolean
-  private serverSideFilterSettings: IFlaskJSONAPIFilter[] = []
-  private esTextFilter: string | null = null
-  private serializer: DeviceSerializer
-
-  constructor (axiosApi: AxiosInstance, basePath: string, serializer: DeviceSerializer) {
-    this.axiosApi = axiosApi
-    this.basePath = basePath
-    this.clientSideFilterFunc = (_d: Device) => true
-    this.serializer = serializer
-  }
-
-  withText (text: string | null) {
-    if (text) {
-      this.esTextFilter = text
-    }
-    return this
-  }
-
-  withOneMachtingManufacturerOf (manufacturers: Manufacturer[]) {
-    if (manufacturers.length > 0) {
-      this.serverSideFilterSettings.push({
-        or: [
-          {
-            name: 'manufacturer_name',
-            op: 'in_',
-            val: manufacturers.map((m: Manufacturer) => m.name)
-          },
-          {
-            name: 'manufacturer_uri',
-            op: 'in_',
-            val: manufacturers.map((m: Manufacturer) => m.uri)
-          }
-        ]
-      })
-    }
-    return this
-  }
-
-  withOneMatchingStatusOf (states: Status[]) {
-    if (states.length > 0) {
-      this.serverSideFilterSettings.push({
-        or: [
-          {
-            name: 'status_name',
-            op: 'in_',
-            val: states.map((s: Status) => s.name)
-          },
-          {
-            name: 'status_uri',
-            op: 'in_',
-            val: states.map((s: Status) => s.uri)
-          }
-        ]
-      })
-    }
-    return this
-  }
-
-  withOneMatchingDeviceTypeOf (types: DeviceType[]) {
-    if (types.length > 0) {
-      this.serverSideFilterSettings.push({
-        or: [
-          {
-            name: 'device_type_name',
-            op: 'in_',
-            val: types.map((t: DeviceType) => t.name)
-          },
-          {
-            name: 'device_type_uri',
-            op: 'in_',
-            val: types.map((t: DeviceType) => t.uri)
-          }
-        ]
-      })
-    }
-    return this
-  }
-
-  withContactEmail (email: string) {
-    this.serverSideFilterSettings.push({
-      name: 'contacts.email',
-      op: 'eq',
-      val: email
-    })
-    return this
-  }
-
-  build (): DeviceSearcher {
-    return new DeviceSearcher(
-      this.axiosApi,
-      this.basePath,
-      this.clientSideFilterFunc,
-      this.serverSideFilterSettings,
-      this.esTextFilter,
-      this.serializer
-    )
-  }
-}
-
-export class DeviceSearcher {
-  private axiosApi: AxiosInstance
-  readonly basePath: string
-  private clientSideFilterFunc: (device: Device) => boolean
-  private serverSideFilterSettings: IFlaskJSONAPIFilter[]
-  private esTextFilter: string | null
-  private serializer: DeviceSerializer
-
-  constructor (
-    axiosApi: AxiosInstance,
-    basePath: string,
-    clientSideFilterFunc: (device: Device) => boolean,
-    serverSideFilterSettings: IFlaskJSONAPIFilter[],
-    esTextFilter: string | null,
-    serializer: DeviceSerializer
-  ) {
-    this.axiosApi = axiosApi
-    this.basePath = basePath
-    this.clientSideFilterFunc = clientSideFilterFunc
-    this.serverSideFilterSettings = serverSideFilterSettings
-    this.esTextFilter = esTextFilter
-    this.serializer = serializer
-  }
-
-  private get commonParams (): any {
-    const result: any = {
-      filter: JSON.stringify(this.serverSideFilterSettings)
-    }
-    if (this.esTextFilter) {
-      result.q = this.esTextFilter
-    } else {
-      result.sort = 'short_name'
-    }
-    return result
-  }
-
-  findMatchingAsCsvBlob (): Promise<Blob> {
-    const url = this.basePath
-    return this.axiosApi.request({
-      url,
-      method: 'get',
-      headers: {
-        accept: 'text/csv'
-      },
-      params: {
-        'page[size]': 10000,
-        ...this.commonParams
-      }
-    }).then((response) => {
-      return new Blob([response.data], { type: 'text/csv;charset=utf-8' })
-    })
-  }
-
-  findMatchingAsList (): Promise<Device[]> {
-    return this.axiosApi.get(
-      this.basePath,
-      {
-        params: {
-          'page[size]': 10000,
-          ...this.commonParams
-        }
-      }
-    ).then((rawResponse: any) => {
-      const rawData = rawResponse.data
-      // We don't ask the api to load the contacts, so we just add dummy objects
-      // to stay with the relationships
-      return this.serializer
-        .convertJsonApiObjectListToModelList(rawData)
-        .map(deviceWithMetaToDeviceByAddingDummyObjects)
-    })
-  }
-
-  findMatchingAsPaginationLoaderOnPage (page: number, pageSize: number): Promise<IPaginationLoader<Device>> {
-    return this.findAllOnPage(page, pageSize)
-  }
-
-  private findAllOnPage (page: number, pageSize: number): Promise<IPaginationLoader<Device>> {
-    return this.axiosApi.get(
-      this.basePath,
-      {
-        params: {
-          'page[size]': pageSize,
-          'page[number]': page,
-          ...this.commonParams
-        }
-      }
-    ).then((rawResponse) => {
-      const rawData = rawResponse.data
-      // And - again - we don't ask the api here to load the contact data as well
-      // so we will add the dummy objects to stay with the relationships
-      const elements: Device[] = this.serializer.convertJsonApiObjectListToModelList(
-        rawData
-      ).map(deviceWithMetaToDeviceByAddingDummyObjects)
-
-      const totalCount = rawData.meta.count
-
-      // check if the provided page param is valid
-      if (totalCount > 0 && elements.length === 0) {
-        throw new RangeError('page is out of bounds')
-      }
-
-      let funToLoadNext = null
-      if (elements.length > 0) {
-        funToLoadNext = () => this.findAllOnPage(page + 1, pageSize)
-      }
-
-      let funToLoadPage = null
-      if (elements.length > 0) {
-        funToLoadPage = (pageNr: number) => this.findAllOnPage(pageNr, pageSize)
-      }
-
-      return {
-        elements,
-        totalCount,
-        page: elements.length ? page : 0,
-        funToLoadNext,
-        funToLoadPage
-      }
-    })
-  }
-}
+//
+// export class DeviceSearchBuilder {
+//   private axiosApi: AxiosInstance
+//   readonly basePath: string
+//   private clientSideFilterFunc: (device: Device) => boolean
+//   private serverSideFilterSettings: IFlaskJSONAPIFilter[] = []
+//   private esTextFilter: string | null = null
+//   private serializer: DeviceSerializer
+//
+//   constructor (axiosApi: AxiosInstance, basePath: string, serializer: DeviceSerializer) {
+//     this.axiosApi = axiosApi
+//     this.basePath = basePath
+//     this.clientSideFilterFunc = (_d: Device) => true
+//     this.serializer = serializer
+//   }
+//
+//   withText (text: string | null) {
+//     if (text) {
+//       this.esTextFilter = text
+//     }
+//     return this
+//   }
+//
+//   withOneMachtingManufacturerOf (manufacturers: Manufacturer[]) {
+//     if (manufacturers.length > 0) {
+//       this.serverSideFilterSettings.push({
+//         or: [
+//           {
+//             name: 'manufacturer_name',
+//             op: 'in_',
+//             val: manufacturers.map((m: Manufacturer) => m.name)
+//           },
+//           {
+//             name: 'manufacturer_uri',
+//             op: 'in_',
+//             val: manufacturers.map((m: Manufacturer) => m.uri)
+//           }
+//         ]
+//       })
+//     }
+//     return this
+//   }
+//
+//   withOneMatchingStatusOf (states: Status[]) {
+//     if (states.length > 0) {
+//       this.serverSideFilterSettings.push({
+//         or: [
+//           {
+//             name: 'status_name',
+//             op: 'in_',
+//             val: states.map((s: Status) => s.name)
+//           },
+//           {
+//             name: 'status_uri',
+//             op: 'in_',
+//             val: states.map((s: Status) => s.uri)
+//           }
+//         ]
+//       })
+//     }
+//     return this
+//   }
+//
+//   withOneMatchingDeviceTypeOf (types: DeviceType[]) {
+//     if (types.length > 0) {
+//       this.serverSideFilterSettings.push({
+//         or: [
+//           {
+//             name: 'device_type_name',
+//             op: 'in_',
+//             val: types.map((t: DeviceType) => t.name)
+//           },
+//           {
+//             name: 'device_type_uri',
+//             op: 'in_',
+//             val: types.map((t: DeviceType) => t.uri)
+//           }
+//         ]
+//       })
+//     }
+//     return this
+//   }
+//
+//   withContactEmail (email: string) {
+//     this.serverSideFilterSettings.push({
+//       name: 'contacts.email',
+//       op: 'eq',
+//       val: email
+//     })
+//     return this
+//   }
+//
+//   build (): DeviceSearcher {
+//     return new DeviceSearcher(
+//       this.axiosApi,
+//       this.basePath,
+//       this.clientSideFilterFunc,
+//       this.serverSideFilterSettings,
+//       this.esTextFilter,
+//       this.serializer
+//     )
+//   }
+// }
+//
+// export class DeviceSearcher {
+//   private axiosApi: AxiosInstance
+//   readonly basePath: string
+//   private clientSideFilterFunc: (device: Device) => boolean
+//   private serverSideFilterSettings: IFlaskJSONAPIFilter[]
+//   private esTextFilter: string | null
+//   private serializer: DeviceSerializer
+//
+//   constructor (
+//     axiosApi: AxiosInstance,
+//     basePath: string,
+//     clientSideFilterFunc: (device: Device) => boolean,
+//     serverSideFilterSettings: IFlaskJSONAPIFilter[],
+//     esTextFilter: string | null,
+//     serializer: DeviceSerializer
+//   ) {
+//     this.axiosApi = axiosApi
+//     this.basePath = basePath
+//     this.clientSideFilterFunc = clientSideFilterFunc
+//     this.serverSideFilterSettings = serverSideFilterSettings
+//     this.esTextFilter = esTextFilter
+//     this.serializer = serializer
+//   }
+//
+//   private get commonParams (): any {
+//     const result: any = {
+//       filter: JSON.stringify(this.serverSideFilterSettings)
+//     }
+//     if (this.esTextFilter) {
+//       result.q = this.esTextFilter
+//     } else {
+//       result.sort = 'short_name'
+//     }
+//     return result
+//   }
+//
+//   findMatchingAsCsvBlob (): Promise<Blob> {
+//     const url = this.basePath
+//     return this.axiosApi.request({
+//       url,
+//       method: 'get',
+//       headers: {
+//         accept: 'text/csv'
+//       },
+//       params: {
+//         'page[size]': 10000,
+//         ...this.commonParams
+//       }
+//     }).then((response) => {
+//       return new Blob([response.data], { type: 'text/csv;charset=utf-8' })
+//     })
+//   }
+//
+//   findMatchingAsList (): Promise<Device[]> {
+//     return this.axiosApi.get(
+//       this.basePath,
+//       {
+//         params: {
+//           'page[size]': 10000,
+//           ...this.commonParams
+//         }
+//       }
+//     ).then((rawResponse: any) => {
+//       const rawData = rawResponse.data
+//       // We don't ask the api to load the contacts, so we just add dummy objects
+//       // to stay with the relationships
+//       return this.serializer
+//         .convertJsonApiObjectListToModelList(rawData)
+//         .map(deviceWithMetaToDeviceByAddingDummyObjects)
+//     })
+//   }
+//
+//   findMatchingAsPaginationLoaderOnPage (page: number, pageSize: number): Promise<IPaginationLoader<Device>> {
+//     return this.findAllOnPage(page, pageSize)
+//   }
+//
+//   private findAllOnPage (page: number, pageSize: number): Promise<IPaginationLoader<Device>> {
+//     return this.axiosApi.get(
+//       this.basePath,
+//       {
+//         params: {
+//           'page[size]': pageSize,
+//           'page[number]': page,
+//           ...this.commonParams
+//         }
+//       }
+//     ).then((rawResponse) => {
+//       const rawData = rawResponse.data
+//       // And - again - we don't ask the api here to load the contact data as well
+//       // so we will add the dummy objects to stay with the relationships
+//       const elements: Device[] = this.serializer.convertJsonApiObjectListToModelList(
+//         rawData
+//       ).map(deviceWithMetaToDeviceByAddingDummyObjects)
+//
+//       const totalCount = rawData.meta.count
+//
+//       // check if the provided page param is valid
+//       if (totalCount > 0 && elements.length === 0) {
+//         throw new RangeError('page is out of bounds')
+//       }
+//
+//       let funToLoadNext = null
+//       if (elements.length > 0) {
+//         funToLoadNext = () => this.findAllOnPage(page + 1, pageSize)
+//       }
+//
+//       let funToLoadPage = null
+//       if (elements.length > 0) {
+//         funToLoadPage = (pageNr: number) => this.findAllOnPage(pageNr, pageSize)
+//       }
+//
+//       return {
+//         elements,
+//         totalCount,
+//         page: elements.length ? page : 0,
+//         funToLoadNext,
+//         funToLoadPage
+//       }
+//     })
+//   }
+// }

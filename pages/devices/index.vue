@@ -128,23 +128,23 @@ permissions and limitations under the Licence.
       color="primary"
       indeterminate
     />
-    <div v-if="!totalCount && !loading">
+    <div v-if="devices.length <=0 && !loading">
       <p class="text-center">
         There are no devices that match your search criteria.
       </p>
     </div>
 
-    <div v-if="totalCount">
+    <div v-if="devices.length>0">
       <v-subheader>
-        <template v-if="totalCount == 1">
+        <template v-if="devices.length == 1">
           1 device found
         </template>
         <template v-else>
-          {{ totalCount }} devices found
+          {{ devices.length }} devices found
         </template>
         <v-spacer />
 
-        <template v-if="lastActiveSearcher != null">
+        <template v-if="devices.length>0">
           <v-dialog v-model="processing" max-width="100">
             <v-card>
               <v-card-text>
@@ -195,224 +195,40 @@ permissions and limitations under the Licence.
       </v-subheader>
 
       <v-pagination
-        :value="page"
+        v-model="page"
         :disabled="loading"
-        :length="numberOfPages"
+        :length="totalPages"
         :total-visible="7"
-        @input="setPage"
+        @input="runSearch"
       />
-      <v-hover
-        v-for="result in getSearchResultForPage(page)"
-        :id="'item-' + result.id"
-        v-slot="{ hover }"
-        :key="result.id"
+      <BaseList
+        :list-items="devices"
       >
-        <v-card
-          :disabled="loading"
-          :elevation="hover ? 6 : 2"
-          class="ma-2"
-        >
-          <v-card-text
-            @click.stop.prevent="showResultItem(result.id)"
+        <template v-slot:list-item="{item}">
+          <DevicesListItem
+            :key="item.id"
+            :device="item"
           >
-            <v-row
-              no-gutters
-            >
-              <v-col>
-                <StatusBadge
-                  :value="getStatus(result)"
-                >
-                  <div :class="'text-caption' + (getType(result) === NO_TYPE ? ' text--disabled' : '')">
-                    {{ getType(result) }}
-                  </div>
-                </StatusBadge>
-              </v-col>
-              <v-col
-                align-self="end"
-                class="text-right"
-              >
-                <DotMenu>
-                  <template #actions>
-                    <DotMenuActionCopy
-                      :readonly="!$auth.loggedIn"
-                      :path="'/devices/copy/' + result.id"
-                    />
-                    <DotMenuActionDelete
-                      :readonly="!$auth.loggedIn"
-                      @click="initDeleteDialog(result)"
-                    />
-                  </template>
-                </DotMenu>
-              </v-col>
-            </v-row>
-            <v-row
-              no-gutters
-            >
-              <v-col class="text-subtitle-1">
-                {{ result.shortName }}
-              </v-col>
-              <v-col
-                align-self="end"
-                class="text-right"
-              >
-                <v-btn
-                  :to="'/devices/' + result.id"
-                  color="primary"
-                  text
-                  @click.stop.prevent
-                >
-                  View
-                </v-btn>
-                <v-btn
-                  icon
-                  @click.stop.prevent="showResultItem(result.id)"
-                >
-                  <v-icon>{{ isResultItemShown(result.id) ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
-                </v-btn>
-              </v-col>
-            </v-row>
-          </v-card-text>
-          <v-expand-transition>
-            <v-card
-              v-show="isResultItemShown(result.id)"
-              flat
-              tile
-              color="grey lighten-5"
-            >
-              <v-card-text>
-                <v-row
-                  dense
-                >
-                  <v-col
-                    cols="4"
-                    xs="4"
-                    sm="3"
-                    md="2"
-                    lg="2"
-                    xl="1"
-                    class="font-weight-medium"
-                  >
-                    Manufacturer:
-                  </v-col>
-                  <v-col
-                    cols="8"
-                    xs="8"
-                    sm="9"
-                    md="4"
-                    lg="4"
-                    xl="5"
-                    class="nowrap-truncate"
-                  >
-                    {{ getTextOrDefault(result.manufacturerName) }}
-                  </v-col>
-                  <v-col
-                    cols="4"
-                    xs="4"
-                    sm="3"
-                    md="2"
-                    lg="2"
-                    xl="1"
-                    class="font-weight-medium"
-                  >
-                    Model:
-                  </v-col>
-                  <v-col
-                    cols="8"
-                    xs="8"
-                    sm="9"
-                    md="4"
-                    lg="4"
-                    xl="5"
-                    class="nowrap-truncate"
-                  >
-                    {{ getTextOrDefault(result.model) }}
-                  </v-col>
-                </v-row>
-                <v-row
-                  dense
-                >
-                  <v-col
-                    cols="4"
-                    xs="4"
-                    sm="3"
-                    md="2"
-                    lg="2"
-                    xl="1"
-                    class="font-weight-medium"
-                  >
-                    Serial number:
-                  </v-col>
-                  <v-col
-                    cols="8"
-                    xs="8"
-                    sm="9"
-                    md="4"
-                    lg="4"
-                    xl="5"
-                    class="nowrap-truncate"
-                  >
-                    {{ getTextOrDefault(result.serialNumber) }}
-                  </v-col>
-                  <v-col
-                    cols="4"
-                    xs="4"
-                    sm="3"
-                    md="2"
-                    lg="2"
-                    xl="1"
-                    class="font-weight-medium"
-                  >
-                    Inventory number:
-                  </v-col>
-                  <v-col
-                    cols="8"
-                    xs="8"
-                    sm="9"
-                    md="4"
-                    lg="4"
-                    xl="5"
-                    class="nowrap-truncate"
-                  >
-                    {{ getTextOrDefault(result.inventoryNumber) }}
-                  </v-col>
-                </v-row>
-                <v-row
-                  dense
-                >
-                  <v-col
-                    cols="4"
-                    xs="4"
-                    sm="3"
-                    md="2"
-                    lg="2"
-                    xl="1"
-                    class="font-weight-medium"
-                  >
-                    Description:
-                  </v-col>
-                  <v-col
-                    cols="8"
-                    xs="8"
-                    sm="9"
-                    md="10"
-                    lg="10"
-                    xl="11"
-                    class="nowrap-truncate"
-                  >
-                    {{ getTextOrDefault(result.description) }}
-                  </v-col>
-                </v-row>
-              </v-card-text>
-            </v-card>
-          </v-expand-transition>
-        </v-card>
-      </v-hover>
+            <template #dot-menu-items>
+              <DotMenuActionCopy
+                :readonly="!$auth.loggedIn"
+                :path="'/devices/copy/' + item.id"
+              />
+              <DotMenuActionDelete
+                :readonly="!$auth.loggedIn"
+                @click="initDeleteDialog(item)"
+              />
+            </template>
+          </DevicesListItem>
+        </template>
+
+      </BaseList>
       <v-pagination
-        :value="page"
+        v-model="page"
         :disabled="loading"
-        :length="numberOfPages"
+        :length="totalPages"
         :total-visible="7"
-        @input="setPage"
+        @input="runSearch"
       />
     </div>
     <DeviceDeleteDialog
@@ -465,6 +281,9 @@ import { DeviceSearcher } from '@/services/sms/DeviceApi'
 
 import { QueryParams } from '@/modelUtils/QueryParams'
 import { IDeviceSearchParams, DeviceSearchParamsSerializer } from '@/modelUtils/DeviceSearchParams'
+import { mapActions, mapState } from 'vuex'
+import BaseList from '@/components/shared/BaseList.vue'
+import DevicesListItem from '@/components/devices/DevicesListItem.vue'
 
 type PaginatedResult = {
   [page: number]: Device[]
@@ -472,89 +291,65 @@ type PaginatedResult = {
 
 @Component({
   components: {
+    DevicesListItem,
+    BaseList,
     DotMenuActionDelete,
     DotMenuActionCopy,
-    DotMenu,
     DeviceDeleteDialog,
     DeviceTypeSelect,
     ManufacturerSelect,
     StatusBadge,
     StatusSelect
+  },
+  computed:{
+    ...mapState('vocabulary',['devicetypes','manufacturers','equipmentstatus']),
+    ...mapState('devices',['devices','pageNumber','pageSize','totalPages'])
+  },
+  methods:{
+    ...mapActions('vocabulary',['loadEquipmentstatus','loadDevicetypes','loadManufacturers']),
+    ...mapActions('devices',['searchDevicesPaginated','setPageNumber','exportAsCsv','deleteDevice'])
   }
 })
 export default class SearchDevicesPage extends Vue {
-  private pageSize: number = 20
-  private page: number = 0
-  private loading: boolean = true
+  private loading: boolean = false
   private processing: boolean = false
-
-  private totalCount: number = 0
-  private loader: null | IPaginationLoader<Device> = null
-  private lastActiveSearcher: DeviceSearcher | null = null
 
   private selectedSearchManufacturers: Manufacturer[] = []
   private selectedSearchStates: Status[] = []
   private selectedSearchDeviceTypes: DeviceType[] = []
   private onlyOwnDevices: boolean = false
-
-  private manufacturer: Manufacturer[] = []
-  private states: Status[] = []
-  private deviceTypes: DeviceType[] = []
-
-  private deviceTypeLookup: Map<string, DeviceType> = new Map<string, DeviceType>()
-  private statusLookup: Map<string, Status> = new Map<string, Status>()
-
-  private searchResults: PaginatedResult = {}
   private searchText: string | null = null
 
   private showDeleteDialog: boolean = false
-
-  private searchResultItemsShown: { [id: string]: boolean } = {}
-
-  public readonly NO_TYPE: string = 'Unknown type'
-
   private deviceToDelete: Device | null = null
 
-  created () {
-    this.initializeAppBar()
-  }
-
-  async mounted () {
-    await this.fetchEntities()
+  async created () {
+    await this.initializeAppBar()
+    await this.loadEquipmentstatus();
+    await this.loadDevicetypes();
+    await this.loadManufacturers();
     this.initSearchQueryParams(this.$route.query)
     this.runInitialSearch()
   }
 
-  async fetchEntities (): Promise<void> {
-    const deviceTypeTypeLookup = new Map<string, DeviceType>()
-    const statusLookup = new Map<string, Status>()
-
-    try {
-      const [deviceTypes, states, manufacturer] = await Promise.all([
-        this.$api.deviceTypes.findAll(),
-        this.$api.states.findAll(),
-        this.$api.manufacturer.findAll()
-      ])
-
-      this.deviceTypes = deviceTypes
-      this.states = states
-      this.manufacturer = manufacturer
-
-      for (const deviceType of deviceTypes) {
-        deviceTypeTypeLookup.set(deviceType.uri, deviceType)
-      }
-      for (const status of states) {
-        statusLookup.set(status.uri, status)
-      }
-      this.deviceTypeLookup = deviceTypeTypeLookup
-      this.statusLookup = statusLookup
-    } catch (_error) {
-      this.$store.commit('snackbar/setError', 'Loading of entities failed')
+  get searchParams(){
+    return {
+      searchText: this.searchText,
+      manufacturer: this.selectedSearchManufacturers,
+      states: this.selectedSearchStates,
+      types: this.selectedSearchDeviceTypes,
+      onlyOwnPlatforms: this.onlyOwnPlatforms && this.$auth.loggedIn
     }
+  }
+  get page(){
+    return this.pageNumber;
+  }
+
+  set page(newVal){
+    this.setPageNumber(newVal);
   }
 
   beforeDestroy () {
-    this.unsetResultItemsShown()
     this.$store.dispatch('appbar/setDefaults')
   }
 
@@ -588,18 +383,9 @@ export default class SearchDevicesPage extends Vue {
   async runInitialSearch (): Promise<void> {
     this.activeTab = this.isExtendedSearch() ? 1 : 0
 
-    const page: number | undefined = this.getPageFromUrl()
+    this.page = this.getPageFromUrl()
 
-    await this.runSearch(
-      {
-        searchText: this.searchText,
-        manufacturer: this.selectedSearchManufacturers,
-        states: this.selectedSearchStates,
-        types: this.selectedSearchDeviceTypes,
-        onlyOwnDevices: this.onlyOwnDevices && this.$auth.loggedIn
-      },
-      page
-    )
+    await this.runSearch()
   }
 
   basicSearch (): Promise<void> {
@@ -635,76 +421,17 @@ export default class SearchDevicesPage extends Vue {
     this.onlyOwnDevices = false
   }
 
-  async runSearch (
-    searchParameters: IDeviceSearchParams,
-    page: number = 1
-  ): Promise<void> {
-    this.initUrlQueryParams(searchParameters)
-
-    this.totalCount = 0
-    this.loading = true
-    this.searchResults = {}
-    this.unsetResultItemsShown()
-    this.loader = null
-    this.page = 0
-
-    const searchBuilder = this.$api.devices
-      .newSearchBuilder()
-      .withText(searchParameters.searchText)
-      .withOneMachtingManufacturerOf(searchParameters.manufacturer)
-      .withOneMatchingStatusOf(searchParameters.states)
-      .withOneMatchingDeviceTypeOf(searchParameters.types)
-
-    if (searchParameters.onlyOwnDevices) {
-      const email = this.$auth.user!.email as string
-      if (email) {
-        searchBuilder.withContactEmail(email)
-      }
-    }
-
-    this.lastActiveSearcher = searchBuilder.build()
+  async runSearch (): Promise<void> {
+    this.initUrlQueryParams()
     try {
-      const loader = await this.lastActiveSearcher.findMatchingAsPaginationLoaderOnPage(page, this.pageSize)
-      this.loader = loader
-      this.searchResults[page] = loader.elements
-      this.totalCount = loader.totalCount
-      this.page = page
-      this.setPageInUrl(page)
+      await this.searchDevicesPaginated(this.searchParams)
+      this.setPageInUrl(this.page)
     } catch (_error) {
+      console.log('err',_error);
       this.$store.commit('snackbar/setError', 'Loading of devices failed')
     } finally {
       this.loading = false
     }
-  }
-
-  async loadPage (pageNr: number, useCache: boolean = true) {
-    // use the results that were already loaded if available
-    if (useCache && this.searchResults[pageNr]) {
-      return
-    }
-    if (this.loader != null && this.loader.funToLoadPage != null) {
-      try {
-        this.loading = true
-        const loader = await this.loader.funToLoadPage(pageNr)
-        this.loader = loader
-        this.searchResults[pageNr] = loader.elements
-        this.totalCount = loader.totalCount
-      } catch (_error) {
-        this.$store.commit('snackbar/setError', 'Loading of devices failed')
-      } finally {
-        this.loading = false
-      }
-    }
-  }
-
-  get numberOfPages (): number {
-    return Math.ceil(this.totalCount / this.pageSize)
-  }
-
-  async setPage (page: number) {
-    await this.loadPage(page)
-    this.page = page
-    this.setPageInUrl(page, false)
   }
 
   getSearchResultForPage (pageNr: number): Device[] | undefined {
@@ -712,14 +439,14 @@ export default class SearchDevicesPage extends Vue {
   }
 
   exportCsv () {
-    if (this.lastActiveSearcher != null) {
-      this.processing = true
-      this.lastActiveSearcher.findMatchingAsCsvBlob().then((blob) => {
-        this.processing = false
+    if(this.devices.length>0){
+      this.processing=true
+      this.exportAsCsv(this.searchParams).then((blob) => {
         saveAs(blob, 'devices.csv')
       }).catch((_err) => {
-        this.processing = false
         this.$store.commit('snackbar/setError', 'CSV export failed')
+      }).finally(()=>{
+        this.processing = false
       })
     }
   }
@@ -730,13 +457,8 @@ export default class SearchDevicesPage extends Vue {
     }
     this.loading = true
     try {
-      await this.$api.devices.deleteById(this.deviceToDelete.id)
-      // if we know that the deleted device was the last of the page, we
-      // decrement the page by one
-      if (this.getSearchResultForPage(this.page)?.length === 1) {
-        this.page = this.page > 1 ? this.page - 1 : 1
-      }
-      this.loadPage(this.page, false)
+      await this.deleteDevice(this.deviceToDelete.id)
+      this.runSearch()
       this.$store.commit('snackbar/setSuccess', 'Device deleted')
     } catch (_error) {
       this.$store.commit('snackbar/setError', 'Device could not be deleted')
@@ -744,28 +466,6 @@ export default class SearchDevicesPage extends Vue {
       this.loading = false
       this.closeDialog()
     }
-  }
-
-  getType (device: Device) {
-    if (this.deviceTypeLookup.has(device.deviceTypeUri)) {
-      const deviceType: DeviceType = this.deviceTypeLookup.get(device.deviceTypeUri) as DeviceType
-      return deviceType.name
-    }
-    if (device.deviceTypeName) {
-      return device.deviceTypeName
-    }
-    return this.NO_TYPE
-  }
-
-  getStatus (device: Device): string {
-    if (this.statusLookup.has(device.statusUri)) {
-      const deviceStatus: Status = this.statusLookup.get(device.statusUri) as Status
-      return deviceStatus.name
-    }
-    if (device.statusName) {
-      return device.statusName
-    }
-    return ''
   }
 
   initDeleteDialog (device: Device) {
@@ -777,21 +477,6 @@ export default class SearchDevicesPage extends Vue {
     this.showDeleteDialog = false
     this.deviceToDelete = null
   }
-
-  showResultItem (id: string) {
-    const show = !!this.searchResultItemsShown[id]
-    Vue.set(this.searchResultItemsShown, id, !show)
-  }
-
-  isResultItemShown (id: string): boolean {
-    return this.searchResultItemsShown[id]
-  }
-
-  unsetResultItemsShown (): void {
-    this.searchResultItemsShown = {}
-  }
-
-  getTextOrDefault = (text: string): string => text || '-'
 
   initSearchQueryParams (params: QueryParams): void {
     const searchParamsObject = (new DeviceSearchParamsSerializer({
@@ -818,17 +503,18 @@ export default class SearchDevicesPage extends Vue {
     }
   }
 
-  initUrlQueryParams (params: IDeviceSearchParams): void {
+  initUrlQueryParams (): void {
     this.$router.push({
-      query: (new DeviceSearchParamsSerializer()).toQueryParams(params),
+      query: (new DeviceSearchParamsSerializer()).toQueryParams(this.searchParams),
       hash: this.$route.hash
     })
   }
 
   getPageFromUrl (): number | undefined {
     if ('page' in this.$route.query && typeof this.$route.query.page === 'string') {
-      return parseInt(this.$route.query.page) || 0
+      return parseInt(this.$route.query.page)
     }
+    return 1
   }
 
   setPageInUrl (page: number, preserveHash: boolean = true): void {

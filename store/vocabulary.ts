@@ -10,7 +10,7 @@ import { ACTION_TYPE_API_FILTER_PLATFORM } from '@/services/cv/ActionTypeApi'
 interface vocabularyState {
   manufacturers: Manufacturer[]
   equipmentstatus: Status[]
-  equipmenttypes: DeviceType[]
+  devicetypes: DeviceType[]
   platformtypes: PlatformType[],
   platformGenericActionTypes: ActionType[]
 }
@@ -18,7 +18,7 @@ interface vocabularyState {
 const state = {
   manufacturers: [],
   equipmentstatus: [],
-  equipmenttypes: [],
+  devicetypes: [],
   platformtypes: [],
   platformGenericActionTypes: []
 }
@@ -30,6 +30,11 @@ const getters = {
   getPlatformTypeByUri: (state: vocabularyState) => (uri: string): PlatformType | undefined => {
     return state.platformtypes.find((platformType: PlatformType) => {
       return platformType.uri === uri
+    })
+  },
+  getDeviceTypeByUri: (state: vocabularyState) => (uri: string): DeviceType | undefined => {
+    return state.devicetypes.find((deviceType: DeviceType) => {
+      return deviceType.uri === uri
     })
   },
   getEquipmentstatusByUri: (state: vocabularyState) => (uri: string): Status | undefined => {
@@ -53,9 +58,9 @@ const actions = {
     //@ts-ignore
     commit('setEquipmentstatus', await this.$api.states.findAll())
   },
-  async loadEquipmenttypes ({ commit }: { commit: Commit }) {
+  async loadDevicetypes ({ commit }: { commit: Commit }) {
     //@ts-ignore
-    commit('setEquipmenttypes', await this.$api.deviceTypes.findAll())
+    commit('setDevicetypes', await this.$api.deviceTypes.findAll())
   },
   async loadPlatformtypes ({ commit }: { commit: Commit }) {
     //@ts-ignore
@@ -74,8 +79,8 @@ const mutations = {
   setEquipmentstatus (state: vocabularyState, equipmentstatus: Status[]) {
     state.equipmentstatus = equipmentstatus
   },
-  setEquipmenttypes (state: vocabularyState, equipmenttypes: DeviceType[]) {
-    state.equipmenttypes = equipmenttypes
+  setDevicetypes (state: vocabularyState, devicetypes: DeviceType[]) {
+    state.devicetypes = devicetypes
   },
   setPlatformtypes (state: vocabularyState, platformtypes: PlatformType[]) {
     state.platformtypes = platformtypes
