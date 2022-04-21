@@ -71,7 +71,7 @@ import { Platform } from '@/models/Platform'
   computed: mapState('platforms',['platformAttachments']),
   methods:mapActions('platforms',['loadPlatformAttachments','deletePlatformAttachment'])
 })
-export default class AttachmentShowPage extends Vue{
+export default class PlatformAttachmentShowPage extends Vue{
   private showDeleteDialog=false;
   private attachmentToDelete:Attachment|null=null;
 

@@ -142,7 +142,7 @@ import { mapActions } from 'vuex'
   middleware: ['auth'],
   methods:mapActions('platforms',['addPlatformAttachment','loadPlatformAttachments'])
 })
-export default class AttachmentAddPage extends mixins(Rules, UploadRules) {
+export default class PlatformAttachmentAddPage extends mixins(Rules, UploadRules) {
   private attachment: Attachment = new Attachment()
   private attachmentType: string = 'file'
   private file: File | null = null
