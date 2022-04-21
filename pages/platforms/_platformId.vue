@@ -62,7 +62,12 @@ export default class PlatformPage extends Vue {
     this.initializeAppBar()
     try {
       this.isLoading = true
-      await this.loadPlatform(this.platformId)
+      await this.loadPlatform(
+        {platformId:this.platformId,
+        includeContacts:false,
+          includePlatformAttachments:false
+        }
+      )
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Loading platform failed')
     } finally {

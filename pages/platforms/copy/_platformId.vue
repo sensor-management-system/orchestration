@@ -85,7 +85,7 @@ permissions and limitations under the Licence.
 
       <PlatformBasicDataForm
         ref="basicForm"
-        v-model="platform"
+        v-model="copyPlatform"
         :persistent-identifier-placeholder="persistentIdentifierPlaceholder"
         :serial-number-placeholder="serialNumberPlaceholder"
         :inventory-number-placeholder="inventoryNumberPlaceholder"
@@ -151,20 +151,23 @@ import { Platform } from '@/models/Platform'
 
 import PlatformBasicDataForm from '@/components/PlatformBasicDataForm.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { mapActions, mapState } from 'vuex'
 
 @Component({
   components: {
     PlatformBasicDataForm,
     ProgressIndicator
   },
-  middleware: ['auth']
+  middleware: ['auth'],
+  computed:mapState('platforms',['platform']),
+  methods:mapActions('platforms',['loadPlatform'])
 })
 // @ts-ignore
 export default class PlatformCopyPage extends mixins(Rules) {
   private numberOfTabs: number = 1
 
-  private platform: Platform = new Platform()
-  private existingPlatform: Platform = new Platform()
+  private copyPlatform: Platform = new Platform()
+  // private existingPlatform: Platform = new Platform()
   private isLoading: boolean = true
 
   private copyContacts: boolean = true
@@ -174,18 +177,19 @@ export default class PlatformCopyPage extends mixins(Rules) {
   private serialNumberPlaceholder: string | null = null
   private inventoryNumberPlaceholder: string | null = null
 
-  mounted () {
+  async created () {
     this.initializeAppBar()
 
     // We also load the contacts and the measured quantities as those
     // are the ones that we will also copy.
-    this.$api.platforms.findById(this.platformId, {
-      includeContacts: true,
-      includePlatformAttachments: true
-    }).then((platform) => {
-      this.existingPlatform = platform
-      const platformToEdit = Platform.createFromObject(this.existingPlatform)
-      // Unset the fields that are very device specific
+    try {
+      await this.loadPlatform({
+        platformId: this.platformId,
+        includeContacts: true,
+        includePlatformAttachments: true
+      })
+      const platformToEdit = Platform.createFromObject(this.platform)
+      // Unset the fields that are very device specific todo: stimmt der kommentar noch?
       // (we need other PIDs, serial numbers and inventory numbers)
       // For the moment we just unset them completely, but there may be
       // some more logic in those numbers.
@@ -206,12 +210,12 @@ export default class PlatformCopyPage extends mixins(Rules) {
       }
       platformToEdit.inventoryNumber = ''
 
-      this.platform = platformToEdit
-      this.isLoading = false
-    }).catch((_error) => {
+      this.copyPlatform = platformToEdit
+    } catch (e) {
       this.$store.commit('snackbar/setError', 'Loading platform failed')
+    } finally {
       this.isLoading = false
-    })
+    }
   }
 
   beforeDestroy () {
@@ -297,13 +301,13 @@ export default class PlatformCopyPage extends mixins(Rules) {
     return this.$route.params.platformId
   }
 
-  @Watch('existingPlatform', { immediate: true, deep: true })
-  // @ts-ignore
-  onDeviceChanged (val: Platform) {
-    if (val.id) {
-      this.$store.commit('appbar/setTitle', 'Copy ' + (val?.shortName || 'Platform'))
-    }
-  }
+  // @Watch('existingPlatform', { immediate: true, deep: true })
+  // // @ts-ignore
+  // onDeviceChanged (val: Platform) {
+  //   if (val.id) {
+  //     this.$store.commit('appbar/setTitle', 'Copy ' + (val?.shortName || 'Platform'))
+  //   }
+  // }
 }
 </script>
 

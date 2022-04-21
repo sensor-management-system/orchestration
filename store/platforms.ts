@@ -90,10 +90,10 @@ const actions = {
     const totalPages = Math.ceil(totalCount / state.pageSize)
     commit('setTotalPages', totalPages)
   },
-  async loadPlatform({ commit }: { commit: Commit },id:number){
-    const platform = await this.$api.platforms.findById(id,{ //TODO Überprüfen, ob man diese Parameter wirklich braucht/ notfalls die payload als Object übergeben lassen
-      includeContacts: false,
-      includePlatformAttachments: false
+  async loadPlatform({ commit }: { commit: Commit },{platformId,includeContacts,includePlatformAttachments}:{platformId:number,includeContacts:boolean,includePlatformAttachments:boolean}){
+    const platform = await this.$api.platforms.findById(platformId,{ //TODO Überprüfen, ob man diese Parameter wirklich braucht/ notfalls die payload als Object übergeben lassen
+      includeContacts: includeContacts,
+      includePlatformAttachments: includePlatformAttachments
     });
     commit('setPlatform',platform)
   },
@@ -171,6 +171,11 @@ const actions = {
   },
   async savePlatform({ commit }: { commit: Commit }, platform:Platform):Promise<Platform>{
     return this.$api.platforms.save(platform);
+  },
+  async copyPlatform({commit}: { commit: Commit },{platform,copyContacts,copyAttachments}:{platform:Platform,copyContacts:boolean,copyAttachments:boolean}){
+    //Todo
+
+
   },
   async exportAsCsv({ commit}: { commit: Commit}, searchParams: IPlatformSearchParams):Promise<Blob> {
     let email = null;
