@@ -14,10 +14,10 @@
         >
           <v-col>
             <StatusBadge
-              :value="getStatus(platform)"
+              :value="getStatus()"
             >
-              <div :class="'text-caption' + (getType(platform) === NO_TYPE ? ' text--disabled' : '')">
-                {{ getType(platform) }}
+              <div :class="'text-caption' + (getType() === NO_TYPE ? ' text--disabled' : '')">
+                {{ getType() }}
               </div>
             </StatusBadge>
           </v-col>
