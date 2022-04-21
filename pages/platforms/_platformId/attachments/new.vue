@@ -135,23 +135,18 @@ import { Rules } from '@/mixins/Rules'
 import { UploadRules } from '@/mixins/UploadRules'
 
 import { Attachment } from '@/models/Attachment'
+import { mapActions } from 'vuex'
 
 @Component({
   components: {},
-  middleware: ['auth']
+  middleware: ['auth'],
+  methods:mapActions('platforms',['addPlatformAttachment','loadPlatformAttachments'])
 })
 export default class AttachmentAddPage extends mixins(Rules, UploadRules) {
   private attachment: Attachment = new Attachment()
   private attachmentType: string = 'file'
   private file: File | null = null
 
-  mounted () {
-    const cancelButton = this.$refs.cancelButton as Vue
-    // due to the active route (and the button being a router link)
-    // this button has the active class
-    // however, we don't want this special behaviour for this button
-    cancelButton.$el.classList.remove('v-btn--active')
-  }
 
   /**
    * returns a list of MimeTypes, seperated by ,
@@ -169,7 +164,6 @@ export default class AttachmentAddPage extends mixins(Rules, UploadRules) {
 
     (this.$refs.attachmentsForm as Vue & { resetValidation: () => boolean }).resetValidation()
 
-    this.$emit('showsave', true)
     let theFailureCanBeFromUpload = true
 
     try {
@@ -179,8 +173,8 @@ export default class AttachmentAddPage extends mixins(Rules, UploadRules) {
         this.attachment.url = uploadResult.url
         theFailureCanBeFromUpload = false
       }
-      const newAttachment = await this.$api.platformAttachments.add(this.platformId, this.attachment)
-      this.$emit('input', newAttachment)
+      await this.addPlatformAttachment({platformId:this.platformId, attachment:this.attachment})
+      await this.loadPlatformAttachments(this.platformId)
       this.$router.push('/platforms/' + this.platformId + '/attachments')
     } catch (error: any) {
       let message = 'Failed to save an attachment'

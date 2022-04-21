@@ -72,6 +72,9 @@ const actions = {
   async removePlatformContact({ commit }: { commit: Commit },{platformId,contactId}:{platformId:number,contactId:number}):Promise<void>{
     return this.$api.platforms.removeContact(platformId, contactId);
   },
+  async addPlatformAttachment({ commit }: { commit: Commit },{platformId,attachment}:{platformId:number,attachment:Attachment}):Promise<void>{
+    return this.$api.platformAttachments.add(platformId, attachment);
+  },
   async deletePlatformAttachment({ commit }: { commit: Commit },attachmentId:number): Promise<void>{
     return this.$api.platformAttachments.deleteById(attachmentId);
   },
