@@ -43,7 +43,7 @@ permissions and limitations under the Licence.
     <SoftwareUpdateActionForm
       ref="softwareUpdateActionForm"
       v-model="action"
-      :attachments="attachments"
+      :attachments="platformAttachments"
       :current-user-mail="$auth.user.email"
     />
 
@@ -67,6 +67,8 @@ import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
 
 import ActionButtonTray from '@/components/actions/ActionButtonTray.vue'
 import SoftwareUpdateActionForm from '@/components/actions/SoftwareUpdateActionForm.vue'
+import { mapActions, mapState } from 'vuex'
+import { GenericAction } from '@/models/GenericAction'
 
 @Component({
   components: {
@@ -74,35 +76,24 @@ import SoftwareUpdateActionForm from '@/components/actions/SoftwareUpdateActionF
     ActionButtonTray
   },
   scrollToTop: true,
-  middleware: ['auth']
+  middleware: ['auth'],
+  computed:mapState('platforms',['platformSoftwareUpdateAction','platformAttachments']),
+  methods:mapActions('platforms',['loadPlatformSoftwareUpdateAction','loadAllPlatformActions','loadPlatformAttachments','updatePlatformSoftwareUpdateAction'])
 })
 export default class PlatformSoftwareUpdateActionEditPage extends Vue {
   private action: SoftwareUpdateAction = new SoftwareUpdateAction()
-  private attachments: Attachment[] = []
-  private _isLoading: boolean = false
-  private _isSaving: boolean = false
+  private isSaving: boolean = false
 
-  async fetch (): Promise<any> {
-    this.isLoading = true
-    await Promise.all([
-      this.fetchAttachments(),
-      this.fetchAction()
-    ])
-    this.isLoading = false
-  }
-
-  async fetchAction (): Promise<any> {
+  async created(){
     try {
-      this.action = await this.$api.platformSoftwareUpdateActions.findById(this.actionId)
-    } catch (_) {
+      await this.loadPlatformSoftwareUpdateAction(this.actionId)
+      this.action = SoftwareUpdateAction.createFromObject(this.platformSoftwareUpdateAction)
+    } catch (error) {
       this.$store.commit('snackbar/setError', 'Failed to fetch action')
     }
-  }
-
-  async fetchAttachments (): Promise<any> {
     try {
-      this.attachments = await this.$api.platforms.findRelatedPlatformAttachments(this.platformId)
-    } catch (_) {
+      await this.loadPlatformAttachments(this.platformId)
+    } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to fetch attachments')
     }
   }
@@ -115,37 +106,25 @@ export default class PlatformSoftwareUpdateActionEditPage extends Vue {
     return this.$route.params.actionId
   }
 
-  get isLoading (): boolean {
-    return this.$data._isLoading
-  }
-
-  set isLoading (value: boolean) {
-    this.$data._isLoading = value
-    this.$emit('showload', value)
-  }
-
-  get isSaving (): boolean {
-    return this.$data._isSaving
-  }
-
-  set isSaving (value: boolean) {
-    this.$data._isSaving = value
-    this.$emit('showsave', value)
-  }
-
-  save (): void {
+  async save (): void {
     if (!(this.$refs.softwareUpdateActionForm as Vue & { isValid: () => boolean }).isValid()) {
       this.$store.commit('snackbar/setError', 'Please correct the errors')
       return
     }
-    this.isSaving = true
-    this.$api.platformSoftwareUpdateActions.update(this.platformId, this.action).then((action: SoftwareUpdateAction) => {
-      this.$router.push('/platforms/' + this.platformId + '/actions', () => this.$emit('input', action))
-    }).catch(() => {
+
+    try {
+      this.isSaving = true
+      await this.updatePlatformSoftwareUpdateAction({
+        platformId: this.platformId,
+        softwareUpdateAction: this.action
+      });
+      this.loadAllPlatformActions(this.platformId);
+      this.$router.push('/platforms/' + this.platformId + '/actions')
+    } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to save the action')
-    }).finally(() => {
+    } finally {
       this.isSaving = false
-    })
+    }
   }
 }
 </script>

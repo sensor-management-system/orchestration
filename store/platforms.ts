@@ -163,6 +163,9 @@ const actions = {
   addPlatformSoftwareUpdateAction({ commit }: { commit: Commit },{platformId,softwareUpdateAction}:{platformId:number,softwareUpdateAction:SoftwareUpdateAction}):Promise<SoftwareUpdateAction>{
     return this.$api.platformSoftwareUpdateActions.add(platformId,softwareUpdateAction)
   },
+  async updatePlatformSoftwareUpdateAction({ commit }: { commit: Commit },{platformId,softwareUpdateAction}:{platformId:number,softwareUpdateAction:SoftwareUpdateAction}):Promise<SoftwareUpdateAction>{
+    return this.$api.platformSoftwareUpdateActions.update(platformId, softwareUpdateAction);
+  },
   async updatePlatform({ commit }: { commit: Commit }, platform:Platform){
     commit('setPlatform',platform);
   },
