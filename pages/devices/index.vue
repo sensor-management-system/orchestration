@@ -338,7 +338,7 @@ export default class SearchDevicesPage extends Vue {
       manufacturer: this.selectedSearchManufacturers,
       states: this.selectedSearchStates,
       types: this.selectedSearchDeviceTypes,
-      onlyOwnPlatforms: this.onlyOwnPlatforms && this.$auth.loggedIn
+      onlyOwnDevices: this.onlyOwnDevices && this.$auth.loggedIn
     }
   }
   get page(){
