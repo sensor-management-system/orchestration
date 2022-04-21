@@ -84,7 +84,7 @@ const actions = {
       .setSearchedStates(searchParams.states)
       .setSearchedPlatformTypes(searchParams.types)
       .setSearchedUserMail(email)
-      .searchPaginated(state.pageNumber, state.pageSize, searchParams)
+      .searchPaginated(state.pageNumber, state.pageSize)
     commit('setPlatforms', elements)
 
     const totalPages = Math.ceil(totalCount / state.pageSize)
