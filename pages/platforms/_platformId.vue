@@ -52,7 +52,6 @@ import {mapActions} from 'vuex'
   methods:mapActions('platforms',['loadPlatform'])
 })
 export default class PlatformPage extends Vue {
-  private platform: Platform = new Platform()
   private isLoading: boolean = false
 
   async created () {
