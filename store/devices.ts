@@ -1,9 +1,14 @@
 import { Device } from '@/models/Device'
-import { Commit } from 'vuex'
+import { Commit, Dispatch } from 'vuex'
 import { IPlatformSearchParams } from '@/modelUtils/PlatformSearchParams'
 import { IDeviceSearchParams } from '@/modelUtils/DeviceSearchParams'
 import { Contact } from '@/models/Contact'
 import { Attachment } from '@/models/Attachment'
+import { GenericAction } from '@/models/GenericAction'
+import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
+import { DeviceMountAction } from '@/models/DeviceMountAction'
+import { DeviceUnmountAction } from '@/models/DeviceUnmountAction'
+import { DeviceCalibrationAction } from '@/models/DeviceCalibrationAction'
 
 interface devicesState {
   devices: Device[],
@@ -11,6 +16,11 @@ interface devicesState {
   deviceContacts:Contact[],
   deviceAttachments:Attachment[],
   deviceAttachment:Attachment|null,
+  deviceGenericActions:GenericAction[],
+  deviceSoftwareUpdateActions: SoftwareUpdateAction[],
+  deviceMountActions:DeviceMountAction[],
+  deviceUnmountActions:DeviceUnmountAction[],
+  deviceCalibrationActions:DeviceCalibrationAction[]
   pageNumber: number,
   pageSize: number,
   totalPages: number
@@ -22,12 +32,27 @@ const state = {
   deviceContacts:[],
   deviceAttachments:[],
   deviceAttachment:null,
+  deviceGenericActions:[],
+  deviceSoftwareUpdateActions:[],
+  deviceMountActions:[],
+  deviceUnmountActions:[],
+  deviceCalibrationActions:[],
   pageNumber: 1,
   pageSize: 20,
   totalPages: 1,
 }
 
-const getters = {}
+const getters = {
+  actions:(state:devicesState)=>{ //Todo actions sortieren, wobei ehrlich gesagt, eine extra route im Backend mit allen Actions (sortiert) besser wäre
+    return [
+      ...state.deviceGenericActions,
+      ...state.deviceSoftwareUpdateActions,
+      ...state.deviceMountActions,
+      ...state.deviceUnmountActions,
+      ...state.deviceCalibrationActions
+    ]
+  }
+}
 
 const actions = {
   async searchDevicesPaginated ({ commit, state }: { commit: Commit, state: devicesState }, searchParams: IDeviceSearchParams) {
@@ -73,6 +98,33 @@ const actions = {
   async loadDeviceAttachment({ commit }: { commit: Commit },id:number){
     const deviceAttachment = await this.$api.deviceAttachments.findById(id)
     commit('setDeviceAttachment',deviceAttachment)
+  },
+  async loadAllDeviceActions({dispatch}:{dispatch:Dispatch},id:number){
+    await dispatch('loadDeviceGenericActions',id)
+    await dispatch('loadDeviceSoftwareUpdateActions',id)
+    await dispatch('loadDeviceMountActions',id)
+    await dispatch('loadDeviceUnmountActions',id)
+    await dispatch('loadDeviceCalibrationActions',id)
+  },
+  async loadDeviceGenericActions({commit}:{commit:Commit},id:number){
+    const deviceGenericActions = await this.$api.devices.findRelatedGenericActions(id)
+    commit('setDeviceGenericActions',deviceGenericActions)
+  },
+  async loadDeviceSoftwareUpdateActions({commit}:{commit:Commit},id:number){
+    const deviceSoftwareUpdateActions = await this.$api.devices.findRelatedSoftwareUpdateActions(id)
+    commit('setDeviceSoftwareUpdateActions',deviceSoftwareUpdateActions)
+  },
+  async loadDeviceMountActions({commit}:{commit:Commit},id:number){
+    const deviceMountActions = await this.$api.devices.findRelatedMountActions(id)
+    commit('setDeviceMountActions',deviceMountActions)
+  },
+  async loadDeviceUnmountActions({commit}:{commit:Commit},id:number){
+    const deviceUnmountActions = await this.$api.devices.findRelatedUnmountActions(id)
+    commit('setDeviceUnmountActions',deviceUnmountActions)
+  },
+  async loadDeviceCalibrationActions({commit}:{commit:Commit},id:number){
+    const deviceCalibrationActions = await this.$api.devices.findRelatedCalibrationActions(id)
+    commit('setDeviceCalibrationActions',deviceCalibrationActions)
   },
   async deleteDeviceAttachment({ commit }: { commit: Commit },attachmentId:number): Promise<void>{
     return this.$api.deviceAttachments.deleteById(attachmentId);
@@ -136,7 +188,23 @@ const mutations = {
   },
   setDeviceAttachment(state:devicesState,attachment:Attachment){
     state.deviceAttachment=attachment
-  }
+  },
+  setDeviceGenericActions(state:devicesState,deviceGenericActions:GenericAction[]){
+    state.deviceGenericActions=deviceGenericActions;
+  },
+  setDeviceSoftwareUpdateActions(state:devicesState,deviceSoftwareUpdateActions:SoftwareUpdateAction[]){
+    state.deviceSoftwareUpdateActions=deviceSoftwareUpdateActions;
+  },
+  setDeviceMountActions(state:devicesState,deviceMountActions:DeviceMountAction[]){
+    state.deviceMountActions=deviceMountActions;
+  },
+  setDeviceUnmountActions(state:devicesState,deviceUnmountActions:DeviceUnmountAction[]){
+    state.deviceUnmountActions=deviceUnmountActions;
+  },
+  setDeviceCalibrationActions(state:devicesState,deviceCalibrationActions:DeviceCalibrationAction[]){
+    state.deviceCalibrationActions=deviceCalibrationActions;
+  },
+
 }
 
 export default {
