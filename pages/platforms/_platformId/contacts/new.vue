@@ -123,17 +123,22 @@ export default class PlatformAddContactPage extends Vue {
     return this.isLoading || this.isSaving
   }
 
-  addContact (): void {
+  async addContact (): void {
     if (this.selectedContact && this.selectedContact.id && this.$auth.loggedIn) {
-      this.isSaving = true
-      this.addPlatformContact({platformId:this.platformId,contactId:this.selectedContact.id}).then(() => {
+
+      try {
+        this.isSaving = true
+        await this.addPlatformContact({
+          platformId: this.platformId,
+          contactId: this.selectedContact.id
+        })
         this.loadPlatformContacts(this.platformId)
         this.$router.push('/platforms/' + this.platformId + '/contacts')
-      }).catch(() => {
+      } catch (e) {
         this.$store.commit('snackbar/setError', 'Failed to add a contact')
-      }).finally(()=>{
+      } finally {
         this.isSaving = false
-      })
+      }
     }
   }
 
