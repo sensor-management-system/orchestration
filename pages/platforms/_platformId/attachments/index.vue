@@ -95,16 +95,12 @@ export default class PlatformAttachmentShowPage extends Vue{
     }
     try {
       await this.deletePlatformAttachment(this.attachmentToDelete.id) // TODO returns a 500 error, but deletion is fine; probably backend problem
+      this.loadPlatformAttachments(this.platformId)
       this.$store.commit('snackbar/setSuccess', 'Attachment deleted')
     } catch (_error) {
       this.$store.commit('snackbar/setError', 'Failed to delete attachment')
     } finally {
       this.closeDialog()
-    }
-    try{
-      this.loadPlatformAttachments(this.platformId)
-    }catch (_error) {
-     console.log('error',_error);
     }
   }
 }

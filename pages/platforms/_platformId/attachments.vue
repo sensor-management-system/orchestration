@@ -68,79 +68,14 @@ export default class PlatformAttachmentsPage extends mixins(AttachmentsMixin) {
     }
   }
 
-  // async fetch () {
-  //   this.isLoading = true
-  //   try {
-  //     this.attachments = await this.$api.platforms.findRelatedPlatformAttachments(this.platformId)
-  //     this.isLoading = false
-  //   } catch (e) {
-  //     this.$store.commit('snackbar/setError', 'failed to fetch attachments')
-  //     this.isLoading = false
-  //   }
-  // }
-
   head () {
     return {
       titleTemplate: 'Attachments - %s'
     }
   }
-  //
-  // get isInProgress (): boolean {
-  //   return this.isLoading || this.isSaving
-  // }
 
   get platformId (): string {
     return this.$route.params.platformId
   }
-
-  // get isEditAttachmentPage (): boolean {
-  //   // eslint-disable-next-line no-useless-escape
-  //   const editUrl = '^\/platforms\/' + this.platformId + '\/attachments\/([0-9]+)\/edit$'
-  //   return !!this.$route.path.match(editUrl)
-  // }
-  //
-  // get isAddAttachmentPage (): boolean {
-  //   // eslint-disable-next-line no-useless-escape
-  //   const addUrl = '^\/platforms\/' + this.platformId + '\/attachments\/new$'
-  //   return !!this.$route.path.match(addUrl)
-  // }
-  //
-  // showsave (shouldShowSave: boolean) {
-  //   this.isSaving = shouldShowSave
-  // }
-
-  // addAttachmentToList (newAttachment: Attachment) {
-  //   this.attachments.push(newAttachment)
-  // }
-
-  // deleteAndCloseDialog (id: string) {
-  //   if (id) {
-  //     this.isSaving = true
-  //     this.showDeleteDialog = {}
-  //
-  //     this.$api.platformAttachments.deleteById(id).then(() => {
-  //       const searchIndex = this.attachments.findIndex(a => a.id === id)
-  //       if (searchIndex > -1) {
-  //         this.attachments.splice(searchIndex, 1)
-  //       }
-  //       this.isSaving = false
-  //     }).catch((_error) => {
-  //       this.isSaving = false
-  //       this.$store.commit('snackbar/setError', 'Failed to delete attachment')
-  //     })
-  //   }
-  // }
-
-  // showDeleteDialogFor (id: string) {
-  //   Vue.set(this.showDeleteDialog, id, true)
-  // }
-  //
-  // hideDeleteDialogFor (id: string) {
-  //   Vue.set(this.showDeleteDialog, id, false)
-  // }
-  //
-  // isEditModeForAttachment (attachment: Attachment): boolean {
-  //   return this.$route.path === '/platforms/' + this.platformId + '/attachments/' + attachment.id + '/edit'
-  // }
 }
 </script>
