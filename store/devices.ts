@@ -61,6 +61,9 @@ const actions = {
     const deviceContacts = await this.$api.devices.findRelatedContacts(id)
     commit('setDeviceContacts',deviceContacts)
   },
+  async addDeviceContact({ commit }: { commit: Commit },{deviceId,contactId}:{deviceId:number,contactId:number}):Promise<void>{
+    return this.$api.devices.addContact(deviceId,contactId)
+  },
   async removeDeviceContact({ commit }: { commit: Commit },{deviceId,contactId}:{deviceId:number,contactId:number}):Promise<void>{
     return this.$api.devices.removeContact(deviceId, contactId);
   },

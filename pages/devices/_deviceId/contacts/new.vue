@@ -39,7 +39,13 @@ permissions and limitations under the Licence.
         cols="12"
         md="5"
       >
-        <v-autocomplete :items="allExceptSelected" :item-text="(x) => x" :item-value="(x) => x.id" label="New contact" @change="select" />
+        <v-autocomplete
+          v-model="selectedContact"
+          :items="allExceptSelected"
+          :item-text="(x) => x"
+          :item-value="(x) => x.id"
+          label="New contact"
+          return-object />
       </v-col>
       <v-col
         cols="12"
@@ -74,72 +80,64 @@ import { Component, Vue, Prop } from 'nuxt-property-decorator'
 import { Contact } from '@/models/Contact'
 
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { mapActions, mapGetters, mapState } from 'vuex'
 
 @Component({
   components: {
     ProgressIndicator
   },
-  middleware: ['auth']
+  middleware: ['auth'],
+  computed:{
+    ...mapGetters('contacts',['contactsByDifference']),
+    ...mapState('devices',['deviceContacts'])
+  },
+  methods:{
+    ...mapActions('contacts',['loadAllContacts']),
+    ...mapActions('devices',['loadDeviceContacts','addDeviceContact'])
+  }
 })
 export default class DeviceAddContactPage extends Vue {
-  private alreadyUsedContacts: Contact[] = []
-  private allContacts: Contact[] = []
   private selectedContact: Contact | null = null
   private isLoading: boolean = false
   private isSaving: boolean = false
 
-  @Prop({
-    default: () => [] as Contact[],
-    required: true,
-    type: Array
-  })
-  readonly value!: Contact[]
 
-  created () {
-    this.alreadyUsedContacts = [...this.value] as Contact[]
-  }
-
-  mounted () {
-    this.isLoading = true
-    this.$api.contacts.findAll().then((foundContacts) => {
-      this.allContacts = foundContacts
-      this.isLoading = false
-    }).catch(() => {
+  async created () {
+    try {
+      this.isLoading=true
+      await this.loadAllContacts()
+      await this.loadDeviceContacts(this.deviceId)
+    } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to fetch related contacts')
+    } finally {
       this.isLoading = false
-    })
+    }
   }
 
   get isInProgress (): boolean {
     return this.isLoading || this.isSaving
   }
 
-  addContact (): void {
+  async addContact (): void {
     if (this.selectedContact && this.selectedContact.id && this.$auth.loggedIn) {
-      this.isSaving = true
-      this.$api.devices.addContact(this.deviceId, this.selectedContact.id).then(() => {
-        this.isSaving = false
-        this.alreadyUsedContacts.push(this.selectedContact as Contact)
-        this.$emit('input', this.alreadyUsedContacts)
+      try {
+        this.isSaving = true
+        await this.addDeviceContact({
+          deviceId: this.deviceId,
+          contactId: this.selectedContact.id
+        })
+        this.loadDeviceContacts(this.deviceId)
         this.$router.push('/devices/' + this.deviceId + '/contacts')
-      }).catch(() => {
-        this.isSaving = false
+      } catch (e) {
         this.$store.commit('snackbar/setError', 'Failed to add a contact')
-      })
-    }
-  }
-
-  select (newContactId: string): void {
-    const idx = this.allContacts.findIndex((c: Contact) => c.id === newContactId)
-    if (idx > -1) {
-      this.selectedContact = this.allContacts[idx]
-    } else {
-      this.selectedContact = null
+      } finally {
+        this.isSaving = false
+      }
     }
   }
 
   get allExceptSelected (): Contact[] {
-    return this.allContacts.filter(c => !this.alreadyUsedContacts.find(rc => rc.id === c.id))
+    return this.contactsByDifference(this.deviceContacts);
   }
 
   get deviceId (): string {
