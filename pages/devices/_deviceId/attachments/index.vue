@@ -63,8 +63,9 @@ import DevicesAttachmentDeleteDialog from '@/components/devices/DevicesAttachmen
 import { Attachment } from '@/models/Attachment'
 import { mapActions, mapState } from 'vuex'
 import HintCard from '@/components/HintCard.vue'
+import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 @Component({
-  components: { HintCard, DevicesAttachmentDeleteDialog, DevicesAttachmentListItem, BaseList },
+  components: { DotMenuActionDelete, HintCard, DevicesAttachmentDeleteDialog, DevicesAttachmentListItem, BaseList },
   computed:mapState('devices',['deviceAttachments']),
   methods:mapActions('devices',['loadDeviceAttachments','deleteDeviceAttachment'])
 })

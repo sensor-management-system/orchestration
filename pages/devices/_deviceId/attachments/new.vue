@@ -132,23 +132,17 @@ import { Rules } from '@/mixins/Rules'
 import { UploadRules } from '@/mixins/UploadRules'
 
 import { Attachment } from '@/models/Attachment'
+import { mapActions } from 'vuex'
 
 @Component({
   components: {},
-  middleware: ['auth']
+  middleware: ['auth'],
+  methods: mapActions('devices',['addDeviceAttachment','loadDeviceAttachments'])
 })
 export default class AttachmentAddPage extends mixins(Rules, UploadRules) {
   private attachment: Attachment = new Attachment()
   private attachmentType: string = 'file'
   private file: File | null = null
-
-  mounted () {
-    const cancelButton = this.$refs.cancelButton as Vue
-    // due to the active route (and the button being a router link)
-    // this button has the active class
-    // however, we don't want this special behaviour for this button
-    cancelButton.$el.classList.remove('v-btn--active')
-  }
 
   /**
    * returns a list of MimeTypes, seperated by ,
@@ -166,35 +160,38 @@ export default class AttachmentAddPage extends mixins(Rules, UploadRules) {
 
     (this.$refs.attachmentsForm as Vue & { resetValidation: () => boolean }).resetValidation()
 
-    this.$emit('showsave', true)
     let theFailureCanBeFromUpload = true
     try {
       if (this.attachmentType !== 'url') {
         // Due to the validation we can be sure that the file is not null
-        const uploadResult = await this.$api.upload.file(this.file as File)
+        const uploadResult = await this.$api.upload.file(this.file as File) //todo in store auslagern
         this.attachment.url = uploadResult.url
         theFailureCanBeFromUpload = false
       }
 
-      const newAttachment = await this.$api.deviceAttachments.add(this.deviceId, this.attachment)
-      this.$emit('input', newAttachment)
-
+      await this.addDeviceAttachment({
+        deviceId:this.deviceId,
+        attachment: this.attachment
+      })
+      this.loadDeviceAttachments(this.deviceId)
       this.$router.push('/devices/' + this.deviceId + '/attachments')
     } catch (error: any) {
-      let message = 'Failed to save an attachment'
-
-      if (theFailureCanBeFromUpload && error.response?.data?.errors?.length) {
-        const errorDetails = error.response.data.errors[0]
-        if (errorDetails.source && errorDetails.title) {
-          // In this case something ala 'Unsupported Media Type: application/exe is Not Permitted'
-          message = errorDetails.title + ': ' + errorDetails.source
-        }
-      }
-      this.$store.commit('snackbar/setError', message)
-    } finally {
-      this.$emit('showsave', false)
+      this.handleError(error,theFailureCanBeFromUpload)
     }
   }
+
+  handelError(error:any,theFailureCanBeFromUpload:boolean){
+  let message = 'Failed to save an attachment'
+
+  if (theFailureCanBeFromUpload && error.response?.data?.errors?.length) {
+    const errorDetails = error.response.data.errors[0]
+    if (errorDetails.source && errorDetails.title) {
+      // In this case something ala 'Unsupported Media Type: application/exe is Not Permitted'
+      message = errorDetails.title + ': ' + errorDetails.source
+    }
+  }
+  this.$store.commit('snackbar/setError', message)
+}
 
   get deviceId (): string {
     return this.$route.params.deviceId

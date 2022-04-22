@@ -77,6 +77,9 @@ const actions = {
   async deleteDeviceAttachment({ commit }: { commit: Commit },attachmentId:number): Promise<void>{
     return this.$api.deviceAttachments.deleteById(attachmentId);
   },
+  async addDeviceAttachment({ commit }: { commit: Commit },{deviceId,attachment}:{deviceId:number,attachment:Attachment}):Promise<void>{
+    return this.$api.deviceAttachments.add(deviceId, attachment);
+  },
   updateDeviceAttachment({ commit }: { commit: Commit },{deviceId,attachment}:{deviceId:number,attachment:Attachment}):Promise<void>{
     return this.$api.deviceAttachments.update(deviceId, attachment);
   },
