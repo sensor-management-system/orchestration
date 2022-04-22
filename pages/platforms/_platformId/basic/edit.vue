@@ -101,7 +101,7 @@ import { Contact } from '@/models/Contact'
   },
   middleware: ['auth'],
   computed:mapState('platforms',['platform']),
-  methods:mapActions('platforms',['updatePlatform','savePlatform'])
+  methods:mapActions('platforms',['loadPlatform','savePlatform'])
 })
 export default class PlatformEditBasicPage extends Vue {
 
@@ -112,30 +112,22 @@ export default class PlatformEditBasicPage extends Vue {
     this.platformCopy = Platform.createFromObject(this.platform);
   }
 
-  onSaveButtonClicked () {
+  async onSaveButtonClicked () {
     if (!(this.$refs.basicForm as Vue & { validateForm: () => boolean }).validateForm()) {
       this.$store.commit('snackbar/setError', 'Please correct your input')
       return
     }
-    this.isLoading = true
-    this.save().then((platform) => {
-      this.isLoading = false
-      this.$emit('input', platform)
-      this.$router.push('/platforms/' + this.platformId + '/basic')
-    }).catch((_error) => {
-      this.isLoading = false
-      this.$store.commit('snackbar/setError', 'Save failed')
-    })
-  }
 
-  save (): Promise<Platform> {
-    return new Promise((resolve, reject) => {
-      this.savePlatform(this.platformCopy).then((savedPlatform) => {
-        resolve(savedPlatform)
-      }).catch((_error) => {
-        reject(_error)
-      })
-    })
+    try {
+      this.isLoading = true
+      await this.savePlatform(this.platformCopy)
+      this.loadPlatform(this.platformId)
+      this.$router.push('/platforms/' + this.platformId + '/basic')
+    } catch (e) {
+      this.$store.commit('snackbar/setError', 'Save failed')
+    } finally {
+      this.isLoading = false
+    }
   }
 
   get platformId () {
