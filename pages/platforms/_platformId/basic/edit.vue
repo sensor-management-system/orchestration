@@ -58,9 +58,8 @@ permissions and limitations under the Licence.
       </v-btn>
     </v-card-actions>
     <PlatformBasicDataForm
-      v-if="formPlatform"
       ref="basicForm"
-      v-model="formPlatform"
+      v-model="platformCopy"
     />
     <v-card-actions>
       <v-spacer />
@@ -106,17 +105,13 @@ import { Contact } from '@/models/Contact'
 })
 export default class PlatformEditBasicPage extends Vue {
 
+  private platformCopy:Platform=new Platform()
   private isLoading: boolean = false
 
-  get formPlatform(){
-    if(this.platform){
-      return this.platform;
-    }
-    return new Platform()
+  created(){
+    this.platformCopy = Platform.createFromObject(this.platform);
   }
-  set formPlatform(val){
-    this.updatePlatform(val);
-  }
+
   onSaveButtonClicked () {
     if (!(this.$refs.basicForm as Vue & { validateForm: () => boolean }).validateForm()) {
       this.$store.commit('snackbar/setError', 'Please correct your input')
@@ -135,7 +130,7 @@ export default class PlatformEditBasicPage extends Vue {
 
   save (): Promise<Platform> {
     return new Promise((resolve, reject) => {
-      this.savePlatform(this.platform).then((savedPlatform) => {
+      this.savePlatform(this.platformCopy).then((savedPlatform) => {
         resolve(savedPlatform)
       }).catch((_error) => {
         reject(_error)
