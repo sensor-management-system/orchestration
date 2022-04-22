@@ -95,6 +95,7 @@ import { AttachmentsMixin } from '@/mixins/AttachmentsMixin'
  * @extends Vue
  */
 @Component({
+  middleware: ['auth'],
   computed:mapState('platforms',['platformAttachment']),
   methods:mapActions('platforms',['loadPlatformAttachment','loadPlatformAttachments','updatePlatformAttachment'])
 })
