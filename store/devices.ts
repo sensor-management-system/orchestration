@@ -2,10 +2,12 @@ import { Device } from '@/models/Device'
 import { Commit } from 'vuex'
 import { IPlatformSearchParams } from '@/modelUtils/PlatformSearchParams'
 import { IDeviceSearchParams } from '@/modelUtils/DeviceSearchParams'
+import { Contact } from '@/models/Contact'
 
 interface devicesState {
   devices: Device[],
   device: Device | null,
+  deviceContacts:Contact[]
   pageNumber: number,
   pageSize: number,
   totalPages: number
@@ -14,6 +16,7 @@ interface devicesState {
 const state = {
   devices: [],
   device: null,
+  deviceContacts:[],
   pageNumber: 1,
   pageSize: 20,
   totalPages: 1,
@@ -54,6 +57,13 @@ const actions = {
     });
     commit('setDevice',device);
   },
+  async loadDeviceContacts({commit}:{commit:Commit},id:number){
+    const deviceContacts = await this.$api.devices.findRelatedContacts(id)
+    commit('setDeviceContacts',deviceContacts)
+  },
+  async removeDeviceContact({ commit }: { commit: Commit },{deviceId,contactId}:{deviceId:number,contactId:number}):Promise<void>{
+    return this.$api.devices.removeContact(deviceId, contactId);
+  },
   async saveDevice({commit}:{commit:Commit},device:Device):Promise<Device>{
     return this.$api.devices.save(device)
   },
@@ -92,6 +102,9 @@ const mutations = {
   },
   setTotalPages (state: devicesState, count: number) {
     state.totalPages = count
+  },
+  setDeviceContacts(state:devicesState,contacts:Contact[]){
+    state.deviceContacts=contacts
   }
 }
 
