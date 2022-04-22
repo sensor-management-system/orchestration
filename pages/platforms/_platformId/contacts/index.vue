@@ -177,15 +177,19 @@ export default class PlatformShowContactPage extends Vue {
   get platformId (): string {
     return this.$route.params.platformId
   }
-  removeContact (contactId: string): void {
-    this.isSaving = true
-    this.removePlatformContact({platformId:this.platformId,contactId:contactId}).then(() => {
+  async removeContact (contactId: string): void {
+    try {
+      this.isSaving = true
+      this.removePlatformContact({
+        platformId: this.platformId,
+        contactId: contactId
+      })
       this.loadPlatformContacts(this.platformId);
-    }).catch((_error) => {
+    } catch (e) {
       this.$store.commit('snackbar/setError', 'Removing contact failed')
-    }).finally(()=>{
+    } finally {
       this.isSaving = false
-    })
+    }
   }
 }
 </script>
