@@ -1,9 +1,9 @@
-<template>
+<<template>
   <div>
     <v-card-actions>
       <v-spacer></v-spacer>
       <ActionButtonTray
-        :cancel-url="'/platforms/' + platformId + '/actions'"
+        :cancel-url="'/devices/' + deviceId + '/actions'"
         :show-apply="true"
         @apply="addSoftwareUpdateAction"
       />
@@ -11,13 +11,13 @@
     <SoftwareUpdateActionForm
       ref="softwareUpdateActionForm"
       v-model="softwareUpdateAction"
-      :attachments="platformAttachments"
+      :attachments="deviceAttachments"
       :current-user-mail="$auth.user.email"
     />
     <v-card-actions>
       <v-spacer></v-spacer>
       <ActionButtonTray
-        :cancel-url="'/platforms/' + platformId + '/actions'"
+        :cancel-url="'/devices/' + deviceId + '/actions'"
         :show-apply="true"
         @apply="addSoftwareUpdateAction"
       />
@@ -27,25 +27,22 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
+import NewSoftwareUpdateActions from '@/pages/platforms/_platformId/actions/new/software-update-actions.vue'
 import SoftwareUpdateActionForm from '@/components/actions/SoftwareUpdateActionForm.vue'
-import { mapActions, mapState } from 'vuex'
-import ActionButtonTray from '@/components/actions/ActionButtonTray.vue'
 import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
-
+import ActionButtonTray from '@/components/actions/ActionButtonTray.vue'
+import { mapActions, mapState } from 'vuex'
 @Component({
-  components: {
-    ActionButtonTray,
-    SoftwareUpdateActionForm
-  },
-  computed: mapState('platforms', ['platformAttachments', 'chosenKindOfPlatformAction']),
-  methods: mapActions('platforms', ['addPlatformSoftwareUpdateAction', 'loadAllPlatformActions'])
+  components: { ActionButtonTray, SoftwareUpdateActionForm },
+  computed: mapState('devices', ['deviceAttachments', 'chosenKindOfDeviceAction']),
+  methods: mapActions('devices', ['addDeviceSoftwareUpdateAction', 'loadAllDeviceActions'])
 })
-export default class NewPlatformSoftwareUpdateActions extends Vue {
-
+export default class NewDeviceSoftwareUpdateActions extends Vue
+{
   private softwareUpdateAction: SoftwareUpdateAction = new SoftwareUpdateAction()
 
-  get platformId (): string {
-    return this.$route.params.platformId
+  get deviceId (): string {
+    return this.$route.params.deviceId
   }
 
   async addSoftwareUpdateAction () {
@@ -56,15 +53,17 @@ export default class NewPlatformSoftwareUpdateActions extends Vue {
       this.$store.commit('snackbar/setError', 'Please correct the errors')
       return
     }
-    await this.addPlatformSoftwareUpdateAction(
-      {
-        platformId: this.platformId,
+
+    try {
+      await this.addDeviceSoftwareUpdateAction({
+        deviceId: this.deviceId,
         softwareUpdateAction: this.softwareUpdateAction
       })
-    this.loadAllPlatformActions(this.platformId)
-    this.$router.push('/platforms/' + this.platformId + '/actions')
-    this.$store.commit('snackbar/setError', 'Failed to save the action')
-
+      this.loadAllDeviceActions(this.deviceId)
+      this.$router.push('/devices/' + this.deviceId + '/actions')
+    } catch (e) {
+      this.$store.commit('snackbar/setError', 'Failed to save the action')
+    }
   }
 }
 </script>

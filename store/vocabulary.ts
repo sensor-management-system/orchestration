@@ -5,14 +5,15 @@ import { PlatformType } from '@/models/PlatformType'
 import { DeviceType } from '@/models/DeviceType'
 import { Platform } from '@/models/Platform'
 import { ActionType } from '@/models/ActionType'
-import { ACTION_TYPE_API_FILTER_PLATFORM } from '@/services/cv/ActionTypeApi'
+import { ACTION_TYPE_API_FILTER_DEVICE, ACTION_TYPE_API_FILTER_PLATFORM } from '@/services/cv/ActionTypeApi'
 
 interface vocabularyState {
   manufacturers: Manufacturer[]
   equipmentstatus: Status[]
   devicetypes: DeviceType[]
   platformtypes: PlatformType[],
-  platformGenericActionTypes: ActionType[]
+  platformGenericActionTypes: ActionType[],
+  deviceGenericActionTypes:ActionType[]
 }
 
 const state = {
@@ -20,7 +21,8 @@ const state = {
   equipmentstatus: [],
   devicetypes: [],
   platformtypes: [],
-  platformGenericActionTypes: []
+  platformGenericActionTypes: [],
+  deviceGenericActionTypes:[]
 }
 // if (this.statusLookup.has(platform.statusUri)) {
 //   const platformStatus: Status = this.statusLookup.get(platform.statusUri) as Status
@@ -69,6 +71,9 @@ const actions = {
   async loadPlatformGenericActionTypes ({ commit }: { commit: Commit }) { //TODO check api and maybe refactor
     commit('setPlatformGenericActionTypes', await this.$api.actionTypes.newSearchBuilder().onlyType(ACTION_TYPE_API_FILTER_PLATFORM).build().findMatchingAsList()
     )
+  },
+  async loadDeviceGenericActionTypes({ commit }: { commit: Commit }){
+    commit('setDeviceGenericActionTypes', await this.$api.actionTypes.newSearchBuilder().onlyType(ACTION_TYPE_API_FILTER_DEVICE).build().findMatchingAsList())
   }
 }
 
@@ -87,6 +92,9 @@ const mutations = {
   },
   setPlatformGenericActionTypes (state: vocabularyState, platformGenericActionTypes: ActionType[]) {
     state.platformGenericActionTypes = platformGenericActionTypes
+  },
+  setDeviceGenericActionTypes(state:vocabularyState,deviceGenericACtionTypes:ActionType[]){
+    state.deviceGenericActionTypes=deviceGenericACtionTypes
   }
 }
 

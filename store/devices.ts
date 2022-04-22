@@ -1,6 +1,5 @@
 import { Device } from '@/models/Device'
 import { Commit, Dispatch } from 'vuex'
-import { IPlatformSearchParams } from '@/modelUtils/PlatformSearchParams'
 import { IDeviceSearchParams } from '@/modelUtils/DeviceSearchParams'
 import { Contact } from '@/models/Contact'
 import { Attachment } from '@/models/Attachment'
@@ -9,6 +8,17 @@ import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
 import { DeviceMountAction } from '@/models/DeviceMountAction'
 import { DeviceUnmountAction } from '@/models/DeviceUnmountAction'
 import { DeviceCalibrationAction } from '@/models/DeviceCalibrationAction'
+import { IActionType } from '@/models/ActionType'
+
+const KIND_OF_ACTION_TYPE_DEVICE_CALIBRATION = 'device_calibration'
+const KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE = 'software_update'
+const KIND_OF_ACTION_TYPE_GENERIC_DEVICE_ACTION = 'generic_device_action'
+const KIND_OF_ACTION_TYPE_UNKNOWN = 'unknown'
+type KindOfActionType = typeof KIND_OF_ACTION_TYPE_DEVICE_CALIBRATION | typeof KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE | typeof KIND_OF_ACTION_TYPE_GENERIC_DEVICE_ACTION | typeof KIND_OF_ACTION_TYPE_UNKNOWN
+
+type IOptionsForActionType = Pick<IActionType, 'id' | 'name' | 'uri'> & {
+  kind: KindOfActionType
+}
 
 interface devicesState {
   devices: Device[],
@@ -20,7 +30,8 @@ interface devicesState {
   deviceSoftwareUpdateActions: SoftwareUpdateAction[],
   deviceMountActions:DeviceMountAction[],
   deviceUnmountActions:DeviceUnmountAction[],
-  deviceCalibrationActions:DeviceCalibrationAction[]
+  deviceCalibrationActions:DeviceCalibrationAction[],
+  chosenKindOfDeviceAction:IOptionsForActionType|null
   pageNumber: number,
   pageSize: number,
   totalPages: number
@@ -37,6 +48,7 @@ const state = {
   deviceMountActions:[],
   deviceUnmountActions:[],
   deviceCalibrationActions:[],
+  chosenKindOfDeviceAction:null,
   pageNumber: 1,
   pageSize: 20,
   totalPages: 1,
@@ -126,6 +138,9 @@ const actions = {
     const deviceCalibrationActions = await this.$api.devices.findRelatedCalibrationActions(id)
     commit('setDeviceCalibrationActions',deviceCalibrationActions)
   },
+  async addDeviceSoftwareUpdateAction({ commit }: { commit: Commit },{deviceId,softwareUpdateAction}:{deviceId:number,softwareUpdateAction:SoftwareUpdateAction}):Promise<SoftwareUpdateAction>{
+    return this.$api.deviceSoftwareUpdateActions.add(deviceId, softwareUpdateAction)
+  },
   async deleteDeviceAttachment({ commit }: { commit: Commit },attachmentId:number): Promise<void>{
     return this.$api.deviceAttachments.deleteById(attachmentId);
   },
@@ -164,6 +179,9 @@ const actions = {
   },
   setPageNumber ({ commit }: { commit: Commit }, newPageNumber: number) {
     commit('setPageNumber', newPageNumber)
+  },
+  setChosenKindOfDeviceAction({ commit }: { commit: Commit }, newval:IOptionsForActionType | null) {
+    commit('setChosenKindOfDeviceAction',newval)
   }
 }
 
@@ -204,7 +222,9 @@ const mutations = {
   setDeviceCalibrationActions(state:devicesState,deviceCalibrationActions:DeviceCalibrationAction[]){
     state.deviceCalibrationActions=deviceCalibrationActions;
   },
-
+  setChosenKindOfDeviceAction(state:devicesState,newVal:IOptionsForActionType | null){
+    state.chosenKindOfDeviceAction=newVal
+  }
 }
 
 export default {
