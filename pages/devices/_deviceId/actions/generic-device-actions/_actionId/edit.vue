@@ -33,9 +33,7 @@ permissions and limitations under the Licence.
     <v-card-actions>
       <v-spacer />
       <ActionButtonTray
-        v-if="$auth.loggedIn"
         :cancel-url="'/devices/' + deviceId + '/actions'"
-        :is-saving="isSaving"
         @apply="save"
       />
     </v-card-actions>
@@ -51,16 +49,14 @@ permissions and limitations under the Licence.
     <GenericActionForm
       ref="genericDeviceActionForm"
       v-model="action"
-      :attachments="attachments"
+      :attachments="deviceAttachments"
       :current-user-mail="$auth.user.email"
     />
 
     <v-card-actions>
       <v-spacer />
       <ActionButtonTray
-        v-if="$auth.loggedIn"
         :cancel-url="'/devices/' + deviceId + '/actions'"
-        :is-saving="isSaving"
         @apply="save"
       />
     </v-card-actions>
@@ -75,6 +71,8 @@ import { GenericAction } from '@/models/GenericAction'
 
 import GenericActionForm from '@/components/actions/GenericActionForm.vue'
 import ActionButtonTray from '@/components/actions/ActionButtonTray.vue'
+import { mapActions, mapState } from 'vuex'
+import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
 
 @Component({
   components: {
@@ -82,35 +80,24 @@ import ActionButtonTray from '@/components/actions/ActionButtonTray.vue'
     ActionButtonTray
   },
   scrollToTop: true,
-  middleware: ['auth']
+  middleware: ['auth'],
+  computed:mapState('devices',['deviceGenericAction','deviceAttachments']),
+  methods:mapActions('devices',['loadDeviceGenericAction','loadAllDeviceActions','loadDeviceAttachments','updateDeviceGenericAction'])
 })
 export default class GenericDeviceActionEditPage extends Vue {
   private action: GenericAction = new GenericAction()
-  private attachments: Attachment[] = []
-  private _isLoading: boolean = false
-  private _isSaving: boolean = false
 
-  async fetch (): Promise<any> {
-    this.isLoading = true
-    await Promise.all([
-      this.fetchAttachments(),
-      this.fetchAction()
-    ])
-    this.isLoading = false
-  }
-
-  async fetchAction (): Promise<any> {
+  async created(){
     try {
-      this.action = await this.$api.genericDeviceActions.findById(this.actionId)
-    } catch (_) {
+      await this.loadDeviceGenericAction(this.actionId)
+      this.action = GenericAction.createFromObject(this.deviceGenericAction)
+    }catch (e){
       this.$store.commit('snackbar/setError', 'Failed to fetch action')
     }
-  }
 
-  async fetchAttachments (): Promise<any> {
     try {
-      this.attachments = await this.$api.devices.findRelatedDeviceAttachments(this.deviceId)
-    } catch (_) {
+      await this.loadDeviceAttachments(this.deviceId)
+    } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to fetch attachments')
     }
   }
@@ -123,37 +110,21 @@ export default class GenericDeviceActionEditPage extends Vue {
     return this.$route.params.actionId
   }
 
-  get isLoading (): boolean {
-    return this.$data._isLoading
-  }
-
-  set isLoading (value: boolean) {
-    this.$data._isLoading = value
-    this.$emit('showload', value)
-  }
-
-  get isSaving (): boolean {
-    return this.$data._isSaving
-  }
-
-  set isSaving (value: boolean) {
-    this.$data._isSaving = value
-    this.$emit('showsave', value)
-  }
-
-  save (): void {
+  async save (): void {
     if (!(this.$refs.genericDeviceActionForm as Vue & { isValid: () => boolean }).isValid()) {
       this.$store.commit('snackbar/setError', 'Please correct the errors')
       return
     }
-    this.isSaving = true
-    this.$api.genericDeviceActions.update(this.deviceId, this.action).then((action: GenericAction) => {
-      this.$router.push('/devices/' + this.deviceId + '/actions', () => this.$emit('input', action))
-    }).catch(() => {
+    try {
+      await this.updateDeviceGenericAction({
+        deviceId: this.deviceId,
+        genericDeviceAction: this.action
+      })
+      this.loadAllDeviceActions(this.deviceId)
+      this.$router.push('/devices/' + this.deviceId + '/actions')
+    } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to save the action')
-    }).finally(() => {
-      this.isSaving = false
-    })
+    }
   }
 }
 </script>

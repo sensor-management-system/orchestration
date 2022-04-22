@@ -35,7 +35,6 @@ permissions and limitations under the Licence.
       <ActionButtonTray
         v-if="$auth.loggedIn"
         :cancel-url="'/devices/' + deviceId + '/actions'"
-        :is-saving="isSaving"
         @apply="save"
       />
     </v-card-actions>
@@ -43,8 +42,8 @@ permissions and limitations under the Licence.
     <DeviceCalibrationActionForm
       ref="deviceCalibrationActionForm"
       v-model="action"
-      :attachments="attachments"
-      :measured-quantities="measuredQuantities"
+      :attachments="deviceAttachments"
+      :measured-quantities="deviceMeasuredQuantities"
       :current-user-mail="$auth.user.email"
     />
 
@@ -53,7 +52,6 @@ permissions and limitations under the Licence.
       <ActionButtonTray
         v-if="$auth.loggedIn"
         :cancel-url="'/devices/' + deviceId + '/actions'"
-        :is-saving="isSaving"
         @apply="save"
       />
     </v-card-actions>
@@ -69,6 +67,8 @@ import { DeviceProperty } from '@/models/DeviceProperty'
 
 import DeviceCalibrationActionForm from '@/components/actions/DeviceCalibrationActionForm.vue'
 import ActionButtonTray from '@/components/actions/ActionButtonTray.vue'
+import { mapActions, mapState } from 'vuex'
+import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
 
 @Component({
   components: {
@@ -76,45 +76,29 @@ import ActionButtonTray from '@/components/actions/ActionButtonTray.vue'
     ActionButtonTray
   },
   scrollToTop: true,
-  middleware: ['auth']
+  middleware: ['auth'],
+  computed:mapState('devices',['deviceCalibrationAction','deviceAttachments','deviceMeasuredQuantities']),
+  methods:mapActions('devices',['loadDeviceCalibrationAction','loadAllDeviceActions','loadDeviceAttachments','loadDeviceMeasuredQuantities','updateDeviceCalibrationAction'])
 })
 export default class DeviceCalibrationActionEditPage extends Vue {
   private action: DeviceCalibrationAction = new DeviceCalibrationAction()
-  private attachments: Attachment[] = []
-  private measuredQuantities: DeviceProperty[] = []
-  private _isLoading: boolean = false
-  private _isSaving: boolean = false
 
-  async fetch (): Promise<any> {
-    this.isLoading = true
-    await Promise.all([
-      this.fetchAttachments(),
-      this.fetchAction(),
-      this.fetchMeasuredQuantities()
-    ])
-    this.isLoading = false
-  }
-
-  async fetchAction (): Promise<any> {
+  async created(){
     try {
-      this.action = await this.$api.deviceCalibrationActions.findById(this.actionId)
-    } catch (_) {
+      await this.loadDeviceCalibrationAction(this.actionId)
+      this.action = DeviceCalibrationAction.createFromObject(this.deviceCalibrationAction)
+    }catch{
       this.$store.commit('snackbar/setError', 'Failed to fetch action')
     }
-  }
 
-  async fetchAttachments (): Promise<any> {
     try {
-      this.attachments = await this.$api.devices.findRelatedDeviceAttachments(this.deviceId)
-    } catch (_) {
+      await this.loadDeviceAttachments(this.deviceId)
+    } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to fetch attachments')
     }
-  }
-
-  async fetchMeasuredQuantities (): Promise<any> {
     try {
-      this.measuredQuantities = await this.$api.devices.findRelatedDeviceProperties(this.deviceId)
-    } catch (_) {
+      await this.loadDeviceMeasuredQuantities(this.deviceId)
+    } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to fetch measured quantities')
     }
   }
@@ -127,37 +111,22 @@ export default class DeviceCalibrationActionEditPage extends Vue {
     return this.$route.params.actionId
   }
 
-  get isLoading (): boolean {
-    return this.$data._isLoading
-  }
-
-  set isLoading (value: boolean) {
-    this.$data._isLoading = value
-    this.$emit('showload', value)
-  }
-
-  get isSaving (): boolean {
-    return this.$data._isSaving
-  }
-
-  set isSaving (value: boolean) {
-    this.$data._isSaving = value
-    this.$emit('showsave', value)
-  }
-
-  save (): void {
+  async save (): void {
     if (!(this.$refs.deviceCalibrationActionForm as Vue & { isValid: () => boolean }).isValid()) {
       this.$store.commit('snackbar/setError', 'Please correct the errors')
       return
     }
-    this.isSaving = true
-    this.$api.deviceCalibrationActions.update(this.deviceId, this.action).then((action: DeviceCalibrationAction) => {
-      this.$router.push('/devices/' + this.deviceId + '/actions', () => this.$emit('input', action))
-    }).catch(() => {
+
+    try {
+      await this.updateDeviceCalibrationAction({
+        deviceId: this.deviceId,
+        calibrationDeviceAction: this.action
+      })
+      this.loadAllDeviceActions(this.deviceId)
+      this.$router.push('/devices/' + this.deviceId + '/actions')
+    } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to save the action')
-    }).finally(() => {
-      this.isSaving = false
-    })
+    }
   }
 }
 </script>

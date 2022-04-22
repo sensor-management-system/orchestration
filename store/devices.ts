@@ -15,7 +15,11 @@ const KIND_OF_ACTION_TYPE_DEVICE_CALIBRATION = 'device_calibration'
 const KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE = 'software_update'
 const KIND_OF_ACTION_TYPE_GENERIC_DEVICE_ACTION = 'generic_device_action'
 const KIND_OF_ACTION_TYPE_UNKNOWN = 'unknown'
-type KindOfActionType = typeof KIND_OF_ACTION_TYPE_DEVICE_CALIBRATION | typeof KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE | typeof KIND_OF_ACTION_TYPE_GENERIC_DEVICE_ACTION | typeof KIND_OF_ACTION_TYPE_UNKNOWN
+type KindOfActionType =
+  typeof KIND_OF_ACTION_TYPE_DEVICE_CALIBRATION
+  | typeof KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE
+  | typeof KIND_OF_ACTION_TYPE_GENERIC_DEVICE_ACTION
+  | typeof KIND_OF_ACTION_TYPE_UNKNOWN
 
 type IOptionsForActionType = Pick<IActionType, 'id' | 'name' | 'uri'> & {
   kind: KindOfActionType
@@ -24,16 +28,19 @@ type IOptionsForActionType = Pick<IActionType, 'id' | 'name' | 'uri'> & {
 interface devicesState {
   devices: Device[],
   device: Device | null,
-  deviceContacts:Contact[],
-  deviceAttachments:Attachment[],
-  deviceAttachment:Attachment|null,
+  deviceContacts: Contact[],
+  deviceAttachments: Attachment[],
+  deviceAttachment: Attachment | null,
   deviceMeasuredQuantities: DeviceProperty[],
-  deviceGenericActions:GenericAction[],
+  deviceGenericActions: GenericAction[],
   deviceSoftwareUpdateActions: SoftwareUpdateAction[],
-  deviceMountActions:DeviceMountAction[],
-  deviceUnmountActions:DeviceUnmountAction[],
-  deviceCalibrationActions:DeviceCalibrationAction[],
-  chosenKindOfDeviceAction:IOptionsForActionType|null
+  deviceCalibrationActions: DeviceCalibrationAction[],
+  deviceGenericAction: GenericAction | null,
+  deviceSoftwareUpdateAction: SoftwareUpdateAction | null,
+  deviceCalibrationAction: DeviceCalibrationAction | null,
+  deviceMountActions: DeviceMountAction[],
+  deviceUnmountActions: DeviceUnmountAction[],
+  chosenKindOfDeviceAction: IOptionsForActionType | null
   pageNumber: number,
   pageSize: number,
   totalPages: number
@@ -42,23 +49,26 @@ interface devicesState {
 const state = {
   devices: [],
   device: null,
-  deviceContacts:[],
-  deviceAttachments:[],
-  deviceAttachment:null,
+  deviceContacts: [],
+  deviceAttachments: [],
+  deviceAttachment: null,
   deviceMeasuredQuantities: [],
-  deviceGenericActions:[],
-  deviceSoftwareUpdateActions:[],
-  deviceMountActions:[],
-  deviceUnmountActions:[],
-  deviceCalibrationActions:[],
-  chosenKindOfDeviceAction:null,
+  deviceGenericActions: [],
+  deviceSoftwareUpdateActions: [],
+  deviceGenericAction: null,
+  deviceSoftwareUpdateAction: null,
+  deviceCalibrationAction: null,
+  deviceCalibrationActions: [],
+  deviceMountActions: [],
+  deviceUnmountActions: [],
+  chosenKindOfDeviceAction: null,
   pageNumber: 1,
   pageSize: 20,
   totalPages: 1,
 }
 
 const getters = {
-  actions:(state:devicesState)=>{ //Todo actions sortieren, wobei ehrlich gesagt, eine extra route im Backend mit allen Actions (sortiert) besser wäre
+  actions: (state: devicesState) => { //Todo actions sortieren, wobei ehrlich gesagt, eine extra route im Backend mit allen Actions (sortiert) besser wäre
     return [
       ...state.deviceGenericActions,
       ...state.deviceSoftwareUpdateActions,
@@ -70,16 +80,22 @@ const getters = {
 }
 
 const actions = {
-  async searchDevicesPaginated ({ commit, state }: { commit: Commit, state: devicesState }, searchParams: IDeviceSearchParams) {
+  async searchDevicesPaginated ({
+    commit,
+    state
+  }: { commit: Commit, state: devicesState }, searchParams: IDeviceSearchParams) {
 
-    let email = null;
+    let email = null
     if (searchParams.onlyOwnDevices) {
       // @ts-ignore
       email = this.$auth.user!.email as string
     }
 
     // @ts-ignore
-    const { elements, totalCount } = await this.$api.devices
+    const {
+      elements,
+      totalCount
+    } = await this.$api.devices
       .setSearchText(searchParams.searchText)
       .setSearchedManufacturers(searchParams.manufacturer)
       .setSearchedStates(searchParams.states)
@@ -91,92 +107,149 @@ const actions = {
     const totalPages = Math.ceil(totalCount / state.pageSize)
     commit('setTotalPages', totalPages)
   },
-  async loadDevice({ commit }: { commit: Commit },
-    {deviceId,includeContacts,includeCustomFields,includeDeviceProperties,includeDeviceAttachments}:
-      {deviceId:number,includeContacts:boolean,includeCustomFields:boolean,includeDeviceProperties:boolean,includeDeviceAttachments:boolean}){
-    const device= await this.$api.devices.findById(deviceId, {
+  async loadDevice ({ commit }: { commit: Commit },
+    {
+      deviceId,
+      includeContacts,
+      includeCustomFields,
+      includeDeviceProperties,
+      includeDeviceAttachments
+    }:
+      { deviceId: number, includeContacts: boolean, includeCustomFields: boolean, includeDeviceProperties: boolean, includeDeviceAttachments: boolean }) {
+    const device = await this.$api.devices.findById(deviceId, {
       includeContacts: includeContacts,
       includeCustomFields: includeCustomFields,
       includeDeviceProperties: includeDeviceProperties,
       includeDeviceAttachments: includeDeviceAttachments
-    });
-    commit('setDevice',device);
+    })
+    commit('setDevice', device)
   },
-  async loadDeviceContacts({commit}:{commit:Commit},id:number){
+  async loadDeviceContacts ({ commit }: { commit: Commit }, id: number) {
     const deviceContacts = await this.$api.devices.findRelatedContacts(id)
-    commit('setDeviceContacts',deviceContacts)
+    commit('setDeviceContacts', deviceContacts)
   },
-  async loadDeviceAttachments({ commit }: { commit: Commit },id:number){
+  async loadDeviceAttachments ({ commit }: { commit: Commit }, id: number) {
     const deviceAttachments = await this.$api.devices.findRelatedDeviceAttachments(id)
-    commit('setDeviceAttachments',deviceAttachments)
+    commit('setDeviceAttachments', deviceAttachments)
   },
-  async loadDeviceAttachment({ commit }: { commit: Commit },id:number){
+  async loadDeviceAttachment ({ commit }: { commit: Commit }, id: number) {
     const deviceAttachment = await this.$api.deviceAttachments.findById(id)
-    commit('setDeviceAttachment',deviceAttachment)
+    commit('setDeviceAttachment', deviceAttachment)
   },
-  async loadDeviceMeasuredQuantities({ commit }: { commit: Commit },id:number){
-    const deviceMeasuredQuantities=await this.$api.devices.findRelatedDeviceProperties(id)
-    commit('setDeviceMeasuredQuantities',deviceMeasuredQuantities);
+  async loadDeviceMeasuredQuantities ({ commit }: { commit: Commit }, id: number) {
+    const deviceMeasuredQuantities = await this.$api.devices.findRelatedDeviceProperties(id)
+    commit('setDeviceMeasuredQuantities', deviceMeasuredQuantities)
   },
-  async loadAllDeviceActions({dispatch}:{dispatch:Dispatch},id:number){
-    await dispatch('loadDeviceGenericActions',id)
-    await dispatch('loadDeviceSoftwareUpdateActions',id)
-    await dispatch('loadDeviceMountActions',id)
-    await dispatch('loadDeviceUnmountActions',id)
-    await dispatch('loadDeviceCalibrationActions',id)
+  async loadAllDeviceActions ({ dispatch }: { dispatch: Dispatch }, id: number) {
+    await dispatch('loadDeviceGenericActions', id)
+    await dispatch('loadDeviceSoftwareUpdateActions', id)
+    await dispatch('loadDeviceMountActions', id)
+    await dispatch('loadDeviceUnmountActions', id)
+    await dispatch('loadDeviceCalibrationActions', id)
   },
-  async loadDeviceGenericActions({commit}:{commit:Commit},id:number){
+  async loadDeviceGenericActions ({ commit }: { commit: Commit }, id: number) {
     const deviceGenericActions = await this.$api.devices.findRelatedGenericActions(id)
-    commit('setDeviceGenericActions',deviceGenericActions)
+    commit('setDeviceGenericActions', deviceGenericActions)
   },
-  async loadDeviceSoftwareUpdateActions({commit}:{commit:Commit},id:number){
+  async loadDeviceGenericAction ({ commit }: { commit: Commit }, actionId: number) {
+    const deviceGenericAction = await this.$api.genericDeviceActions.findById(actionId)
+    commit('setDeviceGenericAction', deviceGenericAction)
+  },
+  async loadDeviceSoftwareUpdateActions ({ commit }: { commit: Commit }, id: number) {
     const deviceSoftwareUpdateActions = await this.$api.devices.findRelatedSoftwareUpdateActions(id)
-    commit('setDeviceSoftwareUpdateActions',deviceSoftwareUpdateActions)
+    commit('setDeviceSoftwareUpdateActions', deviceSoftwareUpdateActions)
   },
-  async loadDeviceMountActions({commit}:{commit:Commit},id:number){
-    const deviceMountActions = await this.$api.devices.findRelatedMountActions(id)
-    commit('setDeviceMountActions',deviceMountActions)
+  async loadDeviceSoftwareUpdateAction ({ commit }: { commit: Commit }, actionId: number) {
+    const deviceSoftwareUpdateAction = await this.$api.deviceSoftwareUpdateActions.findById(actionId)
+    commit('setDeviceSoftwareUpdateAction', deviceSoftwareUpdateAction)
   },
-  async loadDeviceUnmountActions({commit}:{commit:Commit},id:number){
-    const deviceUnmountActions = await this.$api.devices.findRelatedUnmountActions(id)
-    commit('setDeviceUnmountActions',deviceUnmountActions)
-  },
-  async loadDeviceCalibrationActions({commit}:{commit:Commit},id:number){
+  async loadDeviceCalibrationActions ({ commit }: { commit: Commit }, id: number) {
     const deviceCalibrationActions = await this.$api.devices.findRelatedCalibrationActions(id)
-    commit('setDeviceCalibrationActions',deviceCalibrationActions)
+    commit('setDeviceCalibrationActions', deviceCalibrationActions)
   },
-  async addDeviceSoftwareUpdateAction({ commit }: { commit: Commit },{deviceId,softwareUpdateAction}:{deviceId:number,softwareUpdateAction:SoftwareUpdateAction}):Promise<SoftwareUpdateAction>{
+  async loadDeviceCalibrationAction ({ commit }: { commit: Commit }, actionId: number) {
+    const deviceCalibrationAction = await this.$api.deviceCalibrationActions.findById(actionId)
+    commit('setDeviceCalibrationAction', deviceCalibrationAction)
+  },
+  async loadDeviceMountActions ({ commit }: { commit: Commit }, id: number) {
+    const deviceMountActions = await this.$api.devices.findRelatedMountActions(id)
+    commit('setDeviceMountActions', deviceMountActions)
+  },
+  async loadDeviceUnmountActions ({ commit }: { commit: Commit }, id: number) {
+    const deviceUnmountActions = await this.$api.devices.findRelatedUnmountActions(id)
+    commit('setDeviceUnmountActions', deviceUnmountActions)
+  },
+  async addDeviceSoftwareUpdateAction ({ commit }: { commit: Commit }, {
+    deviceId,
+    softwareUpdateAction
+  }: { deviceId: number, softwareUpdateAction: SoftwareUpdateAction }): Promise<SoftwareUpdateAction> {
     return this.$api.deviceSoftwareUpdateActions.add(deviceId, softwareUpdateAction)
   },
-  async addDeviceGenericAction({ commit }: { commit: Commit },{deviceId,genericDeviceAction}:{deviceId:number,genericDeviceAction:GenericAction}): Promise<GenericAction>{
-    return  this.$api.genericDeviceActions.add(deviceId, genericDeviceAction)
+  async addDeviceGenericAction ({ commit }: { commit: Commit }, {
+    deviceId,
+    genericDeviceAction
+  }: { deviceId: number, genericDeviceAction: GenericAction }): Promise<GenericAction> {
+    return this.$api.genericDeviceActions.add(deviceId, genericDeviceAction)
   },
-  async addDeviceCalibrationAction({ commit }: { commit: Commit },{deviceId,calibrationDeviceAction}:{deviceId:number,calibrationDeviceAction:DeviceCalibrationAction}): Promise<DeviceCalibrationAction>{
-    return  this.$api.deviceCalibrationActions.add(deviceId, calibrationDeviceAction)
+  async addDeviceCalibrationAction ({ commit }: { commit: Commit }, {
+    deviceId,
+    calibrationDeviceAction
+  }: { deviceId: number, calibrationDeviceAction: DeviceCalibrationAction }): Promise<DeviceCalibrationAction> {
+    return this.$api.deviceCalibrationActions.add(deviceId, calibrationDeviceAction)
   },
-  async deleteDeviceAttachment({ commit }: { commit: Commit },attachmentId:number): Promise<void>{
-    return this.$api.deviceAttachments.deleteById(attachmentId);
+  async updateDeviceSoftwareUpdateAction ({ commit }: { commit: Commit }, {
+    deviceId,
+    softwareUpdateAction
+  }: { deviceId: number, softwareUpdateAction: SoftwareUpdateAction }): Promise<SoftwareUpdateAction> {
+    return this.$api.deviceSoftwareUpdateActions.update(deviceId, softwareUpdateAction)
   },
-  async addDeviceAttachment({ commit }: { commit: Commit },{deviceId,attachment}:{deviceId:number,attachment:Attachment}):Promise<void>{
-    return this.$api.deviceAttachments.add(deviceId, attachment);
+  async updateDeviceGenericAction ({ commit }: { commit: Commit }, {
+    deviceId,
+    genericDeviceAction
+  }: { deviceId: number, genericDeviceAction: GenericAction }): Promise<GenericAction> {
+    return this.$api.genericDeviceActions.update(deviceId, genericDeviceAction)
   },
-  updateDeviceAttachment({ commit }: { commit: Commit },{deviceId,attachment}:{deviceId:number,attachment:Attachment}):Promise<void>{
-    return this.$api.deviceAttachments.update(deviceId, attachment);
+  async updateDeviceCalibrationAction ({ commit }: { commit: Commit }, {
+    deviceId,
+    calibrationDeviceAction
+  }: { deviceId: number, calibrationDeviceAction: DeviceCalibrationAction }): Promise<DeviceCalibrationAction> {
+    return  this.$api.deviceCalibrationActions.update(deviceId, calibrationDeviceAction)
   },
-  async addDeviceContact({ commit }: { commit: Commit },{deviceId,contactId}:{deviceId:number,contactId:number}):Promise<void>{
-    return this.$api.devices.addContact(deviceId,contactId)
+  async deleteDeviceAttachment ({ commit }: { commit: Commit }, attachmentId: number): Promise<void> {
+    return this.$api.deviceAttachments.deleteById(attachmentId)
   },
-  async removeDeviceContact({ commit }: { commit: Commit },{deviceId,contactId}:{deviceId:number,contactId:number}):Promise<void>{
-    return this.$api.devices.removeContact(deviceId, contactId);
+  async addDeviceAttachment ({ commit }: { commit: Commit }, {
+    deviceId,
+    attachment
+  }: { deviceId: number, attachment: Attachment }): Promise<void> {
+    return this.$api.deviceAttachments.add(deviceId, attachment)
   },
-  async saveDevice({commit}:{commit:Commit},device:Device):Promise<Device>{
+  updateDeviceAttachment ({ commit }: { commit: Commit }, {
+    deviceId,
+    attachment
+  }: { deviceId: number, attachment: Attachment }): Promise<void> {
+    return this.$api.deviceAttachments.update(deviceId, attachment)
+  },
+  async addDeviceContact ({ commit }: { commit: Commit }, {
+    deviceId,
+    contactId
+  }: { deviceId: number, contactId: number }): Promise<void> {
+    return this.$api.devices.addContact(deviceId, contactId)
+  },
+  async removeDeviceContact ({ commit }: { commit: Commit }, {
+    deviceId,
+    contactId
+  }: { deviceId: number, contactId: number }): Promise<void> {
+    return this.$api.devices.removeContact(deviceId, contactId)
+  },
+  async saveDevice ({ commit }: { commit: Commit }, device: Device): Promise<Device> {
     return this.$api.devices.save(device)
   },
-  async deleteDevice({ commit }: { commit: Commit }, id: number){
+  async deleteDevice ({ commit }: { commit: Commit }, id: number) {
     await this.$api.devices.deleteById(id)
   },
-  async exportAsCsv({ commit}: { commit: Commit}, searchParams: IDeviceSearchParams):Promise<Blob>{
-    let email = null;
+  async exportAsCsv ({ commit }: { commit: Commit }, searchParams: IDeviceSearchParams): Promise<Blob> {
+    let email = null
     if (searchParams.onlyOwnDevices) {
       // @ts-ignore
       email = this.$auth.user!.email as string
@@ -193,8 +266,8 @@ const actions = {
   setPageNumber ({ commit }: { commit: Commit }, newPageNumber: number) {
     commit('setPageNumber', newPageNumber)
   },
-  setChosenKindOfDeviceAction({ commit }: { commit: Commit }, newval:IOptionsForActionType | null) {
-    commit('setChosenKindOfDeviceAction',newval)
+  setChosenKindOfDeviceAction ({ commit }: { commit: Commit }, newval: IOptionsForActionType | null) {
+    commit('setChosenKindOfDeviceAction', newval)
   }
 }
 
@@ -211,35 +284,44 @@ const mutations = {
   setTotalPages (state: devicesState, count: number) {
     state.totalPages = count
   },
-  setDeviceContacts(state:devicesState,contacts:Contact[]){
-    state.deviceContacts=contacts
+  setDeviceContacts (state: devicesState, contacts: Contact[]) {
+    state.deviceContacts = contacts
   },
-  setDeviceAttachments(state:devicesState,attachments:Attachment[]){
-    state.deviceAttachments=attachments
+  setDeviceAttachments (state: devicesState, attachments: Attachment[]) {
+    state.deviceAttachments = attachments
   },
-  setDeviceAttachment(state:devicesState,attachment:Attachment){
-    state.deviceAttachment=attachment
+  setDeviceAttachment (state: devicesState, attachment: Attachment) {
+    state.deviceAttachment = attachment
   },
-  setDeviceMeasuredQuantities(state:devicesState,deviceMeasuredQuantities:DeviceProperty[]){
-    state.deviceMeasuredQuantities=deviceMeasuredQuantities;
+  setDeviceMeasuredQuantities (state: devicesState, deviceMeasuredQuantities: DeviceProperty[]) {
+    state.deviceMeasuredQuantities = deviceMeasuredQuantities
   },
-  setDeviceGenericActions(state:devicesState,deviceGenericActions:GenericAction[]){
-    state.deviceGenericActions=deviceGenericActions;
+  setDeviceGenericActions (state: devicesState, deviceGenericActions: GenericAction[]) {
+    state.deviceGenericActions = deviceGenericActions
   },
-  setDeviceSoftwareUpdateActions(state:devicesState,deviceSoftwareUpdateActions:SoftwareUpdateAction[]){
-    state.deviceSoftwareUpdateActions=deviceSoftwareUpdateActions;
+  setDeviceGenericAction (state: devicesState, deviceGenericAction: GenericAction) {
+    state.deviceGenericAction = deviceGenericAction
   },
-  setDeviceMountActions(state:devicesState,deviceMountActions:DeviceMountAction[]){
-    state.deviceMountActions=deviceMountActions;
+  setDeviceSoftwareUpdateActions (state: devicesState, deviceSoftwareUpdateActions: SoftwareUpdateAction[]) {
+    state.deviceSoftwareUpdateActions = deviceSoftwareUpdateActions
   },
-  setDeviceUnmountActions(state:devicesState,deviceUnmountActions:DeviceUnmountAction[]){
-    state.deviceUnmountActions=deviceUnmountActions;
+  setDeviceSoftwareUpdateAction (state: devicesState, deviceSoftwareUpdateAction: SoftwareUpdateAction) {
+    state.deviceSoftwareUpdateAction = deviceSoftwareUpdateAction
   },
-  setDeviceCalibrationActions(state:devicesState,deviceCalibrationActions:DeviceCalibrationAction[]){
-    state.deviceCalibrationActions=deviceCalibrationActions;
+  setDeviceMountActions (state: devicesState, deviceMountActions: DeviceMountAction[]) {
+    state.deviceMountActions = deviceMountActions
   },
-  setChosenKindOfDeviceAction(state:devicesState,newVal:IOptionsForActionType | null){
-    state.chosenKindOfDeviceAction=newVal
+  setDeviceUnmountActions (state: devicesState, deviceUnmountActions: DeviceUnmountAction[]) {
+    state.deviceUnmountActions = deviceUnmountActions
+  },
+  setDeviceCalibrationActions (state: devicesState, deviceCalibrationActions: DeviceCalibrationAction[]) {
+    state.deviceCalibrationActions = deviceCalibrationActions
+  },
+  setDeviceCalibrationAction (state: devicesState, deviceCalibrationAction: DeviceCalibrationAction) {
+    state.deviceCalibrationAction = deviceCalibrationAction
+  },
+  setChosenKindOfDeviceAction (state: devicesState, newVal: IOptionsForActionType | null) {
+    state.chosenKindOfDeviceAction = newVal
   }
 }
 
