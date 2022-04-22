@@ -94,13 +94,15 @@ import { Device } from '@/models/Device'
 
 import DeviceBasicDataForm from '@/components/DeviceBasicDataForm.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { mapActions } from 'vuex'
 
 @Component({
   components: {
     DeviceBasicDataForm,
     ProgressIndicator
   },
-  middleware: ['auth']
+  middleware: ['auth'],
+  methods:mapActions('devices',['saveDevice'])
 })
 // @ts-ignore
 export default class DeviceNewPage extends mixins(Rules) {
@@ -127,7 +129,7 @@ export default class DeviceNewPage extends mixins(Rules) {
       return
     }
     this.isLoading = true
-    this.$api.devices.save(this.device).then((savedDevice) => {
+    this.saveDevice(this.device).then((savedDevice) => {
       this.isLoading = false
       this.$store.commit('snackbar/setSuccess', 'Device created')
       this.$router.push('/devices/' + savedDevice.id + '')

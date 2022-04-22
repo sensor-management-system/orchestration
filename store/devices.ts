@@ -43,6 +43,9 @@ const actions = {
     const totalPages = Math.ceil(totalCount / state.pageSize)
     commit('setTotalPages', totalPages)
   },
+  async saveDevice({commit}:{commit:Commit},device:Device):Promise<Device>{
+    return this.$api.devices.save(device)
+  },
   async deleteDevice({ commit }: { commit: Commit }, id: number){
     await this.$api.devices.deleteById(id)
   },
