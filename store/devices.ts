@@ -3,11 +3,14 @@ import { Commit } from 'vuex'
 import { IPlatformSearchParams } from '@/modelUtils/PlatformSearchParams'
 import { IDeviceSearchParams } from '@/modelUtils/DeviceSearchParams'
 import { Contact } from '@/models/Contact'
+import { Attachment } from '@/models/Attachment'
 
 interface devicesState {
   devices: Device[],
   device: Device | null,
-  deviceContacts:Contact[]
+  deviceContacts:Contact[],
+  deviceAttachments:Attachment[],
+  deviceAttachment:Attachment|null,
   pageNumber: number,
   pageSize: number,
   totalPages: number
@@ -17,6 +20,8 @@ const state = {
   devices: [],
   device: null,
   deviceContacts:[],
+  deviceAttachments:[],
+  deviceAttachment:null,
   pageNumber: 1,
   pageSize: 20,
   totalPages: 1,
@@ -60,6 +65,17 @@ const actions = {
   async loadDeviceContacts({commit}:{commit:Commit},id:number){
     const deviceContacts = await this.$api.devices.findRelatedContacts(id)
     commit('setDeviceContacts',deviceContacts)
+  },
+  async loadDeviceAttachments({ commit }: { commit: Commit },id:number){
+    const deviceAttachments = await this.$api.devices.findRelatedDeviceAttachments(id)
+    commit('setDeviceAttachments',deviceAttachments)
+  },
+  async loadDeviceAttachment({ commit }: { commit: Commit },id:number){
+    const deviceAttachment = await this.$api.deviceAttachments.findById(id)
+    commit('setDeviceAttachment',deviceAttachment)
+  },
+  async deleteDeviceAttachment({ commit }: { commit: Commit },attachmentId:number): Promise<void>{
+    return this.$api.deviceAttachments.deleteById(attachmentId);
   },
   async addDeviceContact({ commit }: { commit: Commit },{deviceId,contactId}:{deviceId:number,contactId:number}):Promise<void>{
     return this.$api.devices.addContact(deviceId,contactId)
@@ -108,6 +124,12 @@ const mutations = {
   },
   setDeviceContacts(state:devicesState,contacts:Contact[]){
     state.deviceContacts=contacts
+  },
+  setDeviceAttachments(state:devicesState,attachments:Attachment[]){
+    state.deviceAttachments=attachments
+  },
+  setDeviceAttachment(state:devicesState,attachment:Attachment){
+    state.deviceAttachment=attachment
   }
 }
 
