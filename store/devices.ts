@@ -9,6 +9,7 @@ import { DeviceMountAction } from '@/models/DeviceMountAction'
 import { DeviceUnmountAction } from '@/models/DeviceUnmountAction'
 import { DeviceCalibrationAction } from '@/models/DeviceCalibrationAction'
 import { IActionType } from '@/models/ActionType'
+import { DeviceProperty } from '@/models/DeviceProperty'
 
 const KIND_OF_ACTION_TYPE_DEVICE_CALIBRATION = 'device_calibration'
 const KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE = 'software_update'
@@ -26,6 +27,7 @@ interface devicesState {
   deviceContacts:Contact[],
   deviceAttachments:Attachment[],
   deviceAttachment:Attachment|null,
+  deviceMeasuredQuantities: DeviceProperty[],
   deviceGenericActions:GenericAction[],
   deviceSoftwareUpdateActions: SoftwareUpdateAction[],
   deviceMountActions:DeviceMountAction[],
@@ -43,6 +45,7 @@ const state = {
   deviceContacts:[],
   deviceAttachments:[],
   deviceAttachment:null,
+  deviceMeasuredQuantities: [],
   deviceGenericActions:[],
   deviceSoftwareUpdateActions:[],
   deviceMountActions:[],
@@ -111,6 +114,10 @@ const actions = {
     const deviceAttachment = await this.$api.deviceAttachments.findById(id)
     commit('setDeviceAttachment',deviceAttachment)
   },
+  async loadDeviceMeasuredQuantities({ commit }: { commit: Commit },id:number){
+    const deviceMeasuredQuantities=await this.$api.devices.findRelatedDeviceProperties(id)
+    commit('setDeviceMeasuredQuantities',deviceMeasuredQuantities);
+  },
   async loadAllDeviceActions({dispatch}:{dispatch:Dispatch},id:number){
     await dispatch('loadDeviceGenericActions',id)
     await dispatch('loadDeviceSoftwareUpdateActions',id)
@@ -140,6 +147,12 @@ const actions = {
   },
   async addDeviceSoftwareUpdateAction({ commit }: { commit: Commit },{deviceId,softwareUpdateAction}:{deviceId:number,softwareUpdateAction:SoftwareUpdateAction}):Promise<SoftwareUpdateAction>{
     return this.$api.deviceSoftwareUpdateActions.add(deviceId, softwareUpdateAction)
+  },
+  async addDeviceGenericAction({ commit }: { commit: Commit },{deviceId,genericDeviceAction}:{deviceId:number,genericDeviceAction:GenericAction}): Promise<GenericAction>{
+    return  this.$api.genericDeviceActions.add(deviceId, genericDeviceAction)
+  },
+  async addDeviceCalibrationAction({ commit }: { commit: Commit },{deviceId,calibrationDeviceAction}:{deviceId:number,calibrationDeviceAction:DeviceCalibrationAction}): Promise<DeviceCalibrationAction>{
+    return  this.$api.deviceCalibrationActions.add(deviceId, calibrationDeviceAction)
   },
   async deleteDeviceAttachment({ commit }: { commit: Commit },attachmentId:number): Promise<void>{
     return this.$api.deviceAttachments.deleteById(attachmentId);
@@ -206,6 +219,9 @@ const mutations = {
   },
   setDeviceAttachment(state:devicesState,attachment:Attachment){
     state.deviceAttachment=attachment
+  },
+  setDeviceMeasuredQuantities(state:devicesState,deviceMeasuredQuantities:DeviceProperty[]){
+    state.deviceMeasuredQuantities=deviceMeasuredQuantities;
   },
   setDeviceGenericActions(state:devicesState,deviceGenericActions:GenericAction[]){
     state.deviceGenericActions=deviceGenericActions;

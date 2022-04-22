@@ -173,7 +173,7 @@ type IOptionsForActionType = Pick<IActionType, 'id' | 'name' | 'uri'> & {
   },
   methods:{
     ...mapActions('vocabulary',['loadDeviceGenericActionTypes']),
-    ...mapActions('devices',['loadDeviceAttachments','setChosenKindOfDeviceAction'])
+    ...mapActions('devices',['loadDeviceAttachments','setChosenKindOfDeviceAction','loadDeviceMeasuredQuantities'])
   }
 })
 export default class ActionAddPage extends Vue {
@@ -196,14 +196,10 @@ export default class ActionAddPage extends Vue {
     try {
       await this.loadDeviceGenericActionTypes()
       await this.loadDeviceAttachments(this.deviceId)
+      await this.loadDeviceMeasuredQuantities(this.deviceId)
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to fetch action types')
     }
-    // this.$api.devices.findRelatedDeviceProperties(this.deviceId).then((foundMeasuredQuantities) => { // todo einbauen in store
-    //   this.measuredQuantities = foundMeasuredQuantities
-    // }).catch((_error) => {
-    //   this.$store.commit('snackbar/setError', 'Failed to fetch measured quantities')
-    // })
   }
 
   get chosenKindOfAction(){
@@ -216,9 +212,9 @@ export default class ActionAddPage extends Vue {
 
 
   updateRoute(){
-    console.log('here');
+
     if(this.genericActionChosen){
-      this.$router.push(`/devices/${this.deviceId}/actions/new/generic-platform-actions`)
+      this.$router.push(`/devices/${this.deviceId}/actions/new/generic-device-actions`)
     }
     if(this.softwareUpdateChosen){
       this.$router.push(`/devices/${this.deviceId}/actions/new/software-update-actions`)
