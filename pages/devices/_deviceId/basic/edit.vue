@@ -119,7 +119,13 @@ export default class DeviceEditBasicPage extends Vue {
     try {
       this.isLoading = true
       await this.saveDevice(this.deviceCopy)
-      this.loadDevice(this.deviceId) // Todo eventuell gibt es eine besser möglichkeit die Änderungen nachzuladen/eventuell das gespeicherte Device als das device im store setzen
+      this.loadDevice({
+        deviceId:this.deviceId,
+        includeContacts: false,
+        includeCustomFields: false,
+        includeDeviceProperties: false,
+        includeDeviceAttachments: false
+      }) // Todo eventuell gibt es eine besser möglichkeit die Änderungen nachzuladen/eventuell das gespeicherte Device als das device im store setzen
       this.$router.push('/devices/' + this.deviceId + '/basic')
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Save failed')
