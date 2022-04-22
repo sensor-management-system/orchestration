@@ -55,6 +55,7 @@ permissions and limitations under the Licence.
       </DotMenu>
     </v-card-actions>
     <DeviceBasicData
+      v-if="device"
       v-model="device"
     />
     <v-card-actions>
@@ -82,6 +83,7 @@ permissions and limitations under the Licence.
       </DotMenu>
     </v-card-actions>
     <DeviceDeleteDialog
+      v-if="device"
       v-model="showDeleteDialog"
       :device-to-delete="device"
       @cancel-deletion="closeDialog"
@@ -100,6 +102,7 @@ import DeviceDeleteDialog from '@/components/devices/DeviceDeleteDialog.vue'
 import DotMenu from '@/components/DotMenu.vue'
 import DotMenuActionCopy from '@/components/DotMenuActionCopy.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
+import { mapActions, mapState } from 'vuex'
 
 @Component({
   components: {
@@ -108,24 +111,13 @@ import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
     DotMenu,
     DeviceDeleteDialog,
     DeviceBasicData
-  }
+  },
+  computed: mapState('devices',['device']),
+  methods:mapActions('devices',['deleteDevice'])
 })
 export default class DeviceShowBasicPage extends Vue {
-  @Prop({
-    required: true,
-    type: Object
-  })
-  readonly value!: Device
 
   private showDeleteDialog: boolean = false
-
-  get device (): Device {
-    return this.value
-  }
-
-  set device (value: Device) {
-    this.$emit('input', value)
-  }
 
   get deviceId () {
     return this.$route.params.deviceId
@@ -145,7 +137,7 @@ export default class DeviceShowBasicPage extends Vue {
       return
     }
 
-    this.$api.devices.deleteById(this.device.id!).then(() => {
+    this.deleteDevice(this.device.id!).then(() => {
       this.$router.push('/devices')
       this.$store.commit('snackbar/setSuccess', 'Device deleted')
     }).catch((_error) => {

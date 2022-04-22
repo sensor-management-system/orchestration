@@ -34,9 +34,7 @@ permissions and limitations under the Licence.
       v-model="isLoading"
     />
     <v-card flat>
-      <NuxtChild
-        v-model="device"
-      />
+      <NuxtChild/>
     </v-card>
   </div>
 </template>
@@ -47,38 +45,38 @@ import { Component, Vue, Watch } from 'nuxt-property-decorator'
 import { Device } from '@/models/Device'
 
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { mapActions } from 'vuex'
 
 @Component({
   components: {
     ProgressIndicator
-  }
+  },
+  methods: mapActions('devices',['loadDevice'])
 })
 export default class DevicePage extends Vue {
-  private device: Device = new Device()
-  private isLoading: boolean = true
+  private isLoading: boolean = false
 
-  created () {
-    if (this.isBasePath()) {
+  async created () {
+    if (this.isBasePath()) {// Todo hinterfragen, ob man das if wirklich braucht
       this.$router.replace('/devices/' + this.deviceId + '/basic')
+    }
+    this.initializeAppBar()
+    try {
+      this.isLoading = true
+      await this.loadDevice({
+        deviceId:this.deviceId,
+        includeContacts: false,
+        includeCustomFields: false,
+        includeDeviceProperties: false,
+        includeDeviceAttachments: false
+      })
+    } catch (e) {
+      this.$store.commit('snackbar/setError', 'Loading device failed')
+    } finally {
+      this.isLoading = false
     }
   }
 
-  mounted () {
-    this.initializeAppBar()
-
-    this.$api.devices.findById(this.deviceId, {
-      includeContacts: false,
-      includeCustomFields: false,
-      includeDeviceProperties: false,
-      includeDeviceAttachments: false
-    }).then((device) => {
-      this.device = device
-      this.isLoading = false
-    }).catch((_error) => {
-      this.$store.commit('snackbar/setError', 'Loading device failed')
-      this.isLoading = false
-    })
-  }
 
   beforeDestroy () {
     this.$store.dispatch('appbar/setDefaults')
@@ -122,14 +120,6 @@ export default class DevicePage extends Vue {
 
   get deviceId () {
     return this.$route.params.deviceId
-  }
-
-  @Watch('device', { immediate: true, deep: true })
-  // @ts-ignore
-  onDeviceChanged (val: Device) {
-    if (val.id) {
-      this.$store.commit('appbar/setTitle', val?.shortName || 'Add Device')
-    }
   }
 }
 </script>

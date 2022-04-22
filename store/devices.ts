@@ -43,6 +43,17 @@ const actions = {
     const totalPages = Math.ceil(totalCount / state.pageSize)
     commit('setTotalPages', totalPages)
   },
+  async loadDevice({ commit }: { commit: Commit },
+    {deviceId,includeContacts,includeCustomFields,includeDeviceProperties,includeDeviceAttachments}:
+      {deviceId:number,includeContacts:boolean,includeCustomFields:boolean,includeDeviceProperties:boolean,includeDeviceAttachments:boolean}){
+    const device= await this.$api.devices.findById(deviceId, {
+      includeContacts: includeContacts,
+      includeCustomFields: includeCustomFields,
+      includeDeviceProperties: includeDeviceProperties,
+      includeDeviceAttachments: includeDeviceAttachments
+    });
+    commit('setDevice',device);
+  },
   async saveDevice({commit}:{commit:Commit},device:Device):Promise<Device>{
     return this.$api.devices.save(device)
   },
