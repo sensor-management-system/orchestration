@@ -47,11 +47,6 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import { mapActions } from 'vuex'
 
 @Component({
-  components: {
-    AttachmentListItem,
-    HintCard,
-    ProgressIndicator
-  },
   methods:mapActions('platforms',['loadPlatformAttachments'])
 })
 export default class PlatformAttachmentsPage extends mixins(AttachmentsMixin) {
