@@ -81,6 +81,9 @@ permissions and limitations under the Licence.
   </div>
 </template>
 
+
+
+
 <script lang="ts">
 import { Component, Vue, Prop, Watch } from 'nuxt-property-decorator'
 
@@ -88,65 +91,45 @@ import DeviceBasicDataForm from '@/components/DeviceBasicDataForm.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
 import { Device } from '@/models/Device'
+import { mapActions, mapState } from 'vuex'
 
 @Component({
   components: {
     DeviceBasicDataForm,
     ProgressIndicator
   },
-  middleware: ['auth']
+  middleware: ['auth'],
+  computed: mapState('devices',['device']),
+  methods: mapActions('devices',['saveDevice','loadDevice'])
 })
 export default class DeviceEditBasicPage extends Vue {
-  // we need to initialize the instance variable with an empty Device instance
-  // here, otherwise the form is not reactive
-  private deviceCopy: Device = new Device()
 
+  private deviceCopy: Device = new Device()
   private isLoading: boolean = false
 
-  @Prop({
-    required: true,
-    type: Object
-  })
-  readonly value!: Device
-
   created () {
-    this.deviceCopy = Device.createFromObject(this.value)
+    this.deviceCopy = Device.createFromObject(this.device)
   }
 
-  onSaveButtonClicked () {
+  async onSaveButtonClicked () {
     if (!(this.$refs.basicForm as Vue & { validateForm: () => boolean }).validateForm()) {
       this.$store.commit('snackbar/setError', 'Please correct your input')
       return
     }
-    this.isLoading = true
-    this.save().then((device) => {
-      this.isLoading = false
-      this.$emit('input', device)
+    try {
+      this.isLoading = true
+      await this.saveDevice(this.deviceCopy)
+      this.loadDevice(this.deviceId) // Todo eventuell gibt es eine besser möglichkeit die Änderungen nachzuladen/eventuell das gespeicherte Device als das device im store setzen
       this.$router.push('/devices/' + this.deviceId + '/basic')
-    }).catch((_error) => {
-      this.isLoading = false
+    } catch (e) {
       this.$store.commit('snackbar/setError', 'Save failed')
-    })
-  }
-
-  save (): Promise<Device> {
-    return new Promise((resolve, reject) => {
-      this.$api.devices.save(this.deviceCopy).then((savedDevice) => {
-        resolve(savedDevice)
-      }).catch((_error) => {
-        reject(_error)
-      })
-    })
+    } finally {
+      this.isLoading = false
+    }
   }
 
   get deviceId () {
     return this.$route.params.deviceId
-  }
-
-  @Watch('value', { immediate: true, deep: true })
-  // @ts-ignore
-  onDeviceChanged (val: Device) {
-    this.deviceCopy = Device.createFromObject(val)
   }
 }
 </script>
