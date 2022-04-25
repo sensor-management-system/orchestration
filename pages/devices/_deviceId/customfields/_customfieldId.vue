@@ -31,7 +31,7 @@ permissions and limitations under the Licence.
 <template>
   <div>
     <NuxtChild
-      v-if="isEditModeForField"
+      v-if="editable && isEditModeForField"
       v-model="field"
     />
     <CustomFieldCard
@@ -61,6 +61,19 @@ export default class DeviceCustomFieldsIdPage extends Vue {
     type: Object
   })
   readonly value!: CustomTextField
+
+  // TODO: uncomment the next two lines and remove the third one after merging the permission management branch
+  // @InjectReactive()
+  //   editable!: boolean
+  get editable () {
+    return this.$auth.loggedIn
+  }
+
+  created () {
+    if (!this.editable) {
+      this.$router.replace('/devices/' + this.deviceId + '/customfields')
+    }
+  }
 
   get field (): CustomTextField {
     return this.value

@@ -30,16 +30,47 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <DevicePropertyForm
-      ref="propertyForm"
-      v-model="valueCopy"
-      :readonly="false"
-      :compartments="compartments"
-      :sampling-medias="samplingMedias"
-      :properties="properties"
-      :units="units"
-      :measured-quantity-units="measuredQuantityUnits"
-    />
+    <v-card class="mt-4">
+      <v-card-title>
+        <v-row>
+          <v-col>
+            Create a new measured quantity
+          </v-col>
+          <v-col
+            align-self="end"
+            class="text-right"
+          >
+            <v-btn
+              text
+              small
+              @click.prevent.stop="cancel"
+            >
+              Cancel
+            </v-btn>
+            <v-btn
+              color="green"
+              small
+              @click.prevent.stop="save"
+            >
+              Save
+            </v-btn>
+          </v-col>
+        </v-row>
+        <v-card-actions />
+      </v-card-title>
+      <v-card-text>
+        <DevicePropertyForm
+          ref="propertyForm"
+          v-model="value"
+          :readonly="false"
+          :compartments="compartments"
+          :sampling-medias="samplingMedias"
+          :properties="properties"
+          :units="units"
+          :measured-quantity-units="measuredQuantityUnits"
+        />
+      </v-card-text>
+    </v-card>
   </div>
 </template>
 
@@ -59,20 +90,8 @@ import { MeasuredQuantityUnit } from '@/models/MeasuredQuantityUnit'
   components: { DevicePropertyForm },
   middleware: ['auth']
 })
-export default class DevicePropertyEditPage extends Vue {
-  private valueCopy: DeviceProperty = new DeviceProperty()
-  @Prop({
-    required: true,
-    type: Object
-  })
-  readonly value!: DeviceProperty
-
-  // TODO: uncomment the next two lines and remove the third one after merging the permission management branch
-  // @InjectReactive()
-  //   editable!: boolean
-  get editable () {
-    return this.$auth.loggedIn
-  }
+export default class DevicePropertyNewPage extends Vue {
+  private value: DeviceProperty = new DeviceProperty()
 
   /**
    * a list of Compartments
@@ -124,23 +143,20 @@ export default class DevicePropertyEditPage extends Vue {
   })
   readonly measuredQuantityUnits!: MeasuredQuantityUnit[]
 
-  created () {
-    if (!this.editable) {
-      this.$router.replace('/devices/' + this.deviceId + '/measuredquantities')
-    }
-    this.valueCopy = DeviceProperty.createFromObject(this.value)
-  }
-
   save () {
     this.$emit('showsave', true)
-    this.$api.deviceProperties.update(this.deviceId, this.valueCopy).then((newProperty: DeviceProperty) => {
+    this.$api.deviceProperties.add(this.deviceId, this.value).then((newDeviceProperty: DeviceProperty) => {
       this.$emit('showsave', false)
-      this.$emit('input', newProperty)
+      this.$emit('input', newDeviceProperty)
       this.$router.push('/devices/' + this.deviceId + '/measuredquantities')
     }).catch(() => {
       this.$emit('showsave', false)
       this.$store.commit('snackbar/setError', 'Failed to save measured quantity')
     })
+  }
+
+  cancel () {
+    this.$router.push('/devices/' + this.deviceId + '/measuredquantities')
   }
 
   get deviceId (): string {

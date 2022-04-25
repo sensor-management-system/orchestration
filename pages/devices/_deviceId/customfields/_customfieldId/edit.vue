@@ -40,17 +40,17 @@ permissions and limitations under the Licence.
     >
       <template #actions>
         <v-btn
-          v-if="$auth.loggedIn"
+          v-if="editable"
           ref="cancelButton"
           text
           small
           nuxt
-          :to="'/devices/' + deviceId + '/customfields'"
+          @click="cancel()"
         >
           Cancel
         </v-btn>
         <v-btn
-          v-if="$auth.loggedIn"
+          v-if="editable"
           color="green"
           small
           @click="save()"
@@ -87,7 +87,17 @@ export default class DeviceCustomFieldsShowPage extends Vue {
   })
   readonly value!: CustomTextField
 
+  // TODO: uncomment the next two lines and remove the third one after merging the permission management branch
+  // @InjectReactive()
+  //   editable!: boolean
+  get editable (): boolean {
+    return this.$auth.loggedIn
+  }
+
   created () {
+    if (!this.editable) {
+      this.$router.replace('/devices/' + this.deviceId + '/customfields')
+    }
     this.valueCopy = CustomTextField.createFromObject(this.value)
   }
 
@@ -114,6 +124,10 @@ export default class DeviceCustomFieldsShowPage extends Vue {
       this.isSaving = false
       this.$store.commit('snackbar/setError', 'Failed to save custom field')
     })
+  }
+
+  cancel (): void {
+    this.$router.push('/devices/' + this.deviceId + '/customfields')
   }
 
   @Watch('value', { immediate: true, deep: true })
