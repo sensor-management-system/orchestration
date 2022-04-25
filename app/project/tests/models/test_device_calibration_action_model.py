@@ -9,13 +9,12 @@ from project.api.models.base_model import db
 from project.tests.base import BaseTestCase, fake, generate_userinfo_data
 
 
-def add_device_calibration_action():
+def add_device_calibration_action(public=True, private=False, internal=False):
     device = Device(short_name="Device 12",
-                    is_public=False,
-                    is_private=False,
-                    is_internal=True,
+                    is_public=public,
+                    is_private=private,
+                    is_internal=internal,
                     )
-    device = Device(short_name="Device 12")
     userinfo = generate_userinfo_data()
     contact = Contact(
         given_name=userinfo["given_name"],

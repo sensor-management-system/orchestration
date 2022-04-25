@@ -43,7 +43,7 @@ class TestGenericConfigurationAction(BaseTestCase):
 
     def test_get_generic_configuration_action_collection(self):
         """Test retrieve a collection of GenericConfigurationAction objects."""
-        configuration_action = generate_configuration_action_model()
+        configuration_action = generate_configuration_action_model(is_public=True, is_private=False, is_internal=False)
         with self.client:
             response = self.client.get(self.url)
         data = json.loads(response.data.decode())
@@ -113,14 +113,14 @@ class TestGenericConfigurationAction(BaseTestCase):
         """Ensure that I can prefilter by a specific configuration."""
         configuration1 = Configuration(
             label="sample configuration", location_type="static",
-            is_public=False,
-            is_internal=True,
+            is_public=True,
+            is_internal=False,
         )
         db.session.add(configuration1)
         configuration2 = Configuration(
             label="sample configuration II", location_type="static",
-            is_public=False,
-            is_internal=True,
+            is_public=True,
+            is_internal=False,
         )
         db.session.add(configuration2)
 

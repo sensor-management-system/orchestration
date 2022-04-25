@@ -5,6 +5,7 @@ from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.orm.exc import NoResultFound
 
 from .base_resource import check_if_object_not_found
+from ..auth.permission_utils import get_query_with_permissions_for_related_objects
 from ..models.base_model import db
 from ..models.configuration import Configuration
 from ..models.device import Device
@@ -23,7 +24,7 @@ class DeviceUnmountActionList(ResourceList):
 
         Also handle optional pre-filters (for specific configurations, for example).
         """
-        query_ = self.session.query(DeviceUnmountAction)
+        query_ = get_query_with_permissions_for_related_objects(self.model)
         configuration_id = view_kwargs.get("configuration_id")
         device_id = view_kwargs.get("device_id")
         if configuration_id is not None:
@@ -54,7 +55,7 @@ class DeviceUnmountActionList(ResourceList):
     data_layer = {
         "session": db.session,
         "model": DeviceUnmountAction,
-        "methods": {"query": query,},
+        "methods": {"query": query},
     }
 
 

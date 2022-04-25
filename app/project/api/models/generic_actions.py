@@ -37,6 +37,10 @@ class GenericPlatformAction(db.Model, AuditMixin, IndirectSearchableMixin):
             "description": self.description,
         }
 
+    def get_parent(self):
+        """Return parent object."""
+        return self.platform
+
 
 class GenericDeviceAction(db.Model, AuditMixin, IndirectSearchableMixin):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -72,6 +76,10 @@ class GenericDeviceAction(db.Model, AuditMixin, IndirectSearchableMixin):
             "action_type_uri": self.action_type_uri,
             "description": self.description,
         }
+
+    def get_parent(self):
+        """Return parent object."""
+        return self.device
 
 
 class GenericConfigurationAction(db.Model, AuditMixin, IndirectSearchableMixin):
@@ -110,3 +118,7 @@ class GenericConfigurationAction(db.Model, AuditMixin, IndirectSearchableMixin):
             "action_type_uri": self.action_type_uri,
             "description": self.description,
         }
+
+    def get_parent(self):
+        """Return parent object."""
+        return self.configuration

@@ -1,4 +1,3 @@
-from ..auth.flask_openidconnect import open_id_connect
 from ..helpers.errors import MethodNotAllowed
 from ..models.permission_groups import permission_groups_to_list_of_jsonapi_dicts
 from ...api.services.idl_services import get_permission_groups
@@ -16,7 +15,6 @@ class PermissionGroups(ResourceList):
 
         :return: list of Permission Groups.
         """
-        open_id_connect.verify_valid_access_token_in_request_and_set_user()
         data = permission_groups_to_list_of_jsonapi_dicts(get_permission_groups())
         response = {"data": data}
         response.update({"meta": {"count": len(data)}})

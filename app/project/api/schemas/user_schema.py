@@ -31,3 +31,13 @@ class UserSchema(Schema):
         type_="contact",
         id_field="id",
     )
+
+
+class UserPublicSchema(Schema):
+    class Meta:
+        type_ = "user"
+        self_view = "api.user_detail"
+        self_view_kwargs = {"id": "<id>"}
+        self_view_many = "api.user_list"
+
+    id = fields.Integer(as_string=True)

@@ -4,13 +4,14 @@ from flask_rest_jsonapi import ResourceDetail, ResourceRelationship
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.orm.exc import NoResultFound
 
+from ..auth.permission_utils import get_query_with_permissions_for_related_objects
+from ..helpers.mounting_checks import assert_object_is_free_to_be_mounted
+from ..helpers.resource_mixin import decode_json_request_data
 from ..models.base_model import db
 from ..models.configuration import Configuration
 from ..models.mount_actions import PlatformMountAction
 from ..models.platform import Platform
-from ..resourceManager.base_resource import (
-    check_if_object_not_found,
-)
+from ..resourceManager.base_resource import check_if_object_not_found
 from ..schemas.mount_actions_schema import PlatformMountActionSchema
 from ..token_checker import token_required
 from ...frj_csv_export.resource import ResourceList
@@ -19,13 +20,17 @@ from ...frj_csv_export.resource import ResourceList
 class PlatformMountActionList(ResourceList):
     """List resource for platform mount actions (get, post)."""
 
+    def before_post(self, args, kwargs, data=None):
+        data_with_relationships = decode_json_request_data()
+        assert_object_is_free_to_be_mounted(data_with_relationships)
+
     def query(self, view_kwargs):
         """
         Query the actions from the database.
 
         Also handle optional pre-filters (for specific configurations, for example).
         """
-        query_ = self.session.query(PlatformMountAction)
+        query_ = get_query_with_permissions_for_related_objects(self.model)
         configuration_id = view_kwargs.get("configuration_id")
         platform_id = view_kwargs.get("platform_id")
         parent_platform_id = view_kwargs.get("parent_platform_id")
@@ -34,7 +39,7 @@ class PlatformMountActionList(ResourceList):
                 self.session.query(Configuration).filter_by(id=configuration_id).one()
             except NoResultFound:
                 raise ObjectNotFound(
-                    {"parameter": "id", },
+                    {"parameter": "id",},
                     "Configuration: {} not found".format(configuration_id),
                 )
             else:
@@ -46,7 +51,7 @@ class PlatformMountActionList(ResourceList):
                 self.session.query(Platform).filter_by(id=platform_id).one()
             except NoResultFound:
                 raise ObjectNotFound(
-                    {"parameter": "id", }, "Platform: {} not found".format(platform_id),
+                    {"parameter": "id",}, "Platform: {} not found".format(platform_id),
                 )
             else:
                 query_ = query_.filter(PlatformMountAction.platform_id == platform_id)
@@ -55,7 +60,7 @@ class PlatformMountActionList(ResourceList):
                 self.session.query(Platform).filter_by(id=parent_platform_id).one()
             except NoResultFound:
                 raise ObjectNotFound(
-                    {"parameter": "id", },
+                    {"parameter": "id",},
                     "Parent platform: {} not found".format(parent_platform_id),
                 )
             else:
@@ -69,7 +74,7 @@ class PlatformMountActionList(ResourceList):
     data_layer = {
         "session": db.session,
         "model": PlatformMountAction,
-        "methods": {"query": query, },
+        "methods": {"query": query,},
     }
 
 

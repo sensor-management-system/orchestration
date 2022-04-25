@@ -3,7 +3,6 @@ from ..models.customfield import CustomField
 from ..models.device import Device
 from ..models.device_attachment import DeviceAttachment
 from ..models.device_property import DeviceProperty
-from ..models.event import Event
 from ..models.platform import Platform
 from ..models.platform_attachment import PlatformAttachment
 
@@ -33,11 +32,6 @@ def add_platform():
     )
     return platform
 
-
-def add_event(device):
-    """""Add event model """
-    event = Event(id=1, description="My first test event", device_id=device.id)
-    return event
 
 
 def add_contact():

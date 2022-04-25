@@ -3,7 +3,6 @@
 """This module contains the logic of resource management
 Modifications: Adopted form Custom content negotiation #171 ( miLibris /
 flask-rest-jsonapi ) """
-
 import pandas as pd
 from cherrypicker import CherryPicker
 from flask import request, url_for
@@ -68,6 +67,7 @@ class Resource(ResourceBase):
         # Start with default renderers, but accept user provided ones
         self.response_renderers = {
             "application/vnd.api+json": render_json,
+            "application/signed-exchange;v=b3": render_json,
             "application/json": render_json,
             "text/html": render_json,
             "text/csv": render_csv,
@@ -87,7 +87,7 @@ class Resource(ResourceBase):
         assert method is not None, "Unimplemented method {}".format(request.method)
 
         # Choose a renderer based on the Accept header
-        if len(request.accept_mimetypes) < 1:
+        if len(request.accept_mimetypes) < 1  or request.accept_mimetypes == [('*/*', 1)]:
             # If the request doesn't specify a mimetype, assume JSON API
             accept_type = "application/vnd.api+json"
         elif request.accept_mimetypes.best not in self.response_renderers:
@@ -156,7 +156,7 @@ class ResourceList(with_metaclass(ResourceMetaBase, Resource)):
         )
 
         try:
-            data = schema.load(json_data)
+            data = schema.load(json_data, partial=True)
         except IncorrectTypeError as e:
             errors = e.messages
             for error in errors["errors"]:

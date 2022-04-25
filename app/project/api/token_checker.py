@@ -66,9 +66,9 @@ def add_contact_if_not_exists(current_contact_exists, email, family_name, given_
     return current_contact_exists
 
 
-def current_user_or_none(optional=False):
+def get_current_user_or_none_by_optional(optional=False):
     """Verify access token and get current user if token is given
-    or return None."""
+    or return None if it is just optional."""
     try:
         open_id_connect.verify_valid_access_token_in_request_and_set_user()
         current_user = open_id_connect.get_current_user()

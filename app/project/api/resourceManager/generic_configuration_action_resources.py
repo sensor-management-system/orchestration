@@ -4,6 +4,13 @@ from flask_rest_jsonapi import ResourceDetail, ResourceRelationship
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.orm.exc import NoResultFound
 
+from ..auth.permission_utils import (
+    get_query_with_permissions_for_configuration_related_objects,
+    check_permissions_for_configuration_related_objects,
+    check_patch_permission_for_configuration_related_objects,
+    check_deletion_permission_for_configuration_related_objects,
+    check_post_permission_for_configuration_related_objects,
+)
 from ..models.base_model import db
 from ..models.configuration import Configuration
 from ..models.generic_actions import GenericConfigurationAction
@@ -22,7 +29,9 @@ class GenericConfigurationActionList(ResourceList):
 
         Also handle optional pre-filters (for specific configurations, for example).
         """
-        query_ = self.session.query(GenericConfigurationAction)
+        query_ = get_query_with_permissions_for_configuration_related_objects(
+            self.model
+        )
         configuration_id = view_kwargs.get("configuration_id")
 
         if configuration_id is not None:
@@ -39,6 +48,9 @@ class GenericConfigurationActionList(ResourceList):
                 )
         return query_
 
+    def before_post(self, args, kwargs, data=None):
+        check_post_permission_for_configuration_related_objects()
+
     schema = GenericConfigurationActionSchema
     decorators = (token_required,)
     data_layer = {
@@ -54,6 +66,19 @@ class GenericConfigurationActionDetail(ResourceDetail):
     def before_get(self, args, kwargs):
         """Return 404 Responses if GenericConfigurationAction not found"""
         check_if_object_not_found(self._data_layer.model, kwargs)
+        check_permissions_for_configuration_related_objects(
+            self._data_layer.model, kwargs["id"]
+        )
+
+    def before_patch(self, args, kwargs, data=None):
+        check_patch_permission_for_configuration_related_objects(
+            kwargs, self._data_layer.model
+        )
+
+    def before_delete(self, args, kwargs):
+        check_deletion_permission_for_configuration_related_objects(
+            kwargs, self._data_layer.model
+        )
 
     schema = GenericConfigurationActionSchema
     decorators = (token_required,)

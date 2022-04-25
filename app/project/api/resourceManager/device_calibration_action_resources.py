@@ -5,12 +5,13 @@ from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.orm.exc import NoResultFound
 
 from .base_resource import check_if_object_not_found
-from ...frj_csv_export.resource import ResourceList
+from ..auth.permission_utils import get_query_with_permissions_for_related_objects
 from ..models.base_model import db
 from ..models.calibration_actions import DeviceCalibrationAction
 from ..models.device import Device
 from ..schemas.calibration_actions_schema import DeviceCalibrationActionSchema
 from ..token_checker import token_required
+from ...frj_csv_export.resource import ResourceList
 
 
 class DeviceCalibrationActionList(ResourceList):
@@ -22,7 +23,7 @@ class DeviceCalibrationActionList(ResourceList):
 
         Also handle optional pre-filters (for specific devices, for example).
         """
-        query_ = self.session.query(DeviceCalibrationAction)
+        query_ = get_query_with_permissions_for_related_objects(self.model)
         device_id = view_kwargs.get("device_id")
 
         if device_id is not None:
@@ -41,7 +42,7 @@ class DeviceCalibrationActionList(ResourceList):
     data_layer = {
         "session": db.session,
         "model": DeviceCalibrationAction,
-        "methods": {"query": query,},
+        "methods": {"query": query},
     }
 
 

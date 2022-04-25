@@ -6,66 +6,21 @@
       "location_type": "test",
       "is_public": false,
       "is_internal": true,
-      "cfg_permission_group": "12",
-      "hierarchy": [
-        {
-          "children": [
-            {
-              "id": 1,
-              "offset_x": 0.5,
-              "calibration_date": "20201111",
-              "type": "device"
-            }
-          ],
-          "id": 1,
-          "offset_x": 1.0,
-          "type": "platform"
-        }
-      ]
+      "cfg_permission_group": "12"
     },
     {
       "longitude": 56.1,
       "location_type": "test2",
       "is_public": false,
       "is_internal": true,
-      "cfg_permission_group": "2",
-      "hierarchy": [
-        {
-          "children": [
-            {
-              "id": 1,
-              "offset_x": 0.52,
-              "calibration_date": 20201111,
-              "type": "device"
-            }
-          ],
-          "id": 1,
-          "offset_x": 2.0,
-          "type": "platform"
-        }
-      ]
+      "cfg_permission_group": "2"
     },
     {
       "longitude": 56.1,
       "location_type": "test3",
       "is_public": false,
       "is_internal": true,
-      "cfg_permission_group": "1",
-      "hierarchy": [
-        {
-          "children": [
-            {
-              "id": 1,
-              "offset_x": 0.52,
-              "calibration_date": "datetime",
-              "type": "device"
-            }
-          ],
-          "id": 1,
-          "offset_x": 2.0,
-          "type": "platform"
-        }
-      ]
+      "cfg_permission_group": "1"
     }
   ]
 }

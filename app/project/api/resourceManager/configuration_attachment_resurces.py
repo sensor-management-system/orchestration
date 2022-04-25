@@ -4,7 +4,12 @@ from flask_rest_jsonapi.exceptions import ObjectNotFound, JsonApiException
 from sqlalchemy.orm.exc import NoResultFound
 
 from .base_resource import delete_attachments_in_minio_by_url, check_if_object_not_found
+from ..auth.permission_utils import check_permissions_for_configuration_related_objects, \
+    get_query_with_permissions_for_configuration_related_objects, \
+    check_post_permission_for_configuration_related_objects, check_patch_permission_for_configuration_related_objects, \
+    check_deletion_permission_for_configuration_related_objects
 from ..helpers.errors import ConflictError
+from ..helpers.resource_mixin import decode_json_request_data
 from ..models import Configuration, ConfigurationAttachment
 from ..models.base_model import db
 from ..schemas.configuration_attachment_schema import ConfigurationAttachmentSchema
@@ -20,7 +25,7 @@ class ConfigurationAttachmentList(ResourceList):
         """
         Query the entries from the database.
         """
-        query_ = self.session.query(ConfigurationAttachment)
+        query_ = get_query_with_permissions_for_configuration_related_objects(self.model)
         configuration_id = view_kwargs.get("configuration_id")
 
         if configuration_id is not None:
@@ -36,6 +41,9 @@ class ConfigurationAttachmentList(ResourceList):
                     ConfigurationAttachment.configuration_id == configuration_id
                 )
         return query_
+
+    def before_post(self, args, kwargs, data=None):
+        check_post_permission_for_configuration_related_objects()
 
     schema = ConfigurationAttachmentSchema
     decorators = (token_required,)
@@ -54,6 +62,17 @@ class ConfigurationAttachmentDetail(ResourceDetail):
     def before_get(self, args, kwargs):
         """Return 404 Responses if ConfigurationAttachment not found"""
         check_if_object_not_found(self._data_layer.model, kwargs)
+        check_permissions_for_configuration_related_objects(self._data_layer.model, kwargs["id"])
+
+    def before_patch(self, args, kwargs, data=None):
+        check_patch_permission_for_configuration_related_objects(
+            kwargs, self._data_layer.model
+        )
+
+    def before_delete(self, args, kwargs):
+        check_deletion_permission_for_configuration_related_objects(
+            kwargs, self._data_layer.model
+        )
 
     def delete(self, *args, **kwargs):
         """

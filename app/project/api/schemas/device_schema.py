@@ -27,6 +27,7 @@ class DeviceSchema(Schema):
         type_ = "device"
         self_view = "api.device_detail"
         self_view_kwargs = {"id": "<id>"}
+        self_view_many = "api.device_list"
 
     id = fields.Integer(as_string=True)
     description = fields.Str(allow_none=True)
@@ -80,15 +81,6 @@ class DeviceSchema(Schema):
         schema="CustomFieldSchema",
         type_="customfield",
         id_field="id",
-    )
-    events = Relationship(
-        related_view="api.device_events",
-        related_view_kwargs={"id": "<id>"},
-        include_resource_linkage=True,
-        many=True,
-        allow_none=True,
-        schema="EventSchema",
-        type_="event",
     )
     device_properties = Relationship(
         related_view="api.device_device_properties",
@@ -164,14 +156,6 @@ class DeviceSchema(Schema):
         type_="device_software_update_action",
         id_field="id",
     )
-    configuration_device = Relationship(
-        self_view="api.device_configuration_device",
-        self_view_kwargs={"id": "<id>"},
-        include_resource_linkage=True,
-        schema="ConfigurationDeviceSchema",
-        type_="configuration_device",
-        id_field="id",
-    )
 
     @staticmethod
     def nested_dict_serializer(obj):
@@ -236,3 +220,13 @@ class DeviceToNestedDictSerializer:
                     for c in device.customfields
                 ],
             }
+
+
+class DeviceSchemaForOnlyId(Schema):
+    class Meta:
+        type_ = "device"
+        self_view = "api.device_detail"
+        self_view_kwargs = {"id": "<id>"}
+        self_view_many = "api.device_list"
+
+    id = fields.Integer(as_string=True)

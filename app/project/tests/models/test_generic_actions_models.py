@@ -14,12 +14,15 @@ from project.tests.base import BaseTestCase, generate_userinfo_data
 from project.tests.models.test_configurations_model import generate_configuration_model
 
 
-def generate_platform_action_model():
+def generate_platform_action_model(
+    public=True, private=False, internal=False, group_ids=[]
+):
     platform = Platform(
         short_name="short_name test",
-        is_public=False,
-        is_private=False,
-        is_internal=True,
+        is_public=public,
+        is_private=private,
+        is_internal=internal,
+        group_ids=group_ids,
     )
     userinfo = generate_userinfo_data()
     contact = Contact(
@@ -43,12 +46,15 @@ def generate_platform_action_model():
     return generic_platform_action
 
 
-def generate_device_action_model():
+def generate_device_action_model(
+    public=True, private=False, internal=False, group_ids=[]
+):
     d = Device(
         short_name="test device",
-        is_public=False,
-        is_private=False,
-        is_internal=True,
+        is_public=public,
+        is_private=private,
+        is_internal=internal,
+        group_ids=group_ids,
     )
 
     userinfo = generate_userinfo_data()
@@ -75,8 +81,8 @@ def generate_device_action_model():
     return generic_device_action
 
 
-def generate_configuration_action_model():
-    config = generate_configuration_model()
+def generate_configuration_action_model(is_public=False, is_private=False, is_internal=True):
+    config = generate_configuration_model(is_public=is_public, is_private=is_private, is_internal=is_internal)
     userinfo = generate_userinfo_data()
     c1 = Contact(
         given_name=userinfo["given_name"],

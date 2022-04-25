@@ -5,20 +5,17 @@ from .calibration_actions import (  # noqa: F401
 from .calibration_attachments import DeviceCalibrationAttachment  # noqa: F401
 from .configuration import Configuration  # noqa: F401
 from .configuration_attachment import ConfigurationAttachment  # noqa: F401
-from .configuration_device import ConfigurationDevice  # noqa: F401
 from .configuration_location_actions import (  # noqa: F401
     ConfigurationDynamicLocationBeginAction,
     ConfigurationDynamicLocationEndAction,
     ConfigurationStaticLocationBeginAction,
     ConfigurationStaticLocationEndAction,
 )
-from .configuration_platform import ConfigurationPlatform  # noqa: F401
 from .contact import Contact  # noqa: F401
 from .customfield import CustomField  # noqa: F401
 from .device import Device  # noqa: F401
 from .device_attachment import DeviceAttachment  # noqa: F401
 from .device_property import DeviceProperty  # noqa: F401
-from .event import Event  # noqa: F401
 from .generic_action_attachments import (  # noqa: F401
     GenericConfigurationActionAttachment,
     GenericDeviceActionAttachment,

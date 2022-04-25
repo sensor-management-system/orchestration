@@ -11,8 +11,10 @@ class PlatformUnmountAction(db.Model, AuditMixin, IndirectSearchableMixin):
         "Configuration",
         uselist=False,
         foreign_keys=[configuration_id],
-        backref=db.backref("platform_unmount_actions",
-                           cascade="save-update, merge, delete, delete-orphan"),
+        backref=db.backref(
+            "platform_unmount_actions",
+            cascade="save-update, merge, delete, delete-orphan",
+        ),
     )
     platform_id = db.Column(db.Integer, db.ForeignKey("platform.id"), nullable=False)
     platform = db.relationship(
@@ -43,6 +45,10 @@ class PlatformUnmountAction(db.Model, AuditMixin, IndirectSearchableMixin):
             "description": self.description,
         }
 
+    def get_parent(self):
+        """Return parent object."""
+        return self.platform
+
 
 class DeviceUnmountAction(db.Model, AuditMixin, IndirectSearchableMixin):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -53,8 +59,10 @@ class DeviceUnmountAction(db.Model, AuditMixin, IndirectSearchableMixin):
         "Configuration",
         uselist=False,
         foreign_keys=[configuration_id],
-        backref=db.backref("device_unmount_actions",
-                           cascade="save-update, merge, delete, delete-orphan"),
+        backref=db.backref(
+            "device_unmount_actions",
+            cascade="save-update, merge, delete, delete-orphan",
+        ),
     )
     device_id = db.Column(db.Integer, db.ForeignKey("device.id"), nullable=False)
     device = db.relationship(
@@ -84,3 +92,7 @@ class DeviceUnmountAction(db.Model, AuditMixin, IndirectSearchableMixin):
         return {
             "description": self.description,
         }
+
+    def get_parent(self):
+        """Return parent object."""
+        return self.device

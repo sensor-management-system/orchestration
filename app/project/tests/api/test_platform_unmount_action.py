@@ -6,6 +6,7 @@ from project import base_url
 from project.api.models import Configuration, Contact, Platform, PlatformUnmountAction
 from project.api.models.base_model import db
 from project.tests.base import BaseTestCase, fake, generate_userinfo_data
+from project.tests.base import create_token
 from project.tests.models.test_configurations_model import generate_configuration_model
 from project.tests.models.test_unmount_actions_model import add_unmount_platform_action
 
@@ -33,13 +34,14 @@ class TestPlatformUnmountAction(BaseTestCase):
             unmount_platform_action.end_date.strftime("%Y-%m-%dT%H:%M:%S"),
             data["data"][0]["attributes"]["end_date"],
         )
+
     def test_post_platform_unmount_action(self):
         """Create PlatformUnmountAction."""
         platform = Platform(
             short_name="Test platform",
-            is_public=False,
+            is_public=True,
             is_private=False,
-            is_internal=True,
+            is_internal=False,
         )
         userinfo = generate_userinfo_data()
         contact = Contact(
@@ -79,9 +81,7 @@ class TestPlatformUnmountAction(BaseTestCase):
             "data": {
                 "type": self.object_type,
                 "id": unmount_platform_action.id,
-                "attributes": {
-                    "description": "updated",
-                },
+                "attributes": {"description": "updated", },
             }
         }
         _ = super().update_object(
@@ -93,22 +93,30 @@ class TestPlatformUnmountAction(BaseTestCase):
     def test_delete_platform_unmount_action(self):
         """Delete PlatformUnmountAction."""
         unmount_platform_action = add_unmount_platform_action()
-        _ = super().delete_object(
-            url=f"{self.url}/{unmount_platform_action.id}",
-        )
+
+        access_headers = create_token()
+        with self.client:
+            response = self.client.delete(
+                f"{self.url}/{unmount_platform_action.id}",
+                content_type="application/vnd.api+json",
+                headers=access_headers,
+            )
+        self.assertEqual(response.status_code, 200)
 
     def test_filtered_by_configuration(self):
         """Ensure that I can prefilter by a specific configuration."""
         configuration1 = Configuration(
-            label="sample configuration", location_type="static",
-            is_public=False,
-            is_internal=True,
+            label="sample configuration",
+            location_type="static",
+            is_public=True,
+            is_internal=False,
         )
         db.session.add(configuration1)
         configuration2 = Configuration(
-            label="sample configuration II", location_type="static",
-            is_public=False,
-            is_internal=True,
+            label="sample configuration II",
+            location_type="static",
+            is_public=True,
+            is_internal=False,
         )
         db.session.add(configuration2)
 
@@ -117,18 +125,14 @@ class TestPlatformUnmountAction(BaseTestCase):
         )
         db.session.add(contact)
 
-        platform1 = Platform(short_name="platform1",
-                             is_public=False,
-                             is_private=False,
-                             is_internal=True,
-                             )
+        platform1 = Platform(
+            short_name="platform1", is_public=True, is_private=False, is_internal=False,
+        )
         db.session.add(platform1)
 
-        platform2 = Platform(short_name="platform2",
-                             is_public=False,
-                             is_private=False,
-                             is_internal=True,
-                             )
+        platform2 = Platform(
+            short_name="platform2", is_public=True, is_private=False, is_internal=False,
+        )
         db.session.add(platform2)
 
         action1 = PlatformUnmountAction(
@@ -204,15 +208,17 @@ class TestPlatformUnmountAction(BaseTestCase):
     def test_filtered_by_platform(self):
         """Ensure that I can prefilter by a specific platforms."""
         configuration1 = Configuration(
-            label="sample configuration", location_type="static",
-            is_public=False,
-            is_internal=True,
+            label="sample configuration",
+            location_type="static",
+            is_public=True,
+            is_internal=False,
         )
         db.session.add(configuration1)
         configuration2 = Configuration(
-            label="sample configuration II", location_type="static",
-            is_public=False,
-            is_internal=True,
+            label="sample configuration II",
+            location_type="static",
+            is_public=True,
+            is_internal=False,
         )
         db.session.add(configuration2)
 
@@ -221,18 +227,14 @@ class TestPlatformUnmountAction(BaseTestCase):
         )
         db.session.add(contact)
 
-        platform1 = Platform(short_name="platform1",
-                             is_public=False,
-                             is_private=False,
-                             is_internal=True,
-                             )
+        platform1 = Platform(
+            short_name="platform1", is_public=True, is_private=False, is_internal=False,
+        )
         db.session.add(platform1)
 
-        platform2 = Platform(short_name="platform2",
-                             is_public=False,
-                             is_private=False,
-                             is_internal=True,
-                             )
+        platform2 = Platform(
+            short_name="platform2", is_public=True, is_private=False, is_internal=False,
+        )
         db.session.add(platform2)
 
         action1 = PlatformUnmountAction(

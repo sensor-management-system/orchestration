@@ -4,6 +4,7 @@ from flask_rest_jsonapi import ResourceDetail, ResourceRelationship
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.orm.exc import NoResultFound
 
+from ..auth.permission_utils import get_query_with_permissions_for_related_objects
 from ...frj_csv_export.resource import ResourceList
 from ..models.base_model import db
 from ..models.device import Device
@@ -22,14 +23,14 @@ class DeviceSoftwareUpdateActionList(ResourceList):
 
         Also handle optional pre-filters (for specific devices, for example).
         """
-        query_ = self.session.query(DeviceSoftwareUpdateAction)
+        query_ = get_query_with_permissions_for_related_objects(self.model)
         device_id = view_kwargs.get("device_id")
         if device_id is not None:
             try:
                 self.session.query(Device).filter_by(id=device_id).one()
             except NoResultFound:
                 raise ObjectNotFound(
-                    {"parameter": "id", }, "Device: {} not found".format(device_id),
+                    {"parameter": "id",}, "Device: {} not found".format(device_id),
                 )
             else:
                 query_ = query_.filter(
@@ -42,7 +43,7 @@ class DeviceSoftwareUpdateActionList(ResourceList):
     data_layer = {
         "session": db.session,
         "model": DeviceSoftwareUpdateAction,
-        "methods": {"query": query, },
+        "methods": {"query": query},
     }
 
 

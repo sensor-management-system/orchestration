@@ -13,8 +13,10 @@ class ConfigurationStaticLocationBeginAction(
         "Configuration",
         uselist=False,
         foreign_keys=[configuration_id],
-        backref=db.backref("configuration_static_location_begin_actions",
-                           cascade="save-update, merge, delete, delete-orphan"),
+        backref=db.backref(
+            "configuration_static_location_begin_actions",
+            cascade="save-update, merge, delete, delete-orphan",
+        ),
     )
     begin_date = db.Column(db.DateTime, nullable=False)
     description = db.Column(db.Text, nullable=True)
@@ -42,6 +44,10 @@ class ConfigurationStaticLocationBeginAction(
             "description": self.description,
         }
 
+    def get_parent(self):
+        """Return parent object."""
+        return self.configuration
+
 
 class ConfigurationStaticLocationEndAction(
     db.Model, AuditMixin, IndirectSearchableMixin
@@ -54,8 +60,10 @@ class ConfigurationStaticLocationEndAction(
         "Configuration",
         uselist=False,
         foreign_keys=[configuration_id],
-        backref=db.backref("configuration_static_location_end_actions",
-                           cascade="save-update, merge, delete, delete-orphan"),
+        backref=db.backref(
+            "configuration_static_location_end_actions",
+            cascade="save-update, merge, delete, delete-orphan",
+        ),
     )
     end_date = db.Column(db.DateTime, nullable=False)
     description = db.Column(db.Text, nullable=True)
@@ -77,6 +85,10 @@ class ConfigurationStaticLocationEndAction(
             "description": self.description,
         }
 
+    def get_parent(self):
+        """Return parent object."""
+        return self.configuration
+
 
 class ConfigurationDynamicLocationBeginAction(
     db.Model, AuditMixin, IndirectSearchableMixin
@@ -89,8 +101,10 @@ class ConfigurationDynamicLocationBeginAction(
         "Configuration",
         uselist=False,
         foreign_keys=[configuration_id],
-        backref=db.backref("configuration_dynamic_location_begin_actions",
-                           cascade="save-update, merge, delete, delete-orphan"),
+        backref=db.backref(
+            "configuration_dynamic_location_begin_actions",
+            cascade="save-update, merge, delete, delete-orphan",
+        ),
     )
     begin_date = db.Column(db.DateTime, nullable=False)
     description = db.Column(db.Text, nullable=True)
@@ -143,6 +157,10 @@ class ConfigurationDynamicLocationBeginAction(
         """Return the configuration as parent search entity."""
         return [self.configuration]
 
+    def get_parent(self):
+        """Return parent object."""
+        return self.configuration
+
 
 class ConfigurationDynamicLocationEndAction(
     db.Model, AuditMixin, IndirectSearchableMixin
@@ -155,8 +173,10 @@ class ConfigurationDynamicLocationEndAction(
         "Configuration",
         uselist=False,
         foreign_keys=[configuration_id],
-        backref=db.backref("configuration_dynamic_location_end_actions",
-                           cascade="save-update, merge, delete, delete-orphan"),
+        backref=db.backref(
+            "configuration_dynamic_location_end_actions",
+            cascade="save-update, merge, delete, delete-orphan",
+        ),
     )
     end_date = db.Column(db.DateTime, nullable=False)
     description = db.Column(db.Text, nullable=True)
@@ -177,3 +197,7 @@ class ConfigurationDynamicLocationEndAction(
     def get_parent_search_entities(self):
         """Return the configuration as parent search entity."""
         return [self.configuration]
+
+    def get_parent(self):
+        """Return parent object."""
+        return self.configuration

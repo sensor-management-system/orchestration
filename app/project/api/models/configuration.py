@@ -1,23 +1,14 @@
 """Class and helpers for the configurations."""
 
-import collections
-
-from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy.ext.mutable import MutableList
-from sqlalchemy.orm import validates
-
-from .base_model import db
-from .mixin import AuditMixin, SearchableMixin
+from ..es_utils import ElasticSearchIndexTypes, settings_with_ngrams
 from ..helpers.errors import ConflictError
-
-from ..es_utils import settings_with_ngrams, ElasticSearchIndexTypes
-
-ConfigurationsTuple = collections.namedtuple(
-    "ConfigurationsTuple", ["configuration_devices", "configuration_platforms"]
-)
+from .base_model import db
+from .mixin import AuditMixin, BeforeCommitValidatableMixin, SearchableMixin
 
 
-class Configuration(db.Model, AuditMixin, SearchableMixin):
+class Configuration(
+    db.Model, AuditMixin, SearchableMixin, BeforeCommitValidatableMixin
+):
     """Data model for the configurations."""
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -59,85 +50,15 @@ class Configuration(db.Model, AuditMixin, SearchableMixin):
     is_internal = db.Column(db.Boolean, default=False)
     is_public = db.Column(db.Boolean, default=False)
 
-    @validates("is_internal")
-    def validate_internal(self, key, is_internal):
-        if is_internal and bool(self.is_public):
-            raise ConflictError(
-                "Please make sure that this object is not public at first."
-            )
-        return is_internal
-
-    @validates("is_public")
-    def validate_public(self, key, is_public):
-
-        if is_public and bool(self.is_internal):
-            raise ConflictError(
-                "Please make sure that this object is not internal at first."
-            )
-        return is_public
-
-    @hybrid_property
-    def hierarchy(self):
+    def validate(self):
         """
-        Return a tuple with that the hierarchy can be build.
+        Validate the model.
 
-        The tuple contains the data with the links to the used
-        devices and platforms. It also includes how the
-        devices and platforms are used in the configuration (offsets,
-        calibration dates) and how the hiearchy is structured (
-        on which device is a platform, and what are those parent
-        platforms).
-
-        With the data here a real tree can be build.
+        Check that we don't have multiple visibility values.
         """
-        return ConfigurationsTuple(
-            configuration_devices=self.configuration_devices,
-            configuration_platforms=self.configuration_platforms,
-        )
-
-    @hierarchy.setter
-    def hierarchy(self, value):
-        new_configuration_devices = value.configuration_devices
-        new_configuration_platforms = value.configuration_platforms
-
-        current_configuration_device_by_device_id = {}
-
-        for device_configuration in self.configuration_devices:
-            current_configuration_device_by_device_id[
-                device_configuration.device_id
-            ] = device_configuration
-
-        current_configuration_platform_by_platform_id = {}
-
-        for platform_configuration in self.configuration_platforms:
-            current_configuration_platform_by_platform_id[
-                platform_configuration.platform_id
-            ] = platform_configuration
-
-        for new_cd in new_configuration_devices:
-            device_id = new_cd.device_id
-            old_configuration_device = current_configuration_device_by_device_id.get(
-                device_id, None
-            )
-            if old_configuration_device is not None:
-                new_cd.id = old_configuration_device.id
-                new_cd.created_at = old_configuration_device.created_at
-                new_cd.created_by = old_configuration_device.created_by
-            new_cd.configuration = self
-
-        for new_cp in new_configuration_platforms:
-            platform_id = new_cp.platform_id
-            old_configuration_platform = (
-                current_configuration_platform_by_platform_id.get(platform_id, None)
-            )
-            if old_configuration_platform is not None:
-                new_cp.id = old_configuration_platform.id
-                new_cp.created_at = old_configuration_platform.created_at
-                new_cp.created_by = old_configuration_platform.created_by
-            new_cp.configuration = self
-
-        self.configuration_devices = new_configuration_devices
-        self.configuration_platforms = new_configuration_platforms
+        super().validate()
+        if self.is_internal and self.is_public:
+            raise ConflictError("The configuration can't be both internal and public")
 
     def to_search_entry(self):
         """
@@ -146,18 +67,6 @@ class Configuration(db.Model, AuditMixin, SearchableMixin):
         All the fields here will be searchable and can be used as
         filters in our full text search.
         """
-        platforms = []
-        for configuration_platform in self.configuration_platforms:
-            if configuration_platform.platform is not None:
-                platforms.append(configuration_platform.platform)
-        devices = []
-        firmware_versions = []
-        for configuration_device in self.configuration_devices:
-            if configuration_device.device is not None:
-                devices.append(configuration_device.device)
-            if configuration_device.firmware_version is not None:
-                firmware_versions.append(configuration_device.firmware_version)
-
         # TODO: With the change for the mount & unmount Actions
         # this here must be improved.
         # Also we need to update the configurations in case that
@@ -169,10 +78,7 @@ class Configuration(db.Model, AuditMixin, SearchableMixin):
             "location_type": self.location_type,
             "project_uri": self.project_uri,
             "project_name": self.project_name,
-            "platforms": [p.to_search_entry() for p in platforms],
-            "devices": [d.to_search_entry() for d in devices],
             "contacts": [c.to_search_entry() for c in self.contacts],
-            "firmware_versions": firmware_versions,
             "attachments": [
                 a.to_search_entry() for a in self.configuration_attachments
             ],

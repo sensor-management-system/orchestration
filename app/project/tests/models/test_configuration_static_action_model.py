@@ -9,8 +9,8 @@ from project.tests.base import BaseTestCase, fake, generate_userinfo_data
 from project.tests.models.test_configurations_model import generate_configuration_model
 
 
-def add_static_location_begin_action_model():
-    config = generate_configuration_model()
+def add_static_location_begin_action_model(is_public=False, is_private=False, is_internal=True):
+    config = generate_configuration_model(is_public=is_public, is_private=is_private, is_internal=is_internal)
     userinfo = generate_userinfo_data()
     contact = Contact(
         given_name=userinfo["given_name"],
@@ -34,8 +34,8 @@ def add_static_location_begin_action_model():
     return configuration_static_location_begin_action
 
 
-def add_static_location_end_action_model():
-    config = generate_configuration_model()
+def add_static_location_end_action_model(is_public=False, is_private=False, is_internal=True):
+    config = generate_configuration_model(is_public=is_public, is_private=is_private, is_internal=is_internal)
     userinfo = generate_userinfo_data()
     contact = Contact(
         given_name=userinfo["given_name"],

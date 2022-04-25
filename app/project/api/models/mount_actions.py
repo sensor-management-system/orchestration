@@ -16,7 +16,7 @@ class PlatformMountAction(db.Model, AuditMixin):
             cascade="save-update, merge, delete, delete-orphan",
         ),
     )
-    platform_id = db.Column(db.Integer, db.ForeignKey("platform.id"), nullable=False)
+    platform_id = db.Column(db.Integer, db.ForeignKey("platform.id"), nullable=False,)
     platform = db.relationship(
         "Platform",
         uselist=False,
@@ -58,6 +58,10 @@ class PlatformMountAction(db.Model, AuditMixin):
             "platform": self.platform.to_search_entry(),
         }
 
+    def get_parent(self):
+        """Return parent object."""
+        return self.platform
+
 
 class DeviceMountAction(db.Model, AuditMixin, IndirectSearchableMixin):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -72,7 +76,7 @@ class DeviceMountAction(db.Model, AuditMixin, IndirectSearchableMixin):
             "device_mount_actions", cascade="save-update, merge, delete, delete-orphan"
         ),
     )
-    device_id = db.Column(db.Integer, db.ForeignKey("device.id"), nullable=False)
+    device_id = db.Column(db.Integer, db.ForeignKey("device.id"), nullable=False,)
     device = db.relationship(
         "Device",
         uselist=False,
@@ -80,7 +84,7 @@ class DeviceMountAction(db.Model, AuditMixin, IndirectSearchableMixin):
         backref=db.backref("device_mount_actions"),
     )
     parent_platform_id = db.Column(
-        db.Integer, db.ForeignKey("platform.id"), nullable=True
+        db.Integer, db.ForeignKey("platform.id"), nullable=True,
     )
     parent_platform = db.relationship(
         "Platform",
@@ -116,3 +120,7 @@ class DeviceMountAction(db.Model, AuditMixin, IndirectSearchableMixin):
             "description": self.description,
             "device": self.device.to_search_entry(),
         }
+
+    def get_parent(self):
+        """Return parent object."""
+        return self.device
