@@ -15,6 +15,7 @@
         There are no actions for this device.
       </hint-card>
       <DeviceActionTimeline
+        v-else
         :value="actions"
         :device-id="deviceId"
         :action-api-dispatcher="apiDispatcher"
