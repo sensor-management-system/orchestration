@@ -69,7 +69,7 @@ export default class DeviceCustomFieldAddPage extends Vue {
     return this.$route.params.deviceId
   }
 
-  async save (): void {
+  async save (): Promise<void> {
 
     try {
       await this.addDeviceCustomField({

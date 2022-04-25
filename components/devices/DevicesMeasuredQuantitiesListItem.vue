@@ -28,7 +28,7 @@
           no-gutters
         >
           <v-col class="text-subtitle-1">
-            {{computedTitel}}
+            {{computedTitle}}
           </v-col>
           <v-col
             align-self="end"
@@ -154,11 +154,14 @@ export default class DevicesMeasuredQuantitiesListItem extends Vue {
   private show=false
 
   get computedTitle(){
-    let additionaLabel = '';
-    if(this.measuredQuantity.label){
-      additionaLabel= ' - ' +this.measuredQuantity.label
+    if(this.measuredQuantity){
+      let additionaLabel = '';
+      if(this.measuredQuantity.label){
+        additionaLabel= ' - ' +this.measuredQuantity.label
+      }
+      return `Measured quantity ${this.index+1}` + additionaLabel;
     }
-    return `Measured quantity ${this.index+1}` + additionaLabel;
+    return ''
   }
 
 }
