@@ -1,12 +1,13 @@
-from flask_rest_jsonapi import ResourceDetail, JsonApiException
+from flask_rest_jsonapi import JsonApiException, ResourceDetail
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 
-from .base_resource import delete_attachments_in_minio_by_url, check_if_object_not_found
 from ..helpers.errors import ConflictError
+from ..helpers.resource_mixin import add_updated_by_id
 from ..models.base_model import db
 from ..models.platform import Platform
 from ..schemas.platform_schema import PlatformSchema
 from ..token_checker import token_required
+from .base_resource import check_if_object_not_found, delete_attachments_in_minio_by_url
 
 
 class PlatformDetail(ResourceDetail):
@@ -40,6 +41,9 @@ class PlatformDetail(ResourceDetail):
 
         final_result = {"meta": {"message": "Object successfully deleted"}}
         return final_result
+
+    def before_patch(self, args, kwargs, data):
+        add_updated_by_id(data)
 
     schema = PlatformSchema
     decorators = (token_required,)

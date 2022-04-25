@@ -7,6 +7,7 @@ from ..auth.permission_utils import (
     is_user_in_a_group,
 )
 from ..helpers.errors import ConflictError, ForbiddenError
+from ..helpers.resource_mixin import add_updated_by_id
 from ..models.base_model import db
 from ..models.configuration import Configuration
 from ..schemas.configuration_schema import ConfigurationSchema
@@ -38,6 +39,7 @@ class ConfigurationDetail(ResourceDetail):
                 raise ForbiddenError(
                     "User is not part of any group to edit this object."
                 )
+        add_updated_by_id(data)
 
     def before_delete(self, args, kwargs):
         """Checks for permission"""

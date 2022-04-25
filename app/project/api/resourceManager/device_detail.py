@@ -1,11 +1,12 @@
-from flask_rest_jsonapi import ResourceDetail, JsonApiException
+from flask_rest_jsonapi import JsonApiException, ResourceDetail
 
-from .base_resource import delete_attachments_in_minio_by_url, check_if_object_not_found
 from ..helpers.errors import ConflictError
+from ..helpers.resource_mixin import add_updated_by_id
 from ..models.base_model import db
 from ..models.device import Device
 from ..schemas.device_schema import DeviceSchema
 from ..token_checker import token_required
+from .base_resource import check_if_object_not_found, delete_attachments_in_minio_by_url
 
 
 class DeviceDetail(ResourceDetail):
@@ -33,6 +34,9 @@ class DeviceDetail(ResourceDetail):
 
         final_result = {"meta": {"message": "Object successfully deleted"}}
         return final_result
+
+    def before_patch(self, args, kwargs, data):
+        add_updated_by_id(data)
 
     schema = DeviceSchema
     decorators = (token_required,)
