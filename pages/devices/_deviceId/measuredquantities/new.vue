@@ -75,14 +75,6 @@ export default class DevicePropertyAddPage extends Vue
 {
   private valueCopy: DeviceProperty = new DeviceProperty()
 
-  async created(){// Todo hier nur vorsichthalber laden + vielleicht doch besser in `pages/devices/_deviceId/measuredquantities.vue` verlagern
-    await this.loadCompartments()
-    await this.loadSamplingMedia()
-    await this.loadProperties()
-    await this.loadUnits()
-    await this.loadMeasuredQuantityUnits()
-  }
-
   get deviceId (): string {
     return this.$route.params.deviceId
   }

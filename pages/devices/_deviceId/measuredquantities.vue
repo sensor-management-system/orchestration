@@ -199,14 +199,23 @@ import { Component, Vue } from 'nuxt-property-decorator'
 import { mapActions } from 'vuex'
 
 @Component({
-  methods:mapActions('devices',['loadDeviceMeasuredQuantities'])
+  methods: {
+    ...mapActions ('devices', ['loadDeviceMeasuredQuantities']),
+    ...mapActions('vocabulary',['loadCompartments','loadSamplingMedia','loadProperties','loadUnits','loadMeasuredQuantityUnits']),
+  }
 })
 export default class DevicePropertiesPage extends Vue {
 
   async created(){
     try {
       await this.loadDeviceMeasuredQuantities(this.deviceId)
+      await this.loadCompartments()
+      await this.loadSamplingMedia()
+      await this.loadProperties()
+      await this.loadUnits()
+      await this.loadMeasuredQuantityUnits()
     } catch (e) {
+      console.log(e);
       this.$store.commit('snackbar/setError', 'Failed to fetch measured quantities')
     }
   }

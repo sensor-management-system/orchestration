@@ -85,14 +85,6 @@ export default class DevicePropertyShowPage extends Vue {
   private showDeleteDialog=false;
   private measuredQuantityToDelete:DeviceProperty|null=null
 
-  async created(){
-    await this.loadCompartments()
-    await this.loadSamplingMedia()
-    await this.loadProperties()
-    await this.loadUnits()
-    await this.loadMeasuredQuantityUnits()
-  }
-
   get deviceId (): string {
     return this.$route.params.deviceId
   }
