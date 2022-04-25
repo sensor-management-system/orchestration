@@ -9,16 +9,10 @@ class TestPermissionGroup(BaseTestCase):
 
     url = base_url + "/permission-groups"
 
-    def test_get_without_jwt(self):
-        """Ensure the GET /permission-groups route behaves correctly."""
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 401)
-
-    def test_get_with_jwt(self):
+    def test_get(self):
         """Ensure it works with a valid jwt."""
-        access_headers = create_token()
         if current_app.config['IDL_URL'] is not None:
-            response = self.client.get(self.url, headers=access_headers)
+            response = self.client.get(self.url)
             self.assertEqual(response.status_code, 200)
             data = response.json["data"]
             self.assertNotEqual(len(data), 0)
