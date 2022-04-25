@@ -36,6 +36,12 @@ class DeviceDetail(ResourceDetail):
         return final_result
 
     def before_patch(self, args, kwargs, data):
+        """
+        Run logic before the patch.
+
+        In this case we want to make sure that we update the updated_by_id
+        with the id of the user that run the request.
+        """
         add_updated_by_id(data)
 
     schema = DeviceSchema

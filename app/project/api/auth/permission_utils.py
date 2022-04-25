@@ -9,7 +9,6 @@ from ..datalayers.esalchemy import AndFilter, OrFilter, TermEqualsExactStringFil
 from ..helpers.errors import ForbiddenError
 from ..helpers.resource_mixin import (
     add_created_by_id,
-    add_updated_by_id,
     decode_json_request_data,
 )
 from ..models import Configuration
@@ -163,9 +162,6 @@ def check_patch_permission(data, object_to_patch):
                 )
         else:
             raise ObjectNotFound(f"Object with id: {data['id']} not found!")
-
-    # Add update by id to data
-    add_updated_by_id(data)
 
 
 def check_deletion_permission(kwargs, object_to_delete):
