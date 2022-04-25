@@ -76,7 +76,6 @@ import BaseList from '@/components/shared/BaseList.vue'
     ...mapState('devices',['deviceMeasuredQuantities'])
   },
   methods:{
-    ...mapActions('vocabulary',['loadCompartments','loadSamplingMedia','loadProperties','loadUnits','loadMeasuredQuantityUnits']),
     ...mapActions('devices',['deleteDeviceMeasuredQuantity','loadDeviceMeasuredQuantities'])
   }
 })

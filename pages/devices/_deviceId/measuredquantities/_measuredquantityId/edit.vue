@@ -29,18 +29,62 @@ implied. See the Licence for the specific language governing
 permissions and limitations under the Licence.
 -->
 <template>
-  <div>
-    <DevicePropertyForm
-      ref="propertyForm"
-      v-model="valueCopy"
-      :readonly="false"
-      :compartments="compartments"
-      :sampling-medias="samplingMedias"
-      :properties="properties"
-      :units="units"
-      :measured-quantity-units="measuredQuantityUnits"
-    />
-  </div>
+    <v-card
+      flat
+    >
+      <v-card-actions>
+        <v-spacer />
+        <v-btn
+          v-if="$auth.loggedIn"
+          small
+          text
+          nuxt
+          :to="'/devices/' + this.deviceId + '/measuredquantities'"
+        >
+          Cancel
+        </v-btn>
+        <v-btn
+          v-if="$auth.loggedIn"
+          color="green"
+          small
+          @click="save"
+        >
+          Update
+        </v-btn>
+      </v-card-actions>
+      <v-card-text>
+        <DevicePropertyForm
+          ref="propertyForm"
+          v-model="valueCopy"
+          :readonly="false"
+          :compartments="compartments"
+          :sampling-medias="samplingMedia"
+          :properties="properties"
+          :units="units"
+          :measured-quantity-units="measuredQuantityUnits"
+        />
+      </v-card-text>
+      <v-card-actions>
+        <v-spacer />
+        <v-btn
+          v-if="$auth.loggedIn"
+          small
+          text
+          nuxt
+          :to="'/devices/' + this.deviceId + '/measuredquantities'"
+        >
+          Cancel
+        </v-btn>
+        <v-btn
+          v-if="$auth.loggedIn"
+          color="green"
+          small
+          @click="save"
+        >
+          Update
+        </v-btn>
+      </v-card-actions>
+  </v-card>
 </template>
 
 <script lang="ts">
@@ -54,87 +98,48 @@ import { Property } from '@/models/Property'
 import { SamplingMedia } from '@/models/SamplingMedia'
 import { Unit } from '@/models/Unit'
 import { MeasuredQuantityUnit } from '@/models/MeasuredQuantityUnit'
+import { mapActions, mapState } from 'vuex'
 
 @Component({
   components: { DevicePropertyForm },
-  middleware: ['auth']
+  middleware: ['auth'],
+  computed:{
+    ...mapState('vocabulary',['compartments','samplingMedia','properties','units','measuredQuantityUnits']),
+    ...mapState('devices',['deviceMeasuredQuantity'])
+  },
+  methods:mapActions('devices',['loadDeviceMeasuredQuantity','loadDeviceMeasuredQuantities','updateDeviceMeasuredQuantity'])
 })
 export default class DevicePropertyEditPage extends Vue {
   private valueCopy: DeviceProperty = new DeviceProperty()
-  @Prop({
-    required: true,
-    type: Object
-  })
-  readonly value!: DeviceProperty
 
-  /**
-   * a list of Compartments
-   */
-  @Prop({
-    default: () => [] as Compartment[],
-    required: true,
-    type: Array
-  })
-  readonly compartments!: Compartment[]
-
-  /**
-   * a list of SamplingMedias
-   */
-  @Prop({
-    default: () => [] as SamplingMedia[],
-    required: true,
-    type: Array
-  })
-  readonly samplingMedias!: SamplingMedia[]
-
-  /**
-   * a list of Properties
-   */
-  @Prop({
-    default: () => [] as Property[],
-    required: true,
-    type: Array
-  })
-  readonly properties!: Property[]
-
-  /**
-   * a list of Units
-   */
-  @Prop({
-    default: () => [] as Unit[],
-    required: true,
-    type: Array
-  })
-  readonly units!: Unit[]
-
-  /**
-   * a list of MeasuredQuantityUnits
-   */
-  @Prop({
-    default: () => [] as MeasuredQuantityUnit[],
-    required: true,
-    type: Array
-  })
-  readonly measuredQuantityUnits!: MeasuredQuantityUnit[]
-
-  created () {
-    this.valueCopy = DeviceProperty.createFromObject(this.value)
-  }
-
-  save () {
-    this.$emit('showsave', true)
-    this.$api.deviceProperties.update(this.deviceId, this.valueCopy).then((newProperty: DeviceProperty) => {
-      this.$emit('showsave', false)
-      this.$emit('input', newProperty)
-      this.$router.push('/devices/' + this.deviceId + '/measuredquantities')
-    }).catch(() => {
-      this.$emit('showsave', false)
-      this.$store.commit('snackbar/setError', 'Failed to save measured quantity')
-    })
+  async created () {
+    try {
+      await this.loadDeviceMeasuredQuantity(this.measuredquantityId)
+      this.valueCopy = DeviceProperty.createFromObject(this.deviceMeasuredQuantity)
+    } catch (e) {
+      console.log('error',e);
+    }
   }
 
   get deviceId (): string {
     return this.$route.params.deviceId
+  }
+
+  get measuredquantityId():string{
+    return this.$route.params.measuredquantityId
+  }
+
+  async save () {
+    try {
+      await this.updateDeviceMeasuredQuantity({
+        deviceId: this.deviceId,
+        deviceMeasuredQuantity: this.valueCopy
+      });
+      this.loadDeviceMeasuredQuantities(this.deviceId)
+      this.$router.push('/devices/' + this.deviceId + '/measuredquantities')
+    } catch (e) {
+      this.$store.commit('snackbar/setError', 'Failed to save measured quantity')
+    }
   }
 }
 </script>

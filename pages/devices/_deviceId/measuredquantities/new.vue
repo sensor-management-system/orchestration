@@ -9,7 +9,7 @@
         small
         text
         nuxt
-        :to="'/devices/' + this.deviceId + '/customfields'"
+        :to="'/devices/' + this.deviceId + '/measuredquantities'"
       >
         Cancel
       </v-btn>
@@ -41,7 +41,7 @@
         small
         text
         nuxt
-        :to="'/devices/' + this.deviceId + '/customfields'"
+        :to="'/devices/' + this.deviceId + '/measuredquantities'"
       >
         Cancel
       </v-btn>

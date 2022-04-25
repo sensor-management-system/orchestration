@@ -149,8 +149,8 @@ const actions = {
     commit('setDeviceMeasuredQuantities', deviceMeasuredQuantities)
   },
   async loadDeviceMeasuredQuantity ({ commit }: { commit: Commit }, id: number) { // Todo
-    const deviceMeasuredQuantities = await this.$api.devices.findRelatedDeviceProperties(id)
-    commit('setDeviceMeasuredQuantities', deviceMeasuredQuantities)
+    const deviceMeasuredQuantity = await this.$api.deviceProperties.findById(id)
+    commit('setDeviceMeasuredQuantity', deviceMeasuredQuantity)
   },
   async loadAllDeviceActions ({ dispatch }: { dispatch: Dispatch }, id: number) {
     await dispatch('loadDeviceGenericActions', id)
