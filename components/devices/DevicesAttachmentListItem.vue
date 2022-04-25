@@ -1,5 +1,5 @@
 <template>
-  <v-card  :key="attachment.id" class="mb-2">
+  <v-card>
     <v-list-item>
       <v-list-item-avatar>
         <v-icon large>
@@ -44,7 +44,6 @@
         </v-list-item-action-text>
       </v-list-item-content>
     </v-list-item>
-
   </v-card>
 </template>
 
