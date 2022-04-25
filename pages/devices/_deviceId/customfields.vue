@@ -37,67 +37,95 @@ permissions and limitations under the Licence.
     <v-card-actions>
       <v-spacer />
       <v-btn
-        v-if="$auth.loggedIn"
-        :disabled="isEditCustomFieldsPage"
+        v-if="editable"
+        :disabled="isEditCustomFieldsPage || isNewCustomFieldsPage"
         color="primary"
         small
-        @click="addField"
+        @click="createField"
       >
         Add Custom Field
       </v-btn>
     </v-card-actions>
-    <hint-card v-if="customFields.length === 0">
+    <hint-card v-if="(customFields.length === 0) && !isLoading">
       There are no custom fields for this device.
     </hint-card>
-    <template
+
+    <div
       v-for="(field, index) in customFields"
+      :key="'customfield-' + index"
     >
-      <div :key="'customfield-' + index">
-        <NuxtChild
-          v-model="customFields[index]"
-          @openDeleteDialog="showDeleteDialogFor"
-        />
-        <v-dialog v-model="showDeleteDialog[field.id]" max-width="290">
-          <v-card>
-            <v-card-title class="headline">
-              Delete Field
-            </v-card-title>
-            <v-card-text>
-              Do you really want to delete the field <em>{{ field.key }}</em>?
-            </v-card-text>
-            <v-card-actions>
-              <v-btn
-                text
-                @click="hideDeleteDialogFor(field.id)"
-              >
-                No
-              </v-btn>
-              <v-spacer />
-              <v-btn
-                color="error"
-                text
-                @click="deleteAndCloseDialog(field)"
-              >
-                <v-icon left>
-                  mdi-delete
-                </v-icon>
-                Delete
-              </v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-dialog>
-      </div>
-    </template>
+      <NuxtChild
+        v-model="customFields[index]"
+        @openDeleteDialog="showDeleteDialogFor"
+      />
+      <v-dialog v-model="showDeleteDialog[field.id]" max-width="290">
+        <v-card>
+          <v-card-title class="headline">
+            Delete Field
+          </v-card-title>
+          <v-card-text>
+            Do you really want to delete the field <em>{{ field.key }}</em>?
+          </v-card-text>
+          <v-card-actions>
+            <v-btn
+              text
+              @click="hideDeleteDialogFor(field.id)"
+            >
+              No
+            </v-btn>
+            <v-spacer />
+            <v-btn
+              color="error"
+              text
+              @click="deleteAndCloseDialog(field)"
+            >
+              <v-icon left>
+                mdi-delete
+              </v-icon>
+              Delete
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+    </div>
+    <div v-show="isNewCustomFieldsPage">
+      <CustomFieldCardForm
+        ref="newCustomFieldCardForm"
+        v-model="newCustomField"
+      >
+        <template #actions>
+          <v-btn
+            v-if="editable"
+            ref="cancelButton"
+            text
+            small
+            nuxt
+            @click="cancel()"
+          >
+            Cancel
+          </v-btn>
+          <v-btn
+            v-if="editable"
+            color="green"
+            small
+            :disabled="newCustomField._key === ''"
+            @click="save()"
+          >
+            Apply
+          </v-btn>
+        </template>
+      </CustomFieldCardForm>
+    </div>
     <v-card-actions
       v-if="customFields.length > 3"
     >
       <v-spacer />
       <v-btn
-        v-if="$auth.loggedIn"
-        :disabled="isEditCustomFieldsPage"
+        v-if="editable"
+        :disabled="isEditCustomFieldsPage || isNewCustomFieldsPage"
         color="primary"
         small
-        @click="addField"
+        @click="createField"
       >
         Add Custom Field
       </v-btn>
@@ -106,34 +134,58 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
+import { Component, Vue, Prop } from 'nuxt-property-decorator'
 import { CustomTextField } from '@/models/CustomTextField'
+
+import { Device } from '@/models/Device'
 
 import HintCard from '@/components/HintCard.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import CustomFieldCardForm from '@/components/CustomFieldCardForm.vue'
 
 @Component({
   components: {
     HintCard,
-    ProgressIndicator
+    ProgressIndicator,
+    CustomFieldCardForm
   }
 })
 export default class DeviceCustomFieldsPage extends Vue {
+  @Prop({
+    required: true,
+    type: Object
+  })
+  readonly value!: Device
+
+  // TODO: uncomment the next two lines and remove the third one after merging the permission management branch
+  // @InjectReactive()
+  //   editable!: boolean
+  get editable (): boolean {
+    return this.$auth.loggedIn
+  }
+
   private customFields: CustomTextField[] = []
   private isLoading = false
   private isSaving = false
+  private newCustomField = new CustomTextField()
 
   private showDeleteDialog: {[idx: string]: boolean} = {}
 
-  mounted () {
+  created () {
+    if (!this.editable && this.isEditCustomFieldsPage) {
+      this.$router.replace('/devices/' + this.deviceId + '/customfields')
+    }
+  }
+
+  async fetch (): Promise<void> {
     this.isLoading = true
-    this.$api.devices.findRelatedCustomFields(this.deviceId).then((foundFields) => {
-      this.customFields = foundFields
-      this.isLoading = false
-    }).catch(() => {
+    try {
+      this.customFields = await this.$api.devices.findRelatedCustomFields(this.deviceId)
+    } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to fetch custom fields')
+    } finally {
       this.isLoading = false
-    })
+    }
   }
 
   head () {
@@ -156,17 +208,34 @@ export default class DeviceCustomFieldsPage extends Vue {
     return !!this.$route.path.match(editUrl)
   }
 
-  addField (): void {
-    const field = new CustomTextField()
+  get isNewCustomFieldsPage (): boolean {
+    return this.$route.path === '/devices/' + this.deviceId + '/customfields/new'
+  }
+
+  save (): void {
     this.isSaving = true
-    this.$api.customfields.add(this.deviceId, field).then((newField: CustomTextField) => {
+    this.$api.customfields.add(this.deviceId, this.newCustomField).then((newField: CustomTextField) => {
       this.isSaving = false
-      this.customFields.push(newField)
-      this.$router.push('/devices/' + this.deviceId + '/customfields/' + newField.id + '/edit')
+      this.$emit('input', newField)
+      // we have to call fetch here because the new field is not present after page reload
+      this.newCustomField = new CustomTextField()
+      this.$fetch()
+      this.$router.push('/devices/' + this.deviceId + '/customfields')
     }).catch(() => {
       this.isSaving = false
       this.$store.commit('snackbar/setError', 'Failed to save custom field')
     })
+  }
+
+  cancel (): void {
+    this.newCustomField = new CustomTextField()
+    this.$router.push('/devices/' + this.deviceId + '/customfields')
+  }
+
+  // TODO: focus on the key input field
+  createField (): void {
+    this.$vuetify.goTo(document.body.scrollHeight)
+    this.$router.push('/devices/' + this.deviceId + '/customfields/new')
   }
 
   deleteAndCloseDialog (field: CustomTextField) {

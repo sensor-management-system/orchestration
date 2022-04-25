@@ -37,16 +37,16 @@ permissions and limitations under the Licence.
     <v-card-actions>
       <v-spacer />
       <v-btn
-        v-if="$auth.loggedIn"
+        v-if="editable"
         :disabled="isEditPropertiesPage"
         color="primary"
         small
-        @click="addProperty"
+        @click="createProperty"
       >
         Add Measured Quantity
       </v-btn>
     </v-card-actions>
-    <hint-card v-if="deviceProperties.length === 0">
+    <hint-card v-if="(deviceProperties.length === 0) && !isLoading">
       There are no measured quantities for this device.
     </hint-card>
     <v-expansion-panels
@@ -67,8 +67,9 @@ permissions and limitations under the Licence.
               class="text-right"
             >
               <v-btn
-                v-if="$auth.loggedIn && (!isEditModeForSomeProperty())"
+                v-if="editable && (!isEditModeForSomeProperty())"
                 color="primary"
+                :disabled="isNewPropertyPage"
                 text
                 small
                 @click.prevent.stop="openInEditMode(property)"
@@ -76,7 +77,7 @@ permissions and limitations under the Licence.
                 Edit
               </v-btn>
               <template
-                v-if="$auth.loggedIn && (isEditModeForProperty(property))"
+                v-if="editable && (isEditModeForProperty(property))"
               >
                 <v-btn
                   text
@@ -95,8 +96,9 @@ permissions and limitations under the Licence.
               </template>
 
               <v-menu
-                v-if="$auth.loggedIn && (!isEditModeForSomeProperty())"
+                v-if="editable && (!isEditModeForSomeProperty())"
                 close-on-click
+
                 close-on-content-click
                 offset-x
                 left
@@ -180,7 +182,7 @@ permissions and limitations under the Licence.
           </v-dialog>
         </v-expansion-panel-header>
         <v-expansion-panel-content>
-          <template v-if="isEditModeForProperty(property)">
+          <template v-if="isEditModeForProperty(property) && !isNewPropertyPage">
             <NuxtChild
               :ref="'deviceProperty_' + property.id"
               v-model="deviceProperties[index]"
@@ -205,16 +207,29 @@ permissions and limitations under the Licence.
         </v-expansion-panel-content>
       </v-expansion-panel>
     </v-expansion-panels>
+    <template v-if="isNewPropertyPage">
+      <NuxtChild
+        id="deviceProperty_new"
+        ref="deviceProperty_new"
+        :compartments="compartments"
+        :sampling-medias="samplingMedias"
+        :properties="properties"
+        :units="units"
+        :measured-quantity-units="measuredQuantityUnits"
+        @showsave="showsave"
+        @input="addDevicePropertyToList"
+      />
+    </template>
     <v-card-actions
       v-if="deviceProperties.length > 3"
     >
       <v-spacer />
       <v-btn
-        v-if="$auth.loggedIn"
+        v-if="editable"
         :disabled="isEditPropertiesPage"
         color="primary"
         small
-        @click="addProperty"
+        @click="createProperty"
       >
         Add Measured Quantity
       </v-btn>
@@ -223,11 +238,12 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
+import { Component, Vue, Prop } from 'nuxt-property-decorator'
 
 import DevicePropertyInfo from '@/components/DevicePropertyInfo.vue'
 import HintCard from '@/components/HintCard.vue'
 
+import { Device } from '@/models/Device'
 import { DeviceProperty } from '@/models/DeviceProperty'
 import { Compartment } from '@/models/Compartment'
 import { Property } from '@/models/Property'
@@ -245,6 +261,19 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
   }
 })
 export default class DevicePropertiesPage extends Vue {
+  @Prop({
+    required: true,
+    type: Object
+  })
+  readonly value!: Device
+
+  // TODO: uncomment the next two lines and remove the third one after merging the permission management branch
+  // @InjectReactive()
+  //   editable!: boolean
+  get editable (): boolean {
+    return this.$auth.loggedIn
+  }
+
   private openedPanels: number[] = [] as number[]
   private deviceProperties: DeviceProperty[] = []
   private isLoading = false
@@ -263,17 +292,32 @@ export default class DevicePropertiesPage extends Vue {
       this.isLoading = true
       this.deviceProperties = await this.$api.devices.findRelatedDeviceProperties(this.deviceId)
       this.openPanelIfStartedInEditMode()
-      this.isLoading = false
     } catch (e) {
-      this.$store.commit('snackbar/setError', 'Failed to fetch measured quantities')
+      this.$store.commit('snackbar/setError', 'Loading of system values failed')
+    } finally {
       this.isLoading = false
     }
+
+    // we split above and the following request to speed up drawing of UI
     try {
-      this.compartments = await this.$api.compartments.findAllPaginated()
-      this.samplingMedias = await this.$api.samplingMedia.findAllPaginated()
-      this.properties = await this.$api.properties.findAllPaginated()
-      this.units = await this.$api.units.findAllPaginated()
-      this.measuredQuantityUnits = await this.$api.measuredQuantityUnits.findAllPaginated()
+      const [
+        compartments,
+        samplingMedias,
+        properties,
+        units,
+        measuredQuantityUnits
+      ] = await Promise.all([
+        this.$api.compartments.findAllPaginated(),
+        this.$api.samplingMedia.findAllPaginated(),
+        this.$api.properties.findAllPaginated(),
+        this.$api.units.findAllPaginated(),
+        this.$api.measuredQuantityUnits.findAllPaginated()
+      ])
+      this.compartments = compartments
+      this.samplingMedias = samplingMedias
+      this.properties = properties
+      this.units = units
+      this.measuredQuantityUnits = measuredQuantityUnits
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Loading of system values failed')
     }
@@ -288,6 +332,7 @@ export default class DevicePropertiesPage extends Vue {
   openPanelIfStartedInEditMode () {
     if (this.isEditPropertiesPage) {
       const propertyId = this.getPropertyIdFromUrl()
+
       if (propertyId) {
         const propertyIndex = this.deviceProperties.findIndex((p: DeviceProperty) => p.id === propertyId)
         if (propertyIndex > -1) {
@@ -311,6 +356,10 @@ export default class DevicePropertiesPage extends Vue {
     return !!this.$route.path.match(editUrl)
   }
 
+  get isNewPropertyPage (): boolean {
+    return this.$route.path === '/devices/' + this.deviceId + '/measuredquantities/new'
+  }
+
   getPropertyIdFromUrl (): string | undefined {
     // eslint-disable-next-line no-useless-escape
     const editUrl = '^\/devices\/' + this.deviceId + '\/measuredquantities\/([0-9]+)\/?.*$'
@@ -321,9 +370,13 @@ export default class DevicePropertiesPage extends Vue {
     return matches[1]
   }
 
-  addProperty (): void {
-    const property = new DeviceProperty()
-    this.copyProperty(property)
+  addDevicePropertyToList (newDeviceProperty: DeviceProperty) {
+    this.deviceProperties.push(newDeviceProperty)
+  }
+
+  createProperty (): void {
+    this.$vuetify.goTo(document.body.scrollHeight)
+    this.$router.push('/devices/' + this.deviceId + '/measuredquantities/new')
   }
 
   deleteAndCloseDialog (id: string) {
@@ -394,6 +447,7 @@ export default class DevicePropertiesPage extends Vue {
 
   openInEditMode (property: DeviceProperty) {
     const propertyIndex = this.deviceProperties.findIndex((p: DeviceProperty) => p.id === property.id)
+
     if (propertyIndex > -1) {
       const openPanelIndex = this.openedPanels.findIndex((v: number) => v === propertyIndex)
       const alreadyExpanded = openPanelIndex > -1
