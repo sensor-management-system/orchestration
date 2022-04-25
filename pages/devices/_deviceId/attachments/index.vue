@@ -39,9 +39,9 @@
     >
       <v-spacer />
       <v-btn
-        v-if="$auth.loggedIn"
         color="primary"
         small
+        :to="'/devices/' + deviceId + '/attachments/new'"
       >
         Add Attachment
       </v-btn>
