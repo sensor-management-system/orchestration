@@ -33,83 +33,141 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
-import { ActionContext } from 'vuex/types'
+import { ActionContext, Commit } from 'vuex/types'
 import { DateTime } from 'luxon'
 
 import { Configuration } from '@/models/Configuration'
 import { Project } from '@/models/Project'
+import { IConfigurationSearchParams } from '@/modelUtils/ConfigurationSearchParams'
 
-export interface ConfigurationsStoreState {
-  configuration: Configuration,
-  projects: Project[],
-  configurationStates: string[]
-  configurationEditDate: DateTime
+export interface configurationsState {
+  configurations: Configuration[]
+  configuration: Configuration|null,
+  totalPages: number
+  pageNumber: number
+  pageSize: number
+  // projects: Project[],
+  // configurationStates: string[]
+  // configurationEditDate: DateTime
 }
 
-export const state = (): ConfigurationsStoreState => {
-  return {
-    configuration: new Configuration(),
-    projects: [],
-    configurationStates: [],
-    configurationEditDate: DateTime.utc()
+const state={
+  configurations:[],
+  configuration:null,
+  totalPages: 1,
+  pageNumber: 1,
+  pageSize: 20
+}
+
+const getters={}
+
+const actions={
+  async searchConfigurationsPaginated({commit,state}:{commit:Commit,state:configurationsState},searchParams:IConfigurationSearchParams){
+    // @ts-ignore
+    const { elements, totalCount } = await this.$api.configurations
+      .setSearchText(searchParams.searchText)
+      .setSearchedProjects(searchParams.projects)
+      .setSearchedStates(searchParams.states)
+      .searchPaginated(state.pageNumber,state.pageSize)
+    commit('setConfigurations',elements)
+
+    const totalPages = Math.ceil(totalCount / state.pageSize)
+    commit('setTotalPages', totalPages)
+  },
+  async loadConfiguration({ commit }: { commit: Commit },id:number){
+
+  },
+  setPageNumber ({ commit }: { commit: Commit }, newPageNumber: number) {
+    commit('setPageNumber', newPageNumber)
   }
 }
 
-export const mutations = {
-  setConfiguration (state: ConfigurationsStoreState, configuration: Configuration) {
-    state.configuration = configuration
+const mutations={
+  setConfigurations(state:configurationsState,configurations:Configuration[]){
+    state.configurations=configurations
   },
-  setProjects (state: ConfigurationsStoreState, projects: Project[]) {
-    state.projects = projects
+  setConfiguration(state:configurationsState,configuration:Configuration){
+    state.configuration=configuration
   },
-  setConfigurationsStates (state: ConfigurationsStoreState, configurationStates: string[]) {
-    state.configurationStates = configurationStates
+  setPageNumber (state: configurationsState, newPageNumber: number) {
+    state.pageNumber = newPageNumber
   },
-  setConfigurationEditDate (state: ConfigurationsStoreState, configurationEditDate: DateTime) {
-    state.configurationEditDate = configurationEditDate
+  setTotalPages (state: configurationsState, count: number) {
+    state.totalPages = count
   }
 }
+// export const state = (): ConfigurationsStoreState => {
+//   return {
+//     configuration: new Configuration(),
+//     projects: [],
+//     configurationStates: [],
+//     configurationEditDate: DateTime.utc()
+//   }
+// }
+//
+// export const mutations = {
+//   setConfiguration (state: ConfigurationsStoreState, configuration: Configuration) {
+//     state.configuration = configuration
+//   },
+//   setProjects (state: ConfigurationsStoreState, projects: Project[]) {
+//     state.projects = projects
+//   },
+//   setConfigurationsStates (state: ConfigurationsStoreState, configurationStates: string[]) {
+//     state.configurationStates = configurationStates
+//   },
+//   setConfigurationEditDate (state: ConfigurationsStoreState, configurationEditDate: DateTime) {
+//     state.configurationEditDate = configurationEditDate
+//   }
+// }
+//
+// export const actions = {
+//   async loadProjects (context: ActionContext<ConfigurationsStoreState, ConfigurationsStoreState>) {
+//     // @ts-ignore
+//     const projects = await this.$api.projects.findAll()
+//     context.commit('setProjects', projects)
+//   },
+//   async loadConfigurationsStates (context: ActionContext<ConfigurationsStoreState, ConfigurationsStoreState>) {
+//     // @ts-ignore
+//     const configurationStates = await this.$api.configurationStates.findAll()
+//     context.commit('setConfigurationsStates', configurationStates)
+//   },
+//   async loadConfigurationById (context: ActionContext<ConfigurationsStoreState, ConfigurationsStoreState>, id: string) {
+//     const oldConfigurationId = context.state.configuration?.id
+//     // @ts-ignore
+//     const configuration = await this.$api.configurations.findById(id)
+//     context.commit('setConfiguration', configuration)
+//
+//     // for the edit date:
+//     // the moment we open the very same configuration, we want to stay with the
+//     // current edit date (say we switch from the platform & devices tab to the one
+//     // for the locations).
+//     // However, in case we load a different configuration there is no point in
+//     // reusing the old date (it is very likely that it doesn't make sense for
+//     // the now selected configuration).
+//     if (oldConfigurationId && oldConfigurationId !== id) {
+//       context.commit('setConfigurationEditDate', DateTime.utc())
+//     }
+//   },
+//   async saveConfiguration (context: ActionContext<ConfigurationsStoreState, ConfigurationsStoreState>) {
+//     // @ts-ignore
+//     const configuration = await this.$api.configurations.save(context.state.configuration)
+//     context.commit('setConfiguration', configuration)
+//   }
+// }
+//
+// export const getters = {
+//   projectNames: (state: ConfigurationsStoreState) => {
+//     return state.projects.map((p: Project) => p.name)
+//   },
+//   configurationEditDate (state: ConfigurationsStoreState): DateTime {
+//     return state.configurationEditDate || DateTime.utc()
+//   }
+// }
 
-export const actions = {
-  async loadProjects (context: ActionContext<ConfigurationsStoreState, ConfigurationsStoreState>) {
-    // @ts-ignore
-    const projects = await this.$api.projects.findAll()
-    context.commit('setProjects', projects)
-  },
-  async loadConfigurationsStates (context: ActionContext<ConfigurationsStoreState, ConfigurationsStoreState>) {
-    // @ts-ignore
-    const configurationStates = await this.$api.configurationStates.findAll()
-    context.commit('setConfigurationsStates', configurationStates)
-  },
-  async loadConfigurationById (context: ActionContext<ConfigurationsStoreState, ConfigurationsStoreState>, id: string) {
-    const oldConfigurationId = context.state.configuration?.id
-    // @ts-ignore
-    const configuration = await this.$api.configurations.findById(id)
-    context.commit('setConfiguration', configuration)
-
-    // for the edit date:
-    // the moment we open the very same configuration, we want to stay with the
-    // current edit date (say we switch from the platform & devices tab to the one
-    // for the locations).
-    // However, in case we load a different configuration there is no point in
-    // reusing the old date (it is very likely that it doesn't make sense for
-    // the now selected configuration).
-    if (oldConfigurationId && oldConfigurationId !== id) {
-      context.commit('setConfigurationEditDate', DateTime.utc())
-    }
-  },
-  async saveConfiguration (context: ActionContext<ConfigurationsStoreState, ConfigurationsStoreState>) {
-    // @ts-ignore
-    const configuration = await this.$api.configurations.save(context.state.configuration)
-    context.commit('setConfiguration', configuration)
-  }
-}
-
-export const getters = {
-  projectNames: (state: ConfigurationsStoreState) => {
-    return state.projects.map((p: Project) => p.name)
-  },
-  configurationEditDate (state: ConfigurationsStoreState): DateTime {
-    return state.configurationEditDate || DateTime.utc()
-  }
+export default {
+  namespaced: true,
+  state,
+  getters,
+  actions,
+  mutations
 }

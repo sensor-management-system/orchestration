@@ -30,11 +30,122 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ConfigurationsSearch
-      :active-tab="activeTab"
-      load-initial-data
-      :delete-callback="deleteConfiguration"
-      @change-active-tab="activeTab = $event"
+<!--    <ConfigurationsSearch-->
+<!--      :active-tab="activeTab"-->
+<!--      load-initial-data-->
+<!--      :delete-callback="deleteConfiguration"-->
+<!--      @change-active-tab="activeTab = $event"-->
+<!--    />-->
+    <v-progress-circular
+      v-if="loading"
+      class="progress-spinner"
+      color="primary"
+      indeterminate
+    />
+    <div v-if="configurations.length <=0 && !loading">
+      <p class="text-center">
+        There are no platforms that match your search criteria.
+      </p>
+    </div>
+    <div
+      v-if="configurations.length >0"
+    >
+      <v-subheader>
+        <template v-if="configurations.length == 1">
+          1 configuration found
+        </template>
+        <template v-else>
+          {{ configurations.length }} configurations found
+        </template>
+        <v-spacer />
+
+<!--        <template v-if="platforms.length>0">-->
+<!--          <v-dialog v-model="processing" max-width="100">-->
+<!--            <v-card>-->
+<!--              <v-card-text>-->
+<!--                <div class="text-center pt-2">-->
+<!--                  <v-progress-circular indeterminate />-->
+<!--                </div>-->
+<!--              </v-card-text>-->
+<!--            </v-card>-->
+<!--          </v-dialog>-->
+<!--          <v-menu-->
+<!--            close-on-click-->
+<!--            close-on-content-click-->
+<!--            offset-x-->
+<!--            left-->
+<!--            z-index="999"-->
+<!--          >-->
+<!--            <template #activator="{ on }">-->
+<!--              <v-btn-->
+<!--                icon-->
+<!--                v-on="on"-->
+<!--              >-->
+<!--                <v-icon-->
+<!--                  dense-->
+<!--                >-->
+<!--                  mdi-file-download-->
+<!--                </v-icon>-->
+<!--              </v-btn>-->
+<!--            </template>-->
+<!--            <v-list>-->
+<!--              <v-list-item-->
+<!--                dense-->
+<!--                @click.prevent="exportCsv"-->
+<!--              >-->
+<!--                <v-list-item-content>-->
+<!--                  <v-list-item-title>-->
+<!--                    <v-icon-->
+<!--                      left-->
+<!--                    >-->
+<!--                      mdi-table-->
+<!--                    </v-icon>-->
+<!--                    CSV-->
+<!--                  </v-list-item-title>-->
+<!--                </v-list-item-content>-->
+<!--              </v-list-item>-->
+<!--            </v-list>-->
+<!--          </v-menu>-->
+<!--        </template>-->
+      </v-subheader>
+
+
+      <v-pagination
+        v-model="page"
+        :disabled="loading"
+        :length="totalPages"
+        :total-visible="7"
+        @input="runSearch"
+      />
+      <BaseList
+        :list-items="configurations"
+      >
+        <template #list-item="{item}">
+          <ConfigurationsListItem
+            :configuration="item"
+          >
+            <template #dot-menu-items>
+              <DotMenuActionDelete
+                :readonly="!$auth.loggedIn"
+                @click="initDeleteDialog(item)"
+                />
+            </template>
+          </ConfigurationsListItem>
+        </template>
+      </BaseList>
+      <v-pagination
+        v-model="page"
+        :disabled="loading"
+        :length="totalPages"
+        :total-visible="7"
+        @input="runSearch"
+      />
+    </div>
+    <ConfigurationsDeleteDialog
+      v-model="showDeleteDialog"
+      :configuration-to-delete="configurationToDelete"
+      @cancel-deletion="closeDialog"
+      @submit-deletion="deleteAndCloseDialog"
     />
     <v-btn
       v-if="$auth.loggedIn"
@@ -59,28 +170,66 @@ permissions and limitations under the Licence.
 import { Component, Vue } from 'nuxt-property-decorator'
 import { Configuration } from '@/models/Configuration'
 
-import ConfigurationsOverviewCard from '@/components/configurations/ConfigurationsOverviewCard.vue'
+import BaseList from '@/components/shared/BaseList.vue'
+import ConfigurationsListItem from '@/components/configurations/ConfigurationsListItem.vue'
+import { mapActions, mapState } from 'vuex'
+import { IConfigurationSearchParams } from '@/modelUtils/ConfigurationSearchParams'
 import ConfigurationsDeleteDialog from '@/components/configurations/ConfigurationsDeleteDialog.vue'
-import ConfigurationsDownloader from '@/components/configurations/ConfigurationsDownloader.vue'
-import ConfigurationsBasicSearch from '@/components/configurations/ConfigurationsBasicSearch.vue'
-import ConfigurationsExtendedSearch from '@/components/configurations/ConfigurationsExtendedSearch.vue'
-import ConfigurationsSearch from '@/components/configurations/ConfigurationsSearch.vue'
+import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 
 @Component({
   components: {
-    ConfigurationsSearch,
-    ConfigurationsExtendedSearch,
-    ConfigurationsBasicSearch,
-    ConfigurationsDownloader,
+    DotMenuActionDelete,
     ConfigurationsDeleteDialog,
-    ConfigurationsOverviewCard
-  }
+    ConfigurationsListItem,
+    BaseList
+  },
+  computed:mapState('configurations',['configurations','pageNumber','pageSize','totalPages']),
+  methods:mapActions('configurations',['searchConfigurationsPaginated','setPageNumber'])
 })
 // @ts-ignore
 export default class SearchConfigurationsPage extends Vue {
-  created () {
+  private searchText: string | null = null
+  private loading=false
+
+  private showDeleteDialog: boolean = false
+  private configurationToDelete: Configuration | null = null
+
+  async created () {
     this.initializeAppBar()
+    await this.runInitialSearch()
   }
+
+  get searchParams() : IConfigurationSearchParams{ //Todo rest
+    return {
+      searchText: this.searchText,
+      states:[],
+      projects:[]
+    }
+  }
+  get page(){
+    return this.pageNumber;
+  }
+
+  set page(newVal){
+    this.setPageNumber(newVal);
+  }
+
+  async runInitialSearch() {
+    //todo an andere entitäten angleichen
+    await this.runSearch()
+    }
+
+  async runSearch() {
+    try {
+      this.loading=true
+      this.searchConfigurationsPaginated(this.searchParams);
+    } catch (_error) {
+      this.$store.commit('snackbar/setError', 'Loading of platforms failed')
+    }finally {
+      this.loading=false
+    }
+    }
 
   beforeDestroy () {
     this.$store.dispatch('appbar/setDefaults')
@@ -96,22 +245,30 @@ export default class SearchConfigurationsPage extends Vue {
     })
   }
 
-  get activeTab (): number | null {
-    return this.$store.state.appbar.activeTab
+  initDeleteDialog (configuration: Configuration) {
+    this.showDeleteDialog = true
+    this.configurationToDelete = configuration
   }
 
-  set activeTab (tab: number | null) {
-    this.$store.commit('appbar/setActiveTab', tab)
+  closeDialog () {
+    this.showDeleteDialog = false
+    this.configurationToDelete = null
   }
 
-  async deleteConfiguration (configuration: Configuration) {
+  async deleteAndCloseDialog () {
+    if (this.configurationToDelete === null || this.configurations.id === null) {
+      this.closeDialog()
+      return
+    }
     try {
-      await this.$api.configurations.deleteById(configuration.id)
+      //Todo
+      this.loading = true
       this.$store.commit('snackbar/setSuccess', 'Configuration deleted')
-    } catch (_error) {
+    } catch {
       this.$store.commit('snackbar/setError', 'Configuration could not be deleted')
-      // throw the error again so that the caller knows that something went wrong
-      throw _error
+    }finally {
+      this.loading = false
+      this.closeDialog()
     }
   }
 }

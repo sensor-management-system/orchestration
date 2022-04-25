@@ -75,6 +75,12 @@ export class ConfigurationApi {
   private dynamicLocationBeginActionApi: DynamicLocationBeginActionApi
   private dynamicLocationEndActionApi: DynamicLocationEndActionApi
 
+  private _searchedProjects: Project[] = []
+  private _searchedStates: string[] = []
+  private _searchText: string | null = null
+  private _searchedUserMail: string | null = null
+  private filterSettings: any[] = []
+
   private serializer: ConfigurationSerializer
 
   constructor (
@@ -84,7 +90,6 @@ export class ConfigurationApi {
     deviceUnmountActionApi: DeviceUnmountActionApi,
     platformMountActionApi: PlatformMountActionApi,
     platformUnmountActionApi: PlatformUnmountActionApi,
-
     staticLocationBeginActionApi: StaticLocationBeginActionApi,
     staticLocationEndActionApi: StaticLocationEndActionApi,
     dynamicLocationBeginActionApi: DynamicLocationBeginActionApi,
@@ -104,6 +109,132 @@ export class ConfigurationApi {
     this.dynamicLocationEndActionApi = dynamicLocationEndActionApi
 
     this.serializer = new ConfigurationSerializer()
+  }
+
+  get searchedProjects (): Project[] {
+    return this._searchedProjects
+  }
+
+  setSearchedProjects (value: Project[]) {
+    this._searchedProjects = value
+    return this
+  }
+
+  get searchedStates (): string[] {
+    return this._searchedStates
+  }
+
+  setSearchedStates (value: string[]) {
+    this._searchedStates = value
+    return this
+  }
+
+  get searchText (): string | null {
+    return this._searchText
+  }
+
+  setSearchText (value: string | null) {
+    this._searchText = value
+    return this
+  }
+
+  get searchedUserMail (): string | null {
+    return this._searchedUserMail
+  }
+
+  setSearchedUserMail (value: string | null) {
+    this._searchedUserMail = value
+    return this
+  }
+
+  private get commonParams (): any {
+    const result: any = {
+      filter: JSON.stringify(this.filterSettings)
+    }
+    if (this.searchText) {
+      result.q = this.searchText
+    }
+    result.sort = 'label'
+    return result
+  }
+
+  searchPaginated (pageNumber: number, pageSize: number) {
+    this.prepareSearch()
+
+    return this.axiosApi.get(
+      this.basePath,
+      {
+        params: {
+          'page[size]': pageSize,
+          'page[number]': pageNumber,
+          ...this.commonParams
+        }
+      }
+    ).then((rawResponse) => {
+      const rawData = rawResponse.data
+      // And - again - we don't ask the api here to load the contact data as well
+      // so we will add the dummy objects to stay with the relationships
+      const elements: Configuration[] = this.serializer.convertJsonApiObjectListToModelList(
+        rawData
+      ).map(configurationWithMetaToConfigurationByAddingDummyObjects)
+
+      const totalCount = rawData.meta.count
+
+      return {
+        elements,
+        totalCount
+      }
+    })
+  }
+
+  prepareSearch () {
+    this.resetFilterSetting()
+    this.prepareProjects()
+    this.prepareStates()
+    this.prepareMail()
+  }
+
+  resetFilterSetting () {
+    this.filterSettings = []
+  }
+
+  prepareProjects () {
+    if (this.searchedProjects.length > 0) {
+      this.filterSettings.push({
+        or: [
+          {
+            name: 'project_name',
+            op: 'in_',
+            val: this.searchedProjects.map((p: Project) => p.name)
+          },
+          {
+            name: 'project_uri',
+            op: 'in_',
+            val: this.searchedProjects.map((p: Project) => p.uri)
+          }
+        ]
+      })
+    }
+  }
+
+  prepareStates () {
+    if (this.searchedStates.length > 0) {
+      this.filterSettings.push({
+        name: 'status',
+        op: 'in_',
+        val: this.searchedStates
+      })
+    }
+  }
+
+  prepareMail () {
+    if (this.searchedUserMail) {
+      this.filterSettings.push({
+        name: 'contacts.email',
+        op: 'eq',
+        val: this.searchedUserMail
+      })
+    }
   }
 
   findById (id: string): Promise<Configuration> {
@@ -147,7 +278,7 @@ export class ConfigurationApi {
   }
 
   // eslint-disable-next-line
-  deleteById (id: string) : Promise<void> {
+  deleteById (id: string): Promise<void> {
     return this.axiosApi.delete<string, void>(this.basePath + '/' + id)
   }
 
@@ -368,9 +499,11 @@ export class ConfigurationApi {
     }
   }
 
-  newSearchBuilder (): ConfigurationSearchBuilder {
-    return new ConfigurationSearchBuilder(this.axiosApi, this.basePath, this.serializer)
-  }
+  // newSearchBuilder ()
+  //   :
+  //   ConfigurationSearchBuilder {
+  //   return new ConfigurationSearchBuilder(this.axiosApi, this.basePath, this.serializer)
+  // }
 
   findRelatedContacts (configurationId: string): Promise<Contact[]> {
     const url = this.basePath + '/' + configurationId + '/contacts'
@@ -403,213 +536,214 @@ export class ConfigurationApi {
   }
 }
 
-export class ConfigurationSearchBuilder {
-  private axiosApi: AxiosInstance
-  readonly basePath: string
+//
+// export class ConfigurationSearchBuilder {
+//   private axiosApi: AxiosInstance
+//   readonly basePath: string
+//
+//   private clientSideFilterFunc: (configuration: Configuration) => boolean
+//   private serverSideFilterSettings: IFlaskJSONAPIFilter[] = []
+//   private esTextFilter: string | null = null
+//   private serializer: ConfigurationSerializer
+//
+//   constructor (axiosApi: AxiosInstance, basePath: string, serializer: ConfigurationSerializer) {
+//     this.axiosApi = axiosApi
+//     this.basePath = basePath
+//     this.clientSideFilterFunc = (_c: Configuration) => true
+//     this.serializer = serializer
+//   }
+//
+//   withText (text: string | null) {
+//     if (text) {
+//       this.esTextFilter = text
+//     }
+//     return this
+//   }
+//
+//   withOneMatchingProjectOf (projects: Project[]) {
+//     if (projects.length > 0) {
+//       this.serverSideFilterSettings.push({
+//         or: [
+//           {
+//             name: 'project_name',
+//             op: 'in_',
+//             val: projects.map((p: Project) => p.name)
+//           },
+//           {
+//             name: 'project_uri',
+//             op: 'in_',
+//             val: projects.map((p: Project) => p.uri)
+//           }
+//         ]
+//       })
+//     }
+//     return this
+//   }
+//
+//   withOneLocationTypeOf (locationTypes: string[]) {
+//     if (locationTypes.length > 0) {
+//       this.serverSideFilterSettings.push({
+//         name: 'location_type',
+//         op: 'in_',
+//         val: locationTypes
+//       })
+//     }
+//     return this
+//   }
+//
+//   withOneStatusOf (states: string[]) {
+//     if (states.length > 0) {
+//       this.serverSideFilterSettings.push({
+//         name: 'status',
+//         op: 'in_',
+//         val: states
+//       })
+//     }
+//     return this
+//   }
+//
+//   withContactEmail (email: string) {
+//     this.serverSideFilterSettings.push({
+//       name: 'contacts.email',
+//       op: 'eq',
+//       val: email
+//     })
+//     return this
+//   }
 
-  private clientSideFilterFunc: (configuration: Configuration) => boolean
-  private serverSideFilterSettings: IFlaskJSONAPIFilter[] = []
-  private esTextFilter: string | null = null
-  private serializer: ConfigurationSerializer
+// build (): ConfigurationSearcher {
+//   return new ConfigurationSearcher(
+//     this.axiosApi,
+//     this.basePath,
+//     this.clientSideFilterFunc,
+//     this.serverSideFilterSettings,
+//     this.esTextFilter,
+//     this.serializer
+//   )
+// }
+// }
 
-  constructor (axiosApi: AxiosInstance, basePath: string, serializer: ConfigurationSerializer) {
-    this.axiosApi = axiosApi
-    this.basePath = basePath
-    this.clientSideFilterFunc = (_c: Configuration) => true
-    this.serializer = serializer
-  }
-
-  withText (text: string | null) {
-    if (text) {
-      this.esTextFilter = text
-    }
-    return this
-  }
-
-  withOneMatchingProjectOf (projects: Project[]) {
-    if (projects.length > 0) {
-      this.serverSideFilterSettings.push({
-        or: [
-          {
-            name: 'project_name',
-            op: 'in_',
-            val: projects.map((p: Project) => p.name)
-          },
-          {
-            name: 'project_uri',
-            op: 'in_',
-            val: projects.map((p: Project) => p.uri)
-          }
-        ]
-      })
-    }
-    return this
-  }
-
-  withOneLocationTypeOf (locationTypes: string[]) {
-    if (locationTypes.length > 0) {
-      this.serverSideFilterSettings.push({
-        name: 'location_type',
-        op: 'in_',
-        val: locationTypes
-      })
-    }
-    return this
-  }
-
-  withOneStatusOf (states: string[]) {
-    if (states.length > 0) {
-      this.serverSideFilterSettings.push({
-        name: 'status',
-        op: 'in_',
-        val: states
-      })
-    }
-    return this
-  }
-
-  withContactEmail (email: string) {
-    this.serverSideFilterSettings.push({
-      name: 'contacts.email',
-      op: 'eq',
-      val: email
-    })
-    return this
-  }
-
-  build (): ConfigurationSearcher {
-    return new ConfigurationSearcher(
-      this.axiosApi,
-      this.basePath,
-      this.clientSideFilterFunc,
-      this.serverSideFilterSettings,
-      this.esTextFilter,
-      this.serializer
-    )
-  }
-}
-
-export class ConfigurationSearcher {
-  private axiosApi: AxiosInstance
-  readonly basePath: string
-  private clientSideFilterFunc: (configuration: Configuration) => boolean
-  private serverSideFilterSettings: IFlaskJSONAPIFilter[]
-  private esTextFilter: string | null
-  private serializer: ConfigurationSerializer
-
-  constructor (
-    axiosApi: AxiosInstance,
-    basePath: string,
-    clientSideFilterFunc: (configuration: Configuration) => boolean,
-    serverSideFilterSettings: IFlaskJSONAPIFilter[],
-    esTextFilter: string | null,
-    serializer: ConfigurationSerializer
-  ) {
-    this.axiosApi = axiosApi
-    this.basePath = basePath
-    this.clientSideFilterFunc = clientSideFilterFunc
-    this.serverSideFilterSettings = serverSideFilterSettings
-    this.esTextFilter = esTextFilter
-    this.serializer = serializer
-  }
-
-  private get commonParams (): any {
-    const result: any = {
-      filter: JSON.stringify(this.serverSideFilterSettings)
-    }
-    if (this.esTextFilter != null) {
-      // In case we have a search string, then we want to
-      // sort by relevance (which is the default)
-      result.q = this.esTextFilter
-    } else {
-      // otherwise we want to search alphabetically
-      result.sort = 'label'
-    }
-    return result
-  }
-
-  findMatchingAsCsvBlob (): Promise<Blob> {
-    const url = this.basePath
-    return this.axiosApi.request({
-      url,
-      method: 'get',
-      headers: {
-        accept: 'text/csv'
-      },
-      params: {
-        'page[size]': 10000,
-        ...this.commonParams
-      }
-    }).then((response) => {
-      return new Blob([response.data], { type: 'text/csv;charset=utf-8' })
-    })
-  }
-
-  findMatchingAsList (): Promise<Configuration[]> {
-    return this.axiosApi.get(
-      this.basePath,
-      {
-        params: {
-          'page[size]': 100000,
-          ...this.commonParams
-        }
-      }
-    ).then((rawResponse: any) => {
-      const rawData = rawResponse.data
-      // We don't ask the api to load the contacts, so we just add dummy objects
-      // to stay with the relationships
-      return this.serializer
-        .convertJsonApiObjectListToModelList(rawData)
-        .map(configurationWithMetaToConfigurationByAddingDummyObjects)
-    })
-  }
-
-  findMatchingAsPaginationLoaderOnPage (page: number, pageSize: number): Promise<IPaginationLoader<Configuration>> {
-    return this.findAllOnPage(page, pageSize)
-  }
-
-  private findAllOnPage (page: number, pageSize: number): Promise<IPaginationLoader<Configuration>> {
-    return this.axiosApi.get(
-      this.basePath,
-      {
-        params: {
-          'page[size]': pageSize,
-          'page[number]': page,
-          ...this.commonParams
-        }
-      }
-    ).then((rawResponse) => {
-      const rawData = rawResponse.data
-      // And - again - we don't ask the api here to load the contact data as well
-      // so we will add the dummy objects to stay with the relationships
-      const elements: Configuration[] = this.serializer.convertJsonApiObjectListToModelList(
-        rawData
-      ).map(configurationWithMetaToConfigurationByAddingDummyObjects)
-
-      const totalCount = rawData.meta.count
-
-      // check if the provided page param is valid
-      if (totalCount > 0 && elements.length === 0) {
-        throw new RangeError('page is out of bounds')
-      }
-
-      let funToLoadNext = null
-      if (elements.length > 0) {
-        funToLoadNext = () => this.findAllOnPage(page + 1, pageSize)
-      }
-
-      let funToLoadPage = null
-      if (elements.length > 0) {
-        funToLoadPage = (pageNr: number) => this.findAllOnPage(pageNr, pageSize)
-      }
-
-      return {
-        elements,
-        totalCount,
-        page,
-        funToLoadNext,
-        funToLoadPage
-      }
-    })
-  }
-}
+// export class ConfigurationSearcher {
+//   private axiosApi: AxiosInstance
+//   readonly basePath: string
+//   private clientSideFilterFunc: (configuration: Configuration) => boolean
+//   private serverSideFilterSettings: IFlaskJSONAPIFilter[]
+//   private esTextFilter: string | null
+//   private serializer: ConfigurationSerializer
+//
+//   constructor (
+//     axiosApi: AxiosInstance,
+//     basePath: string,
+//     clientSideFilterFunc: (configuration: Configuration) => boolean,
+//     serverSideFilterSettings: IFlaskJSONAPIFilter[],
+//     esTextFilter: string | null,
+//     serializer: ConfigurationSerializer
+//   ) {
+//     this.axiosApi = axiosApi
+//     this.basePath = basePath
+//     this.clientSideFilterFunc = clientSideFilterFunc
+//     this.serverSideFilterSettings = serverSideFilterSettings
+//     this.esTextFilter = esTextFilter
+//     this.serializer = serializer
+//   }
+//
+//   private get commonParams (): any {
+//     const result: any = {
+//       filter: JSON.stringify(this.serverSideFilterSettings)
+//     }
+//     if (this.esTextFilter != null) {
+//       // In case we have a search string, then we want to
+//       // sort by relevance (which is the default)
+//       result.q = this.esTextFilter
+//     } else {
+//       // otherwise we want to search alphabetically
+//       result.sort = 'label'
+//     }
+//     return result
+//   }
+//
+//   findMatchingAsCsvBlob (): Promise<Blob> {
+//     const url = this.basePath
+//     return this.axiosApi.request({
+//       url,
+//       method: 'get',
+//       headers: {
+//         accept: 'text/csv'
+//       },
+//       params: {
+//         'page[size]': 10000,
+//         ...this.commonParams
+//       }
+//     }).then((response) => {
+//       return new Blob([response.data], { type: 'text/csv;charset=utf-8' })
+//     })
+//   }
+//
+//   findMatchingAsList (): Promise<Configuration[]> {
+//     return this.axiosApi.get(
+//       this.basePath,
+//       {
+//         params: {
+//           'page[size]': 100000,
+//           ...this.commonParams
+//         }
+//       }
+//     ).then((rawResponse: any) => {
+//       const rawData = rawResponse.data
+//       // We don't ask the api to load the contacts, so we just add dummy objects
+//       // to stay with the relationships
+//       return this.serializer
+//         .convertJsonApiObjectListToModelList(rawData)
+//         .map(configurationWithMetaToConfigurationByAddingDummyObjects)
+//     })
+//   }
+//
+//   findMatchingAsPaginationLoaderOnPage (page: number, pageSize: number): Promise<IPaginationLoader<Configuration>> {
+//     return this.findAllOnPage(page, pageSize)
+//   }
+//
+//   private findAllOnPage (page: number, pageSize: number): Promise<IPaginationLoader<Configuration>> {
+//     return this.axiosApi.get(
+//       this.basePath,
+//       {
+//         params: {
+//           'page[size]': pageSize,
+//           'page[number]': page,
+//           ...this.commonParams
+//         }
+//       }
+//     ).then((rawResponse) => {
+//       const rawData = rawResponse.data
+//       // And - again - we don't ask the api here to load the contact data as well
+//       // so we will add the dummy objects to stay with the relationships
+//       const elements: Configuration[] = this.serializer.convertJsonApiObjectListToModelList(
+//         rawData
+//       ).map(configurationWithMetaToConfigurationByAddingDummyObjects)
+//
+//       const totalCount = rawData.meta.count
+//
+//       // check if the provided page param is valid
+//       if (totalCount > 0 && elements.length === 0) {
+//         throw new RangeError('page is out of bounds')
+//       }
+//
+//       let funToLoadNext = null
+//       if (elements.length > 0) {
+//         funToLoadNext = () => this.findAllOnPage(page + 1, pageSize)
+//       }
+//
+//       let funToLoadPage = null
+//       if (elements.length > 0) {
+//         funToLoadPage = (pageNr: number) => this.findAllOnPage(pageNr, pageSize)
+//       }
+//
+//       return {
+//         elements,
+//         totalCount,
+//         page,
+//         funToLoadNext,
+//         funToLoadPage
+//       }
+//     })
+//   }
+// }
