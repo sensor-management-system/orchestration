@@ -100,6 +100,7 @@ import { SamplingMedia } from '@/models/SamplingMedia'
 import { Unit } from '@/models/Unit'
 import { MeasuredQuantityUnit } from '@/models/MeasuredQuantityUnit'
 import { DeviceProperty } from '@/models/DeviceProperty'
+import { mapActions, mapState } from 'vuex'
 
 /**
  * A class component that renders a form for a device property
