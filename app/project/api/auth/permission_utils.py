@@ -7,7 +7,7 @@ from sqlalchemy import and_, or_
 from ..auth.flask_openidconnect import open_id_connect
 from ..datalayers.esalchemy import AndFilter, OrFilter, TermEqualsExactStringFilter
 from ..helpers.errors import ForbiddenError
-from ..helpers.resource_mixin import add_created_by_id, add_updated_by_id
+from ..helpers.resource_mixin import add_created_by_id
 from ..models import Configuration
 from ..models.base_model import db
 from ..services.idl_services import Idl
@@ -164,9 +164,6 @@ def check_patch_permission(data, object_to_patch):
                 )
         else:
             raise ObjectNotFound(f"Object with id: {data['id']} not found!")
-
-    # Add update by id to data
-    add_updated_by_id(data)
 
 
 def check_deletion_permission(kwargs, object_to_delete):
