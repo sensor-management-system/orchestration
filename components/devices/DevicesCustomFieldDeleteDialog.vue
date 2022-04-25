@@ -9,7 +9,7 @@
         Delete Field
       </v-card-title>
       <v-card-text>
-        Do you really want to delete the field <em>{{ field.key }}</em>?-->?
+        Do you really want to delete the field <em>{{ customFieldToDelete.key }}</em>-->{{ customFieldToDelete.value }}?
       </v-card-text>
       <v-card-actions>
         <v-btn

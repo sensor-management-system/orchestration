@@ -70,56 +70,49 @@ import { CustomTextField } from '@/models/CustomTextField'
 import CustomFieldCardForm from '@/components/CustomFieldCardForm.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
+import { mapActions, mapState } from 'vuex'
+
 @Component({
   components: {
     CustomFieldCardForm,
     ProgressIndicator
   },
-  middleware: ['auth']
+  middleware: ['auth'],
+  computed: mapState('devices',['deviceCustomField']),
+  methods: mapActions('devices',['loadDeviceCustomField','loadDeviceCustomFields','updateDeviceCustomField'])
 })
 export default class DeviceCustomFieldsShowPage extends Vue {
   private isSaving: boolean = false
   private valueCopy: CustomTextField = new CustomTextField()
 
-  @Prop({
-    required: true,
-    type: Object
-  })
-  readonly value!: CustomTextField
-
-  created () {
-    this.valueCopy = CustomTextField.createFromObject(this.value)
-  }
-
-  mounted () {
-    (this.$refs.customFieldCardForm as Vue & { focus: () => void}).focus()
-    const cancelButton = this.$refs.cancelButton as Vue
-    // due to the active route (and the button being a router link)
-    // this button has the active class
-    // however, we don't want this special behaviour for this button
-    cancelButton.$el.classList.remove('v-btn--active')
+  async created () {
+    await this.loadDeviceCustomField(this.customFieldId);
+    this.valueCopy = CustomTextField.createFromObject(this.deviceCustomField)
   }
 
   get deviceId (): string {
     return this.$route.params.deviceId
   }
 
-  save (): void {
-    this.isSaving = true
-    this.$api.customfields.update(this.deviceId, this.valueCopy).then((newField: CustomTextField) => {
-      this.isSaving = false
-      this.$emit('input', newField)
-      this.$router.push('/devices/' + this.deviceId + '/customfields')
-    }).catch(() => {
-      this.isSaving = false
-      this.$store.commit('snackbar/setError', 'Failed to save custom field')
-    })
+  get customFieldId():string{
+    return this.$route.params.customfieldId;
   }
 
-  @Watch('value', { immediate: true, deep: true })
-  // @ts-ignore
-  onValueChanged (val: CustomTextField) {
-    this.valueCopy = CustomTextField.createFromObject(val)
+  async save (): void {
+
+    try {
+      this.isSaving = true
+      await this.updateDeviceCustomField({
+        deviceId: this.deviceId,
+        deviceCustomField: this.valueCopy
+      })
+      this.loadDeviceCustomFields(this.deviceId)
+      this.$router.push('/devices/' + this.deviceId + '/customfields')
+    } catch (e) {
+      this.$store.commit('snackbar/setError', 'Failed to save custom field')
+    } finally {
+      this.isSaving = false
+    }
   }
 }
 </script>

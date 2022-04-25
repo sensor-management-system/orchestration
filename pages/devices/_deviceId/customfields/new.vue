@@ -60,7 +60,7 @@ import { CustomTextField } from '@/models/CustomTextField'
 import { mapActions } from 'vuex'
 @Component({
   components: { CustomFieldForm },
-  methods:mapActions('devices',['addDeviceCustomField'])
+  methods:mapActions('devices',['addDeviceCustomField','loadDeviceCustomFields'])
 })
 export default class DeviceCustomFieldAddPage extends Vue {
   private customField:CustomTextField = new CustomTextField()
@@ -76,6 +76,7 @@ export default class DeviceCustomFieldAddPage extends Vue {
         deviceId: this.deviceId,
         deviceCustomField: this.customField
       })
+      this.loadDeviceCustomFields(this.deviceId)
       this.$router.push('/devices/' + this.deviceId + '/customfields')
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to save custom field')
