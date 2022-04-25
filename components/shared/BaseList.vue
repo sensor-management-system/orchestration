@@ -1,7 +1,7 @@
 <template>
   <div>
-    <template v-for="item in listItems" >
-      <slot name="list-item" :item="item">
+    <template v-for="(item,index) in listItems" >
+      <slot name="list-item" :item="item" :index="index">
 
       </slot>
     </template>

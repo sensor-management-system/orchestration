@@ -6,6 +6,11 @@ import { DeviceType } from '@/models/DeviceType'
 import { Platform } from '@/models/Platform'
 import { ActionType } from '@/models/ActionType'
 import { ACTION_TYPE_API_FILTER_DEVICE, ACTION_TYPE_API_FILTER_PLATFORM } from '@/services/cv/ActionTypeApi'
+import { Compartment } from '@/models/Compartment'
+import { SamplingMedia } from '@/models/SamplingMedia'
+import { Property } from '@/models/Property'
+import { Unit } from '@/models/Unit'
+import { MeasuredQuantityUnit } from '@/models/MeasuredQuantityUnit'
 
 interface vocabularyState {
   manufacturers: Manufacturer[]
@@ -13,7 +18,12 @@ interface vocabularyState {
   devicetypes: DeviceType[]
   platformtypes: PlatformType[],
   platformGenericActionTypes: ActionType[],
-  deviceGenericActionTypes:ActionType[]
+  deviceGenericActionTypes: ActionType[],
+  compartments: Compartment[],
+  samplingMedia: SamplingMedia[],
+  properties: Property[],
+  units: Unit[],
+  measuredQuantityUnits: MeasuredQuantityUnit[]
 }
 
 const state = {
@@ -22,12 +32,14 @@ const state = {
   devicetypes: [],
   platformtypes: [],
   platformGenericActionTypes: [],
-  deviceGenericActionTypes:[]
+  deviceGenericActionTypes: [],
+  compartments:[],
+  samplingMedia:[],
+  properties:[],
+  units:[],
+  measuredQuantityUnits:[]
 }
-// if (this.statusLookup.has(platform.statusUri)) {
-//   const platformStatus: Status = this.statusLookup.get(platform.statusUri) as Status
-//   return platformStatus.name
-// }
+
 const getters = {
   getPlatformTypeByUri: (state: vocabularyState) => (uri: string): PlatformType | undefined => {
     return state.platformtypes.find((platformType: PlatformType) => {
@@ -72,8 +84,23 @@ const actions = {
     commit('setPlatformGenericActionTypes', await this.$api.actionTypes.newSearchBuilder().onlyType(ACTION_TYPE_API_FILTER_PLATFORM).build().findMatchingAsList()
     )
   },
-  async loadDeviceGenericActionTypes({ commit }: { commit: Commit }){
+  async loadDeviceGenericActionTypes ({ commit }: { commit: Commit }) {
     commit('setDeviceGenericActionTypes', await this.$api.actionTypes.newSearchBuilder().onlyType(ACTION_TYPE_API_FILTER_DEVICE).build().findMatchingAsList())
+  },
+  async loadCompartments({ commit }: { commit: Commit }) {
+    commit('setCompartments',await this.$api.compartments.findAllPaginated())
+  },
+  async loadSamplingMedia({ commit }: { commit: Commit }) {
+    commit('setSamplingMedia',await this.$api.samplingMedia.findAllPaginated())
+  },
+  async loadProperties({ commit }: { commit: Commit }) {
+    commit('setProperties',await this.$api.properties.findAllPaginated())
+  },
+  async loadUnits({ commit }: { commit: Commit }) {
+    commit('setUnits',await this.$api.units.findAllPaginated())
+  },
+  async loadMeasuredQuantityUnits({ commit }: { commit: Commit }) {
+    commit('setMeasuredQuantityUnits',await this.$api.measuredQuantityUnits.findAllPaginated())
   }
 }
 
@@ -93,8 +120,23 @@ const mutations = {
   setPlatformGenericActionTypes (state: vocabularyState, platformGenericActionTypes: ActionType[]) {
     state.platformGenericActionTypes = platformGenericActionTypes
   },
-  setDeviceGenericActionTypes(state:vocabularyState,deviceGenericACtionTypes:ActionType[]){
-    state.deviceGenericActionTypes=deviceGenericACtionTypes
+  setDeviceGenericActionTypes (state: vocabularyState, deviceGenericACtionTypes: ActionType[]) {
+    state.deviceGenericActionTypes = deviceGenericACtionTypes
+  },
+  setCompartments (state: vocabularyState, compartments: Compartment[]) {
+    state.compartments = compartments
+  },
+  setSamplingMedia (state: vocabularyState, samplingMedia: SamplingMedia[]) {
+    state.samplingMedia = samplingMedia
+  },
+  setProperties (state: vocabularyState, properties: Property[]) {
+    state.properties = properties
+  },
+  setUnits (state: vocabularyState, units: Unit[]) {
+    state.units = units
+  },
+  setMeasuredQuantityUnits (state: vocabularyState, measuredQuantityUnits: MeasuredQuantityUnit[]) {
+    state.measuredQuantityUnits = measuredQuantityUnits
   }
 }
 

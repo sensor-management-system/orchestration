@@ -34,6 +34,7 @@ interface devicesState {
   deviceAttachments: Attachment[],
   deviceAttachment: Attachment | null,
   deviceMeasuredQuantities: DeviceProperty[],
+  deviceMeasuredQuantity: DeviceProperty|null,
   deviceGenericActions: GenericAction[],
   deviceSoftwareUpdateActions: SoftwareUpdateAction[],
   deviceCalibrationActions: DeviceCalibrationAction[],
@@ -57,6 +58,7 @@ const state = {
   deviceAttachments: [],
   deviceAttachment: null,
   deviceMeasuredQuantities: [],
+  deviceMeasuredQuantity:null,
   deviceGenericActions: [],
   deviceSoftwareUpdateActions: [],
   deviceGenericAction: null,
@@ -143,6 +145,10 @@ const actions = {
     commit('setDeviceAttachment', deviceAttachment)
   },
   async loadDeviceMeasuredQuantities ({ commit }: { commit: Commit }, id: number) {
+    const deviceMeasuredQuantities = await this.$api.devices.findRelatedDeviceProperties(id)
+    commit('setDeviceMeasuredQuantities', deviceMeasuredQuantities)
+  },
+  async loadDeviceMeasuredQuantity ({ commit }: { commit: Commit }, id: number) { // Todo
     const deviceMeasuredQuantities = await this.$api.devices.findRelatedDeviceProperties(id)
     commit('setDeviceMeasuredQuantities', deviceMeasuredQuantities)
   },
@@ -244,8 +250,8 @@ const actions = {
   }: { deviceId: number, attachment: Attachment }): Promise<void> {
     return this.$api.deviceAttachments.update(deviceId, attachment)
   },
-  async deleteDeviceCustomField ({ commit }: { commit: Commit }, attachmentId: number): Promise<void> {
-    return this.$api.customfields.deleteById(attachmentId)
+  async deleteDeviceCustomField ({ commit }: { commit: Commit }, customField: number): Promise<void> {
+    return this.$api.customfields.deleteById(customField)
   },
   async addDeviceCustomField ({ commit }: { commit: Commit }, {
     deviceId,
@@ -258,6 +264,21 @@ const actions = {
     deviceCustomField
   }: { deviceId: number, deviceCustomField: CustomTextField }): Promise<void> {
     return this.$api.customfields.update(deviceId, deviceCustomField)
+  },
+  async deleteDeviceMeasuredQuantity ({ commit }: { commit: Commit }, measuredQuantityId: number): Promise<void> {
+    return this.$api.deviceProperties.deleteById(measuredQuantityId)
+  },
+  async addDeviceMeasuredQuantity ({ commit }: { commit: Commit }, {
+    deviceId,
+    deviceMeasuredQuantity
+  }: { deviceId: number, deviceMeasuredQuantity: DeviceProperty }): Promise<void> {
+    return this.$api.deviceProperties.add(deviceId, deviceMeasuredQuantity)
+  },
+  updateDeviceMeasuredQuantity ({ commit }: { commit: Commit }, {
+    deviceId,
+    deviceMeasuredQuantity
+  }: { deviceId: number, deviceMeasuredQuantity: DeviceProperty }): Promise<void> {
+    return this.$api.deviceProperties.update(deviceId, deviceMeasuredQuantity)
   },
   async addDeviceContact ({ commit }: { commit: Commit }, {
     deviceId,
@@ -324,6 +345,9 @@ const mutations = {
   },
   setDeviceMeasuredQuantities (state: devicesState, deviceMeasuredQuantities: DeviceProperty[]) {
     state.deviceMeasuredQuantities = deviceMeasuredQuantities
+  },
+  setDeviceMeasuredQuantity (state: devicesState, deviceMeasuredQuantity: DeviceProperty) {
+    state.deviceMeasuredQuantity = deviceMeasuredQuantity
   },
   setDeviceGenericActions (state: devicesState, deviceGenericActions: GenericAction[]) {
     state.deviceGenericActions = deviceGenericActions
