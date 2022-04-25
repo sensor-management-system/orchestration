@@ -38,7 +38,7 @@ permissions and limitations under the Licence.
       flat
     >
       <v-card-actions>
-        <v-spacer />
+        <v-spacer/>
         <v-btn
           v-if="$auth.loggedIn"
           small
@@ -70,16 +70,16 @@ permissions and limitations under the Licence.
         </v-row>
         <v-row dense>
           <v-col cols="12" md="2">
-            <v-checkbox v-model="copyContacts" label="Contacts" />
+            <v-checkbox v-model="copyContacts" label="Contacts"/>
           </v-col>
           <v-col cols="12" md="2">
-            <v-checkbox v-model="copyMeasuredQuantities" label="Measured quantities" />
+            <v-checkbox v-model="copyMeasuredQuantities" label="Measured quantities"/>
           </v-col>
           <v-col cols="12" md="2">
-            <v-checkbox v-model="copyCustomFields" label="Custom fields" />
+            <v-checkbox v-model="copyCustomFields" label="Custom fields"/>
           </v-col>
           <v-col cols="12" md="2">
-            <v-checkbox v-model="copyAttachments" label="Attachments" />
+            <v-checkbox v-model="copyAttachments" label="Attachments"/>
           </v-col>
         </v-row>
         <v-row dense>
@@ -90,7 +90,7 @@ permissions and limitations under the Licence.
       </v-alert>
       <DeviceBasicDataForm
         ref="basicForm"
-        v-model="device"
+        v-model="deviceToCopy"
         :persistent-identifier-placeholder="persistentIdentifierPlaceholder"
         :serial-number-placeholder="serialNumberPlaceholder"
         :inventory-number-placeholder="inventoryNumberPlaceholder"
@@ -109,16 +109,16 @@ permissions and limitations under the Licence.
         </v-row>
         <v-row dense>
           <v-col cols="12" md="2">
-            <v-checkbox v-model="copyContacts" label="Contacts" />
+            <v-checkbox v-model="copyContacts" label="Contacts"/>
           </v-col>
           <v-col cols="12" md="2">
-            <v-checkbox v-model="copyMeasuredQuantities" label="Measured quantities" />
+            <v-checkbox v-model="copyMeasuredQuantities" label="Measured quantities"/>
           </v-col>
           <v-col cols="12" md="2">
-            <v-checkbox v-model="copyCustomFields" label="Custom fields" />
+            <v-checkbox v-model="copyCustomFields" label="Custom fields"/>
           </v-col>
           <v-col cols="12" md="2">
-            <v-checkbox v-model="copyAttachments" label="Attachments" />
+            <v-checkbox v-model="copyAttachments" label="Attachments"/>
           </v-col>
         </v-row>
         <v-row dense>
@@ -128,7 +128,7 @@ permissions and limitations under the Licence.
         </v-row>
       </v-alert>
       <v-card-actions>
-        <v-spacer />
+        <v-spacer/>
         <v-btn
           v-if="$auth.loggedIn"
           small
@@ -164,21 +164,23 @@ import { DeviceProperty } from '@/models/DeviceProperty'
 
 import DeviceBasicDataForm from '@/components/DeviceBasicDataForm.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { mapActions, mapState } from 'vuex'
 
 @Component({
   components: {
     DeviceBasicDataForm,
     ProgressIndicator
   },
-  middleware: ['auth']
+  middleware: ['auth'],
+  computed:mapState('devices',['device']),
+  methods:mapActions('devices',['copyDevice','loadDevice'])
 })
 // @ts-ignore
 export default class DeviceCopyPage extends mixins(Rules) {
   private numberOfTabs: number = 1
 
-  private device: Device = new Device()
-  private existingDevice: Device = new Device()
-  private isLoading: boolean = true
+  private deviceToCopy: Device = new Device()
+  private isLoading: boolean = false
 
   private copyContacts: boolean = true
   private copyMeasuredQuantities: boolean = true
@@ -189,46 +191,41 @@ export default class DeviceCopyPage extends mixins(Rules) {
   private serialNumberPlaceholder: string | null = null
   private inventoryNumberPlaceholder: string | null = null
 
-  mounted () {
-    this.initializeAppBar()
-
-    // We also load the contacts and the measured quantities as those
-    // are the ones that we will also copy.
-    this.$api.devices.findById(this.deviceId, {
-      includeContacts: true,
-      includeCustomFields: true,
-      includeDeviceProperties: true,
-      includeDeviceAttachments: true
-    }).then((device) => {
-      this.existingDevice = device
-      const deviceToEdit = Device.createFromObject(this.existingDevice)
-      // Unset the fields that are very device specific
-      // (we need other PIDs, serial numbers and inventory numbers)
-      // For the moment we just unset them completely, but there may be
-      // some more logic in those numbers.
-      // For example the serial numbers could just be something like 'XXXX-1'
-      // and for the next device 'XXXX-2'.
-      // For the inventory numbers the same.
-      deviceToEdit.id = null
-      if (deviceToEdit.persistentIdentifier) {
-        this.persistentIdentifierPlaceholder = deviceToEdit.persistentIdentifier
-      }
-      deviceToEdit.persistentIdentifier = ''
-      if (deviceToEdit.serialNumber) {
-        this.serialNumberPlaceholder = deviceToEdit.serialNumber
-      }
-      deviceToEdit.serialNumber = ''
-      if (deviceToEdit.inventoryNumber) {
-        this.inventoryNumberPlaceholder = deviceToEdit.inventoryNumber
-      }
-      deviceToEdit.inventoryNumber = ''
-
-      this.device = deviceToEdit
-      this.isLoading = false
-    }).catch((_error) => {
+  async created () {
+    try {
+      this.isLoading=true
+      await this.loadDevice({
+        deviceId: this.deviceId,
+        includeContacts: true,
+        includeCustomFields: true,
+        includeDeviceProperties: true,
+        includeDeviceAttachments: true
+      })
+      this.deviceToCopy = this.getPreparedDeviceForCopy()
+    } catch (e) {
+      console.log('e',e);
       this.$store.commit('snackbar/setError', 'Loading device failed')
-      this.isLoading = false
-    })
+    }finally {
+      this.isLoading=false
+    }
+  }
+
+  getPreparedDeviceForCopy (): any {
+    const deviceToEdit = Device.createFromObject(this.device)
+    deviceToEdit.id = null
+    if (deviceToEdit.persistentIdentifier) {
+      this.persistentIdentifierPlaceholder = deviceToEdit.persistentIdentifier
+    }
+    deviceToEdit.persistentIdentifier = ''
+    if (deviceToEdit.serialNumber) {
+      this.serialNumberPlaceholder = deviceToEdit.serialNumber
+    }
+    deviceToEdit.serialNumber = ''
+    if (deviceToEdit.inventoryNumber) {
+      this.inventoryNumberPlaceholder = deviceToEdit.inventoryNumber
+    }
+    deviceToEdit.inventoryNumber = ''
+    return deviceToEdit
   }
 
   beforeDestroy () {
@@ -245,58 +242,18 @@ export default class DeviceCopyPage extends mixins(Rules) {
       return
     }
     this.isLoading = true
-    const contacts = this.device.contacts
-    const measuredQuantities = this.device.properties.map(DeviceProperty.createFromObject)
-    const customFields = this.device.customFields.map(CustomTextField.createFromObject)
-    const attachments = this.device.attachments.map(Attachment.createFromObject)
     try {
-      // most importantly: Save the device itself
-      const savedDevice = await this.$api.devices.save(this.device)
-      const savedDeviceId = savedDevice.id!
-
-      const related: Promise<any>[] = []
-
-      if (this.copyContacts) {
-        // Then we can deal about the contacts
-        // The contacts have the special issue, that our system will add the contact who
-        // add/edit the device automatically.
-        // We we should check who we added this way already.
-        const existingContacts = await this.$api.devices.findRelatedContacts(savedDeviceId)
-        // And then only add those remaining
-        const contactsToSave = contacts.filter(c => existingContacts.findIndex((ec: Contact) => { return ec.id === c.id }) === -1)
-
-        for (const contact of contactsToSave) {
-          if (contact.id) {
-            related.push(this.$api.devices.addContact(savedDeviceId, contact.id))
-          }
-        }
-      }
-      if (this.copyMeasuredQuantities) {
-        // For the measured quantities it is simpler.
-        // But the existing entries have already an id - so we have to unset those
-        // in order to save them (otherwise we would get Unique Constraint Violations)
-        for (const measuredQuantity of measuredQuantities) {
-          measuredQuantity.id = null
-          related.push(this.$api.deviceProperties.add(savedDeviceId, measuredQuantity))
-        }
-      }
-      if (this.copyCustomFields) {
-        for (const customField of customFields) {
-          customField.id = null
-          related.push(this.$api.customfields.add(savedDeviceId, customField))
-        }
-      }
-      if (this.copyAttachments) {
-        for (const attachment of attachments) {
-          attachment.id = null
-          related.push(this.$api.deviceAttachments.add(savedDeviceId, attachment))
-        }
-      }
-      await Promise.all(related)
+      const savedDeviceId = await this.copyDevice({
+        device: this.deviceToCopy,
+        copyContacts: this.copyContacts,
+        copyAttachments: this.copyAttachments,
+        copyMeasuredQuantities: this.copyMeasuredQuantities,
+        copyCustomFields: this.copyCustomFields
+      })
 
       this.isLoading = false
       this.$store.commit('snackbar/setSuccess', 'Device copied')
-      this.$router.push('/devices/' + savedDevice.id + '')
+      this.$router.push('/devices/' + savedDeviceId + '')
     } catch (_error) {
       this.isLoading = false
       this.$store.commit('snackbar/setError', 'Copy failed')
@@ -337,14 +294,6 @@ export default class DeviceCopyPage extends mixins(Rules) {
 
   get deviceId () {
     return this.$route.params.deviceId
-  }
-
-  @Watch('existingDevice', { immediate: true, deep: true })
-  // @ts-ignore
-  onDeviceChanged (val: Device) {
-    if (val.id) {
-      this.$store.commit('appbar/setTitle', 'Copy ' + (val?.shortName || 'Device'))
-    }
   }
 }
 </script>

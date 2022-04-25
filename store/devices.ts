@@ -12,6 +12,7 @@ import { IActionType } from '@/models/ActionType'
 import { DeviceProperty } from '@/models/DeviceProperty'
 import { CustomTextField } from '@/models/CustomTextField'
 import CustomFieldCard from '@/components/CustomFieldCard.vue'
+import { Platform } from '@/models/Platform'
 
 const KIND_OF_ACTION_TYPE_DEVICE_CALIBRATION = 'device_calibration'
 const KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE = 'software_update'
@@ -294,6 +295,56 @@ const actions = {
   },
   async saveDevice ({ commit }: { commit: Commit }, device: Device): Promise<Device> {
     return this.$api.devices.save(device)
+  },
+  async copyDevice(
+    {commit,dispatch,state}: { commit: Commit, dispatch:Dispatch, state:devicesState},
+    {device,copyContacts,copyAttachments,copyMeasuredQuantities,copyCustomFields}:
+      {device:Device,copyContacts:boolean,copyAttachments:boolean,copyMeasuredQuantities:boolean,copyCustomFields:boolean}
+  ){
+    const savedDevice = await dispatch('saveDevice',device)
+    const savedDeviceId = savedDevice.id!
+    const related:Promise<any>[]=[]
+
+    if(copyContacts){
+      const contacts = device.contacts
+      await dispatch('loadDeviceContacts',savedDeviceId)
+      const contactsToSave = contacts.filter(c => state.deviceContacts.findIndex((ec: Contact) => { return ec.id === c.id }) === -1)
+
+      for (const contact of contactsToSave) {
+        if (contact.id) {
+          related.push(dispatch('addDeviceContact',{deviceId:savedDeviceId,contactId:contact.id}))
+        }
+      }
+    }
+    if(copyAttachments){
+      const attachments = device.attachments.map(Attachment.createFromObject)
+      for (const attachment of attachments) {
+        attachment.id = null
+        related.push(dispatch('addDeviceAttachment',{deviceId:savedDeviceId,attachment:attachment}))
+      }
+    }
+    if(copyMeasuredQuantities){
+      console.log('in copyMeasuredQuantities');
+      console.log('device',device);
+      const measuredQuantities = device.properties.map(DeviceProperty.createFromObject)
+      console.log('measuredQuantities',measuredQuantities);
+      for (const measuredQuantity of measuredQuantities) {
+        measuredQuantity.id = null
+        related.push(dispatch('addDeviceMeasuredQuantity',{deviceId:savedDeviceId, deviceMeasuredQuantity:measuredQuantity}))
+      }
+    }
+    if(copyCustomFields){
+      const customFields = device.customFields.map(CustomTextField.createFromObject)
+      for (const customField of customFields) {
+        customField.id = null
+        related.push(dispatch('addDeviceCustomField',{
+          deviceId:savedDeviceId,
+          deviceCustomField:customField}
+        ))
+      }
+    }
+    await Promise.all(related)
+    return savedDeviceId
   },
   async deleteDevice ({ commit }: { commit: Commit }, id: number) {
     await this.$api.devices.deleteById(id)
