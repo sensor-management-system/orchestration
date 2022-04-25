@@ -29,168 +29,108 @@ implied. See the Licence for the specific language governing
 permissions and limitations under the Licence.
 -->
 <template>
-  <div>
-    <ProgressIndicator
-      v-model="isInProgress"
-      :dark="isSaving"
-    />
-    <v-card-actions>
-      <v-spacer />
-      <v-btn
-        v-if="$auth.loggedIn"
-        :disabled="isEditCustomFieldsPage"
-        color="primary"
-        small
-        @click="addField"
-      >
-        Add Custom Field
-      </v-btn>
-    </v-card-actions>
-    <hint-card v-if="customFields.length === 0">
-      There are no custom fields for this device.
-    </hint-card>
-    <template
-      v-for="(field, index) in customFields"
-    >
-      <div :key="'customfield-' + index">
-        <NuxtChild
-          v-model="customFields[index]"
-          @openDeleteDialog="showDeleteDialogFor"
-        />
-        <v-dialog v-model="showDeleteDialog[field.id]" max-width="290">
-          <v-card>
-            <v-card-title class="headline">
-              Delete Field
-            </v-card-title>
-            <v-card-text>
-              Do you really want to delete the field <em>{{ field.key }}</em>?
-            </v-card-text>
-            <v-card-actions>
-              <v-btn
-                text
-                @click="hideDeleteDialogFor(field.id)"
-              >
-                No
-              </v-btn>
-              <v-spacer />
-              <v-btn
-                color="error"
-                text
-                @click="deleteAndCloseDialog(field)"
-              >
-                <v-icon left>
-                  mdi-delete
-                </v-icon>
-                Delete
-              </v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-dialog>
-      </div>
-    </template>
-    <v-card-actions
-      v-if="customFields.length > 3"
-    >
-      <v-spacer />
-      <v-btn
-        v-if="$auth.loggedIn"
-        :disabled="isEditCustomFieldsPage"
-        color="primary"
-        small
-        @click="addField"
-      >
-        Add Custom Field
-      </v-btn>
-    </v-card-actions>
-  </div>
+  <NuxtChild/>
+<!--  <div>-->
+<!--    <ProgressIndicator-->
+<!--      v-model="isInProgress"-->
+<!--      :dark="isSaving"-->
+<!--    />-->
+<!--    <v-card-actions>-->
+<!--      <v-spacer />-->
+<!--      <v-btn-->
+<!--        v-if="$auth.loggedIn"-->
+<!--        :disabled="isEditCustomFieldsPage"-->
+<!--        color="primary"-->
+<!--        small-->
+<!--        @click="addField"-->
+<!--      >-->
+<!--        Add Custom Field-->
+<!--      </v-btn>-->
+<!--    </v-card-actions>-->
+<!--    <v-card-actions-->
+<!--      v-if="customFields.length > 3"-->
+<!--    >-->
+<!--      <v-spacer />-->
+<!--      <v-btn-->
+<!--        v-if="$auth.loggedIn"-->
+<!--        :disabled="isEditCustomFieldsPage"-->
+<!--        color="primary"-->
+<!--        small-->
+<!--        @click="addField"-->
+<!--      >-->
+<!--        Add Custom Field-->
+<!--      </v-btn>-->
+<!--    </v-card-actions>-->
+<!--  </div>-->
 </template>
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 import { CustomTextField } from '@/models/CustomTextField'
 
-import HintCard from '@/components/HintCard.vue'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { mapActions } from 'vuex'
 
 @Component({
-  components: {
-    HintCard,
-    ProgressIndicator
-  }
+  methods:mapActions('devices',['loadDeviceCustomFields'])
 })
 export default class DeviceCustomFieldsPage extends Vue {
-  private customFields: CustomTextField[] = []
-  private isLoading = false
-  private isSaving = false
-
-  private showDeleteDialog: {[idx: string]: boolean} = {}
-
-  mounted () {
-    this.isLoading = true
-    this.$api.devices.findRelatedCustomFields(this.deviceId).then((foundFields) => {
-      this.customFields = foundFields
-      this.isLoading = false
-    }).catch(() => {
+  async created(){
+    try {
+      await this.loadDeviceCustomFields(this.deviceId)
+    } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to fetch custom fields')
-      this.isLoading = false
-    })
+    }
   }
-
   head () {
     return {
       titleTemplate: 'Custom Fields - %s'
     }
   }
-
-  get isInProgress (): boolean {
-    return this.isLoading || this.isSaving
-  }
-
   get deviceId (): string {
     return this.$route.params.deviceId
   }
-
-  get isEditCustomFieldsPage (): boolean {
-    // eslint-disable-next-line no-useless-escape
-    const editUrl = '^\/devices\/' + this.deviceId + '\/customfields\/([0-9]+)\/edit$'
-    return !!this.$route.path.match(editUrl)
-  }
-
-  addField (): void {
-    const field = new CustomTextField()
-    this.isSaving = true
-    this.$api.customfields.add(this.deviceId, field).then((newField: CustomTextField) => {
-      this.isSaving = false
-      this.customFields.push(newField)
-      this.$router.push('/devices/' + this.deviceId + '/customfields/' + newField.id + '/edit')
-    }).catch(() => {
-      this.isSaving = false
-      this.$store.commit('snackbar/setError', 'Failed to save custom field')
-    })
-  }
-
-  deleteAndCloseDialog (field: CustomTextField) {
-    if (!field.id) {
-      return
-    }
-    this.$api.customfields.deleteById(field.id).then(() => {
-      const index: number = this.customFields.findIndex((f: CustomTextField) => f.id === field.id)
-      if (index > -1) {
-        this.customFields.splice(index, 1)
-      }
-    }).catch(() => {
-      this.$store.commit('snackbar/setError', 'Failed to delete custom field')
-    })
-
-    this.showDeleteDialog = {}
-  }
-
-  showDeleteDialogFor (id: string) {
-    Vue.set(this.showDeleteDialog, id, true)
-  }
-
-  hideDeleteDialogFor (id: string) {
-    Vue.set(this.showDeleteDialog, id, false)
-  }
+  //
+  // get isEditCustomFieldsPage (): boolean {
+  //   // eslint-disable-next-line no-useless-escape
+  //   const editUrl = '^\/devices\/' + this.deviceId + '\/customfields\/([0-9]+)\/edit$'
+  //   return !!this.$route.path.match(editUrl)
+  // }
+  //
+  // addField (): void {
+  //   const field = new CustomTextField()
+  //   this.isSaving = true
+  //   this.$api.customfields.add(this.deviceId, field).then((newField: CustomTextField) => {
+  //     this.isSaving = false
+  //     this.customFields.push(newField)
+  //     this.$router.push('/devices/' + this.deviceId + '/customfields/' + newField.id + '/edit')
+  //   }).catch(() => {
+  //     this.isSaving = false
+  //     this.$store.commit('snackbar/setError', 'Failed to save custom field')
+  //   })
+  // }
+  //
+  // deleteAndCloseDialog (field: CustomTextField) {
+  //   if (!field.id) {
+  //     return
+  //   }
+  //   this.$api.customfields.deleteById(field.id).then(() => {
+  //     const index: number = this.customFields.findIndex((f: CustomTextField) => f.id === field.id)
+  //     if (index > -1) {
+  //       this.customFields.splice(index, 1)
+  //     }
+  //   }).catch(() => {
+  //     this.$store.commit('snackbar/setError', 'Failed to delete custom field')
+  //   })
+  //
+  //   this.showDeleteDialog = {}
+  // }
+  //
+  // showDeleteDialogFor (id: string) {
+  //   Vue.set(this.showDeleteDialog, id, true)
+  // }
+  //
+  // hideDeleteDialogFor (id: string) {
+  //   Vue.set(this.showDeleteDialog, id, false)
+  // }
 }
 </script>

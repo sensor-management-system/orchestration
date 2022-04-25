@@ -10,6 +10,8 @@ import { DeviceUnmountAction } from '@/models/DeviceUnmountAction'
 import { DeviceCalibrationAction } from '@/models/DeviceCalibrationAction'
 import { IActionType } from '@/models/ActionType'
 import { DeviceProperty } from '@/models/DeviceProperty'
+import { CustomTextField } from '@/models/CustomTextField'
+import CustomFieldCard from '@/components/CustomFieldCard.vue'
 
 const KIND_OF_ACTION_TYPE_DEVICE_CALIBRATION = 'device_calibration'
 const KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE = 'software_update'
@@ -40,7 +42,9 @@ interface devicesState {
   deviceCalibrationAction: DeviceCalibrationAction | null,
   deviceMountActions: DeviceMountAction[],
   deviceUnmountActions: DeviceUnmountAction[],
-  chosenKindOfDeviceAction: IOptionsForActionType | null
+  chosenKindOfDeviceAction: IOptionsForActionType | null,
+  deviceCustomFields:CustomTextField[],
+  deviceCustomField:CustomTextField|null
   pageNumber: number,
   pageSize: number,
   totalPages: number
@@ -62,6 +66,8 @@ const state = {
   deviceMountActions: [],
   deviceUnmountActions: [],
   chosenKindOfDeviceAction: null,
+  deviceCustomFields:[],
+  deviceCustomField:null,
   pageNumber: 1,
   pageSize: 20,
   totalPages: 1,
@@ -179,6 +185,14 @@ const actions = {
     const deviceUnmountActions = await this.$api.devices.findRelatedUnmountActions(id)
     commit('setDeviceUnmountActions', deviceUnmountActions)
   },
+  async loadDeviceCustomFields({commit}:{commit:Commit},id:number){
+    const deviceCustomFields = await this.$api.devices.findRelatedCustomFields(id)
+    commit('setDeviceCustomFields',deviceCustomFields);
+  },
+  async loadDeviceCustomField({commit}:{commit:Commit},id:number){
+    const deviceCustomField = await this.$api.customfields.findById(id)
+    commit('setDeviceCustomField',deviceCustomField)
+  },
   async addDeviceSoftwareUpdateAction ({ commit }: { commit: Commit }, {
     deviceId,
     softwareUpdateAction
@@ -229,6 +243,21 @@ const actions = {
     attachment
   }: { deviceId: number, attachment: Attachment }): Promise<void> {
     return this.$api.deviceAttachments.update(deviceId, attachment)
+  },
+  async deleteDeviceCustomField ({ commit }: { commit: Commit }, attachmentId: number): Promise<void> {
+    return this.$api.customfields.deleteById(attachmentId)
+  },
+  async addDeviceCustomField ({ commit }: { commit: Commit }, {
+    deviceId,
+    deviceCustomField
+  }: { deviceId: number, deviceCustomField: CustomTextField }): Promise<void> {
+    return this.$api.customfields.add(deviceId, deviceCustomField)
+  },
+  updateDeviceCustomField ({ commit }: { commit: Commit }, {
+    deviceId,
+    deviceCustomField
+  }: { deviceId: number, deviceCustomField: CustomTextField }): Promise<void> {
+    return this.$api.customfields.update(deviceId, deviceCustomField)
   },
   async addDeviceContact ({ commit }: { commit: Commit }, {
     deviceId,
@@ -322,6 +351,12 @@ const mutations = {
   },
   setChosenKindOfDeviceAction (state: devicesState, newVal: IOptionsForActionType | null) {
     state.chosenKindOfDeviceAction = newVal
+  },
+  setDeviceCustomFields(state:devicesState,deviceCustomFields:CustomTextField[]){
+    state.deviceCustomFields=deviceCustomFields
+  },
+  setDeviceCustomField(state:devicesState,deviceCustomField:CustomTextField){
+    state.deviceCustomField=deviceCustomField
   }
 }
 

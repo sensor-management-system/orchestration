@@ -30,67 +30,57 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <CustomFieldCard
-      v-model="value"
+    <v-card-actions
+      v-if="$auth.loggedIn"
     >
-      <template #actions>
-        <v-btn
-          v-if="$auth.loggedIn"
-          color="primary"
-          text
-          small
-          nuxt
-          :to="'/devices/' + deviceId + '/customfields/' + value.id + '/edit'"
-        >
-          Edit
-        </v-btn>
-        <v-menu
-          v-if="$auth.loggedIn"
-          close-on-click
-          close-on-content-click
-          offset-x
-          left
-          z-index="999"
-        >
-          <template #activator="{ on }">
-            <v-btn
-              data-role="property-menu"
-              icon
-              small
-              v-on="on"
-            >
-              <v-icon
-                dense
-                small
-              >
-                mdi-dots-vertical
-              </v-icon>
-            </v-btn>
-          </template>
-          <v-list>
-            <v-list-item
-              dense
-              @click="openDeleteDialog"
-            >
-              <v-list-item-content>
-                <v-list-item-title
-                  class="red--text"
-                >
-                  <v-icon
-                    left
-                    small
-                    color="red"
-                  >
-                    mdi-delete
-                  </v-icon>
-                  Delete
-                </v-list-item-title>
-              </v-list-item-content>
-            </v-list-item>
-          </v-list>
-        </v-menu>
-      </template>
-    </CustomFieldCard>
+      <v-spacer />
+      <v-btn
+        color="primary"
+        small
+        :to="'/devices/' + deviceId + '/customfields/new'"
+      >
+        Add Custom Field
+      </v-btn>
+    </v-card-actions>
+    <hint-card v-if="deviceCustomFields.length === 0">
+      There are no custom fields for this device.
+    </hint-card>
+    <BaseList
+      :list-items="deviceCustomFields"
+    >
+      <template v-slot:list-item="{item}">
+          <DevicesCustomFieldListItem
+            :custom-field="item"
+            :device-id="deviceId"
+          >
+            <template #dot-menu-items>
+              <DotMenuActionDelete
+                :readonly="!$auth.loggedIn"
+                @click="initDeleteDialog(item)"
+              />
+            </template>
+          </DevicesCustomFieldListItem>
+        </template>
+    </BaseList>
+    <v-card-actions
+      v-if="deviceCustomFields.length > 3"
+    >
+      <v-spacer />
+      <v-btn
+        v-if="$auth.loggedIn"
+        color="primary"
+        small
+        :to="'/devices/' + deviceId + '/customfields/new'"
+      >
+        Add Custom Field
+      </v-btn>
+    </v-card-actions>
+    <DevicesCustomFieldDeleteDialog
+      v-model="showDeleteDialog"
+      :custom-field-to-delete="customFieldToDelete"
+      @cancel-deletion="closeDialog"
+      @submit-deletion="deleteAndCloseDialog"
+    />
   </div>
 </template>
 
@@ -99,33 +89,51 @@ import { Component, Vue, Prop } from 'nuxt-property-decorator'
 
 import { CustomTextField } from '@/models/CustomTextField'
 import CustomFieldCard from '@/components/CustomFieldCard.vue'
+import { mapActions, mapState } from 'vuex'
+import BaseList from '@/components/shared/BaseList.vue'
+import DevicesCustomFieldListItem from '@/components/devices/DevicesCustomFieldListItem.vue'
+import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
+import { Attachment } from '@/models/Attachment'
+import DevicesCustomFieldDeleteDialog from '@/components/devices/DevicesCustomFieldDeleteDialog.vue'
+import HintCard from '@/components/HintCard.vue'
 
 @Component({
-  components: {
-    CustomFieldCard
-  }
+  components: { HintCard, DevicesCustomFieldDeleteDialog, DotMenuActionDelete, DevicesCustomFieldListItem, BaseList },
+  computed:mapState('devices',['deviceCustomFields']),
+  methods:mapActions('devices',['deleteDeviceCustomField','loadDeviceCustomFields'])
 })
 export default class DeviceCustomFieldsShowPage extends Vue {
-  @Prop({
-    required: true,
-    type: Object
-  })
-  readonly value!: CustomTextField
 
-  get field (): CustomTextField {
-    return this.value
-  }
-
-  set field (value: CustomTextField) {
-    this.$emit('input', value)
-  }
+  private showDeleteDialog=false;
+  private customFieldToDelete:CustomTextField|null=null
 
   get deviceId (): string {
     return this.$route.params.deviceId
   }
 
-  openDeleteDialog (): void {
-    this.$emit('openDeleteDialog', this.value.id)
+  initDeleteDialog (customField: CustomTextField) {
+    this.showDeleteDialog = true
+    this.customFieldToDelete = customField
+  }
+
+  closeDialog () {
+    this.showDeleteDialog = false
+    this.customFieldToDelete = null
+  }
+
+  async deleteAndCloseDialog () {
+    if (this.customFieldToDelete === null || this.customFieldToDelete.id === null) {
+      return
+    }
+    try {
+      await this.deleteDeviceCustomField(this.customFieldToDelete.id)
+      this.loadDeviceCustomFields(this.deviceId)
+      this.$store.commit('snackbar/setSuccess', 'Custom field deleted')
+    } catch (_error) {
+      this.$store.commit('snackbar/setError', 'Failed to delete custom field')
+    } finally {
+      this.closeDialog()
+    }
   }
 }
 </script>
