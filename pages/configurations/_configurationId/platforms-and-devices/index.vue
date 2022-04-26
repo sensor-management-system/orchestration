@@ -68,8 +68,6 @@ export default class ConfigurationShowPlatformsAndDevicesPage extends Vue {
 
   private selectedNode: ConfigurationsTreeNode | null = null
   private selectedDate = DateTime.utc()
-  private actionDates = []
-
 
   get configurationId (): string {
     return this.$route.params.configurationId

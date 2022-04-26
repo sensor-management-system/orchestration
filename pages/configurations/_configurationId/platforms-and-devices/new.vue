@@ -17,7 +17,7 @@
         <DateTimePicker
           v-model="selectedDate"
           placeholder="e.g. 2000-01-31 12:00"
-          label="Configuration at date"
+          label="Select a date"
         />
       </v-col>
   </v-row>
