@@ -33,99 +33,100 @@ implied. See the Licence for the specific language governing
 permissions and limitations under the Licence.
 -->
 <template>
-  <v-card
-    flat
-  >
-    <ProgressIndicator
-      v-model="isSaving"
-      dark
-    />
-    <v-card-text>
-      <v-row>
-        <v-col cols="12" md="3">
-          <DateTimePicker
-            v-model="selectedDate"
-            placeholder="e.g. 2000-01-31 12:00"
-            label="Configuration at date"
-            :rules="[dateRules.dateNotNull]"
-            :readonly="isInEditMode"
-            :disabled="isInEditMode"
-          />
-        </v-col>
-        <v-col>
-          <v-select
-            v-model="selectedDate"
-            :item-value="(x) => x.date"
-            :item-text="(x) => x.text"
-            :items="actionDates"
-            label="Dates defined by actions"
-            :readonly="isInEditMode"
-            :disabled="isInEditMode"
-            hint="The referenced time zone is UTC."
-            persistent-hint
-          />
-        </v-col>
-      </v-row>
-      <!-- First show the current state for the selected date.
-           In case we have no location at all that is active,
-           show right that.
-           In case we have a static location active, let us show that.
-           And if we already know that we have an end for it, show that
-           one as well.
-           In case our active location is a dynamic one - do the very
-           same stuff as for the static ones - but this time with their
-           data.
+  <NuxtChild/>
+<!--  <v-card-->
+<!--    flat-->
+<!--  >-->
+<!--    <ProgressIndicator-->
+<!--      v-model="isSaving"-->
+<!--      dark-->
+<!--    />-->
+<!--    <v-card-text>-->
+<!--      <v-row>-->
+<!--        <v-col cols="12" md="3">-->
+<!--          <DateTimePicker-->
+<!--            v-model="selectedDate"-->
+<!--            placeholder="e.g. 2000-01-31 12:00"-->
+<!--            label="Configuration at date"-->
+<!--            :rules="[dateRules.dateNotNull]"-->
+<!--            :readonly="isInEditMode"-->
+<!--            :disabled="isInEditMode"-->
+<!--          />-->
+<!--        </v-col>-->
+<!--        <v-col>-->
+<!--          <v-select-->
+<!--            v-model="selectedDate"-->
+<!--            :item-value="(x) => x.date"-->
+<!--            :item-text="(x) => x.text"-->
+<!--            :items="actionDates"-->
+<!--            label="Dates defined by actions"-->
+<!--            :readonly="isInEditMode"-->
+<!--            :disabled="isInEditMode"-->
+<!--            hint="The referenced time zone is UTC."-->
+<!--            persistent-hint-->
+<!--          />-->
+<!--        </v-col>-->
+<!--      </v-row>-->
+<!--      &lt;!&ndash; First show the current state for the selected date.-->
+<!--           In case we have no location at all that is active,-->
+<!--           show right that.-->
+<!--           In case we have a static location active, let us show that.-->
+<!--           And if we already know that we have an end for it, show that-->
+<!--           one as well.-->
+<!--           In case our active location is a dynamic one - do the very-->
+<!--           same stuff as for the static ones - but this time with their-->
+<!--           data.-->
 
-           Depending on the current state we also have different actions.
+<!--           Depending on the current state we also have different actions.-->
 
-      -->
-      <div
-        v-if="showCreateButtons"
-      >
-        <v-row
-          v-if="$auth.loggedIn"
-        >
-          <v-col class="text-right">
-            <v-btn small color="primary" @click="openNewStaticLocationForm">
-              Start static location
-            </v-btn>
-            <v-btn small color="primary" @click="openNewDynamicLocationForm">
-              Start dynamic location
-            </v-btn>
-          </v-col>
-        </v-row>
-        <v-row>
-          <v-row>
-            <v-col>
-              <p class="text-center">
-                There is no location active for the selected date.
-              </p>
-            </v-col>
-          </v-row>
-        </v-row>
-      </div>
+<!--      &ndash;&gt;-->
+<!--      <div-->
+<!--        v-if="showCreateButtons"-->
+<!--      >-->
+<!--        <v-row-->
+<!--          v-if="$auth.loggedIn"-->
+<!--        >-->
+<!--          <v-col class="text-right">-->
+<!--            <v-btn small color="primary" @click="openNewStaticLocationForm">-->
+<!--              Start static location-->
+<!--            </v-btn>-->
+<!--            <v-btn small color="primary" @click="openNewDynamicLocationForm">-->
+<!--              Start dynamic location-->
+<!--            </v-btn>-->
+<!--          </v-col>-->
+<!--        </v-row>-->
+<!--        <v-row>-->
+<!--          <v-row>-->
+<!--            <v-col>-->
+<!--              <p class="text-center">-->
+<!--                There is no location active for the selected date.-->
+<!--              </p>-->
+<!--            </v-col>-->
+<!--          </v-row>-->
+<!--        </v-row>-->
+<!--      </div>-->
 
-      <!--
-      The following pages are included via the NuxtChild component:
-      - locations/_timestamp.vue - selected readonly version of an action
-      - locations/static-location-begin-actions/new.vue - new static location begin action
-      - locations/static-location-begin-actions/_id/edit.vue - edit static location begin action
-      - locations/static-location-end-actions/new.vue - new static location end action
-      - locations/static-location-end-actions/_id/edit.vue - edit static location end action
-      - locations/dynamic-location-begin-actions/new.vue - new dynamic location begin action
-      - locations/dynamic-location-begin-actions/_id/edit.vue - edit dynamic location begin action
-      - locations/dynamic-location-end-actions/new.vue - new dynamic location end action
-      - locations/dynamic-location-end-actions/_id/edit.vue - edit dynamic location end action
-      -->
-      <NuxtChild
-        v-if="value"
-        v-model="value"
-        :contacts="contacts"
-        :elevation-data="elevationData"
-        :epsg-codes="epsgCodes"
-      />
-    </v-card-text>
-  </v-card>
+<!--      &lt;!&ndash;-->
+<!--      The following pages are included via the NuxtChild component:-->
+<!--      - locations/_timestamp.vue - selected readonly version of an action-->
+<!--      - locations/static-location-begin-actions/new.vue - new static location begin action-->
+<!--      - locations/static-location-begin-actions/_id/edit.vue - edit static location begin action-->
+<!--      - locations/static-location-end-actions/new.vue - new static location end action-->
+<!--      - locations/static-location-end-actions/_id/edit.vue - edit static location end action-->
+<!--      - locations/dynamic-location-begin-actions/new.vue - new dynamic location begin action-->
+<!--      - locations/dynamic-location-begin-actions/_id/edit.vue - edit dynamic location begin action-->
+<!--      - locations/dynamic-location-end-actions/new.vue - new dynamic location end action-->
+<!--      - locations/dynamic-location-end-actions/_id/edit.vue - edit dynamic location end action-->
+<!--      &ndash;&gt;-->
+<!--      <NuxtChild-->
+<!--        v-if="value"-->
+<!--        v-model="value"-->
+<!--        :contacts="contacts"-->
+<!--        :elevation-data="elevationData"-->
+<!--        :epsg-codes="epsgCodes"-->
+<!--      />-->
+<!--    </v-card-text>-->
+<!--  </v-card>-->
 </template>
 
 <script lang="ts">
@@ -161,127 +162,127 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
   }
 })
 export default class ConfigurationLocations extends mixins(Rules) {
-  private configuration: Configuration = new Configuration()
-  private epsgCodes: EpsgCode[] = []
-  private elevationData: ElevationDatum[] = []
-  private isSaving: boolean = false
-
-  @Prop({
-    required: true,
-    type: Object
-  })
-  readonly value!: Configuration
-
-  private dateRules: Object = {
-    dateNotNull: Validator.mustBeProvided('Date')
-  }
-
-  async fetch (): Promise<void> {
-    try {
-      // eslint-disable-next-line
-      const [_, elevationData, epsgCodes] = await Promise.all([
-        this.$store.dispatch('contacts/loadAllContacts'),
-        this.$api.elevationData.findAll(),
-        this.$api.epsgCodes.findAll()
-      ])
-      this.elevationData = elevationData
-      this.epsgCodes = epsgCodes
-    } catch (e) {
-      this.$store.commit('snackbar/setError', 'Failed to fetch resources')
-    }
-  }
-
-  created () {
-    if (this.value) {
-      this.configuration = Configuration.createFromObject(this.value)
-    }
-
-    // if we get the date via the URL, set the date accordingly
-    const dateFromUrl = this.dateFromUrlParam(this.$route)
-    if (dateFromUrl && !this.selectedDate.equals(dateFromUrl)) {
-      this.selectedDate = dateFromUrl
-    }
-  }
-
-  get contacts (): Contact[] {
-    return this.$store.state.contacts.allContacts
-  }
-
-  get selectedDate () {
-    return this.$store.getters['configurations/configurationEditDate']
-  }
-
-  set selectedDate (newDate: DateTime) {
-    if (!newDate) {
-      return
-    }
-    const oldDate = this.selectedDate
-    this.$store.commit('configurations/setConfigurationEditDate', newDate)
-    if (this.value.id && !newDate.equals(oldDate)) {
-      const dateString = newDate.toUTC().toISO()
-      this.$router.push('/configurations/' + this.value.id + '/locations/' + dateString)
-    }
-  }
-
-  get isInEditMode (): boolean {
-    const editUrl = new RegExp('/configurations/' + this.value.id + '/locations/(static-location-begin-actions|static-location-end-actions|dynamic-location-begin-actions|dynamic-location-end-actions)/[0-9]*/?(new|edit)')
-    return !!this.$route.path.match(editUrl)
-  }
-
-  get actionDates (): IActionDateWithTextItem[] {
-    return ConfigurationHelper.getActionDatesWithTextsByConfiguration(this.configuration, this.selectedDate, { useMounts: false, useLoctions: true })
-  }
-
-  get currentlyActiveLocationAction (): StaticLocationBeginAction | DynamicLocationBeginAction | null {
-    return getCurrentlyActiveLocationAction(this.configuration, this.selectedDate)
-  }
-
-  get hasNoActiveLocation (): boolean {
-    return this.currentlyActiveLocationAction === null
-  }
-
-  openNewStaticLocationForm (): void {
-    this.$router.push('/configurations/' + this.value.id + '/locations/static-location-begin-actions/new?date=' + this.selectedDate.toISO())
-  }
-
-  openNewDynamicLocationForm (): void {
-    this.$router.push('/configurations/' + this.value.id + '/locations/dynamic-location-begin-actions/new?date=' + this.selectedDate.toISO())
-  }
-
-  get showCreateButtons (): boolean {
-    return this.hasNoActiveLocation && !this.isInEditMode
-  }
-
-  dateFromUrlParam (route: VueRouter.Route): DateTime | undefined {
-    if (!route.params.timestamp) {
-      return
-    }
-    return DateTime.fromISO(route.params.timestamp).toUTC()
-  }
-
-  @Watch('value', {
-    deep: true,
-    immediate: true
-  })
-  onValueChange (val: Configuration): void {
-    if (val) {
-      this.configuration = Configuration.createFromObject(val)
-    }
-  }
-
-  @Watch('$route', {
-    deep: true,
-    immediate: true
-  })
-  onRouteChange (route: VueRouter.Route): void {
-    if (route) {
-      // when the date param is changed (eg. by a cancel or apply button of a child page)
-      // set the selected date to the date of the URL param
-      const dateFromUrl = this.dateFromUrlParam(route)
-      if (dateFromUrl && !dateFromUrl.equals(this.selectedDate)) {
-        this.selectedDate = dateFromUrl
-      }
-    }
-  }
+  // private configuration: Configuration = new Configuration()
+  // private epsgCodes: EpsgCode[] = []
+  // private elevationData: ElevationDatum[] = []
+  // private isSaving: boolean = false
+  //
+  // @Prop({
+  //   required: true,
+  //   type: Object
+  // })
+  // readonly value!: Configuration
+  //
+  // private dateRules: Object = {
+  //   dateNotNull: Validator.mustBeProvided('Date')
+  // }
+  //
+  // async fetch (): Promise<void> {
+  //   try {
+  //     // eslint-disable-next-line
+  //     const [_, elevationData, epsgCodes] = await Promise.all([
+  //       this.$store.dispatch('contacts/loadAllContacts'),
+  //       this.$api.elevationData.findAll(),
+  //       this.$api.epsgCodes.findAll()
+  //     ])
+  //     this.elevationData = elevationData
+  //     this.epsgCodes = epsgCodes
+  //   } catch (e) {
+  //     this.$store.commit('snackbar/setError', 'Failed to fetch resources')
+  //   }
+  // }
+  //
+  // created () {
+  //   if (this.value) {
+  //     this.configuration = Configuration.createFromObject(this.value)
+  //   }
+  //
+  //   // if we get the date via the URL, set the date accordingly
+  //   const dateFromUrl = this.dateFromUrlParam(this.$route)
+  //   if (dateFromUrl && !this.selectedDate.equals(dateFromUrl)) {
+  //     this.selectedDate = dateFromUrl
+  //   }
+  // }
+  //
+  // get contacts (): Contact[] {
+  //   return this.$store.state.contacts.allContacts
+  // }
+  //
+  // get selectedDate () {
+  //   return this.$store.getters['configurations/configurationEditDate']
+  // }
+  //
+  // set selectedDate (newDate: DateTime) {
+  //   if (!newDate) {
+  //     return
+  //   }
+  //   const oldDate = this.selectedDate
+  //   this.$store.commit('configurations/setConfigurationEditDate', newDate)
+  //   if (this.value.id && !newDate.equals(oldDate)) {
+  //     const dateString = newDate.toUTC().toISO()
+  //     this.$router.push('/configurations/' + this.value.id + '/locations/' + dateString)
+  //   }
+  // }
+  //
+  // get isInEditMode (): boolean {
+  //   const editUrl = new RegExp('/configurations/' + this.value.id + '/locations/(static-location-begin-actions|static-location-end-actions|dynamic-location-begin-actions|dynamic-location-end-actions)/[0-9]*/?(new|edit)')
+  //   return !!this.$route.path.match(editUrl)
+  // }
+  //
+  // get actionDates (): IActionDateWithTextItem[] {
+  //   return ConfigurationHelper.getActionDatesWithTextsByConfiguration(this.configuration, this.selectedDate, { useMounts: false, useLoctions: true })
+  // }
+  //
+  // get currentlyActiveLocationAction (): StaticLocationBeginAction | DynamicLocationBeginAction | null {
+  //   return getCurrentlyActiveLocationAction(this.configuration, this.selectedDate)
+  // }
+  //
+  // get hasNoActiveLocation (): boolean {
+  //   return this.currentlyActiveLocationAction === null
+  // }
+  //
+  // openNewStaticLocationForm (): void {
+  //   this.$router.push('/configurations/' + this.value.id + '/locations/static-location-begin-actions/new?date=' + this.selectedDate.toISO())
+  // }
+  //
+  // openNewDynamicLocationForm (): void {
+  //   this.$router.push('/configurations/' + this.value.id + '/locations/dynamic-location-begin-actions/new?date=' + this.selectedDate.toISO())
+  // }
+  //
+  // get showCreateButtons (): boolean {
+  //   return this.hasNoActiveLocation && !this.isInEditMode
+  // }
+  //
+  // dateFromUrlParam (route: VueRouter.Route): DateTime | undefined {
+  //   if (!route.params.timestamp) {
+  //     return
+  //   }
+  //   return DateTime.fromISO(route.params.timestamp).toUTC()
+  // }
+  //
+  // @Watch('value', {
+  //   deep: true,
+  //   immediate: true
+  // })
+  // onValueChange (val: Configuration): void {
+  //   if (val) {
+  //     this.configuration = Configuration.createFromObject(val)
+  //   }
+  // }
+  //
+  // @Watch('$route', {
+  //   deep: true,
+  //   immediate: true
+  // })
+  // onRouteChange (route: VueRouter.Route): void {
+  //   if (route) {
+  //     // when the date param is changed (eg. by a cancel or apply button of a child page)
+  //     // set the selected date to the date of the URL param
+  //     const dateFromUrl = this.dateFromUrlParam(route)
+  //     if (dateFromUrl && !dateFromUrl.equals(this.selectedDate)) {
+  //       this.selectedDate = dateFromUrl
+  //     }
+  //   }
+  // }
 }
 </script>

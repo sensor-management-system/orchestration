@@ -56,6 +56,13 @@ import { dateToDateTimeStringHHMM } from '@/utils/dateHelper'
 import { DeviceMountAction } from '@/models/DeviceMountAction'
 import { PlatformMountAction } from '@/models/PlatformMountAction'
 
+export enum LocationTypes {
+  staticStart='staticStart',
+  staticEnd='staticEnd',
+  dynamicStart='dynamicStart',
+  dynamicEnd='dynamicEnd',
+}
+
 export interface configurationsState {
   configurations: Configuration[]
   configuration: Configuration | null,
@@ -124,25 +131,25 @@ const getters = {
       for (const platformMountAction of state.configuration.platformMountActions) {
         datesWithTexts.push({
           date: platformMountAction.date,
-          text: dateToDateTimeStringHHMM(platformMountAction.date)+ ' - ' +'Mount ' + platformMountAction.platform.shortName
+          text: dateToDateTimeStringHHMM(platformMountAction.date) + ' - ' + 'Mount ' + platformMountAction.platform.shortName
         })
       }
       for (const platformUnmountAction of state.configuration.platformUnmountActions) {
         datesWithTexts.push({
           date: platformUnmountAction.date,
-          text: dateToDateTimeStringHHMM(platformUnmountAction.dat)+ ' - ' +'Unmount ' + platformUnmountAction.platform.shortName
+          text: dateToDateTimeStringHHMM(platformUnmountAction.dat) + ' - ' + 'Unmount ' + platformUnmountAction.platform.shortName
         })
       }
       for (const deviceMountAction of state.configuration.deviceMountActions) {
         datesWithTexts.push({
           date: deviceMountAction.date,
-          text: dateToDateTimeStringHHMM(deviceMountAction.date)+ ' - ' +'Mount ' + deviceMountAction.device.shortName
+          text: dateToDateTimeStringHHMM(deviceMountAction.date) + ' - ' + 'Mount ' + deviceMountAction.device.shortName
         })
       }
       for (const deviceUnmountAction of state.configuration.deviceUnmountActions) {
         datesWithTexts.push({
           date: deviceUnmountAction.date,
-          text: dateToDateTimeStringHHMM(deviceUnmountAction.date) + ' - ' +'Unmount ' + deviceUnmountAction.device.shortName
+          text: dateToDateTimeStringHHMM(deviceUnmountAction.date) + ' - ' + 'Unmount ' + deviceUnmountAction.device.shortName
         })
       }
       datesWithTexts.sort((a, b) => {
@@ -155,47 +162,69 @@ const getters = {
         return 0
       })
       // Todo: Anmerknug: ich hab das grouping nicht eingebaut
-      // // group by date
-      // const dateIndex: { [idx: number]: number } = {}
-      // const itemsGroupedByDate: IActionDateWithTextItem[][] = []
-      // for (const dateObject of datesWithTexts) {
-      //   const key: number = dateObject.date.toMillis()
-      //   if (!dateIndex[key]) {
-      //     dateIndex[key] = itemsGroupedByDate.length
-      //     itemsGroupedByDate.push([dateObject])
-      //   } else {
-      //     const index = dateIndex[key]
-      //     itemsGroupedByDate[index].push(dateObject)
-      //   }
-      // }
-      // datesWithTexts
-      //
-      // itemsGroupedByDate.forEach((value) => {
-      //   const texts = value.filter(e => e.text).map(e => e.text)
-      //   let text = dateToDateTimeStringHHMM(value[0].date) + ' - '
-      //
-      //   if (texts.length > 0) {
-      //     text += texts[0]
-      //
-      //     if (texts.length > 1) {
-      //       text += ' + ' + (texts.length - 1) + ' more'
-      //       if (texts.length > 2) {
-      //         text += ' actions'
-      //       } else {
-      //         text += ' action'
-      //       }
-      //     }
-      //   }
-      //   result.push({
-      //     date: value[0].date,
-      //     text
-      //   })
-      // })
-      //
       result = datesWithTexts
     }
     return result
+  },
+  locationActionsDates: (state: configurationsState) => {
+    let result = []
 
+    if (state.configuration) {
+      const datesWithTexts = []
+      for (const staticLocationBeginAction of state.configuration.staticLocationBeginActions) {
+        if (staticLocationBeginAction.beginDate) {
+          datesWithTexts.push({
+            type:LocationTypes.staticStart,
+            value:staticLocationBeginAction,
+            date:staticLocationBeginAction.beginDate,
+            text: dateToDateTimeStringHHMM(staticLocationBeginAction.beginDate) + ' - '+'Static location begin'
+          })
+        }
+      }
+      for (const staticLocationEndAction of state.configuration.staticLocationEndActions) {
+        if (staticLocationEndAction.endDate) {
+          datesWithTexts.push({
+            type:LocationTypes.staticEnd,
+            value:staticLocationEndAction,
+            date: staticLocationEndAction.endDate,
+            text: dateToDateTimeStringHHMM(staticLocationEndAction.endDate) + ' - '+'Static location end'
+          })
+        }
+      }
+      for (const dynamicLocationBeginAction of state.configuration.dynamicLocationBeginActions) {
+        if (dynamicLocationBeginAction.beginDate) {
+          datesWithTexts.push({
+            type:LocationTypes.dynamicStart,
+            value:dynamicLocationBeginAction,
+            date: dynamicLocationBeginAction.beginDate,
+            text: dateToDateTimeStringHHMM(dynamicLocationBeginAction.beginDate) + ' - '+'Dynamic location begin'
+          })
+        }
+      }
+      for (const dynamicLocationEndAction of state.configuration.dynamicLocationEndActions) {
+        if (dynamicLocationEndAction.endDate) {
+          datesWithTexts.push({
+            type:LocationTypes.dynamicEnd,
+            value:dynamicLocationEndAction,
+            date: dynamicLocationEndAction.endDate,
+            text: dateToDateTimeStringHHMM(dynamicLocationEndAction.endDate) + ' - '+'Dynamic location end'
+          })
+        }
+      }
+      datesWithTexts.sort((a, b) => {
+        if (a.date < b.date) {
+          return -1
+        }
+        if (a.date > b.date) {
+          return 1
+        }
+        return 0
+      })
+      // Todo: Anmerknug: ich hab das grouping nicht eingebaut
+
+      result = datesWithTexts
+    }
+    return result
   }
 }
 
@@ -254,24 +283,28 @@ const actions = {
   }: { configurationId: number, contactId: number }): Promise<void> {
     return this.$api.configurations.removeContact(configurationId, contactId)
   },
-  async addDeviceMountAction(
+  async addDeviceMountAction (
     { commit }: { commit: Commit },
-    {configurationId, deviceMountAction}: {configurationId: string, deviceMountAction: DeviceMountAction}
-  ):Promise<void>
-  {
+    {
+      configurationId,
+      deviceMountAction
+    }: { configurationId: string, deviceMountAction: DeviceMountAction }
+  ): Promise<void> {
     // console.log(this.$api.configurations.deviceMountActionApi);
-    return this.$api.configurations.deviceMountActionApi.add(configurationId,deviceMountAction)
+    return this.$api.configurations.deviceMountActionApi.add(configurationId, deviceMountAction)
   },
-  async addDeviceUnMountAction({ commit }: { commit: Commit }, payload){
+  async addDeviceUnMountAction ({ commit }: { commit: Commit }, payload) {
     // console.log(this.$api.configurations.deviceUnmountActionApi);
   },
-  async addPlatformMountAction({ commit }: { commit: Commit },
-    {configurationId, platformMountAction}: {configurationId: string, platformMountAction: PlatformMountAction}
-    ):Promise<void>
-  {
-    return this.$api.configurations.platformMountActionApi.add(configurationId,platformMountAction)
+  async addPlatformMountAction ({ commit }: { commit: Commit },
+    {
+      configurationId,
+      platformMountAction
+    }: { configurationId: string, platformMountAction: PlatformMountAction }
+  ): Promise<void> {
+    return this.$api.configurations.platformMountActionApi.add(configurationId, platformMountAction)
   },
-  async addPlatformUnMountAction({ commit }: { commit: Commit }, payload){
+  async addPlatformUnMountAction ({ commit }: { commit: Commit }, payload) {
     // console.log(this.$api.configurations.platformUnmountActionApi);
   },
   setPageNumber ({ commit }: { commit: Commit }, newPageNumber: number) {
