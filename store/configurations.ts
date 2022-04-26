@@ -87,6 +87,9 @@ const actions={
   async deleteConfiguration({ commit }: { commit: Commit }, id: number){
     await this.$api.configurations.deleteById(id)
   },
+  async saveConfiguration({ commit }: { commit: Commit }, configuration:Configuration):Promise<Configuration>{
+    return this.$api.configurations.save(configuration)
+  },
   setPageNumber ({ commit }: { commit: Commit }, newPageNumber: number) {
     commit('setPageNumber', newPageNumber)
   },

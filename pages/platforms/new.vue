@@ -122,7 +122,7 @@ export default class PlatformNewPage extends mixins(Rules) {
     this.$store.dispatch('appbar/setDefaults')
   }
 
-  onSaveButtonClicked (): void {
+  async onSaveButtonClicked (): void {
     if (!(this.$refs.basicForm as Vue & { validateForm: () => boolean }).validateForm()) {
       this.$store.commit('snackbar/setError', 'Please correct your input')
       return
@@ -131,15 +131,17 @@ export default class PlatformNewPage extends mixins(Rules) {
       this.$store.commit('snackbar/setError', 'You need to be logged in to save the platform')
       return
     }
-    this.isLoading = true
-    this.savePlatform(this.platform).then((savedPlatform) => {
-      this.isLoading = false
+
+    try {
+      this.isLoading = true
+      const savedPlatform = await this.savePlatform(this.platform)
       this.$store.commit('snackbar/setSuccess', 'Platform created')
       this.$router.push('/platforms/' + savedPlatform.id + '')
-    }).catch((_error) => {
-      this.isLoading = false
+    } catch (e) {
       this.$store.commit('snackbar/setError', 'Save failed')
-    })
+    } finally {
+      this.isLoading = false
+    }
   }
 
   initializeAppBar () {

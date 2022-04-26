@@ -119,7 +119,7 @@ export default class DeviceNewPage extends mixins(Rules) {
     this.$store.dispatch('appbar/setDefaults')
   }
 
-  onSaveButtonClicked (): void {
+  async onSaveButtonClicked (): void {
     if (!(this.$refs.basicForm as Vue & { validateForm: () => boolean }).validateForm()) {
       this.$store.commit('snackbar/setError', 'Please correct your input')
       return
@@ -128,15 +128,18 @@ export default class DeviceNewPage extends mixins(Rules) {
       this.$store.commit('snackbar/setError', 'You need to be logged in to save the device')
       return
     }
-    this.isLoading = true
-    this.saveDevice(this.device).then((savedDevice) => {
-      this.isLoading = false
+
+    try {
+      this.isLoading = true
+      const savedDevice = await this.saveDevice(this.device)
       this.$store.commit('snackbar/setSuccess', 'Device created')
       this.$router.push('/devices/' + savedDevice.id + '')
-    }).catch((_error) => {
-      this.isLoading = false
+    } catch (e) {
       this.$store.commit('snackbar/setError', 'Save failed')
-    })
+    } finally {
+      this.isLoading = false
+    }
+
   }
 
   initializeAppBar () {

@@ -118,7 +118,7 @@ export default class ContactNewPage extends mixins(Rules) {
     this.$store.dispatch('appbar/setDefaults')
   }
 
-  onSaveButtonClicked (): void {
+  async onSaveButtonClicked (): void {
     if (!(this.$refs.basicForm as Vue & { validateForm: () => boolean }).validateForm()) {
       this.$store.commit('snackbar/setError', 'Please correct your input')
       return
@@ -127,15 +127,17 @@ export default class ContactNewPage extends mixins(Rules) {
       this.$store.commit('snackbar/setError', 'You need to be logged in to save the contact')
       return
     }
-    this.isLoading = true
-    this.saveContact(this.contact).then((savedContact) => {
-      this.isLoading = false
+
+    try {
+      this.isLoading = true
+      const savedContact = await this.saveContact(this.contact)
       this.$store.commit('snackbar/setSuccess', 'Contact created')
       this.$router.push('/contacts/' + savedContact.id + '')
-    }).catch((_error) => {
-      this.isLoading = false
+    } catch (e) {
       this.$store.commit('snackbar/setError', 'Creation of contact failed')
-    })
+    } finally {
+      this.isLoading = false
+    }
   }
 
   initializeAppBar () {

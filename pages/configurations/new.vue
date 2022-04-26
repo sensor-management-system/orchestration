@@ -45,7 +45,7 @@ permissions and limitations under the Licence.
         <v-spacer />
         <save-and-cancel-buttons
           :to="'/configurations'"
-          @save="save()"
+          @save="save"
         />
       </v-card-actions>
       <ConfigurationsBasicDataForm
@@ -57,7 +57,7 @@ permissions and limitations under the Licence.
         <v-spacer />
         <save-and-cancel-buttons
           :to="'/configurations'"
-          @save="save()"
+          @save="save"
         />
       </v-card-actions>
     </v-card>
@@ -72,18 +72,16 @@ import { Configuration } from '@/models/Configuration'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
 import ConfigurationsBasicDataForm from '@/components/configurations/ConfigurationsBasicDataForm.vue'
+import { mapActions } from 'vuex'
 
 @Component({
   components: { ConfigurationsBasicDataForm, SaveAndCancelButtons, ProgressIndicator },
-  middleware: ['auth']
+  middleware: ['auth'],
+  methods:mapActions('configurations',['saveConfiguration'])
 })
 export default class ConfigurationNewPage extends Vue {
   private configuration: Configuration = new Configuration()
   private isLoading: boolean = false
-
-  created () {
-    this.$store.commit('configurations/setConfiguration', this.configuration)
-  }
 
   mounted () {
     this.initializeAppBar()
@@ -129,7 +127,7 @@ export default class ConfigurationNewPage extends Vue {
 
     try {
       this.isLoading = true
-      const savedConfiguration = await this.$api.configurations.save(this.configuration)
+      const savedConfiguration = await this.saveConfiguration(this.configuration)
       this.$store.commit('snackbar/setSuccess', 'Save successful')
       await this.$router.push('/configurations/' + savedConfiguration.id)
     } catch (e) {
