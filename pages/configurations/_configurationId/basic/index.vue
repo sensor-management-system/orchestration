@@ -57,6 +57,7 @@ permissions and limitations under the Licence.
     </v-card-actions>
 
     <ConfigurationsBasicData
+      v-if="configuration"
       v-model="configuration"
       :readonly="true"
     />
@@ -99,31 +100,15 @@ import ConfigurationsBasicData from '@/components/configurations/ConfigurationsB
 import DotMenu from '@/components/DotMenu.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 import ConfigurationsDeleteDialog from '@/components/configurations/ConfigurationsDeleteDialog.vue'
+import { mapActions, mapState } from 'vuex'
 @Component({
-  components: { ConfigurationsDeleteDialog, DotMenuActionDelete, DotMenu, ConfigurationsBasicData, ConfigurationsBasicDataForm }
+  components: { ConfigurationsDeleteDialog, DotMenuActionDelete, DotMenu, ConfigurationsBasicData, ConfigurationsBasicDataForm },
+  computed:mapState('configurations',['configuration']),
+  methods:mapActions('configurations',['deleteConfiguration'])
 })
 export default class ConfigurationShowBasicPage extends Vue {
-  @Prop({
-    required: true,
-    type: Object
-  })
-  readonly value!: Configuration
 
   private showDeleteDialog: boolean = false
-
-  head () {
-    return {
-      titleTemplate: 'Basic Data - %s'
-    }
-  }
-
-  get configuration (): Configuration {
-    return this.value
-  }
-
-  set configuration (value: Configuration) {
-    this.$emit('input', value)
-  }
 
   get configurationId () {
     return this.$route.params.configurationId
@@ -143,7 +128,7 @@ export default class ConfigurationShowBasicPage extends Vue {
       return
     }
 
-    this.$api.configurations.deleteById(this.configuration.id).then(() => {
+    this.deleteConfiguration(this.configuration.id).then(() => {
       this.$router.push('/configurations')
       this.$store.commit('snackbar/setSuccess', 'Configuration deleted')
     }).catch((_error) => {
