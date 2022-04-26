@@ -44,24 +44,27 @@ export interface configurationsState {
   configurations: Configuration[]
   configuration: Configuration|null,
   configurationStates: string[]
+  projects:Project[]
   totalPages: number
   pageNumber: number
   pageSize: number
-  // projects: Project[],
-  // configurationStates: string[]
-  // configurationEditDate: DateTime
 }
 
 const state={
   configurations:[],
   configuration:null,
   configurationStates:[],
+  projects:[],
   totalPages: 1,
   pageNumber: 1,
   pageSize: 20
 }
 
-const getters={}
+const getters={
+  projectNames: (state: configurationsState) => {
+    return state.projects.map((p: Project) => p.name)
+  },
+}
 
 const actions={
   async searchConfigurationsPaginated({commit,state}:{commit:Commit,state:configurationsState},searchParams:IConfigurationSearchParams){
@@ -77,12 +80,18 @@ const actions={
     commit('setTotalPages', totalPages)
   },
   async loadConfiguration({ commit }: { commit: Commit },id:number){
-
+    const configuration = await this.$api.configurations.findById(id)
+    commit('setConfiguration', configuration)
   },
   async loadConfigurationsStates ({ commit }: { commit: Commit }) {
     // @ts-ignore
     const configurationStates = await this.$api.configurationStates.findAll()
     commit('setConfigurationStates', configurationStates)
+  },
+  async loadProjects ({ commit }: { commit: Commit }) {
+    // @ts-ignore
+    const projects = await this.$api.projects.findAll()
+    commit('setProjects', projects)
   },
   async deleteConfiguration({ commit }: { commit: Commit }, id: number){
     await this.$api.configurations.deleteById(id)
@@ -110,6 +119,9 @@ const mutations={
   },
   setTotalPages (state: configurationsState, count: number) {
     state.totalPages = count
+  },
+  setProjects(state: configurationsState,projects:Project[]){
+    state.projects=projects;
   }
 }
 // export const state = (): ConfigurationsStoreState => {

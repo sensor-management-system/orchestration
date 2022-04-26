@@ -99,11 +99,17 @@ import { Configuration } from '@/models/Configuration'
 import Validator from '@/utils/validator'
 
 import DateTimePicker from '@/components/DateTimePicker.vue'
+import { mapActions, mapState, mapGetters } from 'vuex'
 
 @Component({
   components: {
     DateTimePicker
-  }
+  },
+  computed:{
+    ...mapState('configurations',['configurationStates']),
+    ...mapGetters('configurations',['projectNames'])
+  },
+  methods:mapActions('configurations',['loadConfigurationsStates','loadProjects'])
 })
 export default class ConfigurationsBasicDataForm extends Vue {
   @Prop({ default: false, type: Boolean }) readonly readonly!: boolean
@@ -117,11 +123,9 @@ export default class ConfigurationsBasicDataForm extends Vue {
   readonly LOCATION_TYPE_STATIONARY = 'Stationary'
   readonly LOCATION_TYPE_DYNAMIC = 'Dynamic'
 
-  async mounted () {
-    await Promise.all([
-      this.$store.dispatch('configurations/loadProjects'),
-      this.$store.dispatch('configurations/loadConfigurationsStates')
-    ])
+  async created(){
+    await this.loadConfigurationsStates()
+    await this.loadProjects()
   }
 
   get configurationStates () { return this.$store.state.configurations.configurationStates }
