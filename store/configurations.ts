@@ -40,6 +40,16 @@ import { Configuration } from '@/models/Configuration'
 import { Project } from '@/models/Project'
 import { IConfigurationSearchParams } from '@/modelUtils/ConfigurationSearchParams'
 import { Contact } from '@/models/Contact'
+import { DeviceMountTimelineAction, DeviceUnmountTimelineAction,
+  DynamicLocationBeginTimelineAction,
+  DynamicLocationEndTimelineAction,
+  ITimelineAction,
+  PlatformMountTimelineAction,
+  PlatformUnmountTimelineAction,
+  StaticLocationBeginTimelineAction,
+  StaticLocationEndTimelineAction} from '@/utils/configurationInterfaces'
+
+import { byDateOldestLast } from '@/modelUtils/mountHelpers'
 
 export interface configurationsState {
   configurations: Configuration[]
@@ -67,6 +77,40 @@ const getters={
   projectNames: (state: configurationsState) => {
     return state.projects.map((p: Project) => p.name)
   },
+  timelineActions: (state:configurationsState) => { // Todo überlegen, ob das man das eventuell anders macht
+    const result: ITimelineAction[] = []
+
+    if(state.configuration !== null){
+      const devices = state.configuration.deviceMountActions.map(a => a.device)
+      for (const platformMountAction of state.configuration.platformMountActions) {
+        result.push(new PlatformMountTimelineAction(platformMountAction))
+      }
+      for (const deviceMountAction of state.configuration.deviceMountActions) {
+        result.push(new DeviceMountTimelineAction(deviceMountAction))
+      }
+      for (const platformUnmountAction of state.configuration.platformUnmountActions) {
+        result.push(new PlatformUnmountTimelineAction(platformUnmountAction))
+      }
+      for (const deviceUnmountAction of state.configuration.deviceUnmountActions) {
+        result.push(new DeviceUnmountTimelineAction(deviceUnmountAction))
+      }
+      for (const action of state.configuration.staticLocationBeginActions) {
+        result.push(new StaticLocationBeginTimelineAction(action))
+      }
+      for (const action of state.configuration.staticLocationEndActions) {
+        result.push(new StaticLocationEndTimelineAction(action))
+      }
+      for (const action of state.configuration.dynamicLocationBeginActions) {
+        result.push(new DynamicLocationBeginTimelineAction(action, devices))
+      }
+      for (const action of state.configuration.dynamicLocationEndActions) {
+        result.push(new DynamicLocationEndTimelineAction(action))
+      }
+      result.sort(byDateOldestLast)
+    }
+
+    return result
+  }
 }
 
 const actions={

@@ -33,105 +33,19 @@ implied. See the Licence for the specific language governing
 permissions and limitations under the Licence.
 -->
 <template>
-  <v-card
-    flat
-  >
-    <hint-card v-if="timelineActions.length === 0">
-      There are no actions for this configuration.
-    </hint-card>
-    <v-card-text v-else>
-      <v-timeline dense>
-        <v-timeline-item
-          v-for="action in timelineActions"
-          :key="action.key"
-          :color="action.color"
-          :icon="action.icon"
-          class="mb-4"
-          small
-        >
-          <ConfigurationsTimelineActionCard
-            :action="action"
-          />
-        </v-timeline-item>
-      </v-timeline>
-    </v-card-text>
-  </v-card>
+  <NuxtChild/>
 </template>
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'nuxt-property-decorator'
 
-import { Configuration } from '@/models/Configuration'
-import {
-  DeviceMountTimelineAction,
-  DeviceUnmountTimelineAction,
-  ITimelineAction,
-  PlatformMountTimelineAction,
-  PlatformUnmountTimelineAction,
-  StaticLocationBeginTimelineAction,
-  StaticLocationEndTimelineAction,
-  DynamicLocationBeginTimelineAction,
-  DynamicLocationEndTimelineAction
-} from '@/utils/configurationInterfaces'
-
-import { byDateOldestLast } from '@/modelUtils/mountHelpers'
-
-import ConfigurationsTimelineActionCard from '@/components/configurations/ConfigurationsTimelineActionCard.vue'
-import HintCard from '@/components/HintCard.vue'
-
-@Component({
-  components: {
-    ConfigurationsTimelineActionCard,
-    HintCard
-  }
-})
+@Component({})
 export default class ConfigurationActions extends Vue {
-  @Prop({
-    required: true,
-    type: Object
-  })
-  readonly value!: Configuration
 
   head () {
     return {
       titleTemplate: 'Actions - %s'
     }
-  }
-
-  get configuration () {
-    return this.value
-  }
-
-  get timelineActions (): ITimelineAction[] {
-    const devices = this.configuration.deviceMountActions.map(a => a.device)
-    const result: ITimelineAction[] = []
-    for (const platformMountAction of this.configuration.platformMountActions) {
-      result.push(new PlatformMountTimelineAction(platformMountAction))
-    }
-    for (const deviceMountAction of this.configuration.deviceMountActions) {
-      result.push(new DeviceMountTimelineAction(deviceMountAction))
-    }
-    for (const platformUnmountAction of this.configuration.platformUnmountActions) {
-      result.push(new PlatformUnmountTimelineAction(platformUnmountAction))
-    }
-    for (const deviceUnmountAction of this.configuration.deviceUnmountActions) {
-      result.push(new DeviceUnmountTimelineAction(deviceUnmountAction))
-    }
-    for (const action of this.configuration.staticLocationBeginActions) {
-      result.push(new StaticLocationBeginTimelineAction(action))
-    }
-    for (const action of this.configuration.staticLocationEndActions) {
-      result.push(new StaticLocationEndTimelineAction(action))
-    }
-    for (const action of this.configuration.dynamicLocationBeginActions) {
-      result.push(new DynamicLocationBeginTimelineAction(action, devices))
-    }
-    for (const action of this.configuration.dynamicLocationEndActions) {
-      result.push(new DynamicLocationEndTimelineAction(action))
-    }
-
-    result.sort(byDateOldestLast)
-    return result
   }
 }
 </script>
