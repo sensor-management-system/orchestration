@@ -179,6 +179,44 @@ export class DeviceApi {
     })
   }
 
+  // findMatchingAsList (): Promise<Device[]> {
+  //   return this.axiosApi.get(
+  //     this.basePath,
+  //     {
+  //       params: {
+  //         'page[size]': 10000,
+  //         ...this.commonParams
+  //       }
+  //     }
+  //   ).then((rawResponse: any) => {
+  //     const rawData = rawResponse.data
+  //     // We don't ask the api to load the contacts, so we just add dummy objects
+  //     // to stay with the relationships
+  //     return this.serializer
+  //       .convertJsonApiObjectListToModelList(rawData)
+  //       .map(deviceWithMetaToDeviceByAddingDummyObjects)
+  //   })
+  // }
+
+  searchAll(){
+    this.prepareSearch()
+    return this.axiosApi.get(
+      this.basePath,
+      {
+        params: {
+          ...this.commonParams
+        }
+      }
+    ).then((rawResponse: any) => {
+      const rawData = rawResponse.data
+      // We don't ask the api to load the contacts, so we just add dummy objects
+      // to stay with the relationships
+      return this.serializer
+        .convertJsonApiObjectListToModelList(rawData)
+        .map(deviceWithMetaToDeviceByAddingDummyObjects)
+    })
+  }
+
   searchMatchingAsCsvBlob (): Promise<Blob> {
 
     this.prepareSearch()
@@ -338,9 +376,9 @@ export class DeviceApi {
     })
   }
 
-  newSearchBuilder (): DeviceSearchBuilder {
-    return new DeviceSearchBuilder(this.axiosApi, this.basePath, this.serializer)
-  }
+  // newSearchBuilder (): DeviceSearchBuilder {
+  //   return new DeviceSearchBuilder(this.axiosApi, this.basePath, this.serializer)
+  // }
 
   findRelatedContacts (deviceId: string): Promise<Contact[]> {
     const url = this.basePath + '/' + deviceId + '/contacts'

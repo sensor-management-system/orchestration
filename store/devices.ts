@@ -116,6 +116,17 @@ const actions = {
     const totalPages = Math.ceil(totalCount / state.pageSize)
     commit('setTotalPages', totalPages)
   },
+  async searchDevices ({
+    commit,
+    state
+  }: { commit: Commit, state: devicesState }, searchParams: IDeviceSearchParams) {
+
+    // @ts-ignore
+    const devices = await this.$api.devices
+      .setSearchText(searchParams.searchText)
+      .searchAll()
+    commit('setDevices', devices)
+  },
   async loadDevice ({ commit }: { commit: Commit },
     {
       deviceId,

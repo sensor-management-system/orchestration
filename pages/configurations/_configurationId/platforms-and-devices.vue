@@ -33,69 +33,70 @@ implied. See the Licence for the specific language governing
 permissions and limitations under the Licence.
 -->
 <template>
-  <v-card
-    flat
-  >
-    <v-card-text>
-      <v-row>
-        <v-col cols="12" md="3">
-          <DateTimePicker
-            v-model="selectedDate"
-            placeholder="e.g. 2000-01-31 12:00"
-            label="Configuration at date"
-            :rules="[rules.dateNotNull]"
-          />
-        </v-col>
-        <v-col>
-          <v-select
-            v-model="selectedDate"
-            :item-value="(x) => x.date"
-            :item-text="(x) => x.text"
-            :items="actionDates"
-            label="Dates defined by actions"
-            hint="The referenced time zone is UTC."
-            persistent-hint
-          />
-        </v-col>
-      </v-row>
-      <v-row>
-        <v-col cols="12" md="6">
-          <ConfigurationsTreeView
-            ref="treeView"
-            v-model="tree"
-            :selected="selectedNode"
-            @select="setSelectedNode"
-          />
-        </v-col>
-        <v-col cols="12" md="6">
-          <InfoBox v-if="!selectedNode && $auth.loggedIn">
-            Select a platform on the left side to add devices or platforms to it. To add a device or platform to the
-            root of this configuration, deselect any previously selected device or platform.
-          </InfoBox>
-          <ConfigurationsSelectedItem
-            :value="getSelectedNode"
-            :breadcrumbs="hierarchyNodeNames"
-            :selected-date="selectedDate"
-            :readonly="!$auth.loggedIn"
-            :contacts="contacts"
-            :current-user-mail="currentUserMail"
-            @remove="removeSelectedNode"
-            @overwriteExistingMountAction="overwriteExistingMountAction"
-          />
-          <ConfigurationsPlatformDeviceSearch
-            v-if="$auth.loggedIn && (!selectedNode || selectedNode.isPlatform())"
-            :is-platform-used-func="isPlatformInTree"
-            :is-device-used-func="isDeviceInTree"
-            :selected-date="selectedDate"
-            :contacts="contacts"
-            :current-user-mail="currentUserMail"
-            @add-platform="addPlatformNode"
-            @add-device="addDeviceNode"
-          />
-        </v-col>
-      </v-row>
-    </v-card-text>
-  </v-card>
+  <NuxtChild/>
+<!--  <v-card-->
+<!--    flat-->
+<!--  >-->
+<!--    <v-card-text>-->
+<!--      <v-row>-->
+<!--        <v-col cols="12" md="3">-->
+<!--          <DateTimePicker-->
+<!--            v-model="selectedDate"-->
+<!--            placeholder="e.g. 2000-01-31 12:00"-->
+<!--            label="Configuration at date"-->
+<!--            :rules="[rules.dateNotNull]"-->
+<!--          />-->
+<!--        </v-col>-->
+<!--        <v-col>-->
+<!--          <v-select-->
+<!--            v-model="selectedDate"-->
+<!--            :item-value="(x) => x.date"-->
+<!--            :item-text="(x) => x.text"-->
+<!--            :items="actionDates"-->
+<!--            label="Dates defined by actions"-->
+<!--            hint="The referenced time zone is UTC."-->
+<!--            persistent-hint-->
+<!--          />-->
+<!--        </v-col>-->
+<!--      </v-row>-->
+<!--      <v-row>-->
+<!--        <v-col cols="12" md="6">-->
+<!--          <ConfigurationsTreeView-->
+<!--            ref="treeView"-->
+<!--            v-model="tree"-->
+<!--            :selected="selectedNode"-->
+<!--            @select="setSelectedNode"-->
+<!--          />-->
+<!--        </v-col>-->
+<!--        <v-col cols="12" md="6">-->
+<!--          <InfoBox v-if="!selectedNode && $auth.loggedIn">-->
+<!--            Select a platform on the left side to add devices or platforms to it. To add a device or platform to the-->
+<!--            root of this configuration, deselect any previously selected device or platform.-->
+<!--          </InfoBox>-->
+<!--          <ConfigurationsSelectedItem-->
+<!--            :value="getSelectedNode"-->
+<!--            :breadcrumbs="hierarchyNodeNames"-->
+<!--            :selected-date="selectedDate"-->
+<!--            :readonly="!$auth.loggedIn"-->
+<!--            :contacts="contacts"-->
+<!--            :current-user-mail="currentUserMail"-->
+<!--            @remove="removeSelectedNode"-->
+<!--            @overwriteExistingMountAction="overwriteExistingMountAction"-->
+<!--          />-->
+<!--          <ConfigurationsPlatformDeviceSearch-->
+<!--            v-if="$auth.loggedIn && (!selectedNode || selectedNode.isPlatform())"-->
+<!--            :is-platform-used-func="isPlatformInTree"-->
+<!--            :is-device-used-func="isDeviceInTree"-->
+<!--            :selected-date="selectedDate"-->
+<!--            :contacts="contacts"-->
+<!--            :current-user-mail="currentUserMail"-->
+<!--            @add-platform="addPlatformNode"-->
+<!--            @add-device="addDeviceNode"-->
+<!--          />-->
+<!--        </v-col>-->
+<!--      </v-row>-->
+<!--    </v-card-text>-->
+<!--  </v-card>-->
 </template>
 
 <script lang="ts">
@@ -130,206 +131,198 @@ import ConfigurationsPlatformDeviceSearch from '@/components/ConfigurationsPlatf
   }
 })
 export default class ConfigurationPlatformsAndDevices extends Vue {
-  private selectedNode: ConfigurationsTreeNode | null = null
-  private valueCopy: Configuration = new Configuration()
-  @Prop({
-    required: true,
-    type: Object
-  })
-  readonly value!: Configuration
-
-  async created () {
-    if (this.value) {
-      this.valueCopy = Configuration.createFromObject(this.value)
-    }
-    try {
-      await this.$store.dispatch('contacts/loadAllContacts')
-    } catch (e) {
-      this.$store.commit('snackbar/setError', 'Failed to fetch contacts')
-    }
-  }
-
+  // private selectedNode: ConfigurationsTreeNode | null = null
+  // private valueCopy: Configuration = new Configuration()
+  // @Prop({
+  //   required: true,
+  //   type: Object
+  // })
+  // readonly value!: Configuration
+  //
+  // async created () {
+  //   if (this.value) {
+  //     this.valueCopy = Configuration.createFromObject(this.value)
+  //   }
+  //   try {
+  //     await this.$store.dispatch('contacts/loadAllContacts')
+  //   } catch (e) {
+  //     this.$store.commit('snackbar/setError', 'Failed to fetch contacts')
+  //   }
+  // }
+  //
   head () {
     return {
       titleTemplate: 'Platforms and Devices - %s'
     }
   }
-
-  get configuration () {
-    return this.valueCopy
-  }
-
-  get contacts (): Contact[] {
-    return this.$store.state.contacts.allContacts
-  }
-
-  private rules: Object = {
-    dateNotNull: Validator.mustBeProvided('Date')
-  }
-
-  get selectedDate () {
-    return this.$store.getters['configurations/configurationEditDate']
-  }
-
-  set selectedDate (newDate: DateTime) {
-    this.$store.commit('configurations/setConfigurationEditDate', newDate)
-  }
-
-  get actionDates (): IActionDateWithText[] {
-    return ConfigurationHelper.getActionDatesWithTextsByConfiguration(this.configuration, this.selectedDate, { useMounts: true, useLoctions: false })
-  }
-
-  setSelectedNode (node: ConfigurationsTreeNode) {
-    this.selectedNode = node
-  }
-
-  get tree () {
-    const selectedNodeId = this.selectedNode?.id
-    const tree = buildConfigurationTree(this.configuration, this.selectedDate)
-    if (selectedNodeId) {
-      const node = tree.getById(selectedNodeId)
-      if (node) {
-        this.selectedNode = node
-      }
-    }
-    return tree
-  }
-
-  get getSelectedNode (): ConfigurationsTreeNode | null {
-    return this.selectedNode
-  }
-
-  get hierarchyNodeNames (): Object[] {
-    return ConfigurationHelper.getHierarchyNodeNamesByTreeAndSelectedNode(this.tree, this.selectedNode)
-  }
-
-  async removeSelectedNode (_node: ConfigurationsTreeNode, contact: Contact, description: string): Promise<void> {
-    // we make a copy of the current configuration in case that something fails
-    const configurationCopy: Configuration = Configuration.createFromObject(this.configuration)
-
-    const node: ConfigurationsTreeNode | null = this.selectedNode
-    if (!node) {
-      return
-    }
-
-    const parentNode = this.tree.getParent(node)
-    let parentNodeId: string | null = null
-    if (parentNode) {
-      parentNodeId = parentNode.id
-    }
-
-    unmount(this.configuration, node, this.selectedDate, contact, description)
-
-    try {
-      await this.save()
-
-      if (parentNodeId) {
-        const nodeWithTheSameId = this.tree.toArray().find(treeNode => treeNode.id === parentNodeId)
-        if (nodeWithTheSameId) {
-          this.selectedNode = nodeWithTheSameId
-        } else {
-          this.selectedNode = null
-        }
-      } else {
-        this.selectedNode = null
-      }
-    } catch (_error) {
-      this.$store.commit('configurations/setConfiguration', configurationCopy)
-    }
-  }
-
-  overwriteExistingMountAction (node: ConfigurationsTreeNode, newSettings: any) {
-    ConfigurationHelper.overwriteExistingMountAction(node, newSettings)
-    // The overwriteExistingMountAction helper overwrites the mount action
-    // directly in the tree & the configuration.
-    // We don't need to set those updated mount action additionally
-    // in the configuration.
-    // All what is left is to save our change.
-    this.save()
-  }
-
-  isPlatformInTree (platform: Platform): boolean {
-    const platformId = platform.id
-    if (platformId === null) {
-      return false
-    }
-    return !!this.tree.getPlatformById(platformId)
-  }
-
-  isDeviceInTree (device: Device): boolean {
-    const deviceId = device.id
-    if (deviceId === null) {
-      return false
-    }
-    return !!this.tree.getDeviceById(deviceId)
-  }
-
-  async addPlatformNode (
-    platform: Platform,
-    offsetX: number,
-    offsetY: number,
-    offsetZ: number,
-    contact: Contact,
-    description: string
-  ): Promise<void> {
-    const node: ConfigurationsTreeNode | null = this.selectedNode
-    // we make a copy of the current configuration in case that something fails
-    const configurationCopy: Configuration = Configuration.createFromObject(this.configuration)
-
-    mountPlatform(this.configuration, platform, offsetX, offsetY, offsetZ, contact, description, node, this.selectedDate)
-
-    try {
-      await this.save()
-    } catch (_error) {
-      this.$store.commit('configurations/setConfiguration', configurationCopy)
-    }
-  }
-
-  async addDeviceNode (
-    device: Device,
-    offsetX: number,
-    offsetY: number,
-    offsetZ: number,
-    contact: Contact,
-    description: string
-  ): Promise<void> {
-    const node: ConfigurationsTreeNode | null = this.selectedNode
-    // we make a copy of the current configuration in case that something fails
-    const configurationCopy: Configuration = Configuration.createFromObject(this.configuration)
-
-    mountDevice(this.configuration, device, offsetX, offsetY, offsetZ, contact, description, node, this.selectedDate)
-
-    try {
-      await this.save()
-    } catch (_error) {
-      this.$store.commit('configurations/setConfiguration', configurationCopy)
-    }
-  }
-
-  async save () {
-    try {
-      this.$store.commit('configurations/setConfiguration', this.valueCopy)
-      await this.$store.dispatch('configurations/saveConfiguration')
-      this.$store.commit('snackbar/setSuccess', 'Save successful')
-    } catch (e) {
-      this.$store.commit('snackbar/setError', 'Save failed')
-      throw e
-    }
-  }
-
-  get currentUserMail (): string | null {
-    if (this.$auth.user && this.$auth.user.email) {
-      return this.$auth.user.email as string
-    }
-    return null
-  }
-
-  @Watch('value', {
-    deep: true,
-    immediate: true
-  })
-  onValueChange (val: Configuration): void {
-    this.valueCopy = Configuration.createFromObject(val)
-  }
+  //
+  // get configuration () {
+  //   return this.valueCopy
+  // }
+  //
+  // get contacts (): Contact[] {
+  //   return this.$store.state.contacts.allContacts
+  // }
+  //
+  // private rules: Object = {
+  //   dateNotNull: Validator.mustBeProvided('Date')
+  // }
+  //
+  // get actionDates (): IActionDateWithText[] {
+  //   return ConfigurationHelper.getActionDatesWithTextsByConfiguration(this.configuration, this.selectedDate, { useMounts: true, useLoctions: false })
+  // }
+  //
+  // setSelectedNode (node: ConfigurationsTreeNode) {
+  //   this.selectedNode = node
+  // }
+  //
+  // get tree () {
+  //   const selectedNodeId = this.selectedNode?.id
+  //   const tree = buildConfigurationTree(this.configuration, this.selectedDate)
+  //   if (selectedNodeId) {
+  //     const node = tree.getById(selectedNodeId)
+  //     if (node) {
+  //       this.selectedNode = node
+  //     }
+  //   }
+  //   return tree
+  // }
+  //
+  // get getSelectedNode (): ConfigurationsTreeNode | null {
+  //   return this.selectedNode
+  // }
+  //
+  // get hierarchyNodeNames (): Object[] {
+  //   return ConfigurationHelper.getHierarchyNodeNamesByTreeAndSelectedNode(this.tree, this.selectedNode)
+  // }
+  //
+  // async removeSelectedNode (_node: ConfigurationsTreeNode, contact: Contact, description: string): Promise<void> {
+  //   // we make a copy of the current configuration in case that something fails
+  //   const configurationCopy: Configuration = Configuration.createFromObject(this.configuration)
+  //
+  //   const node: ConfigurationsTreeNode | null = this.selectedNode
+  //   if (!node) {
+  //     return
+  //   }
+  //
+  //   const parentNode = this.tree.getParent(node)
+  //   let parentNodeId: string | null = null
+  //   if (parentNode) {
+  //     parentNodeId = parentNode.id
+  //   }
+  //
+  //   unmount(this.configuration, node, this.selectedDate, contact, description)
+  //
+  //   try {
+  //     await this.save()
+  //
+  //     if (parentNodeId) {
+  //       const nodeWithTheSameId = this.tree.toArray().find(treeNode => treeNode.id === parentNodeId)
+  //       if (nodeWithTheSameId) {
+  //         this.selectedNode = nodeWithTheSameId
+  //       } else {
+  //         this.selectedNode = null
+  //       }
+  //     } else {
+  //       this.selectedNode = null
+  //     }
+  //   } catch (_error) {
+  //     this.$store.commit('configurations/setConfiguration', configurationCopy)
+  //   }
+  // }
+  //
+  // overwriteExistingMountAction (node: ConfigurationsTreeNode, newSettings: any) {
+  //   ConfigurationHelper.overwriteExistingMountAction(node, newSettings)
+  //   // The overwriteExistingMountAction helper overwrites the mount action
+  //   // directly in the tree & the configuration.
+  //   // We don't need to set those updated mount action additionally
+  //   // in the configuration.
+  //   // All what is left is to save our change.
+  //   this.save()
+  // }
+  //
+  // isPlatformInTree (platform: Platform): boolean {
+  //   const platformId = platform.id
+  //   if (platformId === null) {
+  //     return false
+  //   }
+  //   return !!this.tree.getPlatformById(platformId)
+  // }
+  //
+  // isDeviceInTree (device: Device): boolean {
+  //   const deviceId = device.id
+  //   if (deviceId === null) {
+  //     return false
+  //   }
+  //   return !!this.tree.getDeviceById(deviceId)
+  // }
+  //
+  // async addPlatformNode (
+  //   platform: Platform,
+  //   offsetX: number,
+  //   offsetY: number,
+  //   offsetZ: number,
+  //   contact: Contact,
+  //   description: string
+  // ): Promise<void> {
+  //   const node: ConfigurationsTreeNode | null = this.selectedNode
+  //   // we make a copy of the current configuration in case that something fails
+  //   const configurationCopy: Configuration = Configuration.createFromObject(this.configuration)
+  //
+  //   mountPlatform(this.configuration, platform, offsetX, offsetY, offsetZ, contact, description, node, this.selectedDate)
+  //
+  //   try {
+  //     await this.save()
+  //   } catch (_error) {
+  //     this.$store.commit('configurations/setConfiguration', configurationCopy)
+  //   }
+  // }
+  //
+  // async addDeviceNode (
+  //   device: Device,
+  //   offsetX: number,
+  //   offsetY: number,
+  //   offsetZ: number,
+  //   contact: Contact,
+  //   description: string
+  // ): Promise<void> {
+  //   const node: ConfigurationsTreeNode | null = this.selectedNode
+  //   // we make a copy of the current configuration in case that something fails
+  //   const configurationCopy: Configuration = Configuration.createFromObject(this.configuration)
+  //
+  //   mountDevice(this.configuration, device, offsetX, offsetY, offsetZ, contact, description, node, this.selectedDate)
+  //
+  //   try {
+  //     await this.save()
+  //   } catch (_error) {
+  //     this.$store.commit('configurations/setConfiguration', configurationCopy)
+  //   }
+  // }
+  //
+  // async save () {
+  //   try {
+  //     this.$store.commit('configurations/setConfiguration', this.valueCopy)
+  //     await this.$store.dispatch('configurations/saveConfiguration')
+  //     this.$store.commit('snackbar/setSuccess', 'Save successful')
+  //   } catch (e) {
+  //     this.$store.commit('snackbar/setError', 'Save failed')
+  //     throw e
+  //   }
+  // }
+  //
+  // get currentUserMail (): string | null {
+  //   if (this.$auth.user && this.$auth.user.email) {
+  //     return this.$auth.user.email as string
+  //   }
+  //   return null
+  // }
+  //
+  // @Watch('value', {
+  //   deep: true,
+  //   immediate: true
+  // })
+  // onValueChange (val: Configuration): void {
+  //   this.valueCopy = Configuration.createFromObject(val)
+  // }
 }
 </script>
