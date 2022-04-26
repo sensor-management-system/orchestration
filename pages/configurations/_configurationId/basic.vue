@@ -33,29 +33,18 @@ implied. See the Licence for the specific language governing
 permissions and limitations under the Licence.
 -->
 <template>
-  <NuxtChild
-    :value="configuration"
-  />
+  <NuxtChild/>
 </template>
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'nuxt-property-decorator'
-import { Configuration } from '@/models/Configuration'
 
 @Component
 export default class ConfigurationBasic extends Vue {
-  @Prop({
-    required: true,
-    type: Object
-  })
-  readonly value!: Configuration
-
-  get configuration (): Configuration {
-    return this.value
-  }
-
-  set configuration (value: Configuration) {
-    this.$emit('input', value)
+  head () {
+    return {
+      titleTemplate: 'Basic Data - %s'
+    }
   }
 }
 </script>
