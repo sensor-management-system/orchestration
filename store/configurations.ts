@@ -39,10 +39,12 @@ import { DateTime } from 'luxon'
 import { Configuration } from '@/models/Configuration'
 import { Project } from '@/models/Project'
 import { IConfigurationSearchParams } from '@/modelUtils/ConfigurationSearchParams'
+import { Contact } from '@/models/Contact'
 
 export interface configurationsState {
   configurations: Configuration[]
   configuration: Configuration|null,
+  configurationContacts: Contact[]
   configurationStates: string[]
   projects:Project[]
   totalPages: number
@@ -53,6 +55,7 @@ export interface configurationsState {
 const state={
   configurations:[],
   configuration:null,
+  configurationContacts:[],
   configurationStates:[],
   projects:[],
   totalPages: 1,
@@ -83,6 +86,10 @@ const actions={
     const configuration = await this.$api.configurations.findById(id)
     commit('setConfiguration', configuration)
   },
+  async loadConfigurationContacts({ commit }: { commit: Commit },id:number){
+    const configurationContacts = await this.$api.configurations.findRelatedContacts(id)
+    commit('setConfigurationContacts',configurationContacts)
+  },
   async loadConfigurationsStates ({ commit }: { commit: Commit }) {
     // @ts-ignore
     const configurationStates = await this.$api.configurationStates.findAll()
@@ -99,6 +106,18 @@ const actions={
   async saveConfiguration({ commit }: { commit: Commit }, configuration:Configuration):Promise<Configuration>{
     return this.$api.configurations.save(configuration)
   },
+  async addConfigurationContact ({ commit }: { commit: Commit }, {
+    configurationId,
+    contactId
+  }: { configurationId: number, contactId: number }): Promise<void> {
+    return this.$api.configurations.addContact(configurationId, contactId)
+  },
+  async removeConfigurationContact ({ commit }: { commit: Commit }, {
+    configurationId,
+    contactId
+  }: { configurationId: number, contactId: number }): Promise<void> {
+    return this.$api.configurations.removeContact(configurationId, contactId)
+  },
   setPageNumber ({ commit }: { commit: Commit }, newPageNumber: number) {
     commit('setPageNumber', newPageNumber)
   },
@@ -110,6 +129,9 @@ const mutations={
   },
   setConfiguration(state:configurationsState,configuration:Configuration){
     state.configuration=configuration
+  },
+  setConfigurationContacts(state:configurationsState,configurationContacts:Contact[]){
+    state.configurationContacts=configurationContacts
   },
   setConfigurationStates(state:configurationsState,configurationStates:string[]){
     state.configurationStates=configurationStates;
