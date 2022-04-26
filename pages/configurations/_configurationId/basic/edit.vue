@@ -46,7 +46,7 @@ permissions and limitations under the Licence.
         <save-and-cancel-buttons
           v-if="$auth.loggedIn"
           :to="`/configurations/${configurationId}/basic`"
-          @save="save()"
+          @save="save"
         />
       </v-card-actions>
       <ConfigurationsBasicDataForm
@@ -60,7 +60,7 @@ permissions and limitations under the Licence.
         <save-and-cancel-buttons
           v-if="$auth.loggedIn"
           :to="`/configurations/${configurationId}/basic`"
-          @save="save()"
+          @save="save"
         />
       </v-card-actions>
     </v-card>
@@ -73,33 +73,25 @@ import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButto
 import ConfigurationsBasicDataForm from '@/components/configurations/ConfigurationsBasicDataForm.vue'
 import { Configuration } from '@/models/Configuration'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { mapActions, mapState } from 'vuex'
 @Component({
   components: { ProgressIndicator, ConfigurationsBasicDataForm, SaveAndCancelButtons },
-  middleware: ['auth']
+  middleware: ['auth'],
+  computed:mapState('configurations',['configuration']),
+  methods:mapActions('configurations',['saveConfiguration','loadConfiguration'])
 })
 export default class ConfigurationEditBasicPage extends Vue {
-  @Prop({
-    required: true,
-    type: Configuration
-  })
-  readonly value!: Configuration
 
   private configurationCopy: Configuration = new Configuration()
   private isLoading: boolean = false
   private formIsValid: boolean = true
-
-  head () {
-    return {
-      titleTemplate: 'Basic Data - %s'
-    }
-  }
 
   get configurationId () {
     return this.$route.params.configurationId
   }
 
   created () {
-    this.configurationCopy = Configuration.createFromObject(this.value)
+    this.configurationCopy = Configuration.createFromObject(this.configuration)
   }
 
   async save () {
@@ -110,20 +102,15 @@ export default class ConfigurationEditBasicPage extends Vue {
 
     try {
       this.isLoading = true
-      this.$store.commit('configurations/setConfiguration', this.configurationCopy)
-      await this.$store.dispatch('configurations/saveConfiguration')
+      await this.saveConfiguration(this.configurationCopy);
+      this.loadConfiguration(this.configurationId)
       this.$store.commit('snackbar/setSuccess', 'Save successful')
-      await this.$router.push('/configurations/' + this.$store.state.configurations.configuration.id + '/basic')
+      await this.$router.push('/configurations/' + this.configurationId + '/basic')
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Save failed')
     } finally {
       this.isLoading = false
     }
-  }
-
-  @Watch('value', { immediate: true, deep: true })
-  onConfigurationChanged (val: Configuration) {
-    this.configurationCopy = Configuration.createFromObject(val)
   }
 }
 </script>
