@@ -34,13 +34,16 @@
   </v-row>
   <v-row>
     <v-col cols="12" md="6">
-      <ConfigurationsTreeView
-        v-if="configuration"
-        ref="treeView"
-        v-model="tree"
-        :selected="selectedNode"
-        @select="setSelectedNode"
-      />
+      <v-card>
+        <v-card-title>Mounted devices and platforms</v-card-title>
+        <ConfigurationsTreeView
+          v-if="configuration"
+          ref="treeView"
+          v-model="tree"
+          :selected="selectedNode"
+          @select="setSelectedNode"
+        />
+      </v-card>
     </v-col>
   </v-row>
 </div>

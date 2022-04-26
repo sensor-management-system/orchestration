@@ -90,6 +90,17 @@ const actions = {
     const totalPages = Math.ceil(totalCount / state.pageSize)
     commit('setTotalPages', totalPages)
   },
+  async searchPlatforms ({
+    commit,
+    state
+  }: { commit: Commit, state: platformsState }, searchParams: IPlatformSearchParams) {
+    // @ts-ignore
+    const platforms = await this.$api.platforms
+      .setSearchText(searchParams.searchText)
+      .searchAll()
+    commit('setPlatforms', platforms)
+
+  },
   async loadPlatform({ commit }: { commit: Commit },{platformId,includeContacts,includePlatformAttachments}:{platformId:number,includeContacts:boolean,includePlatformAttachments:boolean}){
     const platform = await this.$api.platforms.findById(platformId,{ //TODO Überprüfen, ob man diese Parameter wirklich braucht/ notfalls die payload als Object übergeben lassen
       includeContacts: includeContacts,

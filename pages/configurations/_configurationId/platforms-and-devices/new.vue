@@ -22,16 +22,20 @@
       </v-col>
   </v-row>
   <v-row justify="center">
-    <v-col cols="12" md="6">
-      <ConfigurationsTreeView
-        v-if="configuration"
-        ref="treeView"
-        v-model="tree"
-        :selected="selectedNode"
-        @select="setSelectedNode"
-      />
+    <v-col cols="12" md="4">
+      <v-card>
+        <v-card-title>Mounted devices and platforms</v-card-title>
+        <ConfigurationsTreeView
+          v-if="configuration"
+          ref="treeView"
+          v-model="tree"
+          :selected="selectedNode"
+          @select="setSelectedNode"
+        />
+      </v-card>
+
     </v-col>
-    <v-col cols="12" md="6">
+    <v-col cols="12" md="8">
       <v-row>
         <v-col>
           <v-card>
@@ -64,7 +68,7 @@
                     <v-row>
                       <v-col cols="12">
                         <v-text-field
-                          v-model="searchText"
+                          v-model="searchTextPlatforms"
                           label="Name"
                           placeholder="Name of platform"
                           hint="Please enter at least 3 characters"
@@ -86,12 +90,43 @@
                         <v-btn
                           text
                           small
-                          @click="clearBasicSearch"
+                          @click="clearBasicSearchPlatforms"
                         >
                           Clear
                         </v-btn>
                       </v-col>
                     </v-row>
+                    <div v-if="platforms.length>0">
+                      <v-subheader>
+                        <template v-if="platforms.length == 1">
+                          1 device found
+                        </template>
+                        <template v-else>
+                          {{ platforms.length }} platforms found
+                        </template>
+                        <v-spacer />
+                      </v-subheader>
+                      <BaseList
+                        :list-items="platforms"
+                      >
+                        <template v-slot:list-item="{item}">
+                          <PlatformMountListItem
+                            :key="item.id"
+                            :platform="item"
+                          >
+                            <template #mount>
+                              <ConfigurationsPlatformDeviceMountForm
+                                data-role-btn="add-platform"
+                                :readonly="false"
+                                :contacts="contacts"
+                                :current-user-mail="currentUserMail"
+                                @add="mountPlatform(item, $event)"
+                              />
+                            </template>
+                          </PlatformMountListItem>
+                        </template>
+                      </BaseList>
+                    </div>
 
                   </v-container>
                 </v-card>
@@ -102,7 +137,7 @@
                     <v-row>
                       <v-col cols="12">
                         <v-text-field
-                          v-model="searchText"
+                          v-model="searchTextDevices"
                           label="Name"
                           placeholder="Name of device"
                           hint="Please enter at least 3 characters"
@@ -124,7 +159,7 @@
                         <v-btn
                           text
                           small
-                          @click="clearBasicSearch"
+                          @click="clearBasicSearchDevices"
                         >
                           Clear
                         </v-btn>
@@ -191,19 +226,23 @@ import { Configuration } from '@/models/Configuration'
 import { Platform } from '@/models/Platform'
 import { DeviceMountAction, IDeviceMountAction } from '@/models/DeviceMountAction'
 import { PlatformNode } from '@/viewmodels/PlatformNode'
+import PlatformMountListItem from '@/components/platforms/PlatformMountListItem.vue'
+import { PlatformMountAction } from '@/models/PlatformMountAction'
 
 @Component({
-  components: { ConfigurationsPlatformDeviceMountForm, DevicesMountListItem, DevicesListItem, BaseList, DateTimePicker, ConfigurationsTreeView },
+  components: { PlatformMountListItem, ConfigurationsPlatformDeviceMountForm, DevicesMountListItem, DevicesListItem, BaseList, DateTimePicker, ConfigurationsTreeView },
   middleware:['auth'],
   computed:{
     ...mapGetters('configurations',['mountingActionsDates']),
     ...mapState('configurations',['configuration']),
     ...mapState('devices',['devices']),
+    ...mapState('platforms',['platforms']),
     ...mapState('contacts',['contacts'])
   },
   methods:{
     ...mapActions('devices',['searchDevices']),
-    ...mapActions('configurations',['addDeviceMountAction']),
+    ...mapActions('platforms',['searchPlatforms']),
+    ...mapActions('configurations',['addDeviceMountAction','addPlatformMountAction','loadConfiguration']),
     ...mapActions('contacts',['loadAllContacts'])
   }
 })
@@ -211,7 +250,8 @@ export default class ConfigurationAddPlatformsAndDevicesPage extends Vue {
   private loading = false
   private tab= null
 
-  private searchText:string|null = null
+  private searchTextPlatforms:string|null = null
+  private searchTextDevices:string|null = null
   private selectedType:string|null =null
   private selectedNode: ConfigurationsTreeNode | null = null
   private selectedDate = DateTime.utc()
@@ -246,21 +286,24 @@ export default class ConfigurationAddPlatformsAndDevicesPage extends Vue {
   setSelectedNode (node: ConfigurationsTreeNode) {
     this.selectedNode = node
   }
-  clearBasicSearch(){
-    this.searchText=null
+  clearBasicSearchPlatforms(){
+    this.searchTextPlatforms=null
+  }
+  clearBasicSearchDevices(){
+    this.searchTextPlatforms=null
   }
 
   async searchDevicesForMount(){
-      await this.searchDevices({ searchText: this.searchText })
+      await this.searchDevices({ searchText: this.searchTextDevices })
   }
   async searchPlatformsForMount(){
-      await this.searchPlatforms({ searchText: this.searchText })
+      await this.searchPlatforms({ searchText: this.searchTextPlatforms })
   }
 
   mountDevice(device,mountInfo){
     try {
 
-      let platform = null;
+      let parentPlatform = null;
 
       if(this.selectedNode && !this.selectedNode.canHaveChildren()){
         this.$store.commit('snackbar/setError', 'Selected node-type cannot have children')
@@ -268,13 +311,13 @@ export default class ConfigurationAddPlatformsAndDevicesPage extends Vue {
       }
 
       if (this.selectedNode && this.selectedNode.canHaveChildren()) {
-        platform = (this.selectedNode as PlatformNode).unpack().platform
+        parentPlatform = (this.selectedNode as PlatformNode).unpack().platform
       }
 
       const newDeviceMountAction = DeviceMountAction.createFromObject({
         id: '',
         device,
-        parentPlatform: platform,
+        parentPlatform: parentPlatform,
         date: this.selectedDate,
         offsetX: mountInfo.offsetX,
         offsetY: mountInfo.offsetY,
@@ -287,14 +330,50 @@ export default class ConfigurationAddPlatformsAndDevicesPage extends Vue {
         configurationId: this.configurationId,
         deviceMountAction: newDeviceMountAction
       })
+      this.loadConfiguration(this.configurationId)
+      this.$store.commit('snackbar/setSuccess', 'Save successful')
+      this.$router.push('/configurations/' + this.configurationId + '/platforms-and-devices')
     } catch (e) {
-      console.log('error',e);
       this.$store.commit('snackbar/setError', 'Failed to add device mount action')
     }
   }
 
-  mountPlatform(platform,mountInfo){
+  async mountPlatform(platform,mountInfo){
+    try {
 
+      let parentPlatform = null;
+
+      if(this.selectedNode && !this.selectedNode.canHaveChildren()){
+        this.$store.commit('snackbar/setError', 'Selected node-type cannot have children')
+        return
+      }
+
+      if (this.selectedNode && this.selectedNode.canHaveChildren()) {
+        parentPlatform = (this.selectedNode as PlatformNode).unpack().platform
+      }
+
+      const newPlatformMountAction = PlatformMountAction.createFromObject({
+        id: '',
+        platform,
+        parentPlatform: parentPlatform,
+        date: this.selectedDate,
+        offsetX: mountInfo.offsetX,
+        offsetY: mountInfo.offsetY,
+        offsetZ: mountInfo.offsetZ,
+        contact: mountInfo.contact,
+        description: mountInfo.description
+      })
+
+      await this.addPlatformMountAction({
+        configurationId: this.configurationId,
+        platformMountAction: newPlatformMountAction
+      })
+      this.loadConfiguration(this.configurationId)
+      this.$store.commit('snackbar/setSuccess', 'Save successful')
+      this.$router.push('/configurations/' + this.configurationId + '/platforms-and-devices')
+    } catch (e) {
+      this.$store.commit('snackbar/setError', 'Failed to add platform mount action')
+    }
   }
 }
 </script>

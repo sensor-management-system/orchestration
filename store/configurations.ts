@@ -54,6 +54,7 @@ import {
 import { byDateOldestLast } from '@/modelUtils/mountHelpers'
 import { dateToDateTimeStringHHMM } from '@/utils/dateHelper'
 import { DeviceMountAction } from '@/models/DeviceMountAction'
+import { PlatformMountAction } from '@/models/PlatformMountAction'
 
 export interface configurationsState {
   configurations: Configuration[]
@@ -264,8 +265,11 @@ const actions = {
   async addDeviceUnMountAction({ commit }: { commit: Commit }, payload){
     // console.log(this.$api.configurations.deviceUnmountActionApi);
   },
-  async addPlatformMountAction({ commit }: { commit: Commit }, payload){
-    // console.log(this.$api.configurations.platformMountActionApi);
+  async addPlatformMountAction({ commit }: { commit: Commit },
+    {configurationId, platformMountAction}: {configurationId: string, platformMountAction: PlatformMountAction}
+    ):Promise<void>
+  {
+    return this.$api.configurations.platformMountActionApi.add(configurationId,platformMountAction)
   },
   async addPlatformUnMountAction({ commit }: { commit: Commit }, payload){
     // console.log(this.$api.configurations.platformUnmountActionApi);

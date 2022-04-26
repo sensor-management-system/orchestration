@@ -64,6 +64,7 @@ import {
   IPaginationLoader
 } from '@/utils/PaginatedLoader'
 import { IPlatformSearchParams } from '@/modelUtils/PlatformSearchParams'
+import { deviceWithMetaToDeviceByAddingDummyObjects } from '@/serializers/jsonapi/DeviceSerializer'
 
 interface IncludedRelationships {
   includeContacts?: boolean
@@ -175,7 +176,24 @@ export class PlatformApi {
       }
     })
   }
-
+  searchAll(){
+    this.prepareSearch()
+    return this.axiosApi.get(
+      this.basePath,
+      {
+        params: {
+          ...this.commonParams
+        }
+      }
+    ).then((rawResponse: any) => {
+      const rawData = rawResponse.data
+      // We don't ask the api to load the contacts, so we just add dummy objects
+      // to stay with the relationships
+      return this.serializer
+        .convertJsonApiObjectListToModelList(rawData)
+        .map(platformWithMetaToPlatformByAddingDummyObjects)
+    })
+  }
   searchMatchingAsCsvBlob (): Promise<Blob> {
 
     this.prepareSearch()
