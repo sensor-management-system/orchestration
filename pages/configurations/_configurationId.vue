@@ -48,11 +48,13 @@ import { Component, Vue, Watch } from 'nuxt-property-decorator'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
 import { Configuration } from '@/models/Configuration'
+import { mapActions } from 'vuex'
 
 @Component({
   components: {
     ProgressIndicator
-  }
+  },
+  methods:mapActions()
 })
 // @ts-ignore
 export default class ConfigurationsIdPage extends Vue {

@@ -251,7 +251,7 @@ export default class ContactTab extends Vue {
   }
 
   get configurationId (): string {
-    return this.$route.params.id
+    return this.$route.params.configurationId
   }
 
   async removeContact (id: string) {

@@ -126,7 +126,7 @@ export default class ConfigurationShowBasicPage extends Vue {
   }
 
   get configurationId () {
-    return this.$route.params.id
+    return this.$route.params.configurationId
   }
 
   initDeleteDialog () {

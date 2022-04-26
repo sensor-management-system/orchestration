@@ -95,7 +95,7 @@ export default class ConfigurationEditBasicPage extends Vue {
   }
 
   get configurationId () {
-    return this.$route.params.id
+    return this.$route.params.configurationId
   }
 
   created () {
