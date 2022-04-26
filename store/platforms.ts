@@ -8,6 +8,8 @@ import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
 import { PlatformUnmountAction } from '@/models/PlatformUnmountAction'
 import { PlatformMountAction } from '@/models/PlatformMountAction'
 import { IActionType } from '@/models/ActionType'
+import { PlatformMountActionWrapper } from '@/viewmodels/PlatformMountActionWrapper'
+import { PlatformUnmountActionWrapper } from '@/viewmodels/PlatformUnmountActionWrapper'
 
 const KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE = 'software_update'
 const KIND_OF_ACTION_TYPE_GENERIC_PLATFORM_ACTION = 'generic_platform_action'
@@ -136,11 +138,20 @@ const actions = {
   },
   async loadPlatformMountActions({ commit }: { commit: Commit },id:number){
     const platformMountActions = await this.$api.platforms.findRelatedMountActions(id)
-    commit('setPlatformMountActions',platformMountActions)
+
+    const wrappedPlatformMountActions = platformMountActions.map((action:PlatformMountAction)=>{
+      return new PlatformMountActionWrapper(action)
+    })
+
+    commit('setPlatformMountActions',wrappedPlatformMountActions)
   },
   async loadPlatformUnmountActions({ commit }: { commit: Commit },id:number){
     const platformUnmountActions = await this.$api.platforms.findRelatedUnmountActions(id)
-    commit('setPlatformUnmountActions',platformUnmountActions)
+
+    const wrappedPlatformUnmountActions = platformUnmountActions.map((action:PlatformUnmountAction)=>{
+      return new PlatformUnmountActionWrapper(action)
+    })
+    commit('setPlatformUnmountActions',wrappedPlatformUnmountActions)
   },
   async loadPlatformGenericAction({ commit }: { commit: Commit },actionId:number){
     const genericPlatformAction = await this.$api.genericPlatformActions.findById(actionId)

@@ -13,6 +13,10 @@ import { DeviceProperty } from '@/models/DeviceProperty'
 import { CustomTextField } from '@/models/CustomTextField'
 import CustomFieldCard from '@/components/CustomFieldCard.vue'
 import { Platform } from '@/models/Platform'
+import { PlatformUnmountAction } from '@/models/PlatformUnmountAction'
+import { PlatformUnmountActionWrapper } from '@/viewmodels/PlatformUnmountActionWrapper'
+import { DeviceUnmountActionWrapper } from '@/viewmodels/DeviceUnmountActionWrapper'
+import { DeviceMountActionWrapper } from '@/viewmodels/DeviceMountActionWrapper'
 
 const KIND_OF_ACTION_TYPE_DEVICE_CALIBRATION = 'device_calibration'
 const KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE = 'software_update'
@@ -197,11 +201,20 @@ const actions = {
   },
   async loadDeviceMountActions ({ commit }: { commit: Commit }, id: number) {
     const deviceMountActions = await this.$api.devices.findRelatedMountActions(id)
-    commit('setDeviceMountActions', deviceMountActions)
+
+    const wrappedDeviceMountActions = deviceMountActions.map((action:DeviceMountAction)=>{
+      return new DeviceMountActionWrapper(action)
+    })
+
+    commit('setDeviceMountActions', wrappedDeviceMountActions)
   },
   async loadDeviceUnmountActions ({ commit }: { commit: Commit }, id: number) {
     const deviceUnmountActions = await this.$api.devices.findRelatedUnmountActions(id)
-    commit('setDeviceUnmountActions', deviceUnmountActions)
+
+    const wrappedDeviceUnmountActions = deviceUnmountActions.map((action:DeviceUnmountAction)=>{
+      return new DeviceUnmountActionWrapper(action)
+    })
+    commit('setDeviceUnmountActions', wrappedDeviceUnmountActions)
   },
   async loadDeviceCustomFields({commit}:{commit:Commit},id:number){
     const deviceCustomFields = await this.$api.devices.findRelatedCustomFields(id)
