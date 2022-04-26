@@ -62,7 +62,7 @@ export default class ConfigurationsIdPage extends Vue {
     return this.$route.params.configurationId
   }
 
-  created () {
+  async created () {
     this.initializeAppBar()
     try {
       this.isLoading = true
