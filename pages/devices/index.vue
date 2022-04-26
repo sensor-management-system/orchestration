@@ -389,28 +389,21 @@ export default class SearchDevicesPage extends Vue {
     await this.runSearch()
   }
 
-  basicSearch (): Promise<void> {
-    return this.runSearch({
-      searchText: this.searchText,
-      manufacturer: [],
-      states: [],
-      types: [],
-      onlyOwnDevices: false
-    })
+  basicSearch (){
+    this.selectedSearchManufacturers= []
+    this.selectedSearchStates= []
+    this.selectedSearchDeviceTypes= []
+    this.onlyOwnDevices= false
+
+     this.runSearch()
   }
 
   clearBasicSearch () {
     this.searchText = null
   }
 
-  extendedSearch (): Promise<void> {
-    return this.runSearch({
-      searchText: this.searchText,
-      manufacturer: this.selectedSearchManufacturers,
-      states: this.selectedSearchStates,
-      types: this.selectedSearchDeviceTypes,
-      onlyOwnDevices: this.onlyOwnDevices && this.$auth.loggedIn
-    })
+  extendedSearch () {
+    this.runSearch()
   }
 
   clearExtendedSearch () {

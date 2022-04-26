@@ -43,6 +43,7 @@ import { IConfigurationSearchParams } from '@/modelUtils/ConfigurationSearchPara
 export interface configurationsState {
   configurations: Configuration[]
   configuration: Configuration|null,
+  configurationStates: string[]
   totalPages: number
   pageNumber: number
   pageSize: number
@@ -54,6 +55,7 @@ export interface configurationsState {
 const state={
   configurations:[],
   configuration:null,
+  configurationStates:[],
   totalPages: 1,
   pageNumber: 1,
   pageSize: 20
@@ -77,9 +79,17 @@ const actions={
   async loadConfiguration({ commit }: { commit: Commit },id:number){
 
   },
+  async loadConfigurationsStates ({ commit }: { commit: Commit }) {
+    // @ts-ignore
+    const configurationStates = await this.$api.configurationStates.findAll()
+    commit('setConfigurationStates', configurationStates)
+  },
+  async deleteConfiguration({ commit }: { commit: Commit }, id: number){
+    await this.$api.configurations.deleteById(id)
+  },
   setPageNumber ({ commit }: { commit: Commit }, newPageNumber: number) {
     commit('setPageNumber', newPageNumber)
-  }
+  },
 }
 
 const mutations={
@@ -88,6 +98,9 @@ const mutations={
   },
   setConfiguration(state:configurationsState,configuration:Configuration){
     state.configuration=configuration
+  },
+  setConfigurationStates(state:configurationsState,configurationStates:string[]){
+    state.configurationStates=configurationStates;
   },
   setPageNumber (state: configurationsState, newPageNumber: number) {
     state.pageNumber = newPageNumber

@@ -30,12 +30,95 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-<!--    <ConfigurationsSearch-->
-<!--      :active-tab="activeTab"-->
-<!--      load-initial-data-->
-<!--      :delete-callback="deleteConfiguration"-->
-<!--      @change-active-tab="activeTab = $event"-->
-<!--    />-->
+    <v-tabs-items
+      v-model="activeTab"
+    >
+      <v-tab-item :eager="true">
+        <v-row>
+          <v-col cols="12" md="5">
+            <v-text-field
+              v-model="searchText"
+              label="Label"
+              placeholder="Label of configuration"
+              hint="Please enter at least 3 characters"
+              @keydown.enter="basicSearch"
+            />
+          </v-col>
+          <v-col
+            cols="12"
+            md="7"
+            align-self="center"
+          >
+            <v-btn
+              color="primary"
+              small
+              @click="basicSearch"
+            >
+              Search
+            </v-btn>
+            <v-btn
+              text
+              small
+              @click="clearBasicSearch"
+            >
+              Clear
+            </v-btn>
+          </v-col>
+        </v-row>
+      </v-tab-item>
+      <v-tab-item :eager="true">
+        <v-row>
+          <v-col cols="12" md="6">
+            <v-text-field
+              v-model="searchText"
+              label="Label"
+              placeholder="Label of configuration"
+              hint="Please enter at least 3 characters"
+              @keydown.enter="extendedSearch"
+            />
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col cols="12" md="3">
+            <StringSelect
+              v-model="selectedConfigurationStates"
+              label="Select a status"
+              :items="configurationStates"
+              color="green"
+            />
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col cols="12" md="3">
+            <ProjectSelect
+              v-model="selectedProjects"
+              label="Select a project"
+            />
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col
+            cols="12"
+            align-self="center"
+          >
+            <v-btn
+              color="primary"
+              small
+              @click="extendedSearch"
+            >
+              Search
+            </v-btn>
+            <v-btn
+              text
+              small
+              @click="clearExtendedSearch"
+            >
+              Clear
+            </v-btn>
+          </v-col>
+        </v-row>
+      </v-tab-item>
+    </v-tabs-items>
     <v-progress-circular
       v-if="loading"
       class="progress-spinner"
@@ -176,35 +259,45 @@ import { mapActions, mapState } from 'vuex'
 import { IConfigurationSearchParams } from '@/modelUtils/ConfigurationSearchParams'
 import ConfigurationsDeleteDialog from '@/components/configurations/ConfigurationsDeleteDialog.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
+import { Project } from '@/models/Project'
+import StringSelect from '@/components/StringSelect.vue'
+import ProjectSelect from '@/components/ProjectSelect.vue'
 
 @Component({
   components: {
+    ProjectSelect,
+    StringSelect,
     DotMenuActionDelete,
     ConfigurationsDeleteDialog,
     ConfigurationsListItem,
     BaseList
   },
-  computed:mapState('configurations',['configurations','pageNumber','pageSize','totalPages']),
-  methods:mapActions('configurations',['searchConfigurationsPaginated','setPageNumber'])
+  computed:mapState('configurations',['configurations','pageNumber','pageSize','totalPages','configurationStates']),
+  methods:mapActions('configurations',['searchConfigurationsPaginated','setPageNumber','loadConfigurationsStates','deleteConfiguration'])
 })
 // @ts-ignore
 export default class SearchConfigurationsPage extends Vue {
-  private searchText: string | null = null
   private loading=false
+
+  private searchText: string | null = null
+  private selectedConfigurationStates: string[] = []
+  private selectedProjects: Project[] = []
+
 
   private showDeleteDialog: boolean = false
   private configurationToDelete: Configuration | null = null
 
   async created () {
     this.initializeAppBar()
+    this.loadConfigurationsStates()
     await this.runInitialSearch()
   }
 
-  get searchParams() : IConfigurationSearchParams{ //Todo rest
+  get searchParams() : IConfigurationSearchParams{
     return {
       searchText: this.searchText,
-      states:[],
-      projects:[]
+      states:this.selectedConfigurationStates,
+      projects:this.selectedProjects
     }
   }
   get page(){
@@ -215,10 +308,40 @@ export default class SearchConfigurationsPage extends Vue {
     this.setPageNumber(newVal);
   }
 
+  get activeTab (): number | null {
+    return this.$store.state.appbar.activeTab
+  }
+
+  set activeTab (tab: number | null) {
+    this.$store.commit('appbar/setActiveTab', tab)
+  }
+
   async runInitialSearch() {
     //todo an andere entitäten angleichen
     await this.runSearch()
     }
+
+  basicSearch (): Promise<void> {
+    this.selectedSearchManufacturers=[]
+    this.selectedSearchStates=[]
+    this.selectedSearchPlatformTypes=[]
+    this.onlyOwnPlatforms=false
+    return this.runSearch()
+  }
+
+  clearBasicSearch () {
+    this.searchText = null
+  }
+
+  extendedSearch (): Promise<void> {
+    return this.runSearch()
+  }
+
+  clearExtendedSearch () {
+    this.clearBasicSearch()
+    this.selectedConfigurationStates = []
+    this.selectedProjects = []
+  }
 
   async runSearch() {
     try {
@@ -261,8 +384,9 @@ export default class SearchConfigurationsPage extends Vue {
       return
     }
     try {
-      //Todo
       this.loading = true
+      this.deleteConfiguration(this.configurationToDelete.id)
+      this.runSearch()
       this.$store.commit('snackbar/setSuccess', 'Configuration deleted')
     } catch {
       this.$store.commit('snackbar/setError', 'Configuration could not be deleted')
