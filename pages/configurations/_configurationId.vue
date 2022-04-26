@@ -87,27 +87,27 @@ export default class ConfigurationsIdPage extends Vue {
     this.$store.dispatch('appbar/init', {
       tabs: [
         {
-          to: '/configurations/' + this.$route.params.id + '/basic',
+          to: '/configurations/' + this.configurationId + '/basic',
           name: 'Basic Data'
         },
         {
-          to: '/configurations/' + this.$route.params.id + '/contacts',
+          to: '/configurations/' + this.configurationId + '/contacts',
           name: 'Contacts'
         },
         {
-          to: '/configurations/' + this.$route.params.id + '/platforms-and-devices',
+          to: '/configurations/' + this.configurationId + '/platforms-and-devices',
           name: 'Platforms and Devices'
         },
         {
-          to: '/configurations/' + this.$route.params.id + '/locations',
+          to: '/configurations/' + this.configurationId + '/locations',
           name: 'Locations'
         },
         {
-          to: '/configurations/' + this.$route.params.id + '/actions',
+          to: '/configurations/' + this.configurationId + '/actions',
           name: 'Actions'
         }
       ],
-      title: this.configuration.label || 'Configuration'
+      title: 'Configurations'
     })
   }
 
