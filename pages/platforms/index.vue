@@ -30,10 +30,66 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <PlatformSearch
-      @basic-search="runSearch"
-      @extended-search="runSearch"
-    />
+    <v-tabs-items
+      v-model="activeTab"
+    >
+      <PlatformsBasicSearch
+        v-model="searchText"
+        @search="basicSearch"
+      />
+      <v-tab-item :eager="true">
+        <v-row>
+          <v-col cols="12" md="6">
+            <PlatformsBasicSearchField
+              v-model="searchText"
+              @start-search="extendedSearch"
+            />
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col cols="12" md="3">
+            <ManufacturerSelect v-model="selectedSearchManufacturers" label="Select a manufacturer" />
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col cols="12" md="3">
+            <StatusSelect v-model="selectedSearchStates" label="Select a status" />
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col cols="12" md="3">
+            <PlatformTypeSelect v-model="selectedSearchPlatformTypes" label="Select a platform type" />
+          </v-col>
+        </v-row>
+        <v-row v-if="$auth.loggedIn">
+          <v-col cols="12" md="3">
+            <v-checkbox v-model="onlyOwnPlatforms" label="Only own platforms" />
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col
+            cols="12"
+            align-self="center"
+          >
+            <v-btn
+              color="primary"
+              small
+              @click="extendedSearch"
+            >
+              Search
+            </v-btn>
+            <v-btn
+              text
+              small
+              @click="clearExtendedSearch"
+            >
+              Clear
+            </v-btn>
+          </v-col>
+        </v-row>
+      </v-tab-item>
+    </v-tabs-items>
+
     <v-progress-circular
       v-if="loading"
       class="progress-spinner"
@@ -187,17 +243,14 @@ import { PlatformType } from '@/models/PlatformType'
 import { Status } from '@/models/Status'
 
 import { QueryParams } from '@/modelUtils/QueryParams'
-import { IPlatformSearchParams, PlatformSearchParamsSerializer } from '@/modelUtils/PlatformSearchParams'
+import { PlatformSearchParamsSerializer } from '@/modelUtils/PlatformSearchParams'
 import BaseList from '@/components/shared/BaseList.vue'
 import PlatformsListItem from '@/components/platforms/PlatformsListItem.vue'
 import PlatformsBasicSearch from '@/components/platforms/PlatformsBasicSearch.vue'
 import PlatformsBasicSearchField from '@/components/platforms/PlatformsBasicSearchField.vue'
-import PlatformSearch from '@/components/platforms/PlatformSearch.vue'
-import { DeviceSearchParamsSerializer } from '@/modelUtils/DeviceSearchParams'
 
 @Component({
   components: {
-    PlatformSearch,
     PlatformsBasicSearchField,
     PlatformsBasicSearch,
     PlatformsListItem,
@@ -222,12 +275,19 @@ export default class SearchPlatformsPage extends Vue {
   private loading: boolean = true
   private processing: boolean = false
 
+  private selectedSearchManufacturers: Manufacturer[] = []
+  private selectedSearchStates: Status[] = []
+  private selectedSearchPlatformTypes: PlatformType[] = []
+  private onlyOwnPlatforms: boolean = false
+
+  private searchText: string | null = null
+
   private showDeleteDialog: boolean = false
 
   private platformToDelete: Platform | null = null
 
   async created () {
-    // await this.initializeAppBar()
+    await this.initializeAppBar()
     await this.loadEquipmentstatus();
     await this.loadPlatformtypes();
     await this.loadManufacturers();
@@ -240,6 +300,17 @@ export default class SearchPlatformsPage extends Vue {
     this.$store.dispatch('appbar/setDefaults')
   }
 
+  initializeAppBar () {
+    this.$store.dispatch('appbar/init', {
+      tabs: [
+        'Search',
+        'Extended Search'
+      ],
+      title: 'Platforms',
+      saveBtnHidden: true,
+      cancelBtnHidden: true
+    })
+  }
 
   get page(){
     return this.pageNumber;
@@ -249,27 +320,27 @@ export default class SearchPlatformsPage extends Vue {
     this.setPageNumber(newVal);
   }
 
-  // isExtendedSearch (): boolean {
-  //   return this.onlyOwnPlatforms === true ||
-  //     !!this.selectedSearchStates.length ||
-  //     !!this.selectedSearchPlatformTypes.length ||
-  //     !!this.selectedSearchManufacturers.length
-  // }
+  get activeTab (): number | null {
+    return this.$store.state.appbar.activeTab
+  }
+
+  set activeTab (tab: number | null) {
+    this.$store.commit('appbar/setActiveTab', tab)
+  }
+
+  isExtendedSearch (): boolean {
+    return this.onlyOwnPlatforms === true ||
+      !!this.selectedSearchStates.length ||
+      !!this.selectedSearchPlatformTypes.length ||
+      !!this.selectedSearchManufacturers.length
+  }
 
   async runInitialSearch (): Promise<void> {
-    // this.activeTab = this.isExtendedSearch() ? 1 : 0
+    this.activeTab = this.isExtendedSearch() ? 1 : 0
 
     this.page = this.getPageFromUrl()
 
-    await this.runSearch(
-      {
-        searchText: '',
-        manufacturer: [],
-        states: [],
-        types: [],
-        onlyOwnPlatforms: false
-      }
-    )
+    await this.runSearch()
   }
 
   get searchParams(){
@@ -282,11 +353,36 @@ export default class SearchPlatformsPage extends Vue {
     }
   }
 
-  async runSearch (searchParams:IPlatformSearchParams): Promise<void> {
+  basicSearch (): Promise<void> {
+    this.selectedSearchManufacturers=[]
+    this.selectedSearchStates=[]
+    this.selectedSearchPlatformTypes=[]
+    this.onlyOwnPlatforms=false
+    return this.runSearch()
+  }
+
+  clearBasicSearch () {
+    this.searchText = null
+  }
+
+  extendedSearch (): Promise<void> {
+    return this.runSearch()
+  }
+
+  clearExtendedSearch () {
+    this.clearBasicSearch()
+
+    this.selectedSearchManufacturers = []
+    this.selectedSearchStates = []
+    this.selectedSearchPlatformTypes = []
+    this.onlyOwnPlatforms = false
+  }
+
+  async runSearch (): Promise<void> {
     this.initUrlQueryParams()
     this.loading = true
     try {
-      this.searchPlatformsPaginated(searchParams);
+      this.searchPlatformsPaginated(this.searchParams);
       this.setPageInUrl(this.page)
     } catch (_error) {
       this.$store.commit('snackbar/setError', 'Loading of platforms failed')
@@ -335,37 +431,37 @@ export default class SearchPlatformsPage extends Vue {
     }
   }
 
-  // initSearchQueryParams (params: QueryParams): void {
-  //   const searchParamsObject = (new PlatformSearchParamsSerializer({
-  //     states: this.states,
-  //     platformTypes: this.platformTypes,
-  //     manufacturer: this.manufacturer
-  //   })).toSearchParams(params)
-  //
-  //   // prefill the form by the serialized search params from the URL
-  //   if (searchParamsObject.searchText) {
-  //     this.searchText = searchParamsObject.searchText
-  //   }
-  //   if (searchParamsObject.onlyOwnPlatforms) {
-  //     this.onlyOwnPlatforms = searchParamsObject.onlyOwnPlatforms
-  //   }
-  //   if (searchParamsObject.manufacturer) {
-  //     this.selectedSearchManufacturers = searchParamsObject.manufacturer
-  //   }
-  //   if (searchParamsObject.types) {
-  //     this.selectedSearchPlatformTypes = searchParamsObject.types
-  //   }
-  //   if (searchParamsObject.states) {
-  //     this.selectedSearchStates = searchParamsObject.states
-  //   }
-  // }
+  initSearchQueryParams (params: QueryParams): void {
+    const searchParamsObject = (new PlatformSearchParamsSerializer({
+      states: this.states,
+      platformTypes: this.platformTypes,
+      manufacturer: this.manufacturer
+    })).toSearchParams(params)
 
-  // initUrlQueryParams (): void { // todo scheint aktuell nicht zu funktionieren, noch keine Ahnung warum. Er pushed nicht zur route
-  //   this.$router.push({
-  //     query: (new PlatformSearchParamsSerializer()).toQueryParams(this.searchParams),
-  //     hash: this.$route.hash
-  //   })
-  // }
+    // prefill the form by the serialized search params from the URL
+    if (searchParamsObject.searchText) {
+      this.searchText = searchParamsObject.searchText
+    }
+    if (searchParamsObject.onlyOwnPlatforms) {
+      this.onlyOwnPlatforms = searchParamsObject.onlyOwnPlatforms
+    }
+    if (searchParamsObject.manufacturer) {
+      this.selectedSearchManufacturers = searchParamsObject.manufacturer
+    }
+    if (searchParamsObject.types) {
+      this.selectedSearchPlatformTypes = searchParamsObject.types
+    }
+    if (searchParamsObject.states) {
+      this.selectedSearchStates = searchParamsObject.states
+    }
+  }
+
+  initUrlQueryParams (): void { // todo scheint aktuell nicht zu funktionieren, noch keine Ahnung warum. Er pushed nicht zur route
+    this.$router.push({
+      query: (new PlatformSearchParamsSerializer()).toQueryParams(this.searchParams),
+      hash: this.$route.hash
+    })
+  }
 
   getPageFromUrl (): number | undefined {
     if ('page' in this.$route.query && typeof this.$route.query.page === 'string') {
