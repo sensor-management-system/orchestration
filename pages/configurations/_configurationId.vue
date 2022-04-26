@@ -35,9 +35,7 @@ permissions and limitations under the Licence.
       v-model="isLoading"
     />
     <v-card flat>
-      <NuxtChild
-        :value="configuration"
-      />
+      <NuxtChild/>
     </v-card>
   </div>
 </template>
@@ -54,40 +52,30 @@ import { mapActions } from 'vuex'
   components: {
     ProgressIndicator
   },
-  methods:mapActions()
+  methods:mapActions('configurations',['loadConfiguration'])
 })
 // @ts-ignore
 export default class ConfigurationsIdPage extends Vue {
   private isLoading: boolean = false
 
   get configurationId () {
-    return this.$route.params.id
+    return this.$route.params.configurationId
   }
 
   created () {
-    if (this.isBasePath()) {
-      this.$router.replace('/configurations/' + this.configurationId + '/basic')
-    }
-  }
-
-  mounted () {
     this.initializeAppBar()
-  }
-
-  async fetch (): Promise<any> {
-    this.isLoading = true
     try {
-      // load the configuration
-      await this.$store.dispatch('configurations/loadConfigurationById', this.configurationId)
+      this.isLoading = true
+      await this.loadConfiguration(this.configurationId)
     } catch (_e) {
       this.$store.commit('snackbar/setError', 'Loading configuration failed')
     } finally {
       this.isLoading = false
     }
-  }
 
-  get configuration (): Configuration {
-    return this.$store.state.configurations.configuration
+    if (this.isBasePath()) { // Todo prüfen ob man das wirklich braucht, oder gleich direkt den redirect machen
+      this.$router.replace('/configurations/' + this.configurationId + '/basic')
+    }
   }
 
   isBasePath () {
@@ -125,14 +113,6 @@ export default class ConfigurationsIdPage extends Vue {
 
   beforeDestroy () {
     this.$store.dispatch('appbar/setDefaults')
-  }
-
-  @Watch('configuration', { immediate: true, deep: true })
-  // @ts-ignore
-  onConfigurationChanged (val: Configuration) {
-    if (val.id) {
-      this.$store.commit('appbar/setTitle', val.label || 'Configuration')
-    }
   }
 }
 </script>
