@@ -7,9 +7,9 @@
       color="primary"
       small
       nuxt
-      :to="'/configurations/' + configurationId + '/platforms-and-devices/new'"
+      :to="'/configurations/' + configurationId + '/platforms-and-devices/mount'"
     >
-      Add Platform or Device
+      Mount Platform or Device
     </v-btn>
   </v-card-actions>
   <v-row>
@@ -32,18 +32,31 @@
       />
     </v-col>
   </v-row>
-  <v-row>
+  <v-row justify="center">
     <v-col cols="12" md="6">
       <v-card>
-        <v-card-title>Mounted devices and platforms</v-card-title>
-        <ConfigurationsTreeView
-          v-if="configuration"
-          ref="treeView"
-          v-model="tree"
-          :selected="selectedNode"
-          @select="setSelectedNode"
-        />
+        <v-container>
+          <v-card-title>Mounted devices and platforms</v-card-title>
+          <ConfigurationsTreeView
+            v-if="configuration"
+            ref="treeView"
+            v-model="tree"
+            :selected="selectedNode"
+            @select="setSelectedNode"
+          />
+        </v-container>
       </v-card>
+    </v-col>
+    <v-col>
+      <v-slide-x-reverse-transition>
+        <div v-show="selectedNode">
+          <v-card-title>Selected node information</v-card-title>
+          <ConfigurationsTreeNodeDetail
+            v-if="selectedNode"
+            :node="selectedNode"
+          />
+        </div>
+      </v-slide-x-reverse-transition>
     </v-col>
   </v-row>
 </div>
@@ -57,8 +70,9 @@ import { mapGetters, mapState } from 'vuex'
 import { buildConfigurationTree } from '@/modelUtils/mountHelpers'
 import { ConfigurationsTreeNode } from '@/viewmodels/ConfigurationsTreeNode'
 import ConfigurationsTreeView from '@/components/ConfigurationsTreeView.vue'
+import ConfigurationsTreeNodeDetail from '@/components/configurations/ConfigurationsTreeNodeDetail.vue'
 @Component({
-  components: { ConfigurationsTreeView, DateTimePicker },
+  components: { ConfigurationsTreeNodeDetail, ConfigurationsTreeView, DateTimePicker },
   computed:{
     ...mapGetters('configurations',['mountingActionsDates']),
     ...mapState('configurations',['configuration'])

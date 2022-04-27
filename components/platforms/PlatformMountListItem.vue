@@ -139,6 +139,16 @@
                         {{ getTextOrDefault(platform.description) }}
                       </v-col>
                     </v-row>
+                    <v-row>
+                      <v-col>
+                        <v-btn :href="'platforms/' + platform.id" target="_blank">
+                          <v-icon>
+                            mdi-open-in-new
+                          </v-icon>
+                          Open in new tab
+                        </v-btn>
+                      </v-col>
+                    </v-row>
                   </v-card-text>
                 </v-card>
               </v-expand-transition>

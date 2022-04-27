@@ -54,7 +54,7 @@
       <v-stepper-content step="2">
         <v-row justify="center">
           <v-col cols="12" md="6">
-            <v-card>
+            <v-card class="my-2">
               <v-container>
                 <v-row no-gutters>
                   <v-col >
@@ -75,7 +75,7 @@
                         You can deselect by clicking on a selected node.
                       </div>
                       <div>
-                        You can't attach a device or platform to a mounted device.
+                        You can't attach a device or platform to a mounted device (<v-icon>mdi-network-outline</v-icon>).
                       </div>
                     </v-alert>
 
