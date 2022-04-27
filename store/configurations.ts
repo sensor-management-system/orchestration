@@ -139,7 +139,7 @@ const getters = {
       for (const platformUnmountAction of state.configuration.platformUnmountActions) {
         datesWithTexts.push({
           date: platformUnmountAction.date,
-          text: dateToDateTimeStringHHMM(platformUnmountAction.dat) + ' - ' + 'Unmount ' + platformUnmountAction.platform.shortName
+          text: dateToDateTimeStringHHMM(platformUnmountAction.date) + ' - ' + 'Unmount ' + platformUnmountAction.platform.shortName
         })
       }
       for (const deviceMountAction of state.configuration.deviceMountActions) {
@@ -317,7 +317,7 @@ const actions = {
       platformUnMountAction
     }: { configurationId: string, platformUnMountAction: PlatformUnmountAction }
     ) {
-    // console.log(this.$api.configurations.platformUnmountActionApi);
+    return this.$api.configurations.platformUnmountActionApi.add(configurationId,platformUnMountAction);
   },
   setPageNumber ({ commit }: { commit: Commit }, newPageNumber: number) {
     commit('setPageNumber', newPageNumber)

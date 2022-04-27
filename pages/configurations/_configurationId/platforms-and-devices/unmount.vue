@@ -134,11 +134,11 @@ export default class ConfigurationUnMountPlatformsAndDevicesPage extends Vue {
       return
     }
 
-    if(this.selectedNode.isDevice){
+    if(this.selectedNode.isDevice()){
       this.unmountDevice(this.selectedNode.unpack().device,contact,description)
     }
-    if(this.selectedNode.isPlatform){
-      this.unmountPlatform()
+    if(this.selectedNode.isPlatform()){
+      this.unmountPlatform(this.selectedNode.unpack().platform,contact,description)
     }
   }
 

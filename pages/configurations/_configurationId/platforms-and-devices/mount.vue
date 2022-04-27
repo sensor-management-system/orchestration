@@ -37,6 +37,13 @@
       >
         Select device or platform
       </v-stepper-step>
+      <v-stepper-step
+        :editable="!!selectedDate && (isDeviceSelectedForMount || isPlatformSelectedForMount)"
+        :rules="[()=>!!selectedDate && (isDeviceSelectedForMount || isPlatformSelectedForMount)]"
+        step="4"
+      >
+        Submit
+      </v-stepper-step>
     </v-stepper-header>
     <v-stepper-items>
       <v-stepper-content step="1">
@@ -178,7 +185,7 @@
                                   :readonly="false"
                                   :contacts="contacts"
                                   :current-user-mail="currentUserMail"
-                                  @add="mountPlatform(item, $event)"
+                                  @add="setPlatformToMount(item, $event)"
                                 />
                               </template>
                             </PlatformMountListItem>
@@ -247,7 +254,7 @@
                                   :readonly="false"
                                   :contacts="contacts"
                                   :current-user-mail="currentUserMail"
-                                  @add="mountDevice(item, $event)"
+                                  @add="setDeviceToMount(item, $event)"
                                 />
                               </template>
                             </DevicesMountListItem>
@@ -260,6 +267,47 @@
               </v-tabs-items>
             </v-card>
           </v-col>
+        </v-row>
+      </v-stepper-content>
+      <v-stepper-content step="4">
+        <v-row justify="center">
+          <v-col cols="12" md="6">
+            <v-row>
+              <v-col cols="3">Selected Date</v-col>
+              <v-col cols="9">{{this.selectedDate|dateToDateTimeStringHHMM}}</v-col>
+            </v-row>
+            <v-divider></v-divider>
+            <v-row>
+              <v-col cols="3">Selected Parent Platform</v-col>
+              <v-col v-if="selectedNode && selectedNode.isPlatform()">
+                {{this.selectedNode.unpack().platform.shortName}}
+              </v-col>
+              <v-col v-else >
+                No parent platform selected
+              </v-col>
+            </v-row>
+            <v-divider></v-divider>
+            <v-row v-if="isPlatformSelectedForMount">
+              <v-col cols="3">Platform to mount</v-col>
+              <v-col>{{platformToMount.platform.shortName}}</v-col>
+            </v-row>
+            <v-row v-if="isDeviceSelectedForMount">
+              <v-col cols="3">Device to mount</v-col>
+              <v-col>{{deviceToMount.device.shortName}}</v-col>
+            </v-row>
+          </v-col>
+        </v-row>
+
+        <v-row>
+          <v-col>
+          <v-btn
+            block
+            color="primary"
+            @click="mount"
+          >
+            Submit
+          </v-btn>
+        </v-col>
         </v-row>
       </v-stepper-content>
     </v-stepper-items>
@@ -288,10 +336,13 @@ import { PlatformNode } from '@/viewmodels/PlatformNode'
 import PlatformMountListItem from '@/components/platforms/PlatformMountListItem.vue'
 import { PlatformMountAction } from '@/models/PlatformMountAction'
 import HintCard from '@/components/HintCard.vue'
+import { mount } from '@vue/test-utils'
+import { dateToDateTimeStringHHMM } from '@/utils/dateHelper'
 
 @Component({
   components: { HintCard, PlatformMountListItem, ConfigurationsPlatformDeviceMountForm, DevicesMountListItem, DevicesListItem, BaseList, DateTimePicker, ConfigurationsTreeView },
   middleware:['auth'],
+  filters:{dateToDateTimeStringHHMM},
   computed:{
     ...mapGetters('configurations',['mountingActionsDates']),
     ...mapState('configurations',['configuration']),
@@ -316,6 +367,8 @@ export default class ConfigurationMountPlatformsAndDevicesPage extends Vue {
   private selectedType:string|null =null
   private selectedNode: ConfigurationsTreeNode | null = null
   private selectedDate = DateTime.utc()
+  private platformToMount = null
+  private deviceToMount  = null
 
   async created(){
     await this.loadAllContacts()
@@ -355,6 +408,15 @@ export default class ConfigurationMountPlatformsAndDevicesPage extends Vue {
   }
   async searchPlatformsForMount(){
       await this.searchPlatforms({ searchText: this.searchTextPlatforms })
+  }
+
+  mount(){
+    if(this.isPlatformSelectedForMount){
+      this.mountPlatform(this.platformToMount.platform,this.platformToMount.mountInfo)
+    }
+    if(this.isDeviceSelectedForMount){
+      this.mountDevice(this.deviceToMount.device,this.deviceToMount.mountInfo)
+    }
   }
 
   mountDevice(device,mountInfo){
@@ -432,6 +494,32 @@ export default class ConfigurationMountPlatformsAndDevicesPage extends Vue {
       this.$store.commit('snackbar/setError', 'Failed to add platform mount action')
     }
   }
+
+  setPlatformToMount(platform,mountInfo){
+    this.deviceToMount=null;
+    this.platformToMount={
+      platform:platform,
+      mountInfo:mountInfo
+    }
+    this.$store.commit('snackbar/setSuccess', 'Selected platform confirmed')
+  }
+  setDeviceToMount(device,mountInfo){
+    this.platformToMount=null;
+
+    this.deviceToMount = {
+      device:device,
+      mountInfo:mountInfo
+    }
+    this.$store.commit('snackbar/setSuccess', 'Selected device confirmed')
+  }
+
+  get isPlatformSelectedForMount(){
+    return this.platformToMount !== null && this.deviceToMount===null;
+  }
+  get isDeviceSelectedForMount(){
+    return this.platformToMount === null && this.deviceToMount!==null;
+  }
+
 }
 </script>
 
