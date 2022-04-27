@@ -289,6 +289,93 @@ export const actions = {
     commit('setCancelBtnHidden',true)
     commit('setSaveBtnHidden',true)
   },
+  initContactsContactIdAppBar({commit}:{commit:Commit}){
+    commit('setTitle','Show Contact');
+    commit('setTabs',[])
+    commit('setCancelBtnHidden',true)
+    commit('setSaveBtnHidden',true)
+  },
+  initPlatformsPlatformIdAppBar({commit}:{commit:Commit},id:number){
+    commit('setTitle','Show Platform');
+    commit('setTabs',[
+      {
+        to: '/platforms/' + id + '/basic',
+        name: 'Basic Data'
+      },
+      {
+        to: '/platforms/' + id + '/contacts',
+        name: 'Contacts'
+      },
+      {
+        to: '/platforms/' + id + '/attachments',
+        name: 'Attachments'
+      },
+      {
+        to: '/platforms/' + id + '/actions',
+        name: 'Actions'
+      }
+    ])
+    commit('setCancelBtnHidden',true)
+    commit('setSaveBtnHidden',true)
+  },
+  initDevicesDeviceIdAppBar({commit}:{commit:Commit},id:number){
+    commit('setTitle','Show Device');
+    commit('setTabs',[
+      {
+        to: '/devices/' + id + '/basic',
+        name: 'Basic Data'
+      },
+      {
+        to: '/devices/' + id + '/contacts',
+        name: 'Contacts'
+      },
+      {
+        to: '/devices/' + id + '/measuredquantities',
+        name: 'Measured Quantities'
+      },
+      {
+        to: '/devices/' + id + '/customfields',
+        name: 'Custom Fields'
+      },
+      {
+        to: '/devices/' + id + '/attachments',
+        name: 'Attachments'
+      },
+      {
+        to: '/devices/' + id + '/actions',
+        name: 'Actions'
+      }
+    ])
+    commit('setCancelBtnHidden',true)
+    commit('setSaveBtnHidden',true)
+  },
+  initConfigurationsConfigurationIdAppBar({commit}:{commit:Commit},id:number){
+    commit('setTitle','Show Configuration');
+    commit('setTabs',[
+      {
+        to: '/configurations/' + id + '/basic',
+        name: 'Basic Data'
+      },
+      {
+        to: '/configurations/' + id + '/contacts',
+        name: 'Contacts'
+      },
+      {
+        to: '/configurations/' + id + '/platforms-and-devices',
+        name: 'Platforms and Devices'
+      },
+      {
+        to: '/configurations/' + id + '/locations',
+        name: 'Locations'
+      },
+      {
+        to: '/configurations/' + id + '/actions',
+        name: 'Actions'
+      }
+    ])
+    commit('setCancelBtnHidden',true)
+    commit('setSaveBtnHidden',true)
+  },
 
   /**
    * sets the Appbar to its default settings

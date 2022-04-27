@@ -40,7 +40,7 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue, Watch } from 'nuxt-property-decorator'
+import { Component, Vue } from 'nuxt-property-decorator'
 
 import { Device } from '@/models/Device'
 
@@ -51,18 +51,19 @@ import { mapActions } from 'vuex'
   components: {
     ProgressIndicator
   },
-  methods: mapActions('devices',['loadDevice'])
+  methods:{
+    ...mapActions('devices',['loadDevice']),
+    ...mapActions('appbar', ['initDevicesDeviceIdAppBar', 'setDefaults'])
+
+  }
 })
 export default class DevicePage extends Vue {
   private isLoading: boolean = false
 
   async created () {
-    if (this.isBasePath()) {// Todo hinterfragen, ob man das if wirklich braucht
-      this.$router.replace('/devices/' + this.deviceId + '/basic')
-    }
-    this.initializeAppBar()
     try {
       this.isLoading = true
+      this.initDevicesDeviceIdAppBar(this.deviceId)
       await this.loadDevice({
         deviceId:this.deviceId,
         includeContacts: false,
@@ -70,6 +71,9 @@ export default class DevicePage extends Vue {
         includeDeviceProperties: false,
         includeDeviceAttachments: false
       })
+      if (this.isBasePath()) {
+        this.$router.replace('/devices/' + this.deviceId + '/basic')
+      }
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Loading device failed')
     } finally {
@@ -77,49 +81,16 @@ export default class DevicePage extends Vue {
     }
   }
 
-
   beforeDestroy () {
-    this.$store.dispatch('appbar/setDefaults')
-  }
-
-  initializeAppBar () {
-    this.$store.dispatch('appbar/init', {
-      tabs: [
-        {
-          to: '/devices/' + this.deviceId + '/basic',
-          name: 'Basic Data'
-        },
-        {
-          to: '/devices/' + this.deviceId + '/contacts',
-          name: 'Contacts'
-        },
-        {
-          to: '/devices/' + this.deviceId + '/measuredquantities',
-          name: 'Measured Quantities'
-        },
-        {
-          to: '/devices/' + this.deviceId + '/customfields',
-          name: 'Custom Fields'
-        },
-        {
-          to: '/devices/' + this.deviceId + '/attachments',
-          name: 'Attachments'
-        },
-        {
-          to: '/devices/' + this.deviceId + '/actions',
-          name: 'Actions'
-        }
-      ],
-      title: 'Devices'
-    })
-  }
-
-  isBasePath () {
-    return this.$route.path === '/devices/' + this.deviceId || this.$route.path === '/devices/' + this.deviceId + '/'
+    this.setDefaults()
   }
 
   get deviceId () {
     return this.$route.params.deviceId
+  }
+
+  isBasePath () {
+    return this.$route.path === '/devices/' + this.deviceId || this.$route.path === '/devices/' + this.deviceId + '/'
   }
 }
 </script>

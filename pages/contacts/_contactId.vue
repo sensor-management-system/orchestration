@@ -29,35 +29,44 @@ implied. See the Licence for the specific language governing
 permissions and limitations under the Licence.
 -->
 <template>
-  <NuxtChild/>
+  <div>
+    <ProgressIndicator
+      v-model="isLoading"
+    />
+    <NuxtChild/>
+  </div>
+
 </template>
 <script lang="ts">
-import { Component, Vue, Watch } from 'nuxt-property-decorator'
+import { Component, Vue } from 'nuxt-property-decorator'
 
 import {mapState,mapActions} from 'vuex'
+import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
 @Component({
-  methods:mapActions('contacts',['loadContact'])
+  components: { ProgressIndicator },
+  methods:{
+    ...mapActions('contacts',['loadContact']),
+    ...mapActions('appbar',['initContactsContactIdAppBar','setDefaults'])
+  }
 })
 export default class ContactShowPage extends Vue {
+  private isLoading: boolean = false
+
   async created () {
-    this.initializeAppBar()
     try {
+      this.isLoading=true
+      this.initContactsContactIdAppBar()
       await this.loadContact(this.contactId)
     }catch (_error){
       this.$store.commit('snackbar/setError', 'Loading contact failed')
     }finally {
+      this.isLoading=true
     }
   }
 
   beforeDestroy () {
-    this.$store.dispatch('appbar/setDefaults')
-  }
-
-  initializeAppBar () {
-    this.$store.dispatch('appbar/init', {
-      title: 'Show Contact'
-    })
+    this.setDefaults()
   }
 
   get contactId () {

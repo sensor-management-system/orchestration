@@ -40,33 +40,36 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue, Watch } from 'nuxt-property-decorator'
+import { Component, Vue } from 'nuxt-property-decorator'
 import { Platform } from '@/models/Platform'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
-import {mapActions} from 'vuex'
+import { mapActions } from 'vuex'
 
 @Component({
   components: {
     ProgressIndicator
   },
-  methods:mapActions('platforms',['loadPlatform'])
+  methods: {
+    ...mapActions('platforms', ['loadPlatform']),
+    ...mapActions('appbar', ['initPlatformsPlatformIdAppBar', 'setDefaults'])
+  }
 })
 export default class PlatformPage extends Vue {
   private isLoading: boolean = false
 
   async created () {
-    if (this.isBasePath()) { // Todo hinterfragen, ob man das if wirklich braucht
-      this.$router.replace('/platforms/' + this.platformId + '/basic')
-    }
-    this.initializeAppBar()
     try {
       this.isLoading = true
-      await this.loadPlatform(
-        {platformId:this.platformId,
-        includeContacts:false,
-          includePlatformAttachments:false
+      this.initPlatformsPlatformIdAppBar(this.platformId)
+      await this.loadPlatform({
+          platformId: this.platformId,
+          includeContacts: false,
+          includePlatformAttachments: false
         }
       )
+      if(this.isBasePath()){
+        this.$router.replace('/platforms/' + this.platformId + '/basic')
+      }
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Loading platform failed')
     } finally {
@@ -74,65 +77,16 @@ export default class PlatformPage extends Vue {
     }
   }
 
-  // mounted () {
-  //
-  //
-  //
-  //
-  //   this.$api.platforms.findById(this.platformId, {
-  //     includeContacts: false,
-  //     includePlatformAttachments: false
-  //   }).then((platform) => {
-  //     this.platform = platform
-  //     this.isLoading = false
-  //   }).catch((_error) => {
-  //     this.$store.commit('snackbar/setError', 'Loading platform failed')
-  //     this.isLoading = false
-  //   })
-  // }
-
   beforeDestroy () {
-    this.$store.dispatch('appbar/setDefaults')
-  }
-
-  initializeAppBar () {
-    this.$store.dispatch('appbar/init', {
-      tabs: [
-        {
-          to: '/platforms/' + this.platformId + '/basic',
-          name: 'Basic Data'
-        },
-        {
-          to: '/platforms/' + this.platformId + '/contacts',
-          name: 'Contacts'
-        },
-        {
-          to: '/platforms/' + this.platformId + '/attachments',
-          name: 'Attachments'
-        },
-        {
-          to: '/platforms/' + this.platformId + '/actions',
-          name: 'Actions'
-        }
-      ],
-      title: 'Platforms'
-    })
-  }
-
-  isBasePath () {
-    return this.$route.path === '/platforms/' + this.platformId || this.$route.path === '/platforms/' + this.platformId + '/'
+    this.setDefaults()
   }
 
   get platformId () {
     return this.$route.params.platformId
   }
-  //
-  // @Watch('platform', { immediate: true, deep: true })
-  // // @ts-ignore
-  // onPlatformChanged (val: Platform) {
-  //   if (val.id) {
-  //     this.$store.commit('appbar/setTitle', val?.shortName || 'Add Platform')
-  //   }
-  // }
+
+  isBasePath () {
+    return this.$route.path === '/platforms/' + this.platformId || this.$route.path === '/platforms/' + this.platformId + '/'
+  }
 }
 </script>

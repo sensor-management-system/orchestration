@@ -52,30 +52,36 @@ import { mapActions } from 'vuex'
   components: {
     ProgressIndicator
   },
-  methods:mapActions('configurations',['loadConfiguration'])
+  methods:{
+    ...mapActions('configurations',['loadConfiguration']),
+    ...mapActions('appbar', ['initConfigurationsConfigurationIdAppBar', 'setDefaults'])
+  }
 })
 // @ts-ignore
 export default class ConfigurationsIdPage extends Vue {
   private isLoading: boolean = false
 
-  get configurationId () {
-    return this.$route.params.configurationId
-  }
-
   async created () {
-    this.initializeAppBar()
     try {
       this.isLoading = true
+      this.initConfigurationsConfigurationIdAppBar(this.configurationId)
       await this.loadConfiguration(this.configurationId)
+      if (this.isBasePath()) {
+        this.$router.replace('/configurations/' + this.configurationId + '/basic')
+      }
     } catch (_e) {
       this.$store.commit('snackbar/setError', 'Loading configuration failed')
     } finally {
       this.isLoading = false
     }
+  }
 
-    if (this.isBasePath()) { // Todo prüfen ob man das wirklich braucht, oder gleich direkt den redirect machen
-      this.$router.replace('/configurations/' + this.configurationId + '/basic')
-    }
+  beforeDestroy () {
+    this.$store.dispatch('appbar/setDefaults')
+  }
+
+  get configurationId () {
+    return this.$route.params.configurationId
   }
 
   isBasePath () {
@@ -83,36 +89,6 @@ export default class ConfigurationsIdPage extends Vue {
       this.$route.path === '/configurations/' + this.configurationId + '/'
   }
 
-  initializeAppBar () {
-    this.$store.dispatch('appbar/init', {
-      tabs: [
-        {
-          to: '/configurations/' + this.configurationId + '/basic',
-          name: 'Basic Data'
-        },
-        {
-          to: '/configurations/' + this.configurationId + '/contacts',
-          name: 'Contacts'
-        },
-        {
-          to: '/configurations/' + this.configurationId + '/platforms-and-devices',
-          name: 'Platforms and Devices'
-        },
-        {
-          to: '/configurations/' + this.configurationId + '/locations',
-          name: 'Locations'
-        },
-        {
-          to: '/configurations/' + this.configurationId + '/actions',
-          name: 'Actions'
-        }
-      ],
-      title: 'Configurations'
-    })
-  }
 
-  beforeDestroy () {
-    this.$store.dispatch('appbar/setDefaults')
-  }
 }
 </script>
