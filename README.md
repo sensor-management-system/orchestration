@@ -45,6 +45,16 @@ map count for the virtual memory:
 sudo sysctl vm.max_map_count=262144
 ```
 
+### Migration 
+
+To generate migrations as SQL scripts, instead of running them against the database use `sqlmigrate`:
+
+`alembic upgrade <migration_file_name> --sql > migration.sql`
+
+An example:
+
+`pythonupgrade  0139893c4e15  --sql > migration.sql`
+
 #### How to pass a mocked JWT to the API for testing
 
 To work with mocked JWT you need at first to change the app setting in the `compose.env` file:
