@@ -64,9 +64,9 @@ permissions and limitations under the Licence.
         color="red"
         text
         data-role="remove-node"
-        @click="remove"
+        @click="unmount"
       >
-        remove
+        unmount
       </v-btn>
     </div>
   </v-form>
@@ -116,9 +116,9 @@ export default class ConfigurationsSelectedItemUnmountForm extends mixins(Rules)
     return null
   }
 
-  remove () {
+  unmount () {
     if (this.validateForm()) {
-      this.$emit('remove', {
+      this.$emit('unmount', {
         contact: this.contact,
         description: this.description
       })

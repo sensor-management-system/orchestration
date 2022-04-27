@@ -55,6 +55,8 @@ import { byDateOldestLast } from '@/modelUtils/mountHelpers'
 import { dateToDateTimeStringHHMM } from '@/utils/dateHelper'
 import { DeviceMountAction } from '@/models/DeviceMountAction'
 import { PlatformMountAction } from '@/models/PlatformMountAction'
+import { DeviceUnmountAction } from '@/models/DeviceUnmountAction'
+import { PlatformUnmountAction } from '@/models/PlatformUnmountAction'
 
 export enum LocationTypes {
   staticStart='staticStart',
@@ -293,8 +295,13 @@ const actions = {
     // console.log(this.$api.configurations.deviceMountActionApi);
     return this.$api.configurations.deviceMountActionApi.add(configurationId, deviceMountAction)
   },
-  async addDeviceUnMountAction ({ commit }: { commit: Commit }, payload) {
-    // console.log(this.$api.configurations.deviceUnmountActionApi);
+  async addDeviceUnMountAction ({ commit }: { commit: Commit },
+    {
+      configurationId,
+      deviceUnMountAction
+    }: { configurationId: string, deviceUnMountAction: DeviceUnmountAction }
+    ) {
+    return this.$api.configurations.deviceUnmountActionApi.add(configurationId,deviceUnMountAction);
   },
   async addPlatformMountAction ({ commit }: { commit: Commit },
     {
@@ -304,7 +311,12 @@ const actions = {
   ): Promise<void> {
     return this.$api.configurations.platformMountActionApi.add(configurationId, platformMountAction)
   },
-  async addPlatformUnMountAction ({ commit }: { commit: Commit }, payload) {
+  async addPlatformUnMountAction ({ commit }: { commit: Commit },
+    {
+      configurationId,
+      platformUnMountAction
+    }: { configurationId: string, platformUnMountAction: PlatformUnmountAction }
+    ) {
     // console.log(this.$api.configurations.platformUnmountActionApi);
   },
   setPageNumber ({ commit }: { commit: Commit }, newPageNumber: number) {
