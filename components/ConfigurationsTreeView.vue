@@ -37,6 +37,7 @@ permissions and limitations under the Licence.
       hoverable
       rounded
       open-all
+      return-object
     >
       <template #prepend="{ item }">
         <v-icon v-if="item.isPlatform()">
@@ -67,34 +68,21 @@ import { ConfigurationsTreeNode } from '@/viewmodels/ConfigurationsTreeNode'
 @Component
 // @ts-ignore
 export default class ConfigurationsTreeView extends Vue {
+
+  @Prop({
+    required: true,
+  })
+  // @ts-ignore
+  readonly value: ConfigurationsTreeNode | null
   /**
    * the tree
    */
   @Prop({
     required: true,
-    type: Object
+    type: Array
   })
   // @ts-ignore
-  readonly value!: ConfigurationsTree
-
-  /**
-   * the selected node
-   */
-  @Prop({
-    default: null,
-    type: Object
-  })
-  // @ts-ignore
-  readonly selected: ConfigurationsTreeNode | null
-
-  /**
-   * returns the tree as a flat array of nodes
-   *
-   * @return {ConfigurationsTreeNode[]} an Array of nodes
-   */
-  get items (): ConfigurationsTreeNode[] {
-    return this.value.toArray()
-  }
+  readonly items!: ConfigurationsTree[]
 
   /**
    * returns a list of selected notes
@@ -105,10 +93,10 @@ export default class ConfigurationsTreeView extends Vue {
    * @return {string[]} an empty array or an Array with the id of exactly one selected node
    */
   get selectedNodeSingletonList (): string[] {
-    if (!this.selected || !this.selected.id) {
+    if (this.value===null) {
       return []
     }
-    return [this.selected.id]
+    return [this.value]
   }
 
   /**
@@ -120,17 +108,9 @@ export default class ConfigurationsTreeView extends Vue {
    * @param {string[]} nodeIds - an Array with the ids of the selected nodes
    * @fires ConfigurationsTreeView#select
    */
-  set selectedNodeSingletonList (nodeIds: string[]) {
-    let node: ConfigurationsTreeNode | null = null
-    if (nodeIds.length) {
-      node = this.value.getById(nodeIds[0])
-    }
-    /**
-     * fires a select event
-     * @event ConfigurationsTreeView#select
-     * @type {ConfigurationsTreeNode}
-     */
-    this.$emit('select', node)
+  set selectedNodeSingletonList (nodesArray) {
+    let node: ConfigurationsTreeNode | null = nodesArray[0] ?? null
+    this.$emit('input', node)
   }
 }
 </script>

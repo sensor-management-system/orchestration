@@ -102,34 +102,25 @@ permissions and limitations under the Licence.
 <script lang="ts">
 import { Component, Prop, Vue, Watch } from 'nuxt-property-decorator'
 
-import { DateTime } from 'luxon'
+// import { DateTime } from 'luxon'
+//
+// import { Contact } from '@/models/Contact'
+// import { Platform } from '@/models/Platform'
+// import { Device } from '@/models/Device'
+// import { Configuration } from '@/models/Configuration'
+//
+// import { ConfigurationsTreeNode } from '@/viewmodels/ConfigurationsTreeNode'
+// import { buildConfigurationTree, mountDevice, mountPlatform, unmount } from '@/modelUtils/mountHelpers'
+// import ConfigurationHelper from '@/utils/configurationHelper'
+// import { IActionDateWithText } from '@/utils/configurationInterfaces'
+// import Validator from '@/utils/validator'
+//
+// import DateTimePicker from '@/components/DateTimePicker.vue'
+// import ConfigurationsSelectedItem from '@/components/ConfigurationsSelectedItem.vue'
+// import InfoBox from '@/components/InfoBox.vue'
+// import ConfigurationsPlatformDeviceSearch from '@/components/ConfigurationsPlatformDeviceSearch.vue'
 
-import { Contact } from '@/models/Contact'
-import { Platform } from '@/models/Platform'
-import { Device } from '@/models/Device'
-import { Configuration } from '@/models/Configuration'
-
-import { ConfigurationsTreeNode } from '@/viewmodels/ConfigurationsTreeNode'
-import { buildConfigurationTree, mountDevice, mountPlatform, unmount } from '@/modelUtils/mountHelpers'
-import ConfigurationHelper from '@/utils/configurationHelper'
-import { IActionDateWithText } from '@/utils/configurationInterfaces'
-import Validator from '@/utils/validator'
-
-import DateTimePicker from '@/components/DateTimePicker.vue'
-import ConfigurationsTreeView from '@/components/ConfigurationsTreeView.vue'
-import ConfigurationsSelectedItem from '@/components/ConfigurationsSelectedItem.vue'
-import InfoBox from '@/components/InfoBox.vue'
-import ConfigurationsPlatformDeviceSearch from '@/components/ConfigurationsPlatformDeviceSearch.vue'
-
-@Component({
-  components: {
-    ConfigurationsPlatformDeviceSearch,
-    InfoBox,
-    ConfigurationsSelectedItem,
-    ConfigurationsTreeView,
-    DateTimePicker
-  }
-})
+@Component()
 export default class ConfigurationPlatformsAndDevices extends Vue {
   // private selectedNode: ConfigurationsTreeNode | null = null
   // private valueCopy: Configuration = new Configuration()

@@ -85,9 +85,8 @@
                 <ConfigurationsTreeView
                   v-if="configuration"
                   ref="treeView"
-                  v-model="tree"
-                  :selected="selectedNode"
-                  @select="setSelectedNode"
+                  v-model="selectedNode"
+                  :items="tree"
                 />
               </v-container>
             </v-card>
@@ -307,7 +306,7 @@ import HintCard from '@/components/HintCard.vue'
     ...mapActions('contacts',['loadAllContacts'])
   }
 })
-export default class ConfigurationAddPlatformsAndDevicesPage extends Vue {
+export default class ConfigurationMountPlatformsAndDevicesPage extends Vue {
   private loading = false
   private tab= null
   private step=1
@@ -335,7 +334,7 @@ export default class ConfigurationAddPlatformsAndDevicesPage extends Vue {
         this.selectedNode = node
       }
     }
-    return tree
+    return tree.toArray()
   }
   get currentUserMail (): string | null {
     if (this.$auth.user && this.$auth.user.email) {
@@ -344,10 +343,6 @@ export default class ConfigurationAddPlatformsAndDevicesPage extends Vue {
     return null
   }
 
-
-  setSelectedNode (node: ConfigurationsTreeNode) {
-    this.selectedNode = node
-  }
   clearBasicSearchPlatforms(){
     this.searchTextPlatforms=null
   }

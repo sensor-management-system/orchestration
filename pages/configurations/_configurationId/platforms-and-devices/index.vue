@@ -11,6 +11,15 @@
     >
       Mount Platform or Device
     </v-btn>
+    <v-btn
+      v-if="$auth.loggedIn"
+      color="secondary"
+      small
+      nuxt
+      :to="'/configurations/' + configurationId + '/platforms-and-devices/unmount'"
+    >
+      -Un-mount Platform or Device
+    </v-btn>
   </v-card-actions>
   <v-row>
     <v-col cols="12" md="3">
@@ -40,9 +49,8 @@
           <ConfigurationsTreeView
             v-if="configuration"
             ref="treeView"
-            v-model="tree"
-            :selected="selectedNode"
-            @select="setSelectedNode"
+            v-model="selectedNode"
+            :items="tree"
           />
         </v-container>
       </v-card>
@@ -96,11 +104,11 @@ export default class ConfigurationShowPlatformsAndDevicesPage extends Vue {
         this.selectedNode = node
       }
     }
-    return tree
+    return tree.toArray()
   }
-  setSelectedNode (node: ConfigurationsTreeNode) {
-    this.selectedNode = node
-  }
+  // setSelectedNode (node: ConfigurationsTreeNode) {
+  //   this.selectedNode = node
+  // }
 }
 </script>
 
