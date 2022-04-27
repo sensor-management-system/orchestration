@@ -22,7 +22,7 @@
         <v-btn
           text
           small
-          @click="clearSearch"
+          @click="emitClear"
         >
           Clear
         </v-btn>
@@ -57,8 +57,8 @@ export default class PlatformsBasicSearch extends Vue {
     this.$emit('search')
   }
 
-  clearSearch () {
-    this.searchText = null
+  emitClear(){
+    this.$emit('clear')
   }
 
 }

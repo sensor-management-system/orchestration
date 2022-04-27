@@ -140,58 +140,8 @@ permissions and limitations under the Licence.
         <template v-else>
           {{ configurations.length }} configurations found
         </template>
-        <v-spacer />
-
-<!--        <template v-if="platforms.length>0">-->
-<!--          <v-dialog v-model="processing" max-width="100">-->
-<!--            <v-card>-->
-<!--              <v-card-text>-->
-<!--                <div class="text-center pt-2">-->
-<!--                  <v-progress-circular indeterminate />-->
-<!--                </div>-->
-<!--              </v-card-text>-->
-<!--            </v-card>-->
-<!--          </v-dialog>-->
-<!--          <v-menu-->
-<!--            close-on-click-->
-<!--            close-on-content-click-->
-<!--            offset-x-->
-<!--            left-->
-<!--            z-index="999"-->
-<!--          >-->
-<!--            <template #activator="{ on }">-->
-<!--              <v-btn-->
-<!--                icon-->
-<!--                v-on="on"-->
-<!--              >-->
-<!--                <v-icon-->
-<!--                  dense-->
-<!--                >-->
-<!--                  mdi-file-download-->
-<!--                </v-icon>-->
-<!--              </v-btn>-->
-<!--            </template>-->
-<!--            <v-list>-->
-<!--              <v-list-item-->
-<!--                dense-->
-<!--                @click.prevent="exportCsv"-->
-<!--              >-->
-<!--                <v-list-item-content>-->
-<!--                  <v-list-item-title>-->
-<!--                    <v-icon-->
-<!--                      left-->
-<!--                    >-->
-<!--                      mdi-table-->
-<!--                    </v-icon>-->
-<!--                    CSV-->
-<!--                  </v-list-item-title>-->
-<!--                </v-list-item-content>-->
-<!--              </v-list-item>-->
-<!--            </v-list>-->
-<!--          </v-menu>-->
-<!--        </template>-->
+        <v-spacer/>
       </v-subheader>
-
 
       <v-pagination
         v-model="page"
@@ -211,7 +161,7 @@ permissions and limitations under the Licence.
               <DotMenuActionDelete
                 :readonly="!$auth.loggedIn"
                 @click="initDeleteDialog(item)"
-                />
+              />
             </template>
           </ConfigurationsListItem>
         </template>
@@ -256,12 +206,14 @@ import { Configuration } from '@/models/Configuration'
 import BaseList from '@/components/shared/BaseList.vue'
 import ConfigurationsListItem from '@/components/configurations/ConfigurationsListItem.vue'
 import { mapActions, mapState } from 'vuex'
-import { IConfigurationSearchParams } from '@/modelUtils/ConfigurationSearchParams'
+import { ConfigurationSearchParamsSerializer, IConfigurationSearchParams } from '@/modelUtils/ConfigurationSearchParams'
 import ConfigurationsDeleteDialog from '@/components/configurations/ConfigurationsDeleteDialog.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 import { Project } from '@/models/Project'
 import StringSelect from '@/components/StringSelect.vue'
 import ProjectSelect from '@/components/ProjectSelect.vue'
+import { PlatformSearchParamsSerializer } from '@/modelUtils/PlatformSearchParams'
+import { QueryParams } from '@/modelUtils/QueryParams'
 
 @Component({
   components: {
@@ -272,40 +224,49 @@ import ProjectSelect from '@/components/ProjectSelect.vue'
     ConfigurationsListItem,
     BaseList
   },
-  computed:mapState('configurations',['configurations','pageNumber','pageSize','totalPages','configurationStates']),
-  methods:mapActions('configurations',['searchConfigurationsPaginated','setPageNumber','loadConfigurationsStates','deleteConfiguration'])
+  computed: mapState('configurations', ['configurations', 'pageNumber', 'pageSize', 'totalPages', 'configurationStates','projects']),
+  methods: {
+    ...mapActions('configurations', ['searchConfigurationsPaginated', 'setPageNumber', 'loadConfigurationsStates','loadProjects', 'deleteConfiguration']),
+    ...mapActions('appbar',['initConfigurationsIndexAppBar','setDefaults'])
+
+  }
 })
 // @ts-ignore
 export default class SearchConfigurationsPage extends Vue {
-  private loading=false
+  private loading = false
 
   private searchText: string | null = null
   private selectedConfigurationStates: string[] = []
   private selectedProjects: Project[] = []
 
-
   private showDeleteDialog: boolean = false
   private configurationToDelete: Configuration | null = null
 
   async created () {
-    this.initializeAppBar()
-    this.loadConfigurationsStates()
-    await this.runInitialSearch()
-  }
-
-  get searchParams() : IConfigurationSearchParams{
-    return {
-      searchText: this.searchText,
-      states:this.selectedConfigurationStates,
-      projects:this.selectedProjects
+    try {
+      this.loading = true
+      await this.initConfigurationsIndexAppBar()
+      await this.loadConfigurationsStates()
+      await this.initSearchQueryParams()
+      await this.runInitialSearch()
+    } catch (e) {
+      this.$store.commit('snackbar/setError', 'Loading of configurations failed')
+    } finally {
+      this.loading=false
     }
   }
-  get page(){
-    return this.pageNumber;
+
+  beforeDestroy () {
+    this.setDefaults()
   }
 
-  set page(newVal){
-    this.setPageNumber(newVal);
+  get page () {
+    return this.pageNumber
+    this.setPageInUrl()
+  }
+
+  set page (newVal) {
+    this.setPageNumber(newVal)
   }
 
   get activeTab (): number | null {
@@ -316,56 +277,63 @@ export default class SearchConfigurationsPage extends Vue {
     this.$store.commit('appbar/setActiveTab', tab)
   }
 
-  async runInitialSearch() {
-    //todo an andere entitäten angleichen
-    await this.runSearch()
+  get searchParams (): IConfigurationSearchParams {
+    return {
+      searchText: this.searchText,
+      states: this.selectedConfigurationStates,
+      projects: this.selectedProjects
     }
+  }
+
+  isExtendedSearch (): boolean {
+    return !!this.selectedProjects.length ||
+      !!this.selectedConfigurationStates.length
+  }
+
+  async runInitialSearch () {
+    this.activeTab = this.isExtendedSearch() ? 1 : 0
+
+    this.page = this.getPageFromUrl()
+    await this.runSearch()
+  }
 
   basicSearch (): Promise<void> {
-    this.selectedSearchManufacturers=[]
-    this.selectedSearchStates=[]
-    this.selectedSearchPlatformTypes=[]
-    this.onlyOwnPlatforms=false
-    return this.runSearch()
+    this.selectedSearchManufacturers = []
+    this.selectedSearchStates = []
+    this.selectedSearchPlatformTypes = []
+    this.onlyOwnPlatforms = false
+    this.page = 1//Important to set page to one otherwise it's possible that you don't anything
+    this.runSearch()
   }
 
   clearBasicSearch () {
     this.searchText = null
+    this.initUrlQueryParams()
   }
 
   extendedSearch (): Promise<void> {
-    return this.runSearch()
+    this.page = 1//Important to set page to one otherwise it's possible that you don't anything
+    this.runSearch()
   }
 
   clearExtendedSearch () {
     this.clearBasicSearch()
     this.selectedConfigurationStates = []
     this.selectedProjects = []
+    this.initUrlQueryParams()
   }
 
-  async runSearch() {
+  async runSearch () {
     try {
-      this.loading=true
-      this.searchConfigurationsPaginated(this.searchParams);
+      this.loading = true
+      this.initUrlQueryParams()
+      await this.searchConfigurationsPaginated(this.searchParams)
+      this.setPageInUrl()
     } catch (_error) {
-      this.$store.commit('snackbar/setError', 'Loading of platforms failed')
-    }finally {
-      this.loading=false
+      this.$store.commit('snackbar/setError', 'Loading of configurations failed')
+    } finally {
+      this.loading = false
     }
-    }
-
-  beforeDestroy () {
-    this.$store.dispatch('appbar/setDefaults')
-  }
-
-  initializeAppBar () {
-    this.$store.dispatch('appbar/init', {
-      tabs: [
-        'Search',
-        'Extended Search'
-      ],
-      title: 'Configurations'
-    })
   }
 
   initDeleteDialog (configuration: Configuration) {
@@ -390,10 +358,56 @@ export default class SearchConfigurationsPage extends Vue {
       this.$store.commit('snackbar/setSuccess', 'Configuration deleted')
     } catch {
       this.$store.commit('snackbar/setError', 'Configuration could not be deleted')
-    }finally {
+    } finally {
       this.loading = false
       this.closeDialog()
     }
+  }
+
+  initSearchQueryParams (): void {
+    const searchParamsObject = (new ConfigurationSearchParamsSerializer({
+      states: this.configurationStates,
+      projects: this.projects,
+    })).toSearchParams(this.$route.query)
+
+    // prefill the form by the serialized search params from the URL
+    if (searchParamsObject.searchText) {
+      this.searchText = searchParamsObject.searchText
+    }
+    if (searchParamsObject.states) {
+      this.selectedConfigurationStates = searchParamsObject.states
+    }
+    if (searchParamsObject.projects) {
+      this.selectedProjects = searchParamsObject.projects
+    }
+  }
+
+  initUrlQueryParams (): void {
+    this.$router.push({
+      query: (new ConfigurationSearchParamsSerializer()).toQueryParams(this.searchParams),
+      hash: this.$route.hash
+    })
+  }
+
+  getPageFromUrl (): number | undefined {
+    if ('page' in this.$route.query && typeof this.$route.query.page === 'string') {
+      return parseInt(this.$route.query.page) || 1
+    }
+    return 1;
+  }
+  setPageInUrl (preserveHash: boolean = true): void {
+    let query: QueryParams = {}
+    if (this.page) {
+      // add page to the current url params
+      query = {
+        ...this.$route.query,
+        page: String(this.page)
+      }
+    }
+    this.$router.push({
+      query,
+      hash: preserveHash ? this.$route.hash : ''
+    })
   }
 }
 

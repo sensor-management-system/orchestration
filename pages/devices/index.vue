@@ -308,7 +308,8 @@ type PaginatedResult = {
   },
   methods:{
     ...mapActions('vocabulary',['loadEquipmentstatus','loadDevicetypes','loadManufacturers']),
-    ...mapActions('devices',['searchDevicesPaginated','setPageNumber','exportAsCsv','deleteDevice'])
+    ...mapActions('devices',['searchDevicesPaginated','setPageNumber','exportAsCsv','deleteDevice']),
+    ...mapActions('appbar',['initDevicesIndexAppBar','setDefaults'])
   }
 })
 export default class SearchDevicesPage extends Vue {
@@ -325,12 +326,40 @@ export default class SearchDevicesPage extends Vue {
   private deviceToDelete: Device | null = null
 
   async created () {
-    await this.initializeAppBar()
-    await this.loadEquipmentstatus();
-    await this.loadDevicetypes();
-    await this.loadManufacturers();
-    this.initSearchQueryParams(this.$route.query)
-    this.runInitialSearch()
+    try {
+      this.loading = true
+      await this.initDevicesIndexAppBar()
+      await this.loadEquipmentstatus()
+      await this.loadDevicetypes()
+      await this.loadManufacturers()
+      await this.initSearchQueryParams()
+      await this.runInitialSearch()
+    } catch (e) {
+      this.$store.commit('snackbar/setError', 'Loading of devices failed')
+    } finally {
+      this.loading=false
+    }
+  }
+
+  beforeDestroy () {
+    this.setDefaults()
+  }
+
+  get page(){
+    return this.pageNumber;
+  }
+
+  set page(newVal){
+    this.setPageNumber(newVal);
+    this.setPageInUrl()
+  }
+
+  get activeTab (): number | null {
+    return this.$store.state.appbar.activeTab
+  }
+
+  set activeTab (tab: number | null) {
+    this.$store.commit('appbar/setActiveTab', tab)
   }
 
   get searchParams(){
@@ -341,37 +370,6 @@ export default class SearchDevicesPage extends Vue {
       types: this.selectedSearchDeviceTypes,
       onlyOwnDevices: this.onlyOwnDevices && this.$auth.loggedIn
     }
-  }
-  get page(){
-    return this.pageNumber;
-  }
-
-  set page(newVal){
-    this.setPageNumber(newVal);
-  }
-
-  beforeDestroy () {
-    this.$store.dispatch('appbar/setDefaults')
-  }
-
-  initializeAppBar () {
-    this.$store.dispatch('appbar/init', {
-      tabs: [
-        'Search',
-        'Extended Search'
-      ],
-      title: 'Devices',
-      saveBtnHidden: true,
-      cancelBtnHidden: true
-    })
-  }
-
-  get activeTab (): number | null {
-    return this.$store.state.appbar.activeTab
-  }
-
-  set activeTab (tab: number | null) {
-    this.$store.commit('appbar/setActiveTab', tab)
   }
 
   isExtendedSearch (): boolean {
@@ -394,15 +392,17 @@ export default class SearchDevicesPage extends Vue {
     this.selectedSearchStates= []
     this.selectedSearchDeviceTypes= []
     this.onlyOwnDevices= false
-
-     this.runSearch()
+    this.page = 1//Important to set page to one otherwise it's possible that you don't anything
+    this.runSearch()
   }
 
   clearBasicSearch () {
     this.searchText = null
+    this.initUrlQueryParams()
   }
 
   extendedSearch () {
+    this.page = 1//Important to set page to one otherwise it's possible that you don't anything
     this.runSearch()
   }
 
@@ -413,23 +413,20 @@ export default class SearchDevicesPage extends Vue {
     this.selectedSearchStates = []
     this.selectedSearchDeviceTypes = []
     this.onlyOwnDevices = false
+    this.initUrlQueryParams()
   }
 
   async runSearch (): Promise<void> {
-    this.initUrlQueryParams()
     try {
+      this.loading=true
+      this.initUrlQueryParams()
       await this.searchDevicesPaginated(this.searchParams)
-      this.setPageInUrl(this.page)
+      this.setPageInUrl()
     } catch (_error) {
-      console.log('err',_error);
       this.$store.commit('snackbar/setError', 'Loading of devices failed')
     } finally {
       this.loading = false
     }
-  }
-
-  getSearchResultForPage (pageNr: number): Device[] | undefined {
-    return this.searchResults[pageNr]
   }
 
   exportCsv () {
@@ -443,6 +440,16 @@ export default class SearchDevicesPage extends Vue {
         this.processing = false
       })
     }
+  }
+
+  initDeleteDialog (device: Device) {
+    this.showDeleteDialog = true
+    this.deviceToDelete = device
+  }
+
+  closeDialog () {
+    this.showDeleteDialog = false
+    this.deviceToDelete = null
   }
 
   async deleteAndCloseDialog () {
@@ -462,22 +469,12 @@ export default class SearchDevicesPage extends Vue {
     }
   }
 
-  initDeleteDialog (device: Device) {
-    this.showDeleteDialog = true
-    this.deviceToDelete = device
-  }
-
-  closeDialog () {
-    this.showDeleteDialog = false
-    this.deviceToDelete = null
-  }
-
-  initSearchQueryParams (params: QueryParams): void {
+  initSearchQueryParams (): void {
     const searchParamsObject = (new DeviceSearchParamsSerializer({
       states: this.states,
       deviceTypes: this.deviceTypes,
       manufacturer: this.manufacturer
-    })).toSearchParams(params)
+    })).toSearchParams(this.$route.query)
 
     // prefill the form by the serialized search params from the URL
     if (searchParamsObject.searchText) {
@@ -513,20 +510,12 @@ export default class SearchDevicesPage extends Vue {
 
   setPageInUrl (page: number, preserveHash: boolean = true): void {
     let query: QueryParams = {}
-    if (page) {
+    if (this.page) {
       // add page to the current url params
       query = {
         ...this.$route.query,
-        page: String(page)
+        page: String(this.page)
       }
-    } else {
-      // remove page from the current url params
-      const {
-        // eslint-disable-next-line
-        page,
-        ...params
-      } = this.$route.query
-      query = params
     }
     this.$router.push({
       query,

@@ -30,6 +30,7 @@
  * permissions and limitations under the Licence.
  */
 import { TabItemConfiguration } from '@/models/TabItemConfiguration'
+import {Commit} from 'vuex'
 
 export interface IAppbarStore {
   activeTab: null | number,
@@ -171,6 +172,39 @@ export const actions = {
     if (typeof payload.cancelBtnDisabled !== 'undefined') {
       context.commit('setCancelBtnDisabled', payload.cancelBtnDisabled)
     }
+  },
+  initContactsIndexAppBar({commit}:{commit:Commit}){
+    commit('setTitle','Contacts');
+    commit('setTabs',[])
+    commit('setCancelBtnHidden',true)
+    commit('setSaveBtnHidden',true)
+  },
+  initPlatformsIndexAppBar({commit}:{commit:Commit}){
+    commit('setTitle','Platforms');
+    commit('setTabs',[
+      'Search',
+      'Extended Search'
+    ])
+    commit('setCancelBtnHidden',true)
+    commit('setSaveBtnHidden',true)
+  },
+  initDevicesIndexAppBar({commit}:{commit:Commit}){
+    commit('setTitle','Devices');
+    commit('setTabs',[
+      'Search',
+      'Extended Search'
+    ])
+    commit('setCancelBtnHidden',true)
+    commit('setSaveBtnHidden',true)
+  },
+  initConfigurationsIndexAppBar({commit}:{commit:Commit}){
+    commit('setTitle','Configurations');
+    commit('setTabs',[
+      'Search',
+      'Extended Search'
+    ])
+    commit('setCancelBtnHidden',true)
+    commit('setSaveBtnHidden',true)
   },
 
   /**

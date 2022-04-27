@@ -36,6 +36,7 @@ permissions and limitations under the Licence.
       <PlatformsBasicSearch
         v-model="searchText"
         @search="basicSearch"
+        @clear="clearBasicSearch"
       />
       <v-tab-item :eager="true">
         <v-row>
@@ -48,22 +49,22 @@ permissions and limitations under the Licence.
         </v-row>
         <v-row>
           <v-col cols="12" md="3">
-            <ManufacturerSelect v-model="selectedSearchManufacturers" label="Select a manufacturer" />
+            <ManufacturerSelect v-model="selectedSearchManufacturers" label="Select a manufacturer"/>
           </v-col>
         </v-row>
         <v-row>
           <v-col cols="12" md="3">
-            <StatusSelect v-model="selectedSearchStates" label="Select a status" />
+            <StatusSelect v-model="selectedSearchStates" label="Select a status"/>
           </v-col>
         </v-row>
         <v-row>
           <v-col cols="12" md="3">
-            <PlatformTypeSelect v-model="selectedSearchPlatformTypes" label="Select a platform type" />
+            <PlatformTypeSelect v-model="selectedSearchPlatformTypes" label="Select a platform type"/>
           </v-col>
         </v-row>
         <v-row v-if="$auth.loggedIn">
           <v-col cols="12" md="3">
-            <v-checkbox v-model="onlyOwnPlatforms" label="Only own platforms" />
+            <v-checkbox v-model="onlyOwnPlatforms" label="Only own platforms"/>
           </v-col>
         </v-row>
         <v-row>
@@ -110,14 +111,14 @@ permissions and limitations under the Licence.
         <template v-else>
           {{ platforms.length }} platforms found
         </template>
-        <v-spacer />
+        <v-spacer/>
 
         <template v-if="platforms.length>0">
           <v-dialog v-model="processing" max-width="100">
             <v-card>
               <v-card-text>
                 <div class="text-center pt-2">
-                  <v-progress-circular indeterminate />
+                  <v-progress-circular indeterminate/>
                 </div>
               </v-card-text>
             </v-card>
@@ -228,7 +229,7 @@ import { Component, Vue } from 'nuxt-property-decorator'
 
 import { saveAs } from 'file-saver'
 
-import {mapState,mapActions} from 'vuex'
+import { mapState, mapActions } from 'vuex'
 
 import ManufacturerSelect from '@/components/ManufacturerSelect.vue'
 import PlatformTypeSelect from '@/components/PlatformTypeSelect.vue'
@@ -262,13 +263,14 @@ import PlatformsBasicSearchField from '@/components/platforms/PlatformsBasicSear
     PlatformTypeSelect,
     StatusSelect
   },
-  computed:{
-    ...mapState('vocabulary',['platformtypes','manufacturers','equipmentstatus']),
-    ...mapState('platforms',['platforms','pageNumber','pageSize','totalPages'])
+  computed: {
+    ...mapState('vocabulary', ['platformtypes', 'manufacturers', 'equipmentstatus']),
+    ...mapState('platforms', ['platforms', 'pageNumber', 'pageSize', 'totalPages'])
   },
-  methods:{
-    ...mapActions('vocabulary',['loadEquipmentstatus','loadPlatformtypes','loadManufacturers']),
-    ...mapActions('platforms',['searchPlatformsPaginated','setPageNumber','exportAsCsv','deletePlatform'])
+  methods: {
+    ...mapActions('vocabulary', ['loadEquipmentstatus', 'loadPlatformtypes', 'loadManufacturers']),
+    ...mapActions('platforms', ['searchPlatformsPaginated', 'setPageNumber', 'exportAsCsv', 'deletePlatform']),
+    ...mapActions('appbar',['initPlatformsIndexAppBar','setDefaults'])
   }
 })
 export default class SearchPlatformsPage extends Vue {
@@ -287,37 +289,33 @@ export default class SearchPlatformsPage extends Vue {
   private platformToDelete: Platform | null = null
 
   async created () {
-    await this.initializeAppBar()
-    await this.loadEquipmentstatus();
-    await this.loadPlatformtypes();
-    await this.loadManufacturers();
 
-    await this.initSearchQueryParams(this.$route.query)
-    await this.runInitialSearch()
+    try {
+      this.loading = true
+      await this.loadEquipmentstatus()
+      await this.loadPlatformtypes()
+      await this.loadManufacturers()
+      await this.initPlatformsIndexAppBar()
+      await this.initSearchQueryParams()
+      await this.runInitialSearch()
+    } catch (e) {
+      this.$store.commit('snackbar/setError', 'Loading of platforms failed')
+    } finally {
+      this.loading=false
+    }
   }
 
   beforeDestroy () {
-    this.$store.dispatch('appbar/setDefaults')
+    this.setDefaults()
   }
 
-  initializeAppBar () {
-    this.$store.dispatch('appbar/init', {
-      tabs: [
-        'Search',
-        'Extended Search'
-      ],
-      title: 'Platforms',
-      saveBtnHidden: true,
-      cancelBtnHidden: true
-    })
+  get page () {
+    return this.pageNumber
   }
 
-  get page(){
-    return this.pageNumber;
-  }
-
-  set page(newVal){
-    this.setPageNumber(newVal);
+  set page (newVal) {
+    this.setPageNumber(newVal)
+    this.setPageInUrl(false)
   }
 
   get activeTab (): number | null {
@@ -326,6 +324,16 @@ export default class SearchPlatformsPage extends Vue {
 
   set activeTab (tab: number | null) {
     this.$store.commit('appbar/setActiveTab', tab)
+  }
+
+  get searchParams () {
+    return {
+      searchText: this.searchText,
+      manufacturer: this.selectedSearchManufacturers,
+      states: this.selectedSearchStates,
+      types: this.selectedSearchPlatformTypes,
+      onlyOwnPlatforms: this.onlyOwnPlatforms && this.$auth.loggedIn
+    }
   }
 
   isExtendedSearch (): boolean {
@@ -343,30 +351,23 @@ export default class SearchPlatformsPage extends Vue {
     await this.runSearch()
   }
 
-  get searchParams(){
-    return {
-      searchText: this.searchText,
-      manufacturer: this.selectedSearchManufacturers,
-      states: this.selectedSearchStates,
-      types: this.selectedSearchPlatformTypes,
-      onlyOwnPlatforms: this.onlyOwnPlatforms && this.$auth.loggedIn
-    }
-  }
-
   basicSearch (): Promise<void> {
-    this.selectedSearchManufacturers=[]
-    this.selectedSearchStates=[]
-    this.selectedSearchPlatformTypes=[]
-    this.onlyOwnPlatforms=false
-    return this.runSearch()
+    this.selectedSearchManufacturers = []
+    this.selectedSearchStates = []
+    this.selectedSearchPlatformTypes = []
+    this.onlyOwnPlatforms = false
+    this.page = 1//Important to set page to one otherwise it's possible that you don't anything
+    this.runSearch()
   }
 
   clearBasicSearch () {
     this.searchText = null
+    this.initUrlQueryParams()
   }
 
   extendedSearch (): Promise<void> {
-    return this.runSearch()
+    this.page = 1//Important to set page to one otherwise it's possible that you don't anything
+    this.runSearch()
   }
 
   clearExtendedSearch () {
@@ -376,14 +377,15 @@ export default class SearchPlatformsPage extends Vue {
     this.selectedSearchStates = []
     this.selectedSearchPlatformTypes = []
     this.onlyOwnPlatforms = false
+    this.initUrlQueryParams()
   }
 
-  async runSearch (): Promise<void> {
-    this.initUrlQueryParams()
-    this.loading = true
+  async runSearch () {
     try {
-      this.searchPlatformsPaginated(this.searchParams);
-      this.setPageInUrl(this.page)
+      this.loading = true
+      this.initUrlQueryParams()
+      await this.searchPlatformsPaginated(this.searchParams)
+      this.setPageInUrl()
     } catch (_error) {
       this.$store.commit('snackbar/setError', 'Loading of platforms failed')
     } finally {
@@ -392,13 +394,13 @@ export default class SearchPlatformsPage extends Vue {
   }
 
   exportCsv () {
-    if(this.platforms.length>0){
-      this.processing=true
+    if (this.platforms.length > 0) {
+      this.processing = true
       this.exportAsCsv(this.searchParams).then((blob) => {
         saveAs(blob, 'platforms.csv')
       }).catch((_err) => {
         this.$store.commit('snackbar/setError', 'CSV export failed')
-      }).finally(()=>{
+      }).finally(() => {
         this.processing = false
       })
     }
@@ -431,12 +433,12 @@ export default class SearchPlatformsPage extends Vue {
     }
   }
 
-  initSearchQueryParams (params: QueryParams): void {
+  initSearchQueryParams (): void {
     const searchParamsObject = (new PlatformSearchParamsSerializer({
       states: this.states,
       platformTypes: this.platformTypes,
       manufacturer: this.manufacturer
-    })).toSearchParams(params)
+    })).toSearchParams(this.$route.query)
 
     // prefill the form by the serialized search params from the URL
     if (searchParamsObject.searchText) {
@@ -456,7 +458,7 @@ export default class SearchPlatformsPage extends Vue {
     }
   }
 
-  initUrlQueryParams (): void { // todo scheint aktuell nicht zu funktionieren, noch keine Ahnung warum. Er pushed nicht zur route
+  initUrlQueryParams (): void {
     this.$router.push({
       query: (new PlatformSearchParamsSerializer()).toQueryParams(this.searchParams),
       hash: this.$route.hash
@@ -472,20 +474,12 @@ export default class SearchPlatformsPage extends Vue {
 
   setPageInUrl (page: number, preserveHash: boolean = true): void {
     let query: QueryParams = {}
-    if (page) {
+    if (this.page) {
       // add page to the current url params
       query = {
         ...this.$route.query,
-        page: String(page)
+        page: String(this.page)
       }
-    } else {
-      // remove page from the current url params
-      const {
-        // eslint-disable-next-line
-        page,
-        ...params
-      } = this.$route.query
-      query = params
     }
     this.$router.push({
       query,
@@ -498,6 +492,7 @@ export default class SearchPlatformsPage extends Vue {
 
 <style lang="scss">
 @import "@/assets/styles/_search.scss";
+
 .progress-spinner {
   position: absolute;
   top: 40vh;

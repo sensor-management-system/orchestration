@@ -37,7 +37,7 @@ permissions and limitations under the Licence.
           label="Name"
           placeholder="Name of contact"
           hint="Please enter at least 3 characters"
-          @keydown.enter="search"
+          @keydown.enter="basicSearch"
         />
       </v-col>
       <v-col
@@ -48,7 +48,7 @@ permissions and limitations under the Licence.
         <v-btn
           color="primary"
           small
-          @click="search"
+          @click="basicSearch"
         >
           Search
         </v-btn>
@@ -90,7 +90,7 @@ permissions and limitations under the Licence.
         :disabled="loading"
         :length="totalPages"
         :total-visible="7"
-        @input="search"
+        @input="runSearch"
       />
       <BaseList
         :list-items="contacts"
@@ -114,7 +114,7 @@ permissions and limitations under the Licence.
         :disabled="loading"
         :length="totalPages"
         :total-visible="7"
-        @input="search"
+        @input="runSearch"
       />
     </div>
     <ContacsDeleteDialog
@@ -152,6 +152,8 @@ import ContacsDeleteDialog from '@/components/contacts/ContacsDeleteDialog.vue'
 
 import BaseList from '@/components/shared/BaseList.vue'
 import ContactsListItem from '@/components/contacts/ContactsListItem.vue'
+import { ContactSearchParamsSerializer, IContactSearchParams } from '@/modelUtils/ContactSearchParams'
+import { QueryParams } from '@/modelUtils/QueryParams'
 
 @Component({
   components: {
@@ -163,7 +165,7 @@ import ContactsListItem from '@/components/contacts/ContactsListItem.vue'
   computed:mapState('contacts',['pageNumber','pageSize','totalPages','contacts']),
   methods:{
     ...mapActions('contacts',['searchContactsPaginated','setPageNumber','deleteContact']),
-    ...mapActions('appbar',['init','setDefaults'])
+    ...mapActions('appbar',['initContactsIndexAppBar','setDefaults'])
   }
 })
 export default class SearchContactsPage extends Vue {
@@ -174,6 +176,23 @@ export default class SearchContactsPage extends Vue {
   private showDeleteDialog: boolean = false
   private contactToDelete: Contact | null = null
 
+  async created () {
+    try {
+      this.loading=true
+      await this.initContactsIndexAppBar()
+      this.initSearchQueryParams()
+      this.runSearch()
+    } catch (e) {
+      this.$store.commit('snackbar/setError', 'Loading of contacts failed')
+    } finally {
+      this.loading=false
+    }
+  }
+
+  beforeDestroy () {
+    this.setDefaults();
+  }
+
   get page(){
     return this.pageNumber;
   }
@@ -183,65 +202,28 @@ export default class SearchContactsPage extends Vue {
     this.setPageInUrl(false);
   }
 
-  async created () {
-    await this.init({
-      tabs: [],
-      title: 'Contacts',
-      saveBtnHiden: true,
-      cancelBtnHidden: true
-    });
-    this.setPageFromUrl();
-    this.search();
+  basicSearch(){
+    //Important to set page to one otherwise it's possible that you don't anything
+    this.page = 1
+    this.runSearch()
   }
 
-  beforeDestroy () {
-    this.setDefaults();
+  clearSearch () {
+    this.searchText = ''
+    this.initUrlQueryParams()
   }
 
-  async search(){
+  async runSearch(){
     try{
       this.loading=true;
+      this.initUrlQueryParams()
       await this.searchContactsPaginated(this.searchText);
+      this.setPageInUrl()
     }catch (e){
       this.$store.commit('snackbar/setError', 'Loading of contacts failed')
     }finally {
       this.loading=false;
     }
-  }
-  clearSearch () {
-    this.searchText = ''
-  }
-  setPageFromUrl():void{
-    const urlPage = this.getPageFromUrl();
-    this.setPageNumber(urlPage);
-  }
-  getPageFromUrl (): number | undefined {
-    if ('page' in this.$route.query && typeof this.$route.query.page === 'string') {
-      return parseInt(this.$route.query.page) || 1
-    }
-    return 1;
-  }
-  setPageInUrl (preserveHash: boolean = true): void {
-    let query: QueryParams = {}
-    if (this.page) {
-      // add page to the current url params
-      query = {
-        ...this.$route.query,
-        page: String(this.page)
-      }
-    } else {
-      // remove page from the current url params
-      const {
-        // eslint-disable-next-line
-        page,
-        ...params
-      } = this.$route.query
-      query = params
-    }
-    this.$router.push({
-      query,
-      hash: preserveHash ? this.$route.hash : ''
-    })
   }
 
 
@@ -263,7 +245,7 @@ export default class SearchContactsPage extends Vue {
     this.loading = true
     try {
       await this.deleteContact(this.contactToDelete.id)
-      this.search();//to update the list
+      this.runSearch();//to update the list
       this.$store.commit('snackbar/setSuccess', 'Contact deleted')
     } catch (_error) {
       this.$store.commit('snackbar/setError', 'Contact could not be deleted')
@@ -273,6 +255,44 @@ export default class SearchContactsPage extends Vue {
     }
   }
 
+  getPageFromUrl (): number | undefined {
+    if ('page' in this.$route.query && typeof this.$route.query.page === 'string') {
+      return parseInt(this.$route.query.page) || 1
+    }
+    return 1;
+  }
+  setPageInUrl (preserveHash: boolean = true): void {
+    let query: QueryParams = {}
+    if (this.page) {
+      // add page to the current url params
+      query = {
+        ...this.$route.query,
+        page: String(this.page)
+      }
+    }
+    this.$router.push({
+      query,
+      hash: preserveHash ? this.$route.hash : ''
+    })
+  }
+
+  initSearchQueryParams (): void {
+    if (this.$route.query.searchText) {
+      this.searchText = this.$route.query.searchText
+    }
+  }
+
+  initUrlQueryParams (): void {
+    let params = {}
+
+    if(this.searchText){
+      params.searchText = this.searchText
+    }
+    this.$router.push({
+      query: params,
+      hash: this.$route.hash
+    })
+  }
 }
 </script>
 
