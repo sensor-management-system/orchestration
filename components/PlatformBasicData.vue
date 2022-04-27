@@ -188,7 +188,7 @@ export default class PlatformBasicData extends Vue {
   }
 
   get platformURN () {
-    return createPlatformUrn(this.value, this.platformTypes)
+    return createPlatformUrn(this.value, this.platformtypes)
   }
 }
 </script>
