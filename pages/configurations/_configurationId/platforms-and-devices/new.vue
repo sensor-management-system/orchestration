@@ -12,199 +12,259 @@
       cancel
     </v-btn>
   </v-card-actions>
-  <v-row justify="center">
-      <v-col cols="12" md="6">
-        <DateTimePicker
-          v-model="selectedDate"
-          placeholder="e.g. 2000-01-31 12:00"
-          label="Select a date"
-        />
-      </v-col>
-  </v-row>
-  <v-row justify="center">
-    <v-col cols="12" md="4">
-      <v-card>
-        <v-card-title>Mounted devices and platforms</v-card-title>
-        <ConfigurationsTreeView
-          v-if="configuration"
-          ref="treeView"
-          v-model="tree"
-          :selected="selectedNode"
-          @select="setSelectedNode"
-        />
-      </v-card>
+  <v-stepper
+    v-model="step"
+  >
+    <v-stepper-header>
+      <v-stepper-step
+        editable
+        :complete="!!selectedDate"
+        step="1"
+      >
+        Select a date
+      </v-stepper-step>
+      <v-stepper-step
+        :editable="!!selectedDate"
+        :rules="[()=>!!selectedDate]"
+        step=2
+      >
+        Choose node
+      </v-stepper-step>
+      <v-stepper-step
+        :editable="!!selectedDate"
+        :rules="[()=>!!selectedDate]"
+        step="3"
+      >
+        Select device or platform
+      </v-stepper-step>
+    </v-stepper-header>
+    <v-stepper-items>
+      <v-stepper-content step="1">
+        <v-row justify="center">
+          <v-col cols="12" md="6">
+            <DateTimePicker
+              v-model="selectedDate"
+              placeholder="e.g. 2000-01-31 12:00"
+              label="Select a date"
+            />
+          </v-col>
+        </v-row>
+      </v-stepper-content>
 
-    </v-col>
-    <v-col cols="12" md="8">
-      <v-row>
-        <v-col>
-          <v-card>
-            <v-toolbar
-              color="grey"
-              dark
-              flat
-            >
-              <v-spacer></v-spacer>
-              <v-toolbar-title>Search</v-toolbar-title>
+      <v-stepper-content step="2">
+        <v-row justify="center">
+          <v-col cols="12" md="6">
+            <v-card>
+              <v-container>
+                <v-row no-gutters>
+                  <v-col >
 
-              <v-spacer></v-spacer>
+                    <v-alert
+                      border="top"
+                      colored-border
+                      type="info"
+                      elevation="2"
+                    >
+                      <div>
+                        Select a platform node (<v-icon>mdi-rocket-outline</v-icon>) to add a device or platform to it.
+                      </div>
+                      <div>
+                        To add a device or platform directly to a configuration don't select anything.
+                      </div>
+                      <div>
+                        You can deselect by clicking on a selected node.
+                      </div>
+                      <div>
+                        You can't attach a device or platform to a mounted device.
+                      </div>
+                    </v-alert>
 
-              <template v-slot:extension>
-                <v-tabs
-                  v-model="tab"
-                  centered
-                  slider-color="yellow"
-                >
-                  <v-tab>Platform</v-tab>
-                  <v-tab>Device</v-tab>
-                </v-tabs>
-              </template>
-            </v-toolbar>
+                  </v-col>
+                </v-row>
 
-            <v-tabs-items v-model="tab">
-              <v-tab-item>
-                <v-card>
-                  <v-container>
-                    <v-row>
-                      <v-col cols="12">
-                        <v-text-field
-                          v-model="searchTextPlatforms"
-                          label="Name"
-                          placeholder="Name of platform"
-                          hint="Please enter at least 3 characters"
-                          @keydown.enter="searchPlatformsForMount"
-                        />
-                      </v-col>
-                      <v-col
-                        cols="12"
-                        md="7"
-                        align-self="center"
-                      >
-                        <v-btn
-                          color="primary"
-                          small
-                          @click="searchPlatformsForMount"
+                <ConfigurationsTreeView
+                  v-if="configuration"
+                  ref="treeView"
+                  v-model="tree"
+                  :selected="selectedNode"
+                  @select="setSelectedNode"
+                />
+              </v-container>
+            </v-card>
+          </v-col>
+        </v-row>
+      </v-stepper-content>
+      <v-stepper-content step="3">
+        <v-row>
+          <v-col>
+            <v-card>
+              <v-toolbar
+                color="grey"
+                dark
+                flat
+              >
+                <v-spacer></v-spacer>
+                <v-toolbar-title>Search</v-toolbar-title>
+
+                <v-spacer></v-spacer>
+
+                <template v-slot:extension>
+                  <v-tabs
+                    v-model="tab"
+                    centered
+                    slider-color="yellow"
+                  >
+                    <v-tab>Platform</v-tab>
+                    <v-tab>Device</v-tab>
+                  </v-tabs>
+                </template>
+              </v-toolbar>
+
+              <v-tabs-items v-model="tab">
+                <v-tab-item>
+                  <v-card>
+                    <v-container>
+                      <v-row>
+                        <v-col cols="12">
+                          <v-text-field
+                            v-model="searchTextPlatforms"
+                            label="Name"
+                            placeholder="Name of platform"
+                            hint="Please enter at least 3 characters"
+                            @keydown.enter="searchPlatformsForMount"
+                          />
+                        </v-col>
+                        <v-col
+                          cols="12"
+                          md="7"
+                          align-self="center"
                         >
-                          Search
-                        </v-btn>
-                        <v-btn
-                          text
-                          small
-                          @click="clearBasicSearchPlatforms"
-                        >
-                          Clear
-                        </v-btn>
-                      </v-col>
-                    </v-row>
-                    <div v-if="platforms.length>0">
-                      <v-subheader>
-                        <template v-if="platforms.length == 1">
-                          1 device found
-                        </template>
-                        <template v-else>
-                          {{ platforms.length }} platforms found
-                        </template>
-                        <v-spacer />
-                      </v-subheader>
-                      <BaseList
-                        :list-items="platforms"
-                      >
-                        <template v-slot:list-item="{item}">
-                          <PlatformMountListItem
-                            :key="item.id"
-                            :platform="item"
+                          <v-btn
+                            color="primary"
+                            small
+                            @click="searchPlatformsForMount"
                           >
-                            <template #mount>
-                              <ConfigurationsPlatformDeviceMountForm
-                                data-role-btn="add-platform"
-                                :readonly="false"
-                                :contacts="contacts"
-                                :current-user-mail="currentUserMail"
-                                @add="mountPlatform(item, $event)"
-                              />
-                            </template>
-                          </PlatformMountListItem>
-                        </template>
-                      </BaseList>
-                    </div>
-
-                  </v-container>
-                </v-card>
-              </v-tab-item>
-              <v-tab-item>
-                <v-card>
-                  <v-container>
-                    <v-row>
-                      <v-col cols="12">
-                        <v-text-field
-                          v-model="searchTextDevices"
-                          label="Name"
-                          placeholder="Name of device"
-                          hint="Please enter at least 3 characters"
-                          @keydown.enter="searchDevicesForMount"
-                        />
-                      </v-col>
-                      <v-col
-                        cols="12"
-                        md="7"
-                        align-self="center"
-                      >
-                        <v-btn
-                          color="primary"
-                          small
-                          @click="searchDevicesForMount"
-                        >
-                          Search
-                        </v-btn>
-                        <v-btn
-                          text
-                          small
-                          @click="clearBasicSearchDevices"
-                        >
-                          Clear
-                        </v-btn>
-                      </v-col>
-                    </v-row>
-                    <div v-if="devices.length>0">
-                      <v-subheader>
-                        <template v-if="devices.length == 1">
-                          1 device found
-                        </template>
-                        <template v-else>
-                          {{ devices.length }} devices found
-                        </template>
-                        <v-spacer />
-                      </v-subheader>
-                      <BaseList
-                        :list-items="devices"
-                      >
-                        <template v-slot:list-item="{item}">
-                          <DevicesMountListItem
-                            :key="item.id"
-                            :device="item"
+                            Search
+                          </v-btn>
+                          <v-btn
+                            text
+                            small
+                            @click="clearBasicSearchPlatforms"
                           >
-                            <template #mount>
-                              <ConfigurationsPlatformDeviceMountForm
-                                data-role-btn="add-device"
-                                :readonly="false"
-                                :contacts="contacts"
-                                :current-user-mail="currentUserMail"
-                                @add="mountDevice(item, $event)"
-                              />
-                            </template>
-                          </DevicesMountListItem>
-                        </template>
-                      </BaseList>
-                    </div>
-                  </v-container>
-                </v-card>
-              </v-tab-item>
-            </v-tabs-items>
-          </v-card>
-        </v-col>
-      </v-row>
-    </v-col>
-  </v-row>
+                            Clear
+                          </v-btn>
+                        </v-col>
+                      </v-row>
+                      <div v-if="platforms.length>0">
+                        <v-subheader>
+                          <template v-if="platforms.length == 1">
+                            1 device found
+                          </template>
+                          <template v-else>
+                            {{ platforms.length }} platforms found
+                          </template>
+                          <v-spacer />
+                        </v-subheader>
+                        <BaseList
+                          :list-items="platforms"
+                        >
+                          <template v-slot:list-item="{item}">
+                            <PlatformMountListItem
+                              :key="item.id"
+                              :platform="item"
+                            >
+                              <template #mount>
+                                <ConfigurationsPlatformDeviceMountForm
+                                  data-role-btn="add-platform"
+                                  :readonly="false"
+                                  :contacts="contacts"
+                                  :current-user-mail="currentUserMail"
+                                  @add="mountPlatform(item, $event)"
+                                />
+                              </template>
+                            </PlatformMountListItem>
+                          </template>
+                        </BaseList>
+                      </div>
+
+                    </v-container>
+                  </v-card>
+                </v-tab-item>
+                <v-tab-item>
+                  <v-card>
+                    <v-container>
+                      <v-row>
+                        <v-col cols="12">
+                          <v-text-field
+                            v-model="searchTextDevices"
+                            label="Name"
+                            placeholder="Name of device"
+                            hint="Please enter at least 3 characters"
+                            @keydown.enter="searchDevicesForMount"
+                          />
+                        </v-col>
+                        <v-col
+                          cols="12"
+                          md="7"
+                          align-self="center"
+                        >
+                          <v-btn
+                            color="primary"
+                            small
+                            @click="searchDevicesForMount"
+                          >
+                            Search
+                          </v-btn>
+                          <v-btn
+                            text
+                            small
+                            @click="clearBasicSearchDevices"
+                          >
+                            Clear
+                          </v-btn>
+                        </v-col>
+                      </v-row>
+                      <div v-if="devices.length>0">
+                        <v-subheader>
+                          <template v-if="devices.length == 1">
+                            1 device found
+                          </template>
+                          <template v-else>
+                            {{ devices.length }} devices found
+                          </template>
+                          <v-spacer />
+                        </v-subheader>
+                        <BaseList
+                          :list-items="devices"
+                        >
+                          <template v-slot:list-item="{item}">
+                            <DevicesMountListItem
+                              :key="item.id"
+                              :device="item"
+                            >
+                              <template #mount>
+                                <ConfigurationsPlatformDeviceMountForm
+                                  data-role-btn="add-device"
+                                  :readonly="false"
+                                  :contacts="contacts"
+                                  :current-user-mail="currentUserMail"
+                                  @add="mountDevice(item, $event)"
+                                />
+                              </template>
+                            </DevicesMountListItem>
+                          </template>
+                        </BaseList>
+                      </div>
+                    </v-container>
+                  </v-card>
+                </v-tab-item>
+              </v-tabs-items>
+            </v-card>
+          </v-col>
+        </v-row>
+      </v-stepper-content>
+    </v-stepper-items>
+  </v-stepper>
 </div>
 </template>
 
@@ -228,9 +288,10 @@ import { DeviceMountAction, IDeviceMountAction } from '@/models/DeviceMountActio
 import { PlatformNode } from '@/viewmodels/PlatformNode'
 import PlatformMountListItem from '@/components/platforms/PlatformMountListItem.vue'
 import { PlatformMountAction } from '@/models/PlatformMountAction'
+import HintCard from '@/components/HintCard.vue'
 
 @Component({
-  components: { PlatformMountListItem, ConfigurationsPlatformDeviceMountForm, DevicesMountListItem, DevicesListItem, BaseList, DateTimePicker, ConfigurationsTreeView },
+  components: { HintCard, PlatformMountListItem, ConfigurationsPlatformDeviceMountForm, DevicesMountListItem, DevicesListItem, BaseList, DateTimePicker, ConfigurationsTreeView },
   middleware:['auth'],
   computed:{
     ...mapGetters('configurations',['mountingActionsDates']),
@@ -249,6 +310,7 @@ import { PlatformMountAction } from '@/models/PlatformMountAction'
 export default class ConfigurationAddPlatformsAndDevicesPage extends Vue {
   private loading = false
   private tab= null
+  private step=1
 
   private searchTextPlatforms:string|null = null
   private searchTextDevices:string|null = null
