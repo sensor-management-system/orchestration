@@ -39,23 +39,11 @@ permissions and limitations under the Licence.
     >
       <v-card-actions>
         <v-spacer />
-        <v-btn
-          v-if="$auth.loggedIn"
-          small
-          text
-          nuxt
-          to="/devices"
-        >
-          cancel
-        </v-btn>
-        <v-btn
-          v-if="$auth.loggedIn"
-          color="green"
-          small
-          @click="onSaveButtonClicked"
-        >
-          create
-        </v-btn>
+        <SaveAndCancelButtons
+          :to="'/devices'"
+          @save="save"
+          save-btn-text="create"
+        />
       </v-card-actions>
       <DeviceBasicDataForm
         ref="basicForm"
@@ -63,23 +51,11 @@ permissions and limitations under the Licence.
       />
       <v-card-actions>
         <v-spacer />
-        <v-btn
-          v-if="$auth.loggedIn"
-          small
-          text
-          nuxt
-          to="/devices"
-        >
-          cancel
-        </v-btn>
-        <v-btn
-          v-if="$auth.loggedIn"
-          color="green"
-          small
-          @click="onSaveButtonClicked"
-        >
-          create
-        </v-btn>
+        <SaveAndCancelButtons
+          :to="'/devices'"
+          @save="save"
+          save-btn-text="create"
+        />
       </v-card-actions>
     </v-card>
   </div>
@@ -95,37 +71,36 @@ import { Device } from '@/models/Device'
 import DeviceBasicDataForm from '@/components/DeviceBasicDataForm.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import { mapActions } from 'vuex'
+import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
 
 @Component({
   components: {
+    SaveAndCancelButtons,
     DeviceBasicDataForm,
     ProgressIndicator
   },
   middleware: ['auth'],
-  methods:mapActions('devices',['saveDevice'])
+  methods:{
+    ...mapActions('devices',['saveDevice']),
+    ...mapActions('appbar',['initDevicesNewAppBar','setDefaults'])
+  }
 })
 // @ts-ignore
 export default class DeviceNewPage extends mixins(Rules) {
-  private numberOfTabs: number = 1
-
   private device: Device = new Device()
   private isLoading: boolean = false
 
-  mounted () {
-    this.initializeAppBar()
+  created () {
+    this.initDevicesNewAppBar()
   }
 
   beforeDestroy () {
-    this.$store.dispatch('appbar/setDefaults')
+    this.setDefaults()
   }
 
-  async onSaveButtonClicked (): void {
+  async save (): void {
     if (!(this.$refs.basicForm as Vue & { validateForm: () => boolean }).validateForm()) {
       this.$store.commit('snackbar/setError', 'Please correct your input')
-      return
-    }
-    if (!this.$auth.loggedIn) {
-      this.$store.commit('snackbar/setError', 'You need to be logged in to save the device')
       return
     }
 
@@ -133,7 +108,7 @@ export default class DeviceNewPage extends mixins(Rules) {
       this.isLoading = true
       const savedDevice = await this.saveDevice(this.device)
       this.$store.commit('snackbar/setSuccess', 'Device created')
-      this.$router.push('/devices/' + savedDevice.id + '')
+      this.$router.push('/devices/' + savedDevice.id)
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Save failed')
     } finally {
@@ -142,37 +117,6 @@ export default class DeviceNewPage extends mixins(Rules) {
 
   }
 
-  initializeAppBar () {
-    this.$store.dispatch('appbar/init', {
-      tabs: [
-        {
-          to: '/devices/new',
-          name: 'Basic Data'
-        },
-        {
-          name: 'Contacts',
-          disabled: true
-        },
-        {
-          name: 'Measured Quantities',
-          disabled: true
-        },
-        {
-          name: 'Custom Fields',
-          disabled: true
-        },
-        {
-          name: 'Attachments',
-          disabled: true
-        },
-        {
-          name: 'Actions',
-          disabled: true
-        }
-      ],
-      title: 'Add Device'
-    })
-  }
 }
 </script>
 

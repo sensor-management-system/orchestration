@@ -206,6 +206,89 @@ export const actions = {
     commit('setCancelBtnHidden',true)
     commit('setSaveBtnHidden',true)
   },
+  initContactsNewAppBar({commit}:{commit:Commit}){
+    commit('setTitle','Add Contact');
+    commit('setTabs',[])
+    commit('setCancelBtnHidden',true)
+    commit('setSaveBtnHidden',true)
+  },
+  initPlatformsNewAppBar({commit}:{commit:Commit}){
+    commit('setTitle','Add Platform');
+    commit('setTabs',[
+      {
+        to: '/platforms/new',
+        name: 'Basic Data'
+      },
+      {
+        name: 'Contacts',
+        disabled: true
+      },
+      {
+        name: 'Attachments',
+        disabled: true
+      }
+    ])
+    commit('setCancelBtnHidden',true)
+    commit('setSaveBtnHidden',true)
+  },
+  initDevicesNewAppBar({commit}:{commit:Commit}){
+    commit('setTitle','Add Device');
+    commit('setTabs',[
+      {
+        to: '/devices/new',
+        name: 'Basic Data'
+      },
+      {
+        name: 'Contacts',
+        disabled: true
+      },
+      {
+        name: 'Measured Quantities',
+        disabled: true
+      },
+      {
+        name: 'Custom Fields',
+        disabled: true
+      },
+      {
+        name: 'Attachments',
+        disabled: true
+      },
+      {
+        name: 'Actions',
+        disabled: true
+      }
+    ])
+    commit('setCancelBtnHidden',true)
+    commit('setSaveBtnHidden',true)
+  },
+  initConfigurationsNewAppBar({commit}:{commit:Commit}){
+    commit('setTitle','Add Configuration');
+    commit('setTabs',[
+      {
+        to: '/configurations/new',
+        name: 'Basic Data'
+      },
+      {
+        name: 'Contacts',
+        disabled: true
+      },
+      {
+        name: 'Platforms and Devices',
+        disabled: true
+      },
+      {
+        name: 'Locations',
+        disabled: true
+      },
+      {
+        name: 'Actions',
+        disabled: true
+      }
+    ])
+    commit('setCancelBtnHidden',true)
+    commit('setSaveBtnHidden',true)
+  },
 
   /**
    * sets the Appbar to its default settings

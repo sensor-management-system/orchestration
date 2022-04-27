@@ -42,23 +42,11 @@ permissions and limitations under the Licence.
     >
       <v-card-actions>
         <v-spacer />
-        <v-btn
-          v-if="$auth.loggedIn"
-          small
-          text
-          nuxt
-          to="/platforms"
-        >
-          cancel
-        </v-btn>
-        <v-btn
-          v-if="$auth.loggedIn"
-          color="green"
-          small
-          @click="onSaveButtonClicked"
-        >
-          create
-        </v-btn>
+        <SaveAndCancelButtons
+          :to="'/platforms'"
+          @save="save"
+          save-btn-text="create"
+        />
       </v-card-actions>
       <PlatformBasicDataForm
         ref="basicForm"
@@ -66,23 +54,11 @@ permissions and limitations under the Licence.
       />
       <v-card-actions>
         <v-spacer />
-        <v-btn
-          v-if="$auth.loggedIn"
-          small
-          text
-          nuxt
-          to="/platforms"
-        >
-          cancel
-        </v-btn>
-        <v-btn
-          v-if="$auth.loggedIn"
-          color="green"
-          small
-          @click="onSaveButtonClicked"
-        >
-          create
-        </v-btn>
+        <SaveAndCancelButtons
+          :to="'/platforms'"
+          @save="save"
+          save-btn-text="create"
+        />
       </v-card-actions>
     </v-card>
   </div>
@@ -98,37 +74,36 @@ import { Platform } from '@/models/Platform'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import PlatformBasicDataForm from '@/components/PlatformBasicDataForm.vue'
 import { mapActions } from 'vuex'
+import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
 
 @Component({
   components: {
+    SaveAndCancelButtons,
     PlatformBasicDataForm,
     ProgressIndicator
   },
   middleware: ['auth'],
-  methods:mapActions('platforms',['savePlatform'])
+  methods:{
+    ...mapActions('platforms',['savePlatform']),
+    ...mapActions('appbar',['setDefaults','initPlatformsNewAppBar'])
+  }
 })
 // @ts-ignore
 export default class PlatformNewPage extends mixins(Rules) {
-  private numberOfTabs: number = 1
-
   private platform: Platform = new Platform()
   private isLoading: boolean = false
 
-  mounted () {
-    this.initializeAppBar()
+  created () {
+    this.initPlatformsNewAppBar()
   }
 
   beforeDestroy () {
-    this.$store.dispatch('appbar/setDefaults')
+    this.setDefaults()
   }
 
-  async onSaveButtonClicked (): void {
+  async save (): void {
     if (!(this.$refs.basicForm as Vue & { validateForm: () => boolean }).validateForm()) {
       this.$store.commit('snackbar/setError', 'Please correct your input')
-      return
-    }
-    if (!this.$auth.loggedIn) {
-      this.$store.commit('snackbar/setError', 'You need to be logged in to save the platform')
       return
     }
 
@@ -136,32 +111,12 @@ export default class PlatformNewPage extends mixins(Rules) {
       this.isLoading = true
       const savedPlatform = await this.savePlatform(this.platform)
       this.$store.commit('snackbar/setSuccess', 'Platform created')
-      this.$router.push('/platforms/' + savedPlatform.id + '')
+      this.$router.push('/platforms/' + savedPlatform.id)
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Save failed')
     } finally {
       this.isLoading = false
     }
-  }
-
-  initializeAppBar () {
-    this.$store.dispatch('appbar/init', {
-      tabs: [
-        {
-          to: '/platforms/new',
-          name: 'Basic Data'
-        },
-        {
-          name: 'Contacts',
-          disabled: true
-        },
-        {
-          name: 'Attachments',
-          disabled: true
-        }
-      ],
-      title: 'Add Platform'
-    })
   }
 }
 </script>

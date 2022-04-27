@@ -43,8 +43,9 @@ permissions and limitations under the Licence.
     >
       <v-card-actions>
         <v-spacer />
-        <save-and-cancel-buttons
+        <SaveAndCancelButtons
           :to="'/configurations'"
+          save-btn-text="create"
           @save="save"
         />
       </v-card-actions>
@@ -55,9 +56,10 @@ permissions and limitations under the Licence.
       />
       <v-card-actions>
         <v-spacer />
-        <save-and-cancel-buttons
+        <SaveAndCancelButtons
           :to="'/configurations'"
           @save="save"
+          save-btn-text="create"
         />
       </v-card-actions>
     </v-card>
@@ -77,46 +79,21 @@ import { mapActions } from 'vuex'
 @Component({
   components: { ConfigurationsBasicDataForm, SaveAndCancelButtons, ProgressIndicator },
   middleware: ['auth'],
-  methods:mapActions('configurations',['saveConfiguration'])
+  methods:{
+    ...mapActions('configurations',['saveConfiguration']),
+    ...mapActions('appbar',['initConfigurationsNewAppBar','setDefaults'])
+  }
 })
 export default class ConfigurationNewPage extends Vue {
   private configuration: Configuration = new Configuration()
   private isLoading: boolean = false
 
-  mounted () {
-    this.initializeAppBar()
+  created () {
+    this.initConfigurationsNewAppBar()
   }
 
   beforeDestroy () {
-    this.$store.dispatch('appbar/setDefaults')
-  }
-
-  private initializeAppBar () {
-    this.$store.dispatch('appbar/init', {
-      tabs: [
-        {
-          to: '/configurations/new',
-          name: 'Basic Data'
-        },
-        {
-          name: 'Contacts',
-          disabled: true
-        },
-        {
-          name: 'Platforms and Devices',
-          disabled: true
-        },
-        {
-          name: 'Locations',
-          disabled: true
-        },
-        {
-          name: 'Actions',
-          disabled: true
-        }
-      ],
-      title: 'Add Configuration'
-    })
+    this.setDefaults()
   }
 
   async save () {

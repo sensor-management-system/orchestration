@@ -39,23 +39,11 @@ permissions and limitations under the Licence.
     >
       <v-card-actions>
         <v-spacer />
-        <v-btn
-          v-if="$auth.loggedIn"
-          small
-          text
-          nuxt
-          to="/contacts"
-        >
-          cancel
-        </v-btn>
-        <v-btn
-          v-if="$auth.loggedIn"
-          color="green"
-          small
-          @click="onSaveButtonClicked"
-        >
-          create
-        </v-btn>
+        <SaveAndCancelButtons
+          :to="'/contacts'"
+          @save="save"
+          save-btn-text="create"
+        />
       </v-card-actions>
       <ContactBasicDataForm
         ref="basicForm"
@@ -63,23 +51,11 @@ permissions and limitations under the Licence.
       />
       <v-card-actions>
         <v-spacer />
-        <v-btn
-          v-if="$auth.loggedIn"
-          small
-          text
-          nuxt
-          to="/contacts"
-        >
-          cancel
-        </v-btn>
-        <v-btn
-          v-if="$auth.loggedIn"
-          color="green"
-          small
-          @click="onSaveButtonClicked"
-        >
-          create
-        </v-btn>
+        <SaveAndCancelButtons
+          :to="'/contacts'"
+          @save="save"
+          save-btn-text="create"
+        />
       </v-card-actions>
     </v-card>
   </div>
@@ -95,36 +71,35 @@ import { Contact } from '@/models/Contact'
 import ContactBasicDataForm from '@/components/ContactBasicDataForm.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import { mapActions } from 'vuex'
+import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
 
 @Component({
   components: {
+    SaveAndCancelButtons,
     ContactBasicDataForm,
     ProgressIndicator
   },
   middleware: ['auth'],
-  methods: mapActions('contacts',['saveContact'])
+  methods: {
+    ...mapActions('contacts',['saveContact']),
+    ...mapActions('appbar',['initContactsNewAppBar','setDefaults'])
+  }
 })
 export default class ContactNewPage extends mixins(Rules) {
-  private numberOfTabs: number = 1
-
   private contact: Contact = new Contact()
   private isLoading: boolean = false
 
-  mounted () {
-    this.initializeAppBar()
+  created () {
+    this.initContactsNewAppBar()
   }
 
   beforeDestroy () {
-    this.$store.dispatch('appbar/setDefaults')
+    this.setDefaults()
   }
 
-  async onSaveButtonClicked (): void {
+  async save (): void {
     if (!(this.$refs.basicForm as Vue & { validateForm: () => boolean }).validateForm()) {
       this.$store.commit('snackbar/setError', 'Please correct your input')
-      return
-    }
-    if (!this.$auth.loggedIn) {
-      this.$store.commit('snackbar/setError', 'You need to be logged in to save the contact')
       return
     }
 
@@ -132,18 +107,12 @@ export default class ContactNewPage extends mixins(Rules) {
       this.isLoading = true
       const savedContact = await this.saveContact(this.contact)
       this.$store.commit('snackbar/setSuccess', 'Contact created')
-      this.$router.push('/contacts/' + savedContact.id + '')
+      this.$router.push('/contacts/' + savedContact.id)
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Creation of contact failed')
     } finally {
       this.isLoading = false
     }
-  }
-
-  initializeAppBar () {
-    this.$store.dispatch('appbar/init', {
-      title: 'Add Contact'
-    })
   }
 }
 </script>
