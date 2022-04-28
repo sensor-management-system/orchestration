@@ -39,23 +39,11 @@ permissions and limitations under the Licence.
     />
     <v-card-actions>
       <v-spacer />
-      <v-btn
-        v-if="$auth.loggedIn"
-        small
-        text
-        nuxt
+      <SaveAndCancelButtons
+        save-btn-text="Apply"
         :to="'/platforms/' + platformId + '/basic'"
-      >
-        cancel
-      </v-btn>
-      <v-btn
-        v-if="$auth.loggedIn"
-        color="green"
-        small
-        @click="save"
-      >
-        apply
-      </v-btn>
+        @save="save"
+      />
     </v-card-actions>
     <PlatformBasicDataForm
       ref="basicForm"
@@ -63,23 +51,11 @@ permissions and limitations under the Licence.
     />
     <v-card-actions>
       <v-spacer />
-      <v-btn
-        v-if="$auth.loggedIn"
-        small
-        text
-        nuxt
+      <SaveAndCancelButtons
+        save-btn-text="Apply"
         :to="'/platforms/' + platformId + '/basic'"
-      >
-        cancel
-      </v-btn>
-      <v-btn
-        v-if="$auth.loggedIn"
-        color="green"
-        small
-        @click="save"
-      >
-        apply
-      </v-btn>
+        @save="save"
+      />
     </v-card-actions>
   </div>
 </template>
@@ -92,9 +68,11 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
 import { Platform } from '@/models/Platform'
 import { mapActions, mapState } from 'vuex'
+import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
 
 @Component({
   components: {
+    SaveAndCancelButtons,
     PlatformBasicDataForm,
     ProgressIndicator
   },
