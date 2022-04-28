@@ -38,10 +38,8 @@ permissions and limitations under the Licence.
 <script lang="ts">
 import { Component, Vue, Prop } from 'nuxt-property-decorator'
 
-import { Platform } from '@/models/Platform'
-
 @Component
-export default class PlatformBasicPage extends Vue { // Todo:prüfen ob man diese Art von Pages überhaupt noch brauchts
+export default class PlatformBasicPage extends Vue {
   head () {
     return {
       titleTemplate: 'Basic Data - %s'
