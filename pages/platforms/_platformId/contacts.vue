@@ -32,30 +32,27 @@ implied. See the Licence for the specific language governing
 permissions and limitations under the Licence.
 -->
 <template>
-  <NuxtChild/>
+  <div>
+    <ProgressIndicator
+      v-model="isLoading"
+    />
+    <NuxtChild/>
+  </div>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
-import { Contact } from '@/models/Contact'
-
-import HintCard from '@/components/HintCard.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import { mapActions } from 'vuex'
 
 @Component({
   components: {
-    HintCard,
     ProgressIndicator
   },
   methods: mapActions('platforms', ['loadPlatformContacts'])
 })
 export default class PlatformContactsPage extends Vue {
   private isLoading = false
-
-  get platformId (): string {
-    return this.$route.params.platformId
-  }
 
   async created () {
     try {
@@ -66,6 +63,10 @@ export default class PlatformContactsPage extends Vue {
     } finally {
       this.isLoading = false
     }
+  }
+
+  get platformId (): string {
+    return this.$route.params.platformId
   }
 
   head () {
