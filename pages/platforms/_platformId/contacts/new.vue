@@ -56,7 +56,6 @@ permissions and limitations under the Licence.
         align-self="center"
       >
         <v-btn
-          v-if="$auth.loggedIn"
           small
           color="primary"
           :disabled="selectedContact == null"
@@ -115,17 +114,21 @@ export default class PlatformAddContactPage extends Vue {
       this.isLoading = false
     }
   }
-  get allExceptSelected (): Contact[] {
-    return this.contactsByDifference(this.platformContacts);
+
+  get platformId (): string {
+    return this.$route.params.platformId
   }
 
   get isInProgress (): boolean {
     return this.isLoading || this.isSaving
   }
 
-  async addContact (): void {
-    if (this.selectedContact && this.selectedContact.id && this.$auth.loggedIn) {
+  get allExceptSelected (): Contact[] {
+    return this.contactsByDifference(this.platformContacts);
+  }
 
+  async addContact (): void {
+    if (this.selectedContact && this.selectedContact.id) {
       try {
         this.isSaving = true
         await this.addPlatformContact({
@@ -140,10 +143,6 @@ export default class PlatformAddContactPage extends Vue {
         this.isSaving = false
       }
     }
-  }
-
-  get platformId (): string {
-    return this.$route.params.platformId
   }
 }
 </script>
