@@ -32,26 +32,24 @@ implied. See the Licence for the specific language governing
 permissions and limitations under the Licence.
 -->
 <template>
- <NuxtChild/>
+  <div>
+    <ProgressIndicator v-model="isLoading"/>
+    <NuxtChild/>
+  </div>
 </template>
 
 <script lang="ts">
-import { Component, Vue, mixins } from 'nuxt-property-decorator'
-import { Attachment } from '@/models/Attachment'
-
-import { AttachmentsMixin } from '@/mixins/AttachmentsMixin'
-
-import AttachmentListItem from '@/components/AttachmentListItem.vue'
-import HintCard from '@/components/HintCard.vue'
+import { Component, Vue } from 'nuxt-property-decorator'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import { mapActions } from 'vuex'
 
 @Component({
+  components: { ProgressIndicator },
   methods:mapActions('platforms',['loadPlatformAttachments'])
 })
-export default class PlatformAttachmentsPage extends mixins(AttachmentsMixin) {
-
+export default class PlatformAttachmentsPage extends Vue {
   private isLoading = false
+
   async created(){
     try {
       this.isLoading = true;
@@ -63,14 +61,14 @@ export default class PlatformAttachmentsPage extends mixins(AttachmentsMixin) {
     }
   }
 
+  get platformId (): string {
+    return this.$route.params.platformId
+  }
+
   head () {
     return {
       titleTemplate: 'Attachments - %s'
     }
-  }
-
-  get platformId (): string {
-    return this.$route.params.platformId
   }
 }
 </script>
