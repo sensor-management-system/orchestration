@@ -61,7 +61,7 @@ export default class ContactShowPage extends Vue {
     }catch (_error){
       this.$store.commit('snackbar/setError', 'Loading contact failed')
     }finally {
-      this.isLoading=true
+      this.isLoading=false
     }
   }
 
