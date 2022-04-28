@@ -56,7 +56,7 @@
                   text
                   small
                   nuxt
-                  :to="'/platforms/' + deviceId + '/attachments/' + attachment.id + '/edit'"
+                  :to="'/platforms/' + platformId + '/attachments/' + attachment.id + '/edit'"
                 >
                   Edit
                 </v-btn>
