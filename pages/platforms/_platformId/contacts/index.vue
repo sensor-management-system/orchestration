@@ -35,7 +35,7 @@ permissions and limitations under the Licence.
   <div>
     <ProgressIndicator
       v-model="isSaving"
-      :dark="isSaving"
+      dark
     />
     <v-card-actions>
       <v-spacer/>

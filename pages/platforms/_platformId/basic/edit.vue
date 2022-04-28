@@ -34,7 +34,7 @@ permissions and limitations under the Licence.
 <template>
   <div>
     <ProgressIndicator
-      v-model="isLoading"
+      v-model="isSaving"
       dark
     />
     <v-card-actions>
@@ -52,7 +52,7 @@ permissions and limitations under the Licence.
         v-if="$auth.loggedIn"
         color="green"
         small
-        @click="onSaveButtonClicked"
+        @click="save"
       >
         apply
       </v-btn>
@@ -76,7 +76,7 @@ permissions and limitations under the Licence.
         v-if="$auth.loggedIn"
         color="green"
         small
-        @click="onSaveButtonClicked"
+        @click="save"
       >
         apply
       </v-btn>
@@ -106,20 +106,24 @@ import { Contact } from '@/models/Contact'
 export default class PlatformEditBasicPage extends Vue {
 
   private platformCopy:Platform=new Platform()
-  private isLoading: boolean = false
+  private isSaving: boolean = false
 
   created(){
     this.platformCopy = Platform.createFromObject(this.platform);
   }
 
-  async onSaveButtonClicked () {
+  get platformId () {
+    return this.$route.params.platformId
+  }
+
+  async save () {
     if (!(this.$refs.basicForm as Vue & { validateForm: () => boolean }).validateForm()) {
       this.$store.commit('snackbar/setError', 'Please correct your input')
       return
     }
 
     try {
-      this.isLoading = true
+      this.isSaving = true
       await this.savePlatform(this.platformCopy)
       this.loadPlatform({
         platformId:this.platformId,
@@ -130,12 +134,8 @@ export default class PlatformEditBasicPage extends Vue {
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Save failed')
     } finally {
-      this.isLoading = false
+      this.isSaving = false
     }
-  }
-
-  get platformId () {
-    return this.$route.params.platformId
   }
 }
 </script>

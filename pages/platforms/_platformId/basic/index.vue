@@ -33,6 +33,10 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
+    <ProgressIndicator
+      v-model="isSaving"
+      dark
+    />
     <v-card-actions>
       <v-spacer />
       <v-btn
@@ -96,7 +100,7 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'nuxt-property-decorator'
+import { Component, Vue } from 'nuxt-property-decorator'
 
 import { Platform } from '@/models/Platform'
 import PlatformBasicData from '@/components/PlatformBasicData.vue'
@@ -105,9 +109,11 @@ import DotMenuActionCopy from '@/components/DotMenuActionCopy.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 import PlatformDeleteDialog from '@/components/platforms/PlatformDeleteDialog.vue'
 import { mapActions, mapState } from 'vuex'
+import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
 @Component({
   components: {
+    ProgressIndicator,
     PlatformDeleteDialog,
     DotMenuActionDelete,
     DotMenuActionCopy,
@@ -118,6 +124,8 @@ import { mapActions, mapState } from 'vuex'
   methods:mapActions('platforms',['deletePlatform'])
 })
 export default class PlatformShowBasicPage extends Vue {
+  private isSaving = false
+
   private showDeleteDialog: boolean = false
 
   get platformId () {
@@ -137,12 +145,17 @@ export default class PlatformShowBasicPage extends Vue {
     if (this.platform === null) {
       return
     }
-    await this.deletePlatform(this.platform.id!).then(() => {
+
+    try {
+      this.isSaving=true
+      await this.deletePlatform(this.platform.id)
       this.$router.push('/platforms')
       this.$store.commit('snackbar/setSuccess', 'Platform deleted')
-    }).catch((_error) => {
+    } catch (e) {
       this.$store.commit('snackbar/setError', 'Platform could not be deleted')
-    })
+    } finally {
+      this.isSaving=false
+    }
   }
 }
 </script>
