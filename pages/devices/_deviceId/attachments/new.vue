@@ -137,7 +137,10 @@ import { mapActions } from 'vuex'
 @Component({
   components: {},
   middleware: ['auth'],
-  methods: mapActions('devices',['addDeviceAttachment','loadDeviceAttachments'])
+  methods: {
+    ...mapActions('devices',['addDeviceAttachment','loadDeviceAttachments']),
+    ...mapActions('files',['uploadFile'])
+  }
 })
 export default class DeviceAttachmentAddPage extends mixins(Rules, UploadRules) {
   private attachment: Attachment = new Attachment()
@@ -164,7 +167,7 @@ export default class DeviceAttachmentAddPage extends mixins(Rules, UploadRules) 
     try {
       if (this.attachmentType !== 'url') {
         // Due to the validation we can be sure that the file is not null
-        const uploadResult = await this.$api.upload.file(this.file as File) //todo in store auslagern
+        const uploadResult = await this.uploadFile(this.file as File)
         this.attachment.url = uploadResult.url
         theFailureCanBeFromUpload = false
       }
