@@ -35,25 +35,11 @@ permissions and limitations under the Licence.
   <v-form ref="attachmentsForm" class="pb-2" @submit.prevent>
     <v-card-actions>
       <v-spacer />
-      <v-btn
-        v-if="$auth.loggedIn"
-        ref="cancelButton"
-        text
-        small
-        nuxt
+      <SaveAndCancelButtons
+        :save-btn-text="attachmentType === 'url' ? 'Add' : 'Upload'"
         :to="'/platforms/' + platformId + '/attachments'"
-      >
-        Cancel
-      </v-btn>
-      <v-btn
-        v-if="$auth.loggedIn"
-        color="green"
-        small
-        data-role="add-attachment"
-        @click="add()"
-      >
-        {{ attachmentType === 'url' ? 'Add' : 'Upload' }}
-      </v-btn>
+        @save="add"
+      />
     </v-card-actions>
     <v-card-text>
       <v-row>
@@ -103,25 +89,11 @@ permissions and limitations under the Licence.
     </v-card-text>
     <v-card-actions>
       <v-spacer />
-      <v-btn
-        v-if="$auth.loggedIn"
-        ref="cancelButton"
-        text
-        small
-        nuxt
+      <SaveAndCancelButtons
+        :save-btn-text="attachmentType === 'url' ? 'Add' : 'Upload'"
         :to="'/platforms/' + platformId + '/attachments'"
-      >
-        Cancel
-      </v-btn>
-      <v-btn
-        v-if="$auth.loggedIn"
-        color="green"
-        small
-        data-role="add-attachment"
-        @click="add()"
-      >
-        {{ attachmentType === 'url' ? 'Add' : 'Upload' }}
-      </v-btn>
+        @save="add"
+      />
     </v-card-actions>
   </v-form>
 </template>
@@ -136,11 +108,15 @@ import { UploadRules } from '@/mixins/UploadRules'
 
 import { Attachment } from '@/models/Attachment'
 import { mapActions } from 'vuex'
+import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
 
 @Component({
-  components: {},
+  components: { SaveAndCancelButtons },
   middleware: ['auth'],
-  methods:mapActions('platforms',['addPlatformAttachment','loadPlatformAttachments'])
+  methods:{
+    ...mapActions('platforms',['addPlatformAttachment','loadPlatformAttachments']),
+    ...mapActions('files',['uploadFile'])
+  }
 })
 export default class PlatformAttachmentAddPage extends mixins(Rules, UploadRules) {
   private attachment: Attachment = new Attachment()
@@ -169,7 +145,7 @@ export default class PlatformAttachmentAddPage extends mixins(Rules, UploadRules
     try {
       if (this.attachmentType !== 'url') {
         // Due to the validation we can be sure that the file is not null
-        const uploadResult = await this.$api.upload.file(this.file as File) //todo in store auslagern
+        const uploadResult = await this.uploadFile(this.file)
         this.attachment.url = uploadResult.url
         theFailureCanBeFromUpload = false
       }
@@ -187,8 +163,6 @@ export default class PlatformAttachmentAddPage extends mixins(Rules, UploadRules
         }
       }
       this.$store.commit('snackbar/setError', message)
-    } finally {
-      this.$emit('showsave', false)
     }
   }
 

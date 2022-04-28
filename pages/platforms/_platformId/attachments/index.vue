@@ -1,5 +1,9 @@
 <template>
   <div>
+    <ProgressIndicator
+      v-model="isSaving"
+      dark
+    />
     <v-card-actions
       v-if="$auth.loggedIn"
     >
@@ -65,13 +69,13 @@ import PlatformsAttachmentListItem from '@/components/platforms/PlatformsAttachm
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 import PlatformsAttachmentDeleteDialog from '@/components/platforms/PlatformsAttachmentDeleteDialog.vue'
 import { Attachment } from '@/models/Attachment'
-import { Platform } from '@/models/Platform'
 @Component({
   components: { PlatformsAttachmentDeleteDialog, DotMenuActionDelete, PlatformsAttachmentListItem, BaseList, HintCard, ProgressIndicator },
   computed: mapState('platforms',['platformAttachments']),
   methods:mapActions('platforms',['loadPlatformAttachments','deletePlatformAttachment'])
 })
 export default class PlatformAttachmentShowPage extends Vue{
+  private isSaving = false
   private showDeleteDialog=false;
   private attachmentToDelete:Attachment|null=null;
 
@@ -94,12 +98,14 @@ export default class PlatformAttachmentShowPage extends Vue{
       return
     }
     try {
-      await this.deletePlatformAttachment(this.attachmentToDelete.id) // TODO returns a 500 error, but deletion is fine; probably backend problem
+      this.isSaving=true
+      await this.deletePlatformAttachment(this.attachmentToDelete.id)
       this.loadPlatformAttachments(this.platformId)
       this.$store.commit('snackbar/setSuccess', 'Attachment deleted')
     } catch (_error) {
       this.$store.commit('snackbar/setError', 'Failed to delete attachment')
     } finally {
+      this.isSaving=false
       this.closeDialog()
     }
   }
