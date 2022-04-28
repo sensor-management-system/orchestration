@@ -85,14 +85,13 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop, Watch } from 'nuxt-property-decorator'
+import { Component, Vue} from 'nuxt-property-decorator'
 
 import PlatformBasicDataForm from '@/components/PlatformBasicDataForm.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
 import { Platform } from '@/models/Platform'
 import { mapActions, mapState } from 'vuex'
-import { Contact } from '@/models/Contact'
 
 @Component({
   components: {
