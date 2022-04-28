@@ -41,58 +41,59 @@ permissions and limitations under the Licence.
       class="mb-4"
       small
     >
-      <GenericActionCard
-        v-if="action.isGenericAction"
-        :value="value[index]"
-        :delete-callback="getActionApiDispatcherDeleteMethod(action)"
-        :is-user-authenticated="isUserAuthenticated"
-        @delete-success="removeActionFromModel"
-        @showdelete="$emit('showdelete', $event)"
-      >
-        <template #actions>
-          <v-btn
-            v-if="isUserAuthenticated"
-            :to="'/platforms/' + platformId + '/actions/generic-platform-actions/' + action.id + '/edit'"
-            color="primary"
-            text
-            @click.stop.prevent
-          >
-            Edit
-          </v-btn>
-        </template>
-      </GenericActionCard>
+      <slot v-if="action.isGenericAction" name="generic-action" :action="action" :index="index"></slot>
+<!--      <GenericActionCard-->
+<!--        v-if="action.isGenericAction"-->
+<!--        :value="value[index]"-->
+<!--        :delete-callback="getActionApiDispatcherDeleteMethod(action)"-->
+<!--        :is-user-authenticated="isUserAuthenticated"-->
+<!--        @delete-success="removeActionFromModel"-->
+<!--        @showdelete="$emit('showdelete', $event)"-->
+<!--      >-->
+<!--        <template #actions>-->
+<!--          <v-btn-->
+<!--            v-if="isUserAuthenticated"-->
+<!--            :to="'/platforms/' + platformId + '/actions/generic-platform-actions/' + action.id + '/edit'"-->
+<!--            color="primary"-->
+<!--            text-->
+<!--            @click.stop.prevent-->
+<!--          >-->
+<!--            Edit-->
+<!--          </v-btn>-->
+<!--        </template>-->
+<!--      </GenericActionCard>-->
 
-      <SoftwareUpdateActionCard
-        v-if="action.isSoftwareUpdateAction"
-        :value="value[index]"
-        target="Platform"
-        :delete-callback="getActionApiDispatcherDeleteMethod(action)"
-        :is-user-authenticated="isUserAuthenticated"
-        @delete-success="removeActionFromModel"
-        @showdelete="$emit('showdelete', $event)"
-      >
-        <template #actions>
-          <v-btn
-            v-if="isUserAuthenticated"
-            :to="'/platforms/' + platformId + '/actions/software-update-actions/' + action.id + '/edit'"
-            color="primary"
-            text
-            @click.stop.prevent
-          >
-            Edit
-          </v-btn>
-        </template>
-      </SoftwareUpdateActionCard>
+<!--      <SoftwareUpdateActionCard-->
+<!--        v-if="action.isSoftwareUpdateAction"-->
+<!--        :value="value[index]"-->
+<!--        target="Platform"-->
+<!--        :delete-callback="getActionApiDispatcherDeleteMethod(action)"-->
+<!--        :is-user-authenticated="isUserAuthenticated"-->
+<!--        @delete-success="removeActionFromModel"-->
+<!--        @showdelete="$emit('showdelete', $event)"-->
+<!--      >-->
+<!--        <template #actions>-->
+<!--          <v-btn-->
+<!--            v-if="isUserAuthenticated"-->
+<!--            :to="'/platforms/' + platformId + '/actions/software-update-actions/' + action.id + '/edit'"-->
+<!--            color="primary"-->
+<!--            text-->
+<!--            @click.stop.prevent-->
+<!--          >-->
+<!--            Edit-->
+<!--          </v-btn>-->
+<!--        </template>-->
+<!--      </SoftwareUpdateActionCard>-->
 
-      <PlatformMountActionCard
-        v-if="action.isPlatformMountAction"
-        v-model="action.inner"
-      />
+<!--      <PlatformMountActionCard-->
+<!--        v-if="action.isPlatformMountAction"-->
+<!--        v-model="action.inner"-->
+<!--      />-->
 
-      <PlatformUnmountActionCard
-        v-if="action.isPlatformUnmountAction"
-        v-model="action.inner"
-      />
+<!--      <PlatformUnmountActionCard-->
+<!--        v-if="action.isPlatformUnmountAction"-->
+<!--        v-model="action.inner"-->
+<!--      />-->
     </v-timeline-item>
   </v-timeline>
 </template>

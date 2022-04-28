@@ -40,11 +40,12 @@ permissions and limitations under the Licence.
           align-self="end"
           class="text-right"
         >
-          <ActionCardMenu
-            v-if="isUserAuthenticated"
-            :value="value"
-            @delete-menu-item-click="showDeleteDialog = true"
-          />
+          <DotMenu>
+            <template #actions>
+              <slot name="dot-menu-items">
+              </slot>
+            </template>
+          </DotMenu>
         </v-col>
       </v-row>
     </v-card-subtitle>
@@ -103,6 +104,7 @@ import { GenericAction } from '@/models/GenericAction'
 
 import ActionCardMenu from '@/components/actions/ActionCardMenu.vue'
 import ActionDeleteDialog from '@/components/actions/ActionDeleteDialog.vue'
+import DotMenu from '@/components/DotMenu.vue'
 
 /**
  * A class component for Generic Device Action card
@@ -110,6 +112,7 @@ import ActionDeleteDialog from '@/components/actions/ActionDeleteDialog.vue'
  */
 @Component({
   components: {
+    DotMenu,
     ActionCardMenu,
     ActionDeleteDialog
   }
@@ -141,12 +144,6 @@ export default class GenericActionCard extends Vue {
   })
   // @ts-ignore
   readonly deleteCallback!: (id: string) => Promise<void>
-
-  @Prop({
-    type: Boolean,
-    required: true
-  })
-  readonly isUserAuthenticated!: boolean
 
   /**
    * whether the card expansion is shown or not
