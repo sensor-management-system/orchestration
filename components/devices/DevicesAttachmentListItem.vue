@@ -1,50 +1,72 @@
 <template>
-  <v-card>
-    <v-list-item>
-      <v-list-item-avatar>
-        <v-icon large>
-          {{ filetypeIcon(attachment) }}
-        </v-icon>
-      </v-list-item-avatar>
-      <v-list-item-content>
-        <v-list-item-subtitle>
-          {{ filename(attachment) }}
-        </v-list-item-subtitle>
-        <v-list-item-title v-if="attachment.label">
-          <a :href="attachment.url" target="_blank">{{ attachment.label }}</a>
-        </v-list-item-title>
-        <v-list-item-title v-else>
-          <a :href="attachment.url" target="_blank">
-            <v-icon color="primary">mdi-open-in-new</v-icon>
-          </a>
-        </v-list-item-title>
-        <v-list-item-action-text>
-          <v-row>
-            <v-col align-self="end" class="text-right">
-              <v-btn
-                v-if="$auth.loggedIn"
-                color="primary"
-                text
-                small
-                nuxt
-                :to="'/devices/' + deviceId + '/attachments/' + attachment.id + '/edit'"
+  <v-hover
+    v-slot="{ hover }"
+  >
+    <v-card
+      :elevation="hover ? 6 : 2"
+      class="ma-2"
+    >
+
+      <v-card-text>
+        <v-row>
+          <v-avatar class="mt-0 align-self-center">
+            <v-icon large>
+              {{ filetypeIcon(attachment) }}
+            </v-icon>
+          </v-avatar>
+          <v-col>
+            <v-row
+              no-gutters
+            >
+              <v-col>
+                <v-card-subtitle>
+                  {{ filename(attachment) }}
+                </v-card-subtitle>
+              </v-col>
+              <v-col
+                align-self="end"
+                class="text-right"
               >
-                Edit
-              </v-btn>
-              <DotMenu
-                v-if="$auth.loggedIn"
+                <DotMenu>
+                  <template #actions>
+                    <slot name="dot-menu-items">
+                    </slot>
+                  </template>
+                </DotMenu>
+              </v-col>
+            </v-row>
+            <v-row
+              no-gutters
+            >
+              <v-col class="text-subtitle-1">
+                <a :href="attachment.url" target="_blank" v-if="attachment.label">
+                  <v-icon color="primary">mdi-open-in-new</v-icon>{{ attachment.label }}
+                </a>
+                <a :href="attachment.url" target="_blank" v-else>
+                  <v-icon color="primary">mdi-open-in-new</v-icon>
+                </a>
+              </v-col>
+              <v-col
+                align-self="end"
+                class="text-right"
               >
-                <template #actions>
-                  <slot name="dot-menu-items">
-                  </slot>
-                </template>
-              </DotMenu>
-            </v-col>
-          </v-row>
-        </v-list-item-action-text>
-      </v-list-item-content>
-    </v-list-item>
-  </v-card>
+                <v-btn
+                  v-if="$auth.loggedIn"
+                  color="primary"
+                  text
+                  small
+                  nuxt
+                  :to="'/devices/' + deviceId + '/attachments/' + attachment.id + '/edit'"
+                >
+                  Edit
+                </v-btn>
+              </v-col>
+            </v-row>
+          </v-col>
+        </v-row>
+      </v-card-text>
+    </v-card>
+  </v-hover>
 </template>
 
 <script lang="ts">
