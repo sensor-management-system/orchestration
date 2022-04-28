@@ -376,6 +376,18 @@ export const actions = {
     commit('setCancelBtnHidden',true)
     commit('setSaveBtnHidden',true)
   },
+  initContactsContactIdIndexAppBar({commit}:{commit:Commit},title:string){
+    commit('setTitle','Show Contact: '+title);
+    commit('setTabs',[])
+    commit('setCancelBtnHidden',true)
+    commit('setSaveBtnHidden',true)
+  },
+  initContactsContactIdEditAppBar({commit}:{commit:Commit},title:string){
+    commit('setTitle','Edit Contact: '+title);
+    commit('setTabs',[])
+    commit('setCancelBtnHidden',true)
+    commit('setSaveBtnHidden',true)
+  },
 
   /**
    * sets the Appbar to its default settings

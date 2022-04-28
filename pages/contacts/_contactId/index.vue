@@ -69,10 +69,17 @@ import ContacsDeleteDialog from '@/components/contacts/ContacsDeleteDialog.vue'
 @Component({
   components: { ContacsDeleteDialog, ContactBasicData, DotMenuActionDelete, DotMenu },
   computed:mapState('contacts',['contact']),
-  methods:mapActions('contacts',['deleteContact'])
+  methods: {
+    ...mapActions('contacts', ['deleteContact']),
+    ...mapActions('appbar', ['initContactsContactIdIndexAppBar'])
+  }
 })
 export default class ContactIndexPage extends Vue {
   showDeleteDialog=false;
+
+  created(){
+    this.initContactsContactIdIndexAppBar(this.contact)
+  }
 
   get contactId () {
     return this.$route.params.contactId
