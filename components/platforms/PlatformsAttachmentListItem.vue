@@ -6,14 +6,13 @@
       :elevation="hover ? 6 : 2"
       class="ma-2"
     >
-
-      <v-card-text>
-        <v-row>
-            <v-avatar class="mt-0 align-self-center">
-              <v-icon large>
-                {{ filetypeIcon(attachment) }}
-              </v-icon>
-            </v-avatar>
+      <v-container>
+        <v-row no-gutters>
+          <v-avatar class="mt-0 align-self-center">
+            <v-icon large>
+              {{ filetypeIcon(attachment) }}
+            </v-icon>
+          </v-avatar>
           <v-col>
             <v-row
               no-gutters
@@ -40,7 +39,8 @@
             >
               <v-col class="text-subtitle-1">
                 <a :href="attachment.url" target="_blank" v-if="attachment.label">
-                  <v-icon color="primary">mdi-open-in-new</v-icon>{{ attachment.label }}
+                  <v-icon color="primary">mdi-open-in-new</v-icon>
+                  {{ attachment.label }}
                 </a>
                 <a :href="attachment.url" target="_blank" v-else>
                   <v-icon color="primary">mdi-open-in-new</v-icon>
@@ -64,7 +64,7 @@
             </v-row>
           </v-col>
         </v-row>
-      </v-card-text>
+      </v-container>
     </v-card>
   </v-hover>
 </template>
