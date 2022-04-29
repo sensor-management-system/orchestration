@@ -180,6 +180,7 @@ export default class DeviceAttachmentAddPage extends mixins(Rules, UploadRules) 
         attachment: this.attachment
       })
       this.loadDeviceAttachments(this.deviceId)
+      this.$store.commit('snackbar/setSuccess', 'New attachment added')
       this.$router.push('/devices/' + this.deviceId + '/attachments')
     } catch (error: any) {
       this.handelError(error,theFailureCanBeFromUpload)
