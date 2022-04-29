@@ -29,17 +29,18 @@ implied. See the Licence for the specific language governing
 permissions and limitations under the Licence.
 -->
 <template>
-
   <div>
+    <ProgressIndicator
+      v-model="isLoading"
+    />
     <v-card
       flat
     >
       <v-card-text>
         <v-select
           v-model="chosenKindOfAction"
-          :items="actionTypeItems"
+          :items="deviceActionTypeItems"
           :item-text="(x) => x.name"
-          :item-value="(x) => x"
           clearable
           label="Action Type"
           :hint="!chosenKindOfAction ? 'Please select an action type' : ''"
@@ -51,124 +52,24 @@ permissions and limitations under the Licence.
     </v-card>
     <NuxtChild/>
   </div>
-
-<!--  <div>-->
-<!--    <v-card-->
-<!--      flat-->
-<!--    >-->
-<!--      &lt;!&ndash; button-tray &ndash;&gt;-->
-<!--      <v-card-actions>-->
-<!--        <v-spacer />-->
-<!--        <ActionButtonTray-->
-<!--          :cancel-url="'/devices/' + deviceId + '/actions'"-->
-<!--          :is-saving="isSaving"-->
-<!--          :show-apply="showApplyButton"-->
-<!--          @apply="onApplyButtonClick"-->
-<!--        />-->
-<!--      </v-card-actions>-->
-<!--      <v-card-text>-->
-<!--        <v-select-->
-<!--          v-model="chosenKindOfAction"-->
-<!--          :items="actionTypeItems"-->
-<!--          :item-text="(x) => x.name"-->
-<!--          :item-value="(x) => x"-->
-<!--          clearable-->
-<!--          label="Action Type"-->
-<!--          :hint="!chosenKindOfAction ? 'Please select an action type' : ''"-->
-<!--          persistent-hint-->
-<!--        />-->
-<!--      </v-card-text>-->
-<!--      &lt;!&ndash; deviceCalibration &ndash;&gt;-->
-<!--      <v-card-text-->
-<!--        v-if="deviceCalibrationChosen"-->
-<!--      >-->
-<!--        <DeviceCalibrationActionForm-->
-<!--          ref="deviceCalibrationActionForm"-->
-<!--          v-model="deviceCalibrationAction"-->
-<!--          :attachments="attachments"-->
-<!--          :measured-quantities="measuredQuantities"-->
-<!--          :current-user-mail="$auth.user.email"-->
-<!--        />-->
-<!--      </v-card-text>-->
-
-<!--      &lt;!&ndash; softwareUpdate &ndash;&gt;-->
-<!--      <v-card-text-->
-<!--        v-if="softwareUpdateChosen"-->
-<!--      >-->
-<!--        <SoftwareUpdateActionForm-->
-<!--          ref="softwareUpdateActionForm"-->
-<!--          v-model="softwareUpdateAction"-->
-<!--          :attachments="attachments"-->
-<!--          :current-user-mail="$auth.user.email"-->
-<!--        />-->
-<!--      </v-card-text>-->
-
-<!--      &lt;!&ndash; genericAction &ndash;&gt;-->
-<!--      <v-card-text-->
-<!--        v-if="genericActionChosen"-->
-<!--      >-->
-<!--        <GenericActionForm-->
-<!--          ref="genericDeviceActionForm"-->
-<!--          v-model="genericDeviceAction"-->
-<!--          :attachments="attachments"-->
-<!--          :current-user-mail="$auth.user.email"-->
-<!--        />-->
-<!--      </v-card-text>-->
-
-<!--      &lt;!&ndash; button-tray &ndash;&gt;-->
-<!--      <v-card-actions-->
-<!--        v-if="chosenKindOfAction"-->
-<!--      >-->
-<!--        <v-spacer />-->
-<!--        <ActionButtonTray-->
-<!--          :cancel-url="'/devices/' + deviceId + '/actions'"-->
-<!--          :is-saving="isSaving"-->
-<!--          :show-apply="showApplyButton"-->
-<!--          @apply="onApplyButtonClick"-->
-<!--        />-->
-<!--      </v-card-actions>-->
-<!--    </v-card>-->
-<!--  </div>-->
 </template>
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 
-import { Attachment } from '@/models/Attachment'
-import { DeviceCalibrationAction } from '@/models/DeviceCalibrationAction'
-import { DeviceProperty } from '@/models/DeviceProperty'
-import { GenericAction } from '@/models/GenericAction'
-import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
-import { IActionType, ActionType } from '@/models/ActionType'
-
-import { ACTION_TYPE_API_FILTER_DEVICE } from '@/services/cv/ActionTypeApi'
-
-import DeviceCalibrationActionForm from '@/components/actions/DeviceCalibrationActionForm.vue'
-import GenericActionForm from '@/components/actions/GenericActionForm.vue'
-import SoftwareUpdateActionForm from '@/components/actions/SoftwareUpdateActionForm.vue'
-import ActionButtonTray from '@/components/actions/ActionButtonTray.vue'
-import { mapActions, mapState } from 'vuex'
+import { mapActions, mapGetters, mapState } from 'vuex'
+import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
 const KIND_OF_ACTION_TYPE_DEVICE_CALIBRATION = 'device_calibration'
 const KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE = 'software_update'
 const KIND_OF_ACTION_TYPE_GENERIC_DEVICE_ACTION = 'generic_device_action'
 const KIND_OF_ACTION_TYPE_UNKNOWN = 'unknown'
-type KindOfActionType = typeof KIND_OF_ACTION_TYPE_DEVICE_CALIBRATION | typeof KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE | typeof KIND_OF_ACTION_TYPE_GENERIC_DEVICE_ACTION | typeof KIND_OF_ACTION_TYPE_UNKNOWN
-
-type IOptionsForActionType = Pick<IActionType, 'id' | 'name' | 'uri'> & {
-  kind: KindOfActionType
-}
 
 @Component({
-  components: {
-    DeviceCalibrationActionForm,
-    GenericActionForm,
-    SoftwareUpdateActionForm,
-    ActionButtonTray
-  },
+  components: { ProgressIndicator },
   middleware: ['auth'],
   computed:{
-    ...mapState('vocabulary',['deviceGenericActionTypes']),
+    ...mapGetters('vocabulary',['deviceActionTypeItems']),
     ...mapState('devices',['chosenKindOfDeviceAction'])
   },
   methods:{
@@ -177,31 +78,25 @@ type IOptionsForActionType = Pick<IActionType, 'id' | 'name' | 'uri'> & {
   }
 })
 export default class ActionAddPage extends Vue {
-  private specialActionTypes: IOptionsForActionType[] = [
-    {
-      id: 'device_calibration',
-      name: 'Device Calibration',
-      uri: '',
-      kind: KIND_OF_ACTION_TYPE_DEVICE_CALIBRATION
-    },
-    {
-      id: 'software_update',
-      name: 'Software Update',
-      uri: '',
-      kind: KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE
-    }
-  ]
+  private isLoading: boolean = false
 
   async created(){
     try {
+      this.isLoading=true
+      this.chosenKindOfAction=null
       await this.loadDeviceGenericActionTypes()
       await this.loadDeviceAttachments(this.deviceId)
       await this.loadDeviceMeasuredQuantities(this.deviceId)
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to fetch action types')
+    }finally {
+      this.isLoading=false
     }
   }
 
+  get deviceId (): string {
+    return this.$route.params.deviceId
+  }
   get chosenKindOfAction(){
     return this.chosenKindOfDeviceAction
   }
@@ -210,6 +105,17 @@ export default class ActionAddPage extends Vue {
     this.setChosenKindOfDeviceAction(newVal)
   }
 
+  get deviceCalibrationChosen () {
+    return this.chosenKindOfDeviceAction?.kind === KIND_OF_ACTION_TYPE_DEVICE_CALIBRATION
+  }
+
+  get softwareUpdateChosen () {
+    return this.chosenKindOfDeviceAction?.kind === KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE
+  }
+
+  get genericActionChosen () {
+    return this.chosenKindOfDeviceAction?.kind === KIND_OF_ACTION_TYPE_GENERIC_DEVICE_ACTION
+  }
 
   updateRoute(){
 
@@ -227,125 +133,7 @@ export default class ActionAddPage extends Vue {
     }
   }
 
-  // async fetch () {
-  //   await Promise.all([
-  //     this.fetchGenericActionTypes()
-  //   ])
-  // }
-  //
-  // async fetchGenericActionTypes (): Promise<any> {
-  //   this.genericActionTypes = await this.$api.actionTypes.newSearchBuilder().onlyType(ACTION_TYPE_API_FILTER_DEVICE).build().findMatchingAsList()
-  // }
-  //
-  // mounted () {
-  //   this.$api.devices.findRelatedDeviceAttachments(this.deviceId).then((foundAttachments) => {
-  //     this.attachments = foundAttachments
-  //   }).catch((_error) => {
-  //     this.$store.commit('snackbar/setError', 'Failed to fetch attachments')
-  //   })
-  //   this.$api.devices.findRelatedDeviceProperties(this.deviceId).then((foundMeasuredQuantities) => {
-  //     this.measuredQuantities = foundMeasuredQuantities
-  //   }).catch((_error) => {
-  //     this.$store.commit('snackbar/setError', 'Failed to fetch measured quantities')
-  //   })
-  // }
 
-  get deviceCalibrationChosen () {
-    return this.chosenKindOfDeviceAction?.kind === KIND_OF_ACTION_TYPE_DEVICE_CALIBRATION
-  }
-
-  get softwareUpdateChosen () {
-    return this.chosenKindOfDeviceAction?.kind === KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE
-  }
-
-  get genericActionChosen () {
-    return this.chosenKindOfDeviceAction?.kind === KIND_OF_ACTION_TYPE_GENERIC_DEVICE_ACTION
-  }
-
-  get deviceId (): string {
-    return this.$route.params.deviceId
-  }
-
-  // addDeviceCalibrationAction () {
-  //   if (!this.$auth.loggedIn) {
-  //     return
-  //   }
-  //   if (!this.deviceCalibrationAction) {
-  //     return
-  //   }
-  //   if (!(this.$refs.deviceCalibrationActionForm as Vue & { isValid: () => boolean }).isValid()) {
-  //     this.isSaving = false
-  //     this.$store.commit('snackbar/setError', 'Please correct the errors')
-  //     return
-  //   }
-  //
-  //   this.isSaving = true
-  //   this.$api.deviceCalibrationActions.add(this.deviceId, this.deviceCalibrationAction).then((action: DeviceCalibrationAction) => {
-  //     this.$router.push('/devices/' + this.deviceId + '/actions', () => this.$emit('input', action))
-  //   }).catch(() => {
-  //     this.$store.commit('snackbar/setError', 'Failed to save the action')
-  //   }).finally(() => {
-  //     this.isSaving = false
-  //   })
-  // }
-
-  // addSoftwareUpdateAction () {
-  //   if (!this.$auth.loggedIn) {
-  //     return
-  //   }
-  //   if (!this.softwareUpdateAction) {
-  //     return
-  //   }
-  //   if (!(this.$refs.softwareUpdateActionForm as Vue & { isValid: () => boolean }).isValid()) {
-  //     this.isSaving = false
-  //     this.$store.commit('snackbar/setError', 'Please correct the errors')
-  //     return
-  //   }
-  //   this.isSaving = true
-  //   this.$api.deviceSoftwareUpdateActions.add(this.deviceId, this.softwareUpdateAction).then((action: SoftwareUpdateAction) => {
-  //     this.$router.push('/devices/' + this.deviceId + '/actions', () => this.$emit('input', action))
-  //   }).catch(() => {
-  //     this.$store.commit('snackbar/setError', 'Failed to save the action')
-  //   }).finally(() => {
-  //     this.isSaving = false
-  //   })
-  // }
-
-  // addGenericAction () {
-  //   if (!this.$auth.loggedIn) {
-  //     return
-  //   }
-  //   if (!this.genericDeviceAction) {
-  //     return
-  //   }
-  //   if (!(this.$refs.genericDeviceActionForm as Vue & { isValid: () => boolean }).isValid()) {
-  //     this.isSaving = false
-  //     this.$store.commit('snackbar/setError', 'Please correct the errors')
-  //     return
-  //   }
-  //   this.isSaving = true
-  //   this.$api.genericDeviceActions.add(this.deviceId, this.genericDeviceAction).then((action: GenericAction) => {
-  //     this.$router.push('/devices/' + this.deviceId + '/actions', () => this.$emit('input', action))
-  //   }).catch(() => {
-  //     this.$store.commit('snackbar/setError', 'Failed to save the action')
-  //   }).finally(() => {
-  //     this.isSaving = false
-  //   })
-  // }
-
-  get actionTypeItems (): IOptionsForActionType[] {
-    return [
-      ...this.specialActionTypes,
-      ...this.deviceGenericActionTypes.map((i) => {
-        return {
-          id: i.id,
-          name: i.name,
-          uri: i.uri,
-          kind: KIND_OF_ACTION_TYPE_GENERIC_DEVICE_ACTION
-        }
-      })
-    ].sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase())) as IOptionsForActionType[]
-  }
 }
 
 </script>

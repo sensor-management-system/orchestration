@@ -49,6 +49,12 @@ export default class NewGenericPlatformAction extends Vue {
   private genericPlatformAction: GenericAction = new GenericAction()
   private isSaving: boolean = false
 
+  created(){
+    if(this.chosenKindOfPlatformAction === null){
+      this.$router.push('/platforms/' + this.platformId + '/actions')
+    }
+  }
+
   get platformId (): string {
     return this.$route.params.platformId
   }

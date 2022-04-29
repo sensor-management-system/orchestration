@@ -51,6 +51,12 @@ export default class NewPlatformSoftwareUpdateActions extends Vue {
   private softwareUpdateAction: SoftwareUpdateAction = new SoftwareUpdateAction()
   private isSaving: boolean = false
 
+  created(){
+    if(this.chosenKindOfPlatformAction === null){
+      this.$router.push('/platforms/' + this.platformId + '/actions')
+    }
+  }
+
   get platformId (): string {
     return this.$route.params.platformId
   }

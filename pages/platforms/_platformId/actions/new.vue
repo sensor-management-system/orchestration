@@ -86,6 +86,7 @@ export default class NewPlatformAction extends Vue {
   async created(){
     try {
       this.isLoading=true
+      this.chosenKindOfAction=null
       await this.loadPlatformGenericActionTypes()
       await this.loadPlatformAttachments(this.platformId)
     } catch (e) {

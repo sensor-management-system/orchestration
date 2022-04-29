@@ -14,6 +14,8 @@ import { MeasuredQuantityUnit } from '@/models/MeasuredQuantityUnit'
 
 const KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE = 'software_update'
 const KIND_OF_ACTION_TYPE_GENERIC_PLATFORM_ACTION = 'generic_platform_action'
+const KIND_OF_ACTION_TYPE_GENERIC_DEVICE_ACTION = 'generic_device_action'
+const KIND_OF_ACTION_TYPE_DEVICE_CALIBRATION = 'device_calibration'
 
 interface vocabularyState {
   manufacturers: Manufacturer[]
@@ -78,6 +80,30 @@ const getters = {
           name: actionType.name,
           uri: actionType.uri,
           kind: KIND_OF_ACTION_TYPE_GENERIC_PLATFORM_ACTION
+        }
+      })
+    ].sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()))
+  },
+  deviceActionTypeItems: (state:vocabularyState)=>{
+    return [
+      {
+        id: 'device_calibration',
+        name: 'Device Calibration',
+        uri: '',
+        kind: KIND_OF_ACTION_TYPE_DEVICE_CALIBRATION
+      },
+      {
+        id: 'software_update',
+        name: 'Software Update',
+        uri: '',
+        kind: KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE
+      },
+      ...state.deviceGenericActionTypes.map((actionType)=>{
+        return {
+          id: actionType.id,
+          name: actionType.name,
+          uri: actionType.uri,
+          kind: KIND_OF_ACTION_TYPE_GENERIC_DEVICE_ACTION
         }
       })
     ].sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()))
