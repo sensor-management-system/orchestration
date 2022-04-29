@@ -65,16 +65,16 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue, mixins } from 'nuxt-property-decorator'
-
-import { Rules } from '@/mixins/Rules'
-
-import { Platform } from '@/models/Platform'
+import { Component, Vue } from 'nuxt-property-decorator'
 
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import PlatformBasicDataForm from '@/components/PlatformBasicDataForm.vue'
-import { mapActions } from 'vuex'
 import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
+
+import { Platform } from '@/models/Platform'
+
+import { mapActions } from 'vuex'
+
 
 @Component({
   components: {
@@ -89,7 +89,7 @@ import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButto
   }
 })
 // @ts-ignore
-export default class PlatformNewPage extends mixins(Rules) {
+export default class PlatformNewPage extends Vue {
   private platform: Platform = new Platform()
   private isLoading: boolean = false
 

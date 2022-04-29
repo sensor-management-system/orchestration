@@ -62,17 +62,15 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue, mixins } from 'nuxt-property-decorator'
-
-import { Rules } from '@/mixins/Rules'
-
-import { Device } from '@/models/Device'
+import { Component, Vue } from 'nuxt-property-decorator'
 
 import DeviceBasicDataForm from '@/components/DeviceBasicDataForm.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
-import { mapActions } from 'vuex'
 import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
 
+import { Device } from '@/models/Device'
+
+import { mapActions } from 'vuex'
 @Component({
   components: {
     SaveAndCancelButtons,
@@ -86,7 +84,7 @@ import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButto
   }
 })
 // @ts-ignore
-export default class DeviceNewPage extends mixins(Rules) {
+export default class DeviceNewPage extends Vue {
   private device: Device = new Device()
   private isLoading: boolean = false
 
