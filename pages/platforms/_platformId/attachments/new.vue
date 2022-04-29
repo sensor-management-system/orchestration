@@ -32,70 +32,76 @@ implied. See the Licence for the specific language governing
 permissions and limitations under the Licence.
 -->
 <template>
-  <v-form ref="attachmentsForm" class="pb-2" @submit.prevent>
-    <v-card-actions>
-      <v-spacer />
-      <SaveAndCancelButtons
-        :save-btn-text="attachmentType === 'url' ? 'Add' : 'Upload'"
-        :to="'/platforms/' + platformId + '/attachments'"
-        @save="add"
-      />
-    </v-card-actions>
-    <v-card-text>
-      <v-row>
-        <v-col cols="12" md="3">
-          <v-radio-group
-            v-model="attachmentType"
-            label="Type"
-            row
-          >
-            <v-radio label="File" value="file" />
-            <v-radio label="Url" value="url" />
-          </v-radio-group>
-        </v-col>
-      </v-row>
-      <v-row>
-        <v-col cols="12">
-          <v-file-input
-            v-if="attachmentType === 'file'"
-            v-model="file"
-            :accept="mimeTypeList"
-            label="File"
-            required
-            class="required"
-            :rules="[rules.required, uploadRules.maxSize, uploadRules.mimeTypeAllowed]"
-            show-size
-          />
-          <v-text-field
-            v-if="attachmentType === 'url'"
-            v-model="attachment.url"
-            label="URL"
-            type="url"
-            placeholder="https://"
-            required
-            class="required"
-            :rules="[rules.required, rules.validUrl]"
-          />
-        </v-col>
-      </v-row>
-      <v-row>
-        <v-col cols="12">
-          <v-text-field
-            v-model="attachment.label"
-            label="Label"
-          />
-        </v-col>
-      </v-row>
-    </v-card-text>
-    <v-card-actions>
-      <v-spacer />
-      <SaveAndCancelButtons
-        :save-btn-text="attachmentType === 'url' ? 'Add' : 'Upload'"
-        :to="'/platforms/' + platformId + '/attachments'"
-        @save="add"
-      />
-    </v-card-actions>
-  </v-form>
+  <div>
+    <ProgressIndicator
+      v-model="isSaving"
+      dark
+    />
+    <v-form ref="attachmentsForm" class="pb-2" @submit.prevent>
+      <v-card-actions>
+        <v-spacer />
+        <SaveAndCancelButtons
+          :save-btn-text="attachmentType === 'url' ? 'Add' : 'Upload'"
+          :to="'/platforms/' + platformId + '/attachments'"
+          @save="add"
+        />
+      </v-card-actions>
+      <v-card-text>
+        <v-row>
+          <v-col cols="12" md="3">
+            <v-radio-group
+              v-model="attachmentType"
+              label="Type"
+              row
+            >
+              <v-radio label="File" value="file" />
+              <v-radio label="Url" value="url" />
+            </v-radio-group>
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col cols="12">
+            <v-file-input
+              v-if="attachmentType === 'file'"
+              v-model="file"
+              :accept="mimeTypeList"
+              label="File"
+              required
+              class="required"
+              :rules="[rules.required, uploadRules.maxSize, uploadRules.mimeTypeAllowed]"
+              show-size
+            />
+            <v-text-field
+              v-if="attachmentType === 'url'"
+              v-model="attachment.url"
+              label="URL"
+              type="url"
+              placeholder="https://"
+              required
+              class="required"
+              :rules="[rules.required, rules.validUrl]"
+            />
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col cols="12">
+            <v-text-field
+              v-model="attachment.label"
+              label="Label"
+            />
+          </v-col>
+        </v-row>
+      </v-card-text>
+      <v-card-actions>
+        <v-spacer />
+        <SaveAndCancelButtons
+          :save-btn-text="attachmentType === 'url' ? 'Add' : 'Upload'"
+          :to="'/platforms/' + platformId + '/attachments'"
+          @save="add"
+        />
+      </v-card-actions>
+    </v-form>
+  </div>
 </template>
 
 <script lang="ts">
@@ -108,10 +114,12 @@ import { UploadRules } from '@/mixins/UploadRules'
 
 import { Attachment } from '@/models/Attachment'
 import { mapActions } from 'vuex'
+
 import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
+import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
 @Component({
-  components: { SaveAndCancelButtons },
+  components: { ProgressIndicator, SaveAndCancelButtons },
   middleware: ['auth'],
   methods:{
     ...mapActions('platforms',['addPlatformAttachment','loadPlatformAttachments']),
@@ -122,6 +130,7 @@ export default class PlatformAttachmentAddPage extends mixins(Rules, UploadRules
   private attachment: Attachment = new Attachment()
   private attachmentType: string = 'file'
   private file: File | null = null
+  private isSaving: boolean = false
 
 
   /**
@@ -131,6 +140,10 @@ export default class PlatformAttachmentAddPage extends mixins(Rules, UploadRules
    */
   get mimeTypeList (): string {
     return UploadConfig.allowedMimeTypes.join(',')
+  }
+
+  get platformId (): string {
+    return this.$route.params.platformId
   }
 
   async add () {
@@ -143,6 +156,9 @@ export default class PlatformAttachmentAddPage extends mixins(Rules, UploadRules
     let theFailureCanBeFromUpload = true
 
     try {
+
+      this.isSaving=true
+
       if (this.attachmentType !== 'url') {
         // Due to the validation we can be sure that the file is not null
         const uploadResult = await this.uploadFile(this.file)
@@ -155,6 +171,8 @@ export default class PlatformAttachmentAddPage extends mixins(Rules, UploadRules
       this.$router.push('/platforms/' + this.platformId + '/attachments')
     } catch (error: any) {
       this.handleError(theFailureCanBeFromUpload, error)
+    }finally {
+      this.isSaving=false
     }
   }
 
@@ -171,8 +189,6 @@ export default class PlatformAttachmentAddPage extends mixins(Rules, UploadRules
     this.$store.commit('snackbar/setError', message)
   }
 
-  get platformId (): string {
-    return this.$route.params.platformId
-  }
+
 }
 </script>
