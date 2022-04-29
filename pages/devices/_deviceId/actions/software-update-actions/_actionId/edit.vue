@@ -30,11 +30,23 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
+    <ProgressIndicator
+      v-model="isInProgress"
+      :dark="isSaving"
+    />
+    <v-select
+      value="Software Update"
+      :items="['Software Update']"
+      :item-text="(x) => x"
+      disabled
+      label="Action Type"
+    />
     <v-card-actions>
       <v-spacer />
-      <ActionButtonTray
-        :cancel-url="'/devices/' + deviceId + '/actions'"
-        @apply="save"
+      <SaveAndCancelButtons
+        save-btn-text="Apply"
+        :to="'/devices/' + deviceId + '/actions'"
+        @save="save"
       />
     </v-card-actions>
 
@@ -44,12 +56,12 @@ permissions and limitations under the Licence.
       :attachments="deviceAttachments"
       :current-user-mail="$auth.user.email"
     />
-
     <v-card-actions>
       <v-spacer />
-      <ActionButtonTray
-        :cancel-url="'/devices/' + deviceId + '/actions'"
-        @apply="save"
+      <SaveAndCancelButtons
+        save-btn-text="Apply"
+        :to="'/devices/' + deviceId + '/actions'"
+        @save="save"
       />
     </v-card-actions>
   </div>
@@ -58,17 +70,17 @@ permissions and limitations under the Licence.
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 
-import { Attachment } from '@/models/Attachment'
-import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
-
 import SoftwareUpdateActionForm from '@/components/actions/SoftwareUpdateActionForm.vue'
-import ActionButtonTray from '@/components/actions/ActionButtonTray.vue'
-import { mapActions, mapState } from 'vuex'
+import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
+import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
+import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
+import { mapActions, mapState } from 'vuex'
 @Component({
   components: {
+    ProgressIndicator,
+    SaveAndCancelButtons,
     SoftwareUpdateActionForm,
-    ActionButtonTray
   },
   scrollToTop: true,
   middleware: ['auth'],
@@ -77,27 +89,32 @@ import { mapActions, mapState } from 'vuex'
 })
 export default class DeviceSoftwareUpdateActionEditPage extends Vue {
   private action: SoftwareUpdateAction = new SoftwareUpdateAction()
+  private isSaving = false
+  private isLoading = false
 
   async created(){
     try {
+      this.isLoading = true
       await this.loadDeviceSoftwareUpdateAction(this.actionId)
+      await this.loadDeviceAttachments(this.deviceId)
       this.action = SoftwareUpdateAction.createFromObject(this.deviceSoftwareUpdateAction)
     }catch{
       this.$store.commit('snackbar/setError', 'Failed to fetch action')
-    }
-
-    try {
-      await this.loadDeviceAttachments(this.deviceId)
-    } catch (e) {
-      this.$store.commit('snackbar/setError', 'Failed to fetch attachments')
+    }finally {
+      this.isLoading = false
     }
   }
+
   get deviceId (): string {
     return this.$route.params.deviceId
   }
 
   get actionId (): string {
     return this.$route.params.actionId
+  }
+
+  get isInProgress (): boolean {
+    return this.isLoading || this.isSaving
   }
 
   async save (): void {
@@ -107,14 +124,18 @@ export default class DeviceSoftwareUpdateActionEditPage extends Vue {
     }
 
     try {
+      this.isSaving = true
       await this.updateDeviceSoftwareUpdateAction({
         deviceId: this.deviceId,
         softwareUpdateAction: this.action
       })
       this.loadAllDeviceActions(this.deviceId)
+      this.$store.commit('snackbar/setSuccess', 'Software Update Action updated')
       this.$router.push('/devices/' + this.deviceId + '/actions')
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to save the action')
+    }finally {
+      this.isSaving = false
     }
   }
 }
