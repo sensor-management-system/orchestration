@@ -45,7 +45,8 @@ permissions and limitations under the Licence.
           :item-text="(x) => x"
           :item-value="(x) => x.id"
           label="New contact"
-          return-object />
+          return-object
+        />
       </v-col>
       <v-col
         cols="12"
@@ -75,11 +76,11 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop } from 'nuxt-property-decorator'
-
-import { Contact } from '@/models/Contact'
+import { Component, Vue } from 'nuxt-property-decorator'
 
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
+
+import { Contact } from '@/models/Contact'
 import { mapActions, mapGetters, mapState } from 'vuex'
 
 @Component({
@@ -101,7 +102,6 @@ export default class DeviceAddContactPage extends Vue {
   private isLoading: boolean = false
   private isSaving: boolean = false
 
-
   async created () {
     try {
       this.isLoading=true
@@ -114,8 +114,16 @@ export default class DeviceAddContactPage extends Vue {
     }
   }
 
+  get deviceId (): string {
+    return this.$route.params.deviceId
+  }
+
   get isInProgress (): boolean {
     return this.isLoading || this.isSaving
+  }
+
+  get allExceptSelected (): Contact[] {
+    return this.contactsByDifference(this.deviceContacts);
   }
 
   async addContact (): void {
@@ -127,6 +135,7 @@ export default class DeviceAddContactPage extends Vue {
           contactId: this.selectedContact.id
         })
         this.loadDeviceContacts(this.deviceId)
+        this.$store.commit('snackbar/setSuccess', 'New Contact added')
         this.$router.push('/devices/' + this.deviceId + '/contacts')
       } catch (e) {
         this.$store.commit('snackbar/setError', 'Failed to add a contact')
@@ -136,12 +145,6 @@ export default class DeviceAddContactPage extends Vue {
     }
   }
 
-  get allExceptSelected (): Contact[] {
-    return this.contactsByDifference(this.deviceContacts);
-  }
 
-  get deviceId (): string {
-    return this.$route.params.deviceId
-  }
 }
 </script>

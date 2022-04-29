@@ -79,9 +79,9 @@ permissions and limitations under the Licence.
 <script lang="ts">
 import { Component, Vue, Prop } from 'nuxt-property-decorator'
 
-import { Contact } from '@/models/Contact'
-
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
+
+import { Contact } from '@/models/Contact'
 import { mapActions, mapGetters, mapState } from 'vuex'
 
 @Component({
