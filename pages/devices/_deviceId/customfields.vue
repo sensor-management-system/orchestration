@@ -29,10 +29,12 @@ implied. See the Licence for the specific language governing
 permissions and limitations under the Licence.
 -->
 <template>
-  <ProgressIndicator
-    v-model="isLoading"
-  />
-  <NuxtChild/>
+  <div>
+    <ProgressIndicator
+      v-model="isLoading"
+    />
+    <NuxtChild/>
+  </div>
 </template>
 
 <script lang="ts">
