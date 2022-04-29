@@ -237,6 +237,10 @@ import StatusSelect from '@/components/StatusSelect.vue'
 import PlatformDeleteDialog from '@/components/platforms/PlatformDeleteDialog.vue'
 import DotMenuActionCopy from '@/components/DotMenuActionCopy.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
+import BaseList from '@/components/shared/BaseList.vue'
+import PlatformsListItem from '@/components/platforms/PlatformsListItem.vue'
+import PlatformsBasicSearch from '@/components/platforms/PlatformsBasicSearch.vue'
+import PlatformsBasicSearchField from '@/components/platforms/PlatformsBasicSearchField.vue'
 
 import { Manufacturer } from '@/models/Manufacturer'
 import { Platform } from '@/models/Platform'
@@ -245,10 +249,7 @@ import { Status } from '@/models/Status'
 
 import { QueryParams } from '@/modelUtils/QueryParams'
 import { PlatformSearchParamsSerializer } from '@/modelUtils/PlatformSearchParams'
-import BaseList from '@/components/shared/BaseList.vue'
-import PlatformsListItem from '@/components/platforms/PlatformsListItem.vue'
-import PlatformsBasicSearch from '@/components/platforms/PlatformsBasicSearch.vue'
-import PlatformsBasicSearchField from '@/components/platforms/PlatformsBasicSearchField.vue'
+
 
 @Component({
   components: {
