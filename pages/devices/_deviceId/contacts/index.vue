@@ -2,7 +2,7 @@
   <div>
     <ProgressIndicator
       v-model="isSaving"
-      :dark="isSaving"
+      dark
     />
     <v-card-actions>
       <v-spacer />
@@ -82,6 +82,7 @@ export default class DeviceShowContactPage extends Vue {
         deviceId: this.deviceId,
         contactId: contactId
       })
+      this.$store.commit('snackbar/setSuccess', 'Contact removed')
       this.loadDeviceContacts(this.deviceId)
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Removing contact failed')
