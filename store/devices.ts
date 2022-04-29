@@ -17,6 +17,7 @@ import { PlatformUnmountAction } from '@/models/PlatformUnmountAction'
 import { PlatformUnmountActionWrapper } from '@/viewmodels/PlatformUnmountActionWrapper'
 import { DeviceUnmountActionWrapper } from '@/viewmodels/DeviceUnmountActionWrapper'
 import { DeviceMountActionWrapper } from '@/viewmodels/DeviceMountActionWrapper'
+import { IDateCompareable } from '@/modelUtils/Compareables'
 
 const KIND_OF_ACTION_TYPE_DEVICE_CALIBRATION = 'device_calibration'
 const KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE = 'software_update'
@@ -82,13 +83,18 @@ const state = {
 
 const getters = {
   actions: (state: devicesState) => { //Todo actions sortieren, wobei ehrlich gesagt, eine extra route im Backend mit allen Actions (sortiert) besser wäre
-    return [
+    let actions = [
       ...state.deviceGenericActions,
       ...state.deviceSoftwareUpdateActions,
       ...state.deviceMountActions,
       ...state.deviceUnmountActions,
       ...state.deviceCalibrationActions
     ]
+    // sort the actions
+    actions = actions.sort((a: IDateCompareable, b: IDateCompareable): number => {
+      return  a.date < b.date ? 1 : a.date > b.date ? -1 : 0;
+    })
+    return actions
   }
 }
 
