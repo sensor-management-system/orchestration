@@ -33,6 +33,7 @@ import GenericActionForm from '@/components/actions/GenericActionForm.vue'
 import ActionButtonTray from '@/components/actions/ActionButtonTray.vue'
 
 @Component({
+  middleware:['auth'],
   components: { ActionButtonTray, GenericActionForm },
   computed: mapState('devices', ['deviceAttachments', 'chosenKindOfDeviceAction']),
   methods: mapActions('devices',['addDeviceGenericAction','loadAllDeviceActions'])

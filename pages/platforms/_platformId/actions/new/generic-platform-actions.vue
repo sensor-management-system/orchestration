@@ -40,6 +40,7 @@ import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButto
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
 @Component({
+  middleware:['auth'],
   components: { ProgressIndicator, SaveAndCancelButtons, GenericActionForm },
   computed:mapState('platforms',['platformAttachments','chosenKindOfPlatformAction']),
   methods:mapActions('platforms',['addPlatformGenericAction','loadAllPlatformActions'])
@@ -60,10 +61,6 @@ export default class NewGenericPlatformAction extends Vue {
   }
 
   async save () {
-
-    if (!this.$auth.loggedIn) {
-      return
-    }
     if (!(this.$refs.genericPlatformActionForm as Vue & { isValid: () => boolean }).isValid()) {
       this.$store.commit('snackbar/setError', 'Please correct the errors')
       return

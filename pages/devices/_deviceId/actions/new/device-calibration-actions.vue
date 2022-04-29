@@ -33,6 +33,7 @@ import { DeviceCalibrationAction } from '@/models/DeviceCalibrationAction'
 import { mapActions, mapState } from 'vuex'
 import ActionButtonTray from '@/components/actions/ActionButtonTray.vue'
 @Component({
+  middleware:['auth'],
   components: { ActionButtonTray, DeviceCalibrationActionForm },
   computed: mapState('devices', ['deviceAttachments', 'chosenKindOfDeviceAction','deviceMeasuredQuantities'],),
   methods: mapActions('devices',['addDeviceCalibrationAction','loadAllDeviceActions'])
