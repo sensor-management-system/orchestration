@@ -1,27 +1,19 @@
 <template>
   <div>
+    <ProgressIndicator
+      v-model="isSaving"
+      dark
+    />
     <v-card
       flat
     >
       <v-card-actions>
         <v-spacer />
-        <v-btn
-          v-if="$auth.loggedIn"
-          small
-          text
-          nuxt
+        <SaveAndCancelButtons
+          save-btn-text="Add"
           :to="'/devices/' + this.deviceId + '/customfields'"
-        >
-          Cancel
-        </v-btn>
-        <v-btn
-          v-if="$auth.loggedIn"
-          color="green"
-          small
-          @click="save"
-        >
-          Add
-        </v-btn>
+          @save="save"
+        />
       </v-card-actions>
       <v-card-text>
             <CustomFieldForm
@@ -58,8 +50,10 @@ import { Component, Vue } from 'vue-property-decorator'
 import CustomFieldForm from '@/components/CustomFieldForm.vue'
 import { CustomTextField } from '@/models/CustomTextField'
 import { mapActions } from 'vuex'
+import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
 @Component({
-  components: { CustomFieldForm },
+  middleware: ['auth'],
+  components: { SaveAndCancelButtons, CustomFieldForm },
   methods:mapActions('devices',['addDeviceCustomField','loadDeviceCustomFields'])
 })
 export default class DeviceCustomFieldAddPage extends Vue {

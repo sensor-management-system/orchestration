@@ -78,6 +78,7 @@ import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButto
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
 @Component({
+  middleware: ['auth'],
   components: { ProgressIndicator, SaveAndCancelButtons, DevicePropertyForm },
   computed:mapState('vocabulary',['compartments','samplingMedia','properties','units','measuredQuantityUnits']),
   methods:{
