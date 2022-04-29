@@ -30,14 +30,10 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <v-card-actions>
-      <v-spacer />
-      <ActionButtonTray
-        :cancel-url="'/devices/' + deviceId + '/actions'"
-        @apply="save"
-      />
-    </v-card-actions>
-
+    <ProgressIndicator
+      v-model="isInProgress"
+      :dark="isSaving"
+    />
     <!-- just to be consistent with the new mask, we show the selected action type as an disabled v-select here -->
     <v-select
       :value="action.actionTypeName"
@@ -46,6 +42,15 @@ permissions and limitations under the Licence.
       disabled
       label="Action Type"
     />
+    <v-card-actions>
+      <v-spacer />
+      <SaveAndCancelButtons
+        save-btn-text="Apply"
+        :to="'/devices/' + deviceId + '/actions'"
+        @save="save"
+      />
+    </v-card-actions>
+
     <GenericActionForm
       ref="genericDeviceActionForm"
       v-model="action"
@@ -55,9 +60,10 @@ permissions and limitations under the Licence.
 
     <v-card-actions>
       <v-spacer />
-      <ActionButtonTray
-        :cancel-url="'/devices/' + deviceId + '/actions'"
-        @apply="save"
+      <SaveAndCancelButtons
+        save-btn-text="Apply"
+        :to="'/devices/' + deviceId + '/actions'"
+        @save="save"
       />
     </v-card-actions>
   </div>
@@ -66,18 +72,18 @@ permissions and limitations under the Licence.
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 
-import { Attachment } from '@/models/Attachment'
-import { GenericAction } from '@/models/GenericAction'
-
 import GenericActionForm from '@/components/actions/GenericActionForm.vue'
-import ActionButtonTray from '@/components/actions/ActionButtonTray.vue'
+import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
+
+import { GenericAction } from '@/models/GenericAction'
 import { mapActions, mapState } from 'vuex'
-import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
 
 @Component({
   components: {
-    GenericActionForm,
-    ActionButtonTray
+    SaveAndCancelButtons,
+    ProgressIndicator,
+    GenericActionForm
   },
   scrollToTop: true,
   middleware: ['auth'],
@@ -86,19 +92,19 @@ import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
 })
 export default class GenericDeviceActionEditPage extends Vue {
   private action: GenericAction = new GenericAction()
+  private isSaving = false
+  private isLoading = false
 
   async created(){
     try {
+      this.isLoading = true
       await this.loadDeviceGenericAction(this.actionId)
+      await this.loadDeviceAttachments(this.deviceId)
       this.action = GenericAction.createFromObject(this.deviceGenericAction)
     }catch (e){
       this.$store.commit('snackbar/setError', 'Failed to fetch action')
-    }
-
-    try {
-      await this.loadDeviceAttachments(this.deviceId)
-    } catch (e) {
-      this.$store.commit('snackbar/setError', 'Failed to fetch attachments')
+    }finally {
+      this.isLoading = false
     }
   }
 
@@ -110,20 +116,24 @@ export default class GenericDeviceActionEditPage extends Vue {
     return this.$route.params.actionId
   }
 
-  async save (): void {
+  async save () {
     if (!(this.$refs.genericDeviceActionForm as Vue & { isValid: () => boolean }).isValid()) {
       this.$store.commit('snackbar/setError', 'Please correct the errors')
       return
     }
     try {
+      this.isSaving=true
       await this.updateDeviceGenericAction({
         deviceId: this.deviceId,
         genericDeviceAction: this.action
       })
       this.loadAllDeviceActions(this.deviceId)
+      this.$store.commit('snackbar/setSuccess', `${this.action.actionTypeName} updated`)
       this.$router.push('/devices/' + this.deviceId + '/actions')
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to save the action')
+    }finally {
+      this.isSaving=false
     }
   }
 }

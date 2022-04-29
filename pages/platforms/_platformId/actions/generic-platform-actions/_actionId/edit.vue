@@ -123,7 +123,7 @@ export default class EditPlatformAction extends Vue {
     return this.isLoading || this.isSaving
   }
 
-  async save (): void {
+  async save (){
     if (!(this.$refs.genericPlatformActionForm as Vue & { isValid: () => boolean }).isValid()) {
       this.$store.commit('snackbar/setError', 'Please correct the errors')
       return
