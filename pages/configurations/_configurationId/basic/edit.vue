@@ -53,8 +53,7 @@ permissions and limitations under the Licence.
         ref="basicDataForm"
         v-model="configurationCopy"
         :readonly="false"
-        :form-is-valid="formIsValid"
-      />
+        />
       <v-card-actions>
         <v-spacer />
         <save-and-cancel-buttons
@@ -69,10 +68,12 @@ permissions and limitations under the Licence.
 
 <script lang="ts">
 import { Component, Prop, Vue, Watch } from 'nuxt-property-decorator'
+
 import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
 import ConfigurationsBasicDataForm from '@/components/configurations/ConfigurationsBasicDataForm.vue'
-import { Configuration } from '@/models/Configuration'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
+
+import { Configuration } from '@/models/Configuration'
 import { mapActions, mapState } from 'vuex'
 @Component({
   components: { ProgressIndicator, ConfigurationsBasicDataForm, SaveAndCancelButtons },
@@ -84,14 +85,13 @@ export default class ConfigurationEditBasicPage extends Vue {
 
   private configurationCopy: Configuration = new Configuration()
   private isLoading: boolean = false
-  private formIsValid: boolean = true
-
-  get configurationId () {
-    return this.$route.params.configurationId
-  }
 
   created () {
     this.configurationCopy = Configuration.createFromObject(this.configuration)
+  }
+
+  get configurationId () {
+    return this.$route.params.configurationId
   }
 
   async save () {
@@ -104,7 +104,7 @@ export default class ConfigurationEditBasicPage extends Vue {
       this.isLoading = true
       await this.saveConfiguration(this.configurationCopy);
       this.loadConfiguration(this.configurationId)
-      this.$store.commit('snackbar/setSuccess', 'Save successful')
+      this.$store.commit('snackbar/setSuccess', 'Configuration updated')
       await this.$router.push('/configurations/' + this.configurationId + '/basic')
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Save failed')
