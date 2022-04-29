@@ -19,6 +19,7 @@
       There are no actions for this platform.
     </hint-card>
     <PlatformActionTimeline
+      v-else
       :value="actions"
       :platform-id="platformId"
       :action-api-dispatcher="apiDispatcher"
