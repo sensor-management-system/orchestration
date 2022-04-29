@@ -99,9 +99,10 @@ import DevicesCustomFieldDeleteDialog from '@/components/devices/DevicesCustomFi
 import HintCard from '@/components/HintCard.vue'
 
 import { mapActions, mapState } from 'vuex'
+import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
 @Component({
-  components: { HintCard, DevicesCustomFieldDeleteDialog, DotMenuActionDelete, DevicesCustomFieldListItem, BaseList },
+  components: { ProgressIndicator, HintCard, DevicesCustomFieldDeleteDialog, DotMenuActionDelete, DevicesCustomFieldListItem, BaseList },
   computed:mapState('devices',['deviceCustomFields']),
   methods:mapActions('devices',['deleteDeviceCustomField','loadDeviceCustomFields'])
 })
