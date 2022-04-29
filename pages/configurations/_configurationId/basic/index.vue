@@ -33,80 +33,88 @@ implied. See the Licence for the specific language governing
 permissions and limitations under the Licence.
 -->
 <template>
-  <v-card flat>
-    <v-card-actions>
-      <v-spacer />
-      <v-btn
-        v-if="$auth.loggedIn"
-        color="primary"
-        small
-        nuxt
-        :to="'/configurations/' + configurationId + '/basic/edit'"
-      >
-        Edit
-      </v-btn>
-      <DotMenu
-        v-if="$auth.loggedIn"
-      >
-        <template #actions>
-          <DotMenuActionDelete
-            @click="initDeleteDialog"
-          />
-        </template>
-      </DotMenu>
-    </v-card-actions>
-
-    <ConfigurationsBasicData
-      v-if="configuration"
-      v-model="configuration"
-      :readonly="true"
+  <div>
+    <ProgressIndicator
+      v-model="isSaving"
+      dark
     />
+    <v-card flat>
+      <v-card-actions>
+        <v-spacer />
+        <v-btn
+          v-if="$auth.loggedIn"
+          color="primary"
+          small
+          nuxt
+          :to="'/configurations/' + configurationId + '/basic/edit'"
+        >
+          Edit
+        </v-btn>
+        <DotMenu
+          v-if="$auth.loggedIn"
+        >
+          <template #actions>
+            <DotMenuActionDelete
+              @click="initDeleteDialog"
+            />
+          </template>
+        </DotMenu>
+      </v-card-actions>
 
-    <v-card-actions>
-      <v-spacer />
-      <v-btn
-        v-if="$auth.loggedIn"
-        color="primary"
-        small
-        nuxt
-        :to="'/configurations/' + configurationId + '/basic/edit'"
-      >
-        Edit
-      </v-btn>
-      <DotMenu
-        v-if="$auth.loggedIn"
-      >
-        <template #actions>
-          <DotMenuActionDelete
-            @click="initDeleteDialog"
-          />
-        </template>
-      </DotMenu>
-    </v-card-actions>
-    <ConfigurationsDeleteDialog
-      v-model="showDeleteDialog"
-      :configuration-to-delete="configuration"
-      @cancel-deletion="closeDialog"
-      @submit-deletion="deleteAndCloseDialog"
-    />
-  </v-card>
+      <ConfigurationsBasicData
+        v-if="configuration"
+        v-model="configuration"
+        :readonly="true"
+      />
+
+      <v-card-actions>
+        <v-spacer />
+        <v-btn
+          v-if="$auth.loggedIn"
+          color="primary"
+          small
+          nuxt
+          :to="'/configurations/' + configurationId + '/basic/edit'"
+        >
+          Edit
+        </v-btn>
+        <DotMenu
+          v-if="$auth.loggedIn"
+        >
+          <template #actions>
+            <DotMenuActionDelete
+              @click="initDeleteDialog"
+            />
+          </template>
+        </DotMenu>
+      </v-card-actions>
+      <ConfigurationsDeleteDialog
+        v-model="showDeleteDialog"
+        :configuration-to-delete="configuration"
+        @cancel-deletion="closeDialog"
+        @submit-deletion="deleteAndCloseDialog"
+      />
+    </v-card>
+  </div>
 </template>
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'nuxt-property-decorator'
-import { Configuration } from '@/models/Configuration'
-import ConfigurationsBasicDataForm from '@/components/configurations/ConfigurationsBasicDataForm.vue'
+
 import ConfigurationsBasicData from '@/components/configurations/ConfigurationsBasicData.vue'
 import DotMenu from '@/components/DotMenu.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 import ConfigurationsDeleteDialog from '@/components/configurations/ConfigurationsDeleteDialog.vue'
+import ProgressIndicator from '@/components/ProgressIndicator.vue'
+
 import { mapActions, mapState } from 'vuex'
 @Component({
-  components: { ConfigurationsDeleteDialog, DotMenuActionDelete, DotMenu, ConfigurationsBasicData, ConfigurationsBasicDataForm },
+  components: { ProgressIndicator, ConfigurationsDeleteDialog, DotMenuActionDelete, DotMenu, ConfigurationsBasicData },
   computed:mapState('configurations',['configuration']),
   methods:mapActions('configurations',['deleteConfiguration'])
 })
 export default class ConfigurationShowBasicPage extends Vue {
+  private isSaving = false
 
   private showDeleteDialog: boolean = false
 
@@ -122,18 +130,22 @@ export default class ConfigurationShowBasicPage extends Vue {
     this.showDeleteDialog = false
   }
 
-  deleteAndCloseDialog () {
+  async deleteAndCloseDialog () {
     this.showDeleteDialog = false
     if (this.configuration === null) {
       return
     }
-
-    this.deleteConfiguration(this.configuration.id).then(() => {
-      this.$router.push('/configurations')
+    try {
+      this.isSaving=true
+      await this.deleteConfiguration(this.configuration.id)
       this.$store.commit('snackbar/setSuccess', 'Configuration deleted')
-    }).catch((_error) => {
+      this.$router.push('/configurations')
+
+    }catch (e) {
       this.$store.commit('snackbar/setError', 'Configuration could not be deleted')
-    })
+    }finally {
+      this.isSaving=false
+    }
   }
 }
 </script>

@@ -106,7 +106,6 @@ import DotMenuActionCopy from '@/components/DotMenuActionCopy.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
-import { Device } from '@/models/Device'
 import { mapActions, mapState } from 'vuex'
 
 

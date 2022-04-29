@@ -109,7 +109,6 @@ import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 import PlatformDeleteDialog from '@/components/platforms/PlatformDeleteDialog.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
-import { Platform } from '@/models/Platform'
 import { mapActions, mapState } from 'vuex'
 
 @Component({
