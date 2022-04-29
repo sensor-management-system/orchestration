@@ -30,12 +30,23 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
+    <ProgressIndicator
+      v-model="isInProgress"
+      :dark="isSaving"
+    />
+    <v-select
+      value="Device Calibration"
+      :items="['Device Calibration']"
+      :item-text="(x) => x"
+      disabled
+      label="Action Type"
+    />
     <v-card-actions>
       <v-spacer />
-      <ActionButtonTray
-        v-if="$auth.loggedIn"
-        :cancel-url="'/devices/' + deviceId + '/actions'"
-        @apply="save"
+      <SaveAndCancelButtons
+        save-btn-text="Apply"
+        :to="'/devices/' + deviceId + '/actions'"
+        @save="save"
       />
     </v-card-actions>
 
@@ -49,10 +60,10 @@ permissions and limitations under the Licence.
 
     <v-card-actions>
       <v-spacer />
-      <ActionButtonTray
-        v-if="$auth.loggedIn"
-        :cancel-url="'/devices/' + deviceId + '/actions'"
-        @apply="save"
+      <SaveAndCancelButtons
+        save-btn-text="Apply"
+        :to="'/devices/' + deviceId + '/actions'"
+        @save="save"
       />
     </v-card-actions>
   </div>
@@ -61,19 +72,18 @@ permissions and limitations under the Licence.
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 
-import { Attachment } from '@/models/Attachment'
-import { DeviceCalibrationAction } from '@/models/DeviceCalibrationAction'
-import { DeviceProperty } from '@/models/DeviceProperty'
-
 import DeviceCalibrationActionForm from '@/components/actions/DeviceCalibrationActionForm.vue'
-import ActionButtonTray from '@/components/actions/ActionButtonTray.vue'
+import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
+import ProgressIndicator from '@/components/ProgressIndicator.vue'
+
+import { DeviceCalibrationAction } from '@/models/DeviceCalibrationAction'
 import { mapActions, mapState } from 'vuex'
-import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
 
 @Component({
   components: {
-    DeviceCalibrationActionForm,
-    ActionButtonTray
+    ProgressIndicator,
+    SaveAndCancelButtons,
+    DeviceCalibrationActionForm
   },
   scrollToTop: true,
   middleware: ['auth'],
@@ -82,24 +92,20 @@ import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
 })
 export default class DeviceCalibrationActionEditPage extends Vue {
   private action: DeviceCalibrationAction = new DeviceCalibrationAction()
+  private isSaving = false
+  private isLoading = false
 
   async created(){
     try {
+      this.isLoading = true
       await this.loadDeviceCalibrationAction(this.actionId)
+      await this.loadDeviceAttachments(this.deviceId)
+      await this.loadDeviceMeasuredQuantities(this.deviceId)
       this.action = DeviceCalibrationAction.createFromObject(this.deviceCalibrationAction)
     }catch{
       this.$store.commit('snackbar/setError', 'Failed to fetch action')
-    }
-
-    try {
-      await this.loadDeviceAttachments(this.deviceId)
-    } catch (e) {
-      this.$store.commit('snackbar/setError', 'Failed to fetch attachments')
-    }
-    try {
-      await this.loadDeviceMeasuredQuantities(this.deviceId)
-    } catch (e) {
-      this.$store.commit('snackbar/setError', 'Failed to fetch measured quantities')
+    }finally {
+      this.isLoading = false
     }
   }
 
@@ -111,6 +117,10 @@ export default class DeviceCalibrationActionEditPage extends Vue {
     return this.$route.params.actionId
   }
 
+  get isInProgress (): boolean {
+    return this.isLoading || this.isSaving
+  }
+
   async save (): void {
     if (!(this.$refs.deviceCalibrationActionForm as Vue & { isValid: () => boolean }).isValid()) {
       this.$store.commit('snackbar/setError', 'Please correct the errors')
@@ -118,6 +128,7 @@ export default class DeviceCalibrationActionEditPage extends Vue {
     }
 
     try {
+      this.isLoading=true
       await this.updateDeviceCalibrationAction({
         deviceId: this.deviceId,
         calibrationDeviceAction: this.action
@@ -126,6 +137,8 @@ export default class DeviceCalibrationActionEditPage extends Vue {
       this.$router.push('/devices/' + this.deviceId + '/actions')
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to save the action')
+    }finally {
+      this.isLoading=false
     }
   }
 }

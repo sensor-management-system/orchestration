@@ -116,6 +116,10 @@ export default class GenericDeviceActionEditPage extends Vue {
     return this.$route.params.actionId
   }
 
+  get isInProgress (): boolean {
+    return this.isLoading || this.isSaving
+  }
+
   async save () {
     if (!(this.$refs.genericDeviceActionForm as Vue & { isValid: () => boolean }).isValid()) {
       this.$store.commit('snackbar/setError', 'Please correct the errors')
