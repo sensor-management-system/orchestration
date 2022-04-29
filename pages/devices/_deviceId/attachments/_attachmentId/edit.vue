@@ -42,54 +42,54 @@ permissions and limitations under the Licence.
         @save="save"
       />
     </v-card-actions>
-  </div>
-  <v-card>
-    <v-container>
-      <v-row no-gutters>
-        <v-avatar class="mt-0 align-self-center">
-          <v-icon large>
-            {{ filetypeIcon(valueCopy) }}
-          </v-icon>
-        </v-avatar>
-        <v-col>
-          <v-row
-            no-gutters
-          >
-            <v-col>
-              <v-card-subtitle>
-                {{ filename(valueCopy) }}, uploaded at {{ uploadedDateTime(valueCopy) }}
-              </v-card-subtitle>
-            </v-col>
-          </v-row>
-          <v-row
-            no-gutters
-          >
-            <v-col class="text-subtitle-1">
-              <v-text-field
-                label="Label"
-                v-model="valueCopy.label"
-              />
-            </v-col>
-            <v-col
-              align-self="end"
-              class="text-right"
+    <v-card>
+      <v-container>
+        <v-row no-gutters>
+          <v-avatar class="mt-0 align-self-center">
+            <v-icon large>
+              {{ filetypeIcon(valueCopy) }}
+            </v-icon>
+          </v-avatar>
+          <v-col>
+            <v-row
+              no-gutters
             >
-              <v-btn
-                icon
-                color="primary"
-                :href="valueCopy.url"
-                target="_blank"
+              <v-col>
+                <v-card-subtitle>
+                  {{ filename(valueCopy) }}, uploaded at {{ uploadedDateTime(valueCopy) }}
+                </v-card-subtitle>
+              </v-col>
+            </v-row>
+            <v-row
+              no-gutters
+            >
+              <v-col class="text-subtitle-1">
+                <v-text-field
+                  label="Label"
+                  v-model="valueCopy.label"
+                />
+              </v-col>
+              <v-col
+                align-self="end"
+                class="text-right"
               >
-                <v-icon>
-                  mdi-open-in-new
-                </v-icon>
-              </v-btn>
-            </v-col>
-          </v-row>
-        </v-col>
-      </v-row>
-    </v-container>
-  </v-card>
+                <v-btn
+                  icon
+                  color="primary"
+                  :href="valueCopy.url"
+                  target="_blank"
+                >
+                  <v-icon>
+                    mdi-open-in-new
+                  </v-icon>
+                </v-btn>
+              </v-col>
+            </v-row>
+          </v-col>
+        </v-row>
+      </v-container>
+    </v-card>
+  </div>
 </template>
 
 <script lang="ts">
