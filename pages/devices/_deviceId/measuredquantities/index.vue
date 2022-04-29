@@ -106,9 +106,11 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import { CustomTextField } from '@/models/CustomTextField'
 import { DeviceProperty } from '@/models/DeviceProperty'
 import { mapActions, mapState } from 'vuex'
+import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 
 @Component({
   components: {
+    DotMenuActionDelete,
     ProgressIndicator,
     BaseList,
     HintCard,
