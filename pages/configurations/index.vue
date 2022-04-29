@@ -201,20 +201,19 @@ permissions and limitations under the Licence.
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
-import { Configuration } from '@/models/Configuration'
 
 import BaseList from '@/components/shared/BaseList.vue'
 import ConfigurationsListItem from '@/components/configurations/ConfigurationsListItem.vue'
-import { mapActions, mapState } from 'vuex'
-import { ConfigurationSearchParamsSerializer, IConfigurationSearchParams } from '@/modelUtils/ConfigurationSearchParams'
 import ConfigurationsDeleteDialog from '@/components/configurations/ConfigurationsDeleteDialog.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
-import { Project } from '@/models/Project'
 import StringSelect from '@/components/StringSelect.vue'
 import ProjectSelect from '@/components/ProjectSelect.vue'
-import { PlatformSearchParamsSerializer } from '@/modelUtils/PlatformSearchParams'
-import { QueryParams } from '@/modelUtils/QueryParams'
 
+import { Configuration } from '@/models/Configuration'
+import { Project } from '@/models/Project'
+import { ConfigurationSearchParamsSerializer, IConfigurationSearchParams } from '@/modelUtils/ConfigurationSearchParams'
+import { QueryParams } from '@/modelUtils/QueryParams'
+import { mapActions, mapState } from 'vuex'
 @Component({
   components: {
     ProjectSelect,
@@ -415,4 +414,14 @@ export default class SearchConfigurationsPage extends Vue {
 
 <style lang="scss">
 @import "@/assets/styles/_search.scss";
+.progress-spinner {
+  position: absolute;
+  top: 40vh;
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
+  width: 32px;
+  z-index: 99;
+}
 </style>

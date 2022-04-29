@@ -449,8 +449,8 @@ export default class SearchDevicesPage extends Vue {
     if (this.deviceToDelete === null || this.deviceToDelete.id === null) {
       return
     }
-    this.loading = true
     try {
+      this.loading = true
       await this.deleteDevice(this.deviceToDelete.id)
       this.runSearch()
       this.$store.commit('snackbar/setSuccess', 'Device deleted')
