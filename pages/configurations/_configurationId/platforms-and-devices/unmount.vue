@@ -86,8 +86,9 @@ import { Device } from '@/models/Device'
 import { Contact } from '@/models/Contact'
 import { Platform } from '@/models/Platform'
 import { PlatformUnmountAction } from '@/models/PlatformUnmountAction'
+import ProgressIndicator from '@/components/ProgressIndicator.vue'
 @Component({
-  components: { ConfigurationsSelectedItemUnmountForm, ConfigurationsTreeView, DateTimePicker },
+  components: { ProgressIndicator, ConfigurationsSelectedItemUnmountForm, ConfigurationsTreeView, DateTimePicker },
   middleware:['auth'],
   computed:{
     ...mapGetters('configurations',['mountingActionsDates']),
@@ -132,8 +133,9 @@ export default class ConfigurationUnMountPlatformsAndDevicesPage extends Vue {
     }
     return tree.toArray()
   }
-  setSelectedNode (node: ConfigurationsTreeNode) {
-    this.selectedNode = node
+
+  get isInProgress (): boolean {
+    return this.isLoading || this.isSaving
   }
 
   get currentUserMail (): string | null {
