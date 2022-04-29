@@ -34,6 +34,13 @@ permissions and limitations under the Licence.
       v-model="isInProgress"
       :dark="isSaving"
     />
+    <v-select
+      value="Software Update"
+      :items="['Software Update']"
+      :item-text="(x) => x"
+      disabled
+      label="Action Type"
+    />
     <v-card-actions>
       <v-spacer/>
       <SaveAndCancelButtons
