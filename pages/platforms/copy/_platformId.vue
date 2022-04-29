@@ -117,9 +117,7 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue, mixins } from 'nuxt-property-decorator'
-
-import { Rules } from '@/mixins/Rules'
+import { Component, Vue } from 'nuxt-property-decorator'
 
 import { Platform } from '@/models/Platform'
 
@@ -142,7 +140,7 @@ import { mapActions, mapState } from 'vuex'
   }
 })
 // @ts-ignore
-export default class PlatformCopyPage extends mixins(Rules) {
+export default class PlatformCopyPage extends Vue {
   private platformToCopy: Platform = new Platform()
   private isSaving = false
   private isLoading = false
@@ -216,10 +214,6 @@ export default class PlatformCopyPage extends mixins(Rules) {
   async save () {
     if (!(this.$refs.basicForm as Vue & { validateForm: () => boolean }).validateForm()) {
       this.$store.commit('snackbar/setError', 'Please correct your input')
-      return
-    }
-    if (!this.$auth.loggedIn) {
-      this.$store.commit('snackbar/setError', 'You need to be logged in to save the platform')
       return
     }
     try {

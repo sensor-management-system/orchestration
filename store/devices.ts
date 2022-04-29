@@ -363,10 +363,7 @@ const actions = {
       }
     }
     if(copyMeasuredQuantities){
-      console.log('in copyMeasuredQuantities');
-      console.log('device',device);
       const measuredQuantities = device.properties.map(DeviceProperty.createFromObject)
-      console.log('measuredQuantities',measuredQuantities);
       for (const measuredQuantity of measuredQuantities) {
         measuredQuantity.id = null
         related.push(dispatch('addDeviceMeasuredQuantity',{deviceId:savedDeviceId, deviceMeasuredQuantity:measuredQuantity}))

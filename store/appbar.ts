@@ -411,6 +411,37 @@ export const actions = {
     commit('setCancelBtnHidden',true)
     commit('setSaveBtnHidden',true)
   },
+  initDeviceCopyAppBar({commit}:{commit:Commit},id:number){
+    commit('setTitle','Copy Device');
+    commit('setTabs',[
+      {
+        to: '/devices/copy/' + id,
+        name: 'Basic Data'
+      },
+      {
+        name: 'Contacts',
+        disabled: true
+      },
+      {
+        name: 'Measured Quantities',
+        disabled: true
+      },
+      {
+        name: 'Custom Fields',
+        disabled: true
+      },
+      {
+        name: 'Attachments',
+        disabled: true
+      },
+      {
+        name: 'Actions',
+        disabled: true
+      }
+    ])
+    commit('setCancelBtnHidden',true)
+    commit('setSaveBtnHidden',true)
+  },
 
   /**
    * sets the Appbar to its default settings

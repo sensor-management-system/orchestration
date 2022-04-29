@@ -31,31 +31,19 @@ permissions and limitations under the Licence.
 <template>
   <div>
     <ProgressIndicator
-      v-model="isLoading"
-      dark
+      v-model="isInProgress"
+      :dark="isSaving"
     />
     <v-card
       flat
     >
       <v-card-actions>
         <v-spacer/>
-        <v-btn
-          v-if="$auth.loggedIn"
-          small
-          text
-          nuxt
-          to="/devices"
-        >
-          cancel
-        </v-btn>
-        <v-btn
-          v-if="$auth.loggedIn"
-          color="green"
-          small
-          @click="onSaveButtonClicked"
-        >
-          create
-        </v-btn>
+        <SaveAndCancelButtons
+          :to="'/devices'"
+          @save="save"
+          save-btn-text="Copy"
+        />
       </v-card-actions>
       <v-alert
         border="left"
@@ -129,58 +117,45 @@ permissions and limitations under the Licence.
       </v-alert>
       <v-card-actions>
         <v-spacer/>
-        <v-btn
-          v-if="$auth.loggedIn"
-          small
-          text
-          nuxt
-          to="/devices"
-        >
-          cancel
-        </v-btn>
-        <v-btn
-          v-if="$auth.loggedIn"
-          color="green"
-          small
-          @click="onSaveButtonClicked"
-        >
-          create
-        </v-btn>
+        <SaveAndCancelButtons
+          :to="'/devices'"
+          @save="save"
+          save-btn-text="Copy"
+        />
       </v-card-actions>
     </v-card>
   </div>
 </template>
 
 <script lang="ts">
-import { Component, Vue, Watch, mixins } from 'nuxt-property-decorator'
+import { Component, Vue } from 'nuxt-property-decorator'
 
-import { Rules } from '@/mixins/Rules'
-
-import { Attachment } from '@/models/Attachment'
-import { Contact } from '@/models/Contact'
-import { CustomTextField } from '@/models/CustomTextField'
-import { Device } from '@/models/Device'
-import { DeviceProperty } from '@/models/DeviceProperty'
-
+import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
 import DeviceBasicDataForm from '@/components/DeviceBasicDataForm.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
+
 import { mapActions, mapState } from 'vuex'
+import { Device } from '@/models/Device'
+
 
 @Component({
   components: {
+    SaveAndCancelButtons,
     DeviceBasicDataForm,
     ProgressIndicator
   },
   middleware: ['auth'],
   computed:mapState('devices',['device']),
-  methods:mapActions('devices',['copyDevice','loadDevice'])
+  methods:{
+    ...mapActions('devices',['copyDevice','loadDevice']),
+    ...mapActions('appbar',['setDefaults','initDeviceCopyAppBar'])
+  }
 })
 // @ts-ignore
-export default class DeviceCopyPage extends mixins(Rules) {
-  private numberOfTabs: number = 1
-
+export default class DeviceCopyPage extends Vue {
   private deviceToCopy: Device = new Device()
-  private isLoading: boolean = false
+  private isSaving = false
+  private isLoading = false
 
   private copyContacts: boolean = true
   private copyMeasuredQuantities: boolean = true
@@ -192,6 +167,7 @@ export default class DeviceCopyPage extends mixins(Rules) {
   private inventoryNumberPlaceholder: string | null = null
 
   async created () {
+    this.initDeviceCopyAppBar(this.deviceId)
     try {
       this.isLoading=true
       await this.loadDevice({
@@ -203,12 +179,25 @@ export default class DeviceCopyPage extends mixins(Rules) {
       })
       this.deviceToCopy = this.getPreparedDeviceForCopy()
     } catch (e) {
-      console.log('e',e);
       this.$store.commit('snackbar/setError', 'Loading device failed')
     }finally {
       this.isLoading=false
     }
   }
+
+  beforeDestroy () {
+    this.setDefaults()
+  }
+
+  get deviceId () {
+    return this.$route.params.deviceId
+  }
+
+
+  get isInProgress (): boolean {
+    return this.isLoading || this.isSaving
+  }
+
 
   getPreparedDeviceForCopy (): any {
     const deviceToEdit = Device.createFromObject(this.device)
@@ -228,21 +217,16 @@ export default class DeviceCopyPage extends mixins(Rules) {
     return deviceToEdit
   }
 
-  beforeDestroy () {
-    this.$store.dispatch('appbar/setDefaults')
-  }
 
-  async onSaveButtonClicked () {
+  async save () {
     if (!(this.$refs.basicForm as Vue & { validateForm: () => boolean }).validateForm()) {
       this.$store.commit('snackbar/setError', 'Please correct your input')
       return
     }
-    if (!this.$auth.loggedIn) {
-      this.$store.commit('snackbar/setError', 'You need to be logged in to save the device')
-      return
-    }
-    this.isLoading = true
+
+
     try {
+      this.isSaving = true
       const savedDeviceId = await this.copyDevice({
         device: this.deviceToCopy,
         copyContacts: this.copyContacts,
@@ -250,51 +234,15 @@ export default class DeviceCopyPage extends mixins(Rules) {
         copyMeasuredQuantities: this.copyMeasuredQuantities,
         copyCustomFields: this.copyCustomFields
       })
-
-      this.isLoading = false
       this.$store.commit('snackbar/setSuccess', 'Device copied')
-      this.$router.push('/devices/' + savedDeviceId + '')
+      this.$router.push('/devices/' + savedDeviceId)
     } catch (_error) {
-      this.isLoading = false
       this.$store.commit('snackbar/setError', 'Copy failed')
+    }finally {
+      this.isSaving = false
     }
   }
 
-  initializeAppBar () {
-    this.$store.dispatch('appbar/init', {
-      tabs: [
-        {
-          to: '/devices/copy/' + this.deviceId,
-          name: 'Basic Data'
-        },
-        {
-          name: 'Contacts',
-          disabled: true
-        },
-        {
-          name: 'Measured Quantities',
-          disabled: true
-        },
-        {
-          name: 'Custom Fields',
-          disabled: true
-        },
-        {
-          name: 'Attachments',
-          disabled: true
-        },
-        {
-          name: 'Actions',
-          disabled: true
-        }
-      ],
-      title: 'Copy Device'
-    })
-  }
-
-  get deviceId () {
-    return this.$route.params.deviceId
-  }
 }
 </script>
 
