@@ -30,6 +30,10 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
+    <ProgressIndicator
+      v-model="isSaving"
+      dark
+    />
     <v-card-actions
       v-if="$auth.loggedIn"
     >
@@ -88,14 +92,13 @@ permissions and limitations under the Licence.
 import { Component, Vue, Prop } from 'nuxt-property-decorator'
 
 import { CustomTextField } from '@/models/CustomTextField'
-import CustomFieldCard from '@/components/CustomFieldCard.vue'
-import { mapActions, mapState } from 'vuex'
 import BaseList from '@/components/shared/BaseList.vue'
 import DevicesCustomFieldListItem from '@/components/devices/DevicesCustomFieldListItem.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
-import { Attachment } from '@/models/Attachment'
 import DevicesCustomFieldDeleteDialog from '@/components/devices/DevicesCustomFieldDeleteDialog.vue'
 import HintCard from '@/components/HintCard.vue'
+
+import { mapActions, mapState } from 'vuex'
 
 @Component({
   components: { HintCard, DevicesCustomFieldDeleteDialog, DotMenuActionDelete, DevicesCustomFieldListItem, BaseList },
@@ -103,7 +106,7 @@ import HintCard from '@/components/HintCard.vue'
   methods:mapActions('devices',['deleteDeviceCustomField','loadDeviceCustomFields'])
 })
 export default class DeviceCustomFieldsShowPage extends Vue {
-
+  private isSaving = false
   private showDeleteDialog=false;
   private customFieldToDelete:CustomTextField|null=null
 
@@ -126,12 +129,14 @@ export default class DeviceCustomFieldsShowPage extends Vue {
       return
     }
     try {
+      this.isSaving = true
       await this.deleteDeviceCustomField(this.customFieldToDelete.id)
       this.loadDeviceCustomFields(this.deviceId)
       this.$store.commit('snackbar/setSuccess', 'Custom field deleted')
     } catch (_error) {
       this.$store.commit('snackbar/setError', 'Failed to delete custom field')
     } finally {
+      this.isSaving = false
       this.closeDialog()
     }
   }
