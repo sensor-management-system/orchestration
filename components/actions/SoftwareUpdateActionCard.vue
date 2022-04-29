@@ -40,11 +40,12 @@ permissions and limitations under the Licence.
           align-self="end"
           class="text-right"
         >
-          <ActionCardMenu
-            v-if="isUserAuthenticated"
-            :value="value"
-            @delete-menu-item-click="showDeleteDialog = true"
-          />
+          <DotMenu>
+            <template #actions>
+              <slot name="dot-menu-items">
+              </slot>
+            </template>
+          </DotMenu>
         </v-col>
       </v-row>
     </v-card-subtitle>
@@ -62,19 +63,19 @@ permissions and limitations under the Licence.
           align-self="end"
           class="text-right"
         >
-          <slot name="actions" />
+          <slot name="actions"/>
           <v-btn
             icon
-            @click.stop.prevent="toggleVisibility()"
+            @click.stop.prevent="show=!show"
           >
-            <v-icon>{{ isVisible() ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
+            <v-icon>{{ show ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
           </v-btn>
         </v-col>
       </v-row>
     </v-card-subtitle>
     <v-expand-transition>
       <div
-        v-show="isVisible(value.id)"
+        v-show="show"
       >
         <v-card-text
           class="grey lighten-5 text--primary pt-2"
@@ -91,7 +92,7 @@ permissions and limitations under the Licence.
                 Repository
               </label>
               <!-- eslint-disable-next-line vue/no-v-html -->
-              <span v-html="repositoryLink" />
+              <span v-html="repositoryLink"/>
             </v-col>
           </v-row>
           <label>Description</label>
@@ -99,10 +100,6 @@ permissions and limitations under the Licence.
         </v-card-text>
       </div>
     </v-expand-transition>
-    <ActionDeleteDialog
-      v-model="showDeleteDialog"
-      @delete-dialog-button-click="deleteActionAndCloseDialog"
-    />
   </v-card>
 </template>
 
@@ -119,6 +116,7 @@ import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
 
 import ActionCardMenu from '@/components/actions/ActionCardMenu.vue'
 import ActionDeleteDialog from '@/components/actions/ActionDeleteDialog.vue'
+import DotMenu from '@/components/DotMenu.vue'
 
 /**
  * A class component for Software Update Action card
@@ -129,15 +127,14 @@ import ActionDeleteDialog from '@/components/actions/ActionDeleteDialog.vue'
     toUtcDate: dateToDateTimeString
   },
   components: {
+    DotMenu,
     ActionCardMenu,
     ActionDeleteDialog
   }
 })
 // @ts-ignore
 export default class SoftwareUpdateActionCard extends Vue {
-  private showDetails: boolean = false
-  private isShowDeleteDialog: boolean = false
-  private _isDeleting: boolean = false
+  private show: boolean = false
 
   /**
    * a SoftwareUpdateAction
@@ -148,16 +145,6 @@ export default class SoftwareUpdateActionCard extends Vue {
     type: Object
   })
   readonly value!: SoftwareUpdateAction
-
-  /**
-   * a function reference that deletes the action
-   */
-  @Prop({
-    default: () => null,
-    required: false,
-    type: Function
-  })
-  readonly deleteCallback!: (id: string) => Promise<void>
 
   /**
    * the target of the action (should be 'Device' or 'Platform')
@@ -171,29 +158,6 @@ export default class SoftwareUpdateActionCard extends Vue {
     type: String
   })
   readonly target!: string
-
-  @Prop({
-    type: Boolean,
-    required: true
-  })
-  readonly isUserAuthenticated!: boolean
-
-  /**
-   * whether the card expansion is shown or not
-   *
-   * @return {boolean} whether the card expansion is shown or not
-   */
-  isVisible (): boolean {
-    return this.showDetails
-  }
-
-  /**
-   * toggles the shown state of the card expansion
-   *
-   */
-  toggleVisibility (): void {
-    this.showDetails = !this.showDetails
-  }
 
   /**
    * returns an URL as an link
@@ -229,52 +193,6 @@ export default class SoftwareUpdateActionCard extends Vue {
     }
     return this.value.softwareTypeName + ' Update'
   }
-
-  get showDeleteDialog (): boolean {
-    return this.isShowDeleteDialog
-  }
-
-  set showDeleteDialog (value: boolean) {
-    this.isShowDeleteDialog = value
-  }
-
-  get isDeleting (): boolean {
-    return this.$data._isDeleting
-  }
-
-  set isDeleting (value: boolean) {
-    this.$data._isDeleting = value
-    this.$emit('showdelete', value)
-  }
-
-  /**
-   * deletes the action and closes the delete dialog
-   *
-   * @fires SoftwareUpdateActionCard#delete-success
-   */
-  deleteActionAndCloseDialog (): void {
-    if (!this.value.id) {
-      return
-    }
-    if (!this.deleteCallback) {
-      return
-    }
-    this.isDeleting = true
-    this.deleteCallback(this.value.id).then(() => {
-      this.isDeleting = false
-      /**
-       * fires an delete-success event
-       * @event SoftwareUpdateActionCard#delete-success
-       * @type {IActionCommonDetails}
-       */
-      this.$emit('delete-success', this.value)
-      this.$store.commit('snackbar/setSuccess', 'Action deleted')
-    }).catch((_error) => {
-      this.isDeleting = false
-      this.$store.commit('snackbar/setError', 'Action could not be deleted')
-    }).finally(() => {
-      this.showDeleteDialog = false
-    })
-  }
 }
+
 </script>

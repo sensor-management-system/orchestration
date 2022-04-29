@@ -85,10 +85,6 @@ permissions and limitations under the Licence.
         </v-card-text>
       </div>
     </v-expand-transition>
-    <ActionDeleteDialog
-      v-model="showDeleteDialog"
-      @delete-dialog-button-click="deleteActionAndCloseDialog"
-    />
   </v-card>
 </template>
 
@@ -168,53 +164,6 @@ export default class GenericActionCard extends Vue {
       actionDate += ' - ' + dateToDateTimeString(this.value.endDate)
     }
     return actionDate
-  }
-
-  get showDeleteDialog (): boolean {
-    return this.isShowDeleteDialog
-  }
-
-  set showDeleteDialog (value: boolean) {
-    this.isShowDeleteDialog = value
-  }
-
-  get isDeleting (): boolean {
-    return this.$data._isDeleting
-  }
-
-  set isDeleting (value: boolean) {
-    this.$data._isDeleting = value
-    this.$emit('showdelete', value)
-  }
-
-  /**
-   * deletes the action and closes the delete dialog
-   *
-   * @fires GenericActionCard#delete-success
-   */
-  deleteActionAndCloseDialog (): void {
-    if (!this.value.id) {
-      return
-    }
-    if (!this.deleteCallback) {
-      return
-    }
-    this.isDeleting = true
-    this.deleteCallback(this.value.id).then(() => {
-      this.isDeleting = false
-      /**
-       * fires an delete-success event
-       * @event GenericActionCard#delete-success
-       * @type {IActionCommonDetails}
-       */
-      this.$emit('delete-success', this.value)
-      this.$store.commit('snackbar/setSuccess', 'Action deleted')
-    }).catch((_error) => {
-      this.isDeleting = false
-      this.$store.commit('snackbar/setError', 'Action could not be deleted')
-    }).finally(() => {
-      this.showDeleteDialog = false
-    })
   }
 }
 </script>

@@ -182,11 +182,17 @@ const actions = {
   async updatePlatformGenericAction({ commit }: { commit: Commit },{platformId,genericPlatformAction}:{platformId:number,genericPlatformAction:GenericAction}):Promise<GenericAction>{
     return this.$api.genericPlatformActions.update(platformId, genericPlatformAction);
   },
+  async deletePlatformGenericAction({ commit }: { commit: Commit },genericPlatformActionId:number):Promise<void>{
+    return this.$api.genericPlatformActions.deleteById(genericPlatformActionId);
+  },
   addPlatformSoftwareUpdateAction({ commit }: { commit: Commit },{platformId,softwareUpdateAction}:{platformId:number,softwareUpdateAction:SoftwareUpdateAction}):Promise<SoftwareUpdateAction>{
     return this.$api.platformSoftwareUpdateActions.add(platformId,softwareUpdateAction)
   },
   async updatePlatformSoftwareUpdateAction({ commit }: { commit: Commit },{platformId,softwareUpdateAction}:{platformId:number,softwareUpdateAction:SoftwareUpdateAction}):Promise<SoftwareUpdateAction>{
     return this.$api.platformSoftwareUpdateActions.update(platformId, softwareUpdateAction);
+  },
+  async deletePlatformSoftwareUpdateAction({ commit }: { commit: Commit },softwareUpdateActionId:number):Promise<void>{
+    return this.$api.platformSoftwareUpdateActions.deleteById(softwareUpdateActionId);
   },
   async updatePlatform({ commit }: { commit: Commit }, platform:Platform){
     commit('setPlatform',platform);
