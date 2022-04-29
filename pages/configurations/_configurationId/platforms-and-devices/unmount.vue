@@ -1,5 +1,9 @@
 <template>
   <div>
+    <ProgressIndicator
+      v-model="isInProgress"
+      :dark="isSaving"
+    />
     <v-card-actions>
       <v-spacer/>
       <v-btn
@@ -99,8 +103,18 @@ export default class ConfigurationUnMountPlatformsAndDevicesPage extends Vue {
   private selectedDate = DateTime.utc()
   private selectedNode: ConfigurationsTreeNode | null = null
 
+  private isSaving = false
+  private isLoading = false
+
   async created(){
-    await this.loadAllContacts()
+    try {
+      this.isLoading=true
+      await this.loadAllContacts()
+    } catch (e) {
+      this.$store.commit('snackbar/setError', 'Failed to fetch contacts')
+    } finally {
+      this.isLoading=false
+    }
   }
 
   get configurationId (): string {
@@ -152,6 +166,7 @@ export default class ConfigurationUnMountPlatformsAndDevicesPage extends Vue {
     })
 
     try {
+      this.isSaving=true
       await this.addDeviceUnMountAction({
         configurationId: this.configurationId,
         deviceUnMountAction: newDeviceUnmountAction
@@ -161,6 +176,8 @@ export default class ConfigurationUnMountPlatformsAndDevicesPage extends Vue {
       this.$router.push('/configurations/' + this.configurationId + '/platforms-and-devices')
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to add device unmount action')
+    }finally {
+      this.isSaving=false
     }
   }
   async unmountPlatform(platform:Platform,contact:Contact,description:string){
@@ -173,6 +190,7 @@ export default class ConfigurationUnMountPlatformsAndDevicesPage extends Vue {
     })
 
     try {
+      this.isSaving=true
       await this.addPlatformUnMountAction({
         configurationId: this.configurationId,
         platformUnMountAction: newPlatformUnmountAction
@@ -182,6 +200,8 @@ export default class ConfigurationUnMountPlatformsAndDevicesPage extends Vue {
       this.$router.push('/configurations/' + this.configurationId + '/platforms-and-devices')
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to add device unmount action')
+    }finally {
+      this.isSaving=true
     }
   }
 }
