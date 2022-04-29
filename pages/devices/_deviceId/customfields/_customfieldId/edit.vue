@@ -34,7 +34,7 @@ permissions and limitations under the Licence.
       v-model="isInProgress"
       :dark="isSaving"
     />
-    <CustomFieldCardForm
+    <CustomFieldForm
       ref="customFieldCardForm"
       v-model="valueCopy"
     >
@@ -45,7 +45,7 @@ permissions and limitations under the Licence.
           @save="save"
         />
       </template>
-    </CustomFieldCardForm>
+    </CustomFieldForm>
   </div>
 </template>
 
@@ -53,18 +53,18 @@ permissions and limitations under the Licence.
 import { Component, Vue } from 'nuxt-property-decorator'
 
 
-import CustomFieldCardForm from '@/components/CustomFieldCardForm.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
 
 import { CustomTextField } from '@/models/CustomTextField'
 import { mapActions, mapState } from 'vuex'
+import CustomFieldForm from '@/components/CustomFieldForm.vue'
 
 
 @Component({
   components: {
+    CustomFieldForm,
     SaveAndCancelButtons,
-    CustomFieldCardForm,
     ProgressIndicator
   },
   middleware: ['auth'],
