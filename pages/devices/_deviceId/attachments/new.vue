@@ -130,7 +130,6 @@ import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButto
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
 @Component({
-  middleware: ['auth'],
   components: { ProgressIndicator, SaveAndCancelButtons },
   middleware: ['auth'],
   methods: {
