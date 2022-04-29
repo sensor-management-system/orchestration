@@ -31,31 +31,19 @@ permissions and limitations under the Licence.
 <template>
   <div>
     <ProgressIndicator
-      v-model="isLoading"
-      dark
+      v-model="isInProgress"
+      :dark="isSaving"
     />
     <v-card
       flat
     >
       <v-card-actions>
         <v-spacer />
-        <v-btn
-          v-if="$auth.loggedIn"
-          small
-          text
-          nuxt
-          to="/platforms"
-        >
-          cancel
-        </v-btn>
-        <v-btn
-          v-if="$auth.loggedIn"
-          color="green"
-          small
-          @click="onSaveButtonClicked"
-        >
-          create
-        </v-btn>
+        <SaveAndCancelButtons
+          :to="'/platforms'"
+          @save="save"
+          save-btn-text="Copy"
+        />
       </v-card-actions>
       <v-alert
         border="left"
@@ -118,57 +106,46 @@ permissions and limitations under the Licence.
       </v-alert>
       <v-card-actions>
         <v-spacer />
-        <v-btn
-          v-if="$auth.loggedIn"
-          small
-          text
-          nuxt
-          to="/platforms"
-        >
-          cancel
-        </v-btn>
-        <v-btn
-          v-if="$auth.loggedIn"
-          color="green"
-          small
-          @click="onSaveButtonClicked"
-        >
-          create
-        </v-btn>
+        <SaveAndCancelButtons
+          :to="'/platforms'"
+          @save="save"
+          save-btn-text="Copy"
+        />
       </v-card-actions>
     </v-card>
   </div>
 </template>
 
 <script lang="ts">
-import { Component, Vue, Watch, mixins } from 'nuxt-property-decorator'
+import { Component, Vue, mixins } from 'nuxt-property-decorator'
 
 import { Rules } from '@/mixins/Rules'
 
-import { Attachment } from '@/models/Attachment'
-import { Contact } from '@/models/Contact'
 import { Platform } from '@/models/Platform'
 
 import PlatformBasicDataForm from '@/components/PlatformBasicDataForm.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
 import { mapActions, mapState } from 'vuex'
 
 @Component({
   components: {
+    SaveAndCancelButtons,
     PlatformBasicDataForm,
     ProgressIndicator
   },
   middleware: ['auth'],
   computed:mapState('platforms',['platform']),
-  methods:mapActions('platforms',['loadPlatform','copyPlatform'])
+  methods:{
+    ...mapActions('platforms',['loadPlatform','copyPlatform']),
+    ...mapActions('appbar',['setDefaults','initPlatformCopyAppBar'])
+  }
 })
 // @ts-ignore
 export default class PlatformCopyPage extends mixins(Rules) {
-  private numberOfTabs: number = 1
-
   private platformToCopy: Platform = new Platform()
-  // private existingPlatform: Platform = new Platform()
-  private isLoading: boolean = true
+  private isSaving = false
+  private isLoading = false
 
   private copyContacts: boolean = true
   private copyAttachments: boolean = false
@@ -178,11 +155,12 @@ export default class PlatformCopyPage extends mixins(Rules) {
   private inventoryNumberPlaceholder: string | null = null
 
   async created () {
-    this.initializeAppBar()
-
+    this.initPlatformCopyAppBar(this.platformId)
     // We also load the contacts and the measured quantities as those
     // are the ones that we will also copy.
     try {
+      this.isLoading=true
+
       await this.loadPlatform({
         platformId: this.platformId,
         includeContacts: true,
@@ -198,9 +176,21 @@ export default class PlatformCopyPage extends mixins(Rules) {
     }
   }
 
-  getPreparedPlatformForCopy(){
+  beforeDestroy () {
+    this.setDefaults()
+  }
+
+  get platformId () {
+    return this.$route.params.platformId
+  }
+
+  get isInProgress (): boolean {
+    return this.isLoading || this.isSaving
+  }
+
+  getPreparedPlatformForCopy(): Platform{
     const platformToEdit = Platform.createFromObject(this.platform)
-    // Unset the fields that are very device specific todo: stimmt der kommentar noch?
+    // Unset the fields that are very device specific
     // (we need other PIDs, serial numbers and inventory numbers)
     // For the moment we just unset them completely, but there may be
     // some more logic in those numbers.
@@ -223,11 +213,7 @@ export default class PlatformCopyPage extends mixins(Rules) {
     return platformToEdit;
   }
 
-  beforeDestroy () {
-    this.$store.dispatch('appbar/setDefaults')
-  }
-
-  async onSaveButtonClicked () {
+  async save () {
     if (!(this.$refs.basicForm as Vue & { validateForm: () => boolean }).validateForm()) {
       this.$store.commit('snackbar/setError', 'Please correct your input')
       return
@@ -236,51 +222,20 @@ export default class PlatformCopyPage extends mixins(Rules) {
       this.$store.commit('snackbar/setError', 'You need to be logged in to save the platform')
       return
     }
-    this.isLoading = true
     try {
-
+      this.isSaving = true
       const savedPLatformId = await this.copyPlatform({
         platform:this.platformToCopy,
         copyContacts:this.copyContacts,
         copyAttachments:this.copyAttachments
       });
-
-      this.isLoading = false
       this.$store.commit('snackbar/setSuccess', 'Platform copied')
-      this.$router.push('/platforms/' + savedPLatformId + '')
+      this.$router.push('/platforms/' + savedPLatformId)
     } catch (_error) {
-      this.isLoading = false
-      console.log('err',_error);
       this.$store.commit('snackbar/setError', 'Copy failed')
+    }finally {
+      this.isSaving = false
     }
-  }
-
-  initializeAppBar () {
-    this.$store.dispatch('appbar/init', {
-      tabs: [
-        {
-          to: '/platform/copy/' + this.platformId,
-          name: 'Basic Data'
-        },
-        {
-          name: 'Contacts',
-          disabled: true
-        },
-        {
-          name: 'Attachments',
-          disabled: true
-        },
-        {
-          name: 'Actions',
-          disabled: true
-        }
-      ],
-      title: 'Copy Platform'
-    })
-  }
-
-  get platformId () {
-    return this.$route.params.platformId
   }
 }
 </script>
