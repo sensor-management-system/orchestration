@@ -30,13 +30,16 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
+    <ProgressIndicator
+      v-model="isInProgress"
+      :dark="isSaving"
+    />
     <v-card-actions>
-      <v-spacer />
-      <ActionButtonTray
-        v-if="$auth.loggedIn"
-        :cancel-url="'/platforms/' + platformId + '/actions'"
-        :is-saving="isSaving"
-        @apply="save"
+      <v-spacer/>
+      <SaveAndCancelButtons
+        save-btn-text="Apply"
+        :to="'/platforms/' + platformId + '/actions'"
+        @save="save"
       />
     </v-card-actions>
 
@@ -48,12 +51,11 @@ permissions and limitations under the Licence.
     />
 
     <v-card-actions>
-      <v-spacer />
-      <ActionButtonTray
-        v-if="$auth.loggedIn"
-        :cancel-url="'/platforms/' + platformId + '/actions'"
-        :is-saving="isSaving"
-        @apply="save"
+      <v-spacer/>
+      <SaveAndCancelButtons
+        save-btn-text="Apply"
+        :to="'/platforms/' + platformId + '/actions'"
+        @save="save"
       />
     </v-card-actions>
   </div>
@@ -62,39 +64,39 @@ permissions and limitations under the Licence.
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 
-import { Attachment } from '@/models/Attachment'
 import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
 
-import ActionButtonTray from '@/components/actions/ActionButtonTray.vue'
 import SoftwareUpdateActionForm from '@/components/actions/SoftwareUpdateActionForm.vue'
 import { mapActions, mapState } from 'vuex'
-import { GenericAction } from '@/models/GenericAction'
+import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
+import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
 @Component({
   components: {
+    ProgressIndicator,
+    SaveAndCancelButtons,
     SoftwareUpdateActionForm,
-    ActionButtonTray
   },
   scrollToTop: true,
   middleware: ['auth'],
-  computed:mapState('platforms',['platformSoftwareUpdateAction','platformAttachments']),
-  methods:mapActions('platforms',['loadPlatformSoftwareUpdateAction','loadAllPlatformActions','loadPlatformAttachments','updatePlatformSoftwareUpdateAction'])
+  computed: mapState('platforms', ['platformSoftwareUpdateAction', 'platformAttachments']),
+  methods: mapActions('platforms', ['loadPlatformSoftwareUpdateAction', 'loadAllPlatformActions', 'loadPlatformAttachments', 'updatePlatformSoftwareUpdateAction'])
 })
 export default class PlatformSoftwareUpdateActionEditPage extends Vue {
   private action: SoftwareUpdateAction = new SoftwareUpdateAction()
-  private isSaving: boolean = false
+  private isSaving = false
+  private isLoading = false
 
-  async created(){
+  async created () {
     try {
+      this.isLoading = true
       await this.loadPlatformSoftwareUpdateAction(this.actionId)
+      await this.loadPlatformAttachments(this.platformId)
       this.action = SoftwareUpdateAction.createFromObject(this.platformSoftwareUpdateAction)
     } catch (error) {
       this.$store.commit('snackbar/setError', 'Failed to fetch action')
-    }
-    try {
-      await this.loadPlatformAttachments(this.platformId)
-    } catch (e) {
-      this.$store.commit('snackbar/setError', 'Failed to fetch attachments')
+    }finally {
+      this.isLoading = false
     }
   }
 
@@ -104,6 +106,10 @@ export default class PlatformSoftwareUpdateActionEditPage extends Vue {
 
   get actionId (): string {
     return this.$route.params.actionId
+  }
+
+  get isInProgress (): boolean {
+    return this.isLoading || this.isSaving
   }
 
   async save (): void {
@@ -117,8 +123,8 @@ export default class PlatformSoftwareUpdateActionEditPage extends Vue {
       await this.updatePlatformSoftwareUpdateAction({
         platformId: this.platformId,
         softwareUpdateAction: this.action
-      });
-      this.loadAllPlatformActions(this.platformId);
+      })
+      this.loadAllPlatformActions(this.platformId)
       this.$router.push('/platforms/' + this.platformId + '/actions')
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to save the action')
