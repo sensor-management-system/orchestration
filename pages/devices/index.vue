@@ -269,25 +269,19 @@ import DeviceDeleteDialog from '@/components/devices/DeviceDeleteDialog.vue'
 import DotMenu from '@/components/DotMenu.vue'
 import DotMenuActionCopy from '@/components/DotMenuActionCopy.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
-
-import { IPaginationLoader } from '@/utils/PaginatedLoader'
+import BaseList from '@/components/shared/BaseList.vue'
+import DevicesListItem from '@/components/devices/DevicesListItem.vue'
 
 import { Device } from '@/models/Device'
 import { DeviceType } from '@/models/DeviceType'
 import { Manufacturer } from '@/models/Manufacturer'
 import { Status } from '@/models/Status'
 
-import { DeviceSearcher } from '@/services/sms/DeviceApi'
-
 import { QueryParams } from '@/modelUtils/QueryParams'
-import { IDeviceSearchParams, DeviceSearchParamsSerializer } from '@/modelUtils/DeviceSearchParams'
-import { mapActions, mapState } from 'vuex'
-import BaseList from '@/components/shared/BaseList.vue'
-import DevicesListItem from '@/components/devices/DevicesListItem.vue'
+import { DeviceSearchParamsSerializer } from '@/modelUtils/DeviceSearchParams'
 
-type PaginatedResult = {
-  [page: number]: Device[]
-}
+
+import { mapActions, mapState } from 'vuex'
 
 @Component({
   components: {
