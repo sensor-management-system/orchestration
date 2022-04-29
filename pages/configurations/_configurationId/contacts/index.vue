@@ -2,7 +2,7 @@
   <div>
     <ProgressIndicator
       v-model="isSaving"
-      :dark="isSaving"
+      dark
     />
     <v-card-actions>
       <v-spacer />
@@ -74,7 +74,7 @@ export default class ConfigurationShowContactPage extends Vue {
     return this.$route.params.configurationId
   }
 
-  async removeContact(contactId:string):void{
+  async removeContact(contactId:string){
 
     try {
       this.isSaving = true

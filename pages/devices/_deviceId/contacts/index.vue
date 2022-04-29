@@ -104,7 +104,7 @@ export default class DeviceShowContactPage extends Vue {
     return this.$route.params.deviceId
   }
 
-  async removeContact(contactId:string):void{
+  async removeContact(contactId:string){
 
     try {
       this.isSaving = true
