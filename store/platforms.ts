@@ -10,6 +10,8 @@ import { PlatformMountAction } from '@/models/PlatformMountAction'
 import { IActionType } from '@/models/ActionType'
 import { PlatformMountActionWrapper } from '@/viewmodels/PlatformMountActionWrapper'
 import { PlatformUnmountActionWrapper } from '@/viewmodels/PlatformUnmountActionWrapper'
+import { DateComparator, IDateCompareable, isDateCompareable } from '@/modelUtils/Compareables'
+import { IActionCommonDetails } from '@/models/ActionCommonDetails'
 
 const KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE = 'software_update'
 const KIND_OF_ACTION_TYPE_GENERIC_PLATFORM_ACTION = 'generic_platform_action'
@@ -19,6 +21,8 @@ type KindOfActionType = typeof KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE | typeof KIND
 type IOptionsForActionType = Pick<IActionType, 'id' | 'name' | 'uri'> & {
   kind: KindOfActionType
 }
+
+const comparator = new DateComparator()
 
 interface platformsState {
   platforms: Platform[],
@@ -57,13 +61,18 @@ const state = {
 }
 
 const getters = {
-  actions:(state:platformsState)=>{ //Todo actions sortieren, wobei ehrlich gesagt, eine extra route im Backend mit allen Actions (sortiert) besser wäre
-    return [
+  actions:(state:platformsState)=>{
+    let actions = [
       ...state.platformGenericActions,
       ...state.platformSoftwareUpdateActions,
       ...state.platformMountActions,
       ...state.platformUnmountActions
     ]
+    // sort the actions
+    actions = actions.sort((a: IDateCompareable, b: IDateCompareable): number => {
+      return  a.date < b.date ? 1 : a.date > b.date ? -1 : 0;
+    })
+    return actions
   }
 }
 
