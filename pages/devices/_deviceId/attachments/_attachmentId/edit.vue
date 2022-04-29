@@ -29,81 +29,106 @@ implied. See the Licence for the specific language governing
 permissions and limitations under the Licence.
 -->
 <template>
-  <v-card class="mb-2">
-    <v-list-item>
-      <v-list-item-avatar>
-        <v-icon large>
-          {{ filetypeIcon(valueCopy) }}
-        </v-icon>
-      </v-list-item-avatar>
-      <v-list-item-content>
-        <v-list-item-subtitle>
-          {{ filename(valueCopy) }}, uploaded at {{ uploadedDateTime(valueCopy) }}
-        </v-list-item-subtitle>
-        <v-list-item-title>
-          <v-text-field
-            v-model="valueCopy.label"
-          />
-        </v-list-item-title>
-      </v-list-item-content>
-      <v-list-item-action-text>
-        <v-row>
-          <v-col align-self="end" class="text-right">
-            <v-btn
-              icon
-              color="primary"
-              :href="valueCopy.url"
-              target="_blank"
+  <div>
+    <ProgressIndicator
+      v-model="isInProgress"
+      :dark="isSaving"
+    />
+    <v-card-actions>
+      <v-spacer />
+      <SaveAndCancelButtons
+        save-btn-text="Apply"
+        :to="'/devices/' + deviceId + '/attachments'"
+        @save="save"
+      />
+    </v-card-actions>
+  </div>
+  <v-card>
+    <v-container>
+      <v-row no-gutters>
+        <v-avatar class="mt-0 align-self-center">
+          <v-icon large>
+            {{ filetypeIcon(valueCopy) }}
+          </v-icon>
+        </v-avatar>
+        <v-col>
+          <v-row
+            no-gutters
+          >
+            <v-col>
+              <v-card-subtitle>
+                {{ filename(valueCopy) }}, uploaded at {{ uploadedDateTime(valueCopy) }}
+              </v-card-subtitle>
+            </v-col>
+          </v-row>
+          <v-row
+            no-gutters
+          >
+            <v-col class="text-subtitle-1">
+              <v-text-field
+                label="Label"
+                v-model="valueCopy.label"
+              />
+            </v-col>
+            <v-col
+              align-self="end"
+              class="text-right"
             >
-              <v-icon>
-                mdi-open-in-new
-              </v-icon>
-            </v-btn>
-            <v-btn
-              ref="cancelButton"
-              text
-              small
-              :to="'/devices/' + deviceId + '/attachments'"
-            >
-              Cancel
-            </v-btn>
-            <v-btn
-              color="green"
-              small
-              @click.prevent.stop="save"
-            >
-              Apply
-            </v-btn>
-          </v-col>
-        </v-row>
-      </v-list-item-action-text>
-    </v-list-item>
+              <v-btn
+                icon
+                color="primary"
+                :href="valueCopy.url"
+                target="_blank"
+              >
+                <v-icon>
+                  mdi-open-in-new
+                </v-icon>
+              </v-btn>
+            </v-col>
+          </v-row>
+        </v-col>
+      </v-row>
+    </v-container>
   </v-card>
 </template>
 
 <script lang="ts">
 import { Vue, Component, Prop, mixins } from 'nuxt-property-decorator'
 
+import { AttachmentsMixin } from '@/mixins/AttachmentsMixin'
+
+import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
+
 import { Attachment } from '@/models/Attachment'
 import { mapState,mapActions } from 'vuex'
-import { AttachmentsMixin } from '@/mixins/AttachmentsMixin'
 
 /**
  * A class component that displays a single attached file
  * @extends Vue
  */
 @Component({
+  components: { SaveAndCancelButtons, ProgressIndicator },
   middleware: ['auth'],
   computed:mapState('devices',['deviceAttachment']),
   methods:mapActions('devices',['loadDeviceAttachment','loadDeviceAttachments','updateDeviceAttachment'])
 })
 // @ts-ignore
 export default class AttachmentEditPage extends mixins(AttachmentsMixin) {
+  private isSaving = false
+  private isLoading = false
   private valueCopy: Attachment = new Attachment()
 
   async created () {
-    await this.loadDeviceAttachment(this.attachmentId)
-    this.valueCopy = Attachment.createFromObject(this.deviceAttachment)
+    try {
+      this.isLoading=true
+      await this.loadDeviceAttachment(this.attachmentId)
+      this.valueCopy = Attachment.createFromObject(this.deviceAttachment)
+    } catch (e) {
+      this.$store.commit('snackbar/setError', 'Failed to load attachment')
+    } finally {
+      this.isLoading=false
+    }
   }
 
   get deviceId (): string {
@@ -113,16 +138,24 @@ export default class AttachmentEditPage extends mixins(AttachmentsMixin) {
     return this.$route.params.attachmentId
   }
 
+  get isInProgress (): boolean {
+    return this.isLoading || this.isSaving
+  }
+
   async save () {
     try {
+      this.isSaving=true
       await this.updateDeviceAttachment({
         deviceId: this.deviceId,
         attachment: this.valueCopy
       })
       this.loadDeviceAttachments(this.deviceId)
+      this.$store.commit('snackbar/setSuccess', 'Attachment updated')
       this.$router.push('/devices/' + this.deviceId + '/attachments')
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to save attachments')
+    }finally {
+      this.isSaving=false
     }
   }
 }

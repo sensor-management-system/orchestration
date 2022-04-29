@@ -96,13 +96,15 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Vue, Component, Prop, mixins } from 'nuxt-property-decorator'
+import { Vue, Component, mixins } from 'nuxt-property-decorator'
+
+import { AttachmentsMixin } from '@/mixins/AttachmentsMixin'
+
+import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
+import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
 import { Attachment } from '@/models/Attachment'
 import { mapActions, mapState } from 'vuex'
-import { AttachmentsMixin } from '@/mixins/AttachmentsMixin'
-import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
 /**
  * A class component that displays a single attached file
  * @extends Vue
