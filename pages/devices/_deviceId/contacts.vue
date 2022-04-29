@@ -34,7 +34,6 @@ permissions and limitations under the Licence.
       v-model="isLoading"
     />
     <NuxtChild/>
-    />
   </div>
 
 </template>

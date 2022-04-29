@@ -33,28 +33,34 @@ implied. See the Licence for the specific language governing
 permissions and limitations under the Licence.
 -->
 <template>
+  <ProgressIndicator
+    v-model="isLoading"
+  />
   <NuxtChild/>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 
-import { Contact } from '@/models/Contact'
 
-import ContactBasicData from '@/components/ContactBasicData.vue'
-import HintCard from '@/components/HintCard.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import { mapActions } from 'vuex'
 
 @Component({
+  components: { ProgressIndicator },
   methods: mapActions('configurations', ['loadConfigurationContacts'])
 })
 export default class ContactTab extends Vue {
+  private isLoading = false
+
   created () {
     try {
+      this.isLoading = true
       this.loadConfigurationContacts(this.configurationId)
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to fetch contacts')
+    }finally {
+      this.isLoading = false
     }
   }
 
