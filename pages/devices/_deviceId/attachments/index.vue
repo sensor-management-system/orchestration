@@ -1,5 +1,9 @@
 <template>
   <div>
+    <ProgressIndicator
+      v-model="isSaving"
+      dark
+    />
     <v-card-actions
       v-if="$auth.loggedIn"
     >
@@ -39,6 +43,7 @@
     >
       <v-spacer />
       <v-btn
+        v-if="$auth.loggedIn"
         color="primary"
         small
         :to="'/devices/' + deviceId + '/attachments/new'"
@@ -60,16 +65,19 @@ import { Component, Vue } from 'vue-property-decorator'
 import BaseList from '@/components/shared/BaseList.vue'
 import DevicesAttachmentListItem from '@/components/devices/DevicesAttachmentListItem.vue'
 import DevicesAttachmentDeleteDialog from '@/components/devices/DevicesAttachmentDeleteDialog.vue'
-import { Attachment } from '@/models/Attachment'
-import { mapActions, mapState } from 'vuex'
 import HintCard from '@/components/HintCard.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
+import ProgressIndicator from '@/components/ProgressIndicator.vue'
+
+import { Attachment } from '@/models/Attachment'
+import { mapActions, mapState } from 'vuex'
 @Component({
-  components: { DotMenuActionDelete, HintCard, DevicesAttachmentDeleteDialog, DevicesAttachmentListItem, BaseList },
+  components: { ProgressIndicator, DotMenuActionDelete, HintCard, DevicesAttachmentDeleteDialog, DevicesAttachmentListItem, BaseList },
   computed:mapState('devices',['deviceAttachments']),
   methods:mapActions('devices',['loadDeviceAttachments','deleteDeviceAttachment'])
 })
 export default class DeviceAttachmentShowPage extends Vue {
+  private isSaving = false
   private showDeleteDialog=false;
   private attachmentToDelete:Attachment|null=null;
 
@@ -92,12 +100,14 @@ export default class DeviceAttachmentShowPage extends Vue {
       return
     }
     try {
-      await this.deleteDeviceAttachment(this.attachmentToDelete.id) // TODO returns a 500 error, but deletion is fine; probably backend problem
+      this.isSaving=true
+      await this.deleteDeviceAttachment(this.attachmentToDelete.id)
       this.loadDeviceAttachments(this.deviceId)
       this.$store.commit('snackbar/setSuccess', 'Attachment deleted')
     } catch (_error) {
       this.$store.commit('snackbar/setError', 'Failed to delete attachment')
     } finally {
+      this.isSaving=false
       this.closeDialog()
     }
   }

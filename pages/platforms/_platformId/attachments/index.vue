@@ -94,14 +94,17 @@ permissions and limitations under the Licence.
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
+
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import HintCard from '@/components/HintCard.vue'
-import { mapActions, mapState } from 'vuex'
 import BaseList from '@/components/shared/BaseList.vue'
 import PlatformsAttachmentListItem from '@/components/platforms/PlatformsAttachmentListItem.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 import PlatformsAttachmentDeleteDialog from '@/components/platforms/PlatformsAttachmentDeleteDialog.vue'
+
 import { Attachment } from '@/models/Attachment'
+import { mapActions, mapState } from 'vuex'
+
 @Component({
   components: { PlatformsAttachmentDeleteDialog, DotMenuActionDelete, PlatformsAttachmentListItem, BaseList, HintCard, ProgressIndicator },
   computed: mapState('platforms',['platformAttachments']),
