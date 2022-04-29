@@ -75,9 +75,10 @@ import { DeviceProperty } from '@/models/DeviceProperty'
 import { mapActions, mapState } from 'vuex'
 import DevicePropertyForm from '@/components/DevicePropertyForm.vue'
 import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
+import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
 @Component({
-  components: { SaveAndCancelButtons, DevicePropertyForm },
+  components: { ProgressIndicator, SaveAndCancelButtons, DevicePropertyForm },
   computed:mapState('vocabulary',['compartments','samplingMedia','properties','units','measuredQuantityUnits']),
   methods:{
     ...mapActions('devices',['addDeviceMeasuredQuantity','loadDeviceMeasuredQuantities']),
