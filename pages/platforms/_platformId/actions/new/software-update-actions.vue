@@ -1,11 +1,15 @@
 <template>
   <div>
+    <ProgressIndicator
+      v-model="isSaving"
+      dark
+    />
     <v-card-actions>
       <v-spacer></v-spacer>
-      <ActionButtonTray
-        :cancel-url="'/platforms/' + platformId + '/actions'"
-        :show-apply="true"
-        @apply="addSoftwareUpdateAction"
+      <SaveAndCancelButtons
+        save-btn-text="Apply"
+        :to="'/platforms/' + platformId + '/actions'"
+        @save="save"
       />
     </v-card-actions>
     <SoftwareUpdateActionForm
@@ -16,10 +20,10 @@
     />
     <v-card-actions>
       <v-spacer></v-spacer>
-      <ActionButtonTray
-        :cancel-url="'/platforms/' + platformId + '/actions'"
-        :show-apply="true"
-        @apply="addSoftwareUpdateAction"
+      <SaveAndCancelButtons
+        save-btn-text="Apply"
+        :to="'/platforms/' + platformId + '/actions'"
+        @save="save"
       />
     </v-card-actions>
   </div>
@@ -29,12 +33,14 @@
 import { Component, Vue } from 'vue-property-decorator'
 import SoftwareUpdateActionForm from '@/components/actions/SoftwareUpdateActionForm.vue'
 import { mapActions, mapState } from 'vuex'
-import ActionButtonTray from '@/components/actions/ActionButtonTray.vue'
 import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
+import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
 
 @Component({
   components: {
-    ActionButtonTray,
+    SaveAndCancelButtons,
+    ProgressIndicator,
     SoftwareUpdateActionForm
   },
   computed: mapState('platforms', ['platformAttachments', 'chosenKindOfPlatformAction']),
@@ -43,12 +49,13 @@ import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
 export default class NewPlatformSoftwareUpdateActions extends Vue {
 
   private softwareUpdateAction: SoftwareUpdateAction = new SoftwareUpdateAction()
+  private isSaving: boolean = false
 
   get platformId (): string {
     return this.$route.params.platformId
   }
 
-  async addSoftwareUpdateAction () {
+  async save () {
     if (!this.$auth.loggedIn) {
       return
     }
@@ -56,14 +63,21 @@ export default class NewPlatformSoftwareUpdateActions extends Vue {
       this.$store.commit('snackbar/setError', 'Please correct the errors')
       return
     }
-    await this.addPlatformSoftwareUpdateAction(
-      {
-        platformId: this.platformId,
-        softwareUpdateAction: this.softwareUpdateAction
-      })
-    this.loadAllPlatformActions(this.platformId)
-    this.$router.push('/platforms/' + this.platformId + '/actions')
-    this.$store.commit('snackbar/setError', 'Failed to save the action')
+    try{
+      this.isSaving=true
+      await this.addPlatformSoftwareUpdateAction(
+        {
+          platformId: this.platformId,
+          softwareUpdateAction: this.softwareUpdateAction
+        })
+      this.loadAllPlatformActions(this.platformId)
+      this.$router.push('/platforms/' + this.platformId + '/actions')
+    }catch (e){
+      this.$store.commit('snackbar/setError', 'Failed to save the action')
+    }finally {
+      this.isSaving=false
+    }
+
 
   }
 }
