@@ -31,49 +31,39 @@ permissions and limitations under the Licence.
 <template>
   <div>
     <ProgressIndicator
-      v-model="isSaving"
-      dark
+      v-model="isInProgress"
+      :dark="isSaving"
     />
     <CustomFieldCardForm
       ref="customFieldCardForm"
       v-model="valueCopy"
     >
       <template #actions>
-        <v-btn
-          v-if="$auth.loggedIn"
-          ref="cancelButton"
-          text
-          small
-          nuxt
+        <SaveAndCancelButtons
+          save-btn-text="Apply"
           :to="'/devices/' + deviceId + '/customfields'"
-        >
-          Cancel
-        </v-btn>
-        <v-btn
-          v-if="$auth.loggedIn"
-          color="green"
-          small
-          @click="save()"
-        >
-          Apply
-        </v-btn>
+          @save="save"
+        />
       </template>
     </CustomFieldCardForm>
   </div>
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop, Watch } from 'nuxt-property-decorator'
+import { Component, Vue } from 'nuxt-property-decorator'
 
-import { CustomTextField } from '@/models/CustomTextField'
 
 import CustomFieldCardForm from '@/components/CustomFieldCardForm.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
 
+import { CustomTextField } from '@/models/CustomTextField'
 import { mapActions, mapState } from 'vuex'
+
 
 @Component({
   components: {
+    SaveAndCancelButtons,
     CustomFieldCardForm,
     ProgressIndicator
   },
@@ -82,12 +72,21 @@ import { mapActions, mapState } from 'vuex'
   methods: mapActions('devices',['loadDeviceCustomField','loadDeviceCustomFields','updateDeviceCustomField'])
 })
 export default class DeviceCustomFieldsShowPage extends Vue {
-  private isSaving: boolean = false
+  private isSaving = false
+  private isLoading = false
+
   private valueCopy: CustomTextField = new CustomTextField()
 
   async created () {
-    await this.loadDeviceCustomField(this.customFieldId);
-    this.valueCopy = CustomTextField.createFromObject(this.deviceCustomField)
+    try {
+      this.isLoading=true
+      await this.loadDeviceCustomField(this.customFieldId)
+      this.valueCopy = CustomTextField.createFromObject(this.deviceCustomField)
+    } catch (e) {
+      this.$store.commit('snackbar/setError', 'Failed to load custom field')
+    } finally {
+      this.isLoading=false
+    }
   }
 
   get deviceId (): string {
@@ -98,8 +97,11 @@ export default class DeviceCustomFieldsShowPage extends Vue {
     return this.$route.params.customfieldId;
   }
 
-  async save (): void {
+  get isInProgress (): boolean {
+    return this.isLoading || this.isSaving
+  }
 
+  async save () {
     try {
       this.isSaving = true
       await this.updateDeviceCustomField({
@@ -107,6 +109,7 @@ export default class DeviceCustomFieldsShowPage extends Vue {
         deviceCustomField: this.valueCopy
       })
       this.loadDeviceCustomFields(this.deviceId)
+      this.$store.commit('snackbar/setSuccess', 'Custom field updated')
       this.$router.push('/devices/' + this.deviceId + '/customfields')
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to save custom field')

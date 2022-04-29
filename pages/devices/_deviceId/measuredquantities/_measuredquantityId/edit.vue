@@ -70,7 +70,7 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop } from 'nuxt-property-decorator'
+import { Component, Vue } from 'nuxt-property-decorator'
 
 import DevicePropertyForm from '@/components/DevicePropertyForm.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
