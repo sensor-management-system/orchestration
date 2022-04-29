@@ -41,9 +41,6 @@ permissions and limitations under the Licence.
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
-
-import { Device } from '@/models/Device'
-
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import { mapActions } from 'vuex'
 
