@@ -1,11 +1,15 @@
 <template>
   <div>
+    <ProgressIndicator
+      v-model="isSaving"
+      dark
+    />
     <v-card-actions>
       <v-spacer></v-spacer>
-      <ActionButtonTray
-        :cancel-url="'/devices/' + deviceId + '/actions'"
-        :show-apply="true"
-        @apply="addGenericAction"
+      <SaveAndCancelButtons
+        save-btn-text="Create"
+        :to="'/devices/' + deviceId + '/actions'"
+        @save="save"
       />
     </v-card-actions>
     <GenericActionForm
@@ -16,10 +20,10 @@
     />
     <v-card-actions>
       <v-spacer></v-spacer>
-      <ActionButtonTray
-        :cancel-url="'/devices/' + deviceId + '/actions'"
-        :show-apply="true"
-        @apply="addGenericAction"
+      <SaveAndCancelButtons
+        save-btn-text="Create"
+        :to="'/devices/' + deviceId + '/actions'"
+        @save="save"
       />
     </v-card-actions>
   </div>
@@ -27,29 +31,34 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
+
+import GenericActionForm from '@/components/actions/GenericActionForm.vue'
+import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
+import ProgressIndicator from '@/components/ProgressIndicator.vue'
+
 import { GenericAction } from '@/models/GenericAction'
 import { mapActions, mapState } from 'vuex'
-import GenericActionForm from '@/components/actions/GenericActionForm.vue'
-import ActionButtonTray from '@/components/actions/ActionButtonTray.vue'
-
 @Component({
   middleware:['auth'],
-  components: { ActionButtonTray, GenericActionForm },
+  components: { ProgressIndicator, SaveAndCancelButtons, GenericActionForm },
   computed: mapState('devices', ['deviceAttachments', 'chosenKindOfDeviceAction']),
   methods: mapActions('devices',['addDeviceGenericAction','loadAllDeviceActions'])
 })
 export default class NewGenericDeviceAction extends Vue {
   private genericDeviceAction: GenericAction = new GenericAction()
+  private isSaving: boolean = false
+
+  created(){
+    if(this.chosenKindOfDeviceAction === null){
+      this.$router.push('/devices/' + this.deviceId + '/actions')
+    }
+  }
 
   get deviceId (): string {
     return this.$route.params.deviceId
   }
 
-
-  addGenericAction () {
-    if (!this.$auth.loggedIn) {
-      return
-    }
+  async save () {
     if (!(this.$refs.genericDeviceActionForm as Vue & { isValid: () => boolean }).isValid()) {
       this.$store.commit('snackbar/setError', 'Please correct the errors')
       return
@@ -59,14 +68,19 @@ export default class NewGenericDeviceAction extends Vue {
     this.genericDeviceAction.actionTypeUrl = this.chosenKindOfDeviceAction?.uri || ''
 
     try {
+      this.isSaving=true
       this.addDeviceGenericAction({
         deviceId: this.deviceId,
         genericDeviceAction: this.genericDeviceAction
       });
       this.loadAllDeviceActions(this.deviceId)
+      let successMessage = this.genericDeviceAction.actionTypeName ?? 'Action'
+      this.$store.commit('snackbar/setSuccess', `${successMessage} created`)
       this.$router.push('/devices/' + this.deviceId + '/actions')
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to save the action')
+    }finally {
+      this.isSaving=false
     }
 
   }
