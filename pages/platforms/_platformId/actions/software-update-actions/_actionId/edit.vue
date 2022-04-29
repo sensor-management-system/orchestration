@@ -132,6 +132,7 @@ export default class PlatformSoftwareUpdateActionEditPage extends Vue {
         softwareUpdateAction: this.action
       })
       this.loadAllPlatformActions(this.platformId)
+      this.$store.commit('snackbar/setSuccess', 'Software Update Action updated')
       this.$router.push('/platforms/' + this.platformId + '/actions')
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to save the action')

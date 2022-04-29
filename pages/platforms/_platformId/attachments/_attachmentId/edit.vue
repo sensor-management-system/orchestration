@@ -150,6 +150,7 @@ export default class AttachmentEditPage extends mixins(AttachmentsMixin) {
         attachment: this.valueCopy
       })
       this.loadPlatformAttachments(this.platformId)
+      this.$store.commit('snackbar/setSuccess', 'Attachment updated')
       this.$router.push('/platforms/' + this.platformId + '/attachments')
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to save attachment')

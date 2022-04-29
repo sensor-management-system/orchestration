@@ -115,6 +115,7 @@ export default class PlatformShowContactPage extends Vue {
         platformId: this.platformId,
         contactId: contactId
       })
+      this.$store.commit('snackbar/setSuccess', 'Contact removed')
       this.loadPlatformContacts(this.platformId);
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Removing contact failed')

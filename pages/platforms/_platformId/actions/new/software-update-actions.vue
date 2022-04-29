@@ -7,7 +7,7 @@
     <v-card-actions>
       <v-spacer></v-spacer>
       <SaveAndCancelButtons
-        save-btn-text="Apply"
+        save-btn-text="Create"
         :to="'/platforms/' + platformId + '/actions'"
         @save="save"
       />
@@ -21,7 +21,7 @@
     <v-card-actions>
       <v-spacer></v-spacer>
       <SaveAndCancelButtons
-        save-btn-text="Apply"
+        save-btn-text="Create"
         :to="'/platforms/' + platformId + '/actions'"
         @save="save"
       />
@@ -71,6 +71,7 @@ export default class NewPlatformSoftwareUpdateActions extends Vue {
           softwareUpdateAction: this.softwareUpdateAction
         })
       this.loadAllPlatformActions(this.platformId)
+      this.$store.commit('snackbar/setSuccess', 'New Software Update Action added')
       this.$router.push('/platforms/' + this.platformId + '/actions')
     }catch (e){
       this.$store.commit('snackbar/setError', 'Failed to save the action')

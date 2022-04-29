@@ -108,6 +108,7 @@ export default class PlatformEditBasicPage extends Vue {
         includePlatformAttachments:false
       })
       this.$router.push('/platforms/' + this.platformId + '/basic')
+      this.$store.commit('snackbar/setSuccess', 'Platform updated')
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Save failed')
     } finally {

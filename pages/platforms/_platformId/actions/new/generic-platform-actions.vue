@@ -7,7 +7,7 @@
     <v-card-actions>
       <v-spacer></v-spacer>
       <SaveAndCancelButtons
-        save-btn-text="Apply"
+        save-btn-text="Create"
         :to="'/platforms/' + platformId + '/actions'"
         @save="save"
       />
@@ -22,7 +22,7 @@
     <v-card-actions>
       <v-spacer></v-spacer>
       <SaveAndCancelButtons
-        save-btn-text="Apply"
+        save-btn-text="Create"
         :to="'/platforms/' + platformId + '/actions'"
         @save="save"
       />
@@ -70,6 +70,8 @@ export default class NewGenericPlatformAction extends Vue {
       this.isSaving=true
       await this.addPlatformGenericAction({platformId:this.platformId,genericPlatformAction: this.genericPlatformAction})
       this.loadAllPlatformActions(this.platformId)
+      let successMessage = this.genericPlatformAction.actionTypeName ?? 'Action'
+      this.$store.commit('snackbar/setSuccess', `${successMessage} created`)
       this.$router.push('/platforms/' + this.platformId + '/actions')
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to save the action')

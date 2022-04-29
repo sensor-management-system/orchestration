@@ -133,7 +133,7 @@ export default class EditPlatformAction extends Vue {
       this.isSaving = true
       await this.updatePlatformGenericAction({platformId:this.platformId,genericPlatformAction: this.action})
       this.loadAllPlatformActions(this.platformId)
-      this.$store.commit('snackbar/setSuccess', `Action: ${this.action.actionTypeName} updated`)
+      this.$store.commit('snackbar/setSuccess', `${this.action.actionTypeName} updated`)
       this.$router.push('/platforms/' + this.platformId + '/actions')
     }catch (err){
       this.$store.commit('snackbar/setError', 'Failed to save the action')

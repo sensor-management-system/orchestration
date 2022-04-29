@@ -151,6 +151,7 @@ export default class PlatformAttachmentAddPage extends mixins(Rules, UploadRules
       }
       await this.addPlatformAttachment({platformId:this.platformId, attachment:this.attachment})
       await this.loadPlatformAttachments(this.platformId)
+      this.$store.commit('snackbar/setSuccess', 'New attachment added')
       this.$router.push('/platforms/' + this.platformId + '/attachments')
     } catch (error: any) {
       this.handleError(theFailureCanBeFromUpload, error)
