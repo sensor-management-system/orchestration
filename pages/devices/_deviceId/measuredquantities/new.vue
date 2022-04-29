@@ -103,10 +103,10 @@ export default class DevicePropertyAddPage extends Vue {
         deviceMeasuredQuantity: this.valueCopy
       })
       this.loadDeviceMeasuredQuantities(this.deviceId)
-      this.$store.commit('snackbar/setSuccess', 'New measured qauntity added')
+      this.$store.commit('snackbar/setSuccess', 'New measured quantity added')
       this.$router.push('/devices/' + this.deviceId + '/measuredquantities')
     } catch (e) {
-      this.$store.commit('snackbar/setError', 'Failed to save measured qauntity')
+      this.$store.commit('snackbar/setError', 'Failed to save measured quantity')
     }finally {
       this.isSaving=false
     }
