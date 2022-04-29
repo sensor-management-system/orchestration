@@ -34,6 +34,10 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
+    <ProgressIndicator
+      v-model="isInProgress"
+      :dark="isSaving"
+    />
     <!-- just to be consistent with the new mask, we show the selected action type as an disabled v-select here -->
     <v-select
       :value="action.actionTypeName"
@@ -44,11 +48,10 @@ permissions and limitations under the Licence.
     />
     <v-card-actions>
       <v-spacer />
-      <ActionButtonTray
-        v-if="$auth.loggedIn"
-        :cancel-url="'/platforms/' + platformId + '/actions'"
-        :is-saving="isSaving"
-        @apply="save"
+      <SaveAndCancelButtons
+        save-btn-text="Apply"
+        :to="'/platforms/' + platformId + '/actions'"
+        @save="save"
       />
     </v-card-actions>
     <GenericActionForm
@@ -60,11 +63,10 @@ permissions and limitations under the Licence.
 
     <v-card-actions>
       <v-spacer />
-      <ActionButtonTray
-        v-if="$auth.loggedIn"
-        :cancel-url="'/platforms/' + platformId + '/actions'"
-        :is-saving="isSaving"
-        @apply="save"
+      <SaveAndCancelButtons
+        save-btn-text="Apply"
+        :to="'/platforms/' + platformId + '/actions'"
+        @save="save"
       />
     </v-card-actions>
   </div>
@@ -74,15 +76,16 @@ permissions and limitations under the Licence.
 import { Component, Vue } from 'nuxt-property-decorator'
 
 import { GenericAction } from '@/models/GenericAction'
-import { Attachment } from '@/models/Attachment'
 
 import GenericActionForm from '@/components/actions/GenericActionForm.vue'
-import ActionButtonTray from '@/components/actions/ActionButtonTray.vue'
 import { mapActions, mapState } from 'vuex'
+import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
 
 @Component({
   components: {
-    ActionButtonTray,
+    SaveAndCancelButtons,
+    ProgressIndicator,
     GenericActionForm
   },
   scrollToTop: true,
@@ -91,21 +94,20 @@ import { mapActions, mapState } from 'vuex'
   methods:mapActions('platforms',['loadPlatformGenericAction','loadAllPlatformActions','loadPlatformAttachments','updatePlatformGenericAction'])
 })
 export default class EditPlatformAction extends Vue {
-  private isSaving: boolean = false
-
   private action:GenericAction=new GenericAction()
+  private isSaving = false
+  private isLoading = false
 
   async created(){
     try {
+      this.isLoading = true
       await this.loadPlatformGenericAction(this.actionId)
+      await this.loadPlatformAttachments(this.platformId)
       this.action = GenericAction.createFromObject(this.platformGenericAction)
     } catch (error) {
       this.$store.commit('snackbar/setError', 'Failed to fetch action')
-    }
-    try {
-      await this.loadPlatformAttachments(this.platformId)
-    } catch (e) {
-      this.$store.commit('snackbar/setError', 'Failed to fetch attachments')
+    }finally {
+      this.isLoading = false
     }
   }
 
@@ -115,6 +117,10 @@ export default class EditPlatformAction extends Vue {
 
   get actionId (): string {
     return this.$route.params.actionId
+  }
+
+  get isInProgress (): boolean {
+    return this.isLoading || this.isSaving
   }
 
   async save (): void {
