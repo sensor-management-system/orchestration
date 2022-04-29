@@ -140,7 +140,6 @@ export default class ConfigurationShowBasicPage extends Vue {
       await this.deleteConfiguration(this.configuration.id)
       this.$store.commit('snackbar/setSuccess', 'Configuration deleted')
       this.$router.push('/configurations')
-
     }catch (e) {
       this.$store.commit('snackbar/setError', 'Configuration could not be deleted')
     }finally {
