@@ -114,8 +114,6 @@ import { dateToDateTimeString } from '@/utils/dateHelper'
 import { protocolsInUrl } from '@/utils/urlHelpers'
 import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
 
-import ActionCardMenu from '@/components/actions/ActionCardMenu.vue'
-import ActionDeleteDialog from '@/components/actions/ActionDeleteDialog.vue'
 import DotMenu from '@/components/DotMenu.vue'
 
 /**
@@ -127,9 +125,7 @@ import DotMenu from '@/components/DotMenu.vue'
     toUtcDate: dateToDateTimeString
   },
   components: {
-    DotMenu,
-    ActionCardMenu,
-    ActionDeleteDialog
+    DotMenu
   }
 })
 // @ts-ignore

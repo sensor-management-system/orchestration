@@ -254,17 +254,26 @@ const actions = {
   }: { deviceId: number, softwareUpdateAction: SoftwareUpdateAction }): Promise<SoftwareUpdateAction> {
     return this.$api.deviceSoftwareUpdateActions.update(deviceId, softwareUpdateAction)
   },
+  async deleteDeviceSoftwareUpdateAction ({ commit }: { commit: Commit }, softwareUpdateActionId:number): Promise<void> {
+    return this.$api.deviceSoftwareUpdateActions.deleteById(softwareUpdateActionId)
+  },
   async updateDeviceGenericAction ({ commit }: { commit: Commit }, {
     deviceId,
     genericDeviceAction
   }: { deviceId: number, genericDeviceAction: GenericAction }): Promise<GenericAction> {
     return this.$api.genericDeviceActions.update(deviceId, genericDeviceAction)
   },
+  async deleteDeviceGenericAction ({ commit }: { commit: Commit }, genericDeviceActionId:number): Promise<void> {
+    return this.$api.genericDeviceActions.deleteById(genericDeviceActionId)
+  },
   async updateDeviceCalibrationAction ({ commit }: { commit: Commit }, {
     deviceId,
     calibrationDeviceAction
   }: { deviceId: number, calibrationDeviceAction: DeviceCalibrationAction }): Promise<DeviceCalibrationAction> {
     return  this.$api.deviceCalibrationActions.update(deviceId, calibrationDeviceAction)
+  },
+  async deleteDeviceCalibrationAction ({ commit }: { commit: Commit }, calibrationDeviceActionId:number): Promise<void> {
+    return this.$api.deviceCalibrationActions.deleteById(calibrationDeviceActionId)
   },
   async deleteDeviceAttachment ({ commit }: { commit: Commit }, attachmentId: number): Promise<void> {
     return this.$api.deviceAttachments.deleteById(attachmentId)

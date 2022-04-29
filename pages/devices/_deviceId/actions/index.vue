@@ -1,7 +1,11 @@
 <template>
   <div>
+    <ProgressIndicator
+      v-model="isSaving"
+      dark
+    />
     <v-card-actions>
-      <v-spacer />
+      <v-spacer/>
       <v-btn
         v-if="$auth.loggedIn"
         color="primary"
@@ -11,36 +15,252 @@
         Add Action
       </v-btn>
     </v-card-actions>
-      <hint-card v-if="actions.length === 0">
-        There are no actions for this device.
-      </hint-card>
-      <DeviceActionTimeline
-        v-else
-        :value="actions"
-        :device-id="deviceId"
-        :action-api-dispatcher="apiDispatcher"
-        :is-user-authenticated="$auth.loggedIn"
-      />
+    <hint-card v-if="actions.length === 0">
+      There are no actions for this device.
+    </hint-card>
+    <DeviceActionTimeline
+      v-else
+      :value="actions"
+    >
+      <template #generic-action="{action}">
+        <GenericActionCard
+          :value="action"
+        >
+          <template #actions>
+            <v-btn
+              v-if="$auth.loggedIn"
+              :to="'/devices/' + deviceId + '/actions/generic-device-actions/' + action.id + '/edit'"
+              color="primary"
+              text
+              @click.stop.prevent
+            >
+              Edit
+            </v-btn>
+          </template>
+          <template #dot-menu-items>
+            <DotMenuActionDelete
+              :readonly="!$auth.loggedIn"
+              @click="initDeleteDialogGenericAction(action)"
+            />
+          </template>
+        </GenericActionCard>
+      </template>
+      <template #software-update-action="{action}">
+        <SoftwareUpdateActionCard
+          :value="action"
+          target="Device"
+        >
+          <template #actions>
+            <v-btn
+              v-if="$auth.loggedIn"
+              :to="'/devices/' + deviceId + '/actions/software-update-actions/' + action.id + '/edit'"
+              color="primary"
+              text
+              @click.stop.prevent
+            >
+              Edit
+            </v-btn>
+          </template>
+          <template #dot-menu-items>
+            <DotMenuActionDelete
+              :readonly="!$auth.loggedIn"
+              @click="initDeleteDialogSoftwareUpdateAction(action)"
+            />
+          </template>
+        </SoftwareUpdateActionCard>
+      </template>
+      <template #calibration-action="{action}">
+        <DeviceCalibrationActionCard
+          :value="action"
+        >
+          <template #actions>
+            <v-btn
+              v-if="$auth.loggedIn"
+              :to="'/devices/' + deviceId + '/actions/device-calibration-actions/' + action.id + '/edit'"
+              color="primary"
+              text
+              @click.stop.prevent
+            >
+              Edit
+            </v-btn>
+          </template>
+          <template #dot-menu-items>
+            <DotMenuActionDelete
+              :readonly="!$auth.loggedIn"
+              @click="initDeleteDialogCalibrationAction(action)"
+            />
+          </template>
+        </DeviceCalibrationActionCard>
+      </template>
+      <template #device-mount-action="{action}">
+        <DeviceMountActionCard
+          :value="action"
+        />
+      </template>
+      <template #device-unmount-action="{action}">
+        <DeviceUnmountActionCard
+          :value="action"
+        />
+      </template>
+    </DeviceActionTimeline>
+    <ActionDeleteDialog
+      v-model="showDeleteDialog"
+      :action-to-delete="actionToDelete"
+      @cancel-deletion="closeDialog"
+      @submit-deletion="deleteAndCloseDialog"
+    />
   </div>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
-import { mapGetters } from 'vuex'
-import { DeviceActionApiDispatcher } from '@/modelUtils/actionHelpers'
+
 import HintCard from '@/components/HintCard.vue'
 import DeviceActionTimeline from '@/components/actions/DeviceActionTimeline.vue'
+import GenericActionCard from '@/components/actions/GenericActionCard.vue'
+import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
+import DeviceMountActionCard from '@/components/actions/DeviceMountActionCard.vue'
+import DeviceUnmountActionCard from '@/components/actions/DeviceUnmountActionCard.vue'
+import DeviceCalibrationActionCard from '@/components/actions/DeviceCalibrationActionCard.vue'
+import ActionDeleteDialog from '@/components/actions/ActionDeleteDialog.vue'
+
+import { GenericAction } from '@/models/GenericAction'
+import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
+import { DeviceCalibrationAction } from '@/models/DeviceCalibrationAction'
+import { mapActions, mapGetters } from 'vuex'
+import { DeviceActionApiDispatcher } from '@/modelUtils/actionHelpers'
+import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import SoftwareUpdateActionCard from '@/components/actions/SoftwareUpdateActionCard.vue'
 
 @Component({
-  components: { DeviceActionTimeline, HintCard },
-  computed:mapGetters('devices',['actions'])
+  components: {
+    SoftwareUpdateActionCard,
+    ProgressIndicator,
+    ActionDeleteDialog,
+    DeviceCalibrationActionCard,
+    DeviceUnmountActionCard,
+    DeviceMountActionCard,
+    DotMenuActionDelete,
+    GenericActionCard,
+    DeviceActionTimeline,
+    HintCard
+  },
+  computed: mapGetters('devices', ['actions']),
+  methods: mapActions('devices', ['deleteDeviceSoftwareUpdateAction', 'deleteDeviceGenericAction', 'deleteDeviceCalibrationAction', 'loadAllDeviceActions'])
 })
 export default class DeviceActionsShowPage extends Vue {
+  private isSaving: boolean = false
+  private genericActionToDelete: GenericAction | null = null
+  private softwareUpdateActionToDelete: SoftwareUpdateAction | null = null
+  private calibrationActionToDelete: DeviceCalibrationAction | null = null
+  private showDeleteDialog: boolean = false
+
   get deviceId (): string {
     return this.$route.params.deviceId
   }
-  get apiDispatcher () { //Todo überarbeiten (siehe auch anmerkung bei pages/platforms/_platformId/actions/index.vue)
-    return new DeviceActionApiDispatcher(this.$api)
+
+  get actionToDelete () {
+    if (this.genericActionToDelete) {
+      return this.genericActionToDelete
+    }
+
+    if (this.softwareUpdateActionToDelete) {
+      return this.softwareUpdateActionToDelete
+    }
+
+    if (this.calibrationActionToDelete) {
+      return this.calibrationActionToDelete
+    }
+    return null
+  }
+
+  initDeleteDialogGenericAction (action: GenericAction) {
+    this.showDeleteDialog = true
+
+    this.genericActionToDelete = action
+    this.softwareUpdateActionToDelete = null
+    this.calibrationActionToDelete = null
+  }
+
+  initDeleteDialogSoftwareUpdateAction (action: SoftwareUpdateAction) {
+    this.showDeleteDialog = true
+
+    this.softwareUpdateActionToDelete = action
+    this.genericActionToDelete = null
+    this.calibrationActionToDelete = null
+  }
+
+  initDeleteDialogCalibrationAction (action: DeviceCalibrationAction) {
+    this.showDeleteDialog = true
+
+    this.calibrationActionToDelete = action
+    this.softwareUpdateActionToDelete = null
+    this.genericActionToDelete = null
+  }
+
+  closeDialog () {
+    this.showDeleteDialog = false
+    this.softwareUpdateActionToDelete = null
+    this.genericActionToDelete = null
+  }
+
+  async deleteAndCloseDialog () {
+    if (this.actionToDelete === null || this.actionToDelete.id === null) {
+      return
+    }
+
+    if (this.genericActionToDelete !== null && this.softwareUpdateActionToDelete === null && this.calibrationActionToDelete === null) {
+      this.deleteGenericAction()
+    }
+
+    if (this.softwareUpdateActionToDelete !== null && this.genericActionToDelete === null && this.calibrationActionToDelete === null) {
+      this.deleteSoftwareUpdateAction()
+    }
+    if (this.calibrationActionToDelete !== null && this.genericActionToDelete === null && this.softwareUpdateActionToDelete === null) {
+      this.deleteCalibrationAction()
+    }
+  }
+
+  async deleteGenericAction () {
+    try {
+      this.isSaving = true
+      await this.deleteDeviceGenericAction(this.genericActionToDelete!.id)
+      this.loadAllDeviceActions(this.deviceId)
+      this.$store.commit('snackbar/setSuccess', 'Generic action deleted')
+    } catch (_error) {
+      this.$store.commit('snackbar/setError', 'Generic action could not be deleted')
+    } finally {
+      this.isSaving = false
+      this.closeDialog()
+    }
+  }
+
+  async deleteSoftwareUpdateAction () {
+    try {
+      this.isSaving = true
+      await this.deleteDeviceSoftwareUpdateAction(this.softwareUpdateActionToDelete!.id)
+      this.loadAllDeviceActions(this.deviceId)
+      this.$store.commit('snackbar/setSuccess', 'Software update action deleted')
+    } catch (_error) {
+      this.$store.commit('snackbar/setError', 'Software update action could not be deleted')
+    } finally {
+      this.isSaving = false
+      this.closeDialog()
+    }
+  }
+
+  async deleteCalibrationAction () {
+    try {
+      this.isSaving = true
+      await this.deleteDeviceCalibrationAction(this.calibrationActionToDelete!.id)
+      this.loadAllDeviceActions(this.deviceId)
+      this.$store.commit('snackbar/setSuccess', 'Calibration action deleted')
+    } catch (_error) {
+      this.$store.commit('snackbar/setError', 'Calibration action could not be deleted')
+    } finally {
+      this.isSaving = false
+      this.closeDialog()
+    }
   }
 }
 </script>

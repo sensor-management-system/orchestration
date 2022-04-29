@@ -66,16 +66,16 @@ permissions and limitations under the Licence.
           <slot name="actions" />
           <v-btn
             icon
-            @click.stop.prevent="toggleVisibility()"
+            @click.stop.prevent="show = !show"
           >
-            <v-icon>{{ isVisible() ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
+            <v-icon>{{ show ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
           </v-btn>
         </v-col>
       </v-row>
     </v-card-subtitle>
     <v-expand-transition>
       <div
-        v-show="isVisible(value.id)"
+        v-show="show"
       >
         <v-card-text
           class="grey lighten-5 text--primary pt-2"
@@ -98,8 +98,6 @@ import { Component, Prop, Vue } from 'nuxt-property-decorator'
 import { dateToDateTimeString } from '@/utils/dateHelper'
 import { GenericAction } from '@/models/GenericAction'
 
-import ActionCardMenu from '@/components/actions/ActionCardMenu.vue'
-import ActionDeleteDialog from '@/components/actions/ActionDeleteDialog.vue'
 import DotMenu from '@/components/DotMenu.vue'
 
 /**
@@ -108,16 +106,12 @@ import DotMenu from '@/components/DotMenu.vue'
  */
 @Component({
   components: {
-    DotMenu,
-    ActionCardMenu,
-    ActionDeleteDialog
+    DotMenu
   }
 })
 // @ts-ignore
 export default class GenericActionCard extends Vue {
-  private showDetails: boolean = false
-  private isShowDeleteDialog: boolean = false
-  private _isDeleting: boolean = false
+  private show: boolean = false
 
   /**
    * a GenericAction
@@ -129,34 +123,6 @@ export default class GenericActionCard extends Vue {
   })
   // @ts-ignore
   readonly value!: GenericAction
-
-  /**
-   * a function reference that deletes the action
-   */
-  @Prop({
-    default: () => null,
-    required: false,
-    type: Function
-  })
-  // @ts-ignore
-  readonly deleteCallback!: (id: string) => Promise<void>
-
-  /**
-   * whether the card expansion is shown or not
-   *
-   * @return {boolean} whether the card expansion is shown or not
-   */
-  isVisible (): boolean {
-    return this.showDetails
-  }
-
-  /**
-   * toggles the shown state of the card expansion
-   *
-   */
-  toggleVisibility (): void {
-    this.showDetails = !this.showDetails
-  }
 
   get actionDate (): string {
     let actionDate = dateToDateTimeString(this.value.beginDate)

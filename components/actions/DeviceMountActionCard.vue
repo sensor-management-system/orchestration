@@ -61,16 +61,16 @@ permissions and limitations under the Licence.
           <slot name="actions" />
           <v-btn
             icon
-            @click.stop.prevent="toggleVisibility()"
+            @click.stop.prevent="show =!show"
           >
-            <v-icon>{{ isVisible() ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
+            <v-icon>{{ show ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
           </v-btn>
         </v-col>
       </v-row>
     </v-card-subtitle>
     <v-expand-transition>
       <div
-        v-show="isVisible()"
+        v-show="show"
       >
         <v-card-text
           class="grey lighten-5 text--primary pt-2"
@@ -118,7 +118,7 @@ import { DeviceMountAction } from '@/models/views/devices/actions/DeviceMountAct
 })
 // @ts-ignore
 export default class DeviceMountActionCard extends Vue {
-  private showDetails: boolean = false
+  private show: boolean = false
 
   /**
    * a DeviceMountAction
@@ -129,22 +129,5 @@ export default class DeviceMountActionCard extends Vue {
   })
   // @ts-ignore
   readonly value!: DeviceMountAction
-
-  /**
-   * whether the card expansion is shown or not
-   *
-   * @return {boolean} whether the card expansion is shown or not
-   */
-  isVisible (): boolean {
-    return this.showDetails
-  }
-
-  /**
-   * toggles the shown state of the card expansion
-   *
-   */
-  toggleVisibility (): void {
-    this.showDetails = !this.showDetails
-  }
 }
 </script>
