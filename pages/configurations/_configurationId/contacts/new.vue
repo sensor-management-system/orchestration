@@ -114,8 +114,16 @@ export default class ConfigurationAddContactPage extends Vue {
     }
   }
 
+  get configurationId (): string {
+    return this.$route.params.configurationId
+  }
+
   get isInProgress (): boolean {
     return this.isLoading || this.isSaving
+  }
+
+  get allExceptSelected (): Contact[] {
+    return this.contactsByDifference(this.configurationContacts);
   }
 
   async addContact (): void {
@@ -137,12 +145,5 @@ export default class ConfigurationAddContactPage extends Vue {
     }
   }
 
-  get allExceptSelected (): Contact[] {
-    return this.contactsByDifference(this.configurationContacts);
-  }
-
-  get configurationId (): string {
-    return this.$route.params.configurationId
-  }
 }
 </script>
