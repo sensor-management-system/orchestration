@@ -239,7 +239,6 @@ permissions and limitations under the Licence.
     />
     <v-btn
       v-if="$auth.loggedIn"
-      style="top:85%"
       bottom
       color="primary"
       dark
