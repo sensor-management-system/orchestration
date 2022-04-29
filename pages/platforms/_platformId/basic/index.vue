@@ -102,14 +102,15 @@ permissions and limitations under the Licence.
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 
-import { Platform } from '@/models/Platform'
 import PlatformBasicData from '@/components/PlatformBasicData.vue'
 import DotMenu from '@/components/DotMenu.vue'
 import DotMenuActionCopy from '@/components/DotMenuActionCopy.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 import PlatformDeleteDialog from '@/components/platforms/PlatformDeleteDialog.vue'
-import { mapActions, mapState } from 'vuex'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
+
+import { Platform } from '@/models/Platform'
+import { mapActions, mapState } from 'vuex'
 
 @Component({
   components: {

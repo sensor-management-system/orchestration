@@ -30,6 +30,10 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
+    <ProgressIndicator
+      v-model="isSaving"
+      dark
+    />
     <v-card-actions>
       <v-spacer />
       <v-btn
@@ -95,17 +99,20 @@ permissions and limitations under the Licence.
 <script lang="ts">
 import { Component, Vue, Prop } from 'nuxt-property-decorator'
 
-import DeviceBasicData from '@/components/DeviceBasicData.vue'
-
-import { Device } from '@/models/Device'
 import DeviceDeleteDialog from '@/components/devices/DeviceDeleteDialog.vue'
+import DeviceBasicData from '@/components/DeviceBasicData.vue'
 import DotMenu from '@/components/DotMenu.vue'
 import DotMenuActionCopy from '@/components/DotMenuActionCopy.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
+import ProgressIndicator from '@/components/ProgressIndicator.vue'
+
+import { Device } from '@/models/Device'
 import { mapActions, mapState } from 'vuex'
+
 
 @Component({
   components: {
+    ProgressIndicator,
     DotMenuActionDelete,
     DotMenuActionCopy,
     DotMenu,
@@ -116,6 +123,7 @@ import { mapActions, mapState } from 'vuex'
   methods:mapActions('devices',['deleteDevice'])
 })
 export default class DeviceShowBasicPage extends Vue {
+  private isSaving = false
 
   private showDeleteDialog: boolean = false
 
@@ -131,18 +139,21 @@ export default class DeviceShowBasicPage extends Vue {
     this.showDeleteDialog = false
   }
 
-  deleteAndCloseDialog () {
+  async deleteAndCloseDialog () {
     this.showDeleteDialog = false
     if (this.device === null) {
       return
     }
-
-    this.deleteDevice(this.device.id!).then(() => {
-      this.$router.push('/devices')
+    try {
+      this.isSaving=true
+      this.deleteDevice(this.device.id)
       this.$store.commit('snackbar/setSuccess', 'Device deleted')
-    }).catch((_error) => {
+      this.$router.push('/devices')
+    }catch (e){
       this.$store.commit('snackbar/setError', 'Device could not be deleted')
-    })
+    }finally {
+      this.isSaving=false
+    }
   }
 }
 </script>
