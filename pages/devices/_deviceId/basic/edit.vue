@@ -31,28 +31,16 @@ permissions and limitations under the Licence.
 <template>
   <div>
     <ProgressIndicator
-      v-model="isLoading"
+      v-model="isSaving"
       dark
     />
     <v-card-actions>
       <v-spacer />
-      <v-btn
-        v-if="$auth.loggedIn"
-        small
-        text
-        nuxt
+      <SaveAndCancelButtons
+        save-btn-text="Apply"
         :to="'/devices/' + deviceId + '/basic'"
-      >
-        cancel
-      </v-btn>
-      <v-btn
-        v-if="$auth.loggedIn"
-        color="green"
-        small
-        @click="onSaveButtonClicked"
-      >
-        apply
-      </v-btn>
+        @save="save"
+      />
     </v-card-actions>
     <DeviceBasicDataForm
       ref="basicForm"
@@ -60,41 +48,28 @@ permissions and limitations under the Licence.
     />
     <v-card-actions>
       <v-spacer />
-      <v-btn
-        v-if="$auth.loggedIn"
-        small
-        text
-        nuxt
+      <SaveAndCancelButtons
+        save-btn-text="Apply"
         :to="'/devices/' + deviceId + '/basic'"
-      >
-        cancel
-      </v-btn>
-      <v-btn
-        v-if="$auth.loggedIn"
-        color="green"
-        small
-        @click="onSaveButtonClicked"
-      >
-        apply
-      </v-btn>
+        @save="save"
+      />
     </v-card-actions>
   </div>
 </template>
 
-
-
-
 <script lang="ts">
-import { Component, Vue, Prop, Watch } from 'nuxt-property-decorator'
+import { Component, Vue } from 'nuxt-property-decorator'
 
 import DeviceBasicDataForm from '@/components/DeviceBasicDataForm.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
 
 import { Device } from '@/models/Device'
 import { mapActions, mapState } from 'vuex'
 
 @Component({
   components: {
+    SaveAndCancelButtons,
     DeviceBasicDataForm,
     ProgressIndicator
   },
@@ -105,19 +80,23 @@ import { mapActions, mapState } from 'vuex'
 export default class DeviceEditBasicPage extends Vue {
 
   private deviceCopy: Device = new Device()
-  private isLoading: boolean = false
+  private isSaving: boolean = false
 
   created () {
     this.deviceCopy = Device.createFromObject(this.device)
   }
 
-  async onSaveButtonClicked () {
+  get deviceId () {
+    return this.$route.params.deviceId
+  }
+
+  async save () {
     if (!(this.$refs.basicForm as Vue & { validateForm: () => boolean }).validateForm()) {
       this.$store.commit('snackbar/setError', 'Please correct your input')
       return
     }
     try {
-      this.isLoading = true
+      this.isSaving = true
       await this.saveDevice(this.deviceCopy)
       this.loadDevice({
         deviceId:this.deviceId,
@@ -126,16 +105,13 @@ export default class DeviceEditBasicPage extends Vue {
         includeDeviceProperties: false,
         includeDeviceAttachments: false
       }) // Todo eventuell gibt es eine besser möglichkeit die Änderungen nachzuladen/eventuell das gespeicherte Device als das device im store setzen
+      this.$store.commit('snackbar/setSuccess', 'Device updated')
       this.$router.push('/devices/' + this.deviceId + '/basic')
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Save failed')
     } finally {
-      this.isLoading = false
+      this.isSaving = false
     }
-  }
-
-  get deviceId () {
-    return this.$route.params.deviceId
   }
 }
 </script>
