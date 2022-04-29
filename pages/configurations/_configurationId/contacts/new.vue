@@ -127,6 +127,7 @@ export default class ConfigurationAddContactPage extends Vue {
           contactId: this.selectedContact.id
         })
         this.loadConfigurationContacts(this.configurationId)
+        this.$store.commit('snackbar/setSuccess', 'New Contact added')
         this.$router.push('/configurations/' + this.configurationId + '/contacts')
       } catch (e) {
         this.$store.commit('snackbar/setError', 'Failed to add a contact')
