@@ -69,7 +69,7 @@ export default class NewGenericDeviceAction extends Vue {
 
     try {
       this.isSaving=true
-      this.addDeviceGenericAction({
+      await this.addDeviceGenericAction({
         deviceId: this.deviceId,
         genericDeviceAction: this.genericDeviceAction
       });
