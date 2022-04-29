@@ -29,169 +29,12 @@ implied. See the Licence for the specific language governing
 permissions and limitations under the Licence.
 -->
 <template>
-  <NuxtChild/>
-<!--  <div>-->
-<!--    <ProgressIndicator-->
-<!--      v-model="isInProgress"-->
-<!--      :dark="isSaving"-->
-<!--    />-->
-<!--    <v-card-actions>-->
-<!--      <v-spacer />-->
-<!--      <v-btn-->
-<!--        v-if="$auth.loggedIn"-->
-<!--        :disabled="isEditPropertiesPage"-->
-<!--        color="primary"-->
-<!--        small-->
-<!--        @click="addProperty"-->
-<!--      >-->
-<!--        Add Measured Quantity-->
-<!--      </v-btn>-->
-<!--    </v-card-actions>-->
-<!--    <hint-card v-if="deviceProperties.length === 0">-->
-<!--      There are no measured quantities for this device.-->
-<!--    </hint-card>-->
-<!--    <v-expansion-panels-->
-<!--      v-model="openedPanels"-->
-<!--      multiple-->
-<!--    >-->
-<!--      <v-expansion-panel-->
-<!--        v-for="(property, index) in deviceProperties"-->
-<!--        :key="'property-' + property.id"-->
-<!--      >-->
-<!--        <v-expansion-panel-header>-->
-<!--          <v-row no-gutters>-->
-<!--            <v-col class="text-subtitle-1" cols="10">-->
-<!--              Measured quantity {{ index+1 }} {{ property.label ? ' - ' + property.label : '' }}-->
-<!--            </v-col>-->
-<!--            <v-col-->
-<!--              align-self="end"-->
-<!--              class="text-right"-->
-<!--            >-->
-<!--              <v-btn-->
-<!--                v-if="$auth.loggedIn && (!isEditModeForSomeProperty())"-->
-<!--                color="primary"-->
-<!--                text-->
-<!--                small-->
-<!--                @click.prevent.stop="openInEditMode(property)"-->
-<!--              >-->
-<!--                Edit-->
-<!--              </v-btn>-->
-<!--              <template-->
-<!--                v-if="$auth.loggedIn && (isEditModeForProperty(property))"-->
-<!--              >-->
-<!--                <v-btn-->
-<!--                  text-->
-<!--                  small-->
-<!--                  @click.prevent.stop="cancelEditMode()"-->
-<!--                >-->
-<!--                  Cancel-->
-<!--                </v-btn>-->
-<!--                <v-btn-->
-<!--                  color="green"-->
-<!--                  small-->
-<!--                  @click.prevent.stop="saveProperty(property)"-->
-<!--                >-->
-<!--                  Apply-->
-<!--                </v-btn>-->
-<!--              </template>-->
-
-<!--              <v-menu-->
-<!--                v-if="$auth.loggedIn && (!isEditModeForSomeProperty())"-->
-<!--                close-on-click-->
-<!--                close-on-content-click-->
-<!--                offset-x-->
-<!--                left-->
-<!--                z-index="999"-->
-<!--              >-->
-<!--                <template #activator="{ on }">-->
-<!--                  <v-btn-->
-<!--                    data-role="property-menu"-->
-<!--                    icon-->
-<!--                    small-->
-<!--                    v-on="on"-->
-<!--                  >-->
-<!--                    <v-icon-->
-<!--                      dense-->
-<!--                      small-->
-<!--                    >-->
-<!--                      mdi-dots-vertical-->
-<!--                    </v-icon>-->
-<!--                  </v-btn>-->
-<!--                </template>-->
-<!--                <v-list>-->
-<!--                  <v-list-item-->
-<!--                    dense-->
-<!--                    @click="copyProperty(property)"-->
-<!--                  >-->
-<!--                    <v-list-item-title>-->
-<!--                      <v-icon-->
-<!--                        left-->
-<!--                        small-->
-<!--                      >-->
-<!--                        mdi-content-copy-->
-<!--                      </v-icon>-->
-<!--                      Copy-->
-<!--                    </v-list-item-title>-->
-<!--                  </v-list-item>-->
-<!--                  <v-list-item-->
-<!--                    dense-->
-<!--                    @click="showDeleteDialogFor(property.id)"-->
-<!--                  >-->
-<!--                    <v-list-item-content>-->
-<!--                      <v-list-item-title class="red&#45;&#45;text">-->
-<!--                        <v-icon left small color="red">-->
-<!--                          mdi-delete-->
-<!--                        </v-icon>-->
-<!--                        Delete-->
-<!--                      </v-list-item-title>-->
-<!--                    </v-list-item-content>-->
-<!--                  </v-list-item>-->
-<!--                </v-list>-->
-<!--              </v-menu>-->
-<!--            </v-col>-->
-<!--          </v-row>-->
-<!--        </v-expansion-panel-header>-->
-<!--        <v-expansion-panel-content>-->
-<!--          <template v-if="isEditModeForProperty(property)">-->
-<!--            <NuxtChild-->
-<!--              :ref="'deviceProperty_' + property.id"-->
-<!--              v-model="deviceProperties[index]"-->
-<!--              :compartments="compartments"-->
-<!--              :sampling-medias="samplingMedias"-->
-<!--              :properties="properties"-->
-<!--              :units="units"-->
-<!--              :measured-quantity-units="measuredQuantityUnits"-->
-<!--              @showsave="showsave"-->
-<!--            />-->
-<!--          </template>-->
-<!--          <template v-else>-->
-<!--            <DevicePropertyInfo-->
-<!--              v-model="deviceProperties[index]"-->
-<!--              :compartments="compartments"-->
-<!--              :sampling-medias="samplingMedias"-->
-<!--              :properties="properties"-->
-<!--              :units="units"-->
-<!--              :measured-quantity-units="measuredQuantityUnits"-->
-<!--            />-->
-<!--          </template>-->
-<!--        </v-expansion-panel-content>-->
-<!--      </v-expansion-panel>-->
-<!--    </v-expansion-panels>-->
-<!--    <v-card-actions-->
-<!--      v-if="deviceProperties.length > 3"-->
-<!--    >-->
-<!--      <v-spacer />-->
-<!--      <v-btn-->
-<!--        v-if="$auth.loggedIn"-->
-<!--        :disabled="isEditPropertiesPage"-->
-<!--        color="primary"-->
-<!--        small-->
-<!--        @click="addProperty"-->
-<!--      >-->
-<!--        Add Measured Quantity-->
-<!--      </v-btn>-->
-<!--    </v-card-actions>-->
-<!--  </div>-->
+  <div>
+    <ProgressIndicator
+      v-model="isLoading"
+    />
+    <NuxtChild/>
+  </div>
 </template>
 
 <script lang="ts">
@@ -205,9 +48,11 @@ import { mapActions } from 'vuex'
   }
 })
 export default class DevicePropertiesPage extends Vue {
+  private isLoading = false
 
   async created(){
     try {
+      this.isLoading=true
       await this.loadDeviceMeasuredQuantities(this.deviceId)
       await this.loadCompartments()
       await this.loadSamplingMedia()
@@ -215,180 +60,20 @@ export default class DevicePropertiesPage extends Vue {
       await this.loadUnits()
       await this.loadMeasuredQuantityUnits()
     } catch (e) {
-      console.log(e);
       this.$store.commit('snackbar/setError', 'Failed to fetch measured quantities')
+    }finally {
+      this.isLoading=false
     }
   }
 
   get deviceId (): string {
     return this.$route.params.deviceId
   }
-  // private openedPanels: number[] = [] as number[]
-  // private deviceProperties: DeviceProperty[] = []
-  // private isLoading = false
-  // private isSaving = false
-  //
-  // private showDeleteDialog: {[idx: string]: boolean} = {}
-  //
-  // private compartments: Compartment[] = []
-  // private samplingMedias: SamplingMedia[] = []
-  // private properties: Property[] = []
-  // private units: Unit[] = []
-  // private measuredQuantityUnits: MeasuredQuantityUnit[] = []
-  //
-  // async fetch () {
-  //   try {
-  //     this.isLoading = true
-  //     this.deviceProperties = await this.$api.devices.findRelatedDeviceProperties(this.deviceId)
-  //     this.openPanelIfStartedInEditMode()
-  //     this.isLoading = false
-  //   } catch (e) {
-  //     this.$store.commit('snackbar/setError', 'Failed to fetch measured quantities')
-  //     this.isLoading = false
-  //   }
-  //   try {
-  //     this.compartments = await this.$api.compartments.findAllPaginated()
-  //     this.samplingMedias = await this.$api.samplingMedia.findAllPaginated()
-  //     this.properties = await this.$api.properties.findAllPaginated()
-  //     this.units = await this.$api.units.findAllPaginated()
-  //     this.measuredQuantityUnits = await this.$api.measuredQuantityUnits.findAllPaginated()
-  //   } catch (e) {
-  //     this.$store.commit('snackbar/setError', 'Loading of system values failed')
-  //   }
-  // }
-  //
-  // head () {
-  //   return {
-  //     titleTemplate: 'Measured Quantities - %s'
-  //   }
-  // }
-  //
-  // openPanelIfStartedInEditMode () {
-  //   if (this.isEditPropertiesPage) {
-  //     const propertyId = this.getPropertyIdFromUrl()
-  //     if (propertyId) {
-  //       const propertyIndex = this.deviceProperties.findIndex((p: DeviceProperty) => p.id === propertyId)
-  //       if (propertyIndex > -1) {
-  //         this.openedPanels.push(propertyIndex)
-  //       }
-  //     }
-  //   }
-  // }
-  //
-  // get isInProgress (): boolean {
-  //   return this.isLoading || this.isSaving
-  // }
-  //
-  // get deviceId (): string {
-  //   return this.$route.params.deviceId
-  // }
-  //
-  // get isEditPropertiesPage (): boolean {
-  //   // eslint-disable-next-line no-useless-escape
-  //   const editUrl = '^\/devices\/' + this.deviceId + '\/measuredquantities\/([0-9]+)\/edit$'
-  //   return !!this.$route.path.match(editUrl)
-  // }
-  //
-  // getPropertyIdFromUrl (): string | undefined {
-  //   // eslint-disable-next-line no-useless-escape
-  //   const editUrl = '^\/devices\/' + this.deviceId + '\/measuredquantities\/([0-9]+)\/?.*$'
-  //   const matches = this.$route.path.match(editUrl)
-  //   if (!matches) {
-  //     return
-  //   }
-  //   return matches[1]
-  // }
-  //
-  // addProperty (): void {
-  //   const property = new DeviceProperty()
-  //   this.copyProperty(property)
-  // }
-  //
-  // deleteAndCloseDialog (id: string) {
-  //   this.isSaving = true
-  //   this.showDeleteDialog = {}
-  //
-  //   this.$api.deviceProperties.deleteById(id).then(() => {
-  //     const searchIndex = this.deviceProperties.findIndex(p => p.id === id)
-  //     if (searchIndex > -1) {
-  //       this.deviceProperties.splice(searchIndex, 1)
-  //     }
-  //     this.isSaving = false
-  //   }).catch((_error) => {
-  //     this.isSaving = false
-  //     this.$store.commit('snackbar/setError', 'Failed to delete measured quantity')
-  //   })
-  // }
-  //
-  // showDeleteDialogFor (id: string) {
-  //   Vue.set(this.showDeleteDialog, id, true)
-  // }
-  //
-  // hideDeleteDialogFor (id: string) {
-  //   Vue.set(this.showDeleteDialog, id, false)
-  // }
-  //
-  // showsave (isSaving: boolean) {
-  //   this.isSaving = isSaving
-  // }
-  //
-  // copyProperty (oldProperty: DeviceProperty) {
-  //   const property = DeviceProperty.createFromObject(oldProperty)
-  //   property.id = null
-  //   this.isSaving = true
-  //   this.$api.deviceProperties.add(this.deviceId, property).then((newProperty: DeviceProperty) => {
-  //     this.isSaving = false
-  //     this.deviceProperties.push(newProperty)
-  //     this.openedPanels = [...this.openedPanels, this.deviceProperties.length - 1]
-  //     this.$router.push('/devices/' + this.deviceId + '/measuredquantities/' + newProperty.id + '/edit')
-  //     this.openPanelIfStartedInEditMode()
-  //   }).catch(() => {
-  //     this.isSaving = false
-  //     this.$store.commit('snackbar/setError', 'Failed to save measured quantity')
-  //   })
-  // }
-  //
-  // saveProperty (property: DeviceProperty) {
-  //   const childComponents = this.$refs['deviceProperty_' + property.id]
-  //   if (Array.isArray(childComponents)) {
-  //     const firstChild: any = childComponents[0]
-  //     if (firstChild.save) {
-  //       firstChild.save()
-  //     } else {
-  //       throw new Error('Can\'t save with the given child reference: No method given.')
-  //     }
-  //   } else {
-  //     throw new TypeError('Can\'t access the child component to run the save method')
-  //   }
-  // }
-  //
-  // isEditModeForProperty (property: DeviceProperty): boolean {
-  //   return this.$route.path === '/devices/' + this.deviceId + '/measuredquantities/' + property.id + '/edit'
-  // }
-  //
-  // isEditModeForSomeProperty (): boolean {
-  //   return this.deviceProperties.some((p: DeviceProperty) => this.isEditModeForProperty(p))
-  // }
-  //
-  // openInEditMode (property: DeviceProperty) {
-  //   const propertyIndex = this.deviceProperties.findIndex((p: DeviceProperty) => p.id === property.id)
-  //   if (propertyIndex > -1) {
-  //     const openPanelIndex = this.openedPanels.findIndex((v: number) => v === propertyIndex)
-  //     const alreadyExpanded = openPanelIndex > -1
-  //     if (!alreadyExpanded) {
-  //       const newOpenPanels = []
-  //       for (const idx of this.openedPanels) {
-  //         newOpenPanels.push(idx)
-  //       }
-  //       newOpenPanels.push(propertyIndex)
-  //       this.openedPanels = [...this.openedPanels, propertyIndex]
-  //     }
-  //   }
-  //   this.$router.push('/devices/' + this.deviceId + '/measuredquantities/' + property.id + '/edit')
-  // }
-  //
-  // cancelEditMode () {
-  //   this.$router.push('/devices/' + this.deviceId + '/measuredquantities')
-  // }
+
+  head () {
+    return {
+      titleTemplate: 'Measured Quantities - %s'
+    }
+  }
 }
 </script>
