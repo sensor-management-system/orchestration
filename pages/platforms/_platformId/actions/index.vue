@@ -29,6 +29,17 @@
         <GenericActionCard
           :value="action"
         >
+          <template #actions>
+            <v-btn
+              v-if="$auth.loggedIn"
+              :to="'/platforms/' + platformId + '/actions/generic-platform-actions/' + action.id + '/edit'"
+              color="primary"
+              text
+              @click.stop.prevent
+            >
+              Edit
+            </v-btn>
+          </template>
           <template #dot-menu-items>
             <DotMenuActionDelete
               :readonly="!$auth.loggedIn"
@@ -43,6 +54,17 @@
           :value="action"
           target="Platform"
         >
+          <template #actions>
+            <v-btn
+              v-if="$auth.loggedIn"
+              :to="'/platforms/' + platformId + '/actions/software-update-actions/' + action.id + '/edit'"
+              color="primary"
+              text
+              @click.stop.prevent
+            >
+              Edit
+            </v-btn>
+          </template>
           <template #dot-menu-items>
             <DotMenuActionDelete
               :readonly="!$auth.loggedIn"
