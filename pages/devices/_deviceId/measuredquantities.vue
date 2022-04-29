@@ -40,8 +40,10 @@ permissions and limitations under the Licence.
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 import { mapActions } from 'vuex'
+import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
 @Component({
+  components: { ProgressIndicator },
   methods: {
     ...mapActions ('devices', ['loadDeviceMeasuredQuantities']),
     ...mapActions('vocabulary',['loadCompartments','loadSamplingMedia','loadProperties','loadUnits','loadMeasuredQuantityUnits']),
