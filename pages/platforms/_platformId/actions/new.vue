@@ -34,15 +34,17 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
+    <ProgressIndicator
+      v-model="isLoading"
+    />
     <v-card
       flat
     >
       <v-card-text>
         <v-select
           v-model="chosenKindOfAction"
-          :items="actionTypeItems"
+          :items="platformActionTypeItems"
           :item-text="(x) => x.name"
-          :item-value="(x) => x"
           clearable
           label="Action Type"
           :hint="!chosenKindOfAction ? 'Please select an action type' : ''"
@@ -59,36 +61,18 @@ permissions and limitations under the Licence.
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 
-import { Attachment } from '@/models/Attachment'
-import { GenericAction } from '@/models/GenericAction'
-import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
-import { IActionType, ActionType } from '@/models/ActionType'
 
-import { ACTION_TYPE_API_FILTER_PLATFORM } from '@/services/cv/ActionTypeApi'
-
-import GenericActionForm from '@/components/actions/GenericActionForm.vue'
-import SoftwareUpdateActionForm from '@/components/actions/SoftwareUpdateActionForm.vue'
-import ActionButtonTray from '@/components/actions/ActionButtonTray.vue'
-import { mapActions, mapState } from 'vuex'
+import { mapActions, mapGetters, mapState } from 'vuex'
+import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
 const KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE = 'software_update'
 const KIND_OF_ACTION_TYPE_GENERIC_PLATFORM_ACTION = 'generic_platform_action'
-const KIND_OF_ACTION_TYPE_UNKNOWN = 'unknown'
-type KindOfActionType = typeof KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE | typeof KIND_OF_ACTION_TYPE_GENERIC_PLATFORM_ACTION | typeof KIND_OF_ACTION_TYPE_UNKNOWN
-
-type IOptionsForActionType = Pick<IActionType, 'id' | 'name' | 'uri'> & {
-  kind: KindOfActionType
-}
 
 @Component({
-  components: {
-    ActionButtonTray,
-    GenericActionForm,
-    SoftwareUpdateActionForm
-  },
+  components: { ProgressIndicator },
   middleware: ['auth'],
   computed:{
-    ...mapState('vocabulary',['platformGenericActionTypes']),
+    ...mapGetters('vocabulary',['platformActionTypeItems']),
     ...mapState('platforms',['chosenKindOfPlatformAction'])
   },
   methods:{
@@ -97,22 +81,22 @@ type IOptionsForActionType = Pick<IActionType, 'id' | 'name' | 'uri'> & {
   }
 })
 export default class NewPlatformAction extends Vue {
-  private specialActionTypes: IOptionsForActionType[] = [
-    {
-      id: 'software_update',
-      name: 'Software Update',
-      uri: '',
-      kind: KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE
-    }
-  ]
+  private isLoading: boolean = false
 
   async created(){
     try {
+      this.isLoading=true
       await this.loadPlatformGenericActionTypes()
       await this.loadPlatformAttachments(this.platformId)
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to fetch action types')
+    }finally {
+      this.isLoading=false
     }
+  }
+
+  get platformId (): string {
+    return this.$route.params.platformId
   }
 
   get chosenKindOfAction(){
@@ -121,6 +105,14 @@ export default class NewPlatformAction extends Vue {
 
   set chosenKindOfAction(newVal){
     this.setChosenKindOfPlatformAction(newVal)
+  }
+
+  get genericActionChosen (): boolean {
+    return this.chosenKindOfAction?.kind === KIND_OF_ACTION_TYPE_GENERIC_PLATFORM_ACTION
+  }
+
+  get softwareUpdateChosen () {
+    return this.chosenKindOfAction?.kind === KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE
   }
 
   updateRoute(){
@@ -134,32 +126,7 @@ export default class NewPlatformAction extends Vue {
     if(!this.chosenKindOfAction){
       this.$router.push(`/platforms/${this.platformId}/actions/new`)
     }
-
   }
 
-  get genericActionChosen (): boolean {
-    return this.chosenKindOfAction?.kind === KIND_OF_ACTION_TYPE_GENERIC_PLATFORM_ACTION
-  }
-
-  get softwareUpdateChosen () {
-    return this.chosenKindOfAction?.kind === KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE
-  }
-
-  get platformId (): string {
-    return this.$route.params.platformId
-  }
-  get actionTypeItems (): IOptionsForActionType[] { // Todo in store auslagern
-    return [
-      ...this.specialActionTypes,
-      ...this.platformGenericActionTypes.map((i) => {
-        return {
-          id: i.id,
-          name: i.name,
-          uri: i.uri,
-          kind: KIND_OF_ACTION_TYPE_GENERIC_PLATFORM_ACTION
-        }
-      })
-    ].sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase())) as IOptionsForActionType[]
-  }
 }
 </script>

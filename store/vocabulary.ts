@@ -12,6 +12,9 @@ import { Property } from '@/models/Property'
 import { Unit } from '@/models/Unit'
 import { MeasuredQuantityUnit } from '@/models/MeasuredQuantityUnit'
 
+const KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE = 'software_update'
+const KIND_OF_ACTION_TYPE_GENERIC_PLATFORM_ACTION = 'generic_platform_action'
+
 interface vocabularyState {
   manufacturers: Manufacturer[]
   equipmentstatus: Status[]
@@ -60,6 +63,24 @@ const getters = {
     return state.manufacturers.find((manufacturer: Manufacturer) => {
       return manufacturer.uri === uri
     })
+  },
+  platformActionTypeItems: (state:vocabularyState)=>{
+    return [
+      {
+        id: 'software_update',
+        name: 'Software Update',
+        uri: '',
+        kind: KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE
+      },
+      ...state.platformGenericActionTypes.map((actionType)=>{
+        return {
+          id: actionType.id,
+          name: actionType.name,
+          uri: actionType.uri,
+          kind: KIND_OF_ACTION_TYPE_GENERIC_PLATFORM_ACTION
+        }
+      })
+    ].sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()))
   }
 }
 
