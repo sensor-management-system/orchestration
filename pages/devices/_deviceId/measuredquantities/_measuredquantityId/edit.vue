@@ -29,28 +29,21 @@ implied. See the Licence for the specific language governing
 permissions and limitations under the Licence.
 -->
 <template>
+  <div>
+    <ProgressIndicator
+      v-model="isInProgress"
+      :dark="isSaving"
+    />
     <v-card
       flat
     >
       <v-card-actions>
         <v-spacer />
-        <v-btn
-          v-if="$auth.loggedIn"
-          small
-          text
-          nuxt
+        <SaveAndCancelButtons
+          save-btn-text="Apply"
           :to="'/devices/' + this.deviceId + '/measuredquantities'"
-        >
-          Cancel
-        </v-btn>
-        <v-btn
-          v-if="$auth.loggedIn"
-          color="green"
-          small
-          @click="save"
-        >
-          Update
-        </v-btn>
+          @save="save"
+        />
       </v-card-actions>
       <v-card-text>
         <DevicePropertyForm
@@ -66,42 +59,28 @@ permissions and limitations under the Licence.
       </v-card-text>
       <v-card-actions>
         <v-spacer />
-        <v-btn
-          v-if="$auth.loggedIn"
-          small
-          text
-          nuxt
+        <SaveAndCancelButtons
+          save-btn-text="Apply"
           :to="'/devices/' + this.deviceId + '/measuredquantities'"
-        >
-          Cancel
-        </v-btn>
-        <v-btn
-          v-if="$auth.loggedIn"
-          color="green"
-          small
-          @click="save"
-        >
-          Update
-        </v-btn>
+          @save="save"
+        />
       </v-card-actions>
-  </v-card>
+    </v-card>
+  </div>
 </template>
 
 <script lang="ts">
 import { Component, Vue, Prop } from 'nuxt-property-decorator'
 
 import DevicePropertyForm from '@/components/DevicePropertyForm.vue'
+import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
 
-import { Compartment } from '@/models/Compartment'
 import { DeviceProperty } from '@/models/DeviceProperty'
-import { Property } from '@/models/Property'
-import { SamplingMedia } from '@/models/SamplingMedia'
-import { Unit } from '@/models/Unit'
-import { MeasuredQuantityUnit } from '@/models/MeasuredQuantityUnit'
 import { mapActions, mapState } from 'vuex'
 
 @Component({
-  components: { DevicePropertyForm },
+  components: { SaveAndCancelButtons, ProgressIndicator, DevicePropertyForm },
   middleware: ['auth'],
   computed:{
     ...mapState('vocabulary',['compartments','samplingMedia','properties','units','measuredQuantityUnits']),
@@ -110,14 +89,20 @@ import { mapActions, mapState } from 'vuex'
   methods:mapActions('devices',['loadDeviceMeasuredQuantity','loadDeviceMeasuredQuantities','updateDeviceMeasuredQuantity'])
 })
 export default class DevicePropertyEditPage extends Vue {
+  private isSaving = false
+  private isLoading = false
+
   private valueCopy: DeviceProperty = new DeviceProperty()
 
   async created () {
     try {
+      this.isLoading=true
       await this.loadDeviceMeasuredQuantity(this.measuredquantityId)
       this.valueCopy = DeviceProperty.createFromObject(this.deviceMeasuredQuantity)
     } catch (e) {
-      console.log('error',e);
+      this.$store.commit('snackbar/setError', 'Failed to load measured quantity')
+    }finally {
+      this.isLoading=false
     }
   }
 
@@ -129,16 +114,24 @@ export default class DevicePropertyEditPage extends Vue {
     return this.$route.params.measuredquantityId
   }
 
+  get isInProgress (): boolean {
+    return this.isLoading || this.isSaving
+  }
+
   async save () {
     try {
+      this.isSaving=true
       await this.updateDeviceMeasuredQuantity({
         deviceId: this.deviceId,
         deviceMeasuredQuantity: this.valueCopy
       });
       this.loadDeviceMeasuredQuantities(this.deviceId)
+      this.$store.commit('snackbar/setSuccess', 'Measured quantity updated')
       this.$router.push('/devices/' + this.deviceId + '/measuredquantities')
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to save measured quantity')
+    }finally {
+      this.isSaving=false
     }
   }
 }
