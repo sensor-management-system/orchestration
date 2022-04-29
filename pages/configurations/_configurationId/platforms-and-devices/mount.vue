@@ -1,5 +1,9 @@
 <template>
 <div>
+  <ProgressIndicator
+    v-model="isInProgress"
+    :dark="isSaving"
+  />
   <v-card-actions>
     <v-spacer />
     <v-btn
@@ -338,9 +342,10 @@ import { PlatformMountAction } from '@/models/PlatformMountAction'
 import HintCard from '@/components/HintCard.vue'
 import { mount } from '@vue/test-utils'
 import { dateToDateTimeStringHHMM } from '@/utils/dateHelper'
+import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
 @Component({
-  components: { HintCard, PlatformMountListItem, ConfigurationsPlatformDeviceMountForm, DevicesMountListItem, DevicesListItem, BaseList, DateTimePicker, ConfigurationsTreeView },
+  components: { ProgressIndicator, HintCard, PlatformMountListItem, ConfigurationsPlatformDeviceMountForm, DevicesMountListItem, DevicesListItem, BaseList, DateTimePicker, ConfigurationsTreeView },
   middleware:['auth'],
   filters:{dateToDateTimeStringHHMM},
   computed:{
@@ -358,7 +363,9 @@ import { dateToDateTimeStringHHMM } from '@/utils/dateHelper'
   }
 })
 export default class ConfigurationMountPlatformsAndDevicesPage extends Vue {
-  private loading = false
+  private isSaving = false
+  private isLoading = false
+
   private tab= null
   private step=1
 
@@ -371,7 +378,14 @@ export default class ConfigurationMountPlatformsAndDevicesPage extends Vue {
   private deviceToMount  = null
 
   async created(){
-    await this.loadAllContacts()
+    try {
+      this.isLoading=true
+      await this.loadAllContacts()
+    } catch (e) {
+      this.$store.commit('snackbar/setError', 'Failed to fetch contacts')
+    } finally {
+      this.isLoading=false
+    }
   }
 
   get configurationId (): string {
@@ -396,6 +410,10 @@ export default class ConfigurationMountPlatformsAndDevicesPage extends Vue {
     return null
   }
 
+  get isInProgress (): boolean {
+    return this.isLoading || this.isSaving
+  }
+
   clearBasicSearchPlatforms(){
     this.searchTextPlatforms=null
   }
@@ -404,10 +422,24 @@ export default class ConfigurationMountPlatformsAndDevicesPage extends Vue {
   }
 
   async searchDevicesForMount(){
+    try {
+      this.isLoading=true
       await this.searchDevices({ searchText: this.searchTextDevices })
+    } catch (e) {
+      this.$store.commit('snackbar/setError', 'Loading of devices failed')
+    } finally {
+      this.isLoading=false
+    }
   }
   async searchPlatformsForMount(){
+    try {
+      this.isLoading=true
       await this.searchPlatforms({ searchText: this.searchTextPlatforms })
+    } catch (e) {
+      this.$store.commit('snackbar/setError', 'Loading of platforms failed')
+    } finally {
+      this.isLoading=false
+    }
   }
 
   mount(){
@@ -422,12 +454,14 @@ export default class ConfigurationMountPlatformsAndDevicesPage extends Vue {
   mountDevice(device,mountInfo){
     try {
 
-      let parentPlatform = null;
-
       if(this.selectedNode && !this.selectedNode.canHaveChildren()){
         this.$store.commit('snackbar/setError', 'Selected node-type cannot have children')
         return
       }
+
+      this.isSaving=true
+
+      let parentPlatform = null;
 
       if (this.selectedNode && this.selectedNode.canHaveChildren()) {
         parentPlatform = (this.selectedNode as PlatformNode).unpack().platform
@@ -454,18 +488,22 @@ export default class ConfigurationMountPlatformsAndDevicesPage extends Vue {
       this.$router.push('/configurations/' + this.configurationId + '/platforms-and-devices')
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to add device mount action')
+    }finally {
+      this.isSaving=false
     }
   }
 
   async mountPlatform(platform,mountInfo){
     try {
 
-      let parentPlatform = null;
-
       if(this.selectedNode && !this.selectedNode.canHaveChildren()){
         this.$store.commit('snackbar/setError', 'Selected node-type cannot have children')
         return
       }
+
+      let parentPlatform = null;
+
+      this.isSaving=true
 
       if (this.selectedNode && this.selectedNode.canHaveChildren()) {
         parentPlatform = (this.selectedNode as PlatformNode).unpack().platform
@@ -492,6 +530,8 @@ export default class ConfigurationMountPlatformsAndDevicesPage extends Vue {
       this.$router.push('/configurations/' + this.configurationId + '/platforms-and-devices')
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to add platform mount action')
+    }finally {
+      this.isSaving=false
     }
   }
 
