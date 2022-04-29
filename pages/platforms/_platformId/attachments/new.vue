@@ -153,17 +153,21 @@ export default class PlatformAttachmentAddPage extends mixins(Rules, UploadRules
       await this.loadPlatformAttachments(this.platformId)
       this.$router.push('/platforms/' + this.platformId + '/attachments')
     } catch (error: any) {
-      let message = 'Failed to save an attachment'
-
-      if (theFailureCanBeFromUpload && error.response?.data?.errors?.length) {
-        const errorDetails = error.response.data.errors[0]
-        if (errorDetails.source && errorDetails.title) {
-          // In this case something ala 'Unsupported Media Type: application/exe is Not Permitted'
-          message = errorDetails.title + ': ' + errorDetails.source
-        }
-      }
-      this.$store.commit('snackbar/setError', message)
+      this.handleError(theFailureCanBeFromUpload, error)
     }
+  }
+
+  private handleError (theFailureCanBeFromUpload: boolean, error: any) {
+    let message = 'Failed to save an attachment'
+
+    if (theFailureCanBeFromUpload && error.response?.data?.errors?.length) {
+      const errorDetails = error.response.data.errors[0]
+      if (errorDetails.source && errorDetails.title) {
+        // In this case something ala 'Unsupported Media Type: application/exe is Not Permitted'
+        message = errorDetails.title + ': ' + errorDetails.source
+      }
+    }
+    this.$store.commit('snackbar/setError', message)
   }
 
   get platformId (): string {
