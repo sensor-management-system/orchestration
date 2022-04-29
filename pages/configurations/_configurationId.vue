@@ -42,10 +42,7 @@ permissions and limitations under the Licence.
 
 <script lang="ts">
 import { Component, Vue, Watch } from 'nuxt-property-decorator'
-
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
-
-import { Configuration } from '@/models/Configuration'
 import { mapActions } from 'vuex'
 
 @Component({
