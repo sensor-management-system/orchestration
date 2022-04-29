@@ -72,13 +72,16 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
+
 import DateTimePicker from '@/components/DateTimePicker.vue'
-import { DateTime } from 'luxon'
-import { mapGetters, mapState } from 'vuex'
-import { buildConfigurationTree } from '@/modelUtils/mountHelpers'
-import { ConfigurationsTreeNode } from '@/viewmodels/ConfigurationsTreeNode'
 import ConfigurationsTreeView from '@/components/ConfigurationsTreeView.vue'
 import ConfigurationsTreeNodeDetail from '@/components/configurations/ConfigurationsTreeNodeDetail.vue'
+
+import { DateTime } from 'luxon'
+import { buildConfigurationTree } from '@/modelUtils/mountHelpers'
+import { ConfigurationsTreeNode } from '@/viewmodels/ConfigurationsTreeNode'
+import { mapGetters, mapState } from 'vuex'
+
 @Component({
   components: { ConfigurationsTreeNodeDetail, ConfigurationsTreeView, DateTimePicker },
   computed:{
@@ -106,9 +109,6 @@ export default class ConfigurationShowPlatformsAndDevicesPage extends Vue {
     }
     return tree.toArray()
   }
-  // setSelectedNode (node: ConfigurationsTreeNode) {
-  //   this.selectedNode = node
-  // }
 }
 </script>
 
