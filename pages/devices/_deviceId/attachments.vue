@@ -33,29 +33,29 @@ permissions and limitations under the Licence.
     <ProgressIndicator
       v-model="isLoading"
     />
-    <NuxtChild/>
+    <NuxtChild />
   </div>
 </template>
 
 <script lang="ts">
-import { Component, Vue, mixins } from 'nuxt-property-decorator'
+import { Component, Vue } from 'nuxt-property-decorator'
 import { mapActions } from 'vuex'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
 @Component({
   components: { ProgressIndicator },
-  methods:mapActions('devices',['loadDeviceAttachments'])
+  methods: mapActions('devices', ['loadDeviceAttachments'])
 })
 export default class DeviceAttachmentsPage extends Vue {
   private isLoading = false
 
-  async created(){
+  async created () {
     try {
       this.isLoading = true
-      this.loadDeviceAttachments(this.deviceId)
+      await this.loadDeviceAttachments(this.deviceId)
     } catch (e) {
       this.$store.commit('snackbar/setError', 'failed to fetch attachments')
-    }finally {
+    } finally {
       this.isLoading = false
     }
   }
@@ -69,6 +69,5 @@ export default class DeviceAttachmentsPage extends Vue {
       titleTemplate: 'Attachments - %s'
     }
   }
-
 }
 </script>

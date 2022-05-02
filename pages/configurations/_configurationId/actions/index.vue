@@ -26,12 +26,12 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
+import { mapGetters } from 'vuex'
 import HintCard from '@/components/HintCard.vue'
 import ConfigurationsTimelineActionCard from '@/components/configurations/ConfigurationsTimelineActionCard.vue'
-import { mapGetters } from 'vuex'
 @Component({
   components: { ConfigurationsTimelineActionCard, HintCard },
-  computed:mapGetters('configurations',['timelineActions'])
+  computed: mapGetters('configurations', ['timelineActions'])
 })
 export default class ConfigurationShowActionPage extends Vue {
 }

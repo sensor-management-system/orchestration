@@ -33,7 +33,7 @@ permissions and limitations under the Licence.
     <ProgressIndicator
       v-model="isLoading"
     />
-    <NuxtChild/>
+    <NuxtChild />
   </div>
 </template>
 
@@ -44,18 +44,18 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
 @Component({
   components: { ProgressIndicator },
-  methods:mapActions('devices',['loadDeviceCustomFields'])
+  methods: mapActions('devices', ['loadDeviceCustomFields'])
 })
 export default class DeviceCustomFieldsPage extends Vue {
   private isLoading = false
 
-  async created(){
+  async created () {
     try {
       this.isLoading = true
       await this.loadDeviceCustomFields(this.deviceId)
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to fetch custom fields')
-    }finally {
+    } finally {
       this.isLoading = false
     }
   }

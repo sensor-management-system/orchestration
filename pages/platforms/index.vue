@@ -49,22 +49,22 @@ permissions and limitations under the Licence.
         </v-row>
         <v-row>
           <v-col cols="12" md="3">
-            <ManufacturerSelect v-model="selectedSearchManufacturers" label="Select a manufacturer"/>
+            <ManufacturerSelect v-model="selectedSearchManufacturers" label="Select a manufacturer" />
           </v-col>
         </v-row>
         <v-row>
           <v-col cols="12" md="3">
-            <StatusSelect v-model="selectedSearchStates" label="Select a status"/>
+            <StatusSelect v-model="selectedSearchStates" label="Select a status" />
           </v-col>
         </v-row>
         <v-row>
           <v-col cols="12" md="3">
-            <PlatformTypeSelect v-model="selectedSearchPlatformTypes" label="Select a platform type"/>
+            <PlatformTypeSelect v-model="selectedSearchPlatformTypes" label="Select a platform type" />
           </v-col>
         </v-row>
         <v-row v-if="$auth.loggedIn">
           <v-col cols="12" md="3">
-            <v-checkbox v-model="onlyOwnPlatforms" label="Only own platforms"/>
+            <v-checkbox v-model="onlyOwnPlatforms" label="Only own platforms" />
           </v-col>
         </v-row>
         <v-row>
@@ -111,14 +111,14 @@ permissions and limitations under the Licence.
         <template v-else>
           {{ platforms.length }} platforms found
         </template>
-        <v-spacer/>
+        <v-spacer />
 
         <template v-if="platforms.length>0">
           <v-dialog v-model="processing" max-width="100">
             <v-card>
               <v-card-text>
                 <div class="text-center pt-2">
-                  <v-progress-circular indeterminate/>
+                  <v-progress-circular indeterminate />
                 </div>
               </v-card-text>
             </v-card>
@@ -173,7 +173,7 @@ permissions and limitations under the Licence.
       <BaseList
         :list-items="platforms"
       >
-        <template v-slot:list-item="{item}">
+        <template #list-item="{item}">
           <PlatformsListItem
             :key="item.id"
             :platform="item"
@@ -190,7 +190,6 @@ permissions and limitations under the Licence.
             </template>
           </PlatformsListItem>
         </template>
-
       </BaseList>
       <v-pagination
         v-model="page"
@@ -250,7 +249,6 @@ import { Status } from '@/models/Status'
 import { QueryParams } from '@/modelUtils/QueryParams'
 import { PlatformSearchParamsSerializer } from '@/modelUtils/PlatformSearchParams'
 
-
 @Component({
   components: {
     PlatformsBasicSearchField,
@@ -271,7 +269,7 @@ import { PlatformSearchParamsSerializer } from '@/modelUtils/PlatformSearchParam
   methods: {
     ...mapActions('vocabulary', ['loadEquipmentstatus', 'loadPlatformtypes', 'loadManufacturers']),
     ...mapActions('platforms', ['searchPlatformsPaginated', 'setPageNumber', 'exportAsCsv', 'deletePlatform']),
-    ...mapActions('appbar',['initPlatformsIndexAppBar','setDefaults'])
+    ...mapActions('appbar', ['initPlatformsIndexAppBar', 'setDefaults'])
   }
 })
 export default class SearchPlatformsPage extends Vue {
@@ -290,7 +288,6 @@ export default class SearchPlatformsPage extends Vue {
   private platformToDelete: Platform | null = null
 
   async created () {
-
     try {
       this.loading = true
       await this.loadEquipmentstatus()
@@ -302,7 +299,7 @@ export default class SearchPlatformsPage extends Vue {
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Loading of platforms failed')
     } finally {
-      this.loading=false
+      this.loading = false
     }
   }
 
@@ -357,7 +354,7 @@ export default class SearchPlatformsPage extends Vue {
     this.selectedSearchStates = []
     this.selectedSearchPlatformTypes = []
     this.onlyOwnPlatforms = false
-    this.page = 1//Important to set page to one otherwise it's possible that you don't anything
+    this.page = 1// Important to set page to one otherwise it's possible that you don't anything
     this.runSearch()
   }
 
@@ -367,7 +364,7 @@ export default class SearchPlatformsPage extends Vue {
   }
 
   extendedSearch (): Promise<void> {
-    this.page = 1//Important to set page to one otherwise it's possible that you don't anything
+    this.page = 1// Important to set page to one otherwise it's possible that you don't anything
     this.runSearch()
   }
 
@@ -421,8 +418,8 @@ export default class SearchPlatformsPage extends Vue {
     if (this.platformToDelete === null || this.platformToDelete.id === null) {
       return
     }
-    this.loading = true
     try {
+      this.loading = true
       await this.deletePlatform(this.platformToDelete.id)
       this.runSearch()
       this.$store.commit('snackbar/setSuccess', 'Platform deleted')
@@ -473,7 +470,7 @@ export default class SearchPlatformsPage extends Vue {
     return 1
   }
 
-  setPageInUrl (page: number, preserveHash: boolean = true): void {
+  setPageInUrl (preserveHash: boolean = true): void {
     let query: QueryParams = {}
     if (this.page) {
       // add page to the current url params

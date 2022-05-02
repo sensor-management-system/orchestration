@@ -21,8 +21,7 @@
           >
             <DotMenu>
               <template #actions>
-                <slot name="dot-menu-items">
-                </slot>
+                <slot name="dot-menu-items" />
               </template>
             </DotMenu>
             <v-btn
@@ -109,12 +108,12 @@ import DotMenu from '@/components/DotMenu.vue'
 })
 export default class BaseEntityContactListItem extends Vue {
   @Prop({
-    required:true,
+    required: true,
     type: Object
   })
-  private contact!:Contact;
+  private contact!: Contact
 
-  private show = false;
+  private show = false
 }
 </script>
 

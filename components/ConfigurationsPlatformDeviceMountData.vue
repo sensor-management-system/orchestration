@@ -91,22 +91,20 @@ permissions and limitations under the Licence.
 </template>
 <script lang="ts">
 
-import { Component, Prop, Vue, mixins } from 'nuxt-property-decorator'
+import { Component, Prop, mixins } from 'nuxt-property-decorator'
 
 import { Rules } from '@/mixins/Rules'
 
-import { Contact } from '@/models/Contact'
-import { Device } from '@/models/Device'
 import { DeviceMountAction } from '@/models/DeviceMountAction'
 import { PlatformMountAction } from '@/models/PlatformMountAction'
 
 @Component
 export default class ConfigurationsPlatformDeviceMountData extends mixins(Rules) {
   @Prop({
-    required:true,
+    required: true,
     type: Object
   })
-  private mountAction!:DeviceMountAction|PlatformMountAction
+  private mountAction!: DeviceMountAction|PlatformMountAction
 }
 </script>
 

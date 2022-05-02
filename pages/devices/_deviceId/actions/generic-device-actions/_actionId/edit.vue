@@ -72,12 +72,12 @@ permissions and limitations under the Licence.
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 
+import { mapActions, mapState } from 'vuex'
 import GenericActionForm from '@/components/actions/GenericActionForm.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
 
 import { GenericAction } from '@/models/GenericAction'
-import { mapActions, mapState } from 'vuex'
 
 @Component({
   components: {
@@ -87,23 +87,23 @@ import { mapActions, mapState } from 'vuex'
   },
   scrollToTop: true,
   middleware: ['auth'],
-  computed:mapState('devices',['deviceGenericAction','deviceAttachments']),
-  methods:mapActions('devices',['loadDeviceGenericAction','loadAllDeviceActions','loadDeviceAttachments','updateDeviceGenericAction'])
+  computed: mapState('devices', ['deviceGenericAction', 'deviceAttachments']),
+  methods: mapActions('devices', ['loadDeviceGenericAction', 'loadAllDeviceActions', 'loadDeviceAttachments', 'updateDeviceGenericAction'])
 })
 export default class GenericDeviceActionEditPage extends Vue {
   private action: GenericAction = new GenericAction()
   private isSaving = false
   private isLoading = false
 
-  async created(){
+  async created () {
     try {
       this.isLoading = true
       await this.loadDeviceGenericAction(this.actionId)
       await this.loadDeviceAttachments(this.deviceId)
       this.action = GenericAction.createFromObject(this.deviceGenericAction)
-    }catch (e){
+    } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to fetch action')
-    }finally {
+    } finally {
       this.isLoading = false
     }
   }
@@ -126,7 +126,7 @@ export default class GenericDeviceActionEditPage extends Vue {
       return
     }
     try {
-      this.isSaving=true
+      this.isSaving = true
       await this.updateDeviceGenericAction({
         deviceId: this.deviceId,
         genericDeviceAction: this.action
@@ -136,8 +136,8 @@ export default class GenericDeviceActionEditPage extends Vue {
       this.$router.push('/devices/' + this.deviceId + '/actions')
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to save the action')
-    }finally {
-      this.isSaving=false
+    } finally {
+      this.isSaving = false
     }
   }
 }

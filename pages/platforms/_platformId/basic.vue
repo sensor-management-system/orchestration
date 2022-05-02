@@ -32,7 +32,7 @@ implied. See the Licence for the specific language governing
 permissions and limitations under the Licence.
 -->
 <template>
-  <NuxtChild/>
+  <NuxtChild />
 </template>
 
 <script lang="ts">
@@ -45,6 +45,5 @@ export default class PlatformBasicPage extends Vue {
       titleTemplate: 'Basic Data - %s'
     }
   }
-
 }
 </script>

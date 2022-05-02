@@ -68,8 +68,8 @@ permissions and limitations under the Licence.
             >
               <v-col class="text-subtitle-1">
                 <v-text-field
-                  label="Label"
                   v-model="valueCopy.label"
+                  label="Label"
                 />
               </v-col>
               <v-col
@@ -96,15 +96,15 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Vue, Component, mixins } from 'nuxt-property-decorator'
+import { Component, mixins } from 'nuxt-property-decorator'
 
+import { mapActions, mapState } from 'vuex'
 import { AttachmentsMixin } from '@/mixins/AttachmentsMixin'
 
 import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
 import { Attachment } from '@/models/Attachment'
-import { mapActions, mapState } from 'vuex'
 /**
  * A class component that displays a single attached file
  * @extends Vue
@@ -112,8 +112,8 @@ import { mapActions, mapState } from 'vuex'
 @Component({
   components: { ProgressIndicator, SaveAndCancelButtons },
   middleware: ['auth'],
-  computed:mapState('platforms',['platformAttachment']),
-  methods:mapActions('platforms',['loadPlatformAttachment','loadPlatformAttachments','updatePlatformAttachment'])
+  computed: mapState('platforms', ['platformAttachment']),
+  methods: mapActions('platforms', ['loadPlatformAttachment', 'loadPlatformAttachments', 'updatePlatformAttachment'])
 })
 // @ts-ignore
 export default class AttachmentEditPage extends mixins(AttachmentsMixin) {
@@ -123,19 +123,20 @@ export default class AttachmentEditPage extends mixins(AttachmentsMixin) {
 
   async created () {
     try {
-      this.isLoading=true
+      this.isLoading = true
       await this.loadPlatformAttachment(this.attachmentId)
       this.valueCopy = Attachment.createFromObject(this.platformAttachment)
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to load attachment')
     } finally {
-      this.isLoading=false
+      this.isLoading = false
     }
   }
 
   get platformId (): string {
     return this.$route.params.platformId
   }
+
   get attachmentId (): string {
     return this.$route.params.attachmentId
   }
@@ -146,7 +147,7 @@ export default class AttachmentEditPage extends mixins(AttachmentsMixin) {
 
   async save () {
     try {
-      this.isSaving=true
+      this.isSaving = true
       await this.updatePlatformAttachment({
         platformId: this.platformId,
         attachment: this.valueCopy
@@ -156,8 +157,8 @@ export default class AttachmentEditPage extends mixins(AttachmentsMixin) {
       this.$router.push('/platforms/' + this.platformId + '/attachments')
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to save attachment')
-    }finally {
-      this.isSaving=false
+    } finally {
+      this.isSaving = false
     }
   }
 }

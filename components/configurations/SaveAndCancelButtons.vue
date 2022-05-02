@@ -47,7 +47,7 @@ permissions and limitations under the Licence.
       small
       @click="$emit('save')"
     >
-      {{saveBtnText}}
+      {{ saveBtnText }}
     </v-btn>
   </div>
 </template>

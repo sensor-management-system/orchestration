@@ -43,10 +43,10 @@ permissions and limitations under the Licence.
         md="5"
       >
         <v-autocomplete
+          v-model="selectedContact"
           :items="allExceptSelected"
           :item-text="(x) => x"
           label="New contact"
-          v-model="selectedContact"
           return-object
         />
       </v-col>
@@ -77,25 +77,25 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop } from 'nuxt-property-decorator'
+import { Component, Vue } from 'nuxt-property-decorator'
 
+import { mapActions, mapGetters, mapState } from 'vuex'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
 import { Contact } from '@/models/Contact'
-import { mapActions, mapGetters, mapState } from 'vuex'
 
 @Component({
   components: {
     ProgressIndicator
   },
   middleware: ['auth'],
-  computed:{
-    ...mapGetters('contacts',['contactsByDifference']),
-    ...mapState('platforms',['platformContacts'])
+  computed: {
+    ...mapGetters('contacts', ['contactsByDifference']),
+    ...mapState('platforms', ['platformContacts'])
   },
-  methods:{
-    ...mapActions('contacts',['loadAllContacts']),
-    ...mapActions('platforms',['loadPlatformContacts','addPlatformContact'])
+  methods: {
+    ...mapActions('contacts', ['loadAllContacts']),
+    ...mapActions('platforms', ['loadPlatformContacts', 'addPlatformContact'])
   }
 })
 export default class PlatformAddContactPage extends Vue {
@@ -105,7 +105,7 @@ export default class PlatformAddContactPage extends Vue {
 
   async created () {
     try {
-      this.isLoading=true
+      this.isLoading = true
       await this.loadAllContacts()
       await this.loadPlatformContacts(this.platformId)
     } catch (e) {
@@ -124,7 +124,7 @@ export default class PlatformAddContactPage extends Vue {
   }
 
   get allExceptSelected (): Contact[] {
-    return this.contactsByDifference(this.platformContacts);
+    return this.contactsByDifference(this.platformContacts)
   }
 
   async addContact (): void {

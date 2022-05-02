@@ -6,7 +6,6 @@
       :elevation="hover ? 6 : 2"
       class="ma-2"
     >
-
       <v-card-text>
         <v-row>
           <v-avatar class="mt-0 align-self-center">
@@ -29,8 +28,7 @@
               >
                 <DotMenu>
                   <template #actions>
-                    <slot name="dot-menu-items">
-                    </slot>
+                    <slot name="dot-menu-items" />
                   </template>
                 </DotMenu>
               </v-col>
@@ -39,10 +37,10 @@
               no-gutters
             >
               <v-col class="text-subtitle-1">
-                <a :href="attachment.url" target="_blank" v-if="attachment.label">
+                <a v-if="attachment.label" :href="attachment.url" target="_blank">
                   <v-icon color="primary">mdi-open-in-new</v-icon>{{ attachment.label }}
                 </a>
-                <a :href="attachment.url" target="_blank" v-else>
+                <a v-else :href="attachment.url" target="_blank">
                   <v-icon color="primary">mdi-open-in-new</v-icon>
                 </a>
               </v-col>
@@ -70,7 +68,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
+import { Component } from 'vue-property-decorator'
 import { mixins, Prop } from 'nuxt-property-decorator'
 import { Attachment } from '@/models/Attachment'
 import DotMenu from '@/components/DotMenu.vue'
@@ -80,16 +78,15 @@ import { AttachmentsMixin } from '@/mixins/AttachmentsMixin'
 })
 export default class DevicesAttachmentListItem extends mixins(AttachmentsMixin) {
   @Prop({
-    required:true,
+    required: true,
     type: Object
   })
-  private attachment!:Attachment;
+  private attachment!: Attachment
 
   @Prop({
-    required:true
+    required: true
   })
-  private deviceId!:string;
-
+  private deviceId!: string
 }
 </script>
 

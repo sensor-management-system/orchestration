@@ -58,14 +58,6 @@ import { PlatformSoftwareUpdateActionSerializer } from '@/serializers/jsonapi/So
 import { PlatformMountActionSerializer } from '@/serializers/jsonapi/composed/platforms/actions/PlatformMountActionSerializer'
 import { PlatformUnmountActionSerializer } from '@/serializers/jsonapi/composed/platforms/actions/PlatformUnmountActionSerializer'
 
-import { IFlaskJSONAPIFilter } from '@/utils/JSONApiInterfaces'
-
-import {
-  IPaginationLoader
-} from '@/utils/PaginatedLoader'
-import { IPlatformSearchParams } from '@/modelUtils/PlatformSearchParams'
-import { deviceWithMetaToDeviceByAddingDummyObjects } from '@/serializers/jsonapi/DeviceSerializer'
-
 interface IncludedRelationships {
   includeContacts?: boolean
   includePlatformAttachments?: boolean
@@ -146,7 +138,6 @@ export class PlatformApi {
   }
 
   searchPaginated (pageNumber: number, pageSize: number) {
-
     this.prepareSearch()
 
     return this.axiosApi.get(
@@ -176,7 +167,8 @@ export class PlatformApi {
       }
     })
   }
-  searchAll(){
+
+  searchAll () {
     this.prepareSearch()
     return this.axiosApi.get(
       this.basePath,
@@ -194,8 +186,8 @@ export class PlatformApi {
         .map(platformWithMetaToPlatformByAddingDummyObjects)
     })
   }
-  searchMatchingAsCsvBlob (): Promise<Blob> {
 
+  searchMatchingAsCsvBlob (): Promise<Blob> {
     this.prepareSearch()
 
     const url = this.basePath
@@ -325,8 +317,7 @@ export class PlatformApi {
     // If we would include them here (without fetching them before), we would
     // delete them. So we will skip them in order to keep them in the backend.
     const includeRelationships = false
-    const data
-      :
+    const data:
       any = this.serializer.convertModelToJsonApiData(platform, includeRelationships)
     let method: Method = 'patch'
     let url = this.basePath

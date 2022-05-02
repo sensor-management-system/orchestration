@@ -41,8 +41,8 @@ permissions and limitations under the Licence.
         <v-spacer />
         <SaveAndCancelButtons
           :to="'/contacts'"
-          @save="save"
           save-btn-text="create"
+          @save="save"
         />
       </v-card-actions>
       <ContactBasicDataForm
@@ -53,8 +53,8 @@ permissions and limitations under the Licence.
         <v-spacer />
         <SaveAndCancelButtons
           :to="'/contacts'"
-          @save="save"
           save-btn-text="create"
+          @save="save"
         />
       </v-card-actions>
     </v-card>
@@ -64,13 +64,13 @@ permissions and limitations under the Licence.
 <script lang="ts">
 import { Component, Vue, mixins } from 'nuxt-property-decorator'
 
+import { mapActions } from 'vuex'
 import { Rules } from '@/mixins/Rules'
 
 import { Contact } from '@/models/Contact'
 
 import ContactBasicDataForm from '@/components/ContactBasicDataForm.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
-import { mapActions } from 'vuex'
 import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
 
 @Component({
@@ -81,8 +81,8 @@ import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButto
   },
   middleware: ['auth'],
   methods: {
-    ...mapActions('contacts',['saveContact']),
-    ...mapActions('appbar',['initContactsNewAppBar','setDefaults'])
+    ...mapActions('contacts', ['saveContact']),
+    ...mapActions('appbar', ['initContactsNewAppBar', 'setDefaults'])
   }
 })
 export default class ContactNewPage extends mixins(Rules) {

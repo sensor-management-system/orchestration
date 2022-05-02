@@ -1,6 +1,6 @@
 <template>
-<div>
-  <v-card flat>
+  <div>
+    <v-card flat>
       <v-card-actions>
         <v-spacer />
         <v-btn
@@ -47,14 +47,14 @@
           </template>
         </DotMenu>
       </v-card-actions>
-    <ContacsDeleteDialog
-      v-model="showDeleteDialog"
-      :contact-to-delete="contact"
-      @cancel-deletion="closeDialog"
-      @submit-deletion="deleteAndCloseDialog"
-    />
-  </v-card>
-</div>
+      <ContacsDeleteDialog
+        v-model="showDeleteDialog"
+        :contact-to-delete="contact"
+        @cancel-deletion="closeDialog"
+        @submit-deletion="deleteAndCloseDialog"
+      />
+    </v-card>
+  </div>
 </template>
 
 <script lang="ts">
@@ -68,16 +68,16 @@ import ContacsDeleteDialog from '@/components/contacts/ContacsDeleteDialog.vue'
 
 @Component({
   components: { ContacsDeleteDialog, ContactBasicData, DotMenuActionDelete, DotMenu },
-  computed:mapState('contacts',['contact']),
+  computed: mapState('contacts', ['contact']),
   methods: {
     ...mapActions('contacts', ['deleteContact']),
     ...mapActions('appbar', ['initContactsContactIdIndexAppBar'])
   }
 })
 export default class ContactIndexPage extends Vue {
-  showDeleteDialog=false;
+  showDeleteDialog = false
 
-  created(){
+  created () {
     this.initContactsContactIdIndexAppBar(this.contact)
   }
 
@@ -94,17 +94,16 @@ export default class ContactIndexPage extends Vue {
   }
 
   async deleteAndCloseDialog () {
-
     this.closeDialog()
 
     if (this.contact === null) {
       return
     }
-    try{
+    try {
       await this.deleteContact(this.contact.id)
       this.$router.push('/contacts')
       this.$store.commit('snackbar/setSuccess', 'Contact deleted')
-    }catch (_error){
+    } catch (_error) {
       this.$store.commit('snackbar/setError', 'Contact could not be deleted')
     }
   }

@@ -21,13 +21,11 @@
             align-self="end"
             class="text-right"
           >
-
-              <DotMenu>
-                <template #actions>
-                  <slot name="dot-menu-items">
-                  </slot>
-                </template>
-              </DotMenu>
+            <DotMenu>
+              <template #actions>
+                <slot name="dot-menu-items" />
+              </template>
+            </DotMenu>
           </v-col>
         </v-row>
         <v-row
@@ -156,13 +154,12 @@ import DotMenu from '@/components/DotMenu.vue'
 })
 export default class ContactsListItem extends Vue {
   @Prop({
-    required:true,
+    required: true,
     type: Object
   })
-  private contact!:Contact;
+  private contact!: Contact
 
-  private show = false;
-
+  private show = false
 }
 </script>
 

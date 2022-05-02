@@ -33,7 +33,7 @@ implied. See the Licence for the specific language governing
 permissions and limitations under the Licence.
 -->
 <template>
-  <NuxtChild/>
+  <NuxtChild />
 </template>
 
 <script lang="ts">
@@ -41,7 +41,6 @@ import { Component, Vue } from 'nuxt-property-decorator'
 
 @Component({})
 export default class ConfigurationActions extends Vue {
-
   head () {
     return {
       titleTemplate: 'Actions - %s'

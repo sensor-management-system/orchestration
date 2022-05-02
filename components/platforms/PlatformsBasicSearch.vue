@@ -33,15 +33,15 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
-import PlatformsBasicSearchField from '@/components/platforms/PlatformsBasicSearchField.vue'
 import { Prop } from 'nuxt-property-decorator'
+import PlatformsBasicSearchField from '@/components/platforms/PlatformsBasicSearchField.vue'
 
 @Component({
   components: { PlatformsBasicSearchField }
 })
 export default class PlatformsBasicSearch extends Vue {
   @Prop({
-    required: true,
+    required: true
   })
   readonly value!: string | null
 
@@ -57,10 +57,9 @@ export default class PlatformsBasicSearch extends Vue {
     this.$emit('search')
   }
 
-  emitClear(){
+  emitClear () {
     this.$emit('clear')
   }
-
 }
 </script>
 

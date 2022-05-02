@@ -61,13 +61,13 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue} from 'nuxt-property-decorator'
+import { Component, Vue } from 'nuxt-property-decorator'
 
+import { mapActions, mapState } from 'vuex'
 import PlatformBasicDataForm from '@/components/PlatformBasicDataForm.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
 import { Platform } from '@/models/Platform'
-import { mapActions, mapState } from 'vuex'
 import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
 
 @Component({
@@ -77,16 +77,15 @@ import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButto
     ProgressIndicator
   },
   middleware: ['auth'],
-  computed:mapState('platforms',['platform']),
-  methods:mapActions('platforms',['loadPlatform','savePlatform'])
+  computed: mapState('platforms', ['platform']),
+  methods: mapActions('platforms', ['loadPlatform', 'savePlatform'])
 })
 export default class PlatformEditBasicPage extends Vue {
-
-  private platformCopy:Platform=new Platform()
+  private platformCopy: Platform = new Platform()
   private isSaving: boolean = false
 
-  created(){
-    this.platformCopy = Platform.createFromObject(this.platform);
+  created () {
+    this.platformCopy = Platform.createFromObject(this.platform)
   }
 
   get platformId () {
@@ -103,9 +102,9 @@ export default class PlatformEditBasicPage extends Vue {
       this.isSaving = true
       await this.savePlatform(this.platformCopy)
       this.loadPlatform({
-        platformId:this.platformId,
-        includeContacts:false,
-        includePlatformAttachments:false
+        platformId: this.platformId,
+        includeContacts: false,
+        includePlatformAttachments: false
       })
       this.$router.push('/platforms/' + this.platformId + '/basic')
       this.$store.commit('snackbar/setSuccess', 'Platform updated')

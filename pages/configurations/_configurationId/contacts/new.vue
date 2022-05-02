@@ -45,7 +45,8 @@ permissions and limitations under the Licence.
           :item-text="(x) => x"
           :item-value="(x) => x.id"
           label="New contact"
-          return-object />
+          return-object
+        />
       </v-col>
       <v-col
         cols="12"
@@ -75,25 +76,25 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop } from 'nuxt-property-decorator'
+import { Component, Vue } from 'nuxt-property-decorator'
 
+import { mapActions, mapGetters, mapState } from 'vuex'
 import { Contact } from '@/models/Contact'
 
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
-import { mapActions, mapGetters, mapState } from 'vuex'
 
 @Component({
   components: {
     ProgressIndicator
   },
   middleware: ['auth'],
-  computed:{
-    ...mapGetters('contacts',['contactsByDifference']),
-    ...mapState('configurations',['configurationContacts'])
+  computed: {
+    ...mapGetters('contacts', ['contactsByDifference']),
+    ...mapState('configurations', ['configurationContacts'])
   },
-  methods:{
-    ...mapActions('contacts',['loadAllContacts']),
-    ...mapActions('configurations',['loadConfigurationContacts','addConfigurationContact'])
+  methods: {
+    ...mapActions('contacts', ['loadAllContacts']),
+    ...mapActions('configurations', ['loadConfigurationContacts', 'addConfigurationContact'])
   }
 })
 export default class ConfigurationAddContactPage extends Vue {
@@ -101,10 +102,9 @@ export default class ConfigurationAddContactPage extends Vue {
   private isLoading: boolean = false
   private isSaving: boolean = false
 
-
   async created () {
     try {
-      this.isLoading=true
+      this.isLoading = true
       await this.loadAllContacts()
       await this.loadConfigurationContacts(this.configurationId)
     } catch (e) {
@@ -123,7 +123,7 @@ export default class ConfigurationAddContactPage extends Vue {
   }
 
   get allExceptSelected (): Contact[] {
-    return this.contactsByDifference(this.configurationContacts);
+    return this.contactsByDifference(this.configurationContacts)
   }
 
   async addContact (): void {
@@ -144,6 +144,5 @@ export default class ConfigurationAddContactPage extends Vue {
       }
     }
   }
-
 }
 </script>

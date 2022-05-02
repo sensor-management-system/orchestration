@@ -33,35 +33,37 @@ permissions and limitations under the Licence.
     <ProgressIndicator
       v-model="isLoading"
     />
-    <NuxtChild/>
+    <NuxtChild />
   </div>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import { mapActions } from 'vuex'
+import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
 @Component({
   components: { ProgressIndicator },
-  methods:mapActions('devices',['loadAllDeviceActions'])
+  methods: mapActions('devices', ['loadAllDeviceActions'])
 })
 export default class DeviceActionsPage extends Vue {
   private isLoading = false
 
-  async created(){
+  async created () {
     try {
-      this.isLoading=true
+      this.isLoading = true
       await this.loadAllDeviceActions(this.deviceId)
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to fetch actions')
     } finally {
-      this.isLoading=false
+      this.isLoading = false
     }
   }
+
   get deviceId (): string {
     return this.$route.params.deviceId
   }
+
   head () {
     return {
       titleTemplate: 'Actions - %s'

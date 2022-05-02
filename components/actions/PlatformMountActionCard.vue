@@ -129,6 +129,5 @@ export default class PlatformMountActionCard extends Vue {
   })
   // @ts-ignore
   readonly value!: PlatformMountAction
-
 }
 </script>

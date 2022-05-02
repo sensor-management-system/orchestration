@@ -72,12 +72,12 @@ permissions and limitations under the Licence.
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 
+import { mapActions, mapState } from 'vuex'
 import DeviceCalibrationActionForm from '@/components/actions/DeviceCalibrationActionForm.vue'
 import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
 import { DeviceCalibrationAction } from '@/models/DeviceCalibrationAction'
-import { mapActions, mapState } from 'vuex'
 
 @Component({
   components: {
@@ -87,24 +87,24 @@ import { mapActions, mapState } from 'vuex'
   },
   scrollToTop: true,
   middleware: ['auth'],
-  computed:mapState('devices',['deviceCalibrationAction','deviceAttachments','deviceMeasuredQuantities']),
-  methods:mapActions('devices',['loadDeviceCalibrationAction','loadAllDeviceActions','loadDeviceAttachments','loadDeviceMeasuredQuantities','updateDeviceCalibrationAction'])
+  computed: mapState('devices', ['deviceCalibrationAction', 'deviceAttachments', 'deviceMeasuredQuantities']),
+  methods: mapActions('devices', ['loadDeviceCalibrationAction', 'loadAllDeviceActions', 'loadDeviceAttachments', 'loadDeviceMeasuredQuantities', 'updateDeviceCalibrationAction'])
 })
 export default class DeviceCalibrationActionEditPage extends Vue {
   private action: DeviceCalibrationAction = new DeviceCalibrationAction()
   private isSaving = false
   private isLoading = false
 
-  async created(){
+  async created () {
     try {
       this.isLoading = true
       await this.loadDeviceCalibrationAction(this.actionId)
       await this.loadDeviceAttachments(this.deviceId)
       await this.loadDeviceMeasuredQuantities(this.deviceId)
       this.action = DeviceCalibrationAction.createFromObject(this.deviceCalibrationAction)
-    }catch{
+    } catch {
       this.$store.commit('snackbar/setError', 'Failed to fetch action')
-    }finally {
+    } finally {
       this.isLoading = false
     }
   }
@@ -128,7 +128,7 @@ export default class DeviceCalibrationActionEditPage extends Vue {
     }
 
     try {
-      this.isLoading=true
+      this.isLoading = true
       await this.updateDeviceCalibrationAction({
         deviceId: this.deviceId,
         calibrationDeviceAction: this.action
@@ -137,8 +137,8 @@ export default class DeviceCalibrationActionEditPage extends Vue {
       this.$router.push('/devices/' + this.deviceId + '/actions')
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to save the action')
-    }finally {
-      this.isLoading=false
+    } finally {
+      this.isLoading = false
     }
   }
 }

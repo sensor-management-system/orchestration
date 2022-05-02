@@ -15,19 +15,20 @@ import { Prop } from 'nuxt-property-decorator'
 @Component
 export default class PlatformsBasicSearchField extends Vue {
   @Prop({
-    required: true,
+    required: true
   })
   readonly value!: string|null
 
-  get text(){
-    return this.value;
+  get text () {
+    return this.value
   }
 
-  set text(newVal){
-    this.$emit('input',newVal)
+  set text (newVal) {
+    this.$emit('input', newVal)
   }
-  emitKeydown(){
-    this.$emit('start-search');
+
+  emitKeydown () {
+    this.$emit('start-search')
   }
 }
 </script>

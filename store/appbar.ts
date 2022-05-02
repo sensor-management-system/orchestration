@@ -29,8 +29,8 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
+import { Commit } from 'vuex'
 import { TabItemConfiguration } from '@/models/TabItemConfiguration'
-import {Commit} from 'vuex'
 
 export interface IAppbarStore {
   activeTab: null | number,
@@ -173,48 +173,48 @@ export const actions = {
       context.commit('setCancelBtnDisabled', payload.cancelBtnDisabled)
     }
   },
-  initContactsIndexAppBar({commit}:{commit:Commit}){
-    commit('setTitle','Contacts');
-    commit('setTabs',[])
-    commit('setCancelBtnHidden',true)
-    commit('setSaveBtnHidden',true)
+  initContactsIndexAppBar ({ commit }: {commit: Commit}) {
+    commit('setTitle', 'Contacts')
+    commit('setTabs', [])
+    commit('setCancelBtnHidden', true)
+    commit('setSaveBtnHidden', true)
   },
-  initPlatformsIndexAppBar({commit}:{commit:Commit}){
-    commit('setTitle','Platforms');
-    commit('setTabs',[
+  initPlatformsIndexAppBar ({ commit }: {commit: Commit}) {
+    commit('setTitle', 'Platforms')
+    commit('setTabs', [
       'Search',
       'Extended Search'
     ])
-    commit('setCancelBtnHidden',true)
-    commit('setSaveBtnHidden',true)
+    commit('setCancelBtnHidden', true)
+    commit('setSaveBtnHidden', true)
   },
-  initDevicesIndexAppBar({commit}:{commit:Commit}){
-    commit('setTitle','Devices');
-    commit('setTabs',[
+  initDevicesIndexAppBar ({ commit }: {commit: Commit}) {
+    commit('setTitle', 'Devices')
+    commit('setTabs', [
       'Search',
       'Extended Search'
     ])
-    commit('setCancelBtnHidden',true)
-    commit('setSaveBtnHidden',true)
+    commit('setCancelBtnHidden', true)
+    commit('setSaveBtnHidden', true)
   },
-  initConfigurationsIndexAppBar({commit}:{commit:Commit}){
-    commit('setTitle','Configurations');
-    commit('setTabs',[
+  initConfigurationsIndexAppBar ({ commit }: {commit: Commit}) {
+    commit('setTitle', 'Configurations')
+    commit('setTabs', [
       'Search',
       'Extended Search'
     ])
-    commit('setCancelBtnHidden',true)
-    commit('setSaveBtnHidden',true)
+    commit('setCancelBtnHidden', true)
+    commit('setSaveBtnHidden', true)
   },
-  initContactsNewAppBar({commit}:{commit:Commit}){
-    commit('setTitle','Add Contact');
-    commit('setTabs',[])
-    commit('setCancelBtnHidden',true)
-    commit('setSaveBtnHidden',true)
+  initContactsNewAppBar ({ commit }: {commit: Commit}) {
+    commit('setTitle', 'Add Contact')
+    commit('setTabs', [])
+    commit('setCancelBtnHidden', true)
+    commit('setSaveBtnHidden', true)
   },
-  initPlatformsNewAppBar({commit}:{commit:Commit}){
-    commit('setTitle','Add Platform');
-    commit('setTabs',[
+  initPlatformsNewAppBar ({ commit }: {commit: Commit}) {
+    commit('setTitle', 'Add Platform')
+    commit('setTabs', [
       {
         to: '/platforms/new',
         name: 'Basic Data'
@@ -228,12 +228,12 @@ export const actions = {
         disabled: true
       }
     ])
-    commit('setCancelBtnHidden',true)
-    commit('setSaveBtnHidden',true)
+    commit('setCancelBtnHidden', true)
+    commit('setSaveBtnHidden', true)
   },
-  initDevicesNewAppBar({commit}:{commit:Commit}){
-    commit('setTitle','Add Device');
-    commit('setTabs',[
+  initDevicesNewAppBar ({ commit }: {commit: Commit}) {
+    commit('setTitle', 'Add Device')
+    commit('setTabs', [
       {
         to: '/devices/new',
         name: 'Basic Data'
@@ -259,12 +259,12 @@ export const actions = {
         disabled: true
       }
     ])
-    commit('setCancelBtnHidden',true)
-    commit('setSaveBtnHidden',true)
+    commit('setCancelBtnHidden', true)
+    commit('setSaveBtnHidden', true)
   },
-  initConfigurationsNewAppBar({commit}:{commit:Commit}){
-    commit('setTitle','Add Configuration');
-    commit('setTabs',[
+  initConfigurationsNewAppBar ({ commit }: {commit: Commit}) {
+    commit('setTitle', 'Add Configuration')
+    commit('setTabs', [
       {
         to: '/configurations/new',
         name: 'Basic Data'
@@ -286,18 +286,18 @@ export const actions = {
         disabled: true
       }
     ])
-    commit('setCancelBtnHidden',true)
-    commit('setSaveBtnHidden',true)
+    commit('setCancelBtnHidden', true)
+    commit('setSaveBtnHidden', true)
   },
-  initContactsContactIdAppBar({commit}:{commit:Commit}){
-    commit('setTitle','Show Contact');
-    commit('setTabs',[])
-    commit('setCancelBtnHidden',true)
-    commit('setSaveBtnHidden',true)
+  initContactsContactIdAppBar ({ commit }: {commit: Commit}) {
+    commit('setTitle', 'Show Contact')
+    commit('setTabs', [])
+    commit('setCancelBtnHidden', true)
+    commit('setSaveBtnHidden', true)
   },
-  initPlatformsPlatformIdAppBar({commit}:{commit:Commit},id:number){
-    commit('setTitle','Show Platform');
-    commit('setTabs',[
+  initPlatformsPlatformIdAppBar ({ commit }: {commit: Commit}, id: number) {
+    commit('setTitle', 'Show Platform')
+    commit('setTabs', [
       {
         to: '/platforms/' + id + '/basic',
         name: 'Basic Data'
@@ -315,12 +315,12 @@ export const actions = {
         name: 'Actions'
       }
     ])
-    commit('setCancelBtnHidden',true)
-    commit('setSaveBtnHidden',true)
+    commit('setCancelBtnHidden', true)
+    commit('setSaveBtnHidden', true)
   },
-  initDevicesDeviceIdAppBar({commit}:{commit:Commit},id:number){
-    commit('setTitle','Show Device');
-    commit('setTabs',[
+  initDevicesDeviceIdAppBar ({ commit }: {commit: Commit}, id: number) {
+    commit('setTitle', 'Show Device')
+    commit('setTabs', [
       {
         to: '/devices/' + id + '/basic',
         name: 'Basic Data'
@@ -346,12 +346,12 @@ export const actions = {
         name: 'Actions'
       }
     ])
-    commit('setCancelBtnHidden',true)
-    commit('setSaveBtnHidden',true)
+    commit('setCancelBtnHidden', true)
+    commit('setSaveBtnHidden', true)
   },
-  initConfigurationsConfigurationIdAppBar({commit}:{commit:Commit},id:number){
-    commit('setTitle','Show Configuration');
-    commit('setTabs',[
+  initConfigurationsConfigurationIdAppBar ({ commit }: {commit: Commit}, id: number) {
+    commit('setTitle', 'Show Configuration')
+    commit('setTabs', [
       {
         to: '/configurations/' + id + '/basic',
         name: 'Basic Data'
@@ -373,24 +373,24 @@ export const actions = {
         name: 'Actions'
       }
     ])
-    commit('setCancelBtnHidden',true)
-    commit('setSaveBtnHidden',true)
+    commit('setCancelBtnHidden', true)
+    commit('setSaveBtnHidden', true)
   },
-  initContactsContactIdIndexAppBar({commit}:{commit:Commit},title:string){
-    commit('setTitle','Show Contact: '+title);
-    commit('setTabs',[])
-    commit('setCancelBtnHidden',true)
-    commit('setSaveBtnHidden',true)
+  initContactsContactIdIndexAppBar ({ commit }: {commit: Commit}, title: string) {
+    commit('setTitle', 'Show Contact: ' + title)
+    commit('setTabs', [])
+    commit('setCancelBtnHidden', true)
+    commit('setSaveBtnHidden', true)
   },
-  initContactsContactIdEditAppBar({commit}:{commit:Commit},title:string){
-    commit('setTitle','Edit Contact: '+title);
-    commit('setTabs',[])
-    commit('setCancelBtnHidden',true)
-    commit('setSaveBtnHidden',true)
+  initContactsContactIdEditAppBar ({ commit }: {commit: Commit}, title: string) {
+    commit('setTitle', 'Edit Contact: ' + title)
+    commit('setTabs', [])
+    commit('setCancelBtnHidden', true)
+    commit('setSaveBtnHidden', true)
   },
-  initPlatformCopyAppBar({commit}:{commit:Commit},id:number){
-    commit('setTitle','Copy Platform');
-    commit('setTabs',[
+  initPlatformCopyAppBar ({ commit }: {commit: Commit}, id: number) {
+    commit('setTitle', 'Copy Platform')
+    commit('setTabs', [
       {
         to: '/platform/copy/' + id,
         name: 'Basic Data'
@@ -408,12 +408,12 @@ export const actions = {
         disabled: true
       }
     ])
-    commit('setCancelBtnHidden',true)
-    commit('setSaveBtnHidden',true)
+    commit('setCancelBtnHidden', true)
+    commit('setSaveBtnHidden', true)
   },
-  initDeviceCopyAppBar({commit}:{commit:Commit},id:number){
-    commit('setTitle','Copy Device');
-    commit('setTabs',[
+  initDeviceCopyAppBar ({ commit }: {commit: Commit}, id: number) {
+    commit('setTitle', 'Copy Device')
+    commit('setTabs', [
       {
         to: '/devices/copy/' + id,
         name: 'Basic Data'
@@ -439,8 +439,8 @@ export const actions = {
         disabled: true
       }
     ])
-    commit('setCancelBtnHidden',true)
-    commit('setSaveBtnHidden',true)
+    commit('setCancelBtnHidden', true)
+    commit('setSaveBtnHidden', true)
   },
 
   /**

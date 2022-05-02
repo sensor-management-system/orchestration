@@ -42,8 +42,7 @@ permissions and limitations under the Licence.
         >
           <DotMenu>
             <template #actions>
-              <slot name="dot-menu-items">
-              </slot>
+              <slot name="dot-menu-items" />
             </template>
           </DotMenu>
         </v-col>
@@ -63,7 +62,7 @@ permissions and limitations under the Licence.
           align-self="end"
           class="text-right"
         >
-          <slot name="actions"/>
+          <slot name="actions" />
           <v-btn
             icon
             @click.stop.prevent="show=!show"
@@ -92,7 +91,7 @@ permissions and limitations under the Licence.
                 Repository
               </label>
               <!-- eslint-disable-next-line vue/no-v-html -->
-              <span v-html="repositoryLink"/>
+              <span v-html="repositoryLink" />
             </v-col>
           </v-row>
           <label>Description</label>

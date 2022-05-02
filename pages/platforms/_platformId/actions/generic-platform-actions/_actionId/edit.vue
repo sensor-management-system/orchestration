@@ -75,10 +75,10 @@ permissions and limitations under the Licence.
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 
+import { mapActions, mapState } from 'vuex'
 import { GenericAction } from '@/models/GenericAction'
 
 import GenericActionForm from '@/components/actions/GenericActionForm.vue'
-import { mapActions, mapState } from 'vuex'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
 
@@ -90,15 +90,15 @@ import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButto
   },
   scrollToTop: true,
   middleware: ['auth'],
-  computed:mapState('platforms',['platformGenericAction','platformAttachments']),
-  methods:mapActions('platforms',['loadPlatformGenericAction','loadAllPlatformActions','loadPlatformAttachments','updatePlatformGenericAction'])
+  computed: mapState('platforms', ['platformGenericAction', 'platformAttachments']),
+  methods: mapActions('platforms', ['loadPlatformGenericAction', 'loadAllPlatformActions', 'loadPlatformAttachments', 'updatePlatformGenericAction'])
 })
 export default class EditPlatformAction extends Vue {
-  private action:GenericAction=new GenericAction()
+  private action: GenericAction = new GenericAction()
   private isSaving = false
   private isLoading = false
 
-  async created(){
+  async created () {
     try {
       this.isLoading = true
       await this.loadPlatformGenericAction(this.actionId)
@@ -106,7 +106,7 @@ export default class EditPlatformAction extends Vue {
       this.action = GenericAction.createFromObject(this.platformGenericAction)
     } catch (error) {
       this.$store.commit('snackbar/setError', 'Failed to fetch action')
-    }finally {
+    } finally {
       this.isLoading = false
     }
   }
@@ -123,7 +123,7 @@ export default class EditPlatformAction extends Vue {
     return this.isLoading || this.isSaving
   }
 
-  async save (){
+  async save () {
     if (!(this.$refs.genericPlatformActionForm as Vue & { isValid: () => boolean }).isValid()) {
       this.$store.commit('snackbar/setError', 'Please correct the errors')
       return
@@ -131,13 +131,13 @@ export default class EditPlatformAction extends Vue {
 
     try {
       this.isSaving = true
-      await this.updatePlatformGenericAction({platformId:this.platformId,genericPlatformAction: this.action})
+      await this.updatePlatformGenericAction({ platformId: this.platformId, genericPlatformAction: this.action })
       this.loadAllPlatformActions(this.platformId)
       this.$store.commit('snackbar/setSuccess', `${this.action.actionTypeName} updated`)
       this.$router.push('/platforms/' + this.platformId + '/actions')
-    }catch (err){
+    } catch (err) {
       this.$store.commit('snackbar/setError', 'Failed to save the action')
-    }finally {
+    } finally {
       this.isSaving = false
     }
   }

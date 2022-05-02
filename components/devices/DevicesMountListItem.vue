@@ -70,7 +70,8 @@
                     <v-row
                       dense
                     >
-                      <v-col cols="4"
+                      <v-col
+                        cols="4"
                         class="font-weight-medium"
                       >
                         Manufacturer:
@@ -183,13 +184,12 @@
                   color="grey lighten-5"
                 >
                   <v-card-text>
-                    <slot name="mount"></slot>
+                    <slot name="mount" />
                   </v-card-text>
                 </v-card>
               </v-expand-transition>
             </v-card>
           </v-container>
-
         </v-card>
       </v-expand-transition>
     </v-card>
@@ -204,10 +204,11 @@ import { Device } from '@/models/Device'
 @Component
 export default class DevicesMountListItem extends Vue {
   @Prop({
-    required:true,
+    required: true,
     type: Object
   })
-  private device!:Device
+  private device!: Device
+
   private show = false
   private showOverview = false
   private showMount = false

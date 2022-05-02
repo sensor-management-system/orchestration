@@ -50,7 +50,7 @@ permissions and limitations under the Licence.
         />
       </v-card-text>
     </v-card>
-    <NuxtChild/>
+    <NuxtChild />
   </div>
 </template>
 
@@ -63,45 +63,45 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
 const KIND_OF_ACTION_TYPE_DEVICE_CALIBRATION = 'device_calibration'
 const KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE = 'software_update'
 const KIND_OF_ACTION_TYPE_GENERIC_DEVICE_ACTION = 'generic_device_action'
-const KIND_OF_ACTION_TYPE_UNKNOWN = 'unknown'
 
 @Component({
   components: { ProgressIndicator },
   middleware: ['auth'],
-  computed:{
-    ...mapGetters('vocabulary',['deviceActionTypeItems']),
-    ...mapState('devices',['chosenKindOfDeviceAction'])
+  computed: {
+    ...mapGetters('vocabulary', ['deviceActionTypeItems']),
+    ...mapState('devices', ['chosenKindOfDeviceAction'])
   },
-  methods:{
-    ...mapActions('vocabulary',['loadDeviceGenericActionTypes']),
-    ...mapActions('devices',['loadDeviceAttachments','setChosenKindOfDeviceAction','loadDeviceMeasuredQuantities'])
+  methods: {
+    ...mapActions('vocabulary', ['loadDeviceGenericActionTypes']),
+    ...mapActions('devices', ['loadDeviceAttachments', 'setChosenKindOfDeviceAction', 'loadDeviceMeasuredQuantities'])
   }
 })
 export default class ActionAddPage extends Vue {
   private isLoading: boolean = false
 
-  async created(){
+  async created () {
     try {
-      this.isLoading=true
-      this.chosenKindOfAction=null
+      this.isLoading = true
+      this.chosenKindOfAction = null
       await this.loadDeviceGenericActionTypes()
       await this.loadDeviceAttachments(this.deviceId)
       await this.loadDeviceMeasuredQuantities(this.deviceId)
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to fetch action types')
-    }finally {
-      this.isLoading=false
+    } finally {
+      this.isLoading = false
     }
   }
 
   get deviceId (): string {
     return this.$route.params.deviceId
   }
-  get chosenKindOfAction(){
+
+  get chosenKindOfAction () {
     return this.chosenKindOfDeviceAction
   }
 
-  set chosenKindOfAction(newVal){
+  set chosenKindOfAction (newVal) {
     this.setChosenKindOfDeviceAction(newVal)
   }
 
@@ -117,23 +117,20 @@ export default class ActionAddPage extends Vue {
     return this.chosenKindOfDeviceAction?.kind === KIND_OF_ACTION_TYPE_GENERIC_DEVICE_ACTION
   }
 
-  updateRoute(){
-
-    if(this.genericActionChosen){
+  updateRoute () {
+    if (this.genericActionChosen) {
       this.$router.push(`/devices/${this.deviceId}/actions/new/generic-device-actions`)
     }
-    if(this.softwareUpdateChosen){
+    if (this.softwareUpdateChosen) {
       this.$router.push(`/devices/${this.deviceId}/actions/new/software-update-actions`)
     }
-    if(this.deviceCalibrationChosen){
+    if (this.deviceCalibrationChosen) {
       this.$router.push(`/devices/${this.deviceId}/actions/new/device-calibration-actions`)
     }
-    if(!this.chosenKindOfAction){
+    if (!this.chosenKindOfAction) {
       this.$router.push(`/devices/${this.deviceId}/actions/new`)
     }
   }
-
-
 }
 
 </script>

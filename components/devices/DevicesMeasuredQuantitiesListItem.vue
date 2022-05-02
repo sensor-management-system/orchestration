@@ -18,8 +18,7 @@
           >
             <DotMenu>
               <template #actions>
-                <slot name="dot-menu-items">
-                </slot>
+                <slot name="dot-menu-items" />
               </template>
             </DotMenu>
           </v-col>
@@ -28,7 +27,7 @@
           no-gutters
         >
           <v-col class="text-subtitle-1">
-            {{computedTitle}}
+            {{ computedTitle }}
           </v-col>
           <v-col
             align-self="end"
@@ -54,17 +53,16 @@
       </v-card-text>
       <v-expand-transition>
         <v-container>
-              <DevicePropertyInfo
-                v-show="show"
-                v-model="measuredQuantity"
-                :compartments="compartments"
-                :sampling-medias="samplingMedias"
-                :properties="properties"
-                :units="units"
-                :measured-quantity-units="measuredQuantityUnits"
-              />
+          <DevicePropertyInfo
+            v-show="show"
+            v-model="measuredQuantity"
+            :compartments="compartments"
+            :sampling-medias="samplingMedias"
+            :properties="properties"
+            :units="units"
+            :measured-quantity-units="measuredQuantityUnits"
+          />
         </v-container>
-
       </v-expand-transition>
     </v-card>
   </v-hover>
@@ -72,8 +70,8 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
-import DotMenu from '@/components/DotMenu.vue'
 import { Prop } from 'nuxt-property-decorator'
+import DotMenu from '@/components/DotMenu.vue'
 import { DeviceProperty } from '@/models/DeviceProperty'
 import DevicePropertyInfo from '@/components/DevicePropertyInfo.vue'
 import { Compartment } from '@/models/Compartment'
@@ -86,10 +84,10 @@ import { MeasuredQuantityUnit } from '@/models/MeasuredQuantityUnit'
 })
 export default class DevicesMeasuredQuantitiesListItem extends Vue {
   @Prop({
-    required:true,
+    required: true,
     type: Object
   })
-  private measuredQuantity!:DeviceProperty;
+  private measuredQuantity!: DeviceProperty
 
   /**
    * a list of Compartments
@@ -142,28 +140,27 @@ export default class DevicesMeasuredQuantitiesListItem extends Vue {
   readonly measuredQuantityUnits!: MeasuredQuantityUnit[]
 
   @Prop({
-    required:true
+    required: true
   })
-  private deviceId!:string;
+  private deviceId!: string
 
   @Prop({
-    required:true
+    required: true
   })
-  private index!:number;
+  private index!: number
 
-  private show=false
+  private show = false
 
-  get computedTitle(){
-    if(this.measuredQuantity){
-      let additionaLabel = '';
-      if(this.measuredQuantity.label){
-        additionaLabel= ' - ' +this.measuredQuantity.label
+  get computedTitle () {
+    if (this.measuredQuantity) {
+      let additionaLabel = ''
+      if (this.measuredQuantity.label) {
+        additionaLabel = ' - ' + this.measuredQuantity.label
       }
-      return `Measured quantity ${this.index+1}` + additionaLabel;
+      return `Measured quantity ${this.index + 1}` + additionaLabel
     }
     return ''
   }
-
 }
 </script>
 

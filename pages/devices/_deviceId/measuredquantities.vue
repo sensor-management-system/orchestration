@@ -33,7 +33,7 @@ permissions and limitations under the Licence.
     <ProgressIndicator
       v-model="isLoading"
     />
-    <NuxtChild/>
+    <NuxtChild />
   </div>
 </template>
 
@@ -45,16 +45,16 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
 @Component({
   components: { ProgressIndicator },
   methods: {
-    ...mapActions ('devices', ['loadDeviceMeasuredQuantities']),
-    ...mapActions('vocabulary',['loadCompartments','loadSamplingMedia','loadProperties','loadUnits','loadMeasuredQuantityUnits']),
+    ...mapActions('devices', ['loadDeviceMeasuredQuantities']),
+    ...mapActions('vocabulary', ['loadCompartments', 'loadSamplingMedia', 'loadProperties', 'loadUnits', 'loadMeasuredQuantityUnits'])
   }
 })
 export default class DevicePropertiesPage extends Vue {
   private isLoading = false
 
-  async created(){
+  async created () {
     try {
-      this.isLoading=true
+      this.isLoading = true
       await this.loadDeviceMeasuredQuantities(this.deviceId)
       await this.loadCompartments()
       await this.loadSamplingMedia()
@@ -63,8 +63,8 @@ export default class DevicePropertiesPage extends Vue {
       await this.loadMeasuredQuantityUnits()
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to fetch measured quantities')
-    }finally {
-      this.isLoading=false
+    } finally {
+      this.isLoading = false
     }
   }
 

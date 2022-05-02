@@ -99,19 +99,19 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'nuxt-property-decorator'
+import { Component, Vue } from 'nuxt-property-decorator'
 
+import { mapActions, mapState } from 'vuex'
 import ConfigurationsBasicData from '@/components/configurations/ConfigurationsBasicData.vue'
 import DotMenu from '@/components/DotMenu.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 import ConfigurationsDeleteDialog from '@/components/configurations/ConfigurationsDeleteDialog.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
-import { mapActions, mapState } from 'vuex'
 @Component({
   components: { ProgressIndicator, ConfigurationsDeleteDialog, DotMenuActionDelete, DotMenu, ConfigurationsBasicData },
-  computed:mapState('configurations',['configuration']),
-  methods:mapActions('configurations',['deleteConfiguration'])
+  computed: mapState('configurations', ['configuration']),
+  methods: mapActions('configurations', ['deleteConfiguration'])
 })
 export default class ConfigurationShowBasicPage extends Vue {
   private isSaving = false
@@ -136,14 +136,14 @@ export default class ConfigurationShowBasicPage extends Vue {
       return
     }
     try {
-      this.isSaving=true
+      this.isSaving = true
       await this.deleteConfiguration(this.configuration.id)
       this.$store.commit('snackbar/setSuccess', 'Configuration deleted')
       this.$router.push('/configurations')
-    }catch (e) {
+    } catch (e) {
       this.$store.commit('snackbar/setError', 'Configuration could not be deleted')
-    }finally {
-      this.isSaving=false
+    } finally {
+      this.isSaving = false
     }
   }
 }

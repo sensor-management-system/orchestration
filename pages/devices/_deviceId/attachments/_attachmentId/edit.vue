@@ -65,8 +65,8 @@ permissions and limitations under the Licence.
             >
               <v-col class="text-subtitle-1">
                 <v-text-field
-                  label="Label"
                   v-model="valueCopy.label"
+                  label="Label"
                 />
               </v-col>
               <v-col
@@ -93,15 +93,15 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Vue, Component, Prop, mixins } from 'nuxt-property-decorator'
+import { Component, mixins } from 'nuxt-property-decorator'
 
+import { mapState, mapActions } from 'vuex'
 import { AttachmentsMixin } from '@/mixins/AttachmentsMixin'
 
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
 
 import { Attachment } from '@/models/Attachment'
-import { mapState,mapActions } from 'vuex'
 
 /**
  * A class component that displays a single attached file
@@ -110,8 +110,8 @@ import { mapState,mapActions } from 'vuex'
 @Component({
   components: { SaveAndCancelButtons, ProgressIndicator },
   middleware: ['auth'],
-  computed:mapState('devices',['deviceAttachment']),
-  methods:mapActions('devices',['loadDeviceAttachment','loadDeviceAttachments','updateDeviceAttachment'])
+  computed: mapState('devices', ['deviceAttachment']),
+  methods: mapActions('devices', ['loadDeviceAttachment', 'loadDeviceAttachments', 'updateDeviceAttachment'])
 })
 // @ts-ignore
 export default class AttachmentEditPage extends mixins(AttachmentsMixin) {
@@ -121,19 +121,20 @@ export default class AttachmentEditPage extends mixins(AttachmentsMixin) {
 
   async created () {
     try {
-      this.isLoading=true
+      this.isLoading = true
       await this.loadDeviceAttachment(this.attachmentId)
       this.valueCopy = Attachment.createFromObject(this.deviceAttachment)
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to load attachment')
     } finally {
-      this.isLoading=false
+      this.isLoading = false
     }
   }
 
   get deviceId (): string {
     return this.$route.params.deviceId
   }
+
   get attachmentId (): string {
     return this.$route.params.attachmentId
   }
@@ -144,7 +145,7 @@ export default class AttachmentEditPage extends mixins(AttachmentsMixin) {
 
   async save () {
     try {
-      this.isSaving=true
+      this.isSaving = true
       await this.updateDeviceAttachment({
         deviceId: this.deviceId,
         attachment: this.valueCopy
@@ -154,8 +155,8 @@ export default class AttachmentEditPage extends mixins(AttachmentsMixin) {
       this.$router.push('/devices/' + this.deviceId + '/attachments')
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to save attachments')
-    }finally {
-      this.isSaving=false
+    } finally {
+      this.isSaving = false
     }
   }
 }

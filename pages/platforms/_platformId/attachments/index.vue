@@ -56,7 +56,7 @@ permissions and limitations under the Licence.
     <BaseList
       :list-items="platformAttachments"
     >
-      <template v-slot:list-item="{item}">
+      <template #list-item="{item}">
         <PlatformsAttachmentListItem
           :attachment="item"
           :platform-id="platformId"
@@ -69,7 +69,6 @@ permissions and limitations under the Licence.
           </template>
         </PlatformsAttachmentListItem>
       </template>
-
     </BaseList>
     <v-card-actions
       v-if="platformAttachments.length > 3"
@@ -95,6 +94,7 @@ permissions and limitations under the Licence.
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
 
+import { mapActions, mapState } from 'vuex'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import HintCard from '@/components/HintCard.vue'
 import BaseList from '@/components/shared/BaseList.vue'
@@ -103,17 +103,16 @@ import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 import PlatformsAttachmentDeleteDialog from '@/components/platforms/PlatformsAttachmentDeleteDialog.vue'
 
 import { Attachment } from '@/models/Attachment'
-import { mapActions, mapState } from 'vuex'
 
 @Component({
   components: { PlatformsAttachmentDeleteDialog, DotMenuActionDelete, PlatformsAttachmentListItem, BaseList, HintCard, ProgressIndicator },
-  computed: mapState('platforms',['platformAttachments']),
-  methods:mapActions('platforms',['loadPlatformAttachments','deletePlatformAttachment'])
+  computed: mapState('platforms', ['platformAttachments']),
+  methods: mapActions('platforms', ['loadPlatformAttachments', 'deletePlatformAttachment'])
 })
-export default class PlatformAttachmentShowPage extends Vue{
+export default class PlatformAttachmentShowPage extends Vue {
   private isSaving = false
-  private showDeleteDialog=false;
-  private attachmentToDelete:Attachment|null=null;
+  private showDeleteDialog = false
+  private attachmentToDelete: Attachment|null = null
 
   get platformId (): string {
     return this.$route.params.platformId
@@ -134,14 +133,14 @@ export default class PlatformAttachmentShowPage extends Vue{
       return
     }
     try {
-      this.isSaving=true
+      this.isSaving = true
       await this.deletePlatformAttachment(this.attachmentToDelete.id)
       this.loadPlatformAttachments(this.platformId)
       this.$store.commit('snackbar/setSuccess', 'Attachment deleted')
     } catch (_error) {
       this.$store.commit('snackbar/setError', 'Failed to delete attachment')
     } finally {
-      this.isSaving=false
+      this.isSaving = false
       this.closeDialog()
     }
   }

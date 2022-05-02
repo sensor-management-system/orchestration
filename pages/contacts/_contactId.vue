@@ -33,21 +33,20 @@ permissions and limitations under the Licence.
     <ProgressIndicator
       v-model="isLoading"
     />
-    <NuxtChild/>
+    <NuxtChild />
   </div>
-
 </template>
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 
-import {mapState,mapActions} from 'vuex'
+import { mapActions } from 'vuex'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
 @Component({
   components: { ProgressIndicator },
-  methods:{
-    ...mapActions('contacts',['loadContact']),
-    ...mapActions('appbar',['initContactsContactIdAppBar','setDefaults'])
+  methods: {
+    ...mapActions('contacts', ['loadContact']),
+    ...mapActions('appbar', ['initContactsContactIdAppBar', 'setDefaults'])
   }
 })
 export default class ContactShowPage extends Vue {
@@ -55,13 +54,13 @@ export default class ContactShowPage extends Vue {
 
   async created () {
     try {
-      this.isLoading=true
+      this.isLoading = true
       this.initContactsContactIdAppBar()
       await this.loadContact(this.contactId)
-    }catch (_error){
+    } catch (_error) {
       this.$store.commit('snackbar/setError', 'Loading contact failed')
-    }finally {
-      this.isLoading=false
+    } finally {
+      this.isLoading = false
     }
   }
 

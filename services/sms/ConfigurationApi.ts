@@ -42,10 +42,6 @@ import { Project } from '@/models/Project'
 import { IFlaskJSONAPIFilter } from '@/utils/JSONApiInterfaces'
 
 import {
-  IPaginationLoader
-} from '@/utils/PaginatedLoader'
-
-import {
   ConfigurationSerializer,
   configurationWithMetaToConfigurationByAddingDummyObjects,
   configurationWithMetaToConfigurationByThrowingErrorOnMissing

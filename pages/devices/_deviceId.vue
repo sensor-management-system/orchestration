@@ -34,22 +34,22 @@ permissions and limitations under the Licence.
       v-model="isLoading"
     />
     <v-card flat>
-      <NuxtChild/>
+      <NuxtChild />
     </v-card>
   </div>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import { mapActions } from 'vuex'
+import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
 @Component({
   components: {
     ProgressIndicator
   },
-  methods:{
-    ...mapActions('devices',['loadDevice']),
+  methods: {
+    ...mapActions('devices', ['loadDevice']),
     ...mapActions('appbar', ['initDevicesDeviceIdAppBar', 'setDefaults'])
 
   }
@@ -62,7 +62,7 @@ export default class DevicePage extends Vue {
       this.isLoading = true
       this.initDevicesDeviceIdAppBar(this.deviceId)
       await this.loadDevice({
-        deviceId:this.deviceId,
+        deviceId: this.deviceId,
         includeContacts: false,
         includeCustomFields: false,
         includeDeviceProperties: false,

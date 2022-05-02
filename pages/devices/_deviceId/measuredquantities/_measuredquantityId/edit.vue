@@ -41,7 +41,7 @@ permissions and limitations under the Licence.
         <v-spacer />
         <SaveAndCancelButtons
           save-btn-text="Apply"
-          :to="'/devices/' + this.deviceId + '/measuredquantities'"
+          :to="'/devices/' + deviceId + '/measuredquantities'"
           @save="save"
         />
       </v-card-actions>
@@ -61,7 +61,7 @@ permissions and limitations under the Licence.
         <v-spacer />
         <SaveAndCancelButtons
           save-btn-text="Apply"
-          :to="'/devices/' + this.deviceId + '/measuredquantities'"
+          :to="'/devices/' + deviceId + '/measuredquantities'"
           @save="save"
         />
       </v-card-actions>
@@ -72,21 +72,21 @@ permissions and limitations under the Licence.
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 
+import { mapActions, mapState } from 'vuex'
 import DevicePropertyForm from '@/components/DevicePropertyForm.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
 
 import { DeviceProperty } from '@/models/DeviceProperty'
-import { mapActions, mapState } from 'vuex'
 
 @Component({
   components: { SaveAndCancelButtons, ProgressIndicator, DevicePropertyForm },
   middleware: ['auth'],
-  computed:{
-    ...mapState('vocabulary',['compartments','samplingMedia','properties','units','measuredQuantityUnits']),
-    ...mapState('devices',['deviceMeasuredQuantity'])
+  computed: {
+    ...mapState('vocabulary', ['compartments', 'samplingMedia', 'properties', 'units', 'measuredQuantityUnits']),
+    ...mapState('devices', ['deviceMeasuredQuantity'])
   },
-  methods:mapActions('devices',['loadDeviceMeasuredQuantity','loadDeviceMeasuredQuantities','updateDeviceMeasuredQuantity'])
+  methods: mapActions('devices', ['loadDeviceMeasuredQuantity', 'loadDeviceMeasuredQuantities', 'updateDeviceMeasuredQuantity'])
 })
 export default class DevicePropertyEditPage extends Vue {
   private isSaving = false
@@ -96,13 +96,13 @@ export default class DevicePropertyEditPage extends Vue {
 
   async created () {
     try {
-      this.isLoading=true
+      this.isLoading = true
       await this.loadDeviceMeasuredQuantity(this.measuredquantityId)
       this.valueCopy = DeviceProperty.createFromObject(this.deviceMeasuredQuantity)
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to load measured quantity')
-    }finally {
-      this.isLoading=false
+    } finally {
+      this.isLoading = false
     }
   }
 
@@ -110,7 +110,7 @@ export default class DevicePropertyEditPage extends Vue {
     return this.$route.params.deviceId
   }
 
-  get measuredquantityId():string{
+  get measuredquantityId (): string {
     return this.$route.params.measuredquantityId
   }
 
@@ -120,18 +120,18 @@ export default class DevicePropertyEditPage extends Vue {
 
   async save () {
     try {
-      this.isSaving=true
+      this.isSaving = true
       await this.updateDeviceMeasuredQuantity({
         deviceId: this.deviceId,
         deviceMeasuredQuantity: this.valueCopy
-      });
+      })
       this.loadDeviceMeasuredQuantities(this.deviceId)
       this.$store.commit('snackbar/setSuccess', 'Measured quantity updated')
       this.$router.push('/devices/' + this.deviceId + '/measuredquantities')
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to save measured quantity')
-    }finally {
-      this.isSaving=false
+    } finally {
+      this.isSaving = false
     }
   }
 }

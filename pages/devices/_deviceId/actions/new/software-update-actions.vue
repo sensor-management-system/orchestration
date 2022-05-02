@@ -1,11 +1,11 @@
-<<template>
+<template>
   <div>
     <ProgressIndicator
       v-model="isSaving"
       dark
     />
     <v-card-actions>
-      <v-spacer></v-spacer>
+      <v-spacer />
       <SaveAndCancelButtons
         save-btn-text="Create"
         :to="'/devices/' + deviceId + '/actions'"
@@ -19,7 +19,7 @@
       :current-user-mail="$auth.user.email"
     />
     <v-card-actions>
-      <v-spacer></v-spacer>
+      <v-spacer />
       <SaveAndCancelButtons
         save-btn-text="Create"
         :to="'/devices/' + deviceId + '/actions'"
@@ -31,26 +31,25 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
+import { mapActions, mapState } from 'vuex'
 import SoftwareUpdateActionForm from '@/components/actions/SoftwareUpdateActionForm.vue'
 import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
 import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
-import { mapActions, mapState } from 'vuex'
 
 @Component({
-  middleware:['auth'],
-  components: { ProgressIndicator, SaveAndCancelButtons,  SoftwareUpdateActionForm },
+  middleware: ['auth'],
+  components: { ProgressIndicator, SaveAndCancelButtons, SoftwareUpdateActionForm },
   computed: mapState('devices', ['deviceAttachments', 'chosenKindOfDeviceAction']),
   methods: mapActions('devices', ['addDeviceSoftwareUpdateAction', 'loadAllDeviceActions'])
 })
-export default class NewDeviceSoftwareUpdateActions extends Vue
-{
+export default class NewDeviceSoftwareUpdateActions extends Vue {
   private softwareUpdateAction: SoftwareUpdateAction = new SoftwareUpdateAction()
   private isSaving: boolean = false
 
-  created(){
-    if(this.chosenKindOfDeviceAction === null){
+  created () {
+    if (this.chosenKindOfDeviceAction === null) {
       this.$router.push('/devices/' + this.deviceId + '/actions')
     }
   }
@@ -66,7 +65,7 @@ export default class NewDeviceSoftwareUpdateActions extends Vue
     }
 
     try {
-      this.isSaving=true
+      this.isSaving = true
       await this.addDeviceSoftwareUpdateAction({
         deviceId: this.deviceId,
         softwareUpdateAction: this.softwareUpdateAction
@@ -76,8 +75,8 @@ export default class NewDeviceSoftwareUpdateActions extends Vue
       this.$router.push('/devices/' + this.deviceId + '/actions')
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to save the action')
-    }finally {
-      this.isSaving=false
+    } finally {
+      this.isSaving = false
     }
   }
 }

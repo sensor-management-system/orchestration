@@ -47,17 +47,16 @@ export class ContactApi {
   }
 
   searchPaginated (pageNumber: number, pageSize: number, search: string = '') {
-
-    let queryParams = {
+    const queryParams = {
       params: {
         'page[number]': pageNumber,
         'page[size]': pageSize,
-        'sort': 'family_name'
+        sort: 'family_name'
       }
     }
-    if(search !== ''){
+    if (search !== '') {
       // @ts-ignore
-      queryParams.params['q']=search;
+      queryParams.params.q = search
     }
 
     return this.axiosApi.get(
@@ -72,7 +71,7 @@ export class ContactApi {
         elements,
         totalCount
       }
-    });
+    })
   }
 
   findById (id: string): Promise<Contact> {

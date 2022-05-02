@@ -52,14 +52,12 @@ permissions and limitations under the Licence.
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 
-
+import { mapActions, mapState } from 'vuex'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
 
 import { CustomTextField } from '@/models/CustomTextField'
-import { mapActions, mapState } from 'vuex'
 import CustomFieldForm from '@/components/CustomFieldForm.vue'
-
 
 @Component({
   components: {
@@ -68,8 +66,8 @@ import CustomFieldForm from '@/components/CustomFieldForm.vue'
     ProgressIndicator
   },
   middleware: ['auth'],
-  computed: mapState('devices',['deviceCustomField']),
-  methods: mapActions('devices',['loadDeviceCustomField','loadDeviceCustomFields','updateDeviceCustomField'])
+  computed: mapState('devices', ['deviceCustomField']),
+  methods: mapActions('devices', ['loadDeviceCustomField', 'loadDeviceCustomFields', 'updateDeviceCustomField'])
 })
 export default class DeviceCustomFieldsShowPage extends Vue {
   private isSaving = false
@@ -79,13 +77,13 @@ export default class DeviceCustomFieldsShowPage extends Vue {
 
   async created () {
     try {
-      this.isLoading=true
+      this.isLoading = true
       await this.loadDeviceCustomField(this.customFieldId)
       this.valueCopy = CustomTextField.createFromObject(this.deviceCustomField)
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to load custom field')
     } finally {
-      this.isLoading=false
+      this.isLoading = false
     }
   }
 
@@ -93,8 +91,8 @@ export default class DeviceCustomFieldsShowPage extends Vue {
     return this.$route.params.deviceId
   }
 
-  get customFieldId():string{
-    return this.$route.params.customfieldId;
+  get customFieldId (): string {
+    return this.$route.params.customfieldId
   }
 
   get isInProgress (): boolean {

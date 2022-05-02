@@ -107,13 +107,13 @@ permissions and limitations under the Licence.
 <script lang="ts">
 import { Component, Vue, mixins } from 'nuxt-property-decorator'
 
+import { mapActions } from 'vuex'
 import UploadConfig from '@/config/uploads'
 
 import { Rules } from '@/mixins/Rules'
 import { UploadRules } from '@/mixins/UploadRules'
 
 import { Attachment } from '@/models/Attachment'
-import { mapActions } from 'vuex'
 
 import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
@@ -121,9 +121,9 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
 @Component({
   components: { ProgressIndicator, SaveAndCancelButtons },
   middleware: ['auth'],
-  methods:{
-    ...mapActions('platforms',['addPlatformAttachment','loadPlatformAttachments']),
-    ...mapActions('files',['uploadFile'])
+  methods: {
+    ...mapActions('platforms', ['addPlatformAttachment', 'loadPlatformAttachments']),
+    ...mapActions('files', ['uploadFile'])
   }
 })
 export default class PlatformAttachmentAddPage extends mixins(Rules, UploadRules) {
@@ -131,7 +131,6 @@ export default class PlatformAttachmentAddPage extends mixins(Rules, UploadRules
   private attachmentType: string = 'file'
   private file: File | null = null
   private isSaving: boolean = false
-
 
   /**
    * returns a list of MimeTypes, seperated by ,
@@ -156,8 +155,7 @@ export default class PlatformAttachmentAddPage extends mixins(Rules, UploadRules
     let theFailureCanBeFromUpload = true
 
     try {
-
-      this.isSaving=true
+      this.isSaving = true
 
       if (this.attachmentType !== 'url') {
         // Due to the validation we can be sure that the file is not null
@@ -165,14 +163,14 @@ export default class PlatformAttachmentAddPage extends mixins(Rules, UploadRules
         this.attachment.url = uploadResult.url
         theFailureCanBeFromUpload = false
       }
-      await this.addPlatformAttachment({platformId:this.platformId, attachment:this.attachment})
+      await this.addPlatformAttachment({ platformId: this.platformId, attachment: this.attachment })
       await this.loadPlatformAttachments(this.platformId)
       this.$store.commit('snackbar/setSuccess', 'New attachment added')
       this.$router.push('/platforms/' + this.platformId + '/attachments')
     } catch (error: any) {
       this.handleError(theFailureCanBeFromUpload, error)
-    }finally {
-      this.isSaving=false
+    } finally {
+      this.isSaving = false
     }
   }
 
@@ -188,7 +186,5 @@ export default class PlatformAttachmentAddPage extends mixins(Rules, UploadRules
     }
     this.$store.commit('snackbar/setError', message)
   }
-
-
 }
 </script>

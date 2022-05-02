@@ -1,5 +1,5 @@
-import { Device } from '@/models/Device'
 import { Commit, Dispatch } from 'vuex'
+import { Device } from '@/models/Device'
 import { IDeviceSearchParams } from '@/modelUtils/DeviceSearchParams'
 import { Contact } from '@/models/Contact'
 import { Attachment } from '@/models/Attachment'
@@ -11,9 +11,6 @@ import { DeviceCalibrationAction } from '@/models/DeviceCalibrationAction'
 import { IActionType } from '@/models/ActionType'
 import { DeviceProperty } from '@/models/DeviceProperty'
 import { CustomTextField } from '@/models/CustomTextField'
-import { Platform } from '@/models/Platform'
-import { PlatformUnmountAction } from '@/models/PlatformUnmountAction'
-import { PlatformUnmountActionWrapper } from '@/viewmodels/PlatformUnmountActionWrapper'
 import { DeviceUnmountActionWrapper } from '@/viewmodels/DeviceUnmountActionWrapper'
 import { DeviceMountActionWrapper } from '@/viewmodels/DeviceMountActionWrapper'
 import { IDateCompareable } from '@/modelUtils/Compareables'
@@ -49,8 +46,8 @@ interface devicesState {
   deviceMountActions: DeviceMountAction[],
   deviceUnmountActions: DeviceUnmountAction[],
   chosenKindOfDeviceAction: IOptionsForActionType | null,
-  deviceCustomFields:CustomTextField[],
-  deviceCustomField:CustomTextField|null
+  deviceCustomFields: CustomTextField[],
+  deviceCustomField: CustomTextField|null
   pageNumber: number,
   pageSize: number,
   totalPages: number
@@ -63,7 +60,7 @@ const state = {
   deviceAttachments: [],
   deviceAttachment: null,
   deviceMeasuredQuantities: [],
-  deviceMeasuredQuantity:null,
+  deviceMeasuredQuantity: null,
   deviceGenericActions: [],
   deviceSoftwareUpdateActions: [],
   deviceGenericAction: null,
@@ -73,15 +70,15 @@ const state = {
   deviceMountActions: [],
   deviceUnmountActions: [],
   chosenKindOfDeviceAction: null,
-  deviceCustomFields:[],
-  deviceCustomField:null,
+  deviceCustomFields: [],
+  deviceCustomField: null,
   pageNumber: 1,
   pageSize: 20,
-  totalPages: 1,
+  totalPages: 1
 }
 
 const getters = {
-  actions: (state: devicesState) => { //Todo actions sortieren, wobei ehrlich gesagt, eine extra route im Backend mit allen Actions (sortiert) besser wäre
+  actions: (state: devicesState) => { // Todo actions sortieren, wobei ehrlich gesagt, eine extra route im Backend mit allen Actions (sortiert) besser wäre
     let actions = [
       ...state.deviceGenericActions,
       ...state.deviceSoftwareUpdateActions,
@@ -91,7 +88,7 @@ const getters = {
     ]
     // sort the actions
     actions = actions.sort((a: IDateCompareable, b: IDateCompareable): number => {
-      return  a.date < b.date ? 1 : a.date > b.date ? -1 : 0;
+      return a.date < b.date ? 1 : a.date > b.date ? -1 : 0
     })
     return actions
   }
@@ -102,7 +99,6 @@ const actions = {
     commit,
     state
   }: { commit: Commit, state: devicesState }, searchParams: IDeviceSearchParams) {
-
     let email = null
     if (searchParams.onlyOwnDevices) {
       // @ts-ignore
@@ -126,10 +122,8 @@ const actions = {
     commit('setTotalPages', totalPages)
   },
   async searchDevices ({
-    commit,
-    state
-  }: { commit: Commit, state: devicesState }, searchParams: IDeviceSearchParams) {
-
+    commit
+  }: { commit: Commit }, searchParams: IDeviceSearchParams) {
     // @ts-ignore
     const devices = await this.$api.devices
       .setSearchText(searchParams.searchText)
@@ -146,10 +140,10 @@ const actions = {
     }:
       { deviceId: number, includeContacts: boolean, includeCustomFields: boolean, includeDeviceProperties: boolean, includeDeviceAttachments: boolean }) {
     const device = await this.$api.devices.findById(deviceId, {
-      includeContacts: includeContacts,
-      includeCustomFields: includeCustomFields,
-      includeDeviceProperties: includeDeviceProperties,
-      includeDeviceAttachments: includeDeviceAttachments
+      includeContacts,
+      includeCustomFields,
+      includeDeviceProperties,
+      includeDeviceAttachments
     })
     commit('setDevice', device)
   },
@@ -207,7 +201,7 @@ const actions = {
   async loadDeviceMountActions ({ commit }: { commit: Commit }, id: number) {
     const deviceMountActions = await this.$api.devices.findRelatedMountActions(id)
 
-    const wrappedDeviceMountActions = deviceMountActions.map((action:DeviceMountAction)=>{
+    const wrappedDeviceMountActions = deviceMountActions.map((action: DeviceMountAction) => {
       return new DeviceMountActionWrapper(action)
     })
 
@@ -216,181 +210,182 @@ const actions = {
   async loadDeviceUnmountActions ({ commit }: { commit: Commit }, id: number) {
     const deviceUnmountActions = await this.$api.devices.findRelatedUnmountActions(id)
 
-    const wrappedDeviceUnmountActions = deviceUnmountActions.map((action:DeviceUnmountAction)=>{
+    const wrappedDeviceUnmountActions = deviceUnmountActions.map((action: DeviceUnmountAction) => {
       return new DeviceUnmountActionWrapper(action)
     })
     commit('setDeviceUnmountActions', wrappedDeviceUnmountActions)
   },
-  async loadDeviceCustomFields({commit}:{commit:Commit},id:number){
+  async loadDeviceCustomFields ({ commit }: {commit: Commit}, id: number) {
     const deviceCustomFields = await this.$api.devices.findRelatedCustomFields(id)
-    commit('setDeviceCustomFields',deviceCustomFields);
+    commit('setDeviceCustomFields', deviceCustomFields)
   },
-  async loadDeviceCustomField({commit}:{commit:Commit},id:number){
+  async loadDeviceCustomField ({ commit }: {commit: Commit}, id: number) {
     const deviceCustomField = await this.$api.customfields.findById(id)
-    commit('setDeviceCustomField',deviceCustomField)
+    commit('setDeviceCustomField', deviceCustomField)
   },
-  async addDeviceSoftwareUpdateAction ({ commit }: { commit: Commit }, {
+  addDeviceSoftwareUpdateAction ({ _commit }: { _commit: Commit }, {
     deviceId,
     softwareUpdateAction
   }: { deviceId: number, softwareUpdateAction: SoftwareUpdateAction }): Promise<SoftwareUpdateAction> {
     return this.$api.deviceSoftwareUpdateActions.add(deviceId, softwareUpdateAction)
   },
-  async addDeviceGenericAction ({ commit }: { commit: Commit }, {
+  addDeviceGenericAction ({ _commit }: { _commit: Commit }, {
     deviceId,
     genericDeviceAction
   }: { deviceId: number, genericDeviceAction: GenericAction }): Promise<GenericAction> {
     return this.$api.genericDeviceActions.add(deviceId, genericDeviceAction)
   },
-  async addDeviceCalibrationAction ({ commit }: { commit: Commit }, {
+  addDeviceCalibrationAction ({ _commit }: { _commit: Commit }, {
     deviceId,
     calibrationDeviceAction
   }: { deviceId: number, calibrationDeviceAction: DeviceCalibrationAction }): Promise<DeviceCalibrationAction> {
     return this.$api.deviceCalibrationActions.add(deviceId, calibrationDeviceAction)
   },
-  async updateDeviceSoftwareUpdateAction ({ commit }: { commit: Commit }, {
+  updateDeviceSoftwareUpdateAction ({ _commit }: { _commit: Commit }, {
     deviceId,
     softwareUpdateAction
   }: { deviceId: number, softwareUpdateAction: SoftwareUpdateAction }): Promise<SoftwareUpdateAction> {
     return this.$api.deviceSoftwareUpdateActions.update(deviceId, softwareUpdateAction)
   },
-  async deleteDeviceSoftwareUpdateAction ({ commit }: { commit: Commit }, softwareUpdateActionId:number): Promise<void> {
+  deleteDeviceSoftwareUpdateAction ({ _commit }: { _commit: Commit }, softwareUpdateActionId: number): Promise<void> {
     return this.$api.deviceSoftwareUpdateActions.deleteById(softwareUpdateActionId)
   },
-  async updateDeviceGenericAction ({ commit }: { commit: Commit }, {
+  updateDeviceGenericAction ({ _commit }: { _commit: Commit }, {
     deviceId,
     genericDeviceAction
   }: { deviceId: number, genericDeviceAction: GenericAction }): Promise<GenericAction> {
     return this.$api.genericDeviceActions.update(deviceId, genericDeviceAction)
   },
-  async deleteDeviceGenericAction ({ commit }: { commit: Commit }, genericDeviceActionId:number): Promise<void> {
+  deleteDeviceGenericAction ({ _commit }: { _commit: Commit }, genericDeviceActionId: number): Promise<void> {
     return this.$api.genericDeviceActions.deleteById(genericDeviceActionId)
   },
-  async updateDeviceCalibrationAction ({ commit }: { commit: Commit }, {
+  updateDeviceCalibrationAction ({ _commit }: { _commit: Commit }, {
     deviceId,
     calibrationDeviceAction
   }: { deviceId: number, calibrationDeviceAction: DeviceCalibrationAction }): Promise<DeviceCalibrationAction> {
-    return  this.$api.deviceCalibrationActions.update(deviceId, calibrationDeviceAction)
+    return this.$api.deviceCalibrationActions.update(deviceId, calibrationDeviceAction)
   },
-  async deleteDeviceCalibrationAction ({ commit }: { commit: Commit }, calibrationDeviceActionId:number): Promise<void> {
+  deleteDeviceCalibrationAction ({ _commit }: { _commit: Commit }, calibrationDeviceActionId: number): Promise<void> {
     return this.$api.deviceCalibrationActions.deleteById(calibrationDeviceActionId)
   },
-  async deleteDeviceAttachment ({ commit }: { commit: Commit }, attachmentId: number): Promise<void> {
+  deleteDeviceAttachment ({ _commit }: { _commit: Commit }, attachmentId: number): Promise<void> {
     return this.$api.deviceAttachments.deleteById(attachmentId)
   },
-  async addDeviceAttachment ({ commit }: { commit: Commit }, {
+  addDeviceAttachment ({ _commit }: { _commit: Commit }, {
     deviceId,
     attachment
   }: { deviceId: number, attachment: Attachment }): Promise<void> {
     return this.$api.deviceAttachments.add(deviceId, attachment)
   },
-  updateDeviceAttachment ({ commit }: { commit: Commit }, {
+  updateDeviceAttachment ({ _commit }: { _commit: Commit }, {
     deviceId,
     attachment
   }: { deviceId: number, attachment: Attachment }): Promise<void> {
     return this.$api.deviceAttachments.update(deviceId, attachment)
   },
-  async deleteDeviceCustomField ({ commit }: { commit: Commit }, customField: number): Promise<void> {
+  deleteDeviceCustomField ({ _commit }: { _commit: Commit }, customField: number): Promise<void> {
     return this.$api.customfields.deleteById(customField)
   },
-  async addDeviceCustomField ({ commit }: { commit: Commit }, {
+  addDeviceCustomField ({ _commit }: { _commit: Commit }, {
     deviceId,
     deviceCustomField
   }: { deviceId: number, deviceCustomField: CustomTextField }): Promise<void> {
     return this.$api.customfields.add(deviceId, deviceCustomField)
   },
-  updateDeviceCustomField ({ commit }: { commit: Commit }, {
+  updateDeviceCustomField ({ _commit }: { _commit: Commit }, {
     deviceId,
     deviceCustomField
   }: { deviceId: number, deviceCustomField: CustomTextField }): Promise<void> {
     return this.$api.customfields.update(deviceId, deviceCustomField)
   },
-  async deleteDeviceMeasuredQuantity ({ commit }: { commit: Commit }, measuredQuantityId: number): Promise<void> {
+  deleteDeviceMeasuredQuantity ({ _commit }: { _commit: Commit }, measuredQuantityId: number): Promise<void> {
     return this.$api.deviceProperties.deleteById(measuredQuantityId)
   },
-  async addDeviceMeasuredQuantity ({ commit }: { commit: Commit }, {
+  addDeviceMeasuredQuantity ({ _commit }: { _commit: Commit }, {
     deviceId,
     deviceMeasuredQuantity
   }: { deviceId: number, deviceMeasuredQuantity: DeviceProperty }): Promise<void> {
     return this.$api.deviceProperties.add(deviceId, deviceMeasuredQuantity)
   },
-  updateDeviceMeasuredQuantity ({ commit }: { commit: Commit }, {
+  updateDeviceMeasuredQuantity ({ _commit }: { _commit: Commit }, {
     deviceId,
     deviceMeasuredQuantity
   }: { deviceId: number, deviceMeasuredQuantity: DeviceProperty }): Promise<void> {
     return this.$api.deviceProperties.update(deviceId, deviceMeasuredQuantity)
   },
-  async addDeviceContact ({ commit }: { commit: Commit }, {
+  addDeviceContact ({ _commit }: { _commit: Commit }, {
     deviceId,
     contactId
   }: { deviceId: number, contactId: number }): Promise<void> {
     return this.$api.devices.addContact(deviceId, contactId)
   },
-  async removeDeviceContact ({ commit }: { commit: Commit }, {
+  removeDeviceContact ({ _commit }: { _commit: Commit }, {
     deviceId,
     contactId
   }: { deviceId: number, contactId: number }): Promise<void> {
     return this.$api.devices.removeContact(deviceId, contactId)
   },
-  async saveDevice ({ commit }: { commit: Commit }, device: Device): Promise<Device> {
+  saveDevice ({ _commit }: { _commit: Commit }, device: Device): Promise<Device> {
     return this.$api.devices.save(device)
   },
-  async copyDevice(
-    {commit,dispatch,state}: { commit: Commit, dispatch:Dispatch, state:devicesState},
-    {device,copyContacts,copyAttachments,copyMeasuredQuantities,copyCustomFields}:
-      {device:Device,copyContacts:boolean,copyAttachments:boolean,copyMeasuredQuantities:boolean,copyCustomFields:boolean}
-  ){
-    const savedDevice = await dispatch('saveDevice',device)
+  async copyDevice (
+    { dispatch, state }: { dispatch: Dispatch, state: devicesState},
+    { device, copyContacts, copyAttachments, copyMeasuredQuantities, copyCustomFields }:
+      {device: Device, copyContacts: boolean, copyAttachments: boolean, copyMeasuredQuantities: boolean, copyCustomFields: boolean}
+  ) {
+    const savedDevice = await dispatch('saveDevice', device)
     const savedDeviceId = savedDevice.id!
-    const related:Promise<any>[]=[]
+    const related: Promise<any>[] = []
 
-    if(copyContacts){
+    if (copyContacts) {
       const contacts = device.contacts
-      await dispatch('loadDeviceContacts',savedDeviceId)
+      await dispatch('loadDeviceContacts', savedDeviceId)
       const contactsToSave = contacts.filter(c => state.deviceContacts.findIndex((ec: Contact) => { return ec.id === c.id }) === -1)
 
       for (const contact of contactsToSave) {
         if (contact.id) {
-          related.push(dispatch('addDeviceContact',{deviceId:savedDeviceId,contactId:contact.id}))
+          related.push(dispatch('addDeviceContact', { deviceId: savedDeviceId, contactId: contact.id }))
         }
       }
     }
-    if(copyAttachments){
+    if (copyAttachments) {
       const attachments = device.attachments.map(Attachment.createFromObject)
       for (const attachment of attachments) {
         attachment.id = null
-        related.push(dispatch('addDeviceAttachment',{deviceId:savedDeviceId,attachment:attachment}))
+        related.push(dispatch('addDeviceAttachment', { deviceId: savedDeviceId, attachment }))
       }
     }
-    if(copyMeasuredQuantities){
+    if (copyMeasuredQuantities) {
       const measuredQuantities = device.properties.map(DeviceProperty.createFromObject)
       for (const measuredQuantity of measuredQuantities) {
         measuredQuantity.id = null
-        related.push(dispatch('addDeviceMeasuredQuantity',{deviceId:savedDeviceId, deviceMeasuredQuantity:measuredQuantity}))
+        related.push(dispatch('addDeviceMeasuredQuantity', { deviceId: savedDeviceId, deviceMeasuredQuantity: measuredQuantity }))
       }
     }
-    if(copyCustomFields){
+    if (copyCustomFields) {
       const customFields = device.customFields.map(CustomTextField.createFromObject)
       for (const customField of customFields) {
         customField.id = null
-        related.push(dispatch('addDeviceCustomField',{
-          deviceId:savedDeviceId,
-          deviceCustomField:customField}
+        related.push(dispatch('addDeviceCustomField', {
+          deviceId: savedDeviceId,
+          deviceCustomField: customField
+        }
         ))
       }
     }
     await Promise.all(related)
     return savedDeviceId
   },
-  async deleteDevice ({ commit }: { commit: Commit }, id: number) {
+  async deleteDevice ({ _commit }: { _commit: Commit }, id: number) {
     await this.$api.devices.deleteById(id)
   },
-  async exportAsCsv ({ commit }: { commit: Commit }, searchParams: IDeviceSearchParams): Promise<Blob> {
+  async exportAsCsv ({ _commit }: { _commit: Commit }, searchParams: IDeviceSearchParams): Promise<Blob> {
     let email = null
     if (searchParams.onlyOwnDevices) {
       // @ts-ignore
       email = this.$auth.user!.email as string
     }
-    //@ts-ignore
+    // @ts-ignore
     return await this.$api.devices
       .setSearchText(searchParams.searchText)
       .setSearchedManufacturers(searchParams.manufacturer)
@@ -462,11 +457,11 @@ const mutations = {
   setChosenKindOfDeviceAction (state: devicesState, newVal: IOptionsForActionType | null) {
     state.chosenKindOfDeviceAction = newVal
   },
-  setDeviceCustomFields(state:devicesState,deviceCustomFields:CustomTextField[]){
-    state.deviceCustomFields=deviceCustomFields
+  setDeviceCustomFields (state: devicesState, deviceCustomFields: CustomTextField[]) {
+    state.deviceCustomFields = deviceCustomFields
   },
-  setDeviceCustomField(state:devicesState,deviceCustomField:CustomTextField){
-    state.deviceCustomField=deviceCustomField
+  setDeviceCustomField (state: devicesState, deviceCustomField: CustomTextField) {
+    state.deviceCustomField = deviceCustomField
   }
 }
 

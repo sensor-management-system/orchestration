@@ -54,13 +54,12 @@ permissions and limitations under the Licence.
         />
       </v-card-text>
     </v-card>
-    <NuxtChild/>
+    <NuxtChild />
   </div>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
-
 
 import { mapActions, mapGetters, mapState } from 'vuex'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
@@ -71,28 +70,28 @@ const KIND_OF_ACTION_TYPE_GENERIC_PLATFORM_ACTION = 'generic_platform_action'
 @Component({
   components: { ProgressIndicator },
   middleware: ['auth'],
-  computed:{
-    ...mapGetters('vocabulary',['platformActionTypeItems']),
-    ...mapState('platforms',['chosenKindOfPlatformAction'])
+  computed: {
+    ...mapGetters('vocabulary', ['platformActionTypeItems']),
+    ...mapState('platforms', ['chosenKindOfPlatformAction'])
   },
-  methods:{
-    ...mapActions('vocabulary',['loadPlatformGenericActionTypes']),
-    ...mapActions('platforms',['loadPlatformAttachments','setChosenKindOfPlatformAction'])
+  methods: {
+    ...mapActions('vocabulary', ['loadPlatformGenericActionTypes']),
+    ...mapActions('platforms', ['loadPlatformAttachments', 'setChosenKindOfPlatformAction'])
   }
 })
 export default class NewPlatformAction extends Vue {
   private isLoading: boolean = false
 
-  async created(){
+  async created () {
     try {
-      this.isLoading=true
-      this.chosenKindOfAction=null
+      this.isLoading = true
+      this.chosenKindOfAction = null
       await this.loadPlatformGenericActionTypes()
       await this.loadPlatformAttachments(this.platformId)
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to fetch action types')
-    }finally {
-      this.isLoading=false
+    } finally {
+      this.isLoading = false
     }
   }
 
@@ -100,11 +99,11 @@ export default class NewPlatformAction extends Vue {
     return this.$route.params.platformId
   }
 
-  get chosenKindOfAction(){
+  get chosenKindOfAction () {
     return this.chosenKindOfPlatformAction
   }
 
-  set chosenKindOfAction(newVal){
+  set chosenKindOfAction (newVal) {
     this.setChosenKindOfPlatformAction(newVal)
   }
 
@@ -116,18 +115,17 @@ export default class NewPlatformAction extends Vue {
     return this.chosenKindOfAction?.kind === KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE
   }
 
-  updateRoute(){
-    if(this.genericActionChosen){
+  updateRoute () {
+    if (this.genericActionChosen) {
       this.$router.push(`/platforms/${this.platformId}/actions/new/generic-platform-actions`)
     }
-    if(this.softwareUpdateChosen){
+    if (this.softwareUpdateChosen) {
       this.$router.push(`/platforms/${this.platformId}/actions/new/software-update-actions`)
     }
 
-    if(!this.chosenKindOfAction){
+    if (!this.chosenKindOfAction) {
       this.$router.push(`/platforms/${this.platformId}/actions/new`)
     }
   }
-
 }
 </script>

@@ -15,9 +15,9 @@
           :items="locationActionsDates"
           label="Dates defined by actions"
           hint="The referenced time zone is UTC."
-          @input="updateDate"
           return-object
           persistent-hint
+          @input="updateDate"
         />
       </v-col>
     </v-row>
@@ -54,10 +54,10 @@
 </template>
 
 <script lang="ts">
-import { LocationTypes } from '@/store/configurations'
 import { Component, Vue } from 'vue-property-decorator'
 import { mapGetters } from 'vuex'
 import { DateTime } from 'luxon'
+import { LocationTypes } from '@/store/configurations'
 import DateTimePicker from '@/components/DateTimePicker.vue'
 import { StaticLocationBeginAction } from '@/models/StaticLocationBeginAction'
 import { StaticLocationEndAction } from '@/models/StaticLocationEndAction'
@@ -74,37 +74,40 @@ import ConfigurationDynamicLocationEndActionData
 
 @Component({
   components: { ConfigurationDynamicLocationEndActionData, ConfigurationDynamicLocationBeginActionData, ConfigurationStaticLocationEndActionData, ConfigurationStaticLocationBeginActionData, DateTimePicker },
-  computed:mapGetters('configurations',['locationActionsDates'])
+  computed: mapGetters('configurations', ['locationActionsDates'])
 })
 export default class ConfigurationShowLocationPage extends Vue {
   private selectedDate = DateTime.utc()
 
-  private selectedAction:StaticLocationBeginAction|StaticLocationEndAction|DynamicLocationBeginAction|DynamicLocationEndAction|null=null
+  private selectedAction: StaticLocationBeginAction|StaticLocationEndAction|DynamicLocationBeginAction|DynamicLocationEndAction|null = null
 
-  updateDate(val){
-    this.selectedDate=val.date;
+  updateDate (val) {
+    this.selectedDate = val.date
   }
 
-  get isStaticLocationStartAction(){
-    if(this.selectedAction && this.selectedAction.type){
+  get isStaticLocationStartAction () {
+    if (this.selectedAction && this.selectedAction.type) {
       return this.selectedAction.type === LocationTypes.staticStart
     }
     return false
   }
-  get isStaticLocationEndAction(){
-    if(this.selectedAction && this.selectedAction.type){
+
+  get isStaticLocationEndAction () {
+    if (this.selectedAction && this.selectedAction.type) {
       return this.selectedAction.type === LocationTypes.staticEnd
     }
     return false
   }
-  get isDynamicLocationStartAction(){
-    if(this.selectedAction && this.selectedAction.type){
+
+  get isDynamicLocationStartAction () {
+    if (this.selectedAction && this.selectedAction.type) {
       return this.selectedAction.type === LocationTypes.dynamicStart
     }
     return false
   }
-  get isDynamicLocationEndAction(){
-    if(this.selectedAction && this.selectedAction.type){
+
+  get isDynamicLocationEndAction () {
+    if (this.selectedAction && this.selectedAction.type) {
       return this.selectedAction.type === LocationTypes.dynamicEnd
     }
     return false

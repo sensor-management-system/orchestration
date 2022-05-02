@@ -68,12 +68,12 @@ import { ConfigurationsTreeNode } from '@/viewmodels/ConfigurationsTreeNode'
 @Component
 // @ts-ignore
 export default class ConfigurationsTreeView extends Vue {
-
   @Prop({
-    required: true,
+    required: true
   })
   // @ts-ignore
   readonly value: ConfigurationsTreeNode | null
+
   /**
    * the tree
    */
@@ -93,7 +93,7 @@ export default class ConfigurationsTreeView extends Vue {
    * @return {string[]} an empty array or an Array with the id of exactly one selected node
    */
   get selectedNodeSingletonList (): string[] {
-    if (this.value===null) {
+    if (this.value === null) {
       return []
     }
     return [this.value]
@@ -109,7 +109,7 @@ export default class ConfigurationsTreeView extends Vue {
    * @fires ConfigurationsTreeView#select
    */
   set selectedNodeSingletonList (nodesArray) {
-    let node: ConfigurationsTreeNode | null = nodesArray[0] ?? null
+    const node: ConfigurationsTreeNode | null = nodesArray[0] ?? null
     this.$emit('input', node)
   }
 }

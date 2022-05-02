@@ -112,20 +112,19 @@ permissions and limitations under the Licence.
         </v-btn>
       </v-card-actions>
     </v-form>
-
   </div>
 </template>
 
 <script lang="ts">
 import { Component, Vue, mixins } from 'nuxt-property-decorator'
 
+import { mapActions } from 'vuex'
 import UploadConfig from '@/config/uploads'
 
 import { Rules } from '@/mixins/Rules'
 import { UploadRules } from '@/mixins/UploadRules'
 
 import { Attachment } from '@/models/Attachment'
-import { mapActions } from 'vuex'
 import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
@@ -133,8 +132,8 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
   components: { ProgressIndicator, SaveAndCancelButtons },
   middleware: ['auth'],
   methods: {
-    ...mapActions('devices',['addDeviceAttachment','loadDeviceAttachments']),
-    ...mapActions('files',['uploadFile'])
+    ...mapActions('devices', ['addDeviceAttachment', 'loadDeviceAttachments']),
+    ...mapActions('files', ['uploadFile'])
   }
 })
 export default class DeviceAttachmentAddPage extends mixins(Rules, UploadRules) {
@@ -165,8 +164,7 @@ export default class DeviceAttachmentAddPage extends mixins(Rules, UploadRules) 
 
     let theFailureCanBeFromUpload = true
     try {
-
-      this.isSaving=true
+      this.isSaving = true
 
       if (this.attachmentType !== 'url') {
         // Due to the validation we can be sure that the file is not null
@@ -176,32 +174,30 @@ export default class DeviceAttachmentAddPage extends mixins(Rules, UploadRules) 
       }
 
       await this.addDeviceAttachment({
-        deviceId:this.deviceId,
+        deviceId: this.deviceId,
         attachment: this.attachment
       })
       this.loadDeviceAttachments(this.deviceId)
       this.$store.commit('snackbar/setSuccess', 'New attachment added')
       this.$router.push('/devices/' + this.deviceId + '/attachments')
     } catch (error: any) {
-      this.handelError(error,theFailureCanBeFromUpload)
-    }finally {
-      this.isSaving=false
+      this.handelError(error, theFailureCanBeFromUpload)
+    } finally {
+      this.isSaving = false
     }
   }
 
-  private handelError(error:any,theFailureCanBeFromUpload:boolean){
-  let message = 'Failed to save an attachment'
+  private handelError (error: any, theFailureCanBeFromUpload: boolean) {
+    let message = 'Failed to save an attachment'
 
-  if (theFailureCanBeFromUpload && error.response?.data?.errors?.length) {
-    const errorDetails = error.response.data.errors[0]
-    if (errorDetails.source && errorDetails.title) {
+    if (theFailureCanBeFromUpload && error.response?.data?.errors?.length) {
+      const errorDetails = error.response.data.errors[0]
+      if (errorDetails.source && errorDetails.title) {
       // In this case something ala 'Unsupported Media Type: application/exe is Not Permitted'
-      message = errorDetails.title + ': ' + errorDetails.source
+        message = errorDetails.title + ': ' + errorDetails.source
+      }
     }
+    this.$store.commit('snackbar/setError', message)
   }
-  this.$store.commit('snackbar/setError', message)
-}
-
-
 }
 </script>

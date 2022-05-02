@@ -33,8 +33,7 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
-import { ActionContext, Commit } from 'vuex/types'
-import { DateTime } from 'luxon'
+import { Commit } from 'vuex/types'
 
 import { Configuration } from '@/models/Configuration'
 import { Project } from '@/models/Project'
@@ -125,7 +124,6 @@ const getters = {
     return result
   },
   mountingActionsDates: (state: configurationsState) => {
-
     let result: IActionDateWithTextItem[] = []
 
     if (state.configuration) {
@@ -176,40 +174,40 @@ const getters = {
       for (const staticLocationBeginAction of state.configuration.staticLocationBeginActions) {
         if (staticLocationBeginAction.beginDate) {
           datesWithTexts.push({
-            type:LocationTypes.staticStart,
-            value:staticLocationBeginAction,
-            date:staticLocationBeginAction.beginDate,
-            text: dateToDateTimeStringHHMM(staticLocationBeginAction.beginDate) + ' - '+'Static location begin'
+            type: LocationTypes.staticStart,
+            value: staticLocationBeginAction,
+            date: staticLocationBeginAction.beginDate,
+            text: dateToDateTimeStringHHMM(staticLocationBeginAction.beginDate) + ' - ' + 'Static location begin'
           })
         }
       }
       for (const staticLocationEndAction of state.configuration.staticLocationEndActions) {
         if (staticLocationEndAction.endDate) {
           datesWithTexts.push({
-            type:LocationTypes.staticEnd,
-            value:staticLocationEndAction,
+            type: LocationTypes.staticEnd,
+            value: staticLocationEndAction,
             date: staticLocationEndAction.endDate,
-            text: dateToDateTimeStringHHMM(staticLocationEndAction.endDate) + ' - '+'Static location end'
+            text: dateToDateTimeStringHHMM(staticLocationEndAction.endDate) + ' - ' + 'Static location end'
           })
         }
       }
       for (const dynamicLocationBeginAction of state.configuration.dynamicLocationBeginActions) {
         if (dynamicLocationBeginAction.beginDate) {
           datesWithTexts.push({
-            type:LocationTypes.dynamicStart,
-            value:dynamicLocationBeginAction,
+            type: LocationTypes.dynamicStart,
+            value: dynamicLocationBeginAction,
             date: dynamicLocationBeginAction.beginDate,
-            text: dateToDateTimeStringHHMM(dynamicLocationBeginAction.beginDate) + ' - '+'Dynamic location begin'
+            text: dateToDateTimeStringHHMM(dynamicLocationBeginAction.beginDate) + ' - ' + 'Dynamic location begin'
           })
         }
       }
       for (const dynamicLocationEndAction of state.configuration.dynamicLocationEndActions) {
         if (dynamicLocationEndAction.endDate) {
           datesWithTexts.push({
-            type:LocationTypes.dynamicEnd,
-            value:dynamicLocationEndAction,
+            type: LocationTypes.dynamicEnd,
+            value: dynamicLocationEndAction,
             date: dynamicLocationEndAction.endDate,
-            text: dateToDateTimeStringHHMM(dynamicLocationEndAction.endDate) + ' - '+'Dynamic location end'
+            text: dateToDateTimeStringHHMM(dynamicLocationEndAction.endDate) + ' - ' + 'Dynamic location end'
           })
         }
       }
@@ -267,43 +265,42 @@ const actions = {
     const projects = await this.$api.projects.findAll()
     commit('setProjects', projects)
   },
-  async deleteConfiguration ({ commit }: { commit: Commit }, id: number) {
+  async deleteConfiguration ({ _commit }: { _commit: Commit }, id: number) {
     await this.$api.configurations.deleteById(id)
   },
-  async saveConfiguration ({ commit }: { commit: Commit }, configuration: Configuration): Promise<Configuration> {
+  saveConfiguration ({ _commit }: { _commit: Commit }, configuration: Configuration): Promise<Configuration> {
     return this.$api.configurations.save(configuration)
   },
-  async addConfigurationContact ({ commit }: { commit: Commit }, {
+  addConfigurationContact ({ _commit }: { _commit: Commit }, {
     configurationId,
     contactId
   }: { configurationId: number, contactId: number }): Promise<void> {
     return this.$api.configurations.addContact(configurationId, contactId)
   },
-  async removeConfigurationContact ({ commit }: { commit: Commit }, {
+  removeConfigurationContact ({ _commit }: { _commit: Commit }, {
     configurationId,
     contactId
   }: { configurationId: number, contactId: number }): Promise<void> {
     return this.$api.configurations.removeContact(configurationId, contactId)
   },
-  async addDeviceMountAction (
-    { commit }: { commit: Commit },
+  addDeviceMountAction (
+    { _commit }: { _commit: Commit },
     {
       configurationId,
       deviceMountAction
     }: { configurationId: string, deviceMountAction: DeviceMountAction }
   ): Promise<void> {
-    // console.log(this.$api.configurations.deviceMountActionApi);
     return this.$api.configurations.deviceMountActionApi.add(configurationId, deviceMountAction)
   },
-  async addDeviceUnMountAction ({ commit }: { commit: Commit },
+  addDeviceUnMountAction ({ _commit }: { _commit: Commit },
     {
       configurationId,
       deviceUnMountAction
     }: { configurationId: string, deviceUnMountAction: DeviceUnmountAction }
-    ) {
-    return this.$api.configurations.deviceUnmountActionApi.add(configurationId,deviceUnMountAction);
+  ) {
+    return this.$api.configurations.deviceUnmountActionApi.add(configurationId, deviceUnMountAction)
   },
-  async addPlatformMountAction ({ commit }: { commit: Commit },
+  addPlatformMountAction ({ _commit }: { _commit: Commit },
     {
       configurationId,
       platformMountAction
@@ -311,17 +308,17 @@ const actions = {
   ): Promise<void> {
     return this.$api.configurations.platformMountActionApi.add(configurationId, platformMountAction)
   },
-  async addPlatformUnMountAction ({ commit }: { commit: Commit },
+  addPlatformUnMountAction ({ _commit }: { _commit: Commit },
     {
       configurationId,
       platformUnMountAction
     }: { configurationId: string, platformUnMountAction: PlatformUnmountAction }
-    ) {
-    return this.$api.configurations.platformUnmountActionApi.add(configurationId,platformUnMountAction);
+  ) {
+    return this.$api.configurations.platformUnmountActionApi.add(configurationId, platformUnMountAction)
   },
   setPageNumber ({ commit }: { commit: Commit }, newPageNumber: number) {
     commit('setPageNumber', newPageNumber)
-  },
+  }
 }
 
 const mutations = {
@@ -347,73 +344,6 @@ const mutations = {
     state.projects = projects
   }
 }
-// export const state = (): ConfigurationsStoreState => {
-//   return {
-//     configuration: new Configuration(),
-//     projects: [],
-//     configurationStates: [],
-//     configurationEditDate: DateTime.utc()
-//   }
-// }
-//
-// export const mutations = {
-//   setConfiguration (state: ConfigurationsStoreState, configuration: Configuration) {
-//     state.configuration = configuration
-//   },
-//   setProjects (state: ConfigurationsStoreState, projects: Project[]) {
-//     state.projects = projects
-//   },
-//   setConfigurationsStates (state: ConfigurationsStoreState, configurationStates: string[]) {
-//     state.configurationStates = configurationStates
-//   },
-//   setConfigurationEditDate (state: ConfigurationsStoreState, configurationEditDate: DateTime) {
-//     state.configurationEditDate = configurationEditDate
-//   }
-// }
-//
-// export const actions = {
-//   async loadProjects (context: ActionContext<ConfigurationsStoreState, ConfigurationsStoreState>) {
-//     // @ts-ignore
-//     const projects = await this.$api.projects.findAll()
-//     context.commit('setProjects', projects)
-//   },
-//   async loadConfigurationsStates (context: ActionContext<ConfigurationsStoreState, ConfigurationsStoreState>) {
-//     // @ts-ignore
-//     const configurationStates = await this.$api.configurationStates.findAll()
-//     context.commit('setConfigurationsStates', configurationStates)
-//   },
-//   async loadConfigurationById (context: ActionContext<ConfigurationsStoreState, ConfigurationsStoreState>, id: string) {
-//     const oldConfigurationId = context.state.configuration?.id
-//     // @ts-ignore
-//     const configuration = await this.$api.configurations.findById(id)
-//     context.commit('setConfiguration', configuration)
-//
-//     // for the edit date:
-//     // the moment we open the very same configuration, we want to stay with the
-//     // current edit date (say we switch from the platform & devices tab to the one
-//     // for the locations).
-//     // However, in case we load a different configuration there is no point in
-//     // reusing the old date (it is very likely that it doesn't make sense for
-//     // the now selected configuration).
-//     if (oldConfigurationId && oldConfigurationId !== id) {
-//       context.commit('setConfigurationEditDate', DateTime.utc())
-//     }
-//   },
-//   async saveConfiguration (context: ActionContext<ConfigurationsStoreState, ConfigurationsStoreState>) {
-//     // @ts-ignore
-//     const configuration = await this.$api.configurations.save(context.state.configuration)
-//     context.commit('setConfiguration', configuration)
-//   }
-// }
-//
-// export const getters = {
-//   projectNames: (state: ConfigurationsStoreState) => {
-//     return state.projects.map((p: Project) => p.name)
-//   },
-//   configurationEditDate (state: ConfigurationsStoreState): DateTime {
-//     return state.configurationEditDate || DateTime.utc()
-//   }
-// }
 
 export default {
   namespaced: true,

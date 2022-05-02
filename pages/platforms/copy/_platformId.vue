@@ -41,8 +41,8 @@ permissions and limitations under the Licence.
         <v-spacer />
         <SaveAndCancelButtons
           :to="'/platforms'"
-          @save="save"
           save-btn-text="Copy"
+          @save="save"
         />
       </v-card-actions>
       <v-alert
@@ -108,8 +108,8 @@ permissions and limitations under the Licence.
         <v-spacer />
         <SaveAndCancelButtons
           :to="'/platforms'"
-          @save="save"
           save-btn-text="Copy"
+          @save="save"
         />
       </v-card-actions>
     </v-card>
@@ -119,12 +119,12 @@ permissions and limitations under the Licence.
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 
+import { mapActions, mapState } from 'vuex'
 import { Platform } from '@/models/Platform'
 
 import PlatformBasicDataForm from '@/components/PlatformBasicDataForm.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
-import { mapActions, mapState } from 'vuex'
 
 @Component({
   components: {
@@ -133,10 +133,10 @@ import { mapActions, mapState } from 'vuex'
     ProgressIndicator
   },
   middleware: ['auth'],
-  computed:mapState('platforms',['platform']),
-  methods:{
-    ...mapActions('platforms',['loadPlatform','copyPlatform']),
-    ...mapActions('appbar',['setDefaults','initPlatformCopyAppBar'])
+  computed: mapState('platforms', ['platform']),
+  methods: {
+    ...mapActions('platforms', ['loadPlatform', 'copyPlatform']),
+    ...mapActions('appbar', ['setDefaults', 'initPlatformCopyAppBar'])
   }
 })
 // @ts-ignore
@@ -157,7 +157,7 @@ export default class PlatformCopyPage extends Vue {
     // We also load the contacts and the measured quantities as those
     // are the ones that we will also copy.
     try {
-      this.isLoading=true
+      this.isLoading = true
 
       await this.loadPlatform({
         platformId: this.platformId,
@@ -166,7 +166,6 @@ export default class PlatformCopyPage extends Vue {
       })
 
       this.platformToCopy = this.getPreparedPlatformForCopy()
-
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Loading platform failed')
     } finally {
@@ -186,7 +185,7 @@ export default class PlatformCopyPage extends Vue {
     return this.isLoading || this.isSaving
   }
 
-  getPreparedPlatformForCopy(): Platform{
+  getPreparedPlatformForCopy (): Platform {
     const platformToEdit = Platform.createFromObject(this.platform)
     // Unset the fields that are very device specific
     // (we need other PIDs, serial numbers and inventory numbers)
@@ -208,7 +207,7 @@ export default class PlatformCopyPage extends Vue {
       this.inventoryNumberPlaceholder = platformToEdit.inventoryNumber
     }
     platformToEdit.inventoryNumber = ''
-    return platformToEdit;
+    return platformToEdit
   }
 
   async save () {
@@ -219,15 +218,15 @@ export default class PlatformCopyPage extends Vue {
     try {
       this.isSaving = true
       const savedPLatformId = await this.copyPlatform({
-        platform:this.platformToCopy,
-        copyContacts:this.copyContacts,
-        copyAttachments:this.copyAttachments
-      });
+        platform: this.platformToCopy,
+        copyContacts: this.copyContacts,
+        copyAttachments: this.copyAttachments
+      })
       this.$store.commit('snackbar/setSuccess', 'Platform copied')
       this.$router.push('/platforms/' + savedPLatformId)
     } catch (_error) {
       this.$store.commit('snackbar/setError', 'Copy failed')
-    }finally {
+    } finally {
       this.isSaving = false
     }
   }

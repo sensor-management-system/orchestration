@@ -36,14 +36,14 @@ permissions and limitations under the Licence.
     <ProgressIndicator
       v-model="isLoading"
     />
-    <NuxtChild/>
+    <NuxtChild />
   </div>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import { mapActions } from 'vuex'
+import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
 @Component({
   components: {
@@ -74,6 +74,5 @@ export default class PlatformContactsPage extends Vue {
       titleTemplate: 'Contacts - %s'
     }
   }
-
 }
 </script>

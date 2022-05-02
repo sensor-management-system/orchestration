@@ -60,13 +60,13 @@ permissions and limitations under the Licence.
   </div>
 </template>
 <script lang="ts">
-import { Component, Vue} from 'nuxt-property-decorator'
+import { Component, Vue } from 'nuxt-property-decorator'
 
+import { mapActions, mapState } from 'vuex'
 import { Contact } from '@/models/Contact'
 
 import ContactBasicDataForm from '@/components/ContactBasicDataForm.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
-import { mapActions, mapState } from 'vuex'
 import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
 
 @Component({
@@ -76,17 +76,17 @@ import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButto
     ProgressIndicator
   },
   middleware: ['auth'],
-  computed:mapState('contacts',['contact']),
-  methods:{
-    ...mapActions('contacts',['saveContact','loadContact']),
-    ...mapActions('appbar',['initContactsContactIdEditAppBar'])
+  computed: mapState('contacts', ['contact']),
+  methods: {
+    ...mapActions('contacts', ['saveContact', 'loadContact']),
+    ...mapActions('appbar', ['initContactsContactIdEditAppBar'])
   }
 })
 export default class ContactEditPage extends Vue {
   private isLoading: boolean = false
   private contactCopy: Contact = new Contact()
 
-  created(){
+  created () {
     this.initContactsContactIdEditAppBar(this.contact.toString())
     this.contactCopy = Contact.createFromObject(this.contact)
   }
@@ -102,7 +102,7 @@ export default class ContactEditPage extends Vue {
     }
     try {
       this.isLoading = true
-      const updatedContact = await this.saveContact(this.contactCopy)
+      await this.saveContact(this.contactCopy)
       this.loadContact(this.contactId)
       this.$router.push('/contacts/' + this.contactId)
     } catch (e) {

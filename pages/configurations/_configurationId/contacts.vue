@@ -37,16 +37,15 @@ permissions and limitations under the Licence.
     <ProgressIndicator
       v-model="isLoading"
     />
-    <NuxtChild/>
+    <NuxtChild />
   </div>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 
-
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import { mapActions } from 'vuex'
+import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
 @Component({
   components: { ProgressIndicator },
@@ -61,7 +60,7 @@ export default class ContactTab extends Vue {
       this.loadConfigurationContacts(this.configurationId)
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to fetch contacts')
-    }finally {
+    } finally {
       this.isLoading = false
     }
   }

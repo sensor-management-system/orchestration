@@ -5,7 +5,7 @@
       :dark="isSaving"
     />
     <v-card-actions>
-      <v-spacer/>
+      <v-spacer />
       <v-btn
         v-if="$auth.loggedIn"
         small
@@ -75,8 +75,8 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
 import { DateTime } from 'luxon'
-import DateTimePicker from '@/components/DateTimePicker.vue'
 import { mapActions, mapGetters, mapState } from 'vuex'
+import DateTimePicker from '@/components/DateTimePicker.vue'
 import { ConfigurationsTreeNode } from '@/viewmodels/ConfigurationsTreeNode'
 import { buildConfigurationTree } from '@/modelUtils/mountHelpers'
 import ConfigurationsTreeView from '@/components/ConfigurationsTreeView.vue'
@@ -89,15 +89,15 @@ import { PlatformUnmountAction } from '@/models/PlatformUnmountAction'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 @Component({
   components: { ProgressIndicator, ConfigurationsSelectedItemUnmountForm, ConfigurationsTreeView, DateTimePicker },
-  middleware:['auth'],
-  computed:{
-    ...mapGetters('configurations',['mountingActionsDates']),
-    ...mapState('configurations',['configuration']),
-    ...mapState('contacts',['contacts'])
+  middleware: ['auth'],
+  computed: {
+    ...mapGetters('configurations', ['mountingActionsDates']),
+    ...mapState('configurations', ['configuration']),
+    ...mapState('contacts', ['contacts'])
   },
-  methods:{
-    ...mapActions('contacts',['loadAllContacts']),
-    ...mapActions('configurations',['addDeviceUnMountAction','addPlatformUnMountAction','loadConfiguration'])
+  methods: {
+    ...mapActions('contacts', ['loadAllContacts']),
+    ...mapActions('configurations', ['addDeviceUnMountAction', 'addPlatformUnMountAction', 'loadConfiguration'])
   }
 })
 export default class ConfigurationUnMountPlatformsAndDevicesPage extends Vue {
@@ -107,14 +107,14 @@ export default class ConfigurationUnMountPlatformsAndDevicesPage extends Vue {
   private isSaving = false
   private isLoading = false
 
-  async created(){
+  async created () {
     try {
-      this.isLoading=true
+      this.isLoading = true
       await this.loadAllContacts()
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to fetch contacts')
     } finally {
-      this.isLoading=false
+      this.isLoading = false
     }
   }
 
@@ -145,30 +145,30 @@ export default class ConfigurationUnMountPlatformsAndDevicesPage extends Vue {
     return null
   }
 
-  unmount({contact,description}){
-    if(!this.selectedNode || !this.selectedDate){
+  unmount ({ contact, description }) {
+    if (!this.selectedNode || !this.selectedDate) {
       return
     }
 
-    if(this.selectedNode.isDevice()){
-      this.unmountDevice(this.selectedNode.unpack().device,contact,description)
+    if (this.selectedNode.isDevice()) {
+      this.unmountDevice(this.selectedNode.unpack().device, contact, description)
     }
-    if(this.selectedNode.isPlatform()){
-      this.unmountPlatform(this.selectedNode.unpack().platform,contact,description)
+    if (this.selectedNode.isPlatform()) {
+      this.unmountPlatform(this.selectedNode.unpack().platform, contact, description)
     }
   }
 
-  async unmountDevice(device:Device,contact:Contact,description:string){
+  async unmountDevice (device: Device, contact: Contact, description: string) {
     const newDeviceUnmountAction = DeviceUnmountAction.createFromObject({
       id: '',
-      device: device,
+      device,
       date: this.selectedDate,
-      contact: contact,
-      description: description
+      contact,
+      description
     })
 
     try {
-      this.isSaving=true
+      this.isSaving = true
       await this.addDeviceUnMountAction({
         configurationId: this.configurationId,
         deviceUnMountAction: newDeviceUnmountAction
@@ -178,21 +178,22 @@ export default class ConfigurationUnMountPlatformsAndDevicesPage extends Vue {
       this.$router.push('/configurations/' + this.configurationId + '/platforms-and-devices')
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to add device unmount action')
-    }finally {
-      this.isSaving=false
+    } finally {
+      this.isSaving = false
     }
   }
-  async unmountPlatform(platform:Platform,contact:Contact,description:string){
+
+  async unmountPlatform (platform: Platform, contact: Contact, description: string) {
     const newPlatformUnmountAction = PlatformUnmountAction.createFromObject({
       id: '',
-      platform: platform,
+      platform,
       date: this.selectedDate,
-      contact: contact,
-      description: description
+      contact,
+      description
     })
 
     try {
-      this.isSaving=true
+      this.isSaving = true
       await this.addPlatformUnMountAction({
         configurationId: this.configurationId,
         platformUnMountAction: newPlatformUnmountAction
@@ -202,8 +203,8 @@ export default class ConfigurationUnMountPlatformsAndDevicesPage extends Vue {
       this.$router.push('/configurations/' + this.configurationId + '/platforms-and-devices')
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to add device unmount action')
-    }finally {
-      this.isSaving=true
+    } finally {
+      this.isSaving = true
     }
   }
 }

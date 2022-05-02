@@ -38,7 +38,7 @@ import { Contact } from '@/models/Contact'
 
 interface contactsState {
   contacts: Contact[],
-  contact : Contact|null,
+  contact: Contact|null,
   configurationContacts: Contact[],
   pageNumber: number,
   pageSize: number,
@@ -47,7 +47,7 @@ interface contactsState {
 
 export const state = {
   contacts: [],
-  contact:null,
+  contact: null,
   configurationContacts: [],
   totalPages: 1,
   pageNumber: 1,
@@ -57,13 +57,13 @@ export const getters = {
   searchContacts: (state: contactsState) => {
     return state.contacts.filter((c: Contact) => !state.configurationContacts.find((rc: Contact) => rc.id === c.id))
   },
-  contactsByDifference:(state:contactsState)=>(contactsToSubtract:Contact[])=>{
-    return state.contacts.filter((contact)=>{
-      return !contactsToSubtract.find((contactToSubtract)=>{
+  contactsByDifference: (state: contactsState) => (contactsToSubtract: Contact[]) => {
+    return state.contacts.filter((contact) => {
+      return !contactsToSubtract.find((contactToSubtract) => {
         return contactToSubtract.id === contact.id
       })
     })
-}
+  }
 }
 export const actions = {
   async searchContactsPaginated ({
@@ -71,16 +71,16 @@ export const actions = {
     state
   }: { commit: Commit, state: contactsState }, searchtext: string = '') {
     // @ts-ignore
-    const {elements,totalCount} = await this.$api.contacts.searchPaginated(state.pageNumber, state.pageSize, searchtext)
+    const { elements, totalCount } = await this.$api.contacts.searchPaginated(state.pageNumber, state.pageSize, searchtext)
     commit('setContacts', elements)
 
     const totalPages = Math.ceil(totalCount / state.pageSize)
     commit('setTotalPages', totalPages)
   },
-  async loadContact({ commit }: { commit: Commit },id:number){
+  async loadContact ({ commit }: { commit: Commit }, id: number) {
     // @ts-ignore
-    const contact = await this.$api.contacts.findById(id);
-    commit('setContact',contact);
+    const contact = await this.$api.contacts.findById(id)
+    commit('setContact', contact)
   },
   async loadAllContacts ({ commit }: { commit: Commit }) {
     // @ts-ignore
@@ -108,27 +108,24 @@ export const actions = {
     // @ts-ignore
     await this.$api.configurations.removeContact(configurationId, contactId)
   },
-  async updateContact({ commit }: { commit: Commit }, contact:Contact){
-    commit('setContact',contact)
-  },
   setPageNumber ({ commit }: { commit: Commit }, newPageNumber: number) {
     commit('setPageNumber', newPageNumber)
   },
-  async deleteContact({ commit }: { commit: Commit }, id: number){
+  async deleteContact ({ _commit }: { _commit: Commit }, id: number) {
     // @ts-ignore
-    await this.$api.contacts.deleteById(id);
+    await this.$api.contacts.deleteById(id)
   },
-  async saveContact({ commit }: { commit: Commit }, contact:Contact):Promise<Contact>{
+  saveContact ({ _commit }: { _commit: Commit }, contact: Contact): Promise<Contact> {
     // @ts-ignore
-    return this.$api.contacts.save(contact);
+    return this.$api.contacts.save(contact)
   }
 }
 export const mutations = {
   setContacts (state: contactsState, contacts: Contact[]) {
     state.contacts = contacts
   },
-  setContact(state: contactsState, contact: Contact){
-    state.contact = contact;
+  setContact (state: contactsState, contact: Contact) {
+    state.contact = contact
   },
   setConfigurationContacts (state: contactsState, contacts: Contact[]) {
     state.configurationContacts = contacts

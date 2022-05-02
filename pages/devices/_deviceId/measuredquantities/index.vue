@@ -37,7 +37,7 @@ permissions and limitations under the Licence.
     <v-card-actions
       v-if="$auth.loggedIn"
     >
-      <v-spacer/>
+      <v-spacer />
       <v-btn
         color="primary"
         small
@@ -52,7 +52,7 @@ permissions and limitations under the Licence.
     <BaseList
       :list-items="deviceMeasuredQuantities"
     >
-      <template v-slot:list-item="{item,index}">
+      <template #list-item="{item,index}">
         <DevicesMeasuredQuantitiesListItem
           :measured-quantity="item"
           :index="index"
@@ -75,7 +75,7 @@ permissions and limitations under the Licence.
     <v-card-actions
       v-if="deviceMeasuredQuantities.length > 3"
     >
-      <v-spacer/>
+      <v-spacer />
       <v-btn
         v-if="$auth.loggedIn"
         color="primary"
@@ -97,15 +97,14 @@ permissions and limitations under the Licence.
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
 
+import { mapActions, mapState } from 'vuex'
 import DevicesMeasuredQuantitiesListItem from '@/components/devices/DevicesMeasuredQuantitiesListItem.vue'
 import DevicesMeasuredQuantitiesDeleteDialog from '@/components/devices/DevicesMeasuredQuantitiesDeleteDialog.vue'
 import HintCard from '@/components/HintCard.vue'
 import BaseList from '@/components/shared/BaseList.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
-import { CustomTextField } from '@/models/CustomTextField'
 import { DeviceProperty } from '@/models/DeviceProperty'
-import { mapActions, mapState } from 'vuex'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 
 @Component({
@@ -126,7 +125,6 @@ import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
   }
 })
 export default class DevicePropertyShowPage extends Vue {
-
   private isSaving = false
 
   private showDeleteDialog = false
@@ -163,7 +161,6 @@ export default class DevicePropertyShowPage extends Vue {
       this.closeDialog()
     }
   }
-
 }
 </script>
 

@@ -95,16 +95,16 @@ permissions and limitations under the Licence.
       <BaseList
         :list-items="contacts"
       >
-        <template v-slot:list-item="{item}">
+        <template #list-item="{item}">
           <ContactsListItem
             :key="item.id"
             :contact="item"
           >
             <template #dot-menu-items>
-                  <DotMenuActionDelete
-                    :readonly="!$auth.loggedIn"
-                    @click="initDeleteDialog(item)"
-                  />
+              <DotMenuActionDelete
+                :readonly="!$auth.loggedIn"
+                @click="initDeleteDialog(item)"
+              />
             </template>
           </ContactsListItem>
         </template>
@@ -143,7 +143,7 @@ permissions and limitations under the Licence.
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
-import {mapState,mapActions} from 'vuex';
+import { mapState, mapActions } from 'vuex'
 
 import { Contact } from '@/models/Contact'
 
@@ -152,7 +152,6 @@ import ContacsDeleteDialog from '@/components/contacts/ContacsDeleteDialog.vue'
 
 import BaseList from '@/components/shared/BaseList.vue'
 import ContactsListItem from '@/components/contacts/ContactsListItem.vue'
-import { ContactSearchParamsSerializer, IContactSearchParams } from '@/modelUtils/ContactSearchParams'
 import { QueryParams } from '@/modelUtils/QueryParams'
 
 @Component({
@@ -162,14 +161,13 @@ import { QueryParams } from '@/modelUtils/QueryParams'
     ContacsDeleteDialog,
     DotMenuActionDelete
   },
-  computed:mapState('contacts',['pageNumber','pageSize','totalPages','contacts']),
-  methods:{
-    ...mapActions('contacts',['searchContactsPaginated','setPageNumber','deleteContact']),
-    ...mapActions('appbar',['initContactsIndexAppBar','setDefaults'])
+  computed: mapState('contacts', ['pageNumber', 'pageSize', 'totalPages', 'contacts']),
+  methods: {
+    ...mapActions('contacts', ['searchContactsPaginated', 'setPageNumber', 'deleteContact']),
+    ...mapActions('appbar', ['initContactsIndexAppBar', 'setDefaults'])
   }
 })
 export default class SearchContactsPage extends Vue {
-
   private loading: boolean = false
   private searchText: string = ''
 
@@ -178,32 +176,32 @@ export default class SearchContactsPage extends Vue {
 
   async created () {
     try {
-      this.loading=true
+      this.loading = true
       await this.initContactsIndexAppBar()
       this.initSearchQueryParams()
       this.runSearch()
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Loading of contacts failed')
     } finally {
-      this.loading=false
+      this.loading = false
     }
   }
 
   beforeDestroy () {
-    this.setDefaults();
+    this.setDefaults()
   }
 
-  get page(){
-    return this.pageNumber;
+  get page () {
+    return this.pageNumber
   }
 
-  set page(newVal){
-    this.setPageNumber(newVal);
-    this.setPageInUrl(false);
+  set page (newVal) {
+    this.setPageNumber(newVal)
+    this.setPageInUrl(false)
   }
 
-  basicSearch(){
-    //Important to set page to one otherwise it's possible that you don't anything
+  basicSearch () {
+    // Important to set page to one otherwise it's possible that you don't anything
     this.page = 1
     this.runSearch()
   }
@@ -213,19 +211,18 @@ export default class SearchContactsPage extends Vue {
     this.initUrlQueryParams()
   }
 
-  async runSearch(){
-    try{
-      this.loading=true;
+  async runSearch () {
+    try {
+      this.loading = true
       this.initUrlQueryParams()
-      await this.searchContactsPaginated(this.searchText);
+      await this.searchContactsPaginated(this.searchText)
       this.setPageInUrl()
-    }catch (e){
+    } catch (e) {
       this.$store.commit('snackbar/setError', 'Loading of contacts failed')
-    }finally {
-      this.loading=false;
+    } finally {
+      this.loading = false
     }
   }
-
 
   initDeleteDialog (contact: Contact) {
     this.showDeleteDialog = true
@@ -242,10 +239,10 @@ export default class SearchContactsPage extends Vue {
       return
     }
 
-    this.loading = true
     try {
+      this.loading = true
       await this.deleteContact(this.contactToDelete.id)
-      this.runSearch();//to update the list
+      this.runSearch()// to update the list
       this.$store.commit('snackbar/setSuccess', 'Contact deleted')
     } catch (_error) {
       this.$store.commit('snackbar/setError', 'Contact could not be deleted')
@@ -259,8 +256,9 @@ export default class SearchContactsPage extends Vue {
     if ('page' in this.$route.query && typeof this.$route.query.page === 'string') {
       return parseInt(this.$route.query.page) || 1
     }
-    return 1;
+    return 1
   }
+
   setPageInUrl (preserveHash: boolean = true): void {
     let query: QueryParams = {}
     if (this.page) {
@@ -283,9 +281,9 @@ export default class SearchContactsPage extends Vue {
   }
 
   initUrlQueryParams (): void {
-    let params = {}
+    const params = {}
 
-    if(this.searchText){
+    if (this.searchText) {
       params.searchText = this.searchText
     }
     this.$router.push({

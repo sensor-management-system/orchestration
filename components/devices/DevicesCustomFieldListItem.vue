@@ -43,8 +43,7 @@
                   v-if="$auth.loggedIn"
                 >
                   <template #actions>
-                    <slot name="dot-menu-items">
-                    </slot>
+                    <slot name="dot-menu-items" />
                   </template>
                 </DotMenu>
               </v-col>
@@ -66,15 +65,15 @@ import DotMenu from '@/components/DotMenu.vue'
 })
 export default class DevicesCustomFieldListItem extends Vue {
   @Prop({
-    required:true,
+    required: true,
     type: Object
   })
-  private customField!:CustomTextField;
+  private customField!: CustomTextField
 
   @Prop({
-    required:true
+    required: true
   })
-  private deviceId!:string;
+  private deviceId!: string
 }
 </script>
 

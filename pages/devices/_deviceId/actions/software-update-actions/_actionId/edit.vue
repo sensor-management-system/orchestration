@@ -70,37 +70,37 @@ permissions and limitations under the Licence.
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 
+import { mapActions, mapState } from 'vuex'
 import SoftwareUpdateActionForm from '@/components/actions/SoftwareUpdateActionForm.vue'
 import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
 import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
-import { mapActions, mapState } from 'vuex'
 @Component({
   components: {
     ProgressIndicator,
     SaveAndCancelButtons,
-    SoftwareUpdateActionForm,
+    SoftwareUpdateActionForm
   },
   scrollToTop: true,
   middleware: ['auth'],
-  computed:mapState('devices',['deviceSoftwareUpdateAction','deviceAttachments']),
-  methods:mapActions('devices',['loadDeviceSoftwareUpdateAction','loadAllDeviceActions','loadDeviceAttachments','updateDeviceSoftwareUpdateAction'])
+  computed: mapState('devices', ['deviceSoftwareUpdateAction', 'deviceAttachments']),
+  methods: mapActions('devices', ['loadDeviceSoftwareUpdateAction', 'loadAllDeviceActions', 'loadDeviceAttachments', 'updateDeviceSoftwareUpdateAction'])
 })
 export default class DeviceSoftwareUpdateActionEditPage extends Vue {
   private action: SoftwareUpdateAction = new SoftwareUpdateAction()
   private isSaving = false
   private isLoading = false
 
-  async created(){
+  async created () {
     try {
       this.isLoading = true
       await this.loadDeviceSoftwareUpdateAction(this.actionId)
       await this.loadDeviceAttachments(this.deviceId)
       this.action = SoftwareUpdateAction.createFromObject(this.deviceSoftwareUpdateAction)
-    }catch{
+    } catch {
       this.$store.commit('snackbar/setError', 'Failed to fetch action')
-    }finally {
+    } finally {
       this.isLoading = false
     }
   }
@@ -134,7 +134,7 @@ export default class DeviceSoftwareUpdateActionEditPage extends Vue {
       this.$router.push('/devices/' + this.deviceId + '/actions')
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to save the action')
-    }finally {
+    } finally {
       this.isSaving = false
     }
   }

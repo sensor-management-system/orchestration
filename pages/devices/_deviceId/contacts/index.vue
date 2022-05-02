@@ -52,7 +52,7 @@ permissions and limitations under the Licence.
     <BaseList
       :list-items="deviceContacts"
     >
-      <template v-slot:list-item="{item}">
+      <template #list-item="{item}">
         <BaseEntityContactListItem
           :contact="item"
         >
@@ -60,7 +60,7 @@ permissions and limitations under the Licence.
             <DotMenuActionDelete
               :readonly="!$auth.loggedIn"
               @click="removeContact(item.id)"
-            ></DotMenuActionDelete>
+            />
           </template>
         </BaseEntityContactListItem>
       </template>
@@ -93,24 +93,22 @@ import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 
 @Component({
   components: { DotMenuActionDelete, BaseEntityContactListItem, BaseList, ProgressIndicator, HintCard },
-  computed:mapState('devices',['deviceContacts']),
-  methods:mapActions('devices',['loadDeviceContacts','removeDeviceContact'])
+  computed: mapState('devices', ['deviceContacts']),
+  methods: mapActions('devices', ['loadDeviceContacts', 'removeDeviceContact'])
 })
 export default class DeviceShowContactPage extends Vue {
-
   private isSaving = false
 
   get deviceId (): string {
     return this.$route.params.deviceId
   }
 
-  async removeContact(contactId:string){
-
+  async removeContact (contactId: string) {
     try {
       this.isSaving = true
       await this.removeDeviceContact({
         deviceId: this.deviceId,
-        contactId: contactId
+        contactId
       })
       this.$store.commit('snackbar/setSuccess', 'Contact removed')
       this.loadDeviceContacts(this.deviceId)

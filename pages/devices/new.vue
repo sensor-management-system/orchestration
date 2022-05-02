@@ -41,8 +41,8 @@ permissions and limitations under the Licence.
         <v-spacer />
         <SaveAndCancelButtons
           :to="'/devices'"
-          @save="save"
           save-btn-text="create"
+          @save="save"
         />
       </v-card-actions>
       <DeviceBasicDataForm
@@ -53,8 +53,8 @@ permissions and limitations under the Licence.
         <v-spacer />
         <SaveAndCancelButtons
           :to="'/devices'"
-          @save="save"
           save-btn-text="create"
+          @save="save"
         />
       </v-card-actions>
     </v-card>
@@ -64,13 +64,13 @@ permissions and limitations under the Licence.
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 
+import { mapActions } from 'vuex'
 import DeviceBasicDataForm from '@/components/DeviceBasicDataForm.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
 
 import { Device } from '@/models/Device'
 
-import { mapActions } from 'vuex'
 @Component({
   components: {
     SaveAndCancelButtons,
@@ -78,9 +78,9 @@ import { mapActions } from 'vuex'
     ProgressIndicator
   },
   middleware: ['auth'],
-  methods:{
-    ...mapActions('devices',['saveDevice']),
-    ...mapActions('appbar',['initDevicesNewAppBar','setDefaults'])
+  methods: {
+    ...mapActions('devices', ['saveDevice']),
+    ...mapActions('appbar', ['initDevicesNewAppBar', 'setDefaults'])
   }
 })
 // @ts-ignore
@@ -112,9 +112,7 @@ export default class DeviceNewPage extends Vue {
     } finally {
       this.isLoading = false
     }
-
   }
-
 }
 </script>
 

@@ -58,8 +58,8 @@ permissions and limitations under the Licence.
         <v-spacer />
         <SaveAndCancelButtons
           :to="'/configurations'"
-          @save="save"
           save-btn-text="create"
+          @save="save"
         />
       </v-card-actions>
     </v-card>
@@ -69,19 +69,19 @@ permissions and limitations under the Licence.
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 
+import { mapActions } from 'vuex'
 import { Configuration } from '@/models/Configuration'
 
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
 import ConfigurationsBasicDataForm from '@/components/configurations/ConfigurationsBasicDataForm.vue'
-import { mapActions } from 'vuex'
 
 @Component({
   components: { ConfigurationsBasicDataForm, SaveAndCancelButtons, ProgressIndicator },
   middleware: ['auth'],
-  methods:{
-    ...mapActions('configurations',['saveConfiguration']),
-    ...mapActions('appbar',['initConfigurationsNewAppBar','setDefaults'])
+  methods: {
+    ...mapActions('configurations', ['saveConfiguration']),
+    ...mapActions('appbar', ['initConfigurationsNewAppBar', 'setDefaults'])
   }
 })
 export default class ConfigurationNewPage extends Vue {

@@ -44,8 +44,8 @@ permissions and limitations under the Licence.
         <v-spacer />
         <SaveAndCancelButtons
           :to="'/platforms'"
-          @save="save"
           save-btn-text="create"
+          @save="save"
         />
       </v-card-actions>
       <PlatformBasicDataForm
@@ -56,8 +56,8 @@ permissions and limitations under the Licence.
         <v-spacer />
         <SaveAndCancelButtons
           :to="'/platforms'"
-          @save="save"
           save-btn-text="create"
+          @save="save"
         />
       </v-card-actions>
     </v-card>
@@ -67,14 +67,12 @@ permissions and limitations under the Licence.
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 
+import { mapActions } from 'vuex'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import PlatformBasicDataForm from '@/components/PlatformBasicDataForm.vue'
 import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
 
 import { Platform } from '@/models/Platform'
-
-import { mapActions } from 'vuex'
-
 
 @Component({
   components: {
@@ -83,9 +81,9 @@ import { mapActions } from 'vuex'
     ProgressIndicator
   },
   middleware: ['auth'],
-  methods:{
-    ...mapActions('platforms',['savePlatform']),
-    ...mapActions('appbar',['setDefaults','initPlatformsNewAppBar'])
+  methods: {
+    ...mapActions('platforms', ['savePlatform']),
+    ...mapActions('appbar', ['setDefaults', 'initPlatformsNewAppBar'])
   }
 })
 // @ts-ignore

@@ -38,11 +38,11 @@ permissions and limitations under the Licence.
       flat
     >
       <v-card-actions>
-        <v-spacer/>
+        <v-spacer />
         <SaveAndCancelButtons
           :to="'/devices'"
-          @save="save"
           save-btn-text="Copy"
+          @save="save"
         />
       </v-card-actions>
       <v-alert
@@ -58,16 +58,16 @@ permissions and limitations under the Licence.
         </v-row>
         <v-row dense>
           <v-col cols="12" md="2">
-            <v-checkbox v-model="copyContacts" label="Contacts"/>
+            <v-checkbox v-model="copyContacts" label="Contacts" />
           </v-col>
           <v-col cols="12" md="2">
-            <v-checkbox v-model="copyMeasuredQuantities" label="Measured quantities"/>
+            <v-checkbox v-model="copyMeasuredQuantities" label="Measured quantities" />
           </v-col>
           <v-col cols="12" md="2">
-            <v-checkbox v-model="copyCustomFields" label="Custom fields"/>
+            <v-checkbox v-model="copyCustomFields" label="Custom fields" />
           </v-col>
           <v-col cols="12" md="2">
-            <v-checkbox v-model="copyAttachments" label="Attachments"/>
+            <v-checkbox v-model="copyAttachments" label="Attachments" />
           </v-col>
         </v-row>
         <v-row dense>
@@ -97,16 +97,16 @@ permissions and limitations under the Licence.
         </v-row>
         <v-row dense>
           <v-col cols="12" md="2">
-            <v-checkbox v-model="copyContacts" label="Contacts"/>
+            <v-checkbox v-model="copyContacts" label="Contacts" />
           </v-col>
           <v-col cols="12" md="2">
-            <v-checkbox v-model="copyMeasuredQuantities" label="Measured quantities"/>
+            <v-checkbox v-model="copyMeasuredQuantities" label="Measured quantities" />
           </v-col>
           <v-col cols="12" md="2">
-            <v-checkbox v-model="copyCustomFields" label="Custom fields"/>
+            <v-checkbox v-model="copyCustomFields" label="Custom fields" />
           </v-col>
           <v-col cols="12" md="2">
-            <v-checkbox v-model="copyAttachments" label="Attachments"/>
+            <v-checkbox v-model="copyAttachments" label="Attachments" />
           </v-col>
         </v-row>
         <v-row dense>
@@ -116,11 +116,11 @@ permissions and limitations under the Licence.
         </v-row>
       </v-alert>
       <v-card-actions>
-        <v-spacer/>
+        <v-spacer />
         <SaveAndCancelButtons
           :to="'/devices'"
-          @save="save"
           save-btn-text="Copy"
+          @save="save"
         />
       </v-card-actions>
     </v-card>
@@ -130,13 +130,12 @@ permissions and limitations under the Licence.
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 
+import { mapActions, mapState } from 'vuex'
 import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
 import DeviceBasicDataForm from '@/components/DeviceBasicDataForm.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
-import { mapActions, mapState } from 'vuex'
 import { Device } from '@/models/Device'
-
 
 @Component({
   components: {
@@ -145,10 +144,10 @@ import { Device } from '@/models/Device'
     ProgressIndicator
   },
   middleware: ['auth'],
-  computed:mapState('devices',['device']),
-  methods:{
-    ...mapActions('devices',['copyDevice','loadDevice']),
-    ...mapActions('appbar',['setDefaults','initDeviceCopyAppBar'])
+  computed: mapState('devices', ['device']),
+  methods: {
+    ...mapActions('devices', ['copyDevice', 'loadDevice']),
+    ...mapActions('appbar', ['setDefaults', 'initDeviceCopyAppBar'])
   }
 })
 // @ts-ignore
@@ -169,7 +168,7 @@ export default class DeviceCopyPage extends Vue {
   async created () {
     this.initDeviceCopyAppBar(this.deviceId)
     try {
-      this.isLoading=true
+      this.isLoading = true
       await this.loadDevice({
         deviceId: this.deviceId,
         includeContacts: true,
@@ -180,8 +179,8 @@ export default class DeviceCopyPage extends Vue {
       this.deviceToCopy = this.getPreparedDeviceForCopy()
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Loading device failed')
-    }finally {
-      this.isLoading=false
+    } finally {
+      this.isLoading = false
     }
   }
 
@@ -193,11 +192,9 @@ export default class DeviceCopyPage extends Vue {
     return this.$route.params.deviceId
   }
 
-
   get isInProgress (): boolean {
     return this.isLoading || this.isSaving
   }
-
 
   getPreparedDeviceForCopy (): any {
     const deviceToEdit = Device.createFromObject(this.device)
@@ -217,13 +214,11 @@ export default class DeviceCopyPage extends Vue {
     return deviceToEdit
   }
 
-
   async save () {
     if (!(this.$refs.basicForm as Vue & { validateForm: () => boolean }).validateForm()) {
       this.$store.commit('snackbar/setError', 'Please correct your input')
       return
     }
-
 
     try {
       this.isSaving = true
@@ -238,11 +233,10 @@ export default class DeviceCopyPage extends Vue {
       this.$router.push('/devices/' + savedDeviceId)
     } catch (_error) {
       this.$store.commit('snackbar/setError', 'Copy failed')
-    }finally {
+    } finally {
       this.isSaving = false
     }
   }
-
 }
 </script>
 

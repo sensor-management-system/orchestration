@@ -34,15 +34,15 @@ permissions and limitations under the Licence.
       v-model="isLoading"
     />
     <v-card flat>
-      <NuxtChild/>
+      <NuxtChild />
     </v-card>
   </div>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import { mapActions } from 'vuex'
+import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
 @Component({
   components: {
@@ -61,12 +61,12 @@ export default class PlatformPage extends Vue {
       this.isLoading = true
       this.initPlatformsPlatformIdAppBar(this.platformId)
       await this.loadPlatform({
-          platformId: this.platformId,
-          includeContacts: false,
-          includePlatformAttachments: false
-        }
+        platformId: this.platformId,
+        includeContacts: false,
+        includePlatformAttachments: false
+      }
       )
-      if(this.isBasePath()){
+      if (this.isBasePath()) {
         this.$router.replace('/platforms/' + this.platformId + '/basic')
       }
     } catch (e) {

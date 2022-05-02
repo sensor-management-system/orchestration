@@ -23,7 +23,7 @@
     <BaseList
       :list-items="deviceAttachments"
     >
-      <template v-slot:list-item="{item}">
+      <template #list-item="{item}">
         <DevicesAttachmentListItem
           :attachment="item"
           :device-id="deviceId"
@@ -36,7 +36,6 @@
           </template>
         </DevicesAttachmentListItem>
       </template>
-
     </BaseList>
     <v-card-actions
       v-if="deviceAttachments.length > 3"
@@ -62,6 +61,7 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
+import { mapActions, mapState } from 'vuex'
 import BaseList from '@/components/shared/BaseList.vue'
 import DevicesAttachmentListItem from '@/components/devices/DevicesAttachmentListItem.vue'
 import DevicesAttachmentDeleteDialog from '@/components/devices/DevicesAttachmentDeleteDialog.vue'
@@ -70,16 +70,15 @@ import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
 import { Attachment } from '@/models/Attachment'
-import { mapActions, mapState } from 'vuex'
 @Component({
   components: { ProgressIndicator, DotMenuActionDelete, HintCard, DevicesAttachmentDeleteDialog, DevicesAttachmentListItem, BaseList },
-  computed:mapState('devices',['deviceAttachments']),
-  methods:mapActions('devices',['loadDeviceAttachments','deleteDeviceAttachment'])
+  computed: mapState('devices', ['deviceAttachments']),
+  methods: mapActions('devices', ['loadDeviceAttachments', 'deleteDeviceAttachment'])
 })
 export default class DeviceAttachmentShowPage extends Vue {
   private isSaving = false
-  private showDeleteDialog=false;
-  private attachmentToDelete:Attachment|null=null;
+  private showDeleteDialog = false
+  private attachmentToDelete: Attachment|null = null
 
   get deviceId (): string {
     return this.$route.params.deviceId
@@ -100,14 +99,14 @@ export default class DeviceAttachmentShowPage extends Vue {
       return
     }
     try {
-      this.isSaving=true
+      this.isSaving = true
       await this.deleteDeviceAttachment(this.attachmentToDelete.id)
       this.loadDeviceAttachments(this.deviceId)
       this.$store.commit('snackbar/setSuccess', 'Attachment deleted')
     } catch (_error) {
       this.$store.commit('snackbar/setError', 'Failed to delete attachment')
     } finally {
-      this.isSaving=false
+      this.isSaving = false
       this.closeDialog()
     }
   }

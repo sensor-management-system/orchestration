@@ -60,12 +60,12 @@ permissions and limitations under the Licence.
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 
+import { mapActions, mapState } from 'vuex'
 import DeviceBasicDataForm from '@/components/DeviceBasicDataForm.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
 
 import { Device } from '@/models/Device'
-import { mapActions, mapState } from 'vuex'
 
 @Component({
   components: {
@@ -74,11 +74,10 @@ import { mapActions, mapState } from 'vuex'
     ProgressIndicator
   },
   middleware: ['auth'],
-  computed: mapState('devices',['device']),
-  methods: mapActions('devices',['saveDevice','loadDevice'])
+  computed: mapState('devices', ['device']),
+  methods: mapActions('devices', ['saveDevice', 'loadDevice'])
 })
 export default class DeviceEditBasicPage extends Vue {
-
   private deviceCopy: Device = new Device()
   private isSaving: boolean = false
 
@@ -99,7 +98,7 @@ export default class DeviceEditBasicPage extends Vue {
       this.isSaving = true
       await this.saveDevice(this.deviceCopy)
       this.loadDevice({
-        deviceId:this.deviceId,
+        deviceId: this.deviceId,
         includeContacts: false,
         includeCustomFields: false,
         includeDeviceProperties: false,

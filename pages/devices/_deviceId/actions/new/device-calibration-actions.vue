@@ -5,7 +5,7 @@
       dark
     />
     <v-card-actions>
-      <v-spacer></v-spacer>
+      <v-spacer />
       <SaveAndCancelButtons
         save-btn-text="Create"
         :to="'/devices/' + deviceId + '/actions'"
@@ -20,7 +20,7 @@
       :current-user-mail="$auth.user.email"
     />
     <v-card-actions>
-      <v-spacer></v-spacer>
+      <v-spacer />
       <SaveAndCancelButtons
         save-btn-text="Create"
         :to="'/devices/' + deviceId + '/actions'"
@@ -33,12 +33,12 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
 
+import { mapActions, mapState } from 'vuex'
 import DeviceCalibrationActionForm from '@/components/actions/DeviceCalibrationActionForm.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
 
 import { DeviceCalibrationAction } from '@/models/DeviceCalibrationAction'
-import { mapActions, mapState } from 'vuex'
 @Component({
   middleware: ['auth'],
   components: {
@@ -53,8 +53,8 @@ export default class NewDeviceCalibrationAction extends Vue {
   private deviceCalibrationAction: DeviceCalibrationAction = new DeviceCalibrationAction()
   private isSaving: boolean = false
 
-  created(){
-    if(this.chosenKindOfDeviceAction === null){
+  created () {
+    if (this.chosenKindOfDeviceAction === null) {
       this.$router.push('/devices/' + this.deviceId + '/actions')
     }
   }
@@ -87,7 +87,6 @@ export default class NewDeviceCalibrationAction extends Vue {
       this.isSaving = false
     }
   }
-
 }
 </script>
 

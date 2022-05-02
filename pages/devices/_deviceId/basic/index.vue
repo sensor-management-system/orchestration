@@ -97,17 +97,15 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop } from 'nuxt-property-decorator'
+import { Component, Vue } from 'nuxt-property-decorator'
 
+import { mapActions, mapState } from 'vuex'
 import DeviceDeleteDialog from '@/components/devices/DeviceDeleteDialog.vue'
 import DeviceBasicData from '@/components/DeviceBasicData.vue'
 import DotMenu from '@/components/DotMenu.vue'
 import DotMenuActionCopy from '@/components/DotMenuActionCopy.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
-
-import { mapActions, mapState } from 'vuex'
-
 
 @Component({
   components: {
@@ -118,8 +116,8 @@ import { mapActions, mapState } from 'vuex'
     DeviceDeleteDialog,
     DeviceBasicData
   },
-  computed: mapState('devices',['device']),
-  methods:mapActions('devices',['deleteDevice'])
+  computed: mapState('devices', ['device']),
+  methods: mapActions('devices', ['deleteDevice'])
 })
 export default class DeviceShowBasicPage extends Vue {
   private isSaving = false
@@ -144,14 +142,14 @@ export default class DeviceShowBasicPage extends Vue {
       return
     }
     try {
-      this.isSaving=true
-      this.deleteDevice(this.device.id)
+      this.isSaving = true
+      await this.deleteDevice(this.device.id)
       this.$store.commit('snackbar/setSuccess', 'Device deleted')
       this.$router.push('/devices')
-    }catch (e){
+    } catch (e) {
       this.$store.commit('snackbar/setError', 'Device could not be deleted')
-    }finally {
-      this.isSaving=false
+    } finally {
+      this.isSaving = false
     }
   }
 }

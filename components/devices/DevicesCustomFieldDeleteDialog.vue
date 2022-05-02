@@ -37,7 +37,6 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
 import { Prop } from 'nuxt-property-decorator'
-import { Attachment } from '@/models/Attachment'
 import { CustomTextField } from '@/models/CustomTextField'
 
 @Component

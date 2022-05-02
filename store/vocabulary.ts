@@ -3,7 +3,6 @@ import { Manufacturer } from '@/models/Manufacturer'
 import { Status } from '@/models/Status'
 import { PlatformType } from '@/models/PlatformType'
 import { DeviceType } from '@/models/DeviceType'
-import { Platform } from '@/models/Platform'
 import { ActionType } from '@/models/ActionType'
 import { ACTION_TYPE_API_FILTER_DEVICE, ACTION_TYPE_API_FILTER_PLATFORM } from '@/services/cv/ActionTypeApi'
 import { Compartment } from '@/models/Compartment'
@@ -38,11 +37,11 @@ const state = {
   platformtypes: [],
   platformGenericActionTypes: [],
   deviceGenericActionTypes: [],
-  compartments:[],
-  samplingMedia:[],
-  properties:[],
-  units:[],
-  measuredQuantityUnits:[]
+  compartments: [],
+  samplingMedia: [],
+  properties: [],
+  units: [],
+  measuredQuantityUnits: []
 }
 
 const getters = {
@@ -66,7 +65,7 @@ const getters = {
       return manufacturer.uri === uri
     })
   },
-  platformActionTypeItems: (state:vocabularyState)=>{
+  platformActionTypeItems: (state: vocabularyState) => {
     return [
       {
         id: 'software_update',
@@ -74,7 +73,7 @@ const getters = {
         uri: '',
         kind: KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE
       },
-      ...state.platformGenericActionTypes.map((actionType)=>{
+      ...state.platformGenericActionTypes.map((actionType) => {
         return {
           id: actionType.id,
           name: actionType.name,
@@ -84,7 +83,7 @@ const getters = {
       })
     ].sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()))
   },
-  deviceActionTypeItems: (state:vocabularyState)=>{
+  deviceActionTypeItems: (state: vocabularyState) => {
     return [
       {
         id: 'device_calibration',
@@ -98,7 +97,7 @@ const getters = {
         uri: '',
         kind: KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE
       },
-      ...state.deviceGenericActionTypes.map((actionType)=>{
+      ...state.deviceGenericActionTypes.map((actionType) => {
         return {
           id: actionType.id,
           name: actionType.name,
@@ -112,42 +111,42 @@ const getters = {
 
 const actions = {
   async loadManufacturers ({ commit }: { commit: Commit }) {
-    //@ts-ignore
+    // @ts-ignore
     commit('setManufacturers', await this.$api.manufacturer.findAll())
   },
   async loadEquipmentstatus ({ commit }: { commit: Commit }) {
-    //@ts-ignore
+    // @ts-ignore
     commit('setEquipmentstatus', await this.$api.states.findAll())
   },
   async loadDevicetypes ({ commit }: { commit: Commit }) {
-    //@ts-ignore
+    // @ts-ignore
     commit('setDevicetypes', await this.$api.deviceTypes.findAll())
   },
   async loadPlatformtypes ({ commit }: { commit: Commit }) {
-    //@ts-ignore
+    // @ts-ignore
     commit('setPlatformtypes', await this.$api.platformTypes.findAll())
   },
-  async loadPlatformGenericActionTypes ({ commit }: { commit: Commit }) { //TODO check api and maybe refactor
+  async loadPlatformGenericActionTypes ({ commit }: { commit: Commit }) { // TODO check api and maybe refactor
     commit('setPlatformGenericActionTypes', await this.$api.actionTypes.newSearchBuilder().onlyType(ACTION_TYPE_API_FILTER_PLATFORM).build().findMatchingAsList()
     )
   },
   async loadDeviceGenericActionTypes ({ commit }: { commit: Commit }) {
     commit('setDeviceGenericActionTypes', await this.$api.actionTypes.newSearchBuilder().onlyType(ACTION_TYPE_API_FILTER_DEVICE).build().findMatchingAsList())
   },
-  async loadCompartments({ commit }: { commit: Commit }) {
-    commit('setCompartments',await this.$api.compartments.findAllPaginated())
+  async loadCompartments ({ commit }: { commit: Commit }) {
+    commit('setCompartments', await this.$api.compartments.findAllPaginated())
   },
-  async loadSamplingMedia({ commit }: { commit: Commit }) {
-    commit('setSamplingMedia',await this.$api.samplingMedia.findAllPaginated())
+  async loadSamplingMedia ({ commit }: { commit: Commit }) {
+    commit('setSamplingMedia', await this.$api.samplingMedia.findAllPaginated())
   },
-  async loadProperties({ commit }: { commit: Commit }) {
-    commit('setProperties',await this.$api.properties.findAllPaginated())
+  async loadProperties ({ commit }: { commit: Commit }) {
+    commit('setProperties', await this.$api.properties.findAllPaginated())
   },
-  async loadUnits({ commit }: { commit: Commit }) {
-    commit('setUnits',await this.$api.units.findAllPaginated())
+  async loadUnits ({ commit }: { commit: Commit }) {
+    commit('setUnits', await this.$api.units.findAllPaginated())
   },
-  async loadMeasuredQuantityUnits({ commit }: { commit: Commit }) {
-    commit('setMeasuredQuantityUnits',await this.$api.measuredQuantityUnits.findAllPaginated())
+  async loadMeasuredQuantityUnits ({ commit }: { commit: Commit }) {
+    commit('setMeasuredQuantityUnits', await this.$api.measuredQuantityUnits.findAllPaginated())
   }
 }
 

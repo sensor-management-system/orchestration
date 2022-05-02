@@ -5,7 +5,7 @@
       dark
     />
     <v-card-actions>
-      <v-spacer/>
+      <v-spacer />
       <v-btn
         v-if="$auth.loggedIn"
         color="primary"
@@ -115,6 +115,7 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
 
+import { mapActions, mapGetters } from 'vuex'
 import HintCard from '@/components/HintCard.vue'
 import DeviceActionTimeline from '@/components/actions/DeviceActionTimeline.vue'
 import GenericActionCard from '@/components/actions/GenericActionCard.vue'
@@ -127,8 +128,6 @@ import ActionDeleteDialog from '@/components/actions/ActionDeleteDialog.vue'
 import { GenericAction } from '@/models/GenericAction'
 import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
 import { DeviceCalibrationAction } from '@/models/DeviceCalibrationAction'
-import { mapActions, mapGetters } from 'vuex'
-import { DeviceActionApiDispatcher } from '@/modelUtils/actionHelpers'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import SoftwareUpdateActionCard from '@/components/actions/SoftwareUpdateActionCard.vue'
 
@@ -204,7 +203,7 @@ export default class DeviceActionsShowPage extends Vue {
     this.genericActionToDelete = null
   }
 
-  async deleteAndCloseDialog () {
+  deleteAndCloseDialog () {
     if (this.actionToDelete === null || this.actionToDelete.id === null) {
       return
     }

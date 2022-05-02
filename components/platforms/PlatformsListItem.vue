@@ -27,8 +27,7 @@
           >
             <DotMenu>
               <template #actions>
-                <slot name="dot-menu-items">
-                </slot>
+                <slot name="dot-menu-items" />
               </template>
             </DotMenu>
           </v-col>
@@ -199,27 +198,27 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
-import { Platform } from '@/models/Platform'
 import { Prop } from 'nuxt-property-decorator'
+import { mapGetters } from 'vuex'
+import { Platform } from '@/models/Platform'
 import DotMenu from '@/components/DotMenu.vue'
 import StatusBadge from '@/components/StatusBadge.vue'
 import { PlatformType } from '@/models/PlatformType'
 import { Status } from '@/models/Status'
-import {mapGetters} from 'vuex'
 
 @Component({
   components: { StatusBadge, DotMenu },
-  computed: mapGetters('vocabulary',['getPlatformTypeByUri','getEquipmentstatusByUri'])
+  computed: mapGetters('vocabulary', ['getPlatformTypeByUri', 'getEquipmentstatusByUri'])
 })
 export default class PlatformsListItem extends Vue {
-
   @Prop({
-    required:true,
+    required: true,
     type: Object
   })
-  private platform!:Platform;
+  private platform!: Platform
+
   public readonly NO_TYPE: string = 'Unknown type'
-  private show = false;
+  private show = false
 
   getTextOrDefault = (text: string): string => text || '-'
 
@@ -228,11 +227,11 @@ export default class PlatformsListItem extends Vue {
       return this.platform.platformTypeName
     }
 
-    if(this.getPlatformTypeByUri(this.platform.platformTypeUri)){
-      const platformType:PlatformType = this.getPlatformTypeByUri(this.platform.platformTypeUri)
+    if (this.getPlatformTypeByUri(this.platform.platformTypeUri)) {
+      const platformType: PlatformType = this.getPlatformTypeByUri(this.platform.platformTypeUri)
       return platformType.name
     }
-     return this.NO_TYPE
+    return this.NO_TYPE
   }
 
   getStatus () {
@@ -240,7 +239,7 @@ export default class PlatformsListItem extends Vue {
       return this.platform.statusName
     }
     if (this.getEquipmentstatusByUri(this.platform.statusUri)) {
-      const platformStatus:Status = this.getEquipmentstatusByUri(this.platform.statusUri)
+      const platformStatus: Status = this.getEquipmentstatusByUri(this.platform.statusUri)
       return platformStatus.name
     }
     return ''

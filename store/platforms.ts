@@ -1,5 +1,5 @@
-import { Platform } from '@/models/Platform'
 import { Commit, Dispatch } from 'vuex'
+import { Platform } from '@/models/Platform'
 import { IPlatformSearchParams } from '@/modelUtils/PlatformSearchParams'
 import { Contact } from '@/models/Contact'
 import { Attachment } from '@/models/Attachment'
@@ -10,8 +10,7 @@ import { PlatformMountAction } from '@/models/PlatformMountAction'
 import { IActionType } from '@/models/ActionType'
 import { PlatformMountActionWrapper } from '@/viewmodels/PlatformMountActionWrapper'
 import { PlatformUnmountActionWrapper } from '@/viewmodels/PlatformUnmountActionWrapper'
-import { DateComparator, IDateCompareable, isDateCompareable } from '@/modelUtils/Compareables'
-import { IActionCommonDetails } from '@/models/ActionCommonDetails'
+import { IDateCompareable } from '@/modelUtils/Compareables'
 
 const KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE = 'software_update'
 const KIND_OF_ACTION_TYPE_GENERIC_PLATFORM_ACTION = 'generic_platform_action'
@@ -22,20 +21,18 @@ type IOptionsForActionType = Pick<IActionType, 'id' | 'name' | 'uri'> & {
   kind: KindOfActionType
 }
 
-const comparator = new DateComparator()
-
 interface platformsState {
   platforms: Platform[],
   platform: Platform | null,
-  platformContacts:Contact[],
-  platformAttachments:Attachment[],
-  platformAttachment:Attachment|null,
-  platformGenericActions:GenericAction[],
-  platformGenericAction:GenericAction|null,
-  platformSoftwareUpdateActions:SoftwareUpdateAction[],
-  platformSoftwareUpdateAction:SoftwareUpdateAction|null,
-  platformMountActions:PlatformMountAction[],
-  platformUnmountActions:PlatformUnmountAction[],
+  platformContacts: Contact[],
+  platformAttachments: Attachment[],
+  platformAttachment: Attachment|null,
+  platformGenericActions: GenericAction[],
+  platformGenericAction: GenericAction|null,
+  platformSoftwareUpdateActions: SoftwareUpdateAction[],
+  platformSoftwareUpdateAction: SoftwareUpdateAction|null,
+  platformMountActions: PlatformMountAction[],
+  platformUnmountActions: PlatformUnmountAction[],
   chosenKindOfPlatformAction: IOptionsForActionType | null,
   pageNumber: number,
   pageSize: number,
@@ -45,23 +42,23 @@ interface platformsState {
 const state = {
   platforms: [],
   platform: null,
-  platformContacts:[],
-  platformAttachments:[],
-  platformAttachment:null,
-  platformGenericActions:[],
-  platformSoftwareUpdateActions:[],
-  platformMountActions:[],
-  platformUnmountActions:[],
-  chosenKindOfPlatformAction:null,
-  platformGenericAction:null,
-  platformSoftwareUpdateAction:null,
+  platformContacts: [],
+  platformAttachments: [],
+  platformAttachment: null,
+  platformGenericActions: [],
+  platformSoftwareUpdateActions: [],
+  platformMountActions: [],
+  platformUnmountActions: [],
+  chosenKindOfPlatformAction: null,
+  platformGenericAction: null,
+  platformSoftwareUpdateAction: null,
   totalPages: 1,
   pageNumber: 1,
   pageSize: 20
 }
 
 const getters = {
-  actions:(state:platformsState)=>{
+  actions: (state: platformsState) => {
     let actions = [
       ...state.platformGenericActions,
       ...state.platformSoftwareUpdateActions,
@@ -70,7 +67,7 @@ const getters = {
     ]
     // sort the actions
     actions = actions.sort((a: IDateCompareable, b: IDateCompareable): number => {
-      return  a.date < b.date ? 1 : a.date > b.date ? -1 : 0;
+      return a.date < b.date ? 1 : a.date > b.date ? -1 : 0
     })
     return actions
   }
@@ -81,8 +78,7 @@ const actions = {
     commit,
     state
   }: { commit: Commit, state: platformsState }, searchParams: IPlatformSearchParams) {
-
-    let email = null;
+    let email = null
     if (searchParams.onlyOwnPlatforms) {
       // @ts-ignore
       email = this.$auth.user!.email as string
@@ -102,144 +98,142 @@ const actions = {
     commit('setTotalPages', totalPages)
   },
   async searchPlatforms ({
-    commit,
-    state
-  }: { commit: Commit, state: platformsState }, searchParams: IPlatformSearchParams) {
+    commit
+  }: { commit: Commit }, searchParams: IPlatformSearchParams) {
     // @ts-ignore
     const platforms = await this.$api.platforms
       .setSearchText(searchParams.searchText)
       .searchAll()
     commit('setPlatforms', platforms)
-
   },
-  async loadPlatform({ commit }: { commit: Commit },{platformId,includeContacts,includePlatformAttachments}:{platformId:number,includeContacts:boolean,includePlatformAttachments:boolean}){
-    const platform = await this.$api.platforms.findById(platformId,{ //TODO Überprüfen, ob man diese Parameter wirklich braucht/ notfalls die payload als Object übergeben lassen
-      includeContacts: includeContacts,
-      includePlatformAttachments: includePlatformAttachments
-    });
-    commit('setPlatform',platform)
+  async loadPlatform ({ commit }: { commit: Commit }, { platformId, includeContacts, includePlatformAttachments }: {platformId: number, includeContacts: boolean, includePlatformAttachments: boolean}) {
+    const platform = await this.$api.platforms.findById(platformId, { // TODO Überprüfen, ob man diese Parameter wirklich braucht/ notfalls die payload als Object übergeben lassen
+      includeContacts,
+      includePlatformAttachments
+    })
+    commit('setPlatform', platform)
   },
-  async loadPlatformContacts({ commit }: { commit: Commit },id:number){
+  async loadPlatformContacts ({ commit }: { commit: Commit }, id: number) {
     const platformContacts = await this.$api.platforms.findRelatedContacts(id)
-    commit('setPlatformContacts',platformContacts)
+    commit('setPlatformContacts', platformContacts)
   },
-  async loadPlatformAttachments({ commit }: { commit: Commit },id:number){
+  async loadPlatformAttachments ({ commit }: { commit: Commit }, id: number) {
     const platformAttachments = await this.$api.platforms.findRelatedPlatformAttachments(id)
-    commit('setPlatformAttachments',platformAttachments)
+    commit('setPlatformAttachments', platformAttachments)
   },
-  async loadPlatformAttachment({ commit }: { commit: Commit },id:number){
+  async loadPlatformAttachment ({ commit }: { commit: Commit }, id: number) {
     const platformAttachment = await this.$api.platformAttachments.findById(id)
-    commit('setPlatformAttachment',platformAttachment)
+    commit('setPlatformAttachment', platformAttachment)
   },
-  async loadAllPlatformActions({dispatch}:{dispatch:Dispatch},id:number){
-    await dispatch('loadPlatformGenericActions',id)
-    await dispatch('loadPlatformSoftwareUpdateActions',id)
-    await dispatch('loadPlatformMountActions',id)
-    await dispatch('loadPlatformUnmountActions',id)
+  async loadAllPlatformActions ({ dispatch }: {dispatch: Dispatch}, id: number) {
+    await dispatch('loadPlatformGenericActions', id)
+    await dispatch('loadPlatformSoftwareUpdateActions', id)
+    await dispatch('loadPlatformMountActions', id)
+    await dispatch('loadPlatformUnmountActions', id)
   },
-  async loadPlatformGenericActions({ commit }: { commit: Commit },id:number){
+  async loadPlatformGenericActions ({ commit }: { commit: Commit }, id: number) {
     const platformGenericActions = await this.$api.platforms.findRelatedGenericActions(id)
-    commit('setPlatformGenericActions',platformGenericActions)
+    commit('setPlatformGenericActions', platformGenericActions)
   },
-  async loadPlatformSoftwareUpdateActions({ commit }: { commit: Commit },id:number){
+  async loadPlatformSoftwareUpdateActions ({ commit }: { commit: Commit }, id: number) {
     const platformSoftwareUpdateActions = await this.$api.platforms.findRelatedSoftwareUpdateActions(id)
-    commit('setPlatformSoftwareUpdateActions',platformSoftwareUpdateActions)
+    commit('setPlatformSoftwareUpdateActions', platformSoftwareUpdateActions)
   },
-  async loadPlatformMountActions({ commit }: { commit: Commit },id:number){
+  async loadPlatformMountActions ({ commit }: { commit: Commit }, id: number) {
     const platformMountActions = await this.$api.platforms.findRelatedMountActions(id)
 
-    const wrappedPlatformMountActions = platformMountActions.map((action:PlatformMountAction)=>{
+    const wrappedPlatformMountActions = platformMountActions.map((action: PlatformMountAction) => {
       return new PlatformMountActionWrapper(action)
     })
 
-    commit('setPlatformMountActions',wrappedPlatformMountActions)
+    commit('setPlatformMountActions', wrappedPlatformMountActions)
   },
-  async loadPlatformUnmountActions({ commit }: { commit: Commit },id:number){
+  async loadPlatformUnmountActions ({ commit }: { commit: Commit }, id: number) {
     const platformUnmountActions = await this.$api.platforms.findRelatedUnmountActions(id)
 
-    const wrappedPlatformUnmountActions = platformUnmountActions.map((action:PlatformUnmountAction)=>{
+    const wrappedPlatformUnmountActions = platformUnmountActions.map((action: PlatformUnmountAction) => {
       return new PlatformUnmountActionWrapper(action)
     })
-    commit('setPlatformUnmountActions',wrappedPlatformUnmountActions)
+    commit('setPlatformUnmountActions', wrappedPlatformUnmountActions)
   },
-  async loadPlatformGenericAction({ commit }: { commit: Commit },actionId:number){
+  async loadPlatformGenericAction ({ commit }: { commit: Commit }, actionId: number) {
     const genericPlatformAction = await this.$api.genericPlatformActions.findById(actionId)
-    commit('setPlatformGenericAction',genericPlatformAction)
+    commit('setPlatformGenericAction', genericPlatformAction)
   },
-  async loadPlatformSoftwareUpdateAction({ commit }: { commit: Commit },actionId:number){
+  async loadPlatformSoftwareUpdateAction ({ commit }: { commit: Commit }, actionId: number) {
     const platformSoftwareUpdateAction = await this.$api.platformSoftwareUpdateActions.findById(actionId)
-    commit('setPlatformSoftwareUpdateAction',platformSoftwareUpdateAction);
+    commit('setPlatformSoftwareUpdateAction', platformSoftwareUpdateAction)
   },
-  async addPlatformContact({ commit }: { commit: Commit },{platformId,contactId}:{platformId:number,contactId:number}):Promise<void>{
+  addPlatformContact ({ _commit }: { _commit: Commit }, { platformId, contactId }: {platformId: number, contactId: number}): Promise<void> {
     return this.$api.platforms.addContact(platformId, contactId)
   },
-  async removePlatformContact({ commit }: { commit: Commit },{platformId,contactId}:{platformId:number,contactId:number}):Promise<void>{
-    return this.$api.platforms.removeContact(platformId, contactId);
+  removePlatformContact ({ _commit }: { _commit: Commit }, { platformId, contactId }: {platformId: number, contactId: number}): Promise<void> {
+    return this.$api.platforms.removeContact(platformId, contactId)
   },
-  async addPlatformAttachment({ commit }: { commit: Commit },{platformId,attachment}:{platformId:number,attachment:Attachment}):Promise<void>{
-    return this.$api.platformAttachments.add(platformId, attachment);
+  addPlatformAttachment ({ _commit }: { _commit: Commit }, { platformId, attachment }: {platformId: number, attachment: Attachment}): Promise<void> {
+    return this.$api.platformAttachments.add(platformId, attachment)
   },
-  async updatePlatformAttachment({ commit }: { commit: Commit },{platformId,attachment}:{platformId:number,attachment:Attachment}):Promise<void>{
-    return this.$api.platformAttachments.update(platformId, attachment);
+  updatePlatformAttachment ({ _commit }: { _commit: Commit }, { platformId, attachment }: {platformId: number, attachment: Attachment}): Promise<void> {
+    return this.$api.platformAttachments.update(platformId, attachment)
   },
-  async deletePlatformAttachment({ commit }: { commit: Commit },attachmentId:number): Promise<void>{
-    return this.$api.platformAttachments.deleteById(attachmentId);
+  deletePlatformAttachment ({ _commit }: { _commit: Commit }, attachmentId: number): Promise<void> {
+    return this.$api.platformAttachments.deleteById(attachmentId)
   },
-  async addPlatformGenericAction({ commit }: { commit: Commit },{platformId,genericPlatformAction}:{platformId:number,genericPlatformAction:GenericAction}): Promise<GenericAction>{
-    return  this.$api.genericPlatformActions.add(platformId, genericPlatformAction)
+  addPlatformGenericAction ({ _commit }: { _commit: Commit }, { platformId, genericPlatformAction }: {platformId: number, genericPlatformAction: GenericAction}): Promise<GenericAction> {
+    return this.$api.genericPlatformActions.add(platformId, genericPlatformAction)
   },
-  async updatePlatformGenericAction({ commit }: { commit: Commit },{platformId,genericPlatformAction}:{platformId:number,genericPlatformAction:GenericAction}):Promise<GenericAction>{
-    return this.$api.genericPlatformActions.update(platformId, genericPlatformAction);
+  updatePlatformGenericAction ({ _commit }: { _commit: Commit }, { platformId, genericPlatformAction }: {platformId: number, genericPlatformAction: GenericAction}): Promise<GenericAction> {
+    return this.$api.genericPlatformActions.update(platformId, genericPlatformAction)
   },
-  async deletePlatformGenericAction({ commit }: { commit: Commit },genericPlatformActionId:number):Promise<void>{
-    return this.$api.genericPlatformActions.deleteById(genericPlatformActionId);
+  deletePlatformGenericAction ({ _commit }: { _commit: Commit }, genericPlatformActionId: number): Promise<void> {
+    return this.$api.genericPlatformActions.deleteById(genericPlatformActionId)
   },
-  addPlatformSoftwareUpdateAction({ commit }: { commit: Commit },{platformId,softwareUpdateAction}:{platformId:number,softwareUpdateAction:SoftwareUpdateAction}):Promise<SoftwareUpdateAction>{
-    return this.$api.platformSoftwareUpdateActions.add(platformId,softwareUpdateAction)
+  addPlatformSoftwareUpdateAction ({ _commit }: { _commit: Commit }, { platformId, softwareUpdateAction }: {platformId: number, softwareUpdateAction: SoftwareUpdateAction}): Promise<SoftwareUpdateAction> {
+    return this.$api.platformSoftwareUpdateActions.add(platformId, softwareUpdateAction)
   },
-  async updatePlatformSoftwareUpdateAction({ commit }: { commit: Commit },{platformId,softwareUpdateAction}:{platformId:number,softwareUpdateAction:SoftwareUpdateAction}):Promise<SoftwareUpdateAction>{
-    return this.$api.platformSoftwareUpdateActions.update(platformId, softwareUpdateAction);
+  updatePlatformSoftwareUpdateAction ({ _commit }: { _commit: Commit }, { platformId, softwareUpdateAction }: {platformId: number, softwareUpdateAction: SoftwareUpdateAction}): Promise<SoftwareUpdateAction> {
+    return this.$api.platformSoftwareUpdateActions.update(platformId, softwareUpdateAction)
   },
-  async deletePlatformSoftwareUpdateAction({ commit }: { commit: Commit },softwareUpdateActionId:number):Promise<void>{
-    return this.$api.platformSoftwareUpdateActions.deleteById(softwareUpdateActionId);
+  deletePlatformSoftwareUpdateAction ({ _commit }: { _commit: Commit }, softwareUpdateActionId: number): Promise<void> {
+    return this.$api.platformSoftwareUpdateActions.deleteById(softwareUpdateActionId)
   },
-  async updatePlatform({ commit }: { commit: Commit }, platform:Platform){
-    commit('setPlatform',platform);
+  updatePlatform ({ commit }: { commit: Commit }, platform: Platform) {
+    commit('setPlatform', platform)
   },
-  async savePlatform({ commit }: { commit: Commit }, platform:Platform):Promise<Platform>{
-    return this.$api.platforms.save(platform);
+  savePlatform ({ _commit }: { _commit: Commit }, platform: Platform): Promise<Platform> {
+    return this.$api.platforms.save(platform)
   },
-  async copyPlatform({commit,dispatch,state}: { commit: Commit, dispatch:Dispatch, state:platformsState },{platform,copyContacts,copyAttachments}:{platform:Platform,copyContacts:boolean,copyAttachments:boolean}){
-    //Todo, prüfen ob man eventuell etwas vereinfachen kann
-    const savedPlatform = await dispatch('savePlatform',platform);
+  async copyPlatform ({ dispatch, state }: { dispatch: Dispatch, state: platformsState }, { platform, copyContacts, copyAttachments }: {platform: Platform, copyContacts: boolean, copyAttachments: boolean}) {
+    // Todo, prüfen ob man eventuell etwas vereinfachen kann
+    const savedPlatform = await dispatch('savePlatform', platform)
     const savedPlatformId = savedPlatform.id!
     const related: Promise<any>[] = []
-    if(copyContacts){
+    if (copyContacts) {
       // hier erstmal die Umsetztung, wie es vorher in pages/platforms/copy/_platformId.vue
       const contacts = platform.contacts
-      await dispatch('loadPlatformContacts',savedPlatformId)
+      await dispatch('loadPlatformContacts', savedPlatformId)
       const contactsToSave = contacts.filter(c => state.platformContacts.findIndex((ec: Contact) => { return ec.id === c.id }) === -1)
 
       for (const contact of contactsToSave) {
         if (contact.id) {
           // related.push(this.$api.platforms.addContact(savedPlatformId, contact.id))
-          related.push(dispatch('addPlatformContact',{platformId:savedPlatformId,contactId:contact.id}))
+          related.push(dispatch('addPlatformContact', { platformId: savedPlatformId, contactId: contact.id }))
         }
       }
     }
-    if(copyAttachments){
+    if (copyAttachments) {
       // hier erstmal die Umsetztung, wie es vorher in pages/platforms/copy/_platformId.vue
       const attachments = platform.attachments.map(Attachment.createFromObject)
       for (const attachment of attachments) {
         attachment.id = null
-        related.push(dispatch('addPlatformAttachment',{platformId:savedPlatformId,attachment:attachment}))
+        related.push(dispatch('addPlatformAttachment', { platformId: savedPlatformId, attachment }))
       }
     }
     await Promise.all(related)
     return savedPlatformId
   },
-  async exportAsCsv({ commit}: { commit: Commit}, searchParams: IPlatformSearchParams):Promise<Blob> {
-    let email = null;
+  async exportAsCsv ({ _commit }: { _commit: Commit}, searchParams: IPlatformSearchParams): Promise<Blob> {
+    let email = null
     if (searchParams.onlyOwnPlatforms) {
       // @ts-ignore
       email = this.$auth.user!.email as string
@@ -253,14 +247,14 @@ const actions = {
       .setSearchedUserMail(email)
       .searchMatchingAsCsvBlob()
   },
-  async deletePlatform({ commit }: { commit: Commit }, id: number){
+  async deletePlatform ({ _commit }: { _commit: Commit }, id: number) {
     await this.$api.platforms.deleteById(id)
   },
   setPageNumber ({ commit }: { commit: Commit }, newPageNumber: number) {
     commit('setPageNumber', newPageNumber)
   },
-  setChosenKindOfPlatformAction({ commit }: { commit: Commit }, newval:IOptionsForActionType | null) {
-    commit('setChosenKindOfPlatformAction',newval)
+  setChosenKindOfPlatformAction ({ commit }: { commit: Commit }, newval: IOptionsForActionType | null) {
+    commit('setChosenKindOfPlatformAction', newval)
   }
 }
 
@@ -277,35 +271,35 @@ const mutations = {
   setTotalPages (state: platformsState, count: number) {
     state.totalPages = count
   },
-  setPlatformContacts(state:platformsState,platformContacts:Contact[]){
-    state.platformContacts=platformContacts
+  setPlatformContacts (state: platformsState, platformContacts: Contact[]) {
+    state.platformContacts = platformContacts
   },
-  setPlatformAttachments(state:platformsState,platformAttachments:Attachment[]){
-    state.platformAttachments=platformAttachments;
+  setPlatformAttachments (state: platformsState, platformAttachments: Attachment[]) {
+    state.platformAttachments = platformAttachments
   },
-  setPlatformAttachment(state:platformsState,platformAttachment:Attachment){
-    state.platformAttachment=platformAttachment
+  setPlatformAttachment (state: platformsState, platformAttachment: Attachment) {
+    state.platformAttachment = platformAttachment
   },
-  setPlatformGenericActions(state:platformsState,platformGenericActions:GenericAction[]){
-    state.platformGenericActions=platformGenericActions
+  setPlatformGenericActions (state: platformsState, platformGenericActions: GenericAction[]) {
+    state.platformGenericActions = platformGenericActions
   },
-  setPlatformSoftwareUpdateActions(state:platformsState,platformSoftwareUpdateActions:SoftwareUpdateAction[]){
-    state.platformSoftwareUpdateActions=platformSoftwareUpdateActions
+  setPlatformSoftwareUpdateActions (state: platformsState, platformSoftwareUpdateActions: SoftwareUpdateAction[]) {
+    state.platformSoftwareUpdateActions = platformSoftwareUpdateActions
   },
-  setPlatformMountActions(state:platformsState,platformMountActions:PlatformMountAction[]){
-    state.platformMountActions=platformMountActions
+  setPlatformMountActions (state: platformsState, platformMountActions: PlatformMountAction[]) {
+    state.platformMountActions = platformMountActions
   },
-  setPlatformUnmountActions(state:platformsState,platformUnmountActions:PlatformUnmountAction[]){
-    state.platformUnmountActions=platformUnmountActions
+  setPlatformUnmountActions (state: platformsState, platformUnmountActions: PlatformUnmountAction[]) {
+    state.platformUnmountActions = platformUnmountActions
   },
-  setChosenKindOfPlatformAction(state:platformsState,newVal:IOptionsForActionType | null){
-    state.chosenKindOfPlatformAction=newVal
+  setChosenKindOfPlatformAction (state: platformsState, newVal: IOptionsForActionType | null) {
+    state.chosenKindOfPlatformAction = newVal
   },
-  setPlatformGenericAction(state:platformsState,action:GenericAction){
-    state.platformGenericAction=action
+  setPlatformGenericAction (state: platformsState, action: GenericAction) {
+    state.platformGenericAction = action
   },
-  setPlatformSoftwareUpdateAction(state:platformsState,action:SoftwareUpdateAction){
-    state.platformSoftwareUpdateAction=action
+  setPlatformSoftwareUpdateAction (state: platformsState, action: SoftwareUpdateAction) {
+    state.platformSoftwareUpdateAction = action
   }
 }
 

@@ -56,16 +56,12 @@ import { DeviceSoftwareUpdateActionSerializer } from '@/serializers/jsonapi/Soft
 import { DeviceMountActionSerializer } from '@/serializers/jsonapi/composed/devices/actions/DeviceMountActionSerializer'
 import { DeviceUnmountActionSerializer } from '@/serializers/jsonapi/composed/devices/actions/DeviceUnmountActionSerializer'
 
-import { IFlaskJSONAPIFilter } from '@/utils/JSONApiInterfaces'
-
-import { IPaginationLoader } from '@/utils/PaginatedLoader'
 import {
   DeviceSerializer,
   deviceWithMetaToDeviceByAddingDummyObjects,
   deviceWithMetaToDeviceThrowingNoErrorOnMissing
 } from '@/serializers/jsonapi/DeviceSerializer'
 import { DeviceCalibrationActionSerializer } from '@/serializers/jsonapi/DeviceCalibrationActionSerializer'
-import { PlatformType } from '@/models/PlatformType'
 
 interface IncludedRelationships {
   includeContacts?: boolean
@@ -149,7 +145,6 @@ export class DeviceApi {
   }
 
   searchPaginated (pageNumber: number, pageSize: number) {
-
     this.prepareSearch()
 
     return this.axiosApi.get(
@@ -170,7 +165,6 @@ export class DeviceApi {
       ).map(deviceWithMetaToDeviceByAddingDummyObjects)
 
       const totalCount = rawData.meta.count
-
 
       return {
         elements,
@@ -198,7 +192,7 @@ export class DeviceApi {
   //   })
   // }
 
-  searchAll(){
+  searchAll () {
     this.prepareSearch()
     return this.axiosApi.get(
       this.basePath,
@@ -218,7 +212,6 @@ export class DeviceApi {
   }
 
   searchMatchingAsCsvBlob (): Promise<Blob> {
-
     this.prepareSearch()
 
     const url = this.basePath
@@ -237,13 +230,14 @@ export class DeviceApi {
     })
   }
 
-  prepareSearch() {
+  prepareSearch () {
     this.resetFilterSetting()
     this.prepareManufacturers()
     this.prepareStates()
     this.prepareTypes()
     this.prepareMail()
-    }
+  }
+
   prepareMail () {
     if (this.searchedUserMail) {
       this.filterSettings.push({
@@ -253,6 +247,7 @@ export class DeviceApi {
       })
     }
   }
+
   resetFilterSetting () {
     this.filterSettings = []
   }

@@ -41,7 +41,7 @@ permissions and limitations under the Licence.
         <v-spacer />
         <SaveAndCancelButtons
           save-btn-text="Add"
-          :to="'/devices/' + this.deviceId + '/measuredquantities'"
+          :to="'/devices/' + deviceId + '/measuredquantities'"
           @save="save"
         />
       </v-card-actions>
@@ -61,7 +61,7 @@ permissions and limitations under the Licence.
         <v-spacer />
         <SaveAndCancelButtons
           save-btn-text="Add"
-          :to="'/devices/' + this.deviceId + '/measuredquantities'"
+          :to="'/devices/' + deviceId + '/measuredquantities'"
           @save="save"
         />
       </v-card-actions>
@@ -71,8 +71,8 @@ permissions and limitations under the Licence.
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
-import { DeviceProperty } from '@/models/DeviceProperty'
 import { mapActions, mapState } from 'vuex'
+import { DeviceProperty } from '@/models/DeviceProperty'
 import DevicePropertyForm from '@/components/DevicePropertyForm.vue'
 import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
@@ -80,10 +80,10 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
 @Component({
   middleware: ['auth'],
   components: { ProgressIndicator, SaveAndCancelButtons, DevicePropertyForm },
-  computed:mapState('vocabulary',['compartments','samplingMedia','properties','units','measuredQuantityUnits']),
-  methods:{
-    ...mapActions('devices',['addDeviceMeasuredQuantity','loadDeviceMeasuredQuantities']),
-    ...mapActions('vocabulary',['loadCompartments','loadSamplingMedia','loadProperties','loadUnits','loadMeasuredQuantityUnits']),
+  computed: mapState('vocabulary', ['compartments', 'samplingMedia', 'properties', 'units', 'measuredQuantityUnits']),
+  methods: {
+    ...mapActions('devices', ['addDeviceMeasuredQuantity', 'loadDeviceMeasuredQuantities']),
+    ...mapActions('vocabulary', ['loadCompartments', 'loadSamplingMedia', 'loadProperties', 'loadUnits', 'loadMeasuredQuantityUnits'])
   }
 })
 export default class DevicePropertyAddPage extends Vue {
@@ -95,9 +95,8 @@ export default class DevicePropertyAddPage extends Vue {
   }
 
   async save (): Promise<void> {
-
     try {
-      this.isSaving=true
+      this.isSaving = true
       await this.addDeviceMeasuredQuantity({
         deviceId: this.deviceId,
         deviceMeasuredQuantity: this.valueCopy
@@ -107,8 +106,8 @@ export default class DevicePropertyAddPage extends Vue {
       this.$router.push('/devices/' + this.deviceId + '/measuredquantities')
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to save measured quantity')
-    }finally {
-      this.isSaving=false
+    } finally {
+      this.isSaving = false
     }
   }
 }

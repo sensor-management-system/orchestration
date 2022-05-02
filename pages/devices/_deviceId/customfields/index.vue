@@ -52,19 +52,19 @@ permissions and limitations under the Licence.
     <BaseList
       :list-items="deviceCustomFields"
     >
-      <template v-slot:list-item="{item}">
-          <DevicesCustomFieldListItem
-            :custom-field="item"
-            :device-id="deviceId"
-          >
-            <template #dot-menu-items>
-              <DotMenuActionDelete
-                :readonly="!$auth.loggedIn"
-                @click="initDeleteDialog(item)"
-              />
-            </template>
-          </DevicesCustomFieldListItem>
-        </template>
+      <template #list-item="{item}">
+        <DevicesCustomFieldListItem
+          :custom-field="item"
+          :device-id="deviceId"
+        >
+          <template #dot-menu-items>
+            <DotMenuActionDelete
+              :readonly="!$auth.loggedIn"
+              @click="initDeleteDialog(item)"
+            />
+          </template>
+        </DevicesCustomFieldListItem>
+      </template>
     </BaseList>
     <v-card-actions
       v-if="deviceCustomFields.length > 3"
@@ -89,8 +89,9 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop } from 'nuxt-property-decorator'
+import { Component, Vue } from 'nuxt-property-decorator'
 
+import { mapActions, mapState } from 'vuex'
 import { CustomTextField } from '@/models/CustomTextField'
 import BaseList from '@/components/shared/BaseList.vue'
 import DevicesCustomFieldListItem from '@/components/devices/DevicesCustomFieldListItem.vue'
@@ -98,18 +99,17 @@ import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 import DevicesCustomFieldDeleteDialog from '@/components/devices/DevicesCustomFieldDeleteDialog.vue'
 import HintCard from '@/components/HintCard.vue'
 
-import { mapActions, mapState } from 'vuex'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
 @Component({
   components: { ProgressIndicator, HintCard, DevicesCustomFieldDeleteDialog, DotMenuActionDelete, DevicesCustomFieldListItem, BaseList },
-  computed:mapState('devices',['deviceCustomFields']),
-  methods:mapActions('devices',['deleteDeviceCustomField','loadDeviceCustomFields'])
+  computed: mapState('devices', ['deviceCustomFields']),
+  methods: mapActions('devices', ['deleteDeviceCustomField', 'loadDeviceCustomFields'])
 })
 export default class DeviceCustomFieldsShowPage extends Vue {
   private isSaving = false
-  private showDeleteDialog=false;
-  private customFieldToDelete:CustomTextField|null=null
+  private showDeleteDialog = false
+  private customFieldToDelete: CustomTextField|null = null
 
   get deviceId (): string {
     return this.$route.params.deviceId

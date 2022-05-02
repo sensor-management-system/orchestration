@@ -42,7 +42,7 @@ permissions and limitations under the Licence.
       label="Action Type"
     />
     <v-card-actions>
-      <v-spacer/>
+      <v-spacer />
       <SaveAndCancelButtons
         save-btn-text="Apply"
         :to="'/platforms/' + platformId + '/actions'"
@@ -58,7 +58,7 @@ permissions and limitations under the Licence.
     />
 
     <v-card-actions>
-      <v-spacer/>
+      <v-spacer />
       <SaveAndCancelButtons
         save-btn-text="Apply"
         :to="'/platforms/' + platformId + '/actions'"
@@ -71,10 +71,10 @@ permissions and limitations under the Licence.
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 
+import { mapActions, mapState } from 'vuex'
 import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
 
 import SoftwareUpdateActionForm from '@/components/actions/SoftwareUpdateActionForm.vue'
-import { mapActions, mapState } from 'vuex'
 import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
@@ -82,7 +82,7 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
   components: {
     ProgressIndicator,
     SaveAndCancelButtons,
-    SoftwareUpdateActionForm,
+    SoftwareUpdateActionForm
   },
   scrollToTop: true,
   middleware: ['auth'],
@@ -102,7 +102,7 @@ export default class PlatformSoftwareUpdateActionEditPage extends Vue {
       this.action = SoftwareUpdateAction.createFromObject(this.platformSoftwareUpdateAction)
     } catch (error) {
       this.$store.commit('snackbar/setError', 'Failed to fetch action')
-    }finally {
+    } finally {
       this.isLoading = false
     }
   }

@@ -184,13 +184,12 @@
                   color="grey lighten-5"
                 >
                   <v-card-text>
-                    <slot name="mount"></slot>
+                    <slot name="mount" />
                   </v-card-text>
                 </v-card>
               </v-expand-transition>
             </v-card>
           </v-container>
-
         </v-card>
       </v-expand-transition>
     </v-card>
@@ -205,10 +204,11 @@ import { Platform } from '@/models/Platform'
 @Component
 export default class PlatformMountListItem extends Vue {
   @Prop({
-    required:true,
+    required: true,
     type: Object
   })
-  private platform!:Platform
+  private platform!: Platform
+
   private show = false
   private showOverview = false
   private showMount = false

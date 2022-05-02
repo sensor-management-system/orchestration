@@ -94,22 +94,22 @@ permissions and limitations under the Licence.
 <script lang="ts">
 import { Vue, Component, Prop } from 'nuxt-property-decorator'
 
+import { mapActions, mapState, mapGetters } from 'vuex'
 import { Configuration } from '@/models/Configuration'
 
 import Validator from '@/utils/validator'
 
 import DateTimePicker from '@/components/DateTimePicker.vue'
-import { mapActions, mapState, mapGetters } from 'vuex'
 
 @Component({
   components: {
     DateTimePicker
   },
-  computed:{
-    ...mapState('configurations',['configurationStates']),
-    ...mapGetters('configurations',['projectNames'])
+  computed: {
+    ...mapState('configurations', ['configurationStates']),
+    ...mapGetters('configurations', ['projectNames'])
   },
-  methods:mapActions('configurations',['loadConfigurationsStates','loadProjects'])
+  methods: mapActions('configurations', ['loadConfigurationsStates', 'loadProjects'])
 })
 export default class ConfigurationsBasicDataForm extends Vue {
   @Prop({ default: false, type: Boolean }) readonly readonly!: boolean
@@ -123,7 +123,7 @@ export default class ConfigurationsBasicDataForm extends Vue {
   readonly LOCATION_TYPE_STATIONARY = 'Stationary'
   readonly LOCATION_TYPE_DYNAMIC = 'Dynamic'
 
-  async created(){
+  async created () {
     await this.loadConfigurationsStates()
     await this.loadProjects()
   }

@@ -102,14 +102,13 @@ permissions and limitations under the Licence.
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 
+import { mapActions, mapState } from 'vuex'
 import PlatformBasicData from '@/components/PlatformBasicData.vue'
 import DotMenu from '@/components/DotMenu.vue'
 import DotMenuActionCopy from '@/components/DotMenuActionCopy.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 import PlatformDeleteDialog from '@/components/platforms/PlatformDeleteDialog.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
-
-import { mapActions, mapState } from 'vuex'
 
 @Component({
   components: {
@@ -120,8 +119,8 @@ import { mapActions, mapState } from 'vuex'
     DotMenu,
     PlatformBasicData
   },
-  computed:mapState('platforms',['platform']),
-  methods:mapActions('platforms',['deletePlatform'])
+  computed: mapState('platforms', ['platform']),
+  methods: mapActions('platforms', ['deletePlatform'])
 })
 export default class PlatformShowBasicPage extends Vue {
   private isSaving = false
@@ -147,14 +146,14 @@ export default class PlatformShowBasicPage extends Vue {
     }
 
     try {
-      this.isSaving=true
+      this.isSaving = true
       await this.deletePlatform(this.platform.id)
       this.$router.push('/platforms')
       this.$store.commit('snackbar/setSuccess', 'Platform deleted')
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Platform could not be deleted')
     } finally {
-      this.isSaving=false
+      this.isSaving = false
     }
   }
 }

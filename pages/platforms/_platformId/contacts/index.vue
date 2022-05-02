@@ -38,7 +38,7 @@ permissions and limitations under the Licence.
       dark
     />
     <v-card-actions>
-      <v-spacer/>
+      <v-spacer />
       <v-btn
         v-if="$auth.loggedIn"
         color="primary"
@@ -55,7 +55,7 @@ permissions and limitations under the Licence.
     <BaseList
       :list-items="platformContacts"
     >
-      <template v-slot:list-item="{item}">
+      <template #list-item="{item}">
         <BaseEntityContactListItem
           :contact="item"
         >
@@ -71,7 +71,7 @@ permissions and limitations under the Licence.
     <v-card-actions
       v-if="platformContacts.length > 3"
     >
-      <v-spacer/>
+      <v-spacer />
       <v-btn
         v-if="$auth.loggedIn"
         color="primary"
@@ -98,10 +98,9 @@ import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 @Component({
   components: { DotMenuActionDelete, BaseEntityContactListItem, BaseList, ProgressIndicator, HintCard },
   computed: mapState('platforms', ['platformContacts']),
-  methods:mapActions('platforms',['removePlatformContact','loadPlatformContacts'])
+  methods: mapActions('platforms', ['removePlatformContact', 'loadPlatformContacts'])
 })
 export default class PlatformShowContactPage extends Vue {
-
   private isSaving = false
 
   get platformId (): string {
@@ -113,10 +112,10 @@ export default class PlatformShowContactPage extends Vue {
       this.isSaving = true
       await this.removePlatformContact({
         platformId: this.platformId,
-        contactId: contactId
+        contactId
       })
       this.$store.commit('snackbar/setSuccess', 'Contact removed')
-      this.loadPlatformContacts(this.platformId);
+      this.loadPlatformContacts(this.platformId)
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Removing contact failed')
     } finally {

@@ -33,9 +33,8 @@ permissions and limitations under the Licence.
     <ProgressIndicator
       v-model="isLoading"
     />
-    <NuxtChild/>
+    <NuxtChild />
   </div>
-
 </template>
 
 <script lang="ts">
@@ -45,18 +44,18 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
 @Component({
   components: { ProgressIndicator },
-  methods:mapActions('devices',['loadDeviceContacts'])
+  methods: mapActions('devices', ['loadDeviceContacts'])
 })
 export default class DeviceContactsPage extends Vue {
   private isLoading = false
 
-  created(){
+  created () {
     try {
       this.isLoading = true
       this.loadDeviceContacts(this.deviceId)
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to fetch contacts')
-    }finally {
+    } finally {
       this.isLoading = false
     }
   }
@@ -65,7 +64,7 @@ export default class DeviceContactsPage extends Vue {
     return this.$route.params.deviceId
   }
 
-    head () {
+  head () {
     return {
       titleTemplate: 'Contacts - %s'
     }

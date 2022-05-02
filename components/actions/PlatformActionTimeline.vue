@@ -41,10 +41,10 @@ permissions and limitations under the Licence.
       class="mb-4"
       small
     >
-      <slot v-if="action.isGenericAction" name="generic-action" :action="action" :index="index"></slot>
-      <slot v-if="action.isSoftwareUpdateAction" name="software-update-action" :action="action" :index="index"></slot>
-      <slot v-if="action.isPlatformMountAction" name="platform-mount-action" :action="action.inner" :index="index"></slot>
-      <slot v-if="action.isPlatformUnmountAction" name="platform-unmount-action" :action="action.inner" :index="index"></slot>
+      <slot v-if="action.isGenericAction" name="generic-action" :action="action" :index="index" />
+      <slot v-if="action.isSoftwareUpdateAction" name="software-update-action" :action="action" :index="index" />
+      <slot v-if="action.isPlatformMountAction" name="platform-mount-action" :action="action.inner" :index="index" />
+      <slot v-if="action.isPlatformUnmountAction" name="platform-unmount-action" :action="action.inner" :index="index" />
     </v-timeline-item>
   </v-timeline>
 </template>
@@ -54,7 +54,7 @@ import { Vue, Component, Prop } from 'nuxt-property-decorator'
 
 import { IActionCommonDetails } from '@/models/ActionCommonDetails'
 import {
-  getActionColor,
+  getActionColor
 } from '@/modelUtils/actionHelpers'
 
 /**

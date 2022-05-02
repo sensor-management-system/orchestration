@@ -42,8 +42,7 @@ permissions and limitations under the Licence.
         >
           <DotMenu>
             <template #actions>
-              <slot name="dot-menu-items">
-              </slot>
+              <slot name="dot-menu-items" />
             </template>
           </DotMenu>
         </v-col>

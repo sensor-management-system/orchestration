@@ -78,23 +78,23 @@ permissions and limitations under the Licence.
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 
+import { mapActions, mapGetters, mapState } from 'vuex'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
 import { Contact } from '@/models/Contact'
-import { mapActions, mapGetters, mapState } from 'vuex'
 
 @Component({
   components: {
     ProgressIndicator
   },
   middleware: ['auth'],
-  computed:{
-    ...mapGetters('contacts',['contactsByDifference']),
-    ...mapState('devices',['deviceContacts'])
+  computed: {
+    ...mapGetters('contacts', ['contactsByDifference']),
+    ...mapState('devices', ['deviceContacts'])
   },
-  methods:{
-    ...mapActions('contacts',['loadAllContacts']),
-    ...mapActions('devices',['loadDeviceContacts','addDeviceContact'])
+  methods: {
+    ...mapActions('contacts', ['loadAllContacts']),
+    ...mapActions('devices', ['loadDeviceContacts', 'addDeviceContact'])
   }
 })
 export default class DeviceAddContactPage extends Vue {
@@ -104,7 +104,7 @@ export default class DeviceAddContactPage extends Vue {
 
   async created () {
     try {
-      this.isLoading=true
+      this.isLoading = true
       await this.loadAllContacts()
       await this.loadDeviceContacts(this.deviceId)
     } catch (e) {
@@ -123,7 +123,7 @@ export default class DeviceAddContactPage extends Vue {
   }
 
   get allExceptSelected (): Contact[] {
-    return this.contactsByDifference(this.deviceContacts);
+    return this.contactsByDifference(this.deviceContacts)
   }
 
   async addContact (): void {
@@ -144,7 +144,5 @@ export default class DeviceAddContactPage extends Vue {
       }
     }
   }
-
-
 }
 </script>

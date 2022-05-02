@@ -35,22 +35,22 @@ permissions and limitations under the Licence.
       v-model="isLoading"
     />
     <v-card flat>
-      <NuxtChild/>
+      <NuxtChild />
     </v-card>
   </div>
 </template>
 
 <script lang="ts">
-import { Component, Vue, Watch } from 'nuxt-property-decorator'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { Component, Vue } from 'nuxt-property-decorator'
 import { mapActions } from 'vuex'
+import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
 @Component({
   components: {
     ProgressIndicator
   },
-  methods:{
-    ...mapActions('configurations',['loadConfiguration']),
+  methods: {
+    ...mapActions('configurations', ['loadConfiguration']),
     ...mapActions('appbar', ['initConfigurationsConfigurationIdAppBar', 'setDefaults'])
   }
 })
@@ -85,7 +85,5 @@ export default class ConfigurationsIdPage extends Vue {
     return this.$route.path === '/configurations/' + this.configurationId ||
       this.$route.path === '/configurations/' + this.configurationId + '/'
   }
-
-
 }
 </script>

@@ -140,7 +140,7 @@ permissions and limitations under the Licence.
         <template v-else>
           {{ configurations.length }} configurations found
         </template>
-        <v-spacer/>
+        <v-spacer />
       </v-subheader>
 
       <v-pagination
@@ -202,6 +202,7 @@ permissions and limitations under the Licence.
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 
+import { mapActions, mapState } from 'vuex'
 import BaseList from '@/components/shared/BaseList.vue'
 import ConfigurationsListItem from '@/components/configurations/ConfigurationsListItem.vue'
 import ConfigurationsDeleteDialog from '@/components/configurations/ConfigurationsDeleteDialog.vue'
@@ -213,7 +214,6 @@ import { Configuration } from '@/models/Configuration'
 import { Project } from '@/models/Project'
 import { ConfigurationSearchParamsSerializer, IConfigurationSearchParams } from '@/modelUtils/ConfigurationSearchParams'
 import { QueryParams } from '@/modelUtils/QueryParams'
-import { mapActions, mapState } from 'vuex'
 @Component({
   components: {
     ProjectSelect,
@@ -223,10 +223,10 @@ import { mapActions, mapState } from 'vuex'
     ConfigurationsListItem,
     BaseList
   },
-  computed: mapState('configurations', ['configurations', 'pageNumber', 'pageSize', 'totalPages', 'configurationStates','projects']),
+  computed: mapState('configurations', ['configurations', 'pageNumber', 'pageSize', 'totalPages', 'configurationStates', 'projects']),
   methods: {
-    ...mapActions('configurations', ['searchConfigurationsPaginated', 'setPageNumber', 'loadConfigurationsStates','loadProjects', 'deleteConfiguration']),
-    ...mapActions('appbar',['initConfigurationsIndexAppBar','setDefaults'])
+    ...mapActions('configurations', ['searchConfigurationsPaginated', 'setPageNumber', 'loadConfigurationsStates', 'loadProjects', 'deleteConfiguration']),
+    ...mapActions('appbar', ['initConfigurationsIndexAppBar', 'setDefaults'])
 
   }
 })
@@ -251,7 +251,7 @@ export default class SearchConfigurationsPage extends Vue {
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Loading of configurations failed')
     } finally {
-      this.loading=false
+      this.loading = false
     }
   }
 
@@ -261,11 +261,11 @@ export default class SearchConfigurationsPage extends Vue {
 
   get page () {
     return this.pageNumber
-    this.setPageInUrl()
   }
 
   set page (newVal) {
     this.setPageNumber(newVal)
+    this.setPageInUrl(false)
   }
 
   get activeTab (): number | null {
@@ -301,7 +301,7 @@ export default class SearchConfigurationsPage extends Vue {
     this.selectedSearchStates = []
     this.selectedSearchPlatformTypes = []
     this.onlyOwnPlatforms = false
-    this.page = 1//Important to set page to one otherwise it's possible that you don't anything
+    this.page = 1// Important to set page to one otherwise it's possible that you don't anything
     this.runSearch()
   }
 
@@ -311,7 +311,7 @@ export default class SearchConfigurationsPage extends Vue {
   }
 
   extendedSearch (): Promise<void> {
-    this.page = 1//Important to set page to one otherwise it's possible that you don't anything
+    this.page = 1// Important to set page to one otherwise it's possible that you don't anything
     this.runSearch()
   }
 
@@ -352,7 +352,7 @@ export default class SearchConfigurationsPage extends Vue {
     }
     try {
       this.loading = true
-      this.deleteConfiguration(this.configurationToDelete.id)
+      await this.deleteConfiguration(this.configurationToDelete.id)
       this.runSearch()
       this.$store.commit('snackbar/setSuccess', 'Configuration deleted')
     } catch {
@@ -366,7 +366,7 @@ export default class SearchConfigurationsPage extends Vue {
   initSearchQueryParams (): void {
     const searchParamsObject = (new ConfigurationSearchParamsSerializer({
       states: this.configurationStates,
-      projects: this.projects,
+      projects: this.projects
     })).toSearchParams(this.$route.query)
 
     // prefill the form by the serialized search params from the URL
@@ -392,8 +392,9 @@ export default class SearchConfigurationsPage extends Vue {
     if ('page' in this.$route.query && typeof this.$route.query.page === 'string') {
       return parseInt(this.$route.query.page) || 1
     }
-    return 1;
+    return 1
   }
+
   setPageInUrl (preserveHash: boolean = true): void {
     let query: QueryParams = {}
     if (this.page) {

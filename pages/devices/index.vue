@@ -204,7 +204,7 @@ permissions and limitations under the Licence.
       <BaseList
         :list-items="devices"
       >
-        <template v-slot:list-item="{item}">
+        <template #list-item="{item}">
           <DevicesListItem
             :key="item.id"
             :device="item"
@@ -221,7 +221,6 @@ permissions and limitations under the Licence.
             </template>
           </DevicesListItem>
         </template>
-
       </BaseList>
       <v-pagination
         v-model="page"
@@ -261,12 +260,12 @@ import { Component, Vue } from 'nuxt-property-decorator'
 
 import { saveAs } from 'file-saver'
 
+import { mapActions, mapState } from 'vuex'
 import DeviceTypeSelect from '@/components/DeviceTypeSelect.vue'
 import ManufacturerSelect from '@/components/ManufacturerSelect.vue'
 import StatusSelect from '@/components/StatusSelect.vue'
 import StatusBadge from '@/components/StatusBadge.vue'
 import DeviceDeleteDialog from '@/components/devices/DeviceDeleteDialog.vue'
-import DotMenu from '@/components/DotMenu.vue'
 import DotMenuActionCopy from '@/components/DotMenuActionCopy.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 import BaseList from '@/components/shared/BaseList.vue'
@@ -280,9 +279,6 @@ import { Status } from '@/models/Status'
 import { QueryParams } from '@/modelUtils/QueryParams'
 import { DeviceSearchParamsSerializer } from '@/modelUtils/DeviceSearchParams'
 
-
-import { mapActions, mapState } from 'vuex'
-
 @Component({
   components: {
     DevicesListItem,
@@ -295,14 +291,14 @@ import { mapActions, mapState } from 'vuex'
     StatusBadge,
     StatusSelect
   },
-  computed:{
-    ...mapState('vocabulary',['devicetypes','manufacturers','equipmentstatus']),
-    ...mapState('devices',['devices','pageNumber','pageSize','totalPages'])
+  computed: {
+    ...mapState('vocabulary', ['devicetypes', 'manufacturers', 'equipmentstatus']),
+    ...mapState('devices', ['devices', 'pageNumber', 'pageSize', 'totalPages'])
   },
-  methods:{
-    ...mapActions('vocabulary',['loadEquipmentstatus','loadDevicetypes','loadManufacturers']),
-    ...mapActions('devices',['searchDevicesPaginated','setPageNumber','exportAsCsv','deleteDevice']),
-    ...mapActions('appbar',['initDevicesIndexAppBar','setDefaults'])
+  methods: {
+    ...mapActions('vocabulary', ['loadEquipmentstatus', 'loadDevicetypes', 'loadManufacturers']),
+    ...mapActions('devices', ['searchDevicesPaginated', 'setPageNumber', 'exportAsCsv', 'deleteDevice']),
+    ...mapActions('appbar', ['initDevicesIndexAppBar', 'setDefaults'])
   }
 })
 export default class SearchDevicesPage extends Vue {
@@ -330,7 +326,7 @@ export default class SearchDevicesPage extends Vue {
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Loading of devices failed')
     } finally {
-      this.loading=false
+      this.loading = false
     }
   }
 
@@ -338,13 +334,13 @@ export default class SearchDevicesPage extends Vue {
     this.setDefaults()
   }
 
-  get page(){
-    return this.pageNumber;
+  get page () {
+    return this.pageNumber
   }
 
-  set page(newVal){
-    this.setPageNumber(newVal);
-    this.setPageInUrl()
+  set page (newVal) {
+    this.setPageNumber(newVal)
+    this.setPageInUrl(false)
   }
 
   get activeTab (): number | null {
@@ -355,7 +351,7 @@ export default class SearchDevicesPage extends Vue {
     this.$store.commit('appbar/setActiveTab', tab)
   }
 
-  get searchParams(){
+  get searchParams () {
     return {
       searchText: this.searchText,
       manufacturer: this.selectedSearchManufacturers,
@@ -380,12 +376,12 @@ export default class SearchDevicesPage extends Vue {
     await this.runSearch()
   }
 
-  basicSearch (){
-    this.selectedSearchManufacturers= []
-    this.selectedSearchStates= []
-    this.selectedSearchDeviceTypes= []
-    this.onlyOwnDevices= false
-    this.page = 1//Important to set page to one otherwise it's possible that you don't anything
+  basicSearch () {
+    this.selectedSearchManufacturers = []
+    this.selectedSearchStates = []
+    this.selectedSearchDeviceTypes = []
+    this.onlyOwnDevices = false
+    this.page = 1// Important to set page to one otherwise it's possible that you don't anything
     this.runSearch()
   }
 
@@ -395,7 +391,7 @@ export default class SearchDevicesPage extends Vue {
   }
 
   extendedSearch () {
-    this.page = 1//Important to set page to one otherwise it's possible that you don't anything
+    this.page = 1// Important to set page to one otherwise it's possible that you don't anything
     this.runSearch()
   }
 
@@ -411,7 +407,7 @@ export default class SearchDevicesPage extends Vue {
 
   async runSearch (): Promise<void> {
     try {
-      this.loading=true
+      this.loading = true
       this.initUrlQueryParams()
       await this.searchDevicesPaginated(this.searchParams)
       this.setPageInUrl()
@@ -423,13 +419,13 @@ export default class SearchDevicesPage extends Vue {
   }
 
   exportCsv () {
-    if(this.devices.length>0){
-      this.processing=true
+    if (this.devices.length > 0) {
+      this.processing = true
       this.exportAsCsv(this.searchParams).then((blob) => {
         saveAs(blob, 'devices.csv')
       }).catch((_err) => {
         this.$store.commit('snackbar/setError', 'CSV export failed')
-      }).finally(()=>{
+      }).finally(() => {
         this.processing = false
       })
     }
@@ -501,7 +497,7 @@ export default class SearchDevicesPage extends Vue {
     return 1
   }
 
-  setPageInUrl (page: number, preserveHash: boolean = true): void {
+  setPageInUrl (preserveHash: boolean = true): void {
     let query: QueryParams = {}
     if (this.page) {
       // add page to the current url params

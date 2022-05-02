@@ -11,21 +11,21 @@
         <v-spacer />
         <SaveAndCancelButtons
           save-btn-text="Add"
-          :to="'/devices/' + this.deviceId + '/customfields'"
+          :to="'/devices/' + deviceId + '/customfields'"
           @save="save"
         />
       </v-card-actions>
       <v-card-text>
-            <CustomFieldForm
-              v-model="customField"
-              :readonly="false"
-            />
+        <CustomFieldForm
+          v-model="customField"
+          :readonly="false"
+        />
       </v-card-text>
       <v-card-actions>
         <v-spacer />
         <SaveAndCancelButtons
           save-btn-text="Add"
-          :to="'/devices/' + this.deviceId + '/customfields'"
+          :to="'/devices/' + deviceId + '/customfields'"
           @save="save"
         />
       </v-card-actions>
@@ -35,31 +35,30 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
+import { mapActions } from 'vuex'
 import CustomFieldForm from '@/components/CustomFieldForm.vue'
 import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
 
 import { CustomTextField } from '@/models/CustomTextField'
-import { mapActions } from 'vuex'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
 @Component({
   middleware: ['auth'],
   components: { ProgressIndicator, SaveAndCancelButtons, CustomFieldForm },
-  methods:mapActions('devices',['addDeviceCustomField','loadDeviceCustomFields'])
+  methods: mapActions('devices', ['addDeviceCustomField', 'loadDeviceCustomFields'])
 })
 export default class DeviceCustomFieldAddPage extends Vue {
   private isSaving = false
 
-  private customField:CustomTextField = new CustomTextField()
+  private customField: CustomTextField = new CustomTextField()
 
   get deviceId (): string {
     return this.$route.params.deviceId
   }
 
   async save (): Promise<void> {
-
     try {
-      this.isSaving=true
+      this.isSaving = true
 
       await this.addDeviceCustomField({
         deviceId: this.deviceId,
@@ -70,8 +69,8 @@ export default class DeviceCustomFieldAddPage extends Vue {
       this.$router.push('/devices/' + this.deviceId + '/customfields')
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to save custom field')
-    }finally {
-      this.isSaving=false
+    } finally {
+      this.isSaving = false
     }
   }
 }

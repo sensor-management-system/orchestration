@@ -27,8 +27,7 @@
           >
             <DotMenu>
               <template #actions>
-                <slot name="dot-menu-items">
-                </slot>
+                <slot name="dot-menu-items" />
               </template>
             </DotMenu>
           </v-col>
@@ -199,26 +198,25 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
-import { Device } from '@/models/Device'
 import { Prop } from 'nuxt-property-decorator'
-import { PlatformType } from '@/models/PlatformType'
-import { Platform } from '@/models/Platform'
-import { Status } from '@/models/Status'
 import { mapGetters } from 'vuex'
+import { Device } from '@/models/Device'
+import { Status } from '@/models/Status'
 import { DeviceType } from '@/models/DeviceType'
 import DotMenu from '@/components/DotMenu.vue'
 import StatusBadge from '@/components/StatusBadge.vue'
 
 @Component({
   components: { StatusBadge, DotMenu },
-  computed: mapGetters('vocabulary',['getDeviceTypeByUri','getEquipmentstatusByUri'])
+  computed: mapGetters('vocabulary', ['getDeviceTypeByUri', 'getEquipmentstatusByUri'])
 })
 export default class DevicesListItem extends Vue {
   @Prop({
-    required:true,
+    required: true,
     type: Object
   })
-  private device!:Device
+  private device!: Device
+
   private show = false
   public readonly NO_TYPE: string = 'Unknown type'
 
@@ -229,8 +227,8 @@ export default class DevicesListItem extends Vue {
       return this.device.deviceTypeName
     }
 
-    if(this.getDeviceTypeByUri(this.device.deviceTypeUri)){
-      const deviceType:DeviceType = this.getDeviceTypeByUri(this.device.deviceTypeUri)
+    if (this.getDeviceTypeByUri(this.device.deviceTypeUri)) {
+      const deviceType: DeviceType = this.getDeviceTypeByUri(this.device.deviceTypeUri)
       return deviceType.name
     }
     return this.NO_TYPE
@@ -241,7 +239,7 @@ export default class DevicesListItem extends Vue {
       return this.device.statusName
     }
     if (this.getEquipmentstatusByUri(this.device.statusUri)) {
-      const deviceStatus:Status = this.getEquipmentstatusByUri(this.device.statusUri)
+      const deviceStatus: Status = this.getEquipmentstatusByUri(this.device.statusUri)
       return deviceStatus.name
     }
     return ''

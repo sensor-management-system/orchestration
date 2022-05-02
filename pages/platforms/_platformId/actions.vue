@@ -37,7 +37,7 @@ permissions and limitations under the Licence.
     <ProgressIndicator
       v-model="isLoading"
     />
-    <NuxtChild/>
+    <NuxtChild />
   </div>
 </template>
 
@@ -48,19 +48,19 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
 @Component({
   components: { ProgressIndicator },
-  methods:mapActions('platforms',['loadAllPlatformActions'])
+  methods: mapActions('platforms', ['loadAllPlatformActions'])
 })
 export default class PlatformActionsPage extends Vue {
   private isLoading = false
 
-  async created(){
+  async created () {
     try {
-      this.isLoading=true
+      this.isLoading = true
       await this.loadAllPlatformActions(this.platformId)
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to fetch actions')
     } finally {
-      this.isLoading=false
+      this.isLoading = false
     }
   }
 
