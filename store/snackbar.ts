@@ -34,14 +34,14 @@ export interface ISnackbarStore {
   success: string
 }
 
-export const state = () => {
+const state = () => {
   return {
     error: '',
     success: ''
   }
 }
 
-export const mutations = {
+const mutations = {
   setError (state: ISnackbarStore, error: string) {
     state.error = error
   },
@@ -54,4 +54,10 @@ export const mutations = {
   clearSuccess (state: ISnackbarStore) {
     state.success = ''
   }
+}
+
+export default {
+  namespaced: true,
+  state,
+  mutations
 }

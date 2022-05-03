@@ -46,7 +46,7 @@ interface contactsState {
   totalPages: number
 }
 
-export const state = () => ({
+const state = () => ({
   contacts: [],
   contact: null,
   configurationContacts: [],
@@ -54,7 +54,8 @@ export const state = () => ({
   pageNumber: 1,
   pageSize: 20
 })
-export const getters = {
+
+const getters = {
   searchContacts: (state: contactsState) => {
     return state.contacts.filter((c: Contact) => !state.configurationContacts.find((rc: Contact) => rc.id === c.id))
   },
@@ -68,7 +69,7 @@ export const getters = {
 }
 
 // @ts-ignore
-export const actions: {
+const actions: {
   [key: string]: any;
   $api: Api
 } = {
@@ -126,7 +127,8 @@ export const actions: {
     return this.$api.contacts.save(contact)
   }
 }
-export const mutations = {
+
+const mutations = {
   setContacts (state: contactsState, contacts: Contact[]) {
     state.contacts = contacts
   },
@@ -142,4 +144,12 @@ export const mutations = {
   setTotalPages (state: contactsState, count: number) {
     state.totalPages = count
   }
+}
+
+export default {
+  namespaced: true,
+  state,
+  getters,
+  actions,
+  mutations
 }

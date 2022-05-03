@@ -47,7 +47,7 @@ export interface IAppbarStore {
  *
  * @return {IAppbarStore} the state object
  */
-export const state = (): IAppbarStore => {
+const state = (): IAppbarStore => {
   return {
     activeTab: null,
     cancelBtnDisabled: false,
@@ -59,7 +59,7 @@ export const state = (): IAppbarStore => {
   }
 }
 
-export const mutations = {
+const mutations = {
   /**
    * Sets the title of the AppBar
    *
@@ -141,7 +141,7 @@ type StoreContext = {
   dispatch: (action: string, payload: any) => void
 }
 
-export const actions = {
+const actions = {
   /**
    * initializes the Appbar
    *
@@ -451,4 +451,11 @@ export const actions = {
   setDefaults (context: StoreContext): void {
     context.dispatch('init', state())
   }
+}
+
+export default {
+  namespaced: true,
+  state,
+  actions,
+  mutations
 }
