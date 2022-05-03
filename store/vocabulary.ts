@@ -42,6 +42,7 @@ import { SamplingMedia } from '@/models/SamplingMedia'
 import { Property } from '@/models/Property'
 import { Unit } from '@/models/Unit'
 import { MeasuredQuantityUnit } from '@/models/MeasuredQuantityUnit'
+import { Api } from '@/services/Api'
 
 const KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE = 'software_update'
 const KIND_OF_ACTION_TYPE_GENERIC_PLATFORM_ACTION = 'generic_platform_action'
@@ -140,8 +141,11 @@ const getters = {
     ].sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()))
   }
 }
-
-const actions = {
+// @ts-ignore
+const actions: {
+  [key: string]: any;
+  $api: Api
+} = {
   async loadManufacturers ({ commit }: { commit: Commit }) {
     // @ts-ignore
     commit('setManufacturers', await this.$api.manufacturer.findAll())

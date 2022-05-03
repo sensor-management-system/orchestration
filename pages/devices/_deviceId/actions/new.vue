@@ -81,11 +81,11 @@ export default class ActionAddPage extends Vue {
   private isLoading: boolean = false
 
   // vuex definition for typescript check
-  loadDeviceGenericActionTypes!:()=>void
-  loadDeviceAttachments!: (id:string)=>void
-  loadDeviceMeasuredQuantities!:(id:string)=>void
-  chosenKindOfDeviceAction!:IOptionsForActionType | null
-  setChosenKindOfDeviceAction!:(newval: IOptionsForActionType | null)=>void
+  loadDeviceGenericActionTypes!: () => void
+  loadDeviceAttachments!: (id: string) => void
+  loadDeviceMeasuredQuantities!: (id: string) => void
+  chosenKindOfDeviceAction!: IOptionsForActionType | null
+  setChosenKindOfDeviceAction!: (newval: IOptionsForActionType | null) => void
 
   async created () {
     try {

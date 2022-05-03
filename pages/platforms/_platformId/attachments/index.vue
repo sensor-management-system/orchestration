@@ -115,8 +115,8 @@ export default class PlatformAttachmentShowPage extends Vue {
   private attachmentToDelete: Attachment|null = null
 
   // vuex definition for typescript check
-  loadPlatformAttachments!:(id:string)=>void
-  deletePlatformAttachment!:(attachmentId: string)=>Promise<void>
+  loadPlatformAttachments!: (id: string) => void
+  deletePlatformAttachment!: (attachmentId: string) => Promise<void>
 
   get platformId (): string {
     return this.$route.params.platformId

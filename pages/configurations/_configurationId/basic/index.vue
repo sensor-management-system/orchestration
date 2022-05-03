@@ -120,8 +120,8 @@ export default class ConfigurationShowBasicPage extends Vue {
   private showDeleteDialog: boolean = false
 
   // vuex definition for typescript check
-  configuration!:IConfiguration
-  deleteConfiguration!:(id: string)=>void
+  configuration!: IConfiguration
+  deleteConfiguration!: (id: string) => void
 
   get configurationId () {
     return this.$route.params.configurationId

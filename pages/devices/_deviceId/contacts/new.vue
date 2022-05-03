@@ -103,14 +103,14 @@ export default class DeviceAddContactPage extends Vue {
   private isSaving: boolean = false
 
   // vuex definition for typescript check
-  loadDeviceContacts!:(id:string) => void
-  loadAllContacts!:()=>void
-  contactsByDifference!:(contactsToSubtract: Contact[])=>Contact[]
-  deviceContacts!:Contact[]
-  addDeviceContact!:({
+  loadDeviceContacts!: (id: string) => void
+  loadAllContacts!: () => void
+  contactsByDifference!: (contactsToSubtract: Contact[]) => Contact[]
+  deviceContacts!: Contact[]
+  addDeviceContact!: ({
     deviceId,
     contactId
-  }: { deviceId: string, contactId: string })=> Promise<void>
+  }: { deviceId: string, contactId: string }) => Promise<void>
 
   async created () {
     try {

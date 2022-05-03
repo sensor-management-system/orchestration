@@ -124,8 +124,8 @@ export default class ConfigurationsBasicDataForm extends Vue {
   readonly LOCATION_TYPE_DYNAMIC = 'Dynamic'
 
   // vuex definition for typescript check
-  loadConfigurationsStates!: ()=> void;
-  loadProjects!: ()=> void;
+  loadConfigurationsStates!: () => void
+  loadProjects!: () => void
 
   async created () {
     await this.loadConfigurationsStates()

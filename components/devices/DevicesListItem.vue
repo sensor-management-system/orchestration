@@ -252,8 +252,8 @@ export default class DevicesListItem extends Vue {
   public readonly NO_TYPE: string = 'Unknown type'
 
   // vuex definition for typescript check
-  getDeviceTypeByUri!: (uri: string)=> DeviceType | undefined;
-  getEquipmentstatusByUri!: (uri: string)=> Status | undefined;
+  getDeviceTypeByUri!: (uri: string) => DeviceType | undefined
+  getEquipmentstatusByUri!: (uri: string) => Status | undefined
 
   getTextOrDefault = (text: string): string => text || '-'
 

@@ -126,7 +126,7 @@ export default class ConfigurationShowPlatformsAndDevicesPage extends Vue {
   private selectedDate = DateTime.utc()
 
   // vuex definition for typescript check
-  configuration!:Configuration
+  configuration!: Configuration
 
   get configurationId (): string {
     return this.$route.params.configurationId

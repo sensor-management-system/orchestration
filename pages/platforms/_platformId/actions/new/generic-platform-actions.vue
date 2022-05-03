@@ -81,9 +81,9 @@ export default class NewGenericPlatformAction extends Vue {
   private isSaving: boolean = false
 
   // vuex definition for typescript check
-  chosenKindOfPlatformAction!:IOptionsForActionType | null
-  addPlatformGenericAction!:({ platformId, genericPlatformAction }: {platformId: string, genericPlatformAction: GenericAction})=> Promise<GenericAction>
-  loadAllPlatformActions!:(id:string)=>void
+  chosenKindOfPlatformAction!: IOptionsForActionType | null
+  addPlatformGenericAction!: ({ platformId, genericPlatformAction }: {platformId: string, genericPlatformAction: GenericAction}) => Promise<GenericAction>
+  loadAllPlatformActions!: (id: string) => void
 
   created () {
     if (this.chosenKindOfPlatformAction === null) {

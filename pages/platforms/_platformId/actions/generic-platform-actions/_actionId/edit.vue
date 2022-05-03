@@ -99,12 +99,11 @@ export default class EditPlatformAction extends Vue {
   private isLoading = false
 
   // vuex definition for typescript check
-  loadAllPlatformActions!:(id:string)=>void
-  loadPlatformGenericAction!:(actionId: string)=>void
-  loadPlatformAttachments!:(id: string)=>void
-  platformGenericAction!:GenericAction
-  updatePlatformGenericAction!:({ platformId, genericPlatformAction }: {platformId: string, genericPlatformAction: GenericAction})=> Promise<GenericAction>
-
+  loadAllPlatformActions!: (id: string) => void
+  loadPlatformGenericAction!: (actionId: string) => void
+  loadPlatformAttachments!: (id: string) => void
+  platformGenericAction!: GenericAction
+  updatePlatformGenericAction!: ({ platformId, genericPlatformAction }: {platformId: string, genericPlatformAction: GenericAction}) => Promise<GenericAction>
 
   async created () {
     try {

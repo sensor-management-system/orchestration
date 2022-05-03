@@ -51,7 +51,7 @@ export default class PlatformAttachmentsPage extends Vue {
   private isLoading = false
 
   // vuex definition for typescript check
-  loadPlatformAttachments!:(id:string)=>void
+  loadPlatformAttachments!: (id: string) => void
 
   async created () {
     try {

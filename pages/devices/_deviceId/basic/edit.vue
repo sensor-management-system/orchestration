@@ -82,16 +82,16 @@ export default class DeviceEditBasicPage extends Vue {
   private isSaving: boolean = false
 
   // vuex definition for typescript check
-  device!:Device
-  saveDevice!:(device: Device)=> Promise<Device>
-  loadDevice!:(  {
+  device!: Device
+  saveDevice!: (device: Device) => Promise<Device>
+  loadDevice!: ({
     deviceId,
     includeContacts,
     includeCustomFields,
     includeDeviceProperties,
     includeDeviceAttachments
   }:
-    { deviceId: string, includeContacts: boolean, includeCustomFields: boolean, includeDeviceProperties: boolean, includeDeviceAttachments: boolean })=>void
+    { deviceId: string, includeContacts: boolean, includeCustomFields: boolean, includeDeviceProperties: boolean, includeDeviceAttachments: boolean }) => void
 
   created () {
     this.deviceCopy = Device.createFromObject(this.device)

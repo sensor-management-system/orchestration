@@ -86,9 +86,9 @@ export default class ConfigurationEditBasicPage extends Vue {
   private isLoading: boolean = false
 
   // vuex definition for typescript check
-  configuration!:IConfiguration
-  saveConfiguration!:(configuration: Configuration)=>void
-  loadConfiguration!:(id:string)=>void
+  configuration!: IConfiguration
+  saveConfiguration!: (configuration: Configuration) => void
+  loadConfiguration!: (id: string) => void
 
   created () {
     this.configurationCopy = Configuration.createFromObject(this.configuration)

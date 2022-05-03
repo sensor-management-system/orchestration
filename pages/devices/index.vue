@@ -260,7 +260,7 @@ import { Component, Vue } from 'nuxt-property-decorator'
 
 import { saveAs } from 'file-saver'
 
-import { Commit, mapActions, mapState } from 'vuex'
+import { mapActions, mapState } from 'vuex'
 import DeviceTypeSelect from '@/components/DeviceTypeSelect.vue'
 import ManufacturerSelect from '@/components/ManufacturerSelect.vue'
 import StatusSelect from '@/components/StatusSelect.vue'
@@ -315,20 +315,20 @@ export default class SearchDevicesPage extends Vue {
   private deviceToDelete: Device | null = null
 
   // vuex definition for typescript check
-  initDevicesIndexAppBar!:()=>void
-  setDefaults!:()=>void
-  loadEquipmentstatus!:()=>void
-  loadDevicetypes!:()=>void
-  loadManufacturers!:()=>void
-  pageNumber!:number
-  setPageNumber!:(newPageNumber: number)=>void
-  searchDevicesPaginated!:( searchParams: IDeviceSearchParams)=>void
-  devices!:Device[]
-  exportAsCsv!:(searchParams: IDeviceSearchParams)=>Promise<Blob>
-  deleteDevice!:(id:string)=>void
-  equipmentstatus!:Status[]
-  devicetypes!:  DeviceType[]
-  manufacturers!:  Manufacturer[]
+  initDevicesIndexAppBar!: () => void
+  setDefaults!: () => void
+  loadEquipmentstatus!: () => void
+  loadDevicetypes!: () => void
+  loadManufacturers!: () => void
+  pageNumber!: number
+  setPageNumber!: (newPageNumber: number) => void
+  searchDevicesPaginated!: (searchParams: IDeviceSearchParams) => void
+  devices!: Device[]
+  exportAsCsv!: (searchParams: IDeviceSearchParams) => Promise<Blob>
+  deleteDevice!: (id: string) => void
+  equipmentstatus!: Status[]
+  devicetypes!: DeviceType[]
+  manufacturers!: Manufacturer[]
 
   async created () {
     try {
@@ -445,8 +445,8 @@ export default class SearchDevicesPage extends Vue {
       } finally {
         this.processing = false
       }
-     }
-   }
+    }
+  }
 
   initDeleteDialog (device: Device) {
     this.showDeleteDialog = true

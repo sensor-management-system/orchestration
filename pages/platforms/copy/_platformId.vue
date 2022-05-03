@@ -119,7 +119,7 @@ permissions and limitations under the Licence.
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 
-import { Dispatch, mapActions, mapState } from 'vuex'
+import { mapActions, mapState } from 'vuex'
 import { Platform } from '@/models/Platform'
 
 import PlatformBasicDataForm from '@/components/PlatformBasicDataForm.vue'
@@ -153,13 +153,13 @@ export default class PlatformCopyPage extends Vue {
   private inventoryNumberPlaceholder: string | null = null
 
   // vuex definition for typescript check
-  platform!:Platform
-  initPlatformCopyAppBar!:(id: string)=>void
-  setDefaults!:()=>void
-  loadPlatform!:({ platformId, includeContacts, includePlatformAttachments }: {platformId: string, includeContacts: boolean, includePlatformAttachments: boolean})=>void
-  copyPlatform!:( { platform, copyContacts, copyAttachments }: {platform: Platform, copyContacts: boolean, copyAttachments: boolean})=>string
+  platform!: Platform
+  initPlatformCopyAppBar!: (id: string) => void
+  setDefaults!: () => void
+  loadPlatform!: ({ platformId, includeContacts, includePlatformAttachments }: {platformId: string, includeContacts: boolean, includePlatformAttachments: boolean}) => void
+  copyPlatform!: ({ platform, copyContacts, copyAttachments }: {platform: Platform, copyContacts: boolean, copyAttachments: boolean}) => string
 
-    async created () {
+  async created () {
     this.initPlatformCopyAppBar(this.platformId)
     // We also load the contacts and the measured quantities as those
     // are the ones that we will also copy.

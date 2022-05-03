@@ -54,7 +54,7 @@ export default class PlatformActionsPage extends Vue {
   private isLoading = false
 
   // vuex definition for typescript check
-  loadAllPlatformActions!:(id:string)=>void
+  loadAllPlatformActions!: (id: string) => void
 
   async created () {
     try {

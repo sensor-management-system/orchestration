@@ -144,13 +144,13 @@ export default class DeviceAttachmentAddPage extends mixins(Rules, UploadRules) 
   private isSaving: boolean = false
 
   // vuex definition for typescript check
-  uploadFile!:(file: File)=> Promise<IUploadResult>
-  addDeviceAttachment!:( {
+  uploadFile!: (file: File) => Promise<IUploadResult>
+  addDeviceAttachment!: ({
     deviceId,
     attachment
-  }: { deviceId: string, attachment: Attachment })=> Promise<void>
-  loadDeviceAttachments!:(id:string)=>void
+  }: { deviceId: string, attachment: Attachment }) => Promise<void>
 
+  loadDeviceAttachments!: (id: string) => void
 
   /**
    * returns a list of MimeTypes, seperated by ,

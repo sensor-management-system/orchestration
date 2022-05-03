@@ -77,8 +77,8 @@ interface devicesState {
   deviceGenericAction: GenericAction | null,
   deviceSoftwareUpdateAction: SoftwareUpdateAction | null,
   deviceCalibrationAction: DeviceCalibrationAction | null,
-  deviceMountActions: DeviceMountAction[],
-  deviceUnmountActions: DeviceUnmountAction[],
+  deviceMountActions: DeviceMountActionWrapper[],
+  deviceUnmountActions: DeviceUnmountActionWrapper[],
   chosenKindOfDeviceAction: IOptionsForActionType | null,
   deviceCustomFields: CustomTextField[],
   deviceCustomField: CustomTextField|null
@@ -121,9 +121,8 @@ const getters = {
       ...state.deviceCalibrationActions
     ]
     // sort the actions
-    actions = actions.sort((a:IDateCompareable, b:IDateCompareable): number => {
-      if(a.date === null) return 0
-      if(b.date === null) return 0
+    actions = actions.sort((a: IDateCompareable, b: IDateCompareable): number => {
+      if (a.date === null || b.date === null) { return 0 }
       return a.date < b.date ? 1 : a.date > b.date ? -1 : 0
     })
     return actions
@@ -131,9 +130,9 @@ const getters = {
 }
 
 // @ts-ignore
-const actions:{
-  [key:string]: any;
-  $api:Api
+const actions: {
+  [key: string]: any;
+  $api: Api
 } = {
   async searchDevicesPaginated ({
     commit,
@@ -482,10 +481,10 @@ const mutations = {
   setDeviceSoftwareUpdateAction (state: devicesState, deviceSoftwareUpdateAction: SoftwareUpdateAction) {
     state.deviceSoftwareUpdateAction = deviceSoftwareUpdateAction
   },
-  setDeviceMountActions (state: devicesState, deviceMountActions: DeviceMountAction[]) {
+  setDeviceMountActions (state: devicesState, deviceMountActions: DeviceMountActionWrapper[]) {
     state.deviceMountActions = deviceMountActions
   },
-  setDeviceUnmountActions (state: devicesState, deviceUnmountActions: DeviceUnmountAction[]) {
+  setDeviceUnmountActions (state: devicesState, deviceUnmountActions: DeviceUnmountActionWrapper[]) {
     state.deviceUnmountActions = deviceUnmountActions
   },
   setDeviceCalibrationActions (state: devicesState, deviceCalibrationActions: DeviceCalibrationAction[]) {

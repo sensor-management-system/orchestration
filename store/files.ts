@@ -32,11 +32,16 @@
  */
 import { Commit } from 'vuex'
 import { IUploadResult } from '@/services/sms/UploadApi'
+import { Api } from '@/services/Api'
 const state = {}
 
 const getters = {}
 
-const actions = {
+// @ts-ignore
+const actions: {
+  [key: string]: any;
+  $api: Api
+} = {
   uploadFile ({ _commit }: {_commit: Commit}, file: File): Promise<IUploadResult> {
     return this.$api.upload.file(file)
   }

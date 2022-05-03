@@ -92,9 +92,9 @@ export default class PlatformNewPage extends Vue {
   private isLoading: boolean = false
 
   // vuex definition for typescript check
-  initPlatformsNewAppBar!:()=>void
-  setDefaults!:()=>void
-  savePlatform!:(platform: Platform)=> Promise<Platform>
+  initPlatformsNewAppBar!: () => void
+  setDefaults!: () => void
+  savePlatform!: (platform: Platform) => Promise<Platform>
 
   created () {
     this.initPlatformsNewAppBar()

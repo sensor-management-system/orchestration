@@ -96,15 +96,16 @@ export default class DeviceCalibrationActionEditPage extends Vue {
   private isLoading = false
 
   // vuex definition for typescript check
-  loadDeviceCalibrationAction!: (id:string)=>void
-  loadDeviceAttachments!: (id:string)=>void
-  loadDeviceMeasuredQuantities!:(id:string)=>void
-  deviceCalibrationAction!:DeviceCalibrationAction
-  updateDeviceCalibrationAction!:({
+  loadDeviceCalibrationAction!: (id: string) => void
+  loadDeviceAttachments!: (id: string) => void
+  loadDeviceMeasuredQuantities!: (id: string) => void
+  deviceCalibrationAction!: DeviceCalibrationAction
+  updateDeviceCalibrationAction!: ({
     deviceId,
     calibrationDeviceAction
-  }: { deviceId: string, calibrationDeviceAction: DeviceCalibrationAction })=>Promise<DeviceCalibrationAction>
-  loadAllDeviceActions!:(id:string)=>void
+  }: { deviceId: string, calibrationDeviceAction: DeviceCalibrationAction }) => Promise<DeviceCalibrationAction>
+
+  loadAllDeviceActions!: (id: string) => void
 
   async created () {
     try {

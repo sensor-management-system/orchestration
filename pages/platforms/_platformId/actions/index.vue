@@ -162,10 +162,9 @@ export default class PlatformActionsShowPage extends Vue {
   private showDeleteDialog: boolean = false
 
   // vuex definition for typescript check
-  loadAllPlatformActions!:(id:string)=>void
-  deletePlatformGenericAction!:(genericPlatformActionId: string)=> Promise<void>
-  deletePlatformSoftwareUpdateAction!:(softwareUpdateActionId: string)=> Promise<void>
-
+  loadAllPlatformActions!: (id: string) => void
+  deletePlatformGenericAction!: (genericPlatformActionId: string) => Promise<void>
+  deletePlatformSoftwareUpdateAction!: (softwareUpdateActionId: string) => Promise<void>
 
   get platformId (): string {
     return this.$route.params.platformId
@@ -215,7 +214,7 @@ export default class PlatformActionsShowPage extends Vue {
   }
 
   async deleteGenericAction () {
-    if(this.genericActionToDelete === null || this.genericActionToDelete.id ===null){
+    if (this.genericActionToDelete === null || this.genericActionToDelete.id === null) {
       return
     }
 
@@ -233,7 +232,7 @@ export default class PlatformActionsShowPage extends Vue {
   }
 
   async deleteSoftwareUpdateAction () {
-    if(this.softwareUpdateActionToDelete === null || this.softwareUpdateActionToDelete.id ===null){
+    if (this.softwareUpdateActionToDelete === null || this.softwareUpdateActionToDelete.id === null) {
       return
     }
 

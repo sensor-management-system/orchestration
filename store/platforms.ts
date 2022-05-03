@@ -37,12 +37,13 @@ import { Contact } from '@/models/Contact'
 import { Attachment } from '@/models/Attachment'
 import { GenericAction } from '@/models/GenericAction'
 import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
-import { PlatformUnmountAction } from '@/models/PlatformUnmountAction'
-import { PlatformMountAction } from '@/models/PlatformMountAction'
+import { PlatformUnmountAction } from '@/models/views/platforms/actions/PlatformUnmountAction'
+import { PlatformMountAction } from '@/models/views/platforms/actions/PlatformMountAction'
 import { IActionType } from '@/models/ActionType'
 import { PlatformMountActionWrapper } from '@/viewmodels/PlatformMountActionWrapper'
 import { PlatformUnmountActionWrapper } from '@/viewmodels/PlatformUnmountActionWrapper'
 import { IDateCompareable } from '@/modelUtils/Compareables'
+import { Api } from '@/services/Api'
 
 const KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE = 'software_update'
 const KIND_OF_ACTION_TYPE_GENERIC_PLATFORM_ACTION = 'generic_platform_action'
@@ -63,8 +64,8 @@ interface platformsState {
   platformGenericAction: GenericAction|null,
   platformSoftwareUpdateActions: SoftwareUpdateAction[],
   platformSoftwareUpdateAction: SoftwareUpdateAction|null,
-  platformMountActions: PlatformMountAction[],
-  platformUnmountActions: PlatformUnmountAction[],
+  platformMountActions: PlatformMountActionWrapper[],
+  platformUnmountActions: PlatformUnmountActionWrapper[],
   chosenKindOfPlatformAction: IOptionsForActionType | null,
   pageNumber: number,
   pageSize: number,
@@ -99,13 +100,18 @@ const getters = {
     ]
     // sort the actions
     actions = actions.sort((a: IDateCompareable, b: IDateCompareable): number => {
+      if (a.date === null || b.date === null) { return 0 }
       return a.date < b.date ? 1 : a.date > b.date ? -1 : 0
     })
     return actions
   }
 }
 
-const actions = {
+// @ts-ignore
+const actions: {
+  [key: string]: any;
+  $api: Api
+} = {
   async searchPlatformsPaginated ({
     commit,
     state
@@ -163,15 +169,15 @@ const actions = {
     await dispatch('loadPlatformMountActions', id)
     await dispatch('loadPlatformUnmountActions', id)
   },
-  async loadPlatformGenericActions ({ commit }: { commit: Commit }, id: number) {
+  async loadPlatformGenericActions ({ commit }: { commit: Commit }, id: string) {
     const platformGenericActions = await this.$api.platforms.findRelatedGenericActions(id)
     commit('setPlatformGenericActions', platformGenericActions)
   },
-  async loadPlatformSoftwareUpdateActions ({ commit }: { commit: Commit }, id: number) {
+  async loadPlatformSoftwareUpdateActions ({ commit }: { commit: Commit }, id: string) {
     const platformSoftwareUpdateActions = await this.$api.platforms.findRelatedSoftwareUpdateActions(id)
     commit('setPlatformSoftwareUpdateActions', platformSoftwareUpdateActions)
   },
-  async loadPlatformMountActions ({ commit }: { commit: Commit }, id: number) {
+  async loadPlatformMountActions ({ commit }: { commit: Commit }, id: string) {
     const platformMountActions = await this.$api.platforms.findRelatedMountActions(id)
 
     const wrappedPlatformMountActions = platformMountActions.map((action: PlatformMountAction) => {
@@ -180,7 +186,7 @@ const actions = {
 
     commit('setPlatformMountActions', wrappedPlatformMountActions)
   },
-  async loadPlatformUnmountActions ({ commit }: { commit: Commit }, id: number) {
+  async loadPlatformUnmountActions ({ commit }: { commit: Commit }, id: string) {
     const platformUnmountActions = await this.$api.platforms.findRelatedUnmountActions(id)
 
     const wrappedPlatformUnmountActions = platformUnmountActions.map((action: PlatformUnmountAction) => {
@@ -199,13 +205,13 @@ const actions = {
   addPlatformContact ({ _commit }: { _commit: Commit }, { platformId, contactId }: {platformId: string, contactId: string}): Promise<void> {
     return this.$api.platforms.addContact(platformId, contactId)
   },
-  removePlatformContact ({ _commit }: { _commit: Commit }, { platformId, contactId }: {platformId: number, contactId: number}): Promise<void> {
+  removePlatformContact ({ _commit }: { _commit: Commit }, { platformId, contactId }: {platformId: string, contactId: string}): Promise<void> {
     return this.$api.platforms.removeContact(platformId, contactId)
   },
-  addPlatformAttachment ({ _commit }: { _commit: Commit }, { platformId, attachment }: {platformId: string, attachment: Attachment}): Promise<void> {
+  addPlatformAttachment ({ _commit }: { _commit: Commit }, { platformId, attachment }: {platformId: string, attachment: Attachment}): Promise<Attachment> {
     return this.$api.platformAttachments.add(platformId, attachment)
   },
-  updatePlatformAttachment ({ _commit }: { _commit: Commit }, { platformId, attachment }: {platformId: string, attachment: Attachment}): Promise<void> {
+  updatePlatformAttachment ({ _commit }: { _commit: Commit }, { platformId, attachment }: {platformId: string, attachment: Attachment}): Promise<Attachment> {
     return this.$api.platformAttachments.update(platformId, attachment)
   },
   deletePlatformAttachment ({ _commit }: { _commit: Commit }, attachmentId: string): Promise<void> {
@@ -318,10 +324,10 @@ const mutations = {
   setPlatformSoftwareUpdateActions (state: platformsState, platformSoftwareUpdateActions: SoftwareUpdateAction[]) {
     state.platformSoftwareUpdateActions = platformSoftwareUpdateActions
   },
-  setPlatformMountActions (state: platformsState, platformMountActions: PlatformMountAction[]) {
+  setPlatformMountActions (state: platformsState, platformMountActions: PlatformMountActionWrapper[]) {
     state.platformMountActions = platformMountActions
   },
-  setPlatformUnmountActions (state: platformsState, platformUnmountActions: PlatformUnmountAction[]) {
+  setPlatformUnmountActions (state: platformsState, platformUnmountActions: PlatformUnmountActionWrapper[]) {
     state.platformUnmountActions = platformUnmountActions
   },
   setChosenKindOfPlatformAction (state: platformsState, newVal: IOptionsForActionType | null) {

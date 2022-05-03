@@ -50,7 +50,7 @@ export default class DeviceCustomFieldsPage extends Vue {
   private isLoading = false
 
   // vuex definition for typescript check
-  loadDeviceCustomFields!:(id: string)=>void
+  loadDeviceCustomFields!: (id: string) => void
 
   async created () {
     try {

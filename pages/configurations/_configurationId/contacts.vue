@@ -55,7 +55,7 @@ export default class ContactTab extends Vue {
   private isLoading = false
 
   // vuex definition for typescript check
-  loadConfigurationContacts!:(id:string)=>void
+  loadConfigurationContacts!: (id: string) => void
 
   created () {
     try {

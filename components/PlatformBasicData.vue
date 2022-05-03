@@ -116,7 +116,6 @@ import { Status } from '@/models/Status'
 import { Manufacturer } from '@/models/Manufacturer'
 
 import { createPlatformUrn } from '@/modelUtils/urnBuilders'
-import { DeviceType } from '@/models/DeviceType'
 
 @Component({
   computed: {
@@ -136,13 +135,13 @@ export default class PlatformBasicData extends Vue {
   readonly value!: Platform
 
   // vuex definition for typescript check
-  loadEquipmentstatus!: ()=> void;
-  loadPlatformtypes!: ()=> void;
-  loadManufacturers!: ()=> void;
-  getManufacturerByUri!: (uri: string)=> Manufacturer | undefined;
-  getPlatformTypeByUri!: (uri: string)=> PlatformType | undefined;
-  getEquipmentstatusByUri!: (uri: string)=> Status | undefined;
-  platformtypes!:[]
+  loadEquipmentstatus!: () => void
+  loadPlatformtypes!: () => void
+  loadManufacturers!: () => void
+  getManufacturerByUri!: (uri: string) => Manufacturer | undefined
+  getPlatformTypeByUri!: (uri: string) => PlatformType | undefined
+  getEquipmentstatusByUri!: (uri: string) => Status | undefined
+  platformtypes!: []
 
   async mounted () {
     try {

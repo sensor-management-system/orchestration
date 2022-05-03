@@ -35,6 +35,7 @@
  */
 import { Commit, ActionContext } from 'vuex/types'
 import { Contact } from '@/models/Contact'
+import { Api } from '@/services/Api'
 
 interface contactsState {
   contacts: Contact[],
@@ -65,7 +66,12 @@ export const getters = {
     })
   }
 }
-export const actions = {
+
+// @ts-ignore
+export const actions: {
+  [key: string]: any;
+  $api: Api
+} = {
   async searchContactsPaginated ({
     commit,
     state

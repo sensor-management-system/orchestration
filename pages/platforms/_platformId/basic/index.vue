@@ -129,8 +129,8 @@ export default class PlatformShowBasicPage extends Vue {
   private showDeleteDialog: boolean = false
 
   // vuex definition for typescript check
-  platform!:Platform
-  deletePlatform!:(id: string)=>void
+  platform!: Platform
+  deletePlatform!: (id: string) => void
 
   get platformId () {
     return this.$route.params.platformId
@@ -146,7 +146,7 @@ export default class PlatformShowBasicPage extends Vue {
 
   async deleteAndCloseDialog () {
     this.showDeleteDialog = false
-    if (this.platform === null || this.platform.id ===null) {
+    if (this.platform === null || this.platform.id === null) {
       return
     }
 

@@ -93,14 +93,15 @@ export default class DeviceSoftwareUpdateActionEditPage extends Vue {
   private isLoading = false
 
   // vuex definition for typescript check
-  loadDeviceSoftwareUpdateAction!:(actionId: string)=>void
-  loadDeviceAttachments!:(id:string)=>void
-  deviceSoftwareUpdateAction!:SoftwareUpdateAction
-  updateDeviceSoftwareUpdateAction!:({
+  loadDeviceSoftwareUpdateAction!: (actionId: string) => void
+  loadDeviceAttachments!: (id: string) => void
+  deviceSoftwareUpdateAction!: SoftwareUpdateAction
+  updateDeviceSoftwareUpdateAction!: ({
     deviceId,
     softwareUpdateAction
-  }: { deviceId: string, softwareUpdateAction: SoftwareUpdateAction })=>Promise<SoftwareUpdateAction>
-  loadAllDeviceActions!:(id:string)=>void
+  }: { deviceId: string, softwareUpdateAction: SoftwareUpdateAction }) => Promise<SoftwareUpdateAction>
+
+  loadAllDeviceActions!: (id: string) => void
 
   async created () {
     try {

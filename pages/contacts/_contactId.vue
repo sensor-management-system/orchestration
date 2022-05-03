@@ -53,9 +53,9 @@ export default class ContactShowPage extends Vue {
   private isLoading: boolean = false
 
   // vuex definition for typescript check
-  initContactsContactIdAppBar!: ()=>void
-  setDefaults!:()=>void
-  loadContact!:(id:string)=>void
+  initContactsContactIdAppBar!: () => void
+  setDefaults!: () => void
+  loadContact!: (id: string) => void
 
   async created () {
     try {

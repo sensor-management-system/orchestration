@@ -112,9 +112,8 @@ export default class DeviceCustomFieldsShowPage extends Vue {
   private customFieldToDelete: CustomTextField|null = null
 
   // vuex definition for typescript check
-  loadDeviceCustomFields!:(id: string)=>void
-  deleteDeviceCustomField!:(customField: string)=>Promise<void>
-
+  loadDeviceCustomFields!: (id: string) => void
+  deleteDeviceCustomField!: (customField: string) => Promise<void>
 
   get deviceId (): string {
     return this.$route.params.deviceId

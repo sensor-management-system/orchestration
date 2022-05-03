@@ -53,12 +53,12 @@ export default class DevicePropertiesPage extends Vue {
   private isLoading = false
 
   // vuex definition for typescript check
-  loadDeviceMeasuredQuantities!:(id:string)=>void
-  loadCompartments!:()=>void
-  loadSamplingMedia!:()=>void
-  loadProperties!:()=>void
-  loadUnits!:()=>void
-  loadMeasuredQuantityUnits!:()=>void
+  loadDeviceMeasuredQuantities!: (id: string) => void
+  loadCompartments!: () => void
+  loadSamplingMedia!: () => void
+  loadProperties!: () => void
+  loadUnits!: () => void
+  loadMeasuredQuantityUnits!: () => void
 
   async created () {
     try {

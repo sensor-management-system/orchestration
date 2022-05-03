@@ -55,7 +55,7 @@ export default class PlatformContactsPage extends Vue {
   private isLoading = false
 
   // vuex definition for typescript check
-  loadPlatformContacts!:(id: string)=>void
+  loadPlatformContacts!: (id: string) => void
 
   async created () {
     try {

@@ -103,9 +103,9 @@ export default class ConfigurationAddContactPage extends Vue {
   private isSaving: boolean = false
 
   // vuex definition for typescript check
-  loadConfigurationContacts!:(id:string)=>void
-  loadAllContacts!:()=>void
-  contactsByDifference!:(contactsToSubtract: Contact[])=>Contact[]
+  loadConfigurationContacts!: (id: string) => void
+  loadAllContacts!: () => void
+  contactsByDifference!: (contactsToSubtract: Contact[]) => Contact[]
   configurationContacts!: []
   addConfigurationContact!: ({
     configurationId,

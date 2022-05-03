@@ -58,16 +58,16 @@ export default class DevicePage extends Vue {
   private isLoading: boolean = false
 
   // vuex definition for typescript check
-  initDevicesDeviceIdAppBar!: (id:string)=>void
-  setDefaults!:()=>void
-  loadDevice!:({
+  initDevicesDeviceIdAppBar!: (id: string) => void
+  setDefaults!: () => void
+  loadDevice!: ({
     deviceId,
     includeContacts,
     includeCustomFields,
     includeDeviceProperties,
     includeDeviceAttachments
   }:
-    { deviceId: string, includeContacts: boolean, includeCustomFields: boolean, includeDeviceProperties: boolean, includeDeviceAttachments: boolean })=>void
+    { deviceId: string, includeContacts: boolean, includeCustomFields: boolean, includeDeviceProperties: boolean, includeDeviceAttachments: boolean }) => void
 
   async created () {
     try {

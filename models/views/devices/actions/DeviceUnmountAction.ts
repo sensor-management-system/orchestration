@@ -67,7 +67,7 @@ export class DeviceUnmountAction implements IDeviceUnmountAction, IDateCompareab
     return this._contact
   }
 
-  get date(){
+  get date () {
     return this._basicData.date
   }
 

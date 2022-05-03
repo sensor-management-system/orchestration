@@ -288,21 +288,20 @@ export default class SearchPlatformsPage extends Vue {
   private platformToDelete: Platform | null = null
 
   // vuex definition for typescript check
-  loadEquipmentstatus!:()=>void
-  loadPlatformtypes!:()=>void
-  loadManufacturers!:()=>void
-  initPlatformsIndexAppBar!:()=>void
-  setDefaults!:()=>void
-  pageNumber!:number
-  setPageNumber!:(newPageNumber: number)=>void
-  searchPlatformsPaginated!:(searchParams: IPlatformSearchParams)=>void
-  platforms!:Platform[]
-  exportAsCsv!:(searchParams: IPlatformSearchParams)=> Promise<Blob>
-  deletePlatform!:(id:string)=>void
-  platformtypes!:  PlatformType[]
-  manufacturers!:  Manufacturer[]
+  loadEquipmentstatus!: () => void
+  loadPlatformtypes!: () => void
+  loadManufacturers!: () => void
+  initPlatformsIndexAppBar!: () => void
+  setDefaults!: () => void
+  pageNumber!: number
+  setPageNumber!: (newPageNumber: number) => void
+  searchPlatformsPaginated!: (searchParams: IPlatformSearchParams) => void
+  platforms!: Platform[]
+  exportAsCsv!: (searchParams: IPlatformSearchParams) => Promise<Blob>
+  deletePlatform!: (id: string) => void
+  platformtypes!: PlatformType[]
+  manufacturers!: Manufacturer[]
   equipmentstatus!: Status[]
-
 
   async created () {
     try {
@@ -366,7 +365,7 @@ export default class SearchPlatformsPage extends Vue {
     await this.runSearch()
   }
 
-  basicSearch (){
+  basicSearch () {
     this.selectedSearchManufacturers = []
     this.selectedSearchStates = []
     this.selectedSearchPlatformTypes = []

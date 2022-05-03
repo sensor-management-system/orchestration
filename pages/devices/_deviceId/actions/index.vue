@@ -186,10 +186,10 @@ export default class DeviceActionsShowPage extends Vue {
   private showDeleteDialog: boolean = false
 
   // vuex definition for typescript check
-  deleteDeviceGenericAction!:(genericDeviceActionId: string)=>Promise<void>
-  loadAllDeviceActions!:(id:string)=>void
-  deleteDeviceSoftwareUpdateAction!:(softwareUpdateActionId: string)=>Promise<void>
-  deleteDeviceCalibrationAction!:(calibrationDeviceActionId: string)=>Promise<void>
+  deleteDeviceGenericAction!: (genericDeviceActionId: string) => Promise<void>
+  loadAllDeviceActions!: (id: string) => void
+  deleteDeviceSoftwareUpdateAction!: (softwareUpdateActionId: string) => Promise<void>
+  deleteDeviceCalibrationAction!: (calibrationDeviceActionId: string) => Promise<void>
 
   get deviceId (): string {
     return this.$route.params.deviceId
@@ -258,7 +258,7 @@ export default class DeviceActionsShowPage extends Vue {
   }
 
   async deleteGenericAction () {
-    if(this.genericActionToDelete === null || this.genericActionToDelete.id ===null){
+    if (this.genericActionToDelete === null || this.genericActionToDelete.id === null) {
       return
     }
 
@@ -276,7 +276,7 @@ export default class DeviceActionsShowPage extends Vue {
   }
 
   async deleteSoftwareUpdateAction () {
-    if(this.softwareUpdateActionToDelete === null || this.softwareUpdateActionToDelete.id ===null){
+    if (this.softwareUpdateActionToDelete === null || this.softwareUpdateActionToDelete.id === null) {
       return
     }
     try {
@@ -293,7 +293,7 @@ export default class DeviceActionsShowPage extends Vue {
   }
 
   async deleteCalibrationAction () {
-    if(this.calibrationActionToDelete === null || this.calibrationActionToDelete.id ===null){
+    if (this.calibrationActionToDelete === null || this.calibrationActionToDelete.id === null) {
       return
     }
 

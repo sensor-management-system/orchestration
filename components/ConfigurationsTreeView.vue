@@ -107,7 +107,7 @@ export default class ConfigurationsTreeView extends Vue {
    *
    * @fires ConfigurationsTreeView#select
    */
-  set selectedNodeSingletonList (nodesArray:ConfigurationsTreeNode[]) {
+  set selectedNodeSingletonList (nodesArray: ConfigurationsTreeNode[]) {
     const node: ConfigurationsTreeNode | null = nodesArray[0] ?? null
     this.$emit('input', node)
   }

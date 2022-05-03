@@ -126,8 +126,8 @@ export default class DeviceShowBasicPage extends Vue {
   private showDeleteDialog: boolean = false
 
   // vuex definition for typescript check
-  device!:Device
-  deleteDevice!:(id: string)=>void
+  device!: Device
+  deleteDevice!: (id: string) => void
 
   get deviceId () {
     return this.$route.params.deviceId

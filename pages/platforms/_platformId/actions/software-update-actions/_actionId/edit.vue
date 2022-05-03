@@ -95,11 +95,11 @@ export default class PlatformSoftwareUpdateActionEditPage extends Vue {
   private isLoading = false
 
   // vuex definition for typescript check
-  loadPlatformSoftwareUpdateAction!:(actionId: string)=>void
-  loadPlatformAttachments!:(id: string)=>void
-  platformSoftwareUpdateAction!:SoftwareUpdateAction
-  updatePlatformSoftwareUpdateAction!:( { platformId, softwareUpdateAction }: {platformId: string, softwareUpdateAction: SoftwareUpdateAction})=> Promise<SoftwareUpdateAction>
-  loadAllPlatformActions!:(id:string)=>void
+  loadPlatformSoftwareUpdateAction!: (actionId: string) => void
+  loadPlatformAttachments!: (id: string) => void
+  platformSoftwareUpdateAction!: SoftwareUpdateAction
+  updatePlatformSoftwareUpdateAction!: ({ platformId, softwareUpdateAction }: {platformId: string, softwareUpdateAction: SoftwareUpdateAction}) => Promise<SoftwareUpdateAction>
+  loadAllPlatformActions!: (id: string) => void
 
   async created () {
     try {

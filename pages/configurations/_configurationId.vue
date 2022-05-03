@@ -59,9 +59,9 @@ export default class ConfigurationsIdPage extends Vue {
   private isLoading: boolean = false
 
   // vuex definition for typescript check
-  initConfigurationsConfigurationIdAppBar!: (id:string)=>void
-  setDefaults!:()=>void
-  loadConfiguration!:(id:string)=>void
+  initConfigurationsConfigurationIdAppBar!: (id: string) => void
+  setDefaults!: () => void
+  loadConfiguration!: (id: string) => void
 
   async created () {
     try {

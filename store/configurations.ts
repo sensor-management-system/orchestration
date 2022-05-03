@@ -231,11 +231,10 @@ const getters = {
   }
 }
 
-
 // @ts-ignore
-const actions:{
-  [key:string]: any;
-  $api:Api
+const actions: {
+  [key: string]: any;
+  $api: Api
 } = {
   async searchConfigurationsPaginated ({
     commit,

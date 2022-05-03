@@ -242,16 +242,16 @@ export default class SearchConfigurationsPage extends Vue {
   private configurationToDelete: Configuration | null = null
 
   // vuex definition for typescript check
-  initConfigurationsIndexAppBar!:()=>void
-  setDefaults!:()=>void
-  loadConfigurationsStates!:()=>void
-  pageNumber!:number
-  setPageNumber!:(newPageNumber: number)=>void
-  searchConfigurationsPaginated!:(searchParams: IConfigurationSearchParams)=>void
-  configurations!:Configuration[]
-  deleteConfiguration!:(id:string)=>void
-  configurationStates!:string[]
-  projects!:Project[]
+  initConfigurationsIndexAppBar!: () => void
+  setDefaults!: () => void
+  loadConfigurationsStates!: () => void
+  pageNumber!: number
+  setPageNumber!: (newPageNumber: number) => void
+  searchConfigurationsPaginated!: (searchParams: IConfigurationSearchParams) => void
+  configurations!: Configuration[]
+  deleteConfiguration!: (id: string) => void
+  configurationStates!: string[]
+  projects!: Project[]
 
   async created () {
     try {
@@ -309,8 +309,8 @@ export default class SearchConfigurationsPage extends Vue {
   }
 
   basicSearch () {
-    this.selectedConfigurationStates=[]
-    this.selectedProjects=[]
+    this.selectedConfigurationStates = []
+    this.selectedProjects = []
     this.page = 1// Important to set page to one otherwise it's possible that you don't anything
     this.runSearch()
   }
@@ -320,7 +320,7 @@ export default class SearchConfigurationsPage extends Vue {
     this.initUrlQueryParams()
   }
 
-  extendedSearch (){
+  extendedSearch () {
     this.page = 1// Important to set page to one otherwise it's possible that you don't anything
     this.runSearch()
   }

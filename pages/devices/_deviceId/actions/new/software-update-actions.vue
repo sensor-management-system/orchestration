@@ -81,12 +81,13 @@ export default class NewDeviceSoftwareUpdateActions extends Vue {
   private isSaving: boolean = false
 
   // vuex definition for typescript check
-  addDeviceSoftwareUpdateAction!:({
+  addDeviceSoftwareUpdateAction!: ({
     deviceId,
     softwareUpdateAction
-  }: { deviceId: string, softwareUpdateAction: SoftwareUpdateAction })=> Promise<SoftwareUpdateAction>
-  loadAllDeviceActions!:(id:string)=>void
-  chosenKindOfDeviceAction!:IOptionsForActionType | null
+  }: { deviceId: string, softwareUpdateAction: SoftwareUpdateAction }) => Promise<SoftwareUpdateAction>
+
+  loadAllDeviceActions!: (id: string) => void
+  chosenKindOfDeviceAction!: IOptionsForActionType | null
 
   created () {
     if (this.chosenKindOfDeviceAction === null) {

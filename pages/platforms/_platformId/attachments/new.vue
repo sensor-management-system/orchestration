@@ -134,10 +134,9 @@ export default class PlatformAttachmentAddPage extends mixins(Rules, UploadRules
   private isSaving: boolean = false
 
   // vuex definition for typescript check
-  uploadFile!:(file: File)=> Promise<IUploadResult>
-  addPlatformAttachment!:( { platformId, attachment }: {platformId: string, attachment: Attachment})=> Promise<void>
-  loadPlatformAttachments!:(id:string)=>void
-
+  uploadFile!: (file: File) => Promise<IUploadResult>
+  addPlatformAttachment!: ({ platformId, attachment }: {platformId: string, attachment: Attachment}) => Promise<void>
+  loadPlatformAttachments!: (id: string) => void
 
   /**
    * returns a list of MimeTypes, seperated by ,

@@ -84,10 +84,10 @@ export default class NewPlatformAction extends Vue {
   private isLoading: boolean = false
 
   // vuex definition for typescript check
-  loadPlatformGenericActionTypes!:()=>void
-  loadPlatformAttachments!:(id:string)=>void
-  chosenKindOfPlatformAction!:IOptionsForActionType | null
-  setChosenKindOfPlatformAction!:(newval: IOptionsForActionType | null) =>void
+  loadPlatformGenericActionTypes!: () => void
+  loadPlatformAttachments!: (id: string) => void
+  chosenKindOfPlatformAction!: IOptionsForActionType | null
+  setChosenKindOfPlatformAction!: (newval: IOptionsForActionType | null) => void
 
   async created () {
     try {

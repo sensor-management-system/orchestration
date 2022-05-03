@@ -90,9 +90,9 @@ export default class ContactNewPage extends mixins(Rules) {
   private isLoading: boolean = false
 
   // vuex definition for typescript check
-  initContactsNewAppBar!: ()=>void
-  setDefaults!:()=>void
-  saveContact!:(contact: Contact)=>Promise<Contact>
+  initContactsNewAppBar!: () => void
+  setDefaults!: () => void
+  saveContact!: (contact: Contact) => Promise<Contact>
 
   created () {
     this.initContactsNewAppBar()

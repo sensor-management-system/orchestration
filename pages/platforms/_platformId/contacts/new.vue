@@ -104,11 +104,11 @@ export default class PlatformAddContactPage extends Vue {
   private isSaving: boolean = false
 
   // vuex definition for typescript check
-  loadAllContacts!:()=>void
-  loadPlatformContacts!:(id: string)=>void
-  contactsByDifference!:(contactsToSubtract: Contact[])=>Contact[]
-  platformContacts!:Contact[]
-  addPlatformContact!:({ platformId, contactId }: {platformId: string, contactId: string})=> Promise<void>
+  loadAllContacts!: () => void
+  loadPlatformContacts!: (id: string) => void
+  contactsByDifference!: (contactsToSubtract: Contact[]) => Contact[]
+  platformContacts!: Contact[]
+  addPlatformContact!: ({ platformId, contactId }: {platformId: string, contactId: string}) => Promise<void>
 
   async created () {
     try {

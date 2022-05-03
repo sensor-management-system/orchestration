@@ -86,14 +86,13 @@ export default class NewDeviceCalibrationAction extends Vue {
   private isSaving: boolean = false
 
   // vuex definition for typescript check
-  addDeviceCalibrationAction!:({
+  addDeviceCalibrationAction!: ({
     deviceId,
     calibrationDeviceAction
-  }: { deviceId: string, calibrationDeviceAction: DeviceCalibrationAction })=>Promise<DeviceCalibrationAction>
-  loadAllDeviceActions!:(id:string)=>void
-  chosenKindOfDeviceAction!:IOptionsForActionType | null
+  }: { deviceId: string, calibrationDeviceAction: DeviceCalibrationAction }) => Promise<DeviceCalibrationAction>
 
-
+  loadAllDeviceActions!: (id: string) => void
+  chosenKindOfDeviceAction!: IOptionsForActionType | null
 
   created () {
     if (this.chosenKindOfDeviceAction === null) {

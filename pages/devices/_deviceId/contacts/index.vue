@@ -100,12 +100,12 @@ export default class DeviceShowContactPage extends Vue {
   private isSaving = false
 
   // vuex definition for typescript check
-  removeDeviceContact!:({
+  removeDeviceContact!: ({
     deviceId,
     contactId
-  }: { deviceId: string, contactId: string })=> Promise<void>
-  loadDeviceContacts!:(id:string) => void
+  }: { deviceId: string, contactId: string }) => Promise<void>
 
+  loadDeviceContacts!: (id: string) => void
 
   get deviceId (): string {
     return this.$route.params.deviceId

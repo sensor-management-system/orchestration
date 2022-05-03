@@ -379,8 +379,6 @@ import HintCard from '@/components/HintCard.vue'
 import { dateToDateTimeStringHHMM } from '@/utils/dateHelper'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import { Configuration } from '@/models/Configuration'
-import { IDeviceSearchParams } from '@/modelUtils/DeviceSearchParams'
-import { IPlatformSearchParams } from '@/modelUtils/PlatformSearchParams'
 
 @Component({
   components: { ProgressIndicator, HintCard, PlatformMountListItem, ConfigurationsPlatformDeviceMountForm, DevicesMountListItem, DevicesListItem, BaseList, DateTimePicker, ConfigurationsTreeView },
@@ -412,23 +410,25 @@ export default class ConfigurationMountPlatformsAndDevicesPage extends Vue {
   private selectedType: string|null = null
   private selectedNode: ConfigurationsTreeNode | null = null
   private selectedDate = DateTime.utc()
-  private platformToMount: {platform:Platform,mountInfo:{}}|null = null
-  private deviceToMount: {device:Device,mountInfo:{}}|null = null
+  private platformToMount: {platform: Platform, mountInfo: {}}|null = null
+  private deviceToMount: {device: Device, mountInfo: {}}|null = null
 
   // vuex definition for typescript check
-  loadAllContacts!:()=>void
-  configuration!:Configuration
-  searchDevices!:(searchText:string)=>void
-  searchPlatforms!:(searchText:string)=>void
-  addDeviceMountAction!:(    {
+  loadAllContacts!: () => void
+  configuration!: Configuration
+  searchDevices!: (searchText: string) => void
+  searchPlatforms!: (searchText: string) => void
+  addDeviceMountAction!: ({
     configurationId,
     deviceMountAction
-  }: { configurationId: string, deviceMountAction: DeviceMountAction })=>Promise<void>
-  addPlatformMountAction!:( {
+  }: { configurationId: string, deviceMountAction: DeviceMountAction }) => Promise<void>
+
+  addPlatformMountAction!: ({
     configurationId,
     platformMountAction
-  }: { configurationId: string, platformMountAction: PlatformMountAction })=>Promise<void>
-  loadConfiguration!: (id: string)=>void
+  }: { configurationId: string, platformMountAction: PlatformMountAction }) => Promise<void>
+
+  loadConfiguration!: (id: string) => void
 
   async created () {
     try {
@@ -479,7 +479,7 @@ export default class ConfigurationMountPlatformsAndDevicesPage extends Vue {
   async searchDevicesForMount () {
     try {
       this.isLoading = true
-      await this.searchDevices(this.searchTextDevices )
+      await this.searchDevices(this.searchTextDevices)
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Loading of devices failed')
     } finally {
@@ -507,7 +507,7 @@ export default class ConfigurationMountPlatformsAndDevicesPage extends Vue {
     }
   }
 
-  mountDevice (device:Device, mountInfo:any) {
+  mountDevice (device: Device, mountInfo: any) {
     try {
       if (this.selectedNode && !this.selectedNode.canHaveChildren()) {
         this.$store.commit('snackbar/setError', 'Selected node-type cannot have children')
@@ -548,7 +548,7 @@ export default class ConfigurationMountPlatformsAndDevicesPage extends Vue {
     }
   }
 
-  async mountPlatform (platform:Platform, mountInfo:any) {
+  async mountPlatform (platform: Platform, mountInfo: any) {
     try {
       if (this.selectedNode && !this.selectedNode.canHaveChildren()) {
         this.$store.commit('snackbar/setError', 'Selected node-type cannot have children')
@@ -589,7 +589,7 @@ export default class ConfigurationMountPlatformsAndDevicesPage extends Vue {
     }
   }
 
-  setPlatformToMount (platform:Platform, mountInfo: any) {
+  setPlatformToMount (platform: Platform, mountInfo: any) {
     this.deviceToMount = null
     this.platformToMount = {
       platform,
@@ -598,7 +598,7 @@ export default class ConfigurationMountPlatformsAndDevicesPage extends Vue {
     this.$store.commit('snackbar/setSuccess', 'Selected platform confirmed')
   }
 
-  setDeviceToMount (device:Device, mountInfo:any) {
+  setDeviceToMount (device: Device, mountInfo: any) {
     this.platformToMount = null
 
     this.deviceToMount = {

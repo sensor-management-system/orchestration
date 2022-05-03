@@ -110,9 +110,9 @@ export default class ContactIndexPage extends Vue {
   showDeleteDialog = false
 
   // vuex definition for typescript check
-  initContactsContactIdIndexAppBar!:(title:string)=>void
-  contact!:Contact
-  deleteContact!:(id:string)=>void
+  initContactsContactIdIndexAppBar!: (title: string) => void
+  contact!: Contact
+  deleteContact!: (id: string) => void
 
   created () {
     this.initContactsContactIdIndexAppBar(this.contact.toString())

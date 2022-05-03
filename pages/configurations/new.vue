@@ -89,9 +89,9 @@ export default class ConfigurationNewPage extends Vue {
   private isLoading: boolean = false
 
   // vuex definition for typescript check
-  initConfigurationsNewAppBar!: ()=>void
-  setDefaults!:()=>void
-  saveConfiguration!:(configuration: Configuration)=>Promise<Configuration>
+  initConfigurationsNewAppBar!: () => void
+  setDefaults!: () => void
+  saveConfiguration!: (configuration: Configuration) => Promise<Configuration>
 
   created () {
     this.initConfigurationsNewAppBar()

@@ -89,9 +89,9 @@ export default class DeviceNewPage extends Vue {
   private isLoading: boolean = false
 
   // vuex definition for typescript check
-  initDevicesNewAppBar!: ()=>void
-  setDefaults!:()=>void
-  saveDevice!:(device: Device)=> Promise<Device>
+  initDevicesNewAppBar!: () => void
+  setDefaults!: () => void
+  saveDevice!: (device: Device) => Promise<Device>
 
   created () {
     this.initDevicesNewAppBar()

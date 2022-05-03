@@ -69,7 +69,6 @@ import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButto
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
 import { GenericAction } from '@/models/GenericAction'
-import { DeviceCalibrationAction } from '@/models/DeviceCalibrationAction'
 import { IOptionsForActionType } from '@/store/devices'
 @Component({
   middleware: ['auth'],
@@ -82,13 +81,13 @@ export default class NewGenericDeviceAction extends Vue {
   private isSaving: boolean = false
 
   // vuex definition for typescript check
-  addDeviceGenericAction!:({
+  addDeviceGenericAction!: ({
     deviceId,
     genericDeviceAction
-  }: { deviceId: string, genericDeviceAction: GenericAction })=> Promise<GenericAction>
-  loadAllDeviceActions!:(id:string)=>void
-  chosenKindOfDeviceAction!:IOptionsForActionType | null
+  }: { deviceId: string, genericDeviceAction: GenericAction }) => Promise<GenericAction>
 
+  loadAllDeviceActions!: (id: string) => void
+  chosenKindOfDeviceAction!: IOptionsForActionType | null
 
   created () {
     if (this.chosenKindOfDeviceAction === null) {

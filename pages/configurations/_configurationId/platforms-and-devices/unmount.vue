@@ -142,17 +142,19 @@ export default class ConfigurationUnMountPlatformsAndDevicesPage extends Vue {
   private isLoading = false
 
   // vuex definition for typescript check
-  loadAllContacts!:()=>void
-  configuration!:Configuration
-  addDeviceUnMountAction!:({
+  loadAllContacts!: () => void
+  configuration!: Configuration
+  addDeviceUnMountAction!: ({
     configurationId,
     deviceUnMountAction
-  }: { configurationId: string, deviceUnMountAction: DeviceUnmountAction })=>Promise<string>
-  addPlatformUnMountAction!:({
-      configurationId,
-      platformUnMountAction
-    }: { configurationId: string, platformUnMountAction: PlatformUnmountAction })=>Promise<string>
-  loadConfiguration!:(id:string)=>void
+  }: { configurationId: string, deviceUnMountAction: DeviceUnmountAction }) => Promise<string>
+
+  addPlatformUnMountAction!: ({
+    configurationId,
+    platformUnMountAction
+  }: { configurationId: string, platformUnMountAction: PlatformUnmountAction }) => Promise<string>
+
+  loadConfiguration!: (id: string) => void
 
   async created () {
     try {
@@ -192,7 +194,7 @@ export default class ConfigurationUnMountPlatformsAndDevicesPage extends Vue {
     return null
   }
 
-  unmount ({ contact, description }:{contact:Contact,description:string}) {
+  unmount ({ contact, description }: {contact: Contact, description: string}) {
     if (!this.selectedNode || !this.selectedDate) {
       return
     }
@@ -201,7 +203,6 @@ export default class ConfigurationUnMountPlatformsAndDevicesPage extends Vue {
       this.unmountDevice((this.selectedNode as DeviceNode).unpack().device, contact, description)
     }
     if (this.selectedNode.isPlatform()) {
-      (this.selectedNode as PlatformNode).unpack().platform
       this.unmountPlatform((this.selectedNode as PlatformNode).unpack().platform, contact, description)
     }
   }

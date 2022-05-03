@@ -104,8 +104,8 @@ export default class PlatformShowContactPage extends Vue {
   private isSaving = false
 
   // vuex definition for typescript check
-  removePlatformContact!:({ platformId, contactId }: {platformId: string, contactId: string})=> Promise<void>
-  loadPlatformContacts!:(id:string)=>void
+  removePlatformContact!: ({ platformId, contactId }: {platformId: string, contactId: string}) => Promise<void>
+  loadPlatformContacts!: (id: string) => void
 
   get platformId (): string {
     return this.$route.params.platformId

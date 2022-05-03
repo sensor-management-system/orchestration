@@ -78,7 +78,6 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
 
 import { GenericAction } from '@/models/GenericAction'
-import { DeviceCalibrationAction } from '@/models/DeviceCalibrationAction'
 
 @Component({
   components: {
@@ -97,14 +96,15 @@ export default class GenericDeviceActionEditPage extends Vue {
   private isLoading = false
 
   // vuex definition for typescript check
-  loadDeviceGenericAction!: (id:string)=>void
-  loadDeviceAttachments!: (id:string)=>void
-  deviceGenericAction!:GenericAction
-  updateDeviceGenericAction!:({
+  loadDeviceGenericAction!: (id: string) => void
+  loadDeviceAttachments!: (id: string) => void
+  deviceGenericAction!: GenericAction
+  updateDeviceGenericAction!: ({
     deviceId,
     genericDeviceAction
-  }: { deviceId: string, genericDeviceAction: GenericAction })=> Promise<GenericAction>
-  loadAllDeviceActions!:(id:string)=>void
+  }: { deviceId: string, genericDeviceAction: GenericAction }) => Promise<GenericAction>
+
+  loadAllDeviceActions!: (id: string) => void
 
   async created () {
     try {

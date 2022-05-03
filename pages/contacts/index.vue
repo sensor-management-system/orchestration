@@ -175,12 +175,12 @@ export default class SearchContactsPage extends Vue {
   private contactToDelete: Contact | null = null
 
   // vuex definition for typescript check
-  initContactsIndexAppBar!: ()=>void
-  setDefaults!:()=>void
-  pageNumber!:number
-  setPageNumber!:(newPageNumber: number)=>void
-  searchContactsPaginated!:(searchtext: string)=>void
-  deleteContact!:(id:string)=>void
+  initContactsIndexAppBar!: () => void
+  setDefaults!: () => void
+  pageNumber!: number
+  setPageNumber!: (newPageNumber: number) => void
+  searchContactsPaginated!: (searchtext: string) => void
+  deleteContact!: (id: string) => void
 
   async created () {
     try {
@@ -289,10 +289,10 @@ export default class SearchContactsPage extends Vue {
   }
 
   initUrlQueryParams (): void {
-    const params:{[key: string]: string} = {}
+    const params: {[key: string]: string} = {}
 
     if (this.searchText) {
-      params.searchText= this.searchText
+      params.searchText = this.searchText
     }
     this.$router.push({
       query: params,

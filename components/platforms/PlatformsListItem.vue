@@ -252,8 +252,8 @@ export default class PlatformsListItem extends Vue {
   private show = false
 
   // vuex definition for typescript check
-  getPlatformTypeByUri!: (uri: string)=> PlatformType | undefined;
-  getEquipmentstatusByUri!: (uri: string)=> Status | undefined;
+  getPlatformTypeByUri!: (uri: string) => PlatformType | undefined
+  getEquipmentstatusByUri!: (uri: string) => Status | undefined
 
   getTextOrDefault = (text: string): string => text || '-'
 

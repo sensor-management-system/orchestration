@@ -84,9 +84,9 @@ export default class NewPlatformSoftwareUpdateActions extends Vue {
   private isSaving: boolean = false
 
   // vuex definition for typescript check
-  chosenKindOfPlatformAction!:IOptionsForActionType | null
-  addPlatformSoftwareUpdateAction!:({ platformId, softwareUpdateAction }: {platformId: string, softwareUpdateAction: SoftwareUpdateAction})=> Promise<SoftwareUpdateAction>
-  loadAllPlatformActions!:(id:string)=>void
+  chosenKindOfPlatformAction!: IOptionsForActionType | null
+  addPlatformSoftwareUpdateAction!: ({ platformId, softwareUpdateAction }: {platformId: string, softwareUpdateAction: SoftwareUpdateAction}) => Promise<SoftwareUpdateAction>
+  loadAllPlatformActions!: (id: string) => void
 
   created () {
     if (this.chosenKindOfPlatformAction === null) {

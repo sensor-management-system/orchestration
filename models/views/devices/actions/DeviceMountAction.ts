@@ -76,7 +76,7 @@ export class DeviceMountAction implements IDeviceMountAction, IDateCompareable {
     return this._parentPlatform
   }
 
-  get date(){
+  get date () {
     return this._basicData.date
   }
 

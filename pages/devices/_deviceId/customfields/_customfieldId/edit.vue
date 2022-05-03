@@ -76,13 +76,14 @@ export default class DeviceCustomFieldsShowPage extends Vue {
   private valueCopy: CustomTextField = new CustomTextField()
 
   // vuex definition for typescript check
-  loadDeviceCustomField!:( id: string)=>void
-  deviceCustomField!:CustomTextField
-  updateDeviceCustomField!:({
+  loadDeviceCustomField!: (id: string) => void
+  deviceCustomField!: CustomTextField
+  updateDeviceCustomField!: ({
     deviceId,
     deviceCustomField
-  }: { deviceId: string, deviceCustomField: CustomTextField })=> Promise<void>
-  loadDeviceCustomFields!:(id: string)=>void
+  }: { deviceId: string, deviceCustomField: CustomTextField }) => Promise<void>
+
+  loadDeviceCustomFields!: (id: string) => void
 
   async created () {
     try {

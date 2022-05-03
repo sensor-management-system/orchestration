@@ -50,7 +50,7 @@ export default class DeviceAttachmentsPage extends Vue {
   private isLoading = false
 
   // vuex definition for typescript check
-  loadDeviceAttachments!:(id:string)=>void
+  loadDeviceAttachments!: (id: string) => void
 
   async created () {
     try {
