@@ -167,7 +167,7 @@ const getters = {
     return result
   },
   locationActionsDates: (state: configurationsState) => {
-    let result = []
+    let result:{type:string,value:}[] = []
 
     if (state.configuration) {
       const datesWithTexts = []
@@ -247,11 +247,11 @@ const actions = {
     const totalPages = Math.ceil(totalCount / state.pageSize)
     commit('setTotalPages', totalPages)
   },
-  async loadConfiguration ({ commit }: { commit: Commit }, id: number) {
+  async loadConfiguration ({ commit }: { commit: Commit }, id: string) {
     const configuration = await this.$api.configurations.findById(id)
     commit('setConfiguration', configuration)
   },
-  async loadConfigurationContacts ({ commit }: { commit: Commit }, id: number) {
+  async loadConfigurationContacts ({ commit }: { commit: Commit }, id: string) {
     const configurationContacts = await this.$api.configurations.findRelatedContacts(id)
     commit('setConfigurationContacts', configurationContacts)
   },
@@ -265,7 +265,7 @@ const actions = {
     const projects = await this.$api.projects.findAll()
     commit('setProjects', projects)
   },
-  async deleteConfiguration ({ _commit }: { _commit: Commit }, id: number) {
+  async deleteConfiguration ({ _commit }: { _commit: Commit }, id: string) {
     await this.$api.configurations.deleteById(id)
   },
   saveConfiguration ({ _commit }: { _commit: Commit }, configuration: Configuration): Promise<Configuration> {
@@ -274,13 +274,13 @@ const actions = {
   addConfigurationContact ({ _commit }: { _commit: Commit }, {
     configurationId,
     contactId
-  }: { configurationId: number, contactId: number }): Promise<void> {
+  }: { configurationId: string, contactId: string }): Promise<void> {
     return this.$api.configurations.addContact(configurationId, contactId)
   },
   removeConfigurationContact ({ _commit }: { _commit: Commit }, {
     configurationId,
     contactId
-  }: { configurationId: number, contactId: number }): Promise<void> {
+  }: { configurationId: string, contactId: string }): Promise<void> {
     return this.$api.configurations.removeContact(configurationId, contactId)
   },
   addDeviceMountAction (
