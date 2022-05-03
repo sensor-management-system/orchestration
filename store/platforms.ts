@@ -72,7 +72,7 @@ interface platformsState {
   totalPages: number
 }
 
-const state = {
+const state = () => ({
   platforms: [],
   platform: null,
   platformContacts: [],
@@ -88,7 +88,7 @@ const state = {
   totalPages: 1,
   pageNumber: 1,
   pageSize: 20
-}
+})
 
 const getters = {
   actions: (state: platformsState) => {

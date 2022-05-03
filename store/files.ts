@@ -33,7 +33,7 @@
 import { Commit } from 'vuex'
 import { IUploadResult } from '@/services/sms/UploadApi'
 import { Api } from '@/services/Api'
-const state = {}
+const state = () => ({})
 
 const getters = {}
 

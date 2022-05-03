@@ -78,7 +78,7 @@ export interface configurationsState {
   pageSize: number
 }
 
-const state = {
+const state = () => ({
   configurations: [],
   configuration: null,
   configurationContacts: [],
@@ -87,7 +87,7 @@ const state = {
   totalPages: 1,
   pageNumber: 1,
   pageSize: 20
-}
+})
 
 const getters = {
   projectNames: (state: configurationsState) => {
@@ -170,7 +170,7 @@ const getters = {
     return result
   },
   locationActionsDates: (state: configurationsState) => {
-    let result = []
+    let result: IActionDateWithTextItem[] = []
 
     if (state.configuration) {
       const datesWithTexts = []

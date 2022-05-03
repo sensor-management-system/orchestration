@@ -87,7 +87,7 @@ interface devicesState {
   totalPages: number
 }
 
-const state = {
+const state = () => ({
   devices: [],
   device: null,
   deviceContacts: [],
@@ -109,7 +109,7 @@ const state = {
   pageNumber: 1,
   pageSize: 20,
   totalPages: 1
-}
+})
 
 const getters = {
   actions: (state: devicesState) => { // Todo actions sortieren, wobei ehrlich gesagt, eine extra route im Backend mit allen Actions (sortiert) besser wäre

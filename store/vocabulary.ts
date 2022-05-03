@@ -63,7 +63,7 @@ interface vocabularyState {
   measuredQuantityUnits: MeasuredQuantityUnit[]
 }
 
-const state = {
+const state = () => ({
   manufacturers: [],
   equipmentstatus: [],
   devicetypes: [],
@@ -75,7 +75,7 @@ const state = {
   properties: [],
   units: [],
   measuredQuantityUnits: []
-}
+})
 
 const getters = {
   getPlatformTypeByUri: (state: vocabularyState) => (uri: string): PlatformType | undefined => {

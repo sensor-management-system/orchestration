@@ -39,21 +39,21 @@ import { Api } from '@/services/Api'
 
 interface contactsState {
   contacts: Contact[],
-  contact: Contact|null,
+  contact: Contact | null,
   configurationContacts: Contact[],
   pageNumber: number,
   pageSize: number,
   totalPages: number
 }
 
-export const state = {
+export const state = () => ({
   contacts: [],
   contact: null,
   configurationContacts: [],
   totalPages: 1,
   pageNumber: 1,
   pageSize: 20
-}
+})
 export const getters = {
   searchContacts: (state: contactsState) => {
     return state.contacts.filter((c: Contact) => !state.configurationContacts.find((rc: Contact) => rc.id === c.id))
