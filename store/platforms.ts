@@ -131,10 +131,10 @@ const actions = {
   },
   async searchPlatforms ({
     commit
-  }: { commit: Commit }, searchParams: IPlatformSearchParams) {
+  }: { commit: Commit }, searchtext: string = '') {
     // @ts-ignore
     const platforms = await this.$api.platforms
-      .setSearchText(searchParams.searchText)
+      .setSearchText(searchtext)
       .searchAll()
     commit('setPlatforms', platforms)
   },
@@ -226,7 +226,7 @@ const actions = {
   updatePlatformSoftwareUpdateAction ({ _commit }: { _commit: Commit }, { platformId, softwareUpdateAction }: {platformId: string, softwareUpdateAction: SoftwareUpdateAction}): Promise<SoftwareUpdateAction> {
     return this.$api.platformSoftwareUpdateActions.update(platformId, softwareUpdateAction)
   },
-  deletePlatformSoftwareUpdateAction ({ _commit }: { _commit: Commit }, softwareUpdateActionId: number): Promise<void> {
+  deletePlatformSoftwareUpdateAction ({ _commit }: { _commit: Commit }, softwareUpdateActionId: string): Promise<void> {
     return this.$api.platformSoftwareUpdateActions.deleteById(softwareUpdateActionId)
   },
   updatePlatform ({ commit }: { commit: Commit }, platform: Platform) {

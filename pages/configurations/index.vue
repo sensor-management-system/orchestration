@@ -398,7 +398,7 @@ export default class SearchConfigurationsPage extends Vue {
     })
   }
 
-  getPageFromUrl (): number | undefined {
+  getPageFromUrl (): number {
     if ('page' in this.$route.query && typeof this.$route.query.page === 'string') {
       return parseInt(this.$route.query.page) || 1
     }

@@ -99,7 +99,7 @@ export default class DeviceSoftwareUpdateActionEditPage extends Vue {
   updateDeviceSoftwareUpdateAction!:({
     deviceId,
     softwareUpdateAction
-  }: { deviceId: number, softwareUpdateAction: SoftwareUpdateAction })=>Promise<SoftwareUpdateAction>
+  }: { deviceId: string, softwareUpdateAction: SoftwareUpdateAction })=>Promise<SoftwareUpdateAction>
   loadAllDeviceActions!:(id:string)=>void
 
   async created () {

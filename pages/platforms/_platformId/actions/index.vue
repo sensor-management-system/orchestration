@@ -164,7 +164,7 @@ export default class PlatformActionsShowPage extends Vue {
   // vuex definition for typescript check
   loadAllPlatformActions!:(id:string)=>void
   deletePlatformGenericAction!:(genericPlatformActionId: string)=> Promise<void>
-  deletePlatformSoftwareUpdateAction!:(softwareUpdateActionId: number)=> Promise<void>
+  deletePlatformSoftwareUpdateAction!:(softwareUpdateActionId: string)=> Promise<void>
 
 
   get platformId (): string {
@@ -215,9 +215,13 @@ export default class PlatformActionsShowPage extends Vue {
   }
 
   async deleteGenericAction () {
+    if(this.genericActionToDelete === null || this.genericActionToDelete.id ===null){
+      return
+    }
+
     try {
       this.isSaving = true
-      await this.deletePlatformGenericAction(this.genericActionToDelete!.id)
+      await this.deletePlatformGenericAction(this.genericActionToDelete.id)
       this.loadAllPlatformActions(this.platformId)
       this.$store.commit('snackbar/setSuccess', 'Generic action deleted')
     } catch (_error) {
@@ -229,9 +233,13 @@ export default class PlatformActionsShowPage extends Vue {
   }
 
   async deleteSoftwareUpdateAction () {
+    if(this.softwareUpdateActionToDelete === null || this.softwareUpdateActionToDelete.id ===null){
+      return
+    }
+
     try {
       this.isSaving = true
-      await this.deletePlatformSoftwareUpdateAction(this.softwareUpdateActionToDelete!.id)
+      await this.deletePlatformSoftwareUpdateAction(this.softwareUpdateActionToDelete.id)
       this.loadAllPlatformActions(this.platformId)
       this.$store.commit('snackbar/setSuccess', 'Software update action deleted')
     } catch (_error) {

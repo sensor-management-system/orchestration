@@ -164,7 +164,7 @@ export default class PlatformAttachmentAddPage extends mixins(Rules, UploadRules
     try {
       this.isSaving = true
 
-      if (this.attachmentType !== 'url') {
+      if (this.attachmentType !== 'url' && this.file !== null) {
         // Due to the validation we can be sure that the file is not null
         const uploadResult = await this.uploadFile(this.file)
         this.attachment.url = uploadResult.url

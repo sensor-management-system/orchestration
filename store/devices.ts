@@ -156,10 +156,10 @@ const actions = {
   },
   async searchDevices ({
     commit
-  }: { commit: Commit }, searchParams: IDeviceSearchParams) {
+  }: { commit: Commit }, searchtext: string = '') {
     // @ts-ignore
     const devices = await this.$api.devices
-      .setSearchText(searchParams.searchText)
+      .setSearchText(searchText)
       .searchAll()
     commit('setDevices', devices)
   },
@@ -277,7 +277,7 @@ const actions = {
   updateDeviceSoftwareUpdateAction ({ _commit }: { _commit: Commit }, {
     deviceId,
     softwareUpdateAction
-  }: { deviceId: number, softwareUpdateAction: SoftwareUpdateAction }): Promise<SoftwareUpdateAction> {
+  }: { deviceId: string, softwareUpdateAction: SoftwareUpdateAction }): Promise<SoftwareUpdateAction> {
     return this.$api.deviceSoftwareUpdateActions.update(deviceId, softwareUpdateAction)
   },
   deleteDeviceSoftwareUpdateAction ({ _commit }: { _commit: Commit }, softwareUpdateActionId: string): Promise<void> {

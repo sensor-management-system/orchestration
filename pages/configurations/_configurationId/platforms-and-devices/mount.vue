@@ -407,8 +407,8 @@ export default class ConfigurationMountPlatformsAndDevicesPage extends Vue {
   private tab = null
   private step = 1
 
-  private searchTextPlatforms: string|null = null
-  private searchTextDevices: string|null = null
+  private searchTextPlatforms: string = ''
+  private searchTextDevices: string = ''
   private selectedType: string|null = null
   private selectedNode: ConfigurationsTreeNode | null = null
   private selectedDate = DateTime.utc()
@@ -418,8 +418,8 @@ export default class ConfigurationMountPlatformsAndDevicesPage extends Vue {
   // vuex definition for typescript check
   loadAllContacts!:()=>void
   configuration!:Configuration
-  searchDevices!:(searchParams: IDeviceSearchParams)=>void
-  searchPlatforms!:(searchParams: IPlatformSearchParams)=>void
+  searchDevices!:(searchText:string)=>void
+  searchPlatforms!:(searchText:string)=>void
   addDeviceMountAction!:(    {
     configurationId,
     deviceMountAction
@@ -479,7 +479,7 @@ export default class ConfigurationMountPlatformsAndDevicesPage extends Vue {
   async searchDevicesForMount () {
     try {
       this.isLoading = true
-      await this.searchDevices({ searchText: this.searchTextDevices })
+      await this.searchDevices(this.searchTextDevices )
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Loading of devices failed')
     } finally {

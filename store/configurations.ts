@@ -40,9 +40,11 @@ import { Project } from '@/models/Project'
 import { IConfigurationSearchParams } from '@/modelUtils/ConfigurationSearchParams'
 import { Contact } from '@/models/Contact'
 import {
-  DeviceMountTimelineAction, DeviceUnmountTimelineAction,
+  DeviceMountTimelineAction,
+  DeviceUnmountTimelineAction,
   DynamicLocationBeginTimelineAction,
-  DynamicLocationEndTimelineAction, IActionDateWithTextItem,
+  DynamicLocationEndTimelineAction,
+  IActionDateWithTextItem,
   ITimelineAction,
   PlatformMountTimelineAction,
   PlatformUnmountTimelineAction,
