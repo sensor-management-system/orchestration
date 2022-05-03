@@ -469,11 +469,11 @@ export default class ConfigurationMountPlatformsAndDevicesPage extends Vue {
   }
 
   clearBasicSearchPlatforms () {
-    this.searchTextPlatforms = null
+    this.searchTextPlatforms = ''
   }
 
   clearBasicSearchDevices () {
-    this.searchTextPlatforms = null
+    this.searchTextPlatforms = ''
   }
 
   async searchDevicesForMount () {
@@ -490,7 +490,7 @@ export default class ConfigurationMountPlatformsAndDevicesPage extends Vue {
   async searchPlatformsForMount () {
     try {
       this.isLoading = true
-      await this.searchPlatforms({ searchText: this.searchTextPlatforms })
+      await this.searchPlatforms(this.searchTextPlatforms)
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Loading of platforms failed')
     } finally {

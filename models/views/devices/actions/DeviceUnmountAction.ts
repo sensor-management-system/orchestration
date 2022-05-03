@@ -33,6 +33,7 @@
 import { DeviceUnmountActionBasicData } from '@/models/basic/DeviceUnmountActionBasicData'
 import { ConfigurationBasicData } from '@/models/basic/ConfigurationBasicData'
 import { ContactBasicData } from '@/models/basic/ContactBasicData'
+import { IDateCompareable } from '@/modelUtils/Compareables'
 
 export interface IDeviceUnmountAction {
   basicData: DeviceUnmountActionBasicData
@@ -40,7 +41,7 @@ export interface IDeviceUnmountAction {
   contact: ContactBasicData
 }
 
-export class DeviceUnmountAction implements IDeviceUnmountAction {
+export class DeviceUnmountAction implements IDeviceUnmountAction, IDateCompareable {
   private _basicData: DeviceUnmountActionBasicData
   private _configuration: ConfigurationBasicData
   private _contact: ContactBasicData
@@ -64,6 +65,10 @@ export class DeviceUnmountAction implements IDeviceUnmountAction {
 
   get contact (): ContactBasicData {
     return this._contact
+  }
+
+  get date(){
+    return this._basicData.date
   }
 
   static createFromObject (otherAction: IDeviceUnmountAction): DeviceUnmountAction {

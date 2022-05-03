@@ -58,6 +58,7 @@ import { DeviceMountAction } from '@/models/DeviceMountAction'
 import { PlatformMountAction } from '@/models/PlatformMountAction'
 import { DeviceUnmountAction } from '@/models/DeviceUnmountAction'
 import { PlatformUnmountAction } from '@/models/PlatformUnmountAction'
+import { Api } from '@/services/Api'
 
 export enum LocationTypes {
   staticStart='staticStart',
@@ -169,7 +170,7 @@ const getters = {
     return result
   },
   locationActionsDates: (state: configurationsState) => {
-    let result:{type:string,value:}[] = []
+    let result = []
 
     if (state.configuration) {
       const datesWithTexts = []
@@ -230,12 +231,16 @@ const getters = {
   }
 }
 
-const actions = {
+
+// @ts-ignore
+const actions:{
+  [key:string]: any;
+  $api:Api
+} = {
   async searchConfigurationsPaginated ({
     commit,
     state
   }: { commit: Commit, state: configurationsState }, searchParams: IConfigurationSearchParams) {
-    // @ts-ignore
     const {
       elements,
       totalCount
@@ -258,12 +263,10 @@ const actions = {
     commit('setConfigurationContacts', configurationContacts)
   },
   async loadConfigurationsStates ({ commit }: { commit: Commit }) {
-    // @ts-ignore
     const configurationStates = await this.$api.configurationStates.findAll()
     commit('setConfigurationStates', configurationStates)
   },
   async loadProjects ({ commit }: { commit: Commit }) {
-    // @ts-ignore
     const projects = await this.$api.projects.findAll()
     commit('setProjects', projects)
   },
@@ -291,7 +294,7 @@ const actions = {
       configurationId,
       deviceMountAction
     }: { configurationId: string, deviceMountAction: DeviceMountAction }
-  ): Promise<void> {
+  ): Promise<string> {
     return this.$api.configurations.deviceMountActionApi.add(configurationId, deviceMountAction)
   },
   addDeviceUnMountAction ({ _commit }: { _commit: Commit },
@@ -307,7 +310,7 @@ const actions = {
       configurationId,
       platformMountAction
     }: { configurationId: string, platformMountAction: PlatformMountAction }
-  ): Promise<void> {
+  ): Promise<string> {
     return this.$api.configurations.platformMountActionApi.add(configurationId, platformMountAction)
   },
   addPlatformUnMountAction ({ _commit }: { _commit: Commit },

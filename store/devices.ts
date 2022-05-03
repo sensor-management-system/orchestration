@@ -38,8 +38,8 @@ import { Contact } from '@/models/Contact'
 import { Attachment } from '@/models/Attachment'
 import { GenericAction } from '@/models/GenericAction'
 import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
-import { DeviceMountAction } from '@/models/DeviceMountAction'
-import { DeviceUnmountAction } from '@/models/DeviceUnmountAction'
+import { DeviceMountAction } from '@/models/views/devices/actions/DeviceMountAction'
+import { DeviceUnmountAction } from '@/models/views/devices/actions/DeviceUnmountAction'
 import { DeviceCalibrationAction } from '@/models/DeviceCalibrationAction'
 import { IActionType } from '@/models/ActionType'
 import { DeviceProperty } from '@/models/DeviceProperty'
@@ -47,6 +47,7 @@ import { CustomTextField } from '@/models/CustomTextField'
 import { DeviceUnmountActionWrapper } from '@/viewmodels/DeviceUnmountActionWrapper'
 import { DeviceMountActionWrapper } from '@/viewmodels/DeviceMountActionWrapper'
 import { IDateCompareable } from '@/modelUtils/Compareables'
+import { Api } from '@/services/Api'
 
 const KIND_OF_ACTION_TYPE_DEVICE_CALIBRATION = 'device_calibration'
 const KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE = 'software_update'
@@ -120,14 +121,20 @@ const getters = {
       ...state.deviceCalibrationActions
     ]
     // sort the actions
-    actions = actions.sort((a: IDateCompareable, b: IDateCompareable): number => {
+    actions = actions.sort((a:IDateCompareable, b:IDateCompareable): number => {
+      if(a.date === null) return 0
+      if(b.date === null) return 0
       return a.date < b.date ? 1 : a.date > b.date ? -1 : 0
     })
     return actions
   }
 }
 
-const actions = {
+// @ts-ignore
+const actions:{
+  [key:string]: any;
+  $api:Api
+} = {
   async searchDevicesPaginated ({
     commit,
     state
@@ -156,7 +163,7 @@ const actions = {
   },
   async searchDevices ({
     commit
-  }: { commit: Commit }, searchtext: string = '') {
+  }: { commit: Commit }, searchText: string = '') {
     // @ts-ignore
     const devices = await this.$api.devices
       .setSearchText(searchText)
@@ -184,7 +191,7 @@ const actions = {
     const deviceContacts = await this.$api.devices.findRelatedContacts(id)
     commit('setDeviceContacts', deviceContacts)
   },
-  async loadDeviceAttachments ({ commit }: { commit: Commit }, string: number) {
+  async loadDeviceAttachments ({ commit }: { commit: Commit }, id: string) {
     const deviceAttachments = await this.$api.devices.findRelatedDeviceAttachments(id)
     commit('setDeviceAttachments', deviceAttachments)
   },
@@ -207,15 +214,15 @@ const actions = {
     await dispatch('loadDeviceUnmountActions', id)
     await dispatch('loadDeviceCalibrationActions', id)
   },
-  async loadDeviceGenericActions ({ commit }: { commit: Commit }, id: number) {
+  async loadDeviceGenericActions ({ commit }: { commit: Commit }, id: string) {
     const deviceGenericActions = await this.$api.devices.findRelatedGenericActions(id)
     commit('setDeviceGenericActions', deviceGenericActions)
   },
-  async loadDeviceGenericAction ({ commit }: { commit: Commit }, actionId: number) {
+  async loadDeviceGenericAction ({ commit }: { commit: Commit }, actionId: string) {
     const deviceGenericAction = await this.$api.genericDeviceActions.findById(actionId)
     commit('setDeviceGenericAction', deviceGenericAction)
   },
-  async loadDeviceSoftwareUpdateActions ({ commit }: { commit: Commit }, id: number) {
+  async loadDeviceSoftwareUpdateActions ({ commit }: { commit: Commit }, id: string) {
     const deviceSoftwareUpdateActions = await this.$api.devices.findRelatedSoftwareUpdateActions(id)
     commit('setDeviceSoftwareUpdateActions', deviceSoftwareUpdateActions)
   },
@@ -223,7 +230,7 @@ const actions = {
     const deviceSoftwareUpdateAction = await this.$api.deviceSoftwareUpdateActions.findById(actionId)
     commit('setDeviceSoftwareUpdateAction', deviceSoftwareUpdateAction)
   },
-  async loadDeviceCalibrationActions ({ commit }: { commit: Commit }, id: number) {
+  async loadDeviceCalibrationActions ({ commit }: { commit: Commit }, id: string) {
     const deviceCalibrationActions = await this.$api.devices.findRelatedCalibrationActions(id)
     commit('setDeviceCalibrationActions', deviceCalibrationActions)
   },
@@ -231,7 +238,7 @@ const actions = {
     const deviceCalibrationAction = await this.$api.deviceCalibrationActions.findById(actionId)
     commit('setDeviceCalibrationAction', deviceCalibrationAction)
   },
-  async loadDeviceMountActions ({ commit }: { commit: Commit }, id: number) {
+  async loadDeviceMountActions ({ commit }: { commit: Commit }, id: string) {
     const deviceMountActions = await this.$api.devices.findRelatedMountActions(id)
 
     const wrappedDeviceMountActions = deviceMountActions.map((action: DeviceMountAction) => {
@@ -240,7 +247,7 @@ const actions = {
 
     commit('setDeviceMountActions', wrappedDeviceMountActions)
   },
-  async loadDeviceUnmountActions ({ commit }: { commit: Commit }, id: number) {
+  async loadDeviceUnmountActions ({ commit }: { commit: Commit }, id: string) {
     const deviceUnmountActions = await this.$api.devices.findRelatedUnmountActions(id)
 
     const wrappedDeviceUnmountActions = deviceUnmountActions.map((action: DeviceUnmountAction) => {
@@ -252,7 +259,7 @@ const actions = {
     const deviceCustomFields = await this.$api.devices.findRelatedCustomFields(id)
     commit('setDeviceCustomFields', deviceCustomFields)
   },
-  async loadDeviceCustomField ({ commit }: {commit: Commit}, id: number) {
+  async loadDeviceCustomField ({ commit }: {commit: Commit}, id: string) {
     const deviceCustomField = await this.$api.customfields.findById(id)
     commit('setDeviceCustomField', deviceCustomField)
   },
@@ -307,13 +314,13 @@ const actions = {
   addDeviceAttachment ({ _commit }: { _commit: Commit }, {
     deviceId,
     attachment
-  }: { deviceId: string, attachment: Attachment }): Promise<void> {
+  }: { deviceId: string, attachment: Attachment }): Promise<Attachment> {
     return this.$api.deviceAttachments.add(deviceId, attachment)
   },
   updateDeviceAttachment ({ _commit }: { _commit: Commit }, {
     deviceId,
     attachment
-  }: { deviceId: string, attachment: Attachment }): Promise<void> {
+  }: { deviceId: string, attachment: Attachment }): Promise<Attachment> {
     return this.$api.deviceAttachments.update(deviceId, attachment)
   },
   deleteDeviceCustomField ({ _commit }: { _commit: Commit }, customField: string): Promise<void> {
@@ -322,13 +329,13 @@ const actions = {
   addDeviceCustomField ({ _commit }: { _commit: Commit }, {
     deviceId,
     deviceCustomField
-  }: { deviceId: string, deviceCustomField: CustomTextField }): Promise<void> {
+  }: { deviceId: string, deviceCustomField: CustomTextField }): Promise<CustomTextField> {
     return this.$api.customfields.add(deviceId, deviceCustomField)
   },
   updateDeviceCustomField ({ _commit }: { _commit: Commit }, {
     deviceId,
     deviceCustomField
-  }: { deviceId: string, deviceCustomField: CustomTextField }): Promise<void> {
+  }: { deviceId: string, deviceCustomField: CustomTextField }): Promise<CustomTextField> {
     return this.$api.customfields.update(deviceId, deviceCustomField)
   },
   deleteDeviceMeasuredQuantity ({ _commit }: { _commit: Commit }, measuredQuantityId: string): Promise<void> {
@@ -337,13 +344,13 @@ const actions = {
   addDeviceMeasuredQuantity ({ _commit }: { _commit: Commit }, {
     deviceId,
     deviceMeasuredQuantity
-  }: { deviceId: string, deviceMeasuredQuantity: DeviceProperty }): Promise<void> {
+  }: { deviceId: string, deviceMeasuredQuantity: DeviceProperty }): Promise<DeviceProperty> {
     return this.$api.deviceProperties.add(deviceId, deviceMeasuredQuantity)
   },
   updateDeviceMeasuredQuantity ({ _commit }: { _commit: Commit }, {
     deviceId,
     deviceMeasuredQuantity
-  }: { deviceId: string, deviceMeasuredQuantity: DeviceProperty }): Promise<void> {
+  }: { deviceId: string, deviceMeasuredQuantity: DeviceProperty }): Promise<DeviceProperty> {
     return this.$api.deviceProperties.update(deviceId, deviceMeasuredQuantity)
   },
   addDeviceContact ({ _commit }: { _commit: Commit }, {

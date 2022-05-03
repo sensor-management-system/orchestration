@@ -34,6 +34,7 @@ import { DeviceMountActionBasicData } from '@/models/basic/DeviceMountActionBasi
 import { ConfigurationBasicData } from '@/models/basic/ConfigurationBasicData'
 import { ContactBasicData } from '@/models/basic/ContactBasicData'
 import { PlatformBasicData } from '@/models/basic/PlatformBasicData'
+import { IDateCompareable } from '@/modelUtils/Compareables'
 
 export interface IDeviceMountAction {
   basicData: DeviceMountActionBasicData
@@ -42,7 +43,7 @@ export interface IDeviceMountAction {
   parentPlatform: PlatformBasicData | null
 }
 
-export class DeviceMountAction implements IDeviceMountAction {
+export class DeviceMountAction implements IDeviceMountAction, IDateCompareable {
   private _basicData: DeviceMountActionBasicData
   private _configuration: ConfigurationBasicData
   private _contact: ContactBasicData
@@ -73,6 +74,10 @@ export class DeviceMountAction implements IDeviceMountAction {
 
   get parentPlatform (): PlatformBasicData | null {
     return this._parentPlatform
+  }
+
+  get date(){
+    return this._basicData.date
   }
 
   static createFromObject (otherAction: IDeviceMountAction): DeviceMountAction {
