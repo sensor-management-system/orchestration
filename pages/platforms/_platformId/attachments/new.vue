@@ -117,6 +117,7 @@ import { Attachment } from '@/models/Attachment'
 
 import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { IUploadResult } from '@/services/sms/UploadApi'
 
 @Component({
   components: { ProgressIndicator, SaveAndCancelButtons },
@@ -131,6 +132,12 @@ export default class PlatformAttachmentAddPage extends mixins(Rules, UploadRules
   private attachmentType: string = 'file'
   private file: File | null = null
   private isSaving: boolean = false
+
+  // vuex definition for typescript check
+  uploadFile!:(file: File)=> Promise<IUploadResult>
+  addPlatformAttachment!:( { platformId, attachment }: {platformId: string, attachment: Attachment})=> Promise<void>
+  loadPlatformAttachments!:(id:string)=>void
+
 
   /**
    * returns a list of MimeTypes, seperated by ,

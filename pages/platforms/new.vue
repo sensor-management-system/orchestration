@@ -91,6 +91,11 @@ export default class PlatformNewPage extends Vue {
   private platform: Platform = new Platform()
   private isLoading: boolean = false
 
+  // vuex definition for typescript check
+  initPlatformsNewAppBar!:()=>void
+  setDefaults!:()=>void
+  savePlatform!:(platform: Platform)=> Promise<Platform>
+
   created () {
     this.initPlatformsNewAppBar()
   }
@@ -99,7 +104,7 @@ export default class PlatformNewPage extends Vue {
     this.setDefaults()
   }
 
-  async save (): void {
+  async save () {
     if (!(this.$refs.basicForm as Vue & { validateForm: () => boolean }).validateForm()) {
       this.$store.commit('snackbar/setError', 'Please correct your input')
       return

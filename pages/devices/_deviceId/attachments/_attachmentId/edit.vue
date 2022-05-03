@@ -119,6 +119,16 @@ export default class AttachmentEditPage extends mixins(AttachmentsMixin) {
   private isLoading = false
   private valueCopy: Attachment = new Attachment()
 
+  // vuex definition for typescript check
+  loadDeviceAttachment!:(id:string)=>void
+  deviceAttachment!:Attachment
+  loadDeviceAttachments!:(id:string)=>void
+  updateDeviceAttachment!: ({
+    deviceId,
+    attachment
+  }: { deviceId: string, attachment: Attachment })=> Promise<void>
+
+
   async created () {
     try {
       this.isLoading = true

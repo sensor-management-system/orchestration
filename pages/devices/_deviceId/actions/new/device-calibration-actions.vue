@@ -70,6 +70,7 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
 
 import { DeviceCalibrationAction } from '@/models/DeviceCalibrationAction'
+import { IOptionsForActionType } from '@/store/devices'
 @Component({
   middleware: ['auth'],
   components: {
@@ -83,6 +84,16 @@ import { DeviceCalibrationAction } from '@/models/DeviceCalibrationAction'
 export default class NewDeviceCalibrationAction extends Vue {
   private deviceCalibrationAction: DeviceCalibrationAction = new DeviceCalibrationAction()
   private isSaving: boolean = false
+
+  // vuex definition for typescript check
+  addDeviceCalibrationAction!:({
+    deviceId,
+    calibrationDeviceAction
+  }: { deviceId: string, calibrationDeviceAction: DeviceCalibrationAction })=>Promise<DeviceCalibrationAction>
+  loadAllDeviceActions!:(id:string)=>void
+  chosenKindOfDeviceAction!:IOptionsForActionType | null
+
+
 
   created () {
     if (this.chosenKindOfDeviceAction === null) {

@@ -247,7 +247,7 @@ import { PlatformType } from '@/models/PlatformType'
 import { Status } from '@/models/Status'
 
 import { QueryParams } from '@/modelUtils/QueryParams'
-import { PlatformSearchParamsSerializer } from '@/modelUtils/PlatformSearchParams'
+import { IPlatformSearchParams, PlatformSearchParamsSerializer } from '@/modelUtils/PlatformSearchParams'
 
 @Component({
   components: {
@@ -286,6 +286,23 @@ export default class SearchPlatformsPage extends Vue {
   private showDeleteDialog: boolean = false
 
   private platformToDelete: Platform | null = null
+
+  // vuex definition for typescript check
+  loadEquipmentstatus!:()=>void
+  loadPlatformtypes!:()=>void
+  loadManufacturers!:()=>void
+  initPlatformsIndexAppBar!:()=>void
+  setDefaults!:()=>void
+  pageNumber!:number
+  setPageNumber!:(newPageNumber: number)=>void
+  searchPlatformsPaginated!:(searchParams: IPlatformSearchParams)=>void
+  platforms!:Platform[]
+  exportAsCsv!:(searchParams: IPlatformSearchParams)=> Promise<Blob>
+  deletePlatform!:(id:string)=>void
+  platformtypes!:  PlatformType[]
+  manufacturers!:  Manufacturer[]
+  equipmentstatus!: Status[]
+
 
   async created () {
     try {
@@ -349,7 +366,7 @@ export default class SearchPlatformsPage extends Vue {
     await this.runSearch()
   }
 
-  basicSearch (): Promise<void> {
+  basicSearch (){
     this.selectedSearchManufacturers = []
     this.selectedSearchStates = []
     this.selectedSearchPlatformTypes = []
@@ -363,7 +380,7 @@ export default class SearchPlatformsPage extends Vue {
     this.initUrlQueryParams()
   }
 
-  extendedSearch (): Promise<void> {
+  extendedSearch () {
     this.page = 1// Important to set page to one otherwise it's possible that you don't anything
     this.runSearch()
   }
@@ -391,16 +408,17 @@ export default class SearchPlatformsPage extends Vue {
     }
   }
 
-  exportCsv () {
+  async exportCsv () {
     if (this.platforms.length > 0) {
-      this.processing = true
-      this.exportAsCsv(this.searchParams).then((blob) => {
+      try {
+        this.processing = true
+        const blob = await this.exportAsCsv(this.searchParams)
         saveAs(blob, 'platforms.csv')
-      }).catch((_err) => {
+      } catch (e) {
         this.$store.commit('snackbar/setError', 'CSV export failed')
-      }).finally(() => {
+      } finally {
         this.processing = false
-      })
+      }
     }
   }
 
@@ -433,9 +451,9 @@ export default class SearchPlatformsPage extends Vue {
 
   initSearchQueryParams (): void {
     const searchParamsObject = (new PlatformSearchParamsSerializer({
-      states: this.states,
-      platformTypes: this.platformTypes,
-      manufacturer: this.manufacturer
+      states: this.equipmentstatus,
+      platformTypes: this.platformtypes,
+      manufacturer: this.manufacturers
     })).toSearchParams(this.$route.query)
 
     // prefill the form by the serialized search params from the URL

@@ -86,6 +86,12 @@ export default class ContactEditPage extends Vue {
   private isLoading: boolean = false
   private contactCopy: Contact = new Contact()
 
+  // vuex definition for typescript check
+  initContactsContactIdEditAppBar!: (title: string)=>void
+  contact!:Contact
+  saveContact!:(contact: Contact)=> Promise<Contact>
+  loadContact!:(id:string)=>void
+
   created () {
     this.initContactsContactIdEditAppBar(this.contact.toString())
     this.contactCopy = Contact.createFromObject(this.contact)

@@ -90,6 +90,13 @@ export default class DevicePropertyAddPage extends Vue {
   private isSaving = false
   private valueCopy: DeviceProperty = new DeviceProperty()
 
+  // vuex definition for typescript check
+  addDeviceMeasuredQuantity!:({
+    deviceId,
+    deviceMeasuredQuantity
+  }: { deviceId: string, deviceMeasuredQuantity: DeviceProperty })=> Promise<void>
+  loadDeviceMeasuredQuantities!:(id:string)=>void
+
   get deviceId (): string {
     return this.$route.params.deviceId
   }

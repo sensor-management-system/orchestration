@@ -92,7 +92,7 @@ export default class ConfigurationsTreeView extends Vue {
    *
    * @return {string[]} an empty array or an Array with the id of exactly one selected node
    */
-  get selectedNodeSingletonList (): string[] {
+  get selectedNodeSingletonList (): ConfigurationsTreeNode[] {
     if (this.value === null) {
       return []
     }
@@ -105,10 +105,9 @@ export default class ConfigurationsTreeView extends Vue {
    * notice that in this component the selection of only one node is supported
    * so this method sets the first item of the argument array
    *
-   * @param {string[]} nodeIds - an Array with the ids of the selected nodes
    * @fires ConfigurationsTreeView#select
    */
-  set selectedNodeSingletonList (nodesArray) {
+  set selectedNodeSingletonList (nodesArray:ConfigurationsTreeNode[]) {
     const node: ConfigurationsTreeNode | null = nodesArray[0] ?? null
     this.$emit('input', node)
   }

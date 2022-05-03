@@ -84,6 +84,11 @@ export default class PlatformEditBasicPage extends Vue {
   private platformCopy: Platform = new Platform()
   private isSaving: boolean = false
 
+  // vuex definition for typescript check
+  platform!:Platform
+  savePlatform!:( platform: Platform)=> Promise<Platform>
+  loadPlatform!:({ platformId, includeContacts, includePlatformAttachments }: {platformId: string, includeContacts: boolean, includePlatformAttachments: boolean})=>void
+
   created () {
     this.platformCopy = Platform.createFromObject(this.platform)
   }

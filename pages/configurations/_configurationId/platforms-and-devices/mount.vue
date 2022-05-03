@@ -378,6 +378,9 @@ import { PlatformMountAction } from '@/models/PlatformMountAction'
 import HintCard from '@/components/HintCard.vue'
 import { dateToDateTimeStringHHMM } from '@/utils/dateHelper'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { Configuration } from '@/models/Configuration'
+import { IDeviceSearchParams } from '@/modelUtils/DeviceSearchParams'
+import { IPlatformSearchParams } from '@/modelUtils/PlatformSearchParams'
 
 @Component({
   components: { ProgressIndicator, HintCard, PlatformMountListItem, ConfigurationsPlatformDeviceMountForm, DevicesMountListItem, DevicesListItem, BaseList, DateTimePicker, ConfigurationsTreeView },
@@ -409,8 +412,23 @@ export default class ConfigurationMountPlatformsAndDevicesPage extends Vue {
   private selectedType: string|null = null
   private selectedNode: ConfigurationsTreeNode | null = null
   private selectedDate = DateTime.utc()
-  private platformToMount: Platform|null = null
-  private deviceToMount: Device|null = null
+  private platformToMount: {platform:Platform,mountInfo:{}}|null = null
+  private deviceToMount: {device:Device,mountInfo:{}}|null = null
+
+  // vuex definition for typescript check
+  loadAllContacts!:()=>void
+  configuration!:Configuration
+  searchDevices!:(searchParams: IDeviceSearchParams)=>void
+  searchPlatforms!:(searchParams: IPlatformSearchParams)=>void
+  addDeviceMountAction!:(    {
+    configurationId,
+    deviceMountAction
+  }: { configurationId: string, deviceMountAction: DeviceMountAction })=>Promise<void>
+  addPlatformMountAction!:( {
+    configurationId,
+    platformMountAction
+  }: { configurationId: string, platformMountAction: PlatformMountAction })=>Promise<void>
+  loadConfiguration!: (id: string)=>void
 
   async created () {
     try {
@@ -482,14 +500,14 @@ export default class ConfigurationMountPlatformsAndDevicesPage extends Vue {
 
   mount () {
     if (this.isPlatformSelectedForMount) {
-      this.mountPlatform(this.platformToMount.platform, this.platformToMount.mountInfo)
+      this.mountPlatform(this.platformToMount!.platform, this.platformToMount!.mountInfo)
     }
     if (this.isDeviceSelectedForMount) {
-      this.mountDevice(this.deviceToMount.device, this.deviceToMount.mountInfo)
+      this.mountDevice(this.deviceToMount!.device, this.deviceToMount!.mountInfo)
     }
   }
 
-  mountDevice (device, mountInfo) {
+  mountDevice (device:Device, mountInfo:any) {
     try {
       if (this.selectedNode && !this.selectedNode.canHaveChildren()) {
         this.$store.commit('snackbar/setError', 'Selected node-type cannot have children')
@@ -530,7 +548,7 @@ export default class ConfigurationMountPlatformsAndDevicesPage extends Vue {
     }
   }
 
-  async mountPlatform (platform, mountInfo) {
+  async mountPlatform (platform:Platform, mountInfo:any) {
     try {
       if (this.selectedNode && !this.selectedNode.canHaveChildren()) {
         this.$store.commit('snackbar/setError', 'Selected node-type cannot have children')
@@ -571,7 +589,7 @@ export default class ConfigurationMountPlatformsAndDevicesPage extends Vue {
     }
   }
 
-  setPlatformToMount (platform, mountInfo) {
+  setPlatformToMount (platform:Platform, mountInfo: any) {
     this.deviceToMount = null
     this.platformToMount = {
       platform,
@@ -580,7 +598,7 @@ export default class ConfigurationMountPlatformsAndDevicesPage extends Vue {
     this.$store.commit('snackbar/setSuccess', 'Selected platform confirmed')
   }
 
-  setDeviceToMount (device, mountInfo) {
+  setDeviceToMount (device:Device, mountInfo:any) {
     this.platformToMount = null
 
     this.deviceToMount = {

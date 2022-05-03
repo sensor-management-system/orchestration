@@ -59,6 +59,7 @@ import { Component, Vue } from 'nuxt-property-decorator'
 
 import { mapActions, mapGetters, mapState } from 'vuex'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { IOptionsForActionType } from '@/store/devices'
 
 const KIND_OF_ACTION_TYPE_DEVICE_CALIBRATION = 'device_calibration'
 const KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE = 'software_update'
@@ -78,6 +79,13 @@ const KIND_OF_ACTION_TYPE_GENERIC_DEVICE_ACTION = 'generic_device_action'
 })
 export default class ActionAddPage extends Vue {
   private isLoading: boolean = false
+
+  // vuex definition for typescript check
+  loadDeviceGenericActionTypes!:()=>void
+  loadDeviceAttachments!: (id:string)=>void
+  loadDeviceMeasuredQuantities!:(id:string)=>void
+  chosenKindOfDeviceAction!:IOptionsForActionType | null
+  setChosenKindOfDeviceAction!:(newval: IOptionsForActionType | null)=>void
 
   async created () {
     try {

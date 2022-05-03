@@ -109,6 +109,7 @@ import DotMenuActionCopy from '@/components/DotMenuActionCopy.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 import PlatformDeleteDialog from '@/components/platforms/PlatformDeleteDialog.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { Platform } from '@/models/Platform'
 
 @Component({
   components: {
@@ -127,6 +128,10 @@ export default class PlatformShowBasicPage extends Vue {
 
   private showDeleteDialog: boolean = false
 
+  // vuex definition for typescript check
+  platform!:Platform
+  deletePlatform!:(id: string)=>void
+
   get platformId () {
     return this.$route.params.platformId
   }
@@ -141,7 +146,7 @@ export default class PlatformShowBasicPage extends Vue {
 
   async deleteAndCloseDialog () {
     this.showDeleteDialog = false
-    if (this.platform === null) {
+    if (this.platform === null || this.platform.id ===null) {
       return
     }
 

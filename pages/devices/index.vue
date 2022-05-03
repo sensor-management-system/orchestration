@@ -260,7 +260,7 @@ import { Component, Vue } from 'nuxt-property-decorator'
 
 import { saveAs } from 'file-saver'
 
-import { mapActions, mapState } from 'vuex'
+import { Commit, mapActions, mapState } from 'vuex'
 import DeviceTypeSelect from '@/components/DeviceTypeSelect.vue'
 import ManufacturerSelect from '@/components/ManufacturerSelect.vue'
 import StatusSelect from '@/components/StatusSelect.vue'
@@ -277,7 +277,7 @@ import { Manufacturer } from '@/models/Manufacturer'
 import { Status } from '@/models/Status'
 
 import { QueryParams } from '@/modelUtils/QueryParams'
-import { DeviceSearchParamsSerializer } from '@/modelUtils/DeviceSearchParams'
+import { DeviceSearchParamsSerializer, IDeviceSearchParams } from '@/modelUtils/DeviceSearchParams'
 
 @Component({
   components: {
@@ -313,6 +313,22 @@ export default class SearchDevicesPage extends Vue {
 
   private showDeleteDialog: boolean = false
   private deviceToDelete: Device | null = null
+
+  // vuex definition for typescript check
+  initDevicesIndexAppBar!:()=>void
+  setDefaults!:()=>void
+  loadEquipmentstatus!:()=>void
+  loadDevicetypes!:()=>void
+  loadManufacturers!:()=>void
+  pageNumber!:number
+  setPageNumber!:(newPageNumber: number)=>void
+  searchDevicesPaginated!:( searchParams: IDeviceSearchParams)=>void
+  devices!:Device[]
+  exportAsCsv!:(searchParams: IDeviceSearchParams)=>Promise<Blob>
+  deleteDevice!:(id:string)=>void
+  equipmentstatus!:Status[]
+  devicetypes!:  DeviceType[]
+  manufacturers!:  Manufacturer[]
 
   async created () {
     try {
@@ -411,25 +427,26 @@ export default class SearchDevicesPage extends Vue {
       this.initUrlQueryParams()
       await this.searchDevicesPaginated(this.searchParams)
       this.setPageInUrl()
-    } catch (_error) {
+    } catch {
       this.$store.commit('snackbar/setError', 'Loading of devices failed')
     } finally {
       this.loading = false
     }
   }
 
-  exportCsv () {
+  async exportCsv () {
     if (this.devices.length > 0) {
-      this.processing = true
-      this.exportAsCsv(this.searchParams).then((blob) => {
+      try {
+        this.processing = true
+        const blob = await this.exportAsCsv(this.searchParams)
         saveAs(blob, 'devices.csv')
-      }).catch((_err) => {
+      } catch (e) {
         this.$store.commit('snackbar/setError', 'CSV export failed')
-      }).finally(() => {
+      } finally {
         this.processing = false
-      })
-    }
-  }
+      }
+     }
+   }
 
   initDeleteDialog (device: Device) {
     this.showDeleteDialog = true
@@ -460,9 +477,9 @@ export default class SearchDevicesPage extends Vue {
 
   initSearchQueryParams (): void {
     const searchParamsObject = (new DeviceSearchParamsSerializer({
-      states: this.states,
-      deviceTypes: this.deviceTypes,
-      manufacturer: this.manufacturer
+      states: this.equipmentstatus,
+      deviceTypes: this.devicetypes,
+      manufacturer: this.manufacturers
     })).toSearchParams(this.$route.query)
 
     // prefill the form by the serialized search params from the URL

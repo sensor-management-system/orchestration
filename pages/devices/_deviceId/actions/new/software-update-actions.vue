@@ -68,6 +68,7 @@ import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButto
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
 import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
+import { IOptionsForActionType } from '@/store/devices'
 
 @Component({
   middleware: ['auth'],
@@ -78,6 +79,14 @@ import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
 export default class NewDeviceSoftwareUpdateActions extends Vue {
   private softwareUpdateAction: SoftwareUpdateAction = new SoftwareUpdateAction()
   private isSaving: boolean = false
+
+  // vuex definition for typescript check
+  addDeviceSoftwareUpdateAction!:({
+    deviceId,
+    softwareUpdateAction
+  }: { deviceId: string, softwareUpdateAction: SoftwareUpdateAction })=> Promise<SoftwareUpdateAction>
+  loadAllDeviceActions!:(id:string)=>void
+  chosenKindOfDeviceAction!:IOptionsForActionType | null
 
   created () {
     if (this.chosenKindOfDeviceAction === null) {

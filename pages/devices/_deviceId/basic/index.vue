@@ -106,6 +106,7 @@ import DotMenu from '@/components/DotMenu.vue'
 import DotMenuActionCopy from '@/components/DotMenuActionCopy.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { Device } from '@/models/Device'
 
 @Component({
   components: {
@@ -124,6 +125,10 @@ export default class DeviceShowBasicPage extends Vue {
 
   private showDeleteDialog: boolean = false
 
+  // vuex definition for typescript check
+  device!:Device
+  deleteDevice!:(id: string)=>void
+
   get deviceId () {
     return this.$route.params.deviceId
   }
@@ -138,7 +143,7 @@ export default class DeviceShowBasicPage extends Vue {
 
   async deleteAndCloseDialog () {
     this.showDeleteDialog = false
-    if (this.device === null) {
+    if (this.device === null || this.device.id === null) {
       return
     }
     try {

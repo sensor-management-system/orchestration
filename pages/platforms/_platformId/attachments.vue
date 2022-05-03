@@ -50,6 +50,9 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
 export default class PlatformAttachmentsPage extends Vue {
   private isLoading = false
 
+  // vuex definition for typescript check
+  loadPlatformAttachments!:(id:string)=>void
+
   async created () {
     try {
       this.isLoading = true

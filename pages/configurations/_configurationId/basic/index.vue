@@ -107,6 +107,7 @@ import DotMenu from '@/components/DotMenu.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 import ConfigurationsDeleteDialog from '@/components/configurations/ConfigurationsDeleteDialog.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { IConfiguration } from '@/models/Configuration'
 
 @Component({
   components: { ProgressIndicator, ConfigurationsDeleteDialog, DotMenuActionDelete, DotMenu, ConfigurationsBasicData },
@@ -117,6 +118,10 @@ export default class ConfigurationShowBasicPage extends Vue {
   private isSaving = false
 
   private showDeleteDialog: boolean = false
+
+  // vuex definition for typescript check
+  configuration!:IConfiguration
+  deleteConfiguration!:(id: string)=>void
 
   get configurationId () {
     return this.$route.params.configurationId

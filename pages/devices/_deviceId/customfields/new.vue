@@ -83,6 +83,13 @@ export default class DeviceCustomFieldAddPage extends Vue {
 
   private customField: CustomTextField = new CustomTextField()
 
+  // vuex definition for typescript check
+  loadDeviceCustomFields!:(id: string)=>void
+  addDeviceCustomField!:({
+    deviceId,
+    deviceCustomField
+  }: { deviceId: string, deviceCustomField: CustomTextField })=> Promise<void>
+
   get deviceId (): string {
     return this.$route.params.deviceId
   }

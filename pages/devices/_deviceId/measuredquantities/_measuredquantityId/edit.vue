@@ -94,6 +94,15 @@ export default class DevicePropertyEditPage extends Vue {
 
   private valueCopy: DeviceProperty = new DeviceProperty()
 
+  // vuex definition for typescript check
+  loadDeviceMeasuredQuantity!:(id:String)=>void
+  deviceMeasuredQuantity!:DeviceProperty
+  updateDeviceMeasuredQuantity!:({
+    deviceId,
+    deviceMeasuredQuantity
+  }: { deviceId: string, deviceMeasuredQuantity: DeviceProperty })=> Promise<void>
+  loadDeviceMeasuredQuantities!:(id:string)=>void
+
   async created () {
     try {
       this.isLoading = true

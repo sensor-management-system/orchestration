@@ -88,6 +88,11 @@ export default class DeviceNewPage extends Vue {
   private device: Device = new Device()
   private isLoading: boolean = false
 
+  // vuex definition for typescript check
+  initDevicesNewAppBar!: ()=>void
+  setDefaults!:()=>void
+  saveDevice!:(device: Device)=> Promise<Device>
+
   created () {
     this.initDevicesNewAppBar()
   }
@@ -96,7 +101,7 @@ export default class DeviceNewPage extends Vue {
     this.setDefaults()
   }
 
-  async save (): void {
+  async save () {
     if (!(this.$refs.basicForm as Vue & { validateForm: () => boolean }).validateForm()) {
       this.$store.commit('snackbar/setError', 'Please correct your input')
       return

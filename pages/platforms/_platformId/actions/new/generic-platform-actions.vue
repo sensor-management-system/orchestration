@@ -68,6 +68,7 @@ import { GenericAction } from '@/models/GenericAction'
 import GenericActionForm from '@/components/actions/GenericActionForm.vue'
 import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { IOptionsForActionType } from '@/store/platforms'
 
 @Component({
   middleware: ['auth'],
@@ -78,6 +79,11 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
 export default class NewGenericPlatformAction extends Vue {
   private genericPlatformAction: GenericAction = new GenericAction()
   private isSaving: boolean = false
+
+  // vuex definition for typescript check
+  chosenKindOfPlatformAction!:IOptionsForActionType | null
+  addPlatformGenericAction!:({ platformId, genericPlatformAction }: {platformId: string, genericPlatformAction: GenericAction})=> Promise<GenericAction>
+  loadAllPlatformActions!:(id:string)=>void
 
   created () {
     if (this.chosenKindOfPlatformAction === null) {

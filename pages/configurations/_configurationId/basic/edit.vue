@@ -74,7 +74,7 @@ import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButto
 import ConfigurationsBasicDataForm from '@/components/configurations/ConfigurationsBasicDataForm.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
-import { Configuration } from '@/models/Configuration'
+import { Configuration, IConfiguration } from '@/models/Configuration'
 @Component({
   components: { ProgressIndicator, ConfigurationsBasicDataForm, SaveAndCancelButtons },
   middleware: ['auth'],
@@ -84,6 +84,11 @@ import { Configuration } from '@/models/Configuration'
 export default class ConfigurationEditBasicPage extends Vue {
   private configurationCopy: Configuration = new Configuration()
   private isLoading: boolean = false
+
+  // vuex definition for typescript check
+  configuration!:IConfiguration
+  saveConfiguration!:(configuration: Configuration)=>void
+  loadConfiguration!:(id:string)=>void
 
   created () {
     this.configurationCopy = Configuration.createFromObject(this.configuration)

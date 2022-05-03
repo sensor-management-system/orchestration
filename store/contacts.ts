@@ -77,7 +77,7 @@ export const actions = {
     const totalPages = Math.ceil(totalCount / state.pageSize)
     commit('setTotalPages', totalPages)
   },
-  async loadContact ({ commit }: { commit: Commit }, id: number) {
+  async loadContact ({ commit }: { commit: Commit }, id: string) {
     // @ts-ignore
     const contact = await this.$api.contacts.findById(id)
     commit('setContact', contact)
@@ -111,7 +111,7 @@ export const actions = {
   setPageNumber ({ commit }: { commit: Commit }, newPageNumber: number) {
     commit('setPageNumber', newPageNumber)
   },
-  async deleteContact ({ _commit }: { _commit: Commit }, id: number) {
+  async deleteContact ({ _commit }: { _commit: Commit }, id: string) {
     // @ts-ignore
     await this.$api.contacts.deleteById(id)
   },

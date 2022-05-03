@@ -116,10 +116,11 @@ import { Status } from '@/models/Status'
 import { Manufacturer } from '@/models/Manufacturer'
 
 import { createPlatformUrn } from '@/modelUtils/urnBuilders'
+import { DeviceType } from '@/models/DeviceType'
 
 @Component({
   computed: {
-    ...mapState('vocabulary', ['platformtypes', 'manufacturers', 'equipmentstatus']),
+    ...mapState('vocabulary', ['platformtypes']),
     ...mapGetters('vocabulary', ['getEquipmentstatusByUri', 'getPlatformTypeByUri', 'getManufacturerByUri'])
   },
   methods: mapActions('vocabulary', ['loadManufacturers', 'loadPlatformtypes', 'loadEquipmentstatus', 'loadManufacturers'])
@@ -133,6 +134,15 @@ export default class PlatformBasicData extends Vue {
     type: Platform
   })
   readonly value!: Platform
+
+  // vuex definition for typescript check
+  loadEquipmentstatus!: ()=> void;
+  loadPlatformtypes!: ()=> void;
+  loadManufacturers!: ()=> void;
+  getManufacturerByUri!: (uri: string)=> Manufacturer | undefined;
+  getPlatformTypeByUri!: (uri: string)=> PlatformType | undefined;
+  getEquipmentstatusByUri!: (uri: string)=> Status | undefined;
+  platformtypes!:[]
 
   async mounted () {
     try {
@@ -157,8 +167,8 @@ export default class PlatformBasicData extends Vue {
       return this.value.manufacturerName
     }
     if (this.getManufacturerByUri(this.value.manufacturerUri)) {
-      const manufacturer: Manufacturer = this.getManufacturerByUri(this.value.manufacturerUri)
-      return manufacturer.name
+      const manufacturer: Manufacturer|undefined = this.getManufacturerByUri(this.value.manufacturerUri)
+      return manufacturer!.name
     }
     return ''
   }
@@ -169,8 +179,8 @@ export default class PlatformBasicData extends Vue {
     }
 
     if (this.getPlatformTypeByUri(this.value.platformTypeUri)) {
-      const platformType: PlatformType = this.getPlatformTypeByUri(this.value.platformTypeUri)
-      return platformType.name
+      const platformType: PlatformType|undefined = this.getPlatformTypeByUri(this.value.platformTypeUri)
+      return platformType!.name
     }
     return this.NO_TYPE
   }
@@ -180,8 +190,8 @@ export default class PlatformBasicData extends Vue {
       return this.value.statusName
     }
     if (this.getEquipmentstatusByUri(this.value.statusUri)) {
-      const platformStatus: Status = this.getEquipmentstatusByUri(this.value.statusUri)
-      return platformStatus.name
+      const platformStatus: Status|undefined = this.getEquipmentstatusByUri(this.value.statusUri)
+      return platformStatus!.name
     }
     return ''
   }

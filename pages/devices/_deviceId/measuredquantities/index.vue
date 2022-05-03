@@ -130,6 +130,10 @@ export default class DevicePropertyShowPage extends Vue {
   private showDeleteDialog = false
   private measuredQuantityToDelete: DeviceProperty | null = null
 
+  // vuex definition for typescript check
+  loadDeviceMeasuredQuantities!:(id:string)=>void
+  deleteDeviceMeasuredQuantity!:(measuredQuantityId: string)=>Promise<void>
+
   get deviceId (): string {
     return this.$route.params.deviceId
   }

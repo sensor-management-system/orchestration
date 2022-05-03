@@ -94,6 +94,13 @@ export default class PlatformSoftwareUpdateActionEditPage extends Vue {
   private isSaving = false
   private isLoading = false
 
+  // vuex definition for typescript check
+  loadPlatformSoftwareUpdateAction!:(actionId: string)=>void
+  loadPlatformAttachments!:(id: string)=>void
+  platformSoftwareUpdateAction!:SoftwareUpdateAction
+  updatePlatformSoftwareUpdateAction!:( { platformId, softwareUpdateAction }: {platformId: string, softwareUpdateAction: SoftwareUpdateAction})=> Promise<SoftwareUpdateAction>
+  loadAllPlatformActions!:(id:string)=>void
+
   async created () {
     try {
       this.isLoading = true
@@ -119,7 +126,7 @@ export default class PlatformSoftwareUpdateActionEditPage extends Vue {
     return this.isLoading || this.isSaving
   }
 
-  async save (): void {
+  async save () {
     if (!(this.$refs.softwareUpdateActionForm as Vue & { isValid: () => boolean }).isValid()) {
       this.$store.commit('snackbar/setError', 'Please correct the errors')
       return

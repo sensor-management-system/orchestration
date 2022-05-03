@@ -49,6 +49,9 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
 export default class DeviceActionsPage extends Vue {
   private isLoading = false
 
+  // vuex definition for typescript check
+  loadAllDeviceActions!: (id:string)=>void
+
   async created () {
     try {
       this.isLoading = true

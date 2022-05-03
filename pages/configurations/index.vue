@@ -241,6 +241,18 @@ export default class SearchConfigurationsPage extends Vue {
   private showDeleteDialog: boolean = false
   private configurationToDelete: Configuration | null = null
 
+  // vuex definition for typescript check
+  initConfigurationsIndexAppBar!:()=>void
+  setDefaults!:()=>void
+  loadConfigurationsStates!:()=>void
+  pageNumber!:number
+  setPageNumber!:(newPageNumber: number)=>void
+  searchConfigurationsPaginated!:(searchParams: IConfigurationSearchParams)=>void
+  configurations!:Configuration[]
+  deleteConfiguration!:(id:string)=>void
+  configurationStates!:string[]
+  projects!:Project[]
+
   async created () {
     try {
       this.loading = true
@@ -296,11 +308,9 @@ export default class SearchConfigurationsPage extends Vue {
     await this.runSearch()
   }
 
-  basicSearch (): Promise<void> {
-    this.selectedSearchManufacturers = []
-    this.selectedSearchStates = []
-    this.selectedSearchPlatformTypes = []
-    this.onlyOwnPlatforms = false
+  basicSearch () {
+    this.selectedConfigurationStates=[]
+    this.selectedProjects=[]
     this.page = 1// Important to set page to one otherwise it's possible that you don't anything
     this.runSearch()
   }
@@ -310,7 +320,7 @@ export default class SearchConfigurationsPage extends Vue {
     this.initUrlQueryParams()
   }
 
-  extendedSearch (): Promise<void> {
+  extendedSearch (){
     this.page = 1// Important to set page to one otherwise it's possible that you don't anything
     this.runSearch()
   }
@@ -346,7 +356,7 @@ export default class SearchConfigurationsPage extends Vue {
   }
 
   async deleteAndCloseDialog () {
-    if (this.configurationToDelete === null || this.configurations.id === null) {
+    if (this.configurationToDelete === null || this.configurationToDelete.id === null) {
       this.closeDialog()
       return
     }

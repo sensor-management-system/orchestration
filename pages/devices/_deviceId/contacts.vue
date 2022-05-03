@@ -49,6 +49,9 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
 export default class DeviceContactsPage extends Vue {
   private isLoading = false
 
+  // vuex definition for typescript check
+  loadDeviceContacts!:(id:string) => void
+
   created () {
     try {
       this.isLoading = true

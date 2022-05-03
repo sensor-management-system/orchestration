@@ -49,6 +49,9 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
 export default class DeviceCustomFieldsPage extends Vue {
   private isLoading = false
 
+  // vuex definition for typescript check
+  loadDeviceCustomFields!:(id: string)=>void
+
   async created () {
     try {
       this.isLoading = true

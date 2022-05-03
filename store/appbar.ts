@@ -295,7 +295,7 @@ export const actions = {
     commit('setCancelBtnHidden', true)
     commit('setSaveBtnHidden', true)
   },
-  initPlatformsPlatformIdAppBar ({ commit }: {commit: Commit}, id: number) {
+  initPlatformsPlatformIdAppBar ({ commit }: {commit: Commit}, id: string) {
     commit('setTitle', 'Show Platform')
     commit('setTabs', [
       {
@@ -318,7 +318,7 @@ export const actions = {
     commit('setCancelBtnHidden', true)
     commit('setSaveBtnHidden', true)
   },
-  initDevicesDeviceIdAppBar ({ commit }: {commit: Commit}, id: number) {
+  initDevicesDeviceIdAppBar ({ commit }: {commit: Commit}, id: string) {
     commit('setTitle', 'Show Device')
     commit('setTabs', [
       {
@@ -349,7 +349,7 @@ export const actions = {
     commit('setCancelBtnHidden', true)
     commit('setSaveBtnHidden', true)
   },
-  initConfigurationsConfigurationIdAppBar ({ commit }: {commit: Commit}, id: number) {
+  initConfigurationsConfigurationIdAppBar ({ commit }: {commit: Commit}, id: string) {
     commit('setTitle', 'Show Configuration')
     commit('setTabs', [
       {
@@ -388,7 +388,7 @@ export const actions = {
     commit('setCancelBtnHidden', true)
     commit('setSaveBtnHidden', true)
   },
-  initPlatformCopyAppBar ({ commit }: {commit: Commit}, id: number) {
+  initPlatformCopyAppBar ({ commit }: {commit: Commit}, id: string) {
     commit('setTitle', 'Copy Platform')
     commit('setTabs', [
       {
@@ -411,7 +411,7 @@ export const actions = {
     commit('setCancelBtnHidden', true)
     commit('setSaveBtnHidden', true)
   },
-  initDeviceCopyAppBar ({ commit }: {commit: Commit}, id: number) {
+  initDeviceCopyAppBar ({ commit }: {commit: Commit}, id: string) {
     commit('setTitle', 'Copy Device')
     commit('setTabs', [
       {

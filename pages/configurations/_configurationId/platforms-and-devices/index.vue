@@ -112,6 +112,7 @@ import ConfigurationsTreeNodeDetail from '@/components/configurations/Configurat
 
 import { buildConfigurationTree } from '@/modelUtils/mountHelpers'
 import { ConfigurationsTreeNode } from '@/viewmodels/ConfigurationsTreeNode'
+import { Configuration } from '@/models/Configuration'
 
 @Component({
   components: { ConfigurationsTreeNodeDetail, ConfigurationsTreeView, DateTimePicker },
@@ -123,6 +124,9 @@ import { ConfigurationsTreeNode } from '@/viewmodels/ConfigurationsTreeNode'
 export default class ConfigurationShowPlatformsAndDevicesPage extends Vue {
   private selectedNode: ConfigurationsTreeNode | null = null
   private selectedDate = DateTime.utc()
+
+  // vuex definition for typescript check
+  configuration!:Configuration
 
   get configurationId (): string {
     return this.$route.params.configurationId

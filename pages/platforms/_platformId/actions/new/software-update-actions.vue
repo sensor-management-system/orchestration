@@ -67,6 +67,7 @@ import SoftwareUpdateActionForm from '@/components/actions/SoftwareUpdateActionF
 import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
+import { IOptionsForActionType } from '@/store/platforms'
 
 @Component({
   middleware: ['auth'],
@@ -81,6 +82,11 @@ import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButto
 export default class NewPlatformSoftwareUpdateActions extends Vue {
   private softwareUpdateAction: SoftwareUpdateAction = new SoftwareUpdateAction()
   private isSaving: boolean = false
+
+  // vuex definition for typescript check
+  chosenKindOfPlatformAction!:IOptionsForActionType | null
+  addPlatformSoftwareUpdateAction!:({ platformId, softwareUpdateAction }: {platformId: string, softwareUpdateAction: SoftwareUpdateAction})=> Promise<SoftwareUpdateAction>
+  loadAllPlatformActions!:(id:string)=>void
 
   created () {
     if (this.chosenKindOfPlatformAction === null) {

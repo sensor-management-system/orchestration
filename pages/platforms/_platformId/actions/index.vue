@@ -161,6 +161,12 @@ export default class PlatformActionsShowPage extends Vue {
   private softwareUpdateActionToDelete: SoftwareUpdateAction | null = null
   private showDeleteDialog: boolean = false
 
+  // vuex definition for typescript check
+  loadAllPlatformActions!:(id:string)=>void
+  deletePlatformGenericAction!:(genericPlatformActionId: string)=> Promise<void>
+  deletePlatformSoftwareUpdateAction!:(softwareUpdateActionId: number)=> Promise<void>
+
+
   get platformId (): string {
     return this.$route.params.platformId
   }

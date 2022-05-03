@@ -102,6 +102,16 @@ export default class ConfigurationAddContactPage extends Vue {
   private isLoading: boolean = false
   private isSaving: boolean = false
 
+  // vuex definition for typescript check
+  loadConfigurationContacts!:(id:string)=>void
+  loadAllContacts!:()=>void
+  contactsByDifference!:(contactsToSubtract: Contact[])=>Contact[]
+  configurationContacts!: []
+  addConfigurationContact!: ({
+    configurationId,
+    contactId
+  }: { configurationId: string, contactId: string }) => Promise<void>
+
   async created () {
     try {
       this.isLoading = true
@@ -126,7 +136,7 @@ export default class ConfigurationAddContactPage extends Vue {
     return this.contactsByDifference(this.configurationContacts)
   }
 
-  async addContact (): void {
+  async addContact () {
     if (this.selectedContact && this.selectedContact.id && this.$auth.loggedIn) {
       try {
         this.isSaving = true

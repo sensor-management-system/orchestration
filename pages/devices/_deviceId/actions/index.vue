@@ -185,6 +185,12 @@ export default class DeviceActionsShowPage extends Vue {
   private calibrationActionToDelete: DeviceCalibrationAction | null = null
   private showDeleteDialog: boolean = false
 
+  // vuex definition for typescript check
+  deleteDeviceGenericAction!:(genericDeviceActionId: string)=>Promise<void>
+  loadAllDeviceActions!:(id:string)=>void
+  deleteDeviceSoftwareUpdateAction!:(softwareUpdateActionId: string)=>Promise<void>
+  deleteDeviceCalibrationAction!:(calibrationDeviceActionId: string)=>Promise<void>
+
   get deviceId (): string {
     return this.$route.params.deviceId
   }
@@ -252,9 +258,13 @@ export default class DeviceActionsShowPage extends Vue {
   }
 
   async deleteGenericAction () {
+    if(this.genericActionToDelete === null || this.genericActionToDelete.id ===null){
+      return
+    }
+
     try {
       this.isSaving = true
-      await this.deleteDeviceGenericAction(this.genericActionToDelete!.id)
+      await this.deleteDeviceGenericAction(this.genericActionToDelete.id)
       this.loadAllDeviceActions(this.deviceId)
       this.$store.commit('snackbar/setSuccess', 'Generic action deleted')
     } catch (_error) {
@@ -266,9 +276,12 @@ export default class DeviceActionsShowPage extends Vue {
   }
 
   async deleteSoftwareUpdateAction () {
+    if(this.softwareUpdateActionToDelete === null || this.softwareUpdateActionToDelete.id ===null){
+      return
+    }
     try {
       this.isSaving = true
-      await this.deleteDeviceSoftwareUpdateAction(this.softwareUpdateActionToDelete!.id)
+      await this.deleteDeviceSoftwareUpdateAction(this.softwareUpdateActionToDelete.id)
       this.loadAllDeviceActions(this.deviceId)
       this.$store.commit('snackbar/setSuccess', 'Software update action deleted')
     } catch (_error) {
@@ -280,9 +293,13 @@ export default class DeviceActionsShowPage extends Vue {
   }
 
   async deleteCalibrationAction () {
+    if(this.calibrationActionToDelete === null || this.calibrationActionToDelete.id ===null){
+      return
+    }
+
     try {
       this.isSaving = true
-      await this.deleteDeviceCalibrationAction(this.calibrationActionToDelete!.id)
+      await this.deleteDeviceCalibrationAction(this.calibrationActionToDelete.id)
       this.loadAllDeviceActions(this.deviceId)
       this.$store.commit('snackbar/setSuccess', 'Calibration action deleted')
     } catch (_error) {

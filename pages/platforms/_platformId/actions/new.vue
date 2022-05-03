@@ -63,6 +63,7 @@ import { Component, Vue } from 'nuxt-property-decorator'
 
 import { mapActions, mapGetters, mapState } from 'vuex'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { IOptionsForActionType } from '@/store/platforms'
 
 const KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE = 'software_update'
 const KIND_OF_ACTION_TYPE_GENERIC_PLATFORM_ACTION = 'generic_platform_action'
@@ -81,6 +82,12 @@ const KIND_OF_ACTION_TYPE_GENERIC_PLATFORM_ACTION = 'generic_platform_action'
 })
 export default class NewPlatformAction extends Vue {
   private isLoading: boolean = false
+
+  // vuex definition for typescript check
+  loadPlatformGenericActionTypes!:()=>void
+  loadPlatformAttachments!:(id:string)=>void
+  chosenKindOfPlatformAction!:IOptionsForActionType | null
+  setChosenKindOfPlatformAction!:(newval: IOptionsForActionType | null) =>void
 
   async created () {
     try {

@@ -165,6 +165,21 @@ export default class DeviceCopyPage extends Vue {
   private serialNumberPlaceholder: string | null = null
   private inventoryNumberPlaceholder: string | null = null
 
+  // vuex definition for typescript check
+  device!:Device
+  initDeviceCopyAppBar!:(id: string)=>void
+  setDefaults!:()=>void
+  copyDevice!:({ device, copyContacts, copyAttachments, copyMeasuredQuantities, copyCustomFields }:
+    {device: Device, copyContacts: boolean, copyAttachments: boolean, copyMeasuredQuantities: boolean, copyCustomFields: boolean})=>string
+  loadDevice!:({
+    deviceId,
+    includeContacts,
+    includeCustomFields,
+    includeDeviceProperties,
+    includeDeviceAttachments
+  }:
+    { deviceId: string, includeContacts: boolean, includeCustomFields: boolean, includeDeviceProperties: boolean, includeDeviceAttachments: boolean })=>void
+
   async created () {
     this.initDeviceCopyAppBar(this.deviceId)
     try {

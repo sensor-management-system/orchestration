@@ -54,6 +54,9 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
 export default class PlatformContactsPage extends Vue {
   private isLoading = false
 
+  // vuex definition for typescript check
+  loadPlatformContacts!:(id: string)=>void
+
   async created () {
     try {
       this.isLoading = true

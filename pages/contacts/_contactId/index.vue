@@ -96,6 +96,7 @@ import DotMenu from '@/components/DotMenu.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 import ContactBasicData from '@/components/ContactBasicData.vue'
 import ContacsDeleteDialog from '@/components/contacts/ContacsDeleteDialog.vue'
+import { Contact } from '@/models/Contact'
 
 @Component({
   components: { ContacsDeleteDialog, ContactBasicData, DotMenuActionDelete, DotMenu },
@@ -108,8 +109,13 @@ import ContacsDeleteDialog from '@/components/contacts/ContacsDeleteDialog.vue'
 export default class ContactIndexPage extends Vue {
   showDeleteDialog = false
 
+  // vuex definition for typescript check
+  initContactsContactIdIndexAppBar!:(title:string)=>void
+  contact!:Contact
+  deleteContact!:(id:string)=>void
+
   created () {
-    this.initContactsContactIdIndexAppBar(this.contact)
+    this.initContactsContactIdIndexAppBar(this.contact.toString())
   }
 
   get contactId () {
@@ -127,7 +133,7 @@ export default class ContactIndexPage extends Vue {
   async deleteAndCloseDialog () {
     this.closeDialog()
 
-    if (this.contact === null) {
+    if (this.contact === null || this.contact.id === null) {
       return
     }
     try {

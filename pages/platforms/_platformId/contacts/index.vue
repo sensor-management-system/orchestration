@@ -103,11 +103,15 @@ import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 export default class PlatformShowContactPage extends Vue {
   private isSaving = false
 
+  // vuex definition for typescript check
+  removePlatformContact!:({ platformId, contactId }: {platformId: string, contactId: string})=> Promise<void>
+  loadPlatformContacts!:(id:string)=>void
+
   get platformId (): string {
     return this.$route.params.platformId
   }
 
-  async removeContact (contactId: string): void {
+  async removeContact (contactId: string) {
     try {
       this.isSaving = true
       await this.removePlatformContact({

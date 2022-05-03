@@ -118,6 +118,9 @@ import { Contact } from '@/models/Contact'
 import { Platform } from '@/models/Platform'
 import { PlatformUnmountAction } from '@/models/PlatformUnmountAction'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { Configuration } from '@/models/Configuration'
+import { PlatformNode } from '@/viewmodels/PlatformNode'
+import { DeviceNode } from '@/viewmodels/DeviceNode'
 @Component({
   components: { ProgressIndicator, ConfigurationsSelectedItemUnmountForm, ConfigurationsTreeView, DateTimePicker },
   middleware: ['auth'],
@@ -137,6 +140,19 @@ export default class ConfigurationUnMountPlatformsAndDevicesPage extends Vue {
 
   private isSaving = false
   private isLoading = false
+
+  // vuex definition for typescript check
+  loadAllContacts!:()=>void
+  configuration!:Configuration
+  addDeviceUnMountAction!:({
+    configurationId,
+    deviceUnMountAction
+  }: { configurationId: string, deviceUnMountAction: DeviceUnmountAction })=>Promise<string>
+  addPlatformUnMountAction!:({
+      configurationId,
+      platformUnMountAction
+    }: { configurationId: string, platformUnMountAction: PlatformUnmountAction })=>Promise<string>
+  loadConfiguration!:(id:string)=>void
 
   async created () {
     try {
@@ -176,16 +192,17 @@ export default class ConfigurationUnMountPlatformsAndDevicesPage extends Vue {
     return null
   }
 
-  unmount ({ contact, description }) {
+  unmount ({ contact, description }:{contact:Contact,description:string}) {
     if (!this.selectedNode || !this.selectedDate) {
       return
     }
 
     if (this.selectedNode.isDevice()) {
-      this.unmountDevice(this.selectedNode.unpack().device, contact, description)
+      this.unmountDevice((this.selectedNode as DeviceNode).unpack().device, contact, description)
     }
     if (this.selectedNode.isPlatform()) {
-      this.unmountPlatform(this.selectedNode.unpack().platform, contact, description)
+      (this.selectedNode as PlatformNode).unpack().platform
+      this.unmountPlatform((this.selectedNode as PlatformNode).unpack().platform, contact, description)
     }
   }
 

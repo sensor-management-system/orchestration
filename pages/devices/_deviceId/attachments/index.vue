@@ -111,6 +111,11 @@ export default class DeviceAttachmentShowPage extends Vue {
   private showDeleteDialog = false
   private attachmentToDelete: Attachment|null = null
 
+  // vuex definition for typescript check
+  deleteDeviceAttachment!:(attachmentId: string)=>Promise<void>
+  loadDeviceAttachments!:(id:string)=>void
+
+
   get deviceId (): string {
     return this.$route.params.deviceId
   }

@@ -100,6 +100,13 @@ import HintCard from '@/components/HintCard.vue'
 export default class ConfigurationShowContactPage extends Vue {
   private isSaving = false
 
+  // vuex definition for typescript check
+  loadConfigurationContacts!:(id:string)=>void
+  removeConfigurationContact!:({
+    configurationId,
+    contactId
+  }: { configurationId: string, contactId: string })=>void
+
   get configurationId (): string {
     return this.$route.params.configurationId
   }

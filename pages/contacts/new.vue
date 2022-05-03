@@ -89,6 +89,11 @@ export default class ContactNewPage extends mixins(Rules) {
   private contact: Contact = new Contact()
   private isLoading: boolean = false
 
+  // vuex definition for typescript check
+  initContactsNewAppBar!: ()=>void
+  setDefaults!:()=>void
+  saveContact!:(contact: Contact)=>Promise<Contact>
+
   created () {
     this.initContactsNewAppBar()
   }
@@ -97,7 +102,7 @@ export default class ContactNewPage extends mixins(Rules) {
     this.setDefaults()
   }
 
-  async save (): void {
+  async save () {
     if (!(this.$refs.basicForm as Vue & { validateForm: () => boolean }).validateForm()) {
       this.$store.commit('snackbar/setError', 'Please correct your input')
       return

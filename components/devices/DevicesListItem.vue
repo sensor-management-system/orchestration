@@ -251,6 +251,10 @@ export default class DevicesListItem extends Vue {
   private show = false
   public readonly NO_TYPE: string = 'Unknown type'
 
+  // vuex definition for typescript check
+  getDeviceTypeByUri!: (uri: string)=> DeviceType | undefined;
+  getEquipmentstatusByUri!: (uri: string)=> Status | undefined;
+
   getTextOrDefault = (text: string): string => text || '-'
 
   getType () {
@@ -259,8 +263,8 @@ export default class DevicesListItem extends Vue {
     }
 
     if (this.getDeviceTypeByUri(this.device.deviceTypeUri)) {
-      const deviceType: DeviceType = this.getDeviceTypeByUri(this.device.deviceTypeUri)
-      return deviceType.name
+      const deviceType: DeviceType | undefined = this.getDeviceTypeByUri(this.device.deviceTypeUri)
+      return deviceType!.name
     }
     return this.NO_TYPE
   }
@@ -270,8 +274,8 @@ export default class DevicesListItem extends Vue {
       return this.device.statusName
     }
     if (this.getEquipmentstatusByUri(this.device.statusUri)) {
-      const deviceStatus: Status = this.getEquipmentstatusByUri(this.device.statusUri)
-      return deviceStatus.name
+      const deviceStatus: Status|undefined = this.getEquipmentstatusByUri(this.device.statusUri)
+      return deviceStatus!.name
     }
     return ''
   }

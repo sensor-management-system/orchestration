@@ -251,6 +251,10 @@ export default class PlatformsListItem extends Vue {
   public readonly NO_TYPE: string = 'Unknown type'
   private show = false
 
+  // vuex definition for typescript check
+  getPlatformTypeByUri!: (uri: string)=> PlatformType | undefined;
+  getEquipmentstatusByUri!: (uri: string)=> Status | undefined;
+
   getTextOrDefault = (text: string): string => text || '-'
 
   getType () {
@@ -259,8 +263,8 @@ export default class PlatformsListItem extends Vue {
     }
 
     if (this.getPlatformTypeByUri(this.platform.platformTypeUri)) {
-      const platformType: PlatformType = this.getPlatformTypeByUri(this.platform.platformTypeUri)
-      return platformType.name
+      const platformType: PlatformType|undefined = this.getPlatformTypeByUri(this.platform.platformTypeUri)
+      return platformType!.name
     }
     return this.NO_TYPE
   }
@@ -270,8 +274,8 @@ export default class PlatformsListItem extends Vue {
       return this.platform.statusName
     }
     if (this.getEquipmentstatusByUri(this.platform.statusUri)) {
-      const platformStatus: Status = this.getEquipmentstatusByUri(this.platform.statusUri)
-      return platformStatus.name
+      const platformStatus: Status|undefined = this.getEquipmentstatusByUri(this.platform.statusUri)
+      return platformStatus!.name
     }
     return ''
   }

@@ -95,6 +95,17 @@ export default class DeviceCalibrationActionEditPage extends Vue {
   private isSaving = false
   private isLoading = false
 
+  // vuex definition for typescript check
+  loadDeviceCalibrationAction!: (id:string)=>void
+  loadDeviceAttachments!: (id:string)=>void
+  loadDeviceMeasuredQuantities!:(id:string)=>void
+  deviceCalibrationAction!:DeviceCalibrationAction
+  updateDeviceCalibrationAction!:({
+    deviceId,
+    calibrationDeviceAction
+  }: { deviceId: string, calibrationDeviceAction: DeviceCalibrationAction })=>Promise<DeviceCalibrationAction>
+  loadAllDeviceActions!:(id:string)=>void
+
   async created () {
     try {
       this.isLoading = true
@@ -121,7 +132,7 @@ export default class DeviceCalibrationActionEditPage extends Vue {
     return this.isLoading || this.isSaving
   }
 
-  async save (): void {
+  async save () {
     if (!(this.$refs.deviceCalibrationActionForm as Vue & { isValid: () => boolean }).isValid()) {
       this.$store.commit('snackbar/setError', 'Please correct the errors')
       return
