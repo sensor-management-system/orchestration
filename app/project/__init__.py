@@ -51,7 +51,9 @@ def create_app():
     minio.init_app(app)
 
     # shell context for flask cli
-    app.shell_context_processor({"app": app, "db": db})
+    @app.shell_context_processor
+    def shell_context():
+        return {'app': app, 'db': db}
 
     # add elasticsearch as mentioned here
     # https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-xvi-full-text-search
