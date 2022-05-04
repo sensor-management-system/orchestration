@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020, 2021
+ * Copyright (C) 2020 - 2022
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -53,6 +53,7 @@ import { DynamicLocationEndActionApi } from '@/services/sms/DynamicLocationEndAc
 import { UploadApi } from '@/services/sms/UploadApi'
 
 import { CompartmentApi } from '@/services/cv/CompartmentApi'
+import { CvContactRoleApi } from '@/services/cv/CvContactRoleApi'
 import { DeviceTypeApi } from '@/services/cv/DeviceTypeApi'
 import { ManufacturerApi } from '@/services/cv/ManufacturerApi'
 import { PlatformTypeApi } from '@/services/cv/PlatformTypeApi'
@@ -118,6 +119,7 @@ export class Api {
   private readonly _measuredQuantityUnitApi: MeasuredQuantityUnitApi
   private readonly _actionTypeApi: ActionTypeApi
   private readonly _softwareTypeApi: SoftwareTypeApi
+  private readonly _cvContactRoleApi: CvContactRoleApi
 
   private readonly _projectApi: ProjectApi
   private readonly _elevationDatumApi: ElevationDatumApi
@@ -333,7 +335,10 @@ export class Api {
       this.createAxios(cvBaseUrl, cvConfig),
       '/softwaretypes/'
     )
-
+    this._cvContactRoleApi = new CvContactRoleApi(
+      this.createAxios(cvBaseUrl, cvConfig),
+      '/contactroles/'
+    )
     this._projectApi = new ProjectApi()
     this._elevationDatumApi = new ElevationDatumApi()
     this._epsgCodeApi = new EpsgCodeApi()
@@ -476,6 +481,10 @@ export class Api {
 
   get actionTypes (): ActionTypeApi {
     return this._actionTypeApi
+  }
+
+  get cvContactRoles (): CvContactRoleApi {
+    return this._cvContactRoleApi
   }
 
   get softwareTypes (): SoftwareTypeApi {
