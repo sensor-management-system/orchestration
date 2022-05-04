@@ -39,7 +39,7 @@ class DeviceList(ResourceList):
         device = db.session.query(Device).filter_by(id=result_id).first()
         contact = add_contact_to_object(device)
         cv_url = os.environ.get("CV_URL")
-        role_name = "owner"
+        role_name = "Owner"
         role_uri = f"{cv_url}/contactroles/4/"
         contact_role = DeviceContactRole(
             contact_id=contact.id,

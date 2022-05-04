@@ -39,7 +39,7 @@ class PlatformList(ResourceList):
         platform = db.session.query(Platform).filter_by(id=result_id).first()
         contact = add_contact_to_object(platform)
         cv_url = os.environ.get("CV_URL")
-        role_name = "owner"
+        role_name = "Owner"
         role_uri = f"{cv_url}/contactroles/4/"
         contact_role = PlatformContactRole(
             contact_id=contact.id,

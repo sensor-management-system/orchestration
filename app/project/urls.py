@@ -1067,7 +1067,7 @@ api.route(
     "platform_contact_role_list",
     "/platform-contact-roles",
     "/contacts/<int:contact_id>/platform-contact-roles",
-    "/platform/<int:platform_id>/platform-contact-roles",
+    "/platforms/<int:platform_id>/platform-contact-roles",
 )
 api.route(
     PlatformRoleDetail, "platform_contact_role_detail", "/platform-contact-roles/<int:id>"
@@ -1088,7 +1088,7 @@ api.route(
     "configuration_contact_role_list",
     "/configuration-contact-roles",
     "/contacts/<int:contact_id>/configuration-contact-roles",
-    "/configuration/<int:configuration_id>/configuration-contact-roles",
+    "/configurations/<int:configuration_id>/configuration-contact-roles",
 )
 api.route(
     ConfigurationRoleDetail,
