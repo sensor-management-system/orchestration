@@ -1,8 +1,8 @@
 """Class and helpers for the configurations."""
 
+from ..es_utils import ElasticSearchIndexTypes, settings_with_ngrams
 from .base_model import db
 from .mixin import AuditMixin, SearchableMixin
-from ..es_utils import settings_with_ngrams, ElasticSearchIndexTypes
 
 
 class Configuration(db.Model, AuditMixin, SearchableMixin):
@@ -62,7 +62,9 @@ class Configuration(db.Model, AuditMixin, SearchableMixin):
             "location_type": self.location_type,
             "project_uri": self.project_uri,
             "project_name": self.project_name,
-            "contacts": [c.to_search_entry() for c in self.contacts],
+            "configuration_contact_roles": [
+                ccr.to_search_entry() for ccr in self.configuration_contact_roles
+            ],
             "attachments": [
                 a.to_search_entry() for a in self.configuration_attachments
             ],
@@ -116,8 +118,10 @@ class Configuration(db.Model, AuditMixin, SearchableMixin):
         type_text_full_searchable = ElasticSearchIndexTypes.text_full_searchable(
             analyzer="ngram_analyzer"
         )
-        type_keyword_and_full_searchable = ElasticSearchIndexTypes.keyword_and_full_searchable(
-            analyzer="ngram_analyzer"
+        type_keyword_and_full_searchable = (
+            ElasticSearchIndexTypes.keyword_and_full_searchable(
+                analyzer="ngram_analyzer"
+            )
         )
 
         return {
@@ -139,9 +143,16 @@ class Configuration(db.Model, AuditMixin, SearchableMixin):
                         "type": "nested",
                         "properties": Device.get_search_index_properties(),
                     },
-                    "contacts": {
+                    "configuration_contact_roles": {
                         "type": "nested",
-                        "properties": Contact.get_search_index_properties(),
+                        "properties": {
+                            "role_name": type_keyword_and_full_searchable,
+                            "role_uri": type_keyword,
+                            "contact": {
+                                "type": "nested",
+                                "properties": Contact.get_search_index_properties(),
+                            },
+                        },
                     },
                     "firmware_versions": type_keyword_and_full_searchable,
                     "attachments": {
@@ -163,19 +174,27 @@ class Configuration(db.Model, AuditMixin, SearchableMixin):
                     },
                     "static_location_begin_actions": {
                         "type": "nested",
-                        "properties": {"description": type_text_full_searchable,},
+                        "properties": {
+                            "description": type_text_full_searchable,
+                        },
                     },
                     "static_location_end_actions": {
                         "type": "nested",
-                        "properties": {"description": type_text_full_searchable,},
+                        "properties": {
+                            "description": type_text_full_searchable,
+                        },
                     },
                     "dynamic_location_begin_actions": {
                         "type": "nested",
-                        "properties": {"description": type_text_full_searchable,},
+                        "properties": {
+                            "description": type_text_full_searchable,
+                        },
                     },
                     "dynamic_location_end_actions": {
                         "type": "nested",
-                        "properties": {"description": type_text_full_searchable,},
+                        "properties": {
+                            "description": type_text_full_searchable,
+                        },
                     },
                     "platform_mount_actions": {
                         "type": "nested",
