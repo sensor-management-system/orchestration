@@ -434,6 +434,15 @@ export default {
     }
   },
   created () {
+    // eslint-disable-next-line
+    console.log('process.env.NUXT_ENV_OIDC_LOGIN_PARAMS', process.env.NUXT_ENV_OIDC_LOGIN_PARAMS)
+    // eslint-disable-next-line
+    console.log('JSON.parse(process.env.NUXT_ENV_OIDC_LOGIN_PARAMS)', JSON.parse(process.env.NUXT_ENV_OIDC_LOGIN_PARAMS))
+    // eslint-disable-next-line
+    console.log('process.env.SMS_BACKEND_URL', process.env.smsBackendUrl)
+    // eslint-disable-next-line
+    console.log('process.env.NUXT_ENV_CLIENT_ID', process.env.NUXT_ENV_CLIENT_ID)
+
     this.$nuxt.$on('app-bar-content', (component) => {
       this.appBarContent = component
     })
