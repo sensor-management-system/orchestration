@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020, 2021
+ * Copyright (C) 2020 - 2022
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -34,7 +34,8 @@
 import { AxiosInstance, Method } from 'axios'
 
 import { Configuration } from '@/models/Configuration'
-import { Contact } from '@/models/Contact'
+import { ContactRole } from '@/models/ContactRole'
+
 import { DynamicLocation } from '@/models/Location'
 import { Project } from '@/models/Project'
 
@@ -51,7 +52,7 @@ import {
   configurationWithMetaToConfigurationByThrowingErrorOnMissing
 } from '@/serializers/jsonapi/ConfigurationSerializer'
 
-import { ContactSerializer } from '@/serializers/jsonapi/ContactSerializer'
+import { ContactRoleSerializer } from '@/serializers/jsonapi/ContactRoleSerializer'
 import { DeviceMountActionApi } from '@/services/sms/DeviceMountActionApi'
 import { DeviceUnmountActionApi } from '@/services/sms/DeviceUnmountActionApi'
 import { PlatformMountActionApi } from '@/services/sms/PlatformMountActionApi'
@@ -372,34 +373,26 @@ export class ConfigurationApi {
     return new ConfigurationSearchBuilder(this.axiosApi, this.basePath, this.serializer)
   }
 
-  findRelatedContacts (configurationId: string): Promise<Contact[]> {
-    const url = this.basePath + '/' + configurationId + '/contacts'
+  findRelatedContactRoles (configurationId: string): Promise<ContactRole[]> {
+    const url = this.basePath + '/' + configurationId + '/configuration-contact-roles'
     const params = {
-      'page[size]': 10000
+      'page[size]': 10000,
+      include: 'contact'
     }
     return this.axiosApi.get(url, { params }).then((rawServerResponse) => {
-      return new ContactSerializer().convertJsonApiObjectListToModelList(rawServerResponse.data)
+      return new ContactRoleSerializer().convertJsonApiObjectListToModelList(rawServerResponse.data)
     })
   }
 
-  removeContact (configurationId: string, contactId: string): Promise<void> {
-    const url = this.basePath + '/' + configurationId + '/relationships/contacts'
-    const params = {
-      data: [{
-        type: 'contact',
-        id: contactId
-      }]
-    }
-    return this.axiosApi.delete(url, { data: params })
+  removeContact (configurationContactRoleId: string): Promise<void> {
+    const url = 'configuration-contact-roles/' + configurationContactRoleId
+    return this.axiosApi.delete(url)
   }
 
-  addContact (configurationId: string, contactId: string): Promise<void> {
-    const url = this.basePath + '/' + configurationId + '/relationships/contacts'
-    const data = [{
-      type: 'contact',
-      id: contactId
-    }]
-    return this.axiosApi.post(url, { data })
+  addContact (configurationId: string, contactRole: ContactRole): Promise<string> {
+    const url = 'configuration-contact-roles'
+    const data = new ContactRoleSerializer().convertModelToJsonApiData(contactRole, 'configuration_contact_role', 'configuration', configurationId)
+    return this.axiosApi.post(url, { data }).then(response => response.data.data.id)
   }
 }
 

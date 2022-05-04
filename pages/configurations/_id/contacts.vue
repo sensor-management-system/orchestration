@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020, 2021
+Copyright (C) 2020 - 2022
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
@@ -39,7 +39,7 @@ permissions and limitations under the Licence.
       :dark="isSaving"
     />
     <NuxtChild
-      v-model="contacts"
+      v-model="contactRoles"
     />
     <v-card-actions
       v-if="!isAddContactPage"
@@ -55,133 +55,72 @@ permissions and limitations under the Licence.
         Add contact
       </v-btn>
     </v-card-actions>
-    <hint-card v-if="contacts.length === 0 && !isAddContactPage">
+    <hint-card v-if="contactRoles.length === 0 && !isAddContactPage">
       There are no contacts for this configuration.
     </hint-card>
     <v-expansion-panels>
       <v-expansion-panel
-        v-for="contact in contacts"
-        :key="contact.id"
+        v-for="contactRole in contactRoles"
+        :key="contactRole.id"
       >
         <v-expansion-panel-header>
-          <v-row
-            no-gutters
-          >
-            <v-col class="text-subtitle-1">
-              {{ contact.toString() }}
-            </v-col>
-            <v-col
-              align-self="end"
-              class="text-right"
+          <contact-role-header-row :value="contactRole">
+            <v-menu
+              v-if="$auth.loggedIn"
+              close-on-click
+              close-on-content-click
+              offset-x
+              left
+              z-index="999"
             >
-              <v-menu
-                v-if="$auth.loggedIn"
-                close-on-click
-                close-on-content-click
-                offset-x
-                left
-                z-index="999"
-              >
-                <template #activator="{ on }">
-                  <v-btn
-                    data-role="property-menu"
-                    icon
-                    small
-                    v-on="on"
-                  >
-                    <v-icon
-                      dense
-                      small
-                    >
-                      mdi-dots-vertical
-                    </v-icon>
-                  </v-btn>
-                </template>
-                <v-list>
-                  <v-list-item
+              <template #activator="{ on }">
+                <v-btn
+                  data-role="property-menu"
+                  icon
+                  small
+                  v-on="on"
+                >
+                  <v-icon
                     dense
-                    @click="removeContact(contact.id)"
+                    small
                   >
-                    <v-list-item-content>
-                      <v-list-item-title
-                        class="red--text"
+                    mdi-dots-vertical
+                  </v-icon>
+                </v-btn>
+              </template>
+              <v-list>
+                <v-list-item
+                  dense
+                  @click="removeContactRole(contactRole.id)"
+                >
+                  <v-list-item-content>
+                    <v-list-item-title
+                      class="red--text"
+                    >
+                      <v-icon
+                        left
+                        small
+                        color="red"
                       >
-                        <v-icon
-                          left
-                          small
-                          color="red"
-                        >
-                          mdi-delete
-                        </v-icon>
-                        Remove
-                      </v-list-item-title>
-                    </v-list-item-content>
-                  </v-list-item>
-                </v-list>
-              </v-menu>
-            </v-col>
-          </v-row>
+                        mdi-delete
+                      </v-icon>
+                      Remove
+                    </v-list-item-title>
+                  </v-list-item-content>
+                </v-list-item>
+              </v-list>
+            </v-menu>
+          </contact-role-header-row>
         </v-expansion-panel-header>
         <v-expansion-panel-content>
           <template #default>
-            <div>
-              <v-row
-                dense
-              >
-                <v-col
-                  cols="12"
-                  md="3"
-                >
-                  <label>Given name:</label>
-                  {{ contact.givenName }}
-                </v-col>
-                <v-col
-                  cols="12"
-                  md="3"
-                >
-                  <label>Family name:</label>
-                  {{ contact.familyName }}
-                </v-col>
-              </v-row>
-              <v-row
-                dense
-              >
-                <v-col
-                  cols="12"
-                  md="3"
-                >
-                  <label>E-Mail:</label>
-                  {{ contact.email | orDefault }}
-                  <a v-if="contact.email.length > 0" :href="'mailto:' + contact.email">
-                    <v-icon
-                      small
-                    >
-                      mdi-email
-                    </v-icon>
-                  </a>
-                </v-col>
-                <v-col
-                  cols="12"
-                  md="6"
-                >
-                  <label>Website:</label>
-                  {{ contact.website | orDefault }}
-                  <a v-if="contact.website.length > 0" :href="contact.website" target="_blank">
-                    <v-icon
-                      small
-                    >
-                      mdi-open-in-new
-                    </v-icon>
-                  </a>
-                </v-col>
-              </v-row>
-            </div>
+            <contact-role-panel :value="contactRole" />
           </template>
         </v-expansion-panel-content>
       </v-expansion-panel>
     </v-expansion-panels>
     <v-card-actions
-      v-if="!isAddContactPage && contacts.length > 3"
+      v-if="!isAddContactPage && contactRoles.length > 3"
     >
       <v-spacer />
       <v-btn
@@ -200,26 +139,30 @@ permissions and limitations under the Licence.
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 
-import { Contact } from '@/models/Contact'
+import { ContactRole } from '@/models/ContactRole'
 
 import ContactBasicData from '@/components/ContactBasicData.vue'
 import HintCard from '@/components/HintCard.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import ContactRoleHeaderRow from '@/components/contacts/ContactRoleHeaderRow.vue'
+import ContactRolePanel from '@/components/contacts/ContactRolePanel.vue'
 
 @Component({
   components: {
     ContactBasicData,
+    ContactRoleHeaderRow,
+    ContactRolePanel,
     HintCard,
     ProgressIndicator
   }
 })
 export default class ContactTab extends Vue {
-  private contacts: Contact[] = []
+  private contactRoles: ContactRole[] = []
   private isLoading = false
   private isSaving = false
 
-  mounted () {
-    this.loadConfigurationContacts()
+  fetch () {
+    this.loadConfigurationContactRoles()
   }
 
   head () {
@@ -230,7 +173,7 @@ export default class ContactTab extends Vue {
 
   beforeRouteUpdate (to: any, _from: any, next: any) {
     if (to.name === 'configurations-id-contacts') {
-      this.loadConfigurationContacts()
+      this.loadConfigurationContactRoles()
     }
     next()
   }
@@ -239,12 +182,12 @@ export default class ContactTab extends Vue {
     return this.isLoading || this.isSaving
   }
 
-  loadConfigurationContacts () {
+  loadConfigurationContactRoles () {
     this.isLoading = true
-    this.$api.configurations.findRelatedContacts(this.configurationId).then((foundContacts) => {
-      this.contacts = foundContacts
+    this.$api.configurations.findRelatedContactRoles(this.configurationId).then((foundContactRoles) => {
+      this.contactRoles = foundContactRoles
     }).catch(() => {
-      this.$store.commit('snackbar/setError', 'Failed to fetch contacts')
+      this.$store.commit('snackbar/setError', 'Failed to fetch contact roles')
     }).finally(() => {
       this.isLoading = false
     })
@@ -254,19 +197,18 @@ export default class ContactTab extends Vue {
     return this.$route.params.id
   }
 
-  async removeContact (id: string) {
+  async removeContactRole (id: string) {
     try {
-      this.isLoading = true
-      await this.$store.dispatch('contacts/removeContactFromConfiguration', {
-        configurationId: this.configurationId,
-        contactId: id
-      })
-      // reloading contacts to refresh the list
-      this.loadConfigurationContacts()
+      this.isSaving = true
+      await this.$api.configurations.removeContact(id)
+      const searchIndex = this.contactRoles.findIndex(cr => cr.id === id)
+      if (searchIndex > -1) {
+        this.contactRoles.splice(searchIndex, 1)
+      }
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Removing contact failed')
     } finally {
-      this.isLoading = false
+      this.isSaving = false
     }
   }
 

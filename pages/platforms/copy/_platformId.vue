@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020-2021
+Copyright (C) 2020-2022
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -146,7 +146,7 @@ import { Component, Vue, Watch, mixins } from 'nuxt-property-decorator'
 import { Rules } from '@/mixins/Rules'
 
 import { Attachment } from '@/models/Attachment'
-import { Contact } from '@/models/Contact'
+import { ContactRole } from '@/models/ContactRole'
 import { Platform } from '@/models/Platform'
 
 import PlatformBasicDataForm from '@/components/PlatformBasicDataForm.vue'
@@ -176,13 +176,16 @@ export default class PlatformCopyPage extends mixins(Rules) {
 
   mounted () {
     this.initializeAppBar()
+  }
 
+  async fetch () {
     // We also load the contacts and the measured quantities as those
     // are the ones that we will also copy.
-    this.$api.platforms.findById(this.platformId, {
-      includeContacts: true,
-      includePlatformAttachments: true
-    }).then((platform) => {
+    try {
+      const platform = await this.$api.platforms.findById(this.platformId, {
+        includeContacts: true,
+        includePlatformAttachments: true
+      })
       this.existingPlatform = platform
       const platformToEdit = Platform.createFromObject(this.existingPlatform)
       // Unset the fields that are very device specific
@@ -207,11 +210,11 @@ export default class PlatformCopyPage extends mixins(Rules) {
       platformToEdit.inventoryNumber = ''
 
       this.platform = platformToEdit
-      this.isLoading = false
-    }).catch((_error) => {
+    } catch (_error) {
       this.$store.commit('snackbar/setError', 'Loading platform failed')
+    } finally {
       this.isLoading = false
-    })
+    }
   }
 
   beforeDestroy () {
@@ -228,7 +231,6 @@ export default class PlatformCopyPage extends mixins(Rules) {
       return
     }
     this.isLoading = true
-    const contacts = this.platform.contacts
     const attachments = this.platform.attachments.map(Attachment.createFromObject)
     try {
       // most importantly: Save the device itself
@@ -242,14 +244,17 @@ export default class PlatformCopyPage extends mixins(Rules) {
         // The contacts have the special issue, that our system will add the contact who
         // add/edit the device automatically.
         // We we should check who we added this way already.
-        const existingContacts = await this.$api.platforms.findRelatedContacts(savedPlatformId)
+        const sourceContactRoles = await this.$api.platforms.findRelatedContactRoles(this.platformId)
+        const freshCreatedContactRoles = await this.$api.platforms.findRelatedContactRoles(savedPlatformId)
         // And then only add those remaining
-        const contactsToSave = contacts.filter(c => existingContacts.findIndex((ec: Contact) => { return ec.id === c.id }) === -1)
+        const contactRolesToSave = sourceContactRoles.filter(c => freshCreatedContactRoles.findIndex((ec: ContactRole) => { return ec.contact!.id === c.contact!.id && ec.roleName === c.roleName }) === -1)
 
-        for (const contact of contactsToSave) {
-          if (contact.id) {
-            related.push(this.$api.platforms.addContact(savedPlatformId, contact.id))
-          }
+        for (const contactRole of contactRolesToSave) {
+          const contactRoleToSave = ContactRole.createFromObject(contactRole)
+          // we don't have a reference to the platform here, but we have an id
+          // that we should remove before we save it
+          contactRoleToSave.id = null
+          related.push(this.$api.platforms.addContact(savedPlatformId, contactRoleToSave))
         }
       }
       if (this.copyAttachments) {

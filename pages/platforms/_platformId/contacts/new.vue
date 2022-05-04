@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020-2021
+Copyright (C) 2020-2022
 - Kotyba Alhaj Taha (UFZ, kotyba.alhaj-taha@ufz.de)
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
@@ -37,37 +37,14 @@ permissions and limitations under the Licence.
       v-model="isInProgress"
       :dark="isSaving"
     />
-    <v-row>
-      <v-col
-        cols="12"
-        md="5"
-      >
-        <v-autocomplete :items="allExceptSelected" :item-text="(x) => x" :item-value="(x) => x.id" label="New contact" @change="select" />
-      </v-col>
-      <v-col
-        cols="12"
-        md="2"
-        align-self="center"
-      >
-        <v-btn
-          v-if="$auth.loggedIn"
-          small
-          color="primary"
-          :disabled="selectedContact == null"
-          @click="addContact"
-        >
-          Add
-        </v-btn>
-        <v-btn
-          small
-          text
-          nuxt
-          :to="'/platforms/' + platformId + '/contacts'"
-        >
-          Cancel
-        </v-btn>
-      </v-col>
-    </v-row>
+    <contact-role-form
+      :existing-contact-roles="value"
+      :contacts="allContacts"
+      :cv-contact-roles="allContactRoles"
+      :cancel-to="'/platforms/' + platformId + '/contacts'"
+      :editable="$auth.loggedIn"
+      @add-contact="addContact"
+    />
   </div>
 </template>
 
@@ -75,74 +52,71 @@ permissions and limitations under the Licence.
 import { Component, Vue, Prop } from 'nuxt-property-decorator'
 
 import { Contact } from '@/models/Contact'
+import { ContactRole } from '@/models/ContactRole'
+import { CvContactRole } from '@/models/CvContactRole'
 
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import ContactRoleForm from '@/components/contacts/ContactRoleForm.vue'
 
 @Component({
   components: {
+    ContactRoleForm,
     ProgressIndicator
   },
   middleware: ['auth']
 })
 export default class PlatformAddContactPage extends Vue {
-  private alreadyUsedContacts: Contact[] = []
+  @Prop({
+    type: Array,
+    required: false,
+    default: () => [] as ContactRole[]
+  })
+  // existing contact roles
+  private readonly value!: ContactRole[]
+
   private allContacts: Contact[] = []
-  private selectedContact: Contact | null = null
+  private allContactRoles: CvContactRole[] = []
+
   private isLoading: boolean = false
   private isSaving: boolean = false
 
-  @Prop({
-    default: () => [] as Contact[],
-    required: true,
-    type: Array
-  })
-  readonly value!: Contact[]
-
-  created () {
-    this.alreadyUsedContacts = [...this.value] as Contact[]
-  }
-
-  mounted () {
-    this.isLoading = true
-    this.$api.contacts.findAll().then((foundContacts) => {
-      this.allContacts = foundContacts
+  async fetch () {
+    try {
+      this.isLoading = true
+      // We can run both queries in parallel.
+      // And the page currently handles the server interaction
+      // (and not the form component).
+      const allContactsPromise = this.$api.contacts.findAll()
+      const allContactRolesPromise = this.$api.cvContactRoles.findAll()
+      this.allContacts = await allContactsPromise
+      this.allContactRoles = await allContactRolesPromise
+    } catch (_error) {
+      this.$store.commit('snackbar/setError', 'Failed to fetch contact information')
+    } finally {
       this.isLoading = false
-    }).catch(() => {
-      this.$store.commit('snackbar/setError', 'Failed to fetch related contacts')
-      this.isLoading = false
-    })
+    }
   }
 
   get isInProgress (): boolean {
     return this.isLoading || this.isSaving
   }
 
-  addContact (): void {
-    if (this.selectedContact && this.selectedContact.id && this.$auth.loggedIn) {
+  async addContact (newContactRole: ContactRole) {
+    if (this.$auth.loggedIn) {
       this.isSaving = true
-      this.$api.platforms.addContact(this.platformId, this.selectedContact.id).then(() => {
-        this.isSaving = false
-        this.alreadyUsedContacts.push(this.selectedContact as Contact)
-        this.$emit('input', this.alreadyUsedContacts)
+      try {
+        const newContactRoleId = await this.$api.platforms.addContact(this.platformId, newContactRole)
+        // the current one has no id so far, so we will set it here
+        newContactRole.id = newContactRoleId
+        const result = [...this.value, newContactRole]
+        this.$emit('input', result)
         this.$router.push('/platforms/' + this.platformId + '/contacts')
-      }).catch(() => {
-        this.isSaving = false
+      } catch (_error) {
         this.$store.commit('snackbar/setError', 'Failed to add a contact')
-      })
+      } finally {
+        this.isSaving = false
+      }
     }
-  }
-
-  select (newContactId: string): void {
-    const idx = this.allContacts.findIndex((c: Contact) => c.id === newContactId)
-    if (idx > -1) {
-      this.selectedContact = this.allContacts[idx]
-    } else {
-      this.selectedContact = null
-    }
-  }
-
-  get allExceptSelected (): Contact[] {
-    return this.allContacts.filter(c => !this.alreadyUsedContacts.find(rc => rc.id === c.id))
   }
 
   get platformId (): string {

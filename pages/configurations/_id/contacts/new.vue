@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020, 2021
+Copyright (C) 2020 - 2022
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
@@ -38,82 +38,59 @@ permissions and limitations under the Licence.
       v-model="isInProgress"
       :dark="isSaving"
     />
-    <v-row>
-      <v-col
-        cols="12"
-        md="5"
-      >
-        <v-autocomplete
-          :items="allExceptSelected"
-          :item-text="(x) => x"
-          :item-value="(x) => x.id"
-          label="New contact"
-          @change="select"
-        />
-      </v-col>
-      <v-col
-        cols="12"
-        md="2"
-        align-self="center"
-      >
-        <v-btn
-          v-if="$auth.loggedIn"
-          small
-          color="primary"
-          :disabled="selectedContact == null"
-          @click="addContact"
-        >
-          Add
-        </v-btn>
-        <v-btn
-          small
-          text
-          nuxt
-          :to="'/configurations/' + configurationId + '/contacts'"
-        >
-          Cancel
-        </v-btn>
-      </v-col>
-    </v-row>
+    <contact-role-form
+      :existing-contact-roles="value"
+      :contacts="allContacts"
+      :cv-contact-roles="allContactRoles"
+      :cancel-to="'/configurations/' + configurationId + '/contacts'"
+      :editable="$auth.loggedIn"
+      @add-contact="addContact"
+    />
   </div>
 </template>
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'nuxt-property-decorator'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import ContactRoleForm from '@/components/contacts/ContactRoleForm.vue'
 import { Contact } from '@/models/Contact'
+import { ContactRole } from '@/models/ContactRole'
+import { CvContactRole } from '@/models/CvContactRole'
 
 @Component({
-  components: { ProgressIndicator },
+  components: { ContactRoleForm, ProgressIndicator },
   middleware: ['auth']
 })
 export default class PlatformAddContactPage extends Vue {
-  private alreadyUsedContacts: Contact[] = []
+  @Prop({
+    type: Array,
+    required: false,
+    default: () => [] as ContactRole[]
+  })
+  // existing contact roles
+  private readonly value!: ContactRole[]
+
   private allContacts: Contact[] = []
-  private selectedContact: Contact | null = null
+  private allContactRoles: CvContactRole[] = []
+
   private isLoading: boolean = false
   private isSaving: boolean = false
 
-  @Prop({
-    default: () => [] as Contact[],
-    required: true,
-    type: Array
-  })
-  readonly value!: Contact[]
-
-  created () {
-    this.alreadyUsedContacts = [...this.value] as Contact[]
-  }
-
-  mounted () {
-    this.isLoading = true
-    this.$api.contacts.findAll().then((foundContacts) => {
-      this.allContacts = foundContacts
-    }).catch(() => {
-      this.$store.commit('snackbar/setError', 'Failed to fetch related contacts')
-    }).finally(() => {
+  async fetch () {
+    try {
+      this.isLoading = true
+      // We can run both queries in parallel.
+      // And the page currently handles the server interaction
+      // (and not the form component).
+      const allContactsPromise = this.$api.contacts.findAll()
+      const allContactRolesPromise = this.$api.cvContactRoles.findAll()
+      this.allContacts = await allContactsPromise
+      this.allContactRoles = await allContactRolesPromise
+    } catch (_error) {
+      this.$store.commit('snackbar/setError', 'Failed to fetch contact information')
+    } finally {
       this.isLoading = false
-    })
+    }
   }
 
   get configurationId (): string {
@@ -124,32 +101,21 @@ export default class PlatformAddContactPage extends Vue {
     return this.isLoading || this.isSaving
   }
 
-  get allExceptSelected (): Contact[] {
-    return this.allContacts.filter(c => !this.alreadyUsedContacts.find(rc => rc.id === c.id))
-  }
-
-  select (newContactId: string): void {
-    const idx = this.allContacts.findIndex((c: Contact) => c.id === newContactId)
-    if (idx > -1) {
-      this.selectedContact = this.allContacts[idx]
-    } else {
-      this.selectedContact = null
-    }
-  }
-
-  addContact () {
-    if (this.selectedContact && this.selectedContact.id && this.$auth.loggedIn) {
+  async addContact (newContactRole: ContactRole) {
+    if (this.$auth.loggedIn) {
       this.isSaving = true
-      this.$store.dispatch('contacts/addContactToConfiguration', {
-        configurationId: this.configurationId,
-        contactId: this.selectedContact.id
-      }).then(() => {
+      try {
+        const newContactRoleId = await this.$api.configurations.addContact(this.configurationId, newContactRole)
+        // the current one has no id so far, so we will set it here
+        newContactRole.id = newContactRoleId
+        const result = [...this.value, newContactRole]
+        this.$emit('input', result)
         this.$router.push('/configurations/' + this.configurationId + '/contacts')
-      }).catch(() => {
+      } catch (_error) {
         this.$store.commit('snackbar/setError', 'Failed to add a contact')
-      }).finally(() => {
+      } finally {
         this.isSaving = false
-      })
+      }
     }
   }
 }

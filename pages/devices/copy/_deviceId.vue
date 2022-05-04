@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020-2021
+Copyright (C) 2020-2022
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -157,7 +157,7 @@ import { Component, Vue, Watch, mixins } from 'nuxt-property-decorator'
 import { Rules } from '@/mixins/Rules'
 
 import { Attachment } from '@/models/Attachment'
-import { Contact } from '@/models/Contact'
+import { ContactRole } from '@/models/ContactRole'
 import { CustomTextField } from '@/models/CustomTextField'
 import { Device } from '@/models/Device'
 import { DeviceProperty } from '@/models/DeviceProperty'
@@ -191,15 +191,18 @@ export default class DeviceCopyPage extends mixins(Rules) {
 
   mounted () {
     this.initializeAppBar()
+  }
 
+  async fetch () {
     // We also load the contacts and the measured quantities as those
     // are the ones that we will also copy.
-    this.$api.devices.findById(this.deviceId, {
-      includeContacts: true,
-      includeCustomFields: true,
-      includeDeviceProperties: true,
-      includeDeviceAttachments: true
-    }).then((device) => {
+    try {
+      const device = await this.$api.devices.findById(this.deviceId, {
+        includeContacts: false,
+        includeCustomFields: true,
+        includeDeviceProperties: true,
+        includeDeviceAttachments: true
+      })
       this.existingDevice = device
       const deviceToEdit = Device.createFromObject(this.existingDevice)
       // Unset the fields that are very device specific
@@ -224,11 +227,11 @@ export default class DeviceCopyPage extends mixins(Rules) {
       deviceToEdit.inventoryNumber = ''
 
       this.device = deviceToEdit
-      this.isLoading = false
-    }).catch((_error) => {
+    } catch (_error) {
       this.$store.commit('snackbar/setError', 'Loading device failed')
+    } finally {
       this.isLoading = false
-    })
+    }
   }
 
   beforeDestroy () {
@@ -245,7 +248,6 @@ export default class DeviceCopyPage extends mixins(Rules) {
       return
     }
     this.isLoading = true
-    const contacts = this.device.contacts
     const measuredQuantities = this.device.properties.map(DeviceProperty.createFromObject)
     const customFields = this.device.customFields.map(CustomTextField.createFromObject)
     const attachments = this.device.attachments.map(Attachment.createFromObject)
@@ -261,14 +263,17 @@ export default class DeviceCopyPage extends mixins(Rules) {
         // The contacts have the special issue, that our system will add the contact who
         // add/edit the device automatically.
         // We we should check who we added this way already.
-        const existingContacts = await this.$api.devices.findRelatedContacts(savedDeviceId)
+        const sourceContactRoles = await this.$api.devices.findRelatedContactRoles(this.deviceId)
+        const freshCreatedContactRoles = await this.$api.devices.findRelatedContactRoles(savedDeviceId)
         // And then only add those remaining
-        const contactsToSave = contacts.filter(c => existingContacts.findIndex((ec: Contact) => { return ec.id === c.id }) === -1)
+        const contactRolesToSave = sourceContactRoles.filter(c => freshCreatedContactRoles.findIndex((ec: ContactRole) => { return ec.contact!.id === c.contact!.id && ec.roleName === c.roleName }) === -1)
 
-        for (const contact of contactsToSave) {
-          if (contact.id) {
-            related.push(this.$api.devices.addContact(savedDeviceId, contact.id))
-          }
+        for (const contactRole of contactRolesToSave) {
+          const contactRoleToSave = ContactRole.createFromObject(contactRole)
+          // we don't have a reference to the device here, but we have an id
+          // that we should remove before we save it
+          contactRoleToSave.id = null
+          related.push(this.$api.devices.addContact(savedDeviceId, contactRoleToSave))
         }
       }
       if (this.copyMeasuredQuantities) {

@@ -32,7 +32,7 @@
 import { AxiosInstance, Method } from 'axios'
 
 import { Attachment } from '@/models/Attachment'
-import { Contact } from '@/models/Contact'
+import { ContactRole } from '@/models/ContactRole'
 import { Platform } from '@/models/Platform'
 import { PlatformType } from '@/models/PlatformType'
 import { Manufacturer } from '@/models/Manufacturer'
@@ -43,7 +43,7 @@ import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
 import { PlatformMountAction } from '@/models/views/platforms/actions/PlatformMountAction'
 import { PlatformUnmountAction } from '@/models/views/platforms/actions/PlatformUnmountAction'
 
-import { ContactSerializer } from '@/serializers/jsonapi/ContactSerializer'
+import { ContactRoleSerializer } from '@/serializers/jsonapi/ContactRoleSerializer'
 
 import {
   PlatformSerializer,
@@ -142,13 +142,14 @@ export class PlatformApi {
     return new PlatformSearchBuilder(this.axiosApi, this.basePath, this.serializer)
   }
 
-  findRelatedContacts (platformId: string): Promise<Contact[]> {
-    const url = this.basePath + '/' + platformId + '/contacts'
+  findRelatedContactRoles (platformId: string): Promise<ContactRole[]> {
+    const url = this.basePath + '/' + platformId + '/platform-contact-roles'
     const params = {
-      'page[size]': 10000
+      'page[size]': 10000,
+      include: 'contact'
     }
     return this.axiosApi.get(url, { params }).then((rawServerResponse) => {
-      return new ContactSerializer().convertJsonApiObjectListToModelList(rawServerResponse.data)
+      return new ContactRoleSerializer().convertJsonApiObjectListToModelList(rawServerResponse.data)
     })
   }
 
@@ -219,24 +220,15 @@ export class PlatformApi {
     })
   }
 
-  removeContact (platformId: string, contactId: string): Promise<void> {
-    const url = this.basePath + '/' + platformId + '/relationships/contacts'
-    const params = {
-      data: [{
-        type: 'contact',
-        id: contactId
-      }]
-    }
-    return this.axiosApi.delete(url, { data: params })
+  removeContact (platformContactRoleId: string): Promise<void> {
+    const url = 'platform-contact-roles/' + platformContactRoleId
+    return this.axiosApi.delete(url)
   }
 
-  addContact (platformId: string, contactId: string): Promise<void> {
-    const url = this.basePath + '/' + platformId + '/relationships/contacts'
-    const data = [{
-      type: 'contact',
-      id: contactId
-    }]
-    return this.axiosApi.post(url, { data })
+  addContact (platformId: string, contactRole: ContactRole): Promise<string> {
+    const url = 'platform-contact-roles'
+    const data = new ContactRoleSerializer().convertModelToJsonApiData(contactRole, 'platform_contact_role', 'platform', platformId)
+    return this.axiosApi.post(url, { data }).then(response => response.data.data.id)
   }
 }
 
