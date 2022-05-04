@@ -159,6 +159,7 @@ services:
       SECRET_KEY: ${BACKEND_SECRET_KEY}
       ALLOWED_MIME_TYPES: ${ALLOWED_MIME_TYPES}
       ELASTICSEARCH_URL: http://elastic-search:9200
+      CV_URL: https://sensors.gfz-potsdam.de/cv/api/v1
     depends_on:
       - backend-db
     volumes:

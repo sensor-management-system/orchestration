@@ -79,6 +79,7 @@ services:
       ALLOWED_MIME_TYPES: ${ALLOWED_MIME_TYPES:-image/png,application/pdf}
       IDL_URL: ${IDL_URL}
       SMS_IDL_TOKEN: ${SMS_IDL_TOKEN}
+      CV_URL: ${CV_URL}
     depends_on:
       - db
     command: >
