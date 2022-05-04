@@ -60,7 +60,7 @@ def upgrade():
     # Fill contact_role tables with default role.
     cv_url = os.environ.get("CV_URL")
     # a default role should be listed in our controlled vocabulary!
-    default_role = "operator"
+    default_role = "Operator"
     # If you are willing to change the default role please be attention to change the uri also ;)
     default_role_uri = f"{cv_url}/contactroles/3/"
     add_device_contact_role(default_role, default_role_uri)
