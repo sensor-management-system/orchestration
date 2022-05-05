@@ -43,6 +43,8 @@ import { Property } from '@/models/Property'
 import { Unit } from '@/models/Unit'
 import { MeasuredQuantityUnit } from '@/models/MeasuredQuantityUnit'
 import { Api } from '@/services/Api'
+import { EpsgCode } from '@/models/EpsgCode'
+import { ElevationDatum } from '@/models/ElevationDatum'
 
 const KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE = 'software_update'
 const KIND_OF_ACTION_TYPE_GENERIC_PLATFORM_ACTION = 'generic_platform_action'
@@ -60,7 +62,9 @@ interface vocabularyState {
   samplingMedia: SamplingMedia[],
   properties: Property[],
   units: Unit[],
-  measuredQuantityUnits: MeasuredQuantityUnit[]
+  measuredQuantityUnits: MeasuredQuantityUnit[],
+  epsgCodes:EpsgCode[],
+  elevationData: ElevationDatum[]
 }
 
 const state = () => ({
@@ -74,7 +78,9 @@ const state = () => ({
   samplingMedia: [],
   properties: [],
   units: [],
-  measuredQuantityUnits: []
+  measuredQuantityUnits: [],
+  epsgCodes:[],
+  elevationData: []
 })
 
 const getters = {
@@ -170,19 +176,25 @@ const actions: {
     commit('setDeviceGenericActionTypes', await this.$api.actionTypes.newSearchBuilder().onlyType(ACTION_TYPE_API_FILTER_DEVICE).build().findMatchingAsList())
   },
   async loadCompartments ({ commit }: { commit: Commit }) {
-    commit('setCompartments', await this.$api.compartments.findAllPaginated())
+    commit('setCompartments', await this.$api.compartments.findAll())
   },
   async loadSamplingMedia ({ commit }: { commit: Commit }) {
-    commit('setSamplingMedia', await this.$api.samplingMedia.findAllPaginated())
+    commit('setSamplingMedia', await this.$api.samplingMedia.findAll())
   },
   async loadProperties ({ commit }: { commit: Commit }) {
-    commit('setProperties', await this.$api.properties.findAllPaginated())
+    commit('setProperties', await this.$api.properties.findAll())
   },
   async loadUnits ({ commit }: { commit: Commit }) {
-    commit('setUnits', await this.$api.units.findAllPaginated())
+    commit('setUnits', await this.$api.units.findAll())
   },
   async loadMeasuredQuantityUnits ({ commit }: { commit: Commit }) {
-    commit('setMeasuredQuantityUnits', await this.$api.measuredQuantityUnits.findAllPaginated())
+    commit('setMeasuredQuantityUnits', await this.$api.measuredQuantityUnits.findAll())
+  },
+  async loadEpsgCodes ({ commit }: { commit: Commit }) {
+    commit('setEpsgCodes', await this.$api.epsgCodes.findAll())
+  },
+  async loadElevationData ({ commit }: { commit: Commit }) {
+    commit('setElevationData', await this.$api.elevationData.findAll())
   }
 }
 
@@ -219,6 +231,12 @@ const mutations = {
   },
   setMeasuredQuantityUnits (state: vocabularyState, measuredQuantityUnits: MeasuredQuantityUnit[]) {
     state.measuredQuantityUnits = measuredQuantityUnits
+  },
+  setEpsgCodes(state:vocabularyState,epsgCodes:EpsgCode[]){
+    state.epsgCodes=epsgCodes
+  },
+  setElevationData(state:vocabularyState,elevationData:ElevationDatum[]){
+    state.elevationData=elevationData
   }
 }
 
