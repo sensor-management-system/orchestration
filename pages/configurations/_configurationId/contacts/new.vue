@@ -54,7 +54,6 @@ permissions and limitations under the Licence.
         align-self="center"
       >
         <v-btn
-          v-if="$auth.loggedIn"
           small
           color="primary"
           :disabled="selectedContact == null"

@@ -44,7 +44,7 @@ permissions and limitations under the Licence.
       <v-card-actions>
         <v-spacer />
         <save-and-cancel-buttons
-          v-if="$auth.loggedIn"
+          save-btn-text="Apply"
           :to="`/configurations/${configurationId}/basic`"
           @save="save"
         />
@@ -57,7 +57,7 @@ permissions and limitations under the Licence.
       <v-card-actions>
         <v-spacer />
         <save-and-cancel-buttons
-          v-if="$auth.loggedIn"
+          save-btn-text="Apply"
           :to="`/configurations/${configurationId}/basic`"
           @save="save"
         />
