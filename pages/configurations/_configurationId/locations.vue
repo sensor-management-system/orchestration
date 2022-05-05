@@ -154,14 +154,31 @@ import {
 
 import DateTimePicker from '@/components/DateTimePicker.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { mapActions } from 'vuex'
 
 @Component({
   components: {
     DateTimePicker,
     ProgressIndicator
+  },
+  methods:{
+    ...mapActions('vocabulary',['loadEpsgCodes','loadElevationData']),
+    ...mapActions('contacts',['loadAllContacts'])
   }
 })
 export default class ConfigurationLocations extends mixins(Rules) {
+
+  // vuex definition for typescript check
+  loadEpsgCodes!:()=>void
+  loadElevationData!:()=>void
+  loadAllContacts!:()=>void
+
+  async created(){ //TODO Try catch + progress inidcator
+    await this.loadEpsgCodes()
+    await this.loadElevationData()
+    await this.loadAllContacts()
+  }
+
   // private configuration: Configuration = new Configuration()
   // private epsgCodes: EpsgCode[] = []
   // private elevationData: ElevationDatum[] = []

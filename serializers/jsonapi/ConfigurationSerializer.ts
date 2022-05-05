@@ -326,6 +326,9 @@ export const configurationWithMetaToConfigurationByThrowingErrorOnMissing = (con
   }
   return configuration
 }
+export const configurationWithMetaToConfigurationByThrowingNoErrorOnMissing = (configurationWithMeta: IConfigurationWithMeta): Configuration => {
+  return configurationWithMeta.configuration
+}
 
 export const configurationWithMetaToConfigurationByAddingDummyObjects = (configurationWithMeta: IConfigurationWithMeta): Configuration => {
   const configuration = configurationWithMeta.configuration

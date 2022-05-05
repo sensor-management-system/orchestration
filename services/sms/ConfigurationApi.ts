@@ -44,7 +44,8 @@ import { IFlaskJSONAPIFilter } from '@/utils/JSONApiInterfaces'
 import {
   ConfigurationSerializer,
   configurationWithMetaToConfigurationByAddingDummyObjects,
-  configurationWithMetaToConfigurationByThrowingErrorOnMissing
+  configurationWithMetaToConfigurationByThrowingErrorOnMissing,
+  configurationWithMetaToConfigurationByThrowingNoErrorOnMissing
 } from '@/serializers/jsonapi/ConfigurationSerializer'
 
 import { ContactSerializer } from '@/serializers/jsonapi/ContactSerializer'
@@ -269,39 +270,40 @@ export class ConfigurationApi {
     return this.axiosApi.get(this.basePath + '/' + id, {
       params: {
         include: [
-          'contacts',
-          'src_longitude',
-          'src_latitude',
-          'src_elevation',
-          'device_mount_actions',
-          'device_unmount_actions',
-          'platform_mount_actions',
-          'platform_unmount_actions',
-          'configuration_static_location_begin_actions',
-          'configuration_static_location_end_actions',
-          'configuration_dynamic_location_begin_actions',
-          'configuration_dynamic_location_end_actions',
-          'platform_mount_actions.platform',
-          'device_mount_actions.device',
-          'device_mount_actions.device.device_properties',
-          'device_mount_actions.contact',
-          'platform_mount_actions.contact',
-          'platform_unmount_actions.contact',
-          'device_unmount_actions.contact',
-          'configuration_static_location_begin_actions.contact',
-          'configuration_static_location_end_actions.contact',
-          'configuration_dynamic_location_begin_actions.contact',
-          'configuration_dynamic_location_end_actions.contact',
-          'configuration_dynamic_location_begin_actions.x_property',
-          'configuration_dynamic_location_begin_actions.y_property',
-          'configuration_dynamic_location_begin_actions.z_property'
+          // 'contacts',
+          // 'src_longitude',
+          // 'src_latitude',
+          // 'src_elevation',
+          // 'device_mount_actions',
+          // 'device_unmount_actions',
+          // 'platform_mount_actions',
+          // 'platform_unmount_actions',
+          // 'configuration_static_location_begin_actions',
+          // 'configuration_static_location_end_actions',
+          // 'configuration_dynamic_location_begin_actions',
+          // 'configuration_dynamic_location_end_actions',
+          // 'platform_mount_actions.platform',
+          // 'device_mount_actions.device',
+          // 'device_mount_actions.device.device_properties',
+          // 'device_mount_actions.contact',
+          // 'platform_mount_actions.contact',
+          // 'platform_unmount_actions.contact',
+          // 'device_unmount_actions.contact',
+          // 'configuration_static_location_begin_actions.contact',
+          // 'configuration_static_location_end_actions.contact',
+          // 'configuration_dynamic_location_begin_actions.contact',
+          // 'configuration_dynamic_location_end_actions.contact',
+          // 'configuration_dynamic_location_begin_actions.x_property',
+          // 'configuration_dynamic_location_begin_actions.y_property',
+          // 'configuration_dynamic_location_begin_actions.z_property'
           // devices of the dynamic location properties must be
           // part of mounted devices
         ].join(',')
       }
     }).then((rawResponse) => {
       const rawData = rawResponse.data
-      return configurationWithMetaToConfigurationByThrowingErrorOnMissing(this.serializer.convertJsonApiObjectToModel(rawData))
+      // return configurationWithMetaToConfigurationByThrowingErrorOnMissing(this.serializer.convertJsonApiObjectToModel(rawData))
+      return configurationWithMetaToConfigurationByThrowingNoErrorOnMissing(this.serializer.convertJsonApiObjectToModel(rawData))
     })
   }
 
@@ -542,6 +544,7 @@ export class ConfigurationApi {
       return new ContactSerializer().convertJsonApiObjectListToModelList(rawServerResponse.data)
     })
   }
+  // /configurations/1/relationships/configuration-static-location-begin-actions
 
   removeContact (configurationId: string, contactId: string): Promise<void> {
     const url = this.basePath + '/' + configurationId + '/relationships/contacts'

@@ -47,7 +47,6 @@ permissions and limitations under the Licence.
           :epsg-codes="epsgCodes"
           :elevation-data="elevationData"
           :contacts="contacts"
-          :current-user-mail="currentUserMail"
           :earliest-date-exclusive="latestActiveActionEndDate"
           :latest-date-exclusive="nextActiveLocationBeginDate"
         />
@@ -88,6 +87,8 @@ import {
 import DateTimePicker from '@/components/DateTimePicker.vue'
 import ConfigurationStaticLocationBeginActionDataForm from '@/components/configurations/ConfigurationStaticLocationBeginActionDataForm.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { mapActions, mapState } from 'vuex'
+import { currentAsUtcDateSecondsAsZeros } from '@/utils/dateHelper'
 
 @Component({
   components: {
@@ -95,39 +96,17 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
     DateTimePicker,
     ProgressIndicator
   },
-  middleware: ['auth']
+  middleware: ['auth'],
+  computed:{
+    ...mapState('vocabulary',['epsgCodes','elevationData']),
+    ...mapState('contacts',['contacts'])
+  },
+  methods:mapActions('configurations',['addStaticLocationBeginAction','loadConfiguration'])
 })
 export default class StaticLocationBeginActionNew extends mixins(Rules) {
   private configuration: Configuration = new Configuration()
   private beginAction: StaticLocationBeginAction = new StaticLocationBeginAction()
   private isSaving: boolean = false
-
-  @Prop({
-    required: true,
-    type: Object
-  })
-  readonly value!: Configuration
-
-  @Prop({
-    default: () => [],
-    required: false,
-    type: Array
-  })
-  readonly contacts!: Contact[]
-
-  @Prop({
-    default: () => [],
-    required: false,
-    type: Array
-  })
-  readonly elevationData!: ElevationDatum[]
-
-  @Prop({
-    default: () => [],
-    required: false,
-    type: Array
-  })
-  readonly epsgCodes!: EpsgCode[]
 
   created () {
     if (this.value) {
@@ -136,11 +115,15 @@ export default class StaticLocationBeginActionNew extends mixins(Rules) {
     this.beginAction.beginDate = this.selectedDate
   }
 
+  get configurationId (): string {
+    return this.$route.params.configurationId
+  }
+
   get selectedDate (): DateTime {
     if ('date' in this.$route.query && this.$route.query.date) {
       return DateTime.fromISO(this.$route.query.date as string).toUTC()
     }
-    return DateTime.utc()
+    return currentAsUtcDateSecondsAsZeros()
   }
 
   get currentlyActiveLocationAction (): StaticLocationBeginAction | DynamicLocationBeginAction | null {
@@ -162,46 +145,38 @@ export default class StaticLocationBeginActionNew extends mixins(Rules) {
   }
 
   closeNewStaticLocationForm (): void {
-    this.$router.push('/configurations/' + this.value.id + '/locations/' + this.selectedDate.toISO())
+    this.$router.push('/configurations/' + this.configurationId + '/locations?timestamp=' + this.selectedDate.toISO())
   }
 
   async saveNewStaticLocation () {
-    if (!this.$auth.loggedIn) {
-      return
-    }
     if (!(this.$refs.newStaticLocationForm as Vue & { isValid: () => boolean }).isValid()) {
       this.$store.commit('snackbar/setError', 'Please correct the errors')
       return
     }
-    this.isSaving = true
-    const configurationBeforeSave = this.$store.state.configurations.configuration
     try {
-      // I have to save it the same way as the mount and unmount actions as it
-      // is always possible that someone goes into the past and makes an earlier
-      // begin or end of the location.
-      this.configuration.staticLocationBeginActions.push(this.beginAction)
-      this.$store.commit('configurations/setConfiguration', this.configuration)
-      await this.$store.dispatch('configurations/saveConfiguration')
+      this.isSaving = true
+      await this.addStaticLocationBeginAction({
+        configurationId:this.configurationId,
+        staticLocationBeginAction:this.beginAction
+      })
+      this.loadConfiguration(this.configurationId)
       this.$store.commit('snackbar/setSuccess', 'Save successful')
-      this.isSaving = false
       this.closeNewStaticLocationForm()
     } catch (e) {
-      this.$store.commit('configurations/setConfiguration', configurationBeforeSave)
       this.$store.commit('snackbar/setError', 'Save failed')
+    }finally {
       this.isSaving = false
     }
   }
 
-  get currentUserMail (): string | null {
-    return this.$auth.user?.email as string | null
-  }
 
-  @Watch('value', {
-    deep: true,
-    immediate: true
-  })
-  onValueChange (val: Configuration): void {
-    this.configuration = Configuration.createFromObject(val)
-  }
+
+  // @Watch('value', {
+  //   deep: true,
+  //   immediate: true
+  // })
+  // onValueChange (val: Configuration): void {
+  //   this.configuration = Configuration.createFromObject(val)
+  // }
 }
 </script>

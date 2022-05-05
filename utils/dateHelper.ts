@@ -73,3 +73,7 @@ export const dateToDateTimeString = (aDate: DateTime | null): string => {
   }
   return aDate.setZone('UTC').toFormat('yyyy-MM-dd HH:mm:ss')
 }
+
+export const currentAsUtcDateSecondsAsZeros = (): DateTime =>{
+  return DateTime.fromFormat(DateTime.now().setZone('UTC').toFormat('yyyy-MM-dd HH:mm'),'yyyy-MM-dd HH:mm')
+}

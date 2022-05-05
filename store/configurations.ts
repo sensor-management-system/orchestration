@@ -59,12 +59,16 @@ import { PlatformMountAction } from '@/models/PlatformMountAction'
 import { DeviceUnmountAction } from '@/models/DeviceUnmountAction'
 import { PlatformUnmountAction } from '@/models/PlatformUnmountAction'
 import { Api } from '@/services/Api'
+import { StaticLocationBeginAction } from '@/models/StaticLocationBeginAction'
+import { StaticLocationEndAction } from '@/models/StaticLocationEndAction'
+import { DynamicLocationBeginAction } from '@/models/DynamicLocationBeginAction'
+import { DynamicLocationEndAction } from '@/models/DynamicLocationEndAction'
 
 export enum LocationTypes {
-  staticStart='staticStart',
-  staticEnd='staticEnd',
-  dynamicStart='dynamicStart',
-  dynamicEnd='dynamicEnd',
+  staticStart = 'staticStart',
+  staticEnd = 'staticEnd',
+  dynamicStart = 'dynamicStart',
+  dynamicEnd = 'dynamicEnd',
 }
 
 export interface configurationsState {
@@ -72,7 +76,15 @@ export interface configurationsState {
   configuration: Configuration | null,
   configurationContacts: Contact[]
   configurationStates: string[]
-  projects: Project[]
+  projects: Project[],
+  deviceMountActions:DeviceMountAction[],
+  deviceUnMountActions:DeviceUnmountAction[],
+  platformMountActions:PlatformMountAction[],
+  platformUnMountActions:PlatformUnmountAction[],
+  staticLocationBeginActions: StaticLocationBeginAction[],
+  staticLocationEndActions:StaticLocationEndAction[],
+  dynamicLocationBeginActions: DynamicLocationBeginAction[],
+  dynamicLocationEndActions: DynamicLocationEndAction[],
   totalPages: number
   pageNumber: number
   pageSize: number
@@ -84,6 +96,14 @@ const state = () => ({
   configurationContacts: [],
   configurationStates: [],
   projects: [],
+  deviceMountActions:[],
+  deviceUnMountActions:[],
+  platformMountActions:[],
+  platformUnMountActions:[],
+  staticLocationBeginActions:[],
+  staticLocationEndActions:[],
+  dynamicLocationBeginActions:[],
+  dynamicLocationEndActions:[],
   totalPages: 1,
   pageNumber: 1,
   pageSize: 20
@@ -319,6 +339,12 @@ const actions: {
     }: { configurationId: string, platformUnMountAction: PlatformUnmountAction }
   ) {
     return this.$api.configurations.platformUnmountActionApi.add(configurationId, platformUnMountAction)
+  },
+  addStaticLocationBeginAction ({ _commit }: { _commit: Commit }, {
+    configurationId,
+    staticLocationBeginAction
+  }: { configurationId: string, staticLocationBeginAction: StaticLocationBeginAction }) {
+    return this.$api.configurations.staticLocationBeginActionApi.add(configurationId,staticLocationBeginAction)
   },
   setPageNumber ({ commit }: { commit: Commit }, newPageNumber: number) {
     commit('setPageNumber', newPageNumber)

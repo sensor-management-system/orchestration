@@ -31,12 +31,35 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
+    <v-card-actions>
+      <v-spacer />
+      <v-btn
+        v-if="$auth.loggedIn"
+        color="primary"
+        :disabled="this.selectedAction !== null"
+        small
+        nuxt
+        :to="'/configurations/' + configurationId + '/locations/static-location-begin-actions/new?timestamp=' + this.selectedDate.toISO()"
+      >
+        Start Static Location
+      </v-btn>
+      <v-btn
+        v-if="$auth.loggedIn"
+        color="primary"
+        :disabled="this.selectedAction !== null"
+        small
+        nuxt
+      >
+        Start Dynamic Location
+      </v-btn>
+    </v-card-actions>
     <v-row>
       <v-col cols="12" md="3">
         <DateTimePicker
           v-model="selectedDate"
           placeholder="e.g. 2000-01-31 12:00"
           label="Configuration at date"
+          @input="updateUrlDate"
         />
       </v-col>
       <v-col>
@@ -102,18 +125,35 @@ import ConfigurationDynamicLocationBeginActionData
   from '@/components/configurations/ConfigurationDynamicLocationBeginActionData.vue'
 import ConfigurationDynamicLocationEndActionData
   from '@/components/configurations/ConfigurationDynamicLocationEndActionData.vue'
+import { currentAsUtcDateSecondsAsZeros, stringToDate } from '@/utils/dateHelper'
 
 @Component({
   components: { ConfigurationDynamicLocationEndActionData, ConfigurationDynamicLocationBeginActionData, ConfigurationStaticLocationEndActionData, ConfigurationStaticLocationBeginActionData, DateTimePicker },
   computed: mapGetters('configurations', ['locationActionsDates'])
 })
 export default class ConfigurationShowLocationPage extends Vue {
-  private selectedDate = DateTime.utc()
-
+  private selectedDate = currentAsUtcDateSecondsAsZeros()
   private selectedAction: StaticLocationBeginAction|StaticLocationEndAction|DynamicLocationBeginAction|DynamicLocationEndAction|null = null
+
+  created(){
+    if(this.$route.query.timestamp){
+      this.selectedDate=stringToDate(this.$route.query.timestamp)
+    }
+  }
+  get configurationId (): string {
+    return this.$route.params.configurationId
+  }
 
   updateDate (val) {
     this.selectedDate = val.date
+    this.updateUrlDate()
+  }
+
+  updateUrlDate(newDate){
+    this.$router.push({
+      query: {timestamp:this.selectedDate},
+      hash: this.$route.hash
+    })
   }
 
   get isStaticLocationStartAction () {

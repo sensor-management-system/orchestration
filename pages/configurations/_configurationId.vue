@@ -72,6 +72,7 @@ export default class ConfigurationsIdPage extends Vue {
         this.$router.replace('/configurations/' + this.configurationId + '/basic')
       }
     } catch (_e) {
+      console.log('_e',_e);
       this.$store.commit('snackbar/setError', 'Loading configuration failed')
     } finally {
       this.isLoading = false

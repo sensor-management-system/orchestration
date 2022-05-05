@@ -207,11 +207,6 @@ export default class ConfigurationStaticLocationBeginActionDataForm extends mixi
   })
   readonly contacts!: Contact[]
 
-  @Prop({
-    required: false,
-    type: String
-  })
-  readonly currentUserMail!: string | null
 
   @Prop({
     required: false,
@@ -240,6 +235,10 @@ export default class ConfigurationStaticLocationBeginActionDataForm extends mixi
     type: DateTime
   })
   readonly latestDateExclusive!: DateTime | null
+
+  get currentUserMail (): string | null {
+    return this.$auth.user?.email as string | null
+  }
 
   get elevationDatum (): string {
     const elevationDatumIndex = this.elevationData.findIndex(d => d.uri === this.value.elevationDatumUri)
