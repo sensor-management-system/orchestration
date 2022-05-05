@@ -57,6 +57,16 @@ import { StaticLocationBeginActionApi } from '@/services/sms/StaticLocationBegin
 import { StaticLocationEndActionApi } from '@/services/sms/StaticLocationEndActionApi'
 import { DynamicLocationBeginActionApi } from '@/services/sms/DynamicLocationBeginActionApi'
 import { DynamicLocationEndActionApi } from '@/services/sms/DynamicLocationEndActionApi'
+import { StaticLocationBeginAction } from '@/models/StaticLocationBeginAction'
+import { StaticLocationBeginActionSerializer } from '@/serializers/jsonapi/StaticLocationBeginActionSerializer'
+import { DateTime } from 'luxon'
+import { StaticLocationEndAction } from '@/models/StaticLocationEndAction'
+import { DynamicLocationBeginAction } from '@/models/DynamicLocationBeginAction'
+import { DynamicLocationEndAction } from '@/models/DynamicLocationEndAction'
+import { DeviceMountAction } from '@/models/DeviceMountAction'
+import { PlatformMountAction } from '@/models/PlatformMountAction'
+import { DeviceSerializer } from '@/serializers/jsonapi/DeviceSerializer'
+import { PlatformSerializer } from '@/serializers/jsonapi/PlatformSerializer'
 
 export class ConfigurationApi {
   private axiosApi: AxiosInstance
@@ -544,7 +554,190 @@ export class ConfigurationApi {
       return new ContactSerializer().convertJsonApiObjectListToModelList(rawServerResponse.data)
     })
   }
-  // /configurations/1/relationships/configuration-static-location-begin-actions
+
+  findRelatedStaticLocationBeginActions(configurationId: string): Promise<StaticLocationBeginAction>{
+    const url = this.basePath + '/' + configurationId + '/static-location-begin-actions'
+    const params = {
+      'page[size]': 10000
+    }
+    return this.axiosApi.get(url, { params }).then((rawServerResponse) => {
+      return rawServerResponse.data.data.map((apiData: any)=>{
+        return {
+          id:apiData.id,
+          beginDate:DateTime.fromISO(apiData.attributes.begin_date, { zone: 'UTC' }),
+          description:apiData.attributes.description,
+          epsgCode:apiData.attributes.epsg_code ?? '4326',
+          x:apiData.attributes.x,
+          y:apiData.attributes.y,
+          z:apiData.attributes.z,
+          elevationDatumName:apiData.attributes.elevation_datum_name ?? 'MSL',
+          elevationDatumUri:apiData.attributes.elevation_datum_uri ?? '',
+        }
+      })
+    })
+  }
+
+  findRelatedStaticLocationEndActions(configurationId: string): Promise<StaticLocationEndAction>{
+    const url = this.basePath + '/' + configurationId + '/static-location-end-actions'
+    const params = {
+      'page[size]': 10000
+    }
+    return this.axiosApi.get(url, { params }).then((rawServerResponse) => {
+      return rawServerResponse.data.data.map((apiData: any)=>{
+        return {
+          id:apiData.id,
+          description:apiData.attributes.description,
+          endDate:apiData.attributes.end_data
+        }
+      })
+    })
+  }
+  findRelatedDynamicLocationBeginActions(configurationId: string): Promise<DynamicLocationBeginAction>{
+    const url = this.basePath + '/' + configurationId + '/dynamic-location-begin-action'
+    const params = {
+      'page[size]': 10000
+    }
+    return this.axiosApi.get(url, { params }).then((rawServerResponse) => {
+      return rawServerResponse.data.data.map((apiData: any)=>{
+        return {
+          id:apiData.id,
+          beginDate:DateTime.fromISO(apiData.attributes.begin_date, { zone: 'UTC' }),
+          description:apiData.attributes.description,
+          epsgCode:apiData.attributes.epsg_code ?? '4326',
+          elevationDatumName:apiData.attributes.elevation_datum_name ?? 'MSL',
+          elevationDatumUri:apiData.attributes.elevation_datum_uri ?? '',
+          contactId:apiData.relationships.contact.data.id
+        }
+      })
+    })
+  }
+  findRelatedDynamicLocationEndActions(configurationId: string): Promise<DynamicLocationEndAction>{
+    const url = this.basePath + '/' + configurationId + '/dynamic-location-end-actions'
+    const params = {
+      'page[size]': 10000
+    }
+    return this.axiosApi.get(url, { params }).then((rawServerResponse) => {
+      return rawServerResponse.data.data.map((apiData: any)=>{
+        return {
+          id:apiData.id,
+          description:apiData.attributes.description,
+          endDate:apiData.attributes.end_data
+        }
+      })
+    })
+  }
+  findRelatedDeviceMountActions(configurationId: string): Promise<DeviceMountAction>{
+    const url = this.basePath + '/' + configurationId + '/device-mount-actions'
+
+
+    const params = {
+      'page[size]': 10000,
+      include:'device,contact,parent_platform'
+    }
+    return this.axiosApi.get(url, { params }).then((rawServerResponse) => {
+
+      const included = rawServerResponse.data.included
+
+      let includedContacts = included.filter((element:any) => element.type==='contact')
+      let includedDevices = included.filter((element:any) => element.type==='device')
+      // let includedContacts = included.filter((element:any) => element.type==='')
+
+      console.log('includedContacts',includedContacts);
+      console.log('includedDevices',includedDevices);
+
+      return rawServerResponse.data.data.map((apiData: any)=>{
+        let contactId = apiData.relationships.contact.data?.id
+        let deviceId = apiData.relationships.device.data?.id
+        let parentPlatformId = apiData.relationships.parent_platform.data?.id
+
+        let deviceData = includedDevices.find((element:any)=> element.id === deviceId)
+        let contactData = includedContacts.find((element:any)=> element.id === contactId)
+        //Todo parent platform
+        let deviceWithMeta= new DeviceSerializer().convertJsonApiDataToModel(deviceData,[])
+
+        return {
+          id: apiData.id,
+          offsetX: apiData.attributes.offset_x,
+          offsetY: apiData.attributes.offset_y,
+          offsetZ: apiData.attributes.offset_z,
+          description: apiData.attributes.description,
+          date: DateTime.fromISO(apiData.attributes.begin_date, { zone: 'UTC' }),
+          device:deviceWithMeta.device
+        }
+      })
+    })
+  }
+  findRelatedPlatformMountActions(configurationId: string): Promise<PlatformMountAction>{
+    const url = this.basePath + '/' + configurationId + '/platform-mount-actions'
+    const params = {
+      'page[size]': 10000,
+      include:'platform,contact,parent_platform'
+    }
+    return this.axiosApi.get(url, { params }).then((rawServerResponse) => {
+      const included = rawServerResponse.data.included
+      let includedContacts = included.filter((element:any) => element.type==='contact')
+      let includedPlatforms = included.filter((element:any) => element.type==='platform')
+
+      return rawServerResponse.data.data.map((apiData: any)=>{
+
+        let contactId = apiData.relationships.contact.data?.id
+        let platformId = apiData.relationships.platform.data?.id
+        let parentPlatformId = apiData.relationships.parent_platform.data?.id
+
+        let platformData = includedPlatforms.find((element:any)=> element.id === platformId)
+        let contactData = includedContacts.find((element:any)=> element.id === contactId)
+        //Todo parent platform
+        let paltformWithMeta= new PlatformSerializer().convertJsonApiDataToModel(platformData,[])
+
+
+        return {
+          id: apiData.id,
+          offsetX: apiData.attributes.offset_x,
+          offsetY: apiData.attributes.offset_y,
+          offsetZ: apiData.attributes.offset_z,
+          description: apiData.attributes.description,
+          date: DateTime.fromISO(apiData.attributes.begin_date, { zone: 'UTC' }),
+          platform:paltformWithMeta.platform
+        }
+      })
+    })
+  }
+  findRelatedDeviceUnmountActions(configurationId: string): Promise<PlatformMountAction>{
+    const url = this.basePath + '/' + configurationId + '/device-unmount-actions'
+    const params = {
+      'page[size]': 10000
+    }
+    return this.axiosApi.get(url, { params }).then((rawServerResponse) => {
+      return rawServerResponse.data.data.map((apiData: any)=>{
+        return {
+          id: apiData.id,
+          description: apiData.attributes.description,
+          date: DateTime.fromISO(apiData.attributes.end_date, { zone: 'UTC' }),
+        }
+      })
+    })
+  }
+  findRelatedPlatformUnmountActions(configurationId: string): Promise<PlatformMountAction>{
+    const url = this.basePath + '/' + configurationId + '/platform-unmount-actions'
+    const params = {
+      'page[size]': 10000
+    }
+    return this.axiosApi.get(url, { params }).then((rawServerResponse) => {
+      return rawServerResponse.data.data.map((apiData: any)=>{
+        return {
+          id: apiData.id,
+          description: apiData.attributes.description,
+          date: DateTime.fromISO(apiData.attributes.end_date, { zone: 'UTC' }),
+        }
+      })
+    })
+  }
+
+  //const url = this.basePath + '/' + configurationId + '/dynamic-location-begin-actions-x'
+  //const url = this.basePath + '/' + configurationId + '/dynamic-location-begin-actions-y'
+  //const url = this.basePath + '/' + configurationId + '/dynamic-location-begin-actions-z'
+
+
 
   removeContact (configurationId: string, contactId: string): Promise<void> {
     const url = this.basePath + '/' + configurationId + '/relationships/contacts'

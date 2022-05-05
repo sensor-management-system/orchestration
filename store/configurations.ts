@@ -33,7 +33,7 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
-import { Commit } from 'vuex/types'
+import { Commit, Dispatch } from 'vuex/types'
 
 import { Configuration } from '@/models/Configuration'
 import { Project } from '@/models/Project'
@@ -77,14 +77,14 @@ export interface configurationsState {
   configurationContacts: Contact[]
   configurationStates: string[]
   projects: Project[],
-  deviceMountActions:DeviceMountAction[],
-  deviceUnMountActions:DeviceUnmountAction[],
-  platformMountActions:PlatformMountAction[],
-  platformUnMountActions:PlatformUnmountAction[],
-  staticLocationBeginActions: StaticLocationBeginAction[],
-  staticLocationEndActions:StaticLocationEndAction[],
-  dynamicLocationBeginActions: DynamicLocationBeginAction[],
-  dynamicLocationEndActions: DynamicLocationEndAction[],
+  configurationDeviceMountActions:DeviceMountAction[],
+  configurationDeviceUnmountActions:DeviceUnmountAction[],
+  configurationPlatformMountActions:PlatformMountAction[],
+  configurationPlatformUnmountActions:PlatformUnmountAction[],
+  configurationStaticLocationBeginActions: StaticLocationBeginAction[],
+  configurationStaticLocationEndActions:StaticLocationEndAction[],
+  configurationDynamicLocationBeginActions: DynamicLocationBeginAction[],
+  configurationDynamicLocationEndActions: DynamicLocationEndAction[],
   totalPages: number
   pageNumber: number
   pageSize: number
@@ -96,14 +96,14 @@ const state = () => ({
   configurationContacts: [],
   configurationStates: [],
   projects: [],
-  deviceMountActions:[],
-  deviceUnMountActions:[],
-  platformMountActions:[],
-  platformUnMountActions:[],
-  staticLocationBeginActions:[],
-  staticLocationEndActions:[],
-  dynamicLocationBeginActions:[],
-  dynamicLocationEndActions:[],
+  configurationDeviceMountActions:[],
+  configurationDeviceUnmountActions:[],
+  configurationPlatformMountActions:[],
+  configurationPlatformUnmountActions:[],
+  configurationStaticLocationBeginActions:[],
+  configurationStaticLocationEndActions:[],
+  configurationDynamicLocationBeginActions:[],
+  configurationDynamicLocationEndActions:[],
   totalPages: 1,
   pageNumber: 1,
   pageSize: 20
@@ -151,25 +151,25 @@ const getters = {
 
     if (state.configuration) {
       const datesWithTexts: IActionDateWithTextItem[] = []
-      for (const platformMountAction of state.configuration.platformMountActions) {
+      for (const platformMountAction of state.configurationPlatformMountActions) {
         datesWithTexts.push({
           date: platformMountAction.date,
           text: dateToDateTimeStringHHMM(platformMountAction.date) + ' - ' + 'Mount ' + platformMountAction.platform.shortName
         })
       }
-      for (const platformUnmountAction of state.configuration.platformUnmountActions) {
+      for (const platformUnmountAction of state.configurationPlatformUnmountActions) {
         datesWithTexts.push({
           date: platformUnmountAction.date,
           text: dateToDateTimeStringHHMM(platformUnmountAction.date) + ' - ' + 'Unmount ' + platformUnmountAction.platform.shortName
         })
       }
-      for (const deviceMountAction of state.configuration.deviceMountActions) {
+      for (const deviceMountAction of state.configurationDeviceMountActions) {
         datesWithTexts.push({
           date: deviceMountAction.date,
           text: dateToDateTimeStringHHMM(deviceMountAction.date) + ' - ' + 'Mount ' + deviceMountAction.device.shortName
         })
       }
-      for (const deviceUnmountAction of state.configuration.deviceUnmountActions) {
+      for (const deviceUnmountAction of state.configurationDeviceUnmountActions) {
         datesWithTexts.push({
           date: deviceUnmountAction.date,
           text: dateToDateTimeStringHHMM(deviceUnmountAction.date) + ' - ' + 'Unmount ' + deviceUnmountAction.device.shortName
@@ -289,6 +289,42 @@ const actions: {
     const projects = await this.$api.projects.findAll()
     commit('setProjects', projects)
   },
+  async loadConfigurationDeviceMountActions({ commit }: { commit: Commit },id:string){
+    commit('setConfigurationDeviceMountActions',await this.$api.configurations.findRelatedDeviceMountActions(id))
+  },
+  async loadConfigurationDeviceUnmountActions({ commit }: { commit: Commit },id:string){
+    commit('setConfigurationDeviceUnmountActions',await this.$api.configurations.findRelatedDeviceUnmountActions(id))
+  },
+  async loadConfigurationPlatformMountActions({ commit }: { commit: Commit },id:string){
+    commit('setConfigurationPlatformMountActions',await this.$api.configurations.findRelatedPlatformMountActions(id))
+  },
+  async loadConfigurationPlatformUnmountActions({ commit }: { commit: Commit },id:string){
+    commit('setConfigurationPlatformUnmountActions',await this.$api.configurations.findRelatedPlatformUnmountActions(id))
+  },
+  async loadConfigurationStaticLocationBeginActions({ commit }: { commit: Commit },id:string){
+    commit('setConfigurationStaticLocationBeginActions',await this.$api.configurations.findRelatedStaticLocationBeginActions(id))
+  },
+  async loadConfigurationStaticLocationEndActions({ commit }: { commit: Commit },id:string){
+    commit('setConfigurationStaticLocationEndActions',await this.$api.configurations.findRelatedStaticLocationEndActions(id))
+  },
+  async loadConfigurationDynamicLocationBeginActions({ commit }: { commit: Commit },id:string){
+    commit('setConfigurationDynamicLocationBeginActions',await this.$api.configurations.findRelatedDynamicLocationBeginActions(id))
+  },
+  async loadConfigurationDynamicLocationEndActions({ commit }: { commit: Commit },id:string){
+    commit('setConfigurationDynamicLocationEndActions',await this.$api.configurations.findRelatedDynamicLocationEndActions(id))
+  },
+  async loadMountingActions({dispatch}:{dispatch:Dispatch},id:string){
+    await dispatch('loadConfigurationDeviceMountActions',id)
+    await dispatch('loadConfigurationDeviceUnmountActions',id)
+    await dispatch('loadConfigurationPlatformMountActions',id)
+    await dispatch('loadConfigurationPlatformUnmountActions',id)
+  },
+  async loadLocationActions({dispatch}:{dispatch:Dispatch},id:string){
+    await dispatch('loadConfigurationStaticLocationBeginActions',id)
+    await dispatch('loadConfigurationStaticLocationEndActions',id)
+    await dispatch('loadConfigurationDynamicLocationBeginActions',id)
+    await dispatch('loadConfigurationDynamicLocationEndActions',id)
+  },
   async deleteConfiguration ({ _commit }: { _commit: Commit }, id: string) {
     await this.$api.configurations.deleteById(id)
   },
@@ -372,7 +408,32 @@ const mutations = {
   },
   setProjects (state: configurationsState, projects: Project[]) {
     state.projects = projects
+  },
+  setConfigurationDeviceMountActions(state:configurationsState,deviceMountActions:DeviceMountAction[]){
+    state.configurationDeviceMountActions=deviceMountActions
+  },
+  setConfigurationDeviceUnmountActions(state:configurationsState,deviceUnmountActions:DeviceUnmountAction[]){
+    state.configurationDeviceUnmountActions=deviceUnmountActions
+  },
+  setConfigurationPlatformMountActions(state:configurationsState,platformMountActions:PlatformMountAction[]){
+    state.configurationPlatformMountActions=platformMountActions
+  },
+  setConfigurationPlatformUnmountActions(state:configurationsState,platformUnmountActions:PlatformUnmountAction[]){
+    state.configurationPlatformUnmountActions=platformUnmountActions
+  },
+  setConfigurationStaticLocationBeginActions(state:configurationsState,staticLocationBeginActions:StaticLocationBeginAction[]){
+    state.configurationStaticLocationBeginActions=staticLocationBeginActions
+  },
+  setConfigurationStaticLocationEndActions(state:configurationsState,staticLocationEndActions:StaticLocationEndAction[]){
+    state.configurationStaticLocationEndActions=staticLocationEndActions
+  },
+  setConfigurationDynamicLocationBeginActions(state:configurationsState,dynamicLocationBeginActions:DynamicLocationBeginAction[]){
+    state.configurationDynamicLocationBeginActions=dynamicLocationBeginActions
+  },
+  setConfigurationDynamicLocationEndActions(state:configurationsState,dynamicLocationEndActions:DynamicLocationEndAction[]){
+    state.configurationDynamicLocationEndActions=dynamicLocationEndActions
   }
+
 }
 
 export default {

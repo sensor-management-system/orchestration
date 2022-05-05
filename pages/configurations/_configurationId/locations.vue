@@ -177,8 +177,13 @@ export default class ConfigurationLocations extends mixins(Rules) {
     await this.loadEpsgCodes()
     await this.loadElevationData()
     await this.loadAllContacts()
-  }
+    const test = await this.$api.configurations.findRelatedStaticLocationBeginActions(this.configurationId)
+    console.log('test',test);
 
+  }
+  get configurationId () {
+    return this.$route.params.configurationId
+  }
   // private configuration: Configuration = new Configuration()
   // private epsgCodes: EpsgCode[] = []
   // private elevationData: ElevationDatum[] = []
