@@ -208,28 +208,29 @@ permissions and limitations under the Licence.
         <nuxt />
       </v-container>
     </v-main>
-    <cookie-law
-      button-text="Okay"
-      button-class="v-btn v-btn--is-elevated v-btn--has-bg v-size--default primary"
-      storage-name="cookie-and-terms-of-use-1:accepted"
-    >
-      <template #message>
-        <!-- eslint-disable -->
-        This site uses cookies to ensure technical functionality. To read more about what we store in the cookies, have
-        a look at our
-        <nuxt-link to="/info/privacy-policy">Privacy Policy</nuxt-link>
-        .
-        By using this service, I also accept the
-        <nuxt-link to="/info/terms-of-use">Terms of Use</nuxt-link>
-        .
-        <!-- eslint-enable -->
-      </template>
-    </cookie-law>
     <v-footer
       :fixed="fixed"
       app
       padless
     >
+      <cookie-law
+        button-text="Okay"
+        button-class="v-btn v-btn--is-elevated v-btn--has-bg v-size--default primary"
+        storage-name="cookie-and-terms-of-use-1:accepted"
+        theme="sms"
+      >
+        <template #message>
+          <!-- eslint-disable -->
+          This site uses cookies to ensure technical functionality. To read more about what we store in the cookies, have
+          a look at our
+          <nuxt-link to="/info/privacy-policy">Privacy Policy</nuxt-link>
+          .
+          By using this service, I also accept the
+          <nuxt-link to="/info/terms-of-use">Terms of Use</nuxt-link>
+          .
+          <!-- eslint-enable -->
+        </template>
+      </cookie-law>
       <v-row
         no-gutters
       >
@@ -470,3 +471,13 @@ export default {
   }
 }
 </script>
+
+<style lang="scss" scoped>
+  @import '~vuetify/src/styles/styles.sass';
+
+  .Cookie--sms {
+    position: relative;
+    background: map-get($grey, 'lighten-3');
+    padding: $grid-gutter / 2;
+  }
+</style>>
