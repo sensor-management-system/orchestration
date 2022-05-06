@@ -63,6 +63,9 @@ import { StaticLocationBeginAction } from '@/models/StaticLocationBeginAction'
 import { StaticLocationEndAction } from '@/models/StaticLocationEndAction'
 import { DynamicLocationBeginAction } from '@/models/DynamicLocationBeginAction'
 import { DynamicLocationEndAction } from '@/models/DynamicLocationEndAction'
+import { DateTime } from 'luxon'
+import mock = jest.mock
+import { mockCurrentConfiguration, mockMountingActions } from '@/utils/mockHelper'
 
 export enum LocationTypes {
   staticStart = 'staticStart',
@@ -77,14 +80,11 @@ export interface configurationsState {
   configurationContacts: Contact[]
   configurationStates: string[]
   projects: Project[],
-  configurationDeviceMountActions:DeviceMountAction[],
-  configurationDeviceUnmountActions:DeviceUnmountAction[],
-  configurationPlatformMountActions:PlatformMountAction[],
-  configurationPlatformUnmountActions:PlatformUnmountAction[],
   configurationStaticLocationBeginActions: StaticLocationBeginAction[],
   configurationStaticLocationEndActions:StaticLocationEndAction[],
   configurationDynamicLocationBeginActions: DynamicLocationBeginAction[],
   configurationDynamicLocationEndActions: DynamicLocationEndAction[],
+  configurationMountingActions:[]
   totalPages: number
   pageNumber: number
   pageSize: number
@@ -96,14 +96,11 @@ const state = () => ({
   configurationContacts: [],
   configurationStates: [],
   projects: [],
-  configurationDeviceMountActions:[],
-  configurationDeviceUnmountActions:[],
-  configurationPlatformMountActions:[],
-  configurationPlatformUnmountActions:[],
   configurationStaticLocationBeginActions:[],
   configurationStaticLocationEndActions:[],
   configurationDynamicLocationBeginActions:[],
   configurationDynamicLocationEndActions:[],
+  configurationMountingActions:[],
   totalPages: 1,
   pageNumber: 1,
   pageSize: 20
@@ -146,49 +143,49 @@ const getters = {
     }
     return result
   },
-  mountingActionsDates: (state: configurationsState) => {
-    let result: IActionDateWithTextItem[] = []
-
-    if (state.configuration) {
-      const datesWithTexts: IActionDateWithTextItem[] = []
-      for (const platformMountAction of state.configurationPlatformMountActions) {
-        datesWithTexts.push({
-          date: platformMountAction.date,
-          text: dateToDateTimeStringHHMM(platformMountAction.date) + ' - ' + 'Mount ' + platformMountAction.platform.shortName
-        })
-      }
-      for (const platformUnmountAction of state.configurationPlatformUnmountActions) {
-        datesWithTexts.push({
-          date: platformUnmountAction.date,
-          text: dateToDateTimeStringHHMM(platformUnmountAction.date) + ' - ' + 'Unmount ' + platformUnmountAction.platform.shortName
-        })
-      }
-      for (const deviceMountAction of state.configurationDeviceMountActions) {
-        datesWithTexts.push({
-          date: deviceMountAction.date,
-          text: dateToDateTimeStringHHMM(deviceMountAction.date) + ' - ' + 'Mount ' + deviceMountAction.device.shortName
-        })
-      }
-      for (const deviceUnmountAction of state.configurationDeviceUnmountActions) {
-        datesWithTexts.push({
-          date: deviceUnmountAction.date,
-          text: dateToDateTimeStringHHMM(deviceUnmountAction.date) + ' - ' + 'Unmount ' + deviceUnmountAction.device.shortName
-        })
-      }
-      datesWithTexts.sort((a, b) => {
-        if (a.date < b.date) {
-          return -1
-        }
-        if (a.date > b.date) {
-          return 1
-        }
-        return 0
-      })
-      // Todo: Anmerknug: ich hab das grouping nicht eingebaut
-      result = datesWithTexts
-    }
-    return result
-  },
+  // mountingActionsDates: (state: configurationsState) => {
+  //   let result: IActionDateWithTextItem[] = []
+  //
+  //   if (state.configuration) {
+  //     const datesWithTexts: IActionDateWithTextItem[] = []
+  //     for (const platformMountAction of state.configurationPlatformMountActions) {
+  //       datesWithTexts.push({
+  //         date: platformMountAction.date,
+  //         text: dateToDateTimeStringHHMM(platformMountAction.date) + ' - ' + 'Mount ' + platformMountAction.platform.shortName
+  //       })
+  //     }
+  //     for (const platformUnmountAction of state.configurationPlatformUnmountActions) {
+  //       datesWithTexts.push({
+  //         date: platformUnmountAction.date,
+  //         text: dateToDateTimeStringHHMM(platformUnmountAction.date) + ' - ' + 'Unmount ' + platformUnmountAction.platform.shortName
+  //       })
+  //     }
+  //     for (const deviceMountAction of state.configurationDeviceMountActions) {
+  //       datesWithTexts.push({
+  //         date: deviceMountAction.date,
+  //         text: dateToDateTimeStringHHMM(deviceMountAction.date) + ' - ' + 'Mount ' + deviceMountAction.device.shortName
+  //       })
+  //     }
+  //     for (const deviceUnmountAction of state.configurationDeviceUnmountActions) {
+  //       datesWithTexts.push({
+  //         date: deviceUnmountAction.date,
+  //         text: dateToDateTimeStringHHMM(deviceUnmountAction.date) + ' - ' + 'Unmount ' + deviceUnmountAction.device.shortName
+  //       })
+  //     }
+  //     datesWithTexts.sort((a, b) => {
+  //       if (a.date < b.date) {
+  //         return -1
+  //       }
+  //       if (a.date > b.date) {
+  //         return 1
+  //       }
+  //       return 0
+  //     })
+  //     // Todo: Anmerknug: ich hab das grouping nicht eingebaut
+  //     result = datesWithTexts
+  //   }
+  //   return result
+  // },
   locationActionsDates: (state: configurationsState) => {
     let result: IActionDateWithTextItem[] = []
 
@@ -289,18 +286,6 @@ const actions: {
     const projects = await this.$api.projects.findAll()
     commit('setProjects', projects)
   },
-  async loadConfigurationDeviceMountActions({ commit }: { commit: Commit },id:string){
-    commit('setConfigurationDeviceMountActions',await this.$api.configurations.findRelatedDeviceMountActions(id))
-  },
-  async loadConfigurationDeviceUnmountActions({ commit }: { commit: Commit },id:string){
-    commit('setConfigurationDeviceUnmountActions',await this.$api.configurations.findRelatedDeviceUnmountActions(id))
-  },
-  async loadConfigurationPlatformMountActions({ commit }: { commit: Commit },id:string){
-    commit('setConfigurationPlatformMountActions',await this.$api.configurations.findRelatedPlatformMountActions(id))
-  },
-  async loadConfigurationPlatformUnmountActions({ commit }: { commit: Commit },id:string){
-    commit('setConfigurationPlatformUnmountActions',await this.$api.configurations.findRelatedPlatformUnmountActions(id))
-  },
   async loadConfigurationStaticLocationBeginActions({ commit }: { commit: Commit },id:string){
     commit('setConfigurationStaticLocationBeginActions',await this.$api.configurations.findRelatedStaticLocationBeginActions(id))
   },
@@ -313,11 +298,23 @@ const actions: {
   async loadConfigurationDynamicLocationEndActions({ commit }: { commit: Commit },id:string){
     commit('setConfigurationDynamicLocationEndActions',await this.$api.configurations.findRelatedDynamicLocationEndActions(id))
   },
-  async loadMountingActions({dispatch}:{dispatch:Dispatch},id:string){
-    await dispatch('loadConfigurationDeviceMountActions',id)
-    await dispatch('loadConfigurationDeviceUnmountActions',id)
-    await dispatch('loadConfigurationPlatformMountActions',id)
-    await dispatch('loadConfigurationPlatformUnmountActions',id)
+  async loadMountingActions({commit}:{commit:Commit},id:string){
+    //Todo currently mock
+
+    // request to controller via $api
+    // /backend/api/v1/controller/configurations/<configuration-id>/mounting-action-timepoints
+
+    //Todo import of mockHelper.ts
+    commit('setConfigurationMountingActions',mockMountingActions)
+  },
+  async getMountingConfigurationForDate({commit}:{commit:Commit},id:string,timepoint:DateTime){
+    //Todo currently mock
+    // request to controller via $api
+    ///backend/api/v1/controller/configurations/<configuration-id>/mounting-actions?timepoint=<time-point>
+
+    //Todo import of mockHelper.ts
+    return mockCurrentConfiguration;
+
   },
   async loadLocationActions({dispatch}:{dispatch:Dispatch},id:string){
     await dispatch('loadConfigurationStaticLocationBeginActions',id)
@@ -409,18 +406,6 @@ const mutations = {
   setProjects (state: configurationsState, projects: Project[]) {
     state.projects = projects
   },
-  setConfigurationDeviceMountActions(state:configurationsState,deviceMountActions:DeviceMountAction[]){
-    state.configurationDeviceMountActions=deviceMountActions
-  },
-  setConfigurationDeviceUnmountActions(state:configurationsState,deviceUnmountActions:DeviceUnmountAction[]){
-    state.configurationDeviceUnmountActions=deviceUnmountActions
-  },
-  setConfigurationPlatformMountActions(state:configurationsState,platformMountActions:PlatformMountAction[]){
-    state.configurationPlatformMountActions=platformMountActions
-  },
-  setConfigurationPlatformUnmountActions(state:configurationsState,platformUnmountActions:PlatformUnmountAction[]){
-    state.configurationPlatformUnmountActions=platformUnmountActions
-  },
   setConfigurationStaticLocationBeginActions(state:configurationsState,staticLocationBeginActions:StaticLocationBeginAction[]){
     state.configurationStaticLocationBeginActions=staticLocationBeginActions
   },
@@ -432,8 +417,10 @@ const mutations = {
   },
   setConfigurationDynamicLocationEndActions(state:configurationsState,dynamicLocationEndActions:DynamicLocationEndAction[]){
     state.configurationDynamicLocationEndActions=dynamicLocationEndActions
+  },
+  setConfigurationMountingActions(state:configurationsState,configurationMountingActions:[]){
+    state.configurationMountingActions=configurationMountingActions
   }
-
 }
 
 export default {
