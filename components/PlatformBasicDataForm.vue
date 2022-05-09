@@ -37,6 +37,14 @@ permissions and limitations under the Licence.
     @submit.prevent
   >
     <v-row>
+      <v-col>
+        <v-autocomplete
+          label="Permission groups"
+          :items="userGroups"
+          ></v-autocomplete>
+      </v-col>
+    </v-row>
+    <v-row>
       <v-col cols="12" md="6">
         <v-text-field
           :value="platformURN"
@@ -192,8 +200,11 @@ import { Status } from '@/models/Status'
 import { Manufacturer } from '@/models/Manufacturer'
 
 import { createPlatformUrn } from '@/modelUtils/urnBuilders'
+import { mapGetters, mapState } from 'vuex'
 
-@Component
+@Component({
+  computed:mapGetters('permissions',['userGroups'])
+})
 export default class PlatformBasicDataForm extends mixins(Rules) {
   private states: Status[] = []
   private manufacturers: Manufacturer[] = []
