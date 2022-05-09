@@ -41,6 +41,7 @@ permissions and limitations under the Licence.
         <v-autocomplete
           label="Permission groups"
           :items="userGroups"
+          item-text="name"
           ></v-autocomplete>
       </v-col>
     </v-row>
