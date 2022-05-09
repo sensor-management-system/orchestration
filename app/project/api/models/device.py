@@ -1,7 +1,7 @@
 """Model for the devices."""
 
+from ..es_utils import ElasticSearchIndexTypes, settings_with_ngrams
 from .base_model import db
-from ..es_utils import settings_with_ngrams, ElasticSearchIndexTypes
 from ..models.mixin import (
     AuditMixin,
     SearchableMixin,
@@ -60,7 +60,9 @@ class Device(
             "status_name": self.status_name,
             "status_uri": self.status_uri,
             "attachments": [a.to_search_entry() for a in self.device_attachments],
-            "contacts": [c.to_search_entry() for c in self.contacts],
+            "device_contact_roles": [
+                dcr.to_search_entry() for dcr in self.device_contact_roles
+            ],
             "properties": [p.to_search_entry() for p in self.device_properties],
             "customfields": [c.to_search_entry() for c in self.customfields],
             "generic_actions": [
@@ -96,8 +98,10 @@ class Device(
         type_text_full_searchable = ElasticSearchIndexTypes.text_full_searchable(
             analyzer="ngram_analyzer"
         )
-        type_keyword_and_full_searchable = ElasticSearchIndexTypes.keyword_and_full_searchable(
-            analyzer="ngram_analyzer"
+        type_keyword_and_full_searchable = (
+            ElasticSearchIndexTypes.keyword_and_full_searchable(
+                analyzer="ngram_analyzer"
+            )
         )
 
         return {
@@ -146,9 +150,16 @@ class Device(
                     "url": type_text_full_searchable,
                 },
             },
-            "contacts": {
+            "device_contact_roles": {
                 "type": "nested",
-                "properties": Contact.get_search_index_properties(),
+                "properties": {
+                    "role_name": type_keyword_and_full_searchable,
+                    "role_uri": type_keyword,
+                    "contact": {
+                        "type": "nested",
+                        "properties": Contact.get_search_index_properties(),
+                    },
+                },
             },
             "customfields": {
                 "type": "nested",

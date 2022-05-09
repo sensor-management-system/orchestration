@@ -78,7 +78,9 @@ class Configuration(
             "location_type": self.location_type,
             "project_uri": self.project_uri,
             "project_name": self.project_name,
-            "contacts": [c.to_search_entry() for c in self.contacts],
+            "configuration_contact_roles": [
+                ccr.to_search_entry() for ccr in self.configuration_contact_roles
+            ],
             "attachments": [
                 a.to_search_entry() for a in self.configuration_attachments
             ],
@@ -168,9 +170,16 @@ class Configuration(
                         "type": "nested",
                         "properties": Device.get_search_index_properties(),
                     },
-                    "contacts": {
+                    "configuration_contact_roles": {
                         "type": "nested",
-                        "properties": Contact.get_search_index_properties(),
+                        "properties": {
+                            "role_name": type_keyword_and_full_searchable,
+                            "role_uri": type_keyword,
+                            "contact": {
+                                "type": "nested",
+                                "properties": Contact.get_search_index_properties(),
+                            },
+                        },
                     },
                     "firmware_versions": type_keyword_and_full_searchable,
                     "attachments": {

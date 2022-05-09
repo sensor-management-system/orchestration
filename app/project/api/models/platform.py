@@ -1,5 +1,6 @@
 """Model for platforms."""
 
+from ..es_utils import ElasticSearchIndexTypes, settings_with_ngrams
 from .base_model import db
 from ..models.mixin import (
     AuditMixin,
@@ -7,8 +8,6 @@ from ..models.mixin import (
     PermissionMixin,
     IndirectSearchableMixin,
 )
-
-from ..es_utils import settings_with_ngrams, ElasticSearchIndexTypes
 
 
 class Platform(
@@ -51,7 +50,9 @@ class Platform(
             "serial_number": self.serial_number,
             "persistent_identifier": self.persistent_identifier,
             "attachments": [a.to_search_entry() for a in self.platform_attachments],
-            "contacts": [c.to_search_entry() for c in self.contacts],
+            "platform_contact_roles": [
+                pcr.to_search_entry() for pcr in self.platform_contact_roles
+            ],
             "generic_actions": [
                 g.to_search_entry() for g in self.generic_platform_actions
             ],
@@ -124,6 +125,17 @@ class Platform(
                     "url": type_text_full_searchable,
                 },
             },
+            "platform_contact_roles": {
+                "type": "nested",
+                "properties": {
+                    "role_name": type_keyword_and_full_searchable,
+                    "role_uri": type_keyword,
+                    "contact": {
+                        "type": "nested",
+                        "properties": Contact.get_search_index_properties(),
+                    },
+                },
+            },
             "generic_actions": {
                 "type": "nested",
                 "properties": {
@@ -141,10 +153,6 @@ class Platform(
                     "version": type_keyword_and_full_searchable,
                     "repository_url": type_text_full_searchable,
                 },
-            },
-            "contacts": {
-                "type": "nested",
-                "properties": Contact.get_search_index_properties(),
             },
         }
 

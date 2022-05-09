@@ -93,16 +93,11 @@ class TestPlatformSoftwareUpdateAction(BaseTestCase):
         )
 
     def test_delete_platform_software_update_action(self):
-        """Delete PlatformSoftwareUpdateAction."""
-        platform_software_update_action = add_platform_software_update_action_model(group_ids=[403])
-        access_headers = create_token()
-        with self.client:
-            response = self.client.delete(
-                f"{self.url}/{platform_software_update_action.id}",
-                content_type="application/vnd.api+json",
-                headers=access_headers,
-            )
-        self.assertNotEqual(response.status_code, 200)
+        """Test the deletion of a simple platform software update action."""
+        # Those where we include groups, we test in the permissions folder.
+        platform_software_update_action = add_platform_software_update_action_model()
+        _ = super().delete_object(url=f"{self.url}/{platform_software_update_action.id}")
+
 
     def test_filtered_by_platform(self):
         """Ensure that I can prefilter by a specific platform."""

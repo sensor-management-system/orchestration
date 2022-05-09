@@ -3,15 +3,12 @@ import json
 from unittest.mock import patch
 
 from project import base_url
-from project.api.models import User, Platform
+from project.api.models import Platform, User
 from project.api.models.base_model import db
 from project.api.models.idl_user import IdlUser
 from project.api.services.idl_services import Idl
-from project.tests.base import BaseTestCase
-from project.tests.base import create_token
-from project.tests.base import fake
-from project.tests.permissions import create_a_test_contact
-from project.tests.permissions import create_superuser_token
+from project.tests.base import BaseTestCase, create_token, fake
+from project.tests.permissions import create_a_test_contact, create_superuser_token
 
 IDL_USER_ACCOUNT = IdlUser(
     id="1000",
@@ -317,7 +314,7 @@ class TestPlatformPermissions(BaseTestCase):
         self.assertNotEqual(response.status, 200)
 
     def test_get_an_private_platform_as_not_owner_user(self):
-        """Make sure that a normal user is not allowed a retrieve a not owned 
+        """Make sure that a normal user is not allowed a retrieve a not owned
         private platform."""
 
         c = create_a_test_contact()
@@ -341,9 +338,33 @@ class TestPlatformPermissions(BaseTestCase):
         response = self.client.get(url, headers=access_headers)
         self.assertEqual(response.status, "403 FORBIDDEN")
 
+    def test_get_an_private_platform_as_anonymous(self):
+        """Make sure that a normal user is not allowed a retrieve a
+        private platform."""
+
+        c = create_a_test_contact()
+        user = User(subject="test_user1@test.test", contact=c)
+
+        db.session.add_all([c, user])
+        db.session.commit()
+
+        private_platform = Platform(
+            short_name=fake.pystr(),
+            is_public=False,
+            is_private=True,
+            is_internal=False,
+            created_by_id=user.id,
+        )
+        db.session.add(private_platform)
+        db.session.commit()
+
+        url = f"{self.platform_url}/{private_platform.id}"
+        response = self.client.get(url)
+        self.assertEqual(response.status, "401 UNAUTHORIZED")
+
     def test_patch_platform_as_a_member_in_a_permission_group(self):
         """Make sure that a member in a group (admin/member) can change
-         the platform data per patch request"""
+        the platform data per patch request"""
         group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permission_groups
         platforms = preparation_of_public_and_internal_platform_data(
             group_id_test_user_is_member_in_2

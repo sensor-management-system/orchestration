@@ -28,7 +28,6 @@ class ConfigurationSchema(Schema):
     label = fields.String(allow_none=True)
     status = fields.String(default="draft", allow_none=True)
     cfg_permission_group = fields.String(required=True)
-    is_private = fields.Boolean(allow_none=True)
     is_internal = fields.Boolean(allow_none=True)
     is_public = fields.Boolean(allow_none=True)
     src_longitude = Relationship(

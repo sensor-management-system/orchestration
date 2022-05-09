@@ -23,36 +23,6 @@ class ContactSchema(Schema):
     email = fields.Email(required=True)
     active = fields.Boolean(dump_only=True)
 
-    platforms = Relationship(
-        attribute="platforms",
-        related_view="api.contact_platforms",
-        related_view_kwargs={"id": "<id>"},
-        include_resource_linkage=False,
-        many=True,
-        schema="PlatformPublicSchema",
-        type_="platform",
-        id_field="id",
-    )
-    configurations = Relationship(
-        attribute="configurations",
-        related_view="api.contact_configurations",
-        related_view_kwargs={"id": "<id>"},
-        many=True,
-        include_resource_linkage=False,
-        schema="ConfigurationPublicSchema",
-        type_="configuration",
-        id_field="id",
-    )
-    devices = Relationship(
-        attribute="devices",
-        related_view="api.contact_devices",
-        related_view_kwargs={"id": "<id>"},
-        many=True,
-        include_resource_linkage=False,
-        schema="DevicePublicSchema",
-        type_="device",
-        id_field="id",
-    )
     # This relationship should be optional as we want to
     # allow adding extern contacts without user accounts.
     user = Relationship(

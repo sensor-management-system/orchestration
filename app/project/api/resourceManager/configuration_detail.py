@@ -1,7 +1,7 @@
 from flask_rest_jsonapi import JsonApiException, ResourceDetail
 
-from .base_resource import delete_attachments_in_minio_by_url, check_if_object_not_found
 from ..auth.permission_utils import (
+    cfg_permission_group_defined,
     check_deletion_permission,
     is_superuser,
     is_user_in_a_group,
@@ -11,7 +11,8 @@ from ..helpers.resource_mixin import add_updated_by_id
 from ..models.base_model import db
 from ..models.configuration import Configuration
 from ..schemas.configuration_schema import ConfigurationSchema
-from ..token_checker import token_required, get_current_user_or_none_by_optional
+from ..token_checker import get_current_user_or_none_by_optional, token_required
+from .base_resource import check_if_object_not_found, delete_attachments_in_minio_by_url
 
 
 class ConfigurationDetail(ResourceDetail):
@@ -35,10 +36,11 @@ class ConfigurationDetail(ResourceDetail):
                 db.session.query(Configuration).filter_by(id=data["id"]).one_or_none()
             )
             group_id = configuration.cfg_permission_group
-            if not is_user_in_a_group([group_id]):
-                raise ForbiddenError(
-                    "User is not part of any group to edit this object."
-                )
+            if cfg_permission_group_defined(group_id):
+                if not is_user_in_a_group([group_id]):
+                    raise ForbiddenError(
+                        "User is not part of any group to edit this object."
+                    )
         add_updated_by_id(data)
 
     def before_delete(self, args, kwargs):

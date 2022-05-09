@@ -6,13 +6,9 @@ from sqlalchemy import and_, or_
 
 from ..auth.flask_openidconnect import open_id_connect
 from ..datalayers.esalchemy import AndFilter, OrFilter, TermEqualsExactStringFilter
-from ..helpers.errors import ForbiddenError
-from ..helpers.resource_mixin import (
-    add_created_by_id,
-    decode_json_request_data,
-)
-from ..models import Configuration
-from ..models import Device, Platform
+from ..helpers.errors import ForbiddenError, UnauthorizedError
+from ..helpers.resource_mixin import add_created_by_id, decode_json_request_data
+from ..models import Configuration, Device, Platform
 from ..models.base_model import db
 from ..services.idl_services import Idl
 from ..token_checker import get_current_user_or_none_by_optional
@@ -68,7 +64,7 @@ def is_superuser():
     return current_user.is_superuser
 
 
-def assert_current_user_is_owner_of_object(object_):
+def assert_current_user_is_superuser_or_owner_of_object(object_):
     """
     Check if the current user is the owner of the given object.
 
@@ -77,11 +73,15 @@ def assert_current_user_is_owner_of_object(object_):
     :param object_:
     :return: None
     """
-    current_user_id = open_id_connect.get_current_user().id
+    current_user = get_current_user_or_none_by_optional(optional=True)
+    if not current_user:
+        raise UnauthorizedError("No valid access token.")
+    current_user_id = current_user.id
     if current_user_id != object_.created_by_id:
-        raise ForbiddenError(
-            "This is a private object. You should be the owner to modify!"
-        )
+        if not current_user.is_superuser:
+            raise ForbiddenError(
+                "This is a private object. You should be the owner to modify!"
+            )
 
 
 def get_query_with_permissions(model):
@@ -100,8 +100,14 @@ def get_query_with_permissions(model):
             user_id = current_user.id
             query = query.filter(
                 or_(
-                    and_(model.is_private, model.created_by_id == user_id,),
-                    or_(model.is_public, model.is_internal,),
+                    and_(
+                        model.is_private,
+                        model.created_by_id == user_id,
+                    ),
+                    or_(
+                        model.is_public,
+                        model.is_internal,
+                    ),
                 )
             )
     return query
@@ -150,7 +156,7 @@ def check_patch_permission(data, object_to_patch):
         )
         if object_:
             if object_.is_private:
-                assert_current_user_is_owner_of_object(object_)
+                assert_current_user_is_superuser_or_owner_of_object(object_)
             else:
                 group_ids = object_.group_ids
                 if not is_user_in_a_group(group_ids):
@@ -191,7 +197,7 @@ def check_deletion_permission(kwargs, object_to_delete):
                 .group_ids
             )
         if group_ids is None:
-            assert_current_user_is_owner_of_object(object_)
+            assert_current_user_is_superuser_or_owner_of_object(object_)
         if not is_user_admin_in_a_group(group_ids):
             raise ForbiddenError("User is not part of any group to delete this object.")
 
@@ -301,7 +307,7 @@ def check_permissions_for_related_objects(model_class, id_):
         raise ObjectNotFound("Object not found!")
     related_object = object_.get_parent()
     if related_object.is_private:
-        assert_current_user_is_owner_of_object(related_object)
+        assert_current_user_is_superuser_or_owner_of_object(related_object)
     elif not related_object.is_public:
         get_current_user_or_none_by_optional()
 
@@ -325,7 +331,7 @@ def check_post_permission_for_related_objects():
             )
         if related_object is not None:
             if related_object.is_private:
-                assert_current_user_is_owner_of_object(related_object)
+                assert_current_user_is_superuser_or_owner_of_object(related_object)
             else:
                 group_ids = related_object.group_ids
                 if not is_user_in_a_group(group_ids):
@@ -351,7 +357,7 @@ def check_patch_and_delete_permission_for_related_objects(data, object_to_patch)
             raise ObjectNotFound("Object not found!")
         related_object = object_.get_parent()
         if related_object.is_private:
-            assert_current_user_is_owner_of_object(related_object)
+            assert_current_user_is_superuser_or_owner_of_object(related_object)
         else:
             group_ids = related_object.group_ids
             if not is_user_in_a_group(group_ids):
@@ -432,6 +438,14 @@ def check_permissions_for_configuration_related_objects(model_class, id_):
         get_current_user_or_none_by_optional()
 
 
+def cfg_permission_group_defined(group_id):
+    """Return true if the permission group is defined."""
+    # Due to the database this can be the value if it is undefined.
+    if group_id == "{}":
+        return False
+    return group_id
+
+
 def check_post_permission_for_configuration_related_objects():
     """
     check if a user has the permission to patch a related object to a configuration.
@@ -444,7 +458,7 @@ def check_post_permission_for_configuration_related_objects():
         )
         if configuration is not None:
             group_id = configuration.cfg_permission_group
-            if group_id:
+            if cfg_permission_group_defined(group_id):
                 if not is_user_in_a_group([group_id]):
                     raise ForbiddenError(
                         "User is not part of the configuration-group to edit this object."
@@ -468,7 +482,7 @@ def check_patch_permission_for_configuration_related_objects(data, object_to_pat
             raise ObjectNotFound("Object not found!")
         configuration = object_.get_parent()
         group_id = configuration.cfg_permission_group
-        if group_id:
+        if cfg_permission_group_defined(group_id):
             if not is_user_in_a_group([group_id]):
                 raise ForbiddenError(
                     "User is not part of the configuration-group to edit this object."
@@ -494,14 +508,16 @@ def check_deletion_permission_for_configuration_related_objects(
             raise ObjectNotFound("Object not found!")
         configuration = object_.get_parent()
         group_id = configuration.cfg_permission_group
-        if group_id:
+        if cfg_permission_group_defined(group_id):
             if not is_user_in_a_group([group_id]):
                 raise ForbiddenError(
                     "User is not part of the configuration-group to delete this object."
                 )
 
 
-def check_parent_group_before_change_a_relationship(string_to_split_after, parent_model):
+def check_parent_group_before_change_a_relationship(
+    string_to_split_after, parent_model
+):
     """
 
     :param parent_model:
