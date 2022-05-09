@@ -59,9 +59,9 @@ def is_superuser():
 
     :return: boolean
     """
-    current_user = open_id_connect.get_current_user()
+    current_user = request.user
 
-    return current_user.is_superuser
+    return current_user and current_user.is_superuser
 
 
 def assert_current_user_is_superuser_or_owner_of_object(object_):

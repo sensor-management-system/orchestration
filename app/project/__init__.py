@@ -11,10 +11,11 @@ from .api.helpers.health_checks import health_check_elastic_search, health_check
 
 from .api.models.base_model import db
 from .api.auth.permission_manager import permission_manager
-from .api.auth.flask_openidconnect import open_id_connect
 from .api.upload_files import upload_routes
 from .config import env
 from .urls import api
+
+from .extensions.instances import auth
 
 migrate = Migrate()
 base_url = env("URL_PREFIX", "/rdm/svm-api/v1")
@@ -29,7 +30,6 @@ def create_app():
     # init the app
     app = Flask(__name__, template_folder='../templates', static_folder='static',
                 static_url_path=static_url_path)
-
     # enable CORS
     # get space separated list from environment var
     origins_raw = env("HTTP_ORIGINS", None)
@@ -47,11 +47,12 @@ def create_app():
     db.init_app(app)
     api.init_app(app, Blueprint("api", __name__, url_prefix=base_url))
     migrate.init_app(app, db)
-    open_id_connect.init_app(app)
     api.permission_manager(permission_manager)
 
     # instantiate minio client
     minio.init_app(app)
+
+    auth.init_app(app)
 
     # shell context for flask cli
     @app.shell_context_processor
@@ -82,5 +83,6 @@ def create_app():
     app.register_blueprint(upload_routes)
     # docs_routes
     app.register_blueprint(docs_routes)
+
 
     return app
