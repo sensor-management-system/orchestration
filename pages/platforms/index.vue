@@ -268,6 +268,7 @@ import PlatformSearch from '@/components/platforms/PlatformSearch.vue'
     PlatformTypeSelect,
     StatusSelect
   },
+  middleware:['permission'],
   computed: {
     ...mapState('platforms', ['platforms', 'pageNumber', 'pageSize', 'totalPages'])
   },

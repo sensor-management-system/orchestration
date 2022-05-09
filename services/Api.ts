@@ -51,6 +51,7 @@ import { StaticLocationEndActionApi } from '@/services/sms/StaticLocationEndActi
 import { DynamicLocationBeginActionApi } from '@/services/sms/DynamicLocationBeginActionApi'
 import { DynamicLocationEndActionApi } from '@/services/sms/DynamicLocationEndActionApi'
 import { UploadApi } from '@/services/sms/UploadApi'
+import { PermissionGroupApi } from '@/services/sms/PermissionGroupApi'
 
 import { CompartmentApi } from '@/services/cv/CompartmentApi'
 import { DeviceTypeApi } from '@/services/cv/DeviceTypeApi'
@@ -76,6 +77,7 @@ import { DeviceCalibrationDevicePropertyApi } from '@/services/sms/DeviceCalibra
 
 import { ElevationDatumApi } from '@/services/cv/ElevationDatumApi'
 import { EpsgCodeApi } from '@/services/cv/EpsgCodeApi'
+import { UserInfoApi } from '@/services/sms/UserInfoApi'
 
 const SMS_BASE_URL = process.env.smsBackendUrl
 const CV_BASE_URL = process.env.cvBackendUrl
@@ -122,6 +124,9 @@ export class Api {
   private readonly _projectApi: ProjectApi
   private readonly _elevationDatumApi: ElevationDatumApi
   private readonly _epsgCodeApi: EpsgCodeApi
+
+  private readonly _userInfoApi: UserInfoApi
+  private readonly _permissionGroupApi: PermissionGroupApi
 
   constructor (
     getIdToken: () => string | null,
@@ -337,6 +342,11 @@ export class Api {
     this._projectApi = new ProjectApi()
     this._elevationDatumApi = new ElevationDatumApi()
     this._epsgCodeApi = new EpsgCodeApi()
+
+    this._userInfoApi = new UserInfoApi(this.createAxios(smsBaseUrl,smsConfig,getIdToken),
+      '/user-info'
+      )
+    this._permissionGroupApi = new PermissionGroupApi(this.createAxios(smsBaseUrl,smsConfig,getIdToken),'/permission-groups')
   }
 
   private createAxios (baseUrl: string | undefined, baseConfig: AxiosRequestConfig, getIdToken?: () => (string | null)): AxiosInstance {
@@ -492,5 +502,13 @@ export class Api {
 
   get epsgCodes (): EpsgCodeApi {
     return this._epsgCodeApi
+  }
+
+  get userInfoApi(): UserInfoApi {
+    return this._userInfoApi
+  }
+
+  get permissionGroupApi (): PermissionGroupApi {
+    return this._permissionGroupApi
   }
 }
