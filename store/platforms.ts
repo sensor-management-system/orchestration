@@ -30,7 +30,7 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
-import { Commit, Dispatch } from 'vuex'
+import { Commit, Dispatch, Getter } from 'vuex'
 import { Platform } from '@/models/Platform'
 import { IPlatformSearchParams } from '@/modelUtils/PlatformSearchParams'
 import { Contact } from '@/models/Contact'
@@ -44,6 +44,9 @@ import { PlatformMountActionWrapper } from '@/viewmodels/PlatformMountActionWrap
 import { PlatformUnmountActionWrapper } from '@/viewmodels/PlatformUnmountActionWrapper'
 import { IDateCompareable } from '@/modelUtils/Compareables'
 import { Api } from '@/services/Api'
+import { Manufacturer } from '@/models/Manufacturer'
+import { Status } from '@/models/Status'
+import { PlatformType } from '@/models/PlatformType'
 
 const KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE = 'software_update'
 const KIND_OF_ACTION_TYPE_GENERIC_PLATFORM_ACTION = 'generic_platform_action'
@@ -67,6 +70,11 @@ interface platformsState {
   platformMountActions: PlatformMountActionWrapper[],
   platformUnmountActions: PlatformUnmountActionWrapper[],
   chosenKindOfPlatformAction: IOptionsForActionType | null,
+  selectedSearchManufacturers:Manufacturer[],
+  selectedSearchStates: Status[],
+  selectedSearchPlatformTypes:PlatformType[],
+  onlyOwnPlatforms: boolean,
+  searchText: string | null
   pageNumber: number,
   pageSize: number,
   totalPages: number
@@ -85,12 +93,28 @@ const state = () => ({
   chosenKindOfPlatformAction: null,
   platformGenericAction: null,
   platformSoftwareUpdateAction: null,
+  selectedSearchManufacturers:[],
+  selectedSearchStates:[],
+  selectedSearchPlatformTypes:[],
+  onlyOwnPlatforms: false,
+  searchText: null,
   totalPages: 1,
   pageNumber: 1,
-  pageSize: 20
+  pageSize: 1
+  // pageSize: 20
 })
 
 const getters = {
+  searchParams: (state: platformsState) => (isLoggedIn:boolean)=>{
+
+    return {
+      searchText: state.searchText,
+      manufacturer: state.selectedSearchManufacturers,
+      states: state.selectedSearchStates,
+      types: state.selectedSearchPlatformTypes,
+      onlyOwnPlatforms: state.onlyOwnPlatforms && isLoggedIn
+    }
+  },
   actions: (state: platformsState) => {
     let actions = [
       ...state.platformGenericActions,
@@ -114,13 +138,19 @@ const actions: {
 } = {
   async searchPlatformsPaginated ({
     commit,
-    state
-  }: { commit: Commit, state: platformsState }, searchParams: IPlatformSearchParams) {
+    state,
+    getters
+  }: { commit: Commit, state: platformsState, getters: any }) {
+
+    let searchParams = getters.searchParams(this.$auth.loggedIn)
+    console.log('searchParams',searchParams);
     let email = null
     if (searchParams.onlyOwnPlatforms) {
       // @ts-ignore
       email = this.$auth.user!.email as string
     }
+
+
 
     // @ts-ignore
     const { elements, totalCount } = await this.$api.platforms
@@ -293,7 +323,23 @@ const actions: {
   },
   setChosenKindOfPlatformAction ({ commit }: { commit: Commit }, newval: IOptionsForActionType | null) {
     commit('setChosenKindOfPlatformAction', newval)
-  }
+  },
+  setSelectedSearchManufacturers({ commit }: { commit: Commit },selectedSearchManufacturers:Manufacturer[]){
+    commit('setSelectedSearchManufacturers',selectedSearchManufacturers)
+  },
+  setSelectedSearchStates({ commit }: { commit: Commit },selectedSearchStates:Status[]){
+    commit('setSelectedSearchStates',selectedSearchStates)
+  },
+  setSelectedSearchPlatformTypes({ commit }: { commit: Commit },selectedSearchPlatformTypes:PlatformType[]){
+    commit('setSelectedSearchPlatformTypes',selectedSearchPlatformTypes)
+  },
+  setOnlyOwnPlatforms({ commit }: { commit: Commit },onlyOwnPlatforms:boolean){
+    commit('setOnlyOwnPlatforms',onlyOwnPlatforms)
+  },
+  setSearchText({ commit }: { commit: Commit },searchText:string|null){
+    commit('setSearchText',searchText)
+  },
+
 }
 
 const mutations = {
@@ -338,7 +384,24 @@ const mutations = {
   },
   setPlatformSoftwareUpdateAction (state: platformsState, action: SoftwareUpdateAction) {
     state.platformSoftwareUpdateAction = action
-  }
+  },
+  setSelectedSearchManufacturers(state:platformsState,selectedSearchManufacturers:Manufacturer[]){
+    state.selectedSearchManufacturers=selectedSearchManufacturers
+  },
+  setSelectedSearchStates(state:platformsState,selectedSearchStates:Status[]){
+    state.selectedSearchStates=selectedSearchStates
+  },
+  setSelectedSearchPlatformTypes(state:platformsState,selectedSearchPlatformTypes:PlatformType[]){
+    state.selectedSearchPlatformTypes=selectedSearchPlatformTypes
+  },
+  setOnlyOwnPlatforms(state:platformsState,onlyOwnPlatforms:boolean){
+    state.onlyOwnPlatforms=onlyOwnPlatforms
+  },
+  setSearchText(state:platformsState,searchText:string|null){
+    state.searchText=searchText
+  },
+
+
 }
 
 export default {

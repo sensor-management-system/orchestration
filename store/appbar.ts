@@ -181,10 +181,11 @@ const actions = {
   },
   initPlatformsIndexAppBar ({ commit }: {commit: Commit}) {
     commit('setTitle', 'Platforms')
-    commit('setTabs', [
-      'Search',
-      'Extended Search'
-    ])
+    // commit('setTabs', [ //todo remove
+    //   'Search',
+    //   'Extended Search'
+    // ])
+    commit('setTabs', [])
     commit('setCancelBtnHidden', true)
     commit('setSaveBtnHidden', true)
   },
