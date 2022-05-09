@@ -1,7 +1,5 @@
 """Model for contacts & reference tables."""
 
-import itertools
-
 from .base_model import db
 from ..models.mixin import SearchableMixin, IndirectSearchableMixin
 
@@ -112,4 +110,26 @@ class Contact(db.Model, SearchableMixin, IndirectSearchableMixin):
 
     def get_parent_search_entities(self):
         """Return a list with all the devices, platforms & configurations."""
-        return list(itertools.chain(self.devices, self.platforms, self.configurations))
+        # We collect here all the devices, platforms & configurations with that
+        # the contact is associated.
+        # So that we can update their search index information once we
+        # update the contact here (so we have contact information in the
+        # search index for a device).
+        # We don't refer to the contact roles, as they are part of the index
+        # for the device/platform/configuration.
+        result = []
+        # TODO: Check if this contact_device_roles name stays to refer back
+        # to the DeviceContactRole model
+        for device_contact_role in self.contact_device_roles:
+            device = device_contact_role.device
+            result.append(device)
+        # TODO: Again check the backref
+        for platform_contact_role in self.contact_platform_roles:
+            platform = platform_contact_role.platform
+            result.append(platform)
+        # TODO: Again check the backref
+        for configuration_contact_role in self.contact_configuration_roles:
+            configuration = configuration_contact_role.configuration
+            result.append(configuration)
+
+        return result

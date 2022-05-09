@@ -120,4 +120,6 @@ class OpenIDConnect:
         It returns the user that was identified with
         the access token & the app specific user lookup loader.
         """
-        return _request_ctx_stack.top.oidc_user
+        if hasattr(_request_ctx_stack.top, "oidc_user"):
+            return _request_ctx_stack.top.oidc_user
+        return None

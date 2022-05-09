@@ -12,6 +12,11 @@ from .configuration_location_actions import (  # noqa: F401
     ConfigurationStaticLocationEndAction,
 )
 from .contact import Contact  # noqa: F401
+from .contact_role import (  # noqa: F401
+    ConfigurationContactRole,
+    DeviceContactRole,
+    PlatformContactRole,
+)
 from .customfield import CustomField  # noqa: F401
 from .device import Device  # noqa: F401
 from .device_attachment import DeviceAttachment  # noqa: F401

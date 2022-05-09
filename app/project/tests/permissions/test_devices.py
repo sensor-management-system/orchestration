@@ -3,14 +3,15 @@ import json
 from unittest.mock import patch
 
 from project import base_url
-from project.api.models import User, Device
+from project.api.models import Device, User
 from project.api.models.base_model import db
 from project.api.services.idl_services import Idl
-from project.tests.base import BaseTestCase
-from project.tests.base import create_token
-from project.tests.base import fake
-from project.tests.permissions import create_a_test_device, create_a_test_contact
-from project.tests.permissions import create_superuser_token
+from project.tests.base import BaseTestCase, create_token, fake
+from project.tests.permissions import (
+    create_a_test_contact,
+    create_a_test_device,
+    create_superuser_token,
+)
 from project.tests.permissions.test_platforms import IDL_USER_ACCOUNT
 
 
@@ -23,7 +24,9 @@ class TestDevicePermissions(BaseTestCase):
     def test_add_public_device(self):
         """Ensure a new device can be public."""
         public_sensor = create_a_test_device(
-            public=True, private=False, internal=False,
+            public=True,
+            private=False,
+            internal=False,
         )
         db.session.add(public_sensor)
         db.session.commit()
@@ -36,7 +39,9 @@ class TestDevicePermissions(BaseTestCase):
     def test_add_private_device(self):
         """Ensure a new device can be private."""
         private_sensor = create_a_test_device(
-            public=False, private=True, internal=False,
+            public=False,
+            private=True,
+            internal=False,
         )
         db.session.add(private_sensor)
         db.session.commit()
@@ -49,7 +54,9 @@ class TestDevicePermissions(BaseTestCase):
     def test_add_device_model(self):
         """Ensure a new device model can be internal."""
         internal_sensor = create_a_test_device(
-            internal=True, public=False, private=False,
+            internal=True,
+            public=False,
+            private=False,
         )
         db.session.add(internal_sensor)
         db.session.commit()
@@ -89,14 +96,20 @@ class TestDevicePermissions(BaseTestCase):
     def test_get_as_anonymous_user(self):
         """Ensure anonymous user can only see public objects."""
         public_sensor = create_a_test_device(
-            private=False, internal=False, public=True,
+            private=False,
+            internal=False,
+            public=True,
         )
 
         internal_sensor = create_a_test_device(
-            public=False, private=False, internal=True,
+            public=False,
+            private=False,
+            internal=True,
         )
         private_sensor = create_a_test_device(
-            public=False, internal=False, private=True,
+            public=False,
+            internal=False,
+            private=True,
         )
         db.session.add_all([public_sensor, internal_sensor, private_sensor])
         db.session.commit()
@@ -110,17 +123,25 @@ class TestDevicePermissions(BaseTestCase):
     def test_get_as_registered_user(self):
         """Ensure that a registered user can see public, internal, and only his own private objects"""
         public_sensor = create_a_test_device(
-            public=True, private=False, internal=False,
+            public=True,
+            private=False,
+            internal=False,
         )
 
         internal_sensor = create_a_test_device(
-            public=False, private=False, internal=True,
+            public=False,
+            private=False,
+            internal=True,
         )
         private_sensor = create_a_test_device(
-            public=False, internal=False, private=True,
+            public=False,
+            internal=False,
+            private=True,
         )
         private_sensor_1 = create_a_test_device(
-            public=False, private=True, internal=False,
+            public=False,
+            private=True,
+            internal=False,
         )
 
         contact = create_a_test_contact()
@@ -290,9 +311,33 @@ class TestDevicePermissions(BaseTestCase):
         response = self.client.get(url, headers=access_headers)
         self.assertEqual(response.status, "403 FORBIDDEN")
 
+    def test_get_an_private_device_as_anonymous(self):
+        """Make sure that an anonymous user is not allowed a retrieve a
+        private device."""
+
+        c = create_a_test_contact()
+        user = User(subject="test_user1@test.test", contact=c)
+
+        db.session.add_all([c, user])
+        db.session.commit()
+
+        private_sensor = Device(
+            short_name=fake.pystr(),
+            is_public=False,
+            is_private=True,
+            is_internal=False,
+            created_by_id=user.id,
+        )
+        db.session.add(private_sensor)
+        db.session.commit()
+
+        url = f"{self.device_url}/{private_sensor.id}"
+        response = self.client.get(url)
+        self.assertEqual(response.status, "401 UNAUTHORIZED")
+
     def test_patch_device_as_a_member_in_a_permission_group(self):
         """Make sure that a member in a group (admin/member) can change
-         the device data per patch request"""
+        the device data per patch request"""
         group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permission_groups
         devices = preparation_of_public_and_internal_device_data(
             group_id_test_user_is_member_in_2
@@ -323,7 +368,9 @@ class TestDevicePermissions(BaseTestCase):
                     "data": {
                         "type": "device",
                         "id": data["data"]["id"],
-                        "attributes": {"short_name": "Changed device name",},
+                        "attributes": {
+                            "short_name": "Changed device name",
+                        },
                     }
                 }
                 url = f"{self.device_url}/{data['data']['id']}"

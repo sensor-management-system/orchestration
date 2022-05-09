@@ -44,6 +44,7 @@ services:
       ALLOWED_MIME_TYPES: ${ALLOWED_MIME_TYPES}
       SMS_IDL_TOKEN: ${SMS_IDL_TOKEN}
       IDL_URL: ${IDL_URL}
+      CV_URL: ${CV_URL}
     depends_on:
       - db
     command: >
