@@ -33,6 +33,7 @@ build-image:
     - echo "ENV WELL_KNOWN_URL" $WELL_KNOWN_URL >> $CI_PROJECT_DIR/Dockerfile.ci
     - echo "ENV HTTP_ORIGINS" $HTTP_ORIGINS >> $CI_PROJECT_DIR/Dockerfile.ci
     - echo "ENV OIDC_USERNAME_CLAIM" $OIDC_USERNAME_CLAIM >> $CI_PROJECT_DIR/Dockerfile.ci
+    - echo "ENV CV_URL https://webapp-stage.intranet.ufz.de/sms/cv/api/v1" >> $CI_PROJECT_DIR/Dockerfile.ci
     - docker build --tag $CONTAINER_TEST_IMAGE .
     - docker push $CONTAINER_TEST_IMAGE
 
