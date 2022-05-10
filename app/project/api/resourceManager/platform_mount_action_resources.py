@@ -4,6 +4,8 @@ from flask_rest_jsonapi import ResourceDetail, ResourceRelationship
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.orm.exc import NoResultFound
 
+from ...frj_csv_export.resource import ResourceList
+from ..helpers.errors import MethodNotAllowed
 from ..models.base_model import db
 from ..models.configuration import Configuration
 from ..models.mount_actions import PlatformMountAction
@@ -15,7 +17,6 @@ from ..resourceManager.base_resource import (
 )
 from ..schemas.mount_actions_schema import PlatformMountActionSchema
 from ..token_checker import token_required
-from ...frj_csv_export.resource import ResourceList
 
 
 class PlatformMountActionList(ResourceList):
@@ -40,7 +41,9 @@ class PlatformMountActionList(ResourceList):
                 self.session.query(Configuration).filter_by(id=configuration_id).one()
             except NoResultFound:
                 raise ObjectNotFound(
-                    {"parameter": "id",},
+                    {
+                        "parameter": "id",
+                    },
                     "Configuration: {} not found".format(configuration_id),
                 )
             else:
@@ -52,7 +55,10 @@ class PlatformMountActionList(ResourceList):
                 self.session.query(Platform).filter_by(id=platform_id).one()
             except NoResultFound:
                 raise ObjectNotFound(
-                    {"parameter": "id",}, "Platform: {} not found".format(platform_id),
+                    {
+                        "parameter": "id",
+                    },
+                    "Platform: {} not found".format(platform_id),
                 )
             else:
                 query_ = query_.filter(PlatformMountAction.platform_id == platform_id)
@@ -61,7 +67,9 @@ class PlatformMountActionList(ResourceList):
                 self.session.query(Platform).filter_by(id=parent_platform_id).one()
             except NoResultFound:
                 raise ObjectNotFound(
-                    {"parameter": "id",},
+                    {
+                        "parameter": "id",
+                    },
                     "Parent platform: {} not found".format(parent_platform_id),
                 )
             else:
@@ -75,7 +83,10 @@ class PlatformMountActionList(ResourceList):
     data_layer = {
         "session": db.session,
         "model": PlatformMountAction,
-        "methods": {"before_create_object": before_create_object, "query": query,},
+        "methods": {
+            "before_create_object": before_create_object,
+            "query": query,
+        },
     }
 
 
@@ -107,3 +118,16 @@ class PlatformMountActionRelationship(ResourceRelationship):
         "session": db.session,
         "model": PlatformMountAction,
     }
+
+
+class PlatformMountActionRelationshipReadOnly(PlatformMountActionRelationship):
+    """A readonly relationship endpoint for platform mount actions."""
+
+    def before_post(self, args, kwargs, json_data=None):
+        raise MethodNotAllowed("This endpoint is readonly!")
+
+    def before_patch(self, args, kwargs, data=None):
+        raise MethodNotAllowed("This endpoint is readonly!")
+
+    def before_delete(self, args, kwargs):
+        raise MethodNotAllowed("This endpoint is readonly!")

@@ -54,6 +54,7 @@ class GenericPlatformActionSchema(Schema):
         schema="UserSchema",
         type_="user",
         id_field="id",
+        dump_only=True,
     )
     updated_by = Relationship(
         self_view="api.generic_platform_action_updated_user",
@@ -64,6 +65,7 @@ class GenericPlatformActionSchema(Schema):
         schema="UserSchema",
         type_="user",
         id_field="id",
+        dump_only=True,
     )
     generic_platform_action_attachments = Relationship(
         related_view="api.generic_platform_action_attachments",
@@ -122,6 +124,7 @@ class GenericDeviceActionSchema(Schema):
         schema="UserSchema",
         type_="user",
         id_field="id",
+        dump_only=True,
     )
     updated_by = Relationship(
         self_view="api.generic_device_action_updated_user",
@@ -132,6 +135,7 @@ class GenericDeviceActionSchema(Schema):
         schema="UserSchema",
         type_="user",
         id_field="id",
+        dump_only=True,
     )
     generic_device_action_attachments = Relationship(
         related_view="api.generic_device_action_attachments",
@@ -190,6 +194,7 @@ class GenericConfigurationActionSchema(Schema):
         include_resource_linkage=True,
         schema="UserSchema",
         type_="user",
+        dump_only=True,
     )
 
     updated_by = Relationship(
@@ -200,6 +205,7 @@ class GenericConfigurationActionSchema(Schema):
         include_resource_linkage=True,
         schema="UserSchema",
         type_="user",
+        dump_only=True,
     )
     generic_configuration_action_attachments = Relationship(
         related_view="api.generic_configuration_action_attachments",

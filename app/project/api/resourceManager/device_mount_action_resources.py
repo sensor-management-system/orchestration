@@ -4,6 +4,8 @@ from flask_rest_jsonapi import ResourceDetail, ResourceRelationship
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.orm.exc import NoResultFound
 
+from ...frj_csv_export.resource import ResourceList
+from ..helpers.errors import MethodNotAllowed
 from ..models.base_model import db
 from ..models.configuration import Configuration
 from ..models.device import Device
@@ -16,7 +18,6 @@ from ..resourceManager.base_resource import (
 )
 from ..schemas.mount_actions_schema import DeviceMountActionSchema
 from ..token_checker import token_required
-from ...frj_csv_export.resource import ResourceList
 
 
 class DeviceMountActionList(ResourceList):
@@ -42,7 +43,9 @@ class DeviceMountActionList(ResourceList):
                 self.session.query(Configuration).filter_by(id=configuration_id).one()
             except NoResultFound:
                 raise ObjectNotFound(
-                    {"parameter": "id",},
+                    {
+                        "parameter": "id",
+                    },
                     "Configuration: {} not found".format(configuration_id),
                 )
             else:
@@ -54,7 +57,10 @@ class DeviceMountActionList(ResourceList):
                 self.session.query(Device).filter_by(id=device_id).one()
             except NoResultFound:
                 raise ObjectNotFound(
-                    {"parameter": "id",}, "Device: {} not found".format(device_id),
+                    {
+                        "parameter": "id",
+                    },
+                    "Device: {} not found".format(device_id),
                 )
             else:
                 query_ = query_.filter(DeviceMountAction.device_id == device_id)
@@ -63,7 +69,9 @@ class DeviceMountActionList(ResourceList):
                 self.session.query(Platform).filter_by(id=parent_platform_id).one()
             except NoResultFound:
                 raise ObjectNotFound(
-                    {"parameter": "id",},
+                    {
+                        "parameter": "id",
+                    },
                     "Platform: {} not found".format(parent_platform_id),
                 )
             else:
@@ -78,7 +86,10 @@ class DeviceMountActionList(ResourceList):
     data_layer = {
         "session": db.session,
         "model": DeviceMountAction,
-        "methods": {"before_create_object": before_create_object, "query": query,},
+        "methods": {
+            "before_create_object": before_create_object,
+            "query": query,
+        },
     }
 
 
@@ -110,3 +121,16 @@ class DeviceMountActionRelationship(ResourceRelationship):
         "session": db.session,
         "model": DeviceMountAction,
     }
+
+
+class DeviceMountActionRelationshipReadOnly(DeviceMountActionRelationship):
+    """A readonly relationship endpoint for device mount actions."""
+
+    def before_post(self, args, kwargs, json_data=None):
+        raise MethodNotAllowed("This endpoint is readonly!")
+
+    def before_patch(self, args, kwargs, data=None):
+        raise MethodNotAllowed("This endpoint is readonly!")
+
+    def before_delete(self, args, kwargs):
+        raise MethodNotAllowed("This endpoint is readonly!")

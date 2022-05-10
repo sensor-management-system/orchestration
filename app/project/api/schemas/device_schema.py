@@ -55,6 +55,7 @@ class DeviceSchema(Schema):
         include_resource_linkage=True,
         schema="UserSchema",
         type_="user",
+        dump_only=True,
     )
     updated_by = Relationship(
         self_view="api.device_updated_user",
@@ -64,6 +65,7 @@ class DeviceSchema(Schema):
         include_resource_linkage=True,
         schema="UserSchema",
         type_="user",
+        dump_only=True,
     )
     customfields = Relationship(
         related_view="api.device_customfields",

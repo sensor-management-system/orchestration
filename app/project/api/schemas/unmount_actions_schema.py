@@ -62,6 +62,7 @@ class PlatformUnmountActionSchema(Schema):
         schema="UserSchema",
         type_="user",
         id_field="id",
+        dump_only=True,
     )
     updated_by = Relationship(
         self_view="api.platform_unmount_action_updated_user",
@@ -72,6 +73,7 @@ class PlatformUnmountActionSchema(Schema):
         schema="UserSchema",
         type_="user",
         id_field="id",
+        dump_only=True,
     )
 
 
@@ -135,6 +137,7 @@ class DeviceUnmountActionSchema(Schema):
         schema="UserSchema",
         type_="user",
         id_field="id",
+        dump_only=True,
     )
     updated_by = Relationship(
         self_view="api.device_unmount_action_updated_user",
@@ -145,4 +148,5 @@ class DeviceUnmountActionSchema(Schema):
         schema="UserSchema",
         type_="user",
         id_field="id",
+        dump_only=True,
     )
