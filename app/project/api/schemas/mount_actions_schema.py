@@ -76,6 +76,7 @@ class PlatformMountActionSchema(Schema):
         schema="UserSchema",
         type_="user",
         id_field="id",
+        dump_only=True,
     )
     updated_by = Relationship(
         self_view="api.platform_mount_action_updated_user",
@@ -86,6 +87,7 @@ class PlatformMountActionSchema(Schema):
         schema="UserSchema",
         type_="user",
         id_field="id",
+        dump_only=True,
     )
 
 
@@ -163,6 +165,7 @@ class DeviceMountActionSchema(Schema):
         schema="UserSchema",
         type_="user",
         id_field="id",
+        dump_only=True,
     )
     updated_by = Relationship(
         self_view="api.device_mount_action_updated_user",
@@ -173,4 +176,5 @@ class DeviceMountActionSchema(Schema):
         schema="UserSchema",
         type_="user",
         id_field="id",
+        dump_only=True,
     )

@@ -4,6 +4,8 @@ from flask_rest_jsonapi import ResourceDetail, ResourceRelationship
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.orm.exc import NoResultFound
 
+from ...frj_csv_export.resource import ResourceList
+from ..helpers.errors import MethodNotAllowed
 from ..models.base_model import db
 from ..models.platform import Platform
 from ..models.software_update_actions import PlatformSoftwareUpdateAction
@@ -14,7 +16,6 @@ from ..resourceManager.base_resource import (
 )
 from ..schemas.software_update_action_schema import PlatformSoftwareUpdateActionSchema
 from ..token_checker import token_required
-from ...frj_csv_export.resource import ResourceList
 
 
 class PlatformSoftwareUpdateActionList(ResourceList):
@@ -37,7 +38,10 @@ class PlatformSoftwareUpdateActionList(ResourceList):
                 self.session.query(Platform).filter_by(id=platform_id).one()
             except NoResultFound:
                 raise ObjectNotFound(
-                    {"parameter": "id",}, "Platform: {} not found".format(platform_id),
+                    {
+                        "parameter": "id",
+                    },
+                    "Platform: {} not found".format(platform_id),
                 )
             else:
                 query_ = query_.filter(
@@ -50,7 +54,10 @@ class PlatformSoftwareUpdateActionList(ResourceList):
     data_layer = {
         "session": db.session,
         "model": PlatformSoftwareUpdateAction,
-        "methods": {"before_create_object": before_create_object, "query": query,},
+        "methods": {
+            "before_create_object": before_create_object,
+            "query": query,
+        },
     }
 
 
@@ -82,3 +89,18 @@ class PlatformSoftwareUpdateActionRelationship(ResourceRelationship):
         "session": db.session,
         "model": PlatformSoftwareUpdateAction,
     }
+
+
+class PlatformSoftwareUpdateActionRelationshipReadOnly(
+    PlatformSoftwareUpdateActionRelationship
+):
+    """A readonly relationship endpoint for platform software update actions."""
+
+    def before_post(self, args, kwargs, json_data=None):
+        raise MethodNotAllowed("This endpoint is readonly!")
+
+    def before_patch(self, args, kwargs, data=None):
+        raise MethodNotAllowed("This endpoint is readonly!")
+
+    def before_delete(self, args, kwargs):
+        raise MethodNotAllowed("This endpoint is readonly!")

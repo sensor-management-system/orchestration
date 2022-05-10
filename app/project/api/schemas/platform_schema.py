@@ -44,6 +44,7 @@ class PlatformSchema(Schema):
         include_resource_linkage=True,
         schema="UserSchema",
         type_="user",
+        dump_only=True,
     )
     updated_by = Relationship(
         self_view="api.platform_updated_user",
@@ -53,6 +54,7 @@ class PlatformSchema(Schema):
         include_resource_linkage=True,
         schema="UserSchema",
         type_="user",
+        dump_only=True,
     )
     inventory_number = fields.Str(allow_none=True)
     serial_number = fields.Str(allow_none=True)
