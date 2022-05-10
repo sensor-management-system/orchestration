@@ -17,7 +17,17 @@ from project.tests.base import (
     generate_userinfo_data,
     test_file_path,
 )
+from project.tests.models.test_device_calibration_action_model import (
+    add_device_calibration_action,
+)
+from project.tests.models.test_generic_actions_models import (
+    generate_device_action_model,
+)
 from project.tests.read_from_json import extract_data_from_json_file
+
+from project.tests.models.test_software_update_actions_model import (
+    add_device_software_update_action_model,
+)
 
 
 class TestDeviceService(BaseTestCase):
@@ -363,3 +373,24 @@ class TestDeviceService(BaseTestCase):
         """Make sure that the backend responds with 404 HTTP-Code if a resource was not found."""
         url = f"{self.device_url}/{fake.random_int()}"
         _ = super().http_code_404_when_resource_not_found(url)
+
+    def test_delete_device_with_calibration_action(self):
+        """Ensure that a device with a calibration_action can be deleted."""
+
+        device_calibration_action = add_device_calibration_action()
+        device_id = device_calibration_action.device_id
+        _ = super().delete_object(url=f"{self.device_url}/{device_id}",)
+
+    def test_delete_device_with_generic_action(self):
+        """Ensure that a device with  a generic action can be deleted."""
+
+        device_action_model = generate_device_action_model()
+        device_id = device_action_model.device_id
+        _ = super().delete_object(url=f"{self.device_url}/{device_id}",)
+
+    def test_delete_device_with_software_update__action(self):
+        """Ensure that a device with  a software update action can be deleted."""
+
+        device_action_model = add_device_software_update_action_model()
+        device_id = device_action_model.device_id
+        _ = super().delete_object(url=f"{self.device_url}/{device_id}",)

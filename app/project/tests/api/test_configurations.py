@@ -10,6 +10,7 @@ from project.api.models.platform import Platform
 from project.tests.base import BaseTestCase, test_file_path
 from project.tests.base import fake, generate_userinfo_data
 from project.tests.models.test_configurations_model import generate_configuration_model
+from project.tests.models.test_generic_actions_models import generate_configuration_action_model
 from project.tests.read_from_json import extract_data_from_json_file
 
 
@@ -369,6 +370,13 @@ class TestConfigurationsService(BaseTestCase):
             data_object=action_data,
             object_type="configuration_dynamic_location_end_action",
         )
+        _ = super().delete_object(url=f"{self.configurations_url}/{config_id}",)
+
+    def test_delete_configuration_with_generic_action(self):
+        """Ensure a configuration with a generic action can be deleted"""
+
+        configuration_action = generate_configuration_action_model()
+        config_id = configuration_action.configuration_id
         _ = super().delete_object(url=f"{self.configurations_url}/{config_id}",)
 
     @staticmethod

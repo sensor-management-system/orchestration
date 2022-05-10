@@ -5,7 +5,18 @@ from project import base_url
 from project.api.models.base_model import db
 from project.api.models.platform import Platform
 from project.api.models.platform_attachment import PlatformAttachment
-from project.tests.base import BaseTestCase, fake, generate_userinfo_data, test_file_path
+from project.tests.base import (
+    BaseTestCase,
+    fake,
+    generate_userinfo_data,
+    test_file_path,
+)
+from project.tests.models.test_generic_action_attachment_model import (
+    add_generic_platform_action_attachment_model,
+)
+from project.tests.models.test_software_update_actions_model import (
+    add_platform_software_update_action_model,
+)
 from project.tests.read_from_json import extract_data_from_json_file
 
 
@@ -177,3 +188,17 @@ class TestPlatformServices(BaseTestCase):
         """Make sure that the backend responds with 404 HTTP-Code if a resource was not found."""
         url = f"{self.platform_url}/{fake.random_int()}"
         _ = super().http_code_404_when_resource_not_found(url)
+
+    def test_delete_platform_with_a_software_update_action(self):
+        """Ensure a platform with software_update_action can be deleted"""
+
+        platform_software_update_action = add_platform_software_update_action_model()
+        platform_id = platform_software_update_action.platform_id
+        _ = super().delete_object(url=f"{self.platform_url}/{platform_id}",)
+
+    def test_delete_platform_with_a_generic_action(self):
+        """Ensure a platform with generic action can be deleted"""
+
+        platform_software_update_action = add_generic_platform_action_attachment_model()
+        platform_id = platform_software_update_action.platform_id
+        _ = super().delete_object(url=f"{self.platform_url}/{platform_id}",)

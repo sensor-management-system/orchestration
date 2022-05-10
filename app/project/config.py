@@ -61,6 +61,8 @@ class TestingConfig(BaseConfig):
     TESTING = True
     SQLALCHEMY_DATABASE_URI = env("DATABASE_TEST_URL", None)
     ELASTICSEARCH_URL = None
+    # AssertionError: Popped wrong request context
+    PRESERVE_CONTEXT_ON_EXCEPTION = False
 
 
 class ProductionConfig(BaseConfig):
