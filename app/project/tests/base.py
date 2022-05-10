@@ -113,6 +113,8 @@ def get_userinfo():
 class LoginMechanismBySettingUserDirectly:
     def __init__(self, get_user_function):
         self.get_user_function = get_user_function
+    def init_app(self, app):
+        pass
 
     def can_be_applied(self):
         return True
@@ -124,6 +126,8 @@ class LoginMechanismBySettingUserDirectly:
 
 class LoginMechanismByTestJwt(CreateNewUserByUserinfoMixin):
 
+    def init_app(self, app):
+        pass
     def can_be_applied(self):
         if request.headers.get("Authorization"):
             return True
