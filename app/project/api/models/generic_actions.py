@@ -9,7 +9,10 @@ class GenericPlatformAction(db.Model, AuditMixin, IndirectSearchableMixin):
         "Platform",
         uselist=False,
         foreign_keys=[platform_id],
-        backref=db.backref("generic_platform_actions"),
+        backref=db.backref(
+            "generic_platform_actions",
+            cascade="save-update, merge, delete, delete-orphan",
+        ),
     )
     description = db.Column(db.Text, nullable=True)
     action_type_name = db.Column(db.String(256), nullable=False)
@@ -45,7 +48,10 @@ class GenericDeviceAction(db.Model, AuditMixin, IndirectSearchableMixin):
         "Device",
         uselist=False,
         foreign_keys=[device_id],
-        backref=db.backref("generic_device_actions"),
+        backref=db.backref(
+            "generic_device_actions",
+            cascade="save-update, merge, delete, delete-orphan",
+        ),
     )
     description = db.Column(db.Text, nullable=True)
     action_type_name = db.Column(db.String(256), nullable=False)
@@ -57,7 +63,10 @@ class GenericDeviceAction(db.Model, AuditMixin, IndirectSearchableMixin):
         "Contact",
         uselist=False,
         foreign_keys=[contact_id],
-        backref=db.backref("generic_device_actions"),
+        backref=db.backref(
+            "generic_device_actions",
+            cascade="save-update, merge, delete, delete-orphan",
+        ),
     )
 
     def get_parent_search_entities(self):
@@ -83,7 +92,10 @@ class GenericConfigurationAction(db.Model, AuditMixin, IndirectSearchableMixin):
         "Configuration",
         uselist=False,
         foreign_keys=[configuration_id],
-        backref=db.backref("generic_configuration_actions"),
+        backref=db.backref(
+            "generic_configuration_actions",
+            cascade="save-update, merge, delete, delete-orphan",
+        ),
     )
     description = db.Column(db.Text, nullable=True)
     action_type_name = db.Column(db.String(256), nullable=False)
