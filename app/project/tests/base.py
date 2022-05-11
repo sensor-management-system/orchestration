@@ -143,7 +143,7 @@ class LoginMechanismByTestJwt(CreateNewUserByUserinfoMixin):
             decode_token = flask_jwt_extended.decode_token(authorization_header)
             identity = decode_token["sub"]
             return self.get_user_or_create_new(identity, decode_token)
-        except Exception as e:
+        except:
             return None
 
 
@@ -168,7 +168,7 @@ class BaseTestCase(TestCase):
         ]
         return app
 
-    def force_login(self):
+    def force_login(self, user):
         self._base_test_current_user = user
 
     def logout(self):

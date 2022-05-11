@@ -1,9 +1,18 @@
 from ....api.models import User, Contact
 from ....api.models.base_model import db
 
+
 class CreateNewUserByUserinfoMixin:
+    """
+    Mixin to create new users if we need to do so.
+
+    As we rely the data that we get from the idp, we
+    create new users in case there is the very first request.
+    If we find existing ones, we can go on with those.
+    """
     def get_user_or_create_new(self, identity, attributes):
-        # And we check if we find a user for this identity entry.
+
+        # We check if we find a user for this identity entry.
         found_user = db.session.query(User).filter_by(subject=identity).one_or_none()
         if found_user:
             return found_user
