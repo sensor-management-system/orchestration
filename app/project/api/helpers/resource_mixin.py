@@ -18,8 +18,7 @@ def add_created_by_id(data):
     check if the user exists or add the user to the database
     so that a user can't be None. Due to that created_by_id can't be None also.
     """
-    if request.user:
-        data["created_by_id"] = request.user.id
+    data["created_by_id"] = request.user.id
 
 
 def add_updated_by_id(data):
@@ -31,8 +30,7 @@ def add_updated_by_id(data):
     :return:
 
     """
-    if request.user:
-        data["updated_by_id"] = request.user..id
+    data["updated_by_id"] = request.user.id
 
 
 def decode_json_request_data():
