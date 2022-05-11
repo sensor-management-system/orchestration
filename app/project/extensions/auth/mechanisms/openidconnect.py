@@ -5,19 +5,18 @@ from cachetools import TTLCache, cached
 from flask import request, current_app
 from .mixins import CreateNewUserByUserinfoMixin
 
-
 class OpenIdConnectAuthMechanism(CreateNewUserByUserinfoMixin):
     """Mechanism to authenticate via OpenIDConnect."""
 
     def __init__(self, app=None):
         """Initialyze the object."""
         self.config = None
+        self.config_loaded = False
         if app is not None:
             self.init_app(app)
 
     def init_app(self, app):
         """Init the flask extension."""
-        self.config = self.load_config(app)
         app.teardown_appcontext(self.teardown)
 
     def load_config(self, app):
@@ -43,6 +42,10 @@ class OpenIdConnectAuthMechanism(CreateNewUserByUserinfoMixin):
     def can_be_applied(self):
         """Check if we can use this mechanism here."""
         # If we don't have a config, there is no way to use this here.
+        if not self.config_loaded:
+            self.config = self.load_config(current_app)
+            self.config_loaded = True
+
         if not self.config:
             return False
         # Then we need an Authorization header with a Bearer token.
