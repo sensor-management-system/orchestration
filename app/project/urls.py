@@ -11,15 +11,10 @@ api.route(PermissionGroups, "permission_group_list", "/permission-groups")
 
 # Platform
 api.route(
-    PlatformList,
-    "platform_list",
-    "/platforms",
-    "/contacts/<int:contact_id>/platforms",
+    PlatformList, "platform_list", "/platforms", "/contacts/<int:contact_id>/platforms",
 )
 api.route(
-    PlatformDetail,
-    "platform_detail",
-    "/platforms/<int:id>",
+    PlatformDetail, "platform_detail", "/platforms/<int:id>",
 )
 api.route(
     PlatformRelationship,
@@ -27,12 +22,12 @@ api.route(
     "/platforms/<int:id>/relationships/contacts",
 )
 api.route(
-    PlatformRelationship,
+    PlatformRelationshipReadOnly,
     "platform_created_user",
     "/platforms/<int:id>/relationships/created-user",
 )
 api.route(
-    PlatformRelationship,
+    PlatformRelationshipReadOnly,
     "platform_updated_user",
     "/platforms/<int:id>/relationships/updated-user",
 )
@@ -123,33 +118,24 @@ api.route(
 )
 # Device
 api.route(
-    DeviceList,
-    "device_list",
-    "/devices",
-    "/contacts/<int:id>/devices",
+    DeviceList, "device_list", "/devices", "/contacts/<int:id>/devices",
 )
 api.route(
-    DeviceDetail,
-    "device_detail",
-    "/devices/<int:id>",
+    DeviceDetail, "device_detail", "/devices/<int:id>",
 )
 api.route(
-    DeviceRelationship,
-    "device_contacts",
-    "/devices/<int:id>/relationships/contacts",
+    DeviceRelationship, "device_contacts", "/devices/<int:id>/relationships/contacts",
 )
 api.route(
-    DeviceRelationship,
-    "device_events",
-    "/devices/<int:id>/relationships/events",
+    DeviceRelationship, "device_events", "/devices/<int:id>/relationships/events",
 )
 api.route(
-    DeviceRelationship,
+    DeviceRelationshipReadOnly,
     "device_created_user",
     "/devices/<int:id>/relationships/created-user",
 )
 api.route(
-    DeviceRelationship,
+    DeviceRelationshipReadOnly,
     "device_updated_user",
     "/devices/<int:id>/relationships/updated-user",
 )
@@ -202,9 +188,7 @@ api.route(
 
 # Device Property
 api.route(
-    DevicePropertyDetail,
-    "device_property_detail",
-    "/device-properties/<int:id>",
+    DevicePropertyDetail, "device_property_detail", "/device-properties/<int:id>",
 )
 
 api.route(
@@ -228,9 +212,7 @@ api.route(
     "/devices/<int:device_id>/device-attachments",
 )
 api.route(
-    DeviceAttachmentDetail,
-    "device_attachment_detail",
-    "/device-attachments/<int:id>",
+    DeviceAttachmentDetail, "device_attachment_detail", "/device-attachments/<int:id>",
 )
 api.route(
     DeviceAttachmentRelationship,
@@ -246,9 +228,7 @@ api.route(
     "/devices/<int:device_id>/customfields",
 )
 api.route(
-    CustomFieldDetail,
-    "customfield_detail",
-    "/customfields/<int:id>",
+    CustomFieldDetail, "customfield_detail", "/customfields/<int:id>",
 )
 api.route(
     CustomFieldRelationship,
@@ -265,16 +245,10 @@ api.route(
     "/platforms/<int:platform_id>/contacts",
     "/configurations/<int:configuration_id>/contacts",
 )
+api.route(ContactDetail, "contact_detail", "/contacts/<int:id>",
+          "/device-contact-roles/<int:id>/contact")
 api.route(
-    ContactDetail,
-    "contact_detail",
-    "/contacts/<int:id>",
-    "/device-contact-roles/<int:id>/contact",
-)
-api.route(
-    ContactRelationship,
-    "contact_devices",
-    "/contacts/<int:id>/relationships/devices",
+    ContactRelationship, "contact_devices", "/contacts/<int:id>/relationships/devices",
 )
 api.route(
     ContactRelationship,
@@ -287,7 +261,7 @@ api.route(
     "/contacts/<int:id>/relationships/configurations",
 )
 api.route(
-    ContactRelationship,
+    ContactRelationshipReadOnly,
     "contact_user",
     "/contacts/<int:id>/relationships/user",
 )
@@ -314,33 +288,22 @@ api.route(
 )
 # Users
 api.route(
-    UserList,
-    "user_list",
-    "/users",
-    "/contacts/<int:id>/users",
+    UserList, "user_list", "/users", "/contacts/<int:id>/users",
 )
 api.route(UserDetail, "user_detail", "/users/<int:id>")
 api.route(
-    UserRelationship,
-    "user_contact",
-    "/users/<int:id>/relationships/contact",
+    UserRelationship, "user_contact", "/users/<int:id>/relationships/contact",
 )
 api.route(
-    UserRelationship,
-    "user_events",
-    "/users/<int:id>/relationships/events",
+    UserRelationship, "user_events", "/users/<int:id>/relationships/events",
 )
 
 # Configuration
 api.route(
-    ConfigurationList,
-    "configuration_list",
-    "/configurations",
+    ConfigurationList, "configuration_list", "/configurations",
 )
 api.route(
-    ConfigurationDetail,
-    "configuration_detail",
-    "/configurations/<int:id>",
+    ConfigurationDetail, "configuration_detail", "/configurations/<int:id>",
 )
 api.route(
     ConfigurationRelationship,
@@ -363,12 +326,12 @@ api.route(
     "/configurations/<int:id>/relationships/src-elevation",
 )
 api.route(
-    ConfigurationRelationship,
+    ConfigurationRelationshipReadOnly,
     "configuration_created_user",
     "/configurations/<int:id>/relationships/created-user",
 )
 api.route(
-    ConfigurationRelationship,
+    ConfigurationRelationshipReadOnly,
     "configuration_updated_user",
     "/configurations/<int:id>/relationships/updated-user",
 )
@@ -445,12 +408,12 @@ api.route(
     "/generic-device-actions/<int:id>/relationships/attachment",
 )
 api.route(
-    GenericDeviceActionRelationship,
+    GenericDeviceActionRelationshipReadOnly,
     "generic_device_action_created_user",
     "/generic-device-actions/<int:id>/relationships/created-user",
 )
 api.route(
-    GenericDeviceActionRelationship,
+    GenericDeviceActionRelationshipReadOnly,
     "generic_device_action_updated_user",
     "/generic-device-actions/<int:id>/relationships/updated-user",
 )
@@ -508,12 +471,12 @@ api.route(
     "/generic-platform-actions/<int:id>/relationships/attachment",
 )
 api.route(
-    GenericPlatformActionRelationship,
+    GenericPlatformActionRelationshipReadOnly,
     "generic_platform_action_created_user",
     "/generic-platform-actions/<int:id>/relationships/created-user",
 )
 api.route(
-    GenericPlatformActionRelationship,
+    GenericPlatformActionRelationshipReadOnly,
     "generic_platform_action_updated_user",
     "/generic-platform-actions/<int:id>/relationships/updated-user",
 )
@@ -572,12 +535,12 @@ api.route(
     "/generic-configuration-actions/<int:id>/relationships/attachment",
 )
 api.route(
-    GenericConfigurationActionRelationship,
+    GenericConfigurationActionRelationshipReadOnly,
     "generic_configuration_action_created_user",
     "/generic-configuration-actions/<int:id>/relationships/created-user",
 )
 api.route(
-    GenericConfigurationActionRelationship,
+    GenericConfigurationActionRelationshipReadOnly,
     "generic_configuration_action_updated_user",
     "/generic-configuration-actions/<int:id>/relationships/updated-user",
 )
@@ -643,12 +606,12 @@ api.route(
     "/device-mount-actions/<int:id>/relationships/parent-platform",
 )
 api.route(
-    DeviceMountActionRelationship,
+    DeviceMountActionRelationshipReadOnly,
     "device_mount_action_created_user",
     "/device-mount-actions/<int:id>/relationships/created-user",
 )
 api.route(
-    DeviceMountActionRelationship,
+    DeviceMountActionRelationshipReadOnly,
     "device_mount_action_updated_user",
     "/device-mount-actions/<int:id>/relationships/updated-user",
 )
@@ -687,12 +650,12 @@ api.route(
     "/platform-mount-actions/<int:id>/relationships/parent-platform",
 )
 api.route(
-    PlatformMountActionRelationship,
+    PlatformMountActionRelationshipReadOnly,
     "platform_mount_action_created_user",
     "/platform-mount-actions/<int:id>/relationships/created-user",
 )
 api.route(
-    PlatformMountActionRelationship,
+    PlatformMountActionRelationshipReadOnly,
     "platform_mount_action_updated_user",
     "/platform-mount-actions/<int:id>/relationships/updated-user",
 )
@@ -730,12 +693,12 @@ api.route(
     "/device-unmount-actions/<int:id>/relationships/parent-platform",
 )
 api.route(
-    DeviceUnmountActionRelationship,
+    DeviceUnmountActionRelationshipReadOnly,
     "device_unmount_action_created_user",
     "/device-unmount-actions/<int:id>/relationships/created-user",
 )
 api.route(
-    DeviceUnmountActionRelationship,
+    DeviceUnmountActionRelationshipReadOnly,
     "device_unmount_action_updated_user",
     "/device-unmount-actions/<int:id>/relationships/updated-user",
 )
@@ -773,12 +736,12 @@ api.route(
     "/platform-unmount-actions/<int:id>/relationships/parent-platform",
 )
 api.route(
-    PlatformUnmountActionRelationship,
+    PlatformUnmountActionRelationshipReadOnly,
     "platform_unmount_action_created_user",
     "/platform-unmount-actions/<int:id>/relationships/created-user",
 )
 api.route(
-    PlatformUnmountActionRelationship,
+    PlatformUnmountActionRelationshipReadOnly,
     "platform_unmount_action_updated_user",
     "/{upa_url}s/<int:id>/relationships/updated-user",
 )
@@ -859,12 +822,12 @@ api.route(
     "/device-software-update-actions/<int:id>/relationships/contact",
 )
 api.route(
-    DeviceSoftwareUpdateActionRelationship,
+    DeviceSoftwareUpdateActionRelationshipReadOnly,
     "device_software_update_action_created_user",
     "/device-software-update-actions/<int:id>/relationships/created-user",
 )
 api.route(
-    DeviceSoftwareUpdateActionRelationship,
+    DeviceSoftwareUpdateActionRelationshipReadOnly,
     "device_software_update_action_updated_user",
     "/device-software-update-actions/<int:id>/relationships/updated-user",
 )
@@ -918,12 +881,12 @@ api.route(
     "/platform-software-update-actions/<int:id>/relationships/contact",
 )
 api.route(
-    PlatformSoftwareUpdateActionRelationship,
+    PlatformSoftwareUpdateActionRelationshipReadOnly,
     "platform_software_update_action_created_user",
     "/platform-software-update-actions/<int:id>/relationships/created-user",
 )
 api.route(
-    PlatformSoftwareUpdateActionRelationship,
+    PlatformSoftwareUpdateActionRelationshipReadOnly,
     "platform_software_update_action_updated_user",
     "/platform-software-update-actions/<int:id>/relationships/updated-user",
 )

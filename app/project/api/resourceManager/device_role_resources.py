@@ -3,7 +3,6 @@
 from flask_rest_jsonapi import ResourceDetail, ResourceRelationship
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.exc import NoResultFound
-
 from ...frj_csv_export.resource import ResourceList
 from ..auth.permission_utils import get_query_with_permissions_for_related_objects
 from ..models import Device

@@ -57,6 +57,7 @@ class PlatformSoftwareUpdateActionSchema(Schema):
         schema="UserSchema",
         type_="user",
         id_field="id",
+        dump_only=True,
     )
     updated_by = Relationship(
         self_view="api.platform_software_update_action_updated_user",
@@ -67,6 +68,7 @@ class PlatformSoftwareUpdateActionSchema(Schema):
         schema="UserSchema",
         type_="user",
         id_field="id",
+        dump_only=True,
     )
     platform_software_update_action_attachments = Relationship(
         related_view="api.platform_software_update_action_attachments",
@@ -132,6 +134,7 @@ class DeviceSoftwareUpdateActionSchema(Schema):
         schema="UserSchema",
         type_="user",
         id_field="id",
+        dump_only=True,
     )
     updated_by = Relationship(
         self_view="api.device_software_update_action_updated_user",
@@ -142,6 +145,7 @@ class DeviceSoftwareUpdateActionSchema(Schema):
         schema="UserSchema",
         type_="user",
         id_field="id",
+        dump_only=True,
     )
     device_software_update_action_attachments = Relationship(
         related_view="api.device_software_update_action_attachments",

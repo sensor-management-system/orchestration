@@ -1,13 +1,11 @@
 """Platform list resource."""
 
 import os
-
 from ...api.auth.permission_utils import (
     get_es_query_with_permissions,
     get_query_with_permissions,
     set_default_permission_view_to_internal_if_not_exists_or_all_false,
 )
-
 from ..models.contact_role import PlatformContactRole
 from ...frj_csv_export.resource import ResourceList
 from ..datalayers.esalchemy import EsSqlalchemyDataLayer

@@ -9,7 +9,10 @@ class DeviceSoftwareUpdateAction(db.Model, AuditMixin, IndirectSearchableMixin):
         "Device",
         uselist=False,
         foreign_keys=[device_id],
-        backref=db.backref("device_software_update_actions"),
+        backref=db.backref(
+            "device_software_update_actions",
+            cascade="save-update, merge, delete, delete-orphan",
+        ),
     )
     software_type_name = db.Column(db.String(256), nullable=False)
     software_type_uri = db.Column(db.String(256), nullable=True)
@@ -50,7 +53,10 @@ class PlatformSoftwareUpdateAction(db.Model, AuditMixin, IndirectSearchableMixin
         "Platform",
         uselist=False,
         foreign_keys=[platform_id],
-        backref=db.backref("platform_software_update_actions"),
+        backref=db.backref(
+            "platform_software_update_actions",
+            cascade="save-update, merge, delete, delete-orphan",
+        ),
     )
     software_type_name = db.Column(db.String(256), nullable=False)
     software_type_uri = db.Column(db.String(256), nullable=True)
