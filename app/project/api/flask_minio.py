@@ -4,14 +4,11 @@ import random
 import time
 
 import minio
-from flask import current_app, _app_ctx_stack, make_response
-from .auth.flask_openidconnect import open_id_connect
+from flask import _app_ctx_stack, current_app, make_response
 from minio.error import S3Error
-from urllib3.exceptions import ResponseError, MaxRetryError
+from urllib3.exceptions import MaxRetryError, ResponseError
 
-from .helpers.errors import NotFoundError, ConflictError, ServiceIsUnreachableError
-from .models import User
-from .models.base_model import db
+from .helpers.errors import ConflictError, NotFoundError, ServiceIsUnreachableError
 
 
 class MinioNotAvailableException(Exception):
@@ -19,7 +16,9 @@ class MinioNotAvailableException(Exception):
 
 
 def search_a_list_of_dictionaries(lod, default, **kw):
-    result = list(filter(lambda item: (item[key] == value for (key, value) in kw.items()), lod))
+    result = list(
+        filter(lambda item: (item[key] == value for (key, value) in kw.items()), lod)
+    )
     if len(result) != 0:
         return result[0]
     else:
@@ -45,10 +44,12 @@ def set_file_extension(filename, content_type):
 def set_a_filename(uploaded_file):
     act_year_month = time.strftime("%Y-%m")
     filename_picked_by_user = os.path.splitext(uploaded_file.filename)
-    file_extension = set_file_extension(filename_picked_by_user, uploaded_file.content_type)
+    file_extension = set_file_extension(
+        filename_picked_by_user, uploaded_file.content_type
+    )
     numbers = random.randint(0, 0x10000)
     filename = "{}{}".format(
-        filename_picked_by_user[0].lower() + '_' + str(numbers),
+        filename_picked_by_user[0].lower() + "_" + str(numbers),
         file_extension,
     )
     ordered_filed = f"{act_year_month}/{filename}"
@@ -139,20 +140,20 @@ class FlaskMinio:
             if not found:
                 # self.connection.make_bucket(minio_bucket_name)
                 # self.set_bucket_policy(minio_bucket_name)
-                raise NotFoundError("A Bucket with the name: {} is not Found.".format(
-                    minio_bucket_name))
+                raise NotFoundError(
+                    "A Bucket with the name: {} is not Found.".format(minio_bucket_name)
+                )
 
             if uploaded_file:
                 ordered_filed = set_a_filename(uploaded_file)
                 content_type = uploaded_file.content_type
-                current_user = open_id_connect.get_current_user()
                 self.connection.put_object(
                     minio_bucket_name,
                     ordered_filed,
                     uploaded_file,
                     size,
                     content_type=content_type,
-                    metadata={"uploaded-by-id": current_user.id}
+                    metadata={"uploaded-by-id": request.user.id},
                 )
                 data = {
                     "message": "object stored in {}".format(minio_bucket_name),

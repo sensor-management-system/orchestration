@@ -4,7 +4,6 @@ from flask import request
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy import and_, or_
 
-from ..auth.flask_openidconnect import open_id_connect
 from ..datalayers.esalchemy import AndFilter, OrFilter, TermEqualsExactStringFilter
 from ..helpers.errors import ForbiddenError, UnauthorizedError
 from ..helpers.resource_mixin import add_created_by_id, decode_json_request_data

@@ -3,7 +3,6 @@ from json import JSONDecodeError
 
 from flask import request
 
-from ..auth.flask_openidconnect import open_id_connect
 from ..helpers.errors import BadRequestError
 
 

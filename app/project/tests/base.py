@@ -1,9 +1,9 @@
 """Base class & utils for the tests."""
 
-from contextlib import contextmanager
 import json
 import os
 import time
+from contextlib import contextmanager
 
 import flask_jwt_extended
 from faker import Faker
@@ -11,6 +11,7 @@ from flask import request
 from flask_jwt_extended import JWTManager
 from flask_jwt_extended.exceptions import JWTDecodeError, WrongTokenError
 from flask_testing import TestCase
+from jwt.exceptions import DecodeError
 
 from project import create_app
 from project.api.helpers.errors import UnauthorizedError
@@ -145,7 +146,7 @@ class LoginMechanismByTestJwt(CreateNewUserByUserinfoMixin):
             decode_token = flask_jwt_extended.decode_token(authorization_header)
             identity = decode_token["sub"]
             return self.get_user_or_create_new(identity, decode_token)
-        except (ValueError, JWTDecodeError, TypeError, WrongTokenError):
+        except (ValueError, DecodeError, TypeError, WrongTokenError):
             return None
 
 
