@@ -4,23 +4,28 @@ from flask_rest_jsonapi import ResourceDetail, ResourceRelationship
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.orm.exc import NoResultFound
 
-from .base_resource import check_if_object_not_found
+from ...frj_csv_export.resource import ResourceList
 from ..auth.permission_utils import (
-    get_query_with_permissions_for_configuration_related_objects,
     check_permissions_for_configuration_related_objects,
     check_post_permission_for_configuration_related_objects,
+    get_query_with_permissions_for_configuration_related_objects,
 )
+from ..helpers.resource_mixin import add_created_by_id, add_updated_by_id
 from ..models import Configuration, ConfigurationStaticLocationEndAction
 from ..models.base_model import db
 from ..schemas.configuration_static_location_actions_schema import (
     ConfigurationStaticLocationEndActionSchema,
 )
 from ..token_checker import token_required
-from ...frj_csv_export.resource import ResourceList
+from .base_resource import check_if_object_not_found
 
 
 class ConfigurationStaticLocationEndActionList(ResourceList):
     """List resource for Configuration static location end actions (get, post)."""
+
+    def before_create_object(self, data, *args, **kwargs):
+        """Use jwt to add user id to dataset."""
+        add_created_by_id(data)
 
     def query(self, view_kwargs):
         """
@@ -38,7 +43,9 @@ class ConfigurationStaticLocationEndActionList(ResourceList):
                 self.session.query(Configuration).filter_by(id=configuration_id).one()
             except NoResultFound:
                 raise ObjectNotFound(
-                    {"parameter": "id",},
+                    {
+                        "parameter": "id",
+                    },
                     "Configuration: {} not found".format(configuration_id),
                 )
             else:
@@ -56,7 +63,10 @@ class ConfigurationStaticLocationEndActionList(ResourceList):
     data_layer = {
         "session": db.session,
         "model": ConfigurationStaticLocationEndAction,
-        "methods": {"query": query},
+        "methods": {
+            "query": query,
+            "before_create_object": before_create_object,
+        },
     }
 
 
@@ -69,6 +79,10 @@ class ConfigurationStaticLocationEndActionDetail(ResourceDetail):
         check_permissions_for_configuration_related_objects(
             self._data_layer.model, kwargs["id"]
         )
+
+    def before_patch(self, args, kwargs, data):
+        """Add updated by user id to the data."""
+        add_updated_by_id(data)
 
     schema = ConfigurationStaticLocationEndActionSchema
     decorators = (token_required,)

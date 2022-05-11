@@ -1,20 +1,21 @@
 """Configuration list resource."""
 
 import os
+
 from sqlalchemy import or_
-from ...frj_csv_export.resource import ResourceList
 from ..datalayers.esalchemy import (
     EsSqlalchemyDataLayer,
     OrFilter,
     TermEqualsExactStringFilter,
 )
+from ...frj_csv_export.resource import ResourceList
 from ..models.base_model import db
 from ..models.configuration import Configuration
 from ..models.contact_role import ConfigurationContactRole
 from ..schemas.configuration_schema import ConfigurationSchema
-from ..token_checker import get_current_user_or_none_by_optional, token_required
-from .base_resource import add_contact_to_object
 from ..helpers.resource_mixin import add_created_by_id
+from ..token_checker import get_current_user_or_none_by_optional, token_required
+from ..resourceManager.base_resource import add_contact_to_object
 
 
 class ConfigurationList(ResourceList):

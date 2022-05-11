@@ -4,7 +4,6 @@ from flask_rest_jsonapi import ResourceDetail, ResourceRelationship
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.exc import NoResultFound
 
-from ...frj_csv_export.resource import ResourceList
 from ..auth.permission_utils import (
     check_deletion_permission_for_configuration_related_objects,
     check_patch_permission_for_configuration_related_objects,
@@ -18,6 +17,7 @@ from ..models.contact_role import ConfigurationContactRole
 from ..schemas.role import ConfigurationRoleSchema
 from ..token_checker import token_required
 from .base_resource import check_if_object_not_found
+from ...frj_csv_export.resource import ResourceList
 
 
 class ConfigurationRoleList(ResourceList):
@@ -68,7 +68,6 @@ class ConfigurationRoleDetail(ResourceDetail):
     Provides get, patch and delete methods to retrieve details
     of an object, update an object and delete a Configuration Role.
     """
-
     def before_get(self, args, kwargs):
         """
         Return 404 Responses if role not found.

@@ -32,6 +32,7 @@ class ContactSchema(Schema):
         schema="UserPublicSchema",
         type_="user",
         id_field="id",
+        dump_only=True,
     )
 
     @staticmethod
