@@ -1,5 +1,6 @@
 """Base class & utils for the tests."""
 
+from contextlib import contextmanager
 import json
 import os
 import time
@@ -177,6 +178,15 @@ class BaseTestCase(TestCase):
 
     def get_current_user(self):
         return self._base_test_current_user
+
+    @contextmanager
+    def run_requests_as(self, user):
+        previous_user = self._base_test_current_user
+        self._base_test_current_user = user
+        try:
+            yield
+        finally:
+            self._base_test_current_user = previous_user
 
     def setUp(self):
         """
