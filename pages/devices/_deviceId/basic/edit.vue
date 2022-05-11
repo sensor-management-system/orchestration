@@ -54,11 +54,80 @@ permissions and limitations under the Licence.
         @save="save"
       />
     </v-card-actions>
+    <!-- <v-alert
+      :value="showNavigationWarning"
+      color="warning"
+      dark
+      icon="mdi-alert"
+      transition="scale-transition"
+    >
+      <v-row>
+        You are about to discard your changes. Are you sure?
+      </v-row>
+      <v-row>
+        <v-btn @click="closeDialog">
+          No, stay here
+        </v-btn>
+        <v-btn @click="saveChanges">
+          Save and move on
+        </v-btn>
+        <v-btn @click="discardChanges">
+          Yes, continue
+        </v-btn>
+      </v-row>
+    </v-alert> -->
+
+    <v-dialog
+      v-model="showNavigationWarning"
+      width="500"
+      @click:outside="closeDialog"
+    >
+      <v-card class="">
+        <v-card-title class="text-h5">
+          <!-- <v-icon>mdi-alert</v-icon> -->
+           Unsaved changes
+        </v-card-title>
+
+        <v-card-text>
+          You have unsaved changes. Are you sure you want to leave the page?
+        </v-card-text>
+
+        <v-card-actions>
+          <v-spacer />
+
+          <v-btn
+            color=""
+            text
+            @click.stop="closeDialog"
+          >
+            close
+          </v-btn>
+
+
+          <v-btn
+            color="secondary"
+            text
+            @click="discardChanges"
+          >
+            Discard changes
+          </v-btn>
+          <v-btn
+            color="primary"
+
+            @click="saveChanges"
+          >
+            Save changes
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
+
+import { RawLocation } from 'vue-router'
 
 import { mapActions, mapState } from 'vuex'
 import DeviceBasicDataForm from '@/components/DeviceBasicDataForm.vue'
@@ -80,6 +149,37 @@ import { Device } from '@/models/Device'
 export default class DeviceEditBasicPage extends Vue {
   private deviceCopy: Device = new Device()
   private isSaving: boolean = false
+  private showNavigationWarning: boolean = false
+  private to: RawLocation | null = null
+
+  // private continueToDifferentPage = () => {
+  //   this.showNavigationWarning = false
+  //   this.$router.push(this.to)
+  // }
+
+  // private stayOnPage = () => {
+  //   this.showNavigationWarning = false
+  //   this.to = null
+  // }
+
+  closeDialog () {
+    this.showNavigationWarning = false
+    this.to = null
+  }
+
+  async saveChanges () {
+    // add code to save changes here
+    await this.save()
+    this.showNavigationWarning = false
+    console.log('save and goto', this.to)
+    this.$router.push(this.to.path)
+  }
+
+  discardChanges () {
+    this.showNavigationWarning = false
+    console.log('discard and goto', this.to)
+    this.$router.push(this.to.path)
+  }
 
   // vuex definition for typescript check
   device!: Device
@@ -99,6 +199,10 @@ export default class DeviceEditBasicPage extends Vue {
 
   get deviceId () {
     return this.$route.params.deviceId
+  }
+
+  get deviceHasBeenEdited () {
+    return (JSON.stringify(this.device) !== JSON.stringify(this.deviceCopy))
   }
 
   async save () {
@@ -122,6 +226,22 @@ export default class DeviceEditBasicPage extends Vue {
       this.$store.commit('snackbar/setError', 'Save failed')
     } finally {
       this.isSaving = false
+    }
+  }
+
+  beforeRouteLeave (to, from, next) {
+    // called when the route that renders this component is about to
+    // be navigated away from.
+    // has access to `this` component instance.
+    if (this.deviceHasBeenEdited) {
+      if (this.to) {
+        next()
+      } else {
+        this.to = to
+        this.showNavigationWarning = true
+      }
+    } else {
+      return next()
     }
   }
 }
