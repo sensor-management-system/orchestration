@@ -8,6 +8,7 @@ import flask_jwt_extended
 from faker import Faker
 from flask import request
 from flask_jwt_extended import JWTManager
+from flask_jwt_extended.exceptions import JWTDecodeError, WrongTokenError
 from flask_testing import TestCase
 
 from project import create_app
@@ -143,7 +144,7 @@ class LoginMechanismByTestJwt(CreateNewUserByUserinfoMixin):
             decode_token = flask_jwt_extended.decode_token(authorization_header)
             identity = decode_token["sub"]
             return self.get_user_or_create_new(identity, decode_token)
-        except:
+        except (ValueError, JWTDecodeError, TypeError, WrongTokenError):
             return None
 
 
