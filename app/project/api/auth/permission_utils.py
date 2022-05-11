@@ -68,7 +68,7 @@ def assert_current_user_is_superuser_or_owner_of_object(object_):
     :return: None
     """
     if not request.user:
-        raise UnauthorizedError("No valid access token.")
+        raise UnauthorizedError("Authentication required.")
     if request.user.id != object_.created_by_id:
         if not request.user.is_superuser:
             raise ForbiddenError(
@@ -220,7 +220,7 @@ def prevent_normal_user_from_viewing_not_owned_private_object(object_):
     :param object_:
     """
     if not request.user:
-        raise UnauthorizedError("Login required")
+        raise UnauthorizedError("Authentication required.")
     if not request.user.is_superuser:
         if object_.created_by_id != request.user.id:
             raise ForbiddenError("User is not allowed to view object.")
@@ -239,7 +239,7 @@ def check_for_permission(model_class, kwargs):
             prevent_normal_user_from_viewing_not_owned_private_object(object_)
         elif object_.is_internal:
             if not request.user:
-                raise UnauthorizedError("Login required for internal objects.")
+                raise UnauthorizedError("Authentication required.")
     else:
         raise ObjectNotFound({"pointer": ""}, "Object Not Found")
 
@@ -301,7 +301,7 @@ def check_permissions_for_related_objects(model_class, id_):
         assert_current_user_is_superuser_or_owner_of_object(related_object)
     elif not related_object.is_public:
         if not request.user:
-            raise UnauthorizedError("Login required for internal objects.")
+            raise UnauthorizedError("Authentication required.")
 
 
 def check_post_permission_for_related_objects():
@@ -426,7 +426,7 @@ def check_permissions_for_configuration_related_objects(model_class, id_):
     related_object = object_.configuration
     if not related_object.is_public:
         if not request.user:
-            raise UnauthorizedError("Login required for internal objects.")
+            raise UnauthorizedError("Authentication required.")
 
 
 def cfg_permission_group_defined(group_id):

@@ -20,9 +20,7 @@ def token_required(fn):
                 # In this wrapper we can't use the error handler
                 # for this kind of error response, so we will
                 # return the payload right away.
-                return UnauthorizedError(
-                    "Write access requires authentication."
-                ).respond()
+                return UnauthorizedError("Authentication required.").respond()
         return fn(*args, **kwargs)
 
     return wrapper

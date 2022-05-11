@@ -28,9 +28,7 @@ class ConfigurationDetail(ResourceDetail):
         config = db.session.query(Configuration).filter_by(id=kwargs["id"]).first()
         if config:
             if config.is_internal and not request.user:
-                raise UnauthorizedError(
-                    "You need to be authenticated to view internal objests."
-                )
+                raise UnauthorizedError("Authentication required.")
 
     def before_patch(self, args, kwargs, data):
         """check if a user has the permission to change this configuration"""
