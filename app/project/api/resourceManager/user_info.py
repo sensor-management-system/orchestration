@@ -1,7 +1,8 @@
-from ..auth.flask_openidconnect import open_id_connect
-from ..helpers.errors import MethodNotAllowed
-from ..services.idl_services import Idl
+from flask import request
+
 from ...frj_csv_export.resource import ResourceList
+from ..helpers.errors import MethodNotAllowed, UnauthorizedError
+from ..services.idl_services import Idl
 
 
 class UserInfo(ResourceList):
@@ -17,13 +18,13 @@ class UserInfo(ResourceList):
 
         :return: Dict with user infos from database + IDL-groups.
         """
-        open_id_connect.verify_valid_access_token_in_request_and_set_user()
-        current_user = open_id_connect.get_current_user()
-        idl_groups = Idl().get_all_permission_groups_for_a_user(current_user.subject)
+        if not request.user:
+            raise UnauthorizedError("Login required")
+        idl_groups = Idl().get_all_permission_groups_for_a_user(request.user.subject)
         data = {
             "data": {
                 "type": "user",
-                "id": current_user.id,
+                "id": request.user.id,
                 "attributes": {
                     "admin": idl_groups.administrated_permission_groups
                     if idl_groups
@@ -31,8 +32,8 @@ class UserInfo(ResourceList):
                     "member": idl_groups.membered_permission_groups
                     if idl_groups
                     else [],
-                    "active": current_user.active,
-                    "is_superuser": current_user.is_superuser,
+                    "active": request.user.active,
+                    "is_superuser": request.user.is_superuser,
                 },
             }
         }

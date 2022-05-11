@@ -1,3 +1,4 @@
+from flask import request
 from flask_rest_jsonapi import JsonApiException, ResourceDetail
 
 from ..auth.permission_utils import (
@@ -6,12 +7,12 @@ from ..auth.permission_utils import (
     is_superuser,
     is_user_in_a_group,
 )
-from ..helpers.errors import ConflictError, ForbiddenError
+from ..helpers.errors import ConflictError, ForbiddenError, UnauthorizedError
 from ..helpers.resource_mixin import add_updated_by_id
 from ..models.base_model import db
 from ..models.configuration import Configuration
 from ..schemas.configuration_schema import ConfigurationSchema
-from ..token_checker import get_current_user_or_none_by_optional, token_required
+from ..token_checker import token_required
 from .base_resource import check_if_object_not_found, delete_attachments_in_minio_by_url
 
 
@@ -26,8 +27,10 @@ class ConfigurationDetail(ResourceDetail):
         check_if_object_not_found(self._data_layer.model, kwargs)
         config = db.session.query(Configuration).filter_by(id=kwargs["id"]).first()
         if config:
-            if config.is_internal:
-                get_current_user_or_none_by_optional()
+            if config.is_internal and not request.user:
+                raise UnauthorizedError(
+                    "You need to be authenticated to view internal objests."
+                )
 
     def before_patch(self, args, kwargs, data):
         """check if a user has the permission to change this configuration"""

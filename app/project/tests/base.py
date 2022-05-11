@@ -9,11 +9,12 @@ from faker import Faker
 from flask import request
 from flask_jwt_extended import JWTManager
 from flask_testing import TestCase
+
 from project import create_app
 from project.api.helpers.errors import UnauthorizedError
 from project.api.models.base_model import db
-from project.extensions.instances import auth
 from project.extensions.auth.mechanisms.mixins import CreateNewUserByUserinfoMixin
+from project.extensions.instances import auth
 
 app = create_app()
 jwt = JWTManager(app)
@@ -110,9 +111,11 @@ def get_userinfo():
         # In case we have a problem with the decoding.
         raise UnauthorizedError(repr(e))
 
+
 class LoginMechanismBySettingUserDirectly:
     def __init__(self, get_user_function):
         self.get_user_function = get_user_function
+
     def init_app(self, app):
         pass
 
@@ -124,10 +127,11 @@ class LoginMechanismBySettingUserDirectly:
         user = fun()
         return user
 
-class LoginMechanismByTestJwt(CreateNewUserByUserinfoMixin):
 
+class LoginMechanismByTestJwt(CreateNewUserByUserinfoMixin):
     def init_app(self, app):
         pass
+
     def can_be_applied(self):
         if request.headers.get("Authorization"):
             return True
@@ -158,18 +162,20 @@ class BaseTestCase(TestCase):
         # One is that we just reuse the existing Jwt tokens that we already have.
         # Or we just have a force_login method in the test, so that we can enforce
         # that we are a certain user (if the mechanism itself doesn't matter).
-        auth.mechanisms = [LoginMechanismByTestJwt(), LoginMechanismBySettingUserDirectly(self.get_current_user)]
+        auth.mechanisms = [
+            LoginMechanismByTestJwt(),
+            LoginMechanismBySettingUserDirectly(self.get_current_user),
+        ]
         return app
 
     def force_login(self):
-        self.user = user
+        self._base_test_current_user = user
 
     def logout(self):
-        self.user = None
+        self._base_test_current_user = None
 
     def get_current_user(self):
-        return self.user
-
+        return self._base_test_current_user
 
     def setUp(self):
         """

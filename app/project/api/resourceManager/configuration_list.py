@@ -2,20 +2,22 @@
 
 import os
 
+from flask import request
 from sqlalchemy import or_
+
+from ...frj_csv_export.resource import ResourceList
 from ..datalayers.esalchemy import (
     EsSqlalchemyDataLayer,
     OrFilter,
     TermEqualsExactStringFilter,
 )
-from ...frj_csv_export.resource import ResourceList
+from ..helpers.resource_mixin import add_created_by_id
 from ..models.base_model import db
 from ..models.configuration import Configuration
 from ..models.contact_role import ConfigurationContactRole
-from ..schemas.configuration_schema import ConfigurationSchema
-from ..helpers.resource_mixin import add_created_by_id
-from ..token_checker import get_current_user_or_none_by_optional, token_required
 from ..resourceManager.base_resource import add_contact_to_object
+from ..schemas.configuration_schema import ConfigurationSchema
+from ..token_checker import token_required
 
 
 class ConfigurationList(ResourceList):
@@ -33,11 +35,10 @@ class ConfigurationList(ResourceList):
         :return: queryset or es filter
         """
         query = db.session.query(self.model)
-        current_user = get_current_user_or_none_by_optional(optional=True)
-        if current_user is None:
+        if request.user is None:
             query = query.filter_by(is_public=True)
         else:
-            if not current_user.is_superuser:
+            if not request.user.is_superuser:
                 query = query.filter(
                     or_(
                         self.model.is_public,
@@ -53,10 +54,9 @@ class ConfigurationList(ResourceList):
         Should return the same set as query, but using
         the elasticsearch fields.
         """
-        current_user = get_current_user_or_none_by_optional(optional=True)
-        if current_user is None:
+        if request.user is None:
             return TermEqualsExactStringFilter("is_public", True)
-        if not current_user.is_superuser:
+        if not request.user.is_superuser:
             return OrFilter(
                 [
                     TermEqualsExactStringFilter("is_public", True),
