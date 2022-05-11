@@ -14,7 +14,10 @@ class DeviceCalibrationAction(db.Model, AuditMixin):
         "Device",
         uselist=False,
         foreign_keys=[device_id],
-        backref=db.backref("device_calibration_actions"),
+        backref=db.backref(
+            "device_calibration_actions",
+            cascade="save-update, merge, delete, delete-orphan",
+        ),
     )
     contact_id = db.Column(db.Integer, db.ForeignKey("contact.id"), nullable=False)
     contact = db.relationship(
@@ -50,7 +53,10 @@ class DevicePropertyCalibration(db.Model, AuditMixin):
         "DeviceProperty",
         uselist=False,
         foreign_keys=[device_property_id],
-        backref=db.backref("device_property_calibrations"),
+        backref=db.backref(
+            "device_property_calibrations",
+            cascade="save-update, merge, delete, delete-orphan",
+        ),
     )
 
     def get_parent(self):

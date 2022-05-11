@@ -9,12 +9,18 @@ from project.api.models.base_model import db
 from project.tests.base import BaseTestCase, fake, generate_userinfo_data
 
 
-def add_device_calibration_action(public=True, private=False, internal=False):
-    device = Device(short_name="Device 12",
-                    is_public=public,
-                    is_private=private,
-                    is_internal=internal,
-                    )
+def add_device_calibration_action(
+    public=True, private=False, internal=False, group_ids=None
+):
+    if group_ids is None:
+        group_ids = []
+    device = Device(
+        short_name="Device 12",
+        is_public=public,
+        is_private=private,
+        is_internal=internal,
+        group_ids=group_ids,
+    )
     userinfo = generate_userinfo_data()
     contact = Contact(
         given_name=userinfo["given_name"],
@@ -36,11 +42,12 @@ def add_device_calibration_action(public=True, private=False, internal=False):
 
 
 def add_device_property_calibration_model():
-    device = Device(short_name="Device 20",
-                    is_public=False,
-                    is_private=False,
-                    is_internal=True,
-                    )
+    device = Device(
+        short_name="Device 20",
+        is_public=False,
+        is_private=False,
+        is_internal=True,
+    )
     device_property = DeviceProperty(
         device=device,
         measuring_range_min=fake.pyfloat(),

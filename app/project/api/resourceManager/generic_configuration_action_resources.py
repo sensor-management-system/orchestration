@@ -4,24 +4,30 @@ from flask_rest_jsonapi import ResourceDetail, ResourceRelationship
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.orm.exc import NoResultFound
 
+from ...frj_csv_export.resource import ResourceList
 from ..auth.permission_utils import (
-    get_query_with_permissions_for_configuration_related_objects,
-    check_permissions_for_configuration_related_objects,
-    check_patch_permission_for_configuration_related_objects,
     check_deletion_permission_for_configuration_related_objects,
+    check_patch_permission_for_configuration_related_objects,
+    check_permissions_for_configuration_related_objects,
     check_post_permission_for_configuration_related_objects,
+    get_query_with_permissions_for_configuration_related_objects,
 )
+from ..helpers.errors import MethodNotAllowed
+from ..helpers.resource_mixin import add_created_by_id, add_updated_by_id
 from ..models.base_model import db
 from ..models.configuration import Configuration
 from ..models.generic_actions import GenericConfigurationAction
 from ..resourceManager.base_resource import check_if_object_not_found
 from ..schemas.generic_actions_schema import GenericConfigurationActionSchema
 from ..token_checker import token_required
-from ...frj_csv_export.resource import ResourceList
 
 
 class GenericConfigurationActionList(ResourceList):
     """List resource for the generic configuration actions (get & post)."""
+
+    def before_create_object(self, data, *args, **kwargs):
+        """Use jwt to add user id to dataset."""
+        add_created_by_id(data)
 
     def query(self, view_kwargs):
         """
@@ -39,7 +45,9 @@ class GenericConfigurationActionList(ResourceList):
                 self.session.query(Configuration).filter_by(id=configuration_id).one()
             except NoResultFound:
                 raise ObjectNotFound(
-                    {"parameter": "id",},
+                    {
+                        "parameter": "id",
+                    },
                     "Configuration: {} not found".format(configuration_id),
                 )
             else:
@@ -56,7 +64,7 @@ class GenericConfigurationActionList(ResourceList):
     data_layer = {
         "session": db.session,
         "model": GenericConfigurationAction,
-        "methods": {"query": query},
+        "methods": {"before_create_object": before_create_object, "query": query},
     }
 
 
@@ -74,6 +82,7 @@ class GenericConfigurationActionDetail(ResourceDetail):
         check_patch_permission_for_configuration_related_objects(
             kwargs, self._data_layer.model
         )
+        add_updated_by_id(data)
 
     def before_delete(self, args, kwargs):
         check_deletion_permission_for_configuration_related_objects(
@@ -97,3 +106,18 @@ class GenericConfigurationActionRelationship(ResourceRelationship):
         "session": db.session,
         "model": GenericConfigurationAction,
     }
+
+
+class GenericConfigurationActionRelationshipReadOnly(
+    GenericConfigurationActionRelationship
+):
+    """A readonly relationship endpoint for generic configuration actions."""
+
+    def before_post(self, args, kwargs, json_data=None):
+        raise MethodNotAllowed("This endpoint is readonly!")
+
+    def before_patch(self, args, kwargs, data=None):
+        raise MethodNotAllowed("This endpoint is readonly!")
+
+    def before_delete(self, args, kwargs):
+        raise MethodNotAllowed("This endpoint is readonly!")

@@ -1,6 +1,7 @@
 from flask_rest_jsonapi import ResourceRelationship
 
 from ..auth.permission_utils import check_parent_group_before_change_a_relationship
+from ..helpers.errors import MethodNotAllowed
 from ..models.base_model import db
 from ..models.configuration import Configuration
 from ..schemas.configuration_schema import ConfigurationSchema
@@ -32,3 +33,16 @@ class ConfigurationRelationship(ResourceRelationship):
     schema = ConfigurationSchema
     decorators = (token_required,)
     data_layer = {"session": db.session, "model": Configuration}
+
+
+class ConfigurationRelationshipReadOnly(ConfigurationRelationship):
+    """A readonly relationship endpoint for configurations."""
+
+    def before_post(self, args, kwargs, json_data=None):
+        raise MethodNotAllowed("This endpoint is readonly!")
+
+    def before_patch(self, args, kwargs, data=None):
+        raise MethodNotAllowed("This endpoint is readonly!")
+
+    def before_delete(self, args, kwargs):
+        raise MethodNotAllowed("This endpoint is readonly!")

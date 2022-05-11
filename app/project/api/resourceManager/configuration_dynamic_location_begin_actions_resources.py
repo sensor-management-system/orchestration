@@ -4,14 +4,15 @@ from flask_rest_jsonapi import ResourceDetail, ResourceRelationship
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.orm.exc import NoResultFound
 
-from .base_resource import check_if_object_not_found
+from ...frj_csv_export.resource import ResourceList
 from ..auth.permission_utils import (
-    get_query_with_permissions_for_configuration_related_objects,
+    check_deletion_permission_for_configuration_related_objects,
+    check_patch_permission_for_configuration_related_objects,
     check_permissions_for_configuration_related_objects,
     check_post_permission_for_configuration_related_objects,
-    check_patch_permission_for_configuration_related_objects,
-    check_deletion_permission_for_configuration_related_objects,
+    get_query_with_permissions_for_configuration_related_objects,
 )
+from ..helpers.resource_mixin import add_created_by_id, add_updated_by_id
 from ..models import (
     Configuration,
     ConfigurationDynamicLocationBeginAction,
@@ -22,11 +23,15 @@ from ..schemas.configuration_dynamic_location_actions_schema import (
     ConfigurationDynamicLocationBeginActionSchema,
 )
 from ..token_checker import token_required
-from ...frj_csv_export.resource import ResourceList
+from .base_resource import check_if_object_not_found
 
 
 class ConfigurationDynamicLocationBeginActionList(ResourceList):
     """List resource for Configuration dynamic location begin actions (get, post)."""
+
+    def before_create_object(self, data, *args, **kwargs):
+        """Use jwt to add user id to dataset."""
+        add_created_by_id(data)
 
     def query(self, view_kwargs):
         """
@@ -47,7 +52,9 @@ class ConfigurationDynamicLocationBeginActionList(ResourceList):
                 self.session.query(Configuration).filter_by(id=configuration_id).one()
             except NoResultFound:
                 raise ObjectNotFound(
-                    {"parameter": "id",},
+                    {
+                        "parameter": "id",
+                    },
                     "Configuration: {} not found".format(configuration_id),
                 )
             else:
@@ -60,7 +67,9 @@ class ConfigurationDynamicLocationBeginActionList(ResourceList):
                 self.session.query(DeviceProperty).filter_by(id=x_property_id).one()
             except NoResultFound:
                 raise ObjectNotFound(
-                    {"parameter": "id",},
+                    {
+                        "parameter": "id",
+                    },
                     "Device property: {} not found".format(x_property_id),
                 )
             else:
@@ -73,7 +82,9 @@ class ConfigurationDynamicLocationBeginActionList(ResourceList):
                 self.session.query(DeviceProperty).filter_by(id=y_property_id).one()
             except NoResultFound:
                 raise ObjectNotFound(
-                    {"parameter": "id",},
+                    {
+                        "parameter": "id",
+                    },
                     "Device property: {} not found".format(y_property_id),
                 )
             else:
@@ -86,7 +97,9 @@ class ConfigurationDynamicLocationBeginActionList(ResourceList):
                 self.session.query(DeviceProperty).filter_by(id=z_property_id).one()
             except NoResultFound:
                 raise ObjectNotFound(
-                    {"parameter": "id",},
+                    {
+                        "parameter": "id",
+                    },
                     "Device property: {} not found".format(z_property_id),
                 )
             else:
@@ -104,7 +117,10 @@ class ConfigurationDynamicLocationBeginActionList(ResourceList):
     data_layer = {
         "session": db.session,
         "model": ConfigurationDynamicLocationBeginAction,
-        "methods": {"query": query},
+        "methods": {
+            "query": query,
+            "before_create_object": before_create_object,
+        },
     }
 
 
@@ -122,6 +138,7 @@ class ConfigurationDynamicLocationBeginActionDetail(ResourceDetail):
         check_patch_permission_for_configuration_related_objects(
             kwargs, self._data_layer.model
         )
+        add_updated_by_id(data)
 
     def before_delete(self, args, kwargs):
         check_deletion_permission_for_configuration_related_objects(

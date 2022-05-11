@@ -12,6 +12,8 @@ from project.tests.base import BaseTestCase, test_file_path
 from project.tests.base import create_token
 from project.tests.base import fake, generate_userinfo_data
 from project.tests.permissions import create_a_test_contact
+from project.tests.models.test_configurations_model import generate_configuration_model
+from project.tests.models.test_generic_actions_models import generate_configuration_action_model
 from project.tests.read_from_json import extract_data_from_json_file
 
 
@@ -438,6 +440,25 @@ class TestConfigurationsService(BaseTestCase):
         )
         url = f"{self.configurations_url}/{configuration.id}"
         _ = self.delete_as_owner(contact, user, url)
+
+    def test_delete_configuration_with_generic_action(self):
+        """Ensure a configuration with a generic action can be deleted"""
+
+        configuration_action = generate_configuration_action_model()
+        config_id = configuration_action.configuration_id
+        _ = super().delete_object(url=f"{self.configurations_url}/{config_id}",)
+
+    @staticmethod
+    def add_a_contact():
+        userinfo = generate_userinfo_data()
+        contact = Contact(
+            given_name=userinfo["given_name"],
+            family_name=userinfo["family_name"],
+            email=userinfo["email"],
+        )
+        db.session.add(contact)
+        db.session.commit()
+        return contact
 
     def add_a_configuration(self):
         config_data = {

@@ -1,6 +1,7 @@
 """Device list resource."""
 
 import os
+
 from ...api.auth.permission_utils import (
     get_es_query_with_permissions,
     get_query_with_permissions,

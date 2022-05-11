@@ -1,17 +1,15 @@
 """Platform contact role resources."""
-
 from flask_rest_jsonapi import ResourceDetail, ResourceRelationship
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.exc import NoResultFound
-
 from ...frj_csv_export.resource import ResourceList
+from .base_resource import check_if_object_not_found
 from ..auth.permission_utils import get_query_with_permissions_for_related_objects
 from ..models import Platform
 from ..models.base_model import db
 from ..models.contact_role import PlatformContactRole
 from ..schemas.role import PlatformRoleSchema
 from ..token_checker import token_required
-from .base_resource import check_if_object_not_found
 
 
 class PlatformRoleList(ResourceList):

@@ -65,6 +65,7 @@ class TestingConfig(BaseConfig):
     SQLALCHEMY_DATABASE_URI = env("DATABASE_TEST_URL", None)
     ELASTICSEARCH_URL = None
     # https://github.com/jarus/flask-testing/issues/21
+    # AssertionError: Popped wrong request context
     PRESERVE_CONTEXT_ON_EXCEPTION = False
 
 
