@@ -4,7 +4,7 @@ import random
 import time
 
 import minio
-from flask import _app_ctx_stack, current_app, make_response
+from flask import _app_ctx_stack, current_app, make_response, request
 from minio.error import S3Error
 from urllib3.exceptions import MaxRetryError, ResponseError
 
