@@ -67,7 +67,40 @@ permissions and limitations under the Licence.
           no-gutters
         >
           <v-col class="text-subtitle-1">
-            {{ platform.shortName }}
+            <span>  {{ platform.shortName }}</span>
+            <v-tooltip v-if="$vuetify.breakpoint.smAndUp" bottom>
+              <template #activator="{ on, attrs }">
+                <span
+                  v-if="platform.manufacturerName !== ''"
+                  v-bind="attrs"
+                  class="text--disabled"
+                  v-on="on"
+                >- {{ platform.manufacturerName }}</span>
+              </template>
+              <span>Manufacturer</span>
+            </v-tooltip>
+            <v-tooltip v-if="$vuetify.breakpoint.smAndUp" bottom>
+              <template #activator="{ on, attrs }">
+                <span
+                  v-if="platform.model !== ''"
+                  v-bind="attrs"
+                  class="text--disabled"
+                  v-on="on"
+                >- {{ platform.model }}</span>
+              </template>
+              <span>Model number</span>
+            </v-tooltip>
+            <v-tooltip bottom>
+              <template #activator="{ on, attrs }">
+                <span
+                  v-if="platform.serialNumber !== ''"
+                  v-bind="attrs"
+                  class="text--disabled"
+                  v-on="on"
+                >- {{ platform.serialNumber }}</span>
+              </template>
+              <span>Serial number</span>
+            </v-tooltip>
           </v-col>
           <v-col
             align-self="end"
