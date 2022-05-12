@@ -106,16 +106,3 @@ class ConfigurationAttachmentDetail(ResourceDetail):
         "session": db.session,
         "model": ConfigurationAttachment,
     }
-
-
-class ConfigurationAttachmentRelationship(ResourceRelationship):
-    """
-    Relationship resource for ConfigurationAttachments.
-    """
-
-    schema = ConfigurationAttachmentSchema
-    decorators = (token_required,)
-    data_layer = {
-        "session": db.session,
-        "model": ConfigurationAttachment,
-    }

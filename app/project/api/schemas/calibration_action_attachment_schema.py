@@ -17,8 +17,6 @@ class DeviceCalibrationAttachmentSchema(Schema):
 
     id = fields.Integer(as_string=True)
     action = Relationship(
-        self_view="api.device_calibration_attachment_action",
-        self_view_kwargs={"id": "<id>"},
         related_view="api.device_calibration_action_detail",
         related_view_kwargs={"id": "<action_id>"},
         include_resource_linkage=True,
@@ -27,8 +25,6 @@ class DeviceCalibrationAttachmentSchema(Schema):
         id_field="id",
     )
     attachment = Relationship(
-        self_view="api.device_calibration_attachment_attachment",
-        self_view_kwargs={"id": "<id>"},
         related_view="api.device_attachment_detail",
         related_view_kwargs={"id": "<attachment_id>"},
         include_resource_linkage=True,

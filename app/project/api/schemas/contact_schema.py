@@ -26,8 +26,8 @@ class ContactSchema(Schema):
     # This relationship should be optional as we want to
     # allow adding extern contacts without user accounts.
     user = Relationship(
-        self_view="api.contact_user",
-        self_view_kwargs={"id": "<id>"},
+        related_view="api.user_detail",
+        related_view_kwargs={"id": "<id>"},
         include_resource_linkage=False,
         schema="UserPublicSchema",
         type_="user",
