@@ -39,6 +39,7 @@ permissions and limitations under the Licence.
           :value="value.beginDate"
           label="Begin date"
           placeholder="e.g 2000-01-31 12:00"
+          :required="true"
           :rules="combine([rules.required], beginDateExtraRules)"
           @input="update('beginDate', $event)"
         />
@@ -52,6 +53,7 @@ permissions and limitations under the Licence.
           type="number"
           step="any"
           :rules="[rules.required]"
+          class="required"
           @wheel.prevent
           @change="update('x', $event)"
         />
@@ -63,6 +65,7 @@ permissions and limitations under the Licence.
           type="number"
           step="any"
           :rules="[rules.required]"
+          class="required"
           @wheel.prevent
           @change="update('y', $event)"
         />
@@ -137,6 +140,7 @@ permissions and limitations under the Licence.
           :item-text="(x) => x.toString()"
           :item-value="(x) => x"
           :rules="[rules.required]"
+          class="required"
           @change="update('contact', $event)"
         />
       </v-col>
@@ -206,7 +210,6 @@ export default class ConfigurationStaticLocationBeginActionDataForm extends mixi
     type: Array
   })
   readonly contacts!: Contact[]
-
 
   @Prop({
     required: false,
@@ -365,3 +368,6 @@ export default class ConfigurationStaticLocationBeginActionDataForm extends mixi
 }
 
 </script>
+<style lang="scss">
+@import '@/assets/styles/_forms.scss';
+</style>

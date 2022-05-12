@@ -40,6 +40,7 @@ permissions and limitations under the Licence.
             :value="actionCopy.currentCalibrationDate"
             label="Current calibration date"
             placeholder="e.g 2000-01-31 12:00"
+            :required="true"
             :rules="[rules.currentCalibrationDate,rules.currentCalibrationDateNotNull]"
             @input="setCurrentCalibrationDateAndValidate"
           />

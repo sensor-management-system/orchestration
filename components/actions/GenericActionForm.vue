@@ -43,6 +43,7 @@ permissions and limitations under the Licence.
             label="Start date"
             placeholder="e.g. 2000-01-31 12:00"
             :rules="[rules.startDate,rules.startDateNotNull]"
+            :required="true"
             @input="setStartDateAndValidate"
           />
         </v-col>
