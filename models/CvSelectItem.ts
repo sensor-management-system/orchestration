@@ -3,11 +3,15 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020
+ * Copyright (C) 2020-2022
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
+ * - Tim Eder (UFZ, tim.eder@ufz.de)
+ * - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
  *   Geosciences (GFZ, https://www.gfz-potsdam.de)
+ * - Helmholtz Centre for Environmental Research GmbH - UFZ
+ *   (UFZ, https://www.ufz.de)
  *
  * Parts of this program were developed within the context of the
  * following publicly funded projects or measures:
@@ -29,24 +33,18 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
-import { Status } from '@/models/Status'
+export interface ICvSelectItem {
+  uri: string
+  name: string
+  definition: string
+}
 
-import {
-  IJsonApiEntityListEnvelope,
-  IJsonApiEntity
-} from '@/serializers/jsonapi/JsonApiTypes'
-
-export class StatusSerializer {
-  convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiEntityListEnvelope): Status[] {
-    return jsonApiObjectList.data.map(this.convertJsonApiDataToModel.bind(this))
-  }
-
-  convertJsonApiDataToModel (jsonApiData: IJsonApiEntity): Status {
-    const id = jsonApiData.id.toString()
-    const name = jsonApiData.attributes.term
-    const url = jsonApiData.links?.self || ''
-    const definition = jsonApiData.attributes.definition
-
-    return Status.createWithData(id, name, url, definition)
-  }
+/**
+  * checks wheter the value has a non-empty definition property
+  *
+  * @param {[TODO:type]} item - the item to check for
+  * @returns {boolean} returns true when the definition property exists and is not falsy
+  */
+export function hasDefinition (value: { definition?: string }): boolean {
+  return value && !!value.definition
 }

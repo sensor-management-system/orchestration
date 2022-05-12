@@ -79,13 +79,62 @@ permissions and limitations under the Licence.
     <v-row>
       <v-col cols="12" md="3">
         <v-combobox
-          :value="deviceStatusName"
-          :items="statusNames"
+          :items="states"
+          item-name="name"
+          :value="valueStatusItem"
           :readonly="readonly"
           :disabled="readonly"
           label="Status"
-          @input="update('statusName', $event)"
-        />
+          clearable
+          @input="updateStatus($event)"
+        >
+          <template #append-outer>
+            <v-tooltip
+              v-if="itemHasDefinition(valueStatusItem)"
+              right
+            >
+              <template #activator="{ on, attrs }">
+                <v-icon
+                  color="primary"
+                  small
+                  v-bind="attrs"
+                  v-on="on"
+                >
+                  mdi-help-circle-outline
+                </v-icon>
+              </template>
+              <span>{{ valueStatusItem.definition }}</span>
+            </v-tooltip>
+          </template>
+          <template #item="data">
+            <template v-if="typeof data.item !== 'object'">
+              <v-list-item-content>{{ data.item }}</v-list-item-content>
+            </template>
+            <template v-else>
+              <v-list-item-content>
+                <v-list-item-title>
+                  {{ data.item.name }}
+                  <v-tooltip
+                    v-if="data.item.definition"
+                    bottom
+                  >
+                    <template #activator="{ on, attrs }">
+                      <v-icon
+                        color="primary"
+                        small
+                        v-bind="attrs"
+                        v-on="on"
+                      >
+                        mdi-help-circle-outline
+                      </v-icon>
+                    </template>
+                    <span>{{ data.item.definition }}</span>
+                  </v-tooltip>
+                </v-list-item-title>
+              </v-list-item-content>
+            </template>
+          </template>
+        </v-combobox>
       </v-col>
       <v-col cols="12" md="3">
         <v-combobox
@@ -201,8 +250,11 @@ import { Device } from '@/models/Device'
 import { DeviceType } from '@/models/DeviceType'
 import { Status } from '@/models/Status'
 import { Manufacturer } from '@/models/Manufacturer'
+import { ICvSelectItem, hasDefinition } from '@/models/CvSelectItem'
 
 import { createDeviceUrn } from '@/modelUtils/urnBuilders'
+
+type StatusSelectValue = Status | string | undefined
 
 @Component
 export default class DeviceBasicDataForm extends mixins(Rules) {
@@ -271,17 +323,6 @@ export default class DeviceBasicDataForm extends mixins(Rules) {
       case 'longName':
         newObj.longName = value
         break
-      case 'statusName':
-        newObj.statusName = value
-        { // for lexical scope
-          const statusIndex = this.states.findIndex(s => s.name === value)
-          if (statusIndex > -1) {
-            newObj.statusUri = this.states[statusIndex].uri
-          } else {
-            newObj.statusUri = ''
-          }
-        }
-        break
       case 'deviceTypeName':
         newObj.deviceTypeName = value
         {
@@ -335,6 +376,38 @@ export default class DeviceBasicDataForm extends mixins(Rules) {
     this.$emit('input', newObj)
   }
 
+  /**
+   * updates the status
+   *
+   * @param {StatusSelectValue} value - an object as provided by the combobox
+   * @fires DeviceBasicDataForm#input
+   */
+  updateStatus (value: StatusSelectValue): void {
+    const newObj = Device.createFromObject(this.value)
+    newObj.statusName = ''
+    newObj.statusUri = ''
+
+    if (value) {
+      if (typeof value === 'string') {
+        newObj.statusName = value
+        newObj.statusUri = ''
+        const state = this.states.find(s => s.name === value)
+        if (state) {
+          newObj.statusUri = state.uri
+        }
+      } else {
+        newObj.statusName = value.name
+        newObj.statusUri = value.uri
+      }
+    }
+    /**
+     * input event
+     * @event DeviceBasicDataForm#input
+     * @type {DeviceProperty}
+     */
+    this.$emit('input', newObj)
+  }
+
   get manufacturerNames (): string[] {
     return this.manufacturers.map(m => m.name)
   }
@@ -371,6 +444,31 @@ export default class DeviceBasicDataForm extends mixins(Rules) {
     return this.value.deviceTypeName
   }
 
+  /**
+   * returns an item to be used as the value of a combobox
+   *
+   * Checks whether value.statusName and value.statusUri can be found in
+   * the list of CV properties. Returns the found property, otherwise
+   * constructs one from the name and the uri. Returns null if both fields are
+   * empty.
+   *
+   * @returns {ICvSelectItem|null} the property, a constructed one or null
+   */
+  get valueStatusItem (): ICvSelectItem | null {
+    if (!this.value.statusName && !this.value.statusUri) {
+      return null
+    }
+    const status = this.states.find(c => c.uri === this.value.statusUri)
+    if (status) {
+      return status
+    }
+    return {
+      name: this.value.statusName,
+      uri: this.value.statusUri,
+      definition: ''
+    }
+  }
+
   get deviceURN () {
     return createDeviceUrn(this.value, this.manufacturers)
   }
@@ -384,6 +482,16 @@ export default class DeviceBasicDataForm extends mixins(Rules) {
    */
   public validateForm (): boolean {
     return (this.$refs.basicForm as Vue & { validate: () => boolean }).validate()
+  }
+
+  /**
+   * checks wheter the item has a non-empty definition property
+   *
+   * @param {ICvSelectItem} item - the item to check for
+   * @returns {boolean} returns true when the definition property exists and is not falsy
+   */
+  itemHasDefinition (item: ICvSelectItem): boolean {
+    return hasDefinition(item)
   }
 }
 </script>

@@ -91,13 +91,62 @@ permissions and limitations under the Licence.
     <v-row>
       <v-col cols="12" md="3">
         <v-combobox
-          :value="platformStatusName"
-          :items="statusNames"
+          :items="states"
+          item-name="name"
+          :value="valueStatusItem"
           :readonly="readonly"
           :disabled="readonly"
           label="Status"
-          @input="update('statusName', $event)"
-        />
+          clearable
+          @input="updateStatus($event)"
+        >
+          <template #append-outer>
+            <v-tooltip
+              v-if="itemHasDefinition(valueStatusItem)"
+              right
+            >
+              <template #activator="{ on, attrs }">
+                <v-icon
+                  color="primary"
+                  small
+                  v-bind="attrs"
+                  v-on="on"
+                >
+                  mdi-help-circle-outline
+                </v-icon>
+              </template>
+              <span>{{ valueStatusItem.definition }}</span>
+            </v-tooltip>
+          </template>
+          <template #item="data">
+            <template v-if="typeof data.item !== 'object'">
+              <v-list-item-content>{{ data.item }}</v-list-item-content>
+            </template>
+            <template v-else>
+              <v-list-item-content>
+                <v-list-item-title>
+                  {{ data.item.name }}
+                  <v-tooltip
+                    v-if="data.item.definition"
+                    bottom
+                  >
+                    <template #activator="{ on, attrs }">
+                      <v-icon
+                        color="primary"
+                        small
+                        v-bind="attrs"
+                        v-on="on"
+                      >
+                        mdi-help-circle-outline
+                      </v-icon>
+                    </template>
+                    <span>{{ data.item.definition }}</span>
+                  </v-tooltip>
+                </v-list-item-title>
+              </v-list-item-content>
+            </template>
+          </template>
+        </v-combobox>
       </v-col>
       <v-col cols="12" md="3">
         <v-combobox
@@ -192,6 +241,7 @@ permissions and limitations under the Licence.
 </template>
 <script lang="ts">
 import { Component, Prop, Vue, mixins } from 'nuxt-property-decorator'
+import { mapGetters } from 'vuex'
 
 import { Rules } from '@/mixins/Rules'
 
@@ -199,12 +249,14 @@ import { Platform } from '@/models/Platform'
 import { PlatformType } from '@/models/PlatformType'
 import { Status } from '@/models/Status'
 import { Manufacturer } from '@/models/Manufacturer'
+import { ICvSelectItem, hasDefinition } from '@/models/CvSelectItem'
 
 import { createPlatformUrn } from '@/modelUtils/urnBuilders'
-import { mapGetters, mapState } from 'vuex'
+
+type StatusSelectValue = Status | string | undefined
 
 @Component({
-  computed:mapGetters('permissions',['userGroups'])
+  computed: mapGetters('permissions', ['userGroups'])
 })
 export default class PlatformBasicDataForm extends mixins(Rules) {
   private states: Status[] = []
@@ -272,17 +324,6 @@ export default class PlatformBasicDataForm extends mixins(Rules) {
       case 'longName':
         newObj.longName = value
         break
-      case 'statusName':
-        newObj.statusName = value
-        {
-          const statusIndex = this.states.findIndex(s => s.name === value)
-          if (statusIndex > -1) {
-            newObj.statusUri = this.states[statusIndex].uri
-          } else {
-            newObj.statusUri = ''
-          }
-        }
-        break
       case 'platformTypeName':
         newObj.platformTypeName = value
         {
@@ -327,6 +368,38 @@ export default class PlatformBasicDataForm extends mixins(Rules) {
     this.$emit('input', newObj)
   }
 
+  /**
+   * updates the status
+   *
+   * @param {StatusSelectValue} value - an object as provided by the combobox
+   * @fires DeviceBasicDataForm#input
+   */
+  updateStatus (value: StatusSelectValue): void {
+    const newObj = Platform.createFromObject(this.value)
+    newObj.statusName = ''
+    newObj.statusUri = ''
+
+    if (value) {
+      if (typeof value === 'string') {
+        newObj.statusName = value
+        newObj.statusUri = ''
+        const state = this.states.find(s => s.name === value)
+        if (state) {
+          newObj.statusUri = state.uri
+        }
+      } else {
+        newObj.statusName = value.name
+        newObj.statusUri = value.uri
+      }
+    }
+    /**
+     * input event
+     * @event DeviceBasicDataForm#input
+     * @type {DeviceProperty}
+     */
+    this.$emit('input', newObj)
+  }
+
   get manufacturerNames (): string[] {
     return this.manufacturers.map(m => m.name)
   }
@@ -363,12 +436,47 @@ export default class PlatformBasicDataForm extends mixins(Rules) {
     return this.value.platformTypeName
   }
 
+  /**
+   * returns an item to be used as the value of a combobox
+   *
+   * Checks whether value.statusName and value.statusUri can be found in
+   * the list of CV properties. Returns the found property, otherwise
+   * constructs one from the name and the uri. Returns null if both fields are
+   * empty.
+   *
+   * @returns {ICvSelectItem|null} the property, a constructed one or null
+   */
+  get valueStatusItem (): ICvSelectItem | null {
+    if (!this.value.statusName && !this.value.statusUri) {
+      return null
+    }
+    const status = this.states.find(c => c.uri === this.value.statusUri)
+    if (status) {
+      return status
+    }
+    return {
+      name: this.value.statusName,
+      uri: this.value.statusUri,
+      definition: ''
+    }
+  }
+
   get platformURN () {
     return createPlatformUrn(this.value, this.platformTypes)
   }
 
   public validateForm (): boolean {
     return (this.$refs.basicForm as Vue & { validate: () => boolean }).validate()
+  }
+
+  /**
+   * checks wheter the item has a non-empty definition property
+   *
+   * @param {ICvSelectItem} item - the item to check for
+   * @returns {boolean} returns true when the definition property exists and is not falsy
+   */
+  itemHasDefinition (item: ICvSelectItem): boolean {
+    return hasDefinition(item)
   }
 }
 </script>
