@@ -30,153 +30,158 @@ implied. See the Licence for the specific language governing
 permissions and limitations under the Licence.
 -->
 <template>
-  <v-hover>
-    <template #default="{ hover }">
-      <v-card
-        :elevation="hover ? 6:2"
-        class="ma-2"
+  <v-hover
+    v-slot="{ hover }"
+  >
+    <v-card
+      :elevation="hover ? 6:2"
+      class="ma-2"
+    >
+      <v-card-text
+        class="py-2 px-3"
+        @click.stop.prevent="show = !show"
       >
-        <v-card-text
-          @click.stop.prevent="show = !show"
+        <div class="d-flex align-center">
+          <div class="text-caption">
+            {{ configuration.projectName || 'no project' }}
+          </div>
+          <status-chip
+            :value="configuration.status"
+          />
+          <v-spacer />
+          <DotMenu>
+            <template #actions>
+              <slot name="dot-menu-items" />
+            </template>
+          </DotMenu>
+        </div>
+        <v-row
+          no-gutters
         >
-          <v-row
-            no-gutters
+          <v-col class="text-subtitle-1">
+            {{ getTextOrDefault(configuration.label, 'Configuration') }}
+          </v-col>
+          <v-col
+            align-self="end"
+            class="text-right"
           >
-            <v-col>
-              <StatusBadge
-                :value="configuration.status"
-              >
-                <div class="text-caption">
-                  {{ configuration.projectName || 'no project' }}
-                </div>
-              </StatusBadge>
-            </v-col>
-            <v-col
-              align-self="end"
-              class="text-right"
+            <v-btn
+              nuxt
+              :to="'/configurations/' + configuration.id"
+              color="primary"
+              text
+              small
+              @click.stop.prevent
             >
-              <DotMenu>
-                <template #actions>
-                  <slot name="dot-menu-items" />
-                </template>
-              </DotMenu>
-            </v-col>
-          </v-row>
-          <v-row
-            no-gutters
-          >
-            <v-col class="text-subtitle-1">
-              {{ getTextOrDefault(configuration.label, 'Configuration') }}
-            </v-col>
-            <v-col
-              align-self="end"
-              class="text-right"
+              View
+            </v-btn>
+            <v-btn
+              icon
+              small
+              @click.stop.prevent="show = !show"
             >
-              <v-btn
-                nuxt
-                :to="'/configurations/' + configuration.id"
-                color="primary"
-                text
-                @click.stop.prevent
+              <v-icon
+                small
               >
-                View
-              </v-btn>
-              <v-btn
-                icon
-                @click.stop.prevent="show = !show"
-              >
-                <v-icon>{{ show ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
-              </v-btn>
-            </v-col>
-          </v-row>
-        </v-card-text>
-        <v-expand-transition>
-          <v-card
-            v-show="show"
-            flat
-            tile
-            color="grey lighten-5"
+                {{ show ? 'mdi-chevron-up' : 'mdi-chevron-down' }}
+              </v-icon>
+            </v-btn>
+          </v-col>
+        </v-row>
+      </v-card-text>
+      <v-expand-transition>
+        <v-card
+          v-show="show"
+          flat
+          tile
+          color="grey lighten-5"
+        >
+          <v-card-text
+            class="py-2 px-3"
           >
-            <v-card-text>
-              <v-row
-                dense
+            <v-row
+              no-gutters
+            >
+              <v-col
+                cols="4"
+                xs="4"
+                sm="3"
+                md="2"
+                lg="2"
+                xl="1"
+                class="font-weight-medium"
               >
-                <v-col
-                  cols="4"
-                  xs="4"
-                  sm="3"
-                  md="2"
-                  lg="2"
-                  xl="1"
-                  class="font-weight-medium"
+                Start:
+              </v-col>
+              <v-col
+                cols="8"
+                xs="8"
+                sm="9"
+                md="4"
+                lg="4"
+                xl="5"
+                class="nowrap-truncate"
+              >
+                {{ configuration.startDate | dateToDateTimeString }}
+                <span
+                  v-if="configuration.startDate"
+                  class="text-caption text--secondary"
                 >
-                  Start:
-                </v-col>
-                <v-col
-                  cols="8"
-                  xs="8"
-                  sm="9"
-                  md="4"
-                  lg="4"
-                  xl="5"
-                  class="nowrap-truncate"
+                  (UTC)
+                </span>
+              </v-col>
+              <v-col
+                cols="4"
+                xs="4"
+                sm="3"
+                md="2"
+                lg="2"
+                xl="1"
+                class="font-weight-medium"
+              >
+                End:
+              </v-col>
+              <v-col
+                cols="8"
+                xs="8"
+                sm="9"
+                md="4"
+                lg="4"
+                xl="5"
+                class="nowrap-truncate"
+              >
+                {{ configuration.endDate | dateToDateTimeString }}
+                <span
+                  v-if="configuration.endDate"
+                  class="text-caption text--secondary"
                 >
-                  {{ configuration.startDate | dateToDateTimeString }}
-                  <span
-                    v-if="configuration.startDate"
-                    class="text-caption text--secondary"
-                  >
-                    (UTC)
-                  </span>
-                </v-col>
-                <v-col
-                  cols="4"
-                  xs="4"
-                  sm="3"
-                  md="2"
-                  lg="2"
-                  xl="1"
-                  class="font-weight-medium"
-                >
-                  End:
-                </v-col>
-                <v-col
-                  cols="8"
-                  xs="8"
-                  sm="9"
-                  md="4"
-                  lg="4"
-                  xl="5"
-                  class="nowrap-truncate"
-                >
-                  {{ configuration.endDate | dateToDateTimeString }}
-                  <span
-                    v-if="configuration.endDate"
-                    class="text-caption text--secondary"
-                  >
-                    (UTC)
-                  </span>
-                </v-col>
-              </v-row>
-            </v-card-text>
-          </v-card>
-        </v-expand-transition>
-      </v-card>
-    </template>
+                  (UTC)
+                </span>
+              </v-col>
+            </v-row>
+          </v-card-text>
+        </v-card>
+      </v-expand-transition>
+    </v-card>
   </v-hover>
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
-import { Prop } from 'nuxt-property-decorator'
-import DotMenu from '@/components/DotMenu.vue'
+import { Component, Vue, Prop } from 'vue-property-decorator'
+
 import { Configuration } from '@/models/Configuration'
-import StatusBadge from '@/components/StatusBadge.vue'
+
 import { dateToDateTimeString } from '@/utils/dateHelper'
+
+import DotMenu from '@/components/DotMenu.vue'
+import StatusChip from '@/components/shared/StatusChip.vue'
 
 @Component({
   filters: { dateToDateTimeString },
-  components: { DotMenu, StatusBadge }
+  components: {
+    DotMenu,
+    StatusChip
+  }
 })
 export default class ConfigurationsListItem extends Vue {
   @Prop({

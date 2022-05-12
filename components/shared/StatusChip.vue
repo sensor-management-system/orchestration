@@ -29,32 +29,28 @@ implied. See the Licence for the specific language governing
 permissions and limitations under the Licence.
 -->
 <template>
-  <v-badge
-    :color="getColor()"
-    :content="value"
-    :value="!!value"
-    inline
+  <v-chip
+    v-if="value"
+    :color="color"
+    text-color="white"
+    x-small
+    class="mx-1"
   >
-    <slot />
-  </v-badge>
+    {{ value }}
+  </v-chip>
 </template>
 
 <script lang="ts">
-/**
- * @file provides a component for a colorful status badge
- * @author <marc.hanisch@gfz-potsdam.de>
- */
 
 import { Vue, Component, Prop } from 'nuxt-property-decorator'
 
 /**
- * A class component that wraps a badge component and sets a color depending on
+ * A class component that displays a colored chip with a status
  * the value property
  * @extends Vue
  */
 @Component
-// @ts-ignore
-export default class StatusBadge extends Vue {
+export default class StatusChip extends Vue {
   /**
    * the text of the badge
    */
@@ -72,11 +68,11 @@ export default class StatusBadge extends Vue {
    * https://dev.vuetifyjs.com/en/styles/colors/#material-colors
    */
   private colors: { [status: string]: string } = {
-
     // for platforms & devices
     blocked: 'red',
     'in use': 'green',
     'in warehouse': 'blue',
+    maintenance: 'blue',
     scrapped: 'blue-grey',
     'under construction': 'brown',
 
@@ -86,16 +82,11 @@ export default class StatusBadge extends Vue {
     draft: 'blue'
   }
 
-  /**
-   * returns a color name depending on the status
-   *
-   * @return {string} a color name as defined in {@link StatusBadge#colors}
-   */
-  getColor (): string {
+  get color (): string {
     const status: string = this.value.toLowerCase()
     // check if status has a color assigned to it
     if (!(status in this.colors)) {
-      return ''
+      return 'grey'
     }
     return this.colors[status]
   }

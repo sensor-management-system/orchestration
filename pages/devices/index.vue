@@ -264,7 +264,6 @@ import { mapActions, mapState } from 'vuex'
 import DeviceTypeSelect from '@/components/DeviceTypeSelect.vue'
 import ManufacturerSelect from '@/components/ManufacturerSelect.vue'
 import StatusSelect from '@/components/StatusSelect.vue'
-import StatusBadge from '@/components/StatusBadge.vue'
 import DeviceDeleteDialog from '@/components/devices/DeviceDeleteDialog.vue'
 import DotMenuActionCopy from '@/components/DotMenuActionCopy.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
@@ -288,7 +287,6 @@ import { DeviceSearchParamsSerializer, IDeviceSearchParams } from '@/modelUtils/
     DeviceDeleteDialog,
     DeviceTypeSelect,
     ManufacturerSelect,
-    StatusBadge,
     StatusSelect
   },
   computed: {

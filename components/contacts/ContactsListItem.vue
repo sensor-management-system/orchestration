@@ -38,27 +38,20 @@ permissions and limitations under the Licence.
       class="ma-2"
     >
       <v-card-text
+        class="py-2 px-3"
         @click.stop.prevent="show = !show"
       >
-        <v-row
-          no.gutters
-        >
-          <v-col>
-            <div class="'text-caption text-disabled">
-              {{ contact.email }}
-            </div>
-          </v-col>
-          <v-col
-            align-self="end"
-            class="text-right"
-          >
-            <DotMenu>
-              <template #actions>
-                <slot name="dot-menu-items" />
-              </template>
-            </DotMenu>
-          </v-col>
-        </v-row>
+        <div class="d-flex align-center">
+          <div class="'text-caption text-disabled">
+            {{ contact.email }}
+          </div>
+          <v-spacer />
+          <DotMenu>
+            <template #actions>
+              <slot name="dot-menu-items" />
+            </template>
+          </DotMenu>
+        </div>
         <v-row
           no-gutters
         >
@@ -73,15 +66,21 @@ permissions and limitations under the Licence.
               :to="'/contacts/' + contact.id"
               color="primary"
               text
+              small
               @click.stop.prevent
             >
               View
             </v-btn>
             <v-btn
               icon
+              small
               @click.stop.prevent="show = !show"
             >
-              <v-icon>{{ show ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
+              <v-icon
+                small
+              >
+                {{ show ? 'mdi-chevron-up' : 'mdi-chevron-down' }}
+              </v-icon>
             </v-btn>
           </v-col>
         </v-row>
@@ -93,9 +92,11 @@ permissions and limitations under the Licence.
           tile
           color="grey lighten-5"
         >
-          <v-card-text>
+          <v-card-text
+            class="py-2 px-3"
+          >
             <v-row
-              dense
+              no-gutters
             >
               <v-col
                 cols="4"
@@ -143,7 +144,7 @@ permissions and limitations under the Licence.
               </v-col>
             </v-row>
             <v-row
-              dense
+              no-gutters
             >
               <v-col
                 cols="4"
@@ -176,12 +177,16 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
-import { Prop } from 'nuxt-property-decorator'
+import { Component, Vue, Prop } from 'vue-property-decorator'
+
 import { Contact } from '@/models/Contact'
+
 import DotMenu from '@/components/DotMenu.vue'
+
 @Component({
-  components: { DotMenu }
+  components: {
+    DotMenu
+  }
 })
 export default class ContactsListItem extends Vue {
   @Prop({
