@@ -226,7 +226,8 @@ permissions and limitations under the Licence.
       </template>
     </cookie-law>
     <v-footer
-      :fixed="fixed"
+      :fixed="$vuetify.breakpoint.smAndUp"
+      :absolute="$vuetify.breakpoint.smAndDown"
       app
       padless
     >
@@ -266,8 +267,8 @@ permissions and limitations under the Licence.
             color="secondary"
           >
             Terms of Use
-          </v-btn>&nbsp;|&nbsp;
-          <span class="ma-2 pl-3">&copy; {{ new Date().getFullYear() }}</span>
+          </v-btn>
+          |&nbsp;<span class="ma-2 pl-3">&copy;&nbsp;{{ new Date().getFullYear() }}</span>
         </v-col>
         <v-col
           cols="12"
