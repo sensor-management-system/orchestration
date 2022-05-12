@@ -45,8 +45,7 @@ permissions and limitations under the Licence.
             />
           </v-col>
           <v-col
-            cols="12"
-            md="7"
+            cols="5"
             align-self="center"
           >
             <v-btn
@@ -62,6 +61,20 @@ permissions and limitations under the Licence.
               @click="clearBasicSearch"
             >
               Clear
+            </v-btn>
+          </v-col>
+          <v-col
+            align-self="center"
+            class="text-right"
+          >
+            <v-btn
+              v-if="$auth.loggedIn"
+              color="accent"
+              small
+              nuxt
+              to="/configurations/new"
+            >
+              New Configuration
             </v-btn>
           </v-col>
         </v-row>
@@ -98,7 +111,7 @@ permissions and limitations under the Licence.
         </v-row>
         <v-row>
           <v-col
-            cols="12"
+            cols="5"
             align-self="center"
           >
             <v-btn
@@ -114,6 +127,20 @@ permissions and limitations under the Licence.
               @click="clearExtendedSearch"
             >
               Clear
+            </v-btn>
+          </v-col>
+          <v-col
+            align-self="center"
+            class="text-right"
+          >
+            <v-btn
+              v-if="$auth.loggedIn"
+              color="accent"
+              small
+              nuxt
+              to="/configurations/new"
+            >
+              New Configuration
             </v-btn>
           </v-col>
         </v-row>
@@ -180,22 +207,6 @@ permissions and limitations under the Licence.
       @cancel-deletion="closeDialog"
       @submit-deletion="deleteAndCloseDialog"
     />
-    <v-btn
-      v-if="$auth.loggedIn"
-      bottom
-      color="primary"
-      dark
-      elevation="10"
-      fab
-      fixed
-      right
-      nuxt
-      to="/configurations/new"
-    >
-      <v-icon>
-        mdi-plus
-      </v-icon>
-    </v-btn>
   </div>
 </template>
 

@@ -103,7 +103,7 @@ permissions and limitations under the Licence.
         </v-btn>
         <v-btn
           v-if="$auth.loggedIn"
-          color="green"
+          color="accent"
           small
           data-role="add-attachment"
           @click="add()"

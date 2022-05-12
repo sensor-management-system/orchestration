@@ -43,7 +43,7 @@ permissions and limitations under the Licence.
       cancel
     </v-btn>
     <v-btn
-      color="green"
+      color="accent"
       small
       @click="$emit('save')"
     >

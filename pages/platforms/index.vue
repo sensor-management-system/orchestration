@@ -31,9 +31,19 @@ permissions and limitations under the Licence.
 <template>
   <div>
     <div>
-      <PlatformSearch
-
-      />
+      <PlatformSearch>
+        <template #actions>
+          <v-btn
+            v-if="$auth.loggedIn"
+            color="accent"
+            small
+            nuxt
+            to="/platforms/new"
+          >
+            New Platform
+          </v-btn>
+        </template>
+      </PlatformSearch>
     </div>
 <!--    <v-tabs-items-->
 <!--      v-model="activeTab"-->
@@ -209,21 +219,6 @@ permissions and limitations under the Licence.
       @cancel-deletion="closeDialog"
       @submit-deletion="deleteAndCloseDialog"
     />
-    <v-btn
-      v-if="$auth.loggedIn"
-      bottom
-      color="primary"
-      dark
-      elevation="10"
-      fab
-      fixed
-      right
-      to="/platforms/new"
-    >
-      <v-icon>
-        mdi-plus
-      </v-icon>
-    </v-btn>
   </div>
 </template>
 

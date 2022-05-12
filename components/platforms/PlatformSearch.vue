@@ -17,15 +17,13 @@
               <v-col cols="12" md="5">
                 <v-text-field
                   v-model="searchedText"
-                  label="Label"
-                  placeholder="Label of configuration"
+                  label="Search term"
                   hint="Please enter at least 3 characters"
                   @keydown.enter="basicSearch"
                 />
               </v-col>
               <v-col
-                cols="12"
-                md="7"
+                cols="5"
                 align-self="center"
               >
                 <v-btn
@@ -43,6 +41,12 @@
                   Clear
                 </v-btn>
               </v-col>
+              <v-col
+                align-self="center"
+                class="text-right"
+              >
+                <slot name="actions" />
+              </v-col>
             </v-row>
           </v-tab-item>
           <v-tab-item :eager="true">
@@ -50,8 +54,7 @@
               <v-col cols="12" md="6">
                 <v-text-field
                   v-model="searchedText"
-                  label="Label"
-                  placeholder="Label of configuration"
+                  label="Search term"
                   hint="Please enter at least 3 characters"
                   @keydown.enter="extendedSearch"
                 />
@@ -79,7 +82,7 @@
             </v-row>
             <v-row>
               <v-col
-                cols="12"
+                cols="5"
                 align-self="center"
               >
                 <v-btn
@@ -96,6 +99,12 @@
                 >
                   Clear
                 </v-btn>
+              </v-col>
+              <v-col
+                align-self="center"
+                class="text-right"
+              >
+                <slot name="actions" />
               </v-col>
             </v-row>
           </v-tab-item>

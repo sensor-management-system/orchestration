@@ -74,7 +74,7 @@ permissions and limitations under the Licence.
         <v-btn small @click="closeEditStaticLocationEndForm">
           Cancel
         </v-btn>
-        <v-btn color="green" small @click="saveEditedStopStaticLocation">
+        <v-btn color="accent" small @click="saveEditedStopStaticLocation">
           Apply
         </v-btn>
       </v-card-actions>
