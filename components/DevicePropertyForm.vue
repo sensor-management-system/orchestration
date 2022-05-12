@@ -420,17 +420,13 @@ import { SamplingMedia } from '@/models/SamplingMedia'
 import { Unit } from '@/models/Unit'
 import { MeasuredQuantityUnit } from '@/models/MeasuredQuantityUnit'
 import { DeviceProperty } from '@/models/DeviceProperty'
+import { ICvSelectItem, hasDefinition } from '@/models/CvSelectItem'
+
 import { parseFloatOrNull } from '@/utils/numericsHelper'
 
 interface INameAndUri {
   name: string
   uri: string
-}
-
-interface ICvComboboxItem {
-  uri: string
-  name: string
-  definition: string
 }
 
 type CompartmentComboboxValue = Compartment | string | undefined
@@ -835,9 +831,9 @@ export default class DevicePropertyForm extends Vue {
    * constructs one from the name and the uri. Returns null if both fields are
    * empty.
    *
-   * @returns {ICvComboboxItem|null} the property, a constructed one or null
+   * @returns {ICvSelectItem|null} the property, a constructed one or null
    */
-  get valueCompartmentItem (): ICvComboboxItem | null {
+  get valueCompartmentItem (): ICvSelectItem | null {
     if (!this.value.compartmentName && !this.value.compartmentUri) {
       return null
     }
@@ -877,9 +873,9 @@ export default class DevicePropertyForm extends Vue {
    * constructs one from the name and the uri. Returns null if both fields are
    * empty.
    *
-   * @returns {ICvComboboxItem|null} the property, a constructed one or null
+   * @returns {ICvSelectItem|null} the property, a constructed one or null
    */
-  get valueSamplingMediaItem (): ICvComboboxItem | null {
+  get valueSamplingMediaItem (): ICvSelectItem | null {
     if (!this.value.samplingMediaName && !this.value.samplingMediaUri) {
       return null
     }
@@ -931,9 +927,9 @@ export default class DevicePropertyForm extends Vue {
    * constructs one from the name and the uri. Returns null if both fields are
    * empty.
    *
-   * @returns {ICvComboboxItem|null} the property, a constructed one or null
+   * @returns {ICvSelectItem|null} the property, a constructed one or null
    */
-  get valuePropertyItem (): ICvComboboxItem | null {
+  get valuePropertyItem (): ICvSelectItem | null {
     if (!this.value.propertyName && !this.value.propertyUri) {
       return null
     }
@@ -978,9 +974,9 @@ export default class DevicePropertyForm extends Vue {
    * of CV units. Returns the found unit, otherwise constructs one from the
    * name and the uri. Returns null if both fields are empty.
    *
-   * @returns {ICvComboboxItem|null} the unit, a constructed one or null
+   * @returns {ICvSelectItem|null} the unit, a constructed one or null
    */
-  get valueUnitItem (): ICvComboboxItem | null {
+  get valueUnitItem (): ICvSelectItem | null {
     if (!this.value.unitName && !this.value.unitUri) {
       return null
     }
@@ -1003,9 +999,9 @@ export default class DevicePropertyForm extends Vue {
    * constructs one from the name and the uri. Returns null if both fields are
    * empty.
    *
-   * @returns {ICvComboboxItem|null} the unit, a constructed one or null
+   * @returns {ICvSelectItem|null} the unit, a constructed one or null
    */
-  get valueResolutionUnitItem (): ICvComboboxItem | null {
+  get valueResolutionUnitItem (): ICvSelectItem | null {
     if (!this.value.resolutionUnitName && !this.value.resolutionUnitUri) {
       return null
     }
@@ -1034,11 +1030,11 @@ export default class DevicePropertyForm extends Vue {
   /**
    * checks wheter the item has a non-empty definition property
    *
-   * @param {[TODO:type]} item - the item to check for
+   * @param {ICvSelectItem} item - the item to check for
    * @returns {boolean} returns true when the definition property exists and is not falsy
    */
-  itemHasDefinition (item: { definition?: string }): boolean {
-    return item && !!item.definition
+  itemHasDefinition (item: ICvSelectItem): boolean {
+    return hasDefinition(item)
   }
 
   focus (): void {

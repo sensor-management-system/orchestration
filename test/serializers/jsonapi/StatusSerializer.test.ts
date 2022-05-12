@@ -81,12 +81,14 @@ describe('StatusSerializer', () => {
       const expectedStatus1 = Status.createFromObject({
         id: '1',
         name: 'Complete',
-        uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/status/1/'
+        uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/status/1/',
+        definition: 'Data collection is complete. No new data values will be added.'
       })
       const expectedStatus2 = Status.createFromObject({
         id: '2',
         name: 'Ongoing',
-        uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/status/2/'
+        uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/status/2/',
+        definition: 'Data collection is ongoing.  New data values will be added periodically.'
       })
 
       const serializer = new StatusSerializer()
