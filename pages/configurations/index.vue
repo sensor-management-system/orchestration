@@ -127,7 +127,7 @@ permissions and limitations under the Licence.
     />
     <div v-if="configurations.length <=0 && !loading">
       <p class="text-center">
-        There are no platforms that match your search criteria.
+        There are no configurations that match your search criteria.
       </p>
     </div>
     <div
