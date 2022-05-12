@@ -17,7 +17,7 @@ from ..models.base_model import db
 from ..models.configuration import Configuration
 from ..models.mount_actions import PlatformMountAction
 from ..models.platform import Platform
-from ..resourceManager.base_resource import check_if_object_not_found
+from ..resources.base_resource import check_if_object_not_found
 from ..schemas.mount_actions_schema import PlatformMountActionSchema
 from ..token_checker import token_required
 

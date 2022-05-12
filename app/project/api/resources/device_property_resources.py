@@ -1,8 +1,10 @@
 """Module for the device property list resource."""
+from flask_rest_jsonapi import ResourceDetail
 from flask_rest_jsonapi import ResourceList
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.orm.exc import NoResultFound
 
+from .base_resource import check_if_object_not_found
 from ..auth.permission_utils import get_query_with_permissions_for_related_objects
 from ..models.base_model import db
 from ..models.device import Device
@@ -46,4 +48,25 @@ class DevicePropertyList(ResourceList):
         "session": db.session,
         "model": DeviceProperty,
         "methods": {"query": query},
+    }
+
+
+"""Module for the device property detail resource."""
+
+
+class DevicePropertyDetail(ResourceDetail):
+    """
+    provides get, patch and delete methods to retrieve details
+    of an object, update an object and delete a Device
+    """
+
+    def before_get(self, args, kwargs):
+        """Return 404 Responses if DeviceProperty not found"""
+        check_if_object_not_found(self._data_layer.model, kwargs)
+
+    schema = DevicePropertySchema
+    decorators = (token_required,)
+    data_layer = {
+        "session": db.session,
+        "model": DeviceProperty,
     }

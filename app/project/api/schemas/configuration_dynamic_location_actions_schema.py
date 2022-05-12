@@ -23,8 +23,6 @@ class ConfigurationDynamicLocationBeginActionSchema(Schema):
 
     contact = Relationship(
         attribute="contact",
-        self_view="api.configuration_dynamic_location_begin_action_contact",
-        self_view_kwargs={"id": "<id>"},
         related_view="api.contact_detail",
         related_view_kwargs={"id": "<contact_id>"},
         include_resource_linkage=True,
@@ -34,8 +32,6 @@ class ConfigurationDynamicLocationBeginActionSchema(Schema):
     )
 
     configuration = Relationship(
-        self_view="api.configuration_dynamic_location_begin_action_configuration",
-        self_view_kwargs={"id": "<id>"},
         related_view="api.configuration_detail",
         related_view_kwargs={"id": "<configuration_id>"},
         include_resource_linkage=True,
@@ -43,8 +39,6 @@ class ConfigurationDynamicLocationBeginActionSchema(Schema):
         schema="ConfigurationSchema",
     )
     x_property = Relationship(
-        self_view="api.configuration_dynamic_location_begin_action_x_property",
-        self_view_kwargs={"id": "<id>"},
         related_view="api.device_property_detail",
         related_view_kwargs={"id": "<x_property_id>"},
         include_resource_linkage=True,
@@ -52,8 +46,6 @@ class ConfigurationDynamicLocationBeginActionSchema(Schema):
         schema="DevicePropertySchema",
     )
     y_property = Relationship(
-        self_view="api.configuration_dynamic_location_begin_action_y_property",
-        self_view_kwargs={"id": "<id>"},
         related_view="api.device_property_detail",
         related_view_kwargs={"id": "<y_property_id>"},
         include_resource_linkage=True,
@@ -61,8 +53,6 @@ class ConfigurationDynamicLocationBeginActionSchema(Schema):
         schema="DevicePropertySchema",
     )
     z_property = Relationship(
-        self_view="api.configuration_dynamic_location_begin_action_z_property",
-        self_view_kwargs={"id": "<id>"},
         related_view="api.device_property_detail",
         related_view_kwargs={"id": "<z_property_id>"},
         include_resource_linkage=True,
@@ -87,8 +77,6 @@ class ConfigurationDynamicLocationEndActionSchema(Schema):
 
     contact = Relationship(
         attribute="contact",
-        self_view="api.configuration_dynamic_location_end_action_contact",
-        self_view_kwargs={"id": "<id>"},
         related_view="api.contact_detail",
         related_view_kwargs={"id": "<contact_id>"},
         include_resource_linkage=True,
@@ -98,8 +86,6 @@ class ConfigurationDynamicLocationEndActionSchema(Schema):
     )
 
     configuration = Relationship(
-        self_view="api.configuration_dynamic_location_end_action_configuration",
-        self_view_kwargs={"id": "<id>"},
         related_view="api.configuration_detail",
         related_view_kwargs={"id": "<configuration_id>"},
         include_resource_linkage=True,

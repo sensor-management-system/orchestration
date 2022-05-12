@@ -2,20 +2,31 @@
 
 import os
 
+from flask_rest_jsonapi import JsonApiException, ResourceDetail
 from sqlalchemy import or_
+
+from .base_resource import add_contact_to_object
+from .base_resource import check_if_object_not_found, delete_attachments_in_minio_by_url
+from ..auth.permission_utils import (
+    cfg_permission_group_defined,
+    check_deletion_permission,
+    is_superuser,
+    is_user_in_a_group,
+)
 from ..datalayers.esalchemy import (
     EsSqlalchemyDataLayer,
     OrFilter,
     TermEqualsExactStringFilter,
 )
-from ...frj_csv_export.resource import ResourceList
+from ..helpers.errors import ConflictError, ForbiddenError
+from ..helpers.resource_mixin import add_created_by_id
+from ..helpers.resource_mixin import add_updated_by_id
 from ..models.base_model import db
 from ..models.configuration import Configuration
 from ..models.contact_role import ConfigurationContactRole
 from ..schemas.configuration_schema import ConfigurationSchema
-from ..helpers.resource_mixin import add_created_by_id
 from ..token_checker import get_current_user_or_none_by_optional, token_required
-from ..resourceManager.base_resource import add_contact_to_object
+from ...frj_csv_export.resource import ResourceList
 
 
 class ConfigurationList(ResourceList):
@@ -38,12 +49,7 @@ class ConfigurationList(ResourceList):
             query = query.filter_by(is_public=True)
         else:
             if not current_user.is_superuser:
-                query = query.filter(
-                    or_(
-                        self.model.is_public,
-                        self.model.is_internal,
-                    )
-                )
+                query = query.filter(or_(self.model.is_public, self.model.is_internal,))
         return query
 
     def es_query(self, view_kwargs):
@@ -117,4 +123,64 @@ class ConfigurationList(ResourceList):
             "query": query,
             "es_query": es_query,
         },
+    }
+
+
+class ConfigurationDetail(ResourceDetail):
+    """
+    provides get, patch and delete methods to retrieve details
+    of an object, update an object and delete a Device
+    """
+
+    def before_get(self, args, kwargs):
+        """Prevent not registered users form viewing internal configs."""
+        check_if_object_not_found(self._data_layer.model, kwargs)
+        config = db.session.query(Configuration).filter_by(id=kwargs["id"]).first()
+        if config:
+            if config.is_internal:
+                get_current_user_or_none_by_optional()
+
+    def before_patch(self, args, kwargs, data):
+        """check if a user has the permission to change this configuration"""
+        if not is_superuser():
+            configuration = (
+                db.session.query(Configuration).filter_by(id=data["id"]).one_or_none()
+            )
+            group_id = configuration.cfg_permission_group
+            if cfg_permission_group_defined(group_id):
+                if not is_user_in_a_group([group_id]):
+                    raise ForbiddenError(
+                        "User is not part of any group to edit this object."
+                    )
+        add_updated_by_id(data)
+
+    def before_delete(self, args, kwargs):
+        """Checks for permission"""
+        check_deletion_permission(kwargs, Configuration)
+
+    def delete(self, *args, **kwargs):
+        """
+        Try to delete an object through sqlalchemy. If could not be done give a ConflictError.
+        :param args: args from the resource view
+        :param kwargs: kwargs from the resource view
+        :return:
+        """
+        configuration = check_if_object_not_found(Configuration, kwargs)
+        urls = [a.url for a in configuration.configuration_attachments]
+        try:
+            super().delete(*args, **kwargs)
+        except JsonApiException as e:
+            raise ConflictError("Deletion failed for the configuration.", str(e))
+
+        for url in urls:
+            delete_attachments_in_minio_by_url(url)
+
+        final_result = {"meta": {"message": "Object successfully deleted"}}
+        return final_result
+
+    schema = ConfigurationSchema
+    decorators = (token_required,)
+    data_layer = {
+        "session": db.session,
+        "model": Configuration,
     }

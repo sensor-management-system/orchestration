@@ -26,8 +26,8 @@ class ConfigurationStaticLocationBeginActionSchema(Schema):
 
     contact = Relationship(
         attribute="contact",
-        self_view="api.configuration_static_location_begin_action_contact",
-        self_view_kwargs={"id": "<id>"},
+        # self_view="api.configuration_static_location_begin_action_contact",
+        # self_view_kwargs={"id": "<id>"},
         related_view="api.contact_detail",
         related_view_kwargs={"id": "<contact_id>"},
         include_resource_linkage=True,
@@ -37,8 +37,8 @@ class ConfigurationStaticLocationBeginActionSchema(Schema):
     )
 
     configuration = Relationship(
-        self_view="api.configuration_static_location_begin_action_configuration",
-        self_view_kwargs={"id": "<id>"},
+        # self_view="api.configuration_static_location_begin_action_configuration",
+        # self_view_kwargs={"id": "<id>"},
         related_view="api.configuration_detail",
         related_view_kwargs={"id": "<configuration_id>"},
         include_resource_linkage=True,
@@ -63,8 +63,6 @@ class ConfigurationStaticLocationEndActionSchema(Schema):
 
     contact = Relationship(
         attribute="contact",
-        self_view="api.configuration_static_location_end_action_contact",
-        self_view_kwargs={"id": "<id>"},
         related_view="api.contact_detail",
         related_view_kwargs={"id": "<contact_id>"},
         include_resource_linkage=True,
@@ -74,8 +72,6 @@ class ConfigurationStaticLocationEndActionSchema(Schema):
     )
 
     configuration = Relationship(
-        self_view="api.configuration_static_location_end_action_configuration",
-        self_view_kwargs={"id": "<id>"},
         related_view="api.configuration_detail",
         related_view_kwargs={"id": "<configuration_id>"},
         include_resource_linkage=True,

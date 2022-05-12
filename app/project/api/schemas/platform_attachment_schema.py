@@ -17,8 +17,6 @@ class PlatformAttachmentSchema(Schema):
     url = fields.Str(required=True)
 
     platform = Relationship(
-        self_view="api.platform_attachment_platform",
-        self_view_kwargs={"id": "<id>"},
         related_view="api.platform_detail",
         related_view_kwargs={"id": "<platform_id>"},
         include_resource_linkage=True,

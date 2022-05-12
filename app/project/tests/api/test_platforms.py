@@ -152,46 +152,6 @@ class TestPlatformServices(BaseTestCase):
                 included_attachments[str(attachment.id)]["attributes"]["label"],
             )
 
-    def test_add_platform_platform_attachment_relationship(self):
-        """Ensure that we can work with the attachment relationship."""
-        platform = Platform(short_name="platform",
-                            is_public=False,
-                            is_private=False,
-                            is_internal=True,
-                            )
-        db.session.add(platform)
-
-        attachment1 = PlatformAttachment(
-            url="www.gfz-potsdam.de", label="GFZ", platform=platform
-        )
-        db.session.add(attachment1)
-        attachment2 = PlatformAttachment(
-            url="www.ufz.de", label="UFZ", platform=platform
-        )
-        db.session.add(attachment2)
-        db.session.commit()
-
-        with self.client:
-            response = self.client.get(
-                base_url
-                + "/platforms/"
-                + str(platform.id)
-                + "/relationships/platform-attachments",
-                content_type="application/vnd.api+json",
-            )
-        self.assertEqual(response.status_code, 200)
-
-        response_data = response.get_json()
-
-        # it seems that this relationships are plain integer values
-        # so we convert them explicitly
-        attachment_ids = [str(x["id"]) for x in response_data["data"]]
-
-        self.assertEqual(len(attachment_ids), 2)
-
-        for attachment in [attachment1, attachment2]:
-            self.assertIn(str(attachment.id), attachment_ids)
-
     def test_http_response_not_found(self):
         """Make sure that the backend responds with 404 HTTP-Code if a resource was not found."""
         url = f"{self.platform_url}/{fake.random_int()}"

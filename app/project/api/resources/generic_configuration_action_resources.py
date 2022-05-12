@@ -17,7 +17,7 @@ from ..helpers.resource_mixin import add_created_by_id, add_updated_by_id
 from ..models.base_model import db
 from ..models.configuration import Configuration
 from ..models.generic_actions import GenericConfigurationAction
-from ..resourceManager.base_resource import check_if_object_not_found
+from ..resources.base_resource import check_if_object_not_found
 from ..schemas.generic_actions_schema import GenericConfigurationActionSchema
 from ..token_checker import token_required
 

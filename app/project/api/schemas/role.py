@@ -20,7 +20,7 @@ class DeviceRoleSchema(Schema, RoleSchema):
         self_view_many = "api.device_contact_role_list"
 
     device = Relationship(
-        self_view="api.device_contact_roles",
+        self_view="api.device_list",
         self_view_kwargs={"id": "<id>"},
         related_view="api.device_detail",
         related_view_kwargs={"id": "<device_id>"},
@@ -30,7 +30,7 @@ class DeviceRoleSchema(Schema, RoleSchema):
         id_field="id",
     )
     contact = Relationship(
-        self_view="api.contact_roles_device",
+        self_view="api.contact_list",
         self_view_kwargs={"id": "<id>"},
         related_view="api.contact_detail",
         related_view_kwargs={"id": "<contact_id>"},
@@ -53,7 +53,7 @@ class PlatformRoleSchema(Schema, RoleSchema):
         self_view_many = "api.platform_contact_role_list"
 
     platform = Relationship(
-        self_view="api.platform_contact_roles",
+        self_view="api.platform_list",
         self_view_kwargs={"id": "<id>"},
         related_view="api.platform_detail",
         related_view_kwargs={"id": "<platform.id>"},
@@ -63,7 +63,7 @@ class PlatformRoleSchema(Schema, RoleSchema):
         id_field="id",
     )
     contact = Relationship(
-        self_view="api.contact_roles_platform",
+        self_view="api.contact_list",
         self_view_kwargs={"id": "<id>"},
         related_view="api.contact_detail",
         related_view_kwargs={"id": "<contact_id>"},
@@ -86,8 +86,6 @@ class ConfigurationRoleSchema(Schema, RoleSchema):
         self_view_many = "api.configuration_contact_role_list"
 
     configuration = Relationship(
-        self_view="api.configuration_contact_roles",
-        self_view_kwargs={"id": "<id>"},
         related_view="api.configuration_detail",
         related_view_kwargs={"id": "<configuration_id>"},
         include_resource_linkage=True,
@@ -96,8 +94,6 @@ class ConfigurationRoleSchema(Schema, RoleSchema):
         id_field="id",
     )
     contact = Relationship(
-        self_view="api.contact_roles_configuration",
-        self_view_kwargs={"id": "<id>"},
         related_view="api.contact_detail",
         related_view_kwargs={"id": "<contact_id>"},
         include_resource_linkage=True,

@@ -25,8 +25,6 @@ class GenericPlatformActionSchema(Schema):
     updated_at = fields.DateTime(dump_only=True)
 
     platform = Relationship(
-        self_view="api.generic_platform_action_platform",
-        self_view_kwargs={"id": "<id>"},
         related_view="api.platform_detail",
         related_view_kwargs={"id": "<platform_id>"},
         include_resource_linkage=True,
@@ -36,8 +34,6 @@ class GenericPlatformActionSchema(Schema):
     )
 
     contact = Relationship(
-        self_view="api.generic_platform_action_contact",
-        self_view_kwargs={"id": "<id>"},
         related_view="api.contact_detail",
         related_view_kwargs={"id": "<contact_id>"},
         include_resource_linkage=True,
@@ -46,8 +42,6 @@ class GenericPlatformActionSchema(Schema):
         id_field="id",
     )
     created_by = Relationship(
-        self_view="api.generic_platform_action_created_user",
-        self_view_kwargs={"id": "<id>"},
         related_view="api.user_detail",
         related_view_kwargs={"id": "<created_by_id>"},
         include_resource_linkage=True,
@@ -57,8 +51,6 @@ class GenericPlatformActionSchema(Schema):
         dump_only=True,
     )
     updated_by = Relationship(
-        self_view="api.generic_platform_action_updated_user",
-        self_view_kwargs={"id": "<id>"},
         related_view="api.user_detail",
         related_view_kwargs={"id": "<updated_by_id>"},
         include_resource_linkage=True,
@@ -68,7 +60,7 @@ class GenericPlatformActionSchema(Schema):
         dump_only=True,
     )
     generic_platform_action_attachments = Relationship(
-        related_view="api.generic_platform_action_attachments",
+        related_view="api.generic_platform_action_attachment_list",
         related_view_kwargs={"id": "<id>"},
         include_resource_linkage=True,
         many=True,
@@ -95,8 +87,6 @@ class GenericDeviceActionSchema(Schema):
     updated_at = fields.DateTime(dump_only=True)
 
     device = Relationship(
-        self_view="api.generic_device_action_device",
-        self_view_kwargs={"id": "<id>"},
         related_view="api.device_detail",
         related_view_kwargs={"id": "<device_id>"},
         include_resource_linkage=True,
@@ -106,8 +96,6 @@ class GenericDeviceActionSchema(Schema):
     )
 
     contact = Relationship(
-        self_view="api.generic_device_action_contact",
-        self_view_kwargs={"id": "<id>"},
         related_view="api.contact_detail",
         related_view_kwargs={"id": "<contact_id>"},
         include_resource_linkage=True,
@@ -116,8 +104,6 @@ class GenericDeviceActionSchema(Schema):
         id_field="id",
     )
     created_by = Relationship(
-        self_view="api.generic_device_action_created_user",
-        self_view_kwargs={"id": "<id>"},
         related_view="api.user_detail",
         related_view_kwargs={"id": "<created_by_id>"},
         include_resource_linkage=True,
@@ -127,8 +113,6 @@ class GenericDeviceActionSchema(Schema):
         dump_only=True,
     )
     updated_by = Relationship(
-        self_view="api.generic_device_action_updated_user",
-        self_view_kwargs={"id": "<id>"},
         related_view="api.user_detail",
         related_view_kwargs={"id": "<updated_by_id>"},
         include_resource_linkage=True,
@@ -138,7 +122,7 @@ class GenericDeviceActionSchema(Schema):
         dump_only=True,
     )
     generic_device_action_attachments = Relationship(
-        related_view="api.generic_device_action_attachments",
+        related_view="api.generic_device_action_attachment_list",
         related_view_kwargs={"id": "<id>"},
         include_resource_linkage=True,
         many=True,
@@ -165,8 +149,6 @@ class GenericConfigurationActionSchema(Schema):
     updated_at = fields.DateTime(dump_only=True)
 
     configuration = Relationship(
-        self_view="api.generic_configuration_action_configuration",
-        self_view_kwargs={"id": "<id>"},
         related_view="api.configuration_detail",
         related_view_kwargs={"id": "<configuration_id>"},
         include_resource_linkage=True,
@@ -176,8 +158,6 @@ class GenericConfigurationActionSchema(Schema):
     )
 
     contact = Relationship(
-        self_view="api.generic_configuration_action_contact",
-        self_view_kwargs={"id": "<id>"},
         related_view="api.contact_detail",
         related_view_kwargs={"id": "<contact_id>"},
         include_resource_linkage=True,
@@ -187,8 +167,6 @@ class GenericConfigurationActionSchema(Schema):
     )
 
     created_by = Relationship(
-        self_view="api.generic_configuration_action_created_user",
-        self_view_kwargs={"id": "<id>"},
         related_view="api.user_detail",
         related_view_kwargs={"id": "<created_by_id>"},
         include_resource_linkage=True,
@@ -198,21 +176,10 @@ class GenericConfigurationActionSchema(Schema):
     )
 
     updated_by = Relationship(
-        self_view="api.generic_configuration_action_updated_user",
-        self_view_kwargs={"id": "<id>"},
         related_view="api.user_detail",
         related_view_kwargs={"id": "<updated_by_id>"},
         include_resource_linkage=True,
         schema="UserSchema",
         type_="user",
         dump_only=True,
-    )
-    generic_configuration_action_attachments = Relationship(
-        related_view="api.generic_configuration_action_attachments",
-        related_view_kwargs={"id": "<id>"},
-        include_resource_linkage=True,
-        many=True,
-        schema="GenericConfigurationActionAttachmentSchema",
-        type_="generic_configuration_action_attachment",
-        id_field="id",
     )

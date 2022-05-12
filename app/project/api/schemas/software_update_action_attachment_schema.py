@@ -19,8 +19,6 @@ class DeviceSoftwareUpdateActionAttachmentSchema(Schema):
 
     id = fields.Integer(as_string=True)
     action = Relationship(
-        self_view="api.device_software_update_action_attachment_action",
-        self_view_kwargs={"id": "<id>"},
         related_view="api.device_software_update_action_attachment_detail",
         related_view_kwargs={"id": "<action_id>"},
         include_resource_linkage=True,
@@ -29,8 +27,6 @@ class DeviceSoftwareUpdateActionAttachmentSchema(Schema):
         id_field="id",
     )
     attachment = Relationship(
-        self_view="api.device_software_update_action_attachment_attachment",
-        self_view_kwargs={"id": "<id>"},
         related_view="api.device_attachment_detail",
         related_view_kwargs={"id": "<attachment_id>"},
         include_resource_linkage=True,
@@ -55,8 +51,6 @@ class PlatformSoftwareUpdateActionAttachmentSchema(Schema):
 
     id = fields.Integer(as_string=True)
     action = Relationship(
-        self_view="api.platform_software_update_action_attachment_action",
-        self_view_kwargs={"id": "<id>"},
         related_view="api.platform_software_update_action_attachment_detail",
         related_view_kwargs={"id": "<action_id>"},
         include_resource_linkage=True,
@@ -65,8 +59,6 @@ class PlatformSoftwareUpdateActionAttachmentSchema(Schema):
         id_field="id",
     )
     attachment = Relationship(
-        self_view="api.platform_software_update_action_attachment_attachment",
-        self_view_kwargs={"id": "<id>"},
         related_view="api.platform_attachment_detail",
         related_view_kwargs={"id": "<attachment_id>"},
         include_resource_linkage=True,

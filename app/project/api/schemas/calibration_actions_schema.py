@@ -23,8 +23,6 @@ class DeviceCalibrationActionSchema(Schema):
 
     device = Relationship(
         attribute="device",
-        self_view="api.device_calibration_action_device",
-        self_view_kwargs={"id": "<id>"},
         related_view="api.device_detail",
         related_view_kwargs={"id": "<device_id>"},
         include_resource_linkage=True,
@@ -34,8 +32,6 @@ class DeviceCalibrationActionSchema(Schema):
     )
     contact = Relationship(
         attribute="contact",
-        self_view="api.device_calibration_action_contact",
-        self_view_kwargs={"id": "<id>"},
         related_view="api.contact_detail",
         related_view_kwargs={"id": "<contact_id>"},
         include_resource_linkage=True,
@@ -44,7 +40,7 @@ class DeviceCalibrationActionSchema(Schema):
         id_field="id",
     )
     device_calibration_attachments = Relationship(
-        related_view="api.device_calibration_action_attachments",
+        related_view="api.device_calibration_action_list",
         related_view_kwargs={"id": "<id>"},
         include_resource_linkage=True,
         many=True,
@@ -53,7 +49,7 @@ class DeviceCalibrationActionSchema(Schema):
         id_field="id",
     )
     device_property_calibrations = Relationship(
-        related_view="api.device_calibration_device_property_calibrations",
+        related_view="api.device_calibration_action_list",
         related_view_kwargs={"id": "<id>"},
         include_resource_linkage=True,
         many=True,
@@ -73,8 +69,6 @@ class DevicePropertyCalibrationSchema(Schema):
 
     device_property = Relationship(
         attribute="device_property",
-        self_view="api.device_property_calibration_device_property",
-        self_view_kwargs={"id": "<id>"},
         related_view="api.device_property_detail",
         related_view_kwargs={"id": "<device_property_id>"},
         include_resource_linkage=True,
@@ -85,8 +79,6 @@ class DevicePropertyCalibrationSchema(Schema):
 
     calibration_action = Relationship(
         attribute="calibration_action",
-        self_view="api.device_property_calibration_calibration_action",
-        self_view_kwargs={"id": "<id>"},
         related_view="api.device_property_calibration_detail",
         related_view_kwargs={"id": "<calibration_action_id>"},
         include_resource_linkage=True,
