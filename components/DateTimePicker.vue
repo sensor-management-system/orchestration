@@ -95,7 +95,7 @@ permissions and limitations under the Licence.
             </v-btn>
             <v-spacer />
             <v-btn
-              color="green"
+              color="accent"
               small
               @click="applyPickerValue"
             >

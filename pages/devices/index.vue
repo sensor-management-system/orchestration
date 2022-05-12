@@ -34,19 +34,23 @@ permissions and limitations under the Licence.
       v-model="activeTab"
     >
       <v-tab-item :eager="true">
-        <v-row>
-          <v-col cols="12" md="5">
+        <v-row
+          dense
+        >
+          <v-col
+            cols="12"
+            md="5"
+          >
             <v-text-field
               v-model="searchText"
-              label="Name"
+              label="Search term"
               placeholder="Name of device"
               hint="Please enter at least 3 characters"
               @keydown.enter="basicSearch"
             />
           </v-col>
           <v-col
-            cols="12"
-            md="7"
+            cols="5"
             align-self="center"
           >
             <v-btn
@@ -64,6 +68,20 @@ permissions and limitations under the Licence.
               Clear
             </v-btn>
           </v-col>
+          <v-col
+            align-self="center"
+            class="text-right"
+          >
+            <v-btn
+              v-if="$auth.loggedIn"
+              color="accent"
+              small
+              nuxt
+              to="/devices/new"
+            >
+              New Device
+            </v-btn>
+          </v-col>
         </v-row>
       </v-tab-item>
       <v-tab-item :eager="true">
@@ -71,7 +89,7 @@ permissions and limitations under the Licence.
           <v-col cols="12" md="6">
             <v-text-field
               v-model="searchText"
-              label="Name"
+              label="Search term"
               placeholder="Name of device"
               hint="Please enter at least 3 characters"
               @keydown.enter="extendedSearch"
@@ -100,7 +118,7 @@ permissions and limitations under the Licence.
         </v-row>
         <v-row>
           <v-col
-            cols="12"
+            cols="5"
             align-self="center"
           >
             <v-btn
@@ -116,6 +134,20 @@ permissions and limitations under the Licence.
               @click="clearExtendedSearch"
             >
               Clear
+            </v-btn>
+          </v-col>
+          <v-col
+            align-self="center"
+            class="text-right"
+          >
+            <v-btn
+              v-if="$auth.loggedIn"
+              color="accent"
+              small
+              nuxt
+              to="/devices/new"
+            >
+              New Device
             </v-btn>
           </v-col>
         </v-row>
@@ -236,22 +268,6 @@ permissions and limitations under the Licence.
       @cancel-deletion="closeDialog"
       @submit-deletion="deleteAndCloseDialog"
     />
-    <v-btn
-      v-if="$auth.loggedIn"
-      bottom
-      color="primary"
-      dark
-      elevation="10"
-      fab
-      fixed
-      right
-      nuxt
-      to="/devices/new"
-    >
-      <v-icon>
-        mdi-plus
-      </v-icon>
-    </v-btn>
   </div>
 </template>
 

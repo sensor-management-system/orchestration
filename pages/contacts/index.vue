@@ -41,8 +41,7 @@ permissions and limitations under the Licence.
         />
       </v-col>
       <v-col
-        cols="12"
-        md="7"
+        cols="5"
         align-self="center"
       >
         <v-btn
@@ -58,6 +57,20 @@ permissions and limitations under the Licence.
           @click="clearSearch"
         >
           Clear
+        </v-btn>
+      </v-col>
+      <v-col
+        align-self="center"
+        class="text-right"
+      >
+        <v-btn
+          v-if="$auth.loggedIn"
+          color="accent"
+          small
+          nuxt
+          to="/contacts/new"
+        >
+          New Contact
         </v-btn>
       </v-col>
     </v-row>
@@ -123,21 +136,6 @@ permissions and limitations under the Licence.
       @cancel-deletion="closeDialog"
       @submit-deletion="deleteAndCloseDialog"
     />
-    <v-btn
-      v-if="$auth.loggedIn"
-      bottom
-      color="primary"
-      dark
-      elevation="10"
-      fab
-      fixed
-      right
-      to="/contacts/new"
-    >
-      <v-icon>
-        mdi-plus
-      </v-icon>
-    </v-btn>
   </div>
 </template>
 

@@ -58,7 +58,7 @@ permissions and limitations under the Licence.
         <v-btn small @click="closeNewDynamicLocationForm">
           Cancel
         </v-btn>
-        <v-btn color="green" small @click="saveNewDynamicLocation">
+        <v-btn color="accent" small @click="saveNewDynamicLocation">
           Add
         </v-btn>
       </v-card-actions>

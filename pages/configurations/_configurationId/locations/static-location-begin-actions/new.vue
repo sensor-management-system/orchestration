@@ -56,7 +56,7 @@ permissions and limitations under the Licence.
         <v-btn small @click="closeNewStaticLocationForm">
           Cancel
         </v-btn>
-        <v-btn color="green" small @click="saveNewStaticLocation">
+        <v-btn color="accent" small @click="saveNewStaticLocation">
           Add
         </v-btn>
       </v-card-actions>

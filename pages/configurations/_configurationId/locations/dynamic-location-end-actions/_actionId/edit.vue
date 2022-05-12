@@ -75,7 +75,7 @@ permissions and limitations under the Licence.
         <v-btn small @click="closeEditDynamicLocationEndForm">
           Cancel
         </v-btn>
-        <v-btn color="green" small @click="saveEditedStopDynamicLocation">
+        <v-btn color="accent" small @click="saveEditedStopDynamicLocation">
           Apply
         </v-btn>
       </v-card-actions>
