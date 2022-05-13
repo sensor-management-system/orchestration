@@ -45,6 +45,7 @@ services:
       SMS_IDL_TOKEN: ${SMS_IDL_TOKEN}
       IDL_URL: ${IDL_URL}
       CV_URL: ${CV_URL}
+      INSTITUTE: ${INSTITUTE:-ufz}
     depends_on:
       - db
     command: >
