@@ -63,6 +63,7 @@ class Platform(
             "is_public": self.is_public,
             "is_private": self.is_private,
             "created_by_id": self.created_by_id,
+            "group_ids": self.group_ids,
         }
 
     def get_parent_search_entities(self):
@@ -116,6 +117,7 @@ class Platform(
             "is_public": {"type": "boolean",},
             "is_private": {"type": "boolean",},
             "created_by_id": {"type": "integer",},
+            "group_ids": type_keyword,
             "attachments": {
                 "type": "nested",
                 "properties": {

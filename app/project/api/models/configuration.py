@@ -78,6 +78,7 @@ class Configuration(
             "location_type": self.location_type,
             "project_uri": self.project_uri,
             "project_name": self.project_name,
+            "cfg_permission_group": self.cfg_permission_group,
             "configuration_contact_roles": [
                 ccr.to_search_entry() for ccr in self.configuration_contact_roles
             ],
@@ -162,6 +163,7 @@ class Configuration(
                     "project_name": type_keyword_and_full_searchable,
                     # The uri just for an keyword filter.
                     "project_uri": type_keyword,
+                    "cfg_permission_group": type_keyword,
                     "platforms": {
                         "type": "nested",
                         "properties": Platform.get_search_index_properties(),
