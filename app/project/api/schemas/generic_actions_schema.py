@@ -182,7 +182,6 @@ class GenericConfigurationActionSchema(Schema):
         schema="UserSchema",
         type_="user",
         dump_only=True,
-        dump_only=True,
     )
     generic_configuration_action_attachments = Relationship(
         related_view="api.generic_configuration_action_attachment_list",

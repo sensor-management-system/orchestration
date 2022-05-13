@@ -1,4 +1,4 @@
-from project.api.resourceManager import *
+from project.api.resources import *
 
 from .api.ping import Ping
 from .api.resources.permission_group_resources import PermissionGroups
@@ -11,15 +11,10 @@ api.route(PermissionGroups, "permission_group_list", "/permission-groups")
 
 # Platform
 api.route(
-    PlatformList,
-    "platform_list",
-    "/platforms",
-    "/contacts/<int:contact_id>/platforms",
+    PlatformList, "platform_list", "/platforms", "/contacts/<int:contact_id>/platforms",
 )
 api.route(
-    PlatformDetail,
-    "platform_detail",
-    "/platforms/<int:id>",
+    PlatformDetail, "platform_detail", "/platforms/<int:id>",
 )
 
 # Platform Attachment
@@ -48,21 +43,14 @@ api.route(
 )
 # Device
 api.route(
-    DeviceList,
-    "device_list",
-    "/devices",
-    "/contacts/<int:id>/devices",
+    DeviceList, "device_list", "/devices", "/contacts/<int:id>/devices",
 )
 api.route(
-    DeviceDetail,
-    "device_detail",
-    "/devices/<int:id>",
+    DeviceDetail, "device_detail", "/devices/<int:id>",
 )
 # Device Property
 api.route(
-    DevicePropertyDetail,
-    "device_property_detail",
-    "/device-properties/<int:id>",
+    DevicePropertyDetail, "device_property_detail", "/device-properties/<int:id>",
 )
 
 api.route(
@@ -80,9 +68,7 @@ api.route(
     "/devices/<int:device_id>/device-attachments",
 )
 api.route(
-    DeviceAttachmentDetail,
-    "device_attachment_detail",
-    "/device-attachments/<int:id>",
+    DeviceAttachmentDetail, "device_attachment_detail", "/device-attachments/<int:id>",
 )
 
 # CustomField
@@ -93,9 +79,7 @@ api.route(
     "/devices/<int:device_id>/customfields",
 )
 api.route(
-    CustomFieldDetail,
-    "customfield_detail",
-    "/customfields/<int:id>",
+    CustomFieldDetail, "customfield_detail", "/customfields/<int:id>",
 )
 
 # Contact
@@ -115,29 +99,20 @@ api.route(
 )
 # User Info
 api.route(
-    UserInfo,
-    "user_info",
-    "/user-info",
+    UserInfo, "user_info", "/user-info",
 )
 # Users
 api.route(
-    UserList,
-    "user_list",
-    "/users",
-    "/contacts/<int:id>/users",
+    UserList, "user_list", "/users", "/contacts/<int:id>/users",
 )
 api.route(UserDetail, "user_detail", "/users/<int:id>")
 
 # Configuration
 api.route(
-    ConfigurationList,
-    "configuration_list",
-    "/configurations",
+    ConfigurationList, "configuration_list", "/configurations",
 )
 api.route(
-    ConfigurationDetail,
-    "configuration_detail",
-    "/configurations/<int:id>",
+    ConfigurationDetail, "configuration_detail", "/configurations/<int:id>",
 )
 # GenericDeviceAction
 api.route(
@@ -447,68 +422,4 @@ api.route(
     ConfigurationRoleDetail,
     "configuration_contact_role_detail",
     "/configuration-contact-roles/<int:id>",
-)
-# DeviceRoles
-api.route(
-    DeviceRoleList,
-    "device_contact_role_list",
-    "/device-contact-roles",
-    "/contacts/<int:contact_id>/device-contact-roles",
-    "/devices/<int:device_id>/device-contact-roles",
-)
-api.route(DeviceRoleDetail, "device_contact_role_detail", "/device-contact-roles/<int:id>")
-api.route(
-    DeviceRoleRelationship,
-    "contact_roles_device",
-    "/device-contact-roles/<int:id>/relationships/contact",
-)
-api.route(
-    DeviceRoleRelationship,
-    "device_contact_roles",
-    "/device-contact-roles/<int:id>/relationships/device",
-)
-
-# PlatformRoles
-api.route(
-    PlatformRoleList,
-    "platform_contact_role_list",
-    "/platform-contact-roles",
-    "/contacts/<int:contact_id>/platform-contact-roles",
-    "/platforms/<int:platform_id>/platform-contact-roles",
-)
-api.route(
-    PlatformRoleDetail, "platform_contact_role_detail", "/platform-contact-roles/<int:id>"
-)
-api.route(
-    PlatformRoleRelationship,
-    "contact_roles_platform",
-    "/platform-contact-roles/<int:id>/relationships/contact",
-)
-api.route(
-    PlatformRoleRelationship,
-    "platform_contact_roles",
-    "/platform-contact-roles/<int:id>/relationships/platform",
-)
-# ConfigurationRoles
-api.route(
-    ConfigurationRoleList,
-    "configuration_contact_role_list",
-    "/configuration-contact-roles",
-    "/contacts/<int:contact_id>/configuration-contact-roles",
-    "/configurations/<int:configuration_id>/configuration-contact-roles",
-)
-api.route(
-    ConfigurationRoleDetail,
-    "configuration_contact_role_detail",
-    "/configuration-contact-roles/<int:id>",
-)
-api.route(
-    ConfigurationRoleRelationship,
-    "contact_roles_configuration",
-    "/configuration-contact-roles/<int:id>/relationships/contact",
-)
-api.route(
-    ConfigurationRoleRelationship,
-    "configuration_contact_roles",
-    "/configuration-contact-roles/<int:id>/relationships/configuration",
 )
