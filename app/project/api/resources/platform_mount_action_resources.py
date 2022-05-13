@@ -125,16 +125,3 @@ class PlatformMountActionRelationship(ResourceRelationship):
         "session": db.session,
         "model": PlatformMountAction,
     }
-
-
-class PlatformMountActionRelationshipReadOnly(PlatformMountActionRelationship):
-    """A readonly relationship endpoint for platform mount actions."""
-
-    def before_post(self, args, kwargs, json_data=None):
-        raise MethodNotAllowed("This endpoint is readonly!")
-
-    def before_patch(self, args, kwargs, data=None):
-        raise MethodNotAllowed("This endpoint is readonly!")
-
-    def before_delete(self, args, kwargs):
-        raise MethodNotAllowed("This endpoint is readonly!")

@@ -86,16 +86,3 @@ class GenericPlatformActionRelationship(ResourceRelationship):
         "session": db.session,
         "model": GenericPlatformAction,
     }
-
-
-class GenericPlatformActionRelationshipReadOnly(GenericPlatformActionRelationship):
-    """A readonly relationship endpoint for generic platform actions."""
-
-    def before_post(self, args, kwargs, json_data=None):
-        raise MethodNotAllowed("This endpoint is readonly!")
-
-    def before_patch(self, args, kwargs, data=None):
-        raise MethodNotAllowed("This endpoint is readonly!")
-
-    def before_delete(self, args, kwargs):
-        raise MethodNotAllowed("This endpoint is readonly!")

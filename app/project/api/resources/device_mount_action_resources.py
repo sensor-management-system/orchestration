@@ -17,7 +17,6 @@ from ..resources.base_resource import (
 )
 from ..schemas.mount_actions_schema import DeviceMountActionSchema
 from ..token_checker import token_required
-from ...frj_csv_export.resource import ResourceList
 
 
 class DeviceMountActionList(ResourceList):
@@ -43,7 +42,9 @@ class DeviceMountActionList(ResourceList):
                 self.session.query(Configuration).filter_by(id=configuration_id).one()
             except NoResultFound:
                 raise ObjectNotFound(
-                    {"parameter": "id", },
+                    {
+                        "parameter": "id",
+                    },
                     "Configuration: {} not found".format(configuration_id),
                 )
             else:
@@ -55,7 +56,10 @@ class DeviceMountActionList(ResourceList):
                 self.session.query(Device).filter_by(id=device_id).one()
             except NoResultFound:
                 raise ObjectNotFound(
-                    {"parameter": "id", }, "Device: {} not found".format(device_id),
+                    {
+                        "parameter": "id",
+                    },
+                    "Device: {} not found".format(device_id),
                 )
             else:
                 query_ = query_.filter(DeviceMountAction.device_id == device_id)
@@ -64,7 +68,9 @@ class DeviceMountActionList(ResourceList):
                 self.session.query(Platform).filter_by(id=parent_platform_id).one()
             except NoResultFound:
                 raise ObjectNotFound(
-                    {"parameter": "id", },
+                    {
+                        "parameter": "id",
+                    },
                     "Platform: {} not found".format(parent_platform_id),
                 )
             else:

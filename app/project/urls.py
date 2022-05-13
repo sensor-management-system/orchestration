@@ -1,4 +1,4 @@
-from project.api.resources import *
+from project.api.resourceManager import *
 
 from .api.ping import Ping
 from .api.resources.permission_group_resources import PermissionGroups
@@ -447,4 +447,68 @@ api.route(
     ConfigurationRoleDetail,
     "configuration_contact_role_detail",
     "/configuration-contact-roles/<int:id>",
+)
+# DeviceRoles
+api.route(
+    DeviceRoleList,
+    "device_contact_role_list",
+    "/device-contact-roles",
+    "/contacts/<int:contact_id>/device-contact-roles",
+    "/devices/<int:device_id>/device-contact-roles",
+)
+api.route(DeviceRoleDetail, "device_contact_role_detail", "/device-contact-roles/<int:id>")
+api.route(
+    DeviceRoleRelationship,
+    "contact_roles_device",
+    "/device-contact-roles/<int:id>/relationships/contact",
+)
+api.route(
+    DeviceRoleRelationship,
+    "device_contact_roles",
+    "/device-contact-roles/<int:id>/relationships/device",
+)
+
+# PlatformRoles
+api.route(
+    PlatformRoleList,
+    "platform_contact_role_list",
+    "/platform-contact-roles",
+    "/contacts/<int:contact_id>/platform-contact-roles",
+    "/platforms/<int:platform_id>/platform-contact-roles",
+)
+api.route(
+    PlatformRoleDetail, "platform_contact_role_detail", "/platform-contact-roles/<int:id>"
+)
+api.route(
+    PlatformRoleRelationship,
+    "contact_roles_platform",
+    "/platform-contact-roles/<int:id>/relationships/contact",
+)
+api.route(
+    PlatformRoleRelationship,
+    "platform_contact_roles",
+    "/platform-contact-roles/<int:id>/relationships/platform",
+)
+# ConfigurationRoles
+api.route(
+    ConfigurationRoleList,
+    "configuration_contact_role_list",
+    "/configuration-contact-roles",
+    "/contacts/<int:contact_id>/configuration-contact-roles",
+    "/configurations/<int:configuration_id>/configuration-contact-roles",
+)
+api.route(
+    ConfigurationRoleDetail,
+    "configuration_contact_role_detail",
+    "/configuration-contact-roles/<int:id>",
+)
+api.route(
+    ConfigurationRoleRelationship,
+    "contact_roles_configuration",
+    "/configuration-contact-roles/<int:id>/relationships/contact",
+)
+api.route(
+    ConfigurationRoleRelationship,
+    "configuration_contact_roles",
+    "/configuration-contact-roles/<int:id>/relationships/configuration",
 )

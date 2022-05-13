@@ -448,6 +448,13 @@ class TestConfigurationsService(BaseTestCase):
         config_id = configuration_action.configuration_id
         _ = super().delete_object(url=f"{self.configurations_url}/{config_id}",)
 
+    def test_delete_configuration_with_generic_action(self):
+        """Ensure a configuration with a generic action can be deleted"""
+
+        configuration_action = generate_configuration_action_model()
+        config_id = configuration_action.configuration_id
+        _ = super().delete_object(url=f"{self.configurations_url}/{config_id}",)
+
     @staticmethod
     def add_a_contact():
         userinfo = generate_userinfo_data()

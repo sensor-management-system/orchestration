@@ -87,18 +87,3 @@ class PlatformSoftwareUpdateActionRelationship(ResourceRelationship):
         "session": db.session,
         "model": PlatformSoftwareUpdateAction,
     }
-
-
-class PlatformSoftwareUpdateActionRelationshipReadOnly(
-    PlatformSoftwareUpdateActionRelationship
-):
-    """A readonly relationship endpoint for platform software update actions."""
-
-    def before_post(self, args, kwargs, json_data=None):
-        raise MethodNotAllowed("This endpoint is readonly!")
-
-    def before_patch(self, args, kwargs, data=None):
-        raise MethodNotAllowed("This endpoint is readonly!")
-
-    def before_delete(self, args, kwargs):
-        raise MethodNotAllowed("This endpoint is readonly!")
