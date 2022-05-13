@@ -72,6 +72,16 @@ permissions and limitations under the Licence.
           Cancel
         </v-btn>
       </v-col>
+      <v-col align-self="center" class="text-right">
+        <v-btn
+          small
+          nuxt
+          color="accent"
+          :to="'/contacts/new?redirect=' + redirectUrl"
+        >
+          New Contact
+        </v-btn>
+      </v-col>
     </v-row>
   </div>
 </template>
@@ -115,6 +125,11 @@ export default class PlatformAddContactPage extends Vue {
       this.isLoading = true
       await this.loadAllContacts()
       await this.loadPlatformContacts(this.platformId)
+
+      const redirectContactId = this.$route.query.contact
+      if (redirectContactId) {
+        this.selectedContact = this.allExceptSelected.find(contact => contact.id === redirectContactId) as Contact
+      }
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to fetch related contacts')
     } finally {
@@ -132,6 +147,10 @@ export default class PlatformAddContactPage extends Vue {
 
   get allExceptSelected (): Contact[] {
     return this.contactsByDifference(this.platformContacts)
+  }
+
+  get redirectUrl (): string {
+    return encodeURI(this.$route.path)
   }
 
   async addContact () {

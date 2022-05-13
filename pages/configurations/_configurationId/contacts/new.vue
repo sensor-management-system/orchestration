@@ -44,7 +44,7 @@ permissions and limitations under the Licence.
           :items="allExceptSelected"
           :item-text="(x) => x"
           :item-value="(x) => x.id"
-          label="New contact"
+          label="Assign contact"
           return-object
         />
       </v-col>
@@ -57,9 +57,9 @@ permissions and limitations under the Licence.
           small
           color="primary"
           :disabled="selectedContact == null"
-          @click="addContact"
+          @click="assignContact"
         >
-          Add
+          Assign
         </v-btn>
         <v-btn
           small
@@ -68,6 +68,16 @@ permissions and limitations under the Licence.
           :to="'/configurations/' + configurationId + '/contacts'"
         >
           Cancel
+        </v-btn>
+      </v-col>
+      <v-col align-self="center" class="text-right">
+        <v-btn
+          small
+          nuxt
+          color="accent"
+          :to="'/contacts/new?redirect=' + redirectUrl"
+        >
+          New Contact
         </v-btn>
       </v-col>
     </v-row>
@@ -96,7 +106,7 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
     ...mapActions('configurations', ['loadConfigurationContacts', 'addConfigurationContact'])
   }
 })
-export default class ConfigurationAddContactPage extends Vue {
+export default class ConfigurationAssignContactPage extends Vue {
   private selectedContact: Contact | null = null
   private isLoading: boolean = false
   private isSaving: boolean = false
@@ -116,6 +126,11 @@ export default class ConfigurationAddContactPage extends Vue {
       this.isLoading = true
       await this.loadAllContacts()
       await this.loadConfigurationContacts(this.configurationId)
+
+      const redirectContactId = this.$route.query.contact
+      if (redirectContactId) {
+        this.selectedContact = this.allExceptSelected.find(contact => contact.id === redirectContactId) as Contact
+      }
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to fetch related contacts')
     } finally {
@@ -135,7 +150,11 @@ export default class ConfigurationAddContactPage extends Vue {
     return this.contactsByDifference(this.configurationContacts)
   }
 
-  async addContact () {
+  get redirectUrl (): string {
+    return encodeURI(this.$route.path)
+  }
+
+  async assignContact () {
     if (this.selectedContact && this.selectedContact.id && this.$auth.loggedIn) {
       try {
         this.isSaving = true

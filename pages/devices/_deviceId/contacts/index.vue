@@ -43,7 +43,7 @@ permissions and limitations under the Licence.
         nuxt
         :to="'/devices/' + deviceId + '/contacts/new'"
       >
-        Add contact
+        Assign contact
       </v-btn>
     </v-card-actions>
     <hint-card v-if="deviceContacts.length === 0">
