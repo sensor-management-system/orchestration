@@ -1,12 +1,30 @@
 from dataclasses import dataclass
 from typing import List, Any, Callable, TypeVar, Type, cast
 
+from flask import current_app
+
 T = TypeVar("T")
 
 
 def from_str(x: Any) -> str:
     assert isinstance(x, str)
     return x
+
+
+def remove_prefix_from_ufz_idl(x: Any) -> str:
+    """
+    Remove the Prefix from uri due to idl implementation on ufz.
+    This should be only temporary solution for this Problem!
+
+    >> s = "/idl/permission-groups/dpvm-9"
+    >> remove_prefix_from_ufz_idl(s)
+    >>  "dpvm-9"
+
+    :param string x: uir
+    :return:
+    """
+    assert isinstance(x, str)
+    return x.split("/")[-1]
 
 
 def from_list(f: Callable[[Any], T], x: Any) -> List[T]:
@@ -31,12 +49,20 @@ class IdlUser:
         assert isinstance(obj, dict)
         id = from_str(obj.get("id"))
         username = from_str(obj.get("userName"))
-        administrated_permission_groups = from_list(
-            from_str, obj.get("administratedPermissionGroups")
-        )
-        membered_permission_groups = from_list(
-            from_str, obj.get("memberedPermissionGroups")
-        )
+        if current_app.config["INSTITUTE"] == "ufz":
+            administrated_permission_groups = from_list(
+                remove_prefix_from_ufz_idl, obj.get("administratedPermissionGroups")
+            )
+            membered_permission_groups = from_list(
+                remove_prefix_from_ufz_idl, obj.get("memberedPermissionGroups")
+            )
+        else:
+            administrated_permission_groups = from_list(
+                from_str, obj.get("administratedPermissionGroups")
+            )
+            membered_permission_groups = from_list(
+                from_str, obj.get("memberedPermissionGroups")
+            )
         return IdlUser(
             id, username, administrated_permission_groups, membered_permission_groups
         )

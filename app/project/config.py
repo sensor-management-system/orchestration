@@ -39,6 +39,7 @@ class BaseConfig:
     SMS_IDL_TOKEN = env("SMS_IDL_TOKEN", None)
     IDL_URL = env("IDL_URL", None)
     CATCH_EXCEPTIONS = True
+    INSTITUTE = env("INSTITUTE", "ufz")
 
 
 class DevelopmentConfig(BaseConfig):
