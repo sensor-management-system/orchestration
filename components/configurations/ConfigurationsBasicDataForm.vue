@@ -44,6 +44,7 @@ permissions and limitations under the Licence.
           :rules="[rules.labelProvided]"
           label="Label"
           :readonly="readonly"
+          class="required"
           @input="update('label',$event)"
         />
       </v-col>
@@ -159,6 +160,6 @@ export default class ConfigurationsBasicDataForm extends Vue {
 }
 </script>
 
-<style scoped>
-
+<style lang="scss">
+@import '@/assets/styles/_forms.scss';
 </style>

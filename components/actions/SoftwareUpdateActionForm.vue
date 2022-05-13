@@ -40,6 +40,7 @@ permissions and limitations under the Licence.
           <DateTimePicker
             :value="actionCopy.updateDate"
             label="Update date"
+            :required="true"
             :rules="[rules.dateNotNull]"
             @input="setUpdateDateAndValidate"
           />
@@ -57,6 +58,7 @@ permissions and limitations under the Licence.
             :item-text="(x) => x.name"
             :item-value="(x) => x.uri"
             label="Software type"
+            class="required"
             :rules="[rules.softwareTypeNotNull]"
             @input="setSoftwareType"
           />
@@ -282,3 +284,6 @@ export default class SoftwareUpdateActionForm extends Vue {
   }
 }
 </script>
+<style lang="scss">
+@import '@/assets/styles/_forms.scss';
+</style>

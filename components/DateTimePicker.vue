@@ -36,6 +36,7 @@ permissions and limitations under the Licence.
     :rules="textInputRules"
     hint="The referenced time zone is UTC."
     persistent-hint
+    :class="{ 'required': required }"
     v-bind="$attrs"
     @input="updateByTextfield"
   >
@@ -131,6 +132,7 @@ export default class DateTimePicker extends Vue {
   @Prop({ default: () => [], type: Array }) readonly rules!: []
 
   @Prop({ default: false, type: Boolean }) readonly readonly!: boolean
+  @Prop({ default: false, type: Boolean }) readonly required!: boolean
 
   private isDatetimeUsed: boolean = true
   private usesDate: boolean = false
@@ -304,7 +306,8 @@ export default class DateTimePicker extends Vue {
 }
 </script>
 
-<style>
+<style lang="scss">
+@import '@/assets/styles/_forms.scss';
 .height-adjustment {
   min-height: 392px;
 }
