@@ -57,11 +57,20 @@ permissions and limitations under the Licence.
         @save="save"
       />
     </v-card-actions>
+
+    <navigation-guard-dialog
+      v-model="showNavigationWarning"
+      :has-entity-changed="platformHasBeenEdited"
+      :to="to"
+      @close="to = null"
+    />
   </div>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
+
+import { RawLocation } from 'vue-router'
 
 import { mapActions, mapState } from 'vuex'
 import PlatformBasicDataForm from '@/components/PlatformBasicDataForm.vue'
@@ -69,12 +78,14 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
 import { Platform } from '@/models/Platform'
 import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
+import NavigationGuardDialog from '@/components/shared/NavigationGuardDialog.vue'
 
 @Component({
   components: {
     SaveAndCancelButtons,
     PlatformBasicDataForm,
-    ProgressIndicator
+    ProgressIndicator,
+    NavigationGuardDialog
   },
   middleware: ['auth'],
   computed: mapState('platforms', ['platform']),
@@ -83,6 +94,9 @@ import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButto
 export default class PlatformEditBasicPage extends Vue {
   private platformCopy: Platform = new Platform()
   private isSaving: boolean = false
+  private hasSaved: boolean = false
+  private showNavigationWarning: boolean = false
+  private to: RawLocation | null = null
 
   // vuex definition for typescript check
   platform!: Platform
@@ -95,6 +109,10 @@ export default class PlatformEditBasicPage extends Vue {
 
   get platformId () {
     return this.$route.params.platformId
+  }
+
+  get platformHasBeenEdited () {
+    return (JSON.stringify(this.platform) !== JSON.stringify(this.platformCopy))
   }
 
   async save () {
@@ -111,12 +129,29 @@ export default class PlatformEditBasicPage extends Vue {
         includeContacts: false,
         includePlatformAttachments: false
       })
+      this.hasSaved = true
+
       this.$router.push('/platforms/' + this.platformId + '/basic')
       this.$store.commit('snackbar/setSuccess', 'Platform updated')
+      this.$router.push('/devices/' + this.platformId + '/basic')
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Save failed')
     } finally {
       this.isSaving = false
+    }
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  beforeRouteLeave (to: RawLocation, from: RawLocation, next: any) {
+    if (this.platformHasBeenEdited && !this.hasSaved) {
+      if (this.to && this.to) {
+        next()
+      } else {
+        this.to = to
+        this.showNavigationWarning = true
+      }
+    } else {
+      return next()
     }
   }
 }

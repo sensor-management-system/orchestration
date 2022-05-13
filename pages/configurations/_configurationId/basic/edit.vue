@@ -62,6 +62,13 @@ permissions and limitations under the Licence.
           @save="save"
         />
       </v-card-actions>
+
+      <navigation-guard-dialog
+        v-model="showNavigationWarning"
+        :has-entity-changed="configurationHasBeenEdited"
+        :to="to"
+        @close="to = null"
+      />
     </v-card>
   </div>
 </template>
@@ -69,14 +76,17 @@ permissions and limitations under the Licence.
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 
+import { RawLocation } from 'vue-router'
+
 import { mapActions, mapState } from 'vuex'
 import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
 import ConfigurationsBasicDataForm from '@/components/configurations/ConfigurationsBasicDataForm.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import NavigationGuardDialog from '@/components/shared/NavigationGuardDialog.vue'
 
 import { Configuration, IConfiguration } from '@/models/Configuration'
 @Component({
-  components: { ProgressIndicator, ConfigurationsBasicDataForm, SaveAndCancelButtons },
+  components: { ProgressIndicator, ConfigurationsBasicDataForm, SaveAndCancelButtons, NavigationGuardDialog },
   middleware: ['auth'],
   computed: mapState('configurations', ['configuration']),
   methods: mapActions('configurations', ['saveConfiguration', 'loadConfiguration'])
@@ -84,6 +94,9 @@ import { Configuration, IConfiguration } from '@/models/Configuration'
 export default class ConfigurationEditBasicPage extends Vue {
   private configurationCopy: Configuration = new Configuration()
   private isLoading: boolean = false
+  private hasSaved: boolean = false
+  private showNavigationWarning: boolean = false
+  private to: RawLocation | null = null
 
   // vuex definition for typescript check
   configuration!: IConfiguration
@@ -98,6 +111,10 @@ export default class ConfigurationEditBasicPage extends Vue {
     return this.$route.params.configurationId
   }
 
+  get configurationHasBeenEdited () {
+    return (JSON.stringify(this.configuration) !== JSON.stringify(this.configurationCopy))
+  }
+
   async save () {
     if (!(this.$refs.basicDataForm as Vue & { validateForm: () => boolean }).validateForm()) {
       this.$store.commit('snackbar/setError', 'Please correct your input')
@@ -108,12 +125,28 @@ export default class ConfigurationEditBasicPage extends Vue {
       this.isLoading = true
       await this.saveConfiguration(this.configurationCopy)
       this.loadConfiguration(this.configurationId)
+      this.hasSaved = true
+
       this.$store.commit('snackbar/setSuccess', 'Configuration updated')
-      await this.$router.push('/configurations/' + this.configurationId + '/basic')
+      this.$router.push('/configurations/' + this.configurationId + '/basic')
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Save failed')
     } finally {
       this.isLoading = false
+    }
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  beforeRouteLeave (to: RawLocation, from: RawLocation, next: any) {
+    if (this.configurationHasBeenEdited && !this.hasSaved) {
+      if (this.to && this.to) {
+        next()
+      } else {
+        this.to = to
+        this.showNavigationWarning = true
+      }
+    } else {
+      return next()
     }
   }
 }

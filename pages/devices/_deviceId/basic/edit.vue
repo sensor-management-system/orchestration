@@ -54,73 +54,13 @@ permissions and limitations under the Licence.
         @save="save"
       />
     </v-card-actions>
-    <!-- <v-alert
-      :value="showNavigationWarning"
-      color="warning"
-      dark
-      icon="mdi-alert"
-      transition="scale-transition"
-    >
-      <v-row>
-        You are about to discard your changes. Are you sure?
-      </v-row>
-      <v-row>
-        <v-btn @click="closeDialog">
-          No, stay here
-        </v-btn>
-        <v-btn @click="saveChanges">
-          Save and move on
-        </v-btn>
-        <v-btn @click="discardChanges">
-          Yes, continue
-        </v-btn>
-      </v-row>
-    </v-alert> -->
 
-    <v-dialog
+    <navigation-guard-dialog
       v-model="showNavigationWarning"
-      width="500"
-      @click:outside="closeDialog"
-    >
-      <v-card class="">
-        <v-card-title class="text-h5">
-          <!-- <v-icon>mdi-alert</v-icon> -->
-           Unsaved changes
-        </v-card-title>
-
-        <v-card-text>
-          You have unsaved changes. Are you sure you want to leave the page?
-        </v-card-text>
-
-        <v-card-actions>
-          <v-spacer />
-
-          <v-btn
-            color=""
-            text
-            @click.stop="closeDialog"
-          >
-            close
-          </v-btn>
-
-
-          <v-btn
-            color="secondary"
-            text
-            @click="discardChanges"
-          >
-            Discard changes
-          </v-btn>
-          <v-btn
-            color="primary"
-
-            @click="saveChanges"
-          >
-            Save changes
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+      :has-entity-changed="deviceHasBeenEdited"
+      :to="to"
+      @close="to = null"
+    />
   </div>
 </template>
 
@@ -133,6 +73,7 @@ import { mapActions, mapState } from 'vuex'
 import DeviceBasicDataForm from '@/components/DeviceBasicDataForm.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
+import NavigationGuardDialog from '@/components/shared/NavigationGuardDialog.vue'
 
 import { Device } from '@/models/Device'
 
@@ -140,7 +81,8 @@ import { Device } from '@/models/Device'
   components: {
     SaveAndCancelButtons,
     DeviceBasicDataForm,
-    ProgressIndicator
+    ProgressIndicator,
+    NavigationGuardDialog
   },
   middleware: ['auth'],
   computed: mapState('devices', ['device']),
@@ -149,37 +91,9 @@ import { Device } from '@/models/Device'
 export default class DeviceEditBasicPage extends Vue {
   private deviceCopy: Device = new Device()
   private isSaving: boolean = false
+  private hasSaved: boolean = false
   private showNavigationWarning: boolean = false
   private to: RawLocation | null = null
-
-  // private continueToDifferentPage = () => {
-  //   this.showNavigationWarning = false
-  //   this.$router.push(this.to)
-  // }
-
-  // private stayOnPage = () => {
-  //   this.showNavigationWarning = false
-  //   this.to = null
-  // }
-
-  closeDialog () {
-    this.showNavigationWarning = false
-    this.to = null
-  }
-
-  async saveChanges () {
-    // add code to save changes here
-    await this.save()
-    this.showNavigationWarning = false
-    console.log('save and goto', this.to)
-    this.$router.push(this.to.path)
-  }
-
-  discardChanges () {
-    this.showNavigationWarning = false
-    console.log('discard and goto', this.to)
-    this.$router.push(this.to.path)
-  }
 
   // vuex definition for typescript check
   device!: Device
@@ -220,6 +134,7 @@ export default class DeviceEditBasicPage extends Vue {
         includeDeviceProperties: false,
         includeDeviceAttachments: false
       }) // Todo eventuell gibt es eine besser möglichkeit die Änderungen nachzuladen/eventuell das gespeicherte Device als das device im store setzen
+      this.hasSaved = true
       this.$store.commit('snackbar/setSuccess', 'Device updated')
       this.$router.push('/devices/' + this.deviceId + '/basic')
     } catch (e) {
@@ -229,12 +144,10 @@ export default class DeviceEditBasicPage extends Vue {
     }
   }
 
-  beforeRouteLeave (to, from, next) {
-    // called when the route that renders this component is about to
-    // be navigated away from.
-    // has access to `this` component instance.
-    if (this.deviceHasBeenEdited) {
-      if (this.to) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  beforeRouteLeave (to: RawLocation, from: RawLocation, next: any) {
+    if (this.deviceHasBeenEdited && !this.hasSaved) {
+      if (this.to && this.to) {
         next()
       } else {
         this.to = to
