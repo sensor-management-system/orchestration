@@ -75,6 +75,7 @@ class Device(
             "is_public": self.is_public,
             "is_private": self.is_private,
             "created_by_id": self.created_by_id,
+            "group_ids": self.group_ids,
         }
 
     def get_parent_search_entities(self):
@@ -141,6 +142,8 @@ class Device(
             "status_name": type_keyword_and_full_searchable,
             # Just keyword for status uri.
             "status_uri": type_keyword,
+            # For the group ids we just want it to be exact.
+            "group_ids": type_keyword,
             "attachments": {
                 "type": "nested",
                 "properties": {
