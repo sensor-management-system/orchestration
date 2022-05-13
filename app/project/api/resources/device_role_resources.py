@@ -1,8 +1,11 @@
+"""Resource classes for the device contact roles."""
+
 from flask_rest_jsonapi import ResourceDetail
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.exc import NoResultFound
 
 from .base_resource import check_if_object_not_found
+from ..auth.permission_utils import get_query_with_permissions_for_related_objects
 from ..models import Device
 from ..models.base_model import db
 from ..models.contact_role import DeviceContactRole
@@ -13,8 +16,10 @@ from ...frj_csv_export.resource import ResourceList
 
 class DeviceRoleList(ResourceList):
     """
-    provides get and post methods to retrieve
-     a collection of Device Role or create one.
+    List resource for device contact roles.
+
+    Provides get and post methods to retrieve
+    a collection of Device Role or create one.
     """
 
     def query(self, view_kwargs):
@@ -24,7 +29,7 @@ class DeviceRoleList(ResourceList):
         Handle also additional logic to query the device
         attachments for a specific device.
         """
-        query_ = self.session.query(DeviceContactRole)
+        query_ = get_query_with_permissions_for_related_objects(self.model)
         device_id = view_kwargs.get("device_id")
 
         if device_id is not None:
@@ -48,12 +53,14 @@ class DeviceRoleList(ResourceList):
 
 class DeviceRoleDetail(ResourceDetail):
     """
-    provides get, patch and delete methods to retrieve details
+    Detail resource for device contact roles.
+
+    Provides get, patch and delete methods to retrieve details
     of an object, update an object and delete a Device Role
     """
 
     def before_get(self, args, kwargs):
-        """Return 404 Responses if role not found"""
+        """Return 404 Responses if role not found."""
         check_if_object_not_found(self._data_layer.model, kwargs)
 
     schema = DeviceRoleSchema
