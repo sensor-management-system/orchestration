@@ -30,380 +30,388 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <v-row>
-      <v-col cols="12" md="3">
-        <v-text-field
-          ref="label"
-          label="Label"
-          :value="value.label"
-          :readonly="readonly"
-          :disabled="readonly"
-          @input="update('label', $event)"
-        />
-      </v-col>
-    </v-row>
-    <v-row>
-      <v-col cols="12" md="3">
-        <v-combobox
-          label="Compartment"
-          clearable
-          :items="compartmentItems"
-          item-name="name"
-          :value="valueCompartmentItem"
-          :readonly="readonly"
-          :disabled="readonly"
-          @input="updateCompartment"
-        >
-          <template #append-outer>
-            <v-tooltip
-              v-if="itemHasDefinition(valueCompartmentItem)"
-              right
-            >
-              <template #activator="{ on, attrs }">
-                <v-icon
-                  color="primary"
-                  small
-                  v-bind="attrs"
-                  v-on="on"
-                >
-                  mdi-help-circle-outline
-                </v-icon>
-              </template>
-              <span>{{ valueCompartmentItem.definition }}</span>
-            </v-tooltip>
-          </template>
-          <template #item="data">
-            <template v-if="typeof data.item !== 'object'">
-              <v-list-item-content>{{ data.item }}</v-list-item-content>
-            </template>
-            <template v-else>
-              <v-list-item-content>
-                <v-list-item-title>
-                  {{ data.item.name }}
-                  <v-tooltip
-                    v-if="data.item.definition"
-                    bottom
+    <v-form
+      ref="propertyForm"
+      @submit.prevent
+    >
+      <v-row>
+        <v-col cols="12" md="3">
+          <v-text-field
+            ref="label"
+            label="Label"
+            :value="value.label"
+            :readonly="readonly"
+            :disabled="readonly"
+            @input="update('label', $event)"
+          />
+        </v-col>
+      </v-row>
+      <v-row>
+        <v-col cols="12" md="3">
+          <v-combobox
+            label="Compartment"
+            clearable
+            :items="compartmentItems"
+            item-name="name"
+            :value="valueCompartmentItem"
+            :readonly="readonly"
+            :disabled="readonly"
+            @input="updateCompartment"
+          >
+            <template #append-outer>
+              <v-tooltip
+                v-if="itemHasDefinition(valueCompartmentItem)"
+                right
+              >
+                <template #activator="{ on, attrs }">
+                  <v-icon
+                    color="primary"
+                    small
+                    v-bind="attrs"
+                    v-on="on"
                   >
-                    <template #activator="{ on, attrs }">
-                      <v-icon
-                        color="primary"
-                        small
-                        v-bind="attrs"
-                        v-on="on"
-                      >
-                        mdi-help-circle-outline
-                      </v-icon>
-                    </template>
-                    <span>{{ data.item.definition }}</span>
-                  </v-tooltip>
-                </v-list-item-title>
-              </v-list-item-content>
+                    mdi-help-circle-outline
+                  </v-icon>
+                </template>
+                <span>{{ valueCompartmentItem.definition }}</span>
+              </v-tooltip>
             </template>
-          </template>
-        </v-combobox>
-      </v-col>
-      <v-col cols="12" md="3">
-        <v-combobox
-          label="Sampling media"
-          clearable
-          :items="samplingMediaItems"
-          item-text="name"
-          :value="valueSamplingMediaItem"
-          :readonly="readonly"
-          :disabled="readonly"
-          @input="updateSamplingMedia"
-        >
-          <template #append-outer>
-            <v-tooltip
-              v-if="itemHasDefinition(valueSamplingMediaItem)"
-              right
-            >
-              <template #activator="{ on, attrs }">
-                <v-icon
-                  color="primary"
-                  small
-                  v-bind="attrs"
-                  v-on="on"
-                >
-                  mdi-help-circle-outline
-                </v-icon>
+            <template #item="data">
+              <template v-if="(typeof data.item) !== 'object'">
+                <v-list-item-content>{{ data.item }}</v-list-item-content>
               </template>
-              <span>{{ valueSamplingMediaItem.definition }}</span>
-            </v-tooltip>
-          </template>
-          <template #item="data">
-            <template v-if="typeof data.item !== 'object'">
-              <v-list-item-content>{{ data.item }}</v-list-item-content>
-            </template>
-            <template v-else>
-              <v-list-item-content>
-                <v-list-item-title>
-                  {{ data.item.name }}
-                  <v-tooltip
-                    v-if="data.item.definition"
-                    bottom
-                  >
-                    <template #activator="{ on, attrs }">
-                      <v-icon
-                        color="primary"
-                        small
-                        v-bind="attrs"
-                        v-on="on"
-                      >
-                        mdi-help-circle-outline
-                      </v-icon>
-                    </template>
-                    <span>{{ data.item.definition }}</span>
-                  </v-tooltip>
-                </v-list-item-title>
-              </v-list-item-content>
-            </template>
-          </template>
-        </v-combobox>
-      </v-col>
-      <v-col cols="12" md="3">
-        <v-combobox
-          label="Measured Quantity"
-          clearable
-          :items="propertyItems"
-          item-text="name"
-          :value="valuePropertyItem"
-          :readonly="readonly"
-          :disabled="readonly"
-          @input="updateProperty"
-        >
-          <template #append-outer>
-            <v-tooltip
-              v-if="itemHasDefinition(valuePropertyItem)"
-              right
-            >
-              <template #activator="{ on, attrs }">
-                <v-icon
-                  color="primary"
-                  small
-                  v-bind="attrs"
-                  v-on="on"
-                >
-                  mdi-help-circle-outline
-                </v-icon>
+              <template v-else>
+                <v-list-item-content>
+                  <v-list-item-title>
+                    {{ data.item.name }}
+                    <v-tooltip
+                      v-if="data.item.definition"
+                      bottom
+                    >
+                      <template #activator="{ on, attrs }">
+                        <v-icon
+                          color="primary"
+                          small
+                          v-bind="attrs"
+                          v-on="on"
+                        >
+                          mdi-help-circle-outline
+                        </v-icon>
+                      </template>
+                      <span>{{ data.item.definition }}</span>
+                    </v-tooltip>
+                  </v-list-item-title>
+                </v-list-item-content>
               </template>
-              <span>{{ valuePropertyItem.definition }}</span>
-            </v-tooltip>
-          </template>
-          <template #item="data">
-            <template v-if="typeof data.item !== 'object'">
-              <v-list-item-content>{{ data.item }}</v-list-item-content>
             </template>
-            <template v-else>
-              <v-list-item-content>
-                <v-list-item-title>
-                  {{ data.item.name }}
-                  <v-tooltip
-                    v-if="data.item.definition"
-                    bottom
+          </v-combobox>
+        </v-col>
+        <v-col cols="12" md="3">
+          <v-combobox
+            label="Sampling media"
+            clearable
+            :items="samplingMediaItems"
+            item-text="name"
+            :value="valueSamplingMediaItem"
+            :readonly="readonly"
+            :disabled="readonly"
+            @input="updateSamplingMedia"
+          >
+            <template #append-outer>
+              <v-tooltip
+                v-if="itemHasDefinition(valueSamplingMediaItem)"
+                right
+              >
+                <template #activator="{ on, attrs }">
+                  <v-icon
+                    color="primary"
+                    small
+                    v-bind="attrs"
+                    v-on="on"
                   >
-                    <template #activator="{ on, attrs }">
-                      <v-icon
-                        color="primary"
-                        small
-                        v-bind="attrs"
-                        v-on="on"
-                      >
-                        mdi-help-circle-outline
-                      </v-icon>
-                    </template>
-                    <span>{{ data.item.definition }}</span>
-                  </v-tooltip>
-                </v-list-item-title>
-              </v-list-item-content>
+                    mdi-help-circle-outline
+                  </v-icon>
+                </template>
+                <span>{{ valueSamplingMediaItem.definition }}</span>
+              </v-tooltip>
             </template>
-          </template>
-        </v-combobox>
-      </v-col>
-    </v-row>
-    <v-row>
-      <v-col cols="12" md="3">
-        <v-combobox
-          label="Unit"
-          clearable
-          :items="measuredQuantityUnitItems"
-          item-text="name"
-          :value="valueUnitItem"
-          :readonly="readonly"
-          :disabled="readonly"
-          @input="updateUnit"
-        >
-          <template #append-outer>
-            <v-tooltip
-              v-if="itemHasDefinition(valueUnitItem)"
-              right
-            >
-              <template #activator="{ on, attrs }">
-                <v-icon
-                  color="primary"
-                  small
-                  v-bind="attrs"
-                  v-on="on"
-                >
-                  mdi-help-circle-outline
-                </v-icon>
+            <template #item="data">
+              <template v-if="(typeof data.item) !== 'object'">
+                <v-list-item-content>{{ data.item }}</v-list-item-content>
               </template>
-              <span>{{ valueUnitItem.definition }}</span>
-            </v-tooltip>
-          </template>
-          <template #item="data">
-            <template v-if="typeof data.item !== 'object'">
-              <v-list-item-content>{{ data.item }}</v-list-item-content>
-            </template>
-            <template v-else>
-              <v-list-item-content>
-                <v-list-item-title>
-                  {{ data.item.name }}
-                  <v-tooltip
-                    v-if="data.item.definition"
-                    bottom
-                  >
-                    <template #activator="{ on, attrs }">
-                      <v-icon
-                        color="primary"
-                        small
-                        v-bind="attrs"
-                        v-on="on"
-                      >
-                        mdi-help-circle-outline
-                      </v-icon>
-                    </template>
-                    <span>{{ data.item.definition }}</span>
-                  </v-tooltip>
-                </v-list-item-title>
-              </v-list-item-content>
-            </template>
-          </template>
-        </v-combobox>
-      </v-col>
-      <v-col cols="12" md="3">
-        <v-text-field
-          label="Measuring range min"
-          :value="value.measuringRange.min"
-          :readonly="readonly"
-          :disabled="readonly"
-          type="number"
-          step="any"
-          @input="update('measuringRange.min', $event)"
-          @wheel.prevent
-        />
-      </v-col>
-      <v-col cols="12" md="3">
-        <v-text-field
-          label="Measuring range max"
-          :value="value.measuringRange.max"
-          :readonly="readonly"
-          :disabled="readonly"
-          type="number"
-          step="any"
-          @input="update('measuringRange.max', $event)"
-          @wheel.prevent
-        />
-      </v-col>
-    </v-row>
-    <v-row>
-      <v-col cols="12" md="3">
-        <v-text-field
-          label="Accuracy"
-          :value="value.accuracy"
-          :readonly="readonly"
-          :disabled="readonly"
-          type="number"
-          step="any"
-          @input="update('accuracy', $event)"
-          @wheel.prevent
-        />
-      </v-col>
-      <v-col cols="12" md="3">
-        <v-text-field
-          label="Failure value"
-          :value="value.failureValue"
-          :readonly="readonly"
-          :disabled="readonly"
-          type="number"
-          step="any"
-          @input="update('failureValue', $event)"
-          @wheel.prevent
-        />
-      </v-col>
-    </v-row>
-    <v-row>
-      <v-col cols="12" md="3">
-        <v-text-field
-          label="Resolution"
-          :value="value.resolution"
-          :readonly="readonly"
-          :disabled="readonly"
-          type="number"
-          step="any"
-          @input="update('resolution', $event)"
-          @wheel.prevent
-        />
-      </v-col>
-      <v-col cols="12" md="3">
-        <v-combobox
-          label="Unit of Resolution"
-          :items="unitItems"
-          item-text="name"
-          :value="valueResolutionUnitItem"
-          :readonly="readonly"
-          :disabled="readonly"
-          @input="updateResolutionUnit"
-        >
-          <template #append-outer>
-            <v-tooltip
-              v-if="itemHasDefinition(valueResolutionUnitItem)"
-              right
-            >
-              <template #activator="{ on, attrs }">
-                <v-icon
-                  color="primary"
-                  small
-                  v-bind="attrs"
-                  v-on="on"
-                >
-                  mdi-help-circle-outline
-                </v-icon>
+              <template v-else>
+                <v-list-item-content>
+                  <v-list-item-title>
+                    {{ data.item.name }}
+                    <v-tooltip
+                      v-if="data.item.definition"
+                      bottom
+                    >
+                      <template #activator="{ on, attrs }">
+                        <v-icon
+                          color="primary"
+                          small
+                          v-bind="attrs"
+                          v-on="on"
+                        >
+                          mdi-help-circle-outline
+                        </v-icon>
+                      </template>
+                      <span>{{ data.item.definition }}</span>
+                    </v-tooltip>
+                  </v-list-item-title>
+                </v-list-item-content>
               </template>
-              <span>{{ valueResolutionUnitItem.definition }}</span>
-            </v-tooltip>
-          </template>
-          <template #item="data">
-            <template v-if="typeof data.item !== 'object'">
-              <v-list-item-content>{{ data.item }}</v-list-item-content>
             </template>
-            <template v-else>
-              <v-list-item-content>
-                <v-list-item-title>
-                  {{ data.item.name }}
-                  <v-tooltip
-                    v-if="data.item.definition"
-                    bottom
+          </v-combobox>
+        </v-col>
+        <v-col cols="12" md="3">
+          <v-combobox
+            label="Measured Quantity"
+            class="required"
+            :rules="[rules.required]"
+            clearable
+            :items="propertyItems"
+            item-text="name"
+            :value="valuePropertyItem"
+            :readonly="readonly"
+            :disabled="readonly"
+            @input="updateProperty"
+            @change="onMeasuredQuantityChanged"
+          >
+            <template #append-outer>
+              <v-tooltip
+                v-if="itemHasDefinition(valuePropertyItem)"
+                right
+              >
+                <template #activator="{ on, attrs }">
+                  <v-icon
+                    color="primary"
+                    small
+                    v-bind="attrs"
+                    v-on="on"
                   >
-                    <template #activator="{ on, attrs }">
-                      <v-icon
-                        color="primary"
-                        small
-                        v-bind="attrs"
-                        v-on="on"
-                      >
-                        mdi-help-circle-outline
-                      </v-icon>
-                    </template>
-                    <span>{{ data.item.definition }}</span>
-                  </v-tooltip>
-                </v-list-item-title>
-              </v-list-item-content>
+                    mdi-help-circle-outline
+                  </v-icon>
+                </template>
+                <span>{{ valuePropertyItem.definition }}</span>
+              </v-tooltip>
             </template>
-          </template>
-        </v-combobox>
-      </v-col>
-    </v-row>
+            <template #item="data">
+              <template v-if="(typeof data.item) !== 'object'">
+                <v-list-item-content>{{ data.item }}</v-list-item-content>
+              </template>
+              <template v-else>
+                <v-list-item-content>
+                  <v-list-item-title>
+                    {{ data.item.name }}
+                    <v-tooltip
+                      v-if="data.item.definition"
+                      bottom
+                    >
+                      <template #activator="{ on, attrs }">
+                        <v-icon
+                          color="primary"
+                          small
+                          v-bind="attrs"
+                          v-on="on"
+                        >
+                          mdi-help-circle-outline
+                        </v-icon>
+                      </template>
+                      <span>{{ data.item.definition }}</span>
+                    </v-tooltip>
+                  </v-list-item-title>
+                </v-list-item-content>
+              </template>
+            </template>
+          </v-combobox>
+        </v-col>
+      </v-row>
+      <v-row>
+        <v-col cols="12" md="3">
+          <v-combobox
+            label="Unit"
+            clearable
+            :items="measuredQuantityUnitItems"
+            item-text="name"
+            :value="valueUnitItem"
+            :readonly="readonly"
+            :disabled="readonly"
+            @input="updateUnit"
+          >
+            <template #append-outer>
+              <v-tooltip
+                v-if="itemHasDefinition(valueUnitItem)"
+                right
+              >
+                <template #activator="{ on, attrs }">
+                  <v-icon
+                    color="primary"
+                    small
+                    v-bind="attrs"
+                    v-on="on"
+                  >
+                    mdi-help-circle-outline
+                  </v-icon>
+                </template>
+                <span>{{ valueUnitItem.definition }}</span>
+              </v-tooltip>
+            </template>
+            <template #item="data">
+              <template v-if="(typeof data.item) !== 'object'">
+                <v-list-item-content>{{ data.item }}</v-list-item-content>
+              </template>
+              <template v-else>
+                <v-list-item-content>
+                  <v-list-item-title>
+                    {{ data.item.name }}
+                    <v-tooltip
+                      v-if="data.item.definition"
+                      bottom
+                    >
+                      <template #activator="{ on, attrs }">
+                        <v-icon
+                          color="primary"
+                          small
+                          v-bind="attrs"
+                          v-on="on"
+                        >
+                          mdi-help-circle-outline
+                        </v-icon>
+                      </template>
+                      <span>{{ data.item.definition }}</span>
+                    </v-tooltip>
+                  </v-list-item-title>
+                </v-list-item-content>
+              </template>
+            </template>
+          </v-combobox>
+        </v-col>
+        <v-col cols="12" md="3">
+          <v-text-field
+            label="Measuring range min"
+            :value="value.measuringRange.min"
+            :readonly="readonly"
+            :disabled="readonly"
+            type="number"
+            step="any"
+            @input="update('measuringRange.min', $event)"
+            @wheel.prevent
+          />
+        </v-col>
+        <v-col cols="12" md="3">
+          <v-text-field
+            label="Measuring range max"
+            :value="value.measuringRange.max"
+            :readonly="readonly"
+            :disabled="readonly"
+            type="number"
+            step="any"
+            @input="update('measuringRange.max', $event)"
+            @wheel.prevent
+          />
+        </v-col>
+      </v-row>
+      <v-row>
+        <v-col cols="12" md="3">
+          <v-text-field
+            label="Accuracy"
+            :value="value.accuracy"
+            :readonly="readonly"
+            :disabled="readonly"
+            type="number"
+            step="any"
+            @input="update('accuracy', $event)"
+            @wheel.prevent
+          />
+        </v-col>
+        <v-col cols="12" md="3">
+          <v-text-field
+            label="Failure value"
+            :value="value.failureValue"
+            :readonly="readonly"
+            :disabled="readonly"
+            type="number"
+            step="any"
+            @input="update('failureValue', $event)"
+            @wheel.prevent
+          />
+        </v-col>
+      </v-row>
+      <v-row>
+        <v-col cols="12" md="3">
+          <v-text-field
+            label="Resolution"
+            :value="value.resolution"
+            :readonly="readonly"
+            :disabled="readonly"
+            type="number"
+            step="any"
+            @input="update('resolution', $event)"
+            @wheel.prevent
+          />
+        </v-col>
+        <v-col cols="12" md="3">
+          <v-combobox
+            label="Unit of Resolution"
+            :items="unitItems"
+            item-text="name"
+            :value="valueResolutionUnitItem"
+            :readonly="readonly"
+            :disabled="readonly"
+            @input="updateResolutionUnit"
+          >
+            <template #append-outer>
+              <v-tooltip
+                v-if="itemHasDefinition(valueResolutionUnitItem)"
+                right
+              >
+                <template #activator="{ on, attrs }">
+                  <v-icon
+                    color="primary"
+                    small
+                    v-bind="attrs"
+                    v-on="on"
+                  >
+                    mdi-help-circle-outline
+                  </v-icon>
+                </template>
+                <span>{{ valueResolutionUnitItem.definition }}</span>
+              </v-tooltip>
+            </template>
+            <template #item="data">
+              <template v-if="(typeof data.item) !== 'object'">
+                <v-list-item-content>{{ data.item }}</v-list-item-content>
+              </template>
+              <template v-else>
+                <v-list-item-content>
+                  <v-list-item-title>
+                    {{ data.item.name }}
+                    <v-tooltip
+                      v-if="data.item.definition"
+                      bottom
+                    >
+                      <template #activator="{ on, attrs }">
+                        <v-icon
+                          color="primary"
+                          small
+                          v-bind="attrs"
+                          v-on="on"
+                        >
+                          mdi-help-circle-outline
+                        </v-icon>
+                      </template>
+                      <span>{{ data.item.definition }}</span>
+                    </v-tooltip>
+                  </v-list-item-title>
+                </v-list-item-content>
+              </template>
+            </template>
+          </v-combobox>
+        </v-col>
+      </v-row>
+    </v-form>
   </div>
 </template>
 
@@ -412,7 +420,7 @@ permissions and limitations under the Licence.
  * @file provides a component that renders a form for a device property
  * @author <marc.hanisch@gfz-potsdam.de>
  */
-import { Vue, Component, Prop } from 'nuxt-property-decorator'
+import { Vue, Component, Prop, mixins } from 'nuxt-property-decorator'
 
 import { Compartment } from '@/models/Compartment'
 import { Property } from '@/models/Property'
@@ -423,6 +431,8 @@ import { DeviceProperty } from '@/models/DeviceProperty'
 import { ICvSelectItem, hasDefinition } from '@/models/CvSelectItem'
 
 import { parseFloatOrNull } from '@/utils/numericsHelper'
+
+import { Rules } from '@/mixins/Rules'
 
 interface INameAndUri {
   name: string
@@ -439,8 +449,7 @@ type UnitComboboxValue = MeasuredQuantityUnit | string | undefined
  * @extends Vue
  */
 @Component
-// @ts-ignore
-export default class DevicePropertyForm extends Vue {
+export default class DevicePropertyForm extends mixins(Rules) {
   /**
    * a DeviceProperty
    */
@@ -511,6 +520,20 @@ export default class DevicePropertyForm extends Vue {
     type: Array
   })
   readonly measuredQuantityUnits!: MeasuredQuantityUnit[]
+
+  onMeasuredQuantityChanged () {
+    if (!this.isNewPropertyPage) {
+      this.$store.commit('snackbar/setWarning', 'Warning! You are about to change historical data')
+    }
+  }
+
+  get deviceId () {
+    return this.$route.params.deviceId
+  }
+
+  get isNewPropertyPage (): boolean {
+    return this.$route.path === '/devices/' + this.deviceId + '/measuredquantities/new'
+  }
 
   /**
    * returns the URI of an value
@@ -616,7 +639,7 @@ export default class DevicePropertyForm extends Vue {
       newObj.samplingMediaUri = ''
     }
     if (this.value.samplingMediaUri !== newObj.samplingMediaUri) {
-      // ok, we also want to update the compartment here
+    // ok, we also want to update the compartment here
       const samplineMediaIndex = this.samplingMedias.findIndex(s => s.uri === newObj.samplingMediaUri)
       if (samplineMediaIndex > -1) {
         const samplingMediaItem = this.samplingMedias[samplineMediaIndex]
@@ -665,7 +688,7 @@ export default class DevicePropertyForm extends Vue {
       newObj.propertyUri = ''
     }
     if (this.value.propertyUri !== newObj.propertyUri) {
-      // and here we want to check both the sampling media & the compartment
+    // and here we want to check both the sampling media & the compartment
       const propertyIndex = this.properties.findIndex(p => p.uri === newObj.propertyUri)
       if (propertyIndex > -1) {
         const propertyItem = this.properties[propertyIndex]
@@ -904,11 +927,11 @@ export default class DevicePropertyForm extends Vue {
     if (this.value.samplingMediaUri !== '') {
       properties = properties.filter(p => p.samplingMediaId === '' || this.checkUriEndsWithId(this.value.samplingMediaUri, p.samplingMediaId))
     } else if (this.value.compartmentUri !== '') {
-      // in case we have only a compartment, then we also just want
-      // to select those properties that are hierachically
-      // within the compartment
-      // In case that we have the compartment, then the
-      // getter for the samlingMediaItems is already pre-filtered
+    // in case we have only a compartment, then we also just want
+    // to select those properties that are hierachically
+    // within the compartment
+    // In case that we have the compartment, then the
+    // getter for the samlingMediaItems is already pre-filtered
       const samplingMediaItems = this.samplingMediaItems
       const samplingMediaIds = new Set<string>()
       for (const sm of samplingMediaItems) {
@@ -950,7 +973,7 @@ export default class DevicePropertyForm extends Vue {
    * @returns {Unit[]} list of units
    */
   get unitItems (): Unit[] {
-    // restrict the list of measuredQuantityUnits based on the choosen property
+  // restrict the list of measuredQuantityUnits based on the choosen property
     return this.units
   }
 
@@ -963,7 +986,7 @@ export default class DevicePropertyForm extends Vue {
    * @returns {MeasuredQuantityUnit[]} list of units
    */
   get measuredQuantityUnitItems (): MeasuredQuantityUnit[] {
-    // restrict the list of measuredQuantityUnits based on the choosen property
+  // restrict the list of measuredQuantityUnits based on the choosen property
     return this.measuredQuantityUnits.filter(u => this.checkUriEndsWithId(this.value.propertyUri, u.measuredQuantityId))
   }
 
@@ -1040,5 +1063,19 @@ export default class DevicePropertyForm extends Vue {
   focus (): void {
     (this.$refs.label as Vue & { focus: () => void }).focus()
   }
+
+  /**
+   * validates the user input
+   *
+   * Note: we can't use 'validate' as a method name, so I used 'validateForm'
+   *
+   * @return {boolean} true when input is valid, otherwise false
+   */
+  public validateForm (): boolean {
+    return (this.$refs.propertyForm as Vue & { validate: () => boolean }).validate()
+  }
 }
 </script>
+<style lang="scss">
+@import "@/assets/styles/_forms.scss";
+</style>

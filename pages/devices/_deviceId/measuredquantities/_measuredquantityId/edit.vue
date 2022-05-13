@@ -47,7 +47,7 @@ permissions and limitations under the Licence.
       </v-card-actions>
       <v-card-text>
         <DevicePropertyForm
-          ref="propertyForm"
+          ref="propertyEditForm"
           v-model="valueCopy"
           :readonly="false"
           :compartments="compartments"

@@ -205,6 +205,16 @@ permissions and limitations under the Licence.
             </v-btn>
           </template>
         </v-snackbar>
+        <v-snackbar v-model="hasWarning" top color="orange">
+          {{ warning }}
+          <template #action="{ attrs }">
+            <v-btn icon small color="white" v-bind="attrs" @click="closeWarningSnackbar">
+              <v-icon small>
+                mdi-close
+              </v-icon>
+            </v-btn>
+          </template>
+        </v-snackbar>
         <nuxt />
       </v-container>
     </v-main>
@@ -372,6 +382,19 @@ export default {
         }
       }
     },
+    warning () {
+      return this.$store.state.snackbar.warning
+    },
+    hasWarning: {
+      get () {
+        return this.$store.state.snackbar.warning !== ''
+      },
+      set (newValue) {
+        if (!newValue) {
+          this.$store.commit('snackbar/clearWarning')
+        }
+      }
+    },
     tabs () {
       return this.$store.state.appbar.tabs
     },
@@ -448,6 +471,9 @@ export default {
     },
     closeSuccessSnackbar () {
       this.$store.commit('snackbar/clearSuccess')
+    },
+    closeWarningSnackbar () {
+      this.$store.commit('snackbar/clearWarning')
     },
     onChangeTab (tab) {
       this.$store.commit('appbar/setActiveTab', tab)
