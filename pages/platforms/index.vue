@@ -177,13 +177,33 @@ permissions and limitations under the Licence.
           </v-menu>
         </template>
       </v-subheader>
-      <v-pagination
-        v-model="page"
-        :disabled="loading"
-        :length="totalPages"
-        :total-visible="7"
-        @input="searchPlatformsPaginated"
-      />
+      <v-row
+        no-gutters
+      >
+        <v-col
+          cols="12"
+          md="10"
+          offset-md="1"
+        >
+          <v-pagination
+            v-model="page"
+            :disabled="loading"
+            :length="totalPages"
+            :total-visible="7"
+            @input="searchPlatformsPaginated"
+          />
+        </v-col>
+        <v-col
+          cols="1"
+          offset="11"
+          offset-md="0"
+        >
+          <page-size-select
+            v-model="size"
+            :items="pageSizeItems"
+          />
+        </v-col>
+      </v-row>
       <BaseList
         :list-items="platforms"
       >
@@ -227,7 +247,7 @@ import { Component, Vue } from 'nuxt-property-decorator'
 
 import { saveAs } from 'file-saver'
 
-import { mapState, mapActions } from 'vuex'
+import { mapActions, mapState, mapGetters } from 'vuex'
 
 import ManufacturerSelect from '@/components/ManufacturerSelect.vue'
 import PlatformTypeSelect from '@/components/PlatformTypeSelect.vue'
@@ -239,6 +259,7 @@ import BaseList from '@/components/shared/BaseList.vue'
 import PlatformsListItem from '@/components/platforms/PlatformsListItem.vue'
 import PlatformsBasicSearch from '@/components/platforms/PlatformsBasicSearch.vue'
 import PlatformsBasicSearchField from '@/components/platforms/PlatformsBasicSearchField.vue'
+import PageSizeSelect from '@/components/shared/PageSizeSelect.vue'
 
 import { Manufacturer } from '@/models/Manufacturer'
 import { Platform } from '@/models/Platform'
@@ -261,14 +282,16 @@ import PlatformSearch from '@/components/platforms/PlatformSearch.vue'
     PlatformDeleteDialog,
     ManufacturerSelect,
     PlatformTypeSelect,
-    StatusSelect
+    StatusSelect,
+    PageSizeSelect
   },
-  middleware:['permission'],
+  middleware: ['permission'],
   computed: {
-    ...mapState('platforms', ['platforms', 'pageNumber', 'pageSize', 'totalPages'])
+    ...mapState('platforms', ['platforms', 'pageNumber', 'pageSize', 'totalPages']),
+    ...mapGetters('platforms', ['pageSizes'])
   },
   methods: {
-    ...mapActions('platforms', ['searchPlatformsPaginated', 'setPageNumber', 'exportAsCsv', 'deletePlatform']),
+    ...mapActions('platforms', ['searchPlatformsPaginated', 'setPageNumber', 'setPageSize', 'exportAsCsv', 'deletePlatform']),
     ...mapActions('appbar', ['initPlatformsIndexAppBar', 'setDefaults'])
   }
 })
@@ -285,6 +308,9 @@ export default class SearchPlatformsPage extends Vue {
   setDefaults!: () => void
   pageNumber!: number
   setPageNumber!: (newPageNumber: number) => void
+  pageSize!: number
+  setPageSize!: (newPageSize: number) => void
+  pageSizes!: number[]
   searchPlatformsPaginated!: (searchParams: IPlatformSearchParams) => void
   platforms!: Platform[]
   exportAsCsv!: (searchParams: IPlatformSearchParams) => Promise<Blob>
@@ -297,6 +323,8 @@ export default class SearchPlatformsPage extends Vue {
     try {
       this.loading = true
       await this.initPlatformsIndexAppBar()
+      this.page = this.getPageFromUrl()
+      this.size = this.getSizeFromUrl()
       await this.searchPlatformsPaginated()
     } catch (e) {
       console.log('e',e);
@@ -319,6 +347,23 @@ export default class SearchPlatformsPage extends Vue {
     this.setPageInUrl(false)
   }
 
+  get size (): number {
+    return this.pageSize
+  }
+
+  set size (newVal: number) {
+    this.setPageSize(newVal)
+    this.setSizeInUrl(false)
+    this.searchPlatformsPaginated()
+  }
+
+  get pageSizeItems (): number[] {
+    const resultSet = new Set([
+      ...this.pageSizes,
+      this.getSizeFromUrl()
+    ])
+    return Array.from(resultSet).sort((a, b) => a - b)
+  }
 
   async exportCsv () {
     if (this.platforms.length > 0) {
@@ -375,6 +420,28 @@ export default class SearchPlatformsPage extends Vue {
       query = {
         ...this.$route.query,
         page: String(this.page)
+      }
+    }
+    this.$router.push({
+      query,
+      hash: preserveHash ? this.$route.hash : ''
+    })
+  }
+
+  getSizeFromUrl (): number {
+    if ('size' in this.$route.query && typeof this.$route.query.size === 'string') {
+      return parseInt(this.$route.query.size) ?? this.size
+    }
+    return this.size
+  }
+
+  setSizeInUrl (preserveHash: boolean = true): void {
+    let query: QueryParams = {}
+    if (this.size) {
+      // add size to the current url params
+      query = {
+        ...this.$route.query,
+        size: String(this.size)
       }
     }
     this.$router.push({

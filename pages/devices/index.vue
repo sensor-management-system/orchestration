@@ -226,13 +226,33 @@ permissions and limitations under the Licence.
         </template>
       </v-subheader>
 
-      <v-pagination
-        v-model="page"
-        :disabled="loading"
-        :length="totalPages"
-        :total-visible="7"
-        @input="runSearch"
-      />
+      <v-row
+        no-gutters
+      >
+        <v-col
+          cols="12"
+          md="10"
+          offset-md="1"
+        >
+          <v-pagination
+            v-model="page"
+            :disabled="loading"
+            :length="totalPages"
+            :total-visible="7"
+            @input="runSearch"
+          />
+        </v-col>
+        <v-col
+          cols="1"
+          offset="11"
+          offset-md="0"
+        >
+          <page-size-select
+            v-model="size"
+            :items="pageSizeItems"
+          />
+        </v-col>
+      </v-row>
       <BaseList
         :list-items="devices"
       >
@@ -276,7 +296,7 @@ import { Component, Vue } from 'nuxt-property-decorator'
 
 import { saveAs } from 'file-saver'
 
-import { mapActions, mapState } from 'vuex'
+import { mapActions, mapState, mapGetters } from 'vuex'
 import DeviceTypeSelect from '@/components/DeviceTypeSelect.vue'
 import ManufacturerSelect from '@/components/ManufacturerSelect.vue'
 import StatusSelect from '@/components/StatusSelect.vue'
@@ -285,6 +305,7 @@ import DotMenuActionCopy from '@/components/DotMenuActionCopy.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 import BaseList from '@/components/shared/BaseList.vue'
 import DevicesListItem from '@/components/devices/DevicesListItem.vue'
+import PageSizeSelect from '@/components/shared/PageSizeSelect.vue'
 
 import { Device } from '@/models/Device'
 import { DeviceType } from '@/models/DeviceType'
@@ -303,15 +324,17 @@ import { DeviceSearchParamsSerializer, IDeviceSearchParams } from '@/modelUtils/
     DeviceDeleteDialog,
     DeviceTypeSelect,
     ManufacturerSelect,
-    StatusSelect
+    StatusSelect,
+    PageSizeSelect
   },
   computed: {
     ...mapState('vocabulary', ['devicetypes', 'manufacturers', 'equipmentstatus']),
-    ...mapState('devices', ['devices', 'pageNumber', 'pageSize', 'totalPages'])
+    ...mapState('devices', ['devices', 'pageNumber', 'pageSize', 'totalPages']),
+    ...mapGetters('devices', ['pageSizes'])
   },
   methods: {
     ...mapActions('vocabulary', ['loadEquipmentstatus', 'loadDevicetypes', 'loadManufacturers']),
-    ...mapActions('devices', ['searchDevicesPaginated', 'setPageNumber', 'exportAsCsv', 'deleteDevice']),
+    ...mapActions('devices', ['searchDevicesPaginated', 'setPageNumber', 'setPageSize', 'exportAsCsv', 'deleteDevice']),
     ...mapActions('appbar', ['initDevicesIndexAppBar', 'setDefaults'])
   }
 })
@@ -336,6 +359,9 @@ export default class SearchDevicesPage extends Vue {
   loadManufacturers!: () => void
   pageNumber!: number
   setPageNumber!: (newPageNumber: number) => void
+  pageSize!: number
+  pageSizes!: number[]
+  setPageSize!: (newPageSize: number) => void
   searchDevicesPaginated!: (searchParams: IDeviceSearchParams) => void
   devices!: Device[]
   exportAsCsv!: (searchParams: IDeviceSearchParams) => Promise<Blob>
@@ -373,6 +399,24 @@ export default class SearchDevicesPage extends Vue {
     this.setPageInUrl(false)
   }
 
+  get size (): number {
+    return this.pageSize
+  }
+
+  set size (newVal: number) {
+    this.setPageSize(newVal)
+    this.setSizeInUrl(false)
+    this.runSearch()
+  }
+
+  get pageSizeItems (): number[] {
+    const resultSet = new Set([
+      ...this.pageSizes,
+      this.getSizeFromUrl()
+    ])
+    return Array.from(resultSet).sort((a, b) => a - b)
+  }
+
   get activeTab (): number | null {
     return this.$store.state.appbar.activeTab
   }
@@ -402,6 +446,7 @@ export default class SearchDevicesPage extends Vue {
     this.activeTab = this.isExtendedSearch() ? 1 : 0
 
     this.page = this.getPageFromUrl()
+    this.size = this.getSizeFromUrl()
 
     await this.runSearch()
   }
@@ -441,6 +486,7 @@ export default class SearchDevicesPage extends Vue {
       this.initUrlQueryParams()
       await this.searchDevicesPaginated(this.searchParams)
       this.setPageInUrl()
+      this.setSizeInUrl()
     } catch {
       this.$store.commit('snackbar/setError', 'Loading of devices failed')
     } finally {
@@ -542,6 +588,28 @@ export default class SearchDevicesPage extends Vue {
       hash: preserveHash ? this.$route.hash : ''
     })
   }
+
+  getSizeFromUrl (): number {
+    if ('size' in this.$route.query && typeof this.$route.query.size === 'string') {
+      return parseInt(this.$route.query.size) ?? this.size
+    }
+    return this.size
+  }
+
+  setSizeInUrl (preserveHash: boolean = true): void {
+    let query: QueryParams = {}
+    if (this.size) {
+      // add size to the current url params
+      query = {
+        ...this.$route.query,
+        size: String(this.size)
+      }
+    }
+    this.$router.push({
+      query,
+      hash: preserveHash ? this.$route.hash : ''
+    })
+  }
 }
 
 </script>
@@ -557,5 +625,8 @@ export default class SearchDevicesPage extends Vue {
   margin-right: auto;
   width: 32px;
   z-index: 99;
+}
+.v-select__selections input {
+  display: none;
 }
 </style>

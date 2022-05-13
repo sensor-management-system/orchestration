@@ -170,13 +170,33 @@ permissions and limitations under the Licence.
         <v-spacer />
       </v-subheader>
 
-      <v-pagination
-        v-model="page"
-        :disabled="loading"
-        :length="totalPages"
-        :total-visible="7"
-        @input="runSearch"
-      />
+      <v-row
+        no-gutters
+      >
+        <v-col
+          cols="12"
+          md="10"
+          offset-md="1"
+        >
+          <v-pagination
+            v-model="page"
+            :disabled="loading"
+            :length="totalPages"
+            :total-visible="7"
+            @input="runSearch"
+          />
+        </v-col>
+        <v-col
+          cols="1"
+          offset="11"
+          offset-md="0"
+        >
+          <page-size-select
+            v-model="size"
+            :items="pageSizeItems"
+          />
+        </v-col>
+      </v-row>
       <BaseList
         :list-items="configurations"
       >
@@ -213,13 +233,14 @@ permissions and limitations under the Licence.
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 
-import { mapActions, mapState } from 'vuex'
+import { mapActions, mapState, mapGetters } from 'vuex'
 import BaseList from '@/components/shared/BaseList.vue'
 import ConfigurationsListItem from '@/components/configurations/ConfigurationsListItem.vue'
 import ConfigurationsDeleteDialog from '@/components/configurations/ConfigurationsDeleteDialog.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 import StringSelect from '@/components/StringSelect.vue'
 import ProjectSelect from '@/components/ProjectSelect.vue'
+import PageSizeSelect from '@/components/shared/PageSizeSelect.vue'
 
 import { Configuration } from '@/models/Configuration'
 import { Project } from '@/models/Project'
@@ -232,11 +253,15 @@ import { QueryParams } from '@/modelUtils/QueryParams'
     DotMenuActionDelete,
     ConfigurationsDeleteDialog,
     ConfigurationsListItem,
-    BaseList
+    BaseList,
+    PageSizeSelect
   },
-  computed: mapState('configurations', ['configurations', 'pageNumber', 'pageSize', 'totalPages', 'configurationStates', 'projects']),
+  computed: {
+    ...mapState('configurations', ['configurations', 'pageNumber', 'pageSize', 'totalPages', 'configurationStates', 'projects']),
+    ...mapGetters('configurations', ['pageSizes'])
+  },
   methods: {
-    ...mapActions('configurations', ['searchConfigurationsPaginated', 'setPageNumber', 'loadConfigurationsStates', 'loadProjects', 'deleteConfiguration']),
+    ...mapActions('configurations', ['searchConfigurationsPaginated', 'setPageNumber', 'setPageSize', 'loadConfigurationsStates', 'loadProjects', 'deleteConfiguration']),
     ...mapActions('appbar', ['initConfigurationsIndexAppBar', 'setDefaults'])
 
   }
@@ -258,6 +283,9 @@ export default class SearchConfigurationsPage extends Vue {
   loadConfigurationsStates!: () => void
   pageNumber!: number
   setPageNumber!: (newPageNumber: number) => void
+  pageSize!: number
+  setPageSize!: (newPageSize: number) => void
+  pageSizes!: number[]
   searchConfigurationsPaginated!: (searchParams: IConfigurationSearchParams) => void
   configurations!: Configuration[]
   deleteConfiguration!: (id: string) => void
@@ -291,6 +319,24 @@ export default class SearchConfigurationsPage extends Vue {
     this.setPageInUrl(false)
   }
 
+  get size (): number {
+    return this.pageSize
+  }
+
+  set size (newVal: number) {
+    this.setPageSize(newVal)
+    this.setSizeInUrl(false)
+    this.runSearch()
+  }
+
+  get pageSizeItems (): number[] {
+    const resultSet = new Set([
+      ...this.pageSizes,
+      this.getSizeFromUrl()
+    ])
+    return Array.from(resultSet).sort((a, b) => a - b)
+  }
+
   get activeTab (): number | null {
     return this.$store.state.appbar.activeTab
   }
@@ -316,6 +362,7 @@ export default class SearchConfigurationsPage extends Vue {
     this.activeTab = this.isExtendedSearch() ? 1 : 0
 
     this.page = this.getPageFromUrl()
+    this.size = this.getSizeFromUrl()
     await this.runSearch()
   }
 
@@ -349,6 +396,7 @@ export default class SearchConfigurationsPage extends Vue {
       this.initUrlQueryParams()
       await this.searchConfigurationsPaginated(this.searchParams)
       this.setPageInUrl()
+      this.setSizeInUrl()
     } catch (_error) {
       this.$store.commit('snackbar/setError', 'Loading of configurations failed')
     } finally {
@@ -423,6 +471,28 @@ export default class SearchConfigurationsPage extends Vue {
       query = {
         ...this.$route.query,
         page: String(this.page)
+      }
+    }
+    this.$router.push({
+      query,
+      hash: preserveHash ? this.$route.hash : ''
+    })
+  }
+
+  getSizeFromUrl (): number {
+    if ('size' in this.$route.query && typeof this.$route.query.size === 'string') {
+      return parseInt(this.$route.query.size) ?? this.size
+    }
+    return this.size
+  }
+
+  setSizeInUrl (preserveHash: boolean = true): void {
+    let query: QueryParams = {}
+    if (this.size) {
+      // add size to the current url params
+      query = {
+        ...this.$route.query,
+        size: String(this.size)
       }
     }
     this.$router.push({

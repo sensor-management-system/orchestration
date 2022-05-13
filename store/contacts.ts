@@ -37,6 +37,12 @@ import { Commit, ActionContext } from 'vuex/types'
 import { Contact } from '@/models/Contact'
 import { Api } from '@/services/Api'
 
+const PAGE_SIZES = [
+  25,
+  50,
+  100
+]
+
 interface contactsState {
   contacts: Contact[],
   contact: Contact | null,
@@ -52,7 +58,7 @@ const state = () => ({
   configurationContacts: [],
   totalPages: 1,
   pageNumber: 1,
-  pageSize: 20
+  pageSize: PAGE_SIZES[0],
 })
 
 const getters = {
@@ -65,6 +71,9 @@ const getters = {
         return contactToSubtract.id === contact.id
       })
     })
+  },
+  pageSizes: () => {
+    return PAGE_SIZES
   }
 }
 
@@ -118,6 +127,9 @@ const actions: {
   setPageNumber ({ commit }: { commit: Commit }, newPageNumber: number) {
     commit('setPageNumber', newPageNumber)
   },
+  setPageSize ({ commit }: { commit: Commit }, newPageSize: number) {
+    commit('setPageSize', newPageSize)
+  },
   async deleteContact ({ _commit }: { _commit: Commit }, id: string) {
     // @ts-ignore
     await this.$api.contacts.deleteById(id)
@@ -140,6 +152,9 @@ const mutations = {
   },
   setPageNumber (state: contactsState, newPageNumber: number) {
     state.pageNumber = newPageNumber
+  },
+  setPageSize (state: contactsState, newPageSize: number) {
+    state.pageSize = newPageSize
   },
   setTotalPages (state: contactsState, count: number) {
     state.totalPages = count
