@@ -31,13 +31,15 @@
  */
 export interface ISnackbarStore {
   error: string,
-  success: string
+  success: string,
+  warning: string
 }
 
 const state = () => {
   return {
     error: '',
-    success: ''
+    success: '',
+    warning: ''
   }
 }
 
@@ -48,11 +50,17 @@ const mutations = {
   setSuccess (state: ISnackbarStore, success: string) {
     state.success = success
   },
+  setWarning (state: ISnackbarStore, warning: string) {
+    state.warning = warning
+  },
   clearError (state: ISnackbarStore) {
     state.error = ''
   },
   clearSuccess (state: ISnackbarStore) {
     state.success = ''
+  },
+  clearWarning (state: ISnackbarStore) {
+    state.warning = ''
   }
 }
 

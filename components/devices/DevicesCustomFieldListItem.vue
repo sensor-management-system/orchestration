@@ -31,9 +31,11 @@ permissions and limitations under the Licence.
 -->
 <template>
   <v-card
-    class="mb-2"
+    class="ma-2"
   >
-    <v-card-text>
+    <v-card-text
+      class="py-2 px-3"
+    >
       <v-row
         no-gutters
       >
@@ -58,7 +60,9 @@ permissions and limitations under the Licence.
           align-self="center"
         >
           <v-row>
-            <v-row>
+            <v-row
+              no-gutters
+            >
               <v-col align-self="end" class="text-right">
                 <v-btn
                   v-if="$auth.loggedIn"

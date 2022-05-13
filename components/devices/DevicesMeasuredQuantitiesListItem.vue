@@ -38,22 +38,17 @@ permissions and limitations under the Licence.
       class="ma-2"
     >
       <v-card-text
+        class="py-2 px-3"
         @click.stop.prevent="show = !show"
       >
-        <v-row
-          no-gutters
-        >
-          <v-col
-            align-self="end"
-            class="text-right"
-          >
-            <DotMenu>
-              <template #actions>
-                <slot name="dot-menu-items" />
-              </template>
-            </DotMenu>
-          </v-col>
-        </v-row>
+        <div class="d-flex align-center">
+          <v-spacer />
+          <DotMenu>
+            <template #actions>
+              <slot name="dot-menu-items" />
+            </template>
+          </DotMenu>
+        </div>
         <v-row
           no-gutters
         >
@@ -69,23 +64,30 @@ permissions and limitations under the Licence.
               :to="'/devices/'+deviceId+'/measuredquantities/'+measuredQuantity.id+'/edit'"
               color="primary"
               text
+              small
               @click.stop.prevent
             >
               Edit
             </v-btn>
             <v-btn
               icon
+              small
               @click.stop.prevent="show = !show"
             >
-              <v-icon>{{ show ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
+              <v-icon
+                small
+              >
+                {{ show ? 'mdi-chevron-up' : 'mdi-chevron-down' }}
+              </v-icon>
             </v-btn>
           </v-col>
         </v-row>
       </v-card-text>
       <v-expand-transition>
-        <v-container>
+        <v-container
+          v-if="show"
+        >
           <DevicePropertyInfo
-            v-show="show"
             v-model="measuredQuantity"
             :compartments="compartments"
             :sampling-medias="samplingMedias"
@@ -184,11 +186,10 @@ export default class DevicesMeasuredQuantitiesListItem extends Vue {
 
   get computedTitle () {
     if (this.measuredQuantity) {
-      let additionaLabel = ''
-      if (this.measuredQuantity.label) {
-        additionaLabel = ' - ' + this.measuredQuantity.label
-      }
-      return `Measured quantity ${this.index + 1}` + additionaLabel
+      const propertyName = this.measuredQuantity.propertyName ?? ''
+      const label = this.measuredQuantity.label ?? ''
+      const unit = this.measuredQuantity.unitName ?? ''
+      return `#${this.measuredQuantity.id} - ${propertyName} ${label} ${unit ? `(${unit})` : ''}`
     }
     return ''
   }

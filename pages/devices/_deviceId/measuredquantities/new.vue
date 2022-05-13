@@ -103,6 +103,11 @@ export default class DevicePropertyAddPage extends Vue {
   }
 
   async save (): Promise<void> {
+    if (!(this.$refs.propertyForm as Vue & { validateForm: () => boolean }).validateForm()) {
+      this.$store.commit('snackbar/setError', 'Please correct your input')
+      return
+    }
+
     try {
       this.isSaving = true
       await this.addDeviceMeasuredQuantity({
