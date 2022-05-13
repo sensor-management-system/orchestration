@@ -40,7 +40,7 @@ permissions and limitations under the Licence.
       <v-card-actions>
         <v-spacer />
         <SaveAndCancelButtons
-          :to="'/contacts'"
+          :to="redirect ? redirect : '/contacts'"
           save-btn-text="create"
           @save="save"
         />
@@ -52,7 +52,7 @@ permissions and limitations under the Licence.
       <v-card-actions>
         <v-spacer />
         <SaveAndCancelButtons
-          :to="'/contacts'"
+          :to="redirect ? redirect : '/contacts'"
           save-btn-text="create"
           @save="save"
         />
@@ -88,6 +88,7 @@ import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButto
 export default class ContactNewPage extends mixins(Rules) {
   private contact: Contact = new Contact()
   private isLoading: boolean = false
+  private redirect: string = ''
 
   // vuex definition for typescript check
   initContactsNewAppBar!: () => void
@@ -95,6 +96,10 @@ export default class ContactNewPage extends mixins(Rules) {
   saveContact!: (contact: Contact) => Promise<Contact>
 
   created () {
+    const backLink = this.$route.query.redirect as string
+    if (backLink && !backLink.startsWith('http')) {
+      this.redirect = backLink
+    }
     this.initContactsNewAppBar()
   }
 
@@ -108,11 +113,17 @@ export default class ContactNewPage extends mixins(Rules) {
       return
     }
 
+    const redirect: string | (string | null)[] = this.$route.query.redirect
+
     try {
       this.isLoading = true
       const savedContact = await this.saveContact(this.contact)
       this.$store.commit('snackbar/setSuccess', 'Contact created')
-      this.$router.push('/contacts/' + savedContact.id)
+      if (redirect && savedContact.id) {
+        this.$router.push(redirect + '?contact=' + encodeURI(savedContact.id))
+      } else {
+        this.$router.push('/contacts/' + savedContact.id)
+      }
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Creation of contact failed')
     } finally {

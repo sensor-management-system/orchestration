@@ -44,7 +44,7 @@ permissions and limitations under the Licence.
         nuxt
         :to="'/configurations/' + configurationId + '/contacts/new'"
       >
-        Add contact
+        Assign contact
       </v-btn>
     </v-card-actions>
     <hint-card v-if="configurationContacts.length === 0">
