@@ -74,6 +74,12 @@ export enum LocationTypes {
   dynamicEnd = 'dynamicEnd',
 }
 
+const PAGE_SIZES = [
+  25,
+  50,
+  100
+]
+
 export interface configurationsState {
   configurations: Configuration[]
   configuration: Configuration | null,
@@ -103,7 +109,7 @@ const state = () => ({
   configurationMountingActions:[],
   totalPages: 1,
   pageNumber: 1,
-  pageSize: 20
+  pageSize: PAGE_SIZES[0],
 })
 
 const getters = {
@@ -245,6 +251,9 @@ const getters = {
       result = datesWithTexts
     }
     return result
+  },
+  pageSizes: () => {
+    return PAGE_SIZES
   }
 }
 
@@ -381,6 +390,9 @@ const actions: {
   },
   setPageNumber ({ commit }: { commit: Commit }, newPageNumber: number) {
     commit('setPageNumber', newPageNumber)
+  },
+  setPageSize ({ commit }: { commit: Commit }, newPageSize: number) {
+    commit('setPageSize', newPageSize)
   }
 }
 
@@ -399,6 +411,9 @@ const mutations = {
   },
   setPageNumber (state: configurationsState, newPageNumber: number) {
     state.pageNumber = newPageNumber
+  },
+  setPageSize (state: configurationsState, newPageSize: number) {
+    state.pageSize = newPageSize
   },
   setTotalPages (state: configurationsState, count: number) {
     state.totalPages = count

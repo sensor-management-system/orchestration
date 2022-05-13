@@ -57,6 +57,12 @@ export type IOptionsForActionType = Pick<IActionType, 'id' | 'name' | 'uri'> & {
   kind: KindOfActionType
 }
 
+const PAGE_SIZES = [
+  25,
+  50,
+  100
+]
+
 interface platformsState {
   platforms: Platform[],
   platform: Platform | null,
@@ -100,8 +106,7 @@ const state = () => ({
   searchText: null,
   totalPages: 1,
   pageNumber: 1,
-  pageSize: 1
-  // pageSize: 20
+  pageSize: PAGE_SIZES[0],
 })
 
 const getters = {
@@ -128,6 +133,9 @@ const getters = {
       return a.date < b.date ? 1 : a.date > b.date ? -1 : 0
     })
     return actions
+  },
+  pageSizes: () => {
+    return PAGE_SIZES
   }
 }
 
@@ -321,6 +329,9 @@ const actions: {
   setPageNumber ({ commit }: { commit: Commit }, newPageNumber: number) {
     commit('setPageNumber', newPageNumber)
   },
+  setPageSize ({ commit }: { commit: Commit }, newPageSize: number) {
+    commit('setPageSize', newPageSize)
+  },
   setChosenKindOfPlatformAction ({ commit }: { commit: Commit }, newval: IOptionsForActionType | null) {
     commit('setChosenKindOfPlatformAction', newval)
   },
@@ -351,6 +362,9 @@ const mutations = {
   },
   setPageNumber (state: platformsState, newPageNumber: number) {
     state.pageNumber = newPageNumber
+  },
+  setPageSize (state: platformsState, newPageSize: number) {
+    state.pageSize = newPageSize
   },
   setTotalPages (state: platformsState, count: number) {
     state.totalPages = count

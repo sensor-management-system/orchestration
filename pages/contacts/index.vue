@@ -98,13 +98,33 @@ permissions and limitations under the Licence.
         <!-- No export to pdf due to data privacy reasons -->
       </v-subheader>
 
-      <v-pagination
-        v-model="page"
-        :disabled="loading"
-        :length="totalPages"
-        :total-visible="7"
-        @input="runSearch"
-      />
+      <v-row
+        no-gutters
+      >
+        <v-col
+          cols="12"
+          md="10"
+          offset-md="1"
+        >
+          <v-pagination
+            v-model="page"
+            :disabled="loading"
+            :length="totalPages"
+            :total-visible="7"
+            @input="runSearch"
+          />
+        </v-col>
+        <v-col
+          cols="1"
+          offset="11"
+          offset-md="0"
+        >
+          <page-size-select
+            v-model="size"
+            :items="pageSizeItems"
+          />
+        </v-col>
+      </v-row>
       <BaseList
         :list-items="contacts"
       >
@@ -141,12 +161,13 @@ permissions and limitations under the Licence.
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
-import { mapState, mapActions } from 'vuex'
+import { mapActions, mapState, mapGetters } from 'vuex'
 
 import { Contact } from '@/models/Contact'
 
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 import ContacsDeleteDialog from '@/components/contacts/ContacsDeleteDialog.vue'
+import PageSizeSelect from '@/components/shared/PageSizeSelect.vue'
 
 import BaseList from '@/components/shared/BaseList.vue'
 import ContactsListItem from '@/components/contacts/ContactsListItem.vue'
@@ -157,11 +178,15 @@ import { QueryParams } from '@/modelUtils/QueryParams'
     ContactsListItem,
     BaseList,
     ContacsDeleteDialog,
-    DotMenuActionDelete
+    DotMenuActionDelete,
+    PageSizeSelect
   },
-  computed: mapState('contacts', ['pageNumber', 'pageSize', 'totalPages', 'contacts']),
+  computed: {
+    ...mapState('contacts', ['pageNumber', 'pageSize', 'totalPages', 'contacts']),
+    ...mapGetters('contacts', ['pageSizes'])
+  },
   methods: {
-    ...mapActions('contacts', ['searchContactsPaginated', 'setPageNumber', 'deleteContact']),
+    ...mapActions('contacts', ['searchContactsPaginated', 'setPageNumber', 'setPageSize', 'deleteContact']),
     ...mapActions('appbar', ['initContactsIndexAppBar', 'setDefaults'])
   }
 })
@@ -177,6 +202,9 @@ export default class SearchContactsPage extends Vue {
   setDefaults!: () => void
   pageNumber!: number
   setPageNumber!: (newPageNumber: number) => void
+  pageSize!: number
+  setPageSize!: (newPageSize: number) => void
+  pageSizes!: number[]
   searchContactsPaginated!: (searchtext: string) => void
   deleteContact!: (id: string) => void
 
@@ -185,7 +213,7 @@ export default class SearchContactsPage extends Vue {
       this.loading = true
       await this.initContactsIndexAppBar()
       this.initSearchQueryParams()
-      this.runSearch()
+      this.runInitialSearch()
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Loading of contacts failed')
     } finally {
@@ -206,6 +234,31 @@ export default class SearchContactsPage extends Vue {
     this.setPageInUrl(false)
   }
 
+  get size (): number {
+    return this.pageSize
+  }
+
+  set size (newVal: number) {
+    this.setPageSize(newVal)
+    this.setSizeInUrl(false)
+    this.runSearch()
+  }
+
+  get pageSizeItems (): number[] {
+    const resultSet = new Set([
+      ...this.pageSizes,
+      this.getSizeFromUrl()
+    ])
+    return Array.from(resultSet).sort((a, b) => a - b)
+  }
+
+  async runInitialSearch (): Promise<void> {
+    this.page = this.getPageFromUrl()
+    this.size = this.getSizeFromUrl()
+
+    await this.runSearch()
+  }
+
   basicSearch () {
     // Important to set page to one otherwise it's possible that you don't anything
     this.page = 1
@@ -223,6 +276,7 @@ export default class SearchContactsPage extends Vue {
       this.initUrlQueryParams()
       await this.searchContactsPaginated(this.searchText)
       this.setPageInUrl()
+      this.setSizeInUrl()
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Loading of contacts failed')
     } finally {
@@ -295,6 +349,28 @@ export default class SearchContactsPage extends Vue {
     this.$router.push({
       query: params,
       hash: this.$route.hash
+    })
+  }
+
+  getSizeFromUrl (): number {
+    if ('size' in this.$route.query && typeof this.$route.query.size === 'string') {
+      return parseInt(this.$route.query.size) ?? this.size
+    }
+    return this.size
+  }
+
+  setSizeInUrl (preserveHash: boolean = true): void {
+    let query: QueryParams = {}
+    if (this.size) {
+      // add size to the current url params
+      query = {
+        ...this.$route.query,
+        size: String(this.size)
+      }
+    }
+    this.$router.push({
+      query,
+      hash: preserveHash ? this.$route.hash : ''
     })
   }
 }

@@ -63,6 +63,12 @@ export type IOptionsForActionType = Pick<IActionType, 'id' | 'name' | 'uri'> & {
   kind: KindOfActionType
 }
 
+const PAGE_SIZES = [
+  25,
+  50,
+  100
+]
+
 interface devicesState {
   devices: Device[],
   device: Device | null,
@@ -107,7 +113,7 @@ const state = () => ({
   deviceCustomFields: [],
   deviceCustomField: null,
   pageNumber: 1,
-  pageSize: 20,
+  pageSize: PAGE_SIZES[0],
   totalPages: 1
 })
 
@@ -126,6 +132,9 @@ const getters = {
       return a.date < b.date ? 1 : a.date > b.date ? -1 : 0
     })
     return actions
+  },
+  pageSizes: () => {
+    return PAGE_SIZES
   }
 }
 
@@ -436,6 +445,9 @@ const actions: {
   setPageNumber ({ commit }: { commit: Commit }, newPageNumber: number) {
     commit('setPageNumber', newPageNumber)
   },
+  setPageSize ({ commit }: { commit: Commit }, newPageSize: number) {
+    commit('setPageSize', newPageSize)
+  },
   setChosenKindOfDeviceAction ({ commit }: { commit: Commit }, newval: IOptionsForActionType | null) {
     commit('setChosenKindOfDeviceAction', newval)
   }
@@ -450,6 +462,9 @@ const mutations = {
   },
   setPageNumber (state: devicesState, newPageNumber: number) {
     state.pageNumber = newPageNumber
+  },
+  setPageSize (state: devicesState, newPageSize: number) {
+    state.pageSize = newPageSize
   },
   setTotalPages (state: devicesState, count: number) {
     state.totalPages = count
