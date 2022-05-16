@@ -28,7 +28,7 @@ class PlatformSoftwareUpdateActionSchema(Schema):
     updated_at = fields.DateTime(dump_only=True)
 
     platform = Relationship(
-        self_view="api.platform_software_update_action_platform",
+        self_view="api.platform_software_update_action_list",
         self_view_kwargs={"id": "<id>"},
         related_view="api.platform_detail",
         related_view_kwargs={"id": "<platform_id>"},
@@ -39,8 +39,8 @@ class PlatformSoftwareUpdateActionSchema(Schema):
     )
 
     contact = Relationship(
-        self_view="api.platform_software_update_action_contact",
-        self_view_kwargs={"id": "<id>"},
+        # self_view="api.platform_software_update_action_contact",
+        # self_view_kwargs={"id": "<id>"},
         related_view="api.contact_detail",
         related_view_kwargs={"id": "<contact_id>"},
         include_resource_linkage=True,
@@ -49,7 +49,7 @@ class PlatformSoftwareUpdateActionSchema(Schema):
         id_field="id",
     )
     created_by = Relationship(
-        self_view="api.platform_software_update_action_created_user",
+        self_view="api.user_list",
         self_view_kwargs={"id": "<id>"},
         related_view="api.user_detail",
         related_view_kwargs={"id": "<created_by_id>"},
@@ -60,7 +60,7 @@ class PlatformSoftwareUpdateActionSchema(Schema):
         dump_only=True,
     )
     updated_by = Relationship(
-        self_view="api.platform_software_update_action_updated_user",
+        self_view="api.user_list",
         self_view_kwargs={"id": "<id>"},
         related_view="api.user_detail",
         related_view_kwargs={"id": "<updated_by_id>"},
@@ -71,7 +71,7 @@ class PlatformSoftwareUpdateActionSchema(Schema):
         dump_only=True,
     )
     platform_software_update_action_attachments = Relationship(
-        related_view="api.platform_software_update_action_attachments",
+        related_view="api.platform_software_update_action_attachment_list",
         related_view_kwargs={"id": "<id>"},
         include_resource_linkage=True,
         many=True,
@@ -105,8 +105,6 @@ class DeviceSoftwareUpdateActionSchema(Schema):
     updated_at = fields.DateTime(dump_only=True)
 
     device = Relationship(
-        self_view="api.device_software_update_action_device",
-        self_view_kwargs={"id": "<id>"},
         related_view="api.device_detail",
         related_view_kwargs={"id": "<device_id>"},
         include_resource_linkage=True,
@@ -116,8 +114,6 @@ class DeviceSoftwareUpdateActionSchema(Schema):
     )
 
     contact = Relationship(
-        self_view="api.device_software_update_action_contact",
-        self_view_kwargs={"id": "<id>"},
         related_view="api.contact_detail",
         related_view_kwargs={"id": "<contact_id>"},
         include_resource_linkage=True,
@@ -126,8 +122,6 @@ class DeviceSoftwareUpdateActionSchema(Schema):
         id_field="id",
     )
     created_by = Relationship(
-        self_view="api.device_software_update_action_created_user",
-        self_view_kwargs={"id": "<id>"},
         related_view="api.user_detail",
         related_view_kwargs={"id": "<created_by_id>"},
         include_resource_linkage=True,
@@ -137,8 +131,6 @@ class DeviceSoftwareUpdateActionSchema(Schema):
         dump_only=True,
     )
     updated_by = Relationship(
-        self_view="api.device_software_update_action_updated_user",
-        self_view_kwargs={"id": "<id>"},
         related_view="api.user_detail",
         related_view_kwargs={"id": "<updated_by_id>"},
         include_resource_linkage=True,
@@ -148,7 +140,7 @@ class DeviceSoftwareUpdateActionSchema(Schema):
         dump_only=True,
     )
     device_software_update_action_attachments = Relationship(
-        related_view="api.device_software_update_action_attachments",
+        related_view="api.device_software_update_action_attachment_list",
         related_view_kwargs={"id": "<id>"},
         include_resource_linkage=True,
         many=True,

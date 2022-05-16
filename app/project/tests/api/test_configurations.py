@@ -441,6 +441,7 @@ class TestConfigurationsService(BaseTestCase):
         url = f"{self.configurations_url}/{configuration.id}"
         _ = self.delete_as_owner(contact, user, url)
 
+
     def test_delete_configuration_with_generic_action(self):
         """Ensure a configuration with a generic action can be deleted"""
 

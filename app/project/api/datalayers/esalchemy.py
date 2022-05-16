@@ -75,6 +75,18 @@ class NestedElementFilterWrapper:
             return False
         return True
 
+@dataclass
+class TermHasAnyExactFilter:
+    term: str
+    value: str
+
+    def to_query(self):
+        # ES doesn't differ that much for arrays or scalar values.
+        # For the first try, we try to do it like the normal term filter.
+        # as in the es it doesn't make that much differnce if term
+        # is a scalar or a list field.
+        return {"term": {f"{self.term}": {"value": self.value}}}
+
 
 class TermExactInListFilter:
     """Class to search for an exact string match in the field with multiple values."""
@@ -218,6 +230,9 @@ class FilterParser:
             ),
             "in_": lambda name, val: cls.wrap_for_nested_elements(
                 name, TermExactInListFilter(term=name, values=val)
+            ),
+            "any": lambda name, val: cls.wrap_for_nested_elements(
+                name, TermHasAnyExactFilter(term=name, value=val)
             ),
         }
         # First check if we have a more complex filter

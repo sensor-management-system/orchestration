@@ -7,7 +7,7 @@ from project import base_url, db
 from project.api.models import Configuration, ConfigurationContactRole, Contact, User
 from project.api.services.idl_services import Idl
 from project.tests.base import BaseTestCase, create_token, generate_userinfo_data
-from project.tests.permissions.test_configurations import IDL_USER_ACCOUNT
+from project.tests.permissions.test_platforms import IDL_USER_ACCOUNT
 
 
 def generate_configuration(

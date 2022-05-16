@@ -32,8 +32,6 @@ class ConfigurationSchema(Schema):
     is_public = fields.Boolean(allow_none=True)
     src_longitude = Relationship(
         attribute="src_longitude",
-        self_view="api.configuration_src_longitude",
-        self_view_kwargs={"id": "<id>"},
         related_view="api.device_property_detail",
         related_view_kwargs={"id": "<longitude_src_device_property_id>"},
         include_resource_linkage=True,
@@ -43,8 +41,6 @@ class ConfigurationSchema(Schema):
 
     src_latitude = Relationship(
         attribute="src_latitude",
-        self_view="api.configuration_src_latitude",
-        self_view_kwargs={"id": "<id>"},
         related_view="api.device_property_detail",
         related_view_kwargs={"id": "<latitude_src_device_property_id>"},
         include_resource_linkage=True,
@@ -54,8 +50,6 @@ class ConfigurationSchema(Schema):
 
     src_elevation = Relationship(
         attribute="src_elevation",
-        self_view="api.configuration_src_elevation",
-        self_view_kwargs={"id": "<id>"},
         related_view="api.device_property_detail",
         related_view_kwargs={"id": "<elevation_src_device_property_id>"},
         include_resource_linkage=True,
@@ -65,7 +59,7 @@ class ConfigurationSchema(Schema):
 
     contacts = Relationship(
         attribute="contacts",
-        related_view="api.configuration_contacts",
+        related_view="api.contact_list",
         related_view_kwargs={"id": "<id>"},
         include_resource_linkage=True,
         many=True,
@@ -74,7 +68,7 @@ class ConfigurationSchema(Schema):
         id_field="id",
     )
     generic_configuration_actions = Relationship(
-        related_view="api.configuration_generic_configuration_actions",
+        related_view="api.generic_configuration_action_list",
         related_view_kwargs={"id": "<id>"},
         include_resource_linkage=True,
         many=True,
@@ -83,7 +77,7 @@ class ConfigurationSchema(Schema):
         id_field="id",
     )
     device_mount_actions = Relationship(
-        related_view="api.configuration_device_mount_actions",
+        related_view="api.device_mount_action_list",
         related_view_kwargs={"id": "<id>"},
         include_resource_linkage=True,
         many=True,
@@ -92,7 +86,7 @@ class ConfigurationSchema(Schema):
         id_field="id",
     )
     platform_mount_actions = Relationship(
-        related_view="api.configuration_platform_mount_actions",
+        related_view="api.platform_mount_action_list",
         related_view_kwargs={"id": "<id>"},
         include_resource_linkage=True,
         many=True,
@@ -101,7 +95,7 @@ class ConfigurationSchema(Schema):
         id_field="id",
     )
     device_unmount_actions = Relationship(
-        related_view="api.configuration_device_unmount_actions",
+        related_view="api.device_unmount_action_list",
         related_view_kwargs={"id": "<id>"},
         include_resource_linkage=True,
         many=True,
@@ -110,7 +104,7 @@ class ConfigurationSchema(Schema):
         id_field="id",
     )
     platform_unmount_actions = Relationship(
-        related_view="api.configuration_platform_unmount_actions",
+        related_view="api.platform_unmount_action_list",
         related_view_kwargs={"id": "<id>"},
         include_resource_linkage=True,
         many=True,
@@ -119,7 +113,7 @@ class ConfigurationSchema(Schema):
         id_field="id",
     )
     configuration_static_location_begin_actions = Relationship(
-        related_view="api.configuration_configuration_static_location_begin_actions",
+        related_view="api.configuration_static_location_begin_action_list",
         related_view_kwargs={"id": "<id>"},
         include_resource_linkage=True,
         many=True,
@@ -128,7 +122,7 @@ class ConfigurationSchema(Schema):
         id_field="id",
     )
     configuration_static_location_end_actions = Relationship(
-        related_view="api.configuration_configuration_static_location_end_actions",
+        related_view="api.configuration_static_location_end_action_list",
         related_view_kwargs={"id": "<id>"},
         include_resource_linkage=True,
         many=True,
@@ -137,7 +131,7 @@ class ConfigurationSchema(Schema):
         id_field="id",
     )
     configuration_dynamic_location_begin_actions = Relationship(
-        related_view="api.configuration_configuration_dynamic_location_begin_actions",
+        related_view="api.configuration_dynamic_location_begin_action_list",
         related_view_kwargs={"id": "<id>"},
         include_resource_linkage=True,
         many=True,
@@ -146,7 +140,7 @@ class ConfigurationSchema(Schema):
         id_field="id",
     )
     configuration_dynamic_location_end_actions = Relationship(
-        related_view="api.configuration_configuration_dynamic_location_end_actions",
+        related_view="api.configuration_dynamic_location_end_action_list",
         related_view_kwargs={"id": "<id>"},
         include_resource_linkage=True,
         many=True,
@@ -155,7 +149,7 @@ class ConfigurationSchema(Schema):
         id_field="id",
     )
     created_by = Relationship(
-        self_view="api.configuration_created_user",
+        self_view="api.user_list",
         self_view_kwargs={"id": "<id>"},
         related_view="api.user_detail",
         related_view_kwargs={"id": "<created_by_id>"},
@@ -165,7 +159,7 @@ class ConfigurationSchema(Schema):
         dump_only=True,
     )
     updated_by = Relationship(
-        self_view="api.configuration_updated_user",
+        self_view="api.user_list",
         self_view_kwargs={"id": "<id>"},
         related_view="api.user_detail",
         related_view_kwargs={"id": "<updated_by_id>"},

@@ -22,8 +22,6 @@ class UserSchema(Schema):
 
     contact = Relationship(
         attribute="contact",
-        self_view="api.user_contact",
-        self_view_kwargs={"id": "<id>"},
         related_view="api.contact_detail",
         related_view_kwargs={"id": "<contact_id>"},
         include_resource_linkage=True,
