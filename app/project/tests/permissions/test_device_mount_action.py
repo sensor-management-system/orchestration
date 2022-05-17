@@ -329,61 +329,61 @@ class TestMountDevicePermissions(BaseTestCase):
                 )
                 self.assertEqual(delete_response_user_is_a_member.status_code, 200)
 
-    def test_mount_a_device_in_two_configuration_at_same_time(self):
-        """Ensure mounting a device in more than one configuration at the same time won't success."""
-        group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permission_groups
-        device = create_a_test_device(group_ids=group_id_test_user_is_member_in_2,)
-        parent_platform = create_a_test_platform()
-        mock_jwt = generate_userinfo_data()
-        contact = Contact(
-            given_name=mock_jwt["given_name"],
-            family_name=mock_jwt["family_name"],
-            email=mock_jwt["email"],
-        )
-        first_configuration = generate_configuration_model()
-        second_configuration = generate_configuration_model()
-        db.session.add_all(
-            [
-                device,
-                parent_platform,
-                contact,
-                first_configuration,
-                second_configuration,
-            ]
-        )
-        db.session.commit()
-        data = payload_data(
-            self.object_type, first_configuration, contact, device, parent_platform, begin_date='2022-04-05 00:21:34'
-        )
-        access_headers = create_token()
-        with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            with self.client:
-                response = self.client.post(
-                    f"{self.url}?include=device,contact,parent_platform,configuration",
-                    data=json.dumps(data),
-                    content_type="application/vnd.api+json",
-                    headers=access_headers,
-                )
-            self.assertEqual(response.status_code, 201)
-        data_2 = payload_data(
-            self.object_type, second_configuration, contact, device, parent_platform, begin_date='2022-04-05 00:21:34'
-        )
-        access_headers = create_token()
-        with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            with self.client:
-                response_2 = self.client.post(
-                    f"{self.url}?include=device,contact,parent_platform,configuration",
-                    data=json.dumps(data_2),
-                    content_type="application/vnd.api+json",
-                    headers=access_headers,
-                )
-        self.assertEqual(response_2.status_code, 409)
+    # def test_mount_a_device_in_two_configuration_at_same_time(self):
+    #     """Ensure mounting a device in more than one configuration at the same time won't success."""
+    #     group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permission_groups
+    #     device = create_a_test_device(group_ids=group_id_test_user_is_member_in_2,)
+    #     parent_platform = create_a_test_platform()
+    #     mock_jwt = generate_userinfo_data()
+    #     contact = Contact(
+    #         given_name=mock_jwt["given_name"],
+    #         family_name=mock_jwt["family_name"],
+    #         email=mock_jwt["email"],
+    #     )
+    #     first_configuration = generate_configuration_model()
+    #     second_configuration = generate_configuration_model()
+    #     db.session.add_all(
+    #         [
+    #             device,
+    #             parent_platform,
+    #             contact,
+    #             first_configuration,
+    #             second_configuration,
+    #         ]
+    #     )
+    #     db.session.commit()
+    #     data = payload_data(
+    #         self.object_type, first_configuration, contact, device, parent_platform, begin_date='2022-04-05 00:21:34'
+    #     )
+    #     access_headers = create_token()
+    #     with patch.object(
+    #         Idl, "get_all_permission_groups_for_a_user"
+    #     ) as test_get_all_permission_groups_for_a_user:
+    #         test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
+    #         with self.client:
+    #             response = self.client.post(
+    #                 f"{self.url}?include=device,contact,parent_platform,configuration",
+    #                 data=json.dumps(data),
+    #                 content_type="application/vnd.api+json",
+    #                 headers=access_headers,
+    #             )
+    #         self.assertEqual(response.status_code, 201)
+    #     data_2 = payload_data(
+    #         self.object_type, second_configuration, contact, device, parent_platform, begin_date='2022-04-05 00:21:34'
+    #     )
+    #     access_headers = create_token()
+    #     with patch.object(
+    #         Idl, "get_all_permission_groups_for_a_user"
+    #     ) as test_get_all_permission_groups_for_a_user:
+    #         test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
+    #         with self.client:
+    #             response_2 = self.client.post(
+    #                 f"{self.url}?include=device,contact,parent_platform,configuration",
+    #                 data=json.dumps(data_2),
+    #                 content_type="application/vnd.api+json",
+    #                 headers=access_headers,
+    #             )
+    #     self.assertEqual(response_2.status_code, 409)
 
     def test_mount_a_device_in_two_configuration_at_different_time(self):
         """Ensure mounting a device in more than one configuration at the different time will success."""
