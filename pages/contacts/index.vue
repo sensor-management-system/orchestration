@@ -139,6 +139,17 @@ permissions and limitations under the Licence.
                 @click="initDeleteDialog(item)"
               />
             </template>
+            <template #actions>
+              <v-btn
+                :to="'/contacts/' + item.id"
+                color="primary"
+                text
+                small
+                @click.stop.prevent
+              >
+                View
+              </v-btn>
+            </template>
           </ContactsListItem>
         </template>
       </BaseList>

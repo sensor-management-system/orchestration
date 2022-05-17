@@ -30,162 +30,148 @@ implied. See the Licence for the specific language governing
 permissions and limitations under the Licence.
 -->
 <template>
-  <v-hover
-    v-slot="{ hover }"
+  <base-expandable-list-item
+    expandable-color="grey lighten-5"
   >
-    <v-card
-      :elevation="hover ? 6 : 2"
-      class="ma-2"
-    >
-      <v-card-text
-        class="py-2 px-3"
-        @click.stop.prevent="show = !show"
+    <template #header>
+      <div class="'text-caption">
+        {{ contact.email }}
+      </div>
+    </template>
+    <template #dot-menu-items>
+      <slot name="dot-menu-items" />
+    </template>
+    <template #actions>
+      <slot name="actions" />
+    </template>
+    <template #default>
+      <span>{{ contact.fullName }}</span>
+    </template>
+    <template #expandable>
+      <v-row
+        no-gutters
       >
-        <div class="d-flex align-center">
-          <div class="'text-caption text-disabled">
-            {{ contact.email }}
-          </div>
-          <v-spacer />
-          <DotMenu>
-            <template #actions>
-              <slot name="dot-menu-items" />
-            </template>
-          </DotMenu>
-        </div>
-        <v-row
-          no-gutters
+        <v-col
+          cols="4"
+          xs="4"
+          sm="3"
+          md="2"
+          lg="2"
+          xl="1"
+          class="font-weight-medium"
         >
-          <v-col class="text-subtitle-1">
-            {{ contact.fullName }}
-          </v-col>
-          <v-col
-            align-self="end"
-            class="text-right"
-          >
-            <v-btn
-              :to="'/contacts/' + contact.id"
-              color="primary"
-              text
-              small
-              @click.stop.prevent
-            >
-              View
-            </v-btn>
-            <v-btn
-              icon
-              small
-              @click.stop.prevent="show = !show"
-            >
-              <v-icon
-                small
-              >
-                {{ show ? 'mdi-chevron-up' : 'mdi-chevron-down' }}
-              </v-icon>
-            </v-btn>
-          </v-col>
-        </v-row>
-      </v-card-text>
-      <v-expand-transition>
-        <v-card
-          v-show="show"
-          flat
-          tile
-          color="grey lighten-5"
+          Given name:
+        </v-col>
+        <v-col
+          cols="8"
+          xs="8"
+          sm="9"
+          md="4"
+          lg="4"
+          xl="5"
+          class="nowrap-truncate"
         >
-          <v-card-text
-            class="py-2 px-3"
-          >
-            <v-row
-              no-gutters
+          {{ contact.givenName }}
+        </v-col>
+        <v-col
+          cols="4"
+          xs="4"
+          sm="3"
+          md="2"
+          lg="2"
+          xl="1"
+          class="font-weight-medium"
+        >
+          Family name:
+        </v-col>
+        <v-col
+          cols="8"
+          xs="8"
+          sm="9"
+          md="4"
+          lg="4"
+          xl="5"
+          class="nowrap-truncate"
+        >
+          {{ contact.familyName }}
+        </v-col>
+      </v-row>
+      <v-row
+        no-gutters
+      >
+        <v-col
+          cols="4"
+          xs="4"
+          sm="3"
+          md="2"
+          lg="2"
+          xl="1"
+          class="font-weight-medium"
+        >
+          Email:
+        </v-col>
+        <v-col
+          cols="8"
+          xs="8"
+          sm="9"
+          md="4"
+          lg="4"
+          xl="5"
+          class="nowrap-truncate"
+        >
+          {{ contact.email | orDefault }}
+          <a v-if="contact.email.length > 0" :href="'mailto:' + contact.email">
+            <v-icon
+              small
             >
-              <v-col
-                cols="4"
-                xs="4"
-                sm="3"
-                md="2"
-                lg="2"
-                xl="1"
-                class="font-weight-medium"
-              >
-                Given name:
-              </v-col>
-              <v-col
-                cols="8"
-                xs="8"
-                sm="9"
-                md="4"
-                lg="4"
-                xl="5"
-                class="nowrap-truncate"
-              >
-                {{ contact.givenName }}
-              </v-col>
-              <v-col
-                cols="4"
-                xs="4"
-                sm="3"
-                md="2"
-                lg="2"
-                xl="1"
-                class="font-weight-medium"
-              >
-                Family name:
-              </v-col>
-              <v-col
-                cols="8"
-                xs="8"
-                sm="9"
-                md="4"
-                lg="4"
-                xl="5"
-                class="nowrap-truncate"
-              >
-                {{ contact.familyName }}
-              </v-col>
-            </v-row>
-            <v-row
-              no-gutters
+              mdi-email
+            </v-icon>
+          </a>
+        </v-col>
+        <v-col
+          cols="4"
+          xs="4"
+          sm="3"
+          md="2"
+          lg="2"
+          xl="1"
+          class="font-weight-medium"
+        >
+          Website:
+        </v-col>
+        <v-col
+          cols="8"
+          xs="8"
+          sm="9"
+          md="4"
+          lg="4"
+          xl="5"
+          class="nowrap-truncate"
+        >
+          {{ contact.website | orDefault }}
+          <a v-if="contact.website.length > 0" :href="contact.website" target="_blank">
+            <v-icon
+              small
             >
-              <v-col
-                cols="4"
-                xs="4"
-                sm="3"
-                md="2"
-                lg="2"
-                xl="1"
-                class="font-weight-medium"
-              >
-                Website:
-              </v-col>
-              <v-col
-                cols="8"
-                xs="8"
-                sm="9"
-                md="4"
-                lg="4"
-                xl="5"
-                class="nowrap-truncate"
-              >
-                {{ contact.website }}
-              </v-col>
-            </v-row>
-          </v-card-text>
-        </v-card>
-      </v-expand-transition>
-    </v-card>
-  </v-hover>
+              mdi-open-in-new
+            </v-icon>
+          </a>
+        </v-col>
+      </v-row>
+    </template>
+  </base-expandable-list-item>
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop } from 'vue-property-decorator'
+import { Component, Vue, Prop } from 'nuxt-property-decorator'
 
 import { Contact } from '@/models/Contact'
 
-import DotMenu from '@/components/DotMenu.vue'
+import BaseExpandableListItem from '@/components/shared/BaseExpandableListItem.vue'
 
 @Component({
   components: {
-    DotMenu
+    BaseExpandableListItem
   }
 })
 export default class ContactsListItem extends Vue {
@@ -194,8 +180,6 @@ export default class ContactsListItem extends Vue {
     type: Object
   })
   private contact!: Contact
-
-  private show = false
 }
 </script>
 

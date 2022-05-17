@@ -108,15 +108,21 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
+import { Component, Vue } from 'nuxt-property-decorator'
 import { mapGetters } from 'vuex'
+
 import { DateTime } from 'luxon'
+
 import { LocationTypes } from '@/store/configurations'
-import DateTimePicker from '@/components/DateTimePicker.vue'
+
 import { StaticLocationBeginAction } from '@/models/StaticLocationBeginAction'
 import { StaticLocationEndAction } from '@/models/StaticLocationEndAction'
 import { DynamicLocationBeginAction } from '@/models/DynamicLocationBeginAction'
 import { DynamicLocationEndAction } from '@/models/DynamicLocationEndAction'
+
+import { currentAsUtcDateSecondsAsZeros, stringToDate } from '@/utils/dateHelper'
+
+import DateTimePicker from '@/components/DateTimePicker.vue'
 import ConfigurationStaticLocationBeginActionData
   from '@/components/configurations/ConfigurationStaticLocationBeginActionData.vue'
 import ConfigurationStaticLocationEndActionData
@@ -125,7 +131,6 @@ import ConfigurationDynamicLocationBeginActionData
   from '@/components/configurations/ConfigurationDynamicLocationBeginActionData.vue'
 import ConfigurationDynamicLocationEndActionData
   from '@/components/configurations/ConfigurationDynamicLocationEndActionData.vue'
-import { currentAsUtcDateSecondsAsZeros, stringToDate } from '@/utils/dateHelper'
 
 @Component({
   components: { ConfigurationDynamicLocationEndActionData, ConfigurationDynamicLocationBeginActionData, ConfigurationStaticLocationEndActionData, ConfigurationStaticLocationBeginActionData, DateTimePicker },

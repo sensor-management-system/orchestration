@@ -124,9 +124,12 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
-
+import { Component, Vue } from 'nuxt-property-decorator'
 import { mapActions, mapGetters } from 'vuex'
+
+import { GenericAction } from '@/models/GenericAction'
+import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
+
 import PlatformActionTimeline from '@/components/actions/PlatformActionTimeline.vue'
 import HintCard from '@/components/HintCard.vue'
 import GenericActionCard from '@/components/actions/GenericActionCard.vue'
@@ -136,9 +139,6 @@ import SoftwareUpdateActionCard from '@/components/actions/SoftwareUpdateActionC
 import PlatformMountActionCard from '@/components/actions/PlatformMountActionCard.vue'
 import PlatformUnmountActionCard from '@/components/actions/PlatformUnmountActionCard.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
-
-import { GenericAction } from '@/models/GenericAction'
-import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
 
 @Component({
   components: {

@@ -70,9 +70,11 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
+import { Component, Vue } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
+
 import { DeviceProperty } from '@/models/DeviceProperty'
+
 import DevicePropertyForm from '@/components/DevicePropertyForm.vue'
 import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'

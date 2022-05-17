@@ -89,14 +89,15 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
-
+import { Component, Vue } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
+
+import { Contact } from '@/models/Contact'
+
 import DotMenu from '@/components/DotMenu.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 import ContactBasicData from '@/components/ContactBasicData.vue'
 import ContacsDeleteDialog from '@/components/contacts/ContacsDeleteDialog.vue'
-import { Contact } from '@/models/Contact'
 
 @Component({
   components: { ContacsDeleteDialog, ContactBasicData, DotMenuActionDelete, DotMenu },

@@ -30,82 +30,52 @@ implied. See the Licence for the specific language governing
 permissions and limitations under the Licence.
 -->
 <template>
-  <v-hover
-    v-slot="{ hover }"
-  >
-    <v-card
-      :elevation="hover ? 6 : 2"
-      class="ma-2"
-    >
-      <v-card-text>
-        <v-row>
-          <v-avatar class="mt-0 align-self-center">
-            <v-icon large>
-              {{ filetypeIcon(attachment) }}
-            </v-icon>
-          </v-avatar>
-          <v-col>
-            <v-row
-              no-gutters
-            >
-              <v-col>
-                <v-card-subtitle>
-                  {{ filename(attachment) }}
-                </v-card-subtitle>
-              </v-col>
-              <v-col
-                align-self="end"
-                class="text-right"
-              >
-                <DotMenu>
-                  <template #actions>
-                    <slot name="dot-menu-items" />
-                  </template>
-                </DotMenu>
-              </v-col>
-            </v-row>
-            <v-row
-              no-gutters
-            >
-              <v-col class="text-subtitle-1">
-                <a v-if="attachment.label" :href="attachment.url" target="_blank">
-                  <v-icon color="primary">mdi-open-in-new</v-icon>{{ attachment.label }}
-                </a>
-                <a v-else :href="attachment.url" target="_blank">
-                  <v-icon color="primary">mdi-open-in-new</v-icon>
-                </a>
-              </v-col>
-              <v-col
-                align-self="end"
-                class="text-right"
-              >
-                <v-btn
-                  v-if="$auth.loggedIn"
-                  color="primary"
-                  text
-                  small
-                  nuxt
-                  :to="'/devices/' + deviceId + '/attachments/' + attachment.id + '/edit'"
-                >
-                  Edit
-                </v-btn>
-              </v-col>
-            </v-row>
-          </v-col>
-        </v-row>
-      </v-card-text>
-    </v-card>
-  </v-hover>
+  <base-expandable-list-item>
+    <template #header>
+      <span class="text-caption">
+        {{ attachment.url | shortenMiddle }}
+      </span>
+    </template>
+    <template #dot-menu-items>
+      <slot name="dot-menu-items" />
+    </template>
+    <template #actions>
+      <v-btn
+        v-if="$auth.loggedIn"
+        color="primary"
+        text
+        small
+        nuxt
+        :to="'/devices/' + deviceId + '/attachments/' + attachment.id + '/edit'"
+      >
+        Edit
+      </v-btn>
+    </template>
+    <template #default>
+      <v-icon>
+        {{ filetypeIcon(attachment) }}
+      </v-icon>
+      <span class="text-caption">
+        <a :href="attachment.url" target="_blank">
+          {{ attachment.label }}&nbsp;<v-icon small>mdi-open-in-new</v-icon>
+        </a>
+      </span>
+    </template>
+  </base-expandable-list-item>
 </template>
 
 <script lang="ts">
-import { Component } from 'vue-property-decorator'
-import { mixins, Prop } from 'nuxt-property-decorator'
+import { Component, mixins, Prop } from 'nuxt-property-decorator'
 import { Attachment } from '@/models/Attachment'
-import DotMenu from '@/components/DotMenu.vue'
+
+import BaseExpandableListItem from '@/components/shared/BaseExpandableListItem.vue'
+
 import { AttachmentsMixin } from '@/mixins/AttachmentsMixin'
+
 @Component({
-  components: { DotMenu }
+  components: {
+    BaseExpandableListItem
+  }
 })
 export default class DevicesAttachmentListItem extends mixins(AttachmentsMixin) {
   @Prop({
@@ -120,7 +90,3 @@ export default class DevicesAttachmentListItem extends mixins(AttachmentsMixin) 
   private deviceId!: string
 }
 </script>
-
-<style scoped>
-
-</style>

@@ -144,9 +144,15 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
-
+import { Component, Vue } from 'nuxt-property-decorator'
 import { mapActions, mapGetters } from 'vuex'
+
+import { GenericAction } from '@/models/GenericAction'
+import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
+import { DeviceCalibrationAction } from '@/models/DeviceCalibrationAction'
+
+import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import SoftwareUpdateActionCard from '@/components/actions/SoftwareUpdateActionCard.vue'
 import HintCard from '@/components/HintCard.vue'
 import DeviceActionTimeline from '@/components/actions/DeviceActionTimeline.vue'
 import GenericActionCard from '@/components/actions/GenericActionCard.vue'
@@ -155,12 +161,6 @@ import DeviceMountActionCard from '@/components/actions/DeviceMountActionCard.vu
 import DeviceUnmountActionCard from '@/components/actions/DeviceUnmountActionCard.vue'
 import DeviceCalibrationActionCard from '@/components/actions/DeviceCalibrationActionCard.vue'
 import ActionDeleteDialog from '@/components/actions/ActionDeleteDialog.vue'
-
-import { GenericAction } from '@/models/GenericAction'
-import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
-import { DeviceCalibrationAction } from '@/models/DeviceCalibrationAction'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
-import SoftwareUpdateActionCard from '@/components/actions/SoftwareUpdateActionCard.vue'
 
 @Component({
   components: {

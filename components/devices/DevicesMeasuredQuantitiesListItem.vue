@@ -30,90 +30,60 @@ implied. See the Licence for the specific language governing
 permissions and limitations under the Licence.
 -->
 <template>
-  <v-hover
-    v-slot="{ hover }"
+  <base-expandable-list-item
+    expandable-color="grey lighten-5"
   >
-    <v-card
-      :elevation="hover ? 6 : 2"
-      class="ma-2"
-    >
-      <v-card-text
-        class="py-2 px-3"
-        @click.stop.prevent="show = !show"
+    <template #dot-menu-items>
+      <slot name="dot-menu-items" />
+    </template>
+    <template #actions>
+      <v-btn
+        v-if="$auth.loggedIn"
+        :to="'/devices/'+deviceId+'/measuredquantities/'+measuredQuantity.id+'/edit'"
+        color="primary"
+        text
+        small
+        @click.stop.prevent
       >
-        <div class="d-flex align-center">
-          <v-spacer />
-          <DotMenu>
-            <template #actions>
-              <slot name="dot-menu-items" />
-            </template>
-          </DotMenu>
-        </div>
-        <v-row
-          no-gutters
-        >
-          <v-col class="text-subtitle-1">
-            {{ computedTitle }}
-          </v-col>
-          <v-col
-            align-self="end"
-            class="text-right"
-          >
-            <v-btn
-              v-if="$auth.loggedIn"
-              :to="'/devices/'+deviceId+'/measuredquantities/'+measuredQuantity.id+'/edit'"
-              color="primary"
-              text
-              small
-              @click.stop.prevent
-            >
-              Edit
-            </v-btn>
-            <v-btn
-              icon
-              small
-              @click.stop.prevent="show = !show"
-            >
-              <v-icon
-                small
-              >
-                {{ show ? 'mdi-chevron-up' : 'mdi-chevron-down' }}
-              </v-icon>
-            </v-btn>
-          </v-col>
-        </v-row>
-      </v-card-text>
-      <v-expand-transition>
-        <v-container
-          v-if="show"
-        >
-          <DevicePropertyInfo
-            v-model="measuredQuantity"
-            :compartments="compartments"
-            :sampling-medias="samplingMedias"
-            :properties="properties"
-            :units="units"
-            :measured-quantity-units="measuredQuantityUnits"
-          />
-        </v-container>
-      </v-expand-transition>
-    </v-card>
-  </v-hover>
+        Edit
+      </v-btn>
+    </template>
+    <template #default>
+      {{ computedTitle }}
+    </template>
+    <template #expandable>
+      <DevicePropertyInfo
+        v-model="measuredQuantity"
+        :compartments="compartments"
+        :sampling-medias="samplingMedias"
+        :properties="properties"
+        :units="units"
+        :measured-quantity-units="measuredQuantityUnits"
+      />
+    </template>
+  </base-expandable-list-item>
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
-import { Prop } from 'nuxt-property-decorator'
-import DotMenu from '@/components/DotMenu.vue'
+import { Component, Vue, Prop } from 'nuxt-property-decorator'
+
 import { DeviceProperty } from '@/models/DeviceProperty'
-import DevicePropertyInfo from '@/components/DevicePropertyInfo.vue'
 import { Compartment } from '@/models/Compartment'
 import { SamplingMedia } from '@/models/SamplingMedia'
 import { Property } from '@/models/Property'
 import { Unit } from '@/models/Unit'
 import { MeasuredQuantityUnit } from '@/models/MeasuredQuantityUnit'
+
+import DotMenu from '@/components/DotMenu.vue'
+import BaseExpandableListItem from '@/components/shared/BaseExpandableListItem.vue'
+import DevicePropertyInfo from '@/components/DevicePropertyInfo.vue'
+
 @Component({
-  components: { DevicePropertyInfo, DotMenu }
+  components: {
+    DevicePropertyInfo,
+    DotMenu,
+    BaseExpandableListItem
+  }
 })
 export default class DevicesMeasuredQuantitiesListItem extends Vue {
   @Prop({
@@ -182,8 +152,6 @@ export default class DevicesMeasuredQuantitiesListItem extends Vue {
   })
   private index!: number
 
-  private show = false
-
   get computedTitle () {
     if (this.measuredQuantity) {
       const propertyName = this.measuredQuantity.propertyName ?? ''
@@ -195,7 +163,3 @@ export default class DevicesMeasuredQuantitiesListItem extends Vue {
   }
 }
 </script>
-
-<style scoped>
-
-</style>

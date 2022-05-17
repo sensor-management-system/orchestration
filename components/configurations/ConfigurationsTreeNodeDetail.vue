@@ -56,13 +56,15 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
-import { Prop } from 'nuxt-property-decorator'
+import { Component, Vue, Prop } from 'nuxt-property-decorator'
+
 import { } from '@/models/Platform'
 import { ConfigurationsTreeNode } from '@/viewmodels/ConfigurationsTreeNode'
+
 import PlatformMountListItem from '@/components/platforms/PlatformMountListItem.vue'
 import DevicesMountListItem from '@/components/devices/DevicesMountListItem.vue'
 import ConfigurationsPlatformDeviceMountData from '@/components/ConfigurationsPlatformDeviceMountData.vue'
+
 @Component({
   components: { ConfigurationsPlatformDeviceMountData, DevicesMountListItem, PlatformMountListItem }
 })
