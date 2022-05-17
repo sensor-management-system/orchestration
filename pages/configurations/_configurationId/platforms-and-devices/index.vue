@@ -134,17 +134,18 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue, Watch } from 'vue-property-decorator'
+import { Component, Vue, Watch } from 'nuxt-property-decorator'
+import { mapActions, mapGetters, mapState } from 'vuex'
 
 import { DateTime } from 'luxon'
-import { mapActions, mapGetters, mapState } from 'vuex'
-import DateTimePicker from '@/components/DateTimePicker.vue'
-import ConfigurationsTreeView from '@/components/ConfigurationsTreeView.vue'
-import ConfigurationsTreeNodeDetail from '@/components/configurations/ConfigurationsTreeNodeDetail.vue'
 
 import { buildConfigurationTree } from '@/modelUtils/mountHelpers'
 import { ConfigurationsTreeNode } from '@/viewmodels/ConfigurationsTreeNode'
 import { Configuration } from '@/models/Configuration'
+
+import DateTimePicker from '@/components/DateTimePicker.vue'
+import ConfigurationsTreeView from '@/components/ConfigurationsTreeView.vue'
+import ConfigurationsTreeNodeDetail from '@/components/configurations/ConfigurationsTreeNodeDetail.vue'
 
 @Component({
   components: { ConfigurationsTreeNodeDetail, ConfigurationsTreeView, DateTimePicker },

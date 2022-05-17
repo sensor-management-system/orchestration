@@ -115,16 +115,20 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
+import { Component, Vue } from 'nuxt-property-decorator'
+import { mapActions, mapGetters, mapState } from 'vuex'
+
 import { Manufacturer } from '@/models/Manufacturer'
 import { Status } from '@/models/Status'
 import { PlatformType } from '@/models/PlatformType'
+
+import { PlatformSearchParamsSerializer } from '@/modelUtils/PlatformSearchParams'
+
 import ManufacturerSelect from '@/components/ManufacturerSelect.vue'
 import StatusSelect from '@/components/StatusSelect.vue'
 import PlatformTypeSelect from '@/components/PlatformTypeSelect.vue'
-import { PlatformSearchParamsSerializer } from '@/modelUtils/PlatformSearchParams'
-import { mapActions, mapGetters, mapState } from 'vuex'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
+
 @Component({
   components: { ProgressIndicator, PlatformTypeSelect, StatusSelect, ManufacturerSelect },
   computed: {

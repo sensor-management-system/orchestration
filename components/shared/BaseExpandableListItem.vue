@@ -38,90 +38,69 @@ permissions and limitations under the Licence.
       class="ma-2"
     >
       <v-card-text
+        class="py-2 px-3"
         @click.stop.prevent="show = !show"
       >
+        <div
+          v-if="$slots['header']"
+          class="d-flex align-center"
+        >
+          <slot name="header" />
+          <v-spacer />
+          <DotMenu
+            v-if="$slots['dot-menu-items']"
+          >
+            <template #actions>
+              <slot name="dot-menu-items" />
+            </template>
+          </DotMenu>
+        </div>
         <v-row
           no-gutters
         >
           <v-col class="text-subtitle-1">
-            {{ contact.toString() }}
+            <slot />
           </v-col>
           <v-col
             align-self="end"
             class="text-right"
           >
-            <DotMenu>
+            <slot name="actions" />
+            <DotMenu
+              v-if="!$slots['header'] && $slots['dot-menu-items']"
+            >
               <template #actions>
                 <slot name="dot-menu-items" />
               </template>
             </DotMenu>
             <v-btn
+              v-if="$slots['expandable']"
               icon
+              small
               @click.stop.prevent="show = !show"
             >
-              <v-icon>{{ show ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
+              <v-icon
+                small
+              >
+                {{ show ? 'mdi-chevron-up' : 'mdi-chevron-down' }}
+              </v-icon>
             </v-btn>
           </v-col>
         </v-row>
       </v-card-text>
-      <v-expand-transition>
+      <v-expand-transition
+        v-if="$slots['expandable']"
+      >
         <v-card
           v-show="show"
           flat
           tile
-          color="grey lighten-5"
+          :color="expandableColor"
         >
-          <v-card-text>
-            <v-row
-              dense
-            >
-              <v-col
-                cols="12"
-                md="3"
-              >
-                <label>Given name:</label>
-                {{ contact.givenName }}
-              </v-col>
-              <v-col
-                cols="12"
-                md="3"
-              >
-                <label>Family name:</label>
-                {{ contact.familyName }}
-              </v-col>
-            </v-row>
-            <v-row
-              dense
-            >
-              <v-col
-                cols="12"
-                md="3"
-              >
-                <label>E-Mail:</label>
-                {{ contact.email | orDefault }}
-                <a v-if="contact.email.length > 0" :href="'mailto:' + contact.email">
-                  <v-icon
-                    small
-                  >
-                    mdi-email
-                  </v-icon>
-                </a>
-              </v-col>
-              <v-col
-                cols="12"
-                md="6"
-              >
-                <label>Website:</label>
-                {{ contact.website | orDefault }}
-                <a v-if="contact.website.length > 0" :href="contact.website" target="_blank">
-                  <v-icon
-                    small
-                  >
-                    mdi-open-in-new
-                  </v-icon>
-                </a>
-              </v-col>
-            </v-row>
+          <v-card-text
+            class="py-2 px-3"
+          >
+            <slot name="expandable" />
           </v-card-text>
         </v-card>
       </v-expand-transition>
@@ -130,24 +109,23 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
-import { Prop } from 'nuxt-property-decorator'
-import { Contact } from '@/models/Contact'
-import DotMenu from '@/components/DotMenu.vue'
-@Component({
-  components: { DotMenu }
-})
-export default class BaseEntityContactListItem extends Vue {
-  @Prop({
-    required: true,
-    type: Object
-  })
-  private contact!: Contact
+import { Component, Vue, Prop } from 'nuxt-property-decorator'
 
-  private show = false
+import DotMenu from '@/components/DotMenu.vue'
+
+@Component({
+  components: {
+    DotMenu
+  }
+})
+export default class BaseExpandableListItem extends Vue {
+  @Prop({
+    default: 'white',
+    required: false,
+    type: String
+  })
+  private expandableColor!: string
+
+  private show: boolean = false
 }
 </script>
-
-<style scoped>
-
-</style>

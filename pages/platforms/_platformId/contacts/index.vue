@@ -56,7 +56,8 @@ permissions and limitations under the Licence.
       :list-items="platformContacts"
     >
       <template #list-item="{item}">
-        <BaseEntityContactListItem
+        <contacts-list-item
+          :key="item.id"
           :contact="item"
         >
           <template #dot-menu-items>
@@ -65,7 +66,7 @@ permissions and limitations under the Licence.
               @click="removeContact(item.id)"
             />
           </template>
-        </BaseEntityContactListItem>
+        </contacts-list-item>
       </template>
     </BaseList>
     <v-card-actions
@@ -86,17 +87,23 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
+import { Component, Vue } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
 
 import HintCard from '@/components/HintCard.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import BaseList from '@/components/shared/BaseList.vue'
-import BaseEntityContactListItem from '@/components/shared/BaseEntityContactListItem.vue'
+import ContactsListItem from '@/components/contacts/ContactsListItem.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 
 @Component({
-  components: { DotMenuActionDelete, BaseEntityContactListItem, BaseList, ProgressIndicator, HintCard },
+  components: {
+    DotMenuActionDelete,
+    ContactsListItem,
+    BaseList,
+    ProgressIndicator,
+    HintCard
+  },
   computed: mapState('platforms', ['platformContacts']),
   methods: mapActions('platforms', ['removePlatformContact', 'loadPlatformContacts'])
 })

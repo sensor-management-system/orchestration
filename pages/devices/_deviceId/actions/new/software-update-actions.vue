@@ -61,14 +61,16 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
+import { Component, Vue } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
+
+import { IOptionsForActionType } from '@/store/devices'
+
+import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
+
 import SoftwareUpdateActionForm from '@/components/actions/SoftwareUpdateActionForm.vue'
 import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
-
-import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
-import { IOptionsForActionType } from '@/store/devices'
 
 @Component({
   middleware: ['auth'],

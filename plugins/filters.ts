@@ -31,6 +31,8 @@
  */
 import Vue from 'vue'
 
+import { shortenRight, shortenLeft, shortenMiddle } from '@/utils/stringHelpers'
+
 /**
  * returns a default string when value is empty
  *
@@ -40,4 +42,40 @@ import Vue from 'vue'
  */
 Vue.filter('orDefault', (value: string, defaultValue: string = '—'): string => {
   return value || defaultValue
+})
+
+/**
+ * shortens a string to length characters to the right, adds a replacement character
+ *
+ * @param {string} text - the text to shorten
+ * @param {number} [length] - the length of the shortened text, defaults to stringHelpers.DEFAULT_SHORTEN_LENGTH
+ * @param {string} [DEFAULT_REPLACEMENT] - a replacement string which is inserted to the right, defaults to stringHelpers.DEFAULT_REPLACEMENT
+ * @returns {string} the shortened string
+ */
+Vue.filter('shortenRight', (text: string, length?: number, replacement?: string): string => {
+  return shortenRight(text, length, replacement)
+})
+
+/**
+ * shortens a string to length characters to the legt, adds a replacement character
+ *
+ * @param {string} text - the text to shorten
+ * @param {number} [length] - the length of the shortened text, defaults to stringHelpers.DEFAULT_SHORTEN_LENGTH
+ * @param {string} [DEFAULT_REPLACEMENT] - a replacement string which is inserted to the left, defaults to stringHelpers.DEFAULT_REPLACEMENT
+ * @returns {string} the shortened string
+ */
+Vue.filter('shortenLeft', (text: string, length?: number, replacement?: string): string => {
+  return shortenLeft(text, length, replacement)
+})
+
+/**
+ * shortens a string to length characters, adds a replacement character in the middle
+ *
+ * @param {string} text - the text to shorten
+ * @param {number} [length] - the length of the shortened text, defaults to stringHelpers.DEFAULT_SHORTEN_LENGTH
+ * @param {string} [DEFAULT_REPLACEMENT] - a replacement string which is inserted in the middle, defaults to stringHelpers.DEFAULT_REPLACEMENT
+ * @returns {string} the shortened string
+ */
+Vue.filter('shortenMiddle', (text: string, length?: number, replacement?: string): string => {
+  return shortenMiddle(text, length, replacement)
 })

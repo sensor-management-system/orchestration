@@ -65,12 +65,13 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
+import { Component, Vue } from 'nuxt-property-decorator'
 import { mapActions } from 'vuex'
-import CustomFieldForm from '@/components/CustomFieldForm.vue'
-import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
 
 import { CustomTextField } from '@/models/CustomTextField'
+
+import CustomFieldForm from '@/components/CustomFieldForm.vue'
+import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
 @Component({

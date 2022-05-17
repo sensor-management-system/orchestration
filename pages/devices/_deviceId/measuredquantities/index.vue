@@ -95,16 +95,16 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
-
+import { Component, Vue } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
+
+import { DeviceProperty } from '@/models/DeviceProperty'
+
 import DevicesMeasuredQuantitiesListItem from '@/components/devices/DevicesMeasuredQuantitiesListItem.vue'
 import DevicesMeasuredQuantitiesDeleteDialog from '@/components/devices/DevicesMeasuredQuantitiesDeleteDialog.vue'
 import HintCard from '@/components/HintCard.vue'
 import BaseList from '@/components/shared/BaseList.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
-
-import { DeviceProperty } from '@/models/DeviceProperty'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 
 @Component({

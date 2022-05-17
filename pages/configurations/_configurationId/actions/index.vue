@@ -56,10 +56,12 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
+import { Component, Vue } from 'nuxt-property-decorator'
 import { mapGetters } from 'vuex'
+
 import HintCard from '@/components/HintCard.vue'
 import ConfigurationsTimelineActionCard from '@/components/configurations/ConfigurationsTimelineActionCard.vue'
+
 @Component({
   components: { ConfigurationsTimelineActionCard, HintCard },
   computed: mapGetters('configurations', ['timelineActions'])

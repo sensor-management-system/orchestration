@@ -30,251 +30,209 @@ implied. See the Licence for the specific language governing
 permissions and limitations under the Licence.
 -->
 <template>
-  <v-hover
-    v-slot="{ hover }"
+  <base-expandable-list-item
+    expandable-color="grey lighten-5"
   >
-    <v-card
-      :elevation="hover ? 6 : 2"
-      class="ma-2"
-    >
-      <v-card-text
-        class="py-2 px-3"
-        @click.stop.prevent="show = !show"
+    <template #header>
+      <div :class="'text-caption' + (getType() === NO_TYPE ? ' text--disabled' : '')">
+        {{ getType() }}
+      </div>
+      <status-chip
+        :value="getStatus()"
+      />
+    </template>
+    <template #dot-menu-items>
+      <slot name="dot-menu-items" />
+    </template>
+    <template #actions>
+      <v-btn
+        :to="'/platforms/' + platform.id"
+        color="primary"
+        text
+        small
+        @click.stop.prevent
       >
-        <div class="d-flex align-center">
-          <div :class="'text-caption' + (getType() === NO_TYPE ? ' text--disabled' : '')">
-            {{ getType() }}
-          </div>
-          <status-chip
-            :value="getStatus()"
-          />
-          <v-spacer />
-          <DotMenu>
-            <template #actions>
-              <slot name="dot-menu-items" />
-            </template>
-          </DotMenu>
-        </div>
-        <v-row
-          no-gutters
+        View
+      </v-btn>
+    </template>
+    <template #default>
+      <span>  {{ platform.shortName }}</span>
+      <v-tooltip v-if="$vuetify.breakpoint.smAndUp" bottom>
+        <template #activator="{ on, attrs }">
+          <span
+            v-if="platform.manufacturerName !== ''"
+            v-bind="attrs"
+            class="text--disabled"
+            v-on="on"
+          >- {{ platform.manufacturerName }}</span>
+        </template>
+        <span>Manufacturer</span>
+      </v-tooltip>
+      <v-tooltip v-if="$vuetify.breakpoint.smAndUp" bottom>
+        <template #activator="{ on, attrs }">
+          <span
+            v-if="platform.model !== ''"
+            v-bind="attrs"
+            class="text--disabled"
+            v-on="on"
+          >- {{ platform.model }}</span>
+        </template>
+        <span>Model number</span>
+      </v-tooltip>
+      <v-tooltip bottom>
+        <template #activator="{ on, attrs }">
+          <span
+            v-if="platform.serialNumber !== ''"
+            v-bind="attrs"
+            class="text--disabled"
+            v-on="on"
+          >- {{ platform.serialNumber }}</span>
+        </template>
+        <span>Serial number</span>
+      </v-tooltip>
+    </template>
+    <template #expandable>
+      <v-row
+        no-gutters
+      >
+        <v-col
+          cols="4"
+          xs="4"
+          sm="3"
+          md="2"
+          lg="2"
+          xl="1"
+          class="font-weight-medium"
         >
-          <v-col class="text-subtitle-1">
-            <span>  {{ platform.shortName }}</span>
-            <v-tooltip v-if="$vuetify.breakpoint.smAndUp" bottom>
-              <template #activator="{ on, attrs }">
-                <span
-                  v-if="platform.manufacturerName !== ''"
-                  v-bind="attrs"
-                  class="text--disabled"
-                  v-on="on"
-                >- {{ platform.manufacturerName }}</span>
-              </template>
-              <span>Manufacturer</span>
-            </v-tooltip>
-            <v-tooltip v-if="$vuetify.breakpoint.smAndUp" bottom>
-              <template #activator="{ on, attrs }">
-                <span
-                  v-if="platform.model !== ''"
-                  v-bind="attrs"
-                  class="text--disabled"
-                  v-on="on"
-                >- {{ platform.model }}</span>
-              </template>
-              <span>Model number</span>
-            </v-tooltip>
-            <v-tooltip bottom>
-              <template #activator="{ on, attrs }">
-                <span
-                  v-if="platform.serialNumber !== ''"
-                  v-bind="attrs"
-                  class="text--disabled"
-                  v-on="on"
-                >- {{ platform.serialNumber }}</span>
-              </template>
-              <span>Serial number</span>
-            </v-tooltip>
-          </v-col>
-          <v-col
-            align-self="end"
-            class="text-right"
-          >
-            <v-btn
-              :to="'/platforms/' + platform.id"
-              color="primary"
-              text
-              small
-              @click.stop.prevent
-            >
-              View
-            </v-btn>
-            <v-btn
-              icon
-              small
-              @click.stop.prevent="show = !show"
-            >
-              <v-icon
-                small
-              >
-                {{ show ? 'mdi-chevron-up' : 'mdi-chevron-down' }}
-              </v-icon>
-            </v-btn>
-          </v-col>
-        </v-row>
-      </v-card-text>
-      <v-expand-transition>
-        <v-card
-          v-show="show"
-          flat
-          tile
-          color="grey lighten-5"
+          Manufacturer:
+        </v-col>
+        <v-col
+          cols="8"
+          xs="8"
+          sm="9"
+          md="4"
+          lg="4"
+          xl="5"
+          class="nowrap-truncate"
         >
-          <v-card-text
-            class="py-2 px-3"
-          >
-            <v-row
-              no-gutters
-            >
-              <v-col
-                cols="4"
-                xs="4"
-                sm="3"
-                md="2"
-                lg="2"
-                xl="1"
-                class="font-weight-medium"
-              >
-                Manufacturer:
-              </v-col>
-              <v-col
-                cols="8"
-                xs="8"
-                sm="9"
-                md="4"
-                lg="4"
-                xl="5"
-                class="nowrap-truncate"
-              >
-                {{ getTextOrDefault(platform.manufacturerName) }}
-              </v-col>
-              <v-col
-                cols="4"
-                xs="4"
-                sm="3"
-                md="2"
-                lg="2"
-                xl="1"
-                class="font-weight-medium"
-              >
-                Model:
-              </v-col>
-              <v-col
-                cols="8"
-                xs="8"
-                sm="9"
-                md="4"
-                lg="4"
-                xl="5"
-                class="nowrap-truncate"
-              >
-                {{ getTextOrDefault(platform.model) }}
-              </v-col>
-            </v-row>
-            <v-row
-              no-gutters
-            >
-              <v-col
-                cols="4"
-                xs="4"
-                sm="3"
-                md="2"
-                lg="2"
-                xl="1"
-                class="font-weight-medium"
-              >
-                Serial number:
-              </v-col>
-              <v-col
-                cols="8"
-                xs="8"
-                sm="9"
-                md="4"
-                lg="4"
-                xl="5"
-                class="nowrap-truncate"
-              >
-                {{ getTextOrDefault(platform.serialNumber) }}
-              </v-col>
-              <v-col
-                cols="4"
-                xs="4"
-                sm="3"
-                md="2"
-                lg="2"
-                xl="1"
-                class="font-weight-medium"
-              >
-                Inventory number:
-              </v-col>
-              <v-col
-                cols="8"
-                xs="8"
-                sm="9"
-                md="4"
-                lg="4"
-                xl="5"
-                class="nowrap-truncate"
-              >
-                {{ getTextOrDefault(platform.inventoryNumber) }}
-              </v-col>
-            </v-row>
-            <v-row
-              no-gutters
-            >
-              <v-col
-                cols="4"
-                xs="4"
-                sm="3"
-                md="2"
-                lg="2"
-                xl="1"
-                class="font-weight-medium"
-              >
-                Description:
-              </v-col>
-              <v-col
-                cols="8"
-                xs="8"
-                sm="9"
-                md="10"
-                lg="10"
-                xl="11"
-                class="nowrap-truncate"
-              >
-                {{ getTextOrDefault(platform.description) }}
-              </v-col>
-            </v-row>
-          </v-card-text>
-        </v-card>
-      </v-expand-transition>
-    </v-card>
-  </v-hover>
+          {{ getTextOrDefault(platform.manufacturerName) }}
+        </v-col>
+        <v-col
+          cols="4"
+          xs="4"
+          sm="3"
+          md="2"
+          lg="2"
+          xl="1"
+          class="font-weight-medium"
+        >
+          Model:
+        </v-col>
+        <v-col
+          cols="8"
+          xs="8"
+          sm="9"
+          md="4"
+          lg="4"
+          xl="5"
+          class="nowrap-truncate"
+        >
+          {{ getTextOrDefault(platform.model) }}
+        </v-col>
+      </v-row>
+      <v-row
+        no-gutters
+      >
+        <v-col
+          cols="4"
+          xs="4"
+          sm="3"
+          md="2"
+          lg="2"
+          xl="1"
+          class="font-weight-medium"
+        >
+          Serial number:
+        </v-col>
+        <v-col
+          cols="8"
+          xs="8"
+          sm="9"
+          md="4"
+          lg="4"
+          xl="5"
+          class="nowrap-truncate"
+        >
+          {{ getTextOrDefault(platform.serialNumber) }}
+        </v-col>
+        <v-col
+          cols="4"
+          xs="4"
+          sm="3"
+          md="2"
+          lg="2"
+          xl="1"
+          class="font-weight-medium"
+        >
+          Inventory number:
+        </v-col>
+        <v-col
+          cols="8"
+          xs="8"
+          sm="9"
+          md="4"
+          lg="4"
+          xl="5"
+          class="nowrap-truncate"
+        >
+          {{ getTextOrDefault(platform.inventoryNumber) }}
+        </v-col>
+      </v-row>
+      <v-row
+        no-gutters
+      >
+        <v-col
+          cols="4"
+          xs="4"
+          sm="3"
+          md="2"
+          lg="2"
+          xl="1"
+          class="font-weight-medium"
+        >
+          Description:
+        </v-col>
+        <v-col
+          cols="8"
+          xs="8"
+          sm="9"
+          md="10"
+          lg="10"
+          xl="11"
+          class="nowrap-truncate"
+        >
+          {{ getTextOrDefault(platform.description) }}
+        </v-col>
+      </v-row>
+    </template>
+  </base-expandable-list-item>
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop } from 'vue-property-decorator'
+import { Component, Vue, Prop } from 'nuxt-property-decorator'
 import { mapGetters } from 'vuex'
 
 import { Platform } from '@/models/Platform'
 import { PlatformType } from '@/models/PlatformType'
 import { Status } from '@/models/Status'
 
-import DotMenu from '@/components/DotMenu.vue'
 import StatusChip from '@/components/shared/StatusChip.vue'
+import BaseExpandableListItem from '@/components/shared/BaseExpandableListItem.vue'
 
 @Component({
   components: {
     StatusChip,
-    DotMenu
+    BaseExpandableListItem
   },
   computed: mapGetters('vocabulary', ['getPlatformTypeByUri', 'getEquipmentstatusByUri'])
 })
@@ -286,7 +244,6 @@ export default class PlatformsListItem extends Vue {
   private platform!: Platform
 
   public readonly NO_TYPE: string = 'Unknown type'
-  private show = false
 
   // vuex definition for typescript check
   getPlatformTypeByUri!: (uri: string) => PlatformType | undefined

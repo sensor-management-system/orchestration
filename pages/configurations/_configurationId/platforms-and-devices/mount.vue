@@ -358,27 +358,33 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
-import { DateTime } from 'luxon'
+import { Component, Vue } from 'nuxt-property-decorator'
 import { mapActions, mapGetters, mapState } from 'vuex'
+
+import { DateTime } from 'luxon'
+
+import { Device } from '@/models/Device'
+import { Platform } from '@/models/Platform'
+import { DeviceMountAction } from '@/models/DeviceMountAction'
+import { PlatformMountAction } from '@/models/PlatformMountAction'
+import { Configuration } from '@/models/Configuration'
+
+import { PlatformNode } from '@/viewmodels/PlatformNode'
 import { ConfigurationsTreeNode } from '@/viewmodels/ConfigurationsTreeNode'
+
 import { buildConfigurationTree } from '@/modelUtils/mountHelpers'
+
+import { dateToDateTimeStringHHMM } from '@/utils/dateHelper'
+
 import ConfigurationsTreeView from '@/components/ConfigurationsTreeView.vue'
 import DateTimePicker from '@/components/DateTimePicker.vue'
 import BaseList from '@/components/shared/BaseList.vue'
 import DevicesListItem from '@/components/devices/DevicesListItem.vue'
 import DevicesMountListItem from '@/components/devices/DevicesMountListItem.vue'
 import ConfigurationsPlatformDeviceMountForm from '@/components/ConfigurationsPlatformDeviceMountForm.vue'
-import { Device } from '@/models/Device'
-import { Platform } from '@/models/Platform'
-import { DeviceMountAction } from '@/models/DeviceMountAction'
-import { PlatformNode } from '@/viewmodels/PlatformNode'
 import PlatformMountListItem from '@/components/platforms/PlatformMountListItem.vue'
-import { PlatformMountAction } from '@/models/PlatformMountAction'
 import HintCard from '@/components/HintCard.vue'
-import { dateToDateTimeStringHHMM } from '@/utils/dateHelper'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
-import { Configuration } from '@/models/Configuration'
 
 @Component({
   components: { ProgressIndicator, HintCard, PlatformMountListItem, ConfigurationsPlatformDeviceMountForm, DevicesMountListItem, DevicesListItem, BaseList, DateTimePicker, ConfigurationsTreeView },

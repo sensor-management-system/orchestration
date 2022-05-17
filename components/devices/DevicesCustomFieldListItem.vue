@@ -30,12 +30,23 @@ implied. See the Licence for the specific language governing
 permissions and limitations under the Licence.
 -->
 <template>
-  <v-card
-    class="ma-2"
-  >
-    <v-card-text
-      class="py-2 px-3"
-    >
+  <base-expandable-list-item>
+    <template #dot-menu-items>
+      <slot name="dot-menu-items" />
+    </template>
+    <template #actions>
+      <v-btn
+        v-if="$auth.loggedIn"
+        color="primary"
+        text
+        small
+        nuxt
+        :to="'/devices/' + deviceId + '/customfields/' + customField.id + '/edit'"
+      >
+        Edit
+      </v-btn>
+    </template>
+    <template #default>
       <v-row
         no-gutters
       >
@@ -53,50 +64,22 @@ permissions and limitations under the Licence.
           <label>Value:</label>
           {{ customField.value }}
         </v-col>
-        <v-col
-          cols="12"
-          md="2"
-          class="text-right"
-          align-self="center"
-        >
-          <v-row>
-            <v-row
-              no-gutters
-            >
-              <v-col align-self="end" class="text-right">
-                <v-btn
-                  v-if="$auth.loggedIn"
-                  color="primary"
-                  text
-                  small
-                  nuxt
-                  :to="'/devices/' + deviceId + '/customfields/' + customField.id + '/edit'"
-                >
-                  Edit
-                </v-btn>
-                <DotMenu
-                  v-if="$auth.loggedIn"
-                >
-                  <template #actions>
-                    <slot name="dot-menu-items" />
-                  </template>
-                </DotMenu>
-              </v-col>
-            </v-row>
-          </v-row>
-        </v-col>
       </v-row>
-    </v-card-text>
-  </v-card>
+    </template>
+  </base-expandable-list-item>
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
-import { Prop } from 'nuxt-property-decorator'
+import { Component, Vue, Prop } from 'nuxt-property-decorator'
+
 import { CustomTextField } from '@/models/CustomTextField'
-import DotMenu from '@/components/DotMenu.vue'
+
+import BaseExpandableListItem from '@/components/shared/BaseExpandableListItem.vue'
+
 @Component({
-  components: { DotMenu }
+  components: {
+    BaseExpandableListItem
+  }
 })
 export default class DevicesCustomFieldListItem extends Vue {
   @Prop({
@@ -111,7 +94,3 @@ export default class DevicesCustomFieldListItem extends Vue {
   private deviceId!: string
 }
 </script>
-
-<style scoped>
-
-</style>

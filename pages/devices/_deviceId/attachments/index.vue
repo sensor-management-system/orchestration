@@ -91,8 +91,11 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
+import { Component, Vue } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
+
+import { Attachment } from '@/models/Attachment'
+
 import BaseList from '@/components/shared/BaseList.vue'
 import DevicesAttachmentListItem from '@/components/devices/DevicesAttachmentListItem.vue'
 import DevicesAttachmentDeleteDialog from '@/components/devices/DevicesAttachmentDeleteDialog.vue'
@@ -100,7 +103,6 @@ import HintCard from '@/components/HintCard.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
-import { Attachment } from '@/models/Attachment'
 @Component({
   components: { ProgressIndicator, DotMenuActionDelete, HintCard, DevicesAttachmentDeleteDialog, DevicesAttachmentListItem, BaseList },
   computed: mapState('devices', ['deviceAttachments']),

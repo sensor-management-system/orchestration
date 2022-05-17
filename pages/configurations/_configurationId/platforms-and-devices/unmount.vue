@@ -104,23 +104,29 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
-import { DateTime } from 'luxon'
+import { Component, Vue } from 'nuxt-property-decorator'
 import { mapActions, mapGetters, mapState } from 'vuex'
-import DateTimePicker from '@/components/DateTimePicker.vue'
-import { ConfigurationsTreeNode } from '@/viewmodels/ConfigurationsTreeNode'
-import { buildConfigurationTree } from '@/modelUtils/mountHelpers'
-import ConfigurationsTreeView from '@/components/ConfigurationsTreeView.vue'
-import ConfigurationsSelectedItemUnmountForm from '@/components/ConfigurationsSelectedItemUnmountForm.vue'
+
+import { DateTime } from 'luxon'
+
 import { DeviceUnmountAction } from '@/models/DeviceUnmountAction'
 import { Device } from '@/models/Device'
 import { Contact } from '@/models/Contact'
 import { Platform } from '@/models/Platform'
 import { PlatformUnmountAction } from '@/models/PlatformUnmountAction'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import { Configuration } from '@/models/Configuration'
+
+import { ConfigurationsTreeNode } from '@/viewmodels/ConfigurationsTreeNode'
 import { PlatformNode } from '@/viewmodels/PlatformNode'
 import { DeviceNode } from '@/viewmodels/DeviceNode'
+
+import { buildConfigurationTree } from '@/modelUtils/mountHelpers'
+
+import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import DateTimePicker from '@/components/DateTimePicker.vue'
+import ConfigurationsTreeView from '@/components/ConfigurationsTreeView.vue'
+import ConfigurationsSelectedItemUnmountForm from '@/components/ConfigurationsSelectedItemUnmountForm.vue'
+
 @Component({
   components: { ProgressIndicator, ConfigurationsSelectedItemUnmountForm, ConfigurationsTreeView, DateTimePicker },
   middleware: ['auth'],
