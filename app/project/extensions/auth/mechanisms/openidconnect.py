@@ -23,7 +23,7 @@ class OpenIdConnectAuthMechanism(CreateNewUserByUserinfoMixin):
         """Init the flask extension."""
         app.teardown_appcontext(self.teardown)
         self.cache = TTLCache(
-            maxsize=5000, ttl=app.config.get("OIDC_SECONDS_CACHING", 600)
+            maxsize=5000, ttl=app.config.get("OIDC_TOKEN_CACHING_SECONDS", 600)
         )
 
     def load_config(self, app):

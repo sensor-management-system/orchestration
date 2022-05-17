@@ -40,7 +40,7 @@ class BaseConfig:
     IDL_URL = env("IDL_URL", None)
     CATCH_EXCEPTIONS = True
     INSTITUTE = env("INSTITUTE", "ufz")
-    OIDC_SECONDS_CACHING = env.int("OIDC_SECONDS_CACHING", 600)
+    OIDC_TOKEN_CACHING_SECONDS = env.int("OIDC_TOKEN_CACHING_SECONDS", 600)
 
 
 class DevelopmentConfig(BaseConfig):
