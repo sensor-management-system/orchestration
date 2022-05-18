@@ -66,7 +66,7 @@ permissions and limitations under the Licence.
       <h2 class="mb-1">
         Authorized representatives
       </h2>
-      <p>The GFZ is legally represented by Prof. Dr. Niels Hovius (Chairman of the Board and Scientific Executive Director, interim) and Dr. Stefan Schwartze (Administrative Executive Director).</p>
+      <p>The GFZ is legally represented by Prof. Dr. Susanne Buiter (Chairperson of the Board and Scientific Executive Director) and Dr. Stefan Schwartze (Administrative Executive Director).</p>
     </section>
     <section class="mb-6">
       <h2 class="mb-1">
