@@ -1,5 +1,10 @@
+"""Authentication middleware."""
+
 from flask import g
+
 from .mechanisms.openidconnect import OpenIdConnectAuthMechanism
+from .mechanisms.session import SessionAuthMechanism
+
 
 class Auth:
     """
@@ -15,6 +20,7 @@ class Auth:
         """Init the object."""
         if mechanisms is None:
             mechanisms = [
+                SessionAuthMechanism(app),
                 OpenIdConnectAuthMechanism(app),
             ]
         self.mechanisms = mechanisms
