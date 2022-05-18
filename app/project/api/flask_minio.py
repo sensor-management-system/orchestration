@@ -4,7 +4,7 @@ import random
 import time
 
 import minio
-from flask import _app_ctx_stack, current_app, make_response, request
+from flask import _app_ctx_stack, current_app, make_response, g
 from minio.error import S3Error
 from urllib3.exceptions import MaxRetryError, ResponseError
 
@@ -153,7 +153,7 @@ class FlaskMinio:
                     uploaded_file,
                     size,
                     content_type=content_type,
-                    metadata={"uploaded-by-id": request.user.id},
+                    metadata={"uploaded-by-id": g.user.id},
                 )
                 data = {
                     "message": "object stored in {}".format(minio_bucket_name),

@@ -2,7 +2,7 @@
 
 import os
 
-from flask import request
+from flask import g
 from sqlalchemy import or_
 
 from flask_rest_jsonapi import JsonApiException, ResourceDetail
@@ -44,10 +44,10 @@ class ConfigurationList(ResourceList):
         :return: queryset or es filter
         """
         query = db.session.query(self.model)
-        if request.user is None:
+        if g.user is None:
             query = query.filter_by(is_public=True)
         else:
-            if not request.user.is_superuser:
+            if not g.user.is_superuser:
                 query = query.filter(
                     or_(
                         self.model.is_public,
@@ -63,9 +63,9 @@ class ConfigurationList(ResourceList):
         Should return the same set as query, but using
         the elasticsearch fields.
         """
-        if request.user is None:
+        if g.user is None:
             return TermEqualsExactStringFilter("is_public", True)
-        if not request.user.is_superuser:
+        if not g.user.is_superuser:
             return OrFilter(
                 [
                     TermEqualsExactStringFilter("is_public", True),
@@ -100,7 +100,7 @@ class ConfigurationList(ResourceList):
         """
         result_id = result[0]["data"]["id"]
         configuration = db.session.query(Configuration).filter_by(id=result_id).first()
-        contact = request.user.contact
+        contact = g.user.contact
         cv_url = os.environ.get("CV_URL")
         role_name = "Owner"
         role_uri = f"{cv_url}/contactroles/4/"
@@ -141,7 +141,7 @@ class ConfigurationDetail(ResourceDetail):
         config = db.session.query(Configuration).filter_by(id=kwargs["id"]).first()
         if config:
             if config.is_internal:
-                if not request.user:
+                if not g.user:
                     raise UnauthorizedError("Authentication required.")
 
     def before_patch(self, args, kwargs, data):

@@ -1,6 +1,6 @@
 """Utility functions to handle permissions."""
 
-from flask import request
+from flask import request, g
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy import and_, or_
 
@@ -23,7 +23,7 @@ def is_user_in_a_group(groups_to_check):
     """
     if not groups_to_check:
         return True
-    idl_groups = Idl().get_all_permission_groups_for_a_user(request.user.subject)
+    idl_groups = Idl().get_all_permission_groups_for_a_user(g.user.subject)
     if not idl_groups:
         return []
     user_groups = (
@@ -42,7 +42,7 @@ def is_user_admin_in_a_group(groups_to_check):
     """
     if not groups_to_check:
         return True
-    idl_groups = Idl().get_all_permission_groups_for_a_user(request.user.subject)
+    idl_groups = Idl().get_all_permission_groups_for_a_user(g.user.subject)
     if not idl_groups:
         return []
     user_groups = idl_groups.administrated_permission_groups
@@ -55,7 +55,7 @@ def is_superuser():
 
     :return: boolean
     """
-    return request.user and request.user.is_superuser
+    return g.user and g.user.is_superuser
 
 
 def assert_current_user_is_superuser_or_owner_of_object(object_):
@@ -67,10 +67,10 @@ def assert_current_user_is_superuser_or_owner_of_object(object_):
     :param object_:
     :return: None
     """
-    if not request.user:
+    if not g.user:
         raise UnauthorizedError("Authentication required.")
-    if request.user.id != object_.created_by_id:
-        if not request.user.is_superuser:
+    if g.user.id != object_.created_by_id:
+        if not g.user.is_superuser:
             raise ForbiddenError(
                 "This is a private object. You should be the owner to modify!"
             )
@@ -84,11 +84,11 @@ def get_query_with_permissions(model):
     :return set: queryset for the model
     """
     query = db.session.query(model)
-    if request.user is None:
+    if g.user is None:
         query = query.filter_by(is_public=True)
     else:
-        if not request.user.is_superuser:
-            user_id = request.user.id
+        if not g.user.is_superuser:
+            user_id = g.user.id
             query = query.filter(
                 or_(
                     and_(
@@ -110,10 +110,10 @@ def get_es_query_with_permissions():
 
     :return set: queryset for the model
     """
-    if request.user is None:
+    if g.user is None:
         return TermEqualsExactStringFilter("is_public", True)
-    if not request.user.is_superuser:
-        user_id = request.user.id
+    if not g.user.is_superuser:
+        user_id = g.user.id
         return OrFilter(
             [
                 AndFilter(
@@ -219,10 +219,10 @@ def prevent_normal_user_from_viewing_not_owned_private_object(object_):
 
     :param object_:
     """
-    if not request.user:
+    if not g.user:
         raise UnauthorizedError("Authentication required.")
-    if not request.user.is_superuser:
-        if object_.created_by_id != request.user.id:
+    if not g.user.is_superuser:
+        if object_.created_by_id != g.user.id:
             raise ForbiddenError("User is not allowed to view object.")
 
 
@@ -238,7 +238,7 @@ def check_for_permission(model_class, kwargs):
         if object_.is_private:
             prevent_normal_user_from_viewing_not_owned_private_object(object_)
         elif object_.is_internal:
-            if not request.user:
+            if not g.user:
                 raise UnauthorizedError("Authentication required.")
     else:
         raise ObjectNotFound({"pointer": ""}, "Object Not Found")
@@ -300,7 +300,7 @@ def check_permissions_for_related_objects(model_class, id_):
     if related_object.is_private:
         assert_current_user_is_superuser_or_owner_of_object(related_object)
     elif not related_object.is_public:
-        if not request.user:
+        if not g.user:
             raise UnauthorizedError("Authentication required.")
 
 
@@ -370,17 +370,17 @@ def get_query_with_permissions_for_related_objects(model):
         related_object = model.device
     else:
         related_object = model.platform
-    if request.user is None:
+    if g.user is None:
         query = query.filter(related_object.has(is_public=True))
     else:
-        if not request.user.is_superuser:
+        if not g.user.is_superuser:
             query = query.filter(
                 or_(
                     related_object.has(is_public=True),
                     related_object.has(is_internal=True),
                     and_(
                         related_object.has(is_private=True),
-                        related_object.has(created_by_id=request.user.id),
+                        related_object.has(created_by_id=g.user.id),
                     ),
                 )
             )
@@ -398,10 +398,10 @@ def get_query_with_permissions_for_configuration_related_objects(model):
     query = db.session.query(model)
 
     related_object = model.configuration
-    if request.user is None:
+    if g.user is None:
         query = query.filter(related_object.has(is_public=True))
     else:
-        if not request.user.is_superuser:
+        if not g.user.is_superuser:
             query = query.filter(
                 or_(
                     related_object.has(is_public=True),
@@ -425,7 +425,7 @@ def check_permissions_for_configuration_related_objects(model_class, id_):
         raise ObjectNotFound("Object not found!")
     related_object = object_.configuration
     if not related_object.is_public:
-        if not request.user:
+        if not g.user:
             raise UnauthorizedError("Authentication required.")
 
 

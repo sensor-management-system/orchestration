@@ -1,4 +1,4 @@
-from flask import request
+from flask import g
 
 from ...frj_csv_export.resource import ResourceList
 from ..helpers.errors import MethodNotAllowed, UnauthorizedError
@@ -18,13 +18,13 @@ class UserInfo(ResourceList):
 
         :return: Dict with user infos from database + IDL-groups.
         """
-        if not request.user:
+        if not g.user:
             raise UnauthorizedError("Login required")
-        idl_groups = Idl().get_all_permission_groups_for_a_user(request.user.subject)
+        idl_groups = Idl().get_all_permission_groups_for_a_user(g.user.subject)
         data = {
             "data": {
                 "type": "user",
-                "id": request.user.id,
+                "id": g.user.id,
                 "attributes": {
                     "admin": idl_groups.administrated_permission_groups
                     if idl_groups
@@ -32,8 +32,8 @@ class UserInfo(ResourceList):
                     "member": idl_groups.membered_permission_groups
                     if idl_groups
                     else [],
-                    "active": request.user.active,
-                    "is_superuser": request.user.is_superuser,
+                    "active": g.user.active,
+                    "is_superuser": g.user.is_superuser,
                 },
             }
         }

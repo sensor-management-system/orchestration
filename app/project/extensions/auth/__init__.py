@@ -1,4 +1,4 @@
-from flask import request
+from flask import g
 from .mechanisms.openidconnect import OpenIdConnectAuthMechanism
 
 class Auth:
@@ -43,10 +43,10 @@ class Auth:
 
     def try_authentification(self):
         """Run the authentication mechanisms & try to set the user object."""
-        request.user = None
+        g.user = None
         for mechanism in self.mechanisms:
             if mechanism.can_be_applied():
                 user = mechanism.authenticate()
                 if user and user.active:
-                    request.user = user
+                    g.user = user
                     break

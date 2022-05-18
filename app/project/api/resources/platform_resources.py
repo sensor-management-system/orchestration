@@ -2,7 +2,7 @@
 
 import os
 
-from flask import request
+from flask import g
 from flask_rest_jsonapi import JsonApiException, ResourceDetail
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from .base_resource import check_if_object_not_found, delete_attachments_in_minio_by_url
@@ -70,7 +70,7 @@ class PlatformList(ResourceList):
         """
         result_id = result[0]["data"]["id"]
         platform = db.session.query(Platform).filter_by(id=result_id).first()
-        contact = request.user.contact
+        contact = g.user.contact
         cv_url = os.environ.get("CV_URL")
         role_name = "Owner"
         role_uri = f"{cv_url}/contactroles/4/"

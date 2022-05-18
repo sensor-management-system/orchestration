@@ -2,7 +2,7 @@
 
 from functools import wraps
 
-from flask import request
+from flask import request, g
 
 from .helpers.errors import UnauthorizedError
 from .models import Contact, User
@@ -16,7 +16,7 @@ def token_required(fn):
     def wrapper(*args, **kwargs):
         """Wrap the function & check for the token before."""
         if request.method not in ["GET", "HEAD", "OPTION"]:
-            if not request.user:
+            if not g.user:
                 # In this wrapper we can't use the error handler
                 # for this kind of error response, so we will
                 # return the payload right away.
