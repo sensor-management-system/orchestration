@@ -65,11 +65,11 @@ class OpenIdConnectAuthMechanism(CreateNewUserByUserinfoMixin):
         return True
 
     @cachedmethod(operator.attrgetter("cache"))
-    def get_userinfo(self):
+    def get_userinfo(self, authorization):
         """Return the userinfo from the IDP."""
         resp_userinfo = requests.get(
             self.config["userinfo_endpoint"],
-            headers={"Authorization": request.headers.get("Authorization")},
+            headers={"Authorization": authorization},
         )
         if not resp_userinfo.ok:
             raise GetUserinfoException()
@@ -81,8 +81,13 @@ class OpenIdConnectAuthMechanism(CreateNewUserByUserinfoMixin):
 
     def authenticate(self):
         """Return a user object for our current request."""
+        authorization = request.headers.get("Authorization")
+        return self.authenticate_by_authorization(authorization)
+
+    def authenticate_by_authorization(self, authorization):
+        """Return a user object for our current request."""
         try:
-            attributes = self.get_userinfo()
+            attributes = self.get_userinfo(authorization)
         except GetUserinfoException:
             # It can be that there are changes on the IDP config.
             # However those should not effect our get userinfo endpoint.

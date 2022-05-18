@@ -2,9 +2,6 @@
 
 from flask import g
 
-from .mechanisms.openidconnect import OpenIdConnectAuthMechanism
-from .mechanisms.session import SessionAuthMechanism
-
 
 class Auth:
     """
@@ -19,10 +16,7 @@ class Auth:
     def __init__(self, app=None, mechanisms=None):
         """Init the object."""
         if mechanisms is None:
-            mechanisms = [
-                SessionAuthMechanism(app),
-                OpenIdConnectAuthMechanism(app),
-            ]
+            mechanisms = []
         self.mechanisms = mechanisms
         if app is not None:
             self.init_app(app)
