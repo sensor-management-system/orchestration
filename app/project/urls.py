@@ -1,6 +1,5 @@
 from project.api.resources import *
 
-from .api.ping import Ping
 from .api.resources.permission_group_resources import PermissionGroups
 from .frj_csv_export.api import Api
 
