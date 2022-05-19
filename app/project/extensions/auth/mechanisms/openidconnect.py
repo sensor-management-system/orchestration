@@ -91,7 +91,7 @@ class OpenIdConnectAuthMechanism(CreateNewUserByUserinfoMixin):
             attributes = self.get_userinfo(authorization)
         except GetUserinfoException:
             # It can be that there are changes on the IDP config.
-            # However those should not effect our get userinfo endpoint.
+            # However, those should not affect our get userinfo endpoint.
             # So if we can't authenticate here, we let another mechanism
             # do its try.
             return None
