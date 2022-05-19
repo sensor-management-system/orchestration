@@ -7,10 +7,10 @@ class Auth:
     """
     Authentication extension for our app here.
 
-    This just tries to authenticate with various mechisms.
+    This just tries to authenticate with various mechanisms.
     The default one is OpenIdConnectAuthMechanism, but we can extend it
     at any time in the future (apikeys for example).
-    We can also overwrite the mechisms for easier testing.
+    We can also overwrite the mechanisms for easier testing.
     """
 
     def __init__(self, app=None, mechanisms=None):

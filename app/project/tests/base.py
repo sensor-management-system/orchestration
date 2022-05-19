@@ -122,7 +122,8 @@ class LoginMechanismBySettingUserDirectly:
     def init_app(self, app):
         pass
 
-    def can_be_applied(self):
+    @staticmethod
+    def can_be_applied():
         return True
 
     def authenticate(self):
