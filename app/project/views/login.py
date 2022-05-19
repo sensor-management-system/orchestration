@@ -1,7 +1,8 @@
 """Login/logout related routes to put users into the session."""
 
-from flask import Blueprint, g, redirect, render_template, request, session, url_for
+from flask import Blueprint, g, request, session
 
+from ..api.helpers.errors import AuthenticationFailedError, UnauthorizedError
 from ..config import env
 from ..extensions.instances import open_id_connect_auth_mechanism
 
@@ -10,59 +11,36 @@ login_routes = Blueprint(
 )
 
 
-@login_routes.route("/login/by-access-token", methods=["GET", "POST"])
+@login_routes.route("/login/by-access-token", methods=["POST"])
 def login_by_access_token():
     """
-    Show login form for usage with the access token.
+    Put the user in the session.
 
-    Set the user into the session in case we have a valid access token.
+    Returns 204 if successful.
     """
-    error = None
-    if request.method == "POST":
-        access_token = request.form.get("accesstoken")
-        user = open_id_connect_auth_mechanism.authenticate_by_authorization(
-            access_token
-        )
-        if not user:
-            error = "No valid access token."
-        else:
-            session["user_id"] = user.id
-            return redirect(url_for("login.show_login_success"))
+    if "accesstoken" in request.values:
+        access_token = request.values.get("accesstoken")
+    elif "accesstoken" in request.json:
+        access_token = request.json.get("accesstoken")
 
-    return render_template("auth_pages/login_by_access_token.html", error=error)
+    user = open_id_connect_auth_mechanism.authenticate_by_authorization(access_token)
+    if not user:
+        raise AuthenticationFailedError("No valid token")
+    else:
+        session["user_id"] = user.id
 
-
-@login_routes.route("login/success", methods=["GET"])
-def show_login_success():
-    """Show the message that the login was successful."""
-    if not g.user:
-        return redirect(url_for("login.login_required"))
-    return render_template("auth_pages/login_success.html")
+    return ("", 204)
 
 
-@login_routes.route("login-required")
-def login_required():
-    """Show the message that a login is required to access the page."""
-    return render_template("auth_pages/login_required.html")
-
-
-@login_routes.route("logout", methods=["GET", "POST"])
+@login_routes.route("logout", methods=["POST"])
 def logout():
     """
-    Show a button to logout.
+    Remove the user from the session.
 
-    Remove the user from the session for the post request.
+    Returns 204 if successful.
     """
     if not g.user:
-        return redirect(url_for("login.login_required"))
-    if request.method == "POST":
+        raise UnauthorizedError("Authentication required.")
+    if "user_id" in session:
         session.pop("user_id", None)
-        return redirect(url_for("login.show_logout_success"))
-
-    return render_template("auth_pages/logout.html")
-
-
-@login_routes.route("logout/success", methods=["GET"])
-def show_logout_success():
-    """Show the message that the logout was successful."""
-    return render_template("auth_pages/logout_success.html")
+    return ("", 204)
