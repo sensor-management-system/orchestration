@@ -6,19 +6,19 @@ from healthcheck import HealthCheck
 
 from .api import minio
 from .api.auth.permission_manager import permission_manager
-from .api.helpers.docs import docs_routes
 from .api.helpers.health_checks import (
     health_check_db,
     health_check_elastic_search,
     health_check_migrations,
     health_check_minio,
 )
-from .api.helpers.login import login_routes
 from .api.models.base_model import db
 from .api.upload_files import upload_routes
 from .config import env
 from .extensions.instances import auth
 from .urls import api
+from .views.docs import docs_routes
+from .views.login import login_routes
 
 migrate = Migrate()
 base_url = env("URL_PREFIX", "/rdm/svm-api/v1")

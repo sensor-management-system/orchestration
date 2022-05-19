@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template
 
-from ...config import env
+from ..config import env
 
 docs_routes = Blueprint('docs', __name__, url_prefix=env("URL_PREFIX","/rdm/svm-api/v1"))
 

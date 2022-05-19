@@ -2,8 +2,8 @@
 
 from flask import Blueprint, g, redirect, render_template, request, session, url_for
 
-from ...config import env
-from ...extensions.instances import open_id_connect_auth_mechanism
+from ..config import env
+from ..extensions.instances import open_id_connect_auth_mechanism
 
 login_routes = Blueprint(
     "login", __name__, url_prefix=env("URL_PREFIX", "/rdm/svm-api/v1")
