@@ -26,8 +26,8 @@ class CreateNewUserByUserinfoMixin:
         contact = db.session.query(Contact).filter_by(email=email).one_or_none()
         if contact:
             if not contact.active:
-                contact.given_name=attributes["given_name"]
-                contact.familiy_name=attributes["familiy_name"]
+                contact.given_name = attributes["given_name"]
+                contact.familiy_name = attributes["family_name"]
                 contact.active = True
                 db.session.add(contact)
         if not contact:
@@ -35,9 +35,10 @@ class CreateNewUserByUserinfoMixin:
                 given_name=attributes["given_name"],
                 family_name=attributes["family_name"],
                 email=attributes["email"],
+                active=True,
             )
             db.session.add(contact)
-        user = User(subject=identity, contact=contact)
+        user = User(subject=identity, contact=contact, active=True)
         db.session.add(user)
         db.session.commit()
         return user
