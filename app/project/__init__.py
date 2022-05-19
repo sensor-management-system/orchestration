@@ -13,12 +13,12 @@ from .api.helpers.health_checks import (
     health_check_minio,
 )
 from .api.models.base_model import db
-from .api.upload_files import upload_routes
 from .config import env
 from .extensions.instances import auth
 from .urls import api
 from .views.docs import docs_routes
 from .views.login import login_routes
+from .views.upload_files import upload_routes
 
 migrate = Migrate()
 base_url = env("URL_PREFIX", "/rdm/svm-api/v1")
