@@ -27,7 +27,7 @@ class CreateNewUserByUserinfoMixin:
         if contact:
             if not contact.active:
                 contact.given_name = attributes["given_name"]
-                contact.familiy_name = attributes["family_name"]
+                contact.family_name = attributes["family_name"]
                 contact.active = True
                 db.session.add(contact)
         if not contact:
