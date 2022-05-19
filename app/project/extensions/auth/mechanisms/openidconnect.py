@@ -6,6 +6,7 @@ import requests
 from cachetools import TTLCache, cachedmethod
 from flask import current_app, request
 
+from ....api.helpers.errors import AuthenticationFailedError
 from .mixins import CreateNewUserByUserinfoMixin
 
 
@@ -64,7 +65,7 @@ class OpenIdConnectAuthMechanism(CreateNewUserByUserinfoMixin):
             headers={"Authorization": authorization},
         )
         if not resp_userinfo.ok:
-            raise GetUserinfoException()
+            raise AuthenticationFailedError()
             # It can be that there are changes on the IDP config.
             # However, those should not affect our get userinfo endpoint.
             # So if we can't authenticate here, we let another mechanism
@@ -80,7 +81,7 @@ class OpenIdConnectAuthMechanism(CreateNewUserByUserinfoMixin):
         """Return a user object for our current request."""
         try:
             attributes = self.get_userinfo(authorization)
-        except GetUserinfoException:
+        except AuthenticationFailedError:
             # It can be that there are changes on the IDP config.
             # However, those should not affect our get userinfo endpoint.
             # So if we can't authenticate here, we let another mechanism
@@ -92,14 +93,3 @@ class OpenIdConnectAuthMechanism(CreateNewUserByUserinfoMixin):
             current_app.config.get("OIDC_USERDATA_IDENTITY_CLAIM", "sub")
         )
         return self.get_user_or_create_new(identity, attributes)
-
-
-class GetUserinfoException(Exception):
-    """
-    Exception that indicates that we can't query for userinformation.
-
-    This can be due to several reasons, but in any case it indicates
-    that we can't make sure that the token we got is valid.
-    """
-
-    pass
