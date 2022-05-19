@@ -1,6 +1,6 @@
 """Authentication middleware."""
 
-from flask import g, session
+from flask import g
 
 
 class Auth:
@@ -39,8 +39,5 @@ class Auth:
             if mechanism.can_be_applied():
                 user = mechanism.authenticate()
                 if user and user.active:
-                    # First we put the user into the request-scoped g object.
                     g.user = user
-                    # But we can also put the user into the session.
-                    session["user_id"] = user.id
                     break
