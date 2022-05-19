@@ -21,7 +21,6 @@ class OpenIdConnectAuthMechanism(CreateNewUserByUserinfoMixin):
 
     def init_app(self, app):
         """Init the flask extension."""
-        app.teardown_appcontext(self.teardown)
         self.cache = TTLCache(
             maxsize=5000, ttl=app.config.get("OIDC_TOKEN_CACHING_SECONDS", 600)
         )
@@ -39,14 +38,6 @@ class OpenIdConnectAuthMechanism(CreateNewUserByUserinfoMixin):
         # a proper answer so that we can work with it.
         resp.raise_for_status()
         return resp.json()
-
-    def teardown(self, exception):
-        """
-        Cleanup on app teardown.
-
-        Can be used to close connections etc. Currently unused.
-        """
-        pass
 
     def can_be_applied(self):
         """Check if we can use this mechanism here."""

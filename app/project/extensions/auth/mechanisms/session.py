@@ -15,11 +15,11 @@ class SessionAuthMechanism:
             self.init_app(app)
 
     def init_app(self, app):
-        """Init the flask extension."""
-        app.teardown_appcontext(self.teardown)
+        """
+        Init the extension with the app.
 
-    def teardown(self, exception):
-        """Cleanup when the app tears down."""
+        This is part of the interface for flask extensions.
+        """
         pass
 
     def can_be_applied(self):

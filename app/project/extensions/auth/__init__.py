@@ -31,15 +31,6 @@ class Auth:
         # user in the request object.
         app.before_request(self.try_authentification)
         # Register the teardown context.
-        app.teardown_appcontext(self.teardown)
-
-    def teardown(self, exception):
-        """
-        Teardown handler.
-
-        Can be used to close connections etc.
-        """
-        pass
 
     def try_authentification(self):
         """Run the authentication mechanisms & try to set the user object."""
