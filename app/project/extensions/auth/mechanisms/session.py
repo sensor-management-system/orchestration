@@ -22,7 +22,8 @@ class SessionAuthMechanism:
         """
         pass
 
-    def can_be_applied(self):
+    @staticmethod
+    def can_be_applied():
         """Return true if we have an user id in the session."""
         # Sessions are stored encrypted, so only work with validated
         # data here that can't be currupted by a user (as long as they
