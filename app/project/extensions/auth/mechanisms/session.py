@@ -30,7 +30,8 @@ class SessionAuthMechanism:
         # don't know the flask secret).
         return "user_id" in session
 
-    def authenticate(self):
+    @staticmethod
+    def authenticate():
         """Try to find the user for the given user id."""
         user_id = session["user_id"]
         return db.session.query(User).filter_by(id=user_id).one_or_none()
