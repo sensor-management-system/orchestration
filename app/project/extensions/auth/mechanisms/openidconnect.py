@@ -26,7 +26,8 @@ class OpenIdConnectAuthMechanism(CreateNewUserByUserinfoMixin):
             maxsize=5000, ttl=app.config.get("OIDC_TOKEN_CACHING_SECONDS", 600)
         )
 
-    def load_config(self, app):
+    @staticmethod
+    def load_config(app):
         """Load the config for the IDP from the well known url."""
         if not app.config.get("OIDC_WELL_KNOWN_URL"):
             app.logger.warn(
