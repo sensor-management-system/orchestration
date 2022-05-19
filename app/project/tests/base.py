@@ -136,7 +136,8 @@ class LoginMechanismByTestJwt(CreateNewUserByUserinfoMixin):
     def init_app(self, app):
         pass
 
-    def can_be_applied(self):
+    @staticmethod
+    def can_be_applied():
         if request.headers.get("Authorization"):
             return True
         return False
