@@ -75,7 +75,7 @@ class OpenIdConnectAuthMechanism(CreateNewUserByUserinfoMixin):
         if not resp_userinfo.ok:
             raise GetUserinfoException()
             # It can be that there are changes on the IDP config.
-            # However those should not effect our get userinfo endpoint.
+            # However, those should not affect our get userinfo endpoint.
             # So if we can't authenticate here, we let another mechanism
             # do its try.
         return resp_userinfo.json()
