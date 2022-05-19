@@ -1,4 +1,4 @@
-"""OpenIDConnect authentification mechanism."""
+"""OpenIDConnect authentication mechanism."""
 
 import operator
 
@@ -13,7 +13,7 @@ class OpenIdConnectAuthMechanism(CreateNewUserByUserinfoMixin):
     """Mechanism to authenticate via OpenIDConnect."""
 
     def __init__(self, app=None):
-        """Initialyze the object."""
+        """Initialize the object."""
         self.config = None
         self.config_loaded = False
         if app is not None:
