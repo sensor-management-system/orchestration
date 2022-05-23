@@ -12,8 +12,8 @@
       "website": "http://device.wepsite1.de",
       "platform_type_name": "platform_type_name_test1",
       "is_public": false,
-      "is_internal": true,
-      "is_private": false
+      "is_internal": false,
+      "is_private": true
     },
     {
       "description": "platform_test_2description",
@@ -28,7 +28,10 @@
       "platform_type_name": "platform_type_name_test2",
       "is_public": false,
       "is_internal": true,
-      "is_private": false
+      "is_private": false,
+       "group_ids": [
+        "3"
+      ]
     }
   ]
 }

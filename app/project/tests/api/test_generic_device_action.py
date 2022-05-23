@@ -2,15 +2,19 @@
 
 import os
 from datetime import datetime
+from unittest.mock import patch
 
 from project import base_url, db
 from project.api.models import Contact, Device, GenericDeviceAction
-from project.tests.base import BaseTestCase, fake, generate_userinfo_data, test_file_path
-from project.tests.base import create_token
-from project.tests.models.test_generic_action_attachment_model import (
-    add_generic_device_action_attachment_model,
+from project.api.services.idl_services import Idl
+from project.tests.base import (
+    BaseTestCase,
+    fake,
+    generate_userinfo_data,
+    test_file_path,
 )
-from project.tests.read_from_json import extract_data_from_json_file
+from project.tests.base import create_token
+from project.tests.permissions.test_platforms import IDL_USER_ACCOUNT
 
 
 class TestGenericDeviceAction(BaseTestCase):
@@ -41,12 +45,15 @@ class TestGenericDeviceAction(BaseTestCase):
     def test_add_generic_device_action(self):
         """Ensure POST a new generic device action can be added to the database."""
         data = self.make_generic_device_action_data()
-
-        _ = super().add_object(
-            url=f"{self.url}?include=device,contact",
-            data_object=data,
-            object_type=self.object_type,
-        )
+        with patch.object(
+            Idl, "get_all_permission_groups_for_a_user"
+        ) as test_get_all_permission_groups:
+            test_get_all_permission_groups.return_value = IDL_USER_ACCOUNT
+            _ = super().add_object(
+                url=f"{self.url}?include=device,contact",
+                data_object=data,
+                object_type=self.object_type,
+            )
 
     def make_generic_device_action_data(self):
         """
@@ -54,11 +61,17 @@ class TestGenericDeviceAction(BaseTestCase):
 
         This also creates some associated objects in the database.
         """
-        devices_json = extract_data_from_json_file(self.device_json_data_url, "devices")
-        device_data = {"data": {"type": "device", "attributes": devices_json[0]}}
-        device = super().add_object(
-            url=self.device_url, data_object=device_data, object_type="device"
+        group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permission_groups
+
+        device = Device(
+            short_name=fake.pystr(),
+            is_public=True,
+            is_private=False,
+            is_internal=False,
+            group_ids=group_id_test_user_is_member_in_2,
         )
+        db.session.add(device)
+        db.session.commit()
         userinfo = generate_userinfo_data()
         contact_data = {
             "data": {
@@ -86,7 +99,7 @@ class TestGenericDeviceAction(BaseTestCase):
                     "begin_date": datetime.now().__str__(),
                 },
                 "relationships": {
-                    "device": {"data": {"type": "device", "id": device["data"]["id"]}},
+                    "device": {"data": {"type": "device", "id": device.id}},
                     "contact": {
                         "data": {"type": "contact", "id": contact["data"]["id"]}
                     },
@@ -98,60 +111,67 @@ class TestGenericDeviceAction(BaseTestCase):
     def test_update_generic_device_action(self):
         """Ensure a generic_device_action can be updated."""
         generic_device_action_data = self.make_generic_device_action_data()
-        generic_device_action = super().add_object(
-            url=f"{self.url}?include=device,contact",
-            data_object=generic_device_action_data,
-            object_type=self.object_type,
-        )
-        userinfo = generate_userinfo_data()
-        contact = Contact(
-            given_name=userinfo["given_name"],
-            family_name=userinfo["family_name"],
-            email=userinfo["email"],
-        )
-        db.session.add(contact)
-        db.session.commit()
-        new_data = {
-            "data": {
-                "type": self.object_type,
-                "id": generic_device_action["data"]["id"],
-                "attributes": {
-                    "description": fake.paragraph(nb_sentences=3),
-                    "action_type_name": fake.lexify(
-                        text="Random type: ??????????", letters="ABCDE"
-                    ),
-                    "action_type_uri": fake.uri(),
-                    "begin_date": datetime.now().__str__(),
-                },
-                "relationships": {
-                    "device": {"data": {"type": "device", "id": "1"}},
-                    "contact": {"data": {"type": "contact", "id": contact.id}},
-                },
+        with patch.object(
+            Idl, "get_all_permission_groups_for_a_user"
+        ) as test_get_all_permission_groups:
+            test_get_all_permission_groups.return_value = IDL_USER_ACCOUNT
+            generic_device_action = super().add_object(
+                url=f"{self.url}?include=device,contact",
+                data_object=generic_device_action_data,
+                object_type=self.object_type,
+            )
+            userinfo = generate_userinfo_data()
+            contact = Contact(
+                given_name=userinfo["given_name"],
+                family_name=userinfo["family_name"],
+                email=userinfo["email"],
+            )
+            db.session.add(contact)
+            db.session.commit()
+            new_data = {
+                "data": {
+                    "type": self.object_type,
+                    "id": generic_device_action["data"]["id"],
+                    "attributes": {
+                        "description": fake.paragraph(nb_sentences=3),
+                        "action_type_name": fake.lexify(
+                            text="Random type: ??????????", letters="ABCDE"
+                        ),
+                        "action_type_uri": fake.uri(),
+                        "begin_date": datetime.now().__str__(),
+                    },
+                    "relationships": {
+                        "device": {"data": {"type": "device", "id": "1"}},
+                        "contact": {"data": {"type": "contact", "id": contact.id}},
+                    },
+                }
             }
-        }
-        _ = super().update_object(
-            url=f"{self.url}/{generic_device_action['data']['id']}?include=device,contact",
-            data_object=new_data,
-            object_type=self.object_type,
-        )
+            _ = super().update_object(
+                url=f"{self.url}/{generic_device_action['data']['id']}?include=device,contact",
+                data_object=new_data,
+                object_type=self.object_type,
+            )
 
     def test_delete_generic_device_action(self):
         """Ensure a generic_device_action can be deleted."""
         data = self.make_generic_device_action_data()
-
-        obj = super().add_object(
-            url=f"{self.url}?include=device,contact",
-            data_object=data,
-            object_type=self.object_type,
-        )
-        access_headers = create_token()
-        with self.client:
-            response = self.client.delete(
-                f"{self.url}/{obj['data']['id']}",
-                content_type="application/vnd.api+json",
-                headers=access_headers,
+        with patch.object(
+            Idl, "get_all_permission_groups_for_a_user"
+        ) as test_get_all_permission_groups:
+            test_get_all_permission_groups.return_value = IDL_USER_ACCOUNT
+            obj = super().add_object(
+                url=f"{self.url}?include=device,contact",
+                data_object=data,
+                object_type=self.object_type,
             )
-        self.assertEqual(response.status_code, 200)
+            access_headers = create_token()
+            with self.client:
+                response = self.client.delete(
+                    f"{self.url}/{obj['data']['id']}",
+                    content_type="application/vnd.api+json",
+                    headers=access_headers,
+                )
+            self.assertEqual(response.status_code, 200)
 
     def test_filtered_by_device(self):
         """Ensure that I can prefilter by a specific device."""
