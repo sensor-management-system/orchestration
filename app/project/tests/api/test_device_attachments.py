@@ -352,3 +352,42 @@ class TestDeviceAttachmentServices(BaseTestCase):
         """Make sure that the backend responds with 404 HTTP-Code if a resource was not found."""
         url = f"{self.url}/{fake.random_int()}"
         _ = super().http_code_404_when_resource_not_found(url)
+
+    def test_post_device_attachment_with_no_label(self):
+        """Ensure that we can not add a device attachment without a label."""
+        device = Device(
+            short_name="anew device",
+            is_public=False,
+            is_private=True,
+            is_internal=False,
+        )
+        db.session.add(device)
+        db.session.commit()
+        self.assertTrue(device.id is not None)
+
+        count_device_attachments = (
+            db.session.query(DeviceAttachment).filter_by(device_id=device.id,).count()
+        )
+        self.assertEqual(count_device_attachments, 0)
+
+        payload = {
+            "data": {
+                "type": "device_attachment",
+                "attributes": {
+                    "url": "https://www.ufz.de",
+                    "label": None,
+                },
+                "relationships": {
+                    "device": {"data": {"type": "device", "id": str(device.id)}}
+                },
+            }
+        }
+        with self.client:
+            url_post = base_url + "/device-attachments"
+            response = self.client.post(
+                url_post,
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+                headers=create_token(),
+            )
+        self.assertEqual(response.status_code, 403)

@@ -31,9 +31,15 @@ def device_properties_model(public=True, private=False, internal=False, group_id
     db.session.add(device1)
     db.session.add(device2)
     db.session.commit()
-    device_property1 = DeviceProperty(label="device property1", device=device1,)
-    device_property2 = DeviceProperty(label="device property2", device=device1,)
-    device_property3 = DeviceProperty(label="device property3", device=device2,)
+    device_property1 = DeviceProperty(
+        label="device property1", property_name="device_property1", device=device1,
+    )
+    device_property2 = DeviceProperty(
+        label="device property2", property_name="device_property2", device=device1,
+    )
+    device_property3 = DeviceProperty(
+        label="device property3", property_name="device_property3", device=device2,
+    )
     db.session.add_all([device_property1, device_property2, device_property3])
     db.session.commit()
     return device1, device2, device_property1, device_property2, device_property3
@@ -90,6 +96,7 @@ class TestDevicePropertyServices(BaseTestCase):
                 "type": "device_property",
                 "attributes": {
                     "label": "device property1",
+                    "property_name": "device_property1",
                     "compartment_name": "climate",
                     "sampling_media_name": "air",
                 },
@@ -129,7 +136,9 @@ class TestDevicePropertyServices(BaseTestCase):
         device1 = create_a_test_device(IDL_USER_ACCOUNT.membered_permission_groups)
         device2 = create_a_test_device(IDL_USER_ACCOUNT.membered_permission_groups)
 
-        device_property1 = DeviceProperty(label="property 1", device=device1,)
+        device_property1 = DeviceProperty(
+            label="property 1", property_name="device_property1", device=device1,
+        )
         db.session.add(device_property1)
         db.session.commit()
 
@@ -137,7 +146,10 @@ class TestDevicePropertyServices(BaseTestCase):
             "data": {
                 "type": "device_property",
                 "id": str(device_property1.id),
-                "attributes": {"label": "property 2",},
+                "attributes": {
+                    "label": "property 2",
+                    "property_name": "device_property2",
+                },
                 "relationships": {
                     "device": {"data": {"type": "device", "id": str(device2.id)}}
                 },
@@ -173,7 +185,9 @@ class TestDevicePropertyServices(BaseTestCase):
             is_internal=True,
             group_ids=IDL_USER_ACCOUNT.administrated_permission_groups,
         )
-        device_property = DeviceProperty(label="device property1", device=device, )
+        device_property = DeviceProperty(
+            label="device property1", property_name="device_property1", device=device,
+        )
         db.session.add_all([device, device_property])
         db.session.commit()
         with patch.object(
@@ -182,7 +196,7 @@ class TestDevicePropertyServices(BaseTestCase):
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             with self.client:
                 response = self.client.delete(
-                    self.url +"/"+ str(device_property.id),
+                    self.url + "/" + str(device_property.id),
                     content_type="application/vnd.api+json",
                     headers=create_token(),
                 )

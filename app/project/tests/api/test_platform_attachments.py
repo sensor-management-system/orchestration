@@ -366,3 +366,43 @@ class TestPlatformAttachmentServices(BaseTestCase):
         """Make sure that the backend responds with 404 HTTP-Code if a resource was not found."""
         url = f"{self.url}/{fake.random_int()}"
         _ = super().http_code_404_when_resource_not_found(url)
+
+    def test_post_platform_attachment_with_no_label(self):
+        """Ensure that we can not add a platform attachment without a label."""
+        # First we need to make sure that we have a platform
+        platform = Platform(
+            short_name="Very new platform",
+            is_public=False,
+            is_private=True,
+            is_internal=False,
+        )
+        db.session.add(platform)
+        db.session.commit()
+        self.assertTrue(platform.id is not None)
+        count_platform_attachments = (
+            db.session.query(PlatformAttachment)
+            .filter_by(platform_id=platform.id,)
+            .count()
+        )
+        self.assertEqual(count_platform_attachments, 0)
+        payload = {
+            "data": {
+                "type": "platform_attachment",
+                "attributes": {
+                    "url": "https://www.ufz.de",
+                    "label": None,
+                },
+                "relationships": {
+                    "platform": {"data": {"type": "platform", "id": str(platform.id)}}
+                },
+            }
+        }
+        with self.client:
+            url_post = base_url + "/platform-attachments"
+            response = self.client.post(
+                url_post,
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+                headers=create_token(),
+            )
+        self.assertEqual(response.status_code, 403)

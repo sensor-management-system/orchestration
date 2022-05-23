@@ -13,7 +13,7 @@ class PlatformAttachmentSchema(Schema):
         self_view_kwargs = {"id": "<id>"}
 
     id = fields.Integer(as_string=True)
-    label = fields.Str(allow_none=True)
+    label = fields.Str(required=True)
     url = fields.Str(required=True)
 
     platform = Relationship(
