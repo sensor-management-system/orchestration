@@ -17,11 +17,10 @@ class DeviceProperty(db.Model, IndirectSearchableMixin):
     label = db.Column(db.String(256), nullable=True)
     unit_uri = db.Column(db.String(256), nullable=True)  # CV
     unit_name = db.Column(db.String(256), nullable=True)  # CV
-    compartment_uri = db.Column(db.String(256), nullable=True)  # vermutlich CV
-    compartment_name = db.Column(db.String(256), nullable=True)  # vermutlich CV
-    property_uri = db.Column(db.String(256), nullable=True)  # vermutlich CV
-    property_name = db.Column(db.String(256), nullable=True)  # vermutlich CV
-    # vermutlich CV, z.B. Atmosphere, Pedosphere
+    compartment_uri = db.Column(db.String(256), nullable=True)
+    compartment_name = db.Column(db.String(256), nullable=True)
+    property_uri = db.Column(db.String(256), nullable=True)
+    property_name = db.Column(db.String(256), nullable=False)
     sampling_media_uri = db.Column(db.String(256), nullable=True)
     sampling_media_name = db.Column(db.String(256), nullable=True)
     resolution = db.Column(db.Float(), nullable=True)

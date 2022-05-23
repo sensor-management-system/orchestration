@@ -186,9 +186,13 @@ class TestDeviceService(BaseTestCase):
         )
         db.session.add(device)
 
-        property1 = DeviceProperty(label="property1", device=device)
+        property1 = DeviceProperty(
+            label="property1", property_name="device_property1", device=device
+        )
         db.session.add(property1)
-        property2 = DeviceProperty(label="property2", device=device)
+        property2 = DeviceProperty(
+            label="property2", property_name="device_property2", device=device
+        )
         db.session.add(property2)
         db.session.commit()
 
