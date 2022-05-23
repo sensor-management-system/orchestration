@@ -28,10 +28,6 @@ from project.tests.models.test_software_update_actions_model import (
 )
 from project.tests.read_from_json import extract_data_from_json_file
 
-from project.tests.models.test_software_update_actions_model import (
-    add_device_software_update_action_model,
-)
-
 
 class TestDeviceService(BaseTestCase):
     """Tests for the Device Service."""
