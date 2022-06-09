@@ -90,6 +90,10 @@ class OpenIdConnectAuthMechanism(CreateNewUserByUserinfoMixin):
 
         # Now we can be sure that we have some userinformation.
         identity = attributes.get(
-            current_app.config.get("OIDC_USERDATA_IDENTITY_CLAIM", "sub")
+            current_app.config.get("OIDC_USERDATA_IDENTITY_CLAIM", "sub"),
+            # Fallback in case we try to use a different claim,
+            # but only have the sub included.
+            # Could be the case for github logins for example.
+            attributes.get("sub")
         )
         return self.get_user_or_create_new(identity, attributes)
