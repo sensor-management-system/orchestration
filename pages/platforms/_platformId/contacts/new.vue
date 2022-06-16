@@ -149,6 +149,9 @@ export default class PlatformAddContactPage extends Vue {
     return this.contactsByDifference(this.platformContacts)
   }
 
+  /**
+   * the current URL is used to redirect the user back to this page after creating a new contact
+   */
   get redirectUrl (): string {
     return encodeURI(this.$route.path)
   }

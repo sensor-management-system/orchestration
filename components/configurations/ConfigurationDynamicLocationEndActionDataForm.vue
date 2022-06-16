@@ -37,6 +37,7 @@ permissions and limitations under the Licence.
       <v-col cols="12" md="6">
         <DateTimePicker
           :value="value.endDate"
+          class="required"
           label="End date"
           placeholder="e.g 2000-01-31 12:00"
           :rules="combine([rules.required], endDateExtraRules)"
@@ -58,6 +59,7 @@ permissions and limitations under the Licence.
       <v-col cols="12" md="6">
         <v-autocomplete
           :value="value.contact"
+          class="required"
           :items="contacts"
           label="Contact"
           clearable
@@ -232,3 +234,6 @@ export default class ConfigurationDynamicLocationEndActionDataForm extends mixin
 }
 
 </script>
+<style lang="scss">
+@import '@/assets/styles/_forms.scss';
+</style>

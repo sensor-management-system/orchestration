@@ -160,6 +160,7 @@ permissions and limitations under the Licence.
       color="primary"
       indeterminate
     />
+
     <div v-if="devices.length <=0 && !loading">
       <p class="text-center">
         There are no devices that match your search criteria.
@@ -167,72 +168,86 @@ permissions and limitations under the Licence.
     </div>
 
     <div v-if="devices.length>0">
-      <v-subheader>
-        <template v-if="devices.length == 1">
-          1 device found
-        </template>
-        <template v-else>
-          {{ devices.length }} devices found
-        </template>
-        <v-spacer />
-
-        <template v-if="devices.length>0">
-          <v-dialog v-model="processing" max-width="100">
-            <v-card>
-              <v-card-text>
-                <div class="text-center pt-2">
-                  <v-progress-circular indeterminate />
-                </div>
-              </v-card-text>
-            </v-card>
-          </v-dialog>
-          <v-menu
-            close-on-click
-            close-on-content-click
-            offset-x
-            left
-            z-index="999"
-          >
-            <template #activator="{ on }">
-              <v-btn
-                icon
-                v-on="on"
-              >
-                <v-icon
-                  dense
-                >
-                  mdi-file-download
-                </v-icon>
-              </v-btn>
-            </template>
-            <v-list>
-              <v-list-item
-                dense
-                @click.prevent="exportCsv"
-              >
-                <v-list-item-content>
-                  <v-list-item-title>
-                    <v-icon
-                      left
-                    >
-                      mdi-table
-                    </v-icon>
-                    CSV
-                  </v-list-item-title>
-                </v-list-item-content>
-              </v-list-item>
-            </v-list>
-          </v-menu>
-        </template>
-      </v-subheader>
-
       <v-row
         no-gutters
+        class="mt-10"
       >
+        <div v-if="devices.length <=0 && !loading">
+          <p class="text-center">
+            There are no devices that match your search criteria.
+          </p>
+        </div>
+
+        <div v-if="devices.length>0">
+          <v-subheader>
+            <template v-if="devices.length == 1">
+              1 device found
+            </template>
+            <template v-else>
+              {{ devices.length }} devices found
+            </template>
+            <v-spacer />
+
+            <template v-if="devices.length>0">
+              <v-dialog v-model="processing" max-width="100">
+                <v-card>
+                  <v-card-text>
+                    <div class="text-center pt-2">
+                      <v-progress-circular indeterminate />
+                    </div>
+                  </v-card-text>
+                </v-card>
+              </v-dialog>
+
+              <v-menu
+                close-on-click
+                close-on-content-click
+                offset-x
+                left
+                z-index="999"
+              >
+                <template #activator="menu">
+                  <v-tooltip top>
+                    <template #activator="tooltip">
+                      <v-btn
+                        icon
+                        v-on="{...menu.on, ...tooltip.on}"
+                      >
+                        <v-icon
+                          dense
+                        >
+                          mdi-file-download
+                        </v-icon>
+                      </v-btn>
+                    </template>
+                    <span>Download results</span>
+                  </v-tooltip>
+                </template>
+                <v-list>
+                  <v-list-item
+                    dense
+                    @click.prevent="exportCsv"
+                  >
+                    <v-list-item-content>
+                      <v-list-item-title>
+                        <v-icon
+                          left
+                        >
+                          mdi-table
+                        </v-icon>
+                        CSV
+                      </v-list-item-title>
+                    </v-list-item-content>
+                  </v-list-item>
+                </v-list>
+              </v-menu>
+            </template>
+          </v-subheader>
+        </div>
+
+        <v-spacer />
         <v-col
-          cols="12"
-          md="10"
-          offset-md="1"
+          cols="4"
         >
           <v-pagination
             v-model="page"
@@ -243,14 +258,16 @@ permissions and limitations under the Licence.
           />
         </v-col>
         <v-col
-          cols="1"
-          offset="11"
-          offset-md="0"
+          cols="4"
+          class="flex-grow-1 flex-shrink-0"
         >
-          <page-size-select
-            v-model="size"
-            :items="pageSizeItems"
-          />
+          <v-subheader>
+            <page-size-select
+              v-model="size"
+              :items="pageSizeItems"
+              label="Items per page"
+            />
+          </v-subheader>
         </v-col>
       </v-row>
       <BaseList

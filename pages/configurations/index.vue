@@ -160,23 +160,22 @@ permissions and limitations under the Licence.
     <div
       v-if="configurations.length >0"
     >
-      <v-subheader>
-        <template v-if="configurations.length == 1">
-          1 configuration found
-        </template>
-        <template v-else>
-          {{ configurations.length }} configurations found
-        </template>
-        <v-spacer />
-      </v-subheader>
-
       <v-row
         no-gutters
+        class="mt-10"
       >
+        <v-subheader>
+          <template v-if="configurations.length == 1">
+            1 configuration found
+          </template>
+          <template v-else>
+            {{ configurations.length }} configurations found
+          </template>
+          <v-spacer />
+        </v-subheader>
+        <v-spacer />
         <v-col
-          cols="12"
-          md="10"
-          offset-md="1"
+          cols="4"
         >
           <v-pagination
             v-model="page"
@@ -187,14 +186,16 @@ permissions and limitations under the Licence.
           />
         </v-col>
         <v-col
-          cols="1"
-          offset="11"
-          offset-md="0"
+          cols="4"
+          class="flex-grow-1 flex-shrink-0"
         >
-          <page-size-select
-            v-model="size"
-            :items="pageSizeItems"
-          />
+          <v-subheader>
+            <page-size-select
+              v-model="size"
+              :items="pageSizeItems"
+              label="Items per page"
+            />
+          </v-subheader>
         </v-col>
       </v-row>
       <BaseList

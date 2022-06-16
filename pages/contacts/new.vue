@@ -96,6 +96,11 @@ export default class ContactNewPage extends mixins(Rules) {
   saveContact!: (contact: Contact) => Promise<Contact>
 
   created () {
+    /** this page accepts the query parameter 'redirect' as a html encoded URI
+      * and sends the user back to this page after a new contact has been created.
+      * it is currently used in /devices/contacts/new and /platforms/contacts/new
+      * it also checks if the redirect starts with http to prevent linking to external pages
+    */
     const backLink = this.$route.query.redirect as string
     if (backLink && !backLink.startsWith('http')) {
       this.redirect = backLink
@@ -119,6 +124,7 @@ export default class ContactNewPage extends mixins(Rules) {
       this.isLoading = true
       const savedContact = await this.saveContact(this.contact)
       this.$store.commit('snackbar/setSuccess', 'Contact created')
+      // sends the user back to the previous contact creation page
       if (redirect && savedContact.id) {
         this.$router.push(redirect + '?contact=' + encodeURI(savedContact.id))
       } else {

@@ -29,32 +29,34 @@ implied. See the Licence for the specific language governing
 permissions and limitations under the Licence.
 -->
 <template>
-  <v-row>
-    <v-col cols="12" md="3">
-      <v-text-field
-        label="Key"
-        :value="value.key"
-        :readonly="readonly"
-        :disabled="readonly"
-        required
-        class="required"
-        :rules="[rules.required]"
-        @input="update('key', $event)"
-      />
-    </v-col>
-    <v-col cols="12" md="3">
-      <v-text-field
-        label="Value"
-        :value="value.value"
-        :readonly="readonly"
-        :disabled="readonly"
-        @input="update('value', $event)"
-      />
-    </v-col>
-    <v-col cols="12" md="3">
-      <slot name="actions" />
-    </v-col>
-  </v-row>
+  <v-form ref="customFieldForm" @submit.prevent>
+    <v-row>
+      <v-col cols="12" md="3">
+        <v-text-field
+          label="Key"
+          :value="value.key"
+          :readonly="readonly"
+          :disabled="readonly"
+          required
+          class="required"
+          :rules="[rules.required]"
+          @input="update('key', $event)"
+        />
+      </v-col>
+      <v-col cols="12" md="3">
+        <v-text-field
+          label="Value"
+          :value="value.value"
+          :readonly="readonly"
+          :disabled="readonly"
+          @input="update('value', $event)"
+        />
+      </v-col>
+      <v-col cols="12" md="3">
+        <slot name="actions" />
+      </v-col>
+    </v-row>
+  </v-form>
 </template>
 
 <script lang="ts">
@@ -124,5 +126,19 @@ export default class CustomFieldForm extends mixins(Rules) {
      */
     this.$emit('input', newObj)
   }
+
+  /**
+   * validates the user input
+   *
+   * Note: we can't use 'validate' as a method name, so I used 'validateForm'
+   *
+   * @return {boolean} true when input is valid, otherwise false
+   */
+  public validateForm (): boolean {
+    return (this.$refs.customFieldForm as Vue & { validate: () => boolean }).validate()
+  }
 }
 </script>
+<style lang="scss">
+@import "@/assets/styles/_forms.scss";
+</style>

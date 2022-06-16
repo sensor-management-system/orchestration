@@ -85,6 +85,9 @@ permissions and limitations under the Licence.
             <v-text-field
               v-model="attachment.label"
               label="Label"
+              required
+              class="required"
+              :rules="[rules.required]"
             />
           </v-col>
         </v-row>
@@ -211,3 +214,6 @@ export default class DeviceAttachmentAddPage extends mixins(Rules, UploadRules) 
   }
 }
 </script>
+<style lang="scss">
+@import "@/assets/styles/_forms.scss";
+</style>

@@ -205,7 +205,7 @@ permissions and limitations under the Licence.
             </v-btn>
           </template>
         </v-snackbar>
-        <v-snackbar v-model="hasWarning" top color="orange">
+        <v-snackbar v-model="hasWarning" top color="orange" :timeout="-1">
           {{ warning }}
           <template #action="{ attrs }">
             <v-btn icon small color="white" v-bind="attrs" @click="closeWarningSnackbar">
@@ -236,8 +236,8 @@ permissions and limitations under the Licence.
       </template>
     </cookie-law>
     <v-footer
-      :fixed="$vuetify.breakpoint.smAndUp"
       :absolute="$vuetify.breakpoint.smAndDown"
+      :fixed="$vuetify.breakpoint.smAndUp"
       app
       padless
     >
