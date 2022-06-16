@@ -152,6 +152,9 @@ export default class DeviceAssignContactPage extends Vue {
     return this.contactsByDifference(this.deviceContacts)
   }
 
+  /**
+   * the current URL is used to redirect the user back to this page after creating a new contact
+   */
   get redirectUrl (): string {
     return encodeURI(this.$route.path)
   }

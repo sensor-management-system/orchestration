@@ -239,6 +239,7 @@ permissions and limitations under the Licence.
             :readonly="readonly"
             :disabled="readonly"
             @input="updateUnit"
+            @change="onMeasuredQuantityChanged"
           >
             <template #append-outer>
               <v-tooltip
@@ -523,7 +524,7 @@ export default class DevicePropertyForm extends mixins(Rules) {
 
   onMeasuredQuantityChanged () {
     if (!this.isNewPropertyPage) {
-      this.$store.commit('snackbar/setWarning', 'Warning! You are about to change historical data')
+      this.$store.commit('snackbar/setWarning', 'Warning! Changes are time-independent and affect the entire history of the device and configurations. ')
     }
   }
 

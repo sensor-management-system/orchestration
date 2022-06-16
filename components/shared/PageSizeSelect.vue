@@ -33,34 +33,42 @@ implied. See the Licence for the specific language governing
 permissions and limitations under the Licence.
 -->
 <template>
-  <v-select
-    v-model="model"
-    :label="label"
-    :items="items"
-    class="text-right"
-    dense
-    flat
-    single-line
-  >
-    <template #selection="{ item }">
-      <v-row
-        no-gutters
+  <v-row no-gutters justify="end" class="d-flex">
+    <v-col class="mr-1 align-self-center text-right">
+      {{ label }}
+    </v-col>
+    <v-col cols="3">
+      <v-select
+        v-model="model"
+        :label="label"
+        :items="items"
+        class="text-right"
+        dense
+        flat
+        single-line
+        hide-details
       >
-        <v-col
-          class="align-self-end text-right"
-        >
-          {{ item }}
-        </v-col>
-      </v-row>
-    </template>
-    <template #item="{ item, on, attrs }">
-      <v-list-item v-bind="attrs" v-on="on">
-        <v-list-item-content class="justify-end">
-          {{ item }}
-        </v-list-item-content>
-      </v-list-item>
-    </template>
-  </v-select>
+        <template #selection="{ item }">
+          <v-row
+            no-gutters
+          >
+            <v-col
+              class="align-self-center text-body-2"
+            >
+              {{ item }}
+            </v-col>
+          </v-row>
+        </template>
+        <template #item="{ item, on, attrs }">
+          <v-list-item v-bind="attrs" v-on="on">
+            <v-list-item-content class="justify-end">
+              {{ item }}
+            </v-list-item-content>
+          </v-list-item>
+        </template>
+      </v-select>
+    </v-col>
+  </v-row>
 </template>
 
 <script lang="ts">

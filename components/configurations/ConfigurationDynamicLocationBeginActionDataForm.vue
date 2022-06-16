@@ -37,6 +37,7 @@ permissions and limitations under the Licence.
           <DateTimePicker
             :value="value.beginDate"
             label="Begin date"
+            class="required"
             placeholder="e.g 2000-01-31 12:00"
             :rules="combine([rules.required], beginDateExtraRules)"
             @input="update('beginDate', $event)"
@@ -76,6 +77,7 @@ permissions and limitations under the Licence.
         <v-col cols="12" md="4">
           <v-select
             :value="value.epsgCode"
+            class="required"
             :item-value="(x) => x.code"
             :item-text="(x) => x.text"
             :items="epsgCodes"
@@ -87,6 +89,7 @@ permissions and limitations under the Licence.
         <v-col cols="12" md="4">
           <v-select
             :value="elevationDatum"
+            class="required"
             :item-value="(x) => x.name"
             :item-text="(x) => x.name"
             :items="elevationData"
@@ -110,6 +113,7 @@ permissions and limitations under the Licence.
         <v-col cols="12" md="6">
           <v-autocomplete
             :value="value.contact"
+            class="required"
             :items="contacts"
             label="Contact"
             clearable
@@ -406,3 +410,6 @@ export default class ConfigurationDynamicLocationActionDataForm extends mixins(R
 }
 
 </script>
+<style lang="scss">
+@import '@/assets/styles/_forms.scss';
+</style>

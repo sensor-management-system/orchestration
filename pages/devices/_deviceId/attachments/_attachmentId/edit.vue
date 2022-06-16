@@ -45,48 +45,54 @@ permissions and limitations under the Licence.
     <v-card>
       <v-container>
         <v-row no-gutters>
-          <v-avatar class="mt-0 align-self-center">
-            <v-icon large>
-              {{ filetypeIcon(valueCopy) }}
-            </v-icon>
-          </v-avatar>
-          <v-col>
-            <v-row
-              no-gutters
-            >
-              <v-col>
-                <v-card-subtitle>
-                  {{ filename(valueCopy) }}, uploaded at {{ uploadedDateTime(valueCopy) }}
-                </v-card-subtitle>
-              </v-col>
-            </v-row>
-            <v-row
-              no-gutters
-            >
-              <v-col class="text-subtitle-1">
-                <v-text-field
-                  v-model="valueCopy.label"
-                  label="Label"
-                />
-              </v-col>
-              <v-col
-                align-self="end"
-                class="text-right"
+          <v-form ref="attachmentsEditForm" class="pb-2" @submit.prevent>
+            <v-avatar class="mt-0 align-self-center">
+              <v-icon large>
+                {{ filetypeIcon(valueCopy) }}
+              </v-icon>
+            </v-avatar>
+            <v-col>
+              <v-row
+                no-gutters
               >
-                <v-btn
-                  icon
-                  color="primary"
-                  :href="valueCopy.url"
-                  target="_blank"
+                <v-col>
+                  <v-card-subtitle>
+                    {{ filename(valueCopy) }}, uploaded at {{ uploadedDateTime(valueCopy) }}
+                  </v-card-subtitle>
+                </v-col>
+              </v-row>
+              <v-row
+                no-gutters
+              >
+                <v-col class="text-subtitle-1">
+                  <v-text-field
+                    v-model="valueCopy.label"
+                    label="Label"
+                    required
+                    class="required"
+                    :rules="[rules.required]"
+                  />
+                </v-col>
+                <v-col
+                  align-self="end"
+                  class="text-right"
                 >
-                  <v-icon>
-                    mdi-open-in-new
-                  </v-icon>
-                </v-btn>
-              </v-col>
-            </v-row>
-          </v-col>
+                  <v-btn
+                    icon
+                    color="primary"
+                    :href="valueCopy.url"
+                    target="_blank"
+                  >
+                    <v-icon>
+                      mdi-open-in-new
+                    </v-icon>
+                  </v-btn>
+                </v-col>
+              </v-row>
+            </v-col>
+          </v-form>
         </v-row>
+        </v-form>
       </v-container>
     </v-card>
   </div>
@@ -97,6 +103,8 @@ import { Component, mixins } from 'nuxt-property-decorator'
 
 import { mapState, mapActions } from 'vuex'
 import { AttachmentsMixin } from '@/mixins/AttachmentsMixin'
+
+import { Rules } from '@/mixins/Rules'
 
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
@@ -114,7 +122,7 @@ import { Attachment } from '@/models/Attachment'
   methods: mapActions('devices', ['loadDeviceAttachment', 'loadDeviceAttachments', 'updateDeviceAttachment'])
 })
 // @ts-ignore
-export default class AttachmentEditPage extends mixins(AttachmentsMixin) {
+export default class AttachmentEditPage extends mixins(Rules, AttachmentsMixin) {
   private isSaving = false
   private isLoading = false
   private valueCopy: Attachment = new Attachment()
@@ -153,6 +161,10 @@ export default class AttachmentEditPage extends mixins(AttachmentsMixin) {
   }
 
   async save () {
+    if (!(this.$refs.attachmentsEditForm as Vue & { validate: () => boolean }).validate()) {
+      this.$store.commit('snackbar/setError', 'Please correct your input')
+      return
+    }
     try {
       this.isSaving = true
       await this.updateDeviceAttachment({
@@ -170,3 +182,6 @@ export default class AttachmentEditPage extends mixins(AttachmentsMixin) {
   }
 }
 </script>
+<style lang="scss">
+@import "@/assets/styles/_forms.scss";
+</style>

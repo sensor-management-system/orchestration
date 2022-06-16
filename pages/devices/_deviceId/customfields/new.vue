@@ -48,6 +48,7 @@ permissions and limitations under the Licence.
       </v-card-actions>
       <v-card-text>
         <CustomFieldForm
+        ref="customFieldForm"
           v-model="customField"
           :readonly="false"
         />
@@ -96,6 +97,10 @@ export default class DeviceCustomFieldAddPage extends Vue {
   }
 
   async save (): Promise<void> {
+    if (!(this.$refs.customFieldForm as Vue & { validateForm: () => boolean }).validateForm()) {
+      this.$store.commit('snackbar/setError', 'Please correct your input')
+      return
+    }
     try {
       this.isSaving = true
 

@@ -45,66 +45,6 @@ permissions and limitations under the Licence.
         </template>
       </PlatformSearch>
     </div>
-<!--    <v-tabs-items-->
-<!--      v-model="activeTab"-->
-<!--    >-->
-<!--      <PlatformsBasicSearch-->
-<!--        v-model="searchText"-->
-<!--        @search="basicSearch"-->
-<!--        @clear="clearBasicSearch"-->
-<!--      />-->
-<!--      <v-tab-item :eager="true">-->
-<!--        <v-row>-->
-<!--          <v-col cols="12" md="6">-->
-<!--            <PlatformsBasicSearchField-->
-<!--              v-model="searchText"-->
-<!--              @start-search="extendedSearch"-->
-<!--            />-->
-<!--          </v-col>-->
-<!--        </v-row>-->
-<!--        <v-row>-->
-<!--          <v-col cols="12" md="3">-->
-<!--            <ManufacturerSelect v-model="selectedSearchManufacturers" label="Select a manufacturer" />-->
-<!--          </v-col>-->
-<!--        </v-row>-->
-<!--        <v-row>-->
-<!--          <v-col cols="12" md="3">-->
-<!--            <StatusSelect v-model="selectedSearchStates" label="Select a status" />-->
-<!--          </v-col>-->
-<!--        </v-row>-->
-<!--        <v-row>-->
-<!--          <v-col cols="12" md="3">-->
-<!--            <PlatformTypeSelect v-model="selectedSearchPlatformTypes" label="Select a platform type" />-->
-<!--          </v-col>-->
-<!--        </v-row>-->
-<!--        <v-row v-if="$auth.loggedIn">-->
-<!--          <v-col cols="12" md="3">-->
-<!--            <v-checkbox v-model="onlyOwnPlatforms" label="Only own platforms" />-->
-<!--          </v-col>-->
-<!--        </v-row>-->
-<!--        <v-row>-->
-<!--          <v-col-->
-<!--            cols="12"-->
-<!--            align-self="center"-->
-<!--          >-->
-<!--            <v-btn-->
-<!--              color="primary"-->
-<!--              small-->
-<!--              @click="extendedSearch"-->
-<!--            >-->
-<!--              Search-->
-<!--            </v-btn>-->
-<!--            <v-btn-->
-<!--              text-->
-<!--              small-->
-<!--              @click="clearExtendedSearch"-->
-<!--            >-->
-<!--              Clear-->
-<!--            </v-btn>-->
-<!--          </v-col>-->
-<!--        </v-row>-->
-<!--      </v-tab-item>-->
-<!--    </v-tabs-items>-->
 
     <v-progress-circular
       v-if="loading"
@@ -119,71 +59,77 @@ permissions and limitations under the Licence.
     </div>
 
     <div v-if="platforms.length>0">
-      <v-subheader>
-        <template v-if="platforms.length == 1">
-          1 platform found
-        </template>
-        <template v-else>
-          {{ platforms.length }} platforms found
-        </template>
-        <v-spacer />
-
-        <template v-if="platforms.length>0">
-          <v-dialog v-model="processing" max-width="100">
-            <v-card>
-              <v-card-text>
-                <div class="text-center pt-2">
-                  <v-progress-circular indeterminate />
-                </div>
-              </v-card-text>
-            </v-card>
-          </v-dialog>
-          <v-menu
-            close-on-click
-            close-on-content-click
-            offset-x
-            left
-            z-index="999"
-          >
-            <template #activator="{ on }">
-              <v-btn
-                icon
-                v-on="on"
-              >
-                <v-icon
-                  dense
-                >
-                  mdi-file-download
-                </v-icon>
-              </v-btn>
-            </template>
-            <v-list>
-              <v-list-item
-                dense
-                @click.prevent="exportCsv"
-              >
-                <v-list-item-content>
-                  <v-list-item-title>
-                    <v-icon
-                      left
-                    >
-                      mdi-table
-                    </v-icon>
-                    CSV
-                  </v-list-item-title>
-                </v-list-item-content>
-              </v-list-item>
-            </v-list>
-          </v-menu>
-        </template>
-      </v-subheader>
       <v-row
         no-gutters
+        class="mt-10"
       >
+        <v-subheader>
+          <template v-if="platforms.length == 1">
+            1 platform found
+          </template>
+          <template v-else>
+            {{ platforms.length }} platforms found
+          </template>
+          <v-spacer />
+
+          <template v-if="platforms.length>0">
+            <v-dialog v-model="processing" max-width="100">
+              <v-card>
+                <v-card-text>
+                  <div class="text-center pt-2">
+                    <v-progress-circular indeterminate />
+                  </div>
+                </v-card-text>
+              </v-card>
+            </v-dialog>
+            <v-menu
+              close-on-click
+              close-on-content-click
+              offset-x
+              left
+              z-index="999"
+            >
+              <template #activator="menu">
+                <v-tooltip top>
+                  <template #activator="tooltip">
+                    <v-btn
+                      icon
+                      v-on="{...menu.on, ...tooltip.on}"
+                    >
+                      <v-icon
+                        dense
+                      >
+                        mdi-file-download
+                      </v-icon>
+                    </v-btn>
+                  </template>
+                  <span>Download results</span>
+                </v-tooltip>
+              </template>
+              <v-list>
+                <v-list-item
+                  dense
+                  @click.prevent="exportCsv"
+                >
+                  <v-list-item-content>
+                    <v-list-item-title>
+                      <v-icon
+                        left
+                      >
+                        mdi-table
+                      </v-icon>
+                      CSV
+                    </v-list-item-title>
+                  </v-list-item-content>
+                </v-list-item>
+              </v-list>
+            </v-menu>
+          </template>
+        </v-subheader>
+        <v-spacer />
+
         <v-col
-          cols="12"
-          md="10"
-          offset-md="1"
+          cols="4"
         >
           <v-pagination
             v-model="page"
@@ -194,14 +140,16 @@ permissions and limitations under the Licence.
           />
         </v-col>
         <v-col
-          cols="1"
-          offset="11"
-          offset-md="0"
+          cols="4"
+          class="flex-grow-1 flex-shrink-0"
         >
-          <page-size-select
-            v-model="size"
-            :items="pageSizeItems"
-          />
+          <v-subheader>
+            <page-size-select
+              v-model="size"
+              :items="pageSizeItems"
+              label="Items per page"
+            />
+          </v-subheader>
         </v-col>
       </v-row>
       <BaseList
@@ -267,7 +215,7 @@ import { PlatformType } from '@/models/PlatformType'
 import { Status } from '@/models/Status'
 
 import { QueryParams } from '@/modelUtils/QueryParams'
-import { IPlatformSearchParams, PlatformSearchParamsSerializer } from '@/modelUtils/PlatformSearchParams'
+import { IPlatformSearchParams } from '@/modelUtils/PlatformSearchParams'
 import PlatformSearch from '@/components/platforms/PlatformSearch.vue'
 
 @Component({
@@ -327,7 +275,6 @@ export default class SearchPlatformsPage extends Vue {
       this.size = this.getSizeFromUrl()
       await this.searchPlatformsPaginated()
     } catch (e) {
-      console.log('e',e);
       this.$store.commit('snackbar/setError', 'Loading of platforms failed')
     } finally {
       this.loading = false

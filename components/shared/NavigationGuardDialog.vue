@@ -60,8 +60,7 @@ permissions and limitations under the Licence.
         </v-btn>
 
         <v-btn
-          color="primary"
-
+          color="warning"
           @click="discardChanges"
         >
           Yes, discard changes
