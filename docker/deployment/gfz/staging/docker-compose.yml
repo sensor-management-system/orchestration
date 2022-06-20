@@ -201,6 +201,9 @@ services:
       ELASTICSEARCH_URL: http://elastic-search:9200
       HTTP_ORIGINS: ${HTTP_ORIGINS}
       CV_URL: https://rz-vm64.gfz-potsdam.de/cv/api/v1
+      SMS_BACKEND_URL: /backend/api/v1
+      PKCE_CLIENT_ID: ${PKCE_CLIENT_ID}
+      PKCE_SCOPES: profile openid email eduperson_principal_name
     depends_on:
       - backend-db
     volumes:

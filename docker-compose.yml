@@ -80,6 +80,9 @@ services:
       IDL_URL: ${IDL_URL}
       SMS_IDL_TOKEN: ${SMS_IDL_TOKEN}
       CV_URL: ${CV_URL}
+      PKCE_SCOPES: ${NUXT_ENV_SCOPE:-openid profile mail}
+      PKCE_CLIENT_ID: ${NUXT_ENV_CLIENT_ID:-rdmsvm-implicit-flow}
+      SMS_BACKEND_URL: ${SMS_BACKEND_URL}
     depends_on:
       - db
     command: >

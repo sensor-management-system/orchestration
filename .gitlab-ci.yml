@@ -419,6 +419,7 @@ deploy-gfz-staging:
     BACKEND_DB_USER: ${GFZ_STAGING_BACKEND_POSTGRES_USER}
     BACKEND_DB_PASSWORD: ${GFZ_STAGING_BACKEND_POSTGRES_PASSWORD}
     BACKEND_SECRET_KEY: ${GFZ_STAGING_BACKEND_SECRET}
+    PKCE_CLIENT_ID: ${GFZ_STAGING_HIFIS_OIDC_CLIENT_ID}
   before_script:
     - *docker_login_gitlab_registry
   script:
@@ -480,6 +481,7 @@ deploy-gfz-staging-develop:
     NGINX_IMAGE_TAG: gfz-latest-develop
     APPLICATION_PORTS: 3000-3001
     MINIO_PORT: 3002
+    PKCE_CLIENT_ID: ${GFZ_STAGING_HIFIS_OIDC_CLIENT_ID}
   before_script:
     - *docker_login_gitlab_registry
   script:
@@ -524,6 +526,7 @@ deploy-gfz-prod:
     BACKEND_DB_USER: ${GFZ_PROD_BACKEND_POSTGRES_USER}
     BACKEND_DB_PASSWORD: ${GFZ_PROD_BACKEND_POSTGRES_PASSWORD}
     BACKEND_SECRET_KEY: ${GFZ_PROD_BACKEND_SECRET}
+    PKCE_CLIENT_ID: ${GFZ_PROD_HIFIS_OIDC_CLIENT_ID}
   before_script:
     - *docker_login_gitlab_registry
   script:

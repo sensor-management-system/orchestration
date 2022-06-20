@@ -203,6 +203,9 @@ services:
       SMS_IDL_TOKEN: $IDL_TOKEN
       IDL_URL: http://idl:8000/idl/api/idl
       CV_URL: https://rz-vm64.gfz-potsdam.de:3000/cv/api/v1
+      SMS_BACKEND_URL: /backend/api/v1
+      PKCE_CLIENT_ID: ${PKCE_CLIENT_ID}
+      PKCE_SCOPES: profile openid email eduperson_principal_name
     depends_on:
       - backend-db
     volumes:
