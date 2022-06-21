@@ -46,6 +46,9 @@ services:
       IDL_URL: ${IDL_URL}
       CV_URL: ${CV_URL}
       INSTITUTE: ${INSTITUTE:-ufz}
+      PKCE_SCOPES: ${NUXT_ENV_SCOPE:-openid profile email}
+      SMS_BACKEND_URL: ${SMS_BACKEND_URL:-https://localhost.localdomain/backend/api/v1}
+      PKCE_CLIENT_ID: ${NUXT_ENV_CLIENT_ID:-rdmsvm-implicit-flow}
     depends_on:
       - db
     command: >
