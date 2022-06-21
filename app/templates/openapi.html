@@ -40,9 +40,11 @@
     window.onload = function () {
         // Begin Swagger UI call region
         const ui = SwaggerUIBundle({
-            url: "{{ url_for('static', filename='openapi.yaml') }}",
+            url: "{{ url_for('docs.openapi_json') }}",
             dom_id: '#swagger-ui',
             docExpansion: 'none',
+            // SET redirect url: im Backend it is /login-callback
+            oauth2RedirectUrl: '{{ redirect_url }}',
             deepLinking: true,
             presets: [
                 SwaggerUIBundle.presets.apis,
@@ -54,7 +56,15 @@
             layout: "StandaloneLayout"
         });
         // End Swagger UI call region
+        const pkceClientId = '{{ client_id }}'; // SET client id
+        const pkceScopes = '{{ scopes }}'; // SET scopes
 
+        ui.initOAuth({
+            clientId: pkceClientId,
+            clientSecret: null,
+            scopes: pkceScopes,
+            usePkceWithAuthorizationCodeGrant: true
+        })
         window.ui = ui;
     };
 </script>

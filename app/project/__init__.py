@@ -1,3 +1,5 @@
+"""Application for the sensor management system."""
+
 from elasticsearch import Elasticsearch
 from flask import Blueprint, Flask
 from flask_cors import CORS
@@ -14,7 +16,7 @@ from .api.helpers.health_checks import (
 )
 from .api.models.base_model import db
 from .config import env
-from .extensions.instances import auth
+from .extensions.instances import auth, well_known_url_config_loader
 from .urls import api
 from .views.docs import docs_routes
 from .views.login import login_routes
@@ -27,9 +29,7 @@ health = HealthCheck()
 
 
 def create_app():
-    """Return an application
-    set up the application in a function
-    """
+    """Return an application and set up the application in a function."""
     # init the app
     app = Flask(
         __name__,
@@ -59,6 +59,7 @@ def create_app():
     # instantiate minio client
     minio.init_app(app)
 
+    well_known_url_config_loader.init_app(app)
     auth.init_app(app)
 
     # shell context for flask cli
