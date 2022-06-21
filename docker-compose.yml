@@ -78,6 +78,7 @@ services:
       DOWNLOAD_ENDPOINT: ${DOWNLOAD_ENDPOINT:-https://localhost.localdomain}
       ALLOWED_MIME_TYPES: ${ALLOWED_MIME_TYPES:-image/png,application/pdf}
       CV_URL: ${CV_URL}
+      INSTITUTE: ${INSTITUTE}
     depends_on:
       - db
     command: >
