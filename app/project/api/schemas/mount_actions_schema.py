@@ -16,7 +16,9 @@ class PlatformMountActionSchema(Schema):
 
     id = fields.Integer(as_string=True)
     begin_date = fields.DateTime(required=True)
-    description = fields.Str(allow_none=True)
+    end_date = fields.DateTime(required=False)
+    begin_description = fields.Str(allow_none=True)
+    end_description = fields.Str(allow_none=True)
     offset_x = fields.Float(allow_none=True)
     offset_y = fields.Float(allow_none=True)
     offset_z = fields.Float(allow_none=True)
@@ -50,10 +52,19 @@ class PlatformMountActionSchema(Schema):
         type_="configuration",
         id_field="id",
     )
-    contact = Relationship(
-        attribute="contact",
+    begin_contact = Relationship(
+        attribute="begin_contact",
         related_view="api.contact_detail",
-        related_view_kwargs={"id": "<contact_id>"},
+        related_view_kwargs={"id": "<begin_contact_id>"},
+        include_resource_linkage=True,
+        schema="ContactSchema",
+        type_="contact",
+        id_field="id",
+    )
+    end_contact = Relationship(
+        attribute="end_contact",
+        related_view="api.contact_detail",
+        related_view_kwargs={"id": "<end_contact_id>"},
         include_resource_linkage=True,
         schema="ContactSchema",
         type_="contact",
@@ -93,7 +104,9 @@ class DeviceMountActionSchema(Schema):
 
     id = fields.Integer(as_string=True)
     begin_date = fields.DateTime(required=True)
-    description = fields.Str(allow_none=True)
+    end_date = fields.DateTime(required=False)
+    begin_description = fields.Str(allow_none=True)
+    end_description = fields.Str(allow_none=True)
     offset_x = fields.Float(allow_none=True)
     offset_y = fields.Float(allow_none=True)
     offset_z = fields.Float(allow_none=True)
@@ -127,10 +140,19 @@ class DeviceMountActionSchema(Schema):
         type_="configuration",
         id_field="id",
     )
-    contact = Relationship(
-        attribute="contact",
+    begin_contact = Relationship(
+        attribute="begin_contact",
         related_view="api.contact_detail",
-        related_view_kwargs={"id": "<contact_id>"},
+        related_view_kwargs={"id": "<begin_contact_id>"},
+        include_resource_linkage=True,
+        schema="ContactSchema",
+        type_="contact",
+        id_field="id",
+    )
+    end_contact = Relationship(
+        attribute="end_contact",
+        related_view="api.contact_detail",
+        related_view_kwargs={"id": "<end_contact_id>"},
         include_resource_linkage=True,
         schema="ContactSchema",
         type_="contact",
