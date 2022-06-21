@@ -4,7 +4,7 @@ from .mixin import IndirectSearchableMixin
 
 class ConfigurationAttachment(db.Model, IndirectSearchableMixin):
     id = db.Column(db.Integer, primary_key=True)
-    label = db.Column(db.String(256), nullable=True)
+    label = db.Column(db.String(256), nullable=False)
     url = db.Column(db.String(1024), nullable=False)
     configuration_id = db.Column(
         db.Integer, db.ForeignKey("configuration.id"), nullable=False

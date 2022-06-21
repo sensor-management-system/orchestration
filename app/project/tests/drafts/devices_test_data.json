@@ -11,8 +11,8 @@
       "persistent_identifier": "device_persistent_identifier1",
       "website": "http://device.website1.de",
       "is_public": false,
-      "is_internal": true,
-      "is_private": false
+      "is_internal": false,
+      "is_private": true
     },
     {
       "description": "device_test2_description",
@@ -26,7 +26,10 @@
       "website": "http://device.website2.de",
       "is_public": false,
       "is_internal": true,
-      "is_private": false
+      "is_private": false,
+      "group_ids": [
+        "3"
+      ]
     },
     {
       "description": "device_test1_changed",
@@ -40,7 +43,11 @@
       "website": "http://device.website1.de",
       "is_public": false,
       "is_internal": true,
-      "is_private": false
+      "is_private": false,
+      "group_ids": [
+        "5",
+        "6"
+      ]
     }
   ],
   "relationships": []

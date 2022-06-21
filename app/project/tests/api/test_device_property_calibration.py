@@ -175,16 +175,16 @@ class TestDevicePropertyCalibration(BaseTestCase):
         )
         db.session.add(device2)
 
-        device_property1 = DeviceProperty(device=device1, label="prop1",)
+        device_property1 = DeviceProperty(device=device1, label="prop1",property_name= "device_property1", )
         db.session.add(device_property1)
 
-        device_property2 = DeviceProperty(device=device1, label="prop2",)
+        device_property2 = DeviceProperty(device=device1, label="prop2",property_name= "device_property2", )
         db.session.add(device_property2)
 
-        device_property3 = DeviceProperty(device=device2, label="prop3")
+        device_property3 = DeviceProperty(device=device2, label="prop3",property_name= "device_property3", )
         db.session.add(device_property3)
 
-        device_property4 = DeviceProperty(device=device2, label="prop4")
+        device_property4 = DeviceProperty(device=device2, label="prop4",property_name= "device_property4", )
         db.session.add(device_property4)
 
         contact1 = Contact(

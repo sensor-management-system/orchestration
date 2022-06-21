@@ -43,6 +43,7 @@ class TestDevicePropertyServices(BaseTestCase):
                 "type": "device_property",
                 "attributes": {
                     "label": "device property1",
+                    "property_name": "device_property1",
                     "compartment_name": "climate",
                     "sampling_media_name": "air",
                 },
@@ -86,7 +87,10 @@ class TestDevicePropertyServices(BaseTestCase):
         payload = {
             "data": {
                 "type": "device_property",
-                "attributes": {"label": "device property1",},
+                "attributes": {
+                    "label": "device property1",
+                    "property_name": "device_property1",
+                },
                 "relationships": {"device": {"data": {"type": "device", "id": None}}},
             }
         }
@@ -123,9 +127,15 @@ class TestDevicePropertyServices(BaseTestCase):
         db.session.add(device2)
         db.session.commit()
 
-        device_property1 = DeviceProperty(label="device property1", device=device1,)
-        device_property2 = DeviceProperty(label="device property2", device=device1,)
-        device_property3 = DeviceProperty(label="device property3", device=device2,)
+        device_property1 = DeviceProperty(
+            label="device property1", property_name="device_property1", device=device1,
+        )
+        device_property2 = DeviceProperty(
+            label="device property2", property_name="device_property2", device=device1,
+        )
+        device_property3 = DeviceProperty(
+            label="device property3", property_name="device_property3", device=device2,
+        )
 
         db.session.add(device_property1)
         db.session.add(device_property2)
@@ -223,7 +233,9 @@ class TestDevicePropertyServices(BaseTestCase):
         db.session.add(device2)
         db.session.commit()
 
-        device_property1 = DeviceProperty(label="property 1", device=device1,)
+        device_property1 = DeviceProperty(
+            label="property 1", property_name="device_property1", device=device1,
+        )
         db.session.add(device_property1)
         db.session.commit()
 
@@ -231,7 +243,10 @@ class TestDevicePropertyServices(BaseTestCase):
             "data": {
                 "type": "device_property",
                 "id": str(device_property1.id),
-                "attributes": {"label": "property 2",},
+                "attributes": {
+                    "label": "property 2",
+                    "property_name": "device_property2",
+                },
                 "relationships": {
                     "device": {"data": {"type": "device", "id": str(device2.id)}}
                 },
@@ -264,7 +279,9 @@ class TestDevicePropertyServices(BaseTestCase):
         )
         db.session.add(device1)
         db.session.commit()
-        device_property1 = DeviceProperty(label="property 1", device=device1,)
+        device_property1 = DeviceProperty(
+            label="property 1", property_name="device_property1", device=device1,
+        )
         db.session.add(device_property1)
         db.session.commit()
 
@@ -312,3 +329,43 @@ class TestDevicePropertyServices(BaseTestCase):
         """Make sure that the backend responds with 404 HTTP-Code if a resource was not found."""
         url = f"{self.url}/{fake.random_int()}"
         _ = super().http_code_404_when_resource_not_found(url)
+
+    def test_post_without_mandatory_fields(self):
+        """Make sure that a request will fail if property_name is None."""
+        device = Device(
+            short_name="New device",
+            is_public=False,
+            is_private=False,
+            is_internal=True,
+        )
+        db.session.add(device)
+        db.session.commit()
+        self.assertTrue(device.id is not None)
+
+        count_device_properties = (
+            db.session.query(DeviceProperty).filter_by(device_id=device.id, ).count()
+        )
+        self.assertEqual(count_device_properties, 0)
+
+        payload = {
+            "data": {
+                "type": "device_property",
+                "attributes": {
+                    "label": "device property1",
+                    "compartment_name": "climate",
+                    "sampling_media_name": "air",
+                },
+                "relationships": {
+                    "device": {"data": {"type": "device", "id": str(device.id)}}
+                },
+            }
+        }
+        with self.client:
+            url_post = base_url + "/device-properties"
+            response = self.client.post(
+                url_post,
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+                headers=create_token(),
+            )
+        self.assertNotEqual(response.status_code, 201)

@@ -25,7 +25,7 @@ class InnerDevicePropertySchema(MarshmallowSchema):
     compartment_uri = fields.Str(allow_none=True)
     compartment_name = fields.Str(allow_none=True)
     property_uri = fields.Str(allow_none=True)
-    property_name = fields.Str(allow_none=True)
+    property_name = fields.Str(required=True)
     sampling_media_uri = fields.Str(allow_none=True)
     sampling_media_name = fields.Str(allow_none=True)
     resolution = fields.Float(allow_none=True)
