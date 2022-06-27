@@ -68,6 +68,9 @@ permissions and limitations under the Licence.
 import { Component, Prop, Vue, Watch, mixins } from 'nuxt-property-decorator'
 
 import { DateTime } from 'luxon'
+import { mapActions, mapState } from 'vuex'
+
+import { VocabularyState } from '@/store/vocabulary'
 
 import { Rules } from '@/mixins/Rules'
 
@@ -87,7 +90,6 @@ import {
 import DateTimePicker from '@/components/DateTimePicker.vue'
 import ConfigurationStaticLocationBeginActionDataForm from '@/components/configurations/ConfigurationStaticLocationBeginActionDataForm.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
-import { mapActions, mapState } from 'vuex'
 import { currentAsUtcDateSecondsAsZeros } from '@/utils/dateHelper'
 
 @Component({
@@ -97,16 +99,20 @@ import { currentAsUtcDateSecondsAsZeros } from '@/utils/dateHelper'
     ProgressIndicator
   },
   middleware: ['auth'],
-  computed:{
-    ...mapState('vocabulary',['epsgCodes','elevationData']),
-    ...mapState('contacts',['contacts'])
+  computed: {
+    ...mapState('vocabulary', ['epsgCodes', 'elevationData']),
+    ...mapState('contacts', ['contacts'])
   },
-  methods:mapActions('configurations',['addStaticLocationBeginAction','loadConfiguration'])
+  methods: mapActions('configurations', ['addStaticLocationBeginAction', 'loadConfiguration'])
 })
 export default class StaticLocationBeginActionNew extends mixins(Rules) {
   private configuration: Configuration = new Configuration()
   private beginAction: StaticLocationBeginAction = new StaticLocationBeginAction()
   private isSaving: boolean = false
+
+  // vuex definition for typescript check
+  epsgCodes!: VocabularyState['epsgCodes']
+  elevationData!: VocabularyState['elevationData']
 
   created () {
     if (this.value) {
@@ -156,20 +162,18 @@ export default class StaticLocationBeginActionNew extends mixins(Rules) {
     try {
       this.isSaving = true
       await this.addStaticLocationBeginAction({
-        configurationId:this.configurationId,
-        staticLocationBeginAction:this.beginAction
+        configurationId: this.configurationId,
+        staticLocationBeginAction: this.beginAction
       })
       this.loadConfiguration(this.configurationId)
       this.$store.commit('snackbar/setSuccess', 'Save successful')
       this.closeNewStaticLocationForm()
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Save failed')
-    }finally {
+    } finally {
       this.isSaving = false
     }
   }
-
-
 
   // @Watch('value', {
   //   deep: true,

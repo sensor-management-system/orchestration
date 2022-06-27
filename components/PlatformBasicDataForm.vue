@@ -37,12 +37,24 @@ permissions and limitations under the Licence.
     @submit.prevent
   >
     <v-row>
-      <v-col>
-        <v-autocomplete
-          label="Permission groups"
-          :items="userGroups"
-          item-text="name"
-          ></v-autocomplete>
+      <v-col cols="12" md="6">
+        <visibility-switch
+          :value="value.visibility"
+          :rules="[pageRules.validateVisibility]"
+          :readonly="readonly"
+          :entity-name="entityName"
+          @input="update('visibility', $event)"
+        />
+      </v-col>
+      <v-col cols="12" md="6">
+        <permission-group-select
+          v-show="!value.isPrivate"
+          :value="value.permissionGroups"
+          :readonly="readonly"
+          :entity-name="entityName"
+          :rules="[pageRules.validatePermissionGroups]"
+          @input="update('permissionGroups', $event)"
+        />
       </v-col>
     </v-row>
     <v-row>
@@ -178,7 +190,7 @@ permissions and limitations under the Licence.
         />
       </v-col>
     </v-row>
-    <v-divider />
+    <v-divider class="my-4" />
     <v-row>
       <v-col cols="12" md="9">
         <v-textarea
@@ -214,7 +226,7 @@ permissions and limitations under the Licence.
         </v-text-field>
       </v-col>
     </v-row>
-    <v-divider />
+    <v-divider class="my-4" />
     <v-row>
       <v-col cols="12" md="3">
         <v-text-field
@@ -249,19 +261,35 @@ import { Platform } from '@/models/Platform'
 import { PlatformType } from '@/models/PlatformType'
 import { Status } from '@/models/Status'
 import { Manufacturer } from '@/models/Manufacturer'
+import { PermissionGroup } from '@/models/PermissionGroup'
+import { Visibility } from '@/models/Visibility'
+import { DetailedUserInfo } from '@/models/UserInfo'
 import { ICvSelectItem, hasDefinition } from '@/models/CvSelectItem'
 
+import PermissionGroupSelect from '@/components/PermissionGroupSelect.vue'
+import VisibilitySwitch from '@/components/VisibilitySwitch.vue'
+
 import { createPlatformUrn } from '@/modelUtils/urnBuilders'
+
+import Validator from '@/utils/validator'
 
 type StatusSelectValue = Status | string | undefined
 
 @Component({
+  components: {
+    PermissionGroupSelect,
+    VisibilitySwitch
+  },
   computed: mapGetters('permissions', ['userGroups'])
 })
 export default class PlatformBasicDataForm extends mixins(Rules) {
   private states: Status[] = []
   private manufacturers: Manufacturer[] = []
   private platformTypes: PlatformType[] = []
+  private permissionGroups: PermissionGroup[] = []
+  private isPermissionGroupsLoaded: boolean = false
+  private userInfo: DetailedUserInfo | null = null
+  private entityName = 'platform'
 
   @Prop({
     required: true,
@@ -293,6 +321,13 @@ export default class PlatformBasicDataForm extends mixins(Rules) {
   })
   readonly persistentIdentifierPlaceholder!: string | null
 
+  get pageRules (): {[index: string]: (a: any) => (boolean | string)} {
+    return {
+      validateVisibility: Validator.validateVisibility(this.value.permissionGroups, this.entityName),
+      validatePermissionGroups: Validator.validatePermissionGroups(this.value.isPrivate, this.entityName)
+    }
+  }
+
   mounted () {
     this.$api.states.findAllPaginated().then((foundStates) => {
       this.states = foundStates
@@ -311,7 +346,7 @@ export default class PlatformBasicDataForm extends mixins(Rules) {
     })
   }
 
-  update (key: string, value: string) {
+  update (key: string, value: any) {
     const newObj = Platform.createFromObject(this.value)
 
     switch (key) {
@@ -361,10 +396,25 @@ export default class PlatformBasicDataForm extends mixins(Rules) {
       case 'inventoryNumber':
         newObj.inventoryNumber = value
         break
+      case 'permissionGroups':
+        newObj.permissionGroups = value
+        break
+      case 'visibility':
+        switch (value) {
+          case Visibility.Private:
+            newObj.visibility = Visibility.Private
+            break
+          case Visibility.Internal:
+            newObj.visibility = Visibility.Internal
+            break
+          case Visibility.Public:
+            newObj.visibility = Visibility.Public
+            break
+        }
+        break
       default:
         throw new TypeError('key ' + key + ' is not valid')
     }
-
     this.$emit('input', newObj)
   }
 

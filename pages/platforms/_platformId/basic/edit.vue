@@ -40,6 +40,7 @@ permissions and limitations under the Licence.
     <v-card-actions>
       <v-spacer />
       <SaveAndCancelButtons
+        v-if="editable"
         save-btn-text="Apply"
         :to="'/platforms/' + platformId + '/basic'"
         @save="save"
@@ -52,6 +53,7 @@ permissions and limitations under the Licence.
     <v-card-actions>
       <v-spacer />
       <SaveAndCancelButtons
+        v-if="editable"
         save-btn-text="Apply"
         :to="'/platforms/' + platformId + '/basic'"
         @save="save"
@@ -68,15 +70,17 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
+import { Component, InjectReactive, Vue } from 'nuxt-property-decorator'
 
 import { RawLocation } from 'vue-router'
-
 import { mapActions, mapState } from 'vuex'
-import PlatformBasicDataForm from '@/components/PlatformBasicDataForm.vue'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+
+import { PlatformsState, LoadPlatformAction, SavePlatformAction } from '@/store/platforms'
 
 import { Platform } from '@/models/Platform'
+
+import PlatformBasicDataForm from '@/components/PlatformBasicDataForm.vue'
+import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
 import NavigationGuardDialog from '@/components/shared/NavigationGuardDialog.vue'
 
@@ -92,6 +96,9 @@ import NavigationGuardDialog from '@/components/shared/NavigationGuardDialog.vue
   methods: mapActions('platforms', ['loadPlatform', 'savePlatform'])
 })
 export default class PlatformEditBasicPage extends Vue {
+  @InjectReactive()
+    editable!: boolean
+
   private platformCopy: Platform = new Platform()
   private isSaving: boolean = false
   private hasSaved: boolean = false
@@ -99,12 +106,20 @@ export default class PlatformEditBasicPage extends Vue {
   private to: RawLocation | null = null
 
   // vuex definition for typescript check
-  platform!: Platform
-  savePlatform!: (platform: Platform) => Promise<Platform>
-  loadPlatform!: ({ platformId, includeContacts, includePlatformAttachments }: {platformId: string, includeContacts: boolean, includePlatformAttachments: boolean}) => void
+  platform!: PlatformsState['platform']
+  savePlatform!: SavePlatformAction
+  loadPlatform!: LoadPlatformAction
 
   created () {
-    this.platformCopy = Platform.createFromObject(this.platform)
+    if (!this.editable) {
+      this.$router.replace('/platforms/' + this.platformId + '/basic', () => {
+        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this platform.')
+      })
+      return
+    }
+    if (this.platform) {
+      this.platformCopy = Platform.createFromObject(this.platform)
+    }
   }
 
   get platformId () {
@@ -133,7 +148,7 @@ export default class PlatformEditBasicPage extends Vue {
 
       this.$router.push('/platforms/' + this.platformId + '/basic')
       this.$store.commit('snackbar/setSuccess', 'Platform updated')
-      this.$router.push('/devices/' + this.platformId + '/basic')
+      this.$router.push('/platforms/' + this.platformId + '/basic')
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Save failed')
     } finally {

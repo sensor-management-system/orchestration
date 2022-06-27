@@ -34,11 +34,18 @@ permissions and limitations under the Licence.
     expandable-color="grey lighten-5"
   >
     <template #header>
-      <div class="text-caption">
+      <div class="text-caption mr-1">
         {{ configuration.projectName || 'no project' }}
       </div>
       <status-chip
         :value="configuration.status"
+      />
+      <visibility-chip
+        v-model="configuration.visibility"
+      />
+      <permission-group-chips
+        :value="[configuration.permissionGroup]"
+        collapsible
       />
     </template>
     <template #dot-menu-items>
@@ -133,11 +140,15 @@ import { dateToDateTimeString } from '@/utils/dateHelper'
 
 import StatusChip from '@/components/shared/StatusChip.vue'
 import BaseExpandableListItem from '@/components/shared/BaseExpandableListItem.vue'
+import VisibilityChip from '@/components/VisibilityChip.vue'
+import PermissionGroupChips from '@/components/PermissionGroupChips.vue'
 
 @Component({
   filters: { dateToDateTimeString },
   components: {
     StatusChip,
+    VisibilityChip,
+    PermissionGroupChips,
     BaseExpandableListItem
   }
 })
@@ -151,7 +162,3 @@ export default class ConfigurationsListItem extends Vue {
   getTextOrDefault = (text: string, defaultValue: string): string => text ?? defaultValue
 }
 </script>
-
-<style scoped>
-
-</style>

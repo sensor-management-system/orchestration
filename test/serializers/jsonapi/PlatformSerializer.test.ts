@@ -148,6 +148,10 @@ describe('PlatformSerializer', () => {
             created_by: {
               links: {
                 self: '/rdm/svm-api/v1/platforms/37/relationships/createdUser'
+              },
+              data: {
+                id: '42',
+                type: 'user'
               }
             }
           },
@@ -313,6 +317,7 @@ describe('PlatformSerializer', () => {
         website: '',
         familyName: 'Mustermann'
       })]
+      expectedPlatform1.createdByUserId = '42'
 
       const expectedPlatform2 = new Platform()
       expectedPlatform2.id = '52'

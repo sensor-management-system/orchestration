@@ -99,17 +99,24 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, mixins } from 'nuxt-property-decorator'
-
+import { Component, mixins, InjectReactive } from 'nuxt-property-decorator'
 import { mapState, mapActions } from 'vuex'
-import { AttachmentsMixin } from '@/mixins/AttachmentsMixin'
+
+import {
+  DevicesState,
+  LoadDeviceAttachmentAction,
+  LoadDeviceAttachmentsAction,
+  UpdateDeviceAttachmentAction
+} from '@/store/devices'
+
+import { Attachment } from '@/models/Attachment'
 
 import { Rules } from '@/mixins/Rules'
 
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
 
-import { Attachment } from '@/models/Attachment'
+import { AttachmentsMixin } from '@/mixins/AttachmentsMixin'
 
 /**
  * A class component that displays a single attached file
@@ -123,24 +130,34 @@ import { Attachment } from '@/models/Attachment'
 })
 // @ts-ignore
 export default class AttachmentEditPage extends mixins(Rules, AttachmentsMixin) {
+  @InjectReactive()
+    editable!: boolean
+
   private isSaving = false
   private isLoading = false
   private valueCopy: Attachment = new Attachment()
 
   // vuex definition for typescript check
-  loadDeviceAttachment!: (id: string) => void
-  deviceAttachment!: Attachment
-  loadDeviceAttachments!: (id: string) => void
-  updateDeviceAttachment!: ({
-    deviceId,
-    attachment
-  }: { deviceId: string, attachment: Attachment }) => Promise<void>
+  deviceAttachment!: DevicesState['deviceAttachment']
+  loadDeviceAttachment!: LoadDeviceAttachmentAction
+  loadDeviceAttachments!: LoadDeviceAttachmentsAction
+  updateDeviceAttachment!: UpdateDeviceAttachmentAction
 
-  async created () {
+  created () {
+    if (!this.editable) {
+      this.$router.replace('/devices/' + this.deviceId + '/attachments', () => {
+        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this device.')
+      })
+    }
+  }
+
+  async fetch (): Promise<void> {
     try {
       this.isLoading = true
       await this.loadDeviceAttachment(this.attachmentId)
-      this.valueCopy = Attachment.createFromObject(this.deviceAttachment)
+      if (this.deviceAttachment) {
+        this.valueCopy = Attachment.createFromObject(this.deviceAttachment)
+      }
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to load attachment')
     } finally {

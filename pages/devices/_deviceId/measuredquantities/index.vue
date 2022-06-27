@@ -35,7 +35,7 @@ permissions and limitations under the Licence.
       dark
     />
     <v-card-actions
-      v-if="$auth.loggedIn"
+      v-if="editable"
     >
       <v-spacer />
       <v-btn
@@ -77,7 +77,7 @@ permissions and limitations under the Licence.
     >
       <v-spacer />
       <v-btn
-        v-if="$auth.loggedIn"
+        v-if="editable"
         color="primary"
         small
         :to="'/devices/' + deviceId + '/measuredquantities/new'"
@@ -95,8 +95,11 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
+import { Component, Vue, InjectReactive } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
+
+import { DeleteDeviceMeasuredQuantityAction, DevicesState, LoadDeviceMeasuredQuantitiesAction } from '@/store/devices'
+import { VocabularyState } from '@/store/vocabulary'
 
 import { DeviceProperty } from '@/models/DeviceProperty'
 
@@ -125,14 +128,23 @@ import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
   }
 })
 export default class DevicePropertyShowPage extends Vue {
+  @InjectReactive()
+    editable!: boolean
+
   private isSaving = false
 
   private showDeleteDialog = false
   private measuredQuantityToDelete: DeviceProperty | null = null
 
   // vuex definition for typescript check
-  loadDeviceMeasuredQuantities!: (id: string) => void
-  deleteDeviceMeasuredQuantity!: (measuredQuantityId: string) => Promise<void>
+  compartments!: VocabularyState['compartments']
+  samplingMedia!: VocabularyState['samplingMedia']
+  properties!: VocabularyState['properties']
+  units!: VocabularyState['units']
+  measureQuantityUnits!: VocabularyState['measuredQuantityUnits']
+  deviceMeasuredQuantities!: DevicesState['deviceMeasuredQuantities']
+  loadDeviceMeasuredQuantities!: LoadDeviceMeasuredQuantitiesAction
+  deleteDeviceMeasuredQuantity!: DeleteDeviceMeasuredQuantityAction
 
   get deviceId (): string {
     return this.$route.params.deviceId

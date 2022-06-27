@@ -35,6 +35,17 @@ permissions and limitations under the Licence.
 <template>
   <div>
     <v-row>
+      <v-col cols="12">
+        <label>Visibility / Permissions</label>
+        <visibility-chip
+          v-model="value.visibility"
+        />
+        <permission-group-chips
+          v-model="value.permissionGroups"
+        />
+      </v-col>
+    </v-row>
+    <v-row>
       <v-col cols="12" md="6">
         <label>URN</label>
         {{ platformURN }}
@@ -72,7 +83,7 @@ permissions and limitations under the Licence.
         {{ value.model | orDefault }}
       </v-col>
     </v-row>
-    <v-divider />
+    <v-divider class="my-4" />
     <v-row>
       <v-col cols="12" md="9">
         <label>Description</label>
@@ -92,7 +103,7 @@ permissions and limitations under the Licence.
         </a>
       </v-col>
     </v-row>
-    <v-divider />
+    <v-divider class="my-4" />
     <v-row>
       <v-col cols="12" md="3">
         <label>Serial number</label>
@@ -108,21 +119,37 @@ permissions and limitations under the Licence.
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'nuxt-property-decorator'
-
 import { mapActions, mapGetters, mapState } from 'vuex'
+
+import {
+  VocabularyState,
+  GetEquipmentstatusByUriGetter,
+  GetPlatformTypeByUriGetter,
+  GetManufacturerByUriGetter,
+  LoadManufacturersAction,
+  LoadPlatformtypesAction,
+  LoadEquipmentstatusAction
+} from '@/store/vocabulary'
+
 import { Platform } from '@/models/Platform'
 import { PlatformType } from '@/models/PlatformType'
 import { Status } from '@/models/Status'
 import { Manufacturer } from '@/models/Manufacturer'
 
 import { createPlatformUrn } from '@/modelUtils/urnBuilders'
+import VisibilityChip from '@/components/VisibilityChip.vue'
+import PermissionGroupChips from '@/components/PermissionGroupChips.vue'
 
 @Component({
+  components: {
+    PermissionGroupChips,
+    VisibilityChip
+  },
   computed: {
     ...mapState('vocabulary', ['platformtypes']),
     ...mapGetters('vocabulary', ['getEquipmentstatusByUri', 'getPlatformTypeByUri', 'getManufacturerByUri'])
   },
-  methods: mapActions('vocabulary', ['loadManufacturers', 'loadPlatformtypes', 'loadEquipmentstatus', 'loadManufacturers'])
+  methods: mapActions('vocabulary', ['loadManufacturers', 'loadPlatformtypes', 'loadEquipmentstatus'])
 })
 export default class PlatformBasicData extends Vue {
   public readonly NO_TYPE: string = 'Unknown type'
@@ -135,13 +162,13 @@ export default class PlatformBasicData extends Vue {
   readonly value!: Platform
 
   // vuex definition for typescript check
-  loadEquipmentstatus!: () => void
-  loadPlatformtypes!: () => void
-  loadManufacturers!: () => void
-  getManufacturerByUri!: (uri: string) => Manufacturer | undefined
-  getPlatformTypeByUri!: (uri: string) => PlatformType | undefined
-  getEquipmentstatusByUri!: (uri: string) => Status | undefined
-  platformtypes!: []
+  loadEquipmentstatus!: LoadEquipmentstatusAction
+  loadPlatformtypes!: LoadPlatformtypesAction
+  loadManufacturers!: LoadManufacturersAction
+  getManufacturerByUri!: GetManufacturerByUriGetter
+  getPlatformTypeByUri!: GetPlatformTypeByUriGetter
+  getEquipmentstatusByUri!: GetEquipmentstatusByUriGetter
+  platformtypes!: VocabularyState['platformtypes']
 
   async mounted () {
     try {

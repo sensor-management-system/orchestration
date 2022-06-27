@@ -38,6 +38,27 @@ permissions and limitations under the Licence.
     @submit.prevent
   >
     <v-row>
+      <v-col cols="12" md="6">
+        <visibility-switch
+          :value="value.visibility"
+          :disabled-options="[visibilityPrivateValue]"
+          :readonly="readonly"
+          :entity-name="entityName"
+          @input="update('visibility', $event)"
+        />
+      </v-col>
+      <v-col cols="12" md="6">
+        <permission-group-select
+          :value="value.permissionGroup"
+          :readonly="readonly"
+          :entity-name="entityName"
+          :multiple="false"
+          :rules="[rules.validatePermissionGroup]"
+          @input="update('permissionGroup', $event)"
+        />
+      </v-col>
+    </v-row>
+    <v-row>
       <v-col cols="12" md="3">
         <v-text-field
           :value="value.label"
@@ -55,15 +76,6 @@ permissions and limitations under the Licence.
           label="Status"
           :readonly="readonly"
           @input="update('status',$event)"
-        />
-      </v-col>
-      <v-col cols="12" md="3">
-        <v-combobox
-          :value="value.projectName"
-          :items="projectNames"
-          label="Project"
-          :readonly="readonly"
-          @input="update('projectName',$event)"
         />
       </v-col>
     </v-row>
@@ -96,14 +108,20 @@ permissions and limitations under the Licence.
 import { Vue, Component, Prop } from 'nuxt-property-decorator'
 
 import { mapActions, mapState, mapGetters } from 'vuex'
+
 import { Configuration } from '@/models/Configuration'
+import { Visibility } from '@/models/Visibility'
 
 import Validator from '@/utils/validator'
 
 import DateTimePicker from '@/components/DateTimePicker.vue'
+import PermissionGroupSelect from '@/components/PermissionGroupSelect.vue'
+import VisibilitySwitch from '@/components/VisibilitySwitch.vue'
 
 @Component({
   components: {
+    VisibilitySwitch,
+    PermissionGroupSelect,
     DateTimePicker
   },
   computed: {
@@ -124,6 +142,8 @@ export default class ConfigurationsBasicDataForm extends Vue {
   readonly LOCATION_TYPE_STATIONARY = 'Stationary'
   readonly LOCATION_TYPE_DYNAMIC = 'Dynamic'
 
+  private entityName: string = 'configuration'
+
   // vuex definition for typescript check
   loadConfigurationsStates!: () => void
   loadProjects!: () => void
@@ -133,14 +153,20 @@ export default class ConfigurationsBasicDataForm extends Vue {
     await this.loadProjects()
   }
 
-  get configurationStates () { return this.$store.state.configurations.configurationStates }
-  get projectNames () { return this.$store.getters['configurations/projectNames'] }
-  // @ts-ignore
-  update (key: string, value: any) {
-    // @ts-ignore
-    if (typeof this.value[key] !== 'undefined') {
+  get configurationStates () {
+    return this.$store.state.configurations.configurationStates
+  }
+
+  get projectNames () {
+    return this.$store.getters['configurations/projectNames']
+  }
+
+  update (
+    key: keyof Pick<Configuration, 'visibility' | 'permissionGroup' | 'label' | 'status' | 'startDate' | 'endDate'>,
+    value: any
+  ) {
+    if (key in this.value) {
       const newObj = Configuration.createFromObject(this.value)
-      // @ts-ignore
       newObj[key] = value
       this.$emit('input', newObj)
     }
@@ -150,12 +176,17 @@ export default class ConfigurationsBasicDataForm extends Vue {
     return {
       startDate: Validator.validateInputForStartDate(this.value),
       endDate: Validator.validateInputForEndDate(this.value),
-      labelProvided: Validator.mustBeProvided('label')
+      labelProvided: Validator.mustBeProvided('label'),
+      validatePermissionGroup: Validator.validatePermissionGroup(false)
     }
   }
 
   public validateForm (): boolean {
     return (this.$refs.basicDataForm as Vue & { validate: () => boolean }).validate()
+  }
+
+  get visibilityPrivateValue (): Visibility {
+    return Visibility.Private
   }
 }
 </script>

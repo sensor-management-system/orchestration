@@ -35,18 +35,32 @@ permissions and limitations under the Licence.
     />
     <v-card flat>
       <NuxtChild />
+      <modification-info
+        v-if="platform"
+        v-model="platform"
+      />
     </v-card>
   </div>
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
-import { mapActions } from 'vuex'
+import { Component, Vue, ProvideReactive } from 'nuxt-property-decorator'
+import { mapActions, mapGetters, mapState } from 'vuex'
+
+import { PlatformsState, LoadPlatformAction } from '@/store/platforms'
+import { CanAccessEntityGetter, CanModifyEntityGetter, CanDeleteEntityGetter } from '@/store/permissions'
+
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import ModificationInfo from '@/components/ModificationInfo.vue'
 
 @Component({
   components: {
-    ProgressIndicator
+    ProgressIndicator,
+    ModificationInfo
+  },
+  computed: {
+    ...mapState('platforms', ['platform']),
+    ...mapGetters('permissions', ['canAccessEntity', 'canModifyEntity', 'canDeleteEntity'])
   },
   methods: {
     ...mapActions('platforms', ['loadPlatform']),
@@ -56,26 +70,50 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
 export default class PlatformPage extends Vue {
   private isLoading: boolean = false
 
+  @ProvideReactive()
+    editable: boolean = false
+
+  @ProvideReactive()
+    deletable: boolean = false
+
   // vuex definition for typescript check
+  platform!: PlatformsState['platform']
+  loadPlatform!: LoadPlatformAction
   initPlatformsPlatformIdAppBar!: (id: string) => void
   setDefaults!: () => void
-  loadPlatform!: ({ platformId, includeContacts, includePlatformAttachments }: {platformId: string, includeContacts: boolean, includePlatformAttachments: boolean}) => void
+  canAccessEntity!: CanAccessEntityGetter
+  canModifyEntity!: CanModifyEntityGetter
+  canDeleteEntity!: CanDeleteEntityGetter
 
-  async created () {
+  created () {
+    this.initPlatformsPlatformIdAppBar(this.platformId)
+  }
+
+  async fetch () {
     try {
       this.isLoading = true
-      this.initPlatformsPlatformIdAppBar(this.platformId)
       await this.loadPlatform({
         platformId: this.platformId,
         includeContacts: false,
-        includePlatformAttachments: false
+        includePlatformAttachments: false,
+        includeCreatedBy: true,
+        includeUpdatedBy: true
       }
       )
+      if (!this.platform || !this.canAccessEntity(this.platform)) {
+        this.$router.replace('/platforms/')
+        this.$store.commit('snackbar/setError', 'You\'re not allowed to access this platform.')
+        return
+      }
+      this.editable = this.canModifyEntity(this.platform)
+      this.deletable = this.canDeleteEntity(this.platform)
+
       if (this.isBasePath()) {
         this.$router.replace('/platforms/' + this.platformId + '/basic')
       }
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Loading platform failed')
+      this.$router.replace('/platforms/')
     } finally {
       this.isLoading = false
     }

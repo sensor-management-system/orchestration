@@ -36,18 +36,21 @@ import { DateTime } from 'luxon'
 
 import { Contact } from '@/models/Contact'
 import { Platform } from '@/models/Platform'
+import { PermissionGroup } from '@/models/PermissionGroup'
 
 import {
   IJsonApiEntityEnvelope,
   IJsonApiEntityListEnvelope,
   IJsonApiEntity,
   IJsonApiEntityWithOptionalId,
-  IJsonApiEntityWithOptionalAttributes
+  IJsonApiEntityWithOptionalAttributes,
+  IJsonApiEntityWithoutDetails
 } from '@/serializers/jsonapi/JsonApiTypes'
 
 import { IMissingAttachmentData } from '@/serializers/jsonapi/AttachmentSerializer'
 import { ContactSerializer, IMissingContactData } from '@/serializers/jsonapi/ContactSerializer'
 import { PlatformAttachmentSerializer } from '@/serializers/jsonapi/PlatformAttachmentSerializer'
+import { Visibility } from '@/models/Visibility'
 
 export interface IPlatformMissingData {
   contacts: IMissingContactData
@@ -62,6 +65,15 @@ export interface IPlatformWithMeta {
 export class PlatformSerializer {
   private attachmentSerializer: PlatformAttachmentSerializer = new PlatformAttachmentSerializer()
   private contactSerializer: ContactSerializer = new ContactSerializer()
+  private _permissionGroups: PermissionGroup[] = []
+
+  set permissionGroups (groups: PermissionGroup[]) {
+    this._permissionGroups = groups
+  }
+
+  get permissionGroups (): PermissionGroup[] {
+    return this._permissionGroups
+  }
 
   convertJsonApiObjectToModel (jsonApiObject: IJsonApiEntityEnvelope): IPlatformWithMeta {
     const included = jsonApiObject.included || []
@@ -91,13 +103,19 @@ export class PlatformSerializer {
       result.createdAt = attributes.created_at != null ? DateTime.fromISO(attributes.created_at, { zone: 'UTC' }) : null
       result.updatedAt = attributes.updated_at != null ? DateTime.fromISO(attributes.updated_at, { zone: 'UTC' }) : null
 
-      // TODO
-      // result.createdBy = attributes.created_by
-      // result.updatedBy = attributes.updated_by
-
       result.inventoryNumber = attributes.inventory_number || ''
       result.serialNumber = attributes.serial_number || ''
       result.persistentIdentifier = attributes.persistent_identifier || ''
+
+      if (attributes.is_private) {
+        result.visibility = Visibility.Private
+      }
+      if (attributes.is_internal) {
+        result.visibility = Visibility.Internal
+      }
+      if (attributes.is_public) {
+        result.visibility = Visibility.Public
+      }
 
       // TODO
       // result.events = []
@@ -110,6 +128,41 @@ export class PlatformSerializer {
     const contactsWithMissing = this.contactSerializer.convertJsonApiRelationshipsModelList(relationships, included)
     result.contacts = contactsWithMissing.contacts
     const missingDataForContactIds = contactsWithMissing.missing.ids
+
+    // just pick the contact from the relationships that is referenced by the created_by user
+    if (relationships.created_by?.data && 'id' in relationships.created_by?.data) {
+      const userId = (relationships.created_by.data as IJsonApiEntityWithoutDetails).id
+      result.createdByUserId = userId
+      const createdBy = this.contactSerializer.getContactFromIncludedByUserId(userId, included)
+      if (createdBy) {
+        result.createdBy = createdBy
+      }
+    }
+
+    // just pick the contact from the relationships that is referenced by the updated_by user
+    if (relationships.updated_by?.data && 'id' in relationships.updated_by?.data) {
+      const userId = (relationships.updated_by.data as IJsonApiEntityWithoutDetails).id
+      const updatedBy = this.contactSerializer.getContactFromIncludedByUserId(userId, included)
+      if (updatedBy) {
+        result.updatedBy = updatedBy
+      }
+    }
+
+    if (attributes?.group_ids) {
+      // look up the group in the provided permission group array. if it was
+      // found, push the found group into the device's permissionGroups property
+      // otherwise create a plain permission group object with just an ID
+      const permissionGroups: PermissionGroup[] = attributes.group_ids.map((id: string) => {
+        let group = this.permissionGroups.find(group => group.id === id)
+        if (!group) {
+          group = PermissionGroup.createFromObject({
+            id
+          })
+        }
+        return group
+      })
+      result.permissionGroups = permissionGroups
+    }
 
     return {
       platform: result,
@@ -161,15 +214,20 @@ export class PlatformSerializer {
         status_uri: platform.statusUri,
         status_name: platform.statusName,
         website: platform.website,
-        // those two time slots are set by the db, no matter what we deliver here
-        // TODO
+        // these properties are set by the db, so we wont send anything related here:
+        // modifiedAt
+        // modifiedBy
         // created_by: platform.createdBy,
         // updated_by: platform.updatedBy,
         inventory_number: platform.inventoryNumber,
         serial_number: platform.serialNumber,
         // as the persistent_identifier must be unique, we sent null in case
         // that we don't have an identifier here
-        persistent_identifier: platform.persistentIdentifier === '' ? null : platform.persistentIdentifier
+        persistent_identifier: platform.persistentIdentifier === '' ? null : platform.persistentIdentifier,
+        is_private: platform.isPrivate,
+        is_internal: platform.isInternal,
+        is_public: platform.isPublic,
+        group_ids: platform.permissionGroups.filter(i => i.id !== null).map(i => i.id)
       }
     }
 

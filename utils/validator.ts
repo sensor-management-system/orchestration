@@ -3,10 +3,11 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020, 2021
+ * Copyright (C) 2020, 2021, 2022
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
+ * - Tim Eder (UFZ, tim.eder@ufz.de)
  * - Erik Pongratz (UFZ, erik.pongratz@ufz.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences
  *   (GFZ, https://www.gfz-potsdam.de)
@@ -35,6 +36,8 @@
  */
 import { LocationType } from '@/models/Location'
 import { Configuration } from '@/models/Configuration'
+import { IPermissionGroup } from '@/models/PermissionGroup'
+import { Visibility } from '@/models/Visibility'
 
 export default {
   validateInputForStartDate (configuration: Configuration): (v: string) => (boolean | string) {
@@ -104,5 +107,66 @@ export default {
       return 'The email address is not valid'
     }
     return true
+  },
+
+  /**
+   * validates the permission groups of an entity
+   *
+   * If the entity is private, then it is not allowed to have permission groups.
+   * If the entity is not private, it is required to have permission groups.
+   *
+   * @param isPrivate whether the entity has Visibility private. default false
+   * @param entityName The entity you are validating, e.g. device, platform, etc...
+   * @returns String or boolean that informs the user about possible Permission Group configurations
+   */
+  validatePermissionGroups (isPrivate: boolean, entityName: string): (groups: IPermissionGroup[]) => boolean | string {
+    return function (groups: IPermissionGroup[]) {
+      if (isPrivate && groups.length) {
+        return `You are not allowed to add groups if the ${entityName} is private.`
+      }
+      if (!isPrivate && !groups.length) {
+        return `You must add groups if the ${entityName} is not private.`
+      }
+      return true
+    }
+  },
+
+  /**
+   * validates the permission group of an entity
+   *
+   * If the entity is private, then it is not allowed to have a permission group.
+   * If the entity is not private, it is required to have a permission group.
+   *
+   * @param isPrivate whether the entity has Visibility private. default false
+   * @returns String or boolean that informs the user about possible Permission Group configurations
+   */
+  validatePermissionGroup (isPrivate: boolean): (group: IPermissionGroup | null) => boolean | string {
+    return function (group: IPermissionGroup | null) {
+      if (isPrivate && group) {
+        return 'You are not allowed to add a group.'
+      }
+      if (!isPrivate && !group) {
+        return 'You must add a group.'
+      }
+      return true
+    }
+  },
+
+  /**
+   * validates the visibility of an entity
+   *
+   * If the entity is private, then it is not allowed to have permission groups.
+   *
+   * @param {PermissionGroup[]} groups - the permission groups of the entity
+   * @param {string} entityName - the entity name
+   * @returns {(visibility: Visibility) => boolean | string} a function that validates the visibility of an entity
+   */
+  validateVisibility (groups: IPermissionGroup[], entityName: string): (visibility: Visibility) => boolean | string {
+    return function (visibility: Visibility) {
+      if (visibility === Visibility.Private && groups.length) {
+        return `You are not allowed to set the visibility to private as long as the ${entityName} has permission groups.`
+      }
+      return true
+    }
   }
 }

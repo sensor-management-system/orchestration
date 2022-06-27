@@ -2,11 +2,15 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020
+Copyright (C) 2020-2022
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
+- Tim Eder (UFZ, tim.eder@ufz.de)
+- Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
   Geosciences (GFZ, https://www.gfz-potsdam.de)
+- Helmholtz Centre for Environmental Research GmbH - UFZ
+  (UFZ, https://www.ufz.de)
 
 Parts of this program were developed within the context of the
 following publicly funded projects or measures:
@@ -33,6 +37,27 @@ permissions and limitations under the Licence.
     ref="basicForm"
     @submit.prevent
   >
+    <v-row>
+      <v-col cols="12" md="6">
+        <visibility-switch
+          :value="value.visibility"
+          :rules="[pageRules.validateVisibility]"
+          :readonly="readonly"
+          :entity-name="entityName"
+          @input="update('visibility', $event)"
+        />
+      </v-col>
+      <v-col cols="12" md="6">
+        <permission-group-select
+          v-show="!value.isPrivate"
+          :value="value.permissionGroups"
+          :readonly="readonly"
+          :entity-name="entityName"
+          :rules="[pageRules.validatePermissionGroups]"
+          @input="update('permissionGroups', $event)"
+        />
+      </v-col>
+    </v-row>
     <v-row>
       <v-col cols="12" md="6">
         <v-text-field
@@ -166,7 +191,9 @@ permissions and limitations under the Licence.
         />
       </v-col>
     </v-row>
-    <v-divider />
+    <v-divider
+      class="my-4"
+    />
     <v-row>
       <v-col cols="12" md="9">
         <v-textarea
@@ -202,7 +229,9 @@ permissions and limitations under the Licence.
         </v-text-field>
       </v-col>
     </v-row>
-    <v-divider />
+    <v-divider
+      class="my-4"
+    />
     <v-row>
       <v-col cols="12" md="3">
         <v-text-field
@@ -250,17 +279,33 @@ import { Device } from '@/models/Device'
 import { DeviceType } from '@/models/DeviceType'
 import { Status } from '@/models/Status'
 import { Manufacturer } from '@/models/Manufacturer'
+import { PermissionGroup } from '@/models/PermissionGroup'
+import { Visibility } from '@/models/Visibility'
+import { DetailedUserInfo } from '@/models/UserInfo'
 import { ICvSelectItem, hasDefinition } from '@/models/CvSelectItem'
+
+import PermissionGroupSelect from '@/components/PermissionGroupSelect.vue'
+import VisibilitySwitch from '@/components/VisibilitySwitch.vue'
 
 import { createDeviceUrn } from '@/modelUtils/urnBuilders'
 
+import Validator from '@/utils/validator'
+
 type StatusSelectValue = Status | string | undefined
 
-@Component
+@Component({
+  components: {
+    PermissionGroupSelect,
+    VisibilitySwitch
+  }
+})
 export default class DeviceBasicDataForm extends mixins(Rules) {
   private states: Status[] = []
   private manufacturers: Manufacturer[] = []
   private deviceTypes: DeviceType[] = []
+  private permissionGroups: PermissionGroup[] = []
+  private userInfo: DetailedUserInfo | null = null
+  private entityName: string = 'device'
 
   @Prop({
     required: true,
@@ -292,6 +337,13 @@ export default class DeviceBasicDataForm extends mixins(Rules) {
   })
   readonly persistentIdentifierPlaceholder!: string | null
 
+  get pageRules (): {[index: string]: (a: any) => (boolean | string)} {
+    return {
+      validateVisibility: Validator.validateVisibility(this.value.permissionGroups, this.entityName),
+      validatePermissionGroups: Validator.validatePermissionGroups(this.value.isPrivate, this.entityName)
+    }
+  }
+
   mounted () {
     this.$api.states.findAllPaginated().then((foundStates) => {
       this.states = foundStates
@@ -310,21 +362,21 @@ export default class DeviceBasicDataForm extends mixins(Rules) {
     })
   }
 
-  update (key: string, value: string) {
+  update (key: string, value: string|PermissionGroup[]) {
     const newObj = Device.createFromObject(this.value)
 
     switch (key) {
       case 'persistentIdentifier':
-        newObj.persistentIdentifier = value
+        newObj.persistentIdentifier = value as string
         break
       case 'shortName':
-        newObj.shortName = value
+        newObj.shortName = value as string
         break
       case 'longName':
-        newObj.longName = value
+        newObj.longName = value as string
         break
       case 'deviceTypeName':
-        newObj.deviceTypeName = value
+        newObj.deviceTypeName = value as string
         {
           const deviceTypeIndex = this.deviceTypes.findIndex(t => t.name === value)
           if (deviceTypeIndex > -1) {
@@ -335,7 +387,7 @@ export default class DeviceBasicDataForm extends mixins(Rules) {
         }
         break
       case 'manufacturerName':
-        newObj.manufacturerName = value
+        newObj.manufacturerName = value as string
         {
           const manufacturerIndex = this.manufacturers.findIndex(m => m.name === value)
           if (manufacturerIndex > -1) {
@@ -346,19 +398,19 @@ export default class DeviceBasicDataForm extends mixins(Rules) {
         }
         break
       case 'model':
-        newObj.model = value
+        newObj.model = value as string
         break
       case 'description':
-        newObj.description = value
+        newObj.description = value as string
         break
       case 'website':
-        newObj.website = value
+        newObj.website = value as string
         break
       case 'serialNumber':
-        newObj.serialNumber = value
+        newObj.serialNumber = value as string
         break
       case 'inventoryNumber':
-        newObj.inventoryNumber = value
+        newObj.inventoryNumber = value as string
         break
       case 'dualUse':
         // Boolean(true) => true
@@ -369,10 +421,25 @@ export default class DeviceBasicDataForm extends mixins(Rules) {
         // so we can be sure to go with it here
         newObj.dualUse = Boolean(value)
         break
+      case 'permissionGroups':
+        newObj.permissionGroups = value as PermissionGroup[]
+        break
+      case 'visibility':
+        switch (value) {
+          case Visibility.Private:
+            newObj.visibility = Visibility.Private
+            break
+          case Visibility.Internal:
+            newObj.visibility = Visibility.Internal
+            break
+          case Visibility.Public:
+            newObj.visibility = Visibility.Public
+            break
+        }
+        break
       default:
         throw new TypeError('key ' + key + ' is not valid')
     }
-
     this.$emit('input', newObj)
   }
 

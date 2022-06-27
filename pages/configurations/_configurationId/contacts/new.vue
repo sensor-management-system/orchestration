@@ -85,7 +85,7 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
+import { Component, InjectReactive, Vue } from 'nuxt-property-decorator'
 
 import { mapActions, mapGetters, mapState } from 'vuex'
 import { Contact } from '@/models/Contact'
@@ -107,6 +107,9 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
   }
 })
 export default class ConfigurationAssignContactPage extends Vue {
+  @InjectReactive()
+    editable!: boolean
+
   private selectedContact: Contact | null = null
   private isLoading: boolean = false
   private isSaving: boolean = false
@@ -122,6 +125,12 @@ export default class ConfigurationAssignContactPage extends Vue {
   }: { configurationId: string, contactId: string }) => Promise<void>
 
   async created () {
+    if (!this.editable) {
+      this.$router.replace('/configurations/' + this.configurationId + '/contacts', () => {
+        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this configuration.')
+      })
+      return
+    }
     try {
       this.isLoading = true
       await this.loadAllContacts()

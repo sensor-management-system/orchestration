@@ -278,13 +278,15 @@ permissions and limitations under the Licence.
             :key="item.id"
             :device="item"
           >
-            <template #dot-menu-items>
+            <template
+              v-if="$auth.loggedIn"
+              #dot-menu-items
+            >
               <DotMenuActionCopy
-                :readonly="!$auth.loggedIn"
                 :path="'/devices/copy/' + item.id"
               />
               <DotMenuActionDelete
-                :readonly="!$auth.loggedIn"
+                v-if="canDeleteEntity(item)"
                 @click="initDeleteDialog(item)"
               />
             </template>
@@ -313,7 +315,35 @@ import { Component, Vue } from 'nuxt-property-decorator'
 
 import { saveAs } from 'file-saver'
 
-import { mapActions, mapState, mapGetters } from 'vuex'
+import { mapActions, mapGetters, mapState } from 'vuex'
+
+import {
+  VocabularyState,
+  LoadEquipmentstatusAction,
+  LoadDevicetypesAction,
+  LoadManufacturersAction
+} from '@/store/vocabulary'
+
+import {
+  DevicesState,
+  SearchDevicesPaginatedAction,
+  SetPageNumberAction,
+  SetPageSizeAction,
+  ExportAsCsvAction,
+  DeleteDeviceAction,
+  PageSizesGetter
+} from '@/store/devices'
+
+import { CanAccessEntityGetter, CanDeleteEntityGetter } from '@/store/permissions'
+
+import { Device } from '@/models/Device'
+import { DeviceType } from '@/models/DeviceType'
+import { Manufacturer } from '@/models/Manufacturer'
+import { Status } from '@/models/Status'
+
+import { QueryParams } from '@/modelUtils/QueryParams'
+import { DeviceSearchParamsSerializer } from '@/modelUtils/DeviceSearchParams'
+
 import DeviceTypeSelect from '@/components/DeviceTypeSelect.vue'
 import ManufacturerSelect from '@/components/ManufacturerSelect.vue'
 import StatusSelect from '@/components/StatusSelect.vue'
@@ -323,14 +353,6 @@ import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 import BaseList from '@/components/shared/BaseList.vue'
 import DevicesListItem from '@/components/devices/DevicesListItem.vue'
 import PageSizeSelect from '@/components/shared/PageSizeSelect.vue'
-
-import { Device } from '@/models/Device'
-import { DeviceType } from '@/models/DeviceType'
-import { Manufacturer } from '@/models/Manufacturer'
-import { Status } from '@/models/Status'
-
-import { QueryParams } from '@/modelUtils/QueryParams'
-import { DeviceSearchParamsSerializer, IDeviceSearchParams } from '@/modelUtils/DeviceSearchParams'
 
 @Component({
   components: {
@@ -345,6 +367,7 @@ import { DeviceSearchParamsSerializer, IDeviceSearchParams } from '@/modelUtils/
     PageSizeSelect
   },
   computed: {
+    ...mapGetters('permissions', ['canDeleteEntity', 'canAccessEntity']),
     ...mapState('vocabulary', ['devicetypes', 'manufacturers', 'equipmentstatus']),
     ...mapState('devices', ['devices', 'pageNumber', 'pageSize', 'totalPages']),
     ...mapGetters('devices', ['pageSizes'])
@@ -369,32 +392,37 @@ export default class SearchDevicesPage extends Vue {
   private deviceToDelete: Device | null = null
 
   // vuex definition for typescript check
+  devices!: DevicesState['devices']
+  pageSize!: DevicesState['pageSize']
+  totalPages!: DevicesState['totalPages']
+  pageNumber!: DevicesState['pageNumber']
+  pageSizes!: PageSizesGetter
   initDevicesIndexAppBar!: () => void
   setDefaults!: () => void
-  loadEquipmentstatus!: () => void
-  loadDevicetypes!: () => void
-  loadManufacturers!: () => void
-  pageNumber!: number
-  setPageNumber!: (newPageNumber: number) => void
-  pageSize!: number
-  pageSizes!: number[]
-  setPageSize!: (newPageSize: number) => void
-  searchDevicesPaginated!: (searchParams: IDeviceSearchParams) => void
-  devices!: Device[]
-  exportAsCsv!: (searchParams: IDeviceSearchParams) => Promise<Blob>
-  deleteDevice!: (id: string) => void
-  equipmentstatus!: Status[]
-  devicetypes!: DeviceType[]
-  manufacturers!: Manufacturer[]
+  loadEquipmentstatus!: LoadEquipmentstatusAction
+  loadDevicetypes!: LoadDevicetypesAction
+  loadManufacturers!: LoadManufacturersAction
+  setPageNumber!: SetPageNumberAction
+  setPageSize!: SetPageSizeAction
+  searchDevicesPaginated!: SearchDevicesPaginatedAction
+  exportAsCsv!: ExportAsCsvAction
+  deleteDevice!: DeleteDeviceAction
+  devicetypes!: VocabularyState['devicetypes']
+  manufacturers!: VocabularyState['manufacturers']
+  equipmentstatus!: VocabularyState['equipmentstatus']
+  canAccessEntity!: CanAccessEntityGetter
+  canDeleteEntity!: CanDeleteEntityGetter
 
   async created () {
+    this.initDevicesIndexAppBar()
     try {
       this.loading = true
-      await this.initDevicesIndexAppBar()
-      await this.loadEquipmentstatus()
-      await this.loadDevicetypes()
-      await this.loadManufacturers()
-      await this.initSearchQueryParams()
+      await Promise.all([
+        this.loadEquipmentstatus(),
+        this.loadDevicetypes(),
+        this.loadManufacturers()
+      ])
+      this.initSearchQueryParams()
       await this.runInitialSearch()
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Loading of devices failed')

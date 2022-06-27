@@ -33,8 +33,11 @@ import { DateTime } from 'luxon'
 
 import { IContact, Contact } from '@/models/Contact'
 import { Attachment, IAttachment } from '@/models/Attachment'
+import { PermissionGroup, IPermissionGroup, IPermissionableMultipleGroups } from '@/models/PermissionGroup'
+import { Visibility, IVisible } from '@/models/Visibility'
+import { IMetaCreationInfo } from '@/models/MetaCreationInfo'
 
-export interface IPlatform {
+export interface IPlatform extends IPermissionableMultipleGroups, IMetaCreationInfo {
   id: string | null
 
   platformTypeUri: string
@@ -60,14 +63,25 @@ export interface IPlatform {
   createdAt: DateTime | null
   updatedAt: DateTime | null
 
-  createdByUserId: number | null
-  updatedByUserId: number | null
+  createdBy: IContact | null
+  updatedBy: IContact | null
+
+  /*
+    You may wonder why there is an extra createdByUserId entry here.
+    The reason is that we use the createBy & updatedBy to show
+    information about the contact that are responsible for the changes.
+    Here we refer to the user object (which can have different ids).
+  */
+  createdByUserId: string | null
 
   contacts: IContact[]
   attachments: IAttachment[]
+  permissionGroups: IPermissionGroup[]
+
+  visibility: Visibility
 }
 
-export class Platform implements IPlatform {
+export class Platform implements IPlatform, IVisible {
   private _id: string | null = null
 
   private _platformTypeUri: string = ''
@@ -92,11 +106,16 @@ export class Platform implements IPlatform {
   private _createdAt: DateTime | null = null
   private _updatedAt: DateTime | null = null
 
-  private _createdByUserId: number | null = null
-  private _updatedByUserId: number | null = null
+  private _createdBy: IContact | null = null
+  private _updatedBy: IContact | null = null
+
+  private _createdByUserId: string | null = null
 
   private _contacts: Contact[] = []
   private _attachments: Attachment[] = []
+  private _permissionGroups: PermissionGroup[] = []
+
+  private _visibility: Visibility = Visibility.Internal
 
   get id (): string | null {
     return this._id
@@ -242,20 +261,20 @@ export class Platform implements IPlatform {
     this._updatedAt = newUpdatedAt
   }
 
-  get createdByUserId (): number | null {
-    return this._createdByUserId
+  get createdBy (): IContact | null {
+    return this._createdBy
   }
 
-  set createdByUserId (newCreatedByUserId: number | null) {
-    this._createdByUserId = newCreatedByUserId
+  set createdBy (user: IContact | null) {
+    this._createdBy = user
   }
 
-  get updatedByUserId (): number | null {
-    return this._updatedByUserId
+  get updatedBy (): IContact | null {
+    return this._updatedBy
   }
 
-  set updatedByUserId (newUpdatedByUserId: number | null) {
-    this._updatedByUserId = newUpdatedByUserId
+  set updatedBy (user: IContact | null) {
+    this._updatedBy = user
   }
 
   get attachments (): Attachment[] {
@@ -264,6 +283,42 @@ export class Platform implements IPlatform {
 
   set attachments (attachments: Attachment[]) {
     this._attachments = attachments
+  }
+
+  get permissionGroups (): PermissionGroup[] {
+    return this._permissionGroups
+  }
+
+  set permissionGroups (permissionGroups: PermissionGroup[]) {
+    this._permissionGroups = permissionGroups
+  }
+
+  get createdByUserId (): string | null {
+    return this._createdByUserId
+  }
+
+  set createdByUserId (newId: string | null) {
+    this._createdByUserId = newId
+  }
+
+  get visibility (): Visibility {
+    return this._visibility
+  }
+
+  set visibility (visibility: Visibility) {
+    this._visibility = visibility
+  }
+
+  get isPrivate (): boolean {
+    return this._visibility === Visibility.Private
+  }
+
+  get isInternal (): boolean {
+    return this._visibility === Visibility.Internal
+  }
+
+  get isPublic (): boolean {
+    return this._visibility === Visibility.Public
   }
 
   static createEmpty (): Platform {
@@ -299,11 +354,15 @@ export class Platform implements IPlatform {
     newObject.createdAt = someObject.createdAt
     newObject.updatedAt = someObject.updatedAt
 
-    newObject.createdByUserId = someObject.createdByUserId
-    newObject.updatedByUserId = someObject.updatedByUserId
+    newObject.createdBy = someObject.createdBy
+    newObject.updatedBy = someObject.updatedBy
 
     newObject.contacts = someObject.contacts.map(Contact.createFromObject)
     newObject.attachments = someObject.attachments.map(Attachment.createFromObject)
+    newObject.permissionGroups = someObject.permissionGroups.map(PermissionGroup.createFromObject)
+    newObject.createdByUserId = someObject.createdByUserId
+
+    newObject.visibility = someObject.visibility
 
     return newObject
   }

@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020, 2021
+ * Copyright (C) 2020-2022
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
@@ -30,30 +30,6 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
-import { Commit } from 'vuex'
-import { IUploadResult } from '@/services/sms/UploadApi'
-import { Api } from '@/services/Api'
+export const state = () => ({})
 
-const state = () => ({})
-
-const getters = {}
-
-// @ts-ignore
-const actions: {
-  [key: string]: any;
-  $api: Api
-} = {
-  uploadFile ({ _commit }: {_commit: Commit}, file: File): Promise<IUploadResult> {
-    return this.$api.upload.file(file)
-  }
-}
-
-const mutations = {}
-
-export default {
-  namespaced: true,
-  state,
-  getters,
-  actions,
-  mutations
-}
+export type RootState = ReturnType<typeof state>

@@ -88,14 +88,24 @@ permissions and limitations under the Licence.
               return-object
             >
               <template #label="{item}">
-                <div v-if="item.action.type==='device_mount_action'">Mount - {{item.entity.attributes.short_name}}</div>
-                <div v-if="item.action.type==='platform_mount_action'">Mount - {{item.entity.attributes.short_name}}</div>
-                <div v-if="item.action.type==='device_unmount_action'"
-                     style="text-decoration: line-through"
-                >UnMount - {{item.entity.attributes.short_name}}</div>
-                <div v-if="item.action.type==='platform_unmount_action'"
-                     style="text-decoration: line-through"
-                >UnMount - {{item.entity.attributes.short_name}}</div>
+                <div v-if="item.action.type==='device_mount_action'">
+                  Mount - {{ item.entity.attributes.short_name }}
+                </div>
+                <div v-if="item.action.type==='platform_mount_action'">
+                  Mount - {{ item.entity.attributes.short_name }}
+                </div>
+                <div
+                  v-if="item.action.type==='device_unmount_action'"
+                  style="text-decoration: line-through"
+                >
+                  UnMount - {{ item.entity.attributes.short_name }}
+                </div>
+                <div
+                  v-if="item.action.type==='platform_unmount_action'"
+                  style="text-decoration: line-through"
+                >
+                  UnMount - {{ item.entity.attributes.short_name }}
+                </div>
               </template>
               <template #prepend="{ item }">
                 <v-icon v-if="item.entity.type==='platform'">
@@ -106,12 +116,12 @@ permissions and limitations under the Licence.
                 </v-icon>
               </template>
             </v-treeview>
-<!--            <ConfigurationsTreeView-->
-<!--              v-if="configuration"-->
-<!--              ref="treeView"-->
-<!--              v-model="selectedNode"-->
-<!--              :items="tree"-->
-<!--            />-->
+            <!--            <ConfigurationsTreeView-->
+            <!--              v-if="configuration"-->
+            <!--              ref="treeView"-->
+            <!--              v-model="selectedNode"-->
+            <!--              :items="tree"-->
+            <!--            />-->
           </v-container>
         </v-card>
       </v-col>
@@ -120,12 +130,12 @@ permissions and limitations under the Licence.
           <div v-show="selectedNode">
             <v-card-title>Selected node information</v-card-title>
             <pre>
-              {{selectedNode}}
+              {{ selectedNode }}
             </pre>
-<!--            <ConfigurationsTreeNodeDetail-->
-<!--              v-if="selectedNode"-->
-<!--              :node="selectedNode"-->
-<!--            />-->
+            <!--            <ConfigurationsTreeNodeDetail-->
+            <!--              v-if="selectedNode"-->
+            <!--              :node="selectedNode"-->
+            <!--            />-->
           </div>
         </v-slide-x-reverse-transition>
       </v-col>
@@ -135,12 +145,10 @@ permissions and limitations under the Licence.
 
 <script lang="ts">
 import { Component, Vue, Watch } from 'nuxt-property-decorator'
-import { mapActions, mapGetters, mapState } from 'vuex'
+import { mapActions, mapState } from 'vuex'
 
 import { DateTime } from 'luxon'
 
-import { buildConfigurationTree } from '@/modelUtils/mountHelpers'
-import { ConfigurationsTreeNode } from '@/viewmodels/ConfigurationsTreeNode'
 import { Configuration } from '@/models/Configuration'
 
 import DateTimePicker from '@/components/DateTimePicker.vue'
@@ -150,9 +158,9 @@ import ConfigurationsTreeNodeDetail from '@/components/configurations/Configurat
 @Component({
   components: { ConfigurationsTreeNodeDetail, ConfigurationsTreeView, DateTimePicker },
   computed: {
-    ...mapState('configurations', ['configuration','configurationMountingActions'])
+    ...mapState('configurations', ['configuration', 'configurationMountingActions'])
   },
-  methods:mapActions('configurations',['getMountingConfigurationForDate'])
+  methods: mapActions('configurations', ['getMountingConfigurationForDate'])
 })
 export default class ConfigurationShowPlatformsAndDevicesPage extends Vue {
   // private selectedNode: ConfigurationsTreeNode | null = null
@@ -161,22 +169,23 @@ export default class ConfigurationShowPlatformsAndDevicesPage extends Vue {
   private tree = []
   // vuex definition for typescript check
   configuration!: Configuration
+  getMountingConfigurationForDate!: (id: string, timepoint: DateTime) => []
 
-  async created(){
-    this.tree = await this.getMountingConfigurationForDate(this.configurationId,this.selectedDate)
+  async created () {
+    this.tree = await this.getMountingConfigurationForDate(this.configurationId, this.selectedDate)
   }
 
   get configurationId (): string {
     return this.$route.params.configurationId
   }
 
-  get selectedNode(){
-    return this.selectListSingelton[0] ??null;
+  get selectedNode () {
+    return this.selectListSingelton[0] ?? null
   }
 
   @Watch('selectedDate')
-  async onPropertyChanged(value: string, oldValue: string) {
-    this.tree = await this.getMountingConfigurationForDate(this.configurationId,this.selectedDate)
+  async onPropertyChanged (_value: string, _oldValue: string) {
+    this.tree = await this.getMountingConfigurationForDate(this.configurationId, this.selectedDate)
   }
   // get tree () {
   //

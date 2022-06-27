@@ -43,23 +43,26 @@ permissions and limitations under the Licence.
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import { mapActions } from 'vuex'
+import ProgressIndicator from '@/components/ProgressIndicator.vue'
 @Component({
   components: { ProgressIndicator },
-  methods:mapActions('configurations',['loadMountingActions'])
+  methods: mapActions('configurations', ['loadMountingActions'])
 })
 export default class ConfigurationPlatformsAndDevices extends Vue {
   private isLoading = false
 
-  async created(){
+  // vuex definition for typescript check
+  loadMountingActions!: (id: string) => void
+
+  async created () {
     try {
-      this.isLoading=true
-      this.loadMountingActions(this.configurationId)
-    }catch (_e){
+      this.isLoading = true
+      await this.loadMountingActions(this.configurationId)
+    } catch (_e) {
       this.$store.commit('snackbar/setError', 'Failed to fetch actions')
-    }finally {
-      this.isLoading=false
+    } finally {
+      this.isLoading = false
     }
   }
 

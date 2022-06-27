@@ -63,8 +63,10 @@ permissions and limitations under the Licence.
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
-
 import { mapActions } from 'vuex'
+
+import { SaveDeviceAction } from '@/store/devices'
+
 import DeviceBasicDataForm from '@/components/DeviceBasicDataForm.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
@@ -91,7 +93,7 @@ export default class DeviceNewPage extends Vue {
   // vuex definition for typescript check
   initDevicesNewAppBar!: () => void
   setDefaults!: () => void
-  saveDevice!: (device: Device) => Promise<Device>
+  saveDevice!: SaveDeviceAction
 
   created () {
     this.initDevicesNewAppBar()

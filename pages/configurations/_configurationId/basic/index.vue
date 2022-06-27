@@ -42,7 +42,7 @@ permissions and limitations under the Licence.
       <v-card-actions>
         <v-spacer />
         <v-btn
-          v-if="$auth.loggedIn"
+          v-if="editable"
           color="primary"
           small
           nuxt
@@ -55,6 +55,7 @@ permissions and limitations under the Licence.
         >
           <template #actions>
             <DotMenuActionDelete
+              :readonly="!deletable"
               @click="initDeleteDialog"
             />
           </template>
@@ -70,7 +71,7 @@ permissions and limitations under the Licence.
       <v-card-actions>
         <v-spacer />
         <v-btn
-          v-if="$auth.loggedIn"
+          v-if="editable"
           color="primary"
           small
           nuxt
@@ -83,6 +84,7 @@ permissions and limitations under the Licence.
         >
           <template #actions>
             <DotMenuActionDelete
+              :readonly="!deletable"
               @click="initDeleteDialog"
             />
           </template>
@@ -99,7 +101,7 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
+import { Component, InjectReactive, Vue } from 'nuxt-property-decorator'
 
 import { mapActions, mapState } from 'vuex'
 import ConfigurationsBasicData from '@/components/configurations/ConfigurationsBasicData.vue'
@@ -115,6 +117,12 @@ import { IConfiguration } from '@/models/Configuration'
   methods: mapActions('configurations', ['deleteConfiguration'])
 })
 export default class ConfigurationShowBasicPage extends Vue {
+  @InjectReactive()
+    editable!: boolean
+
+  @InjectReactive()
+    deletable!: boolean
+
   private isSaving = false
 
   private showDeleteDialog: boolean = false

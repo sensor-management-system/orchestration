@@ -42,6 +42,7 @@ import { Manufacturer } from '@/models/Manufacturer'
 import { Status } from '@/models/Status'
 import { GenericAction } from '@/models/GenericAction'
 import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
+import { PermissionGroup } from '@/models/PermissionGroup'
 
 import { DeviceMountAction } from '@/models/views/devices/actions/DeviceMountAction'
 import { DeviceUnmountAction } from '@/models/views/devices/actions/DeviceUnmountAction'
@@ -63,17 +64,45 @@ import {
 } from '@/serializers/jsonapi/DeviceSerializer'
 import { DeviceCalibrationActionSerializer } from '@/serializers/jsonapi/DeviceCalibrationActionSerializer'
 
-interface IncludedRelationships {
+export interface IncludedRelationships {
   includeContacts?: boolean
   includeCustomFields?: boolean
   includeDeviceProperties?: boolean
   includeDeviceAttachments?: boolean
+  includeCreatedBy?: boolean
+  includeUpdatedBy?: boolean
 }
+
+function getIncludeParams (includes: IncludedRelationships): string {
+  const listIncludedRelationships: string[] = []
+  if (includes.includeContacts) {
+    listIncludedRelationships.push('contacts')
+  }
+  if (includes.includeDeviceProperties) {
+    listIncludedRelationships.push('device_properties')
+  }
+  if (includes.includeCustomFields) {
+    listIncludedRelationships.push('customfields')
+  }
+  if (includes.includeDeviceAttachments) {
+    listIncludedRelationships.push('device_attachments')
+  }
+  if (includes.includeCreatedBy) {
+    listIncludedRelationships.push('created_by.contact')
+  }
+  if (includes.includeUpdatedBy) {
+    listIncludedRelationships.push('updated_by.contact')
+  }
+  return listIncludedRelationships.join(',')
+}
+
+export type DevicePermissionFetchFunction = () => Promise<PermissionGroup[]>
 
 export class DeviceApi {
   private axiosApi: AxiosInstance
   readonly basePath: string
   private serializer: DeviceSerializer
+  private permissionFetcher: DevicePermissionFetchFunction | undefined
 
   private _searchedManufacturers: Manufacturer[] = []
   private _searchedStates: Status[] = []
@@ -82,10 +111,13 @@ export class DeviceApi {
   private _searchText: string | null = null
   private filterSettings: any[] = []
 
-  constructor (axiosInstance: AxiosInstance, basePath: string) {
+  constructor (axiosInstance: AxiosInstance, basePath: string, permissionFetcher?: DevicePermissionFetchFunction) {
     this.axiosApi = axiosInstance
     this.basePath = basePath
     this.serializer = new DeviceSerializer()
+    if (permissionFetcher) {
+      this.permissionFetcher = permissionFetcher
+    }
   }
 
   get searchedManufacturers (): Manufacturer[] {
@@ -144,8 +176,14 @@ export class DeviceApi {
     return result
   }
 
-  searchPaginated (pageNumber: number, pageSize: number) {
+  async searchPaginated (pageNumber: number, pageSize: number, includes: IncludedRelationships = {}) {
     this.prepareSearch()
+    // set the permission groups for the serializer
+    if (this.permissionFetcher) {
+      this.serializer.permissionGroups = await this.permissionFetcher()
+    }
+
+    const include = getIncludeParams(includes)
 
     return this.axiosApi.get(
       this.basePath,
@@ -153,6 +191,7 @@ export class DeviceApi {
         params: {
           'page[size]': pageSize,
           'page[number]': pageNumber,
+          include,
           ...this.commonParams
         }
       }
@@ -173,27 +212,12 @@ export class DeviceApi {
     })
   }
 
-  // findMatchingAsList (): Promise<Device[]> {
-  //   return this.axiosApi.get(
-  //     this.basePath,
-  //     {
-  //       params: {
-  //         'page[size]': 10000,
-  //         ...this.commonParams
-  //       }
-  //     }
-  //   ).then((rawResponse: any) => {
-  //     const rawData = rawResponse.data
-  //     // We don't ask the api to load the contacts, so we just add dummy objects
-  //     // to stay with the relationships
-  //     return this.serializer
-  //       .convertJsonApiObjectListToModelList(rawData)
-  //       .map(deviceWithMetaToDeviceByAddingDummyObjects)
-  //   })
-  // }
-
-  searchAll () {
+  async searchAll () {
     this.prepareSearch()
+    // set the permission groups for the serializer
+    if (this.permissionFetcher) {
+      this.serializer.permissionGroups = await this.permissionFetcher()
+    }
     return this.axiosApi.get(
       this.basePath,
       {
@@ -309,31 +333,25 @@ export class DeviceApi {
     }
   }
 
-  findById (id: string, includes: IncludedRelationships): Promise<Device> {
-    const listIncludedRelationships: string[] = []
-    if (includes.includeContacts) {
-      listIncludedRelationships.push('contacts')
+  async findById (id: string, includes: IncludedRelationships = {}): Promise<Device> {
+    const include = getIncludeParams(includes)
+    // set the permission groups for the serializer
+    if (this.permissionFetcher) {
+      this.serializer.permissionGroups = await this.permissionFetcher()
     }
-    if (includes.includeDeviceProperties) {
-      listIncludedRelationships.push('device_properties')
-    }
-    if (includes.includeCustomFields) {
-      listIncludedRelationships.push('customfields')
-    }
-    if (includes.includeDeviceAttachments) {
-      listIncludedRelationships.push('device_attachments')
-    }
-    const include = listIncludedRelationships.join(',')
 
-    return this.axiosApi.get(this.basePath + '/' + id, {
-      params: {
-        include
+    const rawResponse = await this.axiosApi.get(
+      this.basePath + '/' + id,
+      {
+        params: {
+          include
+        }
       }
-    }).then((rawResponse) => {
-      const rawData = rawResponse.data
-      return deviceWithMetaToDeviceThrowingNoErrorOnMissing(
-        this.serializer.convertJsonApiObjectToModel(rawData))
-    })
+    )
+    const rawData = rawResponse.data
+    return deviceWithMetaToDeviceThrowingNoErrorOnMissing(
+      this.serializer.convertJsonApiObjectToModel(rawData)
+    )
   }
 
   deleteById (id: string): Promise<void> {

@@ -40,6 +40,7 @@ permissions and limitations under the Licence.
       <v-card-actions>
         <v-spacer />
         <SaveAndCancelButtons
+          :disabled="!canModifyEntity(platformToCopy)"
           :to="'/platforms'"
           save-btn-text="Copy"
           @save="save"
@@ -107,6 +108,7 @@ permissions and limitations under the Licence.
       <v-card-actions>
         <v-spacer />
         <SaveAndCancelButtons
+          :disabled="!canModifyEntity(platformToCopy)"
           :to="'/platforms'"
           save-btn-text="Copy"
           @save="save"
@@ -118,8 +120,11 @@ permissions and limitations under the Licence.
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
+import { mapActions, mapGetters, mapState } from 'vuex'
 
-import { mapActions, mapState } from 'vuex'
+import { CanAccessEntityGetter, CanModifyEntityGetter, UserGroupsGetter } from '@/store/permissions'
+import { PlatformsState, LoadPlatformAction, CopyPlatformAction } from '@/store/platforms'
+
 import { Platform } from '@/models/Platform'
 
 import PlatformBasicDataForm from '@/components/PlatformBasicDataForm.vue'
@@ -133,7 +138,10 @@ import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButto
     ProgressIndicator
   },
   middleware: ['auth'],
-  computed: mapState('platforms', ['platform']),
+  computed: {
+    ...mapGetters('permissions', ['canAccessEntity', 'canModifyEntity', 'userGroups']),
+    ...mapState('platforms', ['platform'])
+  },
   methods: {
     ...mapActions('platforms', ['loadPlatform', 'copyPlatform']),
     ...mapActions('appbar', ['setDefaults', 'initPlatformCopyAppBar'])
@@ -153,26 +161,38 @@ export default class PlatformCopyPage extends Vue {
   private inventoryNumberPlaceholder: string | null = null
 
   // vuex definition for typescript check
-  platform!: Platform
+  platform!: PlatformsState['platform']
+  loadPlatform!: LoadPlatformAction
+  copyPlatform!: CopyPlatformAction
   initPlatformCopyAppBar!: (id: string) => void
   setDefaults!: () => void
-  loadPlatform!: ({ platformId, includeContacts, includePlatformAttachments }: {platformId: string, includeContacts: boolean, includePlatformAttachments: boolean}) => void
-  copyPlatform!: ({ platform, copyContacts, copyAttachments }: {platform: Platform, copyContacts: boolean, copyAttachments: boolean}) => string
+  canAccessEntity!: CanAccessEntityGetter
+  canModifyEntity!: CanModifyEntityGetter
+  userGroups!: UserGroupsGetter
 
-  async created () {
+  created () {
     this.initPlatformCopyAppBar(this.platformId)
-    // We also load the contacts and the measured quantities as those
-    // are the ones that we will also copy.
+  }
+
+  async fetch (): Promise<void> {
     try {
       this.isLoading = true
-
       await this.loadPlatform({
         platformId: this.platformId,
         includeContacts: true,
         includePlatformAttachments: true
       })
 
-      this.platformToCopy = this.getPreparedPlatformForCopy()
+      if (!this.platform || !this.canAccessEntity(this.platform)) {
+        this.$router.replace('/platforms/')
+        this.$store.commit('snackbar/setError', 'You\'re not allowed to copy this platform.')
+        return
+      }
+
+      const platformCopy = this.getPreparedPlatformForCopy()
+      if (platformCopy) {
+        this.platformToCopy = platformCopy
+      }
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Loading platform failed')
     } finally {
@@ -192,7 +212,10 @@ export default class PlatformCopyPage extends Vue {
     return this.isLoading || this.isSaving
   }
 
-  getPreparedPlatformForCopy (): Platform {
+  getPreparedPlatformForCopy (): Platform | null {
+    if (!this.platform) {
+      return null
+    }
     const platformToEdit = Platform.createFromObject(this.platform)
     // Unset the fields that are very device specific
     // (we need other PIDs, serial numbers and inventory numbers)
@@ -214,6 +237,7 @@ export default class PlatformCopyPage extends Vue {
       this.inventoryNumberPlaceholder = platformToEdit.inventoryNumber
     }
     platformToEdit.inventoryNumber = ''
+    platformToEdit.permissionGroups = this.userGroups.filter(userGroup => this.platform?.permissionGroups.filter(group => userGroup.equals(group)).length)
     return platformToEdit
   }
 

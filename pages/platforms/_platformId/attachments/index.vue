@@ -42,6 +42,7 @@ permissions and limitations under the Licence.
     >
       <v-spacer />
       <v-btn
+        v-if="editable"
         color="primary"
         small
         :to="'/platforms/' + platformId + '/attachments/new'"
@@ -63,7 +64,7 @@ permissions and limitations under the Licence.
         >
           <template #dot-menu-items>
             <DotMenuActionDelete
-              :readonly="!$auth.loggedIn"
+              :readonly="!editable"
               @click="initDeleteDialog(item)"
             />
           </template>
@@ -75,7 +76,7 @@ permissions and limitations under the Licence.
     >
       <v-spacer />
       <v-btn
-        v-if="$auth.loggedIn"
+        v-if="editable"
         color="primary"
         small
       >
@@ -92,8 +93,10 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
+import { Component, Vue, InjectReactive } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
+
+import { PlatformsState, LoadPlatformAttachmentsAction, DeletePlatformAttachmentAction } from '@/store/platforms'
 
 import { Attachment } from '@/models/Attachment'
 
@@ -110,13 +113,17 @@ import PlatformsAttachmentDeleteDialog from '@/components/platforms/PlatformsAtt
   methods: mapActions('platforms', ['loadPlatformAttachments', 'deletePlatformAttachment'])
 })
 export default class PlatformAttachmentShowPage extends Vue {
+  @InjectReactive()
+    editable!: boolean
+
   private isSaving = false
   private showDeleteDialog = false
   private attachmentToDelete: Attachment|null = null
 
   // vuex definition for typescript check
-  loadPlatformAttachments!: (id: string) => void
-  deletePlatformAttachment!: (attachmentId: string) => Promise<void>
+  platformAttachments!: PlatformsState['platformAttachments']
+  loadPlatformAttachments!: LoadPlatformAttachmentsAction
+  deletePlatformAttachment!: DeletePlatformAttachmentAction
 
   get platformId (): string {
     return this.$route.params.platformId

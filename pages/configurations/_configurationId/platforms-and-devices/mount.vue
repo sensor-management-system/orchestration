@@ -363,11 +363,14 @@ import { mapActions, mapGetters, mapState } from 'vuex'
 
 import { DateTime } from 'luxon'
 
-import { Device } from '@/models/Device'
-import { Platform } from '@/models/Platform'
-import { DeviceMountAction } from '@/models/DeviceMountAction'
-import { PlatformMountAction } from '@/models/PlatformMountAction'
+import { DevicesState, SearchDevicesAction } from '@/store/devices'
+import { PlatformsState, SearchPlatformsAction } from '@/store/platforms'
+
 import { Configuration } from '@/models/Configuration'
+import { Device } from '@/models/Device'
+import { DeviceMountAction } from '@/models/DeviceMountAction'
+import { Platform } from '@/models/Platform'
+import { PlatformMountAction } from '@/models/PlatformMountAction'
 
 import { PlatformNode } from '@/viewmodels/PlatformNode'
 import { ConfigurationsTreeNode } from '@/viewmodels/ConfigurationsTreeNode'
@@ -420,10 +423,12 @@ export default class ConfigurationMountPlatformsAndDevicesPage extends Vue {
   private deviceToMount: {device: Device, mountInfo: {}}|null = null
 
   // vuex definition for typescript check
+  devices!: DevicesState['devices']
+  platforms!: PlatformsState['platforms']
   loadAllContacts!: () => void
   configuration!: Configuration
-  searchDevices!: (searchText: string) => void
-  searchPlatforms!: (searchText: string) => void
+  searchDevices!: SearchDevicesAction
+  searchPlatforms!: SearchPlatformsAction
   addDeviceMountAction!: ({
     configurationId,
     deviceMountAction

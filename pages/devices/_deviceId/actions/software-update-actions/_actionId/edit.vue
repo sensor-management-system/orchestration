@@ -44,6 +44,7 @@ permissions and limitations under the Licence.
     <v-card-actions>
       <v-spacer />
       <SaveAndCancelButtons
+        v-if="editable"
         save-btn-text="Apply"
         :to="'/devices/' + deviceId + '/actions'"
         @save="save"
@@ -59,6 +60,7 @@ permissions and limitations under the Licence.
     <v-card-actions>
       <v-spacer />
       <SaveAndCancelButtons
+        v-if="editable"
         save-btn-text="Apply"
         :to="'/devices/' + deviceId + '/actions'"
         @save="save"
@@ -68,14 +70,23 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
-
+import { Component, Vue, InjectReactive } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
+
+import {
+  LoadDeviceSoftwareUpdateActionAction,
+  LoadAllDeviceActionsAction,
+  LoadDeviceAttachmentsAction,
+  UpdateDeviceSoftwareUpdateAction,
+  DevicesState
+} from '@/store/devices'
+
+import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
+
 import SoftwareUpdateActionForm from '@/components/actions/SoftwareUpdateActionForm.vue'
 import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
-import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
 @Component({
   components: {
     ProgressIndicator,
@@ -88,27 +99,39 @@ import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
   methods: mapActions('devices', ['loadDeviceSoftwareUpdateAction', 'loadAllDeviceActions', 'loadDeviceAttachments', 'updateDeviceSoftwareUpdateAction'])
 })
 export default class DeviceSoftwareUpdateActionEditPage extends Vue {
+  @InjectReactive()
+    editable!: boolean
+
   private action: SoftwareUpdateAction = new SoftwareUpdateAction()
   private isSaving = false
   private isLoading = false
 
   // vuex definition for typescript check
-  loadDeviceSoftwareUpdateAction!: (actionId: string) => void
-  loadDeviceAttachments!: (id: string) => void
-  deviceSoftwareUpdateAction!: SoftwareUpdateAction
-  updateDeviceSoftwareUpdateAction!: ({
-    deviceId,
-    softwareUpdateAction
-  }: { deviceId: string, softwareUpdateAction: SoftwareUpdateAction }) => Promise<SoftwareUpdateAction>
+  deviceSoftwareUpdateAction!: DevicesState['deviceSoftwareUpdateAction']
+  deviceAttachments!: DevicesState['deviceAttachments']
+  loadDeviceSoftwareUpdateAction!: LoadDeviceSoftwareUpdateActionAction
+  loadDeviceAttachments!: LoadDeviceAttachmentsAction
+  updateDeviceSoftwareUpdateAction!: UpdateDeviceSoftwareUpdateAction
+  loadAllDeviceActions!: LoadAllDeviceActionsAction
 
-  loadAllDeviceActions!: (id: string) => void
+  created () {
+    if (!this.editable) {
+      this.$router.replace('/devices/' + this.deviceId + '/actions', () => {
+        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this device.')
+      })
+    }
+  }
 
-  async created () {
+  async fetch (): Promise<void> {
     try {
       this.isLoading = true
-      await this.loadDeviceSoftwareUpdateAction(this.actionId)
-      await this.loadDeviceAttachments(this.deviceId)
-      this.action = SoftwareUpdateAction.createFromObject(this.deviceSoftwareUpdateAction)
+      await Promise.all([
+        this.loadDeviceSoftwareUpdateAction(this.actionId),
+        this.loadDeviceAttachments(this.deviceId)
+      ])
+      if (this.deviceSoftwareUpdateAction) {
+        this.action = SoftwareUpdateAction.createFromObject(this.deviceSoftwareUpdateAction)
+      }
     } catch {
       this.$store.commit('snackbar/setError', 'Failed to fetch action')
     } finally {

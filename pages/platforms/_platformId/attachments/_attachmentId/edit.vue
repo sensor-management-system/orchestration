@@ -40,6 +40,7 @@ permissions and limitations under the Licence.
     <v-card-actions>
       <v-spacer />
       <SaveAndCancelButtons
+        v-if="editable"
         save-btn-text="Apply"
         :to="'/platforms/' + platformId + '/attachments'"
         @save="save"
@@ -96,15 +97,23 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, mixins } from 'nuxt-property-decorator'
-
+import { Component, mixins, InjectReactive } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
-import { AttachmentsMixin } from '@/mixins/AttachmentsMixin'
+
+import {
+  PlatformsState,
+  LoadPlatformAttachmentAction,
+  LoadPlatformAttachmentsAction,
+  UpdatePlatformAttachmentAction
+} from '@/store/platforms'
+
+import { Attachment } from '@/models/Attachment'
 
 import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
-import { Attachment } from '@/models/Attachment'
+import { AttachmentsMixin } from '@/mixins/AttachmentsMixin'
+
 /**
  * A class component that displays a single attached file
  * @extends Vue
@@ -117,21 +126,26 @@ import { Attachment } from '@/models/Attachment'
 })
 // @ts-ignore
 export default class AttachmentEditPage extends mixins(AttachmentsMixin) {
+  @InjectReactive()
+    editable!: boolean
+
   private isSaving = false
   private isLoading = false
   private valueCopy: Attachment = new Attachment()
 
   // vuex definition for typescript check
-  loadPlatformAttachment!: (id: string) => void
-  platformAttachment!: Attachment
-  updatePlatformAttachment!: ({ platformId, attachment }: {platformId: string, attachment: Attachment}) => Promise<void>
-  loadPlatformAttachments!: (id: string) => void
+  platformAttachment!: PlatformsState['platformAttachment']
+  loadPlatformAttachment!: LoadPlatformAttachmentAction
+  updatePlatformAttachment!: UpdatePlatformAttachmentAction
+  loadPlatformAttachments!: LoadPlatformAttachmentsAction
 
-  async created () {
+  async fetch () {
     try {
       this.isLoading = true
       await this.loadPlatformAttachment(this.attachmentId)
-      this.valueCopy = Attachment.createFromObject(this.platformAttachment)
+      if (this.platformAttachment) {
+        this.valueCopy = Attachment.createFromObject(this.platformAttachment)
+      }
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to load attachment')
     } finally {

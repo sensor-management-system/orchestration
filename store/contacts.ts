@@ -58,7 +58,7 @@ const state = () => ({
   configurationContacts: [],
   totalPages: 1,
   pageNumber: 1,
-  pageSize: PAGE_SIZES[0],
+  pageSize: PAGE_SIZES[0]
 })
 
 const getters = {

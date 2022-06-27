@@ -40,7 +40,7 @@ permissions and limitations under the Licence.
     <v-card-actions>
       <v-spacer />
       <v-btn
-        v-if="$auth.loggedIn"
+        v-if="editable"
         color="primary"
         small
         nuxt
@@ -56,6 +56,7 @@ permissions and limitations under the Licence.
             :path="'/platforms/copy/' + platformId"
           />
           <DotMenuActionDelete
+            :readonly="!deletable"
             @click="initDeleteDialog"
           />
         </template>
@@ -68,7 +69,7 @@ permissions and limitations under the Licence.
     <v-card-actions>
       <v-spacer />
       <v-btn
-        v-if="$auth.loggedIn"
+        v-if="editable"
         color="primary"
         small
         nuxt
@@ -84,6 +85,7 @@ permissions and limitations under the Licence.
             :path="'/platforms/copy/' + platformId"
           />
           <DotMenuActionDelete
+            :readonly="!deletable"
             @click="initDeleteDialog"
           />
         </template>
@@ -100,16 +102,17 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
-
+import { Component, Vue, InjectReactive } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
+
+import { PlatformsState, DeletePlatformAction } from '@/store/platforms'
+
 import PlatformBasicData from '@/components/PlatformBasicData.vue'
 import DotMenu from '@/components/DotMenu.vue'
 import DotMenuActionCopy from '@/components/DotMenuActionCopy.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 import PlatformDeleteDialog from '@/components/platforms/PlatformDeleteDialog.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
-import { Platform } from '@/models/Platform'
 
 @Component({
   components: {
@@ -120,17 +123,24 @@ import { Platform } from '@/models/Platform'
     DotMenu,
     PlatformBasicData
   },
-  computed: mapState('platforms', ['platform']),
+  computed: {
+    ...mapState('platforms', ['platform'])
+  },
   methods: mapActions('platforms', ['deletePlatform'])
 })
 export default class PlatformShowBasicPage extends Vue {
-  private isSaving = false
+  @InjectReactive()
+    editable!: boolean
 
+  @InjectReactive()
+    deletable!: boolean
+
+  private isSaving = false
   private showDeleteDialog: boolean = false
 
   // vuex definition for typescript check
-  platform!: Platform
-  deletePlatform!: (id: string) => void
+  platform!: PlatformsState['platform']
+  deletePlatform!: DeletePlatformAction
 
   get platformId () {
     return this.$route.params.platformId

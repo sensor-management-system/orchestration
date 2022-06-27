@@ -42,8 +42,10 @@ import { StaticLocationBeginAction } from '@/models/StaticLocationBeginAction'
 import { StaticLocationEndAction } from '@/models/StaticLocationEndAction'
 import { DynamicLocationBeginAction } from '@/models/DynamicLocationBeginAction'
 import { DynamicLocationEndAction } from '@/models/DynamicLocationEndAction'
+import { PermissionGroup, IPermissionGroup, IPermissionableSingleGroup } from '@/models/PermissionGroup'
+import { Visibility, IVisible } from '@/models/Visibility'
 
-export interface IConfiguration extends IMountActions {
+export interface IConfiguration extends IMountActions, IPermissionableSingleGroup {
   id: string
   startDate: DateTime | null
   endDate: DateTime | null
@@ -57,9 +59,21 @@ export interface IConfiguration extends IMountActions {
   staticLocationEndActions: StaticLocationEndAction[]
   dynamicLocationBeginActions: DynamicLocationBeginAction[]
   dynamicLocationEndActions: DynamicLocationEndAction[]
+  createdAt: DateTime | null
+  updatedAt: DateTime | null
+  createdBy: IContact | null
+  updatedBy: IContact | null
+  /*
+    You may wonder why there is an extra createdByUserId entry here.
+    The reason is that we use the createBy & updatedBy to show
+    information about the contact that are responsible for the changes.
+    Here we refer to the user object (which can have different ids).
+  */
+  createdByUserId: string | null
+  visibility: Visibility
 }
 
-export class Configuration implements IConfiguration {
+export class Configuration implements IConfiguration, IVisible {
   private _id: string = ''
   private _startDate: DateTime | null = null
   private _endDate: DateTime | null = null
@@ -77,6 +91,13 @@ export class Configuration implements IConfiguration {
   private _staticLocationEndActions: StaticLocationEndAction[] = []
   private _dynamicLocationBeginActions: DynamicLocationBeginAction[] = []
   private _dynamicLocationEndActions: DynamicLocationEndAction[] = []
+  private _permissionGroup: IPermissionGroup | null = null
+  private _createdAt: DateTime | null = null
+  private _updatedAt: DateTime | null = null
+  private _createdBy: IContact | null = null
+  private _updatedBy: IContact | null = null
+  private _createdByUserId: string | null = null
+  private _visibility: Visibility = Visibility.Internal
 
   get id (): string {
     return this._id
@@ -214,6 +235,70 @@ export class Configuration implements IConfiguration {
     this._dynamicLocationEndActions = newActions
   }
 
+  get permissionGroup (): IPermissionGroup | null {
+    return this._permissionGroup
+  }
+
+  set permissionGroup (permissionGroup: IPermissionGroup | null) {
+    this._permissionGroup = permissionGroup
+  }
+
+  get createdAt (): DateTime | null {
+    return this._createdAt
+  }
+
+  set createdAt (newCreatedAt: DateTime | null) {
+    this._createdAt = newCreatedAt
+  }
+
+  get updatedAt (): DateTime | null {
+    return this._updatedAt
+  }
+
+  set updatedAt (newUpdatedAt: DateTime | null) {
+    this._updatedAt = newUpdatedAt
+  }
+
+  get createdBy (): IContact | null {
+    return this._createdBy
+  }
+
+  set createdBy (user: IContact | null) {
+    this._createdBy = user
+  }
+
+  get updatedBy (): IContact | null {
+    return this._updatedBy
+  }
+
+  set updatedBy (user: IContact | null) {
+    this._updatedBy = user
+  }
+
+  get createdByUserId (): string | null {
+    return this._createdByUserId
+  }
+
+  set createdByUserId (newId: string | null) {
+    this._createdByUserId = newId
+  }
+
+  get visibility (): Visibility {
+    return this._visibility
+  }
+
+  set visibility (visibility: Visibility) {
+    this._visibility = visibility
+  }
+
+  get isInternal (): boolean {
+    return this._visibility === Visibility.Internal
+  }
+
+  get isPublic (): boolean {
+    return this._visibility === Visibility.Public
+  }
+
   static createFromObject (someObject: IConfiguration): Configuration {
     const newObject = new Configuration()
 
@@ -245,6 +330,16 @@ export class Configuration implements IConfiguration {
     newObject.staticLocationEndActions = someObject.staticLocationEndActions.map(StaticLocationEndAction.createFromObject)
     newObject.dynamicLocationBeginActions = someObject.dynamicLocationBeginActions.map(DynamicLocationBeginAction.createFromObject)
     newObject.dynamicLocationEndActions = someObject.dynamicLocationEndActions.map(DynamicLocationEndAction.createFromObject)
+
+    newObject.permissionGroup = someObject.permissionGroup ? PermissionGroup.createFromObject(someObject.permissionGroup) : null
+
+    newObject.createdAt = someObject.createdAt
+    newObject.updatedAt = someObject.updatedAt
+    newObject.createdBy = someObject.createdBy ? Contact.createFromObject(someObject.createdBy) : null
+    newObject.updatedBy = someObject.updatedBy ? Contact.createFromObject(someObject.updatedBy) : null
+    newObject.createdByUserId = someObject.createdByUserId
+
+    newObject.visibility = someObject.visibility
 
     return newObject
   }

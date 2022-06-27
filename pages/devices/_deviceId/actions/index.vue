@@ -38,7 +38,7 @@ permissions and limitations under the Licence.
     <v-card-actions>
       <v-spacer />
       <v-btn
-        v-if="$auth.loggedIn"
+        v-if="editable"
         color="primary"
         small
         :to="'/devices/' + deviceId + '/actions/new'"
@@ -59,7 +59,7 @@ permissions and limitations under the Licence.
         >
           <template #actions>
             <v-btn
-              v-if="$auth.loggedIn"
+              v-if="editable"
               :to="'/devices/' + deviceId + '/actions/generic-device-actions/' + action.id + '/edit'"
               color="primary"
               text
@@ -70,7 +70,7 @@ permissions and limitations under the Licence.
           </template>
           <template #dot-menu-items>
             <DotMenuActionDelete
-              :readonly="!$auth.loggedIn"
+              :readonly="!editable"
               @click="initDeleteDialogGenericAction(action)"
             />
           </template>
@@ -83,7 +83,7 @@ permissions and limitations under the Licence.
         >
           <template #actions>
             <v-btn
-              v-if="$auth.loggedIn"
+              v-if="editable"
               :to="'/devices/' + deviceId + '/actions/software-update-actions/' + action.id + '/edit'"
               color="primary"
               text
@@ -94,7 +94,7 @@ permissions and limitations under the Licence.
           </template>
           <template #dot-menu-items>
             <DotMenuActionDelete
-              :readonly="!$auth.loggedIn"
+              :readonly="!editable"
               @click="initDeleteDialogSoftwareUpdateAction(action)"
             />
           </template>
@@ -106,7 +106,7 @@ permissions and limitations under the Licence.
         >
           <template #actions>
             <v-btn
-              v-if="$auth.loggedIn"
+              v-if="editable"
               :to="'/devices/' + deviceId + '/actions/device-calibration-actions/' + action.id + '/edit'"
               color="primary"
               text
@@ -117,7 +117,7 @@ permissions and limitations under the Licence.
           </template>
           <template #dot-menu-items>
             <DotMenuActionDelete
-              :readonly="!$auth.loggedIn"
+              :readonly="!editable"
               @click="initDeleteDialogCalibrationAction(action)"
             />
           </template>
@@ -144,15 +144,21 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
+import { Component, Vue, InjectReactive } from 'nuxt-property-decorator'
 import { mapActions, mapGetters } from 'vuex'
+
+import {
+  ActionsGetter,
+  DeleteDeviceSoftwareUpdateAction,
+  DeleteDeviceGenericAction,
+  DeleteDeviceCalibrationAction,
+  LoadAllDeviceActionsAction
+} from '@/store/devices'
 
 import { GenericAction } from '@/models/GenericAction'
 import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
 import { DeviceCalibrationAction } from '@/models/DeviceCalibrationAction'
 
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
-import SoftwareUpdateActionCard from '@/components/actions/SoftwareUpdateActionCard.vue'
 import HintCard from '@/components/HintCard.vue'
 import DeviceActionTimeline from '@/components/actions/DeviceActionTimeline.vue'
 import GenericActionCard from '@/components/actions/GenericActionCard.vue'
@@ -161,6 +167,8 @@ import DeviceMountActionCard from '@/components/actions/DeviceMountActionCard.vu
 import DeviceUnmountActionCard from '@/components/actions/DeviceUnmountActionCard.vue'
 import DeviceCalibrationActionCard from '@/components/actions/DeviceCalibrationActionCard.vue'
 import ActionDeleteDialog from '@/components/actions/ActionDeleteDialog.vue'
+import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import SoftwareUpdateActionCard from '@/components/actions/SoftwareUpdateActionCard.vue'
 
 @Component({
   components: {
@@ -179,6 +187,9 @@ import ActionDeleteDialog from '@/components/actions/ActionDeleteDialog.vue'
   methods: mapActions('devices', ['deleteDeviceSoftwareUpdateAction', 'deleteDeviceGenericAction', 'deleteDeviceCalibrationAction', 'loadAllDeviceActions'])
 })
 export default class DeviceActionsShowPage extends Vue {
+  @InjectReactive()
+    editable!: boolean
+
   private isSaving: boolean = false
   private genericActionToDelete: GenericAction | null = null
   private softwareUpdateActionToDelete: SoftwareUpdateAction | null = null
@@ -186,10 +197,11 @@ export default class DeviceActionsShowPage extends Vue {
   private showDeleteDialog: boolean = false
 
   // vuex definition for typescript check
-  deleteDeviceGenericAction!: (genericDeviceActionId: string) => Promise<void>
-  loadAllDeviceActions!: (id: string) => void
-  deleteDeviceSoftwareUpdateAction!: (softwareUpdateActionId: string) => Promise<void>
-  deleteDeviceCalibrationAction!: (calibrationDeviceActionId: string) => Promise<void>
+  actions!: ActionsGetter
+  deleteDeviceGenericAction!: DeleteDeviceGenericAction
+  loadAllDeviceActions!: LoadAllDeviceActionsAction
+  deleteDeviceSoftwareUpdateAction!: DeleteDeviceSoftwareUpdateAction
+  deleteDeviceCalibrationAction!: DeleteDeviceCalibrationAction
 
   get deviceId (): string {
     return this.$route.params.deviceId

@@ -40,6 +40,9 @@ permissions and limitations under the Licence.
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 import { mapActions } from 'vuex'
+
+import { LoadAllDeviceActionsAction } from '@/store/devices'
+
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
 @Component({
@@ -50,7 +53,7 @@ export default class DeviceActionsPage extends Vue {
   private isLoading = false
 
   // vuex definition for typescript check
-  loadAllDeviceActions!: (id: string) => void
+  loadAllDeviceActions!: LoadAllDeviceActionsAction
 
   async created () {
     try {

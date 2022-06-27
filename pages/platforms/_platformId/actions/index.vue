@@ -38,7 +38,7 @@ permissions and limitations under the Licence.
     <v-card-actions>
       <v-spacer />
       <v-btn
-        v-if="$auth.loggedIn"
+        v-if="editable"
         color="primary"
         small
         :to="'/platforms/' + platformId + '/actions/new'"
@@ -59,7 +59,7 @@ permissions and limitations under the Licence.
         >
           <template #actions>
             <v-btn
-              v-if="$auth.loggedIn"
+              v-if="editable"
               :to="'/platforms/' + platformId + '/actions/generic-platform-actions/' + action.id + '/edit'"
               color="primary"
               text
@@ -70,7 +70,7 @@ permissions and limitations under the Licence.
           </template>
           <template #dot-menu-items>
             <DotMenuActionDelete
-              :readonly="!$auth.loggedIn"
+              :readonly="!editable"
               @click="initDeleteDialogGenericAction(action)"
             />
           </template>
@@ -84,7 +84,7 @@ permissions and limitations under the Licence.
         >
           <template #actions>
             <v-btn
-              v-if="$auth.loggedIn"
+              v-if="editable"
               :to="'/platforms/' + platformId + '/actions/software-update-actions/' + action.id + '/edit'"
               color="primary"
               text
@@ -95,7 +95,7 @@ permissions and limitations under the Licence.
           </template>
           <template #dot-menu-items>
             <DotMenuActionDelete
-              :readonly="!$auth.loggedIn"
+              :readonly="!editable"
               @click="initDeleteDialogSoftwareUpdateAction(action)"
             />
           </template>
@@ -124,8 +124,15 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
+import { Component, Vue, InjectReactive } from 'nuxt-property-decorator'
 import { mapActions, mapGetters } from 'vuex'
+
+import {
+  ActionsGetter,
+  LoadAllPlatformActionsAction,
+  DeletePlatformSoftwareUpdateActionAction,
+  DeletePlatformGenericActionAction
+} from '@/store/platforms'
 
 import { GenericAction } from '@/models/GenericAction'
 import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
@@ -156,15 +163,19 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
   methods: mapActions('platforms', ['loadAllPlatformActions', 'deletePlatformSoftwareUpdateAction', 'deletePlatformGenericAction'])
 })
 export default class PlatformActionsShowPage extends Vue {
+  @InjectReactive()
+    editable!: boolean
+
   private isSaving: boolean = false
   private genericActionToDelete: GenericAction | null = null
   private softwareUpdateActionToDelete: SoftwareUpdateAction | null = null
   private showDeleteDialog: boolean = false
 
   // vuex definition for typescript check
-  loadAllPlatformActions!: (id: string) => void
-  deletePlatformGenericAction!: (genericPlatformActionId: string) => Promise<void>
-  deletePlatformSoftwareUpdateAction!: (softwareUpdateActionId: string) => Promise<void>
+  actions!: ActionsGetter
+  loadAllPlatformActions!: LoadAllPlatformActionsAction
+  deletePlatformGenericAction!: DeletePlatformGenericActionAction
+  deletePlatformSoftwareUpdateAction!: DeletePlatformSoftwareUpdateActionAction
 
   get platformId (): string {
     return this.$route.params.platformId

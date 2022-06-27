@@ -69,9 +69,17 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
-
+import { Component, Vue, InjectReactive } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
+
+import {
+  PlatformsState,
+  LoadPlatformSoftwareUpdateActionAction,
+  LoadAllPlatformActionsAction,
+  LoadPlatformAttachmentsAction,
+  UpdatePlatformSoftwareUpdateActionAction
+} from '@/store/platforms'
+
 import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
 
 import SoftwareUpdateActionForm from '@/components/actions/SoftwareUpdateActionForm.vue'
@@ -90,23 +98,39 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
   methods: mapActions('platforms', ['loadPlatformSoftwareUpdateAction', 'loadAllPlatformActions', 'loadPlatformAttachments', 'updatePlatformSoftwareUpdateAction'])
 })
 export default class PlatformSoftwareUpdateActionEditPage extends Vue {
+  @InjectReactive()
+    editable!: boolean
+
   private action: SoftwareUpdateAction = new SoftwareUpdateAction()
   private isSaving = false
   private isLoading = false
 
   // vuex definition for typescript check
-  loadPlatformSoftwareUpdateAction!: (actionId: string) => void
-  loadPlatformAttachments!: (id: string) => void
-  platformSoftwareUpdateAction!: SoftwareUpdateAction
-  updatePlatformSoftwareUpdateAction!: ({ platformId, softwareUpdateAction }: {platformId: string, softwareUpdateAction: SoftwareUpdateAction}) => Promise<SoftwareUpdateAction>
-  loadAllPlatformActions!: (id: string) => void
+  platformSoftwareUpdateAction!: PlatformsState['platformSoftwareUpdateAction']
+  platformAttachments!: PlatformsState['platformAttachments']
+  loadPlatformSoftwareUpdateAction!: LoadPlatformSoftwareUpdateActionAction
+  loadPlatformAttachments!: LoadPlatformAttachmentsAction
+  updatePlatformSoftwareUpdateAction!: UpdatePlatformSoftwareUpdateActionAction
+  loadAllPlatformActions!: LoadAllPlatformActionsAction
 
-  async created () {
+  created () {
+    if (!this.editable) {
+      this.$router.replace('/platforms/' + this.platformId + '/actions', () => {
+        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this platform.')
+      })
+    }
+  }
+
+  async fetch (): Promise<void> {
     try {
       this.isLoading = true
-      await this.loadPlatformSoftwareUpdateAction(this.actionId)
-      await this.loadPlatformAttachments(this.platformId)
-      this.action = SoftwareUpdateAction.createFromObject(this.platformSoftwareUpdateAction)
+      await Promise.all([
+        this.loadPlatformSoftwareUpdateAction(this.actionId),
+        this.loadPlatformAttachments(this.platformId)
+      ])
+      if (this.platformSoftwareUpdateAction) {
+        this.action = SoftwareUpdateAction.createFromObject(this.platformSoftwareUpdateAction)
+      }
     } catch (error) {
       this.$store.commit('snackbar/setError', 'Failed to fetch action')
     } finally {

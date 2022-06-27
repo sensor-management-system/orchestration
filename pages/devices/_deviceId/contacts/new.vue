@@ -55,7 +55,7 @@ permissions and limitations under the Licence.
         align-self="center"
       >
         <v-btn
-          v-if="$auth.loggedIn"
+          v-if="editable"
           small
           color="primary"
           :disabled="selectedContact == null"
@@ -87,12 +87,14 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
-
+import { Component, InjectReactive, Vue } from 'nuxt-property-decorator'
 import { mapActions, mapGetters, mapState } from 'vuex'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+
+import { LoadDeviceContactsAction, AddDeviceContactAction, DevicesState } from '@/store/devices'
 
 import { Contact } from '@/models/Contact'
+
+import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
 @Component({
   components: {
@@ -109,25 +111,35 @@ import { Contact } from '@/models/Contact'
   }
 })
 export default class DeviceAssignContactPage extends Vue {
+  @InjectReactive()
+    editable!: boolean
+
   private selectedContact: Contact | null = null
   private isLoading: boolean = false
   private isSaving: boolean = false
 
   // vuex definition for typescript check
-  loadDeviceContacts!: (id: string) => void
+  deviceContacts!: DevicesState['deviceContacts']
+  loadDeviceContacts!: LoadDeviceContactsAction
+  addDeviceContact!: AddDeviceContactAction
   loadAllContacts!: () => void
   contactsByDifference!: (contactsToSubtract: Contact[]) => Contact[]
-  deviceContacts!: Contact[]
-  addDeviceContact!: ({
-    deviceId,
-    contactId
-  }: { deviceId: string, contactId: string }) => Promise<void>
 
-  async created () {
+  created () {
+    if (!this.editable) {
+      this.$router.replace('/devices/' + this.deviceId + '/contacts', () => {
+        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this device.')
+      })
+    }
+  }
+
+  async fetch (): Promise<void> {
     try {
       this.isLoading = true
-      await this.loadAllContacts()
-      await this.loadDeviceContacts(this.deviceId)
+      await Promise.all([
+        this.loadAllContacts(),
+        this.loadDeviceContacts(this.deviceId)
+      ])
 
       const redirectContactId = this.$route.query.contact
       if (redirectContactId) {

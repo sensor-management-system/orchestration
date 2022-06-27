@@ -50,13 +50,20 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
-
+import { Component, Vue, InjectReactive } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
-import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
+
+import {
+  DevicesState,
+  LoadDeviceCustomFieldAction,
+  LoadDeviceCustomFieldsAction,
+  UpdateDeviceCustomFieldAction
+} from '@/store/devices'
 
 import { CustomTextField } from '@/models/CustomTextField'
+
+import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
 import CustomFieldForm from '@/components/CustomFieldForm.vue'
 
 @Component({
@@ -70,26 +77,35 @@ import CustomFieldForm from '@/components/CustomFieldForm.vue'
   methods: mapActions('devices', ['loadDeviceCustomField', 'loadDeviceCustomFields', 'updateDeviceCustomField'])
 })
 export default class DeviceCustomFieldsShowPage extends Vue {
+  @InjectReactive()
+    editable!: boolean
+
   private isSaving = false
   private isLoading = false
 
   private valueCopy: CustomTextField = new CustomTextField()
 
   // vuex definition for typescript check
-  loadDeviceCustomField!: (id: string) => void
-  deviceCustomField!: CustomTextField
-  updateDeviceCustomField!: ({
-    deviceId,
-    deviceCustomField
-  }: { deviceId: string, deviceCustomField: CustomTextField }) => Promise<void>
+  deviceCustomField!: DevicesState['deviceCustomField']
+  loadDeviceCustomField!: LoadDeviceCustomFieldAction
+  updateDeviceCustomField!: UpdateDeviceCustomFieldAction
+  loadDeviceCustomFields!: LoadDeviceCustomFieldsAction
 
-  loadDeviceCustomFields!: (id: string) => void
+  created () {
+    if (!this.editable) {
+      this.$router.replace('/devices/' + this.deviceId + '/customfields', () => {
+        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this device.')
+      })
+    }
+  }
 
-  async created () {
+  async fetch (): Promise<void> {
     try {
       this.isLoading = true
       await this.loadDeviceCustomField(this.customFieldId)
-      this.valueCopy = CustomTextField.createFromObject(this.deviceCustomField)
+      if (this.deviceCustomField) {
+        this.valueCopy = CustomTextField.createFromObject(this.deviceCustomField)
+      }
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to load custom field')
     } finally {

@@ -31,6 +31,17 @@ permissions and limitations under the Licence.
 <template>
   <div>
     <v-row>
+      <v-col cols="12">
+        <label>Visibility / Permissions</label>
+        <VisibilityChip
+          v-model="value.visibility"
+        />
+        <PermissionGroupChips
+          v-model="value.permissionGroups"
+        />
+      </v-col>
+    </v-row>
+    <v-row>
       <v-col cols="12" md="6">
         <label>URN</label>
         {{ deviceURN }}
@@ -68,7 +79,7 @@ permissions and limitations under the Licence.
         {{ value.model | orDefault }}
       </v-col>
     </v-row>
-    <v-divider />
+    <v-divider class="my-4" />
     <v-row>
       <v-col cols="12" md="9">
         <label>Description</label>
@@ -88,7 +99,7 @@ permissions and limitations under the Licence.
         </a>
       </v-col>
     </v-row>
-    <v-divider />
+    <v-divider class="my-4" />
     <v-row>
       <v-col cols="12" md="3">
         <label>Serial number</label>
@@ -116,9 +127,17 @@ import { DeviceType } from '@/models/DeviceType'
 import { Status } from '@/models/Status'
 import { Manufacturer } from '@/models/Manufacturer'
 
+import VisibilityChip from '@/components/VisibilityChip.vue'
+import PermissionGroupChips from '@/components/PermissionGroupChips.vue'
+
 import { createDeviceUrn } from '@/modelUtils/urnBuilders'
 
-@Component
+@Component({
+  components: {
+    VisibilityChip,
+    PermissionGroupChips
+  }
+})
 export default class DeviceBasicData extends Vue {
   private states: Status[] = []
   private manufacturers: Manufacturer[] = []

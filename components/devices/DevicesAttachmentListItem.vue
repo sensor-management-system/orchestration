@@ -65,7 +65,8 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, mixins, Prop } from 'nuxt-property-decorator'
+import { Component, Prop, mixins } from 'nuxt-property-decorator'
+
 import { Attachment } from '@/models/Attachment'
 
 import BaseExpandableListItem from '@/components/shared/BaseExpandableListItem.vue'

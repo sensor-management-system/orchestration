@@ -34,11 +34,18 @@ permissions and limitations under the Licence.
     expandable-color="grey lighten-5"
   >
     <template #header>
-      <div :class="'text-caption' + (getType() === NO_TYPE ? ' text--disabled' : '')">
+      <div :class="'mr-1 text-caption' + (getType() === NO_TYPE ? ' text--disabled' : '')">
         {{ getType() }}
       </div>
       <status-chip
         :value="getStatus()"
+      />
+      <visibility-chip
+        v-model="platform.visibility"
+      />
+      <permission-group-chips
+        v-model="platform.permissionGroups"
+        collapsible
       />
     </template>
     <template #dot-menu-items>
@@ -222,16 +229,22 @@ permissions and limitations under the Licence.
 import { Component, Vue, Prop } from 'nuxt-property-decorator'
 import { mapGetters } from 'vuex'
 
+import { GetPlatformTypeByUriGetter, GetEquipmentstatusByUriGetter } from '@/store/vocabulary'
+
 import { Platform } from '@/models/Platform'
 import { PlatformType } from '@/models/PlatformType'
 import { Status } from '@/models/Status'
 
 import StatusChip from '@/components/shared/StatusChip.vue'
+import PermissionGroupChips from '@/components/PermissionGroupChips.vue'
+import VisibilityChip from '@/components/VisibilityChip.vue'
 import BaseExpandableListItem from '@/components/shared/BaseExpandableListItem.vue'
 
 @Component({
   components: {
     StatusChip,
+    PermissionGroupChips,
+    VisibilityChip,
     BaseExpandableListItem
   },
   computed: mapGetters('vocabulary', ['getPlatformTypeByUri', 'getEquipmentstatusByUri'])
@@ -246,8 +259,8 @@ export default class PlatformsListItem extends Vue {
   public readonly NO_TYPE: string = 'Unknown type'
 
   // vuex definition for typescript check
-  getPlatformTypeByUri!: (uri: string) => PlatformType | undefined
-  getEquipmentstatusByUri!: (uri: string) => Status | undefined
+  getPlatformTypeByUri!: GetPlatformTypeByUriGetter
+  getEquipmentstatusByUri!: GetEquipmentstatusByUriGetter
 
   getTextOrDefault = (text: string): string => text || '-'
 

@@ -45,6 +45,7 @@ permissions and limitations under the Licence.
     <v-card-actions>
       <v-spacer />
       <SaveAndCancelButtons
+        v-if="editable"
         save-btn-text="Apply"
         :to="'/devices/' + deviceId + '/actions'"
         @save="save"
@@ -61,6 +62,7 @@ permissions and limitations under the Licence.
     <v-card-actions>
       <v-spacer />
       <SaveAndCancelButtons
+        v-if="editable"
         save-btn-text="Apply"
         :to="'/devices/' + deviceId + '/actions'"
         @save="save"
@@ -70,14 +72,22 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
-
+import { Component, Vue, InjectReactive } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
+
+import {
+  LoadDeviceGenericActionAction,
+  LoadAllDeviceActionsAction,
+  LoadDeviceAttachmentsAction,
+  UpdateDeviceGenericAction,
+  DevicesState
+} from '@/store/devices'
+
+import { GenericAction } from '@/models/GenericAction'
+
 import GenericActionForm from '@/components/actions/GenericActionForm.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
-
-import { GenericAction } from '@/models/GenericAction'
 
 @Component({
   components: {
@@ -91,27 +101,39 @@ import { GenericAction } from '@/models/GenericAction'
   methods: mapActions('devices', ['loadDeviceGenericAction', 'loadAllDeviceActions', 'loadDeviceAttachments', 'updateDeviceGenericAction'])
 })
 export default class GenericDeviceActionEditPage extends Vue {
+  @InjectReactive()
+    editable!: boolean
+
   private action: GenericAction = new GenericAction()
   private isSaving = false
   private isLoading = false
 
   // vuex definition for typescript check
-  loadDeviceGenericAction!: (id: string) => void
-  loadDeviceAttachments!: (id: string) => void
-  deviceGenericAction!: GenericAction
-  updateDeviceGenericAction!: ({
-    deviceId,
-    genericDeviceAction
-  }: { deviceId: string, genericDeviceAction: GenericAction }) => Promise<GenericAction>
+  deviceGenericAction!: DevicesState['deviceGenericAction']
+  deviceAttachments!: DevicesState['deviceAttachments']
+  loadDeviceGenericAction!: LoadDeviceGenericActionAction
+  loadDeviceAttachments!: LoadDeviceAttachmentsAction
+  updateDeviceGenericAction!: UpdateDeviceGenericAction
+  loadAllDeviceActions!: LoadAllDeviceActionsAction
 
-  loadAllDeviceActions!: (id: string) => void
+  created () {
+    if (!this.editable) {
+      this.$router.replace('/devices/' + this.deviceId + '/actions', () => {
+        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this device.')
+      })
+    }
+  }
 
-  async created () {
+  async fetch (): Promise<void> {
     try {
       this.isLoading = true
-      await this.loadDeviceGenericAction(this.actionId)
-      await this.loadDeviceAttachments(this.deviceId)
-      this.action = GenericAction.createFromObject(this.deviceGenericAction)
+      await Promise.all([
+        this.loadDeviceGenericAction(this.actionId),
+        this.loadDeviceAttachments(this.deviceId)
+      ])
+      if (this.deviceGenericAction) {
+        this.action = GenericAction.createFromObject(this.deviceGenericAction)
+      }
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to fetch action')
     } finally {
@@ -140,7 +162,7 @@ export default class GenericDeviceActionEditPage extends Vue {
       this.isSaving = true
       await this.updateDeviceGenericAction({
         deviceId: this.deviceId,
-        genericDeviceAction: this.action
+        genericAction: this.action
       })
       this.loadAllDeviceActions(this.deviceId)
       this.$store.commit('snackbar/setSuccess', `${this.action.actionTypeName} updated`)

@@ -41,6 +41,9 @@ permissions and limitations under the Licence.
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 import { mapActions } from 'vuex'
+
+import { LoadPlatformAttachmentsAction } from '@/store/platforms'
+
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
 @Component({
@@ -51,9 +54,9 @@ export default class PlatformAttachmentsPage extends Vue {
   private isLoading = false
 
   // vuex definition for typescript check
-  loadPlatformAttachments!: (id: string) => void
+  loadPlatformAttachments!: LoadPlatformAttachmentsAction
 
-  async created () {
+  async fetch () {
     try {
       this.isLoading = true
       await this.loadPlatformAttachments(this.platformId)

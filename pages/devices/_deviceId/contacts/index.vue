@@ -37,7 +37,7 @@ permissions and limitations under the Licence.
     <v-card-actions>
       <v-spacer />
       <v-btn
-        v-if="$auth.loggedIn"
+        v-if="editable"
         color="primary"
         small
         nuxt
@@ -71,7 +71,7 @@ permissions and limitations under the Licence.
     >
       <v-spacer />
       <v-btn
-        v-if="$auth.loggedIn"
+        v-if="editable"
         color="primary"
         small
         nuxt
@@ -84,8 +84,10 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
+import { Component, Vue, InjectReactive } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
+
+import { DevicesState, LoadDeviceContactsAction, RemoveDeviceContactAction } from '@/store/devices'
 
 import HintCard from '@/components/HintCard.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
@@ -105,15 +107,15 @@ import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
   methods: mapActions('devices', ['loadDeviceContacts', 'removeDeviceContact'])
 })
 export default class DeviceShowContactPage extends Vue {
+  @InjectReactive()
+    editable!: boolean
+
   private isSaving = false
 
   // vuex definition for typescript check
-  removeDeviceContact!: ({
-    deviceId,
-    contactId
-  }: { deviceId: string, contactId: string }) => Promise<void>
-
-  loadDeviceContacts!: (id: string) => void
+  deviceContacts!: DevicesState['deviceContacts']
+  removeDeviceContact!: RemoveDeviceContactAction
+  loadDeviceContacts!: LoadDeviceContactsAction
 
   get deviceId (): string {
     return this.$route.params.deviceId

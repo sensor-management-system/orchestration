@@ -36,9 +36,15 @@ export interface IPermissionGroup {
   equals (group: IPermissionGroup): boolean
 }
 
-export interface IPermissionable {
+export interface IPermissionableSingleGroup {
+  permissionGroup: IPermissionGroup | null
+}
+
+export interface IPermissionableMultipleGroups {
   permissionGroups: IPermissionGroup[]
 }
+
+export type IPermissionable = IPermissionableSingleGroup | IPermissionableMultipleGroups
 
 export class PermissionGroup implements IPermissionGroup {
   private _id: string | null = null

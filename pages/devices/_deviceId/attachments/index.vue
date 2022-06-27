@@ -36,7 +36,7 @@ permissions and limitations under the Licence.
       dark
     />
     <v-card-actions
-      v-if="$auth.loggedIn"
+      v-if="editable"
     >
       <v-spacer />
       <v-btn
@@ -61,7 +61,7 @@ permissions and limitations under the Licence.
         >
           <template #dot-menu-items>
             <DotMenuActionDelete
-              :readonly="!$auth.loggedIn"
+              :readonly="!editable"
               @click="initDeleteDialog(item)"
             />
           </template>
@@ -73,7 +73,7 @@ permissions and limitations under the Licence.
     >
       <v-spacer />
       <v-btn
-        v-if="$auth.loggedIn"
+        v-if="editable"
         color="primary"
         small
         :to="'/devices/' + deviceId + '/attachments/new'"
@@ -91,8 +91,10 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
+import { Component, Vue, InjectReactive } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
+
+import { LoadDeviceAttachmentsAction, DeleteDeviceAttachmentAction, DevicesState } from '@/store/devices'
 
 import { Attachment } from '@/models/Attachment'
 
@@ -109,13 +111,17 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
   methods: mapActions('devices', ['loadDeviceAttachments', 'deleteDeviceAttachment'])
 })
 export default class DeviceAttachmentShowPage extends Vue {
+  @InjectReactive()
+    editable!: boolean
+
   private isSaving = false
   private showDeleteDialog = false
-  private attachmentToDelete: Attachment|null = null
+  private attachmentToDelete: Attachment | null = null
 
   // vuex definition for typescript check
-  deleteDeviceAttachment!: (attachmentId: string) => Promise<void>
-  loadDeviceAttachments!: (id: string) => void
+  deviceAttachments!: DevicesState['deviceAttachments']
+  deleteDeviceAttachment!: DeleteDeviceAttachmentAction
+  loadDeviceAttachments!: LoadDeviceAttachmentsAction
 
   get deviceId (): string {
     return this.$route.params.deviceId

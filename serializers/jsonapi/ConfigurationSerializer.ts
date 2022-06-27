@@ -40,8 +40,7 @@ import {
   IJsonApiEntityEnvelope,
   IJsonApiEntityWithOptionalId,
   IJsonApiEntityWithoutDetails,
-  IJsonApiEntityWithOptionalAttributes,
-  IJsonApiRelationships
+  IJsonApiEntityWithOptionalAttributes
 } from '@/serializers/jsonapi/JsonApiTypes'
 
 import { ContactSerializer, IMissingContactData } from '@/serializers/jsonapi/ContactSerializer'
@@ -56,11 +55,14 @@ import { StaticLocationBeginActionSerializer } from '@/serializers/jsonapi/Stati
 import { StaticLocationEndActionSerializer } from '@/serializers/jsonapi/StaticLocationEndActionSerializer'
 import { DynamicLocationBeginActionSerializer } from '@/serializers/jsonapi/DynamicLocationBeginActionSerializer'
 import { DynamicLocationEndActionSerializer } from '@/serializers/jsonapi/DynamicLocationEndActionSerializer'
+import { PermissionGroupSerializer } from '@/serializers/jsonapi/PermissionGroupSerializer'
 
 import { DynamicLocation, StationaryLocation, LocationType } from '@/models/Location'
 import { Platform } from '@/models/Platform'
 import { Device } from '@/models/Device'
 import { DeviceProperty } from '@/models/DeviceProperty'
+import { PermissionGroup } from '@/models/PermissionGroup'
+import { Visibility } from '@/models/Visibility'
 
 export interface IConfigurationMissingData {
   contacts: IMissingContactData
@@ -84,6 +86,17 @@ export class ConfigurationSerializer {
   private staticLocationEndActionSerializer: StaticLocationEndActionSerializer = new StaticLocationEndActionSerializer()
   private dynamicLocationBeginActionSerializer: DynamicLocationBeginActionSerializer = new DynamicLocationBeginActionSerializer()
   private dynamicLocationEndActionSerializer: DynamicLocationEndActionSerializer = new DynamicLocationEndActionSerializer()
+  private permissionGroupSerializer: PermissionGroupSerializer = new PermissionGroupSerializer()
+
+  private _permissionGroups: PermissionGroup[] = []
+
+  set permissionGroups (groups: PermissionGroup[]) {
+    this._permissionGroups = groups
+  }
+
+  get permissionGroups (): PermissionGroup[] {
+    return this._permissionGroups
+  }
 
   convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiEntityListEnvelope): IConfigurationWithMeta[] {
     const included = jsonApiObjectList.included || []
@@ -101,7 +114,7 @@ export class ConfigurationSerializer {
     const configuration = new Configuration()
 
     const attributes = jsonApiData.attributes
-    const relationships = jsonApiData.relationships
+    const relationships = jsonApiData.relationships || {}
 
     configuration.id = jsonApiData.id.toString()
     if (attributes) {
@@ -112,6 +125,13 @@ export class ConfigurationSerializer {
 
       configuration.startDate = attributes.start_date ? DateTime.fromISO(attributes.start_date, { zone: 'UTC' }) : null
       configuration.endDate = attributes.end_date ? DateTime.fromISO(attributes.end_date, { zone: 'UTC' }) : null
+
+      if (attributes.is_internal) {
+        configuration.visibility = Visibility.Internal
+      }
+      if (attributes.is_public) {
+        configuration.visibility = Visibility.Public
+      }
     }
 
     const deviceLookupById: {[idx: string]: Device} = {}
@@ -250,6 +270,37 @@ export class ConfigurationSerializer {
     //   )
     // }
 
+    // just pick the contact from the relationships that is referenced by the created_by user
+    if (relationships.created_by?.data && 'id' in relationships.created_by?.data) {
+      const userId = (relationships.created_by.data as IJsonApiEntityWithoutDetails).id
+      configuration.createdByUserId = userId
+      const createdBy = this.contactSerializer.getContactFromIncludedByUserId(userId, included)
+      if (createdBy) {
+        configuration.createdBy = createdBy
+      }
+    }
+
+    // just pick the contact from the relationships that is referenced by the updated_by user
+    if (relationships.updated_by?.data && 'id' in relationships.updated_by?.data) {
+      const userId = (relationships.updated_by.data as IJsonApiEntityWithoutDetails).id
+      const updatedBy = this.contactSerializer.getContactFromIncludedByUserId(userId, included)
+      if (updatedBy) {
+        configuration.updatedBy = updatedBy
+      }
+    }
+
+    if (attributes?.cfg_permission_group != null) {
+      const id = attributes.cfg_permission_group
+      let permissionGroup = this.permissionGroups.find(group => group.id === id)
+
+      if (!permissionGroup) {
+        permissionGroup = PermissionGroup.createFromObject({
+          id
+        })
+      }
+      configuration.permissionGroup = permissionGroup
+    }
+
     return {
       configuration,
       missing: {
@@ -304,6 +355,9 @@ export class ConfigurationSerializer {
         status: configuration.status,
         start_date: configuration.startDate != null ? configuration.startDate.setZone('UTC').toISO() : null,
         end_date: configuration.endDate != null ? configuration.endDate.setZone('UTC').toISO() : null,
+        is_internal: configuration.isInternal,
+        is_public: configuration.isPublic,
+        cfg_permission_group: configuration.permissionGroup?.id,
         ...locationAttributes
       },
       relationships: {

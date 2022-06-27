@@ -70,8 +70,18 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
+import { Component, Vue, InjectReactive } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
+
+import { AddDeviceMeasuredQuantityAction, LoadDeviceMeasuredQuantitiesAction } from '@/store/devices'
+import {
+  LoadCompartmentsAction,
+  LoadSamplingMediaAction,
+  LoadPropertiesAction,
+  LoadUnitsAction,
+  LoadMeasuredQuantityUnitsAction,
+  VocabularyState
+} from '@/store/vocabulary'
 
 import { DeviceProperty } from '@/models/DeviceProperty'
 
@@ -89,16 +99,33 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
   }
 })
 export default class DevicePropertyAddPage extends Vue {
+  @InjectReactive()
+    editable!: boolean
+
   private isSaving = false
   private valueCopy: DeviceProperty = new DeviceProperty()
 
   // vuex definition for typescript check
-  addDeviceMeasuredQuantity!: ({
-    deviceId,
-    deviceMeasuredQuantity
-  }: { deviceId: string, deviceMeasuredQuantity: DeviceProperty }) => Promise<void>
+  compartments!: VocabularyState['compartments']
+  samplingMedia!: VocabularyState['samplingMedia']
+  properties!: VocabularyState['properties']
+  units!: VocabularyState['units']
+  measuredQuantityUnits!: VocabularyState['measuredQuantityUnits']
+  loadCompartments!: LoadCompartmentsAction
+  loadSamplingMedia!: LoadSamplingMediaAction
+  loadProperties!: LoadPropertiesAction
+  loadUnits!: LoadUnitsAction
+  loadMeasuredQuantityUnits!: LoadMeasuredQuantityUnitsAction
+  addDeviceMeasuredQuantity!: AddDeviceMeasuredQuantityAction
+  loadDeviceMeasuredQuantities!: LoadDeviceMeasuredQuantitiesAction
 
-  loadDeviceMeasuredQuantities!: (id: string) => void
+  created () {
+    if (!this.editable) {
+      this.$router.replace('/devices/' + this.deviceId + '/measuredquantities', () => {
+        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this device.')
+      })
+    }
+  }
 
   get deviceId (): string {
     return this.$route.params.deviceId

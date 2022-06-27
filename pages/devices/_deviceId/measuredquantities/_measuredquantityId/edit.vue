@@ -40,6 +40,7 @@ permissions and limitations under the Licence.
       <v-card-actions>
         <v-spacer />
         <SaveAndCancelButtons
+          v-if="editable"
           save-btn-text="Apply"
           :to="'/devices/' + deviceId + '/measuredquantities'"
           @save="save"
@@ -60,6 +61,7 @@ permissions and limitations under the Licence.
       <v-card-actions>
         <v-spacer />
         <SaveAndCancelButtons
+          v-if="editable"
           save-btn-text="Apply"
           :to="'/devices/' + deviceId + '/measuredquantities'"
           @save="save"
@@ -70,14 +72,23 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
-
+import { Component, Vue, InjectReactive } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
+
+import {
+  DevicesState,
+  LoadDeviceMeasuredQuantityAction,
+  LoadDeviceMeasuredQuantitiesAction,
+  UpdateDeviceMeasuredQuantityAction
+} from '@/store/devices'
+
+import { VocabularyState } from '@/store/vocabulary'
+
+import { DeviceProperty } from '@/models/DeviceProperty'
+
 import DevicePropertyForm from '@/components/DevicePropertyForm.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
-
-import { DeviceProperty } from '@/models/DeviceProperty'
 
 @Component({
   components: { SaveAndCancelButtons, ProgressIndicator, DevicePropertyForm },
@@ -89,26 +100,37 @@ import { DeviceProperty } from '@/models/DeviceProperty'
   methods: mapActions('devices', ['loadDeviceMeasuredQuantity', 'loadDeviceMeasuredQuantities', 'updateDeviceMeasuredQuantity'])
 })
 export default class DevicePropertyEditPage extends Vue {
+  @InjectReactive()
+    editable!: boolean
+
   private isSaving = false
   private isLoading = false
 
   private valueCopy: DeviceProperty = new DeviceProperty()
 
   // vuex definition for typescript check
-  loadDeviceMeasuredQuantity!: (id: String) => void
-  deviceMeasuredQuantity!: DeviceProperty
-  updateDeviceMeasuredQuantity!: ({
-    deviceId,
-    deviceMeasuredQuantity
-  }: { deviceId: string, deviceMeasuredQuantity: DeviceProperty }) => Promise<void>
-
-  loadDeviceMeasuredQuantities!: (id: string) => void
+  compartments!: VocabularyState['compartments']
+  samplingMedia!: VocabularyState['samplingMedia']
+  properties!: VocabularyState['properties']
+  units!: VocabularyState['units']
+  measureQuantityUnits!: VocabularyState['measuredQuantityUnits']
+  deviceMeasuredQuantity!: DevicesState['deviceMeasuredQuantity']
+  loadDeviceMeasuredQuantity!: LoadDeviceMeasuredQuantityAction
+  updateDeviceMeasuredQuantity!: UpdateDeviceMeasuredQuantityAction
+  loadDeviceMeasuredQuantities!: LoadDeviceMeasuredQuantitiesAction
 
   async created () {
+    if (!this.editable) {
+      this.$router.replace('/devices/' + this.deviceId + '/customfields', () => {
+        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this device.')
+      })
+    }
     try {
       this.isLoading = true
       await this.loadDeviceMeasuredQuantity(this.measuredquantityId)
-      this.valueCopy = DeviceProperty.createFromObject(this.deviceMeasuredQuantity)
+      if (this.deviceMeasuredQuantity) {
+        this.valueCopy = DeviceProperty.createFromObject(this.deviceMeasuredQuantity)
+      }
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to load measured quantity')
     } finally {

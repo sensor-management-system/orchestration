@@ -38,6 +38,7 @@ permissions and limitations under the Licence.
     <v-card-actions>
       <v-spacer />
       <SaveAndCancelButtons
+        v-if="editable"
         save-btn-text="Create"
         :to="'/devices/' + deviceId + '/actions'"
         @save="save"
@@ -52,6 +53,7 @@ permissions and limitations under the Licence.
     <v-card-actions>
       <v-spacer />
       <SaveAndCancelButtons
+        v-if="editable"
         save-btn-text="Create"
         :to="'/devices/' + deviceId + '/actions'"
         @save="save"
@@ -61,10 +63,14 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
+import { Component, Vue, InjectReactive } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
 
-import { IOptionsForActionType } from '@/store/devices'
+import {
+  AddDeviceSoftwareUpdateAction,
+  LoadAllDeviceActionsAction,
+  DevicesState
+} from '@/store/devices'
 
 import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
 
@@ -79,19 +85,24 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
   methods: mapActions('devices', ['addDeviceSoftwareUpdateAction', 'loadAllDeviceActions'])
 })
 export default class NewDeviceSoftwareUpdateActions extends Vue {
+  @InjectReactive()
+    editable!: boolean
+
   private softwareUpdateAction: SoftwareUpdateAction = new SoftwareUpdateAction()
   private isSaving: boolean = false
 
   // vuex definition for typescript check
-  addDeviceSoftwareUpdateAction!: ({
-    deviceId,
-    softwareUpdateAction
-  }: { deviceId: string, softwareUpdateAction: SoftwareUpdateAction }) => Promise<SoftwareUpdateAction>
-
-  loadAllDeviceActions!: (id: string) => void
-  chosenKindOfDeviceAction!: IOptionsForActionType | null
+  chosenKindOfDeviceAction!: DevicesState['chosenKindOfDeviceAction']
+  deviceAttachments!: DevicesState['deviceAttachments']
+  addDeviceSoftwareUpdateAction!: AddDeviceSoftwareUpdateAction
+  loadAllDeviceActions!: LoadAllDeviceActionsAction
 
   created () {
+    if (!this.editable) {
+      this.$router.replace('/devices/' + this.deviceId + '/actions', () => {
+        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this device.')
+      })
+    }
     if (this.chosenKindOfDeviceAction === null) {
       this.$router.push('/devices/' + this.deviceId + '/actions')
     }

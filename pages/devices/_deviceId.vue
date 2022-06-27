@@ -35,18 +35,32 @@ permissions and limitations under the Licence.
     />
     <v-card flat>
       <NuxtChild />
+      <modification-info
+        v-if="device"
+        v-model="device"
+      />
     </v-card>
   </div>
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
-import { mapActions } from 'vuex'
+import { Component, ProvideReactive, Vue } from 'nuxt-property-decorator'
+import { mapActions, mapGetters, mapState } from 'vuex'
+
+import { DevicesState, LoadDeviceAction } from '@/store/devices'
+import { CanAccessEntityGetter, CanModifyEntityGetter, CanDeleteEntityGetter } from '@/store/permissions'
+
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import ModificationInfo from '@/components/ModificationInfo.vue'
 
 @Component({
   components: {
-    ProgressIndicator
+    ProgressIndicator,
+    ModificationInfo
+  },
+  computed: {
+    ...mapState('devices', ['device']),
+    ...mapGetters('permissions', ['canAccessEntity', 'canModifyEntity', 'canDeleteEntity'])
   },
   methods: {
     ...mapActions('devices', ['loadDevice']),
@@ -55,36 +69,54 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
   }
 })
 export default class DevicePage extends Vue {
+  @ProvideReactive()
+    editable: boolean = false
+
+  @ProvideReactive()
+    deletable: boolean = false
+
   private isLoading: boolean = false
 
   // vuex definition for typescript check
+  device!: DevicesState['device']
   initDevicesDeviceIdAppBar!: (id: string) => void
   setDefaults!: () => void
-  loadDevice!: ({
-    deviceId,
-    includeContacts,
-    includeCustomFields,
-    includeDeviceProperties,
-    includeDeviceAttachments
-  }:
-    { deviceId: string, includeContacts: boolean, includeCustomFields: boolean, includeDeviceProperties: boolean, includeDeviceAttachments: boolean }) => void
+  loadDevice!: LoadDeviceAction
+  canAccessEntity!: CanAccessEntityGetter
+  canModifyEntity!: CanModifyEntityGetter
+  canDeleteEntity!: CanDeleteEntityGetter
 
-  async created () {
+  mounted () {
+    this.initDevicesDeviceIdAppBar(this.deviceId)
+  }
+
+  async fetch (): Promise<void> {
     try {
       this.isLoading = true
-      this.initDevicesDeviceIdAppBar(this.deviceId)
       await this.loadDevice({
         deviceId: this.deviceId,
         includeContacts: false,
         includeCustomFields: false,
         includeDeviceProperties: false,
-        includeDeviceAttachments: false
+        includeDeviceAttachments: false,
+        includeCreatedBy: true,
+        includeUpdatedBy: true
       })
+
+      if (!this.device || !this.canAccessEntity(this.device)) {
+        this.$router.replace('/devices/')
+        this.$store.commit('snackbar/setError', 'You\'re not allowed to access this device.')
+        return
+      }
+
+      this.editable = this.canModifyEntity(this.device)
+      this.deletable = this.canDeleteEntity(this.device)
+
       if (this.isBasePath()) {
         this.$router.replace('/devices/' + this.deviceId + '/basic')
       }
     } catch (e) {
-      this.$store.commit('snackbar/setError', 'Loading device failed')
+      this.$store.commit('snackbar/setError', 'Loading of device failed')
     } finally {
       this.isLoading = false
     }

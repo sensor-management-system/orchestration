@@ -43,6 +43,9 @@ permissions and limitations under the Licence.
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 import { mapActions } from 'vuex'
+
+import { LoadPlatformContactsAction } from '@/store/platforms'
+
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
 @Component({
@@ -55,9 +58,9 @@ export default class PlatformContactsPage extends Vue {
   private isLoading = false
 
   // vuex definition for typescript check
-  loadPlatformContacts!: (id: string) => void
+  loadPlatformContacts!: LoadPlatformContactsAction
 
-  async created () {
+  async fetch (): Promise<void> {
     try {
       this.isLoading = true
       await this.loadPlatformContacts(this.platformId)

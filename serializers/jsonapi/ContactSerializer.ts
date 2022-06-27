@@ -214,4 +214,15 @@ export class ContactSerializer {
       }
     }
   }
+
+  getContactFromIncludedByUserId (userId: string, included: IJsonApiEntityWithOptionalAttributes[]): Contact | undefined {
+    const includedUser = included.find(item => item.type === 'user' && item.id === userId)
+    if (includedUser && includedUser.relationships?.contact?.data) {
+      const contactId = (includedUser.relationships.contact.data as IJsonApiEntityWithoutDetails).id
+      const includedContact = included.find(item => item.type === 'contact' && item.id === contactId)
+      if (includedContact) {
+        return this.convertJsonApiDataToModel(includedContact)
+      }
+    }
+  }
 }

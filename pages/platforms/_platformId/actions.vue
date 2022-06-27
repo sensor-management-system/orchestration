@@ -44,6 +44,9 @@ permissions and limitations under the Licence.
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 import { mapActions } from 'vuex'
+
+import { LoadAllPlatformActionsAction } from '@/store/platforms'
+
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
 @Component({
@@ -54,9 +57,9 @@ export default class PlatformActionsPage extends Vue {
   private isLoading = false
 
   // vuex definition for typescript check
-  loadAllPlatformActions!: (id: string) => void
+  loadAllPlatformActions!: LoadAllPlatformActionsAction
 
-  async created () {
+  async fetch () {
     try {
       this.isLoading = true
       await this.loadAllPlatformActions(this.platformId)

@@ -48,6 +48,8 @@ import { PlatformMountAction } from '@/models/PlatformMountAction'
 import { Contact } from '@/models/Contact'
 import { DeviceMountAction } from '@/models/DeviceMountAction'
 import { Device } from '@/models/Device'
+import { Visibility } from '@/models/Visibility'
+
 import { buildConfigurationTree } from '@/modelUtils/mountHelpers'
 import configurationHelper from '@/utils/configurationHelper'
 import { PlatformNode } from '@/viewmodels/PlatformNode'
@@ -125,11 +127,14 @@ describe('#addNewMountAction', () => {
       attachments: [],
       contacts: [],
       model: '',
+      description: '',
       createdAt: DateTime.utc(2021, 12, 15, 8, 54, 13),
       updatedAt: DateTime.utc(2021, 12, 15, 8, 54, 13),
-      createdByUserId: 1,
-      updatedByUserId: 1,
-      description: ''
+      createdBy: null,
+      updatedBy: null,
+      createdByUserId: null,
+      permissionGroups: [],
+      visibility: Visibility.Internal
     })
     const device1 = Device.createFromObject({
       shortName: 'device 1',
@@ -150,12 +155,15 @@ describe('#addNewMountAction', () => {
       model: '',
       createdAt: DateTime.utc(2021, 12, 15, 8, 54, 13),
       updatedAt: DateTime.utc(2021, 12, 15, 8, 54, 13),
-      createdByUserId: 1,
-      updatedByUserId: 1,
       description: '',
       dualUse: false,
       properties: [],
-      customFields: []
+      customFields: [],
+      createdBy: null,
+      updatedBy: null,
+      createdByUserId: null,
+      permissionGroups: [],
+      visibility: Visibility.Internal
     })
     const contact1 = Contact.createFromObject({
       id: '111111',
@@ -203,7 +211,14 @@ describe('#addNewMountAction', () => {
       deviceUnmountActions: [],
       contacts: [],
       status: '',
-      location: null
+      location: null,
+      permissionGroup: null,
+      visibility: Visibility.Internal,
+      createdAt: null,
+      updatedAt: null,
+      createdBy: null,
+      updatedBy: null,
+      createdByUserId: null
     })
 
     const selectedDate = DateTime.utc(2021, 12, 15, 9, 15, 0)
